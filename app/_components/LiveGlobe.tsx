@@ -148,15 +148,16 @@ export function LiveGlobe({ pins, fallbackSrc, diameter }: GlobeProps) {
         // so dots and pings are legible on the 140px strip globe too.
         pointRadius={1.1}
         pointColor={() => "#bff0ce"}
+        // Tooltip wrapper styling lives in `app/globals.css` under
+        // `.scene-tooltip` so we override three-globe's dark default plate
+        // once. Here we just emit the content; the wrapper provides the
+        // cream background, border, and soft shadow.
         pointLabel={(d: object) => {
           const pin = d as ProjectPin;
-          return `<div style="font-family: var(--font-garamond), Georgia, serif; padding: 4px 8px; background: rgba(244,239,228,0.95); color:#1c1c1a; border-radius:6px; font-size:12px; box-shadow:0 6px 20px -8px rgba(0,0,0,0.4);">
-            <strong>${escapeHtml(pin.name)}</strong>${
-              pin.country
-                ? `<br/><span style="opacity:0.6;text-transform:uppercase;font-size:10px;letter-spacing:0.08em;">${escapeHtml(pin.country)}</span>`
-                : ""
-            }
-          </div>`;
+          const country = pin.country
+            ? `<div style="margin-top:2px;font-family:var(--font-sans),system-ui,sans-serif;font-size:9.5px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:var(--primary);opacity:0.75;">${escapeHtml(pin.country)}</div>`
+            : "";
+          return `<div><div style="font-weight:600;">${escapeHtml(pin.name)}</div>${country}</div>`;
         }}
         // ── Random ping rings on a sparse subset ───────────────────────────
         ringsData={rings}
