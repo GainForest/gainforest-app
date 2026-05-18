@@ -63,8 +63,11 @@ function clampToViewport(pos: Position): Position {
 
 function defaultPosition(): Position {
   if (typeof window === "undefined") return { x: 0, y: 0 };
+  // Bottom-LEFT anchor, 32 px from each edge. The hero composition
+  // already weights the page rightward (Bumicerts card + globe), so the
+  // floating companion balances the layout by sitting on the left.
   return {
-    x: window.innerWidth - SPRITE_W - 32,
+    x: 32,
     y: window.innerHeight - SPRITE_H - 32,
   };
 }
