@@ -1,11 +1,16 @@
 import Image from "next/image";
 import Link from "next/link";
 import { GlobeCard } from "./GlobeCard";
+import { ChoosePathLabels } from "./ChoosePathLabels";
 import type { LiveBumicertsSnapshot } from "../_lib/bumicerts";
 
 const GLOBE_URL = "https://gainforest.app";
 const BUMICERTS_URL = "https://alpha.fund.gainforest.app";
 
+// Server-rendered ChoosePath section. The strings come from a small
+// client island (<ChoosePathLabels />) so we don't have to convert this
+// component to a client one — the live <GlobeCard> inside it is an
+// async server component that fetches pins.
 export function ChoosePath({ snapshot }: { snapshot: LiveBumicertsSnapshot }) {
   // Use real thumbnails when available — the strip should feel like the
   // alpha.fund explore page in miniature.
@@ -16,9 +21,7 @@ export function ChoosePath({ snapshot }: { snapshot: LiveBumicertsSnapshot }) {
   return (
     <section className="border-t border-border-soft">
       <div className="mx-auto w-full max-w-[1440px] px-12 pt-4 pb-5">
-        <h2 className="text-center font-garamond text-[22px] font-normal text-foreground">
-          Choose how you want to use GainForest
-        </h2>
+        <ChoosePathLabels slot="heading" />
 
         <div className="mt-3 grid grid-cols-12 items-center gap-4">
           {/* Globe card */}
@@ -35,23 +38,7 @@ export function ChoosePath({ snapshot }: { snapshot: LiveBumicertsSnapshot }) {
                 className="object-contain"
               />
             </div>
-            <div>
-              <div className="font-garamond text-[22px] font-medium text-foreground">
-                Open the Globe
-              </div>
-              <p className="mt-2 max-w-[280px] text-[13px] leading-relaxed text-foreground/65">
-                Discover projects and ecosystems across the world. Explore,
-                learn, and get inspired.
-              </p>
-              <Link
-                href={GLOBE_URL}
-                target="_blank"
-                rel="noreferrer"
-                className="mt-3 inline-flex items-center gap-2 border-b border-primary/40 pb-1 text-[13px] font-medium text-primary"
-              >
-                Open the Globe <span>→</span>
-              </Link>
-            </div>
+            <ChoosePathLabels slot="globe" href={GLOBE_URL} />
           </div>
 
           {/* center globe — the same live, draggable globe as the hero,
@@ -61,9 +48,7 @@ export function ChoosePath({ snapshot }: { snapshot: LiveBumicertsSnapshot }) {
           </div>
 
           {/* or */}
-          <div className="col-span-12 lg:col-span-1 text-center text-foreground/45 font-garamond italic">
-            or
-          </div>
+          <ChoosePathLabels slot="or" />
 
           {/* Bumicerts card */}
           <div className="col-span-12 lg:col-span-3 flex items-start gap-6">
@@ -76,23 +61,10 @@ export function ChoosePath({ snapshot }: { snapshot: LiveBumicertsSnapshot }) {
                 className="object-contain"
               />
             </div>
-            <div>
-              <div className="font-garamond text-[22px] font-medium text-foreground">
-                Explore Bumicerts
-              </div>
-              <p className="mt-2 max-w-[280px] text-[13px] leading-relaxed text-foreground/65">
-                Browse projects, create and manage Bumicerts, and support
-                verified community impact.
-              </p>
-              <Link
-                href={`${BUMICERTS_URL}/explore`}
-                target="_blank"
-                rel="noreferrer"
-                className="mt-3 inline-flex items-center gap-2 border-b border-primary/40 pb-1 text-[13px] font-medium text-primary"
-              >
-                Explore Bumicerts <span>→</span>
-              </Link>
-            </div>
+            <ChoosePathLabels
+              slot="bumicerts"
+              href={`${BUMICERTS_URL}/explore`}
+            />
           </div>
 
           {/* mini gallery: real explore-page strip */}
@@ -100,9 +72,7 @@ export function ChoosePath({ snapshot }: { snapshot: LiveBumicertsSnapshot }) {
             <div className="overflow-hidden rounded-[14px] border border-border bg-[#fbf8f0] p-2 shadow-sm">
               <div className="flex items-center gap-1.5 px-1 pb-1.5">
                 <SearchGlyph />
-                <span className="text-[9px] font-medium uppercase tracking-[0.12em] text-foreground/45">
-                  All projects
-                </span>
+                <ChoosePathLabels slot="allProjects" />
               </div>
               <div className="grid grid-cols-3 gap-1.5">
                 {(strip.length ? strip : PLACEHOLDER_STRIP).map((item) => (

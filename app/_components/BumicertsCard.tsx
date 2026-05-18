@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { LogoMark } from "./Logo";
 import { useDraggableDocPos } from "../_lib/useDraggableDocPos";
+import { useT } from "./LocaleProvider";
 import type { LiveBumicertsSnapshot, LiveBumicert } from "../_lib/bumicerts";
 
 /**
@@ -42,6 +43,7 @@ export function BumicertsCard({
 }: {
   snapshot: LiveBumicertsSnapshot;
 }) {
+  const t = useT();
   // Prefer Bumicerts with real thumbnails for the card — an empty thumbnail
   // tile looks broken in the hero composition. Fall back to the head of the
   // feed only if we don't have three image-bearing rows.
@@ -124,18 +126,18 @@ export function BumicertsCard({
         <div className="flex flex-col gap-1 pt-9 text-[12px]">
           <RailLink
             icon={<HomeIcon />}
-            label="Projects"
+            label={t("card.projects")}
             href={`${BUMICERTS_URL}/explore`}
             active
           />
           <RailLink
             icon={<BuildingIcon />}
-            label="Organizations"
+            label={t("card.organizations")}
             href={`${BUMICERTS_URL}/organizations`}
           />
           <RailLink
             icon={<TrophyIcon />}
-            label="Leaderboard"
+            label={t("card.leaderboard")}
             href={`${BUMICERTS_URL}/leaderboard`}
           />
         </div>
@@ -165,9 +167,9 @@ export function BumicertsCard({
                 strokeLinecap="round"
               />
             </svg>
-            <span className="flex-1">Search projects…</span>
+            <span className="flex-1">{t("card.searchProjects")}</span>
             <span className="flex items-center gap-1 text-foreground/70">
-              All projects
+              {t("choosePath.allProjects")}
               <svg
                 width="10"
                 height="10"
@@ -196,7 +198,10 @@ export function BumicertsCard({
       {/* footer */}
       <div className="flex items-center justify-between border-t border-[#ece5d4] px-4 py-2.5 text-[11px]">
         <span className="text-foreground/55">
-          {formatCount(snapshot.total)} projects found
+          {t("card.projectsFound").replace(
+            "{n}",
+            formatCount(snapshot.total),
+          )}
         </span>
         <Link
           href={`${BUMICERTS_URL}/explore`}
@@ -204,7 +209,7 @@ export function BumicertsCard({
           rel="noreferrer"
           className="inline-flex items-center gap-1 text-foreground/70 transition-colors hover:text-primary"
         >
-          View all
+          {t("card.viewAll")}
           <svg
             width="11"
             height="11"
@@ -227,6 +232,7 @@ export function BumicertsCard({
 }
 
 function ProjectRow({ row }: { row: LiveBumicert }) {
+  const t = useT();
   const country = deriveCountry(row);
 
   return (
@@ -275,7 +281,7 @@ function ProjectRow({ row }: { row: LiveBumicert }) {
           {row.title}
         </div>
         <div className="mt-1 truncate text-[10px] text-foreground/55">
-          {country}
+          {country === "Worldwide" ? t("card.worldwide") : country}
         </div>
       </div>
     </Link>
@@ -335,6 +341,9 @@ function deriveCountry(row: LiveBumicert): string {
   if (m && m[1]) {
     return m[1];
   }
+  // English fallback — BumicertsCard's project rows render this through
+  // the t(card.worldwide) key at the call site, so the literal here only
+  // matters for code that reads the LiveBumicert directly outside the UI.
   return "Worldwide";
 }
 

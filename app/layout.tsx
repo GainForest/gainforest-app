@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Cormorant_Garamond, Instrument_Serif, Inter } from "next/font/google";
 import "./globals.css";
 import { FloatingCapybara } from "./_components/FloatingCapybara";
+import { LocaleProvider } from "./_components/LocaleProvider";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -193,11 +194,18 @@ export default function RootLayout({
       <body
         className={`${inter.variable} ${cormorant.variable} ${instrument.variable} antialiased`}
       >
-        {children}
-        {/* Draggable codex-pet capybara — port of simocracy's
-            FloatingEinstein. Mounted at the layout level so it follows
-            the user across any future routes. */}
-        <FloatingCapybara />
+        {/* Client-side locale state. Defaults to English; reads the
+            visitor's saved choice (or browser language) on hydration and
+            re-renders every translated component with the right strings.
+            Also exposes the locale to the FloatingCapybara so its chat
+            replies match the active language. */}
+        <LocaleProvider>
+          {children}
+          {/* Draggable codex-pet capybara — port of simocracy's
+              FloatingEinstein. Mounted at the layout level so it follows
+              the user across any future routes. */}
+          <FloatingCapybara />
+        </LocaleProvider>
       </body>
     </html>
   );

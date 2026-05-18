@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useT } from "./LocaleProvider";
 
 // Tiny popover that hosts the ATProto OAuth handle form. Matches the
 // behaviour of simocracy's sign-in flow: user types a handle (or PDS
@@ -16,6 +17,7 @@ export function SignInPopover({
   signedIn: boolean;
   handle: string | null;
 }) {
+  const t = useT();
   const [open, setOpen] = useState(false);
   const popRef = useRef<HTMLDivElement>(null);
 
@@ -53,7 +55,7 @@ export function SignInPopover({
             ✓
           </span>
           <span className="max-w-[160px] truncate">
-            {handle ?? "Signed in"}
+            {handle ?? t("nav.signedIn")}
           </span>
         </button>
         {open && (
@@ -82,7 +84,7 @@ export function SignInPopover({
         onClick={() => setOpen((v) => !v)}
         className="text-[14px] font-normal text-foreground/70 transition-colors hover:text-primary"
       >
-        Sign in
+        {t("nav.signIn")}
       </button>
       {open && (
         <div className="absolute right-0 top-[44px] z-50 w-72 rounded-md border border-border-soft bg-background p-3 shadow-lg">

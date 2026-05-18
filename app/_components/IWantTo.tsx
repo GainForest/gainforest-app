@@ -1,5 +1,9 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { useT } from "./LocaleProvider";
+import type { MessageKey } from "../_lib/i18n";
 
 const GLOBE_URL = "https://gainforest.app";
 const BUMICERTS_URL = "https://alpha.fund.gainforest.app";
@@ -9,42 +13,43 @@ const BUMICERTS_URL = "https://alpha.fund.gainforest.app";
 // (/Users/david/Downloads/02101890-2e05-463d-8151-44123926d31b.png).
 const CARDS: ReadonlyArray<{
   icon: string;
-  title: string;
-  body: string;
+  titleKey: MessageKey;
+  bodyKey: MessageKey;
   href: string;
 }> = [
   {
     icon: "/decor/icon-want-discover.png",
-    title: "Discover projects visually",
-    body: "Explore regeneration projects around the world.",
+    titleKey: "iwantto.card1.title",
+    bodyKey: "iwantto.card1.body",
     href: GLOBE_URL,
   },
   {
     icon: "/decor/icon-want-browse.png",
-    title: "Browse projects to support",
-    body: "Find trusted initiatives and back what matters.",
+    titleKey: "iwantto.card2.title",
+    bodyKey: "iwantto.card2.body",
     href: `${BUMICERTS_URL}/explore`,
   },
   {
     icon: "/decor/icon-want-create.png",
-    title: "Create a Bumicert",
-    body: "Document and verify your regenerative impact.",
+    titleKey: "iwantto.card3.title",
+    bodyKey: "iwantto.card3.body",
     href: `${BUMICERTS_URL}/create`,
   },
   {
     icon: "/decor/icon-want-learn.png",
-    title: "Learn about GainForest",
-    body: "Understand our mission, approach, and community.",
+    titleKey: "iwantto.card4.title",
+    bodyKey: "iwantto.card4.body",
     href: "https://gainforest.earth",
   },
 ];
 
 export function IWantTo() {
+  const t = useT();
   return (
     <section className="border-t border-border-soft">
       <div className="mx-auto w-full max-w-[1480px] px-16 pt-14 pb-12">
         <h2 className="font-garamond text-[44px] font-normal leading-[1.05] text-foreground">
-          I want to&hellip;
+          {t("iwantto.heading")}
         </h2>
 
         <div className="relative mt-8">
@@ -53,7 +58,7 @@ export function IWantTo() {
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 lg:pr-[190px]">
             {CARDS.map((card) => (
               <Link
-                key={card.title}
+                key={card.titleKey}
                 href={card.href}
                 target="_blank"
                 rel="noreferrer"
@@ -69,10 +74,10 @@ export function IWantTo() {
                   />
                 </div>
                 <h3 className="mt-7 font-garamond text-[22px] font-medium leading-tight text-foreground">
-                  {card.title}
+                  {t(card.titleKey)}
                 </h3>
                 <p className="mt-3 max-w-[230px] text-[14px] leading-relaxed text-foreground/65">
-                  {card.body}
+                  {t(card.bodyKey)}
                 </p>
                 <span
                   aria-hidden

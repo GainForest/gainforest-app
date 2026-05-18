@@ -1,46 +1,51 @@
+"use client";
+
 import Image from "next/image";
+import { useT } from "./LocaleProvider";
+import type { MessageKey } from "../_lib/i18n";
 
 // Four-step "How it works" strip with thin arrows between steps, port of the
 // mid-section in /Users/david/Downloads/02101890-2e05-463d-8151-44123926d31b.png.
 const STEPS: ReadonlyArray<{
   icon: string;
-  title: string;
-  body: string;
+  titleKey: MessageKey;
+  bodyKey: MessageKey;
 }> = [
   {
     icon: "/decor/icon-step-discover.png",
-    title: "Discover",
-    body: "Explore projects and communities worldwide using our visual map.",
+    titleKey: "howitworks.step1.title",
+    bodyKey: "howitworks.step1.body",
   },
   {
     icon: "/decor/icon-step-understand.png",
-    title: "Understand",
-    body: "Learn about the impact, methods, and people behind each project.",
+    titleKey: "howitworks.step2.title",
+    bodyKey: "howitworks.step2.body",
   },
   {
     icon: "/decor/icon-step-support.png",
-    title: "Support",
-    body: "Contribute funding, resources, or skills to drive impact.",
+    titleKey: "howitworks.step3.title",
+    bodyKey: "howitworks.step3.body",
   },
   {
     icon: "/decor/icon-step-grow.png",
-    title: "Grow impact",
-    body: "Track outcomes, earn Bumicerts, and help nature thrive.",
+    titleKey: "howitworks.step4.title",
+    bodyKey: "howitworks.step4.body",
   },
 ];
 
 export function HowItWorks() {
+  const t = useT();
   return (
     <section className="border-t border-border-soft">
       <div className="mx-auto w-full max-w-[1480px] px-16 pt-14 pb-14">
         <h2 className="font-garamond text-[44px] font-normal leading-[1.05] text-foreground">
-          How it works
+          {t("howitworks.heading")}
         </h2>
 
         <ol className="mt-10 grid grid-cols-1 gap-y-12 sm:grid-cols-2 lg:flex lg:items-start lg:gap-0">
           {STEPS.map((step, i) => (
             <li
-              key={step.title}
+              key={step.titleKey}
               className="flex flex-1 items-start gap-5 lg:gap-4"
             >
               {/* numbered chip + icon column */}
@@ -62,10 +67,10 @@ export function HowItWorks() {
               {/* title + body */}
               <div className="pt-7 lg:pt-7">
                 <h3 className="font-garamond text-[22px] font-medium leading-tight text-foreground">
-                  {step.title}
+                  {t(step.titleKey)}
                 </h3>
                 <p className="mt-2 max-w-[210px] text-[13.5px] leading-relaxed text-foreground/65">
-                  {step.body}
+                  {t(step.bodyKey)}
                 </p>
               </div>
 

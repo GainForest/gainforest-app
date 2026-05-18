@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { LogoMark } from "./Logo";
 import { useDraggableDocPos } from "../_lib/useDraggableDocPos";
+import { useT } from "./LocaleProvider";
 
 // Wraps the live globe (`<GlobeCard>`) in the same window-chrome card style
 // as `<BumicertsCard>` and makes it draggable. Visual rules:
@@ -40,6 +41,7 @@ export function DraggableGlobeCard({
   /** Number of project pins on the globe (for the footer). */
   pinCount?: number;
 }) {
+  const t = useT();
   const { docPos, dragging, rootRef, handleProps } = useDraggableDocPos({
     storageKey: STORAGE_KEY,
     anchorId: ANCHOR_ID,
@@ -73,7 +75,7 @@ export function DraggableGlobeCard({
       >
         <LogoMark className="h-[22px] w-[22px] text-primary" title="GainForest" />
         <span className="font-garamond text-[20px] font-medium text-foreground">
-          Globe
+          {t("nav.globe")}
         </span>
         <span
           className="ml-auto inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-medium uppercase tracking-[0.08em] text-primary"
@@ -99,8 +101,11 @@ export function DraggableGlobeCard({
       <div className="flex items-center justify-between border-t border-[#ece5d4] px-4 py-2.5 text-[11px]">
         <span className="text-foreground/55">
           {typeof pinCount === "number"
-            ? `${pinCount} projects worldwide`
-            : "Live across the world"}
+            ? t("card.projectsWorldwide").replace(
+                "{n}",
+                String(pinCount),
+              )
+            : t("card.worldwide")}
         </span>
         <Link
           href={GLOBE_HREF}
@@ -109,7 +114,7 @@ export function DraggableGlobeCard({
           className="inline-flex items-center gap-1 text-foreground/70 transition-colors hover:text-primary"
           data-no-drag
         >
-          Open the Globe
+          {t("card.openTheGlobe")}
           <svg
             width="11"
             height="11"

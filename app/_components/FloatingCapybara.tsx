@@ -10,6 +10,7 @@ import {
 } from "react";
 import { renderPetAnimated, type CodexPetState } from "../_lib/codex-pet";
 import { CAPYBARA_SIM } from "../_lib/capybara-sim";
+import { useLocale } from "./LocaleProvider";
 
 // FloatingCapybara — port of `simocracy-v2/components/feedback/floating-einstein.tsx`,
 // pointed at the "Capybara" sim
@@ -99,6 +100,7 @@ function computePanelPosition(spritePos: Position): Position {
 }
 
 export function FloatingCapybara() {
+  const { locale, t } = useLocale();
   const [mounted, setMounted] = useState(false);
   const [position, setPosition] = useState<Position>({ x: 0, y: 0 });
   const [open, setOpen] = useState(false);
@@ -306,7 +308,9 @@ export function FloatingCapybara() {
       const res = await fetch("/api/sim-chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: next }),
+        // `locale` tells the server which language to instruct the
+        // model to reply in — see app/api/sim-chat/route.ts.
+        body: JSON.stringify({ messages: next, locale }),
       });
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
@@ -429,7 +433,7 @@ export function FloatingCapybara() {
                 {CAPYBARA_SIM.name}
               </div>
               <div className="truncate text-[11px] text-foreground/55">
-                Delegate of the South American animal kingdom
+                {t("capy.role")}
               </div>
             </div>
             <button
@@ -447,13 +451,10 @@ export function FloatingCapybara() {
             {messages.length === 0 && (
               <div className="rounded-2xl bg-foreground/5 px-3 py-2 text-foreground/70">
                 <p>
-                  <span aria-hidden>🦦</span> Hello — sit a moment. I&rsquo;m{" "}
-                  Capybara, here to keep you company while you explore
-                  GainForest.
+                  <span aria-hidden>🦦</span> {t("capy.greetingHello")}
                 </p>
                 <p className="mt-1 text-foreground/55">
-                  Ask me about the Globe, Bumicerts, regenerative impact —
-                  or just say hi.
+                  {t("capy.greetingHint")}
                 </p>
               </div>
             )}
@@ -493,7 +494,7 @@ export function FloatingCapybara() {
                 }
               }}
               placeholder={
-                streaming ? `${CAPYBARA_SIM.name} is thinking…` : "Say hi…"
+                streaming ? t("capy.thinking") : t("capy.placeholder")
               }
               rows={1}
               disabled={streaming}
@@ -583,7 +584,7 @@ export function FloatingCapybara() {
               (dragging ? "opacity-0" : "opacity-100")
             }
           >
-            Ask me anything
+            {t("capy.shield")}
           </div>
         )}
       </div>

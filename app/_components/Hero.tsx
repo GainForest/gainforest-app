@@ -1,6 +1,9 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
 import type { LiveBumicertsSnapshot } from "../_lib/bumicerts";
+import { useT } from "./LocaleProvider";
 
 const GLOBE_URL = "https://gainforest.app";
 const BUMICERTS_URL = "https://alpha.fund.gainforest.app";
@@ -11,22 +14,20 @@ export function Hero({
   snapshot: LiveBumicertsSnapshot;
 }) {
   void _snapshot;
+  const t = useT();
   return (
     <section className="relative overflow-hidden">
       <div className="mx-auto grid w-full max-w-[1480px] grid-cols-12 gap-4 px-16 pt-16 pb-10">
         {/* LEFT: copy */}
         <div className="col-span-12 lg:col-span-6 pt-2">
           <h1 className="font-garamond text-[78px] font-normal leading-[1.02] tracking-[-0.015em] text-foreground">
-            One home for
+            {t("hero.title.line1")}
             <br />
-            regenerative impact
+            {t("hero.title.line2")}
           </h1>
 
           <p className="mt-7 max-w-[480px] text-[16px] leading-[1.55] text-foreground/70">
-            Explore nature projects around the world, support community-led
-            restoration, and create Bumicerts
-            <br />
-            that make ecological stewardship visible and verifiable.
+            {t("hero.subtitle")}
           </p>
 
           <div className="mt-9 flex items-center gap-4">
@@ -36,7 +37,7 @@ export function Hero({
               rel="noreferrer"
               className="inline-flex h-[54px] items-center justify-center rounded-[10px] bg-primary px-9 text-[15px] font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary-dark"
             >
-              Explore Bumicerts
+              {t("hero.cta.bumicerts")}
             </Link>
             <Link
               href={GLOBE_URL}
@@ -44,14 +45,12 @@ export function Hero({
               rel="noreferrer"
               className="inline-flex h-[54px] items-center justify-center rounded-[10px] border border-primary/35 bg-transparent px-9 text-[15px] font-medium text-primary transition-colors hover:bg-primary/5"
             >
-              Open the Globe
+              {t("hero.cta.globe")}
             </Link>
           </div>
 
           <p className="mt-6 max-w-[420px] text-[12px] leading-[1.55] text-foreground/45">
-            Bumicerts are signed on AT Protocol — every record lives on a
-            community-owned PDS and the live count to the right is pulled
-            straight from the GainForest indexer.
+            {t("hero.footnote")}
           </p>
         </div>
 

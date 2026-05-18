@@ -5,6 +5,7 @@ import {
   CAPYBARA_SIM,
 } from "../../_lib/capybara-sim";
 import { openRouterChat } from "../../_lib/openrouter";
+import { asLocale, LOCALE_LABELS } from "../../_lib/i18n";
 
 export const dynamic = "force-dynamic";
 
@@ -60,7 +61,11 @@ export async function POST(request: NextRequest) {
 
     const rawMessages = (body as {
       messages?: Array<{ role: string; content: string }>;
+      locale?: string;
     }).messages;
+    const locale = asLocale(
+      (body as { locale?: string }).locale ?? null,
+    );
     if (!rawMessages || !Array.isArray(rawMessages) || rawMessages.length === 0) {
       return new Response(JSON.stringify({ error: "No messages provided" }), {
         status: 400,
@@ -77,7 +82,15 @@ export async function POST(request: NextRequest) {
       }));
 
     const persona = await getCapybaraPersona();
-    const systemPrompt = buildSystemPrompt(persona);
+    let systemPrompt = buildSystemPrompt(persona);
+    // Append a language directive when the visitor is not on English so
+    // Capybara replies match the page they're reading. The directive
+    // goes AFTER the persona reminder so it carries the most recency
+    // weight; the persona itself stays untouched.
+    if (locale !== "en") {
+      const languageName = LOCALE_LABELS[locale].english;
+      systemPrompt += `\n\n## Language\nThe visitor has switched the page to ${languageName} (${LOCALE_LABELS[locale].native}). Reply in ${languageName}, in your own voice. Keep brand names (GainForest, Bumicerts, Capybara) as-is. If the visitor writes in a different language, mirror theirs.`;
+    }
 
     if (!process.env.OPENROUTER_API_KEY) {
       return new Response(

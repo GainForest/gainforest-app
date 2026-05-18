@@ -1,7 +1,11 @@
+"use client";
+
 import Link from "next/link";
 import { LogoMark } from "./Logo";
+import { useT } from "./LocaleProvider";
 
 export function Footer() {
+  const t = useT();
   const year = new Date().getFullYear();
   return (
     <footer className="border-t border-border-soft">
@@ -12,12 +16,12 @@ export function Footer() {
             GainForest
           </span>
           <span className="ml-4 text-foreground/55">
-            © {year} GainForest. All rights reserved.
+            © {year} GainForest. {t("footer.rights")}
           </span>
         </div>
         <nav className="flex items-center gap-10 text-foreground/80">
           <Link href="https://gainforest.app" target="_blank" rel="noreferrer">
-            Globe
+            {t("nav.globe")}
           </Link>
           <Link
             href="https://alpha.fund.gainforest.app/explore"
@@ -38,7 +42,7 @@ export function Footer() {
             target="_blank"
             rel="noreferrer"
           >
-            Contact
+            {t("footer.contact")}
           </Link>
         </nav>
       </div>

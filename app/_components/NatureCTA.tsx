@@ -1,5 +1,8 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { useT } from "./LocaleProvider";
 
 const BUMICERTS_URL = "https://alpha.fund.gainforest.app";
 
@@ -10,6 +13,7 @@ const BUMICERTS_URL = "https://alpha.fund.gainforest.app";
 // generated version has the organic hand-inked feel the reference mockup uses
 // and the earlier hand-coded SVG ovals were too geometric.
 export function NatureCTA() {
+  const t = useT();
   return (
     <section className="px-16 pb-14">
       <div className="relative mx-auto flex w-full max-w-[1480px] flex-col gap-6 overflow-hidden rounded-[18px] border border-border-soft bg-background/50 px-10 py-9 lg:flex-row lg:items-center lg:justify-between">
@@ -30,11 +34,10 @@ export function NatureCTA() {
 
         <div className="relative z-10 max-w-[640px]">
           <h2 className="font-garamond text-[36px] font-normal leading-[1.1] text-foreground">
-            Nature thrives when we act together.
+            {t("natureCta.heading")}
           </h2>
           <p className="mt-3 text-[15px] leading-relaxed text-foreground/65">
-            Join a global community creating a fair future for nature and
-            people.
+            {t("natureCta.body")}
           </p>
         </div>
 
@@ -45,7 +48,7 @@ export function NatureCTA() {
             rel="noreferrer"
             className="inline-flex h-[48px] items-center justify-center rounded-[10px] bg-primary px-7 text-[14px] font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary-dark"
           >
-            Explore projects
+            {t("natureCta.exploreProjects")}
           </Link>
           <Link
             href={`${BUMICERTS_URL}/create`}
@@ -53,7 +56,7 @@ export function NatureCTA() {
             rel="noreferrer"
             className="group inline-flex items-center gap-2 text-[14px] font-medium text-primary"
           >
-            Create a Bumicert
+            {t("natureCta.createBumicert")}
             <span
               aria-hidden
               className="transition-transform group-hover:translate-x-1"
