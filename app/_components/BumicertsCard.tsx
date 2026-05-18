@@ -34,14 +34,18 @@ const BUMICERTS_URL = "https://alpha.fund.gainforest.app";
 // Bump the localStorage key when the coordinate space changes so existing
 // users (who saved viewport coords under the old `position: fixed` impl)
 // don't get a card stuck at a now-meaningless document position.
-const STORAGE_KEY = "gainforest.bumicertsCard.docPos.v2";
+const STORAGE_KEY = "gainforest.bumicertsCard.docPos.v3";
 const ANCHOR_ID = "bumicerts-card-anchor";
 const CARD_WIDTH = 400;
 
 export function BumicertsCard({
   snapshot,
+  inline = false,
 }: {
   snapshot: LiveBumicertsSnapshot;
+  /** When true, render inline (no absolute positioning, no drag) so the
+   *  card flows naturally in the mobile composition. */
+  inline?: boolean;
 }) {
   const t = useT();
   // Prefer Bumicerts with real thumbnails for the card — an empty thumbnail
@@ -55,12 +59,17 @@ export function BumicertsCard({
   ).slice(0, 3);
 
   // All the drag bookkeeping lives in the shared hook so the
-  // DraggableGlobeCard uses the exact same mechanics.
-  const { docPos, dragging, rootRef, handleProps } = useDraggableDocPos({
+  // DraggableGlobeCard uses the exact same mechanics. Skipped entirely
+  // in inline mode — mobile readers don't need a draggable widget.
+  const drag = useDraggableDocPos({
     storageKey: STORAGE_KEY,
     anchorId: ANCHOR_ID,
     width: CARD_WIDTH,
   });
+  const docPos = inline ? null : drag.docPos;
+  const dragging = inline ? false : drag.dragging;
+  const rootRef = inline ? undefined : drag.rootRef;
+  const handleProps = inline ? undefined : drag.handleProps;
 
   // The card is `position: absolute` against the page-level `relative`
   // wrapper in `app/page.tsx`, with top/left in DOCUMENT coordinates.
@@ -69,38 +78,47 @@ export function BumicertsCard({
   // been client-side-controlled in the first place. SSR renders nothing
   // (docPos === null) so there's no flash at (0, 0); useLayoutEffect
   // resolves the position before paint.
-  if (!docPos) {
+  if (!inline && !docPos) {
     return null;
   }
 
-  const containerStyle: React.CSSProperties = {
-    position: "absolute",
-    left: docPos.x,
-    top: docPos.y,
-    width: CARD_WIDTH,
-    zIndex: 40,
-    willChange: "left, top",
-  };
+  const containerStyle: React.CSSProperties = inline
+    ? { width: "100%", maxWidth: 420 }
+    : {
+        position: "absolute",
+        left: docPos!.x,
+        top: docPos!.y,
+        width: CARD_WIDTH,
+        zIndex: 40,
+        willChange: "left, top",
+      };
 
   return (
     <div
       ref={rootRef}
       style={containerStyle}
-      className="overflow-hidden rounded-[18px] border border-[#e6dfd0] bg-[#fbf8f0] shadow-[0_30px_70px_-25px_rgba(40,50,30,0.35)]"
+      className={
+        "overflow-hidden rounded-[18px] border border-[#e6dfd0] bg-[#fbf8f0] " +
+        (inline
+          ? "mx-auto shadow-[0_18px_40px_-22px_rgba(40,50,30,0.28)]"
+          : "shadow-[0_30px_70px_-25px_rgba(40,50,30,0.35)]")
+      }
     >
       {/* header — same GainForest mark Bumicerts uses for its app icon.
-          Doubles as the DRAG HANDLE. Cursor changes to grab/grabbing so
-          it's discoverable. Clicking links inside the header still works
-          because we bail out of the drag start when the target is an
-          anchor or [data-no-drag]. */}
+          On the desktop layout this row doubles as the DRAG HANDLE; on
+          mobile it's just a static header. */}
       <div
         className={
           "flex items-center gap-2 px-5 pt-5 pb-3 select-none " +
-          (dragging ? "cursor-grabbing" : "cursor-grab")
+          (inline
+            ? ""
+            : dragging
+              ? "cursor-grabbing"
+              : "cursor-grab")
         }
-        style={{ touchAction: "none" }}
-        {...handleProps}
-        aria-label="Drag handle"
+        style={inline ? undefined : { touchAction: "none" }}
+        {...(handleProps ?? {})}
+        aria-label={inline ? undefined : "Drag handle"}
       >
         <LogoMark className="h-[22px] w-[22px] text-primary" title="GainForest" />
         <span className="font-garamond text-[20px] font-medium text-foreground">

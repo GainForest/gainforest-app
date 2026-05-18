@@ -41,7 +41,7 @@ export function SignInPopover({
 
   if (signedIn) {
     return (
-      <div className="relative hidden md:block" ref={popRef}>
+      <div className="relative" ref={popRef}>
         <button
           type="button"
           onClick={() => setOpen((v) => !v)}
@@ -78,7 +78,7 @@ export function SignInPopover({
   }
 
   return (
-    <div className="relative hidden md:block" ref={popRef}>
+    <div className="relative" ref={popRef}>
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}

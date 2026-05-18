@@ -29,27 +29,41 @@ export default async function Page() {
     <div className="relative min-h-screen bg-background">
       <TopNav />
       <main>
-        <Hero snapshot={snapshot} />
+        <Hero
+          snapshot={snapshot}
+          // Mobile / tablet: inline live windows beneath the hero copy.
+          // Hidden on lg+ where the floating, draggable versions take
+          // over (rendered below outside the Hero).
+          inlineCards={
+            <>
+              <DraggableGlobeCard pinCount={pins.length} inline>
+                <GlobeCard diameter={250} caption={false} />
+              </DraggableGlobeCard>
+              <BumicertsCard snapshot={snapshot} inline />
+            </>
+          }
+        />
         <ChoosePath snapshot={snapshot} />
         <IWantTo />
         <HowItWorks />
         <NatureCTA />
       </main>
       <Footer />
-      {/* Both cards are rendered OUTSIDE the Hero so they can use
-          document-relative `position: absolute` without being clipped by
-          Hero's `overflow-hidden`. Each defaults to its hero slot via a
-          placeholder anchor Hero renders. */}
-      <BumicertsCard snapshot={snapshot} />
-      {/* Globe diameter is tuned so:
-          (1) the sphere nearly fills the (narrower, 280px) card body,
-              leaving only a slim cream margin on each side; and
-          (2) the card's total height (header 54 + body ~258 + footer 31
-              ≈ 343 px) lands inside Bumicerts' ≈ 345 px height, so the
-              two windows read as the same vertical scale. */}
-      <DraggableGlobeCard pinCount={pins.length}>
-        <GlobeCard diameter={250} caption={false} />
-      </DraggableGlobeCard>
+      {/* Desktop-only floating, draggable cards. Wrapped in a
+          `hidden lg:block` div so they don't render on mobile where the
+          inline siblings above take their place. Both use document-
+          relative `position: absolute` so they scroll with the page. */}
+      <div className="hidden lg:block">
+        <BumicertsCard snapshot={snapshot} />
+        {/* Globe diameter is tuned so:
+            (1) the sphere nearly fills the (narrower, 280px) card body,
+                leaving only a slim cream margin on each side; and
+            (2) the card's total height (header 54 + body ~258 + footer 31
+                ≈ 343 px) lands inside Bumicerts' ≈ 345 px height. */}
+        <DraggableGlobeCard pinCount={pins.length}>
+          <GlobeCard diameter={250} caption={false} />
+        </DraggableGlobeCard>
+      </div>
     </div>
   );
 }

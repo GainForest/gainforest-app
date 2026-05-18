@@ -20,7 +20,7 @@ export function ChoosePath({ snapshot }: { snapshot: LiveBumicertsSnapshot }) {
 
   return (
     <section className="border-t border-border-soft">
-      <div className="mx-auto w-full max-w-[1440px] px-12 pt-4 pb-5">
+      <div className="mx-auto w-full max-w-[1440px] px-6 pt-8 pb-8 sm:px-10 lg:px-12 lg:pt-4 lg:pb-5">
         <ChoosePathLabels slot="heading" />
 
         <div className="mt-3 grid grid-cols-12 items-center gap-4">

@@ -9,17 +9,17 @@ export function Footer() {
   const year = new Date().getFullYear();
   return (
     <footer className="border-t border-border-soft">
-      <div className="mx-auto flex w-full max-w-[1440px] items-center justify-between px-12 py-4 text-[13px]">
-        <div className="flex items-center gap-3">
+      <div className="mx-auto flex w-full max-w-[1440px] flex-col items-start gap-4 px-6 py-5 text-[13px] sm:px-10 sm:py-4 lg:flex-row lg:items-center lg:justify-between lg:px-12">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
           <LogoMark className="h-6 w-6 text-primary" title="GainForest" />
           <span className="font-garamond text-[18px] font-semibold text-foreground">
             GainForest
           </span>
-          <span className="ml-4 text-foreground/55">
+          <span className="text-foreground/55 lg:ml-4">
             © {year} GainForest. {t("footer.rights")}
           </span>
         </div>
-        <nav className="flex items-center gap-10 text-foreground/80">
+        <nav className="flex flex-wrap items-center gap-x-6 gap-y-2 text-foreground/80 lg:gap-10">
           <Link href="https://gainforest.app" target="_blank" rel="noreferrer">
             {t("nav.globe")}
           </Link>

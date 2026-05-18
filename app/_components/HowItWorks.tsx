@@ -37,8 +37,8 @@ export function HowItWorks() {
   const t = useT();
   return (
     <section className="border-t border-border-soft">
-      <div className="mx-auto w-full max-w-[1480px] px-16 pt-14 pb-14">
-        <h2 className="font-garamond text-[44px] font-normal leading-[1.05] text-foreground">
+      <div className="mx-auto w-full max-w-[1480px] px-6 pt-10 pb-10 sm:px-10 lg:px-16 lg:pt-14 lg:pb-14">
+        <h2 className="font-garamond text-[32px] sm:text-[40px] lg:text-[44px] font-normal leading-[1.05] text-foreground">
           {t("howitworks.heading")}
         </h2>
 

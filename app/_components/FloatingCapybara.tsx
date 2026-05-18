@@ -44,10 +44,11 @@ const PANEL_H = 460;
 const PANEL_GAP = 12;
 const VIEWPORT_PADDING = 12;
 const DRAG_THRESHOLD_PX = 4;
-// Bumped to .v2 so the bottom-LEFT default applies even for visitors
-// whose previous session saved a bottom-right position back when that
-// was the default.
-const STORAGE_KEY = "gainforest.floatingCapybara.position.v2";
+// v3: default flips per viewport — bottom-RIGHT on mobile (where the
+// stacked single-column hero leaves the right corner free), bottom-LEFT
+// on desktop (to balance the right-weighted Bumicerts + Globe windows).
+const STORAGE_KEY = "gainforest.floatingCapybara.position.v3";
+const DESKTOP_MIN_WIDTH = 1024;
 const OPEN_WAVE_MS = 1600;
 
 interface Position {
@@ -73,13 +74,18 @@ function clampToViewport(pos: Position): Position {
 
 function defaultPosition(): Position {
   if (typeof window === "undefined") return { x: 0, y: 0 };
-  // Bottom-LEFT anchor, 32 px from each edge. The hero composition
-  // already weights the page rightward (Bumicerts card + globe), so the
-  // floating companion balances the layout by sitting on the left.
-  // BADGE_RESERVE accounts for the "Ask me anything" shield underneath.
+  // Desktop: bottom-LEFT — the hero composition weights the page right
+  // (Bumicerts card + globe), so the floating companion balances it.
+  // Mobile: bottom-RIGHT — the layout is a single stacked column, so
+  // a left-side capybara would constantly overlap the content stream;
+  // bottom-right keeps the corner clear of the column flow.
+  const isDesktop = window.innerWidth >= DESKTOP_MIN_WIDTH;
+  const edgeInset = isDesktop ? 32 : 18;
   return {
-    x: 32,
-    y: window.innerHeight - SPRITE_H - BADGE_RESERVE - 32,
+    x: isDesktop
+      ? edgeInset
+      : window.innerWidth - SPRITE_W - edgeInset,
+    y: window.innerHeight - SPRITE_H - BADGE_RESERVE - edgeInset,
   };
 }
 

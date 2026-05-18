@@ -49,6 +49,12 @@ body {
    cream design. We override the wrapper to match our design tokens and let
    the inline HTML in pointLabel stay minimal.
 --------------------------------------------------------------------------- */
+/* Mobile nav drawer — slide in from the right */
+@keyframes drawerIn {
+  from { transform: translateX(20px); opacity: 0; }
+  to   { transform: translateX(0);    opacity: 1; }
+}
+
 /* LiveGlobe loading skeleton — slow staggered breath on the pin dots */
 @keyframes globeSkelPulse {
   0%, 100% {

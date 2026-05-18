@@ -15,8 +15,8 @@ const BUMICERTS_URL = "https://alpha.fund.gainforest.app";
 export function NatureCTA() {
   const t = useT();
   return (
-    <section className="px-16 pb-14">
-      <div className="relative mx-auto flex w-full max-w-[1480px] flex-col gap-6 overflow-hidden rounded-[18px] border border-border-soft bg-background/50 px-10 py-9 lg:flex-row lg:items-center lg:justify-between">
+    <section className="px-6 pb-10 sm:px-10 lg:px-16 lg:pb-14">
+      <div className="relative mx-auto flex w-full max-w-[1480px] flex-col gap-6 overflow-hidden rounded-[18px] border border-border-soft bg-background/50 px-6 py-7 sm:px-10 sm:py-9 lg:flex-row lg:items-center lg:justify-between">
         {/* topographic contour decoration — generated raster, anchored on the
             right edge of the banner and bleeding off-page */}
         <div
@@ -33,15 +33,15 @@ export function NatureCTA() {
         </div>
 
         <div className="relative z-10 max-w-[640px]">
-          <h2 className="font-garamond text-[36px] font-normal leading-[1.1] text-foreground">
+          <h2 className="font-garamond text-[28px] sm:text-[34px] lg:text-[36px] font-normal leading-[1.1] text-foreground">
             {t("natureCta.heading")}
           </h2>
-          <p className="mt-3 text-[15px] leading-relaxed text-foreground/65">
+          <p className="mt-3 text-[14px] sm:text-[15px] leading-relaxed text-foreground/65">
             {t("natureCta.body")}
           </p>
         </div>
 
-        <div className="relative z-10 flex items-center gap-4">
+        <div className="relative z-10 flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4">
           <Link
             href={`${BUMICERTS_URL}/explore`}
             target="_blank"

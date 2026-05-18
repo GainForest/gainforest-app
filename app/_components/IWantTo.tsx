@@ -47,8 +47,8 @@ export function IWantTo() {
   const t = useT();
   return (
     <section className="border-t border-border-soft">
-      <div className="mx-auto w-full max-w-[1480px] px-16 pt-14 pb-12">
-        <h2 className="font-garamond text-[44px] font-normal leading-[1.05] text-foreground">
+      <div className="mx-auto w-full max-w-[1480px] px-6 pt-10 pb-10 sm:px-10 lg:px-16 lg:pt-14 lg:pb-12">
+        <h2 className="font-garamond text-[32px] sm:text-[40px] lg:text-[44px] font-normal leading-[1.05] text-foreground">
           {t("iwantto.heading")}
         </h2>
 
@@ -62,7 +62,7 @@ export function IWantTo() {
                 href={card.href}
                 target="_blank"
                 rel="noreferrer"
-                className="group relative flex h-[280px] flex-col rounded-[16px] border border-border-soft bg-background/40 p-7 transition-colors hover:border-primary/40 hover:bg-background/70"
+                className="group relative flex min-h-[200px] sm:h-[280px] flex-col rounded-[16px] border border-border-soft bg-background/40 p-5 sm:p-7 transition-colors hover:border-primary/40 hover:bg-background/70"
               >
                 <div className="relative h-[68px] w-[68px]">
                   <Image
