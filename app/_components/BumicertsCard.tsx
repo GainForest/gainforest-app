@@ -1,15 +1,9 @@
 "use client";
 
-import {
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-} from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { LogoMark } from "./Logo";
+import { useDraggableDocPos } from "../_lib/useDraggableDocPos";
 import type { LiveBumicertsSnapshot, LiveBumicert } from "../_lib/bumicerts";
 
 /**
@@ -39,49 +33,9 @@ const BUMICERTS_URL = "https://alpha.fund.gainforest.app";
 // Bump the localStorage key when the coordinate space changes so existing
 // users (who saved viewport coords under the old `position: fixed` impl)
 // don't get a card stuck at a now-meaningless document position.
-const STORAGE_KEY = "gainforest.bumicertsCard.docPos.v1";
+const STORAGE_KEY = "gainforest.bumicertsCard.docPos.v2";
 const ANCHOR_ID = "bumicerts-card-anchor";
-const DRAG_THRESHOLD_PX = 4;
-const EDGE_PADDING = 8;
 const CARD_WIDTH = 400;
-const MIN_HEIGHT_GUESS = 320;
-
-interface Position {
-  x: number;
-  y: number;
-}
-
-function docHeight(): number {
-  if (typeof document === "undefined") return 0;
-  return Math.max(
-    document.documentElement.scrollHeight,
-    document.body.scrollHeight,
-  );
-}
-function docWidth(): number {
-  if (typeof document === "undefined") return 0;
-  return Math.max(
-    document.documentElement.scrollWidth,
-    document.body.scrollWidth,
-  );
-}
-
-// Clamp a *document* position so the card never escapes the document
-// rectangle. We let the card go below the current viewport (so users can
-// drag it down into later sections) but never below the document floor.
-function clampToDocument(
-  pos: Position,
-  width: number,
-  height: number,
-): Position {
-  if (typeof window === "undefined") return pos;
-  const maxX = Math.max(EDGE_PADDING, docWidth() - width - EDGE_PADDING);
-  const maxY = Math.max(EDGE_PADDING, docHeight() - height - EDGE_PADDING);
-  return {
-    x: Math.max(EDGE_PADDING, Math.min(pos.x, maxX)),
-    y: Math.max(EDGE_PADDING, Math.min(pos.y, maxY)),
-  };
-}
 
 export function BumicertsCard({
   snapshot,
@@ -98,167 +52,13 @@ export function BumicertsCard({
       : [...withImage, ...snapshot.bumicerts.filter((b) => !b.imageUrl)]
   ).slice(0, 3);
 
-  // Document-relative position. `null` means "we haven't measured the
-  // anchor yet" — in that brief window we render nothing so we don't
-  // flash at (0, 0). useLayoutEffect resolves the position on mount
-  // before paint, so the gap is invisible.
-  const [docPos, setDocPos] = useState<Position | null>(null);
-  const [dragging, setDragging] = useState(false);
-  const rootRef = useRef<HTMLDivElement>(null);
-  const dragRef = useRef<{
-    pointerId: number;
-    startClientX: number;
-    startClientY: number;
-    startX: number;
-    startY: number;
-    moved: boolean;
-  } | null>(null);
-
-  // On mount: position the card at either the saved position or the spot
-  // where Hero placed the `#bumicerts-card-anchor` placeholder. Both are
-  // document coordinates (origin = top-left of the document, not the
-  // viewport) so the card scrolls naturally with the rest of the page.
-  useLayoutEffect(() => {
-    let initial: Position | null = null;
-    try {
-      const raw = window.localStorage.getItem(STORAGE_KEY);
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        if (
-          parsed &&
-          typeof parsed === "object" &&
-          typeof parsed.x === "number" &&
-          typeof parsed.y === "number"
-        ) {
-          initial = { x: parsed.x, y: parsed.y };
-        }
-      }
-    } catch {
-      // ignore corrupt storage
-    }
-    if (!initial) {
-      const anchor = document.getElementById(ANCHOR_ID);
-      if (anchor) {
-        const rect = anchor.getBoundingClientRect();
-        initial = {
-          x: rect.left + window.scrollX,
-          y: rect.top + window.scrollY,
-        };
-      } else {
-        // Anchor missing (e.g. ad-blocker stripped it). Fall back to a
-        // hero-area-ish default so we never end up at (0, 0).
-        initial = {
-          x: Math.min(window.innerWidth * 0.6, window.innerWidth - CARD_WIDTH - 32),
-          y: window.scrollY + 200,
-        };
-      }
-    }
-    setDocPos(
-      clampToDocument(
-        initial,
-        CARD_WIDTH,
-        rootRef.current?.offsetHeight ?? MIN_HEIGHT_GUESS,
-      ),
-    );
-  }, []);
-
-  // Re-clamp on viewport resize so the card never escapes the document
-  // (the document's width/height can shrink when the user resizes).
-  useEffect(() => {
-    if (!docPos) return;
-    const onResize = () => {
-      const height = rootRef.current?.offsetHeight ?? MIN_HEIGHT_GUESS;
-      setDocPos((p) =>
-        p ? clampToDocument(p, CARD_WIDTH, height) : null,
-      );
-    };
-    window.addEventListener("resize", onResize);
-    return () => window.removeEventListener("resize", onResize);
-  }, [docPos]);
-
-  // Persist position to localStorage whenever it changes.
-  useEffect(() => {
-    if (!docPos) return;
-    try {
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(docPos));
-    } catch {
-      // localStorage may be unavailable in private mode
-    }
-  }, [docPos]);
-
-  // Drag handlers — pointerdown is registered on the header only so the
-  // body of the card (rail items, project rows) stays interactive.
-  const onPointerDown = useCallback(
-    (e: React.PointerEvent<HTMLDivElement>) => {
-      if (e.button !== 0) return;
-      const target = e.target as HTMLElement;
-      if (target.closest("a, button, [data-no-drag]")) return;
-      e.currentTarget.setPointerCapture(e.pointerId);
-
-      // Drag-start bootstrap: read the card's current document-relative
-      // coords. Prefer the cached docPos; fall back to a fresh
-      // getBoundingClientRect+scroll measurement if state hasn't been
-      // initialised yet for some reason.
-      const rect = rootRef.current?.getBoundingClientRect();
-      const startX =
-        docPos?.x ?? (rect ? rect.left + window.scrollX : 0);
-      const startY =
-        docPos?.y ?? (rect ? rect.top + window.scrollY : 0);
-
-      dragRef.current = {
-        pointerId: e.pointerId,
-        startClientX: e.clientX,
-        startClientY: e.clientY,
-        startX,
-        startY,
-        moved: false,
-      };
-    },
-    [docPos],
-  );
-
-  const onPointerMove = useCallback(
-    (e: React.PointerEvent<HTMLDivElement>) => {
-      const drag = dragRef.current;
-      if (!drag || drag.pointerId !== e.pointerId) return;
-      const dx = e.clientX - drag.startClientX;
-      const dy = e.clientY - drag.startClientY;
-      if (!drag.moved) {
-        if (Math.hypot(dx, dy) <= DRAG_THRESHOLD_PX) return;
-        drag.moved = true;
-        setDragging(true);
-      }
-      const height = rootRef.current?.offsetHeight ?? MIN_HEIGHT_GUESS;
-      setDocPos(
-        clampToDocument(
-          { x: drag.startX + dx, y: drag.startY + dy },
-          CARD_WIDTH,
-          height,
-        ),
-      );
-    },
-    [],
-  );
-
-  const onPointerUp = useCallback(
-    (e: React.PointerEvent<HTMLDivElement>) => {
-      const drag = dragRef.current;
-      if (!drag || drag.pointerId !== e.pointerId) return;
-      dragRef.current = null;
-      setDragging(false);
-      try {
-        e.currentTarget.releasePointerCapture(e.pointerId);
-      } catch {
-        // ignore
-      }
-    },
-    [],
-  );
-
-  const onPointerCancel = useCallback(() => {
-    dragRef.current = null;
-    setDragging(false);
-  }, []);
+  // All the drag bookkeeping lives in the shared hook so the
+  // DraggableGlobeCard uses the exact same mechanics.
+  const { docPos, dragging, rootRef, handleProps } = useDraggableDocPos({
+    storageKey: STORAGE_KEY,
+    anchorId: ANCHOR_ID,
+    width: CARD_WIDTH,
+  });
 
   // The card is `position: absolute` against the page-level `relative`
   // wrapper in `app/page.tsx`, with top/left in DOCUMENT coordinates.
@@ -297,10 +97,7 @@ export function BumicertsCard({
           (dragging ? "cursor-grabbing" : "cursor-grab")
         }
         style={{ touchAction: "none" }}
-        onPointerDown={onPointerDown}
-        onPointerMove={onPointerMove}
-        onPointerUp={onPointerUp}
-        onPointerCancel={onPointerCancel}
+        {...handleProps}
         aria-label="Drag handle"
       >
         <LogoMark className="h-[22px] w-[22px] text-primary" title="GainForest" />

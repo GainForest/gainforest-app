@@ -1,6 +1,5 @@
 import Link from "next/link";
 import Image from "next/image";
-import { GlobeCard } from "./GlobeCard";
 import type { LiveBumicertsSnapshot } from "../_lib/bumicerts";
 
 const GLOBE_URL = "https://gainforest.app";
@@ -81,21 +80,40 @@ export function Hero({
             />
           </div>
 
-          {/* Placeholder for the Bumicerts card. The card itself is rendered
-              at the page level so it can scroll naturally with the document
-              (see `app/page.tsx`). This div reserves the hero slot and gives
-              the client component a known anchor to read its initial
-              position from. */}
+          {/* Placeholder anchors for the two draggable cards. Both cards
+              are rendered at the page level (`app/page.tsx`) so they can
+              use document-coordinate `position: absolute` and scroll
+              naturally with the rest of the page. The placeholders
+              reserve their hero slots and give the client components a
+              known starting position to read on mount. */}
+          {/* The hero right column is only ~570px wide at typical viewports,
+              so two ~400px windows cannot sit side-by-side. We embrace it as
+              a stacked-desktop-windows look: the Globe card sits behind +
+              offset to the top-right of the Bumicerts card, with its "Live"
+              badge peeking out as an obvious affordance to grab and drag. */}
+          {/* The two windows are roughly the same HEIGHT (~345 px), but
+              the Globe card is narrower (280 px) than Bumicerts (400 px)
+              because the globe is square — a wider window leaves cream
+              wasted around it. The Globe anchor sits ~120 px above the
+              Bumicerts anchor so the entire Globe header (logo +
+              "Globe" + LIVE badge) and a sliver of the sphere peek out
+              clearly above the Bumicerts card, telegraphing the two
+              draggable windows. */}
           <div
             id="bumicerts-card-anchor"
             aria-hidden
-            className="pointer-events-none absolute left-0 top-[40px] h-[400px] w-[400px]"
+            className="pointer-events-none absolute left-0 top-[140px] h-[360px] w-[400px]"
           />
-
-          {/* Live globe — flush right, fully visible at initial position */}
-          <div className="absolute right-[-40px] top-[10px] z-10">
-            <GlobeCard diameter={380} />
-          </div>
+          {/* right-[-35px] pushes the Globe card past the column's right
+              edge so the sphere ends up sitting ~25% behind the Bumicerts
+              card and ~75% peeking out on the right — the geometry
+              assumes a 250 px sphere inside the 280 px card with Bumicerts
+              ending at column-x ≈ 400. */}
+          <div
+            id="globe-card-anchor"
+            aria-hidden
+            className="pointer-events-none absolute right-[-35px] top-[20px] h-[360px] w-[280px]"
+          />
         </div>
       </div>
     </section>
