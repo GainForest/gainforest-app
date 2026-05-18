@@ -71,9 +71,12 @@ export function BumicertsCard({
       : [...withImage, ...snapshot.bumicerts.filter((b) => !b.imageUrl)]
   ).slice(0, 3);
 
-  // `null` = the card is in its natural-flow slot (set by Hero). Once the
-  // user drags, we switch to `position: fixed` at viewport coords and stay
-  // there for the rest of the session (and across sessions, via storage).
+  // `null` = the card is in its natural-flow slot (briefly, just for the
+  // first SSR paint). Once we hit `useLayoutEffect` on mount we promote
+  // the card to `position: fixed` at the same viewport coords it was
+  // rendered at, so the rest of the session it stays pinned to the
+  // viewport and the page scroll never moves it. Drag updates the
+  // viewport coords; reload restores them from localStorage.
   const [fixedPos, setFixedPos] = useState<Position | null>(null);
   const [dragging, setDragging] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
@@ -86,27 +89,37 @@ export function BumicertsCard({
     moved: boolean;
   } | null>(null);
 
-  // Restore a saved position from localStorage on mount. We use
-  // useLayoutEffect so the card paints at the saved position on first
-  // frame instead of flashing through the hero slot.
+  // On mount: switch to position:fixed at either the saved position or
+  // the card's current natural-flow viewport coords. useLayoutEffect runs
+  // synchronously before paint so there's no visible jump.
   useLayoutEffect(() => {
+    let initial: Position | null = null;
     try {
       const raw = window.localStorage.getItem(STORAGE_KEY);
-      if (!raw) return;
-      const parsed = JSON.parse(raw);
-      if (
-        parsed &&
-        typeof parsed === "object" &&
-        typeof parsed.x === "number" &&
-        typeof parsed.y === "number"
-      ) {
-        const height = rootRef.current?.offsetHeight ?? 320;
-        setFixedPos(
-          clampToViewport({ x: parsed.x, y: parsed.y }, CARD_WIDTH, height),
-        );
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (
+          parsed &&
+          typeof parsed === "object" &&
+          typeof parsed.x === "number" &&
+          typeof parsed.y === "number"
+        ) {
+          initial = { x: parsed.x, y: parsed.y };
+        }
       }
     } catch {
       // ignore corrupt storage
+    }
+    if (!initial && rootRef.current) {
+      // Default: capture wherever the Hero placed the card in natural flow
+      // (viewport coords from getBoundingClientRect) so the switch to
+      // position:fixed is visually invisible.
+      const rect = rootRef.current.getBoundingClientRect();
+      initial = { x: rect.left, y: rect.top };
+    }
+    if (initial) {
+      const height = rootRef.current?.offsetHeight ?? 320;
+      setFixedPos(clampToViewport(initial, CARD_WIDTH, height));
     }
   }, []);
 
@@ -204,8 +217,10 @@ export function BumicertsCard({
     setDragging(false);
   }, []);
 
-  // When fixedPos is set, we float above the page. When null, we sit in
-  // the natural flow slot Hero placed us in.
+  // Once useLayoutEffect runs we're position:fixed for the rest of the
+  // session. The SSR / very-first-paint render shows the card in its
+  // natural-flow slot (whatever the Hero wrapper sets) so the layout
+  // doesn't collapse before hydration.
   const floating = fixedPos !== null;
   const containerStyle: React.CSSProperties = floating
     ? {
@@ -214,6 +229,9 @@ export function BumicertsCard({
         top: fixedPos.y,
         width: CARD_WIDTH,
         zIndex: 40,
+        // hint the compositor so dragging is smooth and the card
+        // doesn't pick up an accidental ancestor transform.
+        willChange: "left, top",
       }
     : { width: CARD_WIDTH };
 
