@@ -49,6 +49,18 @@ body {
    cream design. We override the wrapper to match our design tokens and let
    the inline HTML in pointLabel stay minimal.
 --------------------------------------------------------------------------- */
+/* LiveGlobe loading skeleton — slow staggered breath on the pin dots */
+@keyframes globeSkelPulse {
+  0%, 100% {
+    opacity: 0.3;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    opacity: 0.85;
+    transform: translate(-50%, -50%) scale(1.35);
+  }
+}
+
 .scene-tooltip {
   background: rgba(244, 239, 228, 0.96) !important; /* var(--background) */
   color: var(--foreground) !important;

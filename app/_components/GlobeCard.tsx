@@ -28,11 +28,7 @@ export async function GlobeCard({
       className="relative"
       style={{ width: diameter, height: diameter }}
     >
-      <LiveGlobe
-        pins={pins}
-        fallbackSrc="/decor/globe-inset.png"
-        diameter={diameter}
-      />
+      <LiveGlobe pins={pins} diameter={diameter} />
       {caption && (
         <Link
           href={GLOBE_URL}

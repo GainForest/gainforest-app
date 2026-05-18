@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import dynamic from "next/dynamic";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { ProjectPin } from "../_lib/projects";
@@ -43,11 +42,21 @@ const MAX_PINGING_PINS = 14;
 
 type GlobeProps = {
   pins: ProjectPin[];
-  fallbackSrc: string;
   diameter: number;
 };
 
-export function LiveGlobe({ pins, fallbackSrc, diameter }: GlobeProps) {
+// Pseudo-random pin positions for the loading skeleton. Picked once so the
+// skeleton looks like "a globe with project pins on it" without giving the
+// impression that those specific dots map to real places.
+const SKELETON_PINS: ReadonlyArray<{ x: number; y: number }> = [
+  { x: 35, y: 30 }, // North America
+  { x: 48, y: 38 }, // Europe
+  { x: 56, y: 56 }, // Africa
+  { x: 38, y: 64 }, // South America
+  { x: 70, y: 44 }, // South Asia
+];
+
+export function LiveGlobe({ pins, diameter }: GlobeProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   // The Globe instance ref — used to drive auto-rotate + controls.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -182,20 +191,59 @@ export function LiveGlobe({ pins, fallbackSrc, diameter }: GlobeProps) {
         animateIn={false}
       />
 
-      {/* Static-image fallback shown until react-globe.gl finishes mounting. */}
-      {!ready && (
-        <div className="pointer-events-none absolute inset-0 grid place-items-center">
-          <Image
-            src={fallbackSrc}
-            alt=""
-            width={diameter}
-            height={diameter}
-            unoptimized
-            priority
-            className="opacity-90"
+      {/* Loading skeleton — shown until react-globe.gl finishes mounting.
+          Pure CSS so it ships with the SSR'd HTML and animates without
+          waiting for the three.js bundle. Visual is a soft cream sphere
+          (radial gradient suggests volume), a faint forest-green
+          atmosphere ring (mirrors the loaded globe's atmosphere), and a
+          handful of staggered pin dots gently pulsing to telegraph that
+          this is going to become a live data view. Fades out smoothly
+          once the real globe is ready. */}
+      <div
+        aria-hidden
+        className={
+          "pointer-events-none absolute inset-0 grid place-items-center transition-opacity duration-500 " +
+          (ready ? "opacity-0" : "opacity-100")
+        }
+      >
+        <div className="relative" style={{ width: diameter, height: diameter }}>
+          {/* Atmosphere ring (subtle outer halo — mirrors the live
+              atmosphereColor `#2a4a31` at very low alpha). */}
+          <div
+            className="absolute inset-0 rounded-full"
+            style={{
+              background:
+                "radial-gradient(circle, transparent 56%, rgba(42,74,49,0.14) 68%, transparent 78%)",
+            }}
           />
+          {/* Sphere body — cream highlight at top-left fading to a
+              warmer-grey shadow at bottom-right, giving the disc a soft
+              3D feel without committing to a fake landmass illustration. */}
+          <div
+            className="absolute rounded-full border border-border-soft"
+            style={{
+              inset: "5%",
+              background:
+                "radial-gradient(circle at 32% 26%, rgba(255,255,255,0.72), transparent 50%), radial-gradient(circle at center, var(--background) 30%, #e6dfd0 88%)",
+              boxShadow:
+                "inset 0 0 28px rgba(40,50,30,0.05), 0 1px 2px rgba(40,50,30,0.04)",
+            }}
+          />
+          {/* Decorative pin dots — staggered slow pulse so the disc
+              feels alive rather than static. */}
+          {SKELETON_PINS.map((p, i) => (
+            <span
+              key={i}
+              className="absolute h-1.5 w-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/50"
+              style={{
+                left: `${p.x}%`,
+                top: `${p.y}%`,
+                animation: `globeSkelPulse 3.4s ${(i * 0.42).toFixed(2)}s ease-in-out infinite`,
+              }}
+            />
+          ))}
         </div>
-      )}
+      </div>
     </div>
   );
 }
