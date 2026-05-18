@@ -39,7 +39,10 @@ const PANEL_H = 460;
 const PANEL_GAP = 12;
 const VIEWPORT_PADDING = 12;
 const DRAG_THRESHOLD_PX = 4;
-const STORAGE_KEY = "gainforest.floatingCapybara.position";
+// Bumped to .v2 so the bottom-LEFT default applies even for visitors
+// whose previous session saved a bottom-right position back when that
+// was the default.
+const STORAGE_KEY = "gainforest.floatingCapybara.position.v2";
 const OPEN_WAVE_MS = 1600;
 
 interface Position {
