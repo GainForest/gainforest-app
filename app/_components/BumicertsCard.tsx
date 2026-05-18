@@ -21,10 +21,14 @@ import type { LiveBumicertsSnapshot, LiveBumicert } from "../_lib/bumicerts";
  *
  * The card is **draggable**: grab the header (the area with the
  * GainForest mark + "Bumicerts" + Live badge) and drop the card anywhere
- * on the viewport. Position persists in localStorage. The card starts
- * in its natural-flow slot inside the hero composition and only switches
- * to `position: fixed` the first time the user starts dragging (so the
- * SSR layout is unchanged on first paint).
+ * on the page. Position persists in localStorage.
+ *
+ * Positioning is `position: absolute` with **document coordinates** (top
+ * and left are measured from the top of the document, not the viewport),
+ * so the card scrolls naturally with the rest of the page — once you
+ * scroll past it, it disappears off the top of the screen like normal
+ * content. The card is rendered at the page level (see `app/page.tsx`)
+ * so it isn't clipped by the Hero section's `overflow-hidden`.
  *
  * Rail items (Projects / Organizations / Leaderboard) are real links to
  * the matching Bumicerts pages so the card behaves like a miniature
@@ -32,27 +36,50 @@ import type { LiveBumicertsSnapshot, LiveBumicert } from "../_lib/bumicerts";
  */
 
 const BUMICERTS_URL = "https://alpha.fund.gainforest.app";
-const STORAGE_KEY = "gainforest.bumicertsCard.position";
+// Bump the localStorage key when the coordinate space changes so existing
+// users (who saved viewport coords under the old `position: fixed` impl)
+// don't get a card stuck at a now-meaningless document position.
+const STORAGE_KEY = "gainforest.bumicertsCard.docPos.v1";
+const ANCHOR_ID = "bumicerts-card-anchor";
 const DRAG_THRESHOLD_PX = 4;
-const VIEWPORT_PADDING = 8;
+const EDGE_PADDING = 8;
 const CARD_WIDTH = 400;
+const MIN_HEIGHT_GUESS = 320;
 
 interface Position {
   x: number;
   y: number;
 }
 
-function clampToViewport(
+function docHeight(): number {
+  if (typeof document === "undefined") return 0;
+  return Math.max(
+    document.documentElement.scrollHeight,
+    document.body.scrollHeight,
+  );
+}
+function docWidth(): number {
+  if (typeof document === "undefined") return 0;
+  return Math.max(
+    document.documentElement.scrollWidth,
+    document.body.scrollWidth,
+  );
+}
+
+// Clamp a *document* position so the card never escapes the document
+// rectangle. We let the card go below the current viewport (so users can
+// drag it down into later sections) but never below the document floor.
+function clampToDocument(
   pos: Position,
   width: number,
   height: number,
 ): Position {
   if (typeof window === "undefined") return pos;
-  const maxX = window.innerWidth - width - VIEWPORT_PADDING;
-  const maxY = window.innerHeight - 60; // keep at least the header visible
+  const maxX = Math.max(EDGE_PADDING, docWidth() - width - EDGE_PADDING);
+  const maxY = Math.max(EDGE_PADDING, docHeight() - height - EDGE_PADDING);
   return {
-    x: Math.max(VIEWPORT_PADDING, Math.min(pos.x, maxX)),
-    y: Math.max(VIEWPORT_PADDING, Math.min(pos.y, maxY)),
+    x: Math.max(EDGE_PADDING, Math.min(pos.x, maxX)),
+    y: Math.max(EDGE_PADDING, Math.min(pos.y, maxY)),
   };
 }
 
@@ -71,13 +98,11 @@ export function BumicertsCard({
       : [...withImage, ...snapshot.bumicerts.filter((b) => !b.imageUrl)]
   ).slice(0, 3);
 
-  // `null` = the card is in its natural-flow slot (briefly, just for the
-  // first SSR paint). Once we hit `useLayoutEffect` on mount we promote
-  // the card to `position: fixed` at the same viewport coords it was
-  // rendered at, so the rest of the session it stays pinned to the
-  // viewport and the page scroll never moves it. Drag updates the
-  // viewport coords; reload restores them from localStorage.
-  const [fixedPos, setFixedPos] = useState<Position | null>(null);
+  // Document-relative position. `null` means "we haven't measured the
+  // anchor yet" — in that brief window we render nothing so we don't
+  // flash at (0, 0). useLayoutEffect resolves the position on mount
+  // before paint, so the gap is invisible.
+  const [docPos, setDocPos] = useState<Position | null>(null);
   const [dragging, setDragging] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
   const dragRef = useRef<{
@@ -89,9 +114,10 @@ export function BumicertsCard({
     moved: boolean;
   } | null>(null);
 
-  // On mount: switch to position:fixed at either the saved position or
-  // the card's current natural-flow viewport coords. useLayoutEffect runs
-  // synchronously before paint so there's no visible jump.
+  // On mount: position the card at either the saved position or the spot
+  // where Hero placed the `#bumicerts-card-anchor` placeholder. Both are
+  // document coordinates (origin = top-left of the document, not the
+  // viewport) so the card scrolls naturally with the rest of the page.
   useLayoutEffect(() => {
     let initial: Position | null = null;
     try {
@@ -110,41 +136,55 @@ export function BumicertsCard({
     } catch {
       // ignore corrupt storage
     }
-    if (!initial && rootRef.current) {
-      // Default: capture wherever the Hero placed the card in natural flow
-      // (viewport coords from getBoundingClientRect) so the switch to
-      // position:fixed is visually invisible.
-      const rect = rootRef.current.getBoundingClientRect();
-      initial = { x: rect.left, y: rect.top };
+    if (!initial) {
+      const anchor = document.getElementById(ANCHOR_ID);
+      if (anchor) {
+        const rect = anchor.getBoundingClientRect();
+        initial = {
+          x: rect.left + window.scrollX,
+          y: rect.top + window.scrollY,
+        };
+      } else {
+        // Anchor missing (e.g. ad-blocker stripped it). Fall back to a
+        // hero-area-ish default so we never end up at (0, 0).
+        initial = {
+          x: Math.min(window.innerWidth * 0.6, window.innerWidth - CARD_WIDTH - 32),
+          y: window.scrollY + 200,
+        };
+      }
     }
-    if (initial) {
-      const height = rootRef.current?.offsetHeight ?? 320;
-      setFixedPos(clampToViewport(initial, CARD_WIDTH, height));
-    }
+    setDocPos(
+      clampToDocument(
+        initial,
+        CARD_WIDTH,
+        rootRef.current?.offsetHeight ?? MIN_HEIGHT_GUESS,
+      ),
+    );
   }, []);
 
-  // Re-clamp on viewport resize so the card never escapes the screen.
+  // Re-clamp on viewport resize so the card never escapes the document
+  // (the document's width/height can shrink when the user resizes).
   useEffect(() => {
-    if (!fixedPos) return;
+    if (!docPos) return;
     const onResize = () => {
-      const height = rootRef.current?.offsetHeight ?? 320;
-      setFixedPos((p) =>
-        p ? clampToViewport(p, CARD_WIDTH, height) : null,
+      const height = rootRef.current?.offsetHeight ?? MIN_HEIGHT_GUESS;
+      setDocPos((p) =>
+        p ? clampToDocument(p, CARD_WIDTH, height) : null,
       );
     };
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
-  }, [fixedPos]);
+  }, [docPos]);
 
   // Persist position to localStorage whenever it changes.
   useEffect(() => {
-    if (!fixedPos) return;
+    if (!docPos) return;
     try {
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(fixedPos));
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(docPos));
     } catch {
       // localStorage may be unavailable in private mode
     }
-  }, [fixedPos]);
+  }, [docPos]);
 
   // Drag handlers — pointerdown is registered on the header only so the
   // body of the card (rail items, project rows) stays interactive.
@@ -155,12 +195,15 @@ export function BumicertsCard({
       if (target.closest("a, button, [data-no-drag]")) return;
       e.currentTarget.setPointerCapture(e.pointerId);
 
-      // First-drag bootstrap: compute the card's current viewport coords
-      // so we can switch from natural-flow to position:fixed without a
-      // visual jump.
+      // Drag-start bootstrap: read the card's current document-relative
+      // coords. Prefer the cached docPos; fall back to a fresh
+      // getBoundingClientRect+scroll measurement if state hasn't been
+      // initialised yet for some reason.
       const rect = rootRef.current?.getBoundingClientRect();
-      const startX = fixedPos?.x ?? rect?.left ?? 0;
-      const startY = fixedPos?.y ?? rect?.top ?? 0;
+      const startX =
+        docPos?.x ?? (rect ? rect.left + window.scrollX : 0);
+      const startY =
+        docPos?.y ?? (rect ? rect.top + window.scrollY : 0);
 
       dragRef.current = {
         pointerId: e.pointerId,
@@ -171,7 +214,7 @@ export function BumicertsCard({
         moved: false,
       };
     },
-    [fixedPos],
+    [docPos],
   );
 
   const onPointerMove = useCallback(
@@ -185,9 +228,9 @@ export function BumicertsCard({
         drag.moved = true;
         setDragging(true);
       }
-      const height = rootRef.current?.offsetHeight ?? 320;
-      setFixedPos(
-        clampToViewport(
+      const height = rootRef.current?.offsetHeight ?? MIN_HEIGHT_GUESS;
+      setDocPos(
+        clampToDocument(
           { x: drag.startX + dx, y: drag.startY + dy },
           CARD_WIDTH,
           height,
@@ -217,23 +260,25 @@ export function BumicertsCard({
     setDragging(false);
   }, []);
 
-  // Once useLayoutEffect runs we're position:fixed for the rest of the
-  // session. The SSR / very-first-paint render shows the card in its
-  // natural-flow slot (whatever the Hero wrapper sets) so the layout
-  // doesn't collapse before hydration.
-  const floating = fixedPos !== null;
-  const containerStyle: React.CSSProperties = floating
-    ? {
-        position: "fixed",
-        left: fixedPos.x,
-        top: fixedPos.y,
-        width: CARD_WIDTH,
-        zIndex: 40,
-        // hint the compositor so dragging is smooth and the card
-        // doesn't pick up an accidental ancestor transform.
-        willChange: "left, top",
-      }
-    : { width: CARD_WIDTH };
+  // The card is `position: absolute` against the page-level `relative`
+  // wrapper in `app/page.tsx`, with top/left in DOCUMENT coordinates.
+  // That means the card scrolls naturally with the rest of the page —
+  // exactly the behaviour Hero would have given us if the card hadn't
+  // been client-side-controlled in the first place. SSR renders nothing
+  // (docPos === null) so there's no flash at (0, 0); useLayoutEffect
+  // resolves the position before paint.
+  if (!docPos) {
+    return null;
+  }
+
+  const containerStyle: React.CSSProperties = {
+    position: "absolute",
+    left: docPos.x,
+    top: docPos.y,
+    width: CARD_WIDTH,
+    zIndex: 40,
+    willChange: "left, top",
+  };
 
   return (
     <div

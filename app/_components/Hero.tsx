@@ -1,13 +1,17 @@
 import Link from "next/link";
 import Image from "next/image";
-import { BumicertsCard } from "./BumicertsCard";
 import { GlobeCard } from "./GlobeCard";
 import type { LiveBumicertsSnapshot } from "../_lib/bumicerts";
 
 const GLOBE_URL = "https://gainforest.app";
 const BUMICERTS_URL = "https://alpha.fund.gainforest.app";
 
-export function Hero({ snapshot }: { snapshot: LiveBumicertsSnapshot }) {
+export function Hero({
+  snapshot: _snapshot,
+}: {
+  snapshot: LiveBumicertsSnapshot;
+}) {
+  void _snapshot;
   return (
     <section className="relative overflow-hidden">
       <div className="mx-auto grid w-full max-w-[1480px] grid-cols-12 gap-4 px-16 pt-16 pb-10">
@@ -77,10 +81,16 @@ export function Hero({ snapshot }: { snapshot: LiveBumicertsSnapshot }) {
             />
           </div>
 
-          {/* Bumicerts card — anchored left, no overlap with the globe sphere */}
-          <div className="absolute left-0 top-[40px] z-20">
-            <BumicertsCard snapshot={snapshot} />
-          </div>
+          {/* Placeholder for the Bumicerts card. The card itself is rendered
+              at the page level so it can scroll naturally with the document
+              (see `app/page.tsx`). This div reserves the hero slot and gives
+              the client component a known anchor to read its initial
+              position from. */}
+          <div
+            id="bumicerts-card-anchor"
+            aria-hidden
+            className="pointer-events-none absolute left-0 top-[40px] h-[400px] w-[400px]"
+          />
 
           {/* Live globe — flush right, fully visible at initial position */}
           <div className="absolute right-[-40px] top-[10px] z-10">
