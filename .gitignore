@@ -1,0 +1,31 @@
+# Next.js build output
+/.next/
+/out/
+
+# Dependencies
+/node_modules/
+
+# Env / local secrets
+.env*.local
+
+# Vercel
+/.vercel/
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
+
+# Iteration scratch (autoresearch shots, etc.)
+/.shots/
+/diff.png
+/screenshot.png
+/target.png
+/target_canonical.png
+/autoresearch.*
+
+# TypeScript incremental cache
+tsconfig.tsbuildinfo
+
+# Logs
+*.log
