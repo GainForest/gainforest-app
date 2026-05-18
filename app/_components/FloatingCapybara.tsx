@@ -34,6 +34,10 @@ import { CAPYBARA_SIM } from "../_lib/capybara-sim";
 
 const SPRITE_W = 84;
 const SPRITE_H = 90;
+// Vertical room reserved below the sprite for the "Ask me anything"
+// name-shield. Folded into the viewport clamp so the shield never gets
+// pushed off-screen when the user drags the capybara near the bottom.
+const BADGE_RESERVE = 24;
 const PANEL_W = 340;
 const PANEL_H = 460;
 const PANEL_GAP = 12;
@@ -57,7 +61,9 @@ interface ChatMessage {
 function clampToViewport(pos: Position): Position {
   if (typeof window === "undefined") return pos;
   const maxX = window.innerWidth - SPRITE_W - VIEWPORT_PADDING;
-  const maxY = window.innerHeight - SPRITE_H - VIEWPORT_PADDING;
+  // Subtract BADGE_RESERVE so the shield below the sprite stays on-screen.
+  const maxY =
+    window.innerHeight - SPRITE_H - BADGE_RESERVE - VIEWPORT_PADDING;
   return {
     x: Math.max(VIEWPORT_PADDING, Math.min(pos.x, maxX)),
     y: Math.max(VIEWPORT_PADDING, Math.min(pos.y, maxY)),
@@ -69,9 +75,10 @@ function defaultPosition(): Position {
   // Bottom-LEFT anchor, 32 px from each edge. The hero composition
   // already weights the page rightward (Bumicerts card + globe), so the
   // floating companion balances the layout by sitting on the left.
+  // BADGE_RESERVE accounts for the "Ask me anything" shield underneath.
   return {
     x: 32,
-    y: window.innerHeight - SPRITE_H - 32,
+    y: window.innerHeight - SPRITE_H - BADGE_RESERVE - 32,
   };
 }
 
@@ -556,6 +563,29 @@ export function FloatingCapybara() {
           }}
           className="absolute inset-0"
         />
+
+        {/* Name shield / legend — sits like a small banner beneath the
+            sprite. Clicks bubble up to the parent's pointer handler (no
+            data-no-drag, no pointer-events-none) so tapping the shield
+            opens chat just like tapping the sprite. Hidden while the
+            chat panel is open (redundant) and faded out mid-drag (the
+            capybara is busy moving). */}
+        {!open && (
+          <div
+            aria-hidden
+            className={
+              "pointer-events-none absolute left-1/2 top-full mt-1 " +
+              "-translate-x-1/2 whitespace-nowrap rounded-full " +
+              "border border-border-soft bg-background/95 " +
+              "px-2.5 py-[3px] font-garamond text-[11px] text-primary " +
+              "shadow-[0_2px_8px_-3px_rgba(40,50,30,0.22)] " +
+              "backdrop-blur-sm transition-opacity duration-150 " +
+              (dragging ? "opacity-0" : "opacity-100")
+            }
+          >
+            Ask me anything
+          </div>
+        )}
       </div>
     </>
   );
