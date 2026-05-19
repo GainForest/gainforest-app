@@ -76,7 +76,7 @@ export function TopNavView({
             aria-label="GainForest — home"
           >
             <LogoMark
-              className="h-6 w-6 lg:h-7 lg:w-7 text-primary"
+              className="h-6 w-6 lg:h-7 lg:w-7 text-brand"
               title="GainForest"
             />
             <span className="font-garamond text-[20px] lg:text-[22px] font-semibold tracking-tight text-foreground">
@@ -92,7 +92,7 @@ export function TopNavView({
                 href={item.href}
                 target="_blank"
                 rel="noreferrer"
-                className="text-[15px] font-normal text-foreground/85 transition-colors hover:text-primary"
+                className="text-[15px] font-normal text-foreground/85 transition-colors hover:text-foreground"
               >
                 {item.label}
               </Link>
@@ -104,11 +104,14 @@ export function TopNavView({
             <div className="hidden sm:block">
               <SignInPopover signedIn={signedIn} handle={handle} />
             </div>
+            {/* Pill-shaped primary CTA, mirroring gainforest.earth's
+                "Support us" button. The mint sits on cream so the
+                brand colour reads at first glance. */}
             <Link
               href={`${BUMICERTS_URL}/explore`}
               target="_blank"
               rel="noreferrer"
-              className="hidden sm:inline-flex h-10 lg:h-11 items-center justify-center rounded-md bg-primary px-4 lg:px-5 text-[14px] lg:text-[15px] font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary-dark"
+              className="hidden sm:inline-flex h-10 lg:h-11 items-center justify-center rounded-full bg-primary px-5 lg:px-6 text-[14px] lg:text-[15px] font-medium text-primary-foreground transition-colors hover:bg-primary-dark"
             >
               {t("nav.getStarted")}
             </Link>
@@ -119,7 +122,7 @@ export function TopNavView({
               onClick={() => setMenuOpen((v) => !v)}
               aria-expanded={menuOpen}
               aria-label={t("nav.about")}
-              className="lg:hidden inline-flex h-9 w-9 items-center justify-center rounded-md border border-border-soft text-foreground/75 transition-colors hover:border-primary/40 hover:text-foreground"
+              className="lg:hidden inline-flex h-9 w-9 items-center justify-center rounded-md border border-border-soft text-foreground/75 transition-colors hover:border-foreground/40 hover:text-foreground"
             >
               {menuOpen ? <CloseIcon /> : <MenuIcon />}
             </button>
@@ -148,7 +151,7 @@ export function TopNavView({
           >
             <div className="mb-4 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <LogoMark className="h-5 w-5 text-primary" title="GainForest" />
+                <LogoMark className="h-5 w-5 text-brand" title="GainForest" />
                 <span className="font-garamond text-[18px] font-semibold text-foreground">
                   GainForest
                 </span>
@@ -170,7 +173,7 @@ export function TopNavView({
                 target="_blank"
                 rel="noreferrer"
                 onClick={() => setMenuOpen(false)}
-                className="rounded-md px-2.5 py-2.5 font-garamond text-[18px] text-foreground/85 transition-colors hover:bg-foreground/[0.04] hover:text-primary"
+                className="rounded-md px-2.5 py-2.5 font-garamond text-[18px] text-foreground/85 transition-colors hover:bg-foreground/[0.04] hover:text-foreground"
               >
                 {item.label}
               </Link>
@@ -185,7 +188,7 @@ export function TopNavView({
               target="_blank"
               rel="noreferrer"
               onClick={() => setMenuOpen(false)}
-              className="mt-3 inline-flex h-11 items-center justify-center rounded-md bg-primary px-5 text-[14px] font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary-dark"
+              className="mt-3 inline-flex h-11 items-center justify-center rounded-full bg-primary px-6 text-[14px] font-medium text-primary-foreground transition-colors hover:bg-primary-dark"
             >
               {t("nav.getStarted")}
             </Link>

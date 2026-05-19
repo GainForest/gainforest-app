@@ -120,19 +120,24 @@ export function BumicertsCard({
         {...(handleProps ?? {})}
         aria-label={inline ? undefined : "Drag handle"}
       >
-        <LogoMark className="h-[22px] w-[22px] text-primary" title="GainForest" />
+        <LogoMark className="h-[22px] w-[22px] text-brand" title="GainForest" />
         <span className="font-garamond text-[20px] font-medium text-foreground">
           Bumicerts
         </span>
         {!snapshot.fromFallback && (
+          // LIVE badge — the brand-mint accent is intentional. It is
+          // the same green as the logo, and the only spot the page
+          // uses mint as a *fill* (not just a hover lift). Reads as
+          // "this row is real, live data" without competing with the
+          // primary CTA.
           <span
-            className="ml-auto inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-medium uppercase tracking-[0.08em] text-primary"
+            className="ml-auto inline-flex items-center gap-1.5 rounded-full bg-brand/15 px-2 py-0.5 text-[10px] font-medium uppercase tracking-[0.08em] text-brand-dark"
             title="Pulled from the GainForest indexer in real time"
             data-no-drag
           >
             <span className="relative grid h-1.5 w-1.5 place-items-center">
-              <span className="absolute inset-0 animate-ping rounded-full bg-primary/40" />
-              <span className="relative h-1.5 w-1.5 rounded-full bg-primary" />
+              <span className="absolute inset-0 animate-ping rounded-full bg-brand/40" />
+              <span className="relative h-1.5 w-1.5 rounded-full bg-brand" />
             </span>
             Live
           </span>
@@ -225,7 +230,7 @@ export function BumicertsCard({
           href={`${BUMICERTS_URL}/explore`}
           target="_blank"
           rel="noreferrer"
-          className="inline-flex items-center gap-1 text-foreground/70 transition-colors hover:text-primary"
+          className="inline-flex items-center gap-1 text-foreground/70 transition-colors hover:text-foreground"
         >
           {t("card.viewAll")}
           <svg
@@ -271,7 +276,7 @@ function ProjectRow({ row }: { row: LiveBumicert }) {
             className="absolute inset-0 h-full w-full object-cover"
           />
         ) : (
-          <div className="absolute inset-0 grid place-items-center text-[10px] text-primary/60">
+          <div className="absolute inset-0 grid place-items-center text-[10px] text-brand-dark/60">
             <svg
               width="14"
               height="14"
@@ -330,7 +335,7 @@ function RailLink({
           : "text-foreground/55 hover:bg-black/[0.03] hover:text-foreground")
       }
     >
-      <span className={active ? "text-primary" : "text-foreground/55"}>
+      <span className={active ? "text-foreground" : "text-foreground/55"}>
         {icon}
       </span>
       <span>{label}</span>

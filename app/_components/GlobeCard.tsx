@@ -34,7 +34,7 @@ export async function GlobeCard({
           href={GLOBE_URL}
           target="_blank"
           rel="noreferrer"
-          className="absolute bottom-2 left-1/2 z-10 -translate-x-1/2 whitespace-nowrap text-[10px] font-medium uppercase tracking-[0.18em] text-foreground/45 transition-colors hover:text-primary"
+          className="absolute bottom-2 left-1/2 z-10 -translate-x-1/2 whitespace-nowrap text-[10px] font-medium uppercase tracking-[0.18em] text-foreground/45 transition-colors hover:text-foreground"
         >
           gainforest.app · live globe →
         </Link>

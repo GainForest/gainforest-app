@@ -42,15 +42,19 @@ export function SignInPopover({
   if (signedIn) {
     return (
       <div className="relative" ref={popRef}>
+        {/* Signed-in chip uses the brand mint as a subtle live-data
+            accent — the visual rhyme with the LIVE badges on the hero
+            cards is intentional. Both say "this surface is hooked up
+            to live ATProto data right now". */}
         <button
           type="button"
           onClick={() => setOpen((v) => !v)}
-          className="inline-flex h-9 items-center gap-2 rounded-full border border-primary/30 bg-background/40 pl-2 pr-3 text-[13px] font-medium text-primary transition-colors hover:border-primary/60"
+          className="inline-flex h-9 items-center gap-2 rounded-full border border-brand/40 bg-background/40 pl-2 pr-3 text-[13px] font-medium text-brand-dark transition-colors hover:border-brand-dark"
           title={handle ?? undefined}
         >
           <span
             aria-hidden
-            className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[11px] text-primary-foreground"
+            className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-brand text-[11px] text-primary-foreground"
           >
             ✓
           </span>
@@ -66,7 +70,7 @@ export function SignInPopover({
             <form action="/api/auth/logout" method="post">
               <button
                 type="submit"
-                className="w-full rounded-md px-2 py-1.5 text-left text-[13px] text-foreground hover:bg-primary/10"
+                className="w-full rounded-md px-2 py-1.5 text-left text-[13px] text-foreground hover:bg-foreground/[0.06]"
               >
                 Sign out
               </button>

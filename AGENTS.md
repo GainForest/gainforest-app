@@ -4,9 +4,28 @@ Instructions for AI agents (Claude Code, etc.) working in this repository.
 This is the landing page that fronts the two GainForest production apps —
 [green_globe](https://github.com/GainForest/green_globe) and
 [bumicerts-monorepo](https://github.com/GainForest/bumicerts-monorepo) —
-and renders live data from both. It also hosts a draggable pixel-art
-**capybara codex pet** and an ATProto OAuth sign-in flow ported from
-simocracy-v2.
+and renders live data from both. It also hosts an ATProto OAuth sign-in
+flow ported from simocracy-v2.
+
+The **visual language follows [gainforest.earth](https://gainforest.earth)**
+as of the May 2026 redesign — minimal editorial, big serif headlines
+with a single italic word, an alternating cream / near-black section
+rhythm closing on the dark `NatureCTA` band and `Footer`. The previous
+tropical sprigs, hand-drawn icon PNGs, and the pixel-art capybara were
+dropped per team feedback ("thin-stroke art doesn't match the rendered
+apps; capybara is Simocracy style; tone is too light").
+
+**One subtle deviation from gainforest.earth**: the team explicitly
+rejected mint-green CTAs ("I really hate that gainforest green for our
+buttons — it only works well for our logo") and asked us to use the
+**Bumicerts primary** instead. Our `--primary` is therefore
+`#3e7053` — the sage forest green that `alpha.fund.gainforest.app`
+ships as its `--primary` token. Buttons on cream are a solid sage
+pill; buttons on ink are a cream solid pill. The brand mint
+(`--brand: #2fce8a`) is restricted to the logo plus a small set of
+subtle live-data accents (LIVE badges, globe pin tooltips, signed-in
+chip, active language row). When in doubt, do **not** add a new mint
+fill — lean on the sage primary.
 
 ## Read first
 
@@ -24,8 +43,10 @@ documents — they encode rules that this landing inherits:
   ported the auth machinery from. If a flow detail is unclear, check
   there first — our copy is structurally identical, just slimmer.
 - `simocracy-v2/components/feedback/floating-einstein.tsx` — pattern for
-  draggable codex-pet widgets; our `FloatingCapybara` follows the same
-  drag/click loop.
+  draggable codex-pet widgets. `FloatingCapybara.tsx` is the parallel
+  GainForest port and is **kept on disk but no longer mounted in
+  `layout.tsx`** (May 2026 redesign feedback). Re-mount only if the
+  product direction changes.
 
 When upstream rules conflict with anything written here, **this file
 wins** for the landing — but call out the divergence in the PR.
@@ -55,11 +76,15 @@ wins** for the landing — but call out the divergence in the PR.
    components that need browser APIs are `"use client"`. Don't move
    data-fetching to the client unless there's a reason — server fetches
    share Next's `revalidate` cache and stay out of the bundle.
-6. **Decoration is raster, not SVG.** Botanical sprigs, topographic
-   contours, and icon sets are all generated via gpt-image-2 (see
-   "Visual decoration" below). The one earlier inline SVG topographic
-   decoration looked mechanical and was replaced — don't reintroduce
-   hand-coded ovals or contour blobs.
+6. **Decoration is sparse.** The May 2026 redesign **removed** every
+   illustrated PNG — `leaves.png`, `sprig-side.png`, `icon-step-*.png`,
+   `icon-want-*.png`, `icon-globe.png`, `icon-plant.png`,
+   `icon-leaf.png`, `topo-decor.png` — because their thin-stroke art
+   didn't match the chunky live UI windows (Globe + Bumicerts). The
+   files still live in `public/decor/` for backwards-reference; do not
+   re-import them without explicit team approval. Visual weight now
+   comes from whitespace, the serif headline, the italic emphasis word,
+   and the live cards — the same recipe gainforest.earth uses.
 7. **OAuth secrets stay in env.** `ATPROTO_JWK_PRIVATE` is the only
    secret the app needs and is generated via `scripts/generate-jwk.mjs`.
    Never log it, never print it, never commit it.
@@ -211,12 +236,17 @@ the PLC directory to resolve handle, and passes both into the popover.
 Pings are rendered as a sparse subset of the dot set (`MAX_PINGING_PINS`)
 with staggered random `repeatPeriod` so they never pulse in unison.
 
-## FloatingCapybara (the Capybara sim)
+## FloatingCapybara (the Capybara sim) — currently un-mounted
 
-`app/_components/FloatingCapybara.tsx` mounts on every route via
-`app/layout.tsx`. It is a port of
+`app/_components/FloatingCapybara.tsx` is a port of
 `simocracy-v2/components/feedback/floating-einstein.tsx`, pointed at a
-real Simocracy sim instead of the bundled Einstein:
+real Simocracy sim instead of the bundled Einstein. As of the May 2026
+redesign it is **kept on disk but no longer mounted** in
+`app/layout.tsx` — the team flagged the pixel-art codex-pet tone as
+Simocracy-y and out of step with the editorial branding. Re-mounting
+is a one-line change in `layout.tsx` if the product direction shifts.
+
+Details below describe the component as it would behave when mounted:
 
 - Sim AT-URI:
   `at://did:plc:qc42fmqqlsmdq7jiypiiigww/org.simocracy.sim/3ml6hwvjijm2q`
@@ -350,15 +380,34 @@ Current generated assets:
 All colour/spacing rules live in `app/globals.css`. The token names are:
 
 ```
---background      cream #f4efe4
---foreground      near-black #1c1c1a
---muted-foreground stone #5b5b56
---primary         forest #335a3c
---primary-foreground bone #f6f2e8
---primary-dark    deeper #2a4a31
---border          warm grey #d9d3c3
---border-soft     paler #e6dfd0
+--background         cream #f4efe4         (light section bg)
+--foreground         near-black #1c1c1a    (body text on cream)
+--muted-foreground   stone #5b5b56         (rare; we prefer foreground/70 in Tailwind)
+--primary            sage forest #3e7053   (Bumicerts primary; cream-section CTA fill)
+--primary-dark       deeper sage #2e5840   (hover / pressed)
+--primary-foreground off-white #fafafa     (text on the sage pill)
+--brand              mint #2fce8a          (logo + subtle live-data accents only)
+--brand-dark         deeper mint #21b073   (text-on-mint where contrast matters)
+--border             warm grey #d9d3c3
+--border-soft        paler #e6dfd0
+--ink                near-black #141413    (dark section bg)
+--ink-foreground     cream #f4efe4         (text on ink + cream-pill CTA on dark)
+--ink-muted          stone #a8a59a         (subtle text on ink)
+--ink-border         #2a2a27               (rules on ink)
 ```
+
+**Brand split:** `--brand` (#2fce8a) is the mint that lives in the
+logo SVG fill and re-appears — *subtly* — on live-data accents (LIVE
+badges, globe pin tooltip labels, signed-in chip, active language row).
+It is **never** used as a solid button background. `--primary` is the
+call-to-action colour (near-black on cream, swapped to cream-on-ink on
+the dark band). Do not collapse the two back into one token; the
+separation is deliberate per team feedback.
+
+**Section rhythm:** the page closes with a single tall **dark band**
+composed of `NatureCTA` + `Footer`. Both sit on `bg-ink` so the cream
+→ ink contrast lands hard, matching gainforest.earth's data-commons /
+nature-guild / footer pattern.
 
 If you need a new colour, add a token in `globals.css` first and reference
 it via `var(...)` or its Tailwind `theme inline` alias (e.g.
@@ -370,6 +419,72 @@ Typography:
 - `font-garamond` → Cormorant Garamond (headlines, card labels, accents)
 - `font-instrument` → Instrument Serif (italic accents, e.g. "or")
 - `font-sans` → Inter (body & UI)
+
+## Hero headline
+
+The hero composes its h1 as `before` + italic(`italic`) + `after`
+from `i18n.ts`. The italic phrase renders as **plain italic** (no
+underline, no brush) — it sits as a quiet contrast to the brushed
+word above it.
+
+A single **curved, hand-drawn SVG paintbrush stroke** lives under one
+marked word inside `before`. The implementation is in `Hero.tsx`:
+
+- `before` carries an inline `{word}` marker that flags which word
+  should receive the brush stroke. The marker position varies per
+  locale because the equivalent of English "Open" sits in different
+  parts of the sentence: English `{Open} tools for`, Spanish
+  `Herramientas {abiertas} para la`, Indonesian `Alat {terbuka}
+  untuk`, and so on.
+- `parseBrushed()` (in `Hero.tsx`) walks the string and returns an
+  ordered array of `{ brushed?: true; text }` segments. Plain text
+  outside the marker comes through verbatim — spaces and all — so
+  word boundaries render naturally without extra fiddling.
+- The brush itself is a `BRUSH_PATH` **stroked** cubic curve inside
+  a 178×16 viewBox — ported verbatim from the Bumicerts reference
+  at alpha.fund.gainforest.app (the "Real Communities" underline):
+  - path: `M 3 10.5 C 44 6.5 87 6 175 8.5`
+  - `fill="none"`, `stroke="currentColor"`, `stroke-width="2.25"`,
+    `stroke-linecap="round"`
+  The curve sweeps from `(3, 10.5)` on the left up through control
+  points `(44, 6.5)` and `(87, 6)` and lands at `(175, 8.5)` on the
+  right — left tip slightly lower than the right, peak around `y=6`
+  in the middle. The asymmetric arc reads as a hand-drawn paint
+  stroke rather than a symmetric lens. The team explicitly asked for
+  "curved not straight", so this arc must stay visible — don't
+  flatten it.
+- The brushed word is wrapped in `position: relative inline-block`
+  with the SVG `absolutely-positioned` at `-bottom-2`, `h-4`,
+  `w-full`, `preserveAspectRatio="none"`. The stroke stretches with
+  the word width; the curve flattens horizontally for wider words
+  and steepens for narrow ones, which is the trade-off we accept to
+  keep the stroke hugging its anchor.
+
+Why a stroked cubic curve, and **not**:
+
+- `text-decoration: underline` — mechanically straight, no arc, no
+  brush feel. The team called this "ugly".
+- A single absolute `<span>` with a 4–7 px solid rounded bar — reads
+  as a highlighter pill, not a stroke. The team called this "ugly"
+  first.
+- A filled lens-shaped path (the previous iteration) — tips taper
+  to zero width but the centerline arc gets visually crushed when
+  the SVG is stretched to fit the word, so the brush ends up
+  reading as a flat line. The stroked cubic curve keeps a visible
+  arc at any width.
+- Brushes under multiple words (the previous iteration's per-italic
+  word treatment) — the team narrowed it to one stroke: "only under
+  Open".
+
+The Bumicerts hero on
+[alpha.fund.gainforest.app](https://alpha.fund.gainforest.app) — the
+"Real Communities" line — is the visual reference. Keep the stroked
+cubic curve, keep it on one marked word, keep the visible arc.
+
+Current english copy: `{Open} tools for` + *regenerative
+intelligence*. Tech-forward, plain English¹.
+¹ The previous "One home for regenerative impact" line is in the git
+history; do not revive it unless the product framing shifts back.
 
 ## Brand mark
 
@@ -432,8 +547,7 @@ Before finishing a change:
 4. Scroll to the bottom — "I want to…" cards render with their icons +
    tropical sprig on the right, "How it works" step icons + arrows
    render, "Nature thrives" banner shows the raster topo decoration.
-5. Click the capybara (bottom-right) — speech bubble appears. Drag
-   him somewhere else, reload — he stays put.
+5. *(Skipped — the FloatingCapybara is no longer mounted.)*
 6. Click "Sign in" in the navbar — popover opens, type a bsky handle
    (e.g. `<your-handle>.bsky.social`), submit. Browser should redirect
    to your PDS for consent. On callback you should land back on `/`

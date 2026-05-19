@@ -1,19 +1,63 @@
 @import "tailwindcss";
 
+/* ──────────────────────────────────────────────────────────────────────────
+   Design tokens — aligned with gainforest.earth, with the brand mint
+   restricted to the logo + subtle live-data accents.
+
+   Brand vs. primary:
+   - `--brand` (#2FCE8A) is the mint that lives in the logo SVG fill.
+     It re-appears — *subtly* — on the live-data accents (the LIVE
+     pulse dot, the globe pin tooltip label, the signed-in chip, and
+     the active language switcher row). It is **never** used as a
+     solid button background. The team specifically rejected mint CTAs:
+     "keep the gainforest logo green in the logo but only subtly in
+     the page".
+   - `--primary` is the **call-to-action** colour, not the brand. On
+     cream it's a confident near-black solid pill (text-cream on ink).
+     On the dark closing band we swap to a cream-on-ink pill (see
+     NatureCTA) because near-black on near-black is invisible.
+
+   Headlines: tall serif (Cormorant Garamond), with italic emphasis on
+   a single key word — never a whole line.
+   Body text: black on cream, white on ink. High contrast, not muted.
+   Buttons: full-pill (border-radius: 9999px).
+   Rhythm: alternating cream (`--background`) and near-black (`--ink`)
+   sections, each holding ONE idea — matches gainforest.earth's pace.
+────────────────────────────────────────────────────────────────────────── */
+
 :root {
-  /* Warm cream background sampled from target */
+  /* Warm cream background sampled from the gainforest.earth hero. */
   --background: #f4efe4;
   --foreground: #1c1c1a;
   --muted-foreground: #5b5b56;
 
-  /* Deep forest green */
-  --primary: #335a3c;
-  --primary-foreground: #f6f2e8;
-  --primary-dark: #2a4a31;
+  /* Call-to-action colour — sage forest green, picked to match the
+     primary on alpha.fund.gainforest.app (Bumicerts uses
+     `--primary: #3e7053`). The team explicitly rejected the bright
+     mint logo green for buttons ("keep the gainforest logo green in
+     the logo but only subtly in the page"), so we sit one shade
+     deeper / less saturated than the logo. */
+  --primary: #3e7053;
+  --primary-dark: #2e5840;
+  --primary-foreground: #fafafa;
 
-  /* Subtle borders */
+  /* Brand mint — the logo SVG fill (#2FCE8A). Used by `<LogoMark>` and
+     a small set of subtle live-data accents. Do NOT use as a button
+     background; see the rationale block above. */
+  --brand: #2fce8a;
+  --brand-dark: #21b073;
+
+  /* Subtle borders on the cream surface. */
   --border: #d9d3c3;
   --border-soft: #e6dfd0;
+
+  /* Dark "ink" section — near-black with a touch of warmth so it
+     doesn't clash with the cream when sections alternate. Used for the
+     closing CTA banner and the footer. */
+  --ink: #141413;
+  --ink-foreground: #f4efe4;
+  --ink-muted: #a8a59a;
+  --ink-border: #2a2a27;
 }
 
 @theme inline {
@@ -23,8 +67,14 @@
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
   --color-primary-dark: var(--primary-dark);
+  --color-brand: var(--brand);
+  --color-brand-dark: var(--brand-dark);
   --color-border: var(--border);
   --color-border-soft: var(--border-soft);
+  --color-ink: var(--ink);
+  --color-ink-foreground: var(--ink-foreground);
+  --color-ink-muted: var(--ink-muted);
+  --color-ink-border: var(--ink-border);
 
   --font-sans: var(--font-sans), system-ui, sans-serif;
   --font-garamond: var(--font-garamond), Georgia, serif;
@@ -42,13 +92,6 @@ body {
   border-color: var(--border);
 }
 
-/* ---------------------------------------------------------------------------
-   react-globe.gl / three-globe tooltip
-   The library ships its own .scene-tooltip wrapper element with a dark plate
-   (background-color: rgba(0,0,0,0.6); color: lavender) which clashes with the
-   cream design. We override the wrapper to match our design tokens and let
-   the inline HTML in pointLabel stay minimal.
---------------------------------------------------------------------------- */
 /* Mobile nav drawer — slide in from the right */
 @keyframes drawerIn {
   from { transform: translateX(20px); opacity: 0; }
@@ -67,6 +110,13 @@ body {
   }
 }
 
+/* ---------------------------------------------------------------------------
+   react-globe.gl / three-globe tooltip
+   The library ships its own .scene-tooltip wrapper with a dark plate which
+   clashes with the cream surface. Restyle to match design tokens. The
+   inline `style="color:var(--brand)"` for the country label is set in
+   <LiveGlobe>, so the tooltip body itself stays neutral here.
+--------------------------------------------------------------------------- */
 .scene-tooltip {
   background: rgba(244, 239, 228, 0.96) !important; /* var(--background) */
   color: var(--foreground) !important;

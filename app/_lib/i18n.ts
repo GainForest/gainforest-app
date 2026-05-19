@@ -41,8 +41,12 @@ type Messages = {
   "nav.language": string;
 
   // ── Hero ─────────────────────────────────────────────────────────
-  "hero.title.line1": string;
-  "hero.title.line2": string;
+  // The title is composed as: `before` + italic(`italic`) + `after`.
+  // Each locale chooses *one* word to italicise; word order varies, so
+  // the slots `before` and `after` can be empty strings.
+  "hero.title.before": string;
+  "hero.title.italic": string;
+  "hero.title.after": string;
   "hero.subtitle": string;
   "hero.cta.bumicerts": string;
   "hero.cta.globe": string;
@@ -80,7 +84,11 @@ type Messages = {
   "howitworks.step4.body": string;
 
   // ── Nature CTA ───────────────────────────────────────────────────
-  "natureCta.heading": string;
+  // Closing CTA heading splits the same way as the hero title so we can
+  // italicise a single word per locale.
+  "natureCta.heading.before": string;
+  "natureCta.heading.italic": string;
+  "natureCta.heading.after": string;
   "natureCta.body": string;
   "natureCta.exploreProjects": string;
   "natureCta.createBumicert": string;
@@ -120,8 +128,12 @@ export const MESSAGES: Record<Locale, Messages> = {
     "nav.signedIn": "Signed in",
     "nav.getStarted": "Get started",
     "nav.language": "Language",
-    "hero.title.line1": "One home for",
-    "hero.title.line2": "regenerative impact",
+    // The `{word}` marker picks which word gets the painted brush
+    // stroke. Position varies per locale (English puts it first,
+    // Romance languages mid-phrase), so we encode it inline.
+    "hero.title.before": "{Open} tools for",
+    "hero.title.italic": "regenerative intelligence",
+    "hero.title.after": "",
     "hero.subtitle":
       "Explore nature projects around the world, support community-led restoration, and create Bumicerts that make ecological stewardship visible and verifiable.",
     "hero.cta.bumicerts": "Explore Bumicerts",
@@ -163,7 +175,9 @@ export const MESSAGES: Record<Locale, Messages> = {
     "howitworks.step4.title": "Grow impact",
     "howitworks.step4.body":
       "Track outcomes, earn Bumicerts, and help nature thrive.",
-    "natureCta.heading": "Nature thrives when we act together.",
+    "natureCta.heading.before": "Nature thrives when we act",
+    "natureCta.heading.italic": "together",
+    "natureCta.heading.after": ".",
     "natureCta.body":
       "Join a global community creating a fair future for nature and people.",
     "natureCta.exploreProjects": "Explore projects",
@@ -199,8 +213,9 @@ export const MESSAGES: Record<Locale, Messages> = {
     "nav.signedIn": "Sesión iniciada",
     "nav.getStarted": "Comenzar",
     "nav.language": "Idioma",
-    "hero.title.line1": "Un hogar para el",
-    "hero.title.line2": "impacto regenerativo",
+    "hero.title.before": "Herramientas {abiertas} para la",
+    "hero.title.italic": "inteligencia regenerativa",
+    "hero.title.after": "",
     "hero.subtitle":
       "Explora proyectos de naturaleza en todo el mundo, apoya la restauración liderada por comunidades y crea Bumicerts que hagan visible y verificable la custodia ecológica.",
     "hero.cta.bumicerts": "Explorar Bumicerts",
@@ -242,7 +257,9 @@ export const MESSAGES: Record<Locale, Messages> = {
     "howitworks.step4.title": "Haz crecer el impacto",
     "howitworks.step4.body":
       "Sigue los resultados, gana Bumicerts y ayuda a que la naturaleza prospere.",
-    "natureCta.heading": "La naturaleza prospera cuando actuamos juntos.",
+    "natureCta.heading.before": "La naturaleza prospera cuando actuamos",
+    "natureCta.heading.italic": "juntos",
+    "natureCta.heading.after": ".",
     "natureCta.body":
       "Únete a una comunidad global que construye un futuro justo para la naturaleza y las personas.",
     "natureCta.exploreProjects": "Explorar proyectos",
@@ -278,8 +295,9 @@ export const MESSAGES: Record<Locale, Messages> = {
     "nav.signedIn": "Conectado",
     "nav.getStarted": "Começar",
     "nav.language": "Idioma",
-    "hero.title.line1": "Um lar para o",
-    "hero.title.line2": "impacto regenerativo",
+    "hero.title.before": "Ferramentas {abertas} para a",
+    "hero.title.italic": "inteligência regenerativa",
+    "hero.title.after": "",
     "hero.subtitle":
       "Explore projetos de natureza ao redor do mundo, apoie a restauração liderada por comunidades e crie Bumicerts que tornem o cuidado ecológico visível e verificável.",
     "hero.cta.bumicerts": "Explorar Bumicerts",
@@ -321,7 +339,9 @@ export const MESSAGES: Record<Locale, Messages> = {
     "howitworks.step4.title": "Cultivar impacto",
     "howitworks.step4.body":
       "Acompanhe resultados, conquiste Bumicerts e ajude a natureza a prosperar.",
-    "natureCta.heading": "A natureza prospera quando agimos juntos.",
+    "natureCta.heading.before": "A natureza prospera quando agimos",
+    "natureCta.heading.italic": "juntos",
+    "natureCta.heading.after": ".",
     "natureCta.body":
       "Junte-se a uma comunidade global construindo um futuro justo para a natureza e as pessoas.",
     "natureCta.exploreProjects": "Explorar projetos",
@@ -357,8 +377,9 @@ export const MESSAGES: Record<Locale, Messages> = {
     "nav.signedIn": "Umeingia",
     "nav.getStarted": "Anza",
     "nav.language": "Lugha",
-    "hero.title.line1": "Nyumba moja kwa",
-    "hero.title.line2": "athari ya kuzaa upya",
+    "hero.title.before": "Zana {huria} kwa",
+    "hero.title.italic": "akili ya kuzaa upya",
+    "hero.title.after": "",
     "hero.subtitle":
       "Vinjari miradi ya asili kote duniani, saidia urejeshaji unaoongozwa na jamii, na tengeneza Bumicerts zinazofanya utunzaji wa ikolojia uonekane na kuthibitishwa.",
     "hero.cta.bumicerts": "Vinjari Bumicerts",
@@ -400,7 +421,9 @@ export const MESSAGES: Record<Locale, Messages> = {
     "howitworks.step4.title": "Kuza athari",
     "howitworks.step4.body":
       "Fuatilia matokeo, pata Bumicerts, na saidia asili kustawi.",
-    "natureCta.heading": "Maumbile hustawi tunapotenda pamoja.",
+    "natureCta.heading.before": "Maumbile hustawi tunapotenda",
+    "natureCta.heading.italic": "pamoja",
+    "natureCta.heading.after": ".",
     "natureCta.body":
       "Jiunge na jumuiya ya kimataifa inayojenga mustakabali wa haki kwa maumbile na watu.",
     "natureCta.exploreProjects": "Vinjari miradi",
@@ -436,8 +459,9 @@ export const MESSAGES: Record<Locale, Messages> = {
     "nav.signedIn": "Telah masuk",
     "nav.getStarted": "Mulai",
     "nav.language": "Bahasa",
-    "hero.title.line1": "Satu rumah untuk",
-    "hero.title.line2": "dampak regeneratif",
+    "hero.title.before": "Alat {terbuka} untuk",
+    "hero.title.italic": "kecerdasan regeneratif",
+    "hero.title.after": "",
     "hero.subtitle":
       "Jelajahi proyek alam di seluruh dunia, dukung pemulihan yang dipimpin komunitas, dan buat Bumicerts yang membuat kepedulian ekologis terlihat dan dapat diverifikasi.",
     "hero.cta.bumicerts": "Jelajahi Bumicerts",
@@ -479,7 +503,9 @@ export const MESSAGES: Record<Locale, Messages> = {
     "howitworks.step4.title": "Tumbuhkan dampak",
     "howitworks.step4.body":
       "Lacak hasil, raih Bumicerts, dan bantu alam berkembang.",
-    "natureCta.heading": "Alam berkembang ketika kita bertindak bersama.",
+    "natureCta.heading.before": "Alam berkembang ketika kita bertindak",
+    "natureCta.heading.italic": "bersama",
+    "natureCta.heading.after": ".",
     "natureCta.body":
       "Bergabunglah dengan komunitas global yang membangun masa depan yang adil untuk alam dan manusia.",
     "natureCta.exploreProjects": "Jelajahi proyek",

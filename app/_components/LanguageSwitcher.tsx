@@ -61,7 +61,7 @@ export function LanguageSwitcher() {
           "inline-flex h-9 items-center gap-1.5 rounded-full border " +
           "border-border-soft bg-background/60 px-3 text-[12px] " +
           "font-medium uppercase tracking-[0.1em] text-foreground/75 " +
-          "transition-colors hover:border-primary/40 hover:text-foreground"
+          "transition-colors hover:border-foreground/40 hover:text-foreground"
         }
       >
         <GlobeGlyph />
@@ -94,8 +94,11 @@ export function LanguageSwitcher() {
                     className={
                       "flex w-full items-center justify-between gap-3 " +
                       "px-3.5 py-2 text-left text-[13px] transition-colors " +
+                      // Active row uses a subtle brand-mint tint —
+                      // the same restrained accent pattern as the
+                      // LIVE badges and the signed-in chip.
                       (active
-                        ? "bg-primary/8 text-primary"
+                        ? "bg-brand/10 text-brand-dark"
                         : "text-foreground/85 hover:bg-foreground/[0.04] hover:text-foreground")
                     }
                   >

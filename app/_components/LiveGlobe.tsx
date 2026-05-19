@@ -164,7 +164,7 @@ export function LiveGlobe({ pins, diameter }: GlobeProps) {
         pointLabel={(d: object) => {
           const pin = d as ProjectPin;
           const country = pin.country
-            ? `<div style="margin-top:2px;font-family:var(--font-sans),system-ui,sans-serif;font-size:9.5px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:var(--primary);opacity:0.75;">${escapeHtml(pin.country)}</div>`
+            ? `<div style="margin-top:2px;font-family:var(--font-sans),system-ui,sans-serif;font-size:9.5px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:var(--brand-dark);opacity:0.85;">${escapeHtml(pin.country)}</div>`
             : "";
           return `<div><div style="font-weight:600;">${escapeHtml(pin.name)}</div>${country}</div>`;
         }}
@@ -234,7 +234,7 @@ export function LiveGlobe({ pins, diameter }: GlobeProps) {
           {SKELETON_PINS.map((p, i) => (
             <span
               key={i}
-              className="absolute h-1.5 w-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/50"
+              className="absolute h-1.5 w-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-brand/60"
               style={{
                 left: `${p.x}%`,
                 top: `${p.y}%`,

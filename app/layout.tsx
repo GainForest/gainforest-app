@@ -1,7 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Cormorant_Garamond, Instrument_Serif, Inter } from "next/font/google";
 import "./globals.css";
-import { FloatingCapybara } from "./_components/FloatingCapybara";
 import { LocaleProvider } from "./_components/LocaleProvider";
 
 const inter = Inter({
@@ -199,13 +198,12 @@ export default function RootLayout({
             re-renders every translated component with the right strings.
             Also exposes the locale to the FloatingCapybara so its chat
             replies match the active language. */}
-        <LocaleProvider>
-          {children}
-          {/* Draggable codex-pet capybara — port of simocracy's
-              FloatingEinstein. Mounted at the layout level so it follows
-              the user across any future routes. */}
-          <FloatingCapybara />
-        </LocaleProvider>
+        {/* Capybara is a Simocracy-style codex pet — removed from the
+            GainForest landing per team feedback (the pixel-art tone
+            didn't fit the editorial branding). The component file
+            (`_components/FloatingCapybara.tsx`) is kept on disk in case
+            it's wanted as an opt-in widget later. */}
+        <LocaleProvider>{children}</LocaleProvider>
       </body>
     </html>
   );

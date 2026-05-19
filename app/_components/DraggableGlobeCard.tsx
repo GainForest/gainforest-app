@@ -124,20 +124,22 @@ function GlobeCardChrome({
         aria-label={draggable ? "Drag handle" : undefined}
       >
         <LogoMark
-          className="h-[22px] w-[22px] text-primary"
+          className="h-[22px] w-[22px] text-brand"
           title="GainForest"
         />
         <span className="font-garamond text-[20px] font-medium text-foreground">
           {t("nav.globe")}
         </span>
+        {/* LIVE badge — brand-mint as a subtle accent on live data.
+            Pairs visually with the matching badge on BumicertsCard. */}
         <span
-          className="ml-auto inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-medium uppercase tracking-[0.08em] text-primary"
+          className="ml-auto inline-flex items-center gap-1.5 rounded-full bg-brand/15 px-2 py-0.5 text-[10px] font-medium uppercase tracking-[0.08em] text-brand-dark"
           title="Real ATProto-sourced pins"
           data-no-drag
         >
           <span className="relative grid h-1.5 w-1.5 place-items-center">
-            <span className="absolute inset-0 animate-ping rounded-full bg-primary/40" />
-            <span className="relative h-1.5 w-1.5 rounded-full bg-primary" />
+            <span className="absolute inset-0 animate-ping rounded-full bg-brand/40" />
+            <span className="relative h-1.5 w-1.5 rounded-full bg-brand" />
           </span>
           Live
         </span>
@@ -160,7 +162,7 @@ function GlobeCardChrome({
           href={GLOBE_HREF}
           target="_blank"
           rel="noreferrer"
-          className="inline-flex items-center gap-1 text-foreground/70 transition-colors hover:text-primary"
+          className="inline-flex items-center gap-1 text-foreground/70 transition-colors hover:text-foreground"
           data-no-drag
         >
           {t("card.openTheGlobe")}
