@@ -5,12 +5,11 @@ import { useT } from "./LocaleProvider";
 // "We listen to our Nature Guild." — port of gainforest.earth's Nature
 // Guild member grid.
 //
-// Each member is rendered with an INITIAL-BASED AVATAR (no photograph)
-// — we don't have permission to ship real headshots and the editorial
-// tone the team locked down stays cleaner without portrait raster art
-// anyway. The avatars use the warm cream `#fbf8f0` card chrome from the
-// Bumicerts hero card and a sage forest stroke ring to feel like part
-// of the same design system.
+// Each member ships with the real headshot used on gainforest.earth.
+// The portraits live under `public/nature-guild/` (sourced from the
+// gainforest.earth asset pipeline) and are rendered in a circular crop
+// with a thin sage-forest ring to echo the same design system used by
+// the IWantTo / HowItWorks number chips.
 //
 // Names + affiliations come verbatim from gainforest.earth (these are
 // real Guild members; proper nouns aren't translated). The surrounding
@@ -18,34 +17,51 @@ import { useT } from "./LocaleProvider";
 type GuildMember = {
   name: string;
   affiliation: string; // org, country
-  // 1-2 char initial used for the avatar. Computed at module load
-  // because translating initials would be wrong.
+  photo: string; // /nature-guild/<slug>.(png|jpg) — square headshot
 };
 
 const MEMBERS: ReadonlyArray<GuildMember> = [
-  { name: "Stephen Bright Sakwa", affiliation: "Bees & Trees, Uganda" },
-  { name: "Jaya Kandir", affiliation: "Darukaa Earth, India" },
-  { name: "Esau Daniel", affiliation: "YLEC, Uganda" },
-  { name: "Njambi Njoroge", affiliation: "Grassroots Economics, Kenya" },
+  {
+    name: "Stephen Bright Sakwa",
+    affiliation: "Bees & Trees, Uganda",
+    photo: "/nature-guild/stephen-bright-sakwa.png",
+  },
+  {
+    name: "Jaya Kandir",
+    affiliation: "Darukaa Earth, India",
+    photo: "/nature-guild/jaya-kandir.png",
+  },
+  {
+    name: "Esayu Daniel",
+    affiliation: "YLEC, Uganda",
+    photo: "/nature-guild/esayu-daniel.png",
+  },
+  {
+    name: "Njambi Njoroge",
+    affiliation: "Grassroots Economics, Kenya",
+    photo: "/nature-guild/njambi-njoroge.png",
+  },
   {
     name: "Simon Peter Okoth",
     affiliation: "Climatica Foundation, Uganda",
+    photo: "/nature-guild/simon-peter-okoth.png",
   },
-  { name: "Marina Mura", affiliation: "Inhaã-bé, Brazil" },
-  { name: "Gabriel Nunes", affiliation: "GainForest, Brazil" },
-  { name: "Nurfatin Hamzah", affiliation: "GainForest, Malaysia" },
-  { name: "Tin Dalida", affiliation: "WOVOKA, the Philippines" },
+  {
+    name: "Marina Mura",
+    affiliation: "Inhaã-bé, Brazil",
+    photo: "/nature-guild/marina-mura.jpg",
+  },
+  {
+    name: "Nurfatin Hamzah",
+    affiliation: "GainForest, Malaysia",
+    photo: "/nature-guild/nurfatin-hamzah.jpg",
+  },
+  {
+    name: "Tin Dalida",
+    affiliation: "WOVOKA, the Philippines",
+    photo: "/nature-guild/tin-dalida.jpg",
+  },
 ];
-
-function initials(name: string) {
-  return name
-    .split(" ")
-    .filter(Boolean)
-    .map((n) => n[0])
-    .slice(0, 2)
-    .join("")
-    .toUpperCase();
-}
 
 export function NatureGuild() {
   const t = useT();
@@ -79,15 +95,18 @@ export function NatureGuild() {
               key={m.name}
               className="flex flex-col items-start gap-3"
             >
-              {/* Initial avatar. Sage-ring on cream — same colourway
-                  as the IWantTo / HowItWorks number chips so the page
-                  reads as a single design system. */}
-              <span
-                aria-hidden
-                className="flex h-16 w-16 items-center justify-center rounded-full border border-primary/35 bg-[#fbf8f0] font-garamond text-[22px] text-primary lg:h-[68px] lg:w-[68px] lg:text-[24px]"
-              >
-                {initials(m.name)}
-              </span>
+              {/* Circular headshot crop with a thin sage-forest ring
+                  so the photos sit inside the same design system as
+                  the IWantTo / HowItWorks number chips. `object-cover`
+                  on a square aspect handles the few non-square source
+                  files (most are already square). */}
+              <img
+                src={m.photo}
+                alt={m.name}
+                loading="lazy"
+                decoding="async"
+                className="h-16 w-16 rounded-full border border-primary/35 bg-[#fbf8f0] object-cover lg:h-[68px] lg:w-[68px]"
+              />
               <div>
                 <p className="font-garamond text-[18px] lg:text-[20px] leading-[1.15] tracking-[-0.005em] text-foreground">
                   {m.name}

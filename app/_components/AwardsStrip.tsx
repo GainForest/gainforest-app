@@ -6,16 +6,24 @@ import { useT } from "./LocaleProvider";
 // that sits directly below the hero.
 //
 // The original site renders raster logo PNGs (XPRIZE, Lever for Change,
-// SwissTech, etc). We don't have permission to ship those assets and a
-// chunky raster logo wall would clash with the editorial cream tone the
-// team locked down for the rest of the page. So we use the same
-// editorial treatment the rest of the landing uses: a small italic
-// "Winners of" label, then the award names rendered as quiet serif
-// typography next to a 1px hairline rule.
+// etc). We don't have permission to ship those assets and a chunky
+// raster logo wall would clash with the editorial cream tone the team
+// locked down for the rest of the page. So we use the same editorial
+// treatment the rest of the landing uses: a small italic "Winners of"
+// label, then the award name rendered as quiet serif typography. The
+// secondary "Recognised by" line is the same recipe one notch
+// quieter.
 //
-// Award copy comes verbatim from gainforest.earth's award strip (the
-// names are proper nouns and don't translate). The label around them
-// is localised via i18n.
+// Award copy is verbatim — these are proper nouns and don't translate.
+// The label *around* them ("Winners of" / "Recognised by") is i18n'd.
+//
+// The earlier "Recognised by" list shipped a few placeholders
+// (SwissTech Award, Web3 Foundation Grant, Solana Climate Grant) that
+// were aspirational rather than real. They have been removed in
+// favour of the actual roster of grants / awards / sponsors —
+// Earthshot, BCG Vordenker:innen, Ethereum Foundation, Filecoin
+// Green, Solana, and Klarna — so the band only references real
+// recognition.
 const PRIMARY_AWARDS: ReadonlyArray<{ label: string; href: string }> = [
   {
     label: "XPRIZE Rainforest",
@@ -24,14 +32,16 @@ const PRIMARY_AWARDS: ReadonlyArray<{ label: string; href: string }> = [
 ];
 
 const SECONDARY = [
+  // Awards first (prestige order), then grants, then sponsors.
+  { label: "Earthshot Prize", href: "https://earthshotprize.org/" },
   {
     label: "BCG & Handelsblatt Vordenker:innen",
-    href: "https://www.gainforest.earth/",
+    href: "https://www.bcg.com/",
   },
-  { label: "SwissTech Award", href: "https://www.gainforest.earth/" },
-  { label: "Web3 Foundation Grant", href: "https://web3.foundation/" },
-  { label: "Solana Climate Grant", href: "https://solana.org/" },
+  { label: "Ethereum Foundation", href: "https://ethereum.foundation/" },
   { label: "Filecoin Green", href: "https://green.filecoin.io/" },
+  { label: "Solana", href: "https://solana.com/" },
+  { label: "Klarna", href: "https://www.klarna.com/" },
 ];
 
 export function AwardsStrip() {
