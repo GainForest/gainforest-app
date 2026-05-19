@@ -89,32 +89,41 @@ export function NatureGuild() {
           </p>
         </div>
 
-        <ul className="mt-14 grid grid-cols-2 gap-x-6 gap-y-10 sm:grid-cols-3 lg:mt-20 lg:grid-cols-3 lg:gap-x-12 lg:gap-y-12 xl:grid-cols-5">
+        {/* Portrait grid. 8 members fall into a clean 2 × 4 / 4 × 2
+            arrangement. Photos are intentionally large (~120px) so
+            the Guild reads as a portrait wall rather than a credit
+            list — the editorial weight matches the rest of the
+            cream sections. */}
+        <ul className="mt-16 grid grid-cols-2 gap-x-8 gap-y-12 sm:grid-cols-3 sm:gap-x-10 lg:mt-24 lg:grid-cols-4 lg:gap-x-14 lg:gap-y-16">
           {MEMBERS.map((m) => (
             <li
               key={m.name}
-              className="flex flex-col items-start gap-3"
+              className="group flex flex-col items-center text-center"
             >
-              {/* Circular headshot crop with a thin sage-forest ring
-                  so the photos sit inside the same design system as
-                  the IWantTo / HowItWorks number chips. `object-cover`
-                  on a square aspect handles the few non-square source
-                  files (most are already square). */}
-              <img
-                src={m.photo}
-                alt={m.name}
-                loading="lazy"
-                decoding="async"
-                className="h-16 w-16 rounded-full border border-primary/35 bg-[#fbf8f0] object-cover lg:h-[68px] lg:w-[68px]"
-              />
-              <div>
-                <p className="font-garamond text-[18px] lg:text-[20px] leading-[1.15] tracking-[-0.005em] text-foreground">
-                  {m.name}
-                </p>
-                <p className="mt-1 text-[13px] lg:text-[13.5px] leading-[1.4] text-foreground/65">
-                  {m.affiliation}
-                </p>
+              {/* Circular headshot. Single hairline sage ring sits
+                  flush with the photo edge; a wider, paler
+                  `ring-offset` ring floats one cream-coloured gap
+                  out from it — the same double-stroke recipe the
+                  gainforest.earth portraits use. A very soft drop
+                  shadow adds the merest hint of lift so the photos
+                  don't read as flat stickers on the cream
+                  background. Hover slowly bumps the inner ring to
+                  full primary and nudges the photo up 1px. */}
+              <div className="relative">
+                <img
+                  src={m.photo}
+                  alt={m.name}
+                  loading="lazy"
+                  decoding="async"
+                  className="h-24 w-24 rounded-full border border-primary/30 bg-[#fbf8f0] object-cover shadow-[0_4px_18px_-10px_rgba(20,30,15,0.35)] ring-1 ring-offset-2 ring-offset-background ring-border-soft transition-all duration-300 ease-out group-hover:-translate-y-0.5 group-hover:border-primary/70 sm:h-28 sm:w-28 lg:h-32 lg:w-32"
+                />
               </div>
+              <p className="mt-5 font-garamond text-[19px] lg:text-[21px] leading-[1.15] tracking-[-0.005em] text-foreground">
+                {m.name}
+              </p>
+              <p className="mt-1.5 font-instrument italic text-[13.5px] lg:text-[14.5px] leading-[1.35] text-foreground/55">
+                {m.affiliation}
+              </p>
             </li>
           ))}
         </ul>
