@@ -1,12 +1,13 @@
 {
   "name": "GainForest",
   "short_name": "GainForest",
-  "description": "One home for regenerative impact. Explore the Globe, back verified projects, and mint Bumicerts on ATProto.",
+  "description": "Open tools for regenerative intelligence. Explore the Globe, back verified projects, and mint Bumicerts on ATProto.",
   "icons": [
     { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
-    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png" }
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/icons/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" }
   ],
-  "theme_color": "#335a3c",
+  "theme_color": "#3e7053",
   "background_color": "#f4efe4",
   "display": "minimal-ui",
   "start_url": "/"

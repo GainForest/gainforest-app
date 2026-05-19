@@ -33,7 +33,10 @@ const SITE_URL = (
 ).replace(/\/$/, "");
 
 const SITE_NAME = "GainForest";
-const SITE_TAGLINE = "One home for regenerative impact";
+// Tagline mirrors the on-page hero (`hero.title.before` + `hero.title.italic`
+// in app/_lib/i18n.ts). Keep these two in sync — the tagline drives the
+// browser tab title, OG / Twitter card title, and JSON-LD WebPage name.
+const SITE_TAGLINE = "Open tools for regenerative intelligence";
 const SITE_DESCRIPTION =
   "Explore nature projects around the world, back community-led restoration, and mint Bumicerts — verifiable proof-of-impact records signed on ATProto.";
 
@@ -82,7 +85,7 @@ export const metadata: Metadata = {
         width: 1200,
         height: 630,
         alt:
-          "GainForest — One home for regenerative impact. A botanical illustration sits between the headline and a satellite view of Earth dotted with green project pins.",
+          "GainForest — Open tools for regenerative intelligence. The headline sits to the left of a satellite view of Earth dotted with bright mint-green project pins across the Amazon, central Africa, Madagascar, and Indonesia.",
         type: "image/png",
       },
     ],

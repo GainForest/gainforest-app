@@ -399,8 +399,9 @@ required-then-optional order with sensible local defaults).
 - **Background**: warm cream `#f4efe4` (sampled from the original mockup).
 - **Primary**: deep forest green `#335a3c`. Hover/dark `#2a4a31`.
 - **Body**: Inter.
-- **Display & UI accents**: Cormorant Garamond (the `One home for /
-  regenerative impact` headline) and Instrument Serif italic.
+- **Display & UI accents**: Cormorant Garamond (the `Open tools for /
+  regenerative intelligence` headline, with Cormorant's italic on the
+  emphasis line) and Instrument Serif italic for in-line emphasis.
 - **Borders**: `#d9d3c3` (regular), `#e6dfd0` (soft).
 
 All colour and font tokens live in `app/globals.css` and are exposed both
