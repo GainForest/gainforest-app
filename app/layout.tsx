@@ -33,6 +33,11 @@ const SITE_URL = (
 ).replace(/\/$/, "");
 
 const SITE_NAME = "GainForest";
+// Version the social image path whenever the artwork changes. Telegram
+// and several chat apps cache OG images aggressively by URL, so changing
+// only the bytes behind `/og/landing.png` is not enough to refresh an
+// already-shared preview.
+const OG_IMAGE_PATH = "/og/landing-2026-05-19.png";
 // Tagline mirrors the on-page hero (`hero.title.before` + `hero.title.italic`
 // in app/_lib/i18n.ts). Keep these two in sync — the tagline drives the
 // browser tab title, OG / Twitter card title, and JSON-LD WebPage name.
@@ -80,8 +85,8 @@ export const metadata: Metadata = {
     url: SITE_URL,
     images: [
       {
-        url: "/og/landing.png",
-        secureUrl: `${SITE_URL}/og/landing.png`,
+        url: OG_IMAGE_PATH,
+        secureUrl: `${SITE_URL}${OG_IMAGE_PATH}`,
         width: 1200,
         height: 630,
         alt:
@@ -94,7 +99,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: `${SITE_NAME} — ${SITE_TAGLINE}`,
     description: SITE_DESCRIPTION,
-    images: ["/og/landing.png"],
+    images: [OG_IMAGE_PATH],
     creator: "@gainforest",
     site: "@gainforest",
   },
@@ -172,7 +177,7 @@ const JSON_LD = {
       url: SITE_URL,
       name: `${SITE_NAME} — ${SITE_TAGLINE}`,
       isPartOf: { "@id": `${SITE_URL}/#website` },
-      primaryImageOfPage: `${SITE_URL}/og/landing.png`,
+      primaryImageOfPage: `${SITE_URL}${OG_IMAGE_PATH}`,
       about: { "@id": `${SITE_URL}/#organization` },
       description: SITE_DESCRIPTION,
       inLanguage: "en-US",
