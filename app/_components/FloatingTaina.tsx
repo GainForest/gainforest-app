@@ -9,45 +9,51 @@ import {
   useState,
 } from "react";
 import { renderPetAnimated, type CodexPetState } from "../_lib/codex-pet";
-import { CAPYBARA_SIM } from "../_lib/capybara-sim";
+import { TAINA_SIM } from "../_lib/taina-sim";
 import { useLocale } from "./LocaleProvider";
 
-// FloatingCapybara — port of `simocracy-v2/components/feedback/floating-einstein.tsx`,
-// pointed at the "Capybara" sim
-//   at://did:plc:qc42fmqqlsmdq7jiypiiigww/org.simocracy.sim/3ml6hwvjijm2q
-// owned by @daviddao.org. The sim's PDS blobs (poster + animated codex-pet
-// sheet) are mirrored locally under /public/codex-pets/ so the floating
-// widget doesn't pay a cross-origin fetch on every page load.
+// FloatingTaina — port of `simocracy-v2/components/feedback/floating-einstein.tsx`,
+// pointed at the "Taina" sim
+//   at://did:plc:qc42fmqqlsmdq7jiypiiigww/org.simocracy.sim/3ml7iunv6pp2m
+// owned by @daviddao.org.
 //
-// Behaviour mirrors FloatingEinstein:
-//   - Sits bottom-right by default (32 px from each edge). Drag anywhere
-//     on the viewport; position persists in localStorage.
+// Replaces the earlier `FloatingCapybara` (same widget, different sim).
+// The team's note: "I liked the FloatingCapybara, but I didn't like
+// that it was a capybara — use Taina instead". The codex-pet machinery,
+// the drag/persist behaviour, and the chat-panel layout are unchanged;
+// only the sim binding (sprite assets + system prompt + i18n keys) moved.
+//
+// Behaviour (unchanged from the capybara version):
+//   - Sits bottom-LEFT on desktop / bottom-RIGHT on mobile by default
+//     (32 px / 18 px from each edge). Drag anywhere on the viewport;
+//     position persists in localStorage.
 //   - Pure click toggles a chat panel. The panel anchors to whichever
 //     side of the sprite has the most room.
 //   - Animation state machine: dragging → running-{left|right}; streaming
 //     a reply → review (heads-down); panel just opened → waving (1.6 s);
 //     otherwise → idle. All states are real cells from the 1536×1872
-//     codex-pet sheet from the OpenAI hatch-pet skill.
+//     codex-pet sheet on Taina's PDS (mirrored to /public/codex-pets/).
 //   - Chat streams from `/api/sim-chat`. The system prompt is built from
-//     the sim's constitution + style records on its owner's PDS, so the
-//     companion always speaks in the latest Capybara voice.
+//     Taina's constitution + style records on her owner's PDS, so the
+//     companion always speaks in the latest Taina voice.
 //   - Hidden inside iframes (no OG/print rendering).
 
 const SPRITE_W = 84;
 const SPRITE_H = 90;
 // Vertical room reserved below the sprite for the "Ask me anything"
 // name-shield. Folded into the viewport clamp so the shield never gets
-// pushed off-screen when the user drags the capybara near the bottom.
+// pushed off-screen when the user drags the sprite near the bottom.
 const BADGE_RESERVE = 24;
 const PANEL_W = 340;
 const PANEL_H = 460;
 const PANEL_GAP = 12;
 const VIEWPORT_PADDING = 12;
 const DRAG_THRESHOLD_PX = 4;
-// v3: default flips per viewport — bottom-RIGHT on mobile (where the
-// stacked single-column hero leaves the right corner free), bottom-LEFT
-// on desktop (to balance the right-weighted Bumicerts + Globe windows).
-const STORAGE_KEY = "gainforest.floatingCapybara.position.v3";
+// Distinct key from the old `floatingCapybara` key so existing visitors
+// who positioned the capybara somewhere weird get a fresh default
+// position for Taina (and so a future sim swap doesn't surface the
+// previous sim's coordinates).
+const STORAGE_KEY = "gainforest.floatingTaina.position.v1";
 const DESKTOP_MIN_WIDTH = 1024;
 const OPEN_WAVE_MS = 1600;
 
@@ -77,7 +83,7 @@ function defaultPosition(): Position {
   // Desktop: bottom-LEFT — the hero composition weights the page right
   // (Bumicerts card + globe), so the floating companion balances it.
   // Mobile: bottom-RIGHT — the layout is a single stacked column, so
-  // a left-side capybara would constantly overlap the content stream;
+  // a left-side sprite would constantly overlap the content stream;
   // bottom-right keeps the corner clear of the column flow.
   const isDesktop = window.innerWidth >= DESKTOP_MIN_WIDTH;
   const edgeInset = isDesktop ? 32 : 18;
@@ -105,7 +111,7 @@ function computePanelPosition(spritePos: Position): Position {
   return { x, y };
 }
 
-export function FloatingCapybara() {
+export function FloatingTaina() {
   const { locale, t } = useLocale();
   const [mounted, setMounted] = useState(false);
   const [position, setPosition] = useState<Position>({ x: 0, y: 0 });
@@ -280,7 +286,7 @@ export function FloatingCapybara() {
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    return renderPetAnimated(canvas, CAPYBARA_SIM.sheetUrl, petState, markFirstFrame);
+    return renderPetAnimated(canvas, TAINA_SIM.sheetUrl, petState, markFirstFrame);
   }, [petState, markFirstFrame]);
 
   // Drive the small header avatar in the chat panel (only while open).
@@ -288,7 +294,7 @@ export function FloatingCapybara() {
     if (!open) return;
     const canvas = headerCanvasRef.current;
     if (!canvas) return;
-    return renderPetAnimated(canvas, CAPYBARA_SIM.sheetUrl, "idle");
+    return renderPetAnimated(canvas, TAINA_SIM.sheetUrl, "idle");
   }, [open]);
 
   // End the open-wave after one cycle.
@@ -386,7 +392,7 @@ export function FloatingCapybara() {
         });
       }
     } catch (err) {
-      console.error("[FloatingCapybara] chat failed", err);
+      console.error("[FloatingTaina] chat failed", err);
       setMessages((prev) => [
         ...prev,
         {
@@ -411,7 +417,7 @@ export function FloatingCapybara() {
       {open && (
         <div
           role="dialog"
-          aria-label={`Chat with ${CAPYBARA_SIM.name}`}
+          aria-label={`Chat with ${TAINA_SIM.name}`}
           className="fixed z-[60] flex flex-col overflow-hidden rounded-2xl border border-border-soft bg-background shadow-xl"
           style={{
             left: panelPos.x,
@@ -436,10 +442,10 @@ export function FloatingCapybara() {
             />
             <div className="min-w-0 flex-1">
               <div className="font-garamond text-[15px] font-medium text-foreground">
-                {CAPYBARA_SIM.name}
+                {TAINA_SIM.name}
               </div>
               <div className="truncate text-[11px] text-foreground/55">
-                {t("capy.role")}
+                {t("taina.role")}
               </div>
             </div>
             <button
@@ -457,10 +463,12 @@ export function FloatingCapybara() {
             {messages.length === 0 && (
               <div className="rounded-2xl bg-foreground/5 px-3 py-2 text-foreground/70">
                 <p>
-                  <span aria-hidden>🦦</span> {t("capy.greetingHello")}
+                  {/* Tropical-leaf glyph (echoes the parrot/sprout
+                      emojis in Taina's own constitution sign-off). */}
+                  <span aria-hidden>🌿</span> {t("taina.greetingHello")}
                 </p>
                 <p className="mt-1 text-foreground/55">
-                  {t("capy.greetingHint")}
+                  {t("taina.greetingHint")}
                 </p>
               </div>
             )}
@@ -500,7 +508,7 @@ export function FloatingCapybara() {
                 }
               }}
               placeholder={
-                streaming ? t("capy.thinking") : t("capy.placeholder")
+                streaming ? t("taina.thinking") : t("taina.placeholder")
               }
               rows={1}
               disabled={streaming}
@@ -521,7 +529,7 @@ export function FloatingCapybara() {
       {/* SPRITE */}
       <div
         role="button"
-        aria-label={`${CAPYBARA_SIM.name} — click to chat, drag to move`}
+        aria-label={`${TAINA_SIM.name} — click to chat, drag to move`}
         tabIndex={0}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
@@ -548,7 +556,7 @@ export function FloatingCapybara() {
             first paint via opacity. */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src={CAPYBARA_SIM.posterUrl}
+          src={TAINA_SIM.posterUrl}
           alt=""
           width={SPRITE_W}
           height={SPRITE_H}
@@ -576,7 +584,7 @@ export function FloatingCapybara() {
             data-no-drag, no pointer-events-none) so tapping the shield
             opens chat just like tapping the sprite. Hidden while the
             chat panel is open (redundant) and faded out mid-drag (the
-            capybara is busy moving). */}
+            sprite is busy moving). */}
         {!open && (
           <div
             aria-hidden
@@ -590,7 +598,7 @@ export function FloatingCapybara() {
               (dragging ? "opacity-0" : "opacity-100")
             }
           >
-            {t("capy.shield")}
+            {t("taina.shield")}
           </div>
         )}
       </div>

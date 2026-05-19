@@ -13,7 +13,7 @@ The page renders live data from both apps — recent high-quality Bumicerts in
 the hero card, real ATProto-sourced project pins on a draggable globe — so
 visitors land on a snapshot of the network rather than a static brochure.
 
-It also hosts a draggable pixel-art **capybara codex pet** in the bottom-right
+It also hosts a draggable pixel-art **Taina codex pet** in the bottom-left
 corner, and a proper ATProto OAuth sign-in flow ported from
 [simocracy-v2](https://github.com/your-org/simocracy-v2) so a visitor can
 auth against their own PDS without ever touching the gainforest.app backend.
@@ -51,7 +51,7 @@ app/
 ├── page.tsx                       async server component; fetches
 │                                  Bumicerts snapshot + renders the page
 ├── layout.tsx                     fonts, metadata, mounts the
-│                                  <FloatingCapybara> on every route
+│                                  <FloatingTaina> on every route
 ├── globals.css                    design tokens (--background cream
 │                                  #f4efe4, --primary forest #335a3c, …)
 ├── _components/                   (UI only — no business logic)
@@ -72,7 +72,7 @@ app/
 │   ├── HowItWorks.tsx             4-step strip with hand-drawn icons
 │   ├── NatureCTA.tsx              "Nature thrives" CTA banner with a
 │   │                              raster topographic decoration
-│   ├── FloatingCapybara.tsx       animated codex-pet (Capybara sim)
+│   ├── FloatingTaina.tsx          animated codex-pet (Taina sim)
 │   │                              + streaming chat panel
 │   ├── Footer.tsx                 logo + © + external links
 │   └── Logo.tsx                   inline GainForest leaf SVG (mask-image)
@@ -85,13 +85,13 @@ app/
 │   ├── auth-session.ts            getSession() / getAgent() / getUserDid()
 │   ├── codex-pet.ts               sprite-sheet animator (port of simocracy)
 │   ├── openrouter.ts              minimal OpenRouter chat client
-│   └── capybara-sim.ts            fetches the Capybara sim's PDS persona
+│   └── taina-sim.ts               fetches the Taina sim's PDS persona
 ├── api/
 │   ├── oauth/login/route.ts       GET — start OAuth flow from a handle/PDS
 │   ├── oauth/callback/route.ts    GET — finish OAuth, issue session cookie
 │   ├── auth/logout/route.ts       POST — clear session
 │   ├── auth/whoami/route.ts       GET — JSON status for client polling
-│   └── sim-chat/route.ts          POST — stream Capybara chat (OpenRouter)
+│   └── sim-chat/route.ts          POST — stream Taina chat (OpenRouter)
 ├── client-metadata.json/route.ts  OAuth client metadata document
 └── jwks.json/route.ts             public JWKs (private 'd' stripped)
 ```
@@ -229,26 +229,33 @@ never carries the DID directly.
 | `/client-metadata.json` | GET | OAuth client metadata (production `client_id`) |
 | `/jwks.json` | GET | Public keys for client-assertion verification |
 
-## Floating Capybara (a real Simocracy sim)
+## Floating Taina (a real Simocracy sim)
 
-`app/_components/FloatingCapybara.tsx` is a fully-animated **codex pet**
-that lives in the bottom-right of every route. It is a port of simocracy's
+`app/_components/FloatingTaina.tsx` is a fully-animated **codex pet**
+that lives in the bottom-left of every route on desktop (bottom-right
+on mobile). It is a port of simocracy's
 [`FloatingEinstein`](https://github.com/your-org/simocracy-v2/blob/main/components/feedback/floating-einstein.tsx)
 pointed at a specific Simocracy sim:
 
-- **Sim**: [`Capybara`](https://www.simocracy.org/sims/did%3Aplc%3Aqc42fmqqlsmdq7jiypiiigww/3ml6hwvjijm2q)
-  (`at://did:plc:qc42fmqqlsmdq7jiypiiigww/org.simocracy.sim/3ml6hwvjijm2q`)
-- **Owner**: `@daviddao.org` — delegate of the South American animal
-  kingdom to the Interspecies & Interelemental Parliament.
+- **Sim**: [`Taina`](https://www.simocracy.org/sims/taina)
+  (`at://did:plc:qc42fmqqlsmdq7jiypiiigww/org.simocracy.sim/3ml7iunv6pp2m`)
+- **Owner**: `@daviddao.org` — Taina is GainForest's actual
+  community-facing AI assistant, born during the XPRIZE Rainforest from
+  co-design with Indigenous communities around Greater Manaus. Her
+  constitution centres data sovereignty, storytelling, and IPLCs
+  (Indigenous Peoples & Local Communities). She replaces the earlier
+  `Capybara` sim that this widget used to be bound to (per team
+  feedback: "I liked the floating companion but didn't like that it
+  was a capybara — use Taina instead").
 
 ### Sprite
 
 The sim's PDS blobs are mirrored locally so the floating widget doesn't
 pay a cross-origin fetch on every page load:
 
-- `public/codex-pets/capybara-poster.png` — idle PNG (128×128, 26 KB)
-- `public/codex-pets/capybara-sheet.webp` — full 1536×1872 codex-pet
-  sheet (8 columns × 9 rows of 192×208 cells, 1.7 MB WebP)
+- `public/codex-pets/taina-poster.png` — idle PNG (~20 KB)
+- `public/codex-pets/taina-sheet.webp` — full 1536×1872 codex-pet sheet
+  (8 columns × 9 rows of 192×208 cells, ~1.9 MB WebP)
 
 The sheet follows the
 [OpenAI hatch-pet skill](https://github.com/openai/skills/tree/main/skills/.curated/hatch-pet)
@@ -261,16 +268,24 @@ To re-download the assets after the owner edits the sim:
 ```bash
 DID=did:plc:qc42fmqqlsmdq7jiypiiigww
 PDS=https://blewit.us-west.host.bsky.network
-curl -L "$PDS/xrpc/com.atproto.sync.getBlob?did=$DID&cid=<image-cid>" \
-  -o public/codex-pets/capybara-poster.png
-curl -L "$PDS/xrpc/com.atproto.sync.getBlob?did=$DID&cid=<sheet-cid>" \
-  -o public/codex-pets/capybara-sheet.webp
+IMAGE_CID=bafkreiakyoccwvhvyw7ewbptajxm4vlnyirjz5rf4gdgfx57zendg3xupm
+SHEET_CID=bafkreiciempzqueekmdpqhcfodis77ozdvsmjlkzi6uolwgazlnjfh7due
+curl -L "$PDS/xrpc/com.atproto.sync.getBlob?did=$DID&cid=$IMAGE_CID" \
+  -o public/codex-pets/taina-poster.png
+curl -L "$PDS/xrpc/com.atproto.sync.getBlob?did=$DID&cid=$SHEET_CID" \
+  -o public/codex-pets/taina-sheet.webp
 ```
+
+(The CIDs above are pinned to the current Taina record. If the owner
+edits the blobs they'll change; re-fetch them from
+`com.atproto.repo.getRecord?repo=$DID&collection=org.simocracy.sim&rkey=3ml7iunv6pp2m`
+under `value.image.ref.$link` / `value.petSheet.ref.$link`.)
 
 ### Behaviour
 
-- Sits 32 px from the bottom-right by default; drag anywhere; position
-  persists in `localStorage` under `gainforest.floatingCapybara.position`.
+- Sits 32 px from the bottom-LEFT on desktop / 18 px from the
+  bottom-RIGHT on mobile by default; drag anywhere; position persists
+  in `localStorage` under `gainforest.floatingTaina.position.v1`.
 - 4 px drag threshold separates click from drag.
 - **Animation state machine** — mirrors simocracy's:
   - `dragging` → `running-left` / `running-right` (based on pointer step)
@@ -285,15 +300,15 @@ curl -L "$PDS/xrpc/com.atproto.sync.getBlob?did=$DID&cid=<sheet-cid>" \
 
 The chat panel streams replies from `/api/sim-chat` (see
 `app/api/sim-chat/route.ts`). The system prompt is built fresh per request
-by `getCapybaraPersona()` in `app/_lib/capybara-sim.ts`, which:
+by `getTainaPersona()` in `app/_lib/taina-sim.ts`, which:
 
 1. Resolves the sim owner's DID → PDS via `plc.directory` (1 h cache).
 2. Lists their `org.simocracy.agents` + `org.simocracy.style` records.
-3. Filters to records whose `sim.uri` matches the Capybara sim.
+3. Filters to records whose `sim.uri` matches the Taina sim.
 4. Pulls `shortDescription`, `description`, and `style` into the prompt.
 
 Result: the companion always speaks in the latest version of the
-Capybara persona. If the owner edits the sim on simocracy.org, the next
+Taina persona. If the owner edits the sim on simocracy.org, the next
 request (or after the ISR window) picks up the new constitution
 automatically — no rebuild needed.
 
@@ -326,7 +341,8 @@ Current generated assets:
 | `public/decor/icon-step-{discover,understand,support,grow}.png` | "How it works" step icons |
 | `public/decor/icon-{globe,plant,leaf}.png` | Earlier-set ring-bordered icons (still used by `ChoosePath`) |
 | `public/decor/topo-decor.png` | Hand-drawn contour lines decorating the "Nature thrives" CTA banner |
-| `public/codex-pets/capybara.png` | The floating capybara codex pet |
+| `public/codex-pets/taina-poster.png` | The floating Taina codex pet (idle poster) |
+| `public/codex-pets/taina-sheet.webp` | The Taina codex-pet sprite sheet (1536×1872) |
 
 If you add a new decorative asset, prefer regenerating via gpt-image-2
 over hand-coded SVG — the inline SVG topo lines we shipped first looked
@@ -411,7 +427,7 @@ as CSS custom properties and as Tailwind v4 `@theme inline` values.
 - [GainForest/bumicerts-monorepo](https://github.com/GainForest/bumicerts-monorepo)
   — Bumicerts apps + shared ATProto packages.
 - [simocracy-v2](https://github.com/your-org/simocracy-v2) — the
-  upstream of both our OAuth and our FloatingCapybara port.
+  upstream of both our OAuth and our FloatingTaina port.
 
 ## License
 

@@ -11,9 +11,15 @@ The **visual language follows [gainforest.earth](https://gainforest.earth)**
 as of the May 2026 redesign — minimal editorial, big serif headlines
 with a single italic word, an alternating cream / near-black section
 rhythm closing on the dark `NatureCTA` band and `Footer`. The previous
-tropical sprigs, hand-drawn icon PNGs, and the pixel-art capybara were
-dropped per team feedback ("thin-stroke art doesn't match the rendered
-apps; capybara is Simocracy style; tone is too light").
+tropical sprigs and the hand-drawn icon PNGs were dropped per team
+feedback ("thin-stroke art doesn't match the rendered apps; tone is
+too light"). The earlier pixel-art capybara floating companion was
+temporarily un-mounted during the same pass, then brought back as
+<FloatingTaina /> — same widget, swapped to point at the Taina sim
+(GainForest's actual community-facing AI assistant born from
+co-design with Indigenous communities around Manaus) instead of the
+Capybara sim, so the pixel-art tone now matches the content tone of
+the page.
 
 **One subtle deviation from gainforest.earth**: the team explicitly
 rejected mint-green CTAs ("I really hate that gainforest green for our
@@ -43,7 +49,7 @@ documents — they encode rules that this landing inherits:
   ported the auth machinery from. If a flow detail is unclear, check
   there first — our copy is structurally identical, just slimmer.
 - `simocracy-v2/components/feedback/floating-einstein.tsx` — pattern for
-  draggable codex-pet widgets. `FloatingCapybara.tsx` is the parallel
+  draggable codex-pet widgets. `FloatingTaina.tsx` is the parallel
   GainForest port and is **kept on disk but no longer mounted in
   `layout.tsx`** (May 2026 redesign feedback). Re-mount only if the
   product direction changes.
@@ -72,7 +78,7 @@ wins** for the landing — but call out the divergence in the PR.
    (one already exists for `globeRef` in `LiveGlobe.tsx` — three.js's
    ref shape is too dynamic to type without pulling in the world).
 5. **Server-by-default.** The page is rendered server-side; only
-   `<LiveGlobe>`, `<SignInPopover>`, `<FloatingCapybara>` and other
+   `<LiveGlobe>`, `<SignInPopover>`, `<FloatingTaina>` and other
    components that need browser APIs are `"use client"`. Don't move
    data-fetching to the client unless there's a reason — server fetches
    share Next's `revalidate` cache and stay out of the bundle.
@@ -94,7 +100,7 @@ wins** for the landing — but call out the divergence in the PR.
 ```
 app/
 ├── page.tsx                       async server component; the entry point
-├── layout.tsx                     fonts + metadata + mounts <FloatingCapybara>
+├── layout.tsx                     fonts + metadata + mounts <FloatingTaina>
 ├── globals.css                    design tokens (cream + forest green)
 ├── _components/                   only UI; no business logic
 ├── _lib/                          fetchers + auth + chat helpers
@@ -106,18 +112,18 @@ app/
 │   ├── auth-session.ts            getSession()/getAgent()/getUserDid()
 │   ├── codex-pet.ts               sprite-sheet animator (port of simocracy)
 │   ├── openrouter.ts              minimal OpenRouter chat client
-│   └── capybara-sim.ts            Capybara sim metadata + PDS persona loader
+│   └── taina-sim.ts               Taina sim metadata + PDS persona loader
 ├── api/
 │   ├── oauth/login/route.ts       GET — start OAuth from ?handle=
 │   ├── oauth/callback/route.ts    GET — finish OAuth, issue session cookie
 │   ├── auth/logout/route.ts       POST (GET alias) — clear session
 │   ├── auth/whoami/route.ts       GET — JSON status
-│   └── sim-chat/route.ts          POST — stream Capybara chat (OpenRouter)
+│   └── sim-chat/route.ts          POST — stream Taina chat (OpenRouter)
 ├── client-metadata.json/route.ts  OAuth client metadata document
 └── jwks.json/route.ts             public JWKs
 
 public/decor/                      generated raster decorations
-public/codex-pets/                 capybara sim sprites (mirrored from PDS)
+public/codex-pets/                 taina sim sprites (mirrored from PDS)
 scripts/generate-jwk.mjs           one-shot JWK generator (port of simocracy)
 ```
 
@@ -236,30 +242,31 @@ the PLC directory to resolve handle, and passes both into the popover.
 Pings are rendered as a sparse subset of the dot set (`MAX_PINGING_PINS`)
 with staggered random `repeatPeriod` so they never pulse in unison.
 
-## FloatingCapybara (the Capybara sim) — currently un-mounted
+## FloatingTaina (the Taina sim)
 
-`app/_components/FloatingCapybara.tsx` is a port of
+`app/_components/FloatingTaina.tsx` is a port of
 `simocracy-v2/components/feedback/floating-einstein.tsx`, pointed at a
-real Simocracy sim instead of the bundled Einstein. As of the May 2026
-redesign it is **kept on disk but no longer mounted** in
-`app/layout.tsx` — the team flagged the pixel-art codex-pet tone as
-Simocracy-y and out of step with the editorial branding. Re-mounting
-is a one-line change in `layout.tsx` if the product direction shifts.
-
-Details below describe the component as it would behave when mounted:
+real Simocracy sim instead of the bundled Einstein. The chosen sim is
+Taina — GainForest's actual community-facing AI assistant, born during
+the XPRIZE Rainforest from co-design with Indigenous communities around
+Greater Manaus. The earlier iteration of this component pointed at the
+Capybara sim; the team's verdict was "I liked the widget but didn't
+like that it was a capybara — use Taina instead". The swap kept the
+entire widget intact (drag/persist, chat panel, codex-pet animation)
+and only changed the sim binding.
 
 - Sim AT-URI:
-  `at://did:plc:qc42fmqqlsmdq7jiypiiigww/org.simocracy.sim/3ml6hwvjijm2q`
-- Name: `Capybara` — owned by `@daviddao.org`.
+  `at://did:plc:qc42fmqqlsmdq7jiypiiigww/org.simocracy.sim/3ml7iunv6pp2m`
+- Name: `Taina` — owned by `@daviddao.org`.
 
 ### Assets
 
 The sim's codex-pet sheet and idle PNG are mirrored under
 `public/codex-pets/`:
 
-- `capybara-poster.png` (128×128, 26 KB) — static poster, covers the
-  canvas load gap until the first sprite frame paints.
-- `capybara-sheet.webp` (1536×1872, 1.7 MB) — full 8×9 codex-pet sheet
+- `taina-poster.png` (~20 KB) — static poster, covers the canvas load
+  gap until the first sprite frame paints.
+- `taina-sheet.webp` (1536×1872, ~1.9 MB) — full 8×9 codex-pet sheet
   (idle / running-{left,right} / waving / jumping / failed / waiting /
   running / review).
 
@@ -270,9 +277,13 @@ under `value.image.ref.$link` and `value.petSheet.ref.$link`.
 
 ### Behaviour
 
-- Sits 32 px from the bottom-right on first mount; drag anywhere;
-  position persists in `localStorage` under
-  `gainforest.floatingCapybara.position`.
+- Sits 32 px from the bottom-LEFT on desktop / bottom-RIGHT on mobile on
+  first mount (the desktop default is left so it balances the
+  right-weighted hero composition; mobile is right because the
+  single-column layout would constantly overlap a left-anchored
+  sprite). Drag anywhere; position persists in `localStorage` under
+  `gainforest.floatingTaina.position.v1`. Bumping the key suffix is
+  the right move whenever the default-position logic changes.
 - 4 px drag threshold separates click from drag (matches simocracy).
 - **Animation state machine** — driven by `renderPetAnimated` in
   `app/_lib/codex-pet.ts`:
@@ -293,7 +304,7 @@ The chat panel streams replies from `/api/sim-chat` (port of
 `simocracy-v2/app/api/feedback-chat/route.ts` minus auth and the
 user-companion picker). Per request:
 
-1. `getCapybaraPersona()` (in `app/_lib/capybara-sim.ts`) resolves the
+1. `getTainaPersona()` (in `app/_lib/taina-sim.ts`) resolves the
    sim owner's DID → PDS via `plc.directory`, lists their
    `org.simocracy.agents` and `org.simocracy.style` records, and joins
    on `value.sim.uri` to pull the sim's `shortDescription`,
@@ -317,7 +328,7 @@ Redis if you ever deploy to multi-worker serverless.
 
 ### Rules
 
-- **Don't bypass `capybara-sim.ts`.** The sim's persona is loaded from
+- **Don't bypass `taina-sim.ts`.** The sim's persona is loaded from
   the owner's PDS at request time so the floating companion always speaks
   in the latest version. Hard-coding the constitution into the system
   prompt would stale-pin it.
@@ -360,7 +371,7 @@ behaviour. Prompt-engineering rules we've learned the hard way:
   sprout, certificate plaque + ribbon tails, etc.) — the model otherwise
   defaults to stock-icon variants.
 - **For chroma-key**, prefer `#ff00ff` for green subjects, `#00ff00` for
-  brown/tan subjects. The plant decoration uses #ff00ff; the capybara
+  brown/tan subjects. The plant decoration uses #ff00ff; the Taina
   uses #00ff00.
 
 Current generated assets:
@@ -373,7 +384,7 @@ Current generated assets:
 | `public/decor/icon-step-*.png` | HowItWorks step icons (globe+mag, doc+leaf, hands+plant, tree) |
 | `public/decor/icon-{globe,plant,leaf}.png` | ChoosePath ring-bordered icons |
 | `public/decor/topo-decor.png` | NatureCTA — topographic contour decoration |
-| `public/codex-pets/capybara.png` | FloatingCapybara — pixel-art idle pose |
+| `public/codex-pets/taina-poster.png` | FloatingTaina — pixel-art idle pose (poster fallback) |
 
 ## Design tokens
 
@@ -502,7 +513,7 @@ the original viewBox).
   Client components receive serialisable props (the `snapshot` and
   `pins` are simple JSON-safe objects).
 - **No state managers**. The page is server-rendered and only a couple
-  of components are interactive (globe, capybara, sign-in popover) —
+  of components are interactive (globe, taina sprite, sign-in popover) —
   local `useState`/`useRef` is fine.
 - **Comments earn their keep.** Explain *why* something is the way it
   is, especially when a value mirrors an upstream behaviour ("matches
@@ -515,8 +526,8 @@ the original viewBox).
 ## Don't:
 
 - Don't add fake / inline mock data to the rendered UI. Use the libs.
-- Don't replace the Capybara sim's persona with a hard-coded prompt —
-  always read it from the owner's PDS via `getCapybaraPersona()`.
+- Don't replace the Taina sim's persona with a hard-coded prompt —
+  always read it from the owner's PDS via `getTainaPersona()`.
 - Don't bypass the green_globe filter. If a pin shouldn't show, it's the
   upstream's job to suppress it — propose a fix in green_globe, not here.
 - Don't add a state manager (Zustand, Redux, …). The page is read-only.
@@ -547,7 +558,8 @@ Before finishing a change:
 4. Scroll to the bottom — "I want to…" cards render with their icons +
    tropical sprig on the right, "How it works" step icons + arrows
    render, "Nature thrives" banner shows the raster topo decoration.
-5. *(Skipped — the FloatingCapybara is no longer mounted.)*
+5. <FloatingTaina /> mounts in `layout.tsx` and stays open across
+   routes.
 6. Click "Sign in" in the navbar — popover opens, type a bsky handle
    (e.g. `<your-handle>.bsky.social`), submit. Browser should redirect
    to your PDS for consent. On callback you should land back on `/`
@@ -561,6 +573,6 @@ Before finishing a change:
 
 ## Updating this doc
 
-When the data shape, filter logic, OAuth flow, globe behaviour, capybara
+When the data shape, filter logic, OAuth flow, globe behaviour, taina
 behaviour, or decoration pipeline changes, update the relevant section
 here in the same commit. Stale agent docs are worse than no agent docs.

@@ -1,24 +1,24 @@
 import { NextRequest } from "next/server";
 import {
   buildSystemPrompt,
-  getCapybaraPersona,
-  CAPYBARA_SIM,
-} from "../../_lib/capybara-sim";
+  getTainaPersona,
+  TAINA_SIM,
+} from "../../_lib/taina-sim";
 import { openRouterChat } from "../../_lib/openrouter";
 import { asLocale, LOCALE_LABELS } from "../../_lib/i18n";
 
 export const dynamic = "force-dynamic";
 
-// `/api/sim-chat` — streams a chat reply in the Capybara sim's voice.
+// `/api/sim-chat` — streams a chat reply in the Taina sim's voice.
 //
 // Trimmed port of `simocracy-v2/app/api/feedback-chat/route.ts`. Differences:
 //   - No auth gate. The landing's floating companion is for any visitor.
 //     (Anonymous traffic still costs OpenRouter credits; see `MAX_PER_MIN`
 //     below for the basic rate cap.)
-//   - The companion is fixed to one sim (Capybara). No companion-picker
+//   - The companion is fixed to one sim (Taina). No companion-picker
 //     payload, no per-user companion record.
 //   - The system prompt is built fresh per request but the persona fetch
-//     is cached by Next ISR via fetch() revalidate inside `getCapybaraPersona`.
+//     is cached by Next ISR via fetch() revalidate inside `getTainaPersona`.
 
 const MAX_MESSAGES = 20;
 const MAX_CONTENT_CHARS = 4000;
@@ -81,15 +81,18 @@ export async function POST(request: NextRequest) {
         content: String(m.content).slice(0, MAX_CONTENT_CHARS),
       }));
 
-    const persona = await getCapybaraPersona();
+    const persona = await getTainaPersona();
     let systemPrompt = buildSystemPrompt(persona);
     // Append a language directive when the visitor is not on English so
-    // Capybara replies match the page they're reading. The directive
-    // goes AFTER the persona reminder so it carries the most recency
-    // weight; the persona itself stays untouched.
+    // Taina replies match the page they're reading. The directive goes
+    // AFTER the persona reminder so it carries the most recency weight;
+    // the persona itself stays untouched. (Taina's constitution
+    // already says she speaks EN/PT/ES/Bahasa/Swahili by default, so
+    // this directive is mostly a hint about *which* of those to lean
+    // into for the current page render.)
     if (locale !== "en") {
       const languageName = LOCALE_LABELS[locale].english;
-      systemPrompt += `\n\n## Language\nThe visitor has switched the page to ${languageName} (${LOCALE_LABELS[locale].native}). Reply in ${languageName}, in your own voice. Keep brand names (GainForest, Bumicerts, Capybara) as-is. If the visitor writes in a different language, mirror theirs.`;
+      systemPrompt += `\n\n## Language\nThe visitor has switched the page to ${languageName} (${LOCALE_LABELS[locale].native}). Reply in ${languageName}, in your own voice. Keep brand names (GainForest, Bumicerts, Taina) as-is. If the visitor writes in a different language, mirror theirs.`;
     }
 
     if (!process.env.OPENROUTER_API_KEY) {
@@ -107,7 +110,7 @@ export async function POST(request: NextRequest) {
       maxTokens: 800,
       temperature: 0.8,
       stream: true,
-      title: `GainForest companion (${CAPYBARA_SIM.name})`,
+      title: `GainForest companion (${TAINA_SIM.name})`,
     });
     if (!res.ok) {
       const err = await res.text().catch(() => "");

@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Cormorant_Garamond, Instrument_Serif, Inter } from "next/font/google";
 import "./globals.css";
 import { LocaleProvider } from "./_components/LocaleProvider";
+import { FloatingTaina } from "./_components/FloatingTaina";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -194,16 +195,24 @@ export default function RootLayout({
         className={`${inter.variable} ${cormorant.variable} ${instrument.variable} antialiased`}
       >
         {/* Client-side locale state. Defaults to English; reads the
-            visitor's saved choice (or browser language) on hydration and
-            re-renders every translated component with the right strings.
-            Also exposes the locale to the FloatingCapybara so its chat
-            replies match the active language. */}
-        {/* Capybara is a Simocracy-style codex pet — removed from the
-            GainForest landing per team feedback (the pixel-art tone
-            didn't fit the editorial branding). The component file
-            (`_components/FloatingCapybara.tsx`) is kept on disk in case
-            it's wanted as an opt-in widget later. */}
-        <LocaleProvider>{children}</LocaleProvider>
+            visitor's saved choice (or browser language) on hydration
+            and re-renders every translated component with the right
+            strings. Also exposes the locale to <FloatingTaina /> so
+            her chat replies match the active language. */}
+        {/* <FloatingTaina /> is the floating Simocracy-sim companion
+            in the corner — same widget shape as the earlier
+            FloatingCapybara, swapped to point at the Taina sim
+            (see `app/_lib/taina-sim.ts` for the binding). The team's
+            verdict on the previous version: "I liked the floating
+            companion but didn't like that it was a capybara — use
+            Taina instead". Taina's an actual GainForest-built AI
+            assistant born from co-design with Indigenous communities
+            around Manaus, so the pixel-art tone now matches the
+            content tone of the page. */}
+        <LocaleProvider>
+          {children}
+          <FloatingTaina />
+        </LocaleProvider>
       </body>
     </html>
   );

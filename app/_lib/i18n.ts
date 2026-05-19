@@ -6,9 +6,11 @@
 //
 // Defaults to English. Locale is client-side only (React Context +
 // localStorage persistence); switching does NOT round-trip through the
-// server — the page just re-renders with the new strings. Capybara
-// receives the active locale through `/api/sim-chat` so its replies
-// match the visitor's chosen language.
+// server — the page just re-renders with the new strings. Taina
+// receives the active locale through `/api/sim-chat` so her replies
+// match the visitor's chosen language. (Taina speaks the same five
+// locales by constitution — EN/PT/ES/Bahasa/Swahili — so the locale
+// hint maps 1:1 to a language she's already fluent in.)
 
 export const LOCALES = ["en", "es", "pt", "sw", "id"] as const;
 export type Locale = (typeof LOCALES)[number];
@@ -108,13 +110,13 @@ type Messages = {
   "card.worldwide": string;
   "card.openTheGlobe": string;
 
-  // ── Capybara companion ──────────────────────────────────────────
-  "capy.shield": string;
-  "capy.role": string;
-  "capy.greetingHello": string;
-  "capy.greetingHint": string;
-  "capy.placeholder": string;
-  "capy.thinking": string;
+  // ── Taina companion (floating sim in the corner) ───────────────
+  "taina.shield": string;
+  "taina.role": string;
+  "taina.greetingHello": string;
+  "taina.greetingHint": string;
+  "taina.placeholder": string;
+  "taina.thinking": string;
 };
 
 export const MESSAGES: Record<Locale, Messages> = {
@@ -193,14 +195,14 @@ export const MESSAGES: Record<Locale, Messages> = {
     "card.projectsWorldwide": "{n} projects worldwide",
     "card.worldwide": "Worldwide",
     "card.openTheGlobe": "Open the Globe",
-    "capy.shield": "Ask me anything",
-    "capy.role": "Delegate of the South American animal kingdom",
-    "capy.greetingHello":
-      "Hello — sit a moment. I'm Capybara, here to keep you company while you explore GainForest.",
-    "capy.greetingHint":
-      "Ask me about the Globe, Bumicerts, regenerative impact — or just say hi.",
-    "capy.placeholder": "Say hi…",
-    "capy.thinking": "Capybara is thinking…",
+    "taina.shield": "Ask me anything",
+    "taina.role": "Co-designed with Indigenous communities of Manaus",
+    "taina.greetingHello":
+      "Hi — I'm Taina. Sit a moment and explore GainForest with me.",
+    "taina.greetingHint":
+      "Ask me about the Globe, Bumicerts, community-led nature work, or Indigenous data sovereignty — or just say hi.",
+    "taina.placeholder": "Say hi…",
+    "taina.thinking": "Taina is thinking…",
   },
 
   // ── Spanish ──────────────────────────────────────────────────────
@@ -275,14 +277,14 @@ export const MESSAGES: Record<Locale, Messages> = {
     "card.projectsWorldwide": "{n} proyectos en el mundo",
     "card.worldwide": "En el mundo",
     "card.openTheGlobe": "Abrir el Globo",
-    "capy.shield": "Pregúntame lo que quieras",
-    "capy.role": "Delegada del reino animal sudamericano",
-    "capy.greetingHello":
-      "Hola — siéntate un momento. Soy Capybara, te acompaño mientras exploras GainForest.",
-    "capy.greetingHint":
-      "Pregúntame por el Globo, los Bumicerts, el impacto regenerativo — o solo saluda.",
-    "capy.placeholder": "Saluda…",
-    "capy.thinking": "Capybara está pensando…",
+    "taina.shield": "Pregúntame lo que quieras",
+    "taina.role": "Co-diseñada con comunidades indígenas de Manaus",
+    "taina.greetingHello":
+      "Hola — soy Taina. Siéntate un momento y exploremos GainForest juntos.",
+    "taina.greetingHint":
+      "Pregúntame por el Globo, los Bumicerts, el trabajo de las comunidades en la naturaleza o la soberanía de datos indígenas — o solo saluda.",
+    "taina.placeholder": "Saluda…",
+    "taina.thinking": "Taina está pensando…",
   },
 
   // ── Portuguese ───────────────────────────────────────────────────
@@ -357,14 +359,14 @@ export const MESSAGES: Record<Locale, Messages> = {
     "card.projectsWorldwide": "{n} projetos pelo mundo",
     "card.worldwide": "Pelo mundo",
     "card.openTheGlobe": "Abrir o Globo",
-    "capy.shield": "Me pergunte qualquer coisa",
-    "capy.role": "Delegada do reino animal sul-americano",
-    "capy.greetingHello":
-      "Oi — sente um pouco. Sou a Capybara, aqui para te acompanhar enquanto você explora a GainForest.",
-    "capy.greetingHint":
-      "Pergunte sobre o Globo, os Bumicerts, impacto regenerativo — ou só venha dizer oi.",
-    "capy.placeholder": "Diga oi…",
-    "capy.thinking": "Capybara está pensando…",
+    "taina.shield": "Me pergunte qualquer coisa",
+    "taina.role": "Co-criada com comunidades indígenas de Manaus",
+    "taina.greetingHello":
+      "Oi — sou a Taina. Sente um pouco e vamos explorar a GainForest juntas.",
+    "taina.greetingHint":
+      "Pergunte sobre o Globo, os Bumicerts, o trabalho das comunidades na natureza ou a soberania de dados indígenas — ou só venha dizer oi.",
+    "taina.placeholder": "Diga oi…",
+    "taina.thinking": "Taina está pensando…",
   },
 
   // ── Swahili ──────────────────────────────────────────────────────
@@ -439,14 +441,14 @@ export const MESSAGES: Record<Locale, Messages> = {
     "card.projectsWorldwide": "Miradi {n} duniani kote",
     "card.worldwide": "Duniani kote",
     "card.openTheGlobe": "Fungua Dunia",
-    "capy.shield": "Niulize lolote",
-    "capy.role": "Mwakilishi wa ufalme wa wanyama wa Amerika Kusini",
-    "capy.greetingHello":
-      "Habari — kaa kidogo. Mimi ni Capybara, nipo kukufanya jamaa unapovinjari GainForest.",
-    "capy.greetingHint":
-      "Niulize kuhusu Dunia, Bumicerts, athari ya kuzaa upya — au tu sema habari.",
-    "capy.placeholder": "Sema habari…",
-    "capy.thinking": "Capybara anafikiria…",
+    "taina.shield": "Niulize lolote",
+    "taina.role": "Iliyoundwa pamoja na jamii za Kiasili za Manaus",
+    "taina.greetingHello":
+      "Habari — mimi ni Taina. Kaa kidogo, tuvinjari GainForest pamoja.",
+    "taina.greetingHint":
+      "Niulize kuhusu Dunia, Bumicerts, kazi za kijamii za asili au mamlaka ya data ya Kiasili — au tu sema habari.",
+    "taina.placeholder": "Sema habari…",
+    "taina.thinking": "Taina anafikiria…",
   },
 
   // ── Indonesian ───────────────────────────────────────────────────
@@ -521,14 +523,14 @@ export const MESSAGES: Record<Locale, Messages> = {
     "card.projectsWorldwide": "{n} proyek di seluruh dunia",
     "card.worldwide": "Di seluruh dunia",
     "card.openTheGlobe": "Buka Globe",
-    "capy.shield": "Tanya saya apa saja",
-    "capy.role": "Delegasi kerajaan hewan Amerika Selatan",
-    "capy.greetingHello":
-      "Halo — duduklah sebentar. Aku Capybara, menemanimu menjelajahi GainForest.",
-    "capy.greetingHint":
-      "Tanya aku tentang Globe, Bumicerts, dampak regeneratif — atau sapa saja.",
-    "capy.placeholder": "Sapa…",
-    "capy.thinking": "Capybara sedang berpikir…",
+    "taina.shield": "Tanya saya apa saja",
+    "taina.role": "Dirancang bersama komunitas adat di Manaus",
+    "taina.greetingHello":
+      "Halo — aku Taina. Duduklah sebentar, mari kita jelajahi GainForest bersama.",
+    "taina.greetingHint":
+      "Tanya aku tentang Globe, Bumicerts, kerja komunitas untuk alam, atau kedaulatan data adat — atau sapa saja.",
+    "taina.placeholder": "Sapa…",
+    "taina.thinking": "Taina sedang berpikir…",
   },
 };
 
