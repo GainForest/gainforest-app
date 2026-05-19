@@ -39,22 +39,46 @@ export function DataCommons() {
           </p>
         </div>
 
-        {/* Right: stat. The 1% figure sits in a tall serif so it
-            reads as an editorial pull quote rather than a UI badge.
-            We keep the number cream, not mint: AGENTS.md restricts the
-            brand mint to the logo and tiny live-data accents, and this
-            pull-stat is intentionally large. */}
-        <div className="lg:col-span-5 lg:flex lg:items-end lg:justify-end">
-          <div className="flex flex-col gap-3 lg:items-end lg:text-right">
-            <span
-              aria-hidden
-              className="font-garamond text-[112px] sm:text-[140px] lg:text-[180px] font-normal leading-[0.9] tracking-[-0.02em] text-ink-foreground"
-            >
-              {t("dataCommons.stat.value")}
-            </span>
-            <p className="max-w-[300px] text-[14px] lg:text-[14.5px] leading-[1.5] text-ink-foreground/70 lg:max-w-[280px]">
-              {t("dataCommons.stat.label")}
-            </p>
+        {/* Right: photo collage. Two photographs of the global
+            community the data commons is built with — a community
+            gathering inside an Indigenous maloca (with a drone
+            taking off, the 'data' half of the commons) and field
+            researchers wading through a mangrove forest (the
+            'biodiversity' half). They overlap intentionally to read
+            as a single composition rather than a 2-up grid.
+
+            On mobile the two photos stack vertically with a small
+            negative-margin overlap that preserves the editorial
+            collage feel without depending on absolute positioning. */}
+        <div className="lg:col-span-5">
+          <div className="relative lg:aspect-[5/6]">
+            {/* Top photo: community gathering. On desktop it anchors
+                top-right at ~80% width; on mobile it's just block-
+                level. The thin cream/8% ring keeps the photo edge
+                visible against the ink band without competing with
+                the photo content. */}
+            <img
+              src="/data-commons/community-drone.webp"
+              alt="Indigenous community gathering inside a maloca, launching a drone"
+              loading="lazy"
+              decoding="async"
+              width={1599}
+              height={1048}
+              className="block w-full rounded-md object-cover ring-1 ring-ink-foreground/8 shadow-[0_24px_60px_-30px_rgba(0,0,0,0.6)] lg:absolute lg:right-0 lg:top-0 lg:h-auto lg:w-[82%]"
+            />
+            {/* Bottom photo: field researchers in mangrove. Offset
+                down-and-left so it overlaps the top photo. Slight
+                negative top margin on mobile gives the same overlap
+                feel without absolute positioning. */}
+            <img
+              src="/data-commons/community-mangrove.webp"
+              alt="Field researchers wading through a mangrove forest"
+              loading="lazy"
+              decoding="async"
+              width={1599}
+              height={1066}
+              className="-mt-6 block w-full rounded-md object-cover ring-1 ring-ink-foreground/8 shadow-[0_24px_60px_-30px_rgba(0,0,0,0.6)] sm:-mt-10 lg:absolute lg:bottom-0 lg:left-0 lg:mt-0 lg:h-auto lg:w-[80%]"
+            />
           </div>
         </div>
       </div>
