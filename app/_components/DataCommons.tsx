@@ -21,9 +21,9 @@ export function DataCommons() {
   const after = t("dataCommons.heading.after").trim();
   return (
     <section className="bg-ink text-ink-foreground">
-      <div className="mx-auto grid w-full max-w-[1480px] grid-cols-1 gap-12 px-6 py-20 sm:px-10 lg:grid-cols-12 lg:gap-16 lg:px-16 lg:py-28">
+      <div className="mx-auto grid w-full max-w-[1480px] grid-cols-1 gap-12 px-6 py-20 sm:px-10 lg:grid-cols-12 lg:items-center lg:gap-16 lg:px-16 lg:py-28">
         {/* Left: claim */}
-        <div className="lg:col-span-7">
+        <div className="lg:col-span-6">
           <span className="font-instrument italic text-[14px] uppercase tracking-[0.18em] text-ink-foreground/55">
             {t("dataCommons.eyebrow")}
           </span>
@@ -44,19 +44,26 @@ export function DataCommons() {
             gathering inside an Indigenous maloca (with a drone
             taking off, the 'data' half of the commons) and field
             researchers wading through a mangrove forest (the
-            'biodiversity' half). They overlap intentionally to read
-            as a single composition rather than a 2-up grid.
+            'biodiversity' half).
 
-            On mobile the two photos stack vertically with a small
-            negative-margin overlap that preserves the editorial
-            collage feel without depending on absolute positioning. */}
-        <div className="lg:col-span-5">
-          <div className="relative lg:aspect-[5/6]">
-            {/* Top photo: community gathering. On desktop it anchors
-                top-right at ~80% width; on mobile it's just block-
-                level. The thin cream/8% ring keeps the photo edge
-                visible against the ink band without competing with
-                the photo content. */}
+            Composition: top photo anchors top-right, bottom photo
+            anchors bottom-left and is intentionally shifted further
+            left than the top photo so the pair reads as a single
+            diagonal collage — the same arrangement
+            gainforest.earth's DataCommons section uses. Hard
+            rectangular edges (no rounded corners, no ring) keep the
+            photos feeling like editorial prints rather than UI
+            cards. A single soft drop shadow gives just enough lift
+            against the ink band.
+
+            The collage uses `overflow-visible` so the bottom photo
+            can bleed slightly past the column's left edge on wide
+            screens, the way the original does. On mobile the two
+            photos stack with a generous negative-margin overlap
+            preserved so they still read as one composition. */}
+        <div className="lg:col-span-6">
+          <div className="relative lg:aspect-[7/6]">
+            {/* Top photo: community gathering inside the maloca. */}
             <img
               src="/data-commons/community-drone.webp"
               alt="Indigenous community gathering inside a maloca, launching a drone"
@@ -64,12 +71,12 @@ export function DataCommons() {
               decoding="async"
               width={1599}
               height={1048}
-              className="block w-full rounded-md object-cover ring-1 ring-ink-foreground/8 shadow-[0_24px_60px_-30px_rgba(0,0,0,0.6)] lg:absolute lg:right-0 lg:top-0 lg:h-auto lg:w-[82%]"
+              className="block w-full object-cover shadow-[0_30px_80px_-30px_rgba(0,0,0,0.7)] lg:absolute lg:right-0 lg:top-0 lg:h-auto lg:w-[72%]"
             />
-            {/* Bottom photo: field researchers in mangrove. Offset
-                down-and-left so it overlaps the top photo. Slight
-                negative top margin on mobile gives the same overlap
-                feel without absolute positioning. */}
+            {/* Bottom photo: field researchers wading through
+                mangrove. Shifted left so it bleeds past the top
+                photo's left edge on desktop; stacked with a tight
+                negative-margin overlap on mobile. */}
             <img
               src="/data-commons/community-mangrove.webp"
               alt="Field researchers wading through a mangrove forest"
@@ -77,7 +84,7 @@ export function DataCommons() {
               decoding="async"
               width={1599}
               height={1066}
-              className="-mt-6 block w-full rounded-md object-cover ring-1 ring-ink-foreground/8 shadow-[0_24px_60px_-30px_rgba(0,0,0,0.6)] sm:-mt-10 lg:absolute lg:bottom-0 lg:left-0 lg:mt-0 lg:h-auto lg:w-[80%]"
+              className="-mt-10 block w-full object-cover shadow-[0_30px_80px_-30px_rgba(0,0,0,0.7)] sm:-mt-16 lg:absolute lg:bottom-0 lg:left-[-6%] lg:mt-0 lg:h-auto lg:w-[70%]"
             />
           </div>
         </div>
