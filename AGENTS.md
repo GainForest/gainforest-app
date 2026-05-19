@@ -9,8 +9,8 @@ flow ported from simocracy-v2.
 
 The **visual language follows [gainforest.earth](https://gainforest.earth)**
 as of the May 2026 redesign — minimal editorial, big serif headlines
-with a single italic word, an alternating cream / near-black section
-rhythm closing on the dark `NatureCTA` band and `Footer`. The previous
+with a single italic word, a mostly-cream editorial rhythm punctuated by
+the dark `DataCommons` band and the closing `NatureCTA` + `Footer`. The previous
 tropical sprigs and the hand-drawn icon PNGs were dropped per team
 feedback ("thin-stroke art doesn't match the rendered apps; tone is
 too light"). The earlier pixel-art capybara floating companion was
@@ -384,6 +384,9 @@ Current generated assets:
 | `public/decor/icon-step-*.png` | HowItWorks step icons (globe+mag, doc+leaf, hands+plant, tree) |
 | `public/decor/icon-{globe,plant,leaf}.png` | ChoosePath ring-bordered icons |
 | `public/decor/topo-decor.png` | NatureCTA — topographic contour decoration |
+| `public/decor/pillar-ai-assistants.webp` | EquitableAI — documentary-style AI Assistants pillar image |
+| `public/decor/pillar-bioacoustics.webp` | EquitableAI — documentary-style Bioacoustics pillar image |
+| `public/decor/pillar-remote-sensing.webp` | EquitableAI — documentary-style Remote Sensing pillar image |
 | `public/codex-pets/taina-poster.png` | FloatingTaina — pixel-art idle pose (poster fallback) |
 
 ## Design tokens
@@ -415,10 +418,12 @@ call-to-action colour (near-black on cream, swapped to cream-on-ink on
 the dark band). Do not collapse the two back into one token; the
 separation is deliberate per team feedback.
 
-**Section rhythm:** the page closes with a single tall **dark band**
-composed of `NatureCTA` + `Footer`. Both sit on `bg-ink` so the cream
-→ ink contrast lands hard, matching gainforest.earth's data-commons /
-nature-guild / footer pattern.
+**Section rhythm:** the page is mostly cream, with three deliberate
+near-black beats: `DataCommons` (mid-page WHY / 1% biodiversity-data
+claim), `ImpactReport` (a dark card inside a cream section), and the
+closing `NatureCTA` + `Footer` band. Keep the dark surfaces sparse and
+editorial so the cream → ink contrast lands hard without turning the
+whole page into a dark alternation pattern.
 
 If you need a new colour, add a token in `globals.css` first and reference
 it via `var(...)` or its Tailwind `theme inline` alias (e.g.

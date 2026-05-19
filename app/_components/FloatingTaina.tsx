@@ -203,6 +203,19 @@ export function FloatingTaina() {
     return () => window.removeEventListener("keydown", onKey);
   }, [open]);
 
+  // Allow in-page CTAs (e.g. <TainaFeature />'s "Say hi to Taina") to
+  // open the floating panel without importing or coupling to this
+  // component's local state. CustomEvent keeps the widget optional — if
+  // it is ever unmounted again, the CTA simply becomes a no-op.
+  useEffect(() => {
+    const onOpen = () => {
+      setOpen(true);
+      setWaveActive(true);
+    };
+    window.addEventListener("taina:open", onOpen);
+    return () => window.removeEventListener("taina:open", onOpen);
+  }, []);
+
   // ─── Drag handling ─────────────────────────────────────────────────
   const onPointerDown = useCallback(
     (e: React.PointerEvent<HTMLDivElement>) => {
