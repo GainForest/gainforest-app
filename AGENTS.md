@@ -393,20 +393,42 @@ regenerate**, refresh from the source if gainforest.earth updates):
 
 | File | Source on gainforest.earth | Used in |
 |---|---|---|
-| `public/decor/pillar-ai-assistants.webp` | `_assets/video/0704a1c2…mp4` frame @ t=8s | EquitableAI pillar 1 ("Taina is an artificial intelligence" caption) |
-| `public/decor/pillar-bioacoustics.webp` | `_assets/video/448c69…jpg` poster | EquitableAI pillar 2 ("So every animal has its own radio channel" caption) |
-| `public/decor/pillar-remote-sensing.webp` | `_assets/video/a21b2c9c…mp4` frame @ t=8s | EquitableAI pillar 3 (aerial canopy w/ tree-crown segmentation polygons) |
-| `public/decor/taina-feature.webp` | `_assets/video/fc5564fc…jpg` poster | TainaFeature right-column portrait (Marina Mura, Inhaã-bé, w/ "this artificial intelligence" caption) |
+| `public/videos/pillar-ai-assistants.mp4` (+ `-poster.webp`) | `_assets/video/0704a1c2…mp4` (99 s portrait doc — Marina Mura + the Taina interface), trimmed to 0:05–0:20 | EquitableAI pillar 1 — autoplay loop |
+| `public/videos/pillar-bioacoustics.mp4` (+ `-poster.webp`) | `_assets/video/610cc931…mp4` (167 s portrait doc — green audio recorder + Oceanus Conservation mangrove fieldwork: "audio can record 24 seven", "measures without seeing it"), trimmed to 0:00–0:15 | EquitableAI pillar 2 — autoplay loop |
+| `public/videos/pillar-remote-sensing.mp4` (+ `-poster.webp`) | `_assets/video/a21b2c9c…mp4` (30 s landscape doc — aerial canopy with tree-crown segmentation polygons), trimmed to 0:00–0:15 | EquitableAI pillar 3 — autoplay loop |
+| `public/videos/taina-feature.mp4` (+ `-poster.webp`) | `_assets/video/6e3a1150…mp4` (76 s portrait doc — Indigenous scientists from Greater Manaus speaking about Taina, including Vanda Witoto), trimmed to 0:00–0:15 | TainaFeature right-column — autoplay loop |
 | `public/decor/impact-report-cover.webp` | `_assets/media/4e48bc46…png` | ImpactReport — "3rd Annual Impact Report" PDF cover thumb |
 | `public/community/impact-group.webp` | `_assets/media/7d7dd0dc…jpg` | ImpactReport collage top — XPRIZE Rainforest team + community at the maloca |
 | `public/community/impact-ceremony.webp` | `_assets/media/836d2f75…jpg` | ImpactReport collage bottom — Bumicerts certificate ceremony, Philippines |
 
-Documentary captions baked into the video frames ("Taina is an
-artificial intelligence", "So every animal has its own radio
-channel", "this artificial intelligence") are kept on purpose — they
-reinforce the editorial documentary tone better than any flat icon
-would. If you replace a still, prefer another frame with similarly
-useful caption text rather than a clean caption-less crop.
+Documentary subtitles baked into the videos ("Taina is an artificial
+intelligence", "when it's the insect, the singing when the bats are
+singing", "Saving information in Taina is very easy") are kept on
+purpose — they reinforce the editorial documentary tone better than
+clean caption-less crops would. If you re-trim a clip, prefer a
+segment with similarly useful caption text.
+
+### Video re-encode pipeline
+
+The upstream MP4s are 15–49 MB each and behind Cloudflare bot
+management, so the pipeline goes through the browser session and
+then ffmpeg, **not** curl:
+
+1. Open gainforest.earth, click each tile's Play button so the
+   `<video src>` attaches in the DOM.
+2. `fetch()` each src **inside the browser** (Cloudflare won't
+   serve curl). Stream the bytes back in 4 MB base64 chunks via
+   `agent-browser eval`, reassemble to `/tmp/gf-videos/<hash>.mp4`.
+3. `ffmpeg -ss <start> -i <in> -t <dur> -vf scale=<w>:-2,fps=24 -c:v
+   libx264 -preset slow -crf 26 -movflags +faststart -pix_fmt
+   yuv420p -an <out>` — trim to ~15 s, scale to 480 portrait or
+   720 landscape, drop audio (autoplay requires muted anyway).
+4. Extract a `.webp` poster at `-ss 2` so the card never shows a
+   black frame while the video buffers.
+
+Total payload after re-encode: ~7.6 MB across all 4 videos, vs
+116 MB raw. Keep the trimmed clips ~15 s so the loop feels ambient
+rather than alarming, and so each card's MP4 stays under ~3 MB.
 
 ## Design tokens
 
