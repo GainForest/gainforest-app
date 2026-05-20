@@ -1,47 +1,96 @@
 "use client";
 
+import Image from "next/image";
 import { useT } from "./LocaleProvider";
 
 // "Winners of …" strip — port of gainforest.earth's award badge band
 // that sits directly below the hero.
 //
-// The original site renders raster logo PNGs (XPRIZE, Lever for Change,
-// etc). We don't have permission to ship those assets and a chunky
-// raster logo wall would clash with the editorial cream tone the team
-// locked down for the rest of the page. So we use the same editorial
-// treatment the rest of the landing uses: a small italic "Winners of"
-// label, then the award name rendered as quiet serif typography. The
-// secondary "Recognised by" line is the same recipe one notch
-// quieter.
+// Originally shipped as text-only ("XPRIZE Rainforest" wordmark + a row
+// of secondary text labels). The team's feedback: "no logos, really?"
+// — they wanted real recognisable logos in this band, not a quiet
+// editorial typography treatment.
 //
-// Award copy is verbatim — these are proper nouns and don't translate.
-// The label *around* them ("Winners of" / "Recognised by") is i18n'd.
+// New layout:
 //
-// The earlier "Recognised by" list shipped a few placeholders
-// (SwissTech Award, Web3 Foundation Grant, Solana Climate Grant) that
-// were aspirational rather than real. They have been removed in
-// favour of the actual roster of grants / awards / sponsors —
-// Earthshot, BCG Vordenker:innen, Ethereum Foundation, Filecoin
-// Green, Solana, and Klarna — so the band only references real
-// recognition.
-const PRIMARY_AWARDS: ReadonlyArray<{ label: string; href: string }> = [
+//   ┌─────────────────────────────────────────────────────────────┐
+//   │ Winners of [XPRIZE LOGO]                                    │
+//   │                                                              │
+//   │ Recognised by [Earthshot] [Eth Foundation] [Filecoin]       │
+//   │               [Solana] [Klarna] [BCG / Handelsblatt]        │
+//   └─────────────────────────────────────────────────────────────┘
+//
+// All logos are rendered in monochrome at a uniform height. The
+// XPRIZE primary line uses a larger logo size; the secondary
+// recognitions sit smaller in a flex-wrap row.
+//
+// Why monochrome vs. full-colour: the band sits directly under the
+// cream hero on a cream background. Six full-colour logos would
+// compete with the hero copy above. Flat silhouette treatment keeps
+// the band reading as one quiet block — same recipe as the
+// `<Supporters />` wall further down.
+
+type Logo = {
+  src: string;
+  alt: string;
+  href: string;
+  // Display height in px. Tuned per-logo so optical weight is balanced
+  // even though widths vary wildly. Larger numbers for stacked/short
+  // marks (Klarna pill, BKCF block), smaller for very-long wordmarks.
+  h: number;
+};
+
+const PRIMARY_LOGO: Logo = {
+  src: "/decor/supporters/xprize-rainforest.png",
+  alt: "XPRIZE Rainforest (with alana)",
+  href: "https://www.xprize.org/competitions/rainforest",
+  h: 42,
+};
+
+const SECONDARY_LOGOS: ReadonlyArray<Logo> = [
   {
-    label: "XPRIZE Rainforest",
-    href: "https://www.xprize.org/competitions/rainforest",
+    src: "/decor/awards/earthshot.svg",
+    alt: "Earthshot Prize",
+    href: "https://earthshotprize.org/",
+    h: 34,
+  },
+  {
+    src: "/decor/supporters/ethereum-foundation.png",
+    alt: "Ethereum Foundation",
+    href: "https://ethereum.foundation/",
+    h: 28,
+  },
+  {
+    src: "/decor/supporters/filecoin-foundation.png",
+    alt: "Filecoin Green",
+    href: "https://green.filecoin.io/",
+    h: 24,
+  },
+  {
+    src: "/decor/awards/solana.svg",
+    alt: "Solana",
+    href: "https://solana.com/",
+    h: 18,
+  },
+  {
+    src: "/decor/supporters/klarna.png",
+    alt: "Klarna",
+    href: "https://www.klarna.com/",
+    h: 28,
   },
 ];
 
-const SECONDARY = [
-  // Awards first (prestige order), then grants, then sponsors.
-  { label: "Earthshot Prize", href: "https://earthshotprize.org/" },
+// One text-only recognition for which we don't ship a logo (the BCG /
+// Handelsblatt "Vordenker:innen" feature is a press initiative rather
+// than a sponsor with a single redistributable mark; using the
+// Handelsblatt newspaper logo alone would mis-frame what the recognition
+// actually is). Renders as a small wordmark sitting alongside the
+// logos.
+const SECONDARY_TEXT: ReadonlyArray<{ label: string; href: string }> = [
   {
     label: "BCG & Handelsblatt Vordenker:innen",
-    href: "https://www.bcg.com/",
+    href: "https://www.handelsblatt.com/unternehmen/management/vordenker_innen/vordenker-ernaehrung-und-landwirtschaft-besser-essen-fuer-das-weltklima/28848280.html",
   },
-  { label: "Ethereum Foundation", href: "https://ethereum.foundation/" },
-  { label: "Filecoin Green", href: "https://green.filecoin.io/" },
-  { label: "Solana", href: "https://solana.com/" },
-  { label: "Klarna", href: "https://www.klarna.com/" },
 ];
 
 export function AwardsStrip() {
@@ -51,54 +100,86 @@ export function AwardsStrip() {
       aria-label="Awards"
       className="border-t border-border-soft bg-background"
     >
-      <div className="mx-auto w-full max-w-[1480px] px-6 py-10 sm:px-10 lg:px-16 lg:py-14">
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between lg:gap-10">
-          {/* Primary line — Winners of … */}
-          <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-baseline sm:gap-x-5 sm:gap-y-2">
+      <div className="mx-auto w-full max-w-[1480px] px-6 py-10 sm:px-10 lg:py-14 lg:px-16">
+        <div className="flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between lg:gap-12">
+          {/* Primary — Winners of XPRIZE Rainforest */}
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-6">
             <span className="font-instrument italic text-[15px] lg:text-[16px] text-foreground/55">
               {t("awards.label")}
             </span>
-            <ul className="flex flex-wrap items-baseline gap-x-5 gap-y-1">
-              {PRIMARY_AWARDS.map((a) => (
-                <li key={a.label}>
-                  <a
-                    href={a.href}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="font-garamond text-[20px] lg:text-[24px] font-normal leading-[1.1] tracking-[-0.01em] text-foreground transition-colors hover:text-primary"
-                  >
-                    {a.label}
-                  </a>
-                </li>
-              ))}
-            </ul>
+            <a
+              href={PRIMARY_LOGO.href}
+              target="_blank"
+              rel="noreferrer"
+              aria-label={PRIMARY_LOGO.alt}
+              className="inline-flex items-center transition-opacity hover:opacity-80"
+              style={{ height: PRIMARY_LOGO.h }}
+            >
+              <Image
+                src={PRIMARY_LOGO.src}
+                alt={PRIMARY_LOGO.alt}
+                width={796}
+                height={138}
+                style={{ height: PRIMARY_LOGO.h, width: "auto" }}
+                className="opacity-90"
+                draggable={false}
+              />
+            </a>
           </div>
 
-          {/* Secondary recognitions — quieter ledger to the right */}
-          <div className="flex flex-col gap-2 lg:items-end">
+          {/* Secondary — Recognised by + logos */}
+          <div className="flex flex-col gap-3 lg:items-end">
             <span className="font-instrument italic text-[13px] lg:text-[14px] text-foreground/45">
               {t("awards.alsoLabel")}
             </span>
-            <ul className="flex flex-wrap items-center gap-x-4 gap-y-1.5 lg:justify-end">
-              {SECONDARY.map((a, i) => (
+            <ul
+              className="flex flex-wrap items-center gap-x-7 gap-y-3 lg:justify-end lg:gap-x-8"
+              role="list"
+            >
+              {SECONDARY_LOGOS.map((l) => (
                 <li
-                  key={a.label}
-                  className="flex items-center gap-x-4"
+                  key={l.src}
+                  className="flex items-center"
+                  style={{ height: l.h }}
                 >
                   <a
-                    href={a.href}
+                    href={l.href}
                     target="_blank"
                     rel="noreferrer"
-                    className="text-[13px] lg:text-[13.5px] text-foreground/70 transition-colors hover:text-foreground"
+                    aria-label={l.alt}
+                    className="inline-flex items-center transition-opacity hover:opacity-100"
+                    style={{ height: l.h }}
                   >
-                    {a.label}
-                  </a>
-                  {i < SECONDARY.length - 1 && (
-                    <span
-                      aria-hidden
-                      className="hidden h-[2px] w-[2px] rounded-full bg-foreground/25 sm:inline-block"
+                    {/* `grayscale + multiply` collapses brand colours
+                        into a single neutral silhouette while
+                        preserving wordmark legibility. Hover restores
+                        full presence. */}
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={l.src}
+                      alt={l.alt}
+                      style={{
+                        height: l.h,
+                        width: "auto",
+                        filter: "grayscale(1) contrast(1.05)",
+                        mixBlendMode: "multiply",
+                        opacity: 0.7,
+                      }}
+                      draggable={false}
                     />
-                  )}
+                  </a>
+                </li>
+              ))}
+              {SECONDARY_TEXT.map((t) => (
+                <li key={t.label} className="flex items-center">
+                  <a
+                    href={t.href}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-[13px] lg:text-[13.5px] text-foreground/65 transition-colors hover:text-foreground"
+                  >
+                    {t.label}
+                  </a>
                 </li>
               ))}
             </ul>

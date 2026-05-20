@@ -64,15 +64,23 @@ const BUMICERTS_URL = "https://alpha.fund.gainforest.app";
 // Two layouts, driven by Tailwind responsive utilities:
 //
 //   - lg+: split-column desktop layout. The live Bumicerts + Globe
-//     windows render at the page level (see `app/page.tsx`) with
-//     `position: absolute` against placeholder anchors inside the right
-//     column.
+//     windows render INSIDE this section's right column (see the
+//     `desktopCards` prop) using column-relative absolute positioning
+//     so they stay anchored at every browser zoom level.
 //
 //   - below lg: single-column stacked composition. Headline + subtitle
 //     + CTAs first, then the live windows full-width below them. The
-//     draggable absolute cards are hidden on mobile (wrapped in
-//     `hidden lg:block` in page.tsx) and we mount the inline siblings
-//     here so the user still sees the live data right under the hero.
+//     mobile siblings come in via the `inlineCards` prop (passed by
+//     `app/page.tsx`) so the user still sees the live data right under
+//     the hero on phones.
+//
+// Earlier, the desktop cards lived at the PAGE level with document-
+// coordinate `position: absolute` against placeholder anchors inside
+// this section's right column. That broke at non-100% browser zoom —
+// the cards drifted to the left at 50% zoom because their saved doc-
+// coordinates no longer matched the placeholder's measured position
+// after the layout reflowed. Moving them into the right column with
+// container-relative positioning fixes the drift at any zoom level.
 //
 // We dropped the previous botanical sprig PNG (`/decor/leaves.png`) per
 // the team's "thin-stroke art doesn't match the other apps + feels
@@ -83,9 +91,14 @@ export function Hero({
   /** Inline cards rendered only on mobile (lg:hidden). Server-pulled
    *  data flows in from `app/page.tsx`. */
   inlineCards,
+  /** Desktop cards rendered inside this section's right column on lg+.
+   *  Passed in from `app/page.tsx` so we keep the live-data fetch on
+   *  the server but the layout decisions co-located here. */
+  desktopCards,
 }: {
   snapshot: LiveBumicertsSnapshot;
   inlineCards?: React.ReactNode;
+  desktopCards?: React.ReactNode;
 }) {
   void _snapshot;
   const t = useT();
@@ -180,30 +193,15 @@ export function Hero({
           )}
         </div>
 
-        {/* RIGHT: placeholders for the two draggable cards (desktop). The
-            cards themselves are rendered at the page level (see
-            `app/page.tsx`) so they can use document-coordinate
-            `position: absolute` and scroll with the page. The
-            placeholders reserve their hero slots and give the client
-            components a known starting position to read on mount.
-
-            We removed the previous botanical sprig that lived in the
-            gutter between text and cards — its thin pen-style strokes
-            looked foreign next to the chunky live UI windows. */}
+        {/* RIGHT: live data windows (desktop). The cards are rendered
+            inside this column with `position: absolute` against this
+            `relative` container — so they stay anchored to the hero
+            column at every browser zoom level. The previous
+            implementation lived at the page level with document-
+            coordinate absolute positioning which broke at 50% zoom
+            (cards drifted to the left edge of the page). */}
         <div className="relative hidden lg:block lg:col-span-6 min-h-[520px]">
-          {/* right-[-35px] pushes the Globe card past the column's right
-              edge so the sphere ends up sitting ~25% behind the
-              Bumicerts card and ~75% peeking out on the right. */}
-          <div
-            id="bumicerts-card-anchor"
-            aria-hidden
-            className="pointer-events-none absolute left-0 top-[140px] h-[360px] w-[400px]"
-          />
-          <div
-            id="globe-card-anchor"
-            aria-hidden
-            className="pointer-events-none absolute right-[-35px] top-[20px] h-[360px] w-[280px]"
-          />
+          {desktopCards}
         </div>
       </div>
     </section>

@@ -3,7 +3,6 @@
 import Image from "next/image";
 import Link from "next/link";
 import { LogoMark } from "./Logo";
-import { useDraggableDocPos } from "../_lib/useDraggableDocPos";
 import { useT } from "./LocaleProvider";
 import type { LiveBumicertsSnapshot, LiveBumicert } from "../_lib/bumicerts";
 
@@ -14,38 +13,39 @@ import type { LiveBumicertsSnapshot, LiveBumicert } from "../_lib/bumicerts";
  * curated Bumicerts coming through the same `orgHypercertsClaimActivity`
  * GraphQL feed that powers alpha.fund.gainforest.app/explore.
  *
- * The card is **draggable**: grab the header (the area with the
- * GainForest mark + "Bumicerts" + Live badge) and drop the card anywhere
- * on the page. Position persists in localStorage.
- *
- * Positioning is `position: absolute` with **document coordinates** (top
- * and left are measured from the top of the document, not the viewport),
- * so the card scrolls naturally with the rest of the page — once you
- * scroll past it, it disappears off the top of the screen like normal
- * content. The card is rendered at the page level (see `app/page.tsx`)
- * so it isn't clipped by the Hero section's `overflow-hidden`.
- *
  * Rail items (Projects / Organizations / Leaderboard) are real links to
  * the matching Bumicerts pages so the card behaves like a miniature
  * navigation widget rather than a static mockup.
+ *
+ * Two render modes:
+ *
+ *   - `inline` (mobile): natural document flow under the hero copy.
+ *   - default (desktop): `position: absolute` inside the Hero's right
+ *     column — positioned via the `position` prop (top/left/width).
+ *
+ * The previous implementation used document-coordinate absolute
+ * positioning so the card could be dragged anywhere on the page. That
+ * broke at non-100% browser zoom (the saved doc coords no longer matched
+ * the placeholder div's reflowed position; the card drifted to the
+ * page's left edge at 50% zoom). The dragging was a nice-to-have; the
+ * stable layout matters more.
  */
 
 const BUMICERTS_URL = "https://alpha.fund.gainforest.app";
-// Bump the localStorage key when the coordinate space changes so existing
-// users (who saved viewport coords under the old `position: fixed` impl)
-// don't get a card stuck at a now-meaningless document position.
-const STORAGE_KEY = "gainforest.bumicertsCard.docPos.v3";
-const ANCHOR_ID = "bumicerts-card-anchor";
 const CARD_WIDTH = 400;
 
 export function BumicertsCard({
   snapshot,
   inline = false,
+  position,
 }: {
   snapshot: LiveBumicertsSnapshot;
-  /** When true, render inline (no absolute positioning, no drag) so the
-   *  card flows naturally in the mobile composition. */
+  /** When true, render inline (no absolute positioning) so the card
+   *  flows naturally in the mobile composition. */
   inline?: boolean;
+  /** When set, render `position: absolute` with these coordinates
+   *  relative to the parent (which must be `position: relative`). */
+  position?: { top?: number | string; left?: number | string; right?: number | string; width?: number };
 }) {
   const t = useT();
   // Prefer Bumicerts with real thumbnails for the card — an empty thumbnail
@@ -58,44 +58,19 @@ export function BumicertsCard({
       : [...withImage, ...snapshot.bumicerts.filter((b) => !b.imageUrl)]
   ).slice(0, 3);
 
-  // All the drag bookkeeping lives in the shared hook so the
-  // DraggableGlobeCard uses the exact same mechanics. Skipped entirely
-  // in inline mode — mobile readers don't need a draggable widget.
-  const drag = useDraggableDocPos({
-    storageKey: STORAGE_KEY,
-    anchorId: ANCHOR_ID,
-    width: CARD_WIDTH,
-  });
-  const docPos = inline ? null : drag.docPos;
-  const dragging = inline ? false : drag.dragging;
-  const rootRef = inline ? undefined : drag.rootRef;
-  const handleProps = inline ? undefined : drag.handleProps;
-
-  // The card is `position: absolute` against the page-level `relative`
-  // wrapper in `app/page.tsx`, with top/left in DOCUMENT coordinates.
-  // That means the card scrolls naturally with the rest of the page —
-  // exactly the behaviour Hero would have given us if the card hadn't
-  // been client-side-controlled in the first place. SSR renders nothing
-  // (docPos === null) so there's no flash at (0, 0); useLayoutEffect
-  // resolves the position before paint.
-  if (!inline && !docPos) {
-    return null;
-  }
-
   const containerStyle: React.CSSProperties = inline
     ? { width: "100%", maxWidth: 420 }
     : {
         position: "absolute",
-        left: docPos!.x,
-        top: docPos!.y,
-        width: CARD_WIDTH,
+        top: position?.top,
+        left: position?.left,
+        right: position?.right,
+        width: position?.width ?? CARD_WIDTH,
         zIndex: 40,
-        willChange: "left, top",
       };
 
   return (
     <div
-      ref={rootRef}
       style={containerStyle}
       className={
         "overflow-hidden rounded-[18px] border border-[#e6dfd0] bg-[#fbf8f0] " +
@@ -104,22 +79,8 @@ export function BumicertsCard({
           : "shadow-[0_30px_70px_-25px_rgba(40,50,30,0.35)]")
       }
     >
-      {/* header — same GainForest mark Bumicerts uses for its app icon.
-          On the desktop layout this row doubles as the DRAG HANDLE; on
-          mobile it's just a static header. */}
-      <div
-        className={
-          "flex items-center gap-2 px-5 pt-5 pb-3 select-none " +
-          (inline
-            ? ""
-            : dragging
-              ? "cursor-grabbing"
-              : "cursor-grab")
-        }
-        style={inline ? undefined : { touchAction: "none" }}
-        {...(handleProps ?? {})}
-        aria-label={inline ? undefined : "Drag handle"}
-      >
+      {/* header — same GainForest mark Bumicerts uses for its app icon. */}
+      <div className="flex items-center gap-2 px-5 pt-5 pb-3 select-none">
         <LogoMark className="h-[22px] w-[22px] text-brand" title="GainForest" />
         <span className="font-garamond text-[20px] font-medium text-foreground">
           Bumicerts
@@ -133,7 +94,6 @@ export function BumicertsCard({
           <span
             className="ml-auto inline-flex items-center gap-1.5 rounded-full bg-brand/15 px-2 py-0.5 text-[10px] font-medium uppercase tracking-[0.08em] text-brand-dark"
             title="Pulled from the GainForest indexer in real time"
-            data-no-drag
           >
             <span className="relative grid h-1.5 w-1.5 place-items-center">
               <span className="absolute inset-0 animate-ping rounded-full bg-brand/40" />
@@ -336,7 +296,6 @@ function RailLink({
       href={href}
       target="_blank"
       rel="noreferrer"
-      data-no-drag
       className={
         "flex items-center gap-1.5 rounded-md px-2 py-1.5 transition-colors " +
         (active

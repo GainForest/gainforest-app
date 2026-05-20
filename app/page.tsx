@@ -2,11 +2,10 @@ import { TopNav } from "./_components/TopNav";
 import { Hero } from "./_components/Hero";
 import { AwardsStrip } from "./_components/AwardsStrip";
 import { ChoosePath } from "./_components/ChoosePath";
+import { HowItWorks } from "./_components/HowItWorks";
 import { DataCommons } from "./_components/DataCommons";
 import { EquitableAI } from "./_components/EquitableAI";
 import { TainaFeature } from "./_components/TainaFeature";
-import { IWantTo } from "./_components/IWantTo";
-import { HowItWorks } from "./_components/HowItWorks";
 import { Research } from "./_components/Research";
 import { NatureGuild } from "./_components/NatureGuild";
 import { Partners } from "./_components/Partners";
@@ -26,54 +25,64 @@ import { fetchProjectPins } from "./_lib/projects";
 // pre-rendered, then refreshed in the background as new projects land.
 export const revalidate = 900;
 
-// Page composition (May 2026 gainforest.earth merge).
+// Page composition (May 2026 — narrative-flow pass).
 //
-// We kept the team-loved core (Hero + Globe/Bumicerts windows,
-// ChoosePath, IWantTo, HowItWorks, NatureCTA, Footer) intact, and merged
-// in the rest of gainforest.earth's editorial sections. Order mirrors
-// the upstream marketing site's narrative arc:
+// Audit feedback called out two structural issues with the prior
+// ordering: the page didn't explain what a Bumicert IS before asking
+// the visitor to "Choose a path", and the sequence jumped between
+// route pickers (ChoosePath / IWantTo) and explainers (DataCommons /
+// HowItWorks / EquitableAI) without a coherent thread. The new order
+// reads as a single narrative:
 //
-//   1.  Hero ........................ what GainForest is + live windows
-//   2.  AwardsStrip ................. credibility band (XPRIZE etc.)
-//   3.  ChoosePath .................. pick a tool surface
-//   4.  DataCommons ................. WHY (1% biodiversity claim) — ink
-//   5.  EquitableAI ................. "Local-first AI" research pillars
-//   6.  TainaFeature ................ Indigenous AI Assistant
-//   7.  IWantTo ..................... visitor-routed paths
-//   8.  HowItWorks .................. four-step explainer
-//   9.  Research .................... hackathons
-//  10.  NatureGuild ................. community members
-//  11.  Partners ................... rotating live globe + partner ledger
-//  12.  ImpactReport ............... 24/25 report card + community collage
-//  13.  Media ...................... selected press
-//  14.  Supporters ................. Merci
-//  15.  NatureCTA .................. closing CTA — ink
-//  16.  Footer ..................... legal + IBAN — ink
+//   1.  Hero ........................ promise + live data windows
+//   2.  AwardsStrip ................. credibility (logo wall now)
+//   3.  ChoosePath .................. WHAT — pick a surface, see a real
+//                                     Bumicert preview, learn what
+//                                     a Bumicert actually is
+//   4.  HowItWorks .................. HOW — four-step flow (moved
+//                                     up so the explanation lands
+//                                     immediately after the Bumicert
+//                                     preview)
+//   5.  DataCommons ................. WHY — 1% biodiversity claim
+//                                     (ink band)
+//   6.  EquitableAI ................. THE TECH — three research pillars
+//   7.  TainaFeature ................ THE SHOWCASE — Indigenous AI
+//                                     assistant
+//   8.  Research .................... HACKATHONS — how we iterate
+//   9.  NatureGuild ................. THE COMMUNITY — Guild members
+//  10.  Partners ................... live globe + partner archetypes
+//  11.  ImpactReport ............... 24/25 report card
+//  12.  Media ...................... selected press
+//  13.  Supporters ................. Merci to our supporters
+//  14.  NatureCTA .................. closing CTA (ink)
+//  15.  Footer ..................... legal + IBAN (ink)
 //
-// Cream / ink rhythm: most sections sit on cream (`bg-background`) so
-// the page reads as a long editorial scroll, with two intentional
-// dark "punches" — DataCommons (mid-page WHY) and NatureCTA → Footer
-// (the closing chord). ImpactReport used to be a third (a dark card,
-// not a full band) but is now a warm apricot card mirroring
-// gainforest.earth's treatment.
+// Dropped: <IWantTo /> — it was a second visitor-routing strip with
+// four cards (Discover / Browse / Create / Learn) that duplicated
+// ChoosePath conceptually. The four "routes" are already covered by
+// the hero CTAs (Explore Bumicerts + Open the Globe), the ChoosePath
+// section (with the Bumicert preview), and the HowItWorks four-step
+// flow. Removing it tightens the narrative without losing any
+// destination — every link in IWantTo still has at least one path on
+// the page.
+//
+// Cream / ink rhythm: most sections sit on cream so the page reads as
+// a long editorial scroll, with two intentional dark "punches" —
+// DataCommons (mid-page WHY) and NatureCTA → Footer (the closing
+// chord).
 export default async function Page() {
   const [snapshot, pins] = await Promise.all([
     fetchLiveBumicerts(12),
     fetchProjectPins(),
   ]);
   return (
-    // `relative` so the two draggable cards can use `position: absolute`
-    // anchored to the page wrapper. The wrapper spans the entire document
-    // so the cards scroll with the rest of the content (and disappear off
-    // the top of the screen as you scroll past them).
-    <div className="relative min-h-screen bg-background">
+    <div className="min-h-screen bg-background">
       <TopNav />
       <main>
         <Hero
           snapshot={snapshot}
-          // Mobile / tablet: inline live windows beneath the hero copy.
-          // Hidden on lg+ where the floating, draggable versions take
-          // over (rendered below outside the Hero).
+          // Mobile / tablet (< lg): inline live windows beneath the hero
+          // copy. Hidden on lg+ where the desktopCards take over.
           inlineCards={
             <>
               <DraggableGlobeCard pinCount={pins.length} inline>
@@ -82,14 +91,39 @@ export default async function Page() {
               <BumicertsCard snapshot={snapshot} inline />
             </>
           }
+          // Desktop (lg+): live windows render inside the Hero's right
+          // column with column-relative absolute positioning. The
+          // earlier document-coordinate variant drifted to the page's
+          // left edge at non-100% browser zoom; this anchors them to
+          // the column instead so they stay put at any zoom level.
+          desktopCards={
+            <>
+              <BumicertsCard
+                snapshot={snapshot}
+                position={{ top: 140, left: 0, width: 400 }}
+              />
+              {/* Globe diameter is tuned so:
+                  (1) the sphere nearly fills the (narrower, 280px)
+                      card body, leaving only a slim cream margin
+                      on each side; and
+                  (2) the card's total height (header 54 + body
+                      ~258 + footer 31 ≈ 343 px) lands inside
+                      Bumicerts' ≈ 345 px height. */}
+              <DraggableGlobeCard
+                pinCount={pins.length}
+                position={{ top: 20, right: -35, width: 280 }}
+              >
+                <GlobeCard diameter={250} caption={false} />
+              </DraggableGlobeCard>
+            </>
+          }
         />
         <AwardsStrip />
         <ChoosePath snapshot={snapshot} />
+        <HowItWorks />
         <DataCommons />
         <EquitableAI />
         <TainaFeature />
-        <IWantTo />
-        <HowItWorks />
         <Research />
         <NatureGuild />
         <Partners />
@@ -99,21 +133,6 @@ export default async function Page() {
         <NatureCTA />
       </main>
       <Footer />
-      {/* Desktop-only floating, draggable cards. Wrapped in a
-          `hidden lg:block` div so they don't render on mobile where the
-          inline siblings above take their place. Both use document-
-          relative `position: absolute` so they scroll with the page. */}
-      <div className="hidden lg:block">
-        <BumicertsCard snapshot={snapshot} />
-        {/* Globe diameter is tuned so:
-            (1) the sphere nearly fills the (narrower, 280px) card body,
-                leaving only a slim cream margin on each side; and
-            (2) the card's total height (header 54 + body ~258 + footer 31
-                ≈ 343 px) lands inside Bumicerts' ≈ 345 px height. */}
-        <DraggableGlobeCard pinCount={pins.length}>
-          <GlobeCard diameter={250} caption={false} />
-        </DraggableGlobeCard>
-      </div>
     </div>
   );
 }

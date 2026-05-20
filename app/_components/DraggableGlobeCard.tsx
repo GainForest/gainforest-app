@@ -2,89 +2,73 @@
 
 import Link from "next/link";
 import { LogoMark } from "./Logo";
-import { useDraggableDocPos } from "../_lib/useDraggableDocPos";
 import { useT } from "./LocaleProvider";
 
 // Wraps the live globe (`<GlobeCard>`) in the same window-chrome card style
-// as `<BumicertsCard>` and makes it draggable. Visual rules:
+// as `<BumicertsCard>`. Visual rules:
 //
 //   - cream/beige body and warm-beige border that match the Bumicerts card;
-//   - header doubles as the drag handle (cursor reflects the drag state);
 //   - "Live" badge in the header to advertise the running data feed;
 //   - footer links out to the full-fidelity globe at gainforest.app.
 //
-// Drag mechanics come from the shared `useDraggableDocPos` hook so the
-// behaviour matches the Bumicerts card exactly: document-coordinate
-// positioning that scrolls with the page, anchor-driven default home, and
-// localStorage persistence.
+// Two render modes:
 //
-// Children = the actual globe-card render. We accept it as `children` rather
-// than constructing it inside this client component so the async server
-// fetch in `<GlobeCard>` (which pulls live pins via `fetchProjectPins()`)
-// stays a server-rendered concern.
+//   - `inline` (mobile): natural document flow under the hero copy, no
+//     absolute positioning, no drag.
+//   - default (desktop): `position: absolute` inside the Hero's right
+//     column — positioned via the `position` prop (top/right). This
+//     replaces the previous document-coordinate draggable
+//     implementation which broke at non-100% browser zoom (cards
+//     drifted to the page's left edge).
 //
-// `inline` mode (mobile): render the same chrome but without absolute
-// positioning, dragging, or fixed width — so the card flows naturally in
-// the document. The mobile composition in `<Hero />` mounts this variant
-// directly under the hero copy.
+// The card name is retained ("DraggableGlobeCard") for git history /
+// import-graph stability even though it no longer drags. If we
+// want to bring back interactive dragging later, do it from a
+// column-relative starting point, not document coordinates.
+//
+// Children = the actual globe-card render. We accept it as `children`
+// rather than constructing it inside this client component so the
+// async server fetch in `<GlobeCard>` (which pulls live pins via
+// `fetchProjectPins()`) stays a server-rendered concern.
 
-const STORAGE_KEY = "gainforest.globeCard.docPos.v7";
-const ANCHOR_ID = "globe-card-anchor";
-const CARD_WIDTH = 280;
 const GLOBE_HREF = "https://gainforest.app";
 
 interface Props {
   children: React.ReactNode;
   /** Number of project pins on the globe (for the footer). */
   pinCount?: number;
-  /** When true, render inline (no absolute positioning, no drag). */
+  /** When true, render inline (no absolute positioning). */
   inline?: boolean;
+  /** When set, render `position: absolute` with these coordinates relative
+   *  to the parent (which must be `position: relative`). */
+  position?: { top?: number | string; left?: number | string; right?: number | string; width?: number };
 }
 
-export function DraggableGlobeCard(props: Props) {
-  if (props.inline) {
-    return <InlineGlobeCard {...props} />;
+export function DraggableGlobeCard({
+  children,
+  pinCount,
+  inline = false,
+  position,
+}: Props) {
+  if (inline) {
+    return (
+      <div className="mx-auto w-full max-w-[420px] overflow-hidden rounded-[18px] border border-[#e6dfd0] bg-[#fbf8f0] shadow-[0_18px_40px_-22px_rgba(40,50,30,0.28)]">
+        <GlobeCardChrome pinCount={pinCount}>{children}</GlobeCardChrome>
+      </div>
+    );
   }
-  return <AbsoluteDraggableGlobeCard {...props} />;
-}
-
-function AbsoluteDraggableGlobeCard({ children, pinCount }: Props) {
-  const { docPos, dragging, rootRef, handleProps } = useDraggableDocPos({
-    storageKey: STORAGE_KEY,
-    anchorId: ANCHOR_ID,
-    width: CARD_WIDTH,
-  });
-
-  if (!docPos) return null;
-
   return (
     <div
-      ref={rootRef}
       style={{
         position: "absolute",
-        left: docPos.x,
-        top: docPos.y,
-        width: CARD_WIDTH,
+        top: position?.top,
+        left: position?.left,
+        right: position?.right,
+        width: position?.width ?? 280,
         zIndex: 39, // one below the Bumicerts card so they layer naturally
-        willChange: "left, top",
       }}
       className="overflow-hidden rounded-[18px] border border-[#e6dfd0] bg-[#fbf8f0] shadow-[0_30px_70px_-25px_rgba(40,50,30,0.35)]"
     >
-      <GlobeCardChrome
-        dragging={dragging}
-        handleProps={handleProps}
-        draggable
-        pinCount={pinCount}
-      >
-        {children}
-      </GlobeCardChrome>
-    </div>
-  );
-}
-
-function InlineGlobeCard({ children, pinCount }: Props) {
-  return (
-    <div className="mx-auto w-full max-w-[420px] overflow-hidden rounded-[18px] border border-[#e6dfd0] bg-[#fbf8f0] shadow-[0_18px_40px_-22px_rgba(40,50,30,0.28)]">
       <GlobeCardChrome pinCount={pinCount}>{children}</GlobeCardChrome>
     </div>
   );
@@ -93,36 +77,13 @@ function InlineGlobeCard({ children, pinCount }: Props) {
 interface ChromeProps {
   children: React.ReactNode;
   pinCount?: number;
-  dragging?: boolean;
-  draggable?: boolean;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  handleProps?: any;
 }
 
-function GlobeCardChrome({
-  children,
-  pinCount,
-  dragging,
-  draggable,
-  handleProps,
-}: ChromeProps) {
+function GlobeCardChrome({ children, pinCount }: ChromeProps) {
   const t = useT();
   return (
     <>
-      {/* header — drag handle (only when draggable) */}
-      <div
-        className={
-          "flex items-center gap-2 px-5 pt-5 pb-3 select-none " +
-          (draggable
-            ? dragging
-              ? "cursor-grabbing"
-              : "cursor-grab"
-            : "")
-        }
-        style={draggable ? { touchAction: "none" } : undefined}
-        {...(draggable ? handleProps : {})}
-        aria-label={draggable ? "Drag handle" : undefined}
-      >
+      <div className="flex items-center gap-2 px-5 pt-5 pb-3 select-none">
         <LogoMark
           className="h-[22px] w-[22px] text-brand"
           title="GainForest"

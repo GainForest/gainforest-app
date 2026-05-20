@@ -2,44 +2,54 @@ import Link from "next/link";
 import { GlobeCard } from "./GlobeCard";
 import { ChoosePathLabels } from "./ChoosePathLabels";
 import type { LiveBumicertsSnapshot } from "../_lib/bumicerts";
+import { fetchProjectPins } from "../_lib/projects";
 
 const GLOBE_URL = "https://gainforest.app";
 const BUMICERTS_URL = "https://alpha.fund.gainforest.app";
 
-// "Choose how you want to use GainForest" — two large editorial path
-// cards, side-by-side.
+// "Choose how you want to use GainForest" — two editorial cards
+// side-by-side. Each card explains AND demonstrates one of the two
+// surfaces GainForest hosts:
 //
 //   ┌──────────────────────┐   ┌──────────────────────┐
-//   │ Open the Globe       │   │ Explore Bumicerts    │
-//   │ ─ live spinning ─    │   │ ─ 3 real thumbs ─    │
-//   │   body copy          │   │   body copy          │
+//   │ Open the Globe       │   │ What's a Bumicert?   │
+//   │ ─ live spinning ─    │   │ — single sample      │
+//   │   body copy          │   │   Bumicert detail —  │
 //   │   Open the Globe →   │   │   Explore Bumicerts →│
 //   └──────────────────────┘   └──────────────────────┘
 //
-// Why this replaced the earlier 5-column inline layout (text / globe
-// / "or" / text / mini-card): the original layout read as 5 small
-// disconnected pieces with a tiny globe icon and a floating "or"
-// wedged in the middle. Audit feedback was "this section doesn't make
-// sense" — the cards weren't visually tied to the surfaces they
-// describe, and the "or" did no editorial work it couldn't do by
-// implication. Two equally-weighted cards with the actual product
-// surfaces embedded inside (a small live globe in the Globe card; a
-// thumbnail strip in the Bumicerts card) make the choice immediate.
+// Why this layout (replaces an earlier 5-column row of disconnected
+// pieces): each card visually demonstrates the surface it links to.
+// The Globe card embeds a real spinning sphere of pins; the Bumicerts
+// card embeds a real Bumicert preview drawn from the live indexer
+// (title + thumbnail + description + status badge + region) so visitors
+// SEE what a Bumicert is, not just "three random project photos".
 //
-// What stayed:
-//   - Hand-drawn icon PNGs (icon-globe.png / icon-plant.png) remain
-//     out. AGENTS.md's "thin-stroke art doesn't match the rendered
-//     apps" rule rejects re-introducing them.
-//   - All colour values come from the design system.
-//   - Real Bumicert thumbnails from the live snapshot — no fake data.
+// Audit feedback called the previous version's three-thumbnail strip
+// confusing — "are bumicerts really just photos? it doesn't explain
+// what this is". The single detailed preview answers that directly:
+// a Bumicert is a structured, verifiable record with a real title, a
+// human-written description, an issuing organisation, and a status —
+// not just a photo.
 //
 // Server-rendered (so we can `await fetchProjectPins()` inside
 // <GlobeCard>); translatable strings come from <ChoosePathLabels />.
-export function ChoosePath({ snapshot }: { snapshot: LiveBumicertsSnapshot }) {
-  // Real Bumicert thumbnails for the mini "All projects" card. Never
-  // inline mock arrays per AGENTS.md's "no fake data on the landing
-  // page" hard rule.
-  const strip = snapshot.bumicerts.filter((b) => b.imageUrl).slice(0, 3);
+export async function ChoosePath({
+  snapshot,
+}: {
+  snapshot: LiveBumicertsSnapshot;
+}) {
+  // Pin count for the live-globe preview caption. Fetched server-side
+  // so it stays inside the page's cached server render.
+  const pins = await fetchProjectPins();
+
+  // Single featured Bumicert for the right card. Prefer the first
+  // entry that has both a thumbnail and a non-trivial description so
+  // the card actually demonstrates the "structured record" idea.
+  const featured =
+    snapshot.bumicerts.find(
+      (b) => b.imageUrl && b.shortDescription && b.shortDescription.length > 20,
+    ) ?? snapshot.bumicerts.find((b) => b.imageUrl) ?? snapshot.bumicerts[0];
 
   return (
     <section className="border-t border-border-soft">
@@ -47,38 +57,43 @@ export function ChoosePath({ snapshot }: { snapshot: LiveBumicertsSnapshot }) {
         <ChoosePathLabels slot="heading" />
 
         <div className="mt-12 grid grid-cols-1 gap-6 lg:mt-14 lg:auto-rows-fr lg:grid-cols-2 lg:gap-8">
-          {/* LEFT — Open the Globe path. Live spinning sphere at the
-              bottom, eyebrow + heading + body at the top, arrow link
-              flush with the sibling card. The whole card is a single
-              anchor so any click takes the visitor to the live globe
-              app. Uses `auto-rows-fr` on the grid so both cards reach
-              the same height; the globe slot uses `flex-1` to fill
-              the vertical room and keep the arrow pinned to the
-              card foot. */}
+          {/* LEFT — Green Globe path. Mirrors the structure of the
+              right "What's a Bumicert?" card so the two paths feel
+              like editorial siblings: short explainer copy above,
+              richly-styled preview block in the middle, arrow link
+              below. The previous version had a tiny 200px globe
+              floating in empty space — visually it lost the
+              balance against the detailed Bumicert preview on the
+              right. */}
           <Link
             href={GLOBE_URL}
             target="_blank"
             rel="noreferrer"
-            aria-label="Open the Globe"
+            aria-label="Open Green Globe"
             className="group flex h-full flex-col gap-6 rounded-[18px] border border-border-soft bg-background p-6 transition-all hover:-translate-y-0.5 hover:border-foreground/30 hover:shadow-[0_18px_40px_-24px_rgba(40,50,30,0.22)] sm:gap-8 sm:p-8 lg:p-10"
           >
             <div className="min-w-0">
               <span className="font-instrument italic text-[12px] uppercase tracking-[0.18em] text-foreground/45">
-                01 · Discover
+                01 · Explore the map
               </span>
-              <ChoosePathLabels slot="globe" />
+              <h3 className="mt-3 font-garamond text-[24px] lg:text-[28px] font-normal leading-[1.15] text-foreground">
+                What&apos;s Green Globe?
+              </h3>
+              <p className="mt-3 max-w-[420px] text-[14.5px] leading-[1.55] text-foreground/70">
+                An interactive map of every community-led nature
+                project. Each pin is a real organization on the
+                ATProto network — explore stewards, ecosystems, and
+                impact across continents.
+              </p>
             </div>
-            {/* Live globe — the actual product surface, embedded.
-                Bigger here (200 px) so the card matches the visual
-                weight of the 3-thumbnail strip in the sibling card. */}
-            <div className="flex flex-1 items-center justify-center">
-              <div className="shrink-0">
-                <GlobeCard diameter={200} caption={false} />
-              </div>
+
+            <div className="flex flex-1 items-center">
+              <GlobePreview pinCount={pins.length} />
             </div>
+
             <span className="inline-flex items-center gap-1.5 text-[14px] font-medium text-primary">
               <span className="border-b border-primary/40 pb-0.5 transition-colors group-hover:border-primary">
-                Open the Globe
+                Open Green Globe
               </span>
               <span
                 aria-hidden
@@ -89,54 +104,36 @@ export function ChoosePath({ snapshot }: { snapshot: LiveBumicertsSnapshot }) {
             </span>
           </Link>
 
-          {/* RIGHT — Explore Bumicerts path. Mirrors the Globe card's
-              chrome: eyebrow + heading + body + arrow + a small grid
-              of three real project thumbnails labelled "All projects"
-              (echoing the alpha.fund explore page's grid header). */}
+          {/* RIGHT — What's a Bumicert? path.
+              Embeds a SINGLE real Bumicert (title, photo, description,
+              org, region, status) so visitors see what a Bumicert
+              actually IS — a structured record, not a random photo
+              gallery. */}
           <Link
             href={`${BUMICERTS_URL}/explore`}
             target="_blank"
             rel="noreferrer"
-            aria-label="Explore Bumicerts"
+            aria-label="Meet Bumicerts"
             className="group flex h-full flex-col gap-6 rounded-[18px] border border-border-soft bg-background p-6 transition-all hover:-translate-y-0.5 hover:border-foreground/30 hover:shadow-[0_18px_40px_-24px_rgba(40,50,30,0.22)] sm:gap-8 sm:p-8 lg:p-10"
           >
             <div className="min-w-0">
               <span className="font-instrument italic text-[12px] uppercase tracking-[0.18em] text-foreground/45">
-                02 · Support
+                02 · Meet the certificate
               </span>
-              <ChoosePathLabels slot="bumicerts" />
+              <h3 className="mt-3 font-garamond text-[24px] lg:text-[28px] font-normal leading-[1.15] text-foreground">
+                What&apos;s a Bumicert?
+              </h3>
+              <p className="mt-3 max-w-[420px] text-[14.5px] leading-[1.55] text-foreground/70">
+                An open, verifiable record of nature impact — signed
+                on ATProto, owned by the community that earned it.
+                Each one carries a photo, a story, and a public
+                provenance trail.
+              </p>
             </div>
 
-            {/* Three real Bumicert thumbnails — the same `imageUrl`
-                blobs the hero Bumicerts card uses, just at a smaller
-                size. Each thumbnail is `aspect-[4/3]` so the row
-                reads as a single horizontal band like alpha.fund's
-                grid header strip. */}
-            {strip.length > 0 && (
-              <div className="flex-1">
-                <div className="mb-2 flex items-center gap-1.5">
-                  <SearchGlyph />
-                  <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-foreground/45">
-                    <ChoosePathLabels slot="allProjects" />
-                  </span>
-                </div>
-                <div className="grid grid-cols-3 gap-2">
-                  {strip.map((item) => (
-                    <div
-                      key={item.id}
-                      className="relative aspect-[4/3] overflow-hidden rounded-md bg-[#cfd9c4]"
-                      title={item.title}
-                    >
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={item.imageUrl!}
-                        alt=""
-                        loading="lazy"
-                        className="absolute inset-0 h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
-                      />
-                    </div>
-                  ))}
-                </div>
+            {featured && (
+              <div className="flex flex-1 items-center">
+                <BumicertPreview featured={featured} />
               </div>
             )}
 
@@ -158,25 +155,189 @@ export function ChoosePath({ snapshot }: { snapshot: LiveBumicertsSnapshot }) {
   );
 }
 
-// Small magnifying glass glyph used inside the mini card's header,
-// echoing the search affordance on the real alpha.fund explore page.
-function SearchGlyph() {
+// Live Green Globe preview block. Mirrors the structure of
+// <BumicertPreview /> below — same card chrome, same proportions —
+// so the two ChoosePath cards stay visually balanced. The previous
+// version had a small floating globe with no surrounding chrome,
+// which lost against the richly-detailed Bumicert preview on the
+// right.
+//
+// Inside the chrome:
+//
+//   ┌──────────────────────────────────┐
+//   │ ┌─ aspect 16/9 ──┐  ● LIVE       │
+//   │ │   spinning      │              │
+//   │ │   globe        │              │
+//   │ └─────────────────┘              │
+//   ├──────────────────────────────────┤
+//   │ Green Globe                 Live │
+//   │ Spin and pin community-led …     │
+//   │ ──────────────────────────────── │
+//   │ GAINFOREST.APP       50 LIVE PINS│
+//   └──────────────────────────────────┘
+//
+// The "LIVE" badge in the corner of the visual matches the Bumicerts
+// hero card and the Bumicert preview's "Verified" badge — same mint
+// accent system across the page.
+function GlobePreview({ pinCount }: { pinCount: number }) {
   return (
-    <svg
-      width="11"
-      height="11"
-      viewBox="0 0 24 24"
-      fill="none"
-      aria-hidden
-      className="text-foreground/45"
-    >
-      <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="2" />
-      <path
-        d="M20 20l-3.5-3.5"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-      />
-    </svg>
+    <div className="w-full overflow-hidden rounded-[12px] border border-[#e6dfd0] bg-[#fbf8f0] shadow-[0_6px_20px_-12px_rgba(40,50,30,0.18)]">
+      {/* Globe panel — aspect 16:9 to match the Bumicert preview's
+          image panel. The sphere centers inside; the LIVE badge sits
+          top-right. */}
+      <div className="relative aspect-[16/9] w-full overflow-hidden bg-[#fbf8f0]">
+        <div className="absolute inset-0 grid place-items-center">
+          {/* Diameter scales with the card width via the aspect-16/9
+              container. 220px works well at the ~560px desktop card
+              width and falls back gracefully on tablet. */}
+          <GlobeCard diameter={220} caption={false} />
+        </div>
+        <span className="absolute right-3 top-3 inline-flex items-center gap-1.5 rounded-full bg-background/95 px-2 py-0.5 text-[10px] font-medium uppercase tracking-[0.1em] text-brand-dark backdrop-blur-sm">
+          <span className="relative grid h-1.5 w-1.5 place-items-center">
+            <span className="absolute inset-0 animate-ping rounded-full bg-brand/40" />
+            <span className="relative h-1.5 w-1.5 rounded-full bg-brand" />
+          </span>
+          Live
+        </span>
+      </div>
+
+      {/* Detail panel — mirrors BumicertPreview's */}
+      <div className="px-3.5 py-3 sm:px-4">
+        <div className="flex items-baseline justify-between gap-3">
+          <h4 className="min-w-0 truncate font-garamond text-[16px] font-medium text-foreground sm:text-[17px]">
+            Green Globe
+          </h4>
+          <span className="shrink-0 font-instrument italic text-[11px] tracking-[0.08em] text-foreground/45">
+            live
+          </span>
+        </div>
+        <p className="mt-1.5 text-[12.5px] leading-[1.45] text-foreground/65">
+          Spin and pin community-led nature projects across the
+          planet — every pin is an organization on ATProto.
+        </p>
+        <div className="mt-3 flex items-center justify-between gap-2 border-t border-[#ece5d4] pt-2 text-[10.5px] uppercase tracking-[0.1em] text-foreground/45">
+          <span>gainforest.app</span>
+          <span className="flex items-center gap-1">
+            {pinCount}+ live pins
+            <svg
+              width="9"
+              height="9"
+              viewBox="0 0 24 24"
+              fill="none"
+              aria-hidden
+            >
+              <path
+                d="M12 2C8 8 4 12 4 14a8 8 0 0016 0c0-2-4-6-8-12z"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Single-Bumicert preview card. Compact reproduction of the alpha.fund
+// detail page hero: title + region pill + thumbnail + description, with
+// a brand-mint "VERIFIED" badge so the visitor reads it as a record
+// (not just a photo).
+function BumicertPreview({
+  featured,
+}: {
+  featured: {
+    title: string;
+    imageUrl: string | null;
+    shortDescription: string | null;
+  };
+}) {
+  return (
+    <div className="w-full overflow-hidden rounded-[12px] border border-[#e6dfd0] bg-[#fbf8f0] shadow-[0_6px_20px_-12px_rgba(40,50,30,0.18)]">
+      {/* Thumbnail panel */}
+      {featured.imageUrl && (
+        <div className="relative aspect-[16/9] w-full overflow-hidden bg-[#cfd9c4]">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={featured.imageUrl}
+            alt=""
+            loading="lazy"
+            className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.02]"
+          />
+          {/* Verified badge — brand mint, the only spot mint is a
+              FILL on the cream side (matches the LIVE badges on the
+              hero cards). Communicates "this is a real, signed
+              record" at a glance. */}
+          <span className="absolute right-3 top-3 inline-flex items-center gap-1.5 rounded-full bg-background/95 px-2 py-0.5 text-[10px] font-medium uppercase tracking-[0.1em] text-brand-dark backdrop-blur-sm">
+            <svg
+              width="11"
+              height="11"
+              viewBox="0 0 24 24"
+              fill="none"
+              aria-hidden
+              className="text-brand"
+            >
+              <path
+                d="M9 12l2 2 4-4M12 22a10 10 0 110-20 10 10 0 010 20z"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+            Verified
+          </span>
+        </div>
+      )}
+
+      {/* Detail panel */}
+      <div className="px-3.5 py-3 sm:px-4">
+        <div className="flex items-baseline justify-between gap-3">
+          <h4
+            className="min-w-0 truncate font-garamond text-[16px] font-medium text-foreground sm:text-[17px]"
+            title={featured.title}
+          >
+            {featured.title}
+          </h4>
+          <span className="shrink-0 font-instrument italic text-[11px] tracking-[0.08em] text-foreground/45">
+            Bumicert
+          </span>
+        </div>
+        {featured.shortDescription && (
+          <p
+            className="mt-1.5 text-[12.5px] leading-[1.45] text-foreground/65 overflow-hidden"
+            style={{
+              display: "-webkit-box",
+              WebkitBoxOrient: "vertical",
+              WebkitLineClamp: 2,
+            }}
+          >
+            {featured.shortDescription}
+          </p>
+        )}
+        {/* Tiny meta row mirroring alpha.fund's detail-page header. */}
+        <div className="mt-3 flex items-center justify-between gap-2 border-t border-[#ece5d4] pt-2 text-[10.5px] uppercase tracking-[0.1em] text-foreground/45">
+          <span>org.hypercerts.claim.activity</span>
+          <span className="flex items-center gap-1">
+            ATProto signed
+            <svg
+              width="9"
+              height="9"
+              viewBox="0 0 24 24"
+              fill="none"
+              aria-hidden
+            >
+              <path
+                d="M9 7h11M9 12h11M9 17h11M4 7v.01M4 12v.01M4 17v.01"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+              />
+            </svg>
+          </span>
+        </div>
+      </div>
+    </div>
   );
 }
