@@ -204,6 +204,7 @@ type Messages = {
   "partners.statLabel": string; // "nature partners globally"
   "partners.bannerLabel": string;
   "partners.bannerCountLabel": string;
+  "partners.recordLabel": string;
   "partners.callsEyebrow": string;
   "partners.callsTitle": string;
   "partners.callsBody": string;
@@ -452,6 +453,7 @@ export const MESSAGES: Record<Locale, Messages> = {
     "partners.statLabel": "nature partners worldwide",
     "partners.bannerLabel": "Live from Green Globe",
     "partners.bannerCountLabel": "names",
+    "partners.recordLabel": "Green Globe live record",
     "partners.callsEyebrow": "Monthly community calls",
     "partners.callsTitle": "Hear the stewards behind the pins.",
     "partners.callsBody":
@@ -729,6 +731,7 @@ export const MESSAGES: Record<Locale, Messages> = {
     "partners.statLabel": "aliados de naturaleza en el mundo",
     "partners.bannerLabel": "En vivo desde Green Globe",
     "partners.bannerCountLabel": "nombres",
+    "partners.recordLabel": "Registro en vivo de Green Globe",
     "partners.callsEyebrow": "Llamadas comunitarias mensuales",
     "partners.callsTitle": "Escucha a los guardianes detrás de los puntos.",
     "partners.callsBody":
@@ -1007,6 +1010,7 @@ export const MESSAGES: Record<Locale, Messages> = {
     "partners.statLabel": "parceiros pela natureza no mundo",
     "partners.bannerLabel": "Ao vivo do Green Globe",
     "partners.bannerCountLabel": "nomes",
+    "partners.recordLabel": "Registro ao vivo do Green Globe",
     "partners.callsEyebrow": "Chamadas comunitárias mensais",
     "partners.callsTitle": "Ouça os guardiões por trás dos pontos.",
     "partners.callsBody":
@@ -1283,6 +1287,7 @@ export const MESSAGES: Record<Locale, Messages> = {
     "partners.statLabel": "washirika wa asili duniani",
     "partners.bannerLabel": "Moja kwa moja kutoka Green Globe",
     "partners.bannerCountLabel": "majina",
+    "partners.recordLabel": "Rekodi hai ya Green Globe",
     "partners.callsEyebrow": "Mikutano ya kila mwezi ya jamii",
     "partners.callsTitle": "Sikiliza walinzi walio nyuma ya alama hizi.",
     "partners.callsBody":
@@ -1561,6 +1566,7 @@ export const MESSAGES: Record<Locale, Messages> = {
     "partners.statLabel": "mitra alam di seluruh dunia",
     "partners.bannerLabel": "Langsung dari Green Globe",
     "partners.bannerCountLabel": "nama",
+    "partners.recordLabel": "Rekaman langsung Green Globe",
     "partners.callsEyebrow": "Panggilan komunitas bulanan",
     "partners.callsTitle": "Dengarkan para penjaga di balik titik-titik ini.",
     "partners.callsBody":

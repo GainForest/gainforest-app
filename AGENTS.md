@@ -413,15 +413,18 @@ segment with similarly useful caption text.
 `app/_components/Partners.tsx` must stay wired to `fetchProjectPins()`;
 that fetcher calls Green Globe's `list-organizations?info=true&mapPoint=true`
 route, which is backed by Hyperindex. Do **not** replace the live partner
-banner with made-up categories like "Indigenous Councils" or "Climate
-Funds". The banner in `PartnersClient.tsx` should render real organization /
-community names from `ProjectPin.name`, deduped at the UI boundary, and the
-right-side globe should use the same `pins` array so the names and map agree.
-If the upstream is down, the only acceptable fallback is the fallback already
-owned by `app/_lib/projects.ts`. The small "monthly community calls" card in
-this section links to `https://www.youtube.com/@gainforest/videos`, where the
-team publishes recurring community-call recordings and steward sessions; keep
-that as a subtle CTA rather than a separate fake data feed.
+roster with made-up categories like "Indigenous Councils" or "Climate
+Funds". The roster in `PartnersClient.tsx` should render real organization /
+community names from `ProjectPin.name` and country codes from
+`ProjectPin.country`, deduped at the UI boundary, and the right-side globe
+should use the same `pins` array so the names and map agree. The current
+Green Globe route does **not** expose cover images for organizations; do not
+invent project thumbnails in this section unless that upstream data becomes
+available. If the upstream is down, the only acceptable fallback is the
+fallback already owned by `app/_lib/projects.ts`. The small "monthly
+community calls" card links to `https://www.youtube.com/@gainforest/videos`,
+where the team publishes recurring community-call recordings and steward
+sessions; keep that as a subtle CTA rather than a separate fake data feed.
 
 ### Adding Awards & press / news carousel items
 

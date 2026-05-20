@@ -38,26 +38,36 @@ function uniqueCommunityNames(pins: ProjectPin[]): CommunityName[] {
   return names.sort((a, b) => a.name.localeCompare(b.name));
 }
 
-function CommunityNameRail({
+function CommunityRoster({
   names,
-  reverse = false,
+  recordLabel,
 }: {
   names: CommunityName[];
-  reverse?: boolean;
+  recordLabel: string;
 }) {
-  const loop = [...names, ...names, ...names];
-  if (loop.length === 0) return null;
+  if (names.length === 0) return null;
+  const visible = names.slice(0, 12);
 
   return (
-    <div className="partners-name-rail" data-reverse={reverse ? "true" : "false"}>
-      <div className="partners-name-track">
-        {loop.map((community, i) => (
-          <span key={`${community.name}-${community.country}-${i}`} className="partners-name-pill">
-            <span>{community.name}</span>
-            {community.country ? (
-              <span className="partners-name-country">{community.country}</span>
-            ) : null}
-          </span>
+    <div className="mt-10 rounded-[26px] border border-border-soft bg-background/55 p-3 sm:p-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2">
+        {visible.map((community, i) => (
+          <div
+            key={`${community.name}-${community.country}`}
+            className="group flex min-h-[62px] items-center justify-between gap-4 border-b border-border-soft px-3 py-3 last:border-b-0 sm:px-4 sm:[&:nth-last-child(-n+2)]:border-b-0 sm:[&:nth-child(odd)]:border-r"
+          >
+            <div className="min-w-0">
+              <p className="truncate font-garamond text-[20px] leading-[1.05] text-foreground sm:text-[21px]">
+                {community.name}
+              </p>
+              <p className="mt-1 text-[10px] uppercase tracking-[0.16em] text-foreground/38">
+                {recordLabel}
+              </p>
+            </div>
+            <span className="shrink-0 rounded-full border border-border-soft bg-[#efe8d8] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-foreground/55">
+              {community.country || String(i + 1).padStart(2, "0")}
+            </span>
+          </div>
         ))}
       </div>
     </div>
@@ -71,12 +81,10 @@ export function ClientPartners({ pins }: { pins: ProjectPin[] }) {
   const after = t("partners.heading.after").trim();
 
   const communityNames = uniqueCommunityNames(pins);
-  const marqueeNames =
+  const rosterNames =
     communityNames.length > 0
       ? communityNames
       : pins.map((pin) => ({ name: pin.name, country: pin.country }));
-  const firstRow = marqueeNames.filter((_, i) => i % 2 === 0);
-  const secondRow = marqueeNames.filter((_, i) => i % 2 === 1);
 
   // Responsive globe diameter — sized to comfortably fit inside the
   // right column without overflowing the section. The previous tier
@@ -130,18 +138,13 @@ export function ClientPartners({ pins }: { pins: ProjectPin[] }) {
               </span>
             </p>
 
-            <div className="mt-10 overflow-hidden rounded-[28px] border border-border-soft bg-[#efe8d8] py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.45)]">
-              <div className="mb-3 flex items-center justify-between gap-4 px-5 text-[10px] uppercase tracking-[0.18em] text-foreground/45">
-                <span>{t("partners.bannerLabel")}</span>
-                <span>
-                  {communityNames.length || pins.length} {t("partners.bannerCountLabel")}
-                </span>
-              </div>
-              <CommunityNameRail names={firstRow} />
-              {secondRow.length > 0 ? (
-                <CommunityNameRail names={secondRow} reverse />
-              ) : null}
+            <div className="mt-9 flex items-center justify-between gap-4 border-y border-border-soft py-3 text-[10px] uppercase tracking-[0.18em] text-foreground/45">
+              <span>{t("partners.bannerLabel")}</span>
+              <span>
+                {communityNames.length || pins.length} {t("partners.bannerCountLabel")}
+              </span>
             </div>
+            <CommunityRoster names={rosterNames} recordLabel={t("partners.recordLabel")} />
 
             <Link
               href="https://www.youtube.com/@gainforest/videos"
