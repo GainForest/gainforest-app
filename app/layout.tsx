@@ -37,7 +37,16 @@ const SITE_NAME = "GainForest";
 // and several chat apps cache OG images aggressively by URL, so changing
 // only the bytes behind `/og/landing.png` is not enough to refresh an
 // already-shared preview.
-const OG_IMAGE_PATH = "/og/landing-2026-05-19.png";
+//
+// The 2026-05-20 OG was rendered with headless Chrome from
+// `scripts/og-template.html` (cream half + real mangrove-fieldwork
+// photo half) so the share card matches the post-redesign hero
+// exactly — same curved brush stroke under "Open", same Cormorant
+// Garamond + Instrument Serif headline, same cream/sage palette. The
+// previous 2026-05-19 OG still used the pre-redesign straight-bar
+// underline and decorative leaves PNG, which clashed with the live
+// site after we stripped illustrated decoration.
+const OG_IMAGE_PATH = "/og/landing-2026-05-20.png";
 // Tagline mirrors the on-page hero (`hero.title.before` + `hero.title.italic`
 // in app/_lib/i18n.ts). Keep these two in sync — the tagline drives the
 // browser tab title, OG / Twitter card title, and JSON-LD WebPage name.
@@ -90,7 +99,7 @@ export const metadata: Metadata = {
         width: 1200,
         height: 630,
         alt:
-          "GainForest — Open tools for regenerative intelligence. The headline sits to the left of a satellite view of Earth dotted with bright mint-green project pins across the Amazon, central Africa, Madagascar, and Indonesia.",
+          "GainForest — Open tools for regenerative intelligence. The serif headline sits on a cream editorial background; on the right, three conservationists stand waist-deep in a mangrove channel doing fieldwork, one pointing into the canopy while the others record audio and gear in waterproof bags.",
         type: "image/png",
       },
     ],

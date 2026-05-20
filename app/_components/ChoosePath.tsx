@@ -43,13 +43,16 @@ export async function ChoosePath({
   // so it stays inside the page's cached server render.
   const pins = await fetchProjectPins();
 
-  // Single featured Bumicert for the right card. Prefer the first
-  // entry that has both a thumbnail and a non-trivial description so
-  // the card actually demonstrates the "structured record" idea.
-  const featured =
-    snapshot.bumicerts.find(
-      (b) => b.imageUrl && b.shortDescription && b.shortDescription.length > 20,
-    ) ?? snapshot.bumicerts.find((b) => b.imageUrl) ?? snapshot.bumicerts[0];
+  // Featured trio for the right card. We render three Pokemon-card
+  // style previews so visitors see Bumicerts as a *collection* of
+  // verifiable records, not a single sample. Prefer entries with
+  // a thumbnail AND a non-trivial description — those telegraph the
+  // "structured record with story + photo" idea the section is making.
+  const withImage = snapshot.bumicerts.filter(
+    (b) => b.imageUrl && b.shortDescription && b.shortDescription.length > 20,
+  );
+  const fallback = snapshot.bumicerts.filter((b) => b.imageUrl);
+  const featured = [...withImage, ...fallback].slice(0, 3);
 
   return (
     <section className="border-t border-border-soft">
@@ -121,23 +124,29 @@ export async function ChoosePath({
           </div>
 
           {/* RIGHT — What's a Bumicert? path.
-              Embeds a SINGLE real Bumicert (title, photo, description,
-              org, region, status) so visitors see what a Bumicert
-              actually IS — a structured record, not a random photo
-              gallery. */}
-          <Link
-            href={`${BUMICERTS_URL}/explore`}
-            target="_blank"
-            rel="noreferrer"
-            aria-label="Meet Bumicerts"
-            className="group flex h-full flex-col gap-6 rounded-[18px] border border-border-soft bg-background p-6 transition-all hover:-translate-y-0.5 hover:border-foreground/30 hover:shadow-[0_18px_40px_-24px_rgba(40,50,30,0.22)] sm:gap-8 sm:p-8 lg:p-10"
-          >
+              Embeds a fan of THREE real Bumicert cards (Pokemon-style
+              framing — outer holo ring, title plate, art window,
+              flavour text, bottom stat strip) so visitors read
+              Bumicerts as a collection of verifiable records, not
+              a single sample. Same un-wrapped structure as the left
+              Green Globe card: not a single outer Link, because each
+              fan card is its own link to its individual Bumicert
+              page on alpha.fund. The heading + the bottom CTA arrow
+              remain explicit nav targets. */}
+          <div className="group flex h-full flex-col gap-6 rounded-[18px] border border-border-soft bg-background p-6 transition-all hover:-translate-y-0.5 hover:border-foreground/30 hover:shadow-[0_18px_40px_-24px_rgba(40,50,30,0.22)] sm:gap-8 sm:p-8 lg:p-10">
             <div className="min-w-0">
               <span className="font-instrument italic text-[12px] uppercase tracking-[0.18em] text-foreground/45">
                 02 · Meet the certificate
               </span>
               <h3 className="mt-3 font-garamond text-[24px] lg:text-[28px] font-normal leading-[1.15] text-foreground">
-                What&apos;s a Bumicert?
+                <Link
+                  href={`${BUMICERTS_URL}/explore`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="transition-colors hover:text-primary"
+                >
+                  What&apos;s a Bumicert?
+                </Link>
               </h3>
               <p className="mt-3 max-w-[420px] text-[14.5px] leading-[1.55] text-foreground/70">
                 An open, verifiable record of nature impact — signed
@@ -147,13 +156,19 @@ export async function ChoosePath({
               </p>
             </div>
 
-            {featured && (
+            {featured.length > 0 && (
               <div className="flex flex-1 items-center">
-                <BumicertPreview featured={featured} />
+                <BumicertFan featured={featured} />
               </div>
             )}
 
-            <span className="inline-flex items-center gap-1.5 text-[14px] font-medium text-primary">
+            <Link
+              href={`${BUMICERTS_URL}/explore`}
+              target="_blank"
+              rel="noreferrer"
+              aria-label="Explore Bumicerts"
+              className="inline-flex items-center gap-1.5 text-[14px] font-medium text-primary self-start"
+            >
               <span className="border-b border-primary/40 pb-0.5 transition-colors group-hover:border-primary">
                 Explore Bumicerts
               </span>
@@ -163,8 +178,8 @@ export async function ChoosePath({
               >
                 →
               </span>
-            </span>
-          </Link>
+            </Link>
+          </div>
         </div>
       </div>
     </section>
@@ -287,39 +302,93 @@ function GlobePreview({ pinCount }: { pinCount: number }) {
   );
 }
 
-// Single-Bumicert preview card. Compact reproduction of the alpha.fund
-// detail page hero: title + region pill + thumbnail + description, with
-// a brand-mint "VERIFIED" badge so the visitor reads it as a record
-// (not just a photo).
-function BumicertPreview({
+// Three elegant Bumicert preview cards in a row. Editorial cream
+// cards with a thin border, photo on top, title + description in
+// the middle, ATProto metadata at the bottom — same look-and-feel
+// as the rest of the page, just compact. No gradient rings, no
+// rotation gimmicks — the team explicitly asked us to drop the
+// "Pokemon card" framing that an earlier iteration tried.
+//
+//   ┌─────────┐ ┌─────────┐ ┌─────────┐
+//   │  photo  │ │  photo  │ │  photo  │
+//   ├─────────┤ ├─────────┤ ├─────────┤
+//   │ title   │ │ title   │ │ title   │
+//   │ desc    │ │ desc    │ │ desc    │
+//   │ ⌗ ATP   │ │ ⌗ ATP   │ │ ⌗ ATP   │
+//   └─────────┘ └─────────┘ └─────────┘
+//
+// On narrow viewports the row becomes a horizontal snap-scroll
+// carousel so cards never collapse below their natural width.
+function BumicertFan({
   featured,
 }: {
-  featured: {
+  featured: ReadonlyArray<{
+    id: string;
     title: string;
     imageUrl: string | null;
     shortDescription: string | null;
+    href: string;
+  }>;
+}) {
+  return (
+    <ul
+      role="list"
+      className="-mx-3.5 flex w-[calc(100%+1.75rem)] snap-x snap-mandatory items-stretch gap-3 overflow-x-auto px-3.5 pb-2 sm:mx-0 sm:w-full sm:snap-none sm:gap-3.5 sm:overflow-x-visible sm:px-0"
+    >
+      {featured.map((b) => (
+        <li
+          key={b.id}
+          className="snap-center min-w-[150px] sm:min-w-0 sm:flex-1"
+        >
+          <BumicertCard b={b} />
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+// One Bumicert preview card. Same surface treatment as the
+// editorial cards everywhere else on the page — `bg-background`
+// (cream) inside, soft border, subtle hover lift, no gradient
+// gimmicks. Title gets up to 2 lines, description up to 2 lines,
+// and the ATProto/hypercerts metadata strip sits at the bottom in
+// the small tracking-wide uppercase treatment alpha.fund uses on
+// its own detail-page header.
+function BumicertCard({
+  b,
+}: {
+  b: {
+    id: string;
+    title: string;
+    imageUrl: string | null;
+    shortDescription: string | null;
+    href: string;
   };
 }) {
   return (
-    <div className="w-full overflow-hidden rounded-[12px] border border-[#e6dfd0] bg-[#fbf8f0] shadow-[0_6px_20px_-12px_rgba(40,50,30,0.18)]">
-      {/* Thumbnail panel */}
-      {featured.imageUrl && (
-        <div className="relative aspect-[16/9] w-full overflow-hidden bg-[#cfd9c4]">
+    <Link
+      href={b.href}
+      target="_blank"
+      rel="noreferrer"
+      className="group/card flex h-full flex-col overflow-hidden rounded-[10px] border border-[#e6dfd0] bg-background transition-all duration-200 hover:-translate-y-0.5 hover:border-foreground/25 hover:shadow-[0_10px_24px_-18px_rgba(40,50,30,0.30)]"
+    >
+      {/* Photo */}
+      {b.imageUrl && (
+        <div className="relative aspect-[4/3] w-full overflow-hidden bg-[#cfd9c4]">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src={featured.imageUrl}
+            src={b.imageUrl}
             alt=""
             loading="lazy"
-            className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.02]"
+            className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover/card:scale-[1.03]"
           />
-          {/* Verified badge — brand mint, the only spot mint is a
-              FILL on the cream side (matches the LIVE badges on the
-              hero cards). Communicates "this is a real, signed
-              record" at a glance. */}
-          <span className="absolute right-3 top-3 inline-flex items-center gap-1.5 rounded-full bg-background/95 px-2 py-0.5 text-[10px] font-medium uppercase tracking-[0.1em] text-brand-dark backdrop-blur-sm">
+          {/* Verified badge — same brand-mint accent as the LIVE
+              pill on the Green Globe preview. The only spot mint
+              is a FILL on this card. */}
+          <span className="absolute right-1.5 top-1.5 inline-flex items-center gap-1 rounded-full bg-background/95 px-1.5 py-0.5 text-[9px] font-medium uppercase tracking-[0.08em] text-brand-dark backdrop-blur-sm">
             <svg
-              width="11"
-              height="11"
+              width="9"
+              height="9"
               viewBox="0 0 24 24"
               fill="none"
               aria-hidden
@@ -328,7 +397,7 @@ function BumicertPreview({
               <path
                 d="M9 12l2 2 4-4M12 22a10 10 0 110-20 10 10 0 010 20z"
                 stroke="currentColor"
-                strokeWidth="2"
+                strokeWidth="2.5"
                 strokeLinecap="round"
                 strokeLinejoin="round"
               />
@@ -338,53 +407,55 @@ function BumicertPreview({
         </div>
       )}
 
-      {/* Detail panel */}
-      <div className="px-3.5 py-3 sm:px-4">
-        <div className="flex items-baseline justify-between gap-3">
-          <h4
-            className="min-w-0 truncate font-garamond text-[16px] font-medium text-foreground sm:text-[17px]"
-            title={featured.title}
-          >
-            {featured.title}
-          </h4>
-          <span className="shrink-0 font-instrument italic text-[11px] tracking-[0.08em] text-foreground/45">
-            Bumicert
-          </span>
-        </div>
-        {featured.shortDescription && (
+      {/* Body — title + description */}
+      <div className="flex flex-1 flex-col gap-1.5 px-2.5 pt-2 pb-2 sm:px-3 sm:pt-2.5">
+        <h4
+          className="font-garamond text-[13px] font-medium leading-[1.2] text-foreground overflow-hidden"
+          style={{
+            display: "-webkit-box",
+            WebkitBoxOrient: "vertical",
+            WebkitLineClamp: 2,
+          }}
+          title={b.title}
+        >
+          {b.title}
+        </h4>
+        {b.shortDescription && (
           <p
-            className="mt-1.5 text-[12.5px] leading-[1.45] text-foreground/65 overflow-hidden"
+            className="text-[11px] leading-[1.4] text-foreground/60 overflow-hidden"
             style={{
               display: "-webkit-box",
               WebkitBoxOrient: "vertical",
               WebkitLineClamp: 2,
             }}
           >
-            {featured.shortDescription}
+            {b.shortDescription}
           </p>
         )}
-        {/* Tiny meta row mirroring alpha.fund's detail-page header. */}
-        <div className="mt-3 flex items-center justify-between gap-2 border-t border-[#ece5d4] pt-2 text-[10.5px] uppercase tracking-[0.1em] text-foreground/45">
-          <span>org.hypercerts.claim.activity</span>
-          <span className="flex items-center gap-1">
-            ATProto signed
+        <div className="flex-1" />
+        {/* Provenance footer — mirrors alpha.fund's detail-page header */}
+        <div className="mt-1 border-t border-[#ece5d4] pt-1.5 text-[8.5px] uppercase tracking-[0.1em] text-foreground/45">
+          <div className="truncate">org.hypercerts.claim</div>
+          <div className="mt-0.5 flex items-center gap-1">
             <svg
-              width="9"
-              height="9"
+              width="8"
+              height="8"
               viewBox="0 0 24 24"
               fill="none"
               aria-hidden
+              className="shrink-0"
             >
               <path
-                d="M9 7h11M9 12h11M9 17h11M4 7v.01M4 12v.01M4 17v.01"
+                d="M13 2L4 14h7l-1 8 9-12h-7l1-8z"
                 stroke="currentColor"
                 strokeWidth="2"
-                strokeLinecap="round"
+                strokeLinejoin="round"
               />
             </svg>
-          </span>
+            <span>ATProto signed</span>
+          </div>
         </div>
       </div>
-    </div>
+    </Link>
   );
 }
