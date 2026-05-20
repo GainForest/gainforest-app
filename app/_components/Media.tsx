@@ -73,7 +73,7 @@ const ITEMS: ReadonlyArray<MediaItem> = [
     kind: "Award",
     date: "Nov 15, 2024",
     source: "XPRIZE",
-    headline: "GainForest is an XPRIZE Rainforest Grand Prize Winner",
+    headline: "GainForest is an XPRIZE Rainforest Winner",
     summary:
       "GainForest and partners are recognised through the XPRIZE Rainforest competition for technology that can reveal and protect biodiversity.",
     href: "https://www.xprize.org/competitions/rainforest",
@@ -128,7 +128,7 @@ export function Media() {
 
         <div className="relative mt-12">
           <ul
-            className="media-card-carousel -mx-6 flex snap-x snap-mandatory gap-4 overflow-x-auto overscroll-x-contain px-6 pb-3 sm:-mx-10 sm:px-10 lg:-mx-16 lg:gap-5 lg:px-16"
+            className="media-card-carousel -mx-6 flex snap-x snap-mandatory gap-4 overflow-x-auto overscroll-x-contain px-6 pt-4 pb-10 sm:-mx-10 sm:px-10 lg:-mx-16 lg:gap-5 lg:px-16"
             role="list"
             aria-label={t("media.heading")}
           >
