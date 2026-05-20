@@ -47,7 +47,16 @@ type CuratedSlug =
   | "xprize"
   | "swissnex"
   | "bcg"
-  | "mades";
+  | "mades"
+  | "ethalumni"
+  | "weforum"
+  | "ted"
+  | "folha"
+  | "edge"
+  | "goethe"
+  | "ssir"
+  | "microsoft"
+  | "swissre";
 
 type CuratedItem = {
   slug: CuratedSlug;
@@ -60,12 +69,11 @@ type CuratedItem = {
   image: string;
 };
 
-// Source provenance for each curated cover image lives in
-// `scripts/news-covers.sh` (download list). 10/12 are real article
-// thumbnails (YouTube maxresdefault / og:image / Substack cover) and
-// the two that the publisher couldn't expose (Klarna investor page,
-// MADES press page) are stylised covers generated via gpt-image-2 in
-// the GainForest editorial palette.
+// Source provenance for each curated cover image lives in the git
+// history. 15/21 are real article thumbnails (YouTube maxresdefault /
+// og:image / Substack cover) and the six that either couldn't expose
+// a fitting thumbnail (Klarna, MADES, BCG/Handelsblatt, WEF, Microsoft, Swiss Re) are stylised
+// covers generated via gpt-image-2 in the GainForest editorial palette.
 const CURATED_ITEMS: ReadonlyArray<CuratedItem> = [
   {
     slug: "simocracy",
@@ -131,6 +139,23 @@ const CURATED_ITEMS: ReadonlyArray<CuratedItem> = [
     href: "https://www.youtube.com/watch?v=9Ei-L_sBDSk",
     image: "/decor/news/maearth.jpg",
   },
+
+  {
+    slug: "ethalumni",
+    kind: "talk",
+    sortDate: "2024-12-12",
+    source: "ETH Alumni",
+    href: "https://www.youtube.com/watch?v=QJOV4zl2L_o",
+    image: "/decor/news/ethalumni.jpg",
+  },
+  {
+    slug: "folha",
+    kind: "press",
+    sortDate: "2024-07-29",
+    source: "Folha de S.Paulo",
+    href: "https://www1.folha.uol.com.br/colunas/redesocial/2024/07/competicao-internacional-acelera-pesquisa-da-biodiversidade-na-amazonia.shtml",
+    image: "/decor/news/folha.jpg",
+  },
   {
     slug: "xprize",
     kind: "award",
@@ -147,6 +172,23 @@ const CURATED_ITEMS: ReadonlyArray<CuratedItem> = [
     href: "https://swissnex.org/brazil/news/switzerland-and-amazonia-together-for-a-thriving-planet/",
     image: "/decor/news/swissnex.jpg",
   },
+
+  {
+    slug: "ssir",
+    kind: "feature",
+    sortDate: "2024-06-13",
+    source: "SSIR Brasil",
+    href: "https://ssir.com.br/a-guardia-virtual-das-florestas/",
+    image: "/decor/news/ssir.jpg",
+  },
+  {
+    slug: "goethe",
+    kind: "feature",
+    sortDate: "2023-01-01",
+    source: "Goethe-Institut",
+    href: "https://www.goethe.de/prj/ruy/en/nac/24523406.html",
+    image: "/decor/news/goethe.jpg",
+  },
   {
     slug: "bcg",
     kind: "award",
@@ -155,6 +197,15 @@ const CURATED_ITEMS: ReadonlyArray<CuratedItem> = [
     href: "https://www.handelsblatt.com/unternehmen/management/vordenker_innen/vordenker-ernaehrung-und-landwirtschaft-besser-essen-fuer-das-weltklima/28848280.html",
     image: "/decor/news/bcg.jpg",
   },
+
+  {
+    slug: "weforum",
+    kind: "talk",
+    sortDate: "2022-05-23",
+    source: "World Economic Forum",
+    href: "https://www.weforum.org/events/world-economic-forum-annual-meeting-2022/sessions/a-wake-up-call-from-nature",
+    image: "/decor/news/weforum.jpg",
+  },
   {
     slug: "mades",
     kind: "press",
@@ -162,6 +213,38 @@ const CURATED_ITEMS: ReadonlyArray<CuratedItem> = [
     source: "MADES Paraguay",
     href: "https://www.mades.gov.py/2022/04/12/mades-recibe-apoyo-para-fortalecimiento-de-areas-protegidas-en-el-chaco/",
     image: "/decor/news/mades.jpg",
+  },
+  {
+    slug: "ted",
+    kind: "talk",
+    sortDate: "2022-01-10",
+    source: "TEDx",
+    href: "https://www.ted.com/talks/david_dao_learning_from_nature_s_stewards_a_cryptocurrency_to_reverse_deforestation",
+    image: "/decor/news/ted.jpg",
+  },
+  {
+    slug: "edge",
+    kind: "press",
+    sortDate: "2021-12-12",
+    source: "The Edge Malaysia",
+    href: "https://theedgemalaysia.com/article/cover-story-climate-tech-and-way-forward",
+    image: "/decor/news/edge.jpg",
+  },
+  {
+    slug: "swissre",
+    kind: "talk",
+    sortDate: "2021-06-15",
+    source: "Swiss Re Institute",
+    href: "https://www.swissre.com/institute/conferences/algorithms-for-hope/using-artificial-intelligence.html",
+    image: "/decor/news/swissre.jpg",
+  },
+  {
+    slug: "microsoft",
+    kind: "press",
+    sortDate: "2019-05-28",
+    source: "Microsoft News",
+    href: "https://news.microsoft.com/europe/features/how-gainforest-microsoft-and-the-un-are-incentivizing-sustainability/",
+    image: "/decor/news/microsoft.jpg",
   },
 ];
 

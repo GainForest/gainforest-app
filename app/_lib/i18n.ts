@@ -252,6 +252,24 @@ type Messages = {
   "media.items.bcg.summary": string;
   "media.items.mades.headline": string;
   "media.items.mades.summary": string;
+  "media.items.ethalumni.headline": string;
+  "media.items.ethalumni.summary": string;
+  "media.items.weforum.headline": string;
+  "media.items.weforum.summary": string;
+  "media.items.ted.headline": string;
+  "media.items.ted.summary": string;
+  "media.items.folha.headline": string;
+  "media.items.folha.summary": string;
+  "media.items.edge.headline": string;
+  "media.items.edge.summary": string;
+  "media.items.goethe.headline": string;
+  "media.items.goethe.summary": string;
+  "media.items.ssir.headline": string;
+  "media.items.ssir.summary": string;
+  "media.items.microsoft.headline": string;
+  "media.items.microsoft.summary": string;
+  "media.items.swissre.headline": string;
+  "media.items.swissre.summary": string;
 
   // ── Supporters / Merci ────────────────────────────────────────
   "supporters.heading.before": string;
@@ -489,6 +507,42 @@ export const MESSAGES: Record<Locale, Messages> = {
     "media.items.mades.headline": "Paraguay announces partnership with GainForest",
     "media.items.mades.summary":
       "The Ministerio del Ambiente y Desarrollo Sostenible announces support to strengthen protected areas in the Chaco.",
+    "media.items.ethalumni.headline":
+      "ETH Alumni spotlights GainForest's climate AI journey",
+    "media.items.ethalumni.summary":
+      "The ETH Alumni interview traces GainForest's path from climate activism to XPRIZE-winning AI tools that support Indigenous and local communities.",
+    "media.items.weforum.headline":
+      "World Economic Forum: A Wake-Up Call from Nature",
+    "media.items.weforum.summary":
+      "At the 2022 Open Forum in Davos, the discussion connects deforestation, lifestyle choices, pandemic risk, and the urgent need to protect nature.",
+    "media.items.ted.headline":
+      "TEDx: learning from nature's stewards",
+    "media.items.ted.summary":
+      "The TEDx talk introduces GainForest's early vision for cryptocurrency, community incentives, and reversing deforestation with forest stewards.",
+    "media.items.folha.headline":
+      "Folha: international competition accelerates Amazon biodiversity research",
+    "media.items.folha.summary":
+      "Folha reports from the XPRIZE Rainforest finals in Manaus, where Tainá and field technologies help communities document Amazon biodiversity.",
+    "media.items.edge.headline":
+      "The Edge Malaysia: climate tech and the way forward",
+    "media.items.edge.summary":
+      "The Edge Malaysia profiles climate-tech pathways and includes GainForest's AI approach to conservation finance and transparent forest protection.",
+    "media.items.goethe.headline":
+      "Goethe-Institut: A Renaissance of Nature",
+    "media.items.goethe.summary":
+      "Goethe-Institut interviews GainForest on how modern technologies can restore trust, support conservation, and value nature more fairly.",
+    "media.items.ssir.headline":
+      "SSIR Brasil: the virtual guardian of forests",
+    "media.items.ssir.summary":
+      "Stanford Social Innovation Review Brasil features Taina, GainForest's chatbot for safeguarding knowledge, rights, and biodiversity in Amazon communities.",
+    "media.items.microsoft.headline":
+      "Microsoft: incentivizing sustainability with GainForest and the UN",
+    "media.items.microsoft.summary":
+      "Microsoft News highlights GainForest's early use of Azure, AI, blockchain, and UN collaboration to reward measurable forest protection in the Amazon.",
+    "media.items.swissre.headline":
+      "Swiss Re: using artificial intelligence for hope",
+    "media.items.swissre.summary":
+      "Swiss Re's Algorithms for Hope programme presents GainForest's AI and data-systems approach to monitoring ecosystems and financing restoration.",
     "supporters.heading.before": "Merci to our",
     "supporters.heading.italic": "supporters",
     "supporters.heading.after": ".",
@@ -721,6 +775,42 @@ export const MESSAGES: Record<Locale, Messages> = {
       "Paraguay anuncia su alianza con GainForest",
     "media.items.mades.summary":
       "El Ministerio del Ambiente y Desarrollo Sostenible anuncia apoyo para fortalecer las áreas protegidas del Chaco.",
+    "media.items.ethalumni.headline":
+      "ETH Alumni destaca el recorrido de IA climática de GainForest",
+    "media.items.ethalumni.summary":
+      "La entrevista de ETH Alumni sigue el camino de GainForest desde el activismo climático hasta herramientas de IA premiadas por XPRIZE que apoyan a comunidades indígenas y locales.",
+    "media.items.weforum.headline":
+      "Foro Económico Mundial: una llamada de atención de la naturaleza",
+    "media.items.weforum.summary":
+      "En el Open Forum 2022 de Davos, la conversación conecta deforestación, estilos de vida, riesgo pandémico y la urgencia de proteger la naturaleza.",
+    "media.items.ted.headline":
+      "TEDx: aprender de los guardianes de la naturaleza",
+    "media.items.ted.summary":
+      "La charla TEDx presenta la visión inicial de GainForest para usar criptomonedas, incentivos comunitarios y guardianes del bosque contra la deforestación.",
+    "media.items.folha.headline":
+      "Folha: competición internacional acelera la investigación amazónica",
+    "media.items.folha.summary":
+      "Folha informa desde la final de XPRIZE Rainforest en Manaus, donde Tainá y tecnologías de campo ayudan a comunidades a documentar la biodiversidad amazónica.",
+    "media.items.edge.headline":
+      "The Edge Malaysia: tecnología climática y el camino a seguir",
+    "media.items.edge.summary":
+      "The Edge Malaysia perfila rutas de tecnología climática e incluye el enfoque de IA de GainForest para financiamiento de conservación y protección forestal transparente.",
+    "media.items.goethe.headline":
+      "Goethe-Institut: un renacimiento de la naturaleza",
+    "media.items.goethe.summary":
+      "Goethe-Institut entrevista a GainForest sobre cómo las tecnologías modernas pueden restaurar confianza, apoyar la conservación y valorar la naturaleza con más justicia.",
+    "media.items.ssir.headline":
+      "SSIR Brasil: la guardiana virtual de los bosques",
+    "media.items.ssir.summary":
+      "Stanford Social Innovation Review Brasil presenta a Taina, el chatbot de GainForest para salvaguardar saberes, derechos y biodiversidad en comunidades amazónicas.",
+    "media.items.microsoft.headline":
+      "Microsoft: incentivar sostenibilidad con GainForest y la ONU",
+    "media.items.microsoft.summary":
+      "Microsoft News destaca el uso temprano de Azure, IA, blockchain y colaboración con la ONU para recompensar la protección forestal medible en la Amazonía.",
+    "media.items.swissre.headline":
+      "Swiss Re: usar inteligencia artificial para la esperanza",
+    "media.items.swissre.summary":
+      "El programa Algorithms for Hope de Swiss Re presenta el enfoque de IA y sistemas de datos de GainForest para monitorear ecosistemas y financiar restauración.",
     "supporters.heading.before": "Merci a quienes nos",
     "supporters.heading.italic": "apoyan",
     "supporters.heading.after": ".",
@@ -951,6 +1041,42 @@ export const MESSAGES: Record<Locale, Messages> = {
       "Paraguai anuncia parceria com a GainForest",
     "media.items.mades.summary":
       "O Ministerio del Ambiente y Desarrollo Sostenible anuncia apoio para fortalecer as áreas protegidas do Chaco.",
+    "media.items.ethalumni.headline":
+      "ETH Alumni destaca a jornada de IA climática da GainForest",
+    "media.items.ethalumni.summary":
+      "A entrevista da ETH Alumni acompanha o caminho da GainForest do ativismo climático a ferramentas de IA premiadas pelo XPRIZE que apoiam comunidades indígenas e locais.",
+    "media.items.weforum.headline":
+      "Fórum Econômico Mundial: um alerta da natureza",
+    "media.items.weforum.summary":
+      "No Open Forum 2022 em Davos, a conversa conecta desmatamento, estilos de vida, risco de pandemias e a urgência de proteger a natureza.",
+    "media.items.ted.headline":
+      "TEDx: aprender com os guardiões da natureza",
+    "media.items.ted.summary":
+      "A palestra TEDx apresenta a visão inicial da GainForest para usar criptomoedas, incentivos comunitários e guardiões da floresta contra o desmatamento.",
+    "media.items.folha.headline":
+      "Folha: competição internacional acelera pesquisa da biodiversidade na Amazônia",
+    "media.items.folha.summary":
+      "A Folha relata a final do XPRIZE Rainforest em Manaus, onde Tainá e tecnologias de campo ajudam comunidades a documentar a biodiversidade amazônica.",
+    "media.items.edge.headline":
+      "The Edge Malaysia: tecnologia climática e o caminho adiante",
+    "media.items.edge.summary":
+      "The Edge Malaysia apresenta caminhos de tecnologia climática e inclui a abordagem de IA da GainForest para finanças de conservação e proteção florestal transparente.",
+    "media.items.goethe.headline":
+      "Goethe-Institut: um renascimento da natureza",
+    "media.items.goethe.summary":
+      "O Goethe-Institut entrevista a GainForest sobre como tecnologias modernas podem restaurar confiança, apoiar conservação e valorar a natureza de forma mais justa.",
+    "media.items.ssir.headline":
+      "SSIR Brasil: a guardiã virtual das florestas",
+    "media.items.ssir.summary":
+      "A Stanford Social Innovation Review Brasil apresenta Taina, o chatbot da GainForest para salvaguardar saberes, direitos e biodiversidade em comunidades amazônicas.",
+    "media.items.microsoft.headline":
+      "Microsoft: incentivar sustentabilidade com GainForest e ONU",
+    "media.items.microsoft.summary":
+      "A Microsoft News destaca o uso inicial de Azure, IA, blockchain e colaboração com a ONU para recompensar proteção florestal mensurável na Amazônia.",
+    "media.items.swissre.headline":
+      "Swiss Re: usar inteligência artificial para esperança",
+    "media.items.swissre.summary":
+      "O programa Algorithms for Hope da Swiss Re apresenta a abordagem de IA e sistemas de dados da GainForest para monitorar ecossistemas e financiar restauração.",
     "supporters.heading.before": "Merci a quem",
     "supporters.heading.italic": "nos apoia",
     "supporters.heading.after": ".",
@@ -1183,6 +1309,42 @@ export const MESSAGES: Record<Locale, Messages> = {
       "Paraguay yatangaza ushirikiano na GainForest",
     "media.items.mades.summary":
       "Wizara ya Mazingira na Maendeleo Endelevu yatangaza msaada wa kuimarisha maeneo yaliyolindwa ya Chaco.",
+    "media.items.ethalumni.headline":
+      "ETH Alumni yaangazia safari ya GainForest ya AI kwa tabianchi",
+    "media.items.ethalumni.summary":
+      "Mahojiano ya ETH Alumni yanafuata safari ya GainForest kutoka harakati za tabianchi hadi zana za AI zilizoshinda XPRIZE zinazosaidia jamii za asili na za karibu.",
+    "media.items.weforum.headline":
+      "Jukwaa la Uchumi Duniani: onyo kutoka kwa asili",
+    "media.items.weforum.summary":
+      "Katika Open Forum 2022 huko Davos, mjadala unaunganisha ukataji misitu, mitindo ya maisha, hatari ya milipuko na uharaka wa kulinda asili.",
+    "media.items.ted.headline":
+      "TEDx: kujifunza kutoka kwa walinzi wa asili",
+    "media.items.ted.summary":
+      "Hotuba ya TEDx inaeleza maono ya awali ya GainForest kuhusu sarafu za kidijitali, motisha za jamii na walinzi wa misitu kupunguza ukataji miti.",
+    "media.items.folha.headline":
+      "Folha: shindano la kimataifa laharakisha utafiti wa bioanuwai Amazon",
+    "media.items.folha.summary":
+      "Folha inaripoti kutoka fainali za XPRIZE Rainforest huko Manaus, ambako Tainá na teknolojia za uwandani husaidia jamii kurekodi bioanuwai ya Amazon.",
+    "media.items.edge.headline":
+      "The Edge Malaysia: teknolojia ya tabianchi na njia mbele",
+    "media.items.edge.summary":
+      "The Edge Malaysia inaonyesha njia za teknolojia ya tabianchi na kujumuisha mkabala wa AI wa GainForest kwa fedha za uhifadhi na ulinzi wa misitu wenye uwazi.",
+    "media.items.goethe.headline":
+      "Goethe-Institut: ufufuo wa asili",
+    "media.items.goethe.summary":
+      "Goethe-Institut inaihoji GainForest kuhusu jinsi teknolojia za kisasa zinavyoweza kurejesha imani, kusaidia uhifadhi na kuthamini asili kwa haki zaidi.",
+    "media.items.ssir.headline":
+      "SSIR Brasil: mlinzi wa kidijitali wa misitu",
+    "media.items.ssir.summary":
+      "Stanford Social Innovation Review Brasil inaonyesha Taina, chatbot ya GainForest ya kulinda maarifa, haki na bioanuwai katika jamii za Amazon.",
+    "media.items.microsoft.headline":
+      "Microsoft: kuhamasisha uendelevu na GainForest na Umoja wa Mataifa",
+    "media.items.microsoft.summary":
+      "Microsoft News inaonyesha matumizi ya awali ya Azure, AI, blockchain na ushirikiano na UN kulipa ulinzi wa misitu unaopimika Amazon.",
+    "media.items.swissre.headline":
+      "Swiss Re: kutumia akili bandia kwa matumaini",
+    "media.items.swissre.summary":
+      "Mpango wa Algorithms for Hope wa Swiss Re unaonyesha mkabala wa AI na mifumo ya data wa GainForest kwa ufuatiliaji wa ikolojia na ufadhili wa urejeshaji.",
     "supporters.heading.before": "Merci kwa",
     "supporters.heading.italic": "wafadhili wetu",
     "supporters.heading.after": ".",
@@ -1413,6 +1575,42 @@ export const MESSAGES: Record<Locale, Messages> = {
       "Paraguay mengumumkan kemitraan dengan GainForest",
     "media.items.mades.summary":
       "Ministerio del Ambiente y Desarrollo Sostenible mengumumkan dukungan untuk memperkuat kawasan lindung di Chaco.",
+    "media.items.ethalumni.headline":
+      "ETH Alumni menyorot perjalanan AI iklim GainForest",
+    "media.items.ethalumni.summary":
+      "Wawancara ETH Alumni mengikuti perjalanan GainForest dari aktivisme iklim hingga alat AI pemenang XPRIZE yang mendukung komunitas adat dan lokal.",
+    "media.items.weforum.headline":
+      "Forum Ekonomi Dunia: panggilan bangun dari alam",
+    "media.items.weforum.summary":
+      "Di Open Forum 2022 di Davos, diskusi menghubungkan deforestasi, pilihan gaya hidup, risiko pandemi, dan kebutuhan mendesak melindungi alam.",
+    "media.items.ted.headline":
+      "TEDx: belajar dari penjaga alam",
+    "media.items.ted.summary":
+      "Talk TEDx memperkenalkan visi awal GainForest tentang mata uang kripto, insentif komunitas, dan membalik deforestasi bersama penjaga hutan.",
+    "media.items.folha.headline":
+      "Folha: kompetisi internasional mempercepat riset biodiversitas Amazon",
+    "media.items.folha.summary":
+      "Folha melaporkan final XPRIZE Rainforest di Manaus, tempat Tainá dan teknologi lapangan membantu komunitas mendokumentasikan biodiversitas Amazon.",
+    "media.items.edge.headline":
+      "The Edge Malaysia: teknologi iklim dan jalan ke depan",
+    "media.items.edge.summary":
+      "The Edge Malaysia memetakan jalur teknologi iklim dan memuat pendekatan AI GainForest untuk pembiayaan konservasi dan perlindungan hutan yang transparan.",
+    "media.items.goethe.headline":
+      "Goethe-Institut: kebangkitan alam",
+    "media.items.goethe.summary":
+      "Goethe-Institut mewawancarai GainForest tentang bagaimana teknologi modern dapat memulihkan kepercayaan, mendukung konservasi, dan menilai alam lebih adil.",
+    "media.items.ssir.headline":
+      "SSIR Brasil: penjaga virtual hutan",
+    "media.items.ssir.summary":
+      "Stanford Social Innovation Review Brasil menampilkan Taina, chatbot GainForest untuk menjaga pengetahuan, hak, dan biodiversitas komunitas Amazon.",
+    "media.items.microsoft.headline":
+      "Microsoft: memberi insentif keberlanjutan bersama GainForest dan PBB",
+    "media.items.microsoft.summary":
+      "Microsoft News menyorot penggunaan awal Azure, AI, blockchain, dan kolaborasi PBB untuk memberi imbalan atas perlindungan hutan terukur di Amazon.",
+    "media.items.swissre.headline":
+      "Swiss Re: menggunakan kecerdasan buatan untuk harapan",
+    "media.items.swissre.summary":
+      "Program Algorithms for Hope dari Swiss Re mempresentasikan pendekatan AI dan sistem data GainForest untuk memantau ekosistem dan mendanai restorasi.",
     "supporters.heading.before": "Merci untuk",
     "supporters.heading.italic": "para pendukung",
     "supporters.heading.after": ".",
