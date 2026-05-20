@@ -37,7 +37,7 @@ export const revalidate = 900;
 //   2.  AwardsStrip ................. credibility band (XPRIZE etc.)
 //   3.  ChoosePath .................. pick a tool surface
 //   4.  DataCommons ................. WHY (1% biodiversity claim) — ink
-//   5.  EquitableAI ................. open research pillars
+//   5.  EquitableAI ................. "Local-first AI" research pillars
 //   6.  TainaFeature ................ Indigenous AI Assistant
 //   7.  IWantTo ..................... visitor-routed paths
 //   8.  HowItWorks .................. four-step explainer

@@ -135,7 +135,10 @@ type Messages = {
   "dataCommons.stat.value": string; // visible big-number
   "dataCommons.stat.label": string;
 
-  // ── Equitable AI pillars (3-up: AI Assistants, Bioacoustics, Remote Sensing) ─
+  // ── Local-first AI pillars (3-up: AI Assistants, Bioacoustics, Remote Sensing) ─
+  // Key prefix is `equitableAI.*` for historical reasons — the section
+  // was renamed from "Equitable AI" to "Local-first AI" in the copy,
+  // but renaming the keys would churn every translation file.
   "equitableAI.eyebrow": string;
   "equitableAI.heading.before": string;
   "equitableAI.heading.italic": string;
@@ -298,18 +301,18 @@ export const MESSAGES: Record<Locale, Messages> = {
     "dataCommons.heading.italic": "biodiversity",
     "dataCommons.heading.after": ".",
     "dataCommons.body":
-      "Only 1% of global biodiversity data comes from the world's largest rainforests. We're changing this by turning local communities into Indigenous scientists \u2014 and helping organisations build equitable data products that can preserve nature.",
+      "Only 1% of global biodiversity data comes from the world's largest rainforests. We're changing this by turning local communities into Indigenous scientists — and helping organisations build equitable data products that can preserve nature.",
     "dataCommons.stat.value": "1%",
     "dataCommons.stat.label": "of biodiversity data comes from the largest rainforests",
-    "equitableAI.eyebrow": "Equitable AI",
-    "equitableAI.heading.before": "We build equitable",
+    "equitableAI.eyebrow": "Local-first AI",
+    "equitableAI.heading.before": "We build local-first",
     "equitableAI.heading.italic": "technology",
     "equitableAI.heading.after": "and AI",
     "equitableAI.subheading":
       "Three open research pillars that turn community-collected data into tools the community keeps.",
     "equitableAI.pillar1.title": "AI Assistants",
     "equitableAI.pillar1.body":
-      "Storyteller AI companions that help communities archive and share knowledge in their own language \u2014 starting with Taina, co-designed in Greater Manaus.",
+      "Storyteller AI companions that help communities archive and share knowledge in their own language — starting with Taina, co-designed in Greater Manaus.",
     "equitableAI.pillar2.title": "Bioacoustics",
     "equitableAI.pillar2.body":
       "Passive listening stations in the canopy. Open species classifiers turn dawn choruses into living, queryable biodiversity records.",
@@ -321,7 +324,7 @@ export const MESSAGES: Record<Locale, Messages> = {
     "tainaFeature.heading.italic": "Taina",
     "tainaFeature.heading.after": ", our community AI.",
     "tainaFeature.body":
-      "Taina guides local and Indigenous communities through storytelling on how to archive and share knowledge. The data she collects is self-hosted or governed through a community-elected GainForest Data Council \u2014 never extracted.",
+      "Taina guides local and Indigenous communities through storytelling on how to archive and share knowledge. The data she collects is self-hosted or governed through a community-elected GainForest Data Council — never extracted.",
     "tainaFeature.cta": "Say hi to Taina",
     "research.eyebrow": "Research",
     "research.heading.before": "We research and",
@@ -335,7 +338,7 @@ export const MESSAGES: Record<Locale, Messages> = {
     "natureGuild.heading.italic": "Nature Guild",
     "natureGuild.heading.after": ".",
     "natureGuild.body":
-      "Learning together and shaping new ways to govern nature stewardship \u2014 the Guild is a rotating circle of community scientists, ecologists, and field leads who steer GainForest's research priorities.",
+      "Learning together and shaping new ways to govern nature stewardship — the Guild is a rotating circle of community scientists, ecologists, and field leads who steer GainForest's research priorities.",
     "partners.eyebrow": "Partners",
     "partners.heading.before": "Working with nature stewards",
     "partners.heading.italic": "globally",
@@ -347,7 +350,7 @@ export const MESSAGES: Record<Locale, Messages> = {
     "impact.eyebrow": "Impact report",
     "impact.heading": "Read our 3rd annual impact report.",
     "impact.body":
-      "The 24/25 report unpacks our global mission, the year's grants, community-led research highlights, and the financials \u2014 audited and open.",
+      "The 24/25 report unpacks our global mission, the year's grants, community-led research highlights, and the financials — audited and open.",
     "impact.cta": "Read the report",
     "media.eyebrow": "Selected media",
     "media.heading": "Awards & press.",
@@ -364,7 +367,7 @@ export const MESSAGES: Record<Locale, Messages> = {
     "footer.legal.work": "Work with us",
     "footer.legal.support": "Support us",
     "footer.legal.bank":
-      "Bank: UBS \u00b7 IBAN (CHF): CH34 0023 0230 7349 7401 C \u00b7 IBAN (EUR): CH88 0023 0230 7349 7460 R \u00b7 BIC: UBSWCHZH80A",
+      "Bank: UBS · IBAN (CHF): CH34 0023 0230 7349 7401 C · IBAN (EUR): CH88 0023 0230 7349 7460 R · BIC: UBSWCHZH80A",
   },
 
   // ── Spanish ──────────────────────────────────────────────────────
@@ -457,15 +460,15 @@ export const MESSAGES: Record<Locale, Messages> = {
       "Solo el 1% de los datos globales de biodiversidad proviene de las mayores selvas del mundo. Estamos cambiando esto convirtiendo a las comunidades locales en científicas indígenas, y ayudando a las organizaciones a construir productos de datos equitativos que preserven la naturaleza.",
     "dataCommons.stat.value": "1%",
     "dataCommons.stat.label": "de los datos de biodiversidad viene de las mayores selvas",
-    "equitableAI.eyebrow": "IA equitativa",
+    "equitableAI.eyebrow": "IA local-first",
     "equitableAI.heading.before": "Construimos",
     "equitableAI.heading.italic": "tecnología",
-    "equitableAI.heading.after": "e IA equitativas",
+    "equitableAI.heading.after": "e IA local-first",
     "equitableAI.subheading":
       "Tres pilares de investigación abierta que convierten los datos comunitarios en herramientas que la comunidad conserva.",
     "equitableAI.pillar1.title": "Asistentes de IA",
     "equitableAI.pillar1.body":
-      "Compañeras de IA narradoras que ayudan a las comunidades a archivar y compartir conocimiento en su propio idioma \u2014 empezando por Taina, co-diseñada en el Gran Manaus.",
+      "Compañeras de IA narradoras que ayudan a las comunidades a archivar y compartir conocimiento en su propio idioma — empezando por Taina, co-diseñada en el Gran Manaus.",
     "equitableAI.pillar2.title": "Bioacústica",
     "equitableAI.pillar2.body":
       "Estaciones de escucha pasiva en el dosel. Clasificadores de especies abiertos transforman los coros del amanecer en registros vivos de biodiversidad.",
@@ -477,7 +480,7 @@ export const MESSAGES: Record<Locale, Messages> = {
     "tainaFeature.heading.italic": "Taina",
     "tainaFeature.heading.after": ", nuestra IA comunitaria.",
     "tainaFeature.body":
-      "Taina acompaña a comunidades locales e indígenas a archivar y compartir conocimiento a través del relato. Los datos que recoge se autoalojan o se gobiernan vía un Consejo de Datos GainForest elegido por la comunidad \u2014 nunca se extraen.",
+      "Taina acompaña a comunidades locales e indígenas a archivar y compartir conocimiento a través del relato. Los datos que recoge se autoalojan o se gobiernan vía un Consejo de Datos GainForest elegido por la comunidad — nunca se extraen.",
     "tainaFeature.cta": "Saluda a Taina",
     "research.eyebrow": "Investigación",
     "research.heading.before": "Investigamos e",
@@ -491,7 +494,7 @@ export const MESSAGES: Record<Locale, Messages> = {
     "natureGuild.heading.italic": "Gremio de la Naturaleza",
     "natureGuild.heading.after": ".",
     "natureGuild.body":
-      "Aprendiendo juntas y dando forma a nuevas maneras de gobernar la custodia de la naturaleza \u2014 el Gremio es un círculo rotativo de científicas comunitarias, ecólogas y referentes de campo que orientan nuestras prioridades de investigación.",
+      "Aprendiendo juntas y dando forma a nuevas maneras de gobernar la custodia de la naturaleza — el Gremio es un círculo rotativo de científicas comunitarias, ecólogas y referentes de campo que orientan nuestras prioridades de investigación.",
     "partners.eyebrow": "Aliados",
     "partners.heading.before": "Trabajando con guardianes de la naturaleza",
     "partners.heading.italic": "a nivel global",
@@ -503,7 +506,7 @@ export const MESSAGES: Record<Locale, Messages> = {
     "impact.eyebrow": "Reporte de impacto",
     "impact.heading": "Lee nuestro 3er reporte anual de impacto.",
     "impact.body":
-      "El reporte 24/25 abre nuestra misión global, los aportes del año, los hitos de investigación comunitaria y los números \u2014 auditados y abiertos.",
+      "El reporte 24/25 abre nuestra misión global, los aportes del año, los hitos de investigación comunitaria y los números — auditados y abiertos.",
     "impact.cta": "Leer el reporte",
     "media.eyebrow": "Medios seleccionados",
     "media.heading": "Premios y prensa.",
@@ -520,7 +523,7 @@ export const MESSAGES: Record<Locale, Messages> = {
     "footer.legal.work": "Trabaja con nosotras",
     "footer.legal.support": "Apoyanos",
     "footer.legal.bank":
-      "Banco: UBS \u00b7 IBAN (CHF): CH34 0023 0230 7349 7401 C \u00b7 IBAN (EUR): CH88 0023 0230 7349 7460 R \u00b7 BIC: UBSWCHZH80A",
+      "Banco: UBS · IBAN (CHF): CH34 0023 0230 7349 7401 C · IBAN (EUR): CH88 0023 0230 7349 7460 R · BIC: UBSWCHZH80A",
   },
 
   // ── Portuguese ───────────────────────────────────────────────────
@@ -613,15 +616,15 @@ export const MESSAGES: Record<Locale, Messages> = {
       "Apenas 1% dos dados globais de biodiversidade vem das maiores florestas tropicais do mundo. Estamos mudando isso transformando comunidades locais em cientistas indígenas, e apoiando organizações a construir produtos de dados equitativos que preservam a natureza.",
     "dataCommons.stat.value": "1%",
     "dataCommons.stat.label": "dos dados de biodiversidade vem das maiores florestas",
-    "equitableAI.eyebrow": "IA equitativa",
+    "equitableAI.eyebrow": "IA local-first",
     "equitableAI.heading.before": "Construímos",
     "equitableAI.heading.italic": "tecnologia",
-    "equitableAI.heading.after": "e IA equitativas",
+    "equitableAI.heading.after": "e IA local-first",
     "equitableAI.subheading":
       "Três pilares de pesquisa aberta que transformam dados comunitários em ferramentas que a comunidade mantém.",
     "equitableAI.pillar1.title": "Assistentes de IA",
     "equitableAI.pillar1.body":
-      "Companheiras de IA contadoras de histórias que ajudam comunidades a arquivar e compartilhar conhecimento na própria língua \u2014 começando pela Taina, co-criada na Grande Manaus.",
+      "Companheiras de IA contadoras de histórias que ajudam comunidades a arquivar e compartilhar conhecimento na própria língua — começando pela Taina, co-criada na Grande Manaus.",
     "equitableAI.pillar2.title": "Bioacústica",
     "equitableAI.pillar2.body":
       "Estações de escuta passiva no dossel. Classificadores de espécies abertos transformam os coros do amanhecer em registros vivos de biodiversidade.",
@@ -633,7 +636,7 @@ export const MESSAGES: Record<Locale, Messages> = {
     "tainaFeature.heading.italic": "Taina",
     "tainaFeature.heading.after": ", nossa IA comunitária.",
     "tainaFeature.body":
-      "A Taina acompanha comunidades locais e indígenas a arquivar e compartilhar conhecimento através do storytelling. Os dados que ela coleta são auto-hospedados ou governados por um Conselho de Dados GainForest eleito pela comunidade \u2014 nunca extraídos.",
+      "A Taina acompanha comunidades locais e indígenas a arquivar e compartilhar conhecimento através do storytelling. Os dados que ela coleta são auto-hospedados ou governados por um Conselho de Dados GainForest eleito pela comunidade — nunca extraídos.",
     "tainaFeature.cta": "Diga oi para a Taina",
     "research.eyebrow": "Pesquisa",
     "research.heading.before": "Pesquisamos e",
@@ -647,7 +650,7 @@ export const MESSAGES: Record<Locale, Messages> = {
     "natureGuild.heading.italic": "Conselho da Natureza",
     "natureGuild.heading.after": ".",
     "natureGuild.body":
-      "Aprendendo juntas e desenhando novas formas de governar a guarda da natureza \u2014 o Conselho é um círculo rotativo de cientistas comunitárias, ecólogas e líderes de campo que orientam nossas prioridades de pesquisa.",
+      "Aprendendo juntas e desenhando novas formas de governar a guarda da natureza — o Conselho é um círculo rotativo de cientistas comunitárias, ecólogas e líderes de campo que orientam nossas prioridades de pesquisa.",
     "partners.eyebrow": "Parceiros",
     "partners.heading.before": "Trabalhando com guardiães da natureza",
     "partners.heading.italic": "pelo mundo",
@@ -659,7 +662,7 @@ export const MESSAGES: Record<Locale, Messages> = {
     "impact.eyebrow": "Relatório de impacto",
     "impact.heading": "Leia nosso 3º relatório anual de impacto.",
     "impact.body":
-      "O relatório 24/25 abre nossa missão global, os aportes do ano, os destaques de pesquisa comunitária e os números \u2014 auditados e abertos.",
+      "O relatório 24/25 abre nossa missão global, os aportes do ano, os destaques de pesquisa comunitária e os números — auditados e abertos.",
     "impact.cta": "Ler o relatório",
     "media.eyebrow": "Mídia selecionada",
     "media.heading": "Prêmios e imprensa.",
@@ -676,7 +679,7 @@ export const MESSAGES: Record<Locale, Messages> = {
     "footer.legal.work": "Trabalhe com a gente",
     "footer.legal.support": "Apoie",
     "footer.legal.bank":
-      "Banco: UBS \u00b7 IBAN (CHF): CH34 0023 0230 7349 7401 C \u00b7 IBAN (EUR): CH88 0023 0230 7349 7460 R \u00b7 BIC: UBSWCHZH80A",
+      "Banco: UBS · IBAN (CHF): CH34 0023 0230 7349 7401 C · IBAN (EUR): CH88 0023 0230 7349 7460 R · BIC: UBSWCHZH80A",
   },
 
   // ── Swahili ──────────────────────────────────────────────────────
@@ -769,15 +772,15 @@ export const MESSAGES: Record<Locale, Messages> = {
       "Asilimia 1 tu ya data ya bioanuwai duniani inatoka kwenye misitu mikubwa zaidi ya mvua. Tunabadilisha hili kwa kuwafanya wanajamii kuwa wanasayansi wa Kiasili, na kusaidia mashirika kujenga bidhaa za data zenye usawa zinazohifadhi asili.",
     "dataCommons.stat.value": "1%",
     "dataCommons.stat.label": "ya data ya bioanuwai inatoka kwenye misitu mikubwa",
-    "equitableAI.eyebrow": "AI yenye usawa",
+    "equitableAI.eyebrow": "AI ya local-first",
     "equitableAI.heading.before": "Tunajenga",
     "equitableAI.heading.italic": "teknolojia",
-    "equitableAI.heading.after": "na AI yenye usawa",
+    "equitableAI.heading.after": "na AI ya local-first",
     "equitableAI.subheading":
       "Nguzo tatu za utafiti wazi zinazogeuza data ya jamii kuwa zana ambazo jamii inazimiliki.",
     "equitableAI.pillar1.title": "Wasaidizi wa AI",
     "equitableAI.pillar1.body":
-      "Wasaidizi wa AI wanaosimulia hadithi wanaowasaidia jamii kuhifadhi na kushiriki maarifa katika lugha yao \u2014 kuanzia na Taina, aliyebuniwa pamoja huko Manaus.",
+      "Wasaidizi wa AI wanaosimulia hadithi wanaowasaidia jamii kuhifadhi na kushiriki maarifa katika lugha yao — kuanzia na Taina, aliyebuniwa pamoja huko Manaus.",
     "equitableAI.pillar2.title": "Bioakustiki",
     "equitableAI.pillar2.body":
       "Vituo vya kusikiliza vya kimya mlimani. Visajili huria vya spishi vinabadilisha kwaya za alfajiri kuwa rekodi hai za bioanuwai.",
@@ -789,7 +792,7 @@ export const MESSAGES: Record<Locale, Messages> = {
     "tainaFeature.heading.italic": "Taina",
     "tainaFeature.heading.after": ", AI wetu wa kijamii.",
     "tainaFeature.body":
-      "Taina anaongoza jamii za kienyeji na za Kiasili kuhifadhi na kushiriki maarifa kwa kusimulia hadithi. Data anayoikusanya inahifadhiwa nyumbani au kusimamiwa na Baraza la Data la GainForest lililochaguliwa na jamii \u2014 haitolewi kamwe.",
+      "Taina anaongoza jamii za kienyeji na za Kiasili kuhifadhi na kushiriki maarifa kwa kusimulia hadithi. Data anayoikusanya inahifadhiwa nyumbani au kusimamiwa na Baraza la Data la GainForest lililochaguliwa na jamii — haitolewi kamwe.",
     "tainaFeature.cta": "Mkaribishe Taina",
     "research.eyebrow": "Utafiti",
     "research.heading.before": "Tunafanya utafiti na",
@@ -803,7 +806,7 @@ export const MESSAGES: Record<Locale, Messages> = {
     "natureGuild.heading.italic": "Baraza la Asili",
     "natureGuild.heading.after": ".",
     "natureGuild.body":
-      "Tukijifunza pamoja na kuunda njia mpya za kusimamia utunzaji wa asili \u2014 Baraza ni mzunguko wa wanasayansi wa jamii, wanaikolojia na viongozi wa eneo wanaoongoza vipaumbele vyetu vya utafiti.",
+      "Tukijifunza pamoja na kuunda njia mpya za kusimamia utunzaji wa asili — Baraza ni mzunguko wa wanasayansi wa jamii, wanaikolojia na viongozi wa eneo wanaoongoza vipaumbele vyetu vya utafiti.",
     "partners.eyebrow": "Washirika",
     "partners.heading.before": "Tunafanya kazi na walinzi wa asili",
     "partners.heading.italic": "duniani kote",
@@ -815,7 +818,7 @@ export const MESSAGES: Record<Locale, Messages> = {
     "impact.eyebrow": "Ripoti ya athari",
     "impact.heading": "Soma ripoti yetu ya 3 ya kila mwaka ya athari.",
     "impact.body":
-      "Ripoti ya 24/25 inafichua dhamira yetu ya kimataifa, ruzuku za mwaka, vidokezo vya utafiti wa kijamii na takwimu \u2014 zilizokaguliwa na za wazi.",
+      "Ripoti ya 24/25 inafichua dhamira yetu ya kimataifa, ruzuku za mwaka, vidokezo vya utafiti wa kijamii na takwimu — zilizokaguliwa na za wazi.",
     "impact.cta": "Soma ripoti",
     "media.eyebrow": "Vyombo vya habari",
     "media.heading": "Tuzo na vyombo vya habari.",
@@ -832,7 +835,7 @@ export const MESSAGES: Record<Locale, Messages> = {
     "footer.legal.work": "Fanya kazi nasi",
     "footer.legal.support": "Tuunge mkono",
     "footer.legal.bank":
-      "Benki: UBS \u00b7 IBAN (CHF): CH34 0023 0230 7349 7401 C \u00b7 IBAN (EUR): CH88 0023 0230 7349 7460 R \u00b7 BIC: UBSWCHZH80A",
+      "Benki: UBS · IBAN (CHF): CH34 0023 0230 7349 7401 C · IBAN (EUR): CH88 0023 0230 7349 7460 R · BIC: UBSWCHZH80A",
   },
 
   // ── Indonesian ───────────────────────────────────────────────────
@@ -925,15 +928,15 @@ export const MESSAGES: Record<Locale, Messages> = {
       "Hanya 1% data keanekaragaman hayati global yang berasal dari hutan hujan terbesar di dunia. Kami mengubah ini dengan membantu komunitas lokal menjadi ilmuwan adat, dan mendukung organisasi membangun produk data yang adil untuk melindungi alam.",
     "dataCommons.stat.value": "1%",
     "dataCommons.stat.label": "data keanekaragaman hayati berasal dari hutan hujan terbesar",
-    "equitableAI.eyebrow": "AI yang adil",
+    "equitableAI.eyebrow": "AI local-first",
     "equitableAI.heading.before": "Kami membangun",
     "equitableAI.heading.italic": "teknologi",
-    "equitableAI.heading.after": "dan AI yang adil",
+    "equitableAI.heading.after": "dan AI local-first",
     "equitableAI.subheading":
       "Tiga pilar riset terbuka yang mengubah data dari komunitas menjadi alat yang dimiliki komunitas.",
     "equitableAI.pillar1.title": "Asisten AI",
     "equitableAI.pillar1.body":
-      "Pendamping AI berbasis cerita yang membantu komunitas mengarsipkan dan berbagi pengetahuan dalam bahasa mereka sendiri \u2014 dimulai dari Taina, yang dirancang bersama di Greater Manaus.",
+      "Pendamping AI berbasis cerita yang membantu komunitas mengarsipkan dan berbagi pengetahuan dalam bahasa mereka sendiri — dimulai dari Taina, yang dirancang bersama di Greater Manaus.",
     "equitableAI.pillar2.title": "Bioakustik",
     "equitableAI.pillar2.body":
       "Stasiun pendengar pasif di kanopi. Pengklasifikasi spesies terbuka mengubah paduan suara fajar menjadi rekaman keanekaragaman hayati yang hidup.",
@@ -945,7 +948,7 @@ export const MESSAGES: Record<Locale, Messages> = {
     "tainaFeature.heading.italic": "Taina",
     "tainaFeature.heading.after": ", AI komunitas kami.",
     "tainaFeature.body":
-      "Taina memandu komunitas lokal dan adat untuk mengarsipkan dan berbagi pengetahuan lewat bercerita. Data yang ia kumpulkan dapat dihos sendiri atau dikelola oleh Dewan Data GainForest yang dipilih komunitas \u2014 tidak pernah diekstraksi.",
+      "Taina memandu komunitas lokal dan adat untuk mengarsipkan dan berbagi pengetahuan lewat bercerita. Data yang ia kumpulkan dapat dihos sendiri atau dikelola oleh Dewan Data GainForest yang dipilih komunitas — tidak pernah diekstraksi.",
     "tainaFeature.cta": "Sapa Taina",
     "research.eyebrow": "Riset",
     "research.heading.before": "Kami meneliti dan",
@@ -959,7 +962,7 @@ export const MESSAGES: Record<Locale, Messages> = {
     "natureGuild.heading.italic": "Dewan Alam",
     "natureGuild.heading.after": ".",
     "natureGuild.body":
-      "Belajar bersama dan membentuk cara baru menata kepedulian terhadap alam \u2014 Dewan adalah lingkaran berputar yang berisi ilmuwan komunitas, ekolog, dan koordinator lapangan yang mengarahkan prioritas riset kami.",
+      "Belajar bersama dan membentuk cara baru menata kepedulian terhadap alam — Dewan adalah lingkaran berputar yang berisi ilmuwan komunitas, ekolog, dan koordinator lapangan yang mengarahkan prioritas riset kami.",
     "partners.eyebrow": "Mitra",
     "partners.heading.before": "Bekerja bersama penjaga alam",
     "partners.heading.italic": "di seluruh dunia",
@@ -971,7 +974,7 @@ export const MESSAGES: Record<Locale, Messages> = {
     "impact.eyebrow": "Laporan dampak",
     "impact.heading": "Baca laporan dampak tahunan ke-3 kami.",
     "impact.body":
-      "Laporan 24/25 membuka misi global kami, hibah tahunan, sorotan riset komunitas, dan angka-angka \u2014 telah diaudit dan terbuka.",
+      "Laporan 24/25 membuka misi global kami, hibah tahunan, sorotan riset komunitas, dan angka-angka — telah diaudit dan terbuka.",
     "impact.cta": "Baca laporannya",
     "media.eyebrow": "Media pilihan",
     "media.heading": "Penghargaan & pers.",
@@ -988,7 +991,7 @@ export const MESSAGES: Record<Locale, Messages> = {
     "footer.legal.work": "Bekerja bersama kami",
     "footer.legal.support": "Dukung kami",
     "footer.legal.bank":
-      "Bank: UBS \u00b7 IBAN (CHF): CH34 0023 0230 7349 7401 C \u00b7 IBAN (EUR): CH88 0023 0230 7349 7460 R \u00b7 BIC: UBSWCHZH80A",
+      "Bank: UBS · IBAN (CHF): CH34 0023 0230 7349 7401 C · IBAN (EUR): CH88 0023 0230 7349 7460 R · BIC: UBSWCHZH80A",
   },
 };
 

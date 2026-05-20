@@ -4,8 +4,12 @@ import { useT } from "./LocaleProvider";
 import { HoverVideo } from "./HoverVideo";
 import type { MessageKey } from "../_lib/i18n";
 
-// "We build equitable technology and AI" — three open-research pillars
-// matching gainforest.earth's "Equitable AI" section.
+// "We build local-first technology and AI" — three open-research
+// pillars matching gainforest.earth's "Equitable AI" section. (The
+// gainforest.earth section is still labelled "Equitable AI"; we
+// renamed the landing's copy to "Local-first AI" to land the framing
+// closer to where the work actually sits — community-owned data,
+// community-hosted models, community-governed decisions.)
 //
 //   ┌──────────────┐  ┌──────────────┐  ┌──────────────┐
 //   │   video      │  │   video      │  │   video      │
@@ -29,7 +33,7 @@ import type { MessageKey } from "../_lib/i18n";
 // Beneath each video sits a small italic caption (museum-style)
 // crediting the documentary segment, then the heading + body.
 //
-// Sources (gainforest.earth's Equitable AI section):
+// Sources (gainforest.earth's Equitable AI section on the source site):
 //  - AI Assistants  ← _assets/video/0704a1c2…mp4 (Marina Mura + Taina)
 //  - Bioacoustics   ← _assets/video/610cc931…mp4 (mangrove recorder)
 //  - Remote Sensing ← _assets/video/a21b2c9c…mp4 (canopy segmentation)
