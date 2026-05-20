@@ -7,18 +7,24 @@ import type { MessageKey } from "../_lib/i18n";
 // "We build equitable technology and AI" — three open-research pillars
 // matching gainforest.earth's "Equitable AI" section.
 //
-//   ┌───────────────────┐  ┌───────────────────┐  ┌───────────────────┐
-//   │   image (4:3)     │  │   image (4:3)     │  │   image (4:3)     │
-//   │                   │  │                   │  │                   │
-//   ├───────────────────┤  ├───────────────────┤  ├───────────────────┤
-//   │ AI Assistants     │  │ Bioacoustics      │  │ Remote Sensing    │
-//   │ 1 line body       │  │ 1 line body       │  │ 1 line body       │
-//   └───────────────────┘  └───────────────────┘  └───────────────────┘
+//   ┌──────────────┐  ┌──────────────┐  ┌──────────────┐
+//   │   still      │  │   still      │  │   still      │
+//   │   (4:5       │  │   (4:5       │  │   (4:5       │
+//   │   portrait)  │  │   portrait)  │  │   portrait)  │
+//   ├──────────────┤  ├──────────────┤  ├──────────────┤
+//   │ AI Assistants│  │ Bioacoustics │  │ Remote Sensg │
+//   │ 1 line body  │  │ 1 line body  │  │ 1 line body  │
+//   └──────────────┘  └──────────────┘  └──────────────┘
 //
-// Each pillar gets a raster image — generated via gpt-image-2 per
-// AGENTS.md's "decoration via gpt-image-2 only" rule. The images are
-// documentary-style stills (not flat icons) so the visual weight
-// matches the live Globe + Bumicerts windows in the hero.
+// Each pillar's still is a frame extracted directly from the
+// documentary videos on gainforest.earth's Equitable AI section
+// (AI-Assistants tile poster + Bioacoustics-tile poster + canopy
+// tree-crown segmentation video). We use portrait stills with their
+// original documentary captions intact — the captions ("Taina is an
+// artificial intelligence", "So every animal has its own radio
+// channel") reinforce the editorial documentary tone better than any
+// stock-looking flat illustration would. Portrait aspect matches the
+// 9:16 tile orientation on gainforest.earth.
 const PILLARS: ReadonlyArray<{
   titleKey: MessageKey;
   bodyKey: MessageKey;
@@ -29,19 +35,19 @@ const PILLARS: ReadonlyArray<{
     titleKey: "equitableAI.pillar1.title",
     bodyKey: "equitableAI.pillar1.body",
     image: "/decor/pillar-ai-assistants.webp",
-    alt: "AI Assistants",
+    alt: "Taina is an artificial intelligence",
   },
   {
     titleKey: "equitableAI.pillar2.title",
     bodyKey: "equitableAI.pillar2.body",
     image: "/decor/pillar-bioacoustics.webp",
-    alt: "Bioacoustics",
+    alt: "Bioacoustic monitor — every animal has its own radio channel",
   },
   {
     titleKey: "equitableAI.pillar3.title",
     bodyKey: "equitableAI.pillar3.body",
     image: "/decor/pillar-remote-sensing.webp",
-    alt: "Remote Sensing",
+    alt: "Tree-crown segmentation from aerial imagery",
   },
 ];
 
@@ -74,11 +80,10 @@ export function EquitableAI() {
         <div className="mt-14 grid grid-cols-1 gap-x-8 gap-y-12 sm:grid-cols-2 lg:mt-20 lg:grid-cols-3 lg:gap-x-10">
           {PILLARS.map((p) => (
             <article key={p.titleKey} className="flex flex-col">
-              {/* Image frame. Cream card behind the image with rounded
-                  corners, matching the chunky card chrome on the Bumicerts
-                  hero card so the two surfaces feel related. */}
-              <div className="relative aspect-[5/4] w-full overflow-hidden rounded-[14px] border border-[#e6dfd0] bg-[#fbf8f0]">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
+              {/* Image frame. Portrait 4:5 (taller-than-wide) to match
+                  gainforest.earth's tile orientation; rounded card chrome
+                  matches Bumicerts. */}
+              <div className="relative aspect-[4/5] w-full overflow-hidden rounded-[14px] border border-[#e6dfd0] bg-[#1c1c1a]">
                 <Image
                   src={p.image}
                   alt={p.alt}
@@ -86,11 +91,11 @@ export function EquitableAI() {
                   sizes="(min-width: 1024px) 400px, (min-width: 640px) 50vw, 100vw"
                   className="object-cover"
                 />
-                {/* Hairline gradient at the bottom so the foliage doesn't
-                    fight the headline beneath it. */}
+                {/* Subtle bottom shade so the documentary subtitle text
+                    in the still doesn't fight the headline beneath. */}
                 <div
                   aria-hidden
-                  className="pointer-events-none absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-b from-transparent to-[#fbf8f0]/40"
+                  className="pointer-events-none absolute inset-x-0 bottom-0 h-1/4 bg-gradient-to-b from-transparent to-black/15"
                 />
               </div>
               <h3 className="mt-6 font-garamond text-[26px] lg:text-[30px] font-normal leading-[1.1] tracking-[-0.005em] text-foreground">
