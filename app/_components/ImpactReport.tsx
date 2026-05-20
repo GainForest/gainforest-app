@@ -16,33 +16,44 @@ import { useT } from "./LocaleProvider";
 // and made the section feel separate from the cream-on-cream
 // editorial flow above and below.
 //
-// Re-pass after the apricot-tile version:
-//   • drop the apricot fill. The section now sits on the canonical
-//     cream `--background` like the rest of the editorial flow.
-//   • make the PDF cover the visual anchor at ~320 px wide instead
-//     of a ~140 px thumbnail. The cover's watercolor mountain
-//     illustration is itself a beautiful artifact — the section's
-//     job is to invite a click, so the cover deserves the optical
-//     weight.
-//   • sage primary CTA (matching every other primary on the page)
-//     instead of the bespoke apricot-border / dark-fill recipe.
-//   • italic emphasis on a single word in the heading (English
+// Final layout, after three rounds of team feedback:
+//
+//   │ IMPACT REPORT ──────────────────────────────── 24 / 25 │
+//   │                                                       │
+//   │ ┌────────┐   Read our 3rd     ┌───────────────┐    │
+//   │ │  PDF   │   *annual* impact   │  maloca group  │    │
+//   │ │ cover  │   report.           └───────────────┘    │
+//   │ └────────┘                        XPRIZE finals    │
+//   │  Canva     Body text…          ┌───────────────┐    │
+//   │            [Read the report →]  │ cert ceremony │    │
+//   │                                 └───────────────┘    │
+//   │                                  Inhaã-bé, PH         │
+//
+// Design decisions encoded above:
+//
+//   • No apricot tile. Sits on the canonical cream `--background`
+//     like every other editorial section.
+//   • Quiet section eyebrow + hairline rule + "24 / 25" marker so
+//     the section reads as one editorial moment rather than a
+//     self-contained card.
+//   • Cover at ~220 px wide. The source artwork is only 461 px wide
+//     after we trimmed the 310 px transparent right-margin from the
+//     original 799×720 PDF export, so scaling it bigger upscaled past
+//     the source resolution and the watercolour went soft. ~220 px
+//     keeps each device pixel mapped close to source.
+//   • Community photos stay in the same row as a slim third column —
+//     two stacked landscape thumbs at the source 3:2 aspect (no harsh
+//     portrait crop) with italic field captions underneath. They give
+//     the section its documentary anchor without growing a second row
+//     under the cover the way the earlier 2-up gallery did.
+//   • Italic emphasis on a single word in the heading (English
 //     "annual"; per-locale via the `{word}` marker convention we
 //     already use in Hero.tsx) to match the design system rule
-//     "headlines use serif with italic emphasis on a single word —
-//     never a whole line".
-//   • NO extra cream/ring frame around the cover. The cover's own
-//     cream background already sits on a cream section, so adding
-//     `bg-[#fbf8f0]` + `ring-border-soft` produced a visible double
-//     frame against the section background. The cover now floats on
-//     a soft drop-shadow alone (same recipe gainforest.earth uses).
-//   • NO second row of community photos. The earlier version added
-//     a 2-up landscape collage as "editorial proof" but that made
-//     the section the tallest block in the lower page and pulled
-//     attention away from the report itself. The community work is
-//     already shown in DataCommons / EquitableAI above, so we don't
-//     need to re-litigate it here — this is the *report* section,
-//     not a gallery.
+//     "headlines use serif with italic emphasis on a single word".
+//   • Sage primary CTA (same pill recipe as every other primary).
+//   • NO extra cream/ring frame around the cover. The cover already
+//     has its own cream background; an outer cream + ring wrapper
+//     against the section's cream produced a visible double frame.
 
 // The impact report itself is a published Canva design (no canonical
 // gainforest.earth page; that URL 404s). Linking straight to Canva
@@ -93,42 +104,47 @@ export function ImpactReport() {
           </span>
         </div>
 
-        {/* Single row — the PDF cover (visual anchor) + the copy /
-            CTA on the right. The cover takes 4/12 and the copy 8/12
-            so the headline has plenty of horizontal runway and the
-            section stays compact vertically. */}
-        <div className="mt-8 grid grid-cols-1 items-center gap-10 lg:mt-12 lg:grid-cols-12 lg:gap-14">
-          <div className="lg:col-span-4">
+        {/* Three-column row — PDF cover (visual anchor) | copy / CTA
+            (the centre of gravity) | community photo stack (the
+            documentary anchor). Items align top so the headline +
+            body + CTA hang from the top of the column rather than
+            floating mid-row, which would create awkward whitespace
+            below the small cover. */}
+        <div className="mt-8 grid grid-cols-1 items-start gap-10 lg:mt-12 lg:grid-cols-12 lg:gap-12">
+          {/* COL 1 — PDF cover. Capped at 220 px wide because the
+              trimmed source artwork is only 461 px wide; any larger
+              and the watercolour goes soft. */}
+          <div className="lg:col-span-3">
             <Link
               href={IMPACT_REPORT_URL}
               target="_blank"
               rel="noreferrer"
               aria-label={t("impact.cta")}
-              className="group relative mx-auto block w-full max-w-[320px] transition-transform duration-300 hover:-translate-y-1 lg:mx-0"
+              className="group relative mx-auto block w-full max-w-[220px] transition-transform duration-300 hover:-translate-y-1 lg:mx-0"
             >
-              {/* The cover is portrait at 461×652 ≈ 5:7 after we
-                  trimmed the wide transparent right-side margin the
-                  original PDF-export shipped with (the un-trimmed
-                  canvas was 799×720, so the 310 px of transparent
-                  padding on the right showed up as a visible cream
-                  “frame” next to the artwork). We frame at the
-                  trimmed aspect so the cover sits edge-to-edge with
-                  just a soft long shadow lifting it off the page. */}
               <div className="relative aspect-[461/652] w-full overflow-hidden rounded-[8px] shadow-[0_22px_50px_-24px_rgba(40,50,30,0.36),0_2px_4px_rgba(40,50,30,0.06)] transition-shadow duration-300 group-hover:shadow-[0_30px_60px_-22px_rgba(40,50,30,0.44),0_2px_4px_rgba(40,50,30,0.08)]">
                 <Image
                   src="/decor/impact-report-cover.webp"
                   alt="GainForest 3rd Annual Impact Report 2024 / 2025 cover"
                   fill
-                  sizes="(min-width: 1024px) 320px, (min-width: 640px) 40vw, 80vw"
+                  sizes="(min-width: 1024px) 220px, (min-width: 640px) 30vw, 65vw"
                   priority={false}
                   className="object-cover"
                 />
               </div>
+              <span className="mt-3 block text-center font-instrument italic text-[13px] text-foreground/55 lg:text-left">
+                3rd Annual Report &middot; Canva
+              </span>
             </Link>
           </div>
 
-          <div className="lg:col-span-8">
-            <h2 className="font-garamond text-[36px] sm:text-[44px] lg:text-[60px] font-normal leading-[1.04] tracking-[-0.012em] text-foreground">
+          {/* COL 2 — copy + CTA. Headline scales from 32 (mobile) →
+              56 (desktop). 56 was chosen over 60 so the headline
+              fits comfortably in the slimmer column without ever
+              wrapping past three lines on the widest English
+              wording. */}
+          <div className="lg:col-span-5">
+            <h2 className="font-garamond text-[32px] sm:text-[40px] lg:text-[56px] font-normal leading-[1.04] tracking-[-0.012em] text-foreground">
               {headingSegments.map((seg, i) =>
                 seg.italic ? (
                   <span
@@ -143,16 +159,14 @@ export function ImpactReport() {
               )}
             </h2>
 
-            <p className="mt-5 max-w-[560px] text-[16px] lg:text-[17.5px] leading-[1.55] text-foreground/80">
+            <p className="mt-5 max-w-[520px] text-[15.5px] lg:text-[17px] leading-[1.55] text-foreground/80">
               {t("impact.body")}
             </p>
 
-            <div className="mt-7 lg:mt-9">
+            <div className="mt-7 lg:mt-8">
               {/* Same sage pill recipe Hero / NatureCTA use, so the
                   CTA reads as part of the page's single primary
-                  language. The "Read the report →" copy stays the
-                  same; the chevron animates on hover like other
-                  CTAs on the page. */}
+                  language. */}
               <Link
                 href={IMPACT_REPORT_URL}
                 target="_blank"
@@ -167,6 +181,49 @@ export function ImpactReport() {
                   →
                 </span>
               </Link>
+            </div>
+          </div>
+
+          {/* COL 3 — community photo stack. Two stacked landscape
+              thumbs at the source 3:2 aspect (matches impact-group
+              exactly; impact-ceremony's 4:3 source gets a small
+              top/bottom crop). Italic captions underneath identify
+              the location — same tone as DataCommons photo captions.
+
+              On mobile this column flows below the copy as a 2-up
+              row (sm:grid-cols-2) so the photos still feel like a
+              pair instead of stacking the full width. */}
+          <div className="lg:col-span-4">
+            <div className="grid grid-cols-2 gap-4 lg:grid-cols-1 lg:gap-5">
+              <figure className="m-0">
+                <div className="relative aspect-[3/2] w-full overflow-hidden rounded-[8px] ring-1 ring-border-soft shadow-[0_14px_30px_-22px_rgba(40,50,30,0.28)]">
+                  <Image
+                    src="/community/impact-group.webp"
+                    alt="GainForest team and Indigenous community at the maloca, XPRIZE Rainforest finals in Manaus"
+                    fill
+                    sizes="(min-width: 1024px) 360px, (min-width: 640px) 45vw, 90vw"
+                    className="object-cover"
+                  />
+                </div>
+                <figcaption className="mt-2 font-instrument italic text-[13px] text-foreground/55">
+                  XPRIZE Rainforest finals &middot; Greater Manaus
+                </figcaption>
+              </figure>
+
+              <figure className="m-0">
+                <div className="relative aspect-[3/2] w-full overflow-hidden rounded-[8px] ring-1 ring-border-soft shadow-[0_14px_30px_-22px_rgba(40,50,30,0.28)]">
+                  <Image
+                    src="/community/impact-ceremony.webp"
+                    alt="Bumicerts certificate ceremony with community members in the Philippines"
+                    fill
+                    sizes="(min-width: 1024px) 360px, (min-width: 640px) 45vw, 90vw"
+                    className="object-cover"
+                  />
+                </div>
+                <figcaption className="mt-2 font-instrument italic text-[13px] text-foreground/55">
+                  Bumicerts ceremony &middot; Inhaã-bé, Philippines
+                </figcaption>
+              </figure>
             </div>
           </div>
         </div>
