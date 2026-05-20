@@ -120,7 +120,7 @@ export function SignInPopover({
             </button>
           </form>
           <p className="px-1 pt-2 text-[11px] leading-snug text-foreground/45">
-            We never see your password — the upstream PDS handles the
+            We never see your password; the upstream PDS handles the
             sign-in.
           </p>
         </div>

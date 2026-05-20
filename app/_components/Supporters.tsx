@@ -56,7 +56,7 @@ const LOGOS: Logo[] = [
   { src: "/decor/supporters/edge-city.png", alt: "Edge City", w: 297, h: 168 },
   { src: "/decor/supporters/glo-dollar.png", alt: "Glo Dollar", w: 320, h: 63 },
   { src: "/decor/supporters/planet.png", alt: "planet.", w: 300, h: 147 },
-  { src: "/decor/supporters/bkcf.png", alt: "BKCF — BIMP-EAGA-ROK Cooperation Fund", w: 210, h: 171 },
+  { src: "/decor/supporters/bkcf.png", alt: "BKCF; BIMP-EAGA-ROK Cooperation Fund", w: 210, h: 171 },
 ];
 
 // Per-logo height tweaks. Some marks (BKCF stacked block, square

@@ -73,7 +73,7 @@ export function TopNavView({
           <Link
             href="/"
             className="flex items-center gap-2.5"
-            aria-label="GainForest — home"
+            aria-label="GainForest; home"
           >
             <LogoMark
               className="h-6 w-6 lg:h-7 lg:w-7 text-brand"

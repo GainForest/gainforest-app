@@ -66,7 +66,7 @@ export function TainaFeature() {
                 the human collaborators behind Taina. */}
             <p className="mt-5 max-w-[600px] font-instrument italic text-[14px] text-foreground/55">
               Co-designed with Indigenous scientists from Greater
-              Manaus — part of GainForest&apos;s Nature Guild
+              Manaus; part of GainForest&apos;s Nature Guild
               collaboration.
             </p>
 

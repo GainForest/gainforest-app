@@ -347,7 +347,7 @@ export function FloatingTaina() {
         const reason = err.error || "Something went wrong.";
         const friendly =
           res.status === 503
-            ? "I'm not wired up yet — the AI service is not configured on this server."
+            ? "I'm not wired up yet; the AI service is not configured on this server."
             : res.status === 502
               ? "The AI service is briefly unreachable. Try again in a moment."
               : reason;
@@ -416,7 +416,7 @@ export function FloatingTaina() {
         {
           role: "assistant",
           content:
-            "⚠️ Could not reach the AI service — check your connection and try again.",
+            "⚠️ Could not reach the AI service; check your connection and try again.",
         },
       ]);
     } finally {
@@ -547,7 +547,7 @@ export function FloatingTaina() {
       {/* SPRITE */}
       <div
         role="button"
-        aria-label={`${TAINA_SIM.name} — click to chat, drag to move`}
+        aria-label={`${TAINA_SIM.name}; click to chat, drag to move`}
         tabIndex={0}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}

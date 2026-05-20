@@ -97,7 +97,7 @@ export async function ChoosePath({
               <p className="mt-3 max-w-[420px] text-[14.5px] leading-[1.55] text-foreground/70">
                 An interactive map of every community-led nature
                 project. Each pin is a real organization on the
-                ATProto network — explore stewards, ecosystems, and
+                ATProto network; explore stewards, ecosystems, and
                 impact across continents.
               </p>
             </div>
@@ -154,7 +154,7 @@ export async function ChoosePath({
                 </Link>
               </h3>
               <p className="mt-3 max-w-[420px] text-[14.5px] leading-[1.55] text-foreground/70">
-                An open, verifiable record of nature impact — signed
+                An open, verifiable record of nature impact; signed
                 on ATProto, owned by the community that earned it.
                 Each one carries a photo, a story, and a public
                 provenance trail.

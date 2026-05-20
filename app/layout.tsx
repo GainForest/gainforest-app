@@ -52,13 +52,13 @@ const OG_IMAGE_PATH = "/og/landing-2026-05-20.png";
 // browser tab title, OG / Twitter card title, and JSON-LD WebPage name.
 const SITE_TAGLINE = "Open tools for regenerative intelligence";
 const SITE_DESCRIPTION =
-  "Explore nature projects around the world, back community-led restoration, and mint Bumicerts — verifiable proof-of-impact records signed on ATProto.";
+  "Explore nature projects around the world, back community-led restoration, and mint Bumicerts; verifiable proof-of-impact records signed on ATProto.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: `${SITE_NAME} — ${SITE_TAGLINE}`,
-    template: `%s — ${SITE_NAME}`,
+    default: `${SITE_NAME}; ${SITE_TAGLINE}`,
+    template: `%s; ${SITE_NAME}`,
   },
   description: SITE_DESCRIPTION,
   applicationName: SITE_NAME,
@@ -89,7 +89,7 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_US",
     siteName: SITE_NAME,
-    title: `${SITE_NAME} — ${SITE_TAGLINE}`,
+    title: `${SITE_NAME}; ${SITE_TAGLINE}`,
     description: SITE_DESCRIPTION,
     url: SITE_URL,
     images: [
@@ -99,14 +99,14 @@ export const metadata: Metadata = {
         width: 1200,
         height: 630,
         alt:
-          "GainForest — Open tools for regenerative intelligence. The serif headline sits on a cream editorial background; on the right, three conservationists stand waist-deep in a mangrove channel doing fieldwork, one pointing into the canopy while the others record audio and gear in waterproof bags.",
+          "GainForest; Open tools for regenerative intelligence. The serif headline sits on a cream editorial background; on the right, three conservationists stand waist-deep in a mangrove channel doing fieldwork, one pointing into the canopy while the others record audio and gear in waterproof bags.",
         type: "image/png",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: `${SITE_NAME} — ${SITE_TAGLINE}`,
+    title: `${SITE_NAME}; ${SITE_TAGLINE}`,
     description: SITE_DESCRIPTION,
     images: [OG_IMAGE_PATH],
     creator: "@gainforest",
@@ -184,7 +184,7 @@ const JSON_LD = {
       "@type": "WebPage",
       "@id": `${SITE_URL}/#webpage`,
       url: SITE_URL,
-      name: `${SITE_NAME} — ${SITE_TAGLINE}`,
+      name: `${SITE_NAME}; ${SITE_TAGLINE}`,
       isPartOf: { "@id": `${SITE_URL}/#website` },
       primaryImageOfPage: `${SITE_URL}${OG_IMAGE_PATH}`,
       about: { "@id": `${SITE_URL}/#organization` },

@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
       "anon";
     if (!rateLimit(ip)) {
       return new Response(
-        JSON.stringify({ error: "Slow down — too many messages this minute." }),
+        JSON.stringify({ error: "Slow down; too many messages this minute." }),
         { status: 429, headers: { "Content-Type": "application/json" } },
       );
     }
@@ -99,7 +99,7 @@ export async function POST(request: NextRequest) {
       return new Response(
         JSON.stringify({
           error:
-            "Chat is not configured on this server — set OPENROUTER_API_KEY in .env.local.",
+            "Chat is not configured on this server; set OPENROUTER_API_KEY in .env.local.",
         }),
         { status: 503, headers: { "Content-Type": "application/json" } },
       );
