@@ -17,25 +17,31 @@ import type { ProjectPin } from "../_lib/projects";
 // container) so the sphere always fills its column without overflowing
 // at narrow viewport widths.
 
-function uniqueCommunityNames(pins: ProjectPin[]): string[] {
+type CommunityName = {
+  name: string;
+  country: string;
+};
+
+function uniqueCommunityNames(pins: ProjectPin[]): CommunityName[] {
   const seen = new Set<string>();
-  const names: string[] = [];
+  const names: CommunityName[] = [];
   for (const pin of pins) {
     const name = pin.name.trim();
     if (!name) continue;
-    const key = name.toLocaleLowerCase();
+    const country = pin.country.trim();
+    const key = `${name.toLocaleLowerCase()}|${country.toLocaleLowerCase()}`;
     if (seen.has(key)) continue;
     seen.add(key);
-    names.push(name);
+    names.push({ name, country });
   }
-  return names.sort((a, b) => a.localeCompare(b));
+  return names.sort((a, b) => a.name.localeCompare(b.name));
 }
 
 function CommunityNameRail({
   names,
   reverse = false,
 }: {
-  names: string[];
+  names: CommunityName[];
   reverse?: boolean;
 }) {
   const loop = [...names, ...names, ...names];
@@ -44,9 +50,12 @@ function CommunityNameRail({
   return (
     <div className="partners-name-rail" data-reverse={reverse ? "true" : "false"}>
       <div className="partners-name-track">
-        {loop.map((name, i) => (
-          <span key={`${name}-${i}`} className="partners-name-pill">
-            {name}
+        {loop.map((community, i) => (
+          <span key={`${community.name}-${community.country}-${i}`} className="partners-name-pill">
+            <span>{community.name}</span>
+            {community.country ? (
+              <span className="partners-name-country">{community.country}</span>
+            ) : null}
           </span>
         ))}
       </div>
@@ -61,7 +70,10 @@ export function ClientPartners({ pins }: { pins: ProjectPin[] }) {
   const after = t("partners.heading.after").trim();
 
   const communityNames = uniqueCommunityNames(pins);
-  const marqueeNames = communityNames.length > 0 ? communityNames : pins.map((pin) => pin.name);
+  const marqueeNames =
+    communityNames.length > 0
+      ? communityNames
+      : pins.map((pin) => ({ name: pin.name, country: pin.country }));
   const firstRow = marqueeNames.filter((_, i) => i % 2 === 0);
   const secondRow = marqueeNames.filter((_, i) => i % 2 === 1);
 
