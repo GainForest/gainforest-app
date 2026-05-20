@@ -56,7 +56,8 @@ type CuratedSlug =
   | "goethe"
   | "ssir"
   | "microsoft"
-  | "swissre";
+  | "swissre"
+  | "ata";
 
 type CuratedItem = {
   slug: CuratedSlug;
@@ -70,11 +71,19 @@ type CuratedItem = {
 };
 
 // Source provenance for each curated cover image lives in the git
-// history. 15/21 are real article thumbnails (YouTube maxresdefault /
+// history. 16/22 are real article thumbnails (YouTube maxresdefault /
 // og:image / Substack cover) and the six that either couldn't expose
 // a fitting thumbnail (Klarna, MADES, BCG/Handelsblatt, WEF, Microsoft, Swiss Re) are stylised
 // covers generated via gpt-image-2 in the GainForest editorial palette.
 const CURATED_ITEMS: ReadonlyArray<CuratedItem> = [
+  {
+    slug: "ata",
+    kind: "feature",
+    sortDate: "2026-05-04",
+    source: "After The Algorithm",
+    href: "https://atafestival.io/works/taina",
+    image: "/decor/news/ata.jpg",
+  },
   {
     slug: "simocracy",
     kind: "launch",

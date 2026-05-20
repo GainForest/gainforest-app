@@ -141,6 +141,46 @@ Currently surfaces ~52 pins. The S3 `gainforest-all-shapefiles.geojson`
 file is **not** used — that path only feeds green_globe's separate
 `(shapefile-related)` route.
 
+### 3. Awards & press carousel → curated sources + Substack RSS
+
+`app/_components/Media.tsx` renders a horizontal carousel of real awards,
+press, talks, documentaries, festival works, and recent GainForest
+Substack posts.
+
+- Curated items are configured in `CURATED_ITEMS` with a slug, kind,
+  ISO `sortDate`, source, real external URL, and local cover image from
+  `public/decor/news/<slug>.jpg`.
+- Curated item copy is localised in `app/_lib/i18n.ts` under
+  `media.items.<slug>.headline` and `.summary` for all five locales
+  (EN/ES/PT/SW/ID). Keep our summaries organization-level: say
+  `GainForest`, `Taina`, `Bumicerts`, the community work, or the partner
+  org instead of centering individual names.
+- Blog posts come from `fetchSubstackPosts()` in `app/_lib/blog.ts`, which
+  reads `https://gainforest.substack.com/feed`, keeps the source-language
+  title/summary, and uses the RSS `<enclosure>` image when present.
+
+#### Adding a news item
+
+1. Research the source first: confirm URL, title, publisher, date, and
+   thumbnail. Use `fetch_content` / web search for blocked pages, and
+   `yt-dlp --dump-json` for YouTube metadata.
+2. Add a short slug to the `CuratedSlug` union and a matching object in
+   `CURATED_ITEMS`. Use an ISO `sortDate`; newest-first ordering is
+   computed at runtime.
+3. Add `media.items.<slug>.headline` and `.summary` to the `Messages`
+   type and every locale block in `app/_lib/i18n.ts`.
+4. Add a cover at `public/decor/news/<slug>.jpg`. Prefer real `og:image`,
+   `twitter:image`, RSS enclosure, or YouTube maxres thumbnail. Normalize
+   to 1600×900 JPEG:
+   `magick input -strip -resize '1600x900^' -gravity center -extent 1600x900 -quality 85 public/decor/news/<slug>.jpg`.
+5. Generate a cover only if the publisher blocks image access, has no
+   usable image, or the real image clashes with the editorial system.
+   Prompt for a 16:9 premium editorial image in the GainForest cream/sage
+   palette, with no text, logos, watermarks, UI chrome, or identifiable
+   faces.
+6. Verify with `pnpm exec tsc --noEmit`, `pnpm build`, and a quick mobile +
+   desktop carousel check in the browser.
+
 ### Graceful degradation
 
 Both `_lib` modules wrap the upstream call in `try/catch` and return a

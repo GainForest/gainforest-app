@@ -408,6 +408,48 @@ purpose — they reinforce the editorial documentary tone better than
 clean caption-less crops would. If you re-trim a clip, prefer a
 segment with similarly useful caption text.
 
+### Adding Awards & press / news carousel items
+
+The carousel lives in `app/_components/Media.tsx`; all user-facing copy
+for curated items lives in `app/_lib/i18n.ts`; cover images live under
+`public/decor/news/<slug>.jpg`. When adding a new item:
+
+1. **Research first.** Verify the source URL, title, publication date,
+   publisher, and article/video thumbnail. Prefer `fetch_content` /
+   `web_search` for pages that block `curl`; use `yt-dlp --dump-json`
+   for YouTube metadata. Keep the final link pointed at the real article,
+   talk, or work page (not a homepage placeholder).
+2. **No personal-name framing.** If an article title includes a founder or
+   team member, rewrite our carousel headline/summary to describe
+   GainForest, Taina, Bumicerts, the community work, or the partner org.
+   Proper nouns in original source titles may remain when they are the
+   article title, but our copy should not center individuals.
+3. **Localise curated copy.** Add `media.items.<slug>.headline` and
+   `media.items.<slug>.summary` to the `Messages` type and provide all
+   five locale blocks: EN, ES, PT, SW, ID. Article titles/proper nouns can
+   stay in source language; section labels/kinds and summaries translate.
+   Blog posts are the exception: they come from Substack RSS and stay in
+   source language.
+4. **Use a real cover when possible.** Prefer `og:image`,
+   `twitter:image`, RSS `<enclosure>`, or YouTube `maxresdefault.jpg`.
+   Download it to `public/decor/news/<slug>.jpg`, strip metadata, and
+   normalize to 1600×900 JPEG:
+   `magick in -strip -resize '1600x900^' -gravity center -extent 1600x900 -quality 85 public/decor/news/<slug>.jpg`.
+5. **Generate only as fallback or replacement.** If the publisher blocks
+   image access, exposes no image, or the real image badly clashes with the
+   editorial system, use `codex-imagegen` / gpt-image-2. Prompt for a
+   premium editorial 16:9 cover in the GainForest palette (cream, sage,
+   muted gold, ink), no text, no logos, no watermarks, no identifiable
+   faces, and no UI chrome. Normalize the result the same way.
+6. **Wire the item.** Add the slug to `CuratedSlug`, add one object to
+   `CURATED_ITEMS` with `kind`, ISO `sortDate`, `source`, `href`, and
+   `image`. Keep newest-first sorting data-driven; the array can be
+   loosely chronological but sorting uses `sortDate` at runtime.
+7. **Verify.** Run `pnpm exec tsc --noEmit` and `pnpm build`. Open the
+   page at `http://127.0.0.1:3030`, check the carousel on mobile and
+   desktop, and switch at least one non-English locale to confirm the new
+   copy is localised.
+
 ### Video re-encode pipeline
 
 The upstream MP4s are 15–49 MB each and behind Cloudflare bot

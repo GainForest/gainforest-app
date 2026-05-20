@@ -270,6 +270,8 @@ type Messages = {
   "media.items.microsoft.summary": string;
   "media.items.swissre.headline": string;
   "media.items.swissre.summary": string;
+  "media.items.ata.headline": string;
+  "media.items.ata.summary": string;
 
   // ── Supporters / Merci ────────────────────────────────────────
   "supporters.heading.before": string;
@@ -461,6 +463,10 @@ export const MESSAGES: Record<Locale, Messages> = {
     "media.kind.podcast": "Podcast",
     "media.kind.feature": "Feature",
     "media.kind.blog": "Blog",
+    "media.items.ata.headline":
+      "After The Algorithm exhibits Tainá with GainForest",
+    "media.items.ata.summary":
+      "The Zürich festival presents Tainá as a work co-developed with Indigenous communities, showing how local knowledge, languages, and data stay community-governed.",
     "media.items.simocracy.headline":
       "Simocracy launches with AI digital twins allocating a community treasury",
     "media.items.simocracy.summary":
@@ -728,6 +734,10 @@ export const MESSAGES: Record<Locale, Messages> = {
     "media.kind.podcast": "Podcast",
     "media.kind.feature": "Reportaje",
     "media.kind.blog": "Blog",
+    "media.items.ata.headline":
+      "After The Algorithm exhibe Tainá con GainForest",
+    "media.items.ata.summary":
+      "El festival de Zúrich presenta Tainá como una obra co-desarrollada con comunidades indígenas, mostrando cómo saberes, lenguas y datos quedan bajo gobernanza comunitaria.",
     "media.items.simocracy.headline":
       "Lanzamiento de Simocracy: gemelos digitales con IA reparten un tesoro comunitario",
     "media.items.simocracy.summary":
@@ -996,6 +1006,10 @@ export const MESSAGES: Record<Locale, Messages> = {
     "media.kind.podcast": "Podcast",
     "media.kind.feature": "Matéria",
     "media.kind.blog": "Blog",
+    "media.items.ata.headline":
+      "After The Algorithm exibe Tainá com a GainForest",
+    "media.items.ata.summary":
+      "O festival de Zurique apresenta Tainá como uma obra co-desenvolvida com comunidades indígenas, mostrando como saberes, línguas e dados seguem governados pela comunidade.",
     "media.items.simocracy.headline":
       "Simocracy estreia com gêmeos digitais de IA distribuindo um tesouro comunitário",
     "media.items.simocracy.summary":
@@ -1262,6 +1276,10 @@ export const MESSAGES: Record<Locale, Messages> = {
     "media.kind.podcast": "Podikasti",
     "media.kind.feature": "Kipengele",
     "media.kind.blog": "Blogu",
+    "media.items.ata.headline":
+      "After The Algorithm yaonyesha Tainá pamoja na GainForest",
+    "media.items.ata.summary":
+      "Tamasha la Zürich linaonyesha Tainá kama kazi iliyoundwa pamoja na jamii za asili, ikionyesha jinsi maarifa, lugha na data hubaki chini ya utawala wa jamii.",
     "media.items.simocracy.headline":
       "Simocracy yazinduliwa, mapacha ya kidijitali ya AI yagawanya hazina ya jamii",
     "media.items.simocracy.summary":
@@ -1530,6 +1548,10 @@ export const MESSAGES: Record<Locale, Messages> = {
     "media.kind.podcast": "Podcast",
     "media.kind.feature": "Liputan",
     "media.kind.blog": "Blog",
+    "media.items.ata.headline":
+      "After The Algorithm memamerkan Tainá bersama GainForest",
+    "media.items.ata.summary":
+      "Festival Zürich menampilkan Tainá sebagai karya yang dikembangkan bersama komunitas adat, menunjukkan bagaimana pengetahuan, bahasa, dan data tetap dikelola komunitas.",
     "media.items.simocracy.headline":
       "Simocracy meluncur dengan kembaran digital AI mengalokasikan kas komunitas",
     "media.items.simocracy.summary":
