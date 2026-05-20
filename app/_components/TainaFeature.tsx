@@ -91,6 +91,7 @@ export function TainaFeature() {
                 src="/videos/taina-feature.mp4"
                 poster="/videos/taina-feature-poster.webp"
                 ariaLabel="Indigenous scientists from Greater Manaus speaking about Taina"
+                durationLabel="0:46"
                 aspectClass="aspect-[4/5]"
                 className="rounded-[18px]"
               />
