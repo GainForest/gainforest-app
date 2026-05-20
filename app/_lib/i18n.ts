@@ -348,7 +348,7 @@ export const MESSAGES: Record<Locale, Messages> = {
     "partners.stat": "50+",
     "partners.statLabel": "nature partners worldwide",
     "impact.eyebrow": "Impact report",
-    "impact.heading": "Read our 3rd annual impact report.",
+    "impact.heading": "Read our 3rd {annual} impact report.",
     "impact.body":
       "The 24/25 report unpacks our global mission, the year's grants, community-led research highlights, and the financials — audited and open.",
     "impact.cta": "Read the report",
@@ -504,7 +504,7 @@ export const MESSAGES: Record<Locale, Messages> = {
     "partners.stat": "50+",
     "partners.statLabel": "aliados de naturaleza en el mundo",
     "impact.eyebrow": "Reporte de impacto",
-    "impact.heading": "Lee nuestro 3er reporte anual de impacto.",
+    "impact.heading": "Lee nuestro 3er reporte {anual} de impacto.",
     "impact.body":
       "El reporte 24/25 abre nuestra misión global, los aportes del año, los hitos de investigación comunitaria y los números — auditados y abiertos.",
     "impact.cta": "Leer el reporte",
@@ -660,7 +660,7 @@ export const MESSAGES: Record<Locale, Messages> = {
     "partners.stat": "50+",
     "partners.statLabel": "parceiros pela natureza no mundo",
     "impact.eyebrow": "Relatório de impacto",
-    "impact.heading": "Leia nosso 3º relatório anual de impacto.",
+    "impact.heading": "Leia nosso 3º relatório {anual} de impacto.",
     "impact.body":
       "O relatório 24/25 abre nossa missão global, os aportes do ano, os destaques de pesquisa comunitária e os números — auditados e abertos.",
     "impact.cta": "Ler o relatório",
@@ -816,7 +816,7 @@ export const MESSAGES: Record<Locale, Messages> = {
     "partners.stat": "50+",
     "partners.statLabel": "washirika wa asili duniani",
     "impact.eyebrow": "Ripoti ya athari",
-    "impact.heading": "Soma ripoti yetu ya 3 ya kila mwaka ya athari.",
+    "impact.heading": "Soma ripoti yetu ya 3 ya {kila mwaka} ya athari.",
     "impact.body":
       "Ripoti ya 24/25 inafichua dhamira yetu ya kimataifa, ruzuku za mwaka, vidokezo vya utafiti wa kijamii na takwimu — zilizokaguliwa na za wazi.",
     "impact.cta": "Soma ripoti",
@@ -972,7 +972,7 @@ export const MESSAGES: Record<Locale, Messages> = {
     "partners.stat": "50+",
     "partners.statLabel": "mitra alam di seluruh dunia",
     "impact.eyebrow": "Laporan dampak",
-    "impact.heading": "Baca laporan dampak tahunan ke-3 kami.",
+    "impact.heading": "Baca laporan dampak {tahunan} ke-3 kami.",
     "impact.body":
       "Laporan 24/25 membuka misi global kami, hibah tahunan, sorotan riset komunitas, dan angka-angka — telah diaudit dan terbuka.",
     "impact.cta": "Baca laporannya",
