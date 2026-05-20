@@ -1,64 +1,43 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
 import { useT } from "./LocaleProvider";
-import {
-  CODEX_PET_CELL_H,
-  CODEX_PET_CELL_W,
-  renderPetAnimated,
-  type CodexPetState,
-} from "../_lib/codex-pet";
+import { HoverVideo } from "./HoverVideo";
 
-// "Meet Taina, our community AI." — editorial feature card that gives
-// the floating sprite a story.
+// "Meet Taina, our community AI." — editorial feature section.
 //
 // Layout: two columns on desktop, stacked on mobile.
 //   ┌──────────────────────────┐  ┌──────────────────────────┐
-//   │  eyebrow                 │  │   ╔══════════════════╗   │
-//   │  Serif headline w/       │  │   ║  documentary  ║   │
-//   │  italic "Taina"          │  │   ║  (documentary    ║   │
-//   │                          │  │   ║   still from     ║   │
-//   │  body copy               │  │   ║   gainforest.earth)║ │
-//   │  → Say hi to Taina  →    │  │   ║   ┌──────┐       ║   │
-//   │                          │  │   ║   │sprite│       ║   │
-//   │                          │  │   ╚═══└──────┘═══════╝   │
+//   │  eyebrow                 │  │   ┌──────────────────┐   │
+//   │  Serif headline w/       │  │   │   video          │   │
+//   │  italic "Taina"          │  │   │   (4:5, hover    │   │
+//   │                          │  │   │    to play)      │   │
+//   │  body copy               │  │   │           0:15   │   │
+//   │  attribution (italic)    │  │   └──────────────────┘   │
+//   │  → Say hi to Taina  →    │  │   museum caption (italic)│
 //   └──────────────────────────┘  └──────────────────────────┘
 //
-// The right column plays a 15-second ambient documentary loop
-// (muted autoplay) pulled directly from gainforest.earth's "Indigenous
-// AI Assistant" section. The clip features Indigenous scientists
-// from Greater Manaus — including Vanda Witoto (Social Entrepreneur
-// and teacher) and other community voices — speaking about Taina.
-// The actual Taina codex-pet sprite floats over the bottom-right
-// corner of the video so the section reads as "the humans behind
-// Taina + Taina herself" in one visual beat.
+// The right column plays a 15-second ambient documentary loop on
+// hover — pulled directly from gainforest.earth's "Indigenous AI
+// Assistant" section. The clip features Indigenous scientists from
+// Greater Manaus (including Vanda Witoto, Social Entrepreneur and
+// teacher) speaking about Taina.
 //
-// The sprite reuses the SAME codex-pet sheet that FloatingTaina renders
-// (renderPetAnimated from `_lib/codex-pet.ts`) so the page has a
-// consistent "Taina presence". Hovering the sprite makes her wave;
-// clicking dispatches a `taina:open` custom event so FloatingTaina can
-// open her chat panel without this component coupling to it.
+// We previously layered the Taina codex-pet sprite over the
+// bottom-right of the video. The team asked us to drop it — the
+// FloatingTaina widget already provides the sprite presence
+// anywhere on the page, so doubling up inside this card just made
+// the section feel busy. The cleaner layout treats this section as
+// a museum-style portrait: video on the right, an italic caption
+// beneath, text + CTA on the left. The CTA still dispatches
+// `taina:open` so clicking it pops the floating chat panel.
 //
-// Source: gainforest.earth `_assets/video/6e3a1150…mp4` (76s portrait
-// doc; we use the first 15s, muted, looped, no audio).
-const SPRITE_DISPLAY_SIZE = 160; // px square — smaller because she's
-// layered onto the photo now rather than sitting on a blank card.
-const PIXEL_SCALE = SPRITE_DISPLAY_SIZE / CODEX_PET_CELL_H; // ~0.77
-
+// Source: gainforest.earth `_assets/video/6e3a1150…mp4` (76 s
+// portrait doc; we use the first 15 s, muted, looped, no audio).
 export function TainaFeature() {
   const t = useT();
   const before = t("tainaFeature.heading.before").trim();
   const italic = t("tainaFeature.heading.italic").trim();
   const after = t("tainaFeature.heading.after").trim();
-
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const [state, setState] = useState<CodexPetState>("idle");
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    return renderPetAnimated(canvas, "/codex-pets/taina-sheet.webp", state);
-  }, [state]);
 
   function openTaina() {
     window.dispatchEvent(new CustomEvent("taina:open"));
@@ -83,11 +62,12 @@ export function TainaFeature() {
               {t("tainaFeature.body")}
             </p>
 
-            {/* Attribution line — small, italic, credits the humans.
-                Reinforces that Taina is co-designed, not imposed. */}
+            {/* Attribution line — small, italic, quietly credits
+                the human collaborators behind Taina. */}
             <p className="mt-5 max-w-[600px] font-instrument italic text-[14px] text-foreground/55">
               Co-designed with Indigenous scientists from Greater
-              Manaus — part of GainForest's Nature Guild collaboration.
+              Manaus — part of GainForest&apos;s Nature Guild
+              collaboration.
             </p>
 
             <button
@@ -106,56 +86,19 @@ export function TainaFeature() {
           </div>
 
           <div className="lg:col-span-5">
-            {/* Tall portrait card — ambient documentary loop from
-                gainforest.earth's "Indigenous AI Assistant" section.
-                Muted autoplay-loop so it reads as B-roll rather than a
-                media player. The sprite is layered on the bottom-right
-                so the section reads as "the humans behind Taina +
-                Taina herself" in one visual beat. */}
-            <div className="relative mx-auto aspect-[4/5] max-w-[420px] overflow-hidden rounded-[18px] border border-[#e6dfd0] bg-[#1c1c1a]">
-              <video
+            <div className="mx-auto max-w-[420px]">
+              <HoverVideo
                 src="/videos/taina-feature.mp4"
                 poster="/videos/taina-feature-poster.webp"
-                autoPlay
-                muted
-                loop
-                playsInline
-                preload="metadata"
-                aria-label="Indigenous scientists from Greater Manaus speaking about Taina"
-                className="absolute inset-0 h-full w-full object-cover"
+                ariaLabel="Indigenous scientists from Greater Manaus speaking about Taina"
+                aspectClass="aspect-[4/5]"
+                className="rounded-[18px]"
               />
-
-              {/* Top-left attribution chip — tiny, cream, hugging
-                  the video's top edge. Positioned at the top so it
-                  doesn't fight any documentary subtitle text baked
-                  into the lower thirds of the video frames. */}
-              <span className="absolute top-3 left-3 font-instrument italic text-[11px] tracking-[0.02em] text-white/90 drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]">
+              {/* Museum-style italic caption — credits the humans on
+                  screen without overlaying the video itself. */}
+              <span className="mt-4 block text-center font-instrument italic text-[12.5px] tracking-[0.02em] text-foreground/55">
                 Indigenous scientists · Greater Manaus
               </span>
-
-              {/* Sprite floating in the bottom-right. Hovering makes
-                  her wave; clicking opens the chat. */}
-              <button
-                type="button"
-                aria-label={t("tainaFeature.cta")}
-                onMouseEnter={() => setState("waving")}
-                onMouseLeave={() => setState("idle")}
-                onClick={openTaina}
-                className="absolute -bottom-1 right-3 cursor-pointer drop-shadow-[0_4px_10px_rgba(0,0,0,0.4)]"
-                style={{
-                  width: SPRITE_DISPLAY_SIZE,
-                  height: SPRITE_DISPLAY_SIZE,
-                }}
-              >
-                <canvas
-                  ref={canvasRef}
-                  width={Math.round(CODEX_PET_CELL_W * PIXEL_SCALE)}
-                  height={Math.round(CODEX_PET_CELL_H * PIXEL_SCALE)}
-                  className="block h-full w-full"
-                  // Pixel art: do NOT smooth.
-                  style={{ imageRendering: "pixelated" }}
-                />
-              </button>
             </div>
           </div>
         </div>
