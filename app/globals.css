@@ -117,6 +117,32 @@ body {
   display: none;
 }
 
+/* Awards & press card carousel — same masked edge treatment as the
+   logo rail, but with a slightly wider fade so full cards slide in
+   gently rather than appearing clipped. */
+.media-card-carousel {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  -webkit-mask-image: linear-gradient(
+    90deg,
+    transparent 0,
+    #000 32px,
+    #000 calc(100% - 32px),
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    90deg,
+    transparent 0,
+    #000 32px,
+    #000 calc(100% - 32px),
+    transparent 100%
+  );
+}
+
+.media-card-carousel::-webkit-scrollbar {
+  display: none;
+}
+
 /* Mobile nav drawer — slide in from the right */
 @keyframes drawerIn {
   from { transform: translateX(20px); opacity: 0; }
