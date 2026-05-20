@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 // Shared "ambient B-roll" video card — used by EquitableAI and
 // TainaFeature.
@@ -50,15 +50,59 @@ export function HoverVideo({
   aspectClass = "aspect-[4/5]",
   className = "",
 }: HoverVideoProps) {
+  const cardRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  // Survives renders without re-triggering effects — used to remember
+  // a hover/click that arrived before the <video src> was attached.
+  const pendingPlayRef = useRef(false);
   const [playing, setPlaying] = useState(false);
   // Default muted — required by every major browser's autoplay policy
   // for hover-triggered playback. Clicking the speaker icon flips it.
   const [muted, setMuted] = useState(true);
+  // Lazy-attach the <video src> only when the card is near the
+  // viewport. Until then we render the poster image only, which keeps
+  // the page-load footprint at ~60 KB per card instead of ~500 KB of
+  // speculative H.264 moov metadata across all four cards. Once the
+  // user scrolls within 300 px of the card we upgrade to
+  // preload="metadata" so the first hover plays without a stall.
+  const [active, setActive] = useState(false);
+
+  useEffect(() => {
+    const el = cardRef.current;
+    if (!el) return;
+    // SSR / very old browsers: just activate immediately so the card
+    // still works — the IO bail is the safe upgrade path.
+    if (typeof IntersectionObserver === "undefined") {
+      setActive(true);
+      return;
+    }
+    const obs = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) {
+          setActive(true);
+          obs.disconnect();
+        }
+      },
+      // 300 px lead so the metadata is in flight by the time the
+      // card actually crosses the fold — keeps first-hover snappy.
+      { rootMargin: "300px 0px" }
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
 
   function play() {
     const v = videoRef.current;
     if (!v) return;
+    // If the user hovers before IntersectionObserver has activated
+    // the card (initial-viewport cards, fast cursors), remember the
+    // intent and force-activate. The effect below will drive play()
+    // once the src is attached on the next render.
+    if (!active) {
+      pendingPlayRef.current = true;
+      setActive(true);
+      return;
+    }
     // play() returns a Promise that rejects if the browser blocks the
     // play attempt (rare with muted videos but possible on Safari
     // before any user gesture). Swallow the rejection — the worst
@@ -67,6 +111,16 @@ export function HoverVideo({
       .then(() => setPlaying(true))
       .catch(() => {});
   }
+
+  // Flush a pending play intent once the <video src> upgrade lands.
+  useEffect(() => {
+    if (!active || !pendingPlayRef.current) return;
+    pendingPlayRef.current = false;
+    play();
+    // play() reads `active` to short-circuit — by the time this
+    // effect runs, `active` is true and play() will call v.play()
+    // directly. eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [active]);
   function pause() {
     const v = videoRef.current;
     if (!v) return;
@@ -95,6 +149,7 @@ export function HoverVideo({
 
   return (
     <div
+      ref={cardRef}
       onMouseEnter={play}
       onMouseLeave={pause}
       onClick={toggle}
@@ -102,12 +157,15 @@ export function HoverVideo({
     >
       <video
         ref={videoRef}
-        src={src}
+        // Lazy-load: until the card is in (or near) the viewport,
+        // src is undefined and preload is "none" — the poster
+        // attribute carries the visual on its own.
+        src={active ? src : undefined}
         poster={poster}
         muted={muted}
         loop
         playsInline
-        preload="metadata"
+        preload={active ? "metadata" : "none"}
         aria-label={ariaLabel}
         // Smooth zoom on hover for tactile presence — well within the
         // "restrained motion" rule (1 -> 1.015 over 600ms ease).
