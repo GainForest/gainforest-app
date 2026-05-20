@@ -430,6 +430,42 @@ Total payload after re-encode: ~7.6 MB across all 4 videos, vs
 116 MB raw. Keep the trimmed clips ~15 s so the loop feels ambient
 rather than alarming, and so each card's MP4 stays under ~3 MB.
 
+## OG / share image
+
+The Open Graph image at `public/og/landing-<date>.png` is **not**
+hand-drawn or gpt-image-2 generated. It's rendered from a
+self-contained HTML template via headless Chrome so the share card
+matches the live hero exactly — same Cormorant Garamond + Instrument
+Serif headline, same curved hand-drawn brush stroke under "Open",
+same cream / sage palette, and a real GainForest documentary photo
+on the right half (default: `public/data-commons/community-mangrove.webp`,
+the Oceanus Conservation mangrove fieldwork shot).
+
+Why this approach instead of gpt-image-2: gpt-image-2 hallucinates
+font shapes, often gets the curved brush stroke wrong, and tends to
+re-introduce decorative leaves the team explicitly stripped from the
+page. Rendering from real HTML guarantees pixel-perfect typography
+and a real photograph behind the copy.
+
+Pipeline:
+
+1. `scripts/og-template.html` is the canvas — a self-contained 1200×630
+   page that imports the same Google Font families `app/layout.tsx`
+   loads, embeds the gainforest-logo SVG, and uses the literal
+   `BRUSH_PATH` from `Hero.tsx`.
+2. `scripts/render-og.sh [YYYY-MM-DD]` substitutes absolute `file://`
+   paths into the template, runs Chrome with
+   `--headless=new --window-size=1200,630 --force-device-scale-factor=2`,
+   and down-samples the 2400×1260 capture to a crisp 1200×630 PNG +
+   matching JPG via ImageMagick.
+3. Bump `OG_IMAGE_PATH` in `app/layout.tsx` to the new versioned
+   filename. Telegram / Twitter / Bluesky cache OG by URL, so changing
+   only the bytes behind the old path doesn't refresh shared previews.
+
+The previous landings (`landing-2026-05-19.png`, etc.) stay on disk
+so old shared previews keep working until the upstream caches expire.
+Never overwrite a dated OG — always render a new one and bump the path.
+
 ## Design tokens
 
 All colour/spacing rules live in `app/globals.css`. The token names are:
