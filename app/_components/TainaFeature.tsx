@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { useT } from "./LocaleProvider";
 import {
@@ -16,7 +15,7 @@ import {
 // Layout: two columns on desktop, stacked on mobile.
 //   ┌──────────────────────────┐  ┌──────────────────────────┐
 //   │  eyebrow                 │  │   ╔══════════════════╗   │
-//   │  Serif headline w/       │  │   ║  Marina Mura     ║   │
+//   │  Serif headline w/       │  │   ║  documentary  ║   │
 //   │  italic "Taina"          │  │   ║  (documentary    ║   │
 //   │                          │  │   ║   still from     ║   │
 //   │  body copy               │  │   ║   gainforest.earth)║ │
@@ -25,19 +24,23 @@ import {
 //   │                          │  │   ╚═══└──────┘═══════╝   │
 //   └──────────────────────────┘  └──────────────────────────┘
 //
-// The right column shows a portrait still of Marina Mura (Indigenous
-// scientist from Inhaã-bé, Brazil — Nature Guild member and Taina
-// co-designer) pulled directly from gainforest.earth's "Indigenous AI
-// Assistant" section, with the actual Taina codex-pet sprite floating
-// on top in the bottom-right. Marina is shown speaking with the
-// documentary caption "this artificial intelligence" — the same frame
-// that anchors the corresponding section on gainforest.earth.
+// The right column plays a 15-second ambient documentary loop
+// (muted autoplay) pulled directly from gainforest.earth's "Indigenous
+// AI Assistant" section. The clip features Indigenous scientists
+// from Greater Manaus — including Vanda Witoto (Social Entrepreneur
+// and teacher) and other community voices — speaking about Taina.
+// The actual Taina codex-pet sprite floats over the bottom-right
+// corner of the video so the section reads as "the humans behind
+// Taina + Taina herself" in one visual beat.
 //
 // The sprite reuses the SAME codex-pet sheet that FloatingTaina renders
 // (renderPetAnimated from `_lib/codex-pet.ts`) so the page has a
 // consistent "Taina presence". Hovering the sprite makes her wave;
 // clicking dispatches a `taina:open` custom event so FloatingTaina can
 // open her chat panel without this component coupling to it.
+//
+// Source: gainforest.earth `_assets/video/6e3a1150…mp4` (76s portrait
+// doc; we use the first 15s, muted, looped, no audio).
 const SPRITE_DISPLAY_SIZE = 160; // px square — smaller because she's
 // layered onto the photo now rather than sitting on a blank card.
 const PIXEL_SCALE = SPRITE_DISPLAY_SIZE / CODEX_PET_CELL_H; // ~0.77
@@ -80,11 +83,11 @@ export function TainaFeature() {
               {t("tainaFeature.body")}
             </p>
 
-            {/* Attribution line — small, italic, quietly credits Marina
-                Mura. Reinforces that Taina is co-designed, not imposed. */}
+            {/* Attribution line — small, italic, credits the humans.
+                Reinforces that Taina is co-designed, not imposed. */}
             <p className="mt-5 max-w-[600px] font-instrument italic text-[14px] text-foreground/55">
-              Co-designed with Indigenous scientists from Inhaã-bé,
-              Brazil — featuring Marina Mura, GainForest Nature Guild.
+              Co-designed with Indigenous scientists from Greater
+              Manaus — part of GainForest's Nature Guild collaboration.
             </p>
 
             <button
@@ -103,28 +106,31 @@ export function TainaFeature() {
           </div>
 
           <div className="lg:col-span-5">
-            {/* Tall portrait card — documentary still of Marina Mura
-                speaking about Taina, pulled from gainforest.earth's
-                "Indigenous AI Assistant" video poster. The sprite is
-                layered on the bottom-right corner so the section reads
-                as "the person behind Taina + Taina herself" in one
-                visual beat. */}
+            {/* Tall portrait card — ambient documentary loop from
+                gainforest.earth's "Indigenous AI Assistant" section.
+                Muted autoplay-loop so it reads as B-roll rather than a
+                media player. The sprite is layered on the bottom-right
+                so the section reads as "the humans behind Taina +
+                Taina herself" in one visual beat. */}
             <div className="relative mx-auto aspect-[4/5] max-w-[420px] overflow-hidden rounded-[18px] border border-[#e6dfd0] bg-[#1c1c1a]">
-              <Image
-                src="/decor/taina-feature.webp"
-                alt="Marina Mura, Indigenous scientist and Taina co-designer, on gainforest.earth"
-                fill
-                sizes="(min-width: 1024px) 420px, 100vw"
-                className="object-cover"
+              <video
+                src="/videos/taina-feature.mp4"
+                poster="/videos/taina-feature-poster.webp"
+                autoPlay
+                muted
+                loop
+                playsInline
+                preload="metadata"
+                aria-label="Indigenous scientists from Greater Manaus speaking about Taina"
+                className="absolute inset-0 h-full w-full object-cover"
               />
 
               {/* Top-left attribution chip — tiny, cream, hugging
-                  the photo's top edge. Positioned at the top so it
-                  doesn't fight the documentary subtitle ("this
-                  artificial intelligence") baked into the video
-                  frame's bottom. */}
+                  the video's top edge. Positioned at the top so it
+                  doesn't fight any documentary subtitle text baked
+                  into the lower thirds of the video frames. */}
               <span className="absolute top-3 left-3 font-instrument italic text-[11px] tracking-[0.02em] text-white/90 drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]">
-                Marina Mura · Indigenous scientist
+                Indigenous scientists · Greater Manaus
               </span>
 
               {/* Sprite floating in the bottom-right. Hovering makes
