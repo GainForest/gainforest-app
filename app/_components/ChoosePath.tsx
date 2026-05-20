@@ -186,65 +186,53 @@ export async function ChoosePath({
   );
 }
 
-// Live Green Globe preview block. Mirrors the structure of
-// <BumicertPreview /> below — same card chrome, same proportions —
-// so the two ChoosePath cards stay visually balanced. The previous
-// version had a small floating globe with no surrounding chrome,
-// which lost against the richly-detailed Bumicert preview on the
-// right.
+// Live Green Globe preview — just the spinning sphere, sitting
+// directly on the card's cream background. No inner card chrome.
+// (Earlier iterations wrapped the globe in a second, slightly-warmer
+// cream sub-card with a thin border and a footer caption — but that
+// nested-card look ate vertical space and the right column lost the
+// height match with the left, leaving big whitespace under the
+// Bumicert fan. The team's note: "save space in the green globe
+// card by removing the white card inside the card".)
 //
-// Inside the chrome:
+// What we keep:
+//   - the drag-to-rotate globe canvas (interactive)
+//   - the LIVE pulse pill (top-right), same accent as the hero
+//   - the "drag to spin" affordance hint (bottom-centre)
+//   - a tiny caption underneath ("50+ projects on ATProto" + arrow)
+//     so the section still telegraphs scale + provenance
 //
-//   ┌──────────────────────────────────┐
-//   │ ┌─ aspect 16/9 ──┐  ● LIVE       │
-//   │ │   spinning      │              │
-//   │ │   globe        │              │
-//   │ └─────────────────┘              │
-//   ├──────────────────────────────────┤
-//   │ Green Globe                 Live │
-//   │ Spin and pin community-led …     │
-//   │ ──────────────────────────────── │
-//   │ GAINFOREST.APP       50 LIVE PINS│
-//   └──────────────────────────────────┘
+//   ●LIVE
+//        ____
+//      .'    '.
+//     /  · ·   \      ← spinning globe with pins
+//     |  ·  ·  |
+//      \  · .'./
+//       '.____.'
+//        ⬌ drag to spin
 //
-// The "LIVE" badge in the corner of the visual matches the Bumicerts
-// hero card and the Bumicert preview's "Verified" badge — same mint
-// accent system across the page.
+//        50+ projects · ATProto signed
+//
 function GlobePreview({ pinCount }: { pinCount: number }) {
   return (
-    <div className="w-full overflow-hidden rounded-[12px] border border-[#e6dfd0] bg-[#fbf8f0] shadow-[0_6px_20px_-12px_rgba(40,50,30,0.18)]">
-      {/* Globe panel — aspect 16:9 to match the Bumicert preview's
-          image panel. The sphere centers inside; the LIVE badge sits
-          top-right, and a "drag · zoom" hint sits bottom-right so
-          visitors discover the widget is interactive without
-          having to click through to gainforest.app first.
-
-          `cursor-grab` switches to `cursor-grabbing` while the user
-          is rotating the globe (OrbitControls toggles `:active`
-          pointer state on the canvas underneath). */}
-      <div className="relative aspect-[16/9] w-full overflow-hidden bg-[#fbf8f0]">
-        <div className="absolute inset-0 grid place-items-center cursor-grab active:cursor-grabbing">
-          {/* Diameter scales with the card width via the aspect-16/9
-              container. 220px works well at the ~560px desktop card
-              width and falls back gracefully on tablet.
-              `interactive` enables drag + wheel zoom on this globe
-              instance (the hero floating globe stays static). */}
-          <GlobeCard diameter={220} caption={false} interactive />
+    <div className="flex w-full flex-col items-center gap-3">
+      {/* Globe block — relative wrapper for the LIVE badge and the
+          drag hint. No border, no inner background; the sphere sits
+          directly on the parent card's cream. */}
+      <div className="relative flex w-full items-center justify-center">
+        <div className="cursor-grab active:cursor-grabbing">
+          <GlobeCard diameter={240} caption={false} interactive />
         </div>
-        <span className="absolute right-3 top-3 inline-flex items-center gap-1.5 rounded-full bg-background/95 px-2 py-0.5 text-[10px] font-medium uppercase tracking-[0.1em] text-brand-dark backdrop-blur-sm">
+        <span className="absolute right-2 top-2 inline-flex items-center gap-1.5 rounded-full bg-background/95 px-2 py-0.5 text-[10px] font-medium uppercase tracking-[0.1em] text-brand-dark backdrop-blur-sm">
           <span className="relative grid h-1.5 w-1.5 place-items-center">
             <span className="absolute inset-0 animate-ping rounded-full bg-brand/40" />
             <span className="relative h-1.5 w-1.5 rounded-full bg-brand" />
           </span>
           Live
         </span>
-        {/* Affordance hint — small monochrome tag, doesn't compete with
-            the LIVE badge. Pure drag-to-spin (no zoom); wheel-over the
-            globe scrolls the page so the visitor never feels trapped
-            on the canvas. */}
         <span
           aria-hidden
-          className="pointer-events-none absolute bottom-2 left-1/2 -translate-x-1/2 inline-flex items-center gap-1.5 rounded-full bg-background/80 px-2 py-0.5 text-[10px] font-medium uppercase tracking-[0.12em] text-foreground/55 backdrop-blur-sm opacity-90"
+          className="pointer-events-none absolute -bottom-1 left-1/2 -translate-x-1/2 inline-flex items-center gap-1.5 rounded-full bg-background/80 px-2 py-0.5 text-[10px] font-medium uppercase tracking-[0.12em] text-foreground/55 backdrop-blur-sm"
         >
           <svg
             width="11"
@@ -256,47 +244,19 @@ function GlobePreview({ pinCount }: { pinCount: number }) {
             strokeLinecap="round"
             strokeLinejoin="round"
           >
-            {/* horizontal double-headed arrow — drag-to-spin */}
             <path d="M5 12h14M5 12l4-4M5 12l4 4M19 12l-4-4M19 12l-4 4" />
           </svg>
           drag to spin
         </span>
       </div>
 
-      {/* Detail panel — mirrors BumicertPreview's */}
-      <div className="px-3.5 py-3 sm:px-4">
-        <div className="flex items-baseline justify-between gap-3">
-          <h4 className="min-w-0 truncate font-garamond text-[16px] font-medium text-foreground sm:text-[17px]">
-            Green Globe
-          </h4>
-          <span className="shrink-0 font-instrument italic text-[11px] tracking-[0.08em] text-foreground/45">
-            live
-          </span>
-        </div>
-        <p className="mt-1.5 text-[12.5px] leading-[1.45] text-foreground/65">
-          Spin and pin community-led nature projects across the
-          planet — every pin is an organization on ATProto.
-        </p>
-        <div className="mt-3 flex items-center justify-between gap-2 border-t border-[#ece5d4] pt-2 text-[10.5px] uppercase tracking-[0.1em] text-foreground/45">
-          <span>gainforest.app</span>
-          <span className="flex items-center gap-1">
-            {pinCount}+ live pins
-            <svg
-              width="9"
-              height="9"
-              viewBox="0 0 24 24"
-              fill="none"
-              aria-hidden
-            >
-              <path
-                d="M12 2C8 8 4 12 4 14a8 8 0 0016 0c0-2-4-6-8-12z"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </span>
-        </div>
+      {/* Tight caption row — keeps the scale + provenance signal
+          that the deleted card footer used to carry, without the
+          surrounding chrome. */}
+      <div className="flex w-full items-center justify-center gap-3 pt-1 text-[10.5px] uppercase tracking-[0.12em] text-foreground/50">
+        <span>{pinCount}+ projects</span>
+        <span className="text-foreground/25">·</span>
+        <span>gainforest.app</span>
       </div>
     </div>
   );
