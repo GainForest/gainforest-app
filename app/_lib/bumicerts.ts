@@ -23,9 +23,12 @@
  * - Safe: any network/schema hiccup falls back to a curated static set.
  */
 
+// Production indexer. The dev counterpart (dev.hi.gainforest.app) has
+// flaked with 502s in the past, so we point at the production host by
+// default and let an env override drop us back to dev when needed.
 const INDEXER_URL =
   process.env.NEXT_PUBLIC_INDEXER_URL?.trim() ||
-  "https://dev.hi.gainforest.app/graphql";
+  "https://hi.gainforest.app/graphql";
 
 const HYPERLABEL_URL =
   process.env.NEXT_PUBLIC_HYPERLABEL_URL?.trim() ||
@@ -277,6 +280,22 @@ export async function fetchLiveBumicerts(
         createdAt: node.createdAt,
       })),
     );
+
+    // Defensive: if every indexer call failed silently (e.g. indexer 502),
+    // bumicerts is empty but no exception was thrown. Fall back to the
+    // static snapshot in that case rather than rendering a blank card.
+    // Hyperlabel's `total` is still meaningful (it's the actual count of
+    // high-quality projects) so we preserve it on the way out.
+    if (bumicerts.length === 0) {
+      console.warn(
+        "[landing] hyperlabel ok but indexer returned no nodes; using fallback bumicerts list",
+      );
+      return {
+        ...FALLBACK_SNAPSHOT,
+        total: total || FALLBACK_SNAPSHOT.total,
+        fromFallback: true,
+      };
+    }
 
     return {
       total,
