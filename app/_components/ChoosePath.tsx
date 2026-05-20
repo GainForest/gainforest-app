@@ -64,20 +64,30 @@ export async function ChoosePath({
               below. The previous version had a tiny 200px globe
               floating in empty space — visually it lost the
               balance against the detailed Bumicert preview on the
-              right. */}
-          <Link
-            href={GLOBE_URL}
-            target="_blank"
-            rel="noreferrer"
-            aria-label="Open Green Globe"
-            className="group flex h-full flex-col gap-6 rounded-[18px] border border-border-soft bg-background p-6 transition-all hover:-translate-y-0.5 hover:border-foreground/30 hover:shadow-[0_18px_40px_-24px_rgba(40,50,30,0.22)] sm:gap-8 sm:p-8 lg:p-10"
-          >
+              right.
+
+              This card is intentionally NOT wrapped in a single outer
+              <Link>: the embedded globe is interactive (drag-to-rotate,
+              wheel-to-zoom) and wrapping it in an anchor would (a)
+              steal every click as a navigation, even mid-drag, and
+              (b) produce invalid nested-interactive-element markup.
+              Instead the heading and the CTA arrow at the bottom are
+              independent links, and the card chrome only adds a
+              hover-lift affordance. */}
+          <div className="group flex h-full flex-col gap-6 rounded-[18px] border border-border-soft bg-background p-6 transition-all hover:-translate-y-0.5 hover:border-foreground/30 hover:shadow-[0_18px_40px_-24px_rgba(40,50,30,0.22)] sm:gap-8 sm:p-8 lg:p-10">
             <div className="min-w-0">
               <span className="font-instrument italic text-[12px] uppercase tracking-[0.18em] text-foreground/45">
                 01 · Explore the map
               </span>
               <h3 className="mt-3 font-garamond text-[24px] lg:text-[28px] font-normal leading-[1.15] text-foreground">
-                What&apos;s Green Globe?
+                <Link
+                  href={GLOBE_URL}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="transition-colors hover:text-primary"
+                >
+                  What&apos;s Green Globe?
+                </Link>
               </h3>
               <p className="mt-3 max-w-[420px] text-[14.5px] leading-[1.55] text-foreground/70">
                 An interactive map of every community-led nature
@@ -91,7 +101,13 @@ export async function ChoosePath({
               <GlobePreview pinCount={pins.length} />
             </div>
 
-            <span className="inline-flex items-center gap-1.5 text-[14px] font-medium text-primary">
+            <Link
+              href={GLOBE_URL}
+              target="_blank"
+              rel="noreferrer"
+              aria-label="Open Green Globe"
+              className="inline-flex items-center gap-1.5 text-[14px] font-medium text-primary self-start"
+            >
               <span className="border-b border-primary/40 pb-0.5 transition-colors group-hover:border-primary">
                 Open Green Globe
               </span>
@@ -101,8 +117,8 @@ export async function ChoosePath({
               >
                 →
               </span>
-            </span>
-          </Link>
+            </Link>
+          </div>
 
           {/* RIGHT — What's a Bumicert? path.
               Embeds a SINGLE real Bumicert (title, photo, description,
@@ -184,13 +200,21 @@ function GlobePreview({ pinCount }: { pinCount: number }) {
     <div className="w-full overflow-hidden rounded-[12px] border border-[#e6dfd0] bg-[#fbf8f0] shadow-[0_6px_20px_-12px_rgba(40,50,30,0.18)]">
       {/* Globe panel — aspect 16:9 to match the Bumicert preview's
           image panel. The sphere centers inside; the LIVE badge sits
-          top-right. */}
+          top-right, and a "drag · zoom" hint sits bottom-right so
+          visitors discover the widget is interactive without
+          having to click through to gainforest.app first.
+
+          `cursor-grab` switches to `cursor-grabbing` while the user
+          is rotating the globe (OrbitControls toggles `:active`
+          pointer state on the canvas underneath). */}
       <div className="relative aspect-[16/9] w-full overflow-hidden bg-[#fbf8f0]">
-        <div className="absolute inset-0 grid place-items-center">
+        <div className="absolute inset-0 grid place-items-center cursor-grab active:cursor-grabbing">
           {/* Diameter scales with the card width via the aspect-16/9
               container. 220px works well at the ~560px desktop card
-              width and falls back gracefully on tablet. */}
-          <GlobeCard diameter={220} caption={false} />
+              width and falls back gracefully on tablet.
+              `interactive` enables drag + wheel zoom on this globe
+              instance (the hero floating globe stays static). */}
+          <GlobeCard diameter={220} caption={false} interactive />
         </div>
         <span className="absolute right-3 top-3 inline-flex items-center gap-1.5 rounded-full bg-background/95 px-2 py-0.5 text-[10px] font-medium uppercase tracking-[0.1em] text-brand-dark backdrop-blur-sm">
           <span className="relative grid h-1.5 w-1.5 place-items-center">
@@ -198,6 +222,27 @@ function GlobePreview({ pinCount }: { pinCount: number }) {
             <span className="relative h-1.5 w-1.5 rounded-full bg-brand" />
           </span>
           Live
+        </span>
+        {/* Affordance hint — small monochrome tag, doesn't compete with
+            the LIVE badge. Hidden on hover so the card visually
+            commits to the interaction once the visitor engages. */}
+        <span
+          aria-hidden
+          className="pointer-events-none absolute bottom-2 left-1/2 -translate-x-1/2 inline-flex items-center gap-1.5 rounded-full bg-background/80 px-2 py-0.5 text-[10px] font-medium uppercase tracking-[0.12em] text-foreground/55 backdrop-blur-sm opacity-90 transition-opacity duration-200"
+        >
+          <svg
+            width="11"
+            height="11"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M5 9l-3 3 3 3M19 9l3 3-3 3M9 5l3-3 3 3M9 19l3 3 3-3" />
+          </svg>
+          drag · zoom
         </span>
       </div>
 

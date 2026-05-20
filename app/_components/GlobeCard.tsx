@@ -18,9 +18,13 @@ const DEFAULT_DIAMETER = 380;
 export async function GlobeCard({
   diameter = DEFAULT_DIAMETER,
   caption = true,
+  interactive = false,
 }: {
   diameter?: number;
   caption?: boolean;
+  /** Pass through to {@link LiveGlobe}. When true the globe accepts
+   *  drag + zoom; default is a frozen decorative widget. */
+  interactive?: boolean;
 } = {}) {
   const pins = await fetchProjectPins();
   return (
@@ -28,7 +32,7 @@ export async function GlobeCard({
       className="relative"
       style={{ width: diameter, height: diameter }}
     >
-      <LiveGlobe pins={pins} diameter={diameter} />
+      <LiveGlobe pins={pins} diameter={diameter} interactive={interactive} />
       {caption && (
         <Link
           href={GLOBE_URL}
