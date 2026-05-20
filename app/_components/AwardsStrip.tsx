@@ -78,18 +78,17 @@ const SECONDARY_LOGOS: ReadonlyArray<Logo> = [
     href: "https://www.klarna.com/",
     h: 28,
   },
-];
-
-// One text-only recognition for which we don't ship a logo (the BCG /
-// Handelsblatt "Vordenker:innen" feature is a press initiative rather
-// than a sponsor with a single redistributable mark; using the
-// Handelsblatt newspaper logo alone would mis-frame what the recognition
-// actually is). Renders as a small wordmark sitting alongside the
-// logos.
-const SECONDARY_TEXT: ReadonlyArray<{ label: string; href: string }> = [
   {
-    label: "BCG & Handelsblatt Vordenker:innen",
+    // The "BCG & Handelsblatt Vordenker:innen" recognition is a joint
+    // press initiative; using just BCG's logo is the cleaner read
+    // (Handelsblatt's mark on its own would frame this as a newspaper
+    // mention rather than a strategy-prize recognition). The link
+    // still points to the Handelsblatt feature page so the source is
+    // discoverable.
+    src: "/decor/awards/bcg.svg",
+    alt: "BCG & Handelsblatt Vordenker:innen",
     href: "https://www.handelsblatt.com/unternehmen/management/vordenker_innen/vordenker-ernaehrung-und-landwirtschaft-besser-essen-fuer-das-weltklima/28848280.html",
+    h: 26,
   },
 ];
 
@@ -167,18 +166,6 @@ export function AwardsStrip() {
                       }}
                       draggable={false}
                     />
-                  </a>
-                </li>
-              ))}
-              {SECONDARY_TEXT.map((t) => (
-                <li key={t.label} className="flex items-center">
-                  <a
-                    href={t.href}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="text-[13px] lg:text-[13.5px] text-foreground/65 transition-colors hover:text-foreground"
-                  >
-                    {t.label}
                   </a>
                 </li>
               ))}
