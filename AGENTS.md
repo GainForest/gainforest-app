@@ -393,8 +393,8 @@ regenerate**, refresh from the source if gainforest.earth updates):
 
 | File | Source on gainforest.earth | Used in |
 |---|---|---|
-| `public/videos/pillar-ai-assistants.mp4` (+ `-poster.webp`) | `_assets/video/0704a1c2…mp4` (99 s portrait doc — Marina Mura + the Taina interface), trimmed to 0:05–0:20 | EquitableAI pillar 1 — autoplay loop |
-| `public/videos/pillar-bioacoustics.mp4` (+ `-poster.webp`) | `_assets/video/610cc931…mp4` (167 s portrait doc — green audio recorder + Oceanus Conservation mangrove fieldwork: "audio can record 24 seven", "measures without seeing it"), trimmed to 0:00–0:15 | EquitableAI pillar 2 — autoplay loop |
+| `public/videos/pillar-ai-assistants.mp4` (+ `-poster.webp`) | `_assets/video/0704a1c2…mp4` (99 s portrait doc — Marina Mura + the Taina interface); full clip, re-encoded | EquitableAI pillar 1 — autoplay loop |
+| `public/videos/pillar-bioacoustics.mp4` (+ `-poster.webp`) | `_assets/video/610cc931…mp4` (167 s portrait doc — green audio recorder + Oceanus Conservation mangrove fieldwork: "audio can record 24 seven", "measures without seeing it"); full clip, re-encoded | EquitableAI pillar 2 — autoplay loop |
 | `public/videos/pillar-remote-sensing.mp4` (+ `-poster.webp`) | `_assets/video/a21b2c9c…mp4` (30 s landscape doc — aerial canopy with tree-crown segmentation polygons), trimmed to 0:00–0:15 | EquitableAI pillar 3 — autoplay loop |
 | `public/videos/taina-feature.mp4` (+ `-poster.webp`) | First-party GainForest footage (portrait doc — Indigenous scientists from Greater Manaus speaking about Taina, including Vanda Witoto); re-encoded full clip ~46 s | TainaFeature right-column — autoplay loop |
 | `public/decor/impact-report-cover.webp` | `_assets/media/4e48bc46…png` | ImpactReport — "3rd Annual Impact Report" PDF cover thumb |

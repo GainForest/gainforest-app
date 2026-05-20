@@ -42,6 +42,8 @@ const PILLARS: ReadonlyArray<{
   bodyKey: MessageKey;
   video: string;
   poster: string;
+  /** Bottom-right pill label — matches the encoded clip length. */
+  duration: string;
   caption: string;
   alt: string;
 }> = [
@@ -50,6 +52,7 @@ const PILLARS: ReadonlyArray<{
     bodyKey: "equitableAI.pillar1.body",
     video: "/videos/pillar-ai-assistants.mp4",
     poster: "/videos/pillar-ai-assistants-poster.webp",
+    duration: "1:39",
     caption: "Marina Mura · Taina field interview",
     alt: "Documentary footage of Indigenous scientists using the Taina AI assistant",
   },
@@ -58,6 +61,7 @@ const PILLARS: ReadonlyArray<{
     bodyKey: "equitableAI.pillar2.body",
     video: "/videos/pillar-bioacoustics.mp4",
     poster: "/videos/pillar-bioacoustics-poster.webp",
+    duration: "2:47",
     caption: "Oceanus Conservation · mangrove fieldwork",
     alt: "Field researcher recording bioacoustic data in mangrove forest",
   },
@@ -66,6 +70,7 @@ const PILLARS: ReadonlyArray<{
     bodyKey: "equitableAI.pillar3.body",
     video: "/videos/pillar-remote-sensing.mp4",
     poster: "/videos/pillar-remote-sensing-poster.webp",
+    duration: "0:15",
     caption: "Aerial canopy · tree-crown segmentation",
     alt: "Aerial canopy footage with tree-crown segmentation polygons",
   },
@@ -104,6 +109,7 @@ export function EquitableAI() {
                 src={p.video}
                 poster={p.poster}
                 ariaLabel={p.alt}
+                durationLabel={p.duration}
                 aspectClass="aspect-[4/5]"
                 className="rounded-[14px]"
               />
