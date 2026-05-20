@@ -23,11 +23,11 @@ import { useT } from "./LocaleProvider";
 //   │ ┌────────┐   Read our 3rd     ┌───────────────┐    │
 //   │ │  PDF   │   *annual* impact   │  maloca group  │    │
 //   │ │ cover  │   report.           └───────────────┘    │
-//   │ └────────┘                        XPRIZE finals    │
+//   │ └────────┘                        Inhaã-bé, Manaus  │
 //   │  Canva     Body text…          ┌───────────────┐    │
 //   │            [Read the report →]  │ cert ceremony │    │
 //   │                                 └───────────────┘    │
-//   │                                  Inhaã-bé, PH         │
+//   │                                  Cagwait, Philippines    │
 //
 // Design decisions encoded above:
 //
@@ -206,7 +206,7 @@ export function ImpactReport() {
                   />
                 </div>
                 <figcaption className="mt-2 font-instrument italic text-[13px] text-foreground/55">
-                  XPRIZE Rainforest finals &middot; Greater Manaus
+                  Inhaã-bé, Greater Manaus
                 </figcaption>
               </figure>
 
@@ -221,7 +221,7 @@ export function ImpactReport() {
                   />
                 </div>
                 <figcaption className="mt-2 font-instrument italic text-[13px] text-foreground/55">
-                  Bumicerts ceremony &middot; Inhaã-bé, Philippines
+                  Cagwait, Philippines
                 </figcaption>
               </figure>
             </div>

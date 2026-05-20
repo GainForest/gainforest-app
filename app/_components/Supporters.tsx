@@ -72,10 +72,9 @@ const H_TWEAKS: Record<string, number> = {
   // The Ethereum diamond on the left of the wordmark needs slightly
   // more height to balance the wordmark on the right.
   "ethereum-foundation.png": 38,
-  // Hypercerts' horizontal lockup: chunky icon + wordmark with the
-  // icon framed in a black tile. Bump the height so the icon detail
-  // (concentric ornamental "guilloche" petals) reads.
-  "hypercerts.svg": 38,
+  // (Hypercerts used to sit at h: 38 to give the framed icon room
+  // to read; team feedback was "it's larger than the others", so it
+  // now uses the base height like every other horizontal wordmark.)
   // Klarna's pink pill has lots of internal padding around its
   // wordmark, so the visible letters end up smaller than peers.
   "klarna.png": 38,
