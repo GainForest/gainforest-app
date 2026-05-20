@@ -200,8 +200,10 @@ type Messages = {
   "partners.heading.italic": string;
   "partners.heading.after": string;
   "partners.body": string;
-  "partners.stat": string; // "50+"
+  "partners.stat": string; // legacy fallback label
   "partners.statLabel": string; // "nature partners globally"
+  "partners.bannerLabel": string;
+  "partners.bannerCountLabel": string;
 
   // ── Impact Report ──────────────────────────────────────────────
   "impact.eyebrow": string;
@@ -445,6 +447,8 @@ export const MESSAGES: Record<Locale, Messages> = {
       "Our non-profit collaborates with grassroots cooperatives, Indigenous councils, ecological labs, and protected-area managers across four continents.",
     "partners.stat": "50+",
     "partners.statLabel": "nature partners worldwide",
+    "partners.bannerLabel": "Live from Green Globe",
+    "partners.bannerCountLabel": "names",
     "impact.eyebrow": "Impact report",
     "impact.heading": "Read our 3rd {annual} impact report.",
     "impact.body":
@@ -716,6 +720,8 @@ export const MESSAGES: Record<Locale, Messages> = {
       "Colaboramos con cooperativas de base, consejos indígenas, laboratorios ecológicos y administraciones de áreas protegidas en cuatro continentes.",
     "partners.stat": "50+",
     "partners.statLabel": "aliados de naturaleza en el mundo",
+    "partners.bannerLabel": "En vivo desde Green Globe",
+    "partners.bannerCountLabel": "nombres",
     "impact.eyebrow": "Reporte de impacto",
     "impact.heading": "Lee nuestro 3er reporte {anual} de impacto.",
     "impact.body":
@@ -988,6 +994,8 @@ export const MESSAGES: Record<Locale, Messages> = {
       "Colaboramos com cooperativas de base, conselhos indígenas, laboratórios ecológicos e gestores de áreas protegidas em quatro continentes.",
     "partners.stat": "50+",
     "partners.statLabel": "parceiros pela natureza no mundo",
+    "partners.bannerLabel": "Ao vivo do Green Globe",
+    "partners.bannerCountLabel": "nomes",
     "impact.eyebrow": "Relatório de impacto",
     "impact.heading": "Leia nosso 3º relatório {anual} de impacto.",
     "impact.body":
@@ -1258,6 +1266,8 @@ export const MESSAGES: Record<Locale, Messages> = {
       "Tunashirikiana na vyama vya msingi, mabaraza ya Kiasili, maabara za kiikolojia, na wasimamizi wa hifadhi katika mabara manne.",
     "partners.stat": "50+",
     "partners.statLabel": "washirika wa asili duniani",
+    "partners.bannerLabel": "Moja kwa moja kutoka Green Globe",
+    "partners.bannerCountLabel": "majina",
     "impact.eyebrow": "Ripoti ya athari",
     "impact.heading": "Soma ripoti yetu ya 3 ya {kila mwaka} ya athari.",
     "impact.body":
@@ -1530,6 +1540,8 @@ export const MESSAGES: Record<Locale, Messages> = {
       "Kami bermitra dengan koperasi akar rumput, dewan adat, laboratorium ekologi, dan pengelola kawasan lindung di empat benua.",
     "partners.stat": "50+",
     "partners.statLabel": "mitra alam di seluruh dunia",
+    "partners.bannerLabel": "Langsung dari Green Globe",
+    "partners.bannerCountLabel": "nama",
     "impact.eyebrow": "Laporan dampak",
     "impact.heading": "Baca laporan dampak {tahunan} ke-3 kami.",
     "impact.body":

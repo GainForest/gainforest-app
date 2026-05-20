@@ -408,6 +408,18 @@ purpose — they reinforce the editorial documentary tone better than
 clean caption-less crops would. If you re-trim a clip, prefer a
 segment with similarly useful caption text.
 
+### Partners section
+
+`app/_components/Partners.tsx` must stay wired to `fetchProjectPins()`;
+that fetcher calls Green Globe's `list-organizations?info=true&mapPoint=true`
+route, which is backed by Hyperindex. Do **not** replace the live partner
+banner with made-up categories like "Indigenous Councils" or "Climate
+Funds". The banner in `PartnersClient.tsx` should render real organization /
+community names from `ProjectPin.name`, deduped at the UI boundary, and the
+right-side globe should use the same `pins` array so the names and map agree.
+If the upstream is down, the only acceptable fallback is the fallback already
+owned by `app/_lib/projects.ts`.
+
 ### Adding Awards & press / news carousel items
 
 The carousel lives in `app/_components/Media.tsx`; all user-facing copy

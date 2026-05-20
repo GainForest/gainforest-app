@@ -141,7 +141,16 @@ Currently surfaces ~52 pins. The S3 `gainforest-all-shapefiles.geojson`
 file is **not** used — that path only feeds green_globe's separate
 `(shapefile-related)` route.
 
-### 3. Awards & press carousel → curated sources + Substack RSS
+### 3. Partners banner → live Green Globe / Hyperindex names
+
+The partners section (`app/_components/Partners.tsx` +
+`PartnersClient.tsx`) uses `fetchProjectPins()` — the same Green Globe /
+Hyperindex-backed source as the globe pins — to render a banner of real
+organization/community names. Do not replace this with static categories or
+marketing archetypes. If you change the section, keep the banner and the globe
+on the same `ProjectPin[]` dataset so the names and map remain consistent.
+
+### 4. Awards & press carousel → curated sources + Substack RSS
 
 `app/_components/Media.tsx` renders a horizontal carousel of real awards,
 press, talks, documentaries, festival works, and recent GainForest

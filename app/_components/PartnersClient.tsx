@@ -17,23 +17,53 @@ import type { ProjectPin } from "../_lib/projects";
 // container) so the sphere always fills its column without overflowing
 // at narrow viewport widths.
 
-// Archetypes — same list as the previous stat-driven version; kept as
-// a quiet editorial ledger below the body copy so readers still see
-// the kinds of partners we work with at a glance.
-const PARTNER_ARCHETYPES = [
-  "Indigenous Councils",
-  "Grassroots Cooperatives",
-  "Ecological Labs",
-  "Protected-Area Managers",
-  "Academic Partners",
-  "Climate Funds",
-];
+function uniqueCommunityNames(pins: ProjectPin[]): string[] {
+  const seen = new Set<string>();
+  const names: string[] = [];
+  for (const pin of pins) {
+    const name = pin.name.trim();
+    if (!name) continue;
+    const key = name.toLocaleLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    names.push(name);
+  }
+  return names.sort((a, b) => a.localeCompare(b));
+}
+
+function CommunityNameRail({
+  names,
+  reverse = false,
+}: {
+  names: string[];
+  reverse?: boolean;
+}) {
+  const loop = [...names, ...names, ...names];
+  if (loop.length === 0) return null;
+
+  return (
+    <div className="partners-name-rail" data-reverse={reverse ? "true" : "false"}>
+      <div className="partners-name-track">
+        {loop.map((name, i) => (
+          <span key={`${name}-${i}`} className="partners-name-pill">
+            {name}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export function ClientPartners({ pins }: { pins: ProjectPin[] }) {
   const t = useT();
   const before = t("partners.heading.before").trim();
   const italic = t("partners.heading.italic").trim();
   const after = t("partners.heading.after").trim();
+
+  const communityNames = uniqueCommunityNames(pins);
+  const marqueeNames = communityNames.length > 0 ? communityNames : pins.map((pin) => pin.name);
+  const firstRow = marqueeNames.filter((_, i) => i % 2 === 0);
+  const secondRow = marqueeNames.filter((_, i) => i % 2 === 1);
 
   // Responsive globe diameter — sized to comfortably fit inside the
   // right column without overflowing the section. The previous tier
@@ -80,28 +110,25 @@ export function ClientPartners({ pins }: { pins: ProjectPin[] }) {
                 the visual weight now. */}
             <p className="mt-6 flex items-baseline gap-3 text-[14px] text-foreground/55">
               <span className="font-garamond text-[32px] font-normal leading-none tracking-[-0.01em] text-foreground/85">
-                {t("partners.stat")}
+                {communityNames.length || pins.length}
               </span>
               <span className="font-instrument italic text-[14.5px] text-foreground/65">
                 {t("partners.statLabel")}
               </span>
             </p>
 
-            <ul className="mt-10 grid grid-cols-1 gap-y-1 sm:grid-cols-2 sm:gap-x-12">
-              {PARTNER_ARCHETYPES.map((p, i) => (
-                <li
-                  key={p}
-                  className="flex items-baseline justify-between border-b border-foreground/15 py-3"
-                >
-                  <span className="text-[14px] lg:text-[15px] text-foreground/80">
-                    {p}
-                  </span>
-                  <span className="font-instrument italic text-[12px] text-foreground/45">
-                    {String(i + 1).padStart(2, "0")}
-                  </span>
-                </li>
-              ))}
-            </ul>
+            <div className="mt-10 overflow-hidden rounded-[28px] border border-border-soft bg-[#efe8d8] py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.45)]">
+              <div className="mb-3 flex items-center justify-between gap-4 px-5 text-[10px] uppercase tracking-[0.18em] text-foreground/45">
+                <span>{t("partners.bannerLabel")}</span>
+                <span>
+                  {communityNames.length || pins.length} {t("partners.bannerCountLabel")}
+                </span>
+              </div>
+              <CommunityNameRail names={firstRow} />
+              {secondRow.length > 0 ? (
+                <CommunityNameRail names={secondRow} reverse />
+              ) : null}
+            </div>
           </div>
 
           {/* Right column — rotating LiveGlobe. Same dataset as the
