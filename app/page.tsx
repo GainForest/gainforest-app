@@ -19,6 +19,7 @@ import { DraggableGlobeCard } from "./_components/DraggableGlobeCard";
 import { GlobeCard } from "./_components/GlobeCard";
 import { fetchLiveBumicerts } from "./_lib/bumicerts";
 import { fetchProjectPins } from "./_lib/projects";
+import { fetchSubstackPosts } from "./_lib/blog";
 
 // Re-fetch live Bumicerts at most every 15 minutes via the
 // `next: { revalidate }` option in the GraphQL call. The page can be
@@ -71,9 +72,10 @@ export const revalidate = 900;
 // DataCommons (mid-page WHY) and NatureCTA → Footer (the closing
 // chord).
 export default async function Page() {
-  const [snapshot, pins] = await Promise.all([
+  const [snapshot, pins, blogPosts] = await Promise.all([
     fetchLiveBumicerts(12),
     fetchProjectPins(),
+    fetchSubstackPosts(3),
   ]);
   return (
     <div className="min-h-screen bg-background">
@@ -128,7 +130,7 @@ export default async function Page() {
         <NatureGuild />
         <Partners />
         <ImpactReport />
-        <Media />
+        <Media blogPosts={blogPosts} />
         <Supporters />
         <NatureCTA />
       </main>

@@ -62,6 +62,26 @@ type Messages = {
   "choosePath.bumicerts.body": string;
   "choosePath.or": string;
   "choosePath.allProjects": string;
+  // Eyebrows / explainer cards / preview chrome / hints / CTAs.
+  // The two ChoosePath cards (Globe + Bumicert) mirror each other,
+  // so the key set is paired.
+  "choosePath.globe.eyebrow": string;     // "01 · Explore the map"
+  "choosePath.bumicerts.eyebrow": string; // "02 · Meet the certificate"
+  "choosePath.globe.heading": string;     // "What's Green Globe?"
+  "choosePath.bumicerts.heading": string; // "What's a Bumicert?"
+  "choosePath.globe.dragHint": string;    // "drag to spin"
+  "choosePath.globe.previewTitle": string; // "Green Globe"
+  "choosePath.globe.previewLive": string; // "live"
+  "choosePath.globe.previewBody": string;
+  "choosePath.globe.pins": string;        // template: "{n}+ live pins"
+  "choosePath.globe.caption.projects": string; // template: "{n}+ projects"
+  "choosePath.globe.cta": string;         // "Open Green Globe"
+  "choosePath.bumicerts.cta": string;     // "Explore Bumicerts"
+  "choosePath.bumicerts.live": string;    // "Live · 3 most recent"
+  "choosePath.bumicerts.fallback": string; // "Recent · 3 most recent"
+  "choosePath.bumicerts.verified": string;
+  "choosePath.bumicerts.signed": string;
+  "choosePath.liveBadge": string;         // generic "Live"
 
   // ── I want to… cards ────────────────────────────────────────────
   "iwantto.heading": string;
@@ -192,6 +212,46 @@ type Messages = {
   // ── Selected media ────────────────────────────────────────────
   "media.eyebrow": string;
   "media.heading": string;
+  "media.scroll": string;
+  // Per-item kind labels rendered in the eyebrow of every card.
+  "media.kind.award": string;
+  "media.kind.press": string;
+  "media.kind.documentary": string;
+  "media.kind.launch": string;
+  "media.kind.grant": string;
+  "media.kind.hackathon": string;
+  "media.kind.talk": string;
+  "media.kind.podcast": string;
+  "media.kind.feature": string;
+  "media.kind.blog": string;
+  // Per-item headlines + summaries. Curated press items are
+  // localisable so the carousel reads as native in every locale; blog
+  // posts (Substack) intentionally stay in the source language and
+  // arrive through fetchSubstackPosts() at runtime.
+  "media.items.simocracy.headline": string;
+  "media.items.simocracy.summary": string;
+  "media.items.klarna.headline": string;
+  "media.items.klarna.summary": string;
+  "media.items.bhutan.headline": string;
+  "media.items.bhutan.summary": string;
+  "media.items.changenow.headline": string;
+  "media.items.changenow.summary": string;
+  "media.items.cna.headline": string;
+  "media.items.cna.summary": string;
+  "media.items.atmos.headline": string;
+  "media.items.atmos.summary": string;
+  "media.items.ftc.headline": string;
+  "media.items.ftc.summary": string;
+  "media.items.maearth.headline": string;
+  "media.items.maearth.summary": string;
+  "media.items.xprize.headline": string;
+  "media.items.xprize.summary": string;
+  "media.items.swissnex.headline": string;
+  "media.items.swissnex.summary": string;
+  "media.items.bcg.headline": string;
+  "media.items.bcg.summary": string;
+  "media.items.mades.headline": string;
+  "media.items.mades.summary": string;
 
   // ── Supporters / Merci ────────────────────────────────────────
   "supporters.heading.before": string;
@@ -232,8 +292,26 @@ export const MESSAGES: Record<Locale, Messages> = {
     "hero.cta.bumicerts": "Explore Bumicerts",
     "hero.cta.globe": "Open the Globe",
     "hero.footnote":
-      "Bumicerts are signed on AT Protocol — every record lives on a community-owned PDS and the live count to the right is pulled straight from the GainForest indexer.",
+      "Bumicerts are signed on AT Protocol; every record lives on a community-owned PDS and the live count to the right is pulled straight from the GainForest indexer.",
     "choosePath.heading": "Choose how you want to use GainForest",
+    "choosePath.globe.eyebrow": "01 · Explore the map",
+    "choosePath.bumicerts.eyebrow": "02 · Meet the certificate",
+    "choosePath.globe.heading": "What's Green Globe?",
+    "choosePath.bumicerts.heading": "What's a Bumicert?",
+    "choosePath.globe.dragHint": "drag to spin",
+    "choosePath.globe.previewTitle": "Green Globe",
+    "choosePath.globe.previewLive": "live",
+    "choosePath.globe.previewBody":
+      "Spin and pin community-led nature projects across the planet; every pin is an organization on ATProto.",
+    "choosePath.globe.pins": "{n}+ live pins",
+    "choosePath.globe.caption.projects": "{n}+ projects",
+    "choosePath.globe.cta": "Open Green Globe",
+    "choosePath.bumicerts.cta": "Explore Bumicerts",
+    "choosePath.bumicerts.live": "Live · 3 most recent",
+    "choosePath.bumicerts.fallback": "Recent · 3 most recent",
+    "choosePath.bumicerts.verified": "Verified",
+    "choosePath.bumicerts.signed": "ATProto signed",
+    "choosePath.liveBadge": "Live",
     "choosePath.globe.title": "Open the Globe",
     "choosePath.globe.body":
       "Discover projects and ecosystems across the world. Explore, learn, and get inspired.",
@@ -289,9 +367,9 @@ export const MESSAGES: Record<Locale, Messages> = {
     "taina.shield": "Ask me anything",
     "taina.role": "Co-designed with Indigenous communities of Manaus",
     "taina.greetingHello":
-      "Hi — I'm Taina. Sit a moment and explore GainForest with me.",
+      "Hi; I'm Taina. Sit a moment and explore GainForest with me.",
     "taina.greetingHint":
-      "Ask me about the Globe, Bumicerts, community-led nature work, or Indigenous data sovereignty — or just say hi.",
+      "Ask me about the Globe, Bumicerts, community-led nature work, or Indigenous data sovereignty; or just say hi.",
     "taina.placeholder": "Say hi…",
     "taina.thinking": "Taina is thinking…",
     "awards.label": "Winners of",
@@ -301,7 +379,7 @@ export const MESSAGES: Record<Locale, Messages> = {
     "dataCommons.heading.italic": "biodiversity",
     "dataCommons.heading.after": ".",
     "dataCommons.body":
-      "Only 1% of global biodiversity data comes from the world's largest rainforests. We're changing this by turning local communities into Indigenous scientists — and helping organisations build equitable data products that can preserve nature.",
+      "Only 1% of global biodiversity data comes from the world's largest rainforests. We're changing this by turning local communities into Indigenous scientists; and helping organisations build equitable data products that can preserve nature.",
     "dataCommons.stat.value": "1%",
     "dataCommons.stat.label": "of biodiversity data comes from the largest rainforests",
     "equitableAI.eyebrow": "Local-first AI",
@@ -312,7 +390,7 @@ export const MESSAGES: Record<Locale, Messages> = {
       "Three open research pillars that turn community-collected data into tools the community keeps.",
     "equitableAI.pillar1.title": "AI Assistants",
     "equitableAI.pillar1.body":
-      "Storyteller AI companions that help communities archive and share knowledge in their own language — starting with Taina, co-designed in Greater Manaus.",
+      "Storyteller AI companions that help communities archive and share knowledge in their own language; starting with Taina, co-designed in Greater Manaus.",
     "equitableAI.pillar2.title": "Bioacoustics",
     "equitableAI.pillar2.body":
       "Passive listening stations in the canopy. Open species classifiers turn dawn choruses into living, queryable biodiversity records.",
@@ -324,7 +402,7 @@ export const MESSAGES: Record<Locale, Messages> = {
     "tainaFeature.heading.italic": "Taina",
     "tainaFeature.heading.after": ", our community AI.",
     "tainaFeature.body":
-      "Taina guides local and Indigenous communities through storytelling on how to archive and share knowledge. The data she collects is self-hosted or governed through a community-elected GainForest Data Council — never extracted.",
+      "Taina guides local and Indigenous communities through storytelling on how to archive and share knowledge. The data she collects is self-hosted or governed through a community-elected GainForest Data Council; never extracted.",
     "tainaFeature.cta": "Say hi to Taina",
     "research.eyebrow": "Research",
     "research.heading.before": "We research and",
@@ -338,7 +416,7 @@ export const MESSAGES: Record<Locale, Messages> = {
     "natureGuild.heading.italic": "Nature Guild",
     "natureGuild.heading.after": ".",
     "natureGuild.body":
-      "Learning together and shaping new ways to govern nature stewardship — the Guild is a rotating circle of community scientists, ecologists, and field leads who steer GainForest's research priorities.",
+      "Learning together and shaping new ways to govern nature stewardship; the Guild is a rotating circle of community scientists, ecologists, and field leads who steer GainForest's research priorities.",
     "partners.eyebrow": "Partners",
     "partners.heading.before": "Working with nature stewards",
     "partners.heading.italic": "globally",
@@ -350,10 +428,67 @@ export const MESSAGES: Record<Locale, Messages> = {
     "impact.eyebrow": "Impact report",
     "impact.heading": "Read our 3rd {annual} impact report.",
     "impact.body":
-      "The 24/25 report unpacks our global mission, the year's grants, community-led research highlights, and the financials — audited and open.",
+      "The 24/25 report unpacks our global mission, the year's grants, community-led research highlights, and the financials; audited and open.",
     "impact.cta": "Read the report",
     "media.eyebrow": "Selected media",
     "media.heading": "Awards & press.",
+    "media.scroll": "Scroll →",
+    "media.kind.award": "Award",
+    "media.kind.press": "Press",
+    "media.kind.documentary": "Documentary",
+    "media.kind.launch": "Launch",
+    "media.kind.grant": "Grant",
+    "media.kind.hackathon": "Hackathon",
+    "media.kind.talk": "Talk",
+    "media.kind.podcast": "Podcast",
+    "media.kind.feature": "Feature",
+    "media.kind.blog": "Blog",
+    "media.items.simocracy.headline":
+      "Simocracy launches with AI digital twins allocating a community treasury",
+    "media.items.simocracy.summary":
+      "A mini-documentary follows the Frontier Tower experiment with David Dao, Hypercerts, Funding the Commons, and community sims deliberating over shared funding.",
+    "media.items.klarna.headline":
+      "GainForest selected for Klarna's AI for Climate Resilience Program",
+    "media.items.klarna.summary":
+      "Klarna names GainForest e.V. among six selected innovators using AI to support communities on the climate frontlines.",
+    "media.items.bhutan.headline":
+      "GainForest DeepGov team wins the Bhutan NDI-powered international hackathon",
+    "media.items.bhutan.summary":
+      "Kuensel reports that Team DeepGov and Team Cyberchain emerged as winners of Bhutan's three-day hackathon for decentralised applications powered by National Digital Identity.",
+    "media.items.changenow.headline":
+      "David Dao speaks on nature as an economic choice at ChangeNOW",
+    "media.items.changenow.summary":
+      "ChangeNOW's mainstage conversation features GainForest's approach to AI, remote sensing, blockchain, and ecosystem monitoring for nature finance.",
+    "media.items.cna.headline":
+      "CNA documents how GainForest helps locals conserve mangroves in the Philippines",
+    "media.items.cna.summary":
+      "Tech To Save The World visits the Philippines to show how data collection and AI-backed tools can support mangrove conservation with local communities.",
+    "media.items.atmos.headline":
+      "Atmos features Taina as Indigenous communities safeguard culture with their own ChatGPT",
+    "media.items.atmos.summary":
+      "The Atmos feature follows Tainá, GainForest's community-owned AI assistant for storing local knowledge, stories, and biodiversity observations on community terms.",
+    "media.items.ftc.headline":
+      "David Dao bridges nature, data, and human opportunity",
+    "media.items.ftc.summary":
+      "Funding the Commons features David Dao on GainForest's model for conservation data income and regenerative funding for rainforest communities.",
+    "media.items.maearth.headline":
+      "Conservation Data Income with David Dao and Sharfy Adamantine",
+    "media.items.maearth.summary":
+      "Ma Earth hosts GainForest's co-founders for a long-form conversation on the origin story, current initiatives, retro funding, AI, Web3, and XPRIZE.",
+    "media.items.xprize.headline":
+      "GainForest is an XPRIZE Rainforest Winner",
+    "media.items.xprize.summary":
+      "GainForest and partners are recognised through the XPRIZE Rainforest competition for technology that can reveal and protect biodiversity.",
+    "media.items.swissnex.headline":
+      "GainForest and ETH BiodivX in Amazonia",
+    "media.items.swissnex.summary":
+      "Swissnex reports on Switzerland–Amazonia collaboration, including the ETH BiodivX and GainForest work around biodiversity data and AI.",
+    "media.items.bcg.headline": "BCG & Handelsblatt Vordenker:innen 2022",
+    "media.items.bcg.summary":
+      "GainForest is featured among forward-thinking initiatives connecting food systems, climate, and nature-positive innovation.",
+    "media.items.mades.headline": "Paraguay announces partnership with GainForest",
+    "media.items.mades.summary":
+      "The Ministerio del Ambiente y Desarrollo Sostenible announces support to strengthen protected areas in the Chaco.",
     "supporters.heading.before": "Merci to our",
     "supporters.heading.italic": "supporters",
     "supporters.heading.after": ".",
@@ -388,8 +523,26 @@ export const MESSAGES: Record<Locale, Messages> = {
     "hero.cta.bumicerts": "Explorar Bumicerts",
     "hero.cta.globe": "Abrir el Globo",
     "hero.footnote":
-      "Los Bumicerts se firman en el AT Protocol — cada registro vive en un PDS comunitario y el contador en vivo a la derecha proviene directamente del indexador de GainForest.",
+      "Los Bumicerts se firman en el AT Protocol; cada registro vive en un PDS comunitario y el contador en vivo a la derecha proviene directamente del indexador de GainForest.",
     "choosePath.heading": "Elige cómo quieres usar GainForest",
+    "choosePath.globe.eyebrow": "01 · Explora el mapa",
+    "choosePath.bumicerts.eyebrow": "02 · Conoce el certificado",
+    "choosePath.globe.heading": "¿Qué es Green Globe?",
+    "choosePath.bumicerts.heading": "¿Qué es un Bumicert?",
+    "choosePath.globe.dragHint": "arrastra para girar",
+    "choosePath.globe.previewTitle": "Green Globe",
+    "choosePath.globe.previewLive": "en vivo",
+    "choosePath.globe.previewBody":
+      "Gira el mundo y descubre proyectos liderados por comunidades; cada pin es una organización en ATProto.",
+    "choosePath.globe.pins": "{n}+ pines en vivo",
+    "choosePath.globe.caption.projects": "{n}+ proyectos",
+    "choosePath.globe.cta": "Abrir Green Globe",
+    "choosePath.bumicerts.cta": "Explorar Bumicerts",
+    "choosePath.bumicerts.live": "En vivo · 3 más recientes",
+    "choosePath.bumicerts.fallback": "Recientes · 3 más recientes",
+    "choosePath.bumicerts.verified": "Verificado",
+    "choosePath.bumicerts.signed": "Firmado en ATProto",
+    "choosePath.liveBadge": "En vivo",
     "choosePath.globe.title": "Abrir el Globo",
     "choosePath.globe.body":
       "Descubre proyectos y ecosistemas en todo el mundo. Explora, aprende e inspírate.",
@@ -445,9 +598,9 @@ export const MESSAGES: Record<Locale, Messages> = {
     "taina.shield": "Pregúntame lo que quieras",
     "taina.role": "Co-diseñada con comunidades indígenas de Manaus",
     "taina.greetingHello":
-      "Hola — soy Taina. Siéntate un momento y exploremos GainForest juntos.",
+      "Hola; soy Taina. Siéntate un momento y exploremos GainForest juntos.",
     "taina.greetingHint":
-      "Pregúntame por el Globo, los Bumicerts, el trabajo de las comunidades en la naturaleza o la soberanía de datos indígenas — o solo saluda.",
+      "Pregúntame por el Globo, los Bumicerts, el trabajo de las comunidades en la naturaleza o la soberanía de datos indígenas; o solo saluda.",
     "taina.placeholder": "Saluda…",
     "taina.thinking": "Taina está pensando…",
     "awards.label": "Ganadores de",
@@ -468,7 +621,7 @@ export const MESSAGES: Record<Locale, Messages> = {
       "Tres pilares de investigación abierta que convierten los datos comunitarios en herramientas que la comunidad conserva.",
     "equitableAI.pillar1.title": "Asistentes de IA",
     "equitableAI.pillar1.body":
-      "Compañeras de IA narradoras que ayudan a las comunidades a archivar y compartir conocimiento en su propio idioma — empezando por Taina, co-diseñada en el Gran Manaus.",
+      "Compañeras de IA narradoras que ayudan a las comunidades a archivar y compartir conocimiento en su propio idioma; empezando por Taina, co-diseñada en el Gran Manaus.",
     "equitableAI.pillar2.title": "Bioacústica",
     "equitableAI.pillar2.body":
       "Estaciones de escucha pasiva en el dosel. Clasificadores de especies abiertos transforman los coros del amanecer en registros vivos de biodiversidad.",
@@ -480,7 +633,7 @@ export const MESSAGES: Record<Locale, Messages> = {
     "tainaFeature.heading.italic": "Taina",
     "tainaFeature.heading.after": ", nuestra IA comunitaria.",
     "tainaFeature.body":
-      "Taina acompaña a comunidades locales e indígenas a archivar y compartir conocimiento a través del relato. Los datos que recoge se autoalojan o se gobiernan vía un Consejo de Datos GainForest elegido por la comunidad — nunca se extraen.",
+      "Taina acompaña a comunidades locales e indígenas a archivar y compartir conocimiento a través del relato. Los datos que recoge se autoalojan o se gobiernan vía un Consejo de Datos GainForest elegido por la comunidad; nunca se extraen.",
     "tainaFeature.cta": "Saluda a Taina",
     "research.eyebrow": "Investigación",
     "research.heading.before": "Investigamos e",
@@ -494,7 +647,7 @@ export const MESSAGES: Record<Locale, Messages> = {
     "natureGuild.heading.italic": "Gremio de la Naturaleza",
     "natureGuild.heading.after": ".",
     "natureGuild.body":
-      "Aprendiendo juntas y dando forma a nuevas maneras de gobernar la custodia de la naturaleza — el Gremio es un círculo rotativo de científicas comunitarias, ecólogas y referentes de campo que orientan nuestras prioridades de investigación.",
+      "Aprendiendo juntas y dando forma a nuevas maneras de gobernar la custodia de la naturaleza; el Gremio es un círculo rotativo de científicas comunitarias, ecólogas y referentes de campo que orientan nuestras prioridades de investigación.",
     "partners.eyebrow": "Aliados",
     "partners.heading.before": "Trabajando con guardianes de la naturaleza",
     "partners.heading.italic": "a nivel global",
@@ -506,10 +659,68 @@ export const MESSAGES: Record<Locale, Messages> = {
     "impact.eyebrow": "Reporte de impacto",
     "impact.heading": "Lee nuestro 3er reporte {anual} de impacto.",
     "impact.body":
-      "El reporte 24/25 abre nuestra misión global, los aportes del año, los hitos de investigación comunitaria y los números — auditados y abiertos.",
+      "El reporte 24/25 abre nuestra misión global, los aportes del año, los hitos de investigación comunitaria y los números; auditados y abiertos.",
     "impact.cta": "Leer el reporte",
     "media.eyebrow": "Medios seleccionados",
     "media.heading": "Premios y prensa.",
+    "media.scroll": "Desplaza →",
+    "media.kind.award": "Premio",
+    "media.kind.press": "Prensa",
+    "media.kind.documentary": "Documental",
+    "media.kind.launch": "Lanzamiento",
+    "media.kind.grant": "Beca",
+    "media.kind.hackathon": "Hackathon",
+    "media.kind.talk": "Charla",
+    "media.kind.podcast": "Podcast",
+    "media.kind.feature": "Reportaje",
+    "media.kind.blog": "Blog",
+    "media.items.simocracy.headline":
+      "Lanzamiento de Simocracy: gemelos digitales con IA reparten un tesoro comunitario",
+    "media.items.simocracy.summary":
+      "Un mini documental sigue el experimento en Frontier Tower con David Dao, Hypercerts, Funding the Commons y sims comunitarios deliberando sobre fondos compartidos.",
+    "media.items.klarna.headline":
+      "GainForest, seleccionada para el AI for Climate Resilience Program de Klarna",
+    "media.items.klarna.summary":
+      "Klarna nombra a GainForest e.V. entre seis innovadores seleccionados que usan IA para apoyar a las comunidades en la primera línea climática.",
+    "media.items.bhutan.headline":
+      "El equipo GainForest DeepGov gana el hackathon internacional impulsado por la NDI de Bután",
+    "media.items.bhutan.summary":
+      "Kuensel informa que Team DeepGov y Team Cyberchain ganan el hackathon de tres días de Bután para aplicaciones descentralizadas basadas en la Identidad Digital Nacional.",
+    "media.items.changenow.headline":
+      "David Dao habla en ChangeNOW sobre la naturaleza como elección económica",
+    "media.items.changenow.summary":
+      "La charla principal de ChangeNOW presenta el enfoque de GainForest sobre IA, teledetección, blockchain y monitoreo de ecosistemas para financiar la naturaleza.",
+    "media.items.cna.headline":
+      "CNA documenta cómo GainForest ayuda a conservar manglares en Filipinas",
+    "media.items.cna.summary":
+      "Tech To Save The World visita Filipinas para mostrar cómo la recolección de datos y la IA apoyan la conservación de manglares junto a las comunidades locales.",
+    "media.items.atmos.headline":
+      "Atmos cuenta cómo comunidades indígenas protegen su cultura con su propio ChatGPT",
+    "media.items.atmos.summary":
+      "El reportaje sigue a Tainá, la asistente de IA comunitaria de GainForest, que guarda conocimientos locales, historias y observaciones de biodiversidad bajo gobernanza propia.",
+    "media.items.ftc.headline":
+      "David Dao conecta naturaleza, datos y oportunidad humana",
+    "media.items.ftc.summary":
+      "Funding the Commons presenta a David Dao y el modelo de GainForest de renta por datos de conservación y financiamiento regenerativo para comunidades de selva.",
+    "media.items.maearth.headline":
+      "Renta por datos de conservación con David Dao y Sharfy Adamantine",
+    "media.items.maearth.summary":
+      "Ma Earth conversa con los co-fundadores de GainForest sobre origen, iniciativas actuales, financiamiento retro, IA, Web3 y el XPRIZE.",
+    "media.items.xprize.headline":
+      "GainForest, ganadora del XPRIZE Rainforest",
+    "media.items.xprize.summary":
+      "GainForest y socios son reconocidos por el XPRIZE Rainforest por tecnología que revela y protege la biodiversidad.",
+    "media.items.swissnex.headline":
+      "GainForest y ETH BiodivX en la Amazonía",
+    "media.items.swissnex.summary":
+      "Swissnex relata la colaboración entre Suiza y la Amazonía, incluyendo el trabajo de ETH BiodivX y GainForest en datos de biodiversidad e IA.",
+    "media.items.bcg.headline": "BCG & Handelsblatt Vordenker:innen 2022",
+    "media.items.bcg.summary":
+      "GainForest aparece entre iniciativas pioneras que conectan sistemas alimentarios, clima e innovación a favor de la naturaleza.",
+    "media.items.mades.headline":
+      "Paraguay anuncia su alianza con GainForest",
+    "media.items.mades.summary":
+      "El Ministerio del Ambiente y Desarrollo Sostenible anuncia apoyo para fortalecer las áreas protegidas del Chaco.",
     "supporters.heading.before": "Merci a quienes nos",
     "supporters.heading.italic": "apoyan",
     "supporters.heading.after": ".",
@@ -544,8 +755,26 @@ export const MESSAGES: Record<Locale, Messages> = {
     "hero.cta.bumicerts": "Explorar Bumicerts",
     "hero.cta.globe": "Abrir o Globo",
     "hero.footnote":
-      "Os Bumicerts são assinados no AT Protocol — cada registro vive em um PDS de propriedade comunitária e o contador ao vivo à direita vem direto do indexador da GainForest.",
+      "Os Bumicerts são assinados no AT Protocol; cada registro vive em um PDS de propriedade comunitária e o contador ao vivo à direita vem direto do indexador da GainForest.",
     "choosePath.heading": "Escolha como você quer usar a GainForest",
+    "choosePath.globe.eyebrow": "01 · Explorar o mapa",
+    "choosePath.bumicerts.eyebrow": "02 · Conhecer o certificado",
+    "choosePath.globe.heading": "O que é o Green Globe?",
+    "choosePath.bumicerts.heading": "O que é um Bumicert?",
+    "choosePath.globe.dragHint": "arraste para girar",
+    "choosePath.globe.previewTitle": "Green Globe",
+    "choosePath.globe.previewLive": "ao vivo",
+    "choosePath.globe.previewBody":
+      "Gire e descubra projetos de natureza liderados por comunidades; cada pin é uma organização no ATProto.",
+    "choosePath.globe.pins": "{n}+ pins ao vivo",
+    "choosePath.globe.caption.projects": "{n}+ projetos",
+    "choosePath.globe.cta": "Abrir o Green Globe",
+    "choosePath.bumicerts.cta": "Explorar Bumicerts",
+    "choosePath.bumicerts.live": "Ao vivo · 3 mais recentes",
+    "choosePath.bumicerts.fallback": "Recentes · 3 mais recentes",
+    "choosePath.bumicerts.verified": "Verificado",
+    "choosePath.bumicerts.signed": "Assinado em ATProto",
+    "choosePath.liveBadge": "Ao vivo",
     "choosePath.globe.title": "Abrir o Globo",
     "choosePath.globe.body":
       "Descubra projetos e ecossistemas pelo mundo. Explore, aprenda e inspire-se.",
@@ -601,9 +830,9 @@ export const MESSAGES: Record<Locale, Messages> = {
     "taina.shield": "Me pergunte qualquer coisa",
     "taina.role": "Co-criada com comunidades indígenas de Manaus",
     "taina.greetingHello":
-      "Oi — sou a Taina. Sente um pouco e vamos explorar a GainForest juntas.",
+      "Oi; sou a Taina. Sente um pouco e vamos explorar a GainForest juntas.",
     "taina.greetingHint":
-      "Pergunte sobre o Globo, os Bumicerts, o trabalho das comunidades na natureza ou a soberania de dados indígenas — ou só venha dizer oi.",
+      "Pergunte sobre o Globo, os Bumicerts, o trabalho das comunidades na natureza ou a soberania de dados indígenas; ou só venha dizer oi.",
     "taina.placeholder": "Diga oi…",
     "taina.thinking": "Taina está pensando…",
     "awards.label": "Vencedores de",
@@ -624,7 +853,7 @@ export const MESSAGES: Record<Locale, Messages> = {
       "Três pilares de pesquisa aberta que transformam dados comunitários em ferramentas que a comunidade mantém.",
     "equitableAI.pillar1.title": "Assistentes de IA",
     "equitableAI.pillar1.body":
-      "Companheiras de IA contadoras de histórias que ajudam comunidades a arquivar e compartilhar conhecimento na própria língua — começando pela Taina, co-criada na Grande Manaus.",
+      "Companheiras de IA contadoras de histórias que ajudam comunidades a arquivar e compartilhar conhecimento na própria língua; começando pela Taina, co-criada na Grande Manaus.",
     "equitableAI.pillar2.title": "Bioacústica",
     "equitableAI.pillar2.body":
       "Estações de escuta passiva no dossel. Classificadores de espécies abertos transformam os coros do amanhecer em registros vivos de biodiversidade.",
@@ -636,7 +865,7 @@ export const MESSAGES: Record<Locale, Messages> = {
     "tainaFeature.heading.italic": "Taina",
     "tainaFeature.heading.after": ", nossa IA comunitária.",
     "tainaFeature.body":
-      "A Taina acompanha comunidades locais e indígenas a arquivar e compartilhar conhecimento através do storytelling. Os dados que ela coleta são auto-hospedados ou governados por um Conselho de Dados GainForest eleito pela comunidade — nunca extraídos.",
+      "A Taina acompanha comunidades locais e indígenas a arquivar e compartilhar conhecimento através do storytelling. Os dados que ela coleta são auto-hospedados ou governados por um Conselho de Dados GainForest eleito pela comunidade; nunca extraídos.",
     "tainaFeature.cta": "Diga oi para a Taina",
     "research.eyebrow": "Pesquisa",
     "research.heading.before": "Pesquisamos e",
@@ -650,7 +879,7 @@ export const MESSAGES: Record<Locale, Messages> = {
     "natureGuild.heading.italic": "Conselho da Natureza",
     "natureGuild.heading.after": ".",
     "natureGuild.body":
-      "Aprendendo juntas e desenhando novas formas de governar a guarda da natureza — o Conselho é um círculo rotativo de cientistas comunitárias, ecólogas e líderes de campo que orientam nossas prioridades de pesquisa.",
+      "Aprendendo juntas e desenhando novas formas de governar a guarda da natureza; o Conselho é um círculo rotativo de cientistas comunitárias, ecólogas e líderes de campo que orientam nossas prioridades de pesquisa.",
     "partners.eyebrow": "Parceiros",
     "partners.heading.before": "Trabalhando com guardiães da natureza",
     "partners.heading.italic": "pelo mundo",
@@ -662,10 +891,66 @@ export const MESSAGES: Record<Locale, Messages> = {
     "impact.eyebrow": "Relatório de impacto",
     "impact.heading": "Leia nosso 3º relatório {anual} de impacto.",
     "impact.body":
-      "O relatório 24/25 abre nossa missão global, os aportes do ano, os destaques de pesquisa comunitária e os números — auditados e abertos.",
+      "O relatório 24/25 abre nossa missão global, os aportes do ano, os destaques de pesquisa comunitária e os números; auditados e abertos.",
     "impact.cta": "Ler o relatório",
     "media.eyebrow": "Mídia selecionada",
     "media.heading": "Prêmios e imprensa.",
+    "media.scroll": "Rolar →",
+    "media.kind.award": "Prêmio",
+    "media.kind.press": "Imprensa",
+    "media.kind.documentary": "Documentário",
+    "media.kind.launch": "Lançamento",
+    "media.kind.grant": "Bolsa",
+    "media.kind.hackathon": "Hackathon",
+    "media.kind.talk": "Palestra",
+    "media.kind.podcast": "Podcast",
+    "media.kind.feature": "Matéria",
+    "media.kind.blog": "Blog",
+    "media.items.simocracy.headline":
+      "Simocracy estreia com gêmeos digitais de IA distribuindo um tesouro comunitário",
+    "media.items.simocracy.summary":
+      "Um mini-documentário acompanha o experimento da Frontier Tower com David Dao, Hypercerts, Funding the Commons e sims comunitários deliberando sobre recursos compartilhados.",
+    "media.items.klarna.headline":
+      "GainForest é selecionada para o AI for Climate Resilience Program da Klarna",
+    "media.items.klarna.summary":
+      "A Klarna inclui a GainForest e.V. entre seis inovadoras selecionadas que usam IA para apoiar comunidades na linha de frente do clima.",
+    "media.items.bhutan.headline":
+      "Equipe GainForest DeepGov vence o hackathon internacional do NDI do Butão",
+    "media.items.bhutan.summary":
+      "O Kuensel relata que Team DeepGov e Team Cyberchain vencem o hackathon de três dias do Butão para aplicações descentralizadas baseadas na Identidade Digital Nacional.",
+    "media.items.changenow.headline":
+      "David Dao fala sobre a natureza como escolha econômica no ChangeNOW",
+    "media.items.changenow.summary":
+      "A conversa principal do ChangeNOW apresenta a abordagem da GainForest com IA, sensoriamento remoto, blockchain e monitoramento de ecossistemas para financiar a natureza.",
+    "media.items.cna.headline":
+      "CNA mostra como a GainForest ajuda a conservar manguezais nas Filipinas",
+    "media.items.cna.summary":
+      "Tech To Save The World vai às Filipinas para mostrar como a coleta de dados e ferramentas de IA apoiam a conservação de manguezais com comunidades locais.",
+    "media.items.atmos.headline":
+      "Atmos mostra como grupos indígenas protegem sua cultura com seu próprio ChatGPT",
+    "media.items.atmos.summary":
+      "A matéria acompanha a Tainá, a IA comunitária da GainForest que guarda saberes locais, histórias e observações de biodiversidade segundo regras da comunidade.",
+    "media.items.ftc.headline":
+      "David Dao conecta natureza, dados e oportunidade humana",
+    "media.items.ftc.summary":
+      "Funding the Commons traz David Dao e o modelo da GainForest de renda por dados de conservação e financiamento regenerativo para comunidades de floresta.",
+    "media.items.maearth.headline":
+      "Renda por dados de conservação com David Dao e Sharfy Adamantine",
+    "media.items.maearth.summary":
+      "Ma Earth conversa com os co-fundadores da GainForest sobre origem, iniciativas atuais, financiamento retro, IA, Web3 e o XPRIZE.",
+    "media.items.xprize.headline": "GainForest, vencedora do XPRIZE Rainforest",
+    "media.items.xprize.summary":
+      "GainForest e parceiros são reconhecidos pelo XPRIZE Rainforest por tecnologia que revela e protege a biodiversidade.",
+    "media.items.swissnex.headline": "GainForest e ETH BiodivX na Amazônia",
+    "media.items.swissnex.summary":
+      "A Swissnex relata a colaboração entre Suíça e Amazônia, incluindo o trabalho da ETH BiodivX e da GainForest com dados de biodiversidade e IA.",
+    "media.items.bcg.headline": "BCG & Handelsblatt Vordenker:innen 2022",
+    "media.items.bcg.summary":
+      "GainForest é destaque entre iniciativas pioneiras que conectam alimentação, clima e inovação a favor da natureza.",
+    "media.items.mades.headline":
+      "Paraguai anuncia parceria com a GainForest",
+    "media.items.mades.summary":
+      "O Ministerio del Ambiente y Desarrollo Sostenible anuncia apoio para fortalecer as áreas protegidas do Chaco.",
     "supporters.heading.before": "Merci a quem",
     "supporters.heading.italic": "nos apoia",
     "supporters.heading.after": ".",
@@ -700,8 +985,26 @@ export const MESSAGES: Record<Locale, Messages> = {
     "hero.cta.bumicerts": "Vinjari Bumicerts",
     "hero.cta.globe": "Fungua Dunia",
     "hero.footnote":
-      "Bumicerts husainiwa kwenye AT Protocol — kila rekodi inaishi kwenye PDS inayomilikiwa na jamii na hesabu ya moja kwa moja upande wa kulia inatoka moja kwa moja kwa kiashiria cha GainForest.",
+      "Bumicerts husainiwa kwenye AT Protocol; kila rekodi inaishi kwenye PDS inayomilikiwa na jamii na hesabu ya moja kwa moja upande wa kulia inatoka moja kwa moja kwa kiashiria cha GainForest.",
     "choosePath.heading": "Chagua jinsi unavyotaka kutumia GainForest",
+    "choosePath.globe.eyebrow": "01 · Chunguza ramani",
+    "choosePath.bumicerts.eyebrow": "02 · Tambua cheti",
+    "choosePath.globe.heading": "Green Globe ni nini?",
+    "choosePath.bumicerts.heading": "Bumicert ni nini?",
+    "choosePath.globe.dragHint": "vuta kuzungusha",
+    "choosePath.globe.previewTitle": "Green Globe",
+    "choosePath.globe.previewLive": "moja kwa moja",
+    "choosePath.globe.previewBody":
+      "Zungusha tufe na uone miradi ya jamii ya hifadhi ya asili; kila kilele ni shirika kwenye ATProto.",
+    "choosePath.globe.pins": "{n}+ vilele vya moja kwa moja",
+    "choosePath.globe.caption.projects": "{n}+ miradi",
+    "choosePath.globe.cta": "Fungua Green Globe",
+    "choosePath.bumicerts.cta": "Chunguza Bumicerts",
+    "choosePath.bumicerts.live": "Moja kwa moja · 3 za hivi karibuni",
+    "choosePath.bumicerts.fallback": "Za hivi karibuni · 3",
+    "choosePath.bumicerts.verified": "Imethibitishwa",
+    "choosePath.bumicerts.signed": "Imesainiwa kwa ATProto",
+    "choosePath.liveBadge": "Moja kwa moja",
     "choosePath.globe.title": "Fungua Dunia",
     "choosePath.globe.body":
       "Gundua miradi na mifumo ya ikolojia duniani kote. Vinjari, jifunze, na pata msukumo.",
@@ -757,9 +1060,9 @@ export const MESSAGES: Record<Locale, Messages> = {
     "taina.shield": "Niulize lolote",
     "taina.role": "Iliyoundwa pamoja na jamii za Kiasili za Manaus",
     "taina.greetingHello":
-      "Habari — mimi ni Taina. Kaa kidogo, tuvinjari GainForest pamoja.",
+      "Habari; mimi ni Taina. Kaa kidogo, tuvinjari GainForest pamoja.",
     "taina.greetingHint":
-      "Niulize kuhusu Dunia, Bumicerts, kazi za kijamii za asili au mamlaka ya data ya Kiasili — au tu sema habari.",
+      "Niulize kuhusu Dunia, Bumicerts, kazi za kijamii za asili au mamlaka ya data ya Kiasili; au tu sema habari.",
     "taina.placeholder": "Sema habari…",
     "taina.thinking": "Taina anafikiria…",
     "awards.label": "Washindi wa",
@@ -780,7 +1083,7 @@ export const MESSAGES: Record<Locale, Messages> = {
       "Nguzo tatu za utafiti wazi zinazogeuza data ya jamii kuwa zana ambazo jamii inazimiliki.",
     "equitableAI.pillar1.title": "Wasaidizi wa AI",
     "equitableAI.pillar1.body":
-      "Wasaidizi wa AI wanaosimulia hadithi wanaowasaidia jamii kuhifadhi na kushiriki maarifa katika lugha yao — kuanzia na Taina, aliyebuniwa pamoja huko Manaus.",
+      "Wasaidizi wa AI wanaosimulia hadithi wanaowasaidia jamii kuhifadhi na kushiriki maarifa katika lugha yao; kuanzia na Taina, aliyebuniwa pamoja huko Manaus.",
     "equitableAI.pillar2.title": "Bioakustiki",
     "equitableAI.pillar2.body":
       "Vituo vya kusikiliza vya kimya mlimani. Visajili huria vya spishi vinabadilisha kwaya za alfajiri kuwa rekodi hai za bioanuwai.",
@@ -792,7 +1095,7 @@ export const MESSAGES: Record<Locale, Messages> = {
     "tainaFeature.heading.italic": "Taina",
     "tainaFeature.heading.after": ", AI wetu wa kijamii.",
     "tainaFeature.body":
-      "Taina anaongoza jamii za kienyeji na za Kiasili kuhifadhi na kushiriki maarifa kwa kusimulia hadithi. Data anayoikusanya inahifadhiwa nyumbani au kusimamiwa na Baraza la Data la GainForest lililochaguliwa na jamii — haitolewi kamwe.",
+      "Taina anaongoza jamii za kienyeji na za Kiasili kuhifadhi na kushiriki maarifa kwa kusimulia hadithi. Data anayoikusanya inahifadhiwa nyumbani au kusimamiwa na Baraza la Data la GainForest lililochaguliwa na jamii; haitolewi kamwe.",
     "tainaFeature.cta": "Mkaribishe Taina",
     "research.eyebrow": "Utafiti",
     "research.heading.before": "Tunafanya utafiti na",
@@ -806,7 +1109,7 @@ export const MESSAGES: Record<Locale, Messages> = {
     "natureGuild.heading.italic": "Baraza la Asili",
     "natureGuild.heading.after": ".",
     "natureGuild.body":
-      "Tukijifunza pamoja na kuunda njia mpya za kusimamia utunzaji wa asili — Baraza ni mzunguko wa wanasayansi wa jamii, wanaikolojia na viongozi wa eneo wanaoongoza vipaumbele vyetu vya utafiti.",
+      "Tukijifunza pamoja na kuunda njia mpya za kusimamia utunzaji wa asili; Baraza ni mzunguko wa wanasayansi wa jamii, wanaikolojia na viongozi wa eneo wanaoongoza vipaumbele vyetu vya utafiti.",
     "partners.eyebrow": "Washirika",
     "partners.heading.before": "Tunafanya kazi na walinzi wa asili",
     "partners.heading.italic": "duniani kote",
@@ -818,10 +1121,68 @@ export const MESSAGES: Record<Locale, Messages> = {
     "impact.eyebrow": "Ripoti ya athari",
     "impact.heading": "Soma ripoti yetu ya 3 ya {kila mwaka} ya athari.",
     "impact.body":
-      "Ripoti ya 24/25 inafichua dhamira yetu ya kimataifa, ruzuku za mwaka, vidokezo vya utafiti wa kijamii na takwimu — zilizokaguliwa na za wazi.",
+      "Ripoti ya 24/25 inafichua dhamira yetu ya kimataifa, ruzuku za mwaka, vidokezo vya utafiti wa kijamii na takwimu; zilizokaguliwa na za wazi.",
     "impact.cta": "Soma ripoti",
     "media.eyebrow": "Vyombo vya habari",
     "media.heading": "Tuzo na vyombo vya habari.",
+    "media.scroll": "Sogeza →",
+    "media.kind.award": "Tuzo",
+    "media.kind.press": "Habari",
+    "media.kind.documentary": "Filamu",
+    "media.kind.launch": "Uzinduzi",
+    "media.kind.grant": "Ufadhili",
+    "media.kind.hackathon": "Hackathon",
+    "media.kind.talk": "Mhadhara",
+    "media.kind.podcast": "Podikasti",
+    "media.kind.feature": "Kipengele",
+    "media.kind.blog": "Blogu",
+    "media.items.simocracy.headline":
+      "Simocracy yazinduliwa, mapacha ya kidijitali ya AI yagawanya hazina ya jamii",
+    "media.items.simocracy.summary":
+      "Filamu fupi inafuata jaribio la Frontier Tower likimshirikisha David Dao, Hypercerts, Funding the Commons na sims za jamii zikijadili rasilimali za pamoja.",
+    "media.items.klarna.headline":
+      "GainForest yachaguliwa na Klarna kwa AI for Climate Resilience Program",
+    "media.items.klarna.summary":
+      "Klarna inaitaja GainForest e.V. miongoni mwa wabunifu sita waliochaguliwa wanaotumia AI kusaidia jamii zilizo mstari wa mbele wa hali ya hewa.",
+    "media.items.bhutan.headline":
+      "Timu ya GainForest DeepGov yashinda hackathon ya kimataifa ya NDI ya Bhutan",
+    "media.items.bhutan.summary":
+      "Kuensel yaripoti Team DeepGov na Team Cyberchain washinda hackathon ya siku tatu ya Bhutan kwa programu zilizoegemea kwenye Utambulisho wa Kitaifa wa Kidijitali.",
+    "media.items.changenow.headline":
+      "David Dao azungumzia asili kama chaguo la kiuchumi katika ChangeNOW",
+    "media.items.changenow.summary":
+      "Mhadhara mkuu wa ChangeNOW unaonyesha njia ya GainForest kupitia AI, hisia za mbali, blockchain na ufuatiliaji wa mifumo ikolojia kwa fedha za asili.",
+    "media.items.cna.headline":
+      "CNA inaonyesha jinsi GainForest inavyosaidia kuhifadhi mikoko nchini Ufilipino",
+    "media.items.cna.summary":
+      "Tech To Save The World inatembelea Ufilipino kuonyesha jinsi ukusanyaji wa data na zana za AI vinavyosaidia uhifadhi wa mikoko pamoja na jamii za eneo.",
+    "media.items.atmos.headline":
+      "Atmos yaonyesha Taina, jinsi jamii za asili zinavyolinda utamaduni na ChatGPT yao wenyewe",
+    "media.items.atmos.summary":
+      "Makala ya Atmos inafuata Tainá, msaidizi wa AI wa GainForest unaomilikiwa na jamii kuhifadhi maarifa, hadithi na uchunguzi wa bayoanuwai kwa masharti ya jamii.",
+    "media.items.ftc.headline":
+      "David Dao anaunganisha asili, data na fursa za kibinadamu",
+    "media.items.ftc.summary":
+      "Funding the Commons inaonyesha David Dao na mfano wa GainForest wa kipato kutokana na data ya uhifadhi na ufadhili wa kuzaa upya kwa jamii za misitu.",
+    "media.items.maearth.headline":
+      "Kipato kutokana na data ya uhifadhi na David Dao na Sharfy Adamantine",
+    "media.items.maearth.summary":
+      "Ma Earth inazungumza na waanzilishi wa GainForest kuhusu chimbuko, mipango ya sasa, ufadhili wa nyuma, AI, Web3 na XPRIZE.",
+    "media.items.xprize.headline":
+      "GainForest ni mshindi wa XPRIZE Rainforest",
+    "media.items.xprize.summary":
+      "GainForest na washirika wanatambuliwa na XPRIZE Rainforest kwa teknolojia inayoonyesha na kulinda bayoanuwai.",
+    "media.items.swissnex.headline":
+      "GainForest na ETH BiodivX katika Amazonia",
+    "media.items.swissnex.summary":
+      "Swissnex inaripoti ushirikiano kati ya Uswisi na Amazonia, ikiwemo kazi ya ETH BiodivX na GainForest kuhusu data ya bayoanuwai na AI.",
+    "media.items.bcg.headline": "BCG & Handelsblatt Vordenker:innen 2022",
+    "media.items.bcg.summary":
+      "GainForest inaangaziwa miongoni mwa mipango ya mbele inayounganisha mifumo ya chakula, hali ya hewa na ubunifu unaohifadhi asili.",
+    "media.items.mades.headline":
+      "Paraguay yatangaza ushirikiano na GainForest",
+    "media.items.mades.summary":
+      "Wizara ya Mazingira na Maendeleo Endelevu yatangaza msaada wa kuimarisha maeneo yaliyolindwa ya Chaco.",
     "supporters.heading.before": "Merci kwa",
     "supporters.heading.italic": "wafadhili wetu",
     "supporters.heading.after": ".",
@@ -856,8 +1217,26 @@ export const MESSAGES: Record<Locale, Messages> = {
     "hero.cta.bumicerts": "Jelajahi Bumicerts",
     "hero.cta.globe": "Buka Globe",
     "hero.footnote":
-      "Bumicerts ditandatangani di AT Protocol — setiap catatan disimpan di PDS milik komunitas dan jumlah langsung di sebelah kanan diambil langsung dari pengindeks GainForest.",
+      "Bumicerts ditandatangani di AT Protocol; setiap catatan disimpan di PDS milik komunitas dan jumlah langsung di sebelah kanan diambil langsung dari pengindeks GainForest.",
     "choosePath.heading": "Pilih cara Anda menggunakan GainForest",
+    "choosePath.globe.eyebrow": "01 · Jelajahi peta",
+    "choosePath.bumicerts.eyebrow": "02 · Kenali sertifikat",
+    "choosePath.globe.heading": "Apa itu Green Globe?",
+    "choosePath.bumicerts.heading": "Apa itu Bumicert?",
+    "choosePath.globe.dragHint": "tarik untuk memutar",
+    "choosePath.globe.previewTitle": "Green Globe",
+    "choosePath.globe.previewLive": "langsung",
+    "choosePath.globe.previewBody":
+      "Putar bola dunia dan temukan proyek alam yang dipimpin komunitas; setiap pin adalah organisasi di ATProto.",
+    "choosePath.globe.pins": "{n}+ pin langsung",
+    "choosePath.globe.caption.projects": "{n}+ proyek",
+    "choosePath.globe.cta": "Buka Green Globe",
+    "choosePath.bumicerts.cta": "Jelajahi Bumicerts",
+    "choosePath.bumicerts.live": "Langsung · 3 terbaru",
+    "choosePath.bumicerts.fallback": "Terbaru · 3",
+    "choosePath.bumicerts.verified": "Terverifikasi",
+    "choosePath.bumicerts.signed": "Ditandatangani di ATProto",
+    "choosePath.liveBadge": "Langsung",
     "choosePath.globe.title": "Buka Globe",
     "choosePath.globe.body":
       "Temukan proyek dan ekosistem di seluruh dunia. Jelajahi, pelajari, dan dapatkan inspirasi.",
@@ -913,9 +1292,9 @@ export const MESSAGES: Record<Locale, Messages> = {
     "taina.shield": "Tanya saya apa saja",
     "taina.role": "Dirancang bersama komunitas adat di Manaus",
     "taina.greetingHello":
-      "Halo — aku Taina. Duduklah sebentar, mari kita jelajahi GainForest bersama.",
+      "Halo; aku Taina. Duduklah sebentar, mari kita jelajahi GainForest bersama.",
     "taina.greetingHint":
-      "Tanya aku tentang Globe, Bumicerts, kerja komunitas untuk alam, atau kedaulatan data adat — atau sapa saja.",
+      "Tanya aku tentang Globe, Bumicerts, kerja komunitas untuk alam, atau kedaulatan data adat; atau sapa saja.",
     "taina.placeholder": "Sapa…",
     "taina.thinking": "Taina sedang berpikir…",
     "awards.label": "Pemenang",
@@ -936,7 +1315,7 @@ export const MESSAGES: Record<Locale, Messages> = {
       "Tiga pilar riset terbuka yang mengubah data dari komunitas menjadi alat yang dimiliki komunitas.",
     "equitableAI.pillar1.title": "Asisten AI",
     "equitableAI.pillar1.body":
-      "Pendamping AI berbasis cerita yang membantu komunitas mengarsipkan dan berbagi pengetahuan dalam bahasa mereka sendiri — dimulai dari Taina, yang dirancang bersama di Greater Manaus.",
+      "Pendamping AI berbasis cerita yang membantu komunitas mengarsipkan dan berbagi pengetahuan dalam bahasa mereka sendiri; dimulai dari Taina, yang dirancang bersama di Greater Manaus.",
     "equitableAI.pillar2.title": "Bioakustik",
     "equitableAI.pillar2.body":
       "Stasiun pendengar pasif di kanopi. Pengklasifikasi spesies terbuka mengubah paduan suara fajar menjadi rekaman keanekaragaman hayati yang hidup.",
@@ -948,7 +1327,7 @@ export const MESSAGES: Record<Locale, Messages> = {
     "tainaFeature.heading.italic": "Taina",
     "tainaFeature.heading.after": ", AI komunitas kami.",
     "tainaFeature.body":
-      "Taina memandu komunitas lokal dan adat untuk mengarsipkan dan berbagi pengetahuan lewat bercerita. Data yang ia kumpulkan dapat dihos sendiri atau dikelola oleh Dewan Data GainForest yang dipilih komunitas — tidak pernah diekstraksi.",
+      "Taina memandu komunitas lokal dan adat untuk mengarsipkan dan berbagi pengetahuan lewat bercerita. Data yang ia kumpulkan dapat dihos sendiri atau dikelola oleh Dewan Data GainForest yang dipilih komunitas; tidak pernah diekstraksi.",
     "tainaFeature.cta": "Sapa Taina",
     "research.eyebrow": "Riset",
     "research.heading.before": "Kami meneliti dan",
@@ -962,7 +1341,7 @@ export const MESSAGES: Record<Locale, Messages> = {
     "natureGuild.heading.italic": "Dewan Alam",
     "natureGuild.heading.after": ".",
     "natureGuild.body":
-      "Belajar bersama dan membentuk cara baru menata kepedulian terhadap alam — Dewan adalah lingkaran berputar yang berisi ilmuwan komunitas, ekolog, dan koordinator lapangan yang mengarahkan prioritas riset kami.",
+      "Belajar bersama dan membentuk cara baru menata kepedulian terhadap alam; Dewan adalah lingkaran berputar yang berisi ilmuwan komunitas, ekolog, dan koordinator lapangan yang mengarahkan prioritas riset kami.",
     "partners.eyebrow": "Mitra",
     "partners.heading.before": "Bekerja bersama penjaga alam",
     "partners.heading.italic": "di seluruh dunia",
@@ -974,10 +1353,66 @@ export const MESSAGES: Record<Locale, Messages> = {
     "impact.eyebrow": "Laporan dampak",
     "impact.heading": "Baca laporan dampak {tahunan} ke-3 kami.",
     "impact.body":
-      "Laporan 24/25 membuka misi global kami, hibah tahunan, sorotan riset komunitas, dan angka-angka — telah diaudit dan terbuka.",
+      "Laporan 24/25 membuka misi global kami, hibah tahunan, sorotan riset komunitas, dan angka-angka; telah diaudit dan terbuka.",
     "impact.cta": "Baca laporannya",
     "media.eyebrow": "Media pilihan",
     "media.heading": "Penghargaan & pers.",
+    "media.scroll": "Geser →",
+    "media.kind.award": "Penghargaan",
+    "media.kind.press": "Pers",
+    "media.kind.documentary": "Dokumenter",
+    "media.kind.launch": "Peluncuran",
+    "media.kind.grant": "Hibah",
+    "media.kind.hackathon": "Hackathon",
+    "media.kind.talk": "Talk",
+    "media.kind.podcast": "Podcast",
+    "media.kind.feature": "Liputan",
+    "media.kind.blog": "Blog",
+    "media.items.simocracy.headline":
+      "Simocracy meluncur dengan kembaran digital AI mengalokasikan kas komunitas",
+    "media.items.simocracy.summary":
+      "Sebuah mini dokumenter mengikuti eksperimen Frontier Tower bersama David Dao, Hypercerts, Funding the Commons, dan sims komunitas yang membahas dana bersama.",
+    "media.items.klarna.headline":
+      "GainForest terpilih dalam AI for Climate Resilience Program Klarna",
+    "media.items.klarna.summary":
+      "Klarna menyebut GainForest e.V. di antara enam inovator terpilih yang menggunakan AI untuk mendukung komunitas di garis depan perubahan iklim.",
+    "media.items.bhutan.headline":
+      "Tim GainForest DeepGov memenangi hackathon internasional NDI Bhutan",
+    "media.items.bhutan.summary":
+      "Kuensel melaporkan Team DeepGov dan Team Cyberchain menjadi pemenang hackathon tiga hari Bhutan untuk aplikasi terdesentralisasi berbasis Identitas Digital Nasional.",
+    "media.items.changenow.headline":
+      "David Dao bicara tentang alam sebagai pilihan ekonomi di ChangeNOW",
+    "media.items.changenow.summary":
+      "Sesi panggung utama ChangeNOW menampilkan pendekatan GainForest tentang AI, penginderaan jauh, blockchain, dan pemantauan ekosistem untuk pendanaan alam.",
+    "media.items.cna.headline":
+      "CNA mendokumentasikan bagaimana GainForest membantu konservasi mangrove di Filipina",
+    "media.items.cna.summary":
+      "Tech To Save The World mengunjungi Filipina dan menunjukkan bagaimana pengumpulan data serta AI mendukung konservasi mangrove bersama komunitas lokal.",
+    "media.items.atmos.headline":
+      "Atmos mengangkat Taina, komunitas adat menjaga budaya dengan ChatGPT mereka sendiri",
+    "media.items.atmos.summary":
+      "Liputan Atmos mengikuti Tainá, asisten AI milik komunitas dari GainForest yang menyimpan pengetahuan lokal, cerita, dan pengamatan keanekaragaman hayati sesuai aturan komunitas.",
+    "media.items.ftc.headline":
+      "David Dao menyambungkan alam, data, dan peluang manusia",
+    "media.items.ftc.summary":
+      "Funding the Commons menampilkan David Dao dan model GainForest tentang pendapatan dari data konservasi serta pendanaan regeneratif untuk komunitas hutan hujan.",
+    "media.items.maearth.headline":
+      "Pendapatan dari data konservasi bersama David Dao dan Sharfy Adamantine",
+    "media.items.maearth.summary":
+      "Ma Earth berbincang dengan para co-founder GainForest tentang kisah awal, inisiatif kini, pendanaan retro, AI, Web3, dan XPRIZE.",
+    "media.items.xprize.headline": "GainForest, pemenang XPRIZE Rainforest",
+    "media.items.xprize.summary":
+      "GainForest dan mitra diakui oleh XPRIZE Rainforest atas teknologi yang mengungkap dan melindungi keanekaragaman hayati.",
+    "media.items.swissnex.headline": "GainForest dan ETH BiodivX di Amazonia",
+    "media.items.swissnex.summary":
+      "Swissnex memberitakan kolaborasi Swiss-Amazonia, termasuk pekerjaan ETH BiodivX dan GainForest seputar data keanekaragaman hayati dan AI.",
+    "media.items.bcg.headline": "BCG & Handelsblatt Vordenker:innen 2022",
+    "media.items.bcg.summary":
+      "GainForest disorot sebagai salah satu inisiatif perintis yang menghubungkan sistem pangan, iklim, dan inovasi pro-alam.",
+    "media.items.mades.headline":
+      "Paraguay mengumumkan kemitraan dengan GainForest",
+    "media.items.mades.summary":
+      "Ministerio del Ambiente y Desarrollo Sostenible mengumumkan dukungan untuk memperkuat kawasan lindung di Chaco.",
     "supporters.heading.before": "Merci untuk",
     "supporters.heading.italic": "para pendukung",
     "supporters.heading.after": ".",
