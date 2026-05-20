@@ -418,7 +418,10 @@ Funds". The banner in `PartnersClient.tsx` should render real organization /
 community names from `ProjectPin.name`, deduped at the UI boundary, and the
 right-side globe should use the same `pins` array so the names and map agree.
 If the upstream is down, the only acceptable fallback is the fallback already
-owned by `app/_lib/projects.ts`.
+owned by `app/_lib/projects.ts`. The small "monthly community calls" card in
+this section links to `https://www.youtube.com/@gainforest/videos`, where the
+team publishes recurring community-call recordings and steward sessions; keep
+that as a subtle CTA rather than a separate fake data feed.
 
 ### Adding Awards & press / news carousel items
 

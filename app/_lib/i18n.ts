@@ -204,6 +204,9 @@ type Messages = {
   "partners.statLabel": string; // "nature partners globally"
   "partners.bannerLabel": string;
   "partners.bannerCountLabel": string;
+  "partners.callsEyebrow": string;
+  "partners.callsTitle": string;
+  "partners.callsBody": string;
 
   // ── Impact Report ──────────────────────────────────────────────
   "impact.eyebrow": string;
@@ -449,6 +452,10 @@ export const MESSAGES: Record<Locale, Messages> = {
     "partners.statLabel": "nature partners worldwide",
     "partners.bannerLabel": "Live from Green Globe",
     "partners.bannerCountLabel": "names",
+    "partners.callsEyebrow": "Monthly community calls",
+    "partners.callsTitle": "Hear the stewards behind the pins.",
+    "partners.callsBody":
+      "Watch recent GainForest sessions where communities share field updates, restoration lessons, and open tools.",
     "impact.eyebrow": "Impact report",
     "impact.heading": "Read our 3rd {annual} impact report.",
     "impact.body":
@@ -722,6 +729,10 @@ export const MESSAGES: Record<Locale, Messages> = {
     "partners.statLabel": "aliados de naturaleza en el mundo",
     "partners.bannerLabel": "En vivo desde Green Globe",
     "partners.bannerCountLabel": "nombres",
+    "partners.callsEyebrow": "Llamadas comunitarias mensuales",
+    "partners.callsTitle": "Escucha a los guardianes detrás de los puntos.",
+    "partners.callsBody":
+      "Mira sesiones recientes de GainForest donde las comunidades comparten avances de campo, aprendizajes de restauración y herramientas abiertas.",
     "impact.eyebrow": "Reporte de impacto",
     "impact.heading": "Lee nuestro 3er reporte {anual} de impacto.",
     "impact.body":
@@ -996,6 +1007,10 @@ export const MESSAGES: Record<Locale, Messages> = {
     "partners.statLabel": "parceiros pela natureza no mundo",
     "partners.bannerLabel": "Ao vivo do Green Globe",
     "partners.bannerCountLabel": "nomes",
+    "partners.callsEyebrow": "Chamadas comunitárias mensais",
+    "partners.callsTitle": "Ouça os guardiões por trás dos pontos.",
+    "partners.callsBody":
+      "Assista a sessões recentes da GainForest em que comunidades compartilham atualizações de campo, aprendizados de restauração e ferramentas abertas.",
     "impact.eyebrow": "Relatório de impacto",
     "impact.heading": "Leia nosso 3º relatório {anual} de impacto.",
     "impact.body":
@@ -1268,6 +1283,10 @@ export const MESSAGES: Record<Locale, Messages> = {
     "partners.statLabel": "washirika wa asili duniani",
     "partners.bannerLabel": "Moja kwa moja kutoka Green Globe",
     "partners.bannerCountLabel": "majina",
+    "partners.callsEyebrow": "Mikutano ya kila mwezi ya jamii",
+    "partners.callsTitle": "Sikiliza walinzi walio nyuma ya alama hizi.",
+    "partners.callsBody":
+      "Tazama vipindi vya hivi karibuni vya GainForest ambapo jamii hushiriki taarifa za uwandani, masomo ya urejeshaji na zana huria.",
     "impact.eyebrow": "Ripoti ya athari",
     "impact.heading": "Soma ripoti yetu ya 3 ya {kila mwaka} ya athari.",
     "impact.body":
@@ -1542,6 +1561,10 @@ export const MESSAGES: Record<Locale, Messages> = {
     "partners.statLabel": "mitra alam di seluruh dunia",
     "partners.bannerLabel": "Langsung dari Green Globe",
     "partners.bannerCountLabel": "nama",
+    "partners.callsEyebrow": "Panggilan komunitas bulanan",
+    "partners.callsTitle": "Dengarkan para penjaga di balik titik-titik ini.",
+    "partners.callsBody":
+      "Tonton sesi terbaru GainForest saat komunitas berbagi kabar lapangan, pelajaran restorasi, dan alat terbuka.",
     "impact.eyebrow": "Laporan dampak",
     "impact.heading": "Baca laporan dampak {tahunan} ke-3 kami.",
     "impact.body":

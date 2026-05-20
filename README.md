@@ -149,6 +149,8 @@ Hyperindex-backed source as the globe pins — to render a banner of real
 organization/community names. Do not replace this with static categories or
 marketing archetypes. If you change the section, keep the banner and the globe
 on the same `ProjectPin[]` dataset so the names and map remain consistent.
+The adjacent community-calls CTA links to the GainForest YouTube videos page,
+where monthly community calls and steward sessions are published.
 
 ### 4. Awards & press carousel → curated sources + Substack RSS
 

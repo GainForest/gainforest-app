@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { LiveGlobe } from "./LiveGlobe";
 import { useT } from "./LocaleProvider";
 import type { ProjectPin } from "../_lib/projects";
@@ -141,6 +142,31 @@ export function ClientPartners({ pins }: { pins: ProjectPin[] }) {
                 <CommunityNameRail names={secondRow} reverse />
               ) : null}
             </div>
+
+            <Link
+              href="https://www.youtube.com/@gainforest/videos"
+              target="_blank"
+              rel="noreferrer"
+              className="group mt-5 flex max-w-[620px] items-center justify-between gap-5 rounded-[20px] border border-border-soft bg-background/70 px-5 py-4 transition-all hover:-translate-y-0.5 hover:border-foreground/25 hover:bg-background"
+            >
+              <span className="min-w-0">
+                <span className="block text-[11px] uppercase tracking-[0.16em] text-foreground/45">
+                  {t("partners.callsEyebrow")}
+                </span>
+                <span className="mt-1 block font-garamond text-[22px] leading-[1.08] text-foreground sm:text-[24px]">
+                  {t("partners.callsTitle")}
+                </span>
+                <span className="mt-2 block text-[13px] leading-[1.45] text-foreground/62">
+                  {t("partners.callsBody")}
+                </span>
+              </span>
+              <span
+                aria-hidden
+                className="shrink-0 text-[22px] text-primary transition-transform group-hover:translate-x-1"
+              >
+                →
+              </span>
+            </Link>
           </div>
 
           {/* Right column — rotating LiveGlobe. Same dataset as the
