@@ -43,16 +43,18 @@ export async function ChoosePath({
   // so it stays inside the page's cached server render.
   const pins = await fetchProjectPins();
 
-  // Featured trio for the right card. We render three Pokemon-card
-  // style previews so visitors see Bumicerts as a *collection* of
-  // verifiable records, not a single sample. Prefer entries with
-  // a thumbnail AND a non-trivial description — those telegraph the
-  // "structured record with story + photo" idea the section is making.
-  const withImage = snapshot.bumicerts.filter(
+  // Featured trio for the right card. `fetchLiveBumicerts()` already
+  // sorts by `createdAt DESC`, so preserving array order here means
+  // these are the most recent high-quality Bumicerts that have enough
+  // visual/story signal to work as small preview cards. Dedupe because
+  // the fallback pass can overlap the preferred pass.
+  const withImageAndDescription = snapshot.bumicerts.filter(
     (b) => b.imageUrl && b.shortDescription && b.shortDescription.length > 20,
   );
-  const fallback = snapshot.bumicerts.filter((b) => b.imageUrl);
-  const featured = [...withImage, ...fallback].slice(0, 3);
+  const withImage = snapshot.bumicerts.filter((b) => b.imageUrl);
+  const featured = Array.from(
+    new Map([...withImageAndDescription, ...withImage].map((b) => [b.id, b])).values(),
+  ).slice(0, 3);
 
   return (
     <section className="border-t border-border-soft">
@@ -135,9 +137,12 @@ export async function ChoosePath({
               remain explicit nav targets. */}
           <div className="group flex h-full flex-col gap-6 rounded-[18px] border border-border-soft bg-background p-6 transition-all hover:-translate-y-0.5 hover:border-foreground/30 hover:shadow-[0_18px_40px_-24px_rgba(40,50,30,0.22)] sm:gap-8 sm:p-8 lg:p-10">
             <div className="min-w-0">
-              <span className="font-instrument italic text-[12px] uppercase tracking-[0.18em] text-foreground/45">
-                02 · Meet the certificate
-              </span>
+              <div className="flex items-center justify-between gap-3">
+                <span className="font-instrument italic text-[12px] uppercase tracking-[0.18em] text-foreground/45">
+                  02 · Meet the certificate
+                </span>
+                <LiveRecentBadge isLive={!snapshot.fromFallback} />
+              </div>
               <h3 className="mt-3 font-garamond text-[24px] lg:text-[28px] font-normal leading-[1.15] text-foreground">
                 <Link
                   href={`${BUMICERTS_URL}/explore`}
@@ -183,6 +188,34 @@ export async function ChoosePath({
         </div>
       </div>
     </section>
+  );
+}
+
+function LiveRecentBadge({ isLive }: { isLive: boolean }) {
+  return (
+    <span
+      className={
+        "inline-flex shrink-0 items-center gap-1.5 rounded-full px-2 py-0.5 text-[9.5px] font-medium uppercase tracking-[0.1em] " +
+        (isLive
+          ? "bg-brand/15 text-brand-dark"
+          : "bg-foreground/5 text-foreground/45")
+      }
+      title={
+        isLive
+          ? "Three most recent high-quality Bumicerts from the live indexer"
+          : "Three recent Bumicerts from the fallback snapshot"
+      }
+    >
+      {isLive && (
+        <span className="relative grid h-1.5 w-1.5 place-items-center">
+          <span className="absolute inset-0 animate-ping rounded-full bg-brand/40" />
+          <span className="relative h-1.5 w-1.5 rounded-full bg-brand" />
+        </span>
+      )}
+      {isLive ? "Live" : "Recent"}
+      <span className="text-current/35">·</span>
+      3 most recent
+    </span>
   );
 }
 
