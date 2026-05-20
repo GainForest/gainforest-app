@@ -44,20 +44,15 @@ type GlobeProps = {
   pins: ProjectPin[];
   diameter: number;
   /**
-   * Enable user-driven interaction (drag-to-rotate + wheel/pinch zoom).
+   * Enable user-driven drag-to-rotate.
    *
-   * Default `false`: the globe is a "frozen" decorative widget — fixed
-   * scale, auto-rotates until the user grabs it once, doesn't capture
-   * wheel events (so the page scrolls over it cleanly). That mode is
-   * used by the floating hero card and the small ChoosePath preview
-   * thumbnail.
-   *
-   * `true`: full free-camera mode — drag rotates, wheel/pinch zooms
-   * within a `[0.6×, 1.4×]` window of the initial camera distance,
-   * auto-rotate still stops on first grab. Used by the embedded
-   * "What's Green Globe?" preview so visitors can play with the
-   * sphere right inside the card instead of having to click
-   * through to gainforest.app first.
+   * Both modes share the same OrbitControls config under the hood
+   * (zoom and pan are always disabled — the team preferred wheel
+   * scrolling the page to wheel zooming the globe). The flag exists
+   * so the consumer can decorate the canvas appropriately and so
+   * later tweaks can branch on it. Used today only by the embedded
+   * "What's Green Globe?" preview, which adds a grab cursor and a
+   * "drag to spin" hint chip.
    */
   interactive?: boolean;
 };
@@ -93,28 +88,15 @@ export function LiveGlobe({ pins, diameter, interactive = false }: GlobeProps) {
 
     controls.autoRotate = true;
     controls.autoRotateSpeed = AUTO_ROTATE_SPEED;
-    if (interactive) {
-      // Interactive mode: allow drag-to-rotate (already on by default
-      // via OrbitControls) and wheel/pinch zoom, but clamp the zoom
-      // range so the user can't push the camera through the sphere or
-      // pull it out of frame. The `[0.6×, 1.4×]` window around the
-      // initial distance lines up with what a "preview" globe should
-      // do — let people peek closer at a region and zoom back out,
-      // not free-fly. Pan stays disabled so the sphere always stays
-      // centred in the card.
-      const d0 = controls.getDistance?.() ?? 0;
-      controls.enableZoom = true;
-      controls.enablePan = false;
-      controls.minDistance = d0 * 0.6;
-      controls.maxDistance = d0 * 1.4;
-    } else {
-      // Static mode: hard-disable every zoom path so the globe stays a
-      // fixed scale (used by the floating hero card and the small
-      // ChoosePath thumbnail).
-      controls.enableZoom = false;
-      controls.enablePan = false;
-      controls.minDistance = controls.maxDistance = controls.getDistance?.() ?? 0;
-    }
+    // Drag-to-rotate is OrbitControls' default and works in both
+    // modes. The only thing that toggles per-mode is auto-rotate's
+    // "stops on first grab" behaviour (always on). Zoom and pan are
+    // hard-disabled in both modes — the team preferred a drag-only
+    // interactive preview over wheel zoom (wheel zoom blocks page
+    // scroll over the globe, which feels worse than the upside).
+    controls.enableZoom = false;
+    controls.enablePan = false;
+    controls.minDistance = controls.maxDistance = controls.getDistance?.() ?? 0;
 
     const stopSpin = () => {
       controls.autoRotate = false;
@@ -122,20 +104,13 @@ export function LiveGlobe({ pins, diameter, interactive = false }: GlobeProps) {
     controls.addEventListener?.("start", stopSpin);
   };
 
-  // Wheel handling differs between modes.
-  //
-  // Static mode: even with `enableZoom = false`, three.js still binds a
-  // wheel listener and would block the page from scrolling over the
-  // globe. We capture wheel events on the container and let them bubble
-  // to the page normally.
-  //
-  // Interactive mode: we WANT the wheel to zoom the globe, so we leave
-  // three.js's listener alone. The page can't scroll through the
-  // sphere — that's the expected trade-off for an interactive widget,
-  // and the visitor can scroll the page from any of the surrounding
-  // cream / card chrome.
+  // Safety net: even with `enableZoom = false`, three.js still listens
+  // for wheel events on the canvas and would block the page from
+  // scrolling over the globe. Capturing the wheel event on the
+  // container lets the page scroll like normal and stops any latent
+  // zoom behaviour. Applies to both static and interactive (drag-only)
+  // globes.
   useEffect(() => {
-    if (interactive) return;
     const node = containerRef.current;
     if (!node) return;
     const onWheel = (e: WheelEvent) => {
@@ -146,7 +121,7 @@ export function LiveGlobe({ pins, diameter, interactive = false }: GlobeProps) {
     return () => {
       node.removeEventListener("wheel", onWheel, { capture: true });
     };
-  }, [interactive]);
+  }, []);
 
   // Memoise the points and ring datasets so the globe doesn't redraw on each
   // re-render. Pings stagger pseudo-randomly across pins for the "real data

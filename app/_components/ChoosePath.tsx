@@ -224,11 +224,12 @@ function GlobePreview({ pinCount }: { pinCount: number }) {
           Live
         </span>
         {/* Affordance hint — small monochrome tag, doesn't compete with
-            the LIVE badge. Hidden on hover so the card visually
-            commits to the interaction once the visitor engages. */}
+            the LIVE badge. Pure drag-to-spin (no zoom); wheel-over the
+            globe scrolls the page so the visitor never feels trapped
+            on the canvas. */}
         <span
           aria-hidden
-          className="pointer-events-none absolute bottom-2 left-1/2 -translate-x-1/2 inline-flex items-center gap-1.5 rounded-full bg-background/80 px-2 py-0.5 text-[10px] font-medium uppercase tracking-[0.12em] text-foreground/55 backdrop-blur-sm opacity-90 transition-opacity duration-200"
+          className="pointer-events-none absolute bottom-2 left-1/2 -translate-x-1/2 inline-flex items-center gap-1.5 rounded-full bg-background/80 px-2 py-0.5 text-[10px] font-medium uppercase tracking-[0.12em] text-foreground/55 backdrop-blur-sm opacity-90"
         >
           <svg
             width="11"
@@ -240,9 +241,10 @@ function GlobePreview({ pinCount }: { pinCount: number }) {
             strokeLinecap="round"
             strokeLinejoin="round"
           >
-            <path d="M5 9l-3 3 3 3M19 9l3 3-3 3M9 5l3-3 3 3M9 19l3 3 3-3" />
+            {/* horizontal double-headed arrow — drag-to-spin */}
+            <path d="M5 12h14M5 12l4-4M5 12l4 4M19 12l-4-4M19 12l-4 4" />
           </svg>
-          drag · zoom
+          drag to spin
         </span>
       </div>
 
