@@ -384,10 +384,29 @@ Current generated assets:
 | `public/decor/icon-step-*.png` | HowItWorks step icons (globe+mag, doc+leaf, hands+plant, tree) |
 | `public/decor/icon-{globe,plant,leaf}.png` | ChoosePath ring-bordered icons |
 | `public/decor/topo-decor.png` | NatureCTA — topographic contour decoration |
-| `public/decor/pillar-ai-assistants.webp` | EquitableAI — documentary-style AI Assistants pillar image |
-| `public/decor/pillar-bioacoustics.webp` | EquitableAI — documentary-style Bioacoustics pillar image |
-| `public/decor/pillar-remote-sensing.webp` | EquitableAI — documentary-style Remote Sensing pillar image |
 | `public/codex-pets/taina-poster.png` | FloatingTaina — pixel-art idle pose (poster fallback) |
+
+Current **gainforest.earth-sourced** documentary assets (not
+gpt-image-2 — pulled directly from gainforest.earth's Equitable AI /
+Indigenous AI Assistant / Impact Report sections; **do not
+regenerate**, refresh from the source if gainforest.earth updates):
+
+| File | Source on gainforest.earth | Used in |
+|---|---|---|
+| `public/decor/pillar-ai-assistants.webp` | `_assets/video/0704a1c2…mp4` frame @ t=8s | EquitableAI pillar 1 ("Taina is an artificial intelligence" caption) |
+| `public/decor/pillar-bioacoustics.webp` | `_assets/video/448c69…jpg` poster | EquitableAI pillar 2 ("So every animal has its own radio channel" caption) |
+| `public/decor/pillar-remote-sensing.webp` | `_assets/video/a21b2c9c…mp4` frame @ t=8s | EquitableAI pillar 3 (aerial canopy w/ tree-crown segmentation polygons) |
+| `public/decor/taina-feature.webp` | `_assets/video/fc5564fc…jpg` poster | TainaFeature right-column portrait (Marina Mura, Inhaã-bé, w/ "this artificial intelligence" caption) |
+| `public/decor/impact-report-cover.webp` | `_assets/media/4e48bc46…png` | ImpactReport — "3rd Annual Impact Report" PDF cover thumb |
+| `public/community/impact-group.webp` | `_assets/media/7d7dd0dc…jpg` | ImpactReport collage top — XPRIZE Rainforest team + community at the maloca |
+| `public/community/impact-ceremony.webp` | `_assets/media/836d2f75…jpg` | ImpactReport collage bottom — Bumicerts certificate ceremony, Philippines |
+
+Documentary captions baked into the video frames ("Taina is an
+artificial intelligence", "So every animal has its own radio
+channel", "this artificial intelligence") are kept on purpose — they
+reinforce the editorial documentary tone better than any flat icon
+would. If you replace a still, prefer another frame with similarly
+useful caption text rather than a clean caption-less crop.
 
 ## Design tokens
 
@@ -418,12 +437,15 @@ call-to-action colour (near-black on cream, swapped to cream-on-ink on
 the dark band). Do not collapse the two back into one token; the
 separation is deliberate per team feedback.
 
-**Section rhythm:** the page is mostly cream, with three deliberate
+**Section rhythm:** the page is mostly cream, with two deliberate
 near-black beats: `DataCommons` (mid-page WHY / 1% biodiversity-data
-claim), `ImpactReport` (a dark card inside a cream section), and the
-closing `NatureCTA` + `Footer` band. Keep the dark surfaces sparse and
-editorial so the cream → ink contrast lands hard without turning the
-whole page into a dark alternation pattern.
+claim) and the closing `NatureCTA` + `Footer` band. `ImpactReport`
+used to be a dark card inside a cream section, but as of the
+media-pass update it sits on a warm apricot card (matching
+gainforest.earth) so the only dark chord on the lower half is the
+closing CTA. Keep the dark surfaces sparse and editorial so the
+cream → ink contrast lands hard without turning the whole page into
+a dark alternation pattern.
 
 If you need a new colour, add a token in `globals.css` first and reference
 it via `var(...)` or its Tailwind `theme inline` alias (e.g.

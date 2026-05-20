@@ -43,17 +43,19 @@ export const revalidate = 900;
 //   8.  HowItWorks .................. four-step explainer
 //   9.  Research .................... hackathons
 //  10.  NatureGuild ................. community members
-//  11.  Partners ................... 50+ partner stat
-//  12.  ImpactReport ............... 24/25 report CTA — ink card
+//  11.  Partners ................... rotating live globe + partner ledger
+//  12.  ImpactReport ............... 24/25 report card + community collage
 //  13.  Media ...................... selected press
 //  14.  Supporters ................. Merci
 //  15.  NatureCTA .................. closing CTA — ink
 //  16.  Footer ..................... legal + IBAN — ink
 //
 // Cream / ink rhythm: most sections sit on cream (`bg-background`) so
-// the page reads as a long editorial scroll, with three intentional
-// dark "punches" — DataCommons (mid-page WHY), ImpactReport (a card,
-// not a full band), and NatureCTA → Footer (the closing chord).
+// the page reads as a long editorial scroll, with two intentional
+// dark "punches" — DataCommons (mid-page WHY) and NatureCTA → Footer
+// (the closing chord). ImpactReport used to be a third (a dark card,
+// not a full band) but is now a warm apricot card mirroring
+// gainforest.earth's treatment.
 export default async function Page() {
   const [snapshot, pins] = await Promise.all([
     fetchLiveBumicerts(12),
