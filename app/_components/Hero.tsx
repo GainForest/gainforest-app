@@ -128,7 +128,7 @@ export function Hero({
                       d={BRUSH_PATH}
                       fill="none"
                       stroke="currentColor"
-                      strokeWidth={2.25}
+                      strokeWidth={2.75}
                       strokeLinecap="round"
                     />
                   </svg>

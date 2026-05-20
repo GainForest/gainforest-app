@@ -35,19 +35,20 @@ export function ClientPartners({ pins }: { pins: ProjectPin[] }) {
   const italic = t("partners.heading.italic").trim();
   const after = t("partners.heading.after").trim();
 
-  // Responsive globe diameter — sized to fit a 5-column slot on
-  // desktop (~420px), single column on mobile (cap at viewport - some
-  // padding). We use a window resize listener rather than
-  // ResizeObserver because the container width is purely a function
-  // of viewport (no parent reflow drama on this section).
-  const [diameter, setDiameter] = useState<number>(420);
+  // Responsive globe diameter — sized to comfortably fit inside the
+  // right column without overflowing the section. The previous tier
+  // (420–480 px) over-filled the slot and visually clipped at the
+  // top edge of the next section, so the sphere read as cropped in
+  // half. Smaller tier numbers below; LiveGlobe still draws at the
+  // requested diameter, just within bounds.
+  const [diameter, setDiameter] = useState<number>(360);
   useEffect(() => {
     const update = () => {
       const w = window.innerWidth;
-      if (w >= 1280) setDiameter(480);
-      else if (w >= 1024) setDiameter(420);
-      else if (w >= 640) setDiameter(380);
-      else setDiameter(Math.min(340, w - 64));
+      if (w >= 1280) setDiameter(400);
+      else if (w >= 1024) setDiameter(360);
+      else if (w >= 640) setDiameter(340);
+      else setDiameter(Math.min(320, w - 64));
     };
     update();
     window.addEventListener("resize", update);
@@ -103,15 +104,22 @@ export function ClientPartners({ pins }: { pins: ProjectPin[] }) {
             </ul>
           </div>
 
-          {/* Right column — large rotating LiveGlobe. Same dataset as
-              the hero globe; rendered larger here so it dominates the
-              column the way the "50+" stat used to. */}
-          <div className="lg:col-span-5 lg:flex lg:items-center lg:justify-end">
-            <div className="relative mx-auto">
+          {/* Right column — rotating LiveGlobe. Same dataset as the
+              hero globe; rendered inside an explicit square frame so
+              the sphere is fully visible and the live caption sits
+              under it without bleeding into the next section. */}
+          <div className="lg:col-span-5 lg:flex lg:items-center lg:justify-center">
+            <div
+              className="relative mx-auto flex flex-col items-center justify-center"
+              style={{ width: diameter }}
+            >
               <LiveGlobe pins={pins} diameter={diameter} />
               {/* Live caption beneath the globe — mirrors the
-                  gainforest.app pin so the source of truth is clear. */}
-              <span className="absolute -bottom-2 left-1/2 -translate-x-1/2 whitespace-nowrap text-[10px] font-medium uppercase tracking-[0.18em] text-foreground/45">
+                  gainforest.app pin so the source of truth is
+                  clear. Sits inside the column flow now (not
+                  absolute) so it can't be clipped by the next
+                  section's top edge. */}
+              <span className="mt-3 whitespace-nowrap text-[10px] font-medium uppercase tracking-[0.18em] text-foreground/45">
                 gainforest.app · live pins
               </span>
             </div>

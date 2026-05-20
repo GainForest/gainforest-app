@@ -85,14 +85,22 @@ export function DataCommons() {
                 mangrove. Mobile: left-aligns at the same inset and
                 overlaps the top photo with a percentage-based
                 negative margin. Desktop: anchored bottom-left and
-                shifted past the column edge. */}
+                shifted past the column edge.
+
+                This photo was re-cropped (1500×828) from the
+                original 1599×1066 to remove the heavy
+                out-of-focus foreground leaves and the top tree
+                branches that dominated the frame at small panel
+                sizes — audit feedback called the previous version
+                "a blurry green mass". The three field researchers
+                are now the obvious subject. */}
             <img
               src="/data-commons/community-mangrove.webp"
-              alt="Field researchers wading through a mangrove forest"
+              alt="Field researchers sampling water in a mangrove forest"
               loading="lazy"
               decoding="async"
-              width={1599}
-              height={1066}
+              width={1500}
+              height={828}
               className="-mt-[14%] mr-auto block w-[88%] object-cover shadow-[0_24px_60px_-24px_rgba(0,0,0,0.7)] sm:-mt-[12%] sm:w-[82%] sm:shadow-[0_30px_80px_-30px_rgba(0,0,0,0.7)] lg:absolute lg:bottom-0 lg:left-[-6%] lg:mr-0 lg:mt-0 lg:h-auto lg:w-[70%]"
             />
           </div>

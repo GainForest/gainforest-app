@@ -20,6 +20,15 @@ type MediaItem = {
   href: string;
 };
 
+// Each `href` points to the actual canonical article. The earlier
+// 03 / 04 / 02 placeholders that bounced to the gainforest.earth
+// homepage were dead ends — a click read as broken even though the
+// homepage loaded. Real sources used:
+//   - XPRIZE Rainforest competition page (winner announcement)
+//   - Handelsblatt Vordenker:innen feature
+//   - Ministerio del Ambiente (Paraguay) press release
+//   - Swissnex Brazil report "Switzerland and Amazonia" (covers the
+//     ETH BiodivX/GainForest collaboration)
 const ITEMS: ReadonlyArray<MediaItem> = [
   {
     kind: "Awards",
@@ -31,19 +40,19 @@ const ITEMS: ReadonlyArray<MediaItem> = [
     kind: "Awards",
     date: "Nov 03, 2022",
     headline: "BCG & Handelsblatt Vordenker:innen 2022",
-    href: "https://www.gainforest.earth/",
+    href: "https://www.handelsblatt.com/unternehmen/management/vordenker_innen/vordenker-ernaehrung-und-landwirtschaft-besser-essen-fuer-das-weltklima/28848280.html",
   },
   {
     kind: "Press",
-    date: "Feb 24, 2022",
-    headline: "Paraguay announces partnership with GainForest",
-    href: "https://www.gainforest.earth/",
+    date: "Apr 12, 2022",
+    headline: "Paraguay (MADES) announces partnership with GainForest",
+    href: "https://www.mades.gov.py/2022/04/12/mades-recibe-apoyo-para-fortalecimiento-de-areas-protegidas-en-el-chaco/",
   },
   {
     kind: "Media",
     date: "Sep 1, 2024",
     headline: "GainForest and ETH BiodivX in Amazonia — Swissnex Brazil",
-    href: "https://www.gainforest.earth/",
+    href: "https://swissnex.org/brazil/news/switzerland-and-amazonia-together-for-a-thriving-planet/",
   },
 ];
 

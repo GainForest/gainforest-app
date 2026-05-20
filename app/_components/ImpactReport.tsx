@@ -26,7 +26,12 @@ import { useT } from "./LocaleProvider";
 // chord in this part of the page is now carried by the closing
 // NatureCTA + Footer alone, which keeps the impact-report section
 // tonally aligned with the rest of the cream editorial flow.
-const IMPACT_REPORT_URL = "https://www.gainforest.earth/impact-report/";
+// The impact report lives as a published Canva design (not as a page
+// on gainforest.earth). The previous `/impact-report/` path returned
+// 404 — the only canonical source of the report is the Canva URL
+// linked from gainforest.earth's body copy.
+const IMPACT_REPORT_URL =
+  "https://www.canva.com/design/DAGqnTWl-gw/K4V6DWYyqtZW0NK2_0Dpag/view";
 
 export function ImpactReport() {
   const t = useT();
@@ -90,38 +95,45 @@ export function ImpactReport() {
             </Link>
           </div>
 
-          {/* Right — two-photo collage. Top photo bleeds top-right;
-              bottom photo overlaps diagonally bottom-left, the same
-              recipe as DataCommons so the two photo-collage sections
-              feel like siblings. */}
+          {/* Right — two-photo collage, simplified.
+
+              Earlier this section repeated the DataCommons recipe
+              (top photo right-anchored, bottom photo bleeding past
+              the column edge) but at this row position the photos
+              overlapped chaotically with the apricot card to the
+              left and there was no consistent visual rhythm. Audit
+              feedback called it "chaotic".
+
+              New layout: a clean side-by-side 2-photo grid with a
+              small horizontal offset between them. Each photo sits
+              inside an aspect-[4/3] frame so the two read as a
+              tidy editorial pair without the awkward overlap. */}
           <div className="lg:col-span-6">
-            <div className="relative w-full lg:aspect-[7/6]">
-              {/* Top photo — group at the maloca (XPRIZE Rainforest,
-                  Manaus). Mobile: full-width, right-anchored. */}
-              <div className="ml-auto w-[88%] sm:w-[82%] lg:absolute lg:right-0 lg:top-0 lg:w-[72%]">
-                <div className="relative aspect-[4/3] w-full overflow-hidden">
-                  <Image
-                    src="/community/impact-group.webp"
-                    alt="GainForest team and Indigenous community at XPRIZE Rainforest finals, Manaus"
-                    fill
-                    sizes="(min-width: 1024px) 520px, (min-width: 640px) 60vw, 88vw"
-                    className="object-cover"
-                  />
-                </div>
+            <div className="grid grid-cols-2 gap-3 sm:gap-4">
+              {/* Top-left photo — group at the maloca (XPRIZE
+                  Rainforest, Manaus). Slightly inset from the top so
+                  the pair reads as a quiet diagonal even without an
+                  overlap. */}
+              <div className="relative aspect-[4/5] overflow-hidden rounded-[6px] shadow-[0_12px_28px_-12px_rgba(20,20,19,0.22)] sm:translate-y-3">
+                <Image
+                  src="/community/impact-group.webp"
+                  alt="GainForest team and Indigenous community at XPRIZE Rainforest finals, Manaus"
+                  fill
+                  sizes="(min-width: 1024px) 260px, (min-width: 640px) 30vw, 44vw"
+                  className="object-cover"
+                />
               </div>
-              {/* Bottom photo — Bumicerts cert ceremony in Inhaã-bé
-                  village (or Santa Helena do Ingles). Overlaps the top
-                  photo diagonally bottom-left. */}
-              <div className="-mt-[14%] mr-auto w-[88%] sm:-mt-[12%] sm:w-[82%] lg:absolute lg:bottom-0 lg:left-[-6%] lg:mt-0 lg:w-[70%]">
-                <div className="relative aspect-[4/3] w-full overflow-hidden shadow-[0_12px_30px_rgba(20,20,19,0.18)]">
-                  <Image
-                    src="/community/impact-ceremony.webp"
-                    alt="Bumicerts certificate ceremony with community members"
-                    fill
-                    sizes="(min-width: 1024px) 500px, (min-width: 640px) 60vw, 88vw"
-                    className="object-cover"
-                  />
-                </div>
+              {/* Bottom-right photo — Bumicerts certificate ceremony.
+                  Slightly inset from the bottom so the diagonal reads
+                  from top-left to bottom-right. */}
+              <div className="relative aspect-[4/5] overflow-hidden rounded-[6px] shadow-[0_12px_28px_-12px_rgba(20,20,19,0.22)] sm:-translate-y-3">
+                <Image
+                  src="/community/impact-ceremony.webp"
+                  alt="Bumicerts certificate ceremony with community members"
+                  fill
+                  sizes="(min-width: 1024px) 260px, (min-width: 640px) 30vw, 44vw"
+                  className="object-cover"
+                />
               </div>
             </div>
           </div>

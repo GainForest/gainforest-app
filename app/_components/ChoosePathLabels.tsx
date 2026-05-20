@@ -62,12 +62,17 @@ export function ChoosePathLabels({
       slot === "globe" ? "choosePath.globe.title" : "choosePath.bumicerts.title";
     const bodyKey =
       slot === "globe" ? "choosePath.globe.body" : "choosePath.bumicerts.body";
+    // Inside the new <ChoosePath /> 2-card layout the headline +
+    // body sit at the top of each card. The optional `href` arrow
+    // link is rendered by the outer card anchor in <ChoosePath />
+    // — we keep it here as a fallback in case the labels are
+    // reused without a wrapping anchor.
     return (
-      <div className="max-w-[280px]">
-        <h3 className="font-garamond text-[22px] lg:text-[24px] font-normal leading-[1.15] text-foreground">
+      <div className="mt-3">
+        <h3 className="font-garamond text-[24px] lg:text-[28px] font-normal leading-[1.15] text-foreground">
           {t(titleKey)}
         </h3>
-        <p className="mt-2.5 text-[14px] leading-[1.55] text-foreground/65">
+        <p className="mt-3 max-w-[420px] text-[14.5px] leading-[1.55] text-foreground/70">
           {t(bodyKey)}
         </p>
         {href && (

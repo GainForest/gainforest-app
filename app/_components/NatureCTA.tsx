@@ -59,7 +59,7 @@ export function NatureCTA() {
               "Newsletter / GitBook / Friends of GainForest" footer
               pills. */}
           <Link
-            href={`${BUMICERTS_URL}/create`}
+            href={`${BUMICERTS_URL}/bumicert/create`}
             target="_blank"
             rel="noreferrer"
             className="group inline-flex h-[52px] items-center justify-center gap-2 rounded-full border border-ink-foreground/30 px-8 text-[15px] font-medium text-ink-foreground transition-colors hover:border-ink-foreground/80"

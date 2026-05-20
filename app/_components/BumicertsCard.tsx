@@ -167,7 +167,13 @@ export function BumicertsCard({
 
         {/* right column: search + list */}
         <div className="flex flex-col gap-2 pr-2">
-          {/* search */}
+          {/* search.
+              `min-w-0` + `truncate` on the placeholder span keeps the
+              text on a single line when the card lives inside the
+              narrow mobile inline composition (where the right-hand
+              column ends up <220 px and the search placeholder used
+              to wrap to two lines). `whitespace-nowrap` on the "All
+              projects" dropdown label keeps it from wrapping too. */}
           <div className="flex items-center gap-2 rounded-md border border-[#e6dfd0] bg-white px-2.5 py-1.5 text-[11px] text-foreground/50">
             <svg
               width="12"
@@ -175,6 +181,7 @@ export function BumicertsCard({
               viewBox="0 0 24 24"
               fill="none"
               aria-hidden
+              className="shrink-0"
             >
               <circle
                 cx="11"
@@ -190,8 +197,10 @@ export function BumicertsCard({
                 strokeLinecap="round"
               />
             </svg>
-            <span className="flex-1">{t("card.searchProjects")}</span>
-            <span className="flex items-center gap-1 text-foreground/70">
+            <span className="min-w-0 flex-1 truncate">
+              {t("card.searchProjects")}
+            </span>
+            <span className="flex shrink-0 items-center gap-1 whitespace-nowrap text-foreground/70">
               {t("choosePath.allProjects")}
               <svg
                 width="10"

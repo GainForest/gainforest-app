@@ -32,7 +32,7 @@ const CARDS: ReadonlyArray<{
   {
     titleKey: "iwantto.card3.title",
     bodyKey: "iwantto.card3.body",
-    href: `${BUMICERTS_URL}/create`,
+    href: `${BUMICERTS_URL}/bumicert/create`,
   },
   {
     titleKey: "iwantto.card4.title",

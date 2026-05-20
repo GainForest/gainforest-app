@@ -38,8 +38,13 @@ import { useLocale } from "./LocaleProvider";
 //     companion always speaks in the latest Taina voice.
 //   - Hidden inside iframes (no OG/print rendering).
 
-const SPRITE_W = 84;
-const SPRITE_H = 90;
+// Sprite display size on screen. Slightly smaller than the earlier
+// 84×90 because at that size the fixed-position widget would obscure
+// the leading word of every left-anchored section headline as the page
+// scrolled past it. The codex-pet cell is 192×208 so any display size
+// scales cleanly.
+const SPRITE_W = 72;
+const SPRITE_H = 78;
 // Vertical room reserved below the sprite for the "Ask me anything"
 // name-shield. Folded into the viewport clamp so the shield never gets
 // pushed off-screen when the user drags the sprite near the bottom.
@@ -565,6 +570,36 @@ export function FloatingTaina() {
           touchAction: "none",
         }}
       >
+        {/* Soft cream halo — sits BEHIND the sprite to isolate her
+            from whatever the page is scrolling past underneath. The
+            backdrop is a radial gradient that fades from cream at
+            the centre to fully transparent at the edges (no hard
+            ring), plus a small `backdrop-filter: blur(6px)` so any
+            text passing under the halo softens slightly. Without
+            this, the fixed-position sprite consistently obscured
+            left-anchored section headlines (DataCommons, Equitable
+            AI, Research, Nature Guild, …) on every scroll. Sized
+            ~25% larger than the sprite so the fade has somewhere to
+            go and the sprite never looks pasted on top of a hard
+            disc. Pointer-events disabled so the drag/click hit area
+            is unchanged. */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -inset-2 rounded-full"
+          style={{
+            // Cream halo: solid in the immediate area behind the
+            // sprite (kills the "text peeking through her belt"
+            // effect), then fades to transparent at the outer edge.
+            // Kept compact (-inset-2 not -inset-4) so right-anchored
+            // mobile body text isn't visually clipped by the halo —
+            // the previous larger halo masked the trailing characters
+            // of each line as the user scrolled past her position.
+            background:
+              "radial-gradient(ellipse at 50% 56%, var(--background) 0%, var(--background) 52%, color-mix(in srgb, var(--background) 78%, transparent) 68%, transparent 92%)",
+            backdropFilter: "blur(6px)",
+            WebkitBackdropFilter: "blur(6px)",
+          }}
+        />
         {/* Static poster covers the canvas load gap. Cross-fades out on
             first paint via opacity. */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
