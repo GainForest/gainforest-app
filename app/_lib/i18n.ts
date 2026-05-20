@@ -446,7 +446,7 @@ export const MESSAGES: Record<Locale, Messages> = {
     "media.items.simocracy.headline":
       "Simocracy launches with AI digital twins allocating a community treasury",
     "media.items.simocracy.summary":
-      "A mini-documentary follows the Frontier Tower experiment with David Dao, Hypercerts, Funding the Commons, and community sims deliberating over shared funding.",
+      "A mini-documentary follows the Frontier Tower experiment with GainForest, Hypercerts, Funding the Commons, and community sims deliberating over shared funding.",
     "media.items.klarna.headline":
       "GainForest selected for Klarna's AI for Climate Resilience Program",
     "media.items.klarna.summary":
@@ -456,7 +456,7 @@ export const MESSAGES: Record<Locale, Messages> = {
     "media.items.bhutan.summary":
       "Kuensel reports that Team DeepGov and Team Cyberchain emerged as winners of Bhutan's three-day hackathon for decentralised applications powered by National Digital Identity.",
     "media.items.changenow.headline":
-      "David Dao speaks on nature as an economic choice at ChangeNOW",
+      "GainForest at ChangeNOW: nature as an economic choice",
     "media.items.changenow.summary":
       "ChangeNOW's mainstage conversation features GainForest's approach to AI, remote sensing, blockchain, and ecosystem monitoring for nature finance.",
     "media.items.cna.headline":
@@ -468,13 +468,13 @@ export const MESSAGES: Record<Locale, Messages> = {
     "media.items.atmos.summary":
       "The Atmos feature follows Tainá, GainForest's community-owned AI assistant for storing local knowledge, stories, and biodiversity observations on community terms.",
     "media.items.ftc.headline":
-      "David Dao bridges nature, data, and human opportunity",
+      "GainForest bridges nature, data, and human opportunity",
     "media.items.ftc.summary":
-      "Funding the Commons features David Dao on GainForest's model for conservation data income and regenerative funding for rainforest communities.",
+      "Funding the Commons features GainForest's model for conservation data income and regenerative funding for rainforest communities.",
     "media.items.maearth.headline":
-      "Conservation Data Income with David Dao and Sharfy Adamantine",
+      "Conservation Data Income with GainForest",
     "media.items.maearth.summary":
-      "Ma Earth hosts GainForest's co-founders for a long-form conversation on the origin story, current initiatives, retro funding, AI, Web3, and XPRIZE.",
+      "Ma Earth hosts the GainForest team for a long-form conversation on the origin story, current initiatives, retro funding, AI, Web3, and XPRIZE.",
     "media.items.xprize.headline":
       "GainForest is an XPRIZE Rainforest Winner",
     "media.items.xprize.summary":
@@ -677,7 +677,7 @@ export const MESSAGES: Record<Locale, Messages> = {
     "media.items.simocracy.headline":
       "Lanzamiento de Simocracy: gemelos digitales con IA reparten un tesoro comunitario",
     "media.items.simocracy.summary":
-      "Un mini documental sigue el experimento en Frontier Tower con David Dao, Hypercerts, Funding the Commons y sims comunitarios deliberando sobre fondos compartidos.",
+      "Un mini documental sigue el experimento en Frontier Tower con GainForest, Hypercerts, Funding the Commons y sims comunitarios deliberando sobre fondos compartidos.",
     "media.items.klarna.headline":
       "GainForest, seleccionada para el AI for Climate Resilience Program de Klarna",
     "media.items.klarna.summary":
@@ -687,7 +687,7 @@ export const MESSAGES: Record<Locale, Messages> = {
     "media.items.bhutan.summary":
       "Kuensel informa que Team DeepGov y Team Cyberchain ganan el hackathon de tres días de Bután para aplicaciones descentralizadas basadas en la Identidad Digital Nacional.",
     "media.items.changenow.headline":
-      "David Dao habla en ChangeNOW sobre la naturaleza como elección económica",
+      "GainForest en ChangeNOW: la naturaleza como elección económica",
     "media.items.changenow.summary":
       "La charla principal de ChangeNOW presenta el enfoque de GainForest sobre IA, teledetección, blockchain y monitoreo de ecosistemas para financiar la naturaleza.",
     "media.items.cna.headline":
@@ -699,13 +699,13 @@ export const MESSAGES: Record<Locale, Messages> = {
     "media.items.atmos.summary":
       "El reportaje sigue a Tainá, la asistente de IA comunitaria de GainForest, que guarda conocimientos locales, historias y observaciones de biodiversidad bajo gobernanza propia.",
     "media.items.ftc.headline":
-      "David Dao conecta naturaleza, datos y oportunidad humana",
+      "GainForest conecta naturaleza, datos y oportunidad humana",
     "media.items.ftc.summary":
-      "Funding the Commons presenta a David Dao y el modelo de GainForest de renta por datos de conservación y financiamiento regenerativo para comunidades de selva.",
+      "Funding the Commons presenta el modelo de GainForest de renta por datos de conservación y financiamiento regenerativo para comunidades de selva.",
     "media.items.maearth.headline":
-      "Renta por datos de conservación con David Dao y Sharfy Adamantine",
+      "Renta por datos de conservación con GainForest",
     "media.items.maearth.summary":
-      "Ma Earth conversa con los co-fundadores de GainForest sobre origen, iniciativas actuales, financiamiento retro, IA, Web3 y el XPRIZE.",
+      "Ma Earth conversa con el equipo de GainForest sobre origen, iniciativas actuales, financiamiento retro, IA, Web3 y el XPRIZE.",
     "media.items.xprize.headline":
       "GainForest, ganadora del XPRIZE Rainforest",
     "media.items.xprize.summary":
@@ -909,7 +909,7 @@ export const MESSAGES: Record<Locale, Messages> = {
     "media.items.simocracy.headline":
       "Simocracy estreia com gêmeos digitais de IA distribuindo um tesouro comunitário",
     "media.items.simocracy.summary":
-      "Um mini-documentário acompanha o experimento da Frontier Tower com David Dao, Hypercerts, Funding the Commons e sims comunitários deliberando sobre recursos compartilhados.",
+      "Um mini-documentário acompanha o experimento da Frontier Tower com GainForest, Hypercerts, Funding the Commons e sims comunitários deliberando sobre recursos compartilhados.",
     "media.items.klarna.headline":
       "GainForest é selecionada para o AI for Climate Resilience Program da Klarna",
     "media.items.klarna.summary":
@@ -919,7 +919,7 @@ export const MESSAGES: Record<Locale, Messages> = {
     "media.items.bhutan.summary":
       "O Kuensel relata que Team DeepGov e Team Cyberchain vencem o hackathon de três dias do Butão para aplicações descentralizadas baseadas na Identidade Digital Nacional.",
     "media.items.changenow.headline":
-      "David Dao fala sobre a natureza como escolha econômica no ChangeNOW",
+      "GainForest no ChangeNOW: a natureza como escolha econômica",
     "media.items.changenow.summary":
       "A conversa principal do ChangeNOW apresenta a abordagem da GainForest com IA, sensoriamento remoto, blockchain e monitoramento de ecossistemas para financiar a natureza.",
     "media.items.cna.headline":
@@ -931,13 +931,13 @@ export const MESSAGES: Record<Locale, Messages> = {
     "media.items.atmos.summary":
       "A matéria acompanha a Tainá, a IA comunitária da GainForest que guarda saberes locais, histórias e observações de biodiversidade segundo regras da comunidade.",
     "media.items.ftc.headline":
-      "David Dao conecta natureza, dados e oportunidade humana",
+      "GainForest conecta natureza, dados e oportunidade humana",
     "media.items.ftc.summary":
-      "Funding the Commons traz David Dao e o modelo da GainForest de renda por dados de conservação e financiamento regenerativo para comunidades de floresta.",
+      "Funding the Commons apresenta o modelo da GainForest de renda por dados de conservação e financiamento regenerativo para comunidades de floresta.",
     "media.items.maearth.headline":
-      "Renda por dados de conservação com David Dao e Sharfy Adamantine",
+      "Renda por dados de conservação com a GainForest",
     "media.items.maearth.summary":
-      "Ma Earth conversa com os co-fundadores da GainForest sobre origem, iniciativas atuais, financiamento retro, IA, Web3 e o XPRIZE.",
+      "Ma Earth conversa com a equipe da GainForest sobre origem, iniciativas atuais, financiamento retro, IA, Web3 e o XPRIZE.",
     "media.items.xprize.headline": "GainForest, vencedora do XPRIZE Rainforest",
     "media.items.xprize.summary":
       "GainForest e parceiros são reconhecidos pelo XPRIZE Rainforest por tecnologia que revela e protege a biodiversidade.",
@@ -1139,7 +1139,7 @@ export const MESSAGES: Record<Locale, Messages> = {
     "media.items.simocracy.headline":
       "Simocracy yazinduliwa, mapacha ya kidijitali ya AI yagawanya hazina ya jamii",
     "media.items.simocracy.summary":
-      "Filamu fupi inafuata jaribio la Frontier Tower likimshirikisha David Dao, Hypercerts, Funding the Commons na sims za jamii zikijadili rasilimali za pamoja.",
+      "Filamu fupi inafuata jaribio la Frontier Tower likiwajumuisha GainForest, Hypercerts, Funding the Commons na sims za jamii zikijadili rasilimali za pamoja.",
     "media.items.klarna.headline":
       "GainForest yachaguliwa na Klarna kwa AI for Climate Resilience Program",
     "media.items.klarna.summary":
@@ -1149,7 +1149,7 @@ export const MESSAGES: Record<Locale, Messages> = {
     "media.items.bhutan.summary":
       "Kuensel yaripoti Team DeepGov na Team Cyberchain washinda hackathon ya siku tatu ya Bhutan kwa programu zilizoegemea kwenye Utambulisho wa Kitaifa wa Kidijitali.",
     "media.items.changenow.headline":
-      "David Dao azungumzia asili kama chaguo la kiuchumi katika ChangeNOW",
+      "GainForest katika ChangeNOW: asili kama chaguo la kiuchumi",
     "media.items.changenow.summary":
       "Mhadhara mkuu wa ChangeNOW unaonyesha njia ya GainForest kupitia AI, hisia za mbali, blockchain na ufuatiliaji wa mifumo ikolojia kwa fedha za asili.",
     "media.items.cna.headline":
@@ -1161,13 +1161,13 @@ export const MESSAGES: Record<Locale, Messages> = {
     "media.items.atmos.summary":
       "Makala ya Atmos inafuata Tainá, msaidizi wa AI wa GainForest unaomilikiwa na jamii kuhifadhi maarifa, hadithi na uchunguzi wa bayoanuwai kwa masharti ya jamii.",
     "media.items.ftc.headline":
-      "David Dao anaunganisha asili, data na fursa za kibinadamu",
+      "GainForest yaunganisha asili, data na fursa za kibinadamu",
     "media.items.ftc.summary":
-      "Funding the Commons inaonyesha David Dao na mfano wa GainForest wa kipato kutokana na data ya uhifadhi na ufadhili wa kuzaa upya kwa jamii za misitu.",
+      "Funding the Commons inaonyesha mfano wa GainForest wa kipato kutokana na data ya uhifadhi na ufadhili wa kuzaa upya kwa jamii za misitu.",
     "media.items.maearth.headline":
-      "Kipato kutokana na data ya uhifadhi na David Dao na Sharfy Adamantine",
+      "Kipato kutokana na data ya uhifadhi pamoja na GainForest",
     "media.items.maearth.summary":
-      "Ma Earth inazungumza na waanzilishi wa GainForest kuhusu chimbuko, mipango ya sasa, ufadhili wa nyuma, AI, Web3 na XPRIZE.",
+      "Ma Earth inazungumza na timu ya GainForest kuhusu chimbuko, mipango ya sasa, ufadhili wa nyuma, AI, Web3 na XPRIZE.",
     "media.items.xprize.headline":
       "GainForest ni mshindi wa XPRIZE Rainforest",
     "media.items.xprize.summary":
@@ -1371,7 +1371,7 @@ export const MESSAGES: Record<Locale, Messages> = {
     "media.items.simocracy.headline":
       "Simocracy meluncur dengan kembaran digital AI mengalokasikan kas komunitas",
     "media.items.simocracy.summary":
-      "Sebuah mini dokumenter mengikuti eksperimen Frontier Tower bersama David Dao, Hypercerts, Funding the Commons, dan sims komunitas yang membahas dana bersama.",
+      "Sebuah mini dokumenter mengikuti eksperimen Frontier Tower bersama GainForest, Hypercerts, Funding the Commons, dan sims komunitas yang membahas dana bersama.",
     "media.items.klarna.headline":
       "GainForest terpilih dalam AI for Climate Resilience Program Klarna",
     "media.items.klarna.summary":
@@ -1381,7 +1381,7 @@ export const MESSAGES: Record<Locale, Messages> = {
     "media.items.bhutan.summary":
       "Kuensel melaporkan Team DeepGov dan Team Cyberchain menjadi pemenang hackathon tiga hari Bhutan untuk aplikasi terdesentralisasi berbasis Identitas Digital Nasional.",
     "media.items.changenow.headline":
-      "David Dao bicara tentang alam sebagai pilihan ekonomi di ChangeNOW",
+      "GainForest di ChangeNOW: alam sebagai pilihan ekonomi",
     "media.items.changenow.summary":
       "Sesi panggung utama ChangeNOW menampilkan pendekatan GainForest tentang AI, penginderaan jauh, blockchain, dan pemantauan ekosistem untuk pendanaan alam.",
     "media.items.cna.headline":
@@ -1393,13 +1393,13 @@ export const MESSAGES: Record<Locale, Messages> = {
     "media.items.atmos.summary":
       "Liputan Atmos mengikuti Tainá, asisten AI milik komunitas dari GainForest yang menyimpan pengetahuan lokal, cerita, dan pengamatan keanekaragaman hayati sesuai aturan komunitas.",
     "media.items.ftc.headline":
-      "David Dao menyambungkan alam, data, dan peluang manusia",
+      "GainForest menyambungkan alam, data, dan peluang manusia",
     "media.items.ftc.summary":
-      "Funding the Commons menampilkan David Dao dan model GainForest tentang pendapatan dari data konservasi serta pendanaan regeneratif untuk komunitas hutan hujan.",
+      "Funding the Commons menampilkan model GainForest tentang pendapatan dari data konservasi serta pendanaan regeneratif untuk komunitas hutan hujan.",
     "media.items.maearth.headline":
-      "Pendapatan dari data konservasi bersama David Dao dan Sharfy Adamantine",
+      "Pendapatan dari data konservasi bersama GainForest",
     "media.items.maearth.summary":
-      "Ma Earth berbincang dengan para co-founder GainForest tentang kisah awal, inisiatif kini, pendanaan retro, AI, Web3, dan XPRIZE.",
+      "Ma Earth berbincang dengan tim GainForest tentang kisah awal, inisiatif kini, pendanaan retro, AI, Web3, dan XPRIZE.",
     "media.items.xprize.headline": "GainForest, pemenang XPRIZE Rainforest",
     "media.items.xprize.summary":
       "GainForest dan mitra diakui oleh XPRIZE Rainforest atas teknologi yang mengungkap dan melindungi keanekaragaman hayati.",

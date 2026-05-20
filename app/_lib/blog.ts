@@ -4,6 +4,8 @@ export type BlogPost = {
   href: string;
   publishedAt: string;
   summary: string;
+  /** Cover image URL (Substack CDN). Null when the post has none. */
+  imageUrl: string | null;
 };
 
 const SUBSTACK_FEED_URL = "https://gainforest.substack.com/feed";
@@ -36,15 +38,23 @@ function parseRssItems(xml: string): BlogPost[] {
       const title = cleanXmlText(pickTag(item, "title"));
       const href = cleanXmlText(pickTag(item, "link"));
       const publishedAt = cleanXmlText(pickTag(item, "pubDate"));
-      const rawSummary = pickTag(item, "description") || pickTag(item, "content:encoded");
+      const rawContent = pickTag(item, "content:encoded");
+      const rawSummary = pickTag(item, "description") || rawContent;
       const summary = stripHtml(rawSummary);
       if (!title || !href || !publishedAt) return null;
+      // Cover image: prefer the RSS `<enclosure>` (Substack puts the
+      // post's hero there), then fall back to the first <img src> in
+      // the article body.
+      const enclosure = item.match(/<enclosure[^>]+url="([^"]+)"[^>]*\/?\s*>/i)?.[1];
+      const firstImg = rawContent.match(/<img[^>]+src="([^"]+)"/i)?.[1];
+      const imageUrl = enclosure || firstImg || null;
       return {
         id: href,
         title,
         href,
         publishedAt: new Date(publishedAt).toISOString(),
         summary: summary || "Latest field notes and updates from the GainForest team.",
+        imageUrl,
       } satisfies BlogPost;
     })
     .filter((item): item is BlogPost => item !== null);
