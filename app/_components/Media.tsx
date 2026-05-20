@@ -11,7 +11,7 @@ import { useT } from "./LocaleProvider";
 // system as the rest of the page: cream cards, Garamond headlines,
 // tracking-wide metadata, one arrow affordance.
 //
-// Research notes for the three additions requested in May 2026:
+// Research notes for additions requested in May 2026:
 // - CNA Insider YouTube `SsWzsL03d5M` (yt-dlp metadata):
 //   title "This AI App Pays Locals To Conserve Mangroves In The
 //   Philippines | Tech To Save The World", channel CNA Insider,
@@ -29,11 +29,39 @@ import { useT } from "./LocaleProvider";
 //   AI to help Indigenous forest guardians map and monitor
 //   biodiversity. BusinessWire newsitem id begins `20251204`, so the
 //   carousel date is Dec 4, 2025.
+// - Kuensel page metadata + article lead: published 2025-06-28;
+//   Team Cyberchain and Team DeepGov won the Bhutan NDI-powered
+//   international hackathon in Paro.
+// - ChangeNOW YouTube `_GBdtdGdPJU` (yt-dlp metadata): title "La
+//   nature comme choix économique", channel ChangeNOW, uploaded
+//   2025-05-07. Description identifies David Dao, co-founder and
+//   chief scientist of GainForest.Earth, and frames the session
+//   around AI/remote sensing, ecosystem monitoring, and financing
+//   conservation through digital innovation.
+// - Ma Earth YouTube `9Ei-L_sBDSk` (yt-dlp metadata): title
+//   "Conservation Data Income - David Dao & Sharfy Adamantine
+//   (GainForest)", uploaded 2025-01-09.
+// - Atmos article metadata: published 2025-02-25; title
+//   "Indigenous Groups Are Safeguarding Culture with Their Own
+//   ChatGPT". Article covers Tainá, community-owned local data,
+//   and GainForest's work with Indigenous communities.
+// - Funding the Commons YouTube `KbiXWl8ZDVY` (yt-dlp metadata):
+//   title "Open Conversations: Bridging Nature, Data, and Human
+//   Opportunity (David Dao)", uploaded 2025-02-17.
 //
 // Proper nouns and article titles are not localised; only the section
 // heading comes from i18n.
 type MediaItem = {
-  kind: "Award" | "Press" | "Documentary" | "Launch" | "Grant";
+  kind:
+    | "Award"
+    | "Press"
+    | "Documentary"
+    | "Launch"
+    | "Grant"
+    | "Hackathon"
+    | "Talk"
+    | "Podcast"
+    | "Feature";
   date: string;
   source: string;
   headline: string;
@@ -61,6 +89,24 @@ const ITEMS: ReadonlyArray<MediaItem> = [
     href: "https://investors.klarna.com/News--Events/news/news-details/2025/Klarna-Launches-Global-AI-for-Climate-Resilience-Program-to-Empower-Communities-on-the-Climate-Frontlines/default.aspx",
   },
   {
+    kind: "Hackathon",
+    date: "Jun 28, 2025",
+    source: "Kuensel",
+    headline: "GainForest DeepGov team wins the Bhutan NDI-powered international hackathon",
+    summary:
+      "Kuensel reports that Team DeepGov and Team Cyberchain emerged as winners of Bhutan's three-day hackathon for decentralised applications powered by National Digital Identity.",
+    href: "https://kuenselonline.com/news/team-cyberchain-and-deepgov-win-bhutan-ndi-powered-international-hackathon",
+  },
+  {
+    kind: "Talk",
+    date: "May 7, 2025",
+    source: "ChangeNOW",
+    headline: "David Dao speaks on nature as an economic choice at ChangeNOW",
+    summary:
+      "ChangeNOW's mainstage conversation features GainForest's approach to AI, remote sensing, blockchain, and ecosystem monitoring for nature finance.",
+    href: "https://www.youtube.com/watch?v=_GBdtdGdPJU",
+  },
+  {
     kind: "Documentary",
     date: "Mar 8, 2025",
     source: "CNA Insider",
@@ -68,6 +114,33 @@ const ITEMS: ReadonlyArray<MediaItem> = [
     summary:
       "Tech To Save The World visits the Philippines to show how data collection and AI-backed tools can support mangrove conservation with local communities.",
     href: "https://www.youtube.com/watch?v=SsWzsL03d5M",
+  },
+  {
+    kind: "Feature",
+    date: "Feb 25, 2025",
+    source: "Atmos",
+    headline: "Atmos features Taina as Indigenous communities safeguard culture with their own ChatGPT",
+    summary:
+      "The Atmos feature follows Tainá, GainForest's community-owned AI assistant for storing local knowledge, stories, and biodiversity observations on community terms.",
+    href: "https://atmos.earth/political-landscapes/indigenous-groups-are-safeguarding-culture-with-their-own-chatgpt/",
+  },
+  {
+    kind: "Talk",
+    date: "Feb 17, 2025",
+    source: "Funding the Commons",
+    headline: "David Dao bridges nature, data, and human opportunity",
+    summary:
+      "Funding the Commons features David Dao on GainForest's model for conservation data income and regenerative funding for rainforest communities.",
+    href: "https://www.youtube.com/watch?v=KbiXWl8ZDVY",
+  },
+  {
+    kind: "Podcast",
+    date: "Jan 9, 2025",
+    source: "Ma Earth",
+    headline: "Conservation Data Income with David Dao and Sharfy Adamantine",
+    summary:
+      "Ma Earth hosts GainForest's co-founders for a long-form conversation on the origin story, current initiatives, retro funding, AI, Web3, and XPRIZE.",
+    href: "https://www.youtube.com/watch?v=9Ei-L_sBDSk",
   },
   {
     kind: "Award",
