@@ -607,6 +607,24 @@ the original viewBox).
   code obviously does.
 - **Imports**: `import type` for types; the `@/` alias is not configured
   (only `next-env.d.ts` and built-ins), so relative paths within `app/`.
+- **No em-dashes in user-facing copy.** Team rule: every — visible to a
+  visitor is rewritten to `;`. JSX text, alt / aria attributes, error
+  toasts, page titles, OG / Twitter / JSON-LD metadata, i18n string
+  values — all swept. Comments and the Taina LLM system prompt keep
+  their em-dashes (they're not rendered).
+  - `scripts/em-dash-sweep.mjs` walks the TypeScript AST and only
+    rewrites `StringLiteral` / `JsxText` / template-literal text spans;
+    comments are skipped because `node.getStart(sourceFile)` excludes
+    leading trivia.
+  - `pnpm sweep:emdash` runs the sweep over a curated TARGETS list.
+  - `pnpm check:emdash` is the CI-friendly mode (exits non-zero with
+    file:line for any user-facing — found).
+  - A versioned pre-commit hook at `.githooks/pre-commit` runs the
+    sweep on every staged `.ts` / `.tsx` file and re-stages the
+    rewrites. `pnpm install` (via the `prepare` lifecycle script and
+    `scripts/install-git-hooks.mjs`) wires `core.hooksPath` to
+    `.githooks/` once per clone. Bypass with `git commit --no-verify`
+    if you ever need to.
 
 ## Don't:
 

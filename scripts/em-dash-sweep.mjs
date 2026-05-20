@@ -16,11 +16,20 @@
  *     instead of `node.pos` to exclude the leading trivia (= leading
  *     comments + whitespace) that the TS compiler attaches to each node.
  *   - All identifiers and code expressions.
- *   - app/_lib/taina-sim.ts — LLM system prompt, not user-facing copy.
+ *   - app/_lib/taina-sim.ts; that file's strings are the LLM system
+ *     prompt for the Taina sim, not visitor-facing copy.
  *
  * Replacement style:
  *   " — "  →  "; "     (drop leading space, keep one trailing space)
  *   "—"    →  ";"      (bare em-dash, rare)
+ *
+ * Usage:
+ *   node scripts/em-dash-sweep.mjs               # sweep the curated TARGETS list
+ *   node scripts/em-dash-sweep.mjs file1 file2   # sweep specific paths (used by pre-commit)
+ *   node scripts/em-dash-sweep.mjs --check       # exit non-zero if any em-dashes remain in TARGETS
+ *   node scripts/em-dash-sweep.mjs --check f1    # check specific paths only
+ *
+ * --check mode prints offending file:line and exits 1; useful for CI.
  */
 
 import fs from "node:fs";
@@ -33,7 +42,10 @@ const REPO_ROOT = path.resolve(
   ".."
 );
 
-const TARGETS = [
+// Curated list used when invoked with no file args. Add new user-facing TS /
+// TSX files here. Files outside this list are still swept when explicitly
+// passed (e.g. from the pre-commit hook).
+const DEFAULT_TARGETS = [
   "app/_lib/i18n.ts",
   "app/_lib/blog.ts",
   "app/_components/ChoosePath.tsx",
@@ -45,15 +57,22 @@ const TARGETS = [
   "app/_components/TopNavView.tsx",
   "app/api/sim-chat/route.ts",
   "app/layout.tsx",
-].map((p) => path.join(REPO_ROOT, p));
+];
+
+// Hard-skipped no matter how invoked. taina-sim.ts is the LLM system prompt;
+// rewriting its em-dashes would change what we tell the bot to do, not what
+// visitors see.
+const HARD_SKIPS = new Set([
+  path.join(REPO_ROOT, "app/_lib/taina-sim.ts"),
+]);
 
 function transformText(s) {
   return s.replace(/ — /g, "; ").replace(/—/g, ";");
 }
 
-function rewrite(filePath) {
+function collectEdits(filePath) {
   const src = fs.readFileSync(filePath, "utf8");
-  if (!src.includes("\u2014")) return { changes: 0 };
+  if (!src.includes("\u2014")) return { src, edits: [] };
 
   const sourceFile = ts.createSourceFile(
     filePath,
@@ -72,18 +91,26 @@ function rewrite(filePath) {
       case ts.SyntaxKind.TemplateMiddle:
       case ts.SyntaxKind.TemplateTail:
       case ts.SyntaxKind.JsxText: {
+        // node.pos includes leading trivia (comments + whitespace).
+        // getStart(sourceFile) gives the position where the token
+        // itself begins, so we don't accidentally rewrite comments
+        // that happen to sit directly above a literal.
         const start = node.getStart(sourceFile);
         const raw = src.slice(start, node.end);
         if (raw.includes("\u2014")) {
-          edits.push({ start, end: node.end, raw });
+          const line = sourceFile.getLineAndCharacterOfPosition(start).line + 1;
+          edits.push({ start, end: node.end, raw, line });
         }
-        return;
+        return; // don't recurse into literals
       }
     }
     ts.forEachChild(node, visit);
   }
   visit(sourceFile);
+  return { src, edits };
+}
 
+function applyEdits(src, edits) {
   let out = src;
   let changes = 0;
   for (let i = edits.length - 1; i >= 0; i--) {
@@ -94,20 +121,76 @@ function rewrite(filePath) {
       changes += 1;
     }
   }
-  if (changes) fs.writeFileSync(filePath, out);
-  return { changes };
+  return { out, changes };
 }
 
-let total = 0;
-for (const f of TARGETS) {
-  if (!fs.existsSync(f)) {
-    console.warn("skipping (missing):", path.relative(REPO_ROOT, f));
-    continue;
+function resolvePaths(args) {
+  if (args.length === 0) return DEFAULT_TARGETS.map((p) => path.join(REPO_ROOT, p));
+  return args.map((p) => (path.isAbsolute(p) ? p : path.resolve(REPO_ROOT, p)));
+}
+
+function main() {
+  const args = process.argv.slice(2);
+  let check = false;
+  const fileArgs = [];
+  for (const a of args) {
+    if (a === "--check" || a === "-c") check = true;
+    else fileArgs.push(a);
   }
-  const { changes } = rewrite(f);
-  if (changes) {
-    console.log(`${path.relative(REPO_ROOT, f)}: ${changes} nodes touched`);
-    total += changes;
+
+  const paths = resolvePaths(fileArgs);
+  let totalChanges = 0;
+  let totalRemaining = 0;
+  const remainingDetails = [];
+
+  for (const fp of paths) {
+    if (HARD_SKIPS.has(fp)) continue;
+    if (!fs.existsSync(fp)) {
+      if (fileArgs.length === 0) continue;
+      console.warn(`skip (missing): ${path.relative(REPO_ROOT, fp)}`);
+      continue;
+    }
+    if (!/\.tsx?$/.test(fp)) continue;
+
+    const { src, edits } = collectEdits(fp);
+    if (!edits.length) continue;
+
+    if (check) {
+      totalRemaining += edits.length;
+      for (const e of edits) {
+        remainingDetails.push(
+          `${path.relative(REPO_ROOT, fp)}:${e.line}: ${e.raw
+            .replace(/\n/g, " ")
+            .slice(0, 100)}`
+        );
+      }
+      continue;
+    }
+
+    const { out, changes } = applyEdits(src, edits);
+    if (changes) {
+      fs.writeFileSync(fp, out);
+      console.log(`${path.relative(REPO_ROOT, fp)}: ${changes} nodes touched`);
+      totalChanges += changes;
+    }
+  }
+
+  if (check) {
+    if (totalRemaining > 0) {
+      console.error(
+        `\u2717 ${totalRemaining} user-facing em-dash${totalRemaining === 1 ? "" : "es"} remain:`
+      );
+      for (const d of remainingDetails) console.error("  " + d);
+      console.error(`\nRun \`pnpm sweep:emdash\` to fix automatically.`);
+      process.exit(1);
+    }
+    console.log("\u2713 no user-facing em-dashes");
+    return;
+  }
+
+  if (totalChanges > 0) {
+    console.log(`TOTAL: ${totalChanges} string/JSX-text nodes edited`);
   }
 }
-console.log(`TOTAL: ${total} string/JSX-text nodes edited`);
+
+main();

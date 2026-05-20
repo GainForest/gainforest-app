@@ -6,7 +6,10 @@
   "scripts": {
     "dev": "next dev --port 3030 --turbopack",
     "build": "next build",
-    "start": "next start --port 3030"
+    "start": "next start --port 3030",
+    "sweep:emdash": "node scripts/em-dash-sweep.mjs",
+    "check:emdash": "node scripts/em-dash-sweep.mjs --check",
+    "prepare": "node scripts/install-git-hooks.mjs"
   },
   "dependencies": {
     "@atproto/api": "^0.19.18",

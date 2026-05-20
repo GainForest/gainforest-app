@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+# Pre-commit: sweep em-dashes (—) → semicolons (;) in user-facing strings of
+# every staged .ts / .tsx file, then re-stage the rewrites so the resulting
+# commit contains the cleaned-up bytes.
+#
+# This hook is *not* auto-symlinked from .git/hooks/ — instead, the repo's
+# `pnpm install` runs `scripts/install-git-hooks.mjs` which points
+# `core.hooksPath` at this directory. So `pnpm install` is the one-time
+# install step; after that every commit goes through this script.
+
+set -euo pipefail
+
+# Bail early if there's nothing TS-ish staged.
+staged_files="$(git diff --cached --name-only --diff-filter=ACMR -- '*.ts' '*.tsx' 2>/dev/null || true)"
+if [[ -z "$staged_files" ]]; then
+  exit 0
+fi
+
+# Run the sweep against just the staged files. The script reads from
+# disk (working tree), so we sweep what's about to be committed.
+node scripts/em-dash-sweep.mjs $staged_files
+
+# If the sweep modified any of the staged files, re-stage them. We only
+# re-stage files that were already part of this commit, so we never
+# accidentally pull unrelated working-tree changes into the index.
+while IFS= read -r f; do
+  if [[ -n "$f" ]] && [[ -f "$f" ]]; then
+    # Skip if the file hasn't actually changed vs. what's already staged
+    if ! git diff --quiet -- "$f"; then
+      git add "$f"
+    fi
+  fi
+done <<< "$staged_files"
+
+exit 0
