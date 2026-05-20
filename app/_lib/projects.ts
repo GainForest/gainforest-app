@@ -20,7 +20,11 @@
  */
 
 const GLOBE_ORIGIN =
-  process.env.NEXT_PUBLIC_GREEN_GLOBE_URL?.trim() || "https://gainforest.app";
+  process.env.NEXT_PUBLIC_GREEN_GLOBE_URL?.trim() || "https://data.gainforest.app";
+
+const INDEXER_URL =
+  process.env.NEXT_PUBLIC_INDEXER_URL?.trim() ||
+  "https://hi.gainforest.app/graphql";
 
 export type ProjectPin = {
   did: string;
@@ -28,6 +32,8 @@ export type ProjectPin = {
   country: string;
   lat: number;
   lon: number;
+  /** Real org cover/logo image resolved from Hyperindex → PDS blob, if present. */
+  imageUrl: string | null;
 };
 
 type RawOrg = {
@@ -35,6 +41,136 @@ type RawOrg = {
   info?: { name?: string | null; country?: string | null } | null;
   mapPoint?: { lat?: number | null; lon?: number | null } | null;
 };
+
+type IndexedBlob = {
+  ref?: string | null;
+  mimeType?: string | null;
+  size?: number | null;
+};
+
+type IndexedSmallImage = {
+  image?: IndexedBlob | null;
+} | null;
+
+type OrganizationInfoNode = {
+  did: string;
+  displayName?: string | null;
+  country?: string | null;
+  coverImage?: IndexedSmallImage;
+  logo?: IndexedSmallImage;
+};
+
+type OrganizationInfoResponse = {
+  data?: {
+    appGainforestOrganizationInfo?: {
+      edges?: Array<{ node?: OrganizationInfoNode | null }> | null;
+    } | null;
+  };
+};
+
+const ORG_IMAGES_QUERY = `
+  query LandingOrganizationImages {
+    appGainforestOrganizationInfo(first: 200) {
+      edges {
+        node {
+          did
+          displayName
+          country
+          coverImage { image { ref mimeType size } }
+          logo { image { ref mimeType size } }
+        }
+      }
+    }
+  }
+`;
+
+const pdsHostCache = new Map<string, string | null>();
+
+async function resolvePdsHost(did: string): Promise<string | null> {
+  if (pdsHostCache.has(did)) return pdsHostCache.get(did) ?? null;
+  try {
+    const res = await fetch(`https://plc.directory/${did}`, {
+      next: { revalidate: 60 * 60 * 24 },
+    });
+    if (!res.ok) {
+      pdsHostCache.set(did, null);
+      return null;
+    }
+    const doc: { service?: Array<{ type?: string; serviceEndpoint?: string }> } =
+      await res.json();
+    const endpoint = doc.service?.find(
+      (s) => s.type === "AtprotoPersonalDataServer",
+    )?.serviceEndpoint;
+    const host = endpoint ? new URL(endpoint).host : null;
+    pdsHostCache.set(did, host);
+    return host;
+  } catch {
+    pdsHostCache.set(did, null);
+    return null;
+  }
+}
+
+async function resolveBlobUrl(
+  did: string,
+  image: IndexedSmallImage,
+): Promise<string | null> {
+  const ref = image?.image?.ref?.trim();
+  if (!ref) return null;
+  const host = await resolvePdsHost(did);
+  if (!host) return null;
+  return `https://${host}/xrpc/com.atproto.sync.getBlob?did=${encodeURIComponent(
+    did,
+  )}&cid=${encodeURIComponent(ref)}`;
+}
+
+function imageLookupKey(name: string, country: string): string {
+  return `${name.trim().toLocaleLowerCase()}|${country.trim().toLocaleLowerCase()}`;
+}
+
+async function fetchOrganizationImageUrls(): Promise<Map<string, string>> {
+  try {
+    const res = await fetch(INDEXER_URL, {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        "ngrok-skip-browser-warning": "true",
+      },
+      body: JSON.stringify({
+        operationName: "LandingOrganizationImages",
+        query: ORG_IMAGES_QUERY,
+      }),
+      next: { revalidate: 60 * 15 },
+    });
+    // Hyperindex can return partial data with HTTP 400 when one optional
+    // blob subfield violates a non-null schema constraint. We still use
+    // the successful edges rather than discarding every org image.
+    const json = (await res.json()) as OrganizationInfoResponse;
+    const nodes =
+      json.data?.appGainforestOrganizationInfo?.edges
+        ?.map((edge) => edge.node)
+        .filter((node): node is OrganizationInfoNode => Boolean(node?.did)) ?? [];
+
+    const entries = await Promise.all(
+      nodes.map(async (node) => {
+        // Prefer the editorial cover image; logo is a useful real-data
+        // fallback when an org has not uploaded a cover yet.
+        const imageUrl =
+          (await resolveBlobUrl(node.did, node.coverImage ?? null)) ??
+          (await resolveBlobUrl(node.did, node.logo ?? null));
+        if (!imageUrl) return [] as Array<readonly [string, string]>;
+        const keys: Array<readonly [string, string]> = [[node.did, imageUrl]];
+        if (node.displayName) {
+          keys.push([imageLookupKey(node.displayName, node.country ?? ""), imageUrl]);
+        }
+        return keys;
+      }),
+    );
+
+    return new Map(entries.flat());
+  } catch {
+    return new Map();
+  }
+}
 
 export async function fetchProjectPins(): Promise<ProjectPin[]> {
   try {
@@ -45,6 +181,7 @@ export async function fetchProjectPins(): Promise<ProjectPin[]> {
     });
     if (!res.ok) throw new Error(`green_globe ${res.status}`);
     const data = (await res.json()) as RawOrg[];
+    const imageUrls = await fetchOrganizationImageUrls();
     const pins: ProjectPin[] = [];
     for (const org of data) {
       // Literal port of green_globe's `useIndexedOrganizations` filter
@@ -69,6 +206,10 @@ export async function fetchProjectPins(): Promise<ProjectPin[]> {
         country: org.info?.country?.trim() || "",
         lat,
         lon,
+        imageUrl:
+          imageUrls.get(did) ??
+          imageUrls.get(imageLookupKey(name, org.info?.country?.trim() || "")) ??
+          null,
       });
     }
     return pins;
@@ -81,9 +222,9 @@ export async function fetchProjectPins(): Promise<ProjectPin[]> {
 // Tiny fallback so the globe is never completely empty if the upstream
 // endpoint is unreachable.
 const FALLBACK_PINS: ProjectPin[] = [
-  { did: "fallback-agape", name: "Agape Hand", country: "PE", lat: -11.26, lon: -75.64 },
-  { did: "fallback-bula", name: "Bula Garden Tanzania", country: "TZ", lat: -4.8, lon: 38.29 },
-  { did: "fallback-lobongia", name: "Restoring Lobongia rangelands", country: "UG", lat: 3.51, lon: 34.13 },
-  { did: "fallback-marina-gardens", name: "Marina Gardens", country: "SG", lat: 1.28, lon: 103.86 },
-  { did: "fallback-precious", name: "Precious Forests", country: "BR", lat: -3.47, lon: -62.21 },
+  { did: "fallback-agape", name: "Agape Hand", country: "PE", lat: -11.26, lon: -75.64, imageUrl: null },
+  { did: "fallback-bula", name: "Bula Garden Tanzania", country: "TZ", lat: -4.8, lon: 38.29, imageUrl: null },
+  { did: "fallback-lobongia", name: "Restoring Lobongia rangelands", country: "UG", lat: 3.51, lon: 34.13, imageUrl: null },
+  { did: "fallback-marina-gardens", name: "Marina Gardens", country: "SG", lat: 1.28, lon: 103.86, imageUrl: null },
+  { did: "fallback-precious", name: "Precious Forests", country: "BR", lat: -3.47, lon: -62.21, imageUrl: null },
 ];

@@ -128,11 +128,14 @@ Revalidates every **15 minutes**.
 Literal port of
 [useIndexedOrganizations](https://github.com/GainForest/green_globe/blob/main/src/app/(map-routes)/(main)/_hooks/useIndexedOrganizations.ts):
 
-1. `GET https://gainforest.app/api/list-organizations?info=true&mapPoint=true`
+1. `GET https://data.gainforest.app/api/list-organizations?info=true&mapPoint=true`
    — green_globe walks Hyperindex → org `defaultSite` → certified-location
    GeoJSON blob on the PDS → centroid (Turf.js) → `{ did, info, mapPoint }`.
 2. Client-side filter: keep only orgs with **both** `info` and `mapPoint`
    non-null (and a non-empty `info.name`).
+3. The landing also queries Hyperindex `appGainforestOrganizationInfo` for
+   each org's `coverImage` / `logo` blob and resolves that blob through the
+   org's PDS, producing `ProjectPin.imageUrl` when a real image exists.
 
 Endpoint: `process.env.NEXT_PUBLIC_GREEN_GLOBE_URL`
 (default `https://gainforest.app`). Revalidates every **5 minutes**.
@@ -141,17 +144,19 @@ Currently surfaces ~52 pins. The S3 `gainforest-all-shapefiles.geojson`
 file is **not** used — that path only feeds green_globe's separate
 `(shapefile-related)` route.
 
-### 3. Partners roster → live Green Globe / Hyperindex names
+### 3. Partners globe → live Green Globe / Hyperindex spotlight
 
 The partners section (`app/_components/Partners.tsx` +
 `PartnersClient.tsx`) uses `fetchProjectPins()` — the same Green Globe /
-Hyperindex-backed source as the globe pins — to render a minimal roster of
-real organization/community names plus their country codes. Do not replace
-this with static categories or marketing archetypes. If you change the
-section, keep the roster and the globe on the same `ProjectPin[]` dataset so
-the names, countries, and map remain consistent. The adjacent community-calls
-CTA links to the GainForest YouTube videos page, where monthly community calls
-and steward sessions are published.
+Hyperindex-backed source as the globe pins — to render a compact live globe.
+A small overlay cycles through one real organization/community at a time,
+showing its name, country code, and `ProjectPin.imageUrl` when Hyperindex has
+a real cover/logo blob for that org. Do not replace this with static
+categories, marketing archetypes, or generated partner imagery. If you change
+the section, keep the spotlight and the globe on the same `ProjectPin[]`
+dataset so the names, countries, images, and map remain consistent. The
+adjacent community-calls CTA links to the GainForest YouTube videos page,
+where monthly community calls and steward sessions are published.
 
 ### 4. Awards & press carousel → curated sources + Substack RSS
 

@@ -51,7 +51,7 @@ export const revalidate = 900;
 //                                     assistant
 //   8.  Research .................... HACKATHONS — how we iterate
 //   9.  NatureGuild ................. THE COMMUNITY — Guild members
-//  10.  Partners ................... live globe + partner archetypes
+//  10.  Partners ................... live globe + community spotlight
 //  11.  ImpactReport ............... 24/25 report card
 //  12.  Media ...................... selected press
 //  13.  Supporters ................. Merci to our supporters

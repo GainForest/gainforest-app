@@ -1,31 +1,26 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { LiveGlobe } from "./LiveGlobe";
 import { useT } from "./LocaleProvider";
 import type { ProjectPin } from "../_lib/projects";
 
-// Client child of <Partners />. Renders the editorial copy on the left
-// and a large, slowly-rotating LiveGlobe on the right — swapping out
-// the previous "50+" pull number for the actual live globe of project
-// pins. Gainforest.earth's equivalent section also leads with imagery
-// (a video B-roll wall), so replacing the static stat with the live
-// globe reads as a stronger expression of the same idea: "we work
-// with stewards … here they are."
-//
-// Globe diameter is responsive (read from a ResizeObserver on the
-// container) so the sphere always fills its column without overflowing
-// at narrow viewport widths.
+// Client child of <Partners />. This section intentionally stays quiet:
+// it uses the same live Green Globe pins as the rest of the page, then
+// overlays a rotating spotlight for one real community/org at a time.
+// Images come from Hyperindex organization cover/logo blobs resolved in
+// `_lib/projects.ts`; no generated or invented partner imagery here.
 
-type CommunityName = {
+type Community = {
   name: string;
   country: string;
+  imageUrl: string | null;
 };
 
-function uniqueCommunityNames(pins: ProjectPin[]): CommunityName[] {
+function uniqueCommunities(pins: ProjectPin[]): Community[] {
   const seen = new Set<string>();
-  const names: CommunityName[] = [];
+  const communities: Community[] = [];
   for (const pin of pins) {
     const name = pin.name.trim();
     if (!name) continue;
@@ -33,42 +28,61 @@ function uniqueCommunityNames(pins: ProjectPin[]): CommunityName[] {
     const key = `${name.toLocaleLowerCase()}|${country.toLocaleLowerCase()}`;
     if (seen.has(key)) continue;
     seen.add(key);
-    names.push({ name, country });
+    communities.push({ name, country, imageUrl: pin.imageUrl });
   }
-  return names.sort((a, b) => a.name.localeCompare(b.name));
+  return communities.sort((a, b) => a.name.localeCompare(b.name));
 }
 
-function CommunityRoster({
-  names,
-  recordLabel,
-}: {
-  names: CommunityName[];
-  recordLabel: string;
-}) {
-  if (names.length === 0) return null;
-  const visible = names.slice(0, 12);
+function initials(name: string): string {
+  return name
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase())
+    .join("");
+}
 
+function SpotlightCard({
+  community,
+  label,
+}: {
+  community: Community | undefined;
+  label: string;
+}) {
+  if (!community) return null;
   return (
-    <div className="mt-10 rounded-[26px] border border-border-soft bg-background/55 p-3 sm:p-4">
-      <div className="grid grid-cols-1 sm:grid-cols-2">
-        {visible.map((community, i) => (
-          <div
-            key={`${community.name}-${community.country}`}
-            className="group flex min-h-[62px] items-center justify-between gap-4 border-b border-border-soft px-3 py-3 last:border-b-0 sm:px-4 sm:[&:nth-last-child(-n+2)]:border-b-0 sm:[&:nth-child(odd)]:border-r"
-          >
-            <div className="min-w-0">
-              <p className="truncate font-garamond text-[20px] leading-[1.05] text-foreground sm:text-[21px]">
-                {community.name}
-              </p>
-              <p className="mt-1 text-[10px] uppercase tracking-[0.16em] text-foreground/38">
-                {recordLabel}
-              </p>
-            </div>
-            <span className="shrink-0 rounded-full border border-border-soft bg-[#efe8d8] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-foreground/55">
-              {community.country || String(i + 1).padStart(2, "0")}
+    <div className="absolute inset-x-4 bottom-4 z-10 rounded-[22px] border border-border-soft bg-background/92 p-3 shadow-[0_18px_45px_-28px_rgba(28,28,26,0.45)] backdrop-blur-md sm:left-auto sm:right-5 sm:w-[340px]">
+      <div className="flex items-center gap-3">
+        <div className="relative h-[74px] w-[92px] shrink-0 overflow-hidden rounded-[16px] bg-[#e1dccf]">
+          {community.imageUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              key={community.imageUrl}
+              src={community.imageUrl}
+              alt=""
+              loading="lazy"
+              decoding="async"
+              className="absolute inset-0 h-full w-full object-cover"
+            />
+          ) : (
+            <span className="flex h-full w-full items-center justify-center font-garamond text-[28px] text-foreground/35">
+              {initials(community.name)}
             </span>
-          </div>
-        ))}
+          )}
+        </div>
+        <div className="min-w-0">
+          <p className="text-[9px] uppercase tracking-[0.18em] text-foreground/42">
+            {label}
+          </p>
+          <p className="mt-1 truncate font-garamond text-[22px] leading-[1.03] text-foreground">
+            {community.name}
+          </p>
+          {community.country ? (
+            <p className="mt-2 inline-flex rounded-full border border-border-soft px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-foreground/52">
+              {community.country}
+            </p>
+          ) : null}
+        </div>
       </div>
     </div>
   );
@@ -80,117 +94,117 @@ export function ClientPartners({ pins }: { pins: ProjectPin[] }) {
   const italic = t("partners.heading.italic").trim();
   const after = t("partners.heading.after").trim();
 
-  const communityNames = uniqueCommunityNames(pins);
-  const rosterNames =
-    communityNames.length > 0
-      ? communityNames
-      : pins.map((pin) => ({ name: pin.name, country: pin.country }));
+  const communities = useMemo(() => uniqueCommunities(pins), [pins]);
+  const spotlightPool = useMemo(() => {
+    const withImages = communities.filter((community) => community.imageUrl);
+    return withImages.length > 0 ? withImages : communities;
+  }, [communities]);
+  const total = communities.length || pins.length;
 
-  // Responsive globe diameter — sized to comfortably fit inside the
-  // right column without overflowing the section. The previous tier
-  // (420–480 px) over-filled the slot and visually clipped at the
-  // top edge of the next section, so the sphere read as cropped in
-  // half. Smaller tier numbers below; LiveGlobe still draws at the
-  // requested diameter, just within bounds.
-  const [diameter, setDiameter] = useState<number>(360);
+  const [spotlightIndex, setSpotlightIndex] = useState(0);
+  const [diameter, setDiameter] = useState<number>(380);
+
   useEffect(() => {
     const update = () => {
       const w = window.innerWidth;
-      if (w >= 1280) setDiameter(400);
-      else if (w >= 1024) setDiameter(360);
+      if (w >= 1280) setDiameter(410);
+      else if (w >= 1024) setDiameter(370);
       else if (w >= 640) setDiameter(340);
-      else setDiameter(Math.min(320, w - 64));
+      else setDiameter(Math.min(310, w - 72));
     };
     update();
     window.addEventListener("resize", update);
     return () => window.removeEventListener("resize", update);
   }, []);
 
+  useEffect(() => {
+    if (spotlightPool.length <= 1) {
+      setSpotlightIndex(0);
+      return;
+    }
+    const id = window.setInterval(() => {
+      setSpotlightIndex((current) => {
+        let next = Math.floor(Math.random() * spotlightPool.length);
+        if (next === current) next = (next + 1) % spotlightPool.length;
+        return next;
+      });
+    }, 4200);
+    return () => window.clearInterval(id);
+  }, [spotlightPool.length]);
+
+  const spotlight = spotlightPool[spotlightIndex % Math.max(spotlightPool.length, 1)];
+
   return (
     <section className="border-t border-border-soft">
-      <div className="mx-auto w-full max-w-[1480px] px-6 py-20 sm:px-10 lg:px-16 lg:py-24">
-        <div className="grid grid-cols-1 gap-12 lg:grid-cols-12 lg:items-center lg:gap-16">
-          {/* Left column — editorial copy + archetype ledger. */}
-          <div className="lg:col-span-7">
-            <span className="font-instrument italic text-[13px] uppercase tracking-[0.18em] text-foreground/55">
-              {t("partners.eyebrow")}
+      <div className="mx-auto grid w-full max-w-[1480px] grid-cols-1 gap-10 px-6 py-16 sm:gap-12 sm:px-10 sm:py-20 lg:grid-cols-12 lg:items-center lg:gap-16 lg:px-16 lg:py-28">
+        <div className="lg:col-span-5">
+          <span className="font-instrument italic text-[13px] uppercase tracking-[0.18em] text-foreground/55">
+            {t("partners.eyebrow")}
+          </span>
+          <h2 className="mt-4 font-garamond text-[32px] font-normal leading-[1.08] tracking-[-0.01em] text-foreground sm:text-[40px] lg:text-[52px]">
+            {before && <span>{before} </span>}
+            <span className="font-instrument italic font-normal">
+              {italic}
             </span>
-            <h2 className="mt-4 font-garamond text-[32px] sm:text-[40px] lg:text-[48px] font-normal leading-[1.08] tracking-[-0.01em] text-foreground">
-              {before && <span>{before} </span>}
-              <span className="font-instrument italic font-normal">
-                {italic}
-              </span>
-              {after && <span>{after}</span>}
-            </h2>
-            <p className="mt-6 max-w-[600px] text-[15px] lg:text-[16.5px] leading-[1.55] text-foreground/70">
-              {t("partners.body")}
-            </p>
+            {after && <span>{after}</span>}
+          </h2>
+          <p className="mt-6 max-w-[560px] text-[15px] leading-[1.58] text-foreground/70 lg:text-[16px]">
+            {t("partners.body")}
+          </p>
 
-            {/* Inline stat — kept as a quiet pull line beneath the
-                body. The big number is gone; the live globe carries
-                the visual weight now. */}
-            <p className="mt-6 flex items-baseline gap-3 text-[14px] text-foreground/55">
-              <span className="font-garamond text-[32px] font-normal leading-none tracking-[-0.01em] text-foreground/85">
-                {communityNames.length || pins.length}
-              </span>
-              <span className="font-instrument italic text-[14.5px] text-foreground/65">
-                {t("partners.statLabel")}
-              </span>
-            </p>
+          <p className="mt-7 flex items-baseline gap-3 text-[14px] text-foreground/55">
+            <span className="font-garamond text-[42px] font-normal leading-none tracking-[-0.02em] text-foreground/85">
+              {total}
+            </span>
+            <span className="font-instrument italic text-[14.5px] text-foreground/65">
+              {t("partners.statLabel")}
+            </span>
+          </p>
 
-            <div className="mt-9 flex items-center justify-between gap-4 border-y border-border-soft py-3 text-[10px] uppercase tracking-[0.18em] text-foreground/45">
-              <span>{t("partners.bannerLabel")}</span>
-              <span>
-                {communityNames.length || pins.length} {t("partners.bannerCountLabel")}
+          <Link
+            href="https://www.youtube.com/@gainforest/videos"
+            target="_blank"
+            rel="noreferrer"
+            className="group mt-8 inline-flex max-w-[520px] items-start gap-4 border-t border-border-soft pt-5 transition-colors hover:border-foreground/25"
+          >
+            <span className="min-w-0">
+              <span className="block text-[10px] uppercase tracking-[0.16em] text-foreground/45">
+                {t("partners.callsEyebrow")}
               </span>
+              <span className="mt-1 block font-garamond text-[22px] leading-[1.08] text-foreground sm:text-[24px]">
+                {t("partners.callsTitle")}
+              </span>
+              <span className="mt-2 block text-[13px] leading-[1.45] text-foreground/62">
+                {t("partners.callsBody")}
+              </span>
+            </span>
+            <span
+              aria-hidden
+              className="mt-5 shrink-0 text-[20px] text-primary transition-transform group-hover:translate-x-1"
+            >
+              →
+            </span>
+          </Link>
+        </div>
+
+        <div className="lg:col-span-7">
+          <div className="relative mx-auto min-h-[430px] max-w-[720px] overflow-hidden rounded-[34px] border border-border-soft bg-[#efe8d8]/55 p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.45)] sm:min-h-[470px] lg:ml-auto">
+            <div className="absolute left-5 top-5 z-10 flex items-center gap-3 rounded-full border border-border-soft bg-background/75 px-3 py-1 text-[10px] uppercase tracking-[0.16em] text-foreground/50 backdrop-blur-sm">
+              <span className="h-1.5 w-1.5 rounded-full bg-brand" />
+              {t("partners.bannerLabel")}
             </div>
-            <CommunityRoster names={rosterNames} recordLabel={t("partners.recordLabel")} />
+            <div className="absolute right-5 top-5 z-10 rounded-full border border-border-soft bg-background/75 px-3 py-1 text-[10px] font-medium uppercase tracking-[0.14em] text-foreground/50 backdrop-blur-sm">
+              {total} {t("partners.bannerCountLabel")}
+            </div>
 
-            <Link
-              href="https://www.youtube.com/@gainforest/videos"
-              target="_blank"
-              rel="noreferrer"
-              className="group mt-5 flex max-w-[620px] items-center justify-between gap-5 rounded-[20px] border border-border-soft bg-background/70 px-5 py-4 transition-all hover:-translate-y-0.5 hover:border-foreground/25 hover:bg-background"
-            >
-              <span className="min-w-0">
-                <span className="block text-[11px] uppercase tracking-[0.16em] text-foreground/45">
-                  {t("partners.callsEyebrow")}
-                </span>
-                <span className="mt-1 block font-garamond text-[22px] leading-[1.08] text-foreground sm:text-[24px]">
-                  {t("partners.callsTitle")}
-                </span>
-                <span className="mt-2 block text-[13px] leading-[1.45] text-foreground/62">
-                  {t("partners.callsBody")}
-                </span>
-              </span>
-              <span
-                aria-hidden
-                className="shrink-0 text-[22px] text-primary transition-transform group-hover:translate-x-1"
-              >
-                →
-              </span>
-            </Link>
-          </div>
-
-          {/* Right column — rotating LiveGlobe. Same dataset as the
-              hero globe; rendered inside an explicit square frame so
-              the sphere is fully visible and the live caption sits
-              under it without bleeding into the next section. */}
-          <div className="lg:col-span-5 lg:flex lg:items-center lg:justify-center">
-            <div
-              className="relative mx-auto flex flex-col items-center justify-center"
-              style={{ width: diameter }}
-            >
+            <div className="flex min-h-[390px] items-center justify-center pt-4 sm:min-h-[430px]">
               <LiveGlobe pins={pins} diameter={diameter} />
-              {/* Live caption beneath the globe — mirrors the
-                  gainforest.app pin so the source of truth is
-                  clear. Sits inside the column flow now (not
-                  absolute) so it can't be clipped by the next
-                  section's top edge. */}
-              <span className="mt-3 whitespace-nowrap text-[10px] font-medium uppercase tracking-[0.18em] text-foreground/45">
-                gainforest.app · live pins
-              </span>
             </div>
+
+            <SpotlightCard
+              community={spotlight}
+              label={t("partners.recordLabel")}
+            />
           </div>
         </div>
       </div>
