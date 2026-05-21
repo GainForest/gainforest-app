@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useT } from "./LocaleProvider";
 
 // "Read our 3rd annual impact report." — the editorial bridge between
-// the cream body of the page and the closing CTA / Footer ink band.
+// the cream body of the page and the integrated closing footer.
 //
 // Earlier this section shipped on a warm apricot card (#f4d9a5) to
 // echo gainforest.earth's actual impact-report tile. The team's
@@ -164,9 +164,8 @@ export function ImpactReport() {
             </p>
 
             <div className="mt-7 lg:mt-8">
-              {/* Same sage pill recipe Hero / NatureCTA use, so the
-                  CTA reads as part of the page's single primary
-                  language. */}
+              {/* Same sage pill recipe Hero / Footer use, so the CTA
+                  reads as part of the page's single primary language. */}
               <Link
                 href={IMPACT_REPORT_URL}
                 target="_blank"

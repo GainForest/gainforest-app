@@ -295,6 +295,7 @@ type Messages = {
   "footer.legal.uid": string;
   "footer.legal.work": string;
   "footer.legal.support": string;
+  "footer.legal.bankLabel": string;
   "footer.legal.bank": string;
 };
 
@@ -578,6 +579,7 @@ export const MESSAGES: Record<Locale, Messages> = {
     "footer.legal.uid": "UID: CHE-181.901.605",
     "footer.legal.work": "Work with us",
     "footer.legal.support": "Support us",
+    "footer.legal.bankLabel": "Direct donation details",
     "footer.legal.bank":
       "Bank: UBS · IBAN (CHF): CH34 0023 0230 7349 7401 C · IBAN (EUR): CH88 0023 0230 7349 7460 R · BIC: UBSWCHZH80A",
   },
@@ -859,6 +861,7 @@ export const MESSAGES: Record<Locale, Messages> = {
     "footer.legal.uid": "UID: CHE-181.901.605",
     "footer.legal.work": "Trabaja con nosotras",
     "footer.legal.support": "Apoyanos",
+    "footer.legal.bankLabel": "Datos para donar directamente",
     "footer.legal.bank":
       "Banco: UBS · IBAN (CHF): CH34 0023 0230 7349 7401 C · IBAN (EUR): CH88 0023 0230 7349 7460 R · BIC: UBSWCHZH80A",
   },
@@ -1138,6 +1141,7 @@ export const MESSAGES: Record<Locale, Messages> = {
     "footer.legal.uid": "UID: CHE-181.901.605",
     "footer.legal.work": "Trabalhe com a gente",
     "footer.legal.support": "Apoie",
+    "footer.legal.bankLabel": "Dados para doação direta",
     "footer.legal.bank":
       "Banco: UBS · IBAN (CHF): CH34 0023 0230 7349 7401 C · IBAN (EUR): CH88 0023 0230 7349 7460 R · BIC: UBSWCHZH80A",
   },
@@ -1419,6 +1423,7 @@ export const MESSAGES: Record<Locale, Messages> = {
     "footer.legal.uid": "UID: CHE-181.901.605",
     "footer.legal.work": "Fanya kazi nasi",
     "footer.legal.support": "Tuunge mkono",
+    "footer.legal.bankLabel": "Maelezo ya mchango wa moja kwa moja",
     "footer.legal.bank":
       "Benki: UBS · IBAN (CHF): CH34 0023 0230 7349 7401 C · IBAN (EUR): CH88 0023 0230 7349 7460 R · BIC: UBSWCHZH80A",
   },
@@ -1698,6 +1703,7 @@ export const MESSAGES: Record<Locale, Messages> = {
     "footer.legal.uid": "UID: CHE-181.901.605",
     "footer.legal.work": "Bekerja bersama kami",
     "footer.legal.support": "Dukung kami",
+    "footer.legal.bankLabel": "Detail donasi langsung",
     "footer.legal.bank":
       "Bank: UBS · IBAN (CHF): CH34 0023 0230 7349 7401 C · IBAN (EUR): CH88 0023 0230 7349 7460 R · BIC: UBSWCHZH80A",
   },

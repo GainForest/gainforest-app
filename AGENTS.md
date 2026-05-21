@@ -10,7 +10,7 @@ flow ported from simocracy-v2.
 The **visual language follows [gainforest.earth](https://gainforest.earth)**
 as of the May 2026 redesign — minimal editorial, big serif headlines
 with a single italic word, a mostly-cream editorial rhythm punctuated by
-the dark `DataCommons` band and the closing `NatureCTA` + `Footer`. The previous
+the dark `DataCommons` band and the integrated closing `Footer`. The previous
 tropical sprigs and the hand-drawn icon PNGs were dropped per team
 feedback ("thin-stroke art doesn't match the rendered apps; tone is
 too light"). The earlier pixel-art capybara floating companion was
@@ -383,7 +383,7 @@ Current generated assets:
 | `public/decor/icon-want-*.png` | IWantTo card icons (globe, plant, certificate, book) |
 | `public/decor/icon-step-*.png` | HowItWorks step icons (globe+mag, doc+leaf, hands+plant, tree) |
 | `public/decor/icon-{globe,plant,leaf}.png` | ChoosePath ring-bordered icons |
-| `public/decor/topo-decor.png` | NatureCTA — topographic contour decoration |
+| `public/decor/topo-decor.png` | Retired closing CTA — topographic contour decoration |
 | `public/codex-pets/taina-poster.png` | FloatingTaina — pixel-art idle pose (poster fallback) |
 
 Current **gainforest.earth-sourced** documentary assets (not
@@ -557,11 +557,11 @@ separation is deliberate per team feedback.
 
 **Section rhythm:** the page is mostly cream, with two deliberate
 near-black beats: `DataCommons` (mid-page WHY / 1% biodiversity-data
-claim) and the closing `NatureCTA` + `Footer` band. `ImpactReport`
+claim) and the integrated closing `Footer` band. `ImpactReport`
 used to be a dark card inside a cream section, but as of the
 media-pass update it sits on a warm apricot card (matching
 gainforest.earth) so the only dark chord on the lower half is the
-closing CTA. Keep the dark surfaces sparse and editorial so the
+closing footer. Keep the dark surfaces sparse and editorial so the
 cream → ink contrast lands hard without turning the whole page into
 a dark alternation pattern.
 
@@ -702,8 +702,8 @@ the original viewBox).
   JS bundle and is not committed.
 - Don't hand-code SVG for decorative botanicals or topographic contour
   patterns. Generate via gpt-image-2 + chroma-key. The one inline SVG
-  we tried (`NatureCTA` contour ovals) looked mechanical and was
-  replaced.
+  we tried (retired closing CTA contour ovals) looked mechanical and
+  was replaced.
 - Don't log, print, or commit `ATPROTO_JWK_PRIVATE`.
 - Don't write a custom session-cookie scheme — use `getSession()` from
   `_lib/auth-session.ts`.

@@ -14,8 +14,8 @@
      the page".
    - `--primary` is the **call-to-action** colour, not the brand. On
      cream it's a confident near-black solid pill (text-cream on ink).
-     On the dark closing band we swap to a cream-on-ink pill (see
-     NatureCTA) because near-black on near-black is invisible.
+     On the dark closing footer we swap to a cream-on-ink pill because
+     near-black on near-black is invisible.
 
    Headlines: tall serif (Cormorant Garamond), with italic emphasis on
    a single key word — never a whole line.
@@ -53,7 +53,7 @@
 
   /* Dark "ink" section — near-black with a touch of warmth so it
      doesn't clash with the cream when sections alternate. Used for the
-     closing CTA banner and the footer. */
+     DataCommons section and the integrated closing footer. */
   --ink: #141413;
   --ink-foreground: #f4efe4;
   --ink-muted: #a8a59a;

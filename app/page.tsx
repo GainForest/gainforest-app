@@ -12,7 +12,6 @@ import { Partners } from "./_components/Partners";
 import { ImpactReport } from "./_components/ImpactReport";
 import { Media } from "./_components/Media";
 import { Supporters } from "./_components/Supporters";
-import { NatureCTA } from "./_components/NatureCTA";
 import { Footer } from "./_components/Footer";
 import { BumicertsCard } from "./_components/BumicertsCard";
 import { DraggableGlobeCard } from "./_components/DraggableGlobeCard";
@@ -55,8 +54,7 @@ export const revalidate = 900;
 //  11.  ImpactReport ............... 24/25 report card
 //  12.  Media ...................... selected press
 //  13.  Supporters ................. Merci to our supporters
-//  14.  NatureCTA .................. closing CTA (ink)
-//  15.  Footer ..................... legal + IBAN (ink)
+//  14.  Footer ..................... merged closing CTA + legal (ink)
 //
 // Dropped: <IWantTo /> — it was a second visitor-routing strip with
 // four cards (Discover / Browse / Create / Learn) that duplicated
@@ -69,8 +67,7 @@ export const revalidate = 900;
 //
 // Cream / ink rhythm: most sections sit on cream so the page reads as
 // a long editorial scroll, with two intentional dark "punches" —
-// DataCommons (mid-page WHY) and NatureCTA → Footer (the closing
-// chord).
+// DataCommons (mid-page WHY) and the integrated closing Footer.
 export default async function Page() {
   const [snapshot, pins, blogPosts] = await Promise.all([
     fetchLiveBumicerts(12),
@@ -132,7 +129,6 @@ export default async function Page() {
         <ImpactReport />
         <Media blogPosts={blogPosts} />
         <Supporters />
-        <NatureCTA />
       </main>
       <Footer />
     </div>

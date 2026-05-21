@@ -5,9 +5,10 @@ import { useT } from "./LocaleProvider";
 // "The world's first community-owned data commons for biodiversity." —
 // editorial port of gainforest.earth's "Data Commons" hero.
 //
-// Sits on the INK band (same dark band as NatureCTA + Footer use, so the
-// page rhythm reads as: cream-hero, cream-choose, **DARK band**, cream
-// pillars, …). The hero is split into a left "claim" column (eyebrow
+// Sits on the INK band (the same dark surface as the integrated
+// closing footer), so the page rhythm reads as: cream-hero,
+// cream-choose, **DARK band**, cream pillars, …). The hero is split
+// into a left "claim" column (eyebrow
 // + serif headline with a single italic word + body) and a right
 // "stat" column where the 1% figure lives.
 //
