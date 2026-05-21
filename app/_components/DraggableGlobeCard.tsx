@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { GLOBE_URL } from "../_lib/urls";
+import { LivePill } from "./LivePill";
 import { LogoMark } from "./Logo";
 import { useT } from "./LocaleProvider";
 
@@ -90,19 +91,14 @@ function GlobeCardChrome({ children, pinCount }: ChromeProps) {
         <span className="font-garamond text-[20px] font-medium text-foreground">
           {t("nav.globe")}
         </span>
-        {/* LIVE badge — brand-mint as a subtle accent on live data.
-            Pairs visually with the matching badge on BumicertsCard. */}
-        <span
-          className="ml-auto inline-flex items-center gap-1.5 rounded-full bg-brand/15 px-2 py-0.5 text-[10px] font-medium uppercase tracking-[0.08em] text-brand-dark"
-          title="Real ATProto-sourced pins"
-          data-no-drag
-        >
-          <span className="relative grid h-1.5 w-1.5 place-items-center">
-            <span className="absolute inset-0 animate-ping rounded-full bg-brand/40" />
-            <span className="relative h-1.5 w-1.5 rounded-full bg-brand" />
-          </span>
-          Live
-        </span>
+        {/* Unified <LivePill /> — same component the ChoosePath cards
+            use, with a hover tooltip explaining what's being streamed
+            (project pins via the GainForest indexer). */}
+        <LivePill
+          isLive
+          tooltipKey="choosePath.globe.liveTooltip"
+          className="ml-auto"
+        />
       </div>
 
       {/* body: the live globe canvas, centered. Padding is tight so the

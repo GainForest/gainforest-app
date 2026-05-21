@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import type { LiveBumicertsSnapshot, LiveBumicert } from "../_lib/bumicerts";
 import { BUMICERTS_URL } from "../_lib/urls";
+import { LivePill } from "./LivePill";
 import { LogoMark } from "./Logo";
 import { useT } from "./LocaleProvider";
 
@@ -85,23 +86,19 @@ export function BumicertsCard({
         <span className="font-garamond text-[20px] font-medium text-foreground">
           Bumicerts
         </span>
-        {!snapshot.fromFallback && (
-          // LIVE badge — the brand-mint accent is intentional. It is
-          // the same green as the logo, and the only spot the page
-          // uses mint as a *fill* (not just a hover lift). Reads as
-          // "this row is real, live data" without competing with the
-          // primary CTA.
-          <span
-            className="ml-auto inline-flex items-center gap-1.5 rounded-full bg-brand/15 px-2 py-0.5 text-[10px] font-medium uppercase tracking-[0.08em] text-brand-dark"
-            title="Pulled from the GainForest indexer in real time"
-          >
-            <span className="relative grid h-1.5 w-1.5 place-items-center">
-              <span className="absolute inset-0 animate-ping rounded-full bg-brand/40" />
-              <span className="relative h-1.5 w-1.5 rounded-full bg-brand" />
-            </span>
-            Live
-          </span>
-        )}
+        {/* Unified <LivePill /> — same component the ChoosePath cards
+            use, with a hover tooltip explaining what's being streamed.
+            The pill stays visible in both live and fallback states so
+            the badge is honest about the data source. */}
+        <LivePill
+          isLive={!snapshot.fromFallback}
+          tooltipKey={
+            snapshot.fromFallback
+              ? "choosePath.bumicerts.fallbackTooltip"
+              : "choosePath.bumicerts.liveTooltip"
+          }
+          className="ml-auto"
+        />
       </div>
 
       <div className="grid grid-cols-[120px_1fr] gap-3 px-3 pb-3">
