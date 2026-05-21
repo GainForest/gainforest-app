@@ -4,14 +4,15 @@ import Link from "next/link";
 import { useT } from "./LocaleProvider";
 
 const BUMICERTS_URL = "https://alpha.fund.gainforest.app";
+const DONATE_URL = "https://donorbox.org/gainforest";
 
 // Closing CTA — "Nature thrives when we act together."
 //
 // This is the editorial DARK band, mirroring gainforest.earth's
 // alternating cream/near-black section rhythm (data-commons and
 // Nature-Guild sections both sit on near-black there). White serif
-// headline with a single italic word, mint primary pill, outlined white
-// secondary pill — all matching the gainforest.earth pattern.
+// headline with a single italic word, solid cream donate pill, and
+// outlined secondary pills — all matching the gainforest.earth pattern.
 //
 // Removed:
 //   - `/decor/topo-decor.png` — the topographic raster decoration. Its
@@ -44,20 +45,38 @@ export function NatureCTA() {
 
         <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:gap-4 lg:flex-col lg:items-start lg:gap-3">
           {/* Primary pill on dark — cream solid on ink, the inverse of
-              the near-black cream-section CTA. We cannot reuse
-              `bg-primary` here because the new primary is near-black
-              ink, which would be invisible on this background. */}
+              the sage primary CTA used on cream sections. */}
+          <Link
+            href={DONATE_URL}
+            target="_blank"
+            rel="noreferrer"
+            className="group inline-flex h-[52px] items-center justify-center gap-2 rounded-full bg-ink-foreground px-8 text-[15px] font-medium text-ink transition-colors hover:bg-ink-foreground/85"
+          >
+            {t("natureCta.donate")}
+            <span
+              aria-hidden
+              className="transition-transform group-hover:translate-x-1"
+            >
+              →
+            </span>
+          </Link>
+          {/* Outlined cream pills on ink, mirrors gainforest.earth's
+              "Newsletter / GitBook / Friends of GainForest" footer
+              pills. */}
           <Link
             href={`${BUMICERTS_URL}/explore`}
             target="_blank"
             rel="noreferrer"
-            className="inline-flex h-[52px] items-center justify-center rounded-full bg-ink-foreground px-8 text-[15px] font-medium text-ink transition-colors hover:bg-ink-foreground/85"
+            className="group inline-flex h-[52px] items-center justify-center gap-2 rounded-full border border-ink-foreground/30 px-8 text-[15px] font-medium text-ink-foreground transition-colors hover:border-ink-foreground/80"
           >
             {t("natureCta.exploreProjects")}
+            <span
+              aria-hidden
+              className="transition-transform group-hover:translate-x-1"
+            >
+              →
+            </span>
           </Link>
-          {/* Outlined white pill on ink, mirrors gainforest.earth's
-              "Newsletter / GitBook / Friends of GainForest" footer
-              pills. */}
           <Link
             href={`${BUMICERTS_URL}/bumicert/create`}
             target="_blank"

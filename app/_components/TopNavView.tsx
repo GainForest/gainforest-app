@@ -9,6 +9,7 @@ import { useT } from "./LocaleProvider";
 
 const GLOBE_URL = "https://gainforest.app";
 const BUMICERTS_URL = "https://alpha.fund.gainforest.app";
+const DONATE_URL = "https://donorbox.org/gainforest";
 
 // Client-rendered view for the top navbar. The server wrapper
 // (`TopNav.tsx`) resolves the OAuth session + handle and passes them in
@@ -104,14 +105,23 @@ export function TopNavView({
             <div className="hidden sm:block">
               <SignInPopover signedIn={signedIn} handle={handle} />
             </div>
-            {/* Pill-shaped primary CTA, mirroring gainforest.earth's
-                "Support us" button. The mint sits on cream so the
-                brand colour reads at first glance. */}
+            {/* Donate is the one solid navbar CTA: the sage primary is
+                reserved for action on cream, while product exploration
+                stays quieter so the header does not turn into a button
+                cluster. */}
+            <Link
+              href={DONATE_URL}
+              target="_blank"
+              rel="noreferrer"
+              className="hidden h-10 items-center justify-center rounded-full bg-primary px-4 text-[14px] font-medium text-primary-foreground transition-colors hover:bg-primary-dark sm:inline-flex lg:h-11 lg:px-5 lg:text-[15px]"
+            >
+              {t("nav.donate")}
+            </Link>
             <Link
               href={`${BUMICERTS_URL}/explore`}
               target="_blank"
               rel="noreferrer"
-              className="hidden sm:inline-flex h-10 lg:h-11 items-center justify-center rounded-full bg-primary px-5 lg:px-6 text-[14px] lg:text-[15px] font-medium text-primary-foreground transition-colors hover:bg-primary-dark"
+              className="hidden h-10 items-center justify-center rounded-full border border-foreground/20 px-4 text-[14px] font-medium text-foreground/80 transition-colors hover:border-primary/50 hover:text-primary sm:inline-flex lg:h-11 lg:px-5 lg:text-[15px]"
             >
               {t("nav.getStarted")}
             </Link>
@@ -183,15 +193,26 @@ export function TopNavView({
               <SignInPopover signedIn={signedIn} handle={handle} />
             </div>
 
-            <Link
-              href={`${BUMICERTS_URL}/explore`}
-              target="_blank"
-              rel="noreferrer"
-              onClick={() => setMenuOpen(false)}
-              className="mt-3 inline-flex h-11 items-center justify-center rounded-full bg-primary px-6 text-[14px] font-medium text-primary-foreground transition-colors hover:bg-primary-dark"
-            >
-              {t("nav.getStarted")}
-            </Link>
+            <div className="mt-3 grid grid-cols-1 gap-2">
+              <Link
+                href={DONATE_URL}
+                target="_blank"
+                rel="noreferrer"
+                onClick={() => setMenuOpen(false)}
+                className="inline-flex h-11 items-center justify-center rounded-full bg-primary px-6 text-[14px] font-medium text-primary-foreground transition-colors hover:bg-primary-dark"
+              >
+                {t("nav.donate")}
+              </Link>
+              <Link
+                href={`${BUMICERTS_URL}/explore`}
+                target="_blank"
+                rel="noreferrer"
+                onClick={() => setMenuOpen(false)}
+                className="inline-flex h-11 items-center justify-center rounded-full border border-foreground/20 px-6 text-[14px] font-medium text-foreground/80 transition-colors hover:border-primary/50 hover:text-primary"
+              >
+                {t("nav.getStarted")}
+              </Link>
+            </div>
           </nav>
         </div>
       )}

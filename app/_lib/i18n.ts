@@ -40,6 +40,7 @@ type Messages = {
   "nav.signIn": string;
   "nav.signedIn": string;
   "nav.getStarted": string;
+  "nav.donate": string;
   "nav.language": string;
 
   // ── Hero ─────────────────────────────────────────────────────────
@@ -112,6 +113,7 @@ type Messages = {
   "natureCta.heading.italic": string;
   "natureCta.heading.after": string;
   "natureCta.body": string;
+  "natureCta.donate": string;
   "natureCta.exploreProjects": string;
   "natureCta.createBumicert": string;
 
@@ -306,6 +308,7 @@ export const MESSAGES: Record<Locale, Messages> = {
     "nav.signIn": "Sign in",
     "nav.signedIn": "Signed in",
     "nav.getStarted": "Get started",
+    "nav.donate": "Donate",
     "nav.language": "Language",
     // The `{word}` marker picks which word gets the painted brush
     // stroke. Position varies per locale (English puts it first,
@@ -377,6 +380,7 @@ export const MESSAGES: Record<Locale, Messages> = {
     "natureCta.heading.after": ".",
     "natureCta.body":
       "Join a global community creating a fair future for nature and people.",
+    "natureCta.donate": "Donate",
     "natureCta.exploreProjects": "Explore projects",
     "natureCta.createBumicert": "Create a Bumicert",
     "footer.rights": "All rights reserved.",
@@ -587,6 +591,7 @@ export const MESSAGES: Record<Locale, Messages> = {
     "nav.signIn": "Iniciar sesión",
     "nav.signedIn": "Sesión iniciada",
     "nav.getStarted": "Comenzar",
+    "nav.donate": "Donar",
     "nav.language": "Idioma",
     "hero.title.before": "Herramientas {abiertas} para la",
     "hero.title.italic": "inteligencia regenerativa",
@@ -655,6 +660,7 @@ export const MESSAGES: Record<Locale, Messages> = {
     "natureCta.heading.after": ".",
     "natureCta.body":
       "Únete a una comunidad global que construye un futuro justo para la naturaleza y las personas.",
+    "natureCta.donate": "Donar",
     "natureCta.exploreProjects": "Explorar proyectos",
     "natureCta.createBumicert": "Crear un Bumicert",
     "footer.rights": "Todos los derechos reservados.",
@@ -866,6 +872,7 @@ export const MESSAGES: Record<Locale, Messages> = {
     "nav.signIn": "Entrar",
     "nav.signedIn": "Conectado",
     "nav.getStarted": "Começar",
+    "nav.donate": "Doar",
     "nav.language": "Idioma",
     "hero.title.before": "Ferramentas {abertas} para a",
     "hero.title.italic": "inteligência regenerativa",
@@ -934,6 +941,7 @@ export const MESSAGES: Record<Locale, Messages> = {
     "natureCta.heading.after": ".",
     "natureCta.body":
       "Junte-se a uma comunidade global construindo um futuro justo para a natureza e as pessoas.",
+    "natureCta.donate": "Doar",
     "natureCta.exploreProjects": "Explorar projetos",
     "natureCta.createBumicert": "Criar um Bumicert",
     "footer.rights": "Todos os direitos reservados.",
@@ -1143,6 +1151,7 @@ export const MESSAGES: Record<Locale, Messages> = {
     "nav.signIn": "Ingia",
     "nav.signedIn": "Umeingia",
     "nav.getStarted": "Anza",
+    "nav.donate": "Toa",
     "nav.language": "Lugha",
     "hero.title.before": "Zana {huria} kwa",
     "hero.title.italic": "akili ya kuzaa upya",
@@ -1211,6 +1220,7 @@ export const MESSAGES: Record<Locale, Messages> = {
     "natureCta.heading.after": ".",
     "natureCta.body":
       "Jiunge na jumuiya ya kimataifa inayojenga mustakabali wa haki kwa maumbile na watu.",
+    "natureCta.donate": "Toa",
     "natureCta.exploreProjects": "Vinjari miradi",
     "natureCta.createBumicert": "Tengeneza Bumicert",
     "footer.rights": "Haki zote zimehifadhiwa.",
@@ -1422,6 +1432,7 @@ export const MESSAGES: Record<Locale, Messages> = {
     "nav.signIn": "Masuk",
     "nav.signedIn": "Telah masuk",
     "nav.getStarted": "Mulai",
+    "nav.donate": "Donasi",
     "nav.language": "Bahasa",
     "hero.title.before": "Alat {terbuka} untuk",
     "hero.title.italic": "kecerdasan regeneratif",
@@ -1490,6 +1501,7 @@ export const MESSAGES: Record<Locale, Messages> = {
     "natureCta.heading.after": ".",
     "natureCta.body":
       "Bergabunglah dengan komunitas global yang membangun masa depan yang adil untuk alam dan manusia.",
+    "natureCta.donate": "Donasi",
     "natureCta.exploreProjects": "Jelajahi proyek",
     "natureCta.createBumicert": "Buat Bumicert",
     "footer.rights": "Hak cipta dilindungi.",

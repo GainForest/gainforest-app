@@ -6,6 +6,7 @@ import { useT } from "./LocaleProvider";
 
 const GLOBE_URL = "https://gainforest.app";
 const BUMICERTS_URL = "https://alpha.fund.gainforest.app";
+const DONATE_URL = "https://donorbox.org/gainforest";
 
 // Dark footer — matches gainforest.earth's near-black footer.
 //
@@ -129,12 +130,18 @@ export function Footer() {
               {t("footer.legal.work")}
             </Link>
             <Link
-              href="https://www.gainforest.earth/#support"
+              href={DONATE_URL}
               target="_blank"
               rel="noreferrer"
-              className="inline-flex h-[44px] items-center justify-center rounded-full bg-ink-foreground px-6 text-[13.5px] font-medium text-ink transition-colors hover:bg-ink-foreground/85"
+              className="group inline-flex h-[44px] items-center justify-center gap-2 rounded-full bg-ink-foreground px-6 text-[13.5px] font-medium text-ink transition-colors hover:bg-ink-foreground/85"
             >
               {t("footer.legal.support")}
+              <span
+                aria-hidden
+                className="transition-transform group-hover:translate-x-0.5"
+              >
+                →
+              </span>
             </Link>
           </div>
         </div>
