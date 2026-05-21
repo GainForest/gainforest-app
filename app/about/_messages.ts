@@ -49,7 +49,6 @@ type AboutMessages = {
   "about.team.subheading": string;
   "about.team.cofounders": string;
   "about.team.core": string;
-  "about.team.advisors": string;
 
   // Recognition
   "about.recognition.eyebrow": string;
@@ -87,8 +86,9 @@ const EN: AboutMessages = {
   "about.mission.body1":
     "Most climate finance never reaches the grassroots. We close that loop with regenerative intelligence; a research practice for designing sociotechnical systems that preserve human agency, build digital trust, and scale Ostrom's principles of commons governance beyond their local limits.",
   "about.mission.body2":
-    "In practice that means open protocols, community-owned data, AI assistants co-designed with Indigenous communities, and funding mechanisms like Conservation Data Income that compensate stewards directly for the work of protecting nature.",
+    "In practice that means open protocols, community-owned data, AI assistants co-designed with Indigenous communities, and Bumicerts that bind a community's photos, audio, and field notes into one signed proof-of-impact record they own.",
   "about.mission.readEssay": "Read the essay",
+
 
   "about.story.eyebrow": "Our story",
   "about.story.heading.before": "From a 2017 UN hackathon to the",
@@ -105,12 +105,11 @@ const EN: AboutMessages = {
     "We're a distributed team of researchers, engineers, ecologists, and community organisers spread across Switzerland, Brazil, Malaysia, the Philippines, and beyond.",
   "about.team.cofounders": "Co-founders",
   "about.team.core": "Core team",
-  "about.team.advisors": "Advisors & fellows",
 
   "about.recognition.eyebrow": "Recognition",
   "about.recognition.heading": "Backed by friends who believe in this future.",
   "about.recognition.body":
-    "GainForest e.V. is directly supported by the Ethereum Foundation, Microsoft AI for Earth, and the Filecoin Foundation, and has been recognised by the World Economic Forum, XPRIZE, the Earthshot Prize, and Klarna's AI for Climate Resilience program.",
+    "GainForest e.V. is a small Swiss non-profit standing on the shoulders of foundations, labs, communities, and ecosystems that fund open infrastructure for nature. Every name below has helped move this work forward.",
 
   "about.closing.eyebrow": "Join us",
   "about.closing.heading.before": "The future of conservation is",
@@ -141,7 +140,6 @@ const ES: Partial<AboutMessages> = {
   "about.team.eyebrow": "El equipo",
   "about.team.cofounders": "Cofundadores",
   "about.team.core": "Equipo principal",
-  "about.team.advisors": "Asesores y fellows",
   "about.recognition.eyebrow": "Reconocimientos",
   "about.closing.eyebrow": "Únete",
   "about.closing.donate": "Donar",
@@ -166,7 +164,6 @@ const PT: Partial<AboutMessages> = {
   "about.team.eyebrow": "A equipe",
   "about.team.cofounders": "Cofundadores",
   "about.team.core": "Equipe principal",
-  "about.team.advisors": "Conselheiros e fellows",
   "about.recognition.eyebrow": "Reconhecimento",
   "about.closing.eyebrow": "Junte-se a nós",
   "about.closing.donate": "Doar",
@@ -181,7 +178,6 @@ const SW: Partial<AboutMessages> = {
   "about.team.eyebrow": "Timu",
   "about.team.cofounders": "Waanzilishi wenza",
   "about.team.core": "Timu kuu",
-  "about.team.advisors": "Washauri na wenzao",
   "about.recognition.eyebrow": "Utambuzi",
   "about.closing.eyebrow": "Jiunge nasi",
   "about.closing.donate": "Changia",
@@ -206,7 +202,6 @@ const ID: Partial<AboutMessages> = {
   "about.team.eyebrow": "Tim",
   "about.team.cofounders": "Pendiri bersama",
   "about.team.core": "Tim inti",
-  "about.team.advisors": "Penasihat & fellow",
   "about.recognition.eyebrow": "Pengakuan",
   "about.closing.eyebrow": "Bergabunglah",
   "about.closing.donate": "Donasi",

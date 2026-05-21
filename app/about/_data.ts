@@ -35,9 +35,9 @@ export const COFOUNDERS: ReadonlyArray<TeamMember> = [
     href: "https://www.daviddao.org/",
   },
   {
-    name: "Sharfah \"Sharfy\" Adamantine",
+    name: "Sharfina \"Sharfy\" Adamantine",
     role: "Co-founder & Hypercerts Lead",
-    location: "Selangor, Malaysia",
+    location: "Paris, France",
     bio: "Ethereum Next Billion Fellow (Cohort 4). Connects climate finance to local conservation through hypercerts and on-chain data systems.",
     href: "https://x.com/sharfyae",
   },
@@ -45,59 +45,49 @@ export const COFOUNDERS: ReadonlyArray<TeamMember> = [
 
 export const CORE_TEAM: ReadonlyArray<TeamMember> = [
   {
-    name: "Gabriel Nunes",
-    role: "Science Lead",
-    location: "Amazon, Brazil",
-    bio: "Biologist with master's degrees in invertebrate taxonomy and biodiversity conservation. Born in the Brazilian Amazon; leads the Indigenous Science Endowment Fund.",
-    // Headshot deliberately omitted — we don't ship a photo for Gabriel
-    // on disk, and the monogram avatar fallback reads cleanly. Add a
-    // real photo here only when one is published with consent.
-  },
-  {
     name: "Nurfatin \"Fatin\" Hamzah",
-    role: "Community Manager",
+    role: "Community Lead",
     location: "Malaysia",
     bio: "Holds GainForest's global community programme together. Has spent months in the field with Bumicerts partners in Surigao del Sur and across the network.",
     photo: "/nature-guild/nurfatin-hamzah.jpg",
   },
   {
     name: "Niña Cerilla",
-    role: "Founder's Associate",
+    role: "Operations Lead",
     location: "Philippines",
-    bio: "Coordinates Conservation Data Income rollouts with the Oceanus Conservation mangrove team and other Philippine partners.",
+    bio: "Runs operations across the global network and coordinates Bumicerts rollouts with the Oceanus Conservation mangrove team and other Philippine partners.",
   },
   {
     name: "Diego Rivera Buendia",
-    role: "Engineering",
-    location: "Latin America",
-    bio: "Builds the open-source GainForest stack; ATProto integrations, Bumicerts tooling, and the Hyperindex pipelines behind every live count on this site.",
+    role: "Engineering & AI",
+    location: "Mexico",
+    bio: "Builds the open-source GainForest stack and the AI tooling on top of it; ATProto integrations, Bumicerts pipelines, and the models that turn community-collected data into actionable insight.",
   },
   {
     name: "Satyam Mishra",
-    role: "Engineering & AI",
+    role: "Engineering",
     location: "India",
-    bio: "Works on Taina, the community AI assistant, and the bioacoustics + remote-sensing models that turn community-collected data into actionable insight.",
+    bio: "Works on Taina, the community AI assistant, and the bioacoustics + remote-sensing tooling that the field teams rely on.",
   },
   {
-    name: "Marina Mura",
-    role: "Indigenous Science Lead",
-    location: "Inhaã-bé, Brazil",
-    bio: "Indigenous scientist from the Inhaã-bé community in Greater Manaus; co-leads Taina's design and the Indigenous Data Council.",
-    photo: "/nature-guild/marina-mura.jpg",
+    name: "Karma Yoezer",
+    role: "Engineering",
+    location: "Thimphu, Bhutan",
+    bio: "Software engineer building the ATProto + Hypercerts layer that anchors every Bumicert. Contributes across the Hypercerts Foundation, GainForest, and the wider Hypersphere ecosystem.",
+    href: "https://github.com/Kzoeps",
+  },
+  {
+    name: "Donald Nwokoro",
+    role: "Engineering",
+    location: "Nigeria",
+    bio: "Web3 and back-end engineer working on Green Globe; the live planet view that surfaces community-led nature projects, plus the ATProto packages and lexicons behind it.",
+    href: "https://github.com/DonGuillotine",
   },
 ];
-
-export const ADVISORS: ReadonlyArray<TeamMember> = [
-  {
-    name: "Sejal Rekhan",
-    role: "Advisor",
-  },
-  {
-    name: "Marie-Claire Graf",
-    role: "Advisor",
-    bio: "Climate-policy expert; previous COP youth lead and World Economic Forum Young Global Leader.",
-  },
-];
+// Marina Mura is already credited on the landing's <NatureGuild />
+// (Inhaã-bé, Brazil) and the <TainaFeature /> caption, so we don't
+// duplicate her on the About core team. The Nature Guild block is
+// the canonical surface for Indigenous Data Council leads.
 
 // Story timeline. Each entry is one editorial moment — keep it terse.
 // Year first; the year column doubles as a visual rhythm element.
@@ -136,7 +126,7 @@ export const TIMELINE: ReadonlyArray<TimelineEntry> = [
   {
     year: "2024",
     title: "Founding the Indigenous Science Endowment Fund",
-    body: "The entire $250,000 XPRIZE prize is donated to a new endowment fund, led by Gabriel Nunes, to train Indigenous and grassroots scientists in the Amazon.",
+    body: "The entire $250,000 XPRIZE prize is donated to a new endowment fund to train Indigenous and grassroots scientists in the Amazon.",
   },
   {
     year: "2025",
@@ -150,8 +140,9 @@ export const EXTERNAL = {
   donate: "https://donorbox.org/gainforest",
   impactReport:
     "https://www.canva.com/design/DAGqnTWl-gw/K4V6DWYyqtZW0NK2_0Dpag/view",
-  essay:
-    "https://gainforest.substack.com/p/governing-the-commons-in-the-intelligent",
+  // Current foundational essay; David's piece on Regenerative
+  // Intelligence as the theory of change behind GainForest.
+  essay: "https://www.daviddao.org/posts/regenerative-intelligence/",
   email: "team@gainforest.net",
   substackOrigin: "https://gainforest.substack.com",
   homepage: "https://www.gainforest.earth",

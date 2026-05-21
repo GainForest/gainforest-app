@@ -5,15 +5,15 @@ import Image from "next/image";
 import Link from "next/link";
 import { useLocale } from "../../_components/LocaleProvider";
 import { getAboutT } from "../_messages";
-import { ADVISORS, COFOUNDERS, CORE_TEAM, type TeamMember } from "../_data";
+import { COFOUNDERS, CORE_TEAM, type TeamMember } from "../_data";
 
-// "A small global team, building in the open." — three stacked
-// groups of cards: Co-founders, Core team, Advisors. Each card is a
-// text-first editorial cell with optional headshot circle on the
-// left. We deliberately don't fabricate photos for anyone — when a
-// headshot isn't available, the cell renders cleanly as text-only
-// with a Cormorant Garamond initial monogram in a sage circle, the
-// same recipe the Nature Guild block uses.
+// "A small global team, building in the open." — two stacked groups
+// of cards: Co-founders and Core team. Each card is a text-first
+// editorial cell with optional headshot circle on the left. We
+// deliberately don't fabricate photos for anyone — when a headshot
+// isn't available, the cell renders cleanly as text-only with a
+// Cormorant Garamond initial monogram in a sage circle, the same
+// recipe the Nature Guild block uses.
 export function AboutTeam() {
   const { locale } = useLocale();
   const t = getAboutT(locale);
@@ -56,9 +56,6 @@ export function AboutTeam() {
 
         {/* Core team — 3-column grid. */}
         <TeamGroup label={t("about.team.core")} members={CORE_TEAM} />
-
-        {/* Advisors — compact text-only list. */}
-        <TeamGroup label={t("about.team.advisors")} members={ADVISORS} compact />
       </div>
     </section>
   );
@@ -68,12 +65,10 @@ function TeamGroup({
   label,
   members,
   featured,
-  compact,
 }: {
   label: string;
   members: ReadonlyArray<TeamMember>;
   featured?: boolean;
-  compact?: boolean;
 }) {
   return (
     <div className="mt-14 first:mt-12 lg:mt-20 lg:first:mt-16">
@@ -86,20 +81,13 @@ function TeamGroup({
       <ul
         role="list"
         className={
-          compact
-            ? "mt-6 grid grid-cols-1 gap-x-8 gap-y-6 sm:grid-cols-2 lg:mt-8 lg:grid-cols-3"
-            : featured
-              ? "mt-8 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:mt-10 lg:gap-10"
-              : "mt-8 grid grid-cols-1 gap-x-8 gap-y-10 sm:grid-cols-2 lg:mt-10 lg:grid-cols-3"
+          featured
+            ? "mt-8 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:mt-10 lg:gap-10"
+            : "mt-8 grid grid-cols-1 gap-x-8 gap-y-10 sm:grid-cols-2 lg:mt-10 lg:grid-cols-3"
         }
       >
         {members.map((m) => (
-          <TeamCard
-            key={m.name}
-            member={m}
-            featured={featured}
-            compact={compact}
-          />
+          <TeamCard key={m.name} member={m} featured={featured} />
         ))}
       </ul>
     </div>
@@ -109,31 +97,17 @@ function TeamGroup({
 function TeamCard({
   member,
   featured,
-  compact,
 }: {
   member: TeamMember;
   featured?: boolean;
-  compact?: boolean;
 }) {
   const inner = (
     <div
-      className={
-        compact
-          ? "flex items-center gap-3"
-          : featured
-            ? "flex items-start gap-5"
-            : "flex items-start gap-4"
-      }
+      className={featured ? "flex items-start gap-5" : "flex items-start gap-4"}
     >
-      <Avatar member={member} size={compact ? 40 : featured ? 64 : 52} />
+      <Avatar member={member} size={featured ? 64 : 52} />
       <div className="min-w-0 flex-1">
-        <div
-          className={
-            compact
-              ? "font-garamond text-[18px] font-normal leading-[1.15] text-foreground"
-              : "font-garamond text-[22px] lg:text-[24px] font-normal leading-[1.15] tracking-[-0.005em] text-foreground"
-          }
-        >
+        <div className="font-garamond text-[22px] lg:text-[24px] font-normal leading-[1.15] tracking-[-0.005em] text-foreground">
           {member.name}
         </div>
         <div className="mt-1 text-[13px] text-foreground/65">
@@ -142,7 +116,7 @@ function TeamCard({
             <span className="text-foreground/40"> · {member.location}</span>
           )}
         </div>
-        {!compact && member.bio && (
+        {member.bio && (
           <p className="mt-3 text-[14px] leading-[1.55] text-foreground/72">
             {member.bio}
           </p>

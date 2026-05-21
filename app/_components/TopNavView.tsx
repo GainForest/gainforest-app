@@ -74,8 +74,13 @@ export function TopNavView() {
     <>
       <header className="sticky top-0 z-[70] w-full border-b border-border-soft/80 bg-background/90 backdrop-blur-xl">
         <div className="mx-auto flex h-16 w-full max-w-[1480px] items-center justify-between gap-4 px-5 sm:px-8 lg:h-[68px] lg:px-16">
+          {/* Logo: from the landing, scroll back to top; from any
+              other route (e.g. /about), navigate home. Without the
+              `resolveHref` call this rendered `/about#top` and the
+              browser just scrolled the about page back up instead
+              of taking the visitor home. */}
           <Link
-            href="#top"
+            href={resolveHref("#top", pathname)}
             className="flex items-center gap-2.5 transition-opacity hover:opacity-80"
             aria-label="GainForest"
             onClick={() => setMenuOpen(false)}
