@@ -55,6 +55,8 @@ type GlobeProps = {
    * "drag to spin" hint chip.
    */
   interactive?: boolean;
+  /** Optional live spotlight pin. Rendered larger/warmer with its own ring. */
+  highlightedDid?: string | null;
 };
 
 // Pseudo-random pin positions for the loading skeleton. Picked once so the
@@ -68,7 +70,12 @@ const SKELETON_PINS: ReadonlyArray<{ x: number; y: number }> = [
   { x: 70, y: 44 }, // South Asia
 ];
 
-export function LiveGlobe({ pins, diameter, interactive = false }: GlobeProps) {
+export function LiveGlobe({
+  pins,
+  diameter,
+  interactive = false,
+  highlightedDid = null,
+}: GlobeProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   // The Globe instance ref — used to drive auto-rotate + controls.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -129,7 +136,8 @@ export function LiveGlobe({ pins, diameter, interactive = false }: GlobeProps) {
   const { points, rings } = useMemo(() => {
     const points = pins.map((pin) => ({
       ...pin,
-      altitude: 0.012,
+      altitude: pin.did === highlightedDid ? 0.018 : 0.012,
+      highlighted: pin.did === highlightedDid,
     }));
 
     // Pick a sparse subset of pins for ping rings — small enough to stay
@@ -138,12 +146,22 @@ export function LiveGlobe({ pins, diameter, interactive = false }: GlobeProps) {
     const ringPins = pins.filter((_, i) => i % stride === 0);
     const rings = ringPins.map((pin, i) => ({
       ...pin,
+      highlighted: false,
       // 4–9 second period, staggered so they fire at different beats.
       repeatPeriod: 4000 + ((i * 1303) % 5000),
     }));
 
+    const highlightedPin = pins.find((pin) => pin.did === highlightedDid);
+    if (highlightedPin) {
+      rings.push({
+        ...highlightedPin,
+        highlighted: true,
+        repeatPeriod: 1800,
+      });
+    }
+
     return { points, rings };
-  }, [pins]);
+  }, [pins, highlightedDid]);
 
   return (
     <div
@@ -174,8 +192,14 @@ export function LiveGlobe({ pins, diameter, interactive = false }: GlobeProps) {
         // Pin/ring sizes are in degrees of arc on the sphere, so they
         // scale naturally with the globe diameter. We size them generously
         // so dots and pings are legible on the 140px strip globe too.
-        pointRadius={1.1}
-        pointColor={() => "#bff0ce"}
+        pointRadius={(d: object) =>
+          (d as ProjectPin & { highlighted?: boolean }).highlighted ? 2.6 : 1.1
+        }
+        pointColor={(d: object) =>
+          (d as ProjectPin & { highlighted?: boolean }).highlighted
+            ? "#f1c66b"
+            : "#bff0ce"
+        }
         // Tooltip wrapper styling lives in `app/globals.css` under
         // `.scene-tooltip` so we override three-globe's dark default plate
         // once. Here we just emit the content; the wrapper provides the
@@ -194,7 +218,9 @@ export function LiveGlobe({ pins, diameter, interactive = false }: GlobeProps) {
         // Ring sizes are in degrees of arc on the sphere, so they scale with
         // the globe diameter. We push well above the defaults so the ping is
         // legible even on the 140px strip globe.
-        ringMaxRadius={12}
+        ringMaxRadius={(d: object) =>
+          (d as ProjectPin & { highlighted?: boolean }).highlighted ? 18 : 12
+        }
         ringPropagationSpeed={2.4}
         ringAltitude={0.012}
         ringResolution={96}
@@ -203,9 +229,14 @@ export function LiveGlobe({ pins, diameter, interactive = false }: GlobeProps) {
         }
         // Colour is a function of t∈[0,1] across each ring's life. Bright
         // primary-green at birth, eased decay to transparent.
-        ringColor={() => (t: number) => {
-          const eased = Math.pow(1 - t, 1.6);
-          return `rgba(140, 220, 165, ${eased * 0.95})`;
+        ringColor={(d: object) => {
+          const highlighted = (d as ProjectPin & { highlighted?: boolean }).highlighted;
+          return (t: number) => {
+            const eased = Math.pow(1 - t, highlighted ? 1.15 : 1.6);
+            return highlighted
+              ? `rgba(241, 198, 107, ${eased * 0.98})`
+              : `rgba(140, 220, 165, ${eased * 0.95})`;
+          };
         }}
         animateIn={false}
       />

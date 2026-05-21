@@ -13,6 +13,7 @@ import type { ProjectPin } from "../_lib/projects";
 // `_lib/projects.ts`; no generated or invented partner imagery here.
 
 type Community = {
+  did: string;
   name: string;
   country: string;
   imageUrl: string | null;
@@ -28,7 +29,12 @@ function uniqueCommunities(pins: ProjectPin[]): Community[] {
     const key = `${name.toLocaleLowerCase()}|${country.toLocaleLowerCase()}`;
     if (seen.has(key)) continue;
     seen.add(key);
-    communities.push({ name, country, imageUrl: pin.imageUrl });
+    communities.push({
+      did: pin.did,
+      name,
+      country,
+      imageUrl: pin.imageUrl,
+    });
   }
   return communities.sort((a, b) => a.name.localeCompare(b.name));
 }
@@ -198,7 +204,11 @@ export function ClientPartners({ pins }: { pins: ProjectPin[] }) {
             </div>
 
             <div className="flex min-h-[390px] items-center justify-center pt-4 sm:min-h-[430px]">
-              <LiveGlobe pins={pins} diameter={diameter} />
+              <LiveGlobe
+                pins={pins}
+                diameter={diameter}
+                highlightedDid={spotlight?.did ?? null}
+              />
             </div>
 
             <SpotlightCard
