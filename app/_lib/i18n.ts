@@ -124,6 +124,7 @@ type Messages = {
   // finance rarely reaches grassroots) so the steps land as a solution.
   "howitworks.heading": string;
   "howitworks.subheading": string;
+  "howitworks.docsCta": string;
   "howitworks.step1.title": string;
   "howitworks.step1.body": string;
   "howitworks.step2.title": string;
@@ -143,6 +144,7 @@ type Messages = {
   "natureCta.donate": string;
   "natureCta.exploreProjects": string;
   "natureCta.createBumicert": string;
+  "natureCta.newsletter": string;
 
   // ── Footer ───────────────────────────────────────────────────────
   "footer.rights": string;
@@ -237,6 +239,12 @@ type Messages = {
   "partners.callsEyebrow": string;
   "partners.callsTitle": string;
   "partners.callsBody": string;
+  // Telegram community card — sister of the monthly calls card.
+  // Async videos + sync chat together cover the two ways visitors
+  // can plug into the community channel.
+  "partners.telegramEyebrow": string;
+  "partners.telegramTitle": string;
+  "partners.telegramBody": string;
 
   // ── Impact Report ──────────────────────────────────────────────
   "impact.eyebrow": string;
@@ -410,6 +418,7 @@ export const MESSAGES: Record<Locale, Messages> = {
     "howitworks.heading": "How it works",
     "howitworks.subheading":
       "Most climate finance never reaches the grassroots. We close that loop with local-first technology, community-owned data, and open protocols.",
+    "howitworks.docsCta": "Read the docs",
     "howitworks.step1.title": "Community-owned data",
     "howitworks.step1.body":
       "Communities self-host their fieldwork on their own ATProto PDS, with models, workshops, and tooling from GainForest.",
@@ -430,6 +439,7 @@ export const MESSAGES: Record<Locale, Messages> = {
     "natureCta.donate": "Donate",
     "natureCta.exploreProjects": "Explore projects",
     "natureCta.createBumicert": "Create a Bumicert",
+    "natureCta.newsletter": "Subscribe to our newsletter",
     "footer.rights": "All rights reserved.",
     "footer.contact": "Contact",
     "card.projects": "Projects",
@@ -509,6 +519,10 @@ export const MESSAGES: Record<Locale, Messages> = {
     "partners.callsTitle": "Hear the stewards behind the pins.",
     "partners.callsBody":
       "Watch recent GainForest sessions where communities share field updates, restoration lessons, and open tools.",
+    "partners.telegramEyebrow": "Community Telegram",
+    "partners.telegramTitle": "Join the community in real time.",
+    "partners.telegramBody":
+      "Stewards, scientists, and supporters share field updates and ask questions in the GainForest Telegram group.",
     "impact.eyebrow": "Impact report",
     "impact.heading": "Read our 3rd {annual} impact report.",
     "impact.body":
@@ -710,6 +724,7 @@ export const MESSAGES: Record<Locale, Messages> = {
     "howitworks.heading": "Cómo funciona",
     "howitworks.subheading":
       "La mayor parte del financiamiento climático no llega a las bases. Cerramos ese ciclo con tecnología local-first, datos de propiedad comunitaria y protocolos abiertos.",
+    "howitworks.docsCta": "Leer la documentación",
     "howitworks.step1.title": "Datos de la comunidad",
     "howitworks.step1.body":
       "Las comunidades autoalojan su trabajo de campo en su propio PDS de ATProto, con modelos, talleres y herramientas de GainForest.",
@@ -730,6 +745,7 @@ export const MESSAGES: Record<Locale, Messages> = {
     "natureCta.donate": "Donar",
     "natureCta.exploreProjects": "Explorar proyectos",
     "natureCta.createBumicert": "Crear un Bumicert",
+    "natureCta.newsletter": "Suscríbete a nuestro newsletter",
     "footer.rights": "Todos los derechos reservados.",
     "footer.contact": "Contacto",
     "card.projects": "Proyectos",
@@ -809,6 +825,10 @@ export const MESSAGES: Record<Locale, Messages> = {
     "partners.callsTitle": "Escucha a los guardianes detrás de los puntos.",
     "partners.callsBody":
       "Mira sesiones recientes de GainForest donde las comunidades comparten avances de campo, aprendizajes de restauración y herramientas abiertas.",
+    "partners.telegramEyebrow": "Telegram comunitario",
+    "partners.telegramTitle": "Únete a la comunidad en tiempo real.",
+    "partners.telegramBody":
+      "Guardianes, científicas y aliados comparten avances de campo y preguntas en el Telegram de GainForest.",
     "impact.eyebrow": "Reporte de impacto",
     "impact.heading": "Lee nuestro 3er reporte {anual} de impacto.",
     "impact.body":
@@ -1012,6 +1032,7 @@ export const MESSAGES: Record<Locale, Messages> = {
     "howitworks.heading": "Como funciona",
     "howitworks.subheading":
       "A maior parte do financiamento climático não chega às bases. Fechamos esse ciclo com tecnologia local-first, dados de propriedade comunitária e protocolos abertos.",
+    "howitworks.docsCta": "Ler a documentação",
     "howitworks.step1.title": "Dados da comunidade",
     "howitworks.step1.body":
       "As comunidades hospedam seu próprio trabalho de campo em um PDS de ATProto, com modelos, oficinas e ferramentas da GainForest.",
@@ -1032,6 +1053,7 @@ export const MESSAGES: Record<Locale, Messages> = {
     "natureCta.donate": "Doar",
     "natureCta.exploreProjects": "Explorar projetos",
     "natureCta.createBumicert": "Criar um Bumicert",
+    "natureCta.newsletter": "Assine nossa newsletter",
     "footer.rights": "Todos os direitos reservados.",
     "footer.contact": "Contato",
     "card.projects": "Projetos",
@@ -1111,6 +1133,10 @@ export const MESSAGES: Record<Locale, Messages> = {
     "partners.callsTitle": "Ouça os guardiões por trás dos pontos.",
     "partners.callsBody":
       "Assista a sessões recentes da GainForest em que comunidades compartilham atualizações de campo, aprendizados de restauração e ferramentas abertas.",
+    "partners.telegramEyebrow": "Telegram da comunidade",
+    "partners.telegramTitle": "Entre na comunidade em tempo real.",
+    "partners.telegramBody":
+      "Guardiões, cientistas e apoiadores compartilham atualizações de campo e dúvidas no Telegram da GainForest.",
     "impact.eyebrow": "Relatório de impacto",
     "impact.heading": "Leia nosso 3º relatório {anual} de impacto.",
     "impact.body":
@@ -1312,6 +1338,7 @@ export const MESSAGES: Record<Locale, Messages> = {
     "howitworks.heading": "Inavyofanya kazi",
     "howitworks.subheading":
       "Sehemu kubwa ya fedha za hali ya hewa hazifiki kwa jamii za asili. Tunafunga mzunguko huo kwa teknolojia ya mahali, data inayomilikiwa na jamii, na itifaki huria.",
+    "howitworks.docsCta": "Soma nyaraka",
     "howitworks.step1.title": "Data ya jamii",
     "howitworks.step1.body":
       "Jamii zinajihudumia kazi yao ya nyanjani kwenye PDS yao ya ATProto, pamoja na mifano, warsha, na zana kutoka GainForest.",
@@ -1332,6 +1359,7 @@ export const MESSAGES: Record<Locale, Messages> = {
     "natureCta.donate": "Toa",
     "natureCta.exploreProjects": "Vinjari miradi",
     "natureCta.createBumicert": "Tengeneza Bumicert",
+    "natureCta.newsletter": "Jisajili kwa jarida letu",
     "footer.rights": "Haki zote zimehifadhiwa.",
     "footer.contact": "Wasiliana",
     "card.projects": "Miradi",
@@ -1411,6 +1439,10 @@ export const MESSAGES: Record<Locale, Messages> = {
     "partners.callsTitle": "Sikiliza walinzi walio nyuma ya alama hizi.",
     "partners.callsBody":
       "Tazama vipindi vya hivi karibuni vya GainForest ambapo jamii hushiriki taarifa za uwandani, masomo ya urejeshaji na zana huria.",
+    "partners.telegramEyebrow": "Telegram ya jamii",
+    "partners.telegramTitle": "Jiunge na jumuiya kwa wakati halisi.",
+    "partners.telegramBody":
+      "Walinzi, wanasayansi, na wafuasi wanashiriki taarifa za nyanjani na maswali kwenye kikundi cha Telegram cha GainForest.",
     "impact.eyebrow": "Ripoti ya athari",
     "impact.heading": "Soma ripoti yetu ya 3 ya {kila mwaka} ya athari.",
     "impact.body":
@@ -1614,6 +1646,7 @@ export const MESSAGES: Record<Locale, Messages> = {
     "howitworks.heading": "Cara kerjanya",
     "howitworks.subheading":
       "Sebagian besar pendanaan iklim tidak sampai ke akar rumput. Kami menutup celah itu dengan teknologi lokal-pertama, data milik komunitas, dan protokol terbuka.",
+    "howitworks.docsCta": "Baca dokumentasi",
     "howitworks.step1.title": "Data milik komunitas",
     "howitworks.step1.body":
       "Komunitas menyimpan sendiri kerja lapangan mereka di PDS ATProto, dengan model, lokakarya, dan perangkat dari GainForest.",
@@ -1634,6 +1667,7 @@ export const MESSAGES: Record<Locale, Messages> = {
     "natureCta.donate": "Donasi",
     "natureCta.exploreProjects": "Jelajahi proyek",
     "natureCta.createBumicert": "Buat Bumicert",
+    "natureCta.newsletter": "Berlangganan newsletter kami",
     "footer.rights": "Hak cipta dilindungi.",
     "footer.contact": "Kontak",
     "card.projects": "Proyek",
@@ -1713,6 +1747,10 @@ export const MESSAGES: Record<Locale, Messages> = {
     "partners.callsTitle": "Dengarkan para penjaga di balik titik-titik ini.",
     "partners.callsBody":
       "Tonton sesi terbaru GainForest saat komunitas berbagi kabar lapangan, pelajaran restorasi, dan alat terbuka.",
+    "partners.telegramEyebrow": "Telegram komunitas",
+    "partners.telegramTitle": "Bergabunglah dengan komunitas secara langsung.",
+    "partners.telegramBody":
+      "Para penjaga, ilmuwan, dan pendukung berbagi kabar lapangan dan pertanyaan di grup Telegram GainForest.",
     "impact.eyebrow": "Laporan dampak",
     "impact.heading": "Baca laporan dampak {tahunan} ke-3 kami.",
     "impact.body":

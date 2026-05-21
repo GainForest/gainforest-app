@@ -1,7 +1,14 @@
 "use client";
 
+import Link from "next/link";
 import { useT } from "./LocaleProvider";
 import type { MessageKey } from "../_lib/i18n";
+
+// The deeper-dive technical companion to this section. Linked as a
+// quiet ledger entry beneath the subheading so curious visitors can
+// jump from the 30-second narrative into the full documentation
+// without crowding the editorial layout.
+const DOCS_URL = "https://docs.gainforest.earth/";
 
 // "How it works" — the four-step narrative.
 //
@@ -50,10 +57,31 @@ export function HowItWorks() {
           </h2>
           {/* Framing subhead — names the problem (finance not reaching
               grassroots) then the solution. Sits next to the heading on
-              desktop, stacked below on mobile. */}
-          <p className="max-w-[520px] text-[15px] leading-[1.6] text-foreground/65 lg:col-span-6 lg:col-start-7 lg:mt-2">
-            {t("howitworks.subheading")}
-          </p>
+              desktop, stacked below on mobile. Includes a quiet "Read
+              the docs" link for the curious technical reader; the link
+              sits below the subhead so it doesn't compete with the
+              editorial copy. */}
+          <div className="max-w-[520px] lg:col-span-6 lg:col-start-7 lg:mt-2">
+            <p className="text-[15px] leading-[1.6] text-foreground/65">
+              {t("howitworks.subheading")}
+            </p>
+            <Link
+              href={DOCS_URL}
+              target="_blank"
+              rel="noreferrer"
+              className="group/docs mt-4 inline-flex items-center gap-1.5 text-[13.5px] font-medium text-primary"
+            >
+              <span className="border-b border-primary/40 pb-0.5 transition-colors group-hover/docs:border-primary">
+                {t("howitworks.docsCta")}
+              </span>
+              <span
+                aria-hidden
+                className="transition-transform group-hover/docs:translate-x-1"
+              >
+                →
+              </span>
+            </Link>
+          </div>
         </div>
 
         {/* The thin horizontal rule (`before` pseudo on the parent) acts

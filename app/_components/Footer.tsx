@@ -6,6 +6,35 @@ import { LogoMark } from "./Logo";
 import { useT } from "./LocaleProvider";
 
 const DONATE_URL = "https://donorbox.org/gainforest";
+// Mailchimp-hosted subscribe form. Opens in a new tab; we deliberately
+// don't embed the form on-page to keep the footer minimal and avoid a
+// cross-origin script load just to capture an email.
+const NEWSLETTER_URL =
+  "https://earth.us12.list-manage.com/subscribe?u=09c1244bf2d2f8ad97ddb99b2&id=6e01ef6c4e";
+// Social profiles. Linked from the bottom of the footer as a small
+// icon trio next to the legal block. Kept inline SVG so they follow
+// `currentColor` and don't need an extra HTTP request or icon package.
+const SOCIAL_LINKS = [
+  {
+    label: "Facebook",
+    href: "https://www.facebook.com/gainforest",
+    // Simple Iconish Facebook glyph, viewBox 0 0 24 24.
+    path: "M13.5 21v-7.5h2.6l.4-3h-3v-1.9c0-.9.3-1.5 1.6-1.5H17V4.4a22 22 0 0 0-2.4-.1c-2.4 0-4 1.4-4 4v2.2H8v3h2.6V21h2.9z",
+  },
+  {
+    label: "X (Twitter)",
+    href: "https://x.com/GainForestNow",
+    // X / Twitter glyph (the new mark).
+    path: "M18.2 3H21l-6.6 7.5L22 21h-6.2l-4.9-6.4L5.3 21H2.5l7-8L2 3h6.4l4.4 5.8L18.2 3zm-1.1 16.2h1.7L7 4.7H5.2l11.9 14.5z",
+  },
+  {
+    label: "Instagram",
+    href: "https://www.instagram.com/gainforest/",
+    // Instagram glyph: rounded square + circle + dot. Composed of one
+    // path so it stays a single fill.
+    path: "M12 2.2c2.7 0 3 0 4.1.1 1 0 1.5.2 1.9.4.5.2.8.4 1.2.8.4.4.6.7.8 1.2.2.4.3.9.4 1.9.1 1.1.1 1.4.1 4.1s0 3-.1 4.1c0 1-.2 1.5-.4 1.9-.2.5-.4.8-.8 1.2-.4.4-.7.6-1.2.8-.4.2-.9.3-1.9.4-1.1.1-1.4.1-4.1.1s-3 0-4.1-.1c-1 0-1.5-.2-1.9-.4-.5-.2-.8-.4-1.2-.8a3.3 3.3 0 0 1-.8-1.2c-.2-.4-.3-.9-.4-1.9C2.2 15 2.2 14.7 2.2 12s0-3 .1-4.1c0-1 .2-1.5.4-1.9.2-.5.4-.8.8-1.2.4-.4.7-.6 1.2-.8.4-.2.9-.3 1.9-.4C7.7 2.2 8 2.2 12 2.2zm0 1.8c-2.7 0-3 0-4 .1-.9 0-1.4.2-1.7.3-.4.2-.7.3-1 .6-.3.3-.4.6-.6 1-.1.3-.3.8-.3 1.7-.1 1-.1 1.3-.1 4s0 3 .1 4c0 .9.2 1.4.3 1.7.2.4.3.7.6 1 .3.3.6.4 1 .6.3.1.8.3 1.7.3 1 .1 1.3.1 4 .1s3 0 4-.1c.9 0 1.4-.2 1.7-.3.4-.2.7-.3 1-.6.3-.3.4-.6.6-1 .1-.3.3-.8.3-1.7.1-1 .1-1.3.1-4s0-3-.1-4c0-.9-.2-1.4-.3-1.7-.2-.4-.3-.7-.6-1-.3-.3-.6-.4-1-.6-.3-.1-.8-.3-1.7-.3-1-.1-1.3-.1-4-.1zm0 3.1a5 5 0 1 1 0 9.9 5 5 0 0 1 0-9.9zm0 1.8a3.2 3.2 0 1 0 0 6.4 3.2 3.2 0 0 0 0-6.4zm5.2-3.2a1.2 1.2 0 1 1 0 2.3 1.2 1.2 0 0 1 0-2.3z",
+  },
+] as const;
 
 // Integrated closing footer.
 // The earlier page rendered a full-height closing CTA followed by a
@@ -84,6 +113,20 @@ export function Footer() {
                   →
                 </span>
               </Link>
+              <Link
+                href={NEWSLETTER_URL}
+                target="_blank"
+                rel="noreferrer"
+                className="group inline-flex items-center gap-2 transition-colors hover:text-brand"
+              >
+                {t("natureCta.newsletter")}
+                <span
+                  aria-hidden
+                  className="text-ink-foreground/40 transition-transform group-hover:translate-x-0.5 group-hover:text-brand"
+                >
+                  →
+                </span>
+              </Link>
             </div>
           </div>
         </div>
@@ -125,6 +168,39 @@ export function Footer() {
               >
                 {t("footer.legal.email")}
               </Link>
+
+              {/* Social media icon row. Inline SVG glyphs that follow
+                  `currentColor` so the brand-mint hover state lights
+                  up cleanly on the dark footer. Sits beneath the
+                  email so it reads as part of the brand block, not
+                  the legal block. */}
+              <ul
+                role="list"
+                aria-label="GainForest on social media"
+                className="mt-2 flex items-center gap-4"
+              >
+                {SOCIAL_LINKS.map((social) => (
+                  <li key={social.label}>
+                    <Link
+                      href={social.href}
+                      target="_blank"
+                      rel="noreferrer"
+                      aria-label={`GainForest on ${social.label}`}
+                      className="inline-grid h-8 w-8 place-items-center rounded-full text-ink-foreground/60 transition-colors hover:bg-ink-foreground/10 hover:text-brand"
+                    >
+                      <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                        aria-hidden
+                      >
+                        <path d={social.path} />
+                      </svg>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
             </div>
           </div>
 

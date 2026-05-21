@@ -116,6 +116,49 @@ function SpotlightCard({
   );
 }
 
+// Small ledger-style card used for community channels under the
+// partners stat (YouTube calls + Telegram group). Same chrome as the
+// existing monthly-calls card: hairline top border, eyebrow / title /
+// body, arrow that nudges on hover.
+function CommunityChannelCard({
+  href,
+  eyebrow,
+  title,
+  body,
+}: {
+  href: string;
+  eyebrow: string;
+  title: string;
+  body: string;
+}) {
+  return (
+    <Link
+      href={href}
+      target="_blank"
+      rel="noreferrer"
+      className="group inline-flex items-start gap-4 border-t border-border-soft pt-5 transition-colors hover:border-foreground/25"
+    >
+      <span className="min-w-0">
+        <span className="block text-[10px] uppercase tracking-[0.16em] text-foreground/45">
+          {eyebrow}
+        </span>
+        <span className="mt-1 block font-garamond text-[22px] leading-[1.08] text-foreground sm:text-[24px]">
+          {title}
+        </span>
+        <span className="mt-2 block text-[13px] leading-[1.45] text-foreground/62">
+          {body}
+        </span>
+      </span>
+      <span
+        aria-hidden
+        className="mt-5 shrink-0 text-[20px] text-primary transition-transform group-hover:translate-x-1"
+      >
+        →
+      </span>
+    </Link>
+  );
+}
+
 function minimalAtUri(atUri: string): string {
   const match = atUri.match(/^at:\/\/(did:plc:)([^/]+)\/(.+)$/);
   if (!match) return atUri;
@@ -261,30 +304,24 @@ export function ClientPartners({ pins }: { pins: ProjectPin[] }) {
             </span>
           </p>
 
-          <Link
-            href="https://www.youtube.com/@gainforest/videos"
-            target="_blank"
-            rel="noreferrer"
-            className="group mt-8 inline-flex max-w-[520px] items-start gap-4 border-t border-border-soft pt-5 transition-colors hover:border-foreground/25"
-          >
-            <span className="min-w-0">
-              <span className="block text-[10px] uppercase tracking-[0.16em] text-foreground/45">
-                {t("partners.callsEyebrow")}
-              </span>
-              <span className="mt-1 block font-garamond text-[22px] leading-[1.08] text-foreground sm:text-[24px]">
-                {t("partners.callsTitle")}
-              </span>
-              <span className="mt-2 block text-[13px] leading-[1.45] text-foreground/62">
-                {t("partners.callsBody")}
-              </span>
-            </span>
-            <span
-              aria-hidden
-              className="mt-5 shrink-0 text-[20px] text-primary transition-transform group-hover:translate-x-1"
-            >
-              →
-            </span>
-          </Link>
+          {/* Two community-channel cards stacked vertically: async
+              (YouTube monthly calls) + sync (Telegram chat group).
+              Together they cover the two ways a visitor can plug into
+              the steward community without bumping into a paywall. */}
+          <div className="mt-8 flex max-w-[520px] flex-col gap-6">
+            <CommunityChannelCard
+              href="https://www.youtube.com/@gainforest/videos"
+              eyebrow={t("partners.callsEyebrow")}
+              title={t("partners.callsTitle")}
+              body={t("partners.callsBody")}
+            />
+            <CommunityChannelCard
+              href="https://t.me/+g9KzmLsZh882YWE1"
+              eyebrow={t("partners.telegramEyebrow")}
+              title={t("partners.telegramTitle")}
+              body={t("partners.telegramBody")}
+            />
+          </div>
         </div>
 
         <div className="lg:col-span-7">
