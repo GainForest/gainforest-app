@@ -1,16 +1,32 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import type { MessageKey } from "../_lib/i18n";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import { LogoMark } from "./Logo";
 import { useT } from "./LocaleProvider";
 
+// Resolve a NavItem's href against the current pathname. Hash anchors
+// scroll on the landing; from any other route (e.g. /about) they
+// route back to `/` with the hash so the browser scrolls to the
+// right landing section after navigation. Real routes pass through.
+function resolveHref(href: string, pathname: string): string {
+  if (href.startsWith("#")) {
+    return pathname === "/" ? href : `/${href}`;
+  }
+  return href;
+}
+
 type NavItem = {
   key: string;
   labelKey: MessageKey;
-  href: `#${string}`;
+  /** Either an in-page hash anchor (landing sections) or a real route
+   *  (`/about`). The renderer treats both equivalently — hash anchors
+   *  scroll on the landing and navigate to `/#section` from other
+   *  routes, real routes route normally. */
+  href: `#${string}` | `/${string}`;
 };
 
 const NAV_ITEMS: ReadonlyArray<NavItem> = [
@@ -20,6 +36,9 @@ const NAV_ITEMS: ReadonlyArray<NavItem> = [
   { key: "ai", labelKey: "nav.ai", href: "#ai" },
   { key: "partners", labelKey: "nav.partners", href: "#partners" },
   { key: "impact", labelKey: "nav.impact", href: "#impact" },
+  // Standalone route — lives at /about, not a landing section. The
+  // i18n key already exists in i18n.ts (nav.about, used elsewhere).
+  { key: "about", labelKey: "nav.about", href: "/about" },
 ];
 
 // Client-rendered view for the top navbar. It stays deliberately local:
@@ -28,6 +47,7 @@ const NAV_ITEMS: ReadonlyArray<NavItem> = [
 // of competing with the editorial section rail.
 export function TopNavView() {
   const t = useT();
+  const pathname = usePathname() ?? "/";
   const [menuOpen, setMenuOpen] = useState(false);
 
   // Esc closes the mobile menu.
@@ -73,15 +93,24 @@ export function TopNavView() {
             className="hidden items-center gap-1 rounded-full border border-border-soft bg-background/70 p-1 lg:flex"
             aria-label={t("nav.sections")}
           >
-            {NAV_ITEMS.map((item) => (
-              <Link
-                key={item.key}
-                href={item.href}
-                className="rounded-full px-3.5 py-2 text-[13px] font-medium leading-none text-foreground/65 transition-colors hover:bg-foreground/[0.04] hover:text-foreground xl:px-4"
-              >
-                {t(item.labelKey)}
-              </Link>
-            ))}
+            {NAV_ITEMS.map((item) => {
+              const isActive =
+                item.href.startsWith("/") && pathname === item.href;
+              return (
+                <Link
+                  key={item.key}
+                  href={resolveHref(item.href, pathname)}
+                  aria-current={isActive ? "page" : undefined}
+                  className={`rounded-full px-3.5 py-2 text-[13px] font-medium leading-none transition-colors xl:px-4 ${
+                    isActive
+                      ? "bg-foreground/[0.06] text-foreground"
+                      : "text-foreground/65 hover:bg-foreground/[0.04] hover:text-foreground"
+                  }`}
+                >
+                  {t(item.labelKey)}
+                </Link>
+              );
+            })}
           </nav>
 
           <div className="flex items-center gap-2">
@@ -117,7 +146,7 @@ export function TopNavView() {
               {NAV_ITEMS.map((item) => (
                 <Link
                   key={item.key}
-                  href={item.href}
+                  href={resolveHref(item.href, pathname)}
                   onClick={() => setMenuOpen(false)}
                   className="group flex items-center justify-between border-b border-border-soft/80 py-3.5 font-garamond text-[25px] font-normal leading-none text-foreground transition-colors last:border-b-0 hover:text-primary"
                 >
