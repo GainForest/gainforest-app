@@ -12,27 +12,33 @@ const DONATE_URL = "https://donorbox.org/gainforest";
 const NEWSLETTER_URL =
   "https://earth.us12.list-manage.com/subscribe?u=09c1244bf2d2f8ad97ddb99b2&id=6e01ef6c4e";
 // Social profiles. Linked from the bottom of the footer as a small
-// icon trio next to the legal block. Kept inline SVG so they follow
-// `currentColor` and don't need an extra HTTP request or icon package.
+// icon trio next to the legal block. Inline SVG so they follow
+// `currentColor` and don't need an extra HTTP request or icon
+// package. All three glyphs come from the Bootstrap Icons set
+// (MIT licensed, viewBox 0 0 16 16) so they share the same visual
+// weight — the earlier ad-hoc 24x24 paths for Facebook + X were
+// fine, but the matching Instagram path looked off (rounded-square
+// chrome got too thin against the camera glyph). Bootstrap's set
+// renders cleanly at 16px.
 const SOCIAL_LINKS = [
   {
     label: "Facebook",
     href: "https://www.facebook.com/gainforest",
-    // Simple Iconish Facebook glyph, viewBox 0 0 24 24.
-    path: "M13.5 21v-7.5h2.6l.4-3h-3v-1.9c0-.9.3-1.5 1.6-1.5H17V4.4a22 22 0 0 0-2.4-.1c-2.4 0-4 1.4-4 4v2.2H8v3h2.6V21h2.9z",
+    // bi-facebook (Bootstrap Icons, MIT)
+    path: "M16 8.049c0-4.446-3.582-8.05-8-8.05C3.58 0-.002 3.603-.002 8.05c0 4.017 2.926 7.347 6.75 7.951v-5.625h-2.03V8.05H6.75V6.275c0-2.017 1.195-3.131 3.022-3.131.876 0 1.791.157 1.791.157v1.98h-1.009c-.993 0-1.303.621-1.303 1.258v1.51h2.218l-.354 2.326H9.25V16c3.824-.604 6.75-3.934 6.75-7.951",
   },
   {
     label: "X (Twitter)",
     href: "https://x.com/GainForestNow",
-    // X / Twitter glyph (the new mark).
-    path: "M18.2 3H21l-6.6 7.5L22 21h-6.2l-4.9-6.4L5.3 21H2.5l7-8L2 3h6.4l4.4 5.8L18.2 3zm-1.1 16.2h1.7L7 4.7H5.2l11.9 14.5z",
+    // bi-twitter-x (Bootstrap Icons, MIT)
+    path: "M12.6.75h2.454l-5.36 6.142L16 15.25h-4.937l-3.867-5.07-4.425 5.07H.316l5.733-6.57L0 .75h5.063l3.495 4.633L12.601.75Zm-.86 13.028h1.36L4.323 2.145H2.865z",
   },
   {
     label: "Instagram",
     href: "https://www.instagram.com/gainforest/",
-    // Instagram glyph: rounded square + circle + dot. Composed of one
-    // path so it stays a single fill.
-    path: "M12 2.2c2.7 0 3 0 4.1.1 1 0 1.5.2 1.9.4.5.2.8.4 1.2.8.4.4.6.7.8 1.2.2.4.3.9.4 1.9.1 1.1.1 1.4.1 4.1s0 3-.1 4.1c0 1-.2 1.5-.4 1.9-.2.5-.4.8-.8 1.2-.4.4-.7.6-1.2.8-.4.2-.9.3-1.9.4-1.1.1-1.4.1-4.1.1s-3 0-4.1-.1c-1 0-1.5-.2-1.9-.4-.5-.2-.8-.4-1.2-.8a3.3 3.3 0 0 1-.8-1.2c-.2-.4-.3-.9-.4-1.9C2.2 15 2.2 14.7 2.2 12s0-3 .1-4.1c0-1 .2-1.5.4-1.9.2-.5.4-.8.8-1.2.4-.4.7-.6 1.2-.8.4-.2.9-.3 1.9-.4C7.7 2.2 8 2.2 12 2.2zm0 1.8c-2.7 0-3 0-4 .1-.9 0-1.4.2-1.7.3-.4.2-.7.3-1 .6-.3.3-.4.6-.6 1-.1.3-.3.8-.3 1.7-.1 1-.1 1.3-.1 4s0 3 .1 4c0 .9.2 1.4.3 1.7.2.4.3.7.6 1 .3.3.6.4 1 .6.3.1.8.3 1.7.3 1 .1 1.3.1 4 .1s3 0 4-.1c.9 0 1.4-.2 1.7-.3.4-.2.7-.3 1-.6.3-.3.4-.6.6-1 .1-.3.3-.8.3-1.7.1-1 .1-1.3.1-4s0-3-.1-4c0-.9-.2-1.4-.3-1.7-.2-.4-.3-.7-.6-1-.3-.3-.6-.4-1-.6-.3-.1-.8-.3-1.7-.3-1-.1-1.3-.1-4-.1zm0 3.1a5 5 0 1 1 0 9.9 5 5 0 0 1 0-9.9zm0 1.8a3.2 3.2 0 1 0 0 6.4 3.2 3.2 0 0 0 0-6.4zm5.2-3.2a1.2 1.2 0 1 1 0 2.3 1.2 1.2 0 0 1 0-2.3z",
+    // bi-instagram (Bootstrap Icons, MIT) — user-supplied correction
+    // from /Users/david/Downloads/instagram.svg.
+    path: "M8 0C5.829 0 5.556.01 4.703.048 3.85.088 3.269.222 2.76.42a3.9 3.9 0 0 0-1.417.923A3.9 3.9 0 0 0 .42 2.76C.222 3.268.087 3.85.048 4.7.01 5.555 0 5.827 0 8.001c0 2.172.01 2.444.048 3.297.04.852.174 1.433.372 1.942.205.526.478.972.923 1.417.444.445.89.719 1.416.923.51.198 1.09.333 1.942.372C5.555 15.99 5.827 16 8 16s2.444-.01 3.298-.048c.851-.04 1.434-.174 1.943-.372a3.9 3.9 0 0 0 1.416-.923c.445-.445.718-.891.923-1.417.197-.509.332-1.09.372-1.942C15.99 10.445 16 10.173 16 8s-.01-2.445-.048-3.299c-.04-.851-.175-1.433-.372-1.941a3.9 3.9 0 0 0-.923-1.417A3.9 3.9 0 0 0 13.24.42c-.51-.198-1.092-.333-1.943-.372C10.443.01 10.172 0 7.998 0zm-.717 1.442h.718c2.136 0 2.389.007 3.232.046.78.035 1.204.166 1.486.275.373.145.64.319.92.599s.453.546.598.92c.11.281.24.705.275 1.485.039.843.047 1.096.047 3.231s-.008 2.389-.047 3.232c-.035.78-.166 1.203-.275 1.485a2.5 2.5 0 0 1-.599.919c-.28.28-.546.453-.92.598-.28.11-.704.24-1.485.276-.843.038-1.096.047-3.232.047s-2.39-.009-3.233-.047c-.78-.036-1.203-.166-1.485-.276a2.5 2.5 0 0 1-.92-.598 2.5 2.5 0 0 1-.6-.92c-.109-.281-.24-.705-.275-1.485-.038-.843-.046-1.096-.046-3.233s.008-2.388.046-3.231c.036-.78.166-1.204.276-1.486.145-.373.319-.64.599-.92s.546-.453.92-.598c.282-.11.705-.24 1.485-.276.738-.034 1.024-.044 2.515-.045zm4.988 1.328a.96.96 0 1 0 0 1.92.96.96 0 0 0 0-1.92m-4.27 1.122a4.109 4.109 0 1 0 0 8.217 4.109 4.109 0 0 0 0-8.217m0 1.441a2.667 2.667 0 1 1 0 5.334 2.667 2.667 0 0 1 0-5.334",
   },
 ] as const;
 
@@ -191,7 +197,7 @@ export function Footer() {
                       <svg
                         width="16"
                         height="16"
-                        viewBox="0 0 24 24"
+                        viewBox="0 0 16 16"
                         fill="currentColor"
                         aria-hidden
                       >
