@@ -35,7 +35,7 @@ const STEPS: ReadonlyArray<{
 export function HowItWorks() {
   const t = useT();
   return (
-    <section className="border-t border-border-soft">
+    <section id="how-it-works" className="scroll-mt-20 border-t border-border-soft lg:scroll-mt-24">
       <div className="mx-auto w-full max-w-[1480px] px-6 pt-20 pb-20 sm:px-10 lg:px-16 lg:pt-24 lg:pb-24">
         <h2 className="font-garamond text-[32px] sm:text-[40px] lg:text-[44px] font-normal leading-[1.1] tracking-[-0.01em] text-foreground">
           {t("howitworks.heading")}

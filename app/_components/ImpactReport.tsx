@@ -85,7 +85,7 @@ export function ImpactReport() {
   const headingSegments = parseItalic(t("impact.heading"));
 
   return (
-    <section className="border-t border-border-soft bg-background">
+    <section id="impact" className="scroll-mt-20 border-t border-border-soft bg-background lg:scroll-mt-24">
       <div className="mx-auto w-full max-w-[1480px] px-6 py-14 sm:px-10 lg:px-16 lg:py-20">
         {/* Quiet section eyebrow above the grid — mirrors the
             "selected media" / "supporters" framing the rest of the

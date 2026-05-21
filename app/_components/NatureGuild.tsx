@@ -69,7 +69,7 @@ export function NatureGuild() {
   const italic = t("natureGuild.heading.italic").trim();
   const after = t("natureGuild.heading.after").trim();
   return (
-    <section className="border-t border-border-soft">
+    <section id="guild" className="scroll-mt-20 border-t border-border-soft lg:scroll-mt-24">
       <div className="mx-auto w-full max-w-[1480px] px-6 py-20 sm:px-10 lg:px-16 lg:py-24">
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-12 lg:items-end lg:gap-16">
           <div className="lg:col-span-7">

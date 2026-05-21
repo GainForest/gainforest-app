@@ -2,50 +2,33 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { LogoMark } from "./Logo";
-import { SignInPopover } from "./SignInPopover";
+import type { MessageKey } from "../_lib/i18n";
 import { LanguageSwitcher } from "./LanguageSwitcher";
+import { LogoMark } from "./Logo";
 import { useT } from "./LocaleProvider";
 
-const GLOBE_URL = "https://gainforest.app";
-const BUMICERTS_URL = "https://alpha.fund.gainforest.app";
-const DONATE_URL = "https://donorbox.org/gainforest";
+type NavItem = {
+  key: string;
+  labelKey: MessageKey;
+  href: `#${string}`;
+};
 
-// Client-rendered view for the top navbar. The server wrapper
-// (`TopNav.tsx`) resolves the OAuth session + handle and passes them in
-// as serializable props. Translations, the language switcher, and a
-// mobile drawer menu live here so they react to the active locale
-// without a server round-trip.
-export function TopNavView({
-  signedIn,
-  handle,
-}: {
-  signedIn: boolean;
-  handle: string | null;
-}) {
+const NAV_ITEMS: ReadonlyArray<NavItem> = [
+  { key: "tools", labelKey: "nav.tools", href: "#tools" },
+  { key: "how", labelKey: "nav.howItWorks", href: "#how-it-works" },
+  { key: "data", labelKey: "nav.data", href: "#data-commons" },
+  { key: "ai", labelKey: "nav.ai", href: "#ai" },
+  { key: "partners", labelKey: "nav.partners", href: "#partners" },
+  { key: "impact", labelKey: "nav.impact", href: "#impact" },
+];
+
+// Client-rendered view for the top navbar. It stays deliberately local:
+// every visible nav link is a hash anchor into this landing page, while
+// product, donate, and auth actions live in the body / footer instead
+// of competing with the editorial section rail.
+export function TopNavView() {
   const t = useT();
   const [menuOpen, setMenuOpen] = useState(false);
-
-  const items: ReadonlyArray<{ key: string; label: string; href: string }> = [
-    { key: "globe", label: t("nav.globe"), href: GLOBE_URL },
-    // "Bumicerts" is the product name — kept untranslated on purpose.
-    { key: "bumicerts", label: "Bumicerts", href: `${BUMICERTS_URL}/explore` },
-    {
-      key: "forCommunities",
-      label: t("nav.forCommunities"),
-      href: `${BUMICERTS_URL}/organizations`,
-    },
-    {
-      key: "forSupporters",
-      label: t("nav.forSupporters"),
-      href: `${BUMICERTS_URL}/leaderboard`,
-    },
-    {
-      key: "about",
-      label: t("nav.about"),
-      href: "https://www.gainforest.earth",
-    },
-  ];
 
   // Esc closes the mobile menu.
   useEffect(() => {
@@ -57,7 +40,7 @@ export function TopNavView({
     return () => document.removeEventListener("keydown", onKey);
   }, [menuOpen]);
 
-  // Lock body scroll while the drawer is open.
+  // Lock body scroll while the mobile section menu is open.
   useEffect(() => {
     if (!menuOpen) return;
     const original = document.body.style.overflow;
@@ -69,70 +52,46 @@ export function TopNavView({
 
   return (
     <>
-      <header className="w-full border-b border-border-soft">
-        <div className="mx-auto flex h-[64px] w-full max-w-[1440px] items-center justify-between px-5 sm:px-8 lg:h-[68px] lg:px-12">
+      <header className="sticky top-0 z-[70] w-full border-b border-border-soft/80 bg-background/90 backdrop-blur-xl">
+        <div className="mx-auto flex h-16 w-full max-w-[1480px] items-center justify-between gap-4 px-5 sm:px-8 lg:h-[68px] lg:px-16">
           <Link
-            href="/"
-            className="flex items-center gap-2.5"
-            aria-label="GainForest; home"
+            href="#top"
+            className="flex items-center gap-2.5 transition-opacity hover:opacity-80"
+            aria-label="GainForest"
+            onClick={() => setMenuOpen(false)}
           >
             <LogoMark
-              className="h-6 w-6 lg:h-7 lg:w-7 text-brand"
+              className="h-6 w-6 text-brand lg:h-7 lg:w-7"
               title="GainForest"
             />
-            <span className="font-garamond text-[20px] lg:text-[22px] font-semibold tracking-tight text-foreground">
+            <span className="font-garamond text-[20px] font-semibold tracking-tight text-foreground lg:text-[22px]">
               GainForest
             </span>
           </Link>
 
-          {/* Desktop / tablet links */}
-          <nav className="hidden items-center gap-8 xl:gap-10 lg:flex">
-            {items.map((item) => (
+          <nav
+            className="hidden items-center gap-1 rounded-full border border-border-soft bg-background/70 p-1 lg:flex"
+            aria-label={t("nav.sections")}
+          >
+            {NAV_ITEMS.map((item) => (
               <Link
                 key={item.key}
                 href={item.href}
-                target="_blank"
-                rel="noreferrer"
-                className="text-[15px] font-normal text-foreground/85 transition-colors hover:text-foreground"
+                className="rounded-full px-3.5 py-2 text-[13px] font-medium leading-none text-foreground/65 transition-colors hover:bg-foreground/[0.04] hover:text-foreground xl:px-4"
               >
-                {item.label}
+                {t(item.labelKey)}
               </Link>
             ))}
           </nav>
 
-          <div className="flex items-center gap-2 sm:gap-3">
+          <div className="flex items-center gap-2">
             <LanguageSwitcher />
-            <div className="hidden sm:block">
-              <SignInPopover signedIn={signedIn} handle={handle} />
-            </div>
-            {/* Donate is the one solid navbar CTA: the sage primary is
-                reserved for action on cream, while product exploration
-                stays quieter so the header does not turn into a button
-                cluster. */}
-            <Link
-              href={DONATE_URL}
-              target="_blank"
-              rel="noreferrer"
-              className="hidden h-10 items-center justify-center rounded-full bg-primary px-4 text-[14px] font-medium text-primary-foreground transition-colors hover:bg-primary-dark sm:inline-flex lg:h-11 lg:px-5 lg:text-[15px]"
-            >
-              {t("nav.donate")}
-            </Link>
-            <Link
-              href={`${BUMICERTS_URL}/explore`}
-              target="_blank"
-              rel="noreferrer"
-              className="hidden h-10 items-center justify-center rounded-full border border-foreground/20 px-4 text-[14px] font-medium text-foreground/80 transition-colors hover:border-primary/50 hover:text-primary sm:inline-flex lg:h-11 lg:px-5 lg:text-[15px]"
-            >
-              {t("nav.getStarted")}
-            </Link>
-
-            {/* Mobile hamburger — only visible below lg */}
             <button
               type="button"
               onClick={() => setMenuOpen((v) => !v)}
               aria-expanded={menuOpen}
-              aria-label={t("nav.about")}
-              className="lg:hidden inline-flex h-9 w-9 items-center justify-center rounded-md border border-border-soft text-foreground/75 transition-colors hover:border-foreground/40 hover:text-foreground"
+              aria-label={menuOpen ? t("nav.closeMenu") : t("nav.menu")}
+              className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-border-soft text-foreground/75 transition-colors hover:border-foreground/35 hover:text-foreground lg:hidden"
             >
               {menuOpen ? <CloseIcon /> : <MenuIcon />}
             </button>
@@ -140,78 +99,37 @@ export function TopNavView({
         </div>
       </header>
 
-      {/* Mobile drawer */}
       {menuOpen && (
         <div
-          className="fixed inset-0 z-[80] lg:hidden"
+          className="fixed inset-x-0 bottom-0 top-16 z-[60] lg:hidden"
           onClick={() => setMenuOpen(false)}
         >
-          {/* backdrop */}
-          <div className="absolute inset-0 bg-foreground/25 backdrop-blur-[2px]" />
-
+          <div className="absolute inset-0 bg-foreground/10 backdrop-blur-[1px]" />
           <nav
             onClick={(e) => e.stopPropagation()}
-            className={
-              "absolute right-0 top-0 flex h-full w-[280px] max-w-[88vw] " +
-              "flex-col gap-1 overflow-y-auto border-l border-border-soft " +
-              "bg-background px-4 pb-6 pt-5 shadow-[0_0_60px_-20px_rgba(40,50,30,0.4)] " +
-              "animate-[drawerIn_180ms_ease-out]"
-            }
-            aria-label="Mobile menu"
+            className="relative border-b border-border-soft bg-background/95 px-5 pb-6 pt-4 shadow-[0_18px_60px_-36px_rgba(40,50,30,0.35)] animate-[drawerIn_180ms_ease-out] sm:px-8"
+            aria-label={t("nav.sections")}
           >
-            <div className="mb-4 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <LogoMark className="h-5 w-5 text-brand" title="GainForest" />
-                <span className="font-garamond text-[18px] font-semibold text-foreground">
-                  GainForest
-                </span>
-              </div>
-              <button
-                type="button"
-                onClick={() => setMenuOpen(false)}
-                aria-label="Close menu"
-                className="grid h-9 w-9 place-items-center rounded-md text-foreground/65 transition-colors hover:bg-foreground/5 hover:text-foreground"
-              >
-                <CloseIcon />
-              </button>
-            </div>
-
-            {items.map((item) => (
-              <Link
-                key={item.key}
-                href={item.href}
-                target="_blank"
-                rel="noreferrer"
-                onClick={() => setMenuOpen(false)}
-                className="rounded-md px-2.5 py-2.5 font-garamond text-[18px] text-foreground/85 transition-colors hover:bg-foreground/[0.04] hover:text-foreground"
-              >
-                {item.label}
-              </Link>
-            ))}
-
-            <div className="mt-3 border-t border-border-soft pt-4">
-              <SignInPopover signedIn={signedIn} handle={handle} />
-            </div>
-
-            <div className="mt-3 grid grid-cols-1 gap-2">
-              <Link
-                href={DONATE_URL}
-                target="_blank"
-                rel="noreferrer"
-                onClick={() => setMenuOpen(false)}
-                className="inline-flex h-11 items-center justify-center rounded-full bg-primary px-6 text-[14px] font-medium text-primary-foreground transition-colors hover:bg-primary-dark"
-              >
-                {t("nav.donate")}
-              </Link>
-              <Link
-                href={`${BUMICERTS_URL}/explore`}
-                target="_blank"
-                rel="noreferrer"
-                onClick={() => setMenuOpen(false)}
-                className="inline-flex h-11 items-center justify-center rounded-full border border-foreground/20 px-6 text-[14px] font-medium text-foreground/80 transition-colors hover:border-primary/50 hover:text-primary"
-              >
-                {t("nav.getStarted")}
-              </Link>
+            <p className="mb-2 text-[11px] font-medium uppercase tracking-[0.18em] text-foreground/45">
+              {t("nav.sections")}
+            </p>
+            <div className="grid gap-1">
+              {NAV_ITEMS.map((item) => (
+                <Link
+                  key={item.key}
+                  href={item.href}
+                  onClick={() => setMenuOpen(false)}
+                  className="group flex items-center justify-between border-b border-border-soft/80 py-3.5 font-garamond text-[25px] font-normal leading-none text-foreground transition-colors last:border-b-0 hover:text-primary"
+                >
+                  <span>{t(item.labelKey)}</span>
+                  <span
+                    aria-hidden
+                    className="text-[18px] text-foreground/35 transition-transform group-hover:translate-x-1 group-hover:text-primary"
+                  >
+                    →
+                  </span>
+                </Link>
+              ))}
             </div>
           </nav>
         </div>

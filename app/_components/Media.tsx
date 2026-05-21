@@ -319,7 +319,7 @@ export function Media({ blogPosts }: { blogPosts: ReadonlyArray<BlogPost> }) {
   );
 
   return (
-    <section className="border-t border-border-soft">
+    <section id="news" className="scroll-mt-20 border-t border-border-soft lg:scroll-mt-24">
       <div className="mx-auto w-full max-w-[1480px] px-6 py-20 sm:px-10 lg:px-16 lg:py-24">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between sm:gap-10">
           <div>

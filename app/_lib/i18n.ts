@@ -42,6 +42,15 @@ type Messages = {
   "nav.getStarted": string;
   "nav.donate": string;
   "nav.language": string;
+  "nav.sections": string;
+  "nav.menu": string;
+  "nav.closeMenu": string;
+  "nav.tools": string;
+  "nav.howItWorks": string;
+  "nav.data": string;
+  "nav.ai": string;
+  "nav.partners": string;
+  "nav.impact": string;
 
   // ── Hero ─────────────────────────────────────────────────────────
   // The title is composed as: `before` + italic(`italic`) + `after`.
@@ -311,6 +320,15 @@ export const MESSAGES: Record<Locale, Messages> = {
     "nav.getStarted": "Get started",
     "nav.donate": "Donate",
     "nav.language": "Language",
+    "nav.sections": "Landing sections",
+    "nav.menu": "Menu",
+    "nav.closeMenu": "Close menu",
+    "nav.tools": "Tools",
+    "nav.howItWorks": "How it works",
+    "nav.data": "Data",
+    "nav.ai": "AI",
+    "nav.partners": "Partners",
+    "nav.impact": "Impact",
     // The `{word}` marker picks which word gets the painted brush
     // stroke. Position varies per locale (English puts it first,
     // Romance languages mid-phrase), so we encode it inline.
@@ -595,6 +613,15 @@ export const MESSAGES: Record<Locale, Messages> = {
     "nav.getStarted": "Comenzar",
     "nav.donate": "Donar",
     "nav.language": "Idioma",
+    "nav.sections": "Secciones",
+    "nav.menu": "Menú",
+    "nav.closeMenu": "Cerrar menú",
+    "nav.tools": "Herramientas",
+    "nav.howItWorks": "Cómo funciona",
+    "nav.data": "Datos",
+    "nav.ai": "IA",
+    "nav.partners": "Socios",
+    "nav.impact": "Impacto",
     "hero.title.before": "Herramientas {abiertas} para la",
     "hero.title.italic": "inteligencia regenerativa",
     "hero.title.after": "",
@@ -877,6 +904,15 @@ export const MESSAGES: Record<Locale, Messages> = {
     "nav.getStarted": "Começar",
     "nav.donate": "Doar",
     "nav.language": "Idioma",
+    "nav.sections": "Seções",
+    "nav.menu": "Menu",
+    "nav.closeMenu": "Fechar menu",
+    "nav.tools": "Ferramentas",
+    "nav.howItWorks": "Como funciona",
+    "nav.data": "Dados",
+    "nav.ai": "IA",
+    "nav.partners": "Parceiros",
+    "nav.impact": "Impacto",
     "hero.title.before": "Ferramentas {abertas} para a",
     "hero.title.italic": "inteligência regenerativa",
     "hero.title.after": "",
@@ -1157,6 +1193,15 @@ export const MESSAGES: Record<Locale, Messages> = {
     "nav.getStarted": "Anza",
     "nav.donate": "Toa",
     "nav.language": "Lugha",
+    "nav.sections": "Sehemu",
+    "nav.menu": "Menyu",
+    "nav.closeMenu": "Funga menyu",
+    "nav.tools": "Zana",
+    "nav.howItWorks": "Jinsi inavyofanya kazi",
+    "nav.data": "Data",
+    "nav.ai": "AI",
+    "nav.partners": "Washirika",
+    "nav.impact": "Athari",
     "hero.title.before": "Zana {huria} kwa",
     "hero.title.italic": "akili ya kuzaa upya",
     "hero.title.after": "",
@@ -1439,6 +1484,15 @@ export const MESSAGES: Record<Locale, Messages> = {
     "nav.getStarted": "Mulai",
     "nav.donate": "Donasi",
     "nav.language": "Bahasa",
+    "nav.sections": "Bagian",
+    "nav.menu": "Menu",
+    "nav.closeMenu": "Tutup menu",
+    "nav.tools": "Alat",
+    "nav.howItWorks": "Cara kerja",
+    "nav.data": "Data",
+    "nav.ai": "AI",
+    "nav.partners": "Mitra",
+    "nav.impact": "Dampak",
     "hero.title.before": "Alat {terbuka} untuk",
     "hero.title.italic": "kecerdasan regeneratif",
     "hero.title.after": "",

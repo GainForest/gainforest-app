@@ -196,8 +196,10 @@ SignInPopover (client) ──► GET /api/oauth/login?handle=alice.bsky.social
                                        303 → /
 ```
 
-`TopNav` (server) reads `getSession()` on every request, falls back to
-the PLC directory to resolve handle, and passes both into the popover.
+`TopNav` is now a minimal landing-local header: logo, language picker,
+and hash anchors into the page sections only. It intentionally does not
+mount `SignInPopover` or outbound product CTAs, so the OAuth endpoints
+remain available for direct flows but are not exposed from the top nav.
 
 ## OAuth machinery — rules
 
@@ -718,15 +720,14 @@ Before finishing a change:
    lists 3 high-quality projects with thumbnails.
 3. Drag the hero globe — rotation stops, no zoom on scroll, the page
    scrolls normally over the canvas.
-4. Scroll to the bottom — "I want to…" cards render with their icons +
-   tropical sprig on the right, "How it works" step icons + arrows
-   render, "Nature thrives" banner shows the raster topo decoration.
+4. Use the top navbar anchors. They should scroll to in-page sections
+   (`#tools`, `#how-it-works`, `#data-commons`, `#ai`, `#partners`,
+   `#impact`) and never open outbound app URLs.
 5. <FloatingTaina /> mounts in `layout.tsx` and stays open across
    routes.
-6. Click "Sign in" in the navbar — popover opens, type a bsky handle
-   (e.g. `<your-handle>.bsky.social`), submit. Browser should redirect
-   to your PDS for consent. On callback you should land back on `/`
-   with a signed-in chip.
+6. If you changed OAuth, test the direct login route with
+   `/api/oauth/login?handle=<your-handle>.bsky.social`; the top navbar
+   no longer exposes a sign-in popover.
 7. If you changed the design system, eyeball the cream background and
    primary colour against the original mockups
    (`/Users/david/Downloads/ChatGPT Image May 17, 2026, 12_31_25 PM.png`

@@ -53,7 +53,7 @@ export async function ChoosePath({
     }));
 
   return (
-    <section className="border-t border-border-soft">
+    <section id="tools" className="scroll-mt-20 border-t border-border-soft lg:scroll-mt-24">
       <div className="mx-auto w-full max-w-[1280px] px-6 pt-16 pb-16 sm:px-10 lg:px-16 lg:pt-20 lg:pb-20">
         <ChoosePathLabels slot="heading" />
 

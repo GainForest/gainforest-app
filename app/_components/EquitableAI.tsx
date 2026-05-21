@@ -82,7 +82,7 @@ export function EquitableAI() {
   const italic = t("equitableAI.heading.italic").trim();
   const after = t("equitableAI.heading.after").trim();
   return (
-    <section className="border-t border-border-soft">
+    <section id="ai" className="scroll-mt-20 border-t border-border-soft lg:scroll-mt-24">
       <div className="mx-auto w-full max-w-[1480px] px-6 pt-20 pb-20 sm:px-10 lg:px-16 lg:pt-24 lg:pb-24">
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-12 lg:items-end lg:gap-12">
           <div className="lg:col-span-7">

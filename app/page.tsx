@@ -75,7 +75,7 @@ export default async function Page() {
     fetchSubstackPosts(3),
   ]);
   return (
-    <div className="min-h-screen bg-background">
+    <div id="top" className="min-h-screen bg-background">
       <TopNav />
       <main>
         <Hero

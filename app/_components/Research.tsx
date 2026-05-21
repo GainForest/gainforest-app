@@ -19,7 +19,7 @@ export function Research() {
   const italic = t("research.heading.italic").trim();
   const after = t("research.heading.after").trim();
   return (
-    <section className="border-t border-border-soft">
+    <section id="research" className="scroll-mt-20 border-t border-border-soft lg:scroll-mt-24">
       <div className="mx-auto w-full max-w-[1480px] px-6 py-16 sm:px-10 lg:px-16 lg:py-20">
         <div className="grid grid-cols-1 gap-10 lg:grid-cols-12 lg:items-center lg:gap-16">
           <div className="lg:col-span-7">

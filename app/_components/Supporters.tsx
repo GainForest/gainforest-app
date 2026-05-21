@@ -99,7 +99,7 @@ export function Supporters() {
   const italic = t("supporters.heading.italic").trim();
   const after = t("supporters.heading.after").trim();
   return (
-    <section className="border-t border-border-soft">
+    <section id="supporters" className="scroll-mt-20 border-t border-border-soft lg:scroll-mt-24">
       <div className="mx-auto w-full max-w-[1280px] px-6 py-20 sm:px-10 lg:px-16 lg:py-24">
         {/* Heading + body on a tighter grid so the section reads as a
             quiet footer-style acknowledgement rather than a hero. */}

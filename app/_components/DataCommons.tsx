@@ -21,7 +21,7 @@ export function DataCommons() {
   const italic = t("dataCommons.heading.italic").trim();
   const after = t("dataCommons.heading.after").trim();
   return (
-    <section className="bg-ink text-ink-foreground">
+    <section id="data-commons" className="scroll-mt-20 bg-ink text-ink-foreground lg:scroll-mt-24">
       <div className="mx-auto grid w-full max-w-[1480px] grid-cols-1 gap-10 px-6 py-16 sm:gap-12 sm:px-10 sm:py-20 lg:grid-cols-12 lg:items-center lg:gap-16 lg:px-16 lg:py-28">
         {/* Left: claim */}
         <div className="lg:col-span-6">
