@@ -87,6 +87,7 @@ type Messages = {
   "choosePath.globe.caption.projects": string; // template: "{n}+ projects"
   "choosePath.globe.cta": string;         // "Open Green Globe"
   "choosePath.bumicerts.cta": string;     // "Explore Bumicerts"
+  "choosePath.bumicerts.createCta": string; // "Create a Bumicert"
   "choosePath.bumicerts.verified": string;
   "choosePath.bumicerts.signed": string;
   // Unified live indicator for the two ChoosePath cards. Both cards
@@ -372,6 +373,7 @@ export const MESSAGES: Record<Locale, Messages> = {
     "choosePath.globe.caption.projects": "{n}+ projects",
     "choosePath.globe.cta": "Open Green Globe",
     "choosePath.bumicerts.cta": "Explore Bumicerts",
+    "choosePath.bumicerts.createCta": "Create a Bumicert",
     "choosePath.bumicerts.verified": "Verified",
     "choosePath.bumicerts.signed": "ATProto signed",
     "choosePath.liveBadge": "Live",
@@ -671,6 +673,7 @@ export const MESSAGES: Record<Locale, Messages> = {
     "choosePath.globe.caption.projects": "{n}+ proyectos",
     "choosePath.globe.cta": "Abrir Green Globe",
     "choosePath.bumicerts.cta": "Explorar Bumicerts",
+    "choosePath.bumicerts.createCta": "Crear un Bumicert",
     "choosePath.bumicerts.verified": "Verificado",
     "choosePath.bumicerts.signed": "Firmado en ATProto",
     "choosePath.liveBadge": "En vivo",
@@ -971,6 +974,7 @@ export const MESSAGES: Record<Locale, Messages> = {
     "choosePath.globe.caption.projects": "{n}+ projetos",
     "choosePath.globe.cta": "Abrir o Green Globe",
     "choosePath.bumicerts.cta": "Explorar Bumicerts",
+    "choosePath.bumicerts.createCta": "Criar um Bumicert",
 
     "choosePath.bumicerts.verified": "Verificado",
     "choosePath.bumicerts.signed": "Assinado em ATProto",
@@ -1270,6 +1274,7 @@ export const MESSAGES: Record<Locale, Messages> = {
     "choosePath.globe.caption.projects": "{n}+ miradi",
     "choosePath.globe.cta": "Fungua Green Globe",
     "choosePath.bumicerts.cta": "Chunguza Bumicerts",
+    "choosePath.bumicerts.createCta": "Tengeneza Bumicert",
 
     "choosePath.bumicerts.verified": "Imethibitishwa",
     "choosePath.bumicerts.signed": "Imesainiwa kwa ATProto",
@@ -1571,6 +1576,7 @@ export const MESSAGES: Record<Locale, Messages> = {
     "choosePath.globe.caption.projects": "{n}+ proyek",
     "choosePath.globe.cta": "Buka Green Globe",
     "choosePath.bumicerts.cta": "Jelajahi Bumicerts",
+    "choosePath.bumicerts.createCta": "Buat Bumicert",
 
     "choosePath.bumicerts.verified": "Terverifikasi",
     "choosePath.bumicerts.signed": "Ditandatangani di ATProto",

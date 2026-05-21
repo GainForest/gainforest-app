@@ -74,23 +74,15 @@ export function ChoosePathClient({
           <GlobePreview pinCount={pinCount}>{globe}</GlobePreview>
         </div>
 
-        <Link
-          href={GLOBE_URL}
-          target="_blank"
-          rel="noreferrer"
-          aria-label={t("choosePath.globe.cta")}
-          className="inline-flex items-center gap-1.5 text-[14px] font-medium text-primary self-start"
-        >
-          <span className="border-b border-primary/40 pb-0.5 transition-colors group-hover:border-primary">
-            {t("choosePath.globe.cta")}
-          </span>
-          <span
-            aria-hidden
-            className="transition-transform group-hover:translate-x-1"
-          >
-            →
-          </span>
-        </Link>
+        {/* Single Globe CTA. Wrapped in a flex-row container that
+            mirrors the Bumicerts card's CTA row so both cards align
+            structurally even when the Globe side only has one link. */}
+        <div className="self-start">
+          <CardCta
+            href={GLOBE_URL}
+            label={t("choosePath.globe.cta")}
+          />
+        </div>
       </div>
 
       {/* RIGHT — Bumicerts fan. */}
@@ -132,25 +124,50 @@ export function ChoosePathClient({
           </div>
         )}
 
-        <Link
-          href={`${BUMICERTS_URL}/explore`}
-          target="_blank"
-          rel="noreferrer"
-          aria-label={t("choosePath.bumicerts.cta")}
-          className="inline-flex items-center gap-1.5 text-[14px] font-medium text-primary self-start"
-        >
-          <span className="border-b border-primary/40 pb-0.5 transition-colors group-hover:border-primary">
-            {t("choosePath.bumicerts.cta")}
-          </span>
-          <span
-            aria-hidden
-            className="transition-transform group-hover:translate-x-1"
-          >
-            →
-          </span>
-        </Link>
+        {/* CTA row — two complementary actions for the Bumicerts
+            surface: explore existing certs (supporter / discovery)
+            and create one (community / issuance). Each link owns its
+            own `group/cta` so hovering one only animates that one;
+            the card-level `group` hover no longer drives the CTA
+            underline (would have looked busy with two links). */}
+        <div className="flex flex-wrap items-center gap-x-6 gap-y-2 self-start">
+          <CardCta
+            href={`${BUMICERTS_URL}/explore`}
+            label={t("choosePath.bumicerts.cta")}
+          />
+          <CardCta
+            href={`${BUMICERTS_URL}/bumicert/create`}
+            label={t("choosePath.bumicerts.createCta")}
+          />
+        </div>
       </div>
     </div>
+  );
+}
+
+// Small inline CTA used in the ChoosePath cards. Renders an underlined
+// label + arrow that both animate on local hover only — the parent
+// card's `group` hover used to drive these, but with multiple CTAs in
+// one card the card-level animation looked busy.
+function CardCta({ href, label }: { href: string; label: string }) {
+  return (
+    <Link
+      href={href}
+      target="_blank"
+      rel="noreferrer"
+      aria-label={label}
+      className="group/cta inline-flex items-center gap-1.5 text-[14px] font-medium text-primary"
+    >
+      <span className="border-b border-primary/40 pb-0.5 transition-colors group-hover/cta:border-primary">
+        {label}
+      </span>
+      <span
+        aria-hidden
+        className="transition-transform group-hover/cta:translate-x-1"
+      >
+        →
+      </span>
+    </Link>
   );
 }
 
