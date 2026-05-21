@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { BUMICERTS_URL, GLOBE_HOST, GLOBE_URL } from "../_lib/urls";
+import { BUMICERTS_URL, GLOBE_URL } from "../_lib/urls";
 import { LivePill } from "./LivePill";
 import { useT } from "./LocaleProvider";
 
@@ -190,15 +190,19 @@ function GlobePreview({
         </span>
       </div>
 
-      <div className="flex w-full items-center justify-center gap-3 pt-1 text-[10.5px] uppercase tracking-[0.12em] text-foreground/50">
+      {/* Caption strip below the globe — used to show
+          "{n}+ PROJECTS · DATA.GAINFOREST.APP" but the host string
+          read as technical noise (asymmetric with the Bumicerts card,
+          which had its own `org.hypercerts.claim` lexicon noise that
+          we also stripped). The pin count alone is the meaningful
+          signal; the link to the full globe lives in the CTA below. */}
+      <div className="flex w-full items-center justify-center pt-1 text-[10.5px] uppercase tracking-[0.12em] text-foreground/50">
         <span>
           {t("choosePath.globe.caption.projects").replace(
             "{n}",
             String(pinCount),
           )}
         </span>
-        <span className="text-foreground/25">·</span>
-        <span>{GLOBE_HOST}</span>
       </div>
     </div>
   );
@@ -291,26 +295,28 @@ function BumicertCard({ b }: { b: FeaturedBumicert }) {
           </p>
         )}
         <div className="flex-1" />
-        <div className="mt-1 border-t border-[#ece5d4] pt-1.5 text-[8.5px] uppercase tracking-[0.1em] text-foreground/45">
-          <div className="truncate">org.hypercerts.claim</div>
-          <div className="mt-0.5 flex items-center gap-1">
-            <svg
-              width="8"
-              height="8"
-              viewBox="0 0 24 24"
-              fill="none"
-              aria-hidden
-              className="shrink-0"
-            >
-              <path
-                d="M13 2L4 14h7l-1 8 9-12h-7l1-8z"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinejoin="round"
-              />
-            </svg>
-            <span>{t("choosePath.bumicerts.signed")}</span>
-          </div>
+        {/* Footer trust signal. Earlier iterations also rendered the
+            literal ATProto NSID `org.hypercerts.claim` above this row,
+            but the lexicon string read as jargon to visitors. The
+            lightning + "ATProto signed" line carries the same trust
+            signal in human-readable form. */}
+        <div className="mt-1 flex items-center gap-1 border-t border-[#ece5d4] pt-1.5 text-[8.5px] uppercase tracking-[0.1em] text-foreground/45">
+          <svg
+            width="8"
+            height="8"
+            viewBox="0 0 24 24"
+            fill="none"
+            aria-hidden
+            className="shrink-0"
+          >
+            <path
+              d="M13 2L4 14h7l-1 8 9-12h-7l1-8z"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinejoin="round"
+            />
+          </svg>
+          <span>{t("choosePath.bumicerts.signed")}</span>
         </div>
       </div>
     </Link>

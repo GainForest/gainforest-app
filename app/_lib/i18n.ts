@@ -387,7 +387,7 @@ export const MESSAGES: Record<Locale, Messages> = {
       "Discover projects and ecosystems across the world. Explore, learn, and get inspired.",
     "choosePath.bumicerts.title": "Explore Bumicerts",
     "choosePath.bumicerts.body":
-      "Browse projects, create and manage Bumicerts, and support verified community impact.",
+      "An environmental impact certificate issued by the community doing the work. Each Bumicert binds photos, audio, and field notes into a verifiable, portable record on ATProto.",
     "choosePath.or": "or",
     "choosePath.allProjects": "All projects",
     "iwantto.heading": "I want to…",
@@ -686,7 +686,7 @@ export const MESSAGES: Record<Locale, Messages> = {
       "Descubre proyectos y ecosistemas en todo el mundo. Explora, aprende e inspírate.",
     "choosePath.bumicerts.title": "Explorar Bumicerts",
     "choosePath.bumicerts.body":
-      "Navega proyectos, crea y administra Bumicerts y apoya el impacto comunitario verificado.",
+      "Un certificado de impacto ambiental emitido por la comunidad que hace el trabajo. Cada Bumicert reúne fotos, audio y notas de campo en un registro verificable y portátil en ATProto.",
     "choosePath.or": "o",
     "choosePath.allProjects": "Todos los proyectos",
     "iwantto.heading": "Quiero…",
@@ -987,7 +987,7 @@ export const MESSAGES: Record<Locale, Messages> = {
       "Descubra projetos e ecossistemas pelo mundo. Explore, aprenda e inspire-se.",
     "choosePath.bumicerts.title": "Explorar Bumicerts",
     "choosePath.bumicerts.body":
-      "Navegue por projetos, crie e gerencie Bumicerts e apoie o impacto comunitário verificado.",
+      "Um certificado de impacto ambiental emitido pela comunidade que faz o trabalho. Cada Bumicert reúne fotos, áudios e notas de campo em um registro verificável e portátil no ATProto.",
     "choosePath.or": "ou",
     "choosePath.allProjects": "Todos os projetos",
     "iwantto.heading": "Quero…",
@@ -1286,7 +1286,7 @@ export const MESSAGES: Record<Locale, Messages> = {
       "Gundua miradi na mifumo ya ikolojia duniani kote. Vinjari, jifunze, na pata msukumo.",
     "choosePath.bumicerts.title": "Vinjari Bumicerts",
     "choosePath.bumicerts.body":
-      "Vinjari miradi, tengeneza na simamia Bumicerts, na saidia athari ya jamii iliyothibitishwa.",
+      "Cheti cha athari ya mazingira kinachotolewa na jamii inayofanya kazi. Kila Bumicert inaunganisha picha, sauti, na maelezo ya nyanjani katika rekodi inayoweza kuthibitishwa na kubebeka kwenye ATProto.",
     "choosePath.or": "au",
     "choosePath.allProjects": "Miradi yote",
     "iwantto.heading": "Nataka…",
@@ -1587,7 +1587,7 @@ export const MESSAGES: Record<Locale, Messages> = {
       "Temukan proyek dan ekosistem di seluruh dunia. Jelajahi, pelajari, dan dapatkan inspirasi.",
     "choosePath.bumicerts.title": "Jelajahi Bumicerts",
     "choosePath.bumicerts.body":
-      "Telusuri proyek, buat dan kelola Bumicerts, serta dukung dampak komunitas yang terverifikasi.",
+      "Sertifikat dampak lingkungan yang diterbitkan oleh komunitas yang melakukan pekerjaan itu. Setiap Bumicert menyatukan foto, audio, dan catatan lapangan ke dalam rekam yang dapat diverifikasi dan portabel di ATProto.",
     "choosePath.or": "atau",
     "choosePath.allProjects": "Semua proyek",
     "iwantto.heading": "Saya ingin…",
