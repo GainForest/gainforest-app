@@ -59,6 +59,8 @@ type GlobeProps = {
   highlightedDid?: string | null;
   /** Emits whether the highlighted pin is on the globe's front hemisphere. */
   onHighlightedVisibilityChange?: (visible: boolean) => void;
+  /** Emits the visible front-hemisphere pin DIDs for synchronized spotlights. */
+  onVisiblePinsChange?: (visibleDids: string[]) => void;
 };
 
 // Pseudo-random pin positions for the loading skeleton. Picked once so the
@@ -78,6 +80,7 @@ export function LiveGlobe({
   interactive = false,
   highlightedDid = null,
   onHighlightedVisibilityChange,
+  onVisiblePinsChange,
 }: GlobeProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   // The Globe instance ref — used to drive auto-rotate + controls.
@@ -85,6 +88,7 @@ export function LiveGlobe({
   const globeRef = useRef<any>(null);
   const [ready, setReady] = useState(false);
   const lastHighlightedVisibleRef = useRef<boolean | null>(null);
+  const lastVisibleDidsRef = useRef("");
 
   // Configure controls once the globe finishes initialising. Using the
   // library's `onGlobeReady` callback (rather than a fixed setTimeout)
@@ -155,30 +159,46 @@ export function LiveGlobe({
 
     let frame = 0;
     const tick = () => {
-      const g = globeRef.current;
-      const camera = g?.camera?.();
-      const coords = g?.getCoords?.(pin.lat, pin.lon, 0.012);
-      const position = camera?.position;
-      if (coords && position) {
-        const dot =
-          coords.x * position.x +
-          coords.y * position.y +
-          coords.z * position.z;
-        const pointLength = Math.hypot(coords.x, coords.y, coords.z);
-        const cameraLength = Math.hypot(position.x, position.y, position.z);
-        // Small positive threshold avoids showing the link while the pin is
-        // barely grazing the edge of the globe.
-        const visible = dot / (pointLength * cameraLength) > 0.08;
-        if (visible !== lastHighlightedVisibleRef.current) {
-          lastHighlightedVisibleRef.current = visible;
-          onHighlightedVisibilityChange(visible);
-        }
+      const visible = isPinVisibleOnGlobe(
+        globeRef.current as GlobeApi | null,
+        pin,
+      );
+      if (visible !== null && visible !== lastHighlightedVisibleRef.current) {
+        lastHighlightedVisibleRef.current = visible;
+        onHighlightedVisibilityChange(visible);
       }
       frame = window.requestAnimationFrame(tick);
     };
     tick();
     return () => window.cancelAnimationFrame(frame);
   }, [highlightedDid, onHighlightedVisibilityChange, pins, ready]);
+
+  useEffect(() => {
+    if (!onVisiblePinsChange) return;
+    if (!ready) {
+      if (lastVisibleDidsRef.current) {
+        lastVisibleDidsRef.current = "";
+        onVisiblePinsChange([]);
+      }
+      return;
+    }
+
+    const emitVisiblePins = () => {
+      const api = globeRef.current as GlobeApi | null;
+      const visibleDids = pins
+        .filter((pin) => isPinVisibleOnGlobe(api, pin) === true)
+        .map((pin) => pin.did);
+      const key = visibleDids.join("|");
+      if (key !== lastVisibleDidsRef.current) {
+        lastVisibleDidsRef.current = key;
+        onVisiblePinsChange(visibleDids);
+      }
+    };
+
+    emitVisiblePins();
+    const id = window.setInterval(emitVisiblePins, 650);
+    return () => window.clearInterval(id);
+  }, [onVisiblePinsChange, pins, ready]);
 
   // Memoise the points and ring datasets so the globe doesn't redraw on each
   // re-render. Pings stagger pseudo-randomly across pins for the "real data
@@ -347,6 +367,32 @@ export function LiveGlobe({
       </div>
     </div>
   );
+}
+
+type GlobeVector = { x: number; y: number; z: number };
+
+type GlobeApi = {
+  camera?: () => { position?: GlobeVector };
+  getCoords?: (lat: number, lng: number, altitude?: number) => GlobeVector;
+};
+
+function isPinVisibleOnGlobe(
+  api: GlobeApi | null,
+  pin: ProjectPin,
+): boolean | null {
+  const position = api?.camera?.()?.position;
+  const coords = api?.getCoords?.(pin.lat, pin.lon, 0.012);
+  if (!coords || !position) return null;
+
+  const dot =
+    coords.x * position.x + coords.y * position.y + coords.z * position.z;
+  const pointLength = Math.hypot(coords.x, coords.y, coords.z);
+  const cameraLength = Math.hypot(position.x, position.y, position.z);
+  if (!pointLength || !cameraLength) return null;
+
+  // Small positive threshold avoids showing the link while the pin is barely
+  // grazing the edge of the globe.
+  return dot / (pointLength * cameraLength) > 0.08;
 }
 
 function escapeHtml(value: string): string {

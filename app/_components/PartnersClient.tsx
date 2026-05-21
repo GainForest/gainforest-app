@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { LiveGlobe } from "./LiveGlobe";
 import { useT } from "./LocaleProvider";
@@ -140,9 +140,11 @@ export function ClientPartners({ pins }: { pins: ProjectPin[] }) {
   }, [communities]);
   const total = communities.length || pins.length;
 
-  const [spotlightIndex, setSpotlightIndex] = useState(0);
+  const [spotlightDid, setSpotlightDid] = useState<string | null>(null);
   const [diameter, setDiameter] = useState<number>(380);
-  const [spotlightVisible, setSpotlightVisible] = useState(false);
+  const [visiblePinDids, setVisiblePinDids] = useState<string[]>([]);
+  const spotlightPoolRef = useRef<Community[]>([]);
+  const visibleSpotlightPoolRef = useRef<Community[]>([]);
 
   useEffect(() => {
     const update = () => {
@@ -157,26 +159,70 @@ export function ClientPartners({ pins }: { pins: ProjectPin[] }) {
     return () => window.removeEventListener("resize", update);
   }, []);
 
+  const visiblePinDidSet = useMemo(
+    () => new Set(visiblePinDids),
+    [visiblePinDids],
+  );
+  const visibleSpotlightPool = useMemo(
+    () =>
+      spotlightPool.filter(
+        (community) => community.atUri && visiblePinDidSet.has(community.did),
+      ),
+    [spotlightPool, visiblePinDidSet],
+  );
+
   useEffect(() => {
-    if (spotlightPool.length <= 1) {
-      setSpotlightIndex(0);
+    spotlightPoolRef.current = spotlightPool;
+  }, [spotlightPool]);
+
+  useEffect(() => {
+    visibleSpotlightPoolRef.current = visibleSpotlightPool;
+  }, [visibleSpotlightPool]);
+
+  useEffect(() => {
+    const preferred = visibleSpotlightPool[0] ?? spotlightPool[0];
+    if (!preferred) {
+      setSpotlightDid(null);
       return;
     }
-    const id = window.setInterval(() => {
-      setSpotlightIndex((current) => (current + 1) % spotlightPool.length);
-    }, SPOTLIGHT_ROTATION_MS);
-    return () => window.clearInterval(id);
-  }, [spotlightPool.length]);
-
-  const spotlight =
-    spotlightPool[spotlightIndex % Math.max(spotlightPool.length, 1)];
-  const handleSpotlightVisibility = useCallback((visible: boolean) => {
-    setSpotlightVisible(visible);
-  }, []);
+    const currentIsKnown = spotlightPool.some(
+      (community) => community.did === spotlightDid,
+    );
+    const currentIsVisible = spotlightDid
+      ? visiblePinDidSet.has(spotlightDid)
+      : false;
+    if (
+      !currentIsKnown ||
+      (visibleSpotlightPool.length > 0 && !currentIsVisible)
+    ) {
+      setSpotlightDid(preferred.did);
+    }
+  }, [spotlightDid, spotlightPool, visiblePinDidSet, visibleSpotlightPool]);
 
   useEffect(() => {
-    setSpotlightVisible(false);
-  }, [spotlight?.did]);
+    const id = window.setInterval(() => {
+      setSpotlightDid((current) => {
+        const pool =
+          visibleSpotlightPoolRef.current.length > 0
+            ? visibleSpotlightPoolRef.current
+            : spotlightPoolRef.current.filter((community) => community.atUri);
+        if (pool.length === 0) return current;
+        const currentIndex = pool.findIndex(
+          (community) => community.did === current,
+        );
+        return pool[(currentIndex + 1) % pool.length]?.did ?? current;
+      });
+    }, SPOTLIGHT_ROTATION_MS);
+    return () => window.clearInterval(id);
+  }, []);
+
+  const spotlight =
+    spotlightPool.find((community) => community.did === spotlightDid) ??
+    visibleSpotlightPool[0] ??
+    spotlightPool[0];
+  const handleVisiblePinsChange = useCallback((visibleDids: string[]) => {
+    setVisiblePinDids(visibleDids);
+  }, []);
 
   return (
     <section className="border-t border-border-soft">
@@ -246,14 +292,16 @@ export function ClientPartners({ pins }: { pins: ProjectPin[] }) {
                 pins={pins}
                 diameter={diameter}
                 highlightedDid={spotlight?.did ?? null}
-                onHighlightedVisibilityChange={handleSpotlightVisibility}
+                onVisiblePinsChange={handleVisiblePinsChange}
               />
             </div>
 
             <SpotlightCard
               community={spotlight}
               label={t("partners.recordLabel")}
-              showRecord={spotlightVisible}
+              showRecord={Boolean(
+                spotlight?.atUri && visiblePinDidSet.has(spotlight.did),
+              )}
             />
           </div>
         </div>
