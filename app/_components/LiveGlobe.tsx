@@ -140,6 +140,10 @@ export function LiveGlobe({
   // the pin vector with the camera vector gives a cheap front/back test.
   useEffect(() => {
     if (!onHighlightedVisibilityChange) return;
+    // Force a fresh callback for each new highlighted record. Without this,
+    // a visible → visible spotlight change would leave the parent reset to
+    // hidden because the cached boolean never changed.
+    lastHighlightedVisibleRef.current = null;
     const pin = pins.find((candidate) => candidate.did === highlightedDid);
     if (!ready || !pin) {
       if (lastHighlightedVisibleRef.current !== false) {

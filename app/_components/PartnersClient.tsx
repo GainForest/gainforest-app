@@ -11,6 +11,7 @@ import type { ProjectPin } from "../_lib/projects";
 // overlays a rotating spotlight for one real community/org at a time.
 // Images come from Hyperindex organization cover/logo blobs resolved in
 // `_lib/projects.ts`; no generated or invented partner imagery here.
+const SPOTLIGHT_ROTATION_MS = 11000;
 
 type Community = {
   did: string;
@@ -162,12 +163,8 @@ export function ClientPartners({ pins }: { pins: ProjectPin[] }) {
       return;
     }
     const id = window.setInterval(() => {
-      setSpotlightIndex((current) => {
-        let next = Math.floor(Math.random() * spotlightPool.length);
-        if (next === current) next = (next + 1) % spotlightPool.length;
-        return next;
-      });
-    }, 4200);
+      setSpotlightIndex((current) => (current + 1) % spotlightPool.length);
+    }, SPOTLIGHT_ROTATION_MS);
     return () => window.clearInterval(id);
   }, [spotlightPool.length]);
 
