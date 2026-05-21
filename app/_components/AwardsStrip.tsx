@@ -22,8 +22,10 @@ import { useT } from "./LocaleProvider";
 //
 // All logos are rendered as inert, non-clickable marks in monochrome.
 // The XPRIZE primary line uses a larger logo size; the secondary
-// recognitions sit in a single-row overflow carousel so the wall stays
-// calm as more recognitions are added.
+// recognitions drift slowly from right to left in a continuous CSS
+// marquee so the wall stays calm + alive as more recognitions are
+// added. The marquee pauses on hover / keyboard focus, and respects
+// `prefers-reduced-motion` (defined in `app/globals.css`).
 //
 // Why monochrome vs. full-colour: the band sits directly under the
 // cream hero on a cream background. Full-colour logos would compete
@@ -118,48 +120,77 @@ export function AwardsStrip() {
             </span>
           </div>
 
-          {/* Secondary — Recognised by + logos */}
+          {/* Secondary — Recognised by + auto-scrolling logo marquee */}
           <div className="flex min-w-0 flex-col gap-3 lg:flex-1 lg:items-end">
             <span className="font-instrument italic text-[13px] lg:text-[14px] text-foreground/45">
               {t("awards.alsoLabel")}
             </span>
             <div className="relative w-full max-w-full lg:max-w-[720px]">
-              <ul
-                className="awards-logo-carousel flex snap-x snap-mandatory items-center gap-x-7 overflow-x-auto overscroll-x-contain whitespace-nowrap px-8 py-1 lg:gap-x-8"
-                role="list"
+              <div
+                className="awards-marquee py-1"
+                role="region"
                 aria-label={t("awards.alsoLabel")}
               >
-                {SECONDARY_LOGOS.map((l) => (
-                  <li
-                    key={l.src}
-                    className="flex shrink-0 snap-center items-center"
-                    style={{ height: l.h }}
-                  >
-                    {/* `grayscale + multiply` collapses brand colours
-                        into a single neutral silhouette while
-                        preserving wordmark legibility. The logos are
-                        deliberately not links: this strip is a calm
-                        credibility cue, not a navigation surface. */}
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={l.src}
-                      alt={l.alt}
-                      style={{
-                        height: l.h,
-                        width: "auto",
-                        filter: "grayscale(1) contrast(1.05)",
-                        mixBlendMode: "multiply",
-                        opacity: 0.7,
-                      }}
-                      draggable={false}
-                    />
-                  </li>
-                ))}
-              </ul>
+                <ul
+                  className="awards-marquee-track"
+                  role="list"
+                  aria-label={t("awards.alsoLabel")}
+                >
+                  {/* First copy — the accessible one. */}
+                  {SECONDARY_LOGOS.map((l) => (
+                    <LogoItem key={l.src} logo={l} />
+                  ))}
+                  {/* Duplicate copy — hidden from screen readers; lives
+                      purely to make the marquee loop seamlessly when
+                      the track translates -50%. */}
+                  {SECONDARY_LOGOS.map((l) => (
+                    <LogoItem key={`dup-${l.src}`} logo={l} ariaHidden />
+                  ))}
+                </ul>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </section>
+  );
+}
+
+// Single logo cell in the marquee. Uses `mr-7 lg:mr-8` (not flex
+// `gap`) so that EVERY item has a trailing margin — including the
+// last item of each copy. That uniform trailing margin is what makes
+// the `translateX(-50%)` keyframe end up perfectly aligned with the
+// first frame: A's last gap == the gap between A's end and B's start.
+function LogoItem({
+  logo,
+  ariaHidden,
+}: {
+  logo: Logo;
+  ariaHidden?: boolean;
+}) {
+  return (
+    <li
+      aria-hidden={ariaHidden}
+      className="mr-7 flex shrink-0 items-center lg:mr-8"
+      style={{ height: logo.h }}
+    >
+      {/* `grayscale + multiply` collapses brand colours into a single
+          neutral silhouette while preserving wordmark legibility. The
+          logos are deliberately not links: this strip is a calm
+          credibility cue, not a navigation surface. */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={logo.src}
+        alt={ariaHidden ? "" : logo.alt}
+        style={{
+          height: logo.h,
+          width: "auto",
+          filter: "grayscale(1) contrast(1.05)",
+          mixBlendMode: "multiply",
+          opacity: 0.7,
+        }}
+        draggable={false}
+      />
+    </li>
   );
 }

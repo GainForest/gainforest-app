@@ -102,11 +102,22 @@ body {
   border-color: var(--border);
 }
 
-/* Awards strip logo carousel — inert logos in one quiet horizontal rail.
-   The mask keeps overflow elegant without adding clickable controls. */
-.awards-logo-carousel {
-  scrollbar-width: none;
-  -ms-overflow-style: none;
+/* Awards strip logo marquee — inert logos drifting slowly from right
+   to left in one continuous loop. Replaces the earlier swipeable
+   overflow-scroll carousel; the marquee reads as a calmer credibility
+   band that animates itself rather than waiting for a swipe.
+
+   The track contains TWO identical copies of the logo set rendered
+   inline with no flex `gap` and a uniform `margin-right` on every
+   item (including the trailing item of each copy). That means the
+   total track width is exactly `2 * (sum of items + N * margin)`, so
+   `transform: translateX(-50%)` lands the first item of the duplicate
+   copy exactly where the first item of the original sat — a perfectly
+   seamless loop with no visible jump at the boundary. Animation is
+   GPU-friendly (`translate3d`) and pauses on hover / keyboard focus.
+*/
+.awards-marquee {
+  overflow: hidden;
   -webkit-mask-image: linear-gradient(
     90deg,
     transparent 0,
@@ -123,8 +134,32 @@ body {
   );
 }
 
-.awards-logo-carousel::-webkit-scrollbar {
-  display: none;
+.awards-marquee-track {
+  display: flex;
+  align-items: center;
+  width: max-content;
+  animation: awards-marquee-scroll 50s linear infinite;
+  will-change: transform;
+}
+
+.awards-marquee:hover .awards-marquee-track,
+.awards-marquee:focus-within .awards-marquee-track {
+  animation-play-state: paused;
+}
+
+@keyframes awards-marquee-scroll {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .awards-marquee-track {
+    animation: none;
+  }
 }
 
 /* Awards & press card carousel — hide scrollbars and keep only a very
