@@ -124,7 +124,17 @@ function minimalAtUri(atUri: string): string {
 }
 
 function hyperscanRecordHref(atUri: string): string {
-  return `https://www.hyperscan.dev/data?uri=${encodeURIComponent(atUri)}`;
+  const match = atUri.match(/^at:\/\/([^/]+)\/([^/]+)\/(.+)$/);
+  if (!match) return "https://www.hyperscan.dev/data";
+  const [, did, collection, rkey] = match;
+  // Hyperscan's Data Explorer accepts AT-URIs via the search box, but its
+  // durable record route uses the same params its agent docs/source expose:
+  // /data?did=...&collection=...&rkey=...
+  return `https://www.hyperscan.dev/data?did=${encodeURIComponent(
+    did,
+  )}&collection=${encodeURIComponent(collection)}&rkey=${encodeURIComponent(
+    rkey,
+  )}`;
 }
 
 export function ClientPartners({ pins }: { pins: ProjectPin[] }) {
