@@ -101,7 +101,14 @@ export function BumicertsCard({
         />
       </div>
 
-      <div className="grid grid-cols-[120px_1fr] gap-3 px-3 pb-3">
+      {/* `minmax(0, 1fr)` (not bare `1fr`, which is
+          `minmax(auto, 1fr)`) on the right column is load-bearing on
+          mobile: without it the column grows beyond the card to fit
+          its min-content (the search row's `whitespace-nowrap`
+          dropdown + the 64 px row thumbnails), and the project row
+          titles + the search bar overflow the rounded card border at
+          phone widths in every locale. */}
+      <div className="grid grid-cols-[120px_minmax(0,1fr)] gap-3 px-3 pb-3">
         {/* left rail — real links to the matching Bumicerts pages */}
         <div className="flex flex-col gap-1 pt-9 text-[12px]">
           <RailLink
@@ -157,24 +164,36 @@ export function BumicertsCard({
             <span className="min-w-0 flex-1 truncate">
               {t("card.searchProjects")}
             </span>
-            <span className="flex shrink-0 items-center gap-1 whitespace-nowrap text-foreground/70">
-              {t("choosePath.allProjects")}
-              <svg
-                width="10"
-                height="10"
-                viewBox="0 0 24 24"
-                fill="none"
-                aria-hidden
-              >
-                <path
-                  d="M6 9l6 6 6-6"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </span>
+            {/* The "All projects" dropdown is decorative chrome. On
+                the desktop card (400 px wide) the right column has
+                room for both the placeholder and the dropdown. On the
+                inline mobile card the right column is ~180–215 px and
+                "Todos los proyectos" / "Todos os projetos" /
+                "Semua proyek" with `whitespace-nowrap` crushes the
+                truncated placeholder down to a single letter ("B…"),
+                which reads as broken. Hide the dropdown on the inline
+                variant — visitors get a cleaner search affordance,
+                and the row no longer fights for space. */}
+            {!inline && (
+              <span className="flex shrink-0 items-center gap-1 whitespace-nowrap text-foreground/70">
+                {t("choosePath.allProjects")}
+                <svg
+                  width="10"
+                  height="10"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  aria-hidden
+                >
+                  <path
+                    d="M6 9l6 6 6-6"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </span>
+            )}
           </div>
 
           {/* project rows */}
