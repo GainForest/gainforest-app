@@ -3,6 +3,7 @@ import { Hero } from "./_components/Hero";
 import { AwardsStrip } from "./_components/AwardsStrip";
 import { ChoosePath } from "./_components/ChoosePath";
 import { HowItWorks } from "./_components/HowItWorks";
+import { IWantTo } from "./_components/IWantTo";
 import { DataCommons } from "./_components/DataCommons";
 import { EquitableAI } from "./_components/EquitableAI";
 import { TainaFeature } from "./_components/TainaFeature";
@@ -43,27 +44,29 @@ export const revalidate = 900;
 //                                     up so the explanation lands
 //                                     immediately after the Bumicert
 //                                     preview)
-//   5.  DataCommons ................. WHY — 1% biodiversity claim
+//   5.  IWantTo ..................... ROUTES — two-audience strip
+//                                     ("For communities" / "For
+//                                     supporters"), brought back so
+//                                     the page makes both audiences
+//                                     feel routed, not just donors
+//   6.  DataCommons ................. WHY — 1% biodiversity claim
 //                                     (ink band)
 //   6.  EquitableAI ................. THE TECH — three research pillars
 //   7.  TainaFeature ................ THE SHOWCASE — Indigenous AI
 //                                     assistant
 //   8.  Research .................... HACKATHONS — how we iterate
 //   9.  NatureGuild ................. THE COMMUNITY — Guild members
-//  10.  Partners ................... live globe + community spotlight
-//  11.  ImpactReport ............... 24/25 report card
-//  12.  Media ...................... selected press
-//  13.  Supporters ................. Merci to our supporters
-//  14.  Footer ..................... merged closing CTA + legal (ink)
+//  11.  Partners ................... live globe + community spotlight
+//  12.  ImpactReport ............... 24/25 report card
+//  13.  Media ...................... selected press
+//  14.  Supporters ................. Merci to our supporters
+//  15.  Footer ..................... merged closing CTA + legal (ink)
 //
-// Dropped: <IWantTo /> — it was a second visitor-routing strip with
-// four cards (Discover / Browse / Create / Learn) that duplicated
-// ChoosePath conceptually. The four "routes" are already covered by
-// the hero CTAs (Explore Bumicerts + Open the Globe), the ChoosePath
-// section (with the Bumicert preview), and the HowItWorks four-step
-// flow. Removing it tightens the narrative without losing any
-// destination — every link in IWantTo still has at least one path on
-// the page.
+// IWantTo restored: the strip was briefly dropped as a duplicate
+// router, but the new audience-split version is a different cut from
+// ChoosePath. ChoosePath answers "which surface" (Globe vs Bumicerts);
+// IWantTo answers "which audience" (community vs supporter) — the two
+// complement each other instead of overlapping.
 //
 // Cream / ink rhythm: most sections sit on cream so the page reads as
 // a long editorial scroll, with two intentional dark "punches" —
@@ -120,6 +123,7 @@ export default async function Page() {
         <AwardsStrip />
         <ChoosePath snapshot={snapshot} />
         <HowItWorks />
+        <IWantTo />
         <DataCommons />
         <EquitableAI />
         <TainaFeature />

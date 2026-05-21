@@ -3,11 +3,18 @@
 import { useT } from "./LocaleProvider";
 import type { MessageKey } from "../_lib/i18n";
 
-// "How it works" — four-step explainer.
+// "How it works" — the four-step narrative.
 //
-// Editorial rewrite: drop the hand-drawn `icon-step-*.png` set the team
-// flagged as too thin-stroked and out of step with the rendered apps.
-// What remains is a clean horizontal strip of numbered cards connected
+// Editorial frame: most climate finance never reaches the grassroots,
+// so we close that loop with local-first tech, community-owned data,
+// and open protocols. The steps then mirror the actual flow that
+// powers GainForest end-to-end — community-owned data → Bumicert →
+// supporters discover → ATProto interop with allies like Ma Earth
+// and Hypercerts. Earlier copy ("Discover / Understand / Support /
+// Grow impact") only addressed the donor side; this rewrite is
+// deliberately community-first.
+//
+// Visual pattern: clean horizontal strip of numbered cards connected
 // by a thin rule, in the spirit of gainforest.earth's "section block"
 // rhythm — one idea per slot, no decoration.
 const STEPS: ReadonlyArray<{
@@ -37,9 +44,17 @@ export function HowItWorks() {
   return (
     <section id="how-it-works" className="scroll-mt-20 border-t border-border-soft lg:scroll-mt-24">
       <div className="mx-auto w-full max-w-[1480px] px-6 pt-20 pb-20 sm:px-10 lg:px-16 lg:pt-24 lg:pb-24">
-        <h2 className="font-garamond text-[32px] sm:text-[40px] lg:text-[44px] font-normal leading-[1.1] tracking-[-0.01em] text-foreground">
-          {t("howitworks.heading")}
-        </h2>
+        <div className="grid grid-cols-1 gap-x-12 gap-y-4 lg:grid-cols-12">
+          <h2 className="font-garamond text-[32px] sm:text-[40px] lg:text-[44px] font-normal leading-[1.1] tracking-[-0.01em] text-foreground lg:col-span-6">
+            {t("howitworks.heading")}
+          </h2>
+          {/* Framing subhead — names the problem (finance not reaching
+              grassroots) then the solution. Sits next to the heading on
+              desktop, stacked below on mobile. */}
+          <p className="max-w-[520px] text-[15px] leading-[1.6] text-foreground/65 lg:col-span-6 lg:col-start-7 lg:mt-2">
+            {t("howitworks.subheading")}
+          </p>
+        </div>
 
         {/* The thin horizontal rule (`before` pseudo on the parent) acts
             as the connector between numbered steps on desktop. On mobile
@@ -57,8 +72,7 @@ export function HowItWorks() {
               key={step.titleKey}
               className="relative flex flex-col"
             >
-              {/* numbered chip — mint outline so it pops against the
-                  cream and lines up with the connector rail */}
+              {/* numbered chip — sits on top of the connector rail */}
               <span className="relative z-10 inline-grid h-5 w-5 place-items-center rounded-full bg-background ring-1 ring-foreground/30 font-garamond text-[11px] text-foreground/80">
                 {i + 1}
               </span>

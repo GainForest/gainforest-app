@@ -94,7 +94,13 @@ type Messages = {
   "choosePath.liveBadge": string;         // generic "Live"
 
   // ── I want to… cards ────────────────────────────────────────────
+  // Split into two audience groups (community + supporter) so the
+  // routing strip clearly serves stewards AND funders. Cards 1+2
+  // sit under the community label; cards 3+4 under the supporter
+  // label.
   "iwantto.heading": string;
+  "iwantto.community.label": string;
+  "iwantto.supporter.label": string;
   "iwantto.card1.title": string;
   "iwantto.card1.body": string;
   "iwantto.card2.title": string;
@@ -105,7 +111,11 @@ type Messages = {
   "iwantto.card4.body": string;
 
   // ── How it works ─────────────────────────────────────────────────
+  // Four-step narrative: community-owned data → Bumicert → supporters
+  // discover → ATProto interop. Subheading frames the problem (climate
+  // finance rarely reaches grassroots) so the steps land as a solution.
   "howitworks.heading": string;
+  "howitworks.subheading": string;
   "howitworks.step1.title": string;
   "howitworks.step1.body": string;
   "howitworks.step2.title": string;
@@ -369,31 +379,35 @@ export const MESSAGES: Record<Locale, Messages> = {
     "choosePath.or": "or",
     "choosePath.allProjects": "All projects",
     "iwantto.heading": "I want to…",
-    "iwantto.card1.title": "Discover projects visually",
+    "iwantto.community.label": "For communities",
+    "iwantto.supporter.label": "For supporters",
+    "iwantto.card1.title": "Tell my impact story",
     "iwantto.card1.body":
-      "Explore regeneration projects around the world.",
-    "iwantto.card2.title": "Browse projects to support",
+      "Self-host your fieldwork on ATProto. We bring the models, workshops, and tooling.",
+    "iwantto.card2.title": "Issue a Bumicert",
     "iwantto.card2.body":
-      "Find trusted initiatives and back what matters.",
-    "iwantto.card3.title": "Create a Bumicert",
+      "Bundle your photos, audio, and field notes into one portable, signed record.",
+    "iwantto.card3.title": "Discover projects",
     "iwantto.card3.body":
-      "Document and verify your regenerative impact.",
-    "iwantto.card4.title": "Learn about GainForest",
+      "Spin Green Globe to meet community-led nature work around the planet.",
+    "iwantto.card4.title": "Back what's verified",
     "iwantto.card4.body":
-      "Understand our mission, approach, and community.",
+      "Browse recent Bumicerts and support the stewards behind each one.",
     "howitworks.heading": "How it works",
-    "howitworks.step1.title": "Discover",
+    "howitworks.subheading":
+      "Most climate finance never reaches the grassroots. We close that loop with local-first technology, community-owned data, and open protocols.",
+    "howitworks.step1.title": "Community-owned data",
     "howitworks.step1.body":
-      "Explore projects and communities worldwide using our visual map.",
-    "howitworks.step2.title": "Understand",
+      "Communities self-host their fieldwork on their own ATProto PDS, with models, workshops, and tooling from GainForest.",
+    "howitworks.step2.title": "Issue a Bumicert",
     "howitworks.step2.body":
-      "Learn about the impact, methods, and people behind each project.",
-    "howitworks.step3.title": "Support",
+      "Each community mints a Bumicert that binds their photos, audio, and field notes into one signed record.",
+    "howitworks.step3.title": "Supporters discover",
     "howitworks.step3.body":
-      "Contribute funding, resources, or skills to drive impact.",
-    "howitworks.step4.title": "Grow impact",
+      "Donors, foundations, and allies find verified, community-led work through Green Globe and the Bumicerts directory.",
+    "howitworks.step4.title": "Open by protocol",
     "howitworks.step4.body":
-      "Track outcomes, earn Bumicerts, and help nature thrive.",
+      "Every record lives on ATProto, so the same impact story flows to partners like Ma Earth and Hypercerts. No lock-in.",
     "natureCta.heading.before": "Nature thrives when we act",
     "natureCta.heading.italic": "together",
     "natureCta.heading.after": ".",
@@ -659,31 +673,35 @@ export const MESSAGES: Record<Locale, Messages> = {
     "choosePath.or": "o",
     "choosePath.allProjects": "Todos los proyectos",
     "iwantto.heading": "Quiero…",
-    "iwantto.card1.title": "Descubrir proyectos visualmente",
+    "iwantto.community.label": "Para comunidades",
+    "iwantto.supporter.label": "Para aliados",
+    "iwantto.card1.title": "Contar mi historia de impacto",
     "iwantto.card1.body":
-      "Explora proyectos de regeneración en todo el mundo.",
-    "iwantto.card2.title": "Explorar proyectos para apoyar",
+      "Autoaloja tu trabajo de campo en ATProto. Aportamos modelos, talleres y herramientas.",
+    "iwantto.card2.title": "Emitir un Bumicert",
     "iwantto.card2.body":
-      "Encuentra iniciativas confiables y respalda lo que importa.",
-    "iwantto.card3.title": "Crear un Bumicert",
+      "Reúne tus fotos, audio y notas de campo en un registro portátil y firmado.",
+    "iwantto.card3.title": "Descubrir proyectos",
     "iwantto.card3.body":
-      "Documenta y verifica tu impacto regenerativo.",
-    "iwantto.card4.title": "Conocer GainForest",
+      "Gira Green Globe para conocer el trabajo de naturaleza liderado por comunidades en todo el planeta.",
+    "iwantto.card4.title": "Apoyar lo verificado",
     "iwantto.card4.body":
-      "Comprende nuestra misión, enfoque y comunidad.",
+      "Explora los Bumicerts recientes y respalda a las personas que están detrás.",
     "howitworks.heading": "Cómo funciona",
-    "howitworks.step1.title": "Descubre",
+    "howitworks.subheading":
+      "La mayor parte del financiamiento climático no llega a las bases. Cerramos ese ciclo con tecnología local-first, datos de propiedad comunitaria y protocolos abiertos.",
+    "howitworks.step1.title": "Datos de la comunidad",
     "howitworks.step1.body":
-      "Explora proyectos y comunidades en todo el mundo con nuestro mapa visual.",
-    "howitworks.step2.title": "Comprende",
+      "Las comunidades autoalojan su trabajo de campo en su propio PDS de ATProto, con modelos, talleres y herramientas de GainForest.",
+    "howitworks.step2.title": "Emitir un Bumicert",
     "howitworks.step2.body":
-      "Aprende sobre el impacto, los métodos y las personas detrás de cada proyecto.",
-    "howitworks.step3.title": "Apoya",
+      "Cada comunidad acuña un Bumicert que une sus fotos, audio y notas de campo en un registro firmado.",
+    "howitworks.step3.title": "Los aliados descubren",
     "howitworks.step3.body":
-      "Aporta financiamiento, recursos o habilidades para impulsar el impacto.",
-    "howitworks.step4.title": "Haz crecer el impacto",
+      "Donantes, fundaciones y aliados encuentran trabajo comunitario verificado a través de Green Globe y el directorio de Bumicerts.",
+    "howitworks.step4.title": "Abierto por protocolo",
     "howitworks.step4.body":
-      "Sigue los resultados, gana Bumicerts y ayuda a que la naturaleza prospere.",
+      "Cada registro vive en ATProto, así que la misma historia de impacto fluye hacia aliados como Ma Earth y Hypercerts. Sin lock-in.",
     "natureCta.heading.before": "La naturaleza prospera cuando actuamos",
     "natureCta.heading.italic": "juntos",
     "natureCta.heading.after": ".",
@@ -950,31 +968,35 @@ export const MESSAGES: Record<Locale, Messages> = {
     "choosePath.or": "ou",
     "choosePath.allProjects": "Todos os projetos",
     "iwantto.heading": "Quero…",
-    "iwantto.card1.title": "Descobrir projetos visualmente",
+    "iwantto.community.label": "Para comunidades",
+    "iwantto.supporter.label": "Para apoiadores",
+    "iwantto.card1.title": "Contar minha história de impacto",
     "iwantto.card1.body":
-      "Explore projetos de regeneração ao redor do mundo.",
-    "iwantto.card2.title": "Explorar projetos para apoiar",
+      "Hospede você mesmo seu trabalho de campo no ATProto. Trazemos modelos, oficinas e ferramentas.",
+    "iwantto.card2.title": "Emitir um Bumicert",
     "iwantto.card2.body":
-      "Encontre iniciativas confiáveis e apoie o que importa.",
-    "iwantto.card3.title": "Criar um Bumicert",
+      "Reúna fotos, áudios e notas de campo em um registro portátil e assinado.",
+    "iwantto.card3.title": "Descobrir projetos",
     "iwantto.card3.body":
-      "Documente e verifique seu impacto regenerativo.",
-    "iwantto.card4.title": "Conhecer a GainForest",
+      "Gire o Green Globe para conhecer o trabalho liderado por comunidades em todo o planeta.",
+    "iwantto.card4.title": "Apoiar o verificado",
     "iwantto.card4.body":
-      "Entenda nossa missão, abordagem e comunidade.",
+      "Veja os Bumicerts recentes e apoie quem está por trás de cada um.",
     "howitworks.heading": "Como funciona",
-    "howitworks.step1.title": "Descobrir",
+    "howitworks.subheading":
+      "A maior parte do financiamento climático não chega às bases. Fechamos esse ciclo com tecnologia local-first, dados de propriedade comunitária e protocolos abertos.",
+    "howitworks.step1.title": "Dados da comunidade",
     "howitworks.step1.body":
-      "Explore projetos e comunidades pelo mundo com nosso mapa visual.",
-    "howitworks.step2.title": "Entender",
+      "As comunidades hospedam seu próprio trabalho de campo em um PDS de ATProto, com modelos, oficinas e ferramentas da GainForest.",
+    "howitworks.step2.title": "Emitir um Bumicert",
     "howitworks.step2.body":
-      "Conheça o impacto, os métodos e as pessoas por trás de cada projeto.",
-    "howitworks.step3.title": "Apoiar",
+      "Cada comunidade emite um Bumicert que reúne suas fotos, áudios e notas de campo em um registro assinado.",
+    "howitworks.step3.title": "Apoiadores descobrem",
     "howitworks.step3.body":
-      "Contribua com recursos, conhecimento ou financiamento para impulsionar o impacto.",
-    "howitworks.step4.title": "Cultivar impacto",
+      "Doadores, fundações e aliados encontram trabalho comunitário verificado pelo Green Globe e pelo diretório de Bumicerts.",
+    "howitworks.step4.title": "Aberto por protocolo",
     "howitworks.step4.body":
-      "Acompanhe resultados, conquiste Bumicerts e ajude a natureza a prosperar.",
+      "Cada registro vive no ATProto, então a mesma história de impacto flui para parceiros como Ma Earth e Hypercerts. Sem lock-in.",
     "natureCta.heading.before": "A natureza prospera quando agimos",
     "natureCta.heading.italic": "juntos",
     "natureCta.heading.after": ".",
@@ -1239,31 +1261,35 @@ export const MESSAGES: Record<Locale, Messages> = {
     "choosePath.or": "au",
     "choosePath.allProjects": "Miradi yote",
     "iwantto.heading": "Nataka…",
-    "iwantto.card1.title": "Kugundua miradi kwa picha",
+    "iwantto.community.label": "Kwa jamii",
+    "iwantto.supporter.label": "Kwa wafadhili",
+    "iwantto.card1.title": "Kusimulia hadithi yangu ya athari",
     "iwantto.card1.body":
-      "Vinjari miradi ya uhuishaji kote duniani.",
-    "iwantto.card2.title": "Kuvinjari miradi ya kusaidia",
+      "Jihudumie kazi yako ya nyanjani kwenye ATProto. Tunaleta mifano, warsha, na zana.",
+    "iwantto.card2.title": "Kutoa Bumicert",
     "iwantto.card2.body":
-      "Pata mipango ya kuaminika na uunge mkono kile kinacholeta tofauti.",
-    "iwantto.card3.title": "Kutengeneza Bumicert",
+      "Unganisha picha, sauti, na maelezo yako ya nyanjani katika rekodi moja iliyosainiwa na inayobebeka.",
+    "iwantto.card3.title": "Kugundua miradi",
     "iwantto.card3.body":
-      "Andika na thibitisha athari yako ya kuzaa upya.",
-    "iwantto.card4.title": "Kujifunza kuhusu GainForest",
+      "Zungusha Green Globe ukutane na kazi ya jamii ya asili kote duniani.",
+    "iwantto.card4.title": "Kuunga mkono kazi iliyothibitishwa",
     "iwantto.card4.body":
-      "Elewa dhamira, mbinu, na jumuiya yetu.",
+      "Tazama Bumicerts za hivi karibuni na uunge mkono walinzi nyuma yake.",
     "howitworks.heading": "Inavyofanya kazi",
-    "howitworks.step1.title": "Gundua",
+    "howitworks.subheading":
+      "Sehemu kubwa ya fedha za hali ya hewa hazifiki kwa jamii za asili. Tunafunga mzunguko huo kwa teknolojia ya mahali, data inayomilikiwa na jamii, na itifaki huria.",
+    "howitworks.step1.title": "Data ya jamii",
     "howitworks.step1.body":
-      "Vinjari miradi na jumuiya duniani kote kwa kutumia ramani yetu ya picha.",
-    "howitworks.step2.title": "Elewa",
+      "Jamii zinajihudumia kazi yao ya nyanjani kwenye PDS yao ya ATProto, pamoja na mifano, warsha, na zana kutoka GainForest.",
+    "howitworks.step2.title": "Toa Bumicert",
     "howitworks.step2.body":
-      "Jifunze kuhusu athari, mbinu na watu nyuma ya kila mradi.",
-    "howitworks.step3.title": "Saidia",
+      "Kila jamii inatoa Bumicert inayounganisha picha, sauti, na maelezo yao katika rekodi moja iliyosainiwa.",
+    "howitworks.step3.title": "Wafadhili wagundua",
     "howitworks.step3.body":
-      "Changia ufadhili, rasilimali au ujuzi ili kuendesha athari.",
-    "howitworks.step4.title": "Kuza athari",
+      "Wafadhili, taasisi, na washirika wanapata kazi iliyothibitishwa ya jamii kupitia Green Globe na orodha ya Bumicerts.",
+    "howitworks.step4.title": "Wazi kwa itifaki",
     "howitworks.step4.body":
-      "Fuatilia matokeo, pata Bumicerts, na saidia asili kustawi.",
+      "Kila rekodi ipo kwenye ATProto, hivyo hadithi ile ile ya athari inafika kwa washirika kama Ma Earth na Hypercerts. Bila kufungwa.",
     "natureCta.heading.before": "Maumbile hustawi tunapotenda",
     "natureCta.heading.italic": "pamoja",
     "natureCta.heading.after": ".",
@@ -1530,31 +1556,35 @@ export const MESSAGES: Record<Locale, Messages> = {
     "choosePath.or": "atau",
     "choosePath.allProjects": "Semua proyek",
     "iwantto.heading": "Saya ingin…",
-    "iwantto.card1.title": "Menemukan proyek secara visual",
+    "iwantto.community.label": "Untuk komunitas",
+    "iwantto.supporter.label": "Untuk pendukung",
+    "iwantto.card1.title": "Menceritakan dampak saya",
     "iwantto.card1.body":
-      "Jelajahi proyek regenerasi di seluruh dunia.",
-    "iwantto.card2.title": "Menelusuri proyek untuk didukung",
+      "Simpan sendiri kerja lapangan Anda di ATProto. Kami membawakan model, lokakarya, dan perangkatnya.",
+    "iwantto.card2.title": "Menerbitkan Bumicert",
     "iwantto.card2.body":
-      "Temukan inisiatif tepercaya dan dukung yang berarti.",
-    "iwantto.card3.title": "Membuat Bumicert",
+      "Satukan foto, audio, dan catatan lapangan Anda dalam satu rekam portabel yang ditandatangani.",
+    "iwantto.card3.title": "Menemukan proyek",
     "iwantto.card3.body":
-      "Dokumentasikan dan verifikasi dampak regeneratif Anda.",
-    "iwantto.card4.title": "Mempelajari GainForest",
+      "Putar Green Globe untuk bertemu kerja komunitas alam di seluruh planet.",
+    "iwantto.card4.title": "Mendukung yang terverifikasi",
     "iwantto.card4.body":
-      "Pahami misi, pendekatan, dan komunitas kami.",
+      "Telusuri Bumicerts terbaru dan dukung para penjaga di balik setiap proyek.",
     "howitworks.heading": "Cara kerjanya",
-    "howitworks.step1.title": "Temukan",
+    "howitworks.subheading":
+      "Sebagian besar pendanaan iklim tidak sampai ke akar rumput. Kami menutup celah itu dengan teknologi lokal-pertama, data milik komunitas, dan protokol terbuka.",
+    "howitworks.step1.title": "Data milik komunitas",
     "howitworks.step1.body":
-      "Jelajahi proyek dan komunitas di seluruh dunia melalui peta visual kami.",
-    "howitworks.step2.title": "Pahami",
+      "Komunitas menyimpan sendiri kerja lapangan mereka di PDS ATProto, dengan model, lokakarya, dan perangkat dari GainForest.",
+    "howitworks.step2.title": "Terbitkan Bumicert",
     "howitworks.step2.body":
-      "Pelajari dampak, metode, dan orang-orang di balik setiap proyek.",
-    "howitworks.step3.title": "Dukung",
+      "Setiap komunitas menerbitkan Bumicert yang mengikat foto, audio, dan catatan lapangan ke dalam satu rekam yang ditandatangani.",
+    "howitworks.step3.title": "Pendukung menemukan",
     "howitworks.step3.body":
-      "Sumbangkan pendanaan, sumber daya, atau keahlian untuk mendorong dampak.",
-    "howitworks.step4.title": "Tumbuhkan dampak",
+      "Donor, yayasan, dan mitra menemukan kerja komunitas yang terverifikasi lewat Green Globe dan direktori Bumicerts.",
+    "howitworks.step4.title": "Terbuka lewat protokol",
     "howitworks.step4.body":
-      "Lacak hasil, raih Bumicerts, dan bantu alam berkembang.",
+      "Setiap catatan tinggal di ATProto, jadi cerita dampak yang sama mengalir ke mitra seperti Ma Earth dan Hypercerts. Tanpa lock-in.",
     "natureCta.heading.before": "Alam berkembang ketika kita bertindak",
     "natureCta.heading.italic": "bersama",
     "natureCta.heading.after": ".",

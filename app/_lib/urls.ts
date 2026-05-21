@@ -1,5 +1,11 @@
 const CERTS_URL = "https://certs.gainforest.app";
 const DATA_URL = "https://data.gainforest.app";
+const GAINFOREST_DOT_EARTH = "https://gainforest.earth";
+
+// Marketing / non-profit site. Used as the destination for community
+// onboarding ("Tell my impact story" in IWantTo) and the About route
+// in the top nav. Stays a constant for now — there's no env override.
+export const GAINFOREST_URL = GAINFOREST_DOT_EARTH;
 
 function normalizeBaseUrl(
   value: string | undefined,
