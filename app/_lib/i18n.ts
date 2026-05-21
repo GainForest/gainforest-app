@@ -102,11 +102,11 @@ type Messages = {
   "choosePath.bumicerts.fallbackTooltip": string;
 
   // ── I want to… cards ────────────────────────────────────────────
-  // Split into two audience groups (community + supporter) so the
-  // routing strip clearly serves stewards AND funders. Cards 1+2
-  // sit under the community label; cards 3+4 under the supporter
-  // label.
+  // Two-role tab switcher (community + supporter). Cards 1+2 belong
+  // to the community role; cards 3+4 to the supporter role. The
+  // tablist.label backs the aria label on the role-switcher UI.
   "iwantto.heading": string;
+  "iwantto.tablist.label": string;
   "iwantto.community.label": string;
   "iwantto.supporter.label": string;
   "iwantto.card1.title": string;
@@ -401,6 +401,7 @@ export const MESSAGES: Record<Locale, Messages> = {
     "choosePath.or": "or",
     "choosePath.allProjects": "All projects",
     "iwantto.heading": "I want to…",
+    "iwantto.tablist.label": "Pick your role",
     "iwantto.community.label": "For communities",
     "iwantto.supporter.label": "For supporters",
     "iwantto.card1.title": "Tell my impact story",
@@ -707,6 +708,7 @@ export const MESSAGES: Record<Locale, Messages> = {
     "choosePath.or": "o",
     "choosePath.allProjects": "Todos los proyectos",
     "iwantto.heading": "Quiero…",
+    "iwantto.tablist.label": "Elige tu rol",
     "iwantto.community.label": "Para comunidades",
     "iwantto.supporter.label": "Para aliados",
     "iwantto.card1.title": "Contar mi historia de impacto",
@@ -1015,6 +1017,7 @@ export const MESSAGES: Record<Locale, Messages> = {
     "choosePath.or": "ou",
     "choosePath.allProjects": "Todos os projetos",
     "iwantto.heading": "Quero…",
+    "iwantto.tablist.label": "Escolha seu papel",
     "iwantto.community.label": "Para comunidades",
     "iwantto.supporter.label": "Para apoiadores",
     "iwantto.card1.title": "Contar minha história de impacto",
@@ -1321,6 +1324,7 @@ export const MESSAGES: Record<Locale, Messages> = {
     "choosePath.or": "au",
     "choosePath.allProjects": "Miradi yote",
     "iwantto.heading": "Nataka…",
+    "iwantto.tablist.label": "Chagua jukumu lako",
     "iwantto.community.label": "Kwa jamii",
     "iwantto.supporter.label": "Kwa wafadhili",
     "iwantto.card1.title": "Kusimulia hadithi yangu ya athari",
@@ -1629,6 +1633,7 @@ export const MESSAGES: Record<Locale, Messages> = {
     "choosePath.or": "atau",
     "choosePath.allProjects": "Semua proyek",
     "iwantto.heading": "Saya ingin…",
+    "iwantto.tablist.label": "Pilih peran Anda",
     "iwantto.community.label": "Untuk komunitas",
     "iwantto.supporter.label": "Untuk pendukung",
     "iwantto.card1.title": "Menceritakan dampak saya",
