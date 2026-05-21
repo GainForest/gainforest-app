@@ -3,7 +3,7 @@
 import { Fragment } from "react";
 import { useLocale } from "../../_components/LocaleProvider";
 import { getAboutT } from "../_messages";
-import { TIMELINE } from "../_data";
+import { TIMELINE, pickLocale } from "../_data";
 
 // "From a 2017 UN hackathon to the Amazon." — editorial timeline of
 // the seven moments that shaped GainForest. Two-column layout: each
@@ -59,26 +59,29 @@ export function AboutStory() {
           role="list"
           className="mt-12 border-t border-border-soft lg:mt-16"
         >
-          {TIMELINE.map((entry, i) => (
-            <li
-              key={`${entry.year}-${i}`}
-              className="grid grid-cols-12 gap-6 border-b border-border-soft py-8 sm:gap-10 lg:py-10"
-            >
-              <div className="col-span-12 sm:col-span-3 lg:col-span-2">
-                <span className="font-garamond text-[26px] sm:text-[30px] lg:text-[36px] font-normal leading-none tracking-tight text-foreground/80">
-                  {entry.year}
-                </span>
-              </div>
-              <div className="col-span-12 sm:col-span-9 lg:col-span-10">
-                <h3 className="font-garamond text-[22px] sm:text-[26px] lg:text-[30px] font-normal leading-[1.15] tracking-[-0.005em] text-foreground">
-                  {entry.title}
-                </h3>
-                <p className="mt-3 max-w-[760px] text-[15px] lg:text-[16px] leading-[1.6] text-foreground/72">
-                  {entry.body}
-                </p>
-              </div>
-            </li>
-          ))}
+          {TIMELINE.map((rawEntry, i) => {
+            const entry = pickLocale(rawEntry, locale);
+            return (
+              <li
+                key={`${entry.year}-${i}`}
+                className="grid grid-cols-12 gap-6 border-b border-border-soft py-8 sm:gap-10 lg:py-10"
+              >
+                <div className="col-span-12 sm:col-span-3 lg:col-span-2">
+                  <span className="font-garamond text-[26px] sm:text-[30px] lg:text-[36px] font-normal leading-none tracking-tight text-foreground/80">
+                    {entry.year}
+                  </span>
+                </div>
+                <div className="col-span-12 sm:col-span-9 lg:col-span-10">
+                  <h3 className="font-garamond text-[22px] sm:text-[26px] lg:text-[30px] font-normal leading-[1.15] tracking-[-0.005em] text-foreground">
+                    {entry.title}
+                  </h3>
+                  <p className="mt-3 max-w-[760px] text-[15px] lg:text-[16px] leading-[1.6] text-foreground/72">
+                    {entry.body}
+                  </p>
+                </div>
+              </li>
+            );
+          })}
         </ol>
       </div>
     </section>

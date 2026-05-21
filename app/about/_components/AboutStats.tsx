@@ -81,7 +81,7 @@ export function AboutStats({
                       aria-hidden
                       className="inline-block h-1.5 w-1.5 rounded-full bg-brand animate-pulse"
                     />
-                    Live
+                    {t("about.live.label")}
                   </span>
                 )}
               </div>

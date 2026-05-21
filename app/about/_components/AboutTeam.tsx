@@ -2,10 +2,14 @@
 
 import { Fragment } from "react";
 import Image from "next/image";
-import Link from "next/link";
 import { useLocale } from "../../_components/LocaleProvider";
 import { getAboutT } from "../_messages";
-import { COFOUNDERS, CORE_TEAM, type TeamMember } from "../_data";
+import {
+  COFOUNDERS,
+  CORE_TEAM,
+  pickLocale,
+  type TeamMember,
+} from "../_data";
 
 // "A small global team, building in the open." — two stacked groups
 // of cards: Co-founders and Core team. Each card is a text-first
@@ -17,6 +21,11 @@ import { COFOUNDERS, CORE_TEAM, type TeamMember } from "../_data";
 export function AboutTeam() {
   const { locale } = useLocale();
   const t = getAboutT(locale);
+  // Resolve each team member's locale-specific role / location / bio
+  // once at the top of the component so the renderer below stays a
+  // dumb mapping over already-translated records.
+  const cofounders = COFOUNDERS.map((m) => pickLocale(m, locale));
+  const coreTeam = CORE_TEAM.map((m) => pickLocale(m, locale));
 
   const before = t("about.team.heading.before").trim();
   const italic = t("about.team.heading.italic").trim();
@@ -52,10 +61,10 @@ export function AboutTeam() {
         </div>
 
         {/* Co-founders — featured cards (wider, with bios). */}
-        <TeamGroup label={t("about.team.cofounders")} members={COFOUNDERS} featured />
+        <TeamGroup label={t("about.team.cofounders")} members={cofounders} featured />
 
         {/* Core team — 3-column grid. */}
-        <TeamGroup label={t("about.team.core")} members={CORE_TEAM} />
+        <TeamGroup label={t("about.team.core")} members={coreTeam} />
       </div>
     </section>
   );
@@ -125,23 +134,11 @@ function TeamCard({
     </div>
   );
 
-  // Whole card becomes a Link when a profile URL exists, otherwise
-  // it renders inert. Keeps the hover affordance honest — no fake
-  // pointer cursor on cards that go nowhere.
-  if (member.href) {
-    return (
-      <li>
-        <Link
-          href={member.href}
-          target="_blank"
-          rel="noreferrer"
-          className="group block rounded-[10px] -mx-3 px-3 py-2 transition-colors hover:bg-foreground/[0.03]"
-        >
-          {inner}
-        </Link>
-      </li>
-    );
-  }
+  // Team cards are intentionally inert. Per team direction the page
+  // should not link out to personal profiles on hover or click; the
+  // about page reads as one editorial surface, not a directory of
+  // social handles. If links come back, add `href?: string` to
+  // TeamMember and reintroduce the <Link> wrap.
   return <li>{inner}</li>;
 }
 

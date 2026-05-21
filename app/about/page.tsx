@@ -59,7 +59,11 @@ export default async function AboutPage() {
     <div id="top" className="min-h-screen bg-background">
       <TopNav />
       <main>
-        <AboutHero />
+        {/* Hero now renders the live globe (with rotating real-
+            partner spotlight) in its right column, fed by the same
+            `pins` array used by AboutStats and the landing's Partners
+            section. One fetch, three downstream consumers. */}
+        <AboutHero pins={pins} />
         <AboutStats
           communitiesCount={pins.length}
           bumicertsCount={snapshot.total}
