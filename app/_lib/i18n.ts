@@ -87,11 +87,18 @@ type Messages = {
   "choosePath.globe.caption.projects": string; // template: "{n}+ projects"
   "choosePath.globe.cta": string;         // "Open Green Globe"
   "choosePath.bumicerts.cta": string;     // "Explore Bumicerts"
-  "choosePath.bumicerts.live": string;    // "Live · 3 most recent"
-  "choosePath.bumicerts.fallback": string; // "Recent · 3 most recent"
   "choosePath.bumicerts.verified": string;
   "choosePath.bumicerts.signed": string;
-  "choosePath.liveBadge": string;         // generic "Live"
+  // Unified live indicator for the two ChoosePath cards. Both cards
+  // render the same pill in the eyebrow row; the label is "Live" on
+  // success, "Recent" when the Bumicerts pipeline falls back to its
+  // cached snapshot. Tooltip text differs per card so we can explain
+  // exactly what's being streamed.
+  "choosePath.liveBadge": string;             // "Live"
+  "choosePath.recentBadge": string;           // "Recent" (fallback state)
+  "choosePath.globe.liveTooltip": string;
+  "choosePath.bumicerts.liveTooltip": string;
+  "choosePath.bumicerts.fallbackTooltip": string;
 
   // ── I want to… cards ────────────────────────────────────────────
   // Split into two audience groups (community + supporter) so the
@@ -365,11 +372,16 @@ export const MESSAGES: Record<Locale, Messages> = {
     "choosePath.globe.caption.projects": "{n}+ projects",
     "choosePath.globe.cta": "Open Green Globe",
     "choosePath.bumicerts.cta": "Explore Bumicerts",
-    "choosePath.bumicerts.live": "Live · 3 most recent",
-    "choosePath.bumicerts.fallback": "Recent · 3 most recent",
     "choosePath.bumicerts.verified": "Verified",
     "choosePath.bumicerts.signed": "ATProto signed",
     "choosePath.liveBadge": "Live",
+    "choosePath.recentBadge": "Recent",
+    "choosePath.globe.liveTooltip":
+      "Project pins streamed in real time from ATProto via the GainForest indexer.",
+    "choosePath.bumicerts.liveTooltip":
+      "The three most recent Bumicerts, fetched live from the GainForest indexer.",
+    "choosePath.bumicerts.fallbackTooltip":
+      "Live indexer is unreachable; showing a cached fallback.",
     "choosePath.globe.title": "Open the Globe",
     "choosePath.globe.body":
       "Discover projects and ecosystems across the world. Explore, learn, and get inspired.",
@@ -659,11 +671,16 @@ export const MESSAGES: Record<Locale, Messages> = {
     "choosePath.globe.caption.projects": "{n}+ proyectos",
     "choosePath.globe.cta": "Abrir Green Globe",
     "choosePath.bumicerts.cta": "Explorar Bumicerts",
-    "choosePath.bumicerts.live": "En vivo · 3 más recientes",
-    "choosePath.bumicerts.fallback": "Recientes · 3 más recientes",
     "choosePath.bumicerts.verified": "Verificado",
     "choosePath.bumicerts.signed": "Firmado en ATProto",
     "choosePath.liveBadge": "En vivo",
+    "choosePath.recentBadge": "Recientes",
+    "choosePath.globe.liveTooltip":
+      "Pines de proyectos transmitidos en tiempo real desde ATProto a través del indexador de GainForest.",
+    "choosePath.bumicerts.liveTooltip":
+      "Los tres Bumicerts más recientes, obtenidos en vivo del indexador de GainForest.",
+    "choosePath.bumicerts.fallbackTooltip":
+      "El indexador en vivo no está disponible; mostrando una copia en caché.",
     "choosePath.globe.title": "Abrir el Globo",
     "choosePath.globe.body":
       "Descubre proyectos y ecosistemas en todo el mundo. Explora, aprende e inspírate.",
@@ -954,11 +971,17 @@ export const MESSAGES: Record<Locale, Messages> = {
     "choosePath.globe.caption.projects": "{n}+ projetos",
     "choosePath.globe.cta": "Abrir o Green Globe",
     "choosePath.bumicerts.cta": "Explorar Bumicerts",
-    "choosePath.bumicerts.live": "Ao vivo · 3 mais recentes",
-    "choosePath.bumicerts.fallback": "Recentes · 3 mais recentes",
+
     "choosePath.bumicerts.verified": "Verificado",
     "choosePath.bumicerts.signed": "Assinado em ATProto",
     "choosePath.liveBadge": "Ao vivo",
+    "choosePath.recentBadge": "Recentes",
+    "choosePath.globe.liveTooltip":
+      "Pinos de projetos transmitidos em tempo real do ATProto via indexador da GainForest.",
+    "choosePath.bumicerts.liveTooltip":
+      "Os três Bumicerts mais recentes, obtidos ao vivo do indexador da GainForest.",
+    "choosePath.bumicerts.fallbackTooltip":
+      "O indexador ao vivo está indisponível; mostrando uma cópia em cache.",
     "choosePath.globe.title": "Abrir o Globo",
     "choosePath.globe.body":
       "Descubra projetos e ecossistemas pelo mundo. Explore, aprenda e inspire-se.",
@@ -1247,11 +1270,17 @@ export const MESSAGES: Record<Locale, Messages> = {
     "choosePath.globe.caption.projects": "{n}+ miradi",
     "choosePath.globe.cta": "Fungua Green Globe",
     "choosePath.bumicerts.cta": "Chunguza Bumicerts",
-    "choosePath.bumicerts.live": "Moja kwa moja · 3 za hivi karibuni",
-    "choosePath.bumicerts.fallback": "Za hivi karibuni · 3",
+
     "choosePath.bumicerts.verified": "Imethibitishwa",
     "choosePath.bumicerts.signed": "Imesainiwa kwa ATProto",
     "choosePath.liveBadge": "Moja kwa moja",
+    "choosePath.recentBadge": "Za hivi karibuni",
+    "choosePath.globe.liveTooltip":
+      "Vibao vya miradi vinavyotiririshwa moja kwa moja kutoka ATProto kupitia indexer ya GainForest.",
+    "choosePath.bumicerts.liveTooltip":
+      "Bumicerts tatu za hivi karibuni, zilizopatikana moja kwa moja kutoka indexer ya GainForest.",
+    "choosePath.bumicerts.fallbackTooltip":
+      "Indexer ya moja kwa moja haipatikani; tunaonyesha nakala iliyohifadhiwa.",
     "choosePath.globe.title": "Fungua Dunia",
     "choosePath.globe.body":
       "Gundua miradi na mifumo ya ikolojia duniani kote. Vinjari, jifunze, na pata msukumo.",
@@ -1542,11 +1571,17 @@ export const MESSAGES: Record<Locale, Messages> = {
     "choosePath.globe.caption.projects": "{n}+ proyek",
     "choosePath.globe.cta": "Buka Green Globe",
     "choosePath.bumicerts.cta": "Jelajahi Bumicerts",
-    "choosePath.bumicerts.live": "Langsung · 3 terbaru",
-    "choosePath.bumicerts.fallback": "Terbaru · 3",
+
     "choosePath.bumicerts.verified": "Terverifikasi",
     "choosePath.bumicerts.signed": "Ditandatangani di ATProto",
     "choosePath.liveBadge": "Langsung",
+    "choosePath.recentBadge": "Terbaru",
+    "choosePath.globe.liveTooltip":
+      "Pin proyek mengalir langsung dari ATProto melalui indexer GainForest.",
+    "choosePath.bumicerts.liveTooltip":
+      "Tiga Bumicert terbaru, diambil langsung dari indexer GainForest.",
+    "choosePath.bumicerts.fallbackTooltip":
+      "Indexer langsung tidak tersedia; menampilkan salinan tersimpan.",
     "choosePath.globe.title": "Buka Globe",
     "choosePath.globe.body":
       "Temukan proyek dan ekosistem di seluruh dunia. Jelajahi, pelajari, dan dapatkan inspirasi.",
