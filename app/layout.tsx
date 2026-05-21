@@ -164,8 +164,8 @@ const JSON_LD = {
       url: SITE_URL,
       logo: `${SITE_URL}/icons/icon-512.png`,
       sameAs: [
-        "https://gainforest.app",
-        "https://alpha.fund.gainforest.app",
+        "https://data.gainforest.app",
+        "https://certs.gainforest.app",
         "https://www.gainforest.earth",
         "https://github.com/GainForest",
         "https://twitter.com/gainforest",

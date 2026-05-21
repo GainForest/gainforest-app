@@ -1,11 +1,10 @@
 "use client";
 
 import Link from "next/link";
+import { BUMICERTS_URL, GLOBE_URL } from "../_lib/urls";
 import { LogoMark } from "./Logo";
 import { useT } from "./LocaleProvider";
 
-const GLOBE_URL = "https://gainforest.app";
-const BUMICERTS_URL = "https://alpha.fund.gainforest.app";
 const DONATE_URL = "https://donorbox.org/gainforest";
 
 // Integrated closing footer.

@@ -3,10 +3,11 @@
 import { Fragment } from "react";
 import Link from "next/link";
 import type { LiveBumicertsSnapshot } from "../_lib/bumicerts";
+import { BUMICERTS_URL, GLOBE_URL } from "../_lib/urls";
 import { useT } from "./LocaleProvider";
 
 // Single arced brush sweep — ported from the Bumicerts hero at
-// alpha.fund.gainforest.app (the "Real Communities" underline the
+// certs.gainforest.app (the "Real Communities" underline the
 // team picked as the visual reference). The reference draws the
 // brush as a STROKED cubic curve (not a filled lens) with rounded
 // line caps, which is what gives it a visible arc and soft brush-
@@ -51,9 +52,6 @@ function parseBrushed(
   }
   return segments;
 }
-
-const GLOBE_URL = "https://gainforest.app";
-const BUMICERTS_URL = "https://alpha.fund.gainforest.app";
 
 // Hero composition — minimalist editorial port of gainforest.earth.
 //

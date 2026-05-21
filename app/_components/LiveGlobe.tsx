@@ -13,13 +13,13 @@ import type { ProjectPin } from "../_lib/projects";
  * the floating-globe look the design calls for.
  *
  * Project pins come from {@link fetchProjectPins}, which proxies
- * gainforest.app's `/api/list-organizations?info=true&mapPoint=true` route.
+ * data.gainforest.app's `/api/list-organizations?info=true&mapPoint=true` route.
  * That route walks Hyperindex → each org's `defaultSite` → the certified
  * location GeoJSON blob on the PDS, computes a centroid with Turf, and
  * returns `{ did, info, mapPoint }`. We then filter exactly the way
  * green_globe's `useIndexedOrganizations` filters — keep only entries
  * with both `info` and `mapPoint` non-null — so we render the same set of
- * ATProto-sourced pins gainforest.app's deployed globe renders.
+ * ATProto-sourced pins data.gainforest.app's deployed globe renders.
  *
  * Behaviour:
  *  - The globe auto-rotates until the user grabs it (mirrors green_globe's

@@ -4,7 +4,7 @@
  * We render the real `/decor/gainforest-logo.svg` (copied verbatim from
  * green_globe → `public/assets/logo.webp` and bumicerts →
  * `public/assets/media/images/gainforest-logo.svg`) as a CSS mask, so the
- * artwork is pixel-faithful to what gainforest.app and alpha.fund.gainforest.app
+ * artwork is pixel-faithful to what data.gainforest.app and certs.gainforest.app
  * ship, and the colour follows `currentColor`. That makes the same component
  * usable in the cream navbar (`text-primary`), inside the dark globe card
  * (`text-white`), and so on.

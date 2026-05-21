@@ -25,7 +25,7 @@ the page.
 rejected mint-green CTAs ("I really hate that gainforest green for our
 buttons — it only works well for our logo") and asked us to use the
 **Bumicerts primary** instead. Our `--primary` is therefore
-`#3e7053` — the sage forest green that `alpha.fund.gainforest.app`
+`#3e7053` — the sage forest green that `certs.gainforest.app`
 ships as its `--primary` token. Buttons on cream are a solid sage
 pill; buttons on ink are a cream solid pill. The brand mint
 (`--brand: #2fce8a`) is restricted to the logo plus a small set of
@@ -600,7 +600,7 @@ marked word inside `before`. The implementation is in `Hero.tsx`:
   word boundaries render naturally without extra fiddling.
 - The brush itself is a `BRUSH_PATH` **stroked** cubic curve inside
   a 178×16 viewBox — ported verbatim from the Bumicerts reference
-  at alpha.fund.gainforest.app (the "Real Communities" underline):
+  at certs.gainforest.app (the "Real Communities" underline):
   - path: `M 3 10.5 C 44 6.5 87 6 175 8.5`
   - `fill="none"`, `stroke="currentColor"`, `stroke-width="2.25"`,
     `stroke-linecap="round"`
@@ -635,7 +635,7 @@ Why a stroked cubic curve, and **not**:
   Open".
 
 The Bumicerts hero on
-[alpha.fund.gainforest.app](https://alpha.fund.gainforest.app) — the
+[certs.gainforest.app](https://certs.gainforest.app) — the
 "Real Communities" line — is the visual reference. Keep the stroked
 cubic curve, keep it on one marked word, keep the visible arc.
 
@@ -700,7 +700,7 @@ the original viewBox).
 - Don't switch the globe back to a heavy renderer (Mapbox, Cesium) without
   a serious reason — and update this doc if you do.
 - Don't embed a Mapbox token into the repo. The token in `.env.local`
-  during the initial exploration was the public token from gainforest.app's
+  during the initial exploration was the public token from data.gainforest.app's
   JS bundle and is not committed.
 - Don't hand-code SVG for decorative botanicals or topographic contour
   patterns. Generate via gpt-image-2 + chroma-key. The one inline SVG

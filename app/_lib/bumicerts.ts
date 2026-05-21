@@ -1,7 +1,7 @@
 /**
  * Live Bumicerts fetcher for the landing page.
  *
- * Matches alpha.fund.gainforest.app/explore's exact filter logic:
+ * Matches certs.gainforest.app/explore's exact filter logic:
  *   labelTier = "high-quality" (from the hyperlabel service)
  *
  * That's how Bumicerts itself decides "what's a real, fundable project" —
@@ -23,6 +23,8 @@
  * - Safe: any network/schema hiccup falls back to a curated static set.
  */
 
+import { BUMICERTS_URL as BUMICERTS_BASE } from "./urls";
+
 // Production indexer. The dev counterpart (dev.hi.gainforest.app) has
 // flaked with 502s in the past, so we point at the production host by
 // default and let an env override drop us back to dev when needed.
@@ -33,10 +35,6 @@ const INDEXER_URL =
 const HYPERLABEL_URL =
   process.env.NEXT_PUBLIC_HYPERLABEL_URL?.trim() ||
   "https://hyperlabel-production.up.railway.app";
-
-const BUMICERTS_BASE =
-  process.env.NEXT_PUBLIC_BUMICERTS_URL?.trim() ||
-  "https://alpha.fund.gainforest.app";
 
 /** Revalidate live data every 15 minutes. */
 const REVALIDATE_SECONDS = 60 * 15;

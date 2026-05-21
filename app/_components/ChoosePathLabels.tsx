@@ -53,7 +53,7 @@ export function ChoosePathLabels({
   }
   if (slot === "allProjects") {
     // Used as the header label inside the mini Bumicerts card —
-    // mirrors the small uppercase "All projects" pill the alpha.fund
+    // mirrors the small uppercase "All projects" pill the certs
     // explore page uses at the top of its grid.
     return <>{t("choosePath.allProjects")}</>;
   }

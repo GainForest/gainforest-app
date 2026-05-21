@@ -2,10 +2,8 @@
 
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { BUMICERTS_URL, GLOBE_HOST, GLOBE_URL } from "../_lib/urls";
 import { useT } from "./LocaleProvider";
-
-const GLOBE_URL = "https://gainforest.app";
-const BUMICERTS_URL = "https://alpha.fund.gainforest.app";
 
 // Client wrapper for ChoosePath's translatable strings + interactive
 // chrome. The server wrapper in ChoosePath.tsx renders the async
@@ -208,7 +206,7 @@ function GlobePreview({
           )}
         </span>
         <span className="text-foreground/25">·</span>
-        <span>gainforest.app</span>
+        <span>{GLOBE_HOST}</span>
       </div>
     </div>
   );

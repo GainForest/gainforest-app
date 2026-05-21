@@ -1,11 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useT } from "./LocaleProvider";
 import type { MessageKey } from "../_lib/i18n";
-
-const GLOBE_URL = "https://gainforest.app";
-const BUMICERTS_URL = "https://alpha.fund.gainforest.app";
+import { BUMICERTS_URL, GLOBE_URL } from "../_lib/urls";
+import { useT } from "./LocaleProvider";
 
 // "I want to…" — four-card decision strip.
 //

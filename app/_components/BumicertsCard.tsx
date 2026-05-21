@@ -2,16 +2,17 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import type { LiveBumicertsSnapshot, LiveBumicert } from "../_lib/bumicerts";
+import { BUMICERTS_URL } from "../_lib/urls";
 import { LogoMark } from "./Logo";
 import { useT } from "./LocaleProvider";
-import type { LiveBumicertsSnapshot, LiveBumicert } from "../_lib/bumicerts";
 
 /**
  * Faux Bumicerts UI card used in the hero composition.
  *
  * Wired to the live indexer — the three rows shown are the most recent
  * curated Bumicerts coming through the same `orgHypercertsClaimActivity`
- * GraphQL feed that powers alpha.fund.gainforest.app/explore.
+ * GraphQL feed that powers certs.gainforest.app/explore.
  *
  * Rail items (Projects / Organizations / Leaderboard) are real links to
  * the matching Bumicerts pages so the card behaves like a miniature
@@ -31,7 +32,6 @@ import type { LiveBumicertsSnapshot, LiveBumicert } from "../_lib/bumicerts";
  * stable layout matters more.
  */
 
-const BUMICERTS_URL = "https://alpha.fund.gainforest.app";
 const CARD_WIDTH = 400;
 
 export function BumicertsCard({

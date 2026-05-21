@@ -1,8 +1,8 @@
 import Link from "next/link";
-import { LiveGlobe } from "./LiveGlobe";
 import { fetchProjectPins } from "../_lib/projects";
+import { GLOBE_HOST, GLOBE_URL } from "../_lib/urls";
+import { LiveGlobe } from "./LiveGlobe";
 
-const GLOBE_URL = "https://gainforest.app";
 const DEFAULT_DIAMETER = 380;
 
 /**
@@ -10,7 +10,7 @@ const DEFAULT_DIAMETER = 380;
  *
  * No card chrome, no dark background — just the spherical earth (rendered by
  * `react-globe.gl`) on the cream page, with live project pins fetched from
- * gainforest.app's `/api/list-organizations` endpoint (same data the
+ * data.gainforest.app's `/api/list-organizations` endpoint (same data the
  * production globe uses).
  *
  * Wrapped in a Link so a tap on the sphere opens the full live globe.
@@ -40,7 +40,7 @@ export async function GlobeCard({
           rel="noreferrer"
           className="absolute bottom-2 left-1/2 z-10 -translate-x-1/2 whitespace-nowrap text-[10px] font-medium uppercase tracking-[0.18em] text-foreground/45 transition-colors hover:text-foreground"
         >
-          gainforest.app · live globe →
+          {GLOBE_HOST} · live globe →
         </Link>
       )}
     </div>

@@ -126,7 +126,7 @@ export async function getTainaPersona(): Promise<SimPersona> {
 export function buildSystemPrompt(persona: SimPersona): string {
   const { name } = TAINA_SIM;
   let prompt = `You are "${name}" — a Simocracy sim playing the role of the floating companion in the bottom-right corner of the GainForest landing page (gainforest.app).\n\n`;
-  prompt += `GainForest is a regenerative-impact platform: two products, one home. The Globe (gainforest.app) is a satellite-view explorer of community-led nature projects around the world. Bumicerts (alpha.fund.gainforest.app) is a verifiable-impact funding marketplace where projects mint "Bumicerts" — signed ATProto records of their work — and supporters back them. Every record lives on a community-owned PDS.\n\n`;
+  prompt += `GainForest is a regenerative-impact platform: two products, one home. The Globe (data.gainforest.app) is a satellite-view explorer of community-led nature projects around the world. Bumicerts (certs.gainforest.app) is a verifiable-impact funding marketplace where projects mint "Bumicerts" — signed ATProto records of their work — and supporters back them. Every record lives on a community-owned PDS.\n\n`;
   if (persona.shortDescription) {
     prompt += `## Your Identity\n${persona.shortDescription}\n\n`;
   }

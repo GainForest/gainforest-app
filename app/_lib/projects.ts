@@ -13,14 +13,13 @@
  *   organizations.filter(o => o.mapPoint !== null && o.info !== null)
  *
  * We reproduce that here, so the pins shown on this landing are exactly
- * the pins shown on gainforest.app's deployed Mapbox globe. (The S3
+ * the pins shown on data.gainforest.app's deployed Mapbox globe. (The S3
  * `gainforest-all-shapefiles.geojson` file is *not* used by the main
  * green_globe map — it's only wired into the separate "shapefile-related"
  * route, and would skip real ATProto orgs.)
  */
 
-const GLOBE_ORIGIN =
-  process.env.NEXT_PUBLIC_GREEN_GLOBE_URL?.trim() || "https://data.gainforest.app";
+import { GLOBE_URL as GLOBE_ORIGIN } from "./urls";
 
 const INDEXER_URL =
   process.env.NEXT_PUBLIC_INDEXER_URL?.trim() ||

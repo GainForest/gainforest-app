@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { GLOBE_URL } from "../_lib/urls";
 import { LogoMark } from "./Logo";
 import { useT } from "./LocaleProvider";
 
@@ -9,7 +10,7 @@ import { useT } from "./LocaleProvider";
 //
 //   - cream/beige body and warm-beige border that match the Bumicerts card;
 //   - "Live" badge in the header to advertise the running data feed;
-//   - footer links out to the full-fidelity globe at gainforest.app.
+//   - footer links out to the full-fidelity globe at data.gainforest.app.
 //
 // Two render modes:
 //
@@ -30,8 +31,6 @@ import { useT } from "./LocaleProvider";
 // rather than constructing it inside this client component so the
 // async server fetch in `<GlobeCard>` (which pulls live pins via
 // `fetchProjectPins()`) stays a server-rendered concern.
-
-const GLOBE_HREF = "https://gainforest.app";
 
 interface Props {
   children: React.ReactNode;
@@ -120,7 +119,7 @@ function GlobeCardChrome({ children, pinCount }: ChromeProps) {
             : t("card.worldwide")}
         </span>
         <Link
-          href={GLOBE_HREF}
+          href={GLOBE_URL}
           target="_blank"
           rel="noreferrer"
           className="inline-flex items-center gap-1 text-foreground/70 transition-colors hover:text-foreground"
