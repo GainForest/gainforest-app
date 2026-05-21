@@ -24,9 +24,17 @@ import { useLocale } from "./LocaleProvider";
 // only the sim binding (sprite assets + system prompt + i18n keys) moved.
 //
 // Behaviour (unchanged from the capybara version):
-//   - Sits bottom-LEFT on desktop / bottom-RIGHT on mobile by default
-//     (32 px / 18 px from each edge). Drag anywhere on the viewport;
-//     position persists in localStorage.
+//   - HIDDEN by default. Summoned by clicking the "Say hi to Taina"
+//     CTA inside <TainaFeature />, which dispatches a `taina:open`
+//     CustomEvent. Once summoned she stays mounted in the corner for
+//     the rest of the SPA session; a full page reload resets her back
+//     to hidden. This was a deliberate change from the previous
+//     always-visible behaviour — the floating sprite was competing
+//     with the editorial reading flow on every section, so she now
+//     waits for an explicit invitation.
+//   - On first summon she anchors bottom-LEFT on desktop /
+//     bottom-RIGHT on mobile (32 px / 18 px from each edge). Drag
+//     anywhere on the viewport; position persists in localStorage.
 //   - Pure click toggles a chat panel. The panel anchors to whichever
 //     side of the sprite has the most room.
 //   - Animation state machine: dragging → running-{left|right}; streaming
@@ -119,6 +127,13 @@ function computePanelPosition(spritePos: Position): Position {
 export function FloatingTaina() {
   const { locale, t } = useLocale();
   const [mounted, setMounted] = useState(false);
+  // `visible` is the master visibility gate. We stay completely
+  // un-rendered until the user clicks "Say hi to Taina" inside
+  // <TainaFeature />, which fires the `taina:open` CustomEvent below.
+  // Once summoned she remains visible for the rest of the SPA session
+  // (a full page reload resets her back to hidden so the landing
+  // doesn't pre-occupy the viewport corner on first visit).
+  const [visible, setVisible] = useState(false);
   const [position, setPosition] = useState<Position>({ x: 0, y: 0 });
   const [open, setOpen] = useState(false);
   const [dragging, setDragging] = useState(false);
@@ -209,11 +224,14 @@ export function FloatingTaina() {
   }, [open]);
 
   // Allow in-page CTAs (e.g. <TainaFeature />'s "Say hi to Taina") to
-  // open the floating panel without importing or coupling to this
-  // component's local state. CustomEvent keeps the widget optional — if
-  // it is ever unmounted again, the CTA simply becomes a no-op.
+  // summon the floating sprite + open the chat panel without importing
+  // or coupling to this component's local state. The CustomEvent also
+  // flips `visible` to true — this is the ONLY entry point that makes
+  // Taina appear, so before any CTA click the corner of the viewport
+  // stays clean.
   useEffect(() => {
     const onOpen = () => {
+      setVisible(true);
       setOpen(true);
       setWaveActive(true);
     };
@@ -425,6 +443,9 @@ export function FloatingTaina() {
   }, [input, messages, streaming]);
 
   if (!mounted) return null;
+  // Don't render anything until the visitor explicitly summons Taina
+  // by clicking the "Say hi to Taina" CTA in <TainaFeature />.
+  if (!visible) return null;
   if (typeof window !== "undefined" && window.self !== window.top) return null;
 
   const panelPos = open ? computePanelPosition(position) : { x: 0, y: 0 };

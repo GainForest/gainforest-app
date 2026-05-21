@@ -279,8 +279,21 @@ under `value.image.ref.$link` and `value.petSheet.ref.$link`.
 
 ### Behaviour
 
-- Sits 32 px from the bottom-LEFT on desktop / bottom-RIGHT on mobile on
-  first mount (the desktop default is left so it balances the
+- **Hidden by default.** The sprite is summoned only when the visitor
+  clicks the "Say hi to Taina" CTA inside `<TainaFeature />`, which
+  dispatches a `taina:open` CustomEvent that flips an internal
+  `visible` state and pops the chat panel with a wave. This was a
+  deliberate change from the earlier always-visible behaviour — the
+  floating sprite was competing with the editorial reading flow on
+  every section, so she now waits for an explicit invitation. Once
+  summoned, she stays in the corner for the rest of the SPA session
+  (route navigations preserve her); a full page reload resets her
+  back to hidden. The `taina:open` event is also the only entry
+  point used by `<TainaFeature />`, so the coupling stays loose —
+  any other section that wants to summon Taina just dispatches the
+  same event.
+- On first summon she anchors 32 px from the bottom-LEFT on desktop /
+  bottom-RIGHT on mobile (desktop is left so she balances the
   right-weighted hero composition; mobile is right because the
   single-column layout would constantly overlap a left-anchored
   sprite). Drag anywhere; position persists in `localStorage` under
@@ -297,7 +310,7 @@ under `value.image.ref.$link` and `value.petSheet.ref.$link`.
   - otherwise → `idle`
 - Click toggles a 340×460 chat panel. The panel anchors above-and-left
   of the sprite by default and flips axes when there's no room.
-- Escape closes the panel.
+- Escape closes the panel (the sprite remains in the corner).
 - Hidden inside iframes (no OG/print rendering).
 
 ### Chat (the FloatingEinstein analogue)
@@ -723,8 +736,10 @@ Before finishing a change:
 4. Use the top navbar anchors. They should scroll to in-page sections
    (`#tools`, `#how-it-works`, `#data-commons`, `#ai`, `#partners`,
    `#impact`) and never open outbound app URLs.
-5. <FloatingTaina /> mounts in `layout.tsx` and stays open across
-   routes.
+5. <FloatingTaina /> mounts in `layout.tsx` but stays hidden until
+   the visitor clicks "Say hi to Taina" in <TainaFeature />.
+   Once summoned she persists across SPA route navigations; full
+   reload resets her to hidden.
 6. If you changed OAuth, test the direct login route with
    `/api/oauth/login?handle=<your-handle>.bsky.social`; the top navbar
    no longer exposes a sign-in popover.
