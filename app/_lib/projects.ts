@@ -32,6 +32,8 @@ export type ProjectPin = {
   country: string;
   lat: number;
   lon: number;
+  /** Real app.gainforest.organization.info ATProto record, if indexed. */
+  atUri: string | null;
   /** Real org cover/logo image resolved from Hyperindex → PDS blob, if present. */
   imageUrl: string | null;
 };
@@ -54,10 +56,16 @@ type IndexedSmallImage = {
 
 type OrganizationInfoNode = {
   did: string;
+  uri: string;
   displayName?: string | null;
   country?: string | null;
   coverImage?: IndexedSmallImage;
   logo?: IndexedSmallImage;
+};
+
+type OrganizationRecordMeta = {
+  atUri: string | null;
+  imageUrl: string | null;
 };
 
 type OrganizationInfoResponse = {
@@ -74,6 +82,7 @@ const ORG_IMAGES_QUERY = `
       edges {
         node {
           did
+          uri
           displayName
           country
           coverImage { image { ref mimeType size } }
@@ -127,7 +136,9 @@ function imageLookupKey(name: string, country: string): string {
   return `${name.trim().toLocaleLowerCase()}|${country.trim().toLocaleLowerCase()}`;
 }
 
-async function fetchOrganizationImageUrls(): Promise<Map<string, string>> {
+async function fetchOrganizationRecordMeta(): Promise<
+  Map<string, OrganizationRecordMeta>
+> {
   try {
     const res = await fetch(INDEXER_URL, {
       method: "POST",
@@ -143,7 +154,7 @@ async function fetchOrganizationImageUrls(): Promise<Map<string, string>> {
     });
     // Hyperindex can return partial data with HTTP 400 when one optional
     // blob subfield violates a non-null schema constraint. We still use
-    // the successful edges rather than discarding every org image.
+    // the successful edges rather than discarding every org record.
     const json = (await res.json()) as OrganizationInfoResponse;
     const nodes =
       json.data?.appGainforestOrganizationInfo?.edges
@@ -157,10 +168,12 @@ async function fetchOrganizationImageUrls(): Promise<Map<string, string>> {
         const imageUrl =
           (await resolveBlobUrl(node.did, node.coverImage ?? null)) ??
           (await resolveBlobUrl(node.did, node.logo ?? null));
-        if (!imageUrl) return [] as Array<readonly [string, string]>;
-        const keys: Array<readonly [string, string]> = [[node.did, imageUrl]];
+        const meta = { atUri: node.uri?.trim() || null, imageUrl };
+        const keys: Array<readonly [string, OrganizationRecordMeta]> = [
+          [node.did, meta],
+        ];
         if (node.displayName) {
-          keys.push([imageLookupKey(node.displayName, node.country ?? ""), imageUrl]);
+          keys.push([imageLookupKey(node.displayName, node.country ?? ""), meta]);
         }
         return keys;
       }),
@@ -181,7 +194,7 @@ export async function fetchProjectPins(): Promise<ProjectPin[]> {
     });
     if (!res.ok) throw new Error(`green_globe ${res.status}`);
     const data = (await res.json()) as RawOrg[];
-    const imageUrls = await fetchOrganizationImageUrls();
+    const recordMeta = await fetchOrganizationRecordMeta();
     const pins: ProjectPin[] = [];
     for (const org of data) {
       // Literal port of green_globe's `useIndexedOrganizations` filter
@@ -200,16 +213,17 @@ export async function fetchProjectPins(): Promise<ProjectPin[]> {
       const lon = org.mapPoint?.lon;
       if (!did || !name) continue;
       if (typeof lat !== "number" || typeof lon !== "number") continue;
+      const country = org.info?.country?.trim() || "";
+      const meta =
+        recordMeta.get(did) ?? recordMeta.get(imageLookupKey(name, country));
       pins.push({
         did,
         name,
-        country: org.info?.country?.trim() || "",
+        country,
         lat,
         lon,
-        imageUrl:
-          imageUrls.get(did) ??
-          imageUrls.get(imageLookupKey(name, org.info?.country?.trim() || "")) ??
-          null,
+        atUri: meta?.atUri ?? null,
+        imageUrl: meta?.imageUrl ?? null,
       });
     }
     return pins;
@@ -222,9 +236,49 @@ export async function fetchProjectPins(): Promise<ProjectPin[]> {
 // Tiny fallback so the globe is never completely empty if the upstream
 // endpoint is unreachable.
 const FALLBACK_PINS: ProjectPin[] = [
-  { did: "fallback-agape", name: "Agape Hand", country: "PE", lat: -11.26, lon: -75.64, imageUrl: null },
-  { did: "fallback-bula", name: "Bula Garden Tanzania", country: "TZ", lat: -4.8, lon: 38.29, imageUrl: null },
-  { did: "fallback-lobongia", name: "Restoring Lobongia rangelands", country: "UG", lat: 3.51, lon: 34.13, imageUrl: null },
-  { did: "fallback-marina-gardens", name: "Marina Gardens", country: "SG", lat: 1.28, lon: 103.86, imageUrl: null },
-  { did: "fallback-precious", name: "Precious Forests", country: "BR", lat: -3.47, lon: -62.21, imageUrl: null },
+  {
+    did: "fallback-agape",
+    name: "Agape Hand",
+    country: "PE",
+    lat: -11.26,
+    lon: -75.64,
+    atUri: null,
+    imageUrl: null,
+  },
+  {
+    did: "fallback-bula",
+    name: "Bula Garden Tanzania",
+    country: "TZ",
+    lat: -4.8,
+    lon: 38.29,
+    atUri: null,
+    imageUrl: null,
+  },
+  {
+    did: "fallback-lobongia",
+    name: "Restoring Lobongia rangelands",
+    country: "UG",
+    lat: 3.51,
+    lon: 34.13,
+    atUri: null,
+    imageUrl: null,
+  },
+  {
+    did: "fallback-marina-gardens",
+    name: "Marina Gardens",
+    country: "SG",
+    lat: 1.28,
+    lon: 103.86,
+    atUri: null,
+    imageUrl: null,
+  },
+  {
+    did: "fallback-precious",
+    name: "Precious Forests",
+    country: "BR",
+    lat: -3.47,
+    lon: -62.21,
+    atUri: null,
+    imageUrl: null,
+  },
 ];

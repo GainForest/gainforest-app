@@ -57,6 +57,8 @@ type GlobeProps = {
   interactive?: boolean;
   /** Optional live spotlight pin. Rendered larger/warmer with its own ring. */
   highlightedDid?: string | null;
+  /** Emits whether the highlighted pin is on the globe's front hemisphere. */
+  onHighlightedVisibilityChange?: (visible: boolean) => void;
 };
 
 // Pseudo-random pin positions for the loading skeleton. Picked once so the
@@ -75,12 +77,14 @@ export function LiveGlobe({
   diameter,
   interactive = false,
   highlightedDid = null,
+  onHighlightedVisibilityChange,
 }: GlobeProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   // The Globe instance ref — used to drive auto-rotate + controls.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const globeRef = useRef<any>(null);
   const [ready, setReady] = useState(false);
+  const lastHighlightedVisibleRef = useRef<boolean | null>(null);
 
   // Configure controls once the globe finishes initialising. Using the
   // library's `onGlobeReady` callback (rather than a fixed setTimeout)
@@ -129,6 +133,48 @@ export function LiveGlobe({
       node.removeEventListener("wheel", onWheel, { capture: true });
     };
   }, []);
+
+  // The partners section only exposes the ATProto record link when the
+  // corresponding highlighted dot is actually on the visible hemisphere.
+  // react-globe.gl rotates the camera around a static sphere, so comparing
+  // the pin vector with the camera vector gives a cheap front/back test.
+  useEffect(() => {
+    if (!onHighlightedVisibilityChange) return;
+    const pin = pins.find((candidate) => candidate.did === highlightedDid);
+    if (!ready || !pin) {
+      if (lastHighlightedVisibleRef.current !== false) {
+        lastHighlightedVisibleRef.current = false;
+        onHighlightedVisibilityChange(false);
+      }
+      return;
+    }
+
+    let frame = 0;
+    const tick = () => {
+      const g = globeRef.current;
+      const camera = g?.camera?.();
+      const coords = g?.getCoords?.(pin.lat, pin.lon, 0.012);
+      const position = camera?.position;
+      if (coords && position) {
+        const dot =
+          coords.x * position.x +
+          coords.y * position.y +
+          coords.z * position.z;
+        const pointLength = Math.hypot(coords.x, coords.y, coords.z);
+        const cameraLength = Math.hypot(position.x, position.y, position.z);
+        // Small positive threshold avoids showing the link while the pin is
+        // barely grazing the edge of the globe.
+        const visible = dot / (pointLength * cameraLength) > 0.08;
+        if (visible !== lastHighlightedVisibleRef.current) {
+          lastHighlightedVisibleRef.current = visible;
+          onHighlightedVisibilityChange(visible);
+        }
+      }
+      frame = window.requestAnimationFrame(tick);
+    };
+    tick();
+    return () => window.cancelAnimationFrame(frame);
+  }, [highlightedDid, onHighlightedVisibilityChange, pins, ready]);
 
   // Memoise the points and ring datasets so the globe doesn't redraw on each
   // re-render. Pings stagger pseudo-randomly across pins for the "real data
@@ -230,7 +276,8 @@ export function LiveGlobe({
         // Colour is a function of t∈[0,1] across each ring's life. Bright
         // primary-green at birth, eased decay to transparent.
         ringColor={(d: object) => {
-          const highlighted = (d as ProjectPin & { highlighted?: boolean }).highlighted;
+          const highlighted = (d as ProjectPin & { highlighted?: boolean })
+            .highlighted;
           return (t: number) => {
             const eased = Math.pow(1 - t, highlighted ? 1.15 : 1.6);
             return highlighted

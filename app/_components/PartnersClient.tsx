@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { LiveGlobe } from "./LiveGlobe";
 import { useT } from "./LocaleProvider";
@@ -16,6 +16,7 @@ type Community = {
   did: string;
   name: string;
   country: string;
+  atUri: string | null;
   imageUrl: string | null;
 };
 
@@ -33,6 +34,7 @@ function uniqueCommunities(pins: ProjectPin[]): Community[] {
       did: pin.did,
       name,
       country,
+      atUri: pin.atUri,
       imageUrl: pin.imageUrl,
     });
   }
@@ -51,9 +53,11 @@ function initials(name: string): string {
 function SpotlightCard({
   community,
   label,
+  showRecord,
 }: {
   community: Community | undefined;
   label: string;
+  showRecord: boolean;
 }) {
   if (!community) return null;
   return (
@@ -83,15 +87,43 @@ function SpotlightCard({
           <p className="mt-1 truncate font-garamond text-[22px] leading-[1.03] text-foreground">
             {community.name}
           </p>
-          {community.country ? (
-            <p className="mt-2 inline-flex rounded-full border border-border-soft px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-foreground/52">
-              {community.country}
-            </p>
-          ) : null}
+          <div className="mt-2 flex flex-wrap items-center gap-2">
+            {community.country ? (
+              <p className="inline-flex rounded-full border border-border-soft px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-foreground/52">
+                {community.country}
+              </p>
+            ) : null}
+            {showRecord && community.atUri ? (
+              <Link
+                href={hyperscanRecordHref(community.atUri)}
+                target="_blank"
+                rel="noreferrer"
+                title={community.atUri}
+                aria-label={`Open ${community.name} live ATProto record on Hyperscan`}
+                className="inline-flex max-w-full items-center gap-1 rounded-full border border-primary/20 bg-primary/5 px-2 py-0.5 font-mono text-[9.5px] leading-none text-primary transition-colors hover:border-primary/45 hover:bg-primary/10"
+              >
+                <span className="h-1 w-1 rounded-full bg-brand" aria-hidden />
+                <span className="truncate">
+                  {minimalAtUri(community.atUri)}
+                </span>
+              </Link>
+            ) : null}
+          </div>
         </div>
       </div>
     </div>
   );
+}
+
+function minimalAtUri(atUri: string): string {
+  const match = atUri.match(/^at:\/\/(did:plc:)([^/]+)\/(.+)$/);
+  if (!match) return atUri;
+  const [, prefix, didBody, rest] = match;
+  return `at://${prefix}${didBody.slice(0, 6)}…${didBody.slice(-4)}/${rest}`;
+}
+
+function hyperscanRecordHref(atUri: string): string {
+  return `https://www.hyperscan.dev/data?uri=${encodeURIComponent(atUri)}`;
 }
 
 export function ClientPartners({ pins }: { pins: ProjectPin[] }) {
@@ -109,6 +141,7 @@ export function ClientPartners({ pins }: { pins: ProjectPin[] }) {
 
   const [spotlightIndex, setSpotlightIndex] = useState(0);
   const [diameter, setDiameter] = useState<number>(380);
+  const [spotlightVisible, setSpotlightVisible] = useState(false);
 
   useEffect(() => {
     const update = () => {
@@ -138,7 +171,15 @@ export function ClientPartners({ pins }: { pins: ProjectPin[] }) {
     return () => window.clearInterval(id);
   }, [spotlightPool.length]);
 
-  const spotlight = spotlightPool[spotlightIndex % Math.max(spotlightPool.length, 1)];
+  const spotlight =
+    spotlightPool[spotlightIndex % Math.max(spotlightPool.length, 1)];
+  const handleSpotlightVisibility = useCallback((visible: boolean) => {
+    setSpotlightVisible(visible);
+  }, []);
+
+  useEffect(() => {
+    setSpotlightVisible(false);
+  }, [spotlight?.did]);
 
   return (
     <section className="border-t border-border-soft">
@@ -208,12 +249,14 @@ export function ClientPartners({ pins }: { pins: ProjectPin[] }) {
                 pins={pins}
                 diameter={diameter}
                 highlightedDid={spotlight?.did ?? null}
+                onHighlightedVisibilityChange={handleSpotlightVisibility}
               />
             </div>
 
             <SpotlightCard
               community={spotlight}
               label={t("partners.recordLabel")}
+              showRecord={spotlightVisible}
             />
           </div>
         </div>
