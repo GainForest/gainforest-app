@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>GainForest OG — About</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link
+  href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500&display=swap"
+  rel="stylesheet"
+/>
+<style>
+  /* About OG card.
+     Same fonts, palette, and brand chrome as the main landing OG
+     (scripts/og-template.html) so a shared preview reads as
+     "the same site, the About page". Differences:
+       - Headline is the about-page hero ("We are tech support for nature.")
+       - Italic emphasis sits on "nature" (no curved brush stroke; the
+         brush is reserved for the home page).
+       - Photograph is the community-at-the-maloca shot, which is the
+         hero photo of the About page itself.
+       - Subtitle mirrors the about-page lede. */
+  :root {
+    --background: #f4efe4;
+    --foreground: #1c1c1a;
+    --primary: #3e7053;
+    --brand: #2fce8a;
+    --border-soft: #e6dfd0;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+
+  .og {
+    width: 1200px;
+    height: 630px;
+    display: grid;
+    grid-template-columns: 690px 510px;
+    background: var(--background);
+    font-family: "Inter", system-ui, sans-serif;
+    color: var(--foreground);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .left {
+    padding: 56px 56px 56px 72px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    color: var(--foreground);
+  }
+  .brand .mark {
+    width: 44px;
+    height: 44px;
+    background-image: url("file://__PUBLIC__/decor/gainforest-logo.svg");
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+  }
+  .brand .wordmark {
+    font-family: "Cormorant Garamond", Georgia, serif;
+    font-weight: 500;
+    font-size: 30px;
+    letter-spacing: -0.005em;
+  }
+
+  /* Tiny eyebrow above the H1 so the share preview reads "About"
+     without needing the URL slug. Mirrors the on-page eyebrow chrome. */
+  .eyebrow {
+    font-family: "Instrument Serif", Georgia, serif;
+    font-style: italic;
+    font-weight: 400;
+    font-size: 14px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: rgba(28, 28, 26, 0.55);
+    margin-bottom: 18px;
+  }
+
+  h1 {
+    font-family: "Cormorant Garamond", Georgia, serif;
+    font-weight: 400;
+    font-size: 84px;
+    line-height: 1.02;
+    letter-spacing: -0.015em;
+    margin: 0;
+    color: var(--foreground);
+  }
+  h1 .italic {
+    font-family: "Instrument Serif", Georgia, serif;
+    font-style: italic;
+    font-weight: 400;
+  }
+
+  .subtitle {
+    font-family: "Inter", system-ui, sans-serif;
+    font-weight: 400;
+    font-size: 19px;
+    line-height: 1.5;
+    color: rgba(28, 28, 26, 0.82);
+    max-width: 540px;
+    margin-top: 26px;
+  }
+
+  .footer-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-family: "Instrument Serif", Georgia, serif;
+    font-style: italic;
+    font-weight: 400;
+    font-size: 18px;
+    color: rgba(28, 28, 26, 0.55);
+    letter-spacing: 0.005em;
+  }
+  .footer-row::before {
+    content: "";
+    flex: 0 0 36px;
+    height: 1px;
+    background: rgba(28, 28, 26, 0.25);
+  }
+
+  /* RIGHT — the About hero photograph (community at the maloca,
+     Inhaã-bé, Greater Manaus). Same feathered-seam recipe as the
+     main OG so the cream + photo halves blend. */
+  .right {
+    position: relative;
+    width: 510px;
+    height: 630px;
+    overflow: hidden;
+    background: #0b1814;
+  }
+  .right .photo {
+    position: absolute;
+    inset: 0;
+    background-image: url("file://__PUBLIC__/community/impact-group.webp");
+    background-size: cover;
+    background-position: center 35%;
+    filter: saturate(1.04) contrast(1.04);
+  }
+  .right .feather {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      to right,
+      var(--background) 0%,
+      rgba(244, 239, 228, 0.0) 14px,
+      rgba(244, 239, 228, 0.0) 100%
+    );
+    pointer-events: none;
+  }
+  .right .vignette {
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(
+        to right,
+        rgba(0, 0, 0, 0.10) 0%,
+        rgba(0, 0, 0, 0.0) 18%,
+        rgba(0, 0, 0, 0.0) 100%
+      );
+    pointer-events: none;
+  }
+</style>
+</head>
+<body>
+  <div class="og">
+    <div class="left">
+      <div class="brand">
+        <div class="mark"></div>
+        <div class="wordmark">GainForest</div>
+      </div>
+
+      <div>
+        <div class="eyebrow">About</div>
+        <h1>
+          We are tech support<br />
+          for <span class="italic">nature</span>.
+        </h1>
+
+        <p class="subtitle">
+          A Swiss non-profit building open, community-first tools that give the people protecting our planet the funding, data, and governance power they deserve.
+        </p>
+      </div>
+
+      <div class="footer-row">
+        Built with rainforest communities &nbsp;·&nbsp; gainforest.app/about
+      </div>
+    </div>
+
+    <div class="right">
+      <div class="photo"></div>
+      <div class="vignette"></div>
+      <div class="feather"></div>
+    </div>
+  </div>
+</body>
+</html>
