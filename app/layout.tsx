@@ -28,8 +28,20 @@ const instrument = Instrument_Serif({
 // `NEXT_PUBLIC_BASE_URL` is used by the OAuth flow; reuse it here so all the
 // canonical / OG URLs point at the same origin. Falls back to the production
 // landing URL for prod builds where the env isn't set.
+//
+// IMPORTANT: when Vercel auto-injects `NEXT_PUBLIC_BASE_URL=https://gainforest-app.vercel.app`
+// (or any other `*.vercel.app` preview domain) the OG / og:url / metadataBase
+// would point at the preview origin, which makes Telegram + Twitter previews
+// look broken (image fetches fine, but the canonical URL it advertises
+// disagrees with the shared link, and chat apps occasionally refuse the
+// preview). When we detect a vercel.app value we ignore it and fall back
+// to the canonical production hostname instead.
+const CANONICAL_SITE_URL = "https://gainforest.app";
+const RAW_BASE_URL = process.env.NEXT_PUBLIC_BASE_URL?.trim();
 const SITE_URL = (
-  process.env.NEXT_PUBLIC_BASE_URL ?? "https://gainforest.app"
+  RAW_BASE_URL && !/\.vercel\.app(?::\d+)?\/?$/.test(RAW_BASE_URL)
+    ? RAW_BASE_URL
+    : CANONICAL_SITE_URL
 ).replace(/\/$/, "");
 
 const SITE_NAME = "GainForest";

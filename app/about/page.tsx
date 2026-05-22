@@ -11,8 +11,15 @@ import { AboutTeam } from "./_components/AboutTeam";
 import { AboutRecognition } from "./_components/AboutRecognition";
 import { AboutClosing } from "./_components/AboutClosing";
 
+// Mirrors the same canonical-URL guard layout.tsx uses; we never want
+// the absolute OG / canonical URLs to advertise a vercel.app preview
+// domain even when the env var is set to one.
+const CANONICAL_SITE_URL = "https://gainforest.app";
+const RAW_BASE_URL = process.env.NEXT_PUBLIC_BASE_URL?.trim();
 const SITE_URL = (
-  process.env.NEXT_PUBLIC_BASE_URL ?? "https://gainforest.app"
+  RAW_BASE_URL && !/\.vercel\.app(?::\d+)?\/?$/.test(RAW_BASE_URL)
+    ? RAW_BASE_URL
+    : CANONICAL_SITE_URL
 ).replace(/\/$/, "");
 
 // Versioned per-route OG image. Rendered from `scripts/og-template-about.html`
