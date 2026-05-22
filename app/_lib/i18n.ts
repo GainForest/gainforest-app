@@ -37,6 +37,7 @@ type Messages = {
   "nav.forCommunities": string;
   "nav.forSupporters": string;
   "nav.about": string;
+  "nav.research": string;
   "nav.signIn": string;
   "nav.signedIn": string;
   "nav.getStarted": string;
@@ -341,6 +342,7 @@ export const MESSAGES: Record<Locale, Messages> = {
     "nav.forCommunities": "For Communities",
     "nav.forSupporters": "For Supporters",
     "nav.about": "About",
+    "nav.research": "Research",
     "nav.signIn": "Sign in",
     "nav.signedIn": "Signed in",
     "nav.getStarted": "Get started",
@@ -651,6 +653,7 @@ export const MESSAGES: Record<Locale, Messages> = {
     "nav.forCommunities": "Para comunidades",
     "nav.forSupporters": "Para colaboradores",
     "nav.about": "Acerca de",
+    "nav.research": "Investigación",
     "nav.signIn": "Iniciar sesión",
     "nav.signedIn": "Sesión iniciada",
     "nav.getStarted": "Comenzar",
@@ -959,6 +962,7 @@ export const MESSAGES: Record<Locale, Messages> = {
     "nav.forCommunities": "Para comunidades",
     "nav.forSupporters": "Para apoiadores",
     "nav.about": "Sobre",
+    "nav.research": "Pesquisa",
     "nav.signIn": "Entrar",
     "nav.signedIn": "Conectado",
     "nav.getStarted": "Começar",
@@ -1266,6 +1270,7 @@ export const MESSAGES: Record<Locale, Messages> = {
     "nav.forCommunities": "Kwa jamii",
     "nav.forSupporters": "Kwa wafadhili",
     "nav.about": "Kuhusu",
+    "nav.research": "Utafiti",
     "nav.signIn": "Ingia",
     "nav.signedIn": "Umeingia",
     "nav.getStarted": "Anza",
@@ -1575,6 +1580,7 @@ export const MESSAGES: Record<Locale, Messages> = {
     "nav.forCommunities": "Untuk komunitas",
     "nav.forSupporters": "Untuk pendukung",
     "nav.about": "Tentang",
+    "nav.research": "Riset",
     "nav.signIn": "Masuk",
     "nav.signedIn": "Telah masuk",
     "nav.getStarted": "Mulai",

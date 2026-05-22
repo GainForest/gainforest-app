@@ -4,8 +4,8 @@ const SITE_URL = (
   process.env.NEXT_PUBLIC_BASE_URL ?? "https://gainforest.app"
 ).replace(/\/$/, "");
 
-// `/sitemap.xml` — landing + /about today. Add more URLs as routes
-// grow (e.g. /blog, /team, …).
+// `/sitemap.xml` — landing + /about + /research today. Add more URLs
+// as routes grow (e.g. /blog, /team, …).
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();
   return [
@@ -20,6 +20,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: now,
       changeFrequency: "monthly",
       priority: 0.8,
+    },
+    {
+      url: `${SITE_URL}/research`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.7,
     },
   ];
 }

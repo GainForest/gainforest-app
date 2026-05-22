@@ -36,9 +36,11 @@ const NAV_ITEMS: ReadonlyArray<NavItem> = [
   { key: "ai", labelKey: "nav.ai", href: "#ai" },
   { key: "partners", labelKey: "nav.partners", href: "#partners" },
   { key: "impact", labelKey: "nav.impact", href: "#impact" },
-  // Standalone route — lives at /about, not a landing section. The
-  // i18n key already exists in i18n.ts (nav.about, used elsewhere).
+  // Standalone routes — live at /about and /research, not landing
+  // sections. Their i18n keys already exist in i18n.ts (nav.about
+  // and nav.research).
   { key: "about", labelKey: "nav.about", href: "/about" },
+  { key: "research", labelKey: "nav.research", href: "/research" },
 ];
 
 // Client-rendered view for the top navbar. It stays deliberately local:
