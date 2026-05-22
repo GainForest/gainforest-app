@@ -52,6 +52,13 @@ type ResearchMessages = {
   "research.ecosystem.heading.after": string;
   "research.ecosystem.subheading": string;
 
+  // ML models, datasets, and pipelines
+  "research.models.eyebrow": string;
+  "research.models.heading.before": string;
+  "research.models.heading.italic": string;
+  "research.models.heading.after": string;
+  "research.models.subheading": string;
+
   // Closing CTA
   "research.closing.eyebrow": string;
   "research.closing.heading.before": string;
@@ -99,6 +106,13 @@ const EN: ResearchMessages = {
   "research.ecosystem.subheading":
     "Co-authored with the Hypercerts community and shipped as five reusable layers. Every lexicon, package, and service below is open source and operable end-to-end on your own PDS.",
 
+  "research.models.eyebrow": "Models & datasets",
+  "research.models.heading.before": "Open models,",
+  "research.models.heading.italic": "open datasets",
+  "research.models.heading.after": ".",
+  "research.models.subheading":
+    "Every artefact behind the papers above is downloadable today. Trained weights and datasets on HuggingFace, benchmark suites and field pipelines on GitHub, and the assistant on community-owned PDS infrastructure.",
+
   "research.closing.eyebrow": "The frame",
   "research.closing.heading.before": "The theoretical frame;",
   "research.closing.heading.italic": "regenerative intelligence",
@@ -142,6 +156,13 @@ const ES: ResearchMessages = {
   "research.ecosystem.heading.after": ".",
   "research.ecosystem.subheading":
     "Co-escritos con la comunidad Hypercerts y publicados como cinco capas reutilizables. Cada lexicón, paquete y servicio aquí abajo es de código abierto y operable de extremo a extremo en tu propio PDS.",
+
+  "research.models.eyebrow": "Modelos y conjuntos de datos",
+  "research.models.heading.before": "Modelos abiertos,",
+  "research.models.heading.italic": "datos abiertos",
+  "research.models.heading.after": ".",
+  "research.models.subheading":
+    "Cada artefacto detrás de los artículos anteriores se puede descargar hoy. Pesos entrenados y conjuntos de datos en HuggingFace, suites de benchmark y pipelines de campo en GitHub, y la asistente en infraestructura PDS de propiedad comunitaria.",
 
   "research.closing.eyebrow": "El marco",
   "research.closing.heading.before": "El marco teórico;",
@@ -187,6 +208,13 @@ const PT: ResearchMessages = {
   "research.ecosystem.subheading":
     "Co-escritos com a comunidade Hypercerts e publicados como cinco camadas reutilizáveis. Cada léxicon, pacote e serviço abaixo é open source e operável de ponta a ponta no teu próprio PDS.",
 
+  "research.models.eyebrow": "Modelos e conjuntos de dados",
+  "research.models.heading.before": "Modelos abertos,",
+  "research.models.heading.italic": "dados abertos",
+  "research.models.heading.after": ".",
+  "research.models.subheading":
+    "Cada artefacto por trás dos artigos acima está disponível para download hoje. Pesos treinados e datasets no HuggingFace, suites de benchmark e pipelines de campo no GitHub, e a assistente em infraestrutura PDS de propriedade comunitária.",
+
   "research.closing.eyebrow": "O quadro",
   "research.closing.heading.before": "O quadro teórico;",
   "research.closing.heading.italic": "inteligência regenerativa",
@@ -231,6 +259,13 @@ const SW: ResearchMessages = {
   "research.ecosystem.subheading":
     "Zimeandikwa pamoja na jamii ya Hypercerts na kutolewa kama safu tano zinazoweza kutumika tena. Kila lexicon, paketi, na huduma hapa chini ni ya chanzo wazi na inafanya kazi kuanzia mwanzo hadi mwisho kwenye PDS yako mwenyewe.",
 
+  "research.models.eyebrow": "Mifano na seti za data",
+  "research.models.heading.before": "Mifano wazi,",
+  "research.models.heading.italic": "data wazi",
+  "research.models.heading.after": ".",
+  "research.models.subheading":
+    "Kila kifaa nyuma ya makala hapo juu kinaweza kupakuliwa leo. Uzito uliofunzwa na seti za data kwenye HuggingFace, mikusanyiko ya benchmark na mabomba ya nyanjani kwenye GitHub, na msaidizi kwenye miundombinu ya PDS inayomilikiwa na jamii.",
+
   "research.closing.eyebrow": "Fremu",
   "research.closing.heading.before": "Fremu ya kinadharia;",
   "research.closing.heading.italic": "akili ya kuzaa upya",
@@ -274,6 +309,13 @@ const ID: ResearchMessages = {
   "research.ecosystem.heading.after": ".",
   "research.ecosystem.subheading":
     "Ditulis bersama komunitas Hypercerts dan dirilis sebagai lima lapisan yang dapat dipakai ulang. Setiap leksikon, paket, dan layanan di bawah ini bersifat open source dan dapat dijalankan dari ujung ke ujung di PDS milikmu sendiri.",
+
+  "research.models.eyebrow": "Model & dataset",
+  "research.models.heading.before": "Model terbuka,",
+  "research.models.heading.italic": "data terbuka",
+  "research.models.heading.after": ".",
+  "research.models.subheading":
+    "Setiap artefak di balik makalah-makalah di atas dapat diunduh hari ini. Bobot terlatih dan dataset di HuggingFace, suite benchmark dan pipeline lapangan di GitHub, serta asistennya di infrastruktur PDS milik komunitas.",
 
   "research.closing.eyebrow": "Kerangka",
   "research.closing.heading.before": "Kerangka teoretiknya;",

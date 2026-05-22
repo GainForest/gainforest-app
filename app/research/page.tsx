@@ -5,6 +5,7 @@ import { fetchOccurrenceCount } from "../_lib/occurrences";
 import { ResearchHero } from "./_components/ResearchHero";
 import { ResearchPublications } from "./_components/ResearchPublications";
 import { ResearchEcosystem } from "./_components/ResearchEcosystem";
+import { ResearchModels } from "./_components/ResearchModels";
 import { ResearchClosing } from "./_components/ResearchClosing";
 
 // Same canonical-URL guard layout.tsx and /about use; we never let
@@ -87,6 +88,7 @@ export default async function ResearchPage() {
         <ResearchHero occurrencesCount={occurrences.total} />
         <ResearchPublications />
         <ResearchEcosystem />
+        <ResearchModels />
         <ResearchClosing />
       </main>
       <Footer />
