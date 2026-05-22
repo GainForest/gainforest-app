@@ -34,6 +34,7 @@ export const SUPPORTER_LOGOS: ReadonlyArray<SupporterLogo> = [
   { src: "/decor/supporters/hypercerts.svg", alt: "Hypercerts", w: 1929, h: 340 },
   { src: "/decor/supporters/fondation-valery.png", alt: "Fondation Valery", w: 664, h: 183 },
   { src: "/decor/supporters/filecoin-foundation.png", alt: "Filecoin Foundation", w: 797, h: 247 },
+  { src: "/decor/supporters/sap.png", alt: "SAP", w: 800, h: 396 },
   { src: "/decor/supporters/celo.png", alt: "CELO", w: 788, h: 178 },
   { src: "/decor/supporters/gitcoin.png", alt: "Gitcoin", w: 631, h: 216 },
   { src: "/decor/supporters/devonian.png", alt: "Devonian", w: 799, h: 111 },
@@ -50,6 +51,10 @@ const H_TWEAKS: Record<string, number> = {
   // more vertical room so the text reads.
   "bkcf.png": 52,
   "edge-city.png": 44,
+  // SAP's chunky trapezoidal silhouette + the knocked-out "SAP"
+  // letters read heavier than a horizontal wordmark per unit
+  // height; shrink a touch so it doesn't dominate the row.
+  "sap.png": 28,
   // The Ethereum diamond on the left of the wordmark needs slightly
   // more height to balance the wordmark on the right.
   "ethereum-foundation.png": 38,
