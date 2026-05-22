@@ -38,6 +38,9 @@ type ResearchMessages = {
   "research.publications.eyebrow": string;
   "research.publications.heading": string;
   "research.publications.scroll": string;
+  /** Small-caps section marker between authors and summary on the
+   *  paper-preview cards. Same word every academic paper uses. */
+  "research.publications.abstract": string;
   /** Kind labels for the carousel chip. */
   "research.kind.paper": string;
   "research.kind.essay": string;
@@ -93,6 +96,7 @@ const EN: ResearchMessages = {
   "research.publications.heading":
     "Selected papers, datasets, and writing.",
   "research.publications.scroll": "Drag to scroll",
+  "research.publications.abstract": "Abstract",
   "research.kind.paper": "Paper",
   "research.kind.essay": "Essay",
   "research.kind.talk": "Invited talk",
@@ -144,6 +148,7 @@ const ES: ResearchMessages = {
   "research.publications.heading":
     "Artículos, conjuntos de datos y escritos seleccionados.",
   "research.publications.scroll": "Desliza para ver",
+  "research.publications.abstract": "Resumen",
   "research.kind.paper": "Artículo",
   "research.kind.essay": "Ensayo",
   "research.kind.talk": "Charla invitada",
@@ -195,6 +200,7 @@ const PT: ResearchMessages = {
   "research.publications.heading":
     "Artigos, conjuntos de dados e escritos selecionados.",
   "research.publications.scroll": "Deslize para ver",
+  "research.publications.abstract": "Resumo",
   "research.kind.paper": "Artigo",
   "research.kind.essay": "Ensaio",
   "research.kind.talk": "Palestra convidada",
@@ -246,6 +252,7 @@ const SW: ResearchMessages = {
   "research.publications.heading":
     "Makala, seti za data, na maandishi yaliyochaguliwa.",
   "research.publications.scroll": "Buruta kupita",
+  "research.publications.abstract": "Muhtasari",
   "research.kind.paper": "Makala",
   "research.kind.essay": "Insha",
   "research.kind.talk": "Mhadhara wa mwaliko",
@@ -297,6 +304,7 @@ const ID: ResearchMessages = {
   "research.publications.heading":
     "Makalah, dataset, dan tulisan pilihan.",
   "research.publications.scroll": "Geser untuk melihat",
+  "research.publications.abstract": "Abstrak",
   "research.kind.paper": "Makalah",
   "research.kind.essay": "Esai",
   "research.kind.talk": "Ceramah undangan",

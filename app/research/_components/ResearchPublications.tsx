@@ -5,27 +5,47 @@ import { useLocale } from "../../_components/LocaleProvider";
 import { getResearchT, type ResearchKey } from "../_messages";
 import { PUBLICATIONS, pickLocale, type PublicationKind } from "../_data";
 
-// "Papers, essays, and talks; all freely available." — horizontal
-// editorial carousel for the /research page.
+// "Selected papers, datasets, and writing." — horizontal carousel
+// styled so each card reads as a miniature academic paper preview.
 //
-// Visually mirrors the landing's <Media />: scrollable row of fixed-
-// width cards, scroll-mandatory snapping, hairline borders, italic
-// metadata, single arrow affordance. The two structural differences:
+// Visual recipe (per card, top to bottom):
 //
-//   1. NO COVER IMAGES. Research papers don't have native cover art,
-//      and fabricating illustrations would break AGENTS.md hard-rule
-//      #1 ("no fake data on the rendered UI"). Cards instead lead
-//      with a big Garamond year + venue chip, which reads as a more
-//      editorial / library-catalog gesture than a fake thumbnail.
+//   ┌────────────────────────────────────┐
+//   │       NeurIPS 2024 · 2024          │  ← small-caps venue header
+//   │   ───────────────────────────      │     hairline rule (paper top)
+//   │                                    │
+//   │      OAM-TCD: A Globally           │
+//   │      Diverse Dataset of …          │  ← centred Garamond title
+//   │                                    │
+//   │   Veitch-Michaelis, Dao, et al.    │  ← italic Instrument-Serif authors
+//   │                                    │
+//   │   ── ABSTRACT ──                   │  ← small-caps section marker
+//   │                                    │     with side rules, like a paper
+//   │   280,000+ instance annotations    │
+//   │   of individual tree crowns …      │  ← summary body
+//   │                                    │
+//   │   ─────────────────                │  ← footer rule
+//   │   Dataset                  →       │  ← kind label + arrow
+//   └────────────────────────────────────┘
 //
-//   2. AUTHORS LINE. The publications shape carries an `authors`
-//      string that the carousel surfaces under the title; matches
-//      how an academic ref list reads.
+// The recipe is the same for papers, datasets, workshops, talks, and
+// essays — talks are treated as citation-style entries to match the
+// editorial register. The kind chip at the footer disambiguates.
 //
-// Localisation: kind chip and summary translate per locale (via
-// _messages + _data Translated<>); title, authors, venue stay in
-// their source-language so external links land on the right canonical
-// surface and so authors aren't mistransliterated.
+// Why this layout rather than the news-thumbnail style from
+// Media.tsx: papers don't have native cover art, so the design
+// system instead borrows the typographic anchors readers already
+// associate with academic writing (centred serif title, italic
+// author line, small-caps section markers). It also lets the
+// /research carousel sit visually adjacent to the landing's awards
+// carousel without colliding — different content, different shape.
+
+// Venues that already carry the year (e.g. "NeurIPS 2024") shouldn't
+// have it appended again. This keeps the header line clean across the
+// mixed dataset where some venues include the year and some don't.
+function formatVenue(venue: string, year: string): string {
+  return venue.includes(year) ? venue : `${venue} · ${year}`;
+}
 
 function kindKey(kind: PublicationKind): ResearchKey {
   return `research.kind.${kind}` as ResearchKey;
@@ -61,62 +81,91 @@ export function ResearchPublications() {
             role="list"
             aria-label={t("research.publications.heading")}
           >
-            {PUBLICATIONS.map((raw, i) => {
+            {PUBLICATIONS.map((raw) => {
               const pub = pickLocale(raw, locale);
               const kindLabel = t(kindKey(pub.kind));
+              const venueLine = formatVenue(pub.venue, pub.year);
               return (
                 <li
                   key={pub.slug}
-                  className="flex w-[286px] shrink-0 snap-start sm:w-[330px] lg:w-[360px]"
+                  className="flex w-[300px] shrink-0 snap-start sm:w-[340px] lg:w-[360px]"
                 >
                   <Link
                     href={pub.href}
                     target="_blank"
                     rel="noreferrer"
-                    className="group flex min-h-[300px] w-full flex-col overflow-hidden rounded-[18px] border border-border-soft bg-background transition-all hover:-translate-y-0.5 hover:border-foreground/30 hover:shadow-[0_18px_40px_-26px_rgba(40,50,30,0.24)]"
+                    /* `bg-background` for the card body keeps it on
+                       brand; a marginally stronger drop-shadow than
+                       the news carousel uses gives a touch of lift
+                       so it reads as a sheet of paper on the cream
+                       page. Corners are tighter (rounded-[6px]) than
+                       the news cards' 18px so they feel more
+                       paper-like. */
+                    className="group relative flex min-h-[480px] w-full flex-col rounded-[6px] border border-border-soft bg-background px-6 py-7 shadow-[0_3px_14px_-6px_rgba(40,50,30,0.10)] transition-all hover:-translate-y-0.5 hover:border-foreground/30 hover:shadow-[0_22px_50px_-26px_rgba(40,50,30,0.30)] sm:px-8 sm:py-9"
                   >
-                    {/* Library-catalog plate replaces the news
-                        thumbnail. Sage-tinted band, big Garamond
-                        year on the left, italic venue label on the
-                        right. Keeps the editorial language and
-                        avoids fabricating cover art. */}
-                    <div className="relative flex aspect-[16/9] w-full items-end justify-between bg-[#dde3d7] px-5 pb-4 pt-4">
-                      <span className="font-garamond text-[64px] font-normal leading-none tracking-tight text-foreground/85">
-                        {pub.year}
-                      </span>
-                      <span className="max-w-[55%] truncate text-right font-instrument italic text-[14px] leading-[1.2] text-foreground/65">
-                        {pub.venue}
+                    {/* Venue header — small caps, mirrors the
+                        preprint header line on real arXiv/AAAI PDFs. */}
+                    <div className="text-center">
+                      <span className="font-instrument italic text-[10.5px] uppercase tracking-[0.24em] text-foreground/50">
+                        {venueLine}
                       </span>
                     </div>
+                    <div
+                      aria-hidden
+                      className="mt-3 h-px w-full bg-border-soft"
+                    />
 
-                    <div className="flex flex-1 flex-col p-5 sm:p-6">
-                      <span className="font-instrument italic text-[12px] uppercase tracking-[0.18em] text-foreground/45">
-                        {String(i + 1).padStart(2, "0")} · {kindLabel}
+                    {/* Title — centred Garamond, the dominant
+                        typographic gesture on the card. Slightly
+                        smaller than the section h2 so the carousel
+                        doesn't out-shout the surrounding page. */}
+                    <h3 className="mt-7 text-center font-garamond text-[19px] sm:text-[21px] font-normal leading-[1.22] tracking-[-0.005em] text-foreground">
+                      {pub.title}
+                    </h3>
+
+                    {/* Authors — italic Instrument Serif, centred. */}
+                    <p className="mt-3 text-center font-instrument italic text-[12.5px] leading-[1.3] text-foreground/65">
+                      {pub.authors}
+                    </p>
+
+                    {/* "Abstract" section marker — small caps with
+                        side rules, the way printed papers separate
+                        the abstract from the title block. */}
+                    <div className="mt-7 flex items-center justify-center gap-3">
+                      <span
+                        aria-hidden
+                        className="h-px w-8 bg-border-soft"
+                      />
+                      <span className="font-instrument italic text-[10px] uppercase tracking-[0.26em] text-foreground/45">
+                        {t("research.publications.abstract")}
                       </span>
+                      <span
+                        aria-hidden
+                        className="h-px w-8 bg-border-soft"
+                      />
+                    </div>
 
-                      <h3 className="mt-3 font-garamond text-[20px] font-normal leading-[1.15] text-foreground sm:text-[22px]">
-                        {pub.title}
-                      </h3>
+                    {/* Summary — left-aligned regular body text. The
+                        academic-paper feel comes from the structure
+                        above; the body itself stays as plain
+                        readable sans for legibility. */}
+                    <p className="mt-4 text-[13px] leading-[1.6] text-foreground/72">
+                      {pub.summary}
+                    </p>
 
-                      <p className="mt-2 truncate text-[12px] uppercase tracking-[0.12em] text-foreground/45">
-                        {pub.authors}
-                      </p>
-
-                      <p className="mt-3 text-[13.5px] leading-[1.55] text-foreground/65">
-                        {pub.summary}
-                      </p>
-
-                      <div className="mt-auto flex items-center justify-between gap-4 border-t border-border-soft pt-4">
-                        <span className="min-w-0 truncate text-[11px] uppercase tracking-[0.14em] text-foreground/45">
-                          {pub.venue}
-                        </span>
-                        <span
-                          aria-hidden
-                          className="inline-flex items-center text-[18px] text-primary transition-transform group-hover:translate-x-1"
-                        >
-                          →
-                        </span>
-                      </div>
+                    {/* Footer — kind label on the left, arrow on
+                        the right. The thin top border doubles as a
+                        page-foot separator. */}
+                    <div className="mt-auto flex items-center justify-between gap-4 border-t border-border-soft/70 pt-4">
+                      <span className="text-[10.5px] uppercase tracking-[0.18em] text-foreground/45">
+                        {kindLabel}
+                      </span>
+                      <span
+                        aria-hidden
+                        className="text-[18px] text-primary transition-transform group-hover:translate-x-1"
+                      >
+                        →
+                      </span>
                     </div>
                   </Link>
                 </li>
