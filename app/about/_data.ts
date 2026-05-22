@@ -60,28 +60,28 @@ export const COFOUNDERS: ReadonlyArray<Translated<TeamMember>> = [
     name: "David Dao",
     role: "Co-founder & Chief Scientist",
     location: "Switzerland",
-    bio: "Pioneer in data valuation for machine learning with a PhD in AI Systems from ETH Zurich. XPRIZE Rainforest winner and World Economic Forum Global Shaper.",
+    bio: "Pioneer in data valuation for machine learning with a PhD in AI Systems from ETH Zurich. XPRIZE Rainforest winner working at the frontier of AI and decentralized systems.",
     photo: "/team/david-dao.webp",
     i18n: {
       es: {
         role: "Cofundador y Científico Jefe",
         location: "Suiza",
-        bio: "Pionero en valoración de datos para aprendizaje automático, con doctorado en Sistemas de IA por ETH Zürich. Ganador del XPRIZE Rainforest y Global Shaper del Foro Económico Mundial.",
+        bio: "Pionero en valoración de datos para aprendizaje automático, con doctorado en Sistemas de IA por ETH Zürich. Ganador del XPRIZE Rainforest, trabaja en la frontera entre IA y sistemas descentralizados.",
       },
       pt: {
         role: "Cofundador e Cientista-chefe",
         location: "Suíça",
-        bio: "Pioneiro em valoração de dados para aprendizado de máquina, com doutorado em Sistemas de IA pela ETH Zurique. Vencedor do XPRIZE Rainforest e Global Shaper do Fórum Económico Mundial.",
+        bio: "Pioneiro em valoração de dados para aprendizado de máquina, com doutorado em Sistemas de IA pela ETH Zurique. Vencedor do XPRIZE Rainforest, trabalha na fronteira entre IA e sistemas descentralizados.",
       },
       sw: {
         role: "Mwanzilishi mwenza na Mwanasayansi Mkuu",
         location: "Uswisi",
-        bio: "Mwanzilishi wa thamani ya data kwa ujifunzaji wa mashine, mwenye PhD ya Mifumo ya AI kutoka ETH Zürich. Mshindi wa XPRIZE Rainforest na Global Shaper wa Jukwaa la Uchumi Duniani.",
+        bio: "Mwanzilishi wa thamani ya data kwa ujifunzaji wa mashine, mwenye PhD ya Mifumo ya AI kutoka ETH Zürich. Mshindi wa XPRIZE Rainforest, anafanya kazi mpakani mwa AI na mifumo iliyogatuliwa.",
       },
       id: {
         role: "Pendiri bersama & Ilmuwan Utama",
         location: "Swiss",
-        bio: "Pelopor penilaian data untuk pembelajaran mesin dengan PhD Sistem AI dari ETH Zürich. Pemenang XPRIZE Rainforest dan Global Shaper Forum Ekonomi Dunia.",
+        bio: "Pelopor penilaian data untuk pembelajaran mesin dengan PhD Sistem AI dari ETH Zürich. Pemenang XPRIZE Rainforest yang bekerja di perbatasan AI dan sistem terdesentralisasi.",
       },
     },
   },
