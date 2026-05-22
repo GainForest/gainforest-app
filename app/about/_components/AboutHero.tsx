@@ -164,7 +164,7 @@ export function AboutHero({ pins }: { pins: ProjectPin[] }) {
           <span className="font-instrument italic text-[13px] uppercase tracking-[0.22em] text-foreground/55">
             {t("about.eyebrow")}
           </span>
-          <h1 className="mt-5 font-garamond text-[44px] sm:text-[64px] lg:text-[84px] font-normal leading-[1.04] tracking-[-0.015em] text-foreground">
+          <h1 className="mt-5 font-garamond text-[44px] sm:text-[64px] lg:text-[88px] font-normal leading-[1.04] tracking-[-0.015em] text-foreground">
             {/* `before` carries a `{...}` marker around the emphasis
                 phrase ("tech support" in EN, equivalent phrase in
                 every other locale). <BrushedText /> renders the

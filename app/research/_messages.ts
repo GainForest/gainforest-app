@@ -19,6 +19,8 @@ import type { Locale } from "../_lib/i18n";
 type ResearchMessages = {
   // Top crumb / hero
   "research.eyebrow": string;
+  /** Lowercase "Live" indicator next to the streamed KPI; CSS uppercases. */
+  "research.live.label": string;
   /** `{phrase}` markers the brushed underline. */
   "research.hero.heading.before": string;
   "research.hero.heading.italic": string;
@@ -63,6 +65,7 @@ type ResearchMessages = {
 // ── English ─────────────────────────────────────────────────────────
 const EN: ResearchMessages = {
   "research.eyebrow": "Research",
+  "research.live.label": "Live",
   "research.hero.heading.before": "{Open} models for",
   "research.hero.heading.italic": "biodiversity",
   "research.hero.heading.after": ".",
@@ -72,8 +75,12 @@ const EN: ResearchMessages = {
   "research.hero.kpi1.label": "peer-reviewed papers at NeurIPS, IEEE, and AAAI",
   "research.hero.kpi2.value": "5",
   "research.hero.kpi2.label": "open lexicons, datasets, and services",
-  "research.hero.kpi3.value": "9",
-  "research.hero.kpi3.label": "years co-designing with frontline partners",
+  // KPI3 streams live from Hyperindex (Darwin Core occurrence
+  // total) so the static value here is only a render-time fallback;
+  // ResearchHero overrides it with the formatted live count.
+  "research.hero.kpi3.value": "",
+  "research.hero.kpi3.label":
+    "Darwin Core biodiversity records indexed on ATProto",
 
   "research.publications.eyebrow": "Publications",
   "research.publications.heading":
@@ -105,6 +112,7 @@ const EN: ResearchMessages = {
 // ── Español ─────────────────────────────────────────────────────────
 const ES: ResearchMessages = {
   "research.eyebrow": "Investigación",
+  "research.live.label": "En vivo",
   "research.hero.heading.before": "{Modelos abiertos} para la",
   "research.hero.heading.italic": "biodiversidad",
   "research.hero.heading.after": ".",
@@ -114,8 +122,9 @@ const ES: ResearchMessages = {
   "research.hero.kpi1.label": "artículos revisados por pares en NeurIPS, IEEE y AAAI",
   "research.hero.kpi2.value": "5",
   "research.hero.kpi2.label": "lexicones, conjuntos de datos y servicios abiertos",
-  "research.hero.kpi3.value": "9",
-  "research.hero.kpi3.label": "años co-diseñando con socios de primera línea",
+  "research.hero.kpi3.value": "",
+  "research.hero.kpi3.label":
+    "registros de biodiversidad Darwin Core indexados en ATProto",
 
   "research.publications.eyebrow": "Publicaciones",
   "research.publications.heading":
@@ -147,6 +156,7 @@ const ES: ResearchMessages = {
 // ── Português ───────────────────────────────────────────────────────
 const PT: ResearchMessages = {
   "research.eyebrow": "Pesquisa",
+  "research.live.label": "Ao vivo",
   "research.hero.heading.before": "{Modelos abertos} para a",
   "research.hero.heading.italic": "biodiversidade",
   "research.hero.heading.after": ".",
@@ -156,8 +166,9 @@ const PT: ResearchMessages = {
   "research.hero.kpi1.label": "artigos revistos por pares no NeurIPS, IEEE e AAAI",
   "research.hero.kpi2.value": "5",
   "research.hero.kpi2.label": "léxicons, conjuntos de dados e serviços abertos",
-  "research.hero.kpi3.value": "9",
-  "research.hero.kpi3.label": "anos co-desenhando com parceiros de base",
+  "research.hero.kpi3.value": "",
+  "research.hero.kpi3.label":
+    "registos de biodiversidade Darwin Core indexados no ATProto",
 
   "research.publications.eyebrow": "Publicações",
   "research.publications.heading":
@@ -189,6 +200,7 @@ const PT: ResearchMessages = {
 // ── Kiswahili ───────────────────────────────────────────────────────
 const SW: ResearchMessages = {
   "research.eyebrow": "Utafiti",
+  "research.live.label": "Moja kwa moja",
   "research.hero.heading.before": "{Mifano wazi} kwa",
   "research.hero.heading.italic": "bayoanuwai",
   "research.hero.heading.after": ".",
@@ -198,8 +210,9 @@ const SW: ResearchMessages = {
   "research.hero.kpi1.label": "makala zilizopitiwa na wenzao katika NeurIPS, IEEE na AAAI",
   "research.hero.kpi2.value": "5",
   "research.hero.kpi2.label": "lexicons, seti za data, na huduma wazi",
-  "research.hero.kpi3.value": "9",
-  "research.hero.kpi3.label": "miaka ya kubuni pamoja na washirika wa mstari wa mbele",
+  "research.hero.kpi3.value": "",
+  "research.hero.kpi3.label":
+    "rekodi za bayoanuwai za Darwin Core zilizoorodheshwa kwenye ATProto",
 
   "research.publications.eyebrow": "Machapisho",
   "research.publications.heading":
@@ -231,6 +244,7 @@ const SW: ResearchMessages = {
 // ── Bahasa Indonesia ────────────────────────────────────────────────
 const ID: ResearchMessages = {
   "research.eyebrow": "Riset",
+  "research.live.label": "Langsung",
   "research.hero.heading.before": "{Model terbuka} untuk",
   "research.hero.heading.italic": "keanekaragaman hayati",
   "research.hero.heading.after": ".",
@@ -240,8 +254,9 @@ const ID: ResearchMessages = {
   "research.hero.kpi1.label": "makalah peer-review di NeurIPS, IEEE, dan AAAI",
   "research.hero.kpi2.value": "5",
   "research.hero.kpi2.label": "leksikon, dataset, dan layanan terbuka",
-  "research.hero.kpi3.value": "9",
-  "research.hero.kpi3.label": "tahun merancang bersama mitra garis depan",
+  "research.hero.kpi3.value": "",
+  "research.hero.kpi3.label":
+    "rekam keanekaragaman hayati Darwin Core terindeks di ATProto",
 
   "research.publications.eyebrow": "Publikasi",
   "research.publications.heading":

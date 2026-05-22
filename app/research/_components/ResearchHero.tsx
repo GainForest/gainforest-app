@@ -5,26 +5,58 @@ import { BrushedText } from "../../_components/BrushedText";
 import { useLocale } from "../../_components/LocaleProvider";
 import { getResearchT } from "../_messages";
 
-// "Eight years of open research, in the open." — editorial hero for
-// the /research page. Mirrors the rhythm of <AboutHero /> but with a
-// stat triplet on the right (peer-reviewed papers, open releases,
-// years co-designing with frontline communities) instead of a live
-// globe. The page already has a long carousel + ecosystem grid, so a
-// quieter hero gives the rest of the page room to land.
+// "Open models for biodiversity." — editorial hero for the /research
+// page. Mirrors the rhythm of <AboutHero /> AND <Hero /> on the
+// landing: same Cormorant Garamond display sizes
+// (`text-[44px] sm:text-[64px] lg:text-[88px]`) so all three pages
+// read as one site when a visitor moves between them. Don't drift
+// these sizes per-page — the design system holds the hero typography
+// constant across routes by deliberate choice.
 //
-// Numbers are intentionally hand-counted (not from an indexer feed):
-// the page is a research index, not a live data dashboard. We'd
-// rather under-count and bump the value when a new paper ships than
-// pretend an upstream tracker exists.
-export function ResearchHero() {
+// Stat triplet on the right replaces the live globe / documentary
+// photo used on the other heroes. KPI1 + KPI2 are hand-counted
+// (peer-reviewed papers / open releases — both move slowly enough
+// that an upstream tracker would be over-engineering). KPI3 is
+// streamed live from Hyperindex: the `app.gainforest.dwc.occurrence`
+// total, i.e. every Darwin Core biodiversity observation indexed
+// across partner PDS instances. The page fetches that number
+// server-side via `fetchOccurrenceCount()` and passes it down so
+// this component stays a pure render.
+
+// Locale codes for Intl.NumberFormat. The i18n locale codes are
+// short ("en", "es", "pt", "sw", "id") so we map them to BCP 47
+// region tags that produce the right thousands separators.
+const INTL_LOCALES: Record<string, string> = {
+  en: "en-US",
+  es: "es-ES",
+  pt: "pt-BR",
+  sw: "sw-KE",
+  id: "id-ID",
+};
+
+export function ResearchHero({
+  occurrencesCount,
+}: {
+  /** Live total of `app.gainforest.dwc.occurrence` records on
+   *  Hyperindex. Passed down by the server-rendered /research page;
+   *  the page itself falls back to the most recent known value if
+   *  the upstream is unreachable, so this is always a positive
+   *  integer. */
+  occurrencesCount: number;
+}) {
   const { locale } = useLocale();
   const t = getResearchT(locale);
+
+  const intlLocale = INTL_LOCALES[locale] ?? "en-US";
+  const occurrencesFormatted = new Intl.NumberFormat(intlLocale).format(
+    occurrencesCount,
+  );
 
   const before = t("research.hero.heading.before").trim();
   const italic = t("research.hero.heading.italic").trim();
   const after = t("research.hero.heading.after").trim();
 
-  const kpis: ReadonlyArray<{ value: string; label: string }> = [
+  const kpis: ReadonlyArray<{ value: string; label: string; live?: boolean }> = [
     {
       value: t("research.hero.kpi1.value"),
       label: t("research.hero.kpi1.label"),
@@ -34,8 +66,9 @@ export function ResearchHero() {
       label: t("research.hero.kpi2.label"),
     },
     {
-      value: t("research.hero.kpi3.value"),
+      value: occurrencesFormatted,
       label: t("research.hero.kpi3.label"),
+      live: true,
     },
   ];
 
@@ -47,7 +80,9 @@ export function ResearchHero() {
           <span className="font-instrument italic text-[13px] uppercase tracking-[0.22em] text-foreground/55">
             {t("research.eyebrow")}
           </span>
-          <h1 className="mt-5 font-garamond text-[44px] sm:text-[60px] lg:text-[78px] font-normal leading-[1.04] tracking-[-0.015em] text-foreground">
+          {/* Sizes locked to the landing / about hero — don't shrink
+              per-page. */}
+          <h1 className="mt-5 font-garamond text-[44px] sm:text-[64px] lg:text-[88px] font-normal leading-[1.04] tracking-[-0.015em] text-foreground">
             {before && (
               <Fragment>
                 <BrushedText text={before} />{" "}
@@ -63,10 +98,12 @@ export function ResearchHero() {
           </p>
         </div>
 
-        {/* RIGHT: stat triplet — three Garamond numbers stacked
-            vertically, each with an italic Instrument Serif label
-            beneath. Sits flush-right on desktop so the eye reads
-            headline → numbers in a single sweep. */}
+        {/* RIGHT: stat triplet. Garamond number + italic label per
+            row; the third row carries a small LIVE pill since its
+            value streams live from Hyperindex (matches the LIVE
+            chip on AboutStats). Big numbers shrink slightly so a
+            6-digit occurrence count doesn't overflow the column on
+            narrow desktops. */}
         <aside className="col-span-12 lg:col-span-5">
           <ul
             role="list"
@@ -75,11 +112,23 @@ export function ResearchHero() {
             {kpis.map((kpi, i) => (
               <li
                 key={i}
-                className="flex items-baseline gap-5 py-5 lg:py-6 lg:gap-7"
+                className="flex flex-wrap items-baseline gap-x-5 gap-y-2 py-5 lg:py-6 lg:gap-x-7"
               >
-                <span className="font-garamond text-[44px] sm:text-[52px] lg:text-[64px] font-normal leading-[0.95] tracking-[-0.015em] text-foreground">
+                <span className="font-garamond text-[40px] sm:text-[48px] lg:text-[56px] font-normal leading-[0.95] tracking-[-0.015em] text-foreground">
                   {kpi.value}
                 </span>
+                {kpi.live && (
+                  <span
+                    className="inline-flex items-center gap-1.5 text-[10px] font-medium uppercase tracking-[0.16em] text-brand-dark"
+                    title="Streamed from the GainForest indexer"
+                  >
+                    <span
+                      aria-hidden
+                      className="inline-block h-1.5 w-1.5 rounded-full bg-brand animate-pulse"
+                    />
+                    {t("research.live.label")}
+                  </span>
+                )}
                 <span className="font-instrument italic text-[14.5px] leading-[1.35] text-foreground/65 lg:text-[16px]">
                   {kpi.label}
                 </span>

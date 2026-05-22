@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { TopNav } from "../_components/TopNav";
 import { Footer } from "../_components/Footer";
+import { fetchOccurrenceCount } from "../_lib/occurrences";
 import { ResearchHero } from "./_components/ResearchHero";
 import { ResearchPublications } from "./_components/ResearchPublications";
 import { ResearchEcosystem } from "./_components/ResearchEcosystem";
@@ -26,12 +27,13 @@ const OG_IMAGE_PATH = "/og/landing-2026-05-19.png";
 const OG_IMAGE_ALT =
   "GainForest research; open papers, datasets, and protocols for community-led conservation.";
 
-// Server-rendered. The page is a static editorial index — no live
-// upstream feeds (papers don't have a Hyperindex equivalent), so
-// nothing to cache or revalidate beyond the standard route cache.
-// Setting revalidate anyway keeps the cache behaviour consistent
-// with /about and the landing.
-export const revalidate = 86_400;
+// Server-rendered. One live upstream feed today: the
+// `app.gainforest.dwc.occurrence` totalCount from Hyperindex, used
+// for the third hero KPI. The rest of the page is a static editorial
+// index. A 15-minute revalidate matches the cadence the bumicerts
+// fetcher uses on the landing so the two surfaces stay in sync if a
+// visitor moves between them.
+export const revalidate = 900;
 
 const RESEARCH_TITLE = "Research at GainForest";
 const RESEARCH_DESCRIPTION =
@@ -70,12 +72,19 @@ export const metadata: Metadata = {
   },
 };
 
-export default function ResearchPage() {
+export default async function ResearchPage() {
+  // Live Hyperindex count of `app.gainforest.dwc.occurrence`
+  // records (Darwin Core biodiversity observations across partner
+  // PDS instances). Fetcher swallows upstream errors and returns the
+  // most recent known value as a fallback, so this is always a
+  // positive integer.
+  const occurrences = await fetchOccurrenceCount();
+
   return (
     <div id="top" className="min-h-screen bg-background">
       <TopNav />
       <main>
-        <ResearchHero />
+        <ResearchHero occurrencesCount={occurrences.total} />
         <ResearchPublications />
         <ResearchEcosystem />
         <ResearchClosing />

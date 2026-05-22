@@ -453,6 +453,155 @@ export const ECOSYSTEM_PILLARS: ReadonlyArray<Translated<EcosystemPillar>> = [
   },
 ];
 
+// ── ML models, datasets, and pipelines ─────────────────────────────
+// Companion grid to ECOSYSTEM_PILLARS, focused on the open ML
+// artefacts behind the papers in the carousel. Each row points at a
+// real, downloadable destination (HuggingFace dataset card, GitHub
+// repo, or arXiv abstract when a canonical code release is not
+// public). Same shape as EcosystemPillar so the renderer is a single
+// component family.
+//
+// `channel` is the short "HuggingFace" / "GitHub" / "arXiv" label
+// that surfaces next to the name, the way the ATProto section uses
+// `role`. It tells an ML reader where the artefact actually lives.
+export type MlArtefact = {
+  id: string;
+  /** Short label, e.g. "ReforesTree". */
+  name: string;
+  /** Channel label in italic, e.g. "on arXiv". */
+  channel: string;
+  body: string;
+  href?: string;
+};
+
+export const ML_ARTEFACTS: ReadonlyArray<Translated<MlArtefact>> = [
+  {
+    id: "oam-tcd",
+    name: "OAM-TCD",
+    channel: "on HuggingFace",
+    body: "280,000+ instance annotations of individual tree crowns over OpenAerialMap imagery, plus Mask2Former and SegFormer baselines fine-tuned for instance and semantic segmentation; dataset and weights both released.",
+    href: "https://huggingface.co/restor/tcd-mask2former-r50",
+    i18n: {
+      es: {
+        channel: "en HuggingFace",
+        body: "Más de 280.000 anotaciones por instancia de copas individuales sobre imágenes de OpenAerialMap, junto con líneas base Mask2Former y SegFormer afinadas para segmentación por instancia y semántica; conjunto y pesos publicados.",
+      },
+      pt: {
+        channel: "no HuggingFace",
+        body: "Mais de 280.000 anotações por instância de copas individuais sobre imagens do OpenAerialMap, com baselines Mask2Former e SegFormer afinados para segmentação por instância e semântica; dataset e pesos publicados.",
+      },
+      sw: {
+        channel: "kwenye HuggingFace",
+        body: "Zaidi ya maelezo 280,000 ya kichanga cha kila mti kutoka picha za OpenAerialMap, pamoja na vipimo vya Mask2Former na SegFormer vilivyolinganishwa kwa ugawaji wa instance na semantic; seti na uzito vimetolewa.",
+      },
+      id: {
+        channel: "di HuggingFace",
+        body: "280.000+ anotasi instance untuk tajuk pohon individu dari citra OpenAerialMap, plus baseline Mask2Former dan SegFormer yang di-fine-tune untuk segmentasi instance dan semantik; dataset dan bobotnya sama-sama dirilis.",
+      },
+    },
+  },
+  {
+    id: "geo-bench",
+    name: "Geo-Bench",
+    channel: "on GitHub",
+    body: "Community benchmark suite for Earth-observation foundation models; six classification and six segmentation tasks across six remote-sensing modalities, with a shared pretrain / fine-tune protocol and leaderboard.",
+    href: "https://github.com/ServiceNow/geo-bench",
+    i18n: {
+      es: {
+        channel: "en GitHub",
+        body: "Suite comunitaria de benchmark para foundation models de observación de la Tierra; seis tareas de clasificación y seis de segmentación en seis modalidades de teledetección, con un protocolo común de preentrenamiento y fine-tuning más leaderboard.",
+      },
+      pt: {
+        channel: "no GitHub",
+        body: "Suite comunitária de benchmark para foundation models de observação da Terra; seis tarefas de classificação e seis de segmentação em seis modalidades de sensoriamento remoto, com um protocolo partilhado de pré-treino e fine-tuning mais leaderboard.",
+      },
+      sw: {
+        channel: "kwenye GitHub",
+        body: "Mkusanyiko wa benchmark wa jamii kwa foundation models za uchunguzi wa Dunia; kazi sita za uainishaji na sita za ugawaji katika njia sita za kuhisi kwa mbali, na itifaki ya pamoja ya pretrain na fine-tune pamoja na leaderboard.",
+      },
+      id: {
+        channel: "di GitHub",
+        body: "Suite benchmark komunitas untuk foundation model observasi Bumi; enam tugas klasifikasi dan enam segmentasi pada enam modalitas penginderaan jauh, dengan protokol pretrain / fine-tune bersama plus leaderboard.",
+      },
+    },
+  },
+  {
+    id: "reforestree",
+    name: "ReforesTree",
+    channel: "on arXiv",
+    body: "Drone photogrammetry across six agroforestry sites in Ecuador with per-tree carbon-stock annotations and CNN regression baselines; reused as a downstream task in later Earth-observation foundation-model evaluations.",
+    href: "https://arxiv.org/abs/2201.11192",
+    i18n: {
+      es: {
+        channel: "en arXiv",
+        body: "Fotogrametría con dron en seis sitios agroforestales de Ecuador con anotaciones de stock de carbono por árbol y líneas base de regresión con CNN; reutilizado como tarea downstream en evaluaciones posteriores de foundation models de observación de la Tierra.",
+      },
+      pt: {
+        channel: "no arXiv",
+        body: "Fotogrametria com drone em seis locais agroflorestais no Equador com anotações de stock de carbono por árvore e baselines de regressão com CNN; reutilizado como tarefa downstream em avaliações posteriores de foundation models de observação da Terra.",
+      },
+      sw: {
+        channel: "kwenye arXiv",
+        body: "Picha za drone katika maeneo sita ya kilimo cha misitu Ekuador zenye maelezo ya stoki ya kaboni kwa kila mti na vipimo vya regression vya CNN; imetumika tena kama kazi ya downstream katika tathmini za baadaye za foundation models za uchunguzi wa Dunia.",
+      },
+      id: {
+        channel: "di arXiv",
+        body: "Fotogrametri drone di enam lokasi agroforestri di Ekuador dengan anotasi cadangan karbon per pohon dan baseline regresi CNN; digunakan ulang sebagai tugas downstream dalam evaluasi foundation model observasi Bumi berikutnya.",
+      },
+    },
+  },
+  {
+    id: "biodivx-agents",
+    name: "BiodivX agents",
+    channel: "in IEEE T-FR",
+    body: "Multi-modal field pipeline behind the XPRIZE Rainforest win: autonomous aerial and aquatic drones, vision-language agents, bioacoustic classifiers, and on-site environmental DNA sequencing chained into a 24-hour biodiversity assessment.",
+    href: "https://ieeexplore.ieee.org/document/10976628",
+    i18n: {
+      es: {
+        channel: "en IEEE T-FR",
+        body: "Pipeline de campo multimodal detrás del triunfo en el XPRIZE Rainforest: drones autónomos aéreos y acuáticos, agentes visión-lenguaje, clasificadores bioacústicos y secuenciación de ADN ambiental in situ encadenados en una evaluación de biodiversidad de 24 horas.",
+      },
+      pt: {
+        channel: "na IEEE T-FR",
+        body: "Pipeline de campo multimodal por trás da vitória no XPRIZE Rainforest: drones autónomos aéreos e aquáticos, agentes visão-linguagem, classificadores bioacústicos e sequenciamento de ADN ambiental in situ encadeados numa avaliação de biodiversidade de 24 horas.",
+      },
+      sw: {
+        channel: "katika IEEE T-FR",
+        body: "Bomba la nyanjani la multi-modal nyuma ya ushindi wa XPRIZE Rainforest: ndege zisizo na rubani za angani na za majini, mawakala wa vision-language, vikadiriaji vya bioacoustic, na upangaji wa DNA ya mazingira papo hapo vimeunganishwa katika tathmini ya bayoanuwai ya saa 24.",
+      },
+      id: {
+        channel: "di IEEE T-FR",
+        body: "Pipeline lapangan multi-modal di balik kemenangan XPRIZE Rainforest: drone otonom udara dan akuatik, agen vision-language, klasifikator bioakustik, dan sekuensing DNA lingkungan langsung di lokasi dirangkai menjadi asesmen keanekaragaman hayati 24 jam.",
+      },
+    },
+  },
+  {
+    id: "taina",
+    name: "Taina",
+    channel: "on PDS + Telegram",
+    body: "Community-owned multilingual LLM assistant co-designed with Indigenous and local communities around Manaus; memory and contributions are stored as signed records on the contributor's own PDS rather than a vendor's database.",
+    href: "https://github.com/GainForest",
+    i18n: {
+      es: {
+        channel: "en PDS + Telegram",
+        body: "Asistente LLM multilingüe de propiedad comunitaria, co-diseñado con comunidades indígenas y locales alrededor de Manaos; la memoria y las contribuciones se guardan como registros firmados en el PDS de quien aporta y no en la base de datos de un proveedor.",
+      },
+      pt: {
+        channel: "em PDS + Telegram",
+        body: "Assistente LLM multilingue de propriedade comunitária, co-desenhado com comunidades indígenas e locais em torno de Manaus; a memória e as contribuições são guardadas como registos assinados no PDS de quem contribui e não na base de dados de um fornecedor.",
+      },
+      sw: {
+        channel: "kwenye PDS + Telegram",
+        body: "Msaidizi wa LLM wa lugha nyingi anayemilikiwa na jamii, aliyebuniwa pamoja na jamii za Asili na za eneo karibu na Manaus; kumbukumbu na michango huhifadhiwa kama rekodi zilizotiwa saini kwenye PDS ya mchangiaji badala ya hifadhidata ya muuzaji.",
+      },
+      id: {
+        channel: "di PDS + Telegram",
+        body: "Asisten LLM multibahasa milik komunitas, dirancang bersama komunitas Adat dan lokal di sekitar Manaus; memori dan kontribusi disimpan sebagai rekam bertanda tangan di PDS milik kontributor, bukan di basis data vendor.",
+      },
+    },
+  },
+];
+
 // ── External destinations linked from the research page ────────────
 export const EXTERNAL = {
   essay: "https://www.daviddao.org/posts/regenerative-intelligence/",
