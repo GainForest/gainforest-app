@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { TopNav } from "../_components/TopNav";
 import { Footer } from "../_components/Footer";
 import { ResearchHero } from "./_components/ResearchHero";
-import { ResearchTimeline } from "./_components/ResearchTimeline";
 import { ResearchPublications } from "./_components/ResearchPublications";
 import { ResearchEcosystem } from "./_components/ResearchEcosystem";
 import { ResearchClosing } from "./_components/ResearchClosing";
@@ -36,9 +35,9 @@ export const revalidate = 86_400;
 
 const RESEARCH_TITLE = "Research at GainForest";
 const RESEARCH_DESCRIPTION =
-  "Eight years of open research at the frontier of AI, decentralized systems, and biodiversity; from a 2017 UN hackathon to peer-reviewed papers at NeurIPS.";
+  "Peer-reviewed papers at NeurIPS, IEEE Field Robotics, and AAAI; open ATProto lexicons and a self-hostable Hypersphere stack for community-led conservation.";
 const RESEARCH_OG_TITLE =
-  "Research at GainForest; open AI for nature";
+  "Research at GainForest; open ML and lexicons for nature";
 
 export const metadata: Metadata = {
   title: RESEARCH_TITLE,
@@ -77,7 +76,6 @@ export default function ResearchPage() {
       <TopNav />
       <main>
         <ResearchHero />
-        <ResearchTimeline />
         <ResearchPublications />
         <ResearchEcosystem />
         <ResearchClosing />
