@@ -1,6 +1,7 @@
 "use client";
 
-import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { BrushedText } from "../../_components/BrushedText";
 import { useLocale } from "../../_components/LocaleProvider";
 import { LiveGlobe } from "../../_components/LiveGlobe";
 import type { ProjectPin } from "../../_lib/projects";
@@ -9,8 +10,11 @@ import { getAboutT } from "../_messages";
 // "We are tech support for nature." — editorial hero for the /about
 // page. Mirrors the landing hero's typography rhythm (Cormorant
 // Garamond display + Instrument Serif italic emphasis on a single
-// word) so the two surfaces feel like one site, but drops the brush
-// stroke — that's reserved for the home page's headline word.
+// word) so the two surfaces feel like one site, AND now uses the
+// same curved brush stroke under an emphasis phrase — the
+// equivalent of "tech support" in the active locale, marked with
+// `{...}` in the i18n string. See <BrushedText /> for the rendering
+// helper shared with the landing hero.
 //
 // Right column: the SAME LiveGlobe the landing's Partners section
 // uses, but stripped of its cream tile and chunky rounded card. Here
@@ -161,10 +165,14 @@ export function AboutHero({ pins }: { pins: ProjectPin[] }) {
             {t("about.eyebrow")}
           </span>
           <h1 className="mt-5 font-garamond text-[44px] sm:text-[64px] lg:text-[84px] font-normal leading-[1.04] tracking-[-0.015em] text-foreground">
+            {/* `before` carries a `{...}` marker around the emphasis
+                phrase ("tech support" in EN, equivalent phrase in
+                every other locale). <BrushedText /> renders the
+                curved hand-drawn paintbrush stroke underneath. */}
             {before && (
-              <Fragment>
-                <span>{before}</span>{" "}
-              </Fragment>
+              <>
+                <BrushedText text={before} />{" "}
+              </>
             )}
             <span className="font-instrument italic font-normal">
               {italic}

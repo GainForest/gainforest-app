@@ -75,7 +75,11 @@ type AboutMessages = {
 // ── English ─────────────────────────────────────────────────────────
 const EN: AboutMessages = {
   "about.eyebrow": "About",
-  "about.hero.heading.before": "We are tech support for",
+  // `{tech support}` marks the emphasis phrase that gets the curved
+  // hand-drawn brush stroke underneath (same recipe as the landing
+  // hero's `{Open}`). Equivalent phrase in each non-EN locale is
+  // marked below.
+  "about.hero.heading.before": "We are {tech support} for",
   "about.hero.heading.italic": "nature",
   "about.hero.heading.after": ".",
   "about.hero.lede":
@@ -133,7 +137,7 @@ const EN: AboutMessages = {
 // ── Español ─────────────────────────────────────────────────────────
 const ES: AboutMessages = {
   "about.eyebrow": "Acerca de",
-  "about.hero.heading.before": "Somos soporte técnico para la",
+  "about.hero.heading.before": "Somos {soporte técnico} para la",
   "about.hero.heading.italic": "naturaleza",
   "about.hero.heading.after": ".",
   "about.hero.lede":
@@ -191,7 +195,7 @@ const ES: AboutMessages = {
 // ── Português ───────────────────────────────────────────────────────
 const PT: AboutMessages = {
   "about.eyebrow": "Sobre nós",
-  "about.hero.heading.before": "Somos suporte técnico para a",
+  "about.hero.heading.before": "Somos {suporte técnico} para a",
   "about.hero.heading.italic": "natureza",
   "about.hero.heading.after": ".",
   "about.hero.lede":
@@ -249,7 +253,7 @@ const PT: AboutMessages = {
 // ── Kiswahili ───────────────────────────────────────────────────────
 const SW: AboutMessages = {
   "about.eyebrow": "Kuhusu sisi",
-  "about.hero.heading.before": "Sisi ni msaada wa kiteknolojia kwa",
+  "about.hero.heading.before": "Sisi ni {msaada wa kiteknolojia} kwa",
   "about.hero.heading.italic": "asili",
   "about.hero.heading.after": ".",
   "about.hero.lede":
@@ -307,7 +311,7 @@ const SW: AboutMessages = {
 // ── Bahasa Indonesia ────────────────────────────────────────────────
 const ID: AboutMessages = {
   "about.eyebrow": "Tentang kami",
-  "about.hero.heading.before": "Kami adalah dukungan teknis untuk",
+  "about.hero.heading.before": "Kami adalah {dukungan teknis} untuk",
   "about.hero.heading.italic": "alam",
   "about.hero.heading.after": ".",
   "about.hero.lede":

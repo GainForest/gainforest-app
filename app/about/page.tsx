@@ -30,7 +30,7 @@ const SITE_URL = (
 // Bump this whenever the about hero copy or photograph changes; Twitter
 // and Telegram cache OG by URL, so changing only the bytes behind the
 // old path will not refresh already-shared previews.
-const OG_IMAGE_PATH = "/og/about-2026-05-21.png";
+const OG_IMAGE_PATH = "/og/about-2026-05-22.png";
 const OG_IMAGE_ALT =
   "GainForest · About. The serif headline \"We are tech support for nature\" sits on a cream editorial background; on the right, a documentary photo of the GainForest team and Indigenous community standing together in front of a maloca in Greater Manaus.";
 

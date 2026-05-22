@@ -99,6 +99,28 @@
     font-weight: 400;
   }
 
+  /* Curved hand-drawn brush stroke under the "tech support" phrase,
+     same recipe as the landing OG and the live About hero (see
+     BrushedText.tsx). The brush stretches with the phrase via
+     preserveAspectRatio="none". */
+  .brushed {
+    position: relative;
+    display: inline-block;
+  }
+  .brushed-word { position: relative; z-index: 1; }
+  .brushed svg {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -10px;
+    height: 18px;
+    width: 100%;
+    overflow: visible;
+    color: var(--primary);
+    z-index: 0;
+    pointer-events: none;
+  }
+
   .subtitle {
     font-family: "Inter", system-ui, sans-serif;
     font-weight: 400;
@@ -181,7 +203,7 @@
       <div>
         <div class="eyebrow">About</div>
         <h1>
-          We are tech support<br />
+          We are <span class="brushed"><span class="brushed-word">tech support</span><svg viewBox="0 0 178 16" preserveAspectRatio="none" aria-hidden="true"><path d="M 3 10.5 C 44 6.5 87 6 175 8.5" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" /></svg></span><br />
           for <span class="italic">nature</span>.
         </h1>
 
