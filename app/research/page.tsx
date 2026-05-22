@@ -19,14 +19,22 @@ const SITE_URL = (
     : CANONICAL_SITE_URL
 ).replace(/\/$/, "");
 
-// /research inherits the landing OG until we render a dedicated
-// research card (same flow as /about: add a versioned PNG via
-// scripts/render-og.sh when copy / layout settles). For now the
-// metadata block points at the landing card so shares of /research
-// still render a branded preview rather than a blank fallback.
-const OG_IMAGE_PATH = "/og/landing-2026-05-19.png";
+// Versioned per-route OG image. Rendered from `scripts/og-template-research.html`
+// via `scripts/render-og.sh --slug research <date>` so it sits in the
+// same visual language as the landing + about OGs: Cormorant Garamond
+// + Instrument Serif italic emphasis, cream palette, curved brush
+// stroke under "Open". The right half is the remote-sensing pillar
+// still (aerial canopy with tree-crown segmentation polygons), which
+// visually anchors the three biggest research artefacts on the page
+// (OAM-TCD, Geo-Bench, BiodivX) without needing a caption.
+//
+// Bump this whenever the research hero copy, palette, or photo
+// changes; Twitter / Telegram / Bluesky cache OG by URL, so changing
+// only the bytes behind the old path will not refresh already-shared
+// previews.
+const OG_IMAGE_PATH = "/og/research-2026-05-22.png";
 const OG_IMAGE_ALT =
-  "GainForest research; open papers, datasets, and protocols for community-led conservation.";
+  "GainForest · Research. The serif headline \"Open models for biodiversity\" sits on a cream editorial background with a hand-drawn brush stroke under \"Open\"; on the right, an aerial photograph of forest canopy with tree-crown segmentation polygons drawn over individual trees.";
 
 // Server-rendered. One live upstream feed today: the
 // `app.gainforest.dwc.occurrence` totalCount from Hyperindex, used

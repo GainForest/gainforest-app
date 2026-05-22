@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>GainForest OG — Research</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link
+  href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500&display=swap"
+  rel="stylesheet"
+/>
+<style>
+  /* Research OG card.
+     Same fonts, palette, and brand chrome as the main landing OG
+     (scripts/og-template.html) and the About OG so a shared
+     preview reads as "the same site, the Research page". Specifics:
+       - Headline is the research-page hero ("Open models for biodiversity.")
+       - Curved hand-drawn brush stroke under "Open" (matches the
+         live ResearchHero — both lead with the same emphasis word).
+       - Italic emphasis sits on "biodiversity".
+       - Photograph is the remote-sensing pillar still (aerial canopy
+         with tree-crown segmentation polygons): it visually anchors
+         the three biggest research artefacts on the page (OAM-TCD,
+         Geo-Bench, BiodivX) without needing a caption.
+       - Subtitle mirrors the research-page lede.
+
+     Re-render with `scripts/render-og.sh --slug research` and bump
+     the OG_IMAGE_PATH constant in app/research/page.tsx so cached
+     previews refresh. */
+  :root {
+    --background: #f4efe4;
+    --foreground: #1c1c1a;
+    --primary: #3e7053;
+    --brand: #2fce8a;
+    --border-soft: #e6dfd0;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+
+  .og {
+    width: 1200px;
+    height: 630px;
+    display: grid;
+    grid-template-columns: 690px 510px;
+    background: var(--background);
+    font-family: "Inter", system-ui, sans-serif;
+    color: var(--foreground);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .left {
+    padding: 56px 56px 56px 72px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    color: var(--foreground);
+  }
+  .brand .mark {
+    width: 44px;
+    height: 44px;
+    background-image: url("file://__PUBLIC__/decor/gainforest-logo.svg");
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+  }
+  .brand .wordmark {
+    font-family: "Cormorant Garamond", Georgia, serif;
+    font-weight: 500;
+    font-size: 30px;
+    letter-spacing: -0.005em;
+  }
+
+  .eyebrow {
+    font-family: "Instrument Serif", Georgia, serif;
+    font-style: italic;
+    font-weight: 400;
+    font-size: 14px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: rgba(28, 28, 26, 0.55);
+    margin-bottom: 18px;
+  }
+
+  h1 {
+    font-family: "Cormorant Garamond", Georgia, serif;
+    font-weight: 400;
+    font-size: 88px;
+    line-height: 1.02;
+    letter-spacing: -0.015em;
+    margin: 0;
+    color: var(--foreground);
+  }
+  h1 .italic {
+    font-family: "Instrument Serif", Georgia, serif;
+    font-style: italic;
+    font-weight: 400;
+  }
+
+  /* Curved hand-drawn brush stroke under the "Open" word, same
+     recipe as the landing OG and the live ResearchHero (see
+     BrushedText.tsx). preserveAspectRatio="none" stretches the
+     stroke with the word width; the arc flattens for wider words. */
+  .brushed {
+    position: relative;
+    display: inline-block;
+  }
+  .brushed-word { position: relative; z-index: 1; }
+  .brushed svg {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -10px;
+    height: 18px;
+    width: 100%;
+    overflow: visible;
+    color: var(--primary);
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  .subtitle {
+    font-family: "Inter", system-ui, sans-serif;
+    font-weight: 400;
+    font-size: 19px;
+    line-height: 1.5;
+    color: rgba(28, 28, 26, 0.82);
+    max-width: 540px;
+    margin-top: 26px;
+  }
+
+  .footer-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-family: "Instrument Serif", Georgia, serif;
+    font-style: italic;
+    font-weight: 400;
+    font-size: 18px;
+    color: rgba(28, 28, 26, 0.55);
+    letter-spacing: 0.005em;
+  }
+  .footer-row::before {
+    content: "";
+    flex: 0 0 36px;
+    height: 1px;
+    background: rgba(28, 28, 26, 0.25);
+  }
+
+  /* RIGHT — the remote-sensing pillar still. Slightly darker base
+     than the About OG because the canopy imagery is naturally
+     darker than the maloca shot, so the feathered seam needs less
+     work to blend. */
+  .right {
+    position: relative;
+    width: 510px;
+    height: 630px;
+    overflow: hidden;
+    background: #0a1610;
+  }
+  .right .photo {
+    position: absolute;
+    inset: 0;
+    background-image: url("file://__PUBLIC__/videos/pillar-remote-sensing-poster.webp");
+    background-size: cover;
+    background-position: center center;
+    filter: saturate(1.04) contrast(1.05);
+  }
+  .right .feather {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      to right,
+      var(--background) 0%,
+      rgba(244, 239, 228, 0.0) 14px,
+      rgba(244, 239, 228, 0.0) 100%
+    );
+    pointer-events: none;
+  }
+  .right .vignette {
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(
+        to right,
+        rgba(0, 0, 0, 0.10) 0%,
+        rgba(0, 0, 0, 0.0) 18%,
+        rgba(0, 0, 0, 0.0) 100%
+      );
+    pointer-events: none;
+  }
+</style>
+</head>
+<body>
+  <div class="og">
+    <div class="left">
+      <div class="brand">
+        <div class="mark"></div>
+        <div class="wordmark">GainForest</div>
+      </div>
+
+      <div>
+        <div class="eyebrow">Research</div>
+        <h1>
+          <span class="brushed"><span class="brushed-word">Open</span><svg viewBox="0 0 178 16" preserveAspectRatio="none" aria-hidden="true"><path d="M 3 10.5 C 44 6.5 87 6 175 8.5" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" /></svg></span> models<br />
+          for <span class="italic">biodiversity</span>.
+        </h1>
+
+        <p class="subtitle">
+          Peer-reviewed papers at NeurIPS, IEEE Field Robotics, and AAAI. Open ATProto lexicons. A self-hostable Hypersphere stack. Built with frontline partners; freely usable.
+        </p>
+      </div>
+
+      <div class="footer-row">
+        Open ML and lexicons for nature &nbsp;·&nbsp; gainforest.app/research
+      </div>
+    </div>
+
+    <div class="right">
+      <div class="photo"></div>
+      <div class="vignette"></div>
+      <div class="feather"></div>
+    </div>
+  </div>
+</body>
+</html>
