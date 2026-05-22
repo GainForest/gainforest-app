@@ -355,23 +355,23 @@ export const TIMELINE: ReadonlyArray<Translated<TimelineEntry>> = [
   {
     year: "2022",
     title: "Registered as a Swiss non-profit",
-    body: "GainForest e.V. is registered in Zurich, with two years of operational runway and direct support from the Ethereum Foundation.",
+    body: "GainForest e.V. is registered in Zurich and granted tax-exempt status by the Swiss authorities.",
     i18n: {
       es: {
         title: "Registro como ONG suiza",
-        body: "GainForest e.V. se registra en Zúrich, con dos años de runway operativo y apoyo directo de la Ethereum Foundation.",
+        body: "GainForest e.V. se registra en Zúrich y recibe el estatus de exención fiscal por parte de las autoridades suizas.",
       },
       pt: {
         title: "Registada como ONG suíça",
-        body: "A GainForest e.V. é registada em Zurique, com dois anos de runway operacional e apoio direto da Ethereum Foundation.",
+        body: "A GainForest e.V. é registada em Zurique e recebe o estatuto de isenção fiscal das autoridades suíças.",
       },
       sw: {
         title: "Imesajiliwa kama shirika lisilo la faida la Uswisi",
-        body: "GainForest e.V. inasajiliwa Zurich, ikiwa na miaka miwili ya rasilimali za uendeshaji na msaada wa moja kwa moja kutoka Ethereum Foundation.",
+        body: "GainForest e.V. inasajiliwa Zurich na kupewa hadhi ya kutotozwa kodi na mamlaka za Uswisi.",
       },
       id: {
         title: "Terdaftar sebagai nirlaba Swiss",
-        body: "GainForest e.V. terdaftar di Zurich, dengan dua tahun runway operasional dan dukungan langsung dari Ethereum Foundation.",
+        body: "GainForest e.V. terdaftar di Zurich dan menerima status bebas pajak dari otoritas Swiss.",
       },
     },
   },
