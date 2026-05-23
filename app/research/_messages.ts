@@ -88,8 +88,11 @@ const EN: ResearchMessages = {
   "research.hero.heading.after": ".",
   "research.hero.lede":
     "Peer-reviewed papers at NeurIPS, IEEE Field Robotics, and AAAI. Open ATProto lexicons. A self-hostable Hypersphere stack. Built with frontline partners; freely usable.",
-  "research.hero.kpi1.value": "4",
-  "research.hero.kpi1.label": "peer-reviewed papers at NeurIPS, IEEE, and AAAI",
+  // KPI1 value is computed live from PUBLICATIONS + WORKSHOP_PAPERS
+  // in ResearchHero (so the count never drifts behind the data).
+  // The label still names the venues.
+  "research.hero.kpi1.value": "",
+  "research.hero.kpi1.label": "papers at NeurIPS, ICML, ICLR, IEEE, and AAAI",
   "research.hero.kpi2.value": "5",
   "research.hero.kpi2.label": "open lexicons, datasets, and services",
   // KPI3 streams live from Hyperindex (Darwin Core occurrence
@@ -150,8 +153,8 @@ const ES: ResearchMessages = {
   "research.hero.heading.after": ".",
   "research.hero.lede":
     "Artículos revisados por pares en NeurIPS, IEEE Field Robotics y AAAI. Lexicones ATProto abiertos. Una pila Hypersphere autoalojable. Construido con socios de primera línea; de uso libre.",
-  "research.hero.kpi1.value": "4",
-  "research.hero.kpi1.label": "artículos revisados por pares en NeurIPS, IEEE y AAAI",
+  "research.hero.kpi1.value": "",
+  "research.hero.kpi1.label": "artículos en NeurIPS, ICML, ICLR, IEEE y AAAI",
   "research.hero.kpi2.value": "5",
   "research.hero.kpi2.label": "lexicones, conjuntos de datos y servicios abiertos",
   "research.hero.kpi3.value": "",
@@ -209,8 +212,8 @@ const PT: ResearchMessages = {
   "research.hero.heading.after": ".",
   "research.hero.lede":
     "Artigos revistos por pares no NeurIPS, IEEE Field Robotics e AAAI. Léxicons ATProto abertos. Uma stack Hypersphere auto-hospedável. Construído com parceiros de base; de uso livre.",
-  "research.hero.kpi1.value": "4",
-  "research.hero.kpi1.label": "artigos revistos por pares no NeurIPS, IEEE e AAAI",
+  "research.hero.kpi1.value": "",
+  "research.hero.kpi1.label": "artigos no NeurIPS, ICML, ICLR, IEEE e AAAI",
   "research.hero.kpi2.value": "5",
   "research.hero.kpi2.label": "léxicons, conjuntos de dados e serviços abertos",
   "research.hero.kpi3.value": "",
@@ -268,8 +271,8 @@ const SW: ResearchMessages = {
   "research.hero.heading.after": ".",
   "research.hero.lede":
     "Makala zilizopitiwa na wenzao kwenye NeurIPS, IEEE Field Robotics, na AAAI. Lexicons wazi za ATProto. Stack ya Hypersphere inayoweza kujihifadhi. Imejengwa pamoja na washirika wa mstari wa mbele; ya matumizi ya bure.",
-  "research.hero.kpi1.value": "4",
-  "research.hero.kpi1.label": "makala zilizopitiwa na wenzao katika NeurIPS, IEEE na AAAI",
+  "research.hero.kpi1.value": "",
+  "research.hero.kpi1.label": "makala katika NeurIPS, ICML, ICLR, IEEE na AAAI",
   "research.hero.kpi2.value": "5",
   "research.hero.kpi2.label": "lexicons, seti za data, na huduma wazi",
   "research.hero.kpi3.value": "",
@@ -327,8 +330,8 @@ const ID: ResearchMessages = {
   "research.hero.heading.after": ".",
   "research.hero.lede":
     "Makalah peer-review di NeurIPS, IEEE Field Robotics, dan AAAI. Leksikon ATProto terbuka. Stack Hypersphere yang dapat dihosting sendiri. Dibangun bersama mitra garis depan; bebas digunakan.",
-  "research.hero.kpi1.value": "4",
-  "research.hero.kpi1.label": "makalah peer-review di NeurIPS, IEEE, dan AAAI",
+  "research.hero.kpi1.value": "",
+  "research.hero.kpi1.label": "makalah di NeurIPS, ICML, ICLR, IEEE, dan AAAI",
   "research.hero.kpi2.value": "5",
   "research.hero.kpi2.label": "leksikon, dataset, dan layanan terbuka",
   "research.hero.kpi3.value": "",
