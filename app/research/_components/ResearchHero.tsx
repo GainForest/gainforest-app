@@ -4,25 +4,24 @@ import { Fragment } from "react";
 import { BrushedText } from "../../_components/BrushedText";
 import { useLocale } from "../../_components/LocaleProvider";
 import { getResearchT } from "../_messages";
-import { PUBLICATIONS, WORKSHOP_PAPERS } from "../_data";
+import { PUBLICATIONS } from "../_data";
 
-// Count of academic papers on this page. We compute it from the data
-// arrays at render time so it can never drift behind reality —
-// add a publication to PUBLICATIONS or WORKSHOP_PAPERS and the
-// hero KPI ticks up automatically.
+// Count of academic papers on this page. We compute it from the
+// PUBLICATIONS array at render time so it can never drift behind
+// reality — add a publication and the hero KPI ticks up
+// automatically.
 //
-// Includes every PUBLICATIONS entry that's a paper / dataset /
-// workshop (i.e. drops essays and invited talks, which aren't
-// reviewed academic publications) plus every CCAI workshop entry.
-// As of writing: 4 main-conference / journal papers + 6 CCAI
-// workshop papers = 10. The hero kpi1.value in i18n is left empty
-// because the live count below overrides it; the i18n label still
-// names the venues so the locale block carries the human-facing
+// Includes every entry that's a paper / dataset / workshop (i.e.
+// drops essays and invited talks, which aren't reviewed academic
+// publications). As of writing: 4 main-conference / journal papers +
+// 6 CCAI workshop papers = 10. The hero kpi1.value in i18n is left
+// empty because the live count below overrides it; the i18n label
+// still names the venues so the locale block carries the human-facing
 // translation.
 const PAPER_KINDS = new Set(["paper", "dataset", "workshop"]);
-const PAPERS_COUNT =
-  PUBLICATIONS.filter((p) => PAPER_KINDS.has(p.kind)).length +
-  WORKSHOP_PAPERS.length;
+const PAPERS_COUNT = PUBLICATIONS.filter((p) =>
+  PAPER_KINDS.has(p.kind),
+).length;
 
 // "Open models for biodiversity." — editorial hero for the /research
 // page. Mirrors the rhythm of <AboutHero /> AND <Hero /> on the
@@ -77,8 +76,8 @@ export function ResearchHero({
 
   const kpis: ReadonlyArray<{ value: string; label: string; live?: boolean }> = [
     {
-      // Live count of academic papers on this page (carousel papers /
-      // datasets / workshops + CCAI bibliography), computed above.
+      // Live count of academic papers on this page (carousel
+      // papers / datasets / workshops), computed above.
       value: String(PAPERS_COUNT),
       label: t("research.hero.kpi1.label"),
     },

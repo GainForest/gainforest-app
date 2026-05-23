@@ -274,6 +274,188 @@ export const PUBLICATIONS: ReadonlyArray<Translated<Publication>> = [
     },
   },
   {
+    slug: "forestbench",
+    kind: "workshop",
+    year: "2022",
+    venue: "NeurIPS CCAI",
+    title:
+      "ForestBench: Equitable Benchmarks for Monitoring, Reporting, and Verification of Nature-Based Solutions with Machine Learning",
+    authors:
+      "Newman, Exposito-Alonso, Czech, Dao, Lütjens, Gillespie, Hao, Cottam",
+    summary:
+      "Six benchmark tasks for monitoring, reporting, and verification of nature-based solutions; protocol-level definitions of fairness, uncertainty, and equitable cost-of-error across forest-carbon ML pipelines.",
+    href: "https://www.climatechange.ai/papers/neurips2022/107",
+    i18n: {
+      es: {
+        summary:
+          "Seis tareas de benchmark para monitoreo, reporte y verificación de soluciones basadas en la naturaleza; definiciones a nivel de protocolo de equidad, incertidumbre y costo de error justo en pipelines de ML para carbono forestal.",
+      },
+      pt: {
+        summary:
+          "Seis tarefas de benchmark para monitorização, reporte e verificação de soluções baseadas na natureza; definições ao nível do protocolo de equidade, incerteza e custo de erro justo em pipelines de ML para carbono florestal.",
+      },
+      sw: {
+        summary:
+          "Kazi sita za benchmark kwa ufuatiliaji, ripoti, na uthibitisho wa suluhisho zinazotegemea asili; ufafanuzi wa kiwango cha itifaki wa usawa, kutokuwa na uhakika, na gharama ya makosa katika mabomba ya ML ya kaboni ya msitu.",
+      },
+      id: {
+        summary:
+          "Enam tugas benchmark untuk pemantauan, pelaporan, dan verifikasi solusi berbasis alam; definisi tingkat protokol untuk keadilan, ketidakpastian, dan biaya kesalahan yang setara dalam pipeline ML karbon hutan.",
+      },
+    },
+  },
+  {
+    slug: "overestimation-forest-carbon",
+    kind: "workshop",
+    year: "2021",
+    venue: "ICML CCAI",
+    title:
+      "Tackling the Overestimation of Forest Carbon with Deep Learning and Aerial Imagery",
+    authors: "Reiersen, Dao, Lütjens, Klemmer, Zhu, Zhang",
+    summary:
+      "Spotlight. UAV imagery and CNN regression on six Ecuadorian agroforestry sites exposing systematic overestimation in forest-carbon stock claims relative to allometric ground truth.",
+    href: "https://www.climatechange.ai/papers/icml2021/79",
+    i18n: {
+      es: {
+        summary:
+          "Spotlight. Imágenes de UAV y regresión CNN en seis sitios agroforestales de Ecuador que exponen una sobrestimación sistemática en los reclamos de stock de carbono forestal frente a la verdad de campo alométrica.",
+      },
+      pt: {
+        summary:
+          "Spotlight. Imagens de UAV e regressão CNN em seis locais agroflorestais no Equador que expõem sobrestimação sistemática nas reivindicações de stock de carbono florestal face à verdade de campo alométrica.",
+      },
+      sw: {
+        summary:
+          "Spotlight. Picha za drone na regression ya CNN katika maeneo sita ya kilimo cha misitu nchini Ekuador zinaonyesha makadirio ya kupindukia ya kimfumo katika madai ya stoki ya kaboni ya msitu ikilinganishwa na ukweli wa allometric wa nyanjani.",
+      },
+      id: {
+        summary:
+          "Spotlight. Citra UAV dan regresi CNN di enam lokasi agroforestri Ekuador yang mengungkap overestimasi sistematis dalam klaim cadangan karbon hutan terhadap ground truth alometri.",
+      },
+    },
+  },
+  {
+    slug: "xingu",
+    kind: "workshop",
+    year: "2020",
+    venue: "ICLR CCAI",
+    title:
+      "Xingu: Explaining Critical Geospatial Predictions in Weak Supervision for Climate Finance",
+    authors: "Dao, Rausch, Zhang, Rott",
+    summary:
+      "Saliency and influence-function diagnostics applied to weakly-supervised geospatial classifiers driving climate-finance decisions; case study on Amazonian forest-loss models.",
+    href: "https://www.climatechange.ai/papers/iclr2020/25",
+    i18n: {
+      es: {
+        summary:
+          "Diagnósticos de saliencia y funciones de influencia aplicados a clasificadores geoespaciales con supervisión débil que orientan decisiones de financiamiento climático; estudio de caso en modelos de pérdida forestal amazónica.",
+      },
+      pt: {
+        summary:
+          "Diagnósticos de saliência e funções de influência aplicados a classificadores geoespaciais com supervisão fraca que orientam decisões de financiamento climático; estudo de caso em modelos de perda florestal amazónica.",
+      },
+      sw: {
+        summary:
+          "Uchunguzi wa saliency na influence functions uliotumika kwa vikadiriaji vya geospatial vya usimamizi dhaifu vinavyoongoza maamuzi ya fedha za hali ya hewa; uchunguzi wa kesi juu ya mifano ya upotezaji wa msitu wa Amazon.",
+      },
+      id: {
+        summary:
+          "Diagnostik saliency dan influence function diterapkan pada klasifikator geospasial dengan supervisi lemah yang menggerakkan keputusan pendanaan iklim; studi kasus pada model kehilangan hutan Amazon.",
+      },
+    },
+  },
+  {
+    slug: "truebranch",
+    kind: "workshop",
+    year: "2020",
+    venue: "ICLR CCAI",
+    title:
+      "TrueBranch: Metric Learning-based Verification of Forest Conservation Projects",
+    authors: "Santamaria, Dao, Lütjens, Zhang",
+    summary:
+      "Best Proposal Award. Metric-learning verification of forest conservation projects; on-site and off-site ground-truth photographs embedded into a space where authentic claims separate from staged ones.",
+    href: "https://www.climatechange.ai/papers/iclr2020/23",
+    i18n: {
+      es: {
+        summary:
+          "Best Proposal Award. Verificación por metric learning de proyectos de conservación forestal; fotografías de campo dentro y fuera del sitio incrustadas en un espacio donde los reclamos auténticos se separan de los simulados.",
+      },
+      pt: {
+        summary:
+          "Best Proposal Award. Verificação por metric learning de projetos de conservação florestal; fotografias de terreno dentro e fora do local incorporadas num espaço onde reivindicações autênticas se separam das encenadas.",
+      },
+      sw: {
+        summary:
+          "Best Proposal Award. Uthibitisho wa miradi ya uhifadhi wa misitu kwa metric learning; picha za nyanjani za ndani na nje ya eneo zimewekwa katika nafasi ambapo madai ya kweli yanajitenga na yale ya kuigizwa.",
+      },
+      id: {
+        summary:
+          "Best Proposal Award. Verifikasi proyek konservasi hutan berbasis metric learning; foto ground-truth di lokasi dan di luar lokasi ditanam dalam ruang di mana klaim autentik terpisah dari yang direkayasa.",
+      },
+    },
+  },
+  {
+    slug: "geolabels",
+    kind: "workshop",
+    year: "2019",
+    venue: "NeurIPS CCAI",
+    title:
+      "GeoLabels: Towards Efficient Ecosystem Monitoring using Data Programming on Geospatial Information",
+    authors: "Dao, Rausch, Zhang",
+    summary:
+      "Snorkel-style data programming on geospatial features; weak-supervision labelling for ecosystem monitoring at continental scale without per-pixel ground truth.",
+    href: "https://www.climatechange.ai/papers/neurips2019/51",
+    i18n: {
+      es: {
+        summary:
+          "Programación de datos al estilo Snorkel sobre características geoespaciales; etiquetado por supervisión débil para monitoreo de ecosistemas a escala continental sin verdad de campo por píxel.",
+      },
+      pt: {
+        summary:
+          "Programação de dados ao estilo Snorkel sobre características geoespaciais; etiquetagem por supervisão fraca para monitorização de ecossistemas à escala continental sem verdade de campo por píxel.",
+      },
+      sw: {
+        summary:
+          "Programu ya data ya mtindo wa Snorkel kwenye sifa za geospatial; uwekaji wa lebo kwa usimamizi dhaifu kwa ufuatiliaji wa mfumo wa ikolojia kwa kiwango cha bara bila ukweli wa nyanjani kwa kila pixeli.",
+      },
+      id: {
+        summary:
+          "Pemrograman data gaya Snorkel pada fitur geospasial; pelabelan supervisi lemah untuk pemantauan ekosistem berskala benua tanpa ground truth per-piksel.",
+      },
+    },
+  },
+  {
+    slug: "gainforest-2019",
+    kind: "workshop",
+    year: "2019",
+    venue: "ICML CCAI",
+    title:
+      "GainForest: Scaling Climate Finance for Forest Conservation using Interpretable Machine Learning on Satellite Imagery",
+    authors:
+      "Dao, Cang, Fung, Zhang, Pawlowski, Gonzales, Beglinger, Liu Zhang",
+    summary:
+      "Founding workshop paper. Interpretable ML on satellite imagery driving smart-contract payouts to forest stewards; the original architecture this entire research programme is built on.",
+    href: "https://www.climatechange.ai/papers/icml2019/36",
+    i18n: {
+      es: {
+        summary:
+          "Artículo fundador del taller. ML interpretable sobre imágenes satelitales que activa pagos por contrato inteligente a guardianes del bosque; la arquitectura original sobre la que se construye todo este programa de investigación.",
+      },
+      pt: {
+        summary:
+          "Artigo fundador do workshop. ML interpretável sobre imagens de satélite que aciona pagamentos por smart contract a guardiões da floresta; a arquitetura original sobre a qual todo este programa de pesquisa é construído.",
+      },
+      sw: {
+        summary:
+          "Karatasi ya msingi ya warsha. ML inayoeleweka kwenye picha za setilaiti inayoendesha malipo ya mkataba mahiri kwa walinzi wa msitu; usanifu wa awali ambao programu hii yote ya utafiti imejengwa juu yake.",
+      },
+      id: {
+        summary:
+          "Makalah pendiri lokakarya. ML interpretable pada citra satelit yang menggerakkan pembayaran smart contract kepada penjaga hutan; arsitektur asli yang menjadi fondasi seluruh program riset ini.",
+      },
+    },
+  },
+  {
     slug: "decentralized-sustainability",
     kind: "essay",
     year: "2018",
@@ -599,93 +781,6 @@ export const ML_ARTEFACTS: ReadonlyArray<Translated<MlArtefact>> = [
         body: "Asisten LLM multibahasa milik komunitas, dirancang bersama komunitas Adat dan lokal di sekitar Manaus; memori dan kontribusi disimpan sebagai rekam bertanda tangan di PDS milik kontributor, bukan di basis data vendor.",
       },
     },
-  },
-];
-
-// ── Climate Change AI workshop bibliography ───────────────────────────
-// Companion list to the main publications carousel, scoped to
-// papers accepted at the Tackling Climate Change with Machine
-// Learning (CCAI) workshops at NeurIPS / ICML / ICLR. Together
-// these six entries trace GainForest's research arc from the
-// founding 2019 proposal through ForestBench 2022; they sit on the
-// /research page as a compact academic bibliography rather than as
-// carousel cards (the carousel headline is 'Selected', and surfacing
-// the full CCAI run there would dilute that signal).
-//
-// Authors fields keep the en-dash-free latin-name spelling the way
-// the CCAI paper pages list them, including diacritics ("Lütjens").
-// `award` mirrors what each paper carries on its CCAI page; we don't
-// invent recognitions that aren't there.
-export type WorkshopPaper = {
-  slug: string;
-  year: string;
-  /** Venue label like "NeurIPS CCAI" or "ICML CCAI". */
-  venue: string;
-  title: string;
-  authors: string;
-  /** Optional CCAI recognition ("Spotlight", "Best Proposal Award"); rendered as a small primary-tinted chip if present. */
-  award?: string;
-  href: string;
-};
-
-export const WORKSHOP_PAPERS: ReadonlyArray<WorkshopPaper> = [
-  {
-    slug: "forestbench",
-    year: "2022",
-    venue: "NeurIPS CCAI",
-    title:
-      "ForestBench: Equitable Benchmarks for Monitoring, Reporting, and Verification of Nature-Based Solutions with Machine Learning",
-    authors:
-      "Newman, Exposito-Alonso, Czech, Dao, Lütjens, Gillespie, Hao, Cottam",
-    href: "https://www.climatechange.ai/papers/neurips2022/107",
-  },
-  {
-    slug: "overestimation-forest-carbon",
-    year: "2021",
-    venue: "ICML CCAI",
-    title:
-      "Tackling the Overestimation of Forest Carbon with Deep Learning and Aerial Imagery",
-    authors: "Reiersen, Dao, Lütjens, Klemmer, Zhu, Zhang",
-    award: "Spotlight",
-    href: "https://www.climatechange.ai/papers/icml2021/79",
-  },
-  {
-    slug: "xingu",
-    year: "2020",
-    venue: "ICLR CCAI",
-    title:
-      "Xingu: Explaining Critical Geospatial Predictions in Weak Supervision for Climate Finance",
-    authors: "Dao, Rausch, Zhang, Rott",
-    href: "https://www.climatechange.ai/papers/iclr2020/25",
-  },
-  {
-    slug: "truebranch",
-    year: "2020",
-    venue: "ICLR CCAI",
-    title:
-      "TrueBranch: Metric Learning-based Verification of Forest Conservation Projects",
-    authors: "Santamaria, Dao, Lütjens, Zhang",
-    award: "Best Proposal Award",
-    href: "https://www.climatechange.ai/papers/iclr2020/23",
-  },
-  {
-    slug: "geolabels",
-    year: "2019",
-    venue: "NeurIPS CCAI",
-    title:
-      "GeoLabels: Towards Efficient Ecosystem Monitoring using Data Programming on Geospatial Information",
-    authors: "Dao, Rausch, Zhang",
-    href: "https://www.climatechange.ai/papers/neurips2019/51",
-  },
-  {
-    slug: "gainforest-2019",
-    year: "2019",
-    venue: "ICML CCAI",
-    title:
-      "GainForest: Scaling Climate Finance for Forest Conservation using Interpretable Machine Learning on Satellite Imagery",
-    authors:
-      "Dao, Cang, Fung, Zhang, Pawlowski, Gonzales, Beglinger, Liu Zhang",
-    href: "https://www.climatechange.ai/papers/icml2019/36",
   },
 ];
 
