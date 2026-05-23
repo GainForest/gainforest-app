@@ -6,6 +6,7 @@ import { ResearchHero } from "./_components/ResearchHero";
 import { ResearchPublications } from "./_components/ResearchPublications";
 import { ResearchEcosystem } from "./_components/ResearchEcosystem";
 import { ResearchModels } from "./_components/ResearchModels";
+import { ResearchWorkshop } from "./_components/ResearchWorkshop";
 import { ResearchClosing } from "./_components/ResearchClosing";
 
 // Same canonical-URL guard layout.tsx and /about use; we never let
@@ -97,6 +98,7 @@ export default async function ResearchPage() {
         <ResearchPublications />
         <ResearchEcosystem />
         <ResearchModels />
+        <ResearchWorkshop />
         <ResearchClosing />
       </main>
       <Footer />

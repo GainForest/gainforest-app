@@ -62,6 +62,13 @@ type ResearchMessages = {
   "research.models.heading.after": string;
   "research.models.subheading": string;
 
+  // Climate Change AI workshop bibliography
+  "research.workshop.eyebrow": string;
+  "research.workshop.heading.before": string;
+  "research.workshop.heading.italic": string;
+  "research.workshop.heading.after": string;
+  "research.workshop.subheading": string;
+
   // Closing CTA
   "research.closing.eyebrow": string;
   "research.closing.heading.before": string;
@@ -117,6 +124,13 @@ const EN: ResearchMessages = {
   "research.models.subheading":
     "Every artefact behind the papers above is downloadable today. Trained weights and datasets on HuggingFace, benchmark suites and field pipelines on GitHub, and the assistant on community-owned PDS infrastructure.",
 
+  "research.workshop.eyebrow": "Workshop papers",
+  "research.workshop.heading.before": "A six-year run at",
+  "research.workshop.heading.italic": "Climate Change AI",
+  "research.workshop.heading.after": ".",
+  "research.workshop.subheading":
+    "GainForest's research arc traced through six accepted proposals at the Tackling Climate Change with Machine Learning workshops; from the founding GainForest paper at ICML 2019 to ForestBench at NeurIPS 2022.",
+
   "research.closing.eyebrow": "The frame",
   "research.closing.heading.before": "The theoretical frame;",
   "research.closing.heading.italic": "regenerative intelligence",
@@ -168,6 +182,13 @@ const ES: ResearchMessages = {
   "research.models.heading.after": ".",
   "research.models.subheading":
     "Cada artefacto detrás de los artículos anteriores se puede descargar hoy. Pesos entrenados y conjuntos de datos en HuggingFace, suites de benchmark y pipelines de campo en GitHub, y la asistente en infraestructura PDS de propiedad comunitaria.",
+
+  "research.workshop.eyebrow": "Artículos de taller",
+  "research.workshop.heading.before": "Seis años en",
+  "research.workshop.heading.italic": "Climate Change AI",
+  "research.workshop.heading.after": ".",
+  "research.workshop.subheading":
+    "El arco de investigación de GainForest a través de seis propuestas aceptadas en los talleres Tackling Climate Change with Machine Learning; desde el artículo fundador en ICML 2019 hasta ForestBench en NeurIPS 2022.",
 
   "research.closing.eyebrow": "El marco",
   "research.closing.heading.before": "El marco teórico;",
@@ -221,6 +242,13 @@ const PT: ResearchMessages = {
   "research.models.subheading":
     "Cada artefacto por trás dos artigos acima está disponível para download hoje. Pesos treinados e datasets no HuggingFace, suites de benchmark e pipelines de campo no GitHub, e a assistente em infraestrutura PDS de propriedade comunitária.",
 
+  "research.workshop.eyebrow": "Artigos de workshop",
+  "research.workshop.heading.before": "Seis anos no",
+  "research.workshop.heading.italic": "Climate Change AI",
+  "research.workshop.heading.after": ".",
+  "research.workshop.subheading":
+    "O arco de pesquisa da GainForest através de seis propostas aceitas nos workshops Tackling Climate Change with Machine Learning; do artigo fundador no ICML 2019 ao ForestBench no NeurIPS 2022.",
+
   "research.closing.eyebrow": "O quadro",
   "research.closing.heading.before": "O quadro teórico;",
   "research.closing.heading.italic": "inteligência regenerativa",
@@ -273,6 +301,13 @@ const SW: ResearchMessages = {
   "research.models.subheading":
     "Kila kifaa nyuma ya makala hapo juu kinaweza kupakuliwa leo. Uzito uliofunzwa na seti za data kwenye HuggingFace, mikusanyiko ya benchmark na mabomba ya nyanjani kwenye GitHub, na msaidizi kwenye miundombinu ya PDS inayomilikiwa na jamii.",
 
+  "research.workshop.eyebrow": "Makala za warsha",
+  "research.workshop.heading.before": "Miaka sita katika",
+  "research.workshop.heading.italic": "Climate Change AI",
+  "research.workshop.heading.after": ".",
+  "research.workshop.subheading":
+    "Safari ya utafiti ya GainForest kupitia mapendekezo sita yaliyokubaliwa katika warsha za Tackling Climate Change with Machine Learning; kuanzia karatasi ya msingi katika ICML 2019 hadi ForestBench katika NeurIPS 2022.",
+
   "research.closing.eyebrow": "Fremu",
   "research.closing.heading.before": "Fremu ya kinadharia;",
   "research.closing.heading.italic": "akili ya kuzaa upya",
@@ -324,6 +359,13 @@ const ID: ResearchMessages = {
   "research.models.heading.after": ".",
   "research.models.subheading":
     "Setiap artefak di balik makalah-makalah di atas dapat diunduh hari ini. Bobot terlatih dan dataset di HuggingFace, suite benchmark dan pipeline lapangan di GitHub, serta asistennya di infrastruktur PDS milik komunitas.",
+
+  "research.workshop.eyebrow": "Makalah lokakarya",
+  "research.workshop.heading.before": "Enam tahun di",
+  "research.workshop.heading.italic": "Climate Change AI",
+  "research.workshop.heading.after": ".",
+  "research.workshop.subheading":
+    "Alur riset GainForest melalui enam proposal yang diterima di lokakarya Tackling Climate Change with Machine Learning; dari makalah pendiri di ICML 2019 hingga ForestBench di NeurIPS 2022.",
 
   "research.closing.eyebrow": "Kerangka",
   "research.closing.heading.before": "Kerangka teoretiknya;",

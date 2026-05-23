@@ -602,6 +602,93 @@ export const ML_ARTEFACTS: ReadonlyArray<Translated<MlArtefact>> = [
   },
 ];
 
+// ── Climate Change AI workshop bibliography ───────────────────────────
+// Companion list to the main publications carousel, scoped to
+// papers accepted at the Tackling Climate Change with Machine
+// Learning (CCAI) workshops at NeurIPS / ICML / ICLR. Together
+// these six entries trace GainForest's research arc from the
+// founding 2019 proposal through ForestBench 2022; they sit on the
+// /research page as a compact academic bibliography rather than as
+// carousel cards (the carousel headline is 'Selected', and surfacing
+// the full CCAI run there would dilute that signal).
+//
+// Authors fields keep the en-dash-free latin-name spelling the way
+// the CCAI paper pages list them, including diacritics ("Lütjens").
+// `award` mirrors what each paper carries on its CCAI page; we don't
+// invent recognitions that aren't there.
+export type WorkshopPaper = {
+  slug: string;
+  year: string;
+  /** Venue label like "NeurIPS CCAI" or "ICML CCAI". */
+  venue: string;
+  title: string;
+  authors: string;
+  /** Optional CCAI recognition ("Spotlight", "Best Proposal Award"); rendered as a small primary-tinted chip if present. */
+  award?: string;
+  href: string;
+};
+
+export const WORKSHOP_PAPERS: ReadonlyArray<WorkshopPaper> = [
+  {
+    slug: "forestbench",
+    year: "2022",
+    venue: "NeurIPS CCAI",
+    title:
+      "ForestBench: Equitable Benchmarks for Monitoring, Reporting, and Verification of Nature-Based Solutions with Machine Learning",
+    authors:
+      "Newman, Exposito-Alonso, Czech, Dao, Lütjens, Gillespie, Hao, Cottam",
+    href: "https://www.climatechange.ai/papers/neurips2022/107",
+  },
+  {
+    slug: "overestimation-forest-carbon",
+    year: "2021",
+    venue: "ICML CCAI",
+    title:
+      "Tackling the Overestimation of Forest Carbon with Deep Learning and Aerial Imagery",
+    authors: "Reiersen, Dao, Lütjens, Klemmer, Zhu, Zhang",
+    award: "Spotlight",
+    href: "https://www.climatechange.ai/papers/icml2021/79",
+  },
+  {
+    slug: "xingu",
+    year: "2020",
+    venue: "ICLR CCAI",
+    title:
+      "Xingu: Explaining Critical Geospatial Predictions in Weak Supervision for Climate Finance",
+    authors: "Dao, Rausch, Zhang, Rott",
+    href: "https://www.climatechange.ai/papers/iclr2020/25",
+  },
+  {
+    slug: "truebranch",
+    year: "2020",
+    venue: "ICLR CCAI",
+    title:
+      "TrueBranch: Metric Learning-based Verification of Forest Conservation Projects",
+    authors: "Santamaria, Dao, Lütjens, Zhang",
+    award: "Best Proposal Award",
+    href: "https://www.climatechange.ai/papers/iclr2020/23",
+  },
+  {
+    slug: "geolabels",
+    year: "2019",
+    venue: "NeurIPS CCAI",
+    title:
+      "GeoLabels: Towards Efficient Ecosystem Monitoring using Data Programming on Geospatial Information",
+    authors: "Dao, Rausch, Zhang",
+    href: "https://www.climatechange.ai/papers/neurips2019/51",
+  },
+  {
+    slug: "gainforest-2019",
+    year: "2019",
+    venue: "ICML CCAI",
+    title:
+      "GainForest: Scaling Climate Finance for Forest Conservation using Interpretable Machine Learning on Satellite Imagery",
+    authors:
+      "Dao, Cang, Fung, Zhang, Pawlowski, Gonzales, Beglinger, Liu Zhang",
+    href: "https://www.climatechange.ai/papers/icml2019/36",
+  },
+];
+
 // ── External destinations linked from the research page ────────────
 export const EXTERNAL = {
   essay: "https://www.daviddao.org/posts/regenerative-intelligence/",
