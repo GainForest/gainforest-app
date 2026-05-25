@@ -14,16 +14,16 @@ import { getExplorerT } from "../_messages";
 // Serif italic emphasis word; same brushed cubic curve under one
 // marked word.
 //
-// Three KPIs in the right column, all sourced live:
+// Two KPIs in the right column, both sourced live:
 //   1. Bumicerts total ; hyperlabel's high-quality count.
 //   2. Darwin Core observations total ; appGainforestDwcOccurrence
 //      `totalCount` from Hyperindex.
-//   3. Communities issuing records ; unique DIDs across the loaded
-//      occurrence window.
 //
-// All three numbers are passed in by the server-rendered page so this
-// component stays a pure render. The page itself swallows upstream
-// errors and falls back to a known-recent value rather than 0.
+// A third "communities" stat used to live here, but it depended on
+// walking the indexer feed which is now done in the browser inside
+// <SpecimenWall />. The wall renders its own communities count
+// once its client-side walk completes ; keeping it out of the hero
+// avoids a number that has to update post-mount in the headline.
 
 const INTL_LOCALES: Record<string, string> = {
   en: "en-US",
@@ -36,11 +36,9 @@ const INTL_LOCALES: Record<string, string> = {
 export function ExplorerHero({
   bumicertsTotal,
   occurrencesTotal,
-  communitiesCount,
 }: {
   bumicertsTotal: number;
   occurrencesTotal: number;
-  communitiesCount: number;
 }) {
   const { locale } = useLocale();
   const t = getExplorerT(locale);
@@ -53,7 +51,6 @@ export function ExplorerHero({
   const kpis: ReadonlyArray<{ value: string; label: string }> = [
     { value: fmt.format(bumicertsTotal), label: t("explorer.hero.kpi1.label") },
     { value: fmt.format(occurrencesTotal), label: t("explorer.hero.kpi2.label") },
-    { value: fmt.format(communitiesCount), label: t("explorer.hero.kpi3.label") },
   ];
 
   return (

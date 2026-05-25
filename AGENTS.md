@@ -104,13 +104,14 @@ app/
 ├── globals.css                    design tokens (cream + forest green)
 ├── _components/                   only UI; no business logic
 ├── explorer/                       /explorer route ; live data carousels
-│   ├── page.tsx                    async server component
+│   ├── page.tsx                    async server component (shell only)
 │   ├── _components/                hero + Bumicerts marquee + specimen wall
+│   ├── _lib/
+│   │   └── fetch-occurrences-client.ts   browser-side indexer walker
 │   └── _messages.ts                scoped i18n (5 locales)
 ├── _lib/                          fetchers + auth + chat helpers
 │   ├── bumicerts.ts               hyperlabel + indexer → LiveBumicert[]
 │   ├── occurrences.ts             Hyperindex totalCount for /research KPI
-│   ├── occurrences-feed.ts        Live indexer walk → LiveOccurrence[] for /explorer
 │   ├── projects.ts                green_globe API → ProjectPin[]
 │   ├── auth-config.ts             OAuth client_id / redirect_uri / scope
 │   ├── auth-store.ts              in-memory state + session + cookie stores
@@ -144,36 +145,41 @@ rows scroll in opposite directions and hover-pause together.
 **Bumicerts source**: `fetchLiveBumicerts(12)` ; same fetcher the
 landing hero card uses, so the two surfaces stay in sync.
 
-**Darwin Core source**: `fetchLiveOccurrences()` walks the
-`appGainforestDwcOccurrence` GraphQL connection on Hyperindex live
-and resolves each record's `imageEvidence` blob ref to a PDS sync
-URL via plc.directory. Unlike the deck (which bakes a snapshot at
-build-time to sidestep Cloudflare CORS on hyperlabel), the
-landing's `/explorer` is server-rendered so it can do the walk on
-request. Records without `imageEvidence` are skipped because the
+**Darwin Core source**: `walkOccurrences()` in
+`app/explorer/_lib/fetch-occurrences-client.ts` walks the
+`appGainforestDwcOccurrence` GraphQL connection on Hyperindex from
+the **visitor's browser**, resolves each record's `imageEvidence`
+blob ref to a PDS sync URL via plc.directory, and emits records via
+an `onProgress` callback so the wall fills in as cards become
+available. Records without `imageEvidence` are skipped because the
 wall is visual.
 
-Why this stays fast in production even though the walk is heavy
-(~20-30 pages × ~6 s):
+Why client-side, not server: the indexer's newest pages are heavily
+skewed toward auto-uploaded sensor records with `imageEvidence: null`.
+Finding ~30 image-bearing records requires walking 1500-3000 records
+(~6 s per page) ; that blows past Vercel's 60s static-generation
+timeout for the page. The early attempt to walk server-side worked in
+dev but failed Vercel's build with "took more than 60 seconds".
+Hyperindex (`hi.gainforest.app/graphql`) and `plc.directory` both
+serve `access-control-allow-origin: *`, so the browser can do the
+walk itself without needing an API proxy.
 
-  - `app/explorer/page.tsx` sets `export const revalidate = 900`,
-    so the page renders once every 15 minutes maximum. Vercel
-    serves the cached HTML to every other visitor instantly via
-    ISR. The single slow render happens at build time (under
-    Vercel's 45-min static-generation budget) or in a background
-    revalidation after the cache expires; never on a user request.
-  - Every per-page indexer call uses `next: { revalidate: 900 }`
-    so each cursor page caches independently. After the first
-    walk, any other server work that crosses the same cursors is
-    free.
-  - PDS host lookups are cached for 24h via the same mechanism +
-    a module-scoped Map, so the second record on the same DID is
-    free.
+The page is therefore a server shell that renders instantly:
+
+  - Hero KPIs come from the two cheap upstreams (`fetchLiveBumicerts`
+    + `fetchOccurrenceCount`) at build time.
+  - Bumicerts marquee renders at build time too (12 records, fast).
+  - Specimen wall mounts a skeleton, then `<SpecimenWall />` calls
+    `walkOccurrences()` in a `useEffect` and re-renders progressively
+    as the walker emits more resolved records via `onProgress`.
+  - The fetch is abortable via the `AbortController` the component
+    owns ; navigating away cancels any in-flight indexer pages.
 
 If the indexer starts being denser on `imageEvidence` (e.g. once
-the Telegram bot starts auto-attaching photos), MAX_PAGES in
-`occurrences-feed.ts` can come back down. Until then, keep it
-generous so the wall doesn't end up sparse.
+the Telegram bot starts auto-attaching photos), the walker's
+DEFAULT_MAX_PAGES can come back down. Until then, keep it generous
+so the wall doesn't end up sparse for visitors who arrive during a
+low-density stretch.
 
 Carousel CSS (`.stream-marquee`, `.spec-wall`, `.spec-track-left`,
 `.spec-track-right`) lives in `app/globals.css` next to

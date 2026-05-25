@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { TopNav } from "../_components/TopNav";
 import { Footer } from "../_components/Footer";
 import { fetchLiveBumicerts } from "../_lib/bumicerts";
-import { fetchLiveOccurrences } from "../_lib/occurrences-feed";
 import { fetchOccurrenceCount } from "../_lib/occurrences";
 import { ExplorerHero } from "./_components/ExplorerHero";
 import { BumicertsMarquee } from "./_components/BumicertsMarquee";
@@ -26,20 +25,27 @@ const SITE_URL = (
 // landing's "Open tools for regenerative intelligence" hero.
 const OG_IMAGE_PATH = "/og/landing-2026-05-20.png";
 
-// Server-rendered. Three live upstreams flow in:
+// Server-rendered shell. Two cheap upstreams flow in at build time:
 //
 //   • fetchLiveBumicerts(12)      → most-recent high-quality
 //                                   Bumicerts (hyperlabel + indexer).
-//   • fetchLiveOccurrences(...)   → Darwin Core occurrence records
-//                                   (newest-first, with images).
+//                                   Capped at 12 records, fast.
 //   • fetchOccurrenceCount()      → global Darwin Core record count
-//                                   (Hyperindex `totalCount`); cheap
-//                                   call separate from the feed.
+//                                   (Hyperindex `totalCount`); single-
+//                                   field query, sub-second.
 //
-// All three fetchers cache via Next's HTTP cache (`next: { revalidate }`)
-// at 15 minutes, so this page benefits from the same refresh cycle the
-// landing has ; we don't double-fetch when both pages render close
-// together. Page-level `revalidate` mirrors the lower bound.
+// The Darwin Core record FEED (image-bearing edges that drive the
+// specimen wall) is fetched client-side inside <SpecimenWall />
+// because the indexer's newest pages are heavily skewed toward auto-
+// uploaded sensor records with no `imageEvidence`. Finding 30-50
+// image-bearing records requires walking 1500-3000 records ; that
+// blows past Vercel's 60s static-generation timeout for the page.
+// Hyperindex + plc.directory both serve `access-control-allow-origin: *`,
+// so the browser can do the walk itself without needing an API proxy.
+//
+// Page-level `revalidate` matches the bumicerts cache cadence; once
+// the page is built, subsequent requests serve the cached shell while
+// the wall fetches its data on the client.
 export const revalidate = 900;
 
 const EXPLORER_TITLE = "Explorer";
@@ -79,16 +85,10 @@ export const metadata: Metadata = {
 };
 
 export default async function ExplorerPage() {
-  // Parallel-fetch all three upstreams. Each fetcher swallows its own
-  // network errors and falls back to a known-recent value, so this is
-  // always a positive snapshot.
-  const [bumicerts, occurrences, occurrenceCount] = await Promise.all([
+  // Parallel-fetch the two cheap upstreams. Both swallow their own
+  // network errors and fall back to a known-recent value.
+  const [bumicerts, occurrenceCount] = await Promise.all([
     fetchLiveBumicerts(12),
-    // count: 48 ≈ 24 cards per row × 2 rows. The fetcher walks the
-    // indexer live and resolves PDS blob URLs ; see
-    // occurrences-feed.ts for why this stays fast in production
-    // despite the per-request walk (ISR + per-page caching).
-    fetchLiveOccurrences({ count: 48 }),
     fetchOccurrenceCount(),
   ]);
 
@@ -99,10 +99,13 @@ export default async function ExplorerPage() {
         <ExplorerHero
           bumicertsTotal={bumicerts.total}
           occurrencesTotal={occurrenceCount.total}
-          communitiesCount={occurrences.communities}
         />
         <BumicertsMarquee snapshot={bumicerts} />
-        <SpecimenWall snapshot={occurrences} />
+        {/* Walks the indexer in the browser; renders a skeleton wall
+            until the first batch of records comes back. The page
+            itself never waits on that walk so the static build stays
+            fast. */}
+        <SpecimenWall occurrencesTotal={occurrenceCount.total} />
       </main>
       <Footer />
     </div>

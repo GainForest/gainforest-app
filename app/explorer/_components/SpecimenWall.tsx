@@ -1,10 +1,14 @@
 "use client";
 
-import type { LiveOccurrencesSnapshot, LiveOccurrence } from "../../_lib/occurrences-feed";
+import { useEffect, useRef, useState } from "react";
 import { useLocale } from "../../_components/LocaleProvider";
 import { getExplorerT } from "../_messages";
+import {
+  walkOccurrences,
+  type LiveOccurrence,
+} from "../_lib/fetch-occurrences-client";
 
-// Two-row specimen wall of Darwin Core occurrences.
+// Two-row specimen wall of Darwin Core occurrences ; client-rendered.
 //
 // Direct React port of the swissnex-2026 deck's "specimen wall"
 // slide (slide 9). The two rows scroll in opposite directions
@@ -13,10 +17,16 @@ import { getExplorerT } from "../_messages";
 // wall pauses both rows together (same recipe as
 // `.stream-marquee`); the CSS lives in `app/globals.css`.
 //
-// Cards are square 1:1 with a bottom-anchored caption block over a
-// soft dark wash so the scientific name stays legible against any
-// photograph. An IUCN red-list category, if known, floats as a tiny
-// pill in the top-right corner.
+// Why client-side, not server: the indexer's newest pages are heavily
+// skewed toward auto-uploaded sensor records with `imageEvidence: null`.
+// Finding ~30 image-bearing records requires walking 1500-3000 records
+// at ~6 s per page ; that blows past Vercel's 60s static-generation
+// timeout for the page. Doing the walk in the visitor's browser lets
+// the page render instantly and the wall fill in progressively.
+//
+// `walkOccurrences` emits records via `onProgress` as soon as each
+// page's matches are resolved, so the wall starts filling in well
+// before the full walk completes.
 
 const INTL_LOCALES: Record<string, string> = {
   en: "en-US",
@@ -26,13 +36,56 @@ const INTL_LOCALES: Record<string, string> = {
   id: "id-ID",
 };
 
-export function SpecimenWall({ snapshot }: { snapshot: LiveOccurrencesSnapshot }) {
+const TARGET = 32;
+
+export function SpecimenWall({ occurrencesTotal }: { occurrencesTotal: number }) {
   const { locale } = useLocale();
   const t = getExplorerT(locale);
   const intlLocale = INTL_LOCALES[locale] ?? "en-US";
   const fmt = new Intl.NumberFormat(intlLocale);
 
-  const records = snapshot.records;
+  const [records, setRecords] = useState<LiveOccurrence[]>([]);
+  const [phase, setPhase] = useState<"loading" | "ready" | "error">("loading");
+  // Latest progress count is held in a ref so the loading state can
+  // surface it without re-rendering the whole wall on each emit.
+  const progressRef = useRef(0);
+  const [progressTick, setProgressTick] = useState(0);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    let cancelled = false;
+    walkOccurrences({
+      target: TARGET,
+      signal: controller.signal,
+      onProgress: (running) => {
+        if (cancelled) return;
+        progressRef.current = running.length;
+        setRecords(running);
+        // Cheap re-render of the loading copy without churning the
+        // wall itself ; the records state already triggered that.
+        setProgressTick((n) => n + 1);
+      },
+    })
+      .then((final) => {
+        if (cancelled) return;
+        setRecords(final);
+        setPhase("ready");
+      })
+      .catch((err) => {
+        if (cancelled) return;
+        if ((err as Error).name === "AbortError") return;
+        console.warn("[explorer] occurrence walk failed", err);
+        setPhase("error");
+      });
+    return () => {
+      cancelled = true;
+      controller.abort();
+    };
+  }, []);
+
+  const taxa = new Set(records.map((r) => r.scientificName).filter((v) => v))
+    .size;
+  const communities = new Set(records.map((r) => r.did)).size;
 
   // Interleave records across the two rows so each is its own sample
   // of the feed (not first-half / second-half of the same list).
@@ -60,22 +113,31 @@ export function SpecimenWall({ snapshot }: { snapshot: LiveOccurrencesSnapshot }
             </p>
           </div>
 
-          {/* Right rail ; tiny stats block matching the deck's
-              spec-header.meta cluster. */}
+          {/* Right rail ; live stats once the walk finishes. While
+              loading we keep the slot reserved with a skeleton so the
+              layout doesn't shift when the numbers land. */}
           <div className="col-span-12 flex flex-col items-start gap-2 lg:col-span-5 lg:items-end">
-            <div className="flex items-baseline gap-2">
-              <span className="font-garamond text-[28px] sm:text-[32px] lg:text-[36px] font-medium leading-none text-foreground">
-                {fmt.format(snapshot.taxa)}
-              </span>
-              <span className="font-instrument italic text-[14px] text-foreground/65 lg:text-[15px]">
-                {t("explorer.specimens.taxa")}
-              </span>
-            </div>
-            <div className="text-[13px] text-foreground/65 lg:text-right">
-              {fmt.format(snapshot.communities)} {t("explorer.specimens.communities")}
-              <span aria-hidden> · </span>
-              {fmt.format(snapshot.total)} {t("explorer.specimens.records")}
-            </div>
+            {phase === "loading" && records.length === 0 ? (
+              <SkeletonStats />
+            ) : (
+              <>
+                <div className="flex items-baseline gap-2">
+                  <span className="font-garamond text-[28px] sm:text-[32px] lg:text-[36px] font-medium leading-none text-foreground">
+                    {fmt.format(taxa)}
+                  </span>
+                  <span className="font-instrument italic text-[14px] text-foreground/65 lg:text-[15px]">
+                    {t("explorer.specimens.taxa")}
+                  </span>
+                </div>
+                <div className="text-[13px] text-foreground/65 lg:text-right">
+                  {fmt.format(communities)}{" "}
+                  {t("explorer.specimens.communities")}
+                  <span aria-hidden> · </span>
+                  {fmt.format(occurrencesTotal)}{" "}
+                  {t("explorer.specimens.records")}
+                </div>
+              </>
+            )}
             <div className="font-mono text-[11px] text-primary">
               app.gainforest.dwc.occurrence
             </div>
@@ -83,35 +145,47 @@ export function SpecimenWall({ snapshot }: { snapshot: LiveOccurrencesSnapshot }
         </div>
       </div>
 
-      {/* The wall itself ; two rows scrolling opposite directions. The
-          parent <div> with class `spec-wall` is what owns the hover-
-          pause and the edge-fade mask. */}
-      {records.length > 0 ? (
-        <div
-          className="spec-wall mt-10 border-y border-border-soft py-3 lg:mt-14"
-          aria-label={t("explorer.specimens.eyebrow")}
-          style={{ height: "calc(2 * clamp(140px, 16vw, 200px) + 1.6rem)" }}
-        >
-          <SpecimenRow
-            records={evens}
-            direction="left"
-            unidentifiedLabel={t("explorer.specimens.unidentified")}
-          />
-          <div className="h-2" />
-          <SpecimenRow
-            records={odds.length ? odds : evens}
-            direction="right"
-            unidentifiedLabel={t("explorer.specimens.unidentified")}
-          />
-        </div>
-      ) : (
-        <div className="mx-auto max-w-[1480px] px-6 py-8 text-center font-instrument italic text-[14px] text-foreground/55 sm:px-10 lg:px-16">
-          {t("explorer.specimens.empty")}
-        </div>
-      )}
+      {/* The wall itself. While the first page resolves we render a
+          skeleton band so the section has visual weight from the
+          moment the page hydrates ; the band then swaps to real
+          rows as records arrive (progressively, before the full
+          walk completes). */}
+      <div
+        className="spec-wall mt-10 border-y border-border-soft py-3 lg:mt-14"
+        aria-label={t("explorer.specimens.eyebrow")}
+        aria-busy={phase === "loading"}
+        style={{ height: "calc(2 * clamp(140px, 16vw, 200px) + 1.6rem)" }}
+      >
+        {records.length === 0 ? (
+          <SkeletonWall />
+        ) : (
+          <>
+            <SpecimenRow
+              records={evens}
+              direction="left"
+              unidentifiedLabel={t("explorer.specimens.unidentified")}
+            />
+            <div className="h-2" />
+            <SpecimenRow
+              records={odds.length ? odds : evens}
+              direction="right"
+              unidentifiedLabel={t("explorer.specimens.unidentified")}
+            />
+          </>
+        )}
+      </div>
 
       <p className="mx-auto max-w-[1480px] px-6 pt-4 pb-16 text-center font-instrument italic text-[13px] text-foreground/55 sm:px-10 lg:px-16 lg:pb-24">
-        {t("explorer.specimens.hint")}
+        {phase === "loading"
+          ? progressRef.current > 0
+            ? `${fmt.format(progressRef.current)} / ${TARGET}…`
+            : t("explorer.specimens.hint")
+          : phase === "error"
+            ? t("explorer.specimens.empty")
+            : t("explorer.specimens.hint")}
+        {/* progressTick is only here to make the eslint deps-check
+            happy ; rendering uses progressRef directly. */}
+        <span hidden>{progressTick}</span>
       </p>
     </section>
   );
@@ -126,20 +200,19 @@ function SpecimenRow({
   direction: "left" | "right";
   unidentifiedLabel: string;
 }) {
-  // Empty rows guard: never render an animation if the bucket somehow
-  // ended up empty (e.g. only one occurrence after filtering).
   if (records.length === 0) return null;
 
   return (
-    <div
-      className="spec-row"
-      style={{ height: "clamp(140px, 16vw, 200px)" }}
-    >
+    <div className="spec-row" style={{ height: "clamp(140px, 16vw, 200px)" }}>
       <div
         className={`spec-track ${direction === "left" ? "spec-track-left" : "spec-track-right"}`}
       >
         {records.map((r) => (
-          <SpecimenCard key={r.id} record={r} unidentifiedLabel={unidentifiedLabel} />
+          <SpecimenCard
+            key={r.id}
+            record={r}
+            unidentifiedLabel={unidentifiedLabel}
+          />
         ))}
         {records.map((r) => (
           <SpecimenCard
@@ -215,6 +288,51 @@ function SpecimenCard({
         </div>
       </div>
     </article>
+  );
+}
+
+// ── Loading skeletons ──────────────────────────────────────────────
+
+function SkeletonStats() {
+  return (
+    <div className="flex flex-col items-start gap-2 lg:items-end">
+      <div className="h-9 w-32 animate-pulse rounded bg-foreground/[0.08]" />
+      <div className="h-4 w-48 animate-pulse rounded bg-foreground/[0.06]" />
+    </div>
+  );
+}
+
+function SkeletonWall() {
+  // 8 + 8 placeholder cards across two rows; just enough to give the
+  // band the right visual weight while the first indexer page is
+  // still in flight.
+  const cells = Array.from({ length: 8 });
+  return (
+    <>
+      <div className="spec-row" style={{ height: "clamp(140px, 16vw, 200px)" }}>
+        <div className="spec-track">
+          {cells.map((_, i) => (
+            <SkeletonCard key={`top-${i}`} />
+          ))}
+        </div>
+      </div>
+      <div className="h-2" />
+      <div className="spec-row" style={{ height: "clamp(140px, 16vw, 200px)" }}>
+        <div className="spec-track">
+          {cells.map((_, i) => (
+            <SkeletonCard key={`bot-${i}`} />
+          ))}
+        </div>
+      </div>
+    </>
+  );
+}
+
+function SkeletonCard() {
+  return (
+    <div
+      className="relative aspect-square h-full shrink-0 animate-pulse overflow-hidden rounded-lg border border-border-soft bg-[#e8e2d2]"
+    />
   );
 }
 
