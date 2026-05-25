@@ -9,7 +9,9 @@
 // Voice on /explorer is data-first ; the page is two live carousels
 // of real ATProto records (Bumicerts + Darwin Core occurrences) so
 // the surrounding copy stays out of the way and lets the records
-// breathe. Headings are short, ledes a single sentence each.
+// breathe. The wall is honest about what it's showing ; it samples
+// the latest image-bearing records rather than the full collection,
+// and the right rail labels say so.
 
 import type { Locale } from "../_lib/i18n";
 
@@ -46,8 +48,13 @@ type ExplorerMessages = {
   "explorer.specimens.hint": string;
   "explorer.specimens.unidentified": string;
   "explorer.specimens.taxa": string;
-  "explorer.specimens.communities": string;
-  "explorer.specimens.records": string;
+  /** Right-rail line that clarifies the wall is a sample, not the
+   *  full collection. `{sample}` is replaced with the in-browser
+   *  record count. */
+  "explorer.specimens.acrossRecent": string;
+  /** Right-rail line that names the global indexer collection.
+   *  `{total}` is replaced with the formatted totalCount. */
+  "explorer.specimens.indexedTotal": string;
   "explorer.specimens.empty": string;
 };
 
@@ -59,10 +66,10 @@ const EN: ExplorerMessages = {
   "explorer.hero.heading.italic": "commons",
   "explorer.hero.heading.after": ".",
   "explorer.hero.lede":
-    "Two live feeds from the GainForest indexer side by side. The first; every freshly minted Bumicert. The second; every Darwin Core species observation indexed across partner PDS instances. Hover any band to pause it and read a card.",
+    "Two live data streams from the GainForest indexer. The top band lists the latest high-quality Bumicerts; signed certificates of community fieldwork published on ATProto. The bottom band samples the latest Darwin Core species observations the indexer has ingested. Hover either band to pause it.",
   "explorer.hero.kpi1.label": "high-quality Bumicerts on ATProto",
   "explorer.hero.kpi2.label": "Darwin Core observations indexed",
-  "explorer.hero.kpi3.label": "communities issuing records",
+  "explorer.hero.kpi3.label": "frontline communities, live on Green Globe",
 
   "explorer.bumicerts.eyebrow": "Streaming live",
   "explorer.bumicerts.heading.before": "Freshly minted",
@@ -79,12 +86,14 @@ const EN: ExplorerMessages = {
   "explorer.specimens.heading.italic": "one record at a time",
   "explorer.specimens.heading.after": ".",
   "explorer.specimens.lede":
-    "Each card is one ATProto record on a community's PDS; scientific name, GPS, date, photo. Together they make up the open Darwin Core layer of the GainForest data commons.",
+    "Each card below is one Darwin Core species observation indexed on ATProto; scientific name, GPS, date, photograph. Together they form the open biodiversity layer of the GainForest data commons.",
   "explorer.specimens.hint": "Hover the band to pause",
   "explorer.specimens.unidentified": "Unidentified",
   "explorer.specimens.taxa": "unique taxa",
-  "explorer.specimens.communities": "communities",
-  "explorer.specimens.records": "records",
+  "explorer.specimens.acrossRecent":
+    "across the {sample} most-recent image-bearing records",
+  "explorer.specimens.indexedTotal":
+    "{total} indexed in app.gainforest.dwc.occurrence",
   "explorer.specimens.empty": "No species observations available right now.",
 };
 
@@ -96,10 +105,11 @@ const ES: ExplorerMessages = {
   "explorer.hero.heading.italic": "comunes vivos",
   "explorer.hero.heading.after": ".",
   "explorer.hero.lede":
-    "Dos transmisiones en vivo del indexador GainForest lado a lado. La primera; cada Bumicert recién emitido. La segunda; cada observación de especies Darwin Core indexada en los PDS de socios. Pasa el ratón sobre cualquier banda para pausarla y leer una tarjeta.",
+    "Dos flujos de datos en vivo del indexador GainForest. La banda superior lista los Bumicerts de alta calidad más recientes; certificados firmados de trabajo de campo comunitario publicados en ATProto. La banda inferior muestrea las últimas observaciones de especies Darwin Core que el indexador ha ingerido. Pasa el ratón sobre cualquier banda para pausarla.",
   "explorer.hero.kpi1.label": "Bumicerts de alta calidad en ATProto",
   "explorer.hero.kpi2.label": "observaciones Darwin Core indexadas",
-  "explorer.hero.kpi3.label": "comunidades emitiendo registros",
+  "explorer.hero.kpi3.label":
+    "comunidades de primera línea, en vivo en Green Globe",
 
   "explorer.bumicerts.eyebrow": "Transmitiendo en vivo",
   "explorer.bumicerts.heading.before": "Bumicerts recién",
@@ -116,12 +126,14 @@ const ES: ExplorerMessages = {
   "explorer.specimens.heading.italic": "un registro a la vez",
   "explorer.specimens.heading.after": ".",
   "explorer.specimens.lede":
-    "Cada tarjeta es un registro ATProto en el PDS de una comunidad; nombre científico, GPS, fecha, foto. Juntas componen la capa abierta Darwin Core de los bienes comunes de GainForest.",
+    "Cada tarjeta debajo es una observación de especie Darwin Core indexada en ATProto; nombre científico, GPS, fecha, fotografía. Juntas forman la capa abierta de biodiversidad de los bienes comunes de GainForest.",
   "explorer.specimens.hint": "Pasa el ratón sobre la banda para pausarla",
   "explorer.specimens.unidentified": "Sin identificar",
   "explorer.specimens.taxa": "taxones únicos",
-  "explorer.specimens.communities": "comunidades",
-  "explorer.specimens.records": "registros",
+  "explorer.specimens.acrossRecent":
+    "en los {sample} registros con imagen más recientes",
+  "explorer.specimens.indexedTotal":
+    "{total} indexadas en app.gainforest.dwc.occurrence",
   "explorer.specimens.empty": "No hay observaciones de especies disponibles ahora.",
 };
 
@@ -133,10 +145,11 @@ const PT: ExplorerMessages = {
   "explorer.hero.heading.italic": "comuns vivos",
   "explorer.hero.heading.after": ".",
   "explorer.hero.lede":
-    "Dois feeds ao vivo do indexador GainForest lado a lado. O primeiro; cada Bumicert recém-emitido. O segundo; cada observação Darwin Core indexada nos PDS de parceiros. Passa o rato sobre qualquer faixa para a pausar e ler um cartão.",
+    "Dois fluxos de dados ao vivo do indexador GainForest. A faixa superior lista os Bumicerts de alta qualidade mais recentes; certificados assinados de trabalho de campo comunitário publicados no ATProto. A faixa inferior mostra uma amostra das últimas observações Darwin Core indexadas. Passa o rato sobre qualquer faixa para a pausar.",
   "explorer.hero.kpi1.label": "Bumicerts de alta qualidade no ATProto",
   "explorer.hero.kpi2.label": "observações Darwin Core indexadas",
-  "explorer.hero.kpi3.label": "comunidades a emitir registos",
+  "explorer.hero.kpi3.label":
+    "comunidades de base, ao vivo no Green Globe",
 
   "explorer.bumicerts.eyebrow": "A transmitir ao vivo",
   "explorer.bumicerts.heading.before": "Bumicerts recém",
@@ -153,12 +166,14 @@ const PT: ExplorerMessages = {
   "explorer.specimens.heading.italic": "um registo de cada vez",
   "explorer.specimens.heading.after": ".",
   "explorer.specimens.lede":
-    "Cada cartão é um registo ATProto no PDS de uma comunidade; nome científico, GPS, data, foto. Juntos compõem a camada Darwin Core aberta dos bens comuns da GainForest.",
+    "Cada cartão abaixo é uma observação Darwin Core indexada no ATProto; nome científico, GPS, data, fotografia. Juntas formam a camada aberta de biodiversidade dos bens comuns da GainForest.",
   "explorer.specimens.hint": "Passa o rato sobre a faixa para pausar",
   "explorer.specimens.unidentified": "Sem identificação",
   "explorer.specimens.taxa": "táxones únicos",
-  "explorer.specimens.communities": "comunidades",
-  "explorer.specimens.records": "registos",
+  "explorer.specimens.acrossRecent":
+    "nos {sample} registos com imagem mais recentes",
+  "explorer.specimens.indexedTotal":
+    "{total} indexados em app.gainforest.dwc.occurrence",
   "explorer.specimens.empty": "Sem observações de espécies neste momento.",
 };
 
@@ -170,10 +185,11 @@ const SW: ExplorerMessages = {
   "explorer.hero.heading.italic": "pamoja zinazoishi",
   "explorer.hero.heading.after": ".",
   "explorer.hero.lede":
-    "Mikondo miwili ya moja kwa moja kutoka kwa kihifadhi cha GainForest. Wa kwanza; kila Bumicert mpya. Wa pili; kila uchunguzi wa spishi za Darwin Core ulioorodheshwa kwenye PDS za washirika. Weka kishale kwenye ukanda wowote ili kusimamisha na kusoma kadi.",
+    "Mikondo miwili ya data ya moja kwa moja kutoka kwa kihifadhi cha GainForest. Ukanda wa juu unaorodhesha Bumicerts za hivi karibuni za ubora wa juu; vyeti vilivyotiwa saini vya kazi ya uwandani vya jamii vilivyochapishwa kwenye ATProto. Ukanda wa chini unachukua sampuli ya uchunguzi wa hivi karibuni wa spishi za Darwin Core. Weka kishale kwenye ukanda wowote ili kusimamisha.",
   "explorer.hero.kpi1.label": "Bumicerts za ubora wa juu kwenye ATProto",
   "explorer.hero.kpi2.label": "uchunguzi wa Darwin Core ulioorodheshwa",
-  "explorer.hero.kpi3.label": "jamii zinazotoa rekodi",
+  "explorer.hero.kpi3.label":
+    "jamii za mstari wa mbele, moja kwa moja kwenye Green Globe",
 
   "explorer.bumicerts.eyebrow": "Inatangaza moja kwa moja",
   "explorer.bumicerts.heading.before": "Bumicerts mpya",
@@ -190,12 +206,14 @@ const SW: ExplorerMessages = {
   "explorer.specimens.heading.italic": "rekodi moja kwa wakati",
   "explorer.specimens.heading.after": ".",
   "explorer.specimens.lede":
-    "Kila kadi ni rekodi ya ATProto kwenye PDS ya jamii; jina la kisayansi, GPS, tarehe, picha. Pamoja zinaunda safu wazi ya Darwin Core ya rasilimali za pamoja za GainForest.",
+    "Kila kadi hapa chini ni uchunguzi wa spishi za Darwin Core uliopangwa kwenye ATProto; jina la kisayansi, GPS, tarehe, picha. Pamoja zinaunda safu wazi ya bayoanuwai ya rasilimali za pamoja za GainForest.",
   "explorer.specimens.hint": "Weka kishale kwenye ukanda kusimamisha",
   "explorer.specimens.unidentified": "Haijatambuliwa",
   "explorer.specimens.taxa": "taxa za kipekee",
-  "explorer.specimens.communities": "jamii",
-  "explorer.specimens.records": "rekodi",
+  "explorer.specimens.acrossRecent":
+    "katika rekodi {sample} zenye picha za hivi karibuni",
+  "explorer.specimens.indexedTotal":
+    "{total} zimepangwa katika app.gainforest.dwc.occurrence",
   "explorer.specimens.empty": "Hakuna uchunguzi wa spishi sasa hivi.",
 };
 
@@ -207,10 +225,11 @@ const ID: ExplorerMessages = {
   "explorer.hero.heading.italic": "yang hidup",
   "explorer.hero.heading.after": ".",
   "explorer.hero.lede":
-    "Dua aliran langsung dari pengindeks GainForest berdampingan. Yang pertama; setiap Bumicert yang baru diterbitkan. Yang kedua; setiap observasi spesies Darwin Core yang diindeks di PDS mitra. Arahkan kursor ke pita mana pun untuk menjeda dan membaca sebuah kartu.",
+    "Dua aliran data langsung dari pengindeks GainForest. Pita atas mencantumkan Bumicerts berkualitas tinggi terbaru; sertifikat kerja lapangan komunitas yang ditandatangani dan diterbitkan di ATProto. Pita bawah mengambil sampel observasi spesies Darwin Core terbaru yang diindeks. Arahkan kursor ke salah satu pita untuk menjeda.",
   "explorer.hero.kpi1.label": "Bumicerts berkualitas tinggi di ATProto",
   "explorer.hero.kpi2.label": "observasi Darwin Core terindeks",
-  "explorer.hero.kpi3.label": "komunitas yang menerbitkan rekam",
+  "explorer.hero.kpi3.label":
+    "komunitas garis depan, langsung di Green Globe",
 
   "explorer.bumicerts.eyebrow": "Mengalir langsung",
   "explorer.bumicerts.heading.before": "Bumicerts yang baru",
@@ -227,12 +246,14 @@ const ID: ExplorerMessages = {
   "explorer.specimens.heading.italic": "satu rekam sekali waktu",
   "explorer.specimens.heading.after": ".",
   "explorer.specimens.lede":
-    "Setiap kartu adalah satu rekam ATProto di PDS sebuah komunitas; nama ilmiah, GPS, tanggal, foto. Bersama-sama, kartu-kartu ini membentuk lapisan Darwin Core terbuka dari sumber daya bersama GainForest.",
+    "Setiap kartu di bawah adalah satu observasi spesies Darwin Core yang terindeks di ATProto; nama ilmiah, GPS, tanggal, foto. Bersama-sama membentuk lapisan keanekaragaman hayati terbuka dari sumber daya bersama GainForest.",
   "explorer.specimens.hint": "Arahkan kursor ke pita untuk menjeda",
   "explorer.specimens.unidentified": "Belum diidentifikasi",
   "explorer.specimens.taxa": "taksa unik",
-  "explorer.specimens.communities": "komunitas",
-  "explorer.specimens.records": "rekam",
+  "explorer.specimens.acrossRecent":
+    "dari {sample} rekam dengan gambar terbaru",
+  "explorer.specimens.indexedTotal":
+    "{total} terindeks di app.gainforest.dwc.occurrence",
   "explorer.specimens.empty": "Belum ada observasi spesies saat ini.",
 };
 

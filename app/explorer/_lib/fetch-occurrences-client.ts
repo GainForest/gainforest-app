@@ -28,13 +28,17 @@ const INDEXER_URL = "https://hi.gainforest.app/graphql";
 const PAGE_SIZE = 100;
 
 /** Stop after this many image-bearing records. The wall reads well
- *  with ~24-48 cards across two rows. */
-const DEFAULT_TARGET = 32;
+ *  with a deep sample ; ~200 cards is enough that the rolling
+ *  marquee never visibly repeats, and that the taxa / community
+ *  tallies in the right rail aren't a tiny outlier sample. */
+const DEFAULT_TARGET = 200;
 
-/** Safety cap on indexer pages walked. 50 × 100 = 5000 records is
+/** Safety cap on indexer pages walked. 80 × 100 = 8000 records is
  *  generous enough to cover sparse image-density stretches without
- *  spinning forever. */
-const DEFAULT_MAX_PAGES = 50;
+ *  spinning forever. The walk is progressive (records emit via
+ *  onProgress as soon as each page resolves) so the wall is
+ *  populated long before the full walk completes. */
+const DEFAULT_MAX_PAGES = 80;
 
 /** Parallel PDS lookups when resolving image URLs. */
 const RESOLVE_CONCURRENCY = 8;

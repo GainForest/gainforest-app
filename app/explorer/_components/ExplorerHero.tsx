@@ -14,16 +14,20 @@ import { getExplorerT } from "../_messages";
 // Serif italic emphasis word; same brushed cubic curve under one
 // marked word.
 //
-// Two KPIs in the right column, both sourced live:
+// Three KPIs in the right column, all sourced live at build time:
 //   1. Bumicerts total ; hyperlabel's high-quality count.
 //   2. Darwin Core observations total ; appGainforestDwcOccurrence
 //      `totalCount` from Hyperindex.
+//   3. Frontline communities on Green Globe ; `pins.length+` from
+//      `fetchProjectPins()`. Same source AboutStats uses for its
+//      "43+ frontline communities" stat; we render the same `+`
+//      formatting here so the two surfaces feel coherent.
 //
-// A third "communities" stat used to live here, but it depended on
-// walking the indexer feed which is now done in the browser inside
-// <SpecimenWall />. The wall renders its own communities count
-// once its client-side walk completes ; keeping it out of the hero
-// avoids a number that has to update post-mount in the headline.
+// An earlier version tried to derive a "communities issuing records"
+// stat from the in-browser occurrence walk, but that only counts
+// communities whose latest records happen to carry images ; reads
+// as a much smaller number than the actual partner network. The
+// pins-based count is the honest one and matches /about.
 
 const INTL_LOCALES: Record<string, string> = {
   en: "en-US",
@@ -36,9 +40,11 @@ const INTL_LOCALES: Record<string, string> = {
 export function ExplorerHero({
   bumicertsTotal,
   occurrencesTotal,
+  partnersCount,
 }: {
   bumicertsTotal: number;
   occurrencesTotal: number;
+  partnersCount: number;
 }) {
   const { locale } = useLocale();
   const t = getExplorerT(locale);
@@ -48,9 +54,15 @@ export function ExplorerHero({
   const italic = t("explorer.hero.heading.italic").trim();
   const after = t("explorer.hero.heading.after").trim();
 
+  // Match AboutStats' `${n}+` rendering so the same upstream count
+  // looks the same across surfaces. The `+` reads as "and growing".
+  const partnersDisplay =
+    partnersCount > 0 ? `${fmt.format(partnersCount)}+` : t("explorer.live.label");
+
   const kpis: ReadonlyArray<{ value: string; label: string }> = [
     { value: fmt.format(bumicertsTotal), label: t("explorer.hero.kpi1.label") },
     { value: fmt.format(occurrencesTotal), label: t("explorer.hero.kpi2.label") },
+    { value: partnersDisplay, label: t("explorer.hero.kpi3.label") },
   ];
 
   return (

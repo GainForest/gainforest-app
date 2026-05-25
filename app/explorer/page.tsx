@@ -3,6 +3,7 @@ import { TopNav } from "../_components/TopNav";
 import { Footer } from "../_components/Footer";
 import { fetchLiveBumicerts } from "../_lib/bumicerts";
 import { fetchOccurrenceCount } from "../_lib/occurrences";
+import { fetchProjectPins } from "../_lib/projects";
 import { ExplorerHero } from "./_components/ExplorerHero";
 import { BumicertsMarquee } from "./_components/BumicertsMarquee";
 import { SpecimenWall } from "./_components/SpecimenWall";
@@ -25,7 +26,7 @@ const SITE_URL = (
 // landing's "Open tools for regenerative intelligence" hero.
 const OG_IMAGE_PATH = "/og/landing-2026-05-20.png";
 
-// Server-rendered shell. Two cheap upstreams flow in at build time:
+// Server-rendered shell. Three cheap upstreams flow in at build time:
 //
 //   • fetchLiveBumicerts(12)      → most-recent high-quality
 //                                   Bumicerts (hyperlabel + indexer).
@@ -33,12 +34,17 @@ const OG_IMAGE_PATH = "/og/landing-2026-05-20.png";
 //   • fetchOccurrenceCount()      → global Darwin Core record count
 //                                   (Hyperindex `totalCount`); single-
 //                                   field query, sub-second.
+//   • fetchProjectPins()          → Green Globe live partner pin list.
+//                                   `pins.length` drives the hero's
+//                                   third KPI (frontline communities)
+//                                   ; same source the landing's globe
+//                                   and /about's stats band use.
 //
 // The Darwin Core record FEED (image-bearing edges that drive the
 // specimen wall) is fetched client-side inside <SpecimenWall />
 // because the indexer's newest pages are heavily skewed toward auto-
-// uploaded sensor records with no `imageEvidence`. Finding 30-50
-// image-bearing records requires walking 1500-3000 records ; that
+// uploaded sensor records with no `imageEvidence`. Finding ~200
+// image-bearing records requires walking thousands of records ; that
 // blows past Vercel's 60s static-generation timeout for the page.
 // Hyperindex + plc.directory both serve `access-control-allow-origin: *`,
 // so the browser can do the walk itself without needing an API proxy.
@@ -85,11 +91,12 @@ export const metadata: Metadata = {
 };
 
 export default async function ExplorerPage() {
-  // Parallel-fetch the two cheap upstreams. Both swallow their own
-  // network errors and fall back to a known-recent value.
-  const [bumicerts, occurrenceCount] = await Promise.all([
+  // Parallel-fetch the three cheap upstreams. All three swallow their
+  // own network errors and fall back to a known-recent value.
+  const [bumicerts, occurrenceCount, pins] = await Promise.all([
     fetchLiveBumicerts(12),
     fetchOccurrenceCount(),
+    fetchProjectPins(),
   ]);
 
   return (
@@ -99,6 +106,7 @@ export default async function ExplorerPage() {
         <ExplorerHero
           bumicertsTotal={bumicerts.total}
           occurrencesTotal={occurrenceCount.total}
+          partnersCount={pins.length}
         />
         <BumicertsMarquee snapshot={bumicerts} />
         {/* Walks the indexer in the browser; renders a skeleton wall

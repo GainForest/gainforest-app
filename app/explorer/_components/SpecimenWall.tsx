@@ -36,7 +36,12 @@ const INTL_LOCALES: Record<string, string> = {
   id: "id-ID",
 };
 
-const TARGET = 32;
+/** Number of image-bearing Darwin Core records to fetch into the
+ *  wall. Deep enough that the right-rail taxa tally and the rolling
+ *  marquee don't read as a small outlier sample. The walker emits
+ *  records progressively as each indexer page resolves so the wall
+ *  fills in long before the full target lands. */
+const TARGET = 200;
 
 export function SpecimenWall({ occurrencesTotal }: { occurrencesTotal: number }) {
   const { locale } = useLocale();
@@ -85,7 +90,6 @@ export function SpecimenWall({ occurrencesTotal }: { occurrencesTotal: number })
 
   const taxa = new Set(records.map((r) => r.scientificName).filter((v) => v))
     .size;
-  const communities = new Set(records.map((r) => r.did)).size;
 
   // Interleave records across the two rows so each is its own sample
   // of the feed (not first-half / second-half of the same list).
@@ -113,9 +117,24 @@ export function SpecimenWall({ occurrencesTotal }: { occurrencesTotal: number })
             </p>
           </div>
 
-          {/* Right rail ; live stats once the walk finishes. While
-              loading we keep the slot reserved with a skeleton so the
-              layout doesn't shift when the numbers land. */}
+          {/* Right rail ; layered stats that are honest about the
+              wall being a sample, not the full collection:
+
+                42         unique taxa                  ← from sample
+                across the 200 most-recent image-bearing records
+                417,229 indexed in app.gainforest.dwc.occurrence
+
+              The big garamond number is the in-browser sample
+              count of unique scientific names. The two small lines
+              below frame it ; one names the sample size, the next
+              names the global indexer total. We no longer surface
+              a "communities issuing records" tally because the
+              client-side walk only sees the latest image-bearing
+              uploads (currently 2-3 communities) which dramatically
+              under-counts the actual partner network. The hero KPI
+              shows the honest partner count from Green Globe.
+
+              Skeleton holds the slot until the first page resolves. */}
           <div className="col-span-12 flex flex-col items-start gap-2 lg:col-span-5 lg:items-end">
             {phase === "loading" && records.length === 0 ? (
               <SkeletonStats />
@@ -129,18 +148,20 @@ export function SpecimenWall({ occurrencesTotal }: { occurrencesTotal: number })
                     {t("explorer.specimens.taxa")}
                   </span>
                 </div>
-                <div className="text-[13px] text-foreground/65 lg:text-right">
-                  {fmt.format(communities)}{" "}
-                  {t("explorer.specimens.communities")}
-                  <span aria-hidden> · </span>
-                  {fmt.format(occurrencesTotal)}{" "}
-                  {t("explorer.specimens.records")}
+                <div className="text-[13px] leading-[1.4] text-foreground/65 lg:max-w-[320px] lg:text-right">
+                  {t("explorer.specimens.acrossRecent").replace(
+                    "{sample}",
+                    fmt.format(records.length),
+                  )}
+                </div>
+                <div className="text-[12.5px] leading-[1.4] text-foreground/55 lg:text-right">
+                  {t("explorer.specimens.indexedTotal").replace(
+                    "{total}",
+                    fmt.format(occurrencesTotal),
+                  )}
                 </div>
               </>
             )}
-            <div className="font-mono text-[11px] text-primary">
-              app.gainforest.dwc.occurrence
-            </div>
           </div>
         </div>
       </div>
