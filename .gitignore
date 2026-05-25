@@ -27,6 +27,9 @@
 # TypeScript incremental cache
 tsconfig.tsbuildinfo
 
+# Sibling deck workspaces (their own git repos; not part of this app)
+/decks/
+
 # Logs
 *.log
 .vercel

@@ -162,6 +162,120 @@ body {
   }
 }
 
+/* ---------------------------------------------------------------------------
+   Explorer page carousels
+
+   Two distinct marquee patterns sit on /explorer side by side; both
+   are ports of the swissnex-2026 deck (slides 8 + 9). The Bumicerts
+   band is a single horizontal track of editorial cards (.stream-*);
+   the specimen wall is two parallel tracks scrolling in opposite
+   directions (.spec-*).
+
+   Both share the same recipe: the track contains TWO identical copies
+   of the card set rendered inline; `translateX(-50%)` lands the start
+   of the duplicate set exactly where the first card sat, so the loop
+   has no visible seam. Hover anywhere on the band pauses the
+   animation. `prefers-reduced-motion` disables it entirely.
+--------------------------------------------------------------------------- */
+
+/* Bumicerts marquee ; one long row of editorial cards. */
+.stream-marquee {
+  position: relative;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(
+    90deg,
+    transparent 0,
+    #000 4%,
+    #000 96%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    90deg,
+    transparent 0,
+    #000 4%,
+    #000 96%,
+    transparent 100%
+  );
+}
+
+.stream-marquee-track {
+  display: inline-flex;
+  width: max-content;
+  gap: clamp(0.7rem, 1.2vw, 1.1rem);
+  animation: stream-marquee-scroll 110s linear infinite;
+  will-change: transform;
+}
+
+.stream-marquee:hover .stream-marquee-track,
+.stream-marquee:focus-within .stream-marquee-track {
+  animation-play-state: paused;
+}
+
+@keyframes stream-marquee-scroll {
+  from { transform: translate3d(0, 0, 0); }
+  to   { transform: translate3d(-50%, 0, 0); }
+}
+
+/* Specimen wall ; two rows of square cards drifting in opposite
+   directions. Wraps a single .spec-wall element with two .spec-row
+   children; hovering the wall pauses both rows together. */
+.spec-wall {
+  position: relative;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(
+    90deg,
+    transparent 0,
+    #000 3%,
+    #000 97%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    90deg,
+    transparent 0,
+    #000 3%,
+    #000 97%,
+    transparent 100%
+  );
+}
+
+.spec-row {
+  position: relative;
+  overflow: hidden;
+}
+
+.spec-track {
+  display: inline-flex;
+  width: max-content;
+  height: 100%;
+  gap: clamp(0.4rem, 0.7vw, 0.75rem);
+  will-change: transform;
+}
+
+.spec-track-left  { animation: spec-scroll-left  140s linear infinite; }
+.spec-track-right { animation: spec-scroll-right 160s linear infinite; }
+
+.spec-wall:hover .spec-track,
+.spec-wall:focus-within .spec-track {
+  animation-play-state: paused;
+}
+
+@keyframes spec-scroll-left {
+  from { transform: translate3d(0, 0, 0); }
+  to   { transform: translate3d(-50%, 0, 0); }
+}
+@keyframes spec-scroll-right {
+  from { transform: translate3d(-50%, 0, 0); }
+  to   { transform: translate3d(0, 0, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stream-marquee-track,
+  .spec-track-left,
+  .spec-track-right {
+    animation: none;
+  }
+}
+
 /* Awards & press card carousel — hide scrollbars and keep only a very
    soft horizontal edge fade. The rail has top/bottom padding in
    Media.tsx so hover-lift borders and shadows stay inside the scroll

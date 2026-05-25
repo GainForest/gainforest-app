@@ -36,9 +36,10 @@ const NAV_ITEMS: ReadonlyArray<NavItem> = [
   { key: "ai", labelKey: "nav.ai", href: "#ai" },
   { key: "partners", labelKey: "nav.partners", href: "#partners" },
   { key: "impact", labelKey: "nav.impact", href: "#impact" },
-  // Standalone routes — live at /about and /research, not landing
-  // sections. Their i18n keys already exist in i18n.ts (nav.about
-  // and nav.research).
+  // Standalone routes — live at /about, /research, /explorer, not
+  // landing sections. Their i18n keys already exist in i18n.ts
+  // (nav.about, nav.research, nav.explorer).
+  { key: "explorer", labelKey: "nav.explorer", href: "/explorer" },
   { key: "about", labelKey: "nav.about", href: "/about" },
   { key: "research", labelKey: "nav.research", href: "/research" },
 ];

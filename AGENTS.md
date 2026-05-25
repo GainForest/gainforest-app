@@ -103,8 +103,14 @@ app/
 ├── layout.tsx                     fonts + metadata + mounts <FloatingTaina>
 ├── globals.css                    design tokens (cream + forest green)
 ├── _components/                   only UI; no business logic
+├── explorer/                       /explorer route ; live data carousels
+│   ├── page.tsx                    async server component
+│   ├── _components/                hero + Bumicerts marquee + specimen wall
+│   └── _messages.ts                scoped i18n (5 locales)
 ├── _lib/                          fetchers + auth + chat helpers
 │   ├── bumicerts.ts               hyperlabel + indexer → LiveBumicert[]
+│   ├── occurrences.ts             Hyperindex totalCount for /research KPI
+│   ├── occurrences-feed.ts        Live indexer walk → LiveOccurrence[] for /explorer
 │   ├── projects.ts                green_globe API → ProjectPin[]
 │   ├── auth-config.ts             OAuth client_id / redirect_uri / scope
 │   ├── auth-store.ts              in-memory state + session + cookie stores
@@ -126,6 +132,55 @@ public/decor/                      generated raster decorations
 public/codex-pets/                 taina sim sprites (mirrored from PDS)
 scripts/generate-jwk.mjs           one-shot JWK generator (port of simocracy)
 ```
+
+## /explorer page
+
+A dedicated /explorer route that ports the swissnex-2026 deck's two
+data carousels (slides 8 + 9) into the React app. Same recipe as
+those slides: a horizontal marquee of the freshest Bumicerts on top,
+and a two-row specimen wall of Darwin Core occurrences below; the
+rows scroll in opposite directions and hover-pause together.
+
+**Bumicerts source**: `fetchLiveBumicerts(12)` ; same fetcher the
+landing hero card uses, so the two surfaces stay in sync.
+
+**Darwin Core source**: `fetchLiveOccurrences()` walks the
+`appGainforestDwcOccurrence` GraphQL connection on Hyperindex live
+and resolves each record's `imageEvidence` blob ref to a PDS sync
+URL via plc.directory. Unlike the deck (which bakes a snapshot at
+build-time to sidestep Cloudflare CORS on hyperlabel), the
+landing's `/explorer` is server-rendered so it can do the walk on
+request. Records without `imageEvidence` are skipped because the
+wall is visual.
+
+Why this stays fast in production even though the walk is heavy
+(~20-30 pages × ~6 s):
+
+  - `app/explorer/page.tsx` sets `export const revalidate = 900`,
+    so the page renders once every 15 minutes maximum. Vercel
+    serves the cached HTML to every other visitor instantly via
+    ISR. The single slow render happens at build time (under
+    Vercel's 45-min static-generation budget) or in a background
+    revalidation after the cache expires; never on a user request.
+  - Every per-page indexer call uses `next: { revalidate: 900 }`
+    so each cursor page caches independently. After the first
+    walk, any other server work that crosses the same cursors is
+    free.
+  - PDS host lookups are cached for 24h via the same mechanism +
+    a module-scoped Map, so the second record on the same DID is
+    free.
+
+If the indexer starts being denser on `imageEvidence` (e.g. once
+the Telegram bot starts auto-attaching photos), MAX_PAGES in
+`occurrences-feed.ts` can come back down. Until then, keep it
+generous so the wall doesn't end up sparse.
+
+Carousel CSS (`.stream-marquee`, `.spec-wall`, `.spec-track-left`,
+`.spec-track-right`) lives in `app/globals.css` next to
+`.awards-marquee`. The track recipe is the same throughout: render
+two copies of the card set inline, then translate -50% to seamlessly
+loop the duplicate over the first set. All three respect
+`prefers-reduced-motion`.
 
 The `_` prefix on `_components/` and `_lib/` keeps them out of Next's
 route-segment scanner — they are private to the app directory.
