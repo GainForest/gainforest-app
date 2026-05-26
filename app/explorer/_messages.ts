@@ -46,6 +46,10 @@ type ExplorerMessages = {
   "explorer.specimens.heading.after": string;
   "explorer.specimens.lede": string;
   "explorer.specimens.hint": string;
+  /** Status line shown under the wall while the client-side walk is
+   *  in progress. `{loaded}` is the running count of resolved
+   *  records, `{target}` is the requested target. */
+  "explorer.specimens.loading": string;
   "explorer.specimens.unidentified": string;
   "explorer.specimens.taxa": string;
   /** Right-rail line that clarifies the wall is a sample, not the
@@ -88,6 +92,8 @@ const EN: ExplorerMessages = {
   "explorer.specimens.lede":
     "Each card below is one Darwin Core species observation indexed on ATProto; scientific name, GPS, date, photograph. Together they form the open biodiversity layer of the GainForest data commons.",
   "explorer.specimens.hint": "Hover the band to pause",
+  "explorer.specimens.loading":
+    "Streaming {loaded} of {target} records from the indexer…",
   "explorer.specimens.unidentified": "Unidentified",
   "explorer.specimens.taxa": "unique taxa",
   "explorer.specimens.acrossRecent":
@@ -128,6 +134,8 @@ const ES: ExplorerMessages = {
   "explorer.specimens.lede":
     "Cada tarjeta debajo es una observación de especie Darwin Core indexada en ATProto; nombre científico, GPS, fecha, fotografía. Juntas forman la capa abierta de biodiversidad de los bienes comunes de GainForest.",
   "explorer.specimens.hint": "Pasa el ratón sobre la banda para pausarla",
+  "explorer.specimens.loading":
+    "Transmitiendo {loaded} de {target} registros desde el indexador…",
   "explorer.specimens.unidentified": "Sin identificar",
   "explorer.specimens.taxa": "taxones únicos",
   "explorer.specimens.acrossRecent":
@@ -168,6 +176,8 @@ const PT: ExplorerMessages = {
   "explorer.specimens.lede":
     "Cada cartão abaixo é uma observação Darwin Core indexada no ATProto; nome científico, GPS, data, fotografia. Juntas formam a camada aberta de biodiversidade dos bens comuns da GainForest.",
   "explorer.specimens.hint": "Passa o rato sobre a faixa para pausar",
+  "explorer.specimens.loading":
+    "A transmitir {loaded} de {target} registos do indexador…",
   "explorer.specimens.unidentified": "Sem identificação",
   "explorer.specimens.taxa": "táxones únicos",
   "explorer.specimens.acrossRecent":
@@ -208,6 +218,8 @@ const SW: ExplorerMessages = {
   "explorer.specimens.lede":
     "Kila kadi hapa chini ni uchunguzi wa spishi za Darwin Core uliopangwa kwenye ATProto; jina la kisayansi, GPS, tarehe, picha. Pamoja zinaunda safu wazi ya bayoanuwai ya rasilimali za pamoja za GainForest.",
   "explorer.specimens.hint": "Weka kishale kwenye ukanda kusimamisha",
+  "explorer.specimens.loading":
+    "Inatuma rekodi {loaded} kati ya {target} kutoka kwa kihifadhi…",
   "explorer.specimens.unidentified": "Haijatambuliwa",
   "explorer.specimens.taxa": "taxa za kipekee",
   "explorer.specimens.acrossRecent":
@@ -248,6 +260,8 @@ const ID: ExplorerMessages = {
   "explorer.specimens.lede":
     "Setiap kartu di bawah adalah satu observasi spesies Darwin Core yang terindeks di ATProto; nama ilmiah, GPS, tanggal, foto. Bersama-sama membentuk lapisan keanekaragaman hayati terbuka dari sumber daya bersama GainForest.",
   "explorer.specimens.hint": "Arahkan kursor ke pita untuk menjeda",
+  "explorer.specimens.loading":
+    "Mengalirkan {loaded} dari {target} rekam dari pengindeks…",
   "explorer.specimens.unidentified": "Belum diidentifikasi",
   "explorer.specimens.taxa": "taksa unik",
   "explorer.specimens.acrossRecent":

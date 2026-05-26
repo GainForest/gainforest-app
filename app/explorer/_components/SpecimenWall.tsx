@@ -166,11 +166,11 @@ export function SpecimenWall({ occurrencesTotal }: { occurrencesTotal: number })
         </div>
       </div>
 
-      {/* The wall itself. While the first page resolves we render a
-          skeleton band so the section has visual weight from the
-          moment the page hydrates ; the band then swaps to real
-          rows as records arrive (progressively, before the full
-          walk completes). */}
+      {/* The wall itself. Renders a skeleton band while we wait for
+          the first batch of records to arrive, then swaps to real
+          rows ; subsequent records stream in card-by-card via the
+          `onProgress` callback below, so the wall grows without
+          ever resetting to a skeleton state. */}
       <div
         className="spec-wall mt-10 border-y border-border-soft py-3 lg:mt-14"
         aria-label={t("explorer.specimens.eyebrow")}
@@ -182,13 +182,13 @@ export function SpecimenWall({ occurrencesTotal }: { occurrencesTotal: number })
         ) : (
           <>
             <SpecimenRow
-              records={evens}
+              records={evens.length ? evens : records}
               direction="left"
               unidentifiedLabel={t("explorer.specimens.unidentified")}
             />
             <div className="h-2" />
             <SpecimenRow
-              records={odds.length ? odds : evens}
+              records={odds.length ? odds : records}
               direction="right"
               unidentifiedLabel={t("explorer.specimens.unidentified")}
             />
@@ -198,9 +198,9 @@ export function SpecimenWall({ occurrencesTotal }: { occurrencesTotal: number })
 
       <p className="mx-auto max-w-[1480px] px-6 pt-4 pb-16 text-center font-instrument italic text-[13px] text-foreground/55 sm:px-10 lg:px-16 lg:pb-24">
         {phase === "loading"
-          ? progressRef.current > 0
-            ? `${fmt.format(progressRef.current)} / ${TARGET}…`
-            : t("explorer.specimens.hint")
+          ? t("explorer.specimens.loading")
+              .replace("{loaded}", fmt.format(progressRef.current))
+              .replace("{target}", fmt.format(TARGET))
           : phase === "error"
             ? t("explorer.specimens.empty")
             : t("explorer.specimens.hint")}
@@ -228,11 +228,16 @@ function SpecimenRow({
       <div
         className={`spec-track ${direction === "left" ? "spec-track-left" : "spec-track-right"}`}
       >
-        {records.map((r) => (
+        {records.map((r, i) => (
           <SpecimenCard
             key={r.id}
             record={r}
             unidentifiedLabel={unidentifiedLabel}
+            // Eager-load the first 8 images in each row so the wall
+            // paints with real content as soon as cards are present
+            // in the DOM. Anything further down can wait for the
+            // browser's native lazy-load.
+            eager={i < 8}
           />
         ))}
         {records.map((r) => (
@@ -252,10 +257,17 @@ function SpecimenCard({
   record,
   unidentifiedLabel,
   ariaHidden,
+  eager,
 }: {
   record: LiveOccurrence;
   unidentifiedLabel: string;
   ariaHidden?: boolean;
+  /** Set `true` for the first few cards in a row so the browser
+   *  fetches the image immediately rather than waiting for it to
+   *  scroll into view. The marquee starts paused for a few hundred
+   *  ms while the JS bundle hydrates, so lazy-loading would leave
+   *  the wall looking empty for that whole window. */
+  eager?: boolean;
 }) {
   const sci = record.scientificName || record.vernacularName || unidentifiedLabel;
   const cc =
@@ -280,8 +292,9 @@ function SpecimenCard({
       <img
         src={record.imageUrl}
         alt={ariaHidden ? "" : sci}
-        loading="lazy"
+        loading={eager ? "eager" : "lazy"}
         decoding="async"
+        fetchPriority={eager ? "high" : "auto"}
         className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 hover:scale-[1.04]"
       />
       <div

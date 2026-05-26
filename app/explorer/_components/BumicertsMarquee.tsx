@@ -97,8 +97,17 @@ export function BumicertsMarquee({ snapshot }: { snapshot: LiveBumicertsSnapshot
           aria-label={t("explorer.bumicerts.eyebrow")}
         >
           <ul role="list" className="stream-marquee-track">
-            {cards.map((c) => (
-              <BumicertCard key={c.id} bumicert={c} locale={intlLocale} />
+            {cards.map((c, i) => (
+              <BumicertCard
+                key={c.id}
+                bumicert={c}
+                locale={intlLocale}
+                // Eager-load the first 6 cards so the marquee paints
+                // with real images as soon as the script hydrates,
+                // instead of waiting for the browser's native lazy
+                // loader to notice the cards are in view.
+                eager={i < 6}
+              />
             ))}
             {/* Duplicate copy ; hidden from screen readers; lives
                 purely to make the marquee loop seamlessly when the
@@ -130,10 +139,16 @@ function BumicertCard({
   bumicert,
   locale,
   ariaHidden,
+  eager,
 }: {
   bumicert: LiveBumicert;
   locale: string;
   ariaHidden?: boolean;
+  /** When true, set `loading="eager"` + `fetchpriority="high"` on
+   *  the image so the first few cards in the marquee paint as soon
+   *  as the browser can fetch them, instead of waiting for the
+   *  native lazy-loader. */
+  eager?: boolean;
 }) {
   const dateStr = formatShortDate(bumicert.createdAt, locale);
   const atUri = truncateAtUri(
@@ -171,8 +186,9 @@ function BumicertCard({
             <img
               src={bumicert.imageUrl}
               alt=""
-              loading="lazy"
+              loading={eager ? "eager" : "lazy"}
               decoding="async"
+              fetchPriority={eager ? "high" : "auto"}
               className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
             />
           ) : (

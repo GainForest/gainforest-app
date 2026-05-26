@@ -115,14 +115,16 @@ type PageResponse = {
   errors?: Array<{ message: string }>;
 };
 
-async function fetchPage(
-  after: string | null,
-  signal: AbortSignal,
-): Promise<{
+type PageResult = {
   hasNextPage: boolean;
   endCursor: string | null;
   nodes: RawNode[];
-}> {
+};
+
+async function fetchPage(
+  after: string | null,
+  signal: AbortSignal,
+): Promise<PageResult> {
   const res = await fetch(INDEXER_URL, {
     method: "POST",
     headers: { "content-type": "application/json" },
@@ -218,49 +220,61 @@ async function nodeToRecord(
   };
 }
 
-/** Process an array in fixed-concurrency batches. Mirrors p-limit
- *  without the dependency. */
-async function mapConcurrent<T, R>(
-  items: ReadonlyArray<T>,
+/** Run a list of async tasks with bounded concurrency. Unlike a
+ *  classic `mapConcurrent`, each task is responsible for emitting its
+ *  own result ; this function only enforces the concurrency limit.
+ *  The wall uses it to push records into the running list as soon as
+ *  each PDS lookup resolves, instead of waiting for an entire batch
+ *  to settle. */
+async function runWithLimit(
+  tasks: ReadonlyArray<() => Promise<void>>,
   limit: number,
-  fn: (item: T) => Promise<R>,
-): Promise<R[]> {
-  const out: R[] = new Array(items.length);
+): Promise<void> {
   let cursor = 0;
   async function worker() {
-    while (true) {
+    while (cursor < tasks.length) {
       const i = cursor++;
-      if (i >= items.length) return;
-      out[i] = await fn(items[i]!);
+      await tasks[i]!();
     }
   }
   const workers = Array.from(
-    { length: Math.min(limit, items.length) },
+    { length: Math.min(limit, tasks.length) },
     worker,
   );
   await Promise.all(workers);
-  return out;
 }
 
 export type WalkOptions = {
-  /** Max image-bearing records to collect. Default 32. */
+  /** Max image-bearing records to collect. Default 200. */
   target?: number;
-  /** Max indexer pages to walk. Default 50. */
+  /** Max indexer pages to walk. Default 80. */
   maxPages?: number;
-  /** Called with the running list every time a new page of records
-   *  finishes resolving. Lets the UI render progressively. */
+  /** Called with the running list every time a new record finishes
+   *  resolving. Lets the UI fill cards in card-by-card instead of
+   *  waiting for entire indexer pages. */
   onProgress?: (records: LiveOccurrence[]) => void;
   /** Standard AbortController signal; the walker bails between
-   *  page fetches when fired. */
+   *  per-record resolutions when fired. */
   signal: AbortSignal;
 };
 
 /**
- * Walk the indexer in the browser and return resolved
- * image-bearing occurrence records.
+ * Walk the indexer in the browser and stream resolved image-bearing
+ * occurrence records into the UI.
  *
- * Records are emitted via `onProgress` as soon as each page's
- * matches are resolved, then the final list is returned.
+ * The walk is pipelined: as soon as a page lands, we kick off the
+ * next page's fetch IN PARALLEL with resolving the current page's
+ * image-bearing records. This matters because the indexer is
+ * cursor-paginated (Relay-style; you need each page's `endCursor`
+ * before you can ask for the next) and each page takes ~6 s round-
+ * trip ; without pipelining, an indexer stretch with no
+ * image-bearing records would freeze the wall for that 6 s × N
+ * stretch even though the per-page resolution work is trivial.
+ *
+ * Each successfully resolved record fires `onProgress` immediately
+ * (not in batches), so the specimen wall fills in card-by-card as
+ * PDS lookups complete. Returns the final list once the target is
+ * hit or the indexer runs out of pages.
  */
 export async function walkOccurrences(
   options: WalkOptions,
@@ -270,30 +284,53 @@ export async function walkOccurrences(
   const { signal, onProgress } = options;
 
   const records: LiveOccurrence[] = [];
-  let after: string | null = null;
 
-  for (let page = 0; page < maxPages; page++) {
+  /* Start the first page fetch immediately. Subsequent pages start
+     as soon as we have the previous page's endCursor (i.e. the
+     moment its body lands), in parallel with resolving its records. */
+  let pending: Promise<PageResult> | null = fetchPage(null, signal);
+
+  for (let page = 0; page < maxPages && pending; page++) {
     if (signal.aborted) throw new DOMException("aborted", "AbortError");
-    const { hasNextPage, endCursor, nodes } = await fetchPage(after, signal);
+    const result: PageResult = await pending;
+    const { hasNextPage, endCursor, nodes } = result;
 
-    /* Collect this page's image-bearing nodes, then resolve their
-       PDS blob URLs concurrently before continuing to the next
-       page. This lets the wall fill in as soon as the first
-       image-rich page lands instead of waiting for the whole walk. */
+    /* Kick off the next page fetch before we start resolving this
+       page's records, so the network is busy while we wait on PDS
+       lookups. The `<` guard stops us from over-fetching once we
+       already have enough records ; without it we'd spend an extra
+       page-fetch worth of time after the target is hit. */
+    const willContinue =
+      hasNextPage &&
+      endCursor &&
+      page + 1 < maxPages &&
+      records.length < target;
+    pending = willContinue ? fetchPage(endCursor, signal) : null;
+
+    /* Collect this page's image-bearing nodes and resolve them
+       concurrently. Each task pushes its own result and fires
+       `onProgress` the moment its PDS lookup lands, so the wall
+       sees a stream of records rather than batches at page
+       boundaries. The concurrency limit caps simultaneous PDS
+       requests without forcing a batch barrier. */
     const candidates = nodes.filter((n) => n.imageEvidence?.file?.ref);
     if (candidates.length > 0) {
-      const resolved = await mapConcurrent(
-        candidates,
-        RESOLVE_CONCURRENCY,
-        (n) => nodeToRecord(n, signal),
-      );
-      for (const r of resolved) if (r) records.push(r);
-      onProgress?.(records.slice(0, target));
+      const tasks = candidates.map((n) => async () => {
+        if (records.length >= target || signal.aborted) return;
+        const r = await nodeToRecord(n, signal);
+        if (!r || signal.aborted) return;
+        if (records.length >= target) return;
+        records.push(r);
+        onProgress?.(records.slice(0, target));
+      });
+      await runWithLimit(tasks, RESOLVE_CONCURRENCY);
     }
 
-    if (records.length >= target) break;
-    if (!hasNextPage || !endCursor) break;
-    after = endCursor;
+    if (records.length >= target) {
+      /* Drop any in-flight next-page fetch; we have what we need. */
+      pending = null;
+      break;
+    }
   }
 
   return records.slice(0, target);
