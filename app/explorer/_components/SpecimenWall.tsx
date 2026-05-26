@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { useLocale } from "../../_components/LocaleProvider";
 import { getExplorerT } from "../_messages";
@@ -288,14 +289,25 @@ function SpecimenCard({
           {record.iucn}
         </span>
       )}
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
+      {/* next/image routes through Vercel's image optimizer
+          (/_next/image) which:
+            1. Resizes the original PDS blob (often 1500×2000 ≈ 200 KB)
+               down to the actual rendered size (≈ 200 × 200 = 20 KB).
+            2. Re-encodes as WebP/AVIF.
+            3. Caches on Vercel's edge so a popular record loads from
+               the CDN, not from each community's PDS, on subsequent
+               visitors. Without this, every visitor was hitting
+               certified.one with 200 KB unoptimised JPEGs over a
+               ~1.3 s TTFB each. */}
+      <Image
         src={record.imageUrl}
         alt={ariaHidden ? "" : sci}
-        loading={eager ? "eager" : "lazy"}
-        decoding="async"
-        fetchPriority={eager ? "high" : "auto"}
+        fill
+        sizes="(max-width: 768px) 140px, (max-width: 1280px) 16vw, 200px"
+        priority={eager}
+        unoptimized={record.imageUrl.startsWith("/")}
         className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 hover:scale-[1.04]"
+        style={{ objectFit: "cover" }}
       />
       <div
         className="absolute inset-x-0 bottom-0 z-10 flex flex-col gap-0.5 px-2 pb-1.5 pt-2.5"
