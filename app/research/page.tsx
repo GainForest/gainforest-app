@@ -48,7 +48,7 @@ const RESEARCH_TITLE = "Research at GainForest";
 const RESEARCH_DESCRIPTION =
   "Peer-reviewed papers at NeurIPS, IEEE Field Robotics, and AAAI; open ATProto lexicons and a self-hostable Hypersphere stack for community-led conservation.";
 const RESEARCH_OG_TITLE =
-  "Research at GainForest; open ML and lexicons for nature";
+  "Research at GainForest · open ML and lexicons for nature";
 
 export const metadata: Metadata = {
   title: RESEARCH_TITLE,

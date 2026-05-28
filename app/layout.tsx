@@ -69,8 +69,8 @@ const SITE_DESCRIPTION =
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: `${SITE_NAME}; ${SITE_TAGLINE}`,
-    template: `%s; ${SITE_NAME}`,
+    default: `${SITE_NAME} · ${SITE_TAGLINE}`,
+    template: `%s · ${SITE_NAME}`,
   },
   description: SITE_DESCRIPTION,
   applicationName: SITE_NAME,
@@ -101,7 +101,7 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_US",
     siteName: SITE_NAME,
-    title: `${SITE_NAME}; ${SITE_TAGLINE}`,
+    title: `${SITE_NAME} · ${SITE_TAGLINE}`,
     description: SITE_DESCRIPTION,
     url: SITE_URL,
     images: [
@@ -118,7 +118,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: `${SITE_NAME}; ${SITE_TAGLINE}`,
+    title: `${SITE_NAME} · ${SITE_TAGLINE}`,
     description: SITE_DESCRIPTION,
     images: [OG_IMAGE_PATH],
     creator: "@gainforest",
@@ -196,7 +196,7 @@ const JSON_LD = {
       "@type": "WebPage",
       "@id": `${SITE_URL}/#webpage`,
       url: SITE_URL,
-      name: `${SITE_NAME}; ${SITE_TAGLINE}`,
+      name: `${SITE_NAME} · ${SITE_TAGLINE}`,
       isPartOf: { "@id": `${SITE_URL}/#website` },
       primaryImageOfPage: `${SITE_URL}${OG_IMAGE_PATH}`,
       about: { "@id": `${SITE_URL}/#organization` },

@@ -58,7 +58,7 @@ const EXPLORER_TITLE = "Explorer";
 const EXPLORER_DESCRIPTION =
   "Browse the GainForest data commons live; freshly minted Bumicerts and Darwin Core species observations streamed straight from partner PDS instances.";
 const EXPLORER_OG_TITLE =
-  "Explorer; the living GainForest data commons";
+  "Explorer · the living GainForest data commons";
 
 export const metadata: Metadata = {
   title: EXPLORER_TITLE,

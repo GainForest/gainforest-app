@@ -52,7 +52,7 @@ export const revalidate = 900;
 const ABOUT_TITLE = "About GainForest";
 const ABOUT_DESCRIPTION =
   "GainForest is a Swiss non-profit building open, community-first tools for nature stewards. Tech support for nature; from a 2017 UN hackathon to winning the XPRIZE Rainforest.";
-const ABOUT_OG_TITLE = "About GainForest; tech support for nature";
+const ABOUT_OG_TITLE = "About GainForest · tech support for nature";
 
 export const metadata: Metadata = {
   title: ABOUT_TITLE,
