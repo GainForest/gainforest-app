@@ -39,7 +39,10 @@ const NAV_ITEMS: ReadonlyArray<NavItem> = [
   // Standalone routes — live at /about, /research, /explorer, not
   // landing sections. Their i18n keys already exist in i18n.ts
   // (nav.about, nav.research, nav.explorer).
-  { key: "explorer", labelKey: "nav.explorer", href: "/explorer" },
+  //
+  // Explorer is hidden from the navbar for now (route still lives
+  // at /explorer; uncomment the line below to bring it back).
+  // { key: "explorer", labelKey: "nav.explorer", href: "/explorer" },
   { key: "about", labelKey: "nav.about", href: "/about" },
   { key: "research", labelKey: "nav.research", href: "/research" },
 ];
