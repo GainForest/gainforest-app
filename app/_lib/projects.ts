@@ -225,6 +225,21 @@ export async function fetchProjectPins(): Promise<ProjectPin[]> {
         imageUrl: meta?.imageUrl ?? null,
       });
     }
+    // Upstream sometimes returns the full org list but with mapPoint: null
+    // on every record (a regression in green_globe's defaultSite →
+    // certified-location → centroid pipeline). When that happens the
+    // try-block doesn't throw — we just end up with an empty pins array.
+    // Fall back so the globe is never completely empty even when the
+    // upstream is "reachable but broken".
+    if (pins.length === 0) {
+      console.warn(
+        "[landing] /api/list-organizations returned 0 valid pins (likely the",
+        "upstream mapPoint join is broken); using fallback pins instead.",
+        "Raw org count was",
+        data.length,
+      );
+      return FALLBACK_PINS;
+    }
     return pins;
   } catch (err) {
     console.warn("[landing] project pins fetch failed, using fallback", err);
