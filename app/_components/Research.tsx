@@ -7,11 +7,13 @@ import { useT } from "./LocaleProvider";
 // mirrors gainforest.earth's hackathon block.
 //
 // Single full-width band on cream. Eyebrow + serif headline with italic
-// "innovate" word + body + a quiet outlined CTA pointing to the
-// annual GainForest hackathon page. Deliberately compact so the
-// preceding TainaFeature and the following NatureGuild get more vertical
-// breathing room.
-const HACKATHON_URL = "https://www.gainforest.earth/#research";
+// "innovate" word + body + two CTAs: the internal research route from
+// the navbar, plus the public 2024 AI+Environment EcoHackathon wiki.
+// Deliberately compact so the preceding TainaFeature and the following
+// NatureGuild get more vertical breathing room.
+const RESEARCH_URL = "/research";
+const HACKATHON_URL =
+  "https://gainforest.notion.site/AI-Environment-Hackathon-2024-Wiki-27f7f5459ea743b2bec1b9b11af54ef4?pvs=74";
 
 export function Research() {
   const t = useT();
@@ -38,20 +40,34 @@ export function Research() {
             <p className="text-[15px] lg:text-[16.5px] leading-[1.55] text-foreground/70">
               {t("research.body")}
             </p>
-            <Link
-              href={HACKATHON_URL}
-              target="_blank"
-              rel="noreferrer"
-              className="group mt-6 inline-flex h-[48px] items-center justify-center gap-2 rounded-full border border-foreground/25 px-7 text-[14.5px] font-medium text-foreground transition-colors hover:border-foreground/60"
-            >
-              {t("research.cta")}
-              <span
-                aria-hidden
-                className="inline-block transition-transform group-hover:translate-x-1"
+            <div className="mt-6 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
+              <Link
+                href={RESEARCH_URL}
+                className="group inline-flex h-[48px] items-center justify-center gap-2 rounded-full bg-primary px-7 text-[14.5px] font-medium text-primary-foreground transition-colors hover:bg-primary-dark"
               >
-                →
-              </span>
-            </Link>
+                {t("research.cta")}
+                <span
+                  aria-hidden
+                  className="inline-block transition-transform group-hover:translate-x-1"
+                >
+                  →
+                </span>
+              </Link>
+              <a
+                href={HACKATHON_URL}
+                target="_blank"
+                rel="noreferrer"
+                className="group inline-flex h-[48px] items-center justify-center gap-2 rounded-full border border-foreground/25 px-7 text-[14.5px] font-medium text-foreground transition-colors hover:border-foreground/60"
+              >
+                {t("research.hackathonCta")}
+                <span
+                  aria-hidden
+                  className="inline-block transition-transform group-hover:translate-x-1"
+                >
+                  ↗
+                </span>
+              </a>
+            </div>
           </div>
         </div>
       </div>

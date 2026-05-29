@@ -223,6 +223,7 @@ type Messages = {
   "research.heading.after": string;
   "research.body": string;
   "research.cta": string;
+  "research.hackathonCta": string;
 
   // ── Nature Guild ───────────────────────────────────────────────
   "natureGuild.eyebrow": string;
@@ -510,8 +511,9 @@ export const MESSAGES: Record<Locale, Messages> = {
     "research.heading.italic": "innovate",
     "research.heading.after": "together.",
     "research.body":
-      "Based on community-collected high-quality data, our non-profit hosts annual hackathons in Switzerland and globally to innovate together on AI and data visualisations for nature.",
-    "research.cta": "Join the next hackathon",
+      "Based on community-collected high-quality data, our non-profit runs research programs and hackathons, including the AI+Environment EcoHackathon with ETH AI Center: 136 participants, 20 teams, and three weeks of AI and data visualisation for Amazon conservation.",
+    "research.cta": "Explore our research",
+    "research.hackathonCta": "Open 2024 wiki",
     "natureGuild.eyebrow": "Nature Guild",
     "natureGuild.heading.before": "We listen to our",
     "natureGuild.heading.italic": "Nature Guild",
@@ -824,8 +826,9 @@ export const MESSAGES: Record<Locale, Messages> = {
     "research.heading.italic": "innovamos",
     "research.heading.after": "juntas.",
     "research.body":
-      "A partir de datos comunitarios de alta calidad, nuestra ONG organiza hackathons anuales en Suiza y a nivel global para innovar en IA y visualizaciones para la naturaleza.",
-    "research.cta": "Súmate al próximo hackathon",
+      "A partir de datos comunitarios de alta calidad, impulsamos programas de investigación y hackathons, incluido el AI+Environment EcoHackathon con ETH AI Center: 136 participantes, 20 equipos y tres semanas de IA y visualización de datos para conservar la Amazonía.",
+    "research.cta": "Explorar investigación",
+    "research.hackathonCta": "Abrir wiki 2024",
     "natureGuild.eyebrow": "Gremio de la Naturaleza",
     "natureGuild.heading.before": "Escuchamos a nuestro",
     "natureGuild.heading.italic": "Gremio de la Naturaleza",
@@ -1140,8 +1143,9 @@ export const MESSAGES: Record<Locale, Messages> = {
     "research.heading.italic": "inovamos",
     "research.heading.after": "juntas.",
     "research.body":
-      "A partir de dados comunitários de alta qualidade, nossa ONG organiza hackathons anuais na Suíça e em todo o mundo para inovar em IA e visualizações para a natureza.",
-    "research.cta": "Participe do próximo hackathon",
+      "A partir de dados comunitários de alta qualidade, conduzimos programas de pesquisa e hackathons, incluindo o AI+Environment EcoHackathon com o ETH AI Center: 136 participantes, 20 equipes e três semanas de IA e visualização de dados para conservar a Amazônia.",
+    "research.cta": "Explorar pesquisa",
+    "research.hackathonCta": "Abrir wiki 2024",
     "natureGuild.eyebrow": "Conselho da Natureza",
     "natureGuild.heading.before": "Escutamos nosso",
     "natureGuild.heading.italic": "Conselho da Natureza",
@@ -1454,8 +1458,9 @@ export const MESSAGES: Record<Locale, Messages> = {
     "research.heading.italic": "kubuni",
     "research.heading.after": "pamoja.",
     "research.body":
-      "Kwa kutegemea data ya hali ya juu ya jamii, shirika letu lisilo la faida huandaa hackathon ya kila mwaka nchini Uswisi na duniani kote kubuni kwa pamoja AI na taswira za asili.",
-    "research.cta": "Jiunge na hackathon ijayo",
+      "Kwa kutegemea data bora iliyokusanywa na jamii, tunaendesha programu za utafiti na hackathon, ikiwemo AI+Environment EcoHackathon pamoja na ETH AI Center: washiriki 136, timu 20 na wiki tatu za AI na taswira za data kwa uhifadhi wa Amazon.",
+    "research.cta": "Chunguza utafiti wetu",
+    "research.hackathonCta": "Fungua wiki ya 2024",
     "natureGuild.eyebrow": "Baraza la Asili",
     "natureGuild.heading.before": "Tunasikiliza",
     "natureGuild.heading.italic": "Baraza la Asili",
@@ -1770,8 +1775,9 @@ export const MESSAGES: Record<Locale, Messages> = {
     "research.heading.italic": "berinovasi",
     "research.heading.after": "bersama.",
     "research.body":
-      "Berbasis data berkualitas tinggi dari komunitas, organisasi nirlaba kami menyelenggarakan hackathon tahunan di Swiss dan global untuk berinovasi pada AI dan visualisasi data untuk alam.",
-    "research.cta": "Ikut hackathon berikutnya",
+      "Berbasis data berkualitas tinggi dari komunitas, kami menjalankan program riset dan hackathon, termasuk AI+Environment EcoHackathon bersama ETH AI Center: 136 peserta, 20 tim, dan tiga minggu AI serta visualisasi data untuk konservasi Amazon.",
+    "research.cta": "Jelajahi riset kami",
+    "research.hackathonCta": "Buka wiki 2024",
     "natureGuild.eyebrow": "Dewan Alam",
     "natureGuild.heading.before": "Kami mendengarkan",
     "natureGuild.heading.italic": "Dewan Alam",
