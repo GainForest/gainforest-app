@@ -187,6 +187,10 @@ type Messages = {
   "dataCommons.body": string;
   "dataCommons.stat.value": string; // visible big-number
   "dataCommons.stat.label": string;
+  "dataCommons.soil.eyebrow": string;
+  "dataCommons.soil.title": string;
+  "dataCommons.soil.body": string;
+  "dataCommons.soil.cta": string;
 
   // ── Local-first AI pillars (3-up: AI Assistants, Bioacoustics, Remote Sensing) ─
   // Key prefix is `equitableAI.*` for historical reasons — the section
@@ -474,6 +478,11 @@ export const MESSAGES: Record<Locale, Messages> = {
       "Only 1% of global biodiversity data comes from the world's largest rainforests. We're changing this by turning local communities into Indigenous scientists; and helping organisations build equitable data products that can preserve nature.",
     "dataCommons.stat.value": "1%",
     "dataCommons.stat.label": "of biodiversity data comes from the largest rainforests",
+    "dataCommons.soil.eyebrow": "Data is Soil",
+    "dataCommons.soil.title": "Our commons is a living practice.",
+    "dataCommons.soil.body":
+      "The GainForest Indigenous and Local Data Council frames data less like oil to be extracted and more like soil to be cultivated: tended with consent, attribution, correction paths, and the right to remain unmodeled.",
+    "dataCommons.soil.cta": "Read the playbook",
     "equitableAI.eyebrow": "Local-first AI",
     "equitableAI.heading.before": "We build local-first",
     "equitableAI.heading.italic": "technology",
@@ -783,6 +792,11 @@ export const MESSAGES: Record<Locale, Messages> = {
       "Solo el 1% de los datos globales de biodiversidad proviene de las mayores selvas del mundo. Estamos cambiando esto convirtiendo a las comunidades locales en científicas indígenas, y ayudando a las organizaciones a construir productos de datos equitativos que preserven la naturaleza.",
     "dataCommons.stat.value": "1%",
     "dataCommons.stat.label": "de los datos de biodiversidad viene de las mayores selvas",
+    "dataCommons.soil.eyebrow": "Data is Soil",
+    "dataCommons.soil.title": "Nuestro bien común es una práctica viva.",
+    "dataCommons.soil.body":
+      "El Consejo de Datos Indígenas y Locales de GainForest entiende los datos menos como petróleo que se extrae y más como suelo que se cultiva: cuidados con consentimiento, atribución, vías de corrección y el derecho a no ser modelado.",
+    "dataCommons.soil.cta": "Leer la guía",
     "equitableAI.eyebrow": "IA local-first",
     "equitableAI.heading.before": "Construimos",
     "equitableAI.heading.italic": "tecnología",
@@ -1094,6 +1108,11 @@ export const MESSAGES: Record<Locale, Messages> = {
       "Apenas 1% dos dados globais de biodiversidade vem das maiores florestas tropicais do mundo. Estamos mudando isso transformando comunidades locais em cientistas indígenas, e apoiando organizações a construir produtos de dados equitativos que preservam a natureza.",
     "dataCommons.stat.value": "1%",
     "dataCommons.stat.label": "dos dados de biodiversidade vem das maiores florestas",
+    "dataCommons.soil.eyebrow": "Data is Soil",
+    "dataCommons.soil.title": "Nosso bem comum é uma prática viva.",
+    "dataCommons.soil.body":
+      "O Conselho de Dados Indígenas e Locais da GainForest entende os dados menos como petróleo a ser extraído e mais como solo a ser cultivado: cuidado com consentimento, atribuição, caminhos de correção e o direito de não ser modelado.",
+    "dataCommons.soil.cta": "Ler o guia",
     "equitableAI.eyebrow": "IA local-first",
     "equitableAI.heading.before": "Construímos",
     "equitableAI.heading.italic": "tecnologia",
@@ -1403,6 +1422,11 @@ export const MESSAGES: Record<Locale, Messages> = {
       "Asilimia 1 tu ya data ya bioanuwai duniani inatoka kwenye misitu mikubwa zaidi ya mvua. Tunabadilisha hili kwa kuwafanya wanajamii kuwa wanasayansi wa Kiasili, na kusaidia mashirika kujenga bidhaa za data zenye usawa zinazohifadhi asili.",
     "dataCommons.stat.value": "1%",
     "dataCommons.stat.label": "ya data ya bioanuwai inatoka kwenye misitu mikubwa",
+    "dataCommons.soil.eyebrow": "Data is Soil",
+    "dataCommons.soil.title": "Hifadhi yetu ni mazoea hai.",
+    "dataCommons.soil.body":
+      "Baraza la Data za Kiasili na za Jamii la GainForest linaona data si kama mafuta ya kuchimbwa, bali kama udongo wa kustawishwa: kutunzwa kwa ridhaa, utambuzi, njia za kusahihisha na haki ya kutobadilishwa kuwa modeli.",
+    "dataCommons.soil.cta": "Soma mwongozo",
     "equitableAI.eyebrow": "AI ya local-first",
     "equitableAI.heading.before": "Tunajenga",
     "equitableAI.heading.italic": "teknolojia",
@@ -1714,6 +1738,11 @@ export const MESSAGES: Record<Locale, Messages> = {
       "Hanya 1% data keanekaragaman hayati global yang berasal dari hutan hujan terbesar di dunia. Kami mengubah ini dengan membantu komunitas lokal menjadi ilmuwan adat, dan mendukung organisasi membangun produk data yang adil untuk melindungi alam.",
     "dataCommons.stat.value": "1%",
     "dataCommons.stat.label": "data keanekaragaman hayati berasal dari hutan hujan terbesar",
+    "dataCommons.soil.eyebrow": "Data is Soil",
+    "dataCommons.soil.title": "Komons kami adalah praktik yang hidup.",
+    "dataCommons.soil.body":
+      "Dewan Data Adat dan Lokal GainForest memandang data bukan seperti minyak untuk diekstraksi, melainkan seperti tanah untuk dirawat: dijaga dengan persetujuan, atribusi, jalur koreksi, dan hak untuk tetap tidak dimodelkan.",
+    "dataCommons.soil.cta": "Baca panduan",
     "equitableAI.eyebrow": "AI local-first",
     "equitableAI.heading.before": "Kami membangun",
     "equitableAI.heading.italic": "teknologi",

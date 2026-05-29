@@ -38,6 +38,33 @@ export function DataCommons() {
           <p className="mt-6 max-w-[600px] text-[15px] sm:mt-7 sm:text-[15.5px] lg:text-[17px] leading-[1.6] text-ink-foreground/75 sm:leading-[1.55]">
             {t("dataCommons.body")}
           </p>
+
+          {/* Philosophy bridge into datasoil.org. The landing already
+              shows the technical commons; this callout names the
+              governance frame behind it without adding another full
+              section to the scroll. */}
+          <div className="mt-8 max-w-[620px] border-l border-ink-foreground/20 pl-5 sm:mt-10 sm:pl-6">
+            <p className="font-instrument text-[12px] uppercase tracking-[0.2em] text-ink-muted">
+              {t("dataCommons.soil.eyebrow")}
+            </p>
+            <p className="mt-3 font-garamond text-[24px] font-normal leading-[1.22] tracking-[-0.005em] text-ink-foreground sm:text-[30px]">
+              {t("dataCommons.soil.title")}
+            </p>
+            <p className="mt-3 text-[14.5px] leading-[1.62] text-ink-foreground/68 sm:text-[15px]">
+              {t("dataCommons.soil.body")}
+            </p>
+            <a
+              href="https://datasoil.org"
+              target="_blank"
+              rel="noreferrer"
+              className="mt-5 inline-flex min-h-[44px] items-center justify-center rounded-full bg-ink-foreground px-5 py-2.5 text-[13.5px] font-medium leading-none text-ink transition-colors hover:bg-ink-foreground/90 sm:px-6"
+            >
+              {t("dataCommons.soil.cta")}
+              <span aria-hidden className="ml-2 text-[15px]">
+                ↗
+              </span>
+            </a>
+          </div>
         </div>
 
         {/* Right: photo collage. Two photographs of the global
