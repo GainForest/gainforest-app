@@ -104,7 +104,7 @@ export default async function ExplorerPage() {
       <TopNav />
       <main>
         <ExplorerHero
-          bumicertsTotal={bumicerts.total}
+          bumicertsTotal={bumicerts.orgsTotal}
           occurrencesTotal={occurrenceCount.total}
           partnersCount={pins.length}
         />

@@ -88,7 +88,7 @@ const EN: AboutMessages = {
   "about.hero.spotlightLabel": "live partner",
 
   "about.stats.communities": "frontline communities, live on Green Globe",
-  "about.stats.bumicerts": "high-quality Bumicerts signed on ATProto",
+  "about.stats.bumicerts": "Bumicerts signed on ATProto",
   "about.stats.years": "years as a registered non-profit in Zurich",
   "about.stats.continents": "continents: Latin America, Africa, Asia",
 
@@ -146,7 +146,7 @@ const ES: AboutMessages = {
   "about.hero.spotlightLabel": "socio en vivo",
 
   "about.stats.communities": "comunidades en primera línea, en vivo en Green Globe",
-  "about.stats.bumicerts": "Bumicerts de alta calidad firmados en ATProto",
+  "about.stats.bumicerts": "Bumicerts firmados en ATProto",
   "about.stats.years": "años como ONG registrada en Zúrich",
   "about.stats.continents": "continentes: América Latina, África, Asia",
 
@@ -204,7 +204,7 @@ const PT: AboutMessages = {
   "about.hero.spotlightLabel": "parceiro ao vivo",
 
   "about.stats.communities": "comunidades de base, ao vivo no Green Globe",
-  "about.stats.bumicerts": "Bumicerts de alta qualidade assinados no ATProto",
+  "about.stats.bumicerts": "Bumicerts assinados no ATProto",
   "about.stats.years": "anos como ONG registrada em Zurique",
   "about.stats.continents": "continentes: América Latina, África, Ásia",
 
@@ -262,7 +262,7 @@ const SW: AboutMessages = {
   "about.hero.spotlightLabel": "mshirika wa moja kwa moja",
 
   "about.stats.communities": "jamii za mstari wa mbele, moja kwa moja kwenye Green Globe",
-  "about.stats.bumicerts": "Bumicerts za hali ya juu zilizotiwa saini kwenye ATProto",
+  "about.stats.bumicerts": "Bumicerts zilizotiwa saini kwenye ATProto",
   "about.stats.years": "miaka kama shirika lisilo la faida lililosajiliwa Zürich",
   "about.stats.continents": "mabara: Amerika Kusini, Afrika, Asia",
 
@@ -320,7 +320,7 @@ const ID: AboutMessages = {
   "about.hero.spotlightLabel": "mitra langsung",
 
   "about.stats.communities": "komunitas garis depan, langsung di Green Globe",
-  "about.stats.bumicerts": "Bumicerts berkualitas tinggi ditandatangani di ATProto",
+  "about.stats.bumicerts": "Bumicerts ditandatangani di ATProto",
   "about.stats.years": "tahun sebagai nirlaba terdaftar di Zurich",
   "about.stats.continents": "benua: Amerika Latin, Afrika, Asia",
 

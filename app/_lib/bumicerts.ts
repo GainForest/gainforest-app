@@ -54,6 +54,15 @@ export type LiveBumicert = {
 export type LiveBumicertsSnapshot = {
   /** Total high-quality projects according to the hyperlabel scorer. */
   total: number;
+  /**
+   * Total org projects in the GainForest data commons; counted from the
+   * indexer's `orgHypercertsCollection.totalCount`. This is the honest
+   * "how big is the commons?" number and is much larger than `total`
+   * (which only counts the high-quality tier). Use this for KPI cards
+   * and "X projects" footers; use `total` only when you specifically
+   * mean "high-quality bumicerts shown in the carousel".
+   */
+  orgsTotal: number;
   bumicerts: LiveBumicert[];
   /** True when we served the static fallback because the upstream was unreachable. */
   fromFallback: boolean;
@@ -117,6 +126,38 @@ function extractRkey(uri: string): string {
   // at://did/collection/rkey → rkey
   const parts = uri.split("/");
   return parts[parts.length - 1] ?? "";
+}
+
+// ── Indexer commons total ─────────────────────────────────
+
+/**
+ * Honest commons-scale count: every org project registered as a Hypercert
+ * via GainForest, regardless of hyperlabel tier. Used for the
+ * "X projects found" KPIs across the landing, About, and Explorer.
+ */
+async function fetchOrgsTotal(): Promise<number | null> {
+  try {
+    const res = await fetch(INDEXER_URL, {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        "ngrok-skip-browser-warning": "true",
+      },
+      body: JSON.stringify({
+        operationName: "LandingOrgsTotal",
+        query: `query LandingOrgsTotal { orgHypercertsCollection { totalCount } }`,
+      }),
+      next: { revalidate: REVALIDATE_SECONDS },
+    });
+    if (!res.ok) return null;
+    const json = (await res.json()) as {
+      data?: { orgHypercertsCollection?: { totalCount?: number | null } | null };
+    };
+    const n = json.data?.orgHypercertsCollection?.totalCount;
+    return typeof n === "number" ? n : null;
+  } catch {
+    return null;
+  }
 }
 
 // ── Indexer per-URI fetch ────────────────────────────────────────────────────
@@ -243,7 +284,14 @@ export async function fetchLiveBumicerts(
   count = 12,
 ): Promise<LiveBumicertsSnapshot> {
   try {
-    const { activities: hq, total } = await fetchHighQualityHyperlabels();
+    // Hyperlabel + orgs-total run in parallel — they hit different upstreams
+    // (hyperlabel-production vs hi.gainforest.app) and the orgs-total query
+    // is small so it never holds up the carousel render.
+    const [{ activities: hq, total }, orgsTotalRaw] = await Promise.all([
+      fetchHighQualityHyperlabels(),
+      fetchOrgsTotal(),
+    ]);
+    const orgsTotal = orgsTotalRaw ?? FALLBACK_SNAPSHOT.orgsTotal;
     // Take a slightly larger window than `count` so we can drop any URIs the
     // indexer no longer resolves without coming up short.
     const window = hq.slice(0, Math.max(count * 2, 24));
@@ -291,12 +339,14 @@ export async function fetchLiveBumicerts(
       return {
         ...FALLBACK_SNAPSHOT,
         total: total || FALLBACK_SNAPSHOT.total,
+        orgsTotal,
         fromFallback: true,
       };
     }
 
     return {
       total,
+      orgsTotal,
       bumicerts,
       fromFallback: false,
     };
@@ -309,10 +359,11 @@ export async function fetchLiveBumicerts(
 // ── Static fallback ──────────────────────────────────────────────────────────
 
 const FALLBACK_SNAPSHOT: LiveBumicertsSnapshot = {
-  // 91 is the current high-quality count from hyperlabel as of 2026-05-17;
-  // any number here is just a label, but we pick the most recent observed
-  // value so the card never reads "0 projects found".
-  total: 91,
+  // Most recent observed values, used only when the upstream is unreachable.
+  // `total` = hyperlabel's high-quality count; `orgsTotal` = indexer's
+  // commons-wide count from `orgHypercertsCollection.totalCount`.
+  total: 157,
+  orgsTotal: 315,
   fromFallback: true,
   bumicerts: [
     {

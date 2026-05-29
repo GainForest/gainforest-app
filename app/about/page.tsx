@@ -110,7 +110,7 @@ export default async function AboutPage() {
         <AboutHero pins={pins} />
         <AboutStats
           communitiesCount={pins.length}
-          bumicertsCount={snapshot.total}
+          bumicertsCount={snapshot.orgsTotal}
         />
         <AboutMission />
         <AboutStory />

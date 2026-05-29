@@ -208,7 +208,7 @@ export function BumicertsCard({
         <span className="text-foreground/55">
           {t("card.projectsFound").replace(
             "{n}",
-            formatCount(snapshot.total),
+            formatCount(snapshot.orgsTotal),
           )}
         </span>
         <Link

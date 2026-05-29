@@ -71,7 +71,7 @@ const EN: ExplorerMessages = {
   "explorer.hero.heading.after": ".",
   "explorer.hero.lede":
     "Two live data streams from the GainForest indexer. The top band lists the latest high-quality Bumicerts; signed certificates of community fieldwork published on ATProto. The bottom band samples the latest Darwin Core species observations the indexer has ingested. Hover either band to pause it.",
-  "explorer.hero.kpi1.label": "high-quality Bumicerts on ATProto",
+  "explorer.hero.kpi1.label": "Bumicerts on ATProto",
   "explorer.hero.kpi2.label": "Darwin Core observations indexed",
   "explorer.hero.kpi3.label": "frontline communities, live on Green Globe",
 
@@ -112,7 +112,7 @@ const ES: ExplorerMessages = {
   "explorer.hero.heading.after": ".",
   "explorer.hero.lede":
     "Dos flujos de datos en vivo del indexador GainForest. La banda superior lista los Bumicerts de alta calidad más recientes; certificados firmados de trabajo de campo comunitario publicados en ATProto. La banda inferior muestrea las últimas observaciones de especies Darwin Core que el indexador ha ingerido. Pasa el ratón sobre cualquier banda para pausarla.",
-  "explorer.hero.kpi1.label": "Bumicerts de alta calidad en ATProto",
+  "explorer.hero.kpi1.label": "Bumicerts en ATProto",
   "explorer.hero.kpi2.label": "observaciones Darwin Core indexadas",
   "explorer.hero.kpi3.label":
     "comunidades de primera línea, en vivo en Green Globe",
@@ -154,7 +154,7 @@ const PT: ExplorerMessages = {
   "explorer.hero.heading.after": ".",
   "explorer.hero.lede":
     "Dois fluxos de dados ao vivo do indexador GainForest. A faixa superior lista os Bumicerts de alta qualidade mais recentes; certificados assinados de trabalho de campo comunitário publicados no ATProto. A faixa inferior mostra uma amostra das últimas observações Darwin Core indexadas. Passa o rato sobre qualquer faixa para a pausar.",
-  "explorer.hero.kpi1.label": "Bumicerts de alta qualidade no ATProto",
+  "explorer.hero.kpi1.label": "Bumicerts no ATProto",
   "explorer.hero.kpi2.label": "observações Darwin Core indexadas",
   "explorer.hero.kpi3.label":
     "comunidades de base, ao vivo no Green Globe",
@@ -196,7 +196,7 @@ const SW: ExplorerMessages = {
   "explorer.hero.heading.after": ".",
   "explorer.hero.lede":
     "Mikondo miwili ya data ya moja kwa moja kutoka kwa kihifadhi cha GainForest. Ukanda wa juu unaorodhesha Bumicerts za hivi karibuni za ubora wa juu; vyeti vilivyotiwa saini vya kazi ya uwandani vya jamii vilivyochapishwa kwenye ATProto. Ukanda wa chini unachukua sampuli ya uchunguzi wa hivi karibuni wa spishi za Darwin Core. Weka kishale kwenye ukanda wowote ili kusimamisha.",
-  "explorer.hero.kpi1.label": "Bumicerts za ubora wa juu kwenye ATProto",
+  "explorer.hero.kpi1.label": "Bumicerts kwenye ATProto",
   "explorer.hero.kpi2.label": "uchunguzi wa Darwin Core ulioorodheshwa",
   "explorer.hero.kpi3.label":
     "jamii za mstari wa mbele, moja kwa moja kwenye Green Globe",
@@ -238,7 +238,7 @@ const ID: ExplorerMessages = {
   "explorer.hero.heading.after": ".",
   "explorer.hero.lede":
     "Dua aliran data langsung dari pengindeks GainForest. Pita atas mencantumkan Bumicerts berkualitas tinggi terbaru; sertifikat kerja lapangan komunitas yang ditandatangani dan diterbitkan di ATProto. Pita bawah mengambil sampel observasi spesies Darwin Core terbaru yang diindeks. Arahkan kursor ke salah satu pita untuk menjeda.",
-  "explorer.hero.kpi1.label": "Bumicerts berkualitas tinggi di ATProto",
+  "explorer.hero.kpi1.label": "Bumicerts di ATProto",
   "explorer.hero.kpi2.label": "observasi Darwin Core terindeks",
   "explorer.hero.kpi3.label":
     "komunitas garis depan, langsung di Green Globe",
