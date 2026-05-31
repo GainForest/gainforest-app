@@ -15,6 +15,7 @@ import {
   type OccurrenceFilter,
 } from "../_lib/indexer";
 import { RecordDrawer } from "./RecordDrawer";
+import { RecordMap } from "./RecordMap";
 import { BrushedText } from "./BrushedText";
 import { OwnerBadge } from "./AuthorChip";
 import { formatNumber, countryFlag, shortDid, formatDate } from "../_lib/format";
@@ -77,7 +78,8 @@ export function RecordExplorer({ kind }: { kind: RecordKind }) {
   const [hasMore, setHasMore] = useState(true);
   const [phase, setPhase] = useState<Phase>("idle");
   const [query, setQuery] = useState("");
-  const [occMedia, setOccMedia] = useState<OccurrenceFilter>("image");
+  const [occMedia, setOccMedia] = useState<OccurrenceFilter>("all");
+  const [view, setView] = useState<"cards" | "map">("cards");
   const [walking, setWalking] = useState(false);
   const [drawer, setDrawer] = useState<ExplorerRecord | null>(null);
 
@@ -225,6 +227,31 @@ export function RecordExplorer({ kind }: { kind: RecordKind }) {
             />
           </div>
 
+          {/* Cards / Map view toggle */}
+          <div className="inline-flex rounded-full border border-border-soft bg-surface p-0.5">
+            {(
+              [
+                { id: "cards", label: "Cards" },
+                { id: "map", label: "Map" },
+              ] as const
+            ).map((o) => (
+              <button
+                key={o.id}
+                type="button"
+                onClick={() => setView(o.id)}
+                aria-pressed={view === o.id}
+                className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[12.5px] font-medium transition-colors ${
+                  view === o.id
+                    ? "bg-foreground/[0.08] text-foreground"
+                    : "text-foreground/55 hover:text-foreground"
+                }`}
+              >
+                {o.id === "map" ? <MapGlyph /> : <CardsGlyph />}
+                {o.label}
+              </button>
+            ))}
+          </div>
+
           {kind === "occurrence" && (
             <div className="inline-flex rounded-full border border-border-soft bg-surface p-0.5">
               {(
@@ -259,9 +286,11 @@ export function RecordExplorer({ kind }: { kind: RecordKind }) {
           </div>
         </div>
 
-        {/* Grid */}
+        {/* Grid / Map */}
         <div className="mt-6">
-          {phase === "loading" && records.length === 0 ? (
+          {view === "map" ? (
+            <RecordMap records={filtered} kind={kind} onOpen={setDrawer} />
+          ) : phase === "loading" && records.length === 0 ? (
             <SkeletonGrid />
           ) : phase === "error" && records.length === 0 ? (
             <EmptyState
@@ -598,6 +627,26 @@ function MediaIcon({ kind }: { kind: OccurrenceRecord["media"][number] }) {
   );
 }
 
+
+function CardsGlyph() {
+  return (
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden>
+      <rect x="3" y="3" width="8" height="8" rx="1.5" stroke="currentColor" strokeWidth="2" />
+      <rect x="13" y="3" width="8" height="8" rx="1.5" stroke="currentColor" strokeWidth="2" />
+      <rect x="3" y="13" width="8" height="8" rx="1.5" stroke="currentColor" strokeWidth="2" />
+      <rect x="13" y="13" width="8" height="8" rx="1.5" stroke="currentColor" strokeWidth="2" />
+    </svg>
+  );
+}
+
+function MapGlyph() {
+  return (
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
+      <path d="M9 4v14M15 6v14" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
+    </svg>
+  );
+}
 
 function Spinner() {
   return (

@@ -320,6 +320,8 @@ export type BumicertRecord = {
   endDate: string | null;
   contributorCount: number;
   locationCount: number;
+  /** AT-URIs of the certified locations this claim references. */
+  locationUris: string[];
   createdAt: string;
   imageUrl: string | null;
   imageRef: string | null;
@@ -361,7 +363,7 @@ type RawActivity = {
   startDate?: string | null;
   endDate?: string | null;
   contributors?: Array<unknown> | null;
-  locations?: Array<unknown> | null;
+  locations?: Array<{ uri?: string | null }> | null;
   image?: RawActivityImage;
 };
 
@@ -385,6 +387,11 @@ function mapActivity(n: RawActivity): BumicertRecord {
     endDate: n.endDate?.trim() || null,
     contributorCount: Array.isArray(n.contributors) ? n.contributors.length : 0,
     locationCount: Array.isArray(n.locations) ? n.locations.length : 0,
+    locationUris: Array.isArray(n.locations)
+      ? n.locations
+          .map((l) => l?.uri)
+          .filter((u): u is string => typeof u === "string" && u.length > 0)
+      : [],
     createdAt: n.createdAt,
     imageUrl,
     imageRef,
