@@ -31,6 +31,11 @@ export function RecordMap({
   const [ready, setReady] = useState(false);
   const [points, setPoints] = useState<MapPoint[]>([]);
   const [resolving, setResolving] = useState(true);
+  // Auto-fit bookkeeping: `userMoved` disables auto-fit once the visitor pans
+  // or zooms; `fitting` marks our own programmatic moves so they don't count
+  // as user interaction. Both reset when a new data set loads.
+  const userMovedRef = useRef(false);
+  const fittingRef = useRef(false);
 
   const recordById = useMemo(() => new Map(records.map((r) => [r.id, r])), [records]);
 
@@ -49,9 +54,12 @@ export function RecordMap({
         maxZoom: 19,
       }).addTo(map);
       layerRef.current = L.layerGroup().addTo(map);
+      // Any move we didn't initiate is the visitor exploring; stop auto-fitting.
+      map.on("movestart", () => {
+        if (!fittingRef.current) userMovedRef.current = true;
+      });
       mapRef.current = map;
       setReady(true);
-      // The container may have laid out after init; nudge Leaflet to remeasure.
       setTimeout(() => map.invalidateSize(), 60);
     })();
     return () => {
@@ -62,9 +70,11 @@ export function RecordMap({
     };
   }, []);
 
-  // Resolve points whenever the record set changes.
+  // Resolve points whenever the record set changes. A new data set re-enables
+  // auto-fit so the map always frames the freshly loaded points.
   useEffect(() => {
     const controller = new AbortController();
+    userMovedRef.current = false;
     setResolving(true);
     resolvePointsFor(records, kind, {
       signal: controller.signal,
@@ -76,12 +86,15 @@ export function RecordMap({
     return () => controller.abort();
   }, [records, kind]);
 
-  // Draw markers when points (or the map) change.
+  // Draw markers + auto-fit when points (or the map) change.
   useEffect(() => {
     const L = LRef.current;
     const map = mapRef.current;
     const layer = layerRef.current;
     if (!L || !map || !layer || !ready) return;
+    // Re-measure first so fitBounds uses the real container size (it may have
+    // laid out after init, or the viewport may have changed).
+    map.invalidateSize();
     layer.clearLayers();
     for (const p of points) {
       const marker = L.circleMarker([p.lat, p.lon], {
@@ -99,9 +112,20 @@ export function RecordMap({
       });
       marker.addTo(layer);
     }
-    if (points.length > 0) {
+    if (points.length > 0 && !userMovedRef.current) {
       const bounds = L.latLngBounds(points.map((p) => [p.lat, p.lon] as [number, number]));
-      map.fitBounds(bounds, { padding: [40, 40], maxZoom: 8 });
+      fittingRef.current = true;
+      map.fitBounds(bounds.pad(0.08), {
+        // Single-cluster data (e.g. one survey site) fits to a tight bound;
+        // cap the zoom so it lands on a readable local view rather than the
+        // deepest street level. Globally spread pins stay zoomed out.
+        maxZoom: points.length === 1 ? 9 : 12,
+        animate: false,
+      });
+      // Let the programmatic move settle before re-enabling user detection.
+      setTimeout(() => {
+        fittingRef.current = false;
+      }, 0);
     }
   }, [points, recordById, onOpen, ready]);
 
