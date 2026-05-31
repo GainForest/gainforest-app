@@ -6,6 +6,7 @@ import {
   walkOccurrences,
   fetchSites,
   fetchBumicerts,
+  fetchRecordByUri,
   type ExplorerRecord,
   type OccurrenceRecord,
   type BumicertRecord,
@@ -67,6 +68,27 @@ const KIND_META: Record<RecordKind, KindMeta> = {
 const GRID_CLS =
   "grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 2xl:grid-cols-6";
 
+// AT-URI collection per page kind, so a shareable `?record=did/rkey` value can
+// be expanded back into a full at:// URI (the collection is implied by route).
+const COLLECTION: Record<RecordKind, string> = {
+  occurrence: "app.gainforest.dwc.occurrence",
+  site: "app.gainforest.organization.info",
+  bumicert: "org.hypercerts.claim.activity",
+};
+
+/** Compact, shareable key for a record: `did/rkey` (DIDs never contain "/"). */
+function recordParam(r: ExplorerRecord): string {
+  const m = r.atUri.match(/^at:\/\/([^/]+)\/[^/]+\/(.+)$/);
+  return m ? `${m[1]}/${m[2]}` : r.id;
+}
+function paramToUri(value: string, kind: RecordKind): string | null {
+  const slash = value.indexOf("/");
+  if (slash < 1) return null;
+  const did = value.slice(0, slash);
+  const rkey = value.slice(slash + 1);
+  return rkey ? `at://${did}/${COLLECTION[kind]}/${rkey}` : null;
+}
+
 type Phase = "idle" | "loading" | "ready" | "error" | "more";
 
 // Load a deep first page across every stream so the grid, map, and stats
@@ -89,6 +111,10 @@ export function RecordExplorer({ kind }: { kind: RecordKind }) {
   const [view, setView] = useState<"cards" | "map">("cards");
   const [walking, setWalking] = useState(false);
   const [drawer, setDrawer] = useState<ExplorerRecord | null>(null);
+  // `?record=` value awaiting resolution, so the URL keeps it while we fetch.
+  const [pendingRecord, setPendingRecord] = useState<string | null>(null);
+  // Skip the very first URL write so we don't strip params we just read in.
+  const firstUrlSyncRef = useRef(true);
 
   const controller = useRef<AbortController | null>(null);
   // Latest values for the load closure without re-creating it each render.
@@ -180,6 +206,51 @@ export function RecordExplorer({ kind }: { kind: RecordKind }) {
     return () => controller.current?.abort();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Hydrate state from a shared URL once: seed the search box from `?q=` and,
+  // if `?record=` is present, fetch that record directly (it may be outside
+  // the loaded page) and open its drawer.
+  useEffect(() => {
+    const sp = new URLSearchParams(window.location.search);
+    const q = sp.get("q");
+    if (q) setQuery(q);
+    const rec = sp.get("record");
+    if (!rec) return;
+    const uri = paramToUri(rec, kind);
+    if (!uri) return;
+    setPendingRecord(rec);
+    const ctrl = new AbortController();
+    fetchRecordByUri(uri, ctrl.signal)
+      .then((r) => {
+        // Don't clobber a record the visitor opened while we were fetching.
+        if (r) setDrawer((prev) => prev ?? r);
+      })
+      .catch(() => {})
+      .finally(() => setPendingRecord(null));
+    return () => ctrl.abort();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Keep the URL in sync with the search query + open record so it can be
+  // shared/bookmarked. replaceState (not the router) avoids history spam and
+  // re-renders; debounced so typing doesn't thrash the address bar.
+  useEffect(() => {
+    if (firstUrlSyncRef.current) {
+      firstUrlSyncRef.current = false;
+      return;
+    }
+    const t = setTimeout(() => {
+      const params = new URLSearchParams();
+      const q = query.trim();
+      if (q) params.set("q", q);
+      if (drawer) params.set("record", recordParam(drawer));
+      else if (pendingRecord) params.set("record", pendingRecord);
+      const qs = params.toString();
+      const url = qs ? `${window.location.pathname}?${qs}` : window.location.pathname;
+      window.history.replaceState(null, "", url);
+    }, 200);
+    return () => clearTimeout(t);
+  }, [query, drawer, pendingRecord]);
 
   // Changing the occurrence media filter resets and re-walks.
   function changeMedia(next: OccurrenceFilter) {

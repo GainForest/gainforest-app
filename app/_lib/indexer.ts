@@ -151,25 +151,31 @@ export type OccurrenceRecord = {
   media: MediaKind[];
 };
 
+const OCCURRENCE_NODE_FIELDS = `
+  did rkey uri createdAt eventDate
+  scientificName vernacularName kingdom family genus
+  basisOfRecord recordedBy individualCount
+  country countryCode locality decimalLatitude decimalLongitude
+  occurrenceRemarks fieldNotes
+  imageEvidence { file { ref } }
+  audioEvidence { file { ref } }
+  videoEvidence { file { ref } }
+  spectrogramEvidence { file { ref } }
+`;
+
 const OCCURRENCE_QUERY = `
   query ExplorerOccurrences($first: Int!, $after: String) {
     appGainforestDwcOccurrence(first: $first, after: $after, sortBy: createdAt, sortDirection: DESC) {
       totalCount
       pageInfo { hasNextPage endCursor }
-      edges {
-        node {
-          did rkey uri createdAt eventDate
-          scientificName vernacularName kingdom family genus
-          basisOfRecord recordedBy individualCount
-          country countryCode locality decimalLatitude decimalLongitude
-          occurrenceRemarks fieldNotes
-          imageEvidence { file { ref } }
-          audioEvidence { file { ref } }
-          videoEvidence { file { ref } }
-          spectrogramEvidence { file { ref } }
-        }
-      }
+      edges { node { ${OCCURRENCE_NODE_FIELDS} } }
     }
+  }
+`;
+
+const OCCURRENCE_BY_URI_QUERY = `
+  query ExplorerOccurrenceByUri($uri: String!) {
+    appGainforestDwcOccurrenceByUri(uri: $uri) { ${OCCURRENCE_NODE_FIELDS} }
   }
 `;
 
@@ -357,24 +363,30 @@ export type BumicertRecord = {
   imageRef: string | null;
 };
 
+const ACTIVITY_NODE_FIELDS = `
+  did rkey uri createdAt title shortDescription startDate endDate
+  contributors { contributorIdentity { __typename } }
+  locations { uri }
+  image {
+    __typename
+    ... on OrgHypercertsDefsUri { uri }
+    ... on OrgHypercertsDefsSmallImage { image { ref } }
+  }
+`;
+
 const ACTIVITY_QUERY = `
   query ExplorerActivities($first: Int!, $after: String) {
     orgHypercertsClaimActivity(first: $first, after: $after, sortBy: createdAt, sortDirection: DESC) {
       totalCount
       pageInfo { hasNextPage endCursor }
-      edges {
-        node {
-          did rkey uri createdAt title shortDescription startDate endDate
-          contributors { contributorIdentity { __typename } }
-          locations { uri }
-          image {
-            __typename
-            ... on OrgHypercertsDefsUri { uri }
-            ... on OrgHypercertsDefsSmallImage { image { ref } }
-          }
-        }
-      }
+      edges { node { ${ACTIVITY_NODE_FIELDS} } }
     }
+  }
+`;
+
+const ACTIVITY_BY_URI_QUERY = `
+  query ExplorerActivityByUri($uri: String!) {
+    orgHypercertsClaimActivityByUri(uri: $uri) { ${ACTIVITY_NODE_FIELDS} }
   }
 `;
 
@@ -478,19 +490,25 @@ export type SiteRecord = {
   logoRef: string | null;
 };
 
+const ORG_NODE_FIELDS = `
+  did uri displayName country createdAt
+  coverImage { image { ref } }
+  logo { image { ref } }
+`;
+
 const ORG_QUERY = `
   query ExplorerOrganizations($first: Int!, $after: String) {
     appGainforestOrganizationInfo(first: $first, after: $after) {
       totalCount
       pageInfo { hasNextPage endCursor }
-      edges {
-        node {
-          did uri displayName country createdAt
-          coverImage { image { ref } }
-          logo { image { ref } }
-        }
-      }
+      edges { node { ${ORG_NODE_FIELDS} } }
     }
+  }
+`;
+
+const ORG_BY_URI_QUERY = `
+  query ExplorerOrgByUri($uri: String!) {
+    appGainforestOrganizationInfoByUri(uri: $uri) { ${ORG_NODE_FIELDS} }
   }
 `;
 
@@ -561,3 +579,80 @@ export async function fetchSites(
 
 export type ExplorerRecord = OccurrenceRecord | BumicertRecord | SiteRecord;
 export type RecordKind = ExplorerRecord["kind"];
+
+// ── Single record by AT-URI (shareable deep links) ─────────────────────────
+//
+// A shared `?record=` link may point at a record outside the freshly loaded
+// page (or before the page has loaded at all), so resolve it directly from the
+// indexer's `*ByUri` field and reuse the same mappers + per-record image
+// resolution as the list fetchers. The collection in the URI selects the query.
+
+export async function fetchRecordByUri(
+  atUri: string,
+  signal?: AbortSignal,
+): Promise<ExplorerRecord | null> {
+  const m = atUri.match(/^at:\/\/([^/]+)\/([^/]+)\/(.+)$/);
+  if (!m) return null;
+  const collection = m[2];
+
+  if (collection === "app.gainforest.dwc.occurrence") {
+    const data = await indexerQuery<{ appGainforestDwcOccurrenceByUri?: RawOccurrence | null }>(
+      OCCURRENCE_BY_URI_QUERY,
+      { uri: atUri },
+      signal,
+    );
+    const n = data?.appGainforestDwcOccurrenceByUri;
+    if (!n?.did) return null;
+    const rec = mapOccurrence(n);
+    const ref = n.imageEvidence?.file?.ref ?? n.spectrogramEvidence?.file?.ref ?? null;
+    if (ref) {
+      try {
+        rec.imageUrl = await resolveBlobUrl(rec.did, ref, signal);
+      } catch {
+        /* keep placeholder */
+      }
+    }
+    return rec;
+  }
+
+  if (collection === "org.hypercerts.claim.activity") {
+    const data = await indexerQuery<{ orgHypercertsClaimActivityByUri?: RawActivity | null }>(
+      ACTIVITY_BY_URI_QUERY,
+      { uri: atUri },
+      signal,
+    );
+    const n = data?.orgHypercertsClaimActivityByUri;
+    if (!n?.did) return null;
+    const rec = mapActivity(n);
+    if (rec.imageRef && !rec.imageUrl) {
+      try {
+        rec.imageUrl = await resolveBlobUrl(rec.did, rec.imageRef, signal);
+      } catch {
+        /* keep placeholder */
+      }
+    }
+    return rec;
+  }
+
+  if (collection === "app.gainforest.organization.info") {
+    const data = await indexerQuery<{ appGainforestOrganizationInfoByUri?: RawOrg | null }>(
+      ORG_BY_URI_QUERY,
+      { uri: atUri },
+      signal,
+    );
+    const n = data?.appGainforestOrganizationInfoByUri;
+    if (!n?.did) return null;
+    const rec = mapOrg(n);
+    const ref = rec.coverRef ?? rec.logoRef;
+    if (ref) {
+      try {
+        rec.imageUrl = await resolveBlobUrl(rec.did, ref, signal);
+      } catch {
+        /* keep placeholder */
+      }
+    }
+    return rec;
+  }
+
+  return null;
+}
