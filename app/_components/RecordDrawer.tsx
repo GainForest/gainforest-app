@@ -210,9 +210,21 @@ function UriRow({ uri, href }: { uri: string; href: string | null }) {
         type="button"
         onClick={copy}
         title="Copy AT URI"
-        className="shrink-0 self-stretch rounded-lg border border-border-soft bg-surface-sunken px-2.5 text-[10px] font-medium uppercase tracking-[0.08em] text-foreground/45 transition-colors hover:border-primary/40 hover:text-foreground"
+        aria-label={copied ? "Copied" : "Copy AT URI"}
+        className={`grid h-8 w-8 shrink-0 place-items-center rounded-lg border border-border-soft bg-surface-sunken transition-colors hover:border-primary/40 ${
+          copied ? "text-primary" : "text-foreground/40 hover:text-primary"
+        }`}
       >
-        {copied ? "Copied" : "Copy"}
+        {copied ? (
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden>
+            <path d="M5 12.5l4 4 10-10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        ) : (
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden>
+            <rect x="9" y="9" width="11" height="11" rx="2.2" stroke="currentColor" strokeWidth="1.8" />
+            <path d="M5 15V5.5A1.5 1.5 0 0 1 6.5 4H15" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+          </svg>
+        )}
       </button>
     </div>
   );
