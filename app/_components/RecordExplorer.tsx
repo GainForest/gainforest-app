@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import Image from "next/image";
 import {
   walkOccurrences,
@@ -16,7 +16,8 @@ import {
 } from "../_lib/indexer";
 import { RecordDrawer } from "./RecordDrawer";
 import { BrushedText } from "./BrushedText";
-import { formatRelative, formatNumber, countryFlag, shortDid } from "../_lib/format";
+import { AuthorChip } from "./AuthorChip";
+import { formatNumber, countryFlag } from "../_lib/format";
 
 // Single-stream record explorer. One of the three GainForest record types
 // (Darwin Core occurrences, project sites, Bumicerts) paged straight from
@@ -32,7 +33,6 @@ type KindMeta = {
   titleItalic: string;
   lede: string;
   search: string;
-  grid: "square" | "card";
 };
 
 const KIND_META: Record<RecordKind, KindMeta> = {
@@ -42,7 +42,6 @@ const KIND_META: Record<RecordKind, KindMeta> = {
     titleItalic: "",
     lede: "Darwin Core occurrence records from Hyperindex, newest first. Image and audio evidence blobs are resolved per record from each owner's PDS.",
     search: "Filter by species, family, or country…",
-    grid: "square",
   },
   site: {
     eyebrow: "app.gainforest.organization.info",
@@ -50,7 +49,6 @@ const KIND_META: Record<RecordKind, KindMeta> = {
     titleItalic: "",
     lede: "Registered organization records: display name, country, and cover/logo blobs resolved from each org's PDS.",
     search: "Filter by organization or country…",
-    grid: "card",
   },
   bumicert: {
     eyebrow: "org.hypercerts.claim.activity",
@@ -58,9 +56,13 @@ const KIND_META: Record<RecordKind, KindMeta> = {
     titleItalic: "Bumicerts",
     lede: "Hypercert impact claim records: title, short description, contributors, certified locations, and cover image.",
     search: "Filter Bumicerts by title or description…",
-    grid: "card",
   },
 };
+
+// One grid for all three streams so the explorer reads as a consistent
+// catalog; every card carries an owner (did:plc → handle/avatar) + date footer.
+const GRID_CLS =
+  "grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4";
 
 type Phase = "idle" | "loading" | "ready" | "error" | "more";
 
@@ -259,7 +261,7 @@ export function RecordExplorer({ kind }: { kind: RecordKind }) {
         {/* Grid */}
         <div className="mt-6">
           {phase === "loading" && records.length === 0 ? (
-            <SkeletonGrid grid={meta.grid} />
+            <SkeletonGrid />
           ) : phase === "error" && records.length === 0 ? (
             <EmptyState
               title="Could not reach the indexer"
@@ -288,14 +290,7 @@ export function RecordExplorer({ kind }: { kind: RecordKind }) {
               <EmptyState title="No records yet" body="This stream is empty right now." />
             )
           ) : (
-            <ul
-              role="list"
-              className={
-                meta.grid === "square"
-                  ? "grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
-                  : "grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
-              }
-            >
+            <ul role="list" className={GRID_CLS}>
               {filtered.map((r, i) => (
                 <li key={r.id} className="animate-in" style={{ animationDelay: `${Math.min(i, 12) * 18}ms` }}>
                   <RecordCard record={r} onOpen={() => setDrawer(r)} />
@@ -345,187 +340,196 @@ export function RecordExplorer({ kind }: { kind: RecordKind }) {
   );
 }
 
-// ── Cards ──────────────────────────────────────────────────────────────────
+// ── Card (one layout for all three streams) ─────────────────────────────────
+//
+// Every record renders the same way: image (or a typed placeholder) on top,
+// then title / subtitle / meta, then a shared owner footer — the did:plc
+// resolved to handle + avatar via <AuthorChip> — with the created date.
+
+const clamp = (n: number) =>
+  ({
+    display: "-webkit-box",
+    WebkitBoxOrient: "vertical" as const,
+    WebkitLineClamp: n,
+    overflow: "hidden",
+  }) as const;
+
+type CardView = {
+  alt: string;
+  title: ReactNode;
+  titleCls: string;
+  subtitle?: ReactNode;
+  meta?: ReactNode;
+  topBadges?: ReactNode;
+  placeholder: ReactNode;
+  /** A better avatar the card already has (e.g. an org logo). */
+  avatarOverride?: string | null;
+};
 
 function RecordCard({ record, onOpen }: { record: ExplorerRecord; onOpen: () => void }) {
-  if (record.kind === "occurrence") return <OccurrenceCard record={record} onOpen={onOpen} />;
-  if (record.kind === "site") return <SiteCard record={record} onOpen={onOpen} />;
-  return <BumicertCard record={record} onOpen={onOpen} />;
-}
-
-function OccurrenceCard({ record, onOpen }: { record: OccurrenceRecord; onOpen: () => void }) {
-  const name = record.scientificName || record.vernacularName || "Unidentified";
-  const cc = record.countryCode || (record.country ? record.country.slice(0, 2).toUpperCase() : "");
-  const taxon = record.family || record.genus || record.kingdom || null;
   const [imgError, setImgError] = useState(false);
   const hasImage = Boolean(record.imageUrl) && !imgError;
+  const v = cardView(record);
 
-  return (
-    <button
-      type="button"
-      onClick={onOpen}
-      className="group relative block aspect-square w-full overflow-hidden rounded-xl border border-border-soft bg-surface-sunken text-left transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_14px_34px_-18px_rgba(20,30,15,0.45)]"
-    >
-      {record.media.length > 0 && (
-        <div className="absolute right-1.5 top-1.5 z-20 flex gap-1">
-          {record.media.map((m) => (
-            <span key={m} title={m} className="grid h-5 w-5 place-items-center rounded-full bg-background/90 text-foreground/70">
-              <MediaIcon kind={m} />
-            </span>
-          ))}
-        </div>
-      )}
-
-      {hasImage ? (
-        <>
-          <Image
-            src={record.imageUrl!}
-            alt={name}
-            fill
-            sizes="(max-width:640px) 50vw, (max-width:1280px) 20vw, 280px"
-            unoptimized={record.imageUrl!.startsWith("/")}
-            onError={() => setImgError(true)}
-            className="object-cover transition-transform duration-700 group-hover:scale-[1.05]"
-          />
-          <div
-            className="absolute inset-x-0 bottom-0 z-10 flex flex-col gap-0.5 px-2.5 pb-2 pt-6"
-            style={{ background: "linear-gradient(180deg, transparent 0%, rgba(20,20,18,0.5) 45%, rgba(20,20,18,0.86) 100%)" }}
-          >
-            <div
-              className="font-instrument text-[13px] italic leading-[1.15] text-[#f4efe4]"
-              style={{ display: "-webkit-box", WebkitBoxOrient: "vertical", WebkitLineClamp: 2, overflow: "hidden" }}
-            >
-              {name}
-            </div>
-            <div className="flex items-baseline justify-between font-mono text-[10px] text-[#f4efe4]/75">
-              <span>{taxon || "—"}</span>
-              {cc && <span className="text-brand">{countryFlag(record.countryCode)} {cc}</span>}
-            </div>
-          </div>
-        </>
-      ) : (
-        <div
-          className="flex h-full w-full flex-col justify-between p-3"
-          style={{ background: "radial-gradient(120% 90% at 80% 0%, color-mix(in srgb, var(--primary) 9%, transparent), transparent), var(--surface)" }}
-        >
-          <div className="flex items-center gap-1.5 text-[9.5px] font-medium uppercase tracking-[0.12em] text-foreground/40">
-            <LeafGlyph />
-            {record.basisOfRecord ? record.basisOfRecord.replace(/_/g, " ") : "Observation"}
-          </div>
-          <div>
-            <div
-              className="font-garamond text-[17px] italic leading-[1.12] text-foreground"
-              style={{ display: "-webkit-box", WebkitBoxOrient: "vertical", WebkitLineClamp: 3, overflow: "hidden" }}
-            >
-              {name}
-            </div>
-            <div className="mt-1 flex items-baseline justify-between font-mono text-[9.5px] text-foreground/50">
-              <span>{taxon || formatRelative(record.createdAt)}</span>
-              {cc && <span className="text-primary-dark">{countryFlag(record.countryCode)} {cc}</span>}
-            </div>
-          </div>
-        </div>
-      )}
-    </button>
-  );
-}
-
-function SiteCard({ record, onOpen }: { record: SiteRecord; onOpen: () => void }) {
-  const [imgError, setImgError] = useState(false);
-  const hasImage = Boolean(record.imageUrl) && !imgError;
   return (
     <button
       type="button"
       onClick={onOpen}
       className="group flex h-full w-full flex-col overflow-hidden rounded-2xl border border-border-soft bg-surface text-left shadow-[0_8px_26px_-20px_rgba(20,30,15,0.3)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_-22px_rgba(20,30,15,0.4)]"
     >
-      <div className="relative aspect-[16/9] overflow-hidden bg-surface-sunken">
+      <div className="relative aspect-[4/3] overflow-hidden bg-surface-sunken">
         {hasImage ? (
           <Image
             src={record.imageUrl!}
-            alt={record.name}
+            alt={v.alt}
             fill
-            sizes="(max-width:640px) 100vw, (max-width:1280px) 33vw, 360px"
+            sizes="(max-width:640px) 100vw, (max-width:1280px) 33vw, 340px"
             unoptimized={record.imageUrl!.startsWith("/")}
             onError={() => setImgError(true)}
             className="object-cover transition-transform duration-700 group-hover:scale-105"
           />
         ) : (
-          <div className="flex h-full w-full items-center justify-center font-garamond text-[40px] text-foreground/15">
-            {countryFlag(record.country) || "◰"}
-          </div>
+          v.placeholder
         )}
-        {record.country && (
-          <span className="absolute left-2.5 top-2.5 inline-flex items-center gap-1 rounded-full bg-background/90 px-2 py-0.5 text-[11px] font-medium text-foreground/70">
-            {countryFlag(record.country)} {record.country}
-          </span>
-        )}
+        {v.topBadges}
       </div>
-      <div className="flex flex-1 flex-col gap-1.5 px-4 pb-4 pt-3.5">
-        <div className="font-garamond text-[18px] leading-[1.2] text-foreground">{record.name}</div>
-        <div className="mt-auto flex items-center justify-between border-t border-border-soft pt-2.5 text-[11px] text-foreground/50">
-          <span className="font-mono">{shortDid(record.did)}</span>
-          <span>{record.createdAt ? formatRelative(record.createdAt) : "Organization"}</span>
+      <div className="flex flex-1 flex-col gap-1.5 px-4 pb-3.5 pt-3">
+        <div className={v.titleCls} style={clamp(2)}>
+          {v.title}
         </div>
-      </div>
-    </button>
-  );
-}
-
-function BumicertCard({ record, onOpen }: { record: BumicertRecord; onOpen: () => void }) {
-  const [imgError, setImgError] = useState(false);
-  const hasImage = Boolean(record.imageUrl) && !imgError;
-  return (
-    <button
-      type="button"
-      onClick={onOpen}
-      className="group flex h-full w-full flex-col overflow-hidden rounded-2xl border border-border-soft bg-surface text-left shadow-[0_8px_26px_-20px_rgba(20,30,15,0.3)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_-22px_rgba(20,30,15,0.4)]"
-    >
-      <div className="relative aspect-[16/9] overflow-hidden bg-surface-sunken">
-        {hasImage ? (
-          <Image
-            src={record.imageUrl!}
-            alt=""
-            fill
-            sizes="(max-width:640px) 100vw, (max-width:1280px) 33vw, 360px"
-            unoptimized={record.imageUrl!.startsWith("/")}
-            onError={() => setImgError(true)}
-            className="object-cover transition-transform duration-700 group-hover:scale-105"
-          />
-        ) : (
-          <div className="flex h-full w-full items-center justify-center font-garamond text-[15px] italic text-foreground/35">
-            No cover image
-          </div>
-        )}
-        <span className="absolute left-2.5 top-2.5 inline-flex items-center gap-1.5 rounded-full bg-background/92 px-2 py-0.5 text-[10px] font-medium uppercase tracking-[0.1em] text-brand-dark">
-          <span aria-hidden className="pulse-dot inline-block h-1.5 w-1.5 rounded-full bg-brand text-brand" />
-          Bumicert
-        </span>
-      </div>
-      <div className="flex flex-1 flex-col gap-1.5 px-4 pb-4 pt-3.5">
-        <div
-          className="font-garamond text-[17px] leading-[1.2] text-foreground"
-          style={{ display: "-webkit-box", WebkitBoxOrient: "vertical", WebkitLineClamp: 2, overflow: "hidden" }}
-        >
-          {record.title}
-        </div>
-        {record.shortDescription && (
+        {v.subtitle ? (
           <div
             className="font-instrument text-[12.5px] italic leading-[1.4] text-foreground/65"
-            style={{ display: "-webkit-box", WebkitBoxOrient: "vertical", WebkitLineClamp: 2, overflow: "hidden" }}
+            style={clamp(2)}
           >
-            {record.shortDescription}
+            {v.subtitle}
           </div>
-        )}
-        <div className="mt-auto flex items-center justify-between border-t border-border-soft pt-2.5 text-[11px] text-foreground/50">
-          <span>
-            {formatNumber(record.contributorCount)} contributor{record.contributorCount === 1 ? "" : "s"}
-          </span>
-          <span>{formatRelative(record.createdAt)}</span>
+        ) : null}
+        {v.meta ? (
+          <div className="flex items-center gap-2 font-mono text-[11px] text-foreground/55">
+            {v.meta}
+          </div>
+        ) : null}
+        <div className="mt-auto border-t border-border-soft pt-2.5">
+          <AuthorChip
+            did={record.did}
+            createdAt={record.createdAt}
+            avatarOverride={v.avatarOverride}
+            size="sm"
+          />
         </div>
       </div>
     </button>
   );
+}
+
+function cardView(record: ExplorerRecord): CardView {
+  if (record.kind === "occurrence") {
+    const name = record.scientificName || record.vernacularName || "Unidentified";
+    const cc =
+      record.countryCode || (record.country ? record.country.slice(0, 2).toUpperCase() : "");
+    const taxon = record.family || record.genus || record.kingdom || null;
+    return {
+      alt: name,
+      title: name,
+      titleCls: "font-garamond text-[16px] italic leading-[1.2] text-foreground",
+      subtitle:
+        record.scientificName && record.vernacularName ? record.vernacularName : undefined,
+      meta: (
+        <>
+          <span>{taxon || record.basisOfRecord?.replace(/_/g, " ") || "Observation"}</span>
+          {cc ? (
+            <span className="ml-auto text-primary-dark">
+              {countryFlag(record.countryCode)} {cc}
+            </span>
+          ) : null}
+        </>
+      ),
+      topBadges:
+        record.media.length > 0 ? (
+          <div className="absolute right-2 top-2 z-10 flex gap-1">
+            {record.media.map((m) => (
+              <span
+                key={m}
+                title={m}
+                className="grid h-5 w-5 place-items-center rounded-full bg-background/90 text-foreground/70"
+              >
+                <MediaIcon kind={m} />
+              </span>
+            ))}
+          </div>
+        ) : null,
+      placeholder: (
+        <div
+          className="flex h-full w-full items-center justify-center p-4 text-center"
+          style={{
+            background:
+              "radial-gradient(120% 90% at 80% 0%, color-mix(in srgb, var(--primary) 10%, transparent), transparent), var(--surface)",
+          }}
+        >
+          <span
+            className="font-garamond text-[18px] italic leading-[1.15] text-foreground/55"
+            style={clamp(3)}
+          >
+            {name}
+          </span>
+        </div>
+      ),
+    };
+  }
+
+  if (record.kind === "site") {
+    return {
+      alt: record.name,
+      title: record.name,
+      titleCls: "font-garamond text-[18px] leading-[1.2] text-foreground",
+      meta: record.country ? (
+        <span>
+          {countryFlag(record.country)} {record.country}
+        </span>
+      ) : undefined,
+      topBadges: record.country ? (
+        <span className="absolute left-2.5 top-2.5 inline-flex items-center gap-1 rounded-full bg-background/90 px-2 py-0.5 text-[11px] font-medium text-foreground/70">
+          {countryFlag(record.country)} {record.country}
+        </span>
+      ) : null,
+      placeholder: (
+        <div className="flex h-full w-full items-center justify-center font-garamond text-[40px] text-foreground/15">
+          {countryFlag(record.country) || "\u25F0"}
+        </div>
+      ),
+      // The org's own cover/logo is the most meaningful avatar for its row.
+      avatarOverride: record.imageUrl,
+    };
+  }
+
+  // bumicert
+  return {
+    alt: record.title,
+    title: record.title,
+    titleCls: "font-garamond text-[17px] leading-[1.2] text-foreground",
+    subtitle: record.shortDescription ?? undefined,
+    meta: (
+      <span>
+        {formatNumber(record.contributorCount)} contributor
+        {record.contributorCount === 1 ? "" : "s"}
+        {record.locationCount > 0
+          ? ` \u00B7 ${formatNumber(record.locationCount)} site${record.locationCount === 1 ? "" : "s"}`
+          : ""}
+      </span>
+    ),
+    topBadges: (
+      <span className="absolute left-2.5 top-2.5 inline-flex items-center gap-1.5 rounded-full bg-background/92 px-2 py-0.5 text-[10px] font-medium uppercase tracking-[0.1em] text-brand-dark">
+        <span aria-hidden className="pulse-dot inline-block h-1.5 w-1.5 rounded-full bg-brand text-brand" />
+        Bumicert
+      </span>
+    ),
+    placeholder: (
+      <div className="flex h-full w-full items-center justify-center font-garamond text-[15px] italic text-foreground/35">
+        No cover image
+      </div>
+    ),
+  };
 }
 
 // ── Filtering ──────────────────────────────────────────────────────────────
@@ -575,13 +579,6 @@ function MediaIcon({ kind }: { kind: OccurrenceRecord["media"][number] }) {
   );
 }
 
-function LeafGlyph() {
-  return (
-    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <path d="M5 19c0-7 5-13 14-14 0 9-5 14-14 14zM5 19c3-3 6-5 9-6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
 
 function Spinner() {
   return (
@@ -592,27 +589,22 @@ function Spinner() {
   );
 }
 
-function SkeletonGrid({ grid }: { grid: "square" | "card" }) {
-  const count = grid === "square" ? 15 : 8;
-  const cls =
-    grid === "square"
-      ? "grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
-      : "grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4";
+function SkeletonGrid() {
   return (
-    <div className={cls} aria-hidden>
-      {Array.from({ length: count }).map((_, i) =>
-        grid === "square" ? (
-          <div key={i} className="skeleton aspect-square rounded-xl" />
-        ) : (
-          <div key={i} className="overflow-hidden rounded-2xl border border-border-soft">
-            <div className="skeleton aspect-[16/9]" />
-            <div className="space-y-2 p-4">
-              <div className="skeleton h-4 w-3/4 rounded" />
-              <div className="skeleton h-3 w-1/2 rounded" />
+    <div className={GRID_CLS} aria-hidden>
+      {Array.from({ length: 8 }).map((_, i) => (
+        <div key={i} className="overflow-hidden rounded-2xl border border-border-soft">
+          <div className="skeleton aspect-[4/3]" />
+          <div className="space-y-2 p-4">
+            <div className="skeleton h-4 w-3/4 rounded" />
+            <div className="skeleton h-3 w-1/2 rounded" />
+            <div className="mt-3 flex items-center gap-2 border-t border-border-soft pt-2.5">
+              <div className="skeleton h-5 w-5 rounded-full" />
+              <div className="skeleton h-3 w-2/3 rounded" />
             </div>
           </div>
-        ),
-      )}
+        </div>
+      ))}
     </div>
   );
 }

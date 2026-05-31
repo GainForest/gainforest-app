@@ -13,12 +13,12 @@ import {
   type FundingReceipt,
 } from "../_lib/dashboard";
 import { DonationsChart } from "./DonationsChart";
+import { AuthorInline } from "./AuthorChip";
 import { BUMICERTS_URL, accountHref, bumicertHref } from "../_lib/urls";
 import {
   formatUsd,
   formatNumber,
   formatDate,
-  shortDid,
   shortWallet,
 } from "../_lib/format";
 
@@ -176,9 +176,9 @@ export function Dashboard() {
                             href={accountHref(o.orgDid)}
                             target="_blank"
                             rel="noreferrer"
-                            className="font-mono text-ink-foreground/85 underline-offset-2 hover:text-brand hover:underline"
+                            className="underline-offset-2 hover:underline"
                           >
-                            {shortDid(o.orgDid)}
+                            <AuthorInline did={o.orgDid} dark />
                           </Link>
                         </td>
                         <td className="py-2 pr-2 text-right font-mono tabular-nums text-ink-foreground">
@@ -333,20 +333,21 @@ function Panel({
 }
 
 function DonorCell({ id, type }: { id: string; type: "did" | "wallet" }) {
-  const label = type === "wallet" ? shortWallet(id) : shortDid(id);
+  // DID donors resolve to a handle + avatar via the AppView; anonymous wallet
+  // donors keep their shortened 0x address (no ATProto identity to resolve).
   if (type === "did") {
     return (
       <Link
         href={accountHref(id)}
         target="_blank"
         rel="noreferrer"
-        className="font-mono text-ink-foreground/85 underline-offset-2 hover:text-brand hover:underline"
+        className="underline-offset-2 hover:underline"
       >
-        {label}
+        <AuthorInline did={id} dark />
       </Link>
     );
   }
-  return <span className="font-mono text-ink-foreground/70">{label}</span>;
+  return <span className="font-mono text-ink-foreground/70">{shortWallet(id)}</span>;
 }
 
 function DashSkeleton() {

@@ -4,13 +4,8 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import type { ExplorerRecord } from "../_lib/indexer";
-import {
-  formatDate,
-  formatRelative,
-  formatNumber,
-  countryFlag,
-  shortDid,
-} from "../_lib/format";
+import { formatDate, formatNumber, countryFlag } from "../_lib/format";
+import { AuthorChip } from "./AuthorChip";
 import { BUMICERTS_URL, GLOBE_URL, accountHref, bumicertHref } from "../_lib/urls";
 
 // Right-side detail sheet for any explorer record. Slides in over a dimmed
@@ -107,8 +102,17 @@ export function RecordDrawer({
             </p>
           )}
 
+          {/* Owner identity + created date — did:plc resolved to handle/avatar */}
+          <div className="mt-5 rounded-xl border border-border-soft bg-surface px-3.5 py-3">
+            <AuthorChip
+              did={record.did}
+              createdAt={record.createdAt}
+              avatarOverride={record.kind === "site" ? record.imageUrl : undefined}
+            />
+          </div>
+
           {/* Field grid */}
-          <dl className="mt-6 grid grid-cols-2 gap-x-4 gap-y-4 border-t border-border-soft pt-5">
+          <dl className="mt-5 grid grid-cols-2 gap-x-4 gap-y-4 border-t border-border-soft pt-5">
             {fields.map((f) => (
               <div key={f.label} className={f.wide ? "col-span-2" : ""}>
                 <dt className="text-[11px] font-medium uppercase tracking-[0.1em] text-foreground/45">
@@ -211,7 +215,6 @@ function buildFields(r: ExplorerRecord): Field[] {
     if (r.lat != null && r.lon != null)
       fields.push({ label: "Coordinates", value: `${r.lat.toFixed(4)}, ${r.lon.toFixed(4)}`, wide: true });
     if (r.eventDate) fields.push({ label: "Observed", value: formatDate(r.eventDate) });
-    fields.push({ label: "Indexed", value: formatRelative(r.createdAt) });
     if (r.media.length)
       fields.push({ label: "Media", value: r.media.join(", "), wide: true });
     if (r.remarks) fields.push({ label: "Remarks", value: r.remarks, wide: true });
@@ -220,12 +223,8 @@ function buildFields(r: ExplorerRecord): Field[] {
     fields.push({ label: "Sites", value: formatNumber(r.locationCount) });
     if (r.startDate) fields.push({ label: "Start", value: formatDate(r.startDate) });
     if (r.endDate) fields.push({ label: "End", value: formatDate(r.endDate) });
-    fields.push({ label: "Owner", value: shortDid(r.did), wide: true });
-    fields.push({ label: "Created", value: formatRelative(r.createdAt) });
   } else {
     if (r.country) fields.push({ label: "Country", value: `${countryFlag(r.country)} ${r.country}`.trim() });
-    fields.push({ label: "DID", value: shortDid(r.did), wide: true });
-    if (r.createdAt) fields.push({ label: "Registered", value: formatRelative(r.createdAt) });
   }
   return fields;
 }
