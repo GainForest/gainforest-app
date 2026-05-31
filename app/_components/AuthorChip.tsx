@@ -139,9 +139,9 @@ export function OwnerBadge({
 
   return (
     <span className="inline-flex min-w-0 items-center gap-1.5" title={handle ? `@${handle}` : did}>
-      <Avatar did={did} handle={handle} avatar={avatar} className="h-6 w-6 text-[10px]" />
+      <Avatar did={did} handle={handle} avatar={avatar} className="h-5 w-5 text-[9px]" />
       {handle ? (
-        <span className="truncate text-[11.5px] font-medium text-foreground">@{handle}</span>
+        <span className="truncate text-[11px] font-medium text-foreground">@{handle}</span>
       ) : null}
     </span>
   );

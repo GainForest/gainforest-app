@@ -59,11 +59,11 @@ const KIND_META: Record<RecordKind, KindMeta> = {
   },
 };
 
-// One grid for all three streams so the explorer reads as a consistent
-// catalog; compact but kept readable (4-up at most). Every card carries an
-// owner (did:plc → handle/avatar) + created date.
+// One dense grid for all three streams so the explorer reads as a compact
+// catalog (≈5 per row on a laptop, 6 on wide screens). Every card still
+// carries an owner (did:plc → handle/avatar) + created date.
 const GRID_CLS =
-  "grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4";
+  "grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 2xl:grid-cols-6";
 
 type Phase = "idle" | "loading" | "ready" | "error" | "more";
 
@@ -404,26 +404,26 @@ function RecordCard({ record, onOpen }: { record: ExplorerRecord; onOpen: () => 
       </div>
 
       {/* Content on the solid card surface for legibility. */}
-      <div className="flex flex-1 flex-col px-4 pb-3 pt-3">
+      <div className="flex flex-1 flex-col px-3 pb-2.5 pt-2.5">
         <div>
           <h3
-            className="font-instrument text-[19px] italic leading-tight text-foreground"
+            className="font-instrument text-[16.5px] italic leading-tight text-foreground"
             style={clamp(2)}
           >
             {v.title}
           </h3>
           {v.subtitle ? (
-            <p className="mt-1 text-[13px] leading-snug text-foreground/65" style={clamp(1)}>
+            <p className="mt-0.5 text-[12px] leading-snug text-foreground/65" style={clamp(1)}>
               {v.subtitle}
             </p>
           ) : null}
           {v.pills ? (
-            <div className="mt-2.5 flex flex-wrap items-center gap-1.5">{v.pills}</div>
+            <div className="mt-2 flex flex-wrap items-center gap-1">{v.pills}</div>
           ) : null}
         </div>
 
         {/* did:plc + created date — always shown. */}
-        <div className="mt-3.5 flex items-center justify-between gap-2 border-t border-border-soft pt-2.5 font-mono text-[11px] text-foreground/50">
+        <div className="mt-2.5 flex items-center justify-between gap-1.5 border-t border-border-soft pt-2 font-mono text-[10px] text-foreground/50">
           <span className="truncate" title={record.did}>
             {shortDid(record.did)}
           </span>
@@ -437,7 +437,7 @@ function RecordCard({ record, onOpen }: { record: ExplorerRecord; onOpen: () => 
 function Pill({ children, accent }: { children: ReactNode; accent?: boolean }) {
   return (
     <span
-      className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11.5px] font-medium ${
+      className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium ${
         accent ? "bg-brand/12 text-brand-dark" : "bg-surface-sunken text-foreground/65"
       }`}
     >
