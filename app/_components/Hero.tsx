@@ -1,0 +1,94 @@
+import { BrushedText } from "./BrushedText";
+import { StatusPill } from "./StatusPill";
+import type { ExplorerKpis } from "../_lib/kpis";
+import type { StatusSnapshot } from "../_lib/status";
+import { formatCompact, formatUsd } from "../_lib/format";
+
+// Editorial hero, same rhythm as gainforest-app: eyebrow, big Cormorant
+// headline with one brushed word + one Instrument-Serif italic word, a short
+// lede, the live status pill, and a four-up KPI band. All four numbers are
+// prefetched server-side from the indexer.
+export function Hero({
+  kpis,
+  status,
+}: {
+  kpis: ExplorerKpis;
+  status: StatusSnapshot;
+}) {
+  const cards: Array<{ value: string; label: string; sub: string }> = [
+    {
+      value: formatCompact(kpis.occurrences),
+      label: "Species observations",
+      sub: "Darwin Core records",
+    },
+    {
+      value: formatCompact(kpis.bumicerts),
+      label: "Bumicerts",
+      sub: "Impact claim activities",
+    },
+    {
+      value: formatCompact(kpis.sites),
+      label: "Project sites",
+      sub: "Registered organizations",
+    },
+    {
+      value: formatUsd(kpis.totalRaised),
+      label: "Funding raised",
+      sub: "Across all Bumicerts",
+    },
+  ];
+
+  return (
+    <section id="top" className="relative overflow-hidden">
+      <div className="mx-auto w-full max-w-[1480px] px-6 pt-12 pb-10 sm:px-10 lg:px-16 lg:pt-20 lg:pb-14">
+        <div className="max-w-[920px]">
+          <div className="flex flex-wrap items-center gap-3">
+            <span className="font-instrument text-[13px] uppercase tracking-[0.22em] text-foreground/55">
+              The GainForest data commons
+            </span>
+            <StatusPill snapshot={status} />
+          </div>
+
+          <h1 className="mt-5 font-garamond text-[44px] font-normal leading-[1.04] tracking-[-0.015em] text-foreground sm:text-[64px] lg:text-[82px]">
+            <BrushedText text="{Explore}" /> every record in the{" "}
+            <span className="font-instrument italic">living forest</span>.
+          </h1>
+
+          <p className="mt-6 max-w-[640px] text-[16px] leading-[1.55] text-foreground/80 lg:text-[18.5px]">
+            One block explorer for everything GainForest signs on the AT
+            Protocol; Darwin Core species observations, project sites, and
+            Bumicerts impact certificates, plus live donations and the
+            infrastructure status behind them.
+          </p>
+        </div>
+
+        {/* KPI band */}
+        <ul
+          role="list"
+          className="mt-10 grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-border-soft bg-border-soft lg:mt-14 lg:grid-cols-4"
+        >
+          {cards.map((c) => (
+            <li key={c.label} className="bg-surface p-5 lg:p-7">
+              <div className="flex items-center gap-1.5">
+                <span
+                  aria-hidden
+                  className="pulse-dot inline-block h-1.5 w-1.5 rounded-full bg-brand text-brand"
+                />
+                <span className="text-[10px] font-medium uppercase tracking-[0.16em] text-brand-dark">
+                  Live
+                </span>
+              </div>
+              <div className="mt-2.5 font-garamond text-[34px] font-normal leading-[0.98] tracking-[-0.015em] text-foreground sm:text-[42px] lg:text-[52px]">
+                {c.value}
+              </div>
+              <div className="mt-2 text-[14px] font-medium text-foreground lg:text-[15px]">
+                {c.label}
+              </div>
+              <div className="text-[12.5px] text-foreground/55">{c.sub}</div>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  );
+}

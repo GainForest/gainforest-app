@@ -1,0 +1,264 @@
+@import "tailwindcss";
+
+/* ──────────────────────────────────────────────────────────────────────────
+   GainForest Explorer — design tokens.
+
+   Ported verbatim from the gainforest-app landing (../gainforest-app), which
+   follows gainforest.earth's May 2026 editorial redesign with the Bumicerts
+   sage primary. The brand mint (#2fce8a) is restricted to the logo + a small
+   set of subtle live-data accents (LIVE badges, status dots, active tab);
+   it is NEVER a solid button fill. `--primary` (#3e7053) is the sage forest
+   call-to-action colour.
+────────────────────────────────────────────────────────────────────────── */
+
+:root {
+  --background: #f4efe4;        /* warm cream */
+  --foreground: #1c1c1a;        /* near-black body text */
+  --muted-foreground: #5b5b56;  /* stone */
+
+  --primary: #3e7053;           /* sage forest (Bumicerts primary) */
+  --primary-dark: #2e5840;      /* hover / pressed */
+  --primary-foreground: #fafafa;
+
+  --brand: #2fce8a;             /* logo mint + subtle live-data accents only */
+  --brand-dark: #21b073;
+
+  --border: #d9d3c3;            /* warm grey */
+  --border-soft: #e6dfd0;       /* paler */
+
+  --ink: #141413;               /* dark section bg */
+  --ink-foreground: #f4efe4;
+  --ink-muted: #a8a59a;
+  --ink-border: #2a2a27;
+
+  /* Surface used by data cards + panels sitting on the cream — one shade
+     lighter than the background so cards read as lifted, not cut-in. */
+  --surface: #fbf8f0;
+  --surface-sunken: #efe9da;
+
+  /* Status semantics (instatus mirror). Green = operational, amber =
+     degraded / partial, red = down. Muted to sit on the cream palette. */
+  --ok: #3e9d6b;
+  --warn: #c89a3a;
+  --down: #c25c4e;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-dark: var(--primary-dark);
+  --color-brand: var(--brand);
+  --color-brand-dark: var(--brand-dark);
+  --color-border: var(--border);
+  --color-border-soft: var(--border-soft);
+  --color-ink: var(--ink);
+  --color-ink-foreground: var(--ink-foreground);
+  --color-ink-muted: var(--ink-muted);
+  --color-ink-border: var(--ink-border);
+  --color-surface: var(--surface);
+  --color-surface-sunken: var(--surface-sunken);
+  --color-ok: var(--ok);
+  --color-warn: var(--warn);
+  --color-down: var(--down);
+
+  --font-sans: var(--font-sans), system-ui, sans-serif;
+  --font-garamond: var(--font-garamond), Georgia, serif;
+  --font-instrument: var(--font-instrument), Georgia, serif;
+  --font-mono: var(--font-mono), ui-monospace, monospace;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+html,
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), system-ui, sans-serif;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+* {
+  border-color: var(--border);
+}
+
+/* Editorial brushed underline — single arced cubic curve, ported verbatim
+   from the Bumicerts "Real Communities" hero (certs.gainforest.app) the way
+   gainforest-app's BrushedText does it. */
+.brush-svg {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -0.5rem;
+  height: 1rem;
+  width: 100%;
+  overflow: visible;
+  color: var(--primary);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ---------------------------------------------------------------------------
+   Live-record fade-in. New cards in the explorer grids and dashboard rows
+   ease up a few px so a freshly loaded page doesn't pop. Respects reduced
+   motion.
+--------------------------------------------------------------------------- */
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-in {
+  animation: fade-in-up 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes drawerIn {
+  from {
+    transform: translateX(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes panelIn {
+  from {
+    transform: translateY(8px) scale(0.99);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-in {
+    animation: none;
+  }
+}
+
+/* Status / live pulse dot — soft breathing halo, used for the LIVE badges
+   and the operational status indicator. */
+@keyframes live-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    box-shadow: 0 0 0 0 currentColor;
+  }
+  50% {
+    opacity: 0.7;
+    box-shadow: 0 0 0 3px color-mix(in srgb, currentColor 22%, transparent);
+  }
+}
+
+.pulse-dot {
+  animation: live-pulse 2.4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pulse-dot {
+    animation: none;
+  }
+}
+
+/* Skeleton shimmer for loading cards. */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--surface-sunken) 25%,
+    color-mix(in srgb, var(--surface-sunken) 60%, #fff) 37%,
+    var(--surface-sunken) 63%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.6s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton {
+    animation: none;
+  }
+}
+
+/* Hide scrollbars on horizontal rails (tab strips, chips) while keeping
+   keyboard + swipe scroll. */
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Detail drawer + scrim. The drawer slides from the right and the body
+   beneath it dims. */
+@keyframes scrimIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes sheetIn {
+  from {
+    transform: translateX(24px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+.drawer-scrim {
+  animation: scrimIn 0.2s ease-out both;
+}
+.drawer-sheet {
+  animation: sheetIn 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .drawer-scrim,
+  .drawer-sheet {
+    animation: none;
+  }
+}
+
+/* Custom scrollbar inside the detail drawer / JSON view. */
+.thin-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+.thin-scroll::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.thin-scroll::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 999px;
+}
