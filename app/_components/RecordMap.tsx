@@ -113,15 +113,25 @@ export function RecordMap({
       marker.addTo(layer);
     }
     if (points.length > 0 && !userMovedRef.current) {
-      const bounds = L.latLngBounds(points.map((p) => [p.lat, p.lon] as [number, number]));
+      const lats = points.map((p) => p.lat);
+      const lons = points.map((p) => p.lon);
+      const latSpan = Math.max(...lats) - Math.min(...lats);
+      const lonSpan = Math.max(...lons) - Math.min(...lons);
       fittingRef.current = true;
-      map.fitBounds(bounds.pad(0.08), {
-        // Single-cluster data (e.g. one survey site) fits to a tight bound;
-        // cap the zoom so it lands on a readable local view rather than the
-        // deepest street level. Globally spread pins stay zoomed out.
-        maxZoom: points.length === 1 ? 9 : 12,
-        animate: false,
-      });
+      // Frame every point. When the records all sit at one survey site the
+      // bounding box collapses to ~zero area, which would slam Leaflet to the
+      // deepest street zoom — so fall back to a fixed, readable zoom centered
+      // on the cluster. Otherwise fit the whole box with a pixel margin so
+      // edge markers aren't clipped, capping how far in a tight (but non-zero)
+      // cluster can go. Globally spread pins stay zoomed out to frame them all.
+      if (latSpan < 0.01 && lonSpan < 0.01) {
+        const lat = (Math.min(...lats) + Math.max(...lats)) / 2;
+        const lon = (Math.min(...lons) + Math.max(...lons)) / 2;
+        map.setView([lat, lon], 14, { animate: false });
+      } else {
+        const bounds = L.latLngBounds(points.map((p) => [p.lat, p.lon] as [number, number]));
+        map.fitBounds(bounds, { padding: [56, 56], maxZoom: 14, animate: false });
+      }
       // Let the programmatic move settle before re-enabling user detection.
       setTimeout(() => {
         fittingRef.current = false;
