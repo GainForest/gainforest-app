@@ -1,7 +1,9 @@
+import Link from "next/link";
 import { BrushedText } from "./BrushedText";
 import { StatusPill } from "./StatusPill";
 import type { ExplorerKpis } from "../_lib/kpis";
 import type { StatusSnapshot } from "../_lib/status";
+import type { DevicesLiveSummary } from "../_lib/devices";
 import { formatCompact, formatUsd } from "../_lib/format";
 
 // Editorial hero, same rhythm as gainforest-app: eyebrow, big Cormorant
@@ -11,9 +13,11 @@ import { formatCompact, formatUsd } from "../_lib/format";
 export function Hero({
   kpis,
   status,
+  devices,
 }: {
   kpis: ExplorerKpis;
   status: StatusSnapshot;
+  devices: DevicesLiveSummary;
 }) {
   const cards: Array<{ value: string; label: string; sub: string }> = [
     {
@@ -47,6 +51,22 @@ export function Hero({
               Live · AT Protocol
             </span>
             <StatusPill snapshot={status} />
+            {devices.configured && devices.total > 0 && (
+              <Link
+                href="/devices"
+                className="group inline-flex items-center gap-2 rounded-full border border-border-soft bg-surface px-3 py-1.5 text-[12.5px] font-medium transition-colors hover:border-foreground/25"
+                title="Field Raspberry Pis running Tainá that are reporting up right now"
+              >
+                <span className={`relative inline-flex h-2 w-2 ${devices.healthy > 0 ? "text-ok" : "text-down"}`}>
+                  <span
+                    className={`inline-block h-2 w-2 rounded-full bg-current ${devices.healthy > 0 ? "pulse-dot" : ""}`}
+                  />
+                </span>
+                <span className={devices.healthy > 0 ? "text-ok" : "text-down"}>
+                  {devices.healthy}/{devices.total} Tainás live
+                </span>
+              </Link>
+            )}
           </div>
 
           <h1 className="mt-5 font-garamond text-[44px] font-normal leading-[1.04] tracking-[-0.015em] text-foreground sm:text-[64px] lg:text-[82px]">

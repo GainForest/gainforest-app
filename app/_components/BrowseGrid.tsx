@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { ExplorerKpis } from "../_lib/kpis";
 import type { StatusSnapshot } from "../_lib/status";
+import type { DevicesLiveSummary } from "../_lib/devices";
 import { formatCompact, formatUsd } from "../_lib/format";
 
 // Home navigation grid. One card per explorer page, each with a live stat so
@@ -9,9 +10,11 @@ import { formatCompact, formatUsd } from "../_lib/format";
 export function BrowseGrid({
   kpis,
   status,
+  devices,
 }: {
   kpis: ExplorerKpis;
   status: StatusSnapshot;
+  devices: DevicesLiveSummary;
 }) {
   const operational = status.components.filter((c) => c.status === "OPERATIONAL").length;
   const total = status.components.length;
@@ -61,8 +64,12 @@ export function BrowseGrid({
       label: "healthchecks.io",
       title: "Tainá devices",
       blurb: "Field Raspberry Pi heartbeats: status, CPU temp, RAM, disk, uptime.",
-      stat: "Live",
-      statLabel: "heartbeats",
+      stat:
+        devices.configured && devices.total > 0
+          ? `${devices.healthy}/${devices.total}`
+          : "—",
+      statLabel:
+        devices.configured && devices.total > 0 ? "live now" : "heartbeats",
     },
     {
       href: "/status",
