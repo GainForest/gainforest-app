@@ -1,19 +1,28 @@
 "use client";
 
 import "leaflet/dist/leaflet.css";
+import "leaflet.markercluster/dist/MarkerCluster.css";
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { Map as LeafletMap, LayerGroup } from "leaflet";
+import type { Map as LeafletMap, MarkerClusterGroup, MarkerCluster } from "leaflet";
 import { resolvePointsFor, type MapPoint } from "../_lib/coords";
 import type { ExplorerRecord, RecordKind } from "../_lib/indexer";
-import { formatNumber } from "../_lib/format";
+import { formatNumber, formatCompact } from "../_lib/format";
 import { accountHref } from "../_lib/urls";
 
 // Map view for the record streams. Vanilla Leaflet (dynamically imported so it
-// never touches `window` during SSR) on CARTO Positron tiles to match the
-// cream palette. Occurrences plot their own lat/lon; sites plot every Green
-// Globe project pin; bumicerts resolve their certified locations. Clicking a
-// marker opens the loaded record's drawer, or links out to the org when the
-// pin is not part of the loaded page.
+// never touches `window` during SSR) + leaflet.markercluster on CARTO Positron
+// tiles to match the cream palette. Records cluster into labelled sage bubbles
+// so a dense survey site reads as one "412" pin instead of a confusing pile of
+// overlapping dots; click a cluster to zoom in, and fully-coincident points
+// spiderfy at max zoom. Clicking a single pin opens the loaded record's drawer,
+// or links out to the org when the pin is not part of the loaded page.
+
+function clusterTier(n: number): { tier: string; size: number } {
+  if (n < 10) return { tier: "sm", size: 36 };
+  if (n < 100) return { tier: "md", size: 44 };
+  if (n < 1000) return { tier: "lg", size: 52 };
+  return { tier: "xl", size: 60 };
+}
 
 export function RecordMap({
   records,
@@ -26,7 +35,7 @@ export function RecordMap({
 }) {
   const elRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<LeafletMap | null>(null);
-  const layerRef = useRef<LayerGroup | null>(null);
+  const layerRef = useRef<MarkerClusterGroup | null>(null);
   const LRef = useRef<typeof import("leaflet") | null>(null);
   const [ready, setReady] = useState(false);
   const [points, setPoints] = useState<MapPoint[]>([]);
@@ -44,6 +53,8 @@ export function RecordMap({
     let cancelled = false;
     (async () => {
       const L = (await import("leaflet")).default;
+      // Patches the imported L instance with markerClusterGroup().
+      await import("leaflet.markercluster");
       if (cancelled || !elRef.current || mapRef.current) return;
       LRef.current = L;
       const map = L.map(elRef.current, { worldCopyJump: true, minZoom: 1 }).setView([12, 5], 2);
@@ -53,7 +64,25 @@ export function RecordMap({
         subdomains: "abcd",
         maxZoom: 19,
       }).addTo(map);
-      layerRef.current = L.layerGroup().addTo(map);
+      const cluster = L.markerClusterGroup({
+        // Coverage polygons add visual noise on the cream palette; the count
+        // bubble + zoom-on-click already communicate density.
+        showCoverageOnHover: false,
+        maxClusterRadius: 60,
+        spiderfyDistanceMultiplier: 1.4,
+        chunkedLoading: true,
+        iconCreateFunction: (c: MarkerCluster) => {
+          const n = c.getChildCount();
+          const { tier, size } = clusterTier(n);
+          return L.divIcon({
+            html: `<div class="gf-cluster gf-cluster--${tier}">${formatCompact(n)}</div>`,
+            className: "gf-cluster-wrap",
+            iconSize: L.point(size, size),
+          });
+        },
+      });
+      cluster.addTo(map);
+      layerRef.current = cluster;
       // Any move we didn't initiate is the visitor exploring; stop auto-fitting.
       map.on("movestart", () => {
         if (!fittingRef.current) userMovedRef.current = true;
@@ -86,7 +115,7 @@ export function RecordMap({
     return () => controller.abort();
   }, [records, kind]);
 
-  // Draw markers + auto-fit when points (or the map) change.
+  // Draw markers (clustered) + auto-fit when points (or the map) change.
   useEffect(() => {
     const L = LRef.current;
     const map = mapRef.current;
@@ -96,22 +125,26 @@ export function RecordMap({
     // laid out after init, or the viewport may have changed).
     map.invalidateSize();
     layer.clearLayers();
-    for (const p of points) {
-      const marker = L.circleMarker([p.lat, p.lon], {
-        radius: 5,
-        color: "#2e5840",
-        weight: 1.5,
-        fillColor: "#3e7053",
-        fillOpacity: 0.78,
-      });
-      if (p.label) marker.bindTooltip(p.label, { direction: "top", offset: [0, -4] });
+
+    const pinIcon = L.divIcon({
+      className: "gf-pin",
+      html: "",
+      iconSize: [14, 14],
+      iconAnchor: [7, 7],
+    });
+    const markers = points.map((p) => {
+      const marker = L.marker([p.lat, p.lon], { icon: pinIcon });
+      if (p.label) marker.bindTooltip(p.label, { direction: "top", offset: [0, -8] });
       marker.on("click", () => {
         const rec = p.recordId ? recordById.get(p.recordId) : undefined;
         if (rec) onOpen(rec);
         else if (p.did) window.open(accountHref(p.did), "_blank", "noopener");
       });
-      marker.addTo(layer);
-    }
+      return marker;
+    });
+    // Bulk add so markercluster builds the tree once (chunked under the hood).
+    layer.addLayers(markers);
+
     if (points.length > 0 && !userMovedRef.current) {
       const lats = points.map((p) => p.lat);
       const lons = points.map((p) => p.lon);

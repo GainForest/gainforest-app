@@ -262,3 +262,82 @@ body {
   background: var(--border);
   border-radius: 999px;
 }
+
+/* ---------------------------------------------------------------------------
+   Map markers + clusters (Leaflet + markercluster). A single record is a small
+   sage pin; nearby records collapse into a count bubble so a dense survey site
+   reads as one labelled cluster rather than a confusing pile of overlapping
+   dots. Click a cluster to zoom in; fully-overlapping points spiderfy.
+--------------------------------------------------------------------------- */
+.gf-pin {
+  width: 14px;
+  height: 14px;
+  border-radius: 9999px;
+  background: var(--primary);
+  border: 2px solid var(--surface);
+  box-shadow: 0 1px 5px rgba(20, 30, 15, 0.4);
+  transition: transform 0.12s ease;
+}
+.gf-pin:hover {
+  transform: scale(1.25);
+}
+
+/* The divIcon wrapper Leaflet creates around our cluster markup. */
+.gf-cluster-wrap {
+  background: transparent;
+  border: 0;
+}
+.gf-cluster {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  border-radius: 9999px;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--primary-foreground);
+  background: color-mix(in srgb, var(--primary) 92%, transparent);
+  border: 2px solid var(--surface);
+  box-shadow:
+    0 0 0 4px color-mix(in srgb, var(--primary) 18%, transparent),
+    0 4px 14px rgba(20, 30, 15, 0.34);
+  transition: transform 0.14s ease;
+}
+.gf-cluster:hover {
+  transform: scale(1.07);
+}
+.gf-cluster--sm {
+  font-size: 12px;
+}
+.gf-cluster--md {
+  font-size: 13px;
+}
+.gf-cluster--lg,
+.gf-cluster--xl {
+  font-size: 14px;
+}
+
+/* Spiderfy legs + cluster animations recoloured to the sage palette. */
+.leaflet-cluster-anim .leaflet-marker-icon,
+.leaflet-cluster-anim .leaflet-marker-shadow {
+  transition:
+    transform 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.28s ease;
+}
+.marker-cluster-spider-leg {
+  stroke: color-mix(in srgb, var(--primary) 55%, transparent);
+  stroke-width: 1.5;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gf-pin,
+  .gf-cluster {
+    transition: none;
+  }
+  .leaflet-cluster-anim .leaflet-marker-icon,
+  .leaflet-cluster-anim .leaflet-marker-shadow {
+    transition: none;
+  }
+}
