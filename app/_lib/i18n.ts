@@ -177,6 +177,7 @@ type Messages = {
   // names verbatim — they're proper nouns and don't translate — but
   // the surrounding label is localised.
   "awards.label": string; // e.g. "Winners of"
+  "awards.donateNote": string; // XPRIZE prize donation footnote
   "awards.alsoLabel": string; // e.g. "and recognised by"
 
   // ── Data commons section (the editorial dark band) ─────────────
@@ -470,6 +471,8 @@ export const MESSAGES: Record<Locale, Messages> = {
     "taina.placeholder": "Say hi…",
     "taina.thinking": "Taina is thinking…",
     "awards.label": "Winners of",
+    "awards.donateNote":
+      "We donated our entire XPRIZE Rainforest prize to fund the next generation of Indigenous scientists.",
     "awards.alsoLabel": "Recognised by",
     "dataCommons.eyebrow": "Open data commons",
     "dataCommons.heading.before": "The world's first community-owned data commons for",
@@ -785,6 +788,8 @@ export const MESSAGES: Record<Locale, Messages> = {
     "taina.placeholder": "Saluda…",
     "taina.thinking": "Taina está pensando…",
     "awards.label": "Ganadores de",
+    "awards.donateNote":
+      "Donamos todo nuestro premio XPRIZE Rainforest para financiar a la próxima generación de científicos indígenas.",
     "awards.alsoLabel": "Reconocidos por",
     "dataCommons.eyebrow": "Bienes comunes de datos abiertos",
     "dataCommons.heading.before": "El primer bien común de datos sobre",
@@ -1102,6 +1107,8 @@ export const MESSAGES: Record<Locale, Messages> = {
     "taina.placeholder": "Diga oi…",
     "taina.thinking": "Taina está pensando…",
     "awards.label": "Vencedores de",
+    "awards.donateNote":
+      "Doamos todo o nosso prêmio XPRIZE Rainforest para financiar a próxima geração de cientistas indígenas.",
     "awards.alsoLabel": "Reconhecidos por",
     "dataCommons.eyebrow": "Bens comuns de dados abertos",
     "dataCommons.heading.before": "O primeiro bem comum de dados sobre",
@@ -1417,6 +1424,8 @@ export const MESSAGES: Record<Locale, Messages> = {
     "taina.placeholder": "Sema habari…",
     "taina.thinking": "Taina anafikiria…",
     "awards.label": "Washindi wa",
+    "awards.donateNote":
+      "Tulitoa zawadi yetu yote ya XPRIZE Rainforest kufadhili kizazi kijacho cha wanasayansi asilia.",
     "awards.alsoLabel": "Wametambuliwa na",
     "dataCommons.eyebrow": "Hifadhi ya data huria",
     "dataCommons.heading.before": "Hifadhi ya kwanza ya kijamii ya data ya",
@@ -1734,6 +1743,8 @@ export const MESSAGES: Record<Locale, Messages> = {
     "taina.placeholder": "Sapa…",
     "taina.thinking": "Taina sedang berpikir…",
     "awards.label": "Pemenang",
+    "awards.donateNote":
+      "Kami menyumbangkan seluruh hadiah XPRIZE Rainforest untuk mendanai generasi ilmuwan adat berikutnya.",
     "awards.alsoLabel": "Diakui oleh",
     "dataCommons.eyebrow": "Komons data terbuka",
     "dataCommons.heading.before": "Komons data",

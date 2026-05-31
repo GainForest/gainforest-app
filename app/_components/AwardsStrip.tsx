@@ -1,7 +1,15 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useT } from "./LocaleProvider";
+
+// David Dao's letter on why the team gave the entire XPRIZE Rainforest
+// prize away to seed an endowment for the next generation of Indigenous
+// scientists. Same URL for every locale, so it lives here rather than in
+// the i18n dictionary.
+const XPRIZE_DONATION_URL =
+  "https://www.linkedin.com/pulse/donating-xprize-rainforest-prize-future-generations-modern-dao-6iyze/";
 
 // "Winners of …" strip — port of gainforest.earth's award badge band
 // that sits directly below the hero.
@@ -151,6 +159,28 @@ export function AwardsStrip() {
             </div>
           </div>
         </div>
+
+        {/* Footnote: we won the XPRIZE Rainforest prize, and donated it
+            in full. Links to David Dao's letter. Understated so it reads
+            as a note to the recognition band, not a CTA. */}
+        <p className="mt-8 text-[13px] leading-[1.55] text-foreground/60 lg:mt-10">
+          <Link
+            href={XPRIZE_DONATION_URL}
+            target="_blank"
+            rel="noreferrer"
+            className="group inline transition-colors hover:text-foreground"
+          >
+            <span className="border-b border-border-soft pb-0.5 transition-colors group-hover:border-primary">
+              {t("awards.donateNote")}
+            </span>
+            <span
+              aria-hidden
+              className="ml-1 inline-block font-medium text-primary transition-transform group-hover:translate-x-0.5"
+            >
+              →
+            </span>
+          </Link>
+        </p>
       </div>
     </section>
   );
