@@ -65,10 +65,10 @@ export function DeviceMonitor({ initial }: { initial: DevicesSnapshot }) {
             <span className="font-instrument text-[13px] uppercase tracking-[0.22em] text-foreground/55">
               healthchecks.io
             </span>
-            <h1 className="mt-3 font-garamond text-[40px] font-normal leading-[1.04] tracking-[-0.015em] text-foreground sm:text-[52px] lg:text-[60px]">
+            <h1 className="mt-3 font-garamond text-[34px] font-normal leading-[1.05] tracking-[-0.015em] text-foreground sm:text-[42px] lg:text-[50px]">
               Tainá <span className="font-instrument italic">devices</span>
             </h1>
-            <p className="mt-4 text-[15px] leading-[1.55] text-foreground/70 lg:text-[16.5px]">
+            <p className="mt-4 text-[15px] leading-[1.55] text-foreground/70 lg:text-[16px]">
               Field Raspberry Pis running{" "}
               <Link
                 href="https://github.com/GainForest/pi-taina"

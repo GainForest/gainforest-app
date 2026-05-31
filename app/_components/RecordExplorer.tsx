@@ -16,7 +16,6 @@ import {
 } from "../_lib/indexer";
 import { RecordDrawer } from "./RecordDrawer";
 import { RecordMap } from "./RecordMap";
-import { BrushedText } from "./BrushedText";
 import { OwnerBadge } from "./AuthorChip";
 import { formatNumber, countryFlag, shortDid, formatDate } from "../_lib/format";
 
@@ -29,9 +28,10 @@ import { formatNumber, countryFlag, shortDid, formatDate } from "../_lib/format"
 
 type KindMeta = {
   eyebrow: string;
-  /** `{word}` marks the brushed word. */
-  titleBefore: string;
-  titleItalic: string;
+  /** Plain (Cormorant) lead word; empty renders the accent alone. */
+  title: string;
+  /** Instrument-Serif italic accent word, matching the donations header. */
+  accent: string;
   lede: string;
   search: string;
 };
@@ -39,22 +39,22 @@ type KindMeta = {
 const KIND_META: Record<RecordKind, KindMeta> = {
   occurrence: {
     eyebrow: "app.gainforest.dwc.occurrence",
-    titleBefore: "Species {observations}",
-    titleItalic: "",
+    title: "Species",
+    accent: "observations",
     lede: "Darwin Core occurrence records from Hyperindex, newest first. Image and audio evidence blobs are resolved per record from each owner's PDS.",
     search: "Filter by species, family, or country…",
   },
   site: {
     eyebrow: "app.gainforest.organization.info",
-    titleBefore: "Project {sites}",
-    titleItalic: "",
+    title: "Project",
+    accent: "sites",
     lede: "Registered organization records: display name, country, and cover/logo blobs resolved from each org's PDS.",
     search: "Filter by organization or country…",
   },
   bumicert: {
     eyebrow: "org.hypercerts.claim.activity",
-    titleBefore: "",
-    titleItalic: "Bumicerts",
+    title: "",
+    accent: "Bumicerts",
     lede: "Hypercert impact claim records: title, short description, contributors, certified locations, and cover image.",
     search: "Filter Bumicerts by title or description…",
   },
@@ -192,17 +192,27 @@ export function RecordExplorer({ kind }: { kind: RecordKind }) {
           <span className="font-instrument text-[13px] uppercase tracking-[0.22em] text-foreground/55">
             {meta.eyebrow}
           </span>
-          <h1 className="mt-3 font-garamond text-[40px] font-normal leading-[1.04] tracking-[-0.015em] text-foreground sm:text-[52px] lg:text-[64px]">
-            {meta.titleBefore ? (
-              <BrushedText text={meta.titleBefore} />
+          <h1 className="mt-3 font-garamond text-[34px] font-normal leading-[1.05] tracking-[-0.015em] text-foreground sm:text-[42px] lg:text-[50px]">
+            {meta.title ? (
+              <>
+                {meta.title} <span className="font-instrument italic">{meta.accent}</span>
+              </>
             ) : (
-              <span className="font-instrument italic">{meta.titleItalic}</span>
+              <span className="font-instrument italic">{meta.accent}</span>
             )}
           </h1>
-          <p className="mt-5 text-[16px] leading-[1.55] text-foreground/75 lg:text-[17.5px]">
+          <p className="mt-4 text-[15px] leading-[1.55] text-foreground/70 lg:text-[16px]">
             {meta.lede}
           </p>
         </div>
+
+        {/* Stats overview — computed live from the loaded records, mirroring
+            the donations dashboard KPI band (re-skinned for the light pages). */}
+        {records.length > 0 && (
+          <div className="mt-8">
+            <StatBand stats={computeStats(records, kind)} />
+          </div>
+        )}
 
         {/* Toolbar */}
         <div className="mt-8 flex flex-wrap items-center gap-3 border-y border-border-soft py-3.5">
@@ -599,6 +609,97 @@ function haystack(r: ExplorerRecord): string {
     return [r.name, r.country, r.did].filter(Boolean).join(" ").toLowerCase();
   }
   return [r.title, r.shortDescription, r.did].filter(Boolean).join(" ").toLowerCase();
+}
+
+// ── Stats overview ───────────────────────────────────────────────────────
+//
+// A donations-style KPI band, but derived from whatever records are currently
+// loaded in the browser (the streams page in, so this grows as you "Load
+// more"). Time windows key off each record's createdAt.
+
+type Stat = { label: string; value: string; sub: string };
+
+function within(iso: string | null | undefined, days: number): boolean {
+  if (!iso) return false;
+  const t = new Date(iso).getTime();
+  return Number.isFinite(t) && t >= Date.now() - days * 86_400_000;
+}
+
+function computeStats(records: ExplorerRecord[], kind: RecordKind): Stat[] {
+  const last30 = records.filter((r) => within(r.createdAt, 30)).length;
+  const last7 = records.filter((r) => within(r.createdAt, 7)).length;
+  const n = (v: number) => formatNumber(v);
+
+  if (kind === "occurrence") {
+    const occ = records as OccurrenceRecord[];
+    const species = new Set(occ.map((r) => r.scientificName).filter(Boolean)).size;
+    const countries = new Set(
+      occ.map((r) => r.countryCode || r.country).filter(Boolean),
+    ).size;
+    const withMedia = occ.filter((r) => r.media.length > 0).length;
+    return [
+      { label: "Records loaded", value: n(occ.length), sub: "Observations" },
+      { label: "Last 30 days", value: n(last30), sub: "New uploads" },
+      { label: "Last 7 days", value: n(last7), sub: "This week" },
+      { label: "Species", value: n(species), sub: "Distinct taxa" },
+      { label: "Countries", value: n(countries), sub: "Geographic reach" },
+      { label: "With media", value: n(withMedia), sub: "Photo or audio" },
+    ];
+  }
+
+  if (kind === "bumicert") {
+    const b = records as BumicertRecord[];
+    const contributors = b.reduce((s, r) => s + r.contributorCount, 0);
+    const sites = b.reduce((s, r) => s + r.locationCount, 0);
+    const withCover = b.filter((r) => r.imageUrl).length;
+    return [
+      { label: "Records loaded", value: n(b.length), sub: "Bumicerts" },
+      { label: "Last 30 days", value: n(last30), sub: "New claims" },
+      { label: "Last 7 days", value: n(last7), sub: "This week" },
+      { label: "Contributors", value: n(contributors), sub: "Across claims" },
+      { label: "Certified sites", value: n(sites), sub: "Locations" },
+      { label: "With imagery", value: n(withCover), sub: "Has cover" },
+    ];
+  }
+
+  const s = records as SiteRecord[];
+  const countries = new Set(s.map((r) => r.country).filter(Boolean)).size;
+  const withImg = s.filter((r) => r.imageUrl).length;
+  return [
+    { label: "Records loaded", value: n(s.length), sub: "Organizations" },
+    { label: "Last 30 days", value: n(last30), sub: "New sites" },
+    { label: "Last 7 days", value: n(last7), sub: "This week" },
+    { label: "Countries", value: n(countries), sub: "Geographic reach" },
+    { label: "With imagery", value: n(withImg), sub: "Cover or logo" },
+  ];
+}
+
+const STAT_COLS: Record<number, string> = {
+  4: "lg:grid-cols-4",
+  5: "lg:grid-cols-5",
+  6: "lg:grid-cols-6",
+};
+
+function StatBand({ stats }: { stats: Stat[] }) {
+  const lg = STAT_COLS[stats.length] ?? "lg:grid-cols-6";
+  return (
+    <ul
+      role="list"
+      className={`grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-border-soft bg-border-soft sm:grid-cols-3 ${lg}`}
+    >
+      {stats.map((s) => (
+        <li key={s.label} className="bg-surface p-4 lg:p-5">
+          <div className="text-[11px] font-medium uppercase tracking-[0.12em] text-foreground/50">
+            {s.label}
+          </div>
+          <div className="mt-1.5 font-garamond text-[26px] leading-none text-foreground lg:text-[32px]">
+            {s.value}
+          </div>
+          <div className="mt-1 text-[11.5px] text-foreground/45">{s.sub}</div>
+        </li>
+      ))}
+    </ul>
+  );
 }
 
 // ── Bits ───────────────────────────────────────────────────────────────────
