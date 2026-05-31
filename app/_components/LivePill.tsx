@@ -16,6 +16,13 @@ import { useT } from "./LocaleProvider";
 // The tooltip uses a named Tailwind group (`group/live`) so it does
 // not clash with any `group` hover state the parent card may already
 // own.
+//
+// The pill is also a link to GainForest's public status page so a
+// visitor who notices a stale/fallback badge can jump straight to the
+// uptime dashboard. We link in both live and fallback states because
+// the status page is exactly where you'd check when data looks off.
+const STATUS_URL = "https://gainforest-status.instatus.com/";
+
 export function LivePill({
   isLive,
   tooltipKey,
@@ -41,13 +48,16 @@ export function LivePill({
         (className ? ` ${className}` : "")
       }
     >
-      <span
-        tabIndex={0}
+      <a
+        href={STATUS_URL}
+        target="_blank"
+        rel="noreferrer"
+        aria-label="View GainForest live status"
         className={
-          "inline-flex cursor-help items-center gap-1.5 rounded-full px-2 py-0.5 text-[10px] font-medium uppercase tracking-[0.1em] outline-none transition-colors focus-visible:ring-2 focus-visible:ring-foreground/20 " +
+          "inline-flex cursor-pointer items-center gap-1.5 rounded-full px-2 py-0.5 text-[10px] font-medium uppercase tracking-[0.1em] outline-none transition-colors focus-visible:ring-2 focus-visible:ring-foreground/20 " +
           (isLive
-            ? "bg-brand/15 text-brand-dark"
-            : "bg-foreground/5 text-foreground/45")
+            ? "bg-brand/15 text-brand-dark hover:bg-brand/25"
+            : "bg-foreground/5 text-foreground/45 hover:bg-foreground/10")
         }
       >
         {isLive && (
@@ -57,7 +67,25 @@ export function LivePill({
           </span>
         )}
         {label}
-      </span>
+        {/* External-link arrow so the badge reads as clickable; sits
+            right next to the label and points at the status page. */}
+        <svg
+          width="8"
+          height="8"
+          viewBox="0 0 24 24"
+          fill="none"
+          aria-hidden
+          className="opacity-70"
+        >
+          <path
+            d="M7 17L17 7M9 7h8v8"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      </a>
       {/* Hover/focus tooltip. Anchored to the pill's right edge so it
           stays inside narrower parent containers (hero card chrome can
           be as tight as 280 px), and pushed below with mt 6px. */}
