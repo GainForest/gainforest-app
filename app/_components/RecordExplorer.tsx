@@ -37,26 +37,26 @@ type KindMeta = {
 
 const KIND_META: Record<RecordKind, KindMeta> = {
   occurrence: {
-    eyebrow: "Darwin Core",
+    eyebrow: "app.gainforest.dwc.occurrence",
     titleBefore: "Species {observations}",
     titleItalic: "",
-    lede: "Occurrence records signed by communities and field sensors; photos, bioacoustics, taxonomy, and coordinates streamed live from partner PDS instances.",
+    lede: "Darwin Core occurrence records from Hyperindex, newest first. Image and audio evidence blobs are resolved per record from each owner's PDS.",
     search: "Filter by species, family, or country…",
     grid: "square",
   },
   site: {
-    eyebrow: "Organizations",
+    eyebrow: "app.gainforest.organization.info",
     titleBefore: "Project {sites}",
     titleItalic: "",
-    lede: "The organizations stewarding land in the data commons, with their cover imagery, country, and on-chain identity.",
+    lede: "Registered organization records: display name, country, and cover/logo blobs resolved from each org's PDS.",
     search: "Filter by organization or country…",
     grid: "card",
   },
   bumicert: {
-    eyebrow: "Hypercerts",
+    eyebrow: "org.hypercerts.claim.activity",
     titleBefore: "",
     titleItalic: "Bumicerts",
-    lede: "Impact claim activities; the verifiable proof-of-impact certificates communities mint, each backed by contributors and certified locations.",
+    lede: "Hypercert impact claim records: title, short description, contributors, certified locations, and cover image.",
     search: "Filter Bumicerts by title or description…",
     grid: "card",
   },

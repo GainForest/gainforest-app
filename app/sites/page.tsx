@@ -4,7 +4,7 @@ import { RecordExplorer } from "../_components/RecordExplorer";
 export const metadata: Metadata = {
   title: "Project sites",
   description:
-    "Browse the organizations and communities stewarding land in the GainForest data commons, with their cover imagery, country, and on-chain identity.",
+    "Browse app.gainforest.organization.info records from the GainForest indexer: display name, country, and cover/logo blobs.",
   alternates: { canonical: "/sites" },
 };
 

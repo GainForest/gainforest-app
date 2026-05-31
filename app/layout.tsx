@@ -35,9 +35,9 @@ const mono = JetBrains_Mono({
 
 const SITE_URL = "https://explorer.gainforest.app";
 const SITE_NAME = "GainForest Explorer";
-const SITE_TAGLINE = "Explore every record in the living forest";
+const SITE_TAGLINE = "GainForest data commons explorer";
 const SITE_DESCRIPTION =
-  "A block explorer for the GainForest data commons; Darwin Core species observations, project sites, and Bumicerts impact certificates signed on the AT Protocol, plus live donations and system status.";
+  "Read-only explorer for the GainForest data commons. Darwin Core occurrences, project sites, Bumicerts, and funding receipts from Hyperindex, plus Tainá field-device liveness and system status.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),

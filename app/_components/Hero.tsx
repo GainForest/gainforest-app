@@ -44,21 +44,19 @@ export function Hero({
         <div className="max-w-[920px]">
           <div className="flex flex-wrap items-center gap-3">
             <span className="font-instrument text-[13px] uppercase tracking-[0.22em] text-foreground/55">
-              The GainForest data commons
+              Live · AT Protocol
             </span>
             <StatusPill snapshot={status} />
           </div>
 
           <h1 className="mt-5 font-garamond text-[44px] font-normal leading-[1.04] tracking-[-0.015em] text-foreground sm:text-[64px] lg:text-[82px]">
-            <BrushedText text="{Explore}" /> every record in the{" "}
-            <span className="font-instrument italic">living forest</span>.
+            GainForest data <BrushedText text="{commons}" /> explorer
           </h1>
 
-          <p className="mt-6 max-w-[640px] text-[16px] leading-[1.55] text-foreground/80 lg:text-[18.5px]">
-            One block explorer for everything GainForest signs on the AT
-            Protocol; Darwin Core species observations, project sites, and
-            Bumicerts impact certificates, plus live donations and the
-            infrastructure status behind them.
+          <p className="mt-6 max-w-[660px] text-[16px] leading-[1.55] text-foreground/80 lg:text-[18px]">
+            Read-only browser over the GainForest indexer (Hyperindex) and the
+            ATProto PDS instances behind it. Records, donations, and device
+            health, queried live.
           </p>
         </div>
 

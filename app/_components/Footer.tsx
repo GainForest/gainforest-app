@@ -1,89 +1,57 @@
 import Link from "next/link";
 import { LogoMark } from "./Logo";
-import { BUMICERTS_URL, GLOBE_URL, GAINFOREST_URL, STATUS_URL } from "../_lib/urls";
+import { BUMICERTS_URL, GLOBE_URL, GAINFOREST_URL, STATUS_URL, INDEXER_URL } from "../_lib/urls";
 
-// Integrated closing footer, adapted from gainforest-app's Footer onto the
-// explorer's narrower surface. Dark ink band with the brand mark, a short
-// editorial line, the source links, and the legal block.
+const LINKS: Array<{ label: string; href: string }> = [
+  { label: "Green Globe", href: GLOBE_URL },
+  { label: "Bumicerts", href: `${BUMICERTS_URL}/explore` },
+  { label: "Status", href: STATUS_URL },
+  { label: "Indexer", href: INDEXER_URL },
+  { label: "GitHub", href: "https://github.com/GainForest/gainforest-explorer" },
+  { label: "gainforest.earth", href: GAINFOREST_URL },
+];
+
+// Slim technical footer. The brand mark, the data sources it reads, and a
+// factual disclaimer. No editorial closing band.
 export function Footer() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="bg-ink text-ink-foreground">
-      <div className="mx-auto w-full max-w-[1280px] px-6 py-14 sm:px-10 lg:px-16 lg:py-16">
-        <div className="grid gap-10 border-b border-ink-border pb-12 lg:grid-cols-[minmax(0,640px)_auto] lg:items-end lg:justify-between lg:gap-16">
-          <div>
-            <h2 className="font-garamond text-[32px] font-normal leading-[1.06] tracking-[-0.01em] text-ink-foreground sm:text-[42px] lg:text-[48px]">
-              One open window onto{" "}
-              <span className="font-instrument italic">regenerative impact</span>.
-            </h2>
-            <p className="mt-4 max-w-[520px] text-[15px] leading-[1.55] text-ink-foreground/72">
-              Every record here is signed on the AT Protocol and lives on a
-              community-owned PDS. The explorer just reads the commons; the data
-              belongs to the people who created it.
-            </p>
-          </div>
-          <div className="flex flex-col items-start gap-3 lg:items-end">
-            <Link
-              href={`${BUMICERTS_URL}/explore`}
-              target="_blank"
-              rel="noreferrer"
-              className="group inline-flex h-12 items-center justify-center gap-2 rounded-full bg-ink-foreground px-7 text-[14px] font-medium text-ink transition-colors hover:bg-ink-foreground/85"
-            >
-              Explore Bumicerts
-              <span aria-hidden className="transition-transform group-hover:translate-x-1">
-                →
-              </span>
-            </Link>
-            <Link
-              href={GLOBE_URL}
-              target="_blank"
-              rel="noreferrer"
-              className="group inline-flex items-center gap-2 text-[14px] text-ink-foreground/78 transition-colors hover:text-brand"
-            >
-              Open the Green Globe map
-              <span aria-hidden className="text-ink-foreground/40 transition-transform group-hover:translate-x-0.5 group-hover:text-brand">
-                →
-              </span>
-            </Link>
-          </div>
-        </div>
-
-        <div className="grid gap-8 pt-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start lg:gap-12">
-          <div>
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-              <LogoMark className="h-7 w-7 text-brand" title="GainForest" />
-              <span className="font-garamond text-[22px] font-semibold text-ink-foreground">
-                GainForest
-              </span>
-              <span className="text-[13px] text-ink-foreground/52 lg:ml-2">
-                © {year} GainForest. Data belongs to its communities.
+    <footer className="border-t border-ink-border bg-ink text-ink-foreground">
+      <div className="mx-auto w-full max-w-[1480px] px-6 py-10 sm:px-10 lg:px-16">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+          <div className="max-w-[520px]">
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
+              <LogoMark className="h-6 w-6 text-brand" title="GainForest" />
+              <span className="font-garamond text-[20px] font-semibold text-ink-foreground">
+                GainForest Explorer
               </span>
             </div>
-            <p className="mt-4 max-w-[640px] text-[13px] leading-[1.55] text-ink-foreground/60">
-              GainForest Foundation, a Swiss non-profit. The explorer is an
-              open read layer over the GainForest data commons and is not an
-              official record of donations; figures mirror the live indexer and
-              may lag the chain.
+            <p className="mt-3 text-[13px] leading-[1.6] text-ink-foreground/60">
+              Read-only view over the GainForest data commons. Records resolve
+              from Hyperindex and each owner&apos;s ATProto PDS; donation totals
+              mirror the indexer and may lag the chain. Not an official record.
             </p>
           </div>
-          <nav className="flex flex-wrap items-center gap-x-6 gap-y-3 text-[14px] text-ink-foreground/78 lg:max-w-[420px] lg:justify-end lg:gap-x-7">
-            <Link href={GLOBE_URL} target="_blank" rel="noreferrer" className="transition-colors hover:text-brand">
-              Green Globe
-            </Link>
-            <Link href={`${BUMICERTS_URL}/explore`} target="_blank" rel="noreferrer" className="transition-colors hover:text-brand">
-              Bumicerts
-            </Link>
-            <Link href={STATUS_URL} target="_blank" rel="noreferrer" className="transition-colors hover:text-brand">
-              Status
-            </Link>
-            <Link href="https://github.com/GainForest" target="_blank" rel="noreferrer" className="transition-colors hover:text-brand">
-              GitHub
-            </Link>
-            <Link href={GAINFOREST_URL} target="_blank" rel="noreferrer" className="transition-colors hover:text-brand">
-              gainforest.earth
-            </Link>
+
+          <nav className="flex flex-wrap gap-x-6 gap-y-2.5 text-[13.5px] text-ink-foreground/78 lg:max-w-[420px] lg:justify-end">
+            {LINKS.map((l) => (
+              <Link
+                key={l.label}
+                href={l.href}
+                target="_blank"
+                rel="noreferrer"
+                className="transition-colors hover:text-brand"
+              >
+                {l.label}
+              </Link>
+            ))}
           </nav>
+        </div>
+
+        <div className="mt-8 flex flex-col gap-1 border-t border-ink-border pt-5 text-[12px] text-ink-foreground/45 sm:flex-row sm:items-center sm:justify-between">
+          <span>© {year} GainForest Foundation</span>
+          <span className="font-mono">hi.gainforest.app/graphql · certified.one · instatus</span>
         </div>
       </div>
     </footer>

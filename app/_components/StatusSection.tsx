@@ -65,15 +65,14 @@ export function StatusSection({ initial }: { initial: StatusSnapshot }) {
         <div className="flex flex-col gap-6 border-b border-border-soft pb-8 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <span className="font-instrument text-[13px] uppercase tracking-[0.22em] text-foreground/55">
-              Infrastructure
+              instatus
             </span>
             <h2 className="mt-3 font-garamond text-[34px] font-normal leading-[1.05] tracking-[-0.015em] text-foreground sm:text-[42px] lg:text-[50px]">
               System <span className="font-instrument italic">status</span>
             </h2>
             <p className="mt-4 max-w-[560px] text-[15px] leading-[1.55] text-foreground/70 lg:text-[16px]">
-              The PDS instances, indexer, labeller, and apps that the data
-              commons runs on. Mirrored live from the GainForest status page and
-              re-checked every minute.
+              PDS instances, indexer, labeller, and apps. Mirrored from the
+              GainForest instatus page and re-polled every 60s.
             </p>
           </div>
 

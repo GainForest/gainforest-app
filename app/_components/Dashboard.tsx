@@ -91,18 +91,15 @@ export function Dashboard() {
         <div className="flex flex-col gap-6 border-b border-ink-border pb-8 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <span className="font-instrument text-[13px] uppercase tracking-[0.22em] text-ink-muted">
-              Platform analytics
+              org.hypercerts.funding.receipt
             </span>
             <h2 className="mt-3 font-garamond text-[34px] font-normal leading-[1.05] tracking-[-0.015em] text-ink-foreground sm:text-[42px] lg:text-[50px]">
               Donations <span className="font-instrument italic">dashboard</span>
             </h2>
             <p className="mt-4 max-w-[560px] text-[15px] leading-[1.55] text-ink-foreground/70 lg:text-[16px]">
-              Every on-chain donation recorded as an{" "}
-              <span className="font-mono text-[13px] text-ink-foreground/85">
-                org.hypercerts.funding.receipt
-              </span>{" "}
-              and indexed live; the same figures shown on the Bumicerts
-              marketplace, recomputed here from the facilitator repo.
+              On-chain funding receipts from the facilitator repo, aggregated
+              live. USD/USDC only; figures mirror the indexer and may lag the
+              chain.
             </p>
           </div>
           <PeriodTabs period={period} onChange={setPeriod} />

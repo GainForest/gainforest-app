@@ -26,49 +26,49 @@ export function BrowseGrid({
   }> = [
     {
       href: "/observations",
-      label: "Darwin Core",
+      label: "app.gainforest.dwc.occurrence",
       title: "Species observations",
-      blurb: "Photos, bioacoustics, and field data signed by communities and sensors.",
+      blurb: "Darwin Core occurrences: taxonomy, coordinates, and image/audio evidence blobs.",
       stat: formatCompact(kpis.occurrences),
       statLabel: "records",
     },
     {
       href: "/sites",
-      label: "Organizations",
+      label: "app.gainforest.organization.info",
       title: "Project sites",
-      blurb: "The communities and organizations stewarding land in the commons.",
+      blurb: "Registered organizations: display name, country, and cover/logo blobs.",
       stat: formatCompact(kpis.sites),
       statLabel: "organizations",
     },
     {
       href: "/bumicerts",
-      label: "Hypercerts",
+      label: "org.hypercerts.claim.activity",
       title: "Bumicerts",
-      blurb: "Verifiable proof-of-impact certificates, each backed by contributors.",
+      blurb: "Impact claim activities: title, contributors, and certified locations.",
       stat: formatCompact(kpis.bumicerts),
-      statLabel: "impact claims",
+      statLabel: "claims",
     },
     {
       href: "/donations",
-      label: "Analytics",
-      title: "Donations dashboard",
-      blurb: "Live on-chain funding; totals, donors, and recent transactions.",
+      label: "org.hypercerts.funding.receipt",
+      title: "Donations",
+      blurb: "On-chain funding receipts aggregated: totals, donors, and transactions.",
       stat: formatUsd(kpis.totalRaised),
       statLabel: "raised",
     },
     {
       href: "/devices",
-      label: "Field infrastructure",
+      label: "healthchecks.io",
       title: "Tainá devices",
-      blurb: "Liveness of the field Raspberry Pis running Tainá near Manaus.",
+      blurb: "Field Raspberry Pi heartbeats: status, CPU temp, RAM, disk, uptime.",
       stat: "Live",
       statLabel: "heartbeats",
     },
     {
       href: "/status",
-      label: "Infrastructure",
+      label: "instatus",
       title: "System status",
-      blurb: "The PDS instances, indexer, labeller, and apps behind the commons.",
+      blurb: "PDS instances, indexer, labeller, and apps; uptime per service.",
       stat: total > 0 ? `${operational}/${total}` : "—",
       statLabel: "operational",
     },
@@ -79,9 +79,9 @@ export function BrowseGrid({
       <div className="mx-auto w-full max-w-[1480px] px-6 py-16 sm:px-10 lg:px-16 lg:py-20">
         <div className="mb-8 flex items-end justify-between gap-4">
           <h2 className="font-garamond text-[26px] font-normal leading-none text-foreground sm:text-[32px]">
-            Browse the <span className="font-instrument italic">commons</span>
+            Collections
           </h2>
-          <span className="text-[12.5px] text-foreground/50">Six live surfaces</span>
+          <span className="font-mono text-[12px] text-foreground/45">6 sources</span>
         </div>
 
         <ul role="list" className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">

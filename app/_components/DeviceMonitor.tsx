@@ -63,13 +63,13 @@ export function DeviceMonitor({ initial }: { initial: DevicesSnapshot }) {
         <div className="flex flex-col gap-6 border-b border-border-soft pb-8 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-[640px]">
             <span className="font-instrument text-[13px] uppercase tracking-[0.22em] text-foreground/55">
-              Field infrastructure
+              healthchecks.io
             </span>
             <h1 className="mt-3 font-garamond text-[40px] font-normal leading-[1.04] tracking-[-0.015em] text-foreground sm:text-[52px] lg:text-[60px]">
               Tainá <span className="font-instrument italic">devices</span>
             </h1>
             <p className="mt-4 text-[15px] leading-[1.55] text-foreground/70 lg:text-[16.5px]">
-              The field Raspberry Pis running{" "}
+              Field Raspberry Pis running{" "}
               <Link
                 href="https://github.com/GainForest/pi-taina"
                 target="_blank"
@@ -77,9 +77,9 @@ export function DeviceMonitor({ initial }: { initial: DevicesSnapshot }) {
                 className="text-primary underline-offset-4 hover:underline"
               >
                 Tainá
-              </Link>{" "}
-              in Indigenous communities around Manaus. Each device heartbeats
-              every 60 seconds; this board reads those signals live.
+              </Link>
+              . Each device pings healthchecks.io every 60s; this board reads
+              the last heartbeat plus the system and Tainá stats it embeds.
             </p>
           </div>
 
