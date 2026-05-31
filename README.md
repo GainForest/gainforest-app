@@ -13,20 +13,39 @@ pnpm dev        # http://127.0.0.1:3040
 pnpm build
 ```
 
-## What it shows
+## Pages
 
-| Section | Source | Data |
+Each surface is its own route (shared `TopNav` + `Footer` in the root layout):
+
+| Route | Source | Data |
 |---|---|---|
-| **Hero KPIs** | `app/_lib/kpis.ts` (server) | `totalCount` for occurrences / activities / orgs / locations + raised total from funding receipts |
-| **Explore → Species observations** | `app/_lib/indexer.ts` `walkOccurrences()` (client) | `appGainforestDwcOccurrence` Darwin Core records, image/audio-forward with a media filter |
-| **Explore → Project sites** | `app/_lib/indexer.ts` `fetchSites()` (client) | `appGainforestOrganizationInfo` organizations with cover/logo + country |
-| **Explore → Bumicerts** | `app/_lib/indexer.ts` `fetchBumicerts()` (client) | `orgHypercertsClaimActivity` impact claim activities |
-| **Donations dashboard** | `app/_lib/dashboard.ts` (client) | `orgHypercertsFundingReceipt` from the facilitator repo, re-aggregated exactly like the bumicerts monorepo's `/dashboard` |
-| **System status** | `app/_lib/status.ts` | instatus `summary.json` + `v2/components.json`, re-polled every 60s |
+| `/` | `app/_lib/kpis.ts` (server) | hero KPI band + a six-card "Browse the commons" grid |
+| `/observations` | `app/_lib/indexer.ts` `walkOccurrences()` (client) | `appGainforestDwcOccurrence` Darwin Core records, image/audio-forward with a media filter |
+| `/sites` | `app/_lib/indexer.ts` `fetchSites()` (client) | `appGainforestOrganizationInfo` organizations with cover/logo + country |
+| `/bumicerts` | `app/_lib/indexer.ts` `fetchBumicerts()` (client) | `orgHypercertsClaimActivity` impact claim activities |
+| `/donations` | `app/_lib/dashboard.ts` (client) | `orgHypercertsFundingReceipt` from the facilitator repo, re-aggregated exactly like the bumicerts monorepo's `/dashboard` |
+| `/devices` | `app/_lib/devices.ts` (server) + `/api/devices` | Tainá field-Pi liveness, ported from [pi-taina-monitor](https://github.com/GainForest/pi-taina-monitor): healthchecks.io heartbeats + embedded system/taina stats |
+| `/status` | `app/_lib/status.ts` | instatus `summary.json` + `v2/components.json`, re-polled every 60s |
 
-Every record opens a detail drawer (`RecordDrawer`) with its structured
+Each record opens a detail drawer (`RecordDrawer`) with its structured
 fields, the canonical `at://` URI (copyable), and contextual links out to
 Bumicerts / Green Globe / Bluesky.
+
+### Tainá device monitor
+
+`/devices` reads the field Raspberry Pi heartbeats from healthchecks.io using a
+read-only API key in `HEALTHCHECKS_API_KEY` (server-side only; never shipped to
+the browser). Without the key the page shows a "monitoring not configured"
+state, so it is safe to deploy without the secret. To light it up:
+
+```bash
+vercel env add HEALTHCHECKS_API_KEY production   # paste the read-only key
+vercel --prod
+```
+
+See `.env.local.example`. The board re-polls `/api/devices` every 60s (the Pi
+heartbeat cadence) and leads with liveness: status, last-seen, CPU temp, RAM,
+disk, load, uptime, and the local Tainá draft queue.
 
 ## Design system
 
