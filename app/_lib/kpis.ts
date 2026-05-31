@@ -46,9 +46,12 @@ const RECEIPTS_TOTALS_QUERY = `
   }
 `;
 
-async function fetchTotals(): Promise<
-  Pick<ExplorerKpis, "occurrences" | "bumicerts" | "sites" | "locations">
-> {
+export type CollectionTotals = Pick<
+  ExplorerKpis,
+  "occurrences" | "bumicerts" | "sites" | "locations"
+>;
+
+export async function fetchTotals(): Promise<CollectionTotals> {
   try {
     const res = await fetch(INDEXER_URL, {
       method: "POST",
@@ -78,7 +81,7 @@ async function fetchTotals(): Promise<
 
 const USD = new Set(["USD", "USDC"]);
 
-async function fetchRaised(): Promise<
+export async function fetchRaised(): Promise<
   Pick<ExplorerKpis, "totalRaised" | "totalDonations">
 > {
   try {

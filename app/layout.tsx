@@ -1,6 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import { Cormorant_Garamond, Instrument_Serif, Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
+import { TopNav } from "./_components/TopNav";
+import { Footer } from "./_components/Footer";
+import { fetchStatus } from "./_lib/status";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -99,13 +102,20 @@ export const viewport: Viewport = {
   colorScheme: "light",
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+// The nav's live status pill is prefetched here so it is shared across every
+// route (cached via `revalidate`, so it stays out of the per-request path).
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const status = await fetchStatus({ revalidate: 60 });
   return (
     <html lang="en">
       <body
         className={`${inter.variable} ${cormorant.variable} ${instrument.variable} ${mono.variable} antialiased`}
       >
-        {children}
+        <div className="flex min-h-screen flex-col bg-background">
+          <TopNav status={status} />
+          <main className="flex-1">{children}</main>
+          <Footer />
+        </div>
       </body>
     </html>
   );

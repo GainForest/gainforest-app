@@ -1,24 +1,34 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { LogoMark } from "./Logo";
 import { StatusPill } from "./StatusPill";
 import type { StatusSnapshot } from "../_lib/status";
 import { BUMICERTS_URL, GLOBE_URL } from "../_lib/urls";
 
-const SECTIONS = [
-  { href: "#explore", label: "Explore" },
-  { href: "#dashboard", label: "Donations" },
-  { href: "#status", label: "Status" },
+const NAV = [
+  { href: "/observations", label: "Observations" },
+  { href: "/sites", label: "Sites" },
+  { href: "/bumicerts", label: "Bumicerts" },
+  { href: "/donations", label: "Donations" },
+  { href: "/devices", label: "Devices" },
+  { href: "/status", label: "Status" },
 ] as const;
 
-// Minimal, explorer-local header. Logo + in-page section anchors + a live
-// status pill, with outbound links to the two production apps tucked into the
-// mobile drawer. Sticky + blurred over the cream background, matching
-// gainforest-app's TopNav rhythm.
+// Route-aware top nav. Each section of the explorer is its own page now, so
+// the nav links are real routes (active state from usePathname). Sticky +
+// blurred over the cream background, matching gainforest-app's rhythm. The
+// live status pill links out to the instatus page.
 export function TopNav({ status }: { status: StatusSnapshot }) {
+  const pathname = usePathname() ?? "/";
   const [menuOpen, setMenuOpen] = useState(false);
+
+  // Close the mobile drawer on route change.
+  useEffect(() => {
+    setMenuOpen(false);
+  }, [pathname]);
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -34,15 +44,16 @@ export function TopNav({ status }: { status: StatusSnapshot }) {
     };
   }, [menuOpen]);
 
+  const isActive = (href: string) => pathname === href;
+
   return (
     <>
       <header className="sticky top-0 z-[70] w-full border-b border-border-soft/80 bg-background/90 backdrop-blur-xl">
-        <div className="mx-auto flex h-16 w-full max-w-[1480px] items-center justify-between gap-4 px-5 sm:px-8 lg:h-[68px] lg:px-16">
+        <div className="mx-auto flex h-16 w-full max-w-[1480px] items-center justify-between gap-3 px-5 sm:px-8 lg:h-[68px] lg:px-12 xl:px-16">
           <Link
-            href="#top"
-            className="flex items-center gap-2.5 transition-opacity hover:opacity-80"
-            aria-label="GainForest Explorer"
-            onClick={() => setMenuOpen(false)}
+            href="/"
+            className="flex shrink-0 items-center gap-2.5 transition-opacity hover:opacity-80"
+            aria-label="GainForest Explorer home"
           >
             <LogoMark className="h-6 w-6 text-brand lg:h-7 lg:w-7" title="GainForest" />
             <span className="font-garamond text-[20px] font-semibold tracking-tight text-foreground lg:text-[22px]">
@@ -54,22 +65,27 @@ export function TopNav({ status }: { status: StatusSnapshot }) {
           </Link>
 
           <nav
-            className="hidden items-center gap-1 rounded-full border border-border-soft bg-background/70 p-1 lg:flex"
+            className="hidden items-center gap-0.5 rounded-full border border-border-soft bg-background/70 p-1 lg:flex"
             aria-label="Sections"
           >
-            {SECTIONS.map((s) => (
+            {NAV.map((item) => (
               <Link
-                key={s.href}
-                href={s.href}
-                className="rounded-full px-4 py-2 text-[13px] font-medium leading-none text-foreground/65 transition-colors hover:bg-foreground/[0.04] hover:text-foreground"
+                key={item.href}
+                href={item.href}
+                aria-current={isActive(item.href) ? "page" : undefined}
+                className={`rounded-full px-3 py-2 text-[13px] font-medium leading-none transition-colors ${
+                  isActive(item.href)
+                    ? "bg-foreground/[0.06] text-foreground"
+                    : "text-foreground/60 hover:bg-foreground/[0.04] hover:text-foreground"
+                }`}
               >
-                {s.label}
+                {item.label}
               </Link>
             ))}
           </nav>
 
-          <div className="flex items-center gap-2.5">
-            <span className="hidden sm:inline-flex">
+          <div className="flex shrink-0 items-center gap-2.5">
+            <span className="hidden xl:inline-flex">
               <StatusPill snapshot={status} />
             </span>
             <button
@@ -86,10 +102,7 @@ export function TopNav({ status }: { status: StatusSnapshot }) {
       </header>
 
       {menuOpen && (
-        <div
-          className="fixed inset-x-0 bottom-0 top-16 z-[60] lg:hidden"
-          onClick={() => setMenuOpen(false)}
-        >
+        <div className="fixed inset-x-0 bottom-0 top-16 z-[60] lg:hidden" onClick={() => setMenuOpen(false)}>
           <div className="absolute inset-0 bg-foreground/10 backdrop-blur-[1px]" />
           <nav
             onClick={(e) => e.stopPropagation()}
@@ -100,14 +113,16 @@ export function TopNav({ status }: { status: StatusSnapshot }) {
               <StatusPill snapshot={status} />
             </div>
             <div className="grid gap-1">
-              {SECTIONS.map((s) => (
+              {NAV.map((item) => (
                 <Link
-                  key={s.href}
-                  href={s.href}
-                  onClick={() => setMenuOpen(false)}
-                  className="group flex items-center justify-between border-b border-border-soft/80 py-3.5 font-garamond text-[24px] font-normal leading-none text-foreground transition-colors last:border-b-0 hover:text-primary"
+                  key={item.href}
+                  href={item.href}
+                  aria-current={isActive(item.href) ? "page" : undefined}
+                  className={`group flex items-center justify-between border-b border-border-soft/80 py-3.5 font-garamond text-[24px] font-normal leading-none transition-colors last:border-b-0 ${
+                    isActive(item.href) ? "text-primary" : "text-foreground hover:text-primary"
+                  }`}
                 >
-                  <span>{s.label}</span>
+                  <span>{item.label}</span>
                   <span aria-hidden className="text-foreground/35 transition-transform group-hover:translate-x-1 group-hover:text-primary">
                     →
                   </span>

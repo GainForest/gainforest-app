@@ -15,259 +15,192 @@ import {
   type OccurrenceFilter,
 } from "../_lib/indexer";
 import { RecordDrawer } from "./RecordDrawer";
-import {
-  formatRelative,
-  formatNumber,
-  countryFlag,
-  shortDid,
-} from "../_lib/format";
+import { BrushedText } from "./BrushedText";
+import { formatRelative, formatNumber, countryFlag, shortDid } from "../_lib/format";
 
-// The tabbed record explorer — three GainForest streams paged straight from
-// Hyperindex in the browser (CORS-open), each opening a detail drawer. A
-// search box filters the records already loaded; "Load more" walks the
-// indexer cursor. Ported in spirit from GainForest/hyperscan's feed + data
-// explorer, narrowed to the GainForest-relevant collections and re-skinned in
-// the gainforest.earth editorial system.
+// Single-stream record explorer. One of the three GainForest record types
+// (Darwin Core occurrences, project sites, Bumicerts) paged straight from
+// Hyperindex in the browser (CORS-open), each card opening a detail drawer.
+// A search box filters the records already loaded; "Load more" walks the
+// indexer cursor. This is the per-page form of the old combined tab view —
+// the tab strip was replaced by top-nav routes so each stream is its own page.
 
-type TabId = RecordKind;
+type KindMeta = {
+  eyebrow: string;
+  /** `{word}` marks the brushed word. */
+  titleBefore: string;
+  titleItalic: string;
+  lede: string;
+  search: string;
+  grid: "square" | "card";
+};
 
-const TABS: Array<{
-  id: TabId;
-  label: string;
-  blurb: string;
-  collection: string;
-  pageSize: number;
-}> = [
-  {
-    id: "occurrence",
-    label: "Species observations",
-    blurb: "Darwin Core occurrence records; photos, audio, and field data signed by communities and sensors.",
-    collection: "app.gainforest.dwc.occurrence",
-    pageSize: 24,
+const KIND_META: Record<RecordKind, KindMeta> = {
+  occurrence: {
+    eyebrow: "Darwin Core",
+    titleBefore: "Species {observations}",
+    titleItalic: "",
+    lede: "Occurrence records signed by communities and field sensors; photos, bioacoustics, taxonomy, and coordinates streamed live from partner PDS instances.",
+    search: "Filter by species, family, or country…",
+    grid: "square",
   },
-  {
-    id: "site",
-    label: "Project sites",
-    blurb: "Organizations stewarding land in the data commons, with their cover imagery and country.",
-    collection: "app.gainforest.organization.info",
-    pageSize: 24,
+  site: {
+    eyebrow: "Organizations",
+    titleBefore: "Project {sites}",
+    titleItalic: "",
+    lede: "The organizations stewarding land in the data commons, with their cover imagery, country, and on-chain identity.",
+    search: "Filter by organization or country…",
+    grid: "card",
   },
-  {
-    id: "bumicert",
-    label: "Bumicerts",
-    blurb: "Hypercert impact claim activities; the verifiable proof-of-impact certificates communities mint.",
-    collection: "org.hypercerts.claim.activity",
-    pageSize: 24,
+  bumicert: {
+    eyebrow: "Hypercerts",
+    titleBefore: "",
+    titleItalic: "Bumicerts",
+    lede: "Impact claim activities; the verifiable proof-of-impact certificates communities mint, each backed by contributors and certified locations.",
+    search: "Filter Bumicerts by title or description…",
+    grid: "card",
   },
-];
+};
 
 type Phase = "idle" | "loading" | "ready" | "error" | "more";
 
-type Stream = {
-  records: ExplorerRecord[];
-  cursor: string | null;
-  hasMore: boolean;
-  phase: Phase;
-};
+const PAGE_SIZE = 24;
 
-const EMPTY: Stream = { records: [], cursor: null, hasMore: true, phase: "idle" };
+export function RecordExplorer({ kind }: { kind: RecordKind }) {
+  const meta = KIND_META[kind];
 
-export function ExplorerTabs() {
-  const [active, setActive] = useState<TabId>("occurrence");
-  const [streams, setStreams] = useState<Record<TabId, Stream>>({
-    occurrence: { ...EMPTY },
-    site: { ...EMPTY },
-    bumicert: { ...EMPTY },
-  });
+  const [records, setRecords] = useState<ExplorerRecord[]>([]);
+  const [cursor, setCursor] = useState<string | null>(null);
+  const [hasMore, setHasMore] = useState(true);
+  const [phase, setPhase] = useState<Phase>("idle");
   const [query, setQuery] = useState("");
   const [occMedia, setOccMedia] = useState<OccurrenceFilter>("image");
   const [walking, setWalking] = useState(false);
   const [drawer, setDrawer] = useState<ExplorerRecord | null>(null);
 
-  // One AbortController per tab so switching tabs cancels an in-flight walk.
-  const controllers = useRef<Record<TabId, AbortController | null>>({
-    occurrence: null,
-    site: null,
-    bumicert: null,
-  });
+  const controller = useRef<AbortController | null>(null);
+  // Latest values for the load closure without re-creating it each render.
+  const stateRef = useRef({ records, cursor, hasMore, phase });
+  stateRef.current = { records, cursor, hasMore, phase };
 
   const load = useCallback(
-    (tab: TabId, mode: "first" | "more") => {
-      setStreams((prev) => {
-        const s = prev[tab];
-        if (mode === "first" && s.phase !== "idle") return prev;
-        if (mode === "more" && (s.phase === "loading" || s.phase === "more" || !s.hasMore))
-          return prev;
-        return {
-          ...prev,
-          [tab]: { ...s, phase: mode === "first" ? "loading" : "more" },
-        };
-      });
-
-      const current = streams[tab];
-      if (mode === "first" && current.phase !== "idle") return;
-      if (mode === "more" && (current.phase === "loading" || current.phase === "more" || !current.hasMore))
+    (mode: "first" | "more") => {
+      const s = stateRef.current;
+      if (mode === "first" && s.phase !== "idle") return;
+      if (mode === "more" && (s.phase === "loading" || s.phase === "more" || !s.hasMore))
         return;
 
-      const controller = new AbortController();
-      controllers.current[tab]?.abort();
-      controllers.current[tab] = controller;
-
-      const after = mode === "more" ? current.cursor : null;
-      const tabConfig = TABS.find((t) => t.id === tab)!;
-      const base = mode === "more" ? current.records : [];
+      const ctrl = new AbortController();
+      controller.current?.abort();
+      controller.current = ctrl;
+      const after = mode === "more" ? s.cursor : null;
+      const base = mode === "more" ? s.records : [];
+      setPhase(mode === "first" ? "loading" : "more");
 
       const merge = (incoming: ExplorerRecord[]): ExplorerRecord[] => {
         const seen = new Set(base.map((r) => r.id));
         return [...base, ...incoming.filter((r) => !seen.has(r.id))];
       };
 
-      // Occurrences walk the indexer progressively (media-bearing records are
-      // sparse), streaming cards in as they're found. Sites + bumicerts are a
-      // single dense page each.
-      if (tab === "occurrence") {
+      if (kind === "occurrence") {
         setWalking(true);
         walkOccurrences({
           media: occMedia,
-          target: tabConfig.pageSize,
+          target: PAGE_SIZE,
           after,
-          signal: controller.signal,
+          signal: ctrl.signal,
           onProgress: (running) => {
-            setStreams((prev) => ({
-              ...prev,
-              occurrence: { ...prev.occurrence, records: merge(running), phase: "ready" },
-            }));
+            setRecords(merge(running));
+            setPhase("ready");
           },
         })
           .then((res) => {
-            setStreams((prev) => ({
-              ...prev,
-              occurrence: {
-                records: merge(res.records),
-                cursor: res.cursor,
-                hasMore: res.hasMore,
-                phase: "ready",
-              },
-            }));
+            setRecords(merge(res.records));
+            setCursor(res.cursor);
+            setHasMore(res.hasMore);
+            setPhase("ready");
           })
           .catch((err) => {
             if ((err as Error).name === "AbortError") return;
             console.warn("[explorer] occurrence walk failed", err);
-            setStreams((prev) => ({
-              ...prev,
-              occurrence: {
-                ...prev.occurrence,
-                phase: prev.occurrence.records.length ? "ready" : "error",
-              },
-            }));
+            setPhase(stateRef.current.records.length ? "ready" : "error");
           })
           .finally(() => {
-            if (!controller.signal.aborted) setWalking(false);
+            if (!ctrl.signal.aborted) setWalking(false);
           });
         return;
       }
 
       const request: Promise<Page<ExplorerRecord>> =
-        tab === "site"
-          ? fetchSites(tabConfig.pageSize, after, controller.signal)
-          : fetchBumicerts(tabConfig.pageSize, after, controller.signal);
+        kind === "site"
+          ? fetchSites(PAGE_SIZE, after, ctrl.signal)
+          : fetchBumicerts(PAGE_SIZE, after, ctrl.signal);
 
       request
         .then((page) => {
-          setStreams((prev) => ({
-            ...prev,
-            [tab]: {
-              records: merge(page.records),
-              cursor: page.cursor,
-              hasMore: page.hasMore,
-              phase: "ready",
-            },
-          }));
+          setRecords(merge(page.records));
+          setCursor(page.cursor);
+          setHasMore(page.hasMore);
+          setPhase("ready");
         })
         .catch((err) => {
           if ((err as Error).name === "AbortError") return;
-          console.warn(`[explorer] ${tab} fetch failed`, err);
-          setStreams((prev) => ({
-            ...prev,
-            [tab]: { ...prev[tab], phase: prev[tab].records.length ? "ready" : "error" },
-          }));
+          console.warn(`[explorer] ${kind} fetch failed`, err);
+          setPhase(stateRef.current.records.length ? "ready" : "error");
         });
     },
-    [streams, occMedia],
+    [kind, occMedia],
   );
 
-  // Load the active stream's first page whenever it's idle. This fires on tab
-  // switch and after a media-filter reset drops the occurrence stream back to
-  // idle. The phase guard makes it a no-op once a stream is loading/ready, so
-  // it never loops on its own state changes.
+  // Load the first page on mount.
   useEffect(() => {
-    if (streams[active].phase === "idle") load(active, "first");
+    load("first");
+    return () => controller.current?.abort();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [active, streams]);
+  }, []);
 
-  // Reset the search when switching tabs so a query from one stream doesn't
-  // hide everything in the next.
-  useEffect(() => {
-    setQuery("");
-  }, [active]);
-
-  // Changing the occurrence media filter resets that stream so it re-walks the
-  // indexer with the new predicate.
+  // Changing the occurrence media filter resets and re-walks.
   function changeMedia(next: OccurrenceFilter) {
     if (next === occMedia) return;
+    controller.current?.abort();
     setOccMedia(next);
     setQuery("");
-    controllers.current.occurrence?.abort();
-    setStreams((p) => ({ ...p, occurrence: { ...EMPTY } }));
+    setRecords([]);
+    setCursor(null);
+    setHasMore(true);
+    setPhase("idle");
   }
 
-  const stream = streams[active];
-  const filtered = filterRecords(stream.records, query);
+  // After a media reset drops us back to idle, kick off the new walk.
+  useEffect(() => {
+    if (phase === "idle" && records.length === 0) load("first");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [occMedia, phase]);
+
+  const filtered = filterRecords(records, query);
 
   return (
-    <section id="explore" className="scroll-mt-20 bg-background">
-      <div className="mx-auto w-full max-w-[1480px] px-6 pt-6 pb-16 sm:px-10 lg:px-16 lg:pb-24">
-        {/* Tab strip — compact pills, always visible; the active tab's blurb
-            renders on the line below so the pills never overflow off-screen. */}
-        <div className="flex flex-col gap-3.5 pt-2">
-          <div
-            className="no-scrollbar -mx-1 flex gap-2 overflow-x-auto px-1"
-            role="tablist"
-            aria-label="Record streams"
-          >
-            {TABS.map((t) => {
-              const isActive = t.id === active;
-              return (
-                <button
-                  key={t.id}
-                  type="button"
-                  role="tab"
-                  aria-selected={isActive}
-                  onClick={() => setActive(t.id)}
-                  className={`group inline-flex shrink-0 items-center gap-2 rounded-full border px-4 py-2.5 text-[14px] font-medium transition-colors ${
-                    isActive
-                      ? "border-primary/35 bg-surface text-foreground"
-                      : "border-border-soft bg-background text-foreground/60 hover:border-foreground/20 hover:text-foreground"
-                  }`}
-                >
-                  <span
-                    aria-hidden
-                    className={`inline-block h-1.5 w-1.5 rounded-full ${
-                      isActive ? "pulse-dot bg-brand text-brand" : "bg-foreground/25"
-                    }`}
-                  />
-                  {t.label}
-                </button>
-              );
-            })}
-          </div>
-          <p className="max-w-[680px] text-[14px] leading-[1.5] text-foreground/60">
-            {TABS.find((t) => t.id === active)?.blurb}
+    <section className="bg-background">
+      <div className="mx-auto w-full max-w-[1480px] px-6 pt-10 pb-16 sm:px-10 lg:px-16 lg:pt-16 lg:pb-24">
+        {/* Header */}
+        <div className="max-w-[760px]">
+          <span className="font-instrument text-[13px] uppercase tracking-[0.22em] text-foreground/55">
+            {meta.eyebrow}
+          </span>
+          <h1 className="mt-3 font-garamond text-[40px] font-normal leading-[1.04] tracking-[-0.015em] text-foreground sm:text-[52px] lg:text-[64px]">
+            {meta.titleBefore ? (
+              <BrushedText text={meta.titleBefore} />
+            ) : (
+              <span className="font-instrument italic">{meta.titleItalic}</span>
+            )}
+          </h1>
+          <p className="mt-5 text-[16px] leading-[1.55] text-foreground/75 lg:text-[17.5px]">
+            {meta.lede}
           </p>
         </div>
 
         {/* Toolbar */}
-        <div className="mt-6 flex flex-wrap items-center gap-3 border-y border-border-soft py-3.5">
+        <div className="mt-8 flex flex-wrap items-center gap-3 border-y border-border-soft py-3.5">
           <div className="relative flex-1" style={{ minWidth: "220px" }}>
             <svg
               aria-hidden
@@ -283,12 +216,13 @@ export function ExplorerTabs() {
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder={searchPlaceholder(active)}
+              placeholder={meta.search}
               aria-label="Filter loaded records"
               className="w-full rounded-full border border-border-soft bg-surface py-2 pl-9 pr-3 text-[14px] text-foreground outline-none transition-colors placeholder:text-foreground/40 focus:border-primary/40"
             />
           </div>
-          {active === "occurrence" && (
+
+          {kind === "occurrence" && (
             <div className="inline-flex rounded-full border border-border-soft bg-surface p-0.5">
               {(
                 [
@@ -313,27 +247,26 @@ export function ExplorerTabs() {
               ))}
             </div>
           )}
+
           <div className="flex items-center gap-1.5 text-[12.5px] text-foreground/55">
-            <span
-              aria-hidden
-              className="pulse-dot inline-block h-1.5 w-1.5 rounded-full bg-brand text-brand"
-            />
+            <span aria-hidden className="pulse-dot inline-block h-1.5 w-1.5 rounded-full bg-brand text-brand" />
             {query
-              ? `${formatNumber(filtered.length)} of ${formatNumber(stream.records.length)} loaded`
-              : `${formatNumber(stream.records.length)} loaded`}
+              ? `${formatNumber(filtered.length)} of ${formatNumber(records.length)} loaded`
+              : `${formatNumber(records.length)} loaded`}
           </div>
         </div>
 
         {/* Grid */}
         <div className="mt-6">
-          {stream.phase === "loading" && stream.records.length === 0 ? (
-            <SkeletonGrid kind={active} />
-          ) : stream.phase === "error" && stream.records.length === 0 ? (
+          {phase === "loading" && records.length === 0 ? (
+            <SkeletonGrid grid={meta.grid} />
+          ) : phase === "error" && records.length === 0 ? (
             <EmptyState
               title="Could not reach the indexer"
-              body="The GainForest indexer did not respond. It may be momentarily degraded; check the status board below and try again."
+              body="The GainForest indexer did not respond. It may be momentarily degraded; check the status page and try again."
               onRetry={() => {
-                setStreams((p) => ({ ...p, [active]: { ...EMPTY } }));
+                setPhase("idle");
+                setRecords([]);
               }}
             />
           ) : filtered.length === 0 ? (
@@ -344,7 +277,7 @@ export function ExplorerTabs() {
                 onRetry={() => setQuery("")}
                 retryLabel="Clear search"
               />
-            ) : active === "occurrence" && occMedia !== "all" ? (
+            ) : kind === "occurrence" && occMedia !== "all" ? (
               <EmptyState
                 title={`No ${occMedia === "image" ? "photo" : "audio"} records found nearby`}
                 body="Media-bearing observations are sparse in the newest uploads. Switch to All records to browse the full live stream."
@@ -358,7 +291,7 @@ export function ExplorerTabs() {
             <ul
               role="list"
               className={
-                active === "occurrence"
+                meta.grid === "square"
                   ? "grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
                   : "grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
               }
@@ -373,7 +306,7 @@ export function ExplorerTabs() {
         </div>
 
         {/* Walking hint (occurrence only) */}
-        {active === "occurrence" && walking && stream.records.length > 0 && (
+        {kind === "occurrence" && walking && records.length > 0 && (
           <p className="mt-6 flex items-center justify-center gap-2 text-[13px] italic text-foreground/55">
             <Spinner /> Scanning the indexer for more{" "}
             {occMedia === "audio" ? "audio" : occMedia === "image" ? "photos" : "records"}…
@@ -381,16 +314,16 @@ export function ExplorerTabs() {
         )}
 
         {/* Load more */}
-        {stream.records.length > 0 && !query && (
+        {records.length > 0 && !query && (
           <div className="mt-10 flex justify-center">
-            {stream.hasMore ? (
+            {hasMore ? (
               <button
                 type="button"
-                onClick={() => load(active, "more")}
-                disabled={stream.phase === "more" || (active === "occurrence" && walking)}
+                onClick={() => load("more")}
+                disabled={phase === "more" || (kind === "occurrence" && walking)}
                 className="inline-flex items-center gap-2 rounded-full border border-border-soft bg-surface px-6 py-3 text-[14px] font-medium text-foreground transition-colors hover:border-primary/40 hover:bg-surface-sunken disabled:opacity-60"
               >
-                {stream.phase === "more" || (active === "occurrence" && walking) ? (
+                {phase === "more" || (kind === "occurrence" && walking) ? (
                   <>
                     <Spinner /> Loading more
                   </>
@@ -433,15 +366,10 @@ function OccurrenceCard({ record, onOpen }: { record: OccurrenceRecord; onOpen: 
       onClick={onOpen}
       className="group relative block aspect-square w-full overflow-hidden rounded-xl border border-border-soft bg-surface-sunken text-left transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_14px_34px_-18px_rgba(20,30,15,0.45)]"
     >
-      {/* media badges (always top-right) */}
       {record.media.length > 0 && (
         <div className="absolute right-1.5 top-1.5 z-20 flex gap-1">
           {record.media.map((m) => (
-            <span
-              key={m}
-              title={m}
-              className="grid h-5 w-5 place-items-center rounded-full bg-background/90 text-foreground/70"
-            >
+            <span key={m} title={m} className="grid h-5 w-5 place-items-center rounded-full bg-background/90 text-foreground/70">
               <MediaIcon kind={m} />
             </span>
           ))}
@@ -461,10 +389,7 @@ function OccurrenceCard({ record, onOpen }: { record: OccurrenceRecord; onOpen: 
           />
           <div
             className="absolute inset-x-0 bottom-0 z-10 flex flex-col gap-0.5 px-2.5 pb-2 pt-6"
-            style={{
-              background:
-                "linear-gradient(180deg, transparent 0%, rgba(20,20,18,0.5) 45%, rgba(20,20,18,0.86) 100%)",
-            }}
+            style={{ background: "linear-gradient(180deg, transparent 0%, rgba(20,20,18,0.5) 45%, rgba(20,20,18,0.86) 100%)" }}
           >
             <div
               className="font-instrument text-[13px] italic leading-[1.15] text-[#f4efe4]"
@@ -479,15 +404,9 @@ function OccurrenceCard({ record, onOpen }: { record: OccurrenceRecord; onOpen: 
           </div>
         </>
       ) : (
-        // Editorial tile for imageless records (the common case in the "All"
-        // and "Audio" streams). Subtle sage wash + serif species name reads as
-        // a deliberate specimen card rather than an empty box.
         <div
           className="flex h-full w-full flex-col justify-between p-3"
-          style={{
-            background:
-              "radial-gradient(120% 90% at 80% 0%, color-mix(in srgb, var(--primary) 9%, transparent), transparent), var(--surface)",
-          }}
+          style={{ background: "radial-gradient(120% 90% at 80% 0%, color-mix(in srgb, var(--primary) 9%, transparent), transparent), var(--surface)" }}
         >
           <div className="flex items-center gap-1.5 text-[9.5px] font-medium uppercase tracking-[0.12em] text-foreground/40">
             <LeafGlyph />
@@ -508,20 +427,6 @@ function OccurrenceCard({ record, onOpen }: { record: OccurrenceRecord; onOpen: 
         </div>
       )}
     </button>
-  );
-}
-
-function LeafGlyph() {
-  return (
-    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <path
-        d="M5 19c0-7 5-13 14-14 0 9-5 14-14 14zM5 19c3-3 6-5 9-6"
-        stroke="currentColor"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
   );
 }
 
@@ -614,8 +519,7 @@ function BumicertCard({ record, onOpen }: { record: BumicertRecord; onOpen: () =
         )}
         <div className="mt-auto flex items-center justify-between border-t border-border-soft pt-2.5 text-[11px] text-foreground/50">
           <span>
-            {formatNumber(record.contributorCount)} contributor
-            {record.contributorCount === 1 ? "" : "s"}
+            {formatNumber(record.contributorCount)} contributor{record.contributorCount === 1 ? "" : "s"}
           </span>
           <span>{formatRelative(record.createdAt)}</span>
         </div>
@@ -634,17 +538,7 @@ function filterRecords(records: ExplorerRecord[], query: string): ExplorerRecord
 
 function haystack(r: ExplorerRecord): string {
   if (r.kind === "occurrence") {
-    return [
-      r.scientificName,
-      r.vernacularName,
-      r.family,
-      r.genus,
-      r.kingdom,
-      r.country,
-      r.countryCode,
-      r.locality,
-      r.recordedBy,
-    ]
+    return [r.scientificName, r.vernacularName, r.family, r.genus, r.kingdom, r.country, r.countryCode, r.locality, r.recordedBy]
       .filter(Boolean)
       .join(" ")
       .toLowerCase();
@@ -653,12 +547,6 @@ function haystack(r: ExplorerRecord): string {
     return [r.name, r.country, r.did].filter(Boolean).join(" ").toLowerCase();
   }
   return [r.title, r.shortDescription, r.did].filter(Boolean).join(" ").toLowerCase();
-}
-
-function searchPlaceholder(tab: TabId): string {
-  if (tab === "occurrence") return "Filter by species, family, or country…";
-  if (tab === "site") return "Filter by organization or country…";
-  return "Filter Bumicerts by title or description…";
 }
 
 // ── Bits ───────────────────────────────────────────────────────────────────
@@ -687,6 +575,14 @@ function MediaIcon({ kind }: { kind: OccurrenceRecord["media"][number] }) {
   );
 }
 
+function LeafGlyph() {
+  return (
+    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path d="M5 19c0-7 5-13 14-14 0 9-5 14-14 14zM5 19c3-3 6-5 9-6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
 function Spinner() {
   return (
     <svg className="animate-spin" width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden>
@@ -696,16 +592,16 @@ function Spinner() {
   );
 }
 
-function SkeletonGrid({ kind }: { kind: TabId }) {
-  const count = kind === "occurrence" ? 15 : 8;
+function SkeletonGrid({ grid }: { grid: "square" | "card" }) {
+  const count = grid === "square" ? 15 : 8;
   const cls =
-    kind === "occurrence"
+    grid === "square"
       ? "grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
       : "grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4";
   return (
     <div className={cls} aria-hidden>
       {Array.from({ length: count }).map((_, i) =>
-        kind === "occurrence" ? (
+        grid === "square" ? (
           <div key={i} className="skeleton aspect-square rounded-xl" />
         ) : (
           <div key={i} className="overflow-hidden rounded-2xl border border-border-soft">
