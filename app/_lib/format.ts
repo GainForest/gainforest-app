@@ -41,6 +41,24 @@ export function formatDate(iso: string | null | undefined): string {
   }).format(d);
 }
 
+/** Full human-readable timestamp in UTC: "May 23, 2026, 08:09 AM UTC".
+ *  Records store ISO instants; the date-only `formatDate` hides the time, so
+ *  the drawer uses this where the exact creation moment matters. */
+export function formatDateTime(iso: string | null | undefined): string {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  return new Intl.DateTimeFormat("en-US", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZone: "UTC",
+    timeZoneName: "short",
+  }).format(d);
+}
+
 /** "3 hours ago" / "5 days ago" — relative time for record freshness. */
 export function formatRelative(iso: string | null | undefined): string {
   if (!iso) return "";

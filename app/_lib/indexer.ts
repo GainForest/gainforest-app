@@ -14,7 +14,7 @@
 
 import { INDEXER_URL } from "./urls";
 import { resolveBlobUrl, normaliseRef } from "./pds";
-import { asNumber, formatNumber, formatDate } from "./format";
+import { asNumber, formatNumber, formatDate, formatDateTime } from "./format";
 
 // ── Generic GraphQL helper ────────────────────────────────────────────────
 
@@ -836,43 +836,154 @@ function countryFlagSafe(code: string | null): string {
 
 // ── Bumicert detail ────────────────────────────────────────────────────────
 
+// A bumicert's description can be a plain string OR a Leaflet rich document
+// (`pub.leaflet.pages.linearDocument`); its work scope can be a string OR a CEL
+// expression (`org.hypercerts.workscope.cel`). We handle every shape so the
+// rich body + scope tags always surface instead of silently dropping.
+type LeafletBlock = {
+  block?: {
+    __typename?: string;
+    plaintext?: string | null;
+    children?: Array<{
+      content?: { __typename?: string; plaintext?: string | null } | null;
+    }> | null;
+  } | null;
+};
 type BumiDetailNode = {
   [k: string]: unknown;
-  description?: { __typename?: string; value?: string | null } | null;
-  workScope?: { __typename?: string; scope?: string | null } | null;
+  description?:
+    | { __typename?: string; value?: string | null; blocks?: LeafletBlock[] | null }
+    | null;
+  workScope?: { __typename?: string; scope?: string | null; expression?: string | null } | null;
   contributors?: unknown[] | null;
   locations?: unknown[] | null;
 };
 
+// The owning organization (certified.app actor record) holds the website +
+// social URLs and a long bio — the activity record itself carries neither.
+type CertifiedOrgNode = {
+  organizationType?: string[] | null;
+  urls?: Array<{ url?: string | null }> | null;
+  longDescription?: { __typename?: string; value?: string | null } | null;
+} | null;
+
 const ACTIVITY_DETAIL_QUERY = `
   query ActivityDetail($uri: String!) {
     orgHypercertsClaimActivityByUri(uri: $uri) {
-      title shortDescription startDate endDate createdAt
-      description { __typename ... on OrgHypercertsDefsDescriptionString { value } }
-      workScope { __typename ... on OrgHypercertsClaimActivityWorkScopeString { scope } }
+      did title shortDescription startDate endDate createdAt
+      description {
+        __typename
+        ... on OrgHypercertsDefsDescriptionString { value }
+        ... on PubLeafletPagesLinearDocument {
+          blocks {
+            block {
+              __typename
+              ... on PubLeafletBlocksHeader { plaintext }
+              ... on PubLeafletBlocksText { plaintext }
+              ... on PubLeafletBlocksBlockquote { plaintext }
+              ... on PubLeafletBlocksCode { plaintext }
+              ... on PubLeafletBlocksUnorderedList {
+                children { content {
+                  __typename
+                  ... on PubLeafletBlocksText { plaintext }
+                  ... on PubLeafletBlocksHeader { plaintext }
+                } }
+              }
+            }
+          }
+        }
+      }
+      workScope {
+        __typename
+        ... on OrgHypercertsClaimActivityWorkScopeString { scope }
+        ... on OrgHypercertsWorkscopeCel { expression }
+      }
       contributors { __typename }
       locations { uri }
     }
   }
 `;
 
-function buildBumicertDetail(n: BumiDetailNode): RecordDetail {
-  const desc =
-    n.description?.__typename === "OrgHypercertsDefsDescriptionString" ? sv(n.description.value) : null;
-  const scope =
-    n.workScope?.__typename === "OrgHypercertsClaimActivityWorkScopeString" ? sv(n.workScope.scope) : null;
+const CERTIFIED_ORG_QUERY = `
+  query CertifiedOrg($uri: String!) {
+    appCertifiedActorOrganizationByUri(uri: $uri) {
+      organizationType
+      urls { url }
+      longDescription { __typename ... on OrgHypercertsDefsDescriptionString { value } }
+    }
+  }
+`;
+
+/** Flatten a Leaflet linear document to plain text (headers/paragraphs/quotes/
+ *  code + bullet items), preserving paragraph breaks. */
+function flattenLeaflet(blocks: LeafletBlock[]): string | null {
+  const parts: string[] = [];
+  for (const b of blocks) {
+    const blk = b?.block;
+    if (!blk) continue;
+    const t = sv(blk.plaintext);
+    if (t) {
+      parts.push(t);
+      continue;
+    }
+    if (Array.isArray(blk.children)) {
+      const items = blk.children
+        .map((c) => sv(c?.content?.plaintext))
+        .filter(Boolean)
+        .map((s) => `• ${s}`);
+      if (items.length) parts.push(items.join("\n"));
+    }
+  }
+  return parts.length ? parts.join("\n\n") : null;
+}
+
+/** Map a URL to a recognizable social/platform label (falls back to host). */
+function socialLabel(url: string): string {
+  let host: string;
+  try {
+    host = new URL(url).hostname.replace(/^www\./, "").toLowerCase();
+  } catch {
+    return "Link";
+  }
+  if (host.includes("facebook.")) return "Facebook";
+  if (host.includes("instagram.")) return "Instagram";
+  if (host.includes("youtube.") || host === "youtu.be") return "YouTube";
+  if (host.includes("linkedin.")) return "LinkedIn";
+  if (host === "x.com" || host.includes("twitter.")) return "X";
+  if (host === "t.me" || host.includes("telegram.")) return "Telegram";
+  if (host.includes("tiktok.")) return "TikTok";
+  if (host.includes("github.")) return "GitHub";
+  if (host.includes("bsky.")) return "Bluesky";
+  return host;
+}
+
+function buildBumicertDetail(n: BumiDetailNode, org: CertifiedOrgNode): RecordDetail {
+  // Description: plain string, else flattened Leaflet doc, else the org's bio.
+  let blurb: string | null = null;
+  if (n.description?.__typename === "OrgHypercertsDefsDescriptionString") {
+    blurb = sv(n.description.value);
+  } else if (n.description?.__typename === "PubLeafletPagesLinearDocument") {
+    blurb = flattenLeaflet(n.description.blocks ?? []);
+  }
+  if (!blurb && org?.longDescription?.__typename === "OrgHypercertsDefsDescriptionString") {
+    blurb = sv(org.longDescription.value);
+  }
+
+  // Work scope: explicit string, else the string literals inside the CEL
+  // expression (e.g. scope.hasAny(["restoration", "conservation"])).
+  let scopeTags: string[] = [];
+  if (n.workScope?.__typename === "OrgHypercertsClaimActivityWorkScopeString") {
+    scopeTags = (sv(n.workScope.scope) ?? "").split(/[,;]/).map((s) => s.trim()).filter(Boolean);
+  } else if (n.workScope?.__typename === "OrgHypercertsWorkscopeCel") {
+    const expr = sv(n.workScope.expression) ?? "";
+    scopeTags = [...expr.matchAll(/"([^"]+)"/g)].map((mm) => mm[1]).filter(Boolean);
+  }
+  const badges: DetailBadge[] = scopeTags
+    .slice(0, 6)
+    .map((s) => ({ label: cap(s), tone: "info" }));
+
   const contributors = Array.isArray(n.contributors) ? n.contributors.length : 0;
   const sites = Array.isArray(n.locations) ? n.locations.length : 0;
-
-  const badges: DetailBadge[] = [];
-  if (scope)
-    scope
-      .split(/[,;]/)
-      .map((s) => s.trim())
-      .filter(Boolean)
-      .slice(0, 6)
-      .forEach((s) => badges.push({ label: s, tone: "info" }));
-
   const start = sv(n.startDate);
   const end = sv(n.endDate);
   const period = start || end ? `${start ? formatDate(start) : "—"} → ${end ? formatDate(end) : "—"}` : null;
@@ -882,11 +993,21 @@ function buildBumicertDetail(n: BumiDetailNode): RecordDetail {
       field("Work period", period, true),
       field("Contributors", contributors ? formatNumber(contributors) : null),
       field("Certified sites", sites ? formatNumber(sites) : null),
-      field("Registered", sv(n.createdAt) ? formatDate(n.createdAt as string) : null),
+      field("Created", sv(n.createdAt) ? formatDateTime(n.createdAt as string) : null, true),
     ]),
   ].filter((s) => s.fields.length > 0);
 
-  return { blurb: desc, badges, sections, links: [] };
+  // Website + socials from the owning organization record.
+  const links: DetailLink[] = [];
+  const seen = new Set<string>();
+  for (const u of org?.urls ?? []) {
+    const url = sv(u?.url);
+    if (!url || !/^https?:\/\//.test(url) || seen.has(url)) continue;
+    seen.add(url);
+    links.push({ label: socialLabel(url), href: url });
+  }
+
+  return { blurb, badges, sections, links };
 }
 
 // ── Org / site detail ──────────────────────────────────────────────────────
@@ -974,13 +1095,24 @@ export async function fetchRecordDetail(
     return n ? buildOccurrenceDetail(n) : null;
   }
   if (collection === "org.hypercerts.claim.activity") {
-    const data = await indexerQuery<{ orgHypercertsClaimActivityByUri?: BumiDetailNode | null }>(
-      ACTIVITY_DETAIL_QUERY,
-      { uri: atUri },
-      signal,
-    );
+    const did = m[1];
+    // The activity record has no socials/bio; its owning organization record
+    // (certified.app actor) does. Fetch both in parallel and merge.
+    const [data, orgData] = await Promise.all([
+      indexerQuery<{ orgHypercertsClaimActivityByUri?: BumiDetailNode | null }>(
+        ACTIVITY_DETAIL_QUERY,
+        { uri: atUri },
+        signal,
+      ),
+      indexerQuery<{ appCertifiedActorOrganizationByUri?: CertifiedOrgNode }>(
+        CERTIFIED_ORG_QUERY,
+        { uri: `at://${did}/app.certified.actor.organization/self` },
+        signal,
+      ).catch(() => null),
+    ]);
     const n = data?.orgHypercertsClaimActivityByUri;
-    return n ? buildBumicertDetail(n) : null;
+    const org = orgData?.appCertifiedActorOrganizationByUri ?? null;
+    return n ? buildBumicertDetail(n, org) : null;
   }
   if (collection === "app.gainforest.organization.info") {
     const data = await indexerQuery<{ appGainforestOrganizationInfoByUri?: OrgDetailNode | null }>(
