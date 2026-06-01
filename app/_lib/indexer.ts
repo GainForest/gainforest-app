@@ -477,13 +477,22 @@ export async function fetchBumicerts(
 
 // ── 3. Project sites (organizations) ───────────────────────────────────────
 
+/** Which lexicon a project-site row came from. */
+export type SiteSource = "gainforest" | "certified";
+/** Toolbar filter selection (a single source or both merged). */
+export type SiteSourceFilter = SiteSource | "both";
+
 export type SiteRecord = {
   kind: "site";
+  /** Lexicon this row was read from. */
+  source: SiteSource;
   id: string;
   did: string;
   atUri: string;
   name: string;
   country: string | null;
+  /** Certified-org category (e.g. "nonprofit"); null for GainForest orgs. */
+  orgType: string | null;
   createdAt: string | null;
   imageUrl: string | null;
   coverRef: string | null;
@@ -523,13 +532,16 @@ type RawOrg = {
 };
 
 function mapOrg(n: RawOrg): SiteRecord {
+  const atUri = n.uri || `at://${n.did}/app.gainforest.organization.info/self`;
   return {
     kind: "site",
-    id: n.did,
+    source: "gainforest",
+    id: atUri,
     did: n.did,
-    atUri: n.uri || `at://${n.did}/app.gainforest.organization.info/self`,
+    atUri,
     name: n.displayName?.trim() || "Unnamed organization",
     country: n.country?.trim() || null,
+    orgType: null,
     createdAt: n.createdAt ?? null,
     imageUrl: null,
     coverRef: normaliseRef(n.coverImage?.image?.ref),
@@ -565,14 +577,166 @@ async function fetchOrgPage(
   };
 }
 
-/** Load up to `target` project sites, paging the indexer's 100-record cap. */
+// ── Certified actor organizations (app.certified.actor.organization) ────────
+//
+// This lexicon's record carries no display name or image — those live in the
+// actor's profile (app.certified.actor.profile/self). So we list the org
+// records, then batch-resolve their profiles by URI (one aliased query per
+// page) to get a name + avatar, and resolve the avatar blob to a URL.
+
+const CERT_ORG_NODE_FIELDS = `
+  did uri rkey createdAt visibility organizationType
+`;
+
+const CERT_ORG_QUERY = `
+  query ExplorerCertifiedOrgs($first: Int!, $after: String) {
+    appCertifiedActorOrganization(first: $first, after: $after) {
+      totalCount
+      pageInfo { hasNextPage endCursor }
+      edges { node { ${CERT_ORG_NODE_FIELDS} } }
+    }
+  }
+`;
+
+const CERT_ORG_BY_URI_QUERY = `
+  query ExplorerCertifiedOrgByUri($uri: String!) {
+    appCertifiedActorOrganizationByUri(uri: $uri) { ${CERT_ORG_NODE_FIELDS} }
+  }
+`;
+
+type RawCertOrg = {
+  did: string;
+  uri?: string | null;
+  rkey?: string | null;
+  createdAt?: string | null;
+  visibility?: string | null;
+  organizationType?: string[] | null;
+};
+
+type CertProfileInfo = { name: string | null; avatarRef: string | null };
+
+/** Profile selection shared by the list join + the drawer detail. */
+const CERT_PROFILE_SELECTION = `{
+  displayName
+  avatar { __typename ... on OrgHypercertsDefsSmallImage { image { ref } } }
+}`;
+
+type CertProfileNode = {
+  displayName?: string | null;
+  avatar?: { image?: { ref?: string | null } | null } | null;
+} | null;
+
+/** Resolve many certified profiles in one aliased query (DIDs are quote-safe). */
+async function fetchCertProfiles(
+  dids: string[],
+  signal?: AbortSignal,
+): Promise<Map<string, CertProfileInfo>> {
+  const map = new Map<string, CertProfileInfo>();
+  if (dids.length === 0) return map;
+  const parts = dids.map(
+    (did, i) =>
+      `p${i}: appCertifiedActorProfileByUri(uri: "at://${did}/app.certified.actor.profile/self") ${CERT_PROFILE_SELECTION}`,
+  );
+  const query = `query CertProfiles {\n${parts.join("\n")}\n}`;
+  try {
+    const data = await indexerQuery<Record<string, CertProfileNode>>(query, {}, signal);
+    if (data) {
+      dids.forEach((did, i) => {
+        const n = data[`p${i}`];
+        if (n) map.set(did, { name: sv(n.displayName), avatarRef: normaliseRef(n.avatar?.image?.ref) });
+      });
+    }
+  } catch {
+    /* names/avatars are best-effort; fall back to the DID */
+  }
+  return map;
+}
+
+function mapCertOrg(n: RawCertOrg, profile: CertProfileInfo | undefined): SiteRecord {
+  const atUri = n.uri || `at://${n.did}/app.certified.actor.organization/${n.rkey || "self"}`;
+  return {
+    kind: "site",
+    source: "certified",
+    id: atUri,
+    did: n.did,
+    atUri,
+    name: profile?.name || "Certified organization",
+    country: null,
+    orgType: (n.organizationType ?? []).map((t) => sv(t)).filter(Boolean).join(", ") || null,
+    createdAt: n.createdAt ?? null,
+    imageUrl: null,
+    coverRef: profile?.avatarRef ?? null,
+    logoRef: null,
+  };
+}
+
+async function fetchCertOrgPage(
+  after: string | null,
+  signal?: AbortSignal,
+): Promise<Page<SiteRecord>> {
+  const data = await indexerQuery<{
+    appCertifiedActorOrganization?: Connection<RawCertOrg>;
+  }>(CERT_ORG_QUERY, { first: INDEXER_MAX_PAGE, after }, signal);
+  const conn = data?.appCertifiedActorOrganization;
+  const nodes = (conn?.edges ?? [])
+    .map((e) => e?.node)
+    .filter((n): n is RawCertOrg => Boolean(n?.did));
+  const profiles = await fetchCertProfiles(
+    nodes.map((n) => n.did),
+    signal,
+  );
+  let records = nodes.map((n) => mapCertOrg(n, profiles.get(n.did)));
+  records = await resolveImages(
+    records,
+    (r) => (r.coverRef ? { did: r.did, ref: r.coverRef } : null),
+    (r, url) => ({ ...r, imageUrl: url }),
+    signal,
+  );
+  return {
+    records,
+    cursor: conn?.pageInfo?.endCursor ?? null,
+    hasMore: Boolean(conn?.pageInfo?.hasNextPage),
+  };
+}
+
+function siteTime(iso: string | null | undefined): number {
+  if (!iso) return 0;
+  const t = Date.parse(iso);
+  return Number.isFinite(t) ? t : 0;
+}
+
+/**
+ * Load up to `target` project sites, paging the indexer's 100-record cap.
+ * `source` picks the GainForest org lexicon, the certified actor lexicon, or
+ * both merged (newest first). Cursors only apply to single-source loads — the
+ * merged view fetches each stream to `target` in one pass.
+ */
 export async function fetchSites(
   target: number,
   after: string | null,
   signal?: AbortSignal,
   onProgress?: (records: SiteRecord[]) => void,
+  source: SiteSourceFilter = "both",
 ): Promise<Page<SiteRecord>> {
-  return collectPaged(fetchOrgPage, target, after, signal, onProgress);
+  if (source === "gainforest") return collectPaged(fetchOrgPage, target, after, signal, onProgress);
+  if (source === "certified") return collectPaged(fetchCertOrgPage, target, after, signal, onProgress);
+
+  // Both: fetch each stream fully, streaming a merged running list as they
+  // arrive, then return the combined set sorted newest-first.
+  let gf: SiteRecord[] = [];
+  const gfPage = await collectPaged(fetchOrgPage, target, null, signal, (running) => {
+    gf = running;
+    onProgress?.([...running]);
+  });
+  gf = gfPage.records;
+  const certPage = await collectPaged(fetchCertOrgPage, target, null, signal, (running) => {
+    onProgress?.([...gf, ...running]);
+  });
+  const records = [...gf, ...certPage.records].sort(
+    (a, b) => siteTime(b.createdAt) - siteTime(a.createdAt),
+  );
+  onProgress?.(records);
+  return { records, cursor: null, hasMore: false };
 }
 
 // ── Unified record type for the detail drawer ──────────────────────────────
@@ -627,6 +791,26 @@ export async function fetchRecordByUri(
     if (rec.imageRef && !rec.imageUrl) {
       try {
         rec.imageUrl = await resolveBlobUrl(rec.did, rec.imageRef, signal);
+      } catch {
+        /* keep placeholder */
+      }
+    }
+    return rec;
+  }
+
+  if (collection === "app.certified.actor.organization") {
+    const data = await indexerQuery<{ appCertifiedActorOrganizationByUri?: RawCertOrg | null }>(
+      CERT_ORG_BY_URI_QUERY,
+      { uri: atUri },
+      signal,
+    );
+    const n = data?.appCertifiedActorOrganizationByUri;
+    if (!n?.did) return null;
+    const profiles = await fetchCertProfiles([n.did], signal);
+    const rec = mapCertOrg(n, profiles.get(n.did));
+    if (rec.coverRef) {
+      try {
+        rec.imageUrl = await resolveBlobUrl(rec.did, rec.coverRef, signal);
       } catch {
         /* keep placeholder */
       }
@@ -1374,6 +1558,68 @@ function buildOrgDetail(n: OrgDetailNode): RecordDetail {
   };
 }
 
+// ── Certified actor org detail ──────────────────────────────────────────────
+
+const CERT_ORG_DETAIL_QUERY = `
+  query CertifiedOrgDetail($org: String!, $profile: String!) {
+    org: appCertifiedActorOrganizationByUri(uri: $org) {
+      createdAt organizationType visibility foundedDate
+      urls { url }
+      longDescription { __typename ... on OrgHypercertsDefsDescriptionString { value } }
+    }
+    profile: appCertifiedActorProfileByUri(uri: $profile) {
+      displayName description website
+    }
+  }
+`;
+
+type CertOrgDetailNode = {
+  org?: {
+    organizationType?: string[] | null;
+    visibility?: string | null;
+    foundedDate?: string | null;
+    urls?: Array<{ url?: string | null }> | null;
+    longDescription?: { __typename?: string; value?: string | null } | null;
+    createdAt?: string | null;
+  } | null;
+  profile?: {
+    displayName?: string | null;
+    description?: string | null;
+    website?: string | null;
+  } | null;
+};
+
+function buildCertOrgDetail(d: CertOrgDetailNode, createdAt: string | null): RecordDetail {
+  const org = d.org ?? {};
+  const profile = d.profile ?? {};
+  const types = (org.organizationType ?? [])
+    .map((t) => sv(t))
+    .filter((t): t is string => Boolean(t))
+    .map(cap);
+  const badges: DetailBadge[] = types.map((t) => ({ label: t, tone: "info" }));
+
+  const sections = [
+    section("Organization", [
+      field("Type", types.join(", ") || null, true),
+      field("Founded", sv(org.foundedDate) ? formatDate(sv(org.foundedDate)!) : null),
+      field("Visibility", sv(org.visibility) ? cap(sv(org.visibility)!) : null),
+      field("Created", createdAt ? formatDateTime(createdAt) : null, true),
+    ]),
+  ].filter((s) => s.fields.length > 0);
+
+  const socials = socialsFromUrls([
+    sv(profile.website),
+    ...(org.urls ?? []).map((u) => u?.url),
+  ]);
+
+  const blurb =
+    (org.longDescription?.__typename === "OrgHypercertsDefsDescriptionString"
+      ? sv(org.longDescription.value)
+      : null) ?? sv(profile.description);
+
+  return { blurb, badges, sections, links: [], socials };
+}
+
 /** Fetch the full, drawer-ready detail for a record by its AT-URI. */
 export async function fetchRecordDetail(
   atUri: string,
@@ -1419,6 +1665,18 @@ export async function fetchRecordDetail(
       detail.richBody = await resolveRichImages(detail.richBody, did, signal);
     }
     return detail;
+  }
+  if (collection === "app.certified.actor.organization") {
+    const data = await indexerQuery<CertOrgDetailNode>(
+      CERT_ORG_DETAIL_QUERY,
+      {
+        org: atUri,
+        profile: `at://${did}/app.certified.actor.profile/self`,
+      },
+      signal,
+    );
+    if (!data?.org) return null;
+    return buildCertOrgDetail(data, sv(data.org.createdAt));
   }
   if (collection === "app.gainforest.organization.info") {
     const data = await indexerQuery<{ appGainforestOrganizationInfoByUri?: OrgDetailNode | null }>(

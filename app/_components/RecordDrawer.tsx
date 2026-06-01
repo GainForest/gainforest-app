@@ -97,7 +97,7 @@ export function RecordDrawer({
       <div className="drawer-sheet thin-scroll relative flex h-full w-full max-w-[480px] flex-col overflow-y-auto bg-background shadow-[-24px_0_60px_-30px_rgba(20,30,15,0.5)]">
         {/* Header */}
         <div className="sticky top-0 z-10 flex items-center justify-between gap-3 border-b border-border-soft bg-background/95 px-5 py-4 backdrop-blur-xl">
-          <KindBadge kind={record.kind} />
+          <KindBadge record={record} />
           <button
             type="button"
             onClick={onClose}
@@ -345,16 +345,22 @@ function dedupeLinks<T extends { href: string }>(links: T[]): T[] {
   return links.filter((l) => (seen.has(l.href) ? false : (seen.add(l.href), true)));
 }
 
-function KindBadge({ kind }: { kind: ExplorerRecord["kind"] }) {
+function KindBadge({ record }: { record: ExplorerRecord }) {
   const map = {
     occurrence: { label: "Species observation", cls: "text-primary-dark bg-primary/10" },
     bumicert: { label: "Bumicert", cls: "text-brand-dark bg-brand/12" },
     site: { label: "Project site", cls: "text-foreground/70 bg-foreground/[0.06]" },
   } as const;
-  const m = map[kind];
+  const m = map[record.kind];
+  const label =
+    record.kind === "site"
+      ? record.source === "certified"
+        ? "Certified organization"
+        : "GainForest organization"
+      : m.label;
   return (
     <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11.5px] font-medium ${m.cls}`}>
-      {m.label}
+      {label}
     </span>
   );
 }
@@ -391,6 +397,7 @@ function buildFields(r: ExplorerRecord): Field[] {
     if (r.endDate) fields.push({ label: "End", value: formatDate(r.endDate) });
   } else {
     if (r.country) fields.push({ label: "Country", value: `${countryFlag(r.country)} ${r.country}`.trim() });
+    if (r.orgType) fields.push({ label: "Type", value: r.orgType });
   }
   return fields;
 }

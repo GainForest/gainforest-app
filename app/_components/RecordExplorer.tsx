@@ -14,6 +14,7 @@ import {
   type Page,
   type RecordKind,
   type OccurrenceFilter,
+  type SiteSourceFilter,
 } from "../_lib/indexer";
 import { RecordDrawer } from "./RecordDrawer";
 import { RecordMap } from "./RecordMap";
@@ -47,10 +48,10 @@ const KIND_META: Record<RecordKind, KindMeta> = {
     search: "Filter by species, family, or country…",
   },
   site: {
-    eyebrow: "app.gainforest.organization.info",
+    eyebrow: "app.gainforest.organization.info · app.certified.actor.organization",
     title: "Project",
     accent: "sites",
-    lede: "Registered organization records: display name, country, and cover/logo blobs resolved from each org's PDS.",
+    lede: "Registered organizations from two lexicons \u2014 GainForest org info (display name, country, cover/logo) and certified actor organizations (type + profile name/avatar). Filter to either source or browse both.",
     search: "Filter by organization or country…",
   },
   bumicert: {
@@ -76,12 +77,22 @@ const COLLECTION: Record<RecordKind, string> = {
   bumicert: "org.hypercerts.claim.activity",
 };
 
-/** Compact, shareable key for a record: `did/rkey` (DIDs never contain "/"). */
+/** Compact, shareable key for a record: `did/collection/rkey` (no segment ever
+ *  contains "/"). The collection is encoded so a page that mixes lexicons
+ *  (e.g. Sites = GainForest org + certified actor org) round-trips correctly. */
 function recordParam(r: ExplorerRecord): string {
-  const m = r.atUri.match(/^at:\/\/([^/]+)\/[^/]+\/(.+)$/);
-  return m ? `${m[1]}/${m[2]}` : r.id;
+  const m = r.atUri.match(/^at:\/\/([^/]+)\/([^/]+)\/(.+)$/);
+  return m ? `${m[1]}/${m[2]}/${m[3]}` : r.id;
 }
 function paramToUri(value: string, kind: RecordKind): string | null {
+  const parts = value.split("/");
+  // New form: did/collection/rkey.
+  if (parts.length >= 3) {
+    const [did, collection, ...rest] = parts;
+    const rkey = rest.join("/");
+    return did && collection && rkey ? `at://${did}/${collection}/${rkey}` : null;
+  }
+  // Back-compat: old did/rkey links imply the route's default collection.
   const slash = value.indexOf("/");
   if (slash < 1) return null;
   const did = value.slice(0, slash);
@@ -109,6 +120,7 @@ export function RecordExplorer({ kind }: { kind: RecordKind }) {
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState<SortMode>("newest");
   const [occMedia, setOccMedia] = useState<OccurrenceFilter>("all");
+  const [siteSource, setSiteSource] = useState<SiteSourceFilter>("both");
   const [view, setView] = useState<"cards" | "map">("cards");
   const [walking, setWalking] = useState(false);
   const [drawer, setDrawer] = useState<ExplorerRecord | null>(null);
@@ -179,7 +191,7 @@ export function RecordExplorer({ kind }: { kind: RecordKind }) {
       };
       const request: Promise<Page<ExplorerRecord>> =
         kind === "site"
-          ? fetchSites(LOAD_TARGET, after, ctrl.signal, onProgress)
+          ? fetchSites(LOAD_TARGET, after, ctrl.signal, onProgress, siteSource)
           : fetchBumicerts(LOAD_TARGET, after, ctrl.signal, onProgress);
 
       request
@@ -198,7 +210,7 @@ export function RecordExplorer({ kind }: { kind: RecordKind }) {
           if (!ctrl.signal.aborted) setWalking(false);
         });
     },
-    [kind, occMedia],
+    [kind, occMedia, siteSource],
   );
 
   // Load the first page on mount.
@@ -258,6 +270,18 @@ export function RecordExplorer({ kind }: { kind: RecordKind }) {
     if (next === occMedia) return;
     controller.current?.abort();
     setOccMedia(next);
+    resetStream();
+  }
+
+  // Changing the site source (GainForest / Certified / Both) resets + re-walks.
+  function changeSource(next: SiteSourceFilter) {
+    if (next === siteSource) return;
+    controller.current?.abort();
+    setSiteSource(next);
+    resetStream();
+  }
+
+  function resetStream() {
     setQuery("");
     setRecords([]);
     setCursor(null);
@@ -265,11 +289,11 @@ export function RecordExplorer({ kind }: { kind: RecordKind }) {
     setPhase("idle");
   }
 
-  // After a media reset drops us back to idle, kick off the new walk.
+  // After a filter reset drops us back to idle, kick off the new walk.
   useEffect(() => {
     if (phase === "idle" && records.length === 0) load("first");
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [occMedia, phase]);
+  }, [occMedia, siteSource, phase]);
 
   const filtered = sortRecords(filterRecords(records, query), sort);
 
@@ -375,6 +399,32 @@ export function RecordExplorer({ kind }: { kind: RecordKind }) {
               <path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </div>
+
+          {kind === "site" && (
+            <div className="inline-flex rounded-full border border-border-soft bg-surface p-0.5">
+              {(
+                [
+                  { id: "both", label: "All" },
+                  { id: "gainforest", label: "GainForest" },
+                  { id: "certified", label: "Certified" },
+                ] as Array<{ id: SiteSourceFilter; label: string }>
+              ).map((o) => (
+                <button
+                  key={o.id}
+                  type="button"
+                  onClick={() => changeSource(o.id)}
+                  aria-pressed={siteSource === o.id}
+                  className={`rounded-full px-3 py-1.5 text-[12.5px] font-medium transition-colors ${
+                    siteSource === o.id
+                      ? "bg-primary text-primary-foreground"
+                      : "text-foreground/60 hover:text-foreground"
+                  }`}
+                >
+                  {o.label}
+                </button>
+              ))}
+            </div>
+          )}
 
           {kind === "occurrence" && (
             <div className="inline-flex rounded-full border border-border-soft bg-surface p-0.5">
@@ -653,14 +703,26 @@ function cardView(record: ExplorerRecord): CardView {
   }
 
   if (record.kind === "site") {
+    const certified = record.source === "certified";
     return {
       alt: record.name,
       title: record.name,
-      pills: record.country ? (
-        <Pill>
-          {countryFlag(record.country)} {record.country}
-        </Pill>
-      ) : undefined,
+      pills:
+        record.country || record.orgType ? (
+          <>
+            {record.country ? (
+              <Pill>
+                {countryFlag(record.country)} {record.country}
+              </Pill>
+            ) : null}
+            {record.orgType ? <Pill>{record.orgType}</Pill> : null}
+          </>
+        ) : undefined,
+      badge: (
+        <span className="inline-flex items-center rounded-full bg-background/85 px-2 py-0.5 text-[9.5px] font-medium uppercase tracking-[0.1em] text-foreground/70 backdrop-blur-md">
+          {certified ? "Certified" : "GainForest"}
+        </span>
+      ),
       placeholder: (
         <div className="flex h-full w-full items-center justify-center font-garamond text-[34px] text-foreground/15">
           {countryFlag(record.country) || "\u25F0"}
