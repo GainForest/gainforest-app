@@ -106,18 +106,23 @@ export const viewport: Viewport = {
     { media: "(prefers-color-scheme: light)", color: "#f4efe4" },
     { media: "(prefers-color-scheme: dark)", color: "#141413" },
   ],
-  colorScheme: "light",
+  colorScheme: "light dark",
 };
+
+// Set the theme class before first paint so there's no light/dark flash. Reads
+// the saved choice, else falls back to the OS preference.
+const THEME_INIT = `(function(){try{var t=localStorage.getItem('bumiscan-theme');var m=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches;if(t==='dark'||(t!=='light'&&m)){document.documentElement.classList.add('dark');}}catch(e){}})();`;
 
 // The nav's live status pill is prefetched here so it is shared across every
 // route (cached via `revalidate`, so it stays out of the per-request path).
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const status = await fetchStatus({ revalidate: 60 });
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
         className={`${inter.variable} ${cormorant.variable} ${instrument.variable} ${mono.variable} antialiased`}
       >
+        <script dangerouslySetInnerHTML={{ __html: THEME_INIT }} />
         <div className="flex min-h-screen flex-col bg-background">
           <AccountDrawerProvider>
             <TopNav status={status} />

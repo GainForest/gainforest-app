@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { LogoMark } from "./Logo";
 import { StatusPill } from "./StatusPill";
+import { ThemeToggle } from "./ThemeToggle";
 import type { StatusSnapshot } from "../_lib/status";
 import { BUMICERTS_URL, GLOBE_URL } from "../_lib/urls";
 
@@ -88,6 +89,7 @@ export function TopNav({ status }: { status: StatusSnapshot }) {
             <span className="hidden xl:inline-flex">
               <StatusPill snapshot={status} />
             </span>
+            <ThemeToggle />
             <button
               type="button"
               onClick={() => setMenuOpen((v) => !v)}

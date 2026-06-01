@@ -41,6 +41,39 @@
   --ok: #3e9d6b;
   --warn: #c89a3a;
   --down: #c25c4e;
+
+  color-scheme: light;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   Dark mode. The palette is the editorial "ink" black the donations dashboard
+   already used, promoted to a site-wide theme: near-black background, cream
+   foreground, sage lifted one step for legibility on dark surfaces. Toggled by
+   adding `.dark` to <html> (see ThemeToggle + the no-FOUC script in layout).
+────────────────────────────────────────────────────────────────────────── */
+.dark {
+  --background: #141413;        /* ink */
+  --foreground: #f1ece1;        /* cream text */
+  --muted-foreground: #a8a59a;  /* warm grey */
+
+  --primary: #6fae86;           /* sage lifted for dark surfaces */
+  --primary-dark: #82bd97;      /* hover = brighter on dark */
+  --primary-foreground: #10231a;
+
+  --brand: #2fce8a;
+  --brand-dark: #58dca3;
+
+  --border: #2c2c28;
+  --border-soft: #34332e;
+
+  --surface: #1c1c1a;           /* panels lifted off the ink background */
+  --surface-sunken: #26251f;
+
+  --ok: #4fbf86;
+  --warn: #d8af52;
+  --down: #d97a6c;
+
+  color-scheme: dark;
 }
 
 @theme inline {
@@ -79,6 +112,16 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans), system-ui, sans-serif;
+}
+
+/* Gentle cross-fade when toggling light/dark (skipped under reduced motion). */
+body {
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+@media (prefers-reduced-motion: reduce) {
+  body {
+    transition: none;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

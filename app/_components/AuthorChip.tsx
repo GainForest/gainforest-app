@@ -87,11 +87,9 @@ export function AuthorChip({
 export function AuthorInline({
   did,
   avatarOverride,
-  dark = false,
 }: {
   did: string;
   avatarOverride?: string | null;
-  dark?: boolean;
 }) {
   const [profile, setProfile] = useState<DidProfile | null>(() => getCachedProfile(did) ?? null);
   useEffect(() => {
@@ -112,9 +110,7 @@ export function AuthorInline({
   return (
     <span className="inline-flex min-w-0 items-center gap-1.5 align-middle" title={did}>
       <Avatar did={did} handle={handle} avatar={avatar} className="h-4 w-4 text-[8px]" />
-      <span className={`truncate font-mono ${dark ? "text-ink-foreground/85" : "text-foreground/80"}`}>
-        {label}
-      </span>
+      <span className="truncate font-mono text-foreground/80">{label}</span>
     </span>
   );
 }
