@@ -115,7 +115,7 @@ export function NatureGuild() {
                   alt={m.name}
                   loading="lazy"
                   decoding="async"
-                  className="h-24 w-24 rounded-full border border-primary/30 bg-[#fbf8f0] object-cover shadow-[0_4px_18px_-10px_rgba(20,30,15,0.35)] ring-1 ring-offset-2 ring-offset-background ring-border-soft transition-all duration-300 ease-out group-hover:-translate-y-0.5 group-hover:border-primary/70 sm:h-28 sm:w-28 lg:h-32 lg:w-32"
+                  className="h-24 w-24 rounded-full border border-primary/30 bg-surface object-cover shadow-[0_4px_18px_-10px_rgba(20,30,15,0.35)] ring-1 ring-offset-2 ring-offset-background ring-border-soft transition-all duration-300 ease-out group-hover:-translate-y-0.5 group-hover:border-primary/70 sm:h-28 sm:w-28 lg:h-32 lg:w-32"
                 />
               </div>
               <p className="mt-5 font-garamond text-[19px] lg:text-[21px] leading-[1.15] tracking-[-0.005em] text-foreground">

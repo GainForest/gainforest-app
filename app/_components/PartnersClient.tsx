@@ -64,7 +64,7 @@ function SpotlightCard({
   return (
     <div className="absolute inset-x-4 bottom-4 z-10 rounded-[22px] border border-border-soft bg-background/92 p-3 shadow-[0_18px_45px_-28px_rgba(28,28,26,0.45)] backdrop-blur-md sm:left-auto sm:right-5 sm:w-[340px]">
       <div className="flex items-center gap-3">
-        <div className="relative h-[74px] w-[92px] shrink-0 overflow-hidden rounded-[16px] bg-[#e1dccf]">
+        <div className="relative h-[74px] w-[92px] shrink-0 overflow-hidden rounded-[16px] bg-surface-sunken">
           {community.imageUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
@@ -325,7 +325,7 @@ export function ClientPartners({ pins }: { pins: ProjectPin[] }) {
         </div>
 
         <div className="lg:col-span-7">
-          <div className="relative mx-auto min-h-[430px] max-w-[720px] overflow-hidden rounded-[34px] border border-border-soft bg-[#efe8d8]/55 p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.45)] sm:min-h-[470px] lg:ml-auto">
+          <div className="relative mx-auto min-h-[430px] max-w-[720px] overflow-hidden rounded-[34px] border border-border-soft bg-surface-sunken/55 p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.45)] sm:min-h-[470px] lg:ml-auto">
             <div className="absolute left-5 top-5 z-10 flex items-center gap-3 rounded-full border border-border-soft bg-background/75 px-3 py-1 text-[10px] uppercase tracking-[0.16em] text-foreground/50 backdrop-blur-sm">
               <span className="h-1.5 w-1.5 rounded-full bg-brand" />
               {t("partners.bannerLabel")}

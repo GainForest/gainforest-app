@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import type { MessageKey } from "../_lib/i18n";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import { LogoMark } from "./Logo";
+import { ThemeToggle } from "./ThemeToggle";
 import { useT } from "./LocaleProvider";
 
 // Resolve a NavItem's href against the current pathname. Hash anchors
@@ -126,6 +127,7 @@ export function TopNavView() {
 
           <div className="flex items-center gap-2">
             <LanguageSwitcher />
+            <ThemeToggle />
             <button
               type="button"
               onClick={() => setMenuOpen((v) => !v)}

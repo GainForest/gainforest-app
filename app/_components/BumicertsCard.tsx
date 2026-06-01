@@ -74,7 +74,7 @@ export function BumicertsCard({
     <div
       style={containerStyle}
       className={
-        "overflow-hidden rounded-[18px] border border-[#e6dfd0] bg-[#fbf8f0] " +
+        "overflow-hidden rounded-[18px] border border-border-soft bg-surface " +
         (inline
           ? "mx-auto shadow-[0_18px_40px_-22px_rgba(40,50,30,0.28)]"
           : "shadow-[0_30px_70px_-25px_rgba(40,50,30,0.35)]")
@@ -138,7 +138,7 @@ export function BumicertsCard({
               column ends up <220 px and the search placeholder used
               to wrap to two lines). `whitespace-nowrap` on the "All
               projects" dropdown label keeps it from wrapping too. */}
-          <div className="flex items-center gap-2 rounded-md border border-[#e6dfd0] bg-white px-2.5 py-1.5 text-[11px] text-foreground/50">
+          <div className="flex items-center gap-2 rounded-md border border-border-soft bg-surface px-2.5 py-1.5 text-[11px] text-foreground/50">
             <svg
               width="12"
               height="12"
@@ -204,7 +204,7 @@ export function BumicertsCard({
       </div>
 
       {/* footer */}
-      <div className="flex items-center justify-between border-t border-[#ece5d4] px-4 py-2.5 text-[11px]">
+      <div className="flex items-center justify-between border-t border-border-soft px-4 py-2.5 text-[11px]">
         <span className="text-foreground/55">
           {t("card.projectsFound").replace(
             "{n}",
@@ -250,7 +250,7 @@ function ProjectRow({ row }: { row: LiveBumicert }) {
       rel="noreferrer"
       className="flex items-center gap-2.5 rounded-md p-1.5 transition-colors hover:bg-black/[0.03]"
     >
-      <div className="relative h-[44px] w-[64px] shrink-0 overflow-hidden rounded-[6px] bg-[#cfd9c4]">
+      <div className="relative h-[44px] w-[64px] shrink-0 overflow-hidden rounded-[6px] bg-surface-sunken">
         {row.imageUrl ? (
           // Live PDS-resolved thumbnail.
           // eslint-disable-next-line @next/next/no-img-element
@@ -315,7 +315,7 @@ function RailLink({
       className={
         "flex items-center gap-1.5 rounded-md px-2 py-1.5 transition-colors " +
         (active
-          ? "bg-[#ece5d2] text-foreground"
+          ? "bg-surface-sunken text-foreground"
           : "text-foreground/55 hover:bg-black/[0.03] hover:text-foreground")
       }
     >

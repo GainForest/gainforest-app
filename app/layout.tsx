@@ -159,10 +159,15 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "#f4efe4" },
-    { media: "(prefers-color-scheme: dark)", color: "#1c1c1a" },
+    { media: "(prefers-color-scheme: dark)", color: "#141413" },
   ],
-  colorScheme: "light",
+  colorScheme: "light dark",
 };
+
+// Set the theme class before first paint so there's no light/dark flash.
+// Reads the saved choice, else falls back to the OS preference. Ported from
+// gainforest-explorer's THEME_INIT (storage key swapped to `gainforest-theme`).
+const THEME_INIT = `(function(){try{var t=localStorage.getItem('gainforest-theme');var m=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches;if(t==='dark'||(t!=='light'&&m)){document.documentElement.classList.add('dark');}}catch(e){}})();`;
 
 // JSON-LD structured data — helps Google, Bing, and Bluesky-style scrapers
 // understand what this site is and which other surfaces it fronts. Inlined
@@ -213,8 +218,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
+        {/* No-FOUC theme bootstrap: add `.dark` to <html> before first
+            paint based on the saved choice / OS preference. Must run
+            before the body renders. */}
+        <script dangerouslySetInnerHTML={{ __html: THEME_INIT }} />
         {/* JSON-LD structured data for richer search/SERP previews. */}
         <script
           type="application/ld+json"

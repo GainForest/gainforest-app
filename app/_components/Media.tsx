@@ -355,7 +355,7 @@ export function Media({ blogPosts }: { blogPosts: ReadonlyArray<BlogPost> }) {
                   {/* Cover image — 16:9 crop, soft hover zoom. Falls
                       back to a sage-tinted plate if a blog post has
                       no enclosure image. */}
-                  <div className="relative aspect-[16/9] w-full overflow-hidden bg-[#dde3d7]">
+                  <div className="relative aspect-[16/9] w-full overflow-hidden bg-surface-sunken">
                     {row.imageUrl ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img

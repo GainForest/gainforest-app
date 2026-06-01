@@ -52,7 +52,7 @@ export function DraggableGlobeCard({
 }: Props) {
   if (inline) {
     return (
-      <div className="mx-auto w-full max-w-[420px] overflow-hidden rounded-[18px] border border-[#e6dfd0] bg-[#fbf8f0] shadow-[0_18px_40px_-22px_rgba(40,50,30,0.28)]">
+      <div className="mx-auto w-full max-w-[420px] overflow-hidden rounded-[18px] border border-border-soft bg-surface shadow-[0_18px_40px_-22px_rgba(40,50,30,0.28)]">
         <GlobeCardChrome pinCount={pinCount}>{children}</GlobeCardChrome>
       </div>
     );
@@ -67,7 +67,7 @@ export function DraggableGlobeCard({
         width: position?.width ?? 280,
         zIndex: 39, // one below the Bumicerts card so they layer naturally
       }}
-      className="overflow-hidden rounded-[18px] border border-[#e6dfd0] bg-[#fbf8f0] shadow-[0_30px_70px_-25px_rgba(40,50,30,0.35)]"
+      className="overflow-hidden rounded-[18px] border border-border-soft bg-surface shadow-[0_30px_70px_-25px_rgba(40,50,30,0.35)]"
     >
       <GlobeCardChrome pinCount={pinCount}>{children}</GlobeCardChrome>
     </div>
@@ -108,7 +108,7 @@ function GlobeCardChrome({ children, pinCount }: ChromeProps) {
       </div>
 
       {/* footer */}
-      <div className="flex items-center justify-between border-t border-[#ece5d4] px-4 py-2.5 text-[11px]">
+      <div className="flex items-center justify-between border-t border-border-soft px-4 py-2.5 text-[11px]">
         <span className="text-foreground/55">
           {typeof pinCount === "number"
             ? t("card.projectsWorldwide").replace("{n}", String(pinCount))

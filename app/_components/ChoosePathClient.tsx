@@ -254,10 +254,10 @@ function BumicertCard({ b }: { b: FeaturedBumicert }) {
       href={b.href}
       target="_blank"
       rel="noreferrer"
-      className="group/card flex h-full flex-col overflow-hidden rounded-[10px] border border-[#e6dfd0] bg-background transition-all duration-200 hover:-translate-y-0.5 hover:border-foreground/25 hover:shadow-[0_10px_24px_-18px_rgba(40,50,30,0.30)]"
+      className="group/card flex h-full flex-col overflow-hidden rounded-[10px] border border-border-soft bg-background transition-all duration-200 hover:-translate-y-0.5 hover:border-foreground/25 hover:shadow-[0_10px_24px_-18px_rgba(40,50,30,0.30)]"
     >
       {b.imageUrl && (
-        <div className="relative aspect-[4/3] w-full overflow-hidden bg-[#cfd9c4]">
+        <div className="relative aspect-[4/3] w-full overflow-hidden bg-surface-sunken">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={b.imageUrl}
@@ -317,7 +317,7 @@ function BumicertCard({ b }: { b: FeaturedBumicert }) {
             but the lexicon string read as jargon to visitors. The
             lightning + "ATProto signed" line carries the same trust
             signal in human-readable form. */}
-        <div className="mt-1 flex items-center gap-1 border-t border-[#ece5d4] pt-1.5 text-[8.5px] uppercase tracking-[0.1em] text-foreground/45">
+        <div className="mt-1 flex items-center gap-1 border-t border-border-soft pt-1.5 text-[8.5px] uppercase tracking-[0.1em] text-foreground/45">
           <svg
             width="8"
             height="8"

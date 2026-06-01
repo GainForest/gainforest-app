@@ -58,6 +58,51 @@
   --ink-foreground: #f4efe4;
   --ink-muted: #a8a59a;
   --ink-border: #2a2a27;
+
+  /* Lifted surface used by data cards + image placeholders sitting on
+     the cream — one shade lighter than the background so cards read as
+     lifted, not cut-in. `--surface-sunken` is the recessed variant
+     (image placeholders, selected pills). These swap in `.dark` so the
+     cards stay legible on the ink background. Matches the gainforest-
+     explorer tokens. */
+  --surface: #fbf8f0;
+  --surface-sunken: #efe9da;
+
+  color-scheme: light;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   Dark mode. Ported verbatim from gainforest-explorer: the editorial "ink"
+   black promoted to a site-wide theme — near-black background, cream
+   foreground, sage lifted one step for legibility on dark surfaces. Toggled
+   by adding `.dark` to <html> (see ThemeToggle + the no-FOUC script in
+   layout). The already-dark sections (DataCommons, Footer) keep using the
+   `--ink` tokens, which stay near-black in both themes.
+────────────────────────────────────────────────────────────────────────── */
+.dark {
+  --background: #141413;        /* ink */
+  --foreground: #f1ece1;        /* cream text */
+  --muted-foreground: #a8a59a;  /* warm grey */
+
+  --primary: #6fae86;           /* sage lifted for dark surfaces */
+  --primary-dark: #82bd97;      /* hover = brighter on dark */
+  --primary-foreground: #10231a;
+
+  --brand: #2fce8a;
+  --brand-dark: #58dca3;
+
+  --border: #2c2c28;
+  --border-soft: #34332e;
+
+  --ink: #141413;
+  --ink-foreground: #f4efe4;
+  --ink-muted: #a8a59a;
+  --ink-border: #2a2a27;
+
+  --surface: #1c1c1a;           /* panels lifted off the ink background */
+  --surface-sunken: #26251f;
+
+  color-scheme: dark;
 }
 
 @theme inline {
@@ -75,6 +120,8 @@
   --color-ink-foreground: var(--ink-foreground);
   --color-ink-muted: var(--ink-muted);
   --color-ink-border: var(--ink-border);
+  --color-surface: var(--surface);
+  --color-surface-sunken: var(--surface-sunken);
 
   --font-sans: var(--font-sans), system-ui, sans-serif;
   --font-garamond: var(--font-garamond), Georgia, serif;
@@ -100,6 +147,30 @@ body {
 
 * {
   border-color: var(--border);
+}
+
+/* ── View Transition: circular reveal on theme toggle ───────────────────
+   Ported verbatim from gainforest-explorer (originally broadlistening /
+   bumicerts-monorepo). ThemeToggle sets --theme-ripple-x/y to the click
+   origin and calls document.startViewTransition(...); this block disables
+   the default cross-fade, layers the new theme above the old, and starts its
+   clip-path as a 0px circle at that origin so an inline Web Animation can
+   grow the circle out to the far viewport corner (~1.2s) for a clean radial
+   wipe. */
+::view-transition-group(root),
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+::view-transition-old(root) {
+  z-index: 1;
+}
+::view-transition-new(root) {
+  z-index: 2;
+  clip-path: circle(
+    0px at var(--theme-ripple-x, 0px) var(--theme-ripple-y, 0px)
+  );
 }
 
 /* Awards strip logo marquee — inert logos drifting slowly from right
