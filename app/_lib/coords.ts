@@ -134,7 +134,9 @@ export async function resolveCertifiedLocationCoords(
           )}&cid=${encodeURIComponent(loc.blob.ref)}`,
           { signal: signal ?? AbortSignal.timeout(5000) },
         );
-        if (r.ok) result = centroidFromGeoJson(await r.json());
+        // Blobs are either GeoJSON (bumicert sites) or plain "lat,lon" text
+        // (certified `coordinate-decimal` locations); parse both.
+        if (r.ok) result = parseInlineLocationString(await r.text());
       }
     }
   } catch (err) {
@@ -241,22 +243,46 @@ export async function resolvePointsFor(
     return points;
   }
 
-  // Sites: plot every project-site pin (the full geographic picture, like the
-  // globe), not just the loaded page. Pins backed by a loaded record open its
-  // drawer; the rest link out to the org on Bumicerts.
-  const siteMap = await loadSitePointMap();
-  const loadedByDid = new Map(
-    records.filter((r) => r.kind === "site").map((r) => [r.did, r.id]),
+  // Sites come from two lexicons. GainForest orgs are plotted from Green
+  // Globe's curated did→{lat,lon} map (the full geographic picture, like the
+  // globe). Certified actor orgs carry their own `app.certified.location`
+  // strongRef, which the curated map doesn't include, so resolve those per
+  // record. Each source is only drawn when it's actually in the loaded set,
+  // so the toolbar's GainForest / Certified / Both filter scopes the map too.
+  const siteRecords = records.filter(
+    (r): r is Extract<ExplorerRecord, { kind: "site" }> => r.kind === "site",
   );
-  for (const [did, pt] of siteMap) {
-    points.push({
-      lat: pt.lat,
-      lon: pt.lon,
-      label: pt.name || did,
-      did,
-      recordId: loadedByDid.get(did),
-    });
+  const hasGainforest = siteRecords.some((r) => r.source === "gainforest");
+
+  if (hasGainforest) {
+    const siteMap = await loadSitePointMap();
+    const loadedByDid = new Map(
+      siteRecords.filter((r) => r.source === "gainforest").map((r) => [r.did, r.id]),
+    );
+    for (const [did, pt] of siteMap) {
+      points.push({
+        lat: pt.lat,
+        lon: pt.lon,
+        label: pt.name || did,
+        did,
+        recordId: loadedByDid.get(did),
+      });
+    }
+    onProgress?.([...points]);
   }
-  onProgress?.([...points]);
+
+  // Certified orgs: resolve each org's certified-location coordinates directly.
+  const seenDids = new Set(points.map((p) => p.did));
+  const certTargets = siteRecords.filter(
+    (r) => r.source === "certified" && r.locationUri && !seenDids.has(r.did),
+  );
+  const tasks = certTargets.map((r) => async () => {
+    const coords = await resolveCertifiedLocationCoords(r.locationUri!, signal);
+    if (coords) {
+      points.push({ ...coords, label: r.name, did: r.did, recordId: r.id });
+      onProgress?.([...points]);
+    }
+  });
+  await runLimited(tasks, signal);
   return points;
 }

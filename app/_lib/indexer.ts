@@ -493,6 +493,9 @@ export type SiteRecord = {
   country: string | null;
   /** Certified-org category (e.g. "nonprofit"); null for GainForest orgs. */
   orgType: string | null;
+  /** AT-URI of the org's `app.certified.location` record (certified orgs only),
+   *  resolved to map coordinates on demand. */
+  locationUri: string | null;
   createdAt: string | null;
   imageUrl: string | null;
   coverRef: string | null;
@@ -542,6 +545,7 @@ function mapOrg(n: RawOrg): SiteRecord {
     name: n.displayName?.trim() || "Unnamed organization",
     country: n.country?.trim() || null,
     orgType: null,
+    locationUri: null,
     createdAt: n.createdAt ?? null,
     imageUrl: null,
     coverRef: normaliseRef(n.coverImage?.image?.ref),
@@ -586,6 +590,7 @@ async function fetchOrgPage(
 
 const CERT_ORG_NODE_FIELDS = `
   did uri rkey createdAt visibility organizationType
+  location { uri }
 `;
 
 const CERT_ORG_QUERY = `
@@ -611,6 +616,7 @@ type RawCertOrg = {
   createdAt?: string | null;
   visibility?: string | null;
   organizationType?: string[] | null;
+  location?: { uri?: string | null } | null;
 };
 
 type CertProfileInfo = { name: string | null; avatarRef: string | null };
@@ -663,6 +669,7 @@ function mapCertOrg(n: RawCertOrg, profile: CertProfileInfo | undefined): SiteRe
     name: profile?.name || "Certified organization",
     country: null,
     orgType: (n.organizationType ?? []).map((t) => sv(t)).filter(Boolean).join(", ") || null,
+    locationUri: sv(n.location?.uri),
     createdAt: n.createdAt ?? null,
     imageUrl: null,
     coverRef: profile?.avatarRef ?? null,
