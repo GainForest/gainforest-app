@@ -919,7 +919,10 @@ type CertifiedOrgNode = {
   longDescription?: { __typename?: string; value?: string | null } | null;
 } | null;
 
-const ACTIVITY_DETAIL_QUERY = `
+// Shared GraphQL pieces for decoding `pub.leaflet.pages.linearDocument`s. The
+// same fragment + block selection is reused by bumicert descriptions and org
+// `longDescription`s so rich text + media render identically everywhere.
+const FACETS_FRAGMENT = `
   fragment Facets on PubLeafletRichtextFacet {
     index { byteStart byteEnd }
     features {
@@ -928,41 +931,46 @@ const ACTIVITY_DETAIL_QUERY = `
       ... on PubLeafletRichtextFacetAtMention { href }
     }
   }
+`;
+const LEAFLET_BLOCKS_SELECTION = `
+  blocks {
+    block {
+      __typename
+      ... on PubLeafletBlocksHeader { level plaintext facets { ...Facets } }
+      ... on PubLeafletBlocksText { plaintext facets { ...Facets } }
+      ... on PubLeafletBlocksBlockquote { plaintext facets { ...Facets } }
+      ... on PubLeafletBlocksCode { plaintext language }
+      ... on PubLeafletBlocksImage { alt image { ref } aspectRatio { width height } }
+      ... on PubLeafletBlocksIframe { url height aspectRatio { width height } }
+      ... on PubLeafletBlocksWebsite { src title description previewImage { ref } }
+      ... on PubLeafletBlocksButton { text url }
+      ... on PubLeafletBlocksHorizontalRule { empty }
+      ... on PubLeafletBlocksUnorderedList {
+        children { content {
+          __typename
+          ... on PubLeafletBlocksText { plaintext facets { ...Facets } }
+          ... on PubLeafletBlocksHeader { plaintext }
+        } }
+      }
+      ... on PubLeafletBlocksOrderedList {
+        children { content {
+          __typename
+          ... on PubLeafletBlocksText { plaintext facets { ...Facets } }
+        } }
+      }
+    }
+  }
+`;
+
+const ACTIVITY_DETAIL_QUERY = `
+  ${FACETS_FRAGMENT}
   query ActivityDetail($uri: String!) {
     orgHypercertsClaimActivityByUri(uri: $uri) {
       did title shortDescription startDate endDate createdAt
       description {
         __typename
         ... on OrgHypercertsDefsDescriptionString { value }
-        ... on PubLeafletPagesLinearDocument {
-          blocks {
-            block {
-              __typename
-              ... on PubLeafletBlocksHeader { level plaintext facets { ...Facets } }
-              ... on PubLeafletBlocksText { plaintext facets { ...Facets } }
-              ... on PubLeafletBlocksBlockquote { plaintext facets { ...Facets } }
-              ... on PubLeafletBlocksCode { plaintext language }
-              ... on PubLeafletBlocksImage { alt image { ref } aspectRatio { width height } }
-              ... on PubLeafletBlocksIframe { url height aspectRatio { width height } }
-              ... on PubLeafletBlocksWebsite { src title description previewImage { ref } }
-              ... on PubLeafletBlocksButton { text url }
-              ... on PubLeafletBlocksHorizontalRule { empty }
-              ... on PubLeafletBlocksUnorderedList {
-                children { content {
-                  __typename
-                  ... on PubLeafletBlocksText { plaintext facets { ...Facets } }
-                  ... on PubLeafletBlocksHeader { plaintext }
-                } }
-              }
-              ... on PubLeafletBlocksOrderedList {
-                children { content {
-                  __typename
-                  ... on PubLeafletBlocksText { plaintext facets { ...Facets } }
-                } }
-              }
-            }
-          }
-        }
+        ... on PubLeafletPagesLinearDocument { ${LEAFLET_BLOCKS_SELECTION} }
       }
       workScope {
         __typename
@@ -975,15 +983,32 @@ const ACTIVITY_DETAIL_QUERY = `
   }
 `;
 
-const CERTIFIED_ORG_QUERY = `
-  query CertifiedOrg($uri: String!) {
-    appCertifiedActorOrganizationByUri(uri: $uri) {
-      organizationType
+// Owner-org socials: certified.app actor (urls[]) + GainForest org info
+// (website/email/socialLinks). An occurrence/bumicert owner may publish via
+// either lexicon, so we read both and merge.
+const OWNER_SOCIALS_QUERY = `
+  query OwnerSocials($cert: String!, $gf: String!) {
+    cert: appCertifiedActorOrganizationByUri(uri: $cert) {
       urls { url }
       longDescription { __typename ... on OrgHypercertsDefsDescriptionString { value } }
     }
+    gf: appGainforestOrganizationInfoByUri(uri: $gf) {
+      website email
+      shortDescription { text }
+      socialLinks { platform url }
+    }
   }
 `;
+
+type OwnerOrg = {
+  cert?: CertifiedOrgNode;
+  gf?: {
+    website?: string | null;
+    email?: string | null;
+    shortDescription?: { text?: string | null } | null;
+    socialLinks?: Array<{ platform?: string | null; url?: string | null }> | null;
+  } | null;
+};
 
 // Decode richtext facets (UTF-8 byte offsets, Bluesky-style) into styled spans.
 // Boundary-split the text at every facet edge, then stamp each segment with
@@ -1152,7 +1177,39 @@ function socialPlatform(url: string): string {
   return "website";
 }
 
-function buildBumicertDetail(n: BumiDetailNode, org: CertifiedOrgNode): RecordDetail {
+/** Dedupe + classify a list of URLs into social-icon links. */
+function socialsFromUrls(urls: Array<string | null | undefined>): SocialLink[] {
+  const out: SocialLink[] = [];
+  const seen = new Set<string>();
+  for (const raw of urls) {
+    const url = sv(raw);
+    if (!url || !/^https?:\/\//.test(url) || seen.has(url)) continue;
+    seen.add(url);
+    out.push({ href: url, platform: socialPlatform(url) });
+  }
+  return out;
+}
+
+/** Merge an owning org's socials (both lexicons) + pick a bio fallback. */
+function buildOwnerSocials(owner: OwnerOrg | null): { socials: SocialLink[]; bio: string | null } {
+  const urls: Array<string | null | undefined> = [];
+  for (const u of owner?.cert?.urls ?? []) urls.push(u?.url);
+  if (owner?.gf?.website) urls.push(owner.gf.website);
+  for (const s of owner?.gf?.socialLinks ?? []) urls.push(s?.url);
+  const socials = socialsFromUrls(urls);
+  const email = sv(owner?.gf?.email);
+  if (email) socials.push({ href: `mailto:${email}`, platform: "email" });
+  const bio =
+    (owner?.cert?.longDescription?.__typename === "OrgHypercertsDefsDescriptionString"
+      ? sv(owner.cert.longDescription.value)
+      : null) ?? sv(owner?.gf?.shortDescription?.text);
+  return { socials, bio };
+}
+
+function buildBumicertDetail(
+  n: BumiDetailNode,
+  owner: { socials: SocialLink[]; bio: string | null },
+): RecordDetail {
   // Description: rich Leaflet doc (preferred), else plain string, else org bio.
   let richBody: RichBlock[] | null = null;
   let blurb: string | null = null;
@@ -1162,8 +1219,8 @@ function buildBumicertDetail(n: BumiDetailNode, org: CertifiedOrgNode): RecordDe
   } else if (n.description?.__typename === "OrgHypercertsDefsDescriptionString") {
     blurb = sv(n.description.value);
   }
-  if (!richBody && !blurb && org?.longDescription?.__typename === "OrgHypercertsDefsDescriptionString") {
-    blurb = sv(org.longDescription.value);
+  if (!richBody && !blurb && owner.bio) {
+    blurb = owner.bio;
   }
 
   // Work scope: explicit string, else the string literals inside the CEL
@@ -1194,17 +1251,27 @@ function buildBumicertDetail(n: BumiDetailNode, org: CertifiedOrgNode): RecordDe
     ]),
   ].filter((s) => s.fields.length > 0);
 
-  // Website + socials from the owning organization record → icon row.
-  const socials: SocialLink[] = [];
-  const seen = new Set<string>();
-  for (const u of org?.urls ?? []) {
-    const url = sv(u?.url);
-    if (!url || !/^https?:\/\//.test(url) || seen.has(url)) continue;
-    seen.add(url);
-    socials.push({ href: url, platform: socialPlatform(url) });
-  }
+  return { blurb, richBody, badges, sections, links: [], socials: owner.socials };
+}
 
-  return { blurb, richBody, badges, sections, links: [], socials };
+/** Fetch + merge an owning org's socials/bio for a record DID (both lexicons). */
+async function fetchOwnerSocials(
+  did: string,
+  signal?: AbortSignal,
+): Promise<{ socials: SocialLink[]; bio: string | null }> {
+  try {
+    const data = await indexerQuery<OwnerOrg>(
+      OWNER_SOCIALS_QUERY,
+      {
+        cert: `at://${did}/app.certified.actor.organization/self`,
+        gf: `at://${did}/app.gainforest.organization.info/self`,
+      },
+      signal,
+    );
+    return buildOwnerSocials(data ?? null);
+  } catch {
+    return { socials: [], bio: null };
+  }
 }
 
 /** Resolve any Leaflet image/website blob refs in a rich body to PDS URLs. */
@@ -1239,17 +1306,20 @@ async function resolveRichImages(
 type OrgDetailNode = {
   [k: string]: unknown;
   shortDescription?: { text?: string | null } | null;
+  longDescription?: { blocks?: LeafletBlock[] | null } | null;
   socialLinks?: Array<{ platform?: string | null; url?: string | null }> | null;
   ecosystemTypes?: string[] | null;
   focusSpeciesGroups?: string[] | null;
 };
 
 const ORG_DETAIL_QUERY = `
+  ${FACETS_FRAGMENT}
   query OrgDetail($uri: String!) {
     appGainforestOrganizationInfoByUri(uri: $uri) {
       displayName country createdAt startDate foundedYear teamSize
       website email visibility dataLicense dataDownloadUrl fundingSourcesDescription
       shortDescription { text }
+      longDescription { ${LEAFLET_BLOCKS_SELECTION} }
       ecosystemTypes focusSpeciesGroups
       socialLinks { platform url }
     }
@@ -1279,25 +1349,27 @@ function buildOrgDetail(n: OrgDetailNode): RecordDetail {
     ]),
   ].filter((s) => s.fields.length > 0);
 
+  // Website + socials (+ email) → icon row; data download stays a text link.
+  const socials = socialsFromUrls([f("website"), ...(n.socialLinks ?? []).map((s) => s?.url)]);
+  const email = f("email");
+  if (email) socials.push({ href: `mailto:${email}`, platform: "email" });
+
   const links: DetailLink[] = [];
-  const web = f("website");
-  if (web && /^https?:\/\//.test(web)) {
-    try {
-      links.push({ label: new URL(web).hostname.replace(/^www\./, ""), href: web });
-    } catch {
-      /* skip malformed */
-    }
-  }
-  for (const s of n.socialLinks ?? []) {
-    const url = sv(s?.url);
-    if (url) links.push({ label: cap(sv(s?.platform) ?? "Link"), href: url });
-  }
   const dl = f("dataDownloadUrl");
   if (dl && /^https?:\/\//.test(dl)) links.push({ label: "Download data", href: dl });
-  const email = f("email");
-  if (email) links.push({ label: email, href: `mailto:${email}` });
 
-  return { blurb: n.shortDescription?.text ? sv(n.shortDescription.text) : null, badges: [], sections, links };
+  // Rich `longDescription` (Leaflet doc) preferred; short tagline is fallback.
+  const richBody = n.longDescription?.blocks ? leafletToRich(n.longDescription.blocks) : null;
+  const blurb = sv(n.shortDescription?.text);
+
+  return {
+    blurb,
+    richBody: richBody && richBody.length ? richBody : null,
+    badges: [],
+    sections,
+    links,
+    socials,
+  };
 }
 
 /** Fetch the full, drawer-ready detail for a record by its AT-URI. */
@@ -1309,35 +1381,38 @@ export async function fetchRecordDetail(
   if (!m) return null;
   const collection = m[2];
 
+  const did = m[1];
+
   if (collection === "app.gainforest.dwc.occurrence") {
-    const data = await indexerQuery<{ appGainforestDwcOccurrenceByUri?: OccDetailNode | null }>(
-      OCCURRENCE_DETAIL_QUERY,
-      { uri: atUri },
-      signal,
-    );
+    // The observation itself has no socials; its recording org may. Fetch the
+    // detail + owner socials in parallel and attach the icon row.
+    const [data, owner] = await Promise.all([
+      indexerQuery<{ appGainforestDwcOccurrenceByUri?: OccDetailNode | null }>(
+        OCCURRENCE_DETAIL_QUERY,
+        { uri: atUri },
+        signal,
+      ),
+      fetchOwnerSocials(did, signal),
+    ]);
     const n = data?.appGainforestDwcOccurrenceByUri;
-    return n ? buildOccurrenceDetail(n) : null;
+    if (!n) return null;
+    const detail = buildOccurrenceDetail(n);
+    if (owner.socials.length) detail.socials = owner.socials;
+    return detail;
   }
   if (collection === "org.hypercerts.claim.activity") {
-    const did = m[1];
-    // The activity record has no socials/bio; its owning organization record
-    // (certified.app actor) does. Fetch both in parallel and merge.
-    const [data, orgData] = await Promise.all([
+    // The activity record has no socials/bio; its owning organization does.
+    const [data, owner] = await Promise.all([
       indexerQuery<{ orgHypercertsClaimActivityByUri?: BumiDetailNode | null }>(
         ACTIVITY_DETAIL_QUERY,
         { uri: atUri },
         signal,
       ),
-      indexerQuery<{ appCertifiedActorOrganizationByUri?: CertifiedOrgNode }>(
-        CERTIFIED_ORG_QUERY,
-        { uri: `at://${did}/app.certified.actor.organization/self` },
-        signal,
-      ).catch(() => null),
+      fetchOwnerSocials(did, signal),
     ]);
     const n = data?.orgHypercertsClaimActivityByUri;
-    const org = orgData?.appCertifiedActorOrganizationByUri ?? null;
     if (!n) return null;
-    const detail = buildBumicertDetail(n, org);
+    const detail = buildBumicertDetail(n, owner);
     if (detail.richBody?.length) {
       detail.richBody = await resolveRichImages(detail.richBody, did, signal);
     }
@@ -1350,7 +1425,12 @@ export async function fetchRecordDetail(
       signal,
     );
     const n = data?.appGainforestOrganizationInfoByUri;
-    return n ? buildOrgDetail(n) : null;
+    if (!n) return null;
+    const detail = buildOrgDetail(n);
+    if (detail.richBody?.length) {
+      detail.richBody = await resolveRichImages(detail.richBody, did, signal);
+    }
+    return detail;
   }
   return null;
 }

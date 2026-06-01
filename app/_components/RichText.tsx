@@ -161,6 +161,31 @@ function RichImage({
   );
 }
 
+/** Normalize common video page URLs to their embeddable form (watch pages
+ *  refuse to be framed; YouTube/Vimeo need their /embed/ endpoints). */
+function toEmbedUrl(url: string): string {
+  try {
+    const u = new URL(url);
+    const host = u.hostname.replace(/^www\./, "").toLowerCase();
+    if (host === "youtube.com" || host === "m.youtube.com") {
+      const id = u.searchParams.get("v");
+      if (id) return `https://www.youtube.com/embed/${id}`;
+      if (u.pathname.startsWith("/embed/")) return url;
+    }
+    if (host === "youtu.be") {
+      const id = u.pathname.slice(1).split("/")[0];
+      if (id) return `https://www.youtube.com/embed/${id}`;
+    }
+    if (host === "vimeo.com") {
+      const id = u.pathname.split("/").filter(Boolean)[0];
+      if (id && /^\d+$/.test(id)) return `https://player.vimeo.com/video/${id}`;
+    }
+  } catch {
+    /* keep original */
+  }
+  return url;
+}
+
 function Embed({
   url,
   aspectRatio,
@@ -177,7 +202,7 @@ function Embed({
       style={height && !aspectRatio ? { height } : { aspectRatio: ratio }}
     >
       <iframe
-        src={url}
+        src={toEmbedUrl(url)}
         loading="lazy"
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
         allowFullScreen
