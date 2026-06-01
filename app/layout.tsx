@@ -34,10 +34,10 @@ const mono = JetBrains_Mono({
 });
 
 const SITE_URL = "https://explorer.gainforest.app";
-const SITE_NAME = "GainForest Explorer";
-const SITE_TAGLINE = "GainForest data commons explorer";
+const SITE_NAME = "Bumiscan";
+const SITE_TAGLINE = "the GainForest data commons explorer";
 const SITE_DESCRIPTION =
-  "Read-only explorer for the GainForest data commons. Darwin Core occurrences, project sites, Bumicerts, and funding receipts from Hyperindex, plus Tainá field-device liveness and system status.";
+  "Bumiscan is a read-only explorer for the GainForest data commons. Darwin Core occurrences, project sites, Bumicerts, and funding receipts from Hyperindex, plus Tainá field-device liveness and system status.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -51,6 +51,7 @@ export const metadata: Metadata = {
   creator: "GainForest",
   publisher: "GainForest",
   keywords: [
+    "Bumiscan",
     "GainForest",
     "Bumicerts",
     "Darwin Core",

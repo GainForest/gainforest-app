@@ -70,13 +70,13 @@ export function Hero({
           </div>
 
           <h1 className="mt-5 font-garamond text-[44px] font-normal leading-[1.04] tracking-[-0.015em] text-foreground sm:text-[64px] lg:text-[82px]">
-            GainForest data <BrushedText text="{commons}" /> explorer
+            Bumi<BrushedText text="{scan}" />
           </h1>
 
           <p className="mt-6 max-w-[660px] text-[16px] leading-[1.55] text-foreground/80 lg:text-[18px]">
-            Read-only browser over the GainForest indexer (Hyperindex) and the
-            ATProto PDS instances behind it. Records, donations, and device
-            health, queried live.
+            Bumiscan is a read-only browser over the GainForest data commons —
+            the indexer (Hyperindex) and the ATProto PDS instances behind it.
+            Records, donations, and device health, queried live.
           </p>
         </div>
 

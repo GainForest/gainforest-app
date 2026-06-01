@@ -22,9 +22,9 @@ export function Footer() {
         <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
           <div className="max-w-[520px]">
             <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
-              <LogoMark className="h-6 w-6 text-brand" title="GainForest" />
+              <LogoMark className="h-6 w-6 text-brand" title="Bumiscan" />
               <span className="font-garamond text-[20px] font-semibold text-ink-foreground">
-                GainForest Explorer
+                Bumiscan
               </span>
             </div>
             <p className="mt-3 text-[13px] leading-[1.6] text-ink-foreground/60">
