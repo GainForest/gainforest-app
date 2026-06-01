@@ -670,15 +670,50 @@ export type DetailField = { label: string; value: string; wide?: boolean };
 export type DetailSection = { title: string | null; fields: DetailField[] };
 export type DetailBadge = { label: string; tone: "ok" | "warn" | "down" | "info" };
 export type DetailLink = { label: string; href: string };
+/** A social/website link, rendered as a minimalist icon button in the drawer. */
+export type SocialLink = { href: string; platform: string };
+
+// ── Rich document model (Leaflet linear documents) ─────────────────────────
+// Bumicert descriptions are authored as `pub.leaflet.pages.linearDocument`s:
+// headers, styled paragraphs, quotes, lists, code, images, embeds. We decode
+// them into this structural model so the drawer can render real rich text +
+// media instead of a flattened string.
+
+/** A run of text with inline styling resolved from richtext facets. */
+export type RichSpan = {
+  text: string;
+  bold?: boolean;
+  italic?: boolean;
+  underline?: boolean;
+  strike?: boolean;
+  code?: boolean;
+  href?: string;
+};
+export type RichBlock =
+  | { type: "heading"; level: number; spans: RichSpan[] }
+  | { type: "paragraph"; spans: RichSpan[] }
+  | { type: "blockquote"; spans: RichSpan[] }
+  | { type: "code"; text: string; language?: string | null }
+  | { type: "list"; ordered: boolean; items: RichSpan[][] }
+  | { type: "image"; url: string | null; ref?: string | null; alt?: string | null; aspectRatio?: { width: number; height: number } | null }
+  | { type: "iframe"; url: string; aspectRatio?: { width: number; height: number } | null; height?: number | null }
+  | { type: "website"; src: string; title?: string | null; description?: string | null; image?: string | null; ref?: string | null }
+  | { type: "hr" }
+  | { type: "button"; text: string; url: string };
+
 export type RecordDetail = {
   /** Long-form text shown under the header (full description / field notes). */
   blurb?: string | null;
+  /** Decoded rich document (preferred over `blurb` when present). */
+  richBody?: RichBlock[] | null;
   /** Small status pills under the title (IUCN status, work scope, …). */
   badges: DetailBadge[];
   /** Grouped key/value sections. */
   sections: DetailSection[];
   /** Extra outbound links (GBIF, website, socials). */
   links: DetailLink[];
+  /** Social / website links rendered as an icon row. */
+  socials?: SocialLink[];
 };
 
 const sv = (v: unknown): string | null => {
@@ -840,15 +875,32 @@ function countryFlagSafe(code: string | null): string {
 // (`pub.leaflet.pages.linearDocument`); its work scope can be a string OR a CEL
 // expression (`org.hypercerts.workscope.cel`). We handle every shape so the
 // rich body + scope tags always surface instead of silently dropping.
-type LeafletBlock = {
-  block?: {
-    __typename?: string;
-    plaintext?: string | null;
-    children?: Array<{
-      content?: { __typename?: string; plaintext?: string | null } | null;
-    }> | null;
-  } | null;
+type RawFacet = {
+  index?: { byteStart?: number | null; byteEnd?: number | null } | null;
+  features?: Array<{ __typename?: string; uri?: string | null; href?: string | null }> | null;
 };
+type RawLeafletContent = {
+  __typename?: string;
+  plaintext?: string | null;
+  facets?: RawFacet[] | null;
+};
+type RawLeafletBlock = RawLeafletContent & {
+  level?: number | null;
+  language?: string | null;
+  alt?: string | null;
+  url?: string | null;
+  text?: string | null;
+  src?: string | null;
+  title?: string | null;
+  description?: string | null;
+  height?: number | null;
+  empty?: boolean | null;
+  image?: { ref?: string | null } | null;
+  previewImage?: { ref?: string | null } | null;
+  aspectRatio?: { width?: number | null; height?: number | null } | null;
+  children?: Array<{ content?: RawLeafletContent | null } | null> | null;
+};
+type LeafletBlock = { block?: RawLeafletBlock | null };
 type BumiDetailNode = {
   [k: string]: unknown;
   description?:
@@ -868,6 +920,14 @@ type CertifiedOrgNode = {
 } | null;
 
 const ACTIVITY_DETAIL_QUERY = `
+  fragment Facets on PubLeafletRichtextFacet {
+    index { byteStart byteEnd }
+    features {
+      __typename
+      ... on PubLeafletRichtextFacetLink { uri }
+      ... on PubLeafletRichtextFacetAtMention { href }
+    }
+  }
   query ActivityDetail($uri: String!) {
     orgHypercertsClaimActivityByUri(uri: $uri) {
       did title shortDescription startDate endDate createdAt
@@ -878,15 +938,26 @@ const ACTIVITY_DETAIL_QUERY = `
           blocks {
             block {
               __typename
-              ... on PubLeafletBlocksHeader { plaintext }
-              ... on PubLeafletBlocksText { plaintext }
-              ... on PubLeafletBlocksBlockquote { plaintext }
-              ... on PubLeafletBlocksCode { plaintext }
+              ... on PubLeafletBlocksHeader { level plaintext facets { ...Facets } }
+              ... on PubLeafletBlocksText { plaintext facets { ...Facets } }
+              ... on PubLeafletBlocksBlockquote { plaintext facets { ...Facets } }
+              ... on PubLeafletBlocksCode { plaintext language }
+              ... on PubLeafletBlocksImage { alt image { ref } aspectRatio { width height } }
+              ... on PubLeafletBlocksIframe { url height aspectRatio { width height } }
+              ... on PubLeafletBlocksWebsite { src title description previewImage { ref } }
+              ... on PubLeafletBlocksButton { text url }
+              ... on PubLeafletBlocksHorizontalRule { empty }
               ... on PubLeafletBlocksUnorderedList {
                 children { content {
                   __typename
-                  ... on PubLeafletBlocksText { plaintext }
+                  ... on PubLeafletBlocksText { plaintext facets { ...Facets } }
                   ... on PubLeafletBlocksHeader { plaintext }
+                } }
+              }
+              ... on PubLeafletBlocksOrderedList {
+                children { content {
+                  __typename
+                  ... on PubLeafletBlocksText { plaintext facets { ...Facets } }
                 } }
               }
             }
@@ -914,58 +985,184 @@ const CERTIFIED_ORG_QUERY = `
   }
 `;
 
-/** Flatten a Leaflet linear document to plain text (headers/paragraphs/quotes/
- *  code + bullet items), preserving paragraph breaks. */
-function flattenLeaflet(blocks: LeafletBlock[]): string | null {
-  const parts: string[] = [];
+// Decode richtext facets (UTF-8 byte offsets, Bluesky-style) into styled spans.
+// Boundary-split the text at every facet edge, then stamp each segment with
+// the features of every facet that fully covers it (so bold+italic compose).
+function spansFromText(text: string, facets: RawFacet[] | null | undefined): RichSpan[] {
+  if (!text) return [];
+  if (!facets || facets.length === 0) return [{ text }];
+  const enc = new TextEncoder();
+  const dec = new TextDecoder();
+  const bytes = enc.encode(text);
+  const norm = facets
+    .map((f) => ({
+      start: Math.max(0, f.index?.byteStart ?? 0),
+      end: Math.min(bytes.length, f.index?.byteEnd ?? 0),
+      features: f.features ?? [],
+    }))
+    .filter((f) => f.end > f.start);
+  if (norm.length === 0) return [{ text }];
+  const bounds = new Set<number>([0, bytes.length]);
+  for (const f of norm) {
+    bounds.add(f.start);
+    bounds.add(f.end);
+  }
+  const sorted = [...bounds].sort((a, b) => a - b);
+  const spans: RichSpan[] = [];
+  for (let i = 0; i < sorted.length - 1; i++) {
+    const a = sorted[i]!;
+    const b = sorted[i + 1]!;
+    const segText = dec.decode(bytes.slice(a, b));
+    if (!segText) continue;
+    const span: RichSpan = { text: segText };
+    for (const f of norm) {
+      if (f.start <= a && f.end >= b) {
+        for (const ft of f.features) {
+          switch (ft.__typename) {
+            case "PubLeafletRichtextFacetBold":
+              span.bold = true;
+              break;
+            case "PubLeafletRichtextFacetItalic":
+              span.italic = true;
+              break;
+            case "PubLeafletRichtextFacetUnderline":
+              span.underline = true;
+              break;
+            case "PubLeafletRichtextFacetStrikethrough":
+              span.strike = true;
+              break;
+            case "PubLeafletRichtextFacetCode":
+              span.code = true;
+              break;
+            case "PubLeafletRichtextFacetLink":
+              if (ft.uri) span.href = ft.uri;
+              break;
+            case "PubLeafletRichtextFacetAtMention":
+              if (ft.href) span.href = ft.href;
+              break;
+          }
+        }
+      }
+    }
+    spans.push(span);
+  }
+  return spans;
+}
+
+/** Decode a Leaflet linear document's blocks into the rich block model. Image
+ *  refs are carried through unresolved (`ref`) and turned into URLs later. */
+function leafletToRich(blocks: LeafletBlock[]): RichBlock[] {
+  const out: RichBlock[] = [];
+  const ar = (a?: { width?: number | null; height?: number | null } | null) =>
+    a && a.width && a.height ? { width: a.width, height: a.height } : null;
   for (const b of blocks) {
     const blk = b?.block;
     if (!blk) continue;
-    const t = sv(blk.plaintext);
-    if (t) {
-      parts.push(t);
-      continue;
-    }
-    if (Array.isArray(blk.children)) {
-      const items = blk.children
-        .map((c) => sv(c?.content?.plaintext))
-        .filter(Boolean)
-        .map((s) => `• ${s}`);
-      if (items.length) parts.push(items.join("\n"));
+    switch (blk.__typename) {
+      case "PubLeafletBlocksHeader":
+        out.push({ type: "heading", level: blk.level ?? 2, spans: spansFromText(blk.plaintext ?? "", blk.facets) });
+        break;
+      case "PubLeafletBlocksText": {
+        const spans = spansFromText(blk.plaintext ?? "", blk.facets);
+        if (spans.length) out.push({ type: "paragraph", spans });
+        break;
+      }
+      case "PubLeafletBlocksBlockquote":
+        out.push({ type: "blockquote", spans: spansFromText(blk.plaintext ?? "", blk.facets) });
+        break;
+      case "PubLeafletBlocksCode":
+        out.push({ type: "code", text: blk.plaintext ?? "", language: sv(blk.language) });
+        break;
+      case "PubLeafletBlocksImage": {
+        const ref = normaliseRef(blk.image?.ref);
+        if (ref) out.push({ type: "image", url: null, ref, alt: sv(blk.alt), aspectRatio: ar(blk.aspectRatio) });
+        break;
+      }
+      case "PubLeafletBlocksIframe": {
+        const url = sv(blk.url);
+        if (url) out.push({ type: "iframe", url, aspectRatio: ar(blk.aspectRatio), height: blk.height ?? null });
+        break;
+      }
+      case "PubLeafletBlocksWebsite": {
+        const src = sv(blk.src);
+        if (src)
+          out.push({
+            type: "website",
+            src,
+            title: sv(blk.title),
+            description: sv(blk.description),
+            image: null,
+            ref: normaliseRef(blk.previewImage?.ref),
+          });
+        break;
+      }
+      case "PubLeafletBlocksButton": {
+        const url = sv(blk.url);
+        if (url) out.push({ type: "button", text: sv(blk.text) ?? url, url });
+        break;
+      }
+      case "PubLeafletBlocksHorizontalRule":
+        out.push({ type: "hr" });
+        break;
+      case "PubLeafletBlocksUnorderedList":
+      case "PubLeafletBlocksOrderedList": {
+        const items = (blk.children ?? [])
+          .map((c) => spansFromText(c?.content?.plaintext ?? "", c?.content?.facets))
+          .filter((s) => s.length > 0);
+        if (items.length)
+          out.push({ type: "list", ordered: blk.__typename === "PubLeafletBlocksOrderedList", items });
+        break;
+      }
     }
   }
-  return parts.length ? parts.join("\n\n") : null;
+  return out;
 }
 
-/** Map a URL to a recognizable social/platform label (falls back to host). */
-function socialLabel(url: string): string {
+/** Plain-text fallback for `blurb` (search/SEO/no-JS), derived from spans. */
+function richToPlain(blocks: RichBlock[]): string | null {
+  const parts: string[] = [];
+  for (const b of blocks) {
+    if (b.type === "heading" || b.type === "paragraph" || b.type === "blockquote")
+      parts.push(b.spans.map((s) => s.text).join(""));
+    else if (b.type === "code") parts.push(b.text);
+    else if (b.type === "list")
+      parts.push(b.items.map((it) => `• ${it.map((s) => s.text).join("")}`).join("\n"));
+  }
+  const joined = parts.filter(Boolean).join("\n\n").trim();
+  return joined || null;
+}
+
+/** Classify a URL into a social-icon platform key (mirrors SocialIcon.tsx). */
+function socialPlatform(url: string): string {
   let host: string;
   try {
     host = new URL(url).hostname.replace(/^www\./, "").toLowerCase();
   } catch {
-    return "Link";
+    return "link";
   }
-  if (host.includes("facebook.")) return "Facebook";
-  if (host.includes("instagram.")) return "Instagram";
-  if (host.includes("youtube.") || host === "youtu.be") return "YouTube";
-  if (host.includes("linkedin.")) return "LinkedIn";
-  if (host === "x.com" || host.includes("twitter.")) return "X";
-  if (host === "t.me" || host.includes("telegram.")) return "Telegram";
-  if (host.includes("tiktok.")) return "TikTok";
-  if (host.includes("github.")) return "GitHub";
-  if (host.includes("bsky.")) return "Bluesky";
-  return host;
+  if (host.includes("facebook.") || host === "fb.com") return "facebook";
+  if (host.includes("instagram.")) return "instagram";
+  if (host.includes("youtube.") || host === "youtu.be") return "youtube";
+  if (host.includes("linkedin.")) return "linkedin";
+  if (host === "x.com" || host.includes("twitter.")) return "x";
+  if (host === "t.me" || host.includes("telegram.")) return "telegram";
+  if (host.includes("tiktok.")) return "tiktok";
+  if (host.includes("github.")) return "github";
+  if (host.includes("bsky.") || host.includes("bluesky.")) return "bluesky";
+  return "website";
 }
 
 function buildBumicertDetail(n: BumiDetailNode, org: CertifiedOrgNode): RecordDetail {
-  // Description: plain string, else flattened Leaflet doc, else the org's bio.
+  // Description: rich Leaflet doc (preferred), else plain string, else org bio.
+  let richBody: RichBlock[] | null = null;
   let blurb: string | null = null;
-  if (n.description?.__typename === "OrgHypercertsDefsDescriptionString") {
+  if (n.description?.__typename === "PubLeafletPagesLinearDocument") {
+    richBody = leafletToRich(n.description.blocks ?? []);
+    blurb = richToPlain(richBody);
+  } else if (n.description?.__typename === "OrgHypercertsDefsDescriptionString") {
     blurb = sv(n.description.value);
-  } else if (n.description?.__typename === "PubLeafletPagesLinearDocument") {
-    blurb = flattenLeaflet(n.description.blocks ?? []);
   }
-  if (!blurb && org?.longDescription?.__typename === "OrgHypercertsDefsDescriptionString") {
+  if (!richBody && !blurb && org?.longDescription?.__typename === "OrgHypercertsDefsDescriptionString") {
     blurb = sv(org.longDescription.value);
   }
 
@@ -997,17 +1194,44 @@ function buildBumicertDetail(n: BumiDetailNode, org: CertifiedOrgNode): RecordDe
     ]),
   ].filter((s) => s.fields.length > 0);
 
-  // Website + socials from the owning organization record.
-  const links: DetailLink[] = [];
+  // Website + socials from the owning organization record → icon row.
+  const socials: SocialLink[] = [];
   const seen = new Set<string>();
   for (const u of org?.urls ?? []) {
     const url = sv(u?.url);
     if (!url || !/^https?:\/\//.test(url) || seen.has(url)) continue;
     seen.add(url);
-    links.push({ label: socialLabel(url), href: url });
+    socials.push({ href: url, platform: socialPlatform(url) });
   }
 
-  return { blurb, badges, sections, links };
+  return { blurb, richBody, badges, sections, links: [], socials };
+}
+
+/** Resolve any Leaflet image/website blob refs in a rich body to PDS URLs. */
+async function resolveRichImages(
+  blocks: RichBlock[],
+  did: string,
+  signal?: AbortSignal,
+): Promise<RichBlock[]> {
+  return Promise.all(
+    blocks.map(async (b) => {
+      if (b.type === "image" && b.ref && !b.url) {
+        try {
+          return { ...b, url: await resolveBlobUrl(did, b.ref, signal) };
+        } catch {
+          return b;
+        }
+      }
+      if (b.type === "website" && b.ref && !b.image) {
+        try {
+          return { ...b, image: await resolveBlobUrl(did, b.ref, signal) };
+        } catch {
+          return b;
+        }
+      }
+      return b;
+    }),
+  );
 }
 
 // ── Org / site detail ──────────────────────────────────────────────────────
@@ -1112,7 +1336,12 @@ export async function fetchRecordDetail(
     ]);
     const n = data?.orgHypercertsClaimActivityByUri;
     const org = orgData?.appCertifiedActorOrganizationByUri ?? null;
-    return n ? buildBumicertDetail(n, org) : null;
+    if (!n) return null;
+    const detail = buildBumicertDetail(n, org);
+    if (detail.richBody?.length) {
+      detail.richBody = await resolveRichImages(detail.richBody, did, signal);
+    }
+    return detail;
   }
   if (collection === "app.gainforest.organization.info") {
     const data = await indexerQuery<{ appGainforestOrganizationInfoByUri?: OrgDetailNode | null }>(

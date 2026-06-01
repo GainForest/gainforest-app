@@ -12,6 +12,8 @@ import {
 } from "../_lib/indexer";
 import { formatDate, formatNumber, countryFlag } from "../_lib/format";
 import { AuthorChip } from "./AuthorChip";
+import { RichText } from "./RichText";
+import { SocialGlyph, socialLabel } from "./SocialIcon";
 import { isPdsBlobUrl } from "../_lib/pds";
 import {
   BUMICERTS_URL,
@@ -144,11 +146,34 @@ export function RecordDrawer({
             />
           </div>
 
-          {/* Full description / field notes */}
-          {detail?.blurb && (
-            <p className="mt-5 whitespace-pre-line text-[14px] leading-[1.6] text-foreground/75">
-              {detail.blurb}
-            </p>
+          {/* Social / website links as minimalist icon buttons */}
+          {detail?.socials && detail.socials.length > 0 && (
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              {detail.socials.map((s) => (
+                <Link
+                  key={s.href}
+                  href={s.href}
+                  target="_blank"
+                  rel="noreferrer"
+                  title={socialLabel(s.platform)}
+                  aria-label={socialLabel(s.platform)}
+                  className="grid h-9 w-9 place-items-center rounded-full border border-border-soft text-foreground/60 transition-colors hover:border-primary/40 hover:bg-surface hover:text-primary"
+                >
+                  <SocialGlyph platform={s.platform} />
+                </Link>
+              ))}
+            </div>
+          )}
+
+          {/* Full description — rich Leaflet document, else plain text */}
+          {detail?.richBody && detail.richBody.length > 0 ? (
+            <RichText blocks={detail.richBody} />
+          ) : (
+            detail?.blurb && (
+              <p className="mt-5 whitespace-pre-line text-[14px] leading-[1.6] text-foreground/75">
+                {detail.blurb}
+              </p>
+            )
           )}
 
           {/* Status + media badges */}
