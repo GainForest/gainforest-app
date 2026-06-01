@@ -114,14 +114,27 @@ body {
   font-family: var(--font-sans), system-ui, sans-serif;
 }
 
-/* Gentle cross-fade when toggling light/dark (skipped under reduced motion). */
-body {
-  transition: background-color 0.3s ease, color 0.3s ease;
+/* ── View Transition: circular reveal on theme toggle ───────────────────
+   Ported from broadlistening-frontend (originally bumicerts-monorepo).
+   ThemeToggle sets --theme-ripple-x/y to the click origin and calls
+   document.startViewTransition(...); this block disables the default
+   cross-fade, layers the new theme above the old, and starts its clip-path as
+   a 0px circle at that origin so an inline Web Animation can grow the circle
+   out to the far viewport corner (~1.2s) for a clean radial wipe. */
+::view-transition-group(root),
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
 }
-@media (prefers-reduced-motion: reduce) {
-  body {
-    transition: none;
-  }
+::view-transition-old(root) {
+  z-index: 1;
+}
+::view-transition-new(root) {
+  z-index: 2;
+  clip-path: circle(
+    0px at var(--theme-ripple-x, 0px) var(--theme-ripple-y, 0px)
+  );
 }
 
 @media (prefers-reduced-motion: reduce) {
