@@ -107,6 +107,7 @@ export function RecordExplorer({ kind }: { kind: RecordKind }) {
   const [hasMore, setHasMore] = useState(true);
   const [phase, setPhase] = useState<Phase>("idle");
   const [query, setQuery] = useState("");
+  const [sort, setSort] = useState<SortMode>("newest");
   const [occMedia, setOccMedia] = useState<OccurrenceFilter>("all");
   const [view, setView] = useState<"cards" | "map">("cards");
   const [walking, setWalking] = useState(false);
@@ -270,7 +271,7 @@ export function RecordExplorer({ kind }: { kind: RecordKind }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [occMedia, phase]);
 
-  const filtered = filterRecords(records, query);
+  const filtered = sortRecords(filterRecords(records, query), sort);
 
   return (
     <section className="bg-background">
@@ -348,6 +349,31 @@ export function RecordExplorer({ kind }: { kind: RecordKind }) {
                 {o.label}
               </button>
             ))}
+          </div>
+
+          {/* Sort: timestamp (newest/oldest) or alphabetical (A–Z / Z–A) */}
+          <div className="relative">
+            <select
+              value={sort}
+              onChange={(e) => setSort(e.target.value as SortMode)}
+              aria-label="Sort records"
+              className="appearance-none rounded-full border border-border-soft bg-surface py-2 pl-3.5 pr-8 text-[12.5px] font-medium text-foreground/70 outline-none transition-colors hover:text-foreground focus:border-primary/40"
+            >
+              <option value="newest">Newest first</option>
+              <option value="oldest">Oldest first</option>
+              <option value="az">A → Z</option>
+              <option value="za">Z → A</option>
+            </select>
+            <svg
+              aria-hidden
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-foreground/40"
+            >
+              <path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
           </div>
 
           {kind === "occurrence" && (
@@ -683,6 +709,46 @@ function filterRecords(records: ExplorerRecord[], query: string): ExplorerRecord
   const q = query.trim().toLowerCase();
   if (!q) return records;
   return records.filter((r) => haystack(r).includes(q));
+}
+
+// ── Sorting ──────────────────────────────────────────────────────────────
+//
+// Records arrive newest-first (createdAt DESC) from the indexer; this lets the
+// visitor re-sort the already-loaded slice by timestamp or alphabetically.
+
+type SortMode = "newest" | "oldest" | "az" | "za";
+
+function sortTimestamp(iso: string | null | undefined): number {
+  if (!iso) return 0;
+  const t = new Date(iso).getTime();
+  return Number.isFinite(t) ? t : 0;
+}
+
+/** Title used for alphabetical sort, per record kind. */
+function sortKey(r: ExplorerRecord): string {
+  if (r.kind === "occurrence") return (r.scientificName || r.vernacularName || "").toLowerCase();
+  if (r.kind === "site") return (r.name || "").toLowerCase();
+  return (r.title || "").toLowerCase();
+}
+
+function sortRecords(records: ExplorerRecord[], mode: SortMode): ExplorerRecord[] {
+  const arr = [...records];
+  switch (mode) {
+    case "oldest":
+      arr.sort((a, b) => sortTimestamp(a.createdAt) - sortTimestamp(b.createdAt));
+      break;
+    case "az":
+      arr.sort((a, b) => sortKey(a).localeCompare(sortKey(b)));
+      break;
+    case "za":
+      arr.sort((a, b) => sortKey(b).localeCompare(sortKey(a)));
+      break;
+    case "newest":
+    default:
+      arr.sort((a, b) => sortTimestamp(b.createdAt) - sortTimestamp(a.createdAt));
+      break;
+  }
+  return arr;
 }
 
 function haystack(r: ExplorerRecord): string {

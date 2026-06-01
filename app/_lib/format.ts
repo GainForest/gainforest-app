@@ -76,6 +76,21 @@ export function formatRelative(iso: string | null | undefined): string {
   return formatDate(iso);
 }
 
+/** Compact elapsed duration: 26000 → "26s", 445000 → "7m", 25500000 → "7h 5m". */
+export function formatDuration(ms: number | null | undefined): string {
+  if (ms == null || !Number.isFinite(ms) || ms < 0) return "";
+  const sec = Math.round(ms / 1000);
+  if (sec < 60) return `${sec}s`;
+  const min = Math.round(sec / 60);
+  if (min < 60) return `${min}m`;
+  const hr = Math.floor(min / 60);
+  const remMin = min % 60;
+  if (hr < 24) return remMin ? `${hr}h ${remMin}m` : `${hr}h`;
+  const day = Math.floor(hr / 24);
+  const remHr = hr % 24;
+  return remHr ? `${day}d ${remHr}h` : `${day}d`;
+}
+
 export function formatCoord(
   lat: number | string | null | undefined,
   lon: number | string | null | undefined,

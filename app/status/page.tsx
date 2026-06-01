@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { StatusSection } from "../_components/StatusSection";
-import { fetchStatus } from "../_lib/status";
+import { fetchStatusDetailed } from "../_lib/status";
 
 export const revalidate = 60;
 
@@ -12,6 +12,6 @@ export const metadata: Metadata = {
 };
 
 export default async function StatusPage() {
-  const status = await fetchStatus({ revalidate: 60 });
+  const status = await fetchStatusDetailed({ revalidate: 60 });
   return <StatusSection initial={status} />;
 }
