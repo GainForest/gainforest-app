@@ -157,6 +157,7 @@ const OCCURRENCE_NODE_FIELDS = `
   basisOfRecord recordedBy individualCount
   country countryCode locality decimalLatitude decimalLongitude
   occurrenceRemarks fieldNotes
+  thumbnailUrl speciesImageUrl
   imageEvidence { file { ref } }
   audioEvidence { file { ref } }
   videoEvidence { file { ref } }
@@ -164,8 +165,8 @@ const OCCURRENCE_NODE_FIELDS = `
 `;
 
 const OCCURRENCE_QUERY = `
-  query ExplorerOccurrences($first: Int!, $after: String) {
-    appGainforestDwcOccurrence(first: $first, after: $after, sortBy: createdAt, sortDirection: DESC) {
+  query ExplorerOccurrences($first: Int!, $after: String, $where: AppGainforestDwcOccurrenceWhereInput) {
+    appGainforestDwcOccurrence(first: $first, after: $after, where: $where, sortBy: createdAt, sortDirection: DESC) {
       totalCount
       pageInfo { hasNextPage endCursor }
       edges { node { ${OCCURRENCE_NODE_FIELDS} } }
@@ -200,6 +201,8 @@ type RawOccurrence = {
   decimalLongitude?: number | string | null;
   occurrenceRemarks?: string | null;
   fieldNotes?: string | null;
+  thumbnailUrl?: string | null;
+  speciesImageUrl?: string | null;
   imageEvidence?: { file?: { ref?: string | null } | null } | null;
   audioEvidence?: { file?: { ref?: string | null } | null } | null;
   videoEvidence?: { file?: { ref?: string | null } | null } | null;
@@ -207,8 +210,12 @@ type RawOccurrence = {
 };
 
 function mapOccurrence(n: RawOccurrence): OccurrenceRecord {
+  // Restor-sourced records carry an external photo URL (thumbnailUrl /
+  // speciesImageUrl, the same S3 link) rather than a PDS blob — render it
+  // directly, no getBlob round-trip needed.
+  const externalImage = n.thumbnailUrl?.trim() || n.speciesImageUrl?.trim() || null;
   const media: MediaKind[] = [];
-  if (n.imageEvidence?.file?.ref) media.push("image");
+  if (n.imageEvidence?.file?.ref || externalImage) media.push("image");
   if (n.audioEvidence?.file?.ref) media.push("audio");
   if (n.videoEvidence?.file?.ref) media.push("video");
   if (n.spectrogramEvidence?.file?.ref) media.push("spectrogram");
@@ -234,28 +241,29 @@ function mapOccurrence(n: RawOccurrence): OccurrenceRecord {
     eventDate: n.eventDate?.trim() || null,
     createdAt: n.createdAt,
     remarks: n.occurrenceRemarks?.trim() || n.fieldNotes?.trim() || null,
-    imageUrl: null,
+    imageUrl: externalImage,
     media,
   };
 }
 
 export type OccurrenceFilter = "all" | "image" | "audio";
 
-/** Pages to walk when a media filter is active before giving up. The indexer's
- *  newest pages skew heavily toward imageless bulk sensor uploads (e.g. long
- *  runs of "Ceriops tagal" with no evidence), so finding a screenful of
- *  media-bearing records means paging past them. Same reasoning as
- *  gainforest-app's SpecimenWall walk. */
+/** Pages to walk for filters that can't push down to the indexer ("audio").
+ *  The newest pages skew heavily toward imageless bulk sensor uploads (e.g.
+ *  long runs of "Ceriops tagal" with no evidence), so finding a screenful of
+ *  audio-bearing records means paging past them. The "image" filter no longer
+ *  walks — it uses a server-side `where` on thumbnailUrl (see filterWhere). */
 const MAX_WALK_PAGES = 18;
 
 async function fetchOccurrencePage(
   first: number,
   after: string | null,
   signal?: AbortSignal,
+  where?: Record<string, unknown>,
 ): Promise<{ nodes: RawOccurrence[]; cursor: string | null; hasNextPage: boolean }> {
   const data = await indexerQuery<{
     appGainforestDwcOccurrence?: Connection<RawOccurrence>;
-  }>(OCCURRENCE_QUERY, { first, after }, signal);
+  }>(OCCURRENCE_QUERY, { first, after, where: where ?? null }, signal);
   const conn = data?.appGainforestDwcOccurrence;
   const nodes = (conn?.edges ?? [])
     .map((e) => e?.node)
@@ -269,9 +277,20 @@ async function fetchOccurrencePage(
 
 function matchesFilter(n: RawOccurrence, media: OccurrenceFilter): boolean {
   if (media === "all") return true;
-  if (media === "image") return Boolean(n.imageEvidence?.file?.ref);
+  if (media === "image")
+    return Boolean(n.imageEvidence?.file?.ref || n.thumbnailUrl || n.speciesImageUrl);
   // "audio" includes spectrogram-bearing records too.
   return Boolean(n.audioEvidence?.file?.ref || n.spectrogramEvidence?.file?.ref);
+}
+
+/** Server-side `where` for a media filter, when one exists. Only the external
+ *  photo columns (thumbnailUrl/speciesImageUrl) are indexed scalars, so the
+ *  "image" filter pushes down to the indexer instead of walking pages. The
+ *  blob-evidence relations (imageEvidence/audioEvidence/…) aren't filterable,
+ *  so "audio" still walks client-side. */
+function filterWhere(media: OccurrenceFilter): Record<string, unknown> | undefined {
+  if (media === "image") return { thumbnailUrl: { isNull: false } };
+  return undefined;
 }
 
 export type OccurrenceWalkResult = {
@@ -283,11 +302,13 @@ export type OccurrenceWalkResult = {
 /**
  * Progressively walk the occurrence connection, collecting up to `target`
  * records matching the media filter and emitting them via `onProgress` as each
- * page resolves. Image refs are resolved per page so cards fill in as they are
- * found — essential because media-bearing records are sparse and clustered in
- * the newest pages, so a blocking fetch would leave the gallery blank for many
- * seconds. Mirrors gainforest-app's `walkOccurrences`. Returns the final
- * cursor + `hasMore` so "load more" continues the walk from where it stopped.
+ * page resolves. The "image" filter pushes a `where: { thumbnailUrl }` clause
+ * to the indexer so only photo-bearing records come back (8k of them, vs ~5 in
+ * the newest 2.5k records) — the gallery fills from one request instead of
+ * scanning thousands. "audio"/"all" still page client-side (those relations
+ * aren't filterable). PDS blob refs are resolved per page; external thumbnails
+ * render immediately. Returns the final cursor + `hasMore` so "load more"
+ * continues from where it stopped.
  */
 export async function walkOccurrences(opts: {
   media: OccurrenceFilter;
@@ -298,7 +319,10 @@ export async function walkOccurrences(opts: {
   signal?: AbortSignal;
 }): Promise<OccurrenceWalkResult> {
   const { media, target, signal } = opts;
-  const maxPages = opts.maxPages ?? MAX_WALK_PAGES;
+  const where = filterWhere(media);
+  // With a server-side filter every returned node already matches, so the
+  // target is reached in one or two pages — no need for the deep imageless walk.
+  const maxPages = opts.maxPages ?? (where ? 5 : MAX_WALK_PAGES);
   const pageSize = INDEXER_MAX_PAGE;
 
   const collected: OccurrenceRecord[] = [];
@@ -307,7 +331,7 @@ export async function walkOccurrences(opts: {
 
   for (let page = 0; page < maxPages; page++) {
     if (signal?.aborted) throw new DOMException("aborted", "AbortError");
-    const res = await fetchOccurrencePage(pageSize, cursor, signal);
+    const res = await fetchOccurrencePage(pageSize, cursor, signal, where);
     cursor = res.cursor;
     hasNextPage = res.hasNextPage;
 
@@ -317,6 +341,9 @@ export async function walkOccurrences(opts: {
       mapped = await resolveImages(
         mapped,
         (r) => {
+          // External-thumbnail records already have a usable imageUrl; only PDS
+          // blob evidence needs a getBlob resolution.
+          if (r.imageUrl) return null;
           const raw = matches.find((n) => n.rkey === r.rkey && n.did === r.did);
           const ref =
             raw?.imageEvidence?.file?.ref ?? raw?.spectrogramEvidence?.file?.ref ?? null;
