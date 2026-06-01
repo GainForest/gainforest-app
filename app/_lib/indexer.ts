@@ -751,7 +751,7 @@ type OccDetailNode = {
 };
 
 const OCCURRENCE_DETAIL_FIELDS = `
-  did scientificName scientificNameAuthorship vernacularName taxonRank taxonomicStatus
+  did createdAt scientificName scientificNameAuthorship vernacularName taxonRank taxonomicStatus
   kingdom phylum class order family genus specificEpithet infraspecificEpithet higherClassification gbifTaxonKey
   basisOfRecord occurrenceStatus individualCount organismQuantity organismQuantityType lifeStage sex reproductiveCondition behavior
   country countryCode stateProvince county municipality locality verbatimLocality
@@ -836,6 +836,7 @@ function buildOccurrenceDetail(n: OccDetailNode): RecordDetail {
       field("Observed", eventWhen || null),
       field("Identified by", f("identifiedBy")),
       field("Date identified", f("dateIdentified")),
+      field("Created", f("createdAt") ? formatDateTime(f("createdAt")!) : null, true),
     ]),
     section("Provenance", [
       field("Dataset", f("datasetName")),
@@ -1338,6 +1339,7 @@ function buildOrgDetail(n: OrgDetailNode): RecordDetail {
       field("Team size", num("teamSize") != null ? formatNumber(num("teamSize")) : null),
       field("Country", [countryFlagSafe(f("country")), f("country")].filter(Boolean).join(" ") || null),
       field("Active since", f("startDate") ? formatDate(f("startDate")!) : null),
+      field("Created", f("createdAt") ? formatDateTime(f("createdAt")!) : null, true),
     ]),
     section("Focus", [
       field("Ecosystems", list(n.ecosystemTypes), true),
