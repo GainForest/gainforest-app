@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type SyntheticEvent } from "react";
 import {
   resolveDidProfile,
   getCachedProfile,
@@ -8,6 +8,7 @@ import {
   type DidProfile,
 } from "../_lib/did-profile";
 import { shortDid, formatDate } from "../_lib/format";
+import { useAccountDrawer } from "./AccountDrawer";
 
 // Owner identity + created date, shown on every record card / row / drawer.
 //
@@ -45,6 +46,7 @@ export function AuthorChip({
     };
   }, [did]);
 
+  const { openAccount } = useAccountDrawer();
   const handle = profile?.handle ?? null;
   const avatar = avatarOverride ?? profile?.avatar ?? null;
   const primary = profile?.displayName || (handle ? `@${handle}` : shortDid(did));
@@ -54,7 +56,12 @@ export function AuthorChip({
   const primaryCls = size === "sm" ? "text-[12px]" : "text-[13px]";
 
   return (
-    <div className={`flex min-w-0 items-center gap-2 ${className}`} title={did}>
+    <button
+      type="button"
+      onClick={() => openAccount(did)}
+      title={`View account · ${did}`}
+      className={`-mx-1 flex w-full min-w-0 items-center gap-2 rounded-lg px-1 py-0.5 text-left transition-colors hover:bg-surface-sunken ${className}`}
+    >
       <Avatar did={did} handle={handle} avatar={avatar} className={av} />
       <div className="min-w-0 flex-1 leading-tight">
         <div className={`truncate font-medium text-foreground ${primaryCls}`}>{primary}</div>
@@ -71,7 +78,7 @@ export function AuthorChip({
           )}
         </div>
       </div>
-    </div>
+    </button>
   );
 }
 
@@ -134,11 +141,28 @@ export function OwnerBadge({
     };
   }, [did]);
 
+  const { openAccount } = useAccountDrawer();
   const handle = profile?.handle ?? null;
   const avatar = avatarOverride ?? profile?.avatar ?? null;
 
+  // Lives inside the card's <button>, so this is a role=button span that stops
+  // propagation — clicking the owner opens the account drawer, not the record.
+  const open = (e: SyntheticEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    openAccount(did);
+  };
   return (
-    <span className="inline-flex min-w-0 items-center gap-1.5" title={handle ? `@${handle}` : did}>
+    <span
+      role="button"
+      tabIndex={0}
+      onClick={open}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") open(e);
+      }}
+      className="inline-flex min-w-0 cursor-pointer items-center gap-1.5"
+      title={`View account${handle ? ` · @${handle}` : ""}`}
+    >
       <Avatar did={did} handle={handle} avatar={avatar} className="h-5 w-5 text-[9px]" />
       {handle ? (
         <span className="truncate text-[11px] font-medium text-foreground">@{handle}</span>
