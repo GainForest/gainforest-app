@@ -129,6 +129,9 @@ export function RecordExplorer({ kind }: { kind: RecordKind }) {
   const [siteSource, setSiteSource] = useState<SiteSourceFilter>("both");
   const [view, setView] = useState<"cards" | "map">("cards");
   const [walking, setWalking] = useState(false);
+  // Gate the first load until the URL has been read, so a shared link's filter
+  // params (media/source) are applied before the initial fetch.
+  const [hydrated, setHydrated] = useState(false);
   const [drawer, setDrawer] = useState<ExplorerRecord | null>(null);
   // `?record=` value awaiting resolution, so the URL keeps it while we fetch.
   const [pendingRecord, setPendingRecord] = useState<string | null>(null);
@@ -219,20 +222,28 @@ export function RecordExplorer({ kind }: { kind: RecordKind }) {
     [kind, occMedia, siteSource],
   );
 
-  // Load the first page on mount.
-  useEffect(() => {
-    load("first");
-    return () => controller.current?.abort();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // Hydrate state from a shared URL once: seed the search box from `?q=` and,
-  // if `?record=` is present, fetch that record directly (it may be outside
-  // the loaded page) and open its drawer.
+  // Hydrate all shareable state from the URL once, before the first load, so a
+  // shared link restores the exact view: search (`q`), card/map view (`view`),
+  // sort (`sort`), the occurrence media filter (`media`) or site source
+  // (`source`), and an open record (`record`). Filter params must land before
+  // the first fetch — the load effect below is gated on `hydrated`.
   useEffect(() => {
     const sp = new URLSearchParams(window.location.search);
     const q = sp.get("q");
     if (q) setQuery(q);
+    if (sp.get("view") === "map") setView("map");
+    const s = sp.get("sort");
+    if (s === "oldest" || s === "az" || s === "za") setSort(s);
+    if (kind === "occurrence") {
+      const m = sp.get("media");
+      if (m === "image" || m === "audio") setOccMedia(m);
+    }
+    if (kind === "site") {
+      const src = sp.get("source");
+      if (src === "gainforest" || src === "certified") setSiteSource(src);
+    }
+    setHydrated(true);
+
     const rec = sp.get("record");
     if (!rec) return;
     const uri = paramToUri(rec, kind);
@@ -250,9 +261,13 @@ export function RecordExplorer({ kind }: { kind: RecordKind }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Keep the URL in sync with the search query + open record so it can be
-  // shared/bookmarked. replaceState (not the router) avoids history spam and
-  // re-renders; debounced so typing doesn't thrash the address bar.
+  // Abort any in-flight load on unmount.
+  useEffect(() => () => controller.current?.abort(), []);
+
+  // Keep the URL in sync with every shareable control (search, view, sort,
+  // media/source filter, open record) so it can be shared/bookmarked.
+  // replaceState (not the router) avoids history spam and re-renders; debounced
+  // so typing doesn't thrash the address bar.
   useEffect(() => {
     if (firstUrlSyncRef.current) {
       firstUrlSyncRef.current = false;
@@ -262,6 +277,10 @@ export function RecordExplorer({ kind }: { kind: RecordKind }) {
       const params = new URLSearchParams();
       const q = query.trim();
       if (q) params.set("q", q);
+      if (view === "map") params.set("view", "map");
+      if (sort !== "newest") params.set("sort", sort);
+      if (kind === "occurrence" && occMedia !== "all") params.set("media", occMedia);
+      if (kind === "site" && siteSource !== "both") params.set("source", siteSource);
       if (drawer) params.set("record", recordParam(drawer));
       else if (pendingRecord) params.set("record", pendingRecord);
       const qs = params.toString();
@@ -269,7 +288,7 @@ export function RecordExplorer({ kind }: { kind: RecordKind }) {
       window.history.replaceState(null, "", url);
     }, 200);
     return () => clearTimeout(t);
-  }, [query, drawer, pendingRecord]);
+  }, [query, view, sort, occMedia, siteSource, drawer, pendingRecord, kind]);
 
   // Changing the occurrence media filter resets and re-walks.
   function changeMedia(next: OccurrenceFilter) {
@@ -295,11 +314,13 @@ export function RecordExplorer({ kind }: { kind: RecordKind }) {
     setPhase("idle");
   }
 
-  // After a filter reset drops us back to idle, kick off the new walk.
+  // First load (once hydrated) and any time a filter reset drops us back to
+  // idle, kick off a walk. Gated on `hydrated` so the URL's filter params are
+  // applied to the initial fetch.
   useEffect(() => {
-    if (phase === "idle" && records.length === 0) load("first");
+    if (hydrated && phase === "idle" && records.length === 0) load("first");
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [occMedia, siteSource, phase]);
+  }, [hydrated, occMedia, siteSource, phase]);
 
   const filtered = sortRecords(filterRecords(records, query), sort);
   // Stats + their trend series are derived from the full loaded set (not the

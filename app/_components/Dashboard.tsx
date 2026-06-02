@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import {
   fetchReceipts,
@@ -45,6 +45,29 @@ export function Dashboard() {
   const [orgCountry, setOrgCountry] = useState<Map<string, string>>(new Map());
   const [error, setError] = useState(false);
   const [period, setPeriod] = useState<Period>("all");
+  // Skip the first URL write so we don't strip params we just read in.
+  const firstUrlSyncRef = useRef(true);
+
+  // Restore the period from a shared `?period=` link, then keep it in sync so
+  // the selected tab can be shared/bookmarked.
+  useEffect(() => {
+    const p = new URLSearchParams(window.location.search).get("period");
+    if (p === "month" || p === "week") setPeriod(p);
+  }, []);
+  useEffect(() => {
+    if (firstUrlSyncRef.current) {
+      firstUrlSyncRef.current = false;
+      return;
+    }
+    const params = new URLSearchParams();
+    if (period !== "all") params.set("period", period);
+    const qs = params.toString();
+    window.history.replaceState(
+      null,
+      "",
+      qs ? `${window.location.pathname}?${qs}` : window.location.pathname,
+    );
+  }, [period]);
 
   useEffect(() => {
     const controller = new AbortController();
