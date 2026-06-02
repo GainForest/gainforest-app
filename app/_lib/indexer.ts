@@ -248,11 +248,10 @@ function mapOccurrence(n: RawOccurrence): OccurrenceRecord {
 
 export type OccurrenceFilter = "all" | "image" | "audio";
 
-/** Pages to walk for filters that can't push down to the indexer ("audio").
- *  The newest pages skew heavily toward imageless bulk sensor uploads (e.g.
- *  long runs of "Ceriops tagal" with no evidence), so finding a screenful of
- *  audio-bearing records means paging past them. The "image" filter no longer
- *  walks — it uses a server-side `where` on thumbnailUrl (see filterWhere). */
+/** Pages to walk when no server-side `where` applies (the "all" view paging
+ *  past sparse pages). Every media filter now pushes down to the indexer via a
+ *  presence `where` (see filterWhere), so they reach their target in a page or
+ *  two instead of walking. */
 const MAX_WALK_PAGES = 18;
 
 async function fetchOccurrencePage(
@@ -277,19 +276,21 @@ async function fetchOccurrencePage(
 
 function matchesFilter(n: RawOccurrence, media: OccurrenceFilter): boolean {
   if (media === "all") return true;
-  if (media === "image")
-    return Boolean(n.imageEvidence?.file?.ref || n.thumbnailUrl || n.speciesImageUrl);
+  // "image" means a real PDS blob photo (imageEvidence); the external Restor
+  // thumbnailUrl/speciesImageUrl links are no longer the filter target.
+  if (media === "image") return Boolean(n.imageEvidence?.file?.ref);
   // "audio" includes spectrogram-bearing records too.
   return Boolean(n.audioEvidence?.file?.ref || n.spectrogramEvidence?.file?.ref);
 }
 
-/** Server-side `where` for a media filter, when one exists. Only the external
- *  photo columns (thumbnailUrl/speciesImageUrl) are indexed scalars, so the
- *  "image" filter pushes down to the indexer instead of walking pages. The
- *  blob-evidence relations (imageEvidence/audioEvidence/…) aren't filterable,
- *  so "audio" still walks client-side. */
+/** Server-side `where` for a media filter. Since the indexer upgrade exposed
+ *  `PresenceFilterInput` on the blob-evidence relations, both filters push down
+ *  to the indexer instead of walking pages: "image" selects records that carry
+ *  a real PDS image blob (328k of them, vs 8k external thumbnails) and "audio"
+ *  selects records with an audio blob (47k). */
 function filterWhere(media: OccurrenceFilter): Record<string, unknown> | undefined {
-  if (media === "image") return { thumbnailUrl: { isNull: false } };
+  if (media === "image") return { imageEvidence: { isNull: false } };
+  if (media === "audio") return { audioEvidence: { isNull: false } };
   return undefined;
 }
 
@@ -302,13 +303,13 @@ export type OccurrenceWalkResult = {
 /**
  * Progressively walk the occurrence connection, collecting up to `target`
  * records matching the media filter and emitting them via `onProgress` as each
- * page resolves. The "image" filter pushes a `where: { thumbnailUrl }` clause
- * to the indexer so only photo-bearing records come back (8k of them, vs ~5 in
- * the newest 2.5k records) — the gallery fills from one request instead of
- * scanning thousands. "audio"/"all" still page client-side (those relations
- * aren't filterable). PDS blob refs are resolved per page; external thumbnails
- * render immediately. Returns the final cursor + `hasMore` so "load more"
- * continues from where it stopped.
+ * page resolves. The "image" and "audio" filters push a presence `where` clause
+ * (imageEvidence / audioEvidence isNull:false) to the indexer so only
+ * media-bearing records come back — the gallery fills from one request instead
+ * of scanning thousands of imageless bulk uploads. "all" still pages
+ * client-side. PDS blob refs are resolved per page; external thumbnails (on the
+ * sparser Restor records) render immediately. Returns the final cursor +
+ * `hasMore` so "load more" continues from where it stopped.
  */
 export async function walkOccurrences(opts: {
   media: OccurrenceFilter;
