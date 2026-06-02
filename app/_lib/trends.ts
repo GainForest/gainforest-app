@@ -13,16 +13,11 @@
  */
 
 import { INDEXER_URL, FACILITATOR_DID } from "./urls";
+import { ms, seriesFromIncrements, type MetricSeries } from "./series";
+
+export type { MetricSeries } from "./series";
 
 const REVALIDATE = 60 * 15; // 15 minutes, matches kpis.ts.
-
-/** A cumulative daily time series for one metric. */
-export type MetricSeries = {
-  /** ISO date axis (YYYY-MM-DD), oldest → newest. */
-  days: string[];
-  /** Cumulative value at the end of each day. Same length as `days`. */
-  values: number[];
-};
 
 export type ExplorerTrends = {
   bumicerts: MetricSeries | null;
@@ -30,52 +25,7 @@ export type ExplorerTrends = {
   totalRaised: MetricSeries | null;
 };
 
-const DAY_MS = 24 * 60 * 60 * 1000;
 const USD = new Set(["USD", "USDC"]);
-
-function ms(iso: string | null | undefined): number {
-  if (!iso) return NaN;
-  return new Date(iso).getTime();
-}
-
-/** Day axis (day-start epoch ms + ISO strings) spanning earliest → today. */
-function dayAxis(allTimes: number[]): { days: number[]; isoDays: string[] } {
-  const valid = allTimes.filter((t) => !Number.isNaN(t));
-  if (valid.length === 0) return { days: [], isoDays: [] };
-  const startDay = Math.floor(Math.min(...valid) / DAY_MS) * DAY_MS;
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const endDay = today.getTime();
-  const days: number[] = [];
-  for (let d = startDay; d <= endDay; d += DAY_MS) days.push(d);
-  return { days, isoDays: days.map((d) => new Date(d).toISOString().slice(0, 10)) };
-}
-
-/** Running total at the end of each day in `days`, from timestamped increments. */
-function cumulativeOnAxis(
-  days: number[],
-  events: { t: number; inc: number }[],
-): number[] {
-  const sorted = [...events].filter((e) => !Number.isNaN(e.t)).sort((a, b) => a.t - b.t);
-  const out: number[] = [];
-  let i = 0;
-  let acc = 0;
-  for (const day of days) {
-    const cutoff = day + DAY_MS;
-    while (i < sorted.length && sorted[i].t < cutoff) {
-      acc += sorted[i].inc;
-      i++;
-    }
-    out.push(acc);
-  }
-  return out;
-}
-
-function seriesFromIncrements(events: { t: number; inc: number }[]): MetricSeries | null {
-  const { days, isoDays } = dayAxis(events.map((e) => e.t));
-  if (days.length === 0) return null;
-  return { days: isoDays, values: cumulativeOnAxis(days, events) };
-}
 
 type Page<T> = { edges?: { node?: T | null }[] | null; pageInfo?: { hasNextPage?: boolean; endCursor?: string | null } | null };
 

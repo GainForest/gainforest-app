@@ -14,13 +14,22 @@ import {
 } from "../_lib/dashboard";
 import { DonationsChart } from "./DonationsChart";
 import { AuthorInline } from "./AuthorChip";
+import { StatCard } from "./MetricTrend";
 import { BUMICERTS_URL, accountHref, bumicertHref } from "../_lib/urls";
+import {
+  ms,
+  seriesFromIncrements,
+  seriesFromDistinct,
+  seriesFromAverage,
+} from "../_lib/series";
 import {
   formatUsd,
   formatNumber,
   formatDate,
   shortWallet,
 } from "../_lib/format";
+
+const USD = new Set(["USD", "USDC"]);
 
 type Period = "all" | "month" | "week";
 
@@ -83,6 +92,24 @@ export function Dashboard() {
     [receipts],
   );
 
+  // Cumulative / distinct / running-average trend series for each KPI, built
+  // from the (period-filtered) USD receipts so the sparklines + expand modals
+  // track the same figures the cards show.
+  const kpiSeries = useMemo(() => {
+    const usd = periodFiltered.filter((r) => USD.has(r.currency));
+    return {
+      totalRaised: seriesFromIncrements(usd.map((r) => ({ t: ms(r.occurredAt), inc: r.amount }))),
+      totalDonations: seriesFromIncrements(usd.map((r) => ({ t: ms(r.occurredAt), inc: 1 }))),
+      uniqueDonors: seriesFromDistinct(usd.map((r) => ({ t: ms(r.occurredAt), key: r.from?.id }))),
+      avgDonation: seriesFromAverage(usd.map((r) => ({ t: ms(r.occurredAt), value: r.amount }))),
+      activeBumicerts: seriesFromDistinct(usd.map((r) => ({ t: ms(r.occurredAt), key: r.bumicertUri }))),
+      countries: seriesFromDistinct(
+        usd.map((r) => ({ t: ms(r.occurredAt), key: r.orgDid ? orgCountry.get(r.orgDid) : null })),
+      ),
+    };
+  }, [periodFiltered, orgCountry]);
+
+
   const loading = receipts === null && !error;
 
   return (
@@ -114,12 +141,12 @@ export function Dashboard() {
           <div className="mt-10 flex flex-col gap-12">
             {/* KPIs */}
             <ul role="list" className="grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-border-soft bg-border-soft md:grid-cols-3 lg:grid-cols-6">
-              <Kpi label="Total raised" value={formatUsd(kpis.totalRaised)} sub="USD donations" />
-              <Kpi label="Donations" value={formatNumber(kpis.totalDonations)} sub="Receipts" />
-              <Kpi label="Unique donors" value={formatNumber(kpis.uniqueDonors)} sub="By DID or wallet" />
-              <Kpi label="Avg donation" value={formatUsd(kpis.avgDonation)} sub="Per transaction" />
-              <Kpi label="Active Bumicerts" value={formatNumber(kpis.activeBumicerts)} sub="Funded projects" />
-              <Kpi label="Countries" value={formatNumber(kpis.countries)} sub="Geographic reach" />
+              <StatCard label="Total raised" value={formatUsd(kpis.totalRaised)} sub="USD donations" series={kpiSeries.totalRaised} format="usd" />
+              <StatCard label="Donations" value={formatNumber(kpis.totalDonations)} sub="Receipts" series={kpiSeries.totalDonations} />
+              <StatCard label="Unique donors" value={formatNumber(kpis.uniqueDonors)} sub="By DID or wallet" series={kpiSeries.uniqueDonors} />
+              <StatCard label="Avg donation" value={formatUsd(kpis.avgDonation)} sub="Per transaction" series={kpiSeries.avgDonation} format="usd" />
+              <StatCard label="Active Bumicerts" value={formatNumber(kpis.activeBumicerts)} sub="Funded projects" series={kpiSeries.activeBumicerts} />
+              <StatCard label="Countries" value={formatNumber(kpis.countries)} sub="Geographic reach" series={kpiSeries.countries} />
             </ul>
 
             {/* Chart */}
@@ -298,18 +325,6 @@ function PeriodTabs({ period, onChange }: { period: Period; onChange: (p: Period
         </button>
       ))}
     </div>
-  );
-}
-
-function Kpi({ label, value, sub }: { label: string; value: string; sub: string }) {
-  return (
-    <li className="bg-surface p-4 lg:p-5">
-      <div className="text-[11px] font-medium uppercase tracking-[0.12em] text-foreground/50">{label}</div>
-      <div className="mt-1.5 font-garamond text-[26px] leading-none text-foreground lg:text-[32px]">
-        {value}
-      </div>
-      <div className="mt-1 text-[11.5px] text-foreground/45">{sub}</div>
-    </li>
   );
 }
 

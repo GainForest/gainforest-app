@@ -73,12 +73,16 @@ function MetricModal({
   sub,
   series,
   format,
+  valueLabel,
   onClose,
 }: {
   title: string;
   sub?: string;
   series: MetricSeries;
   format: (n: number) => string;
+  /** Headline number override so the modal matches the card's displayed value
+   *  (e.g. windowed/compact metrics where the last point differs). */
+  valueLabel?: string;
   onClose: () => void;
 }) {
   const [hover, setHover] = useState<number | null>(null);
@@ -145,7 +149,7 @@ function MetricModal({
             </h3>
             <div className="mt-1 text-[13.5px] text-muted-foreground">
               <span className="font-medium text-foreground tabular-nums">
-                {format(values[n - 1] ?? 0)}
+                {valueLabel ?? format(values[n - 1] ?? 0)}
               </span>
               {days.length > 0 && (
                 <span>
@@ -308,6 +312,93 @@ export function KpiCard({
           sub={sub}
           series={series!}
           format={FORMATTERS[format]}
+          valueLabel={value}
+          onClose={() => setOpen(false)}
+        />
+      )}
+    </li>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Stat card — the compact band variant (donations dashboard + record pages).
+// Same uppercase-label / Cormorant-value / sub markup the stat bands already
+// used, now with an inline sparkline + tap-to-expand modal when a series is
+// available. Degrades to a plain stat (no button, no chart) when it isn't.
+// ---------------------------------------------------------------------------
+
+export function StatCard({
+  value,
+  label,
+  sub,
+  series,
+  format = "number",
+}: {
+  value: string;
+  label: string;
+  sub: string;
+  series?: MetricSeries | null;
+  format?: FormatKey;
+}) {
+  const [open, setOpen] = useState(false);
+  const hasSeries = !!series && series.values.length > 1;
+
+  const body = (
+    <>
+      <div className="flex items-center gap-1.5">
+        <span className="text-[11px] font-medium uppercase tracking-[0.12em] text-foreground/50">
+          {label}
+        </span>
+        {hasSeries && (
+          <svg
+            aria-hidden
+            viewBox="0 0 24 24"
+            className="h-2.5 w-2.5 text-foreground/25 transition-colors group-hover:text-primary"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={2}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M15 3h6v6M14 10l7-7M9 21H3v-6M10 14l-7 7" />
+          </svg>
+        )}
+      </div>
+      <div className="mt-1.5 flex items-end justify-between gap-2">
+        <div
+          className={`font-garamond text-[26px] leading-none text-foreground lg:text-[32px] ${
+            hasSeries ? "transition-colors group-hover:text-primary" : ""
+          }`}
+        >
+          {value}
+        </div>
+        {hasSeries && <Sparkline values={series!.values} className="h-7 w-16 shrink-0 self-center" />}
+      </div>
+      <div className="mt-1 text-[11.5px] text-foreground/45">{sub}</div>
+    </>
+  );
+
+  return (
+    <li className="bg-surface p-4 lg:p-5">
+      {hasSeries ? (
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          aria-label={`Expand ${label} trend`}
+          className="group block w-full cursor-pointer text-left outline-none"
+        >
+          {body}
+        </button>
+      ) : (
+        body
+      )}
+      {open && hasSeries && (
+        <MetricModal
+          title={label}
+          sub={sub}
+          series={series!}
+          format={FORMATTERS[format]}
+          valueLabel={value}
           onClose={() => setOpen(false)}
         />
       )}

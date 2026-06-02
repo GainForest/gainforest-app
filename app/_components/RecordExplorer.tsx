@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import Image from "next/image";
 import {
   walkOccurrences,
@@ -19,7 +19,15 @@ import {
 import { RecordDrawer } from "./RecordDrawer";
 import { RecordMap } from "./RecordMap";
 import { OwnerBadge } from "./AuthorChip";
+import { StatCard, type FormatKey } from "./MetricTrend";
 import { isPdsBlobUrl } from "../_lib/pds";
+import {
+  ms,
+  seriesFromIncrements,
+  seriesFromDistinct,
+  dailyCountSeries,
+  type MetricSeries,
+} from "../_lib/series";
 import { formatNumber, countryFlag, shortDid, formatDate } from "../_lib/format";
 
 // Single-stream record explorer. One of the three GainForest record types
@@ -294,6 +302,10 @@ export function RecordExplorer({ kind }: { kind: RecordKind }) {
   }, [occMedia, siteSource, phase]);
 
   const filtered = sortRecords(filterRecords(records, query), sort);
+  // Stats + their trend series are derived from the full loaded set (not the
+  // search-filtered view), so memoize on `records` to avoid rebuilding the
+  // cumulative series on every keystroke.
+  const stats = useMemo(() => computeStats(records, kind), [records, kind]);
 
   return (
     <section className="bg-background">
@@ -321,7 +333,7 @@ export function RecordExplorer({ kind }: { kind: RecordKind }) {
             the donations dashboard KPI band (re-skinned for the light pages). */}
         {records.length > 0 && (
           <div className="mt-8">
-            <StatBand stats={computeStats(records, kind)} />
+            <StatBand stats={stats} />
           </div>
         )}
 
@@ -830,7 +842,13 @@ function haystack(r: ExplorerRecord): string {
 // loaded in the browser (the streams page in, so this grows as you "Load
 // more"). Time windows key off each record's createdAt.
 
-type Stat = { label: string; value: string; sub: string };
+type Stat = {
+  label: string;
+  value: string;
+  sub: string;
+  series?: MetricSeries | null;
+  format?: FormatKey;
+};
 
 function within(iso: string | null | undefined, days: number): boolean {
   if (!iso) return false;
@@ -842,6 +860,15 @@ function computeStats(records: ExplorerRecord[], kind: RecordKind): Stat[] {
   const last30 = records.filter((r) => within(r.createdAt, 30)).length;
   const last7 = records.filter((r) => within(r.createdAt, 7)).length;
   const n = (v: number) => formatNumber(v);
+  const times = records.map((r) => ms(r.createdAt));
+  // Cumulative count of all loaded records over their createdAt span.
+  const totalSeries = seriesFromIncrements(times.map((t) => ({ t, inc: 1 })));
+  // Daily-new activity lines for the rolling windows.
+  const win30 = dailyCountSeries(times, 30);
+  const win7 = dailyCountSeries(times, 7);
+  // Cumulative count of the subset matching `pred`.
+  const countWhere = (pred: (r: ExplorerRecord) => boolean) =>
+    seriesFromIncrements(records.map((r) => ({ t: ms(r.createdAt), inc: pred(r) ? 1 : 0 })));
 
   if (kind === "occurrence") {
     const occ = records as OccurrenceRecord[];
@@ -851,12 +878,29 @@ function computeStats(records: ExplorerRecord[], kind: RecordKind): Stat[] {
     ).size;
     const withMedia = occ.filter((r) => r.media.length > 0).length;
     return [
-      { label: "Records loaded", value: n(occ.length), sub: "Observations" },
-      { label: "Last 30 days", value: n(last30), sub: "New uploads" },
-      { label: "Last 7 days", value: n(last7), sub: "This week" },
-      { label: "Species", value: n(species), sub: "Distinct taxa" },
-      { label: "Countries", value: n(countries), sub: "Geographic reach" },
-      { label: "With media", value: n(withMedia), sub: "Photo or audio" },
+      { label: "Records loaded", value: n(occ.length), sub: "Observations", series: totalSeries },
+      { label: "Last 30 days", value: n(last30), sub: "New uploads", series: win30 },
+      { label: "Last 7 days", value: n(last7), sub: "This week", series: win7 },
+      {
+        label: "Species",
+        value: n(species),
+        sub: "Distinct taxa",
+        series: seriesFromDistinct(occ.map((r) => ({ t: ms(r.createdAt), key: r.scientificName }))),
+      },
+      {
+        label: "Countries",
+        value: n(countries),
+        sub: "Geographic reach",
+        series: seriesFromDistinct(
+          occ.map((r) => ({ t: ms(r.createdAt), key: r.countryCode || r.country })),
+        ),
+      },
+      {
+        label: "With media",
+        value: n(withMedia),
+        sub: "Photo or audio",
+        series: countWhere((r) => (r as OccurrenceRecord).media.length > 0),
+      },
     ];
   }
 
@@ -866,12 +910,27 @@ function computeStats(records: ExplorerRecord[], kind: RecordKind): Stat[] {
     const sites = b.reduce((s, r) => s + r.locationCount, 0);
     const withCover = b.filter((r) => r.imageUrl).length;
     return [
-      { label: "Records loaded", value: n(b.length), sub: "Bumicerts" },
-      { label: "Last 30 days", value: n(last30), sub: "New claims" },
-      { label: "Last 7 days", value: n(last7), sub: "This week" },
-      { label: "Contributors", value: n(contributors), sub: "Across claims" },
-      { label: "Certified sites", value: n(sites), sub: "Locations" },
-      { label: "With imagery", value: n(withCover), sub: "Has cover" },
+      { label: "Records loaded", value: n(b.length), sub: "Bumicerts", series: totalSeries },
+      { label: "Last 30 days", value: n(last30), sub: "New claims", series: win30 },
+      { label: "Last 7 days", value: n(last7), sub: "This week", series: win7 },
+      {
+        label: "Contributors",
+        value: n(contributors),
+        sub: "Across claims",
+        series: seriesFromIncrements(b.map((r) => ({ t: ms(r.createdAt), inc: r.contributorCount }))),
+      },
+      {
+        label: "Certified sites",
+        value: n(sites),
+        sub: "Locations",
+        series: seriesFromIncrements(b.map((r) => ({ t: ms(r.createdAt), inc: r.locationCount }))),
+      },
+      {
+        label: "With imagery",
+        value: n(withCover),
+        sub: "Has cover",
+        series: countWhere((r) => Boolean((r as BumicertRecord).imageUrl)),
+      },
     ];
   }
 
@@ -879,11 +938,21 @@ function computeStats(records: ExplorerRecord[], kind: RecordKind): Stat[] {
   const countries = new Set(s.map((r) => r.country).filter(Boolean)).size;
   const withImg = s.filter((r) => r.imageUrl).length;
   return [
-    { label: "Records loaded", value: n(s.length), sub: "Organizations" },
-    { label: "Last 30 days", value: n(last30), sub: "New sites" },
-    { label: "Last 7 days", value: n(last7), sub: "This week" },
-    { label: "Countries", value: n(countries), sub: "Geographic reach" },
-    { label: "With imagery", value: n(withImg), sub: "Cover or logo" },
+    { label: "Records loaded", value: n(s.length), sub: "Organizations", series: totalSeries },
+    { label: "Last 30 days", value: n(last30), sub: "New sites", series: win30 },
+    { label: "Last 7 days", value: n(last7), sub: "This week", series: win7 },
+    {
+      label: "Countries",
+      value: n(countries),
+      sub: "Geographic reach",
+      series: seriesFromDistinct(s.map((r) => ({ t: ms(r.createdAt), key: r.country }))),
+    },
+    {
+      label: "With imagery",
+      value: n(withImg),
+      sub: "Cover or logo",
+      series: countWhere((r) => Boolean((r as SiteRecord).imageUrl)),
+    },
   ];
 }
 
@@ -901,15 +970,14 @@ function StatBand({ stats }: { stats: Stat[] }) {
       className={`grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-border-soft bg-border-soft sm:grid-cols-3 ${lg}`}
     >
       {stats.map((s) => (
-        <li key={s.label} className="bg-surface p-4 lg:p-5">
-          <div className="text-[11px] font-medium uppercase tracking-[0.12em] text-foreground/50">
-            {s.label}
-          </div>
-          <div className="mt-1.5 font-garamond text-[26px] leading-none text-foreground lg:text-[32px]">
-            {s.value}
-          </div>
-          <div className="mt-1 text-[11.5px] text-foreground/45">{s.sub}</div>
-        </li>
+        <StatCard
+          key={s.label}
+          value={s.value}
+          label={s.label}
+          sub={s.sub}
+          series={s.series}
+          format={s.format}
+        />
       ))}
     </ul>
   );
