@@ -413,6 +413,22 @@ const ACTIVITY_QUERY = `
   }
 `;
 
+const ACTIVITY_BY_DID_QUERY = `
+  query ExplorerActivitiesByDid($did: String!, $first: Int!, $after: String) {
+    orgHypercertsClaimActivity(
+      where: { did: { eq: $did } }
+      first: $first
+      after: $after
+      sortBy: createdAt
+      sortDirection: DESC
+    ) {
+      totalCount
+      pageInfo { hasNextPage endCursor }
+      edges { node { ${ACTIVITY_NODE_FIELDS} } }
+    }
+  }
+`;
+
 const ACTIVITY_BY_URI_QUERY = `
   query ExplorerActivityByUri($uri: String!) {
     orgHypercertsClaimActivityByUri(uri: $uri) { ${ACTIVITY_NODE_FIELDS} }
@@ -469,14 +485,10 @@ function mapActivity(n: RawActivity): BumicertRecord {
   };
 }
 
-async function fetchActivityPage(
-  after: string | null,
+async function mapActivityConnection(
+  conn: Connection<RawActivity> | null | undefined,
   signal?: AbortSignal,
 ): Promise<Page<BumicertRecord>> {
-  const data = await indexerQuery<{
-    orgHypercertsClaimActivity?: Connection<RawActivity>;
-  }>(ACTIVITY_QUERY, { first: INDEXER_MAX_PAGE, after }, signal);
-  const conn = data?.orgHypercertsClaimActivity;
   const nodes = (conn?.edges ?? [])
     .map((e) => e?.node)
     .filter((n): n is RawActivity => Boolean(n?.did));
@@ -494,6 +506,27 @@ async function fetchActivityPage(
   };
 }
 
+async function fetchActivityPage(
+  after: string | null,
+  signal?: AbortSignal,
+): Promise<Page<BumicertRecord>> {
+  const data = await indexerQuery<{
+    orgHypercertsClaimActivity?: Connection<RawActivity>;
+  }>(ACTIVITY_QUERY, { first: INDEXER_MAX_PAGE, after }, signal);
+  return mapActivityConnection(data?.orgHypercertsClaimActivity, signal);
+}
+
+async function fetchActivityByDidPage(
+  did: string,
+  after: string | null,
+  signal?: AbortSignal,
+): Promise<Page<BumicertRecord>> {
+  const data = await indexerQuery<{
+    orgHypercertsClaimActivity?: Connection<RawActivity>;
+  }>(ACTIVITY_BY_DID_QUERY, { did, first: INDEXER_MAX_PAGE, after }, signal);
+  return mapActivityConnection(data?.orgHypercertsClaimActivity, signal);
+}
+
 /** Load up to `target` Bumicerts, paging the indexer's 1000-record cap. */
 export async function fetchBumicerts(
   target: number,
@@ -502,6 +535,17 @@ export async function fetchBumicerts(
   onProgress?: (records: BumicertRecord[]) => void,
 ): Promise<Page<BumicertRecord>> {
   return collectPaged(fetchActivityPage, target, after, signal, onProgress);
+}
+
+/** Load Bumicerts created by a single account DID. */
+export async function fetchBumicertsByDid(
+  did: string,
+  target = 1000,
+  after: string | null = null,
+  signal?: AbortSignal,
+  onProgress?: (records: BumicertRecord[]) => void,
+): Promise<Page<BumicertRecord>> {
+  return collectPaged((cursor, nextSignal) => fetchActivityByDidPage(did, cursor, nextSignal), target, after, signal, onProgress);
 }
 
 // ── 3. Project sites (organizations) ───────────────────────────────────────

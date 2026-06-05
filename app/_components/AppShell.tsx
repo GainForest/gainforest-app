@@ -370,7 +370,7 @@ function ManageSection({ authSession }: { authSession: AuthSession }) {
           id: "bumicerts-manage",
           text: "Bumicerts",
           Icon: CompassIcon,
-          href: `${BUMICERTS_URL}/account/${authSession.did}/bumicerts`,
+          href: `${accountHref(authSession.did)}/bumicerts`,
           pathCheck: { startsWith: "/account" },
         },
         {
@@ -378,8 +378,8 @@ function ManageSection({ authSession }: { authSession: AuthSession }) {
           id: "settings",
           text: "Settings",
           Icon: SettingsIcon,
-          href: `${BUMICERTS_URL}/settings`,
-          pathCheck: { startsWith: "/settings" },
+          href: `${accountHref(authSession.did)}/settings`,
+          pathCheck: { startsWith: "/account" },
         },
       ]
     : [];

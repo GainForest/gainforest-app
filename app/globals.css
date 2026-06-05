@@ -379,6 +379,54 @@ body {
   border-radius: 999px;
 }
 
+/* ── Bumicerts account/profile animations ─────────────────────────────── */
+.scrollbar-hidden {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.scrollbar-hidden::-webkit-scrollbar {
+  display: none;
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.animate-shimmer {
+  animation: shimmer 2s linear infinite;
+}
+
+@keyframes org-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes org-fade-in-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.org-animate {
+  animation-fill-mode: both;
+  animation-timing-function: cubic-bezier(0.25, 0.1, 0.25, 1);
+  animation-duration: 0.6s;
+}
+.org-fade-in { animation-name: org-fade-in; }
+.org-fade-in-up { animation-name: org-fade-in-up; }
+.org-delay-0 { animation-delay: 0s; }
+.org-delay-1 { animation-delay: 0.1s; }
+.org-delay-2 { animation-delay: 0.2s; }
+.org-delay-3 { animation-delay: 0.3s; }
+.org-delay-4 { animation-delay: 0.4s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .org-animate {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
 /* ---------------------------------------------------------------------------
    Map markers + clusters (Leaflet + markercluster). A single record is a small
    sage pin; nearby records collapse into a count bubble so a dense survey site

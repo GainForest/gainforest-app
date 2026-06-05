@@ -57,9 +57,9 @@ export function bumicertHref(did: string, rkey: string): string {
   return `${BUMICERTS_URL}/bumicert/${encodeURIComponent(did)}-${encodeURIComponent(rkey)}`;
 }
 
-/** Build a certs.gainforest.app account page URL from a DID or handle. */
+/** Build a local Bumiscan account page URL from a DID or handle. */
 export function accountHref(didOrHandle: string): string {
-  return `${BUMICERTS_URL}/account/${didOrHandle}`;
+  return `/account/${encodeURIComponent(didOrHandle)}`;
 }
 
 /** Block-explorer transaction URLs by payment network. Mirrors the

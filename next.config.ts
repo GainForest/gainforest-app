@@ -11,6 +11,7 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "**", pathname: "/xrpc/com.atproto.sync.getBlob/**" },
       { protocol: "https", hostname: "**", pathname: "/xrpc/com.atproto.sync.getBlob" },
       { protocol: "https", hostname: "certified.one" },
+      { protocol: "https", hostname: "**" },
     ],
   },
 };
