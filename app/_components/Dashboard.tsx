@@ -48,6 +48,7 @@ import {
 import { accountHref, bumicertHref } from "../_lib/urls";
 import { formatNumber, formatUsd, shortWallet } from "../_lib/format";
 import { AuthorInline } from "./AuthorChip";
+import { StatsTile } from "./StatsTile";
 
 const PERIODS: Array<{ id: Period; label: string }> = [
   { id: "all", label: "All Time" },
@@ -247,43 +248,19 @@ function KPISummary({ kpis }: { kpis: DashboardKpis }) {
 }
 
 function StatCard({ icon, label, value, sub }: { icon: React.ReactNode; label: string; value: string; sub: string }) {
-  return (
-    <div className="flex flex-col gap-3 rounded-2xl border border-border bg-background p-5">
-      <div className="flex items-center gap-2">
-        <span className="text-primary">{icon}</span>
-        <span className="text-xs font-medium tracking-[0.15em] text-muted-foreground uppercase">
-          {label}
-        </span>
-      </div>
-      <p
-        className="text-3xl leading-none font-light tracking-[-0.02em] text-foreground md:text-4xl"
-        style={{ fontFamily: "var(--font-garamond-var)" }}
-      >
-        {value}
-      </p>
-      <p className="text-xs text-muted-foreground">{sub}</p>
-    </div>
-  );
+  return <StatsTile icon={icon} label={label} value={value} detail={sub} accent={label === "Total Raised" || label === "Active Bumicerts"} />;
 }
 
 function GeographicReach({ stats }: { stats: GeoStats }) {
   return (
     <div className="grid grid-cols-1 gap-4 md:grid-cols-[280px_1fr]">
-      <div className="flex flex-col gap-3 rounded-2xl border border-border bg-background p-5">
-        <div className="flex items-center gap-2">
-          <GlobeIcon className="h-4 w-4 text-primary" />
-          <span className="text-xs font-medium tracking-[0.15em] text-muted-foreground uppercase">
-            Geographic Reach
-          </span>
-        </div>
-        <p
-          className="text-3xl leading-none font-light tracking-[-0.02em] text-foreground md:text-4xl"
-          style={{ fontFamily: "var(--font-garamond-var)" }}
-        >
-          {formatNumber(stats.countriesRepresented)}
-        </p>
-        <p className="text-xs text-muted-foreground">Countries represented</p>
-      </div>
+      <StatsTile
+        icon={<GlobeIcon />}
+        label="Geographic Reach"
+        value={formatNumber(stats.countriesRepresented)}
+        detail="Countries represented"
+        accent
+      />
 
       <div className="overflow-hidden rounded-2xl border border-border bg-background">
         <div className="flex items-center gap-2 px-5 pt-5 pb-3">

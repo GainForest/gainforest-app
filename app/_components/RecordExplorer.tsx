@@ -988,7 +988,7 @@ function StatBand({ stats }: { stats: Stat[] }) {
   return (
     <ul
       role="list"
-      className={`grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-border-soft bg-border-soft sm:grid-cols-3 ${lg}`}
+      className={`grid grid-cols-1 gap-4 sm:grid-cols-2 ${lg}`}
     >
       {stats.map((s) => (
         <StatCard

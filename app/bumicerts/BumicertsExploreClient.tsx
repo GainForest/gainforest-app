@@ -5,15 +5,18 @@ import { motion } from "framer-motion";
 import {
   ArrowUpDownIcon,
   ChevronDownIcon,
+  ImageIcon,
   LayoutGridIcon,
   LeafIcon,
   MapIcon,
   SearchIcon,
   SlidersHorizontalIcon,
+  UsersIcon,
 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { RecordDrawer } from "../_components/RecordDrawer";
 import { RecordMap } from "../_components/RecordMap";
+import { StatsTileGrid } from "../_components/StatsTile";
 import type { BumicertRecord, ExplorerRecord } from "../_lib/indexer";
 import { isPdsBlobUrl } from "../_lib/pds";
 
@@ -397,31 +400,24 @@ function StatsBand({
 }: {
   stats: Array<{ label: string; value: number; detail: string }>;
 }) {
+  const icons = [
+    <LayoutGridIcon key="projects" />,
+    <MapIcon key="places" />,
+    <UsersIcon key="contributors" />,
+    <ImageIcon key="photos" />,
+  ];
+
   return (
-    <div className="grid grid-cols-2 gap-px overflow-hidden rounded-3xl border border-border bg-border/80 shadow-2xl shadow-black/5 backdrop-blur md:grid-cols-4 dark:shadow-black/30">
-      {stats.map((stat) => (
-        <div key={stat.label} className="bg-card/90 px-4 py-4 sm:px-5 sm:py-5">
-          <div className="flex items-center gap-2">
-            <span className="h-1.5 w-1.5 rounded-full bg-primary" aria-hidden />
-            <span className="text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
-              {stat.label}
-            </span>
-          </div>
-          <div
-            className="mt-3 text-3xl font-light leading-none tracking-[-0.04em] text-foreground sm:text-4xl"
-            style={{ fontFamily: "var(--font-garamond-var)" }}
-          >
-            {formatStat(stat.value)}
-          </div>
-          <p
-            className="mt-2 text-sm leading-snug text-muted-foreground"
-            style={{ fontFamily: "var(--font-instrument-serif-var)", fontStyle: "italic" }}
-          >
-            {stat.detail}
-          </p>
-        </div>
-      ))}
-    </div>
+    <StatsTileGrid
+      columns={4}
+      items={stats.map((stat, index) => ({
+        label: stat.label,
+        value: formatStat(stat.value),
+        detail: stat.detail,
+        icon: icons[index] ?? <LeafIcon />,
+        accent: index % 2 === 0,
+      }))}
+    />
   );
 }
 

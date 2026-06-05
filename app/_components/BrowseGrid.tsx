@@ -110,16 +110,17 @@ export function BrowseGrid({
                     <p className="mt-4 text-sm leading-6 text-muted-foreground">{card.blurb}</p>
                   </div>
 
-                  <div className="mt-8 flex items-end justify-between gap-4 border-t border-border/70 pt-4">
-                    <div className="flex items-baseline gap-1.5">
-                      <span className="font-garamond text-3xl leading-none font-light text-foreground">
+                  <div className="mt-8 flex items-center justify-between gap-4 rounded-3xl bg-foreground/5 p-4 transition-colors group-hover:bg-foreground/[0.07]">
+                    <div className="min-w-0">
+                      <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                        {card.statLabel}
+                      </span>
+                      <span className="mt-1 block text-3xl font-semibold leading-none tracking-[-0.02em] text-foreground tabular-nums">
                         {card.stat}
                       </span>
-                      <span className="text-xs text-muted-foreground">{card.statLabel}</span>
                     </div>
-                    <span className="flex items-center gap-2 text-sm font-semibold text-foreground transition-colors group-hover:text-primary">
-                      Open
-                      <ArrowUpRightIcon className="size-3.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                    <span className="flex size-12 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary ring-1 ring-primary/10 transition-transform group-hover:scale-105">
+                      <ArrowUpRightIcon className="size-5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
                     </span>
                   </div>
                 </div>

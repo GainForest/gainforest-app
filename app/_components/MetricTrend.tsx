@@ -378,41 +378,44 @@ export function StatCard({
 
   const body = (
     <>
-      <div className="flex items-center gap-1.5">
-        <span className="text-[11px] font-medium uppercase tracking-[0.12em] text-foreground/50">
-          {label}
-        </span>
-        {hasSeries && (
-          <svg
-            aria-hidden
-            viewBox="0 0 24 24"
-            className="h-2.5 w-2.5 text-foreground/25 transition-colors group-hover:text-primary"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={2}
-            strokeLinecap="round"
-            strokeLinejoin="round"
+      <div className="absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-primary/25 to-transparent" />
+      <div className="flex items-start justify-between gap-4">
+        <div className="min-w-0">
+          <div className="flex items-center gap-1.5">
+            <span className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+              {label}
+            </span>
+            {hasSeries && (
+              <svg
+                aria-hidden
+                viewBox="0 0 24 24"
+                className="h-2.5 w-2.5 text-foreground/25 transition-colors group-hover:text-primary"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={2}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M15 3h6v6M14 10l7-7M9 21H3v-6M10 14l-7 7" />
+              </svg>
+            )}
+          </div>
+          <div
+            className={`mt-1 text-3xl font-semibold tracking-[-0.02em] tabular-nums text-foreground ${
+              hasSeries ? "transition-colors group-hover:text-primary" : ""
+            }`}
           >
-            <path d="M15 3h6v6M14 10l7-7M9 21H3v-6M10 14l-7 7" />
-          </svg>
-        )}
-      </div>
-      <div className="mt-1.5 flex items-end justify-between gap-2">
-        <div
-          className={`font-garamond text-[26px] leading-none text-foreground lg:text-[32px] ${
-            hasSeries ? "transition-colors group-hover:text-primary" : ""
-          }`}
-        >
-          {value}
+            {value}
+          </div>
+          <div className="mt-1 text-sm text-muted-foreground">{sub}</div>
         </div>
-        {hasSeries && <Sparkline values={series!.values} className="h-7 w-16 shrink-0 self-center" />}
+        {hasSeries && <Sparkline values={series!.values} className="h-10 w-20 shrink-0 self-center" />}
       </div>
-      <div className="mt-1 text-[11.5px] text-foreground/45">{sub}</div>
     </>
   );
 
   return (
-    <li className="bg-surface p-4 lg:p-5">
+    <li className="group relative overflow-hidden rounded-3xl bg-foreground/5 p-6 backdrop-blur transition-all duration-300 hover:-translate-y-0.5 hover:bg-foreground/[0.07]">
       {hasSeries ? (
         <button
           type="button"

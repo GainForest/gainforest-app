@@ -3,13 +3,25 @@
 import Image from "next/image";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowUpRightIcon, CameraIcon, LeafIcon, MapPinIcon } from "lucide-react";
+import {
+  ActivityIcon,
+  ArrowUpRightIcon,
+  BinocularsIcon,
+  Building2Icon,
+  CameraIcon,
+  CompassIcon,
+  DollarSignIcon,
+  LeafIcon,
+  MapPinIcon,
+  RadioTowerIcon,
+} from "lucide-react";
 import { useState } from "react";
 import type { DevicesLiveSummary } from "../_lib/devices";
 import type { ExplorerKpis } from "../_lib/kpis";
 import type { StatusSnapshot } from "../_lib/status";
 import { BUMICERTS_URL } from "../_lib/urls";
 import { formatCompact, formatUsd } from "../_lib/format";
+import { StatsTileGrid } from "./StatsTile";
 import { ThemeToggle } from "./ThemeToggle";
 
 type HomeLandingProps = {
@@ -280,32 +292,57 @@ function HomeStats({ kpis, status, devices }: HomeLandingProps) {
   const liveDevices = devices.configured && devices.total > 0 ? `${devices.healthy}/${devices.total}` : "—";
 
   const stats = [
-    { value: formatCompact(kpis.bumicerts), label: "Bumicerts", detail: "verified project stories" },
-    { value: formatCompact(kpis.sites), label: "Organizations", detail: "nature stewards" },
-    { value: formatCompact(kpis.occurrences), label: "Observations", detail: "biodiversity records" },
-    { value: formatUsd(kpis.totalRaised), label: "Funding raised", detail: "direct support tracked" },
-    { value: liveDevices, label: "Tainá devices", detail: "field heartbeats" },
-    { value: total > 0 ? `${operational}/${total}` : "—", label: "Systems online", detail: "live infrastructure" },
+    {
+      value: formatCompact(kpis.bumicerts),
+      label: "Bumicerts",
+      detail: "verified project stories",
+      href: "/bumicerts",
+      icon: <CompassIcon />,
+      accent: true,
+    },
+    {
+      value: formatCompact(kpis.sites),
+      label: "Organizations",
+      detail: "nature stewards",
+      href: "/organizations",
+      icon: <Building2Icon />,
+    },
+    {
+      value: formatCompact(kpis.occurrences),
+      label: "Observations",
+      detail: "biodiversity records",
+      href: "/observations",
+      icon: <BinocularsIcon />,
+    },
+    {
+      value: formatUsd(kpis.totalRaised),
+      label: "Funding raised",
+      detail: "direct support tracked",
+      href: "/leaderboard",
+      icon: <DollarSignIcon />,
+      accent: true,
+    },
+    {
+      value: liveDevices,
+      label: "Tainá devices",
+      detail: "field heartbeats",
+      href: "/devices",
+      icon: <RadioTowerIcon />,
+    },
+    {
+      value: total > 0 ? `${operational}/${total}` : "—",
+      label: "Systems online",
+      detail: "live infrastructure",
+      href: "/status",
+      icon: <ActivityIcon />,
+      accent: true,
+    },
   ];
 
   return (
     <section className="px-6 pb-8 pt-0 sm:px-12 md:px-6 md:pb-12">
-      <div className="mx-auto -mt-24 max-w-6xl overflow-hidden rounded-[2rem] border border-border bg-card/90 shadow-2xl shadow-foreground/5 backdrop-blur-xl">
-        <div className="grid grid-cols-2 gap-px bg-border/80 md:grid-cols-3 lg:grid-cols-6">
-          {stats.map((stat) => (
-            <Link
-              key={stat.label}
-              href={stat.label === "Tainá devices" ? "/devices" : stat.label === "Systems online" ? "/status" : stat.label === "Observations" ? "/observations" : stat.label === "Organizations" ? "/organizations" : "/bumicerts"}
-              className="group bg-card/95 px-4 py-5 transition-colors hover:bg-background"
-            >
-              <span className="text-[10px] font-semibold tracking-[0.16em] text-primary uppercase">{stat.label}</span>
-              <span className="font-garamond mt-3 block text-3xl leading-none font-light tracking-[-0.04em] text-foreground sm:text-4xl">
-                {stat.value}
-              </span>
-              <span className="mt-2 block text-sm leading-snug text-muted-foreground">{stat.detail}</span>
-            </Link>
-          ))}
-        </div>
+      <div className="mx-auto -mt-24 max-w-6xl rounded-[2rem] bg-background/65 p-2 shadow-sm shadow-primary/5 ring-1 ring-foreground/5 backdrop-blur-xl">
+        <StatsTileGrid items={stats} columns={6} />
       </div>
     </section>
   );

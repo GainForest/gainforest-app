@@ -237,22 +237,22 @@ function StatCard({
   return (
     <div className="group relative overflow-hidden rounded-3xl bg-foreground/5 p-6 backdrop-blur transition-all duration-300 hover:-translate-y-0.5 hover:bg-foreground/[0.07]">
       <div className="absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-primary/25 to-transparent" />
-      <div className="flex items-center gap-5">
-        <div className="flex size-16 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary ring-1 ring-primary/10 transition-transform duration-300 group-hover:scale-105">
-          {icon}
-        </div>
-        <div className="min-w-0">
+      <div className="min-w-0">
+        <div className="flex items-center gap-2">
+          <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary ring-1 ring-primary/10 transition-transform duration-300 group-hover:scale-105 [&_svg]:size-3.5">
+            {icon}
+          </span>
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">{label}</p>
-          <div
-            className={cn(
-              "mt-1 text-3xl font-semibold tracking-[-0.02em] tabular-nums",
-              accent ? "text-primary" : "text-foreground",
-            )}
-          >
-            {value}
-          </div>
-          <p className="mt-1 text-sm text-muted-foreground">{detail}</p>
         </div>
+        <div
+          className={cn(
+            "mt-3 text-3xl font-semibold tracking-[-0.02em] tabular-nums",
+            accent ? "text-primary" : "text-foreground",
+          )}
+        >
+          {value}
+        </div>
+        <p className="mt-1 text-sm text-muted-foreground">{detail}</p>
       </div>
     </div>
   );
