@@ -12,6 +12,7 @@ import {
 } from "../_lib/devices";
 import { TONE_DOT, TONE_TEXT } from "./StatusPill";
 import { formatRelative, formatNumber } from "../_lib/format";
+import { PictureHero } from "./PictureHero";
 
 // Field-Pi liveness board — a port of GainForest/pi-taina-monitor re-skinned
 // in the gainforest.earth editorial system. Seeds from the server snapshot
@@ -56,50 +57,37 @@ export function DeviceMonitor({ initial }: { initial: DevicesSnapshot }) {
 
   const { healthy, total } = devicesSummary(snapshot.devices);
 
+  const statusAction = snapshot.configured && total > 0 ? (
+    <div className="flex flex-col items-start gap-2 lg:items-end">
+      <div className="inline-flex items-center gap-2.5 rounded-full border border-border bg-background/65 px-4 py-2 shadow-sm shadow-primary/5 backdrop-blur-xl">
+        <span className={`relative inline-flex h-2.5 w-2.5 ${healthy === total ? "text-ok" : healthy === 0 ? "text-down" : "text-warn"}`}>
+          <span className="pulse-dot inline-block h-2.5 w-2.5 rounded-full bg-current" />
+        </span>
+        <span className="text-[14px] font-medium text-foreground">
+          {healthy} of {total} online
+        </span>
+      </div>
+      <span className="text-[12.5px] text-muted-foreground">
+        updated {timeAgo(snapshot.fetchedAt)}
+      </span>
+    </div>
+  ) : null;
+
   return (
-    <section className="bg-background">
-      <div className="mx-auto w-full max-w-[1280px] px-6 pt-10 pb-16 sm:px-10 lg:px-16 lg:pt-16 lg:pb-24">
-        {/* Header */}
-        <div className="flex flex-col gap-6 border-b border-border-soft pb-8 lg:flex-row lg:items-end lg:justify-between">
-          <div className="max-w-[640px]">
-            <span className="font-instrument text-[13px] uppercase tracking-[0.22em] text-foreground/55">
-              healthchecks.io
-            </span>
-            <h1 className="mt-3 font-garamond text-[34px] font-normal leading-[1.05] tracking-[-0.015em] text-foreground sm:text-[42px] lg:text-[50px]">
-              Tainá <span className="font-instrument italic">devices</span>
-            </h1>
-            <p className="mt-4 text-[15px] leading-[1.55] text-foreground/70 lg:text-[16px]">
-              Field Raspberry Pis running{" "}
-              <Link
-                href="https://github.com/GainForest/pi-taina"
-                target="_blank"
-                rel="noreferrer"
-                className="text-primary underline-offset-4 hover:underline"
-              >
-                Tainá
-              </Link>
-              . Each device pings healthchecks.io every 60s; this board reads
-              the last heartbeat plus the system and Tainá stats it embeds.
-            </p>
-          </div>
+    <section className="-mt-14 bg-background pb-20 md:pb-28">
+      <PictureHero
+        lightSrc="/assets/media/images/devices/devices-hero-light.png"
+        darkSrc="/assets/media/images/devices/devices-hero-dark.png"
+        imageAlt="Misty regenerative landscape for GainForest field devices"
+        eyebrow="healthchecks.io"
+        icon={<LeafGlyph />}
+        title="Tainá"
+        accent="devices"
+        lede="Field Raspberry Pis running Tainá ping every 60 seconds; this board reads their liveness, system vitals, uptime, and local draft queues."
+        actions={statusAction}
+      />
 
-          {snapshot.configured && total > 0 && (
-            <div className="flex flex-col items-start gap-2 lg:items-end">
-              <div className="inline-flex items-center gap-2.5 rounded-full border border-border-soft bg-surface px-4 py-2">
-                <span className={`relative inline-flex h-2.5 w-2.5 ${healthy === total ? "text-ok" : healthy === 0 ? "text-down" : "text-warn"}`}>
-                  <span className="pulse-dot inline-block h-2.5 w-2.5 rounded-full bg-current" />
-                </span>
-                <span className="text-[14px] font-medium text-foreground">
-                  {healthy} of {total} online
-                </span>
-              </div>
-              <span className="text-[12.5px] text-foreground/55">
-                updated {timeAgo(snapshot.fetchedAt)}
-              </span>
-            </div>
-          )}
-        </div>
-
+      <div className="relative z-10 mx-auto max-w-6xl px-6 pt-6">
         {!snapshot.configured ? (
           <NotConfigured />
         ) : snapshot.error && snapshot.devices.length === 0 ? (

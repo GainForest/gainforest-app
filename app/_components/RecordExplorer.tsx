@@ -29,6 +29,7 @@ import {
   type MetricSeries,
 } from "../_lib/series";
 import { formatNumber, countryFlag, shortDid, formatDate } from "../_lib/format";
+import { PictureHero } from "./PictureHero";
 
 // Single-stream record explorer. One of the three GainForest record types
 // (Darwin Core occurrences, project sites, Bumicerts) paged straight from
@@ -45,29 +46,37 @@ type KindMeta = {
   accent: string;
   lede: string;
   search: string;
+  heroLight: string;
+  heroDark: string;
 };
 
 const KIND_META: Record<RecordKind, KindMeta> = {
   occurrence: {
-    eyebrow: "app.gainforest.dwc.occurrence",
+    eyebrow: "Observations",
     title: "Species",
     accent: "observations",
-    lede: "Darwin Core occurrence records from Hyperindex, newest first. Image and audio evidence blobs are resolved per record from each owner's PDS.",
+    lede: "Browse Darwin Core records signed on the AT Protocol: photos, bioacoustics, taxonomy, and coordinates from the GainForest data commons.",
     search: "Filter by species, family, or country…",
+    heroLight: "/assets/media/images/observations/observations-hero-light.png",
+    heroDark: "/assets/media/images/observations/observations-hero-dark.png",
   },
   site: {
-    eyebrow: "app.gainforest.organization.info · app.certified.actor.organization",
+    eyebrow: "Project Sites",
     title: "Project",
     accent: "sites",
-    lede: "Registered organizations from two lexicons \u2014 GainForest org info (display name, country, cover/logo) and certified actor organizations (type + profile name/avatar). Filter to either source or browse both.",
+    lede: "Registered organizations from GainForest and certified actor profiles, with country, imagery, profile data, and mapped locations.",
     search: "Filter by organization or country…",
+    heroLight: "/assets/organizations/organizations-hero-light.png",
+    heroDark: "/assets/organizations/organizations-hero-dark.png",
   },
   bumicert: {
-    eyebrow: "org.hypercerts.claim.activity",
-    title: "",
-    accent: "Bumicerts",
-    lede: "Hypercert impact claim records: title, short description, contributors, certified locations, and cover image.",
+    eyebrow: "Explore Projects",
+    title: "Discover",
+    accent: "Regenerative Impact",
+    lede: "Browse projects from communities and organizations restoring ecosystems, strengthening livelihoods, and building a more resilient future.",
     search: "Filter Bumicerts by title or description…",
+    heroLight: "/images/explore/explore-hero-light.png",
+    heroDark: "/images/explore/explore-hero-dark.png",
   },
 };
 
@@ -329,37 +338,28 @@ export function RecordExplorer({ kind }: { kind: RecordKind }) {
   const stats = useMemo(() => computeStats(records, kind), [records, kind]);
 
   return (
-    <section className="bg-background">
-      <div className="mx-auto w-full max-w-[1480px] px-6 pt-10 pb-16 sm:px-10 lg:px-16 lg:pt-16 lg:pb-24">
-        {/* Header */}
-        <div className="max-w-[760px]">
-          <span className="font-instrument text-[13px] uppercase tracking-[0.22em] text-foreground/55">
-            {meta.eyebrow}
-          </span>
-          <h1 className="mt-3 font-garamond text-[34px] font-normal leading-[1.05] tracking-[-0.015em] text-foreground sm:text-[42px] lg:text-[50px]">
-            {meta.title ? (
-              <>
-                {meta.title} <span className="font-instrument italic">{meta.accent}</span>
-              </>
-            ) : (
-              <span className="font-instrument italic">{meta.accent}</span>
-            )}
-          </h1>
-          <p className="mt-4 text-[15px] leading-[1.55] text-foreground/70 lg:text-[16px]">
-            {meta.lede}
-          </p>
-        </div>
+    <section className="-mt-14 bg-background pb-20 md:pb-28">
+      <PictureHero
+        lightSrc={meta.heroLight}
+        darkSrc={meta.heroDark}
+        eyebrow={meta.eyebrow}
+        icon={<LeafGlyph />}
+        title={meta.title}
+        accent={meta.accent}
+        lede={meta.lede}
+        imageAlt={`${meta.eyebrow} nature landscape`}
+      />
 
-        {/* Stats overview — computed live from the loaded records, mirroring
-            the donations dashboard KPI band (re-skinned for the light pages). */}
+      <div className="relative z-10 mx-auto max-w-6xl px-6">
+        {/* Stats overview — computed live from the loaded records, matching the marketplace hero rhythm. */}
         {records.length > 0 && (
-          <div className="mt-8">
-            <StatBand stats={stats} />
+          <div className="relative z-20 -mt-10 px-3">
+            <StatBand stats={stats.slice(0, 4)} />
           </div>
         )}
 
         {/* Toolbar */}
-        <div className="mt-8 flex flex-wrap items-center gap-3 border-y border-border-soft py-3.5">
+        <div className="relative z-20 mt-5 flex flex-wrap items-center gap-3 px-3">
           <div className="relative flex-1" style={{ minWidth: "220px" }}>
             <svg
               aria-hidden
@@ -1005,6 +1005,14 @@ function StatBand({ stats }: { stats: Stat[] }) {
 }
 
 // ── Bits ───────────────────────────────────────────────────────────────────
+
+function LeafGlyph() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path d="M5 19c0-7 5-13 14-14 0 9-5 14-14 14zM5 19c3-3 6-5 9-6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
 
 function MediaIcon({ kind }: { kind: OccurrenceRecord["media"][number] }) {
   if (kind === "audio" || kind === "spectrogram") {

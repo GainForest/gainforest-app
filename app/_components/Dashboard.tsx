@@ -49,6 +49,7 @@ import { accountHref, bumicertHref } from "../_lib/urls";
 import { formatNumber, formatUsd, shortWallet } from "../_lib/format";
 import { AuthorInline } from "./AuthorChip";
 import { StatsTile } from "./StatsTile";
+import { PictureHero } from "./PictureHero";
 
 const PERIODS: Array<{ id: Period; label: string }> = [
   { id: "all", label: "All Time" },
@@ -132,27 +133,20 @@ export function Dashboard() {
 
 function DashboardShell({ children, periodFilter }: { children: React.ReactNode; periodFilter: React.ReactNode }) {
   return (
-    <section className="px-6 pt-6 pb-20 md:pb-28">
-      <div className="mx-auto max-w-6xl">
-        <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <div className="mb-2 flex items-center gap-2">
-              <BarChart3Icon className="h-4 w-4 text-primary" />
-              <p className="text-xs font-medium tracking-[0.15em] text-muted-foreground uppercase">
-                Platform Analytics
-              </p>
-            </div>
-            <h1
-              className="text-3xl leading-[1.1] font-light tracking-[-0.02em] text-foreground md:text-4xl lg:text-5xl"
-              style={{ fontFamily: "var(--font-garamond-var)" }}
-            >
-              Donations Dashboard
-            </h1>
-          </div>
-          <div className="shrink-0">{periodFilter}</div>
-        </div>
+    <section className="-mt-14 bg-background pb-20 md:pb-28">
+      <PictureHero
+        lightSrc="/assets/media/images/donations/donations-hero-light.png"
+        darkSrc="/assets/media/images/donations/donations-hero-dark.png"
+        imageAlt="Misty regenerative landscape for donations analytics"
+        eyebrow="Platform Analytics"
+        icon={<BarChart3Icon />}
+        title="Donations"
+        accent="Dashboard"
+        lede="Track platform-wide giving across Bumicerts: total raised, donor activity, geographic reach, funding trends, and recent transactions."
+        actions={periodFilter}
+      />
 
-        <div className="mb-8 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
+      <div className="relative z-10 mx-auto max-w-6xl px-6 pt-6">
         {children}
       </div>
     </section>
