@@ -21,6 +21,7 @@ import {
   accountHref,
   bumicertHref,
   hyperscanRecordHref,
+  localBumicertHref,
 } from "../_lib/urls";
 
 // Right-side detail sheet for any explorer record. Slides in over a dimmed
@@ -225,6 +226,17 @@ export function RecordDrawer({
 
           {/* Links */}
           <div className="mt-6 flex flex-col gap-2">
+            {record.kind === "bumicert" && (
+              <Link
+                href={localBumicertHref(record.did, record.rkey)}
+                className="group flex items-center justify-between rounded-xl border border-primary/30 bg-primary px-4 py-3 text-[14px] font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90"
+              >
+                <span>Open Bumiscan detail page</span>
+                <span aria-hidden className="transition-transform group-hover:translate-x-0.5">
+                  →
+                </span>
+              </Link>
+            )}
             {links.map((l) => (
               <Link
                 key={l.href}

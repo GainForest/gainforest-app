@@ -52,9 +52,14 @@ export const STATUS_URL = "https://gainforest-status.instatus.com";
  *  (apps/bumicerts/app/(marketplace)/dashboard/_components/DashboardClient.tsx). */
 export const FACILITATOR_DID = "did:plc:edod7rboajioq3jbyxsgeicc";
 
-/** Build a Bumicerts project page URL from a DID + rkey. */
+/** Build a Bumicerts marketplace project page URL from a DID + rkey. */
 export function bumicertHref(did: string, rkey: string): string {
   return `${BUMICERTS_URL}/bumicert/${encodeURIComponent(did)}-${encodeURIComponent(rkey)}`;
+}
+
+/** Build a local Bumiscan Bumicert detail page URL from a DID/handle + rkey. */
+export function localBumicertHref(didOrHandle: string, rkey: string): string {
+  return `/bumicert/${encodeURIComponent(didOrHandle)}/${encodeURIComponent(rkey)}`;
 }
 
 /** Build a local Bumiscan account page URL from a DID or handle. */

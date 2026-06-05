@@ -8,7 +8,7 @@ import {
   cardVariants,
 } from "@/components/bumicert/BumicertCard";
 import type { BumicertRecord } from "../../_lib/indexer";
-import { bumicertHref } from "../../_lib/urls";
+import { localBumicertHref } from "../../_lib/urls";
 
 const containerVariants = {
   hidden: {},
@@ -67,7 +67,7 @@ export function AccountBumicertsGrid({ bumicerts, organizationName, logoUrl }: O
       >
         {bumicerts.map((b) => (
           <motion.div key={b.id} variants={cardVariants} className="h-full">
-            <Link href={bumicertHref(b.did, b.rkey)} className="block h-full">
+            <Link href={localBumicertHref(b.did, b.rkey)} className="block h-full">
               <BumicertCardVisual
                 className="h-full"
                 coverImage={b.imageUrl}
