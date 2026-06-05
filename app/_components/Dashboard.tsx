@@ -1,429 +1,780 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
-  fetchReceipts,
-  fetchOrgCountryMap,
+  Area,
+  AreaChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
+import {
+  BarChart3Icon,
+  BuildingIcon,
+  ChevronDownIcon,
+  ChevronUpIcon,
+  ChevronsUpDownIcon,
+  ClockIcon,
+  DollarSignIcon,
+  ExternalLinkIcon,
+  GlobeIcon,
+  HashIcon,
+  LayoutGridIcon,
+  TrendingUpIcon,
+  UsersIcon,
+} from "lucide-react";
+import {
+  computeGeoStats,
   computeKpis,
-  computeTimeSeries,
-  computeTopDonors,
   computePerOrg,
   computeRecentTransactions,
-  type FundingReceipt,
+  computeTimeSeries,
+  computeTopDonors,
+  fetchOrgCountryMap,
+  fetchReceipts,
+  filterByPeriod,
+  type DashboardKpis,
+  type GeoStats,
+  type OrgRow,
+  type Period,
+  type TimeGranularity,
+  type TimePoint,
+  type TopDonor,
+  type TxRow,
 } from "../_lib/dashboard";
-import { DonationsChart } from "./DonationsChart";
+import { accountHref, bumicertHref } from "../_lib/urls";
+import { formatNumber, formatUsd, shortWallet } from "../_lib/format";
 import { AuthorInline } from "./AuthorChip";
-import { StatCard } from "./MetricTrend";
-import { BUMICERTS_URL, accountHref, bumicertHref } from "../_lib/urls";
-import {
-  ms,
-  seriesFromIncrements,
-  seriesFromDistinct,
-  seriesFromAverage,
-} from "../_lib/series";
-import {
-  formatUsd,
-  formatNumber,
-  formatDate,
-  shortWallet,
-} from "../_lib/format";
 
-const USD = new Set(["USD", "USDC"]);
+const PERIODS: Array<{ id: Period; label: string }> = [
+  { id: "all", label: "All Time" },
+  { id: "month", label: "Past 30 Days" },
+  { id: "week", label: "Past 7 Days" },
+];
 
-type Period = "all" | "month" | "week";
+const GRANULARITIES: TimeGranularity[] = ["day", "week", "month"];
 
-// Donations dashboard — a faithful port of the bumicerts marketplace
-// dashboard (certs.gainforest.app/en/dashboard). All funding receipts are
-// fetched once from the facilitator repo in the browser, then aggregated with
-// the same logic the live app uses. Rendered in the shared editorial theme
-// (cream in light mode, the ink black in dark mode) so it matches every other
-// page; the palette tokens flip with the site theme.
+const GRANULARITY_LABELS: Record<TimeGranularity, string> = {
+  day: "Daily",
+  week: "Weekly",
+  month: "Monthly",
+};
 
 export function Dashboard() {
-  const [receipts, setReceipts] = useState<FundingReceipt[] | null>(null);
-  const [orgCountry, setOrgCountry] = useState<Map<string, string>>(new Map());
+  const { period, setPeriod } = useDashboardPeriod();
+  const [granularity, setGranularity] = useState<TimeGranularity>("day");
+  const [receipts, setReceipts] = useState<Awaited<ReturnType<typeof fetchReceipts>> | null>(null);
+  const [orgCountryMap, setOrgCountryMap] = useState<Map<string, string>>(new Map());
   const [error, setError] = useState(false);
-  const [period, setPeriod] = useState<Period>("all");
-  // Skip the first URL write so we don't strip params we just read in.
-  const firstUrlSyncRef = useRef(true);
-
-  // Restore the period from a shared `?period=` link, then keep it in sync so
-  // the selected tab can be shared/bookmarked.
-  useEffect(() => {
-    const p = new URLSearchParams(window.location.search).get("period");
-    if (p === "month" || p === "week") setPeriod(p);
-  }, []);
-  useEffect(() => {
-    if (firstUrlSyncRef.current) {
-      firstUrlSyncRef.current = false;
-      return;
-    }
-    const params = new URLSearchParams();
-    if (period !== "all") params.set("period", period);
-    const qs = params.toString();
-    window.history.replaceState(
-      null,
-      "",
-      qs ? `${window.location.pathname}?${qs}` : window.location.pathname,
-    );
-  }, [period]);
 
   useEffect(() => {
     const controller = new AbortController();
     let cancelled = false;
-    Promise.all([
-      fetchReceipts(controller.signal),
-      fetchOrgCountryMap(controller.signal),
-    ])
-      .then(([r, m]) => {
+
+    Promise.all([fetchReceipts(controller.signal), fetchOrgCountryMap(controller.signal)])
+      .then(([nextReceipts, nextOrgCountryMap]) => {
         if (cancelled) return;
-        setReceipts(r);
-        setOrgCountry(m);
+        setReceipts(nextReceipts);
+        setOrgCountryMap(nextOrgCountryMap);
       })
       .catch((err) => {
-        if ((err as Error).name === "AbortError") return;
-        if (!cancelled) setError(true);
+        if ((err as Error).name === "AbortError" || cancelled) return;
+        setError(true);
       });
+
     return () => {
       cancelled = true;
       controller.abort();
     };
   }, []);
 
-  const periodFiltered = useMemo(() => {
-    if (!receipts) return [];
-    if (period === "all") return receipts;
-    const ms = period === "week" ? 7 * 86_400_000 : 30 * 86_400_000;
-    const cutoff = Date.now() - ms;
-    return receipts.filter((r) => {
-      if (!r.occurredAt) return false;
-      const t = new Date(r.occurredAt).getTime();
-      return Number.isFinite(t) && t >= cutoff;
-    });
-  }, [receipts, period]);
-
-  const kpis = useMemo(
-    () => computeKpis(periodFiltered, orgCountry),
-    [periodFiltered, orgCountry],
+  const allReceipts = receipts ?? [];
+  const periodFiltered = useMemo(() => filterByPeriod(allReceipts, period), [allReceipts, period]);
+  const kpis = useMemo(() => computeKpis(periodFiltered), [periodFiltered]);
+  const geoStats = useMemo(() => computeGeoStats(orgCountryMap), [orgCountryMap]);
+  const timeSeries = useMemo(
+    () => computeTimeSeries(periodFiltered, granularity),
+    [periodFiltered, granularity],
   );
-  const timeSeries = useMemo(() => computeTimeSeries(periodFiltered), [periodFiltered]);
-  const topDonors = useMemo(() => computeTopDonors(periodFiltered, 15), [periodFiltered]);
+  const topDonors = useMemo(() => computeTopDonors(periodFiltered, 50), [periodFiltered]);
   const perOrg = useMemo(() => computePerOrg(periodFiltered), [periodFiltered]);
-  const recentTx = useMemo(
-    () => computeRecentTransactions(receipts ?? [], 30),
-    [receipts],
-  );
-
-  // Cumulative / distinct / running-average trend series for each KPI, built
-  // from the (period-filtered) USD receipts so the sparklines + expand modals
-  // track the same figures the cards show.
-  const kpiSeries = useMemo(() => {
-    const usd = periodFiltered.filter((r) => USD.has(r.currency));
-    return {
-      totalRaised: seriesFromIncrements(usd.map((r) => ({ t: ms(r.occurredAt), inc: r.amount }))),
-      totalDonations: seriesFromIncrements(usd.map((r) => ({ t: ms(r.occurredAt), inc: 1 }))),
-      uniqueDonors: seriesFromDistinct(usd.map((r) => ({ t: ms(r.occurredAt), key: r.from?.id }))),
-      avgDonation: seriesFromAverage(usd.map((r) => ({ t: ms(r.occurredAt), value: r.amount }))),
-      activeBumicerts: seriesFromDistinct(usd.map((r) => ({ t: ms(r.occurredAt), key: r.bumicertUri }))),
-      countries: seriesFromDistinct(
-        usd.map((r) => ({ t: ms(r.occurredAt), key: r.orgDid ? orgCountry.get(r.orgDid) : null })),
-      ),
-    };
-  }, [periodFiltered, orgCountry]);
-
-
-  const loading = receipts === null && !error;
+  const recentTx = useMemo(() => computeRecentTransactions(allReceipts, 50), [allReceipts]);
 
   return (
-    <section id="dashboard" className="scroll-mt-20 bg-background text-foreground">
-      <div className="mx-auto w-full max-w-[1280px] px-6 py-16 sm:px-10 lg:px-16 lg:py-24">
-        {/* Header */}
-        <div className="flex flex-col gap-6 border-b border-border-soft pb-8 lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <span className="font-instrument text-[13px] uppercase tracking-[0.22em] text-foreground/55">
-              org.hypercerts.funding.receipt
-            </span>
-            <h2 className="mt-3 font-garamond text-[34px] font-normal leading-[1.05] tracking-[-0.015em] text-foreground sm:text-[42px] lg:text-[50px]">
-              Donations <span className="font-instrument italic">dashboard</span>
-            </h2>
-            <p className="mt-4 max-w-[560px] text-[15px] leading-[1.55] text-foreground/70 lg:text-[16px]">
-              On-chain funding receipts from the facilitator repo, aggregated
-              live. USD/USDC only; figures mirror the indexer and may lag the
-              chain.
-            </p>
+    <DashboardShell periodFilter={<PeriodFilter period={period} onPeriodChange={setPeriod} />}>
+      {error ? (
+        <DashboardError />
+      ) : receipts === null ? (
+        <DashboardSkeleton />
+      ) : (
+        <div className="flex flex-col gap-12">
+          <KPISummary kpis={kpis} />
+          <GeographicReach stats={geoStats} />
+          <DonationsVolumeChart
+            data={timeSeries}
+            granularity={granularity}
+            onGranularityChange={setGranularity}
+          />
+          <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
+            <TopDonorsTable rows={topDonors} />
+            <OrganizationsTable rows={perOrg} />
           </div>
-          <PeriodTabs period={period} onChange={setPeriod} />
+          <RecentTransactionsTable rows={recentTx} />
+        </div>
+      )}
+    </DashboardShell>
+  );
+}
+
+function DashboardShell({ children, periodFilter }: { children: React.ReactNode; periodFilter: React.ReactNode }) {
+  return (
+    <section className="px-6 pt-6 pb-20 md:pb-28">
+      <div className="mx-auto max-w-6xl">
+        <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <div className="mb-2 flex items-center gap-2">
+              <BarChart3Icon className="h-4 w-4 text-primary" />
+              <p className="text-xs font-medium tracking-[0.15em] text-muted-foreground uppercase">
+                Platform Analytics
+              </p>
+            </div>
+            <h1
+              className="text-3xl leading-[1.1] font-light tracking-[-0.02em] text-foreground md:text-4xl lg:text-5xl"
+              style={{ fontFamily: "var(--font-garamond-var)" }}
+            >
+              Donations Dashboard
+            </h1>
+          </div>
+          <div className="shrink-0">{periodFilter}</div>
         </div>
 
-        {error ? (
-          <DashError />
-        ) : loading ? (
-          <DashSkeleton />
-        ) : (
-          <div className="mt-10 flex flex-col gap-12">
-            {/* KPIs */}
-            <ul role="list" className="grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-border-soft bg-border-soft md:grid-cols-3 lg:grid-cols-6">
-              <StatCard label="Total raised" value={formatUsd(kpis.totalRaised)} sub="USD donations" series={kpiSeries.totalRaised} format="usd" />
-              <StatCard label="Donations" value={formatNumber(kpis.totalDonations)} sub="Receipts" series={kpiSeries.totalDonations} />
-              <StatCard label="Unique donors" value={formatNumber(kpis.uniqueDonors)} sub="By DID or wallet" series={kpiSeries.uniqueDonors} />
-              <StatCard label="Avg donation" value={formatUsd(kpis.avgDonation)} sub="Per transaction" series={kpiSeries.avgDonation} format="usd" />
-              <StatCard label="Active Bumicerts" value={formatNumber(kpis.activeBumicerts)} sub="Funded projects" series={kpiSeries.activeBumicerts} />
-              <StatCard label="Countries" value={formatNumber(kpis.countries)} sub="Geographic reach" series={kpiSeries.countries} />
-            </ul>
-
-            {/* Chart */}
-            <div>
-              <h3 className="mb-3 font-garamond text-[20px] text-foreground">
-                Donation volume over time
-              </h3>
-              <DonationsChart data={timeSeries} />
-            </div>
-
-            {/* Top donors + orgs */}
-            <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
-              <Panel title="Top donors" caption={`${topDonors.length} shown`}>
-                <table className="w-full text-[13px]">
-                  <thead>
-                    <tr className="text-left text-foreground/55">
-                      <th className="py-2 pr-2 font-medium">#</th>
-                      <th className="py-2 pr-2 font-medium">Donor</th>
-                      <th className="py-2 pr-2 text-right font-medium">Total</th>
-                      <th className="py-2 text-right font-medium">Gifts</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {topDonors.map((d) => (
-                      <tr key={d.id} className="border-t border-border-soft">
-                        <td className="py-2 pr-2 tabular-nums text-foreground/55">{d.rank}</td>
-                        <td className="py-2 pr-2">
-                          <DonorCell id={d.id} type={d.type} />
-                        </td>
-                        <td className="py-2 pr-2 text-right font-mono tabular-nums text-foreground">
-                          {formatUsd(d.total)}
-                        </td>
-                        <td className="py-2 text-right tabular-nums text-foreground/70">{d.count}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </Panel>
-
-              <Panel title="By organization" caption={`${perOrg.length} funded`}>
-                <table className="w-full text-[13px]">
-                  <thead>
-                    <tr className="text-left text-foreground/55">
-                      <th className="py-2 pr-2 font-medium">Organization</th>
-                      <th className="py-2 pr-2 text-right font-medium">Raised</th>
-                      <th className="py-2 pr-2 text-right font-medium">Certs</th>
-                      <th className="py-2 text-right font-medium">Donors</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {perOrg.map((o) => (
-                      <tr key={o.orgDid} className="border-t border-border-soft">
-                        <td className="py-2 pr-2">
-                          <Link
-                            href={accountHref(o.orgDid)}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="underline-offset-2 hover:underline"
-                          >
-                            <AuthorInline did={o.orgDid} />
-                          </Link>
-                        </td>
-                        <td className="py-2 pr-2 text-right font-mono tabular-nums text-foreground">
-                          {formatUsd(o.total)}
-                        </td>
-                        <td className="py-2 pr-2 text-right tabular-nums text-foreground/70">{o.bumicerts}</td>
-                        <td className="py-2 text-right tabular-nums text-foreground/70">{o.donors}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </Panel>
-            </div>
-
-            {/* Recent transactions */}
-            <Panel title="Recent transactions" caption="Latest 30 donations · all time">
-              <div className="thin-scroll overflow-x-auto">
-                <table className="w-full min-w-[560px] text-[13px]">
-                  <thead>
-                    <tr className="text-left text-foreground/55">
-                      <th className="py-2 pr-3 font-medium">Date</th>
-                      <th className="py-2 pr-3 font-medium">Donor</th>
-                      <th className="py-2 pr-3 text-right font-medium">Amount</th>
-                      <th className="py-2 pr-3 font-medium">Bumicert</th>
-                      <th className="py-2 font-medium">Tx</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {recentTx.map((t) => (
-                      <tr key={t.uri} className="border-t border-border-soft">
-                        <td className="whitespace-nowrap py-2 pr-3 text-foreground/70">
-                          {t.date ? formatDate(t.date) : "—"}
-                        </td>
-                        <td className="py-2 pr-3">
-                          {t.donor ? <DonorCell id={t.donor.id} type={t.donor.type} /> : <span className="text-foreground/55">Unknown</span>}
-                        </td>
-                        <td className="whitespace-nowrap py-2 pr-3 text-right font-mono tabular-nums text-foreground">
-                          {formatUsd(t.amount)}
-                        </td>
-                        <td className="py-2 pr-3">
-                          {t.bumicertDid && t.bumicertRkey ? (
-                            <Link
-                              href={bumicertHref(t.bumicertDid, t.bumicertRkey)}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="font-mono text-primary underline-offset-2 hover:text-primary-dark hover:underline"
-                            >
-                              {t.bumicertRkey.slice(-7)}
-                            </Link>
-                          ) : (
-                            <span className="text-foreground/55">—</span>
-                          )}
-                        </td>
-                        <td className="py-2">
-                          {t.txUrl ? (
-                            <Link
-                              href={t.txUrl}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="font-mono text-foreground/60 underline-offset-2 hover:text-primary hover:underline"
-                            >
-                              {t.txHash ? `${t.txHash.slice(0, 6)}…${t.txHash.slice(-4)}` : "view"}
-                            </Link>
-                          ) : (
-                            <span className="text-foreground/55">—</span>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </Panel>
-
-            <div className="flex justify-center">
-              <Link
-                href={`${BUMICERTS_URL}/en/dashboard`}
-                target="_blank"
-                rel="noreferrer"
-                className="group inline-flex items-center gap-1.5 text-[13.5px] font-medium text-foreground/70 transition-colors hover:text-primary"
-              >
-                Open the full dashboard on Bumicerts
-                <span aria-hidden className="transition-transform group-hover:translate-x-0.5">↗</span>
-              </Link>
-            </div>
-          </div>
-        )}
+        <div className="mb-8 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
+        {children}
       </div>
     </section>
   );
 }
 
-// ── Bits ───────────────────────────────────────────────────────────────────
+function useDashboardPeriod() {
+  const [period, setPeriodState] = useState<Period>("all");
+  const firstUrlSyncRef = useRef(true);
 
-function PeriodTabs({ period, onChange }: { period: Period; onChange: (p: Period) => void }) {
-  const opts: Array<{ id: Period; label: string }> = [
-    { id: "all", label: "All time" },
-    { id: "month", label: "30 days" },
-    { id: "week", label: "7 days" },
-  ];
+  useEffect(() => {
+    const value = new URLSearchParams(window.location.search).get("period");
+    if (value === "month" || value === "week" || value === "all") {
+      setPeriodState(value);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (firstUrlSyncRef.current) {
+      firstUrlSyncRef.current = false;
+      return;
+    }
+    const params = new URLSearchParams(window.location.search);
+    if (period === "all") params.delete("period");
+    else params.set("period", period);
+    const query = params.toString();
+    window.history.replaceState(null, "", query ? `${window.location.pathname}?${query}` : window.location.pathname);
+  }, [period]);
+
+  return { period, setPeriod: setPeriodState };
+}
+
+function PeriodFilter({ period, onPeriodChange }: { period: Period; onPeriodChange: (period: Period) => void }) {
   return (
-    <div className="inline-flex rounded-full border border-border-soft bg-surface p-1">
-      {opts.map((o) => (
-        <button
-          key={o.id}
-          type="button"
-          onClick={() => onChange(o.id)}
-          aria-pressed={period === o.id}
-          className={`rounded-full px-3.5 py-1.5 text-[12.5px] font-medium transition-colors ${
-            period === o.id
-              ? "bg-foreground/[0.08] text-foreground"
-              : "text-foreground/60 hover:text-foreground"
-          }`}
+    <div className="flex items-center gap-1 rounded-full border border-border bg-muted/30 p-1">
+      {PERIODS.map((item) => {
+        const active = period === item.id;
+        return (
+          <button
+            key={item.id}
+            type="button"
+            onClick={() => onPeriodChange(item.id)}
+            className={[
+              "rounded-full px-3 py-1 text-xs font-medium transition-all duration-200",
+              active
+                ? "bg-primary text-primary-foreground shadow-sm"
+                : "text-muted-foreground hover:text-foreground",
+            ].join(" ")}
+          >
+            {item.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function KPISummary({ kpis }: { kpis: DashboardKpis }) {
+  return (
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
+      <StatCard
+        icon={<DollarSignIcon className="h-4 w-4" />}
+        label="Total Raised"
+        value={formatUsd(kpis.totalRaised)}
+        sub="All USD donations"
+      />
+      <StatCard
+        icon={<HashIcon className="h-4 w-4" />}
+        label="Total Donations"
+        value={formatNumber(kpis.totalDonations)}
+        sub="Receipts recorded"
+      />
+      <StatCard
+        icon={<UsersIcon className="h-4 w-4" />}
+        label="Unique Donors"
+        value={formatNumber(kpis.uniqueDonors)}
+        sub="By DID or wallet"
+      />
+      <StatCard
+        icon={<TrendingUpIcon className="h-4 w-4" />}
+        label="Avg Donation"
+        value={formatUsd(kpis.avgDonation)}
+        sub="Per transaction"
+      />
+      <StatCard
+        icon={<LayoutGridIcon className="h-4 w-4" />}
+        label="Active Bumicerts"
+        value={formatNumber(kpis.activeBumicerts)}
+        sub="Have received funds"
+      />
+    </div>
+  );
+}
+
+function StatCard({ icon, label, value, sub }: { icon: React.ReactNode; label: string; value: string; sub: string }) {
+  return (
+    <div className="flex flex-col gap-3 rounded-2xl border border-border bg-background p-5">
+      <div className="flex items-center gap-2">
+        <span className="text-primary">{icon}</span>
+        <span className="text-xs font-medium tracking-[0.15em] text-muted-foreground uppercase">
+          {label}
+        </span>
+      </div>
+      <p
+        className="text-3xl leading-none font-light tracking-[-0.02em] text-foreground md:text-4xl"
+        style={{ fontFamily: "var(--font-garamond-var)" }}
+      >
+        {value}
+      </p>
+      <p className="text-xs text-muted-foreground">{sub}</p>
+    </div>
+  );
+}
+
+function GeographicReach({ stats }: { stats: GeoStats }) {
+  return (
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-[280px_1fr]">
+      <div className="flex flex-col gap-3 rounded-2xl border border-border bg-background p-5">
+        <div className="flex items-center gap-2">
+          <GlobeIcon className="h-4 w-4 text-primary" />
+          <span className="text-xs font-medium tracking-[0.15em] text-muted-foreground uppercase">
+            Geographic Reach
+          </span>
+        </div>
+        <p
+          className="text-3xl leading-none font-light tracking-[-0.02em] text-foreground md:text-4xl"
+          style={{ fontFamily: "var(--font-garamond-var)" }}
         >
-          {o.label}
-        </button>
+          {formatNumber(stats.countriesRepresented)}
+        </p>
+        <p className="text-xs text-muted-foreground">Countries represented</p>
+      </div>
+
+      <div className="overflow-hidden rounded-2xl border border-border bg-background">
+        <div className="flex items-center gap-2 px-5 pt-5 pb-3">
+          <GlobeIcon className="h-4 w-4 text-primary" />
+          <span className="text-xs font-medium tracking-[0.15em] text-muted-foreground uppercase">
+            Top Countries
+          </span>
+        </div>
+
+        {stats.topCountries.length === 0 ? (
+          <p className="px-5 pb-5 text-sm text-muted-foreground">No geographic data available.</p>
+        ) : (
+          <ul className="space-y-2 px-5 pb-5">
+            {stats.topCountries.map((country, index) => (
+              <li key={country.countryCode} className="flex items-center justify-between text-sm">
+                <span className="flex items-center gap-2 text-muted-foreground">
+                  <span className="w-4 text-right text-xs text-muted-foreground/50 tabular-nums">
+                    {index + 1}
+                  </span>
+                  <span>{country.emoji}</span>
+                  <span>{country.name}</span>
+                </span>
+                <span className="font-medium text-foreground tabular-nums">
+                  {country.orgCount} {country.orgCount === 1 ? "organization" : "organizations"}
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function DonationsVolumeChart({
+  data,
+  granularity,
+  onGranularityChange,
+}: {
+  data: TimePoint[];
+  granularity: TimeGranularity;
+  onGranularityChange: (granularity: TimeGranularity) => void;
+}) {
+  const formatted = data.map((point) => ({
+    ...point,
+    label: formatChartDate(point.date, granularity),
+  }));
+
+  return (
+    <div className="rounded-2xl border border-border bg-background p-5">
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <div className="flex items-center gap-2">
+            <TrendingUpIcon className="h-4 w-4 text-primary" />
+            <span className="text-xs font-medium tracking-[0.15em] text-muted-foreground uppercase">
+              Donation Volume Over Time
+            </span>
+          </div>
+          <p className="mt-0.5 text-sm text-muted-foreground">USD raised per {granularity}</p>
+        </div>
+        <div className="flex items-center gap-1 rounded-full border border-border bg-muted/30 p-1">
+          {GRANULARITIES.map((item) => {
+            const active = granularity === item;
+            return (
+              <button
+                key={item}
+                type="button"
+                onClick={() => onGranularityChange(item)}
+                className={[
+                  "rounded-full px-3 py-1 text-xs font-medium transition-all duration-200",
+                  active
+                    ? "bg-primary text-primary-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground",
+                ].join(" ")}
+              >
+                {GRANULARITY_LABELS[item]}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {data.length === 0 ? (
+        <div className="flex h-48 items-center justify-center text-sm text-muted-foreground">
+          No donation data for this period.
+        </div>
+      ) : (
+        <ResponsiveContainer width="100%" height={240}>
+          <AreaChart data={formatted} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
+            <defs>
+              <linearGradient id="donationGradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="var(--primary)" stopOpacity={0.2} />
+                <stop offset="95%" stopColor="var(--primary)" stopOpacity={0} />
+              </linearGradient>
+            </defs>
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
+            <XAxis
+              dataKey="label"
+              tick={{ fontSize: 11, fill: "var(--muted-foreground)" }}
+              axisLine={false}
+              tickLine={false}
+              interval="preserveStartEnd"
+            />
+            <YAxis
+              tick={{ fontSize: 11, fill: "var(--muted-foreground)" }}
+              axisLine={false}
+              tickLine={false}
+              tickFormatter={(value: number) => (value >= 1000 ? `$${(value / 1000).toFixed(1)}k` : `$${value}`)}
+              width={48}
+            />
+            <Tooltip content={<ChartTooltip />} />
+            <Area
+              type="monotone"
+              dataKey="amount"
+              stroke="var(--primary)"
+              strokeWidth={2}
+              fill="url(#donationGradient)"
+              dot={false}
+              activeDot={{ r: 4, fill: "var(--primary)" }}
+            />
+          </AreaChart>
+        </ResponsiveContainer>
+      )}
+    </div>
+  );
+}
+
+function ChartTooltip({ active, payload, label }: { active?: boolean; payload?: Array<{ value?: number; payload?: TimePoint }>; label?: string }) {
+  if (!active || !payload?.length) return null;
+  const amount = payload[0]?.value ?? 0;
+  const count = payload[0]?.payload?.count ?? 0;
+  return (
+    <div className="rounded-xl border border-border bg-background px-3 py-2 text-xs shadow-sm">
+      <p className="font-medium text-foreground">{label}</p>
+      <p className="mt-0.5 text-muted-foreground">{formatUsd(amount)}</p>
+      <p className="text-muted-foreground">{count} {count === 1 ? "donation" : "donations"}</p>
+    </div>
+  );
+}
+
+function TopDonorsTable({ rows }: { rows: TopDonor[] }) {
+  const [sortKey, setSortKey] = useState<"rank" | "totalAmount" | "donationCount" | "lastDonatedAt">("rank");
+  const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
+
+  const sorted = useMemo(() => {
+    return [...rows].sort((a, b) => {
+      let compare = 0;
+      if (sortKey === "rank") compare = a.rank - b.rank;
+      else if (sortKey === "totalAmount") compare = a.totalAmount - b.totalAmount;
+      else if (sortKey === "donationCount") compare = a.donationCount - b.donationCount;
+      else compare = (a.lastDonatedAt ?? "").localeCompare(b.lastDonatedAt ?? "");
+      return sortDir === "asc" ? compare : -compare;
+    });
+  }, [rows, sortDir, sortKey]);
+
+  const sort = (key: typeof sortKey) => {
+    if (sortKey === key) setSortDir((dir) => (dir === "asc" ? "desc" : "asc"));
+    else {
+      setSortKey(key);
+      setSortDir("desc");
+    }
+  };
+
+  return (
+    <div className="overflow-hidden rounded-2xl border border-border bg-background">
+      <div className="flex items-center gap-2 px-5 pt-5 pb-3">
+        <UsersIcon className="h-4 w-4 text-primary" />
+        <span className="text-xs font-medium tracking-[0.15em] text-muted-foreground uppercase">Top Donors</span>
+      </div>
+
+      {rows.length === 0 ? (
+        <p className="px-5 pb-5 text-sm text-muted-foreground">No donations yet.</p>
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-t border-border">
+                <SortableCol col="rank" sortKey={sortKey} sortDir={sortDir} onSort={sort}>#</SortableCol>
+                <th className="px-3 py-2 text-left text-xs font-medium tracking-[0.12em] text-muted-foreground uppercase">Donor</th>
+                <SortableCol col="totalAmount" sortKey={sortKey} sortDir={sortDir} onSort={sort}>Total Donated</SortableCol>
+                <SortableCol col="donationCount" sortKey={sortKey} sortDir={sortDir} onSort={sort}>Donations</SortableCol>
+                <SortableCol col="lastDonatedAt" sortKey={sortKey} sortDir={sortDir} onSort={sort}>Last Donation</SortableCol>
+              </tr>
+            </thead>
+            <tbody>
+              {sorted.map((row) => (
+                <tr key={row.donorId} className="border-t border-border/50 transition-colors hover:bg-muted/20">
+                  <td className="px-3 py-2.5 font-mono text-xs text-muted-foreground">{row.rank}</td>
+                  <td className="px-3 py-2.5"><DonorCell id={row.donorId} type={row.donorType} /></td>
+                  <td className="px-3 py-2.5 text-foreground tabular-nums">{formatUsd(row.totalAmount)}</td>
+                  <td className="px-3 py-2.5 text-muted-foreground tabular-nums">{row.donationCount}</td>
+                  <td className="px-3 py-2.5 text-xs text-muted-foreground">{formatTableDate(row.lastDonatedAt)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function OrganizationsTable({ rows }: { rows: OrgRow[] }) {
+  const [sortKey, setSortKey] = useState<"totalRaised" | "bumicertCount" | "donorCount">("totalRaised");
+  const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
+
+  const sorted = useMemo(() => {
+    return [...rows].sort((a, b) => {
+      let compare = 0;
+      if (sortKey === "totalRaised") compare = a.totalRaised - b.totalRaised;
+      else if (sortKey === "bumicertCount") compare = a.bumicertCount - b.bumicertCount;
+      else compare = a.donorCount - b.donorCount;
+      return sortDir === "asc" ? compare : -compare;
+    });
+  }, [rows, sortDir, sortKey]);
+
+  const sort = (key: typeof sortKey) => {
+    if (sortKey === key) setSortDir((dir) => (dir === "asc" ? "desc" : "asc"));
+    else {
+      setSortKey(key);
+      setSortDir("desc");
+    }
+  };
+
+  return (
+    <div className="overflow-hidden rounded-2xl border border-border bg-background">
+      <div className="flex items-center gap-2 px-5 pt-5 pb-3">
+        <BuildingIcon className="h-4 w-4 text-primary" />
+        <span className="text-xs font-medium tracking-[0.15em] text-muted-foreground uppercase">By Organization</span>
+      </div>
+
+      {rows.length === 0 ? (
+        <p className="px-5 pb-5 text-sm text-muted-foreground">No donations yet.</p>
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-t border-border">
+                <th className="px-3 py-2 text-left text-xs font-medium tracking-[0.12em] text-muted-foreground uppercase">Organization</th>
+                <SortableCol col="totalRaised" sortKey={sortKey} sortDir={sortDir} onSort={sort}>Total Raised</SortableCol>
+                <SortableCol col="bumicertCount" sortKey={sortKey} sortDir={sortDir} onSort={sort}>Bumicerts</SortableCol>
+                <SortableCol col="donorCount" sortKey={sortKey} sortDir={sortDir} onSort={sort}>Donors</SortableCol>
+              </tr>
+            </thead>
+            <tbody>
+              {sorted.map((row) => (
+                <tr key={row.orgDid} className="border-t border-border/50 transition-colors hover:bg-muted/20">
+                  <td className="px-3 py-2.5">
+                    <Link
+                      href={accountHref(row.orgDid)}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-1 font-mono text-xs text-foreground transition-colors hover:text-primary"
+                      title={row.orgDid}
+                    >
+                      {truncateDid(row.orgDid)}
+                      <ExternalLinkIcon className="h-3 w-3 opacity-60" />
+                    </Link>
+                  </td>
+                  <td className="px-3 py-2.5 text-foreground tabular-nums">{formatUsd(row.totalRaised)}</td>
+                  <td className="px-3 py-2.5 text-muted-foreground tabular-nums">{row.bumicertCount}</td>
+                  <td className="px-3 py-2.5 text-muted-foreground tabular-nums">{row.donorCount}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function RecentTransactionsTable({ rows }: { rows: TxRow[] }) {
+  return (
+    <div className="overflow-hidden rounded-2xl border border-border bg-background">
+      <div className="flex items-start justify-between gap-4 px-5 pt-5 pb-3">
+        <div>
+          <div className="flex items-center gap-2">
+            <ClockIcon className="h-4 w-4 text-primary" />
+            <span className="text-xs font-medium tracking-[0.15em] text-muted-foreground uppercase">Recent Transactions</span>
+          </div>
+          <p className="mt-0.5 text-xs text-muted-foreground">
+            All time · {rows.length} {rows.length === 1 ? "donation" : "donations"}
+          </p>
+        </div>
+        <span className="mt-1 shrink-0 text-[10px] text-muted-foreground/50">showing latest 50</span>
+      </div>
+
+      {rows.length === 0 ? (
+        <p className="px-5 pb-5 text-sm text-muted-foreground">No transactions yet.</p>
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-t border-border">
+                <th className="px-3 py-2 text-left text-xs font-medium tracking-[0.12em] text-muted-foreground uppercase">Date</th>
+                <th className="px-3 py-2 text-left text-xs font-medium tracking-[0.12em] text-muted-foreground uppercase">Donor</th>
+                <th className="px-3 py-2 text-left text-xs font-medium tracking-[0.12em] text-muted-foreground uppercase">Amount</th>
+                <th className="px-3 py-2 text-left text-xs font-medium tracking-[0.12em] text-muted-foreground uppercase">Bumicert</th>
+                <th className="px-3 py-2 text-left text-xs font-medium tracking-[0.12em] text-muted-foreground uppercase">Tx Hash</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((row) => (
+                <tr key={row.uri} className="border-t border-border/50 transition-colors hover:bg-muted/20">
+                  <td className="whitespace-nowrap px-3 py-2.5 text-xs text-muted-foreground">{formatTableDate(row.date)}</td>
+                  <td className="px-3 py-2.5">
+                    {row.donorId ? <DonorCell id={row.donorId} type={row.donorType ?? "wallet"} /> : <span className="text-xs text-foreground">Anonymous</span>}
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-2.5 font-medium text-foreground tabular-nums">{formatUsd(row.amount)}</td>
+                  <td className="px-3 py-2.5 font-mono text-xs text-muted-foreground">
+                    <BumicertLink uri={row.bumicertUri} />
+                  </td>
+                  <td className="px-3 py-2.5">
+                    {row.txUrl && row.txHash ? (
+                      <Link
+                        href={row.txUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 font-mono text-xs text-primary hover:underline"
+                        title={row.txHash}
+                      >
+                        {`${row.txHash.slice(0, 8)}…${row.txHash.slice(-6)}`}
+                        <ExternalLinkIcon className="h-3 w-3" />
+                      </Link>
+                    ) : (
+                      <span className="text-xs text-muted-foreground">—</span>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function SortableCol<T extends string>({
+  col,
+  sortKey,
+  sortDir,
+  onSort,
+  children,
+}: {
+  col: T;
+  sortKey: T;
+  sortDir: "asc" | "desc";
+  onSort: (col: T) => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <th
+      className="cursor-pointer px-3 py-2 text-left text-xs font-medium tracking-[0.12em] text-muted-foreground uppercase transition-colors select-none hover:text-foreground"
+      onClick={() => onSort(col)}
+    >
+      <span className="inline-flex items-center gap-1">
+        {children}
+        <SortIcon col={col} sortKey={sortKey} sortDir={sortDir} />
+      </span>
+    </th>
+  );
+}
+
+function SortIcon<T extends string>({ col, sortKey, sortDir }: { col: T; sortKey: T; sortDir: "asc" | "desc" }) {
+  if (col !== sortKey) return <ChevronsUpDownIcon className="h-3 w-3 opacity-40" />;
+  return sortDir === "asc" ? <ChevronUpIcon className="h-3 w-3" /> : <ChevronDownIcon className="h-3 w-3" />;
+}
+
+function DonorCell({ id, type }: { id: string; type: "did" | "wallet" }) {
+  if (type === "wallet") {
+    return <span className="text-xs text-foreground" title={id}>Anonymous ({shortWallet(id)})</span>;
+  }
+
+  return (
+    <Link href={accountHref(id)} target="_blank" rel="noreferrer" className="underline-offset-2 hover:underline">
+      <AuthorInline did={id} />
+    </Link>
+  );
+}
+
+function BumicertLink({ uri }: { uri: string | null }) {
+  if (!uri) return <>—</>;
+  const parsed = parseBumicertUri(uri);
+  if (!parsed) return <>—</>;
+  return (
+    <Link href={bumicertHref(parsed.did, parsed.rkey)} target="_blank" rel="noreferrer" className="text-primary hover:underline" title="View bumicert">
+      {parsed.rkey}
+    </Link>
+  );
+}
+
+function parseBumicertUri(uri: string): { did: string; rkey: string } | null {
+  const match = uri.match(/^at:\/\/(did:[^/]+)\/[^/]+\/(.+)$/);
+  if (!match) return null;
+  return { did: match[1], rkey: match[2] };
+}
+
+function formatChartDate(date: string, granularity: TimeGranularity): string {
+  const parsed = new Date(date);
+  if (Number.isNaN(parsed.getTime())) return date;
+  if (granularity === "month") return parsed.toLocaleDateString("en-US", { month: "short", year: "2-digit" });
+  return parsed.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+}
+
+function formatTableDate(date: string | null | undefined): string {
+  if (!date) return "—";
+  const parsed = new Date(date);
+  if (Number.isNaN(parsed.getTime())) return "—";
+  return parsed.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
+}
+
+function truncateDid(did: string): string {
+  const parts = did.split(":");
+  const last = parts[parts.length - 1] ?? "";
+  return `${parts.slice(0, 2).join(":")}:…${last.slice(-8)}`;
+}
+
+function Skeleton({ className }: { className: string }) {
+  return <div className={`animate-pulse rounded bg-muted ${className}`} />;
+}
+
+function KPICardSkeleton() {
+  return (
+    <div className="flex flex-col gap-3 rounded-2xl border border-border bg-background p-5">
+      <Skeleton className="h-3 w-28" />
+      <Skeleton className="h-9 w-32" />
+      <Skeleton className="h-3 w-20" />
+    </div>
+  );
+}
+
+function TableSkeleton() {
+  return (
+    <div className="space-y-3 rounded-2xl border border-border bg-background p-5">
+      <Skeleton className="h-3 w-24" />
+      {Array.from({ length: 5 }).map((_, index) => (
+        <Skeleton key={index} className="h-8 w-full" />
       ))}
     </div>
   );
 }
 
-function Panel({
-  title,
-  caption,
-  children,
-}: {
-  title: string;
-  caption?: string;
-  children: React.ReactNode;
-}) {
+function DashboardSkeleton() {
   return (
-    <div className="rounded-2xl border border-border-soft bg-surface p-4 sm:p-5">
-      <div className="mb-3 flex items-baseline justify-between">
-        <h3 className="font-garamond text-[20px] text-foreground">{title}</h3>
-        {caption && <span className="text-[12px] text-foreground/55">{caption}</span>}
-      </div>
-      {children}
-    </div>
-  );
-}
-
-function DonorCell({ id, type }: { id: string; type: "did" | "wallet" }) {
-  // DID donors resolve to a handle + avatar via the AppView; anonymous wallet
-  // donors keep their shortened 0x address (no ATProto identity to resolve).
-  if (type === "did") {
-    return (
-      <Link
-        href={accountHref(id)}
-        target="_blank"
-        rel="noreferrer"
-        className="underline-offset-2 hover:underline"
-      >
-        <AuthorInline did={id} />
-      </Link>
-    );
-  }
-  return <span className="font-mono text-foreground/70">{shortWallet(id)}</span>;
-}
-
-function DashSkeleton() {
-  return (
-    <div className="mt-10 flex flex-col gap-10" aria-hidden>
-      <div className="grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-border-soft bg-border-soft md:grid-cols-3 lg:grid-cols-6">
-        {Array.from({ length: 6 }).map((_, i) => (
-          <div key={i} className="bg-surface p-5">
-            <div className="h-3 w-16 rounded bg-foreground/10" />
-            <div className="mt-3 h-7 w-20 rounded bg-foreground/[0.06]" />
-          </div>
+    <div className="flex flex-col gap-12">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
+        {Array.from({ length: 5 }).map((_, index) => (
+          <KPICardSkeleton key={index} />
         ))}
       </div>
-      <div className="h-[240px] rounded-2xl border border-border-soft bg-surface" />
-      <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
-        <div className="h-[320px] rounded-2xl border border-border-soft bg-surface" />
-        <div className="h-[320px] rounded-2xl border border-border-soft bg-surface" />
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-[280px_1fr]">
+        <KPICardSkeleton />
+        <div className="space-y-3 rounded-2xl border border-border bg-background p-5">
+          <Skeleton className="h-3 w-24" />
+          {Array.from({ length: 5 }).map((_, index) => (
+            <Skeleton key={index} className="h-5 w-full" />
+          ))}
+        </div>
       </div>
+      <div className="space-y-4 rounded-2xl border border-border bg-background p-5">
+        <Skeleton className="h-3 w-40" />
+        <Skeleton className="h-[240px] w-full" />
+      </div>
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
+        <TableSkeleton />
+        <TableSkeleton />
+      </div>
+      <TableSkeleton />
     </div>
   );
 }
 
-function DashError() {
+function DashboardError() {
   return (
-    <div className="mt-10 flex flex-col items-center justify-center rounded-2xl border border-dashed border-border-soft px-6 py-16 text-center">
-      <div className="font-garamond text-[22px] text-foreground">
+    <div className="mt-10 flex flex-col items-center justify-center rounded-2xl border border-dashed border-border px-6 py-16 text-center">
+      <div
+        className="text-[22px] text-foreground"
+        style={{ fontFamily: "var(--font-garamond-var)" }}
+      >
         Donation data is unavailable
       </div>
-      <p className="mt-2 max-w-[420px] text-[14px] leading-[1.5] text-foreground/60">
-        The indexer did not return funding receipts. View the live figures on
-        the Bumicerts dashboard instead.
+      <p className="mt-2 max-w-[420px] text-sm leading-[1.5] text-muted-foreground">
+        The indexer did not return funding receipts. View the live figures on the Bumicerts dashboard instead.
       </p>
       <Link
-        href={`${BUMICERTS_URL}/en/dashboard`}
+        href="https://certs.gainforest.app/dashboard"
         target="_blank"
         rel="noreferrer"
-        className="mt-5 rounded-full bg-primary px-5 py-2.5 text-[13.5px] font-medium text-primary-foreground transition-colors hover:bg-primary-dark"
+        className="mt-5 rounded-full bg-primary px-5 py-2.5 text-[13.5px] font-medium text-primary-foreground transition-colors hover:bg-primary/90"
       >
         Open Bumicerts dashboard ↗
       </Link>

@@ -1,14 +1,4 @@
-/**
- * Donations dashboard data layer — a faithful port of the bumicerts monorepo's
- * dashboard (apps/bumicerts/app/(marketplace)/dashboard). Every funding receipt
- * across every org is written to the facilitator repo, so we fetch
- * `orgHypercertsFundingReceipt(where: { did: { eq: FACILITATOR_DID } })` and
- * recompute the same KPIs, time-series, top-donor, per-org, and recent-
- * transaction aggregations the live dashboard renders.
- *
- * Runs in the browser (CORS-open indexer); paged at 200/req.
- */
-
+import { countryFlag } from "./format";
 import { INDEXER_URL, FACILITATOR_DID, blockExplorerUrl } from "./urls";
 
 // ── Raw receipt fetch ──────────────────────────────────────────────────────
@@ -23,8 +13,8 @@ export type FundingReceipt = {
   amount: number;
   currency: string;
   occurredAt: string | null;
+  createdAt: string | null;
   from: DonorRef;
-  /** Org DID that received the funds (from the `for` activity AT-URI). */
   orgDid: string | null;
   bumicertUri: string | null;
   txHash: string | null;
@@ -40,7 +30,6 @@ const RECEIPTS_QUERY = `
       sortBy: createdAt
       sortDirection: DESC
     ) {
-      totalCount
       pageInfo { hasNextPage endCursor }
       edges {
         node {
@@ -85,33 +74,44 @@ function extractDonor(from: RawFrom): DonorRef {
   return null;
 }
 
+function extractUriFromStrongRef(uri: string | null | undefined): string | null {
+  return uri ?? null;
+}
+
 /** at://did:plc:org/org.hypercerts.claim.activity/rkey → did:plc:org */
 function orgDidFromUri(uri: string | null | undefined): string | null {
   if (!uri) return null;
-  const m = uri.match(/^at:\/\/(did:[a-z0-9]+:[a-z0-9]+)\//i);
-  return m ? m[1] : null;
+  const match = uri.match(/^at:\/\/(did:[a-z0-9]+:[a-z0-9]+)\//i);
+  return match ? match[1] : null;
 }
 
-function mapReceipt(n: RawReceipt): FundingReceipt {
-  const amount = parseFloat(n.amount ?? "0");
+function safeAmount(raw: string | null | undefined): number {
+  const parsed = Number.parseFloat(raw ?? "0");
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function mapReceipt(node: RawReceipt): FundingReceipt {
+  const bumicertUri = extractUriFromStrongRef(node.for?.uri);
   return {
-    uri: n.uri,
-    amount: Number.isFinite(amount) ? amount : 0,
-    currency: (n.currency ?? "USD").toUpperCase(),
-    occurredAt: n.occurredAt ?? n.createdAt ?? null,
-    from: extractDonor(n.from ?? null),
-    orgDid: orgDidFromUri(n.for?.uri),
-    bumicertUri: n.for?.uri ?? null,
-    txHash: n.transactionId ?? null,
-    paymentNetwork: n.paymentNetwork ?? null,
+    uri: node.uri,
+    amount: safeAmount(node.amount),
+    currency: (node.currency ?? "USD").toUpperCase(),
+    occurredAt: node.occurredAt ?? node.createdAt ?? null,
+    createdAt: node.createdAt ?? null,
+    from: extractDonor(node.from ?? null),
+    orgDid: orgDidFromUri(bumicertUri),
+    bumicertUri,
+    txHash: node.transactionId ?? null,
+    paymentNetwork: node.paymentNetwork ?? null,
   };
 }
 
 export async function fetchReceipts(signal?: AbortSignal): Promise<FundingReceipt[]> {
   const all: FundingReceipt[] = [];
   let after: string | null = null;
-  for (let page = 0; page < 25; page++) {
-    const res: Response = await fetch(INDEXER_URL, {
+
+  for (let page = 0; page < 25; page += 1) {
+    const response: Response = await fetch(INDEXER_URL, {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({
@@ -120,7 +120,8 @@ export async function fetchReceipts(signal?: AbortSignal): Promise<FundingReceip
       }),
       signal,
     });
-    const json = (await res.json()) as {
+
+    const json = (await response.json()) as {
       data?: {
         orgHypercertsFundingReceipt?: {
           pageInfo?: { hasNextPage?: boolean; endCursor?: string | null };
@@ -128,21 +129,45 @@ export async function fetchReceipts(signal?: AbortSignal): Promise<FundingReceip
         } | null;
       };
     };
-    const conn = json.data?.orgHypercertsFundingReceipt;
-    if (!conn) break;
-    for (const e of conn.edges ?? []) {
-      if (e?.node?.uri) all.push(mapReceipt(e.node));
+
+    const connection = json.data?.orgHypercertsFundingReceipt;
+    if (!connection) break;
+
+    for (const edge of connection.edges ?? []) {
+      if (edge.node?.uri) all.push(mapReceipt(edge.node));
     }
-    if (!conn.pageInfo?.hasNextPage || !conn.pageInfo.endCursor) break;
-    after = conn.pageInfo.endCursor;
+
+    if (!connection.pageInfo?.hasNextPage || !connection.pageInfo.endCursor) break;
+    after = connection.pageInfo.endCursor;
   }
+
   return all;
 }
 
-// ── Aggregations (ported from dashboard/_utils/aggregations.ts) ─────────────
+// ── Aggregations ported from Bumicerts dashboard ───────────────────────────
 
-const USD = new Set(["USD", "USDC"]);
-const isUsd = (r: FundingReceipt) => USD.has(r.currency);
+export type Period = "all" | "month" | "week";
+export type TimeGranularity = "day" | "week" | "month";
+
+const USD_CURRENCIES = new Set(["USD", "USDC"]);
+const isUsdCurrency = (receipt: FundingReceipt) => USD_CURRENCIES.has(receipt.currency);
+
+function receiptDate(receipt: FundingReceipt): Date | null {
+  const raw = receipt.occurredAt ?? receipt.createdAt;
+  if (!raw) return null;
+  const date = new Date(raw);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+export function filterByPeriod(receipts: FundingReceipt[], period: Period): FundingReceipt[] {
+  if (period === "all") return receipts;
+  const ms = period === "week" ? 7 * 86_400_000 : 30 * 86_400_000;
+  const cutoff = Date.now() - ms;
+  return receipts.filter((receipt) => {
+    const date = receiptDate(receipt);
+    return date !== null && date.getTime() >= cutoff;
+  });
+}
 
 export type DashboardKpis = {
   totalRaised: number;
@@ -150,179 +175,191 @@ export type DashboardKpis = {
   uniqueDonors: number;
   avgDonation: number;
   activeBumicerts: number;
-  countries: number;
 };
 
-export function computeKpis(
-  receipts: FundingReceipt[],
-  orgCountry: Map<string, string>,
-): DashboardKpis {
-  const usd = receipts.filter(isUsd);
+export function computeKpis(receipts: FundingReceipt[]): DashboardKpis {
+  const usdOnly = receipts.filter(isUsdCurrency);
+
   let totalRaised = 0;
-  const donors = new Set<string>();
-  const bumicerts = new Set<string>();
-  const countries = new Set<string>();
-  for (const r of usd) {
-    totalRaised += r.amount;
-    if (r.from) donors.add(r.from.id);
-    if (r.bumicertUri) bumicerts.add(r.bumicertUri);
-    if (r.orgDid && orgCountry.has(r.orgDid)) {
-      countries.add(orgCountry.get(r.orgDid)!);
-    }
+  const donorIds = new Set<string>();
+  const bumicertUris = new Set<string>();
+
+  for (const receipt of usdOnly) {
+    totalRaised += receipt.amount;
+    if (receipt.from) donorIds.add(receipt.from.id);
+    if (receipt.bumicertUri) bumicertUris.add(receipt.bumicertUri);
   }
-  const totalDonations = usd.length;
+
+  const totalDonations = usdOnly.length;
+
   return {
     totalRaised,
     totalDonations,
-    uniqueDonors: donors.size,
+    uniqueDonors: donorIds.size,
     avgDonation: totalDonations > 0 ? totalRaised / totalDonations : 0,
-    activeBumicerts: bumicerts.size,
-    countries: countries.size,
+    activeBumicerts: bumicertUris.size,
   };
 }
 
 export type TimePoint = { date: string; amount: number; count: number };
 
-export function computeTimeSeries(receipts: FundingReceipt[]): TimePoint[] {
-  const usd = receipts.filter(isUsd);
-  const map = new Map<string, { amount: number; count: number }>();
-  for (const r of usd) {
-    if (!r.occurredAt) continue;
-    const d = new Date(r.occurredAt);
-    if (Number.isNaN(d.getTime())) continue;
-    const key = d.toISOString().slice(0, 10);
-    const ex = map.get(key);
-    if (ex) {
-      ex.amount += r.amount;
-      ex.count += 1;
+export function computeTimeSeries(receipts: FundingReceipt[], granularity: TimeGranularity): TimePoint[] {
+  const usdOnly = receipts.filter(isUsdCurrency);
+
+  const bucket = (date: Date): string => {
+    if (granularity === "month") {
+      return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-01`;
+    }
+    if (granularity === "week") {
+      const day = date.getDay();
+      const diff = day === 0 ? -6 : 1 - day;
+      const monday = new Date(date);
+      monday.setDate(date.getDate() + diff);
+      return monday.toISOString().slice(0, 10);
+    }
+    return date.toISOString().slice(0, 10);
+  };
+
+  const buckets = new Map<string, { amount: number; count: number }>();
+
+  for (const receipt of usdOnly) {
+    const date = receiptDate(receipt);
+    if (!date) continue;
+
+    const key = bucket(date);
+    const existing = buckets.get(key);
+    if (existing) {
+      existing.amount += receipt.amount;
+      existing.count += 1;
     } else {
-      map.set(key, { amount: r.amount, count: 1 });
+      buckets.set(key, { amount: receipt.amount, count: 1 });
     }
   }
-  return Array.from(map.entries())
+
+  return Array.from(buckets.entries())
     .sort(([a], [b]) => a.localeCompare(b))
-    .map(([date, v]) => ({ date, ...v }));
+    .map(([date, value]) => ({ date, ...value }));
 }
 
 export type TopDonor = {
   rank: number;
-  id: string;
-  type: "did" | "wallet";
-  total: number;
-  count: number;
-  lastAt: string | null;
+  donorId: string;
+  donorType: "did" | "wallet";
+  totalAmount: number;
+  donationCount: number;
+  lastDonatedAt: string | null;
 };
 
-export function computeTopDonors(receipts: FundingReceipt[], limit = 25): TopDonor[] {
-  const usd = receipts.filter(isUsd);
-  const map = new Map<
+export function computeTopDonors(receipts: FundingReceipt[], limit = 50): TopDonor[] {
+  const usdOnly = receipts.filter(isUsdCurrency);
+  const donors = new Map<
     string,
-    { type: "did" | "wallet"; total: number; count: number; lastAt: string | null }
+    { type: "did" | "wallet"; totalAmount: number; donationCount: number; lastDonatedAt: string | null }
   >();
-  for (const r of usd) {
-    if (!r.from) continue;
-    const ex = map.get(r.from.id);
-    if (ex) {
-      ex.total += r.amount;
-      ex.count += 1;
-      if (r.occurredAt && (!ex.lastAt || r.occurredAt > ex.lastAt)) ex.lastAt = r.occurredAt;
+
+  for (const receipt of usdOnly) {
+    if (!receipt.from) continue;
+
+    const existing = donors.get(receipt.from.id);
+    if (existing) {
+      existing.totalAmount += receipt.amount;
+      existing.donationCount += 1;
+      if (receipt.occurredAt && (!existing.lastDonatedAt || receipt.occurredAt > existing.lastDonatedAt)) {
+        existing.lastDonatedAt = receipt.occurredAt;
+      }
     } else {
-      map.set(r.from.id, {
-        type: r.from.type,
-        total: r.amount,
-        count: 1,
-        lastAt: r.occurredAt,
+      donors.set(receipt.from.id, {
+        type: receipt.from.type,
+        totalAmount: receipt.amount,
+        donationCount: 1,
+        lastDonatedAt: receipt.occurredAt,
       });
     }
   }
-  return Array.from(map.entries())
-    .sort(([, a], [, b]) => b.total - a.total)
+
+  return Array.from(donors.entries())
+    .sort(([, a], [, b]) => b.totalAmount - a.totalAmount)
     .slice(0, limit)
-    .map(([id, d], i) => ({ rank: i + 1, id, ...d }));
+    .map(([donorId, donor], index) => ({
+      rank: index + 1,
+      donorId,
+      donorType: donor.type,
+      totalAmount: donor.totalAmount,
+      donationCount: donor.donationCount,
+      lastDonatedAt: donor.lastDonatedAt,
+    }));
 }
 
 export type OrgRow = {
   orgDid: string;
-  total: number;
-  bumicerts: number;
-  donors: number;
+  totalRaised: number;
+  bumicertCount: number;
+  donorCount: number;
 };
 
 export function computePerOrg(receipts: FundingReceipt[]): OrgRow[] {
-  const usd = receipts.filter(isUsd);
-  const map = new Map<
-    string,
-    { total: number; bumicerts: Set<string>; donors: Set<string> }
-  >();
-  for (const r of usd) {
-    if (!r.orgDid) continue;
-    const ex = map.get(r.orgDid);
-    if (ex) {
-      ex.total += r.amount;
-      if (r.bumicertUri) ex.bumicerts.add(r.bumicertUri);
-      if (r.from) ex.donors.add(r.from.id);
+  const usdOnly = receipts.filter(isUsdCurrency);
+  const orgs = new Map<string, { totalRaised: number; bumicerts: Set<string>; donors: Set<string> }>();
+
+  for (const receipt of usdOnly) {
+    if (!receipt.orgDid) continue;
+
+    const existing = orgs.get(receipt.orgDid);
+    if (existing) {
+      existing.totalRaised += receipt.amount;
+      if (receipt.bumicertUri) existing.bumicerts.add(receipt.bumicertUri);
+      if (receipt.from) existing.donors.add(receipt.from.id);
     } else {
-      map.set(r.orgDid, {
-        total: r.amount,
-        bumicerts: new Set(r.bumicertUri ? [r.bumicertUri] : []),
-        donors: new Set(r.from ? [r.from.id] : []),
+      orgs.set(receipt.orgDid, {
+        totalRaised: receipt.amount,
+        bumicerts: new Set(receipt.bumicertUri ? [receipt.bumicertUri] : []),
+        donors: new Set(receipt.from ? [receipt.from.id] : []),
       });
     }
   }
-  return Array.from(map.entries())
-    .map(([orgDid, v]) => ({
+
+  return Array.from(orgs.entries())
+    .map(([orgDid, org]) => ({
       orgDid,
-      total: v.total,
-      bumicerts: v.bumicerts.size,
-      donors: v.donors.size,
+      totalRaised: org.totalRaised,
+      bumicertCount: org.bumicerts.size,
+      donorCount: org.donors.size,
     }))
-    .sort((a, b) => b.total - a.total);
+    .sort((a, b) => b.totalRaised - a.totalRaised);
 }
 
 export type TxRow = {
   uri: string;
   date: string | null;
-  donor: DonorRef;
+  donorId: string | null;
+  donorType: "did" | "wallet" | null;
   amount: number;
   currency: string;
   bumicertUri: string | null;
-  bumicertRkey: string | null;
-  bumicertDid: string | null;
   txHash: string | null;
+  paymentNetwork: string | null;
   txUrl: string | null;
 };
 
-export function computeRecentTransactions(
-  receipts: FundingReceipt[],
-  limit = 30,
-): TxRow[] {
+export function computeRecentTransactions(receipts: FundingReceipt[], limit = 50): TxRow[] {
   return [...receipts]
-    .sort((a, b) => {
-      const da = a.occurredAt ? new Date(a.occurredAt).getTime() : 0;
-      const db = b.occurredAt ? new Date(b.occurredAt).getTime() : 0;
-      return db - da;
-    })
+    .sort((a, b) => (receiptDate(b)?.getTime() ?? 0) - (receiptDate(a)?.getTime() ?? 0))
     .slice(0, limit)
-    .map((r) => {
-      const m = r.bumicertUri?.match(
-        /^at:\/\/(did:[a-z0-9]+:[a-z0-9]+)\/[^/]+\/(.+)$/i,
-      );
-      return {
-        uri: r.uri,
-        date: r.occurredAt,
-        donor: r.from,
-        amount: r.amount,
-        currency: r.currency,
-        bumicertUri: r.bumicertUri,
-        bumicertDid: m ? m[1] : null,
-        bumicertRkey: m ? m[2] : null,
-        txHash: r.txHash,
-        txUrl: blockExplorerUrl(r.txHash, r.paymentNetwork),
-      };
-    });
+    .map((receipt) => ({
+      uri: receipt.uri,
+      date: receipt.occurredAt ?? receipt.createdAt,
+      donorId: receipt.from?.id ?? null,
+      donorType: receipt.from?.type ?? null,
+      amount: receipt.amount,
+      currency: receipt.currency,
+      bumicertUri: receipt.bumicertUri,
+      txHash: receipt.txHash,
+      paymentNetwork: receipt.paymentNetwork,
+      txUrl: blockExplorerUrl(receipt.txHash, receipt.paymentNetwork),
+    }));
 }
 
-// ── Org country map (for the geographic-reach KPI) ─────────────────────────
+// ── Geographic reach ───────────────────────────────────────────────────────
 
 const ORG_COUNTRY_QUERY = `
   query DashboardOrgCountries($first: Int!, $after: String) {
@@ -333,42 +370,95 @@ const ORG_COUNTRY_QUERY = `
   }
 `;
 
-export async function fetchOrgCountryMap(
-  signal?: AbortSignal,
-): Promise<Map<string, string>> {
+export type CountryRow = {
+  countryCode: string;
+  name: string;
+  emoji: string;
+  orgCount: number;
+};
+
+export type GeoStats = {
+  countriesRepresented: number;
+  topCountries: CountryRow[];
+};
+
+export async function fetchOrgCountryMap(signal?: AbortSignal): Promise<Map<string, string>> {
   const map = new Map<string, string>();
   let after: string | null = null;
+
   try {
-    for (let page = 0; page < 10; page++) {
-      const res: Response = await fetch(INDEXER_URL, {
+    for (let page = 0; page < 5; page += 1) {
+      const response: Response = await fetch(INDEXER_URL, {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
           query: ORG_COUNTRY_QUERY,
-          variables: { first: 100, after },
+          variables: { first: 200, after },
         }),
         signal,
       });
-      const json = (await res.json()) as {
+
+      const json = (await response.json()) as {
         data?: {
           appGainforestOrganizationInfo?: {
             pageInfo?: { hasNextPage?: boolean; endCursor?: string | null };
-            edges?: Array<{ node?: { did?: string; country?: string } | null }>;
+            edges?: Array<{ node?: { did?: string; country?: string | null } | null }>;
           } | null;
         };
       };
-      const conn = json.data?.appGainforestOrganizationInfo;
-      if (!conn) break;
-      for (const e of conn.edges ?? []) {
-        const did = e?.node?.did;
-        const country = e?.node?.country;
+
+      const connection = json.data?.appGainforestOrganizationInfo;
+      if (!connection) break;
+
+      for (const edge of connection.edges ?? []) {
+        const did = edge.node?.did;
+        const country = normalizeCountry(edge.node?.country);
         if (did && country) map.set(did, country);
       }
-      if (!conn.pageInfo?.hasNextPage || !conn.pageInfo.endCursor) break;
-      after = conn.pageInfo.endCursor;
+
+      if (!connection.pageInfo?.hasNextPage || !connection.pageInfo.endCursor) break;
+      after = connection.pageInfo.endCursor;
     }
   } catch {
-    /* best effort; geographic reach degrades to 0 */
+    // Best effort; dashboard renders without geographic reach data.
   }
+
   return map;
+}
+
+export function computeGeoStats(orgCountryMap: Map<string, string>, limit = 5): GeoStats {
+  const countryOrgCounts = new Map<string, number>();
+
+  for (const countryCode of orgCountryMap.values()) {
+    countryOrgCounts.set(countryCode, (countryOrgCounts.get(countryCode) ?? 0) + 1);
+  }
+
+  const topCountries = Array.from(countryOrgCounts.entries())
+    .map(([countryCode, orgCount]) => ({
+      countryCode,
+      name: countryName(countryCode),
+      emoji: countryFlag(countryCode),
+      orgCount,
+    }))
+    .sort((a, b) => b.orgCount - a.orgCount)
+    .slice(0, limit);
+
+  return {
+    countriesRepresented: countryOrgCounts.size,
+    topCountries,
+  };
+}
+
+function normalizeCountry(country: string | null | undefined): string | null {
+  if (!country) return null;
+  const code = country.trim().toUpperCase();
+  return /^[A-Z]{2}$/.test(code) ? code : null;
+}
+
+function countryName(code: string): string {
+  try {
+    return new Intl.DisplayNames(["en"], { type: "region" }).of(code) ?? code;
+  } catch {
+    return code;
+  }
 }
