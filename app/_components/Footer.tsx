@@ -14,7 +14,7 @@ const DATA_LINKS = [
   { href: "/bumicerts", label: "Bumicerts" },
   { href: "/organizations", label: "Organizations" },
   { href: "/observations", label: "Observations" },
-  { href: "/donations", label: "Donations" },
+  { href: "/leaderboard", label: "Leaderboard" },
   { href: GLOBE_URL, label: "Green Globe" },
   { href: STATUS_URL, label: "Status" },
   { href: INDEXER_URL, label: "Indexer" },
