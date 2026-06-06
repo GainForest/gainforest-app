@@ -5,9 +5,9 @@ import { fetchStatusDetailed } from "../_lib/status";
 export const revalidate = 60;
 
 export const metadata: Metadata = {
-  title: "System status",
+  title: "Site health",
   description:
-    "Live status of the PDS instances, indexer, labeller, and apps behind the GainForest data commons, mirrored from the GainForest status page.",
+    "Live health of the services behind Bumicerts and GainForest.",
   alternates: { canonical: "/status" },
 };
 

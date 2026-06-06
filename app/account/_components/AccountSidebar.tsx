@@ -242,7 +242,7 @@ function buildSidebarData(account: AccountRouteData, bumicertCount: number, dona
       },
       {
         label: account.kind === "organization" ? "Community Backed" : "Impact Supporter",
-        description: donationCount > 0 ? `${formatNumber(donationCount)} public donation receipts` : "No public donations recorded",
+        description: donationCount > 0 ? `${formatNumber(donationCount)} public donations` : "No public donations yet",
         icon: "donation",
       },
     ],

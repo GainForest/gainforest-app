@@ -70,10 +70,10 @@ function initWizard(did: string): { state: WizardState; uploadId: string } {
 }
 
 const STEPS = [
-  { number: 1, label: "Upload File" },
+  { number: 1, label: "Choose File" },
   { number: 2, label: "Map Columns" },
   { number: 3, label: "Preview" },
-  { number: 4, label: "Upload" },
+  { number: 4, label: "Save" },
 ] as const;
 
 function StepIndicator({ currentStep }: { currentStep: 1 | 2 | 3 | 4 }) {

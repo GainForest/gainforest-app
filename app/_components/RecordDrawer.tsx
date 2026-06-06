@@ -18,7 +18,6 @@ import { isPdsBlobUrl } from "../_lib/pds";
 import {
   GLOBE_URL,
   accountHref,
-  hyperscanRecordHref,
   localBumicertHref,
 } from "../_lib/urls";
 
@@ -207,21 +206,6 @@ export function RecordDrawer({
             ),
           )}
 
-          {/* AT URI → opens the raw record JSON on Hyperscan's Data Explorer */}
-          <div className="mt-6 border-t border-border-soft pt-5">
-            <div className="flex items-baseline justify-between gap-2">
-              <span className="text-[11px] font-medium uppercase tracking-[0.1em] text-foreground/45">
-                AT Protocol URI
-              </span>
-              {hyperscanRecordHref(record.atUri) && (
-                <span className="text-[10px] uppercase tracking-[0.08em] text-foreground/40">
-                  Raw data on Hyperscan ↗
-                </span>
-              )}
-            </div>
-            <UriRow uri={record.atUri} href={hyperscanRecordHref(record.atUri)} />
-          </div>
-
           {/* Links */}
           <div className="mt-6 flex flex-col gap-2">
             {record.kind === "bumicert" && (
@@ -256,68 +240,6 @@ export function RecordDrawer({
   );
 }
 
-// The URI itself links to Hyperscan's raw record view; a separate button
-// copies the at:// string (a link can't also be a copy-to-clipboard action).
-function UriRow({ uri, href }: { uri: string; href: string | null }) {
-  const [copied, setCopied] = useState(false);
-  const copy = async () => {
-    try {
-      await navigator.clipboard.writeText(uri);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1400);
-    } catch {
-      /* clipboard unavailable */
-    }
-  };
-  const uriClasses =
-    "flex min-w-0 flex-1 items-start gap-2 rounded-lg border border-border-soft bg-surface-sunken px-3 py-2 text-left font-mono text-[11.5px] leading-[1.4] text-primary transition-colors hover:border-primary/40 hover:bg-surface";
-  return (
-    <div className="mt-1.5 flex items-stretch gap-1.5">
-      {href ? (
-        <Link
-          href={href}
-          target="_blank"
-          rel="noreferrer"
-          className={`group ${uriClasses}`}
-          title="View the raw record on Hyperscan"
-        >
-          <span className="min-w-0 flex-1 break-all">{uri}</span>
-          <span
-            aria-hidden
-            className="shrink-0 text-foreground/35 transition-transform group-hover:translate-x-0.5 group-hover:text-primary"
-          >
-            ↗
-          </span>
-        </Link>
-      ) : (
-        <span className={uriClasses}>
-          <span className="min-w-0 flex-1 break-all">{uri}</span>
-        </span>
-      )}
-      <button
-        type="button"
-        onClick={copy}
-        title="Copy AT URI"
-        aria-label={copied ? "Copied" : "Copy AT URI"}
-        className={`grid h-8 w-8 shrink-0 place-items-center rounded-lg border border-border-soft bg-surface-sunken transition-colors hover:border-primary/40 ${
-          copied ? "text-primary" : "text-foreground/40 hover:text-primary"
-        }`}
-      >
-        {copied ? (
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden>
-            <path d="M5 12.5l4 4 10-10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        ) : (
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden>
-            <rect x="9" y="9" width="11" height="11" rx="2.2" stroke="currentColor" strokeWidth="1.8" />
-            <path d="M5 15V5.5A1.5 1.5 0 0 1 6.5 4H15" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-          </svg>
-        )}
-      </button>
-    </div>
-  );
-}
-
 const BADGE_TONE: Record<DetailBadge["tone"], string> = {
   ok: "bg-ok/15 text-ok",
   warn: "bg-warn/15 text-warn",
@@ -344,7 +266,7 @@ function mediaLabel(kind: string): string {
     case "video":
       return "Video";
     case "spectrogram":
-      return "Spectrogram";
+      return "Sound view";
     default:
       return kind;
   }
@@ -357,7 +279,7 @@ function dedupeLinks<T extends { href: string }>(links: T[]): T[] {
 
 function KindBadge({ record }: { record: ExplorerRecord }) {
   const map = {
-    occurrence: { label: "Species observation", cls: "text-primary-dark bg-primary/10" },
+    occurrence: { label: "Nature sighting", cls: "text-primary-dark bg-primary/10" },
     bumicert: { label: "Bumicert", cls: "text-brand-dark bg-brand/12" },
     site: { label: "Project site", cls: "text-foreground/70 bg-foreground/[0.06]" },
   } as const;
@@ -365,7 +287,7 @@ function KindBadge({ record }: { record: ExplorerRecord }) {
   const label =
     record.kind === "site"
       ? record.source === "certified"
-        ? "Certified organization"
+        ? "Reviewed organization"
         : "GainForest organization"
       : m.label;
   return (
@@ -383,10 +305,10 @@ function buildFields(r: ExplorerRecord): Field[] {
     if (r.family) fields.push({ label: "Family", value: r.family });
     if (r.genus) fields.push({ label: "Genus", value: r.genus });
     if (r.kingdom) fields.push({ label: "Kingdom", value: r.kingdom });
-    if (r.basisOfRecord) fields.push({ label: "Basis of record", value: r.basisOfRecord });
+    if (r.basisOfRecord) fields.push({ label: "What was seen", value: r.basisOfRecord });
     if (r.individualCount != null)
       fields.push({ label: "Count", value: formatNumber(r.individualCount) });
-    if (r.recordedBy) fields.push({ label: "Recorded by", value: r.recordedBy });
+    if (r.recordedBy) fields.push({ label: "Shared by", value: r.recordedBy });
     const place = [r.locality, r.country].filter(Boolean).join(", ");
     if (place)
       fields.push({
@@ -395,10 +317,10 @@ function buildFields(r: ExplorerRecord): Field[] {
         wide: true,
       });
     if (r.lat != null && r.lon != null)
-      fields.push({ label: "Coordinates", value: `${r.lat.toFixed(4)}, ${r.lon.toFixed(4)}`, wide: true });
+      fields.push({ label: "Map location", value: `${r.lat.toFixed(4)}, ${r.lon.toFixed(4)}`, wide: true });
     if (r.eventDate) fields.push({ label: "Observed", value: formatDate(r.eventDate) });
     if (r.media.length)
-      fields.push({ label: "Media", value: r.media.join(", "), wide: true });
+      fields.push({ label: "Photos or sounds", value: r.media.map(mediaLabel).join(", "), wide: true });
     if (r.remarks) fields.push({ label: "Remarks", value: r.remarks, wide: true });
   } else if (r.kind === "bumicert") {
     fields.push({ label: "Contributors", value: formatNumber(r.contributorCount) });
@@ -424,9 +346,9 @@ function buildLinks(r: ExplorerRecord): LinkItem[] {
     links.push({ href: GLOBE_URL, label: "Open the Green Globe map" });
   }
   if (r.kind === "occurrence") {
-    links.push({ href: accountHref(r.did), label: "View recorder account" });
+    links.push({ href: accountHref(r.did), label: "View the person who shared this" });
   }
   // Bluesky profile of the record owner is always meaningful.
-  links.push({ href: `https://bsky.app/profile/${r.did}`, label: "Owner on Bluesky" });
+  links.push({ href: `https://bsky.app/profile/${r.did}`, label: "View public social profile" });
   return links;
 }

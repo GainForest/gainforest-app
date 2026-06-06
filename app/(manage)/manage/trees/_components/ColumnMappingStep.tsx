@@ -88,15 +88,15 @@ export default function ColumnMappingStep({ headers, mappings, sampleData, onMap
   return (
     <div className="space-y-5">
       <div>
-        <h2 className="text-lg font-semibold">Map Columns</h2>
+        <h2 className="text-lg font-semibold">Match File Headings</h2>
         <p className="text-sm text-muted-foreground mt-0.5">
-          Match your CSV columns to Darwin Core fields. {headers.length} columns detected.
+          Match your file headings to the tree information Bumicerts needs. {headers.length} headings detected.
         </p>
       </div>
 
       {!allRequiredMapped && (
         <div className="rounded-md border border-destructive/50 bg-destructive/10 p-3 text-sm text-destructive space-y-1">
-          <p className="font-medium">Required fields not mapped:</p>
+          <p className="font-medium">Required information not matched:</p>
           <ul className="list-disc list-inside space-y-0.5">
             {missingRequired.map((f) => <li key={f}>{getTargetFieldLabel(f)}</li>)}
           </ul>
@@ -107,8 +107,8 @@ export default function ColumnMappingStep({ headers, mappings, sampleData, onMap
         <div className="flex items-start gap-2 rounded-md border border-yellow-500/40 bg-yellow-500/10 p-3 text-sm text-yellow-700 dark:text-yellow-300">
           <CircleAlertIcon className="h-4 w-4 mt-0.5 shrink-0" />
           <div>
-            <p className="font-medium">Review unmapped columns</p>
-            <p className="text-yellow-700/90 dark:text-yellow-300/90">{skippedColumnsNeedingReview.length} column{skippedColumnsNeedingReview.length !== 1 ? "s" : ""} will not be uploaded.</p>
+            <p className="font-medium">Review unmatched headings</p>
+            <p className="text-yellow-700/90 dark:text-yellow-300/90">{skippedColumnsNeedingReview.length} heading{skippedColumnsNeedingReview.length !== 1 ? "s" : ""} will not be saved.</p>
           </div>
         </div>
       )}
@@ -116,13 +116,13 @@ export default function ColumnMappingStep({ headers, mappings, sampleData, onMap
       {expectedSkippedKoboCount > 0 && (
         <div className="flex items-start gap-2 rounded-md border border-border bg-muted/30 p-3 text-sm text-muted-foreground">
           <CheckCircle2 className="h-4 w-4 mt-0.5 shrink-0" />
-          <p>{expectedSkippedKoboCount} KoboToolbox metadata column{expectedSkippedKoboCount !== 1 ? "s" : ""} automatically skipped.</p>
+          <p>{expectedSkippedKoboCount} field-form note{expectedSkippedKoboCount !== 1 ? "s" : ""} automatically skipped.</p>
         </div>
       )}
 
       <div className="rounded-lg border overflow-hidden">
         <div className="grid grid-cols-[1fr_1fr_1fr] gap-0 bg-muted/50 px-4 py-2 text-xs font-medium text-muted-foreground uppercase tracking-wide">
-          <span>Source column</span>
+          <span>File heading</span>
           <span>Sample value</span>
           <span>Map to</span>
         </div>
@@ -163,23 +163,23 @@ export default function ColumnMappingStep({ headers, mappings, sampleData, onMap
                       <SelectValue placeholder="Skip" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value={SKIP_SENTINEL}><span className="text-muted-foreground">Skip this column</span></SelectItem>
+                      <SelectItem value={SKIP_SENTINEL}><span className="text-muted-foreground">Skip this heading</span></SelectItem>
                       <SelectGroup>
-                        <SelectLabel>Required Occurrence</SelectLabel>
+                        <SelectLabel>Required information</SelectLabel>
                         {OCCURRENCE_REQUIRED.map((f) => (
                           <SelectItem key={f.field} value={f.field}>{getTargetFieldLabel(f.field)} <span className="text-destructive ml-1">*</span></SelectItem>
                         ))}
                       </SelectGroup>
                       <SelectGroup>
-                        <SelectLabel>Optional Occurrence</SelectLabel>
+                        <SelectLabel>Optional information</SelectLabel>
                         {OCCURRENCE_OPTIONAL.map((f) => <SelectItem key={f.field} value={f.field}>{getTargetFieldLabel(f.field)}</SelectItem>)}
                       </SelectGroup>
                       <SelectGroup>
-                        <SelectLabel>Measurements</SelectLabel>
+                        <SelectLabel>Tree measurements</SelectLabel>
                         {MEASUREMENTS.map((f) => <SelectItem key={f.field} value={f.field}>{getTargetFieldLabel(f.field)}</SelectItem>)}
                       </SelectGroup>
                       <SelectGroup>
-                        <SelectLabel>Media</SelectLabel>
+                        <SelectLabel>Photos</SelectLabel>
                         {MEDIA.map((f) => <SelectItem key={f.field} value={f.field}>{getTargetFieldLabel(f.field)}</SelectItem>)}
                       </SelectGroup>
                     </SelectContent>
@@ -208,13 +208,13 @@ export default function ColumnMappingStep({ headers, mappings, sampleData, onMap
       {duplicateSourceColumns.size > 0 && (
         <div className="flex items-start gap-2 rounded-md border border-yellow-500/40 bg-yellow-500/10 p-3 text-sm text-yellow-600 dark:text-yellow-400">
           <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
-          <span>Some columns map to the same target field. Only the first mapping will be used.</span>
+          <span>Some headings match the same information. Only the first match will be used.</span>
         </div>
       )}
 
       <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
         <span className="flex items-center gap-1"><CheckCircle2 className="h-3.5 w-3.5 text-primary" />Mapped</span>
-        <span className="flex items-center gap-1"><CircleAlertIcon className="h-3.5 w-3.5 text-yellow-500" />Skipped — will not be uploaded</span>
+        <span className="flex items-center gap-1"><CircleAlertIcon className="h-3.5 w-3.5 text-yellow-500" />Skipped — will not be saved</span>
         <span className="flex items-center gap-1"><AlertTriangle className="h-3.5 w-3.5 text-yellow-500" />Duplicate target</span>
         <span className="flex items-center gap-1"><span className="text-destructive font-medium">*</span>Required field</span>
       </div>

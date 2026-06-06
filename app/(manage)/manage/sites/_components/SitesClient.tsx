@@ -397,7 +397,7 @@ function SiteEditor({
           </div>
         ) : (
           <div className="space-y-1.5">
-            <Label htmlFor="site-uri">GeoJSON / Shapefile URL</Label>
+            <Label htmlFor="site-uri">Map area link</Label>
             <Input
               id="site-uri"
               value={form.uri}

@@ -112,30 +112,30 @@ export default function PreviewStep({ parsedData, mappings, koboMediaZipIndex, s
   return (
     <div className="space-y-5">
       <div>
-        <h2 className="text-lg font-semibold">Preview & Validate</h2>
-        <p className="text-sm text-muted-foreground mt-0.5">Review your data before uploading.</p>
+        <h2 className="text-lg font-semibold">Review & Check</h2>
+        <p className="text-sm text-muted-foreground mt-0.5">Review your tree information before saving.</p>
       </div>
 
       {/* Summary banner */}
       {siteSelection === null ? (
         <div className="flex items-center gap-2 rounded-md border border-destructive/50 bg-destructive/10 p-3 text-sm text-destructive">
           <XCircle className="h-4 w-4 shrink-0" />
-          <span>No site selected. Go back and select a site boundary.</span>
+          <span>No place selected. Go back and select a project area.</span>
         </div>
       ) : boundaryLoading ? (
         <div className="flex items-center gap-2 rounded-md border border-yellow-500/40 bg-yellow-500/10 p-3 text-sm text-yellow-600 dark:text-yellow-400">
           <AlertTriangle className="h-4 w-4 shrink-0" />
-          <span>Checking boundary for {siteSelection.name}…</span>
+          <span>Checking project area for {siteSelection.name}…</span>
         </div>
       ) : boundaryError ? (
         <div className="flex items-center gap-2 rounded-md border border-destructive/50 bg-destructive/10 p-3 text-sm text-destructive">
           <XCircle className="h-4 w-4 shrink-0" />
-          <span>Could not load site boundary: {boundaryError}</span>
+          <span>Could not load project area: {boundaryError}</span>
         </div>
       ) : allValid ? (
         <div className="flex items-center gap-2 rounded-md border border-primary/40 bg-primary/10 p-3 text-sm text-primary">
           <CheckCircle2 className="h-4 w-4 shrink-0" />
-          <span>All {totalRows} row{totalRows !== 1 ? "s" : ""} valid — ready to upload to {siteSelection.name}.</span>
+          <span>All {totalRows} row{totalRows !== 1 ? "s" : ""} ready — ready to save to {siteSelection.name}.</span>
         </div>
       ) : allInvalid ? (
         <div className="flex items-center gap-2 rounded-md border border-destructive/50 bg-destructive/10 p-3 text-sm text-destructive">
@@ -145,14 +145,14 @@ export default function PreviewStep({ parsedData, mappings, koboMediaZipIndex, s
       ) : (
         <div className="flex items-center gap-2 rounded-md border border-yellow-500/40 bg-yellow-500/10 p-3 text-sm text-yellow-600 dark:text-yellow-400">
           <AlertTriangle className="h-4 w-4 shrink-0" />
-          <span>{validCount} valid, {errorCount} invalid. Invalid rows will be skipped.</span>
+          <span>{validCount} ready, {errorCount} need fixes. Rows with problems will be skipped.</span>
         </div>
       )}
 
       {/* Data preview table */}
       <div>
         <div className="flex items-center justify-between mb-2">
-          <h3 className="text-sm font-medium">Data preview</h3>
+          <h3 className="text-sm font-medium">Tree information preview</h3>
           {showingNote && <span className="text-xs text-muted-foreground">Showing first {MAX_PREVIEW_ROWS} of {totalRows} rows</span>}
         </div>
         <div className="rounded-lg border overflow-x-auto">
@@ -162,7 +162,7 @@ export default function PreviewStep({ parsedData, mappings, koboMediaZipIndex, s
                 <th className="px-3 py-2 text-left font-medium text-muted-foreground uppercase tracking-wide w-8">#</th>
                 {mappedHeaders.map((h) => (
                   <th key={h} className="px-3 py-2 text-left font-medium text-muted-foreground uppercase tracking-wide whitespace-nowrap">
-                    {h === "siteBoundary" ? "Site Boundary" : getTargetFieldLabel(h)}
+                    {h === "siteBoundary" ? "Project area" : getTargetFieldLabel(h)}
                   </th>
                 ))}
                 {hasAnyPhotos && <th className="px-3 py-2 text-left font-medium text-muted-foreground uppercase tracking-wide whitespace-nowrap">Photos</th>}

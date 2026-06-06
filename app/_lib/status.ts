@@ -330,17 +330,17 @@ export function componentTone(status: ComponentStatus): StatusTone {
 export function componentLabel(status: ComponentStatus): string {
   switch (status) {
     case "OPERATIONAL":
-      return "Operational";
+      return "Working";
     case "DEGRADEDPERFORMANCE":
-      return "Degraded";
+      return "Slow";
     case "UNDERMAINTENANCE":
-      return "Maintenance";
+      return "Planned work";
     case "PARTIALOUTAGE":
-      return "Partial outage";
+      return "Partly down";
     case "MAJOROUTAGE":
-      return "Major outage";
+      return "Not working";
     default:
-      return "Unknown";
+      return "Checking";
   }
 }
 
@@ -360,18 +360,18 @@ export function pageTone(page: PageStatus, degraded: boolean): StatusTone {
 }
 
 export function pageLabel(page: PageStatus, degraded: boolean): string {
-  if (degraded) return "Status unavailable";
+  if (degraded) return "Health unavailable";
   switch (page) {
     case "UP":
-      return "All systems operational";
+      return "Everything is working";
     case "HASISSUES":
-      return "Some systems degraded";
+      return "Some services are slow";
     case "UNDERMAINTENANCE":
-      return "Under maintenance";
+      return "Planned work happening";
     case "DOWN":
-      return "Major outage";
+      return "A service is not working";
     default:
-      return "Status unknown";
+      return "Checking health";
   }
 }
 

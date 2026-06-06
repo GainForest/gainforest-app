@@ -452,7 +452,7 @@ export function ManageDashboardClient({
     "manage-logo-editor",
     <ImageEditorModal
       title="Edit logo"
-      description="Upload a square logo or avatar for this profile."
+      description="Choose a square logo or avatar for this profile."
       currentUrl={account.avatarUrl}
       onConfirm={setLogoFile}
     />,
@@ -462,7 +462,7 @@ export function ManageDashboardClient({
     "manage-cover-editor",
     <ImageEditorModal
       title="Edit cover image"
-      description="Upload a wide banner image for the top of your profile."
+      description="Choose a wide banner image for the top of your profile."
       currentUrl={account.coverUrl}
       onConfirm={setCoverFile}
     />,

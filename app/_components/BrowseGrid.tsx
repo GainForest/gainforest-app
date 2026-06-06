@@ -30,11 +30,11 @@ export function BrowseGrid({
   }> = [
     {
       href: "/bumicerts",
-      label: "Verified projects",
+      label: "Checked projects",
       title: "Bumicerts",
-      blurb: "Browse verified impact stories with photos, places, contributors, and project context.",
+      blurb: "Browse checked impact stories with photos, places, contributors, and project context.",
       stat: formatCompact(kpis.bumicerts),
-      statLabel: "claims",
+      statLabel: "stories",
     },
     {
       href: "/organizations",
@@ -48,9 +48,9 @@ export function BrowseGrid({
       href: "/observations",
       label: "Biodiversity",
       title: "Observations",
-      blurb: "Explore species records, coordinates, and media evidence from the data commons.",
+      blurb: "Explore species sightings, places, and photos or sounds from GainForest.",
       stat: formatCompact(kpis.occurrences),
-      statLabel: "records",
+      statLabel: "sightings",
     },
     {
       href: "/leaderboard",
@@ -64,17 +64,17 @@ export function BrowseGrid({
       href: "/devices",
       label: "Field signals",
       title: "Tainá devices",
-      blurb: "Check live field-device heartbeats, temperature, memory, disk, and uptime.",
+      blurb: "Check whether field devices are sending updates right now.",
       stat: devices.configured && devices.total > 0 ? `${devices.healthy}/${devices.total}` : "—",
       statLabel: devices.configured && devices.total > 0 ? "live now" : "heartbeats",
     },
     {
       href: "/status",
-      label: "Infrastructure",
-      title: "System status",
-      blurb: "See the PDS instances, indexer, labeller, and apps powering the explorer.",
+      label: "Site health",
+      title: "Site health",
+      blurb: "See whether the services behind Bumicerts and GainForest are working.",
       stat: total > 0 ? `${operational}/${total}` : "—",
-      statLabel: "online",
+      statLabel: "working",
     },
   ];
 
@@ -91,7 +91,7 @@ export function BrowseGrid({
             Collections
           </h2>
           <p className="mx-auto mt-3 max-w-xl text-base leading-relaxed text-muted-foreground">
-            Six live views into the GainForest data commons, shaped for funders, stewards, and field teams.
+            Six live views into GainForest work, shaped for funders, stewards, and field teams.
           </p>
         </div>
 

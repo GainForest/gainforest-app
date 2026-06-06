@@ -47,7 +47,7 @@ export function BumicertsBumicertCard({
   className?: string;
 }) {
   const objectives = buildObjectiveLabels(record);
-  const organizationName = shortDid(record.did);
+  const organizationName = "Project steward";
   const hasImage = Boolean(record.imageUrl);
 
   return (
@@ -125,13 +125,8 @@ export function BumicertsBumicertCard({
 
 function buildObjectiveLabels(record: BumicertsBumicertCardRecord): string[] {
   const labels: string[] = [];
-  if (record.locationCount > 0) labels.push(`${record.locationCount} ${record.locationCount === 1 ? "site" : "sites"}`);
+  if (record.locationCount > 0) labels.push(`${record.locationCount} ${record.locationCount === 1 ? "place" : "places"}`);
   if (record.contributorCount > 0) labels.push(`${record.contributorCount} ${record.contributorCount === 1 ? "contributor" : "contributors"}`);
-  if (record.startDate || record.endDate) labels.push("impact period");
+  if (record.startDate || record.endDate) labels.push("project dates");
   return [labels[0], labels.length > 1 ? `+${labels.length - 1}` : null].filter((value): value is string => Boolean(value));
-}
-
-function shortDid(did: string): string {
-  const value = did.startsWith("did:plc:") ? did.slice(8) : did;
-  return value.length > 22 ? `${value.slice(0, 20)}...` : value;
 }

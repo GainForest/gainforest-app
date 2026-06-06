@@ -93,7 +93,7 @@ export const TARGET_FIELDS: TargetField[] = [
   { field: "decimalLatitude", label: "Decimal Latitude", required: true, category: "occurrence" },
   { field: "decimalLongitude", label: "Decimal Longitude", required: true, category: "occurrence" },
   { field: "vernacularName", label: "Vernacular Name", required: false, category: "occurrence" },
-  { field: "recordedBy", label: "Recorded By", required: false, category: "occurrence" },
+  { field: "recordedBy", label: "Shared By", required: false, category: "occurrence" },
   { field: "locality", label: "Locality", required: false, category: "occurrence" },
   { field: "country", label: "Country", required: false, category: "occurrence" },
   { field: "occurrenceRemarks", label: "Occurrence Remarks", required: false, category: "occurrence" },

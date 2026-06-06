@@ -28,7 +28,7 @@ import {
   dailyCountSeries,
   type MetricSeries,
 } from "../_lib/series";
-import { formatNumber, countryFlag, shortDid, formatDate } from "../_lib/format";
+import { formatNumber, countryFlag, formatDate } from "../_lib/format";
 import { PictureHero } from "./PictureHero";
 
 // Single-stream record explorer. One of the three GainForest record types
@@ -55,7 +55,7 @@ const KIND_META: Record<RecordKind, KindMeta> = {
     eyebrow: "Observations",
     title: "Species",
     accent: "observations",
-    lede: "Browse Darwin Core records signed on the AT Protocol: photos, bioacoustics, taxonomy, and coordinates from the GainForest data commons.",
+    lede: "Browse nature sightings from GainForest: photos, sounds, species names, and map locations.",
     search: "Filter by species, family, or country…",
     heroLight: "/assets/media/images/observations/observations-hero-light.png",
     heroDark: "/assets/media/images/observations/observations-hero-dark.png",
@@ -64,7 +64,7 @@ const KIND_META: Record<RecordKind, KindMeta> = {
     eyebrow: "Project Sites",
     title: "Project",
     accent: "sites",
-    lede: "Registered organizations from GainForest and certified actor profiles, with country, imagery, profile data, and mapped locations.",
+    lede: "Explore nature stewardship groups, where they work, and the stories they share.",
     search: "Filter by organization or country…",
     heroLight: "/assets/organizations/organizations-hero-light.png",
     heroDark: "/assets/organizations/organizations-hero-dark.png",
@@ -376,7 +376,7 @@ export function RecordExplorer({ kind }: { kind: RecordKind }) {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder={meta.search}
-              aria-label="Filter loaded records"
+              aria-label="Search what is shown"
               className="w-full rounded-full border border-border-soft bg-surface py-2 pl-9 pr-3 text-[14px] text-foreground outline-none transition-colors placeholder:text-foreground/40 focus:border-primary/40"
             />
           </div>
@@ -411,7 +411,7 @@ export function RecordExplorer({ kind }: { kind: RecordKind }) {
             <select
               value={sort}
               onChange={(e) => setSort(e.target.value as SortMode)}
-              aria-label="Sort records"
+              aria-label="Choose display order"
               className="appearance-none rounded-full border border-border-soft bg-surface py-2 pl-3.5 pr-8 text-[12.5px] font-medium text-foreground/70 outline-none transition-colors hover:text-foreground focus:border-primary/40"
             >
               <option value="newest">Newest first</option>
@@ -437,7 +437,7 @@ export function RecordExplorer({ kind }: { kind: RecordKind }) {
                 [
                   { id: "both", label: "All" },
                   { id: "gainforest", label: "GainForest" },
-                  { id: "certified", label: "Certified" },
+                  { id: "certified", label: "Reviewed" },
                 ] as Array<{ id: SiteSourceFilter; label: string }>
               ).map((o) => (
                 <button
@@ -486,8 +486,8 @@ export function RecordExplorer({ kind }: { kind: RecordKind }) {
           <div className="flex items-center gap-1.5 text-[12.5px] text-foreground/55">
             <span aria-hidden className="pulse-dot inline-block h-1.5 w-1.5 rounded-full bg-brand text-brand" />
             {query
-              ? `${formatNumber(filtered.length)} of ${formatNumber(records.length)} loaded`
-              : `${formatNumber(records.length)} loaded`}
+              ? `${formatNumber(filtered.length)} of ${formatNumber(records.length)} shown`
+              : `${formatNumber(records.length)} shown`}
           </div>
         </div>
 
@@ -499,8 +499,8 @@ export function RecordExplorer({ kind }: { kind: RecordKind }) {
             <SkeletonGrid />
           ) : phase === "error" && records.length === 0 ? (
             <EmptyState
-              title="Could not reach the indexer"
-              body="The GainForest indexer did not respond. It may be momentarily degraded; check the status page and try again."
+              title="Could not load this page"
+              body="GainForest did not respond. It may be a temporary issue; check the status page and try again."
               onRetry={() => {
                 setPhase("idle");
                 setRecords([]);
@@ -509,20 +509,20 @@ export function RecordExplorer({ kind }: { kind: RecordKind }) {
           ) : filtered.length === 0 ? (
             query ? (
               <EmptyState
-                title="No matches in the loaded records"
-                body="Try a different name, family, or country; or load more records to widen the search."
+                title="No matches here"
+                body="Try a different name, family, or country; or show more to widen the search."
                 onRetry={() => setQuery("")}
                 retryLabel="Clear search"
               />
             ) : kind === "occurrence" && occMedia !== "all" ? (
               <EmptyState
-                title={`No ${occMedia === "image" ? "photo" : "audio"} records found nearby`}
-                body="Media-bearing observations are sparse in the newest uploads. Switch to All records to browse the full live stream."
+                title={`No ${occMedia === "image" ? "photo" : "audio"} sightings found nearby`}
+                body="The newest sightings do not always include photos or sounds. Switch to All to browse everything."
                 onRetry={() => changeMedia("all")}
-                retryLabel="Show all records"
+                retryLabel="Show all"
               />
             ) : (
-              <EmptyState title="No records yet" body="This stream is empty right now." />
+              <EmptyState title="Nothing here yet" body="There is nothing to show right now." />
             )
           ) : (
             <ul role="list" className={GRID_CLS}>
@@ -538,7 +538,7 @@ export function RecordExplorer({ kind }: { kind: RecordKind }) {
         {/* Loading hint while pages stream in */}
         {walking && records.length > 0 && (
           <p className="mt-6 flex items-center justify-center gap-2 text-[13px] italic text-foreground/55">
-            <Spinner /> Loading records…
+            <Spinner /> Loading more…
           </p>
         )}
 
@@ -557,12 +557,12 @@ export function RecordExplorer({ kind }: { kind: RecordKind }) {
                     <Spinner /> Loading more
                   </>
                 ) : (
-                  <>Load more records</>
+                  <>Show more</>
                 )}
               </button>
             ) : (
               <span className="text-[13px] italic text-foreground/50">
-                You have reached the end of this stream.
+                You have reached the end.
               </span>
             )}
           </div>
@@ -655,13 +655,11 @@ function RecordCard({ record, onOpen }: { record: ExplorerRecord; onOpen: () => 
           ) : null}
         </div>
 
-        {/* did:plc + created date — always shown. */}
-        <div className="mt-2.5 flex items-center justify-between gap-1.5 border-t border-border-soft pt-2 font-mono text-[10px] text-foreground/50">
-          <span className="truncate" title={record.did}>
-            {shortDid(record.did)}
-          </span>
-          {record.createdAt ? <span className="shrink-0">{formatDate(record.createdAt)}</span> : null}
-        </div>
+        {record.createdAt ? (
+          <div className="mt-2.5 flex items-center justify-end gap-1.5 border-t border-border-soft pt-2 text-[10px] text-foreground/50">
+            <span className="shrink-0">Shared {formatDate(record.createdAt)}</span>
+          </div>
+        ) : null}
       </div>
     </button>
   );
@@ -751,7 +749,7 @@ function cardView(record: ExplorerRecord): CardView {
         ) : undefined,
       badge: (
         <span className="inline-flex items-center rounded-full bg-background/85 px-2 py-0.5 text-[9.5px] font-medium uppercase tracking-[0.1em] text-foreground/70 backdrop-blur-md">
-          {certified ? "Certified" : "GainForest"}
+          {certified ? "Reviewed" : "GainForest"}
         </span>
       ),
       placeholder: (
@@ -899,27 +897,27 @@ function computeStats(records: ExplorerRecord[], kind: RecordKind): Stat[] {
     ).size;
     const withMedia = occ.filter((r) => r.media.length > 0).length;
     return [
-      { label: "Records loaded", value: n(occ.length), sub: "Observations", series: totalSeries },
-      { label: "Last 30 days", value: n(last30), sub: "New uploads", series: win30 },
+      { label: "Items shown", value: n(occ.length), sub: "Sightings", series: totalSeries },
+      { label: "Last 30 days", value: n(last30), sub: "New sightings", series: win30 },
       { label: "Last 7 days", value: n(last7), sub: "This week", series: win7 },
       {
         label: "Species",
         value: n(species),
-        sub: "Distinct taxa",
+        sub: "Different kinds found",
         series: seriesFromDistinct(occ.map((r) => ({ t: ms(r.createdAt), key: r.scientificName }))),
       },
       {
         label: "Countries",
         value: n(countries),
-        sub: "Geographic reach",
+        sub: "Places reached",
         series: seriesFromDistinct(
           occ.map((r) => ({ t: ms(r.createdAt), key: r.countryCode || r.country })),
         ),
       },
       {
-        label: "With media",
+        label: "With photos or sounds",
         value: n(withMedia),
-        sub: "Photo or audio",
+        sub: "Photos or sounds",
         series: countWhere((r) => (r as OccurrenceRecord).media.length > 0),
       },
     ];
@@ -931,25 +929,25 @@ function computeStats(records: ExplorerRecord[], kind: RecordKind): Stat[] {
     const sites = b.reduce((s, r) => s + r.locationCount, 0);
     const withCover = b.filter((r) => r.imageUrl).length;
     return [
-      { label: "Records loaded", value: n(b.length), sub: "Bumicerts", series: totalSeries },
-      { label: "Last 30 days", value: n(last30), sub: "New claims", series: win30 },
+      { label: "Items shown", value: n(b.length), sub: "Bumicerts", series: totalSeries },
+      { label: "Last 30 days", value: n(last30), sub: "New stories", series: win30 },
       { label: "Last 7 days", value: n(last7), sub: "This week", series: win7 },
       {
         label: "Contributors",
         value: n(contributors),
-        sub: "Across claims",
+        sub: "Across stories",
         series: seriesFromIncrements(b.map((r) => ({ t: ms(r.createdAt), inc: r.contributorCount }))),
       },
       {
-        label: "Certified sites",
+        label: "Project places",
         value: n(sites),
-        sub: "Locations",
+        sub: "Places",
         series: seriesFromIncrements(b.map((r) => ({ t: ms(r.createdAt), inc: r.locationCount }))),
       },
       {
-        label: "With imagery",
+        label: "With pictures",
         value: n(withCover),
-        sub: "Has cover",
+        sub: "Has cover picture",
         series: countWhere((r) => Boolean((r as BumicertRecord).imageUrl)),
       },
     ];
@@ -959,17 +957,17 @@ function computeStats(records: ExplorerRecord[], kind: RecordKind): Stat[] {
   const countries = new Set(s.map((r) => r.country).filter(Boolean)).size;
   const withImg = s.filter((r) => r.imageUrl).length;
   return [
-    { label: "Records loaded", value: n(s.length), sub: "Organizations", series: totalSeries },
-    { label: "Last 30 days", value: n(last30), sub: "New sites", series: win30 },
+    { label: "Items shown", value: n(s.length), sub: "Organizations", series: totalSeries },
+    { label: "Last 30 days", value: n(last30), sub: "New places", series: win30 },
     { label: "Last 7 days", value: n(last7), sub: "This week", series: win7 },
     {
       label: "Countries",
       value: n(countries),
-      sub: "Geographic reach",
+      sub: "Places reached",
       series: seriesFromDistinct(s.map((r) => ({ t: ms(r.createdAt), key: r.country }))),
     },
     {
-      label: "With imagery",
+      label: "With pictures",
       value: n(withImg),
       sub: "Cover or logo",
       series: countWhere((r) => Boolean((r as SiteRecord).imageUrl)),

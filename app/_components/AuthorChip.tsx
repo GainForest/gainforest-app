@@ -7,7 +7,7 @@ import {
   monogram,
   type DidProfile,
 } from "../_lib/did-profile";
-import { shortDid, formatDate } from "../_lib/format";
+import { formatDate } from "../_lib/format";
 import { useAccountDrawer } from "./AccountDrawer";
 
 // Owner identity + created date, shown on every record card / row / drawer.
@@ -49,7 +49,7 @@ export function AuthorChip({
   const { openAccount } = useAccountDrawer();
   const handle = profile?.handle ?? null;
   const avatar = avatarOverride ?? profile?.avatar ?? null;
-  const primary = profile?.displayName || (handle ? `@${handle}` : shortDid(did));
+  const primary = profile?.displayName || handle || "Organization";
   const date = createdAt ? formatDate(createdAt) : null;
 
   const av = size === "sm" ? "h-5 w-5 text-[9px]" : "h-7 w-7 text-[11px]";
@@ -59,24 +59,17 @@ export function AuthorChip({
     <button
       type="button"
       onClick={() => openAccount(did)}
-      title={`View account · ${did}`}
+      title="View profile"
       className={`-mx-1 flex w-full min-w-0 items-center gap-2 rounded-lg px-1 py-0.5 text-left transition-colors hover:bg-surface-sunken ${className}`}
     >
       <Avatar did={did} handle={handle} avatar={avatar} className={av} />
       <div className="min-w-0 flex-1 leading-tight">
         <div className={`truncate font-medium text-foreground ${primaryCls}`}>{primary}</div>
-        <div className="truncate font-mono text-[10.5px] text-foreground/50">
-          {handle || profile?.displayName ? (
-            <>
-              {shortDid(did)}
-              {date ? <span className="text-foreground/35"> · {date}</span> : null}
-            </>
-          ) : date ? (
-            <span className="text-foreground/45">{date}</span>
-          ) : (
-            shortDid(did)
-          )}
-        </div>
+        {date ? (
+          <div className="truncate text-[10.5px] text-foreground/50">
+            Shared {date}
+          </div>
+        ) : null}
       </div>
     </button>
   );
@@ -105,12 +98,12 @@ export function AuthorInline({
 
   const handle = profile?.handle ?? null;
   const avatar = avatarOverride ?? profile?.avatar ?? null;
-  const label = handle ? `@${handle}` : shortDid(did);
+  const label = profile?.displayName || handle || "Supporter";
 
   return (
-    <span className="inline-flex min-w-0 items-center gap-1.5 align-middle" title={did}>
+    <span className="inline-flex min-w-0 items-center gap-1.5 align-middle" title={label}>
       <Avatar did={did} handle={handle} avatar={avatar} className="h-4 w-4 text-[8px]" />
-      <span className="truncate font-mono text-foreground/80">{label}</span>
+      <span className="truncate text-foreground/80">{label}</span>
     </span>
   );
 }
@@ -157,11 +150,11 @@ export function OwnerBadge({
         if (e.key === "Enter" || e.key === " ") open(e);
       }}
       className="inline-flex min-w-0 cursor-pointer items-center gap-1.5"
-      title={`View account${handle ? ` · @${handle}` : ""}`}
+      title="View profile"
     >
       <Avatar did={did} handle={handle} avatar={avatar} className="h-5 w-5 text-[9px]" />
-      {handle ? (
-        <span className="truncate text-[11px] font-medium text-foreground">@{handle}</span>
+      {profile?.displayName || handle ? (
+        <span className="truncate text-[11px] font-medium text-foreground">{profile?.displayName || handle}</span>
       ) : null}
     </span>
   );

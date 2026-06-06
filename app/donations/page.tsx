@@ -4,7 +4,7 @@ import { Dashboard } from "../_components/Dashboard";
 export const metadata: Metadata = {
   title: "Donations Dashboard — Bumicerts",
   description:
-    "Platform-wide donations analytics: total raised, unique donors, funding trends, and recent transactions.",
+    "Donation activity across Bumicerts: total raised, supporters, funding trends, and recent gifts.",
   alternates: { canonical: "/donations" },
 };
 

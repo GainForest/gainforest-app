@@ -384,12 +384,12 @@ export function TreesClient({ did, onUpload }: { did: string; onUpload?: () => v
         <section className="space-y-3">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <h2 className="text-lg font-semibold font-garamond">Datasets</h2>
-              <p className="text-sm text-muted-foreground">Browse tree records by upload dataset.</p>
+              <h2 className="text-lg font-semibold font-garamond">Tree groups</h2>
+              <p className="text-sm text-muted-foreground">Browse trees by group.</p>
             </div>
             {selectedDatasetUri && (
               <Button variant="ghost" size="sm" onClick={() => handleDatasetChange(null)}>
-                Back to datasets
+                Back to groups
               </Button>
             )}
           </div>

@@ -88,7 +88,7 @@ function PillToggle({
             : "text-muted-foreground hover:text-foreground",
         )}
       >
-        Handle
+        Username
       </button>
     </div>
   );
@@ -122,14 +122,14 @@ function EmailForm() {
           autoFocus
           disabled={isRedirecting}
         />
-        <p className="text-xs text-muted-foreground">We’ll send you a verification code</p>
+        <p className="text-xs text-muted-foreground">We’ll send you a sign-in code</p>
       </div>
 
       <Button type="submit" disabled={isRedirecting || !email.trim()} className="w-full">
         {isRedirecting ? (
           <>
             <LoaderIcon className="animate-spin" />
-            Redirecting…
+            Taking you there…
           </>
         ) : (
           <>
@@ -186,11 +186,11 @@ function HandleForm() {
       case "invalidCharacters":
         return "Only letters, numbers, hyphens, and dots are allowed.";
       case "missingDomain":
-        return "Enter your full handle, including its domain.";
+        return "Enter your full username, including the part after the dot.";
       case "emptyLabel":
-        return "Handle labels cannot be empty.";
+        return "Each part of the username must include at least one character.";
       case "invalidLabelEdges":
-        return "Handle labels must start and end with a letter or number.";
+        return "Each part of the username must start and end with a letter or number.";
     }
   };
   const [handle, setHandle] = useState("");
@@ -219,7 +219,7 @@ function HandleForm() {
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="space-y-1.5">
         <label htmlFor="login-handle" className="text-sm font-medium">
-          Handle
+          Username
         </label>
         <Input
           id="login-handle"
@@ -255,7 +255,7 @@ function HandleForm() {
               className="text-xs text-muted-foreground"
             >
               Signing in as{" "}
-              <span className="font-mono text-foreground">{normalizedHandle}</span>
+              <span className="text-foreground">{normalizedHandle}</span>
             </motion.p>
           ) : null}
         </AnimatePresence>
@@ -278,7 +278,7 @@ function HandleForm() {
         {isPending ? (
           <>
             <LoaderIcon className="animate-spin" />
-            Redirecting…
+            Taking you there…
           </>
         ) : (
           <>
@@ -421,7 +421,7 @@ function AuthenticatedMenu({ session }: { session: Extract<AuthSession, { isLogg
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const displayLabel = session.handle || shortDid(session.did);
-  const secondaryLabel = session.handle ? `@${session.handle}` : "User account";
+  const secondaryLabel = session.handle ? session.handle : "User account";
 
   const handleBlur = (event: React.FocusEvent) => {
     if (!containerRef.current?.contains(event.relatedTarget as Node)) {

@@ -141,7 +141,7 @@ export function AudioEditor({ mode, initialData, onClose, onSaved }: AudioEditor
           <CheckIcon className="size-6 text-primary-foreground" />
         </div>
         <span className="text-base font-medium">
-          {mode === "add" ? "Recording uploaded" : "Recording updated"}
+          {mode === "add" ? "Recording added" : "Recording updated"}
         </span>
         <div className="w-full max-w-xs h-1 bg-muted rounded-full overflow-hidden">
           <div
@@ -159,7 +159,7 @@ export function AudioEditor({ mode, initialData, onClose, onSaved }: AudioEditor
   return (
     <div className="space-y-5">
       <h3 className="font-semibold text-lg">
-        {mode === "add" ? "Upload recording" : `Edit: ${initialData?.record.name ?? "recording"}`}
+        {mode === "add" ? "Add recording" : `Edit: ${initialData?.record.name ?? "recording"}`}
       </h3>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
@@ -244,7 +244,7 @@ export function AudioEditor({ mode, initialData, onClose, onSaved }: AudioEditor
         <Button variant="outline" onClick={onClose} disabled={isPending}>Cancel</Button>
         <Button onClick={() => void handleSubmit()} disabled={!isValid || isPending}>
           {isPending && <Loader2Icon className="animate-spin h-3.5 w-3.5" />}
-          {mode === "add" ? (isPending ? "Uploading…" : "Upload") : (isPending ? "Saving…" : "Save")}
+          {mode === "add" ? (isPending ? "Adding…" : "Add") : (isPending ? "Saving…" : "Save")}
         </Button>
       </div>
     </div>

@@ -37,12 +37,12 @@ const instrument = Instrument_Serif({
 });
 
 const SITE_NAME = "Bumicerts";
-const SITE_TAGLINE = "the GainForest data commons explorer";
+const SITE_TAGLINE = "plain-language GainForest impact explorer";
 const SITE_DESCRIPTION =
-  "Bumicerts is a read-only explorer for the GainForest data commons. Darwin Core occurrences, project sites, Bumicerts, and funding receipts from Hyperindex, plus Tainá field-device liveness and system status.";
+  "Bumicerts is a plain-language explorer for GainForest impact: project stories, nature sightings, organizations, donations, field updates, and site health.";
 const OG_IMAGE = "/og/bumicerts-og.png";
 const OG_ALT =
-  "Bumicerts — a warm cream editorial card. On the left, the sage GainForest leaf mark, the kicker ‘Explore the GainForest data commons’, the Bumicerts wordmark (with an italic sage ‘scan’), and an ‘observations · sites · bumicerts · donations’ pill. On the right, a vintage natural-history collage over an antique map: a blue tit and a robin, a fern, a golden chanterelle, a sunflower, a hand cradling soil with a seedling, an archival field-science photo, a brass magnifying glass, and floating faceted crystals.";
+  "Bumicerts — a warm cream editorial card about GainForest impact, with observations, places, Bumicerts, and donations beside a vintage natural-history collage.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -59,12 +59,8 @@ export const metadata: Metadata = {
     "Bumicerts",
     "GainForest",
     "Bumicerts",
-    "Darwin Core",
     "biodiversity",
-    "ATProto",
-    "AT Protocol",
     "explorer",
-    "Hyperindex",
     "impact certification",
     "donations",
   ],

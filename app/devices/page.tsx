@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Tainá devices",
   description:
-    "Liveness of the GainForest field Raspberry Pis running Tainá; heartbeat status, CPU temperature, memory, disk, uptime, and the local draft queue.",
+    "Field updates from GainForest devices running Tainá, including whether each device is active and ready.",
   alternates: { canonical: "/devices" },
 };
 

@@ -20,7 +20,7 @@ import { RecordDrawer } from "../_components/RecordDrawer";
 import { RecordMap } from "../_components/RecordMap";
 import { StatsTileGrid } from "../_components/StatsTile";
 import type { ExplorerRecord, SiteRecord } from "../_lib/indexer";
-import { countryFlag, formatDate, shortDid } from "../_lib/format";
+import { countryFlag, formatDate } from "../_lib/format";
 
 type SortMode = "newest" | "oldest" | "az" | "za";
 type SourceFilter = "both" | "gainforest" | "certified";
@@ -552,7 +552,7 @@ function OrganizationCard({ record, onOpen }: { record: SiteRecord; onOpen: (rec
 
           <div className="flex shrink-0 items-center justify-between gap-3 p-4">
             <div className="min-w-0 font-mono text-[10px] text-muted-foreground">
-              <span className="block truncate" title={record.did}>{shortDid(record.did)}</span>
+              <span className="block truncate">Shared {created}</span>
               {created && <span className="block text-muted-foreground/70">Joined {created}</span>}
             </div>
             <div className="flex shrink-0 items-center gap-1 text-xs font-semibold text-primary">

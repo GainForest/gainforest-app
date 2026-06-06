@@ -14,7 +14,6 @@ import {
   PlusIcon,
   UserIcon,
   WalletIcon,
-  ExternalLinkIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -211,28 +210,22 @@ function WalletsSection() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <WalletIcon className="h-4 w-4 text-foreground/70" />
-          <h2 className="text-sm font-medium">Wallets</h2>
+          <h2 className="text-sm font-medium">Payment apps</h2>
         </div>
         <Button size="sm" variant="outline" className="gap-1.5">
           <PlusIcon className="h-3.5 w-3.5" />
-          Add wallet
+          Add payment app
         </Button>
       </div>
 
       <div className="bg-muted rounded-xl p-1 flex flex-col items-center w-full">
-        <p className="text-sm text-muted-foreground py-4 text-center">No wallets connected.</p>
+        <p className="text-sm text-muted-foreground py-4 text-center">No payment apps connected.</p>
       </div>
     </div>
   );
 }
 
-function AccountSection({ did }: { did: string }) {
-  const viewers = [
-    { label: "pdsls.dev", href: `https://pdsls.dev/at://${did}` },
-    { label: "certified.app", href: `https://certified.app/profile/${did}` },
-    { label: "atproto.at", href: `https://atproto.at/uri/at://${did}` },
-  ];
-
+function AccountSection() {
   return (
     <div className="space-y-3">
       <div className="flex items-center gap-2">
@@ -242,20 +235,7 @@ function AccountSection({ did }: { did: string }) {
 
       <div className="bg-muted rounded-xl p-1 flex flex-col items-center w-full">
         <div className="flex flex-col items-center gap-3 px-3 py-3 w-full">
-          <div className="flex flex-col items-center gap-1 w-full">
-            <p className="text-xs text-muted-foreground">DID</p>
-            <p className="text-xs font-mono break-all text-foreground/70 text-center">{did}</p>
-          </div>
-          <div className="flex flex-wrap gap-2 justify-center">
-            {viewers.map(({ label, href }) => (
-              <Button key={label} variant="outline" size="sm" asChild>
-                <a href={href} target="_blank" rel="noopener noreferrer">
-                  {label}
-                  <ExternalLinkIcon className="h-3 w-3" />
-                </a>
-              </Button>
-            ))}
-          </div>
+          <p className="text-sm text-muted-foreground text-center">Your public Bumicerts profile is ready to share.</p>
         </div>
       </div>
     </div>
@@ -277,7 +257,7 @@ export function AccountSettingsSections({ account }: { account: AccountRouteData
         >
           Advanced
         </button>
-        {advancedOpen && <AccountSection did={account.did} />}
+        {advancedOpen && <AccountSection />}
       </div>
     </div>
   );

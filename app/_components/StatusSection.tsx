@@ -39,6 +39,25 @@ function uptimeTone(pct: number): StatusTone {
   return "down";
 }
 
+function friendlyServiceName(name: string, description: string): { name: string; detail: string | null } {
+  const text = `${name} ${description}`.toLowerCase();
+  if (text.includes("index")) return { name: "Search and browsing", detail: "Finds projects and sightings" };
+  if (text.includes("pds") || text.includes("personal data")) return { name: "Community data storage", detail: "Keeps public project information available" };
+  if (text.includes("label")) return { name: "Review labels", detail: "Shows trust and safety information" };
+  if (text.includes("app")) return { name: "Bumicerts website", detail: "Pages visitors use" };
+  if (text.includes("api")) return { name: "Bumicerts services", detail: "Keeps pages up to date" };
+  const { host, role } = parseComponentName(name);
+  return { name: role ? titleCase(role) : "GainForest service", detail: host || null };
+}
+
+function titleCase(value: string): string {
+  return value
+    .replace(/[-_]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .replace(/\b\w/g, (char) => char.toUpperCase());
+}
+
 export function StatusSection({ initial }: { initial: StatusSnapshot }) {
   const [snapshot, setSnapshot] = useState<StatusSnapshot>(initial);
   const [updatedAt, setUpdatedAt] = useState<string>(initial.fetchedAt);
@@ -83,15 +102,14 @@ export function StatusSection({ initial }: { initial: StatusSnapshot }) {
         <div className="flex flex-col gap-6 border-b border-border-soft pb-8 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <span className="font-instrument text-[13px] uppercase tracking-[0.22em] text-foreground/55">
-              instatus
+              Live health
             </span>
             <h2 className="mt-3 font-garamond text-[34px] font-normal leading-[1.05] tracking-[-0.015em] text-foreground sm:text-[42px] lg:text-[50px]">
-              System <span className="font-instrument italic">status</span>
+              Site <span className="font-instrument italic">health</span>
             </h2>
             <p className="mt-4 max-w-[560px] text-[15px] leading-[1.55] text-foreground/70 lg:text-[16px]">
-              PDS instances, indexer, labeller, and apps. Mirrored from the
-              GainForest instatus page with rolling uptime and incident history,
-              re-polled every 60s.
+              A simple view of whether the services behind Bumicerts and GainForest are working.
+              This page refreshes every minute.
             </p>
           </div>
 
@@ -106,9 +124,9 @@ export function StatusSection({ initial }: { initial: StatusSnapshot }) {
             </div>
             {total > 0 && (
               <span className="text-[12.5px] text-foreground/55">
-                {operational} of {total} operational
+                {operational} of {total} working
                 {snapshot.overallUptime != null && (
-                  <> · {snapshot.overallUptime.toFixed(2)}% avg uptime</>
+                  <> · {snapshot.overallUptime.toFixed(2)}% healthy</>
                 )}{" "}
                 · updated {timeAgo(updatedAt)}
               </span>
@@ -118,14 +136,14 @@ export function StatusSection({ initial }: { initial: StatusSnapshot }) {
 
         {snapshot.components.length === 0 ? (
           <p className="py-12 text-center text-[14px] italic text-foreground/55">
-            Status board is unavailable right now. Check the{" "}
+            This health page is unavailable right now. Check the{" "}
             <Link
               href={STATUS_URL}
               target="_blank"
               rel="noreferrer"
               className="text-primary underline-offset-4 hover:underline"
             >
-              full status page
+              full health page
             </Link>
             .
           </p>
@@ -133,7 +151,7 @@ export function StatusSection({ initial }: { initial: StatusSnapshot }) {
           <ul role="list" className="mt-8 grid gap-3 sm:grid-cols-2">
             {snapshot.components.map((c) => {
               const t = componentTone(c.status);
-              const { host, role } = parseComponentName(c.name);
+              const service = friendlyServiceName(c.name, c.description);
               const up = c.uptime;
               return (
                 <li
@@ -150,8 +168,8 @@ export function StatusSection({ initial }: { initial: StatusSnapshot }) {
                         />
                       </span>
                       <div className="min-w-0">
-                        <div className="truncate font-mono text-[13px] text-foreground">{host}</div>
-                        {role && <div className="truncate text-[12px] text-foreground/55">{role}</div>}
+                        <div className="truncate text-[13px] text-foreground">{service.name}</div>
+                        {service.detail && <div className="truncate text-[12px] text-foreground/55">{service.detail}</div>}
                       </div>
                     </div>
                     <span className={`shrink-0 text-[12.5px] font-medium ${TONE_TEXT[t]}`}>
@@ -182,7 +200,7 @@ export function StatusSection({ initial }: { initial: StatusSnapshot }) {
           <div className="mt-12">
             <div className="flex items-baseline justify-between gap-4 border-b border-border-soft pb-3">
               <h3 className="font-garamond text-[22px] font-normal text-foreground">
-                Recent incidents
+                Recent issues
               </h3>
               <span className="text-[12px] text-foreground/45">
                 {incidents.length > 0 ? `last ${incidents.length}` : "90-day window"}
@@ -190,7 +208,7 @@ export function StatusSection({ initial }: { initial: StatusSnapshot }) {
             </div>
             {incidents.length === 0 ? (
               <p className="py-8 text-center text-[14px] italic text-foreground/55">
-                No incidents recorded in the last 90 days.
+                No issues in the last 90 days.
               </p>
             ) : (
               <ol role="list" className="mt-5 space-y-3">
@@ -209,7 +227,7 @@ export function StatusSection({ initial }: { initial: StatusSnapshot }) {
             rel="noreferrer"
             className="group inline-flex items-center gap-1.5 text-[13.5px] font-medium text-foreground/65 transition-colors hover:text-primary"
           >
-            View full incident history on the status page
+            View full issue history on the health page
             <span aria-hidden className="transition-transform group-hover:translate-x-0.5">
               →
             </span>
@@ -234,11 +252,11 @@ function IncidentRow({ incident }: { incident: Incident }) {
           <span className="font-mono text-[13px] text-foreground">{title}</span>
           {incident.ongoing ? (
             <span className="rounded-full bg-down/15 px-2 py-0.5 text-[10.5px] font-medium uppercase tracking-[0.06em] text-down">
-              Ongoing
+              Happening now
             </span>
           ) : (
             <span className="rounded-full bg-ok/15 px-2 py-0.5 text-[10.5px] font-medium uppercase tracking-[0.06em] text-ok">
-              Resolved
+              Fixed
             </span>
           )}
         </div>

@@ -30,7 +30,7 @@ export const MANAGE_PLACEHOLDER_ROUTES: ManageRoute[] = [
     id: "organization",
     title: "Organization",
     eyebrow: "Manage profile",
-    description: "Placeholder for the Bumicerts /upload organization profile editor, now mapped to /manage.",
+    description: "This profile editor is still being prepared for this area.",
     href: "/manage",
     sourceHref: "/upload",
     Icon: Building2Icon,
@@ -39,7 +39,7 @@ export const MANAGE_PLACEHOLDER_ROUTES: ManageRoute[] = [
     id: "sites",
     title: "Sites",
     eyebrow: "Manage locations",
-    description: "Placeholder for the Bumicerts /upload/sites route, now mapped to /manage/sites.",
+    description: "This places editor is still being prepared for this area.",
     href: "/manage/sites",
     sourceHref: "/upload/sites",
     Icon: MapPinIcon,
@@ -48,7 +48,7 @@ export const MANAGE_PLACEHOLDER_ROUTES: ManageRoute[] = [
     id: "audio",
     title: "Audio",
     eyebrow: "Manage sound",
-    description: "Placeholder for the Bumicerts /upload/audio route, now mapped to /manage/audio.",
+    description: "This sound editor is still being prepared for this area.",
     href: "/manage/audio",
     sourceHref: "/upload/audio",
     Icon: MicIcon,
@@ -56,8 +56,8 @@ export const MANAGE_PLACEHOLDER_ROUTES: ManageRoute[] = [
   {
     id: "trees",
     title: "Trees",
-    eyebrow: "Manage datasets",
-    description: "Placeholder for the Bumicerts /upload/trees route, now mapped to /manage/trees.",
+    eyebrow: "Manage trees",
+    description: "This tree editor is still being prepared for this area.",
     href: "/manage/trees",
     sourceHref: "/upload/trees",
     Icon: TreePineIcon,
@@ -105,20 +105,20 @@ export function ManagePlaceholder({ active }: { active: ManageRouteId }) {
               </div>
               <h1 className="font-garamond text-5xl font-light leading-none tracking-[-0.03em] text-foreground md:text-7xl">
                 {activeRoute.title}
-                <span className="font-instrument italic text-foreground/80"> placeholder</span>
+                <span className="font-instrument italic text-foreground/80"> coming soon</span>
               </h1>
               <p className="mt-5 max-w-2xl text-sm leading-7 text-muted-foreground md:text-base">
-                {activeRoute.description} The folder is <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs">app/(manage)</code>, not <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs">app/(upload)</code>.
+                {activeRoute.description} Please check back soon.
               </p>
             </div>
 
             <div className="rounded-2xl border border-border bg-background/70 p-4 text-sm text-muted-foreground shadow-sm backdrop-blur">
               <div className="mb-2 flex items-center gap-2 text-foreground">
                 <SparklesIcon className="size-4 text-primary" />
-                Route mapping
+                What to expect
               </div>
-              <div className="font-mono text-xs">
-                {activeRoute.sourceHref} → {activeRoute.href}
+              <div className="text-xs">
+                Tools for keeping your organization&apos;s public work up to date.
               </div>
             </div>
           </div>

@@ -28,11 +28,11 @@ export async function fetchUploadTreeDatasets(): Promise<UploadTreeDatasetItem[]
     const message =
       isRecord(payload) && typeof payload.error === "string"
         ? payload.error
-        : "Failed to load datasets.";
+        : "Failed to load tree groups.";
     throw new Error(message);
   }
 
   const payload = (await response.json()) as unknown;
-  if (!Array.isArray(payload)) throw new Error("Unexpected dataset response.");
+  if (!Array.isArray(payload)) throw new Error("Unexpected tree group response.");
   return payload.filter(isUploadTreeDatasetItem);
 }

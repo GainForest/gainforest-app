@@ -174,8 +174,8 @@ export function RecordMap({
 
   const mappedNote =
     resolving && points.length === 0
-      ? "Resolving locations…"
-      : `${formatNumber(points.length)} ${kind === "site" ? "sites" : "records"} mapped`;
+      ? "Finding places…"
+      : `${formatNumber(points.length)} ${kind === "site" ? "places" : "items"} mapped`;
 
   return (
     <div className="relative">
@@ -191,7 +191,7 @@ export function RecordMap({
       {kind !== "occurrence" && !resolving && points.length === 0 && (
         <div className="pointer-events-none absolute inset-x-0 bottom-4 z-[5] flex justify-center">
           <span className="rounded-full bg-background/90 px-3 py-1.5 text-[12.5px] text-foreground/60 shadow-sm backdrop-blur">
-            None of the loaded records have a resolved location yet.
+            None of the items shown have a map location yet.
           </span>
         </div>
       )}

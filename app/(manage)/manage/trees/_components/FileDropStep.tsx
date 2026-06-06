@@ -131,7 +131,7 @@ export default function FileDropStep({
     setDatasetsLoading(true);
     fetchUploadTreeDatasets()
       .then((data) => { setExistingDatasets(data); setDatasetsLoading(false); })
-      .catch(() => { setDatasetsError("Failed to load datasets."); setDatasetsLoading(false); });
+      .catch(() => { setDatasetsError("Failed to load tree groups."); setDatasetsLoading(false); });
   }, [datasetMode]);
 
   const uploadSites = useMemo(() => sites.flatMap((s) => { const u = toUploadSiteSelection(s); return u ? [u] : []; }), [sites]);
@@ -165,7 +165,7 @@ export default function FileDropStep({
 
   const handleFile = useCallback((file: File) => {
     setFileError(null);
-    if (!isAcceptedFile(file)) { setFileError("Only CSV and TSV files are supported."); return; }
+    if (!isAcceptedFile(file)) { setFileError("Only spreadsheet export files are supported."); return; }
     if (file.size > MAX_FILE_SIZE_BYTES) { setFileError(`File too large (${formatBytes(file.size)}). Max 10 MB.`); return; }
     reset();
     setSelectedFile(file);
@@ -178,18 +178,18 @@ export default function FileDropStep({
     setMediaZipIndex(null);
     setSelectedMediaZipFile(null);
     setIsMediaZipParsing(false);
-    if (!isAcceptedMediaZipFile(file)) { setMediaZipError("Only ZIP files are supported."); return; }
+    if (!isAcceptedMediaZipFile(file)) { setMediaZipError("Only compressed photo folders are supported."); return; }
     if (file.size > MAX_MEDIA_ZIP_SIZE_BYTES) { setMediaZipError(`ZIP too large (${formatBytes(file.size)}). Max 200 MB.`); return; }
     setIsMediaZipParsing(true);
     try {
       const index = await buildKoboMediaZipIndex(file);
       if (mediaZipParseRequestRef.current !== requestId) return;
-      if (index.entries.length === 0) { setMediaZipError("ZIP contains no supported images."); return; }
+      if (index.entries.length === 0) { setMediaZipError("This photo folder contains no supported images."); return; }
       setSelectedMediaZipFile(file);
       setMediaZipIndex(index);
     } catch {
       if (mediaZipParseRequestRef.current !== requestId) return;
-      setMediaZipError("Could not read the ZIP file.");
+      setMediaZipError("Could not read the photo folder.");
     } finally {
       if (mediaZipParseRequestRef.current === requestId) setIsMediaZipParsing(false);
     }
@@ -219,8 +219,8 @@ export default function FileDropStep({
     <div className="space-y-5">
       {/* Drop zone */}
       <div>
-        <h2 className="text-lg font-semibold">Upload your data file</h2>
-        <p className="text-sm text-muted-foreground mt-0.5">Drag and drop a CSV or TSV file, or click to browse.</p>
+        <h2 className="text-lg font-semibold">Choose your tree file</h2>
+        <p className="text-sm text-muted-foreground mt-0.5">Drag and drop a spreadsheet export file, or click to browse.</p>
       </div>
 
       <div className="space-y-3">
@@ -242,7 +242,7 @@ export default function FileDropStep({
           {isParsing ? (
             <div className="flex flex-col items-center gap-2 text-muted-foreground">
               <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-              <span className="text-sm">Parsing file…</span>
+              <span className="text-sm">Reading file…</span>
             </div>
           ) : selectedFile && isParsed ? (
             <div className="flex flex-col items-center gap-2">
@@ -254,7 +254,7 @@ export default function FileDropStep({
             <div className="flex flex-col items-center gap-2 text-muted-foreground">
               <Upload className="h-10 w-10" />
               <span className="text-sm font-medium">Drag & drop or click to browse</span>
-              <span className="text-xs">CSV or TSV, max 10 MB</span>
+              <span className="text-xs">Spreadsheet export, max 10 MB</span>
             </div>
           )}
         </div>
@@ -262,21 +262,21 @@ export default function FileDropStep({
       <input ref={inputRef} type="file" accept=".csv,.tsv,text/csv,text/tab-separated-values" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFile(f); e.target.value = ""; }} />
 
       {fileError && <p className="text-sm text-destructive">{fileError}</p>}
-      {error && <p className="text-sm text-destructive">Parse error: {error}</p>}
+      {error && <p className="text-sm text-destructive">Could not read file: {error}</p>}
 
       {isParsed && !error && !fileError && (
         <div className="rounded-md border border-border bg-muted/30 p-4 grid grid-cols-3 gap-2 text-xs text-muted-foreground">
           <div><span className="block font-medium text-foreground text-sm">{rowCount.toLocaleString()}</span>rows</div>
-          <div><span className="block font-medium text-foreground text-sm">{headers.length}</span>columns</div>
-          <div><span className="block font-medium text-foreground text-sm">{detectKoboFormat(headers).isKobo ? "KoboToolbox" : "Generic CSV"}</span>format</div>
+          <div><span className="block font-medium text-foreground text-sm">{headers.length}</span>file headings</div>
+          <div><span className="block font-medium text-foreground text-sm">{detectKoboFormat(headers).isKobo ? "Field form" : "Spreadsheet"}</span>file type</div>
         </div>
       )}
 
       {/* Kobo media ZIP */}
       <div className="space-y-2 rounded-xl border border-border bg-muted/20 p-4">
         <div>
-          <h3 className="text-sm font-medium">KoboToolbox Media Attachments (optional)</h3>
-          <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">If your KoboToolbox export includes photos, upload the Media Attachments ZIP to include them.</p>
+          <h3 className="text-sm font-medium">Photo folder (optional)</h3>
+          <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">If your field form export includes photos, choose the matching compressed photo folder to include them.</p>
         </div>
         <div
           className="cursor-pointer rounded-lg border border-dashed bg-background transition-colors hover:border-primary/60 hover:bg-muted/30"
@@ -286,7 +286,7 @@ export default function FileDropStep({
             {isMediaZipParsing ? (
               <div className="flex items-center gap-3 text-muted-foreground">
                 <div className="h-5 w-5 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-                <span className="text-sm">Reading ZIP…</span>
+                <span className="text-sm">Reading photo folder…</span>
               </div>
             ) : selectedMediaZipFile && mediaZipIndex ? (
               <div className="flex min-w-0 items-center gap-3">
@@ -300,8 +300,8 @@ export default function FileDropStep({
               <div className="flex items-center gap-3 text-muted-foreground">
                 <Archive className="h-5 w-5 shrink-0" />
                 <div>
-                  <p className="text-sm font-medium">Click to select ZIP</p>
-                  <p className="text-xs">ZIP, max 200 MB</p>
+                  <p className="text-sm font-medium">Click to select photo folder</p>
+                  <p className="text-xs">Compressed folder, max 200 MB</p>
                 </div>
               </div>
             )}
@@ -320,20 +320,20 @@ export default function FileDropStep({
       {/* Site selection (required) */}
       <div className="space-y-3 rounded-xl border border-border bg-muted/20 p-4">
         <div>
-          <label htmlFor="site-select" className="text-sm font-medium">Site Boundary <span className="text-destructive">*</span></label>
-          <p className="text-xs text-muted-foreground mt-0.5">Trees will be validated against this site&apos;s polygon boundary.</p>
+          <label htmlFor="site-select" className="text-sm font-medium">Project area <span className="text-destructive">*</span></label>
+          <p className="text-xs text-muted-foreground mt-0.5">Trees will be checked against this place&apos;s drawn map area.</p>
         </div>
         {sitesLoading ? (
           <Skeleton className="h-9 w-full rounded-md" />
         ) : sitesError ? (
           <p className="text-sm text-destructive">{sitesError}</p>
         ) : uploadSites.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No sites found. Add a site with a GeoJSON boundary from the Sites page first.</p>
+          <p className="text-sm text-muted-foreground">No places found. Add a place with a drawn map area from the Places page first.</p>
         ) : (
           <>
             <Select value={selectedSite?.uri ?? ""} onValueChange={setSelectedSiteUri}>
               <SelectTrigger id="site-select">
-                <SelectValue placeholder="Select a site…" />
+                <SelectValue placeholder="Select a place…" />
               </SelectTrigger>
               <SelectContent>
                 {uploadSites.map((site) => {
@@ -342,23 +342,23 @@ export default function FileDropStep({
                   return (
                     <SelectItem key={site.uri} value={site.uri} disabled={!hasBoundary}>
                       {site.name}
-                      {isSyncing ? " — syncing boundary…" : !hasBoundary ? " — no boundary" : ""}
+                      {isSyncing ? " — preparing map area…" : !hasBoundary ? " — no map area" : ""}
                     </SelectItem>
                   );
                 })}
               </SelectContent>
             </Select>
             {selectedSite && selectedSiteHasBoundary && selectedSiteBoundaryLoading && (
-              <p className="text-xs text-muted-foreground">Checking boundary…</p>
+              <p className="text-xs text-muted-foreground">Checking map area…</p>
             )}
             {selectedSite && selectedSiteHasBoundary && selectedSiteBoundaryFailed && (
-              <p className="text-sm text-destructive">Could not load the site boundary. Select another site or upload a valid boundary.</p>
+              <p className="text-sm text-destructive">Could not load the map area. Select another place or draw a valid area.</p>
             )}
             {selectedSite && !selectedSiteHasBoundary && !selectedSiteBoundarySyncing && (
-              <p className="text-sm text-destructive">This site has no boundary. Upload a GeoJSON boundary from the Sites page.</p>
+              <p className="text-sm text-destructive">This place has no drawn map area. Add one from the Places page.</p>
             )}
             {showCreateSiteBoundaryAction && (
-              <p className="text-xs text-muted-foreground">No usable site boundaries found. Add a polygon boundary to a site from the Sites page.</p>
+              <p className="text-xs text-muted-foreground">No usable project areas found. Add a drawn map area to a place from the Places page.</p>
             )}
           </>
         )}
@@ -367,14 +367,14 @@ export default function FileDropStep({
       {/* Dataset selection */}
       <div className="space-y-3">
         <div>
-          <label className="text-sm font-medium">Dataset grouping</label>
-          <p className="text-xs text-muted-foreground mt-0.5">Optionally group this upload into a dataset.</p>
+          <label className="text-sm font-medium">Tree group</label>
+          <p className="text-xs text-muted-foreground mt-0.5">Optionally group these trees together.</p>
         </div>
         <div className="grid gap-3 md:grid-cols-3">
           {([
-            { mode: "none" as const, title: "No dataset", description: "Upload trees without grouping them." },
-            { mode: "new" as const, title: "Create new dataset", description: "Create a named dataset for this upload." },
-            { mode: "existing" as const, title: "Add to existing", description: "Append trees to an existing dataset." },
+            { mode: "none" as const, title: "No group", description: "Add trees without grouping them." },
+            { mode: "new" as const, title: "Create new group", description: "Create a named group for these trees." },
+            { mode: "existing" as const, title: "Add to existing", description: "Add trees to an existing group." },
           ]).map((option) => (
             <button
               key={option.mode}
@@ -394,12 +394,12 @@ export default function FileDropStep({
         {datasetMode === "new" && (
           <div className="space-y-3 rounded-xl border border-border bg-muted/20 p-4">
             <div className="space-y-1.5">
-              <label htmlFor="dataset-name" className="text-sm font-medium">Dataset name <span className="text-destructive">*</span></label>
+              <label htmlFor="dataset-name" className="text-sm font-medium">Group name <span className="text-destructive">*</span></label>
               <Input id="dataset-name" value={datasetName} onChange={(e) => setDatasetName(e.target.value)} placeholder="e.g. Amazon Plot Survey 2024" />
             </div>
             <div className="space-y-1.5">
               <label htmlFor="dataset-desc" className="text-sm font-medium">Description <span className="text-muted-foreground font-normal">(optional)</span></label>
-              <Textarea id="dataset-desc" value={datasetDescription} onChange={(e) => setDatasetDescription(e.target.value)} placeholder="Describe this dataset…" rows={2} className="resize-none" />
+              <Textarea id="dataset-desc" value={datasetDescription} onChange={(e) => setDatasetDescription(e.target.value)} placeholder="Describe this group…" rows={2} className="resize-none" />
             </div>
           </div>
         )}
@@ -407,20 +407,20 @@ export default function FileDropStep({
         {datasetMode === "existing" && (
           <div className="space-y-3 rounded-xl border border-border bg-muted/20 p-4">
             <div>
-              <label className="text-sm font-medium">Choose dataset</label>
-              <p className="text-xs text-muted-foreground mt-0.5">Trees will be added to this dataset.</p>
+              <label className="text-sm font-medium">Choose group</label>
+              <p className="text-xs text-muted-foreground mt-0.5">Trees will be added to this group.</p>
             </div>
             {datasetsLoading ? (
               <Skeleton className="h-9 w-full rounded-md" />
             ) : datasetsError ? (
               <p className="text-sm text-destructive">{datasetsError}</p>
             ) : existingDatasets.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No datasets found. Create one first.</p>
+              <p className="text-sm text-muted-foreground">No groups found. Create one first.</p>
             ) : (
               <>
                 <Select value={selectedExistingDatasetUri} onValueChange={setSelectedExistingDatasetUri}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select a dataset…" />
+                    <SelectValue placeholder="Select a group…" />
                   </SelectTrigger>
                   <SelectContent>
                     {existingDatasets.map((d) => (
@@ -446,7 +446,7 @@ export default function FileDropStep({
       <div className="space-y-3">
         <div>
           <label className="text-sm font-medium">How were these trees established? <span className="text-muted-foreground font-normal">(optional)</span></label>
-          <p className="text-xs text-muted-foreground mt-0.5">This GBIF field describes how trees came to be in this location.</p>
+          <p className="text-xs text-muted-foreground mt-0.5">This describes how trees came to be in this place.</p>
         </div>
         <div className="overflow-hidden rounded-xl border border-border">
           {PARTNER_ESTABLISHMENT_MEANS_OPTIONS.map((option) => {

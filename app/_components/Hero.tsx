@@ -35,7 +35,7 @@ export function Hero({
     {
       value: formatCompact(kpis.occurrences),
       label: "Species observations",
-      sub: "Darwin Core records · recent",
+      sub: "Recent nature sightings",
       series: trends.observations,
       format: "number",
       // The full ~400k history can't be built at request time; show the recent
@@ -46,14 +46,14 @@ export function Hero({
     {
       value: formatCompact(kpis.bumicerts),
       label: "Bumicerts",
-      sub: "Impact claim activities",
+      sub: "Checked project stories",
       series: trends.bumicerts,
       format: "number",
     },
     {
       value: formatCompact(kpis.sites),
       label: "Project sites",
-      sub: "Registered organizations",
+      sub: "Nature stewardship groups",
       series: trends.sites,
       format: "number",
     },
@@ -72,14 +72,14 @@ export function Hero({
         <div className="max-w-[920px]">
           <div className="flex flex-wrap items-center gap-3">
             <span className="font-instrument text-[13px] uppercase tracking-[0.22em] text-foreground/55">
-              Live · AT Protocol
+              Live updates
             </span>
             <StatusPill snapshot={status} />
             {devices.configured && devices.total > 0 && (
               <Link
                 href="/devices"
                 className="group inline-flex items-center gap-2 rounded-full border border-border-soft bg-surface px-3 py-1.5 text-[12.5px] font-medium transition-colors hover:border-foreground/25"
-                title="Field Raspberry Pis running Tainá that are reporting up right now"
+                title="Field devices sending updates right now"
               >
                 <span className={`relative inline-flex h-2 w-2 ${devices.healthy > 0 ? "text-ok" : "text-down"}`}>
                   <span
@@ -98,9 +98,8 @@ export function Hero({
           </h1>
 
           <p className="mt-6 max-w-[660px] text-[16px] leading-[1.55] text-foreground/80 lg:text-[18px]">
-            Bumicerts is a read-only browser over the GainForest data commons —
-            the indexer (Hyperindex) and the ATProto PDS instances behind it.
-            Records, donations, and device health, queried live.
+            Bumicerts helps anyone explore GainForest's environmental work in plain language.
+            See project stories, donations, field updates, and site health as they change.
           </p>
         </div>
 

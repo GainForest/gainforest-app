@@ -34,7 +34,7 @@ function extractPolygonRings(geometry: unknown): Array<[number, number][]> | nul
 
 export function validateGeojsonOrThrow(payload: unknown): SiteBoundaryGeoJson {
   if (!isRecord(payload)) {
-    throw new Error("GeoJSON must be an object.");
+    throw new Error("The map area file could not be read.");
   }
 
   const type = payload.type as string;
@@ -44,13 +44,13 @@ export function validateGeojsonOrThrow(payload: unknown): SiteBoundaryGeoJson {
     const geom = payload.geometry;
     const rings = extractPolygonRings(geom);
     if (!rings) {
-      throw new Error("GeoJSON Feature must contain a Polygon or MultiPolygon geometry.");
+      throw new Error("The map area file must contain a drawn area.");
     }
     allPolygons.push(rings);
   } else if (type === "FeatureCollection") {
     const features = payload.features;
     if (!Array.isArray(features) || features.length === 0) {
-      throw new Error("GeoJSON FeatureCollection must contain at least one Feature.");
+      throw new Error("The map area file must include at least one drawn area.");
     }
     for (const feature of features) {
       if (!isRecord(feature)) continue;
@@ -58,14 +58,14 @@ export function validateGeojsonOrThrow(payload: unknown): SiteBoundaryGeoJson {
       if (rings) allPolygons.push(rings);
     }
     if (allPolygons.length === 0) {
-      throw new Error("GeoJSON FeatureCollection must contain at least one Polygon or MultiPolygon feature.");
+      throw new Error("The map area file must include at least one drawn area.");
     }
   } else if (type === "Polygon" || type === "MultiPolygon") {
     const rings = extractPolygonRings(payload);
-    if (!rings) throw new Error("Invalid Polygon or MultiPolygon GeoJSON.");
+    if (!rings) throw new Error("The drawn map area is not valid.");
     allPolygons.push(rings);
   } else {
-    throw new Error(`Unsupported GeoJSON type: ${type}. Must be Feature, FeatureCollection, Polygon, or MultiPolygon.`);
+    throw new Error("The map area file type is not supported.");
   }
 
   return { type: type as SiteBoundaryGeoJson["type"], _polygons: allPolygons };

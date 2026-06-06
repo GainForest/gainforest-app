@@ -75,7 +75,7 @@ export default async function AccountTimelinePage({ params }: { params: Promise<
               {entries.slice(0, 25).map((entry) => (
                 <div key={entry.id} className="rounded-2xl border border-border bg-card p-4">
                   <p className="text-sm font-medium text-foreground">{entry.title}</p>
-                  <p className="mt-1 text-xs text-muted-foreground">{entry.shortDescription ?? "Bumicert claim activity"}</p>
+                  <p className="mt-1 text-xs text-muted-foreground">{entry.shortDescription ?? "Bumicert story activity"}</p>
                 </div>
               ))}
             </div>

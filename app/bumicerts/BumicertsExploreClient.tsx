@@ -32,7 +32,7 @@ type FilterChip = {
 
 const FILTER_CHIPS: FilterChip[] = [
   { key: "images", label: "With images", predicate: (record) => Boolean(record.imageUrl) },
-  { key: "locations", label: "Certified sites", predicate: (record) => record.locationCount > 0 },
+  { key: "locations", label: "Project places", predicate: (record) => record.locationCount > 0 },
   { key: "contributors", label: "Contributors", predicate: (record) => record.contributorCount > 0 },
   { key: "active", label: "Active period", predicate: (record) => Boolean(record.startDate || record.endDate) },
 ];
@@ -482,7 +482,7 @@ function BumicertGrid({
 
 function BumicertCardVisual({ record, priority }: { record: BumicertRecord; priority: boolean }) {
   const objectives = buildObjectiveLabels(record);
-  const organizationName = shortDid(record.did);
+  const organizationName = "Project steward";
   const [imgError, setImgError] = useState(false);
   const hasImage = Boolean(record.imageUrl) && !imgError;
 
@@ -558,15 +558,10 @@ function BumicertCardVisual({ record, priority }: { record: BumicertRecord; prio
 
 function buildObjectiveLabels(record: BumicertRecord): string[] {
   const labels: string[] = [];
-  if (record.locationCount > 0) labels.push(`${record.locationCount} ${record.locationCount === 1 ? "site" : "sites"}`);
+  if (record.locationCount > 0) labels.push(`${record.locationCount} ${record.locationCount === 1 ? "place" : "places"}`);
   if (record.contributorCount > 0) labels.push(`${record.contributorCount} ${record.contributorCount === 1 ? "contributor" : "contributors"}`);
-  if (record.startDate || record.endDate) labels.push("impact period");
+  if (record.startDate || record.endDate) labels.push("project dates");
   return [labels[0], labels.length > 1 ? `+${labels.length - 1}` : null].filter((value): value is string => Boolean(value));
-}
-
-function shortDid(did: string): string {
-  const value = did.startsWith("did:plc:") ? did.slice(8) : did;
-  return value.length > 22 ? `${value.slice(0, 20)}...` : value;
 }
 
 const orgLabelTextVariants = {

@@ -15,7 +15,7 @@ import { BumicertsBumicertCard } from "@/components/bumicert/BumicertsBumicertCa
 import { RichText } from "../../../_components/RichText";
 import { SocialGlyph } from "../../../_components/SocialIcon";
 import { fetchReceipts, type DonorRef, type FundingReceipt } from "../../../_lib/dashboard";
-import { formatDate, formatDateTime, formatNumber, formatRelative, formatUsd, shortWallet } from "../../../_lib/format";
+import { formatDate, formatDateTime, formatNumber, formatRelative, formatUsd } from "../../../_lib/format";
 import {
   fetchBumicertsByDid,
   fetchImageOccurrencesByDid,
@@ -27,11 +27,13 @@ import {
 } from "../../../_lib/indexer";
 import { isPdsBlobUrl } from "../../../_lib/pds";
 import { blockExplorerUrl, INDEXER_URL, localBumicertHref } from "../../../_lib/urls";
+import { fetchAuthSession } from "../../../_lib/auth-server";
 import { getAccountRouteData, readAccountRouteParams } from "../../../account/_lib/account-route";
 import { Separator } from "@/components/ui/separator";
 import { BumicertHeaderTitleBridge } from "./_components/BumicertHeaderTitleBridge";
 import { BumicertShareButton } from "./_components/BumicertShareButton";
 import { BumicertObservationsGallery } from "./_components/BumicertObservationsGallery";
+import { DonateButton } from "./_components/donate/DonateButton";
 
 export const revalidate = 60;
 
@@ -43,6 +45,9 @@ type FundingConfigStatus = "open" | "coming-soon" | "paused" | "closed" | null;
 type BumicertFundingConfig = {
   receivingWallet: { uri: string } | null;
   status: FundingConfigStatus;
+  goalInUSD: string | null;
+  minDonationInUSD: string | null;
+  maxDonationInUSD: string | null;
 } | null;
 
 type RouteData = {
@@ -50,6 +55,7 @@ type RouteData = {
   detail: Awaited<ReturnType<typeof fetchRecordDetail>>;
   owner: Awaited<ReturnType<typeof getAccountRouteData>>;
   fundingConfig: BumicertFundingConfig;
+  authSession: Awaited<ReturnType<typeof fetchAuthSession>>;
   urlIdentifier: string;
 };
 
@@ -86,7 +92,7 @@ export default async function BumicertDetailPage({
   params: BumicertPageParams;
   searchParams: BumicertSearchParams;
 }) {
-  const [{ record, detail, owner, fundingConfig, urlIdentifier }, search] = await Promise.all([
+  const [{ record, detail, owner, fundingConfig, authSession, urlIdentifier }, search] = await Promise.all([
     readRouteData(params),
     searchParams,
   ]);
@@ -147,6 +153,7 @@ export default async function BumicertDetailPage({
                 receipts={donationReceipts}
                 donationsUnavailable={donationsUnavailable}
                 fundingConfig={fundingConfig}
+                authSession={authSession}
               />
             </aside>
           )}
@@ -186,15 +193,16 @@ async function readRouteData(params: BumicertPageParams): Promise<RouteData> {
   ]);
   const rkey = safeDecode(encodedRkey);
   const atUri = `at://${did}/org.hypercerts.claim.activity/${rkey}`;
-  const [record, detail, owner, fundingConfig] = await Promise.all([
+  const [record, detail, owner, fundingConfig, authSession] = await Promise.all([
     fetchRecordByUri(atUri),
     fetchRecordDetail(atUri).catch(() => null),
     getAccountRouteData(did, urlIdentifier),
     fetchBumicertFundingConfig(did, rkey).catch(() => null),
+    fetchAuthSession(),
   ]);
 
   if (!record || record.kind !== "bumicert") notFound();
-  return { record, detail, owner, fundingConfig, urlIdentifier };
+  return { record, detail, owner, fundingConfig, authSession, urlIdentifier };
 }
 
 async function fetchBumicertFundingConfig(did: string, rkey: string): Promise<BumicertFundingConfig> {
@@ -208,6 +216,9 @@ async function fetchBumicertFundingConfig(did: string, rkey: string): Promise<Bu
           appGainforestFundingConfigByUri(uri: $uri) {
             receivingWallet { ... on AppGainforestFundingConfigEvmLinkRef { uri } }
             status
+            goalInUSD
+            minDonationInUSD
+            maxDonationInUSD
           }
         }
       `,
@@ -221,6 +232,9 @@ async function fetchBumicertFundingConfig(did: string, rkey: string): Promise<Bu
       appGainforestFundingConfigByUri?: {
         receivingWallet?: { uri?: string | null } | null;
         status?: string | null;
+        goalInUSD?: string | null;
+        minDonationInUSD?: string | null;
+        maxDonationInUSD?: string | null;
       } | null;
     };
   };
@@ -231,6 +245,9 @@ async function fetchBumicertFundingConfig(did: string, rkey: string): Promise<Bu
   return {
     receivingWallet: node.receivingWallet?.uri ? { uri: node.receivingWallet.uri } : null,
     status: normalizeFundingStatus(node.status),
+    goalInUSD: node.goalInUSD ?? null,
+    minDonationInUSD: node.minDonationInUSD ?? null,
+    maxDonationInUSD: node.maxDonationInUSD ?? null,
   };
 }
 
@@ -266,6 +283,7 @@ function OverviewSidebar({
   receipts,
   donationsUnavailable,
   fundingConfig,
+  authSession,
 }: {
   record: BumicertRecord;
   detail: RouteData["detail"];
@@ -273,6 +291,7 @@ function OverviewSidebar({
   receipts: FundingReceipt[];
   donationsUnavailable: boolean;
   fundingConfig: BumicertFundingConfig;
+  authSession: RouteData["authSession"];
 }) {
   const orgLinks = buildOrganizationLinks(owner, detail);
 
@@ -328,7 +347,14 @@ function OverviewSidebar({
 
       <Separator />
 
-      <SidebarDonations receipts={receipts} unavailable={donationsUnavailable} fundingConfig={fundingConfig} />
+      <SidebarDonations
+        record={record}
+        owner={owner}
+        receipts={receipts}
+        unavailable={donationsUnavailable}
+        fundingConfig={fundingConfig}
+        authSession={authSession}
+      />
     </div>
   );
 }
@@ -396,13 +422,19 @@ function AboutOrganizationSection({
 }
 
 function SidebarDonations({
+  record,
+  owner,
   receipts,
   unavailable,
   fundingConfig,
+  authSession,
 }: {
+  record: BumicertRecord;
+  owner: RouteData["owner"];
   receipts: FundingReceipt[];
   unavailable: boolean;
   fundingConfig: BumicertFundingConfig;
+  authSession: RouteData["authSession"];
 }) {
   const usdReceipts = receipts.filter((receipt) => ["USD", "USDC"].includes(receipt.currency.toUpperCase()));
   const totalUsd = usdReceipts.reduce((sum, receipt) => sum + receipt.amount, 0);
@@ -430,20 +462,24 @@ function SidebarDonations({
           <p className="mt-0.5 text-lg font-medium text-foreground">{formatUsd(totalUsd)}</p>
         </div>
         <div>
-          <p className="text-xs text-muted-foreground">Receipts</p>
+          <p className="text-xs text-muted-foreground">Completed gifts</p>
           <p className="mt-0.5 text-lg font-medium text-foreground">{formatNumber(receipts.length)}</p>
         </div>
       </div>
-      <button
-        type="button"
+      <DonateButton
+        bumicert={{
+          organizationDid: record.did,
+          rkey: record.rkey,
+          title: record.title,
+          organizationName: owner.displayName,
+        }}
+        fundingConfig={fundingConfig}
+        authSession={authSession}
         disabled={donationStatus.kind !== "open"}
-        className="inline-flex h-9 w-full items-center justify-center gap-2 rounded-full bg-primary px-4 text-sm font-medium text-primary-foreground opacity-80 transition-opacity hover:opacity-100 disabled:pointer-events-none disabled:bg-muted disabled:text-muted-foreground"
-      >
-        <HeartIcon className="h-3.5 w-3.5" />
-        {donationStatus.kind === "open" && hasReceipts ? "Donate again" : "Donate"}
-      </button>
+        label={donationStatus.kind === "open" && hasReceipts ? "Donate again" : "Donate"}
+      />
       <p className="text-xs leading-5 text-muted-foreground">
-        Donations are recorded as public funding receipts once completed.
+        Completed donations appear publicly so supporters can see the impact.
       </p>
     </div>
   );
@@ -517,7 +553,7 @@ function socialPlatformDescription(platform: string, organizationName: string, h
     x: `Follow short updates from ${organizationName} on X.`,
     telegram: `Open ${organizationName}'s Telegram channel or community.`,
     tiktok: `Watch short-form updates from ${organizationName}.`,
-    github: `Explore open-source work and repositories from ${organizationName}.`,
+    github: `See public project updates from ${organizationName}.`,
     bluesky: `Follow ${organizationName} on Bluesky.`,
     discord: `Join ${organizationName}'s Discord community.`,
     email: `Contact ${organizationName} by email.`,
@@ -625,7 +661,7 @@ function SiteBoundariesPanel({ record }: { record: BumicertRecord }) {
                 rel="noreferrer"
                 className="group flex items-center justify-between rounded-xl border border-border-soft bg-surface px-4 py-3 text-sm font-medium text-foreground transition-colors hover:border-primary/40 hover:bg-surface-sunken"
               >
-                <span>Certified site {index + 1}</span>
+                <span>Project place {index + 1}</span>
                 <ExternalLinkIcon className="h-3.5 w-3.5 text-foreground/35 transition-colors group-hover:text-primary" />
               </Link>
             ))}
@@ -634,8 +670,8 @@ function SiteBoundariesPanel({ record }: { record: BumicertRecord }) {
       ) : (
         <EmptyState
           icon={<MapPinnedIcon className="h-8 w-8" />}
-          title="No sites linked"
-          body="This Bumicert does not currently reference certified location boundaries."
+          title="No project places linked"
+          body="This Bumicert does not currently include mapped project areas."
         />
       )}
     </article>
@@ -652,14 +688,14 @@ function DonationsPanel({ receipts, unavailable }: { receipts: FundingReceipt[];
       {unavailable ? (
         <EmptyState
           icon={<HeartIcon className="h-8 w-8" />}
-          title="Donation data is unavailable"
-          body="The indexer did not return funding receipts for this Bumicert. Try again later on this page."
+          title="Donation information is unavailable"
+          body="We could not load donations for this Bumicert. Try again later on this page."
         />
       ) : receipts.length === 0 ? (
         <EmptyState
           icon={<HeartIcon className="h-8 w-8" />}
           title="No donations yet"
-          body="Public funding receipts for this Bumicert will appear here once recorded."
+          body="Completed donations for this Bumicert will appear here."
         />
       ) : (
         <div className="space-y-5">
@@ -692,14 +728,14 @@ function TimelinePanel({
   const events = [
     {
       title: "Bumicert published",
-      body: record.shortDescription ?? "Claim activity created on AT Protocol.",
+      body: record.shortDescription ?? "This project story was published.",
       meta: formatDateTime(record.createdAt),
     },
     record.locationUris.length > 0
       ? {
-          title: "Certified sites linked",
-          body: `${formatNumber(record.locationUris.length)} site boundary record${record.locationUris.length === 1 ? "" : "s"} linked to this Bumicert.`,
-          meta: "Site Boundaries",
+          title: "Project places added",
+          body: `${formatNumber(record.locationUris.length)} project place${record.locationUris.length === 1 ? "" : "s"} linked to this Bumicert.`,
+          meta: "Project areas",
         }
       : null,
     record.startDate || record.endDate
@@ -729,7 +765,7 @@ function TimelinePanel({
       {detail?.badges?.length ? (
         <div className="mt-6 border-t border-border-soft pt-5">
           <p className="mb-3 text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
-            Scope tags
+            What this covers
           </p>
           <div className="flex flex-wrap gap-2">
             {detail.badges.map((badge, index) => (
@@ -821,7 +857,7 @@ function DonationRow({ receipt }: { receipt: FundingReceipt }) {
             rel="noreferrer"
             className="inline-flex w-fit items-center gap-1 rounded-full border border-border-soft px-3 py-1.5 text-xs font-medium text-foreground/70 transition-colors hover:border-primary/40 hover:text-primary"
           >
-            Transaction
+            Payment details
             <ExternalLinkIcon className="h-3 w-3" />
           </Link>
         ) : null}
@@ -847,8 +883,8 @@ function formatDonationAmount(receipt: FundingReceipt): string {
 
 function donorLabel(donor: DonorRef): string {
   if (!donor) return "anonymous donor";
-  if (donor.type === "wallet") return shortWallet(donor.id);
-  return donor.id;
+  if (donor.type === "wallet") return "anonymous supporter";
+  return "named supporter";
 }
 
 function socialPlatformLabel(platform: string): string {

@@ -97,7 +97,7 @@ function DonationCard({
           target="_blank"
           rel="noopener noreferrer"
           className="shrink-0 text-muted-foreground hover:text-primary transition-colors"
-          title="View on BaseScan"
+          title="Payment details"
         >
           <ExternalLinkIcon className="h-3 w-3" />
         </a>

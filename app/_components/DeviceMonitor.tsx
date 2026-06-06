@@ -79,11 +79,11 @@ export function DeviceMonitor({ initial }: { initial: DevicesSnapshot }) {
         lightSrc="/assets/media/images/devices/devices-hero-light.png"
         darkSrc="/assets/media/images/devices/devices-hero-dark.png"
         imageAlt="Misty regenerative landscape for GainForest field devices"
-        eyebrow="healthchecks.io"
+        eyebrow="Field updates"
         icon={<LeafGlyph />}
         title="Tainá"
-        accent="devices"
-        lede="Field Raspberry Pis running Tainá ping every 60 seconds; this board reads their liveness, system vitals, uptime, and local draft queues."
+        accent="field devices"
+        lede="Field devices running Tainá send regular updates so teams can see which tools are active and ready."
         actions={statusAction}
       />
 
@@ -92,13 +92,13 @@ export function DeviceMonitor({ initial }: { initial: DevicesSnapshot }) {
           <NotConfigured />
         ) : snapshot.error && snapshot.devices.length === 0 ? (
           <Notice
-            title="Could not reach the heartbeat store"
-            body="Healthchecks.io did not respond. The devices may still be up; this board just cannot read them right now."
+            title="Could not load field updates"
+            body="The devices may still be working; this page just cannot read them right now."
           />
         ) : snapshot.devices.length === 0 ? (
           <Notice
-            title="No devices registered yet"
-            body="Once a field Pi installs the Tainá monitor agent and sends its first heartbeat, it will appear here."
+            title="No field devices yet"
+            body="Once a field device sends its first update, it will appear here."
           />
         ) : (
           <ul role="list" className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
@@ -136,7 +136,7 @@ function DeviceCard({ device }: { device: Device }) {
               rel="noreferrer"
               className="mt-0.5 inline-flex max-w-full items-center gap-1 truncate text-[12px] text-foreground/55 underline-offset-2 hover:text-primary hover:underline"
             >
-              <LeafGlyph /> @{taina.handle}
+              <LeafGlyph /> {taina.handle}
             </Link>
           )}
         </div>
@@ -153,27 +153,27 @@ function DeviceCard({ device }: { device: Device }) {
       {/* Liveness row */}
       <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-[13px]">
         <Row label="Last seen" value={device.lastPing ? formatRelative(device.lastPing) : "never"} />
-        <Row label="Heartbeats" value={formatNumber(device.nPings)} align="right" />
+        <Row label="Updates sent" value={formatNumber(device.nPings)} align="right" />
       </div>
 
       {/* System vitals */}
       {sys && (
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 rounded-lg bg-surface-sunken/70 px-3 py-2 font-mono text-[12px]">
-          {sys.tempC != null && <Vital label="CPU temp" value={`${sys.tempC.toFixed(1)}°C`} tone={tempTone(sys.tempC)} />}
-          {sys.memUsedPct != null && <Vital label="RAM used" value={`${sys.memUsedPct}%`} tone={pctTone(sys.memUsedPct)} />}
-          {sys.diskUsedPct != null && <Vital label="Disk used" value={`${sys.diskUsedPct}%`} tone={pctTone(sys.diskUsedPct)} />}
-          {sys.load1m != null && <Vital label={`Load 1m · ${sys.cpus ?? "?"} cpu`} value={sys.load1m.toFixed(2)} />}
-          {sys.uptimeS != null && <Vital label="Uptime" value={formatUptime(sys.uptimeS)} />}
-          {sys.throttled && <Vital label={`vcgencmd throttled`} value="throttled" tone="text-down" />}
+          {sys.tempC != null && <Vital label="Device temperature" value={`${sys.tempC.toFixed(1)}°C`} tone={tempTone(sys.tempC)} />}
+          {sys.memUsedPct != null && <Vital label="Memory used" value={`${sys.memUsedPct}%`} tone={pctTone(sys.memUsedPct)} />}
+          {sys.diskUsedPct != null && <Vital label="Storage used" value={`${sys.diskUsedPct}%`} tone={pctTone(sys.diskUsedPct)} />}
+          {sys.load1m != null && <Vital label="Current workload" value={sys.load1m.toFixed(2)} />}
+          {sys.uptimeS != null && <Vital label="Time running" value={formatUptime(sys.uptimeS)} />}
+          {sys.throttled && <Vital label="Needs attention" value="slow" tone="text-down" />}
         </div>
       )}
 
       {/* Local Taina queue */}
       {taina && (taina.drafts != null || taina.whitelist != null) && (
         <div className="grid grid-cols-3 gap-2">
-          <Stat label="Drafts" value={taina.drafts} sub={taina.oldestDraftIso ? `oldest ${formatRelative(taina.oldestDraftIso)}` : undefined} />
+          <Stat label="Saved items" value={taina.drafts} sub={taina.oldestDraftIso ? `oldest ${formatRelative(taina.oldestDraftIso)}` : undefined} />
           <Stat label="With photo" value={taina.draftsWithImages} />
-          <Stat label="Whitelisted" value={taina.whitelist} />
+          <Stat label="Allowed users" value={taina.whitelist} />
         </div>
       )}
 
@@ -225,12 +225,9 @@ function Stat({ label, value, sub }: { label: string; value: number | null; sub?
 function NotConfigured() {
   return (
     <div className="mt-8 flex flex-col items-center justify-center rounded-2xl border border-dashed border-border px-6 py-16 text-center">
-      <div className="font-garamond text-[24px] text-foreground">Device monitoring is not wired up here</div>
+      <div className="font-garamond text-[24px] text-foreground">Field updates are not connected here</div>
       <p className="mt-3 max-w-[520px] text-[14.5px] leading-[1.55] text-foreground/65">
-        The field-Pi heartbeats live on healthchecks.io behind a read-only API
-        key. Set <code className="rounded bg-surface-sunken px-1.5 py-0.5 font-mono text-[12.5px] text-primary">HEALTHCHECKS_API_KEY</code>{" "}
-        in this deployment&apos;s environment to light up the board, or open the
-        standalone Tainá monitor.
+        Field updates are available in the standalone Tainá monitor.
       </p>
       <Link
         href={MONITOR_URL}
@@ -238,7 +235,7 @@ function NotConfigured() {
         rel="noreferrer"
         className="mt-5 inline-flex items-center gap-1.5 rounded-full bg-primary px-5 py-2.5 text-[13.5px] font-medium text-primary-foreground transition-colors hover:bg-primary-dark"
       >
-        Open the Tainá monitor ↗
+        Open Tainá monitor ↗
       </Link>
     </div>
   );

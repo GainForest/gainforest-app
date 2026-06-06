@@ -20,7 +20,6 @@ import {
   formatNumber,
   formatDate,
   formatRelative,
-  shortDid,
   countryFlag,
 } from "../_lib/format";
 import { accountHref } from "../_lib/urls";
@@ -97,7 +96,8 @@ function AccountDrawer({ did, onClose }: { did: string | null; onClose: () => vo
   const displayName =
     summary?.displayName ||
     profile?.displayName ||
-    (handle ? `@${handle}` : shortDid(did));
+    handle ||
+    "Organization";
   const avatar = (!avatarFailed && (summary?.avatarUrl ?? profile?.avatar)) || null;
   const m = monogram(handle, did);
   const roles: { label: string; tone: "primary" | "brand" }[] = [];
@@ -158,11 +158,8 @@ function AccountDrawer({ did, onClose }: { did: string | null; onClose: () => vo
                 {displayName}
               </h2>
               {handle && (
-                <p className="mt-0.5 truncate text-[13px] text-primary">@{handle}</p>
+                <p className="mt-0.5 truncate text-[13px] text-primary">{handle}</p>
               )}
-              <p className="mt-0.5 truncate font-mono text-[10.5px] text-foreground/45" title={did}>
-                {shortDid(did)}
-              </p>
             </div>
           </div>
 
@@ -201,18 +198,18 @@ function AccountDrawer({ did, onClose }: { did: string | null; onClose: () => vo
             <StatTile
               label="Bumicerts"
               value={summary ? formatNumber(summary.bumicertCount) : null}
-              hint="impact claims created"
+              hint="impact stories created"
             />
             <StatTile
               label="Observations"
               value={summary ? formatNumber(summary.observationCount) : null}
-              hint="Darwin Core records"
+              hint="nature sightings shared"
             />
           </div>
 
           {/* Meta */}
           <dl className="mt-5 grid grid-cols-2 gap-x-4 gap-y-3.5 border-t border-border-soft pt-4">
-            <Meta label="Repo created">
+            <Meta label="Profile started">
               {summary === null ? (
                 <Shimmer w="5rem" />
               ) : summary.createdAt ? (
@@ -240,8 +237,8 @@ function AccountDrawer({ did, onClose }: { did: string | null; onClose: () => vo
             {summary?.website && (
               <DrawerLink href={summary.website} label="Website" />
             )}
-            <DrawerLink href={accountHref(did)} label="View account on Bumicerts" />
-            <DrawerLink href={`https://bsky.app/profile/${did}`} label="View on Bluesky" />
+            <DrawerLink href={accountHref(did)} label="View full Bumicerts profile" />
+            <DrawerLink href={`https://bsky.app/profile/${did}`} label="View public social profile" />
           </div>
         </div>
       </div>

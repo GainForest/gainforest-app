@@ -5,7 +5,7 @@ import { CreateBumicertClient } from "./_components/CreateBumicertClient";
 export const metadata: Metadata = {
   title: "Create Bumicert",
   description:
-    "Create and publish a Bumicert impact claim from the GainForest explorer.",
+    "Create and publish a Bumicert impact story from GainForest.",
   robots: { index: false, follow: false },
 };
 

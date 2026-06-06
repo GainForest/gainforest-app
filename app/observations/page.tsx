@@ -4,7 +4,7 @@ import { RecordExplorer } from "../_components/RecordExplorer";
 export const metadata: Metadata = {
   title: "Species observations",
   description:
-    "Browse Darwin Core occurrence records from the GainForest data commons; photos, bioacoustics, taxonomy, and coordinates signed on the AT Protocol.",
+    "Browse GainForest nature sightings with photos, sounds, species names, and map locations.",
   alternates: { canonical: "/observations" },
 };
 

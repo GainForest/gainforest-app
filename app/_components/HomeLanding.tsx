@@ -32,8 +32,8 @@ type HomeLandingProps = {
 const FEATURE_ITEMS = [
   {
     number: "01",
-    title: "Verified environmental impact",
-    description: "Every certificate is backed by photos, geolocation data, and community verification.",
+    title: "Checked environmental impact",
+    description: "Every certificate is backed by photos, map locations, and community review.",
   },
   {
     number: "02",
@@ -42,9 +42,9 @@ const FEATURE_ITEMS = [
   },
   {
     number: "03",
-    title: "Decentralized & transparent",
+    title: "Clear and trustworthy",
     description:
-      "Your work, verified. Unchangeable proof of restoration that builds your reputation with donors and communities.",
+      "Your restoration work is easy to check and simple to share with donors and communities.",
   },
 ] as const;
 
@@ -57,7 +57,7 @@ const OPTION_CARDS = [
     label: "For Funders",
     title: "I want to support",
     emphasis: "a project",
-    description: "Browse verified certificates and fund the exact moment of restoration.",
+    description: "Browse checked certificates and fund a real restoration moment.",
     cta: "Explore Bumicerts",
   },
   {
@@ -78,13 +78,13 @@ const FAQ_ITEMS = [
     key: "digitalCertificate",
     question: "A digital certificate of impact",
     answer:
-      "A Bumicert records a specific environmental action — giving it a permanent, verifiable identity on an open, decentralized network (the same technology that powers Bluesky).",
+      "A Bumicert tells the story of one real environmental action, with proof that people can revisit and share.",
   },
   {
     key: "evidence",
     question: "Backed by real evidence",
     answer:
-      "Photos, geolocation, timestamps, monitoring data. Every claim is verifiable. This isn't a promise of future impact — it's proof of work already done.",
+      "Photos, map locations, dates, and field updates help people check what happened. This isn't a promise about the future — it's proof of work already done.",
   },
   {
     key: "communities",
@@ -94,7 +94,7 @@ const FAQ_ITEMS = [
   },
   {
     key: "story",
-    question: "Your claim to the story",
+    question: "Your place in the story",
     answer:
       "Owning a Bumicert means you're part of that moment. A tree planted. A reef restored. An ecosystem revived. It's yours to share, hold, or gift.",
   },
@@ -157,7 +157,7 @@ function LandingTopNavbar() {
               href="/bumicerts"
               className="inline-flex h-9 shrink-0 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-lg shadow-primary/15 transition-colors hover:bg-primary/90 focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none"
             >
-              Launch App
+              Open Bumicerts
             </Link>
           </motion.div>
 
@@ -199,7 +199,7 @@ function LandingHero() {
             className="flex max-w-[620px] flex-col items-center text-center md:items-start md:text-left"
           >
             <h1 className="font-garamond text-5xl leading-[1.08] font-medium tracking-[-0.02em] text-foreground md:text-7xl">
-              <span className="relative inline-block">Verified Impact</span>
+              <span className="relative inline-block">Checked Impact</span>
               <br />
               <span className="relative inline-block">starts with</span>
               <br />
@@ -231,8 +231,8 @@ function LandingHero() {
               transition={{ duration: 0.65, delay: 0.38, ease: [0.25, 0.1, 0.25, 1] }}
               className="mt-6 max-w-[500px] text-lg leading-relaxed text-foreground/80 md:mt-8 md:text-xl"
             >
-              Fund regenerative projects directly. Every Bumicert is a verified record of real environmental work —
-              backed by photos, locations, and community stewards.
+              Fund regenerative projects directly. Every Bumicert is a checked story of real environmental work —
+              backed by photos, places, and community stewards.
             </motion.p>
 
             <motion.div
@@ -269,12 +269,12 @@ function LandingHero() {
               <span className="hidden h-8 w-px bg-foreground/20 sm:block" />
               <span className="inline-flex items-center gap-3">
                 <CameraIcon className="size-6 stroke-[1.5]" />
-                Photo-verified
+                Photo-backed
               </span>
               <span className="hidden h-8 w-px bg-foreground/20 sm:block" />
               <span className="inline-flex items-center gap-3">
                 <MapPinIcon className="size-6 stroke-[1.5]" />
-                Geolocated
+                Mapped
               </span>
             </motion.div>
           </motion.div>
@@ -294,7 +294,7 @@ function HomeStats({ kpis, status, devices }: HomeLandingProps) {
     {
       value: formatCompact(kpis.bumicerts),
       label: "Bumicerts",
-      detail: "verified project stories",
+      detail: "checked project stories",
       href: "/bumicerts",
       icon: <CompassIcon />,
       accent: true,
@@ -309,7 +309,7 @@ function HomeStats({ kpis, status, devices }: HomeLandingProps) {
     {
       value: formatCompact(kpis.occurrences),
       label: "Observations",
-      detail: "biodiversity records",
+      detail: "nature sightings",
       href: "/observations",
       icon: <BinocularsIcon />,
     },
@@ -330,8 +330,8 @@ function HomeStats({ kpis, status, devices }: HomeLandingProps) {
     },
     {
       value: total > 0 ? `${operational}/${total}` : "—",
-      label: "Systems online",
-      detail: "live infrastructure",
+      label: "Services running",
+      detail: "site health",
       href: "/status",
       icon: <ActivityIcon />,
       accent: true,

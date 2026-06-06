@@ -21,7 +21,7 @@ export default async function AccountPage() {
     <main className="mx-auto max-w-6xl px-4 pt-4 sm:px-6">
       <AccountNotice
         title="Sign in to view your account"
-        description="Your local Bumicerts account profile is created from public ATProto, Bumicerts, and GainForest records. Sign in from the account menu to open your own route."
+        description="Your Bumicerts profile brings together your public Bumicerts and GainForest activity. Sign in from the account menu to open your profile."
         actionHref="/bumicerts"
         actionLabel="Explore Bumicerts"
       />

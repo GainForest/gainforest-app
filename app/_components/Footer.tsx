@@ -1,13 +1,13 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ExternalLinkIcon, FileTextIcon, GlobeIcon } from "lucide-react";
-import { GAINFOREST_URL, GLOBE_URL, INDEXER_URL, STATUS_URL } from "../_lib/urls";
+import { GAINFOREST_URL, GLOBE_URL, STATUS_URL } from "../_lib/urls";
 
 const PRIMARY_LINKS = [
   { href: GAINFOREST_URL, label: "GainForest", Icon: GlobeIcon, external: true },
-  { href: "https://docs.fund.gainforest.app/", label: "Documentation", Icon: FileTextIcon, external: true },
+  { href: "https://docs.fund.gainforest.app/", label: "Learn more", Icon: FileTextIcon, external: true },
   { href: "https://www.x.com/GainForestNow", label: "Twitter", Icon: TwitterIcon, external: true },
-  { href: "https://github.com/GainForest/gainforest-explorer", label: "GitHub", Icon: GithubIcon, external: true },
+  { href: "https://github.com/GainForest/gainforest-explorer", label: "Project updates", Icon: GithubIcon, external: true },
 ] as const;
 
 const DATA_LINKS = [
@@ -17,7 +17,6 @@ const DATA_LINKS = [
   { href: "/leaderboard", label: "Leaderboard" },
   { href: GLOBE_URL, label: "Green Globe" },
   { href: STATUS_URL, label: "Status" },
-  { href: INDEXER_URL, label: "Indexer" },
 ] as const;
 
 // Mixed footer: Bumicerts' light, minimal brand block plus the explorer's data
@@ -47,8 +46,7 @@ export function Footer() {
               Connecting communities with funders.
             </p>
             <p className="mt-1 text-xs text-muted-foreground/60">
-              Open infrastructure. Built with GainForest. Read-only explorer views resolve from Hyperindex,
-              certified.one, ATProto PDS records, and live service status.
+              Built with GainForest to make environmental work easier to find, understand, and support.
             </p>
           </div>
 
@@ -88,7 +86,7 @@ export function Footer() {
         <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
           <div className="flex flex-col gap-1.5 leading-[1.55]">
             <span>
-              © {year} Bumicerts / GainForest. Open source, community-powered.
+              © {year} Bumicerts / GainForest. Community-powered.
             </span>
             <span>
               <span className="font-medium text-muted-foreground/80">GainForest e.V.</span>
@@ -104,7 +102,7 @@ export function Footer() {
                 rel="noreferrer"
                 className="underline-offset-4 transition-colors hover:text-primary hover:underline"
               >
-                UID: CHE-181.901.605
+                Swiss registration: CHE-181.901.605
               </Link>
               <span className="text-muted-foreground/35"> · </span>
               <Link href="mailto:team@gainforest.net" className="underline-offset-4 transition-colors hover:text-primary hover:underline">
@@ -112,8 +110,8 @@ export function Footer() {
               </Link>
             </span>
           </div>
-          <span className="font-mono text-[12px] text-muted-foreground/40">
-            hi.gainforest.app/graphql · certified.one · instatus · current app
+          <span className="text-[12px] text-muted-foreground/40">
+            Built to connect communities with funders.
           </span>
         </div>
       </div>

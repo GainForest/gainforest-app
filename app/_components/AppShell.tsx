@@ -57,7 +57,7 @@ const NAV_ITEMS: NavSection[] = [
   {
     kind: "section",
     id: "marketplace",
-    text: "MARKETPLACE",
+    text: "EXPLORE",
     items: [
       {
         kind: "leaf",
@@ -112,8 +112,8 @@ const NAV_ITEMS: NavSection[] = [
 ];
 
 const SOCIAL_LINKS = [
-  { href: "https://github.com/GainForest/bumicerts-monorepo", text: "GitHub", Icon: GithubIcon },
-  { href: "https://docs.fund.gainforest.app/", text: "Documentation", Icon: BookOpenIcon },
+  { href: "https://github.com/GainForest/bumicerts-monorepo", text: "Project updates", Icon: GithubIcon },
+  { href: "https://docs.fund.gainforest.app/", text: "Learn more", Icon: BookOpenIcon },
   { href: "https://www.x.com/GainForestNow", text: "Twitter", Icon: TwitterIcon },
   { href: "https://www.gainforest.earth", text: "GainForest", Icon: GlobeIcon },
 ] as const;
@@ -424,7 +424,7 @@ function ManageSection({ authSession }: { authSession: AuthSession }) {
         className="px-3 py-1"
       >
         <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground/60">
-          MANAGE
+          YOUR WORK
         </span>
       </motion.div>
 
@@ -670,7 +670,7 @@ function Header({
 
 const BUMICERT_DETAIL_TABS = [
   { id: "overview", label: "Overview" },
-  { id: "site-boundaries", label: "Site Boundaries" },
+  { id: "site-boundaries", label: "Project Areas" },
   { id: "donations", label: "Donations" },
   { id: "timeline", label: "Timeline" },
 ] as const;

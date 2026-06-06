@@ -339,13 +339,13 @@ function CreateHero({ session }: { session: AuthSession }) {
           <div className="relative z-10 flex min-h-[20rem] max-w-[29rem] flex-col justify-center px-6 py-9 sm:px-9">
             <div className="mb-7 inline-flex w-fit items-center gap-2 rounded-full border border-primary/20 bg-primary/[0.08] px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.16em] text-primary">
               <SparklesIcon className="size-3.5" />
-              Impact claim studio
+              Impact story studio
             </div>
             <h1 className="font-serif text-5xl font-medium leading-[0.92] tracking-[-0.04em] text-foreground sm:text-6xl">
               Create a<br />Bumicert
             </h1>
             <p className="mt-5 max-w-[22rem] text-base leading-7 text-muted-foreground">
-              Turn field work, restoration evidence, and community stewardship into a publishable ATProto impact claim — without leaving the explorer.
+              Turn field work, restoration evidence, and community stewardship into a publishable impact story — without leaving Bumicerts.
             </p>
             <div className="mt-7 flex flex-wrap items-center gap-3">
               {session.isLoggedIn ? (
@@ -394,8 +394,8 @@ function CreateHero({ session }: { session: AuthSession }) {
         </h2>
         <div className="mt-5 space-y-4 text-sm leading-6 text-muted-foreground">
           {[
-            ["Structure", "Capture the claim title, scope, dates, and public summary in a focused sequence."],
-            ["Evidence", "Add the long-form story and optional cover image for indexer-ready previews."],
+            ["Structure", "Capture the story title, scope, dates, and public summary in a focused sequence."],
+            ["Evidence", "Add the long-form story and optional cover image for easy previews."],
             ["Provenance", "Attach contributors and certified site boundaries already in your GainForest account."],
           ].map(([title, body]) => (
             <div key={title} className="flex gap-3">
@@ -443,7 +443,7 @@ function LivePreview({
             <div>
               <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/75">Live preview</p>
               <h3 className="mt-1 line-clamp-2 font-serif text-3xl leading-none tracking-[-0.03em]">
-                {values.title.trim() || "Untitled impact claim"}
+                {values.title.trim() || "Untitled impact story"}
               </h3>
             </div>
             <span className="rounded-full border border-white/25 bg-white/15 px-3 py-1 text-xs backdrop-blur">
@@ -588,7 +588,7 @@ function BasicsStep({
           </label>
           <div className="flex flex-col justify-center rounded-3xl border border-border bg-muted/35 p-5">
             <p className="text-sm leading-6 text-muted-foreground">
-              A strong visual helps the Bumicert feel trustworthy and complete. The image is uploaded to your PDS only when you publish.
+              A strong visual helps the Bumicert feel trustworthy and complete. The image is added only when you publish.
             </p>
             {coverFile ? (
               <div className="mt-4 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
@@ -665,7 +665,7 @@ function StoryStep({ values, setValues }: { values: FormValues; setValues: React
         <Textarea
           value={values.shortDescription}
           onChange={(event) => setValues((current) => ({ ...current, shortDescription: event.target.value.slice(0, 300) }))}
-          placeholder="Local stewards restored degraded mangrove plots, verified survival rates, and documented biodiversity return across community-managed sites."
+          placeholder="Local stewards restored degraded mangrove plots, checked survival rates, and documented biodiversity return across community-managed sites."
           className="min-h-28 rounded-3xl bg-background/80 p-4 text-base leading-7"
         />
         <div className="flex justify-between text-xs text-muted-foreground">
@@ -724,14 +724,14 @@ function NetworkStep({
 
   return (
     <div className="space-y-7">
-      <FieldShell label="Contributors" hint="Add people, teams, community groups, or DIDs that should travel with the claim.">
+      <FieldShell label="Contributors" hint="Add people, teams, or community groups that should appear with this story.">
         <div className="space-y-3">
           {values.contributors.map((contributor, index) => (
             <div key={index} className="flex gap-2">
               <Input
                 value={contributor}
                 onChange={(event) => updateContributor(index, event.target.value)}
-                placeholder={index === 0 ? "Rufiji Mangrove Stewards" : "Contributor name or DID"}
+                placeholder={index === 0 ? "Rufiji Mangrove Stewards" : "Contributor name"}
                 className="h-11 rounded-2xl bg-background/80"
               />
               <Button
@@ -758,7 +758,7 @@ function NetworkStep({
         </Button>
       </FieldShell>
 
-      <FieldShell label="Certified sites" hint="Attach app.certified.location records from your account. You can publish without them, but site-linked Bumicerts are easier to inspect.">
+      <FieldShell label="Project places" hint="Attach mapped places from your account. You can publish without them, but place-linked Bumicerts are easier to understand.">
         <div className="rounded-3xl border border-border bg-background/70 p-3">
           {sitesStatus === "loading" ? (
             <div className="flex items-center gap-3 p-4 text-sm text-muted-foreground">
@@ -820,7 +820,7 @@ function ReviewStep({ values, sites, publishError }: { values: FormValues; sites
     ["Dates", values.startDate ? `${values.startDate} → ${values.ongoing ? "ongoing" : values.endDate || "missing"}` : "Missing"],
     ["Summary", clampDescription(values.shortDescription) || "Missing"],
     ["Contributors", contributorList(values).join(", ") || "Missing"],
-    ["Certified sites", selectedLocations(values, sites).map((site) => site.record.name || site.metadata.rkey).join(", ") || "None attached"],
+    ["Project places", selectedLocations(values, sites).map((site) => site.record.name || site.metadata.rkey).join(", ") || "None attached"],
   ];
   const validation = validateAll(values);
   return (
@@ -831,7 +831,7 @@ function ReviewStep({ values, sites, publishError }: { values: FormValues; sites
           <div>
             <h3 className="font-semibold text-foreground">{validation ? "One more thing" : "Ready to publish"}</h3>
             <p className="mt-1 text-sm leading-6 text-muted-foreground">
-              {validation || "Publishing creates an org.hypercerts.claim.activity record in your ATProto repository."}
+              {validation || "Publishing adds this Bumicert to your public profile."}
             </p>
           </div>
         </div>
@@ -867,7 +867,7 @@ function PublishSuccess({ result, session, onReset }: { result: PublishResult; s
       </div>
       <h2 className="font-serif text-4xl font-medium tracking-[-0.03em] text-foreground">Bumicert published</h2>
       <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-muted-foreground">
-        Your claim was written to your ATProto repository. It can take a moment for the indexer to pick it up.
+        Your Bumicert was published. It can take a moment to appear everywhere.
       </p>
       <div className="mt-6 flex flex-wrap justify-center gap-3">
         <Button asChild>

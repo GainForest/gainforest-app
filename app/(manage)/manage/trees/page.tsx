@@ -4,7 +4,7 @@ import { TreesPageClient } from "./_components/TreesPageClient";
 
 export const metadata: Metadata = {
   title: "Manage Trees — Bumicerts",
-  description: "Manage tree occurrence datasets and biodiversity records.",
+  description: "Manage tree groups and nature information.",
   robots: { index: false, follow: false },
 };
 

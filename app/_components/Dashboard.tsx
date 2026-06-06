@@ -46,7 +46,7 @@ import {
   type TxRow,
 } from "../_lib/dashboard";
 import { accountHref, localBumicertHref } from "../_lib/urls";
-import { formatNumber, formatUsd, shortWallet } from "../_lib/format";
+import { formatNumber, formatUsd } from "../_lib/format";
 import { AuthorInline } from "./AuthorChip";
 import { StatsTile } from "./StatsTile";
 import { PictureHero } from "./PictureHero";
@@ -137,12 +137,12 @@ function DashboardShell({ children, periodFilter }: { children: React.ReactNode;
       <PictureHero
         lightSrc="/assets/media/images/donations/donations-hero-light.png"
         darkSrc="/assets/media/images/donations/donations-hero-dark.png"
-        imageAlt="Misty regenerative landscape for donations analytics"
-        eyebrow="Platform Analytics"
+        imageAlt="Misty regenerative landscape for donation activity"
+        eyebrow="Giving Activity"
         icon={<BarChart3Icon />}
         title="Donations"
-        accent="Dashboard"
-        lede="Track platform-wide giving across Bumicerts: total raised, donor activity, geographic reach, funding trends, and recent transactions."
+        accent="Overview"
+        lede="Track giving across Bumicerts: total raised, supporter activity, places reached, funding trends, and recent gifts."
         actions={periodFilter}
       />
 
@@ -217,19 +217,19 @@ function KPISummary({ kpis }: { kpis: DashboardKpis }) {
         icon={<HashIcon className="h-4 w-4" />}
         label="Total Donations"
         value={formatNumber(kpis.totalDonations)}
-        sub="Receipts recorded"
+        sub="Completed gifts"
       />
       <StatCard
         icon={<UsersIcon className="h-4 w-4" />}
-        label="Unique Donors"
+        label="Supporters"
         value={formatNumber(kpis.uniqueDonors)}
-        sub="By DID or wallet"
+        sub="People and anonymous supporters"
       />
       <StatCard
         icon={<TrendingUpIcon className="h-4 w-4" />}
-        label="Avg Donation"
+        label="Average Gift"
         value={formatUsd(kpis.avgDonation)}
-        sub="Per transaction"
+        sub="Per gift"
       />
       <StatCard
         icon={<LayoutGridIcon className="h-4 w-4" />}
@@ -250,9 +250,9 @@ function GeographicReach({ stats }: { stats: GeoStats }) {
     <div className="grid grid-cols-1 gap-4 md:grid-cols-[280px_1fr]">
       <StatsTile
         icon={<GlobeIcon />}
-        label="Geographic Reach"
+        label="Places Reached"
         value={formatNumber(stats.countriesRepresented)}
-        detail="Countries represented"
+        detail="Countries with support"
         accent
       />
 
@@ -310,7 +310,7 @@ function DonationsVolumeChart({
           <div className="flex items-center gap-2">
             <TrendingUpIcon className="h-4 w-4 text-primary" />
             <span className="text-xs font-medium tracking-[0.15em] text-muted-foreground uppercase">
-              Donation Volume Over Time
+              Giving Over Time
             </span>
           </div>
           <p className="mt-0.5 text-sm text-muted-foreground">USD raised per {granularity}</p>
@@ -507,10 +507,9 @@ function OrganizationsTable({ rows }: { rows: OrgRow[] }) {
                       href={accountHref(row.orgDid)}
                       target="_blank"
                       rel="noreferrer"
-                      className="inline-flex items-center gap-1 font-mono text-xs text-foreground transition-colors hover:text-primary"
-                      title={row.orgDid}
+                      className="inline-flex items-center gap-1 text-xs text-foreground transition-colors hover:text-primary"
                     >
-                      {truncateDid(row.orgDid)}
+                      <AuthorInline did={row.orgDid} />
                       <ExternalLinkIcon className="h-3 w-3 opacity-60" />
                     </Link>
                   </td>
@@ -534,7 +533,7 @@ function RecentTransactionsTable({ rows }: { rows: TxRow[] }) {
         <div>
           <div className="flex items-center gap-2">
             <ClockIcon className="h-4 w-4 text-primary" />
-            <span className="text-xs font-medium tracking-[0.15em] text-muted-foreground uppercase">Recent Transactions</span>
+            <span className="text-xs font-medium tracking-[0.15em] text-muted-foreground uppercase">Recent Gifts</span>
           </div>
           <p className="mt-0.5 text-xs text-muted-foreground">
             All time · {rows.length} {rows.length === 1 ? "donation" : "donations"}
@@ -544,7 +543,7 @@ function RecentTransactionsTable({ rows }: { rows: TxRow[] }) {
       </div>
 
       {rows.length === 0 ? (
-        <p className="px-5 pb-5 text-sm text-muted-foreground">No transactions yet.</p>
+        <p className="px-5 pb-5 text-sm text-muted-foreground">No gifts yet.</p>
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
@@ -554,7 +553,6 @@ function RecentTransactionsTable({ rows }: { rows: TxRow[] }) {
                 <th className="px-3 py-2 text-left text-xs font-medium tracking-[0.12em] text-muted-foreground uppercase">Donor</th>
                 <th className="px-3 py-2 text-left text-xs font-medium tracking-[0.12em] text-muted-foreground uppercase">Amount</th>
                 <th className="px-3 py-2 text-left text-xs font-medium tracking-[0.12em] text-muted-foreground uppercase">Bumicert</th>
-                <th className="px-3 py-2 text-left text-xs font-medium tracking-[0.12em] text-muted-foreground uppercase">Tx Hash</th>
               </tr>
             </thead>
             <tbody>
@@ -565,24 +563,8 @@ function RecentTransactionsTable({ rows }: { rows: TxRow[] }) {
                     {row.donorId ? <DonorCell id={row.donorId} type={row.donorType ?? "wallet"} /> : <span className="text-xs text-foreground">Anonymous</span>}
                   </td>
                   <td className="whitespace-nowrap px-3 py-2.5 font-medium text-foreground tabular-nums">{formatUsd(row.amount)}</td>
-                  <td className="px-3 py-2.5 font-mono text-xs text-muted-foreground">
+                  <td className="px-3 py-2.5 text-xs text-muted-foreground">
                     <BumicertLink uri={row.bumicertUri} />
-                  </td>
-                  <td className="px-3 py-2.5">
-                    {row.txUrl && row.txHash ? (
-                      <Link
-                        href={row.txUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 font-mono text-xs text-primary hover:underline"
-                        title={row.txHash}
-                      >
-                        {`${row.txHash.slice(0, 8)}…${row.txHash.slice(-6)}`}
-                        <ExternalLinkIcon className="h-3 w-3" />
-                      </Link>
-                    ) : (
-                      <span className="text-xs text-muted-foreground">—</span>
-                    )}
                   </td>
                 </tr>
               ))}
@@ -627,7 +609,7 @@ function SortIcon<T extends string>({ col, sortKey, sortDir }: { col: T; sortKey
 
 function DonorCell({ id, type }: { id: string; type: "did" | "wallet" }) {
   if (type === "wallet") {
-    return <span className="text-xs text-foreground" title={id}>Anonymous ({shortWallet(id)})</span>;
+    return <span className="text-xs text-foreground">Anonymous supporter</span>;
   }
 
   return (
@@ -643,7 +625,7 @@ function BumicertLink({ uri }: { uri: string | null }) {
   if (!parsed) return <>—</>;
   return (
     <Link href={localBumicertHref(parsed.did, parsed.rkey)} className="text-primary hover:underline" title="View bumicert">
-      {parsed.rkey}
+      View
     </Link>
   );
 }
@@ -666,12 +648,6 @@ function formatTableDate(date: string | null | undefined): string {
   const parsed = new Date(date);
   if (Number.isNaN(parsed.getTime())) return "—";
   return parsed.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
-}
-
-function truncateDid(did: string): string {
-  const parts = did.split(":");
-  const last = parts[parts.length - 1] ?? "";
-  return `${parts.slice(0, 2).join(":")}:…${last.slice(-8)}`;
 }
 
 function Skeleton({ className }: { className: string }) {
@@ -739,13 +715,13 @@ function DashboardError() {
         Donation data is unavailable
       </div>
       <p className="mt-2 max-w-[420px] text-sm leading-[1.5] text-muted-foreground">
-        The indexer did not return funding receipts. Try this donations dashboard again later.
+        We could not load donation information. Try this page again later.
       </p>
       <Link
         href="/donations"
         className="mt-5 rounded-full bg-primary px-5 py-2.5 text-[13.5px] font-medium text-primary-foreground transition-colors hover:bg-primary/90"
       >
-        Open donations dashboard
+        Open donations overview
       </Link>
     </div>
   );

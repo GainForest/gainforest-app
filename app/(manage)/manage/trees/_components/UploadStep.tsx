@@ -145,7 +145,7 @@ export default function UploadStep({
         return;
       }
     } catch {
-      setUploadFatalError("Could not verify site boundary before upload. Go back and try again.");
+      setUploadFatalError("Could not check the project area. Go back and try again.");
       setClockMs(Date.now());
       setUploadDone(true);
       return;
@@ -169,7 +169,7 @@ export default function UploadStep({
         datasetUri = dsResult.uri;
         datasetRkey = dsResult.uri.split("/").pop();
       } catch {
-        setUploadFatalError("Could not create the dataset for this upload. Try again or continue without a dataset.");
+        setUploadFatalError("Could not create the tree group. Try again or continue without a group.");
         setClockMs(Date.now());
         setUploadDone(true);
         return;
@@ -225,7 +225,7 @@ export default function UploadStep({
             partials += 1;
             setRowStatuses((prev) => {
               const next = [...prev];
-              next[rowIndex] = { state: "partial", occurrenceUri: occResult.uri, error: "Tree saved but measurement could not be recorded." };
+              next[rowIndex] = { state: "partial", occurrenceUri: occResult.uri, error: "Tree saved but measurement could not be added." };
               return next;
             });
             setProgress((prev) => ({ ...prev, successes, partials, failures }));
@@ -239,7 +239,7 @@ export default function UploadStep({
         failures += 1;
         setRowStatuses((prev) => {
           const next = [...prev];
-          next[rowIndex] = { state: "error", error: err instanceof Error ? err.message : "Failed to upload." };
+          next[rowIndex] = { state: "error", error: err instanceof Error ? err.message : "Failed to save." };
           return next;
         });
       }
@@ -254,7 +254,7 @@ export default function UploadStep({
       try {
         await deleteRecord("app.gainforest.dwc.dataset", datasetRkey);
       } catch {
-        setDatasetUpdateWarning("The empty dataset could not be removed automatically.");
+        setDatasetUpdateWarning("The empty tree group could not be removed automatically.");
       }
     } else if (datasetRkey && persistedOccurrences > 0) {
       try {
@@ -266,7 +266,7 @@ export default function UploadStep({
         };
         await putRecord("app.gainforest.dwc.dataset", datasetRkey, dsRecord as Record<string, unknown>);
       } catch {
-        setDatasetUpdateWarning("Dataset created, but its tree count could not be updated.");
+        setDatasetUpdateWarning("Tree group created, but its tree count could not be updated.");
       }
     }
 
@@ -283,13 +283,13 @@ export default function UploadStep({
   const { current, total: uploadTotal, successes, partials, failures, currentRow } = progress;
   const progressPercent = uploadTotal > 0 ? Math.round((current / uploadTotal) * 100) : 0;
   const progressLabel = current > 0
-    ? `Uploading row ${current} of ${uploadTotal}${currentRow ? ` — ${currentRow}` : ""}…`
-    : "Preparing upload…";
+    ? `Saving row ${current} of ${uploadTotal}${currentRow ? ` — ${currentRow}` : ""}…`
+    : "Preparing to save…";
 
   const treeUploadTimeEstimate = getUploadTimeEstimate({
     startedAtMs: uploadStartedAtMs, nowMs: clockMs,
     completedUnits: successes + partials + failures, totalUnits: uploadTotal,
-    isComplete: uploadDone, unitLabel: "record",
+    isComplete: uploadDone, unitLabel: "tree",
   });
 
   const totalFailureCount = failures + previewSkippedRows.length;
@@ -307,14 +307,14 @@ export default function UploadStep({
   return (
     <div className="space-y-5">
       <div>
-        <h2 className="text-lg font-semibold">Saving your records</h2>
+        <h2 className="text-lg font-semibold">Saving your trees</h2>
         <p className="text-sm text-muted-foreground mt-0.5">
-          Saving {uploadTotal} tree record{uploadTotal !== 1 ? "s" : ""} to the GainForest network.
+          Saving {uploadTotal} tree{uploadTotal !== 1 ? "s" : ""} to GainForest.
         </p>
         {siteSelection && <p className="text-xs text-muted-foreground mt-1">Assigning to {siteSelection.name}.</p>}
         {selectedDatasetName && (
           <p className="text-xs text-muted-foreground mt-1">
-            {datasetSelection.mode === "existing" ? `Adding to ${selectedDatasetName}.` : `Creating dataset "${selectedDatasetName}".`}
+            {datasetSelection.mode === "existing" ? `Adding to ${selectedDatasetName}.` : `Creating group "${selectedDatasetName}".`}
           </p>
         )}
       </div>
@@ -324,7 +324,7 @@ export default function UploadStep({
           <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" />
           <div>
             <p className="font-medium">Do not refresh or close this page</p>
-            <p>Keep this tab open until the upload completes.</p>
+            <p>Keep this tab open until saving finishes.</p>
           </div>
         </div>
       )}
@@ -358,7 +358,7 @@ export default function UploadStep({
       {uploadDone && allSucceeded && (
         <div className="flex items-center gap-2 rounded-md border border-primary/40 bg-primary/10 p-3 text-sm text-primary">
           <CheckCircle2 className="h-4 w-4 shrink-0" />
-          <span>Successfully uploaded {successes} tree record{successes !== 1 ? "s" : ""}.</span>
+          <span>Successfully saved {successes} tree{successes !== 1 ? "s" : ""}.</span>
         </div>
       )}
 
@@ -441,7 +441,7 @@ export default function UploadStep({
         {uploadDone && (
           <div className="flex gap-2">
             <Button variant="outline" onClick={onComplete}>
-              {uploadFatalError ? "Start Over" : "Upload More Data"}
+              {uploadFatalError ? "Start Over" : "Add More Trees"}
             </Button>
             {!uploadFatalError && (
               <Button onClick={onComplete}>

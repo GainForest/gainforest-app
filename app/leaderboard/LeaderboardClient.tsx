@@ -533,8 +533,8 @@ function DonorCard({ entry, index }: { entry: LeaderboardEntry; index: number })
   const relativeTime = entry.lastDonatedAt ? formatRelativeTimeFromNow(new Date(entry.lastDonatedAt)) : null;
   const isWallet = entry.donorType === "wallet";
   const actionHref = isWallet ? basescanAddress(entry.donorId) : accountHref(entry.donorId);
-  const walletLabel = formatWalletAddress(entry.donorId);
-  const actionLabel = isWallet ? `Open ${walletLabel} on BaseScan` : "Open donor account in a new tab";
+  const walletLabel = "Anonymous supporter";
+  const actionLabel = isWallet ? "Open payment details" : "Open supporter profile in a new tab";
 
   return (
     <motion.div
@@ -560,7 +560,7 @@ function DonorCard({ entry, index }: { entry: LeaderboardEntry; index: number })
       <div className="min-w-0">
         <div className="flex min-w-0 items-center gap-2">
           {isWallet ? (
-            <span className="truncate text-sm font-semibold text-foreground sm:text-base" title={entry.donorId}>
+            <span className="truncate text-sm font-semibold text-foreground sm:text-base">
               {walletLabel}
             </span>
           ) : (
@@ -692,11 +692,6 @@ function formatCurrency(value: number): string {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   }).format(value);
-}
-
-function formatWalletAddress(address: string): string {
-  const truncated = address.length > 12 ? `${address.slice(0, 6)}…${address.slice(-4)}` : address;
-  return `Anonymous (${truncated})`;
 }
 
 function donationSummary(count: number, relativeTime: string | null): string {
