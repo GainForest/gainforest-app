@@ -12,10 +12,7 @@
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import {
-  AlignLeftIcon,
-  ArrowLeftIcon,
   ArrowRightIcon,
-  CalendarRangeIcon,
   CameraIcon,
   CheckIcon,
   LeafIcon,
@@ -24,16 +21,13 @@ import {
   MapPinIcon,
   PlusIcon,
   RotateCcwIcon,
-  TagIcon,
   Trash2Icon,
   TriangleAlertIcon,
-  UsersIcon,
   XIcon,
 } from "lucide-react";
 import {
   useCallback,
   useEffect,
-  useMemo,
   useRef,
   useState,
   type ChangeEvent,
@@ -114,28 +108,14 @@ const STEPS: Array<{ id: StepId; label: string; title: string; subtitle: string 
   { id: "review", label: "Review", title: "review & publish", subtitle: "Check it all reads well, then make it public." },
 ];
 
-const TIPS: Record<StepId, string[]> = {
-  basics: [
-    "A clear, recognisable title travels further than a clever one.",
-    "A single honest photo builds more trust than none.",
-    "Mark the work “ongoing” if there’s no clean end date yet.",
-  ],
-  story: [
-    "Lead the summary with the outcome, not the method.",
-    "In the description, name your evidence: counts, plots, dates.",
-    "Write for a funder skimming a long list of projects.",
-  ],
-  people: [
-    "Start typing a name or @handle to find people on the network.",
-    "Credit communities and teams, not only individuals.",
-    "Linked sites make a Bumicert much easier to verify.",
-  ],
-  review: [
-    "Publishing adds this to your public profile.",
-    "Records can take a moment to appear everywhere.",
-    "You can always create another from your drafts.",
-  ],
-};
+const TIPS = [
+  "A clear, recognisable title travels further than a clever one.",
+  "Lead the summary with the outcome, not the method.",
+  "Name your evidence in the description: counts, plots, dates.",
+  "Credit communities and teams, not only individuals.",
+  "Linked sites make a Bumicert much easier to verify.",
+  "A single honest photo builds more trust than none.",
+] as const;
 
 /* Soft, border-free field styling */
 const FIELD =
@@ -172,14 +152,6 @@ function clampDescription(value: string) {
 }
 function dateToIso(date: string) {
   return new Date(`${date}T12:00:00.000Z`).toISOString();
-}
-function prettyDate(date: string) {
-  if (!date) return "";
-  try {
-    return new Intl.DateTimeFormat(undefined, { year: "numeric", month: "short", day: "numeric" }).format(new Date(`${date}T12:00:00`));
-  } catch {
-    return date;
-  }
 }
 function extractRkey(uri: string) {
   return uri.split("/").filter(Boolean).pop() ?? "";
@@ -240,55 +212,14 @@ function Field({ label, hint, htmlFor, children }: { label: string; hint?: strin
   );
 }
 
-/* ── Step rail (rendered in the sticky sub-header) ──────────────────────── */
+/* ── Section header (editorial display type per section) ────────────────── */
 
-function StepRail({
-  activeStep,
-  completed,
-  onSelect,
-}: {
-  activeStep: StepId;
-  completed: Set<StepId>;
-  onSelect: (id: StepId) => void;
-}) {
-  const activeIndex = STEPS.findIndex((s) => s.id === activeStep);
+function SectionHeader({ eyebrow, title, subtitle }: { eyebrow: string; title: string; subtitle: string }) {
   return (
-    <div className="flex items-center gap-2 sm:gap-3">
-      {STEPS.map((step, idx) => {
-        const isActive = step.id === activeStep;
-        const isDone = completed.has(step.id) && !isActive;
-        const isReached = idx <= activeIndex || isDone;
-        return (
-          <button
-            key={step.id}
-            type="button"
-            onClick={() => onSelect(step.id)}
-            className="group flex flex-1 flex-col gap-1.5 text-left outline-none"
-          >
-            <span className="flex items-center gap-2">
-              <span
-                className={cn(
-                  "flex size-5 shrink-0 items-center justify-center rounded-full text-[11px] font-medium transition-all duration-300",
-                  isActive ? "bg-primary text-primary-foreground" : isDone ? "bg-primary/15 text-primary" : "bg-muted text-muted-foreground/70",
-                )}
-              >
-                {isDone ? <CheckIcon className="size-3" /> : idx + 1}
-              </span>
-              <span className={cn("hidden text-xs transition-colors sm:block", isActive ? "font-medium text-foreground" : "text-muted-foreground/80")}>
-                {step.label}
-              </span>
-            </span>
-            <span className="h-1 w-full overflow-hidden rounded-full bg-muted">
-              <motion.span
-                className="block h-full rounded-full bg-primary"
-                initial={false}
-                animate={{ width: isReached ? "100%" : "0%" }}
-                transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
-              />
-            </span>
-          </button>
-        );
-      })}
+    <div className="mb-8">
+      <p className="mb-2.5 text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground/65">{eyebrow}</p>
+      <h2 className="font-instrument text-[2.5rem] italic leading-[1.05] tracking-[-0.01em] text-foreground">{title}</h2>
+      <p className="mt-2 text-sm leading-6 text-muted-foreground">{subtitle}</p>
     </div>
   );
 }
@@ -643,91 +574,23 @@ function PeopleStep({
   );
 }
 
-function Facet({ icon: Icon, label, full, children }: { icon: typeof TagIcon; label: string; full?: boolean; children: ReactNode }) {
-  return (
-    <div className={cn("rounded-2xl bg-muted/45 p-4", full && "sm:col-span-2")}>
-      <div className="flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground/75">
-        <Icon className="size-3.5" /> {label}
-      </div>
-      <div className="mt-2.5 text-[15px] leading-6 text-foreground">{children}</div>
-    </div>
-  );
-}
-
-function ReviewStep({
+function ConfirmStep({
   values,
   setValues,
-  sites,
-  coverPreview,
   publishError,
 }: {
   values: FormValues;
   setValues: React.Dispatch<React.SetStateAction<FormValues>>;
-  sites: ManagedLocation[];
-  coverPreview: string | null;
   publishError: string | null;
 }) {
   const validation = validateAll(values);
-  const scopes = scopeList(values);
-  const contributors = contributorList(values);
-  const linkedSites = selectedLocations(values, sites);
-  const summary = clampDescription(values.shortDescription);
-  const period = values.startDate
-    ? `${prettyDate(values.startDate)} → ${values.ongoing ? "Ongoing" : prettyDate(values.endDate) || "—"}`
-    : "Not set";
-  const title = values.title.trim();
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       <span className={cn("inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[13px] font-medium", validation ? "bg-warn/15 text-foreground" : "bg-primary/15 text-primary")}>
         {validation ? <TriangleAlertIcon className="size-3.5" /> : <CheckIcon className="size-3.5" />}
-        {validation ? "Almost there" : "Ready to publish"}
+        {validation ?? "Ready to publish"}
       </span>
-
-      {coverPreview ? (
-        <div className="relative overflow-hidden rounded-3xl">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={coverPreview} alt="" className="h-52 w-full object-cover sm:h-60" />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/15 to-transparent" />
-          <h3 className="absolute inset-x-0 bottom-0 p-5 font-instrument text-3xl italic leading-tight text-white sm:text-4xl">{title || "Untitled Bumicert"}</h3>
-        </div>
-      ) : (
-        <div className="rounded-3xl bg-gradient-to-br from-primary/12 to-primary/[0.04] px-6 py-8">
-          <h3 className="font-instrument text-3xl italic leading-tight text-foreground sm:text-4xl">{title || "Untitled Bumicert"}</h3>
-        </div>
-      )}
-
-      <div className="grid gap-3 sm:grid-cols-2">
-        <Facet icon={TagIcon} label="Type of work">
-          {scopes.length ? (
-            <div className="flex flex-wrap gap-1.5">
-              {scopes.map((s) => <span key={s} className="rounded-full bg-background/70 px-2.5 py-1 text-[13px]">{s}</span>)}
-            </div>
-          ) : <span className="text-muted-foreground">—</span>}
-        </Facet>
-
-        <Facet icon={CalendarRangeIcon} label="Time period">{period}</Facet>
-
-        <Facet icon={UsersIcon} label={`Contributors · ${contributors.length}`}>
-          {contributors.length ? (
-            <div className="flex flex-wrap gap-1.5">
-              {contributors.map((c) => <span key={c} className="rounded-full bg-background/70 px-2.5 py-1 text-[13px]">{c}</span>)}
-            </div>
-          ) : <span className="text-muted-foreground">—</span>}
-        </Facet>
-
-        <Facet icon={MapPinIcon} label={`Sites · ${linkedSites.length}`}>
-          {linkedSites.length ? (
-            <div className="flex flex-wrap gap-1.5">
-              {linkedSites.map((s) => <span key={s.metadata.uri} className="rounded-full bg-background/70 px-2.5 py-1 text-[13px]">{s.record.name || s.metadata.rkey}</span>)}
-            </div>
-          ) : <span className="text-muted-foreground">None linked</span>}
-        </Facet>
-
-        <Facet icon={AlignLeftIcon} label="Summary" full>
-          {summary ? <span className="text-muted-foreground">{summary}</span> : <span className="text-muted-foreground">—</span>}
-        </Facet>
-      </div>
 
       <label className="flex cursor-pointer items-start gap-3 rounded-2xl bg-muted/45 px-4 py-3.5">
         <Checkbox
@@ -741,7 +604,7 @@ function ReviewStep({
       </label>
 
       <p className="text-[13px] leading-6 text-muted-foreground">
-        {validation ?? "Publishing adds this Bumicert to your public profile — it becomes visible to everyone."}
+        Publishing adds this Bumicert to your public profile — it becomes visible to everyone.
       </p>
 
       {publishError ? <div className="rounded-2xl bg-destructive/10 px-5 py-3.5 text-[13px] leading-6 text-destructive">{publishError}</div> : null}
@@ -824,10 +687,10 @@ function PreviewContent({
   );
 }
 
-function TipsContent({ activeStep }: { activeStep: StepId }) {
+function TipsContent() {
   return (
     <ul className="space-y-2.5">
-      {TIPS[activeStep].map((tip) => (
+      {TIPS.map((tip) => (
         <li key={tip} className="flex gap-2.5 text-[13px] leading-5 text-muted-foreground">
           <LeafIcon className="mt-0.5 size-3.5 shrink-0 text-primary/55" />
           {tip}
@@ -878,7 +741,6 @@ function PublishedView({ result, did, onReset }: { result: PublishResult; did: s
 
 export function NewBumicertClient({ did }: { did: string }) {
   const [values, setValues] = useState<FormValues>(EMPTY_FORM);
-  const [activeStep, setActiveStep] = useState<StepId>("basics");
   const [drafts, setDrafts] = useState<Draft[]>([]);
   const [activeDraftId, setActiveDraftId] = useState<string | null>(null);
   const [coverFile, setCoverFile] = useState<File | null>(null);
@@ -963,14 +825,7 @@ export function NewBumicertClient({ did }: { did: string }) {
     };
   }, [activeDraftId, publishResult, values]);
 
-  const stepIndex = STEPS.findIndex((s) => s.id === activeStep);
-  const currentStepError = validateStep(activeStep, values);
-
-  const completedSteps = useMemo(() => {
-    const out = new Set<StepId>();
-    for (const step of STEPS) if (!validateStep(step.id, values)) out.add(step.id);
-    return out;
-  }, [values]);
+  const formError = validateAll(values);
 
   const applyCoverFile = useCallback(
     (file: File | null) => {
@@ -1008,25 +863,9 @@ export function NewBumicertClient({ did }: { did: string }) {
     setCoverError(null);
   };
 
-  const goNext = () => {
-    const error = validateStep(activeStep, values);
-    if (error) {
-      setPublishError(error);
-      return;
-    }
-    setPublishError(null);
-    setActiveStep(STEPS[Math.min(stepIndex + 1, STEPS.length - 1)].id);
-  };
-
-  const goBack = () => {
-    setPublishError(null);
-    setActiveStep(STEPS[Math.max(stepIndex - 1, 0)].id);
-  };
-
   const handleLoadDraft = (draft: Draft) => {
     setValues({ ...EMPTY_FORM, ...draft.values });
     setActiveDraftId(draft.id);
-    setActiveStep("basics");
     setPublishResult(null);
     setPublishError(null);
   };
@@ -1042,7 +881,6 @@ export function NewBumicertClient({ did }: { did: string }) {
 
   const resetForm = () => {
     setValues(EMPTY_FORM);
-    setActiveStep("basics");
     setActiveDraftId(null);
     setPublishResult(null);
     setPublishError(null);
@@ -1054,8 +892,6 @@ export function NewBumicertClient({ did }: { did: string }) {
     const validation = validateAll(values);
     if (validation) {
       setPublishError(validation);
-      const firstBad = STEPS.find((s) => validateStep(s.id, values));
-      if (firstBad) setActiveStep(firstBad.id);
       return;
     }
     setIsPublishing(true);
@@ -1092,9 +928,6 @@ export function NewBumicertClient({ did }: { did: string }) {
     }
   };
 
-  const activeStepMeta = STEPS[stepIndex];
-  const isReview = activeStep === "review";
-
   const previewProps = {
     values,
     coverPreview,
@@ -1110,25 +943,13 @@ export function NewBumicertClient({ did }: { did: string }) {
       {/* soft sage wash */}
       <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[20rem] bg-gradient-to-b from-primary/[0.07] via-primary/[0.02] to-transparent" />
 
-      {/* Step bar in the sticky sub-header + Start over in the header */}
+      {/* Start over in the header */}
       {!publishResult ? (
         <HeaderContent
           right={
             <Button type="button" variant="ghost" size="sm" onClick={resetForm} className="text-muted-foreground">
               <RotateCcwIcon className="size-4" /> <span className="hidden sm:inline">Start over</span>
             </Button>
-          }
-          sub={
-            <div className="mx-auto w-full max-w-5xl px-0 sm:px-2">
-              <StepRail
-                activeStep={activeStep}
-                completed={completedSteps}
-                onSelect={(id) => {
-                  setPublishError(null);
-                  setActiveStep(id);
-                }}
-              />
-            </div>
           }
         />
       ) : null}
@@ -1157,50 +978,40 @@ export function NewBumicertClient({ did }: { did: string }) {
 
             <form onSubmit={handlePublish} className={cn("grid gap-x-14 gap-y-12 xl:grid-cols-[minmax(0,1fr)_18rem]", drafts.length > 0 ? "mt-8" : "mt-2")}>
               <div className="min-w-0">
-                <div className="mb-8">
-                  <h2 className="font-instrument text-[2.5rem] italic leading-[1.05] tracking-[-0.01em] text-foreground">{activeStepMeta.title}</h2>
-                  <p className="mt-2 text-sm leading-6 text-muted-foreground">{activeStepMeta.subtitle}</p>
-                </div>
+                <section>
+                  <SectionHeader eyebrow="Basics" title={STEPS[0].title} subtitle={STEPS[0].subtitle} />
+                  <BasicsStep values={values} setValues={setValues} />
 
-                <AnimatePresence mode="wait">
-                  <motion.div key={activeStep} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.22, ease: [0.25, 0.1, 0.25, 1] }}>
-                    {activeStep === "basics" ? <BasicsStep values={values} setValues={setValues} /> : null}
-                    {activeStep === "story" ? <StoryStep values={values} setValues={setValues} /> : null}
-                    {activeStep === "people" ? <PeopleStep values={values} setValues={setValues} sites={sites} sitesStatus={sitesStatus} sitesError={sitesError} refreshSites={refreshSites} /> : null}
-                    {isReview ? <ReviewStep values={values} setValues={setValues} sites={sites} coverPreview={coverPreview} publishError={publishError} /> : null}
-                  </motion.div>
-                </AnimatePresence>
-
-                {/* Mobile: live preview shown by default at the end of step 1 */}
-                {activeStep === "basics" ? (
+                  {/* Mobile: live preview shown inline */}
                   <div className="mt-10 xl:hidden">
                     <p className="mb-3 text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground/70">Live preview</p>
                     <div className="mx-auto max-w-[18rem]">
                       <PreviewContent {...previewProps} />
                     </div>
                   </div>
-                ) : null}
+                </section>
 
-                {publishError && !isReview ? <p className="mt-6 rounded-xl bg-warn/10 px-4 py-2.5 text-[13px] text-foreground">{publishError}</p> : null}
+                <section className="mt-14 border-t border-border/40 pt-14">
+                  <SectionHeader eyebrow="Story" title={STEPS[1].title} subtitle={STEPS[1].subtitle} />
+                  <StoryStep values={values} setValues={setValues} />
+                </section>
+
+                <section className="mt-14 border-t border-border/40 pt-14">
+                  <SectionHeader eyebrow="People & places" title={STEPS[2].title} subtitle={STEPS[2].subtitle} />
+                  <PeopleStep values={values} setValues={setValues} sites={sites} sitesStatus={sitesStatus} sitesError={sitesError} refreshSites={refreshSites} />
+                </section>
+
+                <section className="mt-14 border-t border-border/40 pt-14">
+                  <SectionHeader eyebrow="Publish" title="ready to publish?" subtitle="One last check, then make it public." />
+                  <ConfirmStep values={values} setValues={setValues} publishError={publishError} />
+                </section>
 
                 <div className="mt-10 flex items-center justify-between">
-                  <Button type="button" variant="ghost" onClick={goBack} disabled={stepIndex === 0 || isPublishing} className="-ml-2 text-muted-foreground">
-                    <ArrowLeftIcon className="size-4" /> Back
+                  <span className="hidden text-xs text-muted-foreground sm:block">{activeDraftId ? "Saved" : "Not saved yet"}</span>
+                  <Button type="submit" size="lg" disabled={Boolean(formError) || isPublishing}>
+                    {isPublishing ? <Loader2Icon className="size-4 animate-spin" /> : <LeafIcon className="size-4" />}
+                    {isPublishing ? "Publishing…" : "Publish Bumicert"}
                   </Button>
-
-                  <div className="flex items-center gap-4">
-                    <span className="hidden text-xs text-muted-foreground sm:block">{activeDraftId ? "Saved" : "Not saved yet"}</span>
-                    {isReview ? (
-                      <Button type="submit" size="lg" disabled={Boolean(validateAll(values)) || isPublishing}>
-                        {isPublishing ? <Loader2Icon className="size-4 animate-spin" /> : <LeafIcon className="size-4" />}
-                        {isPublishing ? "Publishing…" : "Publish Bumicert"}
-                      </Button>
-                    ) : (
-                      <Button type="button" size="lg" onClick={goNext} disabled={Boolean(currentStepError) || isPublishing}>
-                        Continue <ArrowRightIcon className="size-4" />
-                      </Button>
-                    )}
-                  </div>
                 </div>
               </div>
 
@@ -1213,7 +1024,7 @@ export function NewBumicertClient({ did }: { did: string }) {
                   </div>
                   <div>
                     <p className="mb-3 text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground/70">Tips</p>
-                    <TipsContent activeStep={activeStep} />
+                    <TipsContent />
                   </div>
                 </div>
               </aside>
@@ -1263,7 +1074,7 @@ export function NewBumicertClient({ did }: { did: string }) {
                       <PreviewContent {...previewProps} />
                     </div>
                   ) : (
-                    <TipsContent activeStep={activeStep} />
+                    <TipsContent />
                   )}
                 </motion.div>
               </motion.div>
