@@ -6,6 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import {
+  Building2Icon,
   CalendarIcon,
   GlobeIcon,
   ImageIcon,
@@ -25,6 +26,7 @@ import type { AccountRouteData } from "@/app/account/_lib/account-route";
 import { ManageNavGrid } from "./ManageNavGrid";
 import { ManageAccountSetup } from "./ManageAccountSetup";
 import type { ManageMode } from "./manageDashboardMode";
+import { HeaderContent } from "@/app/_components/HeaderSlots";
 import { RichText } from "@/app/_components/RichText";
 import { countryFlag } from "@/app/_lib/format";
 import { putRecord, uploadBlob } from "../_lib/mutations";
@@ -371,7 +373,18 @@ function EditableHero({
   );
 }
 
-// ── EditBar ───────────────────────────────────────────────────────────────────
+// ── Header actions / EditBar ──────────────────────────────────────────────────
+
+function RegisterOrganizationButton() {
+  return (
+    <Button asChild variant="secondary">
+      <Link href="/manage?mode=onboard-org">
+        <Building2Icon />
+        Register as an Organization
+      </Link>
+    </Button>
+  );
+}
 
 function EditBar({
   hasChanges,
@@ -449,6 +462,8 @@ export function ManageDashboardClient({
     logoFile,
     coverFile,
   };
+
+  const registerOrganizationHeaderAction = useMemo(() => <RegisterOrganizationButton />, []);
 
   const hasChanges =
     editDisplayName !== account.displayName ||
@@ -548,6 +563,7 @@ export function ManageDashboardClient({
       <form
         onSubmit={(e) => { e.preventDefault(); void handleSave(); }}
       >
+        {account.kind === "user" ? <HeaderContent right={registerOrganizationHeaderAction} /> : null}
         <Container className="pt-4 pb-8 space-y-2">
           <EditBar hasChanges={hasChanges} isSaving={isSaving} saveError={saveError} onCancel={handleCancel} />
           <EditableHero
@@ -578,7 +594,9 @@ export function ManageDashboardClient({
 
   // ── View mode ──────────────────────────────────────────────────────────────
   return (
-    <Container className="pt-4 pb-8 space-y-2">
+    <>
+      {account.kind === "user" ? <HeaderContent right={registerOrganizationHeaderAction} /> : null}
+      <Container className="pt-4 pb-8 space-y-2">
       <EditableHero
         account={account}
         isEditing={false}
@@ -596,7 +614,8 @@ export function ManageDashboardClient({
           <p className="max-w-3xl text-[14px] leading-[1.62] text-foreground/80">{account.description}</p>
         </section>
       ) : null}
-      <ManageNavGrid accountKind={account.kind} />
-    </Container>
+        <ManageNavGrid accountKind={account.kind} />
+      </Container>
+    </>
   );
 }

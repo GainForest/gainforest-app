@@ -36,6 +36,7 @@ import { BumicertsBumicertCard, type BumicertsBumicertCardRecord } from "@/compo
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { AuthButton, SignInPrompt } from "./AuthFlow";
+import { HeaderSlotsProvider, useHeaderSlots } from "./HeaderSlots";
 import { accountHref } from "../_lib/urls";
 
 type NavLeaf = {
@@ -142,7 +143,7 @@ export function AppShell({
   }
 
   return (
-    <>
+    <HeaderSlotsProvider>
       <div className="hidden md:flex h-screen overflow-hidden">
         <UnifiedSidebar authSession={authSession} />
         <main className="relative flex-1 overflow-y-auto">
@@ -160,7 +161,7 @@ export function AppShell({
           {children}
         </div>
       </div>
-    </>
+    </HeaderSlotsProvider>
   );
 }
 
@@ -548,6 +549,34 @@ function ProgressiveBlur({
   );
 }
 
+function getRouteHeaderActions(pathname: string, authSession: AuthSession) {
+  if (pathname === "/bumicerts") {
+    return <CreateBumicertHeaderButton isUnauthenticated={!authSession.isLoggedIn} />;
+  }
+
+  return null;
+}
+
+function CreateBumicertHeaderButton({ isUnauthenticated }: { isUnauthenticated: boolean }) {
+  return (
+    <Link href="/bumicert/create">
+      <motion.span
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
+        className={cn(
+          "inline-flex items-center gap-1.5 rounded-full text-sm font-medium px-3.5 py-1.5 transition-colors border",
+          isUnauthenticated
+            ? "border-border text-foreground hover:bg-muted"
+            : "bg-primary text-primary-foreground border-transparent hover:bg-primary/90",
+        )}
+      >
+        <PlusIcon className="h-3.5 w-3.5" />
+        <span className="hidden sm:inline">Create Bumicert</span>
+      </motion.span>
+    </Link>
+  );
+}
+
 function Header({
   authSession,
   onOpenMobileNav,
@@ -557,6 +586,8 @@ function Header({
 }) {
   const pathname = usePathname() ?? "/";
   const showBumicertTabs = isBumicertDetailPath(pathname);
+  const { leftContent, rightContent } = useHeaderSlots();
+  const routeActions = getRouteHeaderActions(pathname, authSession);
 
   return (
     <div className="sticky top-0 z-30" data-header>
@@ -587,20 +618,38 @@ function Header({
           </motion.button>
 
           {/* Left slot */}
-          <div className="flex-1 flex items-center gap-2 min-w-0" />
+          <div className="flex-1 flex items-center gap-2 min-w-0">
+            <AnimatePresence mode="wait">
+              {leftContent ? (
+                <motion.div
+                  key="left-content"
+                  initial={{ opacity: 0, x: -4 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -4 }}
+                  transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
+                  className="flex-1 min-w-0"
+                >
+                  {leftContent}
+                </motion.div>
+              ) : null}
+            </AnimatePresence>
+          </div>
 
           {/* Right slot */}
           <div className="flex items-center gap-3 shrink-0">
-            <Link href="/bumicert/create">
-              <motion.span
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className="inline-flex items-center gap-1.5 rounded-full text-sm font-medium px-3.5 py-1.5 transition-colors border bg-primary text-primary-foreground border-transparent hover:bg-primary/90"
-              >
-                <PlusIcon className="h-3.5 w-3.5" />
-                <span className="hidden sm:inline">Create Bumicert</span>
-              </motion.span>
-            </Link>
+            <AnimatePresence mode="wait">
+              {rightContent ?? routeActions ? (
+                <motion.div
+                  key={rightContent ? "right-content" : `route-actions-${pathname}`}
+                  initial={{ opacity: 0, x: 4 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 4 }}
+                  transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
+                >
+                  {rightContent ?? routeActions}
+                </motion.div>
+              ) : null}
+            </AnimatePresence>
             <AuthButton session={authSession} />
           </div>
         </div>
