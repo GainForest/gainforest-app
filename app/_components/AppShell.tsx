@@ -21,7 +21,6 @@ import {
   MoonIcon,
   PlusIcon,
   RadioTowerIcon,
-  SettingsIcon,
   Share2Icon,
   SparkleIcon,
   SunIcon,
@@ -37,7 +36,6 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Button } from "@/components/ui/button";
 import { AuthButton, SignInPrompt } from "./AuthFlow";
 import { HeaderSlotsProvider, useHeaderSlots } from "./HeaderSlots";
-import { accountHref } from "../_lib/urls";
 
 type NavLeaf = {
   kind: "leaf";
@@ -409,14 +407,7 @@ function ManageSection({ authSession }: { authSession: AuthSession }) {
           href: "/manage/trees",
           pathCheck: { startsWith: "/manage/trees" },
         },
-        {
-          kind: "leaf",
-          id: "settings",
-          text: "Settings",
-          Icon: SettingsIcon,
-          href: `${accountHref(authSession.did)}/settings`,
-          pathCheck: { startsWith: "/account" },
-        },
+
       ]
     : [];
 
@@ -586,7 +577,7 @@ function Header({
 }) {
   const pathname = usePathname() ?? "/";
   const showBumicertTabs = isBumicertDetailPath(pathname);
-  const { leftContent, rightContent } = useHeaderSlots();
+  const { leftContent, rightContent, subHeaderContent } = useHeaderSlots();
   const routeActions = getRouteHeaderActions(pathname, authSession);
 
   return (
@@ -654,7 +645,18 @@ function Header({
           </div>
         </div>
 
-        {showBumicertTabs ? (
+        {subHeaderContent ? (
+          <motion.div
+            key="sub-header"
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
+            className="overflow-hidden px-4 pb-1"
+          >
+            {subHeaderContent}
+          </motion.div>
+        ) : showBumicertTabs ? (
           <div className="overflow-hidden px-4 pb-1">
             <Suspense fallback={<BumicertHeaderTabsSkeleton />}>
               <BumicertHeaderTabs pathname={pathname} />

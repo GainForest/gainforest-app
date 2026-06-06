@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ChevronLeftIcon,
@@ -20,12 +21,25 @@ import type { ManagedAudio } from "@/app/_lib/indexer";
 type ViewMode = "grid" | "list" | "add" | "edit";
 
 export function AudioClient({ did }: { did: string }) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [recordings, setRecordings] = useState<ManagedAudio[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [fetchError, setFetchError] = useState<string | null>(null);
-  const [search, setSearch] = useState("");
-  const [viewMode, setViewMode] = useState<ViewMode>("grid");
-  const [editRkey, setEditRkey] = useState<string | null>(null);
+  const search = searchParams.get("q") ?? "";
+  const rawViewMode = searchParams.get("view");
+  const viewMode: ViewMode = rawViewMode === "list" || rawViewMode === "add" || rawViewMode === "edit" ? rawViewMode : "grid";
+  const editRkey = searchParams.get("editRkey");
+
+  const setQueryState = useCallback((updates: Record<string, string | null>) => {
+    const params = new URLSearchParams(searchParams.toString());
+    Object.entries(updates).forEach(([key, value]) => {
+      if (value === null || value === "") params.delete(key);
+      else params.set(key, value);
+    });
+    const query = params.toString();
+    router.push(query ? `?${query}` : "/manage/audio", { scroll: false });
+  }, [router, searchParams]);
 
   const loadAudio = useCallback(async () => {
     setIsLoading(true);
@@ -60,13 +74,11 @@ export function AudioClient({ did }: { did: string }) {
     : null;
 
   const handleEdit = (rkey: string) => {
-    setEditRkey(rkey);
-    setViewMode("edit");
+    setQueryState({ view: "edit", editRkey: rkey });
   };
 
   const handleBack = () => {
-    setViewMode("grid");
-    setEditRkey(null);
+    setQueryState({ view: "grid", editRkey: null });
   };
 
   const handleDeleted = (rkey: string) => {
@@ -126,7 +138,7 @@ export function AudioClient({ did }: { did: string }) {
             <Input
               placeholder="Search recordings…"
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) => setQueryState({ q: e.target.value })}
               className="pl-9"
             />
           </div>
@@ -135,7 +147,7 @@ export function AudioClient({ did }: { did: string }) {
             <Button
               size="icon"
               variant={viewMode === "grid" ? "secondary" : "ghost"}
-              onClick={() => setViewMode("grid")}
+              onClick={() => setQueryState({ view: "grid" })}
               className="h-8 w-8"
             >
               <LayoutGridIcon className="h-4 w-4" />
@@ -144,7 +156,7 @@ export function AudioClient({ did }: { did: string }) {
             <Button
               size="icon"
               variant={viewMode === "list" ? "secondary" : "ghost"}
-              onClick={() => setViewMode("list")}
+              onClick={() => setQueryState({ view: "list" })}
               className="h-8 w-8"
             >
               <ListIcon className="h-4 w-4" />
@@ -154,7 +166,7 @@ export function AudioClient({ did }: { did: string }) {
           <Button
             className="rounded-full"
             size="sm"
-            onClick={() => setViewMode("add")}
+            onClick={() => setQueryState({ view: "add", editRkey: null })}
           >
             <CirclePlusIcon />
             Add recording
@@ -189,7 +201,7 @@ export function AudioClient({ did }: { did: string }) {
                     <p className="text-sm text-muted-foreground max-w-sm">
                       Upload field audio to evidence your biodiversity monitoring work.
                     </p>
-                    <Button variant="outline" size="sm" onClick={() => setViewMode("add")}>
+                    <Button variant="outline" size="sm" onClick={() => setQueryState({ view: "add", editRkey: null })}>
                       <CirclePlusIcon />
                       Add recording
                     </Button>

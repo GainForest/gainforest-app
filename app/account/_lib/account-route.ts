@@ -21,6 +21,8 @@ export type AccountRouteData = {
   website: string | null;
   country: string | null;
   createdAt: string | null;
+  foundedDate: string | null;
+  visibility: "Public" | "Unlisted" | null;
   kind: AccountKind;
   summary: AccountSummary;
   detail: RecordDetail | null;
@@ -90,6 +92,9 @@ export const getAccountRouteData = cache(async (
     website: null,
     country: null,
     createdAt: null,
+    foundedDate: null,
+    visibility: null,
+    hasCertifiedProfile: false,
     hasCertifiedOrg: false,
     certOrgType: null,
     hasGainforestOrg: false,
@@ -118,6 +123,8 @@ export const getAccountRouteData = cache(async (
     website: summary.website,
     country: summary.country,
     createdAt: summary.createdAt,
+    foundedDate: summary.foundedDate,
+    visibility: summary.visibility,
     kind,
     summary,
     detail,

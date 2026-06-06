@@ -6,6 +6,7 @@ import {
   CalendarIcon,
   CloudUploadIcon,
   CrosshairIcon,
+  DatabaseIcon,
   Loader2Icon,
   MoreVerticalIcon,
   PencilIcon,
@@ -28,8 +29,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { deleteRecord, putRecord } from "../../_lib/mutations";
-import type { OccurrenceRecord } from "@/app/_lib/indexer";
+import type { OccurrenceRecord, UploadTreeDatasetRecord } from "@/app/_lib/indexer";
 import { TreesManageSkeleton } from "./TreesManageSkeleton";
+import { cn } from "@/lib/utils";
 
 // ── TreeCard ──────────────────────────────────────────────────────────────────
 
@@ -285,6 +287,8 @@ const PAGE_SIZE = 50;
 
 export function TreesClient({ did, onUpload }: { did: string; onUpload?: () => void }) {
   const [trees, setTrees] = useState<OccurrenceRecord[]>([]);
+  const [datasets, setDatasets] = useState<UploadTreeDatasetRecord[]>([]);
+  const [selectedDatasetUri, setSelectedDatasetUri] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [fetchError, setFetchError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
@@ -295,12 +299,19 @@ export function TreesClient({ did, onUpload }: { did: string; onUpload?: () => v
     setIsLoading(true);
     setFetchError(null);
     try {
-      const res = await fetch("/api/manage/trees");
-      const data = (await res.json()) as OccurrenceRecord[] | { error: string };
-      if (!res.ok || "error" in data) {
+      const [treeRes, datasetRes] = await Promise.all([
+        fetch("/api/manage/trees"),
+        fetch("/api/manage/trees/datasets"),
+      ]);
+      const data = (await treeRes.json()) as OccurrenceRecord[] | { error: string };
+      const datasetData = (await datasetRes.json()) as UploadTreeDatasetRecord[] | { error: string };
+      if (!treeRes.ok || "error" in data) {
         setFetchError(("error" in data ? data.error : null) ?? "Failed to load trees.");
       } else {
         setTrees(data);
+      }
+      if (datasetRes.ok && !("error" in datasetData)) {
+        setDatasets(datasetData);
       }
     } catch {
       setFetchError("Could not reach the server.");
@@ -311,7 +322,11 @@ export function TreesClient({ did, onUpload }: { did: string; onUpload?: () => v
 
   useEffect(() => { void loadTrees(); }, [loadTrees]);
 
-  const filtered = trees.filter((t) => {
+  const treesInDataset = selectedDatasetUri
+    ? trees.filter((tree) => tree.datasetRef === selectedDatasetUri)
+    : trees;
+
+  const filtered = treesInDataset.filter((t) => {
     if (!search.trim()) return true;
     const q = search.toLowerCase();
     return (t.scientificName ?? "").toLowerCase().includes(q) ||
@@ -326,6 +341,12 @@ export function TreesClient({ did, onUpload }: { did: string; onUpload?: () => v
   const handleSearchChange = (val: string) => {
     setSearch(val);
     setPage(1);
+  };
+
+  const handleDatasetChange = (uri: string | null) => {
+    setSelectedDatasetUri(uri);
+    setPage(1);
+    setSearch("");
   };
 
   const handleDeleted = (rkey: string) => {
@@ -358,6 +379,48 @@ export function TreesClient({ did, onUpload }: { did: string; onUpload?: () => v
           </Button>
         )}
       </div>
+
+      {datasets.length > 0 && !editingTree && (
+        <section className="space-y-3">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <h2 className="text-lg font-semibold font-garamond">Datasets</h2>
+              <p className="text-sm text-muted-foreground">Browse tree records by upload dataset.</p>
+            </div>
+            {selectedDatasetUri && (
+              <Button variant="ghost" size="sm" onClick={() => handleDatasetChange(null)}>
+                Back to datasets
+              </Button>
+            )}
+          </div>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {datasets.map((dataset) => {
+              const count = trees.filter((tree) => tree.datasetRef === dataset.uri).length;
+              const selected = selectedDatasetUri === dataset.uri;
+              return (
+                <button
+                  key={dataset.uri}
+                  type="button"
+                  onClick={() => handleDatasetChange(selected ? null : dataset.uri)}
+                  className={cn(
+                    "group rounded-2xl border p-4 text-left transition-all hover:border-primary/40 hover:bg-muted/30",
+                    selected ? "border-primary bg-primary/5" : "border-border bg-background",
+                  )}
+                >
+                  <div className="flex items-start gap-3">
+                    <span className="rounded-full bg-primary/10 p-2 text-primary"><DatabaseIcon className="h-4 w-4" /></span>
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate text-sm font-medium">{dataset.name}</span>
+                      <span className="mt-1 line-clamp-2 block text-xs text-muted-foreground">{dataset.description ?? "No description"}</span>
+                      <span className="mt-3 inline-flex rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">{dataset.recordCount ?? count} trees</span>
+                    </span>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </section>
+      )}
 
       {/* Editor */}
       <AnimatePresence>

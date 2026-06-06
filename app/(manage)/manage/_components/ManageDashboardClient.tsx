@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
@@ -19,7 +19,6 @@ import {
   XIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import type { AccountRouteData } from "@/app/account/_lib/account-route";
@@ -31,6 +30,14 @@ import { RichText } from "@/app/_components/RichText";
 import { countryFlag } from "@/app/_lib/format";
 import { putRecord, uploadBlob } from "../_lib/mutations";
 import Container from "@/components/ui/container";
+import { useModal } from "@/components/ui/modal/context";
+import {
+  CountrySelectorModal,
+  ImageEditorModal,
+  StartDateSelectorModal,
+  VisibilitySelectorModal,
+  WebsiteEditorModal,
+} from "../_modals/DashboardEditModals";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -87,28 +94,6 @@ function EditChip({
   );
 }
 
-// ── Inline chip editor panel ──────────────────────────────────────────────────
-
-function InlineChipEditor({
-  open, children,
-}: { open: boolean; children: React.ReactNode }) {
-  return (
-    <AnimatePresence>
-      {open && (
-        <motion.div
-          initial={{ opacity: 0, y: -4, scaleY: 0.95 }}
-          animate={{ opacity: 1, y: 0, scaleY: 1 }}
-          exit={{ opacity: 0, y: -4, scaleY: 0.95 }}
-          transition={{ duration: 0.15, ease: [0.25, 0.1, 0.25, 1] }}
-          className="mt-2 p-3 rounded-xl bg-background/90 backdrop-blur-md border border-border/60 shadow-lg"
-        >
-          {children}
-        </motion.div>
-      )}
-    </AnimatePresence>
-  );
-}
-
 // ── EditableHero ──────────────────────────────────────────────────────────────
 
 type HeroEditState = {
@@ -122,26 +107,29 @@ type HeroEditState = {
   coverFile: File | null;
 };
 
-type ActiveChip = "country" | "website" | "date" | "visibility" | null;
-
 function EditableHero({
   account,
   isEditing,
   editState,
   onChange,
-  onLogoChange,
-  onCoverChange,
+  onEditLogo,
+  onEditCover,
+  onEditCountry,
+  onEditWebsite,
+  onEditStartDate,
+  onEditVisibility,
 }: {
   account: AccountRouteData;
   isEditing: boolean;
   editState: HeroEditState;
   onChange: (field: keyof Omit<HeroEditState, "logoFile" | "coverFile">, value: string) => void;
-  onLogoChange: (file: File) => void;
-  onCoverChange: (file: File) => void;
+  onEditLogo: () => void;
+  onEditCover: () => void;
+  onEditCountry: () => void;
+  onEditWebsite: () => void;
+  onEditStartDate: () => void;
+  onEditVisibility: () => void;
 }) {
-  const logoInputRef = useRef<HTMLInputElement>(null);
-  const coverInputRef = useRef<HTMLInputElement>(null);
-  const [activeChip, setActiveChip] = useState<ActiveChip>(null);
 
   // Blob URLs for preview
   const logoObjectUrl = useMemo(
@@ -159,15 +147,12 @@ function EditableHero({
   const logoUrl = logoObjectUrl ?? account.avatarUrl;
   const initial = (editState.displayName || account.displayName).charAt(0).toUpperCase();
 
-  const sinceDate = formatSinceDate(editState.startDate || account.createdAt);
+  const sinceDate = formatSinceDate(editState.startDate);
   const flag = editState.country ? countryFlag(editState.country) : (account.country ? countryFlag(account.country) : "");
   const resolvedCountry = editState.country || account.country;
   const countryLabel = resolvedCountry ? countryName(resolvedCountry) : null;
   const resolvedWebsite = editState.website || account.website;
   const hasPillRow = isEditing || sinceDate.state === "valid" || countryLabel !== null || resolvedWebsite !== null;
-
-  const toggleChip = (chip: ActiveChip) =>
-    setActiveChip((prev) => (prev === chip ? null : chip));
 
   return (
     <section className="relative min-h-[260px] md:min-h-[320px] flex flex-col overflow-hidden rounded-t-4xl border-t border-border">
@@ -203,14 +188,13 @@ function EditableHero({
             {isEditing && (
               <button
                 type="button"
-                onClick={() => logoInputRef.current?.click()}
+                onClick={onEditLogo}
                 className="absolute -bottom-1 -right-1 h-7 w-7 rounded-full bg-background border border-border flex items-center justify-center shadow-sm hover:bg-muted/60 transition-colors cursor-pointer"
                 aria-label="Change logo"
               >
                 <PencilIcon className="h-3.5 w-3.5" />
               </button>
             )}
-            <input ref={logoInputRef} type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) onLogoChange(f); e.target.value = ""; }} />
           </div>
 
           {/* Name + description */}
@@ -257,7 +241,7 @@ function EditableHero({
             <div className="mt-4 flex flex-wrap items-center gap-2">
               {/* Country */}
               {account.kind === "organization" && (
-                <EditChip onClick={() => toggleChip("country")} isEditing={isEditing} isEmpty={!countryLabel}>
+                <EditChip onClick={onEditCountry} isEditing={isEditing} isEmpty={!countryLabel}>
                   {flag && <span className="text-sm leading-none" aria-hidden="true">{flag}</span>}
                   {countryLabel ?? "Add country"}
                 </EditChip>
@@ -266,7 +250,7 @@ function EditableHero({
               {/* Start date */}
               {account.kind === "organization" && (
                 <EditChip
-                  onClick={() => toggleChip("date")}
+                  onClick={onEditStartDate}
                   isEditing={isEditing}
                   isEmpty={isEditing ? sinceDate.state === "empty" : sinceDate.state !== "valid"}
                 >
@@ -276,61 +260,20 @@ function EditableHero({
               )}
 
               {/* Website */}
-              <EditChip onClick={() => toggleChip("website")} isEditing={isEditing} isEmpty={!resolvedWebsite}>
+              <EditChip onClick={onEditWebsite} isEditing={isEditing} isEmpty={!resolvedWebsite}>
                 <GlobeIcon className="h-3 w-3 shrink-0" />
                 {resolvedWebsite ? formatWebsite(resolvedWebsite) : "Add website"}
               </EditChip>
 
               {/* Visibility (org only, edit mode or when unlisted) */}
               {account.kind === "organization" && (isEditing || editState.visibility === "Unlisted") && (
-                <EditChip onClick={() => onChange("visibility", editState.visibility === "Unlisted" ? "Public" : "Unlisted")} isEditing={isEditing} isEmpty={false}>
+                <EditChip onClick={onEditVisibility} isEditing={isEditing} isEmpty={false}>
                   {editState.visibility === "Unlisted" ? <LockIcon className="h-3 w-3 shrink-0" /> : <MapPinIcon className="h-3 w-3 shrink-0" />}
                   {editState.visibility}
                 </EditChip>
               )}
             </div>
 
-            {/* Inline chip editors */}
-            <InlineChipEditor open={activeChip === "country"}>
-              <div className="space-y-1.5">
-                <label className="text-xs font-medium text-foreground/70">Country code (e.g. BR, ID, KE)</label>
-                <Input
-                  value={editState.country}
-                  onChange={(e) => onChange("country", e.target.value.toUpperCase().slice(0, 2))}
-                  placeholder="e.g. BR"
-                  className="h-8 text-sm w-28 uppercase"
-                  maxLength={2}
-                  autoFocus
-                />
-              </div>
-            </InlineChipEditor>
-
-            <InlineChipEditor open={activeChip === "website"}>
-              <div className="space-y-1.5">
-                <label className="text-xs font-medium text-foreground/70">Website URL</label>
-                <Input
-                  type="url"
-                  value={editState.website}
-                  onChange={(e) => onChange("website", e.target.value)}
-                  placeholder="https://example.com"
-                  className="h-8 text-sm w-64"
-                  autoFocus
-                />
-              </div>
-            </InlineChipEditor>
-
-            <InlineChipEditor open={activeChip === "date"}>
-              <div className="space-y-1.5">
-                <label className="text-xs font-medium text-foreground/70">Founded / start date</label>
-                <Input
-                  type="date"
-                  value={editState.startDate}
-                  onChange={(e) => onChange("startDate", e.target.value)}
-                  className="h-8 text-sm w-44"
-                  autoFocus
-                />
-              </div>
-            </InlineChipEditor>
           </div>
         )}
       </div>
@@ -347,7 +290,7 @@ function EditableHero({
               exit={{ opacity: 0, scale: 0.9 }}
               whileTap={{ scale: 0.96 }}
               transition={{ type: "spring", stiffness: 400, damping: 25 }}
-              onClick={() => coverInputRef.current?.click()}
+              onClick={onEditCover}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-background/55 backdrop-blur-xl border border-white/20 shadow-lg hover:bg-background/70 transition-colors cursor-pointer"
               aria-label="Change cover image"
             >
@@ -356,7 +299,6 @@ function EditableHero({
             </motion.button>
           )}
         </AnimatePresence>
-        <input ref={coverInputRef} type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) onCoverChange(f); e.target.value = ""; }} />
 
         {/* Edit button in view mode */}
         {!isEditing && (
@@ -415,7 +357,7 @@ function EditBar({
         <Button variant="ghost" type="button" onClick={onCancel} disabled={isSaving}>
           <XIcon className="h-3.5 w-3.5" />Cancel
         </Button>
-        <Button type="submit" disabled={isSaving || !hasChanges}>
+        <Button type="submit" form="manage-dashboard-save-form" disabled={isSaving || !hasChanges}>
           <SaveIcon className="h-3.5 w-3.5" />Save
         </Button>
       </div>
@@ -433,16 +375,17 @@ export function ManageDashboardClient({
   mode: ManageMode | null;
 }) {
   const router = useRouter();
+  const modal = useModal();
 
   // ── Edit state ─────────────────────────────────────────────────────────────
   const [editDisplayName, setEditDisplayName] = useState(account.displayName);
   const [editDescription, setEditDescription] = useState(account.description ?? "");
   const [editWebsite, setEditWebsite] = useState(account.website ?? "");
   const [editCountry, setEditCountry] = useState(account.country ?? "");
-  const [editStartDate, setEditStartDate] = useState(
-    account.createdAt ? new Date(account.createdAt).toISOString().slice(0, 10) : ""
-  );
-  const [editVisibility, setEditVisibility] = useState<"Public" | "Unlisted">("Public");
+  const initialStartDate = account.foundedDate ? new Date(account.foundedDate).toISOString().slice(0, 10) : "";
+  const initialVisibility = account.visibility ?? "Public";
+  const [editStartDate, setEditStartDate] = useState(initialStartDate);
+  const [editVisibility, setEditVisibility] = useState<"Public" | "Unlisted">(initialVisibility);
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [coverFile, setCoverFile] = useState<File | null>(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -450,7 +393,7 @@ export function ManageDashboardClient({
 
   const isEditing = mode === "edit";
   const isOnboarding = mode === "onboard-user" || mode === "onboard-org" ||
-    (account.summary.bumicertCount === 0 && !account.description && !account.summary.hasCertifiedOrg && !account.summary.hasGainforestOrg);
+    (!account.summary.hasCertifiedProfile && !account.summary.hasCertifiedOrg && !account.summary.hasGainforestOrg);
 
   const editState: HeroEditState = {
     displayName: editDisplayName,
@@ -470,6 +413,8 @@ export function ManageDashboardClient({
     editDescription !== (account.description ?? "") ||
     editWebsite !== (account.website ?? "") ||
     editCountry !== (account.country ?? "") ||
+    editStartDate !== initialStartDate ||
+    editVisibility !== initialVisibility ||
     logoFile !== null ||
     coverFile !== null;
 
@@ -490,11 +435,59 @@ export function ManageDashboardClient({
     setEditDescription(account.description ?? "");
     setEditWebsite(account.website ?? "");
     setEditCountry(account.country ?? "");
+    setEditStartDate(initialStartDate);
+    setEditVisibility(initialVisibility);
     setLogoFile(null);
     setCoverFile(null);
     setSaveError(null);
     router.push("/manage");
   };
+
+  const openDashboardModal = (id: string, content: React.ReactNode, dialogWidth = "max-w-sm") => {
+    modal.pushModal({ id, content, dialogWidth }, true);
+    void modal.show();
+  };
+
+  const openLogoModal = () => openDashboardModal(
+    "manage-logo-editor",
+    <ImageEditorModal
+      title="Edit logo"
+      description="Upload a square logo or avatar for this profile."
+      currentUrl={account.avatarUrl}
+      onConfirm={setLogoFile}
+    />,
+  );
+
+  const openCoverModal = () => openDashboardModal(
+    "manage-cover-editor",
+    <ImageEditorModal
+      title="Edit cover image"
+      description="Upload a wide banner image for the top of your profile."
+      currentUrl={account.coverUrl}
+      onConfirm={setCoverFile}
+    />,
+    "max-w-2xl",
+  );
+
+  const openCountryModal = () => openDashboardModal(
+    "manage-country-editor",
+    <CountrySelectorModal currentCountry={editCountry} onConfirm={setEditCountry} />,
+  );
+
+  const openWebsiteModal = () => openDashboardModal(
+    "manage-website-editor",
+    <WebsiteEditorModal currentWebsite={editWebsite} onConfirm={setEditWebsite} />,
+  );
+
+  const openStartDateModal = () => openDashboardModal(
+    "manage-start-date-editor",
+    <StartDateSelectorModal currentDate={editStartDate} onConfirm={setEditStartDate} />,
+  );
+
+  const openVisibilityModal = () => openDashboardModal(
+    "manage-visibility-editor",
+    <VisibilitySelectorModal currentVisibility={editVisibility} onConfirm={setEditVisibility} />,
+  );
 
   const handleSave = async () => {
     if (!hasChanges || isSaving) return;
@@ -524,7 +517,7 @@ export function ManageDashboardClient({
       await putRecord("app.bsky.actor.profile", "self", profileRecord);
 
       // Update org record if applicable
-      if (account.kind === "organization" && (editCountry !== (account.country ?? "") || editStartDate)) {
+      if (account.kind === "organization" && (editCountry !== (account.country ?? "") || editStartDate !== initialStartDate || editVisibility !== initialVisibility)) {
         const orgCollection = account.summary.hasGainforestOrg
           ? "app.gainforest.organization.info"
           : "app.certified.actor.organization";
@@ -561,18 +554,29 @@ export function ManageDashboardClient({
   if (isEditing) {
     return (
       <form
+        id="manage-dashboard-save-form"
         onSubmit={(e) => { e.preventDefault(); void handleSave(); }}
       >
-        {account.kind === "user" ? <HeaderContent right={registerOrganizationHeaderAction} /> : null}
+        <HeaderContent
+          {...(account.kind === "user" ? { right: registerOrganizationHeaderAction } : {})}
+          sub={(
+            <Container className="p-0 pt-1">
+              <EditBar hasChanges={hasChanges} isSaving={isSaving} saveError={saveError} onCancel={handleCancel} />
+            </Container>
+          )}
+        />
         <Container className="pt-4 pb-8 space-y-2">
-          <EditBar hasChanges={hasChanges} isSaving={isSaving} saveError={saveError} onCancel={handleCancel} />
           <EditableHero
             account={account}
             isEditing
             editState={editState}
             onChange={handleChange}
-            onLogoChange={setLogoFile}
-            onCoverChange={setCoverFile}
+            onEditLogo={openLogoModal}
+            onEditCover={openCoverModal}
+            onEditCountry={openCountryModal}
+            onEditWebsite={openWebsiteModal}
+            onEditStartDate={openStartDateModal}
+            onEditVisibility={openVisibilityModal}
           />
           {/* About section */}
           {account.kind === "organization" && (
@@ -602,8 +606,12 @@ export function ManageDashboardClient({
         isEditing={false}
         editState={editState}
         onChange={handleChange}
-        onLogoChange={setLogoFile}
-        onCoverChange={setCoverFile}
+        onEditLogo={openLogoModal}
+        onEditCover={openCoverModal}
+        onEditCountry={openCountryModal}
+        onEditWebsite={openWebsiteModal}
+        onEditStartDate={openStartDateModal}
+        onEditVisibility={openVisibilityModal}
       />
       {account.detail?.richBody?.length ? (
         <section className="py-6 md:py-8">

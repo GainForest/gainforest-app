@@ -6,6 +6,7 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import {
+  ArrowLeftIcon,
   Building2Icon,
   CalendarIcon,
   ChevronRight,
@@ -23,6 +24,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { putRecord, uploadBlob } from "../_lib/mutations";
 import type { ManageMode } from "./manageDashboardMode";
+import { HeaderContent } from "@/app/_components/HeaderSlots";
 
 type OnboardingKind = "user" | "organization";
 
@@ -183,11 +185,22 @@ function AccountSetupForm({ did, kind }: { did: string; kind: OnboardingKind }) 
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [coverFile, setCoverFile] = useState<File | null>(null);
   const [accepted, setAccepted] = useState(false);
+  const [onboardingStep, setOnboardingStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const websiteValid = validateUrl(website);
-  const canSubmit = displayName.trim().length > 0 && description.trim().length > 0 && websiteValid && accepted && !isSubmitting;
+  const baseComplete = displayName.trim().length > 0 && description.trim().length > 0 && websiteValid && accepted;
+  const canContinue = baseComplete && !isSubmitting;
+  const canSubmit = baseComplete && !isSubmitting;
+
+  const handleBack = () => {
+    if (kind === "organization" && onboardingStep > 0) {
+      setOnboardingStep(0);
+      return;
+    }
+    router.push("/manage");
+  };
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -239,7 +252,16 @@ function AccountSetupForm({ did, kind }: { did: string; kind: OnboardingKind }) 
   }
 
   return (
-    <form onSubmit={(event) => void handleSubmit(event)} className="space-y-4 rounded-2xl border border-border bg-card p-5 shadow-sm">
+    <>
+      <HeaderContent
+        left={(
+          <Button type="button" variant="ghost" onClick={handleBack} className="-ml-2">
+            <ArrowLeftIcon />
+            Back
+          </Button>
+        )}
+      />
+      <form onSubmit={(event) => void handleSubmit(event)} className="space-y-4 rounded-2xl border border-border bg-card p-5 shadow-sm">
       <div className="flex items-start gap-3">
         <BumicertsMark className="h-14 w-14 shrink-0" />
         <div className="min-w-0 flex-1">
@@ -268,7 +290,7 @@ function AccountSetupForm({ did, kind }: { did: string; kind: OnboardingKind }) 
         <p className="text-xs text-muted-foreground">{description.length}/256</p>
       </div>
 
-      {kind === "organization" && (
+      {kind === "organization" && onboardingStep === 1 && (
         <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="space-y-4 rounded-xl border border-border bg-muted/20 p-4">
           <div className="grid gap-3 sm:grid-cols-2">
             <div className="space-y-1.5">
@@ -312,15 +334,23 @@ function AccountSetupForm({ did, kind }: { did: string; kind: OnboardingKind }) 
       {error && <p className="rounded-xl border border-destructive/20 bg-destructive/5 p-3 text-sm text-destructive">{error}</p>}
 
       <div className="flex items-center justify-between gap-2 pt-1">
-        <Button asChild variant="ghost" disabled={isSubmitting}>
-          <Link href="/manage">Back</Link>
+        <Button type="button" variant="ghost" disabled={isSubmitting} onClick={handleBack}>
+          Back
         </Button>
-        <Button type="submit" disabled={!canSubmit}>
-          {isSubmitting && <Loader2Icon className="h-3.5 w-3.5 animate-spin" />}
-          Complete setup
-        </Button>
+        {kind === "organization" && onboardingStep === 0 ? (
+          <Button type="button" disabled={!canContinue} onClick={() => setOnboardingStep(1)}>
+            Continue
+            <ChevronRight className="h-3.5 w-3.5" />
+          </Button>
+        ) : (
+          <Button type="submit" disabled={!canSubmit}>
+            {isSubmitting && <Loader2Icon className="h-3.5 w-3.5 animate-spin" />}
+            Complete setup
+          </Button>
+        )}
       </div>
     </form>
+    </>
   );
 }
 

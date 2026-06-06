@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import {
   BadgeCheckIcon,
   ChevronLeftIcon,
@@ -18,6 +18,7 @@ import {
   XIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useModal } from "@/components/ui/modal/context";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -435,13 +436,10 @@ function generateSitePreviewUrl(did: string, rkey: string): string {
 export function SitesClient({ did }: { did: string }) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const modal = useModal();
   const [sites, setSites] = useState<ManagedLocation[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [fetchError, setFetchError] = useState<string | null>(null);
-  const [editorState, setEditorState] = useState<
-    | { open: false }
-    | { open: true; form: SiteFormState; editingRkey: string | null }
-  >({ open: false });
   const [deletingRkey, setDeletingRkey] = useState<string | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [previewingRkey, setPreviewingRkey] = useState<string | null>(null);
@@ -498,15 +496,44 @@ export function SitesClient({ did }: { did: string }) {
   const allSiteRkeys = sites.map((s) => s.metadata.rkey).filter(Boolean) as string[];
   const currentSiteIndex = previewingRkey ? allSiteRkeys.indexOf(previewingRkey) : -1;
 
-  const handleOpenAdd = () =>
-    setEditorState({ open: true, form: EMPTY_FORM, editingRkey: null });
+  const closeEditorModal = async () => {
+    await modal.hide();
+    modal.popModal();
+  };
 
-  const handleOpenEdit = (site: ManagedLocation) =>
-    setEditorState({ open: true, form: formFromLocation(site), editingRkey: site.metadata.rkey });
+  const handleOpenAdd = () => {
+    modal.pushModal({
+      id: "site-editor-add",
+      dialogWidth: "max-w-2xl",
+      content: (
+        <SiteEditor
+          initialForm={EMPTY_FORM}
+          editingRkey={null}
+          onClose={() => void closeEditorModal()}
+          onSaved={handleSaved}
+        />
+      ),
+    }, true);
+    void modal.show();
+  };
 
-  const handleEditorClose = () => setEditorState({ open: false });
+  const handleOpenEdit = (site: ManagedLocation) => {
+    modal.pushModal({
+      id: `site-editor-${site.metadata.rkey}`,
+      dialogWidth: "max-w-2xl",
+      content: (
+        <SiteEditor
+          initialForm={formFromLocation(site)}
+          editingRkey={site.metadata.rkey}
+          onClose={() => void closeEditorModal()}
+          onSaved={handleSaved}
+        />
+      ),
+    }, true);
+    void modal.show();
+  };
 
-  const handleSaved = (saved: ManagedLocation) => {
+  function handleSaved(saved: ManagedLocation) {
     setSites((prev) => {
       const idx = prev.findIndex((s) => s.metadata.rkey === saved.metadata.rkey);
       if (idx >= 0) {
@@ -516,10 +543,10 @@ export function SitesClient({ did }: { did: string }) {
       }
       return [{ ...saved, metadata: { ...saved.metadata, did } }, ...prev];
     });
-    setEditorState({ open: false });
+    void closeEditorModal();
     // Refresh to get server-confirmed data
     void loadSites();
-  };
+  }
 
   const handleDelete = async (rkey: string) => {
     setDeletingRkey(rkey);
@@ -553,19 +580,6 @@ export function SitesClient({ did }: { did: string }) {
           Add site
         </Button>
       </div>
-
-      {/* Editor */}
-      <AnimatePresence>
-        {editorState.open && (
-          <SiteEditor
-            key="editor"
-            initialForm={editorState.form}
-            editingRkey={editorState.editingRkey}
-            onClose={handleEditorClose}
-            onSaved={handleSaved}
-          />
-        )}
-      </AnimatePresence>
 
       {/* Map preview iframe */}
       {iframeUrl && previewingRkey && (

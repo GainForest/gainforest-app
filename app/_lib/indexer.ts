@@ -145,6 +145,8 @@ export type OccurrenceRecord = {
   lat: number | null;
   lon: number | null;
   eventDate: string | null;
+  siteRef: string | null;
+  datasetRef: string | null;
   createdAt: string;
   remarks: string | null;
   imageUrl: string | null;
@@ -157,6 +159,7 @@ const OCCURRENCE_NODE_FIELDS = `
   scientificName vernacularName kingdom family genus
   basisOfRecord recordedBy individualCount
   country countryCode locality decimalLatitude decimalLongitude
+  siteRef datasetRef
   occurrenceRemarks fieldNotes
   thumbnailUrl speciesImageUrl
   imageEvidence { file { ref } }
@@ -200,6 +203,8 @@ type RawOccurrence = {
   locality?: string | null;
   decimalLatitude?: number | string | null;
   decimalLongitude?: number | string | null;
+  siteRef?: string | null;
+  datasetRef?: string | null;
   occurrenceRemarks?: string | null;
   fieldNotes?: string | null;
   thumbnailUrl?: string | null;
@@ -240,6 +245,8 @@ function mapOccurrence(n: RawOccurrence): OccurrenceRecord {
     lat: asNumber(n.decimalLatitude),
     lon: asNumber(n.decimalLongitude),
     eventDate: n.eventDate?.trim() || null,
+    siteRef: n.siteRef?.trim() || null,
+    datasetRef: n.datasetRef?.trim() || null,
     createdAt: n.createdAt,
     remarks: n.occurrenceRemarks?.trim() || n.fieldNotes?.trim() || null,
     imageUrl: externalImage,
@@ -2171,6 +2178,10 @@ export type AccountSummary = {
   country: string | null;
   /** Repo (DID) creation time from the PLC audit log. */
   createdAt: string | null;
+  /** Organization founding/start date when available. */
+  foundedDate: string | null;
+  visibility: "Public" | "Unlisted" | null;
+  hasCertifiedProfile: boolean;
   hasCertifiedOrg: boolean;
   certOrgType: string | null;
   hasGainforestOrg: boolean;
@@ -2185,11 +2196,14 @@ type AccountSummaryNode = {
     createdAt?: string | null;
     organizationType?: string[] | null;
     visibility?: string | null;
+    foundedDate?: string | null;
   } | null;
   gfOrg?: {
     createdAt?: string | null;
     displayName?: string | null;
     country?: string | null;
+    visibility?: string | null;
+    foundedYear?: number | string | null;
     coverImage?: { image?: { ref?: string | null } | null } | null;
     logo?: { image?: { ref?: string | null } | null } | null;
   } | null;
@@ -2206,10 +2220,10 @@ const ACCOUNT_SUMMARY_QUERY = `
     occ: appGainforestDwcOccurrence(first: 0, where: { did: { eq: $did } }) { totalCount }
     bumi: orgHypercertsClaimActivity(first: 0, where: { did: { eq: $did } }) { totalCount }
     certOrg: appCertifiedActorOrganizationByUri(uri: $certOrg) {
-      createdAt organizationType visibility
+      createdAt organizationType visibility foundedDate
     }
     gfOrg: appGainforestOrganizationInfoByUri(uri: $gfOrg) {
-      createdAt displayName country
+      createdAt displayName country visibility foundedYear
       coverImage { image { ref } }
       logo { image { ref } }
     }
@@ -2289,6 +2303,10 @@ export async function fetchAccountSummary(
     }
   }
 
+  const rawVisibility = sv(gfOrg?.visibility) ?? sv(certOrg?.visibility);
+  const gfFoundedYear = gfOrg?.foundedYear == null ? null : String(gfOrg.foundedYear).trim();
+  const gfFoundedDate = gfFoundedYear && /^\d{4}$/.test(gfFoundedYear) ? `${gfFoundedYear}-01-01T00:00:00.000Z` : null;
+
   return {
     did,
     handle: plc.handle,
@@ -2298,6 +2316,9 @@ export async function fetchAccountSummary(
     website: sv(profile?.website) ?? null,
     country: sv(gfOrg?.country) ?? null,
     createdAt: sv(plc.createdAt) ?? sv(certOrg?.createdAt) ?? sv(gfOrg?.createdAt) ?? null,
+    foundedDate: gfFoundedDate ?? sv(certOrg?.foundedDate) ?? null,
+    visibility: rawVisibility === "unlisted" || rawVisibility === "Unlisted" ? "Unlisted" : rawVisibility ? "Public" : null,
+    hasCertifiedProfile: Boolean(profile),
     hasCertifiedOrg: Boolean(certOrg),
     certOrgType: certType,
     hasGainforestOrg: Boolean(gfOrg),
