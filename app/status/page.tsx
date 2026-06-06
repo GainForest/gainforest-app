@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { StatusSection } from "../_components/StatusSection";
-import { fetchStatusDetailed } from "../_lib/status";
 
 export const revalidate = 60;
 
@@ -11,7 +10,6 @@ export const metadata: Metadata = {
   alternates: { canonical: "/status" },
 };
 
-export default async function StatusPage() {
-  const status = await fetchStatusDetailed({ revalidate: 60 });
-  return <StatusSection initial={status} />;
+export default function StatusPage() {
+  return <StatusSection />;
 }

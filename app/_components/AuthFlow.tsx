@@ -503,7 +503,7 @@ function AuthenticatedMenu({ session }: { session: Extract<AuthSession, { isLogg
   );
 }
 
-export function AuthButton({ session }: { session: AuthSession }) {
+export function AuthButton({ session }: { session: AuthSession | null }) {
   if (!session) {
     return <AuthSkeleton />;
   }

@@ -15,11 +15,11 @@ import {
   UsersIcon,
   XIcon,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { RecordDrawer } from "../_components/RecordDrawer";
 import { RecordMap } from "../_components/RecordMap";
 import { StatsTileGrid } from "../_components/StatsTile";
-import type { ExplorerRecord, SiteRecord } from "../_lib/indexer";
+import { fetchSites, type ExplorerRecord, type SiteRecord } from "../_lib/indexer";
 import { countryFlag, formatDate } from "../_lib/format";
 
 type SortMode = "newest" | "oldest" | "az" | "za";
@@ -45,23 +45,9 @@ const QUICK_CHIPS: Array<{ value: QuickFilter; label: string; Icon: typeof Image
   { value: "locations", label: "Mapped locations", Icon: MapPinIcon },
 ];
 
-const containerVariants = {
-  hidden: {},
-  visible: { transition: { staggerChildren: 0.1 } },
-};
-
-const cardVariants = {
-  hidden: { opacity: 0, y: 16, scale: 0.97, filter: "blur(4px)" },
-  visible: {
-    opacity: 1,
-    y: 0,
-    scale: 1,
-    filter: "blur(0px)",
-    transition: { duration: 0.45, ease: "easeOut" as const },
-  },
-};
-
-export function OrganizationsClient({ records }: { records: SiteRecord[] }) {
+export function OrganizationsClient({ records: initialRecords = [] }: { records?: SiteRecord[] }) {
+  const [records, setRecords] = useState<SiteRecord[]>(initialRecords);
+  const [loading, setLoading] = useState(initialRecords.length === 0);
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState<SortMode>("newest");
   const [sourceFilter, setSourceFilter] = useState<SourceFilter>("both");
@@ -71,6 +57,25 @@ export function OrganizationsClient({ records }: { records: SiteRecord[] }) {
   const [view, setView] = useState<ViewMode>("cards");
   const [openDropdown, setOpenDropdown] = useState(false);
   const [drawer, setDrawer] = useState<SiteRecord | null>(null);
+
+  useEffect(() => {
+    if (initialRecords.length > 0) return;
+    const controller = new AbortController();
+    setLoading(true);
+    fetchSites(1000, null, controller.signal, (running) => {
+      setRecords(running as SiteRecord[]);
+      setLoading(false);
+    })
+      .then((page) => {
+        setRecords(page.records);
+        setLoading(false);
+      })
+      .catch((error) => {
+        if ((error as Error).name === "AbortError") return;
+        setLoading(false);
+      });
+    return () => controller.abort();
+  }, [initialRecords.length]);
 
   const countryChips = useMemo(() => {
     const codes = records
@@ -98,7 +103,7 @@ export function OrganizationsClient({ records }: { records: SiteRecord[] }) {
       if (sourceFilter !== "both" && record.source !== sourceFilter) return false;
       if (countryFilter && normalizeCountry(record.country) !== countryFilter) return false;
       if (typeFilter && !orgTypes(record).includes(typeFilter)) return false;
-      if (quickFilters.includes("photos") && !record.imageUrl) return false;
+      if (quickFilters.includes("photos") && !hasPhoto(record)) return false;
       if (quickFilters.includes("locations") && !hasMappableLocation(record)) return false;
       if (!normalizedQuery) return true;
       const haystack = [record.name, record.country, countryNameOrEmpty(record.country), record.orgType, record.did, record.source]
@@ -133,7 +138,7 @@ export function OrganizationsClient({ records }: { records: SiteRecord[] }) {
       },
       {
         label: "With photos",
-        value: visibleRecords.filter((record) => record.imageUrl).length,
+        value: visibleRecords.filter(hasPhoto).length,
         detail: "visual profiles",
       },
       {
@@ -177,7 +182,7 @@ export function OrganizationsClient({ records }: { records: SiteRecord[] }) {
 
         <div className="mx-auto max-w-6xl px-6">
           <div className="relative z-20 -mt-10 px-3">
-            <StatsBand stats={stats} />
+            <StatsBand stats={stats} loading={loading && records.length === 0} />
           </div>
 
           <div className="relative z-20 mt-4 mb-0 space-y-3 px-3">
@@ -305,22 +310,19 @@ export function OrganizationsClient({ records }: { records: SiteRecord[] }) {
 
           {view === "map" ? (
             <RecordMap records={visibleRecords} kind="site" onOpen={openMapRecord} />
+          ) : loading && visibleRecords.length === 0 ? (
+            <OrganizationsGridSkeleton />
           ) : visibleRecords.length === 0 ? (
             <EmptyState onClear={clearAll} hasActiveFilters={hasActiveFilters} />
           ) : (
-            <motion.div
+            <div
               key={`${query}-${sort}-${sourceFilter}-${countryFilter}-${typeFilter}-${quickFilters.join(".")}`}
-              variants={containerVariants}
-              initial="hidden"
-              animate="visible"
               className="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-2 lg:gap-4"
             >
-              <AnimatePresence mode="popLayout">
-                {visibleRecords.map((record) => (
-                  <OrganizationCard key={record.id} record={record} onOpen={setDrawer} />
-                ))}
-              </AnimatePresence>
-            </motion.div>
+              {visibleRecords.map((record) => (
+                <OrganizationCard key={record.id} record={record} onOpen={setDrawer} />
+              ))}
+            </div>
           )}
         </div>
       </section>
@@ -441,7 +443,7 @@ function FilterChip({
   );
 }
 
-function StatsBand({ stats }: { stats: Array<{ label: string; value: number; detail: string }> }) {
+function StatsBand({ stats, loading }: { stats: Array<{ label: string; value: number; detail: string }>; loading: boolean }) {
   const icons = [
     <UsersIcon key="organizations" />,
     <GlobeIcon key="countries" />,
@@ -454,12 +456,33 @@ function StatsBand({ stats }: { stats: Array<{ label: string; value: number; det
       columns={4}
       items={stats.map((stat, index) => ({
         label: stat.label,
-        value: formatStat(stat.value),
+        value: loading ? <StatNumberSkeleton /> : formatStat(stat.value),
         detail: stat.detail,
         icon: icons[index] ?? <LeafIcon />,
         accent: index % 2 === 0,
       }))}
     />
+  );
+}
+
+function StatNumberSkeleton() {
+  return <span className="block h-8 w-16 animate-pulse rounded-full bg-muted" aria-label="Loading" />;
+}
+
+function OrganizationsGridSkeleton() {
+  return (
+    <div className="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-2 lg:gap-4" aria-label="Loading organizations">
+      {Array.from({ length: 12 }).map((_, index) => (
+        <div key={index} className="overflow-hidden rounded-2xl border border-border/50 bg-card">
+          <div className="h-32 bg-muted" />
+          <div className="space-y-2 p-4">
+            <div className="h-5 w-3/4 rounded-full bg-muted" />
+            <div className="h-3 w-full rounded-full bg-muted/70" />
+            <div className="h-3 w-2/3 rounded-full bg-muted/50" />
+          </div>
+        </div>
+      ))}
+    </div>
   );
 }
 
@@ -476,13 +499,10 @@ function OrganizationCard({ record, onOpen }: { record: SiteRecord; onOpen: (rec
       : "Organization stewarding regenerative work with GainForest.";
 
   return (
-    <motion.div variants={cardVariants} className="h-full">
+    <div className="h-full">
       <button type="button" onClick={() => onOpen(record)} className="h-full w-full text-left">
-        <motion.div
-          whileHover={{ y: -3 }}
-          whileTap={{ scale: 0.98 }}
-          transition={{ type: "spring", stiffness: 400, damping: 25 }}
-          className="group flex h-full cursor-pointer flex-col overflow-hidden rounded-2xl border border-border/50 bg-card transition-all duration-300"
+        <div
+          className="group flex h-full cursor-pointer flex-col overflow-hidden rounded-2xl border border-border/50 bg-card transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg"
           style={{ viewTransitionName: `org-${record.did.replace(/[^a-z0-9]/gi, "-")}` }}
         >
           <div className="relative h-32 shrink-0 overflow-hidden">
@@ -560,9 +580,9 @@ function OrganizationCard({ record, onOpen }: { record: SiteRecord; onOpen: (rec
               <span>Open</span>
             </div>
           </div>
-        </motion.div>
+        </div>
       </button>
-    </motion.div>
+    </div>
   );
 }
 
@@ -631,6 +651,10 @@ function orgTypes(record: SiteRecord): string[] {
     .split(",")
     .map((type) => type.trim())
     .filter(Boolean);
+}
+
+function hasPhoto(record: SiteRecord): boolean {
+  return Boolean(record.imageUrl || record.coverRef || record.logoRef);
 }
 
 function hasMappableLocation(record: SiteRecord): boolean {

@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { fetchSites } from "../_lib/indexer";
 import { OrganizationsClient } from "./OrganizationsClient";
 
 export const revalidate = 60;
@@ -11,7 +10,6 @@ export const metadata: Metadata = {
   alternates: { canonical: "/organizations" },
 };
 
-export default async function OrganizationsPage() {
-  const page = await fetchSites(1000, null);
-  return <OrganizationsClient records={page.records} />;
+export default function OrganizationsPage() {
+  return <OrganizationsClient />;
 }

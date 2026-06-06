@@ -26,11 +26,18 @@ import { PictureHero } from "./PictureHero";
 const POLL_MS = 60_000;
 const MONITOR_URL = "https://github.com/GainForest/pi-taina-monitor";
 
-export function DeviceMonitor({ initial }: { initial: DevicesSnapshot }) {
-  const [snapshot, setSnapshot] = useState<DevicesSnapshot>(initial);
+const EMPTY_SNAPSHOT: DevicesSnapshot = {
+  configured: true,
+  devices: [],
+  fetchedAt: new Date(0).toISOString(),
+};
+
+export function DeviceMonitor({ initial }: { initial?: DevicesSnapshot }) {
+  const [snapshot, setSnapshot] = useState<DevicesSnapshot>(initial ?? EMPTY_SNAPSHOT);
+  const [loading, setLoading] = useState(!initial);
 
   useEffect(() => {
-    if (!initial.configured) return; // nothing to poll
+    if (initial && !initial.configured) return; // nothing to poll
     const controller = new AbortController();
     let timer: ReturnType<typeof setTimeout> | undefined;
     let cancelled = false;
@@ -44,16 +51,19 @@ export function DeviceMonitor({ initial }: { initial: DevicesSnapshot }) {
       } catch {
         /* keep last good snapshot */
       } finally {
-        if (!cancelled) timer = setTimeout(poll, POLL_MS);
+        if (!cancelled) {
+          setLoading(false);
+          timer = setTimeout(poll, POLL_MS);
+        }
       }
     }
-    timer = setTimeout(poll, POLL_MS);
+    timer = setTimeout(poll, initial ? POLL_MS : 0);
     return () => {
       cancelled = true;
       controller.abort();
       if (timer) clearTimeout(timer);
     };
-  }, [initial.configured]);
+  }, [initial]);
 
   const { healthy, total } = devicesSummary(snapshot.devices);
 
@@ -95,6 +105,8 @@ export function DeviceMonitor({ initial }: { initial: DevicesSnapshot }) {
             title="Could not load field updates"
             body="The devices may still be working; this page just cannot read them right now."
           />
+        ) : loading ? (
+          <DeviceCardsSkeleton />
         ) : snapshot.devices.length === 0 ? (
           <Notice
             title="No field devices yet"
@@ -116,6 +128,29 @@ export function DeviceMonitor({ initial }: { initial: DevicesSnapshot }) {
 }
 
 // ── Card ───────────────────────────────────────────────────────────────────
+
+function DeviceCardsSkeleton() {
+  return (
+    <ul role="list" className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3" aria-label="Loading field updates">
+      {Array.from({ length: 6 }).map((_, index) => (
+        <li key={index} className="rounded-2xl border border-border-soft bg-surface p-5">
+          <div className="flex items-start justify-between gap-3">
+            <div className="space-y-2">
+              <div className="h-4 w-32 rounded-full bg-muted" />
+              <div className="h-3 w-24 rounded-full bg-muted/70" />
+            </div>
+            <div className="h-7 w-20 rounded-full bg-muted" />
+          </div>
+          <div className="mt-5 grid grid-cols-2 gap-3">
+            <div className="h-12 rounded-lg bg-muted/60" />
+            <div className="h-12 rounded-lg bg-muted/60" />
+          </div>
+          <div className="mt-4 h-20 rounded-lg bg-muted/40" />
+        </li>
+      ))}
+    </ul>
+  );
+}
 
 function DeviceCard({ device }: { device: Device }) {
   const tone = deviceTone(device.status);

@@ -58,9 +58,19 @@ function titleCase(value: string): string {
     .replace(/\b\w/g, (char) => char.toUpperCase());
 }
 
-export function StatusSection({ initial }: { initial: StatusSnapshot }) {
-  const [snapshot, setSnapshot] = useState<StatusSnapshot>(initial);
-  const [updatedAt, setUpdatedAt] = useState<string>(initial.fetchedAt);
+const EMPTY_STATUS: StatusSnapshot = {
+  page: "UP",
+  components: [],
+  incidents: [],
+  overallUptime: null,
+  fetchedAt: new Date(0).toISOString(),
+  degraded: true,
+};
+
+export function StatusSection({ initial }: { initial?: StatusSnapshot }) {
+  const [snapshot, setSnapshot] = useState<StatusSnapshot>(initial ?? EMPTY_STATUS);
+  const [updatedAt, setUpdatedAt] = useState<string>(initial?.fetchedAt ?? EMPTY_STATUS.fetchedAt);
+  const [loading, setLoading] = useState(!initial);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -79,17 +89,20 @@ export function StatusSection({ initial }: { initial: StatusSnapshot }) {
       } catch {
         /* keep last good snapshot */
       } finally {
-        if (!cancelled) timer = setTimeout(poll, POLL_MS);
+        if (!cancelled) {
+          setLoading(false);
+          timer = setTimeout(poll, POLL_MS);
+        }
       }
     }
 
-    timer = setTimeout(poll, POLL_MS);
+    timer = setTimeout(poll, initial ? POLL_MS : 0);
     return () => {
       cancelled = true;
       controller.abort();
       if (timer) clearTimeout(timer);
     };
-  }, []);
+  }, [initial]);
 
   const tone = pageTone(snapshot.page, snapshot.degraded);
   const operational = snapshot.components.filter((c) => c.status === "OPERATIONAL").length;
@@ -134,7 +147,9 @@ export function StatusSection({ initial }: { initial: StatusSnapshot }) {
           </div>
         </div>
 
-        {snapshot.components.length === 0 ? (
+        {loading ? (
+          <StatusSkeleton />
+        ) : snapshot.components.length === 0 ? (
           <p className="py-12 text-center text-[14px] italic text-foreground/55">
             This health page is unavailable right now. Check the{" "}
             <Link
@@ -235,6 +250,28 @@ export function StatusSection({ initial }: { initial: StatusSnapshot }) {
         </div>
       </div>
     </section>
+  );
+}
+
+function StatusSkeleton() {
+  return (
+    <ul role="list" className="mt-8 grid gap-3 sm:grid-cols-2" aria-label="Loading site health">
+      {Array.from({ length: 8 }).map((_, index) => (
+        <li key={index} className="rounded-xl border border-border-soft bg-background px-4 py-3.5">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex min-w-0 items-center gap-3">
+              <span className="h-2.5 w-2.5 shrink-0 rounded-full bg-muted" />
+              <div className="space-y-2">
+                <div className="h-3 w-32 rounded-full bg-muted" />
+                <div className="h-3 w-44 rounded-full bg-muted/60" />
+              </div>
+            </div>
+            <div className="h-4 w-16 rounded-full bg-muted/70" />
+          </div>
+          <div className="mt-3 h-1.5 rounded-full bg-muted/50" />
+        </li>
+      ))}
+    </ul>
   );
 }
 

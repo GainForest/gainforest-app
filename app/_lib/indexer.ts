@@ -60,6 +60,7 @@ export type Page<R> = {
 };
 
 const RESOLVE_CONCURRENCY = 8;
+const SITE_IMAGE_RESOLVE_LIMIT = 96;
 
 /** The indexer caps every connection query at 1000 edges regardless of the
  *  requested `first` (it was 100 before the upgrade), so loads beyond 1000 must
@@ -72,11 +73,13 @@ async function resolveImages<R>(
   pick: (r: R) => { did: string; ref: string | null } | null,
   set: (r: R, url: string | null) => R,
   signal?: AbortSignal,
+  maxItems = items.length,
 ): Promise<R[]> {
   const out = [...items];
+  const cappedLength = Math.min(maxItems, out.length);
   let cursor = 0;
   async function worker() {
-    while (cursor < out.length) {
+    while (cursor < cappedLength) {
       const i = cursor++;
       const meta = pick(out[i]!);
       if (!meta?.ref) continue;
@@ -89,7 +92,7 @@ async function resolveImages<R>(
     }
   }
   await Promise.all(
-    Array.from({ length: Math.min(RESOLVE_CONCURRENCY, out.length) }, worker),
+    Array.from({ length: Math.min(RESOLVE_CONCURRENCY, cappedLength) }, worker),
   );
   return out;
 }
@@ -100,7 +103,7 @@ async function resolveImages<R>(
  * load fills the grid in waves instead of after one long wait.
  */
 async function collectPaged<R>(
-  fetchPage: (after: string | null, signal?: AbortSignal) => Promise<Page<R>>,
+  fetchPage: (first: number, after: string | null, signal?: AbortSignal) => Promise<Page<R>>,
   target: number,
   after: string | null,
   signal?: AbortSignal,
@@ -111,7 +114,8 @@ async function collectPaged<R>(
   let hasMore = true;
   while (all.length < target) {
     if (signal?.aborted) throw new DOMException("aborted", "AbortError");
-    const page = await fetchPage(cursor, signal);
+    const pageSize = Math.min(INDEXER_MAX_PAGE, target - all.length);
+    const page = await fetchPage(pageSize, cursor, signal);
     all.push(...page.records);
     cursor = page.cursor;
     hasMore = page.hasMore;
@@ -540,23 +544,25 @@ async function mapActivityConnection(
 }
 
 async function fetchActivityPage(
+  first: number,
   after: string | null,
   signal?: AbortSignal,
 ): Promise<Page<BumicertRecord>> {
   const data = await indexerQuery<{
     orgHypercertsClaimActivity?: Connection<RawActivity>;
-  }>(ACTIVITY_QUERY, { first: INDEXER_MAX_PAGE, after }, signal);
+  }>(ACTIVITY_QUERY, { first, after }, signal);
   return mapActivityConnection(data?.orgHypercertsClaimActivity, signal);
 }
 
 async function fetchActivityByDidPage(
   did: string,
+  first: number,
   after: string | null,
   signal?: AbortSignal,
 ): Promise<Page<BumicertRecord>> {
   const data = await indexerQuery<{
     orgHypercertsClaimActivity?: Connection<RawActivity>;
-  }>(ACTIVITY_BY_DID_QUERY, { did, first: INDEXER_MAX_PAGE, after }, signal);
+  }>(ACTIVITY_BY_DID_QUERY, { did, first, after }, signal);
   return mapActivityConnection(data?.orgHypercertsClaimActivity, signal);
 }
 
@@ -578,7 +584,7 @@ export async function fetchBumicertsByDid(
   signal?: AbortSignal,
   onProgress?: (records: BumicertRecord[]) => void,
 ): Promise<Page<BumicertRecord>> {
-  return collectPaged((cursor, nextSignal) => fetchActivityByDidPage(did, cursor, nextSignal), target, after, signal, onProgress);
+  return collectPaged((first, cursor, nextSignal) => fetchActivityByDidPage(did, first, cursor, nextSignal), target, after, signal, onProgress);
 }
 
 // ── 3. Project sites (organizations) ───────────────────────────────────────
@@ -660,12 +666,13 @@ function mapOrg(n: RawOrg): SiteRecord {
 }
 
 async function fetchOrgPage(
+  first: number,
   after: string | null,
   signal?: AbortSignal,
 ): Promise<Page<SiteRecord>> {
   const data = await indexerQuery<{
     appGainforestOrganizationInfo?: Connection<RawOrg>;
-  }>(ORG_QUERY, { first: INDEXER_MAX_PAGE, after }, signal);
+  }>(ORG_QUERY, { first, after }, signal);
   const conn = data?.appGainforestOrganizationInfo;
   const nodes = (conn?.edges ?? [])
     .map((e) => e?.node)
@@ -679,6 +686,7 @@ async function fetchOrgPage(
     },
     (r, url) => ({ ...r, imageUrl: url }),
     signal,
+    SITE_IMAGE_RESOLVE_LIMIT,
   );
   return {
     records,
@@ -784,12 +792,13 @@ function mapCertOrg(n: RawCertOrg, profile: CertProfileInfo | undefined): SiteRe
 }
 
 async function fetchCertOrgPage(
+  first: number,
   after: string | null,
   signal?: AbortSignal,
 ): Promise<Page<SiteRecord>> {
   const data = await indexerQuery<{
     appCertifiedActorOrganization?: Connection<RawCertOrg>;
-  }>(CERT_ORG_QUERY, { first: INDEXER_MAX_PAGE, after }, signal);
+  }>(CERT_ORG_QUERY, { first, after }, signal);
   const conn = data?.appCertifiedActorOrganization;
   const nodes = (conn?.edges ?? [])
     .map((e) => e?.node)
@@ -804,6 +813,7 @@ async function fetchCertOrgPage(
     (r) => (r.coverRef ? { did: r.did, ref: r.coverRef } : null),
     (r, url) => ({ ...r, imageUrl: url }),
     signal,
+    SITE_IMAGE_RESOLVE_LIMIT,
   );
   return {
     records,
@@ -834,18 +844,24 @@ export async function fetchSites(
   if (source === "gainforest") return collectPaged(fetchOrgPage, target, after, signal, onProgress);
   if (source === "certified") return collectPaged(fetchCertOrgPage, target, after, signal, onProgress);
 
-  // Both: fetch each stream fully, streaming a merged running list as they
-  // arrive, then return the combined set sorted newest-first.
+  // Both streams are independent. Fetch them together so the page is not held
+  // behind two back-to-back remote calls and image-resolution passes.
   let gf: SiteRecord[] = [];
-  const gfPage = await collectPaged(fetchOrgPage, target, null, signal, (running) => {
-    gf = running;
-    onProgress?.([...running]);
-  });
-  gf = gfPage.records;
-  const certPage = await collectPaged(fetchCertOrgPage, target, null, signal, (running) => {
-    onProgress?.([...gf, ...running]);
-  });
-  const records = [...gf, ...certPage.records].sort(
+  let cert: SiteRecord[] = [];
+  const publishProgress = () => {
+    onProgress?.([...gf, ...cert].sort((a, b) => siteTime(b.createdAt) - siteTime(a.createdAt)));
+  };
+  const [gfPage, certPage] = await Promise.all([
+    collectPaged(fetchOrgPage, target, null, signal, (running) => {
+      gf = running;
+      publishProgress();
+    }),
+    collectPaged(fetchCertOrgPage, target, null, signal, (running) => {
+      cert = running;
+      publishProgress();
+    }),
+  ]);
+  const records = [...gfPage.records, ...certPage.records].sort(
     (a, b) => siteTime(b.createdAt) - siteTime(a.createdAt),
   );
   onProgress?.(records);

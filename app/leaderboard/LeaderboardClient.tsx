@@ -120,6 +120,7 @@ export function LeaderboardClient() {
       onDonorFilterChange={setDonorFilter}
       sortBy={sortBy}
       onSortChange={setSortBy}
+      loading={receipts === null && !error}
       totalDonors={leaderboard?.totalDonorsCount ?? 0}
       totalRaised={leaderboard?.totalAmountSum ?? 0}
       totalProjectsSupported={leaderboard?.totalProjectsSupported ?? 0}
@@ -290,29 +291,31 @@ function StatsSummary({
   totalDonors,
   totalRaised,
   totalProjectsSupported,
+  loading,
 }: {
   totalDonors: number;
   totalRaised: number;
   totalProjectsSupported: number;
+  loading: boolean;
 }) {
   return (
     <div className="grid gap-4 lg:grid-cols-3">
       <StatCard
         label="Total Raised"
-        value={formatCompactUsd(totalRaised)}
+        value={loading ? <StatNumberSkeleton /> : formatCompactUsd(totalRaised)}
         detail="All time across the platform"
         icon={<LeafIcon className="size-8" />}
         accent
       />
       <StatCard
         label="Total Donors"
-        value={totalDonors.toLocaleString("en")}
+        value={loading ? <StatNumberSkeleton /> : totalDonors.toLocaleString("en")}
         detail="Generous impact champions"
         icon={<UsersRoundIcon className="size-8" />}
       />
       <StatCard
         label="Projects Supported"
-        value={totalProjectsSupported.toLocaleString("en")}
+        value={loading ? <StatNumberSkeleton /> : totalProjectsSupported.toLocaleString("en")}
         detail="Restoring ecosystems & livelihoods"
         icon={<SproutIcon className="size-8" />}
         accent
@@ -332,6 +335,7 @@ function LeaderboardShell({
   totalDonors = 0,
   totalRaised = 0,
   totalProjectsSupported = 0,
+  loading = false,
   children,
 }: {
   animate?: boolean;
@@ -344,6 +348,7 @@ function LeaderboardShell({
   totalDonors?: number;
   totalRaised?: number;
   totalProjectsSupported?: number;
+  loading?: boolean;
   children?: ReactNode;
 }) {
   return (
@@ -396,6 +401,7 @@ function LeaderboardShell({
               totalDonors={totalDonors}
               totalRaised={totalRaised}
               totalProjectsSupported={totalProjectsSupported}
+              loading={loading}
             />
           </motion.div>
 
@@ -404,6 +410,10 @@ function LeaderboardShell({
       </div>
     </section>
   );
+}
+
+function StatNumberSkeleton() {
+  return <span className="block h-8 w-20 animate-pulse rounded-full bg-muted" aria-label="Loading" />;
 }
 
 function LeaderboardGrid({ entries }: { entries: LeaderboardEntry[] }) {

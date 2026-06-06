@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { fetchBumicerts } from "../_lib/indexer";
 import { BumicertsExploreClient } from "./BumicertsExploreClient";
 
 export const revalidate = 60;
@@ -11,7 +10,6 @@ export const metadata: Metadata = {
   alternates: { canonical: "/bumicerts" },
 };
 
-export default async function BumicertsPage() {
-  const page = await fetchBumicerts(72, null);
-  return <BumicertsExploreClient records={page.records} />;
+export default function BumicertsPage() {
+  return <BumicertsExploreClient />;
 }

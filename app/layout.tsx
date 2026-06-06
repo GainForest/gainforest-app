@@ -1,13 +1,13 @@
 import type { Metadata, Viewport } from "next";
 import { Cormorant_Garamond, Geist, Geist_Mono, Instrument_Serif } from "next/font/google";
+import { Suspense } from "react";
 import "./globals.css";
 import { AppShell } from "./_components/AppShell";
 import { Footer } from "./_components/Footer";
 import { AccountDrawerProvider } from "./_components/AccountDrawer";
+import { LinkPrefetcher } from "./_components/LinkPrefetcher";
+import { RouteChangeIndicator } from "./_components/RouteChangeIndicator";
 import { ModalProvider } from "@/components/ui/modal/context";
-import { fetchStatus } from "./_lib/status";
-import { fetchAuthSession } from "./_lib/auth-server";
-import { fetchAccountSummary } from "./_lib/indexer";
 import { SITE_URL } from "./_lib/urls";
 
 const geistSans = Geist({
@@ -111,28 +111,20 @@ export const viewport: Viewport = {
 // the saved choice, else falls back to the OS preference.
 const THEME_INIT = `(function(){try{var t=localStorage.getItem('bumicerts-theme');var m=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches;if(t==='dark'||(t!=='light'&&m)){document.documentElement.classList.add('dark');}}catch(e){}})();`;
 
-// The nav's live status pill is prefetched here so it is shared across every
-// route (cached via `revalidate`, so it stays out of the per-request path).
-export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const [status, authSession] = await Promise.all([
-    fetchStatus({ revalidate: 60 }),
-    fetchAuthSession(),
-  ]);
-  const manageAccountKind = authSession.isLoggedIn
-    ? await fetchAccountSummary(authSession.did)
-        .then((summary) => summary.hasCertifiedOrg || summary.hasGainforestOrg ? "organization" as const : "user" as const)
-        .catch(() => "user" as const)
-    : "user" as const;
-
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${cormorant.variable} ${instrument.variable} antialiased`}
       >
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT }} />
+        <Suspense fallback={null}>
+          <RouteChangeIndicator />
+          <LinkPrefetcher />
+        </Suspense>
         <ModalProvider>
           <AccountDrawerProvider>
-            <AppShell status={status} authSession={authSession} manageAccountKind={manageAccountKind}>
+            <AppShell authSession={null} manageAccountKind="user">
               {children}
               <Footer />
             </AppShell>

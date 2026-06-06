@@ -484,10 +484,16 @@ export function RecordExplorer({ kind }: { kind: RecordKind }) {
           )}
 
           <div className="flex items-center gap-1.5 text-[12.5px] text-foreground/55">
-            <span aria-hidden className="pulse-dot inline-block h-1.5 w-1.5 rounded-full bg-brand text-brand" />
-            {query
-              ? `${formatNumber(filtered.length)} of ${formatNumber(records.length)} shown`
-              : `${formatNumber(records.length)} shown`}
+            {phase === "loading" && records.length === 0 ? (
+              <span className="h-4 w-20 animate-pulse rounded-full bg-muted" aria-label="Loading" />
+            ) : (
+              <>
+                <span aria-hidden className="pulse-dot inline-block h-1.5 w-1.5 rounded-full bg-brand text-brand" />
+                {query
+                  ? `${formatNumber(filtered.length)} of ${formatNumber(records.length)} shown`
+                  : `${formatNumber(records.length)} shown`}
+              </>
+            )}
           </div>
         </div>
 

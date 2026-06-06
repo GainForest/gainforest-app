@@ -13,14 +13,14 @@ import {
   LeafIcon,
   MapPinIcon,
 } from "lucide-react";
-import { useState } from "react";
-import type { ExplorerKpis } from "../_lib/kpis";
+import { useEffect, useState } from "react";
+import { fetchKpis, type ExplorerKpis } from "../_lib/kpis";
 import { formatCompact, formatCompactUsd } from "../_lib/format";
 import { StatsTileGrid } from "./StatsTile";
 import { ThemeToggle } from "./ThemeToggle";
 
 type HomeLandingProps = {
-  kpis: ExplorerKpis;
+  kpis?: ExplorerKpis | null;
 };
 
 const FEATURE_ITEMS = [
@@ -96,13 +96,29 @@ const FAQ_ITEMS = [
 
 type FaqKey = (typeof FAQ_ITEMS)[number]["key"];
 
-export function HomeLanding({ kpis }: HomeLandingProps) {
+export function HomeLanding({ kpis: initialKpis = null }: HomeLandingProps) {
+  const [kpis, setKpis] = useState<ExplorerKpis | null>(initialKpis);
+
+  useEffect(() => {
+    if (initialKpis) return;
+    let cancelled = false;
+    fetchKpis()
+      .then((next) => {
+        if (!cancelled) setKpis(next);
+      })
+      .catch(() => {
+        if (!cancelled) setKpis(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [initialKpis]);
   return (
     <div className="min-h-screen bg-background">
       <LandingTopNavbar />
       <main className="w-full">
         <LandingHero />
-        <HomeStats kpis={kpis} />
+        <HomeStats kpis={kpis} loading={!kpis} />
         <FeaturesSection />
         <UserOptionCards />
         <WhatIsBumicert />
@@ -279,10 +295,10 @@ function LandingHero() {
   );
 }
 
-function HomeStats({ kpis }: { kpis: ExplorerKpis }) {
+function HomeStats({ kpis, loading }: { kpis: ExplorerKpis | null; loading: boolean }) {
   const stats = [
     {
-      value: formatCompact(kpis.bumicerts),
+      value: loading ? <StatNumberSkeleton /> : formatCompact(kpis?.bumicerts),
       label: "Bumicerts",
       detail: "checked project stories",
       href: "/bumicerts",
@@ -290,21 +306,21 @@ function HomeStats({ kpis }: { kpis: ExplorerKpis }) {
       accent: true,
     },
     {
-      value: formatCompact(kpis.sites),
+      value: loading ? <StatNumberSkeleton /> : formatCompact(kpis?.sites),
       label: "Organizations",
       detail: "nature stewards",
       href: "/organizations",
       icon: <Building2Icon />,
     },
     {
-      value: formatCompact(kpis.occurrences),
+      value: loading ? <StatNumberSkeleton /> : formatCompact(kpis?.occurrences),
       label: "Observations",
       detail: "nature sightings",
       href: "/observations",
       icon: <BinocularsIcon />,
     },
     {
-      value: formatCompactUsd(kpis.totalRaised),
+      value: loading ? <StatNumberSkeleton /> : formatCompactUsd(kpis?.totalRaised),
       label: "Funding raised",
       detail: "direct support tracked",
       href: "/leaderboard",
@@ -320,6 +336,10 @@ function HomeStats({ kpis }: { kpis: ExplorerKpis }) {
       </div>
     </section>
   );
+}
+
+function StatNumberSkeleton() {
+  return <span className="block h-8 w-16 animate-pulse rounded-full bg-muted" aria-label="Loading" />;
 }
 
 function FeaturesSection() {

@@ -2,6 +2,14 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   devIndicators: false,
+  experimental: {
+    dynamicOnHover: true,
+    preloadEntriesOnStart: true,
+    staleTimes: {
+      dynamic: 300,
+      static: 1800,
+    },
+  },
   images: {
     // Record thumbnails (occurrences, bumicerts, org covers) are resolved to
     // each record owner's PDS via com.atproto.sync.getBlob. The host is

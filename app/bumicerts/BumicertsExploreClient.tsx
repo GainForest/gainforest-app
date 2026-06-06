@@ -13,11 +13,11 @@ import {
   SlidersHorizontalIcon,
   UsersIcon,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { RecordDrawer } from "../_components/RecordDrawer";
 import { RecordMap } from "../_components/RecordMap";
 import { StatsTileGrid } from "../_components/StatsTile";
-import type { BumicertRecord, ExplorerRecord } from "../_lib/indexer";
+import { fetchBumicerts, type BumicertRecord, type ExplorerRecord } from "../_lib/indexer";
 import { isPdsBlobUrl } from "../_lib/pds";
 
 type FilterKey = "images" | "locations" | "contributors" | "active";
@@ -48,7 +48,9 @@ const SORT_LABELS: Record<SortMode, string> = Object.fromEntries(
   SORT_OPTIONS.map((option) => [option.value, option.label]),
 ) as Record<SortMode, string>;
 
-export function BumicertsExploreClient({ records }: { records: BumicertRecord[] }) {
+export function BumicertsExploreClient({ records: initialRecords = [] }: { records?: BumicertRecord[] }) {
+  const [records, setRecords] = useState<BumicertRecord[]>(initialRecords);
+  const [loading, setLoading] = useState(initialRecords.length === 0);
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState<SortMode>("newest");
   const [openSort, setOpenSort] = useState(false);
@@ -56,6 +58,25 @@ export function BumicertsExploreClient({ records }: { records: BumicertRecord[] 
   const [filters, setFilters] = useState<FilterKey[]>([]);
   const [view, setView] = useState<ViewMode>("cards");
   const [drawer, setDrawer] = useState<BumicertRecord | null>(null);
+
+  useEffect(() => {
+    if (initialRecords.length > 0) return;
+    const controller = new AbortController();
+    setLoading(true);
+    fetchBumicerts(1000, null, controller.signal, (running) => {
+      setRecords(running);
+      setLoading(false);
+    })
+      .then((page) => {
+        setRecords(page.records);
+        setLoading(false);
+      })
+      .catch((error) => {
+        if ((error as Error).name === "AbortError") return;
+        setLoading(false);
+      });
+    return () => controller.abort();
+  }, [initialRecords.length]);
 
   const visibleRecords = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -156,7 +177,7 @@ export function BumicertsExploreClient({ records }: { records: BumicertRecord[] 
 
         <div className="relative z-10 mx-auto max-w-6xl px-6">
           <div className="relative z-20 -mt-10 px-3">
-            <StatsBand stats={stats} />
+            <StatsBand stats={stats} loading={loading && records.length === 0} />
           </div>
 
           <div className="relative z-20 mt-4 mb-0 space-y-3 px-3">
@@ -359,7 +380,7 @@ export function BumicertsExploreClient({ records }: { records: BumicertRecord[] 
             {view === "map" ? (
               <RecordMap records={visibleRecords} kind="bumicert" onOpen={openMapRecord} />
             ) : (
-              <BumicertGrid records={visibleRecords} onOpen={openRecord} />
+              <BumicertGrid records={visibleRecords} loading={loading} onOpen={openRecord} />
             )}
           </div>
         </div>
@@ -397,8 +418,10 @@ function HeroBackdrop() {
 
 function StatsBand({
   stats,
+  loading,
 }: {
   stats: Array<{ label: string; value: number; detail: string }>;
+  loading: boolean;
 }) {
   const icons = [
     <LayoutGridIcon key="projects" />,
@@ -412,7 +435,7 @@ function StatsBand({
       columns={4}
       items={stats.map((stat, index) => ({
         label: stat.label,
-        value: formatStat(stat.value),
+        value: loading ? <StatNumberSkeleton /> : formatStat(stat.value),
         detail: stat.detail,
         icon: icons[index] ?? <LeafIcon />,
         accent: index % 2 === 0,
@@ -421,17 +444,27 @@ function StatsBand({
   );
 }
 
+function StatNumberSkeleton() {
+  return <span className="block h-8 w-16 animate-pulse rounded-full bg-muted" aria-label="Loading" />;
+}
+
 function formatStat(value: number): string {
   return new Intl.NumberFormat("en", { notation: value >= 10000 ? "compact" : "standard" }).format(value);
 }
 
 function BumicertGrid({
   records,
+  loading,
   onOpen,
 }: {
   records: BumicertRecord[];
+  loading: boolean;
   onOpen: (record: BumicertRecord) => void;
 }) {
+  if (loading && records.length === 0) {
+    return <BumicertGridSkeleton />;
+  }
+
   if (records.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center px-6 py-28 text-center animate-in">
@@ -474,6 +507,23 @@ function BumicertGrid({
           <button type="button" onClick={() => onOpen(record)} className="block h-full w-full text-left">
             <BumicertCardVisual record={record} priority={index < 8} />
           </button>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function BumicertGridSkeleton() {
+  return (
+    <div className="mt-4 grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] items-stretch gap-6 lg:gap-8" aria-label="Loading projects">
+      {Array.from({ length: 12 }).map((_, index) => (
+        <div key={index} className="overflow-hidden rounded-2xl border border-border bg-card">
+          <div className="aspect-[4/3] bg-muted" />
+          <div className="space-y-2 p-4">
+            <div className="h-5 w-3/4 rounded-full bg-muted" />
+            <div className="h-3 w-full rounded-full bg-muted/70" />
+            <div className="h-3 w-2/3 rounded-full bg-muted/50" />
+          </div>
         </div>
       ))}
     </div>

@@ -30,7 +30,6 @@ import {
   UserIcon,
 } from "lucide-react";
 import { Suspense, useEffect, useState, type MouseEvent, type SVGProps } from "react";
-import type { StatusSnapshot } from "../_lib/status";
 import type { AuthSession } from "../_lib/auth";
 import { BumicertsBumicertCard, type BumicertsBumicertCardRecord } from "@/components/bumicert/BumicertsBumicertCard";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -128,18 +127,41 @@ type DocWithViewTransitions = Document & {
   startViewTransition?: (updateCallback: () => void) => { ready: Promise<void> };
 };
 
+type ShellSessionResponse = {
+  session: AuthSession;
+  manageAccountKind: ManageAccountKind;
+};
+
 export function AppShell({
   children,
   authSession,
   manageAccountKind,
 }: {
   children: React.ReactNode;
-  status: StatusSnapshot;
-  authSession: AuthSession;
+  authSession: AuthSession | null;
   manageAccountKind: ManageAccountKind;
 }) {
   const pathname = usePathname() ?? "/";
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [resolvedAuthSession, setResolvedAuthSession] = useState<AuthSession | null>(authSession);
+  const [resolvedManageAccountKind, setResolvedManageAccountKind] = useState<ManageAccountKind>(manageAccountKind);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/session", { cache: "no-store" })
+      .then((response) => (response.ok ? response.json() as Promise<ShellSessionResponse> : null))
+      .then((next) => {
+        if (cancelled || !next) return;
+        setResolvedAuthSession(next.session);
+        setResolvedManageAccountKind(next.manageAccountKind);
+      })
+      .catch(() => {
+        if (!cancelled) setResolvedAuthSession({ isLoggedIn: false });
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   if (pathname === "/") {
     return <>{children}</>;
@@ -148,19 +170,19 @@ export function AppShell({
   return (
     <HeaderSlotsProvider>
       <div className="hidden md:flex h-screen overflow-hidden">
-        <UnifiedSidebar authSession={authSession} manageAccountKind={manageAccountKind} />
+        <UnifiedSidebar authSession={resolvedAuthSession} manageAccountKind={resolvedManageAccountKind} />
         <main className="relative flex-1 overflow-y-auto">
-          <Header authSession={authSession} onOpenMobileNav={() => setMobileNavOpen(true)} />
+          <Header authSession={resolvedAuthSession} onOpenMobileNav={() => setMobileNavOpen(true)} />
           {children}
         </main>
       </div>
 
       <div className="flex h-screen flex-col overflow-hidden md:hidden">
         <MobileNavDrawer open={mobileNavOpen} onOpenChange={setMobileNavOpen}>
-          <UnifiedSidebar authSession={authSession} manageAccountKind={manageAccountKind} />
+          <UnifiedSidebar authSession={resolvedAuthSession} manageAccountKind={resolvedManageAccountKind} />
         </MobileNavDrawer>
         <div className="relative flex-1 overflow-y-auto">
-          <Header authSession={authSession} onOpenMobileNav={() => setMobileNavOpen(true)} />
+          <Header authSession={resolvedAuthSession} onOpenMobileNav={() => setMobileNavOpen(true)} />
           {children}
         </div>
       </div>
@@ -168,7 +190,7 @@ export function AppShell({
   );
 }
 
-function UnifiedSidebar({ authSession, manageAccountKind }: { authSession: AuthSession; manageAccountKind: ManageAccountKind }) {
+function UnifiedSidebar({ authSession, manageAccountKind }: { authSession: AuthSession | null; manageAccountKind: ManageAccountKind }) {
   return (
     <nav className="w-[240px] h-full flex flex-col p-4 border-r border-border bg-foreground/3 relative">
       {/* Top section */}
@@ -372,7 +394,7 @@ function ManageSection({
   authSession,
   manageAccountKind,
 }: {
-  authSession: AuthSession;
+  authSession: AuthSession | null;
   manageAccountKind: ManageAccountKind;
 }) {
   const pathname = usePathname() ?? "/";
@@ -452,7 +474,7 @@ function ManageSection({
       pathCheck: { startsWith: "/manage/settings" },
     },
   ];
-  const items: NavLeaf[] = authSession.isLoggedIn
+  const items: NavLeaf[] = authSession?.isLoggedIn
     ? manageAccountKind === "organization" ? organizationItems : userItems
     : [];
 
@@ -473,7 +495,9 @@ function ManageSection({
         </span>
       </motion.div>
 
-      {authSession.isLoggedIn ? (
+      {authSession == null ? (
+        <ManageSectionSkeleton />
+      ) : authSession.isLoggedIn ? (
         <ul className="flex flex-col gap-0.5">
           {items.map((item, index) => (
             <NavLeaf
@@ -487,6 +511,15 @@ function ManageSection({
       ) : (
         <SignInPrompt />
       )}
+    </div>
+  );
+}
+
+function ManageSectionSkeleton() {
+  return (
+    <div className="space-y-2 px-3 py-1" aria-hidden="true">
+      <div className="h-8 rounded-lg bg-muted/60" />
+      <div className="h-8 rounded-lg bg-muted/40" />
     </div>
   );
 }
@@ -617,13 +650,13 @@ function Header({
   authSession,
   onOpenMobileNav,
 }: {
-  authSession: AuthSession;
+  authSession: AuthSession | null;
   onOpenMobileNav: () => void;
 }) {
   const pathname = usePathname() ?? "/";
   const showBumicertTabs = isBumicertDetailPath(pathname);
   const { leftContent, rightContent, subHeaderContent } = useHeaderSlots();
-  const routeActions = getRouteHeaderActions(pathname, authSession);
+  const routeActions = getRouteHeaderActions(pathname, authSession ?? { isLoggedIn: false });
 
   return (
     <div className="sticky top-0 z-30" data-header>
