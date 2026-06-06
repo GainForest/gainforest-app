@@ -118,7 +118,7 @@ export function HomeLanding({ kpis: initialKpis = null }: HomeLandingProps) {
       <LandingTopNavbar />
       <main className="w-full">
         <LandingHero />
-        <HomeStats kpis={kpis} loading={!kpis} />
+        <HomeStats kpis={kpis} />
         <FeaturesSection />
         <UserOptionCards />
         <WhatIsBumicert />
@@ -295,10 +295,12 @@ function LandingHero() {
   );
 }
 
-function HomeStats({ kpis, loading }: { kpis: ExplorerKpis | null; loading: boolean }) {
+function HomeStats({ kpis }: { kpis: ExplorerKpis | null }) {
+  if (!kpis) return null;
+
   const stats = [
     {
-      value: loading ? <StatNumberSkeleton /> : formatCompact(kpis?.bumicerts),
+      value: formatCompact(kpis.bumicerts),
       label: "Bumicerts",
       detail: "checked project stories",
       href: "/bumicerts",
@@ -306,21 +308,21 @@ function HomeStats({ kpis, loading }: { kpis: ExplorerKpis | null; loading: bool
       accent: true,
     },
     {
-      value: loading ? <StatNumberSkeleton /> : formatCompact(kpis?.sites),
+      value: formatCompact(kpis.sites),
       label: "Organizations",
       detail: "nature stewards",
       href: "/organizations",
       icon: <Building2Icon />,
     },
     {
-      value: loading ? <StatNumberSkeleton /> : formatCompact(kpis?.occurrences),
+      value: formatCompact(kpis.occurrences),
       label: "Observations",
       detail: "nature sightings",
       href: "/observations",
       icon: <BinocularsIcon />,
     },
     {
-      value: loading ? <StatNumberSkeleton /> : formatCompactUsd(kpis?.totalRaised),
+      value: formatCompactUsd(kpis.totalRaised),
       label: "Funding raised",
       detail: "direct support tracked",
       href: "/leaderboard",
@@ -336,10 +338,6 @@ function HomeStats({ kpis, loading }: { kpis: ExplorerKpis | null; loading: bool
       </div>
     </section>
   );
-}
-
-function StatNumberSkeleton() {
-  return <span className="block h-8 w-16 animate-pulse rounded-full bg-muted" aria-label="Loading" />;
 }
 
 function FeaturesSection() {

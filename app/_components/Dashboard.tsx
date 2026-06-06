@@ -654,16 +654,6 @@ function Skeleton({ className }: { className: string }) {
   return <div className={`animate-pulse rounded bg-muted ${className}`} />;
 }
 
-function KPICardSkeleton() {
-  return (
-    <div className="flex flex-col gap-3 rounded-2xl border border-border bg-background p-5">
-      <Skeleton className="h-3 w-28" />
-      <Skeleton className="h-9 w-32" />
-      <Skeleton className="h-3 w-20" />
-    </div>
-  );
-}
-
 function TableSkeleton() {
   return (
     <div className="space-y-3 rounded-2xl border border-border bg-background p-5">
@@ -678,19 +668,11 @@ function TableSkeleton() {
 function DashboardSkeleton() {
   return (
     <div className="flex flex-col gap-12">
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
+      <div className="space-y-3 rounded-2xl border border-border bg-background p-5">
+        <Skeleton className="h-3 w-24" />
         {Array.from({ length: 5 }).map((_, index) => (
-          <KPICardSkeleton key={index} />
+          <Skeleton key={index} className="h-5 w-full" />
         ))}
-      </div>
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-[280px_1fr]">
-        <KPICardSkeleton />
-        <div className="space-y-3 rounded-2xl border border-border bg-background p-5">
-          <Skeleton className="h-3 w-24" />
-          {Array.from({ length: 5 }).map((_, index) => (
-            <Skeleton key={index} className="h-5 w-full" />
-          ))}
-        </div>
       </div>
       <div className="space-y-4 rounded-2xl border border-border bg-background p-5">
         <Skeleton className="h-3 w-40" />

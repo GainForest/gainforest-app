@@ -298,24 +298,26 @@ function StatsSummary({
   totalProjectsSupported: number;
   loading: boolean;
 }) {
+  if (loading) return null;
+
   return (
     <div className="grid gap-4 lg:grid-cols-3">
       <StatCard
         label="Total Raised"
-        value={loading ? <StatNumberSkeleton /> : formatCompactUsd(totalRaised)}
+        value={formatCompactUsd(totalRaised)}
         detail="All time across the platform"
         icon={<LeafIcon className="size-8" />}
         accent
       />
       <StatCard
         label="Total Donors"
-        value={loading ? <StatNumberSkeleton /> : totalDonors.toLocaleString("en")}
+        value={totalDonors.toLocaleString("en")}
         detail="Generous impact champions"
         icon={<UsersRoundIcon className="size-8" />}
       />
       <StatCard
         label="Projects Supported"
-        value={loading ? <StatNumberSkeleton /> : totalProjectsSupported.toLocaleString("en")}
+        value={totalProjectsSupported.toLocaleString("en")}
         detail="Restoring ecosystems & livelihoods"
         icon={<SproutIcon className="size-8" />}
         accent
@@ -410,10 +412,6 @@ function LeaderboardShell({
       </div>
     </section>
   );
-}
-
-function StatNumberSkeleton() {
-  return <span className="block h-8 w-20 animate-pulse rounded-full bg-muted" aria-label="Loading" />;
 }
 
 function LeaderboardGrid({ entries }: { entries: LeaderboardEntry[] }) {

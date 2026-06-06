@@ -194,18 +194,20 @@ function AccountDrawer({ did, onClose }: { did: string | null; onClose: () => vo
           )}
 
           {/* Contribution stats */}
-          <div className="mt-5 grid grid-cols-2 gap-3">
-            <StatTile
-              label="Bumicerts"
-              value={summary ? formatNumber(summary.bumicertCount) : null}
-              hint="impact stories created"
-            />
-            <StatTile
-              label="Observations"
-              value={summary ? formatNumber(summary.observationCount) : null}
-              hint="nature sightings shared"
-            />
-          </div>
+          {summary && (
+            <div className="mt-5 grid grid-cols-2 gap-3">
+              <StatTile
+                label="Bumicerts"
+                value={formatNumber(summary.bumicertCount)}
+                hint="impact stories created"
+              />
+              <StatTile
+                label="Observations"
+                value={formatNumber(summary.observationCount)}
+                hint="nature sightings shared"
+              />
+            </div>
+          )}
 
           {/* Meta */}
           <dl className="mt-5 grid grid-cols-2 gap-x-4 gap-y-3.5 border-t border-border-soft pt-4">
@@ -252,7 +254,7 @@ function StatTile({
   hint,
 }: {
   label: string;
-  value: string | null;
+  value: string;
   hint: string;
 }) {
   return (
@@ -261,7 +263,7 @@ function StatTile({
         {label}
       </div>
       <div className="mt-1 font-garamond text-[30px] font-normal leading-none tracking-[-0.01em] text-foreground">
-        {value === null ? <Shimmer w="2.5rem" h="1.6rem" /> : value}
+        {value}
       </div>
       <div className="mt-1.5 text-[11px] text-foreground/50">{hint}</div>
     </div>

@@ -36,6 +36,8 @@ export function StatsTileGrid({
 }
 
 export function StatsTile({ label, value, detail, icon, accent = false, href }: StatsTileItem) {
+  if (value == null) return null;
+
   const content = (
     <>
       <div className="absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-primary/25 to-transparent" />

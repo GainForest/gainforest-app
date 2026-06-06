@@ -444,6 +444,8 @@ function FilterChip({
 }
 
 function StatsBand({ stats, loading }: { stats: Array<{ label: string; value: number; detail: string }>; loading: boolean }) {
+  if (loading) return null;
+
   const icons = [
     <UsersIcon key="organizations" />,
     <GlobeIcon key="countries" />,
@@ -456,17 +458,13 @@ function StatsBand({ stats, loading }: { stats: Array<{ label: string; value: nu
       columns={4}
       items={stats.map((stat, index) => ({
         label: stat.label,
-        value: loading ? <StatNumberSkeleton /> : formatStat(stat.value),
+        value: formatStat(stat.value),
         detail: stat.detail,
         icon: icons[index] ?? <LeafIcon />,
         accent: index % 2 === 0,
       }))}
     />
   );
-}
-
-function StatNumberSkeleton() {
-  return <span className="block h-8 w-16 animate-pulse rounded-full bg-muted" aria-label="Loading" />;
 }
 
 function OrganizationsGridSkeleton() {
