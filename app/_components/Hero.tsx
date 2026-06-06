@@ -46,7 +46,7 @@ export function Hero({
     {
       value: formatCompact(kpis.bumicerts),
       label: "Bumicerts",
-      sub: "Checked project stories",
+      sub: "Verified project stories",
       series: trends.bumicerts,
       format: "number",
     },

@@ -422,6 +422,7 @@ export type BumicertRecord = {
   endDate: string | null;
   contributorCount: number;
   locationCount: number;
+  scopeTags: string[];
   /** AT-URIs of the certified locations this claim references. */
   locationUris: string[];
   createdAt: string;
@@ -431,6 +432,11 @@ export type BumicertRecord = {
 
 const ACTIVITY_NODE_FIELDS = `
   did rkey uri createdAt title shortDescription startDate endDate
+  workScope {
+    __typename
+    ... on OrgHypercertsClaimActivityWorkScopeString { scope }
+    ... on OrgHypercertsWorkscopeCel { expression }
+  }
   contributors { contributorIdentity { __typename } }
   locations { uri }
   image {
@@ -488,8 +494,28 @@ type RawActivity = {
   endDate?: string | null;
   contributors?: Array<unknown> | null;
   locations?: Array<{ uri?: string | null }> | null;
+  workScope?: { __typename?: string; scope?: string | null; expression?: string | null } | null;
   image?: RawActivityImage;
 };
+
+function splitWorkScopeString(value?: string | null): string[] {
+  return (value ?? "")
+    .split(/[;,]/)
+    .map((s) => s.trim())
+    .filter(Boolean);
+}
+
+function extractWorkScopeTags(workScope?: { __typename?: string; scope?: string | null; expression?: string | null } | null): string[] {
+  const stringTags = splitWorkScopeString(workScope?.scope);
+  if (stringTags.length > 0) return stringTags;
+
+  const expression = workScope?.expression ?? "";
+  if (!expression) return [];
+
+  return [...expression.matchAll(/(["'])(.*?)\1/g)]
+    .map((match) => match[2]?.trim() ?? "")
+    .filter(Boolean);
+}
 
 function mapActivity(n: RawActivity): BumicertRecord {
   let imageUrl: string | null = null;
@@ -511,6 +537,7 @@ function mapActivity(n: RawActivity): BumicertRecord {
     endDate: n.endDate?.trim() || null,
     contributorCount: Array.isArray(n.contributors) ? n.contributors.length : 0,
     locationCount: Array.isArray(n.locations) ? n.locations.length : 0,
+    scopeTags: extractWorkScopeTags(n.workScope),
     locationUris: Array.isArray(n.locations)
       ? n.locations
           .map((l) => l?.uri)
@@ -828,11 +855,40 @@ function siteTime(iso: string | null | undefined): number {
   return Number.isFinite(t) ? t : 0;
 }
 
+type CombinedSiteCursor = {
+  gainforest: string | null;
+  certified: string | null;
+  gainforestMore: boolean;
+  certifiedMore: boolean;
+};
+
+function parseCombinedSiteCursor(value: string | null): CombinedSiteCursor {
+  if (!value?.startsWith("both:")) {
+    return { gainforest: null, certified: null, gainforestMore: true, certifiedMore: true };
+  }
+  try {
+    const parsed = JSON.parse(decodeURIComponent(value.slice("both:".length))) as Partial<CombinedSiteCursor>;
+    return {
+      gainforest: typeof parsed.gainforest === "string" ? parsed.gainforest : null,
+      certified: typeof parsed.certified === "string" ? parsed.certified : null,
+      gainforestMore: parsed.gainforestMore !== false,
+      certifiedMore: parsed.certifiedMore !== false,
+    };
+  } catch {
+    return { gainforest: null, certified: null, gainforestMore: true, certifiedMore: true };
+  }
+}
+
+function encodeCombinedSiteCursor(value: CombinedSiteCursor): string | null {
+  if (!value.gainforestMore && !value.certifiedMore) return null;
+  return `both:${encodeURIComponent(JSON.stringify(value))}`;
+}
+
 /**
  * Load up to `target` project sites, paging the indexer's 1000-record cap.
  * `source` picks the GainForest org lexicon, the certified actor lexicon, or
- * both merged (newest first). Cursors only apply to single-source loads — the
- * merged view fetches each stream to `target` in one pass.
+ * both merged (newest first). The merged view keeps a small combined cursor so
+ * the organizations page can continue both streams after its first load.
  */
 export async function fetchSites(
   target: number,
@@ -844,28 +900,42 @@ export async function fetchSites(
   if (source === "gainforest") return collectPaged(fetchOrgPage, target, after, signal, onProgress);
   if (source === "certified") return collectPaged(fetchCertOrgPage, target, after, signal, onProgress);
 
-  // Both streams are independent. Fetch them together so the page is not held
-  // behind two back-to-back remote calls and image-resolution passes.
+  const previous = parseCombinedSiteCursor(after);
   let gf: SiteRecord[] = [];
   let cert: SiteRecord[] = [];
+  const empty = Promise.resolve({ records: [], cursor: null, hasMore: false } satisfies Page<SiteRecord>);
   const publishProgress = () => {
     onProgress?.([...gf, ...cert].sort((a, b) => siteTime(b.createdAt) - siteTime(a.createdAt)));
   };
   const [gfPage, certPage] = await Promise.all([
-    collectPaged(fetchOrgPage, target, null, signal, (running) => {
-      gf = running;
-      publishProgress();
-    }),
-    collectPaged(fetchCertOrgPage, target, null, signal, (running) => {
-      cert = running;
-      publishProgress();
-    }),
+    previous.gainforestMore
+      ? collectPaged(fetchOrgPage, target, previous.gainforest, signal, (running) => {
+          gf = running;
+          publishProgress();
+        })
+      : empty,
+    previous.certifiedMore
+      ? collectPaged(fetchCertOrgPage, target, previous.certified, signal, (running) => {
+          cert = running;
+          publishProgress();
+        })
+      : empty,
   ]);
   const records = [...gfPage.records, ...certPage.records].sort(
     (a, b) => siteTime(b.createdAt) - siteTime(a.createdAt),
   );
   onProgress?.(records);
-  return { records, cursor: null, hasMore: false };
+  const hasMore = gfPage.hasMore || certPage.hasMore;
+  return {
+    records,
+    cursor: encodeCombinedSiteCursor({
+      gainforest: gfPage.cursor,
+      certified: certPage.cursor,
+      gainforestMore: gfPage.hasMore,
+      certifiedMore: certPage.hasMore,
+    }),
+    hasMore,
+  };
 }
 
 // ── 4. Manage section — certified locations by DID ─────────────────────────
@@ -1889,13 +1959,7 @@ function buildBumicertDetail(
 
   // Work scope: explicit string, else the string literals inside the CEL
   // expression (e.g. scope.hasAny(["restoration", "conservation"])).
-  let scopeTags: string[] = [];
-  if (n.workScope?.__typename === "OrgHypercertsClaimActivityWorkScopeString") {
-    scopeTags = (sv(n.workScope.scope) ?? "").split(/[,;]/).map((s) => s.trim()).filter(Boolean);
-  } else if (n.workScope?.__typename === "OrgHypercertsWorkscopeCel") {
-    const expr = sv(n.workScope.expression) ?? "";
-    scopeTags = [...expr.matchAll(/"([^"]+)"/g)].map((mm) => mm[1]).filter(Boolean);
-  }
+  const scopeTags = extractWorkScopeTags(n.workScope);
   const badges: DetailBadge[] = scopeTags
     .slice(0, 6)
     .map((s) => ({ label: cap(s), tone: "info" }));

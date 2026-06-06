@@ -29,6 +29,7 @@ import {
   type MetricSeries,
 } from "../_lib/series";
 import { formatNumber, countryFlag, formatDate } from "../_lib/format";
+import { AutoLoadMoreButton } from "./AutoLoadMoreButton";
 import { PictureHero } from "./PictureHero";
 
 // Single-stream record explorer. One of the three GainForest record types
@@ -507,7 +508,7 @@ export function RecordExplorer({ kind }: { kind: RecordKind }) {
           ) : phase === "error" && records.length === 0 ? (
             <EmptyState
               title="Could not load this page"
-              body="GainForest did not respond. It may be a temporary issue; check the status page and try again."
+              body="GainForest did not respond. It may be a temporary issue; visit the status page and try again."
               onRetry={() => {
                 setPhase("idle");
                 setRecords([]);
@@ -552,26 +553,13 @@ export function RecordExplorer({ kind }: { kind: RecordKind }) {
         {/* Load more */}
         {records.length > 0 && !query && (
           <div className="mt-10 flex justify-center">
-            {hasMore ? (
-              <button
-                type="button"
-                onClick={() => load("more")}
-                disabled={phase === "more" || walking}
-                className="inline-flex items-center gap-2 rounded-full border border-border-soft bg-surface px-6 py-3 text-[14px] font-medium text-foreground transition-colors hover:border-primary/40 hover:bg-surface-sunken disabled:opacity-60"
-              >
-                {phase === "more" || walking ? (
-                  <>
-                    <Spinner /> Loading more
-                  </>
-                ) : (
-                  <>Show more</>
-                )}
-              </button>
-            ) : (
-              <span className="text-[13px] italic text-foreground/50">
-                You have reached the end.
-              </span>
-            )}
+            <AutoLoadMoreButton
+              hasMore={hasMore}
+              loading={phase === "more" || walking}
+              onLoadMore={() => load("more")}
+              className="inline-flex items-center gap-2 rounded-full border border-border-soft bg-surface px-6 py-3 text-[14px] font-medium text-foreground transition-colors hover:border-primary/40 hover:bg-surface-sunken disabled:opacity-60"
+              endClassName="text-[13px] italic text-foreground/50"
+            />
           </div>
         )}
       </div>
@@ -993,7 +981,7 @@ function StatBand({ stats }: { stats: Stat[] }) {
   return (
     <ul
       role="list"
-      className={`grid grid-cols-1 gap-4 sm:grid-cols-2 ${lg}`}
+      className={`grid grid-cols-2 gap-3 sm:gap-4 ${lg}`}
     >
       {stats.map((s) => (
         <StatCard

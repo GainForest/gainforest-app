@@ -237,24 +237,24 @@ function StatCard({
   accent?: boolean;
 }) {
   return (
-    <div className="group relative overflow-hidden rounded-3xl bg-foreground/5 p-6 backdrop-blur transition-all duration-300 hover:-translate-y-0.5 hover:bg-foreground/[0.07]">
+    <div className="group relative overflow-hidden rounded-2xl bg-foreground/5 p-4 backdrop-blur transition-all duration-300 hover:-translate-y-0.5 hover:bg-foreground/[0.07] sm:rounded-3xl sm:p-6">
       <div className="absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-primary/25 to-transparent" />
       <div className="min-w-0">
         <div className="flex items-center gap-2">
-          <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary ring-1 ring-primary/10 transition-transform duration-300 group-hover:scale-105 [&_svg]:size-3.5">
+          <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary ring-1 ring-primary/10 transition-transform duration-300 group-hover:scale-105 sm:size-7 [&_svg]:size-3 sm:[&_svg]:size-3.5">
             {icon}
           </span>
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">{label}</p>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground sm:text-xs sm:tracking-[0.16em]">{label}</p>
         </div>
         <div
           className={cn(
-            "mt-3 text-3xl font-semibold tracking-[-0.02em] tabular-nums",
+            "mt-2 text-2xl font-semibold tracking-[-0.02em] tabular-nums sm:mt-3 sm:text-3xl",
             accent ? "text-primary" : "text-foreground",
           )}
         >
           {value}
         </div>
-        <p className="mt-1 text-sm text-muted-foreground">{detail}</p>
+        <p className="mt-1 text-xs leading-snug text-muted-foreground sm:text-sm sm:leading-normal">{detail}</p>
       </div>
     </div>
   );
@@ -301,7 +301,7 @@ function StatsSummary({
   if (loading) return null;
 
   return (
-    <div className="grid gap-4 lg:grid-cols-3">
+    <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3">
       <StatCard
         label="Total Raised"
         value={formatCompactUsd(totalRaised)}

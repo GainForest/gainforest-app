@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { motion } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 
 function resolveImageSrc(coverImage: File | string): string {
@@ -71,13 +72,6 @@ export function BumicertCardVisual({
       typeof objective === "string" && objective.trim().length > 0,
   );
 
-  const objectivesToDisplay = [
-    normalizedObjectives[0],
-    normalizedObjectives.length > 1
-      ? `+${normalizedObjectives.length - 1}`
-      : null,
-  ].filter((objective): objective is string => typeof objective === "string");
-
   return (
     <motion.div
       className={cn(
@@ -112,28 +106,7 @@ export function BumicertCardVisual({
             </p>
           )}
         </div>
-        {objectivesToDisplay.length > 0 && (
-          <div className="w-full flex items-center gap-2 flex-wrap mt-4">
-            {objectivesToDisplay.map((obj) => {
-              return (
-                <span
-                  key={obj}
-                  className={cn(
-                    "text-sm text-muted-foreground bg-muted rounded-full px-2.5 py-1 font-medium",
-                    obj.startsWith("+") && "text-foreground",
-                  )}
-                  aria-label={
-                    obj.startsWith("+")
-                      ? `${normalizedObjectives.length - 1} additional objectives`
-                      : undefined
-                  }
-                >
-                  {obj}
-                </span>
-              );
-            })}
-          </div>
-        )}
+        {normalizedObjectives.length > 0 && <OneLineTextPillRow items={normalizedObjectives} />}
       </div>
 
       <div className="absolute top-2 left-2 bg-background/70 rounded-full p-1 backdrop-blur-lg shadow-lg flex items-center gap-1 min-w-0">
@@ -156,6 +129,111 @@ export function BumicertCardVisual({
         </motion.span>
       </div>
     </motion.div>
+  );
+}
+
+const PILL_GAP_PX = 8;
+
+function OneLineTextPillRow({ items }: { items: string[] }) {
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const itemRefs = useRef<Array<HTMLSpanElement | null>>([]);
+  const moreRefs = useRef<Array<HTMLSpanElement | null>>([]);
+  const [visibleCount, setVisibleCount] = useState(items.length);
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container || items.length === 0) return;
+
+    const measure = () => {
+      const width = container.getBoundingClientRect().width;
+      const itemWidths = items.map((_, index) => itemRefs.current[index]?.getBoundingClientRect().width ?? 0);
+      const allItemsWidth = itemWidths.reduce((sum, itemWidth) => sum + itemWidth, 0) + PILL_GAP_PX * Math.max(0, items.length - 1);
+
+      if (allItemsWidth <= width) {
+        setVisibleCount((current) => (current === items.length ? current : items.length));
+        return;
+      }
+
+      let nextVisibleCount = 0;
+      let visibleWidth = 0;
+      for (let count = 0; count < items.length; count += 1) {
+        const hiddenCount = items.length - count;
+        const moreWidth = moreRefs.current[hiddenCount]?.getBoundingClientRect().width ?? 0;
+        const totalWidth = visibleWidth + moreWidth + (count > 0 ? PILL_GAP_PX * count : 0);
+        if (totalWidth <= width) nextVisibleCount = count;
+        visibleWidth += itemWidths[count] ?? 0;
+      }
+
+      setVisibleCount((current) => (current === nextVisibleCount ? current : nextVisibleCount));
+    };
+
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(container);
+    return () => observer.disconnect();
+  }, [items]);
+
+  const hiddenCount = Math.max(0, items.length - visibleCount);
+
+  return (
+    <div ref={containerRef} className="relative mt-4 w-full overflow-hidden">
+      <div className="flex w-full flex-nowrap items-center gap-2">
+        {items.slice(0, visibleCount).map((item, index) => (
+          <TextPill key={`${item}-${index}`} text={item} />
+        ))}
+        {hiddenCount > 0 && <TextPill text={`+${hiddenCount}`} emphasis ariaLabel={`${hiddenCount} more objective${hiddenCount === 1 ? "" : "s"}`} />}
+      </div>
+
+      <div aria-hidden className="invisible pointer-events-none absolute left-0 top-0 flex flex-nowrap items-center gap-2">
+        {items.map((item, index) => (
+          <TextPill
+            key={`measure-${item}-${index}`}
+            text={item}
+            measureRef={(node) => {
+              itemRefs.current[index] = node;
+            }}
+          />
+        ))}
+        {items.map((_, index) => {
+          const hidden = index + 1;
+          return (
+            <TextPill
+              key={`measure-more-${hidden}`}
+              text={`+${hidden}`}
+              emphasis
+              measureRef={(node) => {
+                moreRefs.current[hidden] = node;
+              }}
+            />
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function TextPill({
+  text,
+  emphasis = false,
+  ariaLabel,
+  measureRef,
+}: {
+  text: string;
+  emphasis?: boolean;
+  ariaLabel?: string;
+  measureRef?: (node: HTMLSpanElement | null) => void;
+}) {
+  return (
+    <span
+      ref={measureRef}
+      aria-label={ariaLabel}
+      className={cn(
+        "inline-flex h-7 max-w-[11rem] shrink-0 items-center rounded-full bg-muted px-2.5 text-sm font-medium",
+        emphasis ? "text-foreground" : "text-muted-foreground",
+      )}
+    >
+      <span className="truncate">{text}</span>
+    </span>
   );
 }
 

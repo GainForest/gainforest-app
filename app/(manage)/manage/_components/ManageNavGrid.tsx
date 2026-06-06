@@ -60,7 +60,7 @@ const ORG_NAV_CARDS: NavCard[] = [
   {
     id: "bumicerts",
     label: "Bumicerts",
-    description: "Create and publish checked impact certificates.",
+    description: "Create and publish verified impact certificates.",
     href: "/manage/bumicerts",
     Icon: BumicertIcon,
   },

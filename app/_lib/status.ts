@@ -340,7 +340,7 @@ export function componentLabel(status: ComponentStatus): string {
     case "MAJOROUTAGE":
       return "Not working";
     default:
-      return "Checking";
+      return "Verifying";
   }
 }
 
@@ -371,7 +371,7 @@ export function pageLabel(page: PageStatus, degraded: boolean): string {
     case "DOWN":
       return "A service is not working";
     default:
-      return "Checking health";
+      return "Verifying health";
   }
 }
 

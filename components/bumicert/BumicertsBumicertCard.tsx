@@ -2,6 +2,8 @@
 
 import Image from "next/image";
 import { motion } from "framer-motion";
+import { CalendarDaysIcon, MapPinIcon, UsersIcon } from "lucide-react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { isPdsBlobUrl } from "@/app/_lib/pds";
 import { cn } from "@/lib/utils";
 
@@ -12,6 +14,7 @@ export type BumicertsBumicertCardRecord = {
   imageUrl: string | null;
   locationCount: number;
   contributorCount: number;
+  scopeTags?: string[];
   startDate: string | null;
   endDate: string | null;
 };
@@ -46,7 +49,7 @@ export function BumicertsBumicertCard({
   priority?: boolean;
   className?: string;
 }) {
-  const objectives = buildObjectiveLabels(record);
+  const objectives = buildObjectiveItems(record);
   const organizationName = "Project steward";
   const hasImage = Boolean(record.imageUrl);
 
@@ -89,21 +92,7 @@ export function BumicertsBumicertCard({
           ) : null}
         </div>
 
-        {objectives.length > 0 ? (
-          <div className="mt-4 flex w-full flex-wrap items-center gap-2">
-            {objectives.map((objective) => (
-              <span
-                key={objective}
-                className={cn(
-                  "rounded-full bg-muted px-2.5 py-1 text-sm font-medium",
-                  objective.startsWith("+") ? "text-foreground" : "text-muted-foreground",
-                )}
-              >
-                {objective}
-              </span>
-            ))}
-          </div>
-        ) : null}
+        {objectives.length > 0 ? <OneLinePillRow items={objectives} /> : null}
       </div>
 
       <div className="absolute left-2 top-2 flex min-w-0 items-center gap-1 rounded-full bg-background/70 p-1 shadow-lg backdrop-blur-lg">
@@ -123,10 +112,164 @@ export function BumicertsBumicertCard({
   );
 }
 
-function buildObjectiveLabels(record: BumicertsBumicertCardRecord): string[] {
-  const labels: string[] = [];
-  if (record.locationCount > 0) labels.push(`${record.locationCount} ${record.locationCount === 1 ? "place" : "places"}`);
-  if (record.contributorCount > 0) labels.push(`${record.contributorCount} ${record.contributorCount === 1 ? "contributor" : "contributors"}`);
-  if (record.startDate || record.endDate) labels.push("project dates");
-  return [labels[0], labels.length > 1 ? `+${labels.length - 1}` : null].filter((value): value is string => Boolean(value));
+type CardPill = {
+  key: string;
+  content: ReactNode;
+  ariaLabel?: string;
+  emphasis?: boolean;
+};
+
+const PILL_GAP_PX = 8;
+
+function OneLinePillRow({ items }: { items: CardPill[] }) {
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const itemRefs = useRef<Array<HTMLSpanElement | null>>([]);
+  const moreRefs = useRef<Array<HTMLSpanElement | null>>([]);
+  const [visibleCount, setVisibleCount] = useState(items.length);
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container || items.length === 0) return;
+
+    const measure = () => {
+      const width = container.getBoundingClientRect().width;
+      const itemWidths = items.map((_, index) => itemRefs.current[index]?.getBoundingClientRect().width ?? 0);
+      const allItemsWidth = itemWidths.reduce((sum, itemWidth) => sum + itemWidth, 0) + PILL_GAP_PX * Math.max(0, items.length - 1);
+
+      if (allItemsWidth <= width) {
+        setVisibleCount((current) => (current === items.length ? current : items.length));
+        return;
+      }
+
+      let nextVisibleCount = 0;
+      let visibleWidth = 0;
+      for (let count = 0; count < items.length; count += 1) {
+        const hiddenCount = items.length - count;
+        const moreWidth = moreRefs.current[hiddenCount]?.getBoundingClientRect().width ?? 0;
+        const totalWidth = visibleWidth + moreWidth + (count > 0 ? PILL_GAP_PX * count : 0);
+        if (totalWidth <= width) nextVisibleCount = count;
+        visibleWidth += itemWidths[count] ?? 0;
+      }
+
+      setVisibleCount((current) => (current === nextVisibleCount ? current : nextVisibleCount));
+    };
+
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(container);
+    return () => observer.disconnect();
+  }, [items]);
+
+  const hiddenCount = Math.max(0, items.length - visibleCount);
+
+  return (
+    <div ref={containerRef} className="relative mt-4 w-full overflow-hidden">
+      <div className="flex w-full flex-nowrap items-center gap-2">
+        {items.slice(0, visibleCount).map((item) => (
+          <Pill key={item.key} item={item} />
+        ))}
+        {hiddenCount > 0 ? (
+          <Pill
+            item={{
+              key: "more",
+              content: `+${hiddenCount}`,
+              ariaLabel: `${hiddenCount} more project detail${hiddenCount === 1 ? "" : "s"}`,
+              emphasis: true,
+            }}
+          />
+        ) : null}
+      </div>
+
+      <div aria-hidden className="invisible pointer-events-none absolute left-0 top-0 flex flex-nowrap items-center gap-2">
+        {items.map((item, index) => (
+          <Pill
+            key={`measure-${item.key}`}
+            item={item}
+            measureRef={(node) => {
+              itemRefs.current[index] = node;
+            }}
+          />
+        ))}
+        {items.map((_, index) => {
+          const hidden = index + 1;
+          return (
+            <Pill
+              key={`measure-more-${hidden}`}
+              item={{ key: `more-${hidden}`, content: `+${hidden}`, emphasis: true }}
+              measureRef={(node) => {
+                moreRefs.current[hidden] = node;
+              }}
+            />
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function Pill({ item, measureRef }: { item: CardPill; measureRef?: (node: HTMLSpanElement | null) => void }) {
+  return (
+    <span
+      ref={measureRef}
+      aria-label={item.ariaLabel}
+      className={cn(
+        "inline-flex h-7 max-w-[11rem] shrink-0 items-center gap-1.5 rounded-full bg-muted px-2.5 text-sm font-medium",
+        item.emphasis ? "text-foreground" : "text-muted-foreground",
+      )}
+    >
+      {item.content}
+    </span>
+  );
+}
+
+function buildObjectiveItems(record: BumicertsBumicertCardRecord): CardPill[] {
+  const items: CardPill[] = (record.scopeTags ?? []).map((tag, index) => ({
+    key: `scope-${index}-${tag}`,
+    content: <span className="truncate">{formatScopeTag(tag)}</span>,
+  }));
+
+  if (record.locationCount > 0) {
+    items.push({
+      key: "places",
+      content: (
+        <>
+          <MapPinIcon className="h-3.5 w-3.5" aria-hidden />
+          <span>{formatCompactCount(record.locationCount)}</span>
+        </>
+      ),
+      ariaLabel: `${record.locationCount} project place${record.locationCount === 1 ? "" : "s"}`,
+    });
+  }
+
+  if (record.contributorCount > 0) {
+    items.push({
+      key: "contributors",
+      content: (
+        <>
+          <UsersIcon className="h-3.5 w-3.5" aria-hidden />
+          <span>{formatCompactCount(record.contributorCount)}</span>
+        </>
+      ),
+      ariaLabel: `${record.contributorCount} contributor${record.contributorCount === 1 ? "" : "s"}`,
+    });
+  }
+
+  if (record.startDate || record.endDate) {
+    items.push({
+      key: "dates",
+      content: <CalendarDaysIcon className="h-3.5 w-3.5" aria-hidden />,
+      ariaLabel: "Project dates added",
+    });
+  }
+
+  return items;
+}
+
+function formatScopeTag(tag: string): string {
+  const clean = tag.replace(/[_-]+/g, " ").replace(/\s+/g, " ").trim();
+  return clean ? clean.charAt(0).toUpperCase() + clean.slice(1) : tag;
+}
+
+function formatCompactCount(value: number): string {
+  return new Intl.NumberFormat("en", { notation: value >= 10000 ? "compact" : "standard" }).format(value);
 }

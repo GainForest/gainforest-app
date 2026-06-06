@@ -4,16 +4,20 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 import {
   ArrowUpDownIcon,
+  CalendarDaysIcon,
   ChevronDownIcon,
   ImageIcon,
   LayoutGridIcon,
   LeafIcon,
   MapIcon,
+  MapPinIcon,
   SearchIcon,
   SlidersHorizontalIcon,
   UsersIcon,
 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { Button } from "@/components/ui/button";
+import { AutoLoadMoreButton } from "../_components/AutoLoadMoreButton";
 import { RecordDrawer } from "../_components/RecordDrawer";
 import { RecordMap } from "../_components/RecordMap";
 import { StatsTileGrid } from "../_components/StatsTile";
@@ -50,7 +54,10 @@ const SORT_LABELS: Record<SortMode, string> = Object.fromEntries(
 
 export function BumicertsExploreClient({ records: initialRecords = [] }: { records?: BumicertRecord[] }) {
   const [records, setRecords] = useState<BumicertRecord[]>(initialRecords);
+  const [cursor, setCursor] = useState<string | null>(null);
+  const [hasMore, setHasMore] = useState(initialRecords.length === 0);
   const [loading, setLoading] = useState(initialRecords.length === 0);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState<SortMode>("newest");
   const [openSort, setOpenSort] = useState(false);
@@ -58,6 +65,7 @@ export function BumicertsExploreClient({ records: initialRecords = [] }: { recor
   const [filters, setFilters] = useState<FilterKey[]>(["images"]);
   const [view, setView] = useState<ViewMode>("cards");
   const [drawer, setDrawer] = useState<BumicertRecord | null>(null);
+  const filtersMenuRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     if (initialRecords.length > 0) return;
@@ -69,6 +77,8 @@ export function BumicertsExploreClient({ records: initialRecords = [] }: { recor
     })
       .then((page) => {
         setRecords(page.records);
+        setCursor(page.cursor);
+        setHasMore(page.hasMore);
         setLoading(false);
       })
       .catch((error) => {
@@ -108,38 +118,77 @@ export function BumicertsExploreClient({ records: initialRecords = [] }: { recor
       {
         label: "Projects shown",
         value: visibleRecords.length,
-        detail: "ready to explore",
+        detail: "Bumicerts shown",
       },
       {
         label: "Certified places",
         value: visibleRecords.reduce((sum, record) => sum + record.locationCount, 0),
-        detail: "project locations",
+        detail: "project places linked",
       },
       {
         label: "Contributors",
         value: visibleRecords.reduce((sum, record) => sum + record.contributorCount, 0),
-        detail: "people credited",
+        detail: "contributors credited",
       },
       {
         label: "Project photos",
         value: visibleRecords.filter((record) => record.imageUrl).length,
-        detail: "visual stories",
+        detail: "Bumicerts with photos",
       },
     ],
     [visibleRecords],
   );
 
-  const toggleFilter = (key: FilterKey) => {
+  useEffect(() => {
+    if (!openFilters) return;
+
+    const handlePointerDown = (event: PointerEvent) => {
+      if (filtersMenuRef.current?.contains(event.target as Node)) return;
+      setOpenFilters(false);
+    };
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setOpenFilters(false);
+    };
+
+    document.addEventListener("pointerdown", handlePointerDown);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("pointerdown", handlePointerDown);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [openFilters]);
+
+  const toggleFilter = useCallback((key: FilterKey) => {
     setFilters((current) =>
       current.includes(key) ? current.filter((value) => value !== key) : [...current, key],
     );
-  };
+  }, []);
 
-  const clearFilters = () => setFilters([]);
-  const openRecord = (record: BumicertRecord) => setDrawer(record);
-  const openMapRecord = (record: ExplorerRecord) => {
+  const clearFilters = useCallback(() => setFilters([]), []);
+  const loadMore = useCallback(() => {
+    if (loading || loadingMore || !hasMore) return;
+
+    const controller = new AbortController();
+    const base = records;
+    setLoadingMore(true);
+    fetchBumicerts(1000, cursor, controller.signal, (running) => {
+      setRecords(mergeBumicertRecords(base, running));
+    })
+      .then((page) => {
+        setRecords(mergeBumicertRecords(base, page.records));
+        setCursor(page.cursor);
+        setHasMore(page.hasMore);
+      })
+      .catch((error) => {
+        if ((error as Error).name !== "AbortError") console.warn("[bumicerts] load more failed", error);
+      })
+      .finally(() => setLoadingMore(false));
+  }, [cursor, hasMore, loading, loadingMore, records]);
+  const openRecord = useCallback((record: BumicertRecord) => setDrawer(record), []);
+  const openMapRecord = useCallback((record: ExplorerRecord) => {
     if (record.kind === "bumicert") setDrawer(record);
-  };
+  }, []);
 
   return (
     <>
@@ -283,91 +332,81 @@ export function BumicertsExploreClient({ records: initialRecords = [] }: { recor
                   ))}
                 </div>
 
-                <div className="scrollbar-hidden min-w-0 flex-1 overflow-x-auto pb-px">
+                <div className="scrollbar-hidden hidden min-w-0 flex-1 overflow-x-auto pb-px sm:block">
                   <div className="flex items-center gap-2">
-                    <button
+                    <Button
                       type="button"
                       onClick={clearFilters}
-                      className={`shrink-0 whitespace-nowrap rounded-full border px-4 py-2 text-xs font-medium transition-all ${
-                        filters.length === 0
-                          ? "border-primary bg-primary text-primary-foreground shadow-[0_8px_18px_color-mix(in_oklab,var(--primary)_18%,transparent)]"
-                          : "border-border bg-card/85 text-muted-foreground hover:border-primary/35 hover:text-foreground"
-                      }`}
+                      variant={filters.length === 0 ? "default" : "outline"}
+                      size="sm"
                     >
                       All Projects
-                    </button>
+                    </Button>
                     {FILTER_CHIPS.map((chip) => {
                       const selected = filters.includes(chip.key);
                       return (
-                        <button
+                        <Button
                           key={chip.key}
                           type="button"
                           onClick={() => toggleFilter(chip.key)}
-                          className={`shrink-0 whitespace-nowrap rounded-full border px-4 py-2 text-xs font-medium transition-all ${
-                            selected
-                              ? "border-primary bg-primary text-primary-foreground shadow-[0_8px_18px_color-mix(in_oklab,var(--primary)_18%,transparent)]"
-                              : "border-border bg-card/85 text-muted-foreground hover:border-primary/35 hover:text-foreground"
-                          }`}
+                          variant={selected ? "default" : "outline"}
+                          size="sm"
                         >
                           {chip.label}
-                        </button>
+                        </Button>
                       );
                     })}
                   </div>
                 </div>
 
-                <div className="relative shrink-0">
-                  <button
+                <div ref={filtersMenuRef} className="relative shrink-0">
+                  <Button
                     type="button"
                     onClick={() => setOpenFilters((value) => !value)}
-                    className={`flex h-10 shrink-0 items-center gap-2 rounded-full border px-4 text-xs font-medium transition-all ${
-                      filters.length > 0
-                        ? "border-primary/50 bg-primary/5 text-foreground"
-                        : "border-border text-muted-foreground hover:border-foreground/50 hover:text-foreground"
-                    }`}
+                    aria-haspopup="true"
+                    aria-expanded={openFilters}
+                    variant={openFilters || filters.length > 0 ? "default" : "outline"}
+                    size="sm"
                   >
                     <SlidersHorizontalIcon className="h-3.5 w-3.5" />
                     <span>All filters</span>
                     {filters.length > 0 && (
-                      <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] text-primary-foreground">
+                      <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-primary-foreground px-1 text-[10px] text-primary">
                         {filters.length}
                       </span>
                     )}
-                  </button>
+                  </Button>
 
                   {openFilters && (
-                    <div className="absolute right-0 top-full z-30 mt-2 w-72 rounded-2xl border border-border bg-popover p-4 shadow-xl animate-in">
+                    <div
+                      aria-label="All filters"
+                      className="quick-popover-in absolute right-0 top-full z-30 mt-2 w-[min(18rem,calc(100vw-2rem))] rounded-2xl border border-primary/20 bg-popover p-4 shadow-[0_18px_45px_color-mix(in_oklab,var(--primary)_16%,transparent)]"
+                    >
                       <div className="mb-3">
                         <h2 className="text-base font-medium text-foreground">All Filters</h2>
                         <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-                          Filter projects by organization, country, or impact area
+                          Show projects that include photos, project places, contributors, or active dates.
                         </p>
                       </div>
                       <div className="flex flex-wrap gap-2">
                         {FILTER_CHIPS.map((chip) => (
-                          <button
+                          <Button
                             key={chip.key}
+                            type="button"
+                            aria-pressed={filters.includes(chip.key)}
                             onClick={() => toggleFilter(chip.key)}
-                            className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-all ${
-                              filters.includes(chip.key)
-                                ? "border-foreground bg-foreground text-background"
-                                : "border-border text-muted-foreground hover:border-foreground/50"
-                            }`}
+                            variant={filters.includes(chip.key) ? "default" : "outline"}
+                            size="sm"
                           >
                             {chip.label}
-                          </button>
+                          </Button>
                         ))}
                       </div>
-                      <div className="mt-4 flex items-center justify-between border-t border-border pt-3">
-                        <button onClick={clearFilters} className="text-sm text-muted-foreground transition-colors hover:text-foreground">
+                      <div className="mt-4 flex items-center justify-between border-t border-primary/15 pt-3">
+                        <p className="text-xs text-accent-foreground/75">Filters update as you choose.</p>
+                        <Button type="button" onClick={clearFilters} variant="ghost" size="sm">
                           Clear all
-                        </button>
-                        <button
-                          onClick={() => setOpenFilters(false)}
-                          className="h-10 rounded-full bg-primary px-5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-                        >
-                          {filters.length > 0 ? `Apply filters (${filters.length})` : "Apply filters"}
-                        </button>
+                        </Button>
                       </div>
                     </div>
                   )}
@@ -383,6 +422,18 @@ export function BumicertsExploreClient({ records: initialRecords = [] }: { recor
               <BumicertGrid records={visibleRecords} loading={loading} onOpen={openRecord} />
             )}
           </div>
+
+          {records.length > 0 && (
+            <div className="mt-10 flex justify-center">
+              <AutoLoadMoreButton
+                hasMore={hasMore}
+                loading={loadingMore}
+                onLoadMore={loadMore}
+                className="inline-flex items-center justify-center rounded-full border border-border bg-background px-6 py-3 text-sm font-medium text-foreground transition-colors hover:bg-muted disabled:opacity-60"
+                endClassName="text-sm italic text-muted-foreground"
+              />
+            </div>
+          )}
         </div>
       </section>
       <RecordDrawer record={drawer} onClose={() => setDrawer(null)} />
@@ -450,7 +501,12 @@ function formatStat(value: number): string {
   return new Intl.NumberFormat("en", { notation: value >= 10000 ? "compact" : "standard" }).format(value);
 }
 
-function BumicertGrid({
+function mergeBumicertRecords(base: BumicertRecord[], incoming: BumicertRecord[]): BumicertRecord[] {
+  const seen = new Set(base.map((record) => record.id));
+  return [...base, ...incoming.filter((record) => !seen.has(record.id))];
+}
+
+const BumicertGrid = memo(function BumicertGrid({
   records,
   loading,
   onOpen,
@@ -509,7 +565,7 @@ function BumicertGrid({
       ))}
     </div>
   );
-}
+});
 
 function BumicertGridSkeleton() {
   return (
@@ -528,8 +584,8 @@ function BumicertGridSkeleton() {
   );
 }
 
-function BumicertCardVisual({ record, priority }: { record: BumicertRecord; priority: boolean }) {
-  const objectives = buildObjectiveLabels(record);
+const BumicertCardVisual = memo(function BumicertCardVisual({ record, priority }: { record: BumicertRecord; priority: boolean }) {
+  const objectives = useMemo(() => buildObjectiveItems(record), [record]);
   const organizationName = "Project steward";
   const [imgError, setImgError] = useState(false);
   const hasImage = Boolean(record.imageUrl) && !imgError;
@@ -571,20 +627,7 @@ function BumicertCardVisual({ record, priority }: { record: BumicertRecord; prio
           )}
         </div>
 
-        {objectives.length > 0 && (
-          <div className="mt-4 flex w-full flex-wrap items-center gap-2">
-            {objectives.map((objective) => (
-              <span
-                key={objective}
-                className={`rounded-full bg-muted px-2.5 py-1 text-sm font-medium ${
-                  objective.startsWith("+") ? "text-foreground" : "text-muted-foreground"
-                }`}
-              >
-                {objective}
-              </span>
-            ))}
-          </div>
-        )}
+        {objectives.length > 0 && <OneLinePillRow items={objectives} />}
       </div>
 
       <div className="absolute left-2 top-2 flex min-w-0 items-center gap-1 rounded-full bg-background/70 p-1 shadow-lg backdrop-blur-lg">
@@ -602,14 +645,169 @@ function BumicertCardVisual({ record, priority }: { record: BumicertRecord; prio
       </div>
     </motion.div>
   );
+});
+
+type CardPill = {
+  key: string;
+  content: ReactNode;
+  ariaLabel?: string;
+  emphasis?: boolean;
+};
+
+const PILL_GAP_PX = 8;
+
+function OneLinePillRow({ items }: { items: CardPill[] }) {
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const itemRefs = useRef<Array<HTMLSpanElement | null>>([]);
+  const moreRefs = useRef<Array<HTMLSpanElement | null>>([]);
+  const [visibleCount, setVisibleCount] = useState(items.length);
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container || items.length === 0) return;
+
+    const measure = () => {
+      const width = container.getBoundingClientRect().width;
+      const itemWidths = items.map((_, index) => itemRefs.current[index]?.getBoundingClientRect().width ?? 0);
+      const allItemsWidth = itemWidths.reduce((sum, itemWidth) => sum + itemWidth, 0) + PILL_GAP_PX * Math.max(0, items.length - 1);
+
+      if (allItemsWidth <= width) {
+        setVisibleCount((current) => (current === items.length ? current : items.length));
+        return;
+      }
+
+      let nextVisibleCount = 0;
+      let visibleWidth = 0;
+      for (let count = 0; count < items.length; count += 1) {
+        const hiddenCount = items.length - count;
+        const moreWidth = moreRefs.current[hiddenCount]?.getBoundingClientRect().width ?? 0;
+        const totalWidth = visibleWidth + moreWidth + (count > 0 ? PILL_GAP_PX * count : 0);
+        if (totalWidth <= width) nextVisibleCount = count;
+        visibleWidth += itemWidths[count] ?? 0;
+      }
+
+      setVisibleCount((current) => (current === nextVisibleCount ? current : nextVisibleCount));
+    };
+
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(container);
+    return () => observer.disconnect();
+  }, [items]);
+
+  const hiddenCount = Math.max(0, items.length - visibleCount);
+
+  return (
+    <div ref={containerRef} className="relative mt-4 w-full overflow-hidden">
+      <div className="flex w-full flex-nowrap items-center gap-2">
+        {items.slice(0, visibleCount).map((item) => (
+          <Pill key={item.key} item={item} />
+        ))}
+        {hiddenCount > 0 && (
+          <Pill
+            item={{
+              key: "more",
+              content: `+${hiddenCount}`,
+              ariaLabel: `${hiddenCount} more project detail${hiddenCount === 1 ? "" : "s"}`,
+              emphasis: true,
+            }}
+          />
+        )}
+      </div>
+
+      <div aria-hidden className="invisible pointer-events-none absolute left-0 top-0 flex flex-nowrap items-center gap-2">
+        {items.map((item, index) => (
+          <Pill
+            key={`measure-${item.key}`}
+            item={item}
+            measureRef={(node) => {
+              itemRefs.current[index] = node;
+            }}
+          />
+        ))}
+        {items.map((_, index) => {
+          const hidden = index + 1;
+          return (
+            <Pill
+              key={`measure-more-${hidden}`}
+              item={{ key: `more-${hidden}`, content: `+${hidden}`, emphasis: true }}
+              measureRef={(node) => {
+                moreRefs.current[hidden] = node;
+              }}
+            />
+          );
+        })}
+      </div>
+    </div>
+  );
 }
 
-function buildObjectiveLabels(record: BumicertRecord): string[] {
-  const labels: string[] = [];
-  if (record.locationCount > 0) labels.push(`${record.locationCount} ${record.locationCount === 1 ? "place" : "places"}`);
-  if (record.contributorCount > 0) labels.push(`${record.contributorCount} ${record.contributorCount === 1 ? "contributor" : "contributors"}`);
-  if (record.startDate || record.endDate) labels.push("project dates");
-  return [labels[0], labels.length > 1 ? `+${labels.length - 1}` : null].filter((value): value is string => Boolean(value));
+function Pill({
+  item,
+  measureRef,
+}: {
+  item: CardPill;
+  measureRef?: (node: HTMLSpanElement | null) => void;
+}) {
+  return (
+    <span
+      ref={measureRef}
+      aria-label={item.ariaLabel}
+      className={`inline-flex h-7 max-w-[11rem] shrink-0 items-center gap-1.5 rounded-full bg-muted px-2.5 text-sm font-medium ${
+        item.emphasis ? "text-foreground" : "text-muted-foreground"
+      }`}
+    >
+      {item.content}
+    </span>
+  );
+}
+
+function buildObjectiveItems(record: BumicertRecord): CardPill[] {
+  const items: CardPill[] = (record.scopeTags ?? []).map((tag, index) => ({
+    key: `scope-${index}-${tag}`,
+    content: <span className="truncate">{formatScopeTag(tag)}</span>,
+  }));
+
+  if (record.locationCount > 0) {
+    items.push({
+      key: "places",
+      content: (
+        <>
+          <MapPinIcon className="h-3.5 w-3.5" aria-hidden />
+          <span>{formatStat(record.locationCount)}</span>
+        </>
+      ),
+      ariaLabel: `${record.locationCount} project place${record.locationCount === 1 ? "" : "s"}`,
+    });
+  }
+
+  if (record.contributorCount > 0) {
+    items.push({
+      key: "contributors",
+      content: (
+        <>
+          <UsersIcon className="h-3.5 w-3.5" aria-hidden />
+          <span>{formatStat(record.contributorCount)}</span>
+        </>
+      ),
+      ariaLabel: `${record.contributorCount} contributor${record.contributorCount === 1 ? "" : "s"}`,
+    });
+  }
+
+  if (record.startDate || record.endDate) {
+    items.push({
+      key: "dates",
+      content: <CalendarDaysIcon className="h-3.5 w-3.5" aria-hidden />,
+      ariaLabel: "Project dates added",
+    });
+  }
+
+  return items;
+}
+
+function formatScopeTag(tag: string): string {
+  const clean = tag.replace(/[_-]+/g, " ").replace(/\s+/g, " ").trim();
+  return clean ? clean.charAt(0).toUpperCase() + clean.slice(1) : tag;
 }
 
 const orgLabelTextVariants = {

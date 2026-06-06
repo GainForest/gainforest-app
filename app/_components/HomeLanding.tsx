@@ -26,7 +26,7 @@ type HomeLandingProps = {
 const FEATURE_ITEMS = [
   {
     number: "01",
-    title: "Checked environmental impact",
+    title: "Verified environmental impact",
     description: "Every certificate is backed by photos, map locations, and community review.",
   },
   {
@@ -38,7 +38,7 @@ const FEATURE_ITEMS = [
     number: "03",
     title: "Clear and trustworthy",
     description:
-      "Your restoration work is easy to check and simple to share with donors and communities.",
+      "Your restoration work is easy to verify and simple to share with donors and communities.",
   },
 ] as const;
 
@@ -51,7 +51,7 @@ const OPTION_CARDS = [
     label: "For Funders",
     title: "I want to support",
     emphasis: "a project",
-    description: "Browse checked certificates and fund a real restoration moment.",
+    description: "Browse verified certificates and fund a real restoration moment.",
     cta: "Explore Bumicerts",
   },
   {
@@ -78,7 +78,7 @@ const FAQ_ITEMS = [
     key: "evidence",
     question: "Backed by real evidence",
     answer:
-      "Photos, map locations, dates, and field updates help people check what happened. This isn't a promise about the future — it's proof of work already done.",
+      "Photos, map locations, dates, and field updates help people verify what happened. This isn't a promise about the future — it's proof of work already done.",
   },
   {
     key: "communities",
@@ -209,7 +209,7 @@ function LandingHero() {
             className="flex max-w-[620px] flex-col items-center text-center md:items-start md:text-left"
           >
             <h1 className="font-garamond text-5xl leading-[1.08] font-medium tracking-[-0.02em] text-foreground md:text-7xl">
-              <span className="relative inline-block">Checked Impact</span>
+              <span className="relative inline-block">Verified Impact</span>
               <br />
               <span className="relative inline-block">starts with</span>
               <br />
@@ -241,7 +241,7 @@ function LandingHero() {
               transition={{ duration: 0.65, delay: 0.38, ease: [0.25, 0.1, 0.25, 1] }}
               className="mt-6 max-w-[500px] text-lg leading-relaxed text-foreground/80 md:mt-8 md:text-xl"
             >
-              Fund regenerative projects directly. Every Bumicert is a checked story of real environmental work —
+              Fund regenerative projects directly. Every Bumicert is a verified story of real environmental work —
               backed by photos, places, and community stewards.
             </motion.p>
 
@@ -302,7 +302,7 @@ function HomeStats({ kpis }: { kpis: ExplorerKpis | null }) {
     {
       value: formatCompact(kpis.bumicerts),
       label: "Bumicerts",
-      detail: "checked project stories",
+      detail: "Bumicerts shared",
       href: "/bumicerts",
       icon: <CompassIcon />,
       accent: true,
@@ -310,21 +310,21 @@ function HomeStats({ kpis }: { kpis: ExplorerKpis | null }) {
     {
       value: formatCompact(kpis.sites),
       label: "Organizations",
-      detail: "nature stewards",
+      detail: "organization profiles",
       href: "/organizations",
       icon: <Building2Icon />,
     },
     {
       value: formatCompact(kpis.occurrences),
       label: "Observations",
-      detail: "nature sightings",
+      detail: "nature sightings shared",
       href: "/observations",
       icon: <BinocularsIcon />,
     },
     {
       value: formatCompactUsd(kpis.totalRaised),
       label: "Funding raised",
-      detail: "direct support tracked",
+      detail: "raised for projects",
       href: "/leaderboard",
       icon: <DollarSignIcon />,
       accent: true,

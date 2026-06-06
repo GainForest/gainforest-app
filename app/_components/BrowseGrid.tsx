@@ -30,9 +30,9 @@ export function BrowseGrid({
   }> = [
     {
       href: "/bumicerts",
-      label: "Checked projects",
+      label: "Verified projects",
       title: "Bumicerts",
-      blurb: "Browse checked impact stories with photos, places, contributors, and project context.",
+      blurb: "Browse verified impact stories with photos, places, contributors, and project context.",
       stat: formatCompact(kpis.bumicerts),
       statLabel: "stories",
     },
@@ -64,7 +64,7 @@ export function BrowseGrid({
       href: "/devices",
       label: "Field signals",
       title: "Tainá devices",
-      blurb: "Check whether field devices are sending updates right now.",
+      blurb: "Verify whether field devices are sending updates right now.",
       stat: devices.configured && devices.total > 0 ? `${devices.healthy}/${devices.total}` : "—",
       statLabel: devices.configured && devices.total > 0 ? "live now" : "heartbeats",
     },

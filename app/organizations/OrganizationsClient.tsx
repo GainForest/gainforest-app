@@ -15,7 +15,9 @@ import {
   UsersIcon,
   XIcon,
 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { AutoLoadMoreButton } from "../_components/AutoLoadMoreButton";
 import { RecordDrawer } from "../_components/RecordDrawer";
 import { RecordMap } from "../_components/RecordMap";
 import { StatsTileGrid } from "../_components/StatsTile";
@@ -47,7 +49,10 @@ const QUICK_CHIPS: Array<{ value: QuickFilter; label: string; Icon: typeof Image
 
 export function OrganizationsClient({ records: initialRecords = [] }: { records?: SiteRecord[] }) {
   const [records, setRecords] = useState<SiteRecord[]>(initialRecords);
+  const [cursor, setCursor] = useState<string | null>(null);
+  const [hasMore, setHasMore] = useState(initialRecords.length === 0);
   const [loading, setLoading] = useState(initialRecords.length === 0);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState<SortMode>("newest");
   const [sourceFilter, setSourceFilter] = useState<SourceFilter>("both");
@@ -68,6 +73,8 @@ export function OrganizationsClient({ records: initialRecords = [] }: { records?
     })
       .then((page) => {
         setRecords(page.records);
+        setCursor(page.cursor);
+        setHasMore(page.hasMore);
         setLoading(false);
       })
       .catch((error) => {
@@ -130,21 +137,21 @@ export function OrganizationsClient({ records: initialRecords = [] }: { records?
 
   const stats = useMemo(
     () => [
-      { label: "Organizations", value: visibleRecords.length, detail: "ready to explore" },
+      { label: "Organizations", value: visibleRecords.length, detail: "organizations shown" },
       {
         label: "Countries",
         value: new Set(visibleRecords.map((record) => normalizeCountry(record.country)).filter(Boolean)).size,
-        detail: "local communities",
+        detail: "countries represented",
       },
       {
         label: "With photos",
         value: visibleRecords.filter(hasPhoto).length,
-        detail: "visual profiles",
+        detail: "profiles with photos",
       },
       {
         label: "Mapped places",
         value: visibleRecords.filter(hasMappableLocation).length,
-        detail: "shown on the map",
+        detail: "places shown on map",
       },
     ],
     [visibleRecords],
@@ -170,6 +177,26 @@ export function OrganizationsClient({ records: initialRecords = [] }: { records?
     setTypeFilter(null);
     setQuickFilters([]);
   };
+
+  const loadMore = useCallback(() => {
+    if (loading || loadingMore || !hasMore) return;
+
+    const controller = new AbortController();
+    const base = records;
+    setLoadingMore(true);
+    fetchSites(1000, cursor, controller.signal, (running) => {
+      setRecords(mergeSiteRecords(base, running));
+    })
+      .then((page) => {
+        setRecords(mergeSiteRecords(base, page.records));
+        setCursor(page.cursor);
+        setHasMore(page.hasMore);
+      })
+      .catch((error) => {
+        if ((error as Error).name !== "AbortError") console.warn("[organizations] load more failed", error);
+      })
+      .finally(() => setLoadingMore(false));
+  }, [cursor, hasMore, loading, loadingMore, records]);
 
   const openMapRecord = (record: ExplorerRecord) => {
     if (record.kind === "site") setDrawer(record);
@@ -265,14 +292,10 @@ export function OrganizationsClient({ records: initialRecords = [] }: { records?
                 </FilterChip>
               ))}
               {hasActiveFilters && (
-                <button
-                  type="button"
-                  onClick={clearAll}
-                  className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground transition-all hover:border-foreground/50 hover:text-foreground"
-                >
+                <Button type="button" onClick={clearAll} variant="outline" size="sm">
                   <XIcon className="h-3.5 w-3.5" />
                   Clear filters
-                </button>
+                </Button>
               )}
             </ChipRow>
 
@@ -322,6 +345,18 @@ export function OrganizationsClient({ records: initialRecords = [] }: { records?
               {visibleRecords.map((record) => (
                 <OrganizationCard key={record.id} record={record} onOpen={setDrawer} />
               ))}
+            </div>
+          )}
+
+          {records.length > 0 && (
+            <div className="mt-10 flex justify-center">
+              <AutoLoadMoreButton
+                hasMore={hasMore}
+                loading={loadingMore}
+                onLoadMore={loadMore}
+                className="inline-flex items-center justify-center rounded-full border border-border bg-background px-6 py-3 text-sm font-medium text-foreground transition-colors hover:bg-muted disabled:opacity-60"
+                endClassName="text-sm italic text-muted-foreground"
+              />
             </div>
           )}
         </div>
@@ -429,17 +464,9 @@ function FilterChip({
   children: React.ReactNode;
 }) {
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`inline-flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium whitespace-nowrap transition-all ${
-        selected
-          ? "border-foreground bg-foreground text-background"
-          : "border-border text-muted-foreground hover:border-foreground/50 hover:text-foreground"
-      }`}
-    >
+    <Button type="button" onClick={onClick} variant={selected ? "default" : "outline"} size="sm">
       {children}
-    </button>
+    </Button>
   );
 }
 
@@ -661,6 +688,11 @@ function hasMappableLocation(record: SiteRecord): boolean {
 
 function formatStat(value: number): string {
   return new Intl.NumberFormat("en", { notation: value >= 10000 ? "compact" : "standard" }).format(value);
+}
+
+function mergeSiteRecords(base: SiteRecord[], incoming: SiteRecord[]): SiteRecord[] {
+  const seen = new Set(base.map((record) => record.id));
+  return [...base, ...incoming.filter((record) => !seen.has(record.id))];
 }
 
 function initials(name: string): string {

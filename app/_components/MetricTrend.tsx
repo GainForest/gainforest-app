@@ -382,7 +382,7 @@ export function StatCard({
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
           <div className="flex items-center gap-1.5">
-            <span className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+            <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground sm:text-xs sm:tracking-[0.16em]">
               {label}
             </span>
             {hasSeries && (
@@ -401,21 +401,21 @@ export function StatCard({
             )}
           </div>
           <div
-            className={`mt-1 text-3xl font-semibold tracking-[-0.02em] tabular-nums text-foreground ${
+            className={`mt-1 text-2xl font-semibold tracking-[-0.02em] tabular-nums text-foreground sm:text-3xl ${
               hasSeries ? "transition-colors group-hover:text-primary" : ""
             }`}
           >
             {value}
           </div>
-          <div className="mt-1 text-sm text-muted-foreground">{sub}</div>
+          <div className="mt-1 text-xs leading-snug text-muted-foreground sm:text-sm sm:leading-normal">{sub}</div>
         </div>
-        {hasSeries && <Sparkline values={series!.values} className="h-10 w-20 shrink-0 self-center" />}
+        {hasSeries && <Sparkline values={series!.values} className="hidden h-10 w-20 shrink-0 self-center sm:block" />}
       </div>
     </>
   );
 
   return (
-    <li className="group relative overflow-hidden rounded-3xl bg-foreground/5 p-6 backdrop-blur transition-all duration-300 hover:-translate-y-0.5 hover:bg-foreground/[0.07]">
+    <li className="group relative overflow-hidden rounded-2xl bg-foreground/5 p-4 backdrop-blur transition-all duration-300 hover:-translate-y-0.5 hover:bg-foreground/[0.07] sm:rounded-3xl sm:p-6">
       {hasSeries ? (
         <button
           type="button"

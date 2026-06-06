@@ -112,7 +112,7 @@ export default function PreviewStep({ parsedData, mappings, koboMediaZipIndex, s
   return (
     <div className="space-y-5">
       <div>
-        <h2 className="text-lg font-semibold">Review & Check</h2>
+        <h2 className="text-lg font-semibold">Review & Verify</h2>
         <p className="text-sm text-muted-foreground mt-0.5">Review your tree information before saving.</p>
       </div>
 
@@ -125,7 +125,7 @@ export default function PreviewStep({ parsedData, mappings, koboMediaZipIndex, s
       ) : boundaryLoading ? (
         <div className="flex items-center gap-2 rounded-md border border-yellow-500/40 bg-yellow-500/10 p-3 text-sm text-yellow-600 dark:text-yellow-400">
           <AlertTriangle className="h-4 w-4 shrink-0" />
-          <span>Checking project area for {siteSelection.name}…</span>
+          <span>Verifying project area for {siteSelection.name}…</span>
         </div>
       ) : boundaryError ? (
         <div className="flex items-center gap-2 rounded-md border border-destructive/50 bg-destructive/10 p-3 text-sm text-destructive">

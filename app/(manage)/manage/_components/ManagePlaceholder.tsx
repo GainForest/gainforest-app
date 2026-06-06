@@ -108,7 +108,7 @@ export function ManagePlaceholder({ active }: { active: ManageRouteId }) {
                 <span className="font-instrument italic text-foreground/80"> coming soon</span>
               </h1>
               <p className="mt-5 max-w-2xl text-sm leading-7 text-muted-foreground md:text-base">
-                {activeRoute.description} Please check back soon.
+                {activeRoute.description} Please come back soon.
               </p>
             </div>
 

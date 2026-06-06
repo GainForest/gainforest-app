@@ -105,7 +105,7 @@ const STEPS: Array<{ id: StepId; label: string; title: string; subtitle: string 
   { id: "basics", label: "Basics", title: "the basics", subtitle: "Name the work and set the dates. Add a cover photo on the card." },
   { id: "story", label: "Story", title: "tell the story", subtitle: "A short summary for cards, then the full description." },
   { id: "people", label: "People & places", title: "people & places", subtitle: "Credit who did the work and link the sites involved." },
-  { id: "review", label: "Review", title: "review & publish", subtitle: "Check it all reads well, then make it public." },
+  { id: "review", label: "Review", title: "review & publish", subtitle: "Verify it all reads well, then make it public." },
 ];
 
 const TIPS = [
@@ -1002,7 +1002,7 @@ export function NewBumicertClient({ did }: { did: string }) {
                 </section>
 
                 <section className="mt-14 border-t border-border/40 pt-14">
-                  <SectionHeader eyebrow="Publish" title="ready to publish?" subtitle="One last check, then make it public." />
+                  <SectionHeader eyebrow="Publish" title="ready to publish?" subtitle="One last verification, then make it public." />
                   <ConfirmStep values={values} setValues={setValues} publishError={publishError} />
                 </section>
 

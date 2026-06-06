@@ -321,7 +321,7 @@ export default function FileDropStep({
       <div className="space-y-3 rounded-xl border border-border bg-muted/20 p-4">
         <div>
           <label htmlFor="site-select" className="text-sm font-medium">Project area <span className="text-destructive">*</span></label>
-          <p className="text-xs text-muted-foreground mt-0.5">Trees will be checked against this place&apos;s drawn map area.</p>
+          <p className="text-xs text-muted-foreground mt-0.5">Trees will be verified against this place&apos;s drawn map area.</p>
         </div>
         {sitesLoading ? (
           <Skeleton className="h-9 w-full rounded-md" />
@@ -349,7 +349,7 @@ export default function FileDropStep({
               </SelectContent>
             </Select>
             {selectedSite && selectedSiteHasBoundary && selectedSiteBoundaryLoading && (
-              <p className="text-xs text-muted-foreground">Checking map area…</p>
+              <p className="text-xs text-muted-foreground">Verifying map area…</p>
             )}
             {selectedSite && selectedSiteHasBoundary && selectedSiteBoundaryFailed && (
               <p className="text-sm text-destructive">Could not load the map area. Select another place or draw a valid area.</p>

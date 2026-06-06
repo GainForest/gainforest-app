@@ -274,7 +274,7 @@ export function AmountModal({
             <span>
               <span className="block text-sm font-medium text-foreground">Donate anonymously</span>
               <span className="mt-0.5 block text-xs leading-5 text-muted-foreground">
-                Leave unchecked to show this donation on your Bumicerts profile.
+                Leave this off to show this donation on your Bumicerts profile.
               </span>
             </span>
           </label>

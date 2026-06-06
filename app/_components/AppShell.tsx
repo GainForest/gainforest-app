@@ -7,11 +7,9 @@ import { AnimatePresence, LayoutGroup, motion } from "framer-motion";
 import {
   ArrowRightIcon,
   BinocularsIcon,
-  BookOpenIcon,
   Building2Icon,
   CheckIcon,
   CompassIcon,
-  GlobeIcon,
   HeartHandshakeIcon,
   HeartIcon,
   LeafIcon,
@@ -31,9 +29,11 @@ import {
 } from "lucide-react";
 import { Suspense, useEffect, useState, type MouseEvent, type SVGProps } from "react";
 import type { AuthSession } from "../_lib/auth";
+import packageJson from "@/package.json";
 import { BumicertsBumicertCard, type BumicertsBumicertCardRecord } from "@/components/bumicert/BumicertsBumicertCard";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { AuthButton, SignInPrompt } from "./AuthFlow";
 import { HeaderSlotsProvider, useHeaderSlots } from "./HeaderSlots";
 
@@ -113,12 +113,7 @@ const NAV_ITEMS: NavSection[] = [
   },
 ];
 
-const SOCIAL_LINKS = [
-  { href: "https://github.com/GainForest/bumicerts-monorepo", text: "Project updates", Icon: GithubIcon },
-  { href: "https://docs.fund.gainforest.app/", text: "Learn more", Icon: BookOpenIcon },
-  { href: "https://www.x.com/GainForestNow", text: "Twitter", Icon: TwitterIcon },
-  { href: "https://www.gainforest.earth", text: "GainForest", Icon: GlobeIcon },
-] as const;
+const APP_VERSION = packageJson.version;
 
 const RIPPLE_DURATION_MS = 1200;
 const STORAGE_KEY = "bumicerts-theme";
@@ -192,28 +187,26 @@ export function AppShell({
 
 function UnifiedSidebar({ authSession, manageAccountKind }: { authSession: AuthSession | null; manageAccountKind: ManageAccountKind }) {
   return (
-    <nav className="w-[240px] h-full flex flex-col p-4 border-r border-border bg-foreground/3 relative">
-      {/* Top section */}
-      <div className="flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto pr-1">
-        {/* Header */}
-        <SidebarHeader />
+    <nav className="relative flex h-full w-[240px] flex-col overflow-hidden border-r border-border bg-foreground/3 p-4">
+      <SidebarHeader />
 
-        {/* EXPLORE section */}
+      <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto pr-1">
         <LayoutGroup id="unified-sidebar-nav">
           {NAV_ITEMS.map((item) => (
             <NavSection key={item.id} section={item} startIndex={0} />
           ))}
         </LayoutGroup>
+
+        <div className="mt-auto flex flex-col gap-3 pt-4">
+          <BumicertCreationCard />
+
+          <LayoutGroup id="unified-sidebar-nav-manage">
+            <ManageSection authSession={authSession} manageAccountKind={manageAccountKind} />
+          </LayoutGroup>
+        </div>
       </div>
 
-      {/* Bottom section */}
-      <BumicertCreationCard />
-      <div className="flex flex-col gap-2">
-        <LayoutGroup id="unified-sidebar-nav-manage">
-          <ManageSection authSession={authSession} manageAccountKind={manageAccountKind} />
-        </LayoutGroup>
-
-        <div className="h-px bg-border" />
+      <div className="mt-3 border-t border-border pt-3">
         <SocialFooter />
       </div>
     </nav>
@@ -222,9 +215,8 @@ function UnifiedSidebar({ authSession, manageAccountKind }: { authSession: AuthS
 
 function SidebarHeader() {
   return (
-    <div className="flex flex-col w-full gap-2 mb-4">
-      {/* Logo + Bumicerts text */}
-      <Link className="flex items-center gap-2.5" href="/bumicerts">
+    <div className="mb-4 flex w-full flex-col gap-2">
+      <Link className="flex items-center gap-2.5 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50" href="/" aria-label="Bumicerts home">
         <motion.div
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
@@ -313,25 +305,28 @@ function NavLeaf({ item, isActive, index }: { item: NavLeaf; isActive: boolean; 
         ease: [0.25, 0.1, 0.25, 1],
       }}
     >
-      <Link href={item.href} className="block relative">
+      <Link
+        href={item.href}
+        className="group block rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+      >
         <motion.div
           whileHover={{ x: 2 }}
           transition={{ type: "spring", stiffness: 400, damping: 30 }}
           className={cn(
-            "flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-colors duration-150 relative",
-            isActive
-              ? "bg-primary text-primary-foreground font-medium"
-              : "text-muted-foreground hover:text-foreground hover:bg-muted/60",
+            buttonVariants({ variant: isActive ? "default" : "ghost" }),
+            "relative w-full justify-start pl-1",
+            !isActive && "text-muted-foreground group-hover:text-primary hover:text-primary",
           )}
         >
-          {isActive && (
-            <motion.div
-              layoutId="active-nav-pill"
-              className="absolute left-0 top-2 bottom-2 w-0.5 bg-primary-foreground/50 rounded-full"
-            />
-          )}
-          <item.Icon className="h-4 w-4 shrink-0" />
-          <span className="flex-1">{item.text}</span>
+          <span
+            className={cn(
+              "flex h-7 shrink-0 items-center justify-center rounded-full px-3 transition-colors",
+              isActive ? "bg-primary-foreground text-primary" : "bg-primary/10 text-muted-foreground group-hover:text-primary",
+            )}
+          >
+            <item.Icon className="h-4 w-4 shrink-0" />
+          </span>
+          <span className="flex-1 text-left">{item.text}</span>
         </motion.div>
       </Link>
     </motion.li>
@@ -380,7 +375,7 @@ function BumicertCreationCard() {
       <Link
         href="/manage/bumicerts"
         className={cn(
-          buttonClasses.outlineSm,
+          buttonVariants({ variant: "outline", size: "sm" }),
           "relative z-2 w-full bg-background hover:bg-primary hover:text-primary-foreground",
         )}
       >
@@ -526,32 +521,9 @@ function ManageSectionSkeleton() {
 
 function SocialFooter() {
   return (
-    <div className="flex items-center justify-between px-2">
-      {/* Social icons */}
-      <div className="flex items-center gap-1">
-        {SOCIAL_LINKS.map((link) => (
-          <Link
-            key={link.href}
-            href={link.href}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label={link.text}
-            className={cn(
-              "p-1.5 rounded-md",
-              "text-muted-foreground hover:text-foreground hover:bg-muted/60",
-              "transition-colors duration-150",
-            )}
-          >
-            <link.Icon className="h-3.5 w-3.5" />
-          </Link>
-        ))}
-      </div>
-
-      {/* Version + Theme toggle */}
-      <div className="flex items-center gap-2">
-        <span className="text-[10px] text-muted-foreground/50">v0.2.0</span>
-        <ThemeToggle />
-      </div>
+    <div className="flex items-center justify-between px-1">
+      <span className="text-xs font-medium text-muted-foreground">Bumicerts v{APP_VERSION}</span>
+      <ThemeToggle />
     </div>
   );
 }
@@ -985,56 +957,47 @@ function ThemeToggle({ className }: { className?: string }) {
 
   return (
     <motion.button
-      whileTap={{ scale: 0.9 }}
+      whileTap={{ scale: 0.96 }}
       transition={{ type: "spring", stiffness: 400, damping: 25 }}
       onClick={handleToggleTheme}
       className={cn(
-        "h-8 w-8 flex items-center justify-center rounded-lg hover:bg-muted transition-colors text-muted-foreground hover:text-foreground",
+        "relative inline-flex h-7 w-12 items-center rounded-full border border-border bg-muted/70 p-0.5 text-muted-foreground transition-colors hover:text-foreground dark:border-input dark:bg-background/80",
         className,
       )}
-      aria-label="Toggle theme"
+      aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+      aria-pressed={mounted ? isDark : undefined}
       suppressHydrationWarning
     >
-      <AnimatePresence mode="wait" initial={false}>
-        {mounted && isDark ? (
-          <motion.div
-            key="moon"
-            initial={{ opacity: 0, rotate: -90, scale: 0.5 }}
-            animate={{ opacity: 1, rotate: 0, scale: 1 }}
-            exit={{ opacity: 0, rotate: 90, scale: 0.5 }}
-            transition={{ duration: 0.2, ease: "easeInOut" }}
-          >
-            <MoonIcon className="h-4 w-4" />
-          </motion.div>
-        ) : (
-          <motion.div
-            key="sun"
-            initial={{ opacity: 0, rotate: 90, scale: 0.5 }}
-            animate={{ opacity: 1, rotate: 0, scale: 1 }}
-            exit={{ opacity: 0, rotate: -90, scale: 0.5 }}
-            transition={{ duration: 0.2, ease: "easeInOut" }}
-          >
-            <SunIcon className="h-4 w-4" />
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <motion.span
+        className="flex size-6 items-center justify-center rounded-full bg-background shadow-sm ring-1 ring-border/70 dark:bg-muted dark:ring-input"
+        animate={{ x: mounted && isDark ? 20 : 0 }}
+        transition={{ type: "spring", stiffness: 500, damping: 32 }}
+      >
+        <AnimatePresence mode="wait" initial={false}>
+          {mounted && isDark ? (
+            <motion.span
+              key="moon"
+              initial={{ opacity: 0, rotate: -90, scale: 0.5 }}
+              animate={{ opacity: 1, rotate: 0, scale: 1 }}
+              exit={{ opacity: 0, rotate: 90, scale: 0.5 }}
+              transition={{ duration: 0.2, ease: "easeInOut" }}
+            >
+              <MoonIcon className="h-3.5 w-3.5" />
+            </motion.span>
+          ) : (
+            <motion.span
+              key="sun"
+              initial={{ opacity: 0, rotate: 90, scale: 0.5 }}
+              animate={{ opacity: 1, rotate: 0, scale: 1 }}
+              exit={{ opacity: 0, rotate: -90, scale: 0.5 }}
+              transition={{ duration: 0.2, ease: "easeInOut" }}
+            >
+              <SunIcon className="h-3.5 w-3.5" />
+            </motion.span>
+          )}
+        </AnimatePresence>
+      </motion.span>
     </motion.button>
-  );
-}
-
-function GithubIcon({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" className={className} fill="currentColor" aria-hidden>
-      <path d="M12 .5a12 12 0 0 0-3.79 23.39c.6.11.82-.26.82-.58v-2.03c-3.34.73-4.04-1.61-4.04-1.61-.55-1.39-1.33-1.76-1.33-1.76-1.09-.74.08-.73.08-.73 1.2.09 1.84 1.24 1.84 1.24 1.07 1.83 2.8 1.3 3.49.99.11-.78.42-1.3.76-1.6-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.12-.3-.54-1.52.12-3.18 0 0 1.01-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.29-1.55 3.3-1.23 3.3-1.23.66 1.66.24 2.88.12 3.18.77.84 1.23 1.91 1.23 3.22 0 4.61-2.81 5.62-5.48 5.92.43.37.81 1.1.81 2.22v3.3c0 .32.22.7.83.58A12 12 0 0 0 12 .5Z" />
-    </svg>
-  );
-}
-
-function TwitterIcon({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" className={className} fill="currentColor" aria-hidden>
-      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24h-6.657l-5.214-6.817-5.967 6.817H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231 5.45-6.231Zm-1.161 17.52h1.833L7.084 4.126H5.117L17.083 19.77Z" />
-    </svg>
   );
 }
 
@@ -1101,22 +1064,3 @@ function runThemeTransition(origin: { originX: number; originY: number }, update
   });
 }
 
-function cn(...classes: Array<string | false | null | undefined>) {
-  return classes.filter(Boolean).join(" ");
-}
-
-const buttonBase =
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full font-medium transition-colors focus-visible:outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] disabled:pointer-events-none disabled:opacity-50 cursor-pointer shrink-0 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 [&_svg]:shrink-0 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive";
-
-const buttonClasses = {
-  outlineSm: cn(
-    buttonBase,
-    "border border-border bg-background hover:shadow-sm hover:bg-muted hover:text-foreground dark:border-input dark:hover:bg-background/80",
-    "h-8 px-3 text-xs has-[>svg]:px-2.5",
-  ),
-  ghostSm: cn(
-    buttonBase,
-    "hover:bg-muted hover:text-foreground dark:hover:bg-accent/50",
-    "h-8 px-3 text-xs has-[>svg]:px-2.5",
-  ),
-};

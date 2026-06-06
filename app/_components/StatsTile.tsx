@@ -27,7 +27,7 @@ export function StatsTileGrid({
   className?: string;
 }) {
   return (
-    <div className={["grid grid-cols-1 gap-4 sm:grid-cols-2", GRID_COLUMNS[columns], className].filter(Boolean).join(" ")}>
+    <div className={["grid grid-cols-2 gap-3 sm:gap-4", GRID_COLUMNS[columns], className].filter(Boolean).join(" ")}>
       {items.map((item) => (
         <StatsTile key={item.label} {...item} />
       ))}
@@ -42,27 +42,27 @@ export function StatsTile({ label, value, detail, icon, accent = false, href }: 
     <>
       <div className="absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-primary/25 to-transparent" />
       <div className="min-w-0">
-        <div className="flex items-center gap-2">
-          <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary ring-1 ring-primary/10 transition-transform duration-300 group-hover:scale-105 [&_svg]:size-3.5">
+        <div className="flex min-w-0 items-center gap-2 sm:gap-3">
+          <span className="flex shrink-0 items-center justify-center text-primary transition-transform duration-300 group-hover:scale-105 [&_svg]:size-4 sm:[&_svg]:size-5">
             {icon}
           </span>
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">{label}</p>
+          <span className="sr-only">{label}</span>
+          <div
+            className={[
+              "min-w-0 text-2xl font-semibold tracking-[-0.02em] tabular-nums sm:text-3xl",
+              accent ? "text-primary" : "text-foreground",
+            ].join(" ")}
+          >
+            {value}
+          </div>
         </div>
-        <div
-          className={[
-            "mt-3 text-3xl font-semibold tracking-[-0.02em] tabular-nums",
-            accent ? "text-primary" : "text-foreground",
-          ].join(" ")}
-        >
-          {value}
-        </div>
-        <p className="mt-1 text-sm text-muted-foreground">{detail}</p>
+        <p className="mt-1 text-xs leading-snug text-muted-foreground first-letter:uppercase sm:text-sm sm:leading-normal">{detail}</p>
       </div>
     </>
   );
 
   const className =
-    "group relative overflow-hidden rounded-3xl bg-foreground/5 p-6 text-left backdrop-blur transition-all duration-300 hover:-translate-y-0.5 hover:bg-foreground/[0.07]";
+    "group relative overflow-hidden rounded-2xl bg-foreground/5 p-4 text-left backdrop-blur transition-all duration-300 hover:-translate-y-0.5 hover:bg-foreground/[0.07] sm:rounded-3xl sm:p-6";
 
   if (href) {
     return (

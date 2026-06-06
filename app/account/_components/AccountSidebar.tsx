@@ -103,12 +103,12 @@ function StatsCard({ stats }: { stats: SidebarStat[] }) {
     <SidebarCard className="overflow-hidden">
       <div className="grid grid-cols-2 divide-x divide-border/70">
         {stats.map((stat) => (
-          <div key={stat.label} className="p-5">
-            <div className="mb-3 flex size-9 items-center justify-center rounded-2xl border border-primary/15 bg-primary/[0.08] shadow-inner">
+          <div key={stat.label} className="p-4 sm:p-5">
+            <div className="mb-3 flex size-8 items-center justify-center rounded-2xl border border-primary/15 bg-primary/[0.08] shadow-inner sm:size-9">
               <StatIcon stat={stat} />
             </div>
-            <p className="text-sm font-medium text-foreground">{stat.label}</p>
-            <p className="mt-1 text-3xl font-semibold tracking-tight text-foreground">
+            <p className="text-xs font-medium text-foreground sm:text-sm">{stat.label}</p>
+            <p className="mt-1 text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
               {stat.value}
             </p>
           </div>

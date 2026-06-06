@@ -699,7 +699,7 @@ function DonationsPanel({ receipts, unavailable }: { receipts: FundingReceipt[];
         />
       ) : (
         <div className="space-y-5">
-          <div className="grid gap-3 sm:grid-cols-3">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
             <StatCard label="Total raised" value={formatCompactUsd(totalUsd)} />
             <StatCard label="Donations" value={formatNumber(receipts.length)} />
             <StatCard label="Donors" value={formatNumber(donorCount)} />
@@ -829,9 +829,9 @@ function externalHost(value: string): string {
 
 function StatCard({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-2xl border border-border-soft bg-surface px-4 py-3">
-      <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">{label}</p>
-      <p className="mt-1 text-xl font-medium text-foreground">{value}</p>
+    <div className="rounded-2xl border border-border-soft bg-surface px-3 py-3 sm:px-4">
+      <p className="text-[10px] uppercase tracking-[0.12em] text-muted-foreground sm:text-xs sm:tracking-[0.14em]">{label}</p>
+      <p className="mt-1 text-lg font-medium text-foreground sm:text-xl">{value}</p>
     </div>
   );
 }

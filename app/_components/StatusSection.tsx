@@ -151,7 +151,7 @@ export function StatusSection({ initial }: { initial?: StatusSnapshot }) {
           <StatusSkeleton />
         ) : snapshot.components.length === 0 ? (
           <p className="py-12 text-center text-[14px] italic text-foreground/55">
-            This health page is unavailable right now. Check the{" "}
+            This health page is unavailable right now. Visit the{" "}
             <Link
               href={STATUS_URL}
               target="_blank"

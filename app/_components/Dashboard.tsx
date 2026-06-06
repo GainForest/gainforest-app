@@ -206,12 +206,12 @@ function PeriodFilter({ period, onPeriodChange }: { period: Period; onPeriodChan
 
 function KPISummary({ kpis }: { kpis: DashboardKpis }) {
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
+    <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-5">
       <StatCard
         icon={<DollarSignIcon className="h-4 w-4" />}
         label="Total Raised"
         value={formatCompactUsd(kpis.totalRaised)}
-        sub="All USD donations"
+        sub="Raised from completed gifts"
       />
       <StatCard
         icon={<HashIcon className="h-4 w-4" />}
@@ -223,19 +223,19 @@ function KPISummary({ kpis }: { kpis: DashboardKpis }) {
         icon={<UsersIcon className="h-4 w-4" />}
         label="Supporters"
         value={formatNumber(kpis.uniqueDonors)}
-        sub="People and anonymous supporters"
+        sub="Supporters counted"
       />
       <StatCard
         icon={<TrendingUpIcon className="h-4 w-4" />}
         label="Average Gift"
         value={formatUsd(kpis.avgDonation)}
-        sub="Per gift"
+        sub="Average gift size"
       />
       <StatCard
         icon={<LayoutGridIcon className="h-4 w-4" />}
         label="Active Bumicerts"
         value={formatNumber(kpis.activeBumicerts)}
-        sub="Have received funds"
+        sub="Bumicerts with funding"
       />
     </div>
   );
@@ -252,7 +252,7 @@ function GeographicReach({ stats }: { stats: GeoStats }) {
         icon={<GlobeIcon />}
         label="Places Reached"
         value={formatNumber(stats.countriesRepresented)}
-        detail="Countries with support"
+        detail="Countries with organizations"
         accent
       />
 

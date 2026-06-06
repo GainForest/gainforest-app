@@ -665,7 +665,7 @@ function StoryStep({ values, setValues }: { values: FormValues; setValues: React
         <Textarea
           value={values.shortDescription}
           onChange={(event) => setValues((current) => ({ ...current, shortDescription: event.target.value.slice(0, 300) }))}
-          placeholder="Local stewards restored degraded mangrove plots, checked survival rates, and documented biodiversity return across community-managed sites."
+          placeholder="Local stewards restored degraded mangrove plots, verified survival rates, and documented biodiversity return across community-managed sites."
           className="min-h-28 rounded-3xl bg-background/80 p-4 text-base leading-7"
         />
         <div className="flex justify-between text-xs text-muted-foreground">
