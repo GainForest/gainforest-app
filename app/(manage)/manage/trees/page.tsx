@@ -1,11 +1,15 @@
 import type { Metadata } from "next";
-import { ManagePlaceholder } from "../_components/ManagePlaceholder";
+import { fetchAuthSession } from "@/app/_lib/auth-server";
+import { TreesPageClient } from "./_components/TreesPageClient";
 
 export const metadata: Metadata = {
   title: "Manage Trees — Bumicerts",
-  description: "Placeholder for the Bumicerts manage trees route formerly available at /upload/trees.",
+  description: "Manage tree occurrence datasets and biodiversity records.",
+  robots: { index: false, follow: false },
 };
 
-export default function TreesPage() {
-  return <ManagePlaceholder active="trees" />;
+export default async function TreesPage() {
+  const session = await fetchAuthSession();
+  if (!session.isLoggedIn) return null;
+  return <TreesPageClient did={session.did} />;
 }

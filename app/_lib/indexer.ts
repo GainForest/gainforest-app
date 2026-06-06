@@ -845,6 +845,284 @@ export async function fetchSites(
   return { records, cursor: null, hasMore: false };
 }
 
+// ── 4. Manage section — certified locations by DID ─────────────────────────
+
+export type ManagedLocation = {
+  metadata: {
+    did: string;
+    uri: string;
+    rkey: string;
+    cid: string;
+    createdAt: string | null;
+  };
+  record: {
+    name: string | null;
+    description: string | null;
+    locationType: string | null;
+    location: ManagedLocationData | null;
+  };
+};
+
+export type ManagedLocationData =
+  | { kind: "point"; lat: number; lon: number }
+  | { kind: "uri"; uri: string }
+  | { kind: "unknown" };
+
+const LOCATIONS_BY_DID_QUERY = `
+  query CertifiedLocationsByDid($did: String!, $first: Int!, $after: String) {
+    appCertifiedLocation(
+      where: { did: { eq: $did } }
+      sortDirection: DESC
+      sortBy: createdAt
+      first: $first
+      after: $after
+    ) {
+      totalCount
+      pageInfo { hasNextPage endCursor }
+      edges {
+        node {
+          did uri rkey cid createdAt
+          name description locationType
+          location {
+            __typename
+            ... on AppCertifiedLocationString { string }
+            ... on OrgHypercertsDefsUri { uri }
+          }
+        }
+      }
+    }
+  }
+`;
+
+type RawLocationNode = {
+  did: string;
+  uri: string;
+  rkey: string;
+  cid: string;
+  createdAt?: string | null;
+  name?: string | null;
+  description?: string | null;
+  locationType?: string | null;
+  location?: {
+    __typename?: string;
+    string?: string | null;
+    uri?: string | null;
+  } | null;
+};
+
+function parseLocationCoord(s: string): { lat: number; lon: number } | null {
+  const parts = s.split(/[,\s]+/).map((p) => parseFloat(p)).filter((n) => !isNaN(n));
+  if (parts.length >= 2 && parts[0] !== undefined && parts[1] !== undefined) {
+    return { lat: parts[0], lon: parts[1] };
+  }
+  return null;
+}
+
+function mapLocation(raw: RawLocationNode): ManagedLocation {
+  let location: ManagedLocationData | null = null;
+  const loc = raw.location;
+  if (loc) {
+    if (loc.__typename === "AppCertifiedLocationString" && loc.string) {
+      const coord = parseLocationCoord(loc.string);
+      if (coord) {
+        location = { kind: "point", lat: coord.lat, lon: coord.lon };
+      } else {
+        location = { kind: "unknown" };
+      }
+    } else if (loc.__typename === "OrgHypercertsDefsUri" && loc.uri) {
+      location = { kind: "uri", uri: loc.uri };
+    } else {
+      location = { kind: "unknown" };
+    }
+  }
+  return {
+    metadata: {
+      did: raw.did,
+      uri: raw.uri,
+      rkey: raw.rkey,
+      cid: raw.cid,
+      createdAt: raw.createdAt ?? null,
+    },
+    record: {
+      name: raw.name?.trim() || null,
+      description: raw.description?.trim() || null,
+      locationType: raw.locationType?.trim() || null,
+      location,
+    },
+  };
+}
+
+export async function fetchLocationsByDid(
+  did: string,
+  signal?: AbortSignal,
+): Promise<ManagedLocation[]> {
+  const all: ManagedLocation[] = [];
+  let cursor: string | null = null;
+  for (let page = 0; page < 20; page++) {
+    type LocationPage = { appCertifiedLocation?: Connection<RawLocationNode> };
+    const data: LocationPage | null = await indexerQuery<LocationPage>(
+      LOCATIONS_BY_DID_QUERY, { did, first: 200, after: cursor }, signal,
+    );
+    const conn: Connection<RawLocationNode> | undefined = data?.appCertifiedLocation;
+    const nodes = (conn?.edges ?? [])
+      .map((e) => e?.node)
+      .filter((n): n is RawLocationNode => Boolean(n?.did));
+    all.push(...nodes.map(mapLocation));
+    if (!conn?.pageInfo?.hasNextPage || !conn?.pageInfo?.endCursor) break;
+    cursor = conn.pageInfo.endCursor;
+  }
+  return all;
+}
+
+// ── 5. Manage section — audio recordings by DID ────────────────────────────
+
+export type ManagedAudio = {
+  metadata: {
+    did: string;
+    uri: string;
+    rkey: string;
+    cid: string;
+    createdAt: string | null;
+  };
+  record: {
+    name: string | null;
+    description: string | null;
+    audioUrl: string | null;
+    mimeType: string | null;
+    recordedAt: string | null;
+    sampleRate: number | null;
+    duration: string | null;
+  };
+};
+
+const AUDIO_BY_DID_QUERY = `
+  query AudioRecordingsByDid($did: String!, $first: Int!, $after: String) {
+    appGainforestAcAudio(
+      where: { did: { eq: $did } }
+      sortDirection: DESC
+      sortBy: createdAt
+      first: $first
+      after: $after
+    ) {
+      totalCount
+      pageInfo { hasNextPage endCursor }
+      edges {
+        node {
+          did uri rkey cid createdAt
+          name
+          description { text }
+          blob { file { ref mimeType size } }
+          metadata { recordedAt sampleRate duration codec channels }
+        }
+      }
+    }
+  }
+`;
+
+type RawAudioNode = {
+  did: string;
+  uri: string;
+  rkey: string;
+  cid: string;
+  createdAt?: string | null;
+  name?: string | null;
+  description?: { text?: string | null } | null;
+  blob?: { file?: { ref?: string | null; mimeType?: string | null; size?: number | null } | null } | null;
+  metadata?: {
+    recordedAt?: string | null;
+    sampleRate?: number | null;
+    duration?: string | null;
+    codec?: string | null;
+    channels?: number | null;
+  } | null;
+};
+
+export async function fetchAudioByDid(
+  did: string,
+  signal?: AbortSignal,
+): Promise<ManagedAudio[]> {
+  const all: ManagedAudio[] = [];
+  let cursor: string | null = null;
+  for (let page = 0; page < 20; page++) {
+    type AudioPage = { appGainforestAcAudio?: Connection<RawAudioNode> };
+    const data: AudioPage | null = await indexerQuery<AudioPage>(
+      AUDIO_BY_DID_QUERY, { did, first: 200, after: cursor }, signal,
+    );
+    const conn: Connection<RawAudioNode> | undefined = data?.appGainforestAcAudio;
+    const nodes = (conn?.edges ?? [])
+      .map((e) => e?.node)
+      .filter((n): n is RawAudioNode => Boolean(n?.did));
+    // Map nodes to ManagedAudio; resolve blob URLs concurrently via resolveImages.
+    // We carry the raw ref through the mapped array as audioUrl so resolveImages
+    // can look it up, then overwrite it with the resolved URL.
+    const preMapped: ManagedAudio[] = nodes.map((n) => ({
+      metadata: { did: n.did, uri: n.uri, rkey: n.rkey, cid: n.cid, createdAt: n.createdAt ?? null },
+      record: {
+        name: n.name?.trim() || null,
+        description: n.description?.text?.trim() || null,
+        // Temporarily store the raw CID here so resolveImages can find it; it
+        // will be overwritten with the full blob URL (or null) after resolution.
+        audioUrl: normaliseRef(n.blob?.file?.ref),
+        mimeType: n.blob?.file?.mimeType ?? null,
+        recordedAt: n.metadata?.recordedAt ?? null,
+        sampleRate: n.metadata?.sampleRate ?? null,
+        duration: n.metadata?.duration ?? null,
+      },
+    }));
+    const resolved = await resolveImages(
+      preMapped,
+      (r) => (r.record.audioUrl ? { did: r.metadata.did, ref: r.record.audioUrl } : null),
+      (r, url) => ({ ...r, record: { ...r.record, audioUrl: url } }),
+      signal,
+    );
+    all.push(...resolved);
+    if (!conn?.pageInfo?.hasNextPage || !conn?.pageInfo?.endCursor) break;
+    cursor = conn.pageInfo.endCursor;
+  }
+  return all;
+}
+
+// ── 6. Manage section — occurrences by DID (for trees) ─────────────────────
+
+export async function fetchOccurrencesByDid(
+  did: string,
+  target = 1000,
+  after: string | null = null,
+  signal?: AbortSignal,
+  onProgress?: (records: OccurrenceRecord[]) => void,
+): Promise<Page<OccurrenceRecord>> {
+  const where = { did: { eq: did } };
+  const pageSize = INDEXER_MAX_PAGE;
+  const collected: OccurrenceRecord[] = [];
+  let cursor: string | null = after;
+  let hasNextPage = true;
+  for (let page = 0; page < 20; page++) {
+    if (signal?.aborted) throw new DOMException("aborted", "AbortError");
+    const res = await fetchOccurrencePage(pageSize, cursor, signal, where);
+    cursor = res.cursor;
+    hasNextPage = res.hasNextPage;
+    let mapped = res.nodes.map(mapOccurrence);
+    mapped = await resolveImages(
+      mapped,
+      (r) => {
+        if (r.imageUrl) return null;
+        const raw = res.nodes.find((n) => n.rkey === r.rkey && n.did === r.did);
+        const ref = raw?.imageEvidence?.file?.ref ?? raw?.spectrogramEvidence?.file?.ref ?? null;
+        return ref ? { did: r.did, ref } : null;
+      },
+      (r, url) => ({ ...r, imageUrl: url }),
+      signal,
+    );
+    for (const r of mapped) {
+      if (collected.length >= target) break;
+      collected.push(r);
+    }
+    onProgress?.(collected.slice(0, target));
+    if (collected.length >= target || !hasNextPage || !cursor) break;
+  }
+  return { records: collected.slice(0, target), cursor, hasMore: hasNextPage && Boolean(cursor) };
+}
+
 // ── Unified record type for the detail drawer ──────────────────────────────
 
 export type ExplorerRecord = OccurrenceRecord | BumicertRecord | SiteRecord;

@@ -1,11 +1,15 @@
 import type { Metadata } from "next";
-import { ManagePlaceholder } from "../_components/ManagePlaceholder";
+import { fetchAuthSession } from "@/app/_lib/auth-server";
+import { AudioClient } from "./_components/AudioClient";
 
 export const metadata: Metadata = {
   title: "Manage Audio — Bumicerts",
-  description: "Placeholder for the Bumicerts manage audio route formerly available at /upload/audio.",
+  description: "Manage ecoacoustic and field audio evidence.",
+  robots: { index: false, follow: false },
 };
 
-export default function AudioPage() {
-  return <ManagePlaceholder active="audio" />;
+export default async function AudioPage() {
+  const session = await fetchAuthSession();
+  if (!session.isLoggedIn) return null;
+  return <AudioClient did={session.did} />;
 }

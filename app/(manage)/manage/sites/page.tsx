@@ -1,11 +1,15 @@
 import type { Metadata } from "next";
-import { ManagePlaceholder } from "../_components/ManagePlaceholder";
+import { fetchAuthSession } from "@/app/_lib/auth-server";
+import { SitesClient } from "./_components/SitesClient";
 
 export const metadata: Metadata = {
   title: "Manage Sites — Bumicerts",
-  description: "Placeholder for the Bumicerts manage sites route formerly available at /upload/sites.",
+  description: "Manage your certified field locations.",
+  robots: { index: false, follow: false },
 };
 
-export default function SitesPage() {
-  return <ManagePlaceholder active="sites" />;
+export default async function SitesPage() {
+  const session = await fetchAuthSession();
+  if (!session.isLoggedIn) return null;
+  return <SitesClient did={session.did} />;
 }
