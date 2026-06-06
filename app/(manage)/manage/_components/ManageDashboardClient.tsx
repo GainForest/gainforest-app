@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
@@ -25,7 +25,12 @@ import type { AccountRouteData } from "@/app/account/_lib/account-route";
 import { ManageNavGrid } from "./ManageNavGrid";
 import { ManageAccountSetup } from "./ManageAccountSetup";
 import { ManageAccountTabs } from "./ManageAccountTabs";
-import type { ManageMode } from "./manageDashboardMode";
+import {
+  parseManageMode,
+  resolveDashboardMode,
+  shouldClearDashboardMode,
+  type ManageMode,
+} from "./manageDashboardMode";
 import { HeaderContent } from "@/app/_components/HeaderSlots";
 import { RichText } from "@/app/_components/RichText";
 import { countryFlag } from "@/app/_lib/format";
@@ -371,12 +376,31 @@ function EditBar({
 export function ManageDashboardClient({
   account,
   mode,
+  children,
 }: {
   account: AccountRouteData;
-  mode: ManageMode | null;
+  mode?: ManageMode | null;
+  children?: React.ReactNode;
 }) {
   const router = useRouter();
+  const pathname = usePathname() ?? "/manage";
+  const searchParams = useSearchParams();
   const modal = useModal();
+  const rawMode = mode === undefined ? searchParams.get("mode") ?? undefined : mode ?? undefined;
+  const resolvedMode = resolveDashboardMode({
+    currentKind: account.kind,
+    mode: mode === undefined ? parseManageMode(rawMode) : mode,
+  });
+  const isAccountManageRoute = pathname === "/manage";
+
+  useEffect(() => {
+    if (mode !== undefined || !shouldClearDashboardMode({ currentKind: account.kind, rawMode })) return;
+
+    const nextSearchParams = new URLSearchParams(searchParams.toString());
+    nextSearchParams.delete("mode");
+    const query = nextSearchParams.toString();
+    router.replace(query ? `${pathname}?${query}` : pathname);
+  }, [account.kind, mode, pathname, rawMode, router, searchParams]);
 
   // ── Edit state ─────────────────────────────────────────────────────────────
   const [editDisplayName, setEditDisplayName] = useState(account.displayName);
@@ -392,8 +416,8 @@ export function ManageDashboardClient({
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
 
-  const isEditing = mode === "edit";
-  const isOnboarding = mode === "onboard-user" || mode === "onboard-org" ||
+  const isEditing = resolvedMode === "edit";
+  const isOnboarding = resolvedMode === "onboard-user" || resolvedMode === "onboard-org" ||
     (!account.summary.hasCertifiedProfile && !account.summary.hasCertifiedOrg && !account.summary.hasGainforestOrg);
 
   const editState: HeroEditState = {
@@ -542,11 +566,15 @@ export function ManageDashboardClient({
     }
   };
 
+  if (!isAccountManageRoute) {
+    return <>{children}</>;
+  }
+
   // ── Onboarding ─────────────────────────────────────────────────────────────
   if (isOnboarding) {
     return (
       <Container className="pt-4 pb-8">
-        <ManageAccountSetup did={account.did} mode={mode} />
+        <ManageAccountSetup did={account.did} mode={resolvedMode} />
       </Container>
     );
   }
@@ -603,29 +631,33 @@ export function ManageDashboardClient({
     <>
       {account.kind === "user" ? <HeaderContent right={registerOrganizationHeaderAction} /> : null}
       <Container className="pt-4 pb-8 space-y-2">
-      <EditableHero
-        account={account}
-        isEditing={false}
-        editState={editState}
-        onChange={handleChange}
-        onEditLogo={openLogoModal}
-        onEditCover={openCoverModal}
-        onEditCountry={openCountryModal}
-        onEditWebsite={openWebsiteModal}
-        onEditStartDate={openStartDateModal}
-        onEditVisibility={openVisibilityModal}
-      />
-      <ManageAccountTabs account={account} />
-      {account.detail?.richBody?.length ? (
-        <section className="py-6 md:py-8">
-          <RichText blocks={account.detail.richBody} />
-        </section>
-      ) : account.description ? (
-        <section className="py-6 md:py-8">
-          <p className="max-w-3xl text-[14px] leading-[1.62] text-foreground/80">{account.description}</p>
-        </section>
-      ) : null}
-        <ManageNavGrid accountKind={account.kind} />
+        <EditableHero
+          account={account}
+          isEditing={false}
+          editState={editState}
+          onChange={handleChange}
+          onEditLogo={openLogoModal}
+          onEditCover={openCoverModal}
+          onEditCountry={openCountryModal}
+          onEditWebsite={openWebsiteModal}
+          onEditStartDate={openStartDateModal}
+          onEditVisibility={openVisibilityModal}
+        />
+        <ManageAccountTabs account={account} />
+        {children ?? (
+          <>
+            {account.detail?.richBody?.length ? (
+              <section className="py-6 md:py-8">
+                <RichText blocks={account.detail.richBody} />
+              </section>
+            ) : account.description ? (
+              <section className="py-6 md:py-8">
+                <p className="max-w-3xl text-[14px] leading-[1.62] text-foreground/80">{account.description}</p>
+              </section>
+            ) : null}
+            <ManageNavGrid accountKind={account.kind} />
+          </>
+        )}
       </Container>
     </>
   );

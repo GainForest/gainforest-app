@@ -21,6 +21,7 @@ import {
   MoonIcon,
   PlusIcon,
   RadioTowerIcon,
+  SettingsIcon,
   Share2Icon,
   SparkleIcon,
   SunIcon,
@@ -416,6 +417,14 @@ function ManageSection({
       href: "/manage/trees",
       pathCheck: { startsWith: "/manage/trees" },
     },
+    {
+      kind: "leaf",
+      id: "settings",
+      text: "Settings",
+      Icon: SettingsIcon,
+      href: "/manage/settings",
+      pathCheck: { startsWith: "/manage/settings" },
+    },
   ];
   const userItems: NavLeaf[] = [
     {
@@ -433,6 +442,14 @@ function ManageSection({
       Icon: BumicertIcon,
       href: "/manage/bumicerts",
       pathCheck: { startsWith: "/manage/bumicerts" },
+    },
+    {
+      kind: "leaf",
+      id: "settings",
+      text: "Settings",
+      Icon: SettingsIcon,
+      href: "/manage/settings",
+      pathCheck: { startsWith: "/manage/settings" },
     },
   ];
   const items: NavLeaf[] = authSession.isLoggedIn
@@ -452,7 +469,7 @@ function ManageSection({
         className="px-3 py-1"
       >
         <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground/60">
-          YOUR WORK
+          MANAGE
         </span>
       </motion.div>
 

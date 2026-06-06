@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { ActivityIcon, BadgeIcon, HeartIcon, HomeIcon, SettingsIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { AccountKind } from "../_lib/account-route";
@@ -34,11 +34,11 @@ type TabPaths = {
 function buildTabPaths(did: string, scope: AccountTabBarScope): TabPaths {
   if (scope === "manage") {
     return {
-      home: "/manage",
-      bumicerts: "/manage/bumicerts",
-      donations: "/manage/donations",
-      timeline: "/manage/timeline",
-      settings: "/manage/settings",
+      home: "/manage?tab=home",
+      bumicerts: "/manage?tab=bumicerts",
+      donations: "/manage?tab=donations",
+      timeline: "/manage?tab=timeline",
+      settings: "/manage?tab=settings",
     };
   }
 
@@ -122,12 +122,18 @@ export function AccountTabBar({
   includeSettings = false,
 }: OrgTabBarProps) {
   const pathname = usePathname() ?? "/";
+  const searchParams = useSearchParams();
   const tabs = buildTabs(did, accountKind, scope, includeSettings);
   const paths = buildTabPaths(did, scope);
 
   function isActive(tab: Tab): boolean {
+    if (scope === "manage") {
+      const currentTab = searchParams.get("tab");
+      const tabName = new URL(tab.href, "https://bumicerts.local").searchParams.get("tab");
+      return currentTab ? currentTab === tabName : tab.href === tabs[0]?.href;
+    }
+
     if (
-      scope === "account" &&
       accountKind === "user" &&
       tab.href === paths.bumicerts &&
       pathname === paths.home

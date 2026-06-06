@@ -1,13 +1,11 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import Container from "@/components/ui/container";
 import { fetchAuthSession } from "@/app/_lib/auth-server";
 import { fetchReceipts } from "@/app/_lib/dashboard";
 import { fetchBumicertsByDid } from "@/app/_lib/indexer";
 import { DonationHistory } from "@/app/account/_components/DonationHistory";
 import { AccountContentColumns, AccountSidebar } from "@/app/account/_components/AccountSidebar";
 import { getAccountRouteData } from "@/app/account/_lib/account-route";
-import { ManageAccountTabs } from "../_components/ManageAccountTabs";
 
 export const metadata: Metadata = {
   title: "Donation History — Bumicerts",
@@ -29,13 +27,10 @@ export default async function ManageDonationsPage() {
   const userDonations = receipts.filter((receipt) => receipt.from?.type === "did" && receipt.from.id === session.did);
 
   return (
-    <Container className="pt-4 pb-8">
-      <ManageAccountTabs account={account} />
-      <AccountContentColumns sidebar={<AccountSidebar account={account} bumicertCount={bumicerts.length} donationCount={userDonations.length} />}>
-        <section className="py-6">
-          <DonationHistory receipts={userDonations} />
-        </section>
-      </AccountContentColumns>
-    </Container>
+    <AccountContentColumns sidebar={<AccountSidebar account={account} bumicertCount={bumicerts.length} donationCount={userDonations.length} />}>
+      <section className="py-6">
+        <DonationHistory receipts={userDonations} />
+      </section>
+    </AccountContentColumns>
   );
 }

@@ -1,12 +1,10 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
-import Container from "@/components/ui/container";
 import { fetchAuthSession } from "@/app/_lib/auth-server";
 import { fetchBumicertsByDid } from "@/app/_lib/indexer";
 import { TimelineMotion } from "@/app/account/_components/TimelineMotion";
 import { getAccountRouteData } from "@/app/account/_lib/account-route";
-import { ManageAccountTabs } from "../_components/ManageAccountTabs";
 
 export const metadata: Metadata = {
   title: "Evidence Timeline — Bumicerts",
@@ -25,10 +23,8 @@ export default async function ManageTimelinePage() {
   const linkedWindow = entries.length ? formatLinkedWindow(entries.map((entry) => entry.createdAt)) : null;
 
   return (
-    <Container className="pt-4 pb-8">
-      <ManageAccountTabs account={account} />
-      <TimelineMotion>
-        <div className="space-y-4 py-6">
+    <TimelineMotion>
+      <div className="space-y-4 py-6">
           <div className="rounded-2xl border border-border/50 bg-background p-4">
             <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
               <div>
@@ -86,9 +82,8 @@ export default async function ManageTimelinePage() {
               )}
             </>
           )}
-        </div>
-      </TimelineMotion>
-    </Container>
+      </div>
+    </TimelineMotion>
   );
 }
 
