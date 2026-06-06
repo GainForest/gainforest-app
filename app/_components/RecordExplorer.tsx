@@ -124,6 +124,7 @@ type Phase = "idle" | "loading" | "ready" | "error" | "more";
 // a single page now reaches this for the media-filtered views (which push the
 // filter down server-side) and the cursor pages it for the rest.
 const LOAD_TARGET = 1000;
+const DEFAULT_OCCURRENCE_MEDIA: OccurrenceFilter = "image";
 
 export function RecordExplorer({ kind }: { kind: RecordKind }) {
   const meta = KIND_META[kind];
@@ -134,7 +135,7 @@ export function RecordExplorer({ kind }: { kind: RecordKind }) {
   const [phase, setPhase] = useState<Phase>("idle");
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState<SortMode>("newest");
-  const [occMedia, setOccMedia] = useState<OccurrenceFilter>("all");
+  const [occMedia, setOccMedia] = useState<OccurrenceFilter>(DEFAULT_OCCURRENCE_MEDIA);
   const [siteSource, setSiteSource] = useState<SiteSourceFilter>("both");
   const [view, setView] = useState<"cards" | "map">("cards");
   const [walking, setWalking] = useState(false);
@@ -245,7 +246,7 @@ export function RecordExplorer({ kind }: { kind: RecordKind }) {
     if (s === "oldest" || s === "az" || s === "za") setSort(s);
     if (kind === "occurrence") {
       const m = sp.get("media");
-      if (m === "image" || m === "audio") setOccMedia(m);
+      if (m === "image" || m === "audio" || m === "all") setOccMedia(m);
     }
     if (kind === "site") {
       const src = sp.get("source");
@@ -288,7 +289,7 @@ export function RecordExplorer({ kind }: { kind: RecordKind }) {
       if (q) params.set("q", q);
       if (view === "map") params.set("view", "map");
       if (sort !== "newest") params.set("sort", sort);
-      if (kind === "occurrence" && occMedia !== "all") params.set("media", occMedia);
+      if (kind === "occurrence" && occMedia !== DEFAULT_OCCURRENCE_MEDIA) params.set("media", occMedia);
       if (kind === "site" && siteSource !== "both") params.set("source", siteSource);
       if (drawer) params.set("record", recordParam(drawer));
       else if (pendingRecord) params.set("record", pendingRecord);

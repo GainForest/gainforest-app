@@ -31,7 +31,7 @@ type FilterChip = {
 };
 
 const FILTER_CHIPS: FilterChip[] = [
-  { key: "images", label: "With images", predicate: (record) => Boolean(record.imageUrl) },
+  { key: "images", label: "Photos", predicate: (record) => Boolean(record.imageUrl) },
   { key: "locations", label: "Project places", predicate: (record) => record.locationCount > 0 },
   { key: "contributors", label: "Contributors", predicate: (record) => record.contributorCount > 0 },
   { key: "active", label: "Active period", predicate: (record) => Boolean(record.startDate || record.endDate) },
@@ -55,7 +55,7 @@ export function BumicertsExploreClient({ records: initialRecords = [] }: { recor
   const [sort, setSort] = useState<SortMode>("newest");
   const [openSort, setOpenSort] = useState(false);
   const [openFilters, setOpenFilters] = useState(false);
-  const [filters, setFilters] = useState<FilterKey[]>([]);
+  const [filters, setFilters] = useState<FilterKey[]>(["images"]);
   const [view, setView] = useState<ViewMode>("cards");
   const [drawer, setDrawer] = useState<BumicertRecord | null>(null);
 
