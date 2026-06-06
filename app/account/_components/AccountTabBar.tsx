@@ -21,15 +21,46 @@ interface Tab {
 }
 
 type AccountTabBarKind = "organization" | "user";
+type AccountTabBarScope = "account" | "manage";
+
+type TabPaths = {
+  home: string;
+  bumicerts: string;
+  donations: string;
+  timeline: string;
+  settings: string;
+};
+
+function buildTabPaths(did: string, scope: AccountTabBarScope): TabPaths {
+  if (scope === "manage") {
+    return {
+      home: "/manage",
+      bumicerts: "/manage/bumicerts",
+      donations: "/manage/donations",
+      timeline: "/manage/timeline",
+      settings: "/manage/settings",
+    };
+  }
+
+  return {
+    home: accountPath(did),
+    bumicerts: accountBumicertsPath(did),
+    donations: accountDonationsPath(did),
+    timeline: accountTimelinePath(did),
+    settings: accountSettingsPath(did),
+  };
+}
 
 function buildTabs(
   did: string,
   accountKind: AccountTabBarKind,
-  isOwner: boolean,
+  scope: AccountTabBarScope,
+  includeSettings: boolean,
 ): Tab[] {
+  const paths = buildTabPaths(did, scope);
   const settingsTab: Tab = {
     label: "Settings",
-    href: accountSettingsPath(did),
+    href: paths.settings,
     icon: SettingsIcon,
     exact: false,
   };
@@ -38,64 +69,68 @@ function buildTabs(
     const tabs: Tab[] = [
       {
         label: "Bumicerts",
-        href: accountBumicertsPath(did),
+        href: paths.bumicerts,
         icon: BadgeIcon,
         exact: false,
       },
       {
         label: "Donation History",
-        href: accountDonationsPath(did),
+        href: paths.donations,
         icon: HeartIcon,
         exact: false,
       },
     ];
-    if (isOwner) tabs.push(settingsTab);
+    if (includeSettings) tabs.push(settingsTab);
     return tabs;
   }
 
   const tabs: Tab[] = [
     {
       label: "Home",
-      href: accountPath(did),
+      href: paths.home,
       icon: HomeIcon,
       exact: true,
     },
     {
       label: "Bumicerts",
-      href: accountBumicertsPath(did),
+      href: paths.bumicerts,
       icon: BadgeIcon,
       exact: false,
     },
     {
       label: "Evidence Timeline",
-      href: accountTimelinePath(did),
+      href: paths.timeline,
       icon: ActivityIcon,
       exact: false,
     },
   ];
-  if (isOwner) tabs.push(settingsTab);
+  if (includeSettings) tabs.push(settingsTab);
   return tabs;
 }
 
 interface OrgTabBarProps {
   did: string;
   accountKind?: AccountKind;
-  isOwner?: boolean;
+  scope?: AccountTabBarScope;
+  includeSettings?: boolean;
 }
 
 export function AccountTabBar({
   did,
   accountKind = "organization",
-  isOwner = false,
+  scope = "account",
+  includeSettings = false,
 }: OrgTabBarProps) {
   const pathname = usePathname() ?? "/";
-  const tabs = buildTabs(did, accountKind, isOwner);
+  const tabs = buildTabs(did, accountKind, scope, includeSettings);
+  const paths = buildTabPaths(did, scope);
 
   function isActive(tab: Tab): boolean {
     if (
+      scope === "account" &&
       accountKind === "user" &&
-      tab.href === accountBumicertsPath(did) &&
-      pathname === accountPath(did)
+      tab.href === paths.bumicerts &&
+      pathname === paths.home
     ) {
       return true;
     }

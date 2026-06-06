@@ -9,7 +9,6 @@ import {
   CalendarIcon,
   Share2Icon,
   CheckIcon,
-  PencilIcon,
 } from "lucide-react";
 import type { AccountRouteData } from "../_lib/account-route";
 import { countryFlag } from "../../_lib/format";
@@ -36,13 +35,7 @@ function countryName(code: string): string {
   }
 }
 
-export function AccountHero({
-  account,
-  isOwner,
-}: {
-  account: AccountRouteData;
-  isOwner: boolean;
-}) {
+export function AccountHero({ account }: { account: AccountRouteData }) {
   const [copied, setCopied] = useState(false);
 
   const initial = account.displayName.charAt(0).toUpperCase();
@@ -134,16 +127,6 @@ export function AccountHero({
           </AnimatePresence>
         </motion.button>
 
-        {isOwner && (
-          <Link
-            href="/manage?mode=edit"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary text-primary-foreground border border-primary/20 shadow-lg transition-colors"
-            aria-label="Edit profile"
-          >
-            <PencilIcon className="h-3.5 w-3.5 shrink-0" />
-            <span className="text-xs font-medium">Edit</span>
-          </Link>
-        )}
       </div>
 
       <div className="relative z-10 flex-1 flex flex-col justify-end px-5 pb-6 pt-24">

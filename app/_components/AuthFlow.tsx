@@ -21,7 +21,6 @@ import {
 import type { AuthSession } from "../_lib/auth";
 import { buildLoginUrl, redirectToLogout } from "../_lib/auth-client";
 import { shortDid } from "../_lib/format";
-import { accountHref } from "../_lib/urls";
 import { Button } from "@/components/ui/button";
 import { ModalContent, ModalDescription, ModalTitle } from "@/components/ui/modal/modal";
 import { useModal } from "@/components/ui/modal/context";
@@ -470,16 +469,16 @@ function AuthenticatedMenu({ session }: { session: Extract<AuthSession, { isLogg
 
             <div className="p-1">
               <Link
-                href={accountHref(session.did)}
+                href="/manage"
                 onClick={() => setOpen(false)}
                 className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-foreground hover:bg-muted/60 transition-colors w-full text-left"
               >
                 <UserIcon className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-                My Account
+                Manage account
               </Link>
 
               <Link
-                href={`${accountHref(session.did)}/settings`}
+                href="/manage/settings"
                 onClick={() => setOpen(false)}
                 className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-foreground hover:bg-muted/60 transition-colors w-full text-left"
               >

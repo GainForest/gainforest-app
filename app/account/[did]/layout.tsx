@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import Container from "@/components/ui/container";
 import { AccountHero } from "../_components/AccountHero";
 import { AccountTabBar } from "../_components/AccountTabBar";
-import { fetchAuthSession } from "../../_lib/auth-server";
 import { getAccountRouteData, readAccountRouteParams } from "../_lib/account-route";
 
 export async function generateMetadata({ params }: { params: Promise<{ did: string }> }): Promise<Metadata> {
@@ -23,20 +22,13 @@ export default async function AccountLayout({
   params: Promise<{ did: string }>;
 }) {
   const { did, urlIdentifier } = await readAccountRouteParams(params);
-  const [account, session] = await Promise.all([
-    getAccountRouteData(did, urlIdentifier),
-    fetchAuthSession(),
-  ]);
-  const isOwner = session.isLoggedIn && session.did === did;
+  const account = await getAccountRouteData(did, urlIdentifier);
 
   return (
     <main className="w-full">
       <Container className="pt-4 pb-8">
-        <AccountHero
-          account={account}
-          isOwner={isOwner}
-        />
-        <AccountTabBar did={account.urlIdentifier} accountKind={account.kind} isOwner={isOwner} />
+        <AccountHero account={account} />
+        <AccountTabBar did={account.urlIdentifier} accountKind={account.kind} />
         {children}
       </Container>
     </main>

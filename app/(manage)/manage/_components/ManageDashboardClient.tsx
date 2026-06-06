@@ -24,6 +24,7 @@ import { cn } from "@/lib/utils";
 import type { AccountRouteData } from "@/app/account/_lib/account-route";
 import { ManageNavGrid } from "./ManageNavGrid";
 import { ManageAccountSetup } from "./ManageAccountSetup";
+import { ManageAccountTabs } from "./ManageAccountTabs";
 import type { ManageMode } from "./manageDashboardMode";
 import { HeaderContent } from "@/app/_components/HeaderSlots";
 import { RichText } from "@/app/_components/RichText";
@@ -578,6 +579,7 @@ export function ManageDashboardClient({
             onEditStartDate={openStartDateModal}
             onEditVisibility={openVisibilityModal}
           />
+          <ManageAccountTabs account={account} />
           {/* About section */}
           {account.kind === "organization" && (
             <div className="py-4 space-y-2">
@@ -613,6 +615,7 @@ export function ManageDashboardClient({
         onEditStartDate={openStartDateModal}
         onEditVisibility={openVisibilityModal}
       />
+      <ManageAccountTabs account={account} />
       {account.detail?.richBody?.length ? (
         <section className="py-6 md:py-8">
           <RichText blocks={account.detail.richBody} />
