@@ -356,6 +356,11 @@ function LoginModal() {
 
 export function SignInPrompt() {
   const { pushModal, show } = useModal();
+  const [signInFailed, setSignInFailed] = useState(false);
+
+  useEffect(() => {
+    setSignInFailed(new URLSearchParams(window.location.search).get("error") === "auth_failed");
+  }, []);
 
   const handleSignIn = () => {
     pushModal({
@@ -396,6 +401,12 @@ export function SignInPrompt() {
       <p className="px-2 pb-1.5 pt-2 text-center text-[11px] leading-snug text-muted-foreground">
         Save your project sites, tree information, and Bumicerts in one place.
       </p>
+
+      {signInFailed ? (
+        <p className="mx-2 mb-2 rounded-lg border border-destructive/20 bg-destructive/10 px-3 py-2 text-center text-xs text-destructive">
+          We couldn’t finish signing you in. Please try again.
+        </p>
+      ) : null}
 
       <Button size="sm" onClick={handleSignIn} className="w-full">
         Get started

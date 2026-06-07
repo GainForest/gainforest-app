@@ -157,5 +157,5 @@ export async function POST(request: Request) {
   const fallback = await runConfiguredPdsMutation(body, session.did).catch((error) => Response.json({ error: error instanceof Error ? error.message : String(error) }, { status: 502 }));
   if (fallback) return fallback;
 
-  return Response.json({ error: "Invalid response from auth server" }, { status: upstream.status });
+  return Response.json({ error: "Saving is unavailable right now. Please try again later." }, { status: upstream.ok ? 502 : upstream.status });
 }

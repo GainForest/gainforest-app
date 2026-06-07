@@ -23,8 +23,8 @@ async function callProxy<T>(payload: MutationPayload): Promise<T> {
     body: JSON.stringify(payload),
   });
   const data = (await res.json()) as T & { error?: string };
-  if (!res.ok) {
-    throw new Error((data as { error?: string }).error ?? `Mutation failed (${res.status})`);
+  if (!res.ok || data.error) {
+    throw new Error(data.error ?? `Mutation failed (${res.status})`);
   }
   return data;
 }

@@ -9,6 +9,7 @@
 /e2e/.env
 /e2e/.auth
 /reports
+/artifacts
 /test-results
 /playwright-report
 *.tsbuildinfo

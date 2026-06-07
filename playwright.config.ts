@@ -63,9 +63,9 @@ export default defineConfig({
       testMatch: /auth\.setup\.ts/,
     },
     {
-      name: "bumicert-create",
+      name: "disposable-checklist",
       dependencies: ["auth.setup"],
-      testMatch: /bumicert-create\.spec\.ts/,
+      testMatch: /disposable-checklist\.spec\.ts/,
       use: { ...desktopChrome },
     },
   ],

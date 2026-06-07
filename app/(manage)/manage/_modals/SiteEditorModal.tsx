@@ -43,10 +43,16 @@ async function validateSiteFile(file: File): Promise<void> {
   if (file.size > MAX_SITE_FILE_BYTES) {
     throw new Error("Choose a smaller site file (max 10 MB).");
   }
+  let parsed: unknown;
   try {
-    validateGeojsonOrThrow(JSON.parse(await file.text()));
+    parsed = JSON.parse(await file.text());
+  } catch {
+    throw new Error("Choose a valid map file.");
+  }
+  try {
+    validateGeojsonOrThrow(parsed);
   } catch (err) {
-    throw new Error(err instanceof Error ? err.message : "Choose a valid GeoJSON site file.");
+    throw new Error(err instanceof Error ? err.message.replace(/GeoJSON/gi, "map file") : "Choose a valid map file.");
   }
 }
 
@@ -217,12 +223,12 @@ export function SiteEditorModal({ did, initialData, onSaved }: SiteEditorModalPr
                       }}
                     />
                     <span className="text-sm font-medium text-foreground">
-                      {siteFile ? siteFile.name : "Upload a GeoJSON file"}
+                      {siteFile ? siteFile.name : "Upload a map file"}
                     </span>
                     <span className="mt-1 text-xs text-muted-foreground">
                       {siteFile
                         ? "Click to replace"
-                        : "Choose a saved map boundary (.geojson, .json)"}
+                        : "Choose a saved map boundary file"}
                     </span>
                   </label>
                   <div className="flex items-center gap-2">

@@ -51,6 +51,16 @@ function formatWebsite(url: string): string {
   return url.replace(/^https?:\/\//, "").replace(/\/$/, "");
 }
 
+function isValidWebsite(value: string): boolean {
+  if (!value.trim()) return true;
+  try {
+    const parsed = new URL(value.startsWith("http") ? value : `https://${value}`);
+    return parsed.hostname.includes(".");
+  } catch {
+    return false;
+  }
+}
+
 function formatSinceDate(value: string | null): { label: string | null; state: "empty" | "valid" | "invalid" } {
   if (!value) return { label: null, state: "empty" };
   const date = new Date(value);
@@ -196,7 +206,7 @@ function EditableHero({
                 type="button"
                 onClick={onEditLogo}
                 className="absolute -bottom-1 -right-1 h-7 w-7 rounded-full bg-background border border-border flex items-center justify-center shadow-sm hover:bg-muted/60 transition-colors cursor-pointer"
-                aria-label="Change logo"
+                aria-label={account.kind === "organization" ? "Change logo" : "Change photo"}
               >
                 <PencilIcon className="h-3.5 w-3.5" />
               </button>
@@ -387,20 +397,26 @@ export function ManageDashboardClient({
   const searchParams = useSearchParams();
   const modal = useModal();
   const rawMode = mode === undefined ? searchParams.get("mode") ?? undefined : mode ?? undefined;
-  const resolvedMode = resolveDashboardMode({
-    currentKind: account.kind,
-    mode: mode === undefined ? parseManageMode(rawMode) : mode,
-  });
+  const parsedMode = mode === undefined ? parseManageMode(rawMode) : mode;
+  const hasCompletedSetup = account.summary.hasCertifiedProfile || account.summary.hasCertifiedOrg || account.summary.hasGainforestOrg;
+  const resolvedMode = hasCompletedSetup
+    ? resolveDashboardMode({ currentKind: account.kind, mode: parsedMode })
+    : parsedMode;
   const isAccountManageRoute = pathname === "/manage";
 
   useEffect(() => {
-    if (mode !== undefined || !shouldClearDashboardMode({ currentKind: account.kind, rawMode })) return;
+    if (mode !== undefined) return;
+    if (hasCompletedSetup) {
+      if (!shouldClearDashboardMode({ currentKind: account.kind, rawMode })) return;
+    } else if (rawMode === undefined || parseManageMode(rawMode) !== null) {
+      return;
+    }
 
     const nextSearchParams = new URLSearchParams(searchParams.toString());
     nextSearchParams.delete("mode");
     const query = nextSearchParams.toString();
     router.replace(query ? `${pathname}?${query}` : pathname);
-  }, [account.kind, mode, pathname, rawMode, router, searchParams]);
+  }, [account.kind, hasCompletedSetup, mode, pathname, rawMode, router, searchParams]);
 
   // ── Edit state ─────────────────────────────────────────────────────────────
   const [editDisplayName, setEditDisplayName] = useState(account.displayName);
@@ -417,8 +433,7 @@ export function ManageDashboardClient({
   const [saveError, setSaveError] = useState<string | null>(null);
 
   const isEditing = resolvedMode === "edit";
-  const isOnboarding = resolvedMode === "onboard-user" || resolvedMode === "onboard-org" ||
-    (!account.summary.hasCertifiedProfile && !account.summary.hasCertifiedOrg && !account.summary.hasGainforestOrg);
+  const isOnboarding = resolvedMode === "onboard-user" || resolvedMode === "onboard-org" || !hasCompletedSetup;
 
   const editState: HeroEditState = {
     displayName: editDisplayName,
@@ -476,8 +491,8 @@ export function ManageDashboardClient({
   const openLogoModal = () => openDashboardModal(
     "manage-logo-editor",
     <ImageEditorModal
-      title="Edit logo"
-      description="Choose a square logo or avatar for this profile."
+      title={account.kind === "organization" ? "Edit logo" : "Edit photo"}
+      description={account.kind === "organization" ? "Choose a square logo for this profile." : "Choose a square photo for this profile."}
       currentUrl={account.avatarUrl}
       onConfirm={setLogoFile}
     />,
@@ -516,6 +531,18 @@ export function ManageDashboardClient({
 
   const handleSave = async () => {
     if (!hasChanges || isSaving) return;
+    if (!editDisplayName.trim()) {
+      setSaveError("Add a name before saving.");
+      return;
+    }
+    if (!isValidWebsite(editWebsite)) {
+      setSaveError("Enter a valid website address.");
+      return;
+    }
+    if (account.kind === "organization" && editCountry.trim() && editCountry.trim().length !== 2) {
+      setSaveError("Use a two-letter country code.");
+      return;
+    }
     setIsSaving(true);
     setSaveError(null);
 
@@ -526,20 +553,37 @@ export function ManageDashboardClient({
       if (logoFile) avatarBlob = await uploadBlob(logoFile);
       if (coverFile) bannerBlob = await uploadBlob(coverFile);
 
-      // Build profile record
+      // Build profile records
       const profileRecord: Record<string, unknown> = {
         $type: "app.bsky.actor.profile",
       };
-      if (editDisplayName.trim()) profileRecord.displayName = editDisplayName.trim();
-      if (editDescription.trim()) profileRecord.description = editDescription.trim();
+      const certifiedProfileRecord: Record<string, unknown> = {
+        $type: "app.certified.actor.profile",
+        createdAt: account.createdAt ?? new Date().toISOString(),
+      };
+      if (editDisplayName.trim()) {
+        profileRecord.displayName = editDisplayName.trim();
+        certifiedProfileRecord.displayName = editDisplayName.trim();
+      }
+      if (editDescription.trim()) {
+        profileRecord.description = editDescription.trim();
+        certifiedProfileRecord.description = editDescription.trim();
+      }
       if (editWebsite.trim()) {
         const url = editWebsite.startsWith("http") ? editWebsite : `https://${editWebsite}`;
         profileRecord.website = url.trim();
+        certifiedProfileRecord.website = url.trim();
       }
-      if (avatarBlob) profileRecord.avatar = avatarBlob;
+      if (avatarBlob) {
+        profileRecord.avatar = avatarBlob;
+        certifiedProfileRecord.avatar = { $type: "org.hypercerts.defs#smallImage", image: avatarBlob.ref };
+      }
       if (bannerBlob) profileRecord.banner = bannerBlob;
 
-      await putRecord("app.bsky.actor.profile", "self", profileRecord);
+      await Promise.all([
+        putRecord("app.bsky.actor.profile", "self", profileRecord),
+        putRecord("app.certified.actor.profile", "self", certifiedProfileRecord),
+      ]);
 
       // Update org record if applicable
       if (account.kind === "organization" && (editCountry !== (account.country ?? "") || editStartDate !== initialStartDate || editVisibility !== initialVisibility)) {
@@ -586,15 +630,9 @@ export function ManageDashboardClient({
         id="manage-dashboard-save-form"
         onSubmit={(e) => { e.preventDefault(); void handleSave(); }}
       >
-        <HeaderContent
-          {...(account.kind === "user" ? { right: registerOrganizationHeaderAction } : {})}
-          sub={(
-            <Container className="p-0 pt-1">
-              <EditBar hasChanges={hasChanges} isSaving={isSaving} saveError={saveError} onCancel={handleCancel} />
-            </Container>
-          )}
-        />
+        <HeaderContent {...(account.kind === "user" ? { right: registerOrganizationHeaderAction } : {})} />
         <Container className="pt-4 pb-8 space-y-2">
+          <EditBar hasChanges={hasChanges} isSaving={isSaving} saveError={saveError} onCancel={handleCancel} />
           <EditableHero
             account={account}
             isEditing

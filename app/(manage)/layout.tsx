@@ -18,7 +18,11 @@ export default async function ManageLayout({ children }: { children: React.React
   const session = await fetchAuthSession();
 
   if (!session.isLoggedIn) {
-    return <SignInPrompt />;
+    return (
+      <section className="mx-auto flex min-h-[calc(100vh-12rem)] w-full max-w-sm items-center px-3 py-12">
+        <SignInPrompt />
+      </section>
+    );
   }
 
   return children;

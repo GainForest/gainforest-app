@@ -2,9 +2,9 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useId, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { AnimatePresence, motion } from "framer-motion";
+import { motion } from "framer-motion";
 import {
   ArrowLeftIcon,
   Building2Icon,
@@ -175,6 +175,14 @@ function MediaInput({
 
 function AccountSetupForm({ did, kind }: { did: string; kind: OnboardingKind }) {
   const router = useRouter();
+  const fieldId = useId();
+  const nameId = `${fieldId}-name`;
+  const bioId = `${fieldId}-bio`;
+  const websiteId = `${fieldId}-website`;
+  const countryId = `${fieldId}-country`;
+  const startId = `${fieldId}-start`;
+  const visibilityId = `${fieldId}-visibility`;
+  const longDescriptionId = `${fieldId}-long`;
   const [displayName, setDisplayName] = useState("");
   const [description, setDescription] = useState("");
   const [website, setWebsite] = useState("");
@@ -220,11 +228,26 @@ function AccountSetupForm({ did, kind }: { did: string; kind: OnboardingKind }) 
         displayName: displayName.trim(),
         description: description.trim(),
       };
+      const certifiedProfileRecord: Record<string, unknown> = {
+        $type: "app.certified.actor.profile",
+        displayName: displayName.trim(),
+        description: description.trim(),
+        createdAt: new Date().toISOString(),
+      };
       const normalizedWebsite = normalizeUrl(website);
-      if (normalizedWebsite) profileRecord.website = normalizedWebsite;
-      if (avatarBlob) profileRecord.avatar = avatarBlob;
+      if (normalizedWebsite) {
+        profileRecord.website = normalizedWebsite;
+        certifiedProfileRecord.website = normalizedWebsite;
+      }
+      if (avatarBlob) {
+        profileRecord.avatar = avatarBlob;
+        certifiedProfileRecord.avatar = { $type: "org.hypercerts.defs#smallImage", image: avatarBlob.ref };
+      }
       if (bannerBlob) profileRecord.banner = bannerBlob;
-      await putRecord("app.bsky.actor.profile", "self", profileRecord);
+      await Promise.all([
+        putRecord("app.bsky.actor.profile", "self", profileRecord),
+        putRecord("app.certified.actor.profile", "self", certifiedProfileRecord),
+      ]);
 
       if (kind === "organization") {
         const orgRecord: Record<string, unknown> = {
@@ -275,18 +298,18 @@ function AccountSetupForm({ did, kind }: { did: string; kind: OnboardingKind }) 
       </div>
 
       <div className="grid gap-3 sm:grid-cols-[120px_1fr]">
-        <MediaInput label="Add logo" file={logoFile} onChange={setLogoFile} kind="logo" />
+        <MediaInput label={kind === "organization" ? "Add logo" : "Add photo"} file={logoFile} onChange={setLogoFile} kind="logo" />
         <MediaInput label="Add cover image" file={coverFile} onChange={setCoverFile} kind="cover" />
       </div>
 
       <div className="space-y-1.5">
-        <label htmlFor="setup-name" className="text-sm font-medium">Name <span className="text-destructive">*</span></label>
-        <Input id="setup-name" value={displayName} onChange={(event) => setDisplayName(event.target.value)} placeholder={kind === "organization" ? "Organization name" : "Display name"} maxLength={64} />
+        <label htmlFor={nameId} className="text-sm font-medium">Name <span className="text-destructive">*</span></label>
+        <Input id={nameId} value={displayName} onChange={(event) => setDisplayName(event.target.value)} placeholder={kind === "organization" ? "Organization name" : "Display name"} maxLength={64} />
       </div>
 
       <div className="space-y-1.5">
-        <label htmlFor="setup-bio" className="text-sm font-medium">Bio <span className="text-destructive">*</span></label>
-        <Textarea id="setup-bio" value={description} onChange={(event) => setDescription(event.target.value)} placeholder="Short public description…" rows={3} className="resize-none" maxLength={256} />
+        <label htmlFor={bioId} className="text-sm font-medium">Bio <span className="text-destructive">*</span></label>
+        <Textarea id={bioId} value={description} onChange={(event) => setDescription(event.target.value)} placeholder="Short public description…" rows={3} className="resize-none" maxLength={256} />
         <p className="text-xs text-muted-foreground">{description.length}/256</p>
       </div>
 
@@ -294,22 +317,22 @@ function AccountSetupForm({ did, kind }: { did: string; kind: OnboardingKind }) 
         <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="space-y-4 rounded-xl border border-border bg-muted/20 p-4">
           <div className="grid gap-3 sm:grid-cols-2">
             <div className="space-y-1.5">
-              <label htmlFor="setup-website" className="flex items-center gap-1.5 text-sm font-medium"><GlobeIcon className="h-3.5 w-3.5" /> Website</label>
-              <Input id="setup-website" value={website} onChange={(event) => setWebsite(event.target.value)} placeholder="https://example.org" aria-invalid={!websiteValid} />
-              {!websiteValid && <p className="text-xs text-destructive">Enter a valid website URL.</p>}
+              <label htmlFor={websiteId} className="flex items-center gap-1.5 text-sm font-medium"><GlobeIcon className="h-3.5 w-3.5" /> Website</label>
+              <Input id={websiteId} value={website} onChange={(event) => setWebsite(event.target.value)} placeholder="https://example.org" aria-invalid={!websiteValid} />
+              {!websiteValid && <p className="text-xs text-destructive">Enter a valid website address.</p>}
             </div>
             <div className="space-y-1.5">
-              <label htmlFor="setup-country" className="text-sm font-medium">Country code</label>
-              <Input id="setup-country" value={country} onChange={(event) => setCountry(event.target.value.toUpperCase().slice(0, 2))} placeholder="BR" maxLength={2} className="uppercase" />
+              <label htmlFor={countryId} className="text-sm font-medium">Country code</label>
+              <Input id={countryId} value={country} onChange={(event) => setCountry(event.target.value.toUpperCase().slice(0, 2))} placeholder="BR" maxLength={2} className="uppercase" />
             </div>
             <div className="space-y-1.5">
-              <label htmlFor="setup-start" className="flex items-center gap-1.5 text-sm font-medium"><CalendarIcon className="h-3.5 w-3.5" /> Start date</label>
-              <Input id="setup-start" type="date" value={startDate} onChange={(event) => setStartDate(event.target.value)} />
+              <label htmlFor={startId} className="flex items-center gap-1.5 text-sm font-medium"><CalendarIcon className="h-3.5 w-3.5" /> Start date</label>
+              <Input id={startId} type="date" value={startDate} onChange={(event) => setStartDate(event.target.value)} />
             </div>
             <div className="space-y-1.5">
-              <label htmlFor="setup-visibility" className="flex items-center gap-1.5 text-sm font-medium"><LockIcon className="h-3.5 w-3.5" /> Visibility</label>
+              <label htmlFor={visibilityId} className="flex items-center gap-1.5 text-sm font-medium"><LockIcon className="h-3.5 w-3.5" /> Visibility</label>
               <select
-                id="setup-visibility"
+                id={visibilityId}
                 value={visibility}
                 onChange={(event) => setVisibility(event.target.value as "Public" | "Unlisted")}
                 className="h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
@@ -320,8 +343,8 @@ function AccountSetupForm({ did, kind }: { did: string; kind: OnboardingKind }) 
             </div>
           </div>
           <div className="space-y-1.5">
-            <label htmlFor="setup-long" className="text-sm font-medium">About your organization</label>
-            <Textarea id="setup-long" value={longDescription} onChange={(event) => setLongDescription(event.target.value)} placeholder="Mission, work, local partners, monitoring approach…" rows={5} className="resize-none" />
+            <label htmlFor={longDescriptionId} className="text-sm font-medium">About your organization</label>
+            <Textarea id={longDescriptionId} value={longDescription} onChange={(event) => setLongDescription(event.target.value)} placeholder="Mission, work, local partners, monitoring approach…" rows={5} className="resize-none" />
           </div>
         </motion.div>
       )}
@@ -359,17 +382,15 @@ export function ManageAccountSetup({ did, mode }: { did: string; mode: ManageMod
 
   return (
     <motion.div className="mx-auto w-full max-w-xl" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}>
-      <AnimatePresence mode="wait">
-        {onboardingKind ? (
-          <motion.div key={onboardingKind} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }} transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}>
-            <AccountSetupForm did={did} kind={onboardingKind} />
-          </motion.div>
-        ) : (
-          <motion.div key="choice" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }} transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}>
-            <AccountSetupChoiceStep />
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {onboardingKind ? (
+        <motion.div key={onboardingKind} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}>
+          <AccountSetupForm did={did} kind={onboardingKind} />
+        </motion.div>
+      ) : (
+        <motion.div key="choice" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}>
+          <AccountSetupChoiceStep />
+        </motion.div>
+      )}
     </motion.div>
   );
 }

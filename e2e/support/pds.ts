@@ -1,9 +1,11 @@
 import { appendFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname } from "node:path";
 import { getE2EEnv } from "./env";
+import { readDisposableAccountMetadata } from "./disposable-email";
 
 export const E2E_PDS_COLLECTIONS = {
   claimActivity: "org.hypercerts.claim.activity",
+  certifiedLocation: "app.certified.location",
 } as const;
 
 export const createdRecordsPath = "e2e/.auth/created-records.jsonl";
@@ -14,10 +16,10 @@ export type PdsRepoRecord = {
   value: Record<string, unknown>;
 };
 
-type PdsSession = {
+type PdsReadAccount = {
   did: string;
-  accessJwt: string;
   serviceEndpoint: string;
+  source: "disposable-email" | "static-env";
 };
 
 type ParsedAtUri = {
@@ -46,16 +48,18 @@ function isListRecordsResponse(value: unknown): value is { records: PdsRepoRecor
   return isObject(value) && Array.isArray(value.records) && value.records.every(isPdsRepoRecord);
 }
 
-function pdsBaseUrl(): string {
-  const domain = getE2EEnv().testPdsDomain;
-  if (!domain) throw new Error("E2E_TEST_PDS_DOMAIN is required for direct PDS checks.");
-  return domain.startsWith("http://") || domain.startsWith("https://") ? domain.replace(/\/$/, "") : `https://${domain}`;
+function parseJsonText(text: string): unknown {
+  if (!text) return null;
+  try {
+    return JSON.parse(text) as unknown;
+  } catch {
+    return null;
+  }
 }
 
 async function fetchJson(url: string, init?: RequestInit): Promise<unknown> {
   const response = await fetch(url, init);
-  const text = await response.text();
-  const body = text ? JSON.parse(text) as unknown : null;
+  const body = parseJsonText(await response.text());
 
   if (!response.ok) {
     const message = isObject(body) && typeof body.message === "string" ? body.message : `${response.status} ${response.statusText}`;
@@ -65,20 +69,98 @@ async function fetchJson(url: string, init?: RequestInit): Promise<unknown> {
   return body;
 }
 
-async function createPdsSession(): Promise<PdsSession> {
-  const env = getE2EEnv();
-  const serviceEndpoint = pdsBaseUrl();
-  const session = await fetchJson(`${serviceEndpoint}/xrpc/com.atproto.server.createSession`, {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify({ identifier: env.testHandle, password: env.testPassword }),
-  });
+async function fetchJsonOrNull(url: string): Promise<unknown> {
+  try {
+    const response = await fetch(url);
+    if (!response.ok) return null;
+    return parseJsonText(await response.text());
+  } catch {
+    return null;
+  }
+}
 
-  if (!isObject(session) || typeof session.did !== "string" || typeof session.accessJwt !== "string") {
-    throw new Error("Direct PDS sign-in did not return the expected session.");
+function normalizeServiceEndpoint(endpoint: string): string {
+  return endpoint.replace(/\/$/, "");
+}
+
+function serviceTypeMatches(value: unknown): boolean {
+  if (typeof value === "string") return value === "AtprotoPersonalDataServer";
+  return Array.isArray(value) && value.some((entry) => entry === "AtprotoPersonalDataServer");
+}
+
+function getServiceEndpointFromDidDocument(value: unknown): string | null {
+  if (!isObject(value) || !Array.isArray(value.service)) return null;
+
+  for (const service of value.service) {
+    if (!isObject(service)) continue;
+    const endpoint = service.serviceEndpoint;
+    if (typeof endpoint === "string" && serviceTypeMatches(service.type)) return normalizeServiceEndpoint(endpoint);
   }
 
-  return { did: session.did, accessJwt: session.accessJwt, serviceEndpoint };
+  return null;
+}
+
+async function resolveDid(handle: string): Promise<string> {
+  const search = new URLSearchParams({ handle });
+  const value = await fetchJson(`https://public.api.bsky.app/xrpc/com.atproto.identity.resolveHandle?${search.toString()}`);
+  if (!isObject(value) || typeof value.did !== "string") {
+    throw new Error(`Could not resolve DID for E2E handle ${handle}.`);
+  }
+  return value.did;
+}
+
+async function resolveServiceEndpoint(did: string, fallbackPdsDomain: string | null): Promise<string> {
+  if (did.startsWith("did:plc:")) {
+    const endpoint = getServiceEndpointFromDidDocument(await fetchJsonOrNull(`https://plc.directory/${encodeURIComponent(did)}`));
+    if (endpoint) return endpoint;
+  }
+
+  if (did.startsWith("did:web:")) {
+    const host = did.slice("did:web:".length).replace(/:/g, "/");
+    const endpoint = getServiceEndpointFromDidDocument(await fetchJsonOrNull(`https://${host}/.well-known/did.json`));
+    if (endpoint) return endpoint;
+  }
+
+  if (!fallbackPdsDomain) throw new Error(`Could not resolve a PDS endpoint for ${did}.`);
+  return normalizeServiceEndpoint(fallbackPdsDomain.startsWith("http") ? fallbackPdsDomain : `https://${fallbackPdsDomain}`);
+}
+
+async function createStaticSessionAccount(): Promise<PdsReadAccount> {
+  const env = getE2EEnv();
+  let did = env.testDid;
+  if (!did) {
+    const serviceEndpoint = env.testPdsDomain
+      ? normalizeServiceEndpoint(env.testPdsDomain.startsWith("http") ? env.testPdsDomain : `https://${env.testPdsDomain}`)
+      : null;
+    if (!serviceEndpoint) throw new Error("E2E_TEST_DID or E2E_TEST_PDS_DOMAIN is required for direct PDS checks.");
+    const session = await fetchJson(`${serviceEndpoint}/xrpc/com.atproto.server.createSession`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ identifier: env.testHandle, password: env.testPassword }),
+    });
+    if (!isObject(session) || typeof session.did !== "string") {
+      throw new Error("Direct PDS sign-in did not return the expected session.");
+    }
+    did = session.did;
+    return { did, serviceEndpoint, source: "static-env" };
+  }
+
+  return { did, serviceEndpoint: await resolveServiceEndpoint(did, env.testPdsDomain), source: "static-env" };
+}
+
+async function getDefaultReadAccount(): Promise<PdsReadAccount> {
+  const disposable = readDisposableAccountMetadata();
+  if (disposable?.did) {
+    return {
+      did: disposable.did,
+      serviceEndpoint: disposable.serviceEndpoint
+        ? normalizeServiceEndpoint(disposable.serviceEndpoint)
+        : await resolveServiceEndpoint(disposable.did, getE2EEnv().testPdsDomain),
+      source: "disposable-email",
+    };
+  }
+
+  return createStaticSessionAccount();
 }
 
 export function parseAtUri(uri: string): ParsedAtUri {
@@ -89,18 +171,15 @@ export function parseAtUri(uri: string): ParsedAtUri {
 }
 
 async function listPdsRecords(collection: string): Promise<PdsRepoRecord[]> {
-  const session = await createPdsSession();
+  const account = await getDefaultReadAccount();
   const records: PdsRepoRecord[] = [];
   let cursor: string | undefined;
 
   do {
-    const search = new URLSearchParams({ repo: session.did, collection, limit: "100" });
+    const search = new URLSearchParams({ repo: account.did, collection, limit: "100" });
     if (cursor) search.set("cursor", cursor);
 
-    const value = await fetchJson(`${session.serviceEndpoint}/xrpc/com.atproto.repo.listRecords?${search.toString()}`, {
-      headers: { authorization: `Bearer ${session.accessJwt}` },
-    });
-
+    const value = await fetchJson(`${account.serviceEndpoint}/xrpc/com.atproto.repo.listRecords?${search.toString()}`);
     if (!isListRecordsResponse(value)) {
       throw new Error(`Direct PDS list response for ${collection} had an unexpected shape.`);
     }
@@ -113,16 +192,14 @@ async function listPdsRecords(collection: string): Promise<PdsRepoRecord[]> {
 }
 
 export async function getPdsRecord(uri: string): Promise<PdsRepoRecord> {
-  const session = await createPdsSession();
+  const account = await getDefaultReadAccount();
   const parsed = parseAtUri(uri);
-  if (parsed.did !== session.did) {
-    throw new Error(`Refusing to read a record for ${parsed.did} while signed in as ${session.did}.`);
+  if (parsed.did !== account.did) {
+    throw new Error(`Refusing to read a record for ${parsed.did} while checking ${account.did}.`);
   }
 
-  const search = new URLSearchParams({ repo: session.did, collection: parsed.collection, rkey: parsed.rkey });
-  const value = await fetchJson(`${session.serviceEndpoint}/xrpc/com.atproto.repo.getRecord?${search.toString()}`, {
-    headers: { authorization: `Bearer ${session.accessJwt}` },
-  });
+  const search = new URLSearchParams({ repo: account.did, collection: parsed.collection, rkey: parsed.rkey });
+  const value = await fetchJson(`${account.serviceEndpoint}/xrpc/com.atproto.repo.getRecord?${search.toString()}`);
 
   if (!isPdsRepoRecord(value)) {
     throw new Error(`Direct PDS get response for ${uri} had an unexpected shape.`);
@@ -143,6 +220,21 @@ export async function waitForClaimActivityByTitle(title: string): Promise<PdsRep
   }
 
   throw new Error(`Timed out waiting for direct PDS record titled ${title}. Last count: ${latestCount}.`);
+}
+
+export async function waitForCertifiedLocationByName(name: string): Promise<PdsRepoRecord> {
+  const deadline = Date.now() + 60_000;
+  let latestCount = 0;
+
+  while (Date.now() <= deadline) {
+    const records = await listPdsRecords(E2E_PDS_COLLECTIONS.certifiedLocation);
+    latestCount = records.length;
+    const match = records.find((record) => record.value.name === name);
+    if (match) return match;
+    await new Promise((resolve) => setTimeout(resolve, 2_000));
+  }
+
+  throw new Error(`Timed out waiting for direct PDS location named ${name}. Last count: ${latestCount}.`);
 }
 
 export function getRecordArray(record: PdsRepoRecord, key: string): Record<string, unknown>[] {
@@ -173,52 +265,26 @@ function readTrackedCreatedRecords(): ListedCreatedRecord[] {
     .filter((entry) => typeof entry.uri === "string");
 }
 
-async function deletePdsRecord(uri: string): Promise<void> {
-  const session = await createPdsSession();
-  const parsed = parseAtUri(uri);
-  if (parsed.did !== session.did) {
-    throw new Error(`Refusing to delete ${uri}; active test account is ${session.did}.`);
-  }
-
-  await fetchJson(`${session.serviceEndpoint}/xrpc/com.atproto.repo.deleteRecord`, {
-    method: "POST",
-    headers: {
-      authorization: `Bearer ${session.accessJwt}`,
-      "content-type": "application/json",
-    },
-    body: JSON.stringify({ repo: session.did, collection: parsed.collection, rkey: parsed.rkey }),
-  });
-}
-
-export async function cleanupCreatedPdsRecords(): Promise<{ deleted: number; failed: number }> {
+export async function cleanupCreatedPdsRecords(): Promise<{ deleted: number; failed: number; skipped: number }> {
   const tracked = readTrackedCreatedRecords();
-  const uris = new Set(tracked.map((entry) => entry.uri));
 
-  // Safety sweep for earlier interrupted local runs. Limit this to the test-only
-  // Bumicert title prefix instead of wiping the account.
-  const claimRecords = await listPdsRecords(E2E_PDS_COLLECTIONS.claimActivity).catch(() => []);
-  for (const record of claimRecords) {
-    if (typeof record.value.title === "string" && record.value.title.startsWith("E2E Bumicert ")) {
-      uris.add(record.uri);
+  if (readDisposableAccountMetadata()) {
+    // Current policy: disposable accounts are kept for inspection unless the user
+    // explicitly asks otherwise. Do not delete the account or its records here.
+    if (tracked.length > 0) {
+      mkdirSync(dirname(createdRecordsPath), { recursive: true });
+      writeFileSync(createdRecordsPath, "");
     }
+    return { deleted: 0, failed: 0, skipped: tracked.length };
   }
 
-  let deleted = 0;
-  let failed = 0;
-  for (const uri of uris) {
-    try {
-      await deletePdsRecord(uri);
-      deleted += 1;
-    } catch (error) {
-      failed += 1;
-      console.log(`[e2e] Could not delete test record ${uri}: ${error instanceof Error ? error.message : String(error)}`);
-    }
-  }
-
-  if (deleted > 0 || tracked.length > 0) {
+  // Static handle smoke tests should not create records in the current suite.
+  // If older local runs left tracking data behind, clear the file but do not
+  // mutate the configured account unexpectedly.
+  if (tracked.length > 0) {
     mkdirSync(dirname(createdRecordsPath), { recursive: true });
     writeFileSync(createdRecordsPath, "");
   }
 
-  return { deleted, failed };
+  return { deleted: 0, failed: 0, skipped: tracked.length };
 }

@@ -10,7 +10,7 @@ export function getAuthBaseUrl(): string {
 
 export function getAuthProvider(): string | null {
   const provider = process.env.NEXT_PUBLIC_AUTH_PROVIDER?.trim();
-  return provider || null;
+  return provider || "certs";
 }
 
 export function parseAuthSession(value: unknown): AuthSession {

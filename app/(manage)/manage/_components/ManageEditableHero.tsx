@@ -159,7 +159,7 @@ export function ManageEditableHero({ account, isEditing }: { account: AccountRou
               <Link
                 href="/manage?mode=edit"
                 className="absolute -bottom-1 -right-1 h-7 w-7 rounded-full bg-background border border-border flex items-center justify-center shadow-sm hover:bg-muted/60 transition-colors cursor-pointer"
-                aria-label="Change logo"
+                aria-label={account.kind === "organization" ? "Change logo" : "Change photo"}
               >
                 <PencilIcon className="h-3.5 w-3.5" />
               </Link>

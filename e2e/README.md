@@ -2,11 +2,13 @@
 
 Authenticated E2E tests run through central sign-in on an HTTPS `*.gainforest.app` host so cookie and redirect behavior matches production.
 
+The setup project first smoke-tests the configured handle/password account, then creates a fresh disposable email account and saves that disposable account's browser state for the real checklist test. Teardown deletes the run-owned disposable account automatically.
+
 Local default:
 
 ```bash
 cp e2e/.env.example e2e/.env
-# Fill E2E_TEST_PASSWORD in e2e/.env
+# Fill E2E_TEST_HANDLE and E2E_TEST_PASSWORD in e2e/.env
 pnpm test:e2e
 ```
 

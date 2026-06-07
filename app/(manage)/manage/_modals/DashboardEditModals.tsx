@@ -158,9 +158,9 @@ export function WebsiteEditorModal({
         <ModalDescription>Add a public website for this profile, or remove it entirely.</ModalDescription>
       </ModalHeader>
       <div className="space-y-1.5">
-        <label htmlFor="manage-website" className="text-sm font-medium">Website URL</label>
+        <label htmlFor="manage-website" className="text-sm font-medium">Website address</label>
         <Input id="manage-website" value={website} onChange={(event) => setWebsite(event.target.value)} placeholder="https://example.org" aria-invalid={!valid} autoFocus />
-        {!valid ? <p className="text-xs text-destructive">Enter a valid website URL.</p> : null}
+        {!valid ? <p className="text-xs text-destructive">Enter a valid website address.</p> : null}
       </div>
       <ModalFooter>
         <Button type="button" variant="outline" onClick={() => void close()}>Cancel</Button>

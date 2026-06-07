@@ -7,6 +7,7 @@ import {
   type RecordDetail,
 } from "../../_lib/indexer";
 import { shortDid } from "../../_lib/format";
+import { resolveBlobUrl, resolvePdsHost } from "../../_lib/pds";
 
 export type AccountKind = "organization" | "user";
 
@@ -35,6 +36,21 @@ type AppViewProfile = {
   description?: string;
   avatar?: string;
   banner?: string;
+};
+
+type DirectCertifiedProfile = {
+  displayName: string | null;
+  description: string | null;
+  website: string | null;
+  avatarUrl: string | null;
+  createdAt: string | null;
+};
+
+type DirectCertifiedOrganization = {
+  country: string | null;
+  foundedDate: string | null;
+  visibility: "Public" | "Unlisted" | null;
+  createdAt: string | null;
 };
 
 export function encodeAccountSegment(value: string): string {
@@ -75,12 +91,14 @@ export const getAccountRouteData = cache(async (
   did: string,
   urlIdentifier = did,
 ): Promise<AccountRouteData> => {
-  const [summaryResult, appViewProfile] = await Promise.all([
+  const [summaryResult, appViewProfile, directCertifiedProfile, directCertifiedOrganization] = await Promise.all([
     fetchAccountSummary(did).catch((error) => {
       console.warn("[account] Failed to read indexer account summary", did, error);
       return null;
     }),
     fetchAppViewProfile(did).catch(() => null),
+    fetchDirectCertifiedProfile(did).catch(() => null),
+    fetchDirectCertifiedOrganization(did).catch(() => null),
   ]);
 
   const fallbackSummary: AccountSummary = {
@@ -102,7 +120,20 @@ export const getAccountRouteData = cache(async (
     observationCount: 0,
   };
 
-  const summary = summaryResult ?? fallbackSummary;
+  const baseSummary = summaryResult ?? fallbackSummary;
+  const summary = {
+    ...baseSummary,
+    displayName: baseSummary.displayName ?? directCertifiedProfile?.displayName ?? null,
+    avatarUrl: baseSummary.avatarUrl ?? directCertifiedProfile?.avatarUrl ?? null,
+    bio: baseSummary.bio ?? directCertifiedProfile?.description ?? null,
+    website: baseSummary.website ?? directCertifiedProfile?.website ?? null,
+    country: baseSummary.country ?? directCertifiedOrganization?.country ?? null,
+    createdAt: baseSummary.createdAt ?? directCertifiedOrganization?.createdAt ?? directCertifiedProfile?.createdAt ?? null,
+    foundedDate: baseSummary.foundedDate ?? directCertifiedOrganization?.foundedDate ?? null,
+    visibility: baseSummary.visibility ?? directCertifiedOrganization?.visibility ?? null,
+    hasCertifiedProfile: baseSummary.hasCertifiedProfile || Boolean(directCertifiedProfile),
+    hasCertifiedOrg: baseSummary.hasCertifiedOrg || Boolean(directCertifiedOrganization),
+  };
   const kind: AccountKind = summary.hasCertifiedOrg || summary.hasGainforestOrg ? "organization" : "user";
   const detail = await readBestAccountDetail(did, summary);
   const displayName =
@@ -156,6 +187,48 @@ async function fetchAppViewProfile(actor: string): Promise<AppViewProfile | null
   );
   if (!response.ok) return null;
   return (await response.json()) as AppViewProfile;
+}
+
+async function fetchDirectRecordValue(did: string, collection: string): Promise<Record<string, unknown> | null> {
+  const host = await resolvePdsHost(did);
+  if (!host) return null;
+  const params = new URLSearchParams({ repo: did, collection, rkey: "self" });
+  const response = await fetch(`https://${host}/xrpc/com.atproto.repo.getRecord?${params.toString()}`, {
+    cache: "no-store",
+  });
+  if (!response.ok) return null;
+  const data = (await response.json()) as { value?: Record<string, unknown> };
+  return data.value ?? null;
+}
+
+async function fetchDirectCertifiedProfile(did: string): Promise<DirectCertifiedProfile | null> {
+  const value = await fetchDirectRecordValue(did, "app.certified.actor.profile");
+  if (!value) return null;
+
+  const avatar = value.avatar;
+  const avatarRef = typeof avatar === "object" && avatar !== null && "image" in avatar
+    ? (avatar.image as { ref?: string | null } | undefined)?.ref
+    : null;
+
+  return {
+    displayName: typeof value.displayName === "string" ? value.displayName : null,
+    description: typeof value.description === "string" ? value.description : null,
+    website: typeof value.website === "string" ? value.website : null,
+    avatarUrl: await resolveBlobUrl(did, avatarRef),
+    createdAt: typeof value.createdAt === "string" ? value.createdAt : null,
+  };
+}
+
+async function fetchDirectCertifiedOrganization(did: string): Promise<DirectCertifiedOrganization | null> {
+  const value = await fetchDirectRecordValue(did, "app.certified.actor.organization");
+  if (!value) return null;
+  const rawVisibility = typeof value.visibility === "string" ? value.visibility : null;
+  return {
+    country: typeof value.country === "string" ? value.country : null,
+    foundedDate: typeof value.foundedDate === "string" ? value.foundedDate : null,
+    visibility: rawVisibility === "unlisted" || rawVisibility === "Unlisted" ? "Unlisted" : rawVisibility ? "Public" : null,
+    createdAt: typeof value.createdAt === "string" ? value.createdAt : null,
+  };
 }
 
 async function resolveHandleWithPlc(handle: string): Promise<string | null> {
