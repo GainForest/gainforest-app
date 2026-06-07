@@ -15,7 +15,8 @@ import {
   SlidersHorizontalIcon,
   UsersIcon,
 } from "lucide-react";
-import { memo, useCallback, useDeferredValue, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { memo, useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
+import { BumicertPillRows, type BumicertCardPill } from "@/components/bumicert/BumicertPillRows";
 import { Button } from "@/components/ui/button";
 import { RecordDrawer } from "../_components/RecordDrawer";
 import { RecordMap } from "../_components/RecordMap";
@@ -620,7 +621,7 @@ function BumicertGridSkeleton() {
 }
 
 const BumicertCardVisual = memo(function BumicertCardVisual({ record, priority }: { record: BumicertRecord; priority: boolean }) {
-  const objectives = useMemo(() => buildObjectiveItems(record), [record]);
+  const { scopeItems, iconItems } = useMemo(() => buildPillRows(record), [record]);
   const organizationName = "Project steward";
   const [imgError, setImgError] = useState(false);
   const hasImage = Boolean(record.imageUrl) && !imgError;
@@ -662,7 +663,7 @@ const BumicertCardVisual = memo(function BumicertCardVisual({ record, priority }
           )}
         </div>
 
-        {objectives.length > 0 && <OneLinePillRow items={objectives} />}
+        <BumicertPillRows scopeItems={scopeItems} iconItems={iconItems} />
       </div>
 
       <div className="absolute left-2 top-2 flex min-w-0 items-center gap-1 rounded-full bg-background/70 p-1 shadow-lg backdrop-blur-lg">
@@ -682,59 +683,19 @@ const BumicertCardVisual = memo(function BumicertCardVisual({ record, priority }
   );
 });
 
-type CardPill = {
-  key: string;
-  content: ReactNode;
-  ariaLabel?: string;
-  emphasis?: boolean;
-};
-
-function OneLinePillRow({ items }: { items: CardPill[] }) {
-  const visibleItems = items.slice(0, 2);
-  const hiddenCount = Math.max(0, items.length - visibleItems.length);
-
-  return (
-    <div className="relative mt-4 w-full overflow-hidden">
-      <div className="flex w-full flex-nowrap items-center gap-2">
-        {visibleItems.map((item) => (
-          <Pill key={item.key} item={item} />
-        ))}
-        {hiddenCount > 0 && (
-          <Pill
-            item={{
-              key: "more",
-              content: `+${hiddenCount}`,
-              ariaLabel: `${hiddenCount} more project detail${hiddenCount === 1 ? "" : "s"}`,
-              emphasis: true,
-            }}
-          />
-        )}
-      </div>
-    </div>
-  );
-}
-
-function Pill({ item }: { item: CardPill }) {
-  return (
-    <span
-      aria-label={item.ariaLabel}
-      className={`inline-flex h-7 max-w-[11rem] shrink-0 items-center gap-1.5 rounded-full bg-muted px-2.5 text-sm font-medium ${
-        item.emphasis ? "text-foreground" : "text-muted-foreground"
-      }`}
-    >
-      {item.content}
-    </span>
-  );
-}
-
-function buildObjectiveItems(record: BumicertRecord): CardPill[] {
-  const items: CardPill[] = (record.scopeTags ?? []).map((tag, index) => ({
+function buildPillRows(record: BumicertRecord): {
+  scopeItems: BumicertCardPill[];
+  iconItems: BumicertCardPill[];
+} {
+  const scopeItems: BumicertCardPill[] = (record.scopeTags ?? []).map((tag, index) => ({
     key: `scope-${index}-${tag}`,
-    content: <span className="truncate">{formatScopeTag(tag)}</span>,
+    content: <span>{formatScopeTag(tag)}</span>,
   }));
 
+  const iconItems: BumicertCardPill[] = [];
+
   if (record.locationCount > 0) {
-    items.push({
+    iconItems.push({
       key: "places",
       content: (
         <>
@@ -747,7 +708,7 @@ function buildObjectiveItems(record: BumicertRecord): CardPill[] {
   }
 
   if (record.contributorCount > 0) {
-    items.push({
+    iconItems.push({
       key: "contributors",
       content: (
         <>
@@ -760,14 +721,14 @@ function buildObjectiveItems(record: BumicertRecord): CardPill[] {
   }
 
   if (record.startDate || record.endDate) {
-    items.push({
+    iconItems.push({
       key: "dates",
       content: <CalendarDaysIcon className="h-3.5 w-3.5" aria-hidden />,
       ariaLabel: "Project dates added",
     });
   }
 
-  return items;
+  return { scopeItems, iconItems };
 }
 
 function formatScopeTag(tag: string): string {
