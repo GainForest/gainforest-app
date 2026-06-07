@@ -385,10 +385,11 @@ function filterWhereVariants(media: OccurrenceFilter): Array<Record<string, unkn
   return [undefined];
 }
 
-function occurrenceWhereVariants(media: OccurrenceFilter, query?: string): Record<string, unknown>[] {
-  const bases = filterWhereVariants(media);
+function occurrenceWhereVariants(media: OccurrenceFilter, query?: string, ownerDid?: string): Record<string, unknown>[] {
+  const ownerWhere = ownerDid ? { did: { eq: ownerDid } } : undefined;
+  const bases = filterWhereVariants(media).map((base) => mergeWhere(ownerWhere, base) ?? {});
   const q = query?.trim();
-  if (!q) return bases.map((base) => base ?? {});
+  if (!q) return bases;
   const queryWheres = [
     { scientificName: { contains: q } },
     { vernacularName: { contains: q } },
@@ -590,11 +591,13 @@ async function walkAudioRecords(opts: {
   target: number;
   after: string | null;
   query?: string;
+  ownerDid?: string;
   signal?: AbortSignal;
   onProgress?: (records: OccurrenceRecord[]) => void;
 }): Promise<OccurrenceWalkResult> {
   const q = opts.query?.trim();
-  const where = q ? { name: { contains: q }, blob: { isNull: false } } : { blob: { isNull: false } };
+  const ownerWhere = opts.ownerDid ? { did: { eq: opts.ownerDid } } : undefined;
+  const where = mergeWhere(ownerWhere, q ? { name: { contains: q } } : undefined, { blob: { isNull: false } }) ?? { blob: { isNull: false } };
   const collected: OccurrenceRecord[] = [];
   let cursor: string | null = opts.after;
   let hasNextPage = true;
@@ -644,13 +647,14 @@ export async function walkOccurrences(opts: {
   target: number;
   after: string | null;
   query?: string;
+  ownerDid?: string;
   maxPages?: number;
   onProgress?: (records: OccurrenceRecord[]) => void;
   signal?: AbortSignal;
   resolveMedia?: boolean;
 }): Promise<OccurrenceWalkResult> {
   const { media, target, signal } = opts;
-  const whereVariants = occurrenceWhereVariants(media, opts.query);
+  const whereVariants = occurrenceWhereVariants(media, opts.query, opts.ownerDid);
 
   async function walkOne(where: Record<string, unknown> | undefined, after: string | null): Promise<OccurrenceWalkResult> {
     // With a server-side filter every returned node already matches, so the
@@ -732,6 +736,7 @@ export async function walkOccurrences(opts: {
                 target,
                 after: previous.cursors[whereVariants.length] ?? null,
                 query: opts.query,
+                ownerDid: opts.ownerDid,
                 signal,
                 onProgress: opts.onProgress,
               })

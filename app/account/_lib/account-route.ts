@@ -69,6 +69,10 @@ export function accountDonationsPath(didOrHandle: string): string {
   return `${accountPath(didOrHandle)}/donations`;
 }
 
+export function accountObservationsPath(didOrHandle: string): string {
+  return `${accountPath(didOrHandle)}/observations`;
+}
+
 export function accountTimelinePath(didOrHandle: string): string {
   return `${accountPath(didOrHandle)}/timeline`;
 }

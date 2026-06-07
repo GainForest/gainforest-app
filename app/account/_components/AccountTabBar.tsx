@@ -2,19 +2,19 @@
 
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import { ActivityIcon, BadgeIcon, HeartIcon, HomeIcon, SettingsIcon } from "lucide-react";
+import { ActivityIcon, BadgeIcon, HeartIcon, HomeIcon, LeafIcon, SettingsIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { AccountKind } from "../_lib/account-route";
 import {
   accountBumicertsPath,
   accountDonationsPath,
+  accountObservationsPath,
   accountPath,
   accountSettingsPath,
-  accountTimelinePath,
 } from "../_lib/account-route";
 
 interface Tab {
-  label: "Home" | "Bumicerts" | "Donation History" | "Evidence Timeline" | "Settings";
+  label: "Home" | "Bumicerts" | "Donation History" | "Evidence Timeline" | "Observations" | "Settings";
   href: string;
   icon: React.ElementType;
   exact: boolean;
@@ -27,7 +27,7 @@ type TabPaths = {
   home: string;
   bumicerts: string;
   donations: string;
-  timeline: string;
+  activity: string;
   settings: string;
 };
 
@@ -37,7 +37,7 @@ function buildTabPaths(did: string, scope: AccountTabBarScope): TabPaths {
       home: "/manage?tab=home",
       bumicerts: "/manage?tab=bumicerts",
       donations: "/manage?tab=donations",
-      timeline: "/manage?tab=timeline",
+      activity: "/manage?tab=timeline",
       settings: "/manage?tab=settings",
     };
   }
@@ -46,7 +46,7 @@ function buildTabPaths(did: string, scope: AccountTabBarScope): TabPaths {
     home: accountPath(did),
     bumicerts: accountBumicertsPath(did),
     donations: accountDonationsPath(did),
-    timeline: accountTimelinePath(did),
+    activity: accountObservationsPath(did),
     settings: accountSettingsPath(did),
   };
 }
@@ -98,9 +98,9 @@ function buildTabs(
       exact: false,
     },
     {
-      label: "Evidence Timeline",
-      href: paths.timeline,
-      icon: ActivityIcon,
+      label: scope === "manage" ? "Evidence Timeline" : "Observations",
+      href: paths.activity,
+      icon: scope === "manage" ? ActivityIcon : LeafIcon,
       exact: false,
     },
   ];

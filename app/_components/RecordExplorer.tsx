@@ -151,10 +151,12 @@ export function RecordExplorer({
   kind,
   initialPage,
   showHero = true,
+  ownerDid,
 }: {
   kind: RecordKind;
   initialPage?: InitialExplorerPage;
   showHero?: boolean;
+  ownerDid?: string;
 }) {
   const meta = KIND_META[kind];
   const initialRecords = initialPage?.records ?? [];
@@ -171,7 +173,7 @@ export function RecordExplorer({
   const [view, setView] = useState<"cards" | "map">("cards");
   const [walking, setWalking] = useState(false);
   const [occurrenceStats, setOccurrenceStats] = useState<OccurrenceStats | null>(null);
-  const [occurrenceStatsLoading, setOccurrenceStatsLoading] = useState(kind === "occurrence");
+  const [occurrenceStatsLoading, setOccurrenceStatsLoading] = useState(kind === "occurrence" && !ownerDid);
   // Gate the first load until the URL has been read, so a shared link's filter
   // params (media/source) are applied before the initial fetch.
   const [hydrated, setHydrated] = useState(false);
@@ -190,7 +192,7 @@ export function RecordExplorer({
   const hasLoadedRecords = records.length > 0;
 
   useEffect(() => {
-    if (kind !== "occurrence" || !hasLoadedRecords || occurrenceStatsStartedRef.current) return;
+    if (kind !== "occurrence" || ownerDid || !hasLoadedRecords || occurrenceStatsStartedRef.current) return;
     occurrenceStatsStartedRef.current = true;
     const ctrl = new AbortController();
     const timer = window.setTimeout(() => {
@@ -208,7 +210,7 @@ export function RecordExplorer({
       window.clearTimeout(timer);
       ctrl.abort();
     };
-  }, [hasLoadedRecords, kind]);
+  }, [hasLoadedRecords, kind, ownerDid]);
   // Latest values for the load closure without re-creating it each render.
   const stateRef = useRef({ records, cursor, hasMore, phase });
   stateRef.current = { records, cursor, hasMore, phase };
@@ -243,6 +245,7 @@ export function RecordExplorer({
           target,
           after,
           query: deferredQuery,
+          ownerDid,
           signal: ctrl.signal,
           resolveMedia: false,
           onProgress: (progressRecords) => {
@@ -290,7 +293,7 @@ export function RecordExplorer({
           if (isCurrent()) setWalking(false);
         });
     },
-    [deferredQuery, kind, occMedia, siteSource, sort],
+    [deferredQuery, kind, occMedia, ownerDid, siteSource, sort],
   );
 
   // Hydrate all shareable state from the URL once, before the first load, so a
@@ -441,10 +444,10 @@ export function RecordExplorer({
   // Bumicerts and organizations pages. Other embedded explorer uses still fall
   // back to loaded-record summaries.
   const stats = useMemo(
-    () => (kind === "occurrence" && occurrenceStats ? computeOccurrenceTotalStats(occurrenceStats) : computeStats(records, kind)),
-    [kind, occurrenceStats, records],
+    () => (kind === "occurrence" && !ownerDid && occurrenceStats ? computeOccurrenceTotalStats(occurrenceStats) : computeStats(records, kind)),
+    [kind, occurrenceStats, ownerDid, records],
   );
-  const showStats = kind === "occurrence" ? Boolean(occurrenceStats) || (!occurrenceStatsLoading && records.length > 0) : records.length > 0;
+  const showStats = kind === "occurrence" ? ownerDid ? records.length > 0 : Boolean(occurrenceStats) || (!occurrenceStatsLoading && records.length > 0) : records.length > 0;
   const gridCls = kind === "occurrence" ? GALLERY_GRID_CLS : GRID_CLS;
 
   return (
@@ -465,7 +468,7 @@ export function RecordExplorer({
       <div className="relative z-10 mx-auto max-w-6xl px-6">
         {/* Stats overview — observations use total counters, while older embedded views keep loaded summaries. */}
         {showStats && (
-          <div className="relative z-20 -mt-10">
+          <div className={`relative z-20 ${showHero ? "-mt-10" : "mt-6"}`}>
             <StatBand stats={stats.slice(0, 4)} />
           </div>
         )}

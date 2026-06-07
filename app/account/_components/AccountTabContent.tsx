@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import { RichText } from "../../_components/RichText";
+import { RecordExplorer } from "../../_components/RecordExplorer";
 import { AccountBumicertsGrid } from "./AccountBumicertsGrid";
 import { AccountContentColumns, AccountSidebar } from "./AccountSidebar";
 import { AccountSettingsSections } from "./AccountSettingsSections";
@@ -97,6 +98,14 @@ export async function AccountDonationsTabContent({ account, did }: { account: Ac
       </section>
     </AccountContentColumns>
   );
+}
+
+export function AccountObservationsTabContent({ account, did }: { account: AccountRouteData; did: string }) {
+  if (account.kind !== "organization") {
+    notFound();
+  }
+
+  return <RecordExplorer kind="occurrence" ownerDid={did} showHero={false} />;
 }
 
 export async function AccountTimelineTabContent({ account, did }: { account: AccountRouteData; did: string }) {
