@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import { MenuIcon, XIcon } from "lucide-react";
 import { LogoMark } from "./Logo";
 import { StatusPill } from "./StatusPill";
 import { ThemeToggle } from "./ThemeToggle";
@@ -97,7 +98,7 @@ export function TopNav({ status }: { status: StatusSnapshot }) {
               aria-label={menuOpen ? "Close menu" : "Open menu"}
               className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-border-soft text-foreground/75 transition-colors hover:border-foreground/35 hover:text-foreground lg:hidden"
             >
-              {menuOpen ? <CloseIcon /> : <MenuIcon />}
+              {menuOpen ? <XIcon className="h-4 w-4" aria-hidden /> : <MenuIcon className="h-[18px] w-[18px]" aria-hidden />}
             </button>
           </div>
         </div>
@@ -143,21 +144,5 @@ export function TopNav({ status }: { status: StatusSnapshot }) {
         </div>
       )}
     </>
-  );
-}
-
-function MenuIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-function CloseIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-    </svg>
   );
 }

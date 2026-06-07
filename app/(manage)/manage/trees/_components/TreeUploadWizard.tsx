@@ -1,5 +1,6 @@
 "use client";
 
+import { CheckIcon } from "lucide-react";
 import { useState } from "react";
 import FileDropStep from "./FileDropStep";
 import ColumnMappingStep from "./ColumnMappingStep";
@@ -96,9 +97,7 @@ function StepIndicator({ currentStep }: { currentStep: 1 | 2 | 3 | 4 }) {
                 }`}
               >
                 {isCompleted ? (
-                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                  </svg>
+                  <CheckIcon className="h-4 w-4" aria-hidden />
                 ) : (
                   step.number
                 )}

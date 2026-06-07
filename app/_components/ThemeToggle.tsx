@@ -1,5 +1,6 @@
 "use client";
 
+import { MoonIcon, SunIcon } from "lucide-react";
 import { useEffect, useState, type MouseEvent } from "react";
 
 // Light/dark toggle with a circular View-Transition reveal (ported from
@@ -109,34 +110,7 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
       className={`inline-flex h-9 w-9 items-center justify-center rounded-full border border-border-soft text-foreground/75 transition-colors hover:border-foreground/35 hover:text-foreground ${className}`}
     >
       {/* Default to the moon (light mode) until mounted to match SSR. */}
-      {mounted && isDark ? <SunIcon /> : <MoonIcon />}
+      {mounted && isDark ? <SunIcon className="h-[17px] w-[17px]" aria-hidden /> : <MoonIcon className="h-4 w-4" aria-hidden />}
     </button>
-  );
-}
-
-function MoonIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <path
-        d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"
-        stroke="currentColor"
-        strokeWidth="1.7"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-function SunIcon() {
-  return (
-    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <circle cx="12" cy="12" r="4.2" stroke="currentColor" strokeWidth="1.7" />
-      <path
-        d="M12 2.5v2.2M12 19.3v2.2M4.6 4.6l1.6 1.6M17.8 17.8l1.6 1.6M2.5 12h2.2M19.3 12h2.2M4.6 19.4l1.6-1.6M17.8 6.2l1.6-1.6"
-        stroke="currentColor"
-        strokeWidth="1.7"
-        strokeLinecap="round"
-      />
-    </svg>
   );
 }

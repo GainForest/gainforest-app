@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { LeafIcon } from "lucide-react";
 import {
   deviceLabel,
   deviceTone,
@@ -286,11 +287,7 @@ function Notice({ title, body }: { title: string; body: string }) {
 }
 
 function LeafGlyph() {
-  return (
-    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <path d="M5 19c0-7 5-13 14-14 0 9-5 14-14 14zM5 19c3-3 6-5 9-6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
+  return <LeafIcon width={11} height={11} aria-hidden />;
 }
 
 function tempTone(c: number): string {

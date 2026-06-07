@@ -1,5 +1,6 @@
 "use client";
 
+import { XIcon } from "lucide-react";
 import {
   createContext,
   useCallback,
@@ -125,9 +126,7 @@ function AccountDrawer({ did, onClose }: { did: string | null; onClose: () => vo
             aria-label="Close"
             className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-border-soft text-foreground/60 transition-colors hover:border-foreground/30 hover:text-foreground"
           >
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden>
-              <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-            </svg>
+            <XIcon className="h-[15px] w-[15px]" aria-hidden />
           </button>
         </div>
 

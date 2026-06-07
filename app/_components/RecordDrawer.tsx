@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowUpRightIcon, CalendarRangeIcon, CheckIcon, HeartIcon, MapPinIcon, Share2Icon, UsersIcon } from "lucide-react";
+import { ArrowUpRightIcon, CalendarRangeIcon, CheckIcon, HeartIcon, MapPinIcon, Share2Icon, UsersIcon, XIcon } from "lucide-react";
 import {
   fetchRecordDetail,
   type ExplorerRecord,
@@ -308,9 +308,7 @@ function CloseButton({ onClose, floating = false }: { onClose: () => void; float
           : "inline-flex h-8 w-8 items-center justify-center rounded-full border border-border-soft text-foreground/60 transition-colors hover:border-foreground/30 hover:text-foreground"
       }
     >
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden>
-        <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-      </svg>
+      <XIcon className="h-[15px] w-[15px]" aria-hidden />
     </button>
   );
 }

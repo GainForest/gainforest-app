@@ -1,5 +1,6 @@
 "use client";
 
+import { Maximize2Icon, XIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { MetricSeries } from "../_lib/trends";
 import { formatCompact, formatCompactUsd, formatDate } from "../_lib/format";
@@ -194,9 +195,7 @@ function MetricModal({
             aria-label="Close"
             className="shrink-0 rounded-full p-1.5 text-muted-foreground transition-colors hover:bg-surface-sunken hover:text-foreground"
           >
-            <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round">
-              <path d="M6 6l12 12M18 6L6 18" />
-            </svg>
+            <XIcon className="h-5 w-5" aria-hidden />
           </button>
         </div>
 
@@ -306,18 +305,10 @@ export function KpiCard({
       <div className="mt-2 flex items-center gap-1.5 text-[14px] font-medium text-foreground lg:text-[15px]">
         {label}
         {hasSeries && (
-          <svg
+          <Maximize2Icon
             aria-hidden
-            viewBox="0 0 24 24"
             className="h-3 w-3 text-foreground/30 transition-colors group-hover:text-primary"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={2}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M15 3h6v6M14 10l7-7M9 21H3v-6M10 14l-7 7" />
-          </svg>
+          />
         )}
       </div>
       <div className="text-[12.5px] text-foreground/55">{sub}</div>
@@ -386,18 +377,10 @@ export function StatCard({
               {label}
             </span>
             {hasSeries && (
-              <svg
+              <Maximize2Icon
                 aria-hidden
-                viewBox="0 0 24 24"
                 className="h-2.5 w-2.5 text-foreground/25 transition-colors group-hover:text-primary"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth={2}
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M15 3h6v6M14 10l7-7M9 21H3v-6M10 14l-7 7" />
-              </svg>
+              />
             )}
           </div>
           <div

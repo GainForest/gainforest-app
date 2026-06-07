@@ -1,5 +1,7 @@
 "use client";
 
+import { GlobeIcon, LinkIcon, MailIcon } from "lucide-react";
+
 // Minimalist monochrome brand glyphs for the record drawer's social row.
 // Brand paths are simple-icons (24×24, currentColor); "website"/"link"
 // are generic line glyphs so any URL still gets a tidy icon.
@@ -59,45 +61,13 @@ export function socialLabel(platform: string): string {
 export function SocialGlyph({ platform: raw }: { platform: string }) {
   const platform = asPlatform(raw);
   if (platform === "website") {
-    return (
-      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" aria-hidden>
-        <circle cx="12" cy="12" r="9.25" stroke="currentColor" strokeWidth="1.6" />
-        <path
-          d="M3 12h18M12 2.75c2.5 2.4 3.75 5.7 3.75 9.25S14.5 19.1 12 21.25C9.5 19.1 8.25 15.55 8.25 12S9.5 5.15 12 2.75Z"
-          stroke="currentColor"
-          strokeWidth="1.6"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
-    );
+    return <GlobeIcon width={17} height={17} aria-hidden />;
   }
   if (platform === "email") {
-    return (
-      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" aria-hidden>
-        <rect x="3" y="5" width="18" height="14" rx="2.5" stroke="currentColor" strokeWidth="1.6" />
-        <path
-          d="M4 7l8 5.5L20 7"
-          stroke="currentColor"
-          strokeWidth="1.6"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
-    );
+    return <MailIcon width={17} height={17} aria-hidden />;
   }
   if (platform === "link") {
-    return (
-      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" aria-hidden>
-        <path
-          d="M9.5 14.5l5-5M8 12l-2 2a3.2 3.2 0 0 0 4.5 4.5l2-2M16 12l2-2A3.2 3.2 0 0 0 13.5 5.5l-2 2"
-          stroke="currentColor"
-          strokeWidth="1.7"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
-    );
+    return <LinkIcon width={17} height={17} aria-hidden />;
   }
   return (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden>

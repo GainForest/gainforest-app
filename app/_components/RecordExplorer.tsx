@@ -3,6 +3,17 @@
 import { memo, useCallback, useDeferredValue, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import Image from "next/image";
 import {
+  AudioLinesIcon,
+  ChevronDownIcon,
+  ImageIcon,
+  LayoutGridIcon,
+  LeafIcon,
+  Loader2Icon,
+  MapIcon,
+  PlayIcon,
+  SearchIcon,
+} from "lucide-react";
+import {
   walkOccurrences,
   fetchSites,
   fetchBumicerts,
@@ -377,17 +388,10 @@ export function RecordExplorer({ kind }: { kind: RecordKind }) {
         {/* Toolbar */}
         <div className="relative z-20 mt-5 flex flex-wrap items-center gap-3 px-3">
           <div className="relative flex-1" style={{ minWidth: "220px" }}>
-            <svg
+            <SearchIcon
               aria-hidden
-              width="15"
-              height="15"
-              viewBox="0 0 24 24"
-              fill="none"
-              className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-foreground/40"
-            >
-              <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="2" />
-              <path d="M21 21l-4-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-            </svg>
+              className="pointer-events-none absolute left-3 top-1/2 h-[15px] w-[15px] -translate-y-1/2 text-foreground/40"
+            />
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
@@ -435,16 +439,10 @@ export function RecordExplorer({ kind }: { kind: RecordKind }) {
               <option value="az">A → Z</option>
               <option value="za">Z → A</option>
             </select>
-            <svg
+            <ChevronDownIcon
               aria-hidden
-              width="14"
-              height="14"
-              viewBox="0 0 24 24"
-              fill="none"
-              className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-foreground/40"
-            >
-              <path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
+              className="pointer-events-none absolute right-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-foreground/40"
+            />
           </div>
 
           {kind === "site" && (
@@ -1030,65 +1028,30 @@ function StatBand({ stats }: { stats: Stat[] }) {
 // ── Bits ───────────────────────────────────────────────────────────────────
 
 function LeafGlyph() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <path d="M5 19c0-7 5-13 14-14 0 9-5 14-14 14zM5 19c3-3 6-5 9-6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
+  return <LeafIcon width={16} height={16} aria-hidden />;
 }
 
 function MediaIcon({ kind }: { kind: OccurrenceRecord["media"][number] }) {
   if (kind === "audio" || kind === "spectrogram") {
-    return (
-      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" aria-hidden>
-        <path d="M4 10v4M8 6v12M12 9v6M16 4v16M20 10v4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-      </svg>
-    );
+    return <AudioLinesIcon width={11} height={11} aria-hidden />;
   }
   if (kind === "video") {
-    return (
-      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" aria-hidden>
-        <path d="M8 5l11 7-11 7V5z" fill="currentColor" />
-      </svg>
-    );
+    return <PlayIcon width={11} height={11} aria-hidden />;
   }
-  return (
-    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" strokeWidth="2" />
-      <circle cx="9" cy="10" r="1.5" fill="currentColor" />
-      <path d="M5 18l5-5 4 3 3-2 3 3" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
-    </svg>
-  );
+  return <ImageIcon width={11} height={11} aria-hidden />;
 }
 
 
 function CardsGlyph() {
-  return (
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <rect x="3" y="3" width="8" height="8" rx="1.5" stroke="currentColor" strokeWidth="2" />
-      <rect x="13" y="3" width="8" height="8" rx="1.5" stroke="currentColor" strokeWidth="2" />
-      <rect x="3" y="13" width="8" height="8" rx="1.5" stroke="currentColor" strokeWidth="2" />
-      <rect x="13" y="13" width="8" height="8" rx="1.5" stroke="currentColor" strokeWidth="2" />
-    </svg>
-  );
+  return <LayoutGridIcon width={13} height={13} aria-hidden />;
 }
 
 function MapGlyph() {
-  return (
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
-      <path d="M9 4v14M15 6v14" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
-    </svg>
-  );
+  return <MapIcon width={13} height={13} aria-hidden />;
 }
 
 function Spinner() {
-  return (
-    <svg className="animate-spin" width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2.5" opacity="0.25" />
-      <path d="M21 12a9 9 0 0 0-9-9" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
-    </svg>
-  );
+  return <Loader2Icon className="h-[15px] w-[15px] animate-spin" aria-hidden />;
 }
 
 function SkeletonGrid() {
