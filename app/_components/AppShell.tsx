@@ -773,7 +773,9 @@ function BumicertHeaderTabs({ pathname }: { pathname: string }) {
   return (
     <div>
       {activeTab !== "overview" && summary ? (
-        <BumicertHeaderAccordion summary={summary} overviewHref={bumicertTabHref(pathname, "overview")} />
+        <div className={activeTab === "timeline" ? undefined : "lg:hidden"}>
+          <BumicertHeaderAccordion summary={summary} overviewHref={bumicertTabHref(pathname, "overview")} />
+        </div>
       ) : null}
       <div className="-mx-4 overflow-x-auto px-4">
         <div className="flex min-w-max items-end border-b border-border">
