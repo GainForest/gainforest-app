@@ -515,16 +515,16 @@ function DonorCard({ entry }: { entry: LeaderboardEntry }) {
       target="_blank"
       rel="noopener noreferrer"
       aria-label={actionLabel}
-      className="group flex items-center gap-3.5 px-4 py-[18px] transition-colors duration-200 hover:bg-primary/[0.04] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:gap-4 sm:px-5 sm:py-5"
+      className="group flex items-start gap-3.5 px-4 py-[18px] transition-colors duration-200 hover:bg-primary/[0.04] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:gap-4 sm:px-5 sm:py-5"
     >
       <RankBadge rank={entry.rank} />
 
-      <div className="min-w-0 flex-1">
+      <div className="min-w-0 flex-1 space-y-1.5">
         <p className="flex min-w-0 items-center gap-1.5 text-[15px] font-semibold text-foreground">
           {isWallet ? (
             <>
               <WalletIcon className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
-              <span className="truncate">Anonymous supporter</span>
+              <span className="min-w-0 truncate">Anonymous supporter</span>
             </>
           ) : (
             <span className="min-w-0 truncate">
@@ -532,19 +532,19 @@ function DonorCard({ entry }: { entry: LeaderboardEntry }) {
             </span>
           )}
         </p>
-        <div className="mt-1.5 flex min-w-0 items-center gap-1.5 text-[13px] text-muted-foreground">
+        <div className="flex min-w-0 flex-col items-start gap-1 text-[13px] leading-snug text-muted-foreground">
           <DonorBadge rank={entry.rank} />
-          <span className="truncate">{donationSummary(entry.donationCount, relativeTime)}</span>
+          <span className="w-full min-w-0 whitespace-normal break-words">{donationSummary(entry.donationCount, relativeTime)}</span>
         </div>
       </div>
 
-      <span className="shrink-0 whitespace-nowrap text-[15px] font-bold tabular-nums text-primary sm:text-[17px]">
+      <span className="shrink-0 whitespace-nowrap pt-0.5 text-[15px] font-bold tabular-nums text-primary sm:text-[17px]">
         {formatCompactUsd(entry.totalAmount)}
       </span>
 
       <ChevronRightIcon
         aria-hidden="true"
-        className="size-4 shrink-0 text-muted-foreground/40 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-primary sm:size-5"
+        className="mt-1 size-4 shrink-0 text-muted-foreground/40 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-primary sm:size-5"
       />
     </a>
   );
