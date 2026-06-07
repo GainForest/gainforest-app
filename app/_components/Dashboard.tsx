@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { motion } from "framer-motion";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Area,
@@ -65,6 +66,36 @@ const GRANULARITY_LABELS: Record<TimeGranularity, string> = {
   month: "Monthly",
 };
 
+// Shared surface treatment matching the app's modern pages (leaderboard, explorer):
+// soft card tint, primary-tinted shadow, hairline ring, and backdrop blur.
+const SURFACE =
+  "rounded-3xl bg-card/70 shadow-sm shadow-primary/5 ring-1 ring-foreground/5 backdrop-blur";
+const PILL_GROUP =
+  "flex items-center gap-1 rounded-full bg-muted/55 p-1 shadow-sm shadow-primary/5 ring-1 ring-foreground/5 backdrop-blur";
+
+function pillButton(active: boolean) {
+  return [
+    "rounded-full px-3.5 py-1.5 text-sm font-medium transition-all duration-200",
+    active
+      ? "bg-primary text-primary-foreground shadow-sm shadow-primary/20"
+      : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
+  ].join(" ");
+}
+
+const containerVariants = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.08 } },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 16 },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.5, ease: [0.25, 0.1, 0.25, 1] as const },
+  },
+};
+
 export function Dashboard() {
   const { period, setPeriod } = useDashboardPeriod();
   const [granularity, setGranularity] = useState<TimeGranularity>("day");
@@ -112,20 +143,33 @@ export function Dashboard() {
       ) : receipts === null ? (
         <DashboardSkeleton />
       ) : (
-        <div className="flex flex-col gap-12">
-          <KPISummary kpis={kpis} />
-          <GeographicReach stats={geoStats} />
-          <DonationsVolumeChart
-            data={timeSeries}
-            granularity={granularity}
-            onGranularityChange={setGranularity}
-          />
-          <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          animate="show"
+          className="flex flex-col gap-12"
+        >
+          <motion.div variants={itemVariants}>
+            <KPISummary kpis={kpis} />
+          </motion.div>
+          <motion.div variants={itemVariants}>
+            <GeographicReach stats={geoStats} />
+          </motion.div>
+          <motion.div variants={itemVariants}>
+            <DonationsVolumeChart
+              data={timeSeries}
+              granularity={granularity}
+              onGranularityChange={setGranularity}
+            />
+          </motion.div>
+          <motion.div variants={itemVariants} className="grid grid-cols-1 gap-6 xl:grid-cols-2">
             <TopDonorsTable rows={topDonors} />
             <OrganizationsTable rows={perOrg} />
-          </div>
-          <RecentTransactionsTable rows={recentTx} />
-        </div>
+          </motion.div>
+          <motion.div variants={itemVariants}>
+            <RecentTransactionsTable rows={recentTx} />
+          </motion.div>
+        </motion.div>
       )}
     </DashboardShell>
   );
@@ -181,20 +225,16 @@ function useDashboardPeriod() {
 
 function PeriodFilter({ period, onPeriodChange }: { period: Period; onPeriodChange: (period: Period) => void }) {
   return (
-    <div className="flex items-center gap-1 rounded-full border border-border bg-muted/30 p-1">
+    <div className={PILL_GROUP}>
       {PERIODS.map((item) => {
         const active = period === item.id;
         return (
           <button
             key={item.id}
             type="button"
+            aria-pressed={active}
             onClick={() => onPeriodChange(item.id)}
-            className={[
-              "rounded-full px-3 py-1 text-sm font-medium transition-all duration-200",
-              active
-                ? "bg-primary text-primary-foreground shadow-sm"
-                : "text-muted-foreground hover:text-foreground",
-            ].join(" ")}
+            className={pillButton(active)}
           >
             {item.label}
           </button>
@@ -256,7 +296,7 @@ function GeographicReach({ stats }: { stats: GeoStats }) {
         accent
       />
 
-      <div className="overflow-hidden rounded-2xl border border-border bg-background">
+      <div className={`overflow-hidden ${SURFACE}`}>
         <div className="flex items-center gap-2 px-5 pt-5 pb-3">
           <GlobeIcon className="h-4 w-4 text-primary" />
           <span className="text-xs font-medium tracking-[0.15em] text-muted-foreground uppercase">
@@ -304,7 +344,7 @@ function DonationsVolumeChart({
   }));
 
   return (
-    <div className="rounded-2xl border border-border bg-background p-5">
+    <div className={`${SURFACE} p-5`}>
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <div>
           <div className="flex items-center gap-2">
@@ -315,20 +355,16 @@ function DonationsVolumeChart({
           </div>
           <p className="mt-0.5 text-sm text-muted-foreground">USD raised per {granularity}</p>
         </div>
-        <div className="flex items-center gap-1 rounded-full border border-border bg-muted/30 p-1">
+        <div className={PILL_GROUP}>
           {GRANULARITIES.map((item) => {
             const active = granularity === item;
             return (
               <button
                 key={item}
                 type="button"
+                aria-pressed={active}
                 onClick={() => onGranularityChange(item)}
-                className={[
-                  "rounded-full px-3 py-1 text-sm font-medium transition-all duration-200",
-                  active
-                    ? "bg-primary text-primary-foreground shadow-sm"
-                    : "text-muted-foreground hover:text-foreground",
-                ].join(" ")}
+                className={pillButton(active)}
               >
                 {GRANULARITY_LABELS[item]}
               </button>
@@ -387,7 +423,7 @@ function ChartTooltip({ active, payload, label }: { active?: boolean; payload?: 
   const amount = payload[0]?.value ?? 0;
   const count = payload[0]?.payload?.count ?? 0;
   return (
-    <div className="rounded-xl border border-border bg-background px-3 py-2 text-xs shadow-sm">
+    <div className="rounded-xl bg-card/95 px-3 py-2 text-xs shadow-md shadow-primary/10 ring-1 ring-foreground/10 backdrop-blur">
       <p className="font-medium text-foreground">{label}</p>
       <p className="mt-0.5 text-muted-foreground">{formatCompactUsd(amount)}</p>
       <p className="text-muted-foreground">{count} {count === 1 ? "donation" : "donations"}</p>
@@ -419,7 +455,7 @@ function TopDonorsTable({ rows }: { rows: TopDonor[] }) {
   };
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-border bg-background">
+    <div className={`overflow-hidden ${SURFACE}`}>
       <div className="flex items-center gap-2 px-5 pt-5 pb-3">
         <UsersIcon className="h-4 w-4 text-primary" />
         <span className="text-xs font-medium tracking-[0.15em] text-muted-foreground uppercase">Top Donors</span>
@@ -431,7 +467,7 @@ function TopDonorsTable({ rows }: { rows: TopDonor[] }) {
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-t border-border">
+              <tr className="border-t border-border/60">
                 <SortableCol col="rank" sortKey={sortKey} sortDir={sortDir} onSort={sort}>#</SortableCol>
                 <th className="px-3 py-2 text-left text-xs font-medium tracking-[0.12em] text-muted-foreground uppercase">Donor</th>
                 <SortableCol col="totalAmount" sortKey={sortKey} sortDir={sortDir} onSort={sort}>Total Donated</SortableCol>
@@ -441,7 +477,7 @@ function TopDonorsTable({ rows }: { rows: TopDonor[] }) {
             </thead>
             <tbody>
               {sorted.map((row) => (
-                <tr key={row.donorId} className="border-t border-border/50 transition-colors hover:bg-muted/20">
+                <tr key={row.donorId} className="border-t border-border/40 transition-colors hover:bg-primary/[0.04]">
                   <td className="px-3 py-2.5 font-mono text-xs text-muted-foreground">{row.rank}</td>
                   <td className="px-3 py-2.5"><DonorCell id={row.donorId} type={row.donorType} /></td>
                   <td className="px-3 py-2.5 text-foreground tabular-nums">{formatCompactUsd(row.totalAmount)}</td>
@@ -480,7 +516,7 @@ function OrganizationsTable({ rows }: { rows: OrgRow[] }) {
   };
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-border bg-background">
+    <div className={`overflow-hidden ${SURFACE}`}>
       <div className="flex items-center gap-2 px-5 pt-5 pb-3">
         <BuildingIcon className="h-4 w-4 text-primary" />
         <span className="text-xs font-medium tracking-[0.15em] text-muted-foreground uppercase">By Organization</span>
@@ -492,7 +528,7 @@ function OrganizationsTable({ rows }: { rows: OrgRow[] }) {
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-t border-border">
+              <tr className="border-t border-border/60">
                 <th className="px-3 py-2 text-left text-xs font-medium tracking-[0.12em] text-muted-foreground uppercase">Organization</th>
                 <SortableCol col="totalRaised" sortKey={sortKey} sortDir={sortDir} onSort={sort}>Total Raised</SortableCol>
                 <SortableCol col="bumicertCount" sortKey={sortKey} sortDir={sortDir} onSort={sort}>Bumicerts</SortableCol>
@@ -501,7 +537,7 @@ function OrganizationsTable({ rows }: { rows: OrgRow[] }) {
             </thead>
             <tbody>
               {sorted.map((row) => (
-                <tr key={row.orgDid} className="border-t border-border/50 transition-colors hover:bg-muted/20">
+                <tr key={row.orgDid} className="border-t border-border/40 transition-colors hover:bg-primary/[0.04]">
                   <td className="px-3 py-2.5">
                     <Link
                       href={accountHref(row.orgDid)}
@@ -528,7 +564,7 @@ function OrganizationsTable({ rows }: { rows: OrgRow[] }) {
 
 function RecentTransactionsTable({ rows }: { rows: TxRow[] }) {
   return (
-    <div className="overflow-hidden rounded-2xl border border-border bg-background">
+    <div className={`overflow-hidden ${SURFACE}`}>
       <div className="flex items-start justify-between gap-4 px-5 pt-5 pb-3">
         <div>
           <div className="flex items-center gap-2">
@@ -548,7 +584,7 @@ function RecentTransactionsTable({ rows }: { rows: TxRow[] }) {
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-t border-border">
+              <tr className="border-t border-border/60">
                 <th className="px-3 py-2 text-left text-xs font-medium tracking-[0.12em] text-muted-foreground uppercase">Date</th>
                 <th className="px-3 py-2 text-left text-xs font-medium tracking-[0.12em] text-muted-foreground uppercase">Donor</th>
                 <th className="px-3 py-2 text-left text-xs font-medium tracking-[0.12em] text-muted-foreground uppercase">Amount</th>
@@ -557,7 +593,7 @@ function RecentTransactionsTable({ rows }: { rows: TxRow[] }) {
             </thead>
             <tbody>
               {rows.map((row) => (
-                <tr key={row.uri} className="border-t border-border/50 transition-colors hover:bg-muted/20">
+                <tr key={row.uri} className="border-t border-border/40 transition-colors hover:bg-primary/[0.04]">
                   <td className="whitespace-nowrap px-3 py-2.5 text-xs text-muted-foreground">{formatTableDate(row.date)}</td>
                   <td className="px-3 py-2.5">
                     {row.donorId ? <DonorCell id={row.donorId} type={row.donorType ?? "wallet"} /> : <span className="text-xs text-foreground">Anonymous</span>}
@@ -656,7 +692,7 @@ function Skeleton({ className }: { className: string }) {
 
 function TableSkeleton() {
   return (
-    <div className="space-y-3 rounded-2xl border border-border bg-background p-5">
+    <div className={`space-y-3 ${SURFACE} p-5`}>
       <Skeleton className="h-3 w-24" />
       {Array.from({ length: 5 }).map((_, index) => (
         <Skeleton key={index} className="h-8 w-full" />
@@ -668,13 +704,13 @@ function TableSkeleton() {
 function DashboardSkeleton() {
   return (
     <div className="flex flex-col gap-12">
-      <div className="space-y-3 rounded-2xl border border-border bg-background p-5">
+      <div className={`space-y-3 ${SURFACE} p-5`}>
         <Skeleton className="h-3 w-24" />
         {Array.from({ length: 5 }).map((_, index) => (
           <Skeleton key={index} className="h-5 w-full" />
         ))}
       </div>
-      <div className="space-y-4 rounded-2xl border border-border bg-background p-5">
+      <div className={`space-y-4 ${SURFACE} p-5`}>
         <Skeleton className="h-3 w-40" />
         <Skeleton className="h-[240px] w-full" />
       </div>
@@ -689,19 +725,25 @@ function DashboardSkeleton() {
 
 function DashboardError() {
   return (
-    <div className="mt-10 flex flex-col items-center justify-center rounded-2xl border border-dashed border-border px-6 py-16 text-center">
-      <div
-        className="text-[22px] text-foreground"
+    <div className={`mt-10 flex flex-col items-center gap-3 ${SURFACE} px-6 py-16 text-center`}>
+      <div className="flex size-16 items-center justify-center rounded-full bg-primary/10 text-primary">
+        <BarChart3Icon className="size-8 opacity-60" />
+      </div>
+      <p
+        className="text-3xl font-light text-foreground"
         style={{ fontFamily: "var(--font-garamond-var)" }}
       >
         Donation data is unavailable
-      </div>
-      <p className="mt-2 max-w-[420px] text-sm leading-[1.5] text-muted-foreground">
-        We could not load donation information. Try this page again later.
+      </p>
+      <p
+        className="max-w-sm text-base text-foreground/70"
+        style={{ fontFamily: "var(--font-instrument-serif-var)", fontStyle: "italic" }}
+      >
+        We could not load donation information. Try again in a moment.
       </p>
       <Link
         href="/donations"
-        className="mt-5 rounded-full bg-primary px-5 py-2.5 text-[13.5px] font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+        className="mt-3 rounded-full bg-primary px-5 py-2.5 text-[13.5px] font-medium text-primary-foreground shadow-sm shadow-primary/20 transition-colors hover:bg-primary/90"
       >
         Open donations overview
       </Link>
