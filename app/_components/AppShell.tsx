@@ -373,7 +373,7 @@ function BumicertCreationCard() {
 
       {/*CTA*/}
       <Link
-        href="/manage/bumicerts"
+        href="/manage/bumicerts/new"
         className={cn(
           buttonVariants({ variant: "outline", size: "sm" }),
           "relative z-2 w-full bg-background hover:bg-primary hover:text-primary-foreground",
@@ -600,7 +600,7 @@ function getRouteHeaderActions(pathname: string, authSession: AuthSession) {
 
 function CreateBumicertHeaderButton({ isUnauthenticated }: { isUnauthenticated: boolean }) {
   return (
-    <Link href="/manage/bumicerts">
+    <Link href="/manage/bumicerts/new">
       <motion.span
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}

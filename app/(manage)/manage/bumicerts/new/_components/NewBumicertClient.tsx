@@ -13,12 +13,16 @@ import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   ArrowRightIcon,
+  CalendarClockIcon,
   CameraIcon,
   CheckIcon,
+  ChevronDownIcon,
+  EyeIcon,
   LeafIcon,
   LightbulbIcon,
   Loader2Icon,
   MapPinIcon,
+  PencilIcon,
   PlusIcon,
   RotateCcwIcon,
   Trash2Icon,
@@ -34,13 +38,15 @@ import {
   type FormEvent,
   type ReactNode,
 } from "react";
+import { format } from "date-fns";
 import { localBumicertHref, hyperscanRecordHref } from "@/app/_lib/urls";
-import { createRecord, uploadBlob } from "@/app/(manage)/manage/_lib/mutations";
+import { createRecord, putRecord, uploadBlob } from "@/app/(manage)/manage/_lib/mutations";
 import { BumicertCardVisual } from "@/components/bumicert/BumicertCard";
 import { HeaderContent } from "@/app/_components/HeaderSlots";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { DatePicker } from "@/components/ui/date-picker";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 
 /* ── Types ──────────────────────────────────────────────────────────────── */
@@ -51,19 +57,20 @@ type ManagedLocation = {
 };
 
 type ActorResult = { did: string; handle: string | null; displayName: string | null; avatar: string | null };
+type ProfilePreview = { name: string; avatarUrl: string | null };
 
 type FormValues = {
   title: string;
   shortDescription: string;
   description: string;
   scopes: string[];
-  customScope: string;
   startDate: string;
   endDate: string;
   ongoing: boolean;
   contributors: string[];
   selectedLocationUris: string[];
   confirmedRights: boolean;
+  acceptedTerms: boolean;
 };
 
 type Draft = { id: string; updatedAt: string; values: FormValues };
@@ -75,30 +82,33 @@ type SitesStatus = "idle" | "loading" | "ready" | "error";
 
 const DRAFT_STORAGE_KEY = "bumicerts:create-drafts:v1";
 const COLLECTION = "org.hypercerts.claim.activity";
+const WORK_SCOPE_TAG_COLLECTION = "org.hypercerts.workscope.tag";
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 const TITLE_MAX = 120;
+const POLYGONS_APP_URL = "https://polygons-gainforest.vercel.app";
+const TERMS_URL = "https://www.certified.app/terms";
 
 const EMPTY_FORM: FormValues = {
   title: "",
   shortDescription: "",
   description: "",
   scopes: [],
-  customScope: "",
   startDate: "",
   endDate: "",
   ongoing: true,
   contributors: [""],
   selectedLocationUris: [],
   confirmedRights: false,
+  acceptedTerms: false,
 };
 
 const WORK_SCOPES = [
-  "Reforestation",
-  "Forest protection",
-  "Biodiversity monitoring",
-  "Community stewardship",
-  "Carbon removal",
-  "Restoration maintenance",
+  { key: "reforestation", label: "Reforestation" },
+  { key: "forest_protection", label: "Forest protection" },
+  { key: "biodiversity_monitoring", label: "Biodiversity monitoring" },
+  { key: "community_stewardship", label: "Community stewardship" },
+  { key: "carbon_removal", label: "Carbon removal" },
+  { key: "restoration_maintenance", label: "Restoration maintenance" },
 ] as const;
 
 const STEPS: Array<{ id: StepId; label: string; title: string; subtitle: string }> = [
@@ -117,11 +127,21 @@ const TIPS = [
   "A single honest photo builds more trust than none.",
 ] as const;
 
-/* Soft, border-free field styling */
 const FIELD =
-  "w-full rounded-xl border-0 bg-muted/60 text-foreground shadow-none outline-none transition-colors placeholder:text-muted-foreground/65 focus:bg-muted focus:ring-2 focus:ring-primary/25";
+  "w-full rounded-xl border border-border bg-background text-foreground shadow-none outline-none transition-colors placeholder:text-muted-foreground/65 focus:border-primary/45 focus:bg-background focus:ring-2 focus:ring-primary/20";
 
 /* ── Pure helpers ───────────────────────────────────────────────────────── */
+
+function normalizeDraftValues(values: Partial<FormValues> & { customScope?: string }): FormValues {
+  return {
+    ...EMPTY_FORM,
+    ...values,
+    scopes: Array.isArray(values.scopes) ? values.scopes : [],
+    contributors: Array.isArray(values.contributors) && values.contributors.length ? values.contributors : [""],
+    selectedLocationUris: Array.isArray(values.selectedLocationUris) ? values.selectedLocationUris : [],
+    acceptedTerms: values.acceptedTerms === true,
+  };
+}
 
 function loadDrafts(): Draft[] {
   if (typeof window === "undefined") return [];
@@ -129,7 +149,9 @@ function loadDrafts(): Draft[] {
     const raw = window.localStorage.getItem(DRAFT_STORAGE_KEY);
     if (!raw) return [];
     const parsed = JSON.parse(raw) as Draft[];
-    return Array.isArray(parsed) ? parsed.slice(0, 12) : [];
+    return Array.isArray(parsed)
+      ? parsed.slice(0, 12).map((draft) => ({ ...draft, values: normalizeDraftValues(draft.values as Partial<FormValues> & { customScope?: string }) }))
+      : [];
   } catch {
     return [];
   }
@@ -157,11 +179,16 @@ function extractRkey(uri: string) {
   return uri.split("/").filter(Boolean).pop() ?? "";
 }
 function scopeList(values: FormValues) {
-  return [...values.scopes, values.customScope.trim()].filter(Boolean);
+  const active = new Set(values.scopes);
+  return WORK_SCOPES.filter((scope) => active.has(scope.key)).map((scope) => scope.label);
 }
-function scopeSummary(values: FormValues) {
-  const list = scopeList(values);
-  return list.length ? list.join(", ") : "";
+function scopeKeys(values: FormValues) {
+  const active = new Set(values.scopes);
+  return WORK_SCOPES.filter((scope) => active.has(scope.key));
+}
+function buildWorkScopeExpression(values: FormValues) {
+  const keys = scopeKeys(values).map((scope) => `'${scope.key}'`).join(", ");
+  return `scope.hasAny([${keys}])`;
 }
 function contributorList(values: FormValues) {
   return values.contributors.map((item) => item.trim()).filter(Boolean);
@@ -176,7 +203,7 @@ function validateStep(step: StepId, values: FormValues): string | null {
     if (!values.startDate) return "Add when the work started.";
     if (!values.ongoing && !values.endDate) return "Add an end date, or mark the work as ongoing.";
     if (!values.ongoing && values.endDate < values.startDate) return "The end date can’t be before the start date.";
-    if (scopeList(values).length === 0) return "Pick at least one type of work.";
+    if (scopeKeys(values).length === 0) return "Pick at least one type of work.";
   }
   if (step === "story") {
     if (clampDescription(values.shortDescription).length < 30) return "The summary needs at least 30 characters.";
@@ -187,6 +214,7 @@ function validateStep(step: StepId, values: FormValues): string | null {
   }
   if (step === "review") {
     if (!values.confirmedRights) return "Confirm you have permission to publish this work.";
+    if (!values.acceptedTerms) return "Agree to the terms before publishing.";
   }
   return null;
 }
@@ -232,8 +260,8 @@ function ScopeTag({ label, active, onClick }: { label: string; active: boolean; 
       type="button"
       onClick={onClick}
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[13px] transition-colors",
-        active ? "bg-primary text-primary-foreground" : "bg-muted/70 text-muted-foreground hover:bg-muted hover:text-foreground",
+        "inline-flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-[13px] transition-colors",
+        active ? "border-primary bg-primary text-primary-foreground" : "border-border bg-background text-muted-foreground hover:border-primary/35 hover:text-foreground",
       )}
     >
       {active ? <CheckIcon className="size-3.5" /> : <PlusIcon className="size-3.5 opacity-60" />}
@@ -242,17 +270,97 @@ function ScopeTag({ label, active, onClick }: { label: string; active: boolean; 
   );
 }
 
+function dateFromValue(value: string): Date | undefined {
+  if (!value) return undefined;
+  const [year, month, day] = value.split("-").map(Number);
+  if (!year || !month || !day) return undefined;
+  const date = new Date(year, month - 1, day);
+  return Number.isNaN(date.getTime()) ? undefined : date;
+}
+
+function valueFromDate(date: Date): string {
+  return format(date, "yyyy-MM-dd");
+}
+
+function DateRangePicker({
+  startDate,
+  endDate,
+  ongoing,
+  onChange,
+}: {
+  startDate: string;
+  endDate: string;
+  ongoing: boolean;
+  onChange: (next: { startDate: string; endDate: string }) => void;
+}) {
+  const start = dateFromValue(startDate) ?? new Date();
+  const end = dateFromValue(endDate) ?? start;
+  const label = startDate
+    ? `${format(start, "MMM d, yyyy")} → ${ongoing ? "Ongoing" : format(end, "MMM d, yyyy")}`
+    : "Choose dates";
+
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <button
+          id="work-date-range"
+          type="button"
+          className={cn(FIELD, "flex items-center justify-center gap-2 px-4 py-3 text-center text-sm")}
+        >
+          <CalendarClockIcon className="size-4 shrink-0 text-muted-foreground" />
+          <span className={cn("font-medium", !startDate && "text-muted-foreground/65")}>{label}</span>
+          <ChevronDownIcon className="size-4 shrink-0 text-muted-foreground" />
+        </button>
+      </PopoverTrigger>
+      <PopoverContent align="start" className="w-auto p-0">
+        <Calendar
+          mode="range"
+          selected={{ from: start, to: end }}
+          defaultMonth={start}
+          onSelect={(range) => {
+            if (!range?.from) return;
+            onChange({
+              startDate: valueFromDate(range.from),
+              endDate: valueFromDate(range.to ?? range.from),
+            });
+          }}
+          autoFocus
+        />
+      </PopoverContent>
+    </Popover>
+  );
+}
+
 /* ── Contributor input with actor autocomplete ──────────────────────────── */
+
+function actorLabel(actor: ActorResult) {
+  return actor.displayName ?? actor.handle ?? "Selected profile";
+}
+
+function ActorAvatar({ actor, size = "size-8" }: { actor: ActorResult; size?: string }) {
+  return actor.avatar ? (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img src={actor.avatar} alt="" className={cn(size, "shrink-0 rounded-full object-cover")} />
+  ) : (
+    <span className={cn(size, "flex shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-medium text-primary")}>
+      {actorLabel(actor).charAt(0).toUpperCase()}
+    </span>
+  );
+}
 
 function ContributorInput({
   value,
+  actor,
   onChange,
+  onActorChange,
   onRemove,
   canRemove,
   placeholder,
 }: {
   value: string;
+  actor: ActorResult | null;
   onChange: (value: string) => void;
+  onActorChange: (actor: ActorResult | null) => void;
   onRemove: () => void;
   canRemove: boolean;
   placeholder: string;
@@ -266,9 +374,11 @@ function ContributorInput({
 
   useEffect(() => {
     const query = value.trim();
-    if (!focused || query.length < 2 || query.startsWith("did:")) {
+    if (!focused || actor) return;
+    setOpen(true);
+    if (query.length < 2) {
       setResults([]);
-      setOpen(false);
+      setLoading(false);
       return;
     }
     const controller = new AbortController();
@@ -279,7 +389,7 @@ function ContributorInput({
         .then((d: { results?: ActorResult[] }) => {
           setResults(d.results ?? []);
           setHighlight(0);
-          setOpen((d.results?.length ?? 0) > 0);
+          setOpen(true);
         })
         .catch(() => {})
         .finally(() => setLoading(false));
@@ -288,7 +398,21 @@ function ContributorInput({
       window.clearTimeout(timer);
       controller.abort();
     };
-  }, [value, focused]);
+  }, [actor, value, focused]);
+
+  useEffect(() => {
+    if (actor || !value.trim()) return;
+    const query = value.trim();
+    if (query.length < 3) return;
+    const controller = new AbortController();
+    fetch(`/api/actors/resolve?q=${encodeURIComponent(query)}`, { signal: controller.signal })
+      .then((r) => r.json())
+      .then((d: { actor?: ActorResult | null }) => {
+        if (d.actor) onActorChange(d.actor);
+      })
+      .catch(() => {});
+    return () => controller.abort();
+  }, [actor, onActorChange, value]);
 
   useEffect(() => {
     function onDocClick(event: MouseEvent) {
@@ -298,8 +422,9 @@ function ContributorInput({
     return () => document.removeEventListener("mousedown", onDocClick);
   }, []);
 
-  const choose = (actor: ActorResult) => {
-    onChange(actor.handle ?? actor.did);
+  const choose = (nextActor: ActorResult) => {
+    onActorChange(nextActor);
+    onChange(nextActor.did);
     setOpen(false);
     setResults([]);
   };
@@ -307,65 +432,95 @@ function ContributorInput({
   return (
     <div ref={boxRef} className="relative flex items-center gap-2">
       <div className="relative flex-1">
-        <input
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          onFocus={() => setFocused(true)}
-          onBlur={() => setFocused(false)}
-          onKeyDown={(e) => {
-            if (!open || results.length === 0) return;
-            if (e.key === "ArrowDown") {
-              e.preventDefault();
-              setHighlight((h) => Math.min(h + 1, results.length - 1));
-            } else if (e.key === "ArrowUp") {
-              e.preventDefault();
-              setHighlight((h) => Math.max(h - 1, 0));
-            } else if (e.key === "Enter") {
-              e.preventDefault();
-              choose(results[highlight]);
-            } else if (e.key === "Escape") {
-              setOpen(false);
-            }
-          }}
-          placeholder={placeholder}
-          className={cn(FIELD, "px-4 py-2.5 text-sm")}
-        />
-        {loading ? <Loader2Icon className="absolute right-3 top-1/2 size-4 -translate-y-1/2 animate-spin text-muted-foreground/60" /> : null}
+        {actor ? (
+          <div className="flex min-h-11 items-center gap-3 rounded-xl border border-border bg-background px-3 py-2">
+            <ActorAvatar actor={actor} />
+            <span className="min-w-0 flex-1">
+              <span className="block truncate text-sm font-medium text-foreground">{actorLabel(actor)}</span>
+              {actor.handle ? <span className="block truncate text-xs text-muted-foreground">@{actor.handle}</span> : null}
+            </span>
+            <button
+              type="button"
+              onClick={() => {
+                onActorChange(null);
+                onChange("");
+              }}
+              className="rounded-full p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+              aria-label="Change contributor"
+            >
+              <XIcon className="size-4" />
+            </button>
+          </div>
+        ) : (
+          <input
+            value={value}
+            onChange={(e) => {
+              onActorChange(null);
+              onChange(e.target.value);
+            }}
+            onFocus={() => {
+              setFocused(true);
+              setOpen(true);
+            }}
+            onBlur={() => setFocused(false)}
+            onKeyDown={(e) => {
+              if (!open || results.length === 0) return;
+              if (e.key === "ArrowDown") {
+                e.preventDefault();
+                setHighlight((h) => Math.min(h + 1, results.length - 1));
+              } else if (e.key === "ArrowUp") {
+                e.preventDefault();
+                setHighlight((h) => Math.max(h - 1, 0));
+              } else if (e.key === "Enter") {
+                e.preventDefault();
+                choose(results[highlight]);
+              } else if (e.key === "Escape") {
+                setOpen(false);
+              }
+            }}
+            placeholder={placeholder}
+            className={cn(FIELD, "px-4 py-2.5 text-sm")}
+          />
+        )}
+        {loading && !actor ? <Loader2Icon className="absolute right-3 top-1/2 size-4 -translate-y-1/2 animate-spin text-muted-foreground/60" /> : null}
 
         <AnimatePresence>
-          {open && results.length > 0 ? (
-            <motion.ul
+          {open && !actor ? (
+            <motion.div
               initial={{ opacity: 0, y: 4 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 4 }}
               transition={{ duration: 0.14 }}
-              className="absolute z-[1000] mt-1.5 max-h-72 w-full overflow-y-auto rounded-xl bg-card p-1.5 shadow-xl"
+              className="absolute z-[1000] mt-1.5 max-h-72 w-full overflow-y-auto rounded-xl border border-border bg-card p-1.5 shadow-xl"
             >
-              {results.map((actor, i) => (
-                <li key={actor.did}>
-                  <button
-                    type="button"
-                    onMouseDown={(e) => e.preventDefault()}
-                    onClick={() => choose(actor)}
-                    onMouseEnter={() => setHighlight(i)}
-                    className={cn("flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left transition-colors", i === highlight ? "bg-muted" : "hover:bg-muted/60")}
-                  >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    {actor.avatar ? (
-                      <img src={actor.avatar} alt="" className="size-7 shrink-0 rounded-full object-cover" />
-                    ) : (
-                      <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-muted text-[11px] font-medium text-muted-foreground">
-                        {(actor.displayName ?? actor.handle ?? "?").charAt(0).toUpperCase()}
-                      </span>
-                    )}
-                    <span className="min-w-0">
-                      <span className="block truncate text-sm font-medium text-foreground">{actor.displayName ?? actor.handle ?? actor.did}</span>
-                      {actor.handle ? <span className="block truncate text-xs text-muted-foreground">@{actor.handle}</span> : null}
-                    </span>
-                  </button>
-                </li>
-              ))}
-            </motion.ul>
+              {value.trim().length < 2 ? (
+                <p className="px-3 py-2 text-sm text-muted-foreground">Start typing to get suggestions.</p>
+              ) : loading ? (
+                <p className="flex items-center gap-2 px-3 py-2 text-sm text-muted-foreground"><Loader2Icon className="size-4 animate-spin" /> Loading suggestions…</p>
+              ) : results.length === 0 ? (
+                <p className="px-3 py-2 text-sm text-muted-foreground">No matches yet. You can keep typing a name.</p>
+              ) : (
+                <ul>
+                  {results.map((nextActor, i) => (
+                    <li key={nextActor.did}>
+                      <button
+                        type="button"
+                        onMouseDown={(e) => e.preventDefault()}
+                        onClick={() => choose(nextActor)}
+                        onMouseEnter={() => setHighlight(i)}
+                        className={cn("flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left transition-colors", i === highlight ? "bg-muted" : "hover:bg-muted/60")}
+                      >
+                        <ActorAvatar actor={nextActor} size="size-7" />
+                        <span className="min-w-0">
+                          <span className="block truncate text-sm font-medium text-foreground">{actorLabel(nextActor)}</span>
+                          {nextActor.handle ? <span className="block truncate text-xs text-muted-foreground">@{nextActor.handle}</span> : null}
+                        </span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </motion.div>
           ) : null}
         </AnimatePresence>
       </div>
@@ -380,8 +535,8 @@ function ContributorInput({
 /* ── Steps ──────────────────────────────────────────────────────────────── */
 
 function BasicsStep({ values, setValues }: { values: FormValues; setValues: React.Dispatch<React.SetStateAction<FormValues>> }) {
-  const toggleScope = (scope: string) =>
-    setValues((c) => ({ ...c, scopes: c.scopes.includes(scope) ? c.scopes.filter((s) => s !== scope) : [...c.scopes, scope] }));
+  const toggleScope = (scopeKey: string) =>
+    setValues((c) => ({ ...c, scopes: c.scopes.includes(scopeKey) ? c.scopes.filter((s) => s !== scopeKey) : [...c.scopes, scopeKey] }));
 
   return (
     <div className="space-y-8">
@@ -400,43 +555,23 @@ function BasicsStep({ values, setValues }: { values: FormValues; setValues: Reac
       <Field label="Type of work" hint="pick everything this covers">
         <div className="flex flex-wrap gap-2">
           {WORK_SCOPES.map((scope) => (
-            <ScopeTag key={scope} label={scope} active={values.scopes.includes(scope)} onClick={() => toggleScope(scope)} />
+            <ScopeTag key={scope.key} label={scope.label} active={values.scopes.includes(scope.key)} onClick={() => toggleScope(scope.key)} />
           ))}
         </div>
-        <input
-          value={values.customScope}
-          onChange={(e) => setValues((c) => ({ ...c, customScope: e.target.value }))}
-          placeholder="Add another, e.g. Indigenous governance"
-          className={cn(FIELD, "mt-3 px-4 py-2.5 text-sm")}
-        />
       </Field>
 
       <Field label="Time period">
-        <div className="grid gap-3 sm:grid-cols-2">
-          <div className="space-y-1.5">
-            <span className="block text-xs text-muted-foreground">Start date</span>
-            <DatePicker
-              value={values.startDate}
-              onChange={(startDate) => setValues((c) => ({ ...c, startDate }))}
-              placeholder="When it began"
-            />
-          </div>
-          <div className={cn("space-y-1.5 transition-opacity", values.ongoing && "opacity-50")}>
-            <span className="block text-xs text-muted-foreground">End date</span>
-            <DatePicker
-              value={values.endDate}
-              onChange={(endDate) => setValues((c) => ({ ...c, endDate }))}
-              disabled={values.ongoing}
-              min={values.startDate}
-              placeholder={values.ongoing ? "Ongoing" : "When it wrapped"}
-            />
-          </div>
-        </div>
+        <DateRangePicker
+          startDate={values.startDate}
+          endDate={values.endDate}
+          ongoing={values.ongoing}
+          onChange={({ startDate, endDate }) => setValues((c) => ({ ...c, startDate, endDate }))}
+        />
         <label className="mt-3 inline-flex cursor-pointer items-center gap-2 text-[13px] text-muted-foreground">
           <Checkbox
             checked={values.ongoing}
             onCheckedChange={(checked) =>
-              setValues((c) => ({ ...c, ongoing: checked === true, endDate: checked === true ? "" : c.endDate }))
+              setValues((c) => ({ ...c, ongoing: checked === true, endDate: checked === true ? c.endDate : c.endDate || c.startDate }))
             }
           />
           This work is ongoing
@@ -444,6 +579,31 @@ function BasicsStep({ values, setValues }: { values: FormValues; setValues: Reac
       </Field>
     </div>
   );
+}
+
+type Point = { lng: number; lat: number };
+
+function pointsToMapArea(points: Point[]): string {
+  if (points.length < 3) throw new Error("A drawn site needs at least three points.");
+  const coordinates = points.map((point) => [point.lng, point.lat] as [number, number]);
+  const first = coordinates[0];
+  const last = coordinates[coordinates.length - 1];
+  if (first && last && (first[0] !== last[0] || first[1] !== last[1])) coordinates.push([first[0], first[1]]);
+  return JSON.stringify({ type: "Feature", geometry: { type: "Polygon", coordinates: [coordinates] }, properties: {} });
+}
+
+function processMapAreaData(data: unknown): string | null {
+  if (data === null || (Array.isArray(data) && data.length === 0)) return null;
+  if (Array.isArray(data)) {
+    try { return pointsToMapArea(data as Point[]); } catch { return null; }
+  }
+  if (typeof data === "string") {
+    try { JSON.parse(data); return data; } catch { return null; }
+  }
+  if (data && typeof data === "object") {
+    try { return JSON.stringify(data); } catch { return null; }
+  }
+  return null;
 }
 
 function StoryStep({ values, setValues }: { values: FormValues; setValues: React.Dispatch<React.SetStateAction<FormValues>> }) {
@@ -477,21 +637,124 @@ function StoryStep({ values, setValues }: { values: FormValues; setValues: React
   );
 }
 
+function DrawSiteModal({
+  did,
+  onClose,
+  onSaved,
+}: {
+  did: string;
+  onClose: () => void;
+  onSaved: (site: ManagedLocation) => void;
+}) {
+  const [name, setName] = useState("");
+  const [mapArea, setMapArea] = useState<string | null>(null);
+  const [loaded, setLoaded] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      if (event.origin !== POLYGONS_APP_URL) return;
+      if (event.data?.type === "polygon-data") setMapArea(processMapAreaData(event.data.data));
+    };
+    window.addEventListener("message", handleMessage);
+    return () => window.removeEventListener("message", handleMessage);
+  }, []);
+
+  const save = async () => {
+    if (!name.trim()) {
+      setError("Name this site before saving.");
+      return;
+    }
+    if (!mapArea) {
+      setError("Draw a site area before saving.");
+      return;
+    }
+    setSaving(true);
+    setError(null);
+    try {
+      const createdAt = new Date().toISOString();
+      const record: Record<string, unknown> = {
+        $type: "app.certified.location",
+        lpVersion: "1.0",
+        srs: "http://www.opengis.net/def/crs/OGC/1.3/CRS84",
+        locationType: "geojson",
+        location: { $type: "app.certified.location#string", string: mapArea },
+        name: name.trim(),
+        createdAt,
+      };
+      const result = await createRecord("app.certified.location", record);
+      const rkey = result.uri.split("/").pop() ?? "site";
+      onSaved({
+        metadata: { did, uri: result.uri, rkey, cid: result.cid, createdAt },
+        record: { name: name.trim(), description: null, locationType: "drawn map area", location: { kind: "unknown" } },
+      });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not save this site.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <motion.div className="fixed inset-0 z-50 flex items-end justify-center bg-foreground/45 p-0 backdrop-blur-sm sm:items-center sm:p-6" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+      <motion.div className="max-h-[92vh] w-full max-w-3xl overflow-hidden rounded-t-3xl border border-border bg-background shadow-2xl sm:rounded-3xl" initial={{ y: 28, scale: 0.98 }} animate={{ y: 0, scale: 1 }} exit={{ y: 28, scale: 0.98 }}>
+        <div className="flex items-start justify-between gap-4 border-b border-border px-5 py-4">
+          <div>
+            <h3 className="font-instrument text-2xl italic text-foreground">Draw a site</h3>
+            <p className="mt-1 text-sm text-muted-foreground">Mark the project area, then save it to this Bumicert.</p>
+          </div>
+          <button type="button" onClick={onClose} aria-label="Close" className="rounded-full p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground">
+            <XIcon className="size-5" />
+          </button>
+        </div>
+        <div className="grid gap-4 p-5">
+          <Field label="Site name" htmlFor="drawn-site-name">
+            <input id="drawn-site-name" value={name} onChange={(event) => setName(event.target.value)} placeholder="North restoration plot" className={cn(FIELD, "px-4 py-2.5 text-sm")} />
+          </Field>
+          <div className="relative overflow-hidden rounded-2xl border border-border bg-muted">
+            {!loaded ? <div className="absolute inset-0 z-10 flex items-center justify-center bg-muted"><Loader2Icon className="size-5 animate-spin text-muted-foreground" /></div> : null}
+            <iframe src={`${POLYGONS_APP_URL}/draw`} title="Draw site area" className="h-[28rem] w-full" onLoad={() => setLoaded(true)} />
+          </div>
+          {error ? <p className="text-sm text-destructive">{error}</p> : null}
+          <div className="flex justify-end gap-2">
+            <Button type="button" variant="outline" onClick={onClose} disabled={saving}>Cancel</Button>
+            <Button type="button" onClick={() => void save()} disabled={saving || !mapArea}>
+              {saving ? <Loader2Icon className="size-4 animate-spin" /> : <CheckIcon className="size-4" />}
+              Save site
+            </Button>
+          </div>
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+}
+
 function PeopleStep({
+  did,
   values,
   setValues,
   sites,
   sitesStatus,
   sitesError,
   refreshSites,
+  contributorProfiles,
+  setContributorProfile,
+  onSiteCreated,
 }: {
+  did: string;
   values: FormValues;
   setValues: React.Dispatch<React.SetStateAction<FormValues>>;
   sites: ManagedLocation[];
   sitesStatus: SitesStatus;
   sitesError: string | null;
   refreshSites: () => void;
+  contributorProfiles: Record<string, ActorResult>;
+  setContributorProfile: (identity: string, actor: ActorResult | null) => void;
+  onSiteCreated: (site: ManagedLocation) => void;
 }) {
+  const [showAllSites, setShowAllSites] = useState(false);
+  const [drawingSite, setDrawingSite] = useState(false);
   const updateContributor = (index: number, value: string) =>
     setValues((c) => ({ ...c, contributors: c.contributors.map((v, i) => (i === index ? value : v)) }));
   const removeContributor = (index: number) =>
@@ -501,19 +764,25 @@ function PeopleStep({
       ...c,
       selectedLocationUris: c.selectedLocationUris.includes(uri) ? c.selectedLocationUris.filter((u) => u !== uri) : [...c.selectedLocationUris, uri],
     }));
+  const selectedSiteUris = new Set(values.selectedLocationUris);
+  const visibleSites = showAllSites
+    ? sites
+    : sites.filter((site) => selectedSiteUris.has(site.metadata.uri)).concat(sites.filter((site) => !selectedSiteUris.has(site.metadata.uri)).slice(0, 6));
 
   return (
     <div className="space-y-8">
-      <Field label="Contributors" hint="search a name or @handle, or type any identity">
+      <Field label="Contributors" hint="search a name or @handle">
         <div className="space-y-2.5">
           {values.contributors.map((contributor, index) => (
             <ContributorInput
               key={index}
               value={contributor}
+              actor={contributorProfiles[contributor] ?? null}
               onChange={(v) => updateContributor(index, v)}
+              onActorChange={(actor) => setContributorProfile(contributor, actor)}
               onRemove={() => removeContributor(index)}
               canRemove={values.contributors.length > 1}
-              placeholder={index === 0 ? "Search e.g. “Rufiji Stewards” or @handle" : "Name, @handle, or DID"}
+              placeholder={index === 0 ? "Search e.g. “Rufiji Stewards” or @handle" : "Name or @handle"}
             />
           ))}
         </div>
@@ -529,6 +798,16 @@ function PeopleStep({
       </Field>
 
       <Field label="Sites" hint="optional — but it makes the work easier to verify">
+        <div className="mb-3 flex flex-wrap gap-2">
+          <Button type="button" variant="outline" size="sm" onClick={() => setDrawingSite(true)}>
+            <PencilIcon className="size-4" /> Draw a site
+          </Button>
+          {sites.length > 6 ? (
+            <Button type="button" variant="ghost" size="sm" onClick={() => setShowAllSites((current) => !current)}>
+              {showAllSites ? "Show fewer sites" : `Show all ${sites.length} sites`}
+            </Button>
+          ) : null}
+        </div>
         {sitesStatus === "loading" ? (
           <div className="flex items-center gap-2.5 py-2 text-[13px] text-muted-foreground">
             <Loader2Icon className="size-4 animate-spin" /> Loading your sites…
@@ -540,12 +819,12 @@ function PeopleStep({
           </div>
         ) : sites.length === 0 ? (
           <p className="rounded-2xl bg-muted/50 px-4 py-3.5 text-[13px] leading-6 text-muted-foreground">
-            You don’t have any sites yet. You can publish without one, or add site boundaries under{" "}
+            You don’t have any sites yet. You can publish without one, draw one here, or add project places under{" "}
             <Link href="/manage/sites" className="text-primary underline-offset-2 hover:underline">Manage → Sites</Link> and come back.
           </p>
         ) : (
           <div className="grid gap-2 sm:grid-cols-2">
-            {sites.map((site) => {
+            {visibleSites.map((site) => {
               const active = values.selectedLocationUris.includes(site.metadata.uri);
               return (
                 <button
@@ -553,8 +832,8 @@ function PeopleStep({
                   type="button"
                   onClick={() => toggleLocation(site.metadata.uri)}
                   className={cn(
-                    "flex items-start gap-3 rounded-2xl px-4 py-3 text-left transition-colors",
-                    active ? "bg-primary/10" : "bg-muted/50 hover:bg-muted",
+                    "flex items-start gap-3 rounded-2xl border px-4 py-3 text-left transition-colors",
+                    active ? "border-primary bg-primary/10" : "border-border bg-background hover:border-primary/30",
                   )}
                 >
                   <span className={cn("mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-full transition-colors", active ? "bg-primary text-primary-foreground" : "bg-background/70 text-muted-foreground")}>
@@ -562,7 +841,7 @@ function PeopleStep({
                   </span>
                   <span className="min-w-0">
                     <span className={cn("block truncate text-sm font-medium", active ? "text-primary" : "text-foreground")}>{site.record.name || "Unnamed site"}</span>
-                    <span className="mt-0.5 line-clamp-2 text-xs leading-5 text-muted-foreground">{site.record.description || site.record.locationType || site.metadata.rkey}</span>
+                    <span className="mt-0.5 line-clamp-2 text-xs leading-5 text-muted-foreground">{site.record.description || site.record.locationType || "Project place"}</span>
                   </span>
                 </button>
               );
@@ -570,6 +849,19 @@ function PeopleStep({
           </div>
         )}
       </Field>
+      <AnimatePresence>
+        {drawingSite ? (
+          <DrawSiteModal
+            did={did}
+            onClose={() => setDrawingSite(false)}
+            onSaved={(site) => {
+              onSiteCreated(site);
+              setValues((current) => ({ ...current, selectedLocationUris: [...current.selectedLocationUris, site.metadata.uri] }));
+              setDrawingSite(false);
+            }}
+          />
+        ) : null}
+      </AnimatePresence>
     </div>
   );
 }
@@ -592,7 +884,7 @@ function ConfirmStep({
         {validation ?? "Ready to publish"}
       </span>
 
-      <label className="flex cursor-pointer items-start gap-3 rounded-2xl bg-muted/45 px-4 py-3.5">
+      <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-border bg-background px-4 py-3.5">
         <Checkbox
           checked={values.confirmedRights}
           onCheckedChange={(checked) => setValues((c) => ({ ...c, confirmedRights: checked === true }))}
@@ -600,6 +892,17 @@ function ConfirmStep({
         />
         <span className="text-[13px] leading-6 text-foreground">
           I confirm I have permission to create this Bumicert for the work and sites above, and that the details are accurate.
+        </span>
+      </label>
+
+      <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-border bg-background px-4 py-3.5">
+        <Checkbox
+          checked={values.acceptedTerms}
+          onCheckedChange={(checked) => setValues((c) => ({ ...c, acceptedTerms: checked === true }))}
+          className="mt-0.5"
+        />
+        <span className="text-[13px] leading-6 text-foreground">
+          I agree to the <a href={TERMS_URL} target="_blank" rel="noreferrer" className="text-primary underline-offset-2 hover:underline">terms and conditions</a>.
         </span>
       </label>
 
@@ -618,6 +921,8 @@ function PreviewContent({
   values,
   coverPreview,
   sites,
+  profile,
+  did,
   onCoverChange,
   onCoverFile,
   onCoverClear,
@@ -626,6 +931,8 @@ function PreviewContent({
   values: FormValues;
   coverPreview: string | null;
   sites: ManagedLocation[];
+  profile: ProfilePreview;
+  did: string;
   onCoverChange: (e: ChangeEvent<HTMLInputElement>) => void;
   onCoverFile: (file: File | null) => void;
   onCoverClear: () => void;
@@ -650,9 +957,10 @@ function PreviewContent({
       >
         <BumicertCardVisual
           coverImage={coverPreview}
-          logoUrl={null}
+          logoUrl={profile.avatarUrl}
+          ownerDid={did}
           title={values.title.trim() || "Your Bumicert title"}
-          organizationName="Your profile"
+          organizationName={profile.name}
           objectives={scopeList(values)}
           description={clampDescription(values.shortDescription) || undefined}
         />
@@ -700,6 +1008,38 @@ function TipsContent() {
   );
 }
 
+function DraftsSubheader({
+  drafts,
+  activeDraftId,
+  onLoadDraft,
+  onDeleteDraft,
+}: {
+  drafts: Draft[];
+  activeDraftId: string | null;
+  onLoadDraft: (draft: Draft) => void;
+  onDeleteDraft: (id: string) => void;
+}) {
+  if (drafts.length === 0) return null;
+  return (
+    <div className="-mx-4 overflow-x-auto px-4 pb-2">
+      <div className="flex min-w-max items-center gap-2 border-b border-border/70 pb-2">
+        <span className="mr-1 text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground/80">Drafts</span>
+        {drafts.slice(0, 5).map((draft) => (
+          <span key={draft.id} className={cn("inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs transition-colors", draft.id === activeDraftId ? "border-primary bg-primary/12 text-primary" : "border-border bg-background hover:bg-muted/60")}>
+            <button type="button" onClick={() => onLoadDraft(draft)} className="font-medium">
+              {titleFromDraft(draft)}
+              <span className="ml-1.5 font-normal text-muted-foreground">· {formatDraftDate(draft.updatedAt)}</span>
+            </button>
+            <button type="button" onClick={() => onDeleteDraft(draft.id)} aria-label="Delete draft" className="text-muted-foreground transition-colors hover:text-destructive">
+              <XIcon className="size-3" />
+            </button>
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 /* ── Published ──────────────────────────────────────────────────────────── */
 
 function PublishedView({ result, did, onReset }: { result: PublishResult; did: string; onReset: () => void }) {
@@ -727,19 +1067,19 @@ function PublishedView({ result, did, onReset }: { result: PublishResult; did: s
         </Button>
         {hyperscanHref ? (
           <Button asChild variant="ghost">
-            <a href={hyperscanHref} target="_blank" rel="noreferrer">View record</a>
+            <a href={hyperscanHref} target="_blank" rel="noreferrer">View public details</a>
           </Button>
         ) : null}
         <Button variant="ghost" onClick={onReset}>Create another</Button>
       </div>
-      <p className="mx-auto mt-7 max-w-md break-all rounded-xl bg-muted/60 px-4 py-2.5 font-mono text-[11px] text-muted-foreground">{result.uri}</p>
+
     </motion.div>
   );
 }
 
 /* ── Main ───────────────────────────────────────────────────────────────── */
 
-export function NewBumicertClient({ did }: { did: string }) {
+export function NewBumicertClient({ did, profile }: { did: string; profile: ProfilePreview }) {
   const [values, setValues] = useState<FormValues>(EMPTY_FORM);
   const [drafts, setDrafts] = useState<Draft[]>([]);
   const [activeDraftId, setActiveDraftId] = useState<string | null>(null);
@@ -750,6 +1090,7 @@ export function NewBumicertClient({ did }: { did: string }) {
   const [sitesStatus, setSitesStatus] = useState<SitesStatus>("idle");
   const [sitesError, setSitesError] = useState<string | null>(null);
   const [publishError, setPublishError] = useState<string | null>(null);
+  const [contributorProfiles, setContributorProfiles] = useState<Record<string, ActorResult>>({});
   const [isPublishing, setIsPublishing] = useState(false);
   const [publishResult, setPublishResult] = useState<PublishResult | null>(null);
   const [mobileSheet, setMobileSheet] = useState<"preview" | "tips" | null>(null);
@@ -806,7 +1147,6 @@ export function NewBumicertClient({ did }: { did: string }) {
           values.shortDescription.trim() ||
           values.description.trim() ||
           values.scopes.length ||
-          values.customScope.trim() ||
           contributorList(values).length ||
           values.selectedLocationUris.length,
       );
@@ -863,8 +1203,24 @@ export function NewBumicertClient({ did }: { did: string }) {
     setCoverError(null);
   };
 
+  const setContributorProfile = useCallback((identity: string, actor: ActorResult | null) => {
+    setContributorProfiles((current) => {
+      const next = { ...current };
+      if (identity) delete next[identity];
+      if (actor) {
+        next[actor.did] = actor;
+        if (actor.handle) next[actor.handle] = actor;
+      }
+      return next;
+    });
+  }, []);
+
+  const handleSiteCreated = useCallback((site: ManagedLocation) => {
+    setSites((current) => [site, ...current.filter((item) => item.metadata.uri !== site.metadata.uri)]);
+  }, []);
+
   const handleLoadDraft = (draft: Draft) => {
-    setValues({ ...EMPTY_FORM, ...draft.values });
+    setValues(normalizeDraftValues(draft.values));
     setActiveDraftId(draft.id);
     setPublishResult(null);
     setPublishError(null);
@@ -887,6 +1243,27 @@ export function NewBumicertClient({ did }: { did: string }) {
     clearCover();
   };
 
+  const buildWorkScopeRecord = async () => {
+    const createdAt = new Date().toISOString();
+    const refs = await Promise.all(scopeKeys(values).map(async (scope) => {
+      const result = await putRecord(WORK_SCOPE_TAG_COLLECTION, scope.key, {
+        $type: WORK_SCOPE_TAG_COLLECTION,
+        key: scope.key,
+        name: scope.label,
+        category: "topic",
+        createdAt,
+      });
+      return { uri: result.uri, cid: result.cid };
+    }));
+    return {
+      $type: "org.hypercerts.workscope.cel",
+      expression: buildWorkScopeExpression(values),
+      usedTags: refs,
+      version: "v1",
+      createdAt,
+    };
+  };
+
   const handlePublish = async (event: FormEvent) => {
     event.preventDefault();
     const validation = validateAll(values);
@@ -902,13 +1279,16 @@ export function NewBumicertClient({ did }: { did: string }) {
         const blob = await uploadBlob(coverFile);
         image = { $type: "org.hypercerts.defs#smallImage", image: blob.ref };
       }
-      const siteRefs = selectedLocations(values, sites).map((s) => ({ uri: s.metadata.uri, cid: s.metadata.cid }));
+      const [siteRefs, workScope] = await Promise.all([
+        Promise.resolve(selectedLocations(values, sites).map((s) => ({ uri: s.metadata.uri, cid: s.metadata.cid }))),
+        buildWorkScopeRecord(),
+      ]);
       const record: Record<string, unknown> = {
         $type: COLLECTION,
         title: values.title.trim(),
         shortDescription: clampDescription(values.shortDescription),
         description: { $type: "org.hypercerts.defs#descriptionString", value: values.description.trim() },
-        workScope: { $type: "org.hypercerts.claim.activity#workScopeString", scope: scopeSummary(values) },
+        workScope,
         startDate: dateToIso(values.startDate),
         ...(values.ongoing ? {} : { endDate: dateToIso(values.endDate) }),
         contributors: contributorList(values).map((identity) => ({
@@ -932,6 +1312,8 @@ export function NewBumicertClient({ did }: { did: string }) {
     values,
     coverPreview,
     sites,
+    profile,
+    did,
     onCoverChange: handleCoverChange,
     onCoverFile: applyCoverFile,
     onCoverClear: clearCover,
@@ -944,39 +1326,27 @@ export function NewBumicertClient({ did }: { did: string }) {
       <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[20rem] bg-gradient-to-b from-primary/[0.07] via-primary/[0.02] to-transparent" />
 
       {/* Start over in the header */}
-      {!publishResult ? (
-        <HeaderContent
-          right={
+      <HeaderContent
+        right={
+          !publishResult ? (
             <Button type="button" variant="ghost" size="sm" onClick={resetForm} className="text-muted-foreground">
               <RotateCcwIcon className="size-4" /> <span className="hidden sm:inline">Start over</span>
             </Button>
-          }
-        />
-      ) : null}
+          ) : null
+        }
+        sub={
+          !publishResult && drafts.length > 0 ? (
+            <DraftsSubheader drafts={drafts} activeDraftId={activeDraftId} onLoadDraft={handleLoadDraft} onDeleteDraft={handleDeleteDraft} />
+          ) : null
+        }
+      />
 
       <div className="mx-auto w-full max-w-5xl px-4 py-7 sm:px-6 sm:py-9">
         {publishResult ? (
           <PublishedView result={publishResult} did={did} onReset={resetForm} />
         ) : (
           <>
-            {drafts.length > 0 ? (
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="mr-1 text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground/80">Drafts</span>
-                {drafts.slice(0, 5).map((draft) => (
-                  <span key={draft.id} className={cn("inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs transition-colors", draft.id === activeDraftId ? "bg-primary/12 text-primary" : "bg-muted/60 hover:bg-muted")}>
-                    <button type="button" onClick={() => handleLoadDraft(draft)} className="font-medium">
-                      {titleFromDraft(draft)}
-                      <span className="ml-1.5 font-normal text-muted-foreground">· {formatDraftDate(draft.updatedAt)}</span>
-                    </button>
-                    <button type="button" onClick={() => handleDeleteDraft(draft.id)} aria-label="Delete draft" className="text-muted-foreground transition-colors hover:text-destructive">
-                      <XIcon className="size-3" />
-                    </button>
-                  </span>
-                ))}
-              </div>
-            ) : null}
-
-            <form onSubmit={handlePublish} className={cn("grid gap-x-14 gap-y-12 xl:grid-cols-[minmax(0,1fr)_18rem]", drafts.length > 0 ? "mt-8" : "mt-2")}>
+            <form onSubmit={handlePublish} className="mt-2 grid gap-x-14 gap-y-12 xl:grid-cols-[minmax(0,1fr)_18rem]">
               <div className="min-w-0">
                 <section>
                   <SectionHeader eyebrow="Basics" title={STEPS[0].title} subtitle={STEPS[0].subtitle} />
@@ -998,7 +1368,18 @@ export function NewBumicertClient({ did }: { did: string }) {
 
                 <section className="mt-14 border-t border-border/40 pt-14">
                   <SectionHeader eyebrow="People & places" title={STEPS[2].title} subtitle={STEPS[2].subtitle} />
-                  <PeopleStep values={values} setValues={setValues} sites={sites} sitesStatus={sitesStatus} sitesError={sitesError} refreshSites={refreshSites} />
+                  <PeopleStep
+                    did={did}
+                    values={values}
+                    setValues={setValues}
+                    sites={sites}
+                    sitesStatus={sitesStatus}
+                    sitesError={sitesError}
+                    refreshSites={refreshSites}
+                    contributorProfiles={contributorProfiles}
+                    setContributorProfile={setContributorProfile}
+                    onSiteCreated={handleSiteCreated}
+                  />
                 </section>
 
                 <section className="mt-14 border-t border-border/40 pt-14">
@@ -1036,12 +1417,12 @@ export function NewBumicertClient({ did }: { did: string }) {
       {/* Mobile floating buttons (left) + sheets */}
       {!publishResult ? (
         <>
-          <div className="fixed bottom-5 left-5 z-40 flex flex-col gap-2 xl:hidden">
+          <div className="fixed bottom-5 right-5 z-40 flex flex-col items-end gap-2 xl:hidden">
             <Button type="button" variant="outline" size="sm" onClick={() => setMobileSheet("tips")} className="shadow-lg">
               <LightbulbIcon className="size-4" /> Tips
             </Button>
             <Button type="button" variant="outline" size="sm" onClick={() => setMobileSheet("preview")} className="shadow-lg">
-              <CameraIcon className="size-4" /> Preview
+              <EyeIcon className="size-4" /> Preview
             </Button>
           </div>
 

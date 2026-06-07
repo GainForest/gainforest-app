@@ -921,6 +921,19 @@ function splitWorkScopeString(value?: string | null): string[] {
     .filter(Boolean);
 }
 
+const WORK_SCOPE_LABELS: Record<string, string> = {
+  reforestation: "Reforestation",
+  forest_protection: "Forest protection",
+  biodiversity_monitoring: "Biodiversity monitoring",
+  community_stewardship: "Community stewardship",
+  carbon_removal: "Carbon removal",
+  restoration_maintenance: "Restoration maintenance",
+};
+
+function displayWorkScopeTag(value: string): string {
+  return WORK_SCOPE_LABELS[value] ?? value.replace(/_/g, " ").replace(/^\w/, (letter) => letter.toUpperCase());
+}
+
 function extractWorkScopeTags(workScope?: { __typename?: string; scope?: string | null; expression?: string | null } | null): string[] {
   const stringTags = splitWorkScopeString(workScope?.scope);
   if (stringTags.length > 0) return stringTags;
@@ -929,7 +942,7 @@ function extractWorkScopeTags(workScope?: { __typename?: string; scope?: string 
   if (!expression) return [];
 
   return [...expression.matchAll(/(["'])(.*?)\1/g)]
-    .map((match) => match[2]?.trim() ?? "")
+    .map((match) => displayWorkScopeTag(match[2]?.trim() ?? ""))
     .filter(Boolean);
 }
 

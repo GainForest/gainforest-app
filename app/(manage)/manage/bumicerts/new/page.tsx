@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { fetchAuthSession } from "@/app/_lib/auth-server";
+import { getAccountRouteData } from "@/app/account/_lib/account-route";
 import { NewBumicertClient } from "./_components/NewBumicertClient";
 
 export const metadata: Metadata = {
@@ -12,5 +13,6 @@ export default async function NewBumicertPage() {
   const session = await fetchAuthSession();
   if (!session.isLoggedIn) return null;
 
-  return <NewBumicertClient did={session.did} />;
+  const account = await getAccountRouteData(session.did, session.did);
+  return <NewBumicertClient did={session.did} profile={{ name: account.displayName, avatarUrl: account.avatarUrl }} />;
 }

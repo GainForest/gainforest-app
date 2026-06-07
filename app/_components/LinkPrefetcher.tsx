@@ -13,6 +13,7 @@ const IMPORTANT_ROUTES = [
   "/donations",
   "/manage",
   "/manage/bumicerts",
+  "/manage/bumicerts/new",
   "/manage/sites",
   "/manage/trees",
 ] as const;
