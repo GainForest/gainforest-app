@@ -74,6 +74,7 @@ const SURFACE =
   "rounded-3xl bg-card/70 shadow-sm shadow-primary/5 ring-1 ring-foreground/5 backdrop-blur";
 const PILL_GROUP =
   "flex items-center gap-1 rounded-full bg-muted/55 p-1 shadow-sm shadow-primary/5 ring-1 ring-foreground/5 backdrop-blur";
+const DEFAULT_SECTION_LIMIT = 25;
 
 function pillButton(active: boolean) {
   return [
@@ -129,14 +130,14 @@ export function Dashboard() {
   const allReceipts = receipts ?? [];
   const periodFiltered = useMemo(() => filterByPeriod(allReceipts, period), [allReceipts, period]);
   const kpis = useMemo(() => computeKpis(periodFiltered), [periodFiltered]);
-  const geoStats = useMemo(() => computeGeoStats(orgCountryMap), [orgCountryMap]);
+  const geoStats = useMemo(() => computeGeoStats(orgCountryMap, Number.POSITIVE_INFINITY), [orgCountryMap]);
   const timeSeries = useMemo(
     () => computeTimeSeries(periodFiltered, granularity),
     [periodFiltered, granularity],
   );
-  const topDonors = useMemo(() => computeTopDonors(periodFiltered, 50), [periodFiltered]);
+  const topDonors = useMemo(() => computeTopDonors(periodFiltered, Number.POSITIVE_INFINITY), [periodFiltered]);
   const perOrg = useMemo(() => computePerOrg(periodFiltered), [periodFiltered]);
-  const recentTx = useMemo(() => computeRecentTransactions(allReceipts, 50), [allReceipts]);
+  const recentTx = useMemo(() => computeRecentTransactions(allReceipts, Number.POSITIVE_INFINITY), [allReceipts]);
 
   return (
     <DashboardShell periodFilter={<PeriodFilter period={period} onPeriodChange={setPeriod} />}>
@@ -152,10 +153,7 @@ export function Dashboard() {
           className="flex flex-col gap-12"
         >
           <motion.div variants={itemVariants}>
-            <KPISummary kpis={kpis} />
-          </motion.div>
-          <motion.div variants={itemVariants}>
-            <GeographicReach stats={geoStats} />
+            <KPISummary kpis={kpis} geoStats={geoStats} />
           </motion.div>
           <motion.div variants={itemVariants}>
             <DonationsVolumeChart
@@ -164,9 +162,14 @@ export function Dashboard() {
               onGranularityChange={setGranularity}
             />
           </motion.div>
-          <motion.div variants={itemVariants} className="grid grid-cols-1 gap-6 xl:grid-cols-2">
-            <TopDonorsTable rows={topDonors} />
-            <OrganizationsTable rows={perOrg} />
+          <motion.div variants={itemVariants} className="flex flex-col gap-6 lg:flex-row">
+            <div className="min-w-0 flex-1">
+              <TopDonorsTable rows={topDonors} />
+            </div>
+            <div className="flex min-w-0 flex-col gap-6 lg:w-[42%]">
+              <TopCountriesTable stats={geoStats} />
+              <OrganizationsTable rows={perOrg} />
+            </div>
           </motion.div>
           <motion.div variants={itemVariants}>
             <RecentTransactionsTable rows={recentTx} />
@@ -246,9 +249,9 @@ function PeriodFilter({ period, onPeriodChange }: { period: Period; onPeriodChan
   );
 }
 
-function KPISummary({ kpis }: { kpis: DashboardKpis }) {
+function KPISummary({ kpis, geoStats }: { kpis: DashboardKpis; geoStats: GeoStats }) {
   return (
-    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 xl:grid-cols-5">
+    <div className="grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-4">
       <StatCard
         icon={<CoinsIcon className="h-4 w-4" />}
         label="Total Raised"
@@ -278,56 +281,61 @@ function KPISummary({ kpis }: { kpis: DashboardKpis }) {
         label="Average Donation"
         value={formatCompactUsd(kpis.avgDonation)}
         sub="Average donation size"
-        className="col-span-2 sm:col-span-1"
+      />
+      <StatCard
+        icon={<GlobeIcon className="h-4 w-4" />}
+        label="Places Reached"
+        value={formatCompact(geoStats.countriesRepresented)}
+        sub="Countries with organizations"
       />
     </div>
   );
 }
 
-function StatCard({ icon, label, value, sub, className }: { icon: React.ReactNode; label: string; value: string; sub: string; className?: string }) {
-  return <StatsTile icon={icon} label={label} value={value} detail={sub} accent={label === "Total Raised" || label === "Active Bumicerts"} className={className} />;
+function StatCard({ icon, label, value, sub }: { icon: React.ReactNode; label: string; value: string; sub: string }) {
+  return <StatsTile icon={icon} label={label} value={value} detail={sub} accent={label === "Total Raised" || label === "Active Bumicerts"} />;
 }
 
-function GeographicReach({ stats }: { stats: GeoStats }) {
+function TopCountriesTable({ stats }: { stats: GeoStats }) {
+  const [expanded, setExpanded] = useState(false);
+  const visibleCountries = expanded ? stats.topCountries : stats.topCountries.slice(0, DEFAULT_SECTION_LIMIT);
+
   return (
-    <div className="grid grid-cols-1 gap-4 md:grid-cols-[280px_1fr]">
-      <StatsTile
-        icon={<GlobeIcon />}
-        label="Places Reached"
-        value={formatCompact(stats.countriesRepresented)}
-        detail="Countries with organizations"
-        accent
-      />
+    <div className={`overflow-hidden ${SURFACE}`}>
+      <div className="flex items-center gap-2 px-5 pt-5 pb-3">
+        <GlobeIcon className="h-4 w-4 text-primary" />
+        <span className="text-xs font-medium tracking-[0.15em] text-muted-foreground uppercase">
+          Top Countries
+        </span>
+      </div>
 
-      <div className={`overflow-hidden ${SURFACE}`}>
-        <div className="flex items-center gap-2 px-5 pt-5 pb-3">
-          <GlobeIcon className="h-4 w-4 text-primary" />
-          <span className="text-xs font-medium tracking-[0.15em] text-muted-foreground uppercase">
-            Top Countries
-          </span>
-        </div>
-
-        {stats.topCountries.length === 0 ? (
-          <p className="px-5 pb-5 text-sm text-muted-foreground">No geographic data available.</p>
-        ) : (
+      {stats.topCountries.length === 0 ? (
+        <p className="px-5 pb-5 text-sm text-muted-foreground">No geographic data available.</p>
+      ) : (
+        <>
           <ul className="space-y-2 px-5 pb-5">
-            {stats.topCountries.map((country, index) => (
-              <li key={country.countryCode} className="flex items-center justify-between text-sm">
-                <span className="flex items-center gap-2 text-muted-foreground">
-                  <span className="w-4 text-right text-xs text-muted-foreground/50 tabular-nums">
+            {visibleCountries.map((country, index) => (
+              <li key={country.countryCode} className="flex items-center justify-between gap-4 text-sm">
+                <span className="flex min-w-0 items-center gap-2 text-muted-foreground">
+                  <span className="w-4 shrink-0 text-right text-xs text-muted-foreground/50 tabular-nums">
                     {index + 1}
                   </span>
-                  <span>{country.emoji}</span>
-                  <span>{country.name}</span>
+                  <span className="shrink-0">{country.emoji}</span>
+                  <span className="truncate">{country.name}</span>
                 </span>
-                <span className="font-medium text-foreground tabular-nums">
+                <span className="shrink-0 font-medium text-foreground tabular-nums">
                   {country.orgCount} {country.orgCount === 1 ? "organization" : "organizations"}
                 </span>
               </li>
             ))}
           </ul>
-        )}
-      </div>
+          <SectionLimitButton
+            expanded={expanded}
+            total={stats.topCountries.length}
+            onToggle={() => setExpanded((current) => !current)}
+          />
+        </>
+      )}
     </div>
   );
 }
@@ -437,6 +445,7 @@ function ChartTooltip({ active, payload, label }: { active?: boolean; payload?: 
 function TopDonorsTable({ rows }: { rows: TopDonor[] }) {
   const [sortKey, setSortKey] = useState<"rank" | "totalAmount" | "donationCount" | "lastDonatedAt">("rank");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
+  const [expanded, setExpanded] = useState(false);
 
   const sorted = useMemo(() => {
     return [...rows].sort((a, b) => {
@@ -448,6 +457,7 @@ function TopDonorsTable({ rows }: { rows: TopDonor[] }) {
       return sortDir === "asc" ? compare : -compare;
     });
   }, [rows, sortDir, sortKey]);
+  const visibleRows = expanded ? sorted : sorted.slice(0, DEFAULT_SECTION_LIMIT);
 
   const sort = (key: typeof sortKey) => {
     if (sortKey === key) setSortDir((dir) => (dir === "asc" ? "desc" : "asc"));
@@ -467,30 +477,37 @@ function TopDonorsTable({ rows }: { rows: TopDonor[] }) {
       {rows.length === 0 ? (
         <p className="px-5 pb-5 text-sm text-muted-foreground">No donations yet.</p>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-t border-border/60">
-                <SortableCol col="rank" sortKey={sortKey} sortDir={sortDir} onSort={sort}>#</SortableCol>
-                <th className="px-3 py-2 text-left text-xs font-medium tracking-[0.12em] text-muted-foreground uppercase">Donor</th>
-                <SortableCol col="totalAmount" sortKey={sortKey} sortDir={sortDir} onSort={sort}>Total Donated</SortableCol>
-                <SortableCol col="donationCount" sortKey={sortKey} sortDir={sortDir} onSort={sort}>Donations</SortableCol>
-                <SortableCol col="lastDonatedAt" sortKey={sortKey} sortDir={sortDir} onSort={sort}>Last Donation</SortableCol>
-              </tr>
-            </thead>
-            <tbody>
-              {sorted.map((row) => (
-                <tr key={row.donorId} className="border-t border-border/40 transition-colors hover:bg-primary/[0.04]">
-                  <td className="px-3 py-2.5 font-mono text-xs text-muted-foreground">{row.rank}</td>
-                  <td className="px-3 py-2.5"><DonorCell id={row.donorId} type={row.donorType} /></td>
-                  <td className="px-3 py-2.5 text-foreground tabular-nums">{formatCompactUsd(row.totalAmount)}</td>
-                  <td className="px-3 py-2.5 text-muted-foreground tabular-nums">{row.donationCount}</td>
-                  <td className="px-3 py-2.5 text-xs text-muted-foreground">{formatTableDate(row.lastDonatedAt)}</td>
+        <>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-t border-border/60">
+                  <SortableCol col="rank" sortKey={sortKey} sortDir={sortDir} onSort={sort}>#</SortableCol>
+                  <th className="px-3 py-2 text-left text-xs font-medium tracking-[0.12em] text-muted-foreground uppercase">Donor</th>
+                  <SortableCol col="totalAmount" sortKey={sortKey} sortDir={sortDir} onSort={sort}>Total Donated</SortableCol>
+                  <SortableCol col="donationCount" sortKey={sortKey} sortDir={sortDir} onSort={sort}>Donations</SortableCol>
+                  <SortableCol col="lastDonatedAt" sortKey={sortKey} sortDir={sortDir} onSort={sort}>Last Donation</SortableCol>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {visibleRows.map((row) => (
+                  <tr key={row.donorId} className="border-t border-border/40 transition-colors hover:bg-primary/[0.04]">
+                    <td className="px-3 py-2.5 font-mono text-xs text-muted-foreground">{row.rank}</td>
+                    <td className="px-3 py-2.5"><DonorCell id={row.donorId} type={row.donorType} /></td>
+                    <td className="px-3 py-2.5 text-foreground tabular-nums">{formatCompactUsd(row.totalAmount)}</td>
+                    <td className="px-3 py-2.5 text-muted-foreground tabular-nums">{row.donationCount}</td>
+                    <td className="px-3 py-2.5 text-xs text-muted-foreground">{formatTableDate(row.lastDonatedAt)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <SectionLimitButton
+            expanded={expanded}
+            total={sorted.length}
+            onToggle={() => setExpanded((current) => !current)}
+          />
+        </>
       )}
     </div>
   );
@@ -499,6 +516,7 @@ function TopDonorsTable({ rows }: { rows: TopDonor[] }) {
 function OrganizationsTable({ rows }: { rows: OrgRow[] }) {
   const [sortKey, setSortKey] = useState<"totalRaised" | "bumicertCount" | "donorCount">("totalRaised");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
+  const [expanded, setExpanded] = useState(false);
 
   const sorted = useMemo(() => {
     return [...rows].sort((a, b) => {
@@ -509,6 +527,7 @@ function OrganizationsTable({ rows }: { rows: OrgRow[] }) {
       return sortDir === "asc" ? compare : -compare;
     });
   }, [rows, sortDir, sortKey]);
+  const visibleRows = expanded ? sorted : sorted.slice(0, DEFAULT_SECTION_LIMIT);
 
   const sort = (key: typeof sortKey) => {
     if (sortKey === key) setSortDir((dir) => (dir === "asc" ? "desc" : "asc"));
@@ -528,44 +547,55 @@ function OrganizationsTable({ rows }: { rows: OrgRow[] }) {
       {rows.length === 0 ? (
         <p className="px-5 pb-5 text-sm text-muted-foreground">No donations yet.</p>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-t border-border/60">
-                <th className="px-3 py-2 text-left text-xs font-medium tracking-[0.12em] text-muted-foreground uppercase">Organization</th>
-                <SortableCol col="totalRaised" sortKey={sortKey} sortDir={sortDir} onSort={sort}>Total Raised</SortableCol>
-                <SortableCol col="bumicertCount" sortKey={sortKey} sortDir={sortDir} onSort={sort}>Bumicerts</SortableCol>
-                <SortableCol col="donorCount" sortKey={sortKey} sortDir={sortDir} onSort={sort}>Donors</SortableCol>
-              </tr>
-            </thead>
-            <tbody>
-              {sorted.map((row) => (
-                <tr key={row.orgDid} className="border-t border-border/40 transition-colors hover:bg-primary/[0.04]">
-                  <td className="px-3 py-2.5">
-                    <Link
-                      href={accountHref(row.orgDid)}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="inline-flex items-center gap-1 text-xs text-foreground transition-colors hover:text-primary"
-                    >
-                      <AuthorInline did={row.orgDid} />
-                      <ExternalLinkIcon className="h-3 w-3 opacity-60" />
-                    </Link>
-                  </td>
-                  <td className="px-3 py-2.5 text-foreground tabular-nums">{formatCompactUsd(row.totalRaised)}</td>
-                  <td className="px-3 py-2.5 text-muted-foreground tabular-nums">{row.bumicertCount}</td>
-                  <td className="px-3 py-2.5 text-muted-foreground tabular-nums">{row.donorCount}</td>
+        <>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-t border-border/60">
+                  <th className="px-3 py-2 text-left text-xs font-medium tracking-[0.12em] text-muted-foreground uppercase">Organization</th>
+                  <SortableCol col="totalRaised" sortKey={sortKey} sortDir={sortDir} onSort={sort}>Total Raised</SortableCol>
+                  <SortableCol col="bumicertCount" sortKey={sortKey} sortDir={sortDir} onSort={sort}>Bumicerts</SortableCol>
+                  <SortableCol col="donorCount" sortKey={sortKey} sortDir={sortDir} onSort={sort}>Donors</SortableCol>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {visibleRows.map((row) => (
+                  <tr key={row.orgDid} className="border-t border-border/40 transition-colors hover:bg-primary/[0.04]">
+                    <td className="px-3 py-2.5">
+                      <Link
+                        href={accountHref(row.orgDid)}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-1 text-xs text-foreground transition-colors hover:text-primary"
+                      >
+                        <AuthorInline did={row.orgDid} />
+                        <ExternalLinkIcon className="h-3 w-3 opacity-60" />
+                      </Link>
+                    </td>
+                    <td className="px-3 py-2.5 text-foreground tabular-nums">{formatCompactUsd(row.totalRaised)}</td>
+                    <td className="px-3 py-2.5 text-muted-foreground tabular-nums">{row.bumicertCount}</td>
+                    <td className="px-3 py-2.5 text-muted-foreground tabular-nums">{row.donorCount}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <SectionLimitButton
+            expanded={expanded}
+            total={sorted.length}
+            onToggle={() => setExpanded((current) => !current)}
+          />
+        </>
       )}
     </div>
   );
 }
 
 function RecentTransactionsTable({ rows }: { rows: TxRow[] }) {
+  const [expanded, setExpanded] = useState(false);
+  const visibleRows = expanded ? rows : rows.slice(0, DEFAULT_SECTION_LIMIT);
+  const displaySummary = expanded || rows.length <= DEFAULT_SECTION_LIMIT ? "showing all" : `showing latest ${DEFAULT_SECTION_LIMIT}`;
+
   return (
     <div className={`overflow-hidden ${SURFACE}`}>
       <div className="flex items-start justify-between gap-4 px-5 pt-5 pb-3">
@@ -578,39 +608,62 @@ function RecentTransactionsTable({ rows }: { rows: TxRow[] }) {
             All time · {rows.length} {rows.length === 1 ? "donation" : "donations"}
           </p>
         </div>
-        <span className="mt-1 shrink-0 text-[10px] text-muted-foreground/50">showing latest 50</span>
+        {rows.length > 0 && <span className="mt-1 shrink-0 text-[10px] text-muted-foreground/50">{displaySummary}</span>}
       </div>
 
       {rows.length === 0 ? (
         <p className="px-5 pb-5 text-sm text-muted-foreground">No donations yet.</p>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-t border-border/60">
-                <th className="px-3 py-2 text-left text-xs font-medium tracking-[0.12em] text-muted-foreground uppercase">Date</th>
-                <th className="px-3 py-2 text-left text-xs font-medium tracking-[0.12em] text-muted-foreground uppercase">Donor</th>
-                <th className="px-3 py-2 text-left text-xs font-medium tracking-[0.12em] text-muted-foreground uppercase">Amount</th>
-                <th className="px-3 py-2 text-left text-xs font-medium tracking-[0.12em] text-muted-foreground uppercase">Bumicert</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((row) => (
-                <tr key={row.uri} className="border-t border-border/40 transition-colors hover:bg-primary/[0.04]">
-                  <td className="whitespace-nowrap px-3 py-2.5 text-xs text-muted-foreground">{formatTableDate(row.date)}</td>
-                  <td className="px-3 py-2.5">
-                    {row.donorId ? <DonorCell id={row.donorId} type={row.donorType ?? "wallet"} /> : <span className="text-xs text-foreground">Anonymous</span>}
-                  </td>
-                  <td className="whitespace-nowrap px-3 py-2.5 font-medium text-foreground tabular-nums">{formatUsd(row.amount)}</td>
-                  <td className="px-3 py-2.5 text-xs text-muted-foreground">
-                    <BumicertLink uri={row.bumicertUri} />
-                  </td>
+        <>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-t border-border/60">
+                  <th className="px-3 py-2 text-left text-xs font-medium tracking-[0.12em] text-muted-foreground uppercase">Date</th>
+                  <th className="px-3 py-2 text-left text-xs font-medium tracking-[0.12em] text-muted-foreground uppercase">Donor</th>
+                  <th className="px-3 py-2 text-left text-xs font-medium tracking-[0.12em] text-muted-foreground uppercase">Amount</th>
+                  <th className="px-3 py-2 text-left text-xs font-medium tracking-[0.12em] text-muted-foreground uppercase">Bumicert</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {visibleRows.map((row) => (
+                  <tr key={row.uri} className="border-t border-border/40 transition-colors hover:bg-primary/[0.04]">
+                    <td className="whitespace-nowrap px-3 py-2.5 text-xs text-muted-foreground">{formatTableDate(row.date)}</td>
+                    <td className="px-3 py-2.5">
+                      {row.donorId ? <DonorCell id={row.donorId} type={row.donorType ?? "wallet"} /> : <span className="text-xs text-foreground">Anonymous</span>}
+                    </td>
+                    <td className="whitespace-nowrap px-3 py-2.5 font-medium text-foreground tabular-nums">{formatUsd(row.amount)}</td>
+                    <td className="px-3 py-2.5 text-xs text-muted-foreground">
+                      <BumicertLink uri={row.bumicertUri} />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <SectionLimitButton
+            expanded={expanded}
+            total={rows.length}
+            onToggle={() => setExpanded((current) => !current)}
+          />
+        </>
       )}
+    </div>
+  );
+}
+
+function SectionLimitButton({ expanded, total, onToggle }: { expanded: boolean; total: number; onToggle: () => void }) {
+  if (total <= DEFAULT_SECTION_LIMIT) return null;
+
+  return (
+    <div className="border-t border-border/40 px-5 py-3">
+      <button
+        type="button"
+        onClick={onToggle}
+        className="text-sm font-medium text-primary transition-colors hover:text-primary/80"
+      >
+        {expanded ? `Show first ${DEFAULT_SECTION_LIMIT}` : `Show all ${formatCompact(total)}`}
+      </button>
     </div>
   );
 }
@@ -707,19 +760,27 @@ function TableSkeleton() {
 function DashboardSkeleton() {
   return (
     <div className="flex flex-col gap-12">
-      <div className={`space-y-3 ${SURFACE} p-5`}>
-        <Skeleton className="h-3 w-24" />
-        {Array.from({ length: 5 }).map((_, index) => (
-          <Skeleton key={index} className="h-5 w-full" />
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-4">
+        {Array.from({ length: 6 }).map((_, index) => (
+          <div key={index} className={`space-y-3 ${SURFACE} p-5`}>
+            <Skeleton className="h-3 w-24" />
+            <Skeleton className="h-8 w-full" />
+            <Skeleton className="h-3 w-32" />
+          </div>
         ))}
       </div>
       <div className={`space-y-4 ${SURFACE} p-5`}>
         <Skeleton className="h-3 w-40" />
         <Skeleton className="h-[240px] w-full" />
       </div>
-      <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
-        <TableSkeleton />
-        <TableSkeleton />
+      <div className="flex flex-col gap-6 lg:flex-row">
+        <div className="min-w-0 flex-1">
+          <TableSkeleton />
+        </div>
+        <div className="flex min-w-0 flex-col gap-6 lg:w-[42%]">
+          <TableSkeleton />
+          <TableSkeleton />
+        </div>
       </div>
       <TableSkeleton />
     </div>
