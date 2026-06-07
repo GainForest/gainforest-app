@@ -320,20 +320,20 @@ export default function FileDropStep({
       {/* Site selection (required) */}
       <div className="space-y-3 rounded-xl border border-border bg-muted/20 p-4">
         <div>
-          <label htmlFor="site-select" className="text-sm font-medium">Project area <span className="text-destructive">*</span></label>
-          <p className="text-xs text-muted-foreground mt-0.5">Trees will be verified against this place&apos;s drawn map area.</p>
+          <label htmlFor="site-select" className="text-sm font-medium">Site boundary <span className="text-destructive">*</span></label>
+          <p className="text-xs text-muted-foreground mt-0.5">Trees will be verified against this site&apos;s drawn map area.</p>
         </div>
         {sitesLoading ? (
           <Skeleton className="h-9 w-full rounded-md" />
         ) : sitesError ? (
           <p className="text-sm text-destructive">{sitesError}</p>
         ) : uploadSites.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No places found. Add a place with a drawn map area from the Places page first.</p>
+          <p className="text-sm text-muted-foreground">No sites found. Add a site with a drawn map area from the Sites page first.</p>
         ) : (
           <>
             <Select value={selectedSite?.uri ?? ""} onValueChange={setSelectedSiteUri}>
               <SelectTrigger id="site-select">
-                <SelectValue placeholder="Select a place…" />
+                <SelectValue placeholder="Select a site…" />
               </SelectTrigger>
               <SelectContent>
                 {uploadSites.map((site) => {
@@ -352,13 +352,13 @@ export default function FileDropStep({
               <p className="text-xs text-muted-foreground">Verifying map area…</p>
             )}
             {selectedSite && selectedSiteHasBoundary && selectedSiteBoundaryFailed && (
-              <p className="text-sm text-destructive">Could not load the map area. Select another place or draw a valid area.</p>
+              <p className="text-sm text-destructive">Could not load the map area. Select another site or draw a valid area.</p>
             )}
             {selectedSite && !selectedSiteHasBoundary && !selectedSiteBoundarySyncing && (
-              <p className="text-sm text-destructive">This place has no drawn map area. Add one from the Places page.</p>
+              <p className="text-sm text-destructive">This site has no drawn map area. Add one from the Sites page.</p>
             )}
             {showCreateSiteBoundaryAction && (
-              <p className="text-xs text-muted-foreground">No usable project areas found. Add a drawn map area to a place from the Places page.</p>
+              <p className="text-xs text-muted-foreground">No usable site boundaries found. Add a drawn map area to a site from the Sites page.</p>
             )}
           </>
         )}
@@ -446,7 +446,7 @@ export default function FileDropStep({
       <div className="space-y-3">
         <div>
           <label className="text-sm font-medium">How were these trees established? <span className="text-muted-foreground font-normal">(optional)</span></label>
-          <p className="text-xs text-muted-foreground mt-0.5">This describes how trees came to be in this place.</p>
+          <p className="text-xs text-muted-foreground mt-0.5">This describes how trees came to be at this site.</p>
         </div>
         <div className="overflow-hidden rounded-xl border border-border">
           {PARTNER_ESTABLISHMENT_MEANS_OPTIONS.map((option) => {

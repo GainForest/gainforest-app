@@ -542,8 +542,8 @@ function DonorCard({ entry, index }: { entry: LeaderboardEntry; index: number })
   const relativeTime = entry.lastDonatedAt ? formatRelativeTimeFromNow(new Date(entry.lastDonatedAt)) : null;
   const isWallet = entry.donorType === "wallet";
   const actionHref = isWallet ? basescanAddress(entry.donorId) : accountHref(entry.donorId);
-  const walletLabel = "Anonymous supporter";
-  const actionLabel = isWallet ? "Open payment details" : "Open supporter profile in a new tab";
+  const walletLabel = "Anonymous wallet";
+  const actionLabel = isWallet ? "Open wallet details" : "Open supporter profile in a new tab";
 
   return (
     <motion.div

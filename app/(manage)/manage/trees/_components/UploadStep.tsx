@@ -145,7 +145,7 @@ export default function UploadStep({
         return;
       }
     } catch {
-      setUploadFatalError("Could not verify the project area. Go back and try again.");
+      setUploadFatalError("Could not verify the site boundary. Go back and try again.");
       setClockMs(Date.now());
       setUploadDone(true);
       return;

@@ -966,9 +966,9 @@ function computeStats(records: ExplorerRecord[], kind: RecordKind): Stat[] {
         series: seriesFromIncrements(b.map((r) => ({ t: ms(r.createdAt), inc: r.contributorCount }))),
       },
       {
-        label: "Project places",
+        label: "Sites",
         value: n(sites),
-        sub: "Places",
+        sub: "Site links",
         series: seriesFromIncrements(b.map((r) => ({ t: ms(r.createdAt), inc: r.locationCount }))),
       },
       {
@@ -985,7 +985,7 @@ function computeStats(records: ExplorerRecord[], kind: RecordKind): Stat[] {
   const withImg = s.filter((r) => r.imageUrl).length;
   return [
     { label: "Items shown", value: n(s.length), sub: "Organizations", series: totalSeries },
-    { label: "Last 30 days", value: n(last30), sub: "New places", series: win30 },
+    { label: "Last 30 days", value: n(last30), sub: "New sites", series: win30 },
     { label: "Last 7 days", value: n(last7), sub: "This week", series: win7 },
     {
       label: "Countries",

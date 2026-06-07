@@ -45,7 +45,7 @@ function assertUsableSiteBoundary(boundary: SiteBoundaryGeoJson): SiteBoundaryGe
   });
   if (classification.kind === "invalid-boundary") {
     throw new Error(
-      `Selected project area must contain a valid drawn map area. ${classification.reason}`,
+      `Selected site boundary must contain a valid drawn map area. ${classification.reason}`,
     );
   }
   return boundary;
@@ -55,7 +55,7 @@ export async function fetchUploadSiteBoundary(site: UploadSiteSelection): Promis
   const boundaryUrl = getSiteLocationUrl(site);
   if (!boundaryUrl) {
     throw new Error(
-      "Selected place does not include a drawn map area. Select another place or draw its project area before adding tree information.",
+      "Selected site does not include a drawn map area. Select another site or draw its site boundary before adding tree information.",
     );
   }
 
@@ -126,7 +126,7 @@ export function checkUploadRowsAgainstSelectedSite(options: {
       return {
         rowsToUpload: [],
         skippedRows: [],
-        fatalError: "The selected project area is not valid. Redraw it before adding trees.",
+        fatalError: "The selected site boundary is not valid. Redraw it before adding trees.",
       };
     }
 

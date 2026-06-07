@@ -39,7 +39,7 @@ export const MANAGE_PLACEHOLDER_ROUTES: ManageRoute[] = [
     id: "sites",
     title: "Sites",
     eyebrow: "Manage locations",
-    description: "This places editor is still being prepared for this area.",
+    description: "This sites editor is still being prepared for this area.",
     href: "/manage/sites",
     sourceHref: "/upload/sites",
     Icon: MapPinIcon,

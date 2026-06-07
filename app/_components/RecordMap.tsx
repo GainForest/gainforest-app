@@ -65,7 +65,7 @@ export function RecordMap({
         minZoom: 1,
         zoomControl: false,
       }).setView([12, 5], 2);
-      // Zoom control bottom-right, clear of the top-right "places mapped" chip.
+      // Zoom control bottom-right, clear of the top-right count chip.
       L.control.zoom({ position: "bottomright" }).addTo(map);
       tileRef.current = L.tileLayer(mapTileUrl(dark), {
         attribution:
@@ -199,8 +199,8 @@ export function RecordMap({
 
   const mappedNote =
     resolving && points.length === 0
-      ? "Finding places…"
-      : `${formatNumber(points.length)} ${kind === "site" ? "places" : "items"} mapped`;
+      ? "Finding map locations…"
+      : `${formatNumber(points.length)} ${kind === "site" ? "sites" : "items"} mapped`;
 
   return (
     <div className="relative">

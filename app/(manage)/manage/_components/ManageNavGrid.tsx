@@ -39,7 +39,7 @@ const ORG_NAV_CARDS: NavCard[] = [
   {
     id: "sites",
     label: "Sites",
-    description: "Manage your organization places and mapped project areas.",
+    description: "Manage your organization sites and mapped site boundaries.",
     href: "/manage/sites",
     Icon: MapPinIcon,
   },

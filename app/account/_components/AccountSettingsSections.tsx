@@ -269,25 +269,25 @@ function AddWalletModal({ did, existingName, onSuccess, onBack }: { did: string;
 
   async function connectWallet() {
     const ethereum = getEthereum();
-    if (!ethereum) { setError("No payment app found. Install a wallet such as MetaMask."); setStatus("error"); return; }
+    if (!ethereum) { setError("No wallet found. Install a wallet such as MetaMask."); setStatus("error"); return; }
     setStatus("connecting");
     setError(null);
     try {
       const accounts = await ethereum.request({ method: "eth_requestAccounts" }) as string[];
       const nextAddress = accounts[0];
-      if (!nextAddress) throw new Error("Payment app connection failed.");
+      if (!nextAddress) throw new Error("Wallet connection failed.");
       await ensureBaseNetwork(ethereum);
       setAddress(nextAddress);
       setStatus("idle");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to connect payment app.");
+      setError(err instanceof Error ? err.message : "Failed to connect wallet.");
       setStatus("error");
     }
   }
 
   async function linkWallet() {
     const ethereum = getEthereum();
-    if (!ethereum) { setError("No payment app found."); setStatus("error"); return; }
+    if (!ethereum) { setError("No wallet found."); setStatus("error"); return; }
     const nextAddress = address;
     if (!nextAddress) { await connectWallet(); return; }
     setStatus("signing");
@@ -311,10 +311,10 @@ function AddWalletModal({ did, existingName, onSuccess, onBack }: { did: string;
         body: JSON.stringify({ address: nextAddress, chainId: CHAIN_ID, signature, message, ...(name.trim() ? { name: name.trim() } : {}) }),
       });
       const data = (await response.json().catch(() => null)) as { error?: string } | null;
-      if (!response.ok) throw new Error(data?.error ?? "Failed to link payment app");
+      if (!response.ok) throw new Error(data?.error ?? "Failed to link wallet");
       setStatus("success");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to link payment app");
+      setError(err instanceof Error ? err.message : "Failed to link wallet");
       setStatus("error");
     }
   }
@@ -324,7 +324,7 @@ function AddWalletModal({ did, existingName, onSuccess, onBack }: { did: string;
   return (
     <ModalContent dismissible={!busy}>
       <ModalHeader backAction={busy ? undefined : onBack}>
-        <ModalTitle>{status === "success" ? "Payment app linked" : "Link payment app"}</ModalTitle>
+        <ModalTitle>{status === "success" ? "Wallet linked" : "Link wallet"}</ModalTitle>
         {address ? <ModalDescription>Name this wallet, then sign to link it to your account.</ModalDescription> : null}
       </ModalHeader>
       <div className="flex flex-col gap-4 pt-1">
@@ -332,8 +332,8 @@ function AddWalletModal({ did, existingName, onSuccess, onBack }: { did: string;
           <div className="flex flex-col items-center gap-4 py-4">
             <div className="flex size-14 items-center justify-center rounded-full bg-muted"><WalletIcon className="size-6 text-muted-foreground" /></div>
             <div className="text-center space-y-1">
-              <p className="text-sm font-medium text-foreground">Connect a payment app</p>
-              <p className="text-xs text-muted-foreground">Connect a Base wallet to receive or make payments.</p>
+              <p className="text-sm font-medium text-foreground">Connect a wallet</p>
+              <p className="text-xs text-muted-foreground">Connect a wallet to receive or make payments.</p>
             </div>
             {error ? <p className="text-sm text-destructive text-center">{error}</p> : null}
             <Button className="w-full" onClick={() => void connectWallet()} disabled={busy}>
@@ -347,7 +347,7 @@ function AddWalletModal({ did, existingName, onSuccess, onBack }: { did: string;
         {address && status !== "success" ? (
           <div className="flex flex-col gap-3">
             <div className="flex items-center justify-between rounded-md bg-muted px-3 py-2">
-              <div className="flex items-center gap-2"><div className="size-2 rounded-full bg-primary" /><span className="text-sm font-mono text-foreground">{shortAddress(address)}</span><span className="text-xs text-muted-foreground">Base</span></div>
+              <div className="flex items-center gap-2"><div className="size-2 rounded-full bg-primary" /><span className="text-sm font-mono text-foreground">{shortAddress(address)}</span><span className="text-xs text-muted-foreground">Connected</span></div>
               <button type="button" onClick={() => setAddress(null)} className="text-xs text-muted-foreground hover:text-foreground transition-colors">Switch</button>
             </div>
             <div className="flex flex-col gap-1.5">
@@ -388,7 +388,7 @@ function DeleteWalletModal({ link, onDeleted, onBack }: { link: WalletLink; onDe
       await deleteRecord("app.gainforest.link.evm", link.rkey);
       onDeleted();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to delete payment app");
+      setError(err instanceof Error ? err.message : "Failed to delete wallet");
       setIsDeleting(false);
     }
   }
@@ -396,8 +396,8 @@ function DeleteWalletModal({ link, onDeleted, onBack }: { link: WalletLink; onDe
   return (
     <ModalContent dismissible={!isDeleting}>
       <ModalHeader backAction={isDeleting ? undefined : onBack}>
-        <ModalTitle>Delete payment app?</ModalTitle>
-        <ModalDescription>This removes {link.name ?? shortAddress(link.address)} from your linked payment apps.</ModalDescription>
+        <ModalTitle>Delete wallet?</ModalTitle>
+        <ModalDescription>This removes {link.name ?? shortAddress(link.address)} from your linked wallets.</ModalDescription>
       </ModalHeader>
       {error ? <p className="text-sm text-destructive">{error}</p> : null}
       <ModalFooter>
@@ -423,7 +423,7 @@ function WalletsSection({ did }: { did: string }) {
     try {
       setLinks(await fetchWalletLinks(did));
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load payment apps");
+      setError(err instanceof Error ? err.message : "Failed to load wallets");
     } finally {
       setIsLoading(false);
     }
@@ -491,8 +491,8 @@ function WalletsSection({ did }: { did: string }) {
                   <span className="hidden sm:inline-flex shrink-0 items-center gap-1 text-xs font-medium text-amber-600 dark:text-amber-500 bg-amber-500/10 px-2 py-0.5 rounded-full"><AlertTriangleIcon className="h-3 w-3" />Unverified</span>
                 )}
                 <div className="flex items-center gap-0.5 shrink-0">
-                  <Button size="icon" variant="ghost" className="h-7 w-7 text-muted-foreground hover:text-foreground" onClick={() => openAdd(link)} aria-label="Edit payment app"><PencilIcon className="h-3.5 w-3.5" /></Button>
-                  <Button size="icon" variant="ghost" className="h-7 w-7 text-muted-foreground hover:text-destructive" onClick={() => openDelete(link)} aria-label="Delete payment app"><Trash2Icon className="h-3.5 w-3.5" /></Button>
+                  <Button size="icon" variant="ghost" className="h-7 w-7 text-muted-foreground hover:text-foreground" onClick={() => openAdd(link)} aria-label="Edit wallet"><PencilIcon className="h-3.5 w-3.5" /></Button>
+                  <Button size="icon" variant="ghost" className="h-7 w-7 text-muted-foreground hover:text-destructive" onClick={() => openDelete(link)} aria-label="Delete wallet"><Trash2Icon className="h-3.5 w-3.5" /></Button>
                 </div>
               </div>
             ))}

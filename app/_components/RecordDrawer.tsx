@@ -372,7 +372,7 @@ function BumicertStatStrip({ record }: { record: Extract<ExplorerRecord, { kind:
       <StatTile
         icon={<MapPinIcon />}
         value={formatCompact(record.locationCount)}
-        label={record.locationCount === 1 ? "Project place" : "Project places"}
+        label={record.locationCount === 1 ? "Site" : "Sites"}
       />
       {period && (
         <StatTile

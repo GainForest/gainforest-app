@@ -120,17 +120,17 @@ export default function PreviewStep({ parsedData, mappings, koboMediaZipIndex, s
       {siteSelection === null ? (
         <div className="flex items-center gap-2 rounded-md border border-destructive/50 bg-destructive/10 p-3 text-sm text-destructive">
           <XCircle className="h-4 w-4 shrink-0" />
-          <span>No place selected. Go back and select a project area.</span>
+          <span>No site selected. Go back and select a site boundary.</span>
         </div>
       ) : boundaryLoading ? (
         <div className="flex items-center gap-2 rounded-md border border-yellow-500/40 bg-yellow-500/10 p-3 text-sm text-yellow-600 dark:text-yellow-400">
           <AlertTriangle className="h-4 w-4 shrink-0" />
-          <span>Verifying project area for {siteSelection.name}…</span>
+          <span>Verifying site boundary for {siteSelection.name}…</span>
         </div>
       ) : boundaryError ? (
         <div className="flex items-center gap-2 rounded-md border border-destructive/50 bg-destructive/10 p-3 text-sm text-destructive">
           <XCircle className="h-4 w-4 shrink-0" />
-          <span>Could not load project area: {boundaryError}</span>
+          <span>Could not load site boundary: {boundaryError}</span>
         </div>
       ) : allValid ? (
         <div className="flex items-center gap-2 rounded-md border border-primary/40 bg-primary/10 p-3 text-sm text-primary">
@@ -162,7 +162,7 @@ export default function PreviewStep({ parsedData, mappings, koboMediaZipIndex, s
                 <th className="px-3 py-2 text-left font-medium text-muted-foreground uppercase tracking-wide w-8">#</th>
                 {mappedHeaders.map((h) => (
                   <th key={h} className="px-3 py-2 text-left font-medium text-muted-foreground uppercase tracking-wide whitespace-nowrap">
-                    {h === "siteBoundary" ? "Project area" : getTargetFieldLabel(h)}
+                    {h === "siteBoundary" ? "Site boundary" : getTargetFieldLabel(h)}
                   </th>
                 ))}
                 {hasAnyPhotos && <th className="px-3 py-2 text-left font-medium text-muted-foreground uppercase tracking-wide whitespace-nowrap">Photos</th>}

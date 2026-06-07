@@ -758,7 +758,7 @@ function NetworkStep({
         </Button>
       </FieldShell>
 
-      <FieldShell label="Project places" hint="Attach mapped places from your account. You can publish without them, but place-linked Bumicerts are easier to understand.">
+      <FieldShell label="Sites" hint="Attach sites from your account. You can publish without them, but site-linked Bumicerts are easier to understand.">
         <div className="rounded-3xl border border-border bg-background/70 p-3">
           {sitesStatus === "loading" ? (
             <div className="flex items-center gap-3 p-4 text-sm text-muted-foreground">
@@ -820,7 +820,7 @@ function ReviewStep({ values, sites, publishError }: { values: FormValues; sites
     ["Dates", values.startDate ? `${values.startDate} → ${values.ongoing ? "ongoing" : values.endDate || "missing"}` : "Missing"],
     ["Summary", clampDescription(values.shortDescription) || "Missing"],
     ["Contributors", contributorList(values).join(", ") || "Missing"],
-    ["Project places", selectedLocations(values, sites).map((site) => site.record.name || site.metadata.rkey).join(", ") || "None attached"],
+    ["Sites", selectedLocations(values, sites).map((site) => site.record.name || site.metadata.rkey).join(", ") || "None attached"],
   ];
   const validation = validateAll(values);
   return (

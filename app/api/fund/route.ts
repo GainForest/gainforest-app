@@ -189,7 +189,7 @@ export async function POST(request: Request) {
     return Response.json({ error: "This organization cannot receive donations yet" }, { status: 422 });
   }
   if (authorization.to.toLowerCase() !== recipientWallet.toLowerCase()) {
-    return Response.json({ error: "Payment app details do not match this organization" }, { status: 422 });
+    return Response.json({ error: "Wallet details do not match this organization" }, { status: 422 });
   }
 
   const amount = typeof body.amount === "string" ? normalizeUsdcAmountString(body.amount) : formatUsdcAmount(BigInt(authorization.value));

@@ -42,7 +42,7 @@ type FilterChip = {
 
 const FILTER_CHIPS: FilterChip[] = [
   { key: "images", label: "Photos", predicate: (record) => Boolean(record.imageUrl) },
-  { key: "locations", label: "Project places", predicate: (record) => record.locationCount > 0 },
+  { key: "locations", label: "Sites", predicate: (record) => record.locationCount > 0 },
   { key: "contributors", label: "Contributors", predicate: (record) => record.contributorCount > 0 },
   { key: "active", label: "Active period", predicate: (record) => Boolean(record.startDate || record.endDate) },
   { key: "donations", label: "Accepting Donations", predicate: () => true },
@@ -160,9 +160,9 @@ export function BumicertsExploreClient({ records: initialRecords = [] }: { recor
         detail: "published Bumicerts",
       },
       {
-        label: "Certified places",
+        label: "Certified sites",
         value: totalStats?.certifiedPlaces ?? null,
-        detail: "project places linked",
+        detail: "sites linked",
       },
       {
         label: "Contributors",
@@ -456,7 +456,7 @@ export function BumicertsExploreClient({ records: initialRecords = [] }: { recor
                       <div className="mb-3">
                         <h2 className="text-base font-medium text-foreground">All Filters</h2>
                         <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-                          Show projects that include photos, project places, contributors, active dates, or open giving.
+                          Show projects that include photos, sites, contributors, active dates, or open giving.
                         </p>
                       </div>
                       <div className="flex flex-wrap gap-2">
@@ -759,7 +759,7 @@ function buildPillRows(record: BumicertRecord): {
           <span>{formatStat(record.locationCount)}</span>
         </>
       ),
-      ariaLabel: `${record.locationCount} project place${record.locationCount === 1 ? "" : "s"}`,
+      ariaLabel: `${record.locationCount} site${record.locationCount === 1 ? "" : "s"}`,
     });
   }
 

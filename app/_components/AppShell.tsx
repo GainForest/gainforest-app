@@ -720,7 +720,7 @@ function Header({
 
 const BUMICERT_DETAIL_TABS = [
   { id: "overview", label: "Overview" },
-  { id: "site-boundaries", label: "Project Areas" },
+  { id: "site-boundaries", label: "Site Boundaries" },
   { id: "donations", label: "Donations" },
   { id: "timeline", label: "Timeline" },
 ] as const;

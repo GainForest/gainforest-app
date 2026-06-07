@@ -5,9 +5,9 @@ import { GAINFOREST_URL, GLOBE_URL, STATUS_URL } from "../_lib/urls";
 
 const PRIMARY_LINKS = [
   { href: GAINFOREST_URL, label: "GainForest", Icon: GlobeIcon, external: true },
-  { href: "https://docs.fund.gainforest.app/", label: "Learn more", Icon: FileTextIcon, external: true },
+  { href: "https://docs.fund.gainforest.app/", label: "Documentation", Icon: FileTextIcon, external: true },
   { href: "https://www.x.com/GainForestNow", label: "Twitter", Icon: TwitterIcon, external: true },
-  { href: "https://github.com/GainForest/gainforest-explorer", label: "Project updates", Icon: GithubIcon, external: true },
+  { href: "https://github.com/GainForest/gainforest-explorer", label: "GitHub", Icon: GithubIcon, external: true },
 ] as const;
 
 const DATA_LINKS = [

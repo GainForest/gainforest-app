@@ -661,7 +661,7 @@ function SiteBoundariesPanel({ record }: { record: BumicertRecord }) {
                 rel="noreferrer"
                 className="group flex items-center justify-between rounded-xl border border-border-soft bg-surface px-4 py-3 text-sm font-medium text-foreground transition-colors hover:border-primary/40 hover:bg-surface-sunken"
               >
-                <span>Project place {index + 1}</span>
+                <span>Site boundary {index + 1}</span>
                 <ExternalLinkIcon className="h-3.5 w-3.5 text-foreground/35 transition-colors group-hover:text-primary" />
               </Link>
             ))}
@@ -670,8 +670,8 @@ function SiteBoundariesPanel({ record }: { record: BumicertRecord }) {
       ) : (
         <EmptyState
           icon={<MapPinnedIcon className="h-8 w-8" />}
-          title="No project places linked"
-          body="This Bumicert does not currently include mapped project areas."
+          title="No site boundaries linked"
+          body="This Bumicert does not currently include mapped site boundaries."
         />
       )}
     </article>
@@ -733,9 +733,9 @@ function TimelinePanel({
     },
     record.locationUris.length > 0
       ? {
-          title: "Project places added",
-          body: `${formatNumber(record.locationUris.length)} project place${record.locationUris.length === 1 ? "" : "s"} linked to this Bumicert.`,
-          meta: "Project areas",
+          title: "Site boundaries added",
+          body: `${formatNumber(record.locationUris.length)} ${record.locationUris.length === 1 ? "site boundary" : "site boundaries"} linked to this Bumicert.`,
+          meta: "Site Boundaries",
         }
       : null,
     record.startDate || record.endDate
@@ -883,7 +883,7 @@ function formatDonationAmount(receipt: FundingReceipt): string {
 
 function donorLabel(donor: DonorRef): string {
   if (!donor) return "anonymous donor";
-  if (donor.type === "wallet") return "anonymous supporter";
+  if (donor.type === "wallet") return "anonymous wallet";
   return "named supporter";
 }
 
