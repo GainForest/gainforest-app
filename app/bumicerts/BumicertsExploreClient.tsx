@@ -80,6 +80,7 @@ export function BumicertsExploreClient({ records: initialRecords = [] }: { recor
   const [cardLimit, setCardLimit] = useState(INITIAL_CARD_LIMIT);
   const [totalStats, setTotalStats] = useState<BumicertStats | null>(null);
   const [statsLoading, setStatsLoading] = useState(true);
+  const sortMenuRef = useRef<HTMLDivElement | null>(null);
   const filtersMenuRef = useRef<HTMLDivElement | null>(null);
   const requestSeqRef = useRef(0);
 
@@ -178,6 +179,26 @@ export function BumicertsExploreClient({ records: initialRecords = [] }: { recor
   );
 
   useEffect(() => {
+    if (!openSort) return;
+
+    const handlePointerDown = (event: PointerEvent) => {
+      if (sortMenuRef.current?.contains(event.target as Node)) return;
+      setOpenSort(false);
+    };
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setOpenSort(false);
+    };
+
+    document.addEventListener("pointerdown", handlePointerDown);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("pointerdown", handlePointerDown);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [openSort]);
+
+  useEffect(() => {
     if (!openFilters) return;
 
     const handlePointerDown = (event: PointerEvent) => {
@@ -272,7 +293,7 @@ export function BumicertsExploreClient({ records: initialRecords = [] }: { recor
 
           <div className="relative z-20 mt-4 mb-0 space-y-3">
             <div className="space-y-3 animate-in" style={{ animationDelay: "80ms" }}>
-              <div className="flex items-center gap-3">
+              <div className="relative z-30 flex items-center gap-3">
                 <div className="group/input-group border-input relative flex h-10 min-w-0 flex-1 items-center rounded-full border bg-background/50 shadow-xs backdrop-blur transition-[color,box-shadow] outline-none focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50">
                   <div className="flex h-auto cursor-text items-center justify-center gap-2 py-1.5 pl-3 text-sm font-medium text-muted-foreground select-none">
                     <SearchIcon className="h-4 w-4" />
@@ -311,9 +332,12 @@ export function BumicertsExploreClient({ records: initialRecords = [] }: { recor
                   ))}
                 </div>
 
-                <div className="relative shrink-0">
+                <div ref={sortMenuRef} className="relative shrink-0">
                   <button
-                    onClick={() => setOpenSort((value) => !value)}
+                    onClick={() => {
+                      setOpenFilters(false);
+                      setOpenSort((value) => !value);
+                    }}
                     type="button"
                     aria-label="Sort projects"
                     aria-expanded={openSort}
@@ -325,7 +349,7 @@ export function BumicertsExploreClient({ records: initialRecords = [] }: { recor
                   </button>
 
                   {openSort && (
-                    <div className="absolute right-0 top-full z-20 mt-2 w-36 rounded-2xl border border-border bg-popover py-1.5 shadow-xl animate-in">
+                    <div className="absolute right-0 top-full z-[1000] mt-2 w-36 rounded-2xl border border-border bg-popover py-1.5 shadow-xl animate-in">
                       {SORT_OPTIONS.map((option) => (
                         <button
                           key={option.value}
@@ -348,7 +372,7 @@ export function BumicertsExploreClient({ records: initialRecords = [] }: { recor
                 </div>
               </div>
 
-              <div className="flex items-center justify-between gap-3 sm:justify-start">
+              <div className="relative z-20 flex items-center justify-between gap-3 sm:justify-start">
                 <div className="inline-flex h-10 shrink-0 items-center rounded-full border border-border bg-background/50 p-0.5 backdrop-blur sm:hidden">
                   {(
                     [
@@ -405,7 +429,10 @@ export function BumicertsExploreClient({ records: initialRecords = [] }: { recor
                 <div ref={filtersMenuRef} className="relative shrink-0">
                   <Button
                     type="button"
-                    onClick={() => setOpenFilters((value) => !value)}
+                    onClick={() => {
+                      setOpenSort(false);
+                      setOpenFilters((value) => !value);
+                    }}
                     aria-haspopup="true"
                     aria-expanded={openFilters}
                     variant={openFilters || filters.length > 0 ? "default" : "outline"}
@@ -424,7 +451,7 @@ export function BumicertsExploreClient({ records: initialRecords = [] }: { recor
                   {openFilters && (
                     <div
                       aria-label="All filters"
-                      className="quick-popover-in absolute right-0 top-full z-30 mt-2 w-[min(18rem,calc(100vw-2rem))] rounded-2xl border border-primary/20 bg-popover p-4 shadow-[0_18px_45px_color-mix(in_oklab,var(--primary)_16%,transparent)]"
+                      className="quick-popover-in absolute right-0 top-full z-[1000] mt-2 w-[min(18rem,calc(100vw-2rem))] rounded-2xl border border-primary/20 bg-popover p-4 shadow-[0_18px_45px_color-mix(in_oklab,var(--primary)_16%,transparent)]"
                     >
                       <div className="mb-3">
                         <h2 className="text-base font-medium text-foreground">All Filters</h2>

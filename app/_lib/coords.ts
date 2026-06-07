@@ -30,6 +30,10 @@ export type MapPoint = {
   recordId?: string;
 };
 
+export function mapTileUrl(dark: boolean): string {
+  return `https://{s}.basemaps.cartocdn.com/${dark ? "dark_all" : "light_all"}/{z}/{x}/{y}{r}.png`;
+}
+
 // ── GeoJSON centroid + inline string parsing (ported) ──────────────────────
 
 function centroidFromGeoJson(g: unknown): { lat: number; lon: number } | null {
@@ -183,7 +187,42 @@ async function loadSitePointMap(): Promise<Map<string, SitePoint>> {
   return p;
 }
 
-// ── Public: resolve points for a batch of records ──────────────────────────
+// ── Public: resolve points for records ────────────────────────────────────
+
+export async function resolvePointForRecord(
+  record: ExplorerRecord,
+  signal?: AbortSignal,
+): Promise<MapPoint | null> {
+  if (record.kind === "occurrence") {
+    if (record.lat == null || record.lon == null) return null;
+    return {
+      lat: record.lat,
+      lon: record.lon,
+      label: record.scientificName || record.vernacularName || "Unidentified",
+      did: record.did,
+      recordId: record.id,
+    };
+  }
+
+  if (record.kind === "bumicert") {
+    const locationUri = record.locationUris[0];
+    if (!locationUri) return null;
+    const coords = await resolveCertifiedLocationCoords(locationUri, signal);
+    return coords ? { ...coords, label: record.title, did: record.did, recordId: record.id } : null;
+  }
+
+  if (record.source === "certified") {
+    if (!record.locationUri) return null;
+    const coords = await resolveCertifiedLocationCoords(record.locationUri, signal);
+    return coords ? { ...coords, label: record.name, did: record.did, recordId: record.id } : null;
+  }
+
+  const siteMap = await loadSitePointMap();
+  const point = siteMap.get(record.did);
+  return point
+    ? { lat: point.lat, lon: point.lon, label: point.name || record.name, did: record.did, recordId: record.id }
+    : null;
+}
 
 const CONCURRENCY = 6;
 

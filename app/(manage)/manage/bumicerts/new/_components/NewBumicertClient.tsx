@@ -339,7 +339,7 @@ function ContributorInput({
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 4 }}
               transition={{ duration: 0.14 }}
-              className="absolute z-30 mt-1.5 max-h-72 w-full overflow-y-auto rounded-xl bg-card p-1.5 shadow-xl"
+              className="absolute z-[1000] mt-1.5 max-h-72 w-full overflow-y-auto rounded-xl bg-card p-1.5 shadow-xl"
             >
               {results.map((actor, i) => (
                 <li key={actor.did}>

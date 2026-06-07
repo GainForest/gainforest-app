@@ -4,7 +4,7 @@ import "leaflet/dist/leaflet.css";
 import "leaflet.markercluster/dist/MarkerCluster.css";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { Map as LeafletMap, MarkerClusterGroup, MarkerCluster, TileLayer } from "leaflet";
-import { resolvePointsFor, type MapPoint } from "../_lib/coords";
+import { mapTileUrl, resolvePointsFor, type MapPoint } from "../_lib/coords";
 import type { ExplorerRecord, RecordKind } from "../_lib/indexer";
 import { formatNumber, formatCompact } from "../_lib/format";
 import { accountHref } from "../_lib/urls";
@@ -23,12 +23,6 @@ function clusterTier(n: number): { tier: string; size: number } {
   if (n < 1000) return { tier: "lg", size: 52 };
   return { tier: "xl", size: 60 };
 }
-
-// CARTO basemaps keyed to the app's light/dark theme: Positron (cream) in
-// light mode, Dark Matter (near-black) in dark so the map reads as part of the
-// surface rather than a glowing white panel.
-const tileUrl = (dark: boolean) =>
-  `https://{s}.basemaps.cartocdn.com/${dark ? "dark_all" : "light_all"}/{z}/{x}/{y}{r}.png`;
 
 export function RecordMap({
   records,
@@ -73,7 +67,7 @@ export function RecordMap({
       }).setView([12, 5], 2);
       // Zoom control bottom-right, clear of the top-right "places mapped" chip.
       L.control.zoom({ position: "bottomright" }).addTo(map);
-      tileRef.current = L.tileLayer(tileUrl(dark), {
+      tileRef.current = L.tileLayer(mapTileUrl(dark), {
         attribution:
           '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
         subdomains: "abcd",
@@ -127,7 +121,7 @@ export function RecordMap({
   }, []);
 
   useEffect(() => {
-    tileRef.current?.setUrl(tileUrl(isDark));
+    tileRef.current?.setUrl(mapTileUrl(isDark));
   }, [isDark]);
 
   // Resolve points whenever the record set changes. A new data set re-enables

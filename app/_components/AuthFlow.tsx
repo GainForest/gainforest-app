@@ -15,6 +15,7 @@ import {
   UserIcon,
 } from "lucide-react";
 import {
+  useEffect,
   useRef,
   useState,
   useTransition,
@@ -452,6 +453,26 @@ function AuthenticatedMenu({ session }: { session: Extract<AuthSession, { isLogg
     }
   };
 
+  useEffect(() => {
+    if (!open) return;
+
+    const handlePointerDown = (event: PointerEvent) => {
+      if (containerRef.current?.contains(event.target as Node)) return;
+      setOpen(false);
+    };
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setOpen(false);
+    };
+
+    document.addEventListener("pointerdown", handlePointerDown);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("pointerdown", handlePointerDown);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [open]);
+
   return (
     <div ref={containerRef} className="relative" onBlur={handleBlur}>
       <button
@@ -482,7 +503,7 @@ function AuthenticatedMenu({ session }: { session: Extract<AuthSession, { isLogg
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 6 }}
             transition={{ duration: 0.15, ease: [0.25, 0.1, 0.25, 1] }}
-            className="absolute top-full right-0 mt-2 w-52 rounded-xl border border-border bg-background/95 backdrop-blur-sm shadow-xl shadow-black/10 overflow-hidden z-50"
+            className="absolute top-full right-0 z-[1000] mt-2 w-52 rounded-xl border border-border bg-background/95 backdrop-blur-sm shadow-xl shadow-black/10 overflow-hidden"
           >
             <div className="px-3 py-2.5 border-b border-border">
               <p className="text-sm font-medium text-foreground truncate">{displayLabel}</p>

@@ -258,7 +258,7 @@ export function OrganizationsClient({ records: initialRecords = [] }: { records?
           </div>
 
           <div className="relative z-20 mt-4 mb-0 space-y-2.5">
-            <div className="flex items-center gap-2 animate-in" style={{ animationDelay: "80ms" }}>
+            <div className="relative z-30 flex items-center gap-2 animate-in" style={{ animationDelay: "80ms" }}>
               <div className="group/input-group border-input relative flex h-10 min-w-0 flex-1 items-center rounded-full border bg-background/50 shadow-xs backdrop-blur transition-[color,box-shadow] outline-none focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50">
                 <div className="flex h-auto cursor-text items-center justify-center gap-2 py-1.5 pl-3.5 text-sm font-medium text-muted-foreground select-none">
                   <SearchIcon className="h-4 w-4" />
@@ -278,7 +278,7 @@ export function OrganizationsClient({ records: initialRecords = [] }: { records?
             </div>
 
             <div
-              className="scroll-mask-right scrollbar-hidden overflow-x-auto animate-in"
+              className="scroll-mask-right scrollbar-hidden relative z-20 overflow-x-auto animate-in"
               style={{ animationDelay: "120ms" }}
             >
               <div className="flex items-center gap-1.5 pb-1 pr-8">
@@ -325,21 +325,21 @@ export function OrganizationsClient({ records: initialRecords = [] }: { records?
             </div>
           </div>
 
-          <div className="my-6 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
-
-          {view === "map" ? (
-            <RecordMap records={visibleRecords} kind="site" onOpen={openMapRecord} />
-          ) : loading && visibleRecords.length === 0 ? (
-            <OrganizationsGridSkeleton />
-          ) : visibleRecords.length === 0 ? (
-            <EmptyState onClear={clearAll} hasActiveFilters={hasActiveFilters} />
-          ) : (
-            <div className="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-2 lg:gap-4">
-              {renderedRecords.map((record) => (
-                <OrganizationCard key={record.id} record={record} onOpen={setDrawer} />
-              ))}
-            </div>
-          )}
+          <div className="mt-6">
+            {view === "map" ? (
+              <RecordMap records={visibleRecords} kind="site" onOpen={openMapRecord} />
+            ) : loading && visibleRecords.length === 0 ? (
+              <OrganizationsGridSkeleton />
+            ) : visibleRecords.length === 0 ? (
+              <EmptyState onClear={clearAll} hasActiveFilters={hasActiveFilters} />
+            ) : (
+              <div className="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-2 lg:gap-4">
+                {renderedRecords.map((record) => (
+                  <OrganizationCard key={record.id} record={record} onOpen={setDrawer} />
+                ))}
+              </div>
+            )}
+          </div>
 
           {records.length > 0 && (
             <div className="mt-10 flex flex-col items-center gap-3">
@@ -471,8 +471,30 @@ function SortControl({
   open: boolean;
   setOpen: (updater: (open: boolean) => boolean) => void;
 }) {
+  const containerRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!open) return;
+
+    const handlePointerDown = (event: PointerEvent) => {
+      if (containerRef.current?.contains(event.target as Node)) return;
+      setOpen(() => false);
+    };
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setOpen(() => false);
+    };
+
+    document.addEventListener("pointerdown", handlePointerDown);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("pointerdown", handlePointerDown);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [open, setOpen]);
+
   return (
-    <div className="relative shrink-0">
+    <div ref={containerRef} className="relative shrink-0">
       <button
         type="button"
         onClick={() => setOpen((value) => !value)}
@@ -488,12 +510,11 @@ function SortControl({
       <AnimatePresence>
         {open && (
           <>
-            <div className="fixed inset-0 z-10" onClick={() => setOpen(() => false)} aria-hidden />
             <motion.div
               initial={{ opacity: 0, y: -8 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
-              className="absolute top-full right-0 z-20 mt-2 w-44 rounded-2xl border border-border bg-background py-1.5 shadow-xl"
+              className="absolute top-full right-0 z-[1000] mt-2 w-44 rounded-2xl border border-border bg-popover py-1.5 shadow-xl"
             >
               {SORT_OPTIONS.map((option) => (
                 <button

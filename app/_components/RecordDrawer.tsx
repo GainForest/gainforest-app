@@ -13,6 +13,7 @@ import {
 } from "../_lib/indexer";
 import { formatCompact, formatDate, formatNumber, countryFlag } from "../_lib/format";
 import { AuthorChip } from "./AuthorChip";
+import { RecordLocationMap } from "./RecordLocationMap";
 import { RichText } from "./RichText";
 import { SocialGlyph, socialLabel } from "./SocialIcon";
 import { isPdsBlobUrl } from "../_lib/pds";
@@ -276,6 +277,8 @@ export function RecordDrawer({
               ))}
             </div>
           )}
+
+          <RecordLocationMap record={record} />
 
           {/* Grouped detail sections — rich once loaded, base fields meanwhile */}
           {sections.map((s, i) =>
