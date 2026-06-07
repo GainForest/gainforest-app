@@ -147,16 +147,18 @@ export default async function BumicertDetailPage({
       <main className="min-h-screen bg-background pb-20">
         <section className={`mx-auto max-w-6xl gap-8 px-6 py-8 lg:px-8 ${isOverviewTab ? "grid grid-cols-1 lg:grid-cols-[320px_minmax(0,1fr)]" : ""}`}>
           {isOverviewTab && (
-            <aside className="min-w-0 lg:sticky lg:top-28 lg:self-start">
-              <OverviewSidebar
-                record={record}
-                detail={detail}
-                owner={owner}
-                receipts={donationReceipts}
-                donationsUnavailable={donationsUnavailable}
-                fundingConfig={fundingConfig}
-                authSession={authSession}
-              />
+            <aside className="min-w-0">
+              <div className="lg:sticky lg:top-28">
+                <OverviewSidebar
+                  record={record}
+                  detail={detail}
+                  owner={owner}
+                  receipts={donationReceipts}
+                  donationsUnavailable={donationsUnavailable}
+                  fundingConfig={fundingConfig}
+                  authSession={authSession}
+                />
+              </div>
             </aside>
           )}
 
