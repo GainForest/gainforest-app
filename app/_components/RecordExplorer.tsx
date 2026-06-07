@@ -27,7 +27,7 @@ import {
   dailyCountSeries,
   type MetricSeries,
 } from "../_lib/series";
-import { formatNumber, countryFlag, formatDate } from "../_lib/format";
+import { formatCompact, formatNumber, countryFlag, formatDate } from "../_lib/format";
 import { PictureHero } from "./PictureHero";
 
 // Single-stream record explorer. One of the three GainForest record types
@@ -903,7 +903,7 @@ function within(iso: string | null | undefined, days: number): boolean {
 function computeStats(records: ExplorerRecord[], kind: RecordKind): Stat[] {
   const last30 = records.filter((r) => within(r.createdAt, 30)).length;
   const last7 = records.filter((r) => within(r.createdAt, 7)).length;
-  const n = (v: number) => formatNumber(v);
+  const n = (v: number) => formatCompact(v);
   const times = records.map((r) => ms(r.createdAt));
   // Cumulative count of all loaded records over their createdAt span.
   const totalSeries = seriesFromIncrements(times.map((t) => ({ t, inc: 1 })));

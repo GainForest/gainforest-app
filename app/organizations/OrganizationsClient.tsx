@@ -20,7 +20,13 @@ import { Button } from "@/components/ui/button";
 import { RecordDrawer } from "../_components/RecordDrawer";
 import { RecordMap } from "../_components/RecordMap";
 import { StatsTileGrid } from "../_components/StatsTile";
-import { fetchSites, type ExplorerRecord, type SiteRecord } from "../_lib/indexer";
+import {
+  fetchOrganizationStats,
+  fetchSites,
+  type ExplorerRecord,
+  type OrganizationStats,
+  type SiteRecord,
+} from "../_lib/indexer";
 import { countryFlag, formatDate } from "../_lib/format";
 
 type SortMode = "newest" | "oldest" | "az" | "za";
@@ -66,7 +72,23 @@ export function OrganizationsClient({ records: initialRecords = [] }: { records?
   const [openDropdown, setOpenDropdown] = useState(false);
   const [drawer, setDrawer] = useState<SiteRecord | null>(null);
   const [cardLimit, setCardLimit] = useState(INITIAL_CARD_LIMIT);
+  const [totalStats, setTotalStats] = useState<OrganizationStats | null>(null);
+  const [statsLoading, setStatsLoading] = useState(true);
   const deferredQuery = useDeferredValue(query);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    setStatsLoading(true);
+    fetchOrganizationStats(sourceFilter, controller.signal)
+      .then((nextStats) => setTotalStats(nextStats))
+      .catch((error) => {
+        if ((error as Error).name !== "AbortError") setTotalStats(null);
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setStatsLoading(false);
+      });
+    return () => controller.abort();
+  }, [sourceFilter]);
 
   useEffect(() => {
     if (initialRecords.length > 0) return;
@@ -142,24 +164,28 @@ export function OrganizationsClient({ records: initialRecords = [] }: { records?
 
   const stats = useMemo(
     () => [
-      { label: "Organizations", value: visibleRecords.length, detail: "organizations shown" },
+      {
+        label: "Total organizations",
+        value: totalStats?.organizations ?? null,
+        detail: "organization profiles",
+      },
       {
         label: "Countries",
-        value: new Set(visibleRecords.map((record) => normalizeCountry(record.country)).filter(Boolean)).size,
+        value: totalStats?.countries ?? null,
         detail: "countries represented",
       },
       {
         label: "With photos",
-        value: visibleRecords.filter(hasPhoto).length,
+        value: totalStats?.withPhotos ?? null,
         detail: "profiles with photos",
       },
       {
         label: "Mapped places",
-        value: visibleRecords.filter(hasMappableLocation).length,
+        value: totalStats?.mappedPlaces ?? null,
         detail: "places shown on map",
       },
     ],
-    [visibleRecords],
+    [totalStats],
   );
 
   const renderedRecords = useMemo(
@@ -225,7 +251,7 @@ export function OrganizationsClient({ records: initialRecords = [] }: { records?
 
         <div className="mx-auto max-w-6xl px-6">
           <div className="relative z-20 -mt-10 px-3">
-            <StatsBand stats={stats} loading={loading && records.length === 0} />
+            <StatsBand stats={stats} loading={statsLoading || (loading && records.length === 0)} />
           </div>
 
           <div className="relative z-20 mt-4 mb-0 space-y-3 px-3">
@@ -502,7 +528,7 @@ function FilterChip({
   );
 }
 
-function StatsBand({ stats, loading }: { stats: Array<{ label: string; value: number; detail: string }>; loading: boolean }) {
+function StatsBand({ stats, loading }: { stats: Array<{ label: string; value: number | null; detail: string }>; loading: boolean }) {
   if (loading) return null;
 
   const icons = [
@@ -713,8 +739,9 @@ function hasMappableLocation(record: SiteRecord): boolean {
   return record.source === "gainforest" || Boolean(record.locationUri);
 }
 
-function formatStat(value: number): string {
-  return new Intl.NumberFormat("en", { notation: value >= 10000 ? "compact" : "standard" }).format(value);
+function formatStat(value: number | null): string {
+  if (value === null) return "—";
+  return new Intl.NumberFormat("en", { notation: Math.abs(value) >= 1000 ? "compact" : "standard" }).format(value);
 }
 
 function mergeSiteRecords(base: SiteRecord[], incoming: SiteRecord[]): SiteRecord[] {

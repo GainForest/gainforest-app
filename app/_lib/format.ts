@@ -44,7 +44,7 @@ export function formatCompactUsd(n: number | null | undefined): string {
 /** Compact count: 416106 → "416K", 1765 → "1.8K". */
 export function formatCompact(n: number | null | undefined): string {
   if (n == null || !Number.isFinite(n)) return "—";
-  if (n < 1000) return String(n);
+  if (Math.abs(n) < 1000) return String(n);
   return new Intl.NumberFormat("en-US", {
     notation: "compact",
     maximumFractionDigits: 1,

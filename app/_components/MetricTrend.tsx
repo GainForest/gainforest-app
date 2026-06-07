@@ -2,12 +2,12 @@
 
 import { useEffect, useState } from "react";
 import type { MetricSeries } from "../_lib/trends";
-import { formatCompactUsd, formatDate, formatNumber } from "../_lib/format";
+import { formatCompact, formatCompactUsd, formatDate } from "../_lib/format";
 
 /** Serializable formatter key — functions can't cross the server→client boundary. */
 export type FormatKey = "number" | "usd";
 const FORMATTERS: Record<FormatKey, (n: number) => string> = {
-  number: (n) => formatNumber(n),
+  number: (n) => formatCompact(n),
   usd: (n) => formatCompactUsd(n),
 };
 

@@ -16,7 +16,7 @@ import {
   type DidProfile,
 } from "../_lib/did-profile";
 import {
-  formatNumber,
+  formatCompact,
   formatDate,
   formatRelative,
   countryFlag,
@@ -196,12 +196,12 @@ function AccountDrawer({ did, onClose }: { did: string | null; onClose: () => vo
             <div className="mt-5 grid grid-cols-2 gap-3">
               <StatTile
                 label="Bumicerts"
-                value={formatNumber(summary.bumicertCount)}
+                value={formatCompact(summary.bumicertCount)}
                 hint="impact stories created"
               />
               <StatTile
                 label="Observations"
-                value={formatNumber(summary.observationCount)}
+                value={formatCompact(summary.observationCount)}
                 hint="nature sightings shared"
               />
             </div>

@@ -1,7 +1,10 @@
+import { cachedAsync } from "./async-cache";
 import { countryFlag } from "./format";
 import { INDEXER_URL, FACILITATOR_DID, blockExplorerUrl } from "./urls";
 
 // ── Raw receipt fetch ──────────────────────────────────────────────────────
+
+const TOTAL_STATS_CACHE_MS = 15 * 60 * 1000;
 
 export type DonorRef =
   | { type: "did"; id: string }
@@ -106,7 +109,7 @@ function mapReceipt(node: RawReceipt): FundingReceipt {
   };
 }
 
-export async function fetchReceipts(signal?: AbortSignal): Promise<FundingReceipt[]> {
+async function fetchReceiptsUncached(): Promise<FundingReceipt[]> {
   const all: FundingReceipt[] = [];
   let after: string | null = null;
 
@@ -118,7 +121,6 @@ export async function fetchReceipts(signal?: AbortSignal): Promise<FundingReceip
         query: RECEIPTS_QUERY,
         variables: { did: FACILITATOR_DID, first: 200, after },
       }),
-      signal,
     });
 
     const json = (await response.json()) as {
@@ -142,6 +144,10 @@ export async function fetchReceipts(signal?: AbortSignal): Promise<FundingReceip
   }
 
   return all;
+}
+
+export async function fetchReceipts(signal?: AbortSignal): Promise<FundingReceipt[]> {
+  return cachedAsync("funding-receipts-total-source", TOTAL_STATS_CACHE_MS, fetchReceiptsUncached, signal);
 }
 
 // ── Aggregations ported from Bumicerts dashboard ───────────────────────────
@@ -382,7 +388,7 @@ export type GeoStats = {
   topCountries: CountryRow[];
 };
 
-export async function fetchOrgCountryMap(signal?: AbortSignal): Promise<Map<string, string>> {
+async function fetchOrgCountryMapUncached(): Promise<Map<string, string>> {
   const map = new Map<string, string>();
   let after: string | null = null;
 
@@ -395,7 +401,6 @@ export async function fetchOrgCountryMap(signal?: AbortSignal): Promise<Map<stri
           query: ORG_COUNTRY_QUERY,
           variables: { first: 200, after },
         }),
-        signal,
       });
 
       const json = (await response.json()) as {
@@ -424,6 +429,10 @@ export async function fetchOrgCountryMap(signal?: AbortSignal): Promise<Map<stri
   }
 
   return map;
+}
+
+export async function fetchOrgCountryMap(signal?: AbortSignal): Promise<Map<string, string>> {
+  return cachedAsync("organization-country-map", TOTAL_STATS_CACHE_MS, fetchOrgCountryMapUncached, signal);
 }
 
 export function computeGeoStats(orgCountryMap: Map<string, string>, limit = 5): GeoStats {

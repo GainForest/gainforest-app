@@ -21,7 +21,13 @@ import { Button } from "@/components/ui/button";
 import { RecordDrawer } from "../_components/RecordDrawer";
 import { RecordMap } from "../_components/RecordMap";
 import { StatsTileGrid } from "../_components/StatsTile";
-import { fetchBumicerts, type BumicertRecord, type ExplorerRecord } from "../_lib/indexer";
+import {
+  fetchBumicertStats,
+  fetchBumicerts,
+  type BumicertRecord,
+  type BumicertStats,
+  type ExplorerRecord,
+} from "../_lib/indexer";
 import { isPdsBlobUrl } from "../_lib/pds";
 
 type FilterKey = "images" | "locations" | "contributors" | "active";
@@ -71,7 +77,23 @@ export function BumicertsExploreClient({ records: initialRecords = [] }: { recor
   const [view, setView] = useState<ViewMode>("cards");
   const [drawer, setDrawer] = useState<BumicertRecord | null>(null);
   const [cardLimit, setCardLimit] = useState(INITIAL_CARD_LIMIT);
+  const [totalStats, setTotalStats] = useState<BumicertStats | null>(null);
+  const [statsLoading, setStatsLoading] = useState(true);
   const filtersMenuRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    setStatsLoading(true);
+    fetchBumicertStats(controller.signal)
+      .then((nextStats) => setTotalStats(nextStats))
+      .catch((error) => {
+        if ((error as Error).name !== "AbortError") setTotalStats(null);
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setStatsLoading(false);
+      });
+    return () => controller.abort();
+  }, []);
 
   useEffect(() => {
     if (initialRecords.length > 0) return;
@@ -133,27 +155,27 @@ export function BumicertsExploreClient({ records: initialRecords = [] }: { recor
   const stats = useMemo(
     () => [
       {
-        label: "Projects shown",
-        value: visibleRecords.length,
-        detail: "Bumicerts shown",
+        label: "Total Bumicerts",
+        value: totalStats?.totalBumicerts ?? null,
+        detail: "published Bumicerts",
       },
       {
         label: "Certified places",
-        value: visibleRecords.reduce((sum, record) => sum + record.locationCount, 0),
+        value: totalStats?.certifiedPlaces ?? null,
         detail: "project places linked",
       },
       {
         label: "Contributors",
-        value: visibleRecords.reduce((sum, record) => sum + record.contributorCount, 0),
+        value: totalStats?.contributors ?? null,
         detail: "contributors credited",
       },
       {
         label: "Project photos",
-        value: visibleRecords.filter((record) => record.imageUrl).length,
+        value: totalStats?.projectPhotos ?? null,
         detail: "Bumicerts with photos",
       },
     ],
-    [visibleRecords],
+    [totalStats],
   );
 
   useEffect(() => {
@@ -243,7 +265,7 @@ export function BumicertsExploreClient({ records: initialRecords = [] }: { recor
 
         <div className="relative z-10 mx-auto max-w-6xl px-6">
           <div className="relative z-20 -mt-10 px-3">
-            <StatsBand stats={stats} loading={loading && records.length === 0} />
+            <StatsBand stats={stats} loading={statsLoading || (loading && records.length === 0)} />
           </div>
 
           <div className="relative z-20 mt-4 mb-0 space-y-3 px-3">
@@ -507,7 +529,7 @@ function StatsBand({
   stats,
   loading,
 }: {
-  stats: Array<{ label: string; value: number; detail: string }>;
+  stats: Array<{ label: string; value: number | null; detail: string }>;
   loading: boolean;
 }) {
   if (loading) return null;
@@ -533,8 +555,9 @@ function StatsBand({
   );
 }
 
-function formatStat(value: number): string {
-  return new Intl.NumberFormat("en", { notation: value >= 10000 ? "compact" : "standard" }).format(value);
+function formatStat(value: number | null): string {
+  if (value === null) return "—";
+  return new Intl.NumberFormat("en", { notation: Math.abs(value) >= 1000 ? "compact" : "standard" }).format(value);
 }
 
 function mergeBumicertRecords(base: BumicertRecord[], incoming: BumicertRecord[]): BumicertRecord[] {

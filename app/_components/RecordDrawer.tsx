@@ -11,7 +11,7 @@ import {
   type DetailSection,
   type DetailBadge,
 } from "../_lib/indexer";
-import { formatDate, formatNumber, countryFlag } from "../_lib/format";
+import { formatCompact, formatDate, formatNumber, countryFlag } from "../_lib/format";
 import { AuthorChip } from "./AuthorChip";
 import { RichText } from "./RichText";
 import { SocialGlyph, socialLabel } from "./SocialIcon";
@@ -355,12 +355,12 @@ function BumicertStatStrip({ record }: { record: Extract<ExplorerRecord, { kind:
     <div className="mt-5 grid grid-cols-2 gap-2.5">
       <StatTile
         icon={<UsersIcon />}
-        value={formatNumber(record.contributorCount)}
+        value={formatCompact(record.contributorCount)}
         label={record.contributorCount === 1 ? "Contributor" : "Contributors"}
       />
       <StatTile
         icon={<MapPinIcon />}
-        value={formatNumber(record.locationCount)}
+        value={formatCompact(record.locationCount)}
         label={record.locationCount === 1 ? "Project place" : "Project places"}
       />
       {period && (

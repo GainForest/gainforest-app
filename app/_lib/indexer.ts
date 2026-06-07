@@ -12,6 +12,7 @@
  * reasoning gainforest-app's SpecimenWall documents).
  */
 
+import { cachedAsync } from "./async-cache";
 import { INDEXER_URL } from "./urls";
 import { resolveBlobUrl, normaliseRef } from "./pds";
 import { asNumber, formatNumber, formatDate, formatDateTime } from "./format";
@@ -59,8 +60,16 @@ export type Page<R> = {
   hasMore: boolean;
 };
 
+type StatsPage<N> = {
+  nodes: N[];
+  totalCount: number | null;
+  cursor: string | null;
+  hasMore: boolean;
+};
+
 const RESOLVE_CONCURRENCY = 8;
 const SITE_IMAGE_RESOLVE_LIMIT = 96;
+const TOTAL_STATS_CACHE_MS = 15 * 60 * 1000;
 
 /** The indexer caps every connection query at 1000 edges regardless of the
  *  requested `first` (it was 100 before the upgrade), so loads beyond 1000 must
@@ -616,6 +625,94 @@ export async function fetchBumicertsByDid(
   return collectPaged((first, cursor, nextSignal) => fetchActivityByDidPage(did, first, cursor, nextSignal), target, after, signal, onProgress);
 }
 
+export type BumicertStats = {
+  totalBumicerts: number | null;
+  certifiedPlaces: number;
+  contributors: number;
+  projectPhotos: number;
+};
+
+const ACTIVITY_STATS_QUERY = `
+  query ExplorerActivityStats($first: Int!, $after: String) {
+    orgHypercertsClaimActivity(first: $first, after: $after, sortBy: createdAt, sortDirection: DESC) {
+      totalCount
+      pageInfo { hasNextPage endCursor }
+      edges {
+        node {
+          contributors { contributorIdentity { __typename } }
+          locations { uri }
+          image {
+            __typename
+            ... on OrgHypercertsDefsUri { uri }
+            ... on OrgHypercertsDefsSmallImage { image { ref } }
+          }
+        }
+      }
+    }
+  }
+`;
+
+type RawActivityStats = Pick<RawActivity, "contributors" | "locations" | "image">;
+
+function activityHasImage(image: RawActivityImage): boolean {
+  if (image?.__typename === "OrgHypercertsDefsUri") return Boolean(image.uri?.trim());
+  if (image?.__typename === "OrgHypercertsDefsSmallImage") return Boolean(normaliseRef(image.image?.ref));
+  return false;
+}
+
+async function fetchActivityStatsPage(
+  first: number,
+  after: string | null,
+  signal?: AbortSignal,
+): Promise<StatsPage<RawActivityStats>> {
+  const data = await indexerQuery<{
+    orgHypercertsClaimActivity?: Connection<RawActivityStats>;
+  }>(ACTIVITY_STATS_QUERY, { first, after }, signal);
+  const conn = data?.orgHypercertsClaimActivity;
+  const nodes = (conn?.edges ?? [])
+    .map((e) => e?.node)
+    .filter((n): n is RawActivityStats => Boolean(n));
+  return {
+    nodes,
+    totalCount: conn?.totalCount ?? null,
+    cursor: conn?.pageInfo?.endCursor ?? null,
+    hasMore: Boolean(conn?.pageInfo?.hasNextPage),
+  };
+}
+
+async function fetchBumicertStatsUncached(): Promise<BumicertStats> {
+  let after: string | null = null;
+  let totalBumicerts: number | null = null;
+  let seenRows = 0;
+  let certifiedPlaces = 0;
+  let contributors = 0;
+  let projectPhotos = 0;
+
+  for (let page = 0; page < 100; page += 1) {
+    const res = await fetchActivityStatsPage(INDEXER_MAX_PAGE, after);
+    totalBumicerts ??= res.totalCount;
+    seenRows += res.nodes.length;
+    for (const node of res.nodes) {
+      certifiedPlaces += Array.isArray(node.locations) ? node.locations.length : 0;
+      contributors += Array.isArray(node.contributors) ? node.contributors.length : 0;
+      if (activityHasImage(node.image ?? null)) projectPhotos += 1;
+    }
+    if (!res.hasMore || !res.cursor) break;
+    after = res.cursor;
+  }
+
+  return {
+    totalBumicerts: totalBumicerts ?? seenRows,
+    certifiedPlaces,
+    contributors,
+    projectPhotos,
+  };
+}
+
+export async function fetchBumicertStats(signal?: AbortSignal): Promise<BumicertStats> {
+  return cachedAsync("bumicert-total-stats", TOTAL_STATS_CACHE_MS, fetchBumicertStatsUncached, signal);
+}
+
 // ── 3. Project sites (organizations) ───────────────────────────────────────
 
 /** Which lexicon a project-site row came from. */
@@ -849,6 +946,172 @@ async function fetchCertOrgPage(
     cursor: conn?.pageInfo?.endCursor ?? null,
     hasMore: Boolean(conn?.pageInfo?.hasNextPage),
   };
+}
+
+export type OrganizationStats = {
+  organizations: number | null;
+  countries: number;
+  withPhotos: number;
+  mappedPlaces: number;
+};
+
+const ORG_STATS_QUERY = `
+  query ExplorerOrganizationStats($first: Int!, $after: String) {
+    appGainforestOrganizationInfo(first: $first, after: $after) {
+      totalCount
+      pageInfo { hasNextPage endCursor }
+      edges {
+        node {
+          country
+          coverImage { image { ref } }
+          logo { image { ref } }
+        }
+      }
+    }
+  }
+`;
+
+const CERT_ORG_STATS_QUERY = `
+  query ExplorerCertifiedOrganizationStats($first: Int!, $after: String) {
+    appCertifiedActorOrganization(first: $first, after: $after) {
+      totalCount
+      pageInfo { hasNextPage endCursor }
+      edges { node { did location { uri } } }
+    }
+  }
+`;
+
+type RawOrgStats = Pick<RawOrg, "country" | "coverImage" | "logo">;
+type RawCertOrgStats = Pick<RawCertOrg, "did" | "location">;
+
+function normalizeStatsCountry(country: string | null | undefined): string | null {
+  if (!country) return null;
+  const code = country.trim().toUpperCase();
+  return /^[A-Z]{2}$/.test(code) ? code : null;
+}
+
+async function fetchOrgStatsPage(
+  first: number,
+  after: string | null,
+  signal?: AbortSignal,
+): Promise<StatsPage<RawOrgStats>> {
+  const data = await indexerQuery<{
+    appGainforestOrganizationInfo?: Connection<RawOrgStats>;
+  }>(ORG_STATS_QUERY, { first, after }, signal);
+  const conn = data?.appGainforestOrganizationInfo;
+  const nodes = (conn?.edges ?? [])
+    .map((e) => e?.node)
+    .filter((n): n is RawOrgStats => Boolean(n));
+  return {
+    nodes,
+    totalCount: conn?.totalCount ?? null,
+    cursor: conn?.pageInfo?.endCursor ?? null,
+    hasMore: Boolean(conn?.pageInfo?.hasNextPage),
+  };
+}
+
+async function fetchCertifiedOrgStatsPage(
+  first: number,
+  after: string | null,
+  signal?: AbortSignal,
+): Promise<StatsPage<RawCertOrgStats>> {
+  const data = await indexerQuery<{
+    appCertifiedActorOrganization?: Connection<RawCertOrgStats>;
+  }>(CERT_ORG_STATS_QUERY, { first, after }, signal);
+  const conn = data?.appCertifiedActorOrganization;
+  const nodes = (conn?.edges ?? [])
+    .map((e) => e?.node)
+    .filter((n): n is RawCertOrgStats => Boolean(n?.did));
+  return {
+    nodes,
+    totalCount: conn?.totalCount ?? null,
+    cursor: conn?.pageInfo?.endCursor ?? null,
+    hasMore: Boolean(conn?.pageInfo?.hasNextPage),
+  };
+}
+
+async function fetchGainforestOrganizationStats(): Promise<OrganizationStats> {
+  let after: string | null = null;
+  let organizations: number | null = null;
+  let seenRows = 0;
+  let withPhotos = 0;
+  const countries = new Set<string>();
+
+  for (let page = 0; page < 100; page += 1) {
+    const res = await fetchOrgStatsPage(INDEXER_MAX_PAGE, after);
+    organizations ??= res.totalCount;
+    seenRows += res.nodes.length;
+    for (const node of res.nodes) {
+      const country = normalizeStatsCountry(node.country);
+      if (country) countries.add(country);
+      if (normaliseRef(node.coverImage?.image?.ref) || normaliseRef(node.logo?.image?.ref)) withPhotos += 1;
+    }
+    if (!res.hasMore || !res.cursor) break;
+    after = res.cursor;
+  }
+
+  return {
+    organizations: organizations ?? seenRows,
+    countries: countries.size,
+    withPhotos,
+    mappedPlaces: organizations ?? seenRows,
+  };
+}
+
+async function fetchCertifiedOrganizationStats(): Promise<OrganizationStats> {
+  let after: string | null = null;
+  let organizations: number | null = null;
+  let seenRows = 0;
+  let withPhotos = 0;
+  let mappedPlaces = 0;
+
+  for (let page = 0; page < 100; page += 1) {
+    const res = await fetchCertifiedOrgStatsPage(100, after);
+    organizations ??= res.totalCount;
+    seenRows += res.nodes.length;
+    const profiles = await fetchCertProfiles(res.nodes.map((node) => node.did));
+    for (const node of res.nodes) {
+      if (profiles.get(node.did)?.avatarRef) withPhotos += 1;
+      if (node.location?.uri) mappedPlaces += 1;
+    }
+    if (!res.hasMore || !res.cursor) break;
+    after = res.cursor;
+  }
+
+  return {
+    organizations: organizations ?? seenRows,
+    countries: 0,
+    withPhotos,
+    mappedPlaces,
+  };
+}
+
+async function fetchOrganizationStatsUncached(source: SiteSourceFilter): Promise<OrganizationStats> {
+  if (source === "gainforest") return fetchGainforestOrganizationStats();
+  if (source === "certified") return fetchCertifiedOrganizationStats();
+
+  const [gainforest, certified] = await Promise.all([
+    fetchGainforestOrganizationStats(),
+    fetchCertifiedOrganizationStats(),
+  ]);
+  return {
+    organizations: (gainforest.organizations ?? 0) + (certified.organizations ?? 0),
+    countries: gainforest.countries,
+    withPhotos: gainforest.withPhotos + certified.withPhotos,
+    mappedPlaces: gainforest.mappedPlaces + certified.mappedPlaces,
+  };
+}
+
+export async function fetchOrganizationStats(
+  source: SiteSourceFilter = "both",
+  signal?: AbortSignal,
+): Promise<OrganizationStats> {
+  return cachedAsync(
+    `organization-total-stats:${source}`,
+    TOTAL_STATS_CACHE_MS,
+    () => fetchOrganizationStatsUncached(source),
+    signal,
+  );
 }
 
 function siteTime(iso: string | null | undefined): number {

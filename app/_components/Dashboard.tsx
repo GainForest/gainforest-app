@@ -46,7 +46,7 @@ import {
   type TxRow,
 } from "../_lib/dashboard";
 import { accountHref, localBumicertHref } from "../_lib/urls";
-import { formatCompactUsd, formatNumber, formatUsd } from "../_lib/format";
+import { formatCompact, formatCompactUsd, formatNumber, formatUsd } from "../_lib/format";
 import { AuthorInline } from "./AuthorChip";
 import { StatsTile } from "./StatsTile";
 import { PictureHero } from "./PictureHero";
@@ -216,25 +216,25 @@ function KPISummary({ kpis }: { kpis: DashboardKpis }) {
       <StatCard
         icon={<HashIcon className="h-4 w-4" />}
         label="Total Donations"
-        value={formatNumber(kpis.totalDonations)}
+        value={formatCompact(kpis.totalDonations)}
         sub="Completed gifts"
       />
       <StatCard
         icon={<UsersIcon className="h-4 w-4" />}
         label="Supporters"
-        value={formatNumber(kpis.uniqueDonors)}
+        value={formatCompact(kpis.uniqueDonors)}
         sub="Supporters counted"
       />
       <StatCard
         icon={<TrendingUpIcon className="h-4 w-4" />}
         label="Average Gift"
-        value={formatUsd(kpis.avgDonation)}
+        value={formatCompactUsd(kpis.avgDonation)}
         sub="Average gift size"
       />
       <StatCard
         icon={<LayoutGridIcon className="h-4 w-4" />}
         label="Active Bumicerts"
-        value={formatNumber(kpis.activeBumicerts)}
+        value={formatCompact(kpis.activeBumicerts)}
         sub="Bumicerts with funding"
       />
     </div>
@@ -251,7 +251,7 @@ function GeographicReach({ stats }: { stats: GeoStats }) {
       <StatsTile
         icon={<GlobeIcon />}
         label="Places Reached"
-        value={formatNumber(stats.countriesRepresented)}
+        value={formatCompact(stats.countriesRepresented)}
         detail="Countries with organizations"
         accent
       />

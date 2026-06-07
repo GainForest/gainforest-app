@@ -18,7 +18,7 @@ import {
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { AuthorInline } from "../_components/AuthorChip";
 import { fetchReceipts, type FundingReceipt } from "../_lib/dashboard";
-import { formatCompactUsd } from "../_lib/format";
+import { formatCompact, formatCompactUsd } from "../_lib/format";
 import { accountHref } from "../_lib/urls";
 
 type Period = "all" | "month" | "week";
@@ -311,13 +311,13 @@ function StatsSummary({
       />
       <StatCard
         label="Total Donors"
-        value={totalDonors.toLocaleString("en")}
+        value={formatCompact(totalDonors)}
         detail="Generous impact champions"
         icon={<UsersRoundIcon className="size-8" />}
       />
       <StatCard
         label="Projects Supported"
-        value={totalProjectsSupported.toLocaleString("en")}
+        value={formatCompact(totalProjectsSupported)}
         detail="Restoring ecosystems & livelihoods"
         icon={<SproutIcon className="size-8" />}
         accent

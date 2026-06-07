@@ -11,7 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import BumicertIcon from "@/icons/BumicertIcon";
 import { cn } from "@/lib/utils";
-import { formatNumber } from "../../_lib/format";
+import { formatCompact, formatNumber } from "../../_lib/format";
 import type { AccountRouteData } from "../_lib/account-route";
 import { accountBumicertsPath } from "../_lib/account-route";
 
@@ -220,12 +220,12 @@ function buildSidebarData(account: AccountRouteData, bumicertCount: number, dona
     stats: [
       {
         label: "Total Bumicerts",
-        value: formatNumber(bumicertCount),
+        value: formatCompact(bumicertCount),
         icon: "bumicert",
       },
       {
         label: account.kind === "organization" ? "Donations Received" : "Total Donations",
-        value: formatNumber(donationCount),
+        value: formatCompact(donationCount),
         icon: "donation",
       },
     ],

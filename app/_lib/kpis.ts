@@ -1,16 +1,18 @@
 /**
  * Server-side KPI prefetch for the hero band.
  *
- * Five cheap aggregate queries against Hyperindex (`totalCount` only, no edge
+ * Cheap aggregate queries against Hyperindex (`totalCount` only, no edge
  * rows) plus a single funding-receipt sweep for the raised total. All run in
  * parallel and each swallows its own error so a flaky upstream degrades to a
  * "—" rather than failing the page. Cached via Next's `revalidate` so the
  * shell stays fast and out of the per-request hot path.
  */
 
+import { cachedAsync } from "./async-cache";
 import { INDEXER_URL, FACILITATOR_DID } from "./urls";
 
 const REVALIDATE = 60 * 15; // 15 minutes, matches gainforest-app's cadence.
+const TOTAL_STATS_CACHE_MS = REVALIDATE * 1000;
 
 export type ExplorerKpis = {
   occurrences: number | null;
@@ -26,6 +28,7 @@ const TOTALS_QUERY = `
     occ: appGainforestDwcOccurrence(first: 0) { totalCount }
     act: orgHypercertsClaimActivity(first: 0) { totalCount }
     org: appGainforestOrganizationInfo(first: 0) { totalCount }
+    certOrg: appCertifiedActorOrganization(first: 0) { totalCount }
     loc: appCertifiedLocation(first: 0) { totalCount }
   }
 `;
@@ -51,7 +54,7 @@ export type CollectionTotals = Pick<
   "occurrences" | "bumicerts" | "sites" | "locations"
 >;
 
-export async function fetchTotals(): Promise<CollectionTotals> {
+async function fetchTotalsUncached(): Promise<CollectionTotals> {
   try {
     const res = await fetch(INDEXER_URL, {
       method: "POST",
@@ -64,14 +67,18 @@ export async function fetchTotals(): Promise<CollectionTotals> {
         occ?: { totalCount?: number | null };
         act?: { totalCount?: number | null };
         org?: { totalCount?: number | null };
+        certOrg?: { totalCount?: number | null };
         loc?: { totalCount?: number | null };
       };
     };
     const d = json.data;
+    const organizationCounts = [d?.org?.totalCount, d?.certOrg?.totalCount]
+      .filter((count): count is number => typeof count === "number");
+    const organizationProfiles = organizationCounts.reduce((sum, count) => sum + count, 0);
     return {
       occurrences: d?.occ?.totalCount ?? null,
       bumicerts: d?.act?.totalCount ?? null,
-      sites: d?.org?.totalCount ?? null,
+      sites: organizationCounts.length > 0 ? organizationProfiles : null,
       locations: d?.loc?.totalCount ?? null,
     };
   } catch {
@@ -81,7 +88,11 @@ export async function fetchTotals(): Promise<CollectionTotals> {
 
 const USD = new Set(["USD", "USDC"]);
 
-export async function fetchRaised(): Promise<
+export async function fetchTotals(): Promise<CollectionTotals> {
+  return cachedAsync("home-collection-totals", TOTAL_STATS_CACHE_MS, fetchTotalsUncached);
+}
+
+async function fetchRaisedUncached(): Promise<
   Pick<ExplorerKpis, "totalRaised" | "totalDonations">
 > {
   try {
@@ -125,6 +136,12 @@ export async function fetchRaised(): Promise<
   } catch {
     return { totalRaised: null, totalDonations: null };
   }
+}
+
+export async function fetchRaised(): Promise<
+  Pick<ExplorerKpis, "totalRaised" | "totalDonations">
+> {
+  return cachedAsync("home-raised-totals", TOTAL_STATS_CACHE_MS, fetchRaisedUncached);
 }
 
 export async function fetchKpis(): Promise<ExplorerKpis> {
