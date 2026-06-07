@@ -34,6 +34,7 @@ import { RecordDrawer } from "./RecordDrawer";
 import { RecordMap } from "./RecordMap";
 import { StatsTileGrid } from "./StatsTile";
 import { isPdsBlobUrl, resolveBlobUrl } from "../_lib/pds";
+import { pauseOtherAudio, playExclusiveAudio, registerAudioElement } from "../_lib/audio-coordinator";
 import { resolveDidProfile, getCachedProfile } from "../_lib/did-profile";
 import { formatCompact, countryFlag, formatDate } from "../_lib/format";
 import { PictureHero } from "./PictureHero";
@@ -718,6 +719,7 @@ const OccurrenceCard = memo(function OccurrenceCard({
   const [resolvedImageUrl, setResolvedImageUrl] = useState(record.imageUrl);
   const [profile, setProfile] = useState(() => getCachedProfile(record.did) ?? null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const unregisterAudioRef = useRef<(() => void) | null>(null);
   const [audioState, setAudioState] = useState<"idle" | "loading" | "playing" | "paused">("idle");
 
   const imageUrl = resolvedImageUrl ?? record.imageUrl;
@@ -754,11 +756,13 @@ const OccurrenceCard = memo(function OccurrenceCard({
     };
   }, [profile, record.creatorName, record.did]);
 
-  // Pause and release the audio element on unmount.
+  // Pause and release the sound element on unmount.
   useEffect(
     () => () => {
       audioRef.current?.pause();
+      unregisterAudioRef.current?.();
       audioRef.current = null;
+      unregisterAudioRef.current = null;
     },
     [],
   );
@@ -767,6 +771,7 @@ const OccurrenceCard = memo(function OccurrenceCard({
     e.stopPropagation();
     let el = audioRef.current;
     if (!el) {
+      pauseOtherAudio();
       setAudioState("loading");
       const url = record.audioUrl ?? (await resolveBlobUrl(record.did, record.audioRef));
       if (!url) {
@@ -777,16 +782,19 @@ const OccurrenceCard = memo(function OccurrenceCard({
       el.addEventListener("ended", () => setAudioState("paused"));
       el.addEventListener("pause", () => setAudioState("paused"));
       el.addEventListener("play", () => setAudioState("playing"));
+      unregisterAudioRef.current?.();
+      unregisterAudioRef.current = registerAudioElement(el);
       audioRef.current = el;
     }
     if (el.paused) {
-      el.play().catch(() => setAudioState("paused"));
+      playExclusiveAudio(el).catch(() => setAudioState("paused"));
     } else {
       el.pause();
     }
   }
 
   function open() {
+    if (hasAudio) pauseOtherAudio();
     onOpen(record);
   }
 
@@ -843,7 +851,7 @@ const OccurrenceCard = memo(function OccurrenceCard({
         <button
           type="button"
           onClick={toggleAudio}
-          aria-label={audioState === "playing" ? "Pause audio" : "Play audio"}
+          aria-label={audioState === "playing" ? "Pause sound" : "Play sound"}
           className={
             hasImage
               ? "absolute right-2 top-2 z-20 grid h-9 w-9 place-items-center rounded-full bg-black/55 text-white shadow-md ring-1 ring-white/25 backdrop-blur-md transition hover:bg-black/70"

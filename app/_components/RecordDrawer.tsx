@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowUpRightIcon, CalendarRangeIcon, CheckIcon, HeartIcon, ImageOffIcon, MapPinIcon, Share2Icon, UsersIcon, XIcon } from "lucide-react";
@@ -17,6 +17,7 @@ import { RecordLocationMap } from "./RecordLocationMap";
 import { RichText } from "./RichText";
 import { SocialGlyph, socialLabel } from "./SocialIcon";
 import { isPdsBlobUrl, resolveBlobUrl } from "../_lib/pds";
+import { pauseOtherAudio } from "../_lib/audio-coordinator";
 import {
   INDEXER_URL,
   accountHref,
@@ -39,6 +40,7 @@ export function RecordDrawer({
 }) {
   const [imgError, setImgError] = useState(false);
   const [resolvedOccurrenceImageUrl, setResolvedOccurrenceImageUrl] = useState<string | null>(null);
+  const [resolvedOccurrenceAudioUrl, setResolvedOccurrenceAudioUrl] = useState<string | null>(null);
   const [detail, setDetail] = useState<RecordDetail | null>(null);
   // Whether this Bumicert is currently accepting donations — drives the Donate
   // button. `null` while we don't yet know (loading / non-bumicert).
@@ -51,6 +53,22 @@ export function RecordDrawer({
     const ctrl = new AbortController();
     resolveBlobUrl(record.did, record.imageRef, ctrl.signal)
       .then((url) => setResolvedOccurrenceImageUrl(url))
+      .catch(() => {});
+    return () => ctrl.abort();
+  }, [record]);
+
+  useEffect(() => {
+    setResolvedOccurrenceAudioUrl(null);
+    if (!record || record.kind !== "occurrence") return;
+    if (record.audioUrl) {
+      setResolvedOccurrenceAudioUrl(record.audioUrl);
+      return;
+    }
+    if (!record.audioRef) return;
+
+    const ctrl = new AbortController();
+    resolveBlobUrl(record.did, record.audioRef, ctrl.signal)
+      .then((url) => setResolvedOccurrenceAudioUrl(url))
       .catch(() => {});
     return () => ctrl.abort();
   }, [record]);
@@ -101,11 +119,14 @@ export function RecordDrawer({
 
   const siteBannerUrl = record.kind === "site" ? record.bannerUrl ?? (record.coverRef ? record.imageUrl : null) : null;
   const heroUrl = record.kind === "site" ? siteBannerUrl : record.kind === "occurrence" ? record.imageUrl ?? resolvedOccurrenceImageUrl : record.imageUrl;
+  const occurrenceAudioUrl = record.kind === "occurrence" ? record.audioUrl ?? resolvedOccurrenceAudioUrl : null;
+  const hasOccurrenceAudio = record.kind === "occurrence" && Boolean(record.audioRef || record.audioUrl);
   const ownerAvatarOverride = record.kind === "site" ? record.avatarUrl ?? (!record.coverRef && record.logoRef ? record.imageUrl : null) : undefined;
   const ownerAvatarRefOverride = record.kind === "bumicert" || record.kind === "occurrence" ? record.creatorAvatarRef : record.kind === "site" ? record.logoRef : null;
   const ownerNameOverride = record.kind === "bumicert" || record.kind === "occurrence" ? record.creatorName : record.kind === "site" ? record.name : null;
   const hasHeroImage = Boolean(heroUrl) && !imgError;
-  const showHero = record.kind === "site" || hasHeroImage;
+  const showAudioHero = hasOccurrenceAudio && !hasHeroImage;
+  const showHero = record.kind === "site" || hasHeroImage || showAudioHero;
 
   // For bumicerts the headline numbers (contributors / places / period) live in
   // the stat strip, the scope tags in the pill row, and the created date in the
@@ -154,6 +175,8 @@ export function RecordDrawer({
                   onError={() => setImgError(true)}
                   className="object-cover"
                 />
+              ) : showAudioHero ? (
+                <AudioHero src={occurrenceAudioUrl} title={title} />
               ) : (
                 <div className="absolute inset-0 grid place-items-center bg-[radial-gradient(circle_at_28%_20%,color-mix(in_oklab,var(--primary)_14%,transparent),transparent_58%),linear-gradient(135deg,var(--muted),var(--background))]">
                   <ImageOffIcon className="size-24 text-muted-foreground opacity-50" aria-hidden="true" strokeWidth={1.25} />
@@ -161,8 +184,8 @@ export function RecordDrawer({
               )}
               {/* Top scrim keeps the floating controls legible; bottom fade
                   blends the image into the title that overlaps it. */}
-              <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-foreground/35 to-transparent" />
-              <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-background via-background/40 to-transparent" />
+              <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-foreground/35 to-transparent" />
+              <div className="pointer-events-none absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-background via-background/40 to-transparent" />
             </div>
             <div className="pointer-events-none absolute inset-x-0 top-0 flex items-start justify-between gap-3 p-4">
               <div className="pointer-events-auto">
@@ -317,6 +340,44 @@ export function RecordDrawer({
           )}
 
         </div>
+      </div>
+    </div>
+  );
+}
+
+function AudioHero({ src, title }: { src: string | null; title: string }) {
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    audioRef.current?.pause();
+  }, [src]);
+
+  useEffect(
+    () => () => {
+      audioRef.current?.pause();
+    },
+    [],
+  );
+
+  function handlePlay() {
+    pauseOtherAudio(audioRef.current);
+  }
+
+  return (
+    <div className="absolute inset-0 overflow-hidden bg-[radial-gradient(110%_95%_at_50%_10%,color-mix(in_oklab,var(--primary)_64%,#092014),#07170f)] text-white">
+      <div className="pointer-events-none absolute inset-0 opacity-55 [background-image:linear-gradient(90deg,rgba(255,255,255,0.06)_1px,transparent_1px),linear-gradient(0deg,rgba(255,255,255,0.05)_1px,transparent_1px)] [background-size:28px_28px]" />
+      <div className="relative z-[1] flex h-full flex-col justify-end px-7 pb-12 pt-16">
+        {src ? (
+          <audio
+            ref={audioRef}
+            controls
+            preload="metadata"
+            src={src}
+            aria-label={`Play sound for ${title}`}
+            onPlay={handlePlay}
+            className="relative z-[2] h-10 w-full accent-primary"
+          />
+        ) : null}
       </div>
     </div>
   );
