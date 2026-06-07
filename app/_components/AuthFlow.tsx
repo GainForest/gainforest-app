@@ -393,11 +393,11 @@ export function SignInPrompt() {
       </div>
 
       <p className="px-2 pb-1.5 pt-2 text-center text-[11px] leading-snug text-muted-foreground">
-        Sign in to unlock your sites, trees &amp; Bumicerts.
+        Save your project places, tree information, and Bumicerts in one place.
       </p>
 
       <Button size="sm" onClick={handleSignIn} className="w-full">
-        Sign in
+        Get started
         <ChevronRightIcon />
       </Button>
     </motion.div>
