@@ -163,6 +163,9 @@ export type OccurrenceRecord = {
   createdAt: string;
   remarks: string | null;
   imageUrl: string | null;
+  /** Audio evidence blob ref (CID), resolved to a PDS blob URL on demand for
+   *  inline playback. Null when the record carries no audio. */
+  audioRef: string | null;
   /** Which media kinds the record carries (drives the card badges). */
   media: MediaKind[];
 };
@@ -263,6 +266,7 @@ function mapOccurrence(n: RawOccurrence): OccurrenceRecord {
     createdAt: n.createdAt,
     remarks: n.occurrenceRemarks?.trim() || n.fieldNotes?.trim() || null,
     imageUrl: externalImage,
+    audioRef: normaliseRef(n.audioEvidence?.file?.ref),
     media,
   };
 }
@@ -378,8 +382,16 @@ export async function walkOccurrences(opts: {
       if (matches.length > 0) {
         const needed = target - collected.length;
         const pageMatches = matches.slice(0, needed);
-        let mapped = pageMatches.map(mapOccurrence);
-        mapped = await resolveImages(
+        const startIndex = collected.length;
+        const mapped = pageMatches.map(mapOccurrence);
+
+        for (const record of mapped) {
+          if (collected.length >= target) break;
+          collected.push(record);
+        }
+        opts.onProgress?.(collected.slice(0, target));
+
+        const resolved = await resolveImages(
           mapped,
           (r) => {
             // External-thumbnail records already have a usable imageUrl; only PDS
@@ -392,10 +404,10 @@ export async function walkOccurrences(opts: {
           (r, url) => ({ ...r, imageUrl: url }),
           signal,
         );
-        for (const r of mapped) {
-          if (collected.length >= target) break;
-          collected.push(r);
+        for (let index = 0; index < resolved.length && startIndex + index < collected.length; index += 1) {
+          collected[startIndex + index] = resolved[index]!;
         }
+        opts.onProgress?.(collected.slice(0, target));
       }
 
       if (collected.length >= target || !hasNextPage || !cursor) break;

@@ -1,6 +1,6 @@
 "use client";
 
-import { memo, useCallback, useDeferredValue, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { memo, useCallback, useDeferredValue, useEffect, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent, type ReactNode } from "react";
 import Image from "next/image";
 import {
   AudioLinesIcon,
@@ -10,6 +10,7 @@ import {
   LeafIcon,
   Loader2Icon,
   MapIcon,
+  PauseIcon,
   PlayIcon,
   SearchIcon,
 } from "lucide-react";
@@ -29,16 +30,10 @@ import {
 } from "../_lib/indexer";
 import { RecordDrawer } from "./RecordDrawer";
 import { RecordMap } from "./RecordMap";
-import { StatCard, type FormatKey } from "./MetricTrend";
-import { isPdsBlobUrl } from "../_lib/pds";
-import {
-  ms,
-  seriesFromIncrements,
-  seriesFromDistinct,
-  dailyCountSeries,
-  type MetricSeries,
-} from "../_lib/series";
-import { formatCompact, formatNumber, countryFlag, formatDate } from "../_lib/format";
+import { StatsTileGrid } from "./StatsTile";
+import { isPdsBlobUrl, resolveBlobUrl } from "../_lib/pds";
+import { resolveDidProfile, getCachedProfile } from "../_lib/did-profile";
+import { formatCompact, countryFlag, formatDate } from "../_lib/format";
 import { PictureHero } from "./PictureHero";
 
 // Single-stream record explorer. One of the three GainForest record types
@@ -129,22 +124,37 @@ function paramToUri(value: string, kind: RecordKind): string | null {
 
 type Phase = "idle" | "loading" | "ready" | "error" | "more";
 
+type InitialExplorerPage = {
+  records: ExplorerRecord[];
+  cursor: string | null;
+  hasMore: boolean;
+};
+
 // Load a deep first page across every stream so the grid, map, and stats
 // reflect a real slice of the data. The indexer caps each request at 1000, so
 // a single page now reaches this for the media-filtered views (which push the
 // filter down server-side) and the cursor pages it for the rest.
-const LOAD_TARGET = 12;
-const INITIAL_CARD_LIMIT = 48;
-const CARD_BATCH_SIZE = 48;
+const LOAD_TARGET = 48;
+const INITIAL_CARD_LIMIT = 96;
+const CARD_BATCH_SIZE = 96;
 const DEFAULT_OCCURRENCE_MEDIA: OccurrenceFilter = "image";
 
-export function RecordExplorer({ kind }: { kind: RecordKind }) {
+export function RecordExplorer({
+  kind,
+  initialPage,
+  showHero = true,
+}: {
+  kind: RecordKind;
+  initialPage?: InitialExplorerPage;
+  showHero?: boolean;
+}) {
   const meta = KIND_META[kind];
+  const initialRecords = initialPage?.records ?? [];
 
-  const [records, setRecords] = useState<ExplorerRecord[]>([]);
-  const [cursor, setCursor] = useState<string | null>(null);
-  const [hasMore, setHasMore] = useState(true);
-  const [phase, setPhase] = useState<Phase>("idle");
+  const [records, setRecords] = useState<ExplorerRecord[]>(initialRecords);
+  const [cursor, setCursor] = useState<string | null>(initialPage?.cursor ?? null);
+  const [hasMore, setHasMore] = useState(initialPage?.hasMore ?? true);
+  const [phase, setPhase] = useState<Phase>(initialPage ? "ready" : "idle");
   const [query, setQuery] = useState("");
   const deferredQuery = useDeferredValue(query);
   const [sort, setSort] = useState<SortMode>("newest");
@@ -161,6 +171,8 @@ export function RecordExplorer({ kind }: { kind: RecordKind }) {
   const [pendingRecord, setPendingRecord] = useState<string | null>(null);
   // Skip the very first URL write so we don't strip params we just read in.
   const firstUrlSyncRef = useRef(true);
+  // Server-rendered first pages should stay visible after the URL hydrate pass.
+  const firstResetAfterHydrateRef = useRef(true);
 
   const controller = useRef<AbortController | null>(null);
   const loadSeqRef = useRef(0);
@@ -198,6 +210,10 @@ export function RecordExplorer({ kind }: { kind: RecordKind }) {
           after,
           query: deferredQuery,
           signal: ctrl.signal,
+          onProgress: (progressRecords) => {
+            if (!isCurrent()) return;
+            setRecords(merge(progressRecords));
+          },
         })
           .then((res) => {
             if (!isCurrent()) return;
@@ -249,18 +265,37 @@ export function RecordExplorer({ kind }: { kind: RecordKind }) {
   // the first fetch — the load effect below is gated on `hydrated`.
   useEffect(() => {
     const sp = new URLSearchParams(window.location.search);
+    let shouldClientLoad = false;
     const q = sp.get("q");
-    if (q) setQuery(q);
+    if (q) {
+      setQuery(q);
+      shouldClientLoad = true;
+    }
     if (sp.get("view") === "map") setView("map");
     const s = sp.get("sort");
-    if (s === "oldest" || s === "az" || s === "za") setSort(s);
+    if (s === "oldest" || s === "az" || s === "za") {
+      setSort(s);
+      shouldClientLoad = true;
+    }
     if (kind === "occurrence") {
       const m = sp.get("media");
-      if (m === "image" || m === "audio" || m === "all") setOccMedia(m);
+      if (m === "audio" || m === "all") {
+        setOccMedia(m);
+        shouldClientLoad = true;
+      }
     }
     if (kind === "site") {
       const src = sp.get("source");
-      if (src === "gainforest" || src === "certified") setSiteSource(src);
+      if (src === "gainforest" || src === "certified") {
+        setSiteSource(src);
+        shouldClientLoad = true;
+      }
+    }
+    if (shouldClientLoad) {
+      setRecords([]);
+      setCursor(null);
+      setHasMore(true);
+      setPhase("idle");
     }
     setHydrated(true);
 
@@ -336,6 +371,10 @@ export function RecordExplorer({ kind }: { kind: RecordKind }) {
 
   useEffect(() => {
     if (!hydrated) return;
+    if (firstResetAfterHydrateRef.current) {
+      firstResetAfterHydrateRef.current = false;
+      return;
+    }
     controller.current?.abort();
     setRecords([]);
     setCursor(null);
@@ -363,23 +402,24 @@ export function RecordExplorer({ kind }: { kind: RecordKind }) {
   useEffect(() => {
     setCardLimit(INITIAL_CARD_LIMIT);
   }, [deferredQuery, kind, occMedia, siteSource, sort, view]);
-  // Stats + their trend series are derived from the full loaded set (not the
-  // search-filtered view), so memoize on `records` to avoid rebuilding the
-  // cumulative series on every keystroke.
+  // Stats are derived from the loaded set (not the search-filtered view), so
+  // memoize on `records` to avoid rebuilding the cards on every keystroke.
   const stats = useMemo(() => computeStats(records, kind), [records, kind]);
 
   return (
-    <section className="-mt-14 bg-background pb-20 md:pb-28">
-      <PictureHero
-        lightSrc={meta.heroLight}
-        darkSrc={meta.heroDark}
-        eyebrow={meta.eyebrow}
-        icon={<LeafGlyph />}
-        title={meta.title}
-        accent={meta.accent}
-        lede={meta.lede}
-        imageAlt={`${meta.eyebrow} nature landscape`}
-      />
+    <section className={`${showHero ? "-mt-14 " : ""}bg-background pb-20 md:pb-28`}>
+      {showHero && (
+        <PictureHero
+          lightSrc={meta.heroLight}
+          darkSrc={meta.heroDark}
+          eyebrow={meta.eyebrow}
+          icon={<LeafGlyph />}
+          title={meta.title}
+          accent={meta.accent}
+          lede={meta.lede}
+          imageAlt={`${meta.eyebrow} nature landscape`}
+        />
+      )}
 
       <div className="relative z-10 mx-auto max-w-6xl px-6">
         {/* Stats overview — computed live from the loaded records, matching the marketplace hero rhythm. */}
@@ -400,13 +440,13 @@ export function RecordExplorer({ kind }: { kind: RecordKind }) {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder={meta.search}
-              aria-label="Search what is shown"
+              aria-label="Search nature sightings"
               className="h-10 w-full truncate rounded-full border border-border-soft bg-surface py-0 pl-9 pr-3 text-sm text-foreground outline-none transition-colors placeholder:text-foreground/40 focus:border-primary/40"
             />
           </div>
 
           {/* Cards / Map view toggle */}
-          <div className="inline-flex h-10 items-center rounded-full border border-border-soft bg-surface p-0.5">
+          <div className="inline-flex h-10 shrink-0 items-center rounded-full border border-border bg-background/50 p-0.5 backdrop-blur">
             {(
               [
                 { id: "cards", label: "Cards" },
@@ -420,8 +460,8 @@ export function RecordExplorer({ kind }: { kind: RecordKind }) {
                 aria-pressed={view === o.id}
                 className={`inline-flex h-9 items-center gap-1.5 rounded-full px-3 text-sm font-medium transition-colors ${
                   view === o.id
-                    ? "bg-foreground/[0.08] text-foreground"
-                    : "text-foreground/55 hover:text-foreground"
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:text-foreground"
                 }`}
               >
                 {o.id === "map" ? <MapGlyph /> : <CardsGlyph />}
@@ -501,27 +541,13 @@ export function RecordExplorer({ kind }: { kind: RecordKind }) {
             </div>
           )}
 
-          <div className="flex min-h-10 items-center gap-1.5 text-sm text-foreground/55">
-            {phase === "loading" && records.length === 0 ? (
-              <span className="h-4 w-20 animate-pulse rounded-full bg-muted" aria-label="Loading" />
-            ) : (
-              <>
-                <span aria-hidden className="pulse-dot inline-block h-1.5 w-1.5 rounded-full bg-brand text-brand" />
-                {query
-                  ? `${formatNumber(filtered.length)} of ${formatNumber(records.length)} shown`
-                  : view === "cards" && filtered.length > renderedRecords.length
-                    ? `${formatNumber(renderedRecords.length)} of ${formatNumber(filtered.length)} shown`
-                    : `${formatNumber(filtered.length)} shown`}
-              </>
-            )}
-          </div>
         </div>
 
         {/* Grid / Map */}
         <div className="mt-6">
           {view === "map" ? (
             <RecordMap records={filtered} kind={kind} onOpen={setDrawer} />
-          ) : phase === "loading" && records.length === 0 ? (
+          ) : (phase === "idle" || phase === "loading") && records.length === 0 ? (
             <SkeletonGrid />
           ) : phase === "error" && records.length === 0 ? (
             <EmptyState
@@ -571,11 +597,6 @@ export function RecordExplorer({ kind }: { kind: RecordKind }) {
         {/* Load more */}
         {records.length > 0 && (
           <div className="mt-10 flex flex-col items-center gap-3">
-            {view === "cards" && filtered.length > renderedRecords.length && (
-              <p className="text-[13px] text-foreground/55">
-                Showing {formatNumber(renderedRecords.length)} of {formatNumber(filtered.length)} loaded items.
-              </p>
-            )}
             {hasMoreCardsToShow ? (
               <button
                 type="button"
@@ -633,6 +654,168 @@ type CardView = {
 };
 
 const RecordCard = memo(function RecordCard({ record, onOpen }: { record: ExplorerRecord; onOpen: (record: ExplorerRecord) => void }) {
+  if (record.kind === "occurrence") {
+    return <OccurrenceCard record={record} onOpen={onOpen} />;
+  }
+  return <GenericCard record={record} onOpen={onOpen} />;
+});
+
+// ── Occurrence card (full-bleed) ─────────────────────────────────────────────
+//
+// A sighting reads as the media itself: a photo fills the whole tile, or — for
+// a sound recording — a soft gradient panel with an inline play/pause control.
+// Only the essentials sit over a bottom scrim: the owner's handle, the species
+// name, and the date. No media-type icons, no surface chrome.
+
+const OccurrenceCard = memo(function OccurrenceCard({
+  record,
+  onOpen,
+}: {
+  record: OccurrenceRecord;
+  onOpen: (record: ExplorerRecord) => void;
+}) {
+  const [imgError, setImgError] = useState(false);
+  const [profile, setProfile] = useState(() => getCachedProfile(record.did) ?? null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [audioState, setAudioState] = useState<"idle" | "loading" | "playing" | "paused">("idle");
+
+  const hasImage = Boolean(record.imageUrl) && !imgError;
+  const hasAudio = Boolean(record.audioRef);
+  const name = record.scientificName || record.vernacularName || "Unidentified";
+  const subtitle =
+    record.scientificName && record.vernacularName ? record.vernacularName : null;
+  const handle = profile?.handle ?? profile?.displayName ?? null;
+  const date = record.eventDate || record.createdAt;
+
+  useEffect(() => {
+    if (profile) return;
+    let active = true;
+    resolveDidProfile(record.did).then((p) => {
+      if (active) setProfile(p);
+    });
+    return () => {
+      active = false;
+    };
+  }, [profile, record.did]);
+
+  // Pause and release the audio element on unmount.
+  useEffect(
+    () => () => {
+      audioRef.current?.pause();
+      audioRef.current = null;
+    },
+    [],
+  );
+
+  async function toggleAudio(e: ReactMouseEvent) {
+    e.stopPropagation();
+    let el = audioRef.current;
+    if (!el) {
+      setAudioState("loading");
+      const url = await resolveBlobUrl(record.did, record.audioRef);
+      if (!url) {
+        setAudioState("idle");
+        return;
+      }
+      el = new Audio(url);
+      el.addEventListener("ended", () => setAudioState("paused"));
+      el.addEventListener("pause", () => setAudioState("paused"));
+      el.addEventListener("play", () => setAudioState("playing"));
+      audioRef.current = el;
+    }
+    if (el.paused) {
+      el.play().catch(() => setAudioState("paused"));
+    } else {
+      el.pause();
+    }
+  }
+
+  function open() {
+    onOpen(record);
+  }
+
+  return (
+    <div
+      role="button"
+      tabIndex={0}
+      onClick={open}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          open();
+        }
+      }}
+      aria-label={`Open ${name}`}
+      className="group relative block aspect-[4/3] w-full cursor-pointer overflow-hidden rounded-xl bg-surface-sunken text-left outline-none transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_-24px_rgba(20,30,15,0.45)] focus-visible:ring-2 focus-visible:ring-primary/50"
+    >
+      {hasImage ? (
+        <Image
+          src={record.imageUrl!}
+          alt={name}
+          fill
+          sizes="(max-width:640px) 50vw, (max-width:1280px) 25vw, 240px"
+          unoptimized={!isPdsBlobUrl(record.imageUrl)}
+          onError={() => setImgError(true)}
+          className="scale-[1.08] object-cover transition-transform duration-500 group-hover:scale-100"
+        />
+      ) : (
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              "radial-gradient(120% 100% at 50% 0%, color-mix(in srgb, var(--primary) 16%, transparent), transparent), var(--surface)",
+          }}
+        />
+      )}
+
+      {/* Inline audio control — sits center for sound-only tiles, tucked
+          top-right when there's also a photo. */}
+      {hasAudio ? (
+        <button
+          type="button"
+          onClick={toggleAudio}
+          aria-label={audioState === "playing" ? "Pause audio" : "Play audio"}
+          className={
+            hasImage
+              ? "absolute right-2 top-2 z-20 grid h-9 w-9 place-items-center rounded-full bg-background/80 text-foreground shadow-md backdrop-blur-md transition hover:bg-background"
+              : "absolute left-1/2 top-1/2 z-20 grid h-14 w-14 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-background/85 text-foreground shadow-lg backdrop-blur-md transition hover:scale-105 hover:bg-background"
+          }
+        >
+          {audioState === "loading" ? (
+            <Loader2Icon className="h-5 w-5 animate-spin" aria-hidden />
+          ) : audioState === "playing" ? (
+            <PauseIcon className="h-5 w-5" aria-hidden />
+          ) : (
+            <PlayIcon className="h-5 w-5 translate-x-[1px]" aria-hidden />
+          )}
+        </button>
+      ) : null}
+
+      {/* Bottom scrim for legibility over any media. */}
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/75 via-black/30 to-transparent" />
+
+      <div className="absolute inset-x-0 bottom-0 z-10 p-3">
+        {handle ? (
+          <p className="truncate text-[11px] font-medium text-white/75">@{handle}</p>
+        ) : null}
+        <h3
+          className="font-instrument text-[17px] italic leading-tight text-white drop-shadow-sm"
+          style={clamp(2)}
+        >
+          {name}
+        </h3>
+        {subtitle ? (
+          <p className="truncate text-[12px] leading-snug text-white/70">{subtitle}</p>
+        ) : null}
+        {date ? (
+          <p className="mt-1 text-[10.5px] text-white/60">{formatDate(date)}</p>
+        ) : null}
+      </div>
+    </div>
+  );
+});
+
+const GenericCard = memo(function GenericCard({ record, onOpen }: { record: ExplorerRecord; onOpen: (record: ExplorerRecord) => void }) {
   const [imgError, setImgError] = useState(false);
   const hasImage = Boolean(record.imageUrl) && !imgError;
   const v = cardView(record);
@@ -797,12 +980,12 @@ function cardView(record: ExplorerRecord): CardView {
     pills: (
       <>
         <Pill accent>
-          {formatNumber(record.contributorCount)} contributor
+          {formatCompact(record.contributorCount)} contributor
           {record.contributorCount === 1 ? "" : "s"}
         </Pill>
         {record.locationCount > 0 ? (
           <Pill>
-            {formatNumber(record.locationCount)} site{record.locationCount === 1 ? "" : "s"}
+            {formatCompact(record.locationCount)} site{record.locationCount === 1 ? "" : "s"}
           </Pill>
         ) : null}
       </>
@@ -891,9 +1074,9 @@ function haystack(r: ExplorerRecord): string {
 type Stat = {
   label: string;
   value: string;
-  sub: string;
-  series?: MetricSeries | null;
-  format?: FormatKey;
+  detail: string;
+  icon: ReactNode;
+  accent?: boolean;
 };
 
 function within(iso: string | null | undefined, days: number): boolean {
@@ -906,46 +1089,50 @@ function computeStats(records: ExplorerRecord[], kind: RecordKind): Stat[] {
   const last30 = records.filter((r) => within(r.createdAt, 30)).length;
   const last7 = records.filter((r) => within(r.createdAt, 7)).length;
   const n = (v: number) => formatCompact(v);
-  const times = records.map((r) => ms(r.createdAt));
-  // Cumulative count of all loaded records over their createdAt span.
-  const totalSeries = seriesFromIncrements(times.map((t) => ({ t, inc: 1 })));
-  // Daily-new activity lines for the rolling windows.
-  const win30 = dailyCountSeries(times, 30);
-  const win7 = dailyCountSeries(times, 7);
-  // Cumulative count of the subset matching `pred`.
-  const countWhere = (pred: (r: ExplorerRecord) => boolean) =>
-    seriesFromIncrements(records.map((r) => ({ t: ms(r.createdAt), inc: pred(r) ? 1 : 0 })));
 
   if (kind === "occurrence") {
     const occ = records as OccurrenceRecord[];
     const species = new Set(occ.map((r) => r.scientificName).filter(Boolean)).size;
-    const countries = new Set(
-      occ.map((r) => r.countryCode || r.country).filter(Boolean),
-    ).size;
+    const countries = new Set(occ.map((r) => r.countryCode || r.country).filter(Boolean)).size;
     const withMedia = occ.filter((r) => r.media.length > 0).length;
     return [
-      { label: "Items shown", value: n(occ.length), sub: "Sightings", series: totalSeries },
-      { label: "Last 30 days", value: n(last30), sub: "New sightings", series: win30 },
-      { label: "Last 7 days", value: n(last7), sub: "This week", series: win7 },
+      {
+        label: "Nature sightings",
+        value: n(occ.length),
+        detail: "loaded from recent field reports",
+        icon: <LayoutGridIcon />,
+        accent: true,
+      },
+      {
+        label: "New in 30 days",
+        value: n(last30),
+        detail: "recent sightings in this view",
+        icon: <LeafIcon />,
+      },
       {
         label: "Species",
         value: n(species),
-        sub: "Different kinds found",
-        series: seriesFromDistinct(occ.map((r) => ({ t: ms(r.createdAt), key: r.scientificName }))),
-      },
-      {
-        label: "Countries",
-        value: n(countries),
-        sub: "Places reached",
-        series: seriesFromDistinct(
-          occ.map((r) => ({ t: ms(r.createdAt), key: r.countryCode || r.country })),
-        ),
+        detail: "different kinds found",
+        icon: <LeafIcon />,
+        accent: true,
       },
       {
         label: "With photos or sounds",
         value: n(withMedia),
-        sub: "Photos or sounds",
-        series: countWhere((r) => (r as OccurrenceRecord).media.length > 0),
+        detail: "media-rich sightings",
+        icon: <ImageIcon />,
+      },
+      {
+        label: "Countries",
+        value: n(countries),
+        detail: "places reached",
+        icon: <MapIcon />,
+      },
+      {
+        label: "New this week",
+        value: n(last7),
+        detail: "latest activity",
+        icon: <AudioLinesIcon />,
       },
     ];
   }
@@ -956,27 +1143,12 @@ function computeStats(records: ExplorerRecord[], kind: RecordKind): Stat[] {
     const sites = b.reduce((s, r) => s + r.locationCount, 0);
     const withCover = b.filter((r) => r.imageUrl).length;
     return [
-      { label: "Items shown", value: n(b.length), sub: "Bumicerts", series: totalSeries },
-      { label: "Last 30 days", value: n(last30), sub: "New stories", series: win30 },
-      { label: "Last 7 days", value: n(last7), sub: "This week", series: win7 },
-      {
-        label: "Contributors",
-        value: n(contributors),
-        sub: "Across stories",
-        series: seriesFromIncrements(b.map((r) => ({ t: ms(r.createdAt), inc: r.contributorCount }))),
-      },
-      {
-        label: "Sites",
-        value: n(sites),
-        sub: "Site links",
-        series: seriesFromIncrements(b.map((r) => ({ t: ms(r.createdAt), inc: r.locationCount }))),
-      },
-      {
-        label: "With pictures",
-        value: n(withCover),
-        sub: "Has cover picture",
-        series: countWhere((r) => Boolean((r as BumicertRecord).imageUrl)),
-      },
+      { label: "Bumicerts", value: n(b.length), detail: "loaded project stories", icon: <LayoutGridIcon />, accent: true },
+      { label: "New in 30 days", value: n(last30), detail: "recent stories", icon: <LeafIcon /> },
+      { label: "Contributors", value: n(contributors), detail: "across stories", icon: <LeafIcon />, accent: true },
+      { label: "Project places", value: n(sites), detail: "linked places", icon: <MapIcon /> },
+      { label: "With pictures", value: n(withCover), detail: "cover pictures", icon: <ImageIcon /> },
+      { label: "New this week", value: n(last7), detail: "latest activity", icon: <AudioLinesIcon /> },
     ];
   }
 
@@ -984,48 +1156,26 @@ function computeStats(records: ExplorerRecord[], kind: RecordKind): Stat[] {
   const countries = new Set(s.map((r) => r.country).filter(Boolean)).size;
   const withImg = s.filter((r) => r.imageUrl).length;
   return [
-    { label: "Items shown", value: n(s.length), sub: "Organizations", series: totalSeries },
-    { label: "Last 30 days", value: n(last30), sub: "New sites", series: win30 },
-    { label: "Last 7 days", value: n(last7), sub: "This week", series: win7 },
-    {
-      label: "Countries",
-      value: n(countries),
-      sub: "Places reached",
-      series: seriesFromDistinct(s.map((r) => ({ t: ms(r.createdAt), key: r.country }))),
-    },
-    {
-      label: "With pictures",
-      value: n(withImg),
-      sub: "Cover or logo",
-      series: countWhere((r) => Boolean((r as SiteRecord).imageUrl)),
-    },
+    { label: "Organizations", value: n(s.length), detail: "loaded profiles", icon: <LayoutGridIcon />, accent: true },
+    { label: "New in 30 days", value: n(last30), detail: "recent profiles", icon: <LeafIcon /> },
+    { label: "Countries", value: n(countries), detail: "places reached", icon: <MapIcon />, accent: true },
+    { label: "With pictures", value: n(withImg), detail: "cover or logo pictures", icon: <ImageIcon /> },
+    { label: "New this week", value: n(last7), detail: "latest activity", icon: <AudioLinesIcon /> },
   ];
 }
 
-const STAT_COLS: Record<number, string> = {
-  4: "lg:grid-cols-4",
-  5: "lg:grid-cols-5",
-  6: "lg:grid-cols-6",
-};
-
 function StatBand({ stats }: { stats: Stat[] }) {
-  const lg = STAT_COLS[stats.length] ?? "lg:grid-cols-6";
   return (
-    <ul
-      role="list"
-      className={`grid grid-cols-2 gap-3 sm:gap-4 ${lg}`}
-    >
-      {stats.map((s) => (
-        <StatCard
-          key={s.label}
-          value={s.value}
-          label={s.label}
-          sub={s.sub}
-          series={s.series}
-          format={s.format}
-        />
-      ))}
-    </ul>
+    <StatsTileGrid
+      columns={stats.length === 4 ? 4 : 6}
+      items={stats.map((stat) => ({
+        label: stat.label,
+        value: stat.value,
+        detail: stat.detail,
+        icon: stat.icon,
+        accent: stat.accent,
+      }))}
+    />
   );
 }
 

@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { RecordExplorer } from "../_components/RecordExplorer";
 
+export const revalidate = 60;
+
 export const metadata: Metadata = {
   title: "Species observations",
   description:
