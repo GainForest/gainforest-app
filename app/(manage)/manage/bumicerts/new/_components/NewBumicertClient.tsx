@@ -76,6 +76,8 @@ type Draft = { id: string; updatedAt: string; values: FormValues };
 type PublishResult = { uri: string; cid: string; rkey: string };
 type StepId = "basics" | "story" | "people" | "review";
 type SitesStatus = "idle" | "loading" | "ready" | "error";
+type FormField = "title" | "scopes" | "dates" | "shortDescription" | "description" | "contributors" | "confirmedRights" | "acceptedTerms";
+type FormIssue = { field: FormField; step: StepId; message: string };
 
 /* ── Constants ──────────────────────────────────────────────────────────── */
 
@@ -129,6 +131,8 @@ const TIPS = [
 
 const FIELD =
   "w-full rounded-xl border border-border bg-background text-foreground shadow-none outline-none transition-colors placeholder:text-muted-foreground/65 focus:border-primary/45 focus:bg-background focus:ring-2 focus:ring-primary/20";
+const FIELD_ERROR = "!border-2 !border-destructive ring-2 ring-destructive/25 focus:!border-destructive focus:ring-2 focus:ring-destructive/30";
+const ERROR_MESSAGE = "flex items-center gap-1.5 rounded-lg bg-warn/10 px-2.5 py-1.5 text-xs font-medium text-foreground/75";
 
 /* ── Pure helpers ───────────────────────────────────────────────────────── */
 
@@ -200,38 +204,39 @@ function selectedLocations(values: FormValues, sites: ManagedLocation[]) {
 function siteSubtitle(site: ManagedLocation) {
   return site.record.description || (site.record.locationType ? "Map area" : "Project place");
 }
+function getFormIssues(values: FormValues): FormIssue[] {
+  const issues: FormIssue[] = [];
+  if (values.title.trim().length < 4) issues.push({ field: "title", step: "basics", message: "Add a title with at least 4 characters." });
+  if (scopeKeys(values).length === 0) issues.push({ field: "scopes", step: "basics", message: "Pick at least one type of work." });
+  if (!values.startDate) issues.push({ field: "dates", step: "basics", message: "Add when the work started." });
+  else if (!values.ongoing && !values.endDate) issues.push({ field: "dates", step: "basics", message: "Add an end date, or mark the work as ongoing." });
+  else if (!values.ongoing && values.endDate < values.startDate) issues.push({ field: "dates", step: "basics", message: "The end date can’t be before the start date." });
+  if (clampDescription(values.shortDescription).length < 30) issues.push({ field: "shortDescription", step: "story", message: "Write at least 30 characters for the summary." });
+  if (values.description.trim().length < 80) issues.push({ field: "description", step: "story", message: "Write at least 80 characters for the full description." });
+  if (contributorList(values).length === 0) issues.push({ field: "contributors", step: "people", message: "Add at least one contributor." });
+  if (!values.confirmedRights) issues.push({ field: "confirmedRights", step: "review", message: "Confirm you have permission to publish this work." });
+  if (!values.acceptedTerms) issues.push({ field: "acceptedTerms", step: "review", message: "Agree to the terms before publishing." });
+  return issues;
+}
+function issuesByField(issues: FormIssue[]): Partial<Record<FormField, FormIssue>> {
+  return Object.fromEntries(issues.map((issue) => [issue.field, issue])) as Partial<Record<FormField, FormIssue>>;
+}
+function firstStepIssue(issues: FormIssue[], step: StepId): FormIssue | undefined {
+  return issues.find((issue) => issue.step === step);
+}
+function stepIssueCount(issues: FormIssue[], step: StepId): number {
+  return issues.filter((issue) => issue.step === step).length;
+}
 function validateStep(step: StepId, values: FormValues): string | null {
-  if (step === "basics") {
-    if (values.title.trim().length < 4) return "Give your Bumicert a clear title.";
-    if (!values.startDate) return "Add when the work started.";
-    if (!values.ongoing && !values.endDate) return "Add an end date, or mark the work as ongoing.";
-    if (!values.ongoing && values.endDate < values.startDate) return "The end date can’t be before the start date.";
-    if (scopeKeys(values).length === 0) return "Pick at least one type of work.";
-  }
-  if (step === "story") {
-    if (clampDescription(values.shortDescription).length < 30) return "The summary needs at least 30 characters.";
-    if (values.description.trim().length < 80) return "The description should cover what happened, the evidence, and the outcome.";
-  }
-  if (step === "people") {
-    if (contributorList(values).length === 0) return "Add at least one contributor.";
-  }
-  if (step === "review") {
-    if (!values.confirmedRights) return "Confirm you have permission to publish this work.";
-    if (!values.acceptedTerms) return "Agree to the terms before publishing.";
-  }
-  return null;
+  return firstStepIssue(getFormIssues(values), step)?.message ?? null;
 }
 function validateAll(values: FormValues): string | null {
-  for (const step of STEPS) {
-    const error = validateStep(step.id, values);
-    if (error) return error;
-  }
-  return null;
+  return getFormIssues(values)[0]?.message ?? null;
 }
 
 /* ── Field wrapper ──────────────────────────────────────────────────────── */
 
-function Field({ label, hint, htmlFor, children }: { label: string; hint?: string; htmlFor?: string; children: ReactNode }) {
+function Field({ label, hint, htmlFor, error, children }: { label: string; hint?: string; htmlFor?: string; error?: string; children: ReactNode }) {
   return (
     <div className="space-y-2.5">
       <label htmlFor={htmlFor} className="block text-sm font-medium text-foreground">
@@ -239,16 +244,27 @@ function Field({ label, hint, htmlFor, children }: { label: string; hint?: strin
         {hint ? <span className="ml-2 font-normal text-muted-foreground">{hint}</span> : null}
       </label>
       {children}
+      {error ? <p className={ERROR_MESSAGE}><TriangleAlertIcon className="size-3.5 text-warn" /> {error}</p> : null}
     </div>
   );
 }
 
 /* ── Section header (editorial display type per section) ────────────────── */
 
-function SectionHeader({ eyebrow, title, subtitle }: { eyebrow: string; title: string; subtitle: string }) {
+function SectionHeader({
+  eyebrow,
+  title,
+  subtitle,
+}: {
+  eyebrow: string;
+  title: string;
+  subtitle: string;
+}) {
   return (
     <div className="mb-8">
-      <p className="mb-2.5 text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground/65">{eyebrow}</p>
+      <div className="mb-2.5 flex flex-wrap items-center gap-2">
+        <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground/65">{eyebrow}</p>
+      </div>
       <h2 className="font-instrument text-[2.5rem] italic leading-[1.05] tracking-[-0.01em] text-foreground">{title}</h2>
       <p className="mt-2 text-sm leading-6 text-muted-foreground">{subtitle}</p>
     </div>
@@ -264,7 +280,9 @@ function ScopeTag({ label, active, onClick }: { label: string; active: boolean; 
       onClick={onClick}
       className={cn(
         "inline-flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-[13px] transition-colors",
-        active ? "border-primary bg-primary text-primary-foreground" : "border-border bg-background text-muted-foreground hover:border-primary/35 hover:text-foreground",
+        active
+          ? "border-primary bg-primary text-primary-foreground"
+          : "border-border bg-background text-muted-foreground hover:border-primary/35 hover:text-foreground",
       )}
     >
       {active ? <CheckIcon className="size-3.5" /> : <PlusIcon className="size-3.5 opacity-60" />}
@@ -289,11 +307,13 @@ function DateRangePicker({
   startDate,
   endDate,
   ongoing,
+  error,
   onChange,
 }: {
   startDate: string;
   endDate: string;
   ongoing: boolean;
+  error?: string;
   onChange: (next: { startDate: string; endDate: string }) => void;
 }) {
   const start = dateFromValue(startDate) ?? new Date();
@@ -305,7 +325,7 @@ function DateRangePicker({
         <button
           id="project-date-range"
           type="button"
-          className="group flex w-full cursor-pointer items-center justify-center rounded-md bg-foreground/2 p-2 text-center transition-all duration-300"
+          className={cn("group flex w-full cursor-pointer items-center justify-center rounded-md border border-transparent bg-foreground/2 p-2 text-center transition-all duration-300", error && "border-2 border-destructive ring-2 ring-destructive/25")}
         >
           <span className="text-2xl font-medium text-foreground group-hover:text-primary">
             {format(start, "LLL dd, y")} → {ongoing || !endDate ? "Ongoing" : format(end, "LLL dd, y")}
@@ -353,6 +373,7 @@ function ContributorInput({
   onRemove,
   canRemove,
   placeholder,
+  error,
 }: {
   value: string;
   actor: ActorResult | null;
@@ -361,6 +382,7 @@ function ContributorInput({
   onRemove: () => void;
   canRemove: boolean;
   placeholder: string;
+  error?: string;
 }) {
   const [results, setResults] = useState<ActorResult[]>([]);
   const [open, setOpen] = useState(false);
@@ -430,7 +452,7 @@ function ContributorInput({
     <div ref={boxRef} className="relative flex items-center gap-2">
       <div className="relative flex-1">
         {actor ? (
-          <div className="flex min-h-11 items-center gap-3 rounded-xl border border-border bg-background px-3 py-2">
+          <div className={cn("flex min-h-11 items-center gap-3 rounded-xl border bg-background px-3 py-2", error ? "border-2 border-destructive ring-2 ring-destructive/25" : "border-border")}>
             <ActorAvatar actor={actor} />
             <span className="min-w-0 flex-1">
               <span className="block truncate text-sm font-medium text-foreground">{actorLabel(actor)}</span>
@@ -476,7 +498,7 @@ function ContributorInput({
               }
             }}
             placeholder={placeholder}
-            className={cn(FIELD, "px-4 py-2.5 text-sm")}
+            className={cn(FIELD, "px-4 py-2.5 text-sm", error && FIELD_ERROR)}
           />
         )}
         {loading && !actor ? <Loader2Icon className="absolute right-3 top-1/2 size-4 -translate-y-1/2 animate-spin text-muted-foreground/60" /> : null}
@@ -531,51 +553,71 @@ function ContributorInput({
 
 /* ── Steps ──────────────────────────────────────────────────────────────── */
 
-function BasicsStep({ values, setValues }: { values: FormValues; setValues: React.Dispatch<React.SetStateAction<FormValues>> }) {
-  const toggleScope = (scopeKey: string) =>
+function BasicsStep({
+  values,
+  setValues,
+  issues,
+  onFieldChange,
+}: {
+  values: FormValues;
+  setValues: React.Dispatch<React.SetStateAction<FormValues>>;
+  issues: Partial<Record<FormField, FormIssue>>;
+  onFieldChange: (field: FormField) => void;
+}) {
+  const toggleScope = (scopeKey: string) => {
+    onFieldChange("scopes");
     setValues((c) => ({ ...c, scopes: c.scopes.includes(scopeKey) ? c.scopes.filter((s) => s !== scopeKey) : [...c.scopes, scopeKey] }));
+  };
 
   return (
     <div className="space-y-8">
-      <Field label="Title" hint="what people will recognise" htmlFor="bumicert-title">
+      <Field label="Title" hint="what people will recognise" htmlFor="bumicert-title" error={issues.title?.message}>
         <input
           id="bumicert-title"
           value={values.title}
           maxLength={TITLE_MAX}
-          onChange={(e) => setValues((c) => ({ ...c, title: e.target.value }))}
+          onChange={(e) => {
+            onFieldChange("title");
+            setValues((c) => ({ ...c, title: e.target.value }));
+          }}
           placeholder="Mangrove restoration in the Rufiji Delta"
-          className={cn(FIELD, "px-4 py-3 font-instrument text-2xl italic tracking-[-0.01em]")}
+          className={cn(FIELD, "px-4 py-3 font-instrument text-2xl italic tracking-[-0.01em]", issues.title && FIELD_ERROR)}
         />
         <div className="mt-1.5 text-right text-xs text-muted-foreground">{values.title.length} / {TITLE_MAX}</div>
       </Field>
 
-      <Field label="Type of work" hint="pick everything this covers">
-        <div className="flex flex-wrap gap-2">
+      <Field label="Type of work" hint="pick everything this covers" error={issues.scopes?.message}>
+        <div className={cn("flex flex-wrap gap-2 rounded-2xl transition-colors", issues.scopes && "border-2 border-destructive p-3 ring-2 ring-destructive/20")}>
           {WORK_SCOPES.map((scope) => (
             <ScopeTag key={scope.key} label={scope.label} active={values.scopes.includes(scope.key)} onClick={() => toggleScope(scope.key)} />
           ))}
         </div>
       </Field>
 
-      <Field label="Time period">
+      <Field label="Time period" error={issues.dates?.message}>
         <div className="mt-1 flex flex-col gap-2">
           <DateRangePicker
             startDate={values.startDate}
             endDate={values.endDate}
             ongoing={values.ongoing}
-            onChange={({ startDate, endDate }) => setValues((c) => ({ ...c, startDate, endDate }))}
+            error={issues.dates?.message}
+            onChange={({ startDate, endDate }) => {
+              onFieldChange("dates");
+              setValues((c) => ({ ...c, startDate, endDate }));
+            }}
           />
           <div className="flex items-center gap-2 px-1">
             <Checkbox
               id="is-ongoing"
               checked={values.ongoing}
-              onCheckedChange={(checked) =>
+              onCheckedChange={(checked) => {
+                onFieldChange("dates");
                 setValues((c) => ({
                   ...c,
                   ongoing: checked === true,
                   endDate: checked === true ? "" : valueFromDate(new Date()),
-                }))
-              }
+                }));
+              }}
             />
             <label htmlFor="is-ongoing" className="cursor-pointer select-none text-sm text-muted-foreground">
               This work is ongoing
@@ -612,17 +654,30 @@ function processMapAreaData(data: unknown): string | null {
   return null;
 }
 
-function StoryStep({ values, setValues }: { values: FormValues; setValues: React.Dispatch<React.SetStateAction<FormValues>> }) {
+function StoryStep({
+  values,
+  setValues,
+  issues,
+  onFieldChange,
+}: {
+  values: FormValues;
+  setValues: React.Dispatch<React.SetStateAction<FormValues>>;
+  issues: Partial<Record<FormField, FormIssue>>;
+  onFieldChange: (field: FormField) => void;
+}) {
   const shortCount = clampDescription(values.shortDescription).length;
   return (
     <div className="space-y-8">
-      <Field label="Summary" hint="shown on cards — lead with the outcome" htmlFor="summary">
+      <Field label="Summary" hint="shown on cards — lead with the outcome" htmlFor="summary" error={issues.shortDescription?.message}>
         <textarea
           id="summary"
           value={values.shortDescription}
-          onChange={(e) => setValues((c) => ({ ...c, shortDescription: e.target.value.slice(0, 300) }))}
+          onChange={(e) => {
+            onFieldChange("shortDescription");
+            setValues((c) => ({ ...c, shortDescription: e.target.value.slice(0, 300) }));
+          }}
           placeholder="Local stewards restored degraded mangrove plots, tracked survival rates, and documented biodiversity return across community-managed land."
-          className={cn(FIELD, "min-h-24 resize-none px-4 py-3 text-[15px] leading-7")}
+          className={cn(FIELD, "min-h-24 resize-none px-4 py-3 text-[15px] leading-7", issues.shortDescription && FIELD_ERROR)}
         />
         <div className="mt-1.5 flex justify-between text-xs text-muted-foreground">
           <span>{shortCount < 30 ? "At least 30 characters" : "Looks good"}</span>
@@ -630,13 +685,16 @@ function StoryStep({ values, setValues }: { values: FormValues; setValues: React
         </div>
       </Field>
 
-      <Field label="Full description" hint="what happened, the evidence, the outcome" htmlFor="description">
+      <Field label="Full description" hint="what happened, the evidence, the outcome" htmlFor="description" error={issues.description?.message}>
         <textarea
           id="description"
           value={values.description}
-          onChange={(e) => setValues((c) => ({ ...c, description: e.target.value }))}
+          onChange={(e) => {
+            onFieldChange("description");
+            setValues((c) => ({ ...c, description: e.target.value }));
+          }}
           placeholder={"What happened on the ground?\n\nHow was impact measured?\n\nWhat evidence should a funder look at?\n\nWho benefits, and what comes next?"}
-          className={cn(FIELD, "min-h-64 resize-y px-4 py-3.5 text-[15px] leading-7")}
+          className={cn(FIELD, "min-h-64 resize-y px-4 py-3.5 text-[15px] leading-7", issues.description && FIELD_ERROR)}
         />
       </Field>
     </div>
@@ -697,21 +755,30 @@ function AddSiteModal({
   const [drawing, setDrawing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [siteErrors, setSiteErrors] = useState<{ name?: string; file?: string }>({});
 
   const save = async () => {
-    if (!name.trim()) {
-      setError("Name this site before saving.");
+    const fileToSave = siteFile;
+    const nextErrors: { name?: string; file?: string } = {};
+    if (!name.trim()) nextErrors.name = "Name this site before saving.";
+    if (!fileToSave) nextErrors.file = "Upload a site file or draw a site before saving.";
+    if (nextErrors.name || nextErrors.file) {
+      setSiteErrors(nextErrors);
+      setError(null);
       return;
     }
-    if (!siteFile) {
-      setError("Upload a site file or draw a site before saving.");
-      return;
-    }
+    if (!fileToSave) return;
     setSaving(true);
     setError(null);
+    setSiteErrors({});
     try {
-      await validateSiteFile(siteFile);
-      const uploaded = await uploadBlob(siteFile);
+      try {
+        await validateSiteFile(fileToSave);
+      } catch (validationError) {
+        setSiteErrors({ file: validationError instanceof Error ? validationError.message : "Choose a valid site file." });
+        return;
+      }
+      const uploaded = await uploadBlob(fileToSave);
       const createdAt = new Date().toISOString();
       const record: Record<string, unknown> = {
         $type: "app.certified.location",
@@ -754,14 +821,25 @@ function AddSiteModal({
               setSiteFile(file);
               setDrawing(false);
               setError(null);
+              setSiteErrors((current) => ({ ...current, file: undefined }));
             }}
           />
         ) : (
           <div className="grid gap-4 p-5">
-            <Field label="Site name" htmlFor="new-site-name">
-              <input id="new-site-name" value={name} onChange={(event) => setName(event.target.value)} placeholder="North restoration plot" className={cn(FIELD, "px-4 py-2.5 text-sm")} />
+            <Field label="Site name" htmlFor="new-site-name" error={siteErrors.name}>
+              <input
+                id="new-site-name"
+                value={name}
+                onChange={(event) => {
+                  setName(event.target.value);
+                  setSiteErrors((current) => ({ ...current, name: undefined }));
+                }}
+                placeholder="North restoration plot"
+                className={cn(FIELD, "px-4 py-2.5 text-sm", siteErrors.name && FIELD_ERROR)}
+              />
             </Field>
-            <label className="flex min-h-36 cursor-pointer flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-muted/35 px-5 py-6 text-center transition-colors hover:border-primary/40 hover:bg-primary/5">
+            <Field label="Site file" error={siteErrors.file}>
+              <label className={cn("flex min-h-36 cursor-pointer flex-col items-center justify-center rounded-2xl border border-dashed bg-muted/35 px-5 py-6 text-center transition-colors hover:border-primary/40 hover:bg-primary/5", siteErrors.file ? "border-2 border-destructive ring-2 ring-destructive/25" : "border-border")}>
               <input
                 type="file"
                 accept=".geojson,.json,application/geo+json,application/json"
@@ -769,12 +847,14 @@ function AddSiteModal({
                 onChange={(event) => {
                   setSiteFile(event.target.files?.[0] ?? null);
                   setError(null);
+                  setSiteErrors((current) => ({ ...current, file: undefined }));
                   event.target.value = "";
                 }}
               />
-              <span className="text-sm font-medium text-foreground">{siteFile ? siteFile.name : "Upload a site file"}</span>
-              <span className="mt-1 text-xs text-muted-foreground">Choose a saved map boundary from your device.</span>
-            </label>
+                <span className="text-sm font-medium text-foreground">{siteFile ? siteFile.name : "Upload a site file"}</span>
+                <span className="mt-1 text-xs text-muted-foreground">Choose a saved map boundary from your device.</span>
+              </label>
+            </Field>
             <div className="flex items-center gap-2">
               <div className="h-px flex-1 bg-border" />
               <span className="text-xs text-muted-foreground">or</span>
@@ -786,7 +866,7 @@ function AddSiteModal({
             {error ? <p className="text-sm text-destructive">{error}</p> : null}
             <div className="flex justify-end gap-2">
               <Button type="button" variant="outline" onClick={onClose} disabled={saving}>Cancel</Button>
-              <Button type="button" onClick={() => void save()} disabled={saving || !siteFile}>
+              <Button type="button" onClick={() => void save()} disabled={saving}>
                 {saving ? <Loader2Icon className="size-4 animate-spin" /> : <CheckIcon className="size-4" />}
                 Add site
               </Button>
@@ -809,6 +889,8 @@ function PeopleStep({
   contributorProfiles,
   setContributorProfile,
   onSiteCreated,
+  issues,
+  onFieldChange,
 }: {
   did: string;
   values: FormValues;
@@ -820,13 +902,19 @@ function PeopleStep({
   contributorProfiles: Record<string, ActorResult>;
   setContributorProfile: (identity: string, actor: ActorResult | null) => void;
   onSiteCreated: (site: ManagedLocation) => void;
+  issues: Partial<Record<FormField, FormIssue>>;
+  onFieldChange: (field: FormField) => void;
 }) {
   const [showAllSites, setShowAllSites] = useState(false);
   const [addingSite, setAddingSite] = useState(false);
-  const updateContributor = (index: number, value: string) =>
+  const updateContributor = (index: number, value: string) => {
+    onFieldChange("contributors");
     setValues((c) => ({ ...c, contributors: c.contributors.map((v, i) => (i === index ? value : v)) }));
-  const removeContributor = (index: number) =>
+  };
+  const removeContributor = (index: number) => {
+    onFieldChange("contributors");
     setValues((c) => ({ ...c, contributors: c.contributors.filter((_, i) => i !== index) }));
+  };
   const toggleLocation = (uri: string) =>
     setValues((c) => ({
       ...c,
@@ -839,7 +927,7 @@ function PeopleStep({
 
   return (
     <div className="space-y-8">
-      <Field label="Contributors" hint="search a name or @handle">
+      <Field label="Contributors" hint="search a name or @handle" error={issues.contributors?.message}>
         <div className="space-y-2.5">
           {values.contributors.map((contributor, index) => (
             <ContributorInput
@@ -851,6 +939,7 @@ function PeopleStep({
               onRemove={() => removeContributor(index)}
               canRemove={values.contributors.length > 1}
               placeholder={index === 0 ? "Search e.g. “Rufiji Stewards” or @handle" : "Name or @handle"}
+              error={issues.contributors?.message}
             />
           ))}
         </div>
@@ -858,7 +947,10 @@ function PeopleStep({
           type="button"
           variant="ghost"
           size="sm"
-          onClick={() => setValues((c) => ({ ...c, contributors: [...c.contributors, ""] }))}
+          onClick={() => {
+            onFieldChange("contributors");
+            setValues((c) => ({ ...c, contributors: [...c.contributors, ""] }));
+          }}
           className="mt-2 -ml-2 text-primary hover:text-primary"
         >
           <PlusIcon className="size-4" /> Add contributor
@@ -938,39 +1030,55 @@ function ConfirmStep({
   values,
   setValues,
   publishError,
+  issues,
+  isComplete,
+  onFieldChange,
 }: {
   values: FormValues;
   setValues: React.Dispatch<React.SetStateAction<FormValues>>;
   publishError: string | null;
+  issues: FormIssue[];
+  isComplete: boolean;
+  onFieldChange: (field: FormField) => void;
 }) {
-  const validation = validateAll(values);
+  const validation = issues[0]?.message ?? null;
+  const fieldIssues = issuesByField(issues);
+  const statusLabel = validation ?? (isComplete ? "Ready to publish" : "Complete the required details");
 
   return (
     <div className="space-y-5">
-      <span className={cn("inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[13px] font-medium", validation ? "bg-warn/15 text-foreground" : "bg-primary/15 text-primary")}>
-        {validation ? <TriangleAlertIcon className="size-3.5" /> : <CheckIcon className="size-3.5" />}
-        {validation ?? "Ready to publish"}
+      <span className={cn("inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[13px] font-medium", validation ? "bg-warn/15 text-foreground" : isComplete ? "bg-primary/15 text-primary" : "bg-muted text-muted-foreground")}>
+        {validation ? <TriangleAlertIcon className="size-3.5" /> : isComplete ? <CheckIcon className="size-3.5" /> : <LeafIcon className="size-3.5" />}
+        {statusLabel}
       </span>
 
-      <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-border bg-background px-4 py-3.5">
+      <label className={cn("flex cursor-pointer items-start gap-3 rounded-2xl border bg-background px-4 py-3.5 transition-colors", fieldIssues.confirmedRights ? "border-2 border-destructive ring-2 ring-destructive/25" : "border-border")}>
         <Checkbox
           checked={values.confirmedRights}
-          onCheckedChange={(checked) => setValues((c) => ({ ...c, confirmedRights: checked === true }))}
+          onCheckedChange={(checked) => {
+            onFieldChange("confirmedRights");
+            setValues((c) => ({ ...c, confirmedRights: checked === true }));
+          }}
           className="mt-0.5"
         />
         <span className="text-[13px] leading-6 text-foreground">
           I confirm I have permission to create this Bumicert for the work and sites above, and that the details are accurate.
+          {fieldIssues.confirmedRights ? <span className="mt-2 inline-flex items-center gap-1.5 rounded-lg bg-warn/10 px-2.5 py-1.5 text-xs font-medium text-foreground/75"><TriangleAlertIcon className="size-3.5 text-warn" /> {fieldIssues.confirmedRights.message}</span> : null}
         </span>
       </label>
 
-      <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-border bg-background px-4 py-3.5">
+      <label className={cn("flex cursor-pointer items-start gap-3 rounded-2xl border bg-background px-4 py-3.5 transition-colors", fieldIssues.acceptedTerms ? "border-2 border-destructive ring-2 ring-destructive/25" : "border-border")}>
         <Checkbox
           checked={values.acceptedTerms}
-          onCheckedChange={(checked) => setValues((c) => ({ ...c, acceptedTerms: checked === true }))}
+          onCheckedChange={(checked) => {
+            onFieldChange("acceptedTerms");
+            setValues((c) => ({ ...c, acceptedTerms: checked === true }));
+          }}
           className="mt-0.5"
         />
         <span className="text-[13px] leading-6 text-foreground">
           I agree to the <a href={TERMS_URL} target="_blank" rel="noreferrer" className="text-primary underline-offset-2 hover:underline">terms and conditions</a>.
+          {fieldIssues.acceptedTerms ? <span className="mt-2 inline-flex items-center gap-1.5 rounded-lg bg-warn/10 px-2.5 py-1.5 text-xs font-medium text-foreground/75"><TriangleAlertIcon className="size-3.5 text-warn" /> {fieldIssues.acceptedTerms.message}</span> : null}
         </span>
       </label>
 
@@ -1159,6 +1267,8 @@ export function NewBumicertClient({ did, profile }: { did: string; profile: Prof
   const [sitesError, setSitesError] = useState<string | null>(null);
   const [publishError, setPublishError] = useState<string | null>(null);
   const [contributorProfiles, setContributorProfiles] = useState<Record<string, ActorResult>>({});
+  const [touchedFields, setTouchedFields] = useState<Partial<Record<FormField, boolean>>>({});
+  const [publishAttempted, setPublishAttempted] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
   const [publishResult, setPublishResult] = useState<PublishResult | null>(null);
   const [mobileSheet, setMobileSheet] = useState<"preview" | "tips" | null>(null);
@@ -1233,7 +1343,13 @@ export function NewBumicertClient({ did, profile }: { did: string; profile: Prof
     };
   }, [activeDraftId, publishResult, values]);
 
-  const formError = validateAll(values);
+  const formIssues = getFormIssues(values);
+  const visibleIssues = formIssues.filter((issue) => publishAttempted || touchedFields[issue.field]);
+  const fieldIssues = issuesByField(visibleIssues);
+
+  const markFieldChanged = useCallback((field: FormField) => {
+    setTouchedFields((current) => current[field] ? current : { ...current, [field]: true });
+  }, []);
 
   const applyCoverFile = useCallback(
     (file: File | null) => {
@@ -1292,6 +1408,8 @@ export function NewBumicertClient({ did, profile }: { did: string; profile: Prof
     setActiveDraftId(draft.id);
     setPublishResult(null);
     setPublishError(null);
+    setPublishAttempted(false);
+    setTouchedFields({});
   };
 
   const handleDeleteDraft = (id: string) => {
@@ -1308,6 +1426,8 @@ export function NewBumicertClient({ did, profile }: { did: string; profile: Prof
     setActiveDraftId(null);
     setPublishResult(null);
     setPublishError(null);
+    setPublishAttempted(false);
+    setTouchedFields({});
     clearCover();
   };
 
@@ -1336,6 +1456,7 @@ export function NewBumicertClient({ did, profile }: { did: string; profile: Prof
     event.preventDefault();
     const validation = validateAll(values);
     if (validation) {
+      setPublishAttempted(true);
       setPublishError(validation);
       return;
     }
@@ -1418,7 +1539,7 @@ export function NewBumicertClient({ did, profile }: { did: string; profile: Prof
               <div className="min-w-0">
                 <section>
                   <SectionHeader eyebrow="Basics" title={STEPS[0].title} subtitle={STEPS[0].subtitle} />
-                  <BasicsStep values={values} setValues={setValues} />
+                  <BasicsStep values={values} setValues={setValues} issues={fieldIssues} onFieldChange={markFieldChanged} />
 
                   {/* Mobile: live preview shown inline */}
                   <div className="mt-10 xl:hidden">
@@ -1431,7 +1552,7 @@ export function NewBumicertClient({ did, profile }: { did: string; profile: Prof
 
                 <section className="mt-14 border-t border-border/40 pt-14">
                   <SectionHeader eyebrow="Story" title={STEPS[1].title} subtitle={STEPS[1].subtitle} />
-                  <StoryStep values={values} setValues={setValues} />
+                  <StoryStep values={values} setValues={setValues} issues={fieldIssues} onFieldChange={markFieldChanged} />
                 </section>
 
                 <section className="mt-14 border-t border-border/40 pt-14">
@@ -1447,17 +1568,19 @@ export function NewBumicertClient({ did, profile }: { did: string; profile: Prof
                     contributorProfiles={contributorProfiles}
                     setContributorProfile={setContributorProfile}
                     onSiteCreated={handleSiteCreated}
+                    issues={fieldIssues}
+                    onFieldChange={markFieldChanged}
                   />
                 </section>
 
                 <section className="mt-14 border-t border-border/40 pt-14">
                   <SectionHeader eyebrow="Publish" title="ready to publish?" subtitle="One last verification, then make it public." />
-                  <ConfirmStep values={values} setValues={setValues} publishError={publishError} />
+                  <ConfirmStep values={values} setValues={setValues} publishError={publishError} issues={visibleIssues} isComplete={formIssues.length === 0} onFieldChange={markFieldChanged} />
                 </section>
 
-                <div className="mt-10 flex items-center justify-between">
+                <div className="mt-10 flex flex-wrap items-center justify-between gap-3">
                   <span className="hidden text-xs text-muted-foreground sm:block">{activeDraftId ? "Saved" : "Not saved yet"}</span>
-                  <Button type="submit" size="lg" disabled={Boolean(formError) || isPublishing}>
+                  <Button type="submit" size="lg" disabled={isPublishing}>
                     {isPublishing ? <Loader2Icon className="size-4 animate-spin" /> : <LeafIcon className="size-4" />}
                     {isPublishing ? "Publishing…" : "Publish Bumicert"}
                   </Button>
