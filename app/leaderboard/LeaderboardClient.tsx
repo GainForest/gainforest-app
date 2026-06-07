@@ -24,13 +24,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { AuthorInline } from "../_components/AuthorChip";
 import { StatsTileGrid, type StatsTileItem } from "../_components/StatsTile";
-import {
-  getCachedProfile,
-  monogram,
-  resolveDidProfile,
-  type DidProfile,
-} from "../_lib/did-profile";
 import { fetchReceipts, type FundingReceipt } from "../_lib/dashboard";
 import { formatCompact, formatCompactUsd } from "../_lib/format";
 import { accountHref } from "../_lib/urls";
@@ -310,9 +305,9 @@ function StatsSummary({
       accent: true,
     },
     {
-      label: "Total Gifts",
+      label: "No. of Donations",
       value: formatCompact(totalDonationCount),
-      detail: "completed gifts counted",
+      detail: "completed donations counted",
       icon: <GiftIcon />,
     },
   ];
@@ -380,13 +375,13 @@ function LeaderboardShell({
             initial={animate ? { opacity: 0, y: 12 } : false}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1, ease: [0.25, 0.1, 0.25, 1] }}
-            className="mb-5 rounded-3xl bg-background/65 p-2 shadow-sm shadow-primary/5 ring-1 ring-foreground/5 backdrop-blur-xl"
+            className="mb-5 grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center xl:grid-cols-[1.15fr_minmax(0,1fr)_auto]"
           >
-            <div className="grid gap-3 xl:grid-cols-[1fr_1.15fr_auto] xl:items-center">
-              <PeriodChips period={period} onPeriodChange={onPeriodChange} />
+            <div className="sm:col-span-2 xl:col-span-1">
               <DonorTypeTabs donorFilter={donorFilter} onDonorFilterChange={onDonorFilterChange} />
-              <SortControl sortBy={sortBy} onSortChange={onSortChange} />
             </div>
+            <PeriodChips period={period} onPeriodChange={onPeriodChange} />
+            <SortControl sortBy={sortBy} onSortChange={onSortChange} />
           </motion.div>
 
           <motion.div
@@ -506,50 +501,11 @@ function DonorBadge({ rank }: { rank: number }) {
   );
 }
 
-function DonorAvatar({ entry, profile }: { entry: LeaderboardEntry; profile: DidProfile | null }) {
-  const [failed, setFailed] = useState(false);
-  const ring = "size-11 shrink-0 rounded-full ring-1 ring-foreground/5";
-
-  const avatar = profile?.avatar ?? null;
-  if (avatar && !failed) {
-    // eslint-disable-next-line @next/next/no-img-element -- avatar URLs come from arbitrary PDS/CDN hosts; next/image is not worth the remotePatterns surface.
-    return <img src={avatar} alt="" onError={() => setFailed(true)} className={cn(ring, "object-cover")} />;
-  }
-
-  const m = monogram(profile?.handle ?? null, entry.donorId);
-  return (
-    <span
-      aria-hidden
-      style={{ backgroundColor: m.bg }}
-      className={cn(ring, "grid place-items-center text-sm font-semibold text-white/95")}
-    >
-      {m.char}
-    </span>
-  );
-}
-
 function DonorCard({ entry }: { entry: LeaderboardEntry }) {
   const isWallet = entry.donorType === "wallet";
-  const [profile, setProfile] = useState<DidProfile | null>(() =>
-    isWallet ? null : getCachedProfile(entry.donorId) ?? null,
-  );
-
-  useEffect(() => {
-    if (isWallet) return;
-    let active = true;
-    setProfile(getCachedProfile(entry.donorId) ?? null);
-    resolveDidProfile(entry.donorId).then((p) => {
-      if (active) setProfile(p);
-    });
-    return () => {
-      active = false;
-    };
-  }, [entry.donorId, isWallet]);
-
   const relativeTime = entry.lastDonatedAt ? formatRelativeTimeFromNow(new Date(entry.lastDonatedAt)) : null;
   const actionHref = isWallet ? basescanAddress(entry.donorId) : accountHref(entry.donorId);
   const actionLabel = isWallet ? "Open payment details" : "Open supporter profile in a new tab";
-  const name = isWallet ? "Anonymous supporter" : profile?.displayName || profile?.handle || "Supporter";
 
   return (
     <a
@@ -560,12 +516,19 @@ function DonorCard({ entry }: { entry: LeaderboardEntry }) {
       className="group flex items-center gap-3.5 px-4 py-[18px] transition-colors duration-200 hover:bg-primary/[0.04] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:gap-4 sm:px-5 sm:py-5"
     >
       <RankBadge rank={entry.rank} />
-      {!isWallet && <DonorAvatar entry={entry} profile={profile} />}
 
       <div className="min-w-0 flex-1">
         <p className="flex min-w-0 items-center gap-1.5 text-[15px] font-semibold text-foreground">
-          {isWallet && <WalletIcon className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />}
-          <span className="truncate">{name}</span>
+          {isWallet ? (
+            <>
+              <WalletIcon className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+              <span className="truncate">Anonymous supporter</span>
+            </>
+          ) : (
+            <span className="min-w-0 truncate">
+              <AuthorInline did={entry.donorId} />
+            </span>
+          )}
         </p>
         <div className="mt-1.5 flex min-w-0 items-center gap-1.5 text-[13px] text-muted-foreground">
           <DonorBadge rank={entry.rank} />
