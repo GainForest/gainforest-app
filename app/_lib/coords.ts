@@ -213,17 +213,9 @@ export async function resolvePointForRecord(
     return coords ? { ...coords, label: record.title, did: record.did, recordId: record.id } : null;
   }
 
-  if (record.source === "certified") {
-    if (!record.locationUri) return null;
-    const coords = await resolveCertifiedLocationCoords(record.locationUri, signal);
-    return coords ? { ...coords, label: record.name, did: record.did, recordId: record.id } : null;
-  }
-
-  const siteMap = await loadSitePointMap();
-  const point = siteMap.get(record.did);
-  return point
-    ? { lat: point.lat, lon: point.lon, label: point.name || record.name, did: record.did, recordId: record.id }
-    : null;
+  if (!record.locationUri) return null;
+  const coords = await resolveCertifiedLocationCoords(record.locationUri, signal);
+  return coords ? { ...coords, label: record.name, did: record.did, recordId: record.id } : null;
 }
 
 const CONCURRENCY = 6;
@@ -284,39 +276,12 @@ export async function resolvePointsFor(
     return points;
   }
 
-  // Sites come from two lexicons. GainForest orgs are plotted from Green
-  // Globe's curated did→{lat,lon} map (the full geographic picture, like the
-  // globe). Certified actor orgs carry their own `app.certified.location`
-  // strongRef, which the curated map doesn't include, so resolve those per
-  // record. Each source is only drawn when it's actually in the loaded set,
-  // so the toolbar's GainForest / Certified / Both filter scopes the map too.
+  // Organizations carry their own `app.certified.location` reference, so resolve
+  // each loaded organization's coordinates directly.
   const siteRecords = records.filter(
     (r): r is Extract<ExplorerRecord, { kind: "site" }> => r.kind === "site",
   );
-  const hasGainforest = siteRecords.some((r) => r.source === "gainforest");
-
-  if (hasGainforest) {
-    const siteMap = await loadSitePointMap();
-    const loadedByDid = new Map(
-      siteRecords.filter((r) => r.source === "gainforest").map((r) => [r.did, r.id]),
-    );
-    for (const [did, pt] of siteMap) {
-      points.push({
-        lat: pt.lat,
-        lon: pt.lon,
-        label: pt.name || did,
-        did,
-        recordId: loadedByDid.get(did),
-      });
-    }
-    onProgress?.([...points]);
-  }
-
-  // Certified orgs: resolve each org's certified-location coordinates directly.
-  const seenDids = new Set(points.map((p) => p.did));
-  const certTargets = siteRecords.filter(
-    (r) => r.source === "certified" && r.locationUri && !seenDids.has(r.did),
-  );
+  const certTargets = siteRecords.filter((r) => r.locationUri);
   const tasks = certTargets.map((r) => async () => {
     const coords = await resolveCertifiedLocationCoords(r.locationUri!, signal);
     if (coords) {

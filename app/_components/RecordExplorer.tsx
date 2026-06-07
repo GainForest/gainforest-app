@@ -102,13 +102,12 @@ const GALLERY_GRID_CLS =
 // be expanded back into a full at:// URI (the collection is implied by route).
 const COLLECTION: Record<RecordKind, string> = {
   occurrence: "app.gainforest.dwc.occurrence",
-  site: "app.gainforest.organization.info",
+  site: "app.certified.actor.organization",
   bumicert: "org.hypercerts.claim.activity",
 };
 
 /** Compact, shareable key for a record: `did/collection/rkey` (no segment ever
- *  contains "/"). The collection is encoded so a page that mixes lexicons
- *  (e.g. Sites = GainForest org + certified actor org) round-trips correctly. */
+ *  contains "/"). The collection is encoded so records round-trip correctly. */
 function recordParam(r: ExplorerRecord): string {
   const m = r.atUri.match(/^at:\/\/([^/]+)\/([^/]+)\/(.+)$/);
   return m ? `${m[1]}/${m[2]}/${m[3]}` : r.id;
@@ -324,7 +323,7 @@ export function RecordExplorer({
     }
     if (kind === "site") {
       const src = sp.get("source");
-      if (src === "gainforest" || src === "certified") {
+      if (src === "certified") {
         setSiteSource(src);
         shouldClientLoad = true;
       }
@@ -391,7 +390,7 @@ export function RecordExplorer({
     resetStream();
   }
 
-  // Changing the site source (GainForest / Certified / Both) resets + re-walks.
+  // Changing the organization source resets + re-walks.
   function changeSource(next: SiteSourceFilter) {
     if (next === siteSource) return;
     controller.current?.abort();
@@ -532,32 +531,6 @@ export function RecordExplorer({
               className="pointer-events-none absolute right-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-foreground/40"
             />
           </div>
-
-          {kind === "site" && (
-            <div className="inline-flex h-10 items-center rounded-full border border-border-soft bg-surface p-0.5">
-              {(
-                [
-                  { id: "both", label: "All" },
-                  { id: "gainforest", label: "GainForest" },
-                  { id: "certified", label: "Reviewed" },
-                ] as Array<{ id: SiteSourceFilter; label: string }>
-              ).map((o) => (
-                <button
-                  key={o.id}
-                  type="button"
-                  onClick={() => changeSource(o.id)}
-                  aria-pressed={siteSource === o.id}
-                  className={`inline-flex h-9 items-center rounded-full px-3 text-sm font-medium transition-colors ${
-                    siteSource === o.id
-                      ? "bg-primary text-primary-foreground"
-                      : "text-foreground/60 hover:text-foreground"
-                  }`}
-                >
-                  {o.label}
-                </button>
-              ))}
-            </div>
-          )}
 
           {kind === "occurrence" && (
             <div className="inline-flex h-10 items-center rounded-full border border-border-soft bg-surface p-0.5">

@@ -27,7 +27,6 @@ const TOTALS_QUERY = `
   query ExplorerTotals {
     occ: appGainforestDwcOccurrence(first: 0) { totalCount }
     act: orgHypercertsClaimActivity(first: 0) { totalCount }
-    org: appGainforestOrganizationInfo(first: 0) { totalCount }
     certOrg: appCertifiedActorOrganization(first: 0) { totalCount }
     loc: appCertifiedLocation(first: 0) { totalCount }
   }
@@ -66,19 +65,15 @@ async function fetchTotalsUncached(): Promise<CollectionTotals> {
       data?: {
         occ?: { totalCount?: number | null };
         act?: { totalCount?: number | null };
-        org?: { totalCount?: number | null };
         certOrg?: { totalCount?: number | null };
         loc?: { totalCount?: number | null };
       };
     };
     const d = json.data;
-    const organizationCounts = [d?.org?.totalCount, d?.certOrg?.totalCount]
-      .filter((count): count is number => typeof count === "number");
-    const organizationProfiles = organizationCounts.reduce((sum, count) => sum + count, 0);
     return {
       occurrences: d?.occ?.totalCount ?? null,
       bumicerts: d?.act?.totalCount ?? null,
-      sites: organizationCounts.length > 0 ? organizationProfiles : null,
+      sites: d?.certOrg?.totalCount ?? null,
       locations: d?.loc?.totalCount ?? null,
     };
   } catch {

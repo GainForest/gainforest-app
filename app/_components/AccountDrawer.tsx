@@ -101,7 +101,6 @@ function AccountDrawer({ did, onClose }: { did: string | null; onClose: () => vo
   const m = monogram(handle, did);
   const roles: { label: string; tone: "primary" | "brand" }[] = [];
   if (summary?.hasCertifiedOrg) roles.push({ label: "Certified organization", tone: "primary" });
-  if (summary?.hasGainforestOrg) roles.push({ label: "GainForest organization", tone: "brand" });
 
   return (
     <div

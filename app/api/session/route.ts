@@ -12,7 +12,7 @@ export async function GET() {
 
   if (session.isLoggedIn) {
     manageAccountKind = await fetchAccountSummary(session.did)
-      .then((summary) => (summary.hasCertifiedOrg || summary.hasGainforestOrg ? "organization" : "user"))
+      .then((summary) => (summary.hasCertifiedOrg ? "organization" : "user"))
       .catch(() => "user");
   }
 

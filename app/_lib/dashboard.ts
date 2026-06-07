@@ -1,5 +1,6 @@
 import { cachedAsync } from "./async-cache";
 import { countryFlag } from "./format";
+import { resolvePdsHost } from "./pds";
 import { INDEXER_URL, FACILITATOR_DID, blockExplorerUrl } from "./urls";
 
 // ── Raw receipt fetch ──────────────────────────────────────────────────────
@@ -371,9 +372,9 @@ export function computeRecentTransactions(receipts: FundingReceipt[], limit = 50
 
 const ORG_COUNTRY_QUERY = `
   query DashboardOrgCountries($first: Int!, $after: String) {
-    appGainforestOrganizationInfo(first: $first, after: $after) {
+    appCertifiedActorOrganization(first: $first, after: $after) {
       pageInfo { hasNextPage endCursor }
-      edges { node { did country certifiedProfileData { displayName } } }
+      edges { node { did certifiedProfileData { displayName } } }
     }
   }
 `;
@@ -389,6 +390,20 @@ export type GeoStats = {
   countriesRepresented: number;
   topCountries: CountryRow[];
 };
+
+async function fetchCertifiedOrgCountry(did: string): Promise<string | null> {
+  try {
+    const host = await resolvePdsHost(did);
+    if (!host) return null;
+    const params = new URLSearchParams({ repo: did, collection: "app.certified.actor.organization", rkey: "self" });
+    const response = await fetch(`https://${host}/xrpc/com.atproto.repo.getRecord?${params.toString()}`);
+    if (!response.ok) return null;
+    const data = (await response.json().catch(() => null)) as { value?: Record<string, unknown> } | null;
+    return typeof data?.value?.country === "string" ? data.value.country : null;
+  } catch {
+    return null;
+  }
+}
 
 async function fetchOrgCountryMapUncached(): Promise<Map<string, string>> {
   const map = new Map<string, string>();
@@ -407,21 +422,24 @@ async function fetchOrgCountryMapUncached(): Promise<Map<string, string>> {
 
       const json = (await response.json()) as {
         data?: {
-          appGainforestOrganizationInfo?: {
+          appCertifiedActorOrganization?: {
             pageInfo?: { hasNextPage?: boolean; endCursor?: string | null };
-            edges?: Array<{ node?: { did?: string; country?: string | null } | null }>;
+            edges?: Array<{ node?: { did?: string } | null }>;
           } | null;
         };
       };
 
-      const connection = json.data?.appGainforestOrganizationInfo;
+      const connection = json.data?.appCertifiedActorOrganization;
       if (!connection) break;
 
-      for (const edge of connection.edges ?? []) {
-        const did = edge.node?.did;
-        const country = normalizeCountry(edge.node?.country);
-        if (did && country) map.set(did, country);
-      }
+      const dids = (connection.edges ?? [])
+        .map((edge) => edge.node?.did)
+        .filter((did): did is string => Boolean(did));
+      const countries = await Promise.all(dids.map((did) => fetchCertifiedOrgCountry(did)));
+      dids.forEach((did, index) => {
+        const country = normalizeCountry(countries[index]);
+        if (country) map.set(did, country);
+      });
 
       if (!connection.pageInfo?.hasNextPage || !connection.pageInfo.endCursor) break;
       after = connection.pageInfo.endCursor;

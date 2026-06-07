@@ -879,7 +879,7 @@ function organizationAvatarUrl(record: SiteRecord): string | null {
 }
 
 function hasMappableLocation(record: SiteRecord): boolean {
-  return record.source === "gainforest" || Boolean(record.locationUri);
+  return Boolean(record.locationUri);
 }
 
 function formatStat(value: number | null): string {

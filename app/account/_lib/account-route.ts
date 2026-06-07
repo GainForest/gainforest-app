@@ -126,7 +126,6 @@ export const getAccountRouteData = cache(async (
     hasCertifiedProfile: false,
     hasCertifiedOrg: false,
     certOrgType: null,
-    hasGainforestOrg: false,
     bumicertCount: 0,
     observationCount: 0,
   };
@@ -145,7 +144,7 @@ export const getAccountRouteData = cache(async (
     hasCertifiedProfile: baseSummary.hasCertifiedProfile || Boolean(directCertifiedProfile),
     hasCertifiedOrg: baseSummary.hasCertifiedOrg || Boolean(directCertifiedOrganization),
   };
-  const kind: AccountKind = summary.hasCertifiedOrg || summary.hasGainforestOrg ? "organization" : "user";
+  const kind: AccountKind = summary.hasCertifiedOrg ? "organization" : "user";
   const detail = await readBestAccountDetail(did, summary);
   const displayName =
     summary.displayName?.trim() ||
@@ -262,7 +261,6 @@ async function readBestAccountDetail(
   summary: AccountSummary,
 ): Promise<RecordDetail | null> {
   const uris = [
-    summary.hasGainforestOrg ? `at://${did}/app.gainforest.organization.info/self` : null,
     summary.hasCertifiedOrg ? `at://${did}/app.certified.actor.organization/self` : null,
   ].filter((uri): uri is string => Boolean(uri));
 

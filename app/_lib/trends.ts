@@ -95,7 +95,7 @@ export async function fetchTrends(): Promise<ExplorerTrends> {
   const [observations, bumiNodes, siteNodes, receiptNodes] = await Promise.all([
     fetchObservationsTail().catch(() => null),
     fetchNodes<{ createdAt?: string }>("orgHypercertsClaimActivity", "createdAt").catch(() => []),
-    fetchNodes<{ createdAt?: string }>("appGainforestOrganizationInfo", "createdAt").catch(() => []),
+    fetchNodes<{ createdAt?: string }>("appCertifiedActorOrganization", "createdAt").catch(() => []),
     fetchNodes<{ createdAt?: string; amount?: string; currency?: string }>(
       "orgHypercertsFundingReceipt",
       "createdAt amount currency",

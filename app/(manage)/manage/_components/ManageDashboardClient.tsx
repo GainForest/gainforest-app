@@ -398,7 +398,7 @@ export function ManageDashboardClient({
   const modal = useModal();
   const rawMode = mode === undefined ? searchParams.get("mode") ?? undefined : mode ?? undefined;
   const parsedMode = mode === undefined ? parseManageMode(rawMode) : mode;
-  const hasCompletedSetup = account.summary.hasCertifiedProfile || account.summary.hasCertifiedOrg || account.summary.hasGainforestOrg;
+  const hasCompletedSetup = account.summary.hasCertifiedProfile || account.summary.hasCertifiedOrg;
   const resolvedMode = hasCompletedSetup
     ? resolveDashboardMode({ currentKind: account.kind, mode: parsedMode })
     : parsedMode;
@@ -587,18 +587,14 @@ export function ManageDashboardClient({
 
       // Update org record if applicable
       if (account.kind === "organization" && (editCountry !== (account.country ?? "") || editStartDate !== initialStartDate || editVisibility !== initialVisibility)) {
-        const orgCollection = account.summary.hasGainforestOrg
-          ? "app.gainforest.organization.info"
-          : "app.certified.actor.organization";
-
         const orgRecord: Record<string, unknown> = {
-          $type: orgCollection,
+          $type: "app.certified.actor.organization",
           visibility: editVisibility === "Unlisted" ? "unlisted" : "public",
         };
         if (editCountry.trim().length === 2) orgRecord.country = editCountry.trim().toUpperCase();
         if (editStartDate.trim()) orgRecord.foundedDate = `${editStartDate.trim()}T00:00:00.000Z`;
 
-        await putRecord(orgCollection, "self", orgRecord);
+        await putRecord("app.certified.actor.organization", "self", orgRecord);
       }
 
       // Navigate back to view mode and refresh data

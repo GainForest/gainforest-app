@@ -528,12 +528,7 @@ function KindBadge({ record, floating = false }: { record: ExplorerRecord; float
     site: { label: "Project site", cls: "text-foreground/70 bg-foreground/[0.06]" },
   } as const;
   const m = map[record.kind];
-  const label =
-    record.kind === "site"
-      ? record.source === "certified"
-        ? "Reviewed organization"
-        : "GainForest organization"
-      : m.label;
+  const label = record.kind === "site" ? "Reviewed organization" : m.label;
   const cls = floating
     ? "bg-background/80 text-foreground shadow-sm backdrop-blur-md"
     : m.cls;
