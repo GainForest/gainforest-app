@@ -34,7 +34,7 @@ import { countryFlag } from "../_lib/format";
 
 type SortMode = "newest" | "oldest" | "az" | "za";
 type ViewMode = "cards" | "map";
-type QuickFilter = "photos" | "locations";
+type QuickFilter = "photos" | "bumicerts";
 
 const SORT_OPTIONS: Array<{ value: SortMode; label: string }> = [
   { value: "newest", label: "Newest first" },
@@ -43,9 +43,9 @@ const SORT_OPTIONS: Array<{ value: SortMode; label: string }> = [
   { value: "za", label: "Z → A" },
 ];
 
-const QUICK_CHIPS: Array<{ value: QuickFilter; label: string; Icon: typeof ImageIcon }> = [
-  { value: "photos", label: "With photos", Icon: ImageIcon },
-  { value: "locations", label: "Mapped locations", Icon: MapPinIcon },
+const QUICK_CHIPS: Array<{ value: QuickFilter; label: string }> = [
+  { value: "photos", label: "With images" },
+  { value: "bumicerts", label: "With Bumicerts" },
 ];
 
 const ORGANIZATIONS_PAGE_SIZE = 24;
@@ -139,7 +139,7 @@ export function OrganizationsClient({ records: initialRecords = [] }: { records?
       if (countryFilter && normalizeCountry(record.country) !== countryFilter) return false;
       if (typeFilter && !orgTypes(record).includes(typeFilter)) return false;
       if (quickFilters.includes("photos") && !hasPhoto(record)) return false;
-      if (quickFilters.includes("locations") && !hasMappableLocation(record)) return false;
+      if (quickFilters.includes("bumicerts") && (record.bumicertCount ?? 0) <= 0) return false;
       if (!normalizedQuery) return true;
       const haystack = [record.name, record.country, countryNameOrEmpty(record.country), record.orgType, record.source]
         .filter(Boolean)
@@ -282,13 +282,12 @@ export function OrganizationsClient({ records: initialRecords = [] }: { records?
               style={{ animationDelay: "120ms" }}
             >
               <div className="flex items-center gap-1.5 pb-1 pr-8">
-                {QUICK_CHIPS.map(({ value, label, Icon }) => (
+                {QUICK_CHIPS.map(({ value, label }) => (
                   <FilterChip
                     key={value}
                     selected={quickFilters.includes(value)}
                     onClick={() => toggleQuickFilter(value)}
                   >
-                    <Icon className="h-3.5 w-3.5" />
                     {label}
                   </FilterChip>
                 ))}
