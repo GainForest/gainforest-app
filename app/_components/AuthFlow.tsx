@@ -8,6 +8,8 @@ import {
   ChevronDownIcon,
   ChevronRightIcon,
   LoaderIcon,
+  LockIcon,
+  LockOpenIcon,
   LogOutIcon,
   SettingsIcon,
   UserIcon,
@@ -367,13 +369,35 @@ export function SignInPrompt() {
       initial={{ opacity: 0, y: 4 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, delay: 0.1, ease: [0.25, 0.1, 0.25, 1] }}
-      className="mx-1 p-3 rounded-lg bg-muted/40 border border-border/50"
+      className="group relative flex w-full flex-col overflow-hidden rounded-2xl border border-border bg-background p-1"
     >
-      <p className="text-xs text-muted-foreground text-center mb-2">
-        Sign in to manage your account and content.
+      {/* Aurora stage: a soft glow that breathes brighter on hover */}
+      <div className="relative h-20 overflow-hidden rounded-xl bg-gradient-to-b from-primary/[0.07] to-transparent">
+        <div className="pointer-events-none absolute -left-3 -top-5 size-20 rounded-full bg-primary/20 blur-2xl transition-all duration-700 group-hover:scale-110 group-hover:bg-primary/35" />
+        <div className="pointer-events-none absolute -right-4 top-1 size-16 rounded-full bg-primary/10 blur-2xl transition-all duration-700 group-hover:scale-110 group-hover:bg-primary/25" />
+
+        {/* A spark that rises out of the lock as it opens */}
+        <div className="absolute left-1/2 top-1/2 size-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary opacity-0 blur-[1px] transition-all duration-500 ease-out group-hover:-translate-y-[150%] group-hover:opacity-80" />
+
+        {/* Frosted lock plate that lifts and unlocks on hover */}
+        <div className="absolute left-1/2 top-1/2 flex size-12 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-2xl border border-border bg-background/70 shadow-lg backdrop-blur-md transition-all duration-500 ease-out group-hover:-translate-y-[58%] group-hover:shadow-xl">
+          <LockIcon
+            className="absolute size-5 text-primary transition-all duration-300 group-hover:scale-50 group-hover:opacity-0"
+            strokeWidth={2.2}
+          />
+          <LockOpenIcon
+            className="absolute size-5 scale-50 text-primary opacity-0 transition-all duration-300 group-hover:scale-100 group-hover:opacity-100"
+            strokeWidth={2.2}
+          />
+        </div>
+      </div>
+
+      <p className="px-2 pb-1.5 pt-2 text-center text-[11px] leading-snug text-muted-foreground">
+        Sign in to unlock your sites, trees &amp; Bumicerts.
       </p>
-      <Button variant="ghost" size="sm" className="w-full" onClick={handleSignIn}>
-        Sign In
+
+      <Button size="sm" onClick={handleSignIn} className="w-full">
+        Sign in
         <ChevronRightIcon />
       </Button>
     </motion.div>

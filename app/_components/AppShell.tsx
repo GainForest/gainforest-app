@@ -198,7 +198,7 @@ function UnifiedSidebar({ authSession, manageAccountKind }: { authSession: AuthS
         </LayoutGroup>
 
         <div className="mt-auto flex flex-col gap-3 pt-4">
-          <BumicertCreationCard />
+          {authSession?.isLoggedIn && <BumicertCreationCard />}
 
           <LayoutGroup id="unified-sidebar-nav-manage">
             <ManageSection authSession={authSession} manageAccountKind={manageAccountKind} />
