@@ -179,8 +179,8 @@ export async function POST(request: Request) {
   let payload: ReturnType<typeof parsePaymentSignature>;
   try {
     payload = parsePaymentSignature(paymentSig);
-  } catch (error) {
-    return Response.json({ error: error instanceof Error ? error.message : "Invalid PAYMENT-SIGNATURE header" }, { status: 400 });
+  } catch {
+    return Response.json({ error: "Payment approval could not be read" }, { status: 400 });
   }
 
   const { authorization, signature } = payload.payload;
@@ -195,7 +195,7 @@ export async function POST(request: Request) {
   const amount = typeof body.amount === "string" ? normalizeUsdcAmountString(body.amount) : formatUsdcAmount(BigInt(authorization.value));
   if (!amount) return Response.json({ error: "Invalid donation amount" }, { status: 400 });
   if (parseUsdcAmount(amount) !== BigInt(authorization.value)) {
-    return Response.json({ error: "Authorization amount does not match donation amount" }, { status: 422 });
+    return Response.json({ error: "The payment amount does not match this donation" }, { status: 422 });
   }
 
   let transactionHash: `0x${string}`;
@@ -203,7 +203,7 @@ export async function POST(request: Request) {
     transactionHash = (await executeTransferWithAuthorization({ authorization, signature })).transactionHash;
   } catch (error) {
     console.error("[fund] On-chain transfer failed:", error);
-    return Response.json({ error: "On-chain transfer failed", details: error instanceof Error ? error.message : String(error) }, { status: 500 });
+    return Response.json({ error: "Payment could not be completed", details: error instanceof Error ? error.message : String(error) }, { status: 500 });
   }
 
   const donorRecordedAs = body.anonymous ? "wallet" : "did";

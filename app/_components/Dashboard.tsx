@@ -701,7 +701,7 @@ function SortIcon<T extends string>({ col, sortKey, sortDir }: { col: T; sortKey
 
 function DonorCell({ id, type }: { id: string; type: "did" | "wallet" }) {
   if (type === "wallet") {
-    return <span className="text-xs text-foreground">Anonymous wallet</span>;
+    return <span className="text-xs text-foreground">Anonymous supporter</span>;
   }
 
   return (

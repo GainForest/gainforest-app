@@ -105,6 +105,7 @@ export default async function BumicertDetailPage({
   ]);
   const activeTab = parseDetailTab(search.tab);
   const detailHref = localBumicertHref(urlIdentifier, record.rkey);
+  const donationsHref = `${detailHref}?tab=donations`;
   const period = record.startDate || record.endDate
     ? `${record.startDate ? formatDate(record.startDate) : "—"} → ${record.endDate ? formatDate(record.endDate) : "—"}`
     : "Not specified";
@@ -163,7 +164,7 @@ export default async function BumicertDetailPage({
       <BumicertHeaderTitleBridge
         summary={{
           title: record.title,
-          donateHref: detailHref,
+          donateHref: donationsHref,
           card: {
             did: record.did,
             title: record.title,
@@ -207,7 +208,14 @@ export default async function BumicertDetailPage({
             )}
             {activeTab === "site-boundaries" && <SiteBoundariesPanel record={record} />}
             {activeTab === "donations" && (
-              <DonationsPanel receipts={donationReceipts} unavailable={donationsUnavailable} />
+              <DonationsPanel
+                record={record}
+                owner={owner}
+                fundingConfig={fundingConfig}
+                authSession={authSession}
+                receipts={donationReceipts}
+                unavailable={donationsUnavailable}
+              />
             )}
             {activeTab === "timeline" && (
               <BumicertTimeline
@@ -729,13 +737,56 @@ function SiteBoundariesPanel({ record }: { record: BumicertRecord }) {
   );
 }
 
-function DonationsPanel({ receipts, unavailable }: { receipts: FundingReceipt[]; unavailable: boolean }) {
+function DonationsPanel({
+  record,
+  owner,
+  fundingConfig,
+  authSession,
+  receipts,
+  unavailable,
+}: {
+  record: BumicertRecord;
+  owner: RouteData["owner"];
+  fundingConfig: BumicertFundingConfig;
+  authSession: RouteData["authSession"];
+  receipts: FundingReceipt[];
+  unavailable: boolean;
+}) {
   const usdReceipts = receipts.filter((receipt) => ["USD", "USDC"].includes(receipt.currency.toUpperCase()));
   const totalUsd = usdReceipts.reduce((sum, receipt) => sum + receipt.amount, 0);
   const donorCount = new Set(receipts.map((receipt) => receipt.from?.id).filter(Boolean)).size;
+  const donationStatus = getDonationStatus(fundingConfig, unavailable);
 
   return (
-    <article className="py-1">
+    <article className="space-y-5 py-1">
+      {!unavailable ? (
+        <div className="rounded-3xl border border-border-soft bg-surface p-4 sm:flex sm:items-center sm:justify-between sm:gap-4">
+          <div className="min-w-0">
+            <h2 className="font-instrument text-2xl italic text-foreground">Support this Bumicert</h2>
+            <p className="mt-1 text-sm leading-6 text-muted-foreground">
+              Your gift supports {owner.displayName} and appears with this project story once completed.
+            </p>
+          </div>
+          <div className="mt-4 w-full sm:mt-0 sm:w-44 sm:shrink-0">
+            <DonateButton
+              bumicert={{
+                organizationDid: record.did,
+                rkey: record.rkey,
+                title: record.title,
+                organizationName: owner.displayName,
+              }}
+              fundingConfig={fundingConfig}
+              authSession={authSession}
+              disabled={donationStatus.kind !== "open"}
+              label={donationStatus.kind === "open" && receipts.length > 0 ? "Donate again" : "Donate"}
+            />
+            {donationStatus.kind !== "open" ? (
+              <p className="mt-2 text-center text-xs text-muted-foreground">{donationStatus.label}</p>
+            ) : null}
+          </div>
+        </div>
+      ) : null}
+
       {unavailable ? (
         <EmptyState
           icon={<HeartIcon className="h-8 w-8" />}
@@ -934,7 +985,7 @@ function formatDonationAmount(receipt: FundingReceipt): string {
 
 function donorLabel(donor: DonorRef): string {
   if (!donor) return "anonymous donor";
-  if (donor.type === "wallet") return "anonymous wallet";
+  if (donor.type === "wallet") return "anonymous supporter";
   return "named supporter";
 }
 
