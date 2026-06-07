@@ -373,8 +373,8 @@ export function BumicertsExploreClient({ records: initialRecords = [] }: { recor
                   ))}
                 </div>
 
-                <div className="scrollbar-hidden hidden min-w-0 flex-1 overflow-x-auto pb-px sm:block">
-                  <div className="flex items-center gap-2">
+                <div className="scroll-mask-right scrollbar-hidden hidden min-w-0 flex-1 overflow-x-auto pb-px sm:block">
+                  <div className="flex items-center gap-2 pr-8">
                     <Button
                       type="button"
                       onClick={clearFilters}

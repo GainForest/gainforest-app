@@ -516,8 +516,8 @@ function ViewToggle({ view, setView }: { view: ViewMode; setView: (view: ViewMod
 
 function ChipRow({ children, delay }: { children: React.ReactNode; delay: number }) {
   return (
-    <div className="scrollbar-hidden overflow-x-auto animate-in" style={{ animationDelay: `${delay}ms` }}>
-      <div className="flex items-center gap-2 pb-1">{children}</div>
+    <div className="scroll-mask-right scrollbar-hidden overflow-x-auto animate-in" style={{ animationDelay: `${delay}ms` }}>
+      <div className="flex items-center gap-2 pb-1 pr-8">{children}</div>
     </div>
   );
 }

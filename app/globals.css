@@ -392,6 +392,10 @@ body {
 .scrollbar-hidden::-webkit-scrollbar {
   display: none;
 }
+.scroll-mask-right {
+  -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 2rem), transparent);
+  mask-image: linear-gradient(to right, #000 calc(100% - 2rem), transparent);
+}
 
 @keyframes shimmer {
   0% { background-position: -200% 0; }
