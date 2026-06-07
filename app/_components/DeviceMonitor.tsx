@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { LeafIcon } from "lucide-react";
 import {
@@ -157,9 +157,14 @@ function DeviceCard({ device }: { device: Device }) {
   const tone = deviceTone(device.status);
   const sys = device.system;
   const taina = device.taina;
+  const cpuPct = cpuPercent(sys);
+  const hasHealth =
+    sys != null &&
+    (sys.tempC != null || sys.memUsedPct != null || sys.diskUsedPct != null || cpuPct != null || sys.uptimeS != null);
+  const hasActivity = taina != null && (taina.drafts != null || taina.draftsWithImages != null || taina.whitelist != null);
 
   return (
-    <article className="flex h-full flex-col gap-4 rounded-2xl border border-border-soft bg-surface p-5 shadow-[0_8px_26px_-20px_rgba(20,30,15,0.3)]">
+    <article className="flex h-full flex-col gap-5 rounded-2xl border border-border-soft bg-surface p-5 shadow-[0_8px_26px_-20px_rgba(20,30,15,0.3)]">
       <header className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <h2 className="truncate font-mono text-[15px] font-semibold text-foreground">
@@ -186,35 +191,52 @@ function DeviceCard({ device }: { device: Device }) {
         </span>
       </header>
 
-      {/* Liveness row */}
-      <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-[13px]">
-        <Row label="Last seen" value={device.lastPing ? formatRelative(device.lastPing) : "never"} />
-        <Row label="Updates sent" value={formatNumber(device.nPings)} align="right" />
+      {/* Liveness — the single signal users care about most */}
+      <div className="flex items-baseline justify-between gap-2 text-[13px]">
+        <span className="text-foreground/55">Last reported</span>
+        <span className="font-medium text-foreground">
+          {device.lastPing ? formatRelative(device.lastPing) : "never"}
+        </span>
       </div>
 
-      {/* System vitals */}
-      {sys && (
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 rounded-lg bg-surface-sunken/70 px-3 py-2 font-mono text-[12px]">
-          {sys.tempC != null && <Vital label="Device temperature" value={`${sys.tempC.toFixed(1)}°C`} tone={tempTone(sys.tempC)} />}
-          {sys.memUsedPct != null && <Vital label="Memory used" value={`${sys.memUsedPct}%`} tone={pctTone(sys.memUsedPct)} />}
-          {sys.diskUsedPct != null && <Vital label="Storage used" value={`${sys.diskUsedPct}%`} tone={pctTone(sys.diskUsedPct)} />}
-          {sys.load1m != null && <Vital label="Current workload" value={sys.load1m.toFixed(2)} />}
-          {sys.uptimeS != null && <Vital label="Time running" value={formatUptime(sys.uptimeS)} />}
-          {sys.throttled && <Vital label="Needs attention" value="slow" tone="text-down" />}
-        </div>
+      {/* Device health */}
+      {hasHealth && sys && (
+        <Section title="Device health">
+          <div className="grid grid-cols-2 gap-x-5 gap-y-3.5 sm:grid-cols-3">
+            {sys.tempC != null && (
+              <Reading label="Temperature" value={`${sys.tempC.toFixed(1)}°C`} tone={tempTone(sys.tempC)} />
+            )}
+            {sys.memUsedPct != null && <Gauge label="Memory" pct={sys.memUsedPct} />}
+            {sys.diskUsedPct != null && <Gauge label="Storage" pct={sys.diskUsedPct} />}
+            {cpuPct != null && <Gauge label="Processor" pct={cpuPct} />}
+            {sys.uptimeS != null && <Reading label="Uptime" value={formatUptime(sys.uptimeS)} />}
+          </div>
+          {sys.throttled && (
+            <p className="mt-3 inline-flex items-center gap-1.5 rounded-md bg-down/10 px-2 py-1 text-[11.5px] font-medium text-down">
+              <span aria-hidden className="inline-block h-1.5 w-1.5 rounded-full bg-current" />
+              Running slow — may need attention
+            </p>
+          )}
+        </Section>
       )}
 
-      {/* Local Taina queue */}
-      {taina && (taina.drafts != null || taina.whitelist != null) && (
-        <div className="grid grid-cols-3 gap-2">
-          <Stat label="Saved items" value={taina.drafts} sub={taina.oldestDraftIso ? `oldest ${formatRelative(taina.oldestDraftIso)}` : undefined} />
-          <Stat label="With photo" value={taina.draftsWithImages} />
-          <Stat label="Allowed users" value={taina.whitelist} />
-        </div>
+      {/* Tainá activity */}
+      {hasActivity && taina && (
+        <Section title="Tainá activity">
+          <div className="grid grid-cols-3 gap-2">
+            <Stat
+              label="Saved observations"
+              value={taina.drafts}
+              sub={taina.oldestDraftIso ? `oldest ${formatRelative(taina.oldestDraftIso)}` : undefined}
+            />
+            <Stat label="With photos" value={taina.draftsWithImages} />
+            <Stat label="Allowed users" value={taina.whitelist} />
+          </div>
+        </Section>
       )}
 
       {device.tags.length > 0 && (
-        <footer className="mt-auto flex flex-wrap gap-1.5 border-t border-border-soft pt-3">
+        <footer className="mt-auto flex flex-wrap gap-1.5 border-t border-border-soft pt-4">
           {device.tags.map((t) => (
             <span key={t} className="rounded-md bg-surface-sunken px-2 py-0.5 text-[11px] font-medium text-foreground/55">
               {t}
@@ -226,32 +248,50 @@ function DeviceCard({ device }: { device: Device }) {
   );
 }
 
-function Row({ label, value, align }: { label: string; value: string; align?: "right" }) {
+function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <div className={`flex items-baseline justify-between gap-2 ${align === "right" ? "" : ""}`}>
-      <span className="text-foreground/55">{label}</span>
-      <span className="font-medium text-foreground">{value}</span>
+    <div>
+      <h3 className="mb-2.5 text-[10.5px] font-semibold uppercase tracking-[0.1em] text-foreground/40">{title}</h3>
+      {children}
     </div>
   );
 }
 
-function Vital({ label, value, tone }: { label: string; value: string; tone?: string }) {
+/** A labelled reading whose value is text (temperature, uptime). */
+function Reading({ label, value, tone }: { label: string; value: string; tone?: string }) {
   return (
-    <span title={label} className={`inline-flex items-center gap-1 ${tone ?? "text-foreground/80"}`}>
-      <span aria-hidden className={`inline-block h-1.5 w-1.5 rounded-full ${tone ? "bg-current" : "bg-foreground/30"}`} />
-      {value}
-    </span>
+    <div>
+      <div className="text-[11px] font-medium text-foreground/50">{label}</div>
+      <div className={`mt-1 font-mono text-[14px] font-semibold tabular-nums ${tone ?? "text-foreground"}`}>{value}</div>
+    </div>
+  );
+}
+
+/** A labelled percentage with a usage bar — makes "42%" mean "42% used". */
+function Gauge({ label, pct }: { label: string; pct: number }) {
+  const clamped = Math.max(0, Math.min(100, pct));
+  const bar = clamped >= 90 ? "bg-down" : clamped >= 75 ? "bg-warn" : "bg-primary/60";
+  return (
+    <div>
+      <div className="flex items-baseline justify-between gap-2">
+        <span className="text-[11px] font-medium text-foreground/50">{label}</span>
+        <span className="font-mono text-[12.5px] font-semibold tabular-nums text-foreground/70">{clamped}%</span>
+      </div>
+      <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-surface-sunken">
+        <div className={`h-full rounded-full ${bar}`} style={{ width: `${Math.max(3, clamped)}%` }} />
+      </div>
+    </div>
   );
 }
 
 function Stat({ label, value, sub }: { label: string; value: number | null; sub?: string }) {
   return (
     <div className="rounded-lg bg-surface-sunken/60 px-2.5 py-2">
-      <div className="text-[10.5px] uppercase tracking-[0.08em] text-foreground/45">{label}</div>
-      <div className="mt-0.5 font-mono text-[15px] font-semibold text-foreground">
+      <div className="text-[10.5px] font-medium leading-tight text-foreground/45">{label}</div>
+      <div className="mt-1 font-mono text-[15px] font-semibold text-foreground">
         {value == null ? "—" : formatNumber(value)}
       </div>
-      {sub && <div className="font-mono text-[9.5px] text-foreground/45">{sub}</div>}
+      {sub && <div className="text-[9.5px] text-foreground/45">{sub}</div>}
     </div>
   );
 }
@@ -296,10 +336,11 @@ function tempTone(c: number): string {
   return "text-ok";
 }
 
-function pctTone(pct: number): string {
-  if (pct >= 90) return "text-down";
-  if (pct >= 75) return "text-warn";
-  return "text-foreground/80";
+/** Load average is jargon; expressed against core count it becomes a CPU
+ *  usage % a non-technical reader can parse. Returns null when we can't. */
+function cpuPercent(sys: Device["system"]): number | null {
+  if (!sys || sys.load1m == null || !sys.cpus || sys.cpus <= 0) return null;
+  return Math.min(100, Math.round((sys.load1m / sys.cpus) * 100));
 }
 
 function timeAgo(iso: string): string {
