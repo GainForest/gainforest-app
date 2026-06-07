@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { unstable_cache } from "next/cache";
 import { Suspense } from "react";
 import { BrowseGrid } from "./_components/BrowseGrid";
 import { HomeLanding } from "./_components/HomeLanding";
@@ -15,33 +16,35 @@ export const metadata: Metadata = {
   alternates: { canonical: "/" },
 };
 
-export default function HomePage() {
+const fetchHomeKpis = unstable_cache(fetchKpis, ["home-page-kpis"], {
+  revalidate: 60 * 15,
+});
+
+export default async function HomePage() {
+  const kpis = await fetchHomeKpis();
+
   return (
     <>
-      <HomeLanding />
+      <HomeLanding kpis={kpis} />
       <Suspense fallback={<BrowseGridFallback />}>
-        <HomeCollections />
+        <HomeCollections kpis={kpis} />
       </Suspense>
     </>
   );
 }
 
-async function HomeCollections() {
-  const [kpis, status, devices] = await Promise.all([
-    fetchKpis(),
-    fetchStatus({ revalidate: 60 }),
-    fetchDevicesSummary(),
-  ]);
+async function HomeCollections({ kpis }: { kpis: Awaited<ReturnType<typeof fetchKpis>> }) {
+  const [status, devices] = await Promise.all([fetchStatus({ revalidate: 60 }), fetchDevicesSummary()]);
 
   return <BrowseGrid kpis={kpis} status={status} devices={devices} />;
 }
 
 function BrowseGridFallback() {
   return (
-    <section className="bg-background px-6 pt-4 pb-12 sm:px-12 md:px-6 md:pt-8 md:pb-16" aria-label="Collections loading">
+    <section className="bg-background px-6 pt-10 pb-14 sm:px-12 sm:pt-12 md:px-6 md:pt-10 md:pb-16" aria-label="Explore links loading">
       <div className="mx-auto max-w-6xl">
         <div className="mb-6 text-center md:mb-8">
-          <h2 className="font-garamond text-4xl font-light tracking-[-0.01em] text-foreground md:text-5xl">Collections</h2>
+          <h2 className="font-garamond text-4xl font-light tracking-[-0.01em] text-foreground md:text-5xl">Ways to Explore</h2>
           <p className="mx-auto mt-3 max-w-xl text-base leading-relaxed text-muted-foreground">
             Six live views into GainForest work, shaped for funders, stewards, and field teams.
           </p>

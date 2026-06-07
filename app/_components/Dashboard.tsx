@@ -18,7 +18,7 @@ import {
   ChevronUpIcon,
   ChevronsUpDownIcon,
   ClockIcon,
-  DollarSignIcon,
+  HandHeartIcon,
   ExternalLinkIcon,
   GlobeIcon,
   HashIcon,
@@ -208,7 +208,7 @@ function KPISummary({ kpis }: { kpis: DashboardKpis }) {
   return (
     <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-5">
       <StatCard
-        icon={<DollarSignIcon className="h-4 w-4" />}
+        icon={<HandHeartIcon className="h-4 w-4" />}
         label="Total Raised"
         value={formatCompactUsd(kpis.totalRaised)}
         sub="Raised from completed gifts"

@@ -9,12 +9,12 @@ import {
   Building2Icon,
   CameraIcon,
   CompassIcon,
-  DollarSignIcon,
+  HandHeartIcon,
   LeafIcon,
   MapPinIcon,
 } from "lucide-react";
-import { useEffect, useState } from "react";
-import { fetchKpis, type ExplorerKpis } from "../_lib/kpis";
+import { useState } from "react";
+import type { ExplorerKpis } from "../_lib/kpis";
 import { formatCompact, formatCompactUsd } from "../_lib/format";
 import { StatsTileGrid } from "./StatsTile";
 import { ThemeToggle } from "./ThemeToggle";
@@ -96,23 +96,7 @@ const FAQ_ITEMS = [
 
 type FaqKey = (typeof FAQ_ITEMS)[number]["key"];
 
-export function HomeLanding({ kpis: initialKpis = null }: HomeLandingProps) {
-  const [kpis, setKpis] = useState<ExplorerKpis | null>(initialKpis);
-
-  useEffect(() => {
-    if (initialKpis) return;
-    let cancelled = false;
-    fetchKpis()
-      .then((next) => {
-        if (!cancelled) setKpis(next);
-      })
-      .catch(() => {
-        if (!cancelled) setKpis(null);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [initialKpis]);
+export function HomeLanding({ kpis = null }: HomeLandingProps) {
   return (
     <div className="min-h-screen bg-background">
       <LandingTopNavbar />
@@ -197,6 +181,7 @@ function LandingHero() {
             className="object-cover object-center"
           />
           <div className="absolute inset-0 bg-linear-to-t from-background via-background/75 to-transparent md:bg-linear-to-r" />
+          <div className="absolute inset-x-0 bottom-0 h-56 bg-linear-to-b from-transparent via-background/80 to-background" />
         </motion.div>
       </div>
 
@@ -257,11 +242,11 @@ function LandingHero() {
               >
                 Explore Projects
                 <motion.span
-                  className="inline-block"
+                  className="inline-flex"
                   animate={{ x: [0, 3, 0] }}
                   transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
                 >
-                  →
+                  <ArrowUpRightIcon aria-hidden="true" className="size-4" />
                 </motion.span>
               </Link>
             </motion.div>
@@ -326,13 +311,13 @@ function HomeStats({ kpis }: { kpis: ExplorerKpis | null }) {
       label: "Funding raised",
       detail: "raised for projects",
       href: "/leaderboard",
-      icon: <DollarSignIcon />,
+      icon: <HandHeartIcon />,
       accent: true,
     },
   ];
 
   return (
-    <section className="px-6 pb-8 pt-0 sm:px-12 md:px-6 md:pb-12">
+    <section className="px-6 pb-10 pt-0 sm:px-12 sm:pb-12 md:px-6 md:pb-12">
       <div className="mx-auto -mt-24 max-w-6xl rounded-[2rem] bg-background/65 p-2 shadow-sm shadow-primary/5 ring-1 ring-foreground/5 backdrop-blur-xl">
         <StatsTileGrid items={stats} columns={4} />
       </div>
@@ -342,7 +327,7 @@ function HomeStats({ kpis }: { kpis: ExplorerKpis | null }) {
 
 function FeaturesSection() {
   return (
-    <section className="px-6 pt-3 pb-0 sm:px-12 md:px-6 md:pt-6 md:pb-6">
+    <section className="px-6 pt-8 pb-10 sm:px-12 sm:pt-10 sm:pb-12 md:px-6 md:pt-8 md:pb-10">
       <div className="mx-auto max-w-6xl">
         <motion.div
           initial={{ opacity: 0, y: 18 }}
@@ -385,7 +370,7 @@ function FeaturesSection() {
 
 function UserOptionCards() {
   return (
-    <section className="px-6 pt-0 pb-6 sm:px-12 md:px-6 md:pt-2 md:pb-10">
+    <section className="px-6 pt-8 pb-10 sm:px-12 sm:pt-10 sm:pb-12 md:px-6 md:pt-8 md:pb-12">
       <div className="mx-auto max-w-6xl">
         <motion.div
           initial={{ opacity: 0, y: 18 }}
@@ -459,7 +444,7 @@ function WhatIsBumicert() {
   const [openItem, setOpenItem] = useState<FaqKey>("digitalCertificate");
 
   return (
-    <section className="px-6 pt-4 pb-6 sm:px-12 md:px-6 md:pt-6 md:pb-10">
+    <section className="px-6 pt-10 pb-12 sm:px-12 sm:pt-12 sm:pb-14 md:px-6 md:pt-10 md:pb-14">
       <div className="mx-auto max-w-6xl">
         <div className="grid grid-cols-1 items-center gap-8 sm:grid-cols-2 lg:gap-12">
           <motion.div
