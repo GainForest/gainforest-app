@@ -81,14 +81,21 @@ export function accountSettingsPath(didOrHandle: string): string {
   return `${accountPath(didOrHandle)}/settings`;
 }
 
-export async function readAccountRouteParams(
+export async function readOptionalAccountRouteParams(
   params: Promise<{ did: string }>,
-): Promise<{ urlIdentifier: string; did: string }> {
+): Promise<{ urlIdentifier: string; did: string } | null> {
   const { did: encodedDid } = await params;
   const urlIdentifier = safeDecode(encodedDid);
   const did = await resolveIdentifierToDid(urlIdentifier);
-  if (!did?.startsWith("did:")) notFound();
-  return { urlIdentifier, did };
+  return did?.startsWith("did:") ? { urlIdentifier, did } : null;
+}
+
+export async function readAccountRouteParams(
+  params: Promise<{ did: string }>,
+): Promise<{ urlIdentifier: string; did: string }> {
+  const routeParams = await readOptionalAccountRouteParams(params);
+  if (!routeParams) notFound();
+  return routeParams;
 }
 
 export const getAccountRouteData = cache(async (
