@@ -5,17 +5,26 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
   BanIcon,
+  ChevronRightIcon,
   CircleDotIcon,
+  CrownIcon,
   ExternalLinkIcon,
+  GiftIcon,
   HeartIcon,
+  LeafIcon,
   MapPinnedIcon,
+  SparklesIcon,
   SproutIcon,
+  UsersRoundIcon,
+  WalletIcon,
 } from "lucide-react";
 import { BumicertsBumicertCard } from "@/components/bumicert/BumicertsBumicertCard";
+import { AuthorInline } from "../../../_components/AuthorChip";
 import { RichText } from "../../../_components/RichText";
 import { SocialGlyph } from "../../../_components/SocialIcon";
+import { StatsTileGrid, type StatsTileItem } from "../../../_components/StatsTile";
 import { fetchReceipts, type DonorRef, type FundingReceipt } from "../../../_lib/dashboard";
-import { formatCompact, formatCompactUsd, formatDate, formatDateTime, formatNumber, formatRelative, formatUsd } from "../../../_lib/format";
+import { formatCompact, formatCompactUsd, formatDate, formatDateTime, formatNumber, formatRelative } from "../../../_lib/format";
 import {
   fetchAudioByDid,
   fetchBumicertsByDid,
@@ -32,7 +41,7 @@ import {
   type TimelineAttachmentItem,
 } from "../../../_lib/indexer";
 import { isPdsBlobUrl } from "../../../_lib/pds";
-import { blockExplorerUrl, INDEXER_URL, localBumicertHref } from "../../../_lib/urls";
+import { accountHref, blockExplorerUrl, INDEXER_URL, localBumicertHref } from "../../../_lib/urls";
 import { fetchAuthSession } from "../../../_lib/auth-server";
 import { getAccountRouteData, readAccountRouteParams } from "../../../account/_lib/account-route";
 import { Separator } from "@/components/ui/separator";
@@ -754,35 +763,62 @@ function DonationsPanel({
 }) {
   const usdReceipts = receipts.filter((receipt) => ["USD", "USDC"].includes(receipt.currency.toUpperCase()));
   const totalUsd = usdReceipts.reduce((sum, receipt) => sum + receipt.amount, 0);
-  const donorCount = new Set(receipts.map((receipt) => receipt.from?.id).filter(Boolean)).size;
+  const donationEntries = buildDonationLeaderboard(usdReceipts);
+  const donorCount = donationEntries.length;
   const donationStatus = getDonationStatus(fundingConfig, unavailable);
+  const stats: StatsTileItem[] = [
+    {
+      label: "Total raised",
+      value: formatCompactUsd(totalUsd),
+      detail: "given to this project story",
+      icon: <LeafIcon />,
+      accent: true,
+    },
+    {
+      label: "Donations",
+      value: formatCompact(usdReceipts.length),
+      detail: "completed gifts counted",
+      icon: <GiftIcon />,
+    },
+    {
+      label: "Supporters",
+      value: formatCompact(donorCount),
+      detail: "people in this list",
+      icon: <UsersRoundIcon />,
+      accent: true,
+    },
+  ];
 
   return (
     <article className="space-y-5 py-1">
       {!unavailable ? (
-        <div className="rounded-3xl border border-border-soft bg-surface p-4 sm:flex sm:items-center sm:justify-between sm:gap-4">
-          <div className="min-w-0">
-            <h2 className="font-instrument text-2xl italic text-foreground">Support this Bumicert</h2>
-            <p className="mt-1 text-sm leading-6 text-muted-foreground">
-              Your gift supports {owner.displayName} and appears with this project story once completed.
-            </p>
-          </div>
-          <div className="mt-4 w-full sm:mt-0 sm:w-44 sm:shrink-0">
-            <DonateButton
-              bumicert={{
-                organizationDid: record.did,
-                rkey: record.rkey,
-                title: record.title,
-                organizationName: owner.displayName,
-              }}
-              fundingConfig={fundingConfig}
-              authSession={authSession}
-              disabled={donationStatus.kind !== "open"}
-              label={donationStatus.kind === "open" && receipts.length > 0 ? "Donate again" : "Donate"}
-            />
-            {donationStatus.kind !== "open" ? (
-              <p className="mt-2 text-center text-xs text-muted-foreground">{donationStatus.label}</p>
-            ) : null}
+        <div className="overflow-hidden rounded-3xl bg-card/75 p-5 shadow-sm shadow-primary/5 ring-1 ring-foreground/5 backdrop-blur sm:p-6">
+          <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+            <div className="min-w-0">
+              <h2 className="font-instrument text-3xl font-light italic leading-tight tracking-[-0.025em] text-foreground sm:text-4xl">
+                Support this Bumicert
+              </h2>
+              <p className="mt-3 max-w-xl text-sm leading-6 text-muted-foreground">
+                Your gift supports {owner.displayName} and appears with this project story once completed.
+              </p>
+            </div>
+            <div className="w-full sm:w-44 sm:shrink-0">
+              <DonateButton
+                bumicert={{
+                  organizationDid: record.did,
+                  rkey: record.rkey,
+                  title: record.title,
+                  organizationName: owner.displayName,
+                }}
+                fundingConfig={fundingConfig}
+                authSession={authSession}
+                disabled={donationStatus.kind !== "open"}
+                label={donationStatus.kind === "open" && receipts.length > 0 ? "Donate again" : "Donate"}
+              />
+              {donationStatus.kind !== "open" ? (
+                <p className="mt-2 text-center text-xs text-muted-foreground">{donationStatus.label}</p>
+              ) : null}
+            </div>
           </div>
         </div>
       ) : null}
@@ -792,26 +828,33 @@ function DonationsPanel({
           icon={<HeartIcon className="h-8 w-8" />}
           title="Donation information is unavailable"
           body="We could not load donations for this Bumicert. Try again later on this page."
+          variant="leaderboard"
         />
       ) : receipts.length === 0 ? (
         <EmptyState
           icon={<HeartIcon className="h-8 w-8" />}
           title="No donations yet"
-          body="Completed donations for this Bumicert will appear here."
+          body="Be the first to support this project story."
+          variant="leaderboard"
         />
       ) : (
         <div className="space-y-5">
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-            <StatCard label="Total raised" value={formatCompactUsd(totalUsd)} />
-            <StatCard label="Donations" value={formatCompact(receipts.length)} />
-            <StatCard label="Donors" value={formatCompact(donorCount)} />
-          </div>
+          <StatsTileGrid items={stats} columns={3} />
 
-          <div className="space-y-3">
-            {receipts.map((receipt) => (
-              <DonationRow key={receipt.uri} receipt={receipt} />
-            ))}
-          </div>
+          {donationEntries.length > 0 ? (
+            <div className="overflow-hidden rounded-3xl bg-card/70 shadow-sm shadow-primary/5 ring-1 ring-foreground/5 backdrop-blur divide-y divide-border/60">
+              {donationEntries.map((entry) => (
+                <DonationLeaderboardRow key={entry.key} entry={entry} />
+              ))}
+            </div>
+          ) : (
+            <EmptyState
+              icon={<HeartIcon className="h-8 w-8" />}
+              title="No donation totals yet"
+              body="Completed donations for this Bumicert will appear here."
+              variant="leaderboard"
+            />
+          )}
         </div>
       )}
     </article>
@@ -929,46 +972,170 @@ function externalHost(value: string): string {
   }
 }
 
-function StatCard({ label, value }: { label: string; value: string }) {
+type DonationLeaderboardEntry = {
+  key: string;
+  rank: number;
+  donor: DonorRef;
+  totalAmount: number;
+  donationCount: number;
+  lastDonatedAt: string | null;
+  latestReceipt: FundingReceipt;
+};
+
+const DONATION_RANK_TIERS: Record<number, string> = {
+  1: "bg-gradient-to-br from-amber-300/35 to-amber-500/10 text-amber-700 ring-amber-500/25 dark:text-amber-300",
+  2: "bg-gradient-to-br from-slate-300/40 to-slate-400/10 text-slate-600 ring-slate-400/25 dark:text-slate-300",
+  3: "bg-gradient-to-br from-orange-300/35 to-orange-500/10 text-orange-700 ring-orange-500/25 dark:text-orange-300",
+};
+
+const DONATION_RANK_BADGES: Record<number, { Icon: typeof CrownIcon; label: string }> = {
+  1: { Icon: CrownIcon, label: "Top supporter" },
+  2: { Icon: SparklesIcon, label: "Steady giver" },
+  3: { Icon: SproutIcon, label: "Growing impact" },
+};
+
+function buildDonationLeaderboard(receipts: FundingReceipt[]): DonationLeaderboardEntry[] {
+  const entries = new Map<string, Omit<DonationLeaderboardEntry, "rank">>();
+
+  for (const receipt of receipts) {
+    const key = receipt.from ? `${receipt.from.type}:${receipt.from.id}` : `anonymous:${receipt.uri}`;
+    const existing = entries.get(key);
+    const receiptDate = receipt.occurredAt ?? receipt.createdAt;
+
+    if (existing) {
+      existing.totalAmount += receipt.amount;
+      existing.donationCount += 1;
+      if (dateTimeValue(receiptDate) > dateTimeValue(existing.lastDonatedAt)) {
+        existing.lastDonatedAt = receiptDate;
+        existing.latestReceipt = receipt;
+      }
+    } else {
+      entries.set(key, {
+        key,
+        donor: receipt.from,
+        totalAmount: receipt.amount,
+        donationCount: 1,
+        lastDonatedAt: receiptDate,
+        latestReceipt: receipt,
+      });
+    }
+  }
+
+  return Array.from(entries.values())
+    .sort((a, b) => (b.totalAmount - a.totalAmount) || (b.donationCount - a.donationCount) || (dateTimeValue(b.lastDonatedAt) - dateTimeValue(a.lastDonatedAt)))
+    .map((entry, index) => ({ ...entry, rank: index + 1 }));
+}
+
+function DonationRankBadge({ rank }: { rank: number }) {
   return (
-    <div className="rounded-2xl border border-border-soft bg-surface px-3 py-3 sm:px-4">
-      <p className="text-[10px] uppercase tracking-[0.12em] text-muted-foreground sm:text-xs sm:tracking-[0.14em]">{label}</p>
-      <p className="mt-1 text-lg font-medium text-foreground sm:text-xl">{value}</p>
-    </div>
+    <span
+      aria-label={`Rank ${rank}`}
+      className={[
+        "flex size-9 shrink-0 items-center justify-center rounded-full text-sm font-bold tabular-nums ring-1",
+        DONATION_RANK_TIERS[rank] ?? "bg-muted/50 text-muted-foreground ring-foreground/5",
+      ].join(" ")}
+    >
+      {rank}
+    </span>
   );
 }
 
-function DonationRow({ receipt }: { receipt: FundingReceipt }) {
-  const txHref = blockExplorerUrl(receipt.txHash, receipt.paymentNetwork);
+function DonationSupporterBadge({ rank }: { rank: number }) {
+  const badge = DONATION_RANK_BADGES[rank];
+  if (!badge) return null;
+  const { Icon, label } = badge;
   return (
-    <div className="rounded-2xl border border-border-soft bg-surface p-4">
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <p className="text-sm font-medium text-foreground">
-            {formatDonationAmount(receipt)}
-          </p>
-          <p className="mt-1 text-xs text-muted-foreground">
-            From {donorLabel(receipt.from)}
-            {receipt.occurredAt || receipt.createdAt ? ` · ${formatDateTime(receipt.occurredAt ?? receipt.createdAt)}` : ""}
-          </p>
+    <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-medium leading-none text-primary">
+      <Icon className="size-3" />
+      {label}
+    </span>
+  );
+}
+
+function DonationLeaderboardRow({ entry }: { entry: DonationLeaderboardEntry }) {
+  const actionHref = donationEntryHref(entry);
+  const content = (
+    <>
+      <DonationRankBadge rank={entry.rank} />
+
+      <div className="min-w-0 flex-1 space-y-1.5">
+        <p className="flex min-w-0 items-center gap-1.5 text-[15px] font-semibold text-foreground">
+          {entry.donor?.type === "did" ? (
+            <span className="min-w-0 truncate">
+              <AuthorInline did={entry.donor.id} />
+            </span>
+          ) : (
+            <>
+              <WalletIcon className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+              <span className="min-w-0 truncate">Anonymous supporter</span>
+            </>
+          )}
+        </p>
+        <div className="flex min-w-0 flex-col items-start gap-1 text-[13px] leading-snug text-muted-foreground">
+          <DonationSupporterBadge rank={entry.rank} />
+          <span className="w-full min-w-0 whitespace-normal break-words">{donationEntrySummary(entry)}</span>
         </div>
-        {txHref ? (
-          <Link
-            href={txHref}
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex w-fit items-center gap-1 rounded-full border border-border-soft px-3 py-1.5 text-xs font-medium text-foreground/70 transition-colors hover:border-primary/40 hover:text-primary"
-          >
-            Payment details
-            <ExternalLinkIcon className="h-3 w-3" />
-          </Link>
-        ) : null}
       </div>
-    </div>
+
+      <span className="shrink-0 whitespace-nowrap pt-0.5 text-[15px] font-bold tabular-nums text-primary sm:text-[17px]">
+        {formatCompactUsd(entry.totalAmount)}
+      </span>
+
+      {actionHref ? (
+        <ChevronRightIcon
+          aria-hidden="true"
+          className="mt-1 size-4 shrink-0 text-muted-foreground/40 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-primary sm:size-5"
+        />
+      ) : null}
+    </>
   );
+  const className = "group flex items-start gap-3.5 px-4 py-[18px] transition-colors duration-200 hover:bg-primary/[0.04] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:gap-4 sm:px-5 sm:py-5";
+
+  if (actionHref) {
+    return (
+      <Link
+        href={actionHref}
+        target={actionHref.startsWith("http") ? "_blank" : undefined}
+        rel={actionHref.startsWith("http") ? "noreferrer" : undefined}
+        aria-label={entry.donor?.type === "did" ? "Open supporter profile" : "Open payment details"}
+        className={className}
+      >
+        {content}
+      </Link>
+    );
+  }
+
+  return <div className={className}>{content}</div>;
 }
 
-function EmptyState({ icon, title, body }: { icon: ReactNode; title: string; body: string }) {
+function donationEntryHref(entry: DonationLeaderboardEntry): string | null {
+  if (entry.donor?.type === "did") return accountHref(entry.donor.id);
+  return blockExplorerUrl(entry.latestReceipt.txHash, entry.latestReceipt.paymentNetwork);
+}
+
+function donationEntrySummary(entry: DonationLeaderboardEntry): string {
+  const donationCount = `${formatNumber(entry.donationCount)} ${entry.donationCount === 1 ? "donation" : "donations"}`;
+  const lastGift = entry.lastDonatedAt ? `Last donation ${formatRelative(entry.lastDonatedAt)}` : null;
+  return lastGift ? `${donationCount} · ${lastGift}` : donationCount;
+}
+
+function dateTimeValue(date: string | null): number {
+  if (!date) return 0;
+  const time = Date.parse(date);
+  return Number.isNaN(time) ? 0 : time;
+}
+
+function EmptyState({ icon, title, body, variant = "default" }: { icon: ReactNode; title: string; body: string; variant?: "default" | "leaderboard" }) {
+  if (variant === "leaderboard") {
+    return (
+      <div className="flex flex-col items-center gap-3 rounded-3xl bg-card/75 py-16 text-center text-muted-foreground shadow-sm shadow-primary/5 ring-1 ring-foreground/5 backdrop-blur">
+        <div className="flex size-16 items-center justify-center rounded-full bg-primary/10 text-primary">{icon}</div>
+        <p className="font-garamond text-3xl font-light text-foreground">{title}</p>
+        <p className="font-instrument max-w-sm text-base italic text-foreground/70">{body}</p>
+      </div>
+    );
+  }
+
   return (
     <div className="grid place-items-center rounded-2xl border border-dashed border-border-soft bg-surface/50 px-6 py-12 text-center">
       <div className="text-muted-foreground/50">{icon}</div>
@@ -976,17 +1143,6 @@ function EmptyState({ icon, title, body }: { icon: ReactNode; title: string; bod
       <p className="mt-2 max-w-md text-sm leading-6 text-muted-foreground">{body}</p>
     </div>
   );
-}
-
-function formatDonationAmount(receipt: FundingReceipt): string {
-  if (["USD", "USDC"].includes(receipt.currency.toUpperCase())) return formatUsd(receipt.amount);
-  return `${formatNumber(receipt.amount)} ${receipt.currency}`;
-}
-
-function donorLabel(donor: DonorRef): string {
-  if (!donor) return "anonymous donor";
-  if (donor.type === "wallet") return "anonymous supporter";
-  return "named supporter";
 }
 
 function socialPlatformLabel(platform: string): string {
