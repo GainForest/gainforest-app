@@ -181,7 +181,7 @@ export async function AccountTimelineTabContent({ account, did }: { account: Acc
 }
 
 export function AccountSettingsTabContent({ account }: { account: AccountRouteData }) {
-  return <AccountSettingsSections account={account} />;
+  return <AccountSettingsSections did={account.did} />;
 }
 
 function formatLinkedWindow(values: string[]): string | null {

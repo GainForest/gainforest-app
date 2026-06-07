@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { blo } from "blo";
 import {
   AlertTriangleIcon,
@@ -12,7 +12,6 @@ import {
   ExternalLinkIcon,
   EyeIcon,
   EyeOffIcon,
-  ImageIcon,
   KeyRoundIcon,
   Loader2Icon,
   PencilIcon,
@@ -24,8 +23,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import {
@@ -36,12 +33,10 @@ import {
 } from "@/components/ui/input-group";
 import { ModalContent, ModalDescription, ModalFooter, ModalHeader, ModalTitle } from "@/components/ui/modal/modal";
 import { useModal } from "@/components/ui/modal/context";
-import { ImageEditorModal } from "@/app/(manage)/manage/_modals/DashboardEditModals";
-import { deleteRecord, putRecord, uploadBlob } from "@/app/(manage)/manage/_lib/mutations";
+import { deleteRecord } from "@/app/(manage)/manage/_lib/mutations";
 import { INDEXER_URL } from "@/app/_lib/urls";
 import { CHAIN_ID } from "@/lib/facilitator/usdc";
 import { cn } from "@/lib/utils";
-import type { AccountRouteData } from "../_lib/account-route";
 
 type EthereumProvider = {
   request: (args: { method: string; params?: unknown[] }) => Promise<unknown>;
@@ -83,250 +78,6 @@ async function resolvePdsUrl(did: string): Promise<string> {
   const data = (await response.json().catch(() => null)) as { pdsUrl?: string; error?: string } | null;
   if (!response.ok || !data?.pdsUrl) throw new Error(data?.error ?? "Failed to resolve account server");
   return data.pdsUrl;
-}
-
-async function fetchRecordValue(
-  pdsUrl: string,
-  did: string,
-  collection: string,
-): Promise<Record<string, unknown> | null> {
-  const params = new URLSearchParams({ repo: did, collection, rkey: "self" });
-  const response = await fetch(
-    `${pdsUrl.replace(/\/$/, "")}/xrpc/com.atproto.repo.getRecord?${params.toString()}`,
-    { cache: "no-store" },
-  );
-  if (!response.ok) return null;
-  const data = (await response.json().catch(() => null)) as { value?: Record<string, unknown> } | null;
-  return data?.value ?? null;
-}
-
-// ── Profile (Edit Profile) ──────────────────────────────────────────────────
-
-function ProfileForm({ account }: { account: AccountRouteData }) {
-  const modal = useModal();
-
-  const [displayName, setDisplayName] = useState(account.displayName ?? "");
-  const [bio, setBio] = useState(account.description ?? "");
-  const [avatarFile, setAvatarFile] = useState<File | undefined>();
-  const [bannerFile, setBannerFile] = useState<File | undefined>();
-  const [isSaving, setIsSaving] = useState(false);
-  const [saveError, setSaveError] = useState<string | null>(null);
-  const [saveSuccess, setSaveSuccess] = useState(false);
-
-  const avatarPreviewUrl = useMemo(() => (avatarFile ? URL.createObjectURL(avatarFile) : null), [avatarFile]);
-  const bannerPreviewUrl = useMemo(() => (bannerFile ? URL.createObjectURL(bannerFile) : null), [bannerFile]);
-
-  const displayedAvatarUrl = avatarPreviewUrl ?? account.avatarUrl;
-  const displayedBannerUrl = bannerPreviewUrl ?? account.coverUrl;
-
-  const displayNameError =
-    displayName.trim().length === 0
-      ? "Name is required."
-      : displayName.trim().length > 64
-        ? "Name must be 64 characters or fewer."
-        : undefined;
-  const bioError = bio.trim().length > 256 ? "Bio must be 256 characters or fewer." : undefined;
-
-  const openImageEditor = (target: "avatar" | "banner") => {
-    const isAvatar = target === "avatar";
-    modal.pushModal(
-      {
-        id: "settings-profile-image-editor",
-        content: (
-          <ImageEditorModal
-            title={isAvatar ? "Change avatar" : "Change banner"}
-            description={
-              isAvatar
-                ? "Choose a clear avatar for your profile."
-                : "Choose a banner that sets the tone for your profile."
-            }
-            currentUrl={isAvatar ? displayedAvatarUrl : displayedBannerUrl}
-            onConfirm={(file) => (isAvatar ? setAvatarFile(file) : setBannerFile(file))}
-          />
-        ),
-        dialogWidth: isAvatar ? "max-w-sm" : "max-w-2xl",
-      },
-      true,
-    );
-    void modal.show();
-  };
-
-  const handleSave = useCallback(async () => {
-    if (displayNameError || bioError) return;
-
-    setIsSaving(true);
-    setSaveError(null);
-    setSaveSuccess(false);
-
-    try {
-      const pdsUrl = await resolvePdsUrl(account.did);
-      const [bskyRecord, certifiedRecord] = await Promise.all([
-        fetchRecordValue(pdsUrl, account.did, "app.bsky.actor.profile"),
-        fetchRecordValue(pdsUrl, account.did, "app.certified.actor.profile"),
-      ]);
-
-      const [avatarBlob, bannerBlob] = await Promise.all([
-        avatarFile ? uploadBlob(avatarFile) : Promise.resolve(null),
-        bannerFile ? uploadBlob(bannerFile) : Promise.resolve(null),
-      ]);
-
-      const trimmedName = displayName.trim();
-      const trimmedBio = bio.trim();
-
-      const nextBsky: Record<string, unknown> = {
-        ...(bskyRecord ?? {}),
-        $type: "app.bsky.actor.profile",
-        displayName: trimmedName,
-      };
-      if (trimmedBio) nextBsky.description = trimmedBio;
-      else delete nextBsky.description;
-      if (avatarBlob) nextBsky.avatar = avatarBlob;
-      if (bannerBlob) nextBsky.banner = bannerBlob;
-
-      const nextCertified: Record<string, unknown> = {
-        ...(certifiedRecord ?? {}),
-        $type: "app.certified.actor.profile",
-        displayName: trimmedName,
-      };
-      if (trimmedBio) nextCertified.description = trimmedBio;
-      else delete nextCertified.description;
-      if (!nextCertified.createdAt) nextCertified.createdAt = new Date().toISOString();
-      if (avatarBlob) {
-        nextCertified.avatar = { $type: "org.hypercerts.defs#smallImage", image: avatarBlob.ref };
-      }
-
-      await Promise.all([
-        putRecord("app.bsky.actor.profile", "self", nextBsky),
-        putRecord("app.certified.actor.profile", "self", nextCertified),
-      ]);
-
-      setAvatarFile(undefined);
-      setBannerFile(undefined);
-      setSaveSuccess(true);
-      setTimeout(() => setSaveSuccess(false), 3000);
-    } catch (error) {
-      setSaveError(error instanceof Error ? error.message : "Failed to save profile.");
-    } finally {
-      setIsSaving(false);
-    }
-  }, [account.did, avatarFile, bannerFile, bio, bioError, displayName, displayNameError]);
-
-  return (
-    <div className="space-y-5">
-      {/* Banner + Avatar picker */}
-      <div>
-        <button
-          type="button"
-          onClick={() => openImageEditor("banner")}
-          className="group relative block w-full overflow-hidden rounded-t-2xl border border-border bg-muted/50 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          aria-label="Change banner"
-        >
-          <div className="aspect-[16/5] w-full">
-            {displayedBannerUrl ? (
-              <Image src={displayedBannerUrl} alt="Banner" fill unoptimized className="object-cover" />
-            ) : (
-              <div className="flex h-full w-full items-center justify-center">
-                <ImageIcon className="h-7 w-7 text-muted-foreground/40" />
-              </div>
-            )}
-          </div>
-          <span className="absolute right-2 top-2 rounded-full bg-background/80 px-2 py-0.5 text-xs text-foreground backdrop-blur-sm transition-opacity group-hover:opacity-100 opacity-80">
-            {displayedBannerUrl ? "Change banner" : "Add banner"}
-          </span>
-        </button>
-
-        <div className="flex items-end gap-4 pl-4">
-          <button
-            type="button"
-            onClick={() => openImageEditor("avatar")}
-            className="group relative -mt-10 flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-background bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            aria-label="Change avatar"
-          >
-            {displayedAvatarUrl ? (
-              <Image src={displayedAvatarUrl} alt="Avatar" fill unoptimized className="object-cover" />
-            ) : (
-              <ImageIcon className="h-6 w-6 text-muted-foreground/50" />
-            )}
-            <div className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 transition-opacity group-hover:opacity-100">
-              <ImageIcon className="h-5 w-5 text-white" />
-            </div>
-          </button>
-        </div>
-      </div>
-
-      {/* Text fields */}
-      <div className="space-y-4">
-        <div className="space-y-1.5">
-          <Label htmlFor="settings-display-name">Display Name</Label>
-          <Input
-            id="settings-display-name"
-            value={displayName}
-            onChange={(e) => {
-              setDisplayName(e.target.value);
-              setSaveSuccess(false);
-            }}
-            placeholder="Your name"
-            maxLength={64}
-            className="max-w-sm"
-          />
-          {displayName.length > 0 && displayNameError && (
-            <p className="text-xs text-destructive">{displayNameError}</p>
-          )}
-        </div>
-
-        <div className="space-y-1.5">
-          <Label htmlFor="settings-bio">Bio</Label>
-          <Textarea
-            id="settings-bio"
-            value={bio}
-            onChange={(e) => {
-              setBio(e.target.value);
-              setSaveSuccess(false);
-            }}
-            placeholder="A short introduction to who you are."
-            rows={3}
-            maxLength={256}
-            className="max-w-sm resize-none"
-          />
-          <p className="max-w-sm text-right text-xs text-muted-foreground">{bio.length}/256</p>
-          {bioError && <p className="text-xs text-destructive">{bioError}</p>}
-        </div>
-      </div>
-
-      {saveError && <p className="text-sm text-destructive">{saveError}</p>}
-
-      <Button onClick={() => void handleSave()} disabled={isSaving || !!displayNameError} size="sm">
-        {isSaving ? (
-          <>
-            <Loader2Icon className="h-3.5 w-3.5 animate-spin" />
-            Saving...
-          </>
-        ) : saveSuccess ? (
-          <>
-            <CheckIcon className="h-3.5 w-3.5" />
-            Saved!
-          </>
-        ) : (
-          "Save Changes"
-        )}
-      </Button>
-    </div>
-  );
-}
-
-function ProfileSection({ account }: { account: AccountRouteData }) {
-  return (
-    <div className="space-y-4">
-      <div>
-        <h2 className="text-base font-semibold">Edit Profile</h2>
-        <p className="text-sm text-muted-foreground mt-0.5">
-          Update your display name, bio, and profile images.
-        </p>
-      </div>
-      <Separator />
-      <ProfileForm account={account} />
-    </div>
-  );
 }
 
 // ── Password ────────────────────────────────────────────────────────────────
@@ -867,19 +618,18 @@ function AccountSection({ did }: { did: string }) {
   );
 }
 
-export function AccountSettingsSections({ account }: { account: AccountRouteData }) {
+export function AccountSettingsSections({ did }: { did: string }) {
   return (
     <div className="mx-auto mt-8 mb-20 space-y-8">
-      <ProfileSection account={account} />
-      <PasswordSection did={account.did} />
-      <WalletsSection did={account.did} />
+      <PasswordSection did={did} />
+      <WalletsSection did={did} />
       <Accordion type="single" collapsible>
         <AccordionItem value="advanced" className="border-none">
           <AccordionTrigger className="text-sm font-medium text-muted-foreground hover:text-foreground hover:no-underline py-0 pb-3">
             Advanced
           </AccordionTrigger>
           <AccordionContent className="pb-0">
-            <AccountSection did={account.did} />
+            <AccountSection did={did} />
           </AccordionContent>
         </AccordionItem>
       </Accordion>
