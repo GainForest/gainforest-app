@@ -33,7 +33,6 @@ import {
 import { countryFlag } from "../_lib/format";
 
 type SortMode = "newest" | "oldest" | "az" | "za";
-type SourceFilter = "both" | "gainforest" | "certified";
 type ViewMode = "cards" | "map";
 type QuickFilter = "photos" | "locations";
 
@@ -42,12 +41,6 @@ const SORT_OPTIONS: Array<{ value: SortMode; label: string }> = [
   { value: "oldest", label: "Oldest first" },
   { value: "az", label: "A → Z" },
   { value: "za", label: "Z → A" },
-];
-
-const SOURCE_CHIPS: Array<{ value: SourceFilter; label: string }> = [
-  { value: "both", label: "All organizations" },
-  { value: "gainforest", label: "Project profiles" },
-  { value: "certified", label: "Bumicerts profiles" },
 ];
 
 const QUICK_CHIPS: Array<{ value: QuickFilter; label: string; Icon: typeof ImageIcon }> = [
@@ -67,7 +60,6 @@ export function OrganizationsClient({ records: initialRecords = [] }: { records?
   const [loadingMore, setLoadingMore] = useState(false);
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState<SortMode>("newest");
-  const [sourceFilter, setSourceFilter] = useState<SourceFilter>("both");
   const [countryFilter, setCountryFilter] = useState<string | null>(null);
   const [typeFilter, setTypeFilter] = useState<string | null>(null);
   const [quickFilters, setQuickFilters] = useState<QuickFilter[]>([]);
@@ -83,7 +75,7 @@ export function OrganizationsClient({ records: initialRecords = [] }: { records?
   useEffect(() => {
     const controller = new AbortController();
     setStatsLoading(true);
-    fetchOrganizationStats(sourceFilter, controller.signal)
+    fetchOrganizationStats("both", controller.signal)
       .then((nextStats) => setTotalStats(nextStats))
       .catch((error) => {
         if ((error as Error).name !== "AbortError") setTotalStats(null);
@@ -92,7 +84,7 @@ export function OrganizationsClient({ records: initialRecords = [] }: { records?
         if (!controller.signal.aborted) setStatsLoading(false);
       });
     return () => controller.abort();
-  }, [sourceFilter]);
+  }, []);
 
   useEffect(() => {
     if (initialRecords.length > 0) return;
@@ -105,7 +97,7 @@ export function OrganizationsClient({ records: initialRecords = [] }: { records?
     setRecords([]);
     setCursor(null);
     setHasMore(true);
-    fetchSites(ORGANIZATIONS_PAGE_SIZE, null, controller.signal, undefined, sourceFilter, options)
+    fetchSites(ORGANIZATIONS_PAGE_SIZE, null, controller.signal, undefined, "both", options)
       .then((page) => {
         if (!isCurrent()) return;
         setRecords(page.records);
@@ -119,7 +111,7 @@ export function OrganizationsClient({ records: initialRecords = [] }: { records?
         if (isCurrent()) setLoading(false);
       });
     return () => controller.abort();
-  }, [countryFilter, deferredQuery, initialRecords.length, quickFilters, sort, sourceFilter, typeFilter]);
+  }, [countryFilter, deferredQuery, initialRecords.length, quickFilters, sort, typeFilter]);
 
   const countryChips = useMemo(() => {
     const codes = records
@@ -144,7 +136,6 @@ export function OrganizationsClient({ records: initialRecords = [] }: { records?
   const visibleRecords = useMemo(() => {
     const normalizedQuery = deferredQuery.trim().toLowerCase();
     const filtered = records.filter((record) => {
-      if (sourceFilter !== "both" && record.source !== sourceFilter) return false;
       if (countryFilter && normalizeCountry(record.country) !== countryFilter) return false;
       if (typeFilter && !orgTypes(record).includes(typeFilter)) return false;
       if (quickFilters.includes("photos") && !hasPhoto(record)) return false;
@@ -170,7 +161,7 @@ export function OrganizationsClient({ records: initialRecords = [] }: { records?
           return siteTime(b.createdAt) - siteTime(a.createdAt);
       }
     });
-  }, [countryFilter, deferredQuery, quickFilters, records, sort, sourceFilter, typeFilter]);
+  }, [countryFilter, deferredQuery, quickFilters, records, sort, typeFilter]);
 
   const stats = useMemo(
     () => [
@@ -206,7 +197,6 @@ export function OrganizationsClient({ records: initialRecords = [] }: { records?
   const hasMoreCardsToShow = view === "cards" && renderedRecords.length < visibleRecords.length;
 
   const activeFilterCount =
-    (sourceFilter !== "both" ? 1 : 0) +
     (countryFilter ? 1 : 0) +
     (typeFilter ? 1 : 0) +
     quickFilters.length;
@@ -215,7 +205,7 @@ export function OrganizationsClient({ records: initialRecords = [] }: { records?
 
   useEffect(() => {
     setCardLimit(INITIAL_CARD_LIMIT);
-  }, [deferredQuery, sort, sourceFilter, countryFilter, typeFilter, quickFilters, view]);
+  }, [deferredQuery, sort, countryFilter, typeFilter, quickFilters, view]);
 
   const toggleQuickFilter = (filter: QuickFilter) => {
     setQuickFilters((current) =>
@@ -225,7 +215,6 @@ export function OrganizationsClient({ records: initialRecords = [] }: { records?
 
   const clearAll = () => {
     setQuery("");
-    setSourceFilter("both");
     setCountryFilter(null);
     setTypeFilter(null);
     setQuickFilters([]);
@@ -239,7 +228,7 @@ export function OrganizationsClient({ records: initialRecords = [] }: { records?
     const isCurrent = () => requestSeqRef.current === requestSeq && !controller.signal.aborted;
     const base = records;
     setLoadingMore(true);
-    fetchSites(ORGANIZATIONS_PAGE_SIZE, cursor, controller.signal, undefined, sourceFilter, { query: deferredQuery, country: countryFilter, orgType: typeFilter, quickFilters, sort })
+    fetchSites(ORGANIZATIONS_PAGE_SIZE, cursor, controller.signal, undefined, "both", { query: deferredQuery, country: countryFilter, orgType: typeFilter, quickFilters, sort })
       .then((page) => {
         if (!isCurrent()) return;
         setRecords(mergeSiteRecords(base, page.records));
@@ -252,7 +241,7 @@ export function OrganizationsClient({ records: initialRecords = [] }: { records?
       .finally(() => {
         if (isCurrent()) setLoadingMore(false);
       });
-  }, [countryFilter, cursor, deferredQuery, hasMore, loading, loadingMore, quickFilters, records, sort, sourceFilter, typeFilter]);
+  }, [countryFilter, cursor, deferredQuery, hasMore, loading, loadingMore, quickFilters, records, sort, typeFilter]);
 
   const openMapRecord = (record: ExplorerRecord) => {
     if (record.kind === "site") setDrawer(record);
@@ -293,18 +282,6 @@ export function OrganizationsClient({ records: initialRecords = [] }: { records?
               style={{ animationDelay: "120ms" }}
             >
               <div className="flex items-center gap-1.5 pb-1 pr-8">
-                {SOURCE_CHIPS.map((chip) => (
-                  <FilterChip
-                    key={chip.value}
-                    selected={sourceFilter === chip.value}
-                    onClick={() => setSourceFilter(chip.value)}
-                  >
-                    {chip.label}
-                  </FilterChip>
-                ))}
-
-                <span className="mx-0.5 h-5 w-px shrink-0 bg-border" aria-hidden />
-
                 {QUICK_CHIPS.map(({ value, label, Icon }) => (
                   <FilterChip
                     key={value}
