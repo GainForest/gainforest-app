@@ -258,7 +258,7 @@ function ServiceCard({
         <div className="mt-auto">
           <div className="flex items-baseline justify-between gap-2">
             <span className="text-[11px] font-medium uppercase tracking-[0.08em] text-foreground/45">
-              90-day uptime
+              90-day health
             </span>
             <span className="font-mono text-[12.5px] font-semibold tabular-nums text-foreground/70">
               {uptime.toFixed(2)}%
@@ -311,10 +311,17 @@ function Notice({ title, body }: { title: string; body: ReactNode }) {
   );
 }
 
+function friendlyIncidentTitle(name: string): string {
+  // Auto-generated names end with " is back up" / " is down"; trim for clarity.
+  const rawTitle = name.replace(/\s+is (back up|down)$/i, "").trim() || name;
+  const service = friendlyServiceName(rawTitle, "");
+  if (service.name !== "GainForest service") return service.name;
+  return rawTitle.replace(/\(\s+/g, "(").replace(/\s+\)/g, ")");
+}
+
 function IncidentRow({ incident }: { incident: Incident }) {
   const t = componentTone(incident.impact);
-  // Auto-generated names end with " is back up" / " is down"; trim for clarity.
-  const title = incident.name.replace(/\s+is (back up|down)$/i, "").trim() || incident.name;
+  const title = friendlyIncidentTitle(incident.name);
   const when = incident.started ? formatRelative(incident.started) : "";
   const dur = incident.durationMs != null ? formatDuration(incident.durationMs) : null;
   return (
