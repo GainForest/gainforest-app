@@ -92,6 +92,10 @@ const KIND_META: Record<RecordKind, KindMeta> = {
 // carries an owner (did:plc → handle/avatar) + created date.
 const GRID_CLS =
   "grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 2xl:grid-cols-6";
+// Observations read as a photo gallery: square tiles packed tight, more per
+// row, minimal seams between them. The other streams keep the airier card grid.
+const GALLERY_GRID_CLS =
+  "grid grid-cols-2 gap-1.5 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 2xl:grid-cols-6";
 
 // AT-URI collection per page kind, so a shareable `?record=did/rkey` value can
 // be expanded back into a full at:// URI (the collection is implied by route).
@@ -440,6 +444,7 @@ export function RecordExplorer({
     [kind, occurrenceStats, records],
   );
   const showStats = kind === "occurrence" ? Boolean(occurrenceStats) || (!occurrenceStatsLoading && records.length > 0) : records.length > 0;
+  const gridCls = kind === "occurrence" ? GALLERY_GRID_CLS : GRID_CLS;
 
   return (
     <section className={`${showHero ? "-mt-14 " : ""}bg-background pb-20 md:pb-28`}>
@@ -583,7 +588,7 @@ export function RecordExplorer({
           {view === "map" ? (
             <RecordMap records={filtered} kind={kind} onOpen={setDrawer} />
           ) : (phase === "idle" || phase === "loading") && records.length === 0 ? (
-            <SkeletonGrid />
+            <SkeletonGrid kind={kind} />
           ) : phase === "error" && records.length === 0 ? (
             <EmptyState
               title="Could not load this page"
@@ -612,7 +617,7 @@ export function RecordExplorer({
               <EmptyState title="Nothing here yet" body="There is nothing to show right now." />
             )
           ) : (
-            <ul role="list" className={GRID_CLS}>
+            <ul role="list" className={gridCls}>
               {renderedRecords.map((r, i) => (
                 <li key={r.id} className="animate-in" style={{ animationDelay: `${Math.min(i, 12) * 18}ms` }}>
                   <RecordCard record={r} onOpen={setDrawer} />
@@ -785,6 +790,8 @@ const OccurrenceCard = memo(function OccurrenceCard({
     onOpen(record);
   }
 
+  const audioOnly = hasAudio && !hasImage;
+
   return (
     <div
       role="button"
@@ -797,7 +804,7 @@ const OccurrenceCard = memo(function OccurrenceCard({
         }
       }}
       aria-label={`Open ${name}`}
-      className="group relative block aspect-[4/3] w-full cursor-pointer overflow-hidden rounded-xl bg-surface-sunken text-left outline-none transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_-24px_rgba(20,30,15,0.45)] focus-visible:ring-2 focus-visible:ring-primary/50"
+      className="group relative block aspect-square w-full cursor-pointer overflow-hidden rounded-lg bg-surface-sunken text-left outline-none transition-all duration-300 hover:z-10 hover:shadow-[0_18px_40px_-22px_rgba(20,30,15,0.55)] focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-primary/60"
     >
       {hasImage ? (
         <Image
@@ -807,20 +814,31 @@ const OccurrenceCard = memo(function OccurrenceCard({
           sizes="(max-width:640px) 50vw, (max-width:1280px) 25vw, 240px"
           unoptimized={!isPdsBlobUrl(imageUrl)}
           onError={() => setImgError(true)}
-          className="scale-[1.08] object-cover transition-transform duration-500 group-hover:scale-100"
+          className="scale-[1.05] object-cover transition-transform duration-[600ms] ease-out group-hover:scale-110"
         />
       ) : (
+        // Sound-only (and empty) tiles get a deep forest panel so the white
+        // label and the play control read with strong contrast — the old light
+        // surface left both washed out.
         <div
           className="absolute inset-0"
           style={{
-            background:
-              "radial-gradient(120% 100% at 50% 0%, color-mix(in srgb, var(--primary) 16%, transparent), transparent), var(--surface)",
+            background: audioOnly
+              ? "radial-gradient(125% 110% at 50% 18%, color-mix(in srgb, var(--primary) 60%, #0b2015), #081a10)"
+              : "radial-gradient(120% 100% at 50% 0%, color-mix(in srgb, var(--primary) 16%, transparent), transparent), var(--surface)",
           }}
-        />
+        >
+          {audioOnly ? (
+            <AudioLinesIcon
+              aria-hidden
+              className="absolute left-1/2 top-[38%] h-24 w-24 -translate-x-1/2 -translate-y-1/2 text-white/10"
+            />
+          ) : null}
+        </div>
       )}
 
-      {/* Inline audio control — sits center for sound-only tiles, tucked
-          top-right when there's also a photo. */}
+      {/* Inline audio control — centered on sound-only tiles, tucked top-right
+          when a photo is also present. High-contrast in both cases. */}
       {hasAudio ? (
         <button
           type="button"
@@ -828,8 +846,8 @@ const OccurrenceCard = memo(function OccurrenceCard({
           aria-label={audioState === "playing" ? "Pause audio" : "Play audio"}
           className={
             hasImage
-              ? "absolute right-2 top-2 z-20 grid h-9 w-9 place-items-center rounded-full bg-background/80 text-foreground shadow-md backdrop-blur-md transition hover:bg-background"
-              : "absolute left-1/2 top-1/2 z-20 grid h-14 w-14 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-background/85 text-foreground shadow-lg backdrop-blur-md transition hover:scale-105 hover:bg-background"
+              ? "absolute right-2 top-2 z-20 grid h-9 w-9 place-items-center rounded-full bg-black/55 text-white shadow-md ring-1 ring-white/25 backdrop-blur-md transition hover:bg-black/70"
+              : "absolute left-1/2 top-[38%] z-20 grid h-14 w-14 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-white text-[#0b2015] shadow-[0_8px_24px_-6px_rgba(0,0,0,0.5)] transition hover:scale-105"
           }
         >
           {audioState === "loading" ? (
@@ -842,24 +860,36 @@ const OccurrenceCard = memo(function OccurrenceCard({
         </button>
       ) : null}
 
-      {/* Bottom scrim for legibility over any media. */}
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/75 via-black/30 to-transparent" />
+      {/* Bottom scrim — darker than before so labels stay legible over any
+          media, and always present (not hover-gated). */}
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-3/4 bg-gradient-to-t from-black/85 via-black/35 to-transparent" />
 
-      <div className="absolute inset-x-0 bottom-0 z-10 p-3">
+      <div className="absolute inset-x-0 bottom-0 z-10 p-2.5">
         {creatorLabel ? (
-          <p className="truncate text-[11px] font-medium text-white/75">{creatorLabel}</p>
+          <p className="truncate text-[10.5px] font-medium uppercase tracking-[0.06em] text-white/85">
+            {creatorLabel}
+          </p>
         ) : null}
         <h3
-          className="font-instrument text-[17px] italic leading-tight text-white drop-shadow-sm"
+          className="font-instrument text-[16px] italic leading-tight text-white [text-shadow:0_1px_3px_rgba(0,0,0,0.6)]"
           style={clamp(2)}
         >
           {name}
         </h3>
-        {subtitle ? (
-          <p className="truncate text-[12px] leading-snug text-white/70">{subtitle}</p>
-        ) : null}
-        {date ? (
-          <p className="mt-1 text-[10.5px] text-white/60">{formatDate(date)}</p>
+
+        {/* Secondary details slide open only on hover/focus, keeping the resting
+            tile to just the species + creator. */}
+        {subtitle || date ? (
+          <div className="grid grid-rows-[0fr] opacity-0 transition-all duration-300 ease-out group-hover:grid-rows-[1fr] group-hover:opacity-100 group-focus-visible:grid-rows-[1fr] group-focus-visible:opacity-100">
+            <div className="overflow-hidden">
+              {subtitle ? (
+                <p className="mt-0.5 truncate text-[12px] leading-snug text-white/80">{subtitle}</p>
+              ) : null}
+              {date ? (
+                <p className="mt-0.5 text-[10.5px] text-white/65">{formatDate(date)}</p>
+              ) : null}
+            </div>
+          </div>
         ) : null}
       </div>
     </div>
@@ -1291,7 +1321,17 @@ function Spinner() {
   return <Loader2Icon className="h-[15px] w-[15px] animate-spin" aria-hidden />;
 }
 
-function SkeletonGrid() {
+function SkeletonGrid({ kind }: { kind?: RecordKind }) {
+  // Observations skeletons mirror the gallery: bare square tiles, tight gaps.
+  if (kind === "occurrence") {
+    return (
+      <div className={GALLERY_GRID_CLS} aria-hidden>
+        {Array.from({ length: 18 }).map((_, i) => (
+          <div key={i} className="skeleton aspect-square rounded-lg" />
+        ))}
+      </div>
+    );
+  }
   return (
     <div className={GRID_CLS} aria-hidden>
       {Array.from({ length: 15 }).map((_, i) => (
