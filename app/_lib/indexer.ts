@@ -784,6 +784,7 @@ export type BumicertRecord = {
   did: string;
   rkey: string;
   atUri: string;
+  cid: string | null;
   title: string;
   shortDescription: string | null;
   startDate: string | null;
@@ -801,7 +802,7 @@ export type BumicertRecord = {
 };
 
 const ACTIVITY_NODE_FIELDS = `
-  did rkey uri createdAt title shortDescription startDate endDate
+  did rkey uri cid createdAt title shortDescription startDate endDate
   ${CERTIFIED_PROFILE_DATA_FIELDS}
   workScope {
     __typename
@@ -891,6 +892,7 @@ type RawActivity = {
   did: string;
   rkey: string;
   uri: string;
+  cid?: string | null;
   createdAt: string;
   title?: string | null;
   shortDescription?: string | null;
@@ -945,6 +947,7 @@ function mapActivity(n: RawActivity): BumicertRecord {
     did: n.did,
     rkey: n.rkey,
     atUri: n.uri || `at://${n.did}/org.hypercerts.claim.activity/${n.rkey}`,
+    cid: n.cid ?? null,
     title: (n.title ?? "Untitled bumicert").trim() || "Untitled bumicert",
     shortDescription: n.shortDescription?.trim() || null,
     startDate: n.startDate?.trim() || null,
@@ -2401,6 +2404,296 @@ export async function fetchTreeDatasetsByDid(
   }
 
   return all;
+}
+
+// ── 8. Bumicert evidence timeline attachments ─────────────────────────────
+
+export type TimelineAttachmentSubject = { uri: string | null; cid: string | null };
+
+export type TimelineAttachmentItem = {
+  metadata: {
+    did: string | null;
+    uri: string | null;
+    rkey: string | null;
+    cid: string | null;
+    createdAt: string | null;
+    indexedAt: string | null;
+  };
+  creatorInfo: {
+    did: string | null;
+    organizationName: string | null;
+    organizationLogo: { uri: string | null; cid: string | null; mimeType: string | null; size: number | null } | null;
+  } | null;
+  record: {
+    title: string | null;
+    shortDescription: string | null;
+    description: unknown;
+    contentType: string | null;
+    subjects: TimelineAttachmentSubject[] | null;
+    content: unknown;
+    createdAt: string | null;
+  };
+};
+
+export type TimelineDatasetRecord = {
+  metadata: { did: string; uri: string; rkey: string; cid: string; createdAt: string | null };
+  record: { name: string; description: string | null; recordCount: number | null; createdAt: string | null };
+};
+
+const TIMELINE_ATTACHMENTS_BY_DID_QUERY = `
+  query TimelineAttachmentsByDid($did: String!, $first: Int!, $after: String) {
+    orgHypercertsContextAttachment(
+      where: { did: { eq: $did } }
+      first: $first
+      after: $after
+      sortDirection: DESC
+      sortBy: createdAt
+    ) {
+      pageInfo { hasNextPage endCursor }
+      edges {
+        node {
+          did uri rkey cid createdAt
+          ${CERTIFIED_PROFILE_DATA_FIELDS}
+          title shortDescription contentType
+          subjects { uri cid }
+          description {
+            __typename
+            ... on OrgHypercertsDefsDescriptionString { value }
+            ... on ComAtprotoRepoStrongRef { uri cid }
+          }
+          content {
+            __typename
+            ... on OrgHypercertsDefsUri { uri }
+            ... on OrgHypercertsDefsSmallBlob { blob { ref mimeType size } }
+          }
+        }
+      }
+    }
+  }
+`;
+
+const TIMELINE_DATASET_BY_URI_QUERY = `
+  query TimelineDatasetByUri($uri: String!) {
+    appGainforestDwcDatasetByUri(uri: $uri) {
+      did uri rkey cid createdAt name description recordCount
+    }
+  }
+`;
+
+const TIMELINE_LOCATION_BY_URI_QUERY = `
+  query TimelineLocationByUri($uri: String!) {
+    appCertifiedLocationByUri(uri: $uri) {
+      did uri rkey cid createdAt name description locationType
+      location {
+        __typename
+        ... on AppCertifiedLocationString { string }
+        ... on OrgHypercertsDefsUri { uri }
+      }
+    }
+  }
+`;
+
+type RawTimelineAttachment = {
+  did?: string | null;
+  uri?: string | null;
+  rkey?: string | null;
+  cid?: string | null;
+  createdAt?: string | null;
+  title?: string | null;
+  shortDescription?: string | null;
+  contentType?: string | null;
+  subjects?: Array<{ uri?: string | null; cid?: string | null } | null> | null;
+  description?: { __typename?: string | null; value?: string | null; uri?: string | null; cid?: string | null } | null;
+  content?: Array<{
+    __typename?: string | null;
+    uri?: string | null;
+    blob?: { ref?: string | null; mimeType?: string | null; size?: number | null } | null;
+  } | null> | null;
+  certifiedProfileData?: CertifiedProfileData;
+};
+
+type RawTimelineDataset = {
+  did: string;
+  uri: string;
+  rkey: string;
+  cid: string;
+  createdAt?: string | null;
+  name: string;
+  description?: string | null;
+  recordCount?: number | null;
+};
+
+type RawTimelineLocation = {
+  did: string;
+  uri: string;
+  rkey: string;
+  cid: string;
+  createdAt?: string | null;
+  name?: string | null;
+  description?: string | null;
+  locationType?: string | null;
+  location?: { __typename?: string | null; string?: string | null; uri?: string | null } | null;
+};
+
+function normalizeTimelineDescription(value: RawTimelineAttachment["description"]): unknown {
+  if (!value) return null;
+  if (value.__typename === "OrgHypercertsDefsDescriptionString") {
+    return { $type: "org.hypercerts.defs#descriptionString", value: value.value ?? "" };
+  }
+  if (value.__typename === "ComAtprotoRepoStrongRef") {
+    return { $type: "com.atproto.repo.strongRef", uri: value.uri ?? null, cid: value.cid ?? null };
+  }
+  return value;
+}
+
+async function normalizeTimelineContent(
+  items: RawTimelineAttachment["content"],
+  did: string | null | undefined,
+  signal?: AbortSignal,
+): Promise<unknown[]> {
+  const normalized: unknown[] = [];
+  for (const item of items ?? []) {
+    if (!item?.__typename) continue;
+    if (item.__typename === "OrgHypercertsDefsUri") {
+      normalized.push({ $type: "org.hypercerts.defs#uri", uri: item.uri ?? "" });
+      continue;
+    }
+    if (item.__typename === "OrgHypercertsDefsSmallBlob") {
+      const ref = normaliseRef(item.blob?.ref);
+      let uri: string | null = null;
+      if (did && ref) {
+        try {
+          uri = await resolveBlobUrl(did, ref, signal);
+        } catch {
+          uri = null;
+        }
+      }
+      normalized.push({
+        $type: "org.hypercerts.defs#smallBlob",
+        blob: {
+          $type: "blob",
+          uri,
+          cid: ref,
+          mimeType: item.blob?.mimeType ?? null,
+          size: item.blob?.size ?? null,
+        },
+      });
+    }
+  }
+  return normalized;
+}
+
+async function mapTimelineAttachment(
+  node: RawTimelineAttachment,
+  signal?: AbortSignal,
+): Promise<TimelineAttachmentItem> {
+  const did = node.did ?? null;
+  const avatarRef = profileAvatarRef(node.certifiedProfileData);
+  let logoUrl: string | null = null;
+  if (did && avatarRef) {
+    try {
+      logoUrl = await resolveBlobUrl(did, avatarRef, signal);
+    } catch {
+      logoUrl = null;
+    }
+  }
+
+  return {
+    metadata: {
+      did,
+      uri: node.uri ?? null,
+      rkey: node.rkey ?? null,
+      cid: node.cid ?? null,
+      createdAt: node.createdAt ?? null,
+      indexedAt: null,
+    },
+    creatorInfo: did
+      ? {
+          did,
+          organizationName: profileName(node.certifiedProfileData) ?? did,
+          organizationLogo: logoUrl ? { uri: logoUrl, cid: null, mimeType: null, size: null } : null,
+        }
+      : null,
+    record: {
+      title: node.title?.trim() || null,
+      shortDescription: node.shortDescription?.trim() || null,
+      description: normalizeTimelineDescription(node.description),
+      contentType: node.contentType?.trim() || null,
+      subjects: (node.subjects ?? []).map((subject) => ({ uri: subject?.uri ?? null, cid: subject?.cid ?? null })),
+      content: await normalizeTimelineContent(node.content, did, signal),
+      createdAt: node.createdAt ?? null,
+    },
+  };
+}
+
+export async function fetchTimelineAttachmentsByDid(
+  did: string,
+  signal?: AbortSignal,
+): Promise<TimelineAttachmentItem[]> {
+  const all: TimelineAttachmentItem[] = [];
+  let cursor: string | null = null;
+  for (let page = 0; page < 50; page += 1) {
+    type AttachmentPage = { orgHypercertsContextAttachment?: Connection<RawTimelineAttachment> };
+    const data: AttachmentPage | null = await indexerQuery<AttachmentPage>(
+      TIMELINE_ATTACHMENTS_BY_DID_QUERY,
+      { did, first: 100, after: cursor },
+      signal,
+    );
+    const conn: Connection<RawTimelineAttachment> | undefined = data?.orgHypercertsContextAttachment;
+    const nodes = (conn?.edges ?? [])
+      .map((edge) => edge?.node)
+      .filter((node): node is RawTimelineAttachment => Boolean(node));
+    all.push(...await Promise.all(nodes.map((node) => mapTimelineAttachment(node, signal))));
+    if (!conn?.pageInfo?.hasNextPage || !conn.pageInfo.endCursor) break;
+    cursor = conn.pageInfo.endCursor;
+  }
+  return all;
+}
+
+export async function fetchTimelineDatasetByUri(
+  uri: string,
+  signal?: AbortSignal,
+): Promise<TimelineDatasetRecord | null> {
+  const data = await indexerQuery<{ appGainforestDwcDatasetByUri?: RawTimelineDataset | null }>(
+    TIMELINE_DATASET_BY_URI_QUERY,
+    { uri },
+    signal,
+  );
+  const node = data?.appGainforestDwcDatasetByUri;
+  if (!node?.uri) return null;
+  return {
+    metadata: { did: node.did, uri: node.uri, rkey: node.rkey, cid: node.cid, createdAt: node.createdAt ?? null },
+    record: {
+      name: node.name,
+      description: node.description?.trim() || null,
+      recordCount: typeof node.recordCount === "number" ? node.recordCount : null,
+      createdAt: node.createdAt ?? null,
+    },
+  };
+}
+
+export async function fetchTimelineLocationByUri(
+  uri: string,
+  signal?: AbortSignal,
+): Promise<ManagedLocation | null> {
+  const data = await indexerQuery<{ appCertifiedLocationByUri?: RawTimelineLocation | null }>(
+    TIMELINE_LOCATION_BY_URI_QUERY,
+    { uri },
+    signal,
+  );
+  const node = data?.appCertifiedLocationByUri;
+  if (!node?.uri) return null;
+  return mapLocation({
+    ...node,
+    createdAt: node.createdAt ?? null,
+    location: node.location
+      ? {
+          __typename: node.location.__typename ?? undefined,
+          string: node.location.string,
+          uri: node.location.uri,
+        }
+      : null,
+  });
 }
 
 // ── Unified record type for the detail drawer ──────────────────────────────

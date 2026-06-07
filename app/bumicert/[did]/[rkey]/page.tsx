@@ -17,13 +17,19 @@ import { SocialGlyph } from "../../../_components/SocialIcon";
 import { fetchReceipts, type DonorRef, type FundingReceipt } from "../../../_lib/dashboard";
 import { formatCompact, formatCompactUsd, formatDate, formatDateTime, formatNumber, formatRelative, formatUsd } from "../../../_lib/format";
 import {
+  fetchAudioByDid,
   fetchBumicertsByDid,
   fetchImageOccurrencesByDid,
+  fetchLocationsByDid,
+  fetchOccurrencesByDid,
   fetchRecordByUri,
   fetchRecordDetail,
+  fetchTimelineAttachmentsByDid,
+  fetchTreeDatasetsByDid,
   type BumicertRecord,
   type DetailBadge,
   type OccurrenceRecord,
+  type TimelineAttachmentItem,
 } from "../../../_lib/indexer";
 import { isPdsBlobUrl } from "../../../_lib/pds";
 import { blockExplorerUrl, INDEXER_URL, localBumicertHref } from "../../../_lib/urls";
@@ -34,6 +40,7 @@ import { BumicertHeaderTitleBridge } from "./_components/BumicertHeaderTitleBrid
 import { BumicertShareButton } from "./_components/BumicertShareButton";
 import { BumicertObservationsGallery } from "./_components/BumicertObservationsGallery";
 import { DonateButton } from "./_components/donate/DonateButton";
+import { BumicertTimeline } from "./_components/timeline/BumicertTimeline";
 
 export const revalidate = 60;
 
@@ -125,6 +132,32 @@ export default async function BumicertDetailPage({
       ])
     : [[], [] as OccurrenceRecord[]];
 
+  let timelineAttachments: TimelineAttachmentItem[] = [];
+  let timelineAttachmentsUnavailable = false;
+  const emptyTimelineSources = { audio: [], occurrences: [], treeGroups: [], places: [] };
+  let timelineSources: {
+    audio: Awaited<ReturnType<typeof fetchAudioByDid>>;
+    occurrences: OccurrenceRecord[];
+    treeGroups: Awaited<ReturnType<typeof fetchTreeDatasetsByDid>>;
+    places: Awaited<ReturnType<typeof fetchLocationsByDid>>;
+  } = emptyTimelineSources;
+
+  if (activeTab === "timeline") {
+    const [attachmentsResult, audio, occurrencePage, treeGroups, places] = await Promise.all([
+      fetchTimelineAttachmentsByDid(record.did).then(
+        (items) => ({ ok: true as const, items }),
+        () => ({ ok: false as const, items: [] as TimelineAttachmentItem[] }),
+      ),
+      fetchAudioByDid(record.did).catch(() => []),
+      fetchOccurrencesByDid(record.did, 1000).catch(() => ({ records: [] as OccurrenceRecord[], cursor: null, hasMore: false })),
+      fetchTreeDatasetsByDid(record.did).catch(() => []),
+      fetchLocationsByDid(record.did).catch(() => []),
+    ]);
+    timelineAttachments = attachmentsResult.items;
+    timelineAttachmentsUnavailable = !attachmentsResult.ok;
+    timelineSources = { audio, occurrences: occurrencePage.records, treeGroups, places };
+  }
+
   return (
     <>
       <BumicertHeaderTitleBridge
@@ -176,7 +209,18 @@ export default async function BumicertDetailPage({
             {activeTab === "donations" && (
               <DonationsPanel receipts={donationReceipts} unavailable={donationsUnavailable} />
             )}
-            {activeTab === "timeline" && <TimelinePanel record={record} detail={detail} period={period} />}
+            {activeTab === "timeline" && (
+              <BumicertTimeline
+                organizationDid={record.did}
+                activityUri={record.atUri}
+                activityCid={record.cid ?? ""}
+                bumicertTitle={record.title}
+                isOwner={authSession.isLoggedIn && authSession.did === record.did}
+                initialEntries={timelineAttachments}
+                sources={timelineSources}
+                attachmentsUnavailable={timelineAttachmentsUnavailable}
+              />
+            )}
           </div>
 
           {isOverviewTab && moreBumicerts.length > 0 ? (
