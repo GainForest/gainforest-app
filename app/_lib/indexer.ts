@@ -14,7 +14,7 @@
 
 import { cachedAsync } from "./async-cache";
 import { INDEXER_URL } from "./urls";
-import { resolveBlobUrl, normaliseRef } from "./pds";
+import { blobUrl, resolveBlobUrl, resolvePdsHost, normaliseRef } from "./pds";
 import { asNumber, formatNumber, formatDate, formatDateTime } from "./format";
 
 // ── Generic GraphQL helper ────────────────────────────────────────────────
@@ -189,8 +189,10 @@ export type OccurrenceRecord = {
    *  first list page can appear without waiting for every image host lookup. */
   imageRef: string | null;
   /** Audio evidence blob ref (CID), resolved to a PDS blob URL on demand for
-   *  inline playback. Null when the record carries no audio. */
+   *  inline playback. Null when the record carries no PDS-hosted audio. */
   audioRef: string | null;
+  /** Older sightings sometimes carry a direct sound link instead of a blob ref. */
+  audioUrl: string | null;
   /** Which media kinds the record carries (drives the card badges). */
   media: MediaKind[];
 };
@@ -203,7 +205,7 @@ const OCCURRENCE_NODE_FIELDS = `
   country countryCode locality decimalLatitude decimalLongitude
   siteRef datasetRef
   occurrenceRemarks fieldNotes
-  thumbnailUrl speciesImageUrl
+  thumbnailUrl speciesImageUrl associatedMedia
   imageEvidence { file { ref } }
   audioEvidence { file { ref } }
   videoEvidence { file { ref } }
@@ -250,6 +252,7 @@ type RawOccurrence = {
   fieldNotes?: string | null;
   thumbnailUrl?: string | null;
   speciesImageUrl?: string | null;
+  associatedMedia?: string | null;
   imageEvidence?: { file?: { ref?: string | null } | null } | null;
   audioEvidence?: { file?: { ref?: string | null } | null } | null;
   videoEvidence?: { file?: { ref?: string | null } | null } | null;
@@ -257,14 +260,37 @@ type RawOccurrence = {
   certifiedProfileData?: CertifiedProfileData;
 };
 
+function normaliseDriveDownloadUrl(url: string): string {
+  try {
+    const parsed = new URL(url);
+    if (!parsed.hostname.includes("drive.google.com")) return url;
+    const id = parsed.searchParams.get("id") ?? parsed.pathname.match(/\/d\/([^/]+)/)?.[1] ?? null;
+    return id ? `https://drive.google.com/uc?export=download&id=${encodeURIComponent(id)}` : url;
+  } catch {
+    return url;
+  }
+}
+
+function associatedAudioUrl(n: RawOccurrence): string | null {
+  const value = n.associatedMedia?.trim();
+  if (!value) return null;
+  // Some older sound sightings were imported as plain media links rather than
+  // structured audio blobs. Direct sound-file URLs are handled here.
+  if (/\.(?:mp3|m4a|wav|ogg|oga|flac|aac)(?:[?#]|$)/i.test(value)) {
+    return normaliseDriveDownloadUrl(value);
+  }
+  return null;
+}
+
 function mapOccurrence(n: RawOccurrence): OccurrenceRecord {
   // Restor-sourced records carry an external photo URL (thumbnailUrl /
   // speciesImageUrl, the same S3 link) rather than a PDS blob — render it
   // directly, no getBlob round-trip needed.
   const externalImage = n.thumbnailUrl?.trim() || n.speciesImageUrl?.trim() || null;
+  const externalAudio = associatedAudioUrl(n);
   const media: MediaKind[] = [];
   if (n.imageEvidence?.file?.ref || externalImage) media.push("image");
-  if (n.audioEvidence?.file?.ref) media.push("audio");
+  if (n.audioEvidence?.file?.ref || externalAudio) media.push("audio");
   if (n.videoEvidence?.file?.ref) media.push("video");
   if (n.spectrogramEvidence?.file?.ref) media.push("spectrogram");
   const imageRef = normaliseRef(n.imageEvidence?.file?.ref) ?? normaliseRef(n.spectrogramEvidence?.file?.ref);
@@ -297,6 +323,7 @@ function mapOccurrence(n: RawOccurrence): OccurrenceRecord {
     imageUrl: externalImage,
     imageRef,
     audioRef: normaliseRef(n.audioEvidence?.file?.ref),
+    audioUrl: externalAudio,
     media,
   };
 }
@@ -334,32 +361,42 @@ function matchesFilter(n: RawOccurrence, media: OccurrenceFilter): boolean {
   // "image" means a real PDS blob photo (imageEvidence); the external Restor
   // thumbnailUrl/speciesImageUrl links are no longer the filter target.
   if (media === "image") return Boolean(n.imageEvidence?.file?.ref);
-  // "audio" includes spectrogram-bearing records too.
-  return Boolean(n.audioEvidence?.file?.ref || n.spectrogramEvidence?.file?.ref);
+  // "audio" includes spectrogram-bearing records and older sound links too.
+  return Boolean(n.audioEvidence?.file?.ref || n.spectrogramEvidence?.file?.ref || associatedAudioUrl(n));
 }
 
-/** Server-side `where` for a media filter. Since the indexer upgrade exposed
- *  `PresenceFilterInput` on the blob-evidence relations, both filters push down
- *  to the indexer instead of walking pages: "image" selects records that carry
- *  a real PDS image blob (328k of them, vs 8k external thumbnails) and "audio"
- *  selects records with an audio blob (47k). */
-function filterWhere(media: OccurrenceFilter): Record<string, unknown> | undefined {
-  if (media === "image") return { imageEvidence: { isNull: false } };
-  if (media === "audio") return { audioEvidence: { isNull: false } };
-  return undefined;
+/** Server-side `where` clauses for a media filter. The sound filter needs a
+ *  few variants because older sightings store field recordings as plain media
+ *  links instead of structured audio evidence, and this GraphQL layer does not
+ *  expose an OR operator in the where input. */
+function filterWhereVariants(media: OccurrenceFilter): Array<Record<string, unknown> | undefined> {
+  if (media === "image") return [{ imageEvidence: { isNull: false } }];
+  if (media === "audio") {
+    return [
+      { audioEvidence: { isNull: false } },
+      { spectrogramEvidence: { isNull: false } },
+      { associatedMedia: { contains: ".mp3" } },
+      { associatedMedia: { contains: ".m4a" } },
+      { associatedMedia: { contains: ".wav" } },
+      { associatedMedia: { contains: ".ogg" } },
+      { associatedMedia: { contains: ".flac" } },
+    ];
+  }
+  return [undefined];
 }
 
 function occurrenceWhereVariants(media: OccurrenceFilter, query?: string): Record<string, unknown>[] {
-  const base = filterWhere(media);
+  const bases = filterWhereVariants(media);
   const q = query?.trim();
-  if (!q) return [base ?? {}];
-  return [
+  if (!q) return bases.map((base) => base ?? {});
+  const queryWheres = [
     { scientificName: { contains: q } },
     { vernacularName: { contains: q } },
     { family: { contains: q } },
     { country: { contains: q } },
     { locality: { contains: q } },
-  ].map((where) => mergeWhere(base, where) ?? {});
+  ];
+  return bases.flatMap((base) => queryWheres.map((where) => mergeWhere(base, where) ?? {}));
 }
 
 export type OccurrenceWalkResult = {
@@ -371,13 +408,38 @@ export type OccurrenceWalkResult = {
 export type OccurrenceStats = {
   totalSightings: number | null;
   photoSightings: number | null;
-  soundRecordings: number | null;
+  recentSightings: number | null;
   mappedSightings: number | null;
 };
 
 const OCCURRENCE_COUNT_QUERY = `
   query ExplorerOccurrenceCount($where: AppGainforestDwcOccurrenceWhereInput) {
     appGainforestDwcOccurrence(first: 0, where: $where) { totalCount }
+  }
+`;
+
+const AUDIO_RECORDS_QUERY = `
+  query ExplorerAudioRecords($first: Int!, $after: String, $where: AppGainforestAcAudioWhereInput) {
+    appGainforestAcAudio(first: $first, after: $after, where: $where, sortBy: createdAt, sortDirection: DESC) {
+      pageInfo { hasNextPage endCursor }
+      edges {
+        node {
+          did rkey uri cid createdAt name occurrenceRef siteRef recordedBy
+          ${CERTIFIED_PROFILE_DATA_FIELDS}
+          metadata { recordedAt duration sampleRate fileFormat }
+        }
+      }
+    }
+  }
+`;
+
+const AUDIO_BY_URI_QUERY = `
+  query ExplorerAudioByUri($uri: String!) {
+    appGainforestAcAudioByUri(uri: $uri) {
+      did rkey uri cid createdAt name occurrenceRef siteRef recordedBy
+      ${CERTIFIED_PROFILE_DATA_FIELDS}
+      metadata { recordedAt duration sampleRate fileFormat }
+    }
   }
 `;
 
@@ -401,16 +463,165 @@ function fetchOccurrenceCountCached(
   );
 }
 
+type RawAudioRecord = {
+  did: string;
+  rkey: string;
+  uri: string;
+  cid: string;
+  createdAt: string;
+  name?: string | null;
+  occurrenceRef?: string | null;
+  siteRef?: string | null;
+  recordedBy?: string | null;
+  certifiedProfileData?: CertifiedProfileData;
+  metadata?: {
+    recordedAt?: string | null;
+    duration?: string | null;
+    sampleRate?: number | null;
+    fileFormat?: string | null;
+  } | null;
+};
+
+async function fetchAudioPage(
+  first: number,
+  after: string | null,
+  signal?: AbortSignal,
+  where?: Record<string, unknown>,
+): Promise<{ nodes: RawAudioRecord[]; cursor: string | null; hasNextPage: boolean }> {
+  const data = await indexerQuery<{
+    appGainforestAcAudio?: Connection<RawAudioRecord>;
+  }>(AUDIO_RECORDS_QUERY, { first, after, where: where ?? { blob: { isNull: false } } }, signal);
+  const conn = data?.appGainforestAcAudio;
+  const nodes = (conn?.edges ?? [])
+    .map((e) => e?.node)
+    .filter((n): n is RawAudioRecord => Boolean(n?.did));
+  return {
+    nodes,
+    cursor: conn?.pageInfo?.endCursor ?? null,
+    hasNextPage: Boolean(conn?.pageInfo?.hasNextPage),
+  };
+}
+
+function blobRefFromRecordValue(value: unknown): string | null {
+  const blob = (value as {
+    blob?: {
+      ref?: string | { $link?: string | null } | null;
+      file?: { ref?: string | { $link?: string | null } | null } | null;
+    } | null;
+  } | null)?.blob;
+  const ref = blob?.ref ?? blob?.file?.ref;
+  if (typeof ref === "string") return normaliseRef(ref);
+  return normaliseRef(ref?.$link);
+}
+
+async function resolveAudioBlob(record: RawAudioRecord, signal?: AbortSignal): Promise<{ ref: string | null; url: string | null }> {
+  const host = await resolvePdsHost(record.did, signal);
+  if (!host) return { ref: null, url: null };
+  try {
+    const params = new URLSearchParams({
+      repo: record.did,
+      collection: "app.gainforest.ac.audio",
+      rkey: record.rkey,
+    });
+    const res = await fetch(`https://${host}/xrpc/com.atproto.repo.getRecord?${params.toString()}`, { signal });
+    if (!res.ok) return { ref: null, url: null };
+    const json = (await res.json()) as { value?: unknown };
+    const ref = blobRefFromRecordValue(json.value);
+    return ref ? { ref, url: blobUrl(host, record.did, ref) } : { ref: null, url: null };
+  } catch (err) {
+    if ((err as Error).name === "AbortError") throw err;
+    return { ref: null, url: null };
+  }
+}
+
+function mapAudioRecord(n: RawAudioRecord, audioRef: string | null, audioUrl: string | null): OccurrenceRecord {
+  const duration = n.metadata?.duration ? `${Math.round(Number(n.metadata.duration))} seconds` : null;
+  const format = n.metadata?.fileFormat ? `${n.metadata.fileFormat} recording` : "Sound recording";
+  return {
+    kind: "occurrence",
+    id: `${n.did}-audio-${n.rkey}`,
+    did: n.did,
+    rkey: n.rkey,
+    atUri: n.uri || `at://${n.did}/app.gainforest.ac.audio/${n.rkey}`,
+    scientificName: n.name?.trim() || "Field sound recording",
+    vernacularName: null,
+    kingdom: null,
+    family: null,
+    genus: null,
+    basisOfRecord: "Sound recording",
+    recordedBy: n.recordedBy?.trim() || null,
+    individualCount: null,
+    country: null,
+    countryCode: null,
+    locality: null,
+    lat: null,
+    lon: null,
+    eventDate: n.metadata?.recordedAt ?? null,
+    siteRef: n.siteRef?.trim() || null,
+    datasetRef: null,
+    createdAt: n.createdAt,
+    creatorName: profileName(n.certifiedProfileData),
+    creatorAvatarRef: profileAvatarRef(n.certifiedProfileData),
+    remarks: [format, duration].filter(Boolean).join(" · ") || null,
+    imageUrl: null,
+    imageRef: null,
+    audioRef,
+    audioUrl,
+    media: ["audio"],
+  };
+}
+
+async function mapAudioRecords(nodes: RawAudioRecord[], signal?: AbortSignal): Promise<OccurrenceRecord[]> {
+  const out: OccurrenceRecord[] = new Array(nodes.length);
+  let cursor = 0;
+  async function worker() {
+    while (cursor < nodes.length) {
+      const i = cursor++;
+      const node = nodes[i]!;
+      const audio = await resolveAudioBlob(node, signal);
+      out[i] = mapAudioRecord(node, audio.ref, audio.url);
+    }
+  }
+  await Promise.all(Array.from({ length: Math.min(RESOLVE_CONCURRENCY, nodes.length) }, worker));
+  return out;
+}
+
+async function walkAudioRecords(opts: {
+  target: number;
+  after: string | null;
+  query?: string;
+  signal?: AbortSignal;
+  onProgress?: (records: OccurrenceRecord[]) => void;
+}): Promise<OccurrenceWalkResult> {
+  const q = opts.query?.trim();
+  const where = q ? { name: { contains: q }, blob: { isNull: false } } : { blob: { isNull: false } };
+  const collected: OccurrenceRecord[] = [];
+  let cursor: string | null = opts.after;
+  let hasNextPage = true;
+  while (collected.length < opts.target) {
+    if (opts.signal?.aborted) throw new DOMException("aborted", "AbortError");
+    const page = await fetchAudioPage(Math.min(INDEXER_MAX_PAGE, Math.max(opts.target, 24)), cursor, opts.signal, where);
+    cursor = page.cursor;
+    hasNextPage = page.hasNextPage;
+    const mapped = await mapAudioRecords(page.nodes.slice(0, opts.target - collected.length), opts.signal);
+    collected.push(...mapped);
+    opts.onProgress?.(collected.slice(0, opts.target));
+    if (!hasNextPage || !cursor) break;
+  }
+  return { records: collected.slice(0, opts.target), cursor, hasMore: hasNextPage && Boolean(cursor) };
+}
+
 async function fetchOccurrenceStatsUncached(signal?: AbortSignal): Promise<OccurrenceStats> {
-  // Do these one at a time. Running all four count scans in one request (or in
-  // parallel requests) makes this large sightings stream much slower and can
-  // compete with the first card page.
+  // Do these one at a time. Running count scans in one request (or in parallel
+  // requests) makes this large sightings stream much slower and can compete
+  // with the first card page.
   const totalSightings = await fetchOccurrenceCountCached("total", undefined, signal);
   const photoSightings = await fetchOccurrenceCountCached("photos", { imageEvidence: { isNull: false } }, signal);
-  const soundRecordings = await fetchOccurrenceCountCached("sounds", { audioEvidence: { isNull: false } }, signal);
+  const recentSince = new Date(Date.now() - 30 * 86_400_000).toISOString();
+  const recentSightings = await fetchOccurrenceCountCached(`recent:${recentSince.slice(0, 10)}`, { createdAt: { gte: recentSince } }, signal);
   const mappedSightings = await fetchOccurrenceCountCached("mapped", { decimalLatitude: { isNull: false } }, signal);
 
-  return { totalSightings, photoSightings, soundRecordings, mappedSightings };
+  return { totalSightings, photoSightings, recentSightings, mappedSightings };
 }
 
 export async function fetchOccurrenceStats(signal?: AbortSignal): Promise<OccurrenceStats> {
@@ -420,14 +631,13 @@ export async function fetchOccurrenceStats(signal?: AbortSignal): Promise<Occurr
 /**
  * Progressively walk the occurrence connection, collecting up to `target`
  * records matching the media filter and emitting them via `onProgress` as each
- * page resolves. The "image" and "audio" filters push a presence `where` clause
- * (imageEvidence / audioEvidence isNull:false) to the indexer so only
- * media-bearing records come back — the gallery fills from one request instead
- * of scanning thousands of imageless bulk uploads. "all" still pages
- * client-side. PDS blob refs can be resolved per page, or returned as refs for
- * visible cards to resolve lazily; external thumbnails (on the sparser Restor
- * records) render immediately. Returns the final cursor + `hasMore` so "load
- * more" continues from where it stopped.
+ * page resolves. The "image" filter pushes a presence `where` clause to the
+ * indexer. The "audio" filter tries each known sound storage shape because
+ * older sound sightings were imported as plain media links, not structured
+ * audio evidence. "all" still pages client-side. PDS blob refs can be resolved
+ * per page, or returned as refs for visible cards to resolve lazily; external
+ * thumbnails (on the sparser Restor records) render immediately. Returns the
+ * final cursor + `hasMore` so "load more" continues from where it stopped.
  */
 export async function walkOccurrences(opts: {
   media: OccurrenceFilter;
@@ -507,11 +717,28 @@ export async function walkOccurrences(opts: {
     return page;
   }
 
-  const previous = parseMultiCursor(opts.after, whereVariants.length);
-  const pages = await Promise.all(whereVariants.map((where, index) => {
-    if (!previous.more[index]) return Promise.resolve({ records: [], cursor: null, hasMore: false } satisfies OccurrenceWalkResult);
-    return walkOne(where, previous.cursors[index] ?? null);
-  }));
+  const includeAudioRecords = media === "audio";
+  const streamCount = whereVariants.length + (includeAudioRecords ? 1 : 0);
+  const previous = parseMultiCursor(opts.after, streamCount);
+  const pages = await Promise.all([
+    ...whereVariants.map((where, index) => {
+      if (!previous.more[index]) return Promise.resolve({ records: [], cursor: null, hasMore: false } satisfies OccurrenceWalkResult);
+      return walkOne(where, previous.cursors[index] ?? null);
+    }),
+    ...(includeAudioRecords
+      ? [
+          previous.more[whereVariants.length]
+            ? walkAudioRecords({
+                target,
+                after: previous.cursors[whereVariants.length] ?? null,
+                query: opts.query,
+                signal,
+                onProgress: opts.onProgress,
+              })
+            : Promise.resolve({ records: [], cursor: null, hasMore: false } satisfies OccurrenceWalkResult),
+        ]
+      : []),
+  ]);
   const seen = new Map<string, OccurrenceRecord>();
   for (const record of pages.flatMap((page) => page.records)) seen.set(record.id, record);
   const records = [...seen.values()].sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt));
@@ -2214,6 +2441,18 @@ export async function fetchRecordByUri(
       }
     }
     return rec;
+  }
+
+  if (collection === "app.gainforest.ac.audio") {
+    const data = await indexerQuery<{ appGainforestAcAudioByUri?: RawAudioRecord | null }>(
+      AUDIO_BY_URI_QUERY,
+      { uri: atUri },
+      signal,
+    );
+    const n = data?.appGainforestAcAudioByUri;
+    if (!n?.did) return null;
+    const audio = await resolveAudioBlob(n, signal);
+    return mapAudioRecord(n, audio.ref, audio.url);
   }
 
   if (collection === "org.hypercerts.claim.activity") {

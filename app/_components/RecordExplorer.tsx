@@ -722,7 +722,7 @@ const OccurrenceCard = memo(function OccurrenceCard({
 
   const imageUrl = resolvedImageUrl ?? record.imageUrl;
   const hasImage = Boolean(imageUrl) && !imgError;
-  const hasAudio = Boolean(record.audioRef);
+  const hasAudio = Boolean(record.audioRef || record.audioUrl);
   const name = record.scientificName || record.vernacularName || "Unidentified";
   const subtitle =
     record.scientificName && record.vernacularName ? record.vernacularName : null;
@@ -768,7 +768,7 @@ const OccurrenceCard = memo(function OccurrenceCard({
     let el = audioRef.current;
     if (!el) {
       setAudioState("loading");
-      const url = await resolveBlobUrl(record.did, record.audioRef);
+      const url = record.audioUrl ?? (await resolveBlobUrl(record.did, record.audioRef));
       if (!url) {
         setAudioState("idle");
         return;
@@ -1183,10 +1183,10 @@ function computeOccurrenceTotalStats(stats: OccurrenceStats): Stat[] {
       icon: <ImageIcon />,
     },
     {
-      label: "Sound recordings",
-      value: n(stats.soundRecordings),
-      detail: "with sounds",
-      icon: <AudioLinesIcon />,
+      label: "New sightings",
+      value: n(stats.recentSightings),
+      detail: "shared in the last 30 days",
+      icon: <LeafIcon />,
       accent: true,
     },
     {
