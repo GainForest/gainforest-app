@@ -190,7 +190,7 @@ function PeriodFilter({ period, onPeriodChange }: { period: Period; onPeriodChan
             type="button"
             onClick={() => onPeriodChange(item.id)}
             className={[
-              "rounded-full px-3 py-1 text-xs font-medium transition-all duration-200",
+              "rounded-full px-3 py-1 text-sm font-medium transition-all duration-200",
               active
                 ? "bg-primary text-primary-foreground shadow-sm"
                 : "text-muted-foreground hover:text-foreground",
@@ -324,7 +324,7 @@ function DonationsVolumeChart({
                 type="button"
                 onClick={() => onGranularityChange(item)}
                 className={[
-                  "rounded-full px-3 py-1 text-xs font-medium transition-all duration-200",
+                  "rounded-full px-3 py-1 text-sm font-medium transition-all duration-200",
                   active
                     ? "bg-primary text-primary-foreground shadow-sm"
                     : "text-muted-foreground hover:text-foreground",

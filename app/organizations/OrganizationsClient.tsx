@@ -274,8 +274,8 @@ export function OrganizationsClient({ records: initialRecords = [] }: { records?
                   type="text"
                   value={query}
                   onChange={(event) => setQuery(event.target.value)}
-                  placeholder="Search organizations..."
-                  className="min-w-0 flex-1 border-0 bg-transparent px-3 py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground"
+                  placeholder="Search organizations"
+                  className="min-w-0 flex-1 truncate border-0 bg-transparent px-3 py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground"
                 />
               </div>
 
@@ -286,7 +286,7 @@ export function OrganizationsClient({ records: initialRecords = [] }: { records?
                   type="button"
                   onClick={() => setOpenDropdown((open) => !open)}
                   aria-expanded={openDropdown}
-                  className="inline-flex h-10 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-full border border-border bg-background px-4 text-sm font-medium transition-colors hover:bg-muted hover:text-foreground hover:shadow-sm sm:px-8 sm:text-base has-[>svg]:px-4"
+                  className="inline-flex h-10 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-full border border-border bg-background px-4 text-sm font-medium transition-colors hover:bg-muted hover:text-foreground hover:shadow-sm sm:px-8 has-[>svg]:px-4"
                 >
                   <ArrowUpDownIcon className="h-4 w-4" />
                   <span className="hidden sm:inline">{SORT_OPTIONS.find((option) => option.value === sort)?.label}</span>
@@ -344,7 +344,7 @@ export function OrganizationsClient({ records: initialRecords = [] }: { records?
                 </FilterChip>
               ))}
               {hasActiveFilters && (
-                <Button type="button" onClick={clearAll} variant="outline" size="sm">
+                <Button type="button" onClick={clearAll} variant="outline" size="sm" className="h-10 text-sm">
                   <XIcon className="h-3.5 w-3.5" />
                   Clear filters
                 </Button>
@@ -492,7 +492,7 @@ function OrganizationsHero() {
 
 function ViewToggle({ view, setView }: { view: ViewMode; setView: (view: ViewMode) => void }) {
   return (
-    <div className="inline-flex rounded-full border border-border bg-background/70 p-0.5 backdrop-blur">
+    <div className="inline-flex h-10 items-center rounded-full border border-border bg-background/70 p-0.5 backdrop-blur">
       {([
         { id: "cards", label: "Cards", Icon: LayoutGridIcon },
         { id: "map", label: "Map", Icon: MapIcon },
@@ -502,7 +502,7 @@ function ViewToggle({ view, setView }: { view: ViewMode; setView: (view: ViewMod
           type="button"
           onClick={() => setView(id)}
           aria-pressed={view === id}
-          className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[12.5px] font-medium transition-colors ${
+          className={`inline-flex h-9 items-center gap-1.5 rounded-full px-3 text-sm font-medium transition-colors ${
             view === id ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
           }`}
         >
@@ -532,7 +532,7 @@ function FilterChip({
   children: React.ReactNode;
 }) {
   return (
-    <Button type="button" onClick={onClick} variant={selected ? "default" : "outline"} size="sm">
+    <Button type="button" onClick={onClick} variant={selected ? "default" : "outline"} size="sm" className="h-10 text-sm">
       {children}
     </Button>
   );

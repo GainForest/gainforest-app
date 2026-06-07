@@ -138,7 +138,7 @@ export function LeaderboardClient() {
 
 function PeriodChips({ period, onPeriodChange }: { period: Period; onPeriodChange: (period: Period) => void }) {
   return (
-    <div className="grid grid-cols-3 rounded-full bg-muted/55 p-1 shadow-sm shadow-primary/5 ring-1 ring-foreground/5 backdrop-blur">
+    <div className="grid h-12 grid-cols-3 rounded-full bg-muted/55 p-1 shadow-sm shadow-primary/5 ring-1 ring-foreground/5 backdrop-blur">
       {PERIODS.map((option) => {
         const isSelected = period === option;
         return (
@@ -148,7 +148,7 @@ function PeriodChips({ period, onPeriodChange }: { period: Period; onPeriodChang
             aria-pressed={isSelected}
             onClick={() => onPeriodChange(option)}
             className={cn(
-              "whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium transition-all duration-200",
+              "inline-flex h-10 items-center justify-center whitespace-nowrap rounded-full px-4 text-sm font-medium transition-all duration-200",
               isSelected
                 ? "bg-primary text-primary-foreground shadow-sm shadow-primary/20"
                 : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
@@ -170,7 +170,7 @@ function DonorTypeTabs({
   onDonorFilterChange: (donorFilter: DonorFilter) => void;
 }) {
   return (
-    <div className="grid grid-cols-1 rounded-full bg-muted/55 p-1 shadow-sm shadow-primary/5 ring-1 ring-foreground/5 backdrop-blur sm:grid-cols-3">
+    <div className="grid grid-cols-1 rounded-full bg-muted/55 p-1 shadow-sm shadow-primary/5 ring-1 ring-foreground/5 backdrop-blur sm:h-12 sm:grid-cols-3">
       {DONOR_FILTERS.map(({ value, Icon, label }) => {
         const isSelected = donorFilter === value;
         return (
@@ -180,7 +180,7 @@ function DonorTypeTabs({
             aria-pressed={isSelected}
             onClick={() => onDonorFilterChange(value)}
             className={cn(
-              "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium transition-all duration-200",
+              "inline-flex h-10 items-center justify-center gap-2 whitespace-nowrap rounded-full px-4 text-sm font-medium transition-all duration-200",
               isSelected
                 ? "bg-primary text-primary-foreground shadow-sm shadow-primary/20"
                 : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
@@ -197,10 +197,10 @@ function DonorTypeTabs({
 
 function SortControl({ sortBy, onSortChange }: { sortBy: SortMode; onSortChange: (sortBy: SortMode) => void }) {
   return (
-    <div className="flex items-center justify-between gap-3 rounded-full bg-muted/55 py-1.5 pr-1.5 pl-4 shadow-sm shadow-primary/5 ring-1 ring-foreground/5 backdrop-blur">
+    <div className="flex h-12 items-center justify-between gap-3 rounded-full bg-muted/55 py-1.5 pr-1.5 pl-4 shadow-sm shadow-primary/5 ring-1 ring-foreground/5 backdrop-blur">
       <span
         id="leaderboard-sort-label"
-        className="inline-flex shrink-0 items-center gap-2 whitespace-nowrap text-xs font-medium text-muted-foreground"
+        className="inline-flex shrink-0 items-center gap-2 whitespace-nowrap text-sm font-medium text-muted-foreground"
       >
         <ArrowDownWideNarrowIcon className="size-4" />
         Sort by

@@ -282,12 +282,12 @@ export function BumicertsExploreClient({ records: initialRecords = [] }: { recor
                     value={query}
                     onChange={(event) => setQuery(event.target.value)}
                     aria-label="Search projects"
-                    placeholder="Search projects by name, keyword, or location..."
-                    className="min-w-0 flex-1 border-0 bg-transparent px-3 py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground"
+                    placeholder="Search projects by name, keyword, or location"
+                    className="min-w-0 flex-1 truncate border-0 bg-transparent px-3 py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground"
                   />
                 </div>
 
-                <div className="hidden shrink-0 rounded-full border border-border bg-background/50 p-0.5 backdrop-blur sm:inline-flex">
+                <div className="hidden h-10 shrink-0 items-center rounded-full border border-border bg-background/50 p-0.5 backdrop-blur sm:inline-flex">
                   {(
                     [
                       { id: "cards", label: "Cards", Icon: LayoutGridIcon },
@@ -299,7 +299,7 @@ export function BumicertsExploreClient({ records: initialRecords = [] }: { recor
                       type="button"
                       onClick={() => setView(option.id)}
                       aria-pressed={view === option.id}
-                      className={`inline-flex items-center gap-1.5 rounded-full px-3 py-2 text-xs font-medium transition-colors ${
+                      className={`inline-flex h-9 items-center gap-1.5 rounded-full px-3 text-sm font-medium transition-colors ${
                         view === option.id
                           ? "bg-primary text-primary-foreground"
                           : "text-muted-foreground hover:text-foreground"
@@ -317,7 +317,7 @@ export function BumicertsExploreClient({ records: initialRecords = [] }: { recor
                     type="button"
                     aria-label="Sort projects"
                     aria-expanded={openSort}
-                    className="inline-flex h-10 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-full border border-border bg-background px-8 text-base font-medium transition-colors hover:bg-muted hover:text-foreground hover:shadow-sm disabled:pointer-events-none disabled:opacity-50 has-[>svg]:px-4"
+                    className="inline-flex h-10 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-full border border-border bg-background px-8 text-sm font-medium transition-colors hover:bg-muted hover:text-foreground hover:shadow-sm disabled:pointer-events-none disabled:opacity-50 has-[>svg]:px-4"
                   >
                     <ArrowUpDownIcon className="h-4 w-4" />
                     <span className="hidden sm:inline">{SORT_LABELS[sort]}</span>
@@ -348,8 +348,8 @@ export function BumicertsExploreClient({ records: initialRecords = [] }: { recor
                 </div>
               </div>
 
-              <div className="flex items-center gap-3">
-                <div className="inline-flex shrink-0 rounded-full border border-border bg-background/50 p-0.5 backdrop-blur sm:hidden">
+              <div className="flex items-center justify-between gap-3 sm:justify-start">
+                <div className="inline-flex h-10 shrink-0 items-center rounded-full border border-border bg-background/50 p-0.5 backdrop-blur sm:hidden">
                   {(
                     [
                       { id: "cards", label: "Cards", Icon: LayoutGridIcon },
@@ -361,7 +361,7 @@ export function BumicertsExploreClient({ records: initialRecords = [] }: { recor
                       type="button"
                       onClick={() => setView(option.id)}
                       aria-pressed={view === option.id}
-                      className={`inline-flex items-center gap-1.5 rounded-full px-3 py-2 text-xs font-medium transition-colors ${
+                      className={`inline-flex h-9 items-center gap-1.5 rounded-full px-3 text-sm font-medium transition-colors ${
                         view === option.id
                           ? "bg-primary text-primary-foreground"
                           : "text-muted-foreground hover:text-foreground"
@@ -380,6 +380,7 @@ export function BumicertsExploreClient({ records: initialRecords = [] }: { recor
                       onClick={clearFilters}
                       variant={filters.length === 0 ? "default" : "outline"}
                       size="sm"
+                      className="h-10 text-sm"
                     >
                       All Projects
                     </Button>
@@ -392,6 +393,7 @@ export function BumicertsExploreClient({ records: initialRecords = [] }: { recor
                           onClick={() => toggleFilter(chip.key)}
                           variant={selected ? "default" : "outline"}
                           size="sm"
+                          className="h-10 text-sm"
                         >
                           {chip.label}
                         </Button>
@@ -408,6 +410,7 @@ export function BumicertsExploreClient({ records: initialRecords = [] }: { recor
                     aria-expanded={openFilters}
                     variant={openFilters || filters.length > 0 ? "default" : "outline"}
                     size="sm"
+                    className="h-10 text-sm"
                   >
                     <SlidersHorizontalIcon className="h-3.5 w-3.5" />
                     <span>All filters</span>
@@ -438,6 +441,7 @@ export function BumicertsExploreClient({ records: initialRecords = [] }: { recor
                             onClick={() => toggleFilter(chip.key)}
                             variant={filters.includes(chip.key) ? "default" : "outline"}
                             size="sm"
+                            className="h-10 text-sm"
                           >
                             {chip.label}
                           </Button>

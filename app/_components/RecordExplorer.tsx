@@ -66,7 +66,7 @@ const KIND_META: Record<RecordKind, KindMeta> = {
     title: "Species",
     accent: "observations",
     lede: "Browse nature sightings from GainForest: photos, sounds, species names, and map locations.",
-    search: "Filter by species, family, or country…",
+    search: "Filter by species, family, or country",
     heroLight: "/assets/media/images/observations/observations-hero-light.png",
     heroDark: "/assets/media/images/observations/observations-hero-dark.png",
   },
@@ -75,7 +75,7 @@ const KIND_META: Record<RecordKind, KindMeta> = {
     title: "Project",
     accent: "sites",
     lede: "Explore nature stewardship groups, where they work, and the stories they share.",
-    search: "Filter by organization or country…",
+    search: "Filter by organization or country",
     heroLight: "/assets/organizations/organizations-hero-light.png",
     heroDark: "/assets/organizations/organizations-hero-dark.png",
   },
@@ -84,7 +84,7 @@ const KIND_META: Record<RecordKind, KindMeta> = {
     title: "Discover",
     accent: "Regenerative Impact",
     lede: "Browse projects from communities and organizations restoring ecosystems, strengthening livelihoods, and building a more resilient future.",
-    search: "Filter Bumicerts by title or description…",
+    search: "Filter Bumicerts by title or description",
     heroLight: "/images/explore/explore-hero-light.png",
     heroDark: "/images/explore/explore-hero-dark.png",
   },
@@ -401,12 +401,12 @@ export function RecordExplorer({ kind }: { kind: RecordKind }) {
               onChange={(e) => setQuery(e.target.value)}
               placeholder={meta.search}
               aria-label="Search what is shown"
-              className="w-full rounded-full border border-border-soft bg-surface py-2 pl-9 pr-3 text-[14px] text-foreground outline-none transition-colors placeholder:text-foreground/40 focus:border-primary/40"
+              className="h-10 w-full truncate rounded-full border border-border-soft bg-surface py-0 pl-9 pr-3 text-sm text-foreground outline-none transition-colors placeholder:text-foreground/40 focus:border-primary/40"
             />
           </div>
 
           {/* Cards / Map view toggle */}
-          <div className="inline-flex rounded-full border border-border-soft bg-surface p-0.5">
+          <div className="inline-flex h-10 items-center rounded-full border border-border-soft bg-surface p-0.5">
             {(
               [
                 { id: "cards", label: "Cards" },
@@ -418,7 +418,7 @@ export function RecordExplorer({ kind }: { kind: RecordKind }) {
                 type="button"
                 onClick={() => setView(o.id)}
                 aria-pressed={view === o.id}
-                className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[12.5px] font-medium transition-colors ${
+                className={`inline-flex h-9 items-center gap-1.5 rounded-full px-3 text-sm font-medium transition-colors ${
                   view === o.id
                     ? "bg-foreground/[0.08] text-foreground"
                     : "text-foreground/55 hover:text-foreground"
@@ -436,7 +436,7 @@ export function RecordExplorer({ kind }: { kind: RecordKind }) {
               value={sort}
               onChange={(e) => setSort(e.target.value as SortMode)}
               aria-label="Choose display order"
-              className="appearance-none rounded-full border border-border-soft bg-surface py-2 pl-3.5 pr-8 text-[12.5px] font-medium text-foreground/70 outline-none transition-colors hover:text-foreground focus:border-primary/40"
+              className="h-10 appearance-none rounded-full border border-border-soft bg-surface py-0 pl-3.5 pr-8 text-sm font-medium text-foreground/70 outline-none transition-colors hover:text-foreground focus:border-primary/40"
             >
               <option value="newest">Newest first</option>
               <option value="oldest">Oldest first</option>
@@ -450,7 +450,7 @@ export function RecordExplorer({ kind }: { kind: RecordKind }) {
           </div>
 
           {kind === "site" && (
-            <div className="inline-flex rounded-full border border-border-soft bg-surface p-0.5">
+            <div className="inline-flex h-10 items-center rounded-full border border-border-soft bg-surface p-0.5">
               {(
                 [
                   { id: "both", label: "All" },
@@ -463,7 +463,7 @@ export function RecordExplorer({ kind }: { kind: RecordKind }) {
                   type="button"
                   onClick={() => changeSource(o.id)}
                   aria-pressed={siteSource === o.id}
-                  className={`rounded-full px-3 py-1.5 text-[12.5px] font-medium transition-colors ${
+                  className={`inline-flex h-9 items-center rounded-full px-3 text-sm font-medium transition-colors ${
                     siteSource === o.id
                       ? "bg-primary text-primary-foreground"
                       : "text-foreground/60 hover:text-foreground"
@@ -476,7 +476,7 @@ export function RecordExplorer({ kind }: { kind: RecordKind }) {
           )}
 
           {kind === "occurrence" && (
-            <div className="inline-flex rounded-full border border-border-soft bg-surface p-0.5">
+            <div className="inline-flex h-10 items-center rounded-full border border-border-soft bg-surface p-0.5">
               {(
                 [
                   { id: "image", label: "Photos" },
@@ -489,7 +489,7 @@ export function RecordExplorer({ kind }: { kind: RecordKind }) {
                   type="button"
                   onClick={() => changeMedia(o.id)}
                   aria-pressed={occMedia === o.id}
-                  className={`rounded-full px-3 py-1.5 text-[12.5px] font-medium transition-colors ${
+                  className={`inline-flex h-9 items-center rounded-full px-3 text-sm font-medium transition-colors ${
                     occMedia === o.id
                       ? "bg-primary text-primary-foreground"
                       : "text-foreground/60 hover:text-foreground"
@@ -501,7 +501,7 @@ export function RecordExplorer({ kind }: { kind: RecordKind }) {
             </div>
           )}
 
-          <div className="flex items-center gap-1.5 text-[12.5px] text-foreground/55">
+          <div className="flex min-h-10 items-center gap-1.5 text-sm text-foreground/55">
             {phase === "loading" && records.length === 0 ? (
               <span className="h-4 w-20 animate-pulse rounded-full bg-muted" aria-label="Loading" />
             ) : (
