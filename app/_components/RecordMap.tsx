@@ -3,7 +3,7 @@
 import "leaflet/dist/leaflet.css";
 import "leaflet.markercluster/dist/MarkerCluster.css";
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { Map as LeafletMap, MarkerClusterGroup, MarkerCluster } from "leaflet";
+import type { Map as LeafletMap, MarkerClusterGroup, MarkerCluster, TileLayer } from "leaflet";
 import { resolvePointsFor, type MapPoint } from "../_lib/coords";
 import type { ExplorerRecord, RecordKind } from "../_lib/indexer";
 import { formatNumber, formatCompact } from "../_lib/format";
@@ -24,6 +24,12 @@ function clusterTier(n: number): { tier: string; size: number } {
   return { tier: "xl", size: 60 };
 }
 
+// CARTO basemaps keyed to the app's light/dark theme: Positron (cream) in
+// light mode, Dark Matter (near-black) in dark so the map reads as part of the
+// surface rather than a glowing white panel.
+const tileUrl = (dark: boolean) =>
+  `https://{s}.basemaps.cartocdn.com/${dark ? "dark_all" : "light_all"}/{z}/{x}/{y}{r}.png`;
+
 export function RecordMap({
   records,
   kind,
@@ -36,8 +42,10 @@ export function RecordMap({
   const elRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<LeafletMap | null>(null);
   const layerRef = useRef<MarkerClusterGroup | null>(null);
+  const tileRef = useRef<TileLayer | null>(null);
   const LRef = useRef<typeof import("leaflet") | null>(null);
   const [ready, setReady] = useState(false);
+  const [isDark, setIsDark] = useState(false);
   const [points, setPoints] = useState<MapPoint[]>([]);
   const [resolving, setResolving] = useState(true);
   // Auto-fit bookkeeping: `userMoved` disables auto-fit once the visitor pans
@@ -57,8 +65,15 @@ export function RecordMap({
       await import("leaflet.markercluster");
       if (cancelled || !elRef.current || mapRef.current) return;
       LRef.current = L;
-      const map = L.map(elRef.current, { worldCopyJump: true, minZoom: 1 }).setView([12, 5], 2);
-      L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
+      const dark = document.documentElement.classList.contains("dark");
+      const map = L.map(elRef.current, {
+        worldCopyJump: true,
+        minZoom: 1,
+        zoomControl: false,
+      }).setView([12, 5], 2);
+      // Zoom control bottom-right, clear of the top-right "places mapped" chip.
+      L.control.zoom({ position: "bottomright" }).addTo(map);
+      tileRef.current = L.tileLayer(tileUrl(dark), {
         attribution:
           '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
         subdomains: "abcd",
@@ -96,8 +111,24 @@ export function RecordMap({
       mapRef.current?.remove();
       mapRef.current = null;
       layerRef.current = null;
+      tileRef.current = null;
     };
   }, []);
+
+  // Track the app theme (the toggle flips `.dark` on <html>) and swap basemaps
+  // so the map follows light/dark without a remount.
+  useEffect(() => {
+    const root = document.documentElement;
+    const sync = () => setIsDark(root.classList.contains("dark"));
+    sync();
+    const observer = new MutationObserver(sync);
+    observer.observe(root, { attributes: true, attributeFilter: ["class"] });
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    tileRef.current?.setUrl(tileUrl(isDark));
+  }, [isDark]);
 
   // Resolve points whenever the record set changes. A new data set re-enables
   // auto-fit so the map always frames the freshly loaded points.

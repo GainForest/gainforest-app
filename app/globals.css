@@ -448,7 +448,9 @@ body {
   border-radius: 9999px;
   background: var(--primary);
   border: 2px solid var(--surface);
-  box-shadow: 0 1px 5px rgba(20, 30, 15, 0.4);
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--primary) 30%, transparent),
+    0 1px 6px color-mix(in srgb, var(--primary) 35%, transparent);
   transition: transform 0.12s ease;
 }
 .gf-pin:hover {
@@ -475,7 +477,7 @@ body {
   border: 2px solid var(--surface);
   box-shadow:
     0 0 0 4px color-mix(in srgb, var(--primary) 18%, transparent),
-    0 4px 14px rgba(20, 30, 15, 0.34);
+    0 4px 14px color-mix(in srgb, var(--primary) 30%, transparent);
   transition: transform 0.14s ease;
 }
 .gf-cluster:hover {
@@ -504,9 +506,102 @@ body {
   stroke-width: 1.5;
 }
 
+/* ── Leaflet chrome (zoom controls, attribution, tooltips) ────────────────
+   Leaflet ships utilitarian white-box controls that ignore the theme and look
+   dated against the app. Restyle them onto the design tokens so they read as
+   modern, glassy surface chips that follow light/dark automatically. */
+.leaflet-bar,
+.leaflet-control-zoom {
+  border: 0 !important;
+  border-radius: var(--radius-md) !important;
+  overflow: hidden;
+  box-shadow:
+    0 1px 2px color-mix(in srgb, var(--foreground) 8%, transparent),
+    0 6px 18px color-mix(in srgb, var(--foreground) 10%, transparent) !important;
+  background: color-mix(in srgb, var(--popover) 88%, transparent);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.leaflet-bar a,
+.leaflet-control-zoom a {
+  width: 32px;
+  height: 32px;
+  line-height: 32px;
+  color: color-mix(in srgb, var(--foreground) 72%, transparent);
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
+  font-size: 17px;
+  font-weight: 500;
+  transition:
+    background-color 0.14s ease,
+    color 0.14s ease;
+}
+.leaflet-bar a:last-child,
+.leaflet-control-zoom a:last-child {
+  border-bottom: 0;
+}
+.leaflet-bar a:hover,
+.leaflet-control-zoom a:hover {
+  background: color-mix(in srgb, var(--primary) 12%, transparent);
+  color: var(--primary);
+}
+.leaflet-bar a.leaflet-disabled,
+.leaflet-control-zoom a.leaflet-disabled {
+  color: color-mix(in srgb, var(--foreground) 28%, transparent);
+  background: transparent;
+}
+
+/* Attribution: a subtle glass chip rather than the default opaque white bar. */
+.leaflet-control-attribution {
+  padding: 2px 8px;
+  border-radius: var(--radius-full) 0 0 0;
+  font-size: 10.5px;
+  color: color-mix(in srgb, var(--foreground) 45%, transparent);
+  background: color-mix(in srgb, var(--popover) 78%, transparent) !important;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.leaflet-control-attribution a {
+  color: color-mix(in srgb, var(--foreground) 62%, transparent);
+}
+.leaflet-control-attribution a:hover {
+  color: var(--primary);
+}
+
+/* Marker tooltips: themed pill matching the app surface, with a colour-matched
+   arrow on every side instead of the default white box. */
+.leaflet-tooltip {
+  padding: 4px 9px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--popover-foreground);
+  background: var(--popover);
+  font-family: var(--font-sans), system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  box-shadow:
+    0 2px 6px color-mix(in srgb, var(--foreground) 10%, transparent),
+    0 8px 22px color-mix(in srgb, var(--foreground) 12%, transparent);
+}
+.leaflet-tooltip-top::before {
+  border-top-color: var(--popover);
+}
+.leaflet-tooltip-bottom::before {
+  border-bottom-color: var(--popover);
+}
+.leaflet-tooltip-left::before {
+  border-left-color: var(--popover);
+}
+.leaflet-tooltip-right::before {
+  border-right-color: var(--popover);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .gf-pin,
-  .gf-cluster {
+  .gf-cluster,
+  .leaflet-bar a,
+  .leaflet-control-zoom a {
     transition: none;
   }
   .leaflet-cluster-anim .leaflet-marker-icon,
