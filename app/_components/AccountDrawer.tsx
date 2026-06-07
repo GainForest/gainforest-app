@@ -8,7 +8,6 @@ import {
   useMemo,
   useState,
 } from "react";
-import Link from "next/link";
 import { fetchAccountSummary, type AccountSummary } from "../_lib/indexer";
 import {
   resolveDidProfile,
@@ -22,7 +21,6 @@ import {
   formatRelative,
   countryFlag,
 } from "../_lib/format";
-import { accountHref } from "../_lib/urls";
 
 // A second, higher-stacked drawer that profiles an *account* (a did:plc) rather
 // than a single record. Opened by clicking any handle/owner chip. It sits at
@@ -234,14 +232,6 @@ function AccountDrawer({ did, onClose }: { did: string | null; onClose: () => vo
             </Meta>
           </dl>
 
-          {/* Links */}
-          <div className="mt-6 flex flex-col gap-2">
-            {summary?.website && (
-              <DrawerLink href={summary.website} label="Website" />
-            )}
-            <DrawerLink href={accountHref(did)} label="View full Bumicerts profile" />
-            <DrawerLink href={`https://bsky.app/profile/${did}`} label="View public social profile" />
-          </div>
         </div>
       </div>
     </div>
@@ -278,25 +268,6 @@ function Meta({ label, children }: { label: string; children: React.ReactNode })
       </dt>
       <dd className="mt-0.5 text-[14px] leading-[1.45] text-foreground">{children}</dd>
     </div>
-  );
-}
-
-function DrawerLink({ href, label }: { href: string; label: string }) {
-  return (
-    <Link
-      href={href}
-      target="_blank"
-      rel="noreferrer"
-      className="group flex items-center justify-between rounded-xl border border-border-soft bg-surface px-4 py-3 text-[14px] font-medium text-foreground transition-colors hover:border-primary/40 hover:bg-surface-sunken"
-    >
-      <span className="truncate">{label}</span>
-      <span
-        aria-hidden
-        className="shrink-0 text-foreground/35 transition-transform group-hover:translate-x-0.5 group-hover:text-primary"
-      >
-        ↗
-      </span>
-    </Link>
   );
 }
 
