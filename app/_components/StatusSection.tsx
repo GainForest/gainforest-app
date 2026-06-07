@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
+import { ActivityIcon, ArrowUpRightIcon } from "lucide-react";
 import { STATUS_URL } from "../_lib/urls";
 import { formatDuration, formatRelative } from "../_lib/format";
 import {
@@ -10,10 +11,12 @@ import {
   pageLabel,
   pageTone,
   parseComponentName,
+  type ComponentStatus,
   type Incident,
   type StatusSnapshot,
   type StatusTone,
 } from "../_lib/status";
+import { PictureHero } from "./PictureHero";
 import { TONE_DOT, TONE_TEXT } from "./StatusPill";
 
 // Live system-status board, mirroring https://gainforest-status.instatus.com.
@@ -22,6 +25,9 @@ import { TONE_DOT, TONE_TEXT } from "./StatusPill";
 // same-origin /api/status route every 60s. That route enriches the instatus
 // JSON with rolling uptime % + incident history (scraped server-side), so the
 // board shows uptime bars and an incident timeline, not just status dots.
+//
+// Reskinned in the app's editorial system (PictureHero + card grid) so it
+// matches /devices, /donations and the other monitoring pages.
 
 const POLL_MS = 60_000;
 
@@ -109,120 +115,86 @@ export function StatusSection({ initial }: { initial?: StatusSnapshot }) {
   const total = snapshot.components.length;
   const incidents = snapshot.incidents ?? [];
 
+  const statusAction = (
+    <div className="flex flex-col items-start gap-2 lg:items-end">
+      <div className="inline-flex items-center gap-2.5 rounded-full border border-border bg-background/65 px-4 py-2 shadow-sm shadow-primary/5 backdrop-blur-xl">
+        <span className={`relative inline-flex h-2.5 w-2.5 ${TONE_DOT[tone]}`}>
+          <span className="pulse-dot inline-block h-2.5 w-2.5 rounded-full bg-current" />
+        </span>
+        <span className={`text-[14px] font-medium ${TONE_TEXT[tone]}`}>
+          {pageLabel(snapshot.page, snapshot.degraded)}
+        </span>
+      </div>
+      {total > 0 && (
+        <span className="text-[12.5px] text-muted-foreground">
+          {operational} of {total} working
+          {snapshot.overallUptime != null && <> · {snapshot.overallUptime.toFixed(2)}% healthy</>}{" "}
+          · updated {timeAgo(updatedAt)}
+        </span>
+      )}
+    </div>
+  );
+
   return (
-    <section id="status" className="scroll-mt-20 bg-surface">
-      <div className="mx-auto w-full max-w-[1280px] px-6 py-16 sm:px-10 lg:px-16 lg:py-24">
-        <div className="flex flex-col gap-6 border-b border-border-soft pb-8 lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <span className="font-instrument text-[13px] uppercase tracking-[0.22em] text-foreground/55">
-              Live health
-            </span>
-            <h2 className="mt-3 font-garamond text-[34px] font-normal leading-[1.05] tracking-[-0.015em] text-foreground sm:text-[42px] lg:text-[50px]">
-              Site <span className="font-instrument italic">health</span>
-            </h2>
-            <p className="mt-4 max-w-[560px] text-[15px] leading-[1.55] text-foreground/70 lg:text-[16px]">
-              A simple view of whether the services behind Bumicerts and GainForest are working.
-              This page refreshes every minute.
-            </p>
-          </div>
+    <section className="-mt-14 bg-background pb-20 md:pb-28">
+      <PictureHero
+        lightSrc="/assets/media/images/status/status-hero-light@2x.webp"
+        darkSrc="/assets/media/images/status/status-hero-dark@2x.webp"
+        imageAlt="Calm regenerative landscape representing the services behind Bumicerts"
+        eyebrow="Live health"
+        icon={<ActivityIcon aria-hidden />}
+        title="Site"
+        accent="health"
+        lede="A simple view of whether the services behind Bumicerts and GainForest are working. This page refreshes every minute."
+        actions={total > 0 ? statusAction : null}
+      />
 
-          <div className="flex flex-col items-start gap-3 lg:items-end">
-            <div className="inline-flex items-center gap-2.5 rounded-full border border-border-soft bg-background px-4 py-2">
-              <span className={`relative inline-flex h-2.5 w-2.5 ${TONE_DOT[tone]}`}>
-                <span className="pulse-dot inline-block h-2.5 w-2.5 rounded-full bg-current" />
-              </span>
-              <span className={`text-[14px] font-medium ${TONE_TEXT[tone]}`}>
-                {pageLabel(snapshot.page, snapshot.degraded)}
-              </span>
-            </div>
-            {total > 0 && (
-              <span className="text-[12.5px] text-foreground/55">
-                {operational} of {total} working
-                {snapshot.overallUptime != null && (
-                  <> · {snapshot.overallUptime.toFixed(2)}% healthy</>
-                )}{" "}
-                · updated {timeAgo(updatedAt)}
-              </span>
-            )}
-          </div>
-        </div>
-
+      <div className="relative z-10 mx-auto max-w-6xl px-6 pt-6">
         {loading ? (
           <StatusSkeleton />
         ) : snapshot.components.length === 0 ? (
-          <p className="py-12 text-center text-[14px] italic text-foreground/55">
-            This health page is unavailable right now. Visit the{" "}
-            <Link
-              href={STATUS_URL}
-              target="_blank"
-              rel="noreferrer"
-              className="text-primary underline-offset-4 hover:underline"
-            >
-              full health page
-            </Link>
-            .
-          </p>
-        ) : (
-          <ul role="list" className="mt-8 grid gap-3 sm:grid-cols-2">
-            {snapshot.components.map((c) => {
-              const t = componentTone(c.status);
-              const service = friendlyServiceName(c.name, c.description);
-              const up = c.uptime;
-              return (
-                <li
-                  key={c.id}
-                  className="rounded-xl border border-border-soft bg-background px-4 py-3.5"
+          <Notice
+            title="This health page is unavailable right now"
+            body={
+              <>
+                The services may still be working; this page just cannot read them right now. Visit the{" "}
+                <Link
+                  href={STATUS_URL}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-primary underline-offset-4 hover:underline"
                 >
-                  <div className="flex items-center justify-between gap-4">
-                    <div className="flex min-w-0 items-center gap-3">
-                      <span className={`relative inline-flex h-2.5 w-2.5 shrink-0 ${TONE_DOT[t]}`}>
-                        <span
-                          className={`inline-block h-2.5 w-2.5 rounded-full bg-current ${
-                            t === "ok" ? "pulse-dot" : ""
-                          }`}
-                        />
-                      </span>
-                      <div className="min-w-0">
-                        <div className="truncate text-[13px] text-foreground">{service.name}</div>
-                        {service.detail && <div className="truncate text-[12px] text-foreground/55">{service.detail}</div>}
-                      </div>
-                    </div>
-                    <span className={`shrink-0 text-[12.5px] font-medium ${TONE_TEXT[t]}`}>
-                      {componentLabel(c.status)}
-                    </span>
-                  </div>
-                  {up != null && (
-                    <div className="mt-3 flex items-center gap-2.5">
-                      <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-foreground/10">
-                        <div
-                          className={`h-full rounded-full ${TONE_BAR[uptimeTone(up)]}`}
-                          style={{ width: `${Math.max(2, Math.min(100, up))}%` }}
-                        />
-                      </div>
-                      <span className="shrink-0 font-mono text-[11.5px] tabular-nums text-foreground/55">
-                        {up.toFixed(2)}%
-                      </span>
-                    </div>
-                  )}
-                </li>
-              );
-            })}
+                  full health page
+                </Link>
+                .
+              </>
+            }
+          />
+        ) : (
+          <ul role="list" className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {snapshot.components.map((c) => (
+              <li key={c.id}>
+                <ServiceCard
+                  status={c.status}
+                  service={friendlyServiceName(c.name, c.description)}
+                  uptime={c.uptime}
+                />
+              </li>
+            ))}
           </ul>
         )}
 
         {/* Incident history */}
         {snapshot.components.length > 0 && (
-          <div className="mt-12">
+          <div className="mt-14">
             <div className="flex items-baseline justify-between gap-4 border-b border-border-soft pb-3">
-              <h3 className="font-garamond text-[22px] font-normal text-foreground">
-                Recent issues
-              </h3>
-              <span className="text-[12px] text-foreground/45">
+              <h2 className="font-garamond text-[24px] font-normal text-foreground">Recent issues</h2>
+              <span className="text-[12px] text-muted-foreground">
                 {incidents.length > 0 ? `last ${incidents.length}` : "90-day window"}
               </span>
             </div>
             {incidents.length === 0 ? (
-              <p className="py-8 text-center text-[14px] italic text-foreground/55">
+              <p className="py-10 text-center text-[14px] italic text-muted-foreground">
                 No issues in the last 90 days.
               </p>
             ) : (
@@ -240,12 +212,10 @@ export function StatusSection({ initial }: { initial?: StatusSnapshot }) {
             href={STATUS_URL}
             target="_blank"
             rel="noreferrer"
-            className="group inline-flex items-center gap-1.5 text-[13.5px] font-medium text-foreground/65 transition-colors hover:text-primary"
+            className="group inline-flex items-center gap-1.5 rounded-full border border-border-soft bg-surface px-4 py-2 text-[13.5px] font-medium text-muted-foreground transition-colors hover:border-foreground/25 hover:text-primary"
           >
             View full issue history on the health page
-            <span aria-hidden className="transition-transform group-hover:translate-x-0.5">
-              →
-            </span>
+            <ArrowUpRightIcon className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
           </Link>
         </div>
       </div>
@@ -253,28 +223,91 @@ export function StatusSection({ initial }: { initial?: StatusSnapshot }) {
   );
 }
 
+// ── Service card ─────────────────────────────────────────────────────────────
+
+function ServiceCard({
+  status,
+  service,
+  uptime,
+}: {
+  status: ComponentStatus;
+  service: { name: string; detail: string | null };
+  uptime: number | null;
+}) {
+  const tone = componentTone(status);
+  return (
+    <article className="flex h-full flex-col gap-4 rounded-2xl border border-border-soft bg-surface p-5 shadow-[0_8px_26px_-20px_rgba(20,30,15,0.3)]">
+      <header className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <h2 className="truncate text-[15px] font-semibold text-foreground">{service.name}</h2>
+          {service.detail && (
+            <p className="mt-0.5 truncate text-[12.5px] text-muted-foreground">{service.detail}</p>
+          )}
+        </div>
+        <span
+          className={`inline-flex shrink-0 items-center gap-1.5 rounded-full border border-border-soft bg-background px-2.5 py-1 text-[12px] font-medium ${TONE_TEXT[tone]}`}
+        >
+          <span className={`relative inline-flex h-2 w-2 ${TONE_DOT[tone]}`}>
+            <span className={`inline-block h-2 w-2 rounded-full bg-current ${tone === "ok" ? "pulse-dot" : ""}`} />
+          </span>
+          {componentLabel(status)}
+        </span>
+      </header>
+
+      {uptime != null && (
+        <div className="mt-auto">
+          <div className="flex items-baseline justify-between gap-2">
+            <span className="text-[11px] font-medium uppercase tracking-[0.08em] text-foreground/45">
+              90-day uptime
+            </span>
+            <span className="font-mono text-[12.5px] font-semibold tabular-nums text-foreground/70">
+              {uptime.toFixed(2)}%
+            </span>
+          </div>
+          <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-surface-sunken">
+            <div
+              className={`h-full rounded-full ${TONE_BAR[uptimeTone(uptime)]}`}
+              style={{ width: `${Math.max(3, Math.min(100, uptime))}%` }}
+            />
+          </div>
+        </div>
+      )}
+    </article>
+  );
+}
+
 function StatusSkeleton() {
   return (
-    <ul role="list" className="mt-8 grid gap-3 sm:grid-cols-2" aria-label="Loading site health">
-      {Array.from({ length: 8 }).map((_, index) => (
-        <li key={index} className="rounded-xl border border-border-soft bg-background px-4 py-3.5">
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex min-w-0 items-center gap-3">
-              <span className="h-2.5 w-2.5 shrink-0 rounded-full bg-muted" />
-              <div className="space-y-2">
-                <div className="h-3 w-32 rounded-full bg-muted" />
-                <div className="h-3 w-44 rounded-full bg-muted/60" />
-              </div>
+    <ul
+      role="list"
+      className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3"
+      aria-label="Loading site health"
+    >
+      {Array.from({ length: 6 }).map((_, index) => (
+        <li key={index} className="rounded-2xl border border-border-soft bg-surface p-5">
+          <div className="flex items-start justify-between gap-3">
+            <div className="space-y-2">
+              <div className="h-4 w-32 rounded-full bg-muted" />
+              <div className="h-3 w-44 rounded-full bg-muted/70" />
             </div>
-            <div className="h-4 w-16 rounded-full bg-muted/70" />
+            <div className="h-7 w-20 rounded-full bg-muted" />
           </div>
-          <div className="mt-3 flex items-center gap-2.5">
-            <div className="h-1.5 flex-1 rounded-full bg-muted/50" />
-            <div className="h-3 w-12 shrink-0 rounded-full bg-muted/60" />
+          <div className="mt-6 space-y-2">
+            <div className="h-3 w-24 rounded-full bg-muted/60" />
+            <div className="h-1.5 rounded-full bg-muted/50" />
           </div>
         </li>
       ))}
     </ul>
+  );
+}
+
+function Notice({ title, body }: { title: string; body: ReactNode }) {
+  return (
+    <div className="mt-8 flex flex-col items-center justify-center rounded-2xl border border-dashed border-border px-6 py-16 text-center">
+      <div className="font-garamond text-[22px] text-foreground">{title}</div>
+      <p className="mt-2 max-w-[460px] text-[14px] leading-[1.5] text-muted-foreground">{body}</p>
+    </div>
   );
 }
 
@@ -285,7 +318,7 @@ function IncidentRow({ incident }: { incident: Incident }) {
   const when = incident.started ? formatRelative(incident.started) : "";
   const dur = incident.durationMs != null ? formatDuration(incident.durationMs) : null;
   return (
-    <li className="flex items-start gap-3 rounded-xl border border-border-soft bg-background px-4 py-3.5">
+    <li className="flex items-start gap-3 rounded-2xl border border-border-soft bg-surface px-4 py-3.5 shadow-[0_8px_26px_-20px_rgba(20,30,15,0.3)]">
       <span className={`mt-1.5 inline-flex h-2 w-2 shrink-0 rounded-full ${TONE_BAR[t]}`} />
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
@@ -300,7 +333,7 @@ function IncidentRow({ incident }: { incident: Incident }) {
             </span>
           )}
         </div>
-        <div className="mt-1 flex flex-wrap items-center gap-x-2 text-[12px] text-foreground/55">
+        <div className="mt-1 flex flex-wrap items-center gap-x-2 text-[12px] text-muted-foreground">
           <span className={TONE_TEXT[t]}>{componentLabel(incident.impact)}</span>
           {when && <span aria-hidden>·</span>}
           {when && <span>{when}</span>}
