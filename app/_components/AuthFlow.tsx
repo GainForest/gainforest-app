@@ -7,7 +7,7 @@ import {
   ArrowRightIcon,
   ChevronDownIcon,
   ChevronRightIcon,
-  LoaderIcon,
+  Loader2,
   LockIcon,
   LockOpenIcon,
   LogOutIcon,
@@ -18,7 +18,6 @@ import {
   useEffect,
   useRef,
   useState,
-  useTransition,
   type FormEvent,
 } from "react";
 import type { AuthSession } from "../_lib/auth";
@@ -130,8 +129,8 @@ function EmailForm() {
       <Button type="submit" disabled={isRedirecting || !email.trim()} className="w-full">
         {isRedirecting ? (
           <>
-            <LoaderIcon className="animate-spin" />
-            Taking you there…
+            <Loader2 className="animate-spin" />
+            Redirecting...
           </>
         ) : (
           <>
@@ -197,7 +196,7 @@ function HandleForm() {
   };
   const [handle, setHandle] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [isPending, startTransition] = useTransition();
+  const [isRedirecting, setIsRedirecting] = useState(false);
 
   const normalizedHandle = handle.trim();
   const handleErrorKey = getHandleErrorKey(handle);
@@ -207,14 +206,15 @@ function HandleForm() {
     e.preventDefault();
     if (!canSubmit) return;
     setError(null);
+    setIsRedirecting(true);
+    setTimeout(() => setIsRedirecting(false), 10_000);
     localStorage.setItem("auth_redirect", `${window.location.pathname}${window.location.search}`);
-    startTransition(() => {
-      try {
-        window.location.href = buildLoginUrl({ handle: handle.trim() });
-      } catch {
-        setError("Something went wrong. Please try again.");
-      }
-    });
+    try {
+      window.location.href = buildLoginUrl({ handle: handle.trim() });
+    } catch {
+      setIsRedirecting(false);
+      setError("Something went wrong. Please try again.");
+    }
   };
 
   return (
@@ -234,7 +234,7 @@ function HandleForm() {
           placeholder="alice.example.com"
           autoComplete="username"
           autoFocus
-          disabled={isPending}
+          disabled={isRedirecting}
         />
 
         <AnimatePresence mode="wait">
@@ -276,11 +276,11 @@ function HandleForm() {
         )}
       </AnimatePresence>
 
-      <Button type="submit" disabled={!canSubmit || isPending} className="w-full">
-        {isPending ? (
+      <Button type="submit" disabled={!canSubmit || isRedirecting} className="w-full">
+        {isRedirecting ? (
           <>
-            <LoaderIcon className="animate-spin" />
-            Taking you there…
+            <Loader2 className="animate-spin" />
+            Redirecting...
           </>
         ) : (
           <>
