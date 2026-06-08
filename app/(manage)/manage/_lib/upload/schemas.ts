@@ -117,6 +117,22 @@ function isLikelyUrl(value: string): boolean {
   return /^https?:\/\//i.test(value.trim());
 }
 
+function getPhotoUrlFallback(
+  rawRow: Record<string, string>,
+  sourceColumn: string,
+): string | null {
+  const companionColumn = `${sourceColumn}_url`.toLowerCase();
+
+  for (const [columnName, value] of Object.entries(rawRow)) {
+    if (columnName.toLowerCase() !== companionColumn) continue;
+
+    const fallbackValue = value.trim();
+    if (fallbackValue && isLikelyUrl(fallbackValue)) return fallbackValue;
+  }
+
+  return null;
+}
+
 function extractPhotos(
   rawRow: Record<string, string>,
   photoMappings: { sourceColumn: string; subjectPart: string }[],
@@ -127,6 +143,9 @@ function extractPhotos(
     const cellValue = rawRow[sourceColumn];
     if (!cellValue || cellValue.trim() === "") continue;
     const urls = splitPhotoUrls(cellValue);
+    const fallbackUrl = getPhotoUrlFallback(rawRow, sourceColumn);
+    let usedFallbackUrl = false;
+
     for (const value of urls) {
       if (koboMediaZipIndex) {
         const zipEntry = resolveKoboMediaZipEntry(koboMediaZipIndex, rawRow, value);
@@ -137,6 +156,11 @@ function extractPhotos(
       }
       if (isLikelyUrl(value)) {
         photos.push({ source: "url", url: value, subjectPart });
+        continue;
+      }
+      if (fallbackUrl && !usedFallbackUrl) {
+        photos.push({ source: "url", url: fallbackUrl, subjectPart });
+        usedFallbackUrl = true;
       }
     }
   }

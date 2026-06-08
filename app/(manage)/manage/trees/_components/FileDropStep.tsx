@@ -63,7 +63,14 @@ function isAcceptedMediaZipFile(file: File): boolean {
 }
 
 function toExistingDatasetSelection(dataset: UploadTreeDatasetItem): ExistingUploadDatasetSelection {
-  return { uri: dataset.uri, rkey: dataset.rkey, name: dataset.name, description: dataset.description, recordCount: dataset.recordCount };
+  return {
+    uri: dataset.uri,
+    rkey: dataset.rkey,
+    name: dataset.name,
+    description: dataset.description,
+    recordCount: dataset.recordCount,
+    createdAt: dataset.createdAt,
+  };
 }
 
 function hasShapeLocation(site: ManagedLocation): boolean {
