@@ -172,7 +172,13 @@ export function AppShell({
         try {
           const profileResponse = await fetch("/api/session/profile", { cache: "no-store" });
           const profile = profileResponse.ok ? await profileResponse.json() as ShellProfileResponse : null;
-          if (cancelled || !profile) return;
+          if (cancelled) return;
+
+          if (!profile) {
+            setResolvedManageAccountKind("user");
+            setResolvedProfileName(null);
+            return;
+          }
 
           setResolvedManageAccountKind(profile.manageAccountKind);
           setResolvedProfileName(profile.profileName);
@@ -200,10 +206,16 @@ export function AppShell({
     return <>{children}</>;
   }
 
+  const isProfileLoading = resolvedAuthSession?.isLoggedIn === true && resolvedProfileName === undefined;
+
   return (
     <HeaderSlotsProvider>
       <div className="hidden md:flex h-screen overflow-hidden">
-        <UnifiedSidebar authSession={resolvedAuthSession} manageAccountKind={resolvedManageAccountKind} />
+        <UnifiedSidebar
+          authSession={resolvedAuthSession}
+          manageAccountKind={resolvedManageAccountKind}
+          isProfileLoading={isProfileLoading}
+        />
         <main className="relative flex-1 overflow-y-auto">
           <Header authSession={resolvedAuthSession} profileName={resolvedProfileName} onOpenMobileNav={() => setMobileNavOpen(true)} />
           {children}
@@ -212,7 +224,11 @@ export function AppShell({
 
       <div className="flex h-screen flex-col overflow-hidden md:hidden">
         <MobileNavDrawer open={mobileNavOpen} onOpenChange={setMobileNavOpen}>
-          <UnifiedSidebar authSession={resolvedAuthSession} manageAccountKind={resolvedManageAccountKind} />
+          <UnifiedSidebar
+            authSession={resolvedAuthSession}
+            manageAccountKind={resolvedManageAccountKind}
+            isProfileLoading={isProfileLoading}
+          />
         </MobileNavDrawer>
         <div className="relative flex-1 overflow-y-auto">
           <Header authSession={resolvedAuthSession} profileName={resolvedProfileName} onOpenMobileNav={() => setMobileNavOpen(true)} />
@@ -223,7 +239,15 @@ export function AppShell({
   );
 }
 
-function UnifiedSidebar({ authSession, manageAccountKind }: { authSession: AuthSession | null; manageAccountKind: ManageAccountKind }) {
+function UnifiedSidebar({
+  authSession,
+  manageAccountKind,
+  isProfileLoading,
+}: {
+  authSession: AuthSession | null;
+  manageAccountKind: ManageAccountKind;
+  isProfileLoading: boolean;
+}) {
   return (
     <nav className="relative flex h-full w-[240px] flex-col overflow-hidden border-r border-border bg-foreground/3 p-4">
       <SidebarHeader />
@@ -240,7 +264,11 @@ function UnifiedSidebar({ authSession, manageAccountKind }: { authSession: AuthS
 
           <LayoutGroup id="unified-sidebar-nav-manage">
             <Suspense fallback={<ManageSectionSkeleton />}>
-              <ManageSection authSession={authSession} manageAccountKind={manageAccountKind} />
+              <ManageSection
+                authSession={authSession}
+                manageAccountKind={manageAccountKind}
+                isProfileLoading={isProfileLoading}
+              />
             </Suspense>
           </LayoutGroup>
         </div>
@@ -428,9 +456,11 @@ function BumicertCreationCard() {
 function ManageSection({
   authSession,
   manageAccountKind,
+  isProfileLoading,
 }: {
   authSession: AuthSession | null;
   manageAccountKind: ManageAccountKind;
+  isProfileLoading: boolean;
 }) {
   const pathname = usePathname() ?? "/";
   const searchParams = useSearchParams();
@@ -533,7 +563,7 @@ function ManageSection({
         </span>
       </motion.div>
 
-      {authSession == null ? (
+      {authSession == null || isProfileLoading ? (
         <ManageSectionSkeleton />
       ) : authSession.isLoggedIn ? (
         <ul className="flex flex-col gap-0.5">
