@@ -406,7 +406,7 @@ export function ManageDashboardClient({
   const isAccountManageRoute = pathname === "/manage";
 
   useEffect(() => {
-    if (mode !== undefined) return;
+    if (!isAccountManageRoute || mode !== undefined) return;
     if (hasCompletedSetup) {
       if (!shouldClearDashboardMode({ currentKind: account.kind, rawMode })) return;
     } else if (rawMode === undefined || parseManageMode(rawMode) !== null) {
@@ -417,7 +417,7 @@ export function ManageDashboardClient({
     nextSearchParams.delete("mode");
     const query = nextSearchParams.toString();
     router.replace(query ? `${pathname}?${query}` : pathname);
-  }, [account.kind, hasCompletedSetup, mode, pathname, rawMode, router, searchParams]);
+  }, [account.kind, hasCompletedSetup, isAccountManageRoute, mode, pathname, rawMode, router, searchParams]);
 
   // ── Edit state ─────────────────────────────────────────────────────────────
   const [editDisplayName, setEditDisplayName] = useState(account.displayName);
