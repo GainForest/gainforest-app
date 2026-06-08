@@ -8,12 +8,10 @@ import {
   CheckIcon,
   ChevronDownIcon,
   GlobeIcon,
-  ImageIcon,
   ImageOffIcon,
   LayoutGridIcon,
   LeafIcon,
   MapIcon,
-  MapPinIcon,
   SearchIcon,
   UsersIcon,
   XIcon,
@@ -36,7 +34,7 @@ import { countryFlag } from "../_lib/format";
 
 type SortMode = "newest" | "oldest" | "az" | "za";
 type ViewMode = "cards" | "map";
-type QuickFilter = "photos" | "bumicerts";
+type QuickFilter = "observations" | "bumicerts";
 
 const SORT_OPTIONS: Array<{ value: SortMode; label: string }> = [
   { value: "newest", label: "Newest first" },
@@ -46,7 +44,7 @@ const SORT_OPTIONS: Array<{ value: SortMode; label: string }> = [
 ];
 
 const QUICK_CHIPS: Array<{ value: QuickFilter; label: string }> = [
-  { value: "photos", label: "Has profile photos" },
+  { value: "observations", label: "Has observations" },
   { value: "bumicerts", label: "Has Bumicerts" },
 ];
 
@@ -171,7 +169,7 @@ export function OrganizationsClient({ records: initialRecords = [] }: { records?
     const filtered = records.filter((record) => {
       if (countryFilter && normalizeCountry(record.country) !== countryFilter) return false;
       if (typeFilter && !orgTypes(record).includes(typeFilter)) return false;
-      if (quickFilters.includes("photos") && !hasPhoto(record)) return false;
+      if (quickFilters.includes("observations") && (record.observationCount ?? 0) <= 0) return false;
       if (quickFilters.includes("bumicerts") && (record.bumicertCount ?? 0) <= 0) return false;
       if (!normalizedQuery) return true;
       const haystack = [record.name, record.country, countryNameOrEmpty(record.country), record.orgType, record.source]
@@ -204,14 +202,14 @@ export function OrganizationsClient({ records: initialRecords = [] }: { records?
         detail: "public profiles",
       },
       {
-        label: "Countries",
-        value: totalStats?.countries ?? null,
-        detail: "represented",
+        label: "With Bumicerts",
+        value: totalStats?.withBumicerts ?? null,
+        detail: "organizations with project stories",
       },
       {
-        label: "Profile photos",
-        value: totalStats?.withPhotos ?? null,
-        detail: "organizations with a profile photo",
+        label: "With observations",
+        value: totalStats?.withObservations ?? null,
+        detail: "organizations with nature sightings",
       },
       {
         label: "Locations shown",
@@ -673,9 +671,9 @@ function StatsBand({ stats, loading }: { stats: Array<{ label: string; value: nu
 
   const icons = [
     <UsersIcon key="organizations" />,
-    <GlobeIcon key="countries" />,
-    <ImageIcon key="photos" />,
-    <MapPinIcon key="mapped" />,
+    <GlobeIcon key="bumicerts" />,
+    <LeafIcon key="observations" />,
+    <MapIcon key="mapped" />,
   ];
 
   return (
@@ -732,7 +730,6 @@ const OrganizationCard = memo(function OrganizationCard({ record, onOpen }: { re
   const primaryType = types[0] ?? null;
   const description = orgDescription(types, countryLabel);
   const joinedYear = createdYear(record.createdAt);
-  const mapped = hasMappableLocation(record);
   const bannerUrl = organizationBannerUrl(record);
   const avatarUrl = organizationAvatarUrl(record);
 
@@ -797,13 +794,6 @@ const OrganizationCard = memo(function OrganizationCard({ record, onOpen }: { re
           <div className="flex items-center justify-between gap-3 border-t border-border/60 pt-2.5">
             <div className="flex min-w-0 items-center gap-2 text-xs text-muted-foreground">
               {joinedYear && <span className="shrink-0">Joined {joinedYear}</span>}
-              {joinedYear && mapped && <span aria-hidden className="text-border">&bull;</span>}
-              {mapped && (
-                <span className="flex shrink-0 items-center gap-1 text-primary/80">
-                  <MapPinIcon className="size-3.5" />
-                  Location shown
-                </span>
-              )}
             </div>
             <span className="flex shrink-0 items-center gap-1.5 text-xs font-medium text-foreground">
               <span className="transition-colors group-hover:text-primary">Show details</span>
@@ -899,20 +889,12 @@ function orgTypes(record: SiteRecord): string[] {
     .filter(Boolean);
 }
 
-function hasPhoto(record: SiteRecord): boolean {
-  return Boolean(record.imageUrl || record.bannerUrl || record.avatarUrl || record.coverRef || record.logoRef);
-}
-
 function organizationBannerUrl(record: SiteRecord): string | null {
   return record.bannerUrl ?? (record.coverRef ? record.imageUrl : null);
 }
 
 function organizationAvatarUrl(record: SiteRecord): string | null {
   return record.avatarUrl ?? (!record.coverRef && record.logoRef ? record.imageUrl : null);
-}
-
-function hasMappableLocation(record: SiteRecord): boolean {
-  return Boolean(record.locationUri);
 }
 
 function formatStat(value: number): string {

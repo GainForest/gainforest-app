@@ -1405,22 +1405,59 @@ export type SiteRecord = {
   logoRef: string | null;
   /** Number of public Bumicerts created by this organization, when loaded. */
   bumicertCount: number | null;
+  /** Number of nature sightings shared by this organization, when loaded. */
+  observationCount: number | null;
 };
 
-async function attachBumicertCounts(records: SiteRecord[], signal?: AbortSignal): Promise<SiteRecord[]> {
-  const dids = Array.from(new Set(records.map((record) => record.did).filter(Boolean)));
-  if (dids.length === 0) return records;
+const ORG_COUNT_BATCH_SIZE = 50;
 
-  const query = `query OrganizationBumicertCounts {\n${dids
-    .map(
-      (did, index) =>
-        `b${index}: orgHypercertsClaimActivity(first: 0, where: { did: { eq: ${JSON.stringify(did)} } }) { totalCount }`,
-    )
-    .join("\n")}\n}`;
+type CountFieldBuilder = (did: string, index: number) => string;
 
-  try {
+async function fetchCountsByDid(
+  dids: string[],
+  queryName: string,
+  fieldFor: CountFieldBuilder,
+  signal?: AbortSignal,
+): Promise<Map<string, number>> {
+  const uniqueDids = Array.from(new Set(dids.filter(Boolean)));
+  const counts = new Map(uniqueDids.map((did) => [did, 0]));
+  if (uniqueDids.length === 0) return counts;
+
+  const batches = Array.from(
+    { length: Math.ceil(uniqueDids.length / ORG_COUNT_BATCH_SIZE) },
+    (_, index) => uniqueDids.slice(index * ORG_COUNT_BATCH_SIZE, (index + 1) * ORG_COUNT_BATCH_SIZE),
+  );
+
+  await Promise.all(batches.map(async (batch, batchIndex) => {
+    const query = `query ${queryName}${batchIndex} {\n${batch.map(fieldFor).join("\n")}\n}`;
     const data = await indexerQuery<Record<string, { totalCount?: number | null } | null>>(query, {}, signal);
-    const counts = new Map(dids.map((did, index) => [did, data?.[`b${index}`]?.totalCount ?? 0]));
+    batch.forEach((did, index) => counts.set(did, data?.[`c${index}`]?.totalCount ?? 0));
+  }));
+
+  return counts;
+}
+
+function fetchBumicertCountsByDid(dids: string[], signal?: AbortSignal): Promise<Map<string, number>> {
+  return fetchCountsByDid(
+    dids,
+    "OrganizationBumicertCounts",
+    (did, index) => `c${index}: orgHypercertsClaimActivity(first: 0, where: { did: { eq: ${JSON.stringify(did)} } }) { totalCount }`,
+    signal,
+  );
+}
+
+function fetchObservationCountsByDid(dids: string[], signal?: AbortSignal): Promise<Map<string, number>> {
+  return fetchCountsByDid(
+    dids,
+    "OrganizationObservationCounts",
+    (did, index) => `c${index}: appGainforestDwcOccurrence(first: 0, where: { did: { eq: ${JSON.stringify(did)} } }) { totalCount }`,
+    signal,
+  );
+}
+
+async function attachBumicertCounts(records: SiteRecord[], signal?: AbortSignal): Promise<SiteRecord[]> {
+  try {
+    const counts = await fetchBumicertCountsByDid(records.map((record) => record.did), signal);
     return records.map((record) => ({ ...record, bumicertCount: counts.get(record.did) ?? 0 }));
   } catch (error) {
     if ((error as Error).name === "AbortError") throw error;
@@ -1428,7 +1465,17 @@ async function attachBumicertCounts(records: SiteRecord[], signal?: AbortSignal)
   }
 }
 
-export type SiteIndexQuickFilter = "photos" | "locations" | "bumicerts";
+async function attachObservationCounts(records: SiteRecord[], signal?: AbortSignal): Promise<SiteRecord[]> {
+  try {
+    const counts = await fetchObservationCountsByDid(records.map((record) => record.did), signal);
+    return records.map((record) => ({ ...record, observationCount: counts.get(record.did) ?? 0 }));
+  } catch (error) {
+    if ((error as Error).name === "AbortError") throw error;
+    return records.map((record) => ({ ...record, observationCount: 0 }));
+  }
+}
+
+export type SiteIndexQuickFilter = "locations" | "bumicerts" | "observations";
 export type SiteQueryOptions = {
   query?: string;
   country?: string | null;
@@ -1461,9 +1508,9 @@ function siteMatchesOptions(record: SiteRecord, options?: SiteQueryOptions): boo
     if (!types.includes(options.orgType.toLowerCase())) return false;
   }
   const quick = options?.quickFilters ?? [];
-  if (quick.includes("photos") && !record.imageUrl && !record.bannerUrl && !record.avatarUrl && !record.coverRef && !record.logoRef) return false;
   if (quick.includes("locations") && !record.locationUri) return false;
   if (quick.includes("bumicerts") && (record.bumicertCount ?? 0) <= 0) return false;
+  if (quick.includes("observations") && (record.observationCount ?? 0) <= 0) return false;
   return true;
 }
 
@@ -1626,6 +1673,7 @@ function mapCertOrg(n: RawCertOrg, profile: CertProfileInfo | undefined): SiteRe
     coverRef: null,
     logoRef: profile?.avatarRef ?? null,
     bumicertCount: null,
+    observationCount: null,
   };
 }
 
@@ -1644,6 +1692,7 @@ async function fetchCertOrgPage(
   where?: SiteWhere,
   sort?: ExplorerSortMode,
   includeBumicertCounts = false,
+  includeObservationCounts = false,
 ): Promise<Page<SiteRecord>> {
   const { sortBy, sortDirection } = certifiedOrgSort(sort);
   const data = await indexerQuery<{
@@ -1677,6 +1726,7 @@ async function fetchCertOrgPage(
     SITE_IMAGE_RESOLVE_LIMIT,
   );
   if (includeBumicertCounts) records = await attachBumicertCounts(records, signal);
+  if (includeObservationCounts) records = await attachObservationCounts(records, signal);
   return {
     records,
     cursor: conn?.pageInfo?.endCursor ?? null,
@@ -1688,7 +1738,8 @@ export type OrganizationStats = {
   organizations: number | null;
   countries: number;
   countryCodes: string[];
-  withPhotos: number;
+  withBumicerts: number;
+  withObservations: number;
   mappedPlaces: number;
 };
 
@@ -1779,7 +1830,8 @@ async function fetchCertifiedOrganizationStats(signal?: AbortSignal): Promise<Or
   let after: string | null = null;
   let organizations: number | null = null;
   let seenRows = 0;
-  let withPhotos = 0;
+  let withBumicerts = 0;
+  let withObservations = 0;
   let mappedPlaces = 0;
   const countries = new Set<string>();
 
@@ -1787,20 +1839,22 @@ async function fetchCertifiedOrganizationStats(signal?: AbortSignal): Promise<Or
     const res = await fetchCertifiedOrgStatsPage(INDEXER_MAX_PAGE, after, signal);
     organizations ??= res.totalCount;
     seenRows += res.nodes.length;
-    const missingProfileDids = res.nodes
-      .filter((node) => !profileAvatarRef(node.certifiedProfileData))
-      .map((node) => node.did);
-    const profiles = await fetchCertProfiles(missingProfileDids, signal);
+    const dids = res.nodes.map((node) => node.did);
     const locationEntries = res.nodes.map((node) => node.location?.uri ?? null);
-    const countryByLocation = await fetchCertifiedLocationCountriesByUri(
-      locationEntries.filter((uri): uri is string => Boolean(uri)),
-      signal,
-    ).catch(() => new Map<string, string>());
+    const [countryByLocation, bumicertCounts, observationCounts] = await Promise.all([
+      fetchCertifiedLocationCountriesByUri(
+        locationEntries.filter((uri): uri is string => Boolean(uri)),
+        signal,
+      ).catch(() => new Map<string, string>()),
+      fetchBumicertCountsByDid(dids, signal).catch(() => new Map<string, number>()),
+      fetchObservationCountsByDid(dids, signal).catch(() => new Map<string, number>()),
+    ]);
     for (const [index, node] of res.nodes.entries()) {
       const locationUri = locationEntries[index];
       const country = locationUri ? countryByLocation.get(locationUri) : null;
       if (country) countries.add(country);
-      if (profileAvatarRef(node.certifiedProfileData) || profiles.get(node.did)?.avatarRef) withPhotos += 1;
+      if ((bumicertCounts.get(node.did) ?? 0) > 0) withBumicerts += 1;
+      if ((observationCounts.get(node.did) ?? 0) > 0) withObservations += 1;
       if (locationUri) mappedPlaces += 1;
     }
     if (!res.hasMore || !res.cursor) break;
@@ -1811,7 +1865,8 @@ async function fetchCertifiedOrganizationStats(signal?: AbortSignal): Promise<Or
     organizations: organizations ?? seenRows,
     countries: countries.size,
     countryCodes: [...countries].sort(),
-    withPhotos,
+    withBumicerts,
+    withObservations,
     mappedPlaces,
   };
 }
@@ -1866,6 +1921,7 @@ export async function fetchSites(
   });
 
   const includeBumicertCounts = options?.quickFilters?.includes("bumicerts") ?? false;
+  const includeObservationCounts = options?.quickFilters?.includes("observations") ?? false;
   const collectAllForNameSort = options?.sort === "az" || options?.sort === "za";
   const records: SiteRecord[] = [];
   let cursor = after;
@@ -1875,7 +1931,7 @@ export async function fetchSites(
     if (signal?.aborted) throw new DOMException("aborted", "AbortError");
     const matchedCount = sortSites(records).length;
     const first = collectAllForNameSort ? INDEXER_MAX_PAGE : Math.min(INDEXER_MAX_PAGE, Math.max(1, target - matchedCount));
-    const page = await fetchCertOrgPage(first, cursor, signal, certifiedWhere(options), options?.sort, includeBumicertCounts);
+    const page = await fetchCertOrgPage(first, cursor, signal, certifiedWhere(options), options?.sort, includeBumicertCounts, includeObservationCounts);
     records.push(...page.records);
     cursor = page.cursor;
     hasMore = page.hasMore && Boolean(page.cursor);
