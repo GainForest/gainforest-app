@@ -1,12 +1,11 @@
 "use client";
 
 import { useMemo } from "react";
-import Link from "next/link";
 import { motion } from "framer-motion";
 import { HeartIcon, ExternalLinkIcon } from "lucide-react";
 import type { FundingReceipt } from "../../_lib/dashboard";
 import { formatCompactUsd } from "../../_lib/format";
-import { localBumicertHref } from "../../_lib/urls";
+import { PreferredBumicertLink } from "../../_components/PreferredLinks";
 
 interface DonationHistoryProps {
   receipts: FundingReceipt[];
@@ -75,12 +74,13 @@ function DonationCard({
           </span>
           <span className="text-xs text-muted-foreground">·</span>
           {bumicertInfo ? (
-            <Link
-              href={localBumicertHref(bumicertInfo.did, bumicertInfo.rkey)}
+            <PreferredBumicertLink
+              did={bumicertInfo.did}
+              rkey={bumicertInfo.rkey}
               className="text-xs text-primary hover:underline truncate"
             >
               View bumicert
-            </Link>
+            </PreferredBumicertLink>
           ) : (
             <span className="text-xs text-muted-foreground truncate">
               Unknown bumicert

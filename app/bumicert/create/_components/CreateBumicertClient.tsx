@@ -856,7 +856,7 @@ function ReviewStep({ values, sites, publishError }: { values: FormValues; sites
 }
 
 function PublishSuccess({ result, session, onReset }: { result: PublishResult; session: Extract<AuthSession, { isLoggedIn: true }>; onReset: () => void }) {
-  const detailHref = localBumicertHref(session.did, result.rkey);
+  const detailHref = localBumicertHref(session.handle || session.did, result.rkey);
   const hyperscanHref = hyperscanRecordHref(result.uri);
   return (
     <motion.div

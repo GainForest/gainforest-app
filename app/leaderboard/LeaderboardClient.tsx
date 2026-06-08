@@ -25,10 +25,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { AuthorInline } from "../_components/AuthorChip";
+import { PreferredAccountLink } from "../_components/PreferredLinks";
 import { StatsTileGrid, type StatsTileItem } from "../_components/StatsTile";
 import { fetchReceipts, type FundingReceipt } from "../_lib/dashboard";
 import { formatCompact, formatCompactUsd } from "../_lib/format";
-import { accountHref } from "../_lib/urls";
 
 type Period = "all" | "month" | "week";
 type DonorFilter = "all" | "anonymous" | "known";
@@ -505,17 +505,9 @@ function DonorBadge({ rank }: { rank: number }) {
 function DonorCard({ entry }: { entry: LeaderboardEntry }) {
   const isWallet = entry.donorType === "wallet";
   const relativeTime = entry.lastDonatedAt ? formatRelativeTimeFromNow(new Date(entry.lastDonatedAt)) : null;
-  const actionHref = isWallet ? basescanAddress(entry.donorId) : accountHref(entry.donorId);
-  const actionLabel = isWallet ? "Open payment details" : "Open supporter profile in a new tab";
-
-  return (
-    <a
-      href={actionHref}
-      target="_blank"
-      rel="noopener noreferrer"
-      aria-label={actionLabel}
-      className="group flex items-start gap-3.5 px-4 py-[18px] transition-colors duration-200 hover:bg-primary/[0.04] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:gap-4 sm:px-5 sm:py-5"
-    >
+  const className = "group flex items-start gap-3.5 px-4 py-[18px] transition-colors duration-200 hover:bg-primary/[0.04] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:gap-4 sm:px-5 sm:py-5";
+  const content = (
+    <>
       <RankBadge rank={entry.rank} />
 
       <div className="min-w-0 flex-1 space-y-1.5">
@@ -545,7 +537,33 @@ function DonorCard({ entry }: { entry: LeaderboardEntry }) {
         aria-hidden="true"
         className="mt-1 size-4 shrink-0 text-muted-foreground/40 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-primary sm:size-5"
       />
-    </a>
+    </>
+  );
+
+  if (isWallet) {
+    return (
+      <a
+        href={basescanAddress(entry.donorId)}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Open payment details"
+        className={className}
+      >
+        {content}
+      </a>
+    );
+  }
+
+  return (
+    <PreferredAccountLink
+      did={entry.donorId}
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label="Open supporter profile in a new tab"
+      className={className}
+    >
+      {content}
+    </PreferredAccountLink>
   );
 }
 

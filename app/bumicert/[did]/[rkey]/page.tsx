@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import {
   BanIcon,
   ChevronRightIcon,
@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { BumicertsBumicertCard } from "@/components/bumicert/BumicertsBumicertCard";
 import { AuthorInline } from "../../../_components/AuthorChip";
+import { PreferredAccountLink } from "../../../_components/PreferredLinks";
 import { RichText } from "../../../_components/RichText";
 import { SocialGlyph } from "../../../_components/SocialIcon";
 import { StatsTileGrid, type StatsTileItem } from "../../../_components/StatsTile";
@@ -41,7 +42,7 @@ import {
   type TimelineAttachmentItem,
 } from "../../../_lib/indexer";
 import { isPdsBlobUrl } from "../../../_lib/pds";
-import { accountHref, blockExplorerUrl, INDEXER_URL, localBumicertHref } from "../../../_lib/urls";
+import { blockExplorerUrl, INDEXER_URL, localBumicertHref } from "../../../_lib/urls";
 import { fetchAuthSession } from "../../../_lib/auth-server";
 import { getAccountRouteData, readAccountRouteParams } from "../../../account/_lib/account-route";
 import { Separator } from "@/components/ui/separator";
@@ -72,6 +73,7 @@ type RouteData = {
   owner: Awaited<ReturnType<typeof getAccountRouteData>>;
   fundingConfig: BumicertFundingConfig;
   authSession: Awaited<ReturnType<typeof fetchAuthSession>>;
+  routeIdentifier: string;
   urlIdentifier: string;
 };
 
@@ -108,12 +110,15 @@ export default async function BumicertDetailPage({
   params: BumicertPageParams;
   searchParams: BumicertSearchParams;
 }) {
-  const [{ record, detail, owner, fundingConfig, authSession, urlIdentifier }, search] = await Promise.all([
+  const [{ record, detail, owner, fundingConfig, authSession, routeIdentifier, urlIdentifier }, search] = await Promise.all([
     readRouteData(params),
     searchParams,
   ]);
   const activeTab = parseDetailTab(search.tab);
   const detailHref = localBumicertHref(urlIdentifier, record.rkey);
+  if (routeIdentifier !== urlIdentifier) {
+    redirect(activeTab === "overview" ? detailHref : `${detailHref}?tab=${activeTab}`);
+  }
   const donationsHref = `${detailHref}?tab=donations`;
   const period = record.startDate || record.endDate
     ? `${record.startDate ? formatDate(record.startDate) : "—"} → ${record.endDate ? formatDate(record.endDate) : "—"}`
@@ -268,7 +273,7 @@ async function readRouteData(params: BumicertPageParams): Promise<RouteData> {
   ]);
 
   if (!record || record.kind !== "bumicert") notFound();
-  return { record, detail, owner, fundingConfig, authSession, urlIdentifier };
+  return { record, detail, owner, fundingConfig, authSession, routeIdentifier: urlIdentifier, urlIdentifier: owner.urlIdentifier };
 }
 
 async function fetchBumicertFundingConfig(did: string, rkey: string): Promise<BumicertFundingConfig> {
@@ -955,7 +960,7 @@ function MoreBumicertsSection({
         }}
       >
         {bumicerts.map((item) => (
-          <Link key={item.id} href={localBumicertHref(item.did, item.rkey)} className="block w-[260px] shrink-0">
+          <Link key={item.id} href={localBumicertHref(owner.urlIdentifier, item.rkey)} className="block w-[260px] shrink-0">
             <BumicertsBumicertCard record={item} />
           </Link>
         ))}
@@ -1091,13 +1096,25 @@ function DonationLeaderboardRow({ entry }: { entry: DonationLeaderboardEntry }) 
   );
   const className = "group flex items-start gap-3.5 px-4 py-[18px] transition-colors duration-200 hover:bg-primary/[0.04] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:gap-4 sm:px-5 sm:py-5";
 
+  if (entry.donor?.type === "did") {
+    return (
+      <PreferredAccountLink
+        did={entry.donor.id}
+        aria-label="Open supporter profile"
+        className={className}
+      >
+        {content}
+      </PreferredAccountLink>
+    );
+  }
+
   if (actionHref) {
     return (
       <Link
         href={actionHref}
-        target={actionHref.startsWith("http") ? "_blank" : undefined}
-        rel={actionHref.startsWith("http") ? "noreferrer" : undefined}
-        aria-label={entry.donor?.type === "did" ? "Open supporter profile" : "Open payment details"}
+        target="_blank"
+        rel="noreferrer"
+        aria-label="Open payment details"
         className={className}
       >
         {content}
@@ -1109,7 +1126,7 @@ function DonationLeaderboardRow({ entry }: { entry: DonationLeaderboardEntry }) 
 }
 
 function donationEntryHref(entry: DonationLeaderboardEntry): string | null {
-  if (entry.donor?.type === "did") return accountHref(entry.donor.id);
+  if (entry.donor?.type === "did") return null;
   return blockExplorerUrl(entry.latestReceipt.txHash, entry.latestReceipt.paymentNetwork);
 }
 

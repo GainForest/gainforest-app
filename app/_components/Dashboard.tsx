@@ -48,9 +48,9 @@ import {
   type TopDonor,
   type TxRow,
 } from "../_lib/dashboard";
-import { accountHref, localBumicertHref } from "../_lib/urls";
 import { formatCompact, formatCompactUsd, formatNumber, formatUsd } from "../_lib/format";
 import { AuthorInline } from "./AuthorChip";
+import { PreferredAccountLink, PreferredBumicertLink } from "./PreferredLinks";
 import { StatsTile } from "./StatsTile";
 import { PictureHero } from "./PictureHero";
 
@@ -562,15 +562,15 @@ function OrganizationsTable({ rows }: { rows: OrgRow[] }) {
                 {visibleRows.map((row) => (
                   <tr key={row.orgDid} className="border-t border-border/40 transition-colors hover:bg-primary/[0.04]">
                     <td className="px-3 py-2.5">
-                      <Link
-                        href={accountHref(row.orgDid)}
+                      <PreferredAccountLink
+                        did={row.orgDid}
                         target="_blank"
                         rel="noreferrer"
                         className="inline-flex items-center gap-1 text-xs text-foreground transition-colors hover:text-primary"
                       >
                         <AuthorInline did={row.orgDid} />
                         <ExternalLinkIcon className="h-3 w-3 opacity-60" />
-                      </Link>
+                      </PreferredAccountLink>
                     </td>
                     <td className="px-3 py-2.5 text-foreground tabular-nums">{formatCompactUsd(row.totalRaised)}</td>
                     <td className="px-3 py-2.5 text-muted-foreground tabular-nums">{row.bumicertCount}</td>
@@ -705,9 +705,9 @@ function DonorCell({ id, type }: { id: string; type: "did" | "wallet" }) {
   }
 
   return (
-    <Link href={accountHref(id)} className="underline-offset-2 hover:underline">
+    <PreferredAccountLink did={id} className="underline-offset-2 hover:underline">
       <AuthorInline did={id} />
-    </Link>
+    </PreferredAccountLink>
   );
 }
 
@@ -716,9 +716,9 @@ function BumicertLink({ uri }: { uri: string | null }) {
   const parsed = parseBumicertUri(uri);
   if (!parsed) return <>—</>;
   return (
-    <Link href={localBumicertHref(parsed.did, parsed.rkey)} className="text-primary hover:underline" title="View bumicert">
+    <PreferredBumicertLink did={parsed.did} rkey={parsed.rkey} className="text-primary hover:underline" title="View bumicert">
       View
-    </Link>
+    </PreferredBumicertLink>
   );
 }
 

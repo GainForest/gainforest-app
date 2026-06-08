@@ -74,7 +74,7 @@ export async function AccountBumicertsTabContent({
       sidebar={<AccountSidebar account={account} bumicertCount={bumicerts.length} donationCount={donationCount} />}
     >
       <ManageActionRow action={manageAction} />
-      <AccountBumicertsGrid bumicerts={bumicerts} organizationName={account.displayName} logoUrl={account.avatarUrl} />
+      <AccountBumicertsGrid bumicerts={bumicerts} organizationIdentifier={account.urlIdentifier} organizationName={account.displayName} logoUrl={account.avatarUrl} />
     </AccountContentColumns>
   );
 }

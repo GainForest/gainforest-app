@@ -1,5 +1,6 @@
 import { notFound, redirect } from "next/navigation";
 import { localBumicertHref } from "../../_lib/urls";
+import { getAccountRouteData } from "../../account/_lib/account-route";
 
 export const revalidate = 60;
 
@@ -26,5 +27,6 @@ export default async function LegacyBumicertPage({ params }: { params: Promise<{
   const { did } = await params;
   const parsed = parseLegacyBumicertId(did);
   if (!parsed) notFound();
-  redirect(localBumicertHref(parsed.did, parsed.rkey));
+  const account = await getAccountRouteData(parsed.did, parsed.did).catch(() => null);
+  redirect(localBumicertHref(account?.urlIdentifier ?? parsed.did, parsed.rkey));
 }

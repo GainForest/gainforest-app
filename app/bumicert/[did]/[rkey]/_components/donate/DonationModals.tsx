@@ -9,6 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import { useModal } from "@/components/ui/modal/context";
 import { ModalContent, ModalDescription, ModalFooter, ModalHeader, ModalTitle } from "@/components/ui/modal/modal";
 import type { AuthSession } from "@/app/_lib/auth";
+import { usePreferredDidIdentifier } from "@/app/_components/PreferredLinks";
 import { SocialGlyph } from "@/app/_components/SocialIcon";
 import { SITE_URL, blockExplorerUrl, localBumicertHref } from "@/app/_lib/urls";
 import {
@@ -604,7 +605,8 @@ function SuccessModal({
   const { hide, clear } = useModal();
   const [copied, setCopied] = useState(false);
   const txHref = blockExplorerUrl(transactionHash, "base");
-  const sharePath = localBumicertHref(bumicert.organizationDid, bumicert.rkey);
+  const organizationIdentifier = usePreferredDidIdentifier(bumicert.organizationDid);
+  const sharePath = localBumicertHref(organizationIdentifier, bumicert.rkey);
   const shareUrl = absoluteLocalUrl(sharePath);
   const shareText = `I donated $${amount.toFixed(2)} to support a Bumicert: ${shareUrl}`;
   const shareLinks = [

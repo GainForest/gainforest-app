@@ -7,6 +7,7 @@ import {
   type RecordDetail,
 } from "../../_lib/indexer";
 import { shortDid } from "../../_lib/format";
+import { preferredDidIdentifier } from "../../_lib/urls";
 import { fetchCertifiedLocationCountryCode } from "../../_lib/country-location";
 import { resolveBlobUrl, resolvePdsHost } from "../../_lib/pds";
 
@@ -156,7 +157,7 @@ export const getAccountRouteData = cache(async (
 
   return {
     did,
-    urlIdentifier,
+    urlIdentifier: preferredDidIdentifier(did, summary.handle ?? appViewProfile?.handle ?? (urlIdentifier === did ? null : urlIdentifier)),
     displayName,
     handle: summary.handle ?? appViewProfile?.handle ?? null,
     avatarUrl: summary.avatarUrl ?? appViewProfile?.avatar ?? null,

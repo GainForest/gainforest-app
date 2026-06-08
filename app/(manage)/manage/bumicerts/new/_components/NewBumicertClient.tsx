@@ -1052,8 +1052,8 @@ function DraftsSubheader({
 
 /* ── Published ──────────────────────────────────────────────────────────── */
 
-function PublishedView({ result, did, onReset }: { result: PublishResult; did: string; onReset: () => void }) {
-  const detailHref = localBumicertHref(did, result.rkey);
+function PublishedView({ result, ownerIdentifier, onReset }: { result: PublishResult; ownerIdentifier: string; onReset: () => void }) {
+  const detailHref = localBumicertHref(ownerIdentifier, result.rkey);
   const hyperscanHref = hyperscanRecordHref(result.uri);
   return (
     <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }} className="mx-auto max-w-xl py-16 text-center">
@@ -1089,7 +1089,7 @@ function PublishedView({ result, did, onReset }: { result: PublishResult; did: s
 
 /* ── Main ───────────────────────────────────────────────────────────────── */
 
-export function NewBumicertClient({ did, profile }: { did: string; profile: ProfilePreview }) {
+export function NewBumicertClient({ did, ownerIdentifier, profile }: { did: string; ownerIdentifier: string; profile: ProfilePreview }) {
   const [values, setValues] = useState<FormValues>(EMPTY_FORM);
   const [drafts, setDrafts] = useState<Draft[]>([]);
   const [activeDraftId, setActiveDraftId] = useState<string | null>(null);
@@ -1366,7 +1366,7 @@ export function NewBumicertClient({ did, profile }: { did: string; profile: Prof
 
       <div className="mx-auto w-full max-w-5xl px-4 py-7 sm:px-6 sm:py-9">
         {publishResult ? (
-          <PublishedView result={publishResult} did={did} onReset={resetForm} />
+          <PublishedView result={publishResult} ownerIdentifier={ownerIdentifier} onReset={resetForm} />
         ) : (
           <>
             <form onSubmit={handlePublish} className="mt-2 grid gap-x-14 gap-y-12 xl:grid-cols-[minmax(0,1fr)_18rem]">

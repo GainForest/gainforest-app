@@ -13,6 +13,7 @@ import {
 } from "../_lib/indexer";
 import { formatCompact, formatDate, formatNumber, countryFlag } from "../_lib/format";
 import { AuthorChip } from "./AuthorChip";
+import { usePreferredDidIdentifier } from "./PreferredLinks";
 import { RecordLocationMap } from "./RecordLocationMap";
 import { RichText } from "./RichText";
 import { SocialGlyph, socialLabel } from "./SocialIcon";
@@ -108,6 +109,8 @@ export function RecordDrawer({
     return () => ctrl.abort();
   }, [record]);
 
+  const preferredOwnerIdentifier = usePreferredDidIdentifier(record?.did ?? "");
+
   if (!record) return null;
 
   const title =
@@ -143,8 +146,8 @@ export function RecordDrawer({
       ? record.media.map((m) => ({ label: mediaLabel(m), tone: "info" }))
       : [];
   const badges = record.kind === "bumicert" ? [] : [...(detail?.badges ?? []), ...mediaBadges];
-  const detailHref = record.kind === "bumicert" ? localBumicertHref(record.did, record.rkey) : null;
-  const ownerHref = accountHref(record.did);
+  const detailHref = record.kind === "bumicert" ? localBumicertHref(preferredOwnerIdentifier, record.rkey) : null;
+  const ownerHref = accountHref(preferredOwnerIdentifier);
 
   // A Bumicert's short description is the single description shown in the
   // drawer; when present, suppress the long-form body so it isn't shown twice.

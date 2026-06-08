@@ -51,6 +51,12 @@ export const STATUS_URL = "https://gainforest-status.instatus.com";
  *  (apps/bumicerts/app/(marketplace)/dashboard/_components/DashboardClient.tsx). */
 export const FACILITATOR_DID = "did:plc:edod7rboajioq3jbyxsgeicc";
 
+/** Prefer a handle for public URLs when one is known, while keeping DID fallback support. */
+export function preferredDidIdentifier(did: string, handle?: string | null): string {
+  const cleanHandle = handle?.trim().replace(/^@/, "");
+  return cleanHandle && !cleanHandle.startsWith("did:") ? cleanHandle : did;
+}
+
 /** Build a Bumicerts detail page URL in this app from a DID/handle + rkey. */
 export function localBumicertHref(didOrHandle: string, rkey: string): string {
   return `/bumicert/${encodeURIComponent(didOrHandle)}/${encodeURIComponent(rkey)}`;

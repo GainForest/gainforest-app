@@ -71,7 +71,7 @@ function CreateHeroCard() {
   );
 }
 
-function RecentBumicerts({ bumicerts, did }: { bumicerts: BumicertRecord[]; did: string }) {
+function RecentBumicerts({ bumicerts, did, ownerIdentifier }: { bumicerts: BumicertRecord[]; did: string; ownerIdentifier: string }) {
   return (
     <AnimatePresence mode="wait">
       {bumicerts.length === 0 ? (
@@ -109,7 +109,7 @@ function RecentBumicerts({ bumicerts, did }: { bumicerts: BumicertRecord[]; did:
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.35, ease: [0.25, 0.1, 0.25, 1] }}
             >
-              <Link href={localBumicertHref(bumicert.did || did, bumicert.rkey)} className="block h-full">
+              <Link href={localBumicertHref((bumicert.did || did) === did ? ownerIdentifier : bumicert.did || did, bumicert.rkey)} className="block h-full">
                 <BumicertCardVisual
                   coverImage={bumicert.imageUrl}
                   logoUrl={null}
@@ -134,7 +134,7 @@ function RecentBumicerts({ bumicerts, did }: { bumicerts: BumicertRecord[]; did:
   );
 }
 
-export function ManageBumicertsClient({ did, bumicerts, error }: { did: string; bumicerts: BumicertRecord[]; error?: string | null }) {
+export function ManageBumicertsClient({ did, ownerIdentifier, bumicerts, error }: { did: string; ownerIdentifier: string; bumicerts: BumicertRecord[]; error?: string | null }) {
   return (
     <div className="mx-auto w-full max-w-[1440px] px-4 py-4 sm:px-6 sm:py-6">
       <div className="space-y-4">
@@ -153,7 +153,7 @@ export function ManageBumicertsClient({ did, bumicerts, error }: { did: string; 
             </div>
           </motion.div>
         ) : (
-          <RecentBumicerts bumicerts={bumicerts} did={did} />
+          <RecentBumicerts bumicerts={bumicerts} did={did} ownerIdentifier={ownerIdentifier} />
         )}
       </div>
     </div>

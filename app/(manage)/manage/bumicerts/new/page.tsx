@@ -14,5 +14,5 @@ export default async function NewBumicertPage() {
   if (!session.isLoggedIn) return null;
 
   const account = await getAccountRouteData(session.did, session.did);
-  return <NewBumicertClient did={session.did} profile={{ name: account.displayName, avatarUrl: account.avatarUrl }} />;
+  return <NewBumicertClient did={session.did} ownerIdentifier={account.urlIdentifier} profile={{ name: account.displayName, avatarUrl: account.avatarUrl }} />;
 }

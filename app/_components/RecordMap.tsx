@@ -7,7 +7,8 @@ import type { Map as LeafletMap, MarkerClusterGroup, MarkerCluster, TileLayer } 
 import { mapTileUrl, resolvePointsFor, type MapPoint } from "../_lib/coords";
 import type { ExplorerRecord, RecordKind } from "../_lib/indexer";
 import { formatNumber, formatCompact } from "../_lib/format";
-import { accountHref } from "../_lib/urls";
+import { accountHref, preferredDidIdentifier } from "../_lib/urls";
+import { getCachedProfile } from "../_lib/did-profile";
 
 // Map view for the record streams. Vanilla Leaflet (dynamically imported so it
 // never touches `window` during SSR) + leaflet.markercluster on CARTO Positron
@@ -163,7 +164,7 @@ export function RecordMap({
       marker.on("click", () => {
         const rec = p.recordId ? recordById.get(p.recordId) : undefined;
         if (rec) onOpen(rec);
-        else if (p.did) window.open(accountHref(p.did), "_blank", "noopener");
+        else if (p.did) window.open(accountHref(preferredDidIdentifier(p.did, getCachedProfile(p.did)?.handle)), "_blank", "noopener");
       });
       return marker;
     });

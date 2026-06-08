@@ -17,6 +17,7 @@ const containerVariants = {
 
 interface OrgBumicertsGridProps {
   bumicerts: BumicertRecord[];
+  organizationIdentifier: string;
   organizationName: string;
   logoUrl: string | null;
 }
@@ -28,7 +29,7 @@ function objectivesFor(bumicert: BumicertRecord): string[] {
   ].filter((value): value is string => Boolean(value));
 }
 
-export function AccountBumicertsGrid({ bumicerts, organizationName, logoUrl }: OrgBumicertsGridProps) {
+export function AccountBumicertsGrid({ bumicerts, organizationIdentifier, organizationName, logoUrl }: OrgBumicertsGridProps) {
   if (bumicerts.length === 0) {
     return (
       <div className="py-16 flex flex-col items-center justify-center text-center">
@@ -67,7 +68,7 @@ export function AccountBumicertsGrid({ bumicerts, organizationName, logoUrl }: O
       >
         {bumicerts.map((b) => (
           <motion.div key={b.id} variants={cardVariants} className="h-full">
-            <Link href={localBumicertHref(b.did, b.rkey)} className="block h-full">
+            <Link href={localBumicertHref(organizationIdentifier, b.rkey)} className="block h-full">
               <BumicertCardVisual
                 className="h-full"
                 coverImage={b.imageUrl}

@@ -15,9 +15,9 @@ export default async function ManageBumicertsPage() {
 
   try {
     const page = await fetchBumicertsByDid(session.did, 24);
-    return <ManageBumicertsClient did={session.did} bumicerts={page.records} />;
+    return <ManageBumicertsClient did={session.did} ownerIdentifier={session.handle || session.did} bumicerts={page.records} />;
   } catch (error) {
     const message = error instanceof Error ? error.message : "Failed to load recent Bumicerts.";
-    return <ManageBumicertsClient did={session.did} bumicerts={[]} error={message} />;
+    return <ManageBumicertsClient did={session.did} ownerIdentifier={session.handle || session.did} bumicerts={[]} error={message} />;
   }
 }
