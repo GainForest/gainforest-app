@@ -49,7 +49,22 @@ export const STATUS_URL = "https://gainforest-status.instatus.com";
  *  dashboard reads `orgHypercertsFundingReceipt(where: { did: { eq } })`
  *  against it. Mirrors the bumicerts monorepo's NEXT_PUBLIC_FACILITATOR_DID
  *  (apps/bumicerts/app/(marketplace)/dashboard/_components/DashboardClient.tsx). */
-export const FACILITATOR_DID = "did:plc:edod7rboajioq3jbyxsgeicc";
+export const FACILITATOR_DID = process.env.NEXT_PUBLIC_FACILITATOR_DID || "did:plc:edod7rboajioq3jbyxsgeicc";
+
+/** The platform (facilitator) wallet address that signs the EVM-link platform
+ *  attestation. When set, a linked wallet only counts as "trusted" for
+ *  receiving donations if its `platformAttestation.platformAddress` matches
+ *  this. Mirrors the monorepo's NEXT_PUBLIC_FACILITATOR_WALLET_ADDRESS. */
+export const FACILITATOR_WALLET_ADDRESS = process.env.NEXT_PUBLIC_FACILITATOR_WALLET_ADDRESS;
+
+/** WalletConnect Cloud project id, required by RainbowKit's getDefaultConfig
+ *  for mobile wallet (deep-link) support. Mirrors the monorepo's
+ *  NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID. RainbowKit refuses to initialise with
+ *  an empty id (it throws during SSR/prerender), so we fall back to a
+ *  placeholder when unset: injected/browser wallets (MetaMask, Rainbow,
+ *  Coinbase) still work; only mobile WalletConnect deep-links need the real id. */
+export const WALLETCONNECT_PROJECT_ID =
+  process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || "00000000000000000000000000000000";
 
 /** Prefer a handle for public URLs when one is known, while keeping DID fallback support. */
 export function preferredDidIdentifier(did: string, handle?: string | null): string {

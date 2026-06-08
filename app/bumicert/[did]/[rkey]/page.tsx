@@ -50,6 +50,7 @@ import { BumicertHeaderTitleBridge } from "./_components/BumicertHeaderTitleBrid
 import { BumicertShareButton } from "./_components/BumicertShareButton";
 import { BumicertObservationsGallery } from "./_components/BumicertObservationsGallery";
 import { DonateButton } from "./_components/donate/DonateButton";
+import { FundingStatus } from "./_components/donate/FundingStatus";
 import { BumicertTimeline } from "./_components/timeline/BumicertTimeline";
 
 export const revalidate = 60;
@@ -65,6 +66,9 @@ type BumicertFundingConfig = {
   goalInUSD: string | null;
   minDonationInUSD: string | null;
   maxDonationInUSD: string | null;
+  allowOversell: boolean | null;
+  createdAt: string | null;
+  updatedAt: string | null;
 } | null;
 
 type RouteData = {
@@ -291,6 +295,9 @@ async function fetchBumicertFundingConfig(did: string, rkey: string): Promise<Bu
             goalInUSD
             minDonationInUSD
             maxDonationInUSD
+            allowOversell
+            createdAt
+            updatedAt
           }
         }
       `,
@@ -308,6 +315,9 @@ async function fetchBumicertFundingConfig(did: string, rkey: string): Promise<Bu
         goalInUSD?: string | null;
         minDonationInUSD?: string | null;
         maxDonationInUSD?: string | null;
+        allowOversell?: boolean | null;
+        createdAt?: string | null;
+        updatedAt?: string | null;
       } | null;
     };
   };
@@ -321,6 +331,9 @@ async function fetchBumicertFundingConfig(did: string, rkey: string): Promise<Bu
     goalInUSD: node.goalInUSD ?? null,
     minDonationInUSD: node.minDonationInUSD ?? null,
     maxDonationInUSD: node.maxDonationInUSD ?? null,
+    allowOversell: node.allowOversell ?? null,
+    createdAt: node.createdAt ?? null,
+    updatedAt: node.updatedAt ?? null,
   };
 }
 
@@ -513,6 +526,7 @@ function SidebarDonations({
   const totalUsd = usdReceipts.reduce((sum, receipt) => sum + receipt.amount, 0);
   const hasReceipts = receipts.length > 0;
   const donationStatus = getDonationStatus(fundingConfig, unavailable);
+  const isOwner = authSession.isLoggedIn && authSession.did === record.did;
 
   return (
     <div className="space-y-3">
@@ -539,18 +553,22 @@ function SidebarDonations({
           <p className="mt-0.5 text-lg font-medium text-foreground">{formatCompact(receipts.length)}</p>
         </div>
       </div>
-      <DonateButton
-        bumicert={{
-          organizationDid: record.did,
-          rkey: record.rkey,
-          title: record.title,
-          organizationName: owner.displayName,
-        }}
-        fundingConfig={fundingConfig}
-        authSession={authSession}
-        disabled={donationStatus.kind !== "open"}
-        label={donationStatus.kind === "open" && hasReceipts ? "Donate again" : "Donate"}
-      />
+      {isOwner ? (
+        <FundingStatus ownerDid={record.did} bumicertRkey={record.rkey} fundingConfig={fundingConfig} />
+      ) : (
+        <DonateButton
+          bumicert={{
+            organizationDid: record.did,
+            rkey: record.rkey,
+            title: record.title,
+            organizationName: owner.displayName,
+          }}
+          fundingConfig={fundingConfig}
+          authSession={authSession}
+          disabled={donationStatus.kind !== "open"}
+          label={donationStatus.kind === "open" && hasReceipts ? "Donate again" : "Donate"}
+        />
+      )}
       <p className="text-xs leading-5 text-muted-foreground">
         Completed donations appear publicly so supporters can see the impact.
       </p>
@@ -771,6 +789,7 @@ function DonationsPanel({
   const donationEntries = buildDonationLeaderboard(usdReceipts);
   const donorCount = donationEntries.length;
   const donationStatus = getDonationStatus(fundingConfig, unavailable);
+  const isOwner = authSession.isLoggedIn && authSession.did === record.did;
   const stats: StatsTileItem[] = [
     {
       label: "Total raised",
@@ -808,21 +827,27 @@ function DonationsPanel({
               </p>
             </div>
             <div className="w-full sm:w-44 sm:shrink-0">
-              <DonateButton
-                bumicert={{
-                  organizationDid: record.did,
-                  rkey: record.rkey,
-                  title: record.title,
-                  organizationName: owner.displayName,
-                }}
-                fundingConfig={fundingConfig}
-                authSession={authSession}
-                disabled={donationStatus.kind !== "open"}
-                label={donationStatus.kind === "open" && receipts.length > 0 ? "Donate again" : "Donate"}
-              />
-              {donationStatus.kind !== "open" ? (
-                <p className="mt-2 text-center text-xs text-muted-foreground">{donationStatus.label}</p>
-              ) : null}
+              {isOwner ? (
+                <FundingStatus ownerDid={record.did} bumicertRkey={record.rkey} fundingConfig={fundingConfig} />
+              ) : (
+                <>
+                  <DonateButton
+                    bumicert={{
+                      organizationDid: record.did,
+                      rkey: record.rkey,
+                      title: record.title,
+                      organizationName: owner.displayName,
+                    }}
+                    fundingConfig={fundingConfig}
+                    authSession={authSession}
+                    disabled={donationStatus.kind !== "open"}
+                    label={donationStatus.kind === "open" && receipts.length > 0 ? "Donate again" : "Donate"}
+                  />
+                  {donationStatus.kind !== "open" ? (
+                    <p className="mt-2 text-center text-xs text-muted-foreground">{donationStatus.label}</p>
+                  ) : null}
+                </>
+              )}
             </div>
           </div>
         </div>

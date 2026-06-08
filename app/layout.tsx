@@ -8,6 +8,7 @@ import { AccountDrawerProvider } from "./_components/AccountDrawer";
 import { LinkPrefetcher } from "./_components/LinkPrefetcher";
 import { RouteChangeIndicator } from "./_components/RouteChangeIndicator";
 import { ModalProvider } from "@/components/ui/modal/context";
+import { WagmiProvider } from "@/components/providers/WagmiProvider";
 import { SITE_URL } from "./_lib/urls";
 
 const geistSans = Geist({
@@ -122,14 +123,16 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <RouteChangeIndicator />
           <LinkPrefetcher />
         </Suspense>
-        <ModalProvider>
-          <AccountDrawerProvider>
-            <AppShell authSession={null} manageAccountKind="user">
-              {children}
-              <Footer />
-            </AppShell>
-          </AccountDrawerProvider>
-        </ModalProvider>
+        <WagmiProvider>
+          <ModalProvider>
+            <AccountDrawerProvider>
+              <AppShell authSession={null} manageAccountKind="user">
+                {children}
+                <Footer />
+              </AppShell>
+            </AccountDrawerProvider>
+          </ModalProvider>
+        </WagmiProvider>
       </body>
     </html>
   );
