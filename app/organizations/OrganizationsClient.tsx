@@ -371,7 +371,7 @@ export function OrganizationsClient({ records: initialRecords = [] }: { records?
             )}
           </div>
 
-          {records.length > 0 && (
+          {(records.length > 0 || (!loading && hasMore && hasActiveFilters)) && (
             <div className="mt-10 flex flex-col items-center gap-3">
               {view === "cards" && visibleRecords.length > renderedRecords.length && (
                 <p className="text-sm text-muted-foreground">

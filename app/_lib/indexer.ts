@@ -1677,31 +1677,12 @@ function mapCertOrg(n: RawCertOrg, profile: CertProfileInfo | undefined): SiteRe
   };
 }
 
-function certifiedWhere(options?: SiteQueryOptions): SiteWhere | undefined {
-  const where: SiteWhere = {};
-  const quick = options?.quickFilters ?? [];
-  if (quick.includes("locations")) where.location = { isNull: false };
-  if (options?.orgType) where.organizationType = { isNull: false };
-  return Object.keys(where).length > 0 ? where : undefined;
-}
-
-async function fetchCertOrgPage(
-  first: number,
-  after: string | null,
+async function hydrateCertOrgs(
+  nodes: RawCertOrg[],
   signal?: AbortSignal,
-  where?: SiteWhere,
-  sort?: ExplorerSortMode,
   includeBumicertCounts = false,
   includeObservationCounts = false,
-): Promise<Page<SiteRecord>> {
-  const { sortBy, sortDirection } = certifiedOrgSort(sort);
-  const data = await indexerQuery<{
-    appCertifiedActorOrganization?: Connection<RawCertOrg>;
-  }>(CERT_ORG_QUERY, { first, after, where: where ?? null, sortBy, sortDirection }, signal);
-  const conn = data?.appCertifiedActorOrganization;
-  const nodes = (conn?.edges ?? [])
-    .map((e) => e?.node)
-    .filter((n): n is RawCertOrg => Boolean(n?.did));
+): Promise<SiteRecord[]> {
   const missingProfileDids = nodes
     .filter((n) => !profileName(n.certifiedProfileData) && !profileAvatarRef(n.certifiedProfileData))
     .map((n) => n.did);
@@ -1727,6 +1708,35 @@ async function fetchCertOrgPage(
   );
   if (includeBumicertCounts) records = await attachBumicertCounts(records, signal);
   if (includeObservationCounts) records = await attachObservationCounts(records, signal);
+  return records;
+}
+
+function certifiedWhere(options?: SiteQueryOptions): SiteWhere | undefined {
+  const where: SiteWhere = {};
+  const quick = options?.quickFilters ?? [];
+  if (quick.includes("locations")) where.location = { isNull: false };
+  if (options?.orgType) where.organizationType = { isNull: false };
+  return Object.keys(where).length > 0 ? where : undefined;
+}
+
+async function fetchCertOrgPage(
+  first: number,
+  after: string | null,
+  signal?: AbortSignal,
+  where?: SiteWhere,
+  sort?: ExplorerSortMode,
+  includeBumicertCounts = false,
+  includeObservationCounts = false,
+): Promise<Page<SiteRecord>> {
+  const { sortBy, sortDirection } = certifiedOrgSort(sort);
+  const data = await indexerQuery<{
+    appCertifiedActorOrganization?: Connection<RawCertOrg>;
+  }>(CERT_ORG_QUERY, { first, after, where: where ?? null, sortBy, sortDirection }, signal);
+  const conn = data?.appCertifiedActorOrganization;
+  const nodes = (conn?.edges ?? [])
+    .map((e) => e?.node)
+    .filter((n): n is RawCertOrg => Boolean(n?.did));
+  const records = await hydrateCertOrgs(nodes, signal, includeBumicertCounts, includeObservationCounts);
   return {
     records,
     cursor: conn?.pageInfo?.endCursor ?? null,
@@ -1922,25 +1932,36 @@ export async function fetchSites(
 
   const includeBumicertCounts = options?.quickFilters?.includes("bumicerts") ?? false;
   const includeObservationCounts = options?.quickFilters?.includes("observations") ?? false;
+  const hasClientSideFilters = Boolean(
+    options?.query?.trim() ||
+    options?.country ||
+    options?.orgType ||
+    includeBumicertCounts ||
+    includeObservationCounts,
+  );
   const collectAllForNameSort = options?.sort === "az" || options?.sort === "za";
   const records: SiteRecord[] = [];
   let cursor = after;
   let hasMore = true;
 
-  while (hasMore && (collectAllForNameSort || sortSites(records).length < target)) {
+  while (hasMore && (collectAllForNameSort || hasClientSideFilters || sortSites(records).length < target)) {
     if (signal?.aborted) throw new DOMException("aborted", "AbortError");
+    const previousCursor = cursor;
     const matchedCount = sortSites(records).length;
-    const first = collectAllForNameSort ? INDEXER_MAX_PAGE : Math.min(INDEXER_MAX_PAGE, Math.max(1, target - matchedCount));
+    const first = collectAllForNameSort || hasClientSideFilters
+      ? INDEXER_MAX_PAGE
+      : Math.min(INDEXER_MAX_PAGE, Math.max(1, target - matchedCount));
     const page = await fetchCertOrgPage(first, cursor, signal, certifiedWhere(options), options?.sort, includeBumicertCounts, includeObservationCounts);
     records.push(...page.records);
     cursor = page.cursor;
-    hasMore = page.hasMore && Boolean(page.cursor);
+    const advanced = Boolean(cursor) && cursor !== previousCursor;
+    hasMore = page.hasMore && advanced;
     onProgress?.(sortSites(records).slice(0, target));
-    if (!cursor) break;
+    if (!advanced) break;
   }
 
   return {
-    records: sortSites(records).slice(0, target),
+    records: (collectAllForNameSort || hasClientSideFilters) ? sortSites(records) : sortSites(records).slice(0, target),
     cursor,
     hasMore,
   };
