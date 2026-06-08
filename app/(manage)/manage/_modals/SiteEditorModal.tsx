@@ -38,6 +38,7 @@ type SiteEditorModalProps = {
     recordValue?: Record<string, unknown> | null;
   } | null;
   onSaved?: (site: SavedSiteRef) => void;
+  requireBoundary?: boolean;
 };
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -81,7 +82,7 @@ async function validateSiteFile(file: File): Promise<void> {
   }
 }
 
-export function SiteEditorModal({ did, initialData, onSaved }: SiteEditorModalProps) {
+export function SiteEditorModal({ did, initialData, onSaved, requireBoundary = false }: SiteEditorModalProps) {
   const isEditMode = Boolean(initialData?.rkey);
   const previewUrl =
     isEditMode && initialData?.hasShapeLocation
@@ -114,11 +115,11 @@ export function SiteEditorModal({ did, initialData, onSaved }: SiteEditorModalPr
     void show();
   };
 
-  const disableSubmit = !name.trim() || (!isEditMode && !siteFile) || isPending;
+  const disableSubmit = !name.trim() || (!isEditMode && !siteFile) || (requireBoundary && !siteFile) || isPending;
 
   const handleSave = async () => {
     if (!name.trim()) { setError("Name is required."); return; }
-    if (!isEditMode && !siteFile) { setError("Upload a site file or draw a site."); return; }
+    if ((!isEditMode || requireBoundary) && !siteFile) { setError("Choose a map file or draw a site boundary."); return; }
     setIsPending(true);
     setError(null);
     try {

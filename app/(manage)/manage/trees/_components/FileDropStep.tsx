@@ -5,6 +5,7 @@ import { Archive, CirclePlus, FileSpreadsheet, Upload, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { useModal } from "@/components/ui/modal/context";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
@@ -35,6 +36,7 @@ import {
   fetchUploadSiteBoundary,
 } from "../../_lib/upload/site-boundary";
 import type { ManagedLocation } from "@/app/_lib/indexer";
+import { SiteEditorModal, SiteEditorModalId } from "../../_modals/SiteEditorModal";
 import TreeDataGuide, { KoboExportGuide } from "./TreeDataGuide";
 
 const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024;
@@ -64,6 +66,15 @@ function toExistingDatasetSelection(dataset: UploadTreeDatasetItem): ExistingUpl
   return { uri: dataset.uri, rkey: dataset.rkey, name: dataset.name, description: dataset.description, recordCount: dataset.recordCount };
 }
 
+function hasShapeLocation(site: ManagedLocation): boolean {
+  return Boolean(
+    site.record.location?.kind === "uri" ||
+      (site.record.locationType !== null &&
+        site.record.locationType !== "point" &&
+        site.record.locationType !== "coordinate-decimal"),
+  );
+}
+
 type FileDropStepProps = {
   uploadId: string;
   did: string;
@@ -80,6 +91,7 @@ type FileDropStepProps = {
 export default function FileDropStep({
   did, initialEstablishmentMeans, initialDatasetSelection, initialSiteSelection, onFileAndMappings,
 }: FileDropStepProps) {
+  const modal = useModal();
   const { parsedData, headers, rowCount, error, isParsing, parseFile, reset } = useCsvParser();
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -117,13 +129,33 @@ export default function FileDropStep({
   const mediaZipInputRef = useRef<HTMLInputElement>(null);
   const mediaZipParseRequestRef = useRef(0);
 
+  const loadSites = useCallback(async (siteUriToSelect?: string) => {
+    setSitesLoading(true);
+    setSitesError(null);
+    try {
+      const response = await fetch("/api/manage/sites");
+      const payload = (await response.json()) as ManagedLocation[] | { error?: string };
+      if (!response.ok || !Array.isArray(payload)) {
+        setSites([]);
+        setSitesError(!Array.isArray(payload) && payload.error ? payload.error : "Failed to load sites.");
+        return;
+      }
+      setSites(payload);
+      if (siteUriToSelect && payload.some((site) => site.metadata.uri === siteUriToSelect)) {
+        setSelectedSiteUri(siteUriToSelect);
+      }
+    } catch {
+      setSites([]);
+      setSitesError("Could not load sites. Try again.");
+    } finally {
+      setSitesLoading(false);
+    }
+  }, []);
+
   // Load sites on mount
   useEffect(() => {
-    fetch("/api/manage/sites")
-      .then((r) => r.json())
-      .then((data: ManagedLocation[]) => { setSites(data); setSitesLoading(false); })
-      .catch(() => { setSitesError("Failed to load sites."); setSitesLoading(false); });
-  }, []);
+    void loadSites();
+  }, [loadSites]);
 
   // Load existing datasets when mode = "existing"
   useEffect(() => {
@@ -137,25 +169,69 @@ export default function FileDropStep({
   const uploadSites = useMemo(() => sites.flatMap((s) => { const u = toUploadSiteSelection(s); return u ? [u] : []; }), [sites]);
   const sitesWithBoundary = useMemo(() => getBoundaryCapableUploadSites(uploadSites), [uploadSites]);
   const selectedSite = useMemo(() => resolveUploadSiteSelection({ sites: uploadSites, selectedSiteUri }), [uploadSites, selectedSiteUri]);
+  const selectedManagedSite = useMemo(
+    () => selectedSite ? sites.find((site) => site.metadata.uri === selectedSite.uri) ?? null : null,
+    [selectedSite, sites],
+  );
   const selectedSiteHasBoundary = selectedSite ? uploadSiteHasBoundary(selectedSite) : false;
   const selectedSiteBoundarySyncing = selectedSite ? uploadSiteHasTransientBoundary(selectedSite) : false;
   const showCreateSiteBoundaryAction = !selectedSiteBoundarySyncing && shouldOfferCreateUploadSiteBoundary({
     sitesWithBoundary, selectedSite, selectedSiteBoundaryFailed,
   });
 
+  const openSiteBoundaryModal = useCallback((siteToEdit: ManagedLocation | null = null) => {
+    modal.pushModal(
+      {
+        id: siteToEdit ? `${SiteEditorModalId}-upload-${siteToEdit.metadata.rkey}` : `${SiteEditorModalId}-upload-new`,
+        dialogWidth: "max-w-lg",
+        content: (
+          <SiteEditorModal
+            did={did}
+            requireBoundary={siteToEdit !== null}
+            initialData={siteToEdit
+              ? {
+                  rkey: siteToEdit.metadata.rkey,
+                  name: siteToEdit.record.name ?? "",
+                  hasShapeLocation: selectedSiteBoundaryFailed ? false : hasShapeLocation(siteToEdit),
+                  recordValue: siteToEdit.rawRecord ?? null,
+                }
+              : null}
+            onSaved={(site) => {
+              setSelectedSiteUri(site.uri);
+              void loadSites(site.uri);
+            }}
+          />
+        ),
+      },
+      true,
+    );
+    void modal.show();
+  }, [did, loadSites, modal, selectedSiteBoundaryFailed]);
+
   // Validate site boundary when selectedSite changes
   useEffect(() => {
+    let cancelled = false;
     if (!selectedSite || !selectedSiteHasBoundary || selectedSiteBoundarySyncing) {
       setSelectedSiteBoundaryReady(false);
       setSelectedSiteBoundaryFailed(false);
+      setSelectedSiteBoundaryLoading(false);
       return;
     }
     setSelectedSiteBoundaryLoading(true);
     setSelectedSiteBoundaryReady(false);
     setSelectedSiteBoundaryFailed(false);
     fetchUploadSiteBoundary(selectedSite)
-      .then(() => { setSelectedSiteBoundaryReady(true); setSelectedSiteBoundaryLoading(false); })
-      .catch(() => { setSelectedSiteBoundaryFailed(true); setSelectedSiteBoundaryLoading(false); });
+      .then(() => {
+        if (cancelled) return;
+        setSelectedSiteBoundaryReady(true);
+        setSelectedSiteBoundaryLoading(false);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setSelectedSiteBoundaryFailed(true);
+        setSelectedSiteBoundaryLoading(false);
+      });
+    return () => { cancelled = true; };
   }, [selectedSite, selectedSiteHasBoundary, selectedSiteBoundarySyncing]);
 
   const selectedExistingDataset = useMemo(() => {
@@ -321,14 +397,31 @@ export default function FileDropStep({
       <div className="space-y-3 rounded-xl border border-border bg-muted/20 p-4">
         <div>
           <label htmlFor="site-select" className="text-sm font-medium">Site boundary <span className="text-destructive">*</span></label>
-          <p className="text-xs text-muted-foreground mt-0.5">Trees will be verified against this site&apos;s drawn map area.</p>
+          <p className="text-xs text-muted-foreground mt-0.5">Each upload uses one site boundary. Trees outside its drawn map area will be skipped.</p>
         </div>
         {sitesLoading ? (
           <Skeleton className="h-9 w-full rounded-md" />
         ) : sitesError ? (
-          <p className="text-sm text-destructive">{sitesError}</p>
+          <div className="space-y-2">
+            <p className="text-sm text-destructive">{sitesError}</p>
+            <div className="flex flex-wrap gap-2">
+              <Button type="button" variant="outline" size="sm" onClick={() => void loadSites()}>
+                Retry
+              </Button>
+              <Button type="button" variant="outline" size="sm" onClick={() => openSiteBoundaryModal()}>
+                <CirclePlus className="h-4 w-4" />
+                Add site boundary
+              </Button>
+            </div>
+          </div>
         ) : uploadSites.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No sites found. Add a site with a drawn map area from the Sites page first.</p>
+          <div className="space-y-2">
+            <p className="text-sm text-muted-foreground">No sites yet. Add a site boundary here to keep going.</p>
+            <Button type="button" variant="outline" size="sm" onClick={() => openSiteBoundaryModal()}>
+              <CirclePlus className="h-4 w-4" />
+              Add site boundary
+            </Button>
+          </div>
         ) : (
           <>
             <Select value={selectedSite?.uri ?? ""} onValueChange={setSelectedSiteUri}>
@@ -340,25 +433,39 @@ export default function FileDropStep({
                   const hasBoundary = uploadSiteHasBoundary(site);
                   const isSyncing = uploadSiteHasTransientBoundary(site);
                   return (
-                    <SelectItem key={site.uri} value={site.uri} disabled={!hasBoundary}>
+                    <SelectItem key={site.uri} value={site.uri} disabled={isSyncing}>
                       {site.name}
-                      {isSyncing ? " — preparing map area…" : !hasBoundary ? " — no map area" : ""}
+                      {isSyncing ? " — preparing map area…" : !hasBoundary ? " — needs map area" : ""}
                     </SelectItem>
                   );
                 })}
               </SelectContent>
             </Select>
+            <div className="flex flex-wrap gap-2">
+              <Button type="button" variant="outline" size="sm" onClick={() => openSiteBoundaryModal()}>
+                <CirclePlus className="h-4 w-4" />
+                Add site boundary
+              </Button>
+              {selectedManagedSite && (!selectedSiteHasBoundary || selectedSiteBoundaryFailed) && (
+                <Button type="button" variant="outline" size="sm" onClick={() => openSiteBoundaryModal(selectedManagedSite)}>
+                  Add map area to selected site
+                </Button>
+              )}
+            </div>
             {selectedSite && selectedSiteHasBoundary && selectedSiteBoundaryLoading && (
-              <p className="text-xs text-muted-foreground">Verifying map area…</p>
+              <p className="text-xs text-muted-foreground">Checking drawn map area…</p>
             )}
             {selectedSite && selectedSiteHasBoundary && selectedSiteBoundaryFailed && (
-              <p className="text-sm text-destructive">Could not load the map area. Select another site or draw a valid area.</p>
+              <p className="text-sm text-destructive">Could not load this drawn map area. Add a new area to the selected site or choose another site boundary.</p>
             )}
             {selectedSite && !selectedSiteHasBoundary && !selectedSiteBoundarySyncing && (
-              <p className="text-sm text-destructive">This site has no drawn map area. Add one from the Sites page.</p>
+              <p className="text-sm text-destructive">This site has no drawn map area. Add one here before continuing.</p>
+            )}
+            {!selectedSite && (
+              <p className="text-sm text-muted-foreground">Choose one site for this upload, then add a drawn map area if needed. If the file covers more than one site, split it into separate uploads.</p>
             )}
             {showCreateSiteBoundaryAction && (
-              <p className="text-xs text-muted-foreground">No usable site boundaries found. Add a drawn map area to a site from the Sites page.</p>
+              <p className="text-xs text-muted-foreground">Need a new site boundary? Add one here without leaving the upload.</p>
             )}
           </>
         )}

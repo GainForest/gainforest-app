@@ -101,12 +101,12 @@ function getBoundaryIssue(row: TreeRowOutput, index: number, boundary: SiteBound
   });
   if (!failure) return null;
   if (failure.kind === "near-boundary") {
-    return { path: "siteBoundary", message: `Near boundary: this tree is ${formatBoundaryDistance(failure.distanceMeters)} outside the selected site polygon.` };
+    return { path: "siteBoundary", message: `This tree is ${formatBoundaryDistance(failure.distanceMeters)} outside the selected drawn map area. Check the coordinates, choose a different site boundary, or remove this row.` };
   }
   if (failure.kind === "invalid-boundary") {
-    return { path: "siteBoundary", message: `Invalid boundary: ${failure.reason ?? "the boundary could not be used for validation."}` };
+    return { path: "siteBoundary", message: `The selected drawn map area cannot be used. ${failure.reason ?? "Choose or draw another site boundary."}` };
   }
-  return { path: "siteBoundary", message: "Out of site: this tree is outside the selected site polygon." };
+  return { path: "siteBoundary", message: `This tree is ${formatBoundaryDistance(failure.distanceMeters)} outside the selected drawn map area. Check the coordinates, choose a different site boundary, or remove this row.` };
 }
 
 function splitPhotoUrls(value: string): string[] {
