@@ -2,7 +2,7 @@ import Container from "@/components/ui/container";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const NAV_CARDS = ["sites", "audio", "trees", "bumicerts"];
-const TABS = ["home", "bumicerts", "timeline", "settings"];
+const TABS = ["home", "bumicerts", "observations", "settings"];
 
 export function ManageDashboardSkeleton() {
   return (

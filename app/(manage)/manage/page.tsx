@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 import { fetchAuthSession } from "@/app/_lib/auth-server";
 import {
   AccountBumicertsTabContent,
   AccountDonationsTabContent,
   AccountHomeTabContent,
+  AccountObservationsTabContent,
   AccountSettingsTabContent,
-  AccountTimelineTabContent,
 } from "@/app/account/_components/AccountTabContent";
 import { getAccountRouteData, type AccountRouteData } from "@/app/account/_lib/account-route";
 
@@ -15,7 +16,7 @@ export const metadata: Metadata = {
 };
 
 type ManagePageSearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
-type ManageTab = "home" | "bumicerts" | "donations" | "timeline" | "settings";
+type ManageTab = "home" | "bumicerts" | "donations" | "observations" | "settings";
 
 export default async function ManagePage({ searchParams }: { searchParams: ManagePageSearchParams }) {
   const session = await fetchAuthSession();
@@ -25,7 +26,11 @@ export default async function ManagePage({ searchParams }: { searchParams: Manag
     getAccountRouteData(session.did, session.did),
     searchParams,
   ]);
-  const tab = resolveManageTab(account, resolvedSearchParams.tab);
+  const rawTab = normalizeManageTabParam(resolvedSearchParams.tab);
+  if (account.kind === "organization" && rawTab === "timeline") {
+    redirect("/manage?tab=observations");
+  }
+  const tab = resolveManageTab(account, rawTab);
 
   switch (tab) {
     case "bumicerts":
@@ -42,8 +47,8 @@ export default async function ManagePage({ searchParams }: { searchParams: Manag
       );
     case "donations":
       return <AccountDonationsTabContent account={account} did={session.did} />;
-    case "timeline":
-      return <AccountTimelineTabContent account={account} did={session.did} />;
+    case "observations":
+      return <AccountObservationsTabContent account={account} did={session.did} />;
     case "settings":
       return <AccountSettingsTabContent account={account} />;
     case "home":
@@ -51,9 +56,11 @@ export default async function ManagePage({ searchParams }: { searchParams: Manag
   }
 }
 
-function resolveManageTab(account: AccountRouteData, value: string | string[] | undefined): ManageTab {
-  const tab = Array.isArray(value) ? value[0] : value;
+function normalizeManageTabParam(value: string | string[] | undefined): string | undefined {
+  return Array.isArray(value) ? value[0] : value;
+}
 
+function resolveManageTab(account: AccountRouteData, tab: string | undefined): ManageTab {
   if (account.kind === "user") {
     switch (tab) {
       case "donations":
@@ -67,7 +74,7 @@ function resolveManageTab(account: AccountRouteData, value: string | string[] | 
 
   switch (tab) {
     case "bumicerts":
-    case "timeline":
+    case "observations":
     case "settings":
     case "home":
       return tab;

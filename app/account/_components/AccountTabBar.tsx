@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import { ActivityIcon, BadgeIcon, HeartIcon, HomeIcon, LeafIcon, SettingsIcon } from "lucide-react";
+import { BadgeIcon, HeartIcon, HomeIcon, LeafIcon, SettingsIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { AccountKind } from "../_lib/account-route";
 import {
@@ -14,7 +14,7 @@ import {
 } from "../_lib/account-route";
 
 interface Tab {
-  label: "Home" | "Bumicerts" | "Donation History" | "Evidence Timeline" | "Observations" | "Settings";
+  label: "Home" | "Bumicerts" | "Donation History" | "Observations" | "Settings";
   href: string;
   icon: React.ElementType;
   exact: boolean;
@@ -37,7 +37,7 @@ function buildTabPaths(did: string, scope: AccountTabBarScope): TabPaths {
       home: "/manage?tab=home",
       bumicerts: "/manage?tab=bumicerts",
       donations: "/manage?tab=donations",
-      activity: "/manage?tab=timeline",
+      activity: "/manage?tab=observations",
       settings: "/manage?tab=settings",
     };
   }
@@ -98,9 +98,9 @@ function buildTabs(
       exact: false,
     },
     {
-      label: scope === "manage" ? "Evidence Timeline" : "Observations",
+      label: "Observations",
       href: paths.activity,
-      icon: scope === "manage" ? ActivityIcon : LeafIcon,
+      icon: LeafIcon,
       exact: false,
     },
   ];
