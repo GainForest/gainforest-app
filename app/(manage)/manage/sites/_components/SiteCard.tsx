@@ -225,12 +225,7 @@ export function SiteCard({
 }
 
 function hasMapPreview(site: ManagedLocation): boolean {
-  return Boolean(
-    site.record.location?.kind === "uri" ||
-      (site.record.locationType &&
-        site.record.locationType !== "point" &&
-        site.record.locationType !== "coordinate-decimal"),
-  );
+  return site.record.location?.kind === "uri";
 }
 
 function getSiteLocationUrl(site: ManagedLocation): string | null {

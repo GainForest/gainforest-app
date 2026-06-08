@@ -43,6 +43,10 @@ function isShapeLocation(site: ManagedLocation): boolean {
   );
 }
 
+function canPreviewSite(site: ManagedLocation): boolean {
+  return site.record.location?.kind === "uri";
+}
+
 export function SitesClient({ did }: { did: string }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -101,7 +105,7 @@ export function SitesClient({ did }: { did: string }) {
     const rkey = searchParams.get("rkey");
     if (!rkey) return;
     const site = sites.find((item) => item.metadata.rkey === rkey) ?? null;
-    if (!site || iframeUrl) return;
+    if (!site || !canPreviewSite(site) || iframeUrl) return;
     setPreviewingRkey(rkey);
     setIframeUrl(generateSitePreviewUrl(siteRecordUri(did, site, rkey)));
   }, [did, iframeUrl, searchParams, sites]);
@@ -110,7 +114,7 @@ export function SitesClient({ did }: { did: string }) {
     const rkey = site.metadata.rkey;
     const nextSiteUri = siteRecordUri(did, site, rkey);
     const nextUrl = generateSitePreviewUrl(nextSiteUri);
-    if (!rkey || !nextUrl) return;
+    if (!rkey || !nextUrl || !canPreviewSite(site)) return;
 
     const params = new URLSearchParams(searchParams.toString());
     params.set("rkey", rkey);
@@ -127,7 +131,19 @@ export function SitesClient({ did }: { did: string }) {
     });
   };
 
+  useEffect(() => {
+    if (isLoading || fetchError || searchParams.get("rkey") || previewingRkey || iframeUrl) return;
+
+    const previewableSites = sites.filter(canPreviewSite);
+    const defaultSite = defaultSiteUri
+      ? previewableSites.find((site) => site.metadata.uri === defaultSiteUri) ?? null
+      : null;
+    const initialSite = defaultSite ?? previewableSites[0] ?? null;
+    if (initialSite) handlePreviewSite(initialSite);
+  }, [defaultSiteUri, fetchError, iframeUrl, isLoading, previewingRkey, searchParams, sites]);
+
   const allSiteRkeys = sites
+    .filter(canPreviewSite)
     .map((site) => site.metadata.rkey)
     .filter((rkey): rkey is string => typeof rkey === "string" && rkey.length > 0);
   const currentSiteIndex = previewingRkey ? allSiteRkeys.indexOf(previewingRkey) : -1;

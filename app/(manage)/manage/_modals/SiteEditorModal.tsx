@@ -40,6 +40,30 @@ type SiteEditorModalProps = {
   onSaved?: (site: SavedSiteRef) => void;
 };
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
+type UploadedBlobLike = {
+  ref?: unknown;
+  mimeType?: unknown;
+  size?: unknown;
+  blob?: unknown;
+};
+
+function toLexBlobRef(uploaded: UploadedBlobLike, file: File) {
+  const raw = isRecord(uploaded.blob) ? uploaded.blob : uploaded;
+  if (!("ref" in raw) || raw.ref === undefined || raw.ref === null) {
+    throw new Error("Could not save the site file. Please try again.");
+  }
+  return {
+    $type: "blob" as const,
+    ref: raw.ref,
+    mimeType: typeof raw.mimeType === "string" ? raw.mimeType : (file.type || "application/geo+json"),
+    size: typeof raw.size === "number" ? raw.size : file.size,
+  };
+}
+
 async function validateSiteFile(file: File): Promise<void> {
   if (file.size > MAX_SITE_FILE_BYTES) {
     throw new Error("Choose a smaller site file (max 10 MB).");
@@ -108,7 +132,7 @@ export function SiteEditorModal({ did, initialData, onSaved }: SiteEditorModalPr
           lpVersion: "1.0.0",
           srs: "https://epsg.io/3857",
           locationType: "geojson-point",
-          location: { $type: "org.hypercerts.defs#smallBlob", blob: uploaded.ref },
+          location: { $type: "org.hypercerts.defs#smallBlob", blob: toLexBlobRef(uploaded, siteFile) },
           name: name.trim(),
           createdAt: new Date().toISOString(),
         });
@@ -128,7 +152,7 @@ export function SiteEditorModal({ did, initialData, onSaved }: SiteEditorModalPr
           record.lpVersion = "1.0.0";
           record.srs = "https://epsg.io/3857";
           record.locationType = "geojson-point";
-          record.location = { $type: "org.hypercerts.defs#smallBlob", blob: uploaded.ref };
+          record.location = { $type: "org.hypercerts.defs#smallBlob", blob: toLexBlobRef(uploaded, siteFile) };
         }
         result = await putRecord("app.certified.location", rkey, record);
       }
