@@ -2120,6 +2120,296 @@ export async function fetchAudioByDid(
   return all;
 }
 
+export type AudioRecordingItem = {
+  metadata: { did: string; uri: string; rkey: string; cid: string };
+  record: {
+    name: string | null;
+    description: unknown;
+    createdAt: string | null;
+    blob: unknown;
+    metadata: unknown;
+    license: string | null;
+    recordedBy: string | null;
+    tags: string[] | null;
+    occurrenceRef: string | null;
+    deploymentRef: string | null;
+    siteRef: string | null;
+  };
+};
+
+export type AudioDeploymentItem = {
+  metadata: { did: string; uri: string; rkey: string; cid: string };
+  record: {
+    createdAt: string | null;
+    name: string | null;
+    deviceModel: string | null;
+    deviceSerialNumber: string | null;
+    firmwareVersion: string | null;
+    gain: string | null;
+    recordingSchedule: string | null;
+    sampleRateHz: number | null;
+    microphoneType: string | null;
+    mountingHeight: string | null;
+    mountingOrientation: string | null;
+    batteryType: string | null;
+    storageMedia: string | null;
+    deployedAt: string | null;
+    retrievedAt: string | null;
+    decimalLatitude: string | null;
+    decimalLongitude: string | null;
+    altitude: string | null;
+    habitat: string | null;
+    eventRef: string | null;
+    siteRef: string | null;
+    remarks: string | null;
+  };
+};
+
+export type AudioEventItem = {
+  metadata: { did: string; uri: string; rkey: string; cid: string };
+  record: {
+    createdAt: string | null;
+    eventID: string | null;
+    eventDate: string | null;
+    eventTime: string | null;
+    habitat: string | null;
+    samplingProtocol: string | null;
+    samplingEffort: string | null;
+    fieldNotes: string | null;
+    eventRemarks: string | null;
+    decimalLatitude: string | null;
+    decimalLongitude: string | null;
+    geodeticDatum: string | null;
+    coordinateUncertaintyInMeters: string | null;
+    country: string | null;
+    countryCode: string | null;
+    stateProvince: string | null;
+    county: string | null;
+    municipality: string | null;
+    locality: string | null;
+    minimumElevationInMeters: string | null;
+    maximumElevationInMeters: string | null;
+    locationRemarks: string | null;
+    monitoringProgramme: string | null;
+    monitoringFrequency: string | null;
+    temperature: string | null;
+    humidity: string | null;
+    windSpeed: string | null;
+    cloudCover: string | null;
+    precipitation: string | null;
+    weatherRemarks: string | null;
+    moonPhase: string | null;
+    teamSize: string | null;
+    recordedBy: string | null;
+    equipmentUsed: string | null;
+    qualityControlNotes: string | null;
+    completeness: string | null;
+  };
+};
+
+export type AudioWorkspace = {
+  events: AudioEventItem[];
+  deployments: AudioDeploymentItem[];
+  recordings: AudioRecordingItem[];
+};
+
+const AUDIO_RECORDINGS_WORKSPACE_QUERY = `
+  query AudioRecordingsWorkspaceByDid($did: String!, $first: Int!, $after: String) {
+    appGainforestAcAudio(
+      where: { did: { eq: $did } }
+      sortDirection: DESC
+      sortBy: createdAt
+      first: $first
+      after: $after
+    ) {
+      pageInfo { hasNextPage endCursor }
+      edges {
+        node {
+          did uri rkey cid createdAt name license recordedBy tags occurrenceRef deploymentRef siteRef
+          description { text }
+          blob { file { ref mimeType size } }
+          metadata { bitDepth channels codec duration fileFormat fileSizeBytes maxFrequencyHz recordedAt sampleRate }
+        }
+      }
+    }
+  }
+`;
+
+const AUDIO_DEPLOYMENTS_BY_DID_QUERY = `
+  query AudioDeploymentsByDid($did: String!, $first: Int!, $after: String) {
+    appGainforestAcDeployment(
+      where: { did: { eq: $did } }
+      first: $first
+      after: $after
+      sortDirection: DESC
+      sortBy: createdAt
+    ) {
+      pageInfo { hasNextPage endCursor }
+      edges { node { did uri rkey cid createdAt name deviceModel deviceSerialNumber firmwareVersion gain recordingSchedule sampleRateHz microphoneType mountingHeight mountingOrientation batteryType storageMedia deployedAt retrievedAt decimalLatitude decimalLongitude altitude habitat eventRef siteRef remarks } }
+    }
+  }
+`;
+
+const AUDIO_EVENTS_BY_DID_QUERY = `
+  query AudioEventsByDid($did: String!, $first: Int!, $after: String) {
+    appGainforestDwcEvent(
+      where: { did: { eq: $did } }
+      first: $first
+      after: $after
+      sortDirection: DESC
+      sortBy: createdAt
+    ) {
+      pageInfo { hasNextPage endCursor }
+      edges { node { did uri rkey cid createdAt eventID eventDate eventTime habitat samplingProtocol samplingEffort fieldNotes eventRemarks decimalLatitude decimalLongitude geodeticDatum coordinateUncertaintyInMeters country countryCode stateProvince county municipality locality minimumElevationInMeters maximumElevationInMeters locationRemarks monitoringProgramme monitoringFrequency temperature humidity windSpeed cloudCover precipitation weatherRemarks moonPhase teamSize recordedBy equipmentUsed qualityControlNotes completeness } }
+    }
+  }
+`;
+
+type RawAudioWorkspaceNode = RawAudioNode & {
+  license?: string | null;
+  recordedBy?: string | null;
+  tags?: string[] | null;
+  occurrenceRef?: string | null;
+  deploymentRef?: string | null;
+  siteRef?: string | null;
+  description?: { text?: string | null; facets?: unknown[] | null } | null;
+  metadata?: (RawAudioNode["metadata"] & {
+    bitDepth?: number | null;
+    fileFormat?: string | null;
+    fileSizeBytes?: number | null;
+    maxFrequencyHz?: number | null;
+  }) | null;
+};
+
+type RawAudioDeploymentNode = AudioDeploymentItem["metadata"] & AudioDeploymentItem["record"];
+type RawAudioEventNode = AudioEventItem["metadata"] & AudioEventItem["record"];
+
+function audioDescription(description: RawAudioWorkspaceNode["description"]): unknown {
+  if (!description) return null;
+  return {
+    $type: "app.gainforest.common.defs#richtext",
+    text: description.text ?? "",
+    ...(description.facets && description.facets.length > 0 ? { facets: description.facets } : {}),
+  };
+}
+
+async function audioBlobForNode(node: RawAudioWorkspaceNode, signal?: AbortSignal): Promise<unknown> {
+  const file = node.blob?.file;
+  const ref = normaliseRef(file?.ref);
+  if (!ref) return null;
+  const url = await resolveBlobUrl(node.did, ref, signal).catch(() => null);
+  if (!url) return null;
+  return {
+    $type: "app.gainforest.common.defs#audio",
+    file: {
+      $type: "blob",
+      uri: url,
+      cid: ref,
+      mimeType: file?.mimeType ?? undefined,
+      size: file?.size ?? undefined,
+    },
+  };
+}
+
+function audioMetadataForNode(node: RawAudioWorkspaceNode): unknown {
+  const metadata = node.metadata;
+  if (!metadata) return null;
+  return {
+    $type: "app.gainforest.ac.audio#metadata",
+    ...(metadata.codec !== undefined && { codec: metadata.codec }),
+    ...(metadata.channels !== undefined && { channels: metadata.channels }),
+    ...(metadata.duration !== undefined && { duration: metadata.duration }),
+    ...(metadata.recordedAt !== undefined && { recordedAt: metadata.recordedAt }),
+    ...(metadata.sampleRate !== undefined && { sampleRate: metadata.sampleRate }),
+    ...(metadata.bitDepth !== undefined && { bitDepth: metadata.bitDepth }),
+    ...(metadata.fileFormat !== undefined && { fileFormat: metadata.fileFormat }),
+    ...(metadata.fileSizeBytes !== undefined && { fileSizeBytes: metadata.fileSizeBytes }),
+    ...(metadata.maxFrequencyHz !== undefined && { maxFrequencyHz: metadata.maxFrequencyHz }),
+  };
+}
+
+async function mapAudioWorkspaceNode(node: RawAudioWorkspaceNode, signal?: AbortSignal): Promise<AudioRecordingItem> {
+  return {
+    metadata: { did: node.did, uri: node.uri, rkey: node.rkey, cid: node.cid },
+    record: {
+      name: node.name ?? null,
+      description: audioDescription(node.description),
+      createdAt: node.createdAt ?? null,
+      blob: await audioBlobForNode(node, signal),
+      metadata: audioMetadataForNode(node),
+      license: node.license ?? null,
+      recordedBy: node.recordedBy ?? null,
+      tags: node.tags ?? null,
+      occurrenceRef: node.occurrenceRef ?? null,
+      deploymentRef: node.deploymentRef ?? null,
+      siteRef: node.siteRef ?? null,
+    },
+  };
+}
+
+async function fetchAudioRecordingItemsByDid(did: string, signal?: AbortSignal): Promise<AudioRecordingItem[]> {
+  const all: AudioRecordingItem[] = [];
+  let cursor: string | null = null;
+  for (let page = 0; page < 50; page += 1) {
+    const data: { appGainforestAcAudio?: Connection<RawAudioWorkspaceNode> } | null = await indexerQuery<{ appGainforestAcAudio?: Connection<RawAudioWorkspaceNode> }>(
+      AUDIO_RECORDINGS_WORKSPACE_QUERY,
+      { did, first: 200, after: cursor },
+      signal,
+    );
+    const conn: Connection<RawAudioWorkspaceNode> | undefined = data?.appGainforestAcAudio;
+    const nodes: RawAudioWorkspaceNode[] = (conn?.edges ?? []).map((edge) => edge?.node).filter((node): node is RawAudioWorkspaceNode => Boolean(node?.did));
+    all.push(...(await Promise.all(nodes.map((node) => mapAudioWorkspaceNode(node, signal)))));
+    if (!conn?.pageInfo?.hasNextPage || !conn.pageInfo.endCursor) break;
+    cursor = conn.pageInfo.endCursor;
+  }
+  return all;
+}
+
+async function fetchAudioDeploymentItemsByDid(did: string, signal?: AbortSignal): Promise<AudioDeploymentItem[]> {
+  const all: AudioDeploymentItem[] = [];
+  let cursor: string | null = null;
+  for (let page = 0; page < 50; page += 1) {
+    const data: { appGainforestAcDeployment?: Connection<RawAudioDeploymentNode> } | null = await indexerQuery<{ appGainforestAcDeployment?: Connection<RawAudioDeploymentNode> }>(
+      AUDIO_DEPLOYMENTS_BY_DID_QUERY,
+      { did, first: 200, after: cursor },
+      signal,
+    );
+    const conn: Connection<RawAudioDeploymentNode> | undefined = data?.appGainforestAcDeployment;
+    const nodes: RawAudioDeploymentNode[] = (conn?.edges ?? []).map((edge) => edge?.node).filter((node): node is RawAudioDeploymentNode => Boolean(node?.did));
+    all.push(...nodes.map(({ did, uri, rkey, cid, ...record }) => ({ metadata: { did, uri, rkey, cid }, record })));
+    if (!conn?.pageInfo?.hasNextPage || !conn.pageInfo.endCursor) break;
+    cursor = conn.pageInfo.endCursor;
+  }
+  return all;
+}
+
+async function fetchAudioEventItemsByDid(did: string, signal?: AbortSignal): Promise<AudioEventItem[]> {
+  const all: AudioEventItem[] = [];
+  let cursor: string | null = null;
+  for (let page = 0; page < 50; page += 1) {
+    const data: { appGainforestDwcEvent?: Connection<RawAudioEventNode> } | null = await indexerQuery<{ appGainforestDwcEvent?: Connection<RawAudioEventNode> }>(
+      AUDIO_EVENTS_BY_DID_QUERY,
+      { did, first: 200, after: cursor },
+      signal,
+    );
+    const conn: Connection<RawAudioEventNode> | undefined = data?.appGainforestDwcEvent;
+    const nodes: RawAudioEventNode[] = (conn?.edges ?? []).map((edge) => edge?.node).filter((node): node is RawAudioEventNode => Boolean(node?.did));
+    all.push(...nodes.map(({ did, uri, rkey, cid, ...record }) => ({ metadata: { did, uri, rkey, cid }, record })));
+    if (!conn?.pageInfo?.hasNextPage || !conn.pageInfo.endCursor) break;
+    cursor = conn.pageInfo.endCursor;
+  }
+  return all;
+}
+
+export async function fetchAudioWorkspaceByDid(did: string, signal?: AbortSignal): Promise<AudioWorkspace> {
+  const [events, deployments, recordings] = await Promise.all([
+    fetchAudioEventItemsByDid(did, signal),
+    fetchAudioDeploymentItemsByDid(did, signal),
+    fetchAudioRecordingItemsByDid(did, signal),
+  ]);
+  return { events, deployments, recordings };
+}
+
 // ── 6. Manage section — occurrences by DID (for trees) ─────────────────────
 
 export async function fetchOccurrencesByDid(
