@@ -600,8 +600,8 @@ function ManageSectionSkeleton() {
     <ul className="flex flex-col gap-0.5" aria-hidden="true">
       {labelWidths.map((width, index) => (
         <li key={index} className="flex h-9 items-center gap-2 pl-1">
-          <Skeleton className="h-7 w-[42px] shrink-0 rounded-full" />
-          <Skeleton className={`h-3.5 rounded-full ${width}`} />
+          <Skeleton className="sidebar-skeleton h-7 w-[42px] shrink-0 rounded-full" />
+          <Skeleton className={`sidebar-skeleton h-3.5 rounded-full ${width}`} />
         </li>
       ))}
     </ul>

@@ -321,6 +321,17 @@ body {
   animation: shimmer 1.6s ease-in-out infinite;
 }
 
+.sidebar-skeleton {
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--foreground) 9%, transparent) 25%,
+    color-mix(in srgb, var(--foreground) 14%, transparent) 37%,
+    color-mix(in srgb, var(--foreground) 9%, transparent) 63%
+  );
+  background-size: 200% 100%;
+  box-shadow: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .skeleton {
     animation: none;
