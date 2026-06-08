@@ -4,6 +4,7 @@ import { memo, useCallback, useDeferredValue, useEffect, useMemo, useRef, useSta
 import Image from "next/image";
 import {
   AudioLinesIcon,
+  ArrowUpDownIcon,
   ChevronDownIcon,
   ImageIcon,
   LayoutGridIcon,
@@ -153,6 +154,12 @@ const OCCURRENCE_CATEGORY_OPTIONS: Array<{ id: OccurrenceCategory; label: string
   { id: "birds", label: "Birds" },
   { id: "flowers", label: "Flowers" },
 ];
+const SORT_OPTIONS: Array<{ value: SortMode; label: string }> = [
+  { value: "newest", label: "Newest first" },
+  { value: "oldest", label: "Oldest first" },
+  { value: "az", label: "A → Z" },
+  { value: "za", label: "Z → A" },
+];
 
 export function RecordExplorer({
   kind,
@@ -175,6 +182,7 @@ export function RecordExplorer({
   const [query, setQuery] = useState("");
   const deferredQuery = useDeferredValue(query);
   const [sort, setSort] = useState<SortMode>("newest");
+  const [sortOpen, setSortOpen] = useState(false);
   const [occMedia, setOccMedia] = useState<OccurrenceFilter>(DEFAULT_OCCURRENCE_MEDIA);
   const [occCategory, setOccCategory] = useState<OccurrenceCategory>("all");
   const [siteSource, setSiteSource] = useState<SiteSourceFilter>("both");
@@ -516,111 +524,88 @@ export function RecordExplorer({
         )}
 
         {/* Toolbar */}
-        <div className="relative z-20 mt-5 flex flex-wrap items-center gap-3">
-          <div className="relative flex-1" style={{ minWidth: "220px" }}>
-            <SearchIcon
-              aria-hidden
-              className="pointer-events-none absolute left-3 top-1/2 h-[15px] w-[15px] -translate-y-1/2 text-foreground/40"
-            />
-            <input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder={meta.search}
-              aria-label="Search nature sightings"
-              className="h-10 w-full truncate rounded-full border border-border-soft bg-surface py-0 pl-9 pr-3 text-sm text-foreground outline-none transition-colors placeholder:text-foreground/40 focus:border-primary/40"
-            />
-          </div>
+        <div className="relative z-20 mt-5 space-y-2.5">
+          <div className="flex items-center gap-2 animate-in" style={{ animationDelay: "80ms" }}>
+            <div className="group/input-group relative flex h-10 min-w-0 flex-1 items-center rounded-full border border-border-soft bg-surface shadow-xs backdrop-blur transition-colors focus-within:border-primary/40">
+              <SearchIcon
+                aria-hidden
+                className="ml-3.5 h-[15px] w-[15px] shrink-0 text-foreground/40"
+              />
+              <input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder={meta.search}
+                aria-label="Search nature sightings"
+                className="min-w-0 flex-1 truncate border-0 bg-transparent px-2.5 py-2 text-sm text-foreground outline-none placeholder:text-foreground/40"
+              />
+            </div>
 
-          {/* Cards / Map view toggle */}
-          <div className="inline-flex h-10 shrink-0 items-center rounded-full border border-border bg-background/50 p-0.5 backdrop-blur">
-            {(
-              [
-                { id: "cards", label: "Cards" },
-                { id: "map", label: "Map" },
-              ] as const
-            ).map((o) => (
-              <button
-                key={o.id}
-                type="button"
-                onClick={() => setView(o.id)}
-                aria-pressed={view === o.id}
-                className={`inline-flex h-9 items-center gap-1.5 rounded-full px-3 text-sm font-medium transition-colors ${
-                  view === o.id
-                    ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                {o.id === "map" ? <MapGlyph /> : <CardsGlyph />}
-                {o.label}
-              </button>
-            ))}
-          </div>
+            <SortControl sort={sort} setSort={setSort} open={sortOpen} setOpen={setSortOpen} />
 
-          {/* Sort: timestamp (newest/oldest) or alphabetical (A–Z / Z–A) */}
-          <div className="relative">
-            <select
-              value={sort}
-              onChange={(e) => setSort(e.target.value as SortMode)}
-              aria-label="Choose display order"
-              className="h-10 appearance-none rounded-full border border-border-soft bg-surface py-0 pl-3.5 pr-8 text-sm font-medium text-foreground/70 outline-none transition-colors hover:text-foreground focus:border-primary/40"
-            >
-              <option value="newest">Newest first</option>
-              <option value="oldest">Oldest first</option>
-              <option value="az">A → Z</option>
-              <option value="za">Z → A</option>
-            </select>
-            <ChevronDownIcon
-              aria-hidden
-              className="pointer-events-none absolute right-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-foreground/40"
-            />
+            {/* Cards / Map view toggle */}
+            <div className="inline-flex h-10 shrink-0 items-center rounded-full border border-border bg-background/50 p-0.5 backdrop-blur">
+              {(
+                [
+                  { id: "cards", label: "Cards" },
+                  { id: "map", label: "Map" },
+                ] as const
+              ).map((o) => (
+                <button
+                  key={o.id}
+                  type="button"
+                  onClick={() => setView(o.id)}
+                  aria-pressed={view === o.id}
+                  aria-label={o.label}
+                  title={o.label}
+                  className={`inline-flex h-9 w-9 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-full p-0 text-sm font-medium transition-colors sm:w-auto sm:px-3 ${
+                    view === o.id
+                      ? "bg-primary text-primary-foreground"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {o.id === "map" ? <MapGlyph /> : <CardsGlyph />}
+                  <span className="hidden sm:inline">{o.label}</span>
+                </button>
+              ))}
+            </div>
           </div>
 
           {kind === "occurrence" && (
-            <>
-              <div className="inline-flex h-10 items-center rounded-full border border-border-soft bg-surface p-0.5" aria-label="Choose sighting media">
+            <div
+              className="scroll-mask-right scrollbar-hidden relative z-20 overflow-x-auto animate-in"
+              style={{ animationDelay: "120ms" }}
+            >
+              <div className="flex items-center gap-1.5 pb-1 pr-8">
                 {(
                   [
                     { id: "image", label: "Photos" },
                     { id: "audio", label: "Field sounds" },
-                    { id: "all", label: "All" },
+                    { id: "all", label: "All media" },
                   ] as Array<{ id: OccurrenceFilter; label: string }>
                 ).map((o) => (
-                  <button
+                  <FilterPill
                     key={o.id}
-                    type="button"
+                    selected={occMedia === o.id}
                     onClick={() => changeMedia(o.id)}
-                    aria-pressed={occMedia === o.id}
-                    className={`inline-flex h-9 items-center rounded-full px-3 text-sm font-medium transition-colors ${
-                      occMedia === o.id
-                        ? "bg-primary text-primary-foreground"
-                        : "text-foreground/60 hover:text-foreground"
-                    }`}
                   >
                     {o.label}
-                  </button>
+                  </FilterPill>
                 ))}
-              </div>
 
-              <div className="inline-flex min-h-10 flex-wrap items-center gap-1 rounded-full border border-border-soft bg-surface p-0.5" aria-label="Choose sighting type">
+                <span className="mx-1 h-5 w-px shrink-0 bg-border-soft" aria-hidden />
+
                 {OCCURRENCE_CATEGORY_OPTIONS.map((o) => (
-                  <button
+                  <FilterPill
                     key={o.id}
-                    type="button"
+                    selected={occCategory === o.id}
                     onClick={() => changeCategory(o.id)}
-                    aria-pressed={occCategory === o.id}
-                    className={`inline-flex h-9 items-center rounded-full px-3 text-sm font-medium transition-colors ${
-                      occCategory === o.id
-                        ? "bg-primary text-primary-foreground"
-                        : "text-foreground/60 hover:text-foreground"
-                    }`}
                   >
                     {o.label}
-                  </button>
+                  </FilterPill>
                 ))}
               </div>
-            </>
+            </div>
           )}
-
         </div>
 
         {/* Grid / Map */}
@@ -1025,6 +1010,106 @@ function Pill({ children, accent }: { children: ReactNode; accent?: boolean }) {
     >
       {children}
     </span>
+  );
+}
+
+function SortControl({
+  sort,
+  setSort,
+  open,
+  setOpen,
+}: {
+  sort: SortMode;
+  setSort: (sort: SortMode) => void;
+  open: boolean;
+  setOpen: (next: boolean | ((value: boolean) => boolean)) => void;
+}) {
+  const containerRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!open) return;
+
+    const handlePointerDown = (event: PointerEvent) => {
+      if (containerRef.current?.contains(event.target as Node)) return;
+      setOpen(false);
+    };
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setOpen(false);
+    };
+
+    document.addEventListener("pointerdown", handlePointerDown);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("pointerdown", handlePointerDown);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [open, setOpen]);
+
+  const label = SORT_OPTIONS.find((option) => option.value === sort)?.label ?? "Sort";
+
+  return (
+    <div ref={containerRef} className="relative shrink-0">
+      <button
+        type="button"
+        onClick={() => setOpen((value) => !value)}
+        aria-expanded={open}
+        aria-label="Sort sightings"
+        title={label}
+        className="inline-flex h-10 cursor-pointer items-center justify-center gap-1.5 whitespace-nowrap rounded-full border border-border bg-background/70 px-3 text-sm font-medium text-foreground/70 transition-colors hover:bg-muted hover:text-foreground hover:shadow-sm"
+      >
+        <ArrowUpDownIcon className="h-4 w-4" aria-hidden />
+        <span className="hidden md:inline">{label}</span>
+        <ChevronDownIcon className={`hidden h-4 w-4 transition-transform md:inline ${open ? "rotate-180" : ""}`} aria-hidden />
+      </button>
+
+      {open ? (
+        <div className="absolute right-0 top-full z-[1000] mt-2 w-44 rounded-2xl border border-border bg-popover py-1.5 shadow-xl">
+          {SORT_OPTIONS.map((option) => (
+            <button
+              key={option.value}
+              type="button"
+              onClick={() => {
+                setSort(option.value);
+                setOpen(false);
+              }}
+              className={`w-full px-3 py-2 text-left text-sm transition-colors ${
+                sort === option.value
+                  ? "bg-primary/5 text-primary"
+                  : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+              }`}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+function FilterPill({
+  selected,
+  onClick,
+  children,
+}: {
+  selected: boolean;
+  onClick: () => void;
+  children: ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={selected}
+      className={`inline-flex h-9 shrink-0 items-center rounded-full border px-3 text-sm font-medium transition-colors ${
+        selected
+          ? "border-primary bg-primary text-primary-foreground shadow-sm"
+          : "border-border-soft bg-surface text-foreground/65 hover:border-primary/30 hover:text-foreground"
+      }`}
+    >
+      {children}
+    </button>
   );
 }
 
@@ -1440,11 +1525,11 @@ function mediaLabel(kind: OccurrenceRecord["media"][number]): string {
 
 
 function CardsGlyph() {
-  return <LayoutGridIcon width={13} height={13} aria-hidden />;
+  return <LayoutGridIcon width={16} height={16} aria-hidden />;
 }
 
 function MapGlyph() {
-  return <MapIcon width={13} height={13} aria-hidden />;
+  return <MapIcon width={16} height={16} aria-hidden />;
 }
 
 function Spinner() {
