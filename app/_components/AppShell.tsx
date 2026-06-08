@@ -33,6 +33,7 @@ import packageJson from "@/package.json";
 import { BumicertsBumicertCard, type BumicertsBumicertCardRecord } from "@/components/bumicert/BumicertsBumicertCard";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button, buttonVariants } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { AuthButton, SignInPrompt } from "./AuthFlow";
 import { HeaderSlotsProvider, useHeaderSlots } from "./HeaderSlots";
@@ -148,6 +149,7 @@ export function AppShell({
   const [resolvedProfileName, setResolvedProfileName] = useState<string | null | undefined>(
     authSession?.isLoggedIn ? undefined : null,
   );
+  const [isShellProfileLoading, setIsShellProfileLoading] = useState(authSession?.isLoggedIn === true);
 
   useEffect(() => {
     let cancelled = false;
@@ -164,10 +166,12 @@ export function AppShell({
         if (!nextSession.isLoggedIn) {
           setResolvedManageAccountKind("user");
           setResolvedProfileName(null);
+          setIsShellProfileLoading(false);
           return;
         }
 
         setResolvedProfileName(undefined);
+        setIsShellProfileLoading(true);
 
         try {
           const profileResponse = await fetch("/api/session/profile", { cache: "no-store" });
@@ -177,21 +181,25 @@ export function AppShell({
           if (!profile) {
             setResolvedManageAccountKind("user");
             setResolvedProfileName(null);
+            setIsShellProfileLoading(false);
             return;
           }
 
           setResolvedManageAccountKind(profile.manageAccountKind);
           setResolvedProfileName(profile.profileName);
+          setIsShellProfileLoading(false);
         } catch {
           if (cancelled) return;
           setResolvedManageAccountKind("user");
           setResolvedProfileName(null);
+          setIsShellProfileLoading(false);
         }
       } catch {
         if (cancelled) return;
         setResolvedAuthSession({ isLoggedIn: false });
         setResolvedManageAccountKind("user");
         setResolvedProfileName(null);
+        setIsShellProfileLoading(false);
       }
     }
 
@@ -206,7 +214,7 @@ export function AppShell({
     return <>{children}</>;
   }
 
-  const isProfileLoading = resolvedAuthSession?.isLoggedIn === true && resolvedProfileName === undefined;
+  const isProfileLoading = resolvedAuthSession?.isLoggedIn === true && isShellProfileLoading;
 
   return (
     <HeaderSlotsProvider>
@@ -592,8 +600,8 @@ function ManageSectionSkeleton() {
     <ul className="flex flex-col gap-0.5" aria-hidden="true">
       {labelWidths.map((width, index) => (
         <li key={index} className="flex h-9 items-center gap-2 pl-1">
-          <span className="h-7 w-[42px] shrink-0 rounded-full bg-muted/60" />
-          <span className={`h-3.5 rounded-full bg-muted/50 ${width}`} />
+          <Skeleton className="h-7 w-[42px] shrink-0 rounded-full" />
+          <Skeleton className={`h-3.5 rounded-full ${width}`} />
         </li>
       ))}
     </ul>
