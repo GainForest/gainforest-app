@@ -41,24 +41,45 @@ export default function PreviewStep({ parsedData, mappings, koboMediaZipIndex, s
   const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set());
   const [errorSectionOpen, setErrorSectionOpen] = useState(false);
   const [siteBoundary, setSiteBoundary] = useState<SiteBoundaryGeoJson | null>(null);
+  const [siteBoundarySiteUri, setSiteBoundarySiteUri] = useState<string | null>(null);
   const [boundaryLoading, setBoundaryLoading] = useState(false);
   const [boundaryError, setBoundaryError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!siteSelection) return;
+    let cancelled = false;
+    if (!siteSelection) {
+      setBoundaryLoading(false);
+      setBoundaryError(null);
+      setSiteBoundary(null);
+      setSiteBoundarySiteUri(null);
+      return;
+    }
     setBoundaryLoading(true);
     setBoundaryError(null);
     setSiteBoundary(null);
+    setSiteBoundarySiteUri(null);
     fetchUploadSiteBoundary(siteSelection)
-      .then((b) => { setSiteBoundary(b); setBoundaryLoading(false); })
-      .catch((err) => { setBoundaryError(err instanceof Error ? err.message : "Failed to load boundary."); setBoundaryLoading(false); });
+      .then((b) => {
+        if (cancelled) return;
+        setSiteBoundary(b);
+        setSiteBoundarySiteUri(siteSelection.uri);
+        setBoundaryLoading(false);
+      })
+      .catch((err) => {
+        if (cancelled) return;
+        setBoundaryError(err instanceof Error ? err.message : "Failed to load boundary.");
+        setBoundaryLoading(false);
+      });
+    return () => { cancelled = true; };
   }, [siteSelection]);
+
+  const activeSiteBoundary = siteSelection && siteBoundarySiteUri === siteSelection.uri ? siteBoundary : null;
 
   const { validationResult, mappedHeaders, mappedRows, hasAnyPhotos } = useMemo(() => {
     const mapped = applyMappings(parsedData, mappings);
     const result = parseAndValidateRows(mapped, parsedData, mappings, {
       koboMediaZipIndex,
-      siteBoundary: siteSelection && siteBoundary ? { geoJson: siteBoundary, siteRef: siteSelection.uri } : null,
+      siteBoundary: siteSelection && activeSiteBoundary ? { geoJson: activeSiteBoundary, siteRef: siteSelection.uri } : null,
     });
     const headerSet = new Set<string>();
     for (const row of mapped) {
@@ -68,7 +89,7 @@ export default function PreviewStep({ parsedData, mappings, koboMediaZipIndex, s
     }
     const anyPhotos = result.valid.some((r) => r.photos && r.photos.length > 0);
     return { validationResult: result, mappedHeaders: Array.from(headerSet), mappedRows: mapped, hasAnyPhotos: anyPhotos };
-  }, [koboMediaZipIndex, parsedData, mappings, siteBoundary, siteSelection]);
+  }, [koboMediaZipIndex, parsedData, mappings, activeSiteBoundary, siteSelection]);
 
   const { valid, errors } = validationResult;
   const totalRows = parsedData.length;
@@ -76,7 +97,7 @@ export default function PreviewStep({ parsedData, mappings, koboMediaZipIndex, s
   const errorCount = errors.length;
   const allValid = errorCount === 0;
   const allInvalid = validCount === 0;
-  const canContinue = siteSelection !== null && validCount > 0 && !boundaryLoading;
+  const canContinue = siteSelection !== null && activeSiteBoundary !== null && validCount > 0 && !boundaryLoading && !boundaryError;
 
   const photoCountByIndex = useMemo(() => {
     const map = new Map<number, number>();
@@ -118,17 +139,17 @@ export default function PreviewStep({ parsedData, mappings, koboMediaZipIndex, s
       {siteSelection === null ? (
         <div className="flex items-center gap-2 rounded-md border border-destructive/50 bg-destructive/10 p-3 text-sm text-destructive">
           <XCircle className="h-4 w-4 shrink-0" />
-          <span>No site selected. Go back and select a site boundary.</span>
+          <span>No site selected. Go back and choose or create a site boundary.</span>
         </div>
       ) : boundaryLoading ? (
         <div className="flex items-center gap-2 rounded-md border border-yellow-500/40 bg-yellow-500/10 p-3 text-sm text-yellow-600 dark:text-yellow-400">
           <AlertTriangle className="h-4 w-4 shrink-0" />
-          <span>Verifying site boundary for {siteSelection.name}…</span>
+          <span>Checking drawn map area for {siteSelection.name}…</span>
         </div>
       ) : boundaryError ? (
-        <div className="flex items-center gap-2 rounded-md border border-yellow-500/40 bg-yellow-500/10 p-3 text-sm text-yellow-600 dark:text-yellow-400">
+        <div className="flex items-center gap-2 rounded-md border border-destructive/50 bg-destructive/10 p-3 text-sm text-destructive">
           <AlertTriangle className="h-4 w-4 shrink-0" />
-          <span>Could not verify site boundary ({boundaryError}). Row coordinates will be checked against the boundary during upload.</span>
+          <span>Could not check the selected drawn map area ({boundaryError}). Go back, choose or create a site boundary, then try again.</span>
         </div>
       ) : allValid ? (
         <div className="flex items-center gap-2 rounded-md border border-primary/40 bg-primary/10 p-3 text-sm text-primary">

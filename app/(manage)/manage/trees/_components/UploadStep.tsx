@@ -113,7 +113,7 @@ export default function UploadStep({
     let skippedRowsForUpload: SkippedBoundaryRow[] = [];
 
     if (!siteSelection) {
-      setUploadFatalError("No site selected. Go back and select a site boundary.");
+      setUploadFatalError("No site selected. Go back and choose or create a site boundary.");
       setClockMs(Date.now());
       setUploadDone(true);
       return;
@@ -145,7 +145,7 @@ export default function UploadStep({
         return;
       }
     } catch {
-      setUploadFatalError("Could not verify the site boundary. Go back and try again.");
+      setUploadFatalError("Could not check the selected drawn map area. Go back, choose or create a site boundary, then try again.");
       setClockMs(Date.now());
       setUploadDone(true);
       return;

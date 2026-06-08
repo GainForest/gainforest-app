@@ -18,7 +18,7 @@ const POLYGONS_APP_URL = "https://polygons-gainforest.vercel.app";
 type Point = { lng: number; lat: number };
 
 function pointsToGeoJSON(points: Point[]): string {
-  if (points.length < 3) throw new Error("A polygon needs at least 3 points.");
+  if (points.length < 3) throw new Error("A drawn map area needs at least 3 points.");
   const coordinates = points.map((p) => [p.lng, p.lat] as [number, number]);
   const first = coordinates[0];
   const last = coordinates[coordinates.length - 1];
@@ -82,7 +82,7 @@ export function DrawPolygonModal({ onSubmit }: DrawPolygonModalProps) {
         <ModalHeader>
           <ModalTitle>Draw site boundary</ModalTitle>
           <ModalDescription>
-            Draw a polygon on the map to define your site boundary.
+            Draw a map area to define your site boundary.
           </ModalDescription>
         </ModalHeader>
       </div>

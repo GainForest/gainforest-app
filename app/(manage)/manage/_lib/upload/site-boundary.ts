@@ -45,7 +45,7 @@ function assertUsableSiteBoundary(boundary: SiteBoundaryGeoJson): SiteBoundaryGe
   });
   if (classification.kind === "invalid-boundary") {
     throw new Error(
-      `Selected site boundary must contain a valid drawn map area. ${classification.reason}`,
+      `The selected site boundary must contain a valid drawn map area. ${classification.reason}`,
     );
   }
   return boundary;
@@ -55,13 +55,13 @@ export async function fetchUploadSiteBoundary(site: UploadSiteSelection): Promis
   const boundaryUrl = getSiteLocationUrl(site);
   if (!boundaryUrl) {
     throw new Error(
-      "Selected site does not include a drawn map area. Select another site or draw its site boundary before adding tree information.",
+      "The selected site does not include a drawn map area. Choose another site boundary or draw one before adding tree information.",
     );
   }
 
   const response = await fetch(boundaryUrl);
   if (!response.ok) {
-    throw new Error(`Failed to load selected site boundary: HTTP ${response.status}.`);
+    throw new Error("Could not load the selected drawn map area. Try again or choose another site boundary.");
   }
 
   const payload: unknown = await response.json();
@@ -102,7 +102,7 @@ export function checkUploadRowsAgainstSelectedSite(options: {
     if (!row) continue;
 
     if (row.occurrence.siteRef !== options.siteSelection.uri) {
-      skippedRows.push({ row, rowIndex, message: "This row no longer matches the selected site boundary." });
+      skippedRows.push({ row, rowIndex, message: "This row was prepared for a different site boundary. Go back and review the selected site boundary." });
       continue;
     }
 
@@ -126,17 +126,14 @@ export function checkUploadRowsAgainstSelectedSite(options: {
       return {
         rowsToUpload: [],
         skippedRows: [],
-        fatalError: "The selected site boundary is not valid. Redraw it before adding trees.",
+        fatalError: "The selected drawn map area cannot be used. Go back and redraw it before saving trees.",
       };
     }
 
     skippedRows.push({
       row,
       rowIndex,
-      message:
-        failure.kind === "near-boundary"
-          ? `Near boundary: this tree is ${formatBoundaryDistance(failure.distanceMeters)} outside the selected site polygon.`
-          : "Out of site: this tree is outside the selected site polygon.",
+      message: `This tree is ${formatBoundaryDistance(failure.distanceMeters)} outside the selected drawn map area. Check the coordinates, choose a different site boundary, or remove this row.`,
     });
   }
 
