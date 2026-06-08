@@ -366,15 +366,36 @@ export function RecordExplorer({
       return;
     }
     const t = setTimeout(() => {
-      const params = new URLSearchParams();
+      const params = new URLSearchParams(window.location.search);
       const q = query.trim();
+
       if (q) params.set("q", q);
+      else params.delete("q");
+
       if (view === "map") params.set("view", "map");
+      else params.delete("view");
+
       if (sort !== "newest") params.set("sort", sort);
-      if (kind === "occurrence" && occMedia !== DEFAULT_OCCURRENCE_MEDIA) params.set("media", occMedia);
-      if (kind === "site" && siteSource !== "both") params.set("source", siteSource);
+      else params.delete("sort");
+
+      if (kind === "occurrence") {
+        if (occMedia !== DEFAULT_OCCURRENCE_MEDIA) params.set("media", occMedia);
+        else params.delete("media");
+      } else {
+        params.delete("media");
+      }
+
+      if (kind === "site") {
+        if (siteSource !== "both") params.set("source", siteSource);
+        else params.delete("source");
+      } else {
+        params.delete("source");
+      }
+
       if (drawer) params.set("record", recordParam(drawer));
       else if (pendingRecord) params.set("record", pendingRecord);
+      else params.delete("record");
+
       const qs = params.toString();
       const url = qs ? `${window.location.pathname}?${qs}` : window.location.pathname;
       window.history.replaceState(null, "", url);
@@ -586,9 +607,9 @@ export function RecordExplorer({
             ) : kind === "occurrence" && occMedia !== "all" ? (
               <EmptyState
                 title={`No ${occMedia === "image" ? "photo" : "audio"} sightings found nearby`}
-                body="The newest sightings do not always include photos or sounds. Switch to All to browse everything."
+                body="The newest sightings do not always include photos or sounds. Remove filters to browse everything."
                 onRetry={() => changeMedia("all")}
-                retryLabel="Show all"
+                retryLabel="Remove filters"
               />
             ) : (
               <EmptyState title="Nothing here yet" body="There is nothing to show right now." />
