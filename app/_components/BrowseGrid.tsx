@@ -1,25 +1,12 @@
 import Link from "next/link";
 import { ArrowUpRightIcon, LeafIcon } from "lucide-react";
 import type { ExplorerKpis } from "../_lib/kpis";
-import type { StatusSnapshot } from "../_lib/status";
-import type { DevicesLiveSummary } from "../_lib/devices";
 import { formatCompact, formatCompactUsd } from "../_lib/format";
 
 // Landing-page collections grid. Kept intentionally aligned to the Bumicerts
 // home sections: max-w-6xl, centered editorial heading, rounded cards, and the
 // same restrained primary accents instead of the old wide dashboard band.
-export function BrowseGrid({
-  kpis,
-  status,
-  devices,
-}: {
-  kpis: ExplorerKpis;
-  status: StatusSnapshot;
-  devices: DevicesLiveSummary;
-}) {
-  const operational = status.components.filter((c) => c.status === "OPERATIONAL").length;
-  const total = status.components.length;
-
+export function BrowseGrid({ kpis }: { kpis: ExplorerKpis }) {
   const cards: Array<{
     href: string;
     label: string;
@@ -60,22 +47,6 @@ export function BrowseGrid({
       stat: formatCompactUsd(kpis.totalRaised),
       statLabel: "raised",
     },
-    {
-      href: "/devices",
-      label: "Field signals",
-      title: "Tainá devices",
-      blurb: "Verify whether field devices are sending updates right now.",
-      stat: devices.configured && devices.total > 0 ? `${devices.healthy}/${devices.total}` : "—",
-      statLabel: devices.configured && devices.total > 0 ? "live now" : "heartbeats",
-    },
-    {
-      href: "/status",
-      label: "Site health",
-      title: "Site health",
-      blurb: "See whether the services behind Bumicerts and GainForest are working.",
-      stat: total > 0 ? `${operational}/${total}` : "—",
-      statLabel: "working",
-    },
   ];
 
   return (
@@ -91,11 +62,11 @@ export function BrowseGrid({
             Ways to Explore
           </h2>
           <p className="mx-auto mt-3 max-w-xl text-base leading-relaxed text-muted-foreground">
-            Six live views into GainForest work, shaped for funders, stewards, and field teams.
+            Four ways into GainForest work, shaped for funders, stewards, and field teams.
           </p>
         </div>
 
-        <ul role="list" className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <ul role="list" className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {cards.map((card) => (
             <li key={card.href}>
               <Link href={card.href} className="group block h-full">

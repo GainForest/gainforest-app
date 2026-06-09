@@ -4,9 +4,7 @@ import { Suspense } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { BrowseGrid } from "./_components/BrowseGrid";
 import { HomeLanding } from "./_components/HomeLanding";
-import { fetchDevicesSummary } from "./_lib/devices";
 import { fetchKpis } from "./_lib/kpis";
-import { fetchStatus } from "./_lib/status";
 
 export const revalidate = 300;
 
@@ -39,9 +37,7 @@ async function HomeContent() {
   return (
     <>
       <HomeLanding kpis={kpis} />
-      <Suspense fallback={<BrowseGridFallback />}>
-        <HomeCollections kpis={kpis} />
-      </Suspense>
+      <BrowseGrid kpis={kpis} />
     </>
   );
 }
@@ -66,12 +62,6 @@ function HomeFallback() {
   );
 }
 
-async function HomeCollections({ kpis }: { kpis: Awaited<ReturnType<typeof fetchKpis>> }) {
-  const [status, devices] = await Promise.all([fetchStatus({ revalidate: 60 }), fetchDevicesSummary()]);
-
-  return <BrowseGrid kpis={kpis} status={status} devices={devices} />;
-}
-
 function BrowseGridFallback() {
   return (
     <section className="bg-background px-6 pt-10 pb-14 sm:px-12 sm:pt-12 md:px-6 md:pt-10 md:pb-16" aria-label="Explore links loading">
@@ -79,11 +69,11 @@ function BrowseGridFallback() {
         <div className="mb-6 text-center md:mb-8">
           <h2 className="font-garamond text-4xl font-light tracking-[-0.01em] text-foreground md:text-5xl">Ways to Explore</h2>
           <p className="mx-auto mt-3 max-w-xl text-base leading-relaxed text-muted-foreground">
-            Six live views into GainForest work, shaped for funders, stewards, and field teams.
+            Four ways into GainForest work, shaped for funders, stewards, and field teams.
           </p>
         </div>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {Array.from({ length: 6 }).map((_, index) => (
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {Array.from({ length: 4 }).map((_, index) => (
             <div key={index} className="min-h-[230px] rounded-2xl border border-border bg-card p-6 shadow-lg shadow-foreground/5">
               <Skeleton className="h-6 w-28 rounded-full" />
               <Skeleton className="mt-5 h-9 w-40 rounded-full" />
