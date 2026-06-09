@@ -210,7 +210,7 @@ const OCCURRENCE_NODE_FIELDS = `
   scientificName vernacularName kingdom family genus
   basisOfRecord recordedBy individualCount
   datasetName country countryCode stateProvince locality decimalLatitude decimalLongitude
-  habitat siteRef datasetRef dynamicProperties establishmentMeans
+  habitat siteRef datasetRef dynamicProperties
   occurrenceRemarks fieldNotes
   thumbnailUrl speciesImageUrl associatedMedia
   imageEvidence { file { ref } }
