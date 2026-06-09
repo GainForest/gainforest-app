@@ -15,15 +15,20 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
+  appendExistingDataset,
+  createMeasurement,
   createMultimediaFromFile,
   createMultimediaFromUrl,
   createRecord,
   deleteRecord,
-  getDatasetRecord,
+  detachOccurrenceFromDataset,
   incrementDatasetRecordCount,
-  putRecord,
 } from "../../_lib/mutations";
 import { occurrenceInputToRecord } from "../../_lib/upload/occurrence-adapter";
+import {
+  APPEND_EXISTING_DWC_DATASET_CLIENT_ROWS,
+  toAppendExistingDatasetRows,
+} from "../../_lib/upload/append-existing-dataset";
 import { buildTreeDynamicProperties } from "../../_lib/upload/tree-dynamic-properties";
 import { getUploadTimeEstimate } from "../../_lib/upload/time-estimate";
 import {
@@ -130,6 +135,41 @@ function getOccurrenceUriFromStatus(status: RowStatus | undefined): string | nul
 
 function hasPersistedOccurrence(status: RowStatus | undefined): boolean {
   return getOccurrenceUriFromStatus(status) !== null;
+}
+
+function getOccurrenceRkey(status: RowStatus | undefined): string | null {
+  const occurrenceUri = getOccurrenceUriFromStatus(status);
+  if (!occurrenceUri) return null;
+  const rkey = occurrenceUri.split("/").pop();
+  return rkey && rkey.length > 0 ? rkey : null;
+}
+
+const EXISTING_TREE_GROUP_UNAVAILABLE_MESSAGE =
+  "The selected tree group disappeared during upload. Remaining rows were not added.";
+const UNCONFIRMED_TREE_GROUP_CHUNK_MESSAGE =
+  "This group of trees could not be confirmed. Some trees may already be saved; review your trees before retrying.";
+
+function isTreeGroupUnavailableMessage(message: string): boolean {
+  return message.toLowerCase().includes("tree group") && (
+    message.toLowerCase().includes("no longer available") ||
+    message.toLowerCase().includes("disappeared")
+  );
+}
+
+function plainSaveErrorMessage(error: unknown, fallback: string): string {
+  const message = error instanceof Error ? error.message.trim() : "";
+  if (!message) return fallback;
+  if (
+    message.includes("tree group") ||
+    message.includes("Tree group") ||
+    message.includes("Tree information") ||
+    message.includes("Measurement") ||
+    message.includes("could not be saved") ||
+    message.includes("could not be updated")
+  ) {
+    return message;
+  }
+  return fallback;
 }
 
 function photoErrorMessage(error: unknown): string {
@@ -291,17 +331,15 @@ export default function UploadStep({
     // Phase 0: Create tree group if needed
     let datasetUri: string | undefined;
     let datasetRkey: string | undefined;
-    let datasetCreatedAt: string | undefined;
 
     if (datasetSelection.mode === "new" && datasetSelection.name.trim().length > 0) {
       try {
-        datasetCreatedAt = new Date().toISOString();
         const dsResult = await createRecord("app.gainforest.dwc.dataset", {
           $type: "app.gainforest.dwc.dataset",
           name: datasetSelection.name.trim(),
           ...(datasetSelection.description.trim() ? { description: datasetSelection.description.trim() } : {}),
           ...(establishmentMeans ? { establishmentMeans } : {}),
-          createdAt: datasetCreatedAt,
+          createdAt: new Date().toISOString(),
         });
         datasetUri = dsResult.uri;
         datasetRkey = dsResult.uri.split("/").pop();
@@ -312,16 +350,183 @@ export default function UploadStep({
         return;
       }
     } else if (datasetSelection.mode === "existing") {
-      datasetUri = datasetSelection.dataset.uri;
-      datasetRkey = datasetSelection.dataset.rkey;
-      datasetCreatedAt = datasetSelection.dataset.createdAt ?? undefined;
-      try {
-        const currentTreeGroup = await getDatasetRecord(datasetSelection.dataset.rkey);
-        datasetUri = currentTreeGroup.uri;
-        datasetCreatedAt = typeof currentTreeGroup.record.createdAt === "string" ? currentTreeGroup.record.createdAt : datasetCreatedAt;
-      } catch {
-        setDatasetUpdateWarning("The selected tree group could not be checked, so its tree count may not update.");
+
+      const rowUploadStartMs = Date.now();
+      setClockMs(rowUploadStartMs);
+      setUploadStartedAtMs(rowUploadStartMs);
+
+      const appendExistingDatasetRows = toAppendExistingDatasetRows(
+        rowsToUpload.map(({ row }) => row),
+        siteSelection.uri,
+      );
+      const nextStatuses = getInitialRowStatuses(validRows, skippedRowsForUpload);
+      let successes = 0;
+      let partials = 0;
+      let failures = skippedRowsForUpload.length;
+      let stopExistingTreeGroupUpload = false;
+
+      const detachUploadedRowsFromUnavailableTreeGroup = async (statuses: RowStatus[], rowIndexes: number[]) => {
+        let demotedSuccesses = 0;
+
+        for (const index of rowIndexes) {
+          const status = statuses[index];
+          if (!status || (status.state !== "success" && status.state !== "partial")) continue;
+
+          const baseError = "The selected tree group disappeared during upload, so this tree was kept without that group. Review this tree before retrying.";
+          const fallbackError = "The selected tree group disappeared during upload and this tree could not be moved out of that group automatically. Review this tree before retrying.";
+          const nextBaseError = status.state === "partial" ? `${status.error} ${baseError}` : baseError;
+          const nextFallbackError = status.state === "partial" ? `${status.error} ${fallbackError}` : fallbackError;
+          const rkey = getOccurrenceRkey(status);
+
+          if (!rkey) {
+            if (status.state === "success") demotedSuccesses += 1;
+            statuses[index] = { state: "partial", occurrenceUri: status.occurrenceUri, photoCount: status.photoCount, error: nextFallbackError };
+            continue;
+          }
+
+          try {
+            await detachOccurrenceFromDataset(rkey);
+            if (status.state === "success") demotedSuccesses += 1;
+            statuses[index] = { state: "partial", occurrenceUri: status.occurrenceUri, photoCount: status.photoCount, error: nextBaseError };
+          } catch {
+            if (status.state === "success") demotedSuccesses += 1;
+            statuses[index] = { state: "partial", occurrenceUri: status.occurrenceUri, photoCount: status.photoCount, error: nextFallbackError };
+          }
+        }
+
+        return demotedSuccesses;
+      };
+
+      for (
+        let chunkStart = 0;
+        chunkStart < appendExistingDatasetRows.length;
+        chunkStart += APPEND_EXISTING_DWC_DATASET_CLIENT_ROWS
+      ) {
+        const chunkRows = appendExistingDatasetRows.slice(
+          chunkStart,
+          chunkStart + APPEND_EXISTING_DWC_DATASET_CLIENT_ROWS,
+        );
+        const chunkEntries = rowsToUpload.slice(
+          chunkStart,
+          chunkStart + APPEND_EXISTING_DWC_DATASET_CLIENT_ROWS,
+        );
+        const chunkEnd = chunkStart + chunkRows.length;
+        const chunkLabel = chunkEntries.length === 1
+          ? (chunkEntries[0]?.row.occurrence.scientificName || `Row ${(chunkEntries[0]?.rowIndex ?? chunkStart) + 1}`)
+          : `Rows ${chunkStart + 1}-${chunkEnd} of ${rowsToUpload.length}`;
+
+        for (const entry of chunkEntries) {
+          nextStatuses[entry.rowIndex] = { state: "uploading" };
+        }
+        setRowStatuses([...nextStatuses]);
+        setProgress((prev) => ({
+          ...prev,
+          current: Math.min(skippedRowsForUpload.length + chunkStart + 1, validRows.length),
+          currentRow: chunkLabel,
+        }));
+        setClockMs(Date.now());
+
+        try {
+          const response = await appendExistingDataset({
+            datasetRkey: datasetSelection.dataset.rkey,
+            rows: chunkRows,
+            establishmentMeans,
+          });
+          const handledIndexes = new Set<number>();
+
+          for (const result of response.results) {
+            const entry = chunkEntries[result.index];
+            if (!entry) continue;
+
+            const globalIndex = entry.rowIndex;
+            handledIndexes.add(result.index);
+
+            if (result.state === "success") {
+              successes += 1;
+              nextStatuses[globalIndex] = { state: "success", occurrenceUri: result.occurrenceUri, photoCount: result.photoCount };
+              continue;
+            }
+
+            if (result.state === "partial") {
+              partials += 1;
+              nextStatuses[globalIndex] = { state: "partial", occurrenceUri: result.occurrenceUri, photoCount: result.photoCount, error: result.error };
+              continue;
+            }
+
+            failures += 1;
+            nextStatuses[globalIndex] = { state: "error", error: result.error };
+          }
+
+          for (const [chunkIndex] of chunkRows.entries()) {
+            const entry = chunkEntries[chunkIndex];
+            if (!entry || handledIndexes.has(chunkIndex)) continue;
+
+            failures += 1;
+            nextStatuses[entry.rowIndex] = { state: "error", error: "Unexpected save response for this row." };
+          }
+
+          if (response.datasetBecameUnavailable) {
+            const demotedSuccesses = await detachUploadedRowsFromUnavailableTreeGroup(
+              nextStatuses,
+              rowsToUpload.slice(0, chunkStart).map((entry) => entry.rowIndex),
+            );
+            successes -= demotedSuccesses;
+            partials += demotedSuccesses;
+
+            for (let remainingIndex = chunkEnd; remainingIndex < rowsToUpload.length; remainingIndex += 1) {
+              const remainingEntry = rowsToUpload[remainingIndex];
+              if (!remainingEntry) continue;
+
+              nextStatuses[remainingEntry.rowIndex] = { state: "error", error: EXISTING_TREE_GROUP_UNAVAILABLE_MESSAGE };
+              failures += 1;
+            }
+            stopExistingTreeGroupUpload = true;
+          }
+        } catch (error) {
+          const baseMessage = plainSaveErrorMessage(error, "Trees could not be saved.");
+          const treeGroupUnavailable = isTreeGroupUnavailableMessage(baseMessage);
+          const chunkMessage = treeGroupUnavailable
+            ? EXISTING_TREE_GROUP_UNAVAILABLE_MESSAGE
+            : `${baseMessage} ${UNCONFIRMED_TREE_GROUP_CHUNK_MESSAGE}`;
+
+          if (treeGroupUnavailable) {
+            const demotedSuccesses = await detachUploadedRowsFromUnavailableTreeGroup(
+              nextStatuses,
+              rowsToUpload.slice(0, chunkStart).map((entry) => entry.rowIndex),
+            );
+            successes -= demotedSuccesses;
+            partials += demotedSuccesses;
+          }
+
+          for (let remainingIndex = chunkStart; remainingIndex < rowsToUpload.length; remainingIndex += 1) {
+            const remainingEntry = rowsToUpload[remainingIndex];
+            if (!remainingEntry) continue;
+
+            nextStatuses[remainingEntry.rowIndex] = { state: "error", error: chunkMessage };
+            failures += 1;
+          }
+
+          stopExistingTreeGroupUpload = true;
+        }
+
+        setRowStatuses([...nextStatuses]);
+        setProgress({
+          current: successes + partials + failures,
+          total: validRows.length,
+          successes,
+          partials,
+          failures,
+          currentRow: "",
+        });
+        setClockMs(Date.now());
+
+        if (stopExistingTreeGroupUpload) break;
+
       }
+
+      setClockMs(Date.now());
+      setUploadDone(true);
+      return;
     }
 
     const rowUploadStartMs = Date.now();
@@ -353,28 +558,41 @@ export default function UploadStep({
         };
         const occRecord = occurrenceInputToRecord(occurrence);
         const occResult = await createRecord("app.gainforest.dwc.occurrence", occRecord as Record<string, unknown>);
+        const occurrenceRkey = occResult.uri.split("/").pop();
 
         if (row.floraMeasurement) {
           try {
-            await createRecord("app.gainforest.dwc.measurement", {
-              $type: "app.gainforest.dwc.measurement",
+            await createMeasurement({
               occurrenceRef: occResult.uri,
-              ...(row.floraMeasurement.dbh ? { dbh: row.floraMeasurement.dbh } : {}),
-              ...(row.floraMeasurement.totalHeight ? { totalHeight: row.floraMeasurement.totalHeight } : {}),
-              ...(row.floraMeasurement.diameter ? { basalDiameter: row.floraMeasurement.diameter } : {}),
-              ...(row.floraMeasurement.canopyCoverPercent ? { canopyCoverPercent: row.floraMeasurement.canopyCoverPercent } : {}),
-              createdAt: new Date().toISOString(),
+              flora: {
+                dbh: row.floraMeasurement.dbh,
+                totalHeight: row.floraMeasurement.totalHeight,
+                basalDiameter: row.floraMeasurement.diameter,
+                canopyCoverPercent: row.floraMeasurement.canopyCoverPercent,
+              },
             });
-          } catch {
-            // Measurement failed - mark as partial but keep the saved tree.
-            partials += 1;
-            setRowStatuses((prev) => {
-              const next = [...prev];
-              next[rowIndex] = { state: "partial", occurrenceUri: occResult.uri, photoCount: 0, error: "Tree saved but measurement could not be added." };
-              return next;
-            });
-            setProgress((prev) => ({ ...prev, successes, partials, failures }));
-            continue;
+          } catch (measurementError) {
+            if (occurrenceRkey) {
+              try {
+                await deleteRecord("app.gainforest.dwc.occurrence", occurrenceRkey);
+              } catch {
+                partials += 1;
+                setRowStatuses((prev) => {
+                  const next = [...prev];
+                  next[rowIndex] = {
+                    state: "partial",
+                    occurrenceUri: occResult.uri,
+                    photoCount: 0,
+                    error: "The tree was saved, but its measurement could not be saved and automatic cleanup could not finish. Review this tree before retrying.",
+                  };
+                  return next;
+                });
+                setProgress((prev) => ({ ...prev, successes, partials, failures }));
+                continue;
+              }
+            }
+
+            throw measurementError;
           }
         }
 
@@ -384,7 +602,7 @@ export default function UploadStep({
         failures += 1;
         setRowStatuses((prev) => {
           const next = [...prev];
-          next[rowIndex] = { state: "error", error: err instanceof Error ? err.message : "Failed to save." };
+          next[rowIndex] = { state: "error", error: plainSaveErrorMessage(err, "Tree could not be saved.") };
           return next;
         });
       }
@@ -401,27 +619,11 @@ export default function UploadStep({
       } catch {
         setDatasetUpdateWarning("The empty tree group could not be removed automatically.");
       }
-    } else if (datasetRkey && persistedOccurrences > 0) {
-      if (datasetSelection.mode === "existing") {
-        try {
-          await incrementDatasetRecordCount(datasetRkey, persistedOccurrences);
-        } catch {
-          setDatasetUpdateWarning("Trees saved, but this tree group's count could not be updated.");
-        }
-      } else if (datasetSelection.mode === "new") {
-        try {
-          const dsRecord = {
-            $type: "app.gainforest.dwc.dataset",
-            name: datasetSelection.name,
-            ...(datasetSelection.description.trim() ? { description: datasetSelection.description.trim() } : {}),
-            ...(establishmentMeans ? { establishmentMeans } : {}),
-            recordCount: persistedOccurrences,
-            createdAt: datasetCreatedAt ?? new Date().toISOString(),
-          };
-          await putRecord("app.gainforest.dwc.dataset", datasetRkey, dsRecord as Record<string, unknown>);
-        } catch {
-          setDatasetUpdateWarning("Tree group created, but its tree count could not be updated.");
-        }
+    } else if (datasetSelection.mode === "new" && datasetRkey && persistedOccurrences > 0) {
+      try {
+        await incrementDatasetRecordCount(datasetRkey, persistedOccurrences);
+      } catch {
+        setDatasetUpdateWarning("Tree group created, but its tree count could not be updated.");
       }
     }
 

@@ -30,7 +30,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { deleteRecord, putRecord } from "../../_lib/mutations";
+import { deleteRecord, updateOccurrence } from "../../_lib/mutations";
 import type { OccurrenceRecord, UploadTreeDatasetRecord } from "@/app/_lib/indexer";
 import { TreesManageSkeleton } from "./TreesManageSkeleton";
 import { cn } from "@/lib/utils";
@@ -135,7 +135,7 @@ function TreeCard({
 
       {isConfirming && (
         <div className="absolute left-0 right-0 bottom-0 mx-3 mb-2 p-3 bg-destructive/10 border border-destructive/20 rounded-lg z-10">
-          <p className="text-sm text-destructive font-medium mb-1">Delete this tree record?</p>
+          <p className="text-sm text-destructive font-medium mb-1">Delete this tree?</p>
           <p className="text-xs text-muted-foreground mb-3">This cannot be undone.</p>
           <div className="flex gap-2">
             <Button variant="destructive" size="sm" onClick={() => void handleDelete()} disabled={isDeleting}>
@@ -179,35 +179,58 @@ function TreeEditor({
     setIsPending(true);
     setError(null);
     try {
-      const record: Record<string, unknown> = {
-        $type: "app.gainforest.dwc.occurrence",
-        scientificName: scientificName.trim(),
-        ...(vernacularName.trim() ? { vernacularName: vernacularName.trim() } : {}),
-        ...(eventDate.trim() ? { eventDate: eventDate.trim() } : {}),
-        ...(lat && lon ? {
-          decimalLatitude: parseFloat(lat),
-          decimalLongitude: parseFloat(lon),
-        } : {}),
-        ...(locality.trim() ? { locality: locality.trim() } : {}),
-        ...(remarks.trim() ? { occurrenceRemarks: remarks.trim() } : {}),
-        createdAt: tree.createdAt,
+      const trimmedScientificName = scientificName.trim();
+      const trimmedEventDate = eventDate.trim();
+      const trimmedVernacularName = vernacularName.trim();
+      const trimmedLocality = locality.trim();
+      const trimmedRemarks = remarks.trim();
+      const trimmedLat = lat.trim();
+      const trimmedLon = lon.trim();
+      const data: Parameters<typeof updateOccurrence>[0]["data"] = {
+        scientificName: trimmedScientificName,
       };
+      const unset: string[] = [];
 
-      await putRecord("app.gainforest.dwc.occurrence", tree.rkey, record);
+      if (trimmedEventDate) data.eventDate = trimmedEventDate;
+      if (trimmedVernacularName) data.vernacularName = trimmedVernacularName;
+      else unset.push("vernacularName");
+      if (trimmedLocality) data.locality = trimmedLocality;
+      else unset.push("locality");
+      if (trimmedRemarks) data.occurrenceRemarks = trimmedRemarks;
+      else unset.push("occurrenceRemarks");
+
+      if ((trimmedLat && !trimmedLon) || (!trimmedLat && trimmedLon)) {
+        setError("Enter both latitude and longitude, or leave both unchanged.");
+        setIsPending(false);
+        return;
+      }
+      if (trimmedLat && trimmedLon) {
+        const nextLat = Number(trimmedLat);
+        const nextLon = Number(trimmedLon);
+        if (!Number.isFinite(nextLat) || nextLat < -90 || nextLat > 90 || !Number.isFinite(nextLon) || nextLon < -180 || nextLon > 180) {
+          setError("Enter a valid latitude and longitude.");
+          setIsPending(false);
+          return;
+        }
+        data.decimalLatitude = String(nextLat);
+        data.decimalLongitude = String(nextLon);
+      }
+
+      await updateOccurrence({ rkey: tree.rkey, data, unset });
 
       onSaved({
         ...tree,
-        scientificName: scientificName.trim() || null,
-        vernacularName: vernacularName.trim() || null,
-        eventDate: eventDate.trim() || null,
-        lat: lat ? parseFloat(lat) : null,
-        lon: lon ? parseFloat(lon) : null,
-        locality: locality.trim() || null,
-        remarks: remarks.trim() || null,
+        scientificName: trimmedScientificName || null,
+        vernacularName: trimmedVernacularName || null,
+        eventDate: trimmedEventDate || tree.eventDate,
+        lat: trimmedLat && trimmedLon ? Number(trimmedLat) : tree.lat,
+        lon: trimmedLat && trimmedLon ? Number(trimmedLon) : tree.lon,
+        locality: trimmedLocality || null,
+        remarks: trimmedRemarks || null,
       });
       onClose();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to save.");
+      setError(err instanceof Error ? err.message : "Tree could not be saved.");
     } finally {
       setIsPending(false);
     }
@@ -222,7 +245,7 @@ function TreeEditor({
       className="rounded-2xl border border-border bg-card p-5 space-y-5"
     >
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold">Edit occurrence</h2>
+        <h2 className="text-lg font-semibold">Edit tree</h2>
         <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={onClose}>
           <XIcon className="h-4 w-4" />
         </Button>
@@ -263,7 +286,7 @@ function TreeEditor({
             id="tree-remarks"
             value={remarks}
             onChange={(e) => setRemarks(e.target.value)}
-            placeholder="Field notes or observation remarks…"
+            placeholder="Field notes…"
             rows={2}
             className="resize-none"
           />
@@ -399,7 +422,7 @@ export function TreesClient({ did, onUpload }: { did: string; onUpload?: () => v
         <div>
           <h1 className="text-2xl font-bold font-garamond">Trees</h1>
           <p className="text-sm text-muted-foreground mt-0.5">
-            Manage tree occurrence datasets and biodiversity records.
+            Manage tree groups and saved tree information.
           </p>
         </div>
         {onUpload && (

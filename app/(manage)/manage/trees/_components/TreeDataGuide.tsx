@@ -28,7 +28,7 @@ const FIELD_DOCS: FieldDoc[] = [
   { field: "recordedBy", description: "Name of person who shared this", format: "Text" },
   { field: "locality", description: "Site or location name", format: "Text" },
   { field: "country", description: "Country where the tree was recorded", format: "Text" },
-  { field: "occurrenceRemarks", description: "Notes or comments about the occurrence", format: "Text" },
+  { field: "occurrenceRemarks", description: "Notes or comments about the tree", format: "Text" },
   { field: "habitat", description: "Habitat or vegetation type", format: "Text" },
   { field: "height", description: "Tree height in meters", format: "Number" },
   { field: "dbh", description: "Diameter at breast height (cm)", format: "Number" },

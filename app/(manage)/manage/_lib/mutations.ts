@@ -7,6 +7,28 @@
  * All mutations are executed in the context of the logged-in user's account.
  */
 
+import type {
+  AppendExistingDatasetResponse,
+  AppendExistingDatasetRowInput,
+} from "./upload/append-existing-dataset";
+
+type FloraMeasurementFields = {
+  dbh?: string;
+  totalHeight?: string;
+  basalDiameter?: string;
+  canopyCoverPercent?: string;
+};
+
+type UpdateOccurrenceData = {
+  scientificName?: string;
+  vernacularName?: string;
+  eventDate?: string;
+  decimalLatitude?: string;
+  decimalLongitude?: string;
+  locality?: string;
+  occurrenceRemarks?: string;
+};
+
 type MutationPayload =
   | { operation: "createRecord"; collection: string; rkey?: string; record: Record<string, unknown> }
   | { operation: "putRecord"; collection: string; rkey: string; record: Record<string, unknown> }
@@ -14,6 +36,15 @@ type MutationPayload =
   | { operation: "uploadBlob"; blobData: string; blobMimeType: string }
   | { operation: "getDatasetRecord"; rkey: string }
   | { operation: "incrementDatasetRecordCount"; rkey: string; increment: number }
+  | { operation: "createMeasurement"; occurrenceRef: string; flora: FloraMeasurementFields }
+  | { operation: "updateOccurrence"; rkey: string; data: UpdateOccurrenceData; unset?: string[] }
+  | { operation: "detachOccurrenceFromDataset"; rkey: string }
+  | {
+      operation: "appendExistingDataset";
+      datasetRkey: string;
+      rows: AppendExistingDatasetRowInput[];
+      establishmentMeans?: string | null;
+    }
   | {
       operation: "createMultimediaFromUrl";
       url: string;
@@ -24,6 +55,7 @@ type MutationPayload =
     };
 
 type CreateResult = { uri: string; cid: string };
+type RecordMutationResult = { uri: string; cid: string; rkey: string; record?: Record<string, unknown> };
 type UploadBlobResult = { ref: unknown; mimeType: string; size: number; blob?: unknown };
 type MultimediaResult = { uri: string; cid: string; rkey: string; record?: Record<string, unknown> };
 type DatasetRecordResult = { uri: string; cid: string; rkey: string; record: Record<string, unknown> };
@@ -85,6 +117,33 @@ export async function getDatasetRecord(rkey: string): Promise<DatasetRecordResul
 
 export async function incrementDatasetRecordCount(rkey: string, increment: number): Promise<DatasetRecordResult> {
   return callProxy({ operation: "incrementDatasetRecordCount", rkey, increment });
+}
+
+export async function createMeasurement(input: {
+  occurrenceRef: string;
+  flora: FloraMeasurementFields;
+}): Promise<RecordMutationResult> {
+  return callProxy({ operation: "createMeasurement", ...input });
+}
+
+export async function updateOccurrence(input: {
+  rkey: string;
+  data: UpdateOccurrenceData;
+  unset?: string[];
+}): Promise<RecordMutationResult> {
+  return callProxy({ operation: "updateOccurrence", ...input });
+}
+
+export async function appendExistingDataset(input: {
+  datasetRkey: string;
+  rows: AppendExistingDatasetRowInput[];
+  establishmentMeans?: string | null;
+}): Promise<AppendExistingDatasetResponse> {
+  return callProxy({ operation: "appendExistingDataset", ...input });
+}
+
+export async function detachOccurrenceFromDataset(rkey: string): Promise<RecordMutationResult> {
+  return callProxy({ operation: "detachOccurrenceFromDataset", rkey });
 }
 
 function bytesToBase64(bytes: Uint8Array): string {
