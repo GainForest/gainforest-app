@@ -63,7 +63,14 @@ function isAcceptedMediaZipFile(file: File): boolean {
 }
 
 function toExistingDatasetSelection(dataset: UploadTreeDatasetItem): ExistingUploadDatasetSelection {
-  return { uri: dataset.uri, rkey: dataset.rkey, name: dataset.name, description: dataset.description, recordCount: dataset.recordCount };
+  return {
+    uri: dataset.uri,
+    rkey: dataset.rkey,
+    name: dataset.name,
+    description: dataset.description,
+    recordCount: dataset.recordCount,
+    createdAt: dataset.createdAt,
+  };
 }
 
 function hasShapeLocation(site: ManagedLocation): boolean {
@@ -584,7 +591,7 @@ export default function FileDropStep({
 
       <div className="flex items-center justify-end pt-2 border-t border-border">
         <Button onClick={handleContinue} disabled={!canContinue}>
-          Continue to Column Mapping
+          Continue to match headings
         </Button>
       </div>
     </div>

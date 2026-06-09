@@ -10,7 +10,7 @@ import type { ColumnMapping, TreeUploadRowAttentionSummary, ValidatedRow } from 
 import type { KoboMediaZipIndex } from "../../_lib/upload/kobo-media-zip";
 import { NO_UPLOAD_DATASET_SELECTION, type UploadDatasetSelection } from "../../_lib/upload/upload-dataset-selection";
 import type { UploadSiteSelection } from "../../_lib/upload/site-selection";
-import { readPendingUpload } from "./upload-session";
+import { clearPendingUpload, readPendingUpload } from "./upload-session";
 
 type WizardState = {
   currentStep: 1 | 2 | 3 | 4;
@@ -72,7 +72,7 @@ function initWizard(did: string): { state: WizardState; uploadId: string } {
 
 const STEPS = [
   { number: 1, label: "Choose File" },
-  { number: 2, label: "Map Columns" },
+  { number: 2, label: "Match Headings" },
   { number: 3, label: "Preview" },
   { number: 4, label: "Save" },
 ] as const;
@@ -148,15 +148,22 @@ export function TreeUploadWizard({ did, onDone }: { did: string; onDone: () => v
   };
 
   const handleComplete = () => {
+    clearPendingUpload();
     setUploadId(createUploadId());
     setState(INITIAL_STATE);
     onDone();
   };
 
-  const handleBackToStep1 = () => setState((prev) => ({ ...prev, currentStep: 1 }));
+  const handleBackToStep1 = () => {
+    clearPendingUpload();
+    setState((prev) => ({ ...prev, currentStep: 1 }));
+  };
   const handleBackToStep2 = () => setState((prev) => ({ ...prev, currentStep: 2 }));
   const handleBackToStep3 = () =>
-    setState((prev) => ({ ...prev, currentStep: prev.parsedData !== null ? 3 : 1 }));
+    setState((prev) => {
+      if (prev.parsedData === null) clearPendingUpload();
+      return { ...prev, currentStep: prev.parsedData !== null ? 3 : 1 };
+    });
 
   const { currentStep, parsedData, headers, mappings, validRows, previewSkippedRows,
     koboMediaZipFile, koboMediaZipIndex, establishmentMeans, datasetSelection, siteSelection } = state;
@@ -166,7 +173,7 @@ export function TreeUploadWizard({ did, onDone }: { did: string; onDone: () => v
       <div className="mb-6">
         <h1 className="text-2xl font-medium">Upload Trees</h1>
         <p className="text-sm text-muted-foreground mt-1">
-          Upload a CSV of tree occurrences to the GainForest network.
+          Upload a spreadsheet export of tree information to GainForest.
         </p>
       </div>
       <StepIndicator currentStep={currentStep} />

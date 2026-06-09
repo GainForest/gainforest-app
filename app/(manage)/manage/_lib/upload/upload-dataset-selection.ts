@@ -4,6 +4,7 @@ export type ExistingUploadDatasetSelection = {
   name: string;
   description: string | null;
   recordCount: number | null;
+  createdAt?: string | null;
 };
 
 export type UploadDatasetSelection =
@@ -21,7 +22,8 @@ function isExistingUploadDatasetSelection(value: unknown): value is ExistingUplo
     typeof c.rkey === "string" &&
     typeof c.name === "string" &&
     (typeof c.description === "string" || c.description === null) &&
-    (typeof c.recordCount === "number" || c.recordCount === null)
+    (typeof c.recordCount === "number" || c.recordCount === null) &&
+    (typeof c.createdAt === "string" || c.createdAt === null || typeof c.createdAt === "undefined")
   );
 }
 
