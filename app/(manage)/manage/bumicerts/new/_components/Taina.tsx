@@ -37,6 +37,52 @@ interface ChatMessage {
   content: string;
 }
 
+// ─── Progressive blur ───────────────────────────────────────────────
+// Same technique as the app header (see HomeLanding's ProgressiveBlur): a
+// stack of backdrop-filter layers, each masked by a gradient, so the blur
+// ramps from heavy at the edge to nothing toward the centre. Used behind the
+// chat's transparent header/footer to soften the messages scrolling under
+// them without an opaque bar or a hard divider line.
+function ProgressiveBlur({
+  height = "30%",
+  position = "bottom",
+  blurLevels = [0.5, 1, 2, 4, 8],
+}: {
+  height?: string;
+  position?: "top" | "bottom";
+  blurLevels?: number[];
+}) {
+  const direction = position === "top" ? "to top" : "to bottom";
+  const step = 100 / (blurLevels.length + 1);
+  return (
+    <div
+      className={cn(
+        "pointer-events-none absolute inset-x-0 z-10 grid",
+        position === "top" ? "top-0" : "bottom-0",
+      )}
+      style={{ height }}
+    >
+      {blurLevels.map((blur, index) => {
+        const fadeStart = index * step;
+        const fadeEnd = (index + 1) * step;
+        const mask = `linear-gradient(${direction}, transparent ${fadeStart}%, #000 ${fadeEnd}%)`;
+        return (
+          <span
+            key={blur}
+            style={{
+              gridArea: "1 / 1",
+              backdropFilter: `blur(${blur}px)`,
+              WebkitBackdropFilter: `blur(${blur}px)`,
+              maskImage: mask,
+              WebkitMaskImage: mask,
+            }}
+          />
+        );
+      })}
+    </div>
+  );
+}
+
 // ─── Animated sprite ────────────────────────────────────────────────
 function TainaSprite({
   size,
@@ -185,33 +231,13 @@ function TainaChatCard({
   return (
     <div
       className={cn(
-        "flex flex-col overflow-hidden rounded-2xl border border-border-soft bg-background",
+        "relative overflow-hidden rounded-2xl border border-border-soft bg-background",
         className,
       )}
     >
-      {/* header */}
-      <div className="flex items-center gap-3 border-b border-border-soft px-3 py-2.5">
-        <TainaSprite size={36} state={streaming ? "review" : "idle"} className="shrink-0" />
-        <div className="min-w-0 flex-1">
-          <div className="font-garamond text-[15px] font-medium text-foreground">
-            {TAINA_SIM.name}
-          </div>
-          <div className="truncate text-[11px] text-foreground/55">{COPY.role}</div>
-        </div>
-        {onClose ? (
-          <button
-            type="button"
-            onClick={onClose}
-            className="grid h-7 w-7 place-items-center rounded-full text-foreground/55 hover:bg-foreground/5 hover:text-foreground"
-            aria-label="Close chat"
-          >
-            <XIcon className="size-4" />
-          </button>
-        ) : null}
-      </div>
-
-      {/* messages */}
-      <div className="flex-1 space-y-3 overflow-y-auto px-3 py-3 text-[13px] leading-relaxed">
+      {/* messages — fill the card and scroll behind the transparent header
+          and footer; the padding keeps the first/last bubbles clear of them */}
+      <div className="absolute inset-0 space-y-3 overflow-y-auto px-3 pt-[60px] pb-[64px] text-[13px] leading-relaxed">
         {messages.length === 0 && (
           <div className="rounded-2xl bg-foreground/5 px-3 py-2 text-foreground/70">
             <p>
@@ -235,9 +261,42 @@ function TainaChatCard({
         <div ref={messagesEndRef} />
       </div>
 
-      {/* input */}
+      {/* header — transparent; progressive blur softens whatever scrolls
+          under, and a background gradient over it lifts contrast (same combo
+          as the app header) */}
+      <ProgressiveBlur position="top" height="84px" />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 top-0 z-10 h-[84px] bg-gradient-to-b from-background/85 to-background/0"
+      />
+      <div className="absolute inset-x-0 top-0 z-20 flex items-center gap-3 px-3 pt-3 pb-2">
+        <TainaSprite size={36} state={streaming ? "review" : "idle"} className="shrink-0" />
+        <div className="min-w-0 flex-1">
+          <div className="text-[15px] font-medium text-foreground">
+            {TAINA_SIM.name}
+          </div>
+          <div className="truncate text-[11px] text-foreground/55">{COPY.role}</div>
+        </div>
+        {onClose ? (
+          <button
+            type="button"
+            onClick={onClose}
+            className="grid h-7 w-7 place-items-center rounded-full text-foreground/55 hover:bg-foreground/5 hover:text-foreground"
+            aria-label="Close chat"
+          >
+            <XIcon className="size-4" />
+          </button>
+        ) : null}
+      </div>
+
+      {/* footer — transparent; progressive blur + gradient, mirrored upward */}
+      <ProgressiveBlur position="bottom" height="96px" />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-[96px] bg-gradient-to-t from-background/85 to-background/0"
+      />
       <form
-        className="flex items-end gap-2 border-t border-border-soft px-3 py-2.5"
+        className="absolute inset-x-0 bottom-0 z-20 flex items-end gap-2 px-3 pt-2 pb-3"
         onSubmit={(e) => {
           e.preventDefault();
           void sendMessage();
@@ -255,13 +314,12 @@ function TainaChatCard({
           }}
           placeholder={streaming ? COPY.thinking : COPY.placeholder}
           rows={1}
-          disabled={streaming}
-          className="max-h-24 min-h-[36px] flex-1 resize-none rounded-md border border-border-soft bg-background px-2 py-1.5 text-[13px] outline-none focus:border-primary/60 disabled:opacity-60"
+          className="max-h-24 min-h-[36px] flex-1 resize-none rounded-2xl border border-border-soft bg-background/70 px-3.5 py-2 text-[13px] outline-none focus:border-primary/60"
         />
         <button
           type="submit"
           disabled={streaming || !input.trim()}
-          className="grid h-9 w-9 shrink-0 place-items-center rounded-md bg-primary text-primary-foreground transition-colors hover:bg-primary-dark disabled:cursor-not-allowed disabled:opacity-40"
+          className="grid size-9 shrink-0 place-items-center rounded-full bg-primary text-primary-foreground transition-colors hover:bg-primary-dark disabled:cursor-not-allowed disabled:opacity-40"
           aria-label="Send"
         >
           ↑
