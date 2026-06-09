@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { BumicertsExploreClient } from "./BumicertsExploreClient";
 
 export const revalidate = 60;
@@ -11,5 +12,9 @@ export const metadata: Metadata = {
 };
 
 export default function BumicertsPage() {
-  return <BumicertsExploreClient />;
+  return (
+    <Suspense fallback={null}>
+      <BumicertsExploreClient />
+    </Suspense>
+  );
 }

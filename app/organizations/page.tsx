@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { OrganizationsClient } from "./OrganizationsClient";
 
 export const revalidate = 60;
@@ -11,5 +12,9 @@ export const metadata: Metadata = {
 };
 
 export default function OrganizationsPage() {
-  return <OrganizationsClient />;
+  return (
+    <Suspense fallback={null}>
+      <OrganizationsClient />
+    </Suspense>
+  );
 }

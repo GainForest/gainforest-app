@@ -2,6 +2,7 @@
 
 import { memo, useCallback, useDeferredValue, useEffect, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent, type ReactNode } from "react";
 import Image from "next/image";
+import { parseAsString, parseAsStringEnum, useQueryState } from "nuqs";
 import {
   AudioLinesIcon,
   ArrowUpDownIcon,
@@ -132,6 +133,16 @@ function paramToUri(value: string, kind: RecordKind): string | null {
 
 type Phase = "idle" | "loading" | "ready" | "error" | "more";
 type OccurrenceCategory = "all" | "plants" | "trees" | "birds" | "flowers";
+type SortMode = "newest" | "oldest" | "az" | "za";
+type ViewMode = "cards" | "list" | "map";
+
+const QUERY_STATE_OPTIONS = { history: "replace", scroll: false, shallow: true } as const;
+const SEARCH_QUERY_STATE_OPTIONS = { ...QUERY_STATE_OPTIONS, throttleMs: 200 } as const;
+const SORT_MODES: SortMode[] = ["newest", "oldest", "az", "za"];
+const VIEW_MODES: ViewMode[] = ["cards", "list", "map"];
+const OCCURRENCE_MEDIA_FILTERS: OccurrenceFilter[] = ["image", "audio", "all"];
+const OCCURRENCE_CATEGORIES: OccurrenceCategory[] = ["all", "plants", "trees", "birds", "flowers"];
+const SITE_SOURCE_FILTERS: SiteSourceFilter[] = ["both", "certified"];
 
 type InitialExplorerPage = {
   records: ExplorerRecord[];
@@ -174,20 +185,43 @@ export function RecordExplorer({
   ownerDid?: string;
 }) {
   const meta = KIND_META[kind];
-  const initialRecords = initialPage?.records ?? [];
-
-  const [records, setRecords] = useState<ExplorerRecord[]>(initialRecords);
-  const [cursor, setCursor] = useState<string | null>(initialPage?.cursor ?? null);
-  const [hasMore, setHasMore] = useState(initialPage?.hasMore ?? true);
-  const [phase, setPhase] = useState<Phase>(initialPage ? "ready" : "idle");
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useQueryState(
+    "q",
+    parseAsString.withDefault("").withOptions(SEARCH_QUERY_STATE_OPTIONS),
+  );
   const deferredQuery = useDeferredValue(query);
-  const [sort, setSort] = useState<SortMode>("newest");
+  const [sort, setSort] = useQueryState(
+    "sort",
+    parseAsStringEnum<SortMode>(SORT_MODES).withDefault("newest").withOptions(QUERY_STATE_OPTIONS),
+  );
+  const [occMedia, setOccMedia] = useQueryState(
+    "media",
+    parseAsStringEnum<OccurrenceFilter>(OCCURRENCE_MEDIA_FILTERS).withDefault(DEFAULT_OCCURRENCE_MEDIA).withOptions(QUERY_STATE_OPTIONS),
+  );
+  const [occCategory, setOccCategory] = useQueryState(
+    "category",
+    parseAsStringEnum<OccurrenceCategory>(OCCURRENCE_CATEGORIES).withDefault("all").withOptions(QUERY_STATE_OPTIONS),
+  );
+  const [siteSource, setSiteSource] = useQueryState(
+    "source",
+    parseAsStringEnum<SiteSourceFilter>(SITE_SOURCE_FILTERS).withDefault("both").withOptions(QUERY_STATE_OPTIONS),
+  );
+  const [view, setView] = useQueryState(
+    "view",
+    parseAsStringEnum<ViewMode>(VIEW_MODES).withDefault("cards").withOptions(QUERY_STATE_OPTIONS),
+  );
+  const [recordParamValue, setRecordParamValue] = useQueryState(
+    "record",
+    parseAsString.withOptions(QUERY_STATE_OPTIONS),
+  );
+  const initialRecords = initialPage?.records ?? [];
+  const shouldLoadFromUrl = Boolean(query.trim()) || sort !== "newest" || (kind === "occurrence" && occMedia !== DEFAULT_OCCURRENCE_MEDIA) || (kind === "site" && siteSource !== "both");
+
+  const [records, setRecords] = useState<ExplorerRecord[]>(shouldLoadFromUrl ? [] : initialRecords);
+  const [cursor, setCursor] = useState<string | null>(shouldLoadFromUrl ? null : initialPage?.cursor ?? null);
+  const [hasMore, setHasMore] = useState(shouldLoadFromUrl ? true : initialPage?.hasMore ?? true);
+  const [phase, setPhase] = useState<Phase>(initialPage && !shouldLoadFromUrl ? "ready" : "idle");
   const [sortOpen, setSortOpen] = useState(false);
-  const [occMedia, setOccMedia] = useState<OccurrenceFilter>(DEFAULT_OCCURRENCE_MEDIA);
-  const [occCategory, setOccCategory] = useState<OccurrenceCategory>("all");
-  const [siteSource, setSiteSource] = useState<SiteSourceFilter>("both");
-  const [view, setView] = useState<ViewMode>("cards");
   const [walking, setWalking] = useState(false);
   const [occurrenceStats, setOccurrenceStats] = useState<OccurrenceStats | null>(null);
   const [occurrenceStatsLoading, setOccurrenceStatsLoading] = useState(kind === "occurrence" && !ownerDid);
@@ -198,10 +232,9 @@ export function RecordExplorer({
   const [cardLimit, setCardLimit] = useState(INITIAL_CARD_LIMIT);
   // `?record=` value awaiting resolution, so the URL keeps it while we fetch.
   const [pendingRecord, setPendingRecord] = useState<string | null>(null);
-  // Skip the very first URL write so we don't strip params we just read in.
-  const firstUrlSyncRef = useRef(true);
   // Server-rendered first pages should stay visible after the URL hydrate pass.
   const firstResetAfterHydrateRef = useRef(true);
+  const lastDrawerParamRef = useRef<string | null>(null);
 
   const controller = useRef<AbortController | null>(null);
   const loadSeqRef = useRef(0);
@@ -313,55 +346,17 @@ export function RecordExplorer({
     [deferredQuery, kind, occMedia, ownerDid, siteSource, sort],
   );
 
-  // Hydrate all shareable state from the URL once, before the first load, so a
-  // shared link restores the exact view: search (`q`), card/map view (`view`),
-  // sort (`sort`), the occurrence media filter (`media`) or site source
-  // (`source`), and an open record (`record`). Filter params must land before
-  // the first fetch — the load effect below is gated on `hydrated`.
+  // Once nuqs has read the URL, allow the first load and resolve any shared
+  // record link.
   useEffect(() => {
-    const sp = new URLSearchParams(window.location.search);
-    let shouldClientLoad = false;
-    const q = sp.get("q");
-    if (q) {
-      setQuery(q);
-      shouldClientLoad = true;
-    }
-    const urlView = sp.get("view");
-    if (urlView === "map" || urlView === "list") setView(urlView);
-    const s = sp.get("sort");
-    if (s === "oldest" || s === "az" || s === "za") {
-      setSort(s);
-      shouldClientLoad = true;
-    }
-    if (kind === "occurrence") {
-      const m = sp.get("media");
-      if (m === "audio" || m === "all") {
-        setOccMedia(m);
-        shouldClientLoad = true;
-      }
-      const category = sp.get("category");
-      if (isOccurrenceCategory(category)) setOccCategory(category);
-    }
-    if (kind === "site") {
-      const src = sp.get("source");
-      if (src === "certified") {
-        setSiteSource(src);
-        shouldClientLoad = true;
-      }
-    }
-    if (shouldClientLoad) {
-      setRecords([]);
-      setCursor(null);
-      setHasMore(true);
-      setPhase("idle");
-    }
     setHydrated(true);
+  }, []);
 
-    const rec = sp.get("record");
-    if (!rec) return;
-    const uri = paramToUri(rec, kind);
+  useEffect(() => {
+    if (!recordParamValue) return;
+    const uri = paramToUri(recordParamValue, kind);
     if (!uri) return;
-    setPendingRecord(rec);
+    setPendingRecord(recordParamValue);
     const ctrl = new AbortController();
     fetchRecordByUri(uri, ctrl.signal)
       .then((r) => {
@@ -371,85 +366,42 @@ export function RecordExplorer({
       .catch(() => {})
       .finally(() => setPendingRecord(null));
     return () => ctrl.abort();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [kind, recordParamValue]);
 
   // Abort any in-flight load on unmount.
   useEffect(() => () => controller.current?.abort(), []);
 
-  // Keep the URL in sync with every shareable control (search, view, sort,
-  // media/source filter, open record) so it can be shared/bookmarked.
-  // replaceState (not the router) avoids history spam and re-renders; debounced
-  // so typing doesn't thrash the address bar.
   useEffect(() => {
-    if (firstUrlSyncRef.current) {
-      firstUrlSyncRef.current = false;
-      return;
-    }
-    const t = setTimeout(() => {
-      const params = new URLSearchParams(window.location.search);
-      const q = query.trim();
-
-      if (q) params.set("q", q);
-      else params.delete("q");
-
-      if (view !== "cards") params.set("view", view);
-      else params.delete("view");
-
-      if (sort !== "newest") params.set("sort", sort);
-      else params.delete("sort");
-
-      if (kind === "occurrence") {
-        if (occMedia !== DEFAULT_OCCURRENCE_MEDIA) params.set("media", occMedia);
-        else params.delete("media");
-        if (occCategory !== "all") params.set("category", occCategory);
-        else params.delete("category");
-      } else {
-        params.delete("media");
-        params.delete("category");
-      }
-
-      if (kind === "site") {
-        if (siteSource !== "both") params.set("source", siteSource);
-        else params.delete("source");
-      } else {
-        params.delete("source");
-      }
-
-      if (drawer) params.set("record", recordParam(drawer));
-      else if (pendingRecord) params.set("record", pendingRecord);
-      else params.delete("record");
-
-      const qs = params.toString();
-      const url = qs ? `${window.location.pathname}?${qs}` : window.location.pathname;
-      window.history.replaceState(null, "", url);
-    }, 200);
-    return () => clearTimeout(t);
-  }, [query, view, sort, occMedia, occCategory, siteSource, drawer, pendingRecord, kind]);
+    if (pendingRecord) return;
+    const nextRecordParam = drawer ? recordParam(drawer) : null;
+    if (nextRecordParam === lastDrawerParamRef.current) return;
+    lastDrawerParamRef.current = nextRecordParam;
+    if (nextRecordParam !== recordParamValue) void setRecordParamValue(nextRecordParam);
+  }, [drawer, pendingRecord, recordParamValue, setRecordParamValue]);
 
   // Changing the occurrence media filter resets and re-walks.
   function changeMedia(next: OccurrenceFilter) {
     if (next === occMedia) return;
     controller.current?.abort();
-    setOccMedia(next);
+    void setOccMedia(next);
     resetStream();
   }
 
   function changeCategory(next: OccurrenceCategory) {
     if (next === occCategory) return;
-    setOccCategory(next);
+    void setOccCategory(next);
   }
 
   // Changing the organization source resets + re-walks.
   function changeSource(next: SiteSourceFilter) {
     if (next === siteSource) return;
     controller.current?.abort();
-    setSiteSource(next);
+    void setSiteSource(next);
     resetStream();
   }
 
   function resetStream() {
-    setQuery("");
+    void setQuery("");
     setRecords([]);
     setCursor(null);
     setHasMore(true);
@@ -467,7 +419,7 @@ export function RecordExplorer({
     setCursor(null);
     setHasMore(true);
     setPhase("idle");
-  }, [deferredQuery, hydrated, sort]);
+  }, [deferredQuery, hydrated, occMedia, siteSource, sort]);
 
   // First load (once hydrated) and any time a filter reset drops us back to
   // idle, kick off a walk. Gated on `hydrated` so the URL's filter params are
@@ -535,14 +487,14 @@ export function RecordExplorer({
               />
               <input
                 value={query}
-                onChange={(e) => setQuery(e.target.value)}
+                onChange={(e) => void setQuery(e.target.value)}
                 placeholder={meta.search}
                 aria-label="Search nature sightings"
                 className="min-w-0 flex-1 truncate border-0 bg-transparent px-2.5 py-2 text-sm text-foreground outline-none placeholder:text-foreground/40"
               />
             </div>
 
-            <SortControl sort={sort} setSort={setSort} open={sortOpen} setOpen={setSortOpen} />
+            <SortControl sort={sort} setSort={(nextSort) => void setSort(nextSort)} open={sortOpen} setOpen={setSortOpen} />
 
             {/* Cards / List / Map view toggle */}
             <div className="inline-flex h-10 shrink-0 items-center rounded-full border border-border bg-background/50 p-0.5 backdrop-blur">
@@ -556,7 +508,7 @@ export function RecordExplorer({
                 <button
                   key={o.id}
                   type="button"
-                  onClick={() => setView(o.id)}
+                  onClick={() => void setView(o.id)}
                   aria-pressed={view === o.id}
                   aria-label={o.label}
                   title={o.label}
@@ -631,7 +583,7 @@ export function RecordExplorer({
               <EmptyState
                 title="No matches here"
                 body="Try a different name, place, or country; or show more to widen the search."
-                onRetry={() => setQuery("")}
+                onRetry={() => void setQuery("")}
                 retryLabel="Clear search"
               />
             ) : kind === "occurrence" && occCategory !== "all" ? (
@@ -1387,10 +1339,6 @@ function filterRecords(records: ExplorerRecord[], query: string): ExplorerRecord
   return records.filter((r) => haystack(r).includes(q));
 }
 
-function isOccurrenceCategory(value: string | null): value is OccurrenceCategory {
-  return value === "all" || value === "plants" || value === "trees" || value === "birds" || value === "flowers";
-}
-
 function occurrenceCategoryLabel(category: OccurrenceCategory): string {
   return OCCURRENCE_CATEGORY_OPTIONS.find((option) => option.id === category)?.label ?? "Nature";
 }
@@ -1428,9 +1376,6 @@ function filterOccurrenceCategory(records: OccurrenceRecord[], category: Occurre
 //
 // Records arrive newest-first (createdAt DESC) from the indexer; this lets the
 // visitor re-sort the already-loaded slice by timestamp or alphabetically.
-
-type ViewMode = "cards" | "list" | "map";
-type SortMode = "newest" | "oldest" | "az" | "za";
 
 function sortTimestamp(iso: string | null | undefined): number {
   if (!iso) return 0;

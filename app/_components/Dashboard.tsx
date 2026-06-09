@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { parseAsStringEnum, useQueryState } from "nuqs";
 import {
   Area,
   AreaChart,
@@ -62,6 +63,11 @@ const PERIODS: Array<{ id: Period; label: string }> = [
 ];
 
 const GRANULARITIES: TimeGranularity[] = ["day", "week", "month"];
+const PERIOD_VALUES: Period[] = ["all", "month", "week"];
+const SORT_DIRECTIONS: Array<"asc" | "desc"> = ["asc", "desc"];
+const DONOR_SORT_KEYS: Array<"rank" | "totalAmount" | "donationCount" | "lastDonatedAt"> = ["rank", "totalAmount", "donationCount", "lastDonatedAt"];
+const ORG_SORT_KEYS: Array<"totalRaised" | "bumicertCount" | "donorCount"> = ["totalRaised", "bumicertCount", "donorCount"];
+const QUERY_STATE_OPTIONS = { history: "replace", scroll: false, shallow: true } as const;
 
 const GRANULARITY_LABELS: Record<TimeGranularity, string> = {
   day: "Daily",
@@ -102,7 +108,10 @@ const itemVariants = {
 
 export function Dashboard() {
   const { period, setPeriod } = useDashboardPeriod();
-  const [granularity, setGranularity] = useState<TimeGranularity>("day");
+  const [granularity, setGranularity] = useQueryState(
+    "granularity",
+    parseAsStringEnum<TimeGranularity>(GRANULARITIES).withDefault("day").withOptions(QUERY_STATE_OPTIONS),
+  );
   const [receipts, setReceipts] = useState<Awaited<ReturnType<typeof fetchReceipts>> | null>(null);
   const [orgCountryMap, setOrgCountryMap] = useState<Map<string, string>>(new Map());
   const [error, setError] = useState(false);
@@ -141,7 +150,7 @@ export function Dashboard() {
   const recentTx = useMemo(() => computeRecentTransactions(allReceipts, Number.POSITIVE_INFINITY), [allReceipts]);
 
   return (
-    <DashboardShell periodFilter={<PeriodFilter period={period} onPeriodChange={setPeriod} />}>
+    <DashboardShell periodFilter={<PeriodFilter period={period} onPeriodChange={(nextPeriod) => void setPeriod(nextPeriod)} />}>
       {error ? (
         <DashboardError />
       ) : receipts === null ? (
@@ -160,7 +169,7 @@ export function Dashboard() {
             <DonationsVolumeChart
               data={timeSeries}
               granularity={granularity}
-              onGranularityChange={setGranularity}
+              onGranularityChange={(nextGranularity) => void setGranularity(nextGranularity)}
             />
           </motion.div>
           <motion.div variants={itemVariants} className="flex flex-col gap-6 lg:flex-row">
@@ -204,29 +213,12 @@ function DashboardShell({ children, periodFilter }: { children: React.ReactNode;
 }
 
 function useDashboardPeriod() {
-  const [period, setPeriodState] = useState<Period>("all");
-  const firstUrlSyncRef = useRef(true);
+  const [period, setPeriod] = useQueryState(
+    "period",
+    parseAsStringEnum<Period>(PERIOD_VALUES).withDefault("all").withOptions(QUERY_STATE_OPTIONS),
+  );
 
-  useEffect(() => {
-    const value = new URLSearchParams(window.location.search).get("period");
-    if (value === "month" || value === "week" || value === "all") {
-      setPeriodState(value);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (firstUrlSyncRef.current) {
-      firstUrlSyncRef.current = false;
-      return;
-    }
-    const params = new URLSearchParams(window.location.search);
-    if (period === "all") params.delete("period");
-    else params.set("period", period);
-    const query = params.toString();
-    window.history.replaceState(null, "", query ? `${window.location.pathname}?${query}` : window.location.pathname);
-  }, [period]);
-
-  return { period, setPeriod: setPeriodState };
+  return { period, setPeriod };
 }
 
 function PeriodFilter({ period, onPeriodChange }: { period: Period; onPeriodChange: (period: Period) => void }) {
@@ -444,8 +436,14 @@ function ChartTooltip({ active, payload, label }: { active?: boolean; payload?: 
 }
 
 function TopDonorsTable({ rows }: { rows: TopDonor[] }) {
-  const [sortKey, setSortKey] = useState<"rank" | "totalAmount" | "donationCount" | "lastDonatedAt">("rank");
-  const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
+  const [sortKey, setSortKey] = useQueryState(
+    "donorSort",
+    parseAsStringEnum<(typeof DONOR_SORT_KEYS)[number]>(DONOR_SORT_KEYS).withDefault("rank").withOptions(QUERY_STATE_OPTIONS),
+  );
+  const [sortDir, setSortDir] = useQueryState(
+    "donorDir",
+    parseAsStringEnum<"asc" | "desc">(SORT_DIRECTIONS).withDefault("asc").withOptions(QUERY_STATE_OPTIONS),
+  );
   const [expanded, setExpanded] = useState(false);
 
   const sorted = useMemo(() => {
@@ -461,10 +459,11 @@ function TopDonorsTable({ rows }: { rows: TopDonor[] }) {
   const visibleRows = expanded ? sorted : sorted.slice(0, DEFAULT_SECTION_LIMIT);
 
   const sort = (key: typeof sortKey) => {
-    if (sortKey === key) setSortDir((dir) => (dir === "asc" ? "desc" : "asc"));
-    else {
-      setSortKey(key);
-      setSortDir("desc");
+    if (sortKey === key) {
+      void setSortDir(sortDir === "asc" ? "desc" : "asc");
+    } else {
+      void setSortKey(key);
+      void setSortDir("desc");
     }
   };
 
@@ -515,8 +514,14 @@ function TopDonorsTable({ rows }: { rows: TopDonor[] }) {
 }
 
 function OrganizationsTable({ rows }: { rows: OrgRow[] }) {
-  const [sortKey, setSortKey] = useState<"totalRaised" | "bumicertCount" | "donorCount">("totalRaised");
-  const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
+  const [sortKey, setSortKey] = useQueryState(
+    "orgSort",
+    parseAsStringEnum<(typeof ORG_SORT_KEYS)[number]>(ORG_SORT_KEYS).withDefault("totalRaised").withOptions(QUERY_STATE_OPTIONS),
+  );
+  const [sortDir, setSortDir] = useQueryState(
+    "orgDir",
+    parseAsStringEnum<"asc" | "desc">(SORT_DIRECTIONS).withDefault("desc").withOptions(QUERY_STATE_OPTIONS),
+  );
   const [expanded, setExpanded] = useState(false);
 
   const sorted = useMemo(() => {
@@ -531,10 +536,11 @@ function OrganizationsTable({ rows }: { rows: OrgRow[] }) {
   const visibleRows = expanded ? sorted : sorted.slice(0, DEFAULT_SECTION_LIMIT);
 
   const sort = (key: typeof sortKey) => {
-    if (sortKey === key) setSortDir((dir) => (dir === "asc" ? "desc" : "asc"));
-    else {
-      setSortKey(key);
-      setSortDir("desc");
+    if (sortKey === key) {
+      void setSortDir(sortDir === "asc" ? "desc" : "asc");
+    } else {
+      void setSortKey(key);
+      void setSortDir("desc");
     }
   };
 

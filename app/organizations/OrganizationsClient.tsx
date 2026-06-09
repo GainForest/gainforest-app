@@ -18,6 +18,7 @@ import {
   XIcon,
 } from "lucide-react";
 import { memo, useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
+import { parseAsString, parseAsStringEnum, useQueryState } from "nuqs";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Skeleton } from "@/components/ui/skeleton";
 import { RecordDrawer } from "../_components/RecordDrawer";
@@ -36,6 +37,12 @@ import { countryFlag } from "../_lib/format";
 type SortMode = "newest" | "oldest" | "az" | "za";
 type ViewMode = "cards" | "list" | "map";
 type QuickFilter = "observations" | "bumicerts";
+
+const SORT_MODES: SortMode[] = ["newest", "oldest", "az", "za"];
+const VIEW_MODES: ViewMode[] = ["cards", "list", "map"];
+const QUICK_FILTERS: QuickFilter[] = ["observations", "bumicerts"];
+const QUERY_STATE_OPTIONS = { history: "replace", scroll: false, shallow: true } as const;
+const SEARCH_QUERY_STATE_OPTIONS = { ...QUERY_STATE_OPTIONS, throttleMs: 200 } as const;
 
 const SORT_OPTIONS: Array<{ value: SortMode; label: string }> = [
   { value: "newest", label: "Newest first" },
@@ -59,12 +66,31 @@ export function OrganizationsClient({ records: initialRecords = [] }: { records?
   const [hasMore, setHasMore] = useState(initialRecords.length === 0);
   const [loading, setLoading] = useState(initialRecords.length === 0);
   const [loadingMore, setLoadingMore] = useState(false);
-  const [query, setQuery] = useState("");
-  const [sort, setSort] = useState<SortMode>("newest");
-  const [countryFilter, setCountryFilter] = useState<string | null>(null);
-  const [typeFilter, setTypeFilter] = useState<string | null>(null);
-  const [quickFilters, setQuickFilters] = useState<QuickFilter[]>([]);
-  const [view, setView] = useState<ViewMode>("cards");
+  const [query, setQuery] = useQueryState(
+    "q",
+    parseAsString.withDefault("").withOptions(SEARCH_QUERY_STATE_OPTIONS),
+  );
+  const [sort, setSort] = useQueryState(
+    "sort",
+    parseAsStringEnum<SortMode>(SORT_MODES).withDefault("newest").withOptions(QUERY_STATE_OPTIONS),
+  );
+  const [countryFilter, setCountryFilter] = useQueryState(
+    "country",
+    parseAsString.withOptions(QUERY_STATE_OPTIONS),
+  );
+  const [typeFilter, setTypeFilter] = useQueryState(
+    "category",
+    parseAsString.withOptions(QUERY_STATE_OPTIONS),
+  );
+  const [quickFiltersParam, setQuickFiltersParam] = useQueryState(
+    "quick",
+    parseAsString.withOptions(QUERY_STATE_OPTIONS),
+  );
+  const quickFilters = useMemo(() => parseQuickFiltersParam(quickFiltersParam), [quickFiltersParam]);
+  const [view, setView] = useQueryState(
+    "view",
+    parseAsStringEnum<ViewMode>(VIEW_MODES).withDefault("cards").withOptions(QUERY_STATE_OPTIONS),
+  );
   const [openDropdown, setOpenDropdown] = useState(false);
   const [drawer, setDrawer] = useState<SiteRecord | null>(null);
   const [cardLimit, setCardLimit] = useState(INITIAL_CARD_LIMIT);
@@ -239,17 +265,19 @@ export function OrganizationsClient({ records: initialRecords = [] }: { records?
     setCardLimit(INITIAL_CARD_LIMIT);
   }, [deferredQuery, sort, countryFilter, typeFilter, quickFilters, view]);
 
+  const updateQuickFilters = (nextFilters: QuickFilter[]) => {
+    void setQuickFiltersParam(serializeQuickFiltersParam(nextFilters));
+  };
+
   const toggleQuickFilter = (filter: QuickFilter) => {
-    setQuickFilters((current) =>
-      current.includes(filter) ? current.filter((value) => value !== filter) : [...current, filter],
-    );
+    updateQuickFilters(quickFilters.includes(filter) ? quickFilters.filter((value) => value !== filter) : [...quickFilters, filter]);
   };
 
   const clearAll = () => {
-    setQuery("");
-    setCountryFilter(null);
-    setTypeFilter(null);
-    setQuickFilters([]);
+    void setQuery("");
+    void setCountryFilter(null);
+    void setTypeFilter(null);
+    updateQuickFilters([]);
   };
 
   const loadMore = useCallback(() => {
@@ -298,15 +326,15 @@ export function OrganizationsClient({ records: initialRecords = [] }: { records?
                 <input
                   type="text"
                   value={query}
-                  onChange={(event) => setQuery(event.target.value)}
+                  onChange={(event) => void setQuery(event.target.value)}
                   placeholder="Search organizations"
                   className="min-w-0 flex-1 truncate border-0 bg-transparent px-2.5 py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground"
                 />
               </div>
 
-              <SortControl sort={sort} setSort={setSort} open={openDropdown} setOpen={setOpenDropdown} />
+              <SortControl sort={sort} setSort={(nextSort) => void setSort(nextSort)} open={openDropdown} setOpen={setOpenDropdown} />
 
-              <ViewToggle view={view} setView={setView} />
+              <ViewToggle view={view} setView={(nextView) => void setView(nextView)} />
             </div>
 
             <div
@@ -329,7 +357,7 @@ export function OrganizationsClient({ records: initialRecords = [] }: { records?
                     label="Category"
                     value={typeFilter}
                     options={typeChips.map((type) => ({ value: type.value, label: type.label, count: type.count }))}
-                    onChange={setTypeFilter}
+                    onChange={(nextType) => void setTypeFilter(nextType)}
                   />
                 )}
 
@@ -338,7 +366,7 @@ export function OrganizationsClient({ records: initialRecords = [] }: { records?
                     label="Country"
                     value={countryFilter}
                     options={countryChips.map((country) => ({ value: country.code, label: country.name, emoji: country.emoji }))}
-                    onChange={setCountryFilter}
+                    onChange={(nextCountry) => void setCountryFilter(nextCountry)}
                   />
                 )}
 
@@ -985,6 +1013,16 @@ function initials(name: string): string {
     .slice(0, 2)
     .map((part) => part[0]?.toUpperCase() ?? "")
     .join("") || "•";
+}
+
+function parseQuickFiltersParam(value: string | null): QuickFilter[] {
+  if (!value) return [];
+  const parsed = value.split(",").filter((item): item is QuickFilter => QUICK_FILTERS.includes(item as QuickFilter));
+  return [...new Set(parsed)];
+}
+
+function serializeQuickFiltersParam(filters: QuickFilter[]): string | null {
+  return filters.length > 0 ? filters.join(",") : null;
 }
 
 function titleCase(value: string): string {

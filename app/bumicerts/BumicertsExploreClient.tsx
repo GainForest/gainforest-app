@@ -17,6 +17,7 @@ import {
   UsersIcon,
 } from "lucide-react";
 import { memo, useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
+import { parseAsString, parseAsStringEnum, useQueryState } from "nuqs";
 import { BumicertOwnerAvatar } from "@/components/bumicert/BumicertOwnerAvatar";
 import { BumicertPillRows, type BumicertCardPill } from "@/components/bumicert/BumicertPillRows";
 import { Button } from "@/components/ui/button";
@@ -51,6 +52,12 @@ const FILTER_CHIPS: FilterChip[] = [
   { key: "donations", label: "Accepts donations", predicate: () => true },
 ];
 
+const FILTER_KEYS: FilterKey[] = ["images", "locations", "contributors", "active", "donations"];
+const SORT_MODES: SortMode[] = ["newest", "oldest", "az", "za"];
+const VIEW_MODES: ViewMode[] = ["cards", "list", "map"];
+const QUERY_STATE_OPTIONS = { history: "replace", scroll: false, shallow: true } as const;
+const SEARCH_QUERY_STATE_OPTIONS = { ...QUERY_STATE_OPTIONS, throttleMs: 200 } as const;
+
 const SORT_OPTIONS: Array<{ value: SortMode; label: string }> = [
   { value: "newest", label: "Newest" },
   { value: "oldest", label: "Oldest" },
@@ -72,13 +79,26 @@ export function BumicertsExploreClient({ records: initialRecords = [] }: { recor
   const [hasMore, setHasMore] = useState(initialRecords.length === 0);
   const [loading, setLoading] = useState(initialRecords.length === 0);
   const [loadingMore, setLoadingMore] = useState(false);
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useQueryState(
+    "q",
+    parseAsString.withDefault("").withOptions(SEARCH_QUERY_STATE_OPTIONS),
+  );
   const deferredQuery = useDeferredValue(query);
-  const [sort, setSort] = useState<SortMode>("newest");
+  const [sort, setSort] = useQueryState(
+    "sort",
+    parseAsStringEnum<SortMode>(SORT_MODES).withDefault("newest").withOptions(QUERY_STATE_OPTIONS),
+  );
+  const [filtersParam, setFiltersParam] = useQueryState(
+    "filters",
+    parseAsString.withOptions(QUERY_STATE_OPTIONS),
+  );
+  const filters = useMemo(() => parseFilterParam(filtersParam), [filtersParam]);
+  const [view, setView] = useQueryState(
+    "view",
+    parseAsStringEnum<ViewMode>(VIEW_MODES).withDefault("cards").withOptions(QUERY_STATE_OPTIONS),
+  );
   const [openSort, setOpenSort] = useState(false);
   const [openFilters, setOpenFilters] = useState(false);
-  const [filters, setFilters] = useState<FilterKey[]>(["images"]);
-  const [view, setView] = useState<ViewMode>("cards");
   const [drawer, setDrawer] = useState<BumicertRecord | null>(null);
   const [cardLimit, setCardLimit] = useState(INITIAL_CARD_LIMIT);
   const [totalStats, setTotalStats] = useState<BumicertStats | null>(null);
@@ -224,13 +244,15 @@ export function BumicertsExploreClient({ records: initialRecords = [] }: { recor
     };
   }, [openFilters]);
 
-  const toggleFilter = useCallback((key: FilterKey) => {
-    setFilters((current) =>
-      current.includes(key) ? current.filter((value) => value !== key) : [...current, key],
-    );
-  }, []);
+  const updateFilters = useCallback((nextFilters: FilterKey[]) => {
+    void setFiltersParam(serializeFilterParam(nextFilters));
+  }, [setFiltersParam]);
 
-  const clearFilters = useCallback(() => setFilters([]), []);
+  const toggleFilter = useCallback((key: FilterKey) => {
+    updateFilters(filters.includes(key) ? filters.filter((value) => value !== key) : [...filters, key]);
+  }, [filters, updateFilters]);
+
+  const clearFilters = useCallback(() => updateFilters([]), [updateFilters]);
   const loadMore = useCallback(() => {
     if (loading || loadingMore || !hasMore) return;
 
@@ -307,7 +329,7 @@ export function BumicertsExploreClient({ records: initialRecords = [] }: { recor
                   <input
                     type="text"
                     value={query}
-                    onChange={(event) => setQuery(event.target.value)}
+                    onChange={(event) => void setQuery(event.target.value)}
                     aria-label="Search projects"
                     placeholder="Search projects by name, keyword, or location"
                     className="min-w-0 flex-1 truncate border-0 bg-transparent px-3 py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground"
@@ -325,7 +347,7 @@ export function BumicertsExploreClient({ records: initialRecords = [] }: { recor
                     <button
                       key={option.id}
                       type="button"
-                      onClick={() => setView(option.id)}
+                      onClick={() => void setView(option.id)}
                       aria-pressed={view === option.id}
                       className={`inline-flex h-9 items-center gap-1.5 rounded-full px-3 text-sm font-medium transition-colors ${
                         view === option.id
@@ -362,7 +384,7 @@ export function BumicertsExploreClient({ records: initialRecords = [] }: { recor
                           key={option.value}
                           type="button"
                           onClick={() => {
-                            setSort(option.value);
+                            void setSort(option.value);
                             setOpenSort(false);
                           }}
                           className={`w-full px-3 py-2 text-left text-sm transition-colors ${
@@ -391,7 +413,7 @@ export function BumicertsExploreClient({ records: initialRecords = [] }: { recor
                     <button
                       key={option.id}
                       type="button"
-                      onClick={() => setView(option.id)}
+                      onClick={() => void setView(option.id)}
                       aria-pressed={view === option.id}
                       className={`inline-flex h-9 items-center gap-1.5 rounded-full px-3 text-sm font-medium transition-colors ${
                         view === option.id
@@ -895,6 +917,18 @@ function buildPillRows(record: BumicertRecord): {
 function formatScopeTag(tag: string): string {
   const clean = tag.replace(/[_-]+/g, " ").replace(/\s+/g, " ").trim();
   return clean ? clean.charAt(0).toUpperCase() + clean.slice(1) : tag;
+}
+
+function parseFilterParam(value: string | null): FilterKey[] {
+  if (value === null) return ["images"];
+  if (value === "none") return [];
+  const parsed = value.split(",").filter((item): item is FilterKey => FILTER_KEYS.includes(item as FilterKey));
+  return [...new Set(parsed)];
+}
+
+function serializeFilterParam(filters: FilterKey[]): string | null {
+  if (filters.length === 1 && filters[0] === "images") return null;
+  return filters.length > 0 ? filters.join(",") : "none";
 }
 
 const orgLabelTextVariants = {

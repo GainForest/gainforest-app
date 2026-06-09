@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { parseAsString, parseAsStringEnum, useQueryState } from "nuqs";
 import { useTranslations } from "./audio-copy";
 import { ChevronLeftIcon } from "lucide-react";
 import Container from "@/components/ui/container";
@@ -15,42 +15,35 @@ import { MODES, SECTIONS, TELEGRAM_BOT_URL, type AudioWorkspaceData, type Sectio
 
 type Mode = (typeof MODES)[number];
 
+const QUERY_STATE_OPTIONS = { history: "replace", scroll: false, shallow: true } as const;
+const SEARCH_QUERY_STATE_OPTIONS = { ...QUERY_STATE_OPTIONS, throttleMs: 200 } as const;
+
 interface AudioClientProps {
   did: string;
 }
 
-function isSection(value: string | null): value is Section {
-  return SECTIONS.includes(value as Section);
-}
-
-function isMode(value: string | null): value is Mode {
-  return MODES.includes(value as Mode);
-}
-
 export function AudioClient({ did }: AudioClientProps) {
   const t = useTranslations("upload.audio");
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-
-  const section = isSection(searchParams.get("section")) ? searchParams.get("section") as Section : "events";
-  const mode = isMode(searchParams.get("mode")) ? searchParams.get("mode") as Mode : "list";
-  const selectedUri = searchParams.get("uri") ?? "";
-  const searchQuery = searchParams.get("q") ?? "";
+  const [section, setSection] = useQueryState(
+    "section",
+    parseAsStringEnum<Section>([...SECTIONS]).withDefault("events").withOptions(QUERY_STATE_OPTIONS),
+  );
+  const [mode, setMode] = useQueryState(
+    "mode",
+    parseAsStringEnum<Mode>([...MODES]).withDefault("list").withOptions(QUERY_STATE_OPTIONS),
+  );
+  const [selectedUri, setSelectedUri] = useQueryState(
+    "uri",
+    parseAsString.withDefault("").withOptions(QUERY_STATE_OPTIONS),
+  );
+  const [searchQuery, setSearchQuery] = useQueryState(
+    "q",
+    parseAsString.withDefault("").withOptions(SEARCH_QUERY_STATE_OPTIONS),
+  );
 
   const [workspace, setWorkspace] = useState<AudioWorkspaceData>({ events: [], deployments: [], recordings: [] });
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  const setQueryState = useCallback((updates: Record<string, string | null>) => {
-    const params = new URLSearchParams(searchParams.toString());
-    for (const [key, value] of Object.entries(updates)) {
-      if (value === null || value === "") params.delete(key);
-      else params.set(key, value);
-    }
-    const query = params.toString();
-    router.push(query ? `${pathname}?${query}` : pathname, { scroll: false });
-  }, [pathname, router, searchParams]);
 
   const loadAudio = useCallback(async () => {
     setIsLoading(true);
@@ -80,19 +73,26 @@ export function AudioClient({ did }: AudioClientProps) {
   };
 
   const showList = (target: Section) => {
-    setQueryState({ section: target, mode: "list", uri: null });
+    void setSection(target);
+    void setMode("list");
+    void setSelectedUri("");
   };
 
   const openNew = (target: Section) => {
-    setQueryState({ section: target, mode: "new", uri: null });
+    void setSection(target);
+    void setMode("new");
+    void setSelectedUri("");
   };
 
   const openDetail = (target: Section, uri: string) => {
-    setQueryState({ section: target, mode: "detail", uri });
+    void setSection(target);
+    void setMode("detail");
+    void setSelectedUri(uri);
   };
 
   const backToList = () => {
-    setQueryState({ mode: "list", uri: null });
+    void setMode("list");
+    void setSelectedUri("");
   };
 
   const { events, deployments, recordings } = workspace;
@@ -188,7 +188,7 @@ export function AudioClient({ did }: AudioClientProps) {
         <ListPanel
           section={section}
           searchQuery={searchQuery}
-          onSearchChange={(value) => setQueryState({ q: value || null })}
+          onSearchChange={(value) => void setSearchQuery(value || "")}
           events={events}
           deployments={deployments}
           recordings={recordings}

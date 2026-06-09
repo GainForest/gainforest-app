@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { fetchAuthSession } from "@/app/_lib/auth-server";
 import { AudioClient } from "./_components/AudioClient";
 
@@ -11,5 +12,9 @@ export const metadata: Metadata = {
 export default async function AudioPage() {
   const session = await fetchAuthSession();
   if (!session.isLoggedIn) return null;
-  return <AudioClient did={session.did} />;
+  return (
+    <Suspense fallback={null}>
+      <AudioClient did={session.did} />
+    </Suspense>
+  );
 }

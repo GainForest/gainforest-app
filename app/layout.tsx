@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Cormorant_Garamond, Geist, Geist_Mono, Instrument_Serif } from "next/font/google";
 import { Suspense } from "react";
+import { NuqsAdapter } from "nuqs/adapters/next/app";
 import "./globals.css";
 import { AppShell } from "./_components/AppShell";
 import { Footer } from "./_components/Footer";
@@ -123,16 +124,18 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <RouteChangeIndicator />
           <LinkPrefetcher />
         </Suspense>
-        <WagmiProvider>
-          <ModalProvider>
-            <AccountDrawerProvider>
-              <AppShell authSession={null} manageAccountKind="user">
-                {children}
-                <Footer />
-              </AppShell>
-            </AccountDrawerProvider>
-          </ModalProvider>
-        </WagmiProvider>
+        <NuqsAdapter>
+          <WagmiProvider>
+            <ModalProvider>
+              <AccountDrawerProvider>
+                <AppShell authSession={null} manageAccountKind="user">
+                  {children}
+                  <Footer />
+                </AppShell>
+              </AccountDrawerProvider>
+            </ModalProvider>
+          </WagmiProvider>
+        </NuqsAdapter>
       </body>
     </html>
   );

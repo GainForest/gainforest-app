@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { ChevronRightIcon } from "lucide-react";
 import { RichText } from "../../_components/RichText";
@@ -104,7 +105,11 @@ export function AccountObservationsTabContent({ account, did }: { account: Accou
     notFound();
   }
 
-  return <RecordExplorer kind="occurrence" ownerDid={did} showHero={false} />;
+  return (
+    <Suspense fallback={null}>
+      <RecordExplorer kind="occurrence" ownerDid={did} showHero={false} />
+    </Suspense>
+  );
 }
 
 export function AccountSettingsTabContent({ account }: { account: AccountRouteData }) {

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { LeaderboardClient } from "./LeaderboardClient";
 
 export const metadata: Metadata = {
@@ -9,5 +10,9 @@ export const metadata: Metadata = {
 };
 
 export default function LeaderboardPage() {
-  return <LeaderboardClient />;
+  return (
+    <Suspense fallback={null}>
+      <LeaderboardClient />
+    </Suspense>
+  );
 }

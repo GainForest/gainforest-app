@@ -16,7 +16,8 @@ import {
   UsersRoundIcon,
   WalletIcon,
 } from "lucide-react";
-import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { parseAsStringEnum, useQueryState } from "nuqs";
 import {
   Select,
   SelectContent,
@@ -53,6 +54,9 @@ type LeaderboardResult = {
 };
 
 const PERIODS: Period[] = ["all", "month", "week"];
+const DONOR_FILTER_VALUES: DonorFilter[] = ["all", "anonymous", "known"];
+const SORT_VALUES: SortMode[] = ["total-raised", "donation-count", "recent-donation"];
+const QUERY_STATE_OPTIONS = { history: "replace", scroll: false, shallow: true } as const;
 const DONOR_FILTERS: Array<{ value: DonorFilter; Icon: typeof UsersRoundIcon; label: string; shortLabel: string }> = [
   { value: "all", Icon: UsersRoundIcon, label: "All Donors", shortLabel: "All" },
   { value: "anonymous", Icon: UserRoundXIcon, label: "Anonymous Only", shortLabel: "Anonymous" },
@@ -72,33 +76,18 @@ const PERIOD_LABELS: Record<Period, string> = {
 export function LeaderboardClient() {
   const [receipts, setReceipts] = useState<FundingReceipt[] | null>(null);
   const [error, setError] = useState(false);
-  const [period, setPeriod] = useState<Period>("all");
-  const [donorFilter, setDonorFilter] = useState<DonorFilter>("all");
-  const [sortBy, setSortBy] = useState<SortMode>("total-raised");
-  const firstUrlSyncRef = useRef(true);
-
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const nextPeriod = params.get("period");
-    const nextDonorFilter = params.get("donors");
-    const nextSort = params.get("sort");
-    if (isPeriod(nextPeriod)) setPeriod(nextPeriod);
-    if (isDonorFilter(nextDonorFilter)) setDonorFilter(nextDonorFilter);
-    if (isSortMode(nextSort)) setSortBy(nextSort);
-  }, []);
-
-  useEffect(() => {
-    if (firstUrlSyncRef.current) {
-      firstUrlSyncRef.current = false;
-      return;
-    }
-    const params = new URLSearchParams();
-    if (period !== "all") params.set("period", period);
-    if (donorFilter !== "all") params.set("donors", donorFilter);
-    if (sortBy !== "total-raised") params.set("sort", sortBy);
-    const qs = params.toString();
-    window.history.replaceState(null, "", qs ? `${window.location.pathname}?${qs}` : window.location.pathname);
-  }, [period, donorFilter, sortBy]);
+  const [period, setPeriod] = useQueryState(
+    "period",
+    parseAsStringEnum<Period>(PERIODS).withDefault("all").withOptions(QUERY_STATE_OPTIONS),
+  );
+  const [donorFilter, setDonorFilter] = useQueryState(
+    "donors",
+    parseAsStringEnum<DonorFilter>(DONOR_FILTER_VALUES).withDefault("all").withOptions(QUERY_STATE_OPTIONS),
+  );
+  const [sortBy, setSortBy] = useQueryState(
+    "sort",
+    parseAsStringEnum<SortMode>(SORT_VALUES).withDefault("total-raised").withOptions(QUERY_STATE_OPTIONS),
+  );
 
   useEffect(() => {
     const controller = new AbortController();
@@ -126,11 +115,11 @@ export function LeaderboardClient() {
     <LeaderboardShell
       animate={false}
       period={period}
-      onPeriodChange={setPeriod}
+      onPeriodChange={(nextPeriod) => void setPeriod(nextPeriod)}
       donorFilter={donorFilter}
-      onDonorFilterChange={setDonorFilter}
+      onDonorFilterChange={(nextDonorFilter) => void setDonorFilter(nextDonorFilter)}
       sortBy={sortBy}
-      onSortChange={setSortBy}
+      onSortChange={(nextSort) => void setSortBy(nextSort)}
       loading={receipts === null && !error}
       totalDonors={leaderboard?.totalDonorsCount ?? 0}
       totalRaised={leaderboard?.totalAmountSum ?? 0}
@@ -678,16 +667,8 @@ function basescanAddress(address: string): string {
   return `https://basescan.org/address/${encodeURIComponent(address)}`;
 }
 
-function isPeriod(value: string | null): value is Period {
-  return value === "all" || value === "month" || value === "week";
-}
-
-function isDonorFilter(value: string | null): value is DonorFilter {
-  return value === "all" || value === "anonymous" || value === "known";
-}
-
-function isSortMode(value: string | null): value is SortMode {
-  return value === "total-raised" || value === "donation-count" || value === "recent-donation";
+function isSortMode(value: string): value is SortMode {
+  return SORT_VALUES.includes(value as SortMode);
 }
 
 function cn(...classes: Array<string | false | null | undefined>) {

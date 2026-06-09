@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { parseAsInteger, parseAsString, parseAsStringEnum, useQueryState } from "nuqs";
 import {
   CalendarIcon,
   CloudUploadIcon,
@@ -311,6 +312,10 @@ function TreeEditor({
 const PAGE_SIZE = 50;
 type DatasetViewMode = "cards" | "list";
 
+const DATASET_VIEW_MODES: DatasetViewMode[] = ["cards", "list"];
+const QUERY_STATE_OPTIONS = { history: "replace", scroll: false, shallow: true } as const;
+const SEARCH_QUERY_STATE_OPTIONS = { ...QUERY_STATE_OPTIONS, throttleMs: 200 } as const;
+
 function DatasetViewToggle({ view, setView }: { view: DatasetViewMode; setView: (view: DatasetViewMode) => void }) {
   return (
     <div className="inline-flex h-10 shrink-0 items-center rounded-full border border-border bg-background/70 p-0.5 backdrop-blur">
@@ -340,13 +345,25 @@ function DatasetViewToggle({ view, setView }: { view: DatasetViewMode; setView: 
 export function TreesClient({ did, onUpload }: { did: string; onUpload?: () => void }) {
   const [trees, setTrees] = useState<OccurrenceRecord[]>([]);
   const [datasets, setDatasets] = useState<UploadTreeDatasetRecord[]>([]);
-  const [selectedDatasetUri, setSelectedDatasetUri] = useState<string | null>(null);
+  const [selectedDatasetUri, setSelectedDatasetUri] = useQueryState(
+    "dataset",
+    parseAsString.withOptions(QUERY_STATE_OPTIONS),
+  );
   const [isLoading, setIsLoading] = useState(true);
   const [fetchError, setFetchError] = useState<string | null>(null);
-  const [search, setSearch] = useState("");
-  const [page, setPage] = useState(1);
+  const [search, setSearch] = useQueryState(
+    "q",
+    parseAsString.withDefault("").withOptions(SEARCH_QUERY_STATE_OPTIONS),
+  );
+  const [page, setPage] = useQueryState(
+    "page",
+    parseAsInteger.withDefault(1).withOptions(QUERY_STATE_OPTIONS),
+  );
   const [editingTree, setEditingTree] = useState<OccurrenceRecord | null>(null);
-  const [datasetView, setDatasetView] = useState<DatasetViewMode>("cards");
+  const [datasetView, setDatasetView] = useQueryState(
+    "treeView",
+    parseAsStringEnum<DatasetViewMode>(DATASET_VIEW_MODES).withDefault("cards").withOptions(QUERY_STATE_OPTIONS),
+  );
 
   const loadTrees = useCallback(async () => {
     setIsLoading(true);
@@ -388,18 +405,18 @@ export function TreesClient({ did, onUpload }: { did: string; onUpload?: () => v
   });
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
-  const currentPage = Math.min(page, totalPages);
+  const currentPage = Math.min(Math.max(1, page), totalPages);
   const paginated = filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
 
   const handleSearchChange = (val: string) => {
-    setSearch(val);
-    setPage(1);
+    void setSearch(val);
+    void setPage(1);
   };
 
   const handleDatasetChange = (uri: string | null) => {
-    setSelectedDatasetUri(uri);
-    setPage(1);
-    setSearch("");
+    void setSelectedDatasetUri(uri);
+    void setPage(1);
+    void setSearch("");
   };
 
   const handleDeleted = (rkey: string) => {
@@ -441,7 +458,7 @@ export function TreesClient({ did, onUpload }: { did: string; onUpload?: () => v
               <p className="text-sm text-muted-foreground">Browse trees by group.</p>
             </div>
             <div className="flex shrink-0 items-center gap-2">
-              <DatasetViewToggle view={datasetView} setView={setDatasetView} />
+              <DatasetViewToggle view={datasetView} setView={(nextView) => void setDatasetView(nextView)} />
               {selectedDatasetUri && (
                 <Button variant="ghost" size="sm" onClick={() => handleDatasetChange(null)}>
                   Back to groups
@@ -567,7 +584,7 @@ export function TreesClient({ did, onUpload }: { did: string; onUpload?: () => v
                 variant="outline"
                 size="sm"
                 disabled={currentPage <= 1}
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                onClick={() => void setPage(Math.max(1, currentPage - 1))}
               >
                 Previous
               </Button>
@@ -576,7 +593,7 @@ export function TreesClient({ did, onUpload }: { did: string; onUpload?: () => v
                 variant="outline"
                 size="sm"
                 disabled={currentPage >= totalPages}
-                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                onClick={() => void setPage(Math.min(totalPages, currentPage + 1))}
               >
                 Next
               </Button>

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { RecordExplorer } from "../_components/RecordExplorer";
 
 export const revalidate = 60;
@@ -11,5 +12,9 @@ export const metadata: Metadata = {
 };
 
 export default function ObservationsPage() {
-  return <RecordExplorer kind="occurrence" />;
+  return (
+    <Suspense fallback={null}>
+      <RecordExplorer kind="occurrence" />
+    </Suspense>
+  );
 }
