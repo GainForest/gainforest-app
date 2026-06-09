@@ -1008,9 +1008,9 @@ const GenericCard = memo(function GenericCard({ record, onOpen }: { record: Expl
 
 const RecordList = memo(function RecordList({ records, onOpen }: { records: ExplorerRecord[]; onOpen: (record: ExplorerRecord) => void }) {
   return (
-    <ul role="list" className="divide-y divide-border-soft">
+    <ul role="list">
       {records.map((record, index) => (
-        <li key={record.id} className="animate-in" style={{ animationDelay: `${Math.min(index, 12) * 18}ms` }}>
+        <li key={record.id} className="relative animate-in after:absolute after:inset-x-4 after:bottom-0 after:h-px after:bg-border-soft last:after:hidden" style={{ animationDelay: `${Math.min(index, 12) * 18}ms` }}>
           <RecordListItem record={record} onOpen={onOpen} />
         </li>
       ))}
@@ -1082,7 +1082,7 @@ const RecordListItem = memo(function RecordListItem({ record, onOpen }: { record
           open();
         }
       }}
-      className="group flex w-full cursor-pointer items-stretch gap-3 px-1 py-3 text-left outline-none transition-colors duration-300 hover:bg-surface-sunken focus-visible:ring-2 focus-visible:ring-primary/60 sm:gap-4 sm:px-2 sm:py-4"
+      className="group flex w-full cursor-pointer items-stretch gap-3 rounded-2xl px-1 py-3 text-left outline-none transition-colors duration-300 hover:bg-surface-sunken focus-visible:ring-2 focus-visible:ring-primary/60 sm:gap-4 sm:px-2 sm:py-4"
     >
       <span className="relative h-20 w-20 shrink-0 overflow-hidden rounded-xl bg-surface-sunken sm:h-24 sm:w-28">
         {hasImage ? (

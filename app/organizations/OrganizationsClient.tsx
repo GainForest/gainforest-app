@@ -729,9 +729,9 @@ function OrganizationsGridSkeleton() {
 
 const OrganizationList = memo(function OrganizationList({ records, onOpen }: { records: SiteRecord[]; onOpen: (record: SiteRecord) => void }) {
   return (
-    <ul role="list" className="divide-y divide-border">
+    <ul role="list">
       {records.map((record) => (
-        <li key={record.id}>
+        <li key={record.id} className="relative after:absolute after:inset-x-4 after:bottom-0 after:h-px after:bg-border last:after:hidden">
           <OrganizationListItem record={record} onOpen={onOpen} />
         </li>
       ))}
@@ -753,7 +753,7 @@ const OrganizationListItem = memo(function OrganizationListItem({ record, onOpen
     <button
       type="button"
       onClick={() => onOpen(record)}
-      className="group flex w-full gap-3 px-1 py-3 text-left transition-colors duration-300 hover:bg-muted/20 sm:gap-4 sm:px-2 sm:py-4"
+      className="group flex w-full gap-3 rounded-2xl px-1 py-3 text-left outline-none transition-colors duration-300 hover:bg-surface-sunken focus-visible:ring-2 focus-visible:ring-primary/60 sm:gap-4 sm:px-2 sm:py-4"
     >
       <span className="relative h-24 w-24 shrink-0 overflow-hidden rounded-xl bg-muted sm:h-28 sm:w-36">
         {bannerUrl ? (

@@ -112,7 +112,7 @@ export function ListPanel(props: {
           )}
         </div>
       ) : (
-        <div className={view === "list" ? "divide-y divide-border" : "grid gap-3 lg:grid-cols-2"}>
+        <div className={view === "list" ? "[&>*]:relative [&>*:not(:last-child)]:after:absolute [&>*:not(:last-child)]:after:inset-x-4 [&>*:not(:last-child)]:after:bottom-0 [&>*:not(:last-child)]:after:h-px [&>*:not(:last-child)]:after:bg-border" : "grid gap-3 lg:grid-cols-2"}>
           {filtered.map((item) => {
             if (props.section === "events") {
               const event = item as AudioEventItem;
@@ -225,7 +225,7 @@ function RecordCard(props: {
     <button
       type="button"
       onClick={props.onClick}
-      className={props.variant === "list" ? "w-full px-1 py-3 text-left transition-colors hover:bg-muted/30 sm:px-2" : "rounded-2xl border p-4 text-left transition hover:border-primary/50 hover:bg-muted/30"}
+      className={props.variant === "list" ? "w-full rounded-2xl px-1 py-3 text-left outline-none transition-colors duration-300 hover:bg-surface-sunken focus-visible:ring-2 focus-visible:ring-primary/60 sm:px-2" : "rounded-2xl border p-4 text-left transition hover:border-primary/50 hover:bg-muted/30"}
     >
       <p className="font-medium">{props.title ?? t("untitled")}</p>
       {props.subtitle && (

@@ -112,9 +112,11 @@ function RecentBumicerts({ bumicerts, did, ownerIdentifier }: { bumicerts: Bumic
             <ViewToggle view={view} setView={setView} />
           </div>
           {view === "list" ? (
-            <div className="divide-y divide-border">
+            <div>
               {bumicerts.map((bumicert) => (
-                <ManageBumicertListItem key={bumicert.id} bumicert={bumicert} did={did} ownerIdentifier={ownerIdentifier} />
+                <div key={bumicert.id} className="relative after:absolute after:inset-x-4 after:bottom-0 after:h-px after:bg-border last:after:hidden">
+                  <ManageBumicertListItem bumicert={bumicert} did={did} ownerIdentifier={ownerIdentifier} />
+                </div>
               ))}
             </div>
           ) : (
@@ -189,7 +191,7 @@ function ManageBumicertListItem({ bumicert, did, ownerIdentifier }: { bumicert: 
   const details = bumicertObjectives(bumicert);
 
   return (
-    <Link href={href} className="group flex gap-3 px-1 py-3 text-left transition-colors duration-300 hover:bg-muted/20 sm:gap-4 sm:px-2 sm:py-4">
+    <Link href={href} className="group flex w-full gap-3 rounded-2xl px-1 py-3 text-left outline-none transition-colors duration-300 hover:bg-surface-sunken focus-visible:ring-2 focus-visible:ring-primary/60 sm:gap-4 sm:px-2 sm:py-4">
       <span className="relative h-24 w-24 shrink-0 overflow-hidden rounded-xl bg-muted sm:h-28 sm:w-36">
         {bumicert.imageUrl ? (
           <Image src={bumicert.imageUrl} alt={bumicert.title} fill unoptimized sizes="144px" className="object-cover transition-transform duration-500 group-hover:scale-105" />

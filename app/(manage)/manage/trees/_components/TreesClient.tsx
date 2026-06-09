@@ -78,7 +78,7 @@ function TreeCard({
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
-      className="flex items-start justify-between px-4 py-3 hover:bg-muted/30 transition-colors"
+      className="flex items-start justify-between rounded-2xl px-4 py-3 transition-colors duration-300 hover:bg-surface-sunken"
     >
       <div className="min-w-0 flex-1">
         <p className="font-medium text-sm truncate">
@@ -426,7 +426,7 @@ export function TreesClient({ did, onUpload }: { did: string; onUpload?: () => v
               )}
             </div>
           </div>
-          <div className={datasetView === "list" ? "divide-y divide-border" : "grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3"}>
+          <div className={datasetView === "list" ? "[&>*]:relative [&>*:not(:last-child)]:after:absolute [&>*:not(:last-child)]:after:inset-x-4 [&>*:not(:last-child)]:after:bottom-0 [&>*:not(:last-child)]:after:h-px [&>*:not(:last-child)]:after:bg-border" : "grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3"}>
             {datasets.map((dataset) => {
               const count = trees.filter((tree) => tree.datasetRef === dataset.uri).length;
               const selected = selectedDatasetUri === dataset.uri;
@@ -436,8 +436,8 @@ export function TreesClient({ did, onUpload }: { did: string; onUpload?: () => v
                   type="button"
                   onClick={() => handleDatasetChange(selected ? null : dataset.uri)}
                   className={cn(
-                    "group text-left transition-colors hover:bg-muted/30",
-                    datasetView === "list" ? "w-full px-1 py-3 sm:px-2" : "rounded-2xl border p-4 hover:border-primary/40",
+                    "group text-left outline-none transition-colors duration-300 hover:bg-surface-sunken focus-visible:ring-2 focus-visible:ring-primary/60",
+                    datasetView === "list" ? "w-full rounded-2xl px-1 py-3 sm:px-2" : "rounded-2xl border p-4 hover:border-primary/40",
                     selected && datasetView === "list" ? "bg-primary/5" : null,
                     selected && datasetView === "cards" ? "border-primary bg-primary/5" : null,
                     !selected && datasetView === "cards" ? "border-border bg-background" : null,
@@ -524,9 +524,9 @@ export function TreesClient({ did, onUpload }: { did: string; onUpload?: () => v
               )}
             </motion.div>
           ) : (
-            <div className="divide-y divide-border rounded-xl border border-border overflow-hidden">
+            <div className="rounded-xl border border-border p-1">
               {paginated.map((tree) => (
-                <div key={`${tree.did}-${tree.rkey}`} className="relative">
+                <div key={`${tree.did}-${tree.rkey}`} className="relative after:absolute after:inset-x-4 after:bottom-0 after:h-px after:bg-border last:after:hidden">
                   <TreeCard
                     tree={tree}
                     onEdit={setEditingTree}

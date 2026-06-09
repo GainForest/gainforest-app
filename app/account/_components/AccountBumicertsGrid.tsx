@@ -70,9 +70,9 @@ export function AccountBumicertsGrid({ bumicerts, organizationIdentifier, organi
         <ViewToggle view={view} setView={setView} />
       </div>
       {view === "list" ? (
-        <motion.ul variants={containerVariants} initial="hidden" animate="visible" role="list" className="divide-y divide-border">
+        <motion.ul variants={containerVariants} initial="hidden" animate="visible" role="list">
           {bumicerts.map((b) => (
-            <motion.li key={b.id} variants={cardVariants}>
+            <motion.li key={b.id} variants={cardVariants} className="relative after:absolute after:inset-x-4 after:bottom-0 after:h-px after:bg-border last:after:hidden">
               <AccountBumicertListItem bumicert={b} organizationIdentifier={organizationIdentifier} organizationName={organizationName} />
             </motion.li>
           ))}
@@ -139,7 +139,7 @@ function AccountBumicertListItem({ bumicert, organizationIdentifier, organizatio
   const details = objectivesFor(bumicert);
 
   return (
-    <Link href={localBumicertHref(organizationIdentifier, bumicert.rkey)} className="group flex gap-3 px-1 py-3 transition-colors hover:bg-muted/20 sm:gap-4 sm:px-2 sm:py-4">
+    <Link href={localBumicertHref(organizationIdentifier, bumicert.rkey)} className="group flex w-full gap-3 rounded-2xl px-1 py-3 outline-none transition-colors duration-300 hover:bg-surface-sunken focus-visible:ring-2 focus-visible:ring-primary/60 sm:gap-4 sm:px-2 sm:py-4">
       <span className="relative h-24 w-24 shrink-0 overflow-hidden rounded-xl bg-muted sm:h-28 sm:w-36">
         {hasImage ? (
           <Image src={bumicert.imageUrl!} alt={bumicert.title} fill unoptimized sizes="144px" onError={() => setImgError(true)} className="object-cover transition-transform duration-500 group-hover:scale-105" />

@@ -373,13 +373,12 @@ export function SitesClient({ did }: { did: string }) {
         </motion.div>
       ) : (
         <AnimatePresence>
-          <div className={view === "list" ? "divide-y divide-border" : "grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"}>
+          <div className={view === "list" ? "" : "grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"}>
             {sites.map((site) => {
               const rkey = site.metadata.rkey;
               if (!rkey) return null;
-              return (
+              const card = (
                 <SiteCard
-                  key={site.metadata.uri ?? rkey}
                   site={site}
                   defaultSiteUri={defaultSiteUri}
                   onPreview={() => handlePreviewSite(site)}
@@ -392,6 +391,13 @@ export function SitesClient({ did }: { did: string }) {
                   error={cardErrors[rkey] ?? null}
                   variant={view === "list" ? "list" : "card"}
                 />
+              );
+              return view === "list" ? (
+                <div key={site.metadata.uri ?? rkey} className="relative after:absolute after:inset-x-4 after:bottom-0 after:h-px after:bg-border last:after:hidden">
+                  {card}
+                </div>
+              ) : (
+                <div key={site.metadata.uri ?? rkey}>{card}</div>
               );
             })}
           </div>

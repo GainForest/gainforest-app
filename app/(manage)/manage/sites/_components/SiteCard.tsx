@@ -112,10 +112,10 @@ export function SiteCard({
       transition={{ duration: 0.35, ease: [0.25, 0.1, 0.25, 1] }}
       className={cn(
         "relative overflow-hidden bg-background transition-all duration-300",
-        variant === "card" ? "rounded-xl border" : "border-0",
+        variant === "card" ? "rounded-xl border" : "rounded-2xl border-0",
         isPreviewable && variant === "card" &&
           "hover:border-primary/30 hover:shadow-md focus-within:border-ring focus-within:ring-ring/50 focus-within:ring-[3px]",
-        isPreviewable && variant === "list" && "hover:bg-muted/20 focus-within:ring-2 focus-within:ring-primary/50",
+        isPreviewable && variant === "list" && "hover:bg-surface-sunken focus-within:ring-2 focus-within:ring-primary/60",
         isPreviewing && variant === "card" ? "border-primary" : variant === "card" ? "border-border" : "",
       )}
     >
