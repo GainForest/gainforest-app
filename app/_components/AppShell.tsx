@@ -65,7 +65,7 @@ const NAV_ITEMS: NavSection[] = [
       {
         kind: "leaf",
         id: "bumicerts",
-        text: "Bumicerts",
+        text: "Projects",
         Icon: CompassIcon,
         href: "/bumicerts",
         pathCheck: { startsWith: "/bumicerts" },
@@ -278,7 +278,7 @@ function UnifiedSidebar({
 function SidebarHeader() {
   return (
     <div className="mb-4 flex w-full flex-col gap-2">
-      <Link className="flex items-center gap-2.5 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50" href="/" aria-label="Bumicerts home">
+      <Link className="flex items-center gap-2.5 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50" href="/" aria-label="GainForest home">
         <motion.div
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
@@ -293,7 +293,7 @@ function SidebarHeader() {
         >
           <Image
             src="/assets/media/images/app-icon.png"
-            alt="Bumicerts"
+            alt="GainForest"
             width={28}
             height={28}
             className="drop-shadow-md"
@@ -310,7 +310,7 @@ function SidebarHeader() {
           }}
           className="font-serif text-xl font-bold tracking-tight text-foreground"
         >
-          Bumicerts
+          GainForest
         </motion.span>
       </Link>
     </div>
@@ -441,7 +441,7 @@ function BumicertCreationCard() {
           "relative z-2 w-full bg-background hover:bg-primary hover:text-primary-foreground",
         )}
       >
-        <PlusIcon /> Create a Bumicert
+        <PlusIcon /> Create a Project
       </Link>
     </div>
   );
@@ -486,7 +486,7 @@ function ManageSection({
     {
       kind: "leaf",
       id: "bumicerts-manage",
-      text: "Bumicerts",
+      text: "Projects",
       Icon: BumicertIcon,
       href: "/manage/bumicerts",
       pathCheck: { startsWith: "/manage/bumicerts" },
@@ -521,7 +521,7 @@ function ManageSection({
     {
       kind: "leaf",
       id: "bumicerts-manage",
-      text: "Bumicerts",
+      text: "Projects",
       Icon: BumicertIcon,
       href: "/manage/bumicerts",
       pathCheck: { startsWith: "/manage/bumicerts" },
