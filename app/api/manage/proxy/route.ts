@@ -31,7 +31,7 @@ type UpdateOccurrenceData = {
 };
 
 type UpdateMeasurementData = {
-  result?: Record<string, unknown>;
+  result?: FloraMeasurementFields & { $type?: string };
 };
 
 type UpdateMultimediaData = {
@@ -76,6 +76,7 @@ type MutationBody =
   | { operation: "putRecord"; collection: string; rkey: string; record: Record<string, unknown>; swapRecord?: string }
   | { operation: "deleteRecord"; collection: string; rkey: string }
   | { operation: "uploadBlob"; blobData: string; blobMimeType: string }
+  | { operation: "createMultimediaFromFile"; blobData: string; blobMimeType: string; occurrenceRef: string; siteRef?: string; subjectPart: string; caption?: string }
   | { operation: "getDatasetRecord"; rkey: string }
   | { operation: "incrementDatasetRecordCount"; rkey: string; increment: number }
   | { operation: "createMeasurement"; occurrenceRef: string; flora: FloraMeasurementFields }
@@ -102,6 +103,7 @@ type MutationBody =
 type ForwardableMutationBody = Exclude<
   MutationBody,
   | { operation: "createMultimediaFromUrl" }
+  | { operation: "createMultimediaFromFile" }
   | { operation: "getDatasetRecord" }
   | { operation: "incrementDatasetRecordCount" }
   | { operation: "createMeasurement" }
@@ -121,6 +123,7 @@ const MULTIMEDIA_COLLECTION = "app.gainforest.ac.multimedia";
 const DATASET_COLLECTION = "app.gainforest.dwc.dataset";
 const OCCURRENCE_COLLECTION = "app.gainforest.dwc.occurrence";
 const MEASUREMENT_COLLECTION = "app.gainforest.dwc.measurement";
+const FLORA_MEASUREMENT_TYPE = "app.gainforest.dwc.measurement#floraMeasurement";
 const MAX_URL_IMAGE_BYTES = 4.5 * 1024 * 1024;
 const PHOTO_FETCH_TIMEOUT_MS = 30_000;
 const MAX_PHOTO_REDIRECTS = 5;
@@ -292,6 +295,20 @@ function isFloraMeasurementFields(value: unknown): value is FloraMeasurementFiel
   );
 }
 
+const UPDATE_OCCURRENCE_DATA_FIELDS = new Set([
+  "scientificName",
+  "vernacularName",
+  "eventDate",
+  "recordedBy",
+  "decimalLatitude",
+  "decimalLongitude",
+  "locality",
+  "country",
+  "habitat",
+  "establishmentMeans",
+  "occurrenceRemarks",
+]);
+
 const UPDATE_OCCURRENCE_UNSET_FIELDS = new Set([
   "vernacularName",
   "recordedBy",
@@ -300,10 +317,27 @@ const UPDATE_OCCURRENCE_UNSET_FIELDS = new Set([
   "habitat",
   "establishmentMeans",
   "occurrenceRemarks",
+  "fieldNotes",
+]);
+
+const UPDATE_MULTIMEDIA_DATA_FIELDS = new Set([
+  "caption",
 ]);
 
 const UPDATE_MULTIMEDIA_UNSET_FIELDS = new Set([
   "caption",
+]);
+
+const UPDATE_MEASUREMENT_DATA_FIELDS = new Set([
+  "result",
+]);
+
+const UPDATE_FLORA_MEASUREMENT_RESULT_FIELDS = new Set([
+  "$type",
+  "dbh",
+  "totalHeight",
+  "basalDiameter",
+  "canopyCoverPercent",
 ]);
 
 const UPDATE_FLORA_MEASUREMENT_RESULT_UNSET_FIELDS = new Set([
@@ -313,8 +347,12 @@ const UPDATE_FLORA_MEASUREMENT_RESULT_UNSET_FIELDS = new Set([
   "canopyCoverPercent",
 ]);
 
+function hasOnlyKeys(value: Record<string, unknown>, allowed: Set<string>): boolean {
+  return Object.keys(value).every((key) => allowed.has(key));
+}
+
 function isUpdateOccurrenceData(value: unknown): value is UpdateOccurrenceData {
-  if (!isRecord(value)) return false;
+  if (!isRecord(value) || !hasOnlyKeys(value, UPDATE_OCCURRENCE_DATA_FIELDS)) return false;
   return (
     isOptionalString(value.scientificName) &&
     isOptionalString(value.vernacularName) &&
@@ -330,13 +368,24 @@ function isUpdateOccurrenceData(value: unknown): value is UpdateOccurrenceData {
   );
 }
 
+function isFloraMeasurementResultPatch(value: unknown): value is FloraMeasurementFields & { $type?: string } {
+  if (!isRecord(value) || !hasOnlyKeys(value, UPDATE_FLORA_MEASUREMENT_RESULT_FIELDS)) return false;
+  return (
+    (typeof value.$type === "undefined" || value.$type === FLORA_MEASUREMENT_TYPE) &&
+    isOptionalString(value.dbh) &&
+    isOptionalString(value.totalHeight) &&
+    isOptionalString(value.basalDiameter) &&
+    isOptionalString(value.canopyCoverPercent)
+  );
+}
+
 function isUpdateMeasurementData(value: unknown): value is UpdateMeasurementData {
-  if (!isRecord(value)) return false;
-  return typeof value.result === "undefined" || isRecord(value.result);
+  if (!isRecord(value) || !hasOnlyKeys(value, UPDATE_MEASUREMENT_DATA_FIELDS)) return false;
+  return typeof value.result === "undefined" || isFloraMeasurementResultPatch(value.result);
 }
 
 function isUpdateMultimediaData(value: unknown): value is UpdateMultimediaData {
-  if (!isRecord(value)) return false;
+  if (!isRecord(value) || !hasOnlyKeys(value, UPDATE_MULTIMEDIA_DATA_FIELDS)) return false;
   return isOptionalString(value.caption);
 }
 
@@ -388,6 +437,17 @@ function isMutationBody(value: unknown): value is MutationBody {
   if (!isRecord(value)) return false;
   const body = value as Partial<MutationBody>;
   if (body.operation === "uploadBlob") return typeof body.blobData === "string" && typeof body.blobMimeType === "string";
+  if (body.operation === "createMultimediaFromFile") {
+    return (
+      typeof body.blobData === "string" &&
+      typeof body.blobMimeType === "string" &&
+      typeof body.occurrenceRef === "string" &&
+      isOptionalString(body.siteRef) &&
+      typeof body.subjectPart === "string" &&
+      body.subjectPart.trim().length > 0 &&
+      isOptionalString(body.caption)
+    );
+  }
   if (body.operation === "createRecord") return typeof body.collection === "string" && typeof body.record === "object" && body.record !== null;
   if (body.operation === "putRecord") {
     return (
@@ -957,6 +1017,14 @@ function hasCoordinateValue(value: unknown): boolean {
   return value !== undefined && value !== null && !(typeof value === "string" && value.trim().length === 0);
 }
 
+function pickAllowedPatch(source: Record<string, unknown>, allowed: Set<string>): Record<string, unknown> {
+  const patch: Record<string, unknown> = {};
+  for (const key of allowed) {
+    if (source[key] !== undefined) patch[key] = source[key];
+  }
+  return patch;
+}
+
 function assertCoordinatePair(record: Record<string, unknown>): void {
   const hasLat = hasCoordinateValue(record.decimalLatitude);
   const hasLon = hasCoordinateValue(record.decimalLongitude);
@@ -987,7 +1055,7 @@ async function updateOccurrenceByRkey(
   });
   const nextRecord: Record<string, unknown> = {
     ...current.record,
-    ...body.data,
+    ...pickAllowedPatch(body.data, UPDATE_OCCURRENCE_DATA_FIELDS),
     $type: typeof current.record.$type === "string" ? current.record.$type : OCCURRENCE_COLLECTION,
     basisOfRecord: typeof current.record.basisOfRecord === "string" ? current.record.basisOfRecord : "HumanObservation",
     createdAt: typeof current.record.createdAt === "string" ? current.record.createdAt : new Date().toISOString(),
@@ -1058,7 +1126,6 @@ async function updateMeasurementByRkey(
   const resultUnset = body.resultUnset ?? [];
   const nextRecord: Record<string, unknown> = {
     ...current.record,
-    ...body.data,
     $type: typeof current.record.$type === "string" ? current.record.$type : MEASUREMENT_COLLECTION,
     createdAt: typeof current.record.createdAt === "string" ? current.record.createdAt : new Date().toISOString(),
   };
@@ -1099,7 +1166,7 @@ async function updateMultimediaByRkey(
   });
   const nextRecord: Record<string, unknown> = {
     ...current.record,
-    ...body.data,
+    ...pickAllowedPatch(body.data, UPDATE_MULTIMEDIA_DATA_FIELDS),
     $type: typeof current.record.$type === "string" ? current.record.$type : MULTIMEDIA_COLLECTION,
     createdAt: typeof current.record.createdAt === "string" ? current.record.createdAt : new Date().toISOString(),
   };
@@ -1674,25 +1741,47 @@ async function fetchPhotoBytes(url: string): Promise<{ bytes: Uint8Array; mimeTy
   }
 }
 
-async function createMultimediaFromUrl(
-  body: Extract<MutationBody, { operation: "createMultimediaFromUrl" }>,
+function normalizeAcceptedPhotoMimeType(mimeType: string): string {
+  const normalized = mimeType.split(";")[0]?.trim().toLowerCase() ?? "";
+  if (!ACCEPTED_URL_IMAGE_MIME_TYPES.has(normalized)) {
+    throw new Error("Use a JPG, PNG, WebP, or HEIC photo.");
+  }
+  return normalized;
+}
+
+function decodeUploadedPhotoBytes(blobData: string, blobMimeType: string): { bytes: Buffer; mimeType: string } {
+  const mimeType = normalizeAcceptedPhotoMimeType(blobMimeType);
+  const bytes = Buffer.from(blobData, "base64");
+  if (bytes.byteLength === 0) throw new Error("Choose a photo to upload.");
+  if (bytes.byteLength > MAX_URL_IMAGE_BYTES) throw photoTooLargeError(bytes.byteLength);
+  return { bytes, mimeType };
+}
+
+async function createMultimediaFromPhotoBytes(
+  input: {
+    bytes: Uint8Array;
+    mimeType: string;
+    occurrenceRef: string;
+    siteRef?: string;
+    subjectPart: string;
+    caption?: string;
+  },
   did: string,
   cookie: string | null,
 ): Promise<{ uri: string; cid: string; rkey: string; record: Record<string, unknown> }> {
-  const { bytes, mimeType } = await fetchPhotoBytes(body.url);
   const uploadResult = await executeForwardableMutation<unknown>({
     operation: "uploadBlob",
-    blobData: Buffer.from(bytes).toString("base64"),
-    blobMimeType: mimeType,
+    blobData: Buffer.from(input.bytes).toString("base64"),
+    blobMimeType: input.mimeType,
   }, did, cookie, "Photo could not be saved.");
-  const file = getUploadedBlob(uploadResult, mimeType, bytes.byteLength);
+  const file = getUploadedBlob(uploadResult, input.mimeType, input.bytes.byteLength);
   const record = omitUndefined({
     $type: MULTIMEDIA_COLLECTION,
     file,
-    occurrenceRef: body.occurrenceRef,
-    siteRef: body.siteRef,
-    subjectPart: body.subjectPart,
-    caption: body.caption,
+    occurrenceRef: input.occurrenceRef,
+    siteRef: input.siteRef,
+    subjectPart: input.subjectPart,
+    caption: input.caption,
     format: file.mimeType,
     createdAt: new Date().toISOString(),
   });
@@ -1703,6 +1792,38 @@ async function createMultimediaFromUrl(
   }, did, cookie, "Photo could not be saved.");
 
   return { ...result, rkey: rkeyFromUri(result.uri), record };
+}
+
+async function createMultimediaFromFile(
+  body: Extract<MutationBody, { operation: "createMultimediaFromFile" }>,
+  did: string,
+  cookie: string | null,
+): Promise<{ uri: string; cid: string; rkey: string; record: Record<string, unknown> }> {
+  const { bytes, mimeType } = decodeUploadedPhotoBytes(body.blobData, body.blobMimeType);
+  return createMultimediaFromPhotoBytes({
+    bytes,
+    mimeType,
+    occurrenceRef: body.occurrenceRef,
+    siteRef: body.siteRef,
+    subjectPart: body.subjectPart,
+    caption: body.caption,
+  }, did, cookie);
+}
+
+async function createMultimediaFromUrl(
+  body: Extract<MutationBody, { operation: "createMultimediaFromUrl" }>,
+  did: string,
+  cookie: string | null,
+): Promise<{ uri: string; cid: string; rkey: string; record: Record<string, unknown> }> {
+  const { bytes, mimeType } = await fetchPhotoBytes(body.url);
+  return createMultimediaFromPhotoBytes({
+    bytes,
+    mimeType,
+    occurrenceRef: body.occurrenceRef,
+    siteRef: body.siteRef,
+    subjectPart: body.subjectPart,
+    caption: body.caption,
+  }, did, cookie);
 }
 
 /**
@@ -1814,6 +1935,15 @@ export async function POST(request: Request) {
       return Response.json(result);
     } catch (error) {
       return Response.json({ error: error instanceof Error ? error.message : "Trees could not be saved to the selected tree group." }, { status: 502 });
+    }
+  }
+
+  if (body.operation === "createMultimediaFromFile") {
+    try {
+      const result = await createMultimediaFromFile(body, session.did, cookie);
+      return Response.json(result);
+    } catch (error) {
+      return Response.json({ error: error instanceof Error ? error.message : "Photo could not be saved." }, { status: 502 });
     }
   }
 

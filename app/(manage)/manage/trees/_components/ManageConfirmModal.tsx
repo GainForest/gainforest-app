@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Loader2Icon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -34,6 +34,10 @@ export function ManageConfirmModal({
 }: ManageConfirmModalProps) {
   const [isPending, setIsPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    setError(null);
+  }, [open, title, description, confirmLabel]);
 
   const handleConfirm = async () => {
     setIsPending(true);

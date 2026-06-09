@@ -349,6 +349,7 @@ export function TreesClient({ did, onUpload }: TreesClientProps) {
   const [deletedFeedback, setDeletedFeedback] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const lastDraftResetKeyRef = useRef<string | null>(null);
+  const selectedDraftTreeRkeyRef = useRef<string | null>(null);
 
   const loadAll = useCallback(async (signal?: AbortSignal) => {
     setIsLoading(true);
@@ -498,24 +499,51 @@ export function TreesClient({ did, onUpload }: TreesClientProps) {
         selectedTree.floraMeasurement?.canopyCoverPercent,
       ].map((value) => String(value ?? "")).join("|")
     : null;
+  const selectedTreeIdentity = selectedTree?.occurrence.rkey ?? null;
+
   useEffect(() => {
-    if (lastDraftResetKeyRef.current === activeTreeResetKey) return;
+    const selectedTreeChanged = selectedDraftTreeRkeyRef.current !== selectedTreeIdentity;
+    if (!selectedTreeChanged && lastDraftResetKeyRef.current === activeTreeResetKey) return;
+
+    selectedDraftTreeRkeyRef.current = selectedTreeIdentity;
     lastDraftResetKeyRef.current = activeTreeResetKey;
+
     const nextOccurrenceDraft = selectedTree ? getTreeOccurrenceDraft(selectedTree.occurrence) : EMPTY_OCCURRENCE_DRAFT;
     const nextMeasurementDraft = getTreeMeasurementDraft(selectedTree?.floraMeasurement ?? null);
-    setOccurrenceDraft(nextOccurrenceDraft);
-    setInitialOccurrenceDraft(nextOccurrenceDraft);
-    setMeasurementDraft(nextMeasurementDraft);
-    setInitialMeasurementDraft(nextMeasurementDraft);
-    setOccurrenceError(null);
-    setOccurrenceFeedback(null);
-    setMeasurementError(null);
-    setMeasurementFeedback(null);
-    setPhotoError(null);
-    setPhotoFeedback(null);
-    setEditingPhotoRkey(null);
-    setPhotoCaptionDraft("");
-  }, [activeTreeResetKey, selectedTree]);
+
+    if (selectedTreeChanged) {
+      setOccurrenceDraft(nextOccurrenceDraft);
+      setInitialOccurrenceDraft(nextOccurrenceDraft);
+      setMeasurementDraft(nextMeasurementDraft);
+      setInitialMeasurementDraft(nextMeasurementDraft);
+      setOccurrenceError(null);
+      setOccurrenceFeedback(null);
+      setMeasurementError(null);
+      setMeasurementFeedback(null);
+      setPhotoError(null);
+      setPhotoFeedback(null);
+      setEditingPhotoRkey(null);
+      setPhotoCaptionDraft("");
+      return;
+    }
+
+    if (isDraftEqual(occurrenceDraft, initialOccurrenceDraft)) {
+      setOccurrenceDraft(nextOccurrenceDraft);
+      setInitialOccurrenceDraft(nextOccurrenceDraft);
+    }
+    if (isDraftEqual(measurementDraft, initialMeasurementDraft)) {
+      setMeasurementDraft(nextMeasurementDraft);
+      setInitialMeasurementDraft(nextMeasurementDraft);
+    }
+  }, [
+    activeTreeResetKey,
+    initialMeasurementDraft,
+    initialOccurrenceDraft,
+    measurementDraft,
+    occurrenceDraft,
+    selectedTree,
+    selectedTreeIdentity,
+  ]);
 
   const occurrenceHasChanges = !isDraftEqual(occurrenceDraft, initialOccurrenceDraft);
   const measurementHasChanges = !isDraftEqual(measurementDraft, initialMeasurementDraft);
@@ -585,6 +613,7 @@ export function TreesClient({ did, onUpload }: TreesClientProps) {
       if (normalizedCurrent[field] === normalizedInitial[field]) return;
       if (OPTIONAL_OCCURRENCE_FIELDS.includes(field) && normalizedCurrent[field] === "") {
         unset.push(field);
+        if (field === "occurrenceRemarks") unset.push("fieldNotes");
         return;
       }
       data[field] = normalizedCurrent[field];
