@@ -181,6 +181,14 @@ body {
     color 0.3s ease;
 }
 
+/* Radix Dialog sets pointer-events: none on <body> while an app modal is open.
+   RainbowKit renders its wallet modal in a separate portal, so force it to
+   remain clickable when opened from donation and wallet-linking modals. */
+[data-rk],
+[data-rk] * {
+  pointer-events: auto;
+}
+
 ::view-transition-group(root),
 ::view-transition-old(root),
 ::view-transition-new(root) {
