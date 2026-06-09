@@ -22,7 +22,7 @@ export async function expectBumicertPublishValidationEdgeCases(page: Page, testI
   await expect(page.getByText(/pick at least one type of work/i).first()).toBeVisible();
   await expect(page.getByText(/write at least 30 characters for the summary/i).first()).toBeVisible();
   await expect(page.getByText(/write at least 80 characters for the full description/i).first()).toBeVisible();
-  await expect(page.getByText(/add at least one contributor/i).first()).toBeVisible();
+  await expect(page.getByText(/add at least one person or group/i).first()).toBeVisible();
   await expect(page.getByText(/confirm you have permission/i).first()).toBeVisible();
   await expect(page.getByText(/agree to the terms before publishing/i).first()).toBeVisible();
   await screenshotStep(page, testInfo, "create-empty-publish-errors");

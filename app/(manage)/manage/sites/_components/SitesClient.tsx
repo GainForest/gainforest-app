@@ -7,6 +7,8 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
   CirclePlusIcon,
+  LayoutGridIcon,
+  ListIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useModal } from "@/components/ui/modal/context";
@@ -22,6 +24,7 @@ import {
 
 const PREVIEW_APP_BASE_URL = "https://polygons-gainforest.vercel.app";
 const DEFAULT_SITE_COLLECTION = "app.gainforest.organization.defaultSite";
+type ViewMode = "cards" | "list";
 
 function siteRecordUri(did: string, site: ManagedLocation | null, rkey: string | null): string | null {
   if (site?.metadata.uri) return site.metadata.uri;
@@ -47,6 +50,32 @@ function canPreviewSite(site: ManagedLocation): boolean {
   return site.record.location?.kind === "uri";
 }
 
+function ViewToggle({ view, setView }: { view: ViewMode; setView: (view: ViewMode) => void }) {
+  return (
+    <div className="inline-flex h-10 shrink-0 items-center rounded-full border border-border bg-background/70 p-0.5 backdrop-blur">
+      {([
+        { id: "cards", label: "Cards", Icon: LayoutGridIcon },
+        { id: "list", label: "List", Icon: ListIcon },
+      ] as const).map(({ id, label, Icon }) => (
+        <button
+          key={id}
+          type="button"
+          onClick={() => setView(id)}
+          aria-pressed={view === id}
+          aria-label={label}
+          title={label}
+          className={`inline-flex h-9 items-center gap-1.5 rounded-full px-3 text-sm font-medium transition-colors ${
+            view === id ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          <Icon className="h-4 w-4" />
+          <span>{label}</span>
+        </button>
+      ))}
+    </div>
+  );
+}
+
 export function SitesClient({ did }: { did: string }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -62,6 +91,7 @@ export function SitesClient({ did }: { did: string }) {
   const [cardErrors, setCardErrors] = useState<Record<string, string>>({});
   const [previewingRkey, setPreviewingRkey] = useState<string | null>(searchParams.get("rkey"));
   const [iframeUrl, setIframeUrl] = useState<string | null>(null);
+  const [view, setView] = useState<ViewMode>("cards");
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
 
   const loadDefaultSite = useCallback(async () => {
@@ -254,17 +284,20 @@ export function SitesClient({ did }: { did: string }) {
 
   return (
     <Container className="space-y-6 pb-8 pt-4">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-3">
         <div>
           <h1 className="font-garamond text-2xl font-bold">Sites</h1>
           <p className="mt-0.5 text-sm text-muted-foreground">
             Manage your field locations and mapped project areas.
           </p>
         </div>
-        <Button size="sm" className="rounded-full" onClick={handleOpenAdd}>
-          <CirclePlusIcon />
-          Add site
-        </Button>
+        <div className="flex shrink-0 items-center gap-2">
+          {sites.length > 0 ? <ViewToggle view={view} setView={setView} /> : null}
+          <Button size="sm" className="rounded-full" onClick={handleOpenAdd}>
+            <CirclePlusIcon />
+            Add site
+          </Button>
+        </div>
       </div>
 
       {canShowPreview && (
@@ -340,7 +373,7 @@ export function SitesClient({ did }: { did: string }) {
         </motion.div>
       ) : (
         <AnimatePresence>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className={view === "list" ? "divide-y divide-border" : "grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"}>
             {sites.map((site) => {
               const rkey = site.metadata.rkey;
               if (!rkey) return null;
@@ -357,6 +390,7 @@ export function SitesClient({ did }: { did: string }) {
                   isSettingDefault={settingDefaultRkey === rkey}
                   isDeleting={deletingRkey === rkey}
                   error={cardErrors[rkey] ?? null}
+                  variant={view === "list" ? "list" : "card"}
                 />
               );
             })}

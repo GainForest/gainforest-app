@@ -9,6 +9,7 @@ import {
   ImageIcon,
   LayoutGridIcon,
   LeafIcon,
+  ListIcon,
   MapIcon,
   MapPinIcon,
   SearchIcon,
@@ -34,7 +35,7 @@ import { isPdsBlobUrl } from "../_lib/pds";
 
 type FilterKey = "images" | "locations" | "contributors" | "active" | "donations";
 type SortMode = "newest" | "oldest" | "az" | "za";
-type ViewMode = "cards" | "map";
+type ViewMode = "cards" | "list" | "map";
 
 type FilterChip = {
   key: FilterKey;
@@ -147,11 +148,11 @@ export function BumicertsExploreClient({ records: initialRecords = [] }: { recor
   }, [records, deferredQuery, sort, filters]);
 
   const renderedRecords = useMemo(
-    () => (view === "cards" ? visibleRecords.slice(0, cardLimit) : visibleRecords),
+    () => (view === "map" ? visibleRecords : visibleRecords.slice(0, cardLimit)),
     [cardLimit, view, visibleRecords],
   );
 
-  const hasMoreCardsToShow = view === "cards" && renderedRecords.length < visibleRecords.length;
+  const hasMoreCardsToShow = view !== "map" && renderedRecords.length < visibleRecords.length;
 
   useEffect(() => {
     setCardLimit(INITIAL_CARD_LIMIT);
@@ -317,6 +318,7 @@ export function BumicertsExploreClient({ records: initialRecords = [] }: { recor
                   {(
                     [
                       { id: "cards", label: "Cards", Icon: LayoutGridIcon },
+                      { id: "list", label: "List", Icon: ListIcon },
                       { id: "map", label: "Map", Icon: MapIcon },
                     ] as const
                   ).map((option) => (
@@ -382,6 +384,7 @@ export function BumicertsExploreClient({ records: initialRecords = [] }: { recor
                   {(
                     [
                       { id: "cards", label: "Cards", Icon: LayoutGridIcon },
+                      { id: "list", label: "List", Icon: ListIcon },
                       { id: "map", label: "Map", Icon: MapIcon },
                     ] as const
                   ).map((option) => (
@@ -495,6 +498,8 @@ export function BumicertsExploreClient({ records: initialRecords = [] }: { recor
           <div className="mt-5">
             {view === "map" ? (
               <RecordMap records={visibleRecords} kind="bumicert" onOpen={openMapRecord} />
+            ) : view === "list" ? (
+              <BumicertList records={renderedRecords} loading={loading} onOpen={openRecord} />
             ) : (
               <BumicertGrid records={renderedRecords} loading={loading} onOpen={openRecord} />
             )}
@@ -502,7 +507,7 @@ export function BumicertsExploreClient({ records: initialRecords = [] }: { recor
 
           {records.length > 0 && (
             <div className="mt-10 flex flex-col items-center gap-3">
-              {view === "cards" && visibleRecords.length > renderedRecords.length && (
+              {view !== "map" && visibleRecords.length > renderedRecords.length && (
                 <p className="text-sm text-muted-foreground">
                   Showing {renderedRecords.length} of {visibleRecords.length} projects.
                 </p>
@@ -700,6 +705,80 @@ function BumicertGridSkeleton() {
     </div>
   );
 }
+
+const BumicertList = memo(function BumicertList({
+  records,
+  loading,
+  onOpen,
+}: {
+  records: BumicertRecord[];
+  loading: boolean;
+  onOpen: (record: BumicertRecord) => void;
+}) {
+  if (loading && records.length === 0) {
+    return <BumicertGridSkeleton />;
+  }
+
+  if (records.length === 0) {
+    return <BumicertGrid records={records} loading={loading} onOpen={onOpen} />;
+  }
+
+  return (
+    <ul role="list" className="mt-4 divide-y divide-border">
+      {records.map((record, index) => (
+        <li key={record.id} className="animate-in" style={{ animationDelay: `${Math.min(index, 10) * 35}ms` }}>
+          <BumicertListItem record={record} onOpen={onOpen} priority={index < 8} />
+        </li>
+      ))}
+    </ul>
+  );
+});
+
+const BumicertListItem = memo(function BumicertListItem({ record, priority, onOpen }: { record: BumicertRecord; priority: boolean; onOpen: (record: BumicertRecord) => void }) {
+  const [imgError, setImgError] = useState(false);
+  const hasImage = Boolean(record.imageUrl) && !imgError;
+  const placeLabel = record.locationCount > 0 ? `${record.locationCount} project place${record.locationCount === 1 ? "" : "s"}` : null;
+  const peopleLabel = record.contributorCount > 0 ? `${record.contributorCount} people named` : null;
+
+  return (
+    <button
+      type="button"
+      onClick={() => onOpen(record)}
+      className="group flex w-full gap-3 px-1 py-3 text-left transition-colors duration-300 hover:bg-muted/20 sm:gap-4 sm:px-2 sm:py-4"
+    >
+      <span className="relative h-24 w-24 shrink-0 overflow-hidden rounded-xl bg-muted sm:h-28 sm:w-36">
+        {hasImage ? (
+          <Image
+            src={record.imageUrl!}
+            alt={record.title}
+            fill
+            sizes="144px"
+            priority={priority}
+            fetchPriority={priority ? "high" : "auto"}
+            unoptimized={!isPdsBlobUrl(record.imageUrl)}
+            onError={() => setImgError(true)}
+            className="object-cover transition-transform duration-500 group-hover:scale-105"
+          />
+        ) : (
+          <span className="grid h-full place-items-center font-garamond text-sm italic text-muted-foreground">No cover image</span>
+        )}
+      </span>
+      <span className="flex min-w-0 flex-1 flex-col justify-between py-1">
+        <span className="min-w-0">
+          <span className="block truncate font-instrument text-2xl italic leading-tight text-foreground">{record.title}</span>
+          {record.shortDescription ? <span className="mt-1 line-clamp-2 block text-sm leading-relaxed text-muted-foreground">{record.shortDescription}</span> : null}
+        </span>
+        <span className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-border/60 pt-2">
+          <span className="flex min-w-0 flex-wrap gap-1.5 text-xs text-muted-foreground">
+            {peopleLabel ? <span>{peopleLabel}</span> : null}
+            {placeLabel ? <span>{placeLabel}</span> : null}
+          </span>
+          <span className="shrink-0 text-xs font-medium text-foreground transition-colors group-hover:text-primary">Show details</span>
+        </span>
+      </span>
+    </button>
+  );
+});
 
 const BumicertCardVisual = memo(function BumicertCardVisual({ record, priority }: { record: BumicertRecord; priority: boolean }) {
   const { scopeItems, iconItems } = useMemo(() => buildPillRows(record), [record]);

@@ -1,7 +1,7 @@
 "use client";
 
-import { useMemo, type ReactNode } from "react";
-import { CirclePlusIcon, SearchIcon } from "lucide-react";
+import { useMemo, useState, type ReactNode } from "react";
+import { CirclePlusIcon, LayoutGridIcon, ListIcon, SearchIcon } from "lucide-react";
 import { useTranslations } from "./audio-copy";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,6 +11,8 @@ import type { AudioEventItem } from "@/app/_lib/indexer";
 import { formatDate, getAudioMeta, textFromDescription } from "./audio-utils";
 import type { Section } from "./types";
 import { AudioForm, DeploymentForm, EventForm } from "./AudioForms";
+
+type ViewMode = "cards" | "list";
 
 export function ListPanel(props: {
   section: Section;
@@ -23,6 +25,7 @@ export function ListPanel(props: {
   onOpenDetail: (section: Section, uri: string) => void;
 }) {
   const t = useTranslations("upload.audio");
+  const [view, setView] = useState<ViewMode>("cards");
 
   const filtered = useMemo(() => {
     const query = props.searchQuery.toLowerCase();
@@ -87,9 +90,12 @@ export function ListPanel(props: {
             className="pl-9"
           />
         </div>
-        <Button onClick={props.onNew} className="rounded-full">
-          <CirclePlusIcon className="size-4" /> {t("list.new")}
-        </Button>
+        <div className="flex shrink-0 items-center gap-2">
+          <ViewToggle view={view} setView={setView} />
+          <Button onClick={props.onNew} className="rounded-full">
+            <CirclePlusIcon className="size-4" /> {t("list.new")}
+          </Button>
+        </div>
       </div>
       {filtered.length === 0 ? (
         <div className="rounded-2xl border border-dashed bg-muted/20 p-10 text-center text-sm text-muted-foreground">
@@ -106,7 +112,7 @@ export function ListPanel(props: {
           )}
         </div>
       ) : (
-        <div className="grid gap-3 lg:grid-cols-2">
+        <div className={view === "list" ? "divide-y divide-border" : "grid gap-3 lg:grid-cols-2"}>
           {filtered.map((item) => {
             if (props.section === "events") {
               const event = item as AudioEventItem;
@@ -134,6 +140,7 @@ export function ListPanel(props: {
                   onClick={() =>
                     props.onOpenDetail("events", event.metadata.uri)
                   }
+                  variant={view === "list" ? "list" : "card"}
                 />
               );
             }
@@ -155,6 +162,7 @@ export function ListPanel(props: {
                   onClick={() =>
                     props.onOpenDetail("deployments", deployment.metadata.uri)
                   }
+                  variant={view === "list" ? "list" : "card"}
                 />
               );
             }
@@ -169,6 +177,7 @@ export function ListPanel(props: {
                 onClick={() =>
                   props.onOpenDetail("recordings", recording.metadata.uri)
                 }
+                variant={view === "list" ? "list" : "card"}
               />
             );
           })}
@@ -178,18 +187,45 @@ export function ListPanel(props: {
   );
 }
 
+function ViewToggle({ view, setView }: { view: ViewMode; setView: (view: ViewMode) => void }) {
+  return (
+    <div className="inline-flex h-10 shrink-0 items-center rounded-full border border-border bg-background/70 p-0.5 backdrop-blur">
+      {([
+        { id: "cards", label: "Cards", Icon: LayoutGridIcon },
+        { id: "list", label: "List", Icon: ListIcon },
+      ] as const).map(({ id, label, Icon }) => (
+        <button
+          key={id}
+          type="button"
+          onClick={() => setView(id)}
+          aria-pressed={view === id}
+          aria-label={label}
+          title={label}
+          className={`inline-flex h-9 items-center gap-1.5 rounded-full px-3 text-sm font-medium transition-colors ${
+            view === id ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          <Icon className="h-4 w-4" />
+          <span className="hidden sm:inline">{label}</span>
+        </button>
+      ))}
+    </div>
+  );
+}
+
 function RecordCard(props: {
   title: string | null;
   subtitle?: string | null;
   meta: string;
   onClick: () => void;
+  variant?: "card" | "list";
 }) {
   const t = useTranslations("upload.audio.detail");
   return (
     <button
       type="button"
       onClick={props.onClick}
-      className="rounded-2xl border p-4 text-left transition hover:border-primary/50 hover:bg-muted/30"
+      className={props.variant === "list" ? "w-full px-1 py-3 text-left transition-colors hover:bg-muted/30 sm:px-2" : "rounded-2xl border p-4 text-left transition hover:border-primary/50 hover:bg-muted/30"}
     >
       <p className="font-medium">{props.title ?? t("untitled")}</p>
       {props.subtitle && (

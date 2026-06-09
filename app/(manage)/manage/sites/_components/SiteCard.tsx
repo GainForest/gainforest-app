@@ -34,6 +34,7 @@ type SiteCardProps = {
   isSettingDefault: boolean;
   isDeleting: boolean;
   error?: string | null;
+  variant?: "card" | "list";
 };
 
 export function SiteCard({
@@ -47,6 +48,7 @@ export function SiteCard({
   isSettingDefault,
   isDeleting,
   error,
+  variant = "card",
 }: SiteCardProps) {
   const locationUrl = useMemo(() => getSiteLocationUrl(site), [site]);
   const inlineCoord = useMemo(() => getInlineSiteCoordinate(site), [site]);
@@ -109,17 +111,20 @@ export function SiteCard({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35, ease: [0.25, 0.1, 0.25, 1] }}
       className={cn(
-        "relative overflow-hidden rounded-xl border bg-background transition-all duration-300",
-        isPreviewable &&
+        "relative overflow-hidden bg-background transition-all duration-300",
+        variant === "card" ? "rounded-xl border" : "border-0",
+        isPreviewable && variant === "card" &&
           "hover:border-primary/30 hover:shadow-md focus-within:border-ring focus-within:ring-ring/50 focus-within:ring-[3px]",
-        isPreviewing ? "border-primary" : "border-border",
+        isPreviewable && variant === "list" && "hover:bg-muted/20 focus-within:ring-2 focus-within:ring-primary/50",
+        isPreviewing && variant === "card" ? "border-primary" : variant === "card" ? "border-border" : "",
       )}
     >
       <button
         type="button"
         onClick={handleCardClick}
         className={cn(
-          "flex w-full flex-col rounded-xl text-left",
+          "flex w-full flex-col text-left",
+          variant === "card" ? "rounded-xl" : "py-1",
           isPreviewable ? "cursor-pointer focus-visible:outline-none" : "cursor-default",
         )}
       >

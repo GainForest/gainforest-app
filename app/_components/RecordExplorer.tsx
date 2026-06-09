@@ -9,6 +9,7 @@ import {
   ImageIcon,
   LayoutGridIcon,
   LeafIcon,
+  ListIcon,
   Loader2Icon,
   MapIcon,
   PauseIcon,
@@ -186,7 +187,7 @@ export function RecordExplorer({
   const [occMedia, setOccMedia] = useState<OccurrenceFilter>(DEFAULT_OCCURRENCE_MEDIA);
   const [occCategory, setOccCategory] = useState<OccurrenceCategory>("all");
   const [siteSource, setSiteSource] = useState<SiteSourceFilter>("both");
-  const [view, setView] = useState<"cards" | "map">("cards");
+  const [view, setView] = useState<ViewMode>("cards");
   const [walking, setWalking] = useState(false);
   const [occurrenceStats, setOccurrenceStats] = useState<OccurrenceStats | null>(null);
   const [occurrenceStatsLoading, setOccurrenceStatsLoading] = useState(kind === "occurrence" && !ownerDid);
@@ -325,7 +326,8 @@ export function RecordExplorer({
       setQuery(q);
       shouldClientLoad = true;
     }
-    if (sp.get("view") === "map") setView("map");
+    const urlView = sp.get("view");
+    if (urlView === "map" || urlView === "list") setView(urlView);
     const s = sp.get("sort");
     if (s === "oldest" || s === "az" || s === "za") {
       setSort(s);
@@ -391,7 +393,7 @@ export function RecordExplorer({
       if (q) params.set("q", q);
       else params.delete("q");
 
-      if (view === "map") params.set("view", "map");
+      if (view !== "cards") params.set("view", view);
       else params.delete("view");
 
       if (sort !== "newest") params.set("sort", sort);
@@ -482,10 +484,10 @@ export function RecordExplorer({
     return sortRecords(categorized, sort);
   }, [deferredQuery, kind, occCategory, records, sort]);
   const renderedRecords = useMemo(
-    () => (view === "cards" ? filtered.slice(0, cardLimit) : filtered),
+    () => (view === "map" ? filtered : filtered.slice(0, cardLimit)),
     [cardLimit, filtered, view],
   );
-  const hasMoreCardsToShow = view === "cards" && renderedRecords.length < filtered.length;
+  const hasMoreCardsToShow = view !== "map" && renderedRecords.length < filtered.length;
 
   useEffect(() => {
     setCardLimit(INITIAL_CARD_LIMIT);
@@ -542,11 +544,12 @@ export function RecordExplorer({
 
             <SortControl sort={sort} setSort={setSort} open={sortOpen} setOpen={setSortOpen} />
 
-            {/* Cards / Map view toggle */}
+            {/* Cards / List / Map view toggle */}
             <div className="inline-flex h-10 shrink-0 items-center rounded-full border border-border bg-background/50 p-0.5 backdrop-blur">
               {(
                 [
                   { id: "cards", label: "Cards" },
+                  { id: "list", label: "List" },
                   { id: "map", label: "Map" },
                 ] as const
               ).map((o) => (
@@ -563,7 +566,7 @@ export function RecordExplorer({
                       : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
-                  {o.id === "map" ? <MapGlyph /> : <CardsGlyph />}
+                  {o.id === "map" ? <MapGlyph /> : o.id === "list" ? <ListGlyph /> : <CardsGlyph />}
                   <span className="hidden sm:inline">{o.label}</span>
                 </button>
               ))}
@@ -648,6 +651,8 @@ export function RecordExplorer({
             ) : (
               <EmptyState title="Nothing here yet" body="There is nothing to show right now." />
             )
+          ) : view === "list" ? (
+            <RecordList records={renderedRecords} onOpen={setDrawer} />
           ) : (
             <ul role="list" className={gridCls}>
               {renderedRecords.map((r, i) => (
@@ -1001,6 +1006,132 @@ const GenericCard = memo(function GenericCard({ record, onOpen }: { record: Expl
   );
 });
 
+const RecordList = memo(function RecordList({ records, onOpen }: { records: ExplorerRecord[]; onOpen: (record: ExplorerRecord) => void }) {
+  return (
+    <ul role="list" className="divide-y divide-border-soft">
+      {records.map((record, index) => (
+        <li key={record.id} className="animate-in" style={{ animationDelay: `${Math.min(index, 12) * 18}ms` }}>
+          <RecordListItem record={record} onOpen={onOpen} />
+        </li>
+      ))}
+    </ul>
+  );
+});
+
+const RecordListItem = memo(function RecordListItem({ record, onOpen }: { record: ExplorerRecord; onOpen: (record: ExplorerRecord) => void }) {
+  const [imgError, setImgError] = useState(false);
+  const v = cardView(record);
+  const occurrenceRecord = record.kind === "occurrence" ? record : null;
+  const hasImage = Boolean(record.imageUrl) && !imgError;
+  const hasAudio = Boolean(occurrenceRecord?.audioRef || occurrenceRecord?.audioUrl);
+  const ownerLabel = record.kind === "bumicert" ? record.creatorName ?? "Project steward" : record.kind === "site" ? record.name : record.creatorName ?? "Shared profile";
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const unregisterAudioRef = useRef<(() => void) | null>(null);
+  const [audioState, setAudioState] = useState<"idle" | "loading" | "playing" | "paused">("idle");
+
+  useEffect(
+    () => () => {
+      audioRef.current?.pause();
+      unregisterAudioRef.current?.();
+      audioRef.current = null;
+      unregisterAudioRef.current = null;
+    },
+    [],
+  );
+
+  async function toggleAudio(e: ReactMouseEvent) {
+    e.stopPropagation();
+    if (!occurrenceRecord) return;
+    let el = audioRef.current;
+    if (!el) {
+      pauseOtherAudio();
+      setAudioState("loading");
+      const url = occurrenceRecord.audioUrl ?? (occurrenceRecord.audioRef ? await resolveBlobUrl(occurrenceRecord.did, occurrenceRecord.audioRef) : null);
+      if (!url) {
+        setAudioState("idle");
+        return;
+      }
+      el = new Audio(url);
+      el.addEventListener("ended", () => setAudioState("paused"));
+      el.addEventListener("pause", () => setAudioState("paused"));
+      el.addEventListener("play", () => setAudioState("playing"));
+      unregisterAudioRef.current?.();
+      unregisterAudioRef.current = registerAudioElement(el);
+      audioRef.current = el;
+    }
+    if (el.paused) {
+      playExclusiveAudio(el).catch(() => setAudioState("paused"));
+    } else {
+      el.pause();
+    }
+  }
+
+  function open() {
+    if (hasAudio) pauseOtherAudio();
+    onOpen(record);
+  }
+
+  return (
+    <div
+      role="button"
+      tabIndex={0}
+      onClick={open}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          open();
+        }
+      }}
+      className="group flex w-full cursor-pointer items-stretch gap-3 px-1 py-3 text-left outline-none transition-colors duration-300 hover:bg-surface-sunken focus-visible:ring-2 focus-visible:ring-primary/60 sm:gap-4 sm:px-2 sm:py-4"
+    >
+      <span className="relative h-20 w-20 shrink-0 overflow-hidden rounded-xl bg-surface-sunken sm:h-24 sm:w-28">
+        {hasImage ? (
+          <Image
+            src={record.imageUrl!}
+            alt={v.alt}
+            fill
+            sizes="112px"
+            unoptimized={!isPdsBlobUrl(record.imageUrl)}
+            onError={() => setImgError(true)}
+            className="object-cover transition-transform duration-500 group-hover:scale-105"
+          />
+        ) : (
+          v.placeholder
+        )}
+        {hasAudio ? (
+          <button
+            type="button"
+            onClick={toggleAudio}
+            aria-label={audioState === "playing" ? "Pause sound" : "Play sound"}
+            className="absolute left-1/2 top-1/2 z-10 grid h-10 w-10 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-white text-[#0b2015] shadow-[0_8px_24px_-6px_rgba(0,0,0,0.5)] transition hover:scale-105"
+          >
+            {audioState === "loading" ? (
+              <Loader2Icon className="h-4 w-4 animate-spin" aria-hidden />
+            ) : audioState === "playing" ? (
+              <PauseIcon className="h-4 w-4" aria-hidden />
+            ) : (
+              <PlayIcon className="h-4 w-4 translate-x-[1px]" aria-hidden />
+            )}
+          </button>
+        ) : null}
+      </span>
+      <span className="flex min-w-0 flex-1 flex-col justify-between py-0.5">
+        <span className="min-w-0">
+          {record.createdAt ? <span className="mb-1 block text-xs text-foreground/45">Shared {formatDate(record.createdAt)}</span> : null}
+          <span className="block truncate font-instrument text-xl italic leading-tight text-foreground sm:text-2xl">
+            {v.title}
+          </span>
+          {v.subtitle ? <span className="mt-1 block truncate text-sm text-foreground/65">{v.subtitle}</span> : null}
+        </span>
+        <span className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-border-soft pt-2">
+          <span className="min-w-0 truncate text-xs text-foreground/55">{ownerLabel}</span>
+          <span className="shrink-0 text-xs font-medium text-foreground transition-colors group-hover:text-primary">Show details</span>
+        </span>
+      </span>
+    </div>
+  );
+});
+
 function Pill({ children, accent }: { children: ReactNode; accent?: boolean }) {
   return (
     <span
@@ -1298,6 +1429,7 @@ function filterOccurrenceCategory(records: OccurrenceRecord[], category: Occurre
 // Records arrive newest-first (createdAt DESC) from the indexer; this lets the
 // visitor re-sort the already-loaded slice by timestamp or alphabetically.
 
+type ViewMode = "cards" | "list" | "map";
 type SortMode = "newest" | "oldest" | "az" | "za";
 
 function sortTimestamp(iso: string | null | undefined): number {
@@ -1526,6 +1658,10 @@ function mediaLabel(kind: OccurrenceRecord["media"][number]): string {
 
 function CardsGlyph() {
   return <LayoutGridIcon width={16} height={16} aria-hidden />;
+}
+
+function ListGlyph() {
+  return <ListIcon width={16} height={16} aria-hidden />;
 }
 
 function MapGlyph() {

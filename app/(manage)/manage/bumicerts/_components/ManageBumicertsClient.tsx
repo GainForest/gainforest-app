@@ -5,9 +5,12 @@ import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   CirclePlusIcon,
+  LayoutGridIcon,
   LeafIcon,
+  ListIcon,
   TriangleAlertIcon,
 } from "lucide-react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { BumicertCardSkeleton, BumicertCardVisual } from "@/components/bumicert/BumicertCard";
 import type { BumicertRecord } from "@/app/_lib/indexer";
@@ -71,7 +74,11 @@ function CreateHeroCard() {
   );
 }
 
+type ViewMode = "cards" | "list";
+
 function RecentBumicerts({ bumicerts, did, ownerIdentifier }: { bumicerts: BumicertRecord[]; did: string; ownerIdentifier: string }) {
+  const [view, setView] = useState<ViewMode>("cards");
+
   return (
     <AnimatePresence mode="wait">
       {bumicerts.length === 0 ? (
@@ -100,37 +107,107 @@ function RecentBumicerts({ bumicerts, did, ownerIdentifier }: { bumicerts: Bumic
           </Button>
         </motion.div>
       ) : (
-        <div key="grid" className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {bumicerts.map((bumicert) => (
-            <motion.div
-              key={bumicert.id}
-              className="h-full"
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.35, ease: [0.25, 0.1, 0.25, 1] }}
-            >
-              <Link href={localBumicertHref((bumicert.did || did) === did ? ownerIdentifier : bumicert.did || did, bumicert.rkey)} className="block h-full">
-                <BumicertCardVisual
-                  coverImage={bumicert.imageUrl}
-                  logoUrl={null}
-                  logoRef={bumicert.creatorAvatarRef}
-                  ownerDid={bumicert.did || did}
-                  title={bumicert.title}
-                  organizationName={bumicert.creatorName ?? "Your profile"}
-                  objectives={[
-                    bumicert.locationCount > 0 ? `${bumicert.locationCount} ${bumicert.locationCount === 1 ? "site" : "sites"}` : "",
-                    bumicert.contributorCount > 0 ? `${bumicert.contributorCount} ${bumicert.contributorCount === 1 ? "contributor" : "contributors"}` : "",
-                    bumicert.startDate || bumicert.endDate ? "impact period" : "",
-                  ].filter(Boolean)}
-                  description={bumicert.shortDescription ?? undefined}
+        <div key="content" className="space-y-4">
+          <div className="flex justify-end">
+            <ViewToggle view={view} setView={setView} />
+          </div>
+          {view === "list" ? (
+            <div className="divide-y divide-border">
+              {bumicerts.map((bumicert) => (
+                <ManageBumicertListItem key={bumicert.id} bumicert={bumicert} did={did} ownerIdentifier={ownerIdentifier} />
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {bumicerts.map((bumicert) => (
+                <motion.div
+                  key={bumicert.id}
                   className="h-full"
-                />
-              </Link>
-            </motion.div>
-          ))}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.35, ease: [0.25, 0.1, 0.25, 1] }}
+                >
+                  <Link href={localBumicertHref((bumicert.did || did) === did ? ownerIdentifier : bumicert.did || did, bumicert.rkey)} className="block h-full">
+                    <BumicertCardVisual
+                      coverImage={bumicert.imageUrl}
+                      logoUrl={null}
+                      logoRef={bumicert.creatorAvatarRef}
+                      ownerDid={bumicert.did || did}
+                      title={bumicert.title}
+                      organizationName={bumicert.creatorName ?? "Your profile"}
+                      objectives={bumicertObjectives(bumicert)}
+                      description={bumicert.shortDescription ?? undefined}
+                      className="h-full"
+                    />
+                  </Link>
+                </motion.div>
+              ))}
+            </div>
+          )}
         </div>
       )}
     </AnimatePresence>
+  );
+}
+
+function bumicertObjectives(bumicert: BumicertRecord): string[] {
+  return [
+    bumicert.locationCount > 0 ? `${bumicert.locationCount} ${bumicert.locationCount === 1 ? "site" : "sites"}` : "",
+    bumicert.contributorCount > 0 ? `${bumicert.contributorCount} ${bumicert.contributorCount === 1 ? "contributor" : "contributors"}` : "",
+    bumicert.startDate || bumicert.endDate ? "impact period" : "",
+  ].filter(Boolean);
+}
+
+function ViewToggle({ view, setView }: { view: ViewMode; setView: (view: ViewMode) => void }) {
+  return (
+    <div className="inline-flex h-10 shrink-0 items-center rounded-full border border-border bg-background/70 p-0.5 backdrop-blur">
+      {([
+        { id: "cards", label: "Cards", Icon: LayoutGridIcon },
+        { id: "list", label: "List", Icon: ListIcon },
+      ] as const).map(({ id, label, Icon }) => (
+        <button
+          key={id}
+          type="button"
+          onClick={() => setView(id)}
+          aria-pressed={view === id}
+          aria-label={label}
+          title={label}
+          className={`inline-flex h-9 items-center gap-1.5 rounded-full px-3 text-sm font-medium transition-colors ${
+            view === id ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          <Icon className="h-4 w-4" />
+          <span>{label}</span>
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function ManageBumicertListItem({ bumicert, did, ownerIdentifier }: { bumicert: BumicertRecord; did: string; ownerIdentifier: string }) {
+  const href = localBumicertHref((bumicert.did || did) === did ? ownerIdentifier : bumicert.did || did, bumicert.rkey);
+  const details = bumicertObjectives(bumicert);
+
+  return (
+    <Link href={href} className="group flex gap-3 px-1 py-3 text-left transition-colors duration-300 hover:bg-muted/20 sm:gap-4 sm:px-2 sm:py-4">
+      <span className="relative h-24 w-24 shrink-0 overflow-hidden rounded-xl bg-muted sm:h-28 sm:w-36">
+        {bumicert.imageUrl ? (
+          <Image src={bumicert.imageUrl} alt={bumicert.title} fill unoptimized sizes="144px" className="object-cover transition-transform duration-500 group-hover:scale-105" />
+        ) : (
+          <span className="grid h-full place-items-center font-garamond text-sm italic text-muted-foreground">No cover image</span>
+        )}
+      </span>
+      <span className="flex min-w-0 flex-1 flex-col justify-between py-1">
+        <span className="min-w-0">
+          <span className="block truncate font-instrument text-2xl italic leading-tight text-foreground">{bumicert.title}</span>
+          {bumicert.shortDescription ? <span className="mt-1 line-clamp-2 block text-sm leading-relaxed text-muted-foreground">{bumicert.shortDescription}</span> : null}
+        </span>
+        <span className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-border/60 pt-2">
+          <span className="min-w-0 truncate text-xs text-muted-foreground">{details.length > 0 ? details.join(" · ") : bumicert.creatorName ?? "Your profile"}</span>
+          <span className="shrink-0 text-xs font-medium text-foreground transition-colors group-hover:text-primary">Open</span>
+        </span>
+      </span>
+    </Link>
   );
 }
 

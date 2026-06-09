@@ -7,6 +7,8 @@ import {
   CloudUploadIcon,
   CrosshairIcon,
   DatabaseIcon,
+  LayoutGridIcon,
+  ListIcon,
   Loader2Icon,
   MoreVerticalIcon,
   PencilIcon,
@@ -284,6 +286,33 @@ function TreeEditor({
 // ── TreesClient ───────────────────────────────────────────────────────────────
 
 const PAGE_SIZE = 50;
+type DatasetViewMode = "cards" | "list";
+
+function DatasetViewToggle({ view, setView }: { view: DatasetViewMode; setView: (view: DatasetViewMode) => void }) {
+  return (
+    <div className="inline-flex h-10 shrink-0 items-center rounded-full border border-border bg-background/70 p-0.5 backdrop-blur">
+      {([
+        { id: "cards", label: "Cards", Icon: LayoutGridIcon },
+        { id: "list", label: "List", Icon: ListIcon },
+      ] as const).map(({ id, label, Icon }) => (
+        <button
+          key={id}
+          type="button"
+          onClick={() => setView(id)}
+          aria-pressed={view === id}
+          aria-label={label}
+          title={label}
+          className={`inline-flex h-9 items-center gap-1.5 rounded-full px-3 text-sm font-medium transition-colors ${
+            view === id ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          <Icon className="h-4 w-4" />
+          <span className="hidden sm:inline">{label}</span>
+        </button>
+      ))}
+    </div>
+  );
+}
 
 export function TreesClient({ did, onUpload }: { did: string; onUpload?: () => void }) {
   const [trees, setTrees] = useState<OccurrenceRecord[]>([]);
@@ -294,6 +323,7 @@ export function TreesClient({ did, onUpload }: { did: string; onUpload?: () => v
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [editingTree, setEditingTree] = useState<OccurrenceRecord | null>(null);
+  const [datasetView, setDatasetView] = useState<DatasetViewMode>("cards");
 
   const loadTrees = useCallback(async () => {
     setIsLoading(true);
@@ -387,13 +417,16 @@ export function TreesClient({ did, onUpload }: { did: string; onUpload?: () => v
               <h2 className="text-lg font-semibold font-garamond">Tree groups</h2>
               <p className="text-sm text-muted-foreground">Browse trees by group.</p>
             </div>
-            {selectedDatasetUri && (
-              <Button variant="ghost" size="sm" onClick={() => handleDatasetChange(null)}>
-                Back to groups
-              </Button>
-            )}
+            <div className="flex shrink-0 items-center gap-2">
+              <DatasetViewToggle view={datasetView} setView={setDatasetView} />
+              {selectedDatasetUri && (
+                <Button variant="ghost" size="sm" onClick={() => handleDatasetChange(null)}>
+                  Back to groups
+                </Button>
+              )}
+            </div>
           </div>
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <div className={datasetView === "list" ? "divide-y divide-border" : "grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3"}>
             {datasets.map((dataset) => {
               const count = trees.filter((tree) => tree.datasetRef === dataset.uri).length;
               const selected = selectedDatasetUri === dataset.uri;
@@ -403,8 +436,11 @@ export function TreesClient({ did, onUpload }: { did: string; onUpload?: () => v
                   type="button"
                   onClick={() => handleDatasetChange(selected ? null : dataset.uri)}
                   className={cn(
-                    "group rounded-2xl border p-4 text-left transition-all hover:border-primary/40 hover:bg-muted/30",
-                    selected ? "border-primary bg-primary/5" : "border-border bg-background",
+                    "group text-left transition-colors hover:bg-muted/30",
+                    datasetView === "list" ? "w-full px-1 py-3 sm:px-2" : "rounded-2xl border p-4 hover:border-primary/40",
+                    selected && datasetView === "list" ? "bg-primary/5" : null,
+                    selected && datasetView === "cards" ? "border-primary bg-primary/5" : null,
+                    !selected && datasetView === "cards" ? "border-border bg-background" : null,
                   )}
                 >
                   <div className="flex items-start gap-3">

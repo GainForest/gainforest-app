@@ -11,6 +11,7 @@ import {
   ImageOffIcon,
   LayoutGridIcon,
   LeafIcon,
+  ListIcon,
   MapIcon,
   SearchIcon,
   UsersIcon,
@@ -33,7 +34,7 @@ import {
 import { countryFlag } from "../_lib/format";
 
 type SortMode = "newest" | "oldest" | "az" | "za";
-type ViewMode = "cards" | "map";
+type ViewMode = "cards" | "list" | "map";
 type QuickFilter = "observations" | "bumicerts";
 
 const SORT_OPTIONS: Array<{ value: SortMode; label: string }> = [
@@ -221,11 +222,11 @@ export function OrganizationsClient({ records: initialRecords = [] }: { records?
   );
 
   const renderedRecords = useMemo(
-    () => (view === "cards" ? visibleRecords.slice(0, cardLimit) : visibleRecords),
+    () => (view === "map" ? visibleRecords : visibleRecords.slice(0, cardLimit)),
     [cardLimit, view, visibleRecords],
   );
 
-  const hasMoreCardsToShow = view === "cards" && renderedRecords.length < visibleRecords.length;
+  const hasMoreCardsToShow = view !== "map" && renderedRecords.length < visibleRecords.length;
 
   const activeFilterCount =
     (countryFilter ? 1 : 0) +
@@ -362,6 +363,8 @@ export function OrganizationsClient({ records: initialRecords = [] }: { records?
               <OrganizationsGridSkeleton />
             ) : visibleRecords.length === 0 ? (
               <EmptyState onClear={clearAll} hasActiveFilters={hasActiveFilters} />
+            ) : view === "list" ? (
+              <OrganizationList records={renderedRecords} onOpen={setDrawer} />
             ) : (
               <div className="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-2 lg:gap-4">
                 {renderedRecords.map((record) => (
@@ -373,7 +376,7 @@ export function OrganizationsClient({ records: initialRecords = [] }: { records?
 
           {(records.length > 0 || (!loading && hasMore && hasActiveFilters)) && (
             <div className="mt-10 flex flex-col items-center gap-3">
-              {view === "cards" && visibleRecords.length > renderedRecords.length && (
+              {view !== "map" && visibleRecords.length > renderedRecords.length && (
                 <p className="text-sm text-muted-foreground">
                   Showing {renderedRecords.length} of {visibleRecords.length} organizations.
                 </p>
@@ -471,6 +474,7 @@ function ViewToggle({ view, setView }: { view: ViewMode; setView: (view: ViewMod
     <div className="inline-flex h-10 shrink-0 items-center rounded-full border border-border bg-background/70 p-0.5 backdrop-blur">
       {([
         { id: "cards", label: "Cards", Icon: LayoutGridIcon },
+        { id: "list", label: "List", Icon: ListIcon },
         { id: "map", label: "Map", Icon: MapIcon },
       ] as const).map(({ id, label, Icon }) => (
         <button
@@ -722,6 +726,74 @@ function OrganizationsGridSkeleton() {
     </div>
   );
 }
+
+const OrganizationList = memo(function OrganizationList({ records, onOpen }: { records: SiteRecord[]; onOpen: (record: SiteRecord) => void }) {
+  return (
+    <ul role="list" className="divide-y divide-border">
+      {records.map((record) => (
+        <li key={record.id}>
+          <OrganizationListItem record={record} onOpen={onOpen} />
+        </li>
+      ))}
+    </ul>
+  );
+});
+
+const OrganizationListItem = memo(function OrganizationListItem({ record, onOpen }: { record: SiteRecord; onOpen: (record: SiteRecord) => void }) {
+  const country = normalizeCountry(record.country);
+  const countryLabel = country ? countryName(country) : null;
+  const types = orgTypes(record).map(titleCase);
+  const primaryType = types[0] ?? null;
+  const description = orgDescription(types, countryLabel);
+  const bannerUrl = organizationBannerUrl(record);
+  const avatarUrl = organizationAvatarUrl(record);
+  const joinedYear = createdYear(record.createdAt);
+
+  return (
+    <button
+      type="button"
+      onClick={() => onOpen(record)}
+      className="group flex w-full gap-3 px-1 py-3 text-left transition-colors duration-300 hover:bg-muted/20 sm:gap-4 sm:px-2 sm:py-4"
+    >
+      <span className="relative h-24 w-24 shrink-0 overflow-hidden rounded-xl bg-muted sm:h-28 sm:w-36">
+        {bannerUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={bannerUrl} alt="" loading="lazy" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+        ) : (
+          <span className="grid h-full place-items-center bg-[radial-gradient(circle_at_30%_20%,color-mix(in_oklab,var(--primary)_22%,transparent),transparent_70%),linear-gradient(135deg,var(--muted),var(--card))] text-muted-foreground">
+            <ImageOffIcon className="size-10 opacity-50" aria-hidden strokeWidth={1.25} />
+          </span>
+        )}
+      </span>
+      <span className="flex min-w-0 flex-1 flex-col justify-between py-1">
+        <span className="min-w-0">
+          {(primaryType || countryLabel) ? (
+            <span className="mb-1 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+              {primaryType ? <span>{primaryType}</span> : null}
+              {countryLabel ? <span>{countryFlag(country)} {countryLabel}</span> : null}
+            </span>
+          ) : null}
+          <span className="flex min-w-0 items-center gap-2">
+            <span aria-hidden className="grid size-9 shrink-0 place-items-center overflow-hidden rounded-full bg-primary/15 text-xs font-semibold text-primary">
+              {avatarUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={avatarUrl} alt="" loading="lazy" className="h-full w-full object-cover" />
+              ) : (
+                initials(record.name)
+              )}
+            </span>
+            <span className="block min-w-0 truncate font-instrument text-2xl italic leading-tight text-foreground">{record.name}</span>
+          </span>
+          <span className="mt-1 line-clamp-2 block text-sm leading-relaxed text-muted-foreground">{description}</span>
+        </span>
+        <span className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-border/60 pt-2">
+          <span className="text-xs text-muted-foreground">{joinedYear ? `Joined ${joinedYear}` : "Public profile"}</span>
+          <span className="shrink-0 text-xs font-medium text-foreground transition-colors group-hover:text-primary">Show details</span>
+        </span>
+      </span>
+    </button>
+  );
+});
 
 const OrganizationCard = memo(function OrganizationCard({ record, onOpen }: { record: SiteRecord; onOpen: (record: SiteRecord) => void }) {
   const country = normalizeCountry(record.country);
