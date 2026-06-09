@@ -295,12 +295,10 @@ function TainaChatCard({
         aria-hidden
         className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-[96px] bg-gradient-to-t from-background/85 to-background/0"
       />
-      <form
+      <div
+        role="form"
+        aria-label="Ask Taina"
         className="absolute inset-x-0 bottom-0 z-20 flex items-end gap-2 px-3 pt-2 pb-3"
-        onSubmit={(e) => {
-          e.preventDefault();
-          void sendMessage();
-        }}
       >
         <textarea
           ref={inputRef}
@@ -317,14 +315,15 @@ function TainaChatCard({
           className="max-h-24 min-h-[36px] flex-1 resize-none rounded-2xl border border-border-soft bg-background/70 px-3.5 py-2 text-[13px] outline-none focus:border-primary/60"
         />
         <button
-          type="submit"
+          type="button"
+          onClick={() => void sendMessage()}
           disabled={streaming || !input.trim()}
           className="grid size-9 shrink-0 place-items-center rounded-full bg-primary text-primary-foreground transition-colors hover:bg-primary-dark disabled:cursor-not-allowed disabled:opacity-40"
           aria-label="Send"
         >
           ↑
         </button>
-      </form>
+      </div>
     </div>
   );
 }
