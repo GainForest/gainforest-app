@@ -6,6 +6,7 @@ import { readDisposableAccountMetadata } from "./disposable-email";
 export const E2E_PDS_COLLECTIONS = {
   claimActivity: "org.hypercerts.claim.activity",
   certifiedLocation: "app.certified.location",
+  occurrence: "app.gainforest.dwc.occurrence",
   audioRecording: "app.gainforest.ac.audio",
 } as const;
 
@@ -238,6 +239,21 @@ export async function waitForCertifiedLocationByName(name: string): Promise<PdsR
   throw new Error(`Timed out waiting for direct PDS location named ${name}. Last count: ${latestCount}.`);
 }
 
+export async function waitForOccurrenceByScientificName(scientificName: string): Promise<PdsRepoRecord> {
+  const deadline = Date.now() + 60_000;
+  let latestCount = 0;
+
+  while (Date.now() <= deadline) {
+    const records = await listPdsRecords(E2E_PDS_COLLECTIONS.occurrence);
+    latestCount = records.length;
+    const match = records.find((record) => record.value.scientificName === scientificName);
+    if (match) return match;
+    await new Promise((resolve) => setTimeout(resolve, 2_000));
+  }
+
+  throw new Error(`Timed out waiting for direct PDS sighting named ${scientificName}. Last count: ${latestCount}.`);
+}
+
 export async function waitForAudioRecordingByName(name: string): Promise<PdsRepoRecord> {
   const deadline = Date.now() + 60_000;
   let latestCount = 0;
@@ -251,6 +267,21 @@ export async function waitForAudioRecordingByName(name: string): Promise<PdsRepo
   }
 
   throw new Error(`Timed out waiting for direct PDS audio recording named ${name}. Last count: ${latestCount}.`);
+}
+
+export async function waitForPdsRecordDeleted(uri: string): Promise<void> {
+  const deadline = Date.now() + 60_000;
+  const parsed = parseAtUri(uri);
+  let latestCount = 0;
+
+  while (Date.now() <= deadline) {
+    const records = await listPdsRecords(parsed.collection);
+    latestCount = records.length;
+    if (!records.some((record) => record.uri === uri)) return;
+    await new Promise((resolve) => setTimeout(resolve, 2_000));
+  }
+
+  throw new Error(`Timed out waiting for direct PDS record deletion for ${uri}. Last count: ${latestCount}.`);
 }
 
 export function getRecordArray(record: PdsRepoRecord, key: string): Record<string, unknown>[] {

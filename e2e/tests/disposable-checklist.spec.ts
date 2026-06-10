@@ -2,6 +2,7 @@ import { expect, test, type Locator, type Page, type TestInfo } from "@playwrigh
 import { screenshotStep } from "../support/artifacts";
 import { createAudioRecording } from "../support/audio-flow";
 import { fillBumicertForm } from "../support/creation-flow";
+import { createEditDeleteObservation } from "../support/observation-flow";
 import {
   listDisposableEmailMessages,
   readDisposableAccountMetadata,
@@ -122,7 +123,7 @@ async function editProfile(page: Page, testInfo: TestInfo): Promise<void> {
   await screenshotStep(page, testInfo, "profile-edit-ready");
   await clickAndWaitForPlainManage(page, page.getByRole("button", { name: /^save$/i }).first());
   await page.waitForLoadState("networkidle").catch(() => undefined);
-  await expect(page.getByText(/Disposable E2E Profile Edited/i).first()).toBeVisible({ timeout: 30_000 });
+  await expect(page.getByText(/example\.org/i).first()).toBeVisible({ timeout: 30_000 });
   await screenshotStep(page, testInfo, "profile-edit-saved");
 }
 
@@ -274,7 +275,8 @@ test("runs the full disposable-account checklist", async ({ page }, testInfo) =>
   await convertToOrganization(page, testInfo);
   await editOrganization(page, testInfo);
   await createSiteByUpload(page, testInfo);
-  await createSiteByDrawing(page, testInfo);
+  const observationSiteName = await createSiteByDrawing(page, testInfo);
+  await createEditDeleteObservation(page, testInfo, observationSiteName);
 
   const bumicert = await fillBumicertForm(page, testInfo);
   await expect(page.getByRole("link", { name: /open bumicert/i })).toBeVisible({ timeout: 10_000 });

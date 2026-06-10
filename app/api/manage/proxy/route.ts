@@ -532,7 +532,8 @@ function getConfiguredPdsUrl(): string | null {
 
 async function getPdsBaseUrl(did: string): Promise<string> {
   const configuredPdsUrl = getConfiguredPdsUrl();
-  if (configuredPdsUrl) return configuredPdsUrl;
+  const configuredDid = process.env.E2E_TEST_DID?.trim();
+  if (configuredPdsUrl && (!configuredDid || configuredDid === did)) return configuredPdsUrl;
   const host = await resolvePdsHost(did);
   if (!host) throw new Error("Could not reach your saved tree information.");
   return `https://${host}`;

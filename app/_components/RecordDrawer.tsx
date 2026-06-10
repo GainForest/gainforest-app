@@ -478,7 +478,6 @@ type ObservationDraft = {
   locality: string;
   country: string;
   habitat: string;
-  establishmentMeans: string;
   occurrenceRemarks: string;
 };
 
@@ -492,7 +491,6 @@ const EMPTY_OBSERVATION_DRAFT: ObservationDraft = {
   locality: "",
   country: "",
   habitat: "",
-  establishmentMeans: "",
   occurrenceRemarks: "",
 };
 
@@ -502,7 +500,6 @@ const OPTIONAL_OBSERVATION_FIELDS: Array<keyof ObservationDraft> = [
   "locality",
   "country",
   "habitat",
-  "establishmentMeans",
   "occurrenceRemarks",
 ];
 
@@ -702,7 +699,6 @@ function observationDraftFromRecord(record: Extract<ExplorerRecord, { kind: "occ
     locality: record.locality ?? "",
     country: record.country ?? "",
     habitat: record.habitat ?? "",
-    establishmentMeans: record.establishmentMeans ?? "",
     occurrenceRemarks: record.remarks ?? "",
   };
 }
@@ -744,7 +740,6 @@ function observationPatchFromDraft(draft: ObservationDraft): {
     locality?: string;
     country?: string;
     habitat?: string;
-    establishmentMeans?: string;
     occurrenceRemarks?: string;
   };
   unset: string[];
@@ -759,7 +754,6 @@ function observationPatchFromDraft(draft: ObservationDraft): {
     locality: optionalDraftValue(draft.locality),
     country: optionalDraftValue(draft.country),
     habitat: optionalDraftValue(draft.habitat),
-    establishmentMeans: optionalDraftValue(draft.establishmentMeans),
     occurrenceRemarks: optionalDraftValue(draft.occurrenceRemarks),
   };
   const unset: string[] = OPTIONAL_OBSERVATION_FIELDS.filter((field) => !optionalDraftValue(draft[field]));
@@ -784,7 +778,6 @@ function applyObservationDraft(
     locality: optionalDraftValue(draft.locality) ?? null,
     country: optionalDraftValue(draft.country) ?? null,
     habitat: optionalDraftValue(draft.habitat) ?? null,
-    establishmentMeans: optionalDraftValue(draft.establishmentMeans) ?? null,
     remarks: optionalDraftValue(draft.occurrenceRemarks) ?? null,
   };
 }
