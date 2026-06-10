@@ -1,11 +1,11 @@
 # GainForest
 
-GainForest is a plain-language explorer for the environmental work GainForest supports, in the
+GainForest is a block explorer for everything GainForest signs on the AT Protocol, in the
 editorial design language of the [gainforest-app](../gainforest-app) landing
 (cream + sage, Cormorant Garamond headlines, the brushed underline, the dark
 ink data bands). It ports the GainForest-relevant slices of
 [GainForest/hyperscan](https://github.com/GainForest/hyperscan) and folds in
-the live status page and the GainForest donations view.
+the live status page and the GainForest donations dashboard.
 
 ```bash
 pnpm install

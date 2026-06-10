@@ -109,7 +109,7 @@ const NETWORK_APPS = [
   {
     key: "gainforest",
     name: "GainForest",
-    blurb: "Checked project stories",
+    blurb: "Verified impact certificates",
     logo: null,
     isSelf: true,
   },

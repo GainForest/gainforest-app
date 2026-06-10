@@ -1290,7 +1290,7 @@ function cardView(record: ExplorerRecord): CardView {
         ) : undefined,
       badge: (
         <span className="inline-flex items-center rounded-full bg-background/85 px-2 py-0.5 text-[9.5px] font-medium uppercase tracking-[0.1em] text-foreground/70 backdrop-blur-md">
-          {certified ? "Checked" : "GainForest"}
+          {certified ? "Verified" : "GainForest"}
         </span>
       ),
       placeholder: (

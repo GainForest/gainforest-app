@@ -11,7 +11,7 @@ export const revalidate = 300;
 export const metadata: Metadata = {
   title: "GainForest — Fund Regenerative Impact",
   description:
-    "GainForest connects funders with nature stewards doing on-ground regenerative work. Support checked environmental impact directly.",
+    "GainForest connects funders with nature stewards doing on-ground regenerative work. Support verified environmental impact directly.",
   alternates: { canonical: "/" },
 };
 
