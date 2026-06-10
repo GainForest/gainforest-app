@@ -4,14 +4,18 @@ import Image from "next/image";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import {
+  ArrowLeftRightIcon,
   ArrowUpRightIcon,
   BinocularsIcon,
   Building2Icon,
   CameraIcon,
   CompassIcon,
   HandHeartIcon,
+  KeyRoundIcon,
   LeafIcon,
   MapPinIcon,
+  NetworkIcon,
+  Share2Icon,
 } from "lucide-react";
 import { useState } from "react";
 import type { ExplorerKpis } from "../_lib/kpis";
@@ -94,6 +98,36 @@ const FAQ_ITEMS = [
   },
 ] as const;
 
+const NETWORK_APPS = [
+  {
+    key: "ma-earth",
+    name: "Ma Earth",
+    blurb: "Regeneration funding & monitoring",
+    logo: "/assets/media/images/landing/partners/ma-earth.png",
+    isSelf: false,
+  },
+  {
+    key: "bumicerts",
+    name: "Bumicerts",
+    blurb: "Verified impact certificates",
+    logo: null,
+    isSelf: true,
+  },
+  {
+    key: "hypercerts",
+    name: "Hypercerts",
+    blurb: "Impact certificates & retroactive funding",
+    logo: "/assets/media/images/landing/partners/hypercerts.png",
+    isSelf: false,
+  },
+] as const;
+
+const NETWORK_POINTS = [
+  { key: "portable", label: "Portable records", icon: ArrowLeftRightIcon },
+  { key: "owned", label: "You own your data", icon: KeyRoundIcon },
+  { key: "shared", label: "Readable everywhere", icon: Share2Icon },
+] as const;
+
 type FaqKey = (typeof FAQ_ITEMS)[number]["key"];
 
 export function HomeLanding({ kpis = null }: HomeLandingProps) {
@@ -106,6 +140,7 @@ export function HomeLanding({ kpis = null }: HomeLandingProps) {
         <FeaturesSection />
         <UserOptionCards />
         <WhatIsBumicert />
+        <OpenNetworkSection />
       </main>
     </div>
   );
@@ -512,6 +547,121 @@ function WhatIsBumicert() {
             </div>
           </motion.div>
         </div>
+      </div>
+    </section>
+  );
+}
+
+function OpenNetworkSection() {
+  return (
+    <section className="px-6 pt-8 pb-12 sm:px-12 sm:pt-10 sm:pb-14 md:px-6 md:pt-8 md:pb-16">
+      <div className="mx-auto max-w-6xl">
+        <motion.div
+          initial={{ opacity: 0, y: 18 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.55, ease: [0.25, 0.1, 0.25, 1] }}
+          className="mb-6 text-center md:mb-8"
+        >
+          <div className="mb-4 flex items-center justify-center gap-3 text-primary/60">
+            <span className="h-px w-8 bg-border" />
+            <NetworkIcon className="size-4" />
+            <span className="h-px w-8 bg-border" />
+          </div>
+          <h2 className="font-garamond text-4xl font-light tracking-[-0.01em] text-foreground md:text-5xl">
+            Built to <span className="font-instrument text-primary italic">interoperate</span>
+          </h2>
+          <p className="mx-auto mt-3 max-w-2xl text-base leading-relaxed text-muted-foreground">
+            Bumicerts runs on the open AT Protocol network, so your impact data is never
+            locked in. The same records flow freely to apps like Ma&nbsp;Earth and Hypercerts —
+            owned by you, readable everywhere.
+          </p>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 22 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.55, delay: 0.08, ease: [0.25, 0.1, 0.25, 1] }}
+          className="mt-10 flex flex-col items-center"
+        >
+          <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-2 text-sm font-medium text-primary shadow-sm">
+            <NetworkIcon className="size-4" />
+            AT Protocol
+            <span className="text-primary/55">· open network</span>
+          </div>
+
+          <div aria-hidden="true" className="hidden h-8 border-l border-dashed border-border sm:block" />
+          <div className="my-5 h-6 border-l border-dashed border-border sm:hidden" />
+
+          <div className="relative w-full">
+            <div
+              aria-hidden="true"
+              className="absolute top-1/2 left-0 hidden w-full -translate-y-1/2 border-t border-dashed border-border sm:block"
+            />
+            <div className="relative grid grid-cols-1 gap-5 sm:grid-cols-3">
+              {NETWORK_APPS.map((app, index) => (
+                <motion.div
+                  key={app.key}
+                  initial={{ opacity: 0, y: 16 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.45, delay: index * 0.08 + 0.12, ease: [0.25, 0.1, 0.25, 1] }}
+                  className={cn(
+                    "relative flex flex-col items-center gap-4 rounded-2xl border bg-card px-6 py-8 text-center transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg",
+                    app.isSelf
+                      ? "border-primary/30 shadow-md shadow-primary/10"
+                      : "border-border hover:border-primary/20",
+                  )}
+                >
+                  {app.isSelf && (
+                    <span className="absolute top-3 right-3 rounded-full bg-primary px-2 py-0.5 text-[10px] font-bold tracking-wider text-primary-foreground uppercase">
+                      You
+                    </span>
+                  )}
+                  <div className="flex h-9 items-center justify-center">
+                    {app.isSelf ? (
+                      <span className="flex items-center gap-2">
+                        <Image
+                          src="/assets/media/images/app-icon.png"
+                          alt=""
+                          width={30}
+                          height={30}
+                          className="drop-shadow-sm"
+                        />
+                        <span className="font-garamond text-2xl font-medium tracking-tight text-foreground">
+                          {app.name}
+                        </span>
+                      </span>
+                    ) : (
+                      <div className="relative h-7 w-[180px]">
+                        <Image
+                          src={app.logo}
+                          alt={`${app.name} logo`}
+                          fill
+                          sizes="180px"
+                          className="object-contain opacity-90 dark:invert"
+                        />
+                      </div>
+                    )}
+                  </div>
+                  <p className="text-sm leading-relaxed text-muted-foreground dark:text-foreground/75">
+                    {app.blurb}
+                  </p>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-x-7 gap-y-3 text-sm text-muted-foreground">
+            {NETWORK_POINTS.map((point) => (
+              <span key={point.key} className="inline-flex items-center gap-2">
+                <point.icon className="size-4 text-primary/70" />
+                {point.label}
+              </span>
+            ))}
+          </div>
+        </motion.div>
       </div>
     </section>
   );
