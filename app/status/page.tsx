@@ -6,7 +6,7 @@ export const revalidate = 60;
 export const metadata: Metadata = {
   title: "Site health",
   description:
-    "Live health of the services behind Bumicerts and GainForest.",
+    "Live health of the services behind GainForest.",
   alternates: { canonical: "/status" },
 };
 

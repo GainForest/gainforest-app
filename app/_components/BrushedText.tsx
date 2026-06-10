@@ -1,7 +1,7 @@
 import { Fragment, type ReactNode } from "react";
 
 // Single arced brush sweep, ported verbatim from gainforest-app's
-// BrushedText (itself from the Bumicerts "Real Communities" hero).
+// BrushedText (itself from the GainForest "Real Communities" hero).
 // Drawn as a STROKED cubic curve with rounded caps, which is what gives it
 // the visible hand-drawn arc.
 const BRUSH_PATH = "M 3 10.5 C 44 6.5 87 6 175 8.5";

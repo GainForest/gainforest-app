@@ -90,7 +90,7 @@ export default function ColumnMappingStep({ headers, mappings, sampleData, onMap
       <div>
         <h2 className="text-lg font-semibold">Match File Headings</h2>
         <p className="text-sm text-muted-foreground mt-0.5">
-          Match your file headings to the tree information Bumicerts needs. {headers.length} headings detected.
+          Match your file headings to the tree information GainForest needs. {headers.length} headings detected.
         </p>
       </div>
 

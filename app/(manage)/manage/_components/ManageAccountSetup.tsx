@@ -91,14 +91,14 @@ function normalizeWebsite(url: string): string | undefined {
   return trimmed.startsWith("http") ? trimmed : `https://${trimmed}`;
 }
 
-// ── Bumicerts mark ──────────────────────────────────────────────────────────
+// ── GainForest mark ──────────────────────────────────────────────────────────
 
-function BumicertsMark({ className, alt = "" }: { className?: string; alt?: string }) {
+function GainForestMark({ className, alt = "" }: { className?: string; alt?: string }) {
   return (
     <motion.div
       className={cn("relative h-20 w-20", className)}
       transition={{ duration: 0.75, type: "spring" }}
-      layoutId="bumicerts-icon"
+      layoutId="gainforest-icon"
     >
       <Image className="drop-shadow-2xl" src={APP_ICON_SRC} fill alt={alt} />
     </motion.div>
@@ -146,7 +146,7 @@ function OnboardingRoleSelector({
 }) {
   return (
     <div className={cn("flex flex-col items-center pt-8", className)}>
-      <BumicertsMark />
+      <GainForestMark />
       <h1 className="mt-3 text-center text-xl font-medium">{title}</h1>
       <p className="text-center text-sm text-muted-foreground">{description}</p>
       <div className="mt-4 grid w-full gap-2">
@@ -170,7 +170,7 @@ function AccountSetupChoiceStep({
       <OnboardingRoleSelector
         className="w-full max-w-md"
         title="Choose your setup"
-        description="Pick the kind of profile you want to create on Bumicerts."
+        description="Pick the kind of profile you want to create on GainForest."
         options={[
           {
             onClick: onChooseUser,
@@ -184,7 +184,7 @@ function AccountSetupChoiceStep({
             Icon: Building2Icon,
             optionName: "Organization",
             optionDescription:
-              "Set up your organization profile and let Bumicerts prefill what it can from your website.",
+              "Set up your organization profile and let GainForest prefill what it can from your website.",
           },
         ]}
       />

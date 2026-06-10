@@ -45,7 +45,7 @@ export async function openRouterChat(
       "Content-Type": "application/json",
       "HTTP-Referer":
         process.env.NEXT_PUBLIC_SITE_URL ?? "http://127.0.0.1:3040",
-      "X-Title": opts.title ?? "Bumicerts",
+      "X-Title": opts.title ?? "GainForest",
     },
     body: JSON.stringify(payload),
   });

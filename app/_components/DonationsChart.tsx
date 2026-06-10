@@ -6,7 +6,7 @@ import { formatCompactUsd, formatDate, formatUsd } from "../_lib/format";
 
 // Lightweight dependency-free donations chart. Renders the cumulative USD
 // raised as a smooth sage area, with per-day volume as faint bars underneath
-// and an interactive hover crosshair. Mirrors the bumicerts dashboard's
+// and an interactive hover crosshair. Mirrors the GainForest donations view's
 // "Donation Volume Over Time" panel without pulling in Recharts.
 
 const W = 720;

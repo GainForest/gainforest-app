@@ -53,7 +53,7 @@ function WagmiClientProvider({ children }: { children: React.ReactNode }) {
   const wagmiConfig = useMemo(
     () =>
       getDefaultConfig({
-        appName: "Bumicerts",
+        appName: "GainForest",
         projectId: WALLETCONNECT_PROJECT_ID,
         chains: [base],
         ssr: true,

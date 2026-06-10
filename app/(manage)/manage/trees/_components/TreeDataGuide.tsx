@@ -47,7 +47,7 @@ export default function TreeDataGuide() {
         <AccordionTrigger className="px-4 hover:no-underline">New to tree files? See accepted information and download templates</AccordionTrigger>
         <AccordionContent className="px-4">
           <p className="mb-4 text-sm leading-relaxed text-muted-foreground">
-            Use the templates below to prepare tree files with headings Bumicerts can understand automatically.
+            Use the templates below to prepare tree files with headings GainForest can understand automatically.
           </p>
           <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
             {TEMPLATE_DOWNLOADS.map((template) => (

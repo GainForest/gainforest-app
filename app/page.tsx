@@ -9,9 +9,9 @@ import { fetchKpis } from "./_lib/kpis";
 export const revalidate = 300;
 
 export const metadata: Metadata = {
-  title: "Bumicerts — Fund Regenerative Impact",
+  title: "GainForest — Fund Regenerative Impact",
   description:
-    "Bumicerts connects funders with nature stewards doing on-ground regenerative work. Support verified environmental impact directly.",
+    "GainForest connects funders with nature stewards doing on-ground regenerative work. Support checked environmental impact directly.",
   alternates: { canonical: "/" },
 };
 

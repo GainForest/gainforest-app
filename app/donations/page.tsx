@@ -3,9 +3,9 @@ import { Suspense } from "react";
 import { Dashboard } from "../_components/Dashboard";
 
 export const metadata: Metadata = {
-  title: "Donations Overview — Bumicerts",
+  title: "Donations Overview — GainForest",
   description:
-    "Donation activity across Bumicerts: total raised, supporters, funding trends, and recent donations.",
+    "Donation activity across GainForest: total raised, supporters, funding trends, and recent donations.",
   alternates: { canonical: "/donations" },
 };
 

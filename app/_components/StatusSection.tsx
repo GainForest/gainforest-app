@@ -51,8 +51,8 @@ function friendlyServiceName(name: string, description: string): { name: string;
   if (text.includes("index")) return { name: "Search and browsing", detail: "Finds projects and sightings" };
   if (text.includes("pds") || text.includes("personal data")) return { name: "Community data storage", detail: "Keeps public project information available" };
   if (text.includes("label")) return { name: "Review labels", detail: "Shows trust and safety information" };
-  if (text.includes("app")) return { name: "Bumicerts website", detail: "Pages visitors use" };
-  if (text.includes("api")) return { name: "Bumicerts services", detail: "Keeps pages up to date" };
+  if (text.includes("app")) return { name: "GainForest website", detail: "Pages visitors use" };
+  if (text.includes("api")) return { name: "GainForest services", detail: "Keeps pages up to date" };
   const { host, role } = parseComponentName(name);
   return { name: role ? titleCase(role) : "GainForest service", detail: host || null };
 }
@@ -141,12 +141,12 @@ export function StatusSection({ initial }: { initial?: StatusSnapshot }) {
       <PictureHero
         lightSrc="/assets/media/images/status/status-hero-light@2x.webp"
         darkSrc="/assets/media/images/status/status-hero-dark@2x.webp"
-        imageAlt="Calm regenerative landscape representing the services behind Bumicerts"
+        imageAlt="Calm regenerative landscape representing the services behind GainForest"
         eyebrow="Live health"
         icon={<ActivityIcon aria-hidden />}
         title="Site"
         accent="health"
-        lede="A simple view of whether the services behind Bumicerts and GainForest are working. This page refreshes every minute."
+        lede="A simple view of whether the services behind GainForest are working. This page refreshes every minute."
         actions={total > 0 ? statusAction : null}
       />
 

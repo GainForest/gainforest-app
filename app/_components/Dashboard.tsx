@@ -201,7 +201,7 @@ function DashboardShell({ children, periodFilter }: { children: React.ReactNode;
         icon={<BarChart3Icon />}
         title="Donations"
         accent="Overview"
-        lede="Track giving across Bumicerts: total raised, supporter activity, places reached, funding trends, and recent donations."
+        lede="Track giving across GainForest: total raised, supporter activity, places reached, funding trends, and recent donations."
         actions={periodFilter}
       />
 

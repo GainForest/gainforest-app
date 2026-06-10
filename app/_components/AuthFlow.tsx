@@ -49,9 +49,9 @@ function Input({ className, type, ...props }: React.ComponentProps<"input">) {
 function AuthModal() {
   return (
     <ModalContent className="py-2">
-      <ModalTitle className="sr-only">Sign in to Bumicerts</ModalTitle>
+      <ModalTitle className="sr-only">Sign in to GainForest</ModalTitle>
       <ModalDescription className="sr-only">
-        Sign in or create your account to access Bumicerts.
+        Sign in or create your account to access GainForest.
       </ModalDescription>
       <LoginModal />
     </ModalContent>

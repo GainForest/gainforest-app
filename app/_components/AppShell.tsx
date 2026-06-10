@@ -597,7 +597,7 @@ function ManageSectionSkeleton() {
 function SocialFooter() {
   return (
     <div className="flex items-center justify-between px-1">
-      <span className="text-xs font-medium text-muted-foreground">Bumicerts v{APP_VERSION}</span>
+      <span className="text-xs font-medium text-muted-foreground">GainForest v{APP_VERSION}</span>
       <ThemeToggle />
     </div>
   );
@@ -709,7 +709,7 @@ function Header({
 
   return (
     <div className="sticky top-0 z-30" data-header>
-      {/* Progressive blur background - same approach as Bumicerts Header. */}
+      {/* Progressive blur background - same approach as the GainForest header. */}
       <div className="absolute inset-0 pointer-events-none">
         <div
           className="absolute inset-0 z-1"

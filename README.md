@@ -1,11 +1,11 @@
-# Bumicerts
+# GainForest
 
-Bumicerts is a block explorer for everything GainForest signs on the AT Protocol, in the
+GainForest is a plain-language explorer for the environmental work GainForest supports, in the
 editorial design language of the [gainforest-app](../gainforest-app) landing
 (cream + sage, Cormorant Garamond headlines, the brushed underline, the dark
 ink data bands). It ports the GainForest-relevant slices of
 [GainForest/hyperscan](https://github.com/GainForest/hyperscan) and folds in
-the live status page and the Bumicerts donations dashboard.
+the live status page and the GainForest donations view.
 
 ```bash
 pnpm install
@@ -30,7 +30,7 @@ Each surface is its own route (shared `TopNav` + `Footer` in the root layout):
 
 Each record opens a detail drawer (`RecordDrawer`) with its structured
 fields, the canonical `at://` URI (copyable), and contextual links out to
-Bumicerts / Green Globe / Bluesky.
+GainForest / Green Globe / Bluesky.
 
 ### Tainá device monitor
 
@@ -56,7 +56,7 @@ server-side to `/api/auth/session`, then redirects users to `/login` or
 `/logout` with the current page as `returnTo`.
 
 Auth cookies are scoped to `*.gainforest.app`, so local auth must run through a
-`*.gainforest.app` hostname over HTTPS, just like Bumicerts. Use Caddy as the
+`*.gainforest.app` hostname over HTTPS, just like GainForest. Use Caddy as the
 local reverse proxy:
 
 ```bash
@@ -99,7 +99,7 @@ walks) — cards stream in as they're found.
 - Indexer: `https://hi.gainforest.app/graphql`
 - Facilitator (all donations): `did:plc:edod7rboajioq3jbyxsgeicc`
 - Status: `https://gainforest-status.instatus.com`
-- Links out: `data.gainforest.app` (Bumicerts links stay in this app)
+- Links out: `data.gainforest.app` (GainForest links stay in this app)
 
 > The explorer is a read-only window over the commons. Donation figures
 > mirror the live indexer and may lag the chain; it is not an official record.

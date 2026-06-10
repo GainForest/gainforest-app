@@ -80,7 +80,7 @@ export async function POST(request: Request) {
       maxTokens: 800,
       temperature: 0.8,
       stream: true,
-      title: `Bumicerts companion (${TAINA_SIM.name})`,
+      title: `GainForest companion (${TAINA_SIM.name})`,
     });
     if (!res.ok) {
       const err = await res.text().catch(() => "");

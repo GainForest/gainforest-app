@@ -7,7 +7,7 @@ export async function generateMetadata({ params }: { params: Promise<{ did: stri
   const { did, urlIdentifier } = await readAccountRouteParams(params);
   const account = await getAccountRouteData(did, urlIdentifier);
   return {
-    title: `${account.displayName} — Bumicerts`,
+    title: `${account.displayName}'s Bumicerts`,
     description: `Public Bumicerts created by ${account.displayName}.`,
     alternates: { canonical: `/account/${encodeURIComponent(account.urlIdentifier)}/bumicerts` },
   };

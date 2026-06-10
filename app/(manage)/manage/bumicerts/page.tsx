@@ -4,7 +4,7 @@ import { fetchBumicertsByDid } from "@/app/_lib/indexer";
 import { ManageBumicertsClient } from "./_components/ManageBumicertsClient";
 
 export const metadata: Metadata = {
-  title: "Manage Bumicerts — Bumicerts",
+  title: "Manage Bumicerts — GainForest",
   description: "Review your recent Bumicerts and drafts.",
   robots: { index: false, follow: false },
 };

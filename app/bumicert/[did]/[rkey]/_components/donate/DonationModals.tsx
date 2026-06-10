@@ -295,7 +295,7 @@ export function AmountModal({
             <span className="min-w-0">
               <span className="block text-sm font-medium text-foreground">Donate anonymously</span>
               <span className="mt-0.5 block text-xs leading-5 text-muted-foreground">
-                Leave this off to show this donation on your Bumicerts profile.
+                Leave this off to show this donation on your GainForest profile.
               </span>
             </span>
           </label>
@@ -645,7 +645,7 @@ function SuccessModal({
               Your <span className="text-nowrap text-foreground">${amount.toFixed(2)}</span> donation to <span className="text-foreground">{bumicert.organizationName}</span> was successful.
             </p>
             <p className="mt-1 text-xs text-muted-foreground">
-              {donorRecordedAs === "did" ? "Recorded with your Bumicerts profile." : "Recorded as anonymous."}
+              {donorRecordedAs === "did" ? "Recorded with your GainForest profile." : "Recorded as anonymous."}
             </p>
           </div>
 

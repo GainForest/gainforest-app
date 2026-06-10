@@ -8,7 +8,7 @@ import { AccountContentColumns, AccountSidebar } from "@/app/account/_components
 import { getAccountRouteData } from "@/app/account/_lib/account-route";
 
 export const metadata: Metadata = {
-  title: "Donation History — Bumicerts",
+  title: "Donation History — GainForest",
   description: "View your public donation history.",
   robots: { index: false, follow: false },
 };

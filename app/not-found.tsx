@@ -3,7 +3,7 @@ import { GracefulNotFound } from "./_components/GracefulNotFound";
 
 export const metadata: Metadata = {
   title: "Page not found",
-  description: "A gentle message for a Bumicerts page that cannot be found.",
+  description: "A gentle message for a GainForest page that cannot be found.",
   robots: { index: false, follow: false },
 };
 

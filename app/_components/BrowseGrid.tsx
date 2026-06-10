@@ -3,7 +3,7 @@ import { ArrowUpRightIcon, LeafIcon } from "lucide-react";
 import type { ExplorerKpis } from "../_lib/kpis";
 import { formatCompact, formatCompactUsd } from "../_lib/format";
 
-// Landing-page collections grid. Kept intentionally aligned to the Bumicerts
+// Landing-page collections grid. Kept intentionally aligned to the GainForest
 // home sections: max-w-6xl, centered editorial heading, rounded cards, and the
 // same restrained primary accents instead of the old wide dashboard band.
 export function BrowseGrid({ kpis }: { kpis: ExplorerKpis }) {

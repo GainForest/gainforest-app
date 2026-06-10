@@ -66,7 +66,7 @@ function writeIndexHtml(repoPath) {
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Bumicerts E2E Reports</title>
+    <title>GainForest E2E Reports</title>
     <style>
       :root { color-scheme: light dark; font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
       body { margin: 0; padding: 48px; background: Canvas; color: CanvasText; }
@@ -83,7 +83,7 @@ function writeIndexHtml(repoPath) {
   </head>
   <body>
     <main>
-      <h1>Bumicerts E2E Reports</h1>
+      <h1>GainForest E2E Reports</h1>
       <p>Central archive of Playwright HTML reports published by engineers and CI.</p>
       <div id="app" class="empty">No reports published yet.</div>
     </main>

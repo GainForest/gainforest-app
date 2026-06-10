@@ -3,7 +3,7 @@
  * data endpoints. Kept in one place so a host change is a single edit.
  */
 
-/** Bumicerts's own canonical origin. Drives metadataBase, canonical/OG
+/** GainForest's own canonical origin. Drives metadataBase, canonical/OG
  * URLs, the sitemap, and robots. Configure this per deployment. */
 export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || "https://certs-rewrite.gainforest.app").replace(/\/$/, "");
 
@@ -77,7 +77,7 @@ export function localBumicertHref(didOrHandle: string, rkey: string): string {
   return `/bumicert/${encodeURIComponent(didOrHandle)}/${encodeURIComponent(rkey)}`;
 }
 
-/** Build a local Bumicerts account page URL from a DID or handle. */
+/** Build a local GainForest account page URL from a DID or handle. */
 export function accountHref(didOrHandle: string): string {
   return `/account/${encodeURIComponent(didOrHandle)}`;
 }

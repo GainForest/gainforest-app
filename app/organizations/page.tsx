@@ -5,9 +5,9 @@ import { OrganizationsClient } from "./OrganizationsClient";
 export const revalidate = 60;
 
 export const metadata: Metadata = {
-  title: "Organizations — Bumicerts",
+  title: "Organizations — GainForest",
   description:
-    "Browse nature steward organizations creating verified environmental impact with GainForest and Bumicerts.",
+    "Browse nature steward organizations creating verified environmental impact with GainForest.",
   alternates: { canonical: "/organizations" },
 };
 

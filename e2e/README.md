@@ -1,4 +1,4 @@
-# Bumicerts E2E
+# GainForest E2E
 
 Authenticated E2E tests run through central sign-in on an HTTPS `*.gainforest.app` host so cookie and redirect behavior matches production.
 

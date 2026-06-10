@@ -11,8 +11,8 @@ import {
 import { getAccountRouteData, type AccountRouteData } from "@/app/account/_lib/account-route";
 
 export const metadata: Metadata = {
-  title: "Manage Organization — Bumicerts",
-  description: "Manage your Bumicerts organization profile and data.",
+  title: "Manage Organization — GainForest",
+  description: "Manage your GainForest organization profile and data.",
 };
 
 type ManagePageSearchParams = Promise<{ [key: string]: string | string[] | undefined }>;

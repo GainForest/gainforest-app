@@ -215,7 +215,7 @@ function buildSidebarData(account: AccountRouteData, bumicertCount: number, dona
     inviteTitle: account.kind === "organization" ? "Invite collaborators" : "Invite friends",
     inviteDescription: account.kind === "organization" ? "Share this organization profile with collaborators and funders." : "Share your public impact profile with friends.",
     inviteActionLabel: account.kind === "organization" ? "Invite collaborators" : "Invite friends",
-    inviteHref: `https://x.com/intent/tweet?text=${encodeURIComponent(`Explore ${displayName} on Bumicerts`)}`,
+    inviteHref: `https://x.com/intent/tweet?text=${encodeURIComponent(`Explore ${displayName} on GainForest`)}`,
     achievementsHref: `${accountBumicertsPath(account.urlIdentifier)}#account-achievements`,
     stats: [
       {

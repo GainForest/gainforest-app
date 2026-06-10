@@ -4,7 +4,7 @@
 @custom-variant dark (&:is(.dark *));
 
 /* ──────────────────────────────────────────────────────────────────────────
-   Bumicerts — Bumicerts design system tokens.
+   GainForest — GainForest design system tokens.
 
    Mirrored from ../bumicerts-monorepo/apps/bumicerts/app/globals.css: stark
    white/ink surfaces, oklch sage primary, shadcn-compatible card/muted/accent
@@ -45,7 +45,7 @@
 
   --radius: 0.75rem;
 
-  /* Bumicerts legacy aliases, now mapped onto the Bumicerts system. */
+  /* Bumicerts legacy aliases, now mapped onto the GainForest system. */
   --border-soft: var(--border);
   --surface: var(--card);
   --surface-sunken: var(--muted);
@@ -216,7 +216,7 @@ body {
 }
 
 /* Editorial brushed underline — single arced cubic curve, ported verbatim
-   from the Bumicerts "Real Communities" hero the way gainforest-app's
+   from the GainForest "Real Communities" hero the way gainforest-app's
    BrushedText does it. */
 .brush-svg {
   position: absolute;
@@ -403,7 +403,7 @@ body {
   border-radius: 999px;
 }
 
-/* ── Bumicerts account/profile animations ─────────────────────────────── */
+/* ── GainForest account/profile animations ─────────────────────────────── */
 .scrollbar-hidden {
   scrollbar-width: none;
   -ms-overflow-style: none;

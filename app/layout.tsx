@@ -39,13 +39,13 @@ const instrument = Instrument_Serif({
   display: "swap",
 });
 
-const SITE_NAME = "Bumicerts";
-const SITE_TAGLINE = "plain-language GainForest impact explorer";
+const SITE_NAME = "GainForest";
+const SITE_TAGLINE = "plain-language impact explorer";
 const SITE_DESCRIPTION =
-  "Bumicerts is a plain-language explorer for GainForest impact: project stories, nature sightings, organizations, donations, field updates, and site health.";
+  "GainForest helps people explore project stories, nature sightings, organizations, donations, field updates, and site health.";
 const OG_IMAGE = "/og/bumicerts-og.png";
 const OG_ALT =
-  "Bumicerts — a warm cream editorial card about GainForest impact, with observations, places, Bumicerts, and donations beside a vintage natural-history collage.";
+  "GainForest — a warm cream editorial card about environmental impact, with observations, places, Bumicerts, and donations beside a vintage natural-history collage.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -59,7 +59,6 @@ export const metadata: Metadata = {
   creator: "GainForest",
   publisher: "GainForest",
   keywords: [
-    "Bumicerts",
     "GainForest",
     "Bumicerts",
     "biodiversity",

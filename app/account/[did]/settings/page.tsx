@@ -4,7 +4,7 @@ import { fetchAuthSession } from "../../../_lib/auth-server";
 import { readAccountRouteParams } from "../../_lib/account-route";
 
 export const metadata: Metadata = {
-  title: "Account settings moved — Bumicerts",
+  title: "Account settings moved — GainForest",
   description: "Account settings are managed from /manage.",
   robots: { index: false, follow: false },
 };

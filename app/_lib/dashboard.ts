@@ -154,7 +154,7 @@ export async function fetchReceipts(signal?: AbortSignal): Promise<FundingReceip
   return cachedAsync("funding-receipts-total-source", TOTAL_STATS_CACHE_MS, fetchReceiptsUncached, signal);
 }
 
-// ── Aggregations ported from Bumicerts dashboard ───────────────────────────
+// ── Aggregations ported from the GainForest donations view ────────────────
 
 export type Period = "all" | "month" | "week";
 export type TimeGranularity = "day" | "week" | "month";

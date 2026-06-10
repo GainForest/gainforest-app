@@ -107,9 +107,9 @@ const NETWORK_APPS = [
     isSelf: false,
   },
   {
-    key: "bumicerts",
-    name: "Bumicerts",
-    blurb: "Verified impact certificates",
+    key: "gainforest",
+    name: "GainForest",
+    blurb: "Checked project stories",
     logo: null,
     isSelf: true,
   },
@@ -123,7 +123,7 @@ const NETWORK_APPS = [
 ] as const;
 
 const NETWORK_POINTS = [
-  { key: "portable", label: "Portable records", icon: ArrowLeftRightIcon },
+  { key: "portable", label: "Easy to move", icon: ArrowLeftRightIcon },
   { key: "owned", label: "You own your data", icon: KeyRoundIcon },
   { key: "shared", label: "Readable everywhere", icon: Share2Icon },
 ] as const;
@@ -164,14 +164,14 @@ function LandingTopNavbar() {
           <motion.div whileHover={{ scale: 1.05 }} transition={{ type: "spring", stiffness: 400, damping: 25 }}>
             <Image
               src="/assets/media/images/app-icon.png"
-              alt="Bumicerts"
+              alt="GainForest"
               width={28}
               height={28}
               className="drop-shadow-md"
             />
           </motion.div>
           <span className="font-garamond text-base font-medium tracking-tight text-foreground/85 transition-colors duration-200 group-hover:text-foreground">
-            Bumicerts
+            GainForest
           </span>
         </Link>
 
@@ -186,7 +186,7 @@ function LandingTopNavbar() {
               href="/bumicerts"
               className="inline-flex h-9 shrink-0 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-lg shadow-primary/15 transition-colors hover:bg-primary/90 focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none"
             >
-              Open Bumicerts
+              Open GainForest
             </Link>
           </motion.div>
 
@@ -541,7 +541,7 @@ function WhatIsBumicert() {
                 coverImage="/assets/media/images/landing/certificate-river.jpg"
                 title="Reforestation of Mount Halimun"
                 description="Community-led restoration of native forest in West Java, Indonesia. 5,000 trees planted across 12 hectares."
-                organizationName="Bumicerts"
+                organizationName="GainForest"
                 objectives={["Reforestation", "Biodiversity"]}
               />
             </div>
@@ -572,9 +572,9 @@ function OpenNetworkSection() {
             Built to <span className="font-instrument text-primary italic">interoperate</span>
           </h2>
           <p className="mx-auto mt-3 max-w-2xl text-base leading-relaxed text-muted-foreground">
-            Bumicerts runs on the open AT Protocol network, so your impact data is never
-            locked in. The same records flow freely to apps like Ma&nbsp;Earth and Hypercerts —
-            owned by you, readable everywhere.
+            GainForest keeps your impact information portable, so it is never
+            locked in. The same information can flow to trusted tools like Ma&nbsp;Earth and Hypercerts —
+            owned by you, readable where you need it.
           </p>
         </motion.div>
 
@@ -587,8 +587,8 @@ function OpenNetworkSection() {
         >
           <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-2 text-sm font-medium text-primary shadow-sm">
             <NetworkIcon className="size-4" />
-            AT Protocol
-            <span className="text-primary/55">· open network</span>
+            Open network
+            <span className="text-primary/55">· easy to move</span>
           </div>
 
           <div aria-hidden="true" className="hidden h-8 border-l border-dashed border-border sm:block" />

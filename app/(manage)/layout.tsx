@@ -3,14 +3,14 @@ import { SignInPrompt } from "../_components/AuthFlow";
 import { fetchAuthSession } from "../_lib/auth-server";
 
 export const metadata: Metadata = {
-  title: "Manage — Bumicerts",
+  title: "Manage — GainForest",
   robots: { index: false, follow: false },
 };
 
 /**
  * (MANAGE) layout
  *
- * Mirrors the Bumicerts app's former (upload) route group, but this app exposes
+ * Mirrors the GainForest app's former upload route group, but this app exposes
  * those routes under /manage instead of /upload. For now these are placeholders
  * while the upload/manage workflows are ported.
  */

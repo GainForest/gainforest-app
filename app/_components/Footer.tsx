@@ -19,7 +19,7 @@ const DATA_LINKS = [
   { href: STATUS_URL, label: "Status" },
 ] as const;
 
-// Mixed footer: Bumicerts' light, minimal brand block plus the explorer's data
+// Mixed footer: GainForest's light, minimal brand block plus the explorer's data
 // source/legal details and GainForest social presence.
 export function Footer() {
   const year = new Date().getFullYear();
@@ -32,12 +32,12 @@ export function Footer() {
             <div className="flex items-center gap-2.5">
               <Image
                 src="/assets/media/images/app-icon.png"
-                alt="Bumicerts"
+                alt="GainForest"
                 width={28}
                 height={28}
                 className="drop-shadow-md"
               />
-              <span className="font-serif text-xl font-bold tracking-tight">Bumicerts</span>
+              <span className="font-serif text-xl font-bold tracking-tight">GainForest</span>
             </div>
             <p
               className="text-sm text-muted-foreground"
@@ -86,7 +86,7 @@ export function Footer() {
         <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
           <div className="flex flex-col gap-1.5 leading-[1.55]">
             <span>
-              © {year} Bumicerts / GainForest. Community-powered.
+              © {year} GainForest. Community-powered.
             </span>
             <span>
               <span className="font-medium text-muted-foreground/80">GainForest e.V.</span>

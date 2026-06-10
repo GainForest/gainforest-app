@@ -347,7 +347,7 @@ function CreateHero({ session }: { session: AuthSession }) {
               Create a<br />Bumicert
             </h1>
             <p className="mt-5 max-w-[22rem] text-base leading-7 text-muted-foreground">
-              Turn field work, restoration evidence, and community stewardship into a publishable impact story — without leaving Bumicerts.
+              Turn field work, restoration evidence, and community stewardship into a publishable impact story — without leaving GainForest.
             </p>
             <div className="mt-7 flex flex-wrap items-center gap-3">
               {session.isLoggedIn ? (

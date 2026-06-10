@@ -3,9 +3,9 @@ import { Suspense } from "react";
 import { LeaderboardClient } from "./LeaderboardClient";
 
 export const metadata: Metadata = {
-  title: "Leaderboard — Bumicerts",
+  title: "Leaderboard — GainForest",
   description:
-    "See the top donors making an impact on Bumicerts. Our Impact Champions are ranked by their total funding contributions.",
+    "See the top donors making an impact on GainForest. Our Impact Champions are ranked by their total funding contributions.",
   alternates: { canonical: "/leaderboard" },
 };
 

@@ -57,7 +57,7 @@ function deriveStatus(
   if (!receivingWalletTrusted) {
     return {
       kind: "invalid",
-      reason: "Wallet not verified by Bumicerts — re-link through the platform.",
+      reason: "Wallet not verified by GainForest — re-link through the platform.",
     };
   }
 

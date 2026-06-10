@@ -3,8 +3,8 @@ import { redirect } from "next/navigation";
 import { fetchAuthSession } from "@/app/_lib/auth-server";
 
 export const metadata: Metadata = {
-  title: "Settings — Bumicerts",
-  description: "Manage your Bumicerts account settings.",
+  title: "Settings — GainForest",
+  description: "Manage your GainForest account settings.",
   robots: { index: false, follow: false },
 };
 

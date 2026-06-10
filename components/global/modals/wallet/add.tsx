@@ -144,7 +144,7 @@ export function AddWalletModal({
               </button>
             </div>
             <p className="text-xs text-muted-foreground">
-              Bumicerts requires Base network. Switch to continue.
+              GainForest requires Base network. Switch to continue.
             </p>
             <Button
               onClick={() => switchChain({ chainId: base.id })}

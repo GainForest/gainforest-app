@@ -62,7 +62,7 @@ export function useWalletAttestation(donorDid: string): UseWalletAttestationResu
       return;
     }
     if (!donorDid) {
-      setError("Not signed in. Sign in to your Bumicerts account first.");
+      setError("Not signed in. Sign in to your GainForest account first.");
       return;
     }
 

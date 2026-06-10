@@ -98,7 +98,7 @@ export function Hero({
           </h1>
 
           <p className="mt-6 max-w-[660px] text-[16px] leading-[1.55] text-foreground/80 lg:text-[18px]">
-            Bumicerts helps anyone explore GainForest's environmental work in plain language.
+            GainForest helps anyone explore environmental work in plain language.
             See project stories, donations, field updates, and site health as they change.
           </p>
         </div>

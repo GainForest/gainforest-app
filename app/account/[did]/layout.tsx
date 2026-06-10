@@ -9,7 +9,7 @@ export async function generateMetadata({ params }: { params: Promise<{ did: stri
   if (!routeParams) {
     return {
       title: "Profile not found",
-      description: "A gentle message for a public profile Bumicerts cannot find.",
+      description: "A gentle message for a public profile GainForest cannot find.",
       robots: { index: false, follow: false },
     };
   }
@@ -17,7 +17,7 @@ export async function generateMetadata({ params }: { params: Promise<{ did: stri
   const account = await getAccountRouteData(routeParams.did, routeParams.urlIdentifier);
   return {
     title: `${account.displayName} — Account`,
-    description: account.description ?? `Public Bumicerts profile for ${account.displayName}.`,
+    description: account.description ?? `Public GainForest profile for ${account.displayName}.`,
     alternates: { canonical: `/account/${encodeURIComponent(account.urlIdentifier)}` },
   };
 }

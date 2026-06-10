@@ -330,7 +330,7 @@ export function FundingConfigModal({
               <p className="text-xs text-destructive leading-snug">
                 {!selectedLink.specialMetadata?.valid
                   ? "Signature unverified — donations may not be processable."
-                  : "Not verified by Bumicerts — re-link through the platform."}
+                  : "Not verified by GainForest — re-link through the platform."}
               </p>
             </div>
           )}
