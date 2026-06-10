@@ -78,6 +78,7 @@ type MutationBody =
   | { operation: "uploadBlob"; blobData: string; blobMimeType: string }
   | { operation: "createMultimediaFromFile"; blobData: string; blobMimeType: string; occurrenceRef: string; siteRef?: string; subjectPart: string; caption?: string }
   | { operation: "getDatasetRecord"; rkey: string }
+  | { operation: "getCertifiedLocationRecord"; rkey: string }
   | { operation: "incrementDatasetRecordCount"; rkey: string; increment: number }
   | { operation: "createMeasurement"; occurrenceRef: string; flora: FloraMeasurementFields }
   | { operation: "updateMeasurement"; rkey: string; data: UpdateMeasurementData; unset?: string[]; resultUnset?: string[] }
@@ -105,6 +106,7 @@ type ForwardableMutationBody = Exclude<
   | { operation: "createMultimediaFromUrl" }
   | { operation: "createMultimediaFromFile" }
   | { operation: "getDatasetRecord" }
+  | { operation: "getCertifiedLocationRecord" }
   | { operation: "incrementDatasetRecordCount" }
   | { operation: "createMeasurement" }
   | { operation: "updateMeasurement" }
@@ -121,6 +123,7 @@ type PersistedOccurrence = { index: number; occurrenceUri: string; occurrenceRke
 
 const MULTIMEDIA_COLLECTION = "app.gainforest.ac.multimedia";
 const DATASET_COLLECTION = "app.gainforest.dwc.dataset";
+const CERTIFIED_LOCATION_COLLECTION = "app.certified.location";
 const OCCURRENCE_COLLECTION = "app.gainforest.dwc.occurrence";
 const MEASUREMENT_COLLECTION = "app.gainforest.dwc.measurement";
 const FLORA_MEASUREMENT_TYPE = "app.gainforest.dwc.measurement#floraMeasurement";
@@ -460,6 +463,7 @@ function isMutationBody(value: unknown): value is MutationBody {
   }
   if (body.operation === "deleteRecord") return typeof body.collection === "string" && typeof body.rkey === "string";
   if (body.operation === "getDatasetRecord") return typeof body.rkey === "string" && body.rkey.length > 0;
+  if (body.operation === "getCertifiedLocationRecord") return typeof body.rkey === "string" && body.rkey.length > 0;
   if (body.operation === "incrementDatasetRecordCount") {
     return typeof body.rkey === "string" && body.rkey.length > 0 && typeof body.increment === "number" && Number.isInteger(body.increment) && body.increment >= 0;
   }
@@ -692,6 +696,15 @@ async function getDatasetRecordFromPds(did: string, rkey: string): Promise<Datas
     throw new Error("Could not check the selected tree group.");
   }
   return result;
+}
+
+async function getCertifiedLocationRecordFromPds(did: string, rkey: string): Promise<DatasetRecordResult> {
+  return fetchRepoRecord({
+    did,
+    collection: CERTIFIED_LOCATION_COLLECTION,
+    rkey,
+    missingMessage: "Could not check the selected site.",
+  });
 }
 
 function buildTreeDynamicProperties(datasetRef?: string): string {
@@ -1859,6 +1872,15 @@ export async function POST(request: Request) {
       return Response.json(result);
     } catch (error) {
       return Response.json({ error: error instanceof Error ? error.message : "Could not check the selected tree group." }, { status: 502 });
+    }
+  }
+
+  if (body.operation === "getCertifiedLocationRecord") {
+    try {
+      const result = await getCertifiedLocationRecordFromPds(session.did, body.rkey);
+      return Response.json(result);
+    } catch (error) {
+      return Response.json({ error: error instanceof Error ? error.message : "Could not check the selected site." }, { status: 502 });
     }
   }
 

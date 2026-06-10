@@ -13,8 +13,19 @@ import {
   ModalTitle,
 } from "@/components/ui/modal/modal";
 import { useModal } from "@/components/ui/modal/context";
-import { createRecord, putRecord, uploadBlob } from "../_lib/mutations";
-import { validateGeojsonOrThrow } from "../_lib/upload/geojson";
+import {
+  createRecord,
+  getCertifiedLocationRecord,
+  putRecord,
+  uploadBlob,
+} from "../_lib/mutations";
+import {
+  findTreeBoundaryFailures,
+  formatBoundaryDistance,
+  readGeoJsonFile,
+  type SiteBoundaryGeoJson,
+  type TreeBoundaryCoordinate,
+} from "../_lib/upload/site-boundary";
 import { DrawPolygonModal, DrawPolygonModalId } from "./DrawPolygonModal";
 
 export const SiteEditorModalId = "site-editor";
@@ -41,6 +52,18 @@ type SiteEditorModalProps = {
   requireBoundary?: boolean;
 };
 
+type LinkedSiteTree = {
+  uri: string;
+  rkey: string;
+  scientificName: string | null;
+  decimalLatitude: number | null;
+  decimalLongitude: number | null;
+};
+
+type LinkedSiteTreesPayload =
+  | { trees: LinkedSiteTree[]; truncated?: boolean }
+  | { error?: string };
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
 }
@@ -65,21 +88,85 @@ function toLexBlobRef(uploaded: UploadedBlobLike, file: File) {
   };
 }
 
-async function validateSiteFile(file: File): Promise<void> {
+async function readSiteBoundaryFile(file: File): Promise<SiteBoundaryGeoJson> {
   if (file.size > MAX_SITE_FILE_BYTES) {
     throw new Error("Choose a smaller site file (max 10 MB).");
   }
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(await file.text());
-  } catch {
-    throw new Error("Choose a valid map file.");
+  return readGeoJsonFile(file);
+}
+
+function toTreeBoundaryCoordinate(tree: LinkedSiteTree, index: number): TreeBoundaryCoordinate | null {
+  const decimalLatitude = tree.decimalLatitude;
+  const decimalLongitude = tree.decimalLongitude;
+  if (
+    typeof decimalLatitude !== "number" ||
+    typeof decimalLongitude !== "number" ||
+    !Number.isFinite(decimalLatitude) ||
+    !Number.isFinite(decimalLongitude)
+  ) {
+    return null;
   }
-  try {
-    validateGeojsonOrThrow(parsed);
-  } catch (err) {
-    throw new Error(err instanceof Error ? err.message.replace(/GeoJSON/gi, "map file") : "Choose a valid map file.");
+
+  return {
+    index,
+    scientificName: tree.scientificName,
+    decimalLatitude,
+    decimalLongitude,
+  };
+}
+
+function formatLinkedTreeIssue(failure: ReturnType<typeof findTreeBoundaryFailures>[number]): string {
+  const treeLabel = failure.tree.scientificName ?? `tree ${failure.tree.index + 1}`;
+  if (failure.kind === "near-boundary") {
+    return `${treeLabel} (near the edge, ${formatBoundaryDistance(failure.distanceMeters)} outside)`;
   }
+  if (failure.kind === "out-of-site") {
+    return `${treeLabel} (${formatBoundaryDistance(failure.distanceMeters)} outside)`;
+  }
+  return `${treeLabel} (could not be checked)`;
+}
+
+function buildBoundaryEditBlockedMessage(options: {
+  failures: ReturnType<typeof findTreeBoundaryFailures>;
+  uncheckedCount: number;
+  truncated: boolean;
+}): string {
+  if (options.truncated) {
+    return "This boundary cannot be replaced because there are too many linked trees to check at once. Contact support before replacing the drawn map area.";
+  }
+
+  if (options.uncheckedCount > 0) {
+    return `This boundary cannot be replaced because ${options.uncheckedCount} linked tree${options.uncheckedCount === 1 ? "" : "s"} could not be checked. Add coordinates to those trees before replacing the drawn map area.`;
+  }
+
+  const sample = options.failures.slice(0, 3).map(formatLinkedTreeIssue).join("; ");
+  return `This boundary cannot be replaced because ${options.failures.length} linked tree${options.failures.length === 1 ? "" : "s"} would be outside the new drawn map area${sample ? `: ${sample}` : ""}. Draw a larger area or update those tree coordinates first.`;
+}
+
+async function fetchLinkedSiteTrees(rkey: string): Promise<{ trees: LinkedSiteTree[]; truncated: boolean }> {
+  const response = await fetch(`/api/manage/sites/${encodeURIComponent(rkey)}/trees`, {
+    cache: "no-store",
+  });
+  const payload = (await response.json().catch(() => null)) as LinkedSiteTreesPayload | null;
+
+  if (!response.ok || !payload || "error" in payload) {
+    const maybeError = payload as { error?: unknown } | null;
+    const message = typeof maybeError?.error === "string"
+      ? maybeError.error
+      : "Could not check linked trees.";
+    throw new Error(message);
+  }
+
+  const successPayload = payload as { trees?: unknown; truncated?: unknown };
+  return {
+    trees: Array.isArray(successPayload.trees) ? successPayload.trees as LinkedSiteTree[] : [],
+    truncated: Boolean(successPayload.truncated),
+  };
+}
+
+async function loadCurrentSiteRecord(rkey: string): Promise<{ cid: string; record: Record<string, unknown> }> {
+  const current = await getCertifiedLocationRecord(rkey);
+  return { cid: current.cid, record: current.record };
 }
 
 export function SiteEditorModal({ did, initialData, onSaved, requireBoundary = false }: SiteEditorModalProps) {
@@ -96,13 +183,14 @@ export function SiteEditorModal({ did, initialData, onSaved, requireBoundary = f
   const [showEditor, setShowEditor] = useState(!isEditMode || !previewUrl);
   const [isCompleted, setIsCompleted] = useState(false);
   const [isPending, setIsPending] = useState(false);
+  const [isVerifyingBoundary, setIsVerifyingBoundary] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const { stack, popModal, hide, pushModal, show } = useModal();
 
   const handleDrawDone = useCallback((geojsonString: string) => {
     const blob = new Blob([geojsonString], { type: "application/geo+json" });
-    setSiteFile(new File([blob], "drawn-site.geojson", { type: "application/geo+json" }));
+    setSiteFile(new File([blob], "drawn-site-map", { type: "application/geo+json" }));
     setError(null);
   }, []);
 
@@ -113,6 +201,25 @@ export function SiteEditorModal({ did, initialData, onSaved, requireBoundary = f
       content: <DrawPolygonModal onSubmit={handleDrawDone} />,
     });
     void show();
+  };
+
+  const verifyBoundaryReplacement = async (rkey: string, boundary: SiteBoundaryGeoJson) => {
+    setIsVerifyingBoundary(true);
+    try {
+      const { trees, truncated } = await fetchLinkedSiteTrees(rkey);
+      const treeCoordinates = trees.flatMap((tree, index) => {
+        const coordinate = toTreeBoundaryCoordinate(tree, index);
+        return coordinate ? [coordinate] : [];
+      });
+      const uncheckedCount = trees.length - treeCoordinates.length;
+      const failures = findTreeBoundaryFailures({ trees: treeCoordinates, boundary });
+
+      if (truncated || uncheckedCount > 0 || failures.length > 0) {
+        throw new Error(buildBoundaryEditBlockedMessage({ failures, uncheckedCount, truncated }));
+      }
+    } finally {
+      setIsVerifyingBoundary(false);
+    }
   };
 
   const disableSubmit = !name.trim() || (!isEditMode && !siteFile) || (requireBoundary && !siteFile) || isPending;
@@ -126,7 +233,7 @@ export function SiteEditorModal({ did, initialData, onSaved, requireBoundary = f
       let result: { uri: string; cid: string };
       if (!isEditMode) {
         if (!siteFile) return;
-        await validateSiteFile(siteFile);
+        await readSiteBoundaryFile(siteFile);
         const uploaded = await uploadBlob(siteFile);
         result = await createRecord("app.certified.location", {
           $type: "app.certified.location",
@@ -139,23 +246,30 @@ export function SiteEditorModal({ did, initialData, onSaved, requireBoundary = f
         });
       } else {
         const rkey = initialData!.rkey;
+        let replacementLocation: Record<string, unknown> | null = null;
+        if (siteFile) {
+          const boundary = await readSiteBoundaryFile(siteFile);
+          await verifyBoundaryReplacement(rkey, boundary);
+          const uploaded = await uploadBlob(siteFile);
+          replacementLocation = { $type: "org.hypercerts.defs#smallBlob", blob: toLexBlobRef(uploaded, siteFile) };
+        }
+
+        const currentSite = await loadCurrentSiteRecord(rkey);
         const record: Record<string, unknown> = {
-          ...(initialData?.recordValue ?? {}),
+          ...currentSite.record,
           $type: "app.certified.location",
           name: name.trim(),
         };
         if (typeof record.createdAt !== "string") {
           record.createdAt = new Date().toISOString();
         }
-        if (siteFile) {
-          await validateSiteFile(siteFile);
-          const uploaded = await uploadBlob(siteFile);
+        if (replacementLocation) {
           record.lpVersion = "1.0.0";
           record.srs = "https://epsg.io/3857";
           record.locationType = "geojson-point";
-          record.location = { $type: "org.hypercerts.defs#smallBlob", blob: toLexBlobRef(uploaded, siteFile) };
+          record.location = replacementLocation;
         }
-        result = await putRecord("app.certified.location", rkey, record);
+        result = await putRecord("app.certified.location", rkey, record, { swapRecord: currentSite.cid });
       }
       const rkey = result.uri.split("/").pop() ?? (initialData?.rkey ?? "site");
       onSaved?.({ uri: result.uri, cid: result.cid, rkey, name: name.trim() });
@@ -182,7 +296,7 @@ export function SiteEditorModal({ did, initialData, onSaved, requireBoundary = f
         <ModalDescription>
           {isEditMode
             ? "Update the site name or replace its boundary."
-            : "Add a new certified field location."}
+            : "Add a site name and drawn map area."}
         </ModalDescription>
       </ModalHeader>
 
@@ -297,7 +411,7 @@ export function SiteEditorModal({ did, initialData, onSaved, requireBoundary = f
           <Button onClick={() => void handleSave()} disabled={disableSubmit}>
             {isPending && <Loader2Icon className="mr-2 animate-spin" />}
             {isEditMode
-              ? isPending ? "Saving…" : "Save"
+              ? isPending ? (isVerifyingBoundary ? "Checking…" : "Saving…") : "Save"
               : isPending ? "Adding…" : "Add"}
           </Button>
         ) : (

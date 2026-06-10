@@ -1,5 +1,7 @@
 import type { ManagedLocation } from "@/app/_lib/indexer";
 
+const CERTIFIED_LOCATION_COLLECTION = "app.certified.location";
+
 export type UploadSiteSelection = {
   uri: string;
   rkey: string;
@@ -12,14 +14,22 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
 }
 
-function isAtUri(value: unknown): value is string {
-  return typeof value === "string" && /^at:\/\/[^/]+\/[^/]+\/[^/]+$/.test(value);
+function getCertifiedLocationAtUriRkey(uri: string): string | null {
+  const match = /^at:\/\/[^/]+\/([^/]+)\/([^/]+)$/.exec(uri);
+  if (!match) return null;
+
+  const [, collection, rkey] = match;
+  return collection === CERTIFIED_LOCATION_COLLECTION ? rkey ?? null : null;
+}
+
+function isCertifiedLocationAtUriForRkey(uri: string, rkey: string): boolean {
+  return getCertifiedLocationAtUriRkey(uri) === rkey;
 }
 
 export function toUploadSiteSelection(site: ManagedLocation): UploadSiteSelection | null {
   const uri = site.metadata?.uri;
   const rkey = site.metadata?.rkey;
-  if (!uri || !rkey || !isAtUri(uri)) return null;
+  if (!uri || !rkey || !isCertifiedLocationAtUriForRkey(uri, rkey)) return null;
 
   return {
     uri,
@@ -32,9 +42,11 @@ export function toUploadSiteSelection(site: ManagedLocation): UploadSiteSelectio
 
 function extractSiteLocationUrl(location: unknown): string | null {
   if (!isRecord(location)) return null;
+
   if (location.$type === "app.certified.location#string") return null;
   if (typeof location.uri === "string") return location.uri;
   if (isRecord(location.blob) && typeof location.blob.uri === "string") return location.blob.uri;
+
   return null;
 }
 
@@ -75,10 +87,20 @@ export function shouldOfferCreateUploadSiteBoundary(options: {
 export function resolveUploadSiteSelection(options: {
   sites: UploadSiteSelection[];
   selectedSiteUri: string | null;
+  defaultSiteUri?: string | null;
 }): UploadSiteSelection | null {
-  if (options.selectedSiteUri) {
-    return options.sites.find((s) => s.uri === options.selectedSiteUri) ?? null;
-  }
+  const explicitlySelectedSite = options.selectedSiteUri
+    ? options.sites.find((site) => site.uri === options.selectedSiteUri)
+    : undefined;
+
+  if (explicitlySelectedSite) return explicitlySelectedSite;
+  if (options.selectedSiteUri !== null) return null;
+
+  const defaultSite = options.defaultSiteUri
+    ? options.sites.find((site) => site.uri === options.defaultSiteUri)
+    : undefined;
+  if (defaultSite) return defaultSite;
+
   if (options.sites.length === 1) return options.sites[0] ?? null;
   return null;
 }
@@ -89,7 +111,7 @@ export function isUploadSiteSelection(value: unknown): value is UploadSiteSelect
     typeof value.uri === "string" &&
     typeof value.rkey === "string" &&
     value.rkey.length > 0 &&
-    isAtUri(value.uri) &&
+    isCertifiedLocationAtUriForRkey(value.uri, value.rkey) &&
     typeof value.name === "string" &&
     (typeof value.locationType === "string" || value.locationType === null) &&
     "location" in value

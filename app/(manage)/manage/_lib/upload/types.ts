@@ -84,6 +84,7 @@ export type TargetField = {
 };
 
 export function getTargetFieldLabel(field: string): string {
+  if (field === "siteBoundary") return "Site boundary";
   return TARGET_FIELDS.find((item) => item.field === field)?.label ?? field;
 }
 

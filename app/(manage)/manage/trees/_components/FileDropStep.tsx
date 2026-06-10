@@ -82,6 +82,8 @@ function hasShapeLocation(site: ManagedLocation): boolean {
   );
 }
 
+type BoundaryCandidateStatus = "pending" | "valid" | "invalid";
+
 type FileDropStepProps = {
   uploadId: string;
   did: string;
@@ -116,6 +118,7 @@ export default function FileDropStep({
     initialDatasetSelection.mode === "existing" ? initialDatasetSelection.dataset.uri : "",
   );
   const [selectedSiteUri, setSelectedSiteUri] = useState<string | null>(initialSiteSelection?.uri ?? null);
+  const [defaultSiteUri, setDefaultSiteUri] = useState<string | null>(null);
 
   // Sites data
   const [sites, setSites] = useState<ManagedLocation[]>([]);
@@ -131,10 +134,21 @@ export default function FileDropStep({
   const [selectedSiteBoundaryReady, setSelectedSiteBoundaryReady] = useState(false);
   const [selectedSiteBoundaryLoading, setSelectedSiteBoundaryLoading] = useState(false);
   const [selectedSiteBoundaryFailed, setSelectedSiteBoundaryFailed] = useState(false);
+  const [boundaryCandidateStatuses, setBoundaryCandidateStatuses] = useState<Record<string, BoundaryCandidateStatus>>({});
 
   const inputRef = useRef<HTMLInputElement>(null);
   const mediaZipInputRef = useRef<HTMLInputElement>(null);
   const mediaZipParseRequestRef = useRef(0);
+
+  const loadDefaultSite = useCallback(async () => {
+    try {
+      const response = await fetch("/api/manage/sites/default");
+      const payload = (await response.json()) as { siteUri?: string | null } | { error?: string };
+      setDefaultSiteUri(response.ok && "siteUri" in payload ? payload.siteUri ?? null : null);
+    } catch {
+      setDefaultSiteUri(null);
+    }
+  }, []);
 
   const loadSites = useCallback(async (siteUriToSelect?: string) => {
     setSitesLoading(true);
@@ -162,7 +176,8 @@ export default function FileDropStep({
   // Load sites on mount
   useEffect(() => {
     void loadSites();
-  }, [loadSites]);
+    void loadDefaultSite();
+  }, [loadDefaultSite, loadSites]);
 
   // Load existing datasets when mode = "existing"
   useEffect(() => {
@@ -175,15 +190,24 @@ export default function FileDropStep({
 
   const uploadSites = useMemo(() => sites.flatMap((s) => { const u = toUploadSiteSelection(s); return u ? [u] : []; }), [sites]);
   const sitesWithBoundary = useMemo(() => getBoundaryCapableUploadSites(uploadSites), [uploadSites]);
-  const selectedSite = useMemo(() => resolveUploadSiteSelection({ sites: uploadSites, selectedSiteUri }), [uploadSites, selectedSiteUri]);
+  const selectedSite = useMemo(
+    () => resolveUploadSiteSelection({ sites: uploadSites, selectedSiteUri, defaultSiteUri }),
+    [defaultSiteUri, selectedSiteUri, uploadSites],
+  );
   const selectedManagedSite = useMemo(
     () => selectedSite ? sites.find((site) => site.metadata.uri === selectedSite.uri) ?? null : null,
     [selectedSite, sites],
   );
   const selectedSiteHasBoundary = selectedSite ? uploadSiteHasBoundary(selectedSite) : false;
   const selectedSiteBoundarySyncing = selectedSite ? uploadSiteHasTransientBoundary(selectedSite) : false;
+  const boundaryCandidateChecksDone = sitesWithBoundary.length > 0 && sitesWithBoundary.every((site) => {
+    const status = boundaryCandidateStatuses[site.uri];
+    return status === "valid" || status === "invalid";
+  });
+  const hasValidatedBoundaryCandidate = sitesWithBoundary.some((site) => boundaryCandidateStatuses[site.uri] === "valid");
+  const allBoundaryCandidatesFailed = boundaryCandidateChecksDone && !hasValidatedBoundaryCandidate;
   const showCreateSiteBoundaryAction = !selectedSiteBoundarySyncing && shouldOfferCreateUploadSiteBoundary({
-    sitesWithBoundary, selectedSite, selectedSiteBoundaryFailed,
+    sitesWithBoundary, selectedSite, selectedSiteBoundaryFailed, allBoundaryCandidatesFailed,
   });
 
   const openSiteBoundaryModal = useCallback((siteToEdit: ManagedLocation | null = null) => {
@@ -214,6 +238,33 @@ export default function FileDropStep({
     );
     void modal.show();
   }, [did, loadSites, modal, selectedSiteBoundaryFailed]);
+
+  // Validate every existing site boundary so the upload can detect when none can be used.
+  useEffect(() => {
+    let cancelled = false;
+
+    if (sitesWithBoundary.length === 0) {
+      setBoundaryCandidateStatuses({});
+      return;
+    }
+
+    const initialStatuses: Record<string, BoundaryCandidateStatus> = {};
+    for (const site of sitesWithBoundary) initialStatuses[site.uri] = "pending";
+    setBoundaryCandidateStatuses(initialStatuses);
+    for (const site of sitesWithBoundary) {
+      void fetchUploadSiteBoundary(site)
+        .then(() => {
+          if (cancelled) return;
+          setBoundaryCandidateStatuses((prev) => ({ ...prev, [site.uri]: "valid" }));
+        })
+        .catch(() => {
+          if (cancelled) return;
+          setBoundaryCandidateStatuses((prev) => ({ ...prev, [site.uri]: "invalid" }));
+        });
+    }
+
+    return () => { cancelled = true; };
+  }, [sitesWithBoundary]);
 
   // Validate site boundary when selectedSite changes
   useEffect(() => {
@@ -297,6 +348,7 @@ export default function FileDropStep({
     selectedSite !== null && selectedSiteBoundaryReady &&
     (datasetMode !== "new" || datasetName.trim().length > 0) &&
     (datasetMode !== "existing" || selectedExistingDataset !== null);
+  const hasUnavailableSiteSelection = selectedSiteUri !== null && !sitesLoading && !sitesError && selectedSite === null;
 
   return (
     <div className="space-y-5">
@@ -439,9 +491,11 @@ export default function FileDropStep({
                 {uploadSites.map((site) => {
                   const hasBoundary = uploadSiteHasBoundary(site);
                   const isSyncing = uploadSiteHasTransientBoundary(site);
+                  const isDefault = defaultSiteUri === site.uri;
                   return (
                     <SelectItem key={site.uri} value={site.uri} disabled={isSyncing}>
                       {site.name}
+                      {isDefault ? " (default)" : ""}
                       {isSyncing ? " — preparing map area…" : !hasBoundary ? " — needs map area" : ""}
                     </SelectItem>
                   );
@@ -459,20 +513,57 @@ export default function FileDropStep({
                 </Button>
               )}
             </div>
+            {selectedSite && (
+              <div className="rounded-lg border border-border bg-background p-3 text-sm">
+                <p className="font-medium text-foreground">{selectedSite.name}</p>
+                <p className="mt-1 text-xs text-muted-foreground">Trees will be checked against this one drawn map area.</p>
+              </div>
+            )}
+            {selectedSiteBoundarySyncing && (
+              <p className="text-sm text-muted-foreground">This drawn map area is still being prepared. Try again in a moment.</p>
+            )}
             {selectedSite && selectedSiteHasBoundary && selectedSiteBoundaryLoading && (
               <p className="text-xs text-muted-foreground">Checking drawn map area…</p>
             )}
             {selectedSite && selectedSiteHasBoundary && selectedSiteBoundaryFailed && (
               <p className="text-sm text-destructive">Could not load this drawn map area. Add a new area to the selected site or choose another site boundary.</p>
             )}
+            {allBoundaryCandidatesFailed && (
+              <p className="text-sm text-destructive">None of the existing drawn map areas could be checked. Add a new site boundary or replace one before continuing.</p>
+            )}
+            {hasUnavailableSiteSelection && (
+              <p className="text-sm text-destructive">The selected site is no longer available. Choose another site boundary.</p>
+            )}
             {selectedSite && !selectedSiteHasBoundary && !selectedSiteBoundarySyncing && (
               <p className="text-sm text-destructive">This site has no drawn map area. Add one here before continuing.</p>
             )}
-            {!selectedSite && (
+            {!selectedSite && !hasUnavailableSiteSelection && (
               <p className="text-sm text-muted-foreground">Choose one site for this upload, then add a drawn map area if needed. If the file covers more than one site, split it into separate uploads.</p>
             )}
             {showCreateSiteBoundaryAction && (
-              <p className="text-xs text-muted-foreground">Need a new site boundary? Add one here without leaving the upload.</p>
+              <div className="space-y-3 rounded-lg border border-dashed border-primary/40 bg-primary/5 p-4">
+                <div className="space-y-1">
+                  <p className="text-sm font-medium text-foreground">
+                    {allBoundaryCandidatesFailed ? "No usable site boundaries found" : "Need a site boundary?"}
+                  </p>
+                  <p className="text-xs leading-relaxed text-muted-foreground">
+                    {allBoundaryCandidatesFailed
+                      ? "Add a new site boundary or replace the selected drawn map area so trees can be checked before upload."
+                      : "Add a site boundary here without leaving the upload."}
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <Button type="button" variant="outline" size="sm" onClick={() => openSiteBoundaryModal()}>
+                    <CirclePlus className="h-4 w-4" />
+                    Add site boundary
+                  </Button>
+                  {selectedManagedSite && (allBoundaryCandidatesFailed || !selectedSiteHasBoundary || selectedSiteBoundaryFailed) && (
+                    <Button type="button" variant="outline" size="sm" onClick={() => openSiteBoundaryModal(selectedManagedSite)}>
+                      Replace selected map area
+                    </Button>
+                  )}
+                </div>
+              </div>
             )}
           </>
         )}

@@ -2603,6 +2603,34 @@ export async function fetchOccurrencesByDid(
   return { records: collected.slice(0, target), cursor, hasMore: hasNextPage && Boolean(cursor) };
 }
 
+export async function fetchOccurrencesBySiteRef(
+  did: string,
+  siteRef: string,
+  target = 10000,
+  signal?: AbortSignal,
+): Promise<Page<OccurrenceRecord>> {
+  const where = { did: { eq: did }, siteRef: { eq: siteRef } };
+  const collected: OccurrenceRecord[] = [];
+  let cursor: string | null = null;
+  let hasNextPage = true;
+
+  for (let page = 0; page < 50; page++) {
+    if (signal?.aborted) throw new DOMException("aborted", "AbortError");
+    const res = await fetchOccurrencePage(INDEXER_MAX_PAGE, cursor, signal, where);
+    cursor = res.cursor;
+    hasNextPage = res.hasNextPage;
+
+    for (const record of res.nodes.map(mapOccurrence)) {
+      if (collected.length >= target) break;
+      collected.push(record);
+    }
+
+    if (collected.length >= target || !hasNextPage || !cursor) break;
+  }
+
+  return { records: collected.slice(0, target), cursor, hasMore: hasNextPage && Boolean(cursor) };
+}
+
 // ── 7. Manage section — tree datasets by DID ───────────────────────────────
 
 export type UploadTreeDatasetRecord = {

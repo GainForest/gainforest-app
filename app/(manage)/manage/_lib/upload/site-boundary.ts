@@ -59,13 +59,29 @@ export async function fetchUploadSiteBoundary(site: UploadSiteSelection): Promis
     );
   }
 
-  const response = await fetch(boundaryUrl);
+  const response = await fetch(boundaryUrl, { credentials: "same-origin" });
   if (!response.ok) {
     throw new Error("Could not load the selected drawn map area. Try again or choose another site boundary.");
   }
 
   const payload: unknown = await response.json();
   return assertUsableSiteBoundary(validateGeojsonOrThrow(payload));
+}
+
+export async function readGeoJsonFile(file: File): Promise<SiteBoundaryGeoJson> {
+  let payload: unknown;
+  try {
+    payload = JSON.parse(await file.text());
+  } catch {
+    throw new Error("Choose a valid map file.");
+  }
+
+  try {
+    return assertUsableSiteBoundary(validateGeojsonOrThrow(payload));
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "The map file must include a valid drawn map area.";
+    throw new Error(message.replace(/GeoJSON/gi, "map file"));
+  }
 }
 
 export function getTreeBoundaryFailure(options: {
@@ -87,6 +103,22 @@ export function getTreeBoundaryFailure(options: {
     return { tree: options.tree, kind: "out-of-site", distanceMeters: classification.distanceMeters };
   }
   return { tree: options.tree, kind: "invalid-boundary", distanceMeters: Infinity, reason: classification.reason };
+}
+
+export function findTreeBoundaryFailures(options: {
+  trees: TreeBoundaryCoordinate[];
+  boundary: SiteBoundaryGeoJson;
+  nearBoundaryMeters?: number;
+}): TreeBoundaryFailure[] {
+  return options.trees.flatMap((tree) => {
+    const failure = getTreeBoundaryFailure({
+      tree,
+      boundary: options.boundary,
+      nearBoundaryMeters: options.nearBoundaryMeters,
+    });
+
+    return failure ? [failure] : [];
+  });
 }
 
 export function checkUploadRowsAgainstSelectedSite(options: {

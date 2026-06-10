@@ -224,7 +224,7 @@ async function createSiteByDrawing(page: Page, testInfo: TestInfo): Promise<stri
   await doneButton.click({ force: true });
   await screenshotStep(page, testInfo, "site-draw-ready");
 
-  await expect(dialog.getByText(/drawn-site\.geojson/i)).toBeVisible({ timeout: 10_000 });
+  await expect(dialog.getByText(/drawn-site-map/i)).toBeVisible({ timeout: 10_000 });
   await dialog.getByRole("button", { name: /^add$/i }).click();
   await expect(dialog.getByText(/site added!/i)).toBeVisible({ timeout: 90_000 });
   await screenshotStep(page, testInfo, "site-drawn-created");

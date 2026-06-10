@@ -43,11 +43,12 @@ type UpdateMultimediaData = {
 
 type MutationPayload =
   | { operation: "createRecord"; collection: string; rkey?: string; record: Record<string, unknown> }
-  | { operation: "putRecord"; collection: string; rkey: string; record: Record<string, unknown> }
+  | { operation: "putRecord"; collection: string; rkey: string; record: Record<string, unknown>; swapRecord?: string }
   | { operation: "deleteRecord"; collection: string; rkey: string }
   | { operation: "uploadBlob"; blobData: string; blobMimeType: string }
   | { operation: "createMultimediaFromFile"; blobData: string; blobMimeType: string; occurrenceRef: string; siteRef?: string; subjectPart: string; caption?: string }
   | { operation: "getDatasetRecord"; rkey: string }
+  | { operation: "getCertifiedLocationRecord"; rkey: string }
   | { operation: "incrementDatasetRecordCount"; rkey: string; increment: number }
   | { operation: "createMeasurement"; occurrenceRef: string; flora: FloraMeasurementFields }
   | { operation: "updateMeasurement"; rkey: string; data: UpdateMeasurementData; unset?: string[]; resultUnset?: string[] }
@@ -75,6 +76,7 @@ type RecordMutationResult = { uri: string; cid: string; rkey: string; record?: R
 type UploadBlobResult = { ref: unknown; mimeType: string; size: number; blob?: unknown };
 type MultimediaResult = { uri: string; cid: string; rkey: string; record?: Record<string, unknown> };
 type DatasetRecordResult = { uri: string; cid: string; rkey: string; record: Record<string, unknown> };
+type CertifiedLocationRecordResult = { uri: string; cid: string; rkey: string; record: Record<string, unknown> };
 type CascadeDeleteResult = {
   deletedOccurrenceRkey: string;
   deletedMeasurementRkeys: string[];
@@ -127,8 +129,15 @@ export async function putRecord(
   collection: string,
   rkey: string,
   record: Record<string, unknown>,
+  options?: { swapRecord?: string },
 ): Promise<CreateResult> {
-  return callProxy({ operation: "putRecord", collection, rkey, record });
+  return callProxy({
+    operation: "putRecord",
+    collection,
+    rkey,
+    record,
+    ...(options?.swapRecord ? { swapRecord: options.swapRecord } : {}),
+  });
 }
 
 export async function deleteRecord(collection: string, rkey: string): Promise<void> {
@@ -137,6 +146,10 @@ export async function deleteRecord(collection: string, rkey: string): Promise<vo
 
 export async function getDatasetRecord(rkey: string): Promise<DatasetRecordResult> {
   return callProxy({ operation: "getDatasetRecord", rkey });
+}
+
+export async function getCertifiedLocationRecord(rkey: string): Promise<CertifiedLocationRecordResult> {
+  return callProxy({ operation: "getCertifiedLocationRecord", rkey });
 }
 
 export async function incrementDatasetRecordCount(rkey: string, increment: number): Promise<DatasetRecordResult> {
