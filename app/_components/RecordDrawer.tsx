@@ -3,9 +3,11 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowUpRightIcon, CalendarRangeIcon, CheckIcon, HeartIcon, ImageOffIcon, Loader2Icon, MapPinIcon, PencilIcon, Share2Icon, Trash2Icon, UsersIcon, XIcon } from "lucide-react";
+import { ArrowUpRightIcon, CalendarRangeIcon, CheckIcon, HeartIcon, ImageOffIcon, Layers3Icon, Loader2Icon, MapPinIcon, PencilIcon, Share2Icon, Trash2Icon, UsersIcon, XIcon } from "lucide-react";
 import {
+  fetchRecordByUri,
   fetchRecordDetail,
+  type BumicertRecord,
   type ExplorerRecord,
   type RecordDetail,
   type DetailSection,
@@ -57,6 +59,7 @@ export function RecordDrawer({
   const [savingOccurrence, setSavingOccurrence] = useState(false);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [deletingOccurrence, setDeletingOccurrence] = useState(false);
+  const [projectBumicerts, setProjectBumicerts] = useState<BumicertRecord[] | null>(null);
   // Whether this Bumicert is currently accepting donations — drives the Donate
   // button. `null` while we don't yet know (loading / non-bumicert).
   const [donatable, setDonatable] = useState<boolean | null>(null);
@@ -125,6 +128,32 @@ export function RecordDrawer({
   }, [record]);
 
   useEffect(() => {
+    setProjectBumicerts(null);
+    if (!record || record.kind !== "project") return;
+    if (record.bumicertUris.length === 0) {
+      setProjectBumicerts([]);
+      return;
+    }
+
+    const ctrl = new AbortController();
+    Promise.all(
+      record.bumicertUris.slice(0, 50).map((uri) =>
+        fetchRecordByUri(uri, ctrl.signal).catch(() => null),
+      ),
+    )
+      .then((linkedRecords) => {
+        if (ctrl.signal.aborted) return;
+        setProjectBumicerts(
+          linkedRecords.filter((linkedRecord): linkedRecord is BumicertRecord => linkedRecord?.kind === "bumicert"),
+        );
+      })
+      .catch(() => {
+        if (!ctrl.signal.aborted) setProjectBumicerts([]);
+      });
+    return () => ctrl.abort();
+  }, [record]);
+
+  useEffect(() => {
     setIsEditingOccurrence(false);
     setOccurrenceFeedback(null);
     setDeleteConfirmOpen(false);
@@ -159,7 +188,7 @@ export function RecordDrawer({
   const title =
     record.kind === "occurrence"
       ? occurrenceDisplayName(record)
-      : record.kind === "bumicert"
+      : record.kind === "bumicert" || record.kind === "project"
         ? record.title
         : record.name;
 
@@ -168,8 +197,8 @@ export function RecordDrawer({
   const occurrenceAudioUrl = record.kind === "occurrence" ? record.audioUrl ?? resolvedOccurrenceAudioUrl : null;
   const hasOccurrenceAudio = record.kind === "occurrence" && Boolean(record.audioRef || record.audioUrl);
   const ownerAvatarOverride = record.kind === "site" ? record.avatarUrl ?? (!record.coverRef && record.logoRef ? record.imageUrl : null) : undefined;
-  const ownerAvatarRefOverride = record.kind === "bumicert" || record.kind === "occurrence" ? record.creatorAvatarRef : record.kind === "site" ? record.logoRef : null;
-  const ownerNameOverride = record.kind === "bumicert" || record.kind === "occurrence" ? record.creatorName : record.kind === "site" ? record.name : null;
+  const ownerAvatarRefOverride = record.kind === "bumicert" || record.kind === "occurrence" || record.kind === "project" ? record.creatorAvatarRef : record.kind === "site" ? record.logoRef : null;
+  const ownerNameOverride = record.kind === "bumicert" || record.kind === "occurrence" || record.kind === "project" ? record.creatorName : record.kind === "site" ? record.name : null;
   const hasHeroImage = Boolean(heroUrl) && !imgError;
   const showAudioHero = hasOccurrenceAudio && !hasHeroImage;
   const showHero = record.kind === "site" || hasHeroImage || showAudioHero;
@@ -241,9 +270,9 @@ export function RecordDrawer({
 
   // A Bumicert's short description is the single description shown in the
   // drawer; when present, suppress the long-form body so it isn't shown twice.
-  const bumicertLead = record.kind === "bumicert" ? record.shortDescription : null;
+  const shortLead = record.kind === "bumicert" || record.kind === "project" ? record.shortDescription : null;
   const blurb = detail?.blurb ?? "";
-  const showLongBody = !bumicertLead;
+  const showLongBody = !shortLead;
 
   return (
     <div
@@ -315,9 +344,9 @@ export function RecordDrawer({
           {record.kind === "occurrence" && occurrenceSecondaryName(record) && (
             <p className="mt-1.5 text-[14px] italic text-foreground/65">{occurrenceSecondaryName(record)}</p>
           )}
-          {record.kind === "bumicert" && record.shortDescription && (
+          {shortLead && (
             <p className="mt-2.5 text-[14.5px] leading-[1.55] text-foreground/72">
-              {record.shortDescription}
+              {shortLead}
             </p>
           )}
 
@@ -379,6 +408,14 @@ export function RecordDrawer({
               </div>
             )}
           </div>
+
+          {record.kind === "project" && (
+            <ProjectBumicertList
+              records={projectBumicerts}
+              totalCount={record.bumicertCount}
+              requestedCount={record.bumicertUris.length}
+            />
+          )}
 
           {record.kind === "occurrence" && canManageOccurrence && (
             <ObservationOwnerControls
@@ -865,6 +902,96 @@ function ShareIconButton({ path }: { path: string }) {
   );
 }
 
+function ProjectBumicertList({
+  records,
+  totalCount,
+  requestedCount,
+}: {
+  records: BumicertRecord[] | null;
+  totalCount: number;
+  requestedCount: number;
+}) {
+  const loading = records === null && requestedCount > 0;
+  const shownCount = records?.length ?? 0;
+
+  return (
+    <section className="mt-5 rounded-2xl border border-border-soft bg-foreground/[0.04] p-4">
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <Layers3Icon className="h-4 w-4 text-primary" aria-hidden />
+          <h3 className="text-[13px] font-medium text-foreground">Bumicerts in this project</h3>
+        </div>
+        <span className="rounded-full bg-background px-2.5 py-1 text-[11.5px] font-medium text-muted-foreground">
+          {formatCompact(totalCount)}
+        </span>
+      </div>
+
+      {loading ? (
+        <div className="mt-3 space-y-2" aria-label="Loading linked Bumicerts">
+          {Array.from({ length: Math.min(Math.max(totalCount, 1), 3) }).map((_, index) => (
+            <div key={index} className="flex gap-3 rounded-2xl bg-background/70 p-2">
+              <div className="h-14 w-16 shrink-0 animate-pulse rounded-xl bg-muted" />
+              <div className="min-w-0 flex-1 space-y-2 py-1">
+                <div className="h-3.5 w-3/4 animate-pulse rounded-full bg-muted" />
+                <div className="h-3 w-full animate-pulse rounded-full bg-muted" />
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : shownCount > 0 ? (
+        <div className="mt-3 space-y-2">
+          {records!.map((bumicert) => (
+            <Link
+              key={bumicert.id}
+              href={localBumicertHref(bumicert.did, bumicert.rkey)}
+              className="group flex gap-3 rounded-2xl bg-background/70 p-2 transition-colors hover:bg-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
+            >
+              <span className="relative h-14 w-16 shrink-0 overflow-hidden rounded-xl bg-muted">
+                {bumicert.imageUrl ? (
+                  <Image
+                    src={bumicert.imageUrl}
+                    alt=""
+                    fill
+                    sizes="64px"
+                    unoptimized={!isPdsBlobUrl(bumicert.imageUrl)}
+                    className="object-cover transition-transform duration-300 group-hover:scale-105"
+                  />
+                ) : (
+                  <span className="grid h-full place-items-center text-primary/45">
+                    <Layers3Icon className="h-5 w-5" />
+                  </span>
+                )}
+              </span>
+              <span className="min-w-0 flex-1 py-0.5">
+                <span className="line-clamp-1 block font-instrument text-lg italic leading-tight text-foreground">
+                  {bumicert.title}
+                </span>
+                {bumicert.shortDescription ? (
+                  <span className="mt-1 line-clamp-2 block text-[12.5px] leading-snug text-muted-foreground">
+                    {bumicert.shortDescription}
+                  </span>
+                ) : null}
+                <span className="mt-1.5 inline-flex text-[11.5px] font-medium text-primary">
+                  View Bumicert
+                </span>
+              </span>
+            </Link>
+          ))}
+          {requestedCount > shownCount ? (
+            <p className="px-1 pt-1 text-[12px] text-muted-foreground">
+              Showing {shownCount} of {requestedCount} linked Bumicerts.
+            </p>
+          ) : null}
+        </div>
+      ) : (
+        <p className="mt-3 text-[13px] leading-5 text-muted-foreground">
+          This project does not have linked Bumicerts yet.
+        </p>
+      )}
+    </section>
+  );
+}
+
 function BumicertStatStrip({ record }: { record: Extract<ExplorerRecord, { kind: "bumicert" }> }) {
   const period = useMemo(() => {
     if (!record.startDate && !record.endDate) return null;
@@ -954,6 +1081,7 @@ function KindBadge({ record, floating = false }: { record: ExplorerRecord; float
   const map = {
     occurrence: { label: "Nature sighting", cls: "text-primary-dark bg-primary/10" },
     bumicert: { label: "Bumicert", cls: "text-brand-dark bg-brand/12" },
+    project: { label: "Project", cls: "text-primary-dark bg-primary/10" },
     site: { label: "Project site", cls: "text-foreground/70 bg-foreground/[0.06]" },
   } as const;
   const m = map[record.kind];
@@ -998,6 +1126,9 @@ function buildFields(r: ExplorerRecord): Field[] {
     fields.push({ label: "Project places", value: formatNumber(r.locationCount) });
     if (r.startDate) fields.push({ label: "Start", value: formatDate(r.startDate) });
     if (r.endDate) fields.push({ label: "End", value: formatDate(r.endDate) });
+  } else if (r.kind === "project") {
+    fields.push({ label: "Bumicerts", value: formatNumber(r.bumicertCount) });
+    if (r.locationUri) fields.push({ label: "Project place", value: "Added" });
   } else {
     if (r.country) fields.push({ label: "Country", value: formatCountry(r.country) });
     if (r.orgType) fields.push({ label: "Type", value: r.orgType });

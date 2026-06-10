@@ -333,7 +333,7 @@ export function BumicertsExploreClient({ records: initialRecords = [] }: { recor
             <div className="mb-5 flex items-center gap-2.5">
               <LeafIcon className="h-4 w-4 text-primary" />
               <span className="text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
-                Explore Projects
+                Explore Bumicerts
               </span>
             </div>
             <h1
@@ -352,7 +352,7 @@ export function BumicertsExploreClient({ records: initialRecords = [] }: { recor
               </span>
             </h1>
             <p className="mt-7 max-w-2xl text-base leading-8 text-muted-foreground md:text-lg">
-              Browse projects from communities and organizations restoring ecosystems,
+              Browse Bumicerts from communities and organizations restoring ecosystems,
               strengthening livelihoods, and building a more resilient future.
             </p>
           </div>
@@ -374,8 +374,8 @@ export function BumicertsExploreClient({ records: initialRecords = [] }: { recor
                     type="text"
                     value={query}
                     onChange={(event) => void setQuery(event.target.value)}
-                    aria-label="Search projects"
-                    placeholder="Search projects by name, keyword, or location"
+                    aria-label="Search Bumicerts"
+                    placeholder="Search Bumicerts by name, keyword, or location"
                     className="min-w-0 flex-1 truncate border-0 bg-transparent px-3 py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground"
                   />
                 </div>
@@ -575,7 +575,7 @@ export function BumicertsExploreClient({ records: initialRecords = [] }: { recor
             <div className="mt-10 flex flex-col items-center gap-3">
               {view !== "map" && visibleRecords.length > renderedRecords.length && (
                 <p className="text-sm text-muted-foreground">
-                  Showing {renderedRecords.length} of {visibleRecords.length} projects.
+                  Showing {renderedRecords.length} of {visibleRecords.length} Bumicerts.
                 </p>
               )}
               {hasMoreCardsToShow ? (

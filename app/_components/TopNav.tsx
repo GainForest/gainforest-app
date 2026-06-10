@@ -14,6 +14,7 @@ const NAV = [
   { href: "/observations", label: "Observations" },
   { href: "/organizations", label: "Organizations" },
   { href: "/bumicerts", label: "Bumicerts" },
+  { href: "/projects", label: "Projects" },
   { href: "/leaderboard", label: "Leaderboard" },
   { href: "/devices", label: "Devices" },
   { href: "/status", label: "Status" },

@@ -1399,7 +1399,353 @@ export async function fetchBumicertStats(signal?: AbortSignal): Promise<Bumicert
   return cachedAsync("bumicert-total-stats", TOTAL_STATS_CACHE_MS, fetchBumicertStatsUncached, signal);
 }
 
-// ── 3. Project sites (organizations) ───────────────────────────────────────
+// ── 3. Projects (hypercert collections) ────────────────────────────────────
+
+export type ProjectRecord = {
+  kind: "project";
+  id: string;
+  did: string;
+  rkey: string;
+  atUri: string;
+  cid: string | null;
+  title: string;
+  shortDescription: string | null;
+  createdAt: string;
+  type: string | null;
+  imageUrl: string | null;
+  imageRef: string | null;
+  creatorName: string | null;
+  creatorAvatarRef: string | null;
+  bumicertUris: string[];
+  bumicertCount: number;
+  locationUri: string | null;
+};
+
+type RawCollectionImage =
+  | { __typename: "OrgHypercertsDefsUri"; uri?: string | null }
+  | { __typename: "OrgHypercertsDefsSmallImage"; image?: { ref?: string | null } | null }
+  | { __typename: "OrgHypercertsDefsLargeImage"; image?: { ref?: string | null } | null }
+  | null;
+
+type RawProjectCollection = {
+  did: string;
+  rkey: string;
+  uri: string;
+  cid?: string | null;
+  createdAt: string;
+  title?: string | null;
+  type?: string | null;
+  shortDescription?: string | null;
+  avatar?: RawCollectionImage;
+  banner?: RawCollectionImage;
+  items?: Array<{ itemIdentifier?: { uri?: string | null; cid?: string | null } | null } | null> | null;
+  location?: { uri?: string | null; cid?: string | null } | null;
+  certifiedProfileData?: CertifiedProfileData;
+};
+
+const PROJECT_COLLECTION_NODE_FIELDS = `
+  did rkey uri cid createdAt title type shortDescription
+  ${CERTIFIED_PROFILE_DATA_FIELDS}
+  location { uri cid }
+  items { itemIdentifier { uri cid } }
+  avatar {
+    __typename
+    ... on OrgHypercertsDefsUri { uri }
+    ... on OrgHypercertsDefsSmallImage { image { ref } }
+  }
+  banner {
+    __typename
+    ... on OrgHypercertsDefsUri { uri }
+    ... on OrgHypercertsDefsLargeImage { image { ref } }
+  }
+`;
+
+const PROJECT_COLLECTION_QUERY = `
+  query ExplorerProjects(
+    $first: Int!
+    $after: String
+    $where: OrgHypercertsCollectionWhereInput
+    $sortBy: OrgHypercertsCollectionSortField
+    $sortDirection: SortDirection
+  ) {
+    orgHypercertsCollection(
+      first: $first
+      after: $after
+      where: $where
+      sortBy: $sortBy
+      sortDirection: $sortDirection
+    ) {
+      totalCount
+      pageInfo { hasNextPage endCursor }
+      edges { node { ${PROJECT_COLLECTION_NODE_FIELDS} } }
+    }
+  }
+`;
+
+export type ProjectIndexFilter = "images" | "locations";
+
+type ProjectQueryOptions = {
+  query?: string;
+  filters?: ProjectIndexFilter[];
+  sort?: ExplorerSortMode;
+};
+
+type ProjectWhere = Record<string, unknown>;
+
+const PROJECT_TYPE_WHERE: ProjectWhere = { type: { in: ["project", "Project"] } };
+
+function collectionImageMeta(image: RawCollectionImage): { url: string | null; ref: string | null } {
+  if (image?.__typename === "OrgHypercertsDefsUri") return { url: image.uri?.trim() || null, ref: null };
+  if (image?.__typename === "OrgHypercertsDefsSmallImage" || image?.__typename === "OrgHypercertsDefsLargeImage") {
+    return { url: null, ref: normaliseRef(image.image?.ref) };
+  }
+  return { url: null, ref: null };
+}
+
+function mapProjectCollection(n: RawProjectCollection): ProjectRecord {
+  const banner = collectionImageMeta(n.banner ?? null);
+  const avatar = collectionImageMeta(n.avatar ?? null);
+  const bumicertUris = Array.isArray(n.items)
+    ? n.items
+        .map((item) => item?.itemIdentifier?.uri)
+        .filter((uri): uri is string => typeof uri === "string" && uri.includes("/org.hypercerts.claim.activity/"))
+    : [];
+
+  return {
+    kind: "project",
+    id: `${n.did}-${n.rkey}`,
+    did: n.did,
+    rkey: n.rkey,
+    atUri: n.uri || `at://${n.did}/org.hypercerts.collection/${n.rkey}`,
+    cid: n.cid ?? null,
+    title: (n.title ?? "Untitled project").trim() || "Untitled project",
+    shortDescription: n.shortDescription?.trim() || null,
+    createdAt: n.createdAt,
+    type: n.type?.trim() || null,
+    imageUrl: banner.url ?? avatar.url,
+    imageRef: banner.ref ?? avatar.ref,
+    creatorName: profileName(n.certifiedProfileData),
+    creatorAvatarRef: profileAvatarRef(n.certifiedProfileData),
+    bumicertUris,
+    bumicertCount: bumicertUris.length,
+    locationUri: n.location?.uri ?? null,
+  };
+}
+
+async function mapProjectConnection(
+  conn: Connection<RawProjectCollection> | null | undefined,
+  signal?: AbortSignal,
+): Promise<Page<ProjectRecord>> {
+  const nodes = (conn?.edges ?? [])
+    .map((edge) => edge?.node)
+    .filter((node): node is RawProjectCollection => Boolean(node?.did));
+  let records = nodes.map(mapProjectCollection);
+  records = await resolveImages(
+    records,
+    (record) => (record.imageRef && !record.imageUrl ? { did: record.did, ref: record.imageRef } : null),
+    (record, url) => ({ ...record, imageUrl: url ?? record.imageUrl }),
+    signal,
+  );
+  return {
+    records,
+    cursor: conn?.pageInfo?.endCursor ?? null,
+    hasMore: Boolean(conn?.pageInfo?.hasNextPage),
+  };
+}
+
+function projectSort(sort: ExplorerSortMode | undefined): { sortBy: string; sortDirection: "ASC" | "DESC" } {
+  switch (sort) {
+    case "oldest":
+      return { sortBy: "createdAt", sortDirection: "ASC" };
+    case "az":
+      return { sortBy: "title", sortDirection: "ASC" };
+    case "za":
+      return { sortBy: "title", sortDirection: "DESC" };
+    case "newest":
+    default:
+      return { sortBy: "createdAt", sortDirection: "DESC" };
+  }
+}
+
+function mergeProjectWhere(...parts: Array<ProjectWhere | undefined>): ProjectWhere {
+  return Object.assign({}, ...parts.filter(Boolean));
+}
+
+function projectFilterWhere(filters: ProjectIndexFilter[] | undefined): ProjectWhere | undefined {
+  if (!filters?.length) return undefined;
+  const where: ProjectWhere = {};
+  if (filters.includes("images")) where.banner = { isNull: false };
+  if (filters.includes("locations")) where.location = { isNull: false };
+  return Object.keys(where).length > 0 ? where : undefined;
+}
+
+function projectSearchWhere(query: string | undefined): ProjectWhere[] {
+  const q = query?.trim();
+  if (!q) return [{}];
+  return [{ title: { contains: q } }, { shortDescription: { contains: q } }];
+}
+
+function projectWhereVariants(options?: ProjectQueryOptions): ProjectWhere[] {
+  const base = mergeProjectWhere(PROJECT_TYPE_WHERE, projectFilterWhere(options?.filters));
+  return projectSearchWhere(options?.query).map((searchWhere) => mergeProjectWhere(base, searchWhere));
+}
+
+function compareProjects(a: ProjectRecord, b: ProjectRecord, sort: ExplorerSortMode | undefined): number {
+  switch (sort) {
+    case "oldest":
+      return Date.parse(a.createdAt) - Date.parse(b.createdAt);
+    case "az":
+      return a.title.localeCompare(b.title, undefined, { sensitivity: "base" });
+    case "za":
+      return b.title.localeCompare(a.title, undefined, { sensitivity: "base" });
+    case "newest":
+    default:
+      return Date.parse(b.createdAt) - Date.parse(a.createdAt);
+  }
+}
+
+function uniqueProjects(records: ProjectRecord[], sort?: ExplorerSortMode): ProjectRecord[] {
+  const map = new Map<string, ProjectRecord>();
+  for (const record of records) map.set(record.id, record);
+  return [...map.values()].sort((a, b) => compareProjects(a, b, sort));
+}
+
+async function fetchProjectPage(
+  first: number,
+  after: string | null,
+  signal?: AbortSignal,
+  where?: ProjectWhere,
+  sort: ExplorerSortMode = "newest",
+): Promise<Page<ProjectRecord>> {
+  const { sortBy, sortDirection } = projectSort(sort);
+  const data = await indexerQuery<{
+    orgHypercertsCollection?: Connection<RawProjectCollection>;
+  }>(PROJECT_COLLECTION_QUERY, { first, after, where: where ?? null, sortBy, sortDirection }, signal);
+  return mapProjectConnection(data?.orgHypercertsCollection, signal);
+}
+
+async function fetchProjectsFromCollections(
+  target: number,
+  after: string | null,
+  signal?: AbortSignal,
+  onProgress?: (records: ProjectRecord[]) => void,
+  options?: ProjectQueryOptions,
+): Promise<Page<ProjectRecord>> {
+  const variants = projectWhereVariants(options);
+  if (variants.length === 1) {
+    return collectPaged(
+      (first, cursor, nextSignal) => fetchProjectPage(first, cursor, nextSignal, variants[0], options?.sort),
+      target,
+      after,
+      signal,
+      onProgress,
+    );
+  }
+
+  const previous = parseMultiCursor(after, variants.length);
+  const pages = await Promise.all(
+    variants.map((where, index) => {
+      if (!previous.more[index]) return Promise.resolve({ records: [], cursor: null, hasMore: false } satisfies Page<ProjectRecord>);
+      return collectPaged(
+        (first, cursor, nextSignal) => fetchProjectPage(first, cursor, nextSignal, where, options?.sort),
+        target,
+        previous.cursors[index] ?? null,
+        signal,
+      );
+    }),
+  );
+  const records = uniqueProjects(pages.flatMap((page) => page.records), options?.sort);
+  onProgress?.(records);
+  return {
+    records,
+    cursor: encodeMultiCursor({ cursors: pages.map((page) => page.cursor), more: pages.map((page) => page.hasMore) }),
+    hasMore: pages.some((page) => page.hasMore),
+  };
+}
+
+/** Load org.hypercerts.collection records whose type is Project/project. */
+export async function fetchProjects(
+  target: number,
+  after: string | null,
+  signal?: AbortSignal,
+  onProgress?: (records: ProjectRecord[]) => void,
+  options?: ProjectQueryOptions,
+): Promise<Page<ProjectRecord>> {
+  return fetchProjectsFromCollections(target, after, signal, onProgress, options);
+}
+
+export type ProjectStats = {
+  totalProjects: number | null;
+  projectsWithBumicerts: number;
+  bumicerts: number;
+  projectsWithImages: number;
+};
+
+type RawProjectStats = Pick<RawProjectCollection, "items" | "avatar" | "banner">;
+
+async function fetchProjectStatsPage(
+  first: number,
+  after: string | null,
+  signal?: AbortSignal,
+): Promise<StatsPage<RawProjectStats>> {
+  const data = await indexerQuery<{
+    orgHypercertsCollection?: Connection<RawProjectStats>;
+  }>(PROJECT_COLLECTION_QUERY, {
+    first,
+    after,
+    where: PROJECT_TYPE_WHERE,
+    sortBy: "createdAt",
+    sortDirection: "DESC",
+  }, signal);
+  const conn = data?.orgHypercertsCollection;
+  const nodes = (conn?.edges ?? [])
+    .map((edge) => edge?.node)
+    .filter((node): node is RawProjectStats => Boolean(node));
+  return {
+    nodes,
+    totalCount: conn?.totalCount ?? null,
+    cursor: conn?.pageInfo?.endCursor ?? null,
+    hasMore: Boolean(conn?.pageInfo?.hasNextPage),
+  };
+}
+
+async function fetchProjectStatsUncached(): Promise<ProjectStats> {
+  let after: string | null = null;
+  let totalProjects: number | null = null;
+  let seenRows = 0;
+  let projectsWithBumicerts = 0;
+  let bumicerts = 0;
+  let projectsWithImages = 0;
+
+  for (let page = 0; page < 100; page += 1) {
+    const res = await fetchProjectStatsPage(INDEXER_MAX_PAGE, after);
+    totalProjects ??= res.totalCount;
+    seenRows += res.nodes.length;
+    for (const node of res.nodes) {
+      const itemCount = Array.isArray(node.items) ? node.items.length : 0;
+      if (itemCount > 0) projectsWithBumicerts += 1;
+      bumicerts += itemCount;
+      if (collectionImageMeta(node.banner ?? null).url || collectionImageMeta(node.banner ?? null).ref || collectionImageMeta(node.avatar ?? null).url || collectionImageMeta(node.avatar ?? null).ref) {
+        projectsWithImages += 1;
+      }
+    }
+    if (!res.hasMore || !res.cursor) break;
+    after = res.cursor;
+  }
+
+  return {
+    totalProjects: totalProjects ?? seenRows,
+    projectsWithBumicerts,
+    bumicerts,
+    projectsWithImages,
+  };
+}
+
+export async function fetchProjectStats(signal?: AbortSignal): Promise<ProjectStats> {
+  return cachedAsync("project-total-stats", TOTAL_STATS_CACHE_MS, fetchProjectStatsUncached, signal);
+}
+
+// ── 4. Project sites (organizations) ───────────────────────────────────────
 
 /** Which lexicon a project-site row came from. */
 export type SiteSource = "certified";
@@ -3290,7 +3636,7 @@ export async function fetchTimelineLocationByUri(
 
 // ── Unified record type for the detail drawer ──────────────────────────────
 
-export type ExplorerRecord = OccurrenceRecord | BumicertRecord | SiteRecord;
+export type ExplorerRecord = OccurrenceRecord | BumicertRecord | ProjectRecord | SiteRecord;
 export type RecordKind = ExplorerRecord["kind"];
 
 // ── Single record by AT-URI (shareable deep links) ─────────────────────────
@@ -3349,6 +3695,27 @@ export async function fetchRecordByUri(
     const n = data?.orgHypercertsClaimActivityByUri;
     if (!n?.did) return null;
     const rec = mapActivity(n);
+    if (rec.imageRef && !rec.imageUrl) {
+      try {
+        rec.imageUrl = await resolveBlobUrl(rec.did, rec.imageRef, signal);
+      } catch {
+        /* keep placeholder */
+      }
+    }
+    return rec;
+  }
+
+  if (collection === "org.hypercerts.collection") {
+    const data = await indexerQuery<{ orgHypercertsCollectionByUri?: RawProjectCollection | null }>(
+      `query ExplorerProjectByUri($uri: String!) {
+        orgHypercertsCollectionByUri(uri: $uri) { ${PROJECT_COLLECTION_NODE_FIELDS} }
+      }`,
+      { uri: atUri },
+      signal,
+    );
+    const n = data?.orgHypercertsCollectionByUri;
+    if (!n?.did) return null;
+    const rec = mapProjectCollection(n);
     if (rec.imageRef && !rec.imageUrl) {
       try {
         rec.imageUrl = await resolveBlobUrl(rec.did, rec.imageRef, signal);

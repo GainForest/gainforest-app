@@ -1,7 +1,7 @@
 /**
  * Coordinate resolution for the map view.
  *
- * Occurrences carry decimalLatitude/Longitude directly. Sites and Bumicerts
+ * Occurrences carry decimalLatitude/Longitude directly. Sites, Projects, and Bumicerts
  * reference `app.certified.location` records instead, so their coordinates are
  * resolved here — a client-side port of gainforest-app's
  * `resolveCertifiedLocationCoords` (app/_lib/projects.ts):
@@ -213,6 +213,12 @@ export async function resolvePointForRecord(
     return coords ? { ...coords, label: record.title, did: record.did, recordId: record.id } : null;
   }
 
+  if (record.kind === "project") {
+    if (!record.locationUri) return null;
+    const coords = await resolveCertifiedLocationCoords(record.locationUri, signal);
+    return coords ? { ...coords, label: record.title, did: record.did, recordId: record.id } : null;
+  }
+
   if (!record.locationUri) return null;
   const coords = await resolveCertifiedLocationCoords(record.locationUri, signal);
   return coords ? { ...coords, label: record.name, did: record.did, recordId: record.id } : null;
@@ -267,6 +273,22 @@ export async function resolvePointsFor(
     );
     const tasks = targets.map((r) => async () => {
       const coords = await resolveCertifiedLocationCoords(r.locationUris[0], signal);
+      if (coords) {
+        points.push({ ...coords, label: r.title, did: r.did, recordId: r.id });
+        onProgress?.([...points]);
+      }
+    });
+    await runLimited(tasks, signal);
+    return points;
+  }
+
+  if (kind === "project") {
+    const targets = records.filter(
+      (r): r is Extract<ExplorerRecord, { kind: "project" }> =>
+        r.kind === "project" && Boolean(r.locationUri),
+    );
+    const tasks = targets.map((r) => async () => {
+      const coords = await resolveCertifiedLocationCoords(r.locationUri!, signal);
       if (coords) {
         points.push({ ...coords, label: r.title, did: r.did, recordId: r.id });
         onProgress?.([...points]);

@@ -90,6 +90,15 @@ const KIND_META: Record<RecordKind, KindMeta> = {
     heroLight: "/images/explore/explore-hero-light@2x.webp",
     heroDark: "/images/explore/explore-hero-dark@2x.webp",
   },
+  project: {
+    eyebrow: "Projects",
+    title: "Browse",
+    accent: "project collections",
+    lede: "Explore project collections and the Bumicerts they group together.",
+    search: "Filter projects by title or description",
+    heroLight: "/images/explore/explore-hero-light@2x.webp",
+    heroDark: "/images/explore/explore-hero-dark@2x.webp",
+  },
 };
 
 // One dense grid for all three streams so the explorer reads as a compact
@@ -108,6 +117,7 @@ const COLLECTION: Record<RecordKind, string> = {
   occurrence: "app.gainforest.dwc.occurrence",
   site: "app.certified.actor.organization",
   bumicert: "org.hypercerts.claim.activity",
+  project: "org.hypercerts.collection",
 };
 
 /** Compact, shareable key for a record: `did/collection/rkey` (no segment ever
@@ -939,7 +949,7 @@ const GenericCard = memo(function GenericCard({ record, onOpen }: { record: Expl
         )}
 
         <div className="absolute left-1.5 top-1.5 z-10 inline-flex max-w-[calc(100%-0.75rem)] items-center rounded-full bg-background/75 px-2 py-1 text-[10px] font-medium text-foreground/65 shadow-sm backdrop-blur-md">
-          <span className="truncate">{record.kind === "bumicert" ? record.creatorName ?? "Project steward" : record.kind === "site" ? record.name : "Shared profile"}</span>
+          <span className="truncate">{record.kind === "bumicert" || record.kind === "project" ? record.creatorName ?? "Project steward" : record.kind === "site" ? record.name : "Shared profile"}</span>
         </div>
 
         {v.badge ? <div className="absolute right-1.5 top-1.5 z-10">{v.badge}</div> : null}
@@ -992,7 +1002,7 @@ const RecordListItem = memo(function RecordListItem({ record, onOpen }: { record
   const occurrenceRecord = record.kind === "occurrence" ? record : null;
   const hasImage = Boolean(record.imageUrl) && !imgError;
   const hasAudio = Boolean(occurrenceRecord?.audioRef || occurrenceRecord?.audioUrl);
-  const ownerLabel = record.kind === "bumicert" ? record.creatorName ?? "Project steward" : record.kind === "site" ? record.name : record.creatorName ?? "Shared profile";
+  const ownerLabel = record.kind === "bumicert" || record.kind === "project" ? record.creatorName ?? "Project steward" : record.kind === "site" ? record.name : record.creatorName ?? "Shared profile";
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const unregisterAudioRef = useRef<(() => void) | null>(null);
   const [audioState, setAudioState] = useState<"idle" | "loading" | "playing" | "paused">("idle");
@@ -1316,6 +1326,32 @@ function cardView(record: ExplorerRecord): CardView {
     };
   }
 
+  if (record.kind === "project") {
+    return {
+      alt: record.title,
+      title: record.title,
+      subtitle: record.shortDescription ?? undefined,
+      pills: (
+        <>
+          <Pill accent>
+            {formatCompact(record.bumicertCount)} Bumicert{record.bumicertCount === 1 ? "" : "s"}
+          </Pill>
+          {record.locationUri ? <Pill>Project place</Pill> : null}
+        </>
+      ),
+      badge: (
+        <span className="inline-flex items-center gap-1 rounded-full bg-background/85 px-2 py-0.5 text-[9.5px] font-medium uppercase tracking-[0.1em] text-primary backdrop-blur-md">
+          Project
+        </span>
+      ),
+      placeholder: (
+        <div className="flex h-full w-full items-center justify-center font-garamond text-[14px] italic text-foreground/30">
+          No cover image
+        </div>
+      ),
+    };
+  }
+
   // bumicert
   return {
     alt: record.title,
@@ -1551,6 +1587,21 @@ function computeStats(records: ExplorerRecord[], kind: RecordKind): Stat[] {
       { label: "Project places in loaded Bumicerts", value: n(sites), icon: <MapIcon /> },
       { label: "Loaded Bumicerts with pictures", value: n(withCover), icon: <ImageIcon /> },
       { label: "Bumicerts from this week", value: n(last7), icon: <AudioLinesIcon /> },
+    ];
+  }
+
+  if (kind === "project") {
+    const p = records.filter((r): r is Extract<ExplorerRecord, { kind: "project" }> => r.kind === "project");
+    const bumicerts = p.reduce((sum, record) => sum + record.bumicertCount, 0);
+    const withImg = p.filter((record) => record.imageUrl).length;
+    const withPlace = p.filter((record) => record.locationUri).length;
+    return [
+      { label: "Loaded projects", value: n(p.length), icon: <LayoutGridIcon />, accent: true },
+      { label: "Projects from last 30 days", value: n(last30), icon: <LeafIcon /> },
+      { label: "Bumicerts in loaded projects", value: n(bumicerts), icon: <LeafIcon />, accent: true },
+      { label: "Loaded projects with places", value: n(withPlace), icon: <MapIcon /> },
+      { label: "Loaded projects with pictures", value: n(withImg), icon: <ImageIcon /> },
+      { label: "Projects from this week", value: n(last7), icon: <AudioLinesIcon /> },
     ];
   }
 
