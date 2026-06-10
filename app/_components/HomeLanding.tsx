@@ -123,7 +123,7 @@ const NETWORK_APPS = [
 ] as const;
 
 const NETWORK_POINTS = [
-  { key: "portable", label: "Easy to move", icon: ArrowLeftRightIcon },
+  { key: "portable", label: "Portable records", icon: ArrowLeftRightIcon },
   { key: "owned", label: "You own your data", icon: KeyRoundIcon },
   { key: "shared", label: "Readable everywhere", icon: Share2Icon },
 ] as const;
@@ -572,9 +572,9 @@ function OpenNetworkSection() {
             Built to <span className="font-instrument text-primary italic">interoperate</span>
           </h2>
           <p className="mx-auto mt-3 max-w-2xl text-base leading-relaxed text-muted-foreground">
-            GainForest keeps your impact information portable, so it is never
-            locked in. The same information can flow to trusted tools like Ma&nbsp;Earth and Hypercerts —
-            owned by you, readable where you need it.
+            Bumicerts runs on the open AT Protocol network, so your impact data is never
+            locked in. The same records flow freely to apps like Ma&nbsp;Earth and Hypercerts —
+            owned by you, readable everywhere.
           </p>
         </motion.div>
 
@@ -587,8 +587,8 @@ function OpenNetworkSection() {
         >
           <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-2 text-sm font-medium text-primary shadow-sm">
             <NetworkIcon className="size-4" />
-            Open network
-            <span className="text-primary/55">· easy to move</span>
+            AT Protocol
+            <span className="text-primary/55">· open network</span>
           </div>
 
           <div aria-hidden="true" className="hidden h-8 border-l border-dashed border-border sm:block" />
