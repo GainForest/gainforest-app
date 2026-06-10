@@ -1,15 +1,21 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import { RecordDrawer } from "@/app/_components/RecordDrawer";
 import type { OccurrenceRecord } from "@/app/_lib/indexer";
 import { isPdsBlobUrl } from "@/app/_lib/pds";
 
 export function BumicertObservationsGallery({ observations }: { observations: OccurrenceRecord[] }) {
+  const [items, setItems] = useState(observations);
   const [drawer, setDrawer] = useState<OccurrenceRecord | null>(null);
 
-  if (observations.length === 0) return null;
+  useEffect(() => {
+    setItems(observations);
+    setDrawer((current) => current ? observations.find((item) => item.atUri === current.atUri) ?? null : null);
+  }, [observations]);
+
+  if (items.length === 0) return null;
 
   return (
     <section className="mt-10 border-t border-border-soft pt-6">
@@ -17,7 +23,7 @@ export function BumicertObservationsGallery({ observations }: { observations: Oc
         Observations
       </h2>
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
-        {observations.map((observation) => (
+        {items.map((observation) => (
           <button
             key={observation.id}
             type="button"
@@ -38,7 +44,19 @@ export function BumicertObservationsGallery({ observations }: { observations: Oc
           </button>
         ))}
       </div>
-      <RecordDrawer record={drawer} onClose={() => setDrawer(null)} />
+      <RecordDrawer
+        record={drawer}
+        onClose={() => setDrawer(null)}
+        onRecordUpdated={(record) => {
+          if (record.kind !== "occurrence") return;
+          setDrawer(record);
+          setItems((current) => current.map((item) => (item.atUri === record.atUri ? record : item)));
+        }}
+        onRecordDeleted={(record) => {
+          setDrawer(null);
+          setItems((current) => current.filter((item) => item.atUri !== record.atUri));
+        }}
+      />
     </section>
   );
 }

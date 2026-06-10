@@ -210,7 +210,7 @@ const OCCURRENCE_NODE_FIELDS = `
   scientificName vernacularName kingdom family genus
   basisOfRecord recordedBy individualCount
   datasetName country countryCode stateProvince locality decimalLatitude decimalLongitude
-  habitat siteRef datasetRef dynamicProperties
+  habitat siteRef datasetRef dynamicProperties establishmentMeans
   occurrenceRemarks fieldNotes
   thumbnailUrl speciesImageUrl associatedMedia
   imageEvidence { file { ref } }
@@ -334,7 +334,7 @@ function mapOccurrence(n: RawOccurrence): OccurrenceRecord {
     datasetRef: n.datasetRef?.trim() || null,
     datasetName: n.datasetName?.trim() || null,
     dynamicProperties: n.dynamicProperties?.trim() || null,
-    establishmentMeans: null,
+    establishmentMeans: n.establishmentMeans?.trim() || null,
     createdAt: n.createdAt,
     creatorName: profileName(n.certifiedProfileData),
     creatorAvatarRef: profileAvatarRef(n.certifiedProfileData),

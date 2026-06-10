@@ -394,6 +394,16 @@ export function RecordExplorer({
     void setOccCategory(next);
   }
 
+  function handleDrawerRecordUpdated(nextRecord: ExplorerRecord) {
+    setDrawer(nextRecord);
+    setRecords((current) => current.map((record) => (record.atUri === nextRecord.atUri ? nextRecord : record)));
+  }
+
+  function handleDrawerRecordDeleted(deletedRecord: ExplorerRecord) {
+    setDrawer(null);
+    setRecords((current) => current.filter((record) => record.atUri !== deletedRecord.atUri));
+  }
+
   // Changing the organization source resets + re-walks.
   function changeSource(next: SiteSourceFilter) {
     if (next === siteSource) return;
@@ -652,7 +662,12 @@ export function RecordExplorer({
         )}
       </div>
 
-      <RecordDrawer record={drawer} onClose={() => setDrawer(null)} />
+      <RecordDrawer
+        record={drawer}
+        onClose={() => setDrawer(null)}
+        onRecordUpdated={handleDrawerRecordUpdated}
+        onRecordDeleted={handleDrawerRecordDeleted}
+      />
     </section>
   );
 }

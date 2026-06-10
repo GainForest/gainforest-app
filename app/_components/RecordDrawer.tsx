@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowUpRightIcon, CalendarRangeIcon, CheckIcon, HeartIcon, ImageOffIcon, MapPinIcon, Share2Icon, UsersIcon, XIcon } from "lucide-react";
+import { ArrowUpRightIcon, CalendarRangeIcon, CheckIcon, HeartIcon, ImageOffIcon, Loader2Icon, MapPinIcon, PencilIcon, Share2Icon, Trash2Icon, UsersIcon, XIcon } from "lucide-react";
 import {
   fetchRecordDetail,
   type ExplorerRecord,
@@ -20,6 +20,8 @@ import { SocialGlyph, socialLabel } from "./SocialIcon";
 import { RecordDrawerStatsTile } from "./StatsTile";
 import { isPdsBlobUrl, resolveBlobUrl } from "../_lib/pds";
 import { pauseOtherAudio } from "../_lib/audio-coordinator";
+import type { AuthSession } from "../_lib/auth";
+import { deleteOccurrenceCascade, updateOccurrence } from "@/app/(manage)/manage/_lib/mutations";
 import {
   INDEXER_URL,
   accountHref,
@@ -36,17 +38,29 @@ import {
 export function RecordDrawer({
   record,
   onClose,
+  onRecordUpdated,
+  onRecordDeleted,
 }: {
   record: ExplorerRecord | null;
   onClose: () => void;
+  onRecordUpdated?: (record: ExplorerRecord) => void;
+  onRecordDeleted?: (record: ExplorerRecord) => void;
 }) {
   const [imgError, setImgError] = useState(false);
   const [resolvedOccurrenceImageUrl, setResolvedOccurrenceImageUrl] = useState<string | null>(null);
   const [resolvedOccurrenceAudioUrl, setResolvedOccurrenceAudioUrl] = useState<string | null>(null);
   const [detail, setDetail] = useState<RecordDetail | null>(null);
+  const [authSession, setAuthSession] = useState<AuthSession | null>(null);
+  const [isEditingOccurrence, setIsEditingOccurrence] = useState(false);
+  const [occurrenceDraft, setOccurrenceDraft] = useState<ObservationDraft>(EMPTY_OBSERVATION_DRAFT);
+  const [occurrenceFeedback, setOccurrenceFeedback] = useState<string | null>(null);
+  const [savingOccurrence, setSavingOccurrence] = useState(false);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [deletingOccurrence, setDeletingOccurrence] = useState(false);
   // Whether this Bumicert is currently accepting donations — drives the Donate
   // button. `null` while we don't yet know (loading / non-bumicert).
   const [donatable, setDonatable] = useState<boolean | null>(null);
+  const recordIdentity = record?.atUri ?? null;
   useEffect(() => {
     setImgError(false);
     setResolvedOccurrenceImageUrl(null);
@@ -110,9 +124,37 @@ export function RecordDrawer({
     return () => ctrl.abort();
   }, [record]);
 
+  useEffect(() => {
+    setIsEditingOccurrence(false);
+    setOccurrenceFeedback(null);
+    setDeleteConfirmOpen(false);
+    setSavingOccurrence(false);
+    setDeletingOccurrence(false);
+    setOccurrenceDraft(record?.kind === "occurrence" ? observationDraftFromRecord(record) : EMPTY_OBSERVATION_DRAFT);
+  }, [recordIdentity]);
+
+  useEffect(() => {
+    setAuthSession(null);
+    if (!record || !isEditableObservationRecord(record)) return;
+
+    let cancelled = false;
+    fetch("/api/session", { cache: "no-store" })
+      .then((response) => (response.ok ? response.json() : null))
+      .then((payload: { session?: AuthSession } | null) => {
+        if (!cancelled) setAuthSession(payload?.session ?? { isLoggedIn: false });
+      })
+      .catch(() => {
+        if (!cancelled) setAuthSession({ isLoggedIn: false });
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [record]);
+
   const preferredOwnerIdentifier = usePreferredDidIdentifier(record?.did ?? "");
 
   if (!record) return null;
+  const activeRecord = record;
 
   const title =
     record.kind === "occurrence"
@@ -149,6 +191,53 @@ export function RecordDrawer({
   const badges = record.kind === "bumicert" ? [] : [...(detail?.badges ?? []), ...mediaBadges];
   const detailHref = record.kind === "bumicert" ? localBumicertHref(preferredOwnerIdentifier, record.rkey) : null;
   const ownerHref = accountHref(preferredOwnerIdentifier);
+  const canManageOccurrence = isEditableObservationRecord(record) && authSession?.isLoggedIn === true && authSession.did === record.did;
+  const occurrenceValidationError = record.kind === "occurrence" ? validateObservationDraft(occurrenceDraft) : null;
+  const occurrenceHasChanges = record.kind === "occurrence" && !observationDraftsEqual(occurrenceDraft, observationDraftFromRecord(record));
+
+  async function handleSaveOccurrence(event?: FormEvent<HTMLFormElement>) {
+    event?.preventDefault();
+    if (activeRecord.kind !== "occurrence" || !canManageOccurrence || savingOccurrence) return;
+
+    const validationError = validateObservationDraft(occurrenceDraft);
+    if (validationError) {
+      setOccurrenceFeedback(validationError);
+      return;
+    }
+
+    setSavingOccurrence(true);
+    setOccurrenceFeedback(null);
+    try {
+      const result = await updateOccurrence({
+        rkey: activeRecord.rkey,
+        ...observationPatchFromDraft(occurrenceDraft),
+      });
+      const nextRecord = applyObservationDraft(activeRecord, occurrenceDraft, typeof result.cid === "string" ? result.cid : activeRecord.cid);
+      onRecordUpdated?.(nextRecord);
+      setDetail(null);
+      setIsEditingOccurrence(false);
+      setOccurrenceFeedback("Sighting saved.");
+    } catch {
+      setOccurrenceFeedback("This sighting could not be saved. Please try again.");
+    } finally {
+      setSavingOccurrence(false);
+    }
+  }
+
+  async function handleDeleteOccurrence() {
+    if (activeRecord.kind !== "occurrence" || !canManageOccurrence || deletingOccurrence) return;
+
+    setDeletingOccurrence(true);
+    setOccurrenceFeedback(null);
+    try {
+      await deleteOccurrenceCascade(activeRecord.rkey);
+      onRecordDeleted?.(activeRecord);
+      onClose();
+    } catch {
+      setOccurrenceFeedback("This sighting could not be deleted. Please try again.");
+      setDeletingOccurrence(false);
+    }
+  }
 
   // A Bumicert's short description is the single description shown in the
   // drawer; when present, suppress the long-form body so it isn't shown twice.
@@ -291,6 +380,36 @@ export function RecordDrawer({
             )}
           </div>
 
+          {record.kind === "occurrence" && canManageOccurrence && (
+            <ObservationOwnerControls
+              draft={occurrenceDraft}
+              feedback={occurrenceFeedback}
+              hasChanges={occurrenceHasChanges}
+              isDeleting={deletingOccurrence}
+              isEditing={isEditingOccurrence}
+              isSaving={savingOccurrence}
+              deleteConfirmOpen={deleteConfirmOpen}
+              validationError={occurrenceValidationError}
+              onCancelEdit={() => {
+                setOccurrenceDraft(observationDraftFromRecord(record));
+                setOccurrenceFeedback(null);
+                setIsEditingOccurrence(false);
+              }}
+              onChange={(field, value) => {
+                setOccurrenceFeedback(null);
+                setOccurrenceDraft((current) => ({ ...current, [field]: value }));
+              }}
+              onConfirmDelete={() => void handleDeleteOccurrence()}
+              onDeleteClick={() => setDeleteConfirmOpen(true)}
+              onEditClick={() => {
+                setDeleteConfirmOpen(false);
+                setIsEditingOccurrence(true);
+              }}
+              onSave={(event) => void handleSaveOccurrence(event)}
+              onStopDelete={() => setDeleteConfirmOpen(false)}
+            />
+          )}
+
           {/* Headline numbers for a Bumicert */}
           {record.kind === "bumicert" && <BumicertStatStrip record={record} />}
 
@@ -347,6 +466,327 @@ export function RecordDrawer({
       </div>
     </div>
   );
+}
+
+type ObservationDraft = {
+  scientificName: string;
+  vernacularName: string;
+  eventDate: string;
+  recordedBy: string;
+  decimalLatitude: string;
+  decimalLongitude: string;
+  locality: string;
+  country: string;
+  habitat: string;
+  establishmentMeans: string;
+  occurrenceRemarks: string;
+};
+
+const EMPTY_OBSERVATION_DRAFT: ObservationDraft = {
+  scientificName: "",
+  vernacularName: "",
+  eventDate: "",
+  recordedBy: "",
+  decimalLatitude: "",
+  decimalLongitude: "",
+  locality: "",
+  country: "",
+  habitat: "",
+  establishmentMeans: "",
+  occurrenceRemarks: "",
+};
+
+const OPTIONAL_OBSERVATION_FIELDS: Array<keyof ObservationDraft> = [
+  "vernacularName",
+  "recordedBy",
+  "locality",
+  "country",
+  "habitat",
+  "establishmentMeans",
+  "occurrenceRemarks",
+];
+
+const INPUT_CLASS = "mt-1.5 h-10 w-full rounded-xl border border-border-soft bg-background px-3 text-[14px] text-foreground outline-none transition-colors placeholder:text-muted-foreground/60 focus:border-primary/50 focus:ring-2 focus:ring-primary/10";
+const TEXTAREA_CLASS = "mt-1.5 min-h-20 w-full rounded-xl border border-border-soft bg-background px-3 py-2 text-[14px] leading-5 text-foreground outline-none transition-colors placeholder:text-muted-foreground/60 focus:border-primary/50 focus:ring-2 focus:ring-primary/10";
+const LABEL_CLASS = "text-[11px] font-medium uppercase tracking-[0.08em] text-foreground/45";
+
+function ObservationOwnerControls({
+  draft,
+  feedback,
+  hasChanges,
+  isDeleting,
+  isEditing,
+  isSaving,
+  deleteConfirmOpen,
+  validationError,
+  onCancelEdit,
+  onChange,
+  onConfirmDelete,
+  onDeleteClick,
+  onEditClick,
+  onSave,
+  onStopDelete,
+}: {
+  draft: ObservationDraft;
+  feedback: string | null;
+  hasChanges: boolean;
+  isDeleting: boolean;
+  isEditing: boolean;
+  isSaving: boolean;
+  deleteConfirmOpen: boolean;
+  validationError: string | null;
+  onCancelEdit: () => void;
+  onChange: (field: keyof ObservationDraft, value: string) => void;
+  onConfirmDelete: () => void;
+  onDeleteClick: () => void;
+  onEditClick: () => void;
+  onSave: (event: FormEvent<HTMLFormElement>) => void;
+  onStopDelete: () => void;
+}) {
+  return (
+    <div className="mt-4 rounded-2xl border border-border-soft bg-surface/60 p-4">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <p className="text-[13px] font-medium text-foreground">Your sighting</p>
+          <p className="mt-1 text-[13px] leading-5 text-muted-foreground">
+            You can change the saved details or remove this sighting.
+          </p>
+        </div>
+        {!isEditing ? (
+          <button
+            type="button"
+            onClick={onEditClick}
+            className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full border border-border-soft bg-background px-3 text-[13px] font-medium text-foreground transition-colors hover:border-primary/40 hover:text-primary"
+          >
+            <PencilIcon className="h-3.5 w-3.5" />
+            Edit
+          </button>
+        ) : null}
+      </div>
+
+      {isEditing ? (
+        <form onSubmit={onSave} className="mt-4 space-y-4">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <TextField label="Plant or animal name" value={draft.scientificName} onChange={(value) => onChange("scientificName", value)} required />
+            <TextField label="Common name" value={draft.vernacularName} onChange={(value) => onChange("vernacularName", value)} />
+            <TextField label="Date seen" value={draft.eventDate} onChange={(value) => onChange("eventDate", value)} placeholder="YYYY-MM-DD" required />
+            <TextField label="Shared by" value={draft.recordedBy} onChange={(value) => onChange("recordedBy", value)} />
+            <TextField label="Latitude" value={draft.decimalLatitude} onChange={(value) => onChange("decimalLatitude", value)} inputMode="decimal" required />
+            <TextField label="Longitude" value={draft.decimalLongitude} onChange={(value) => onChange("decimalLongitude", value)} inputMode="decimal" required />
+            <TextField label="Place" value={draft.locality} onChange={(value) => onChange("locality", value)} />
+            <TextField label="Country" value={draft.country} onChange={(value) => onChange("country", value)} />
+          </div>
+          <TextAreaField label="Habitat" value={draft.habitat} onChange={(value) => onChange("habitat", value)} />
+          <TextAreaField label="Notes" value={draft.occurrenceRemarks} onChange={(value) => onChange("occurrenceRemarks", value)} />
+          {(feedback || validationError) && (
+            <p className={`text-[13px] ${validationError ? "text-destructive" : "text-muted-foreground"}`}>
+              {validationError ?? feedback}
+            </p>
+          )}
+          <div className="flex flex-wrap items-center justify-end gap-2">
+            <button
+              type="button"
+              onClick={onCancelEdit}
+              disabled={isSaving}
+              className="inline-flex h-10 items-center rounded-full border border-border-soft bg-background px-4 text-[13px] font-medium text-foreground/80 transition-colors hover:border-foreground/30 disabled:opacity-60"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={isSaving || !hasChanges || Boolean(validationError)}
+              className="inline-flex h-10 items-center gap-2 rounded-full bg-primary px-4 text-[13px] font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-60"
+            >
+              {isSaving ? <Loader2Icon className="h-3.5 w-3.5 animate-spin" /> : <CheckIcon className="h-3.5 w-3.5" />}
+              Save changes
+            </button>
+          </div>
+        </form>
+      ) : feedback ? (
+        <p className="mt-3 text-[13px] text-muted-foreground">{feedback}</p>
+      ) : null}
+
+      <div className="mt-4 border-t border-border-soft pt-4">
+        {deleteConfirmOpen ? (
+          <div className="rounded-xl bg-destructive/10 p-3">
+            <p className="text-[13px] font-medium text-foreground">Delete this sighting?</p>
+            <p className="mt-1 text-[13px] leading-5 text-muted-foreground">
+              This removes the sighting and linked photos, field sounds, and saved details. This cannot be undone.
+            </p>
+            <div className="mt-3 flex flex-wrap justify-end gap-2">
+              <button
+                type="button"
+                onClick={onStopDelete}
+                disabled={isDeleting}
+                className="inline-flex h-9 items-center rounded-full border border-border-soft bg-background px-3 text-[13px] font-medium text-foreground/80 transition-colors hover:border-foreground/30 disabled:opacity-60"
+              >
+                Keep sighting
+              </button>
+              <button
+                type="button"
+                onClick={onConfirmDelete}
+                disabled={isDeleting}
+                className="inline-flex h-9 items-center gap-2 rounded-full bg-destructive px-3 text-[13px] font-medium text-destructive-foreground transition-colors hover:bg-destructive/90 disabled:opacity-60"
+              >
+                {isDeleting ? <Loader2Icon className="h-3.5 w-3.5 animate-spin" /> : <Trash2Icon className="h-3.5 w-3.5" />}
+                Delete sighting
+              </button>
+            </div>
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={onDeleteClick}
+            className="inline-flex h-9 items-center gap-1.5 rounded-full border border-destructive/25 bg-background px-3 text-[13px] font-medium text-destructive transition-colors hover:bg-destructive/10"
+          >
+            <Trash2Icon className="h-3.5 w-3.5" />
+            Delete sighting
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function TextField({
+  label,
+  value,
+  onChange,
+  placeholder,
+  inputMode,
+  required,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  placeholder?: string;
+  inputMode?: "decimal";
+  required?: boolean;
+}) {
+  return (
+    <label className="block">
+      <span className={LABEL_CLASS}>{label}</span>
+      <input
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        placeholder={placeholder}
+        inputMode={inputMode}
+        required={required}
+        className={INPUT_CLASS}
+      />
+    </label>
+  );
+}
+
+function TextAreaField({ label, value, onChange }: { label: string; value: string; onChange: (value: string) => void }) {
+  return (
+    <label className="block">
+      <span className={LABEL_CLASS}>{label}</span>
+      <textarea value={value} onChange={(event) => onChange(event.target.value)} className={TEXTAREA_CLASS} />
+    </label>
+  );
+}
+
+function isEditableObservationRecord(record: ExplorerRecord): record is Extract<ExplorerRecord, { kind: "occurrence" }> {
+  return record.kind === "occurrence" && record.atUri.includes("/app.gainforest.dwc.occurrence/");
+}
+
+function observationDraftFromRecord(record: Extract<ExplorerRecord, { kind: "occurrence" }>): ObservationDraft {
+  return {
+    scientificName: record.scientificName ?? "",
+    vernacularName: record.vernacularName ?? "",
+    eventDate: record.eventDate ?? "",
+    recordedBy: record.recordedBy ?? "",
+    decimalLatitude: record.lat != null ? String(record.lat) : "",
+    decimalLongitude: record.lon != null ? String(record.lon) : "",
+    locality: record.locality ?? "",
+    country: record.country ?? "",
+    habitat: record.habitat ?? "",
+    establishmentMeans: record.establishmentMeans ?? "",
+    occurrenceRemarks: record.remarks ?? "",
+  };
+}
+
+function normalizeDraftValue(value: string): string {
+  return value.trim();
+}
+
+function observationDraftsEqual(a: ObservationDraft, b: ObservationDraft): boolean {
+  return (Object.keys(a) as Array<keyof ObservationDraft>).every((field) => normalizeDraftValue(a[field]) === normalizeDraftValue(b[field]));
+}
+
+function validateObservationDraft(draft: ObservationDraft): string | null {
+  if (!normalizeDraftValue(draft.scientificName)) return "Enter a plant or animal name.";
+  if (!normalizeDraftValue(draft.eventDate)) return "Enter when it was seen.";
+
+  const lat = Number(normalizeDraftValue(draft.decimalLatitude));
+  const lon = Number(normalizeDraftValue(draft.decimalLongitude));
+  if (!Number.isFinite(lat) || lat < -90 || lat > 90 || !Number.isFinite(lon) || lon < -180 || lon > 180) {
+    return "Enter a valid map location.";
+  }
+
+  return null;
+}
+
+function optionalDraftValue(value: string): string | undefined {
+  const normalized = normalizeDraftValue(value);
+  return normalized ? normalized : undefined;
+}
+
+function observationPatchFromDraft(draft: ObservationDraft): {
+  data: {
+    scientificName: string;
+    vernacularName?: string;
+    eventDate: string;
+    recordedBy?: string;
+    decimalLatitude: string;
+    decimalLongitude: string;
+    locality?: string;
+    country?: string;
+    habitat?: string;
+    establishmentMeans?: string;
+    occurrenceRemarks?: string;
+  };
+  unset: string[];
+} {
+  const data = {
+    scientificName: normalizeDraftValue(draft.scientificName),
+    eventDate: normalizeDraftValue(draft.eventDate),
+    decimalLatitude: normalizeDraftValue(draft.decimalLatitude),
+    decimalLongitude: normalizeDraftValue(draft.decimalLongitude),
+    vernacularName: optionalDraftValue(draft.vernacularName),
+    recordedBy: optionalDraftValue(draft.recordedBy),
+    locality: optionalDraftValue(draft.locality),
+    country: optionalDraftValue(draft.country),
+    habitat: optionalDraftValue(draft.habitat),
+    establishmentMeans: optionalDraftValue(draft.establishmentMeans),
+    occurrenceRemarks: optionalDraftValue(draft.occurrenceRemarks),
+  };
+  const unset: string[] = OPTIONAL_OBSERVATION_FIELDS.filter((field) => !optionalDraftValue(draft[field]));
+  if (!optionalDraftValue(draft.occurrenceRemarks)) unset.push("fieldNotes");
+  return { data, unset };
+}
+
+function applyObservationDraft(
+  record: Extract<ExplorerRecord, { kind: "occurrence" }>,
+  draft: ObservationDraft,
+  cid: string | null,
+): ExplorerRecord {
+  return {
+    ...record,
+    cid,
+    scientificName: normalizeDraftValue(draft.scientificName),
+    vernacularName: optionalDraftValue(draft.vernacularName) ?? null,
+    eventDate: normalizeDraftValue(draft.eventDate),
+    recordedBy: optionalDraftValue(draft.recordedBy) ?? null,
+    lat: Number(normalizeDraftValue(draft.decimalLatitude)),
+    lon: Number(normalizeDraftValue(draft.decimalLongitude)),
+    locality: optionalDraftValue(draft.locality) ?? null,
+    country: optionalDraftValue(draft.country) ?? null,
+    habitat: optionalDraftValue(draft.habitat) ?? null,
+    establishmentMeans: optionalDraftValue(draft.establishmentMeans) ?? null,
+    remarks: optionalDraftValue(draft.occurrenceRemarks) ?? null,
+  };
 }
 
 function AudioHero({ src, title }: { src: string | null; title: string }) {
