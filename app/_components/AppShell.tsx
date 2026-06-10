@@ -9,9 +9,11 @@ import {
   BinocularsIcon,
   Building2Icon,
   CheckIcon,
+  CompassIcon,
   FolderKanbanIcon,
   HeartHandshakeIcon,
   HeartIcon,
+  LayoutDashboardIcon,
   LeafIcon,
   MapPinIcon,
   MenuIcon,
@@ -250,20 +252,49 @@ function UnifiedSidebar({
   manageAccountKind: ManageAccountKind;
   isProfileLoading: boolean;
 }) {
+  const pathname = usePathname() ?? "/";
+  const activeTab: SidebarTab = pathname.startsWith("/manage") ? "manage" : "explore";
+
   return (
-    <nav className="relative flex h-full w-[240px] flex-col overflow-hidden border-r border-border bg-foreground/3 p-4">
+    <nav className="relative isolate flex h-full w-[240px] flex-col overflow-hidden border-r border-border bg-foreground/3 p-4">
+      <AnimatePresence>
+        <motion.div
+          key={activeTab}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-x-0 bottom-0 -z-10 h-108 overflow-hidden"
+        >
+          {/* Ambient glow — present in both modes */}
+          <div className="absolute -bottom-24 left-1/2 h-56 w-[160%] -translate-x-1/2 rounded-[50%] bg-primary/20 blur-3xl" />
+          <div className="absolute bottom-0 left-1/3 h-32 w-32 -translate-x-1/2 rounded-full bg-primary/[0.12] blur-2xl" />
+          {/* Mode-specific line art that bleeds off the bottom edge */}
+          {activeTab === "manage" ? <ManageArt /> : <ExploreArt />}
+        </motion.div>
+      </AnimatePresence>
+
       <SidebarHeader />
 
-      <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto pr-1">
-        <LayoutGroup id="unified-sidebar-nav">
-          {NAV_ITEMS.map((item) => (
-            <NavSection key={item.id} section={item} startIndex={0} />
-          ))}
-        </LayoutGroup>
+      <div className="mt-2">
+        <SidebarTabs activeTab={activeTab} />
+      </div>
 
-        <div className="mt-auto flex flex-col gap-3 pt-4">
-          {authSession?.isLoggedIn && <BumicertCreationCard />}
+      <div className="mt-3 border-t border-border" />
 
+      <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto pr-1 pt-3">
+        {activeTab === "explore" ? (
+          <>
+            <LayoutGroup id="unified-sidebar-nav">
+              <ExploreNav />
+            </LayoutGroup>
+
+            <div className="mt-auto flex flex-col gap-3 pt-4">
+              {authSession?.isLoggedIn ? <BumicertCreationCard /> : <SignInPrompt />}
+            </div>
+          </>
+        ) : (
           <LayoutGroup id="unified-sidebar-nav-manage">
             <Suspense fallback={<ManageSectionSkeleton />}>
               <ManageSection
@@ -273,13 +304,80 @@ function UnifiedSidebar({
               />
             </Suspense>
           </LayoutGroup>
-        </div>
+        )}
       </div>
 
       <div className="mt-3 border-t border-border pt-3">
         <SocialFooter />
       </div>
     </nav>
+  );
+}
+
+type SidebarTab = "explore" | "manage";
+
+const SIDEBAR_TABS: {
+  id: SidebarTab;
+  label: string;
+  href: string;
+  Icon: React.ComponentType<{ className?: string }>;
+}[] = [
+  { id: "explore", label: "Explore", href: "/bumicerts", Icon: CompassIcon },
+  { id: "manage", label: "Manage", href: "/manage", Icon: LayoutDashboardIcon },
+];
+
+function SidebarTabs({ activeTab }: { activeTab: SidebarTab }) {
+  return (
+    <LayoutGroup id="sidebar-tabs">
+      <div className="flex rounded-full border border-border bg-foreground/5 p-1">
+        {SIDEBAR_TABS.map((tab) => {
+          const isActive = tab.id === activeTab;
+          return (
+            <Link
+              key={tab.id}
+              href={tab.href}
+              aria-current={isActive ? "page" : undefined}
+              className="relative flex-1 rounded-full px-3 py-1.5 text-center text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+            >
+              {isActive ? (
+                <motion.span
+                  layoutId="sidebar-tab-active"
+                  className="absolute inset-0 rounded-full bg-background shadow-sm ring-1 ring-border"
+                  transition={{ type: "spring", stiffness: 400, damping: 32 }}
+                />
+              ) : null}
+              <span
+                className={cn(
+                  "relative z-10 flex items-center justify-center gap-1.5 transition-colors",
+                  isActive ? "text-foreground" : "text-muted-foreground hover:text-foreground",
+                )}
+              >
+                <tab.Icon className="h-4 w-4 shrink-0 opacity-50" />
+                {tab.label}
+              </span>
+            </Link>
+          );
+        })}
+      </div>
+    </LayoutGroup>
+  );
+}
+
+function ExploreNav() {
+  const pathname = usePathname() ?? "/";
+  const items = NAV_ITEMS.flatMap((section) => section.items);
+
+  return (
+    <ul className="flex flex-col gap-0.5">
+      {items.map((item, index) => (
+        <NavLeaf
+          key={item.id}
+          item={item}
+          isActive={isLeafActive(item.pathCheck, pathname)}
+          index={index + 1}
+        />
+      ))}
+    </ul>
   );
 }
 
@@ -321,45 +419,6 @@ function SidebarHeader() {
           GainForest
         </motion.span>
       </Link>
-    </div>
-  );
-}
-
-function NavSection({ section, startIndex }: { section: NavSection; startIndex: number }) {
-  const pathname = usePathname() ?? "/";
-
-  return (
-    <div className="flex flex-col gap-1">
-      {/* Section label */}
-      <motion.div
-        initial={{ opacity: 0, x: -8 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{
-          duration: 0.3,
-          delay: 0.05 * startIndex,
-          ease: [0.25, 0.1, 0.25, 1],
-        }}
-        className="px-3 py-1"
-      >
-        <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground/60">
-          {section.text}
-        </span>
-      </motion.div>
-
-      {/* Section items */}
-      <ul className="flex flex-col gap-0.5">
-        {section.items.map((item, idx) => {
-          const isActive = isLeafActive(item.pathCheck, pathname);
-          return (
-            <NavLeaf
-              key={item.id}
-              item={item}
-              isActive={isActive}
-              index={startIndex + idx + 1}
-            />
-          );
-        })}
-      </ul>
     </div>
   );
 }
@@ -470,7 +529,7 @@ function ManageSection({
     {
       kind: "leaf",
       id: "organization",
-      text: "Organization",
+      text: "My Organization",
       Icon: Building2Icon,
       href: "/manage",
       pathCheck: { equals: "/manage" },
@@ -478,7 +537,7 @@ function ManageSection({
     {
       kind: "leaf",
       id: "sites",
-      text: "Sites",
+      text: "My Sites",
       Icon: MapPinIcon,
       href: "/manage/sites",
       pathCheck: { startsWith: "/manage/sites" },
@@ -486,7 +545,7 @@ function ManageSection({
     {
       kind: "leaf",
       id: "audio",
-      text: "Audio",
+      text: "My Audio",
       Icon: MicIcon,
       href: "/manage/audio",
       pathCheck: { startsWith: "/manage/audio" },
@@ -494,7 +553,7 @@ function ManageSection({
     {
       kind: "leaf",
       id: "bumicerts-manage",
-      text: "Projects",
+      text: "My Projects",
       Icon: BumicertIcon,
       href: "/manage/bumicerts",
       pathCheck: { startsWith: "/manage/bumicerts" },
@@ -502,7 +561,7 @@ function ManageSection({
     {
       kind: "leaf",
       id: "trees",
-      text: "Trees",
+      text: "My Trees",
       Icon: TreePineIcon,
       href: "/manage/trees",
       pathCheck: { startsWith: "/manage/trees" },
@@ -521,7 +580,7 @@ function ManageSection({
     {
       kind: "leaf",
       id: "profile",
-      text: "Profile",
+      text: "My Profile",
       Icon: UserIcon,
       href: "/manage",
       pathCheck: { equals: "/manage" },
@@ -529,7 +588,7 @@ function ManageSection({
     {
       kind: "leaf",
       id: "bumicerts-manage",
-      text: "Projects",
+      text: "My Projects",
       Icon: BumicertIcon,
       href: "/manage/bumicerts",
       pathCheck: { startsWith: "/manage/bumicerts" },
@@ -550,21 +609,6 @@ function ManageSection({
 
   return (
     <div className="flex flex-col gap-2">
-      <motion.div
-        initial={{ opacity: 0, x: -8 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{
-          duration: 0.3,
-          delay: 0,
-          ease: [0.25, 0.1, 0.25, 1],
-        }}
-        className="px-3 py-1"
-      >
-        <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground/60">
-          MANAGE
-        </span>
-      </motion.div>
-
       {authSession == null || isProfileLoading ? (
         <ManageSectionSkeleton />
       ) : authSession.isLoggedIn ? (
@@ -1108,6 +1152,79 @@ function BumicertIcon(props: SVGProps<SVGSVGElement>) {
       <path d="M203.664 349.511C227.807 355.388 285.622 351.023 323.741 286.55C361.86 222.076 331.872 175.549 328.149 168.239" stroke="currentColor" strokeWidth="43.6177" strokeLinecap="round" />
       <path d="M319.385 165.16C295.171 159.586 237.415 164.673 200.105 229.618C162.795 294.563 193.362 340.712 197.177 347.975" stroke="currentColor" strokeWidth="43.6177" strokeLinecap="round" />
       <path d="M251.741 271.831C220.845 291.823 158.326 356.522 155.418 455.389" stroke="currentColor" strokeWidth="43.6177" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function ExploreArt() {
+  // Two climbing vines hugging either edge at different heights — growth
+  // creeping up the sides of the sidebar.
+  return (
+    <>
+      {/* Half the smaller vine, hugging each edge */}
+      <Vine side="left" className="bottom-0 left-0 h-26 w-5" />
+      <Vine side="right" className="bottom-0 right-0 h-26 w-5" />
+      {/* 1.5x the bigger vine, centered */}
+      <Vine side="left" className="bottom-0 left-1/2 h-108 w-18 -translate-x-1/2" />
+    </>
+  );
+}
+
+function Vine({ side, className }: { side: "left" | "right"; className?: string }) {
+  // Drawn once for the left edge; the right edge mirrors it horizontally so
+  // the leaves always curl inward toward the sidebar.
+  return (
+    <svg
+      viewBox="0 0 60 240"
+      fill="none"
+      preserveAspectRatio="xMidYMax meet"
+      className={cn("absolute text-primary", side === "right" && "-scale-x-100", className)}
+    >
+      {/* Winding stem climbing from the bottom edge */}
+      <path
+        d="M16 240 C 9 206 24 188 16 158 C 9 130 26 110 16 80 C 10 56 22 36 16 8"
+        className="stroke-primary/30"
+        strokeWidth="2"
+        strokeLinecap="round"
+        fill="none"
+      />
+      {/* Leaves branching off, alternating sides of the stem */}
+      <g className="fill-primary/20">
+        <path d="M16 198 C 32 194 39 178 36 168 C 25 171 16 183 16 198 Z" />
+        <path d="M16 150 C 2 147 -4 133 -1 124 C 11 127 16 138 16 150 Z" />
+        <path d="M16 104 C 32 100 39 84 36 74 C 25 77 16 89 16 104 Z" />
+        <path d="M16 58 C 2 55 -4 41 -1 32 C 11 35 16 46 16 58 Z" />
+      </g>
+    </svg>
+  );
+}
+
+function ManageArt() {
+  // A wild forest horizon: rolling hills with scattered pines.
+  return (
+    <svg
+      className="absolute inset-x-0 bottom-0 w-full text-primary"
+      viewBox="0 0 240 120"
+      fill="none"
+      preserveAspectRatio="xMidYMax meet"
+    >
+      {/* Far hill */}
+      <path
+        d="M0 78 C 44 58 84 74 120 66 C 168 56 204 66 240 76 L240 120 L0 120 Z"
+        className="fill-primary/[0.06]"
+      />
+      {/* Near hill */}
+      <path
+        d="M0 100 C 52 84 92 98 140 92 C 188 86 216 96 240 100 L240 120 L0 120 Z"
+        className="fill-primary/[0.11]"
+      />
+      {/* Scattered pines along the ridge */}
+      <g className="fill-primary/20">
+        <path d="M40 80 L33 96 L47 96 Z M40 70 L31 86 L49 86 Z" />
+        <path d="M70 86 L65 98 L75 98 Z M70 78 L63 90 L77 90 Z" />
+        <path d="M176 84 L170 98 L182 98 Z M176 75 L168 89 L184 89 Z" />
+        <path d="M208 90 L203 100 L213 100 Z M208 83 L201 94 L215 94 Z" />
+      </g>
     </svg>
   );
 }
