@@ -257,10 +257,17 @@ SignInPopover (client) ──► GET /api/oauth/login?handle=alice.bsky.social
                                        303 → /
 ```
 
-`TopNav` is now a minimal landing-local header: logo, language picker,
-and hash anchors into the page sections only. It intentionally does not
-mount `SignInPopover` or outbound product CTAs, so the OAuth endpoints
-remain available for direct flows but are not exposed from the top nav.
+`TopNav` is a route-aware header, ported from bumicerts-clean-rewrite's
+`TopNav`: logo, a pill rail of real pages (`/`, `/explorer`,
+`/research`, `/about`) with `aria-current` active states from
+`usePathname`, language picker, and theme toggle. The rail is
+**pages-only** — the earlier version mixed landing hash anchors and
+routes in one rail, which read as broken navigation. In-page landing
+anchors now live only in the mobile drawer's secondary "On this page"
+group, rendered when the visitor is on `/`. The header intentionally
+does not mount `SignInPopover` or outbound product CTAs, so the OAuth
+endpoints remain available for direct flows but are not exposed from
+the top nav.
 
 ## OAuth machinery — rules
 
@@ -794,9 +801,12 @@ Before finishing a change:
    lists 3 high-quality projects with thumbnails.
 3. Drag the hero globe — rotation stops, no zoom on scroll, the page
    scrolls normally over the canvas.
-4. Use the top navbar anchors. They should scroll to in-page sections
-   (`#tools`, `#how-it-works`, `#data-commons`, `#ai`, `#partners`,
-   `#impact`) and never open outbound app URLs.
+4. Use the top navbar pills. They should route between the four pages
+   (`/`, `/explorer`, `/research`, `/about`) with the correct active
+   state, and never open outbound app URLs. On mobile, open the drawer
+   on the landing and confirm the secondary "On this page" group
+   scrolls to in-page sections (`#tools`, `#how-it-works`,
+   `#data-commons`, `#ai`, `#partners`, `#impact`).
 5. <FloatingTaina /> mounts in `layout.tsx` but stays hidden until
    the visitor clicks "Say hi to Taina" in <TainaFeature />.
    Once summoned she persists across SPA route navigations; full

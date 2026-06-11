@@ -39,6 +39,9 @@ type Messages = {
   "nav.about": string;
   "nav.research": string;
   "nav.explorer": string;
+  "nav.home": string;
+  "nav.pages": string;
+  "nav.onThisPage": string;
   "nav.signIn": string;
   "nav.signedIn": string;
   "nav.getStarted": string;
@@ -351,6 +354,9 @@ export const MESSAGES: Record<Locale, Messages> = {
     "nav.about": "About",
     "nav.research": "Research",
     "nav.explorer": "Explorer",
+    "nav.home": "Home",
+    "nav.pages": "Pages",
+    "nav.onThisPage": "On this page",
     "nav.signIn": "Sign in",
     "nav.signedIn": "Signed in",
     "nav.getStarted": "Get started",
@@ -671,6 +677,9 @@ export const MESSAGES: Record<Locale, Messages> = {
     "nav.about": "Acerca de",
     "nav.research": "Investigación",
     "nav.explorer": "Explorador",
+    "nav.home": "Inicio",
+    "nav.pages": "Páginas",
+    "nav.onThisPage": "En esta página",
     "nav.signIn": "Iniciar sesión",
     "nav.signedIn": "Sesión iniciada",
     "nav.getStarted": "Comenzar",
@@ -989,6 +998,9 @@ export const MESSAGES: Record<Locale, Messages> = {
     "nav.about": "Sobre",
     "nav.research": "Pesquisa",
     "nav.explorer": "Explorador",
+    "nav.home": "Início",
+    "nav.pages": "Páginas",
+    "nav.onThisPage": "Nesta página",
     "nav.signIn": "Entrar",
     "nav.signedIn": "Conectado",
     "nav.getStarted": "Começar",
@@ -1306,6 +1318,9 @@ export const MESSAGES: Record<Locale, Messages> = {
     "nav.about": "Kuhusu",
     "nav.research": "Utafiti",
     "nav.explorer": "Mchunguzi",
+    "nav.home": "Mwanzo",
+    "nav.pages": "Kurasa",
+    "nav.onThisPage": "Kwenye ukurasa huu",
     "nav.signIn": "Ingia",
     "nav.signedIn": "Umeingia",
     "nav.getStarted": "Anza",
@@ -1625,6 +1640,9 @@ export const MESSAGES: Record<Locale, Messages> = {
     "nav.about": "Tentang",
     "nav.research": "Riset",
     "nav.explorer": "Penjelajah",
+    "nav.home": "Beranda",
+    "nav.pages": "Halaman",
+    "nav.onThisPage": "Di halaman ini",
     "nav.signIn": "Masuk",
     "nav.signedIn": "Telah masuk",
     "nav.getStarted": "Mulai",
