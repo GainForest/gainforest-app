@@ -86,6 +86,7 @@ type MutationBody =
   | { operation: "updateMultimedia"; rkey: string; data: UpdateMultimediaData; unset?: string[] }
   | { operation: "deleteOccurrenceCascade"; rkey: string }
   | { operation: "detachOccurrenceFromDataset"; rkey: string }
+  | { operation: "attachExistingOccurrences"; datasetRkey: string; occurrenceRkeys: string[] }
   | {
       operation: "appendExistingDataset";
       datasetRkey: string;
@@ -114,6 +115,7 @@ type ForwardableMutationBody = Exclude<
   | { operation: "updateMultimedia" }
   | { operation: "deleteOccurrenceCascade" }
   | { operation: "detachOccurrenceFromDataset" }
+  | { operation: "attachExistingOccurrences" }
   | { operation: "appendExistingDataset" }
 >;
 type PdsSession = { did: string; accessJwt: string };
@@ -131,6 +133,7 @@ const MAX_URL_IMAGE_BYTES = 4.5 * 1024 * 1024;
 const PHOTO_FETCH_TIMEOUT_MS = 30_000;
 const MAX_PHOTO_REDIRECTS = 5;
 const APPEND_EXISTING_DATASET_MAX_ROWS = 10;
+const ATTACH_EXISTING_TREE_GROUP_MAX_TREES = 50;
 const LIST_RECORDS_PAGE_LIMIT = 100;
 const MAX_DATASET_COUNT_ATTEMPTS = 5;
 const BASE_RETRY_DELAY_MS = 50;
@@ -500,6 +503,16 @@ function isMutationBody(value: unknown): value is MutationBody {
   }
   if (body.operation === "detachOccurrenceFromDataset") {
     return typeof body.rkey === "string" && body.rkey.length > 0;
+  }
+  if (body.operation === "attachExistingOccurrences") {
+    return (
+      typeof body.datasetRkey === "string" &&
+      body.datasetRkey.length > 0 &&
+      Array.isArray(body.occurrenceRkeys) &&
+      body.occurrenceRkeys.length > 0 &&
+      body.occurrenceRkeys.length <= ATTACH_EXISTING_TREE_GROUP_MAX_TREES &&
+      body.occurrenceRkeys.every((rkey) => typeof rkey === "string" && rkey.length > 0)
+    );
   }
   if (body.operation === "appendExistingDataset") {
     return (
@@ -1025,6 +1038,126 @@ async function detachOccurrenceFromDatasetByRkey(options: {
   } catch {
     throw new Error("The tree was saved, but it could not be moved out of the tree group automatically.");
   }
+}
+
+function mergeTreeGroupDynamicProperties(value: unknown, datasetRef: string): string {
+  if (typeof value !== "string" || value.trim().length === 0) {
+    return buildTreeDynamicProperties(datasetRef);
+  }
+
+  try {
+    const parsed = JSON.parse(value) as unknown;
+    if (!isRecord(parsed) || Array.isArray(parsed)) return value;
+    return JSON.stringify({ ...parsed, datasetRef });
+  } catch {
+    return value;
+  }
+}
+
+async function attachExistingOccurrencesToDataset(
+  body: Extract<MutationBody, { operation: "attachExistingOccurrences" }>,
+  did: string,
+  cookie: string | null,
+): Promise<{
+  datasetUri: string;
+  datasetRkey: string;
+  attachedCount: number;
+  skippedCount: number;
+  errorCount: number;
+  datasetCountUpdated: boolean;
+  datasetCountError: string | null;
+  results: Array<
+    | { rkey: string; state: "success"; occurrenceUri: string }
+    | { rkey: string; state: "skipped"; reason: string }
+    | { rkey: string; state: "error"; error: string }
+  >;
+}> {
+  const occurrenceRkeys = Array.from(new Set(body.occurrenceRkeys.filter(Boolean)));
+  if (occurrenceRkeys.length === 0) throw new Error("Choose at least one tree to add.");
+  if (occurrenceRkeys.length > ATTACH_EXISTING_TREE_GROUP_MAX_TREES) {
+    throw new Error("Choose fewer trees and try again.");
+  }
+
+  const datasetRecord = await getDatasetRecordFromPds(did, body.datasetRkey).catch((error) => {
+    if (error instanceof TreeGroupUnavailableError || isUnavailableLikeError(error)) {
+      throw new TreeGroupUnavailableError();
+    }
+    throw new Error("Could not check the selected tree group.");
+  });
+
+  const results: Array<
+    | { rkey: string; state: "success"; occurrenceUri: string }
+    | { rkey: string; state: "skipped"; reason: string }
+    | { rkey: string; state: "error"; error: string }
+  > = [];
+  let attachedCount = 0;
+
+  for (const rkey of occurrenceRkeys) {
+    try {
+      const current = await fetchRepoRecord({
+        did,
+        collection: OCCURRENCE_COLLECTION,
+        rkey,
+        missingMessage: "Could not check one of the selected trees.",
+      });
+
+      if (getOccurrenceDatasetRef(current.record)) {
+        results.push({ rkey, state: "skipped", reason: "This tree is already in a tree group." });
+        continue;
+      }
+
+      const nextRecord: Record<string, unknown> = {
+        ...current.record,
+        $type: typeof current.record.$type === "string" ? current.record.$type : OCCURRENCE_COLLECTION,
+        datasetRef: datasetRecord.uri,
+        dynamicProperties: mergeTreeGroupDynamicProperties(current.record.dynamicProperties, datasetRecord.uri),
+      };
+
+      await executeForwardableMutation<{ uri: string; cid: string }>({
+        operation: "putRecord",
+        collection: OCCURRENCE_COLLECTION,
+        rkey,
+        record: nextRecord,
+        swapRecord: current.cid,
+      }, did, cookie, "Tree could not be added to the tree group.");
+
+      attachedCount += 1;
+      results.push({ rkey, state: "success", occurrenceUri: current.uri });
+    } catch (error) {
+      results.push({
+        rkey,
+        state: "error",
+        error: error instanceof Error ? error.message : "Tree could not be added to the tree group.",
+      });
+    }
+  }
+
+  let datasetCountUpdated = true;
+  let datasetCountError: string | null = null;
+  if (attachedCount > 0) {
+    try {
+      await updateDatasetRecordCount({
+        did,
+        cookie,
+        datasetRkey: body.datasetRkey,
+        incrementBy: attachedCount,
+      });
+    } catch (error) {
+      datasetCountUpdated = false;
+      datasetCountError = error instanceof Error ? error.message : "Tree group count could not be updated.";
+    }
+  }
+
+  return {
+    datasetUri: datasetRecord.uri,
+    datasetRkey: body.datasetRkey,
+    attachedCount,
+    skippedCount: results.filter((result) => result.state === "skipped").length,
+    errorCount: results.filter((result) => result.state === "error").length,
+    datasetCountUpdated,
+    datasetCountError,
+    results,
+  };
 }
 
 function hasCoordinateValue(value: unknown): boolean {
@@ -1949,6 +2082,15 @@ export async function POST(request: Request) {
       return Response.json(result);
     } catch (error) {
       return Response.json({ error: error instanceof Error ? error.message : "The tree could not be updated." }, { status: 502 });
+    }
+  }
+
+  if (body.operation === "attachExistingOccurrences") {
+    try {
+      const result = await attachExistingOccurrencesToDataset(body, session.did, cookie);
+      return Response.json(result);
+    } catch (error) {
+      return Response.json({ error: error instanceof Error ? error.message : "Trees could not be added to the selected tree group." }, { status: 502 });
     }
   }
 

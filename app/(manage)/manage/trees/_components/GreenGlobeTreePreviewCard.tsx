@@ -95,7 +95,7 @@ export function GreenGlobeTreePreviewCard({
   }, [postPreviewFocusMessage]);
 
   return (
-    <section className="space-y-3 rounded-2xl border border-border bg-background p-4 shadow-sm md:p-5" aria-label="Green Globe tree group preview">
+    <section className="space-y-3 rounded-2xl border border-border bg-background p-4 shadow-sm md:p-5 lg:sticky lg:top-4 lg:z-20" aria-label="Green Globe tree group preview">
       <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
         <div className="min-w-0 space-y-1">
           <h2 className="flex items-center gap-2 text-lg font-semibold font-garamond text-foreground">

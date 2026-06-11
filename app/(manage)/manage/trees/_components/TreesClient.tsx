@@ -21,10 +21,13 @@ import {
   XIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import Container from "@/components/ui/container";
+import { useModal } from "@/components/ui/modal/context";
+import { MODAL_IDS } from "@/components/global/modals/ids";
 import { cn } from "@/lib/utils";
 import type {
   OccurrenceRecord,
@@ -36,6 +39,12 @@ import { TreesManageSkeleton } from "./TreesManageSkeleton";
 import { TreeListPagination } from "./TreeListPagination";
 import { ManageConfirmModal } from "./ManageConfirmModal";
 import GreenGlobeTreePreviewCard from "./GreenGlobeTreePreviewCard";
+import AddToTreeGroupModal from "./AddToTreeGroupModal";
+import {
+  buildDatasetLandingCards,
+  DatasetLandingSection,
+  UNGROUPED_DATASET_FILTER,
+} from "./DatasetLandingSection";
 import {
   CANOPY_COVER_PERCENT_MAX,
   buildTreeManagerItems,
@@ -57,6 +66,7 @@ import {
   type TreeOccurrenceDraft,
 } from "./tree-manager-utils";
 import {
+  attachExistingOccurrences,
   createMeasurement,
   createMultimediaFromFile,
   createMultimediaFromUrl,
@@ -65,6 +75,7 @@ import {
   updateMeasurement,
   updateMultimedia,
   updateOccurrence,
+  type AttachExistingOccurrencesResult,
 } from "../../_lib/mutations";
 import { PARTNER_ESTABLISHMENT_MEANS_OPTIONS } from "../../_lib/upload/establishment-means";
 import {
@@ -120,6 +131,30 @@ const OPTIONAL_OCCURRENCE_FIELDS: Array<keyof TreeOccurrenceDraft> = [
   "habitat",
   "establishmentMeans",
 ];
+
+const ATTACH_EXISTING_TREE_GROUP_MAX_TREES = 50;
+
+function isUngroupedTree(item: TreeManagerItem): boolean {
+  return !item.occurrence.datasetRef;
+}
+
+function chunkStrings(values: string[], chunkSize: number): string[][] {
+  const chunks: string[][] = [];
+  for (let index = 0; index < values.length; index += chunkSize) {
+    chunks.push(values.slice(index, index + chunkSize));
+  }
+  return chunks;
+}
+
+function hashStrings(values: string[]): string {
+  let hash = 5381;
+  for (const value of values) {
+    for (let index = 0; index < value.length; index += 1) {
+      hash = (hash * 33 + value.charCodeAt(index)) % 4_294_967_295;
+    }
+  }
+  return hash.toString(36);
+}
 
 function isErrorPayload(value: unknown): value is { error: string } {
   return typeof value === "object" && value !== null && "error" in value;
@@ -323,6 +358,7 @@ export function TreesClient({ did, onUpload }: TreesClientProps) {
     treePageQuery,
     setQueryValues,
   } = useTreesManageUrlState();
+  const { pushModal, show } = useModal();
 
   const [trees, setTrees] = useState<OccurrenceRecord[]>([]);
   const [datasets, setDatasets] = useState<UploadTreeDatasetRecord[]>([]);
@@ -353,6 +389,10 @@ export function TreesClient({ did, onUpload }: TreesClientProps) {
   const [savingPhotoCaptionRkey, setSavingPhotoCaptionRkey] = useState<string | null>(null);
   const [photoCaptionError, setPhotoCaptionError] = useState<string | null>(null);
   const [deletedFeedback, setDeletedFeedback] = useState<string | null>(null);
+  const [treeGroupAttachFeedback, setTreeGroupAttachFeedback] = useState<string | null>(null);
+  const [treeGroupAttachPending, setTreeGroupAttachPending] = useState(false);
+  const [treeGroupSearchQuery, setTreeGroupSearchQuery] = useState("");
+  const [selectedUngroupedTreeRkeys, setSelectedUngroupedTreeRkeys] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const lastDraftResetKeyRef = useRef<string | null>(null);
   const selectedDraftTreeRkeyRef = useRef<string | null>(null);
@@ -404,7 +444,19 @@ export function TreesClient({ did, onUpload }: TreesClientProps) {
     [measurements, photos, trees],
   );
 
+  const treeGroupCards = useMemo(
+    () => buildDatasetLandingCards(datasets, treeItems),
+    [datasets, treeItems],
+  );
+  const showTreeGroupLanding = !datasetFilter && treeGroupCards.length > 0;
+  const filteredTreeGroupCards = useMemo(() => {
+    const query = treeGroupSearchQuery.trim().toLowerCase();
+    if (!query) return treeGroupCards;
+    return treeGroupCards.filter((card) => card.searchText.includes(query));
+  }, [treeGroupCards, treeGroupSearchQuery]);
+
   const datasetScopedTrees = useMemo(() => {
+    if (datasetFilter === UNGROUPED_DATASET_FILTER) return treeItems.filter(isUngroupedTree);
     if (!datasetFilter) return treeItems;
     return treeItems.filter((item) => item.occurrence.datasetRef === datasetFilter);
   }, [datasetFilter, treeItems]);
@@ -428,6 +480,29 @@ export function TreesClient({ did, onUpload }: TreesClientProps) {
     });
   }, [datasetLookup, datasetScopedTrees, searchQuery]);
 
+  const filteredUngroupedTreeRkeys = useMemo(() => {
+    if (datasetFilter !== UNGROUPED_DATASET_FILTER) return [];
+    return filteredTrees.flatMap((item) => {
+      const rkey = item.occurrence.rkey;
+      return rkey && isUngroupedTree(item) ? [rkey] : [];
+    });
+  }, [datasetFilter, filteredTrees]);
+  const filteredUngroupedTreeRkeySet = useMemo(() => new Set(filteredUngroupedTreeRkeys), [filteredUngroupedTreeRkeys]);
+  const selectedUngroupedTreeRkeySet = useMemo(() => new Set(selectedUngroupedTreeRkeys), [selectedUngroupedTreeRkeys]);
+  const selectedUngroupedTrees = useMemo(
+    () => filteredTrees.filter((item) => selectedUngroupedTreeRkeySet.has(item.occurrence.rkey)),
+    [filteredTrees, selectedUngroupedTreeRkeySet],
+  );
+  const allFilteredUngroupedTreesSelected =
+    filteredUngroupedTreeRkeys.length > 0 &&
+    filteredUngroupedTreeRkeys.every((rkey) => selectedUngroupedTreeRkeySet.has(rkey));
+  const someFilteredUngroupedTreesSelected = filteredUngroupedTreeRkeys.some((rkey) => selectedUngroupedTreeRkeySet.has(rkey));
+  const selectAllUngroupedChecked = allFilteredUngroupedTreesSelected
+    ? true
+    : someFilteredUngroupedTreesSelected
+      ? "indeterminate"
+      : false;
+
   const requestedTreePage = useMemo(() => getTreePageFromQuery(treePageQuery), [treePageQuery]);
   const totalTreePages = getTotalPages(filteredTrees.length, TREE_ITEMS_PER_PAGE);
   const currentTreePage = getBoundedPage(requestedTreePage, totalTreePages);
@@ -437,11 +512,30 @@ export function TreesClient({ did, onUpload }: TreesClientProps) {
   }, [currentTreePage, filteredTrees]);
 
   const selectedTree = useMemo(() => {
+    if (showTreeGroupLanding) return null;
     if (selectedTreeRkey) {
       return treeItems.find((item) => item.occurrence.rkey === selectedTreeRkey) ?? null;
     }
     return paginatedTrees[0] ?? null;
-  }, [paginatedTrees, selectedTreeRkey, treeItems]);
+  }, [paginatedTrees, selectedTreeRkey, showTreeGroupLanding, treeItems]);
+  const selectedUngroupedTreeCount = selectedUngroupedTreeRkeys.length;
+
+  useEffect(() => {
+    if (!showTreeGroupLanding || !selectedTreeRkey) return;
+    setQueryValues({ tree: null });
+  }, [selectedTreeRkey, setQueryValues, showTreeGroupLanding]);
+
+  useEffect(() => {
+    if (datasetFilter !== UNGROUPED_DATASET_FILTER) {
+      if (selectedUngroupedTreeRkeys.length > 0) setSelectedUngroupedTreeRkeys([]);
+      return;
+    }
+
+    setSelectedUngroupedTreeRkeys((current) => {
+      const next = current.filter((rkey) => filteredUngroupedTreeRkeySet.has(rkey));
+      return next.length === current.length ? current : next;
+    });
+  }, [datasetFilter, filteredUngroupedTreeRkeySet, selectedUngroupedTreeRkeys.length]);
 
   useEffect(() => {
     if (isLoading) return;
@@ -581,8 +675,31 @@ export function TreesClient({ did, onUpload }: TreesClientProps) {
   }, [setQueryValues]);
 
   const handleDatasetChange = useCallback((uri: string | null) => {
-    setQueryValues({ dataset: uri, "tree-page": null, tree: null });
+    setQueryValues({ dataset: uri, q: null, "tree-page": null, tree: null });
   }, [setQueryValues]);
+
+  const handleReturnToTreeGroups = useCallback(() => {
+    setQueryValues({ dataset: null, q: null, "tree-page": null, tree: null });
+  }, [setQueryValues]);
+
+  const handleToggleUngroupedTreeSelection = useCallback((rkey: string) => {
+    setSelectedUngroupedTreeRkeys((current) => {
+      if (current.includes(rkey)) return current.filter((selectedRkey) => selectedRkey !== rkey);
+      return [...current, rkey];
+    });
+  }, []);
+
+  const handleToggleAllFilteredUngroupedTrees = useCallback(() => {
+    setSelectedUngroupedTreeRkeys((current) => {
+      if (allFilteredUngroupedTreesSelected) {
+        return current.filter((rkey) => !filteredUngroupedTreeRkeySet.has(rkey));
+      }
+
+      const next = new Set(current);
+      for (const rkey of filteredUngroupedTreeRkeys) next.add(rkey);
+      return Array.from(next);
+    });
+  }, [allFilteredUngroupedTreesSelected, filteredUngroupedTreeRkeySet, filteredUngroupedTreeRkeys]);
 
   const handleTreePageChange = useCallback((nextPage: number) => {
     const bounded = getBoundedPage(nextPage, totalTreePages);
@@ -852,6 +969,130 @@ export function TreesClient({ did, onUpload }: TreesClientProps) {
     setDeletedFeedback(deleteNotes.length > 0 ? `Tree deleted. ${deleteNotes.join(" ")}` : "Tree deleted.");
   };
 
+  const applyAttachResult = (result: AttachExistingOccurrencesResult, treeGroup: UploadTreeDatasetRecord) => {
+    const successfulRkeys = result.results.flatMap((item) => item.state === "success" ? [item.rkey] : []);
+    const successfulRkeySet = new Set(successfulRkeys);
+    const treeGroupName = treeGroup.name || "the selected tree group";
+
+    if (successfulRkeys.length > 0) {
+      setTrees((current) => current.map((tree) => (
+        successfulRkeySet.has(tree.rkey)
+          ? { ...tree, datasetRef: result.datasetUri, datasetName: treeGroup.name || tree.datasetName }
+          : tree
+      )));
+      setDatasets((current) => current.map((item) => (
+        item.rkey === treeGroup.rkey
+          ? { ...item, recordCount: (item.recordCount ?? 0) + successfulRkeys.length }
+          : item
+      )));
+      setSelectedUngroupedTreeRkeys((current) => current.filter((rkey) => !successfulRkeySet.has(rkey)));
+      if (selectedTreeRkey && successfulRkeySet.has(selectedTreeRkey)) {
+        setQueryValues({ tree: null });
+      }
+    }
+
+    const feedbackParts: string[] = [];
+    if (result.attachedCount > 0) {
+      feedbackParts.push(`Added ${result.attachedCount} tree${result.attachedCount === 1 ? "" : "s"} to ${treeGroupName}.`);
+    } else {
+      feedbackParts.push(`No trees were added to ${treeGroupName}.`);
+    }
+    if (result.skippedCount > 0) {
+      feedbackParts.push(`${result.skippedCount} tree${result.skippedCount === 1 ? " was" : "s were"} already in a tree group and skipped.`);
+    }
+    if (result.errorCount > 0) {
+      feedbackParts.push(`${result.errorCount} tree${result.errorCount === 1 ? "" : "s"} could not be added.`);
+    }
+    if (!result.datasetCountUpdated) {
+      feedbackParts.push(result.datasetCountError ?? "The tree group count may update later.");
+    }
+    setTreeGroupAttachFeedback(feedbackParts.join(" "));
+  };
+
+  const handleAttachTreesToTreeGroup = async (occurrenceRkeys: string[], treeGroup: UploadTreeDatasetRecord) => {
+    const uniqueRkeys = Array.from(new Set(occurrenceRkeys.filter(Boolean)));
+    if (uniqueRkeys.length === 0) throw new Error("Choose at least one ungrouped tree.");
+
+    setTreeGroupAttachPending(true);
+    try {
+      const chunks = chunkStrings(uniqueRkeys, ATTACH_EXISTING_TREE_GROUP_MAX_TREES);
+      const aggregate: AttachExistingOccurrencesResult = {
+        datasetUri: treeGroup.uri,
+        datasetRkey: treeGroup.rkey,
+        attachedCount: 0,
+        skippedCount: 0,
+        errorCount: 0,
+        datasetCountUpdated: true,
+        datasetCountError: null,
+        results: [],
+      };
+      let fatalChunkError: string | null = null;
+
+      for (const [chunkIndex, chunk] of chunks.entries()) {
+        try {
+          const result = await attachExistingOccurrences({ datasetRkey: treeGroup.rkey, occurrenceRkeys: chunk });
+          aggregate.datasetUri = result.datasetUri;
+          aggregate.datasetRkey = result.datasetRkey;
+          aggregate.attachedCount += result.attachedCount;
+          aggregate.skippedCount += result.skippedCount;
+          aggregate.errorCount += result.errorCount;
+          aggregate.results.push(...result.results);
+          if (!result.datasetCountUpdated) {
+            aggregate.datasetCountUpdated = false;
+            aggregate.datasetCountError = result.datasetCountError ?? aggregate.datasetCountError;
+          }
+        } catch (error) {
+          const remaining = chunks.slice(chunkIndex).reduce((count, nextChunk) => count + nextChunk.length, 0);
+          aggregate.errorCount += remaining;
+          fatalChunkError = error instanceof Error ? error.message : "Some trees could not be added.";
+          break;
+        }
+      }
+
+      if (aggregate.attachedCount === 0 && aggregate.skippedCount === 0 && fatalChunkError) {
+        throw new Error(fatalChunkError);
+      }
+
+      applyAttachResult(aggregate, treeGroup);
+      if (fatalChunkError) {
+        setTreeGroupAttachFeedback((current) => [current, fatalChunkError].filter(Boolean).join(" "));
+      }
+    } finally {
+      setTreeGroupAttachPending(false);
+    }
+  };
+
+  const openAddToTreeGroupModal = (items: TreeManagerItem[]) => {
+    if (datasets.length === 0) {
+      setTreeGroupAttachFeedback("Create a tree group during tree upload before adding ungrouped trees to it.");
+      return;
+    }
+
+    const occurrenceRkeys = items.flatMap((item) => isUngroupedTree(item) && item.occurrence.rkey ? [item.occurrence.rkey] : []);
+    if (occurrenceRkeys.length === 0) {
+      setTreeGroupAttachFeedback("Choose at least one ungrouped tree.");
+      return;
+    }
+
+    setTreeGroupAttachFeedback(null);
+    const selectionHash = hashStrings(occurrenceRkeys);
+    pushModal(
+      {
+        id: `${MODAL_IDS.MANAGE_TREE_ADD_TO_TREE_GROUP}/${occurrenceRkeys.length}/${selectionHash}`,
+        content: (
+          <AddToTreeGroupModal
+            treeGroups={datasets}
+            treeCount={occurrenceRkeys.length}
+            onConfirm={(treeGroup) => handleAttachTreesToTreeGroup(occurrenceRkeys, treeGroup)}
+          />
+        ),
+        dialogWidth: "max-w-md",
+      },
+      true,
+    );
+    void show();
+  };
+
   const activeDeletionTarget = selectedTree ? getTreeDeletionTarget(selectedTree) : null;
   const confirmDescription = confirmTarget?.type === "tree"
     ? (() => {
@@ -907,6 +1148,13 @@ export function TreesClient({ did, onUpload }: TreesClientProps) {
         ) : null}
       </div>
 
+      {!showTreeGroupLanding && treeGroupCards.length > 0 ? (
+        <Button variant="ghost" className="-ml-2 w-fit" onClick={handleReturnToTreeGroups}>
+          <ChevronLeftIcon />
+          Back to tree groups
+        </Button>
+      ) : null}
+
       {deletedFeedback ? (
         <div className="flex items-start gap-3 rounded-2xl border border-primary/20 bg-primary/5 px-4 py-3">
           <InfoIcon className="mt-0.5 size-4 shrink-0 text-primary" />
@@ -914,82 +1162,36 @@ export function TreesClient({ did, onUpload }: TreesClientProps) {
         </div>
       ) : null}
 
-      {datasets.length > 0 ? (
-        <section className="space-y-3">
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <h2 className="text-lg font-semibold font-garamond">Tree groups</h2>
-              <p className="text-sm text-muted-foreground">Choose a group or review all trees.</p>
-            </div>
-            {datasetFilter ? (
-              <Button variant="ghost" size="sm" onClick={() => handleDatasetChange(null)}>
-                <ChevronLeftIcon />
-                Show all groups
-              </Button>
-            ) : null}
-          </div>
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            <button
-              type="button"
-              onClick={() => handleDatasetChange(null)}
-              className={cn(
-                "rounded-2xl border p-4 text-left transition-colors hover:border-primary/40 hover:bg-surface-sunken focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60",
-                !datasetFilter ? "border-primary bg-primary/5" : "border-border bg-background",
-              )}
-            >
-              <div className="flex items-start gap-3">
-                <span className="rounded-full bg-primary/10 p-2 text-primary"><TreesIcon className="h-4 w-4" /></span>
-                <span className="min-w-0 flex-1">
-                  <span className="block text-sm font-medium">All trees</span>
-                  <span className="mt-1 block text-xs text-muted-foreground">Review every saved tree.</span>
-                  <span className="mt-3 inline-flex rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">{trees.length} trees</span>
-                </span>
-              </div>
-            </button>
-            {datasets.map((dataset) => {
-              const selected = datasetFilter === dataset.uri;
-              const count = trees.filter((tree) => tree.datasetRef === dataset.uri).length;
-              return (
-                <button
-                  key={dataset.uri}
-                  type="button"
-                  onClick={() => handleDatasetChange(selected ? null : dataset.uri)}
-                  className={cn(
-                    "rounded-2xl border p-4 text-left transition-colors hover:border-primary/40 hover:bg-surface-sunken focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60",
-                    selected ? "border-primary bg-primary/5" : "border-border bg-background",
-                  )}
-                >
-                  <div className="flex items-start gap-3">
-                    <span className="rounded-full bg-primary/10 p-2 text-primary"><DatabaseIcon className="h-4 w-4" /></span>
-                    <span className="min-w-0 flex-1">
-                      <span className="block truncate text-sm font-medium">{dataset.name}</span>
-                      <span className="mt-1 line-clamp-2 block text-xs text-muted-foreground">{dataset.description ?? "No description added"}</span>
-                      <span className="mt-3 inline-flex rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">{dataset.recordCount ?? count} trees</span>
-                    </span>
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-        </section>
+      {treeGroupAttachFeedback ? (
+        <div className="flex items-start gap-3 rounded-2xl border border-primary/20 bg-primary/5 px-4 py-3">
+          <InfoIcon className="mt-0.5 size-4 shrink-0 text-primary" />
+          <p className="text-sm text-foreground">{treeGroupAttachFeedback}</p>
+        </div>
       ) : null}
 
-      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-        <div className="relative w-full lg:max-w-sm">
-          <SearchIcon className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            value={searchQuery}
-            onChange={(event) => handleTreeSearchChange(event.target.value)}
-            placeholder="Search by species, place, or person…"
-            className="pl-9"
-          />
+      {treeGroupCards.length > 0 || treeItems.length > 0 ? (
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+          <div className="relative w-full lg:max-w-sm">
+            <SearchIcon className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              value={showTreeGroupLanding ? treeGroupSearchQuery : searchQuery}
+              onChange={(event) => {
+                if (showTreeGroupLanding) setTreeGroupSearchQuery(event.target.value);
+                else handleTreeSearchChange(event.target.value);
+              }}
+              placeholder={showTreeGroupLanding ? "Search tree groups…" : "Search by species, place, or person…"}
+              className="pl-9"
+            />
+          </div>
+          <p className="text-sm text-muted-foreground">
+            {showTreeGroupLanding
+              ? `${filteredTreeGroupCards.length} of ${treeGroupCards.length} tree group${treeGroupCards.length === 1 ? "" : "s"}`
+              : `${filteredTrees.length} of ${datasetScopedTrees.length} tree${datasetScopedTrees.length === 1 ? "" : "s"}`}
+          </p>
         </div>
-        <p className="text-sm text-muted-foreground">
-          {filteredTrees.length} of {datasetScopedTrees.length} tree{datasetScopedTrees.length === 1 ? "" : "s"}
-        </p>
-      </div>
+      ) : null}
 
-      {selectedTreeGroup ? (
+      {selectedTreeGroup && datasetFilter !== UNGROUPED_DATASET_FILTER ? (
         <GreenGlobeTreePreviewCard
           did={did}
           datasetRef={selectedTreeGroup.uri}
@@ -1002,7 +1204,7 @@ export function TreesClient({ did, onUpload }: TreesClientProps) {
         />
       ) : null}
 
-      {treeItems.length === 0 ? (
+      {treeGroupCards.length === 0 && treeItems.length === 0 ? (
         <div className="flex flex-col items-center justify-center h-64 gap-4 rounded-2xl border border-dashed border-border text-center px-6">
           <p className="text-2xl text-muted-foreground font-garamond">No trees uploaded yet</p>
           <p className="text-sm text-muted-foreground max-w-md">
@@ -1015,6 +1217,27 @@ export function TreesClient({ did, onUpload }: TreesClientProps) {
             </Button>
           ) : null}
         </div>
+      ) : showTreeGroupLanding ? (
+        <div className="space-y-4">
+          <div className="flex flex-col gap-3 rounded-2xl border border-dashed border-border bg-muted/20 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-start gap-3">
+              <InfoIcon className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+              <p className="text-sm text-muted-foreground">
+                Open a tree group to review its trees. Open ungrouped trees to select them and add them to an existing tree group.
+              </p>
+            </div>
+          </div>
+
+          {filteredTreeGroupCards.length === 0 ? (
+            <div className="flex flex-col items-center justify-center h-56 gap-3 rounded-2xl border border-dashed border-border text-center px-6">
+              <p className="text-2xl text-muted-foreground font-garamond">No tree groups match your search</p>
+              <p className="text-sm text-muted-foreground">Try a different name, place, or status.</p>
+              <Button variant="outline" onClick={() => setTreeGroupSearchQuery("")}>Clear search</Button>
+            </div>
+          ) : (
+            <DatasetLandingSection datasetCards={filteredTreeGroupCards} onOpen={handleDatasetChange} />
+          )}
+        </div>
       ) : filteredTrees.length === 0 ? (
         <div className="flex flex-col items-center justify-center h-56 gap-3 rounded-2xl border border-dashed border-border text-center px-6">
           <p className="text-2xl text-muted-foreground font-garamond">No trees match your search</p>
@@ -1024,42 +1247,91 @@ export function TreesClient({ did, onUpload }: TreesClientProps) {
       ) : (
         <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,22rem)_minmax(0,1fr)]">
           <section className="rounded-2xl border border-border bg-background overflow-hidden">
-            <div className="border-b border-border px-4 py-3">
-              <p className="text-sm font-medium text-foreground">Saved trees</p>
-              <p className="mt-0.5 text-xs text-muted-foreground">Select a tree to review details, photos, and measurements.</p>
+            <div className="border-b border-border px-4 py-3 space-y-3">
+              <div>
+                <p className="text-sm font-medium text-foreground">
+                  {datasetFilter === UNGROUPED_DATASET_FILTER ? "Ungrouped trees" : "Saved trees"}
+                </p>
+                <p className="mt-0.5 text-xs text-muted-foreground">
+                  {datasetFilter === UNGROUPED_DATASET_FILTER
+                    ? "Select one or more trees to add them to a tree group."
+                    : "Select a tree to review details, photos, and measurements."}
+                </p>
+              </div>
+
+              {datasetFilter === UNGROUPED_DATASET_FILTER ? (
+                <div className="flex flex-col gap-3 rounded-xl border border-border bg-muted/20 px-3 py-2 sm:flex-row sm:items-center sm:justify-between">
+                  <label className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <Checkbox
+                      checked={selectAllUngroupedChecked}
+                      onCheckedChange={handleToggleAllFilteredUngroupedTrees}
+                      disabled={filteredUngroupedTreeRkeys.length === 0}
+                      aria-label="Select all filtered ungrouped trees"
+                    />
+                    <span>Select all filtered trees</span>
+                    {selectedUngroupedTreeCount > 0 ? (
+                      <span className="font-medium text-foreground">{selectedUngroupedTreeCount} selected</span>
+                    ) : null}
+                  </label>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => openAddToTreeGroupModal(selectedUngroupedTrees)}
+                    disabled={selectedUngroupedTreeCount === 0 || datasets.length === 0 || treeGroupAttachPending}
+                    className="w-full sm:w-auto"
+                  >
+                    {treeGroupAttachPending ? <Loader2Icon className="animate-spin" /> : <DatabaseIcon />}
+                    {selectedUngroupedTreeCount > 1 ? `Add ${selectedUngroupedTreeCount} to tree group` : "Add to tree group"}
+                  </Button>
+                </div>
+              ) : null}
             </div>
             <div className="divide-y divide-border">
               {paginatedTrees.map((item) => {
                 const tree = item.occurrence;
                 const selected = selectedTree?.occurrence.rkey === tree.rkey;
                 const groupName = tree.datasetRef ? datasetLookup.get(tree.datasetRef)?.name ?? tree.datasetName : null;
+                const canSelectUngroupedTree = datasetFilter === UNGROUPED_DATASET_FILTER && isUngroupedTree(item);
+                const isUngroupedTreeSelected = selectedUngroupedTreeRkeySet.has(tree.rkey);
                 return (
-                  <button
+                  <div
                     key={tree.atUri}
-                    type="button"
-                    onClick={() => setQueryValues({ tree: tree.rkey })}
                     className={cn(
-                      "block w-full px-4 py-3 text-left transition-colors hover:bg-muted/35 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60",
-                      selected && "bg-primary/5",
+                      "flex items-start gap-3 px-4 py-3 transition-colors hover:bg-muted/35",
+                      (selected || isUngroupedTreeSelected) && "bg-primary/5",
                     )}
                   >
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0 space-y-1">
-                        <p className="truncate text-lg leading-none font-garamond">{tree.scientificName ?? "Unnamed tree"}</p>
-                        {tree.vernacularName ? <p className="truncate text-xs italic text-muted-foreground">{tree.vernacularName}</p> : null}
-                        <p className="flex items-center gap-1 truncate text-xs text-muted-foreground">
-                          <MapPinIcon className="size-3" />
-                          {formatTreeSubtitle(item)}
-                        </p>
-                        <p className="text-xs text-muted-foreground">{formatEventDate(tree.eventDate)}</p>
+                    {canSelectUngroupedTree ? (
+                      <Checkbox
+                        checked={isUngroupedTreeSelected}
+                        onCheckedChange={() => handleToggleUngroupedTreeSelection(tree.rkey)}
+                        aria-label={`Select ${tree.scientificName ?? "tree"}`}
+                        className="mt-0.5"
+                      />
+                    ) : null}
+                    <button
+                      type="button"
+                      onClick={() => setQueryValues({ tree: tree.rkey })}
+                      className="min-w-0 flex-1 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0 space-y-1">
+                          <p className="truncate text-lg leading-none font-garamond">{tree.scientificName ?? "Unnamed tree"}</p>
+                          {tree.vernacularName ? <p className="truncate text-xs italic text-muted-foreground">{tree.vernacularName}</p> : null}
+                          <p className="flex items-center gap-1 truncate text-xs text-muted-foreground">
+                            <MapPinIcon className="size-3" />
+                            {formatTreeSubtitle(item)}
+                          </p>
+                          <p className="text-xs text-muted-foreground">{formatEventDate(tree.eventDate)}</p>
+                        </div>
+                        <div className="flex shrink-0 flex-col items-end gap-1">
+                          {groupName ? <Badge><DatabaseIcon className="size-3" />{groupName}</Badge> : null}
+                          {item.photos.length > 0 ? <Badge><ImageIcon className="size-3" />{item.photos.length}</Badge> : null}
+                          {item.hasDuplicateBundledMeasurements ? <Badge tone="warn">Review needed</Badge> : hasAnyMeasurementValue(getTreeMeasurementDraft(item.floraMeasurement)) ? <Badge tone="good">Measured</Badge> : null}
+                        </div>
                       </div>
-                      <div className="flex shrink-0 flex-col items-end gap-1">
-                        {groupName ? <Badge><DatabaseIcon className="size-3" />{groupName}</Badge> : null}
-                        {item.photos.length > 0 ? <Badge><ImageIcon className="size-3" />{item.photos.length}</Badge> : null}
-                        {item.hasDuplicateBundledMeasurements ? <Badge tone="warn">Review needed</Badge> : hasAnyMeasurementValue(getTreeMeasurementDraft(item.floraMeasurement)) ? <Badge tone="good">Measured</Badge> : null}
-                      </div>
-                    </div>
-                  </button>
+                    </button>
+                  </div>
                 );
               })}
             </div>
@@ -1090,6 +1362,17 @@ export function TreesClient({ did, onUpload }: TreesClientProps) {
                     </div>
                   </div>
                   <div className="flex flex-wrap gap-2">
+                    {isUngroupedTree(selectedTree) ? (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => openAddToTreeGroupModal([selectedTree])}
+                        disabled={datasets.length === 0 || treeGroupAttachPending}
+                      >
+                        {treeGroupAttachPending ? <Loader2Icon className="animate-spin" /> : <DatabaseIcon />}
+                        Add to tree group
+                      </Button>
+                    ) : null}
                     <Badge>{shortCount(selectedTree.photos.length, "photo", "photos")}</Badge>
                     {selectedTree.hasDuplicateBundledMeasurements ? (
                       <Badge tone="warn">Measurement review needed</Badge>

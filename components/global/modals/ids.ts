@@ -11,6 +11,7 @@ export const MODAL_IDS = {
   // Tree upload
   UPLOAD_TREES_COMPLETE: "upload/trees/complete",
   UPLOAD_TREES_FEEDBACK: "upload/trees/feedback",
+  MANAGE_TREE_ADD_TO_TREE_GROUP: "manage/tree/add-to-tree-group",
 } as const;
 
 export type ModalId = (typeof MODAL_IDS)[keyof typeof MODAL_IDS];

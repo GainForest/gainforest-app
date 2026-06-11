@@ -41,6 +41,21 @@ type UpdateMultimediaData = {
   caption?: string;
 };
 
+export type AttachExistingOccurrencesResult = {
+  datasetUri: string;
+  datasetRkey: string;
+  attachedCount: number;
+  skippedCount: number;
+  errorCount: number;
+  datasetCountUpdated: boolean;
+  datasetCountError: string | null;
+  results: Array<
+    | { rkey: string; state: "success"; occurrenceUri: string }
+    | { rkey: string; state: "skipped"; reason: string }
+    | { rkey: string; state: "error"; error: string }
+  >;
+};
+
 type MutationPayload =
   | { operation: "createRecord"; collection: string; rkey?: string; record: Record<string, unknown> }
   | { operation: "putRecord"; collection: string; rkey: string; record: Record<string, unknown>; swapRecord?: string }
@@ -56,6 +71,7 @@ type MutationPayload =
   | { operation: "updateMultimedia"; rkey: string; data: UpdateMultimediaData; unset?: string[] }
   | { operation: "deleteOccurrenceCascade"; rkey: string }
   | { operation: "detachOccurrenceFromDataset"; rkey: string }
+  | { operation: "attachExistingOccurrences"; datasetRkey: string; occurrenceRkeys: string[] }
   | {
       operation: "appendExistingDataset";
       datasetRkey: string;
@@ -194,6 +210,13 @@ export async function appendExistingDataset(input: {
 
 export async function detachOccurrenceFromDataset(rkey: string): Promise<RecordMutationResult> {
   return callProxy({ operation: "detachOccurrenceFromDataset", rkey });
+}
+
+export async function attachExistingOccurrences(input: {
+  datasetRkey: string;
+  occurrenceRkeys: string[];
+}): Promise<AttachExistingOccurrencesResult> {
+  return callProxy({ operation: "attachExistingOccurrences", ...input });
 }
 
 export async function updateMultimedia(input: {
