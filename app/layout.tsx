@@ -3,8 +3,7 @@ import { Cormorant_Garamond, Geist, Geist_Mono, Instrument_Serif } from "next/fo
 import { Suspense } from "react";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import "./globals.css";
-import { AppShell } from "./_components/AppShell";
-import { Footer } from "./_components/Footer";
+import { ChromeGate } from "./_components/ChromeGate";
 import { AccountDrawerProvider } from "./_components/AccountDrawer";
 import { LinkPrefetcher } from "./_components/LinkPrefetcher";
 import { RouteChangeIndicator } from "./_components/RouteChangeIndicator";
@@ -127,10 +126,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <WagmiProvider>
             <ModalProvider>
               <AccountDrawerProvider>
-                <AppShell authSession={null} manageAccountKind="user">
-                  {children}
-                  <Footer />
-                </AppShell>
+                <ChromeGate>{children}</ChromeGate>
               </AccountDrawerProvider>
             </ModalProvider>
           </WagmiProvider>

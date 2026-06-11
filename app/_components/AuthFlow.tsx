@@ -27,6 +27,13 @@ import { Button } from "@/components/ui/button";
 import { ModalContent, ModalDescription, ModalTitle } from "@/components/ui/modal/modal";
 import { useModal } from "@/components/ui/modal/context";
 
+const AUTH_ERROR_PARAMS = new Set([
+  "auth_failed",
+  "epds_not_configured",
+  "missing_login_identifier",
+  "unknown_epds_provider",
+]);
+
 function cn(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(" ");
 }
@@ -359,7 +366,14 @@ export function SignInPrompt() {
   const [signInFailed, setSignInFailed] = useState(false);
 
   useEffect(() => {
-    setSignInFailed(new URLSearchParams(window.location.search).get("error") === "auth_failed");
+    const url = new URL(window.location.href);
+    const error = url.searchParams.get("error");
+    setSignInFailed(error === "auth_failed");
+
+    if (error && AUTH_ERROR_PARAMS.has(error)) {
+      url.searchParams.delete("error");
+      window.history.replaceState(null, "", `${url.pathname}${url.search}${url.hash}`);
+    }
   }, []);
 
   const handleSignIn = () => {
