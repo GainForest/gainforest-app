@@ -1,10 +1,13 @@
+import type { ReactNode } from "react";
 import {
   CalendarIcon,
   ChevronRightIcon,
   DatabaseIcon,
   MapPinIcon,
+  Trash2Icon,
   TreesIcon,
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { UploadTreeDatasetRecord } from "@/app/_lib/indexer";
 import {
@@ -29,6 +32,7 @@ export type DatasetLandingCard = {
   statusTone: StatusTone;
   searchText: string;
   isUngrouped: boolean;
+  canDelete: boolean;
 };
 
 function formatUploadDate(value: string | null | undefined): string {
@@ -135,6 +139,7 @@ function createTreeGroupLandingCard(options: {
     statusTone,
     searchText,
     isUngrouped,
+    canDelete: !isUngrouped && treeGroup !== null,
   };
 }
 
@@ -187,7 +192,7 @@ export function buildDatasetLandingCards(
   });
 }
 
-function StatusBadge({ tone, children }: { tone: StatusTone; children: React.ReactNode }) {
+function StatusBadge({ tone, children }: { tone: StatusTone; children: ReactNode }) {
   return (
     <span
       className={cn(
@@ -205,20 +210,20 @@ function StatusBadge({ tone, children }: { tone: StatusTone; children: React.Rea
 export function DatasetLandingSection({
   datasetCards,
   onOpen,
+  onDelete,
 }: {
   datasetCards: DatasetLandingCard[];
   onOpen: (treeGroupId: string) => void;
+  onDelete?: (treeGroupId: string) => void;
 }) {
   return (
     <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
       {datasetCards.map((card) => (
-        <button
+        <article
           key={card.id}
-          type="button"
-          onClick={() => onOpen(card.id)}
           className={cn(
             "group flex h-full flex-col rounded-2xl border border-border bg-background p-5 text-left transition-all",
-            "hover:-translate-y-0.5 hover:border-foreground/15 hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60",
+            "hover:-translate-y-0.5 hover:border-foreground/15 hover:shadow-sm",
           )}
         >
           <div className="flex items-start justify-between gap-3">
@@ -250,14 +255,27 @@ export function DatasetLandingSection({
             </div>
           </div>
 
-          <div className="mt-5 flex items-center justify-between border-t border-border/70 pt-4 text-sm font-medium text-foreground">
-            <span className="inline-flex items-center gap-2">
+          <div className="mt-5 flex flex-wrap items-center justify-between gap-2 border-t border-border/70 pt-4 text-sm font-medium text-foreground">
+            <Button type="button" variant="ghost" size="sm" className="-ml-2" onClick={() => onOpen(card.id)}>
               <DatabaseIcon className="size-4 text-muted-foreground" />
               Open tree group
-            </span>
-            <ChevronRightIcon className="size-4 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
+              <ChevronRightIcon className="size-4 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
+            </Button>
+            {card.canDelete && onDelete ? (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="text-destructive hover:text-destructive"
+                onClick={() => onDelete(card.id)}
+                aria-label={`Delete tree group ${card.name}`}
+              >
+                <Trash2Icon />
+                Delete tree group
+              </Button>
+            ) : null}
           </div>
-        </button>
+        </article>
       ))}
     </div>
   );

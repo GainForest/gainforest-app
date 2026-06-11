@@ -72,10 +72,12 @@ import {
   createMultimediaFromUrl,
   deleteMultimedia,
   deleteOccurrenceCascade,
+  deleteTreeGroupCascade,
   updateMeasurement,
   updateMultimedia,
   updateOccurrence,
   type AttachExistingOccurrencesResult,
+  type DeleteTreeGroupCascadeResult,
 } from "../../_lib/mutations";
 import { PARTNER_ESTABLISHMENT_MEANS_OPTIONS } from "../../_lib/upload/establishment-means";
 import {
@@ -97,9 +99,23 @@ type ManagedSite = {
   record: { name: string | null };
 };
 
+type TreeGroupDeletionTarget = {
+  treeGroup: UploadTreeDatasetRecord;
+  trees: TreeManagerItem[];
+  treeCount: number;
+  measurementCount: number;
+  photoCount: number;
+};
+
 type ConfirmTarget =
   | { type: "tree"; item: TreeManagerItem }
+  | { type: "treeGroup"; target: TreeGroupDeletionTarget }
   | { type: "photo"; photo: TreeMultimediaRecord };
+
+type DeletionFeedback = {
+  message: string;
+  tone: "success" | "warn";
+};
 
 const EMPTY_OCCURRENCE_DRAFT: TreeOccurrenceDraft = {
   scientificName: "",
@@ -200,6 +216,48 @@ function establishmentMeansLabel(value: string | null | undefined): string {
 function getUniqueTreeSiteRef(items: TreeManagerItem[]): string | null {
   const siteRefs = Array.from(new Set(items.map((item) => item.occurrence.siteRef).filter((value): value is string => Boolean(value))));
   return siteRefs.length === 1 ? siteRefs[0] : null;
+}
+
+function getTreeGroupDeletionTarget(treeGroup: UploadTreeDatasetRecord, items: TreeManagerItem[]): TreeGroupDeletionTarget {
+  const trees = items.filter((item) => item.occurrence.datasetRef === treeGroup.uri);
+  return {
+    treeGroup,
+    trees,
+    treeCount: Math.max(trees.length, treeGroup.recordCount ?? 0),
+    measurementCount: trees.reduce((count, item) => count + item.measurements.length, 0),
+    photoCount: trees.reduce((count, item) => count + item.photos.length, 0),
+  };
+}
+
+function buildTreeGroupDeleteFeedback(result: DeleteTreeGroupCascadeResult, treeGroupName: string): DeletionFeedback {
+  const deletedTrees = result.deletedTreeRkeys.length;
+  const deletedTreeLabel = shortCount(deletedTrees, "tree", "trees");
+
+  if (result.treeGroupDeleted && result.errors.length === 0) {
+    return {
+      tone: "success",
+      message: `Deleted ${treeGroupName} and ${deletedTreeLabel}.`,
+    };
+  }
+
+  if (result.treeGroupDeleted) {
+    return {
+      tone: "warn",
+      message: `Deleted ${treeGroupName} and ${deletedTreeLabel}, but some linked photos or measurements could not be removed. Refresh before trying again.`,
+    };
+  }
+
+  if (deletedTrees > 0) {
+    return {
+      tone: "warn",
+      message: `${treeGroupName} was not fully deleted. ${deletedTreeLabel} ${deletedTrees === 1 ? "was" : "were"} deleted, but the tree group was kept so you can retry.`,
+    };
+  }
+
+  return {
+    tone: "warn",
+    message: `${treeGroupName} could not be deleted. The tree group was kept so you can retry.`,
+  };
 }
 
 function Badge({ children, tone = "neutral" }: { children: React.ReactNode; tone?: "neutral" | "good" | "warn" }) {
@@ -388,7 +446,7 @@ export function TreesClient({ did, onUpload }: TreesClientProps) {
   const [photoCaptionDraft, setPhotoCaptionDraft] = useState("");
   const [savingPhotoCaptionRkey, setSavingPhotoCaptionRkey] = useState<string | null>(null);
   const [photoCaptionError, setPhotoCaptionError] = useState<string | null>(null);
-  const [deletedFeedback, setDeletedFeedback] = useState<string | null>(null);
+  const [deletedFeedback, setDeletedFeedback] = useState<DeletionFeedback | null>(null);
   const [treeGroupAttachFeedback, setTreeGroupAttachFeedback] = useState<string | null>(null);
   const [treeGroupAttachPending, setTreeGroupAttachPending] = useState(false);
   const [treeGroupSearchQuery, setTreeGroupSearchQuery] = useState("");
@@ -966,7 +1024,47 @@ export function TreesClient({ did, onUpload }: TreesClientProps) {
       result.cleanupError,
       result.treeGroupCountUpdated === false ? "The tree group count may update later." : null,
     ].filter((note): note is string => Boolean(note));
-    setDeletedFeedback(deleteNotes.length > 0 ? `Tree deleted. ${deleteNotes.join(" ")}` : "Tree deleted.");
+    setDeletedFeedback({
+      tone: deleteNotes.length > 0 ? "warn" : "success",
+      message: deleteNotes.length > 0 ? `Tree deleted. ${deleteNotes.join(" ")}` : "Tree deleted.",
+    });
+  };
+
+  const handleConfirmDeleteTreeGroup = async (target: TreeGroupDeletionTarget) => {
+    const result = await deleteTreeGroupCascade(target.treeGroup.rkey);
+    const deletedTreeRkeys = new Set(result.deletedTreeRkeys);
+    const deletedTreeUris = new Set(result.deletedTreeUris);
+    const deletedMeasurementRkeys = new Set(result.deletedMeasurementRkeys);
+    const deletedPhotoRkeys = new Set(result.deletedMultimediaRkeys);
+    const treeGroupName = target.treeGroup.name || "Tree group";
+
+    if (deletedTreeRkeys.size > 0) {
+      setTrees((current) => current.filter((tree) => !deletedTreeRkeys.has(tree.rkey)));
+      setMeasurements((current) => current.filter((measurement) => (
+        !deletedMeasurementRkeys.has(measurement.metadata.rkey) &&
+        (!measurement.record.occurrenceRef || !deletedTreeUris.has(measurement.record.occurrenceRef))
+      )));
+      setPhotos((current) => current.filter((photo) => (
+        !deletedPhotoRkeys.has(photo.metadata.rkey) &&
+        (!photo.record.occurrenceRef || !deletedTreeUris.has(photo.record.occurrenceRef))
+      )));
+    }
+
+    if (result.treeGroupDeleted) {
+      setDatasets((current) => current.filter((item) => item.rkey !== target.treeGroup.rkey));
+      setQueryValues({ dataset: null, q: null, "tree-page": null, tree: null });
+    } else if (deletedTreeRkeys.size > 0) {
+      setDatasets((current) => current.map((item) => (
+        item.rkey === target.treeGroup.rkey
+          ? { ...item, recordCount: item.recordCount === null ? null : Math.max(0, item.recordCount - deletedTreeRkeys.size) }
+          : item
+      )));
+      if (selectedTreeRkey && deletedTreeRkeys.has(selectedTreeRkey)) {
+        setQueryValues({ tree: null });
+      }
+    }
+
+    setDeletedFeedback(buildTreeGroupDeleteFeedback(result, treeGroupName));
   };
 
   const applyAttachResult = (result: AttachExistingOccurrencesResult, treeGroup: UploadTreeDatasetRecord) => {
@@ -1093,21 +1191,52 @@ export function TreesClient({ did, onUpload }: TreesClientProps) {
     void show();
   };
 
+  const openDeleteTreeGroupConfirm = (treeGroupId: string) => {
+    if (treeGroupId === UNGROUPED_DATASET_FILTER) return;
+    const treeGroup = datasetLookup.get(treeGroupId);
+    if (!treeGroup) {
+      setDeletedFeedback({ tone: "warn", message: "This tree group could not be checked. Refresh and try again." });
+      return;
+    }
+    setConfirmTarget({ type: "treeGroup", target: getTreeGroupDeletionTarget(treeGroup, treeItems) });
+  };
+
   const activeDeletionTarget = selectedTree ? getTreeDeletionTarget(selectedTree) : null;
-  const confirmDescription = confirmTarget?.type === "tree"
-    ? (() => {
-        const target = getTreeDeletionTarget(confirmTarget.item);
-        const linked = target
-          ? [
-              target.photoCount > 0 ? shortCount(target.photoCount, "photo", "photos") : null,
-              target.measurementCount > 0 ? shortCount(target.measurementCount, "measurement", "measurements") : null,
-            ].filter(Boolean).join(" and ")
-          : "";
-        return linked
-          ? `This will delete the tree and its linked ${linked}. This cannot be undone.`
-          : "This will delete the tree and any linked photos or measurements found at that time. This cannot be undone.";
-      })()
-    : "This will delete this photo from the selected tree. This cannot be undone.";
+  const confirmDescription = (() => {
+    if (confirmTarget?.type === "tree") {
+      const target = getTreeDeletionTarget(confirmTarget.item);
+      const linked = target
+        ? [
+            target.photoCount > 0 ? shortCount(target.photoCount, "photo", "photos") : null,
+            target.measurementCount > 0 ? shortCount(target.measurementCount, "measurement", "measurements") : null,
+          ].filter(Boolean).join(" and ")
+        : "";
+      return linked
+        ? `This will delete the tree and its linked ${linked}. This cannot be undone.`
+        : "This will delete the tree and any linked photos or measurements found at that time. This cannot be undone.";
+    }
+
+    if (confirmTarget?.type === "treeGroup") {
+      const { target } = confirmTarget;
+      const treeGroupName = target.treeGroup.name || "this tree group";
+      return (
+        <div className="space-y-3 text-sm text-muted-foreground">
+          <p>Deleting {treeGroupName} deletes the tree group and everything inside it. This cannot be undone.</p>
+          <div className="space-y-2">
+            <p className="font-medium text-foreground">This will delete:</p>
+            <ul className="list-disc space-y-1 pl-5">
+              <li>the tree group</li>
+              <li>{shortCount(target.treeCount, "tree", "trees")} in this tree group</li>
+              <li>{shortCount(target.measurementCount, "measurement", "measurements")} linked to those trees</li>
+              <li>{shortCount(target.photoCount, "photo", "photos")} linked to those trees</li>
+            </ul>
+          </div>
+        </div>
+      );
+    }
+
+    return "This will delete this photo from the selected tree. This cannot be undone.";
+  })();
 
   if (isLoading) return <TreesManageSkeleton />;
 
@@ -1156,9 +1285,16 @@ export function TreesClient({ did, onUpload }: TreesClientProps) {
       ) : null}
 
       {deletedFeedback ? (
-        <div className="flex items-start gap-3 rounded-2xl border border-primary/20 bg-primary/5 px-4 py-3">
-          <InfoIcon className="mt-0.5 size-4 shrink-0 text-primary" />
-          <p className="text-sm text-foreground">{deletedFeedback}</p>
+        <div
+          className={cn(
+            "flex items-start gap-3 rounded-2xl border px-4 py-3",
+            deletedFeedback.tone === "warn"
+              ? "border-yellow-500/30 bg-yellow-500/10"
+              : "border-primary/20 bg-primary/5",
+          )}
+        >
+          <InfoIcon className={cn("mt-0.5 size-4 shrink-0", deletedFeedback.tone === "warn" ? "text-yellow-700 dark:text-yellow-300" : "text-primary")} />
+          <p className="text-sm text-foreground">{deletedFeedback.message}</p>
         </div>
       ) : null}
 
@@ -1192,16 +1328,24 @@ export function TreesClient({ did, onUpload }: TreesClientProps) {
       ) : null}
 
       {selectedTreeGroup && datasetFilter !== UNGROUPED_DATASET_FILTER ? (
-        <GreenGlobeTreePreviewCard
-          did={did}
-          datasetRef={selectedTreeGroup.uri}
-          treeGroupName={selectedTreeGroup.name}
-          treeCount={selectedTreeGroupPreviewTreeCount}
-          treeUri={selectedTreeGroupPreviewTree?.occurrence.atUri ?? null}
-          treeName={selectedTreeGroupPreviewTree?.occurrence.scientificName ?? null}
-          siteRef={selectedTreeGroupPreviewSiteRef}
-          focusedSiteRef={selectedTreeGroupPreviewFocusedSiteRef}
-        />
+        <div className="space-y-3">
+          <GreenGlobeTreePreviewCard
+            did={did}
+            datasetRef={selectedTreeGroup.uri}
+            treeGroupName={selectedTreeGroup.name}
+            treeCount={selectedTreeGroupPreviewTreeCount}
+            treeUri={selectedTreeGroupPreviewTree?.occurrence.atUri ?? null}
+            treeName={selectedTreeGroupPreviewTree?.occurrence.scientificName ?? null}
+            siteRef={selectedTreeGroupPreviewSiteRef}
+            focusedSiteRef={selectedTreeGroupPreviewFocusedSiteRef}
+          />
+          <div className="flex justify-end">
+            <Button variant="destructive" size="sm" onClick={() => openDeleteTreeGroupConfirm(selectedTreeGroup.uri)}>
+              <Trash2Icon />
+              Delete tree group
+            </Button>
+          </div>
+        </div>
       ) : null}
 
       {treeGroupCards.length === 0 && treeItems.length === 0 ? (
@@ -1235,7 +1379,7 @@ export function TreesClient({ did, onUpload }: TreesClientProps) {
               <Button variant="outline" onClick={() => setTreeGroupSearchQuery("")}>Clear search</Button>
             </div>
           ) : (
-            <DatasetLandingSection datasetCards={filteredTreeGroupCards} onOpen={handleDatasetChange} />
+            <DatasetLandingSection datasetCards={filteredTreeGroupCards} onOpen={handleDatasetChange} onDelete={openDeleteTreeGroupConfirm} />
           )}
         </div>
       ) : filteredTrees.length === 0 ? (
@@ -1633,13 +1777,14 @@ export function TreesClient({ did, onUpload }: TreesClientProps) {
 
       <ManageConfirmModal
         open={confirmTarget !== null}
-        title={confirmTarget?.type === "tree" ? "Delete tree?" : "Delete photo?"}
+        title={confirmTarget?.type === "tree" ? "Delete tree?" : confirmTarget?.type === "treeGroup" ? "Delete tree group?" : "Delete photo?"}
         description={confirmDescription}
-        confirmLabel={confirmTarget?.type === "tree" ? "Delete tree" : "Delete photo"}
+        confirmLabel={confirmTarget?.type === "tree" ? "Delete tree" : confirmTarget?.type === "treeGroup" ? "Delete tree group" : "Delete photo"}
         onOpenChange={(open) => { if (!open) setConfirmTarget(null); }}
         onConfirm={async () => {
           if (!confirmTarget) return;
           if (confirmTarget.type === "tree") await handleConfirmDeleteTree(confirmTarget.item);
+          else if (confirmTarget.type === "treeGroup") await handleConfirmDeleteTreeGroup(confirmTarget.target);
           else await handleConfirmDeletePhoto(confirmTarget.photo);
         }}
       />
