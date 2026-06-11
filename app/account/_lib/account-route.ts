@@ -174,6 +174,19 @@ export const getAccountRouteData = cache(async (
   };
 });
 
+/**
+ * Slim profile card for a DID, read straight from `app.certified.actor.profile`.
+ * Used by the account picker on /auth/complete where we only need a name +
+ * avatar per group and don't want the full indexer/AppView hydration.
+ */
+export const getCertifiedProfileCard = cache(
+  async (did: string): Promise<{ displayName: string | null; avatarUrl: string | null }> => {
+    if (!did.startsWith("did:")) return { displayName: null, avatarUrl: null };
+    const profile = await fetchDirectCertifiedProfile(did).catch(() => null);
+    return { displayName: profile?.displayName ?? null, avatarUrl: profile?.avatarUrl ?? null };
+  },
+);
+
 function safeDecode(value: string): string {
   try {
     return decodeURIComponent(value);

@@ -1,13 +1,13 @@
 "use client";
 
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { ChevronRight, Loader2Icon, UserIcon, UsersIcon, type LucideIcon } from "lucide-react";
+import { ChevronRight, Loader2Icon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { shortDid } from "@/app/_lib/format";
+import { monogram } from "@/app/_lib/did-profile";
 import type { CgsGroupMembership } from "@/app/(manage)/manage/_lib/cgs";
 
 const ACTIVE_CONTEXT_KEY = "gainforest-active-account-context";
@@ -20,6 +20,9 @@ type AuthCompleteAccount = {
   avatarUrl: string | null;
   kind: "user" | "organization";
 } | null;
+
+type ProfileCard = { displayName: string | null; avatarUrl: string | null };
+type GroupOption = CgsGroupMembership & ProfileCard;
 
 type ActiveContext =
   | { type: "personal"; did: string; selectedAt: string }
@@ -66,6 +69,81 @@ function AppMark({ showAnimations = false }: { showAnimations?: boolean }) {
   );
 }
 
+function OptionAvatar({ name, avatarUrl, did }: { name: string | null; avatarUrl: string | null; did: string }) {
+  if (avatarUrl) {
+    return (
+      <Image
+        src={avatarUrl}
+        alt=""
+        width={40}
+        height={40}
+        unoptimized
+        className="size-10 shrink-0 rounded-full object-cover"
+      />
+    );
+  }
+  const { char, bg } = monogram(name, did);
+  return (
+    <span
+      style={{ backgroundColor: bg }}
+      className="flex size-10 shrink-0 items-center justify-center rounded-full text-sm font-medium text-white"
+    >
+      {char}
+    </span>
+  );
+}
+
+// Options are a fixed 64px tall (h-16), so the outer pill radius is exactly
+// half the height (32px). Inner corners keep the standard radius rather than
+// squaring off, so the section reads as one grouped stack with pill ends.
+function cornerClass(index: number, total: number): string {
+  if (total === 1) return "rounded-[32px]";
+  if (index === 0) return "rounded-t-[32px] rounded-b-xl";
+  if (index === total - 1) return "rounded-b-[32px] rounded-t-xl";
+  return "rounded-xl";
+}
+
+function OptionCard({
+  did,
+  name,
+  avatarUrl,
+  sublabel,
+  onClick,
+  rounded,
+}: {
+  did: string;
+  name: string;
+  avatarUrl: string | null;
+  sublabel: string;
+  onClick: () => void;
+  rounded: string;
+}) {
+  return (
+    <Button
+      variant="secondary"
+      onClick={onClick}
+      className={cn(
+        "group relative flex h-16 w-full items-center justify-start gap-3 px-4 shadow-none hover:bg-primary/10",
+        rounded,
+      )}
+    >
+      <OptionAvatar name={name} avatarUrl={avatarUrl} did={did} />
+      <span className="flex min-w-0 flex-col items-start">
+        <span
+          className="truncate text-xl italic leading-tight"
+          style={{ fontFamily: "var(--font-instrument-serif-var)", fontStyle: "italic" }}
+        >
+          {name}
+        </span>
+        <span className="text-xs text-muted-foreground">{sublabel}</span>
+      </span>
+      <span className="absolute right-3 top-1/2 -translate-y-1/2 -translate-x-2 text-primary opacity-0 transition-all group-hover:translate-x-0 group-hover:opacity-100">
+        <ChevronRight className="size-5" />
+      </span>
+    </Button>
+  );
+}
+
 function SigningInView({ redirectTo }: { redirectTo: string }) {
   return (
     <div className="flex flex-col items-center">
@@ -93,38 +171,6 @@ function SigningInView({ redirectTo }: { redirectTo: string }) {
   );
 }
 
-function OptionCard({
-  Icon,
-  title,
-  description,
-  onClick,
-}: {
-  Icon: LucideIcon;
-  title: ReactNode;
-  description: string;
-  onClick: () => void;
-}) {
-  return (
-    <Button
-      variant="secondary"
-      onClick={onClick}
-      className="group relative h-auto w-full flex-col items-start justify-between gap-1 rounded-xl py-3.5 shadow-none hover:bg-primary/10"
-    >
-      <span
-        className="flex items-center gap-1.5 text-2xl italic"
-        style={{ fontFamily: "var(--font-instrument-serif-var)", fontStyle: "italic" }}
-      >
-        <Icon className="size-5 text-primary opacity-50" />
-        {title}
-      </span>
-      <span className="text-left text-sm text-muted-foreground text-pretty">{description}</span>
-      <span className="absolute right-3 top-3 -translate-x-2 text-primary opacity-0 transition-all group-hover:translate-x-0 group-hover:opacity-100">
-        <ChevronRight className="size-5" />
-      </span>
-    </Button>
-  );
-}
-
 function GroupChoiceView({
   account,
   session,
@@ -133,17 +179,17 @@ function GroupChoiceView({
 }: {
   account: AuthCompleteAccount;
   session: NonNullable<AuthCompleteSession>;
-  groups: CgsGroupMembership[];
+  groups: GroupOption[];
   redirectTo: string;
 }) {
-  const personalLabel = account?.displayName || session.handle || shortDid(session.did);
+  const personalName = account?.displayName?.trim() || "Personal Account";
 
   const continuePersonal = () => {
     rememberContext({ type: "personal", did: session.did, selectedAt: new Date().toISOString() });
     window.location.assign(redirectTo);
   };
 
-  const continueGroup = (group: CgsGroupMembership) => {
+  const continueGroup = (group: GroupOption) => {
     rememberContext({ type: "group", did: group.groupDid, role: group.role, selectedAt: new Date().toISOString() });
     window.location.assign(`/manage/groups/${encodeURIComponent(group.groupDid)}`);
   };
@@ -158,17 +204,40 @@ function GroupChoiceView({
       <AppMark showAnimations />
       <h1 className="mt-4 text-center text-xl font-medium">Continue as</h1>
       <p className="text-center text-sm text-muted-foreground">Choose an account for this session.</p>
-      <div className="mt-5 grid w-full gap-2">
-        <OptionCard Icon={UserIcon} title={personalLabel} description="Your personal account" onClick={continuePersonal} />
-        {groups.map((group) => (
-          <OptionCard
-            key={group.groupDid}
-            Icon={UsersIcon}
-            title={<span className="font-mono text-base not-italic">{shortDid(group.groupDid)}</span>}
-            description={`${roleLabel(group.role)} · Certified Group`}
-            onClick={() => continueGroup(group)}
-          />
-        ))}
+
+      <div className="mt-6 w-full space-y-5">
+        <section>
+          <p className="mb-1.5 px-1 text-xs font-medium text-muted-foreground">Your account</p>
+          <div className="flex flex-col gap-1.5">
+            <OptionCard
+              did={session.did}
+              name={personalName}
+              avatarUrl={account?.avatarUrl ?? null}
+              sublabel="Personal Account"
+              onClick={continuePersonal}
+              rounded={cornerClass(0, 1)}
+            />
+          </div>
+        </section>
+
+        {groups.length > 0 ? (
+          <section>
+            <p className="mb-1.5 px-1 text-xs font-medium text-muted-foreground">Your groups</p>
+            <div className="flex flex-col gap-1.5">
+              {groups.map((group, index) => (
+                <OptionCard
+                  key={group.groupDid}
+                  did={group.groupDid}
+                  name={group.displayName?.trim() || "Unnamed Group"}
+                  avatarUrl={group.avatarUrl}
+                  sublabel={`as ${roleLabel(group.role)}`}
+                  onClick={() => continueGroup(group)}
+                  rounded={cornerClass(index, groups.length)}
+                />
+              ))}
+            </div>
+          </section>
+        ) : null}
       </div>
     </motion.div>
   );
@@ -199,7 +268,7 @@ export function AuthCompleteClient({
   account: AuthCompleteAccount;
   redirectTo: string;
 }) {
-  const [groups, setGroups] = useState<CgsGroupMembership[]>([]);
+  const [groups, setGroups] = useState<GroupOption[]>([]);
   const [status, setStatus] = useState<"loading" | "success" | "choices" | "error">(session ? "loading" : "error");
   const safeRedirect = useMemo(() => sanitizeRedirect(redirectTo), [redirectTo]);
 
@@ -209,24 +278,43 @@ export function AuthCompleteClient({
     let cancelled = false;
     let redirectTimer: ReturnType<typeof setTimeout> | null = null;
 
+    async function resolveProfiles(memberships: CgsGroupMembership[]): Promise<GroupOption[]> {
+      return Promise.all(
+        memberships.map(async (group) => {
+          try {
+            const res = await fetch(`/api/account/card?did=${encodeURIComponent(group.groupDid)}`, {
+              cache: "no-store",
+            });
+            const card = (await res.json().catch(() => ({}))) as ProfileCard;
+            return { ...group, displayName: card.displayName ?? null, avatarUrl: card.avatarUrl ?? null };
+          } catch {
+            return { ...group, displayName: null, avatarUrl: null };
+          }
+        }),
+      );
+    }
+
     async function loadGroups() {
       setStatus("loading");
       try {
         const response = await fetch("/api/cgs/groups", { cache: "no-store" });
         const data = (await response.json().catch(() => ({}))) as { groups?: CgsGroupMembership[] };
         const loadedGroups = response.ok && Array.isArray(data.groups) ? data.groups : [];
-        if (cancelled) return;
-        setGroups(loadedGroups);
 
         if (loadedGroups.length === 0) {
+          if (cancelled) return;
           rememberContext({ type: "personal", did: activeSession.did, selectedAt: new Date().toISOString() });
           setStatus("success");
           redirectTimer = setTimeout(() => {
             window.location.assign(safeRedirect);
           }, REDIRECT_DELAY_MS);
-        } else {
-          setStatus("choices");
+          return;
         }
+
+        const enriched = await resolveProfiles(loadedGroups);
+        if (cancelled) return;
+        setGroups(enriched);
+        setStatus("choices");
       } catch {
         if (cancelled) return;
         rememberContext({ type: "personal", did: activeSession.did, selectedAt: new Date().toISOString() });
