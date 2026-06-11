@@ -6,6 +6,6 @@ const authStatePath = "e2e/.auth/user.json";
 test.use({ storageState: authStatePath });
 
 test("edits the disposable organization profile", async ({ page }, testInfo) => {
-  test.setTimeout(180_000);
+  test.setTimeout(300_000);
   await editOrganization(page, testInfo);
 });

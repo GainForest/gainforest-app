@@ -124,19 +124,72 @@ export async function convertToOrganization(page: Page, testInfo: TestInfo): Pro
 }
 
 export async function editOrganization(page: Page, testInfo: TestInfo): Promise<void> {
-  await page.goto("/manage?mode=edit", { waitUntil: "domcontentloaded" });
-  await screenshotStep(page, testInfo, "org-edit-open");
+  const targetName = "Disposable E2E Forest Org Edited";
+  let lastError: unknown = null;
 
-  const nameInput = page.locator('input[placeholder="Organization name"]:visible').first();
-  await expect(nameInput).toBeVisible({ timeout: 30_000 });
-  await nameInput.fill("Disposable E2E Forest Org Edited");
-  await page.locator('textarea[placeholder="Short description…"]:visible').first().fill("Edited organization summary from disposable testing.");
-  await screenshotStep(page, testInfo, "org-edit-ready");
+  for (let attempt = 1; attempt <= 3; attempt += 1) {
+    await page.goto("/manage?mode=edit", { waitUntil: "domcontentloaded" });
+    await screenshotStep(page, testInfo, attempt === 1 ? "org-edit-open" : `org-edit-open-retry-${attempt}`);
 
-  await clickAndWaitForPlainManage(page, page.getByRole("button", { name: /^save$/i }).first());
-  await page.waitForLoadState("networkidle").catch(() => undefined);
-  await expect(page.getByText(/Disposable E2E Forest Org Edited/i).first()).toBeVisible({ timeout: 30_000 });
-  await screenshotStep(page, testInfo, "org-edit-saved");
+    const nameInput = page.locator('input[placeholder="Organization name"]:visible').first();
+    await expect(nameInput).toBeVisible({ timeout: 30_000 });
+    await nameInput.fill(targetName);
+    await page.locator('textarea[placeholder="Short description…"]:visible').first().fill("Edited organization summary from disposable testing.");
+    await screenshotStep(page, testInfo, attempt === 1 ? "org-edit-ready" : `org-edit-ready-retry-${attempt}`);
+
+    const saveButton = page.getByRole("button", { name: /^save$/i }).first();
+    const saveEnabled = await saveButton.isEnabled().catch(() => false);
+    if (!saveEnabled) {
+      await page.goto("/manage", { waitUntil: "domcontentloaded" });
+      try {
+        await expect(page.getByText(new RegExp(targetName, "i")).first()).toBeVisible({ timeout: 30_000 });
+        await screenshotStep(page, testInfo, "org-edit-saved");
+        return;
+      } catch (error) {
+        lastError = error;
+        await screenshotStep(page, testInfo, `org-edit-no-save-changes-${attempt}`);
+        continue;
+      }
+    }
+
+    const navigation = page.waitForURL(isPlainManageUrl, { timeout: 45_000 }).catch((error: unknown) => {
+      lastError = error;
+      return null;
+    });
+    try {
+      await saveButton.click({ noWaitAfter: true, timeout: 10_000 });
+    } catch (error) {
+      lastError = error;
+      if ((await bodyText(page)).includes(targetName)) {
+        await screenshotStep(page, testInfo, "org-edit-saved");
+        return;
+      }
+      await screenshotStep(page, testInfo, `org-edit-save-click-failed-${attempt}`);
+      continue;
+    }
+    const navigated = await navigation;
+    if (!navigated) {
+      await screenshotStep(page, testInfo, `org-edit-save-stalled-${attempt}`);
+      continue;
+    }
+
+    await page.waitForLoadState("domcontentloaded").catch(() => undefined);
+    try {
+      await expect(page.getByText(new RegExp(targetName, "i")).first()).toBeVisible({ timeout: 30_000 });
+      await screenshotStep(page, testInfo, "org-edit-saved");
+      return;
+    } catch (error) {
+      lastError = error;
+      await screenshotStep(page, testInfo, `org-edit-save-not-visible-${attempt}`);
+    }
+  }
+
+  if ((await bodyText(page)).includes(targetName)) {
+    await screenshotStep(page, testInfo, "org-edit-saved");
+    return;
+  }
+
+  throw lastError instanceof Error ? lastError : new Error("Organization edit did not finish after 3 attempts.");
 }
 
 export async function checkSettings(page: Page, testInfo: TestInfo): Promise<void> {

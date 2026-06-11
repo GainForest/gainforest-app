@@ -10,8 +10,8 @@ import {
 } from "./pds";
 
 const OBSERVATION_EVENT_DATE = "2026-06-10";
-const OBSERVATION_LATITUDE = "-4.002";
-const OBSERVATION_LONGITUDE = "-61.005";
+const OBSERVATION_LATITUDE = "-3.005";
+const OBSERVATION_LONGITUDE = "-60.005";
 
 export type CreatedObservation = {
   scientificName: string;

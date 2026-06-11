@@ -5,6 +5,7 @@ import { readDisposableAccountMetadata } from "./disposable-email";
 
 export const E2E_PDS_COLLECTIONS = {
   claimActivity: "org.hypercerts.claim.activity",
+  projectCollection: "org.hypercerts.collection",
   certifiedLocation: "app.certified.location",
   occurrence: "app.gainforest.dwc.occurrence",
   audioRecording: "app.gainforest.ac.audio",
@@ -222,6 +223,21 @@ export async function waitForClaimActivityByTitle(title: string): Promise<PdsRep
   }
 
   throw new Error(`Timed out waiting for direct PDS record titled ${title}. Last count: ${latestCount}.`);
+}
+
+export async function waitForProjectByTitle(title: string): Promise<PdsRepoRecord> {
+  const deadline = Date.now() + 60_000;
+  let latestCount = 0;
+
+  while (Date.now() <= deadline) {
+    const records = await listPdsRecords(E2E_PDS_COLLECTIONS.projectCollection);
+    latestCount = records.length;
+    const match = records.find((record) => record.value.title === title && String(record.value.type).toLowerCase() === "project");
+    if (match) return match;
+    await new Promise((resolve) => setTimeout(resolve, 2_000));
+  }
+
+  throw new Error(`Timed out waiting for direct PDS project titled ${title}. Last count: ${latestCount}.`);
 }
 
 export async function waitForCertifiedLocationByName(name: string): Promise<PdsRepoRecord> {

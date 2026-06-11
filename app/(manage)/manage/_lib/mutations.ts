@@ -119,18 +119,32 @@ type CreateMultimediaFromUrlInput = CreateMultimediaInput & {
 };
 
 const MULTIMEDIA_COLLECTION = "app.gainforest.ac.multimedia";
+const MUTATION_TIMEOUT_MS = 45_000;
 
 async function callProxy<T>(payload: MutationPayload): Promise<T> {
-  const res = await fetch("/api/manage/proxy", {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify(payload),
-  });
-  const data = (await res.json()) as T & { error?: string };
-  if (!res.ok || data.error) {
-    throw new Error(data.error ?? `Saving failed (${res.status})`);
+  const controller = new AbortController();
+  const timeout = window.setTimeout(() => controller.abort(), MUTATION_TIMEOUT_MS);
+
+  try {
+    const res = await fetch("/api/manage/proxy", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(payload),
+      signal: controller.signal,
+    });
+    const data = (await res.json()) as T & { error?: string };
+    if (!res.ok || data.error) {
+      throw new Error(data.error ?? `Saving failed (${res.status})`);
+    }
+    return data;
+  } catch (error) {
+    if (error instanceof DOMException && error.name === "AbortError") {
+      throw new Error("Saving timed out. Please try again.");
+    }
+    throw error;
+  } finally {
+    window.clearTimeout(timeout);
   }
-  return data;
 }
 
 export async function createRecord(

@@ -18,7 +18,7 @@ async function expectDisabled(locator: Locator, label: string): Promise<void> {
 export async function createSiteByUpload(page: Page, testInfo: TestInfo): Promise<string> {
   const siteName = `Uploaded Map Site ${Date.now()}`;
   await page.goto("/manage/sites", { waitUntil: "domcontentloaded" });
-  await expect(page.getByRole("heading", { name: /^sites$/i })).toBeVisible({ timeout: 60_000 });
+  await expect(page.getByRole("heading", { name: /^(my )?sites$/i })).toBeVisible({ timeout: 60_000 });
   await screenshotStep(page, testInfo, "sites-open");
 
   await page.getByRole("button", { name: /add (a )?site/i }).first().click();
@@ -57,17 +57,21 @@ export async function createSiteByDrawing(page: Page, testInfo: TestInfo): Promi
 
   const drawDialog = page.locator('[role="dialog"]:visible').last();
   await expect(drawDialog.getByRole("button", { name: /^done$/i })).toBeVisible({ timeout: 15_000 });
-  await page.evaluate(() => {
-    window.dispatchEvent(new MessageEvent("message", {
-      origin: "https://polygons-gainforest.vercel.app",
-      data: {
-        type: "polygon-data",
-        data: [{ lng: -61, lat: -4 }, { lng: -61.01, lat: -4 }, { lng: -61.01, lat: -4.01 }],
-      },
-    }));
-  });
   const doneButton = drawDialog.getByRole("button", { name: /^done$/i });
-  await expect(doneButton).toBeEnabled({ timeout: 10_000 });
+  await expect
+    .poll(async () => {
+      await page.evaluate(() => {
+        window.dispatchEvent(new MessageEvent("message", {
+          origin: window.location.origin,
+          data: {
+            type: "polygon-data",
+            data: [{ lng: -61, lat: -4 }, { lng: -61.01, lat: -4 }, { lng: -61.01, lat: -4.01 }],
+          },
+        }));
+      });
+      return doneButton.isEnabled().catch(() => false);
+    }, { timeout: 15_000 })
+    .toBe(true);
   await doneButton.click({ force: true });
   await screenshotStep(page, testInfo, "site-draw-ready");
 

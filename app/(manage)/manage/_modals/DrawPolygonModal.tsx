@@ -57,7 +57,7 @@ export function DrawPolygonModal({ onSubmit }: DrawPolygonModalProps) {
 
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
-      if (event.origin !== POLYGONS_APP_URL) return;
+      if (event.origin !== POLYGONS_APP_URL && event.origin !== window.location.origin) return;
       if (event.data?.type === "polygon-data") {
         setPolygonData(processPolygonData(event.data.data));
       }

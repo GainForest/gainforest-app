@@ -99,8 +99,14 @@ export default defineConfig({
       use: { ...desktopChrome },
     },
     {
-      name: "bumicert-create",
+      name: "projects",
       dependencies: ["observations"],
+      testMatch: /projects\.spec\.ts/,
+      use: { ...desktopChrome },
+    },
+    {
+      name: "bumicert-create",
+      dependencies: ["projects"],
       testMatch: /bumicert-create\.spec\.ts/,
       use: { ...desktopChrome },
     },
