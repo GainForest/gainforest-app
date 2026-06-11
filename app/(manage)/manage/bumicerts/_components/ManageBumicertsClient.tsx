@@ -217,6 +217,16 @@ export function ManageBumicertsClient({ did, ownerIdentifier, bumicerts, error }
   return (
     <div className="mx-auto w-full max-w-[1440px] px-4 py-4 sm:px-6 sm:py-6">
       <div className="space-y-4">
+        <section className="-mx-4 px-4 py-1 sm:-mx-6 sm:px-6">
+          <div className="max-w-2xl">
+            <h1 className="font-instrument text-2xl font-medium italic tracking-[-0.03em] text-foreground sm:text-3xl">
+              My Bumicerts
+            </h1>
+            <p className="mt-2 max-w-xl text-sm leading-6 text-muted-foreground">
+              Create and manage the verified impact stories connected to your work.
+            </p>
+          </div>
+        </section>
         <CreateHeroCard />
         {error ? (
           <motion.div

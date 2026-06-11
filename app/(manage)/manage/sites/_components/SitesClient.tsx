@@ -286,7 +286,7 @@ export function SitesClient({ did }: { did: string }) {
     <Container className="space-y-6 pb-8 pt-4">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <h1 className="font-garamond text-2xl font-bold">Sites</h1>
+          <h1 className="font-instrument text-2xl font-medium italic tracking-[-0.03em] text-foreground sm:text-3xl">My Sites</h1>
           <p className="mt-0.5 text-sm text-muted-foreground">
             Manage your field locations and mapped project areas.
           </p>

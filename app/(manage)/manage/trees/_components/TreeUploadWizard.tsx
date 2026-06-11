@@ -224,7 +224,7 @@ export function TreeUploadWizard({ did, onDone }: { did: string; onDone: () => v
   return (
     <div className="max-w-3xl mx-auto px-4 py-8">
       <div className="mb-6">
-        <h1 className="text-2xl font-medium">Upload trees</h1>
+        <h1 className="font-instrument text-2xl font-medium italic tracking-[-0.03em] text-foreground sm:text-3xl">Upload Trees</h1>
         <p className="text-sm text-muted-foreground mt-1">
           Upload a spreadsheet export of tree information to GainForest.
         </p>

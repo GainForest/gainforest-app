@@ -1119,7 +1119,7 @@ export function TreesClient({ did, onUpload }: TreesClientProps) {
             <AlertTriangleIcon className="size-5 text-destructive" />
           </div>
           <div className="space-y-1">
-            <h1 className="text-2xl font-garamond">Could not load trees</h1>
+            <h1 className="font-instrument text-2xl font-medium italic tracking-[-0.03em] text-foreground sm:text-3xl">Could not load trees</h1>
             <p className="text-sm text-muted-foreground">{fetchError}</p>
           </div>
           <Button variant="outline" onClick={() => void loadAll()}>
@@ -1135,7 +1135,7 @@ export function TreesClient({ did, onUpload }: TreesClientProps) {
     <Container className="pt-4 pb-8 space-y-6">
       <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
         <div className="space-y-1">
-          <h1 className="text-2xl font-bold font-garamond">Trees</h1>
+          <h1 className="font-instrument text-2xl font-medium italic tracking-[-0.03em] text-foreground sm:text-3xl">My Trees</h1>
           <p className="text-sm text-muted-foreground max-w-2xl">
             Review saved tree information, measurements, and photos in one place.
           </p>

@@ -119,12 +119,13 @@ export function AudioClient({ did }: AudioClientProps) {
 
   return (
     <Container className="pt-4 pb-10 space-y-6">
-      <header className="space-y-1">
-        <div className="flex items-center justify-between">
-          <span className="ml-2 font-medium text-lg">
-            {t("howDoesThisWork")}
-          </span>
-          <Button asChild size="sm">
+      <header className="space-y-3">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <h1 className="font-instrument text-2xl font-medium italic tracking-[-0.03em] text-foreground sm:text-3xl">My Audio</h1>
+            <p className="mt-2 text-sm leading-6 text-muted-foreground">{t("howDoesThisWork")}</p>
+          </div>
+          <Button asChild size="sm" className="shrink-0">
             <Link href={TELEGRAM_BOT_URL} target="_blank" rel="noreferrer">
               <TelegramIcon /> {t("useTaina")}
             </Link>

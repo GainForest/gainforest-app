@@ -560,14 +560,6 @@ function ManageSection({
     },
     {
       kind: "leaf",
-      id: "bumicerts-manage",
-      text: "My Bumicerts",
-      Icon: BumicertIcon,
-      href: "/manage/bumicerts",
-      pathCheck: { startsWith: "/manage/bumicerts" },
-    },
-    {
-      kind: "leaf",
       id: "trees",
       text: "My Trees",
       Icon: TreePineIcon,
@@ -600,14 +592,6 @@ function ManageSection({
       Icon: FolderKanbanIcon,
       href: "/manage/projects",
       pathCheck: { startsWith: "/manage/projects" },
-    },
-    {
-      kind: "leaf",
-      id: "bumicerts-manage",
-      text: "My Bumicerts",
-      Icon: BumicertIcon,
-      href: "/manage/bumicerts",
-      pathCheck: { startsWith: "/manage/bumicerts" },
     },
     {
       kind: "leaf",
