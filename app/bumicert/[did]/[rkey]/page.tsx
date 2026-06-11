@@ -5,8 +5,10 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import {
   BanIcon,
+  BotIcon,
   ChevronRightIcon,
   CircleDotIcon,
+  ClipboardCheckIcon,
   CrownIcon,
   ExternalLinkIcon,
   GiftIcon,
@@ -27,6 +29,7 @@ import { SocialGlyph } from "../../../_components/SocialIcon";
 import { StatsTileGrid, type StatsTileItem } from "../../../_components/StatsTile";
 import { fetchReceipts, type DonorRef, type FundingReceipt } from "../../../_lib/dashboard";
 import { formatCompact, formatCompactUsd, formatCountry, formatDate, formatDateTime, formatNumber, formatRelative } from "../../../_lib/format";
+import { fetchReviewCounts, fetchReviewsForSubject, type BumicertReviews, type ReviewComment, type ReviewCounts } from "../../../_lib/reviews";
 import {
   fetchAudioByDid,
   fetchBumicertsByDid,
@@ -91,7 +94,7 @@ const BADGE_TONE: Record<DetailBadge["tone"], string> = {
   info: "bg-foreground/[0.06] text-foreground/70",
 };
 
-const BUMICERT_DETAIL_TABS = ["overview", "site-boundaries", "donations", "timeline"] as const;
+const BUMICERT_DETAIL_TABS = ["overview", "site-boundaries", "reviews", "donations", "timeline"] as const;
 type BumicertDetailTab = (typeof BUMICERT_DETAIL_TABS)[number];
 
 export async function generateMetadata({ params }: { params: BumicertPageParams }): Promise<Metadata> {
@@ -145,7 +148,7 @@ export default async function BumicertDetailPage({
 
   const isOverviewTab = activeTab === "overview";
   const showsDetailSidebar = activeTab !== "timeline";
-  const [moreBumicerts, observations, observationSummary, linkedTimelineCount] = isOverviewTab
+  const [moreBumicerts, observations, observationSummary, linkedTimelineCount, reviewCounts] = isOverviewTab
     ? await Promise.all([
         fetchBumicertsByDid(record.did, 6)
           .then((page) => page.records.filter((item) => item.id !== record.id).slice(0, 5))
@@ -155,8 +158,13 @@ export default async function BumicertDetailPage({
         fetchTimelineAttachmentsByDid(record.did)
           .then((items) => items.filter((item) => item.record.subjects?.[0]?.uri === record.atUri).length)
           .catch(() => null),
+        fetchReviewCounts(record.atUri).catch(() => null),
       ])
-    : [[], [] as OccurrenceRecord[], null, null];
+    : [[], [] as OccurrenceRecord[], null, null, null];
+
+  const reviews = activeTab === "reviews"
+    ? await fetchReviewsForSubject(record.atUri).catch(() => ({ evaluations: [], comments: [] }))
+    : null;
 
   let timelineAttachments: TimelineAttachmentItem[] = [];
   let timelineAttachmentsUnavailable = false;
@@ -240,12 +248,14 @@ export default async function BumicertDetailPage({
                   boundaries: record.locationUris.length,
                   observationSummary,
                   timelineCount: linkedTimelineCount,
+                  reviews: reviewCounts,
                   detailHref,
                   ownerHref: `/account/${encodeURIComponent(owner.urlIdentifier)}`,
                 }}
               />
             )}
             {activeTab === "site-boundaries" && <SiteBoundariesPanel record={record} />}
+            {activeTab === "reviews" && reviews && <ReviewsPanel record={record} reviews={reviews} />}
             {activeTab === "donations" && (
               <DonationsPanel
                 record={record}
@@ -778,6 +788,7 @@ type EvidenceInfo = {
   boundaries: number;
   observationSummary: ObservationSummary | null;
   timelineCount: number | null;
+  reviews: ReviewCounts | null;
   detailHref: string;
   ownerHref: string;
 };
@@ -857,7 +868,15 @@ function OverviewPanel({
  * evidence-rich and evidence-light Bumicerts are distinguishable at a glance.
  */
 function EvidenceSection({ evidence }: { evidence: EvidenceInfo }) {
-  const { boundaries, observationSummary, timelineCount, detailHref, ownerHref } = evidence;
+  const { boundaries, observationSummary, timelineCount, reviews, detailHref, ownerHref } = evidence;
+
+  const reviewVoices = reviews ? reviews.evaluations + reviews.comments : 0;
+  const reviewLabel = !reviews || reviewVoices === 0
+    ? "No reviews yet"
+    : [
+        reviews.evaluations > 0 ? `${formatNumber(reviews.evaluations)} evaluation${reviews.evaluations === 1 ? "" : "s"}` : null,
+        reviews.comments > 0 ? `${formatNumber(reviews.comments)} comment${reviews.comments === 1 ? "" : "s"}` : null,
+      ].filter(Boolean).join(" · ");
 
   const chips: Array<{ key: string; href: string; icon: ReactNode; label: string; present: boolean }> = [
     {
@@ -893,6 +912,15 @@ function EvidenceSection({ evidence }: { evidence: EvidenceInfo }) {
           present: timelineCount > 0,
         }]
       : []),
+    ...(reviews
+      ? [{
+          key: "reviews",
+          href: `${detailHref}?tab=reviews`,
+          icon: <ClipboardCheckIcon className="h-3.5 w-3.5" aria-hidden />,
+          label: reviewLabel,
+          present: reviewVoices > 0,
+        }]
+      : []),
   ];
 
   if (chips.length === 0) return null;
@@ -919,10 +947,168 @@ function EvidenceSection({ evidence }: { evidence: EvidenceInfo }) {
         ))}
       </div>
       <p className="mt-3 text-xs leading-5 text-muted-foreground">
-        Evidence is published by the organization on the open ATProto network and can be inspected by anyone.
+        Evidence and reviews live on the open ATProto network and can be inspected by anyone.
       </p>
     </div>
   );
+}
+
+/**
+ * Reviews tab — third-party judgement about this claim, read straight off the
+ * open network: formal `org.hypercerts.context.evaluation` records plus
+ * threaded `org.impactindexer.review.comment` discussion (including comments
+ * authored by Simocracy AI sims, which are labelled as such).
+ */
+function ReviewsPanel({ record, reviews }: { record: BumicertRecord; reviews: BumicertReviews }) {
+  const { evaluations, comments } = reviews;
+  const isEmpty = evaluations.length === 0 && comments.length === 0;
+
+  return (
+    <article className="py-1">
+      <p className="max-w-2xl text-sm leading-6 text-muted-foreground">
+        Independent evaluations and public comments attached to this Bumicert on the open ATProto
+        network. Anyone — auditors, community members, or AI agents — can publish a review; nothing
+        here is written or curated by {record.creatorName ?? "the project"} itself.
+      </p>
+
+      <div className="mt-8">
+        <h2 className="mb-4 text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
+          Evaluations{evaluations.length > 0 ? ` · ${evaluations.length}` : ""}
+        </h2>
+        {evaluations.length === 0 ? (
+          <p className="rounded-2xl border border-border-soft bg-surface p-4 text-sm leading-6 text-muted-foreground">
+            No formal evaluations yet. An evaluation is an{" "}
+            <code className="rounded bg-muted px-1 py-0.5 text-[11px]">org.hypercerts.context.evaluation</code>{" "}
+            record — a signed summary, optional score, and supporting reports published against this claim.
+          </p>
+        ) : (
+          <div className="grid gap-3">
+            {evaluations.map((evaluation) => (
+              <div key={evaluation.uri} className="rounded-2xl border border-border-soft bg-surface p-4">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <AuthorInline did={evaluation.did} />
+                  <div className="flex items-center gap-2">
+                    {evaluation.score ? (
+                      <span
+                        className="inline-flex items-baseline gap-0.5 rounded-full border border-primary/25 bg-primary/[0.08] px-2.5 py-1 text-sm font-semibold text-primary"
+                        aria-label={`Score: ${evaluation.score.value} out of ${evaluation.score.max}`}
+                      >
+                        {evaluation.score.value}
+                        <span className="text-[11px] font-medium text-primary/70">/{evaluation.score.max}</span>
+                      </span>
+                    ) : null}
+                    {evaluation.createdAt ? (
+                      <span className="text-xs text-muted-foreground" title={formatDateTime(evaluation.createdAt)}>
+                        {formatRelative(evaluation.createdAt)}
+                      </span>
+                    ) : null}
+                  </div>
+                </div>
+                <p className="mt-3 whitespace-pre-line text-sm leading-6 text-foreground">{evaluation.summary}</p>
+                {evaluation.contentUris.length > 0 ? (
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {evaluation.contentUris.map((uri) => (
+                      <a
+                        key={uri}
+                        href={uri}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex max-w-full items-center gap-1.5 rounded-full border border-border-soft bg-background px-3 py-1 text-xs text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary"
+                      >
+                        <ExternalLinkIcon className="h-3 w-3 shrink-0" aria-hidden />
+                        <span className="truncate">{formatReportLabel(uri)}</span>
+                      </a>
+                    ))}
+                  </div>
+                ) : null}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div className="mt-8">
+        <h2 className="mb-4 text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
+          Comments{comments.length > 0 ? ` · ${comments.reduce((sum, c) => sum + 1 + c.replies.length, 0)}` : ""}
+        </h2>
+        {comments.length === 0 ? (
+          <p className="rounded-2xl border border-border-soft bg-surface p-4 text-sm leading-6 text-muted-foreground">
+            No public comments yet. Comments posted on this claim from the wider network — including
+            reviews by Simocracy AI sims — will appear here.
+          </p>
+        ) : (
+          <div className="grid gap-3">
+            {comments.map((comment) => (
+              <ReviewCommentCard key={comment.uri} comment={comment} />
+            ))}
+          </div>
+        )}
+      </div>
+
+      {isEmpty ? null : (
+        <p className="mt-6 text-xs leading-5 text-muted-foreground">
+          Reviews are independent records on their authors’ accounts; they are shown here unedited.
+        </p>
+      )}
+    </article>
+  );
+}
+
+function ReviewCommentCard({ comment, nested = false }: { comment: ReviewComment; nested?: boolean }) {
+  return (
+    <div className={nested ? "border-l-2 border-border-soft pl-4" : "rounded-2xl border border-border-soft bg-surface p-4"}>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        {comment.sim ? <SimIdentity name={comment.sim.name} uri={comment.sim.uri} /> : <AuthorInline did={comment.did} />}
+        {comment.createdAt ? (
+          <span className="text-xs text-muted-foreground" title={formatDateTime(comment.createdAt)}>
+            {formatRelative(comment.createdAt)}
+          </span>
+        ) : null}
+      </div>
+      <p className="mt-2 whitespace-pre-line text-sm leading-6 text-foreground">{comment.text}</p>
+      {comment.replies.length > 0 ? (
+        <div className="mt-4 grid gap-4">
+          {comment.replies.map((reply) => (
+            <ReviewCommentCard key={reply.uri} comment={reply} nested />
+          ))}
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+/** Sim-authored comments are labelled and linked to the sim's public page. */
+function SimIdentity({ name, uri }: { name: string; uri: string | null }) {
+  const match = uri?.match(/^at:\/\/([^/]+)\/org\.simocracy\.sim\/([^/]+)$/);
+  const href = match ? `https://simocracy.org/sims/${encodeURIComponent(match[1])}/${encodeURIComponent(match[2])}` : null;
+  const body = (
+    <span className="inline-flex items-center gap-1.5">
+      <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary/15 text-primary">
+        <BotIcon className="h-3 w-3" aria-hidden />
+      </span>
+      <span className="text-sm font-medium text-foreground">{name}</span>
+      <span className="rounded-full border border-border-soft bg-background px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+        AI sim
+      </span>
+    </span>
+  );
+  return href ? (
+    <a href={href} target="_blank" rel="noreferrer" className="transition-opacity hover:opacity-80">
+      {body}
+    </a>
+  ) : (
+    body
+  );
+}
+
+function formatReportLabel(uri: string): string {
+  try {
+    const url = new URL(uri);
+    const file = url.pathname.split("/").filter(Boolean).pop();
+    return file ? `${url.hostname}/…/${file}` : url.hostname;
+  } catch {
+    return uri;
+  }
 }
 
 function SiteBoundariesPanel({ record }: { record: BumicertRecord }) {

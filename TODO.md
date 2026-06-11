@@ -64,9 +64,30 @@ Legend: `[ ]` open · `[x]` done · `[~]` partially done
   normalized at the data layer ("⭔ 24164249 ha" → "⭔ 24.2M ha"); areas
   larger than any country (>1.5B ha) are dropped as bad data. Remaining:
   validation at creation time.
-- [ ] **Evaluation records (ATProto)** — let third parties publish evaluation
-  records against a claim (Hypercerts evaluation model). Add an
-  "Evaluations" tab: who reviewed, methodology, verdict.
+- [~] **Evaluation records (ATProto)** — READ SIDE DONE. New "Reviews" tab on
+  bumicert detail pages renders:
+  - `org.hypercerts.context.evaluation` records (summary, optional numeric
+    score rendered as "8/10" badge, report links, evaluator identity = repo
+    owner DID, relative date) from the GainForest hyperindex — 110 records
+    already exist. Drained + indexed by `subject.uri` in
+    `app/_lib/reviews.ts` (the GraphQL `where` only has a presence filter
+    on subject), 5-min cache, same pattern as `funding-summary.ts`.
+  - `org.impactindexer.review.comment` threaded comments from the Simocracy
+    indexer (`simocracy-indexer.gainforest.id` — the GainForest hyperindex
+    does NOT ingest this collection), with sim authorship joined from
+    `org.simocracy.history` sidecars (`type: "comment"`): sim-authored
+    comments get a bot icon + "AI sim" pill linking to
+    simocracy.org/sims/{did}/{rkey}.
+  - Overview Evidence strip gained a "N evaluations · M comments" chip.
+  Remaining (write side + protocol):
+  - Publish-an-evaluation flow for signed-in evaluators (lexicon docs:
+    hyperscan.dev/agents → /agents/lexicon/org.hypercerts).
+  - Owner responses via `org.hypercerts.context.acknowledgement` (subject =
+    evaluation, acknowledged bool + comment) — 0 records exist today; show
+    "acknowledged by project" badges once they appear.
+  - `org.hypercerts.context.measurement` references on evaluations — render
+    metric/unit/value chips when evaluations start carrying them.
+  - Surface aggregate review signal on catalog cards (avg score / count).
 - [ ] **Verified-org tier** — a "verified by GainForest" badge + default
   catalog view; requires a curation/moderation surface.
 - [ ] **Donor identity prompts** — top donor is "Anonymous supporter" ($19.2K
@@ -129,6 +150,44 @@ Legend: `[ ]` open · `[x]` done · `[~]` partially done
 
 ---
 
+## Simocracy sync — sims evaluating Bumicerts (plan)
+
+Goal: surface Bumicerts inside a Simocracy community (../simocracy-v2) so AI
+sims can deliberate, comment, and publish evaluations — and show all of that
+back on bumicerts detail pages (display side shipped, see P1 above).
+
+How the pieces fit (verified against live indexers + lexicons, 2026-06-11):
+
+1. **Bumicerts ARE proposals already.** A Simocracy proposal is just an
+   `org.hypercerts.claim.activity` plus an `org.simocracy.proposalContext`
+   sidecar binding `subject.uri` to a gathering (or FtC SF floor). The
+   sidecar may live in ANY repo (the proposer's repo outranks; latest
+   `createdAt` wins within a tier) — so syncing requires zero writes to the
+   bumicert owners' repos:
+   - create one `org.simocracy.gathering` ("Bumicerts" community),
+   - write one `proposalContext` per bumicert from the syncing account.
+2. **Sims comment** via pi-simocracy `simocracy_post_comment` →
+   `org.impactindexer.review.comment` + `org.simocracy.history` attribution
+   sidecar. The bumicerts Reviews tab already renders both.
+3. **Sims evaluate**: have the agent harness write
+   `org.hypercerts.context.evaluation` records (subject = bumicert strongRef,
+   summary + score). The GainForest hyperindex ingests that collection
+   firehose-wide, so they appear on the Reviews tab automatically.
+
+**Blocking gap (simocracy side, not this repo):** the simocracy indexer does
+not ingest the bumicert publishers' DIDs (verified: ecocertain's DID returns
+0 activity records there), and simocracy-v2's `fetchActivitiesByUris` /
+`fetchRecordByUri` point-fetch also goes to the simocracy indexer — so synced
+bumicerts would not render on simocracy.org. Fix options:
+  a. add a PDS fallback to `fetchRecordByUri` in simocracy-v2 (smallest),
+  b. make the simocracy indexer track DIDs referenced by proposalContext
+     sidecars,
+  c. point simocracy-v2's activity reads at the GainForest hyperindex, which
+     already has all claim.activity records.
+
+Agent-facing docs for all of this: https://hyperscan.dev/agents (lexicon
+index, create-hypercert / post-comment write guides, auth guide).
+
 ## Implementation notes
 
 - Funding index lives in `app/_lib/funding-summary.ts`: one cached pass over
@@ -139,3 +198,8 @@ Legend: `[ ]` open · `[x]` done · `[~]` partially done
   (cards, drawer, detail, search) benefits.
 - e2e safety: disposable-org assertions only run on /manage pages, which use
   by-DID fetchers — public-catalog filtering does not affect them.
+- Reviews layer lives in `app/_lib/reviews.ts`: evaluation index from the
+  GainForest hyperindex + comment/sim-attribution indexes from the Simocracy
+  indexer (generic `records(collection:)` endpoint), both cached 5 min.
+  Gotcha: don't request `evaluators { did }` in the evaluation query — one
+  malformed record nulls the entire connection via non-null bubbling.

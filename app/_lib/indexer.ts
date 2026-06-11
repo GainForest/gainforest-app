@@ -22,7 +22,7 @@ import { asNumber, formatNumber, formatDate, formatDateTime, formatCountry } fro
 
 type GqlResponse<T> = { data?: T | null; errors?: Array<{ message: string }> };
 
-async function indexerQuery<T>(
+export async function indexerQuery<T>(
   query: string,
   variables: Record<string, unknown>,
   signal?: AbortSignal,
