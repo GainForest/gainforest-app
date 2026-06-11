@@ -43,7 +43,6 @@ import { getFileExtension, getFileSizeBucket } from "@/lib/analytics/tree-upload
 import { trackTreeUploadEvent } from "@/lib/analytics/hotjar";
 
 const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024;
-const MAX_MEDIA_ZIP_SIZE_BYTES = 200 * 1024 * 1024;
 const ACCEPTED_EXTENSIONS = [".csv", ".tsv"];
 const ACCEPTED_MIME_TYPES = ["text/csv", "text/tab-separated-values", "application/csv"];
 const ACCEPTED_MEDIA_ZIP_MIME_TYPES = ["application/zip", "application/x-zip-compressed", "multipart/x-zip"];
@@ -63,6 +62,12 @@ function isAcceptedFile(file: File): boolean {
 function isAcceptedMediaZipFile(file: File): boolean {
   return file.name.toLowerCase().endsWith(".zip") ||
     (file.type !== "" && ACCEPTED_MEDIA_ZIP_MIME_TYPES.includes(file.type));
+}
+
+function plainPhotoFolderReadError(error: unknown): string {
+  const message = error instanceof Error ? error.message.trim() : "";
+  if (message.startsWith("This photo folder") || message.startsWith("The selected photo folder")) return message;
+  return "Could not read this photo folder. Make sure you selected the photo folder downloaded from your field form app.";
 }
 
 function toExistingDatasetSelection(dataset: UploadTreeDatasetItem): ExistingUploadDatasetSelection {
@@ -347,17 +352,7 @@ export default function FileDropStep({
         mediaZipSizeBucket: getFileSizeBucket(file.size),
         failureReason: "unsupported_media_zip_type",
       });
-      setMediaZipError("Only compressed photo folders are supported.");
-      return;
-    }
-    if (file.size > MAX_MEDIA_ZIP_SIZE_BYTES) {
-      trackTreeUploadEvent(TREE_UPLOAD_EVENTS.MEDIA_ZIP_REJECTED, {
-        uploadId,
-        fileExtension: getFileExtension(file.name),
-        mediaZipSizeBucket: getFileSizeBucket(file.size),
-        failureReason: "media_zip_too_large",
-      });
-      setMediaZipError(`Photo folder too large (${formatBytes(file.size)}). Max 200 MB.`);
+      setMediaZipError("Choose the photo folder file downloaded from your field form app.");
       return;
     }
     setIsMediaZipParsing(true);
@@ -385,7 +380,7 @@ export default function FileDropStep({
       });
       setSelectedMediaZipFile(file);
       setMediaZipIndex(index);
-    } catch {
+    } catch (zipReadError) {
       if (mediaZipParseRequestRef.current !== requestId) return;
       trackTreeUploadEvent(TREE_UPLOAD_EVENTS.MEDIA_ZIP_REJECTED, {
         uploadId,
@@ -393,7 +388,7 @@ export default function FileDropStep({
         mediaZipSizeBucket: getFileSizeBucket(file.size),
         failureReason: "media_zip_read_failed",
       });
-      setMediaZipError("Could not read the photo folder.");
+      setMediaZipError(plainPhotoFolderReadError(zipReadError));
     } finally {
       if (mediaZipParseRequestRef.current === requestId) setIsMediaZipParsing(false);
     }
@@ -508,7 +503,7 @@ export default function FileDropStep({
       <div className="space-y-2 rounded-xl border border-border bg-muted/20 p-4">
         <div>
           <h3 className="text-sm font-medium">Photo folder (optional)</h3>
-          <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">If your field form export includes photos, choose the matching compressed photo folder to include them.</p>
+          <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">If your field form export includes photos, choose the matching photo folder to include them.</p>
         </div>
         <div
           className="cursor-pointer rounded-lg border border-dashed bg-background transition-colors hover:border-primary/60 hover:bg-muted/30"
@@ -518,7 +513,10 @@ export default function FileDropStep({
             {isMediaZipParsing ? (
               <div className="flex items-center gap-3 text-muted-foreground">
                 <div className="h-5 w-5 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-                <span className="text-sm">Reading photo folder…</span>
+                <div>
+                  <p className="text-sm font-medium">Reading photo folder…</p>
+                  <p className="text-xs">Large photo folders can take a few minutes. Keep this page open.</p>
+                </div>
               </div>
             ) : selectedMediaZipFile && mediaZipIndex ? (
               <div className="flex min-w-0 items-center gap-3">
@@ -533,7 +531,7 @@ export default function FileDropStep({
                 <Archive className="h-5 w-5 shrink-0" />
                 <div>
                   <p className="text-sm font-medium">Click to select photo folder</p>
-                  <p className="text-xs">Compressed folder, max 200 MB</p>
+                  <p className="text-xs">Large photo folders are supported. Only matched photos will be uploaded.</p>
                 </div>
               </div>
             )}

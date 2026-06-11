@@ -7,6 +7,7 @@
     "dev": "next dev --port 3040 --turbopack",
     "dev:proxy": "caddy run --config Caddyfile --watch",
     "build": "next build",
+    "test:unit": "vitest run",
     "start": "next start --port 3040",
     "test:e2e": "playwright test",
     "test:e2e:headed": "playwright test --headed",
@@ -17,12 +18,12 @@
     "@radix-ui/react-dialog": "^1.1.15",
     "@rainbow-me/rainbowkit": "^2.2.11",
     "@tanstack/react-query": "^5.101.0",
+    "@zip.js/zip.js": "^2.8.26",
     "blo": "^2.0.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.4.0",
     "framer-motion": "^12.40.0",
-    "jszip": "^3.10.1",
     "leaflet": "^1.9.4",
     "leaflet.markercluster": "^1.5.3",
     "lucide-react": "^1.17.0",
@@ -44,7 +45,6 @@
   "devDependencies": {
     "@playwright/test": "^1.60.0",
     "@tailwindcss/postcss": "^4",
-    "@types/jszip": "^3.4.1",
     "@types/leaflet": "^1.9.21",
     "@types/leaflet.markercluster": "^1.5.6",
     "@types/node": "^25",
@@ -52,6 +52,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^4.1.8"
   }
 }

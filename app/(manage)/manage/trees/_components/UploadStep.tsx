@@ -185,7 +185,9 @@ function photoErrorMessage(error: unknown): string {
     message.startsWith("This photo") ||
     message.startsWith("Could not open this photo link") ||
     message.startsWith("Photo link") ||
-    message.startsWith("The photo")
+    message.startsWith("The photo") ||
+    message.startsWith("The selected photo folder") ||
+    message.startsWith("The photo folder")
   ) {
     return message;
   }
@@ -390,7 +392,7 @@ export default function UploadStep({
         durationSeconds: Math.round((completedAtMs - uploadStartMs) / 1_000),
       });
       setUploadFatalError(
-        "This upload includes photos from a compressed photo folder, but that folder cannot be restored after refreshing or signing in again. Start over and select both the tree file and matching photo folder.",
+        "This upload includes photos from a photo folder, but that folder cannot be restored after refreshing or signing in again. Start over and select both the tree file and matching photo folder.",
       );
       setClockMs(completedAtMs);
       setUploadDone(true);
@@ -767,6 +769,12 @@ export default function UploadStep({
       return koboMediaArchivePromise;
     };
 
+    const closeKoboMediaArchive = async () => {
+      if (!koboMediaArchivePromise) return;
+      const koboMediaArchive = await koboMediaArchivePromise.catch(() => null);
+      if (koboMediaArchive) await koboMediaArchive.close();
+    };
+
     for (let photoIndex = 0; photoIndex < photoFetchQueue.length; photoIndex++) {
       const entry = photoFetchQueue[photoIndex];
       if (!entry) continue;
@@ -865,6 +873,8 @@ export default function UploadStep({
       setPhotoFetchProgress((prev) => ({ ...prev, successes, failures }));
       setClockMs(Date.now());
     }
+
+    await closeKoboMediaArchive();
 
     const completedAtMs = Date.now();
     const photoEvent = failures > 0

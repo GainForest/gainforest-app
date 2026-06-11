@@ -34,7 +34,7 @@ const FIELD_DOCS: FieldDoc[] = [
   { field: "dbh", description: "Diameter at breast height (cm)", format: "Number" },
   { field: "diameter", description: "Basal or stem diameter in centimeters", format: "Number" },
   { field: "canopyCoverPercent", description: "Canopy cover percentage", format: "0-100" },
-  { field: "photo_tree", description: "Photo of the whole tree.", format: "File name or link", helperText: "If you used a field form app, choose the matching compressed photo folder." },
+  { field: "photo_tree", description: "Photo of the whole tree.", format: "File name or link", helperText: "If you used a field form app, choose the matching photo folder." },
   { field: "photo_leaf", description: "Photo of the leaf.", format: "File name or link", helperText: "Private photo links are not needed when the photo folder is provided." },
   { field: "photo_bark", description: "Photo of the bark.", format: "File name or link", helperText: "Private photo links are not needed when the photo folder is provided." },
   { field: "photo_url", description: "Photo file name or link. Multiple values may be separated with commas or semicolons.", format: "File names or links", helperText: "Photos default to whole tree unless the file heading says leaf or bark." },
@@ -90,7 +90,7 @@ export function KoboExportGuide() {
       <AccordionItem value="kobo-export" className="border-b-0">
         <AccordionTrigger className="px-4 hover:no-underline">Using a field form app? Here&apos;s what to export</AccordionTrigger>
         <AccordionContent className="space-y-4 border-t px-4 pt-4">
-          <p className="text-sm leading-relaxed text-muted-foreground">Download both your tree file and compressed photo folder, then choose both here so photos can be matched.</p>
+          <p className="text-sm leading-relaxed text-muted-foreground">Download both your tree file and photo folder, then choose both here so photos can be matched.</p>
         </AccordionContent>
       </AccordionItem>
     </Accordion>
