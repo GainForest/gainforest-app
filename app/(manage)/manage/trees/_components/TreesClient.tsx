@@ -27,6 +27,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import Container from "@/components/ui/container";
 import { useModal } from "@/components/ui/modal/context";
+import { ModalContent, ModalDescription, ModalFooter, ModalHeader, ModalTitle } from "@/components/ui/modal/modal";
 import { MODAL_IDS } from "@/components/global/modals/ids";
 import { cn } from "@/lib/utils";
 import type {
@@ -109,7 +110,6 @@ type TreeGroupDeletionTarget = {
 
 type ConfirmTarget =
   | { type: "tree"; item: TreeManagerItem }
-  | { type: "treeGroup"; target: TreeGroupDeletionTarget }
   | { type: "photo"; photo: TreeMultimediaRecord };
 
 type DeletionFeedback = {
@@ -258,6 +258,78 @@ function buildTreeGroupDeleteFeedback(result: DeleteTreeGroupCascadeResult, tree
     tone: "warn",
     message: `${treeGroupName} could not be deleted. The tree group was kept so you can retry.`,
   };
+}
+
+function DeleteTreeGroupConfirmModal({
+  target,
+  onConfirm,
+}: {
+  target: TreeGroupDeletionTarget;
+  onConfirm: () => Promise<void> | void;
+}) {
+  const { hide, popModal, stack } = useModal();
+  const [isPending, setIsPending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const treeGroupName = target.treeGroup.name || "this tree group";
+
+  const close = async () => {
+    if (stack.length === 1) {
+      await hide();
+      popModal();
+      return;
+    }
+    popModal();
+  };
+
+  const handleConfirm = async () => {
+    setIsPending(true);
+    setError(null);
+
+    try {
+      await onConfirm();
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Tree group could not be deleted.");
+      setIsPending(false);
+      return;
+    }
+
+    const activeElement = document.activeElement;
+    if (activeElement instanceof HTMLElement) activeElement.blur();
+    await close();
+  };
+
+  return (
+    <ModalContent dismissible={false} className="space-y-4">
+      <ModalHeader>
+        <ModalTitle>Delete tree group?</ModalTitle>
+        <ModalDescription>
+          Deleting {treeGroupName} deletes the tree group and everything inside it. This cannot be undone.
+        </ModalDescription>
+      </ModalHeader>
+
+      <div className="space-y-2 text-sm text-muted-foreground">
+        <p className="font-medium text-foreground">This will delete:</p>
+        <ul className="list-disc space-y-1 pl-5">
+          <li>the tree group</li>
+          <li>{shortCount(target.treeCount, "tree", "trees")} in this tree group</li>
+          <li>{shortCount(target.measurementCount, "measurement", "measurements")} linked to those trees</li>
+          <li>{shortCount(target.photoCount, "photo", "photos")} linked to those trees</li>
+        </ul>
+      </div>
+
+      {error ? <p className="text-sm text-destructive">{error}</p> : null}
+
+      <ModalFooter className="sm:flex-row sm:justify-end">
+        <Button type="button" variant="outline" onClick={() => void close()} disabled={isPending}>
+          Cancel
+        </Button>
+        <Button type="button" variant="destructive" onClick={() => void handleConfirm()} disabled={isPending}>
+          {isPending ? <Loader2Icon className="h-3.5 w-3.5 animate-spin" /> : null}
+          Delete tree group
+        </Button>
+      </ModalFooter>
+    </ModalContent>
+  );
 }
 
 function Badge({ children, tone = "neutral" }: { children: React.ReactNode; tone?: "neutral" | "good" | "warn" }) {
@@ -1198,7 +1270,22 @@ export function TreesClient({ did, onUpload }: TreesClientProps) {
       setDeletedFeedback({ tone: "warn", message: "This tree group could not be checked. Refresh and try again." });
       return;
     }
-    setConfirmTarget({ type: "treeGroup", target: getTreeGroupDeletionTarget(treeGroup, treeItems) });
+
+    const target = getTreeGroupDeletionTarget(treeGroup, treeItems);
+    pushModal(
+      {
+        id: `${MODAL_IDS.MANAGE_TREE_DELETE_TREE_GROUP}/${treeGroup.rkey}`,
+        content: (
+          <DeleteTreeGroupConfirmModal
+            target={target}
+            onConfirm={() => handleConfirmDeleteTreeGroup(target)}
+          />
+        ),
+        dialogWidth: "max-w-md",
+      },
+      true,
+    );
+    void show();
   };
 
   const activeDeletionTarget = selectedTree ? getTreeDeletionTarget(selectedTree) : null;
@@ -1214,25 +1301,6 @@ export function TreesClient({ did, onUpload }: TreesClientProps) {
       return linked
         ? `This will delete the tree and its linked ${linked}. This cannot be undone.`
         : "This will delete the tree and any linked photos or measurements found at that time. This cannot be undone.";
-    }
-
-    if (confirmTarget?.type === "treeGroup") {
-      const { target } = confirmTarget;
-      const treeGroupName = target.treeGroup.name || "this tree group";
-      return (
-        <div className="space-y-3 text-sm text-muted-foreground">
-          <p>Deleting {treeGroupName} deletes the tree group and everything inside it. This cannot be undone.</p>
-          <div className="space-y-2">
-            <p className="font-medium text-foreground">This will delete:</p>
-            <ul className="list-disc space-y-1 pl-5">
-              <li>the tree group</li>
-              <li>{shortCount(target.treeCount, "tree", "trees")} in this tree group</li>
-              <li>{shortCount(target.measurementCount, "measurement", "measurements")} linked to those trees</li>
-              <li>{shortCount(target.photoCount, "photo", "photos")} linked to those trees</li>
-            </ul>
-          </div>
-        </div>
-      );
     }
 
     return "This will delete this photo from the selected tree. This cannot be undone.";
@@ -1779,14 +1847,13 @@ export function TreesClient({ did, onUpload }: TreesClientProps) {
 
       <ManageConfirmModal
         open={confirmTarget !== null}
-        title={confirmTarget?.type === "tree" ? "Delete tree?" : confirmTarget?.type === "treeGroup" ? "Delete tree group?" : "Delete photo?"}
+        title={confirmTarget?.type === "tree" ? "Delete tree?" : "Delete photo?"}
         description={confirmDescription}
-        confirmLabel={confirmTarget?.type === "tree" ? "Delete tree" : confirmTarget?.type === "treeGroup" ? "Delete tree group" : "Delete photo"}
+        confirmLabel={confirmTarget?.type === "tree" ? "Delete tree" : "Delete photo"}
         onOpenChange={(open) => { if (!open) setConfirmTarget(null); }}
         onConfirm={async () => {
           if (!confirmTarget) return;
           if (confirmTarget.type === "tree") await handleConfirmDeleteTree(confirmTarget.item);
-          else if (confirmTarget.type === "treeGroup") await handleConfirmDeleteTreeGroup(confirmTarget.target);
           else await handleConfirmDeletePhoto(confirmTarget.photo);
         }}
       />
