@@ -1,2 +1,2 @@
-scientificName,eventDate,decimalLatitude,decimalLongitude,vernacularName,recordedBy,locality,country,occurrenceRemarks,habitat,height,dbh,diameter,canopyCoverPercent,photo_tree,photo_leaf,photo_bark,photo_url
+scientificName,eventDate,decimalLatitude,decimalLongitude,vernacularName,recordedBy,locality,country,occurrenceRemarks,habitat,height,dbh,root_collar_diameter,canopyCoverPercent,photo_tree,photo_leaf,photo_bark,photo_url
 Cedrela odorata,2026-01-15,-3.4653,-62.2159,Spanish cedar,Field Team,Amazon Plot,BR,Healthy sapling,Riparian forest,12.4,18.2,21.0,68,tree-photo-001.jpg,leaf-photo-001.jpg,bark-photo-001.jpg,

@@ -101,7 +101,7 @@ export const TARGET_FIELDS: TargetField[] = [
   { field: "habitat", label: "Habitat", required: false, category: "occurrence" },
   { field: "height", label: "Height", required: false, category: "measurement" },
   { field: "dbh", label: "DBH", required: false, category: "measurement" },
-  { field: "diameter", label: "Diameter", required: false, category: "measurement" },
+  { field: "diameter", label: "Root collar diameter (cm)", required: false, category: "measurement" },
   { field: "canopyCoverPercent", label: "Canopy Cover (%)", required: false, category: "measurement" },
   { field: "photoUrl", label: "Photo URL", required: false, category: "media" },
 ];

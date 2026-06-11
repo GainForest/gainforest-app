@@ -247,9 +247,9 @@ export function validateOccurrenceDraft(draft: TreeOccurrenceDraft): string | nu
 
 export function validateMeasurementDraft(draft: TreeMeasurementDraft): string | null {
   const fields: Array<{ label: string; value: string; min?: number; minExclusive?: boolean; max?: number }> = [
-    { label: "Trunk diameter", value: draft.dbh, min: 0, minExclusive: true },
+    { label: "DBH", value: draft.dbh, min: 0, minExclusive: true },
     { label: "Height", value: draft.totalHeight, min: 0, minExclusive: true },
-    { label: "Base diameter", value: draft.diameter, min: 0, minExclusive: true },
+    { label: "Root collar diameter", value: draft.diameter, min: 0, minExclusive: true },
     { label: "Canopy cover", value: draft.canopyCoverPercent, min: 0, max: CANOPY_COVER_PERCENT_MAX },
   ];
 

@@ -53,6 +53,9 @@ const MeasurementFields = {
   totalHeight: z.coerce.number().positive("Measurement must be positive").optional(),
   dbh: z.coerce.number().positive("Measurement must be positive").optional(),
   diameter: z.coerce.number().positive("Measurement must be positive").optional(),
+  rootCollarDiameter: z.coerce.number().positive("Measurement must be positive").optional(),
+  basalDiameter: z.coerce.number().positive("Measurement must be positive").optional(),
+  baseDiameter: z.coerce.number().positive("Measurement must be positive").optional(),
   canopyCoverPercent: z.coerce.number().min(0).max(100).optional(),
   canopyCover: z.coerce.number().min(0).max(100).optional(),
 };
@@ -63,10 +66,11 @@ type TreeRowOutput = z.output<typeof TreeRowSchema>;
 function extractFloraMeasurement(row: TreeRowOutput): FloraMeasurementBundle | null {
   const bundle: FloraMeasurementBundle = {};
   const totalHeight = row.height ?? row.totalHeight;
+  const diameter = row.diameter ?? row.rootCollarDiameter ?? row.basalDiameter ?? row.baseDiameter;
   const canopyCoverPercent = row.canopyCoverPercent ?? row.canopyCover;
   if (totalHeight !== undefined) bundle.totalHeight = String(totalHeight);
   if (row.dbh !== undefined) bundle.dbh = String(row.dbh);
-  if (row.diameter !== undefined) bundle.diameter = String(row.diameter);
+  if (diameter !== undefined) bundle.diameter = String(diameter);
   if (canopyCoverPercent !== undefined) bundle.canopyCoverPercent = String(canopyCoverPercent);
   const hasAny = bundle.totalHeight !== undefined || bundle.dbh !== undefined ||
     bundle.diameter !== undefined || bundle.canopyCoverPercent !== undefined;

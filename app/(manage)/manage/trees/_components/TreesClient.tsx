@@ -1599,11 +1599,12 @@ export function TreesClient({ did, onUpload }: TreesClientProps) {
                 </div>
               </SectionCard>
 
-              <SectionCard title="Measurements" description="Track trunk, height, base diameter, and canopy cover values.">
-                <div className="grid grid-cols-1 gap-3 md:grid-cols-4">
+              <SectionCard title="Measurements" description="Track DBH, height, root collar diameter, and canopy cover values.">
+                <div className="grid grid-cols-1 gap-3 md:grid-cols-5">
                   <DetailFact label="Linked measurements" value={selectedTree.measurements.length} />
-                  <DetailFact label="Trunk diameter" value={selectedTree.floraMeasurement?.dbh ? `${selectedTree.floraMeasurement.dbh} cm` : "Not set"} />
+                  <DetailFact label="DBH" value={selectedTree.floraMeasurement?.dbh ? `${selectedTree.floraMeasurement.dbh} cm` : "Not set"} />
                   <DetailFact label="Height" value={selectedTree.floraMeasurement?.totalHeight ? `${selectedTree.floraMeasurement.totalHeight} m` : "Not set"} />
+                  <DetailFact label="Root collar diameter (cm)" value={selectedTree.floraMeasurement?.basalDiameter ?? "Not set"} />
                   <DetailFact label="Canopy cover" value={selectedTree.floraMeasurement?.canopyCoverPercent ? `${selectedTree.floraMeasurement.canopyCoverPercent}%` : "Not set"} />
                 </div>
 
@@ -1616,14 +1617,15 @@ export function TreesClient({ did, onUpload }: TreesClientProps) {
                 ) : (
                   <>
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                      <Field label="Trunk diameter (cm)">
+                      <Field label="DBH (cm)">
                         <Input value={measurementDraft.dbh} inputMode="decimal" onChange={(event) => handleMeasurementFieldChange("dbh", event.target.value)} />
                       </Field>
                       <Field label="Height (m)">
                         <Input value={measurementDraft.totalHeight} inputMode="decimal" onChange={(event) => handleMeasurementFieldChange("totalHeight", event.target.value)} />
                       </Field>
-                      <Field label="Base diameter (cm)">
+                      <Field label="Root collar diameter (cm)">
                         <Input value={measurementDraft.diameter} inputMode="decimal" onChange={(event) => handleMeasurementFieldChange("diameter", event.target.value)} />
+                        <p className="text-xs leading-relaxed text-muted-foreground">Useful for planted or young trees where trunk diameter is not yet meaningful.</p>
                       </Field>
                       <Field label="Canopy cover (%)">
                         <Input type="number" min={0} max={CANOPY_COVER_PERCENT_MAX} step="any" value={measurementDraft.canopyCoverPercent} onChange={(event) => handleMeasurementFieldChange("canopyCoverPercent", event.target.value)} />
