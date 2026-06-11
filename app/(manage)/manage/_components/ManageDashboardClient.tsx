@@ -9,13 +9,15 @@ import {
   Building2Icon,
   CalendarIcon,
   CheckIcon,
+  EyeIcon,
   GlobeIcon,
-  ImageIcon,
+  ImagePlusIcon,
+  Link2Icon,
   Loader2Icon,
   LockIcon,
   MapPinIcon,
   PencilIcon,
-  PlusCircleIcon,
+  SettingsIcon,
   XIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -36,12 +38,15 @@ import { createCountryLocationStrongRef, normalizeCountryCode } from "../_lib/co
 import Container from "@/components/ui/container";
 import { useModal } from "@/components/ui/modal/context";
 import {
+  OrgTypeEditorModal,
+  SocialLinksEditorModal,
   StartDateSelectorModal,
   VisibilitySelectorModal,
   WebsiteEditorModal,
 } from "../_modals/DashboardEditModals";
 import CountrySelectorModal from "@/components/modals/country-selector";
 import { ImageEditorModal } from "@/components/modals/image-editor";
+import { SocialGlyph } from "@/app/_components/SocialIcon";
 
 function formatWebsite(url: string): string {
   return url.replace(/^https?:\/\//, "").replace(/\/$/, "");
@@ -88,41 +93,49 @@ type HeroEditState = {
   country: string;
   startDate: string;
   visibility: "Public" | "Unlisted";
+  orgType: string;
+  socials: string[];
   logoFile: File | null;
   coverFile: File | null;
 };
 
-type InlineField = "displayName" | "description" | null;
+type InlineField = "profile" | null;
 
-function EditableChip({
-  onClick,
-  className,
-  children,
-  isEmpty = false,
-}: {
-  onClick?: () => void;
-  className?: string;
-  children: React.ReactNode;
-  isEmpty?: boolean;
-}) {
+const SECTION_EASE = [0.25, 0.1, 0.25, 1] as const;
+
+/** Classify a URL into a social-icon platform key (mirrors the indexer). */
+function classifySocial(url: string): string {
+  let host: string;
+  try {
+    host = new URL(url).hostname.replace(/^www\./, "").toLowerCase();
+  } catch {
+    return "link";
+  }
+  if (host.includes("facebook.") || host === "fb.com") return "facebook";
+  if (host.includes("instagram.")) return "instagram";
+  if (host.includes("youtube.") || host === "youtu.be") return "youtube";
+  if (host.includes("linkedin.")) return "linkedin";
+  if (host === "x.com" || host.includes("twitter.")) return "x";
+  if (host === "t.me" || host.includes("telegram.")) return "telegram";
+  if (host.includes("tiktok.")) return "tiktok";
+  if (host.includes("github.")) return "github";
+  if (host.includes("bsky.") || host.includes("bluesky.")) return "bluesky";
+  return "website";
+}
+
+function AboutSection({ account }: { account: AccountRouteData }) {
+  const text = (account.description ?? "").trim();
   return (
-    <motion.button
-      type="button"
-      onClick={onClick}
-      whileHover={{ scale: 1.03 }}
-      whileTap={{ scale: 0.97 }}
-      transition={{ type: "spring", stiffness: 400, damping: 25 }}
-      className={cn(
-        "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-medium uppercase tracking-[0.08em] backdrop-blur-md transition-colors",
-        isEmpty
-          ? "border-primary/20 bg-primary/5 text-primary/70 hover:bg-primary/10"
-          : "border-border/50 bg-background/40 text-foreground/60 hover:bg-background/60 hover:text-foreground/80",
-        className,
-      )}
+    <motion.section
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, delay: 0.1, ease: SECTION_EASE }}
     >
-      {isEmpty ? <PlusCircleIcon className="h-3 w-3 shrink-0" /> : <PencilIcon className="h-3 w-3 shrink-0 opacity-60" />}
-      {children}
-    </motion.button>
+      <h2 className="font-instrument text-2xl italic leading-none text-foreground">About</h2>
+      <p className={cn("mt-3 max-w-2xl whitespace-pre-line text-sm leading-relaxed", text ? "text-muted-foreground" : "text-muted-foreground/60")}>
+        {text || "No long description provided."}
+      </p>
+    </motion.section>
   );
 }
 
@@ -164,13 +177,15 @@ function EditableHero({
   onEditWebsite,
   onEditStartDate,
   onEditVisibility,
+  onEditOrgType,
+  onEditSocials,
 }: {
   account: AccountRouteData;
   editState: HeroEditState;
   inlineField: InlineField;
   isSaving: boolean;
   saveError: string | null;
-  onChange: (field: keyof Omit<HeroEditState, "logoFile" | "coverFile">, value: string) => void;
+  onChange: (field: keyof Omit<HeroEditState, "logoFile" | "coverFile" | "socials">, value: string) => void;
   onEditField: (field: InlineField) => void;
   onSaveInline: () => void;
   onCancelInline: () => void;
@@ -180,6 +195,8 @@ function EditableHero({
   onEditWebsite: () => void;
   onEditStartDate: () => void;
   onEditVisibility: () => void;
+  onEditOrgType: () => void;
+  onEditSocials: () => void;
 }) {
   const logoObjectUrl = useMemo(
     () => (editState.logoFile ? URL.createObjectURL(editState.logoFile) : null),
@@ -194,139 +211,159 @@ function EditableHero({
 
   const coverImageUrl = coverObjectUrl ?? account.coverUrl;
   const logoUrl = logoObjectUrl ?? account.avatarUrl;
-  const initial = (editState.displayName || account.displayName).charAt(0).toUpperCase();
-  const sinceDate = formatSinceDate(editState.startDate);
-  const flag = editState.country ? countryFlag(editState.country) : (account.country ? countryFlag(account.country) : "");
+
+  const editing = inlineField === "profile";
+
+  const isOrg = account.kind === "organization";
+  const resolvedWebsite = editState.website || account.website;
   const resolvedCountry = editState.country || account.country;
   const countryLabel = resolvedCountry ? countryName(resolvedCountry) : null;
-  const resolvedWebsite = editState.website || account.website;
+  const flag = resolvedCountry ? countryFlag(resolvedCountry) : "";
+  const sinceDate = formatSinceDate(editState.startDate);
 
   return (
-    <section className="relative flex min-h-[260px] flex-col overflow-hidden rounded-t-4xl border-t border-border md:min-h-[320px]">
-      <div className="absolute inset-0 z-0">
-        <motion.div
-          initial={{ scale: 1.08, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ duration: 1.6, ease: [0.25, 0.1, 0.25, 1] }}
-          className="absolute inset-0"
+    <section className="overflow-hidden rounded-3xl border border-border/60 bg-card">
+      {/* Cover band — click anywhere to change; icon reveals on hover/focus */}
+      <div className="relative h-32 sm:h-40 md:h-44">
+        <button
+          type="button"
+          onClick={onEditCover}
+          className="group/cover absolute inset-0 block w-full overflow-hidden"
+          aria-label={coverImageUrl ? "Change cover image" : "Add cover image"}
         >
           {coverImageUrl ? (
             <Image src={coverImageUrl} alt={`${account.displayName} cover image`} fill priority unoptimized className="object-cover object-center" sizes="(max-width: 1152px) 100vw, 1152px" />
           ) : (
-            <div className="absolute inset-0 bg-muted" style={{ backgroundImage: "radial-gradient(circle at 30% 50%, oklch(0.5 0.07 157 / 0.08) 0%, transparent 60%), radial-gradient(circle at 75% 25%, oklch(0.5 0.07 157 / 0.05) 0%, transparent 50%)" }} />
+            <div className="absolute inset-0 bg-muted" style={{ backgroundImage: "radial-gradient(circle at 22% 40%, oklch(0.5 0.07 157 / 0.14) 0%, transparent 55%), radial-gradient(circle at 82% 18%, oklch(0.5 0.07 157 / 0.08) 0%, transparent 50%)" }} />
           )}
-          <div className="absolute inset-0 bg-linear-to-b from-background/0 via-background/75 to-background" />
-        </motion.div>
-      </div>
-
-      <div className="absolute left-0 right-0 top-0 z-10 flex items-start justify-between p-4">
-        <motion.button
-          type="button"
-          whileTap={{ scale: 0.96 }}
-          onClick={onEditCover}
-          className="flex items-center gap-1.5 rounded-full border border-white/20 bg-background/55 px-3 py-1.5 shadow-lg backdrop-blur-xl transition-colors hover:bg-background/70"
-          aria-label="Change cover image"
-        >
-          <ImageIcon className="h-3.5 w-3.5 shrink-0 text-foreground/80" />
-          <span className="text-xs font-medium text-foreground/80">Change cover</span>
-        </motion.button>
-      </div>
-
-      <div className="relative z-10 flex flex-1 flex-col justify-end px-5 pb-6 pt-24">
-        <div className="mb-3 flex flex-col items-start gap-3 md:flex-row md:items-center">
-          <div className="relative shrink-0">
-            <div className="relative h-24 w-24 overflow-hidden rounded-full border border-white/15 bg-muted shadow-sm">
-              {logoUrl ? (
-                <Image src={logoUrl} alt={account.displayName} fill unoptimized className="object-cover" />
-              ) : (
-                <div className="flex h-full w-full items-center justify-center text-sm font-bold text-muted-foreground">{initial}</div>
-              )}
-            </div>
-            <button
-              type="button"
-              onClick={onEditLogo}
-              className="absolute -bottom-1 -right-1 flex h-7 w-7 items-center justify-center rounded-full border border-border bg-background shadow-sm transition-colors hover:bg-muted/60"
-              aria-label={account.kind === "organization" ? "Change logo" : "Change photo"}
-            >
-              <PencilIcon className="h-3.5 w-3.5" />
-            </button>
+          {/* gentle fade into the card at the bottom */}
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-14 bg-linear-to-t from-card to-transparent" />
+          {/* hover/focus affordance */}
+          <div
+            className={cn(
+              "absolute inset-0 flex items-center justify-center gap-1.5 transition-all duration-300",
+              coverImageUrl
+                ? "bg-black/0 opacity-0 backdrop-blur-0 group-hover/cover:bg-black/30 group-hover/cover:opacity-100 group-hover/cover:backdrop-blur-[2px] group-focus-visible/cover:bg-black/30 group-focus-visible/cover:opacity-100 group-focus-visible/cover:backdrop-blur-[2px]"
+                : "opacity-100",
+            )}
+          >
+            <ImagePlusIcon className={cn("size-5", coverImageUrl ? "text-white drop-shadow" : "text-muted-foreground")} />
+            {!coverImageUrl ? <span className="text-xs font-medium text-muted-foreground">Add cover image</span> : null}
           </div>
+        </button>
 
-          <div className="w-full max-w-3xl min-w-0">
-            {inlineField === "displayName" ? (
-              <div>
-                <input
-                  type="text"
-                  value={editState.displayName}
-                  onChange={(e) => onChange("displayName", e.target.value)}
-                  placeholder={account.kind === "organization" ? "Organization name" : "Display name"}
-                  className="w-full border-b-2 border-white/40 bg-transparent font-instrument text-3xl font-light italic leading-none tracking-[-0.02em] text-foreground outline-none transition-colors placeholder:text-foreground/40 focus:border-primary/60 sm:text-4xl md:text-5xl"
-                  autoFocus
-                />
-                <InlineEditActions isSaving={isSaving} onSave={onSaveInline} onCancel={onCancelInline} />
-              </div>
-            ) : (
+        {/* Settings shortcut */}
+        <Link
+          href="/manage/settings"
+          className="absolute right-3 top-3 z-10 flex size-9 items-center justify-center rounded-full border border-border/50 bg-background/65 text-foreground/70 shadow-sm backdrop-blur-xl transition-colors hover:bg-background/90 hover:text-foreground"
+          aria-label="Settings"
+          title="Settings"
+        >
+          <SettingsIcon className="size-4" />
+        </Link>
+      </div>
+
+      {/* Identity */}
+      <div className="relative z-10 px-5 pb-5 sm:px-6 sm:pb-6">
+        <div className="-mt-12 flex flex-col gap-4 md:flex-row md:items-end md:gap-5">
+        <button
+          type="button"
+          onClick={onEditLogo}
+          className="group/avatar relative block size-24 shrink-0 overflow-hidden rounded-full border border-border/60 bg-muted ring-4 ring-card"
+          aria-label={logoUrl ? (account.kind === "organization" ? "Change logo" : "Change photo") : (account.kind === "organization" ? "Add logo" : "Add photo")}
+        >
+          {logoUrl ? (
+            <Image src={logoUrl} alt={account.displayName} fill unoptimized className="object-cover" />
+          ) : null}
+          <span
+            className={cn(
+              "absolute inset-0 flex items-center justify-center transition-all duration-300",
+              logoUrl
+                ? "bg-black/0 opacity-0 backdrop-blur-0 group-hover/avatar:bg-black/35 group-hover/avatar:opacity-100 group-hover/avatar:backdrop-blur-[2px] group-focus-visible/avatar:bg-black/35 group-focus-visible/avatar:opacity-100 group-focus-visible/avatar:backdrop-blur-[2px]"
+                : "opacity-100",
+            )}
+          >
+            <ImagePlusIcon className={cn("size-6", logoUrl ? "text-white drop-shadow" : "text-muted-foreground")} />
+          </span>
+        </button>
+
+        <div className="min-w-0 max-w-2xl md:flex-1 md:pb-1">
+          {editing ? (
+            <div className="space-y-3">
+              <input
+                type="text"
+                value={editState.displayName}
+                onChange={(e) => onChange("displayName", e.target.value)}
+                placeholder={account.kind === "organization" ? "Organization name" : "Display name"}
+                className="w-full border-b-2 border-border/50 bg-transparent font-instrument text-3xl font-light italic leading-[1.1] tracking-[-0.02em] text-foreground outline-none transition-colors placeholder:text-foreground/40 focus:border-primary/60 md:text-4xl"
+                autoFocus
+              />
+              <textarea
+                value={editState.description}
+                onChange={(e) => onChange("description", e.target.value)}
+                placeholder="Short bio…"
+                rows={3}
+                className="w-full resize-none border-b border-border/40 bg-transparent text-sm leading-relaxed text-muted-foreground outline-none transition-colors field-sizing-content placeholder:text-muted-foreground/60 focus:border-primary/60"
+              />
+              <InlineEditActions isSaving={isSaving} onSave={onSaveInline} onCancel={onCancelInline} />
+            </div>
+          ) : (
+            <>
               <div className="flex items-start gap-2">
-                <h1 className="font-instrument text-3xl font-light italic leading-none tracking-[-0.02em] text-foreground sm:text-4xl md:text-5xl">
+                <h1 className="font-instrument text-3xl font-light italic leading-[1.1] tracking-[-0.02em] text-foreground md:text-4xl">
                   {editState.displayName || account.displayName}
                 </h1>
-                <button type="button" onClick={() => onEditField("displayName")} className="mt-1 rounded-full p-1 text-foreground/50 hover:bg-background/60 hover:text-foreground" aria-label="Edit display name">
-                  <PencilIcon className="h-4 w-4" />
+                <button type="button" onClick={() => onEditField("profile")} className="mt-1 rounded-full p-1 text-foreground/40 transition-colors hover:bg-muted hover:text-foreground" aria-label="Edit name and bio">
+                  <PencilIcon className="size-4" />
                 </button>
               </div>
-            )}
-
-            {inlineField === "description" ? (
-              <div className="mt-2">
-                <textarea
-                  value={editState.description}
-                  onChange={(e) => onChange("description", e.target.value)}
-                  placeholder="Short description…"
-                  rows={3}
-                  className="w-full resize-none border-b border-white/30 bg-transparent leading-relaxed text-muted-foreground outline-none transition-colors field-sizing-content placeholder:text-muted-foreground/60 focus:border-primary/60"
-                  autoFocus
-                />
-                <InlineEditActions isSaving={isSaving} onSave={onSaveInline} onCancel={onCancelInline} />
-              </div>
-            ) : (
-              <div className="mt-1 flex items-start gap-2">
-                {editState.description ? (
-                  <p className="line-clamp-4 text-muted-foreground md:line-clamp-2">{editState.description}</p>
-                ) : (
-                  <p className="text-muted-foreground/70">Add a short description.</p>
-                )}
-                <button type="button" onClick={() => onEditField("description")} className="rounded-full p-1 text-foreground/50 hover:bg-background/60 hover:text-foreground" aria-label="Edit description">
-                  <PencilIcon className="h-3.5 w-3.5" />
-                </button>
-              </div>
-            )}
-            {saveError ? <p className="mt-2 text-sm text-destructive">{saveError}</p> : null}
-          </div>
+              <p className={cn("mt-1.5 line-clamp-2 text-sm leading-relaxed", editState.description ? "text-muted-foreground" : "text-muted-foreground/60")}>
+                {editState.description || "No bio provided."}
+              </p>
+            </>
+          )}
+          {saveError ? <p className="mt-2 text-sm text-destructive">{saveError}</p> : null}
+        </div>
         </div>
 
-        <div className="mt-4 flex flex-wrap items-center gap-2">
-          {account.kind === "organization" && (
-            <EditableChip onClick={onEditCountry} isEmpty={!countryLabel}>
-              {flag && <span className="text-sm leading-none" aria-hidden="true">{flag}</span>}
+        {/* Detail buttons */}
+        <div className="mt-5 flex flex-wrap items-center gap-2">
+          {isOrg ? (
+            <Button variant="outline" onClick={onEditOrgType} className={cn(!editState.orgType.trim() && "text-muted-foreground")}>
+              <Building2Icon /> {editState.orgType.trim() || "Add type"}
+            </Button>
+          ) : null}
+          {isOrg ? (
+            <Button variant="outline" onClick={onEditCountry} className={cn(!countryLabel && "text-muted-foreground")}>
+              {flag ? <span className="text-base leading-none" aria-hidden="true">{flag}</span> : <MapPinIcon />}
               {countryLabel ?? "Add country"}
-            </EditableChip>
-          )}
-          {account.kind === "organization" && (
-            <EditableChip onClick={onEditStartDate} isEmpty={sinceDate.state === "empty"}>
-              <CalendarIcon className="h-3 w-3 shrink-0" />
+            </Button>
+          ) : null}
+          {isOrg ? (
+            <Button variant="outline" onClick={onEditStartDate} className={cn(sinceDate.state === "empty" && "text-muted-foreground")}>
+              <CalendarIcon />
               {sinceDate.state === "valid" ? `Since ${sinceDate.label}` : sinceDate.state === "invalid" ? "Invalid date" : "Add start date"}
-            </EditableChip>
-          )}
-          <EditableChip onClick={onEditWebsite} isEmpty={!resolvedWebsite}>
-            <GlobeIcon className="h-3 w-3 shrink-0" />
-            {resolvedWebsite ? formatWebsite(resolvedWebsite) : "Add website"}
-          </EditableChip>
-          {account.kind === "organization" && (
-            <EditableChip onClick={onEditVisibility}>
-              {editState.visibility === "Unlisted" ? <LockIcon className="h-3 w-3 shrink-0" /> : <MapPinIcon className="h-3 w-3 shrink-0" />}
-              {editState.visibility}
-            </EditableChip>
-          )}
+            </Button>
+          ) : null}
+          <Button variant="outline" onClick={onEditWebsite} className={cn(!resolvedWebsite && "text-muted-foreground")}>
+            <GlobeIcon /> {resolvedWebsite ? formatWebsite(resolvedWebsite) : "Add website"}
+          </Button>
+          {isOrg ? (
+            <Button variant="outline" onClick={onEditVisibility}>
+              {editState.visibility === "Unlisted" ? <LockIcon /> : <EyeIcon />} {editState.visibility}
+            </Button>
+          ) : null}
+          {isOrg ? (
+            <Button variant="outline" onClick={onEditSocials} className={cn(!editState.socials.length && "text-muted-foreground")}>
+              {editState.socials.length ? (
+                editState.socials.map((url) => <SocialGlyph key={url} platform={classifySocial(url)} />)
+              ) : (
+                <>
+                  <Link2Icon /> Add social links
+                </>
+              )}
+            </Button>
+          ) : null}
         </div>
       </div>
     </section>
@@ -391,6 +428,8 @@ export function ManageDashboardClient({
   const initialVisibility = account.visibility ?? "Public";
   const [editStartDate, setEditStartDate] = useState(initialStartDate);
   const [editVisibility, setEditVisibility] = useState<"Public" | "Unlisted">(initialVisibility);
+  const [editOrgType, setEditOrgType] = useState(account.orgType ?? "");
+  const [editSocials, setEditSocials] = useState<string[]>(account.socialLinks ?? []);
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [coverFile, setCoverFile] = useState<File | null>(null);
   const [inlineField, setInlineField] = useState<InlineField>(null);
@@ -406,6 +445,8 @@ export function ManageDashboardClient({
     country: editCountry,
     startDate: editStartDate,
     visibility: editVisibility,
+    orgType: editOrgType,
+    socials: editSocials,
     logoFile,
     coverFile,
   };
@@ -419,6 +460,8 @@ export function ManageDashboardClient({
     setEditCountry(next.country);
     setEditStartDate(next.startDate);
     setEditVisibility(next.visibility);
+    setEditOrgType(next.orgType);
+    setEditSocials(next.socials);
     setLogoFile(next.logoFile);
     setCoverFile(next.coverFile);
   };
@@ -431,6 +474,8 @@ export function ManageDashboardClient({
       country: account.country ?? "",
       startDate: initialStartDate,
       visibility: initialVisibility,
+      orgType: account.orgType ?? "",
+      socials: account.socialLinks ?? [],
       logoFile: null,
       coverFile: null,
     });
@@ -438,7 +483,7 @@ export function ManageDashboardClient({
     setSaveError(null);
   };
 
-  const handleChange = (field: keyof Omit<HeroEditState, "logoFile" | "coverFile">, value: string) => {
+  const handleChange = (field: keyof Omit<HeroEditState, "logoFile" | "coverFile" | "socials">, value: string) => {
     switch (field) {
       case "displayName": setEditDisplayName(value); break;
       case "description": setEditDescription(value); break;
@@ -446,6 +491,7 @@ export function ManageDashboardClient({
       case "country": setEditCountry(value); break;
       case "startDate": setEditStartDate(value); break;
       case "visibility": setEditVisibility(value as "Public" | "Unlisted"); break;
+      case "orgType": setEditOrgType(value); break;
     }
   };
 
@@ -530,16 +576,35 @@ export function ManageDashboardClient({
       }
 
       const shouldWriteOrg = account.kind === "organization" && (
-        "country" in overrides || "startDate" in overrides || "visibility" in overrides
+        "country" in overrides || "startDate" in overrides || "visibility" in overrides ||
+        "orgType" in overrides || "socials" in overrides
       );
       if (shouldWriteOrg) {
+        const repo = writeRepoDid ?? account.did;
+        // Read-merge: preserve fields we don't touch (longDescription, etc.).
+        const existingOrg = await fetchExistingSelfRecord(repo, "app.certified.actor.organization");
         const orgRecord: Record<string, unknown> = {
+          ...existingOrg,
           $type: "app.certified.actor.organization",
-          createdAt: account.createdAt ?? new Date().toISOString(),
+          createdAt: typeof existingOrg.createdAt === "string" ? existingOrg.createdAt : account.createdAt ?? new Date().toISOString(),
           visibility: next.visibility === "Unlisted" ? "unlisted" : "public",
         };
-        if (next.country.trim()) orgRecord.location = await createCountryLocationStrongRef(next.country, writeOptions);
-        if (next.startDate.trim()) orgRecord.foundedDate = `${next.startDate.trim()}T00:00:00.000Z`;
+        if ("country" in overrides) {
+          if (next.country.trim()) orgRecord.location = await createCountryLocationStrongRef(next.country, writeOptions);
+          else delete orgRecord.location;
+        }
+        if ("startDate" in overrides) {
+          if (next.startDate.trim()) orgRecord.foundedDate = `${next.startDate.trim()}T00:00:00.000Z`;
+          else delete orgRecord.foundedDate;
+        }
+        if ("orgType" in overrides) {
+          if (next.orgType.trim()) orgRecord.organizationType = [next.orgType.trim()];
+          else delete orgRecord.organizationType;
+        }
+        if ("socials" in overrides) {
+          if (next.socials.length) orgRecord.urls = next.socials.map((url) => ({ url }));
+          else delete orgRecord.urls;
+        }
         await putRecord("app.certified.actor.organization", "self", orgRecord, writeOptions);
       }
 
@@ -599,6 +664,16 @@ export function ManageDashboardClient({
     <VisibilitySelectorModal current={editVisibility} onConfirm={(visibility) => void saveChanges({ visibility })} />,
   );
 
+  const openOrgTypeModal = () => openDashboardModal(
+    "manage-org-type-editor",
+    <OrgTypeEditorModal current={editOrgType || null} onConfirm={(orgType) => void saveChanges({ orgType: orgType ?? "" })} />,
+  );
+
+  const openSocialsModal = () => openDashboardModal(
+    "manage-socials-editor",
+    <SocialLinksEditorModal current={editSocials} onConfirm={(socials) => void saveChanges({ socials })} />,
+  );
+
   if (!isAccountManageRoute) {
     return <>{children}</>;
   }
@@ -614,7 +689,7 @@ export function ManageDashboardClient({
   return (
     <>
       {account.kind === "user" ? <HeaderContent right={registerOrganizationHeaderAction} /> : null}
-      <Container className="space-y-4 pt-4 pb-8">
+      <Container className="space-y-6 pt-4 pb-12">
         <EditableHero
           account={account}
           editState={editState}
@@ -631,7 +706,10 @@ export function ManageDashboardClient({
           onEditWebsite={openWebsiteModal}
           onEditStartDate={openStartDateModal}
           onEditVisibility={openVisibilityModal}
+          onEditOrgType={openOrgTypeModal}
+          onEditSocials={openSocialsModal}
         />
+        {account.kind === "organization" ? <AboutSection account={account} /> : null}
         {children}
       </Container>
     </>

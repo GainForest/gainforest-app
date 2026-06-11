@@ -26,6 +26,10 @@ export type AccountRouteData = {
   createdAt: string | null;
   foundedDate: string | null;
   visibility: "Public" | "Unlisted" | null;
+  /** Organization category (e.g. "Nonprofit"), read straight from the org record. */
+  orgType: string | null;
+  /** Social / website URLs stored on the org record's `urls` list. */
+  socialLinks: string[];
   kind: AccountKind;
   summary: AccountSummary;
   detail: RecordDetail | null;
@@ -53,6 +57,8 @@ type DirectCertifiedOrganization = {
   foundedDate: string | null;
   visibility: "Public" | "Unlisted" | null;
   createdAt: string | null;
+  orgType: string | null;
+  socialLinks: string[];
 };
 
 export function encodeAccountSegment(value: string): string {
@@ -168,6 +174,8 @@ export const getAccountRouteData = cache(async (
     createdAt: summary.createdAt,
     foundedDate: summary.foundedDate,
     visibility: summary.visibility,
+    orgType: directCertifiedOrganization?.orgType ?? summary.certOrgType ?? null,
+    socialLinks: directCertifiedOrganization?.socialLinks ?? [],
     kind,
     summary,
     detail,
@@ -252,11 +260,21 @@ async function fetchDirectCertifiedOrganization(did: string): Promise<DirectCert
   const locationUri = typeof location === "object" && location !== null && "uri" in location
     ? typeof location.uri === "string" ? location.uri : null
     : null;
+  const orgTypes = Array.isArray(value.organizationType)
+    ? value.organizationType.filter((t): t is string => typeof t === "string" && t.trim().length > 0)
+    : [];
+  const socialLinks = Array.isArray(value.urls)
+    ? value.urls
+        .map((entry) => (typeof entry === "object" && entry !== null && "url" in entry ? (entry as { url?: unknown }).url : null))
+        .filter((url): url is string => typeof url === "string" && url.trim().length > 0)
+    : [];
   return {
     country: await fetchCertifiedLocationCountryCode(locationUri),
     foundedDate: typeof value.foundedDate === "string" ? value.foundedDate : null,
     visibility: rawVisibility === "unlisted" || rawVisibility === "Unlisted" ? "Unlisted" : rawVisibility ? "Public" : null,
     createdAt: typeof value.createdAt === "string" ? value.createdAt : null,
+    orgType: orgTypes.length ? orgTypes.join(", ") : null,
+    socialLinks,
   };
 }
 

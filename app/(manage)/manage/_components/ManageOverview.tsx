@@ -1,19 +1,10 @@
+"use client";
+
 import Link from "next/link";
-import {
-  BadgeIcon,
-  ChevronRightIcon,
-  HeartIcon,
-  LeafIcon,
-  MicIcon,
-  SettingsIcon,
-  TreesIcon,
-  UsersIcon,
-  MapPinIcon,
-  FolderKanbanIcon,
-} from "lucide-react";
-import BumicertIcon from "@/icons/BumicertIcon";
+import { motion } from "framer-motion";
+import { BinocularsIcon, HeartIcon, LayersIcon, MapPinIcon, TreePineIcon } from "lucide-react";
 import type { AccountRouteData } from "@/app/account/_lib/account-route";
-import type { ComponentType } from "react";
+import type { ReactNode } from "react";
 
 type OverviewStats = {
   bumicerts: number;
@@ -25,114 +16,139 @@ type OverviewStats = {
   audio?: number | null;
 };
 
-type DashboardCard = {
+type FolderTile = {
   id: string;
   title: string;
-  description: string;
   href: string;
-  count?: number | null;
-  countLabel?: string;
-  Icon: ComponentType<{ className?: string }>;
+  count: number | null | undefined;
+  unit: string;
 };
+
+const EASE = [0.25, 0.1, 0.25, 1] as const;
 
 function formatCount(value: number | null | undefined): string {
   if (typeof value !== "number") return "—";
   return new Intl.NumberFormat("en").format(value);
 }
 
-function buildCards(account: AccountRouteData, stats: OverviewStats): DashboardCard[] {
-  const common: DashboardCard[] = [
-    {
-      id: "bumicerts",
-      title: "Bumicerts",
-      description: "Create, edit, and review verified impact stories.",
-      href: "/manage/bumicerts",
-      count: stats.bumicerts,
-      countLabel: "published",
-      Icon: BumicertIcon,
-    },
-    {
-      id: "groups",
-      title: "Groups",
-      description: "Open CGS group accounts and manage roles.",
-      href: "/manage/groups",
-      countLabel: "memberships",
-      Icon: UsersIcon,
-    },
-    {
-      id: "settings",
-      title: "Settings",
-      description: "Manage account settings, links, and export tools.",
-      href: "/manage/settings",
-      Icon: SettingsIcon,
-    },
-  ];
+// ── Peeking "art": small DOM illustrations, one per section, echoing the
+//    sidebar's project-creation card (image header + skeleton lines). ─────────
 
+function CardArt({ header, lines = [8, 14] }: { header: ReactNode; lines?: number[] }) {
+  return (
+    <div className="flex h-16 w-14 flex-col gap-1 rounded-lg border border-border/70 bg-background/85 p-1.5 shadow-md backdrop-blur-sm">
+      <div className="flex h-8 w-full items-center justify-center rounded-md bg-primary/15">{header}</div>
+      <div className="mt-auto space-y-1">
+        {lines.map((w, i) => (
+          <div key={i} className="h-1.5 rounded-full bg-muted" style={{ width: `${w * 4}px` }} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function MedallionArt({ icon }: { icon: ReactNode }) {
+  return (
+    <div className="flex h-16 w-14 flex-col items-center justify-center gap-1.5 rounded-lg border border-border/70 bg-background/85 shadow-md backdrop-blur-sm">
+      <div className="flex size-9 items-center justify-center rounded-full bg-primary/15 ring-2 ring-primary/20">{icon}</div>
+      <div className="h-1.5 w-8 rounded-full bg-muted" />
+    </div>
+  );
+}
+
+const ART: Record<string, ReactNode> = {
+  donations: <MedallionArt icon={<HeartIcon className="size-4 text-primary/80" fill="currentColor" />} />,
+  projects: <CardArt header={<LayersIcon className="size-4 text-primary/80" />} lines={[7, 11]} />,
+  observations: (
+    <div className="flex h-16 w-14 flex-col gap-1 rounded-lg border border-border/70 bg-background/85 p-1.5 shadow-md backdrop-blur-sm">
+      <div className="flex h-7 w-full items-center justify-center rounded-md bg-primary/15">
+        <BinocularsIcon className="size-4 text-primary/80" />
+      </div>
+      <div className="mt-auto flex items-end gap-[3px]">
+        {[8, 14, 10, 6, 12].map((h, i) => (
+          <div key={i} className={i === 1 ? "w-1.5 rounded-sm bg-primary/40" : "w-1.5 rounded-sm bg-muted"} style={{ height: `${h}px` }} />
+        ))}
+      </div>
+    </div>
+  ),
+  sites: (
+    <div className="relative h-16 w-16 overflow-hidden rounded-lg border border-border/70 bg-primary/5 shadow-md">
+      <div
+        className="absolute inset-0 opacity-40"
+        style={{
+          backgroundImage:
+            "linear-gradient(oklch(0.5 0.07 157 / 0.25) 1px, transparent 1px), linear-gradient(90deg, oklch(0.5 0.07 157 / 0.25) 1px, transparent 1px)",
+          backgroundSize: "10px 10px",
+        }}
+      />
+      <svg viewBox="0 0 64 64" className="absolute inset-0 size-full">
+        <polygon points="14,40 26,16 50,26 44,50 22,50" className="fill-primary/15 stroke-primary/50" strokeWidth="1.5" strokeDasharray="3 2" />
+      </svg>
+      <MapPinIcon className="absolute left-1/2 top-1/2 size-5 -translate-x-1/2 -translate-y-[60%] text-primary drop-shadow" fill="currentColor" />
+    </div>
+  ),
+  trees: (
+    <div className="flex h-16 w-16 flex-col justify-center gap-1.5 rounded-lg border border-border/70 bg-background/85 px-2 shadow-md backdrop-blur-sm">
+      {[0, 1, 2].map((i) => (
+        <div key={i} className="flex items-center gap-1.5">
+          <TreePineIcon className="size-3.5 shrink-0 text-primary/70" />
+          <div className="h-1.5 flex-1 rounded-full bg-muted" />
+        </div>
+      ))}
+    </div>
+  ),
+  audio: (
+    <div className="flex h-16 w-16 items-center justify-center gap-[3px] rounded-lg border border-border/70 bg-background/85 shadow-md backdrop-blur-sm">
+      {[10, 18, 28, 14, 24, 8, 20].map((h, i) => (
+        <div key={i} className="w-1 rounded-full bg-primary/50" style={{ height: `${h}px` }} />
+      ))}
+    </div>
+  ),
+};
+
+function buildTiles(account: AccountRouteData, stats: OverviewStats): FolderTile[] {
   if (account.kind === "user") {
     return [
-      ...common.slice(0, 1),
-      {
-        id: "donations",
-        title: "Donations",
-        description: "Review public donation receipts from this account.",
-        href: "/manage/donations",
-        count: stats.donations,
-        countLabel: "receipts",
-        Icon: HeartIcon,
-      },
-      ...common.slice(1),
+      { id: "donations", title: "Donations", href: "/manage/donations", count: stats.donations, unit: "receipts" },
     ];
   }
-
   return [
-    ...common.slice(0, 1),
-    {
-      id: "projects",
-      title: "Projects",
-      description: "Manage project collections used by Bumicerts.",
-      href: "/manage/projects",
-      count: stats.projects,
-      countLabel: "collections",
-      Icon: FolderKanbanIcon,
-    },
-    {
-      id: "observations",
-      title: "Observations",
-      description: "Browse biodiversity and field occurrence records.",
-      href: "/manage/observations",
-      count: stats.observations,
-      countLabel: "records",
-      Icon: LeafIcon,
-    },
-    {
-      id: "sites",
-      title: "Sites",
-      description: "Manage certified field locations and boundaries.",
-      href: "/manage/sites",
-      count: stats.sites,
-      countLabel: "locations",
-      Icon: MapPinIcon,
-    },
-    {
-      id: "trees",
-      title: "Trees",
-      description: "Upload and maintain tree datasets.",
-      href: "/manage/trees",
-      count: stats.trees,
-      countLabel: "datasets",
-      Icon: TreesIcon,
-    },
-    {
-      id: "audio",
-      title: "Audio",
-      description: "Manage field recordings and acoustic metadata.",
-      href: "/manage/audio",
-      count: stats.audio,
-      countLabel: "recordings",
-      Icon: MicIcon,
-    },
-    ...common.slice(1),
+    { id: "projects", title: "Projects", href: "/manage/projects", count: stats.projects, unit: "collections" },
+    { id: "observations", title: "Observations", href: "/manage/observations", count: stats.observations, unit: "records" },
+    { id: "sites", title: "Sites", href: "/manage/sites", count: stats.sites, unit: "locations" },
+    { id: "trees", title: "Trees", href: "/manage/trees", count: stats.trees, unit: "datasets" },
+    { id: "audio", title: "Audio", href: "/manage/audio", count: stats.audio, unit: "recordings" },
   ];
+}
+
+function Folder({ tile, index }: { tile: FolderTile; index: number }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 14 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, delay: index * 0.05, ease: EASE }}
+    >
+      <Link href={tile.href} className="group relative block">
+        {/* Art peeking from behind the folder, tucked to the right */}
+        <div className="pointer-events-none absolute inset-x-0 top-1 z-0 flex justify-end pr-4">
+          <div className="rotate-6 transition-transform duration-300 ease-out group-hover:-translate-y-1.5 group-hover:rotate-0">
+            {ART[tile.id]}
+          </div>
+        </div>
+
+        {/* Folder shape */}
+        <div className="relative pt-10">
+          {/* tab */}
+          <div className="absolute left-0 top-[18px] z-20 h-[24px] w-[44%] rounded-t-xl border border-b-0 border-border/60 bg-card transition-colors duration-300 group-hover:border-primary/40" />
+          {/* body */}
+          <div className="relative z-10 flex min-h-[132px] flex-col justify-end rounded-3xl rounded-tl-none border border-border/60 bg-card p-4 transition-all duration-300 group-hover:border-primary/40 group-hover:shadow-[0_18px_44px_-18px_oklch(0_0_0/0.28)]">
+            <div className="font-instrument text-4xl italic leading-[0.8] text-foreground">{formatCount(tile.count)}</div>
+            <p className="mt-2 text-sm font-medium text-foreground transition-colors duration-300 group-hover:text-primary">{tile.title}</p>
+          </div>
+        </div>
+      </Link>
+    </motion.div>
+  );
 }
 
 export function ManageOverview({
@@ -142,42 +158,13 @@ export function ManageOverview({
   account: AccountRouteData;
   stats: OverviewStats;
 }) {
-  const cards = buildCards(account, stats);
+  const tiles = buildTiles(account, stats);
 
   return (
-    <section className="space-y-4">
-      <div>
-        <h2 className="text-2xl font-medium">Manage your {account.kind === "organization" ? "organization" : "account"}</h2>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Quick access to the records, groups, and settings connected to this profile.
-        </p>
-      </div>
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {cards.map((card) => {
-          const Icon = card.Icon;
-          return (
-            <Link
-              key={card.id}
-              href={card.href}
-              className="group flex min-h-40 flex-col justify-between rounded-3xl border border-border bg-muted/40 p-4 transition-colors hover:bg-muted"
-            >
-              <div className="flex items-start justify-between gap-3">
-                <Icon className="size-6 text-muted-foreground transition-colors group-hover:text-primary" />
-                <ChevronRightIcon className="size-5 text-muted-foreground/40 transition-transform group-hover:translate-x-0.5" />
-              </div>
-              <div>
-                <p className="text-lg font-medium text-foreground transition-colors group-hover:text-primary">{card.title}</p>
-                <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">{card.description}</p>
-                {card.countLabel ? (
-                  <p className="mt-3 text-xs uppercase tracking-[0.08em] text-muted-foreground">
-                    <span className="font-semibold text-foreground">{formatCount(card.count)}</span> {card.countLabel}
-                  </p>
-                ) : null}
-              </div>
-            </Link>
-          );
-        })}
-      </div>
-    </section>
+    <div className="grid grid-cols-2 gap-x-3 gap-y-4 sm:grid-cols-3 lg:grid-cols-4">
+      {tiles.map((tile, index) => (
+        <Folder key={tile.id} tile={tile} index={index} />
+      ))}
+    </div>
   );
 }
