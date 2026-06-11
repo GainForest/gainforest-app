@@ -1,7 +1,6 @@
 import { cachedAsync } from "./async-cache";
-import { fetchCertifiedLocationCountryCode } from "./country-location";
 import { countryFlag } from "./format";
-import { resolvePdsHost } from "./pds";
+import { fetchCertifiedLocationCountriesByUri } from "./indexer";
 import { INDEXER_URL, FACILITATOR_DID, blockExplorerUrl } from "./urls";
 
 // ── Raw receipt fetch ──────────────────────────────────────────────────────
@@ -123,7 +122,7 @@ async function fetchReceiptsUncached(): Promise<FundingReceipt[]> {
       headers: { "content-type": "application/json" },
       body: JSON.stringify({
         query: RECEIPTS_QUERY,
-        variables: { did: FACILITATOR_DID, first: 200, after },
+        variables: { did: FACILITATOR_DID, first: 1000, after },
       }),
     });
 
@@ -375,7 +374,7 @@ const ORG_COUNTRY_QUERY = `
   query DashboardOrgCountries($first: Int!, $after: String) {
     appCertifiedActorOrganization(first: $first, after: $after) {
       pageInfo { hasNextPage endCursor }
-      edges { node { did certifiedProfileData { displayName } } }
+      edges { node { did location { uri } } }
     }
   }
 `;
@@ -392,36 +391,20 @@ export type GeoStats = {
   topCountries: CountryRow[];
 };
 
-async function fetchCertifiedOrgCountry(did: string): Promise<string | null> {
-  try {
-    const host = await resolvePdsHost(did);
-    if (!host) return null;
-    const params = new URLSearchParams({ repo: did, collection: "app.certified.actor.organization", rkey: "self" });
-    const response = await fetch(`https://${host}/xrpc/com.atproto.repo.getRecord?${params.toString()}`);
-    if (!response.ok) return null;
-    const data = (await response.json().catch(() => null)) as { value?: Record<string, unknown> } | null;
-    const location = data?.value?.location;
-    const locationUri = typeof location === "object" && location !== null && "uri" in location
-      ? typeof location.uri === "string" ? location.uri : null
-      : null;
-    return fetchCertifiedLocationCountryCode(locationUri);
-  } catch {
-    return null;
-  }
-}
-
 async function fetchOrgCountryMapUncached(): Promise<Map<string, string>> {
   const map = new Map<string, string>();
+  const locationUriByDid = new Map<string, string>();
   let after: string | null = null;
 
   try {
+    // 1. Page the org list (with its location AT-URI) from the indexer.
     for (let page = 0; page < 5; page += 1) {
       const response: Response = await fetch(INDEXER_URL, {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
           query: ORG_COUNTRY_QUERY,
-          variables: { first: 200, after },
+          variables: { first: 1000, after },
         }),
       });
 
@@ -429,7 +412,7 @@ async function fetchOrgCountryMapUncached(): Promise<Map<string, string>> {
         data?: {
           appCertifiedActorOrganization?: {
             pageInfo?: { hasNextPage?: boolean; endCursor?: string | null };
-            edges?: Array<{ node?: { did?: string } | null }>;
+            edges?: Array<{ node?: { did?: string; location?: { uri?: string | null } | null } | null }>;
           } | null;
         };
       };
@@ -437,17 +420,22 @@ async function fetchOrgCountryMapUncached(): Promise<Map<string, string>> {
       const connection = json.data?.appCertifiedActorOrganization;
       if (!connection) break;
 
-      const dids = (connection.edges ?? [])
-        .map((edge) => edge.node?.did)
-        .filter((did): did is string => Boolean(did));
-      const countries = await Promise.all(dids.map((did) => fetchCertifiedOrgCountry(did)));
-      dids.forEach((did, index) => {
-        const country = normalizeCountry(countries[index]);
-        if (country) map.set(did, country);
-      });
+      for (const edge of connection.edges ?? []) {
+        const did = edge.node?.did;
+        const uri = edge.node?.location?.uri;
+        if (did && uri) locationUriByDid.set(did, uri);
+      }
 
       if (!connection.pageInfo?.hasNextPage || !connection.pageInfo.endCursor) break;
       after = connection.pageInfo.endCursor;
+    }
+
+    // 2. Resolve every location to a country in a few batched indexer queries
+    //    instead of 2–4 HTTP round trips per organization.
+    const countryByUri = await fetchCertifiedLocationCountriesByUri([...locationUriByDid.values()]);
+    for (const [did, uri] of locationUriByDid) {
+      const country = normalizeCountry(countryByUri.get(uri));
+      if (country) map.set(did, country);
     }
   } catch {
     // Best effort; dashboard renders without geographic reach data.

@@ -101,23 +101,40 @@ export function OrganizationsClient({ records: initialRecords = [] }: { records?
   const deferredQuery = useDeferredValue(query);
   const requestSeqRef = useRef(0);
   const countryHydrationKeyRef = useRef("");
+  // One-way gate: flips true once the first card page has rendered (or the
+  // first load settled), then stays true so the stats fetch runs exactly once.
+  const [statsEnabled, setStatsEnabled] = useState(false);
+  const hasLoadedRecords = records.length > 0;
+
+  // The stats walk pages every organization plus per-org count batches, so
+  // let the first card page win the connection: start it only after records
+  // have rendered (or the first load settled empty).
+  useEffect(() => {
+    if (!statsEnabled && (hasLoadedRecords || !loading)) setStatsEnabled(true);
+  }, [statsEnabled, hasLoadedRecords, loading]);
 
   useEffect(() => {
+    if (!statsEnabled) return;
     const controller = new AbortController();
-    setStatsLoading(true);
-    fetchOrganizationStats("both", controller.signal)
-      .then((nextStats) => setTotalStats(nextStats))
-      .catch((error) => {
-        if ((error as Error).name !== "AbortError") {
-          console.warn("[organizations] stats fetch failed", error);
-          setTotalStats(null);
-        }
-      })
-      .finally(() => {
-        if (!controller.signal.aborted) setStatsLoading(false);
-      });
-    return () => controller.abort();
-  }, []);
+    const timer = window.setTimeout(() => {
+      setStatsLoading(true);
+      fetchOrganizationStats("both", controller.signal)
+        .then((nextStats) => setTotalStats(nextStats))
+        .catch((error) => {
+          if ((error as Error).name !== "AbortError") {
+            console.warn("[organizations] stats fetch failed", error);
+            setTotalStats(null);
+          }
+        })
+        .finally(() => {
+          if (!controller.signal.aborted) setStatsLoading(false);
+        });
+    }, 300);
+    return () => {
+      window.clearTimeout(timer);
+      controller.abort();
+    };
+  }, [statsEnabled]);
 
   useEffect(() => {
     if (initialRecords.length > 0) return;

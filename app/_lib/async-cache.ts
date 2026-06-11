@@ -9,7 +9,7 @@ function abortError(): DOMException {
   return new DOMException("aborted", "AbortError");
 }
 
-function withAbort<T>(promise: Promise<T>, signal?: AbortSignal): Promise<T> {
+export function withAbort<T>(promise: Promise<T>, signal?: AbortSignal): Promise<T> {
   if (!signal) return promise;
   if (signal.aborted) return Promise.reject(abortError());
 

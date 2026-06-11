@@ -1479,26 +1479,6 @@ function fetchObservationCountsByDid(dids: string[], signal?: AbortSignal): Prom
   );
 }
 
-async function attachBumicertCounts(records: SiteRecord[], signal?: AbortSignal): Promise<SiteRecord[]> {
-  try {
-    const counts = await fetchBumicertCountsByDid(records.map((record) => record.did), signal);
-    return records.map((record) => ({ ...record, bumicertCount: counts.get(record.did) ?? 0 }));
-  } catch (error) {
-    if ((error as Error).name === "AbortError") throw error;
-    return records.map((record) => ({ ...record, bumicertCount: 0 }));
-  }
-}
-
-async function attachObservationCounts(records: SiteRecord[], signal?: AbortSignal): Promise<SiteRecord[]> {
-  try {
-    const counts = await fetchObservationCountsByDid(records.map((record) => record.did), signal);
-    return records.map((record) => ({ ...record, observationCount: counts.get(record.did) ?? 0 }));
-  } catch (error) {
-    if ((error as Error).name === "AbortError") throw error;
-    return records.map((record) => ({ ...record, observationCount: 0 }));
-  }
-}
-
 export type SiteIndexQuickFilter = "locations" | "bumicerts" | "observations";
 export type SiteQueryOptions = {
   query?: string;
@@ -1710,18 +1690,29 @@ async function hydrateCertOrgs(
   const missingProfileDids = nodes
     .filter((n) => !profileName(n.certifiedProfileData) && !profileAvatarRef(n.certifiedProfileData))
     .map((n) => n.did);
-  const profiles = await fetchCertProfiles(missingProfileDids, signal);
+  const dids = nodes.map((n) => n.did);
+  const locationUris = nodes
+    .map((n) => sv(n.location?.uri))
+    .filter((uri): uri is string => Boolean(uri));
+
+  // Profiles, location countries, and per-org counts are independent of one
+  // another — run them in parallel instead of as four sequential round trips.
+  // The non-profile lookups never reject (they fall back to empty maps), so an
+  // abort surfaces from the awaits below without leaving unhandled rejections.
+  const profilesPromise = fetchCertProfiles(missingProfileDids, signal);
+  const countriesPromise = fetchCertifiedLocationCountriesByUri(locationUris, signal)
+    .catch(() => new Map<string, string>());
+  const bumicertCountsPromise = includeBumicertCounts
+    ? fetchBumicertCountsByDid(dids, signal).catch(() => new Map<string, number>())
+    : null;
+  const observationCountsPromise = includeObservationCounts
+    ? fetchObservationCountsByDid(dids, signal).catch(() => new Map<string, number>())
+    : null;
+
+  const profiles = await profilesPromise;
   let records = nodes.map((n) => mapCertOrg(n, {
     name: profileName(n.certifiedProfileData) ?? profiles.get(n.did)?.name ?? null,
     avatarRef: profileAvatarRef(n.certifiedProfileData) ?? profiles.get(n.did)?.avatarRef ?? null,
-  }));
-  const countryByLocation = await fetchCertifiedLocationCountriesByUri(
-    records.map((record) => record.locationUri).filter((uri): uri is string => Boolean(uri)),
-    signal,
-  ).catch(() => new Map<string, string>());
-  records = records.map((record) => ({
-    ...record,
-    country: record.locationUri ? countryByLocation.get(record.locationUri) ?? record.country : record.country,
   }));
   records = await resolveImages(
     records,
@@ -1730,8 +1721,19 @@ async function hydrateCertOrgs(
     signal,
     SITE_IMAGE_RESOLVE_LIMIT,
   );
-  if (includeBumicertCounts) records = await attachBumicertCounts(records, signal);
-  if (includeObservationCounts) records = await attachObservationCounts(records, signal);
+  const countryByLocation = await countriesPromise;
+  records = records.map((record) => ({
+    ...record,
+    country: record.locationUri ? countryByLocation.get(record.locationUri) ?? record.country : record.country,
+  }));
+  if (bumicertCountsPromise) {
+    const counts = await bumicertCountsPromise;
+    records = records.map((record) => ({ ...record, bumicertCount: counts.get(record.did) ?? 0 }));
+  }
+  if (observationCountsPromise) {
+    const counts = await observationCountsPromise;
+    records = records.map((record) => ({ ...record, observationCount: counts.get(record.did) ?? 0 }));
+  }
   return records;
 }
 

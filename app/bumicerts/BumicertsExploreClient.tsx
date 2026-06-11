@@ -110,6 +110,10 @@ export function BumicertsExploreClient({ records: initialRecords = [] }: { recor
   const sortMenuRef = useRef<HTMLDivElement | null>(null);
   const filtersMenuRef = useRef<HTMLDivElement | null>(null);
   const requestSeqRef = useRef(0);
+  // One-way gate: flips true once the first card page has rendered (or the
+  // first load settled), then stays true so the stats fetch runs exactly once.
+  const [statsEnabled, setStatsEnabled] = useState(false);
+  const hasLoadedRecords = records.length > 0;
 
   useLayoutEffect(() => {
     const locationView = readViewFromLocation();
@@ -122,22 +126,35 @@ export function BumicertsExploreClient({ records: initialRecords = [] }: { recor
     setLocalView((currentView) => currentView === nextView ? currentView : nextView);
   }, [queryView]);
 
+  // The stats walk pages the whole activity stream, so let the first card
+  // page win the connection: start it only after records have rendered (or
+  // the first load settled empty).
   useEffect(() => {
+    if (!statsEnabled && (hasLoadedRecords || !loading)) setStatsEnabled(true);
+  }, [statsEnabled, hasLoadedRecords, loading]);
+
+  useEffect(() => {
+    if (!statsEnabled) return;
     const controller = new AbortController();
-    setStatsLoading(true);
-    fetchBumicertStats(controller.signal)
-      .then((nextStats) => setTotalStats(nextStats))
-      .catch((error) => {
-        if ((error as Error).name !== "AbortError") {
-          console.warn("[bumicerts] stats fetch failed", error);
-          setTotalStats(null);
-        }
-      })
-      .finally(() => {
-        if (!controller.signal.aborted) setStatsLoading(false);
-      });
-    return () => controller.abort();
-  }, []);
+    const timer = window.setTimeout(() => {
+      setStatsLoading(true);
+      fetchBumicertStats(controller.signal)
+        .then((nextStats) => setTotalStats(nextStats))
+        .catch((error) => {
+          if ((error as Error).name !== "AbortError") {
+            console.warn("[bumicerts] stats fetch failed", error);
+            setTotalStats(null);
+          }
+        })
+        .finally(() => {
+          if (!controller.signal.aborted) setStatsLoading(false);
+        });
+    }, 300);
+    return () => {
+      window.clearTimeout(timer);
+      controller.abort();
+    };
+  }, [statsEnabled]);
 
   useEffect(() => {
     if (initialRecords.length > 0) return;

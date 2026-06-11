@@ -113,22 +113,32 @@ export function Dashboard() {
     parseAsStringEnum<TimeGranularity>(GRANULARITIES).withDefault("day").withOptions(QUERY_STATE_OPTIONS),
   );
   const [receipts, setReceipts] = useState<Awaited<ReturnType<typeof fetchReceipts>> | null>(null);
-  const [orgCountryMap, setOrgCountryMap] = useState<Map<string, string>>(new Map());
+  // null while loading — the geo fetch is much slower than the receipts fetch,
+  // so the dashboard renders as soon as receipts land and geo data fills in.
+  const [orgCountryMap, setOrgCountryMap] = useState<Map<string, string> | null>(null);
   const [error, setError] = useState(false);
 
   useEffect(() => {
     const controller = new AbortController();
     let cancelled = false;
 
-    Promise.all([fetchReceipts(controller.signal), fetchOrgCountryMap(controller.signal)])
-      .then(([nextReceipts, nextOrgCountryMap]) => {
-        if (cancelled) return;
-        setReceipts(nextReceipts);
-        setOrgCountryMap(nextOrgCountryMap);
+    fetchReceipts(controller.signal)
+      .then((nextReceipts) => {
+        if (!cancelled) setReceipts(nextReceipts);
       })
       .catch((err) => {
         if ((err as Error).name === "AbortError" || cancelled) return;
         setError(true);
+      });
+
+    fetchOrgCountryMap(controller.signal)
+      .then((nextOrgCountryMap) => {
+        if (!cancelled) setOrgCountryMap(nextOrgCountryMap);
+      })
+      .catch((err) => {
+        if ((err as Error).name === "AbortError" || cancelled) return;
+        // Best effort; render the dashboard without geographic reach data.
+        setOrgCountryMap(new Map());
       });
 
     return () => {
@@ -138,9 +148,13 @@ export function Dashboard() {
   }, []);
 
   const allReceipts = receipts ?? [];
+  const geoLoading = orgCountryMap === null;
   const periodFiltered = useMemo(() => filterByPeriod(allReceipts, period), [allReceipts, period]);
   const kpis = useMemo(() => computeKpis(periodFiltered), [periodFiltered]);
-  const geoStats = useMemo(() => computeGeoStats(orgCountryMap, Number.POSITIVE_INFINITY), [orgCountryMap]);
+  const geoStats = useMemo(
+    () => computeGeoStats(orgCountryMap ?? new Map(), Number.POSITIVE_INFINITY),
+    [orgCountryMap],
+  );
   const timeSeries = useMemo(
     () => computeTimeSeries(periodFiltered, granularity),
     [periodFiltered, granularity],
@@ -163,7 +177,7 @@ export function Dashboard() {
           className="flex flex-col gap-12"
         >
           <motion.div variants={itemVariants}>
-            <KPISummary kpis={kpis} geoStats={geoStats} />
+            <KPISummary kpis={kpis} geoStats={geoStats} geoLoading={geoLoading} />
           </motion.div>
           <motion.div variants={itemVariants}>
             <DonationsVolumeChart
@@ -177,7 +191,7 @@ export function Dashboard() {
               <TopDonorsTable rows={topDonors} />
             </div>
             <div className="flex min-w-0 flex-col gap-6 lg:w-[42%]">
-              <TopCountriesTable stats={geoStats} />
+              <TopCountriesTable stats={geoStats} loading={geoLoading} />
               <OrganizationsTable rows={perOrg} />
             </div>
           </motion.div>
@@ -242,7 +256,7 @@ function PeriodFilter({ period, onPeriodChange }: { period: Period; onPeriodChan
   );
 }
 
-function KPISummary({ kpis, geoStats }: { kpis: DashboardKpis; geoStats: GeoStats }) {
+function KPISummary({ kpis, geoStats, geoLoading }: { kpis: DashboardKpis; geoStats: GeoStats; geoLoading: boolean }) {
   return (
     <div className="grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-4">
       <StatCard
@@ -273,7 +287,7 @@ function KPISummary({ kpis, geoStats }: { kpis: DashboardKpis; geoStats: GeoStat
       <StatCard
         icon={<GlobeIcon className="h-4 w-4" />}
         label="Countries with Bumicerts"
-        value={formatCompact(geoStats.countriesRepresented)}
+        value={geoLoading ? "…" : formatCompact(geoStats.countriesRepresented)}
       />
     </div>
   );
@@ -283,7 +297,7 @@ function StatCard({ icon, label, value }: { icon: React.ReactNode; label: string
   return <StatsTile icon={icon} label={label} value={value} accent={label === "Total donated" || label === "Bumicerts with donations"} />;
 }
 
-function TopCountriesTable({ stats }: { stats: GeoStats }) {
+function TopCountriesTable({ stats, loading }: { stats: GeoStats; loading: boolean }) {
   const [expanded, setExpanded] = useState(false);
   const visibleCountries = expanded ? stats.topCountries : stats.topCountries.slice(0, DEFAULT_SECTION_LIMIT);
 
@@ -296,7 +310,19 @@ function TopCountriesTable({ stats }: { stats: GeoStats }) {
         </span>
       </div>
 
-      {stats.topCountries.length === 0 ? (
+      {loading && stats.topCountries.length === 0 ? (
+        <ul className="space-y-2 px-5 pb-5" aria-label="Loading countries">
+          {Array.from({ length: 5 }).map((_, index) => (
+            <li key={index} className="flex items-center justify-between gap-4">
+              <span className="flex min-w-0 flex-1 items-center gap-2">
+                <Skeleton className="h-3 w-4 shrink-0" />
+                <Skeleton className="h-3 w-2/3" />
+              </span>
+              <Skeleton className="h-3 w-20 shrink-0" />
+            </li>
+          ))}
+        </ul>
+      ) : stats.topCountries.length === 0 ? (
         <p className="px-5 pb-5 text-sm text-muted-foreground">No geographic data available.</p>
       ) : (
         <>

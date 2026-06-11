@@ -12,38 +12,47 @@
  * makes repeated DIDs free within a session.
  */
 
-const pdsHostCache = new Map<string, string | null>();
+import { withAbort } from "./async-cache";
 
-export async function resolvePdsHost(
+// Cache the in-flight promise (not just the settled value) so concurrent
+// resolutions of the same DID — e.g. 48 bumicert covers owned by a handful of
+// orgs — share one plc.directory request instead of firing duplicates.
+const pdsHostCache = new Map<string, Promise<string | null>>();
+
+async function lookupPdsHost(did: string): Promise<string | null> {
+  const res = await fetch(`https://plc.directory/${did}`);
+  if (!res.ok) return null;
+  const doc: { service?: Array<{ type?: string; serviceEndpoint?: string }> } =
+    await res.json();
+  const endpoint = doc.service?.find(
+    (s) => s.type === "AtprotoPersonalDataServer",
+  )?.serviceEndpoint;
+  return endpoint ? new URL(endpoint).host : null;
+}
+
+export function resolvePdsHost(
   did: string,
   signal?: AbortSignal,
 ): Promise<string | null> {
-  if (pdsHostCache.has(did)) return pdsHostCache.get(did) ?? null;
-  // did:web resolves to its own host without a plc lookup.
-  if (did.startsWith("did:web:")) {
-    const host = did.slice("did:web:".length).replace(/:/g, "/");
-    pdsHostCache.set(did, host);
-    return host;
-  }
-  try {
-    const res = await fetch(`https://plc.directory/${did}`, { signal });
-    if (!res.ok) {
-      pdsHostCache.set(did, null);
-      return null;
+  let promise = pdsHostCache.get(did);
+  if (!promise) {
+    // did:web resolves to its own host without a plc lookup.
+    if (did.startsWith("did:web:")) {
+      promise = Promise.resolve(did.slice("did:web:".length).replace(/:/g, "/"));
+    } else {
+      const lookup = lookupPdsHost(did).catch(() => {
+        // Network failure: drop the entry so a later call can retry, but
+        // resolve null for everyone currently waiting on this lookup.
+        if (pdsHostCache.get(did) === lookup) pdsHostCache.delete(did);
+        return null;
+      });
+      promise = lookup;
     }
-    const doc: { service?: Array<{ type?: string; serviceEndpoint?: string }> } =
-      await res.json();
-    const endpoint = doc.service?.find(
-      (s) => s.type === "AtprotoPersonalDataServer",
-    )?.serviceEndpoint;
-    const host = endpoint ? new URL(endpoint).host : null;
-    pdsHostCache.set(did, host);
-    return host;
-  } catch (err) {
-    if ((err as Error).name === "AbortError") throw err;
-    pdsHostCache.set(did, null);
-    return null;
+    pdsHostCache.set(did, promise);
   }
+  // The underlying lookup keeps running (and fills the cache) even if this
+  // caller aborts; only the caller's await is rejected.
+  return withAbort(promise, signal);
 }
 
 /** Normalise an indexer blob ref. Hyperindex sometimes serialises a ref as a
