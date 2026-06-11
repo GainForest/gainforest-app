@@ -1482,6 +1482,22 @@ const PROJECT_COLLECTION_QUERY = `
   }
 `;
 
+const PROJECT_COLLECTION_BY_DID_QUERY = `
+  query ExplorerProjectsByDid($did: String!, $first: Int!, $after: String) {
+    orgHypercertsCollection(
+      where: { did: { eq: $did }, type: { in: ["project", "Project"] } }
+      first: $first
+      after: $after
+      sortBy: createdAt
+      sortDirection: DESC
+    ) {
+      totalCount
+      pageInfo { hasNextPage endCursor }
+      edges { node { ${PROJECT_COLLECTION_NODE_FIELDS} } }
+    }
+  }
+`;
+
 export type ProjectIndexFilter = "images" | "locations";
 
 type ProjectQueryOptions = {
@@ -1624,6 +1640,18 @@ async function fetchProjectPage(
   return mapProjectConnection(data?.orgHypercertsCollection, signal);
 }
 
+async function fetchProjectByDidPage(
+  did: string,
+  first: number,
+  after: string | null,
+  signal?: AbortSignal,
+): Promise<Page<ProjectRecord>> {
+  const data = await indexerQuery<{
+    orgHypercertsCollection?: Connection<RawProjectCollection>;
+  }>(PROJECT_COLLECTION_BY_DID_QUERY, { did, first, after }, signal);
+  return mapProjectConnection(data?.orgHypercertsCollection, signal);
+}
+
 async function fetchProjectsFromCollections(
   target: number,
   after: string | null,
@@ -1672,6 +1700,17 @@ export async function fetchProjects(
   options?: ProjectQueryOptions,
 ): Promise<Page<ProjectRecord>> {
   return fetchProjectsFromCollections(target, after, signal, onProgress, options);
+}
+
+/** Load project collections created by a single account DID. */
+export async function fetchProjectsByDid(
+  did: string,
+  target = 1000,
+  after: string | null = null,
+  signal?: AbortSignal,
+  onProgress?: (records: ProjectRecord[]) => void,
+): Promise<Page<ProjectRecord>> {
+  return collectPaged((first, cursor, nextSignal) => fetchProjectByDidPage(did, first, cursor, nextSignal), target, after, signal, onProgress);
 }
 
 export type ProjectStats = {

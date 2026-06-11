@@ -78,6 +78,19 @@ type FormValues = {
 
 type Draft = { id: string; updatedAt: string; values: FormValues };
 type PublishResult = { uri: string; cid: string; rkey: string };
+export type LinkedProjectPrefill = {
+  did: string;
+  rkey: string;
+  atUri: string;
+  cid: string | null;
+  title: string;
+  shortDescription: string | null;
+  description: string | null;
+  imageUrl: string | null;
+  locationUri: string | null;
+  rawRecord: Record<string, unknown> | null;
+  canLink: boolean;
+};
 type StepId = "basics" | "story" | "people" | "review";
 type SitesStatus = "idle" | "loading" | "ready" | "error";
 type FormField = "title" | "scopes" | "dates" | "shortDescription" | "description" | "contributors" | "confirmedRights" | "acceptedTerms";
@@ -87,6 +100,7 @@ type FormIssue = { field: FormField; step: StepId; message: string };
 
 const DRAFT_STORAGE_KEY = "bumicerts:create-drafts:v1";
 const COLLECTION = "org.hypercerts.claim.activity";
+const PROJECT_COLLECTION = "org.hypercerts.collection";
 const WORK_SCOPE_TAG_COLLECTION = "org.hypercerts.workscope.tag";
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 const TITLE_MAX = 120;
@@ -138,6 +152,60 @@ function normalizeDraftValues(values: Partial<FormValues> & { customScope?: stri
     selectedLocationUris: Array.isArray(values.selectedLocationUris) ? values.selectedLocationUris : [],
     acceptedTerms: values.acceptedTerms === true,
   };
+}
+
+function initialFormValues(project: LinkedProjectPrefill | null): FormValues {
+  if (!project) return { ...EMPTY_FORM, scopes: [], contributors: [""], selectedLocationUris: [] };
+  return {
+    ...EMPTY_FORM,
+    title: project.title,
+    shortDescription: project.shortDescription ?? "",
+    description: project.description ?? "",
+    selectedLocationUris: project.locationUri ? [project.locationUri] : [],
+    scopes: [],
+    contributors: [""],
+  };
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
+function stringValue(value: unknown): string | null {
+  return typeof value === "string" && value.trim().length > 0 ? value : null;
+}
+
+function projectItemUri(value: unknown): string | null {
+  if (!isRecord(value)) return null;
+  const itemIdentifier = isRecord(value.itemIdentifier) ? value.itemIdentifier : value;
+  return stringValue(itemIdentifier.uri);
+}
+
+function projectRecordWithBumicert(project: LinkedProjectPrefill, bumicert: { uri: string; cid: string }): Record<string, unknown> {
+  const base: Record<string, unknown> = isRecord(project.rawRecord) ? { ...project.rawRecord } : {};
+  const existingItems = Array.isArray(base.items) ? base.items.filter(isRecord) : [];
+  const existingUris = new Set(existingItems.map(projectItemUri).filter((uri): uri is string => Boolean(uri)));
+  const items = existingUris.has(bumicert.uri)
+    ? existingItems
+    : [...existingItems, { itemIdentifier: { uri: bumicert.uri, cid: bumicert.cid } }];
+
+  return {
+    ...base,
+    $type: PROJECT_COLLECTION,
+    title: stringValue(base.title) ?? project.title,
+    type: "project",
+    createdAt: stringValue(base.createdAt) ?? new Date().toISOString(),
+    items,
+  };
+}
+
+async function appendBumicertToProject(project: LinkedProjectPrefill, bumicert: { uri: string; cid: string }) {
+  await putRecord(
+    PROJECT_COLLECTION,
+    project.rkey,
+    projectRecordWithBumicert(project, bumicert),
+    project.cid ? { swapRecord: project.cid } : undefined,
+  );
 }
 
 function loadDrafts(): Draft[] {
@@ -193,6 +261,17 @@ function contributorList(values: FormValues) {
 function selectedLocations(values: FormValues, sites: ManagedLocation[]) {
   const selected = new Set(values.selectedLocationUris);
   return sites.filter((site) => selected.has(site.metadata.uri));
+}
+function selectedLocationRefs(values: FormValues, sites: ManagedLocation[], linkedProject: LinkedProjectPrefill | null) {
+  const refs: Array<{ uri: string; cid?: string }> = selectedLocations(values, sites).map((site) => ({ uri: site.metadata.uri, cid: site.metadata.cid }));
+  if (
+    linkedProject?.locationUri &&
+    values.selectedLocationUris.includes(linkedProject.locationUri) &&
+    !refs.some((ref) => ref.uri === linkedProject.locationUri)
+  ) {
+    refs.push({ uri: linkedProject.locationUri });
+  }
+  return refs;
 }
 function siteSubtitle(site: ManagedLocation) {
   return site.record.description || (site.record.locationType ? "Map area" : "Project place");
@@ -1067,12 +1146,23 @@ function PublishedView({ result, ownerIdentifier, onReset }: { result: PublishRe
 
 /* ── Main ───────────────────────────────────────────────────────────────── */
 
-export function NewBumicertClient({ did, ownerIdentifier, profile }: { did: string; ownerIdentifier: string; profile: ProfilePreview }) {
-  const [values, setValues] = useState<FormValues>(EMPTY_FORM);
+export function NewBumicertClient({
+  did,
+  ownerIdentifier,
+  profile,
+  linkedProject = null,
+}: {
+  did: string;
+  ownerIdentifier: string;
+  profile: ProfilePreview;
+  linkedProject?: LinkedProjectPrefill | null;
+}) {
+  const [values, setValues] = useState<FormValues>(() => initialFormValues(linkedProject));
   const [drafts, setDrafts] = useState<Draft[]>([]);
   const [activeDraftId, setActiveDraftId] = useState<string | null>(null);
   const [coverFile, setCoverFile] = useState<File | null>(null);
   const [coverPreview, setCoverPreview] = useState<string | null>(null);
+  const [prefilledCoverUrl, setPrefilledCoverUrl] = useState<string | null>(() => linkedProject?.imageUrl ?? null);
   const [coverError, setCoverError] = useState<string | null>(null);
   const [sites, setSites] = useState<ManagedLocation[]>([]);
   const [sitesStatus, setSitesStatus] = useState<SitesStatus>("idle");
@@ -1176,6 +1266,7 @@ export function NewBumicertClient({ did, ownerIdentifier, profile }: { did: stri
         return;
       }
       setCoverFile(file);
+      setPrefilledCoverUrl(null);
       setCoverPreview((prev) => {
         if (prev) URL.revokeObjectURL(prev);
         return URL.createObjectURL(file);
@@ -1196,6 +1287,7 @@ export function NewBumicertClient({ did, ownerIdentifier, profile }: { did: stri
       return null;
     });
     setCoverFile(null);
+    setPrefilledCoverUrl(null);
     setCoverError(null);
   };
 
@@ -1234,13 +1326,14 @@ export function NewBumicertClient({ did, ownerIdentifier, profile }: { did: stri
   };
 
   const resetForm = () => {
-    setValues(EMPTY_FORM);
+    setValues(initialFormValues(linkedProject));
     setActiveDraftId(null);
     setPublishResult(null);
     setPublishError(null);
     setPublishAttempted(false);
     setTouchedFields({});
     clearCover();
+    setPrefilledCoverUrl(linkedProject?.imageUrl ?? null);
   };
 
   const buildWorkScopeRecord = async () => {
@@ -1279,9 +1372,11 @@ export function NewBumicertClient({ did, ownerIdentifier, profile }: { did: stri
       if (coverFile) {
         const blob = await uploadBlob(coverFile);
         image = { $type: "org.hypercerts.defs#smallImage", image: blob.ref };
+      } else if (prefilledCoverUrl) {
+        image = { $type: "org.hypercerts.defs#uri", uri: prefilledCoverUrl };
       }
       const [siteRefs, workScope] = await Promise.all([
-        Promise.resolve(selectedLocations(values, sites).map((s) => ({ uri: s.metadata.uri, cid: s.metadata.cid }))),
+        Promise.resolve(selectedLocationRefs(values, sites, linkedProject)),
         buildWorkScopeRecord(),
       ]);
       const record: Record<string, unknown> = {
@@ -1300,6 +1395,7 @@ export function NewBumicertClient({ did, ownerIdentifier, profile }: { did: stri
         createdAt: new Date().toISOString(),
       };
       const result = await createRecord(COLLECTION, record);
+      if (linkedProject?.canLink) await appendBumicertToProject(linkedProject, result);
       setPublishResult({ uri: result.uri, cid: result.cid, rkey: extractRkey(result.uri) });
       if (activeDraftId) handleDeleteDraft(activeDraftId);
     } catch (error) {
@@ -1311,7 +1407,7 @@ export function NewBumicertClient({ did, ownerIdentifier, profile }: { did: stri
 
   const previewProps = {
     values,
-    coverPreview,
+    coverPreview: coverPreview ?? prefilledCoverUrl,
     sites,
     profile,
     did,
@@ -1394,7 +1490,7 @@ export function NewBumicertClient({ did, ownerIdentifier, profile }: { did: stri
                   <span className="hidden text-xs text-muted-foreground sm:block">{activeDraftId ? "Saved" : "Not saved yet"}</span>
                   <Button type="submit" size="lg" disabled={isPublishing}>
                     {isPublishing ? <Loader2Icon className="size-4 animate-spin" /> : <LeafIcon className="size-4" />}
-                    {isPublishing ? "Publishing…" : "Publish Bumicert"}
+                    {isPublishing ? "Publishing…" : linkedProject?.canLink ? "Publish to the project" : "Publish"}
                   </Button>
                 </div>
               </div>
