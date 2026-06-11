@@ -1,3 +1,4 @@
+import { TREE_FUTURE_DATE_ERROR, isTreeDateInFuture } from "../../../../_lib/tree-date-validation";
 import { z } from "zod";
 import type {
   ColumnMapping,
@@ -33,7 +34,8 @@ const OccurrenceRowSchema = z.object({
   eventDate: z
     .string()
     .min(1, "Event date is required")
-    .refine(isValidDate, { message: "Date must be in ISO 8601 or common format (YYYY-MM-DD, MM/DD/YYYY, YYYY)" }),
+    .refine(isValidDate, { message: "Date must be in ISO 8601 or common format (YYYY-MM-DD, MM/DD/YYYY, YYYY)" })
+    .refine((value) => !isTreeDateInFuture(value), { message: TREE_FUTURE_DATE_ERROR }),
   decimalLatitude: z.coerce.number().min(-90).max(90),
   decimalLongitude: z.coerce.number().min(-180).max(180),
   basisOfRecord: z.string().optional().default("HumanObservation"),

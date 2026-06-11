@@ -6,7 +6,7 @@ import { getTargetFieldLabel } from "./types";
 
 const REQUIRED_TREE_VALUES = {
   scientificName: "Cedrela odorata",
-  eventDate: "2026-01-15",
+  eventDate: "2020-01-15",
   decimalLatitude: "-3.4653",
   decimalLongitude: "-62.2159",
 };

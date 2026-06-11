@@ -3,6 +3,7 @@ import { isIP } from "node:net";
 import { headers } from "next/headers";
 import { fetchAuthSession } from "@/app/_lib/auth-server";
 import { getAuthBaseUrl } from "@/app/_lib/auth";
+import { TREE_FUTURE_DATE_ERROR, isTreeDateInFuture } from "@/app/_lib/tree-date-validation";
 import { resolvePdsHost } from "@/app/_lib/pds";
 import { transformPhotoUrl } from "@/app/(manage)/manage/_lib/upload/url-transforms";
 
@@ -167,6 +168,30 @@ function isOptionalString(value: unknown): value is string | undefined {
 
 function isOptionalNonEmptyString(value: unknown): value is string | undefined {
   return typeof value === "undefined" || (typeof value === "string" && value.trim().length > 0);
+}
+
+function hasFutureTreeEventDate(value: unknown): boolean {
+  return typeof value === "string" && isTreeDateInFuture(value);
+}
+
+function getMutationFutureDateError(body: MutationBody): string | null {
+  if ((body.operation === "createRecord" || body.operation === "putRecord") && body.collection === OCCURRENCE_COLLECTION) {
+    return hasFutureTreeEventDate(body.record.eventDate) ? TREE_FUTURE_DATE_ERROR : null;
+  }
+
+  if (body.operation === "updateOccurrence") {
+    return hasFutureTreeEventDate(body.data.eventDate) ? TREE_FUTURE_DATE_ERROR : null;
+  }
+
+  if (body.operation === "appendExistingDataset") {
+    return body.rows.some((row) => hasFutureTreeEventDate(row.occurrence.eventDate)) ? TREE_FUTURE_DATE_ERROR : null;
+  }
+
+  return null;
+}
+
+function assertTreeEventDateIsNotFuture(value: unknown): void {
+  if (hasFutureTreeEventDate(value)) throw new Error(TREE_FUTURE_DATE_ERROR);
 }
 
 function isHttpUrl(value: string): boolean {
@@ -637,6 +662,9 @@ async function runConfiguredPdsMutation(body: ForwardableMutationBody, did: stri
 }
 
 async function forwardMutationResponse(body: ForwardableMutationBody, did: string, cookie: string | null): Promise<Response> {
+  const futureDateError = getMutationFutureDateError(body);
+  if (futureDateError) return Response.json({ error: futureDateError }, { status: 400 });
+
   const authUrl = `${getAuthBaseUrl()}/api/atproto/mutation`;
   let upstream: Response;
   try {
@@ -844,6 +872,7 @@ async function createOccurrenceRecord(options: {
     establishmentMeans?: string;
   };
 }): Promise<CreatedRecord> {
+  assertTreeEventDateIsNotFuture(options.occurrenceInput.eventDate);
   const record = buildOccurrenceRecord(options.occurrenceInput);
   const result = await executeForwardableMutation<{ uri: string; cid: string }>({
     operation: "createRecord",
@@ -1223,6 +1252,7 @@ async function updateOccurrenceByRkey(
   if (typeof nextRecord.eventDate !== "string" || nextRecord.eventDate.trim().length === 0) {
     throw new Error("Event date is required.");
   }
+  assertTreeEventDateIsNotFuture(nextRecord.eventDate);
   if (typeof nextRecord.decimalLatitude === "number") nextRecord.decimalLatitude = String(nextRecord.decimalLatitude);
   if (typeof nextRecord.decimalLongitude === "number") nextRecord.decimalLongitude = String(nextRecord.decimalLongitude);
   assertCoordinatePair(nextRecord);
@@ -2158,6 +2188,11 @@ export async function POST(request: Request) {
   }
   if (!isMutationBody(body)) {
     return Response.json({ error: "Invalid request" }, { status: 400 });
+  }
+
+  const futureDateError = getMutationFutureDateError(body);
+  if (futureDateError) {
+    return Response.json({ error: futureDateError }, { status: 400 });
   }
 
   if (body.operation === "getDatasetRecord") {

@@ -1,3 +1,4 @@
+import { TREE_FUTURE_DATE_ERROR, isTreeDateInFuture } from "../../../../_lib/tree-date-validation";
 import type {
   OccurrenceRecord,
   TreeMeasurementRecord,
@@ -229,6 +230,7 @@ export function toFloraMeasurementPayload(
 export function validateOccurrenceDraft(draft: TreeOccurrenceDraft): string | null {
   if (!draft.scientificName.trim()) return "Scientific name is required.";
   if (!draft.eventDate.trim()) return "Event date is required.";
+  if (isTreeDateInFuture(draft.eventDate)) return TREE_FUTURE_DATE_ERROR;
   if (!draft.decimalLatitude.trim()) return "Latitude is required.";
   if (!draft.decimalLongitude.trim()) return "Longitude is required.";
 
