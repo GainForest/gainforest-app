@@ -3,6 +3,8 @@
 import { Fragment, useEffect, useMemo, useState } from "react";
 import { Camera, ChevronDown, ChevronRight, CheckCircle2, XCircle, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { TREE_UPLOAD_EVENTS } from "@/lib/analytics/events";
+import { trackTreeUploadEvent } from "@/lib/analytics/hotjar";
 import { applyMappings } from "../../_lib/upload/column-mapper";
 import { parseAndValidateRows } from "../../_lib/upload/schemas";
 import { getTargetFieldLabel } from "../../_lib/upload/types";
@@ -15,6 +17,7 @@ import { fetchUploadSiteBoundary, type SiteBoundaryGeoJson } from "../../_lib/up
 const MAX_PREVIEW_ROWS = 20;
 
 type Props = {
+  uploadId: string;
   parsedData: Record<string, string>[];
   mappings: ColumnMapping[];
   koboMediaZipIndex: KoboMediaZipIndex | null;
@@ -37,7 +40,7 @@ function buildErrorSummary(errors: { index: number; issues: { path: string; mess
     .sort((a, b) => b.count - a.count);
 }
 
-export default function PreviewStep({ parsedData, mappings, koboMediaZipIndex, siteSelection, onBack, onNext }: Props) {
+export default function PreviewStep({ uploadId, parsedData, mappings, koboMediaZipIndex, siteSelection, onBack, onNext }: Props) {
   const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set());
   const [errorSectionOpen, setErrorSectionOpen] = useState(false);
   const [siteBoundary, setSiteBoundary] = useState<SiteBoundaryGeoJson | null>(null);
@@ -107,6 +110,11 @@ export default function PreviewStep({ parsedData, mappings, koboMediaZipIndex, s
     return map;
   }, [valid]);
 
+  const totalPhotoCount = useMemo(
+    () => valid.reduce((sum, row) => sum + (row.photos?.length ?? 0), 0),
+    [valid],
+  );
+
   const errorByIndex = useMemo(() => {
     const map = new Map<number, { path: string; message: string }[]>();
     for (const err of errors) map.set(err.index, err.issues);
@@ -126,6 +134,22 @@ export default function PreviewStep({ parsedData, mappings, koboMediaZipIndex, s
       else next.add(rowIndex);
       return next;
     });
+  };
+
+  const handleNext = () => {
+    if (!canContinue) return;
+
+    trackTreeUploadEvent(TREE_UPLOAD_EVENTS.STEP_COMPLETED, {
+      uploadId,
+      stepIndex: 3,
+      stepName: "preview",
+      totalRows,
+      validRows: validCount,
+      invalidRows: errorCount,
+      mappedColumns: mappedHeaders.length,
+      photoTotal: totalPhotoCount,
+    });
+    onNext(valid, previewSkippedRows);
   };
 
   return (
@@ -295,8 +319,8 @@ export default function PreviewStep({ parsedData, mappings, koboMediaZipIndex, s
       )}
 
       <div className="flex items-center justify-between pt-2 border-t border-border">
-        <Button variant="outline" onClick={onBack}>Back to Column Mapping</Button>
-        <Button onClick={() => onNext(valid, previewSkippedRows)} disabled={!canContinue}>
+        <Button variant="outline" onClick={onBack}>Back to matched headings</Button>
+        <Button onClick={handleNext} disabled={!canContinue}>
           Upload {validCount} valid row{validCount !== 1 ? "s" : ""}
         </Button>
       </div>

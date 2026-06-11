@@ -3,6 +3,8 @@
 import { useMemo } from "react";
 import { AlertTriangle, CheckCircle2, CircleAlertIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { TREE_UPLOAD_EVENTS } from "@/lib/analytics/events";
+import { trackTreeUploadEvent } from "@/lib/analytics/hotjar";
 import {
   Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
@@ -34,6 +36,7 @@ function getMappedTarget(mappings: ColumnMapping[], sourceColumn: string): strin
 }
 
 type Props = {
+  uploadId: string;
   headers: string[];
   mappings: ColumnMapping[];
   sampleData?: Record<string, string>[];
@@ -42,7 +45,7 @@ type Props = {
   onNext: () => void;
 };
 
-export default function ColumnMappingStep({ headers, mappings, sampleData, onMappingsChange, onBack, onNext }: Props) {
+export default function ColumnMappingStep({ uploadId, headers, mappings, sampleData, onMappingsChange, onBack, onNext }: Props) {
   const koboDetection = useMemo(() => detectKoboFormat(headers), [headers]);
 
   const targetToSources = useMemo(() => {
@@ -83,6 +86,22 @@ export default function ColumnMappingStep({ headers, mappings, sampleData, onMap
     const updated = mappings.filter((m) => m.sourceColumn !== sourceColumn);
     if (newTarget !== SKIP_SENTINEL) updated.push({ sourceColumn, targetField: newTarget });
     onMappingsChange(updated);
+  };
+
+  const handleNext = () => {
+    trackTreeUploadEvent(TREE_UPLOAD_EVENTS.STEP_COMPLETED, {
+      uploadId,
+      stepIndex: 2,
+      stepName: "mapping",
+      totalColumns: headers.length,
+      mappedColumns: mappings.length,
+      skippedColumns: skippedColumnsNeedingReview.length,
+      requiredMissingCount: missingRequired.length,
+      duplicateMappingCount: duplicateSourceColumns.size,
+      expectedSkippedKoboColumnCount: expectedSkippedKoboCount,
+      sourceFormat: koboDetection.isKobo ? "kobo" : "generic",
+    });
+    onNext();
   };
 
   return (
@@ -221,7 +240,7 @@ export default function ColumnMappingStep({ headers, mappings, sampleData, onMap
 
       <div className="flex items-center justify-between pt-2 border-t border-border">
         <Button variant="outline" onClick={onBack}>Back</Button>
-        <Button onClick={onNext} disabled={!allRequiredMapped}>Continue to Preview</Button>
+        <Button onClick={handleNext} disabled={!allRequiredMapped}>Continue to preview</Button>
       </div>
     </div>
   );

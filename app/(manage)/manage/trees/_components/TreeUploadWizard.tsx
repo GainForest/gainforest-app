@@ -1,11 +1,15 @@
 "use client";
 
 import { CheckIcon } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import FileDropStep from "./FileDropStep";
 import ColumnMappingStep from "./ColumnMappingStep";
 import PreviewStep from "./PreviewStep";
 import UploadStep from "./UploadStep";
+import { TREE_UPLOAD_EVENTS } from "@/lib/analytics/events";
+import { trackTreeUploadEvent } from "@/lib/analytics/hotjar";
+import { getTreeUploadStepName } from "@/lib/analytics/tree-upload";
+import { useAnalyticsConsent } from "@/lib/analytics/use-analytics-consent";
 import type { ColumnMapping, TreeUploadRowAttentionSummary, ValidatedRow } from "../../_lib/upload/types";
 import type { KoboMediaZipIndex } from "../../_lib/upload/kobo-media-zip";
 import { NO_UPLOAD_DATASET_SELECTION, type UploadDatasetSelection } from "../../_lib/upload/upload-dataset-selection";
@@ -27,6 +31,12 @@ type WizardState = {
   siteSelection: UploadSiteSelection | null;
 };
 
+type InitializedWizard = {
+  state: WizardState;
+  uploadId: string;
+  restoredPendingUpload: boolean;
+};
+
 const INITIAL_STATE: WizardState = {
   currentStep: 1,
   file: null,
@@ -45,13 +55,14 @@ const INITIAL_STATE: WizardState = {
 function createUploadId(): string {
   return typeof globalThis.crypto?.randomUUID === "function"
     ? globalThis.crypto.randomUUID()
-    : `upload-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    : `tree-upload-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 }
 
-function initWizard(did: string): { state: WizardState; uploadId: string } {
+function initWizard(did: string): InitializedWizard {
   if (typeof window === "undefined") {
-    return { state: INITIAL_STATE, uploadId: createUploadId() };
+    return { state: INITIAL_STATE, uploadId: createUploadId(), restoredPendingUpload: false };
   }
+
   const pending = readPendingUpload(did);
   if (pending) {
     return {
@@ -65,14 +76,16 @@ function initWizard(did: string): { state: WizardState; uploadId: string } {
         currentStep: 4,
       },
       uploadId: pending.uploadId ?? createUploadId(),
+      restoredPendingUpload: true,
     };
   }
-  return { state: INITIAL_STATE, uploadId: createUploadId() };
+
+  return { state: INITIAL_STATE, uploadId: createUploadId(), restoredPendingUpload: false };
 }
 
 const STEPS = [
-  { number: 1, label: "Choose File" },
-  { number: 2, label: "Match Headings" },
+  { number: 1, label: "Choose file" },
+  { number: 2, label: "Match headings" },
   { number: 3, label: "Preview" },
   { number: 4, label: "Save" },
 ] as const;
@@ -96,11 +109,7 @@ function StepIndicator({ currentStep }: { currentStep: 1 | 2 | 3 | 4 }) {
                     : "bg-muted text-muted-foreground"
                 }`}
               >
-                {isCompleted ? (
-                  <CheckIcon className="h-4 w-4" aria-hidden />
-                ) : (
-                  step.number
-                )}
+                {isCompleted ? <CheckIcon className="h-4 w-4" aria-hidden /> : step.number}
               </div>
               <span className={`text-xs whitespace-nowrap ${isActive ? "text-foreground font-medium" : "text-muted-foreground/70"}`}>
                 {step.label}
@@ -120,6 +129,48 @@ export function TreeUploadWizard({ did, onDone }: { did: string; onDone: () => v
   const [initial] = useState(() => initWizard(did));
   const [state, setState] = useState<WizardState>(initial.state);
   const [uploadId, setUploadId] = useState(initial.uploadId);
+  const flowStartedUploadIdRef = useRef<string | null>(null);
+  const lastViewedStepRef = useRef<string | null>(null);
+  const restoredPendingUploadRef = useRef(initial.restoredPendingUpload);
+  const analyticsConsent = useAnalyticsConsent();
+
+  useEffect(() => {
+    if (analyticsConsent !== "granted") return;
+    if (flowStartedUploadIdRef.current === uploadId) return;
+
+    if (restoredPendingUploadRef.current) {
+      restoredPendingUploadRef.current = false;
+      flowStartedUploadIdRef.current = uploadId;
+      return;
+    }
+
+    if (trackTreeUploadEvent(TREE_UPLOAD_EVENTS.FLOW_STARTED, { uploadId })) {
+      flowStartedUploadIdRef.current = uploadId;
+    }
+  }, [analyticsConsent, uploadId]);
+
+  useEffect(() => {
+    if (analyticsConsent !== "granted") return;
+
+    const stepName = getTreeUploadStepName(state.currentStep);
+    const stepKey = `${uploadId}:${state.currentStep}`;
+
+    if (lastViewedStepRef.current === stepKey) return;
+
+    if (trackTreeUploadEvent(TREE_UPLOAD_EVENTS.STEP_VIEWED, {
+      uploadId,
+      stepIndex: state.currentStep,
+      stepName,
+    })) {
+      lastViewedStepRef.current = stepKey;
+    }
+  }, [analyticsConsent, state.currentStep, uploadId]);
+
+  const resetWizard = () => {
+    clearPendingUpload();
+    setUploadId(createUploadId());
+    setState(INITIAL_STATE);
+  };
 
   const handleFileAndMappings = (
     file: File,
@@ -147,10 +198,12 @@ export function TreeUploadWizard({ did, onDone }: { did: string; onDone: () => v
     setState((prev) => ({ ...prev, validRows, previewSkippedRows, currentStep: 4 }));
   };
 
-  const handleComplete = () => {
-    clearPendingUpload();
-    setUploadId(createUploadId());
-    setState(INITIAL_STATE);
+  const handleUploadMore = () => {
+    resetWizard();
+  };
+
+  const handleDone = () => {
+    resetWizard();
     onDone();
   };
 
@@ -171,7 +224,7 @@ export function TreeUploadWizard({ did, onDone }: { did: string; onDone: () => v
   return (
     <div className="max-w-3xl mx-auto px-4 py-8">
       <div className="mb-6">
-        <h1 className="text-2xl font-medium">Upload Trees</h1>
+        <h1 className="text-2xl font-medium">Upload trees</h1>
         <p className="text-sm text-muted-foreground mt-1">
           Upload a spreadsheet export of tree information to GainForest.
         </p>
@@ -191,6 +244,7 @@ export function TreeUploadWizard({ did, onDone }: { did: string; onDone: () => v
 
       {currentStep === 2 && headers !== null && parsedData !== null && (
         <ColumnMappingStep
+          uploadId={uploadId}
           headers={headers}
           mappings={mappings}
           sampleData={parsedData.slice(0, 5)}
@@ -202,6 +256,7 @@ export function TreeUploadWizard({ did, onDone }: { did: string; onDone: () => v
 
       {currentStep === 3 && parsedData !== null && (
         <PreviewStep
+          uploadId={uploadId}
           parsedData={parsedData}
           mappings={mappings}
           koboMediaZipIndex={koboMediaZipIndex}
@@ -221,9 +276,10 @@ export function TreeUploadWizard({ did, onDone }: { did: string; onDone: () => v
           establishmentMeans={establishmentMeans}
           datasetSelection={datasetSelection}
           siteSelection={siteSelection}
-          backLabel={parsedData !== null ? "Back to Preview" : "Start Over"}
+          backLabel={parsedData !== null ? "Back to preview" : "Start over"}
           onBack={handleBackToStep3}
-          onComplete={handleComplete}
+          onUploadMore={handleUploadMore}
+          onDone={handleDone}
         />
       )}
     </div>

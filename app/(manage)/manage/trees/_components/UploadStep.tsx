@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useMemo, useRef, useState } from "react";
 import {
   AlertTriangle,
@@ -14,6 +15,10 @@ import {
   XCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useModal } from "@/components/ui/modal/context";
+import { TREE_UPLOAD_EVENTS, type TreeUploadEventPayload } from "@/lib/analytics/events";
+import { trackTreeUploadEvent } from "@/lib/analytics/hotjar";
+import { links } from "@/lib/links";
 import {
   appendExistingDataset,
   createMeasurement,
@@ -103,7 +108,8 @@ type UploadStepProps = {
   siteSelection: UploadSiteSelection | null;
   backLabel: string;
   onBack: () => void;
-  onComplete: () => void;
+  onUploadMore: () => void;
+  onDone: () => void;
 };
 
 function getInitialRowStatuses(rows: ValidatedRow[], skippedRows: SkippedBoundaryRow[]): RowStatus[] {
@@ -201,13 +207,16 @@ export default function UploadStep({
   siteSelection,
   backLabel,
   onBack,
-  onComplete,
+  onUploadMore,
+  onDone,
 }: UploadStepProps) {
+  const { pushModal, show } = useModal();
   const [uploadStarted, setUploadStarted] = useState(false);
   const [uploadDone, setUploadDone] = useState(false);
   const [uploadStartedAtMs, setUploadStartedAtMs] = useState<number | null>(null);
   const [uploadFatalError, setUploadFatalError] = useState<string | null>(null);
   const [datasetUpdateWarning, setDatasetUpdateWarning] = useState<string | null>(null);
+  const [uploadedDatasetUri, setUploadedDatasetUri] = useState<string | null>(null);
   const [clockMs, setClockMs] = useState(() => Date.now());
   const [progress, setProgress] = useState<UploadProgress>({
     current: 0, total: validRows.length, successes: 0, partials: 0, failures: 0, currentRow: "",
@@ -229,6 +238,7 @@ export default function UploadStep({
 
   const uploadRef = useRef(false);
   const photoFetchRef = useRef(false);
+  const completionModalShownRef = useRef(false);
 
   const skippedUploadRowIndexSet = useMemo(() => new Set(skippedUploadRowIndexes), [skippedUploadRowIndexes]);
   const photoFetchQueue = useMemo(
@@ -256,12 +266,15 @@ export default function UploadStep({
     if (uploadRef.current) return;
     uploadRef.current = true;
     const uploadStartMs = Date.now();
+    const previewSkippedCount = previewSkippedRows.length;
+    const sourceTotalRows = validRows.length + previewSkippedCount;
     setClockMs(uploadStartMs);
     setUploadStarted(true);
     setUploadStartedAtMs(null);
     setPhotoFetchStartedAtMs(null);
     setUploadFatalError(null);
     setDatasetUpdateWarning(null);
+    setUploadedDatasetUri(null);
     setPhotoFetchStarted(false);
     setPhotoFetchDone(false);
     setPhotoFetchStatuses({});
@@ -271,9 +284,28 @@ export default function UploadStep({
     let skippedRowsForUpload: SkippedBoundaryRow[] = [];
     let photoFetchQueueForUploadableRows: PhotoUploadQueueEntry[] = [];
 
+    trackTreeUploadEvent(TREE_UPLOAD_EVENTS.UPLOAD_STARTED, {
+      uploadId,
+      datasetMode: datasetSelection.mode,
+      totalRows: sourceTotalRows,
+      validRows: validRows.length,
+      invalidRows: previewSkippedCount,
+      photoTotal: photoFetchQueue.length,
+      hasKoboZip: koboMediaZipFile !== null,
+    });
+
     if (!siteSelection) {
+      const completedAtMs = Date.now();
+      trackTreeUploadEvent(TREE_UPLOAD_EVENTS.UPLOAD_FAILED, {
+        uploadId,
+        datasetMode: datasetSelection.mode,
+        totalRows: sourceTotalRows,
+        photoTotal: 0,
+        failureReason: "site_selection_missing",
+        durationSeconds: Math.round((completedAtMs - uploadStartMs) / 1_000),
+      });
       setUploadFatalError("No site selected. Go back and choose or create a site boundary.");
-      setClockMs(Date.now());
+      setClockMs(completedAtMs);
       setUploadDone(true);
       return;
     }
@@ -298,30 +330,69 @@ export default function UploadStep({
       });
 
       if (siteBoundaryCheck.fatalError) {
+        const completedAtMs = Date.now();
+        trackTreeUploadEvent(TREE_UPLOAD_EVENTS.UPLOAD_FAILED, {
+          uploadId,
+          datasetMode: datasetSelection.mode,
+          totalRows: sourceTotalRows,
+          photoTotal: photoFetchQueueForUploadableRows.length,
+          failureReason: "site_boundary_validation_failed",
+          durationSeconds: Math.round((completedAtMs - uploadStartMs) / 1_000),
+        });
         setUploadFatalError(siteBoundaryCheck.fatalError);
-        setClockMs(Date.now());
+        setClockMs(completedAtMs);
         setUploadDone(true);
         return;
       }
       if (rowsToUpload.length === 0) {
+        const completedAtMs = Date.now();
         clearPendingUpload();
-        setClockMs(Date.now());
+        trackTreeUploadEvent(TREE_UPLOAD_EVENTS.UPLOAD_COMPLETED, {
+          uploadId,
+          datasetMode: datasetSelection.mode,
+          totalRows: sourceTotalRows,
+          savedRows: 0,
+          partialRows: 0,
+          failedRows: previewSkippedCount + siteBoundaryCheck.skippedRows.length,
+          photoTotal: 0,
+          hasKoboZip: false,
+          durationSeconds: Math.round((completedAtMs - uploadStartMs) / 1_000),
+        });
+        setClockMs(completedAtMs);
         setUploadDone(true);
         return;
       }
     } catch {
+      const completedAtMs = Date.now();
+      trackTreeUploadEvent(TREE_UPLOAD_EVENTS.UPLOAD_FAILED, {
+        uploadId,
+        datasetMode: datasetSelection.mode,
+        totalRows: sourceTotalRows,
+        photoTotal: photoFetchQueueForUploadableRows.length,
+        failureReason: "site_boundary_validation_failed",
+        durationSeconds: Math.round((completedAtMs - uploadStartMs) / 1_000),
+      });
       setUploadFatalError("Could not check the selected drawn map area. Go back, choose or create a site boundary, then try again.");
-      setClockMs(Date.now());
+      setClockMs(completedAtMs);
       setUploadDone(true);
       return;
     }
 
     const needsPhotoFolder = photoFetchQueueForUploadableRows.some((entry) => entry.photo.source === "koboZip");
     if (needsPhotoFolder && !koboMediaZipFile) {
+      const completedAtMs = Date.now();
+      trackTreeUploadEvent(TREE_UPLOAD_EVENTS.UPLOAD_FAILED, {
+        uploadId,
+        datasetMode: datasetSelection.mode,
+        totalRows: sourceTotalRows,
+        photoTotal: photoFetchQueueForUploadableRows.length,
+        failureReason: "missing_kobo_media_zip",
+        durationSeconds: Math.round((completedAtMs - uploadStartMs) / 1_000),
+      });
       setUploadFatalError(
         "This upload includes photos from a compressed photo folder, but that folder cannot be restored after refreshing or signing in again. Start over and select both the tree file and matching photo folder.",
       );
-      setClockMs(Date.now());
+      setClockMs(completedAtMs);
       setUploadDone(true);
       return;
     }
@@ -343,9 +414,19 @@ export default function UploadStep({
         });
         datasetUri = dsResult.uri;
         datasetRkey = dsResult.uri.split("/").pop();
+        setUploadedDatasetUri(dsResult.uri);
       } catch {
+        const completedAtMs = Date.now();
+        trackTreeUploadEvent(TREE_UPLOAD_EVENTS.UPLOAD_FAILED, {
+          uploadId,
+          datasetMode: datasetSelection.mode,
+          totalRows: sourceTotalRows,
+          photoTotal: photoFetchQueueForUploadableRows.length,
+          failureReason: "tree_group_create_failed",
+          durationSeconds: Math.round((completedAtMs - uploadStartMs) / 1_000),
+        });
         setUploadFatalError("Could not create the tree group. Try again or continue without a group.");
-        setClockMs(Date.now());
+        setClockMs(completedAtMs);
         setUploadDone(true);
         return;
       }
@@ -433,6 +514,7 @@ export default function UploadStep({
             establishmentMeans,
           });
           const handledIndexes = new Set<number>();
+          setUploadedDatasetUri(response.datasetBecameUnavailable ? null : response.datasetUri);
 
           for (const result of response.results) {
             const entry = chunkEntries[result.index];
@@ -472,6 +554,7 @@ export default function UploadStep({
             );
             successes -= demotedSuccesses;
             partials += demotedSuccesses;
+            setUploadedDatasetUri(null);
 
             for (let remainingIndex = chunkEnd; remainingIndex < rowsToUpload.length; remainingIndex += 1) {
               const remainingEntry = rowsToUpload[remainingIndex];
@@ -496,6 +579,7 @@ export default function UploadStep({
             );
             successes -= demotedSuccesses;
             partials += demotedSuccesses;
+            setUploadedDatasetUri(null);
           }
 
           for (let remainingIndex = chunkStart; remainingIndex < rowsToUpload.length; remainingIndex += 1) {
@@ -524,7 +608,19 @@ export default function UploadStep({
 
       }
 
-      setClockMs(Date.now());
+      const completedAtMs = Date.now();
+      trackTreeUploadEvent(TREE_UPLOAD_EVENTS.UPLOAD_COMPLETED, {
+        uploadId,
+        datasetMode: datasetSelection.mode,
+        totalRows: sourceTotalRows,
+        savedRows: successes + partials,
+        partialRows: partials,
+        failedRows: previewSkippedCount + failures,
+        photoTotal: photoFetchQueueForUploadableRows.length,
+        hasKoboZip: koboMediaZipFile !== null,
+        durationSeconds: Math.round((completedAtMs - rowUploadStartMs) / 1_000),
+      });
+      setClockMs(completedAtMs);
       setUploadDone(true);
       return;
     }
@@ -616,6 +712,7 @@ export default function UploadStep({
     if (datasetSelection.mode === "new" && datasetRkey && persistedOccurrences === 0) {
       try {
         await deleteRecord("app.gainforest.dwc.dataset", datasetRkey);
+        setUploadedDatasetUri(null);
       } catch {
         setDatasetUpdateWarning("The empty tree group could not be removed automatically.");
       }
@@ -627,9 +724,21 @@ export default function UploadStep({
       }
     }
 
-    setClockMs(Date.now());
+    const completedAtMs = Date.now();
+    trackTreeUploadEvent(TREE_UPLOAD_EVENTS.UPLOAD_COMPLETED, {
+      uploadId,
+      datasetMode: datasetSelection.mode,
+      totalRows: sourceTotalRows,
+      savedRows: successes + partials,
+      partialRows: partials,
+      failedRows: previewSkippedCount + failures,
+      photoTotal: photoFetchQueueForUploadableRows.length,
+      hasKoboZip: koboMediaZipFile !== null,
+      durationSeconds: Math.round((completedAtMs - rowUploadStartMs) / 1_000),
+    });
+    setClockMs(completedAtMs);
     setUploadDone(true);
-  }, [datasetSelection, establishmentMeans, koboMediaZipFile, siteSelection, validRows]);
+  }, [datasetSelection, establishmentMeans, koboMediaZipFile, photoFetchQueue.length, previewSkippedRows.length, siteSelection, uploadId, validRows]);
 
   const runPhotoFetch = useCallback(async () => {
     if (photoFetchRef.current) return;
@@ -639,6 +748,14 @@ export default function UploadStep({
     setPhotoFetchStartedAtMs(photoStartMs);
     setPhotoFetchStarted(true);
     setPhotoFetchProgress((prev) => ({ ...prev, total: photoFetchQueue.length }));
+
+    trackTreeUploadEvent(TREE_UPLOAD_EVENTS.PHOTO_UPLOAD_STARTED, {
+      uploadId,
+      datasetMode: datasetSelection.mode,
+      totalRows: validRows.length,
+      photoTotal: photoFetchQueue.length,
+      hasKoboZip: koboMediaZipFile !== null,
+    });
 
     let successes = 0;
     let failures = 0;
@@ -749,9 +866,23 @@ export default function UploadStep({
       setClockMs(Date.now());
     }
 
-    setClockMs(Date.now());
+    const completedAtMs = Date.now();
+    const photoEvent = failures > 0
+      ? TREE_UPLOAD_EVENTS.PHOTO_UPLOAD_FAILED
+      : TREE_UPLOAD_EVENTS.PHOTO_UPLOAD_COMPLETED;
+    trackTreeUploadEvent(photoEvent, {
+      uploadId,
+      datasetMode: datasetSelection.mode,
+      totalRows: validRows.length,
+      photoTotal: photoFetchQueue.length,
+      photoSucceeded: successes,
+      photoFailed: failures,
+      hasKoboZip: koboMediaZipFile !== null,
+      durationSeconds: Math.round((completedAtMs - photoStartMs) / 1_000),
+    });
+    setClockMs(completedAtMs);
     setPhotoFetchDone(true);
-  }, [koboMediaZipFile, photoFetchQueue, rowStatuses, siteSelection?.uri]);
+  }, [datasetSelection.mode, koboMediaZipFile, photoFetchQueue, rowStatuses, siteSelection?.uri, uploadId, validRows.length]);
 
   const { current, total: uploadTotal, successes, partials, failures, currentRow } = progress;
   const completedRows = successes + partials + failures;
@@ -777,6 +908,7 @@ export default function UploadStep({
   const isUploadInProgress = uploadStarted && !allPhasesComplete;
   const showBackNavigation = !uploadDone;
   const hasUploadedTrees = persistedCount > 0;
+  const shouldShowCompletionModal = uploadStarted && allPhasesComplete && !uploadFatalError;
 
   const selectedDatasetName =
     datasetSelection.mode === "new" ? datasetSelection.name :
@@ -794,6 +926,43 @@ export default function UploadStep({
     isComplete: photoFetchDone,
     unitLabel: "photo",
   });
+
+  const sourceTotalCount = uploadTotal + previewSkippedRows.length;
+  const treeManagerHref = links.manage.treesFiltered({ dataset: uploadedDatasetUri });
+  const treeManagerLabel = uploadedDatasetUri ? "View tree group" : "View trees";
+  const uploadDurationSeconds = uploadStartedAtMs
+    ? Math.max(0, Math.round((clockMs - uploadStartedAtMs) / 1_000))
+    : null;
+  const completionAnalyticsPayload = useMemo<TreeUploadEventPayload>(() => {
+    const payload: TreeUploadEventPayload = {
+      uploadId,
+      datasetMode: datasetSelection.mode,
+      totalRows: sourceTotalCount,
+      savedRows: persistedCount,
+      partialRows: partials,
+      failedRows: totalFailureCount,
+      photoTotal: photoFetchProgress.total,
+      photoSucceeded: photoFetchProgress.successes,
+      photoFailed: photoFetchProgress.failures,
+      hasKoboZip: koboMediaZipFile !== null,
+    };
+
+    return uploadDurationSeconds === null
+      ? payload
+      : { ...payload, durationSeconds: uploadDurationSeconds };
+  }, [
+    datasetSelection.mode,
+    koboMediaZipFile,
+    partials,
+    persistedCount,
+    photoFetchProgress.failures,
+    photoFetchProgress.successes,
+    photoFetchProgress.total,
+    sourceTotalCount,
+    totalFailureCount,
+    uploadDurationSeconds,
+    uploadId,
+  ]);
 
   useUploadStepEffects({
     did,
@@ -813,6 +982,20 @@ export default function UploadStep({
     runPhotoFetch,
     isUploadInProgress,
     setClockMs,
+    allPhasesComplete,
+    shouldShowCompletionModal,
+    completionModalShownRef,
+    total: sourceTotalCount,
+    partials,
+    failures: totalFailureCount,
+    rowAttentionSummaries,
+    photoFailureCount,
+    treeManagerHref,
+    treeManagerLabel,
+    completionAnalyticsPayload,
+    onUploadMore,
+    pushModal,
+    show,
   });
 
   return (
@@ -1006,15 +1189,30 @@ export default function UploadStep({
         )}
         {allPhasesComplete && (
           <div className="flex gap-2">
-            <Button variant="outline" onClick={onComplete}>
-              {uploadFatalError ? "Start Over" : "Add More Trees"}
+            <Button
+              variant="outline"
+              onClick={() => {
+                if (!uploadFatalError) {
+                  trackTreeUploadEvent(TREE_UPLOAD_EVENTS.UPLOAD_MORE_CLICKED, completionAnalyticsPayload);
+                }
+                onUploadMore();
+              }}
+            >
+              {uploadFatalError ? "Start over" : "Upload more trees"}
             </Button>
-            {!uploadFatalError && hasUploadedTrees && (
-              <Button onClick={onComplete}>
-                <DatabaseIcon />
-                Done
+            {!uploadFatalError && hasUploadedTrees ? (
+              <Button asChild>
+                <Link
+                  href={treeManagerHref}
+                  onClick={() => trackTreeUploadEvent(TREE_UPLOAD_EVENTS.VIEW_TREES_CLICKED, completionAnalyticsPayload)}
+                >
+                  <DatabaseIcon />
+                  {treeManagerLabel}
+                </Link>
               </Button>
-            )}
+            ) : !uploadFatalError ? (
+              <Button onClick={onDone}>Done</Button>
+            ) : null}
           </div>
         )}
       </div>

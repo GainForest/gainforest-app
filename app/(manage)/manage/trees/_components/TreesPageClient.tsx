@@ -3,6 +3,7 @@
 import { Suspense } from "react";
 import { TreeUploadWizard } from "./TreeUploadWizard";
 import { TreesClient } from "./TreesClient";
+import { TreeUploadContentsquareProvider } from "./TreeUploadContentsquareProvider";
 import { useTreesMode } from "../_hooks/useTreesMode";
 
 function TreesPageInner({ did }: { did: string }) {
@@ -17,7 +18,9 @@ function TreesPageInner({ did }: { did: string }) {
 export function TreesPageClient({ did }: { did: string }) {
   return (
     <Suspense fallback={null}>
-      <TreesPageInner did={did} />
+      <TreeUploadContentsquareProvider>
+        <TreesPageInner did={did} />
+      </TreeUploadContentsquareProvider>
     </Suspense>
   );
 }
