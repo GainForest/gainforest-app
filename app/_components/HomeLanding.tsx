@@ -569,12 +569,12 @@ function OpenNetworkSection() {
             <span className="h-px w-8 bg-border" />
           </div>
           <h2 className="font-garamond text-4xl font-light tracking-[-0.01em] text-foreground md:text-5xl">
-            Built to <span className="font-instrument text-primary italic">interoperate</span>
+            Built for <span className="font-instrument text-primary italic">collective impact</span>
           </h2>
           <p className="mx-auto mt-3 max-w-2xl text-base leading-relaxed text-muted-foreground">
-            Bumicerts runs on the open AT Protocol network, so your impact data is never
-            locked in. The same records flow freely to apps like Ma&nbsp;Earth and Hypercerts —
-            owned by you, readable everywhere.
+            GainForest uses the open AT Protocol network, so your impact data stays yours.
+            The same records can be shared with apps like Ma&nbsp;Earth and Hypercerts —
+            easy to move, easy to read.
           </p>
         </motion.div>
 
