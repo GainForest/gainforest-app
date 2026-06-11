@@ -1,106 +1,116 @@
 @import "tailwindcss";
 
 /* ──────────────────────────────────────────────────────────────────────────
-   Design tokens — aligned with gainforest.earth, with the brand mint
-   restricted to the logo + subtle live-data accents.
+   Design tokens — ported from ../bumicerts-clean-rewrite/app/globals.css
+   (itself mirrored from bumicerts-monorepo): stark white/ink surfaces,
+   oklch sage primary, shadcn-compatible card/muted/accent slots, and the
+   same radius scale. The earlier warm-cream gainforest.earth palette is in
+   git history; the team asked to adopt the Bumicerts system wholesale.
 
-   Brand vs. primary:
-   - `--brand` (#2FCE8A) is the mint that lives in the logo SVG fill.
-     It re-appears — *subtly* — on the live-data accents (the LIVE
-     pulse dot, the globe pin tooltip label, the signed-in chip, and
-     the active language switcher row). It is **never** used as a
-     solid button background. The team specifically rejected mint CTAs:
-     "keep the gainforest logo green in the logo but only subtly in
-     the page".
-   - `--primary` is the **call-to-action** colour, not the brand. On
-     cream it's a confident near-black solid pill (text-cream on ink).
-     On the dark closing footer we swap to a cream-on-ink pill because
-     near-black on near-black is invisible.
+   Compatibility aliases (`--border-soft`, `--surface`, `--surface-sunken`,
+   `--brand`, `--ink*`) keep this app's existing components themed without
+   a mechanical class rename. `--brand` now maps onto the sage primary the
+   same way bumicerts-clean-rewrite does — the mint #2fce8a is retired.
 
    Headlines: tall serif (Cormorant Garamond), with italic emphasis on
    a single key word — never a whole line.
-   Body text: black on cream, white on ink. High contrast, not muted.
    Buttons: full-pill (border-radius: 9999px).
-   Rhythm: alternating cream (`--background`) and near-black (`--ink`)
-   sections, each holding ONE idea — matches gainforest.earth's pace.
+   Rhythm: mostly light sections with two deliberate near-black `--ink`
+   beats (DataCommons + closing Footer), unchanged from before.
 ────────────────────────────────────────────────────────────────────────── */
 
 :root {
-  /* Warm cream background sampled from the gainforest.earth hero. */
-  --background: #f4efe4;
-  --foreground: #1c1c1a;
-  --muted-foreground: #5b5b56;
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
 
-  /* Call-to-action colour — sage forest green, picked to match the
-     primary on certs.gainforest.app (Bumicerts uses
-     `--primary: #3e7053`). The team explicitly rejected the bright
-     mint logo green for buttons ("keep the gainforest logo green in
-     the logo but only subtly in the page"), so we sit one shade
-     deeper / less saturated than the logo. */
-  --primary: #3e7053;
-  --primary-dark: #2e5840;
-  --primary-foreground: #fafafa;
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
 
-  /* Brand mint — the logo SVG fill (#2FCE8A). Used by `<LogoMark>` and
-     a small set of subtle live-data accents. Do NOT use as a button
-     background; see the rationale block above. */
-  --brand: #2fce8a;
-  --brand-dark: #21b073;
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
 
-  /* Subtle borders on the cream surface. */
-  --border: #d9d3c3;
-  --border-soft: #e6dfd0;
+  --primary: oklch(0.5 0.0719 157.12);
+  --primary-dark: oklch(0.42 0.0719 157.12);
+  --primary-foreground: oklch(0.985 0 0);
 
-  /* Dark "ink" section — near-black with a touch of warmth so it
-     doesn't clash with the cream when sections alternate. Used for the
-     DataCommons section and the integrated closing footer. */
-  --ink: #141413;
-  --ink-foreground: #f4efe4;
-  --ink-muted: #a8a59a;
-  --ink-border: #2a2a27;
+  --secondary: oklch(0.97 0.003 264.54);
+  --secondary-foreground: oklch(0.205 0 0);
 
-  /* Lifted surface used by data cards + image placeholders sitting on
-     the cream — one shade lighter than the background so cards read as
-     lifted, not cut-in. `--surface-sunken` is the recessed variant
-     (image placeholders, selected pills). These swap in `.dark` so the
-     cards stay legible on the ink background. Matches the gainforest-
-     explorer tokens. */
-  --surface: #fbf8f0;
-  --surface-sunken: #efe9da;
+  --muted: oklch(0.97 0.003 264.54);
+  --muted-foreground: oklch(0.48 0.012 264.54);
+
+  --accent: oklch(0.97 0.0209 147.64);
+  --accent-foreground: oklch(0.3 0.04 157);
+
+  --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: oklch(0.985 0 0);
+
+  --border: oklch(0.922 0.004 286.32);
+  --input: oklch(0.922 0.004 286.32);
+  --ring: oklch(0.5 0.0719 157.12 / 0.3);
+
+  --radius: 0.75rem;
+
+  /* Legacy gainforest-app aliases, mapped onto the Bumicerts system. */
+  --border-soft: var(--border);
+  --surface: var(--card);
+  --surface-sunken: var(--muted);
+  --brand: var(--primary);
+  --brand-dark: var(--primary-dark);
+  --ink: oklch(0.08 0 0);
+  --ink-foreground: oklch(0.93 0 0);
+  --ink-muted: oklch(0.65 0.01 264.54);
+  --ink-border: oklch(1 0 0 / 0.08);
 
   color-scheme: light;
 }
 
 /* ──────────────────────────────────────────────────────────────────────────
-   Dark mode. Ported verbatim from gainforest-explorer: the editorial "ink"
-   black promoted to a site-wide theme — near-black background, cream
-   foreground, sage lifted one step for legibility on dark surfaces. Toggled
+   Dark mode — same block as bumicerts-clean-rewrite: neutral near-black
+   surfaces with the sage primary lifted one step for legibility. Toggled
    by adding `.dark` to <html> (see ThemeToggle + the no-FOUC script in
    layout). The already-dark sections (DataCommons, Footer) keep using the
    `--ink` tokens, which stay near-black in both themes.
 ────────────────────────────────────────────────────────────────────────── */
 .dark {
-  --background: #141413;        /* ink */
-  --foreground: #f1ece1;        /* cream text */
-  --muted-foreground: #a8a59a;  /* warm grey */
+  --background: oklch(0.08 0 0);
+  --foreground: oklch(0.93 0 0);
 
-  --primary: #6fae86;           /* sage lifted for dark surfaces */
-  --primary-dark: #82bd97;      /* hover = brighter on dark */
-  --primary-foreground: #10231a;
+  --card: oklch(0.12 0 0);
+  --card-foreground: oklch(0.93 0 0);
 
-  --brand: #2fce8a;
-  --brand-dark: #58dca3;
+  --popover: oklch(0.12 0 0);
+  --popover-foreground: oklch(0.93 0 0);
 
-  --border: #2c2c28;
-  --border-soft: #34332e;
+  --primary: oklch(0.58 0.0751 159.05);
+  --primary-dark: oklch(0.66 0.0751 159.05);
+  --primary-foreground: oklch(0.93 0 0);
 
-  --ink: #141413;
-  --ink-foreground: #f4efe4;
-  --ink-muted: #a8a59a;
-  --ink-border: #2a2a27;
+  --secondary: oklch(0.18 0.005 264.54);
+  --secondary-foreground: oklch(0.93 0 0);
 
-  --surface: #1c1c1a;           /* panels lifted off the ink background */
-  --surface-sunken: #26251f;
+  --muted: oklch(0.16 0.005 264.54);
+  --muted-foreground: oklch(0.65 0.01 264.54);
+
+  --accent: oklch(0.2 0.02 157);
+  --accent-foreground: oklch(0.75 0.08 157);
+
+  --destructive: oklch(0.65 0.22 27.325);
+  --destructive-foreground: oklch(0.08 0 0);
+
+  --border: oklch(1 0 0 / 0.08);
+  --input: oklch(1 0 0 / 0.08);
+  --ring: oklch(0.58 0.0751 159.05 / 0.3);
+
+  --border-soft: var(--border);
+  --surface: var(--card);
+  --surface-sunken: var(--muted);
+  --brand: var(--primary);
+  --brand-dark: var(--primary-dark);
+  --ink: oklch(0.08 0 0);
+  --ink-foreground: oklch(0.93 0 0);
+  --ink-muted: oklch(0.65 0.01 264.54);
+  --ink-border: oklch(1 0 0 / 0.08);
 
   color-scheme: dark;
 }
@@ -108,14 +118,27 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --color-muted-foreground: var(--muted-foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
   --color-primary-dark: var(--primary-dark);
-  --color-brand: var(--brand);
-  --color-brand-dark: var(--brand-dark);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
   --color-border: var(--border);
   --color-border-soft: var(--border-soft);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-brand: var(--brand);
+  --color-brand-dark: var(--brand-dark);
   --color-ink: var(--ink);
   --color-ink-foreground: var(--ink-foreground);
   --color-ink-muted: var(--ink-muted);
@@ -126,6 +149,14 @@
   --font-sans: var(--font-sans), system-ui, sans-serif;
   --font-garamond: var(--font-garamond), Georgia, serif;
   --font-instrument: var(--font-instrument), Georgia, serif;
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 16px);
+  --radius-full: 9999px;
 }
 
 html {
@@ -137,6 +168,13 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans), system-ui, sans-serif;
+}
+
+/* Smooth surface swap on theme toggle (bumicerts-clean-rewrite). */
+body {
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -233,120 +271,6 @@ body {
   }
 }
 
-/* ---------------------------------------------------------------------------
-   Explorer page carousels
-
-   Two distinct marquee patterns sit on /explorer side by side; both
-   are ports of the swissnex-2026 deck (slides 8 + 9). The Bumicerts
-   band is a single horizontal track of editorial cards (.stream-*);
-   the specimen wall is two parallel tracks scrolling in opposite
-   directions (.spec-*).
-
-   Both share the same recipe: the track contains TWO identical copies
-   of the card set rendered inline; `translateX(-50%)` lands the start
-   of the duplicate set exactly where the first card sat, so the loop
-   has no visible seam. Hover anywhere on the band pauses the
-   animation. `prefers-reduced-motion` disables it entirely.
---------------------------------------------------------------------------- */
-
-/* Bumicerts marquee ; one long row of editorial cards. */
-.stream-marquee {
-  position: relative;
-  overflow: hidden;
-  -webkit-mask-image: linear-gradient(
-    90deg,
-    transparent 0,
-    #000 4%,
-    #000 96%,
-    transparent 100%
-  );
-  mask-image: linear-gradient(
-    90deg,
-    transparent 0,
-    #000 4%,
-    #000 96%,
-    transparent 100%
-  );
-}
-
-.stream-marquee-track {
-  display: inline-flex;
-  width: max-content;
-  gap: clamp(0.7rem, 1.2vw, 1.1rem);
-  animation: stream-marquee-scroll 110s linear infinite;
-  will-change: transform;
-}
-
-.stream-marquee:hover .stream-marquee-track,
-.stream-marquee:focus-within .stream-marquee-track {
-  animation-play-state: paused;
-}
-
-@keyframes stream-marquee-scroll {
-  from { transform: translate3d(0, 0, 0); }
-  to   { transform: translate3d(-50%, 0, 0); }
-}
-
-/* Specimen wall ; two rows of square cards drifting in opposite
-   directions. Wraps a single .spec-wall element with two .spec-row
-   children; hovering the wall pauses both rows together. */
-.spec-wall {
-  position: relative;
-  overflow: hidden;
-  -webkit-mask-image: linear-gradient(
-    90deg,
-    transparent 0,
-    #000 3%,
-    #000 97%,
-    transparent 100%
-  );
-  mask-image: linear-gradient(
-    90deg,
-    transparent 0,
-    #000 3%,
-    #000 97%,
-    transparent 100%
-  );
-}
-
-.spec-row {
-  position: relative;
-  overflow: hidden;
-}
-
-.spec-track {
-  display: inline-flex;
-  width: max-content;
-  height: 100%;
-  gap: clamp(0.4rem, 0.7vw, 0.75rem);
-  will-change: transform;
-}
-
-.spec-track-left  { animation: spec-scroll-left  140s linear infinite; }
-.spec-track-right { animation: spec-scroll-right 160s linear infinite; }
-
-.spec-wall:hover .spec-track,
-.spec-wall:focus-within .spec-track {
-  animation-play-state: paused;
-}
-
-@keyframes spec-scroll-left {
-  from { transform: translate3d(0, 0, 0); }
-  to   { transform: translate3d(-50%, 0, 0); }
-}
-@keyframes spec-scroll-right {
-  from { transform: translate3d(-50%, 0, 0); }
-  to   { transform: translate3d(0, 0, 0); }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .stream-marquee-track,
-  .spec-track-left,
-  .spec-track-right {
-    animation: none;
-  }
-}
-
 /* Awards & press card carousel — hide scrollbars and keep only a very
    soft horizontal edge fade. The rail has top/bottom padding in
    Media.tsx so hover-lift borders and shadows stay inside the scroll
@@ -395,13 +319,17 @@ body {
 /* ---------------------------------------------------------------------------
    react-globe.gl / three-globe tooltip
    The library ships its own .scene-tooltip wrapper with a dark plate which
-   clashes with the cream surface. Restyle to match design tokens. The
+   clashes with the light surface. Restyle to match design tokens. The
    inline `style="color:var(--brand)"` for the country label is set in
    <LiveGlobe>, so the tooltip body itself stays neutral here.
 --------------------------------------------------------------------------- */
 .scene-tooltip {
-  background: rgba(244, 239, 228, 0.96) !important; /* var(--background) */
-  color: var(--foreground) !important;
+  background: color-mix(
+    in srgb,
+    var(--popover) 96%,
+    transparent
+  ) !important;
+  color: var(--popover-foreground) !important;
   border: 1px solid var(--border-soft);
   border-radius: 8px;
   padding: 6px 10px 7px !important;

@@ -7,10 +7,12 @@ This is the landing page that fronts the two GainForest production apps —
 and renders live data from both. It also hosts an ATProto OAuth sign-in
 flow ported from simocracy-v2.
 
-The **visual language follows [gainforest.earth](https://gainforest.earth)**
-as of the May 2026 redesign — minimal editorial, big serif headlines
-with a single italic word, a mostly-cream editorial rhythm punctuated by
-the dark `DataCommons` band and the integrated closing `Footer`. The previous
+The **visual language follows `../bumicerts-clean-rewrite`** as of the
+June 2026 restyle — minimal editorial, big serif headlines with a
+single italic word, stark white/ink oklch surfaces with a sage primary,
+punctuated by the dark `DataCommons` band and the integrated closing
+`Footer`. (The earlier warm-cream gainforest.earth palette is in git
+history; the team asked to adopt the Bumicerts system wholesale.) The previous
 tropical sprigs and the hand-drawn icon PNGs were dropped per team
 feedback ("thin-stroke art doesn't match the rendered apps; tone is
 too light"). The earlier pixel-art capybara floating companion was
@@ -21,17 +23,13 @@ co-design with Indigenous communities around Manaus) instead of the
 Capybara sim, so the pixel-art tone now matches the content tone of
 the page.
 
-**One subtle deviation from gainforest.earth**: the team explicitly
-rejected mint-green CTAs ("I really hate that gainforest green for our
-buttons — it only works well for our logo") and asked us to use the
-**Bumicerts primary** instead. Our `--primary` is therefore
-`#3e7053` — the sage forest green that `certs.gainforest.app`
-ships as its `--primary` token. Buttons on cream are a solid sage
-pill; buttons on ink are a cream solid pill. The brand mint
-(`--brand: #2fce8a`) is restricted to the logo plus a small set of
-subtle live-data accents (LIVE badges, globe pin tooltips, signed-in
-chip, active language row). When in doubt, do **not** add a new mint
-fill — lean on the sage primary.
+**Colour rules in one breath**: the CTA colour is the oklch sage
+`--primary` (the same token bumicerts-clean-rewrite ships). The old
+brand mint `#2fce8a` is **retired** — `--brand` is now an alias of
+`--primary`, exactly like bumicerts-clean-rewrite, so the logo and the
+live-data accents (LIVE badges, signed-in chip, active language row)
+all render sage. The team rejected mint CTAs long ago ("I really hate
+that gainforest green for our buttons"); do not reintroduce the mint.
 
 ## Read first
 
@@ -101,14 +99,8 @@ wins** for the landing — but call out the divergence in the PR.
 app/
 ├── page.tsx                       async server component; the entry point
 ├── layout.tsx                     fonts + metadata + mounts <FloatingTaina>
-├── globals.css                    design tokens (cream + forest green)
+├── globals.css                    design tokens (white/ink + sage, oklch)
 ├── _components/                   only UI; no business logic
-├── explorer/                       /explorer route ; live data carousels
-│   ├── page.tsx                    async server component (shell only)
-│   ├── _components/                hero + Bumicerts marquee + specimen wall
-│   ├── _lib/
-│   │   └── fetch-occurrences-client.ts   browser-side indexer walker
-│   └── _messages.ts                scoped i18n (5 locales)
 ├── _lib/                          fetchers + auth + chat helpers
 │   ├── bumicerts.ts               hyperlabel + indexer → LiveBumicert[]
 │   ├── occurrences.ts             Hyperindex totalCount for /research KPI
@@ -134,62 +126,15 @@ public/codex-pets/                 taina sim sprites (mirrored from PDS)
 scripts/generate-jwk.mjs           one-shot JWK generator (port of simocracy)
 ```
 
-## /explorer page
-
-A dedicated /explorer route that ports the swissnex-2026 deck's two
-data carousels (slides 8 + 9) into the React app. Same recipe as
-those slides: a horizontal marquee of the freshest Bumicerts on top,
-and a two-row specimen wall of Darwin Core occurrences below; the
-rows scroll in opposite directions and hover-pause together.
-
-**Bumicerts source**: `fetchLiveBumicerts(12)` ; same fetcher the
-landing hero card uses, so the two surfaces stay in sync.
-
-**Darwin Core source**: `walkOccurrences()` in
-`app/explorer/_lib/fetch-occurrences-client.ts` walks the
-`appGainforestDwcOccurrence` GraphQL connection on Hyperindex from
-the **visitor's browser**, resolves each record's `imageEvidence`
-blob ref to a PDS sync URL via plc.directory, and emits records via
-an `onProgress` callback so the wall fills in as cards become
-available. Records without `imageEvidence` are skipped because the
-wall is visual.
-
-Why client-side, not server: the indexer's newest pages are heavily
-skewed toward auto-uploaded sensor records with `imageEvidence: null`.
-Finding ~30 image-bearing records requires walking 1500-3000 records
-(~6 s per page) ; that blows past Vercel's 60s static-generation
-timeout for the page. The early attempt to walk server-side worked in
-dev but failed Vercel's build with "took more than 60 seconds".
-Hyperindex (`hi.gainforest.app/graphql`) and `plc.directory` both
-serve `access-control-allow-origin: *`, so the browser can do the
-walk itself without needing an API proxy.
-
-The page is therefore a server shell that renders instantly:
-
-  - Hero KPIs come from the two cheap upstreams (`fetchLiveBumicerts`
-    + `fetchOccurrenceCount`) at build time.
-  - Bumicerts marquee renders at build time too (12 records, fast).
-  - Specimen wall mounts a skeleton, then `<SpecimenWall />` calls
-    `walkOccurrences()` in a `useEffect` and re-renders progressively
-    as the walker emits more resolved records via `onProgress`.
-  - The fetch is abortable via the `AbortController` the component
-    owns ; navigating away cancels any in-flight indexer pages.
-
-If the indexer starts being denser on `imageEvidence` (e.g. once
-the Telegram bot starts auto-attaching photos), the walker's
-DEFAULT_MAX_PAGES can come back down. Until then, keep it generous
-so the wall doesn't end up sparse for visitors who arrive during a
-low-density stretch.
-
-Carousel CSS (`.stream-marquee`, `.spec-wall`, `.spec-track-left`,
-`.spec-track-right`) lives in `app/globals.css` next to
-`.awards-marquee`. The track recipe is the same throughout: render
-two copies of the card set inline, then translate -50% to seamlessly
-loop the duplicate over the first set. All three respect
-`prefers-reduced-motion`.
-
 The `_` prefix on `_components/` and `_lib/` keeps them out of Next's
 route-segment scanner — they are private to the app directory.
+
+The former `/explorer` route (swissnex-2026 data carousels: Bumicerts
+marquee + Darwin Core specimen wall) was removed in June 2026 per team
+decision; its code — including the client-side `walkOccurrences()`
+indexer walker and the `.stream-*` / `.spec-*` carousel CSS — lives in
+git history if a similar surface ever comes back. `app/_lib/occurrences.ts`
+survived the removal because /research uses it for the live KPI count.
 
 ## Live data flows (don't lose these)
 
@@ -258,8 +203,8 @@ SignInPopover (client) ──► GET /api/oauth/login?handle=alice.bsky.social
 ```
 
 `TopNav` is a route-aware header, ported from bumicerts-clean-rewrite's
-`TopNav`: logo, a pill rail of real pages (`/`, `/explorer`,
-`/research`, `/about`) with `aria-current` active states from
+`TopNav`: logo, a pill rail of real pages (`/`, `/research`, `/about`)
+with `aria-current` active states from
 `usePathname`, language picker, and theme toggle. The rail is
 **pages-only** — the earlier version mixed landing hash anchors and
 routes in one rail, which read as broken navigation. In-page landing
@@ -611,42 +556,43 @@ Never overwrite a dated OG — always render a new one and bump the path.
 
 ## Design tokens
 
-All colour/spacing rules live in `app/globals.css`. The token names are:
+All colour/spacing rules live in `app/globals.css`. The token blocks are
+a **verbatim port of `../bumicerts-clean-rewrite/app/globals.css`**
+(stark white/ink oklch surfaces, sage primary, shadcn-compatible
+card/popover/secondary/muted/accent/destructive/input/ring slots, and
+the `--radius: 0.75rem` scale). When a token question comes up, diff
+against that file first — it is the source of truth.
 
 ```
---background         cream #f4efe4         (light section bg)
---foreground         near-black #1c1c1a    (body text on cream)
---muted-foreground   stone #5b5b56         (rare; we prefer foreground/70 in Tailwind)
---primary            sage forest #3e7053   (Bumicerts primary; cream-section CTA fill)
---primary-dark       deeper sage #2e5840   (hover / pressed)
---primary-foreground off-white #fafafa     (text on the sage pill)
---brand              mint #2fce8a          (logo + subtle live-data accents only)
---brand-dark         deeper mint #21b073   (text-on-mint where contrast matters)
---border             warm grey #d9d3c3
---border-soft        paler #e6dfd0
---ink                near-black #141413    (dark section bg)
---ink-foreground     cream #f4efe4         (text on ink + cream-pill CTA on dark)
---ink-muted          stone #a8a59a         (subtle text on ink)
---ink-border         #2a2a27               (rules on ink)
+--background / --foreground      white / near-black (oklch), swap in .dark
+--card, --popover (+foregrounds) panel surfaces (white light / 0.12 dark)
+--primary            oklch sage  (CTA fill; lifted one step in .dark)
+--primary-dark                   hover / pressed
+--secondary, --muted, --accent   cool-grey + pale-sage utility slots
+--muted-foreground               secondary text
+--destructive, --input, --ring   shadcn-compatible form slots
+--border                         hairlines (white 8% in .dark)
+--radius             0.75rem     drives the rounded-sm…rounded-3xl scale
 ```
 
-**Brand split:** `--brand` (#2fce8a) is the mint that lives in the
-logo SVG fill and re-appears — *subtly* — on live-data accents (LIVE
-badges, globe pin tooltip labels, signed-in chip, active language row).
-It is **never** used as a solid button background. `--primary` is the
-call-to-action colour (near-black on cream, swapped to cream-on-ink on
-the dark band). Do not collapse the two back into one token; the
-separation is deliberate per team feedback.
+Legacy aliases kept so existing components don't need a rename:
+`--border-soft` → `--border`, `--surface` → `--card`,
+`--surface-sunken` → `--muted`, `--brand`/`--brand-dark` →
+`--primary`/`--primary-dark`, and the `--ink*` family (near-black in
+both themes) for the dark editorial bands.
 
-**Section rhythm:** the page is mostly cream, with two deliberate
+**Brand = primary now.** The mint #2fce8a is retired; `--brand` is an
+alias of the sage `--primary`, exactly as in bumicerts-clean-rewrite.
+The logo, LIVE badges, signed-in chip, and active language row all
+render sage. Don't resurrect the mint without team sign-off.
+
+**Section rhythm:** the page is mostly white, with two deliberate
 near-black beats: `DataCommons` (mid-page WHY / 1% biodiversity-data
-claim) and the integrated closing `Footer` band. `ImpactReport`
-used to be a dark card inside a cream section, but as of the
-media-pass update it sits on a warm apricot card (matching
-gainforest.earth) so the only dark chord on the lower half is the
-closing footer. Keep the dark surfaces sparse and editorial so the
-cream → ink contrast lands hard without turning the whole page into
-a dark alternation pattern.
+claim) and the integrated closing `Footer` band — both pinned to the
+`--ink*` tokens so they stay near-black in light *and* dark themes.
+Keep the dark surfaces sparse and editorial so the white → ink
+contrast lands hard without turning the whole page into a dark
+alternation pattern.
 
 If you need a new colour, add a token in `globals.css` first and reference
 it via `var(...)` or its Tailwind `theme inline` alias (e.g.
@@ -801,8 +747,8 @@ Before finishing a change:
    lists 3 high-quality projects with thumbnails.
 3. Drag the hero globe — rotation stops, no zoom on scroll, the page
    scrolls normally over the canvas.
-4. Use the top navbar pills. They should route between the four pages
-   (`/`, `/explorer`, `/research`, `/about`) with the correct active
+4. Use the top navbar pills. They should route between the three pages
+   (`/`, `/research`, `/about`) with the correct active
    state, and never open outbound app URLs. On mobile, open the drawer
    on the landing and confirm the secondary "On this page" group
    scrolls to in-page sections (`#tools`, `#how-it-works`,
@@ -814,12 +760,10 @@ Before finishing a change:
 6. If you changed OAuth, test the direct login route with
    `/api/oauth/login?handle=<your-handle>.bsky.social`; the top navbar
    no longer exposes a sign-in popover.
-7. If you changed the design system, eyeball the cream background and
-   primary colour against the original mockups
-   (`/Users/david/Downloads/ChatGPT Image May 17, 2026, 12_31_25 PM.png`
-   for the hero,
-   `/Users/david/Downloads/02101890-2e05-463d-8151-44123926d31b.png`
-   for the bottom sections) one more time.
+7. If you changed the design system, diff the token blocks against
+   `../bumicerts-clean-rewrite/app/globals.css` (the source of truth)
+   and eyeball both themes side by side with the running
+   bumicerts-clean-rewrite app.
 
 ## Updating this doc
 

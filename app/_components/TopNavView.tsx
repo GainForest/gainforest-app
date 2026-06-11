@@ -25,7 +25,6 @@ type PageItem = {
 
 const PAGES: ReadonlyArray<PageItem> = [
   { href: "/", labelKey: "nav.home" },
-  { href: "/explorer", labelKey: "nav.explorer" },
   { href: "/research", labelKey: "nav.research" },
   { href: "/about", labelKey: "nav.about" },
 ];

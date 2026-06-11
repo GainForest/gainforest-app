@@ -273,7 +273,7 @@ export function LiveGlobe({
         // Tooltip wrapper styling lives in `app/globals.css` under
         // `.scene-tooltip` so we override three-globe's dark default plate
         // once. Here we just emit the content; the wrapper provides the
-        // cream background, border, and soft shadow.
+        // popover background, border, and soft shadow.
         pointLabel={(d: object) => {
           const pin = d as ProjectPin;
           const country = pin.country
@@ -345,7 +345,7 @@ export function LiveGlobe({
             style={{
               inset: "5%",
               background:
-                "radial-gradient(circle at 32% 26%, rgba(255,255,255,0.72), transparent 50%), radial-gradient(circle at center, var(--background) 30%, #e6dfd0 88%)",
+                "radial-gradient(circle at 32% 26%, rgba(255,255,255,0.72), transparent 50%), radial-gradient(circle at center, var(--background) 30%, var(--surface-sunken) 88%)",
               boxShadow:
                 "inset 0 0 28px rgba(40,50,30,0.05), 0 1px 2px rgba(40,50,30,0.04)",
             }}

@@ -38,7 +38,6 @@ type Messages = {
   "nav.forSupporters": string;
   "nav.about": string;
   "nav.research": string;
-  "nav.explorer": string;
   "nav.home": string;
   "nav.pages": string;
   "nav.onThisPage": string;
@@ -47,7 +46,6 @@ type Messages = {
   "nav.getStarted": string;
   "nav.donate": string;
   "nav.language": string;
-  "nav.sections": string;
   "nav.menu": string;
   "nav.closeMenu": string;
   "nav.tools": string;
@@ -353,7 +351,6 @@ export const MESSAGES: Record<Locale, Messages> = {
     "nav.forSupporters": "For Supporters",
     "nav.about": "About",
     "nav.research": "Research",
-    "nav.explorer": "Explorer",
     "nav.home": "Home",
     "nav.pages": "Pages",
     "nav.onThisPage": "On this page",
@@ -362,7 +359,6 @@ export const MESSAGES: Record<Locale, Messages> = {
     "nav.getStarted": "Get started",
     "nav.donate": "Donate",
     "nav.language": "Language",
-    "nav.sections": "Landing sections",
     "nav.menu": "Menu",
     "nav.closeMenu": "Close menu",
     "nav.tools": "Tools",
@@ -676,7 +672,6 @@ export const MESSAGES: Record<Locale, Messages> = {
     "nav.forSupporters": "Para colaboradores",
     "nav.about": "Acerca de",
     "nav.research": "Investigación",
-    "nav.explorer": "Explorador",
     "nav.home": "Inicio",
     "nav.pages": "Páginas",
     "nav.onThisPage": "En esta página",
@@ -685,7 +680,6 @@ export const MESSAGES: Record<Locale, Messages> = {
     "nav.getStarted": "Comenzar",
     "nav.donate": "Donar",
     "nav.language": "Idioma",
-    "nav.sections": "Secciones",
     "nav.menu": "Menú",
     "nav.closeMenu": "Cerrar menú",
     "nav.tools": "Herramientas",
@@ -997,7 +991,6 @@ export const MESSAGES: Record<Locale, Messages> = {
     "nav.forSupporters": "Para apoiadores",
     "nav.about": "Sobre",
     "nav.research": "Pesquisa",
-    "nav.explorer": "Explorador",
     "nav.home": "Início",
     "nav.pages": "Páginas",
     "nav.onThisPage": "Nesta página",
@@ -1006,7 +999,6 @@ export const MESSAGES: Record<Locale, Messages> = {
     "nav.getStarted": "Começar",
     "nav.donate": "Doar",
     "nav.language": "Idioma",
-    "nav.sections": "Seções",
     "nav.menu": "Menu",
     "nav.closeMenu": "Fechar menu",
     "nav.tools": "Ferramentas",
@@ -1317,7 +1309,6 @@ export const MESSAGES: Record<Locale, Messages> = {
     "nav.forSupporters": "Kwa wafadhili",
     "nav.about": "Kuhusu",
     "nav.research": "Utafiti",
-    "nav.explorer": "Mchunguzi",
     "nav.home": "Mwanzo",
     "nav.pages": "Kurasa",
     "nav.onThisPage": "Kwenye ukurasa huu",
@@ -1326,7 +1317,6 @@ export const MESSAGES: Record<Locale, Messages> = {
     "nav.getStarted": "Anza",
     "nav.donate": "Toa",
     "nav.language": "Lugha",
-    "nav.sections": "Sehemu",
     "nav.menu": "Menyu",
     "nav.closeMenu": "Funga menyu",
     "nav.tools": "Zana",
@@ -1639,7 +1629,6 @@ export const MESSAGES: Record<Locale, Messages> = {
     "nav.forSupporters": "Untuk pendukung",
     "nav.about": "Tentang",
     "nav.research": "Riset",
-    "nav.explorer": "Penjelajah",
     "nav.home": "Beranda",
     "nav.pages": "Halaman",
     "nav.onThisPage": "Di halaman ini",
@@ -1648,7 +1637,6 @@ export const MESSAGES: Record<Locale, Messages> = {
     "nav.getStarted": "Mulai",
     "nav.donate": "Donasi",
     "nav.language": "Bahasa",
-    "nav.sections": "Bagian",
     "nav.menu": "Menu",
     "nav.closeMenu": "Tutup menu",
     "nav.tools": "Alat",

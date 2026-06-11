@@ -158,8 +158,9 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#f4efe4" },
-    { media: "(prefers-color-scheme: dark)", color: "#141413" },
+    // Matches the bumicerts-clean-rewrite surfaces: white / near-black.
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#141414" },
   ],
   colorScheme: "light dark",
 };
