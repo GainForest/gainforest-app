@@ -36,10 +36,11 @@ const XPRIZE_DONATION_URL =
 // `prefers-reduced-motion` (defined in `app/globals.css`).
 //
 // Why monochrome vs. full-colour: the band sits directly under the
-// cream hero on a cream background. Full-colour logos would compete
-// with the hero copy above. Flat silhouette treatment keeps the band
-// reading as one quiet block — same recipe as the `<Supporters />` wall
-// further down.
+// hero. Full-colour logos would compete with the hero copy above.
+// Flat silhouette treatment keeps the band reading as one quiet
+// block — same recipe as the `<Supporters />` wall further down.
+// The treatment lives in `.logo-mono` (globals.css), which also
+// carries the dark-theme flip (invert + screen instead of multiply).
 
 type Logo = {
   src: string;
@@ -122,7 +123,7 @@ export function AwardsStrip() {
                 width={796}
                 height={138}
                 style={{ height: PRIMARY_LOGO.h, width: "auto" }}
-                className="opacity-90"
+                className="logo-dark-invert opacity-90"
                 draggable={false}
               />
             </span>
@@ -204,19 +205,19 @@ function LogoItem({
       className="mr-7 flex shrink-0 items-center lg:mr-8"
       style={{ height: logo.h }}
     >
-      {/* `grayscale + multiply` collapses brand colours into a single
-          neutral silhouette while preserving wordmark legibility. The
-          logos are deliberately not links: this strip is a calm
-          credibility cue, not a navigation surface. */}
+      {/* `.logo-mono` collapses brand colours into a single neutral
+          silhouette while preserving wordmark legibility (and flips to
+          invert + screen on the dark theme). The logos are deliberately
+          not links: this strip is a calm credibility cue, not a
+          navigation surface. */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={logo.src}
         alt={ariaHidden ? "" : logo.alt}
+        className="logo-mono"
         style={{
           height: logo.h,
           width: "auto",
-          filter: "grayscale(1) contrast(1.05)",
-          mixBlendMode: "multiply",
           opacity: 0.7,
         }}
         draggable={false}

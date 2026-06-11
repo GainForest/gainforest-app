@@ -89,7 +89,7 @@ export function Hero({
           <div className="mt-8 lg:mt-10 flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4">
             {/* Primary pill — bright mint, matching gainforest.earth. */}
             <Link
-              href={`${BUMICERTS_URL}/explore`}
+              href={`${BUMICERTS_URL}/bumicerts`}
               target="_blank"
               rel="noreferrer"
               className="inline-flex h-[54px] items-center justify-center rounded-full bg-primary px-8 lg:px-10 text-[15px] lg:text-[16px] font-medium text-primary-foreground transition-colors hover:bg-primary-dark"

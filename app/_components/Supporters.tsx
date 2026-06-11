@@ -60,13 +60,10 @@ export function Supporters() {
         </div>
 
         {/* Monochrome editorial logo wall.
-            - `mix-blend-mode: multiply` lets the cream page bleed
-              through any residual light pixels and binds each logo
-              to the page warmth.
-            - `grayscale(1) contrast(1.05)` desaturates each mark but
-              preserves *internal* brightness so wordmarks-inside-pills
-              (Klarna) and rainbow gradients (Ethereum) still read as
-              their original shape — they just turn neutral.
+            - `.logo-mono` (globals.css) desaturates each mark and
+              multiplies it onto the light page; on the dark theme it
+              flips to invert + screen so the silhouettes stay legible
+              on ink.
             - `opacity: 0.62` quiets the wall to a section accent;
               hover restores full presence for an unobtrusive moment
               of identity recognition. */}
@@ -84,12 +81,10 @@ export function Supporters() {
                   alt={l.alt}
                   width={l.w}
                   height={l.h}
-                  className="opacity-[0.62] transition-opacity duration-200 ease-out hover:opacity-100"
+                  className="logo-mono opacity-[0.62] transition-opacity duration-200 ease-out hover:opacity-100"
                   style={{
                     height: renderH,
                     width: "auto",
-                    filter: "grayscale(1) contrast(1.05)",
-                    mixBlendMode: "multiply",
                   }}
                   draggable={false}
                 />

@@ -56,7 +56,7 @@ const ROLE_CARDS: Record<Role, ReadonlyArray<Card>> = {
     {
       titleKey: "iwantto.card4.title",
       bodyKey: "iwantto.card4.body",
-      href: `${BUMICERTS_URL}/explore`,
+      href: `${BUMICERTS_URL}/bumicerts`,
     },
   ],
 };

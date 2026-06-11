@@ -211,6 +211,29 @@ body {
   );
 }
 
+/* ---------------------------------------------------------------------------
+   Monochrome partner / award logo treatment (AwardsStrip, Supporters,
+   AboutRecognition). On light surfaces dark silhouettes multiply onto the
+   background — but multiply drowns dark marks on the near-black dark theme,
+   so `.dark` flips the recipe: invert to light silhouettes and screen them
+   onto the ink.
+--------------------------------------------------------------------------- */
+.logo-mono {
+  filter: grayscale(1) contrast(1.05);
+  mix-blend-mode: multiply;
+}
+.dark .logo-mono {
+  filter: grayscale(1) invert(1) contrast(1.05);
+  mix-blend-mode: screen;
+}
+
+/* Full-colour logos (the XPRIZE Rainforest lockup) keep their colours on
+   light surfaces but collapse to a white silhouette on the dark theme,
+   where their dark navy wordmark would otherwise vanish. */
+.dark .logo-dark-invert {
+  filter: brightness(0) invert(1);
+}
+
 /* Awards strip logo marquee — inert logos drifting slowly from right
    to left in one continuous loop. Replaces the earlier swipeable
    overflow-scroll carousel; the marquee reads as a calmer credibility

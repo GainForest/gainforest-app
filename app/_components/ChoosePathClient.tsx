@@ -105,7 +105,7 @@ export function ChoosePathClient({
           </div>
           <h3 className="mt-3 font-garamond text-[24px] lg:text-[28px] font-normal leading-[1.15] text-foreground">
             <Link
-              href={`${BUMICERTS_URL}/explore`}
+              href={`${BUMICERTS_URL}/bumicerts`}
               target="_blank"
               rel="noreferrer"
               className="transition-colors hover:text-primary"
@@ -132,7 +132,7 @@ export function ChoosePathClient({
             underline (would have looked busy with two links). */}
         <div className="flex flex-wrap items-center gap-x-6 gap-y-2 self-start">
           <CardCta
-            href={`${BUMICERTS_URL}/explore`}
+            href={`${BUMICERTS_URL}/bumicerts`}
             label={t("choosePath.bumicerts.cta")}
           />
           <CardCta

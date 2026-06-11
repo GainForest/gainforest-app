@@ -13,7 +13,7 @@ import { useT } from "./LocaleProvider";
  *
  * Wired to the live indexer — the three rows shown are the most recent
  * curated Bumicerts coming through the same `orgHypercertsClaimActivity`
- * GraphQL feed that powers certs.gainforest.app/explore.
+ * GraphQL feed that powers certs.gainforest.app/bumicerts.
  *
  * Rail items (Projects / Organizations / Leaderboard) are real links to
  * the matching Bumicerts pages so the card behaves like a miniature
@@ -114,7 +114,7 @@ export function BumicertsCard({
           <RailLink
             icon={<HomeIcon />}
             label={t("card.projects")}
-            href={`${BUMICERTS_URL}/explore`}
+            href={`${BUMICERTS_URL}/bumicerts`}
             active
           />
           <RailLink
@@ -212,7 +212,7 @@ export function BumicertsCard({
           )}
         </span>
         <Link
-          href={`${BUMICERTS_URL}/explore`}
+          href={`${BUMICERTS_URL}/bumicerts`}
           target="_blank"
           rel="noreferrer"
           className="inline-flex items-center gap-1 text-foreground/70 transition-colors hover:text-foreground"

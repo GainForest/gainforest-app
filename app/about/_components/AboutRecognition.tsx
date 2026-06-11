@@ -19,9 +19,9 @@ import {
 // matched to the landing), so the recognition reads as one collective
 // thanks rather than a tiered list.
 //
-// Visual treatment mirrors <Supporters />: monochrome via
-// `grayscale + multiply`, 0.62 opacity baseline, hover lifts to full
-// presence. The grid uses `justify-start` instead of the landing's
+// Visual treatment mirrors <Supporters />: monochrome via the shared
+// `.logo-mono` recipe (globals.css; flips to invert + screen on the
+// dark theme), 0.62 opacity baseline, hover lifts to full presence. The grid uses `justify-start` instead of the landing's
 // `justify-center` because /about's column is wider and centring 17
 // logos in a wide wrap reads as scattered rather than ordered.
 
@@ -70,12 +70,10 @@ export function AboutRecognition() {
                   alt={l.alt}
                   width={l.w}
                   height={l.h}
-                  className="opacity-[0.62] transition-opacity duration-200 ease-out hover:opacity-100"
+                  className="logo-mono opacity-[0.62] transition-opacity duration-200 ease-out hover:opacity-100"
                   style={{
                     height: h,
                     width: "auto",
-                    filter: "grayscale(1) contrast(1.05)",
-                    mixBlendMode: "multiply",
                   }}
                   draggable={false}
                 />

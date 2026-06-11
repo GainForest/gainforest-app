@@ -1,7 +1,7 @@
 /**
  * Live Bumicerts fetcher for the landing page.
  *
- * Matches certs.gainforest.app/explore's exact filter logic:
+ * Matches certs.gainforest.app/bumicerts's exact filter logic:
  *   labelTier = "high-quality" (from the hyperlabel service)
  *
  * That's how Bumicerts itself decides "what's a real, fundable project" —
@@ -384,7 +384,7 @@ const FALLBACK_SNAPSHOT: LiveBumicertsSnapshot = {
       title: "Marina Gardens community restoration in Singapore",
       shortDescription: "Community-led mangrove restoration",
       imageUrl: null,
-      href: `${BUMICERTS_BASE}/explore`,
+      href: `${BUMICERTS_BASE}/bumicerts`,
       createdAt: "2026-05-17T18:29:16.070Z",
     },
     {
@@ -394,7 +394,7 @@ const FALLBACK_SNAPSHOT: LiveBumicertsSnapshot = {
       title: "Community-led forest conservation in Uganda's Madi region",
       shortDescription: "Madi region forest stewardship",
       imageUrl: null,
-      href: `${BUMICERTS_BASE}/explore`,
+      href: `${BUMICERTS_BASE}/bumicerts`,
       createdAt: "2026-05-16T00:00:00.000Z",
     },
   ],

@@ -92,7 +92,7 @@ export function Footer() {
             </Link>
             <div className="flex flex-col gap-3 text-[14px] text-ink-foreground/78 lg:items-end">
               <Link
-                href={`${BUMICERTS_URL}/explore`}
+                href={`${BUMICERTS_URL}/bumicerts`}
                 target="_blank"
                 rel="noreferrer"
                 className="group inline-flex items-center gap-2 transition-colors hover:text-brand"
@@ -220,7 +220,7 @@ export function Footer() {
               {t("nav.globe")}
             </Link>
             <Link
-              href={`${BUMICERTS_URL}/explore`}
+              href={`${BUMICERTS_URL}/bumicerts`}
               target="_blank"
               rel="noreferrer"
               className="transition-colors hover:text-brand"
