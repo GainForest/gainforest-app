@@ -47,7 +47,7 @@ import {
 import CountrySelectorModal from "@/components/modals/country-selector";
 import { ImageEditorModal } from "@/components/modals/image-editor";
 import { SocialGlyph } from "@/app/_components/SocialIcon";
-import { GroupMembersClient } from "../groups/_components/GroupMembersClient";
+import { GroupMembers } from "../groups/_components/GroupMembers";
 import { ManageGroupsClient } from "../groups/_components/ManageGroupsClient";
 import type { CgsRole } from "../_lib/cgs";
 
@@ -806,7 +806,7 @@ export function ManageDashboardClient({
               onCancel={() => { setEditLongDescription(account.longDescription ?? ""); setSaveError(null); setInlineField(null); }}
             />
             {writeRepoDid && groupRole ? (
-              <GroupMembersClient groupDid={writeRepoDid} currentRole={groupRole} />
+              <GroupMembers groupDid={writeRepoDid} currentRole={groupRole} variant="section" />
             ) : null}
           </>
         ) : null}

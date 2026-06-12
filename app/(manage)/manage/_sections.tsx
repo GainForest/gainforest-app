@@ -15,7 +15,7 @@ import { AccountSettingsSections } from "@/app/account/_components/AccountSettin
 import Container from "@/components/ui/container";
 import { ManageOverview } from "./_components/ManageOverview";
 import { ManageDashboard } from "./_components/ManageDashboard";
-import { GroupMembersClient } from "./groups/_components/GroupMembersClient";
+import { GroupMembers } from "./groups/_components/GroupMembers";
 import type { CgsRole } from "./_lib/cgs";
 import { ManageProjectsClient } from "./projects/_components/ManageProjectsClient";
 import { SitesClient } from "./sites/_components/SitesClient";
@@ -132,10 +132,10 @@ export function SettingsSection({ target }: { target: ManageTarget }) {
     return (
       <Container className="pt-4 pb-8">
         <div className="mb-6">
-          <h1 className="text-2xl font-medium">Organization settings</h1>
+          <h1 className="font-instrument text-3xl font-light italic leading-tight tracking-[-0.02em] text-foreground">Organization settings</h1>
           <p className="mt-1 text-sm text-muted-foreground">Manage members and control who can make changes for this organization.</p>
         </div>
-        <GroupMembersClient groupDid={target.did} currentRole={role} />
+        <GroupMembers groupDid={target.did} currentRole={role} variant="panel" />
       </Container>
     );
   }

@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState, useTransition } from "react";
-import { ArrowRightIcon, Building2Icon, Loader2Icon, PlusIcon } from "lucide-react";
+import { ArrowRightIcon, Loader2Icon, PlusIcon } from "lucide-react";
 import { fetchCgsGroups, type CgsGroupMembership } from "../../_lib/cgs";
 
 function roleBadge(role: string) {
@@ -26,38 +26,60 @@ function groupInitial(group: CgsGroupMembership): string {
   return groupName(group).charAt(0).toUpperCase();
 }
 
+const EMPTY_COVER =
+  "radial-gradient(circle at 20% 30%, oklch(0.5 0.07 157 / 0.20) 0%, transparent 55%), radial-gradient(circle at 85% 20%, oklch(0.5 0.07 157 / 0.12) 0%, transparent 50%)";
+
 function OrgCard({ group }: { group: CgsGroupMembership }) {
   return (
     <Link
       href={groupHref(group)}
-      className="group relative flex flex-col gap-4 rounded-3xl border border-border bg-background/70 p-5 transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+      className="group relative flex flex-col overflow-hidden rounded-3xl border border-border/60 bg-card transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-[0_18px_44px_-18px_oklch(0_0_0/0.28)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
     >
-      <div className="flex items-start justify-between gap-3">
-        <div className="relative flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-border bg-muted text-lg font-semibold text-muted-foreground">
+      {/* Cover band — the org's avatar blurred, or a soft brand gradient */}
+      <div className="relative h-20 overflow-hidden">
+        {group.avatarUrl ? (
+          <Image
+            src={group.avatarUrl}
+            alt=""
+            fill
+            unoptimized
+            className="scale-110 object-cover blur-xl saturate-150"
+          />
+        ) : (
+          <div className="absolute inset-0 bg-muted" style={{ backgroundImage: EMPTY_COVER }} />
+        )}
+        <div className="absolute inset-0 bg-linear-to-t from-card via-card/40 to-transparent" />
+        <span
+          className={`absolute right-3 top-3 rounded-full px-2.5 py-1 text-xs font-medium capitalize shadow-sm backdrop-blur-sm ${roleBadge(group.role)}`}
+        >
+          {group.role}
+        </span>
+      </div>
+
+      {/* Body */}
+      <div className="relative flex flex-1 flex-col px-5 pb-5">
+        <div className="relative -mt-9 mb-3 flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-full bg-muted text-xl font-semibold text-muted-foreground ring-4 ring-card">
           {group.avatarUrl ? (
             <Image src={group.avatarUrl} alt={groupName(group)} fill className="object-cover" unoptimized />
           ) : (
             groupInitial(group)
           )}
         </div>
-        <span className={`rounded-full px-2.5 py-1 text-xs font-medium capitalize ${roleBadge(group.role)}`}>
-          {group.role}
+
+        <div className="min-w-0">
+          <p className="truncate text-base font-medium text-foreground transition-colors group-hover:text-primary">
+            {groupName(group)}
+          </p>
+          <p className="truncate text-sm text-muted-foreground">
+            {group.handle ? `@${group.handle}` : "Organization account"}
+          </p>
+        </div>
+
+        <span className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-primary">
+          Open
+          <ArrowRightIcon className="size-3.5 transition-transform group-hover:translate-x-0.5" />
         </span>
       </div>
-
-      <div className="min-w-0">
-        <p className="truncate text-base font-medium text-foreground">{groupName(group)}</p>
-        {group.handle ? (
-          <p className="truncate text-sm text-muted-foreground">@{group.handle}</p>
-        ) : (
-          <p className="truncate text-sm text-muted-foreground">Organization account</p>
-        )}
-      </div>
-
-      <span className="mt-auto inline-flex items-center gap-1 text-sm font-medium text-primary">
-        Open
-        <ArrowRightIcon className="size-3.5 transition-transform group-hover:translate-x-0.5" />
-      </span>
     </Link>
   );
 }
@@ -66,10 +88,10 @@ function CreateOrgCard() {
   return (
     <Link
       href="/manage?mode=onboard-org"
-      className="group flex min-h-[180px] flex-col items-center justify-center gap-2 rounded-3xl border border-dashed border-border bg-background/40 p-5 text-center transition-all hover:border-primary/50 hover:bg-primary/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+      className="group flex min-h-[220px] flex-col items-center justify-center gap-2.5 rounded-3xl border border-dashed border-border/70 bg-card/40 p-5 text-center transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/50 hover:bg-primary/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
     >
-      <span className="flex size-12 items-center justify-center rounded-2xl bg-primary/10 text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
-        <PlusIcon className="size-5" />
+      <span className="flex size-14 items-center justify-center rounded-2xl bg-primary/10 text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
+        <PlusIcon className="size-6" />
       </span>
       <span className="text-sm font-medium text-foreground">Create an organization</span>
       <span className="text-xs text-muted-foreground">Start a new shared account</span>
@@ -97,17 +119,7 @@ export function ManageGroupsClient() {
   }, []);
 
   return (
-    <div className="space-y-6 py-2">
-      <div className="flex flex-col gap-1">
-        <div className="flex items-center gap-2">
-          <Building2Icon className="size-5 text-primary" />
-          <h1 className="text-2xl font-medium">My Organizations</h1>
-        </div>
-        <p className="text-sm text-muted-foreground">
-          Select an organization to manage it, or create a new one.
-        </p>
-      </div>
-
+    <div className="space-y-4">
       {error ? (
         <p className="rounded-2xl bg-destructive/10 px-3 py-2 text-sm text-destructive">{error}</p>
       ) : null}
