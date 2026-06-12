@@ -2,9 +2,9 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState, useTransition } from "react";
 import { ArrowRightIcon, Loader2Icon, PlusIcon } from "lucide-react";
-import { fetchCgsGroups, type CgsGroupMembership } from "../../_lib/cgs";
+import { useAccountList } from "@/app/_lib/account-switcher";
+import type { CgsGroupMembership } from "../../_lib/cgs";
 
 function roleBadge(role: string) {
   return role === "owner"
@@ -101,32 +101,24 @@ function CreateOrgCard() {
   );
 }
 
-export function ManageGroupsClient() {
-  const [groups, setGroups] = useState<CgsGroupMembership[]>([]);
-  const [error, setError] = useState<string | null>(null);
-  const [loaded, setLoaded] = useState(false);
-  const [isPending, startTransition] = useTransition();
-
-  useEffect(() => {
-    startTransition(async () => {
-      try {
-        const result = await fetchCgsGroups();
-        setGroups(result.groups ?? []);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Could not load organizations.");
-      } finally {
-        setLoaded(true);
-      }
-    });
-  }, []);
+export function ManageGroupsClient({ sessionDid }: { sessionDid: string | null }) {
+  const { groups, status, error, reload } = useAccountList(sessionDid);
+  const isInitialLoading = Boolean(sessionDid) && (status === "idle" || (status === "loading" && groups.length === 0));
 
   return (
     <div className="space-y-4">
-      {error ? (
-        <p className="rounded-2xl bg-destructive/10 px-3 py-2 text-sm text-destructive">{error}</p>
+      {status === "error" ? (
+        <p className="rounded-2xl bg-destructive/10 px-3 py-2 text-sm text-destructive">
+          {error ?? "Could not load organizations."}{" "}
+          {sessionDid ? (
+            <button type="button" onClick={() => void reload()} className="font-medium underline underline-offset-2">
+              Try again
+            </button>
+          ) : null}
+        </p>
       ) : null}
 
-      {isPending && !loaded ? (
+      {isInitialLoading ? (
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <Loader2Icon className="size-4 animate-spin" /> Loading organizations…
         </div>

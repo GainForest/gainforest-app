@@ -820,7 +820,7 @@ export function ManageDashboardClient({
             ) : null}
           </>
         ) : null}
-        {account.kind === "user" ? <ManageGroupsClient /> : null}
+        {account.kind === "user" ? <ManageGroupsClient sessionDid={account.did} /> : null}
         {children}
       </Container>
     </>

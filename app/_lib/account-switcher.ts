@@ -34,6 +34,7 @@ export type ActiveAccountContext =
 const CACHE_KEY = "gainforest-account-switcher-cache";
 const ACTIVE_CONTEXT_EVENT = "gainforest-active-account-context";
 const TTL_MS = 5 * 60 * 1000;
+const EMPTY_GROUP_RECHECK_MS = 30 * 1000;
 
 const SERVER_STATE: AccountListState = {
   status: "idle",
@@ -47,6 +48,8 @@ const SERVER_STATE: AccountListState = {
 let state: AccountListState = SERVER_STATE;
 const listeners = new Set<() => void>();
 let inflight: Promise<void> | null = null;
+let inflightSessionDid: string | null = null;
+const emptyGroupRefreshCounts = new Map<string, number>();
 
 function emit() {
   for (const listener of listeners) listener();
@@ -135,6 +138,10 @@ async function hydrateGroup(group: CgsGroupMembership): Promise<SwitcherGroup> {
   return { ...group, displayName: card.displayName, avatarUrl: card.avatarUrl, handle: card.handle ?? null };
 }
 
+function hasAccountCardData(card: AccountCard | null): boolean {
+  return Boolean(card?.displayName?.trim() || card?.avatarUrl?.trim() || card?.handle?.trim());
+}
+
 async function loadAccounts(sessionDid: string): Promise<void> {
   const hadData = state.status === "ready" && (state.groups.length > 0 || state.personal != null);
   setState({ status: hadData ? "ready" : "loading", error: null });
@@ -142,19 +149,51 @@ async function loadAccounts(sessionDid: string): Promise<void> {
   try {
     const [personalResponse, groupResponse] = await Promise.all([
       fetch(`/api/account/card?did=${encodeURIComponent(sessionDid)}`).catch(() => null),
-      fetch("/api/cgs/groups", { cache: "no-store" }),
+      fetch("/api/cgs/groups", { cache: "no-store" }).catch(() => null),
     ]);
 
-    const personal = personalResponse?.ok ? ((await personalResponse.json()) as AccountCard) : state.personal;
-    const payload = (await groupResponse.json().catch(() => ({}))) as { groups?: CgsGroupMembership[] };
-    const raw = groupResponse.ok && Array.isArray(payload.groups) ? payload.groups : [];
-    const groups = await Promise.all(raw.map(hydrateGroup));
+    if (state.sessionDid !== sessionDid) return;
 
-    state = { status: "ready", sessionDid, personal, groups, error: null, fetchedAt: Date.now() };
+    const fetchedPersonal = personalResponse?.ok ? ((await personalResponse.json()) as AccountCard) : null;
+    const personal = hasAccountCardData(fetchedPersonal) || !hasAccountCardData(state.personal) ? fetchedPersonal : state.personal;
+
+    if (!groupResponse?.ok) {
+      throw new Error("Could not load organizations.");
+    }
+
+    const payload = (await groupResponse.json().catch(() => ({}))) as { groups?: CgsGroupMembership[] };
+    if (!Array.isArray(payload.groups)) {
+      throw new Error("Could not load organizations.");
+    }
+
+    const hydratedGroups = await Promise.all(payload.groups.map(hydrateGroup));
+    let groups = hydratedGroups;
+    let fetchedAt = Date.now();
+
+    // CGS membership fetches can occasionally come back as an empty success
+    // after the app has been idle (usually while auth/session state is being
+    // refreshed). Do not let one suspicious empty response erase a known-good
+    // account list in memory/localStorage; keep stale data briefly and require a
+    // second empty response before accepting that the user truly has no orgs.
+    if (hydratedGroups.length > 0) {
+      emptyGroupRefreshCounts.delete(sessionDid);
+    } else if (state.groups.length > 0) {
+      const emptyCount = (emptyGroupRefreshCounts.get(sessionDid) ?? 0) + 1;
+      emptyGroupRefreshCounts.set(sessionDid, emptyCount);
+      if (emptyCount < 2) {
+        groups = state.groups;
+        fetchedAt = Date.now() - TTL_MS + EMPTY_GROUP_RECHECK_MS;
+      } else {
+        emptyGroupRefreshCounts.delete(sessionDid);
+      }
+    }
+
+    state = { status: "ready", sessionDid, personal, groups, error: null, fetchedAt };
     emit();
     writeCache();
   } catch {
-    setState({ status: state.groups.length ? "ready" : "error", error: "Could not load organizations." });
+    if (state.sessionDid !== sessionDid) return;
+    setState({ status: state.groups.length || state.personal ? "ready" : "error", error: "Could not load organizations." });
   }
 }
 
@@ -171,12 +210,14 @@ export function ensureAccountList(sessionDid: string, options?: { force?: boolea
     emit();
   }
 
-  const fresh = state.status === "ready" && Date.now() - state.fetchedAt < TTL_MS;
+  const fresh = state.status === "ready" && state.groups.length > 0 && Date.now() - state.fetchedAt < TTL_MS;
   if (!options?.force && fresh) return Promise.resolve();
-  if (inflight) return inflight;
+  if (inflight && inflightSessionDid === sessionDid) return inflight;
 
+  inflightSessionDid = sessionDid;
   inflight = loadAccounts(sessionDid).finally(() => {
     inflight = null;
+    inflightSessionDid = null;
   });
   return inflight;
 }
@@ -187,7 +228,13 @@ export function useAccountList(sessionDid: string | null): UseAccountListResult 
   const snapshot = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 
   useEffect(() => {
-    if (sessionDid) void ensureAccountList(sessionDid);
+    if (sessionDid) {
+      void ensureAccountList(sessionDid);
+      return;
+    }
+
+    state = SERVER_STATE;
+    emit();
   }, [sessionDid]);
 
   return {

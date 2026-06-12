@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Container from "@/components/ui/container";
+import { fetchAuthSession } from "@/app/_lib/auth-server";
 import { ManageGroupsClient } from "../groups/_components/ManageGroupsClient";
 
 export const metadata: Metadata = {
@@ -7,7 +8,9 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-export default function ManageOrganizationsPage() {
+export default async function ManageOrganizationsPage() {
+  const session = await fetchAuthSession();
+
   return (
     <Container className="pt-4 pb-8">
       <div className="mb-6">
@@ -18,7 +21,7 @@ export default function ManageOrganizationsPage() {
           Select an organization to manage it, or create a new one.
         </p>
       </div>
-      <ManageGroupsClient />
+      <ManageGroupsClient sessionDid={session.isLoggedIn ? session.did : null} />
     </Container>
   );
 }
