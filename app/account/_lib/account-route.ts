@@ -188,10 +188,17 @@ export const getAccountRouteData = cache(async (
  * avatar per group and don't want the full indexer/AppView hydration.
  */
 export const getCertifiedProfileCard = cache(
-  async (did: string): Promise<{ displayName: string | null; avatarUrl: string | null }> => {
-    if (!did.startsWith("did:")) return { displayName: null, avatarUrl: null };
-    const profile = await fetchDirectCertifiedProfile(did).catch(() => null);
-    return { displayName: profile?.displayName ?? null, avatarUrl: profile?.avatarUrl ?? null };
+  async (did: string): Promise<{ displayName: string | null; avatarUrl: string | null; handle: string | null }> => {
+    if (!did.startsWith("did:")) return { displayName: null, avatarUrl: null, handle: null };
+    const [profile, appViewProfile] = await Promise.all([
+      fetchDirectCertifiedProfile(did).catch(() => null),
+      fetchAppViewProfile(did).catch(() => null),
+    ]);
+    return {
+      displayName: profile?.displayName ?? appViewProfile?.displayName ?? null,
+      avatarUrl: profile?.avatarUrl ?? appViewProfile?.avatar ?? null,
+      handle: appViewProfile?.handle ?? null,
+    };
   },
 );
 
@@ -203,7 +210,7 @@ function safeDecode(value: string): string {
   }
 }
 
-async function resolveIdentifierToDid(identifier: string): Promise<string | null> {
+export async function resolveIdentifierToDid(identifier: string): Promise<string | null> {
   if (identifier.startsWith("did:")) return identifier;
 
   const appViewProfile = await fetchAppViewProfile(identifier).catch(() => null);
@@ -240,16 +247,28 @@ async function fetchDirectCertifiedProfile(did: string): Promise<DirectCertified
 
   const avatar = value.avatar;
   const avatarRef = typeof avatar === "object" && avatar !== null && "image" in avatar
-    ? (avatar.image as { ref?: string | null } | undefined)?.ref
+    ? blobRef((avatar as { image?: unknown }).image)
     : null;
 
   return {
-    displayName: typeof value.displayName === "string" ? value.displayName : null,
+    displayName: typeof value.displayName === "string" && value.displayName.trim() ? value.displayName.trim() : null,
     description: typeof value.description === "string" ? value.description : null,
     website: typeof value.website === "string" ? value.website : null,
     avatarUrl: await resolveBlobUrl(did, avatarRef),
     createdAt: typeof value.createdAt === "string" ? value.createdAt : null,
   };
+}
+
+function blobRef(value: unknown): string | null {
+  if (typeof value === "string") return value;
+  if (typeof value !== "object" || value === null) return null;
+  const ref = (value as { ref?: unknown }).ref;
+  if (typeof ref === "string") return ref;
+  if (typeof ref === "object" && ref !== null && "$link" in ref) {
+    const link = (ref as { $link?: unknown }).$link;
+    return typeof link === "string" ? link : null;
+  }
+  return null;
 }
 
 async function fetchDirectCertifiedOrganization(did: string): Promise<DirectCertifiedOrganization | null> {

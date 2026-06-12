@@ -5,6 +5,7 @@ import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   ArrowRightIcon,
+  CheckIcon,
   ChevronDownIcon,
   ChevronRightIcon,
   Loader2,
@@ -12,7 +13,9 @@ import {
   LockOpenIcon,
   LogOutIcon,
   SettingsIcon,
+  ShieldCheckIcon,
   UserIcon,
+  UsersIcon,
 } from "lucide-react";
 import {
   useEffect,
@@ -20,9 +23,9 @@ import {
   useState,
   type FormEvent,
 } from "react";
+import type { CgsGroupMembership } from "@/app/(manage)/manage/_lib/cgs";
 import type { AuthSession } from "../_lib/auth";
 import { buildLoginUrl, redirectToLogout } from "../_lib/auth-client";
-import { shortDid } from "../_lib/format";
 import { Button } from "@/components/ui/button";
 import { ModalContent, ModalDescription, ModalTitle } from "@/components/ui/modal/modal";
 import { useModal } from "@/components/ui/modal/context";
@@ -469,6 +472,114 @@ function UnauthenticatedButtons() {
   );
 }
 
+const ACTIVE_CONTEXT_KEY = "gainforest-active-account-context";
+
+type ProfileCard = { displayName: string | null; avatarUrl: string | null; handle?: string | null };
+type MenuGroup = CgsGroupMembership & ProfileCard;
+type ActiveAccountContext =
+  | { type: "personal"; did: string; selectedAt?: string }
+  | { type: "group"; did: string; role?: CgsGroupMembership["role"]; selectedAt?: string };
+
+function readActiveContext(sessionDid: string): ActiveAccountContext {
+  try {
+    const raw = window.localStorage.getItem(ACTIVE_CONTEXT_KEY);
+    const parsed = raw ? JSON.parse(raw) as Partial<ActiveAccountContext> : null;
+    if (parsed?.type === "group" && typeof parsed.did === "string") {
+      return { type: "group", did: parsed.did, role: parsed.role, selectedAt: parsed.selectedAt };
+    }
+  } catch {
+    // Ignore malformed or blocked localStorage.
+  }
+  return { type: "personal", did: sessionDid };
+}
+
+function rememberActiveContext(context: ActiveAccountContext) {
+  try {
+    window.localStorage.setItem(ACTIVE_CONTEXT_KEY, JSON.stringify({ ...context, selectedAt: new Date().toISOString() }));
+    window.dispatchEvent(new Event("gainforest-active-account-context"));
+  } catch {
+    // Non-critical; navigation still works without persisted context.
+  }
+}
+
+function isActiveContext(active: ActiveAccountContext, type: "personal" | "group", did: string): boolean {
+  return active.type === type && active.did === did;
+}
+
+function accountSegment(didOrHandle: string): string {
+  return encodeURIComponent(didOrHandle);
+}
+
+function groupManageHref(group: MenuGroup): string {
+  const identifier = group.handle?.trim() || group.groupDid;
+  return `/manage/groups/${accountSegment(identifier)}`;
+}
+
+function groupName(group: MenuGroup): string {
+  return group.displayName?.trim() || "Group account";
+}
+
+function roleLabel(role: CgsGroupMembership["role"]): string {
+  return role === "owner" ? "Owner" : role === "admin" ? "Admin" : "Member";
+}
+
+function AccountDot({
+  avatarUrl,
+  label,
+  icon,
+}: {
+  avatarUrl?: string | null;
+  label: string;
+  icon: React.ReactNode;
+}) {
+  return (
+    <span className="relative flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-primary/10 text-primary">
+      {avatarUrl ? (
+        <Image src={avatarUrl} alt={label} fill unoptimized sizes="32px" className="object-cover" />
+      ) : icon}
+    </span>
+  );
+}
+
+function AccountMenuRow({
+  href,
+  label,
+  subtitle,
+  avatarUrl,
+  active,
+  icon,
+  onSelect,
+}: {
+  href: string;
+  label: string;
+  subtitle: string;
+  avatarUrl?: string | null;
+  active: boolean;
+  icon: React.ReactNode;
+  onSelect: () => void;
+}) {
+  return (
+    <Link
+      href={href}
+      onClick={onSelect}
+      className="group flex items-center gap-3 rounded-xl px-2.5 py-2 text-left transition-colors hover:bg-muted/60"
+    >
+      <AccountDot avatarUrl={avatarUrl} label={label} icon={icon} />
+      <span className="min-w-0 flex-1">
+        <span className="block truncate text-sm font-medium text-foreground">{label}</span>
+        <span className="block truncate text-xs text-muted-foreground">{subtitle}</span>
+      </span>
+      {active ? (
+        <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground">
+          <CheckIcon className="h-3 w-3" />
+        </span>
+      ) : (
+        <ChevronRightIcon className="h-4 w-4 shrink-0 text-muted-foreground/45 opacity-0 transition-all group-hover:translate-x-0.5 group-hover:opacity-100" />
+      )}
+    </Link>
+  );
+}
+
 function AuthenticatedMenu({
   session,
   profileName,
@@ -479,17 +590,79 @@ function AuthenticatedMenu({
   isProfileNameLoading?: boolean;
 }) {
   const [open, setOpen] = useState(false);
+  const [activeContext, setActiveContext] = useState<ActiveAccountContext>(() => ({ type: "personal", did: session.did }));
+  const [personalCard, setPersonalCard] = useState<ProfileCard | null>(null);
+  const [groups, setGroups] = useState<MenuGroup[]>([]);
+  const [groupsStatus, setGroupsStatus] = useState<"idle" | "loading" | "ready" | "error">("idle");
   const containerRef = useRef<HTMLDivElement>(null);
-  const cleanProfileName = profileName?.trim() || null;
+  const cleanProfileName = profileName?.trim() || personalCard?.displayName?.trim() || null;
   const profileNameLoading = isProfileNameLoading && profileName === undefined;
-  const displayLabel = cleanProfileName ?? (profileNameLoading ? "Account" : session.handle || shortDid(session.did));
-  const secondaryLabel = cleanProfileName ? "Signed in" : profileNameLoading ? "Loading profile" : "User account";
+  const displayLabel = cleanProfileName ?? (profileNameLoading ? "Account" : "Personal account");
+  const secondaryLabel = cleanProfileName ? "Signed in" : profileNameLoading ? "Loading profile" : "Personal account";
+
+  const loadAccounts = async () => {
+    setGroupsStatus("loading");
+    try {
+      const [personalResponse, groupResponse] = await Promise.all([
+        fetch(`/api/account/card?did=${encodeURIComponent(session.did)}`, { cache: "no-store" }).catch(() => null),
+        fetch("/api/cgs/groups", { cache: "no-store" }),
+      ]);
+      const personal = personalResponse?.ok ? await personalResponse.json() as ProfileCard : null;
+      const groupPayload = await groupResponse.json().catch(() => ({})) as { groups?: CgsGroupMembership[] };
+      const rawGroups = groupResponse.ok && Array.isArray(groupPayload.groups) ? groupPayload.groups : [];
+      const hydratedGroups = await Promise.all(rawGroups.map(async (group): Promise<MenuGroup> => {
+        if (group.displayName || group.avatarUrl || group.handle) return { ...group, displayName: group.displayName ?? null, avatarUrl: group.avatarUrl ?? null, handle: group.handle ?? null };
+        const response = await fetch(`/api/account/card?did=${encodeURIComponent(group.groupDid)}`, { cache: "no-store" }).catch(() => null);
+        const card = response?.ok ? await response.json() as ProfileCard : { displayName: null, avatarUrl: null, handle: null };
+        return { ...group, displayName: card.displayName, avatarUrl: card.avatarUrl, handle: card.handle ?? null };
+      }));
+
+      setPersonalCard(personal);
+      setGroups(hydratedGroups);
+      setGroupsStatus("ready");
+    } catch {
+      setGroupsStatus("error");
+    }
+  };
+
+  const selectPersonal = () => {
+    const next = { type: "personal" as const, did: session.did };
+    setActiveContext(next);
+    rememberActiveContext(next);
+    setOpen(false);
+  };
+
+  const selectGroup = (group: MenuGroup) => {
+    const next = { type: "group" as const, did: group.groupDid, role: group.role };
+    setActiveContext(next);
+    rememberActiveContext(next);
+    setOpen(false);
+  };
 
   const handleBlur = (event: React.FocusEvent) => {
     if (!containerRef.current?.contains(event.relatedTarget as Node)) {
       setOpen(false);
     }
   };
+
+  useEffect(() => {
+    setActiveContext(readActiveContext(session.did));
+
+    const refresh = () => setActiveContext(readActiveContext(session.did));
+    const handleStorage = (event: StorageEvent) => {
+      if (event.key === ACTIVE_CONTEXT_KEY) refresh();
+    };
+    window.addEventListener("storage", handleStorage);
+    window.addEventListener("gainforest-active-account-context", refresh);
+    return () => {
+      window.removeEventListener("storage", handleStorage);
+      window.removeEventListener("gainforest-active-account-context", refresh);
+    };
+  }, [session.did]);
+
+  useEffect(() => {
+    if (open && groupsStatus === "idle") void loadAccounts();
+  }, [open, groupsStatus]);
 
   useEffect(() => {
     if (!open) return;
@@ -517,9 +690,7 @@ function AuthenticatedMenu({
         onClick={() => setOpen((value) => !value)}
         className="flex items-center gap-2 px-2 py-1 rounded-xl hover:bg-muted/60 transition-colors cursor-pointer group"
       >
-        <div className="h-7 w-7 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0 overflow-hidden">
-          <UserIcon className="h-3.5 w-3.5 text-primary" />
-        </div>
+        <AccountDot avatarUrl={personalCard?.avatarUrl} label={displayLabel} icon={<UserIcon className="h-3.5 w-3.5" />} />
 
         <span className="hidden sm:block text-sm font-medium text-foreground max-w-[120px] truncate">
           {displayLabel}
@@ -541,39 +712,87 @@ function AuthenticatedMenu({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 6 }}
             transition={{ duration: 0.15, ease: [0.25, 0.1, 0.25, 1] }}
-            className="absolute top-full right-0 z-[1000] mt-2 w-52 rounded-xl border border-border bg-background/95 backdrop-blur-sm shadow-xl shadow-black/10 overflow-hidden"
+            className="absolute top-full right-0 z-[1000] mt-2 w-[min(22rem,calc(100vw-1.5rem))] overflow-hidden rounded-2xl border border-border bg-background/95 shadow-xl shadow-black/10 backdrop-blur-sm"
           >
-            <div className="px-3 py-2.5 border-b border-border">
+            <div className="border-b border-border px-3 py-3">
               <p className="text-sm font-medium text-foreground truncate">{displayLabel}</p>
               {secondaryLabel && (
                 <p className="text-xs text-muted-foreground truncate">{secondaryLabel}</p>
               )}
             </div>
 
-            <div className="p-1">
-              <Link
+            <div className="max-h-[min(70vh,34rem)] overflow-y-auto p-2">
+              <div className="px-2 pb-1 pt-1 text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
+                Accounts
+              </div>
+
+              <AccountMenuRow
                 href="/manage"
+                label={displayLabel}
+                subtitle="Personal account"
+                avatarUrl={personalCard?.avatarUrl}
+                active={isActiveContext(activeContext, "personal", session.did)}
+                icon={<UserIcon className="h-4 w-4" />}
+                onSelect={selectPersonal}
+              />
+
+              {groupsStatus === "loading" ? (
+                <div className="flex items-center gap-2 px-2.5 py-3 text-sm text-muted-foreground">
+                  <Loader2 className="h-4 w-4 animate-spin text-primary" /> Loading groups…
+                </div>
+              ) : null}
+
+              {groupsStatus === "error" ? (
+                <div className="rounded-xl bg-destructive/10 px-3 py-2 text-xs text-destructive">
+                  <p>Couldn’t load your groups.</p>
+                  <button type="button" onClick={() => void loadAccounts()} className="mt-1 font-medium underline underline-offset-2">
+                    Try again
+                  </button>
+                </div>
+              ) : null}
+
+              {groupsStatus === "ready" && groups.length === 0 ? (
+                <p className="px-2.5 py-2 text-xs text-muted-foreground">No groups yet.</p>
+              ) : null}
+
+              {groups.map((group) => (
+                <AccountMenuRow
+                  key={group.groupDid}
+                  href={groupManageHref(group)}
+                  label={groupName(group)}
+                  subtitle={roleLabel(group.role)}
+                  avatarUrl={group.avatarUrl}
+                  active={isActiveContext(activeContext, "group", group.groupDid)}
+                  icon={<UsersIcon className="h-4 w-4" />}
+                  onSelect={() => selectGroup(group)}
+                />
+              ))}
+
+              <div className="my-2 h-px bg-border/60" />
+
+              <Link
+                href="/manage/groups"
                 onClick={() => setOpen(false)}
-                className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-foreground hover:bg-muted/60 transition-colors w-full text-left"
+                className="flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm text-foreground transition-colors hover:bg-muted/60"
               >
-                <UserIcon className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-                Manage account
+                <ShieldCheckIcon className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                View all groups
               </Link>
 
               <Link
-                href="/manage?tab=settings"
+                href="/manage/settings"
                 onClick={() => setOpen(false)}
-                className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-foreground hover:bg-muted/60 transition-colors w-full text-left"
+                className="flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm text-foreground transition-colors hover:bg-muted/60"
               >
                 <SettingsIcon className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
                 Settings
               </Link>
 
-              <div className="h-px bg-border/60 my-1" />
+              <div className="my-2 h-px bg-border/60" />
 
               <button
                 onClick={redirectToLogout}
-                className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors w-full text-left cursor-pointer"
+                className="flex w-full cursor-pointer items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-sm text-red-500 transition-colors hover:bg-red-50 dark:hover:bg-red-950/30"
               >
                 <LogOutIcon className="h-3.5 w-3.5 shrink-0" />
                 Sign out

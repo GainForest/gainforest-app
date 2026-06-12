@@ -6,6 +6,9 @@ export type CgsGroupMembership = {
   groupDid: string;
   role: CgsRole;
   joinedAt?: string | null;
+  displayName?: string | null;
+  avatarUrl?: string | null;
+  handle?: string | null;
 };
 
 export type CgsGroupsResponse = {

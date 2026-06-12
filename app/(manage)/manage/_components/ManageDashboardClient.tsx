@@ -48,6 +48,14 @@ import CountrySelectorModal from "@/components/modals/country-selector";
 import { ImageEditorModal } from "@/components/modals/image-editor";
 import { SocialGlyph } from "@/app/_components/SocialIcon";
 
+function decodePath(value: string): string {
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return value;
+  }
+}
+
 function formatWebsite(url: string): string {
   return url.replace(/^https?:\/\//, "").replace(/\/$/, "");
 }
@@ -404,7 +412,7 @@ export function ManageDashboardClient({
   const resolvedMode = hasCompletedSetup
     ? resolveDashboardMode({ currentKind: account.kind, mode: parsedMode })
     : parsedMode;
-  const isAccountManageRoute = pathname === basePath;
+  const isAccountManageRoute = pathname === basePath || decodePath(pathname) === decodePath(basePath);
 
   useEffect(() => {
     if (!isAccountManageRoute || mode !== undefined) return;

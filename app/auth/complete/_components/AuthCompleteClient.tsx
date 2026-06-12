@@ -21,7 +21,7 @@ type AuthCompleteAccount = {
   kind: "user" | "organization";
 } | null;
 
-type ProfileCard = { displayName: string | null; avatarUrl: string | null };
+type ProfileCard = { displayName: string | null; avatarUrl: string | null; handle?: string | null };
 type GroupOption = CgsGroupMembership & ProfileCard;
 
 type ActiveContext =
@@ -49,6 +49,52 @@ function rememberContext(context: ActiveContext) {
 
 function roleLabel(role: CgsGroupMembership["role"]): string {
   return role === "owner" ? "Owner" : role === "admin" ? "Admin" : "Member";
+}
+
+function normalizeDid(value: string): string {
+  let current = value.trim();
+  for (let i = 0; i < 3; i++) {
+    if (current.startsWith("did:")) return current;
+    try {
+      const decoded = decodeURIComponent(current);
+      if (decoded === current) break;
+      current = decoded;
+    } catch {
+      break;
+    }
+  }
+  return current;
+}
+
+function accountSegment(didOrHandle: string): string {
+  return encodeURIComponent(didOrHandle);
+}
+
+function groupManageHref(group: GroupOption): string {
+  const identifier = group.handle?.trim() || normalizeDid(group.groupDid);
+  return `/manage/groups/${accountSegment(identifier)}`;
+}
+
+function bestGroupName(group: GroupOption): string {
+  return group.displayName?.trim() || "Group account";
+}
+
+function redirectGroupIdentifier(redirectTo: string): string | null {
+  try {
+    const url = new URL(redirectTo, window.location.origin);
+    const match = url.pathname.match(/^\/manage\/groups\/([^/]+)\/?$/);
+    return match?.[1] ? decodeURIComponent(match[1]).trim() : null;
+  } catch {
+    return null;
+  }
+}
+
+function groupMatchesIdentifier(group: GroupOption, identifier: string): boolean {
+  const normalizedIdentifier = normalizeDid(identifier);
+  if (normalizedIdentifier.startsWith("did:")) {
+    return normalizeDid(group.groupDid) === normalizedIdentifier;
+  }
+  return Boolean(group.handle && group.handle.toLowerCase() === normalizedIdentifier.toLowerCase());
 }
 
 function AppMark({ showAnimations = false }: { showAnimations?: boolean }) {
@@ -190,8 +236,9 @@ function GroupChoiceView({
   };
 
   const continueGroup = (group: GroupOption) => {
-    rememberContext({ type: "group", did: group.groupDid, role: group.role, selectedAt: new Date().toISOString() });
-    window.location.assign(`/manage/groups/${encodeURIComponent(group.groupDid)}`);
+    const groupDid = normalizeDid(group.groupDid);
+    rememberContext({ type: "group", did: groupDid, role: group.role, selectedAt: new Date().toISOString() });
+    window.location.assign(groupManageHref(group));
   };
 
   return (
@@ -227,8 +274,8 @@ function GroupChoiceView({
               {groups.map((group, index) => (
                 <OptionCard
                   key={group.groupDid}
-                  did={group.groupDid}
-                  name={group.displayName?.trim() || "Unnamed Group"}
+                  did={normalizeDid(group.groupDid)}
+                  name={bestGroupName(group)}
                   avatarUrl={group.avatarUrl}
                   sublabel={`as ${roleLabel(group.role)}`}
                   onClick={() => continueGroup(group)}
@@ -259,6 +306,30 @@ function ErrorView({ redirectTo }: { redirectTo: string }) {
   );
 }
 
+function GroupLookupErrorView({
+  message,
+  redirectTo,
+  onRetry,
+}: {
+  message: string | null;
+  redirectTo: string;
+  onRetry: () => void;
+}) {
+  return (
+    <div className="flex flex-col items-center text-center">
+      <AppMark showAnimations />
+      <h1 className="mt-6 text-xl font-medium">Signed in, but groups didn’t load</h1>
+      <p className="mt-1 max-w-xs text-sm text-muted-foreground">
+        {message || "We couldn’t load your groups. You can retry or continue with your personal account."}
+      </p>
+      <div className="mt-6 flex justify-center gap-2">
+        <Button type="button" variant="secondary" size="sm" onClick={onRetry}>Retry</Button>
+        <Button type="button" size="sm" onClick={() => window.location.assign(redirectTo)}>Continue</Button>
+      </div>
+    </div>
+  );
+}
+
 export function AuthCompleteClient({
   session,
   account,
@@ -269,7 +340,10 @@ export function AuthCompleteClient({
   redirectTo: string;
 }) {
   const [groups, setGroups] = useState<GroupOption[]>([]);
-  const [status, setStatus] = useState<"loading" | "success" | "choices" | "error">(session ? "loading" : "error");
+  const [groupError, setGroupError] = useState<string | null>(null);
+  const [choiceRedirect, setChoiceRedirect] = useState<string | null>(null);
+  const [retryNonce, setRetryNonce] = useState(0);
+  const [status, setStatus] = useState<"loading" | "success" | "choices" | "error" | "group-error">(session ? "loading" : "error");
   const safeRedirect = useMemo(() => sanitizeRedirect(redirectTo), [redirectTo]);
 
   useEffect(() => {
@@ -280,15 +354,23 @@ export function AuthCompleteClient({
 
     async function resolveProfiles(memberships: CgsGroupMembership[]): Promise<GroupOption[]> {
       return Promise.all(
-        memberships.map(async (group) => {
+        memberships.map(async (rawGroup) => {
+          const group = { ...rawGroup, groupDid: normalizeDid(rawGroup.groupDid) };
+          const existingName = group.displayName?.trim() || null;
+          const existingAvatar = group.avatarUrl ?? null;
           try {
             const res = await fetch(`/api/account/card?did=${encodeURIComponent(group.groupDid)}`, {
               cache: "no-store",
             });
-            const card = (await res.json().catch(() => ({}))) as ProfileCard;
-            return { ...group, displayName: card.displayName ?? null, avatarUrl: card.avatarUrl ?? null };
+            const card: Partial<ProfileCard> = res.ok ? (await res.json().catch(() => ({}))) as Partial<ProfileCard> : {};
+            return {
+              ...group,
+              displayName: card.displayName?.trim() || existingName,
+              avatarUrl: card.avatarUrl ?? existingAvatar,
+              handle: card.handle?.trim() || group.handle || null,
+            };
           } catch {
-            return { ...group, displayName: null, avatarUrl: null };
+            return { ...group, displayName: existingName, avatarUrl: existingAvatar, handle: group.handle ?? null };
           }
         }),
       );
@@ -296,13 +378,28 @@ export function AuthCompleteClient({
 
     async function loadGroups() {
       setStatus("loading");
+      setGroupError(null);
+      setChoiceRedirect(null);
       try {
         const response = await fetch("/api/cgs/groups", { cache: "no-store" });
-        const data = (await response.json().catch(() => ({}))) as { groups?: CgsGroupMembership[] };
-        const loadedGroups = response.ok && Array.isArray(data.groups) ? data.groups : [];
+        const data = (await response.json().catch(() => ({}))) as { groups?: CgsGroupMembership[]; error?: string; message?: string };
+        if (!response.ok) {
+          throw new Error(data.message ?? data.error ?? `Group lookup failed (${response.status}).`);
+        }
+        if (!Array.isArray(data.groups)) {
+          throw new Error("We couldn’t load your groups.");
+        }
+        const loadedGroups = data.groups;
+        const targetIdentifier = redirectGroupIdentifier(safeRedirect);
 
         if (loadedGroups.length === 0) {
           if (cancelled) return;
+          if (targetIdentifier) {
+            setGroups([]);
+            setChoiceRedirect("/manage");
+            setStatus("choices");
+            return;
+          }
           rememberContext({ type: "personal", did: activeSession.did, selectedAt: new Date().toISOString() });
           setStatus("success");
           redirectTimer = setTimeout(() => {
@@ -313,15 +410,27 @@ export function AuthCompleteClient({
 
         const enriched = await resolveProfiles(loadedGroups);
         if (cancelled) return;
+
+        const targetGroup = targetIdentifier
+          ? enriched.find((group) => groupMatchesIdentifier(group, targetIdentifier)) ?? null
+          : null;
+        if (targetGroup) {
+          const groupDid = normalizeDid(targetGroup.groupDid);
+          rememberContext({ type: "group", did: groupDid, role: targetGroup.role, selectedAt: new Date().toISOString() });
+          setStatus("success");
+          redirectTimer = setTimeout(() => {
+            window.location.assign(groupManageHref(targetGroup));
+          }, 250);
+          return;
+        }
+
+        if (targetIdentifier) setChoiceRedirect("/manage");
         setGroups(enriched);
         setStatus("choices");
-      } catch {
+      } catch (err) {
         if (cancelled) return;
-        rememberContext({ type: "personal", did: activeSession.did, selectedAt: new Date().toISOString() });
-        setStatus("success");
-        redirectTimer = setTimeout(() => {
-          window.location.assign(safeRedirect);
-        }, REDIRECT_DELAY_MS);
+        setGroupError(err instanceof Error ? err.message : "We couldn’t load your groups.");
+        setStatus("group-error");
       }
     }
 
@@ -330,15 +439,18 @@ export function AuthCompleteClient({
       cancelled = true;
       if (redirectTimer) clearTimeout(redirectTimer);
     };
-  }, [safeRedirect, session]);
+  }, [retryNonce, safeRedirect, session]);
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-md flex-col items-center justify-center px-6 py-12">
       {status === "loading" || status === "success" ? <SigningInView redirectTo={safeRedirect} /> : null}
       {status === "choices" && session ? (
-        <GroupChoiceView account={account} session={session} groups={groups} redirectTo={safeRedirect} />
+        <GroupChoiceView account={account} session={session} groups={groups} redirectTo={choiceRedirect ?? safeRedirect} />
       ) : null}
       {status === "error" ? <ErrorView redirectTo={safeRedirect} /> : null}
+      {status === "group-error" ? (
+        <GroupLookupErrorView message={groupError} redirectTo={safeRedirect} onRetry={() => setRetryNonce((value) => value + 1)} />
+      ) : null}
     </main>
   );
 }

@@ -5,7 +5,6 @@ import { useEffect, useMemo, useState, useTransition, type FormEvent } from "rea
 import { ArrowRightIcon, Loader2Icon, ShieldIcon, Trash2Icon, UserPlusIcon, UsersIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { shortDid } from "@/app/_lib/format";
 import {
   addCgsMember,
   fetchCgsGroups,
@@ -27,6 +26,14 @@ function formatDate(value?: string | null) {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return null;
   return date.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+}
+
+function groupName(group: CgsGroupMembership): string {
+  return group.displayName?.trim() || "Group account";
+}
+
+function groupHref(group: CgsGroupMembership): string {
+  return `/manage/groups/${encodeURIComponent(group.handle?.trim() || group.groupDid)}`;
 }
 
 function MemberPanel({ group }: { group: CgsGroupMembership }) {
@@ -99,7 +106,7 @@ function MemberPanel({ group }: { group: CgsGroupMembership }) {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h2 className="flex items-center gap-2 text-lg font-medium"><UsersIcon className="size-4" /> Members</h2>
-          <p className="text-sm text-muted-foreground">CGS roles are enforced when this app writes to the group repo.</p>
+          <p className="text-sm text-muted-foreground">Roles control who can make changes for this group.</p>
         </div>
         <Button type="button" variant="secondary" onClick={refresh} disabled={isPending}>
           {isPending ? <Loader2Icon className="animate-spin" /> : null}
@@ -108,7 +115,7 @@ function MemberPanel({ group }: { group: CgsGroupMembership }) {
       </div>
 
       <form onSubmit={handleAdd} className="mt-4 grid gap-2 sm:grid-cols-[1fr_auto_auto]">
-        <Input value={memberDid} onChange={(event) => setMemberDid(event.target.value)} placeholder="did:plc:member…" disabled={isPending} />
+        <Input value={memberDid} onChange={(event) => setMemberDid(event.target.value)} placeholder="Member username or account ID" disabled={isPending} />
         <select className="h-10 rounded-md border border-input bg-background px-3 text-sm" value={role} onChange={(event) => setRole(event.target.value as RoleInput)} disabled={isPending}>
           <option value="member">member</option>
           <option value="admin">admin</option>
@@ -126,10 +133,10 @@ function MemberPanel({ group }: { group: CgsGroupMembership }) {
           return (
             <div key={member.did} className="grid gap-3 p-3 sm:grid-cols-[1fr_auto_auto] sm:items-center">
               <div className="min-w-0">
-                <p className="truncate font-mono text-xs text-foreground" title={member.did}>{member.did}</p>
+                <p className="truncate text-sm font-medium text-foreground">Member account</p>
                 <p className="text-xs text-muted-foreground">
                   {formatDate(member.addedAt) ? `Joined ${formatDate(member.addedAt)}` : "Member"}
-                  {member.addedBy ? ` · added by ${shortDid(member.addedBy)}` : ""}
+                  {member.addedBy ? " · added by another member" : ""}
                 </p>
               </div>
               <div className="flex items-center gap-2">
@@ -179,7 +186,7 @@ export function ManageGroupsClient() {
     <div className="space-y-4 py-2">
       <div>
         <h1 className="text-2xl font-medium">Your group accounts</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Groups are listed from the Certified Group Service memberships for your signed-in DID.</p>
+        <p className="mt-1 text-sm text-muted-foreground">Groups are listed from the accounts you can access.</p>
       </div>
 
       {isPending && groups.length === 0 ? <p className="text-sm text-muted-foreground">Loading groups…</p> : null}
@@ -187,8 +194,8 @@ export function ManageGroupsClient() {
 
       {groups.length === 0 && !isPending ? (
         <div className="rounded-3xl border border-border bg-muted/40 p-5">
-          <p className="font-medium">No CGS memberships found.</p>
-          <p className="mt-1 text-sm text-muted-foreground">Ask a group owner or admin to add your DID, then refresh this page.</p>
+          <p className="font-medium">No groups found.</p>
+          <p className="mt-1 text-sm text-muted-foreground">Ask a group owner or admin to add your account, then refresh this page.</p>
         </div>
       ) : null}
 
@@ -201,13 +208,13 @@ export function ManageGroupsClient() {
             >
               <button type="button" onClick={() => setSelectedDid(group.groupDid)} className="w-full text-left">
                 <div className="flex items-center justify-between gap-3">
-                  <p className="truncate font-mono text-xs" title={group.groupDid}>{group.groupDid}</p>
+                  <p className="truncate text-sm font-medium">{groupName(group)}</p>
                   <span className={`rounded-full px-2 py-1 text-xs font-medium ${roleBadge(group.role)}`}>{group.role}</span>
                 </div>
               </button>
               <div className="mt-3 flex items-center justify-between gap-3 text-sm text-muted-foreground">
-                <span>{formatDate(group.joinedAt) ? `Joined ${formatDate(group.joinedAt)}` : shortDid(group.groupDid)}</span>
-                <Link className="inline-flex items-center gap-1 text-primary hover:underline" href={`/manage/groups/${encodeURIComponent(group.groupDid)}`}>
+                <span>{formatDate(group.joinedAt) ? `Joined ${formatDate(group.joinedAt)}` : "Group account"}</span>
+                <Link className="inline-flex items-center gap-1 text-primary hover:underline" href={groupHref(group)}>
                   Open <ArrowRightIcon className="size-3" />
                 </Link>
               </div>
