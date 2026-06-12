@@ -586,10 +586,13 @@ function AuthenticatedMenu({
   const routeGroupIdentifier = groupIdentifierFromManagePath(pathname);
   const routeGroup = routeGroupIdentifier ? findSwitcherGroupByIdentifier(groups, routeGroupIdentifier) : null;
   const activeGroup = activeContext.type === "group" ? groups.find((group) => group.groupDid === activeContext.did) ?? null : null;
-  const currentGroup = routeGroup ?? (routeGroupIdentifier && activeContext.type === "group" ? activeGroup : null);
-  const showingGroup = Boolean(routeGroupIdentifier);
-  const routeGroupFallbackLabel = routeGroupIdentifier && !routeGroupIdentifier.startsWith("did:") ? routeGroupIdentifier : "Organization account";
-  const groupDisplayLabel = currentGroup ? groupName(currentGroup) : routeGroupFallbackLabel;
+  const currentGroup = routeGroup ?? (activeContext.type === "group" ? activeGroup : null);
+  const showingGroup = Boolean(routeGroup) || activeContext.type === "group";
+  const fallbackGroupIdentifier = routeGroupIdentifier ?? (activeContext.type === "group" ? activeContext.identifier : null);
+  const groupFallbackLabel = fallbackGroupIdentifier && !fallbackGroupIdentifier.startsWith("did:")
+    ? fallbackGroupIdentifier
+    : "Organization account";
+  const groupDisplayLabel = currentGroup ? groupName(currentGroup) : groupFallbackLabel;
   const displayLabel = showingGroup ? groupDisplayLabel : personalDisplayLabel;
   const secondaryLabel = showingGroup
     ? currentGroup ? roleLabel(currentGroup.role) : "Organization"
