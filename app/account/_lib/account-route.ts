@@ -21,6 +21,8 @@ export type AccountRouteData = {
   avatarUrl: string | null;
   coverUrl: string | null;
   description: string | null;
+  /** Long-form "about" text, read from the org record's `longDescription`. */
+  longDescription: string | null;
   website: string | null;
   country: string | null;
   createdAt: string | null;
@@ -59,6 +61,7 @@ type DirectCertifiedOrganization = {
   createdAt: string | null;
   orgType: string | null;
   socialLinks: string[];
+  longDescription: string | null;
 };
 
 export function encodeAccountSegment(value: string): string {
@@ -169,6 +172,7 @@ export const getAccountRouteData = cache(async (
     avatarUrl: summary.avatarUrl ?? appViewProfile?.avatar ?? null,
     coverUrl: appViewProfile?.banner ?? null,
     description: summary.bio ?? appViewProfile?.description ?? detail?.blurb ?? null,
+    longDescription: directCertifiedOrganization?.longDescription ?? null,
     website: summary.website,
     country: summary.country,
     createdAt: summary.createdAt,
@@ -287,6 +291,11 @@ async function fetchDirectCertifiedOrganization(did: string): Promise<DirectCert
         .map((entry) => (typeof entry === "object" && entry !== null && "url" in entry ? (entry as { url?: unknown }).url : null))
         .filter((url): url is string => typeof url === "string" && url.trim().length > 0)
     : [];
+  const longDescription = typeof value.longDescription === "object" && value.longDescription !== null && "value" in value.longDescription
+    ? typeof (value.longDescription as { value?: unknown }).value === "string"
+      ? (value.longDescription as { value: string }).value.trim() || null
+      : null
+    : null;
   return {
     country: await fetchCertifiedLocationCountryCode(locationUri),
     foundedDate: typeof value.foundedDate === "string" ? value.foundedDate : null,
@@ -294,6 +303,7 @@ async function fetchDirectCertifiedOrganization(did: string): Promise<DirectCert
     createdAt: typeof value.createdAt === "string" ? value.createdAt : null,
     orgType: orgTypes.length ? orgTypes.join(", ") : null,
     socialLinks,
+    longDescription,
   };
 }
 

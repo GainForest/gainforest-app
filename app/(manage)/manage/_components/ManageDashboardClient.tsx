@@ -47,6 +47,9 @@ import {
 import CountrySelectorModal from "@/components/modals/country-selector";
 import { ImageEditorModal } from "@/components/modals/image-editor";
 import { SocialGlyph } from "@/app/_components/SocialIcon";
+import { GroupMembersClient } from "../groups/_components/GroupMembersClient";
+import { ManageGroupsClient } from "../groups/_components/ManageGroupsClient";
+import type { CgsRole } from "../_lib/cgs";
 
 function decodePath(value: string): string {
   try {
@@ -97,6 +100,7 @@ async function fetchExistingSelfRecord(repo: string, collection: string): Promis
 type HeroEditState = {
   displayName: string;
   description: string;
+  longDescription: string;
   website: string;
   country: string;
   startDate: string;
@@ -107,7 +111,7 @@ type HeroEditState = {
   coverFile: File | null;
 };
 
-type InlineField = "profile" | null;
+type InlineField = "profile" | "about" | null;
 
 const SECTION_EASE = [0.25, 0.1, 0.25, 1] as const;
 
@@ -131,18 +135,65 @@ function classifySocial(url: string): string {
   return "website";
 }
 
-function AboutSection({ account }: { account: AccountRouteData }) {
-  const text = (account.description ?? "").trim();
+function AboutSection({
+  value,
+  draft,
+  isEditing,
+  isSaving,
+  saveError,
+  onEdit,
+  onChange,
+  onSave,
+  onCancel,
+}: {
+  value: string;
+  draft: string;
+  isEditing: boolean;
+  isSaving: boolean;
+  saveError: string | null;
+  onEdit: () => void;
+  onChange: (value: string) => void;
+  onSave: () => void;
+  onCancel: () => void;
+}) {
+  const text = value.trim();
   return (
     <motion.section
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: 0.1, ease: SECTION_EASE }}
     >
-      <h2 className="font-instrument text-2xl italic leading-none text-foreground">About</h2>
-      <p className={cn("mt-3 max-w-2xl whitespace-pre-line text-sm leading-relaxed", text ? "text-muted-foreground" : "text-muted-foreground/60")}>
-        {text || "No long description provided."}
-      </p>
+      <div className="flex items-center gap-2">
+        <h2 className="font-instrument text-2xl italic leading-none text-foreground">About</h2>
+        {isEditing ? null : (
+          <button
+            type="button"
+            onClick={onEdit}
+            className="rounded-full p-1 text-foreground/40 transition-colors hover:bg-muted hover:text-foreground"
+            aria-label="Edit about"
+          >
+            <PencilIcon className="size-4" />
+          </button>
+        )}
+      </div>
+      {isEditing ? (
+        <div className="mt-3 max-w-2xl space-y-2">
+          <textarea
+            value={draft}
+            onChange={(e) => onChange(e.target.value)}
+            placeholder="Tell people about this organization…"
+            rows={6}
+            className="w-full resize-none rounded-xl border border-border/50 bg-transparent p-3 text-sm leading-relaxed text-foreground outline-none transition-colors field-sizing-content placeholder:text-muted-foreground/60 focus:border-primary/60"
+            autoFocus
+          />
+          <InlineEditActions isSaving={isSaving} onSave={onSave} onCancel={onCancel} />
+          {saveError ? <p className="text-sm text-destructive">{saveError}</p> : null}
+        </div>
+      ) : (
+        <p className={cn("mt-3 max-w-2xl whitespace-pre-line text-sm leading-relaxed", text ? "text-muted-foreground" : "text-muted-foreground/60")}>
+          {text || "No long description provided."}
+        </p>
+      )}
     </motion.section>
   );
 }
@@ -396,12 +447,15 @@ export function ManageDashboardClient({
   mode,
   basePath = "/manage",
   writeRepoDid,
+  groupRole,
   children,
 }: {
   account: AccountRouteData;
   mode?: ManageMode | null;
   basePath?: string;
   writeRepoDid?: string;
+  /** When scoped into a CGS group, the current user's role — enables the members list. */
+  groupRole?: CgsRole;
   children?: React.ReactNode;
 }) {
   const router = useRouter();
@@ -435,6 +489,7 @@ export function ManageDashboardClient({
 
   const [editDisplayName, setEditDisplayName] = useState(account.displayName);
   const [editDescription, setEditDescription] = useState(account.description ?? "");
+  const [editLongDescription, setEditLongDescription] = useState(account.longDescription ?? "");
   const [editWebsite, setEditWebsite] = useState(account.website ?? "");
   const [editCountry, setEditCountry] = useState(account.country ?? "");
   const initialStartDate = account.foundedDate ? new Date(account.foundedDate).toISOString().slice(0, 10) : "";
@@ -454,6 +509,7 @@ export function ManageDashboardClient({
   const editState: HeroEditState = {
     displayName: editDisplayName,
     description: editDescription,
+    longDescription: editLongDescription,
     website: editWebsite,
     country: editCountry,
     startDate: editStartDate,
@@ -469,6 +525,7 @@ export function ManageDashboardClient({
   const applyState = (next: HeroEditState) => {
     setEditDisplayName(next.displayName);
     setEditDescription(next.description);
+    setEditLongDescription(next.longDescription);
     setEditWebsite(next.website);
     setEditCountry(next.country);
     setEditStartDate(next.startDate);
@@ -483,6 +540,7 @@ export function ManageDashboardClient({
     applyState({
       displayName: account.displayName,
       description: account.description ?? "",
+      longDescription: account.longDescription ?? "",
       website: account.website ?? "",
       country: account.country ?? "",
       startDate: initialStartDate,
@@ -500,6 +558,7 @@ export function ManageDashboardClient({
     switch (field) {
       case "displayName": setEditDisplayName(value); break;
       case "description": setEditDescription(value); break;
+      case "longDescription": setEditLongDescription(value); break;
       case "website": setEditWebsite(value); break;
       case "country": setEditCountry(value); break;
       case "startDate": setEditStartDate(value); break;
@@ -590,7 +649,7 @@ export function ManageDashboardClient({
 
       const shouldWriteOrg = account.kind === "organization" && (
         "country" in overrides || "startDate" in overrides || "visibility" in overrides ||
-        "orgType" in overrides || "socials" in overrides
+        "orgType" in overrides || "socials" in overrides || "longDescription" in overrides
       );
       if (shouldWriteOrg) {
         const repo = writeRepoDid ?? account.did;
@@ -617,6 +676,16 @@ export function ManageDashboardClient({
         if ("socials" in overrides) {
           if (next.socials.length) orgRecord.urls = next.socials.map((url) => ({ url }));
           else delete orgRecord.urls;
+        }
+        if ("longDescription" in overrides) {
+          if (next.longDescription.trim()) {
+            orgRecord.longDescription = {
+              $type: "org.hypercerts.defs#descriptionString",
+              value: next.longDescription.trim(),
+            };
+          } else {
+            delete orgRecord.longDescription;
+          }
         }
         await putRecord("app.certified.actor.organization", "self", orgRecord, writeOptions);
       }
@@ -709,7 +778,7 @@ export function ManageDashboardClient({
           editState={editState}
           inlineField={inlineField}
           isSaving={isSaving}
-          saveError={saveError}
+          saveError={inlineField === "about" ? null : saveError}
           onChange={handleChange}
           onEditField={setInlineField}
           onSaveInline={() => void saveChanges()}
@@ -723,7 +792,25 @@ export function ManageDashboardClient({
           onEditOrgType={openOrgTypeModal}
           onEditSocials={openSocialsModal}
         />
-        {account.kind === "organization" ? <AboutSection account={account} /> : null}
+        {account.kind === "organization" ? (
+          <>
+            <AboutSection
+              value={account.longDescription ?? ""}
+              draft={editLongDescription}
+              isEditing={inlineField === "about"}
+              isSaving={isSaving}
+              saveError={inlineField === "about" ? saveError : null}
+              onEdit={() => { setEditLongDescription(account.longDescription ?? ""); setSaveError(null); setInlineField("about"); }}
+              onChange={setEditLongDescription}
+              onSave={() => void saveChanges({ longDescription: editLongDescription })}
+              onCancel={() => { setEditLongDescription(account.longDescription ?? ""); setSaveError(null); setInlineField(null); }}
+            />
+            {writeRepoDid && groupRole ? (
+              <GroupMembersClient groupDid={writeRepoDid} currentRole={groupRole} />
+            ) : null}
+          </>
+        ) : null}
+        {account.kind === "user" ? <ManageGroupsClient /> : null}
         {children}
       </Container>
     </>

@@ -109,9 +109,7 @@ const ART: Record<string, ReactNode> = {
 
 function buildTiles(account: AccountRouteData, stats: OverviewStats, target: ManageTarget): FolderTile[] {
   if (account.kind === "user") {
-    return [
-      { id: "donations", title: "Donations", href: manageHref(target, "donations"), count: stats.donations, unit: "receipts" },
-    ];
+    return [];
   }
   return [
     { id: "projects", title: "Projects", href: manageHref(target, "projects"), count: stats.projects, unit: "collections" },
@@ -162,6 +160,7 @@ export function ManageOverview({
   stats: OverviewStats;
 }) {
   const tiles = buildTiles(account, stats, target);
+  if (tiles.length === 0) return null;
 
   return (
     <div className="grid grid-cols-2 gap-x-3 gap-y-4 sm:grid-cols-3 lg:grid-cols-4">

@@ -732,14 +732,6 @@ function ManageSection({
     },
     {
       kind: "leaf",
-      id: "projects-manage",
-      text: "My Projects",
-      Icon: FolderKanbanIcon,
-      href: manageHref({ basePath }, "projects"),
-      pathCheck: { startsWith: manageHref({ basePath }, "projects") },
-    },
-    {
-      kind: "leaf",
       id: "organizations-manage",
       text: "My Organizations",
       Icon: Building2Icon,

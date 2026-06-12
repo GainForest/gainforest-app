@@ -59,11 +59,16 @@ export async function ManageHomeSection({ target, wrapDashboard = true }: { targ
 
   if (!wrapDashboard) return overview;
 
+  const groupRole: CgsRole | undefined = target.kind === "group"
+    ? target.role === "owner" ? "owner" : target.role === "admin" ? "admin" : "member"
+    : undefined;
+
   return (
     <ManageDashboard
       account={account}
       basePath={target.basePath}
       writeRepoDid={target.kind === "group" ? target.did : undefined}
+      groupRole={groupRole}
     >
       {overview}
     </ManageDashboard>
