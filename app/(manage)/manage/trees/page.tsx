@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import { fetchAuthSession } from "@/app/_lib/auth-server";
-import { TreesPageClient } from "./_components/TreesPageClient";
+import { resolvePersonalManageTarget } from "@/app/_lib/manage-server";
+import { TreesSection } from "../_sections";
 
 export const metadata: Metadata = {
   title: "Manage Trees — GainForest",
@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 };
 
 export default async function TreesPage() {
-  const session = await fetchAuthSession();
-  if (!session.isLoggedIn) return null;
-  return <TreesPageClient did={session.did} />;
+  const target = await resolvePersonalManageTarget();
+  if (!target) return null;
+  return <TreesSection target={target} />;
 }

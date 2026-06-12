@@ -11,6 +11,7 @@ import {
   ListIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { manageApiHref, manageHref, type ManageTarget } from "@/lib/links";
 import { useModal } from "@/components/ui/modal/context";
 import Container from "@/components/ui/container";
 import { deleteRecord, putRecord } from "../../_lib/mutations";
@@ -76,7 +77,7 @@ function ViewToggle({ view, setView }: { view: ViewMode; setView: (view: ViewMod
   );
 }
 
-export function SitesClient({ did }: { did: string }) {
+export function SitesClient({ did, target }: { did: string; target: ManageTarget }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const modal = useModal();
@@ -97,7 +98,7 @@ export function SitesClient({ did }: { did: string }) {
   const loadDefaultSite = useCallback(async () => {
     setDefaultError(null);
     try {
-      const res = await fetch("/api/manage/sites/default");
+      const res = await fetch(manageApiHref("/api/manage/sites/default", target));
       const data = (await res.json()) as { siteUri: string | null } | { error: string };
       if (!res.ok || "error" in data) {
         setDefaultError(("error" in data ? data.error : null) ?? "Could not load the default site.");
@@ -107,14 +108,14 @@ export function SitesClient({ did }: { did: string }) {
     } catch {
       setDefaultError("Could not load the default site.");
     }
-  }, []);
+  }, [target]);
 
   const loadSites = useCallback(async () => {
     setIsLoading(true);
     setFetchError(null);
     setCardErrors({});
     try {
-      const res = await fetch("/api/manage/sites");
+      const res = await fetch(manageApiHref("/api/manage/sites", target));
       const data = (await res.json()) as ManagedLocation[] | { error: string };
       if (!res.ok || "error" in data) {
         setFetchError(("error" in data ? data.error : null) ?? "Failed to load sites.");
@@ -127,7 +128,7 @@ export function SitesClient({ did }: { did: string }) {
     } finally {
       setIsLoading(false);
     }
-  }, [loadDefaultSite]);
+  }, [loadDefaultSite, target]);
 
   useEffect(() => { void loadSites(); }, [loadSites]);
 
@@ -187,6 +188,7 @@ export function SitesClient({ did }: { did: string }) {
         content: (
           <SiteEditorModal
             did={did}
+            target={target}
             initialData={null}
             onSaved={() => void loadSites()}
           />
@@ -206,8 +208,10 @@ export function SitesClient({ did }: { did: string }) {
         content: (
           <SiteEditorModal
             did={did}
+            target={target}
             initialData={{
               rkey,
+              cid: site.metadata.cid,
               name: site.record.name ?? "",
               hasShapeLocation: isShapeLocation(site),
               recordValue: site.rawRecord ?? null,
@@ -243,7 +247,7 @@ export function SitesClient({ did }: { did: string }) {
         $type: DEFAULT_SITE_COLLECTION,
         site: siteUri,
         createdAt: new Date().toISOString(),
-      });
+      }, target.kind === "group" ? { repo: target.did } : undefined);
       void loadDefaultSite();
     } catch (err) {
       setDefaultSiteUri(previousDefault);
@@ -264,12 +268,12 @@ export function SitesClient({ did }: { did: string }) {
     setDeletingRkey(rkey);
     setCardError(rkey, null);
     try {
-      await deleteRecord("app.certified.location", rkey);
+      await deleteRecord("app.certified.location", rkey, target.kind === "group" ? { repo: target.did } : undefined);
       setSites((prev) => prev.filter((item) => item.metadata.rkey !== rkey));
       if (previewingRkey === rkey) {
         setPreviewingRkey(null);
         setIframeUrl(null);
-        router.push("/manage/sites", { scroll: false });
+        router.push(manageHref(target, "sites"), { scroll: false });
       }
     } catch (err) {
       setCardError(rkey, err instanceof Error ? err.message : "Failed to delete site.");

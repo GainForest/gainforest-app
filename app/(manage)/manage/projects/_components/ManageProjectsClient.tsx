@@ -28,6 +28,7 @@ import { ModalContent, ModalDescription, ModalFooter, ModalHeader, ModalTitle } 
 import { useModal } from "@/components/ui/modal/context";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
+import { manageApiHref, manageHref, type ManageTarget } from "@/lib/links";
 import type { BumicertRecord } from "@/app/_lib/indexer";
 import { createRecord, deleteRecord, putRecord, uploadBlob } from "../../_lib/mutations";
 
@@ -85,7 +86,7 @@ const emptyDraft: ProjectDraft = {
   bumicertUris: [],
 };
 
-export function ManageProjectsClient({ bumicerts }: { bumicerts: BumicertRecord[] }) {
+export function ManageProjectsClient({ target, bumicerts }: { target: ManageTarget; bumicerts: BumicertRecord[] }) {
   const [projects, setProjects] = useState<ManagedProject[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -102,7 +103,7 @@ export function ManageProjectsClient({ bumicerts }: { bumicerts: BumicertRecord[
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch("/api/manage/projects", { cache: "no-store" });
+      const response = await fetch(manageApiHref("/api/manage/projects", target), { cache: "no-store" });
       const data = (await response.json()) as ManagedProject[] | { error: string };
       if (!response.ok || !Array.isArray(data)) {
         setError(!Array.isArray(data) ? data.error : "Failed to load projects.");
@@ -116,7 +117,7 @@ export function ManageProjectsClient({ bumicerts }: { bumicerts: BumicertRecord[
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [target]);
 
   useEffect(() => {
     void loadProjects();
@@ -157,6 +158,7 @@ export function ManageProjectsClient({ bumicerts }: { bumicerts: BumicertRecord[
           <ProjectEditor
             key="new-project"
             state={{ mode: "create", project: null }}
+            target={target}
             bumicerts={bumicerts}
             presentation="inline"
             onClose={backToList}
@@ -172,6 +174,7 @@ export function ManageProjectsClient({ bumicerts }: { bumicerts: BumicertRecord[
             <ProjectEditor
               key={selectedProject.atUri}
               state={{ mode: "edit", project: selectedProject }}
+              target={target}
               bumicerts={bumicerts}
               presentation="inline"
               onClose={backToList}
@@ -339,6 +342,7 @@ function ProjectCard({
 
 function ProjectEditor({
   state,
+  target,
   bumicerts,
   onClose,
   onSaved,
@@ -346,6 +350,7 @@ function ProjectEditor({
   presentation = "modal",
 }: {
   state: EditorState;
+  target: ManageTarget;
   bumicerts: BumicertRecord[];
   onClose: () => void;
   onSaved: () => void;
@@ -415,7 +420,7 @@ function ProjectEditor({
           <DeleteProjectModal
             projectTitle={state.project.title}
             onConfirm={async () => {
-              await deleteRecord(PROJECT_COLLECTION, state.project.rkey);
+              await deleteRecord(PROJECT_COLLECTION, state.project.rkey, target.kind === "group" ? { repo: target.did } : undefined);
               onDeleted?.();
             }}
           />
@@ -437,11 +442,12 @@ function ProjectEditor({
     setSaving(true);
     setError(null);
     try {
-      const cover = coverFile ? await uploadBlob(coverFile) : null;
+      const writeOptions = target.kind === "group" ? { repo: target.did } : undefined;
+      const cover = coverFile ? await uploadBlob(coverFile, writeOptions) : null;
       const record = buildProjectRecord(draft, state.project, cover?.ref);
       const result = isEdit
-        ? await putRecord(PROJECT_COLLECTION, state.project.rkey, record, state.project.cid ? { swapRecord: state.project.cid } : undefined)
-        : await createRecord(PROJECT_COLLECTION, record);
+        ? await putRecord(PROJECT_COLLECTION, state.project.rkey, record, { ...(state.project.cid ? { swapRecord: state.project.cid } : {}), ...(writeOptions ?? {}) })
+        : await createRecord(PROJECT_COLLECTION, record, undefined, writeOptions);
       setSavedProjectUri(result.uri);
       setShowSuccess(true);
     } catch (saveError) {
@@ -460,6 +466,7 @@ function ProjectEditor({
           className={shellClass}
           onBack={onSaved}
           projectTitle={draft.title.trim()}
+          target={target}
           projectUri={savedProjectUri}
           showAddBumicert={draft.bumicertUris.length === 0}
         />
@@ -601,6 +608,7 @@ function ProjectSuccessPanel({
   className,
   onBack,
   projectTitle,
+  target,
   projectUri,
   showAddBumicert,
 }: {
@@ -608,12 +616,13 @@ function ProjectSuccessPanel({
   className: string;
   onBack: () => void;
   projectTitle: string;
+  target: ManageTarget;
   projectUri: string | null;
   showAddBumicert: boolean;
 }) {
   const addBumicertHref = projectUri
-    ? `/manage/bumicerts/new?forProject=${encodeURIComponent(projectIdentityFromUri(projectUri) ?? projectUri)}`
-    : "/manage/bumicerts/new";
+    ? manageHref(target, "newBumicert", { forProject: projectIdentityFromUri(projectUri) ?? projectUri })
+    : manageHref(target, "newBumicert");
 
   return (
     <motion.div

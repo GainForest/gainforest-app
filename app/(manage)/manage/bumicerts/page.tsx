@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
-import { fetchAuthSession } from "@/app/_lib/auth-server";
-import { fetchBumicertsByDid } from "@/app/_lib/indexer";
-import { ManageBumicertsClient } from "./_components/ManageBumicertsClient";
+import { resolvePersonalManageTarget } from "@/app/_lib/manage-server";
+import { BumicertsSection } from "../_sections";
 
 export const metadata: Metadata = {
   title: "Manage Bumicerts — GainForest",
@@ -10,14 +9,7 @@ export const metadata: Metadata = {
 };
 
 export default async function ManageBumicertsPage() {
-  const session = await fetchAuthSession();
-  if (!session.isLoggedIn) return null;
-
-  try {
-    const page = await fetchBumicertsByDid(session.did, 24);
-    return <ManageBumicertsClient did={session.did} ownerIdentifier={session.handle || session.did} bumicerts={page.records} />;
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "Failed to load recent Bumicerts.";
-    return <ManageBumicertsClient did={session.did} ownerIdentifier={session.handle || session.did} bumicerts={[]} error={message} />;
-  }
+  const target = await resolvePersonalManageTarget();
+  if (!target) return null;
+  return <BumicertsSection target={target} />;
 }

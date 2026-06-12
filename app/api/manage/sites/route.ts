@@ -1,18 +1,17 @@
-import { fetchAuthSession } from "@/app/_lib/auth-server";
 import { fetchLocationsByDid, type ManagedLocation } from "@/app/_lib/indexer";
+import { isResponse, resolveManageApiTarget } from "../_lib/target";
 import { resolveBlobUrl, resolvePdsHost } from "@/app/_lib/pds";
 
 export const runtime = "nodejs";
 
-export async function GET() {
-  const session = await fetchAuthSession();
-  if (!session.isLoggedIn) {
-    return Response.json({ error: "Please sign in and try again." }, { status: 401 });
-  }
+export async function GET(request: Request) {
+  const target = await resolveManageApiTarget(request);
+  if (isResponse(target)) return target;
+
   try {
     const [indexedLocations, directLocations] = await Promise.all([
-      fetchLocationsByDid(session.did),
-      fetchDirectLocations(session.did).catch(() => []),
+      fetchLocationsByDid(target.did),
+      fetchDirectLocations(target.did).catch(() => []),
     ]);
     return Response.json(mergeLocations(indexedLocations, directLocations));
   } catch (err) {

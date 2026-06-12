@@ -26,7 +26,7 @@ type GroupOption = CgsGroupMembership & ProfileCard;
 
 type ActiveContext =
   | { type: "personal"; did: string; selectedAt: string }
-  | { type: "group"; did: string; role: CgsGroupMembership["role"]; selectedAt: string };
+  | { type: "group"; did: string; identifier?: string; role: CgsGroupMembership["role"]; selectedAt: string };
 
 function sanitizeRedirect(value: string): string {
   if (!value) return "/manage";
@@ -237,7 +237,7 @@ function GroupChoiceView({
 
   const continueGroup = (group: GroupOption) => {
     const groupDid = normalizeDid(group.groupDid);
-    rememberContext({ type: "group", did: groupDid, role: group.role, selectedAt: new Date().toISOString() });
+    rememberContext({ type: "group", did: groupDid, identifier: group.handle?.trim() || groupDid, role: group.role, selectedAt: new Date().toISOString() });
     window.location.assign(groupManageHref(group));
   };
 
@@ -416,7 +416,7 @@ export function AuthCompleteClient({
           : null;
         if (targetGroup) {
           const groupDid = normalizeDid(targetGroup.groupDid);
-          rememberContext({ type: "group", did: groupDid, role: targetGroup.role, selectedAt: new Date().toISOString() });
+          rememberContext({ type: "group", did: groupDid, identifier: targetGroup.handle?.trim() || groupDid, role: targetGroup.role, selectedAt: new Date().toISOString() });
           setStatus("success");
           redirectTimer = setTimeout(() => {
             window.location.assign(groupManageHref(targetGroup));

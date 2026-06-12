@@ -1,5 +1,5 @@
-import { fetchAuthSession } from "@/app/_lib/auth-server";
 import { fetchProjectsByDid, type ProjectRecord } from "@/app/_lib/indexer";
+import { isResponse, resolveManageApiTarget } from "../_lib/target";
 import { resolveBlobUrl, resolvePdsHost } from "@/app/_lib/pds";
 
 export const runtime = "nodejs";
@@ -18,16 +18,14 @@ type ListedRecordsResponse = {
   records?: ListedRecord[];
 };
 
-export async function GET() {
-  const session = await fetchAuthSession();
-  if (!session.isLoggedIn) {
-    return Response.json({ error: "Please sign in and try again." }, { status: 401 });
-  }
+export async function GET(request: Request) {
+  const target = await resolveManageApiTarget(request);
+  if (isResponse(target)) return target;
 
   try {
     const [indexedProjects, directProjects] = await Promise.all([
-      fetchProjectsByDid(session.did, 500).then((page) => page.records).catch(() => []),
-      fetchDirectProjects(session.did).catch(() => []),
+      fetchProjectsByDid(target.did, 500).then((page) => page.records).catch(() => []),
+      fetchDirectProjects(target.did).catch(() => []),
     ]);
     return Response.json(mergeProjects(indexedProjects, directProjects));
   } catch (error) {

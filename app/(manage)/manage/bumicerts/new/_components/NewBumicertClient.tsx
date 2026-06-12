@@ -51,6 +51,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { CalendarRange } from "@/components/ui/calendar-range";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
+import { manageApiHref, manageHref, type ManageTarget } from "@/lib/links";
 
 /* ── Types ──────────────────────────────────────────────────────────────── */
 
@@ -199,12 +200,12 @@ function projectRecordWithBumicert(project: LinkedProjectPrefill, bumicert: { ur
   };
 }
 
-async function appendBumicertToProject(project: LinkedProjectPrefill, bumicert: { uri: string; cid: string }) {
+async function appendBumicertToProject(project: LinkedProjectPrefill, bumicert: { uri: string; cid: string }, target: ManageTarget) {
   await putRecord(
     PROJECT_COLLECTION,
     project.rkey,
     projectRecordWithBumicert(project, bumicert),
-    project.cid ? { swapRecord: project.cid } : undefined,
+    { ...(project.cid ? { swapRecord: project.cid } : {}), ...(target.kind === "group" ? { repo: target.did } : {}) },
   );
 }
 
@@ -752,6 +753,7 @@ function StoryStep({
 
 function PeopleStep({
   did,
+  target,
   values,
   setValues,
   sites,
@@ -765,6 +767,7 @@ function PeopleStep({
   onFieldChange,
 }: {
   did: string;
+  target: ManageTarget;
   values: FormValues;
   setValues: React.Dispatch<React.SetStateAction<FormValues>>;
   sites: ManagedLocation[];
@@ -843,6 +846,7 @@ function PeopleStep({
                   content: (
                     <SiteEditorModal
                       did={did}
+                      target={target}
                       initialData={null}
                       onSaved={(savedRef) => {
                         const optimisticSite: ManagedLocation = {
@@ -897,7 +901,7 @@ function PeopleStep({
         ) : sites.length === 0 ? (
           <p className="rounded-2xl bg-muted/50 px-4 py-3.5 text-[13px] leading-6 text-muted-foreground">
             You don’t have any sites yet. You can publish without one, add one here, or add project places under{" "}
-            <Link href="/manage/sites" className="text-primary underline-offset-2 hover:underline">Manage → Sites</Link> and come back.
+            <Link href={manageHref(target, "sites")} className="text-primary underline-offset-2 hover:underline">Manage → Sites</Link> and come back.
           </p>
         ) : (
           <div className="grid gap-2 sm:grid-cols-2">
@@ -1109,7 +1113,7 @@ function DraftsSubheader({
 
 /* ── Published ──────────────────────────────────────────────────────────── */
 
-function PublishedView({ result, ownerIdentifier, onReset }: { result: PublishResult; ownerIdentifier: string; onReset: () => void }) {
+function PublishedView({ result, target, ownerIdentifier, onReset }: { result: PublishResult; target: ManageTarget; ownerIdentifier: string; onReset: () => void }) {
   const detailHref = localBumicertHref(ownerIdentifier, result.rkey);
   const hyperscanHref = hyperscanRecordHref(result.uri);
   return (
@@ -1130,7 +1134,7 @@ function PublishedView({ result, ownerIdentifier, onReset }: { result: PublishRe
           <Link href={detailHref}>Open Bumicert <ArrowRightIcon className="size-4" /></Link>
         </Button>
         <Button asChild variant="secondary">
-          <Link href="/manage/bumicerts">Back to Bumicerts</Link>
+          <Link href={manageHref(target, "bumicerts")}>Back to Bumicerts</Link>
         </Button>
         {hyperscanHref ? (
           <Button asChild variant="ghost">
@@ -1148,11 +1152,13 @@ function PublishedView({ result, ownerIdentifier, onReset }: { result: PublishRe
 
 export function NewBumicertClient({
   did,
+  target,
   ownerIdentifier,
   profile,
   linkedProject = null,
 }: {
   did: string;
+  target: ManageTarget;
   ownerIdentifier: string;
   profile: ProfilePreview;
   linkedProject?: LinkedProjectPrefill | null;
@@ -1193,7 +1199,7 @@ export function NewBumicertClient({
     const controller = new AbortController();
     setSitesStatus("loading");
     setSitesError(null);
-    fetch("/api/manage/sites", { signal: controller.signal })
+    fetch(manageApiHref("/api/manage/sites", target), { signal: controller.signal })
       .then(async (res) => {
         const json = await res.json();
         if (!res.ok) throw new Error(json?.error ?? "Failed to load sites");
@@ -1206,7 +1212,7 @@ export function NewBumicertClient({
         setSitesError(error instanceof Error ? error.message : "Failed to load sites");
       });
     return () => controller.abort();
-  }, []);
+  }, [target]);
 
   useEffect(() => {
     if (sitesStatus === "idle") refreshSites();
@@ -1345,7 +1351,7 @@ export function NewBumicertClient({
         name: scope.label,
         category: "topic",
         createdAt,
-      });
+      }, target.kind === "group" ? { repo: target.did } : undefined);
       return { uri: result.uri, cid: result.cid };
     }));
     return {
@@ -1370,7 +1376,7 @@ export function NewBumicertClient({
     try {
       let image: Record<string, unknown> | undefined;
       if (coverFile) {
-        const blob = await uploadBlob(coverFile);
+        const blob = await uploadBlob(coverFile, target.kind === "group" ? { repo: target.did } : undefined);
         image = { $type: "org.hypercerts.defs#smallImage", image: blob.ref };
       } else if (prefilledCoverUrl) {
         image = { $type: "org.hypercerts.defs#uri", uri: prefilledCoverUrl };
@@ -1394,8 +1400,8 @@ export function NewBumicertClient({
         ...(image ? { image } : {}),
         createdAt: new Date().toISOString(),
       };
-      const result = await createRecord(COLLECTION, record);
-      if (linkedProject?.canLink) await appendBumicertToProject(linkedProject, result);
+      const result = await createRecord(COLLECTION, record, undefined, target.kind === "group" ? { repo: target.did } : undefined);
+      if (linkedProject?.canLink) await appendBumicertToProject(linkedProject, result, target);
       setPublishResult({ uri: result.uri, cid: result.cid, rkey: extractRkey(result.uri) });
       if (activeDraftId) handleDeleteDraft(activeDraftId);
     } catch (error) {
@@ -1440,7 +1446,7 @@ export function NewBumicertClient({
 
       <div className="mx-auto w-full max-w-5xl px-4 py-7 sm:px-6 sm:py-9">
         {publishResult ? (
-          <PublishedView result={publishResult} ownerIdentifier={ownerIdentifier} onReset={resetForm} />
+          <PublishedView result={publishResult} target={target} ownerIdentifier={ownerIdentifier} onReset={resetForm} />
         ) : (
           <>
             <form onSubmit={handlePublish} className="mt-2 grid gap-x-14 gap-y-12 xl:grid-cols-[minmax(0,1fr)_18rem]">
@@ -1467,6 +1473,7 @@ export function NewBumicertClient({
                   <SectionHeader eyebrow="People & places" title={STEPS[2].title} subtitle={STEPS[2].subtitle} />
                   <PeopleStep
                     did={did}
+                    target={target}
                     values={values}
                     setValues={setValues}
                     sites={sites}

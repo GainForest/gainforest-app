@@ -1,5 +1,5 @@
-import { fetchAuthSession } from "@/app/_lib/auth-server";
 import { resolvePdsHost } from "@/app/_lib/pds";
+import { isResponse, resolveManageApiTarget } from "../../_lib/target";
 import type { UploadTreeDatasetItem } from "@/app/(manage)/manage/_lib/upload/tree-upload-datasets";
 
 export const runtime = "nodejs";
@@ -89,14 +89,12 @@ async function listTreeGroups(did: string): Promise<UploadTreeDatasetItem[]> {
   return items;
 }
 
-export async function GET() {
-  const session = await fetchAuthSession();
-  if (!session.isLoggedIn) {
-    return Response.json({ error: "Sign in to continue." }, { status: 401 });
-  }
+export async function GET(request: Request) {
+  const target = await resolveManageApiTarget(request);
+  if (isResponse(target)) return target;
 
   try {
-    const datasets = await listTreeGroups(session.did);
+    const datasets = await listTreeGroups(target.did);
     return Response.json(datasets);
   } catch (err) {
     const message = err instanceof Error ? err.message : "Could not load tree groups.";

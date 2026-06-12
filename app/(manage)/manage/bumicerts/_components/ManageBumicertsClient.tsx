@@ -15,8 +15,9 @@ import { Button } from "@/components/ui/button";
 import { BumicertCardSkeleton, BumicertCardVisual } from "@/components/bumicert/BumicertCard";
 import type { BumicertRecord } from "@/app/_lib/indexer";
 import { localBumicertHref } from "@/app/_lib/urls";
+import { manageHref, type ManageTarget } from "@/lib/links";
 
-function CreateHeroCard() {
+function CreateHeroCard({ target }: { target: ManageTarget }) {
   return (
     <section className="relative overflow-visible rounded-[1.6rem] border border-border/80 bg-card shadow-sm">
       <div className="relative min-h-[6rem] overflow-hidden rounded-[1.55rem]">
@@ -47,7 +48,7 @@ function CreateHeroCard() {
             Bumicerts are public impact stories that connect a project to people, places, time periods, and supporting photos or notes. Use them to make field work easier to review, share, and fund.
           </p>
           <Button size="sm" asChild className="shrink-0 self-start sm:self-auto">
-            <Link href="/manage/bumicerts/new">
+            <Link href={manageHref(target, "newBumicert")}>
               <CirclePlusIcon />
               Create Bumicert
             </Link>
@@ -76,7 +77,7 @@ function CreateHeroCard() {
 
 type ViewMode = "cards" | "list";
 
-function RecentBumicerts({ bumicerts, did, ownerIdentifier }: { bumicerts: BumicertRecord[]; did: string; ownerIdentifier: string }) {
+function RecentBumicerts({ target, bumicerts, did, ownerIdentifier }: { target: ManageTarget; bumicerts: BumicertRecord[]; did: string; ownerIdentifier: string }) {
   const [view, setView] = useState<ViewMode>("cards");
 
   return (
@@ -100,7 +101,7 @@ function RecentBumicerts({ bumicerts, did, ownerIdentifier }: { bumicerts: Bumic
             </p>
           </div>
           <Button variant="outline" size="sm" asChild className="mt-5">
-            <Link href="/manage/bumicerts/new">
+            <Link href={manageHref(target, "newBumicert")}>
               <CirclePlusIcon />
               Create first Bumicert
             </Link>
@@ -213,7 +214,7 @@ function ManageBumicertListItem({ bumicert, did, ownerIdentifier }: { bumicert: 
   );
 }
 
-export function ManageBumicertsClient({ did, ownerIdentifier, bumicerts, error }: { did: string; ownerIdentifier: string; bumicerts: BumicertRecord[]; error?: string | null }) {
+export function ManageBumicertsClient({ target, did, ownerIdentifier, bumicerts, error }: { target: ManageTarget; did: string; ownerIdentifier: string; bumicerts: BumicertRecord[]; error?: string | null }) {
   return (
     <div className="mx-auto w-full max-w-[1440px] px-4 py-4 sm:px-6 sm:py-6">
       <div className="space-y-4">
@@ -227,7 +228,7 @@ export function ManageBumicertsClient({ did, ownerIdentifier, bumicerts, error }
             </p>
           </div>
         </section>
-        <CreateHeroCard />
+        <CreateHeroCard target={target} />
         {error ? (
           <motion.div
             initial={{ opacity: 0, y: 8 }}
@@ -242,7 +243,7 @@ export function ManageBumicertsClient({ did, ownerIdentifier, bumicerts, error }
             </div>
           </motion.div>
         ) : (
-          <RecentBumicerts bumicerts={bumicerts} did={did} ownerIdentifier={ownerIdentifier} />
+          <RecentBumicerts target={target} bumicerts={bumicerts} did={did} ownerIdentifier={ownerIdentifier} />
         )}
       </div>
     </div>

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { BinocularsIcon, HeartIcon, LayersIcon, MapPinIcon, TreePineIcon } from "lucide-react";
 import type { AccountRouteData } from "@/app/account/_lib/account-route";
+import { manageHref, type ManageTarget } from "@/lib/links";
 import type { ReactNode } from "react";
 
 type OverviewStats = {
@@ -106,18 +107,18 @@ const ART: Record<string, ReactNode> = {
   ),
 };
 
-function buildTiles(account: AccountRouteData, stats: OverviewStats): FolderTile[] {
+function buildTiles(account: AccountRouteData, stats: OverviewStats, target: ManageTarget): FolderTile[] {
   if (account.kind === "user") {
     return [
-      { id: "donations", title: "Donations", href: "/manage/donations", count: stats.donations, unit: "receipts" },
+      { id: "donations", title: "Donations", href: manageHref(target, "donations"), count: stats.donations, unit: "receipts" },
     ];
   }
   return [
-    { id: "projects", title: "Projects", href: "/manage/projects", count: stats.projects, unit: "collections" },
-    { id: "observations", title: "Observations", href: "/manage/observations", count: stats.observations, unit: "records" },
-    { id: "sites", title: "Sites", href: "/manage/sites", count: stats.sites, unit: "locations" },
-    { id: "trees", title: "Trees", href: "/manage/trees", count: stats.trees, unit: "datasets" },
-    { id: "audio", title: "Audio", href: "/manage/audio", count: stats.audio, unit: "recordings" },
+    { id: "projects", title: "Projects", href: manageHref(target, "projects"), count: stats.projects, unit: "collections" },
+    { id: "observations", title: "Observations", href: manageHref(target, "observations"), count: stats.observations, unit: "records" },
+    { id: "sites", title: "Sites", href: manageHref(target, "sites"), count: stats.sites, unit: "locations" },
+    { id: "trees", title: "Trees", href: manageHref(target, "trees"), count: stats.trees, unit: "datasets" },
+    { id: "audio", title: "Audio", href: manageHref(target, "audio"), count: stats.audio, unit: "recordings" },
   ];
 }
 
@@ -152,13 +153,15 @@ function Folder({ tile, index }: { tile: FolderTile; index: number }) {
 }
 
 export function ManageOverview({
+  target,
   account,
   stats,
 }: {
+  target: ManageTarget;
   account: AccountRouteData;
   stats: OverviewStats;
 }) {
-  const tiles = buildTiles(account, stats);
+  const tiles = buildTiles(account, stats, target);
 
   return (
     <div className="grid grid-cols-2 gap-x-3 gap-y-4 sm:grid-cols-3 lg:grid-cols-4">

@@ -29,6 +29,7 @@ import Container from "@/components/ui/container";
 import { useModal } from "@/components/ui/modal/context";
 import { MODAL_IDS } from "@/components/global/modals/ids";
 import { cn } from "@/lib/utils";
+import { manageApiHref, type ManageTarget } from "@/lib/links";
 import type {
   OccurrenceRecord,
   TreeMeasurementRecord,
@@ -89,6 +90,7 @@ import {
 
 type TreesClientProps = {
   did: string;
+  target: ManageTarget;
   onUpload?: () => void;
 };
 
@@ -350,7 +352,7 @@ function mergeTreeDetail(existing: OccurrenceRecord, detail: Partial<OccurrenceR
   };
 }
 
-export function TreesClient({ did, onUpload }: TreesClientProps) {
+export function TreesClient({ did, target, onUpload }: TreesClientProps) {
   const {
     searchQuery,
     selectedTreeRkey,
@@ -402,11 +404,11 @@ export function TreesClient({ did, onUpload }: TreesClientProps) {
     setFetchError(null);
     try {
       const [treeData, datasetData, measurementData, photoData, siteData] = await Promise.all([
-        fetchJson<OccurrenceRecord[]>("/api/manage/trees", signal),
-        fetchJson<UploadTreeDatasetRecord[]>("/api/manage/trees/datasets", signal),
-        fetchJson<TreeMeasurementRecord[]>("/api/manage/trees/measurements", signal),
-        fetchJson<TreeMultimediaRecord[]>("/api/manage/trees/photos", signal),
-        fetchJson<ManagedSite[]>("/api/manage/sites", signal).catch(() => []),
+        fetchJson<OccurrenceRecord[]>(manageApiHref("/api/manage/trees", target), signal),
+        fetchJson<UploadTreeDatasetRecord[]>(manageApiHref("/api/manage/trees/datasets", target), signal),
+        fetchJson<TreeMeasurementRecord[]>(manageApiHref("/api/manage/trees/measurements", target), signal),
+        fetchJson<TreeMultimediaRecord[]>(manageApiHref("/api/manage/trees/photos", target), signal),
+        fetchJson<ManagedSite[]>(manageApiHref("/api/manage/sites", target), signal).catch(() => []),
       ]);
       setTrees(treeData);
       setDatasets(datasetData);
@@ -419,7 +421,7 @@ export function TreesClient({ did, onUpload }: TreesClientProps) {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [target]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -566,7 +568,7 @@ export function TreesClient({ did, onUpload }: TreesClientProps) {
     if (!rkey) return;
     let cancelled = false;
     setDetailLoadingRkey(rkey);
-    fetchJson<Partial<OccurrenceRecord>>(`/api/manage/trees/${encodeURIComponent(rkey)}`)
+    fetchJson<Partial<OccurrenceRecord>>(manageApiHref(`/api/manage/trees/${encodeURIComponent(rkey)}`, target))
       .then((detail) => {
         if (cancelled) return;
         setTrees((current) => current.map((tree) => tree.rkey === rkey ? mergeTreeDetail(tree, detail) : tree));
@@ -576,7 +578,7 @@ export function TreesClient({ did, onUpload }: TreesClientProps) {
         if (!cancelled) setDetailLoadingRkey(null);
       });
     return () => { cancelled = true; };
-  }, [selectedTree?.occurrence.rkey]);
+  }, [selectedTree?.occurrence.rkey, target]);
 
   const activeTreeResetKey = selectedTree
     ? [

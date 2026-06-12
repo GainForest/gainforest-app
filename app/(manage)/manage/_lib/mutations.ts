@@ -200,7 +200,22 @@ export async function incrementDatasetRecordCount(rkey: string, increment: numbe
 export async function createMeasurement(input: {
   occurrenceRef: string;
   flora: FloraMeasurementFields;
-}): Promise<RecordMutationResult> {
+}, options?: { repo?: string }): Promise<RecordMutationResult> {
+  if (options?.repo) {
+    const basalDiameter = input.flora.basalDiameter;
+    return createRecord("app.gainforest.dwc.measurement", {
+      $type: "app.gainforest.dwc.measurement",
+      occurrenceRef: input.occurrenceRef,
+      result: {
+        $type: "app.gainforest.dwc.measurement#floraMeasurement",
+        dbh: input.flora.dbh,
+        totalHeight: input.flora.totalHeight,
+        basalDiameter,
+        canopyCoverPercent: input.flora.canopyCoverPercent,
+      },
+      createdAt: new Date().toISOString(),
+    }, undefined, options) as Promise<RecordMutationResult>;
+  }
   return callProxy({ operation: "createMeasurement", ...input });
 }
 

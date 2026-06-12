@@ -36,6 +36,14 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
+import {
+  ACTIVE_MANAGE_CONTEXT_KEY,
+  activeContextToManagePath,
+  groupIdentifierFromManagePath,
+  groupManageBasePath,
+  manageHref,
+  type ManageTarget,
+} from "@/lib/links";
 import { AuthButton, SignInPrompt } from "./AuthFlow";
 import { HeaderSlotsProvider, useHeaderSlots } from "./HeaderSlots";
 
@@ -133,6 +141,35 @@ type ShellProfileResponse = {
   manageAccountKind: ManageAccountKind;
   profileName: string | null;
 };
+
+type ManageContextResponse = ManageTarget | { error?: string };
+
+function useContextualManageBasePath(): string {
+  const pathname = usePathname() ?? "/";
+  const [basePath, setBasePath] = useState("/manage");
+
+  useEffect(() => {
+    const groupIdentifier = groupIdentifierFromManagePath(pathname);
+    if (groupIdentifier) {
+      setBasePath(groupManageBasePath(groupIdentifier));
+      return;
+    }
+
+    const refresh = () => setBasePath(activeContextToManagePath(window.localStorage.getItem(ACTIVE_MANAGE_CONTEXT_KEY)));
+    refresh();
+    const handleStorage = (event: StorageEvent) => {
+      if (event.key === ACTIVE_MANAGE_CONTEXT_KEY) refresh();
+    };
+    window.addEventListener("storage", handleStorage);
+    window.addEventListener("gainforest-active-account-context", refresh);
+    return () => {
+      window.removeEventListener("storage", handleStorage);
+      window.removeEventListener("gainforest-active-account-context", refresh);
+    };
+  }, [pathname]);
+
+  return basePath;
+}
 
 export function AppShell({
   children,
@@ -327,6 +364,7 @@ const SIDEBAR_TABS: {
 ];
 
 function SidebarTabs({ activeTab }: { activeTab: SidebarTab }) {
+  const manageBasePath = useContextualManageBasePath();
   return (
     <LayoutGroup id="sidebar-tabs">
       <div className="flex rounded-full border border-border bg-foreground/5 p-1">
@@ -335,7 +373,7 @@ function SidebarTabs({ activeTab }: { activeTab: SidebarTab }) {
           return (
             <Link
               key={tab.id}
-              href={tab.href}
+              href={tab.id === "manage" ? manageBasePath : tab.href}
               aria-current={isActive ? "page" : undefined}
               className="relative flex-1 rounded-full px-3 py-1.5 text-center text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
             >
@@ -463,6 +501,7 @@ function NavLeaf({ item, isActive, index }: { item: NavLeaf; isActive: boolean; 
 }
 
 function BumicertCreationCard() {
+  const manageBasePath = useContextualManageBasePath();
   return (
     <div className="group flex flex-col w-full h-20 border border-border bg-background rounded-2xl p-1">
       <div className="flex-1 relative">
@@ -502,7 +541,7 @@ function BumicertCreationCard() {
 
       {/*CTA*/}
       <Link
-        href="/manage/projects?mode=new"
+        href={manageHref({ basePath: manageBasePath }, "projects", { mode: "new" })}
         className={cn(
           buttonVariants({ variant: "outline", size: "sm" }),
           "relative z-2 w-full bg-background hover:bg-primary hover:text-primary-foreground",
@@ -525,55 +564,72 @@ function ManageSection({
 }) {
   const pathname = usePathname() ?? "/";
   const searchParams = useSearchParams();
+  const [manageTarget, setManageTarget] = useState<ManageTarget | null>(null);
+  const groupIdentifier = groupIdentifierFromManagePath(pathname);
+  const basePath = manageTarget?.basePath ?? (groupIdentifier ? groupManageBasePath(groupIdentifier) : "/manage");
+  const resolvedAccountKind = manageTarget?.accountKind ?? manageAccountKind;
+
+  useEffect(() => {
+    let cancelled = false;
+    const params = groupIdentifier ? `?group=${encodeURIComponent(groupIdentifier)}` : "";
+    fetch(`/api/manage/context${params}`, { cache: "no-store" })
+      .then(async (response) => response.ok ? await response.json() as ManageContextResponse : null)
+      .then((payload) => {
+        if (cancelled) return;
+        setManageTarget(payload && "kind" in payload ? payload : null);
+      })
+      .catch(() => { if (!cancelled) setManageTarget(null); });
+    return () => { cancelled = true; };
+  }, [groupIdentifier]);
+
   const organizationItems: NavLeaf[] = [
     {
       kind: "leaf",
       id: "organization",
-      text: "My Organization",
+      text: manageTarget?.kind === "group" ? "Group Home" : "My Organization",
       Icon: Building2Icon,
-      href: "/manage",
-      pathCheck: { equals: "/manage" },
+      href: basePath,
+      pathCheck: { equals: basePath },
     },
     {
       kind: "leaf",
       id: "sites",
       text: "My Sites",
       Icon: MapPinIcon,
-      href: "/manage/sites",
-      pathCheck: { startsWith: "/manage/sites" },
+      href: manageHref({ basePath }, "sites"),
+      pathCheck: { startsWith: manageHref({ basePath }, "sites") },
     },
     {
       kind: "leaf",
       id: "audio",
       text: "My Audio",
       Icon: MicIcon,
-      href: "/manage/audio",
-      pathCheck: { startsWith: "/manage/audio" },
+      href: manageHref({ basePath }, "audio"),
+      pathCheck: { startsWith: manageHref({ basePath }, "audio") },
     },
     {
       kind: "leaf",
       id: "projects-manage",
       text: "My Projects",
       Icon: FolderKanbanIcon,
-      href: "/manage/projects",
-      pathCheck: { startsWith: "/manage/projects" },
+      href: manageHref({ basePath }, "projects"),
+      pathCheck: { startsWith: manageHref({ basePath }, "projects") },
     },
     {
       kind: "leaf",
       id: "trees",
       text: "My Trees",
       Icon: TreePineIcon,
-      href: "/manage/trees",
-      pathCheck: { startsWith: "/manage/trees" },
+      href: manageHref({ basePath }, "trees"),
+      pathCheck: { startsWith: manageHref({ basePath }, "trees") },
     },
     {
       kind: "leaf",
       id: "settings",
       text: "Settings",
       Icon: SettingsIcon,
-      href: "/manage?tab=settings",
-      pathCheck: { equals: "/manage" },
-      tabCheck: "settings",
+      href: manageHref({ basePath }, "settings"),
+      pathCheck: { startsWith: manageHref({ basePath }, "settings") },
     },
   ];
   const userItems: NavLeaf[] = [
@@ -582,29 +638,28 @@ function ManageSection({
       id: "profile",
       text: "My Profile",
       Icon: UserIcon,
-      href: "/manage",
-      pathCheck: { equals: "/manage" },
+      href: basePath,
+      pathCheck: { equals: basePath },
     },
     {
       kind: "leaf",
       id: "projects-manage",
       text: "My Projects",
       Icon: FolderKanbanIcon,
-      href: "/manage/projects",
-      pathCheck: { startsWith: "/manage/projects" },
+      href: manageHref({ basePath }, "projects"),
+      pathCheck: { startsWith: manageHref({ basePath }, "projects") },
     },
     {
       kind: "leaf",
       id: "settings",
       text: "Settings",
       Icon: SettingsIcon,
-      href: "/manage?tab=settings",
-      pathCheck: { equals: "/manage" },
-      tabCheck: "settings",
+      href: manageHref({ basePath }, "settings"),
+      pathCheck: { startsWith: manageHref({ basePath }, "settings") },
     },
   ];
   const items: NavLeaf[] = authSession?.isLoggedIn
-    ? manageAccountKind === "organization" ? organizationItems : userItems
+    ? resolvedAccountKind === "organization" ? organizationItems : userItems
     : [];
 
   return (
@@ -726,8 +781,9 @@ function getRouteHeaderActions(pathname: string, authSession: AuthSession) {
 }
 
 function CreateBumicertHeaderButton({ isUnauthenticated }: { isUnauthenticated: boolean }) {
+  const manageBasePath = useContextualManageBasePath();
   return (
-    <Link href="/manage/projects?mode=new">
+    <Link href={manageHref({ basePath: manageBasePath }, "projects", { mode: "new" })}>
       <motion.span
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}

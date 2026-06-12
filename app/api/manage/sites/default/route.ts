@@ -1,20 +1,18 @@
-import { fetchAuthSession } from "@/app/_lib/auth-server";
 import { fetchDefaultSiteByDid } from "@/app/_lib/indexer";
+import { isResponse, resolveManageApiTarget } from "../../_lib/target";
 import { resolvePdsHost } from "@/app/_lib/pds";
 
 export const runtime = "nodejs";
 
-export async function GET() {
-  const session = await fetchAuthSession();
-  if (!session.isLoggedIn) {
-    return Response.json({ error: "Please sign in and try again." }, { status: 401 });
-  }
+export async function GET(request: Request) {
+  const target = await resolveManageApiTarget(request);
+  if (isResponse(target)) return target;
 
   try {
-    const indexed = await fetchDefaultSiteByDid(session.did);
-    return Response.json({ siteUri: indexed ?? await fetchDirectDefaultSite(session.did) });
+    const indexed = await fetchDefaultSiteByDid(target.did);
+    return Response.json({ siteUri: indexed ?? await fetchDirectDefaultSite(target.did) });
   } catch (err) {
-    const direct = await fetchDirectDefaultSite(session.did).catch(() => null);
+    const direct = await fetchDirectDefaultSite(target.did).catch(() => null);
     if (direct) return Response.json({ siteUri: direct });
     const message = err instanceof Error ? err.message : "Failed to load the default site.";
     return Response.json({ error: message }, { status: 500 });

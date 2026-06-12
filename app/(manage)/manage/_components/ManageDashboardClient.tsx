@@ -171,6 +171,7 @@ function InlineEditActions({
 
 function EditableHero({
   account,
+  basePath,
   editState,
   inlineField,
   isSaving,
@@ -189,6 +190,7 @@ function EditableHero({
   onEditSocials,
 }: {
   account: AccountRouteData;
+  basePath: string;
   editState: HeroEditState;
   inlineField: InlineField;
   isSaving: boolean;
@@ -262,7 +264,7 @@ function EditableHero({
 
         {/* Settings shortcut */}
         <Link
-          href="/manage/settings"
+          href={`${basePath}/settings`}
           className="absolute right-3 top-3 z-10 flex size-9 items-center justify-center rounded-full border border-border/50 bg-background/65 text-foreground/70 shadow-sm backdrop-blur-xl transition-colors hover:bg-background/90 hover:text-foreground"
           aria-label="Settings"
           title="Settings"
@@ -700,6 +702,7 @@ export function ManageDashboardClient({
       <Container className="space-y-6 pt-4 pb-12">
         <EditableHero
           account={account}
+          basePath={basePath}
           editState={editState}
           inlineField={inlineField}
           isSaving={isSaving}

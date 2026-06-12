@@ -24,6 +24,7 @@ import {
   type FormEvent,
 } from "react";
 import type { CgsGroupMembership } from "@/app/(manage)/manage/_lib/cgs";
+import { groupManageBasePath, manageHref } from "@/lib/links";
 import type { AuthSession } from "../_lib/auth";
 import { buildLoginUrl, redirectToLogout } from "../_lib/auth-client";
 import { Button } from "@/components/ui/button";
@@ -478,14 +479,14 @@ type ProfileCard = { displayName: string | null; avatarUrl: string | null; handl
 type MenuGroup = CgsGroupMembership & ProfileCard;
 type ActiveAccountContext =
   | { type: "personal"; did: string; selectedAt?: string }
-  | { type: "group"; did: string; role?: CgsGroupMembership["role"]; selectedAt?: string };
+  | { type: "group"; did: string; identifier?: string; role?: CgsGroupMembership["role"]; selectedAt?: string };
 
 function readActiveContext(sessionDid: string): ActiveAccountContext {
   try {
     const raw = window.localStorage.getItem(ACTIVE_CONTEXT_KEY);
     const parsed = raw ? JSON.parse(raw) as Partial<ActiveAccountContext> : null;
     if (parsed?.type === "group" && typeof parsed.did === "string") {
-      return { type: "group", did: parsed.did, role: parsed.role, selectedAt: parsed.selectedAt };
+      return { type: "group", did: parsed.did, identifier: typeof parsed.identifier === "string" ? parsed.identifier : undefined, role: parsed.role, selectedAt: parsed.selectedAt };
     }
   } catch {
     // Ignore malformed or blocked localStorage.
@@ -633,7 +634,7 @@ function AuthenticatedMenu({
   };
 
   const selectGroup = (group: MenuGroup) => {
-    const next = { type: "group" as const, did: group.groupDid, role: group.role };
+    const next = { type: "group" as const, did: group.groupDid, identifier: group.handle?.trim() || group.groupDid, role: group.role };
     setActiveContext(next);
     rememberActiveContext(next);
     setOpen(false);
@@ -727,7 +728,7 @@ function AuthenticatedMenu({
               </div>
 
               <AccountMenuRow
-                href="/manage"
+                href={manageHref({ basePath: "/manage" })}
                 label={displayLabel}
                 subtitle="Personal account"
                 avatarUrl={personalCard?.avatarUrl}
@@ -780,7 +781,7 @@ function AuthenticatedMenu({
               </Link>
 
               <Link
-                href="/manage/settings"
+                href={activeContext.type === "group" ? manageHref({ basePath: groupManageBasePath(activeContext.identifier || activeContext.did) }, "settings") : manageHref({ basePath: "/manage" }, "settings")}
                 onClick={() => setOpen(false)}
                 className="flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm text-foreground transition-colors hover:bg-muted/60"
               >
