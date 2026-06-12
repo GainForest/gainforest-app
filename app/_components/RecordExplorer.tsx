@@ -1360,7 +1360,7 @@ function cardView(record: ExplorerRecord): CardView {
     pills: (
       <>
         <Pill accent>
-          {formatCompact(record.contributorCount)} people named
+          {formatCompact(record.contributorCount)} {record.contributorCount === 1 ? "person" : "people"} named
         </Pill>
         {record.locationCount > 0 ? (
           <Pill>

@@ -3,6 +3,7 @@ import { isIP } from "node:net";
 import { headers } from "next/headers";
 import { fetchAuthSession } from "@/app/_lib/auth-server";
 import { getAuthBaseUrl } from "@/app/_lib/auth";
+import { TREE_FUTURE_DATE_ERROR, isTreeDateInFuture } from "@/app/_lib/tree-date-validation";
 import { resolvePdsHost } from "@/app/_lib/pds";
 import { transformPhotoUrl } from "@/app/(manage)/manage/_lib/upload/url-transforms";
 
@@ -85,6 +86,7 @@ type MutationBody =
   | { operation: "updateOccurrence"; rkey: string; data: UpdateOccurrenceData; unset?: string[] }
   | { operation: "updateMultimedia"; rkey: string; data: UpdateMultimediaData; unset?: string[] }
   | { operation: "deleteOccurrenceCascade"; rkey: string }
+  | { operation: "deleteTreeGroupCascade"; datasetRkey: string }
   | { operation: "detachOccurrenceFromDataset"; rkey: string }
   | { operation: "attachExistingOccurrences"; datasetRkey: string; occurrenceRkeys: string[] }
   | {
@@ -114,6 +116,7 @@ type ForwardableMutationBody = Exclude<
   | { operation: "updateOccurrence" }
   | { operation: "updateMultimedia" }
   | { operation: "deleteOccurrenceCascade" }
+  | { operation: "deleteTreeGroupCascade" }
   | { operation: "detachOccurrenceFromDataset" }
   | { operation: "attachExistingOccurrences" }
   | { operation: "appendExistingDataset" }
@@ -165,6 +168,30 @@ function isOptionalString(value: unknown): value is string | undefined {
 
 function isOptionalNonEmptyString(value: unknown): value is string | undefined {
   return typeof value === "undefined" || (typeof value === "string" && value.trim().length > 0);
+}
+
+function hasFutureTreeEventDate(value: unknown): boolean {
+  return typeof value === "string" && isTreeDateInFuture(value);
+}
+
+function getMutationFutureDateError(body: MutationBody): string | null {
+  if ((body.operation === "createRecord" || body.operation === "putRecord") && body.collection === OCCURRENCE_COLLECTION) {
+    return hasFutureTreeEventDate(body.record.eventDate) ? TREE_FUTURE_DATE_ERROR : null;
+  }
+
+  if (body.operation === "updateOccurrence") {
+    return hasFutureTreeEventDate(body.data.eventDate) ? TREE_FUTURE_DATE_ERROR : null;
+  }
+
+  if (body.operation === "appendExistingDataset") {
+    return body.rows.some((row) => hasFutureTreeEventDate(row.occurrence.eventDate)) ? TREE_FUTURE_DATE_ERROR : null;
+  }
+
+  return null;
+}
+
+function assertTreeEventDateIsNotFuture(value: unknown): void {
+  if (hasFutureTreeEventDate(value)) throw new Error(TREE_FUTURE_DATE_ERROR);
 }
 
 function isHttpUrl(value: string): boolean {
@@ -501,6 +528,9 @@ function isMutationBody(value: unknown): value is MutationBody {
   if (body.operation === "deleteOccurrenceCascade") {
     return typeof body.rkey === "string" && body.rkey.length > 0;
   }
+  if (body.operation === "deleteTreeGroupCascade") {
+    return typeof body.datasetRkey === "string" && body.datasetRkey.length > 0;
+  }
   if (body.operation === "detachOccurrenceFromDataset") {
     return typeof body.rkey === "string" && body.rkey.length > 0;
   }
@@ -632,6 +662,9 @@ async function runConfiguredPdsMutation(body: ForwardableMutationBody, did: stri
 }
 
 async function forwardMutationResponse(body: ForwardableMutationBody, did: string, cookie: string | null): Promise<Response> {
+  const futureDateError = getMutationFutureDateError(body);
+  if (futureDateError) return Response.json({ error: futureDateError }, { status: 400 });
+
   const authUrl = `${getAuthBaseUrl()}/api/atproto/mutation`;
   let upstream: Response;
   try {
@@ -839,6 +872,7 @@ async function createOccurrenceRecord(options: {
     establishmentMeans?: string;
   };
 }): Promise<CreatedRecord> {
+  assertTreeEventDateIsNotFuture(options.occurrenceInput.eventDate);
   const record = buildOccurrenceRecord(options.occurrenceInput);
   const result = await executeForwardableMutation<{ uri: string; cid: string }>({
     operation: "createRecord",
@@ -1218,6 +1252,7 @@ async function updateOccurrenceByRkey(
   if (typeof nextRecord.eventDate !== "string" || nextRecord.eventDate.trim().length === 0) {
     throw new Error("Event date is required.");
   }
+  assertTreeEventDateIsNotFuture(nextRecord.eventDate);
   if (typeof nextRecord.decimalLatitude === "number") nextRecord.decimalLatitude = String(nextRecord.decimalLatitude);
   if (typeof nextRecord.decimalLongitude === "number") nextRecord.decimalLongitude = String(nextRecord.decimalLongitude);
   assertCoordinatePair(nextRecord);
@@ -1367,6 +1402,161 @@ async function listLinkedRecordRkeys(options: {
   } while (cursor);
 
   return rkeys.filter(Boolean);
+}
+
+async function listDatasetOccurrenceRefs(options: {
+  did: string;
+  datasetUri: string;
+}): Promise<Array<{ rkey: string; uri: string }>> {
+  const trees: Array<{ rkey: string; uri: string }> = [];
+  let cursor: string | undefined;
+
+  do {
+    const page = await listRepoRecords({
+      did: options.did,
+      collection: OCCURRENCE_COLLECTION,
+      cursor,
+    });
+
+    for (const record of page.records) {
+      if (getOccurrenceDatasetRef(record.value) !== options.datasetUri) continue;
+      const rkey = rkeyFromUri(record.uri);
+      if (rkey) trees.push({ rkey, uri: record.uri });
+    }
+
+    cursor = page.cursor;
+  } while (cursor);
+
+  return trees;
+}
+
+function pushUniqueError(errors: string[], message: string): void {
+  if (!errors.includes(message)) errors.push(message);
+}
+
+async function deleteTreeGroupCascadeByRkey(
+  body: Extract<MutationBody, { operation: "deleteTreeGroupCascade" }>,
+  did: string,
+  cookie: string | null,
+): Promise<{
+  treeGroupRkey: string;
+  treeGroupUri: string;
+  foundTreeCount: number;
+  deletedTreeRkeys: string[];
+  deletedTreeUris: string[];
+  deletedMeasurementRkeys: string[];
+  deletedMultimediaRkeys: string[];
+  failedTreeCount: number;
+  cleanupErrorCount: number;
+  treeGroupDeleted: boolean;
+  treeGroupDeleteError: string | null;
+  errors: string[];
+}> {
+  const treeGroup = await getDatasetRecordFromPds(did, body.datasetRkey).catch((error) => {
+    if (error instanceof TreeGroupUnavailableError || isUnavailableLikeError(error)) {
+      throw new TreeGroupUnavailableError("The selected tree group is no longer available.");
+    }
+    throw new Error("Could not check the selected tree group.");
+  });
+
+  const linkedTrees = await listDatasetOccurrenceRefs({ did, datasetUri: treeGroup.uri }).catch(() => {
+    throw new Error("Could not check trees in this tree group.");
+  });
+
+  const deletedTreeRkeys: string[] = [];
+  const deletedTreeUris: string[] = [];
+  const deletedMeasurementRkeys: string[] = [];
+  const deletedMultimediaRkeys: string[] = [];
+  const errors: string[] = [];
+  let failedTreeCount = 0;
+  let cleanupErrorCount = 0;
+
+  for (const tree of linkedTrees) {
+    let measurementRkeys: string[];
+    let multimediaRkeys: string[];
+
+    try {
+      [measurementRkeys, multimediaRkeys] = await Promise.all([
+        listLinkedRecordRkeys({ did, collection: MEASUREMENT_COLLECTION, occurrenceUri: tree.uri }),
+        listLinkedRecordRkeys({ did, collection: MULTIMEDIA_COLLECTION, occurrenceUri: tree.uri }),
+      ]);
+    } catch {
+      failedTreeCount += 1;
+      pushUniqueError(errors, "Could not check linked photos and measurements for one tree.");
+      continue;
+    }
+
+    try {
+      await deleteStoredRecord({
+        did,
+        cookie,
+        collection: OCCURRENCE_COLLECTION,
+        rkey: tree.rkey,
+      });
+      deletedTreeRkeys.push(tree.rkey);
+      deletedTreeUris.push(tree.uri);
+    } catch {
+      failedTreeCount += 1;
+      pushUniqueError(errors, "A tree in this tree group could not be deleted.");
+      continue;
+    }
+
+    for (const rkey of measurementRkeys) {
+      try {
+        await deleteStoredRecord({ did, cookie, collection: MEASUREMENT_COLLECTION, rkey });
+        deletedMeasurementRkeys.push(rkey);
+      } catch {
+        cleanupErrorCount += 1;
+        pushUniqueError(errors, "Some linked measurements could not be deleted.");
+      }
+    }
+
+    for (const rkey of multimediaRkeys) {
+      try {
+        await deleteStoredRecord({ did, cookie, collection: MULTIMEDIA_COLLECTION, rkey });
+        deletedMultimediaRkeys.push(rkey);
+      } catch {
+        cleanupErrorCount += 1;
+        pushUniqueError(errors, "Some linked photos could not be deleted.");
+      }
+    }
+  }
+
+  let treeGroupDeleted = false;
+  let treeGroupDeleteError: string | null = null;
+
+  if (failedTreeCount === 0) {
+    try {
+      await deleteStoredRecord({
+        did,
+        cookie,
+        collection: DATASET_COLLECTION,
+        rkey: body.datasetRkey,
+      });
+      treeGroupDeleted = true;
+    } catch {
+      treeGroupDeleteError = "Tree group could not be deleted.";
+      pushUniqueError(errors, treeGroupDeleteError);
+    }
+  } else {
+    treeGroupDeleteError = "The tree group was kept because not all trees could be deleted.";
+    pushUniqueError(errors, treeGroupDeleteError);
+  }
+
+  return {
+    treeGroupRkey: body.datasetRkey,
+    treeGroupUri: treeGroup.uri,
+    foundTreeCount: linkedTrees.length,
+    deletedTreeRkeys,
+    deletedTreeUris,
+    deletedMeasurementRkeys,
+    deletedMultimediaRkeys,
+    failedTreeCount,
+    cleanupErrorCount,
+    treeGroupDeleted,
+    treeGroupDeleteError,
+    errors,
+  };
 }
 
 async function deleteOccurrenceCascadeByRkey(
@@ -2000,6 +2190,11 @@ export async function POST(request: Request) {
     return Response.json({ error: "Invalid request" }, { status: 400 });
   }
 
+  const futureDateError = getMutationFutureDateError(body);
+  if (futureDateError) {
+    return Response.json({ error: futureDateError }, { status: 400 });
+  }
+
   if (body.operation === "getDatasetRecord") {
     try {
       const result = await getDatasetRecordFromPds(session.did, body.rkey);
@@ -2069,6 +2264,15 @@ export async function POST(request: Request) {
       return Response.json(result);
     } catch (error) {
       return Response.json({ error: error instanceof Error ? error.message : "Tree could not be deleted." }, { status: 502 });
+    }
+  }
+
+  if (body.operation === "deleteTreeGroupCascade") {
+    try {
+      const result = await deleteTreeGroupCascadeByRkey(body, session.did, cookie);
+      return Response.json(result);
+    } catch (error) {
+      return Response.json({ error: error instanceof Error ? error.message : "Tree group could not be deleted." }, { status: 502 });
     }
   }
 

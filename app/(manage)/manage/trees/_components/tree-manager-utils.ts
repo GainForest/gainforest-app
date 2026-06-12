@@ -1,3 +1,4 @@
+import { TREE_FUTURE_DATE_ERROR, isTreeDateInFuture } from "../../../../_lib/tree-date-validation";
 import type {
   OccurrenceRecord,
   TreeMeasurementRecord,
@@ -229,6 +230,7 @@ export function toFloraMeasurementPayload(
 export function validateOccurrenceDraft(draft: TreeOccurrenceDraft): string | null {
   if (!draft.scientificName.trim()) return "Scientific name is required.";
   if (!draft.eventDate.trim()) return "Event date is required.";
+  if (isTreeDateInFuture(draft.eventDate)) return TREE_FUTURE_DATE_ERROR;
   if (!draft.decimalLatitude.trim()) return "Latitude is required.";
   if (!draft.decimalLongitude.trim()) return "Longitude is required.";
 
@@ -247,9 +249,9 @@ export function validateOccurrenceDraft(draft: TreeOccurrenceDraft): string | nu
 
 export function validateMeasurementDraft(draft: TreeMeasurementDraft): string | null {
   const fields: Array<{ label: string; value: string; min?: number; minExclusive?: boolean; max?: number }> = [
-    { label: "Trunk diameter", value: draft.dbh, min: 0, minExclusive: true },
+    { label: "DBH", value: draft.dbh, min: 0, minExclusive: true },
     { label: "Height", value: draft.totalHeight, min: 0, minExclusive: true },
-    { label: "Base diameter", value: draft.diameter, min: 0, minExclusive: true },
+    { label: "Root collar diameter", value: draft.diameter, min: 0, minExclusive: true },
     { label: "Canopy cover", value: draft.canopyCoverPercent, min: 0, max: CANOPY_COVER_PERCENT_MAX },
   ];
 

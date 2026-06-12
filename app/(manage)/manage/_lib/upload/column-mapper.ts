@@ -39,6 +39,21 @@ export function inferSubjectPartFromColumnName(header: string): string {
 /** Target fields that allow multiple source columns (no dedup). */
 const MULTI_MAP_TARGETS = new Set(["photoUrl"]);
 
+function normalizeHeaderForMatching(header: string): string {
+  return header
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "");
+}
+
+function headerMatchCandidates(header: string): string[] {
+  const lower = header.toLowerCase().trim();
+  const normalized = normalizeHeaderForMatching(header);
+  const compact = normalized.replace(/_/g, "");
+  return Array.from(new Set([lower, normalized, compact].filter(Boolean)));
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Known patterns for auto-detecting column mappings
 // ─────────────────────────────────────────────────────────────────────────────
@@ -96,9 +111,25 @@ const KNOWN_PATTERNS: { patterns: string[]; target: string }[] = [
   { patterns: ["habitat", "habitat_type"], target: "habitat" },
 
   // Measurement fields
-  { patterns: ["dbh", "diameter_breast_height", "trunk_diameter"], target: "dbh" },
-  { patterns: ["height", "tree_height", "total_height"], target: "height" },
-  { patterns: ["diameter"], target: "diameter" },
+  { patterns: ["dbh", "diameter_breast_height", "diameterbreastheight", "trunk_diameter", "trunkdiameter"], target: "dbh" },
+  { patterns: ["height", "tree_height", "treeheight", "total_height", "totalheight"], target: "height" },
+  {
+    patterns: [
+      "root collar diameter",
+      "root_collar_diameter",
+      "rootcollardiameter",
+      "root collar diameter cm",
+      "root_collar_diameter_cm",
+      "rootcollardiametercm",
+      "rcd",
+      "basal_diameter",
+      "basaldiameter",
+      "base_diameter",
+      "basediameter",
+      "diameter",
+    ],
+    target: "diameter",
+  },
   {
     patterns: [
       "canopycoverpercent",
@@ -161,12 +192,12 @@ export function autoDetectMappings(headers: string[]): ColumnMapping[] {
   const mappings: ColumnMapping[] = [];
 
   for (const header of headers) {
-    const normalizedHeader = header.toLowerCase().trim();
+    const candidates = headerMatchCandidates(header);
 
     for (const { patterns, target } of KNOWN_PATTERNS) {
       const isMultiMap = MULTI_MAP_TARGETS.has(target);
 
-      if (patterns.includes(normalizedHeader) && (isMultiMap || !claimedTargets.has(target))) {
+      if (patterns.some((pattern) => candidates.includes(pattern)) && (isMultiMap || !claimedTargets.has(target))) {
         if (!isMultiMap) {
           claimedTargets.add(target);
         }

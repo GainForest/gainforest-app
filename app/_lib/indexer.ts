@@ -22,7 +22,7 @@ import { asNumber, formatNumber, formatDate, formatDateTime, formatCountry } fro
 
 type GqlResponse<T> = { data?: T | null; errors?: Array<{ message: string }> };
 
-async function indexerQuery<T>(
+export async function indexerQuery<T>(
   query: string,
   variables: Record<string, unknown>,
   signal?: AbortSignal,
@@ -780,6 +780,39 @@ export async function walkOccurrences(opts: {
   };
 }
 
+export type ObservationSummary = {
+  count: number;
+  latestAt: string | null;
+};
+
+/** Count + most recent date of an organization's nature sightings — the
+ *  evidence signal shown on Bumicert detail pages. One cheap indexer query. */
+export async function fetchObservationSummaryByDid(
+  did: string,
+  signal?: AbortSignal,
+): Promise<ObservationSummary> {
+  const data = await indexerQuery<{
+    appGainforestDwcOccurrence?: {
+      totalCount?: number | null;
+      edges?: Array<{ node?: { createdAt?: string | null } | null } | null> | null;
+    } | null;
+  }>(
+    `query ObservationSummary($did: String!) {
+      appGainforestDwcOccurrence(first: 1, where: { did: { eq: $did } }, sortBy: createdAt, sortDirection: DESC) {
+        totalCount
+        edges { node { createdAt } }
+      }
+    }`,
+    { did },
+    signal,
+  );
+  const conn = data?.appGainforestDwcOccurrence;
+  return {
+    count: conn?.totalCount ?? 0,
+    latestAt: conn?.edges?.[0]?.node?.createdAt ?? null,
+  };
+}
+
 /** Load recent image observations owned by a single DID. Used by Bumicert detail
  * pages to show a compact evidence gallery connected to the publishing
  * organization. */
@@ -966,7 +999,7 @@ function displayWorkScopeTag(value: string): string {
 
 function extractWorkScopeTags(workScope?: { __typename?: string; scope?: string | null; expression?: string | null } | null): string[] {
   const stringTags = splitWorkScopeString(workScope?.scope);
-  if (stringTags.length > 0) return stringTags;
+  if (stringTags.length > 0) return stringTags.map(normalizeScopeTag).filter((tag): tag is string => Boolean(tag));
 
   const expression = workScope?.expression ?? "";
   if (!expression) return [];
@@ -974,6 +1007,56 @@ function extractWorkScopeTags(workScope?: { __typename?: string; scope?: string 
   return [...expression.matchAll(/(["'])(.*?)\1/g)]
     .map((match) => displayWorkScopeTag(match[2]?.trim() ?? ""))
     .filter(Boolean);
+}
+
+/** "⭔ 24164249 ha" → "⭔ 24.2M ha"; obviously bad areas are dropped. */
+const AREA_SCOPE_TAG_RE = /^([\u2b12-\u2b59]\s*)?([\d,.]+)\s*(ha|hectares?)\.?$/i;
+/** Larger than any country's land area — clearly bad data, not a claim. */
+const MAX_PLAUSIBLE_AREA_HA = 1.5e9;
+
+function normalizeScopeTag(tag: string): string | null {
+  const trimmed = tag.trim();
+  if (!trimmed) return null;
+  const area = trimmed.match(AREA_SCOPE_TAG_RE);
+  if (!area) return trimmed;
+  const value = Number.parseFloat((area[2] ?? "").replace(/,/g, ""));
+  if (!Number.isFinite(value) || value <= 0 || value > MAX_PLAUSIBLE_AREA_HA) return null;
+  const formatted = new Intl.NumberFormat("en", {
+    notation: value >= 10_000 ? "compact" : "standard",
+    maximumFractionDigits: 1,
+  }).format(value);
+  return `${(area[1] ?? "").trim() || "⬡"} ${formatted} ha`;
+}
+
+/**
+ * Creation-wizard placeholder copy that leaked into live records. Rendering it
+ * as a real description makes the catalog look auto-generated, so treat these
+ * as "no description". Matched case-insensitively against the trimmed start.
+ */
+const PLACEHOLDER_DESCRIPTION_PATTERNS: RegExp[] = [
+  /^inspire others to support you\./i,
+  /^share your (story|vision), build your community$/i,
+  /^project story$/i,
+  /^why we care$/i,
+];
+
+function sanitizeShortDescription(value: string | null | undefined): string | null {
+  const trimmed = value?.trim();
+  if (!trimmed) return null;
+  if (PLACEHOLDER_DESCRIPTION_PATTERNS.some((pattern) => pattern.test(trimmed))) return null;
+  return trimmed;
+}
+
+/**
+ * Disposable records created by the browser e2e suites (e.g. "Disposable
+ * E2E Forest Org Edited", "E2E Bumicert 1749…-0-0") should not appear in the
+ * public catalogs. The e2e specs assert against the PDS / manage pages, which
+ * fetch by DID and are unaffected.
+ */
+export function isLikelyTestRecordName(name: string | null | undefined): boolean {
+  if (!name) return false;
+  if (/disposable/i.test(name) && /\be2e\b/i.test(name)) return true;
+  return /^e2e bumicert \d/i.test(name.trim());
 }
 
 function mapActivity(n: RawActivity): BumicertRecord {
@@ -992,7 +1075,7 @@ function mapActivity(n: RawActivity): BumicertRecord {
     atUri: n.uri || `at://${n.did}/org.hypercerts.claim.activity/${n.rkey}`,
     cid: n.cid ?? null,
     title: (n.title ?? "Untitled bumicert").trim() || "Untitled bumicert",
-    shortDescription: n.shortDescription?.trim() || null,
+    shortDescription: sanitizeShortDescription(n.shortDescription),
     startDate: n.startDate?.trim() || null,
     endDate: n.endDate?.trim() || null,
     contributorCount: Array.isArray(n.contributors) ? n.contributors.length : 0,
@@ -1017,7 +1100,8 @@ async function mapActivityConnection(
 ): Promise<Page<BumicertRecord>> {
   const nodes = (conn?.edges ?? [])
     .map((e) => e?.node)
-    .filter((n): n is RawActivity => Boolean(n?.did));
+    .filter((n): n is RawActivity => Boolean(n?.did))
+    .filter((n) => !isLikelyTestRecordName(n.title));
   let records = nodes.map(mapActivity);
   records = await resolveImages(
     records,
@@ -1855,7 +1939,7 @@ function fetchBumicertCountsByDid(dids: string[], signal?: AbortSignal): Promise
   );
 }
 
-function fetchObservationCountsByDid(dids: string[], signal?: AbortSignal): Promise<Map<string, number>> {
+export function fetchObservationCountsByDid(dids: string[], signal?: AbortSignal): Promise<Map<string, number>> {
   return fetchCountsByDid(
     dids,
     "OrganizationObservationCounts",
@@ -2147,7 +2231,8 @@ async function fetchCertOrgPage(
   const nodes = (conn?.edges ?? [])
     .map((e) => e?.node)
     .filter((n): n is RawCertOrg => Boolean(n?.did));
-  const records = await hydrateCertOrgs(nodes, signal, includeBumicertCounts, includeObservationCounts);
+  const records = (await hydrateCertOrgs(nodes, signal, includeBumicertCounts, includeObservationCounts))
+    .filter((record) => !isLikelyTestRecordName(record.name));
   return {
     records,
     cursor: conn?.pageInfo?.endCursor ?? null,

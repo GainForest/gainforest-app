@@ -8,7 +8,6 @@ import {
   CheckIcon,
   ChevronDownIcon,
   GlobeIcon,
-  ImageOffIcon,
   LayoutGridIcon,
   LeafIcon,
   ListIcon,
@@ -801,8 +800,8 @@ const OrganizationListItem = memo(function OrganizationListItem({ record, onOpen
           // eslint-disable-next-line @next/next/no-img-element
           <img src={bannerUrl} alt="" loading="lazy" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
         ) : (
-          <span className="grid h-full place-items-center bg-[radial-gradient(circle_at_30%_20%,color-mix(in_oklab,var(--primary)_22%,transparent),transparent_70%),linear-gradient(135deg,var(--muted),var(--card))] text-muted-foreground">
-            <ImageOffIcon className="size-10 opacity-50" aria-hidden strokeWidth={1.25} />
+          <span className="grid h-full place-items-center bg-[radial-gradient(circle_at_30%_20%,color-mix(in_oklab,var(--primary)_22%,transparent),transparent_70%),linear-gradient(135deg,var(--muted),var(--card))] text-primary/40">
+            <LeafIcon className="size-9" aria-hidden strokeWidth={1.25} />
           </span>
         )}
       </span>
@@ -864,7 +863,7 @@ const OrganizationCard = memo(function OrganizationCard({ record, onOpen }: { re
             />
           ) : (
             <div className="absolute inset-0 grid place-items-center bg-[radial-gradient(circle_at_30%_20%,color-mix(in_oklab,var(--primary)_22%,transparent),transparent_70%),linear-gradient(135deg,var(--muted),var(--card))]">
-              <ImageOffIcon className="size-12 text-muted-foreground opacity-50" aria-hidden="true" strokeWidth={1.25} />
+              <LeafIcon className="size-10 text-primary/40" aria-hidden="true" strokeWidth={1.25} />
             </div>
           )}
           <div className="absolute inset-0 bg-linear-to-t from-card via-card/40 to-transparent" />

@@ -85,11 +85,11 @@ export function BumicertsBumicertCard({
       <div className="relative z-1 -mt-6 flex flex-1 flex-col justify-between px-4 py-3">
         <div className="absolute -top-2 left-0 right-0 z-0 h-8 bg-linear-to-b from-transparent via-background/65 to-background" />
         <div>
-          <h3 className="relative z-1 line-clamp-1 font-instrument text-2xl italic leading-snug text-foreground">
+          <h3 className="relative z-1 line-clamp-2 font-instrument text-2xl italic leading-snug text-foreground">
             {record.title}
           </h3>
           {record.shortDescription ? (
-            <p className="mt-1.5 line-clamp-3 text-sm leading-relaxed text-muted-foreground">
+            <p className="mt-1.5 line-clamp-2 text-sm leading-relaxed text-muted-foreground">
               {record.shortDescription}
             </p>
           ) : null}
@@ -149,7 +149,7 @@ function buildPillRows(record: BumicertsBumicertCardRecord): {
           <span>{formatCompactCount(record.contributorCount)}</span>
         </>
       ),
-      ariaLabel: `${record.contributorCount} people named`,
+      ariaLabel: `${record.contributorCount} ${record.contributorCount === 1 ? "person" : "people"} named`,
     });
   }
 

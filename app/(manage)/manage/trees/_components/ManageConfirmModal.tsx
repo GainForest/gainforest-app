@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { Loader2Icon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,7 +14,7 @@ import {
 type ManageConfirmModalProps = {
   open: boolean;
   title: string;
-  description: string;
+  description: ReactNode;
   confirmLabel: string;
   cancelLabel?: string;
   destructive?: boolean;
@@ -57,7 +57,13 @@ export function ManageConfirmModal({
       <DialogPlaceholder dialogWidth="max-w-md">
         <div className="space-y-2">
           <DialogTitle>{title}</DialogTitle>
-          <DialogDescription>{description}</DialogDescription>
+          {typeof description === "string" ? (
+            <DialogDescription>{description}</DialogDescription>
+          ) : (
+            <DialogDescription asChild>
+              <div>{description}</div>
+            </DialogDescription>
+          )}
         </div>
         {error ? <p className="text-sm text-destructive">{error}</p> : null}
         <DialogFooter className="sm:flex-row sm:justify-end">

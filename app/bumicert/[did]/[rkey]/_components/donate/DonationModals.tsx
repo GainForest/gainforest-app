@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { ArrowUpRightIcon, BadgeCheckIcon, CheckIcon, CompassIcon, CopyIcon, Share2Icon, TrophyIcon, WalletIcon } from "lucide-react";
+import { ArrowUpRightIcon, BadgeCheckIcon, CheckIcon, CompassIcon, CopyIcon, EyeIcon, Share2Icon, TrophyIcon, WalletIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
@@ -284,6 +284,19 @@ export function AmountModal({
             </button>
           ))}
         </div>
+
+        <ul className="space-y-1.5 rounded-2xl border border-primary/15 bg-primary/[0.05] p-3 text-xs leading-5 text-foreground/75">
+          <li className="flex items-start gap-2">
+            <BadgeCheckIcon className="mt-0.5 size-3.5 shrink-0 text-primary" aria-hidden />
+            <span>
+              100% goes directly to {bumicert.organizationName}’s verified wallet — no platform fee, and the network fee is covered for you.
+            </span>
+          </li>
+          <li className="flex items-start gap-2">
+            <EyeIcon className="mt-0.5 size-3.5 shrink-0 text-primary" aria-hidden />
+            <span>Recorded as a public donation receipt anyone can audit.</span>
+          </li>
+        </ul>
 
         {authSession.isLoggedIn ? (
           <label className="flex min-w-0 cursor-pointer items-start gap-3 rounded-2xl border border-border-soft bg-surface p-3">

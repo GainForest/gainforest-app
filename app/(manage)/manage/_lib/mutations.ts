@@ -58,6 +58,21 @@ export type AttachExistingOccurrencesResult = {
 
 type GroupScoped = { repo?: string };
 
+export type DeleteTreeGroupCascadeResult = {
+  treeGroupRkey: string;
+  treeGroupUri: string;
+  foundTreeCount: number;
+  deletedTreeRkeys: string[];
+  deletedTreeUris: string[];
+  deletedMeasurementRkeys: string[];
+  deletedMultimediaRkeys: string[];
+  failedTreeCount: number;
+  cleanupErrorCount: number;
+  treeGroupDeleted: boolean;
+  treeGroupDeleteError: string | null;
+  errors: string[];
+};
+
 type MutationPayload =
   | ({ operation: "createRecord"; collection: string; rkey?: string; record: Record<string, unknown> } & GroupScoped)
   | ({ operation: "putRecord"; collection: string; rkey: string; record: Record<string, unknown>; swapRecord?: string } & GroupScoped)
@@ -72,6 +87,7 @@ type MutationPayload =
   | { operation: "updateOccurrence"; rkey: string; data: UpdateOccurrenceData; unset?: string[] }
   | { operation: "updateMultimedia"; rkey: string; data: UpdateMultimediaData; unset?: string[] }
   | { operation: "deleteOccurrenceCascade"; rkey: string }
+  | { operation: "deleteTreeGroupCascade"; datasetRkey: string }
   | { operation: "detachOccurrenceFromDataset"; rkey: string }
   | { operation: "attachExistingOccurrences"; datasetRkey: string; occurrenceRkeys: string[] }
   | {
@@ -273,6 +289,10 @@ export async function deleteMultimedia(rkey: string): Promise<void> {
 
 export async function deleteOccurrenceCascade(rkey: string): Promise<CascadeDeleteResult> {
   return callProxy({ operation: "deleteOccurrenceCascade", rkey });
+}
+
+export async function deleteTreeGroupCascade(datasetRkey: string): Promise<DeleteTreeGroupCascadeResult> {
+  return callProxy({ operation: "deleteTreeGroupCascade", datasetRkey });
 }
 
 function bytesToBase64(bytes: Uint8Array): string {

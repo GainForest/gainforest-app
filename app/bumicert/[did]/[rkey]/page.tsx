@@ -5,14 +5,17 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import {
   BanIcon,
+  BotIcon,
   ChevronRightIcon,
   CircleDotIcon,
+  ClipboardCheckIcon,
   CrownIcon,
   ExternalLinkIcon,
   GiftIcon,
   HeartIcon,
   LeafIcon,
   MapPinnedIcon,
+  PaperclipIcon,
   SparklesIcon,
   SproutIcon,
   UsersRoundIcon,
@@ -26,11 +29,13 @@ import { SocialGlyph } from "../../../_components/SocialIcon";
 import { StatsTileGrid, type StatsTileItem } from "../../../_components/StatsTile";
 import { fetchReceipts, type DonorRef, type FundingReceipt } from "../../../_lib/dashboard";
 import { formatCompact, formatCompactUsd, formatCountry, formatDate, formatDateTime, formatNumber, formatRelative } from "../../../_lib/format";
+import { fetchReviewCounts, fetchReviewsForSubject, type BumicertReviews, type ReviewComment, type ReviewCounts } from "../../../_lib/reviews";
 import {
   fetchAudioByDid,
   fetchBumicertsByDid,
   fetchImageOccurrencesByDid,
   fetchLocationsByDid,
+  fetchObservationSummaryByDid,
   fetchOccurrencesByDid,
   fetchRecordByUri,
   fetchRecordDetail,
@@ -38,11 +43,12 @@ import {
   fetchTreeDatasetsByDid,
   type BumicertRecord,
   type DetailBadge,
+  type ObservationSummary,
   type OccurrenceRecord,
   type TimelineAttachmentItem,
 } from "../../../_lib/indexer";
 import { isPdsBlobUrl } from "../../../_lib/pds";
-import { blockExplorerUrl, INDEXER_URL, localBumicertHref } from "../../../_lib/urls";
+import { blockExplorerUrl, INDEXER_URL, localBumicertHref, SITE_URL } from "../../../_lib/urls";
 import { fetchAuthSession } from "../../../_lib/auth-server";
 import { getAccountRouteData, readAccountRouteParams } from "../../../account/_lib/account-route";
 import { Separator } from "@/components/ui/separator";
@@ -88,7 +94,7 @@ const BADGE_TONE: Record<DetailBadge["tone"], string> = {
   info: "bg-foreground/[0.06] text-foreground/70",
 };
 
-const BUMICERT_DETAIL_TABS = ["overview", "site-boundaries", "donations", "timeline"] as const;
+const BUMICERT_DETAIL_TABS = ["overview", "site-boundaries", "reviews", "donations", "timeline"] as const;
 type BumicertDetailTab = (typeof BUMICERT_DETAIL_TABS)[number];
 
 export async function generateMetadata({ params }: { params: BumicertPageParams }): Promise<Metadata> {
@@ -142,14 +148,23 @@ export default async function BumicertDetailPage({
 
   const isOverviewTab = activeTab === "overview";
   const showsDetailSidebar = activeTab !== "timeline";
-  const [moreBumicerts, observations] = isOverviewTab
+  const [moreBumicerts, observations, observationSummary, linkedTimelineCount, reviewCounts] = isOverviewTab
     ? await Promise.all([
         fetchBumicertsByDid(record.did, 6)
           .then((page) => page.records.filter((item) => item.id !== record.id).slice(0, 5))
           .catch(() => []),
         fetchImageOccurrencesByDid(record.did, 24).catch(() => []),
+        fetchObservationSummaryByDid(record.did).catch(() => null),
+        fetchTimelineAttachmentsByDid(record.did)
+          .then((items) => items.filter((item) => item.record.subjects?.[0]?.uri === record.atUri).length)
+          .catch(() => null),
+        fetchReviewCounts(record.atUri).catch(() => null),
       ])
-    : [[], [] as OccurrenceRecord[]];
+    : [[], [] as OccurrenceRecord[], null, null, null];
+
+  const reviews = activeTab === "reviews"
+    ? await fetchReviewsForSubject(record.atUri).catch(() => ({ evaluations: [], comments: [] }))
+    : null;
 
   let timelineAttachments: TimelineAttachmentItem[] = [];
   let timelineAttachmentsUnavailable = false;
@@ -177,8 +192,15 @@ export default async function BumicertDetailPage({
     timelineSources = { audio, occurrences: occurrencePage.records, treeGroups, places };
   }
 
+  const jsonLd = buildBumicertJsonLd(record, owner, fundingConfig, detailHref, description ?? null);
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        // eslint-disable-next-line react/no-danger
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <BumicertHeaderTitleBridge
         summary={{
           title: record.title,
@@ -222,9 +244,18 @@ export default async function BumicertDetailPage({
                 detail={detail}
                 description={description}
                 observations={observations}
+                evidence={{
+                  boundaries: record.locationUris.length,
+                  observationSummary,
+                  timelineCount: linkedTimelineCount,
+                  reviews: reviewCounts,
+                  detailHref,
+                  ownerHref: `/account/${encodeURIComponent(owner.urlIdentifier)}`,
+                }}
               />
             )}
             {activeTab === "site-boundaries" && <SiteBoundariesPanel record={record} />}
+            {activeTab === "reviews" && reviews && <ReviewsPanel record={record} reviews={reviews} />}
             {activeTab === "donations" && (
               <DonationsPanel
                 record={record}
@@ -259,6 +290,40 @@ export default async function BumicertDetailPage({
       </main>
     </>
   );
+}
+
+function buildBumicertJsonLd(
+  record: BumicertRecord,
+  owner: RouteData["owner"],
+  fundingConfig: BumicertFundingConfig,
+  detailHref: string,
+  description: string | null,
+): Record<string, unknown> {
+  const accepting = Boolean(fundingConfig?.receivingWallet?.uri) && (fundingConfig?.status ?? "open") === "open";
+  const url = `${SITE_URL}${detailHref}`;
+  return {
+    "@context": "https://schema.org",
+    "@type": "Project",
+    name: record.title,
+    url,
+    ...(description ? { description } : {}),
+    ...(record.imageUrl ? { image: record.imageUrl } : {}),
+    ...(record.startDate ? { foundingDate: record.startDate } : {}),
+    parentOrganization: {
+      "@type": "Organization",
+      name: owner.displayName,
+      url: `${SITE_URL}/account/${encodeURIComponent(owner.urlIdentifier)}`,
+    },
+    ...(accepting
+      ? {
+          potentialAction: {
+            "@type": "DonateAction",
+            target: `${url}?tab=donations`,
+            recipient: { "@type": "Organization", name: owner.displayName },
+          },
+        }
+      : {}),
+  };
 }
 
 async function readRouteData(params: BumicertPageParams): Promise<RouteData> {
@@ -527,6 +592,22 @@ function SidebarDonations({
   const hasReceipts = receipts.length > 0;
   const donationStatus = getDonationStatus(fundingConfig, unavailable);
   const isOwner = authSession.isLoggedIn && authSession.did === record.did;
+  const goalUsd = parseGoalUsd(fundingConfig);
+
+  // No funding config, no history, and not the owner: skip the dead commerce
+  // UI ($0 stats + disabled button) — a short note is more honest.
+  if (!isOwner && donationStatus.kind === "not-applicable" && !hasReceipts) {
+    return (
+      <div className="space-y-2">
+        <h3 className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
+          Donations
+        </h3>
+        <p className="text-sm leading-6 text-muted-foreground">
+          This project is not accepting donations yet. Explore the story, places, and evidence — or follow {owner.displayName} for updates.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-3">
@@ -555,9 +636,12 @@ function SidebarDonations({
           <p className="mt-0.5 text-lg font-medium text-foreground">{formatCompact(receipts.length)}</p>
         </div>
       </div>
+      {goalUsd !== null && donationStatus.kind === "open" ? (
+        <FundingProgress raisedUsd={totalUsd} goalUsd={goalUsd} />
+      ) : null}
       {isOwner ? (
         <FundingStatus ownerDid={record.did} bumicertRkey={record.rkey} fundingConfig={fundingConfig} />
-      ) : (
+      ) : donationStatus.kind === "open" ? (
         <DonateButton
           bumicert={{
             organizationDid: record.did,
@@ -567,12 +651,43 @@ function SidebarDonations({
           }}
           fundingConfig={fundingConfig}
           authSession={authSession}
-          disabled={donationStatus.kind !== "open"}
-          label={donationStatus.kind === "open" && hasReceipts ? "Donate again" : "Donate"}
+          disabled={false}
+          label={hasReceipts ? "Donate again" : "Donate"}
         />
-      )}
-      <p className="text-xs leading-5 text-muted-foreground">
-        Completed donations appear publicly so supporters can see the impact.
+      ) : null}
+      {donationStatus.kind === "open" ? (
+        <p className="text-xs leading-5 text-muted-foreground">
+          Completed donations appear publicly so supporters can see the impact.
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
+function parseGoalUsd(fundingConfig: BumicertFundingConfig): number | null {
+  const raw = fundingConfig?.goalInUSD;
+  if (!raw) return null;
+  const parsed = Number.parseFloat(raw);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+}
+
+function FundingProgress({ raisedUsd, goalUsd }: { raisedUsd: number; goalUsd: number }) {
+  const ratio = Math.max(0, Math.min(1, raisedUsd / goalUsd));
+  const percent = Math.round(ratio * 100);
+  return (
+    <div className="space-y-1.5">
+      <div
+        role="progressbar"
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={percent}
+        aria-label={`Funding progress: ${percent}% of ${formatCompactUsd(goalUsd)} goal`}
+        className="h-2 w-full overflow-hidden rounded-full bg-muted"
+      >
+        <div className="h-full rounded-full bg-primary transition-[width]" style={{ width: `${Math.max(percent, 2)}%` }} />
+      </div>
+      <p className="text-xs text-muted-foreground">
+        <span className="font-medium text-foreground">{percent}%</span> of {formatCompactUsd(goalUsd)} goal
       </p>
     </div>
   );
@@ -608,10 +723,15 @@ function buildOrganizationLinks(
 ): OrganizationLinkItem[] {
   const links: OrganizationLinkItem[] = [];
   const seen = new Set<string>();
+  const seenPlatforms = new Set<string>();
 
   function add(item: OrganizationLinkItem) {
     if (seen.has(item.href)) return;
+    // One button per platform — orgs sometimes list e.g. two YouTube URLs,
+    // which rendered as confusing duplicate icons in the sidebar.
+    if (item.platform !== "link" && item.platform !== "website" && seenPlatforms.has(item.platform)) return;
     seen.add(item.href);
+    seenPlatforms.add(item.platform);
     links.push(item);
   }
 
@@ -664,16 +784,27 @@ function Badge({ badge }: { badge: DetailBadge }) {
   );
 }
 
+type EvidenceInfo = {
+  boundaries: number;
+  observationSummary: ObservationSummary | null;
+  timelineCount: number | null;
+  reviews: ReviewCounts | null;
+  detailHref: string;
+  ownerHref: string;
+};
+
 function OverviewPanel({
   record,
   detail,
   description,
   observations,
+  evidence,
 }: {
   record: BumicertRecord;
   detail: RouteData["detail"];
   description: string | null | undefined;
   observations: OccurrenceRecord[];
+  evidence: EvidenceInfo;
 }) {
   return (
     <article className="py-1">
@@ -724,9 +855,260 @@ function OverviewPanel({
         ),
       )}
 
+      <EvidenceSection evidence={evidence} />
+
       <BumicertObservationsGallery observations={observations} />
     </article>
   );
+}
+
+/**
+ * The trust meter: how much verifiable material backs this claim. Each chip
+ * links to where the evidence lives, and zero-states stay visible (muted) so
+ * evidence-rich and evidence-light Bumicerts are distinguishable at a glance.
+ */
+function EvidenceSection({ evidence }: { evidence: EvidenceInfo }) {
+  const { boundaries, observationSummary, timelineCount, reviews, detailHref, ownerHref } = evidence;
+
+  const reviewVoices = reviews ? reviews.evaluations + reviews.comments : 0;
+  const reviewLabel = !reviews || reviewVoices === 0
+    ? "No reviews yet"
+    : [
+        reviews.evaluations > 0 ? `${formatNumber(reviews.evaluations)} evaluation${reviews.evaluations === 1 ? "" : "s"}` : null,
+        reviews.comments > 0 ? `${formatNumber(reviews.comments)} comment${reviews.comments === 1 ? "" : "s"}` : null,
+      ].filter(Boolean).join(" · ");
+
+  const chips: Array<{ key: string; href: string; icon: ReactNode; label: string; present: boolean }> = [
+    {
+      key: "boundaries",
+      href: `${detailHref}?tab=site-boundaries`,
+      icon: <MapPinnedIcon className="h-3.5 w-3.5" aria-hidden />,
+      label: boundaries > 0
+        ? `${formatNumber(boundaries)} site ${boundaries === 1 ? "boundary" : "boundaries"} mapped`
+        : "No site boundaries yet",
+      present: boundaries > 0,
+    },
+    ...(observationSummary
+      ? [{
+          key: "sightings",
+          href: ownerHref,
+          icon: <LeafIcon className="h-3.5 w-3.5" aria-hidden />,
+          label: observationSummary.count > 0
+            ? `${formatCompact(observationSummary.count)} nature sighting${observationSummary.count === 1 ? "" : "s"}${
+                observationSummary.latestAt ? ` · latest ${formatRelative(observationSummary.latestAt)}` : ""
+              }`
+            : "No nature sightings yet",
+          present: observationSummary.count > 0,
+        }]
+      : []),
+    ...(timelineCount !== null
+      ? [{
+          key: "timeline",
+          href: `${detailHref}?tab=timeline`,
+          icon: <PaperclipIcon className="h-3.5 w-3.5" aria-hidden />,
+          label: timelineCount > 0
+            ? `${formatNumber(timelineCount)} timeline item${timelineCount === 1 ? "" : "s"}`
+            : "No timeline evidence yet",
+          present: timelineCount > 0,
+        }]
+      : []),
+    ...(reviews
+      ? [{
+          key: "reviews",
+          href: `${detailHref}?tab=reviews`,
+          icon: <ClipboardCheckIcon className="h-3.5 w-3.5" aria-hidden />,
+          label: reviewLabel,
+          present: reviewVoices > 0,
+        }]
+      : []),
+  ];
+
+  if (chips.length === 0) return null;
+
+  return (
+    <div className="mt-8 border-t border-border-soft pt-6">
+      <h2 className="mb-4 text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
+        Evidence
+      </h2>
+      <div className="flex flex-wrap gap-2">
+        {chips.map((chip) => (
+          <Link
+            key={chip.key}
+            href={chip.href}
+            className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm transition-colors ${
+              chip.present
+                ? "border-primary/25 bg-primary/[0.07] text-foreground hover:border-primary/50 hover:text-primary"
+                : "border-border-soft bg-surface text-muted-foreground hover:border-border hover:text-foreground"
+            }`}
+          >
+            <span className={chip.present ? "text-primary" : "text-muted-foreground/70"}>{chip.icon}</span>
+            {chip.label}
+          </Link>
+        ))}
+      </div>
+      <p className="mt-3 text-xs leading-5 text-muted-foreground">
+        Evidence and reviews live on the open ATProto network and can be inspected by anyone.
+      </p>
+    </div>
+  );
+}
+
+/**
+ * Reviews tab — third-party judgement about this claim, read straight off the
+ * open network: formal `org.hypercerts.context.evaluation` records plus
+ * threaded `org.impactindexer.review.comment` discussion (including comments
+ * authored by Simocracy AI sims, which are labelled as such).
+ */
+function ReviewsPanel({ record, reviews }: { record: BumicertRecord; reviews: BumicertReviews }) {
+  const { evaluations, comments } = reviews;
+  const isEmpty = evaluations.length === 0 && comments.length === 0;
+
+  return (
+    <article className="py-1">
+      <p className="max-w-2xl text-sm leading-6 text-muted-foreground">
+        Independent evaluations and public comments attached to this Bumicert on the open ATProto
+        network. Anyone — auditors, community members, or AI agents — can publish a review; nothing
+        here is written or curated by {record.creatorName ?? "the project"} itself.
+      </p>
+
+      <div className="mt-8">
+        <h2 className="mb-4 text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
+          Evaluations{evaluations.length > 0 ? ` · ${evaluations.length}` : ""}
+        </h2>
+        {evaluations.length === 0 ? (
+          <p className="rounded-2xl border border-border-soft bg-surface p-4 text-sm leading-6 text-muted-foreground">
+            No formal evaluations yet. An evaluation is an{" "}
+            <code className="rounded bg-muted px-1 py-0.5 text-[11px]">org.hypercerts.context.evaluation</code>{" "}
+            record — a signed summary, optional score, and supporting reports published against this claim.
+          </p>
+        ) : (
+          <div className="grid gap-3">
+            {evaluations.map((evaluation) => (
+              <div key={evaluation.uri} className="rounded-2xl border border-border-soft bg-surface p-4">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <AuthorInline did={evaluation.did} />
+                  <div className="flex items-center gap-2">
+                    {evaluation.score ? (
+                      <span
+                        className="inline-flex items-baseline gap-0.5 rounded-full border border-primary/25 bg-primary/[0.08] px-2.5 py-1 text-sm font-semibold text-primary"
+                        aria-label={`Score: ${evaluation.score.value} out of ${evaluation.score.max}`}
+                      >
+                        {evaluation.score.value}
+                        <span className="text-[11px] font-medium text-primary/70">/{evaluation.score.max}</span>
+                      </span>
+                    ) : null}
+                    {evaluation.createdAt ? (
+                      <span className="text-xs text-muted-foreground" title={formatDateTime(evaluation.createdAt)}>
+                        {formatRelative(evaluation.createdAt)}
+                      </span>
+                    ) : null}
+                  </div>
+                </div>
+                <p className="mt-3 whitespace-pre-line text-sm leading-6 text-foreground">{evaluation.summary}</p>
+                {evaluation.contentUris.length > 0 ? (
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {evaluation.contentUris.map((uri) => (
+                      <a
+                        key={uri}
+                        href={uri}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex max-w-full items-center gap-1.5 rounded-full border border-border-soft bg-background px-3 py-1 text-xs text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary"
+                      >
+                        <ExternalLinkIcon className="h-3 w-3 shrink-0" aria-hidden />
+                        <span className="truncate">{formatReportLabel(uri)}</span>
+                      </a>
+                    ))}
+                  </div>
+                ) : null}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div className="mt-8">
+        <h2 className="mb-4 text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
+          Comments{comments.length > 0 ? ` · ${comments.reduce((sum, c) => sum + 1 + c.replies.length, 0)}` : ""}
+        </h2>
+        {comments.length === 0 ? (
+          <p className="rounded-2xl border border-border-soft bg-surface p-4 text-sm leading-6 text-muted-foreground">
+            No public comments yet. Comments posted on this claim from the wider network — including
+            reviews by Simocracy AI sims — will appear here.
+          </p>
+        ) : (
+          <div className="grid gap-3">
+            {comments.map((comment) => (
+              <ReviewCommentCard key={comment.uri} comment={comment} />
+            ))}
+          </div>
+        )}
+      </div>
+
+      {isEmpty ? null : (
+        <p className="mt-6 text-xs leading-5 text-muted-foreground">
+          Reviews are independent records on their authors’ accounts; they are shown here unedited.
+        </p>
+      )}
+    </article>
+  );
+}
+
+function ReviewCommentCard({ comment, nested = false }: { comment: ReviewComment; nested?: boolean }) {
+  return (
+    <div className={nested ? "border-l-2 border-border-soft pl-4" : "rounded-2xl border border-border-soft bg-surface p-4"}>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        {comment.sim ? <SimIdentity name={comment.sim.name} uri={comment.sim.uri} /> : <AuthorInline did={comment.did} />}
+        {comment.createdAt ? (
+          <span className="text-xs text-muted-foreground" title={formatDateTime(comment.createdAt)}>
+            {formatRelative(comment.createdAt)}
+          </span>
+        ) : null}
+      </div>
+      <p className="mt-2 whitespace-pre-line text-sm leading-6 text-foreground">{comment.text}</p>
+      {comment.replies.length > 0 ? (
+        <div className="mt-4 grid gap-4">
+          {comment.replies.map((reply) => (
+            <ReviewCommentCard key={reply.uri} comment={reply} nested />
+          ))}
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+/** Sim-authored comments are labelled and linked to the sim's public page. */
+function SimIdentity({ name, uri }: { name: string; uri: string | null }) {
+  const match = uri?.match(/^at:\/\/([^/]+)\/org\.simocracy\.sim\/([^/]+)$/);
+  const href = match ? `https://simocracy.org/sims/${encodeURIComponent(match[1])}/${encodeURIComponent(match[2])}` : null;
+  const body = (
+    <span className="inline-flex items-center gap-1.5">
+      <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary/15 text-primary">
+        <BotIcon className="h-3 w-3" aria-hidden />
+      </span>
+      <span className="text-sm font-medium text-foreground">{name}</span>
+      <span className="rounded-full border border-border-soft bg-background px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+        AI sim
+      </span>
+    </span>
+  );
+  return href ? (
+    <a href={href} target="_blank" rel="noreferrer" className="transition-opacity hover:opacity-80">
+      {body}
+    </a>
+  ) : (
+    body
+  );
+}
+
+function formatReportLabel(uri: string): string {
+  try {
+    const url = new URL(uri);
+    const file = url.pathname.split("/").filter(Boolean).pop();
+    return file ? `${url.hostname}/…/${file}` : url.hostname;
+  } catch {
+    return uri;
+  }
 }
 
 function SiteBoundariesPanel({ record }: { record: BumicertRecord }) {
@@ -792,6 +1174,8 @@ function DonationsPanel({
   const donorCount = donationEntries.length;
   const donationStatus = getDonationStatus(fundingConfig, unavailable);
   const isOwner = authSession.isLoggedIn && authSession.did === record.did;
+  const goalUsd = parseGoalUsd(fundingConfig);
+  const showSupportCard = !unavailable && (isOwner || donationStatus.kind !== "not-applicable");
   const stats: StatsTileItem[] = [
     {
       label: "raised",
@@ -814,7 +1198,7 @@ function DonationsPanel({
 
   return (
     <article className="space-y-5 py-1">
-      {!unavailable ? (
+      {showSupportCard ? (
         <div className="overflow-hidden rounded-3xl bg-card/75 p-5 shadow-sm shadow-primary/5 ring-1 ring-foreground/5 backdrop-blur sm:p-6">
           <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
             <div className="min-w-0">
@@ -824,6 +1208,11 @@ function DonationsPanel({
               <p className="mt-3 max-w-xl text-sm leading-6 text-muted-foreground">
                 Your donation supports {owner.displayName} and appears with this project story once completed.
               </p>
+              {goalUsd !== null && donationStatus.kind === "open" ? (
+                <div className="mt-4 max-w-xl">
+                  <FundingProgress raisedUsd={totalUsd} goalUsd={goalUsd} />
+                </div>
+              ) : null}
             </div>
             <div className="w-full sm:w-44 sm:shrink-0">
               {isOwner ? (
@@ -862,8 +1251,12 @@ function DonationsPanel({
       ) : receipts.length === 0 ? (
         <EmptyState
           icon={<HeartIcon className="h-8 w-8" />}
-          title="No donations yet"
-          body="Be the first to support this project story."
+          title={donationStatus.kind === "not-applicable" && !isOwner ? "Not accepting donations yet" : "No donations yet"}
+          body={
+            donationStatus.kind === "not-applicable" && !isOwner
+              ? `${owner.displayName} has not enabled donations for this project. Check the story and evidence tabs in the meantime.`
+              : "Be the first to support this project story."
+          }
           variant="leaderboard"
         />
       ) : (
