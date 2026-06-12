@@ -1,7 +1,7 @@
 import { cache } from "react";
 import { headers } from "next/headers";
 import { fetchAuthSession } from "./auth-server";
-import { getAuthBaseUrl } from "./auth";
+import { getAuthBaseUrl, getAuthForwardCookie } from "./auth";
 import { getAccountRouteData, resolveIdentifierToDid } from "@/app/account/_lib/account-route";
 import {
   groupManageTarget,
@@ -59,7 +59,7 @@ function sameIdentifier(group: CgsGroupMembership, identifier: string, did: stri
 
 export const fetchUserCgsGroups = cache(async (): Promise<CgsGroupMembership[]> => {
   const headerList = await headers();
-  const cookie = headerList.get("cookie");
+  const cookie = getAuthForwardCookie(headerList.get("cookie"));
   if (!cookie) return [];
 
   const upstream = await fetch(new URL("/api/cgs/groups", getAuthBaseUrl()), {

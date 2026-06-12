@@ -49,7 +49,7 @@ import { ImageEditorModal } from "@/components/modals/image-editor";
 import { SocialGlyph } from "@/app/_components/SocialIcon";
 import { GroupMembers } from "../groups/_components/GroupMembers";
 import { ManageGroupsClient } from "../groups/_components/ManageGroupsClient";
-import type { CgsRole } from "../_lib/cgs";
+import type { CgsMember, CgsRole } from "../_lib/cgs";
 
 function decodePath(value: string): string {
   try {
@@ -448,6 +448,8 @@ export function ManageDashboardClient({
   basePath = "/manage",
   writeRepoDid,
   groupRole,
+  initialGroupMembers,
+  initialGroupMembersError,
   children,
 }: {
   account: AccountRouteData;
@@ -456,6 +458,8 @@ export function ManageDashboardClient({
   writeRepoDid?: string;
   /** When scoped into a CGS group, the current user's role — enables the members list. */
   groupRole?: CgsRole;
+  initialGroupMembers?: CgsMember[];
+  initialGroupMembersError?: string | null;
   children?: React.ReactNode;
 }) {
   const router = useRouter();
@@ -806,7 +810,13 @@ export function ManageDashboardClient({
               onCancel={() => { setEditLongDescription(account.longDescription ?? ""); setSaveError(null); setInlineField(null); }}
             />
             {writeRepoDid && groupRole ? (
-              <GroupMembers groupDid={writeRepoDid} currentRole={groupRole} variant="section" />
+              <GroupMembers
+                groupDid={writeRepoDid}
+                currentRole={groupRole}
+                variant="section"
+                initialMembers={initialGroupMembers}
+                initialError={initialGroupMembersError}
+              />
             ) : null}
           </>
         ) : null}

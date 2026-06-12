@@ -1,11 +1,11 @@
 import { headers } from "next/headers";
-import { getAuthBaseUrl } from "@/app/_lib/auth";
+import { getAuthBaseUrl, getAuthForwardCookie } from "@/app/_lib/auth";
 
 export const runtime = "nodejs";
 
 export async function POST(request: Request) {
   const headerList = await headers();
-  const cookie = headerList.get("cookie");
+  const cookie = getAuthForwardCookie(headerList.get("cookie"));
   const upstream = await fetch(new URL("/api/cgs/mutation", getAuthBaseUrl()), {
     method: "POST",
     headers: {

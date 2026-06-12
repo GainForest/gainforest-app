@@ -11,12 +11,13 @@ import {
 import { resolveBlobUrl, resolvePdsHost } from "@/app/_lib/pds";
 import { RecordExplorer } from "@/app/_components/RecordExplorer";
 import { getAccountRouteData } from "@/app/account/_lib/account-route";
+import { fetchCgsMembersForRequest } from "@/app/_lib/cgs-server";
 import { AccountSettingsSections } from "@/app/account/_components/AccountSettingsSections";
 import Container from "@/components/ui/container";
 import { ManageOverview } from "./_components/ManageOverview";
 import { ManageDashboard } from "./_components/ManageDashboard";
 import { GroupMembers } from "./groups/_components/GroupMembers";
-import type { CgsRole } from "./_lib/cgs";
+import type { CgsMember, CgsRole } from "./_lib/cgs";
 import { ManageProjectsClient } from "./projects/_components/ManageProjectsClient";
 import { SitesClient } from "./sites/_components/SitesClient";
 import { TreesPageClient } from "./trees/_components/TreesPageClient";
@@ -62,6 +63,7 @@ export async function ManageHomeSection({ target, wrapDashboard = true }: { targ
   const groupRole: CgsRole | undefined = target.kind === "group"
     ? target.role === "owner" ? "owner" : target.role === "admin" ? "admin" : "member"
     : undefined;
+  const initialMembers = target.kind === "group" ? await loadInitialGroupMembers(target.did) : null;
 
   return (
     <ManageDashboard
@@ -69,6 +71,8 @@ export async function ManageHomeSection({ target, wrapDashboard = true }: { targ
       basePath={target.basePath}
       writeRepoDid={target.kind === "group" ? target.did : undefined}
       groupRole={groupRole}
+      initialGroupMembers={initialMembers?.members}
+      initialGroupMembersError={initialMembers?.error ?? null}
     >
       {overview}
     </ManageDashboard>
@@ -126,16 +130,23 @@ export async function NewBumicertSection({ target, searchParams }: { target: Man
   );
 }
 
-export function SettingsSection({ target }: { target: ManageTarget }) {
+export async function SettingsSection({ target }: { target: ManageTarget }) {
   if (target.kind === "group") {
     const role: CgsRole = target.role === "owner" ? "owner" : target.role === "admin" ? "admin" : "member";
+    const initialMembers = await loadInitialGroupMembers(target.did);
     return (
       <Container className="pt-4 pb-8">
         <div className="mb-6">
           <h1 className="font-instrument text-3xl font-light italic leading-tight tracking-[-0.02em] text-foreground">Organization settings</h1>
           <p className="mt-1 text-sm text-muted-foreground">Manage members and control who can make changes for this organization.</p>
         </div>
-        <GroupMembers groupDid={target.did} currentRole={role} variant="panel" />
+        <GroupMembers
+          groupDid={target.did}
+          currentRole={role}
+          variant="panel"
+          initialMembers={initialMembers.members}
+          initialError={initialMembers.error}
+        />
       </Container>
     );
   }
@@ -171,6 +182,23 @@ type PdsRecordResponse = {
   cid?: string;
   value?: Record<string, unknown>;
 };
+
+type InitialGroupMembers = {
+  members: CgsMember[];
+  error: string | null;
+};
+
+async function loadInitialGroupMembers(groupDid: string): Promise<InitialGroupMembers> {
+  try {
+    const result = await fetchCgsMembersForRequest(groupDid);
+    return { members: result.members, error: null };
+  } catch (error) {
+    return {
+      members: [],
+      error: error instanceof Error ? error.message : "Could not load members.",
+    };
+  }
+}
 
 function projectParam(value: string | string[] | undefined): string | null {
   const raw = Array.isArray(value) ? value[0] : value;

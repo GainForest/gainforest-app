@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useMemo, useState, useTransition, type FormEvent } from "react";
+import { useCallback, useEffect, useMemo, useState, useTransition, type FormEvent } from "react";
 import { motion } from "framer-motion";
 import { Loader2Icon, LockIcon, RefreshCwIcon, Trash2Icon, UserPlusIcon, UsersIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -132,22 +132,27 @@ export function GroupMembers({
   groupDid,
   currentRole,
   variant = "panel",
+  initialMembers,
+  initialError = null,
 }: {
   groupDid: string;
   currentRole: CgsRole;
   variant?: Variant;
+  initialMembers?: CgsMember[];
+  initialError?: string | null;
 }) {
   const canManage = currentRole === "owner" || currentRole === "admin";
+  const hasInitialMembers = initialMembers !== undefined;
 
-  const [members, setMembers] = useState<CgsMember[]>([]);
+  const [members, setMembers] = useState<CgsMember[]>(() => initialMembers ?? []);
   const [profiles, setProfiles] = useState<Record<string, DidProfile>>({});
   const [memberDid, setMemberDid] = useState("");
   const [role, setRole] = useState<RoleInput>("member");
-  const [error, setError] = useState<string | null>(null);
-  const [loaded, setLoaded] = useState(false);
+  const [error, setError] = useState<string | null>(initialError);
+  const [loaded, setLoaded] = useState(hasInitialMembers || Boolean(initialError));
   const [isPending, startTransition] = useTransition();
 
-  const refresh = () => {
+  const refresh = useCallback(() => {
     startTransition(async () => {
       setError(null);
       try {
@@ -159,12 +164,14 @@ export function GroupMembers({
         setLoaded(true);
       }
     });
-  };
+  }, [groupDid]);
 
   useEffect(() => {
-    refresh();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [groupDid]);
+    setMembers(initialMembers ?? []);
+    setError(initialError);
+    setLoaded(hasInitialMembers || Boolean(initialError));
+    if (!hasInitialMembers && !initialError) refresh();
+  }, [groupDid, hasInitialMembers, initialError, initialMembers, refresh]);
 
   // Hydrate member identities (name + avatar) from the public AppView.
   useEffect(() => {

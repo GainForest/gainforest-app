@@ -28,6 +28,14 @@ export type CgsMembersResponse = {
   cursor?: string;
 };
 
+type RawCgsMember = {
+  did?: unknown;
+  memberDid?: unknown;
+  role?: unknown;
+  addedBy?: unknown;
+  addedAt?: unknown;
+};
+
 export type RegisterCgsGroupResponse = {
   groupDid: string;
   handle?: string | null;
@@ -148,8 +156,27 @@ export async function registerCgsGroup(input: {
     : new Error("Could not register organization handle.");
 }
 
+function normalizeCgsMembers(value: unknown): CgsMember[] {
+  if (!Array.isArray(value)) return [];
+  return value.flatMap((entry) => {
+    if (typeof entry !== "object" || entry === null) return [];
+    const member = entry as RawCgsMember;
+    const did = typeof member.did === "string" ? member.did : typeof member.memberDid === "string" ? member.memberDid : null;
+    if (!did) return [];
+    return [{
+      did,
+      role: member.role === "owner" || member.role === "admin" ? member.role : "member",
+      addedBy: typeof member.addedBy === "string" ? member.addedBy : null,
+      addedAt: typeof member.addedAt === "string" ? member.addedAt : null,
+    }];
+  });
+}
+
 export async function listCgsMembers(repo: string): Promise<CgsMembersResponse> {
-  return callCgs<CgsMembersResponse>({ operation: "listMembers", repo, limit: 100 });
+  const params = new URLSearchParams({ repo, limit: "100" });
+  const res = await fetch(`/api/cgs/members?${params.toString()}`, { cache: "no-store" });
+  const data = await parseJsonResponse<CgsMembersResponse>(res, "Could not load members.");
+  return { ...data, members: normalizeCgsMembers(data.members) };
 }
 
 export async function addCgsMember(repo: string, memberDid: string, role: "member" | "admin") {

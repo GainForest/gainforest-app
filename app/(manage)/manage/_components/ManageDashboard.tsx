@@ -1,7 +1,7 @@
 import type { AccountRouteData } from "@/app/account/_lib/account-route";
 import { ManageDashboardClient } from "./ManageDashboardClient";
 import type { ManageMode } from "./manageDashboardMode";
-import type { CgsRole } from "../_lib/cgs";
+import type { CgsMember, CgsRole } from "../_lib/cgs";
 
 export function ManageDashboard({
   account,
@@ -9,6 +9,8 @@ export function ManageDashboard({
   basePath,
   writeRepoDid,
   groupRole,
+  initialGroupMembers,
+  initialGroupMembersError,
   children,
 }: {
   account: AccountRouteData;
@@ -16,6 +18,8 @@ export function ManageDashboard({
   basePath?: string;
   writeRepoDid?: string;
   groupRole?: CgsRole;
+  initialGroupMembers?: CgsMember[];
+  initialGroupMembersError?: string | null;
   children?: React.ReactNode;
 }) {
   return (
@@ -25,6 +29,8 @@ export function ManageDashboard({
       basePath={basePath}
       writeRepoDid={writeRepoDid}
       groupRole={groupRole}
+      initialGroupMembers={initialGroupMembers}
+      initialGroupMembersError={initialGroupMembersError}
     >
       {children}
     </ManageDashboardClient>

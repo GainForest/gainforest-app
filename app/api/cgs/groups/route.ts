@@ -1,11 +1,11 @@
 import { headers } from "next/headers";
-import { getAuthBaseUrl } from "@/app/_lib/auth";
+import { getAuthBaseUrl, getAuthForwardCookie } from "@/app/_lib/auth";
 
 export const runtime = "nodejs";
 
 export async function GET(request: Request) {
   const headerList = await headers();
-  const cookie = headerList.get("cookie");
+  const cookie = getAuthForwardCookie(headerList.get("cookie"));
   const sourceUrl = new URL(request.url);
   const upstreamUrl = new URL("/api/cgs/groups", getAuthBaseUrl());
   upstreamUrl.search = sourceUrl.search;

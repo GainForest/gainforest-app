@@ -13,6 +13,37 @@ export function getAuthProvider(): string | null {
   return provider || "certs";
 }
 
+function authSessionCookieName(baseUrl: string): string {
+  try {
+    const host = new URL(baseUrl).hostname.toLowerCase();
+    if (host.startsWith("dev.") || host.startsWith("staging.") || host.includes("staging")) {
+      return "__Secure_gainforest_staging_session";
+    }
+  } catch {
+    // Fall through to production cookie name.
+  }
+  return "__Secure_gainforest_session";
+}
+
+export function getAuthForwardCookie(cookieHeader: string | null): string | null {
+  if (!cookieHeader) return null;
+  const cookies = cookieHeader
+    .split(";")
+    .map((part) => part.trim())
+    .filter(Boolean);
+  const targetName = authSessionCookieName(getAuthBaseUrl());
+  const target = cookies.find((cookie) => cookie.startsWith(`${targetName}=`));
+  if (target) return target;
+
+  const authCookies = cookies.filter((cookie) =>
+    cookie.startsWith("__Secure_gainforest_session=") ||
+    cookie.startsWith("__Secure_gainforest_staging_session="),
+  );
+  if (authCookies.length === 1) return authCookies[0];
+
+  return cookieHeader;
+}
+
 export function parseAuthSession(value: unknown): AuthSession {
   if (
     typeof value === "object" &&
