@@ -143,7 +143,7 @@ export async function SettingsSection({ target }: { target: ManageTarget }) {
         <GroupMembers
           groupDid={target.did}
           currentRole={role}
-          variant="panel"
+          variant="section"
           initialMembers={initialMembers.members}
           initialError={initialMembers.error}
         />

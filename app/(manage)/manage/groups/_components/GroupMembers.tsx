@@ -74,7 +74,7 @@ function MemberRow({
   const joined = formatDate(member.addedAt);
 
   return (
-    <div className="flex items-center gap-3 px-3 py-3 transition-colors hover:bg-muted/40">
+    <div className="flex items-center gap-3 rounded-xl px-3 py-3 transition-colors hover:bg-muted/40">
       <MemberAvatar did={member.did} profile={profile} />
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm font-medium text-foreground">{primary}</p>
@@ -264,7 +264,7 @@ export function GroupMembers({
   ) : null;
 
   const list = (
-    <div className="overflow-hidden rounded-2xl border border-border bg-card/40 divide-y divide-border">
+    <div className="divide-y divide-border/60">
       {sortedMembers.length === 0 ? (
         <p className="flex items-center gap-2 px-4 py-6 text-sm text-muted-foreground">
           {isPending || !loaded ? (

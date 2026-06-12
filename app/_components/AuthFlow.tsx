@@ -26,8 +26,9 @@ import {
   type FormEvent,
 } from "react";
 import type { CgsGroupMembership } from "@/app/(manage)/manage/_lib/cgs";
-import { groupManageBasePath, manageHref } from "@/lib/links";
+import { groupIdentifierFromManagePath, groupManageBasePath, manageHref } from "@/lib/links";
 import {
+  findSwitcherGroupByIdentifier,
   switcherGroupIdentifier,
   useAccountList,
   useActiveAccountContext,
@@ -580,8 +581,24 @@ function AuthenticatedMenu({
   const [activeContext, setActiveContext] = useActiveAccountContext(session.did);
   const cleanProfileName = profileName?.trim() || personalCard?.displayName?.trim() || null;
   const profileNameLoading = isProfileNameLoading && profileName === undefined;
-  const displayLabel = cleanProfileName ?? (profileNameLoading ? "Account" : "Personal account");
-  const secondaryLabel = cleanProfileName ? "Signed in" : profileNameLoading ? "Loading profile" : "Personal account";
+  const personalDisplayLabel = cleanProfileName ?? (profileNameLoading ? "Account" : "Personal account");
+  const personalSecondaryLabel = cleanProfileName ? "Signed in" : profileNameLoading ? "Loading profile" : "Personal account";
+  const routeGroupIdentifier = groupIdentifierFromManagePath(pathname);
+  const routeGroup = routeGroupIdentifier ? findSwitcherGroupByIdentifier(groups, routeGroupIdentifier) : null;
+  const activeGroup = activeContext.type === "group" ? groups.find((group) => group.groupDid === activeContext.did) ?? null : null;
+  const currentGroup = routeGroup ?? (routeGroupIdentifier && activeContext.type === "group" ? activeGroup : null);
+  const showingGroup = Boolean(routeGroupIdentifier);
+  const routeGroupFallbackLabel = routeGroupIdentifier && !routeGroupIdentifier.startsWith("did:") ? routeGroupIdentifier : "Organization account";
+  const groupDisplayLabel = currentGroup ? groupName(currentGroup) : routeGroupFallbackLabel;
+  const displayLabel = showingGroup ? groupDisplayLabel : personalDisplayLabel;
+  const secondaryLabel = showingGroup
+    ? currentGroup ? roleLabel(currentGroup.role) : "Organization"
+    : personalSecondaryLabel;
+  const triggerAvatarUrl = showingGroup ? currentGroup?.avatarUrl : personalCard?.avatarUrl;
+  const triggerIcon = showingGroup ? <UsersIcon className="h-4 w-4" /> : <UserIcon className="h-3.5 w-3.5" />;
+  const settingsGroupIdentifier = routeGroupIdentifier
+    ?? (currentGroup ? switcherGroupIdentifier(currentGroup) : null)
+    ?? (activeContext.type === "group" ? activeContext.identifier || activeContext.did : null);
 
   useManagePathContextSync({ pathname, sessionDid: session.did, groups, activeContext, setActiveContext });
 
@@ -632,7 +649,7 @@ function AuthenticatedMenu({
         onClick={() => setOpen((value) => !value)}
         className="flex items-center gap-2 px-2 py-1 rounded-xl hover:bg-muted/60 transition-colors cursor-pointer group"
       >
-        <AccountDot avatarUrl={personalCard?.avatarUrl} label={displayLabel} icon={<UserIcon className="h-3.5 w-3.5" />} />
+        <AccountDot avatarUrl={triggerAvatarUrl} label={displayLabel} icon={triggerIcon} />
 
         <span className="hidden sm:block text-sm font-medium text-foreground max-w-[120px] truncate">
           {displayLabel}
@@ -670,10 +687,10 @@ function AuthenticatedMenu({
 
               <AccountMenuRow
                 href={manageHref({ basePath: "/manage" })}
-                label={displayLabel}
+                label={personalDisplayLabel}
                 subtitle="Personal account"
                 avatarUrl={personalCard?.avatarUrl}
-                active={isActiveContext(activeContext, "personal", session.did)}
+                active={!routeGroupIdentifier && isActiveContext(activeContext, "personal", session.did)}
                 icon={<UserIcon className="h-4 w-4" />}
                 onSelect={selectPersonal}
               />
@@ -704,7 +721,7 @@ function AuthenticatedMenu({
                   label={groupName(group)}
                   subtitle={roleLabel(group.role)}
                   avatarUrl={group.avatarUrl}
-                  active={isActiveContext(activeContext, "group", group.groupDid)}
+                  active={isActiveContext(activeContext, "group", group.groupDid) || routeGroup?.groupDid === group.groupDid}
                   icon={<UsersIcon className="h-4 w-4" />}
                   onSelect={() => selectGroup(group)}
                 />
@@ -731,7 +748,7 @@ function AuthenticatedMenu({
               </Link>
 
               <Link
-                href={activeContext.type === "group" ? manageHref({ basePath: groupManageBasePath(activeContext.identifier || activeContext.did) }, "settings") : manageHref({ basePath: "/manage" }, "settings")}
+                href={settingsGroupIdentifier ? manageHref({ basePath: groupManageBasePath(settingsGroupIdentifier) }, "settings") : manageHref({ basePath: "/manage" }, "settings")}
                 onClick={() => setOpen(false)}
                 className="flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm text-foreground transition-colors hover:bg-muted/60"
               >
