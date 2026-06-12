@@ -1,10 +1,10 @@
 import { headers } from "next/headers";
-import { getAuthBaseUrl, parseAuthSession, type AuthSession } from "./auth";
+import { getAuthBaseUrl, getAuthForwardCookie, parseAuthSession, type AuthSession } from "./auth";
 
 export async function fetchAuthSession(): Promise<AuthSession> {
   try {
     const headerList = await headers();
-    const cookie = headerList.get("cookie");
+    const cookie = getAuthForwardCookie(headerList.get("cookie"));
 
     const response = await fetch(`${getAuthBaseUrl()}/api/auth/session`, {
       headers: cookie ? { cookie } : undefined,

@@ -18,7 +18,7 @@ import { Button } from "@/components/ui/button";
 import { useModal } from "@/components/ui/modal/context";
 import { TREE_UPLOAD_EVENTS, type TreeUploadEventPayload } from "@/lib/analytics/events";
 import { trackTreeUploadEvent } from "@/lib/analytics/hotjar";
-import { links } from "@/lib/links";
+import { links, type ManageTarget } from "@/lib/links";
 import {
   appendExistingDataset,
   createMeasurement,
@@ -100,6 +100,7 @@ type PhotoUploadQueueEntry = {
 type UploadStepProps = {
   uploadId: string;
   did: string;
+  target: ManageTarget;
   validRows: ValidatedRow[];
   previewSkippedRows: TreeUploadRowAttentionSummary[];
   koboMediaZipFile: File | null;
@@ -201,6 +202,7 @@ function fileFromSerializablePhoto(photoFile: { name: string; type: string; arra
 export default function UploadStep({
   uploadId,
   did,
+  target,
   validRows,
   previewSkippedRows,
   koboMediaZipFile,
@@ -213,6 +215,7 @@ export default function UploadStep({
   onDone,
 }: UploadStepProps) {
   const { pushModal, show } = useModal();
+  const writeOptions = target.kind === "group" ? { repo: target.did } : undefined;
   const [uploadStarted, setUploadStarted] = useState(false);
   const [uploadDone, setUploadDone] = useState(false);
   const [uploadStartedAtMs, setUploadStartedAtMs] = useState<number | null>(null);
@@ -413,7 +416,7 @@ export default function UploadStep({
           ...(datasetSelection.description.trim() ? { description: datasetSelection.description.trim() } : {}),
           ...(establishmentMeans ? { establishmentMeans } : {}),
           createdAt: new Date().toISOString(),
-        });
+        }, undefined, writeOptions);
         datasetUri = dsResult.uri;
         datasetRkey = dsResult.uri.split("/").pop();
         setUploadedDatasetUri(dsResult.uri);
@@ -655,7 +658,7 @@ export default function UploadStep({
           dynamicProperties: buildTreeDynamicProperties(datasetUri),
         };
         const occRecord = occurrenceInputToRecord(occurrence);
-        const occResult = await createRecord("app.gainforest.dwc.occurrence", occRecord as Record<string, unknown>);
+        const occResult = await createRecord("app.gainforest.dwc.occurrence", occRecord as Record<string, unknown>, undefined, writeOptions);
         const occurrenceRkey = occResult.uri.split("/").pop();
 
         if (row.floraMeasurement) {
@@ -668,11 +671,11 @@ export default function UploadStep({
                 basalDiameter: row.floraMeasurement.diameter,
                 canopyCoverPercent: row.floraMeasurement.canopyCoverPercent,
               },
-            });
+            }, writeOptions);
           } catch (measurementError) {
             if (occurrenceRkey) {
               try {
-                await deleteRecord("app.gainforest.dwc.occurrence", occurrenceRkey);
+                await deleteRecord("app.gainforest.dwc.occurrence", occurrenceRkey, writeOptions);
               } catch {
                 partials += 1;
                 setRowStatuses((prev) => {
@@ -713,7 +716,7 @@ export default function UploadStep({
     const persistedOccurrences = successes + partials;
     if (datasetSelection.mode === "new" && datasetRkey && persistedOccurrences === 0) {
       try {
-        await deleteRecord("app.gainforest.dwc.dataset", datasetRkey);
+        await deleteRecord("app.gainforest.dwc.dataset", datasetRkey, writeOptions);
         setUploadedDatasetUri(null);
       } catch {
         setDatasetUpdateWarning("The empty tree group could not be removed automatically.");
@@ -938,7 +941,7 @@ export default function UploadStep({
   });
 
   const sourceTotalCount = uploadTotal + previewSkippedRows.length;
-  const treeManagerHref = links.manage.treesFiltered({ dataset: uploadedDatasetUri });
+  const treeManagerHref = links.manage.target.trees(target, { dataset: uploadedDatasetUri });
   const treeManagerLabel = uploadedDatasetUri ? "View tree group" : "View trees";
   const uploadDurationSeconds = uploadStartedAtMs
     ? Math.max(0, Math.round((clockMs - uploadStartedAtMs) / 1_000))

@@ -11,6 +11,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
+import { manageApiHref, type ManageTarget } from "@/lib/links";
 import { useCsvParser } from "../../_lib/upload/use-csv-parser";
 import { PARTNER_ESTABLISHMENT_MEANS_OPTIONS } from "../../_lib/upload/establishment-means";
 import { detectKoboFormat } from "../../_lib/upload/kobo-mapper";
@@ -95,6 +96,7 @@ type BoundaryCandidateStatus = "pending" | "valid" | "invalid";
 type FileDropStepProps = {
   uploadId: string;
   did: string;
+  target: ManageTarget;
   initialEstablishmentMeans: string | null;
   initialDatasetSelection: UploadDatasetSelection;
   initialSiteSelection: UploadSiteSelection | null;
@@ -106,7 +108,7 @@ type FileDropStepProps = {
 };
 
 export default function FileDropStep({
-  uploadId, did, initialEstablishmentMeans, initialDatasetSelection, initialSiteSelection, onFileAndMappings,
+  uploadId, did, target, initialEstablishmentMeans, initialDatasetSelection, initialSiteSelection, onFileAndMappings,
 }: FileDropStepProps) {
   const modal = useModal();
   const { parsedData, headers, rowCount, error, isParsing, parseFile, reset } = useCsvParser();
@@ -151,19 +153,19 @@ export default function FileDropStep({
 
   const loadDefaultSite = useCallback(async () => {
     try {
-      const response = await fetch("/api/manage/sites/default");
+      const response = await fetch(manageApiHref("/api/manage/sites/default", target));
       const payload = (await response.json()) as { siteUri?: string | null } | { error?: string };
       setDefaultSiteUri(response.ok && "siteUri" in payload ? payload.siteUri ?? null : null);
     } catch {
       setDefaultSiteUri(null);
     }
-  }, []);
+  }, [target]);
 
   const loadSites = useCallback(async (siteUriToSelect?: string) => {
     setSitesLoading(true);
     setSitesError(null);
     try {
-      const response = await fetch("/api/manage/sites");
+      const response = await fetch(manageApiHref("/api/manage/sites", target));
       const payload = (await response.json()) as ManagedLocation[] | { error?: string };
       if (!response.ok || !Array.isArray(payload)) {
         setSites([]);
@@ -180,7 +182,7 @@ export default function FileDropStep({
     } finally {
       setSitesLoading(false);
     }
-  }, []);
+  }, [target]);
 
   // Load sites on mount
   useEffect(() => {
@@ -192,10 +194,10 @@ export default function FileDropStep({
   useEffect(() => {
     if (datasetMode !== "existing") return;
     setDatasetsLoading(true);
-    fetchUploadTreeDatasets()
+    fetchUploadTreeDatasets(target)
       .then((data) => { setExistingDatasets(data); setDatasetsLoading(false); })
       .catch(() => { setDatasetsError("Failed to load tree groups."); setDatasetsLoading(false); });
-  }, [datasetMode]);
+  }, [datasetMode, target]);
 
   const uploadSites = useMemo(() => sites.flatMap((s) => { const u = toUploadSiteSelection(s); return u ? [u] : []; }), [sites]);
   const sitesWithBoundary = useMemo(() => getBoundaryCapableUploadSites(uploadSites), [uploadSites]);
@@ -227,10 +229,12 @@ export default function FileDropStep({
         content: (
           <SiteEditorModal
             did={did}
+            target={target}
             requireBoundary={siteToEdit !== null}
             initialData={siteToEdit
               ? {
                   rkey: siteToEdit.metadata.rkey,
+                  cid: siteToEdit.metadata.cid,
                   name: siteToEdit.record.name ?? "",
                   hasShapeLocation: selectedSiteBoundaryFailed ? false : hasShapeLocation(siteToEdit),
                   recordValue: siteToEdit.rawRecord ?? null,
@@ -246,7 +250,7 @@ export default function FileDropStep({
       true,
     );
     void modal.show();
-  }, [did, loadSites, modal, selectedSiteBoundaryFailed]);
+  }, [did, loadSites, modal, selectedSiteBoundaryFailed, target]);
 
   // Validate every existing site boundary so the upload can detect when none can be used.
   useEffect(() => {

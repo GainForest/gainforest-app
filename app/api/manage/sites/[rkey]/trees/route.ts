@@ -1,5 +1,5 @@
-import { fetchAuthSession } from "@/app/_lib/auth-server";
 import { fetchOccurrencesBySiteRef } from "@/app/_lib/indexer";
+import { isResponse, resolveManageApiTarget } from "../../../_lib/target";
 
 export const runtime = "nodejs";
 
@@ -7,21 +7,19 @@ type RouteContext = {
   params: Promise<{ rkey: string }> | { rkey: string };
 };
 
-export async function GET(_request: Request, context: RouteContext) {
-  const session = await fetchAuthSession();
-  if (!session.isLoggedIn) {
-    return Response.json({ error: "Please sign in and try again." }, { status: 401 });
-  }
+export async function GET(request: Request, context: RouteContext) {
+  const target = await resolveManageApiTarget(request);
+  if (isResponse(target)) return target;
 
   const { rkey } = await context.params;
   if (!rkey || rkey.includes("/")) {
     return Response.json({ error: "Could not check linked trees." }, { status: 400 });
   }
 
-  const siteRef = `at://${session.did}/app.certified.location/${rkey}`;
+  const siteRef = `at://${target.did}/app.certified.location/${rkey}`;
 
   try {
-    const page = await fetchOccurrencesBySiteRef(session.did, siteRef, 10000);
+    const page = await fetchOccurrencesBySiteRef(target.did, siteRef, 10000);
     return Response.json({
       trees: page.records.map((tree) => ({
         uri: tree.atUri,

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import { fetchAuthSession } from "@/app/_lib/auth-server";
-import { SitesClient } from "./_components/SitesClient";
+import { resolvePersonalManageTarget } from "@/app/_lib/manage-server";
+import { SitesSection } from "../_sections";
 
 export const metadata: Metadata = {
   title: "Manage Sites — GainForest",
@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 };
 
 export default async function SitesPage() {
-  const session = await fetchAuthSession();
-  if (!session.isLoggedIn) return null;
-  return <SitesClient did={session.did} />;
+  const target = await resolvePersonalManageTarget();
+  if (!target) return null;
+  return <SitesSection target={target} />;
 }

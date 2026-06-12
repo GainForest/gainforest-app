@@ -10,6 +10,16 @@ type UploadBlobResult = { ref: unknown; mimeType: string; size: number };
 
 type RichText = { text: string; facets?: unknown };
 
+let activeGroupRepo: string | null = null;
+
+export function configureAudioMutationRepo(repo: string | null) {
+  activeGroupRepo = repo;
+}
+
+function mutationOptions(): { repo?: string } | undefined {
+  return activeGroupRepo ? { repo: activeGroupRepo } : undefined;
+}
+
 const EVENT_COLLECTION = "app.gainforest.dwc.event";
 const DEPLOYMENT_COLLECTION = "app.gainforest.ac.deployment";
 const AUDIO_COLLECTION = "app.gainforest.ac.audio";
@@ -103,7 +113,7 @@ export function formatMutationError(error: unknown): string {
 }
 
 export async function createAudioEvent(data: Record<string, unknown>): Promise<MutationResult> {
-  const result = await createRecord(EVENT_COLLECTION, eventRecord(data));
+  const result = await createRecord(EVENT_COLLECTION, eventRecord(data), undefined, mutationOptions());
   return { ...result, rkey: rkeyFromUri(result.uri) };
 }
 
@@ -113,12 +123,12 @@ export async function updateAudioEvent(input: {
   unset?: string[];
 }): Promise<MutationResult> {
   const record = applyUnset(eventRecord({ ...input.event.record, ...input.data }, input.event.record.createdAt), input.unset);
-  const result = await putRecord(EVENT_COLLECTION, input.event.metadata.rkey, record);
+  const result = await putRecord(EVENT_COLLECTION, input.event.metadata.rkey, record, mutationOptions());
   return { ...result, rkey: input.event.metadata.rkey };
 }
 
 export async function createAudioDeployment(data: Record<string, unknown>): Promise<MutationResult> {
-  const result = await createRecord(DEPLOYMENT_COLLECTION, deploymentRecord(data));
+  const result = await createRecord(DEPLOYMENT_COLLECTION, deploymentRecord(data), undefined, mutationOptions());
   return { ...result, rkey: rkeyFromUri(result.uri) };
 }
 
@@ -131,7 +141,7 @@ export async function updateAudioDeployment(input: {
     deploymentRecord({ ...input.deployment.record, ...input.data }, input.deployment.record.createdAt),
     input.unset,
   );
-  const result = await putRecord(DEPLOYMENT_COLLECTION, input.deployment.metadata.rkey, record);
+  const result = await putRecord(DEPLOYMENT_COLLECTION, input.deployment.metadata.rkey, record, mutationOptions());
   return { ...result, rkey: input.deployment.metadata.rkey };
 }
 
@@ -147,7 +157,7 @@ export async function createAudioRecording(input: {
   occurrenceRef?: string;
   siteRef?: string;
 }): Promise<MutationResult> {
-  const uploaded = await uploadBlob(input.audioFile);
+  const uploaded = await uploadBlob(input.audioFile, mutationOptions());
   const record = omitUndefined({
     $type: AUDIO_COLLECTION,
     name: input.name,
@@ -162,7 +172,7 @@ export async function createAudioRecording(input: {
     siteRef: input.siteRef,
     createdAt: new Date().toISOString(),
   });
-  const result = await createRecord(AUDIO_COLLECTION, record);
+  const result = await createRecord(AUDIO_COLLECTION, record, undefined, mutationOptions());
   return { ...result, rkey: rkeyFromUri(result.uri), record };
 }
 
@@ -172,7 +182,7 @@ export async function linkCreatedAudioRecordingOccurrence(input: {
   occurrenceRef: string;
 }): Promise<MutationResult> {
   const record = { ...input.record, occurrenceRef: input.occurrenceRef };
-  const result = await putRecord(AUDIO_COLLECTION, input.rkey, record);
+  const result = await putRecord(AUDIO_COLLECTION, input.rkey, record, mutationOptions());
   return { ...result, rkey: input.rkey, record };
 }
 
@@ -197,7 +207,7 @@ export async function updateAudioRecording(input: {
   let metadata = input.recording.record.metadata as Record<string, unknown> | null;
 
   if (input.newAudioFile && input.newTechnicalMetadata) {
-    const uploaded = await uploadBlob(input.newAudioFile);
+    const uploaded = await uploadBlob(input.newAudioFile, mutationOptions());
     blob = audioBlobFromUpload(uploaded);
     metadata = audioMetadata({
       ...input.newTechnicalMetadata,
@@ -231,15 +241,15 @@ export async function updateAudioRecording(input: {
     input.unset,
   );
 
-  const result = await putRecord(AUDIO_COLLECTION, input.recording.metadata.rkey, record);
+  const result = await putRecord(AUDIO_COLLECTION, input.recording.metadata.rkey, record, mutationOptions());
   return { ...result, rkey: input.recording.metadata.rkey };
 }
 
 export async function createSpeciesOccurrence(data: Record<string, unknown>): Promise<MutationResult> {
-  const result = await createRecord(OCCURRENCE_COLLECTION, occurrenceRecord(data));
+  const result = await createRecord(OCCURRENCE_COLLECTION, occurrenceRecord(data), undefined, mutationOptions());
   return { ...result, rkey: rkeyFromUri(result.uri) };
 }
 
 export async function deleteAudioRecording(rkey: string): Promise<void> {
-  await deleteRecord(AUDIO_COLLECTION, rkey);
+  await deleteRecord(AUDIO_COLLECTION, rkey, mutationOptions());
 }

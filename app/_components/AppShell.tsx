@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { AnimatePresence, LayoutGroup, motion } from "framer-motion";
 import {
   ArrowRightIcon,
@@ -36,8 +36,18 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
+import {
+  ACTIVE_MANAGE_CONTEXT_KEY,
+  activeContextToManagePath,
+  groupIdentifierFromManagePath,
+  groupManageBasePath,
+  manageHref,
+} from "@/lib/links";
 import { AuthButton, SignInPrompt } from "./AuthFlow";
+import { ManageContextSwitcher } from "./ManageContextSwitcher";
 import { HeaderSlotsProvider, useHeaderSlots } from "./HeaderSlots";
+import { ModalContent, ModalDescription, ModalFooter, ModalTitle } from "@/components/ui/modal/modal";
+import { useModal } from "@/components/ui/modal/context";
 
 type NavLeaf = {
   kind: "leaf";
@@ -132,7 +142,40 @@ type ShellSessionResponse = {
 type ShellProfileResponse = {
   manageAccountKind: ManageAccountKind;
   profileName: string | null;
+  hasCertifiedProfile?: boolean;
+  hasCertifiedOrg?: boolean;
 };
+
+const ONBOARDING_PROMPT_MODAL_ID = "fresh-account-onboarding";
+
+function readContextualManageBasePath(): string {
+  if (typeof window === "undefined") return "/manage";
+  return activeContextToManagePath(window.localStorage.getItem(ACTIVE_MANAGE_CONTEXT_KEY));
+}
+
+function useContextualManageBasePath(): string {
+  const pathname = usePathname() ?? "/";
+  const groupIdentifier = groupIdentifierFromManagePath(pathname);
+  const [basePath, setBasePath] = useState(readContextualManageBasePath);
+
+  useEffect(() => {
+    if (groupIdentifier) return;
+
+    const refresh = () => setBasePath(readContextualManageBasePath());
+    refresh();
+    const handleStorage = (event: StorageEvent) => {
+      if (event.key === ACTIVE_MANAGE_CONTEXT_KEY) refresh();
+    };
+    window.addEventListener("storage", handleStorage);
+    window.addEventListener("gainforest-active-account-context", refresh);
+    return () => {
+      window.removeEventListener("storage", handleStorage);
+      window.removeEventListener("gainforest-active-account-context", refresh);
+    };
+  }, [groupIdentifier]);
+
+  return groupIdentifier ? groupManageBasePath(groupIdentifier) : basePath;
+}
 
 export function AppShell({
   children,
@@ -150,6 +193,7 @@ export function AppShell({
   const [resolvedProfileName, setResolvedProfileName] = useState<string | null | undefined>(
     authSession?.isLoggedIn ? undefined : null,
   );
+  const [hasCertifiedProfile, setHasCertifiedProfile] = useState<boolean>(true);
   const [isShellProfileLoading, setIsShellProfileLoading] = useState(authSession?.isLoggedIn === true);
 
   useEffect(() => {
@@ -167,11 +211,13 @@ export function AppShell({
         if (!nextSession.isLoggedIn) {
           setResolvedManageAccountKind("user");
           setResolvedProfileName(null);
+          setHasCertifiedProfile(true);
           setIsShellProfileLoading(false);
           return;
         }
 
         setResolvedProfileName(undefined);
+        setHasCertifiedProfile(true);
         setIsShellProfileLoading(true);
 
         try {
@@ -182,17 +228,20 @@ export function AppShell({
           if (!profile) {
             setResolvedManageAccountKind("user");
             setResolvedProfileName(null);
+            setHasCertifiedProfile(true);
             setIsShellProfileLoading(false);
             return;
           }
 
           setResolvedManageAccountKind(profile.manageAccountKind);
           setResolvedProfileName(profile.profileName);
+          setHasCertifiedProfile(profile.hasCertifiedProfile !== false);
           setIsShellProfileLoading(false);
         } catch {
           if (cancelled) return;
           setResolvedManageAccountKind("user");
           setResolvedProfileName(null);
+          setHasCertifiedProfile(true);
           setIsShellProfileLoading(false);
         }
       } catch {
@@ -200,6 +249,7 @@ export function AppShell({
         setResolvedAuthSession({ isLoggedIn: false });
         setResolvedManageAccountKind("user");
         setResolvedProfileName(null);
+        setHasCertifiedProfile(true);
         setIsShellProfileLoading(false);
       }
     }
@@ -236,11 +286,80 @@ export function AppShell({
         </MobileNavDrawer>
         <main className="relative flex-1 overflow-y-auto">
           <Header authSession={resolvedAuthSession} profileName={resolvedProfileName} onOpenMobileNav={() => setMobileNavOpen(true)} />
+          <FreshAccountOnboardingPrompt
+            authSession={resolvedAuthSession}
+            isProfileLoading={isProfileLoading}
+            hasCertifiedProfile={hasCertifiedProfile}
+          />
           {children}
         </main>
       </div>
     </HeaderSlotsProvider>
   );
+}
+
+function FreshAccountOnboardingPrompt({
+  authSession,
+  isProfileLoading,
+  hasCertifiedProfile,
+}: {
+  authSession: AuthSession | null;
+  isProfileLoading: boolean;
+  hasCertifiedProfile: boolean;
+}) {
+  const modal = useModal();
+  const router = useRouter();
+  const pathname = usePathname() ?? "/";
+
+  useEffect(() => {
+    if (!authSession?.isLoggedIn || isProfileLoading || hasCertifiedProfile) return;
+    const onboardingMode = new URLSearchParams(window.location.search).get("mode")?.startsWith("onboard") === true;
+    if (onboardingMode) return;
+    if (modal.stack.length > 0) return;
+
+    modal.pushModal(
+      {
+        id: ONBOARDING_PROMPT_MODAL_ID,
+        content: (
+          <ModalContent dismissible={false} className="py-2">
+            <div className="flex flex-col items-center pt-4 text-center">
+              <motion.div
+                className="relative h-20 w-20"
+                transition={{ duration: 0.75, type: "spring" }}
+                layoutId="gainforest-icon"
+                initial={{ scale: 0.2, filter: "blur(20px)", opacity: 0 }}
+                animate={{ scale: 1, filter: "blur(0px)", opacity: 1 }}
+              >
+                <Image className="drop-shadow-2xl" src="/assets/media/images/app-icon.png" fill alt="GainForest" />
+              </motion.div>
+              <ModalTitle className="mt-4">Set up your profile</ModalTitle>
+              <ModalDescription className="mt-1 max-w-sm">
+                Welcome to GainForest. Create your personal profile to start managing your projects, records, and organizations.
+              </ModalDescription>
+              <ModalFooter className="mt-6 w-full">
+                <Button
+                  type="button"
+                  size="lg"
+                  className="w-full"
+                  onClick={() => {
+                    void modal.hide().then(() => modal.clear());
+                    router.push("/manage?mode=onboard-user");
+                  }}
+                >
+                  Continue
+                  <ArrowRightIcon />
+                </Button>
+              </ModalFooter>
+            </div>
+          </ModalContent>
+        ),
+      },
+      true,
+    );
+    void modal.show();
+  }, [authSession, hasCertifiedProfile, isProfileLoading, modal, pathname, router]);
+
+  return null;
 }
 
 function UnifiedSidebar({
@@ -280,6 +399,12 @@ function UnifiedSidebar({
       <div className="mt-2">
         <SidebarTabs activeTab={activeTab} />
       </div>
+
+      {authSession?.isLoggedIn ? (
+        <div className="mt-3">
+          <ManageContextSwitcher sessionDid={authSession.did} />
+        </div>
+      ) : null}
 
       <div className="mt-3 border-t border-border" />
 
@@ -327,6 +452,7 @@ const SIDEBAR_TABS: {
 ];
 
 function SidebarTabs({ activeTab }: { activeTab: SidebarTab }) {
+  const manageBasePath = useContextualManageBasePath();
   return (
     <LayoutGroup id="sidebar-tabs">
       <div className="flex rounded-full border border-border bg-foreground/5 p-1">
@@ -335,7 +461,7 @@ function SidebarTabs({ activeTab }: { activeTab: SidebarTab }) {
           return (
             <Link
               key={tab.id}
-              href={tab.href}
+              href={tab.id === "manage" ? manageBasePath : tab.href}
               aria-current={isActive ? "page" : undefined}
               className="relative flex-1 rounded-full px-3 py-1.5 text-center text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
             >
@@ -463,6 +589,7 @@ function NavLeaf({ item, isActive, index }: { item: NavLeaf; isActive: boolean; 
 }
 
 function BumicertCreationCard() {
+  const manageBasePath = useContextualManageBasePath();
   return (
     <div className="group flex flex-col w-full h-20 border border-border bg-background rounded-2xl p-1">
       <div className="flex-1 relative">
@@ -502,7 +629,7 @@ function BumicertCreationCard() {
 
       {/*CTA*/}
       <Link
-        href="/manage/projects?mode=new"
+        href={manageHref({ basePath: manageBasePath }, "projects", { mode: "new" })}
         className={cn(
           buttonVariants({ variant: "outline", size: "sm" }),
           "relative z-2 w-full bg-background hover:bg-primary hover:text-primary-foreground",
@@ -525,55 +652,73 @@ function ManageSection({
 }) {
   const pathname = usePathname() ?? "/";
   const searchParams = useSearchParams();
+  const groupIdentifier = groupIdentifierFromManagePath(pathname);
+  const isGroupManageContext = Boolean(groupIdentifier);
+  const basePath = groupIdentifier ? groupManageBasePath(groupIdentifier) : "/manage";
+  const resolvedAccountKind = isGroupManageContext ? "organization" : manageAccountKind;
+
   const organizationItems: NavLeaf[] = [
     {
       kind: "leaf",
       id: "organization",
-      text: "My Organization",
+      text: isGroupManageContext ? "Organization Home" : "My Organization",
       Icon: Building2Icon,
-      href: "/manage",
-      pathCheck: { equals: "/manage" },
+      href: basePath,
+      pathCheck: { equals: basePath },
     },
+    // "My Organizations" is the cross-org switcher — hidden once you're scoped
+    // into a single organization's manage section.
+    ...(isGroupManageContext
+      ? []
+      : [
+          {
+            kind: "leaf" as const,
+            id: "organizations-manage",
+            text: "My Organizations",
+            Icon: Building2Icon,
+            href: "/manage/organizations",
+            pathCheck: { startsWith: "/manage/organizations" },
+          },
+        ]),
     {
       kind: "leaf",
       id: "sites",
       text: "My Sites",
       Icon: MapPinIcon,
-      href: "/manage/sites",
-      pathCheck: { startsWith: "/manage/sites" },
+      href: manageHref({ basePath }, "sites"),
+      pathCheck: { startsWith: manageHref({ basePath }, "sites") },
     },
     {
       kind: "leaf",
       id: "audio",
       text: "My Audio",
       Icon: MicIcon,
-      href: "/manage/audio",
-      pathCheck: { startsWith: "/manage/audio" },
+      href: manageHref({ basePath }, "audio"),
+      pathCheck: { startsWith: manageHref({ basePath }, "audio") },
     },
     {
       kind: "leaf",
       id: "projects-manage",
       text: "My Projects",
       Icon: FolderKanbanIcon,
-      href: "/manage/projects",
-      pathCheck: { startsWith: "/manage/projects" },
+      href: manageHref({ basePath }, "projects"),
+      pathCheck: { startsWith: manageHref({ basePath }, "projects") },
     },
     {
       kind: "leaf",
       id: "trees",
       text: "My Trees",
       Icon: TreePineIcon,
-      href: "/manage/trees",
-      pathCheck: { startsWith: "/manage/trees" },
+      href: manageHref({ basePath }, "trees"),
+      pathCheck: { startsWith: manageHref({ basePath }, "trees") },
     },
     {
       kind: "leaf",
       id: "settings",
       text: "Settings",
       Icon: SettingsIcon,
-      href: "/manage?tab=settings",
-      pathCheck: { equals: "/manage" },
-      tabCheck: "settings",
+      href: manageHref({ basePath }, "settings"),
+      pathCheck: { startsWith: manageHref({ basePath }, "settings") },
     },
   ];
   const userItems: NavLeaf[] = [
@@ -582,29 +727,28 @@ function ManageSection({
       id: "profile",
       text: "My Profile",
       Icon: UserIcon,
-      href: "/manage",
-      pathCheck: { equals: "/manage" },
+      href: basePath,
+      pathCheck: { equals: basePath },
     },
     {
       kind: "leaf",
-      id: "projects-manage",
-      text: "My Projects",
-      Icon: FolderKanbanIcon,
-      href: "/manage/projects",
-      pathCheck: { startsWith: "/manage/projects" },
+      id: "organizations-manage",
+      text: "My Organizations",
+      Icon: Building2Icon,
+      href: "/manage/organizations",
+      pathCheck: { startsWith: "/manage/organizations" },
     },
     {
       kind: "leaf",
       id: "settings",
       text: "Settings",
       Icon: SettingsIcon,
-      href: "/manage?tab=settings",
-      pathCheck: { equals: "/manage" },
-      tabCheck: "settings",
+      href: manageHref({ basePath }, "settings"),
+      pathCheck: { startsWith: manageHref({ basePath }, "settings") },
     },
   ];
   const items: NavLeaf[] = authSession?.isLoggedIn
-    ? manageAccountKind === "organization" ? organizationItems : userItems
+    ? resolvedAccountKind === "organization" ? organizationItems : userItems
     : [];
 
   return (
@@ -726,8 +870,9 @@ function getRouteHeaderActions(pathname: string, authSession: AuthSession) {
 }
 
 function CreateBumicertHeaderButton({ isUnauthenticated }: { isUnauthenticated: boolean }) {
+  const manageBasePath = useContextualManageBasePath();
   return (
-    <Link href="/manage/projects?mode=new">
+    <Link href={manageHref({ basePath: manageBasePath }, "projects", { mode: "new" })}>
       <motion.span
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}

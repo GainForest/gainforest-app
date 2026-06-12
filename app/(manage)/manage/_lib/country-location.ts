@@ -5,7 +5,10 @@ import { createRecord } from "./mutations";
 
 const COUNTRY_LOCATION_SRS = "http://www.opengis.net/def/crs/OGC/1.3/CRS84";
 
-export async function createCountryLocationStrongRef(countryCode: string): Promise<{ uri: string; cid: string }> {
+export async function createCountryLocationStrongRef(
+  countryCode: string,
+  options?: { repo?: string },
+): Promise<{ uri: string; cid: string }> {
   const country = getCountry(countryCode);
   if (!country) throw new Error("Choose a country from the list.");
 
@@ -21,7 +24,7 @@ export async function createCountryLocationStrongRef(countryCode: string): Promi
     },
     name: country.name,
     createdAt: new Date().toISOString(),
-  });
+  }, undefined, options);
 }
 
 export function normalizeCountryCode(value: string): CountryCode | null {

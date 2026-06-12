@@ -15,10 +15,10 @@ import {
 import { useModal } from "@/components/ui/modal/context";
 import {
   createRecord,
-  getCertifiedLocationRecord,
   putRecord,
   uploadBlob,
 } from "../_lib/mutations";
+import { manageApiHref, type ManageTarget } from "@/lib/links";
 import {
   findTreeBoundaryFailures,
   formatBoundaryDistance,
@@ -41,9 +41,11 @@ export type SavedSiteRef = {
 
 type SiteEditorModalProps = {
   did: string;
+  target: ManageTarget;
   // null = create mode; object = edit mode
   initialData?: {
     rkey: string;
+    cid?: string | null;
     name: string;
     hasShapeLocation: boolean;
     recordValue?: Record<string, unknown> | null;
@@ -143,8 +145,8 @@ function buildBoundaryEditBlockedMessage(options: {
   return `This boundary cannot be replaced because ${options.failures.length} linked tree${options.failures.length === 1 ? "" : "s"} would be outside the new drawn map area${sample ? `: ${sample}` : ""}. Draw a larger area or update those tree coordinates first.`;
 }
 
-async function fetchLinkedSiteTrees(rkey: string): Promise<{ trees: LinkedSiteTree[]; truncated: boolean }> {
-  const response = await fetch(`/api/manage/sites/${encodeURIComponent(rkey)}/trees`, {
+async function fetchLinkedSiteTrees(rkey: string, target: ManageTarget): Promise<{ trees: LinkedSiteTree[]; truncated: boolean }> {
+  const response = await fetch(manageApiHref(`/api/manage/sites/${encodeURIComponent(rkey)}/trees`, target), {
     cache: "no-store",
   });
   const payload = (await response.json().catch(() => null)) as LinkedSiteTreesPayload | null;
@@ -164,12 +166,14 @@ async function fetchLinkedSiteTrees(rkey: string): Promise<{ trees: LinkedSiteTr
   };
 }
 
-async function loadCurrentSiteRecord(rkey: string): Promise<{ cid: string; record: Record<string, unknown> }> {
-  const current = await getCertifiedLocationRecord(rkey);
-  return { cid: current.cid, record: current.record };
+function loadCurrentSiteRecord(initialData: NonNullable<SiteEditorModalProps["initialData"]>): { cid: string; record: Record<string, unknown> } {
+  if (!initialData.cid || !initialData.recordValue) {
+    throw new Error("Could not load the current site record. Refresh and try again.");
+  }
+  return { cid: initialData.cid, record: initialData.recordValue };
 }
 
-export function SiteEditorModal({ did, initialData, onSaved, requireBoundary = false }: SiteEditorModalProps) {
+export function SiteEditorModal({ did, target, initialData, onSaved, requireBoundary = false }: SiteEditorModalProps) {
   const isEditMode = Boolean(initialData?.rkey);
   const previewUrl =
     isEditMode && initialData?.hasShapeLocation
@@ -206,7 +210,7 @@ export function SiteEditorModal({ did, initialData, onSaved, requireBoundary = f
   const verifyBoundaryReplacement = async (rkey: string, boundary: SiteBoundaryGeoJson) => {
     setIsVerifyingBoundary(true);
     try {
-      const { trees, truncated } = await fetchLinkedSiteTrees(rkey);
+      const { trees, truncated } = await fetchLinkedSiteTrees(rkey, target);
       const treeCoordinates = trees.flatMap((tree, index) => {
         const coordinate = toTreeBoundaryCoordinate(tree, index);
         return coordinate ? [coordinate] : [];
@@ -234,7 +238,8 @@ export function SiteEditorModal({ did, initialData, onSaved, requireBoundary = f
       if (!isEditMode) {
         if (!siteFile) return;
         await readSiteBoundaryFile(siteFile);
-        const uploaded = await uploadBlob(siteFile);
+        const writeOptions = target.kind === "group" ? { repo: target.did } : undefined;
+        const uploaded = await uploadBlob(siteFile, writeOptions);
         result = await createRecord("app.certified.location", {
           $type: "app.certified.location",
           lpVersion: "1.0.0",
@@ -243,18 +248,18 @@ export function SiteEditorModal({ did, initialData, onSaved, requireBoundary = f
           location: { $type: "org.hypercerts.defs#smallBlob", blob: toLexBlobRef(uploaded, siteFile) },
           name: name.trim(),
           createdAt: new Date().toISOString(),
-        });
+        }, undefined, writeOptions);
       } else {
         const rkey = initialData!.rkey;
         let replacementLocation: Record<string, unknown> | null = null;
         if (siteFile) {
           const boundary = await readSiteBoundaryFile(siteFile);
           await verifyBoundaryReplacement(rkey, boundary);
-          const uploaded = await uploadBlob(siteFile);
+          const uploaded = await uploadBlob(siteFile, target.kind === "group" ? { repo: target.did } : undefined);
           replacementLocation = { $type: "org.hypercerts.defs#smallBlob", blob: toLexBlobRef(uploaded, siteFile) };
         }
 
-        const currentSite = await loadCurrentSiteRecord(rkey);
+        const currentSite = loadCurrentSiteRecord(initialData!);
         const record: Record<string, unknown> = {
           ...currentSite.record,
           $type: "app.certified.location",
@@ -269,7 +274,7 @@ export function SiteEditorModal({ did, initialData, onSaved, requireBoundary = f
           record.locationType = "geojson-point";
           record.location = replacementLocation;
         }
-        result = await putRecord("app.certified.location", rkey, record, { swapRecord: currentSite.cid });
+        result = await putRecord("app.certified.location", rkey, record, { swapRecord: currentSite.cid, ...(target.kind === "group" ? { repo: target.did } : {}) });
       }
       const rkey = result.uri.split("/").pop() ?? (initialData?.rkey ?? "site");
       onSaved?.({ uri: result.uri, cid: result.cid, rkey, name: name.trim() });

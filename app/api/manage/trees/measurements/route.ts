@@ -1,6 +1,6 @@
-import { fetchAuthSession } from "@/app/_lib/auth-server";
 import { fetchMeasurementsByDid, type TreeMeasurementRecord } from "@/app/_lib/indexer";
 import { resolvePdsHost } from "@/app/_lib/pds";
+import { isResponse, resolveManageApiTarget } from "../../_lib/target";
 
 export const runtime = "nodejs";
 
@@ -144,15 +144,13 @@ function mergeMeasurements(
   });
 }
 
-export async function GET() {
-  const session = await fetchAuthSession();
-  if (!session.isLoggedIn) {
-    return Response.json({ error: "Sign in to continue." }, { status: 401 });
-  }
+export async function GET(request: Request) {
+  const target = await resolveManageApiTarget(request);
+  if (isResponse(target)) return target;
 
   const [pdsResult, indexerResult] = await Promise.allSettled([
-    fetchMeasurementsFromPds(session.did),
-    fetchMeasurementsByDid(session.did),
+    fetchMeasurementsFromPds(target.did),
+    fetchMeasurementsByDid(target.did),
   ]);
 
   if (pdsResult.status === "fulfilled") {

@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
-import { Suspense } from "react";
-import { fetchAuthSession } from "@/app/_lib/auth-server";
-import { fetchBumicertsByDid } from "@/app/_lib/indexer";
-import { ManageProjectsClient } from "./_components/ManageProjectsClient";
+import { resolvePersonalManageTarget } from "@/app/_lib/manage-server";
+import { ProjectsSection } from "../_sections";
 
 export const metadata: Metadata = {
   title: "Manage Projects — GainForest",
@@ -11,12 +9,7 @@ export const metadata: Metadata = {
 };
 
 export default async function ManageProjectsPage() {
-  const session = await fetchAuthSession();
-  if (!session.isLoggedIn) return null;
-  const bumicerts = await fetchBumicertsByDid(session.did, 500).then((page) => page.records).catch(() => []);
-  return (
-    <Suspense fallback={null}>
-      <ManageProjectsClient bumicerts={bumicerts} />
-    </Suspense>
-  );
+  const target = await resolvePersonalManageTarget();
+  if (!target) return null;
+  return <ProjectsSection target={target} />;
 }

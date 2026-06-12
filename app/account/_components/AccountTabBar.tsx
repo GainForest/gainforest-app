@@ -31,14 +31,14 @@ type TabPaths = {
   settings: string;
 };
 
-function buildTabPaths(did: string, scope: AccountTabBarScope): TabPaths {
+function buildTabPaths(did: string, scope: AccountTabBarScope, manageBasePath = "/manage"): TabPaths {
   if (scope === "manage") {
     return {
-      home: "/manage?tab=home",
-      bumicerts: "/manage?tab=bumicerts",
-      donations: "/manage?tab=donations",
-      activity: "/manage?tab=observations",
-      settings: "/manage?tab=settings",
+      home: `${manageBasePath}?tab=home`,
+      bumicerts: `${manageBasePath}?tab=bumicerts`,
+      donations: `${manageBasePath}?tab=donations`,
+      activity: `${manageBasePath}?tab=observations`,
+      settings: `${manageBasePath}?tab=settings`,
     };
   }
 
@@ -56,8 +56,9 @@ function buildTabs(
   accountKind: AccountTabBarKind,
   scope: AccountTabBarScope,
   includeSettings: boolean,
+  manageBasePath?: string,
 ): Tab[] {
-  const paths = buildTabPaths(did, scope);
+  const paths = buildTabPaths(did, scope, manageBasePath);
   const settingsTab: Tab = {
     label: "Settings",
     href: paths.settings,
@@ -113,6 +114,7 @@ interface OrgTabBarProps {
   accountKind?: AccountKind;
   scope?: AccountTabBarScope;
   includeSettings?: boolean;
+  manageBasePath?: string;
 }
 
 export function AccountTabBar({
@@ -120,11 +122,12 @@ export function AccountTabBar({
   accountKind = "organization",
   scope = "account",
   includeSettings = false,
+  manageBasePath,
 }: OrgTabBarProps) {
   const pathname = usePathname() ?? "/";
   const searchParams = useSearchParams();
-  const tabs = buildTabs(did, accountKind, scope, includeSettings);
-  const paths = buildTabPaths(did, scope);
+  const tabs = buildTabs(did, accountKind, scope, includeSettings, manageBasePath);
+  const paths = buildTabPaths(did, scope, manageBasePath);
 
   function isActive(tab: Tab): boolean {
     if (scope === "manage") {

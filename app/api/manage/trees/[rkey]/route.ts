@@ -1,5 +1,5 @@
-import { fetchAuthSession } from "@/app/_lib/auth-server";
 import { resolvePdsHost } from "@/app/_lib/pds";
+import { isResponse, resolveManageApiTarget } from "../../_lib/target";
 import type { OccurrenceRecord } from "@/app/_lib/indexer";
 
 export const runtime = "nodejs";
@@ -78,11 +78,9 @@ function mapOccurrenceFromValue(options: {
   };
 }
 
-export async function GET(_request: Request, context: { params: Promise<{ rkey: string }> }) {
-  const session = await fetchAuthSession();
-  if (!session.isLoggedIn) {
-    return Response.json({ error: "Sign in to continue." }, { status: 401 });
-  }
+export async function GET(request: Request, context: { params: Promise<{ rkey: string }> }) {
+  const target = await resolveManageApiTarget(request);
+  if (isResponse(target)) return target;
 
   const { rkey } = await context.params;
   if (!rkey) {
@@ -90,9 +88,9 @@ export async function GET(_request: Request, context: { params: Promise<{ rkey: 
   }
 
   try {
-    const pdsBaseUrl = await getPdsBaseUrl(session.did);
+    const pdsBaseUrl = await getPdsBaseUrl(target.did);
     const params = new URLSearchParams({
-      repo: session.did,
+      repo: target.did,
       collection: OCCURRENCE_COLLECTION,
       rkey,
     });
@@ -112,7 +110,7 @@ export async function GET(_request: Request, context: { params: Promise<{ rkey: 
     }
 
     return Response.json(mapOccurrenceFromValue({
-      did: session.did,
+      did: target.did,
       rkey,
       uri: payload.uri,
       cid: typeof payload.cid === "string" ? payload.cid : null,

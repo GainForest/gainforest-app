@@ -15,6 +15,7 @@ import type { KoboMediaZipIndex } from "../../_lib/upload/kobo-media-zip";
 import { NO_UPLOAD_DATASET_SELECTION, type UploadDatasetSelection } from "../../_lib/upload/upload-dataset-selection";
 import type { UploadSiteSelection } from "../../_lib/upload/site-selection";
 import { clearPendingUpload, readPendingUpload } from "./upload-session";
+import type { ManageTarget } from "@/lib/links";
 
 type WizardState = {
   currentStep: 1 | 2 | 3 | 4;
@@ -125,7 +126,7 @@ function StepIndicator({ currentStep }: { currentStep: 1 | 2 | 3 | 4 }) {
   );
 }
 
-export function TreeUploadWizard({ did, onDone }: { did: string; onDone: () => void }) {
+export function TreeUploadWizard({ did, target, onDone }: { did: string; target: ManageTarget; onDone: () => void }) {
   const [initial] = useState(() => initWizard(did));
   const [state, setState] = useState<WizardState>(initial.state);
   const [uploadId, setUploadId] = useState(initial.uploadId);
@@ -235,6 +236,7 @@ export function TreeUploadWizard({ did, onDone }: { did: string; onDone: () => v
         <FileDropStep
           uploadId={uploadId}
           did={did}
+          target={target}
           initialEstablishmentMeans={establishmentMeans}
           initialDatasetSelection={datasetSelection}
           initialSiteSelection={siteSelection}
@@ -270,6 +272,7 @@ export function TreeUploadWizard({ did, onDone }: { did: string; onDone: () => v
         <UploadStep
           uploadId={uploadId}
           did={did}
+          target={target}
           validRows={validRows}
           previewSkippedRows={previewSkippedRows}
           koboMediaZipFile={koboMediaZipFile}

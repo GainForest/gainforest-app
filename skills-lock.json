@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "skills": {
+    "app-development-with-cgs": {
+      "source": "hypercerts-org/certified-group-service",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/app-development-with-cgs/SKILL.md",
+      "computedHash": "7cd1dd8068445c529dcba23d3171a6925cff2f1063062787690dee2820d8e7fc"
+    }
+  }
+}

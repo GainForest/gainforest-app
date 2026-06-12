@@ -1,3 +1,4 @@
+import { manageApiHref, type ManageTarget } from "@/lib/links";
 import type { ExistingUploadDatasetSelection } from "./upload-dataset-selection";
 
 export type UploadTreeDatasetItem = ExistingUploadDatasetSelection & {
@@ -20,8 +21,8 @@ function isUploadTreeDatasetItem(value: unknown): value is UploadTreeDatasetItem
   );
 }
 
-export async function fetchUploadTreeDatasets(): Promise<UploadTreeDatasetItem[]> {
-  const response = await fetch("/api/manage/trees/datasets", { credentials: "same-origin" });
+export async function fetchUploadTreeDatasets(target?: ManageTarget): Promise<UploadTreeDatasetItem[]> {
+  const response = await fetch(manageApiHref("/api/manage/trees/datasets", target), { credentials: "same-origin" });
 
   if (!response.ok) {
     const payload = (await response.json().catch(() => null)) as unknown;

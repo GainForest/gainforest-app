@@ -21,11 +21,17 @@ export type AccountRouteData = {
   avatarUrl: string | null;
   coverUrl: string | null;
   description: string | null;
+  /** Long-form "about" text, read from the org record's `longDescription`. */
+  longDescription: string | null;
   website: string | null;
   country: string | null;
   createdAt: string | null;
   foundedDate: string | null;
   visibility: "Public" | "Unlisted" | null;
+  /** Organization category (e.g. "Nonprofit"), read straight from the org record. */
+  orgType: string | null;
+  /** Social / website URLs stored on the org record's `urls` list. */
+  socialLinks: string[];
   kind: AccountKind;
   summary: AccountSummary;
   detail: RecordDetail | null;
@@ -53,6 +59,9 @@ type DirectCertifiedOrganization = {
   foundedDate: string | null;
   visibility: "Public" | "Unlisted" | null;
   createdAt: string | null;
+  orgType: string | null;
+  socialLinks: string[];
+  longDescription: string | null;
 };
 
 export function encodeAccountSegment(value: string): string {
@@ -163,16 +172,40 @@ export const getAccountRouteData = cache(async (
     avatarUrl: summary.avatarUrl ?? appViewProfile?.avatar ?? null,
     coverUrl: appViewProfile?.banner ?? null,
     description: summary.bio ?? appViewProfile?.description ?? detail?.blurb ?? null,
+    longDescription: directCertifiedOrganization?.longDescription ?? null,
     website: summary.website,
     country: summary.country,
     createdAt: summary.createdAt,
     foundedDate: summary.foundedDate,
     visibility: summary.visibility,
+    orgType: directCertifiedOrganization?.orgType ?? summary.certOrgType ?? null,
+    socialLinks: directCertifiedOrganization?.socialLinks ?? [],
     kind,
     summary,
     detail,
   };
 });
+
+/**
+ * Slim profile card for a DID, read straight from `app.certified.actor.profile`.
+ * Used by account pickers/cards where we only need basic profile copy +
+ * avatar per group and don't want the full indexer/AppView hydration.
+ */
+export const getCertifiedProfileCard = cache(
+  async (did: string): Promise<{ displayName: string | null; description: string | null; avatarUrl: string | null; handle: string | null }> => {
+    if (!did.startsWith("did:")) return { displayName: null, description: null, avatarUrl: null, handle: null };
+    const [profile, appViewProfile] = await Promise.all([
+      fetchDirectCertifiedProfile(did).catch(() => null),
+      fetchAppViewProfile(did).catch(() => null),
+    ]);
+    return {
+      displayName: profile?.displayName ?? appViewProfile?.displayName ?? null,
+      description: profile?.description ?? appViewProfile?.description ?? null,
+      avatarUrl: profile?.avatarUrl ?? appViewProfile?.avatar ?? null,
+      handle: appViewProfile?.handle ?? null,
+    };
+  },
+);
 
 function safeDecode(value: string): string {
   try {
@@ -182,7 +215,7 @@ function safeDecode(value: string): string {
   }
 }
 
-async function resolveIdentifierToDid(identifier: string): Promise<string | null> {
+export async function resolveIdentifierToDid(identifier: string): Promise<string | null> {
   if (identifier.startsWith("did:")) return identifier;
 
   const appViewProfile = await fetchAppViewProfile(identifier).catch(() => null);
@@ -219,16 +252,28 @@ async function fetchDirectCertifiedProfile(did: string): Promise<DirectCertified
 
   const avatar = value.avatar;
   const avatarRef = typeof avatar === "object" && avatar !== null && "image" in avatar
-    ? (avatar.image as { ref?: string | null } | undefined)?.ref
+    ? blobRef((avatar as { image?: unknown }).image)
     : null;
 
   return {
-    displayName: typeof value.displayName === "string" ? value.displayName : null,
+    displayName: typeof value.displayName === "string" && value.displayName.trim() ? value.displayName.trim() : null,
     description: typeof value.description === "string" ? value.description : null,
     website: typeof value.website === "string" ? value.website : null,
     avatarUrl: await resolveBlobUrl(did, avatarRef),
     createdAt: typeof value.createdAt === "string" ? value.createdAt : null,
   };
+}
+
+function blobRef(value: unknown): string | null {
+  if (typeof value === "string") return value;
+  if (typeof value !== "object" || value === null) return null;
+  const ref = (value as { ref?: unknown }).ref;
+  if (typeof ref === "string") return ref;
+  if (typeof ref === "object" && ref !== null && "$link" in ref) {
+    const link = (ref as { $link?: unknown }).$link;
+    return typeof link === "string" ? link : null;
+  }
+  return null;
 }
 
 async function fetchDirectCertifiedOrganization(did: string): Promise<DirectCertifiedOrganization | null> {
@@ -239,11 +284,27 @@ async function fetchDirectCertifiedOrganization(did: string): Promise<DirectCert
   const locationUri = typeof location === "object" && location !== null && "uri" in location
     ? typeof location.uri === "string" ? location.uri : null
     : null;
+  const orgTypes = Array.isArray(value.organizationType)
+    ? value.organizationType.filter((t): t is string => typeof t === "string" && t.trim().length > 0)
+    : [];
+  const socialLinks = Array.isArray(value.urls)
+    ? value.urls
+        .map((entry) => (typeof entry === "object" && entry !== null && "url" in entry ? (entry as { url?: unknown }).url : null))
+        .filter((url): url is string => typeof url === "string" && url.trim().length > 0)
+    : [];
+  const longDescription = typeof value.longDescription === "object" && value.longDescription !== null && "value" in value.longDescription
+    ? typeof (value.longDescription as { value?: unknown }).value === "string"
+      ? (value.longDescription as { value: string }).value.trim() || null
+      : null
+    : null;
   return {
     country: await fetchCertifiedLocationCountryCode(locationUri),
     foundedDate: typeof value.foundedDate === "string" ? value.foundedDate : null,
     visibility: rawVisibility === "unlisted" || rawVisibility === "Unlisted" ? "Unlisted" : rawVisibility ? "Public" : null,
     createdAt: typeof value.createdAt === "string" ? value.createdAt : null,
+    orgType: orgTypes.length ? orgTypes.join(", ") : null,
+    socialLinks,
+    longDescription,
   };
 }
 

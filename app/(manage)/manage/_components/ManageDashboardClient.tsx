@@ -1,30 +1,29 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import {
   Building2Icon,
   CalendarIcon,
+  CheckIcon,
+  EyeIcon,
   GlobeIcon,
-  ImageIcon,
-  LockIcon,
+  ImagePlusIcon,
+  Link2Icon,
   Loader2Icon,
+  LockIcon,
   MapPinIcon,
   PencilIcon,
-  PlusCircleIcon,
-  SaveIcon,
+  SettingsIcon,
   XIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import type { AccountRouteData } from "@/app/account/_lib/account-route";
-import { ManageNavGrid } from "./ManageNavGrid";
 import { ManageAccountSetup } from "./ManageAccountSetup";
-import { ManageAccountTabs } from "./ManageAccountTabs";
 import {
   parseManageMode,
   resolveDashboardMode,
@@ -32,21 +31,33 @@ import {
   type ManageMode,
 } from "./manageDashboardMode";
 import { HeaderContent } from "@/app/_components/HeaderSlots";
-import { RichText } from "@/app/_components/RichText";
 import { countryFlag } from "@/app/_lib/format";
+import { resolvePdsHost } from "@/app/_lib/pds";
 import { putRecord, uploadBlob } from "../_lib/mutations";
 import { createCountryLocationStrongRef, normalizeCountryCode } from "../_lib/country-location";
 import Container from "@/components/ui/container";
 import { useModal } from "@/components/ui/modal/context";
 import {
+  OrgTypeEditorModal,
+  SocialLinksEditorModal,
   StartDateSelectorModal,
   VisibilitySelectorModal,
   WebsiteEditorModal,
 } from "../_modals/DashboardEditModals";
 import CountrySelectorModal from "@/components/modals/country-selector";
 import { ImageEditorModal } from "@/components/modals/image-editor";
+import { SocialGlyph } from "@/app/_components/SocialIcon";
+import { GroupMembers } from "../groups/_components/GroupMembers";
+import { ManageGroupsClient } from "../groups/_components/ManageGroupsClient";
+import type { CgsMember, CgsRole } from "../_lib/cgs";
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
+function decodePath(value: string): string {
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return value;
+  }
+}
 
 function formatWebsite(url: string): string {
   return url.replace(/^https?:\/\//, "").replace(/\/$/, "");
@@ -74,81 +85,180 @@ function countryName(code: string): string {
   catch { return code; }
 }
 
-// ── EditChip ──────────────────────────────────────────────────────────────────
-
-function EditChip({
-  onClick, className, children, isEditing, isEmpty = false,
-}: {
-  onClick?: () => void; className?: string; children: React.ReactNode; isEditing: boolean; isEmpty?: boolean;
-}) {
-  if (!isEditing) {
-    if (isEmpty) return null;
-    return (
-      <span className={cn("inline-flex items-center gap-1.5 text-[10px] uppercase tracking-[0.08em] text-foreground/60 bg-background/40 backdrop-blur-md border border-border/50 rounded-full px-2.5 py-1 font-medium", className)}>
-        {children}
-      </span>
-    );
-  }
-  return (
-    <motion.button
-      type="button"
-      onClick={onClick}
-      whileHover={{ scale: 1.03 }}
-      whileTap={{ scale: 0.97 }}
-      transition={{ type: "spring", stiffness: 400, damping: 25 }}
-      className={cn(
-        "inline-flex items-center gap-1.5 text-[10px] uppercase tracking-[0.08em] rounded-full px-2.5 py-1 font-medium border cursor-pointer transition-colors",
-        isEmpty
-          ? "text-primary/70 bg-primary/5 border-primary/20 hover:bg-primary/10"
-          : "text-foreground/60 bg-background/40 backdrop-blur-md border-border/50 hover:bg-background/60 hover:text-foreground/80",
-        className,
-      )}
-    >
-      {isEmpty && <PlusCircleIcon className="h-3 w-3 shrink-0" />}
-      {!isEmpty && <PencilIcon className="h-3 w-3 shrink-0 opacity-60" />}
-      {children}
-    </motion.button>
-  );
+async function fetchExistingSelfRecord(repo: string, collection: string): Promise<Record<string, unknown>> {
+  const host = await resolvePdsHost(repo).catch(() => null);
+  if (!host) return {};
+  const params = new URLSearchParams({ repo, collection, rkey: "self" });
+  const response = await fetch(`https://${host}/xrpc/com.atproto.repo.getRecord?${params.toString()}`, { cache: "no-store" });
+  if (!response.ok) return {};
+  const data = (await response.json().catch(() => ({}))) as { value?: unknown };
+  return typeof data.value === "object" && data.value !== null && !Array.isArray(data.value)
+    ? data.value as Record<string, unknown>
+    : {};
 }
-
-// ── EditableHero ──────────────────────────────────────────────────────────────
 
 type HeroEditState = {
   displayName: string;
   description: string;
+  longDescription: string;
   website: string;
   country: string;
   startDate: string;
   visibility: "Public" | "Unlisted";
+  orgType: string;
+  socials: string[];
   logoFile: File | null;
   coverFile: File | null;
 };
 
+type InlineField = "profile" | "about" | null;
+
+const SECTION_EASE = [0.25, 0.1, 0.25, 1] as const;
+
+/** Classify a URL into a social-icon platform key (mirrors the indexer). */
+function classifySocial(url: string): string {
+  let host: string;
+  try {
+    host = new URL(url).hostname.replace(/^www\./, "").toLowerCase();
+  } catch {
+    return "link";
+  }
+  if (host.includes("facebook.") || host === "fb.com") return "facebook";
+  if (host.includes("instagram.")) return "instagram";
+  if (host.includes("youtube.") || host === "youtu.be") return "youtube";
+  if (host.includes("linkedin.")) return "linkedin";
+  if (host === "x.com" || host.includes("twitter.")) return "x";
+  if (host === "t.me" || host.includes("telegram.")) return "telegram";
+  if (host.includes("tiktok.")) return "tiktok";
+  if (host.includes("github.")) return "github";
+  if (host.includes("bsky.") || host.includes("bluesky.")) return "bluesky";
+  return "website";
+}
+
+function AboutSection({
+  value,
+  draft,
+  isEditing,
+  isSaving,
+  saveError,
+  onEdit,
+  onChange,
+  onSave,
+  onCancel,
+}: {
+  value: string;
+  draft: string;
+  isEditing: boolean;
+  isSaving: boolean;
+  saveError: string | null;
+  onEdit: () => void;
+  onChange: (value: string) => void;
+  onSave: () => void;
+  onCancel: () => void;
+}) {
+  const text = value.trim();
+  return (
+    <motion.section
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, delay: 0.1, ease: SECTION_EASE }}
+    >
+      <div className="flex items-center gap-2">
+        <h2 className="font-instrument text-2xl italic leading-none text-foreground">About</h2>
+        {isEditing ? null : (
+          <button
+            type="button"
+            onClick={onEdit}
+            className="rounded-full p-1 text-foreground/40 transition-colors hover:bg-muted hover:text-foreground"
+            aria-label="Edit about"
+          >
+            <PencilIcon className="size-4" />
+          </button>
+        )}
+      </div>
+      {isEditing ? (
+        <div className="mt-3 max-w-2xl space-y-2">
+          <textarea
+            value={draft}
+            onChange={(e) => onChange(e.target.value)}
+            placeholder="Tell people about this organization…"
+            rows={6}
+            className="w-full resize-none rounded-xl border border-border/50 bg-transparent p-3 text-sm leading-relaxed text-foreground outline-none transition-colors field-sizing-content placeholder:text-muted-foreground/60 focus:border-primary/60"
+            autoFocus
+          />
+          <InlineEditActions isSaving={isSaving} onSave={onSave} onCancel={onCancel} />
+          {saveError ? <p className="text-sm text-destructive">{saveError}</p> : null}
+        </div>
+      ) : (
+        <p className={cn("mt-3 max-w-2xl whitespace-pre-line text-sm leading-relaxed", text ? "text-muted-foreground" : "text-muted-foreground/60")}>
+          {text || "No long description provided."}
+        </p>
+      )}
+    </motion.section>
+  );
+}
+
+function InlineEditActions({
+  isSaving,
+  onSave,
+  onCancel,
+}: {
+  isSaving: boolean;
+  onSave: () => void;
+  onCancel: () => void;
+}) {
+  return (
+    <span className="mt-2 flex items-center gap-1.5">
+      <Button type="button" size="sm" onClick={onSave} disabled={isSaving}>
+        {isSaving ? <Loader2Icon className="animate-spin" /> : <CheckIcon />}
+        Save
+      </Button>
+      <Button type="button" size="sm" variant="ghost" onClick={onCancel} disabled={isSaving}>
+        <XIcon /> Cancel
+      </Button>
+    </span>
+  );
+}
+
 function EditableHero({
   account,
-  isEditing,
+  basePath,
   editState,
+  inlineField,
+  isSaving,
+  saveError,
   onChange,
+  onEditField,
+  onSaveInline,
+  onCancelInline,
   onEditLogo,
   onEditCover,
   onEditCountry,
   onEditWebsite,
   onEditStartDate,
   onEditVisibility,
+  onEditOrgType,
+  onEditSocials,
 }: {
   account: AccountRouteData;
-  isEditing: boolean;
+  basePath: string;
   editState: HeroEditState;
-  onChange: (field: keyof Omit<HeroEditState, "logoFile" | "coverFile">, value: string) => void;
+  inlineField: InlineField;
+  isSaving: boolean;
+  saveError: string | null;
+  onChange: (field: keyof Omit<HeroEditState, "logoFile" | "coverFile" | "socials">, value: string) => void;
+  onEditField: (field: InlineField) => void;
+  onSaveInline: () => void;
+  onCancelInline: () => void;
   onEditLogo: () => void;
   onEditCover: () => void;
   onEditCountry: () => void;
   onEditWebsite: () => void;
   onEditStartDate: () => void;
   onEditVisibility: () => void;
+  onEditOrgType: () => void;
+  onEditSocials: () => void;
 }) {
-
-  // Blob URLs for preview
   const logoObjectUrl = useMemo(
     () => (editState.logoFile ? URL.createObjectURL(editState.logoFile) : null),
     [editState.logoFile],
@@ -162,235 +272,194 @@ function EditableHero({
 
   const coverImageUrl = coverObjectUrl ?? account.coverUrl;
   const logoUrl = logoObjectUrl ?? account.avatarUrl;
-  const initial = (editState.displayName || account.displayName).charAt(0).toUpperCase();
 
-  const sinceDate = formatSinceDate(editState.startDate);
-  const flag = editState.country ? countryFlag(editState.country) : (account.country ? countryFlag(account.country) : "");
+  const editing = inlineField === "profile";
+
+  const isOrg = account.kind === "organization";
+  const resolvedWebsite = editState.website || account.website;
   const resolvedCountry = editState.country || account.country;
   const countryLabel = resolvedCountry ? countryName(resolvedCountry) : null;
-  const resolvedWebsite = editState.website || account.website;
-  const hasPillRow = isEditing || sinceDate.state === "valid" || countryLabel !== null || resolvedWebsite !== null;
+  const flag = resolvedCountry ? countryFlag(resolvedCountry) : "";
+  const sinceDate = formatSinceDate(editState.startDate);
 
   return (
-    <section className="relative min-h-[260px] md:min-h-[320px] flex flex-col overflow-hidden rounded-t-4xl border-t border-border">
-      {/* Cover image */}
-      <div className="absolute inset-0 z-0">
-        <motion.div
-          initial={{ scale: 1.08, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ duration: 1.6, ease: [0.25, 0.1, 0.25, 1] }}
-          className="absolute inset-0"
+    <section className="overflow-hidden rounded-3xl border border-border/60 bg-card">
+      {/* Cover band — click anywhere to change; icon reveals on hover/focus */}
+      <div className="relative h-32 sm:h-40 md:h-44">
+        <button
+          type="button"
+          onClick={onEditCover}
+          className="group/cover absolute inset-0 block w-full overflow-hidden"
+          aria-label={coverImageUrl ? "Change cover image" : "Add cover image"}
         >
           {coverImageUrl ? (
             <Image src={coverImageUrl} alt={`${account.displayName} cover image`} fill priority unoptimized className="object-cover object-center" sizes="(max-width: 1152px) 100vw, 1152px" />
           ) : (
-            <div className="absolute inset-0 bg-muted" style={{ backgroundImage: "radial-gradient(circle at 30% 50%, oklch(0.5 0.07 157 / 0.08) 0%, transparent 60%), radial-gradient(circle at 75% 25%, oklch(0.5 0.07 157 / 0.05) 0%, transparent 50%)" }} />
+            <div className="absolute inset-0 bg-muted" style={{ backgroundImage: "radial-gradient(circle at 22% 40%, oklch(0.5 0.07 157 / 0.14) 0%, transparent 55%), radial-gradient(circle at 82% 18%, oklch(0.5 0.07 157 / 0.08) 0%, transparent 50%)" }} />
           )}
-          <div className="absolute inset-0 bg-linear-to-b from-background/0 via-background/75 to-background" />
-        </motion.div>
+          {/* gentle fade into the card at the bottom */}
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-14 bg-linear-to-t from-card to-transparent" />
+          {/* hover/focus affordance */}
+          <div
+            className={cn(
+              "absolute inset-0 flex items-center justify-center gap-1.5 transition-all duration-300",
+              coverImageUrl
+                ? "bg-black/0 opacity-0 backdrop-blur-0 group-hover/cover:bg-black/30 group-hover/cover:opacity-100 group-hover/cover:backdrop-blur-[2px] group-focus-visible/cover:bg-black/30 group-focus-visible/cover:opacity-100 group-focus-visible/cover:backdrop-blur-[2px]"
+                : "opacity-100",
+            )}
+          >
+            <ImagePlusIcon className={cn("size-5", coverImageUrl ? "text-white drop-shadow" : "text-muted-foreground")} />
+            {!coverImageUrl ? <span className="text-xs font-medium text-muted-foreground">Add cover image</span> : null}
+          </div>
+        </button>
+
+        {/* Settings shortcut */}
+        <Link
+          href={`${basePath}/settings`}
+          className="absolute right-3 top-3 z-10 flex size-9 items-center justify-center rounded-full border border-border/50 bg-background/65 text-foreground/70 shadow-sm backdrop-blur-xl transition-colors hover:bg-background/90 hover:text-foreground"
+          aria-label="Settings"
+          title="Settings"
+        >
+          <SettingsIcon className="size-4" />
+        </Link>
       </div>
 
-      {/* Bottom content */}
-      <div className="relative z-10 flex-1 flex flex-col justify-end px-5 pb-6 pt-24">
-        <div className="flex flex-col md:flex-row items-start md:items-center gap-3 mb-3">
-          {/* Logo */}
-          <div className="relative shrink-0">
-            <div className="relative h-24 w-24 rounded-full overflow-hidden bg-muted border border-white/15 shadow-sm">
-              {logoUrl ? (
-                <Image src={logoUrl} alt={account.displayName} fill unoptimized className="object-cover" />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center text-sm font-bold text-muted-foreground">{initial}</div>
-              )}
-            </div>
-            {isEditing && (
-              <button
-                type="button"
-                onClick={onEditLogo}
-                className="absolute -bottom-1 -right-1 h-7 w-7 rounded-full bg-background border border-border flex items-center justify-center shadow-sm hover:bg-muted/60 transition-colors cursor-pointer"
-                aria-label={account.kind === "organization" ? "Change logo" : "Change photo"}
-              >
-                <PencilIcon className="h-3.5 w-3.5" />
-              </button>
+      {/* Identity */}
+      <div className="relative z-10 px-5 pb-5 sm:px-6 sm:pb-6">
+        <div className="-mt-12 flex flex-col gap-4 md:flex-row md:items-end md:gap-5">
+        <button
+          type="button"
+          onClick={onEditLogo}
+          className="group/avatar relative block size-24 shrink-0 overflow-hidden rounded-full border border-border/60 bg-muted ring-4 ring-card"
+          aria-label={logoUrl ? (account.kind === "organization" ? "Change logo" : "Change photo") : (account.kind === "organization" ? "Add logo" : "Add photo")}
+        >
+          {logoUrl ? (
+            <Image src={logoUrl} alt={account.displayName} fill unoptimized className="object-cover" />
+          ) : null}
+          <span
+            className={cn(
+              "absolute inset-0 flex items-center justify-center transition-all duration-300",
+              logoUrl
+                ? "bg-black/0 opacity-0 backdrop-blur-0 group-hover/avatar:bg-black/35 group-hover/avatar:opacity-100 group-hover/avatar:backdrop-blur-[2px] group-focus-visible/avatar:bg-black/35 group-focus-visible/avatar:opacity-100 group-focus-visible/avatar:backdrop-blur-[2px]"
+                : "opacity-100",
             )}
-          </div>
+          >
+            <ImagePlusIcon className={cn("size-6", logoUrl ? "text-white drop-shadow" : "text-muted-foreground")} />
+          </span>
+        </button>
 
-          {/* Name + description */}
-          <div className="max-w-3xl w-full min-w-0">
-            {isEditing ? (
+        <div className="min-w-0 max-w-2xl md:flex-1 md:pb-1">
+          {editing ? (
+            <div className="space-y-3">
               <input
                 type="text"
                 value={editState.displayName}
                 onChange={(e) => onChange("displayName", e.target.value)}
-                placeholder="Organization name"
-                className={cn(
-                  "text-3xl sm:text-4xl md:text-5xl font-light tracking-[-0.02em] leading-none",
-                  "font-instrument italic bg-transparent border-b-2 border-white/40 focus:border-primary/60 outline-none",
-                  "text-foreground placeholder:text-foreground/40 w-full transition-colors",
-                )}
+                placeholder={account.kind === "organization" ? "Organization name" : "Display name"}
+                className="w-full border-b-2 border-border/50 bg-transparent font-instrument text-3xl font-light italic leading-[1.1] tracking-[-0.02em] text-foreground outline-none transition-colors placeholder:text-foreground/40 focus:border-primary/60 md:text-4xl"
+                autoFocus
               />
-            ) : (
-              <h1 className="text-3xl sm:text-4xl md:text-5xl font-light tracking-[-0.02em] leading-none text-foreground font-instrument italic">
-                {account.displayName}
-              </h1>
-            )}
-            {isEditing ? (
               <textarea
                 value={editState.description}
                 onChange={(e) => onChange("description", e.target.value)}
-                placeholder="Short description…"
-                rows={2}
-                className={cn(
-                  "mt-1 w-full resize-none overflow-hidden whitespace-pre-wrap break-words bg-transparent border-b border-white/30 focus:border-primary/60 outline-none transition-colors field-sizing-content",
-                  "text-muted-foreground placeholder:text-muted-foreground/60 leading-relaxed",
-                )}
+                placeholder="Short bio…"
+                rows={3}
+                className="w-full resize-none border-b border-border/40 bg-transparent text-sm leading-relaxed text-muted-foreground outline-none transition-colors field-sizing-content placeholder:text-muted-foreground/60 focus:border-primary/60"
               />
-            ) : (
-              account.description && (
-                <p className="text-muted-foreground line-clamp-4 md:line-clamp-2 mt-1">{account.description}</p>
-              )
-            )}
-          </div>
+              <InlineEditActions isSaving={isSaving} onSave={onSaveInline} onCancel={onCancelInline} />
+            </div>
+          ) : (
+            <>
+              <div className="flex items-start gap-2">
+                <h1 className="font-instrument text-3xl font-light italic leading-[1.1] tracking-[-0.02em] text-foreground md:text-4xl">
+                  {editState.displayName || account.displayName}
+                </h1>
+                <button type="button" onClick={() => onEditField("profile")} className="mt-1 rounded-full p-1 text-foreground/40 transition-colors hover:bg-muted hover:text-foreground" aria-label="Edit name and bio">
+                  <PencilIcon className="size-4" />
+                </button>
+              </div>
+              <p className={cn("mt-1.5 line-clamp-2 text-sm leading-relaxed", editState.description ? "text-muted-foreground" : "text-muted-foreground/60")}>
+                {editState.description || "No bio provided."}
+              </p>
+            </>
+          )}
+          {saveError ? <p className="mt-2 text-sm text-destructive">{saveError}</p> : null}
+        </div>
         </div>
 
-        {/* Pills row */}
-        {hasPillRow && (
-          <div>
-            <div className="mt-4 flex flex-wrap items-center gap-2">
-              {/* Country */}
-              {account.kind === "organization" && (
-                <EditChip onClick={onEditCountry} isEditing={isEditing} isEmpty={!countryLabel}>
-                  {flag && <span className="text-sm leading-none" aria-hidden="true">{flag}</span>}
-                  {countryLabel ?? "Add country"}
-                </EditChip>
+        {/* Detail buttons */}
+        <div className="mt-5 flex flex-wrap items-center gap-2">
+          {isOrg ? (
+            <Button variant="outline" onClick={onEditOrgType} className={cn(!editState.orgType.trim() && "text-muted-foreground")}>
+              <Building2Icon /> {editState.orgType.trim() || "Add type"}
+            </Button>
+          ) : null}
+          {isOrg ? (
+            <Button variant="outline" onClick={onEditCountry} className={cn(!countryLabel && "text-muted-foreground")}>
+              {flag ? <span className="text-base leading-none" aria-hidden="true">{flag}</span> : <MapPinIcon />}
+              {countryLabel ?? "Add country"}
+            </Button>
+          ) : null}
+          {isOrg ? (
+            <Button variant="outline" onClick={onEditStartDate} className={cn(sinceDate.state === "empty" && "text-muted-foreground")}>
+              <CalendarIcon />
+              {sinceDate.state === "valid" ? `Since ${sinceDate.label}` : sinceDate.state === "invalid" ? "Invalid date" : "Add start date"}
+            </Button>
+          ) : null}
+          <Button variant="outline" onClick={onEditWebsite} className={cn(!resolvedWebsite && "text-muted-foreground")}>
+            <GlobeIcon /> {resolvedWebsite ? formatWebsite(resolvedWebsite) : "Add website"}
+          </Button>
+          {isOrg ? (
+            <Button variant="outline" onClick={onEditVisibility}>
+              {editState.visibility === "Unlisted" ? <LockIcon /> : <EyeIcon />} {editState.visibility}
+            </Button>
+          ) : null}
+          {isOrg ? (
+            <Button variant="outline" onClick={onEditSocials} className={cn(!editState.socials.length && "text-muted-foreground")}>
+              {editState.socials.length ? (
+                editState.socials.map((url) => <SocialGlyph key={url} platform={classifySocial(url)} />)
+              ) : (
+                <>
+                  <Link2Icon /> Add social links
+                </>
               )}
-
-              {/* Start date */}
-              {account.kind === "organization" && (
-                <EditChip
-                  onClick={onEditStartDate}
-                  isEditing={isEditing}
-                  isEmpty={isEditing ? sinceDate.state === "empty" : sinceDate.state !== "valid"}
-                >
-                  <CalendarIcon className="h-3 w-3 shrink-0" />
-                  {sinceDate.state === "valid" ? `Since ${sinceDate.label}` : isEditing && sinceDate.state === "invalid" ? "Invalid date" : "Add start date"}
-                </EditChip>
-              )}
-
-              {/* Website */}
-              <EditChip onClick={onEditWebsite} isEditing={isEditing} isEmpty={!resolvedWebsite}>
-                <GlobeIcon className="h-3 w-3 shrink-0" />
-                {resolvedWebsite ? formatWebsite(resolvedWebsite) : "Add website"}
-              </EditChip>
-
-              {/* Visibility (org only, edit mode or when unlisted) */}
-              {account.kind === "organization" && (isEditing || editState.visibility === "Unlisted") && (
-                <EditChip onClick={onEditVisibility} isEditing={isEditing} isEmpty={false}>
-                  {editState.visibility === "Unlisted" ? <LockIcon className="h-3 w-3 shrink-0" /> : <MapPinIcon className="h-3 w-3 shrink-0" />}
-                  {editState.visibility}
-                </EditChip>
-              )}
-            </div>
-
-          </div>
-        )}
-      </div>
-
-      {/* Top action row */}
-      <div className="absolute top-0 left-0 right-0 z-10 flex items-start justify-between p-4">
-        <AnimatePresence>
-          {isEditing && (
-            <motion.button
-              key="cover-btn"
-              type="button"
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.9 }}
-              whileTap={{ scale: 0.96 }}
-              transition={{ type: "spring", stiffness: 400, damping: 25 }}
-              onClick={onEditCover}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-background/55 backdrop-blur-xl border border-white/20 shadow-lg hover:bg-background/70 transition-colors cursor-pointer"
-              aria-label="Change cover image"
-            >
-              <ImageIcon className="h-3.5 w-3.5 text-foreground/80 shrink-0" />
-              <span className="text-xs font-medium text-foreground/80">Change cover</span>
-            </motion.button>
-          )}
-        </AnimatePresence>
-
-        {/* Edit button in view mode */}
-        {!isEditing && (
-          <Link
-            href="/manage?mode=edit"
-            className="ml-auto flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-background/55 backdrop-blur-xl border border-white/20 shadow-lg hover:bg-background/70 transition-colors text-xs font-medium text-foreground/80"
-          >
-            <PencilIcon className="h-3.5 w-3.5" />
-            Edit profile
-          </Link>
-        )}
+            </Button>
+          ) : null}
+        </div>
       </div>
     </section>
   );
 }
 
-// ── Header actions / EditBar ──────────────────────────────────────────────────
-
-function RegisterOrganizationButton() {
+function CreateOrganizationButton() {
   return (
     <Button asChild variant="secondary">
       <Link href="/manage?mode=onboard-org">
         <Building2Icon />
-        Register as an Organization
+        Create an Organization
       </Link>
     </Button>
   );
 }
 
-function EditBar({
-  hasChanges,
-  isSaving,
-  saveError,
-  onCancel,
-}: { hasChanges: boolean; isSaving: boolean; saveError: string | null; onCancel: () => void }) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: -8 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -8 }}
-      transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
-      className="flex items-center justify-between gap-4 rounded-3xl bg-muted/80 px-4 py-2.5 mb-2"
-    >
-      <div className="flex items-center gap-2 text-sm text-muted-foreground min-w-0">
-        {isSaving ? (
-          <span className="text-primary text-sm font-medium flex items-center gap-1.5">
-            <Loader2Icon className="h-3.5 w-3.5 animate-spin" />Saving…
-          </span>
-        ) : saveError ? (
-          <span className="text-destructive text-xs truncate">{saveError}</span>
-        ) : (
-          <span>{hasChanges ? "You have unsaved changes." : "No changes yet."}</span>
-        )}
-      </div>
-      <div className="flex items-center gap-2 shrink-0">
-        <Button variant="ghost" type="button" onClick={onCancel} disabled={isSaving}>
-          <XIcon className="h-3.5 w-3.5" />Cancel
-        </Button>
-        <Button type="submit" form="manage-dashboard-save-form" disabled={isSaving || !hasChanges}>
-          <SaveIcon className="h-3.5 w-3.5" />Save
-        </Button>
-      </div>
-    </motion.div>
-  );
-}
-
-// ── Main client component ─────────────────────────────────────────────────────
-
 export function ManageDashboardClient({
   account,
   mode,
+  basePath = "/manage",
+  writeRepoDid,
+  groupRole,
+  initialGroupMembers,
+  initialGroupMembersError,
   children,
 }: {
   account: AccountRouteData;
   mode?: ManageMode | null;
+  basePath?: string;
+  writeRepoDid?: string;
+  /** When scoped into an organization, the current user's role — enables the members list. */
+  groupRole?: CgsRole;
+  initialGroupMembers?: CgsMember[];
+  initialGroupMembersError?: string | null;
   children?: React.ReactNode;
 }) {
   const router = useRouter();
@@ -402,86 +471,238 @@ export function ManageDashboardClient({
   const hasCompletedSetup = account.summary.hasCertifiedProfile || account.summary.hasCertifiedOrg;
   const resolvedMode = hasCompletedSetup
     ? resolveDashboardMode({ currentKind: account.kind, mode: parsedMode })
-    : parsedMode;
-  const isAccountManageRoute = pathname === "/manage";
+    : parsedMode ?? "onboard-user";
+  const isAccountManageRoute = pathname === basePath || decodePath(pathname) === decodePath(basePath);
 
   useEffect(() => {
     if (!isAccountManageRoute || mode !== undefined) return;
-    if (hasCompletedSetup) {
-      if (!shouldClearDashboardMode({ currentKind: account.kind, rawMode })) return;
-    } else if (rawMode === undefined || parseManageMode(rawMode) !== null) {
+    const nextSearchParams = new URLSearchParams(searchParams.toString());
+
+    if (!hasCompletedSetup) {
+      if (rawMode === "onboard-user") return;
+      nextSearchParams.set("mode", "onboard-user");
+      router.replace(`${pathname}?${nextSearchParams.toString()}`);
       return;
     }
 
-    const nextSearchParams = new URLSearchParams(searchParams.toString());
+    if (!shouldClearDashboardMode({ currentKind: account.kind, rawMode })) return;
     nextSearchParams.delete("mode");
     const query = nextSearchParams.toString();
     router.replace(query ? `${pathname}?${query}` : pathname);
   }, [account.kind, hasCompletedSetup, isAccountManageRoute, mode, pathname, rawMode, router, searchParams]);
 
-  // ── Edit state ─────────────────────────────────────────────────────────────
   const [editDisplayName, setEditDisplayName] = useState(account.displayName);
   const [editDescription, setEditDescription] = useState(account.description ?? "");
+  const [editLongDescription, setEditLongDescription] = useState(account.longDescription ?? "");
   const [editWebsite, setEditWebsite] = useState(account.website ?? "");
   const [editCountry, setEditCountry] = useState(account.country ?? "");
   const initialStartDate = account.foundedDate ? new Date(account.foundedDate).toISOString().slice(0, 10) : "";
   const initialVisibility = account.visibility ?? "Public";
   const [editStartDate, setEditStartDate] = useState(initialStartDate);
   const [editVisibility, setEditVisibility] = useState<"Public" | "Unlisted">(initialVisibility);
+  const [editOrgType, setEditOrgType] = useState(account.orgType ?? "");
+  const [editSocials, setEditSocials] = useState<string[]>(account.socialLinks ?? []);
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [coverFile, setCoverFile] = useState<File | null>(null);
+  const [inlineField, setInlineField] = useState<InlineField>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
 
-  const isEditing = resolvedMode === "edit";
   const isOnboarding = resolvedMode === "onboard-user" || resolvedMode === "onboard-org" || !hasCompletedSetup;
 
   const editState: HeroEditState = {
     displayName: editDisplayName,
     description: editDescription,
+    longDescription: editLongDescription,
     website: editWebsite,
     country: editCountry,
     startDate: editStartDate,
     visibility: editVisibility,
+    orgType: editOrgType,
+    socials: editSocials,
     logoFile,
     coverFile,
   };
 
-  const registerOrganizationHeaderAction = useMemo(() => <RegisterOrganizationButton />, []);
+  const createOrganizationHeaderAction = useMemo(() => <CreateOrganizationButton />, []);
 
-  const hasChanges =
-    editDisplayName !== account.displayName ||
-    editDescription !== (account.description ?? "") ||
-    editWebsite !== (account.website ?? "") ||
-    editCountry !== (account.country ?? "") ||
-    editStartDate !== initialStartDate ||
-    editVisibility !== initialVisibility ||
-    logoFile !== null ||
-    coverFile !== null;
+  const applyState = (next: HeroEditState) => {
+    setEditDisplayName(next.displayName);
+    setEditDescription(next.description);
+    setEditLongDescription(next.longDescription);
+    setEditWebsite(next.website);
+    setEditCountry(next.country);
+    setEditStartDate(next.startDate);
+    setEditVisibility(next.visibility);
+    setEditOrgType(next.orgType);
+    setEditSocials(next.socials);
+    setLogoFile(next.logoFile);
+    setCoverFile(next.coverFile);
+  };
 
-  const handleChange = (field: keyof Omit<HeroEditState, "logoFile" | "coverFile">, value: string) => {
+  const resetState = () => {
+    applyState({
+      displayName: account.displayName,
+      description: account.description ?? "",
+      longDescription: account.longDescription ?? "",
+      website: account.website ?? "",
+      country: account.country ?? "",
+      startDate: initialStartDate,
+      visibility: initialVisibility,
+      orgType: account.orgType ?? "",
+      socials: account.socialLinks ?? [],
+      logoFile: null,
+      coverFile: null,
+    });
+    setInlineField(null);
+    setSaveError(null);
+  };
+
+  const handleChange = (field: keyof Omit<HeroEditState, "logoFile" | "coverFile" | "socials">, value: string) => {
     switch (field) {
       case "displayName": setEditDisplayName(value); break;
       case "description": setEditDescription(value); break;
+      case "longDescription": setEditLongDescription(value); break;
       case "website": setEditWebsite(value); break;
       case "country": setEditCountry(value); break;
       case "startDate": setEditStartDate(value); break;
       case "visibility": setEditVisibility(value as "Public" | "Unlisted"); break;
+      case "orgType": setEditOrgType(value); break;
     }
   };
 
-  const handleCancel = () => {
-    // Reset state
-    setEditDisplayName(account.displayName);
-    setEditDescription(account.description ?? "");
-    setEditWebsite(account.website ?? "");
-    setEditCountry(account.country ?? "");
-    setEditStartDate(initialStartDate);
-    setEditVisibility(initialVisibility);
-    setLogoFile(null);
-    setCoverFile(null);
+  const saveChanges = async (overrides: Partial<HeroEditState> = {}) => {
+    if (isSaving) return;
+    const next: HeroEditState = { ...editState, ...overrides };
+    if (!next.displayName.trim()) {
+      setSaveError("Add a name before saving.");
+      return;
+    }
+    if (!isValidWebsite(next.website)) {
+      setSaveError("Enter a valid website address.");
+      return;
+    }
+    if (account.kind === "organization" && next.country.trim() && !normalizeCountryCode(next.country)) {
+      setSaveError("Choose a country from the list.");
+      return;
+    }
+
+    setIsSaving(true);
     setSaveError(null);
-    router.push("/manage");
+    applyState(next);
+
+    try {
+      let avatarBlob: { ref: unknown; mimeType: string; size: number } | null = null;
+      let bannerBlob: { ref: unknown; mimeType: string; size: number } | null = null;
+      const writeOptions = writeRepoDid ? { repo: writeRepoDid } : undefined;
+      if (next.logoFile) avatarBlob = await uploadBlob(next.logoFile, writeOptions);
+      if (next.coverFile) bannerBlob = await uploadBlob(next.coverFile, writeOptions);
+
+      const shouldWriteProfile = Object.keys(overrides).length === 0 || (
+        "displayName" in overrides ||
+        "description" in overrides ||
+        "website" in overrides ||
+        "logoFile" in overrides ||
+        "coverFile" in overrides
+      );
+      if (shouldWriteProfile) {
+        const repo = writeRepoDid ?? account.did;
+        const [existingProfile, existingCertifiedProfile] = await Promise.all([
+          fetchExistingSelfRecord(repo, "app.bsky.actor.profile"),
+          fetchExistingSelfRecord(repo, "app.certified.actor.profile"),
+        ]);
+        const profileRecord: Record<string, unknown> = { ...existingProfile, $type: "app.bsky.actor.profile" };
+        const certifiedProfileRecord: Record<string, unknown> = {
+          ...existingCertifiedProfile,
+          $type: "app.certified.actor.profile",
+          createdAt: typeof existingCertifiedProfile.createdAt === "string" ? existingCertifiedProfile.createdAt : account.createdAt ?? new Date().toISOString(),
+        };
+        if (next.displayName.trim()) {
+          profileRecord.displayName = next.displayName.trim();
+          certifiedProfileRecord.displayName = next.displayName.trim();
+        } else {
+          delete profileRecord.displayName;
+          delete certifiedProfileRecord.displayName;
+        }
+        if (next.description.trim()) {
+          profileRecord.description = next.description.trim();
+          certifiedProfileRecord.description = next.description.trim();
+        } else {
+          delete profileRecord.description;
+          delete certifiedProfileRecord.description;
+        }
+        if (next.website.trim()) {
+          const url = next.website.startsWith("http") ? next.website : `https://${next.website}`;
+          profileRecord.website = url.trim();
+          certifiedProfileRecord.website = url.trim();
+        } else {
+          delete profileRecord.website;
+          delete certifiedProfileRecord.website;
+        }
+        if (avatarBlob) {
+          profileRecord.avatar = avatarBlob;
+          certifiedProfileRecord.avatar = { $type: "org.hypercerts.defs#smallImage", image: avatarBlob.ref };
+        }
+        if (bannerBlob) profileRecord.banner = bannerBlob;
+
+        await Promise.all([
+          putRecord("app.bsky.actor.profile", "self", profileRecord, writeOptions),
+          putRecord("app.certified.actor.profile", "self", certifiedProfileRecord, writeOptions),
+        ]);
+      }
+
+      const shouldWriteOrg = account.kind === "organization" && (
+        "country" in overrides || "startDate" in overrides || "visibility" in overrides ||
+        "orgType" in overrides || "socials" in overrides || "longDescription" in overrides
+      );
+      if (shouldWriteOrg) {
+        const repo = writeRepoDid ?? account.did;
+        // Read-merge: preserve fields we don't touch (longDescription, etc.).
+        const existingOrg = await fetchExistingSelfRecord(repo, "app.certified.actor.organization");
+        const orgRecord: Record<string, unknown> = {
+          ...existingOrg,
+          $type: "app.certified.actor.organization",
+          createdAt: typeof existingOrg.createdAt === "string" ? existingOrg.createdAt : account.createdAt ?? new Date().toISOString(),
+          visibility: next.visibility === "Unlisted" ? "unlisted" : "public",
+        };
+        if ("country" in overrides) {
+          if (next.country.trim()) orgRecord.location = await createCountryLocationStrongRef(next.country, writeOptions);
+          else delete orgRecord.location;
+        }
+        if ("startDate" in overrides) {
+          if (next.startDate.trim()) orgRecord.foundedDate = `${next.startDate.trim()}T00:00:00.000Z`;
+          else delete orgRecord.foundedDate;
+        }
+        if ("orgType" in overrides) {
+          if (next.orgType.trim()) orgRecord.organizationType = [next.orgType.trim()];
+          else delete orgRecord.organizationType;
+        }
+        if ("socials" in overrides) {
+          if (next.socials.length) orgRecord.urls = next.socials.map((url) => ({ url }));
+          else delete orgRecord.urls;
+        }
+        if ("longDescription" in overrides) {
+          if (next.longDescription.trim()) {
+            orgRecord.longDescription = {
+              $type: "org.hypercerts.defs#descriptionString",
+              value: next.longDescription.trim(),
+            };
+          } else {
+            delete orgRecord.longDescription;
+          }
+        }
+        await putRecord("app.certified.actor.organization", "self", orgRecord, writeOptions);
+      }
+
+      setInlineField(null);
+      setLogoFile(null);
+      setCoverFile(null);
+      router.refresh();
+    } catch (err) {
+      setSaveError(err instanceof Error ? err.message : "Failed to save. Please try again.");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const openDashboardModal = (id: string, content: React.ReactNode) => {
@@ -495,7 +716,7 @@ export function ManageDashboardClient({
       title={account.kind === "organization" ? "Edit logo" : "Edit photo"}
       description={account.kind === "organization" ? "Choose a square logo for this profile." : "Choose a square photo for this profile."}
       initialImage={account.avatarUrl ?? undefined}
-      onImageChange={(image) => setLogoFile(image ?? null)}
+      onImageChange={(image) => { if (image) void saveChanges({ logoFile: image }); }}
     />,
   );
 
@@ -505,113 +726,44 @@ export function ManageDashboardClient({
       title="Edit cover image"
       description="Choose a wide banner image for the top of your profile."
       initialImage={account.coverUrl ?? undefined}
-      onImageChange={(image) => setCoverFile(image ?? null)}
+      onImageChange={(image) => { if (image) void saveChanges({ coverFile: image }); }}
     />,
   );
 
   const openCountryModal = () => openDashboardModal(
     "manage-country-editor",
-    <CountrySelectorModal initialCountryCode={editCountry} onCountryChange={setEditCountry} />,
+    <CountrySelectorModal initialCountryCode={editCountry} onCountryChange={(country) => void saveChanges({ country })} />,
   );
 
   const openWebsiteModal = () => openDashboardModal(
     "manage-website-editor",
-    <WebsiteEditorModal currentUrl={editWebsite || null} onConfirm={(url) => setEditWebsite(url ?? "")} />,
+    <WebsiteEditorModal currentUrl={editWebsite || null} onConfirm={(url) => void saveChanges({ website: url ?? "" })} />,
   );
 
   const openStartDateModal = () => openDashboardModal(
     "manage-start-date-editor",
-    <StartDateSelectorModal currentDate={editStartDate || null} onConfirm={(date) => setEditStartDate(date ?? "")} />,
+    <StartDateSelectorModal currentDate={editStartDate || null} onConfirm={(date) => void saveChanges({ startDate: date ?? "" })} />,
   );
 
   const openVisibilityModal = () => openDashboardModal(
     "manage-visibility-editor",
-    <VisibilitySelectorModal current={editVisibility} onConfirm={setEditVisibility} />,
+    <VisibilitySelectorModal current={editVisibility} onConfirm={(visibility) => void saveChanges({ visibility })} />,
   );
 
-  const handleSave = async () => {
-    if (!hasChanges || isSaving) return;
-    if (!editDisplayName.trim()) {
-      setSaveError("Add a name before saving.");
-      return;
-    }
-    if (!isValidWebsite(editWebsite)) {
-      setSaveError("Enter a valid website address.");
-      return;
-    }
-    if (account.kind === "organization" && editCountry.trim() && !normalizeCountryCode(editCountry)) {
-      setSaveError("Choose a country from the list.");
-      return;
-    }
-    setIsSaving(true);
-    setSaveError(null);
+  const openOrgTypeModal = () => openDashboardModal(
+    "manage-org-type-editor",
+    <OrgTypeEditorModal current={editOrgType || null} onConfirm={(orgType) => void saveChanges({ orgType: orgType ?? "" })} />,
+  );
 
-    try {
-      // Upload blobs if files selected
-      let avatarBlob: { ref: unknown; mimeType: string; size: number } | null = null;
-      let bannerBlob: { ref: unknown; mimeType: string; size: number } | null = null;
-      if (logoFile) avatarBlob = await uploadBlob(logoFile);
-      if (coverFile) bannerBlob = await uploadBlob(coverFile);
-
-      // Build profile records
-      const profileRecord: Record<string, unknown> = {
-        $type: "app.bsky.actor.profile",
-      };
-      const certifiedProfileRecord: Record<string, unknown> = {
-        $type: "app.certified.actor.profile",
-        createdAt: account.createdAt ?? new Date().toISOString(),
-      };
-      if (editDisplayName.trim()) {
-        profileRecord.displayName = editDisplayName.trim();
-        certifiedProfileRecord.displayName = editDisplayName.trim();
-      }
-      if (editDescription.trim()) {
-        profileRecord.description = editDescription.trim();
-        certifiedProfileRecord.description = editDescription.trim();
-      }
-      if (editWebsite.trim()) {
-        const url = editWebsite.startsWith("http") ? editWebsite : `https://${editWebsite}`;
-        profileRecord.website = url.trim();
-        certifiedProfileRecord.website = url.trim();
-      }
-      if (avatarBlob) {
-        profileRecord.avatar = avatarBlob;
-        certifiedProfileRecord.avatar = { $type: "org.hypercerts.defs#smallImage", image: avatarBlob.ref };
-      }
-      if (bannerBlob) profileRecord.banner = bannerBlob;
-
-      await Promise.all([
-        putRecord("app.bsky.actor.profile", "self", profileRecord),
-        putRecord("app.certified.actor.profile", "self", certifiedProfileRecord),
-      ]);
-
-      // Update org record if applicable
-      if (account.kind === "organization" && (editCountry !== (account.country ?? "") || editStartDate !== initialStartDate || editVisibility !== initialVisibility)) {
-        const orgRecord: Record<string, unknown> = {
-          $type: "app.certified.actor.organization",
-          createdAt: account.createdAt ?? new Date().toISOString(),
-          visibility: editVisibility === "Unlisted" ? "unlisted" : "public",
-        };
-        if (editCountry.trim()) orgRecord.location = await createCountryLocationStrongRef(editCountry);
-        if (editStartDate.trim()) orgRecord.foundedDate = `${editStartDate.trim()}T00:00:00.000Z`;
-
-        await putRecord("app.certified.actor.organization", "self", orgRecord);
-      }
-
-      // Navigate back to view mode and refresh data
-      router.push("/manage");
-      router.refresh();
-    } catch (err) {
-      setSaveError(err instanceof Error ? err.message : "Failed to save. Please try again.");
-      setIsSaving(false);
-    }
-  };
+  const openSocialsModal = () => openDashboardModal(
+    "manage-socials-editor",
+    <SocialLinksEditorModal current={editSocials} onConfirm={(socials) => void saveChanges({ socials })} />,
+  );
 
   if (!isAccountManageRoute) {
     return <>{children}</>;
   }
 
-  // ── Onboarding ─────────────────────────────────────────────────────────────
   if (isOnboarding) {
     return (
       <Container className="pt-4 pb-8">
@@ -620,79 +772,56 @@ export function ManageDashboardClient({
     );
   }
 
-  // ── Edit mode ──────────────────────────────────────────────────────────────
-  if (isEditing) {
-    return (
-      <form
-        id="manage-dashboard-save-form"
-        onSubmit={(e) => { e.preventDefault(); void handleSave(); }}
-      >
-        <HeaderContent {...(account.kind === "user" ? { right: registerOrganizationHeaderAction } : {})} />
-        <Container className="pt-4 pb-8 space-y-2">
-          <EditBar hasChanges={hasChanges} isSaving={isSaving} saveError={saveError} onCancel={handleCancel} />
-          <EditableHero
-            account={account}
-            isEditing
-            editState={editState}
-            onChange={handleChange}
-            onEditLogo={openLogoModal}
-            onEditCover={openCoverModal}
-            onEditCountry={openCountryModal}
-            onEditWebsite={openWebsiteModal}
-            onEditStartDate={openStartDateModal}
-            onEditVisibility={openVisibilityModal}
-          />
-          <ManageAccountTabs account={account} />
-          {/* About section */}
-          {account.kind === "organization" && (
-            <div className="py-4 space-y-2">
-              <label className="text-sm font-medium text-foreground/70">About</label>
-              <Textarea
-                value={editDescription}
-                onChange={(e) => setEditDescription(e.target.value)}
-                placeholder="Tell your story — describe your organization's mission, work, and impact…"
-                rows={6}
-                className="resize-none text-sm"
-              />
-            </div>
-          )}
-        </Container>
-      </form>
-    );
-  }
-
-  // ── View mode ──────────────────────────────────────────────────────────────
   return (
     <>
-      {account.kind === "user" ? <HeaderContent right={registerOrganizationHeaderAction} /> : null}
-      <Container className="pt-4 pb-8 space-y-2">
+      {account.kind === "user" ? <HeaderContent right={createOrganizationHeaderAction} /> : null}
+      <Container className="space-y-6 pt-4 pb-12">
         <EditableHero
           account={account}
-          isEditing={false}
+          basePath={basePath}
           editState={editState}
+          inlineField={inlineField}
+          isSaving={isSaving}
+          saveError={inlineField === "about" ? null : saveError}
           onChange={handleChange}
+          onEditField={setInlineField}
+          onSaveInline={() => void saveChanges()}
+          onCancelInline={resetState}
           onEditLogo={openLogoModal}
           onEditCover={openCoverModal}
           onEditCountry={openCountryModal}
           onEditWebsite={openWebsiteModal}
           onEditStartDate={openStartDateModal}
           onEditVisibility={openVisibilityModal}
+          onEditOrgType={openOrgTypeModal}
+          onEditSocials={openSocialsModal}
         />
-        <ManageAccountTabs account={account} />
-        {children ?? (
+        {account.kind === "organization" ? (
           <>
-            {account.detail?.richBody?.length ? (
-              <section className="py-6 md:py-8">
-                <RichText blocks={account.detail.richBody} />
-              </section>
-            ) : account.description ? (
-              <section className="py-6 md:py-8">
-                <p className="max-w-3xl text-[14px] leading-[1.62] text-foreground/80">{account.description}</p>
-              </section>
+            <AboutSection
+              value={account.longDescription ?? ""}
+              draft={editLongDescription}
+              isEditing={inlineField === "about"}
+              isSaving={isSaving}
+              saveError={inlineField === "about" ? saveError : null}
+              onEdit={() => { setEditLongDescription(account.longDescription ?? ""); setSaveError(null); setInlineField("about"); }}
+              onChange={setEditLongDescription}
+              onSave={() => void saveChanges({ longDescription: editLongDescription })}
+              onCancel={() => { setEditLongDescription(account.longDescription ?? ""); setSaveError(null); setInlineField(null); }}
+            />
+            {writeRepoDid && groupRole ? (
+              <GroupMembers
+                groupDid={writeRepoDid}
+                currentRole={groupRole}
+                variant="section"
+                initialMembers={initialGroupMembers}
+                initialError={initialGroupMembersError}
+              />
             ) : null}
-            <ManageNavGrid accountKind={account.kind} />
           </>
-        )}
+        ) : null}
+        {account.kind === "user" ? <ManageGroupsClient sessionDid={account.did} /> : null}
+        {children}
       </Container>
     </>
   );
