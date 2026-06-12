@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   ArrowRightIcon,
@@ -25,8 +26,10 @@ import {
   type FormEvent,
 } from "react";
 import type { CgsGroupMembership } from "@/app/(manage)/manage/_lib/cgs";
-import { groupManageBasePath, manageHref } from "@/lib/links";
+import { groupIdentifierFromManagePath, groupManageBasePath, manageHref } from "@/lib/links";
 import {
+  findSwitcherGroupByIdentifier,
+  switcherGroupIdentifier,
   useAccountList,
   useActiveAccountContext,
   type AccountCard,
@@ -493,8 +496,7 @@ function accountSegment(didOrHandle: string): string {
 }
 
 function groupManageHref(group: MenuGroup): string {
-  const identifier = group.handle?.trim() || group.groupDid;
-  return `/manage/groups/${accountSegment(identifier)}`;
+  return `/manage/groups/${accountSegment(switcherGroupIdentifier(group))}`;
 }
 
 function groupName(group: MenuGroup): string {
@@ -571,14 +573,20 @@ function AuthenticatedMenu({
   profileName?: string | null;
   isProfileNameLoading?: boolean;
 }) {
+  const pathname = usePathname() ?? "/";
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const { personal: personalCard, groups, status: groupsStatus, reload } = useAccountList(session.did);
   const [activeContext, setActiveContext] = useActiveAccountContext(session.did);
+  const activeContextRef = useRef(activeContext);
   const cleanProfileName = profileName?.trim() || personalCard?.displayName?.trim() || null;
   const profileNameLoading = isProfileNameLoading && profileName === undefined;
   const displayLabel = cleanProfileName ?? (profileNameLoading ? "Account" : "Personal account");
   const secondaryLabel = cleanProfileName ? "Signed in" : profileNameLoading ? "Loading profile" : "Personal account";
+
+  useEffect(() => {
+    activeContextRef.current = activeContext;
+  }, [activeContext]);
 
   const selectPersonal = () => {
     setActiveContext({ type: "personal", did: session.did });
@@ -589,11 +597,21 @@ function AuthenticatedMenu({
     setActiveContext({
       type: "group",
       did: group.groupDid,
-      identifier: group.handle?.trim() || group.groupDid,
+      identifier: switcherGroupIdentifier(group),
       role: group.role,
     });
     setOpen(false);
   };
+
+  useEffect(() => {
+    const urlIdentifier = groupIdentifierFromManagePath(pathname);
+    if (!urlIdentifier) return;
+    const match = findSwitcherGroupByIdentifier(groups, urlIdentifier);
+    if (!match) return;
+    const current = activeContextRef.current;
+    if (current.type === "group" && current.did === match.groupDid) return;
+    setActiveContext({ type: "group", did: match.groupDid, identifier: switcherGroupIdentifier(match), role: match.role });
+  }, [pathname, groups, setActiveContext]);
 
   const handleBlur = (event: React.FocusEvent) => {
     if (!containerRef.current?.contains(event.relatedTarget as Node)) {

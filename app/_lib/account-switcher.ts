@@ -107,6 +107,20 @@ function writeCache() {
   }
 }
 
+export function switcherGroupIdentifier(group: SwitcherGroup): string {
+  return group.handle?.trim() || group.groupDid;
+}
+
+export function findSwitcherGroupByIdentifier(groups: SwitcherGroup[], identifier: string): SwitcherGroup | null {
+  const normalized = identifier.trim();
+  if (!normalized) return null;
+  const normalizedLower = normalized.toLowerCase();
+  return groups.find((group) => {
+    if (group.groupDid === normalized) return true;
+    return Boolean(group.handle && group.handle.toLowerCase() === normalizedLower);
+  }) ?? null;
+}
+
 async function hydrateGroup(group: CgsGroupMembership): Promise<SwitcherGroup> {
   if (group.displayName || group.avatarUrl || group.handle) {
     return {

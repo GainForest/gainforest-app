@@ -16,6 +16,8 @@ import {
 } from "lucide-react";
 import { groupIdentifierFromManagePath, groupManageBasePath } from "@/lib/links";
 import {
+  findSwitcherGroupByIdentifier,
+  switcherGroupIdentifier,
   useAccountList,
   useActiveAccountContext,
   type ActiveAccountContext,
@@ -28,10 +30,6 @@ function roleLabel(role: SwitcherGroup["role"]): string {
 
 function groupName(group: SwitcherGroup): string {
   return group.displayName?.trim() || "Organization account";
-}
-
-function groupIdentifier(group: SwitcherGroup): string {
-  return group.handle?.trim() || group.groupDid;
 }
 
 function AccountAvatar({ avatarUrl, label, icon }: { avatarUrl?: string | null; label: string; icon: React.ReactNode }) {
@@ -56,17 +54,23 @@ export function ManageContextSwitcher({
 
   const { personal, groups, status, reload } = useAccountList(sessionDid);
   const [activeContext, setActiveContext] = useActiveAccountContext(sessionDid);
+  const activeContextRef = useRef(activeContext);
+
+  useEffect(() => {
+    activeContextRef.current = activeContext;
+  }, [activeContext]);
 
   // When you land on an organization's manage URL (via any link), reflect that
   // org as the active context so the switcher and header menu stay in sync.
   useEffect(() => {
     const urlIdentifier = groupIdentifierFromManagePath(pathname);
     if (!urlIdentifier) return;
-    const match = groups.find((group) => group.handle === urlIdentifier || group.groupDid === urlIdentifier);
+    const match = findSwitcherGroupByIdentifier(groups, urlIdentifier);
     if (!match) return;
-    if (activeContext.type === "group" && activeContext.did === match.groupDid) return;
-    setActiveContext({ type: "group", did: match.groupDid, identifier: groupIdentifier(match), role: match.role });
-  }, [pathname, groups, activeContext, setActiveContext]);
+    const current = activeContextRef.current;
+    if (current.type === "group" && current.did === match.groupDid) return;
+    setActiveContext({ type: "group", did: match.groupDid, identifier: switcherGroupIdentifier(match), role: match.role });
+  }, [pathname, groups, setActiveContext]);
 
   useEffect(() => {
     if (!open) return;
@@ -150,8 +154,8 @@ export function ManageContextSwitcher({
                     type="button"
                     onClick={() =>
                       select(
-                        { type: "group", did: group.groupDid, identifier: groupIdentifier(group), role: group.role },
-                        groupManageBasePath(groupIdentifier(group)),
+                        { type: "group", did: group.groupDid, identifier: switcherGroupIdentifier(group), role: group.role },
+                        groupManageBasePath(switcherGroupIdentifier(group)),
                       )
                     }
                     className="flex w-full items-center gap-2.5 rounded-lg px-2 py-2 text-left transition-colors hover:bg-muted/60"

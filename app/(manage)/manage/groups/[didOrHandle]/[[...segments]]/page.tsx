@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
-import { resolveGroupManageTarget } from "@/app/_lib/manage-server";
+import { resolveGroupManageAccess } from "@/app/_lib/manage-server";
+import Container from "@/components/ui/container";
 import {
   AudioSection,
   BumicertsSection,
@@ -37,10 +39,42 @@ function safeDecode(value: string): string {
   return current;
 }
 
+function GroupNotMemberMessage({
+  group,
+}: {
+  group: { displayName: string; handle: string | null; identifier: string };
+}) {
+  const name = group.displayName?.trim() || group.handle || group.identifier;
+
+  return (
+    <Container className="flex min-h-[50vh] items-center justify-center py-12">
+      <section className="max-w-xl rounded-3xl border border-border bg-card p-6 text-center shadow-sm sm:p-8">
+        <p className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">Organization access</p>
+        <h1 className="mt-3 font-instrument text-3xl font-light italic tracking-[-0.02em] text-foreground">
+          You’re not a member of {name}
+        </h1>
+        <p className="mt-3 text-sm leading-6 text-muted-foreground">
+          This manage page is only available to members of the organization. Ask an owner or admin to add you, or switch to another organization you belong to.
+        </p>
+        <div className="mt-6 flex flex-col justify-center gap-2 sm:flex-row">
+          <Link href="/manage/organizations" className="rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90">
+            View my organizations
+          </Link>
+          <Link href="/manage" className="rounded-full border border-border px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted/60">
+            Back to manage home
+          </Link>
+        </div>
+      </section>
+    </Container>
+  );
+}
+
 export default async function ManageGroupScopedPage({ params, searchParams }: PageProps) {
   const { didOrHandle, segments = [] } = await params;
-  const target = await resolveGroupManageTarget(safeDecode(didOrHandle));
-  if (!target) notFound();
+  const access = await resolveGroupManageAccess(safeDecode(didOrHandle));
+  if (access.status === "not-member") return <GroupNotMemberMessage group={access.group} />;
+  if (access.status !== "allowed") notFound();
+  const target = access.target;
 
   const [first, second, ...rest] = segments;
   if (rest.length > 0) notFound();

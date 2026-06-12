@@ -21,6 +21,21 @@ type CgsGroupsResponse = {
   groups?: CgsGroupMembership[];
 };
 
+export type GroupManageAccessResult =
+  | { status: "allowed"; target: ManageTarget }
+  | {
+      status: "not-member";
+      group: {
+        did: string;
+        identifier: string;
+        displayName: string;
+        avatarUrl: string | null;
+        handle: string | null;
+      };
+    }
+  | { status: "not-found" }
+  | { status: "signed-out" };
+
 function normalizeDid(value: string): string {
   let current = value.trim();
   for (let i = 0; i < 3; i++) {
@@ -70,35 +85,58 @@ export async function resolvePersonalManageTarget(): Promise<ManageTarget | null
   });
 }
 
-export async function resolveGroupManageTarget(identifier: string): Promise<ManageTarget | null> {
+export async function resolveGroupManageAccess(identifier: string): Promise<GroupManageAccessResult> {
   const session = await fetchAuthSession();
-  if (!session.isLoggedIn) return null;
+  if (!session.isLoggedIn) return { status: "signed-out" };
 
   const normalizedIdentifier = normalizeDid(identifier);
   const did = normalizedIdentifier.startsWith("did:")
     ? normalizedIdentifier
     : await resolveIdentifierToDid(normalizedIdentifier).catch(() => null);
-  if (!did?.startsWith("did:")) return null;
+  if (!did?.startsWith("did:")) return { status: "not-found" };
 
-  const groups = await fetchUserCgsGroups();
+  const [groups, account] = await Promise.all([
+    fetchUserCgsGroups(),
+    getAccountRouteData(did, identifier).catch(() => null),
+  ]);
+  if (!account) return { status: "not-found" };
+
   const membership = groups.find((group) => group.groupDid === did || sameIdentifier(group, identifier, did));
-  if (!membership) return null;
+  const routeIdentifier = normalizedIdentifier || identifier || account.handle || did;
 
-  const account = await getAccountRouteData(did, identifier).catch(() => null);
-  if (!account) return null;
+  if (!membership) {
+    return {
+      status: "not-member",
+      group: {
+        did,
+        identifier: routeIdentifier,
+        displayName: account.displayName,
+        avatarUrl: account.avatarUrl,
+        handle: account.handle,
+      },
+    };
+  }
 
-  return groupManageTarget({
-    did,
-    accountKind: account.kind,
-    // Keep the dashboard anchored to the route segment that was requested.
-    // ManageDashboardClient uses target.basePath to decide whether it should
-    // render the hero; switching to a canonical handle here can make valid
-    // aliases like /manage/groups/group render only the child overview.
-    identifier: normalizedIdentifier || identifier || membership.handle?.trim() || account.handle || did,
-    role: membership.role,
-    displayName: account.displayName || membership.displayName || null,
-    avatarUrl: account.avatarUrl || membership.avatarUrl || null,
-  });
+  return {
+    status: "allowed",
+    target: groupManageTarget({
+      did,
+      accountKind: account.kind,
+      // Keep the dashboard anchored to the route segment that was requested.
+      // ManageDashboardClient uses target.basePath to decide whether it should
+      // render the hero; switching to a canonical handle here can make valid
+      // aliases like /manage/groups/group render only the child overview.
+      identifier: routeIdentifier || membership.handle?.trim() || did,
+      role: membership.role,
+      displayName: account.displayName || membership.displayName || null,
+      avatarUrl: account.avatarUrl || membership.avatarUrl || null,
+    }),
+  };
+}
+
+export async function resolveGroupManageTarget(identifier: string): Promise<ManageTarget | null> {
+  const access = await resolveGroupManageAccess(identifier);
+  return access.status === "allowed" ? access.target : null;
 }
 
 export async function resolveManageTargetFromRepo(repo: string | null): Promise<ManageTarget | null> {
