@@ -26,6 +26,13 @@ import {
 } from "react";
 import type { CgsGroupMembership } from "@/app/(manage)/manage/_lib/cgs";
 import { groupManageBasePath, manageHref } from "@/lib/links";
+import {
+  useAccountList,
+  useActiveAccountContext,
+  type AccountCard,
+  type ActiveAccountContext,
+  type SwitcherGroup,
+} from "../_lib/account-switcher";
 import type { AuthSession } from "../_lib/auth";
 import { buildLoginUrl, redirectToLogout } from "../_lib/auth-client";
 import { Button } from "@/components/ui/button";
@@ -474,35 +481,8 @@ function UnauthenticatedButtons() {
   );
 }
 
-const ACTIVE_CONTEXT_KEY = "gainforest-active-account-context";
-
-type ProfileCard = { displayName: string | null; avatarUrl: string | null; handle?: string | null };
-type MenuGroup = CgsGroupMembership & ProfileCard;
-type ActiveAccountContext =
-  | { type: "personal"; did: string; selectedAt?: string }
-  | { type: "group"; did: string; identifier?: string; role?: CgsGroupMembership["role"]; selectedAt?: string };
-
-function readActiveContext(sessionDid: string): ActiveAccountContext {
-  try {
-    const raw = window.localStorage.getItem(ACTIVE_CONTEXT_KEY);
-    const parsed = raw ? JSON.parse(raw) as Partial<ActiveAccountContext> : null;
-    if (parsed?.type === "group" && typeof parsed.did === "string") {
-      return { type: "group", did: parsed.did, identifier: typeof parsed.identifier === "string" ? parsed.identifier : undefined, role: parsed.role, selectedAt: parsed.selectedAt };
-    }
-  } catch {
-    // Ignore malformed or blocked localStorage.
-  }
-  return { type: "personal", did: sessionDid };
-}
-
-function rememberActiveContext(context: ActiveAccountContext) {
-  try {
-    window.localStorage.setItem(ACTIVE_CONTEXT_KEY, JSON.stringify({ ...context, selectedAt: new Date().toISOString() }));
-    window.dispatchEvent(new Event("gainforest-active-account-context"));
-  } catch {
-    // Non-critical; navigation still works without persisted context.
-  }
-}
+type ProfileCard = AccountCard;
+type MenuGroup = SwitcherGroup;
 
 function isActiveContext(active: ActiveAccountContext, type: "personal" | "group", did: string): boolean {
   return active.type === type && active.did === did;
@@ -592,52 +572,26 @@ function AuthenticatedMenu({
   isProfileNameLoading?: boolean;
 }) {
   const [open, setOpen] = useState(false);
-  const [activeContext, setActiveContext] = useState<ActiveAccountContext>(() => ({ type: "personal", did: session.did }));
-  const [personalCard, setPersonalCard] = useState<ProfileCard | null>(null);
-  const [groups, setGroups] = useState<MenuGroup[]>([]);
-  const [groupsStatus, setGroupsStatus] = useState<"idle" | "loading" | "ready" | "error">("idle");
   const containerRef = useRef<HTMLDivElement>(null);
+  const { personal: personalCard, groups, status: groupsStatus, reload } = useAccountList(session.did);
+  const [activeContext, setActiveContext] = useActiveAccountContext(session.did);
   const cleanProfileName = profileName?.trim() || personalCard?.displayName?.trim() || null;
   const profileNameLoading = isProfileNameLoading && profileName === undefined;
   const displayLabel = cleanProfileName ?? (profileNameLoading ? "Account" : "Personal account");
   const secondaryLabel = cleanProfileName ? "Signed in" : profileNameLoading ? "Loading profile" : "Personal account";
 
-  const loadAccounts = async () => {
-    setGroupsStatus("loading");
-    try {
-      const [personalResponse, groupResponse] = await Promise.all([
-        fetch(`/api/account/card?did=${encodeURIComponent(session.did)}`, { cache: "no-store" }).catch(() => null),
-        fetch("/api/cgs/groups", { cache: "no-store" }),
-      ]);
-      const personal = personalResponse?.ok ? await personalResponse.json() as ProfileCard : null;
-      const groupPayload = await groupResponse.json().catch(() => ({})) as { groups?: CgsGroupMembership[] };
-      const rawGroups = groupResponse.ok && Array.isArray(groupPayload.groups) ? groupPayload.groups : [];
-      const hydratedGroups = await Promise.all(rawGroups.map(async (group): Promise<MenuGroup> => {
-        if (group.displayName || group.avatarUrl || group.handle) return { ...group, displayName: group.displayName ?? null, avatarUrl: group.avatarUrl ?? null, handle: group.handle ?? null };
-        const response = await fetch(`/api/account/card?did=${encodeURIComponent(group.groupDid)}`, { cache: "no-store" }).catch(() => null);
-        const card = response?.ok ? await response.json() as ProfileCard : { displayName: null, avatarUrl: null, handle: null };
-        return { ...group, displayName: card.displayName, avatarUrl: card.avatarUrl, handle: card.handle ?? null };
-      }));
-
-      setPersonalCard(personal);
-      setGroups(hydratedGroups);
-      setGroupsStatus("ready");
-    } catch {
-      setGroupsStatus("error");
-    }
-  };
-
   const selectPersonal = () => {
-    const next = { type: "personal" as const, did: session.did };
-    setActiveContext(next);
-    rememberActiveContext(next);
+    setActiveContext({ type: "personal", did: session.did });
     setOpen(false);
   };
 
   const selectGroup = (group: MenuGroup) => {
-    const next = { type: "group" as const, did: group.groupDid, identifier: group.handle?.trim() || group.groupDid, role: group.role };
-    setActiveContext(next);
-    rememberActiveContext(next);
+    setActiveContext({
+      type: "group",
+      did: group.groupDid,
+      identifier: group.handle?.trim() || group.groupDid,
+      role: group.role,
+    });
     setOpen(false);
   };
 
@@ -646,25 +600,6 @@ function AuthenticatedMenu({
       setOpen(false);
     }
   };
-
-  useEffect(() => {
-    setActiveContext(readActiveContext(session.did));
-
-    const refresh = () => setActiveContext(readActiveContext(session.did));
-    const handleStorage = (event: StorageEvent) => {
-      if (event.key === ACTIVE_CONTEXT_KEY) refresh();
-    };
-    window.addEventListener("storage", handleStorage);
-    window.addEventListener("gainforest-active-account-context", refresh);
-    return () => {
-      window.removeEventListener("storage", handleStorage);
-      window.removeEventListener("gainforest-active-account-context", refresh);
-    };
-  }, [session.did]);
-
-  useEffect(() => {
-    if (open && groupsStatus === "idle") void loadAccounts();
-  }, [open, groupsStatus]);
 
   useEffect(() => {
     if (!open) return;
@@ -747,7 +682,7 @@ function AuthenticatedMenu({
               {groupsStatus === "error" ? (
                 <div className="rounded-xl bg-destructive/10 px-3 py-2 text-xs text-destructive">
                   <p>Couldn’t load your organizations.</p>
-                  <button type="button" onClick={() => void loadAccounts()} className="mt-1 font-medium underline underline-offset-2">
+                  <button type="button" onClick={() => void reload()} className="mt-1 font-medium underline underline-offset-2">
                     Try again
                   </button>
                 </div>

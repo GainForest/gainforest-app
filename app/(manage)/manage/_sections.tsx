@@ -15,6 +15,8 @@ import { AccountSettingsSections } from "@/app/account/_components/AccountSettin
 import Container from "@/components/ui/container";
 import { ManageOverview } from "./_components/ManageOverview";
 import { ManageDashboard } from "./_components/ManageDashboard";
+import { GroupMembersClient } from "./groups/_components/GroupMembersClient";
+import type { CgsRole } from "./_lib/cgs";
 import { ManageProjectsClient } from "./projects/_components/ManageProjectsClient";
 import { SitesClient } from "./sites/_components/SitesClient";
 import { TreesPageClient } from "./trees/_components/TreesPageClient";
@@ -121,12 +123,14 @@ export async function NewBumicertSection({ target, searchParams }: { target: Man
 
 export function SettingsSection({ target }: { target: ManageTarget }) {
   if (target.kind === "group") {
+    const role: CgsRole = target.role === "owner" ? "owner" : target.role === "admin" ? "admin" : "member";
     return (
       <Container className="pt-4 pb-8">
         <div className="mb-6">
-          <h1 className="text-2xl font-medium">Group settings</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Organization account settings are managed from the overview and member management screens.</p>
+          <h1 className="text-2xl font-medium">Organization settings</h1>
+          <p className="mt-1 text-sm text-muted-foreground">Manage members and control who can make changes for this organization.</p>
         </div>
+        <GroupMembersClient groupDid={target.did} currentRole={role} />
       </Container>
     );
   }

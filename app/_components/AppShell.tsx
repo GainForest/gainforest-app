@@ -44,6 +44,7 @@ import {
   manageHref,
 } from "@/lib/links";
 import { AuthButton, SignInPrompt } from "./AuthFlow";
+import { ManageContextSwitcher } from "./ManageContextSwitcher";
 import { HeaderSlotsProvider, useHeaderSlots } from "./HeaderSlots";
 import { ModalContent, ModalDescription, ModalFooter, ModalTitle } from "@/components/ui/modal/modal";
 import { useModal } from "@/components/ui/modal/context";
@@ -399,6 +400,12 @@ function UnifiedSidebar({
         <SidebarTabs activeTab={activeTab} />
       </div>
 
+      {authSession?.isLoggedIn ? (
+        <div className="mt-3">
+          <ManageContextSwitcher sessionDid={authSession.did} />
+        </div>
+      ) : null}
+
       <div className="mt-3 border-t border-border" />
 
       <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto pr-1 pt-3">
@@ -659,14 +666,20 @@ function ManageSection({
       href: basePath,
       pathCheck: { equals: basePath },
     },
-    {
-      kind: "leaf",
-      id: "organizations-manage",
-      text: "Manage Organizations",
-      Icon: Building2Icon,
-      href: "/manage/organizations",
-      pathCheck: { startsWith: "/manage/organizations" },
-    },
+    // "My Organizations" is the cross-org switcher — hidden once you're scoped
+    // into a single organization's manage section.
+    ...(isGroupManageContext
+      ? []
+      : [
+          {
+            kind: "leaf" as const,
+            id: "organizations-manage",
+            text: "My Organizations",
+            Icon: Building2Icon,
+            href: "/manage/organizations",
+            pathCheck: { startsWith: "/manage/organizations" },
+          },
+        ]),
     {
       kind: "leaf",
       id: "sites",
@@ -728,7 +741,7 @@ function ManageSection({
     {
       kind: "leaf",
       id: "organizations-manage",
-      text: "Manage Organizations",
+      text: "My Organizations",
       Icon: Building2Icon,
       href: "/manage/organizations",
       pathCheck: { startsWith: "/manage/organizations" },

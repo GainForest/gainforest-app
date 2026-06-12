@@ -3,7 +3,7 @@ import Container from "@/components/ui/container";
 import { ManageGroupsClient } from "../groups/_components/ManageGroupsClient";
 
 export const metadata: Metadata = {
-  title: "Manage Organizations — GainForest",
+  title: "My Organizations — GainForest",
   robots: { index: false, follow: false },
 };
 
