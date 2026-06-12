@@ -76,7 +76,7 @@ function groupManageHref(group: GroupOption): string {
 }
 
 function bestGroupName(group: GroupOption): string {
-  return group.displayName?.trim() || "Group account";
+  return group.displayName?.trim() || "Organization account";
 }
 
 function redirectGroupIdentifier(redirectTo: string): string | null {
@@ -269,7 +269,7 @@ function GroupChoiceView({
 
         {groups.length > 0 ? (
           <section>
-            <p className="mb-1.5 px-1 text-xs font-medium text-muted-foreground">Your groups</p>
+            <p className="mb-1.5 px-1 text-xs font-medium text-muted-foreground">Your organizations</p>
             <div className="flex flex-col gap-1.5">
               {groups.map((group, index) => (
                 <OptionCard
@@ -318,9 +318,9 @@ function GroupLookupErrorView({
   return (
     <div className="flex flex-col items-center text-center">
       <AppMark showAnimations />
-      <h1 className="mt-6 text-xl font-medium">Signed in, but groups didn’t load</h1>
+      <h1 className="mt-6 text-xl font-medium">Signed in, but organizations didn’t load</h1>
       <p className="mt-1 max-w-xs text-sm text-muted-foreground">
-        {message || "We couldn’t load your groups. You can retry or continue with your personal account."}
+        {message || "We couldn’t load your organizations. You can retry or continue with your personal account."}
       </p>
       <div className="mt-6 flex justify-center gap-2">
         <Button type="button" variant="secondary" size="sm" onClick={onRetry}>Retry</Button>
@@ -384,10 +384,10 @@ export function AuthCompleteClient({
         const response = await fetch("/api/cgs/groups", { cache: "no-store" });
         const data = (await response.json().catch(() => ({}))) as { groups?: CgsGroupMembership[]; error?: string; message?: string };
         if (!response.ok) {
-          throw new Error(data.message ?? data.error ?? `Group lookup failed (${response.status}).`);
+          throw new Error(data.message ?? data.error ?? `Organization lookup failed (${response.status}).`);
         }
         if (!Array.isArray(data.groups)) {
-          throw new Error("We couldn’t load your groups.");
+          throw new Error("We couldn’t load your organizations.");
         }
         const loadedGroups = data.groups;
         const targetIdentifier = redirectGroupIdentifier(safeRedirect);
@@ -429,7 +429,7 @@ export function AuthCompleteClient({
         setStatus("choices");
       } catch (err) {
         if (cancelled) return;
-        setGroupError(err instanceof Error ? err.message : "We couldn’t load your groups.");
+        setGroupError(err instanceof Error ? err.message : "We couldn’t load your organizations.");
         setStatus("group-error");
       }
     }

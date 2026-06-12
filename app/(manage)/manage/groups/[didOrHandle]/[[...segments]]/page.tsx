@@ -14,7 +14,7 @@ import {
 } from "../../../_sections";
 
 export const metadata: Metadata = {
-  title: "Manage Group — GainForest",
+  title: "Manage Organization — GainForest",
   robots: { index: false, follow: false },
 };
 

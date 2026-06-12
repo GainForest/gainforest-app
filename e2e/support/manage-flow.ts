@@ -34,15 +34,8 @@ async function clickAndWaitForPlainManage(page: Page, button: Locator): Promise<
 
 export async function completeUserOnboarding(page: Page, testInfo: TestInfo): Promise<void> {
   await page.goto("/manage", { waitUntil: "domcontentloaded" });
-  await expect(page.getByRole("heading", { name: /create your profile|choose your setup/i })).toBeVisible({ timeout: 60_000 });
-  await screenshotStep(page, testInfo, "onboarding-choice");
-
-  const userChoice = page.getByRole("button", { name: /^user\b/i }).first();
-  if (await userChoice.isVisible({ timeout: 2_000 }).catch(() => false)) {
-    await userChoice.click();
-  } else {
-    await page.goto("/manage?mode=onboard-user", { waitUntil: "domcontentloaded" });
-  }
+  await expect(page.getByRole("heading", { name: /^user$/i })).toBeVisible({ timeout: 60_000 });
+  await screenshotStep(page, testInfo, "user-onboarding-direct");
 
   const form = await visibleForm(page);
   await screenshotStep(page, testInfo, "user-onboarding-empty");

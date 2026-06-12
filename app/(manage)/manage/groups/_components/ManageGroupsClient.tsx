@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState, useTransition, type FormEvent } from "react";
-import { ArrowRightIcon, Loader2Icon, ShieldIcon, Trash2Icon, UserPlusIcon, UsersIcon } from "lucide-react";
+import { ArrowRightIcon, Loader2Icon, PlusIcon, ShieldIcon, Trash2Icon, UserPlusIcon, UsersIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -29,7 +29,7 @@ function formatDate(value?: string | null) {
 }
 
 function groupName(group: CgsGroupMembership): string {
-  return group.displayName?.trim() || "Group account";
+  return group.displayName?.trim() || "Organization account";
 }
 
 function groupHref(group: CgsGroupMembership): string {
@@ -106,7 +106,7 @@ function MemberPanel({ group }: { group: CgsGroupMembership }) {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h2 className="flex items-center gap-2 text-lg font-medium"><UsersIcon className="size-4" /> Members</h2>
-          <p className="text-sm text-muted-foreground">Roles control who can make changes for this group.</p>
+          <p className="text-sm text-muted-foreground">Roles control who can make changes for this organization.</p>
         </div>
         <Button type="button" variant="secondary" onClick={refresh} disabled={isPending}>
           {isPending ? <Loader2Icon className="animate-spin" /> : null}
@@ -172,7 +172,7 @@ export function ManageGroupsClient() {
         setGroups(result.groups ?? []);
         setSelectedDid((result.groups ?? [])[0]?.groupDid ?? null);
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Could not load groups.");
+        setError(err instanceof Error ? err.message : "Could not load organizations.");
       }
     });
   }, []);
@@ -184,18 +184,23 @@ export function ManageGroupsClient() {
 
   return (
     <div className="space-y-4 py-2">
-      <div>
-        <h1 className="text-2xl font-medium">Your group accounts</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Groups are listed from the accounts you can access.</p>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <h1 className="text-2xl font-medium">Manage Organizations</h1>
+          <p className="mt-1 text-sm text-muted-foreground">Organizations are listed from the CGS accounts you can access.</p>
+        </div>
+        <Button asChild>
+          <Link href="/manage?mode=onboard-org"><PlusIcon /> Create an Organization</Link>
+        </Button>
       </div>
 
-      {isPending && groups.length === 0 ? <p className="text-sm text-muted-foreground">Loading groups…</p> : null}
+      {isPending && groups.length === 0 ? <p className="text-sm text-muted-foreground">Loading organizations…</p> : null}
       {error ? <p className="rounded-2xl bg-destructive/10 px-3 py-2 text-sm text-destructive">{error}</p> : null}
 
       {groups.length === 0 && !isPending ? (
         <div className="rounded-3xl border border-border bg-muted/40 p-5">
-          <p className="font-medium">No groups found.</p>
-          <p className="mt-1 text-sm text-muted-foreground">Ask a group owner or admin to add your account, then refresh this page.</p>
+          <p className="font-medium">No organizations found.</p>
+          <p className="mt-1 text-sm text-muted-foreground">Create an organization or ask an owner/admin to add your account, then refresh this page.</p>
         </div>
       ) : null}
 
@@ -213,7 +218,7 @@ export function ManageGroupsClient() {
                 </div>
               </button>
               <div className="mt-3 flex items-center justify-between gap-3 text-sm text-muted-foreground">
-                <span>{formatDate(group.joinedAt) ? `Joined ${formatDate(group.joinedAt)}` : "Group account"}</span>
+                <span>{formatDate(group.joinedAt) ? `Joined ${formatDate(group.joinedAt)}` : "Organization account"}</span>
                 <Link className="inline-flex items-center gap-1 text-primary hover:underline" href={groupHref(group)}>
                   Open <ArrowRightIcon className="size-3" />
                 </Link>

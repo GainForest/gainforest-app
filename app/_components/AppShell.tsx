@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { AnimatePresence, LayoutGroup, motion } from "framer-motion";
 import {
   ArrowRightIcon,
@@ -45,6 +45,8 @@ import {
 } from "@/lib/links";
 import { AuthButton, SignInPrompt } from "./AuthFlow";
 import { HeaderSlotsProvider, useHeaderSlots } from "./HeaderSlots";
+import { ModalContent, ModalDescription, ModalFooter, ModalTitle } from "@/components/ui/modal/modal";
+import { useModal } from "@/components/ui/modal/context";
 
 type NavLeaf = {
   kind: "leaf";
@@ -139,7 +141,11 @@ type ShellSessionResponse = {
 type ShellProfileResponse = {
   manageAccountKind: ManageAccountKind;
   profileName: string | null;
+  hasCertifiedProfile?: boolean;
+  hasCertifiedOrg?: boolean;
 };
+
+const ONBOARDING_PROMPT_MODAL_ID = "fresh-account-onboarding";
 
 function readContextualManageBasePath(): string {
   if (typeof window === "undefined") return "/manage";
@@ -186,6 +192,7 @@ export function AppShell({
   const [resolvedProfileName, setResolvedProfileName] = useState<string | null | undefined>(
     authSession?.isLoggedIn ? undefined : null,
   );
+  const [hasCertifiedProfile, setHasCertifiedProfile] = useState<boolean>(true);
   const [isShellProfileLoading, setIsShellProfileLoading] = useState(authSession?.isLoggedIn === true);
 
   useEffect(() => {
@@ -203,11 +210,13 @@ export function AppShell({
         if (!nextSession.isLoggedIn) {
           setResolvedManageAccountKind("user");
           setResolvedProfileName(null);
+          setHasCertifiedProfile(true);
           setIsShellProfileLoading(false);
           return;
         }
 
         setResolvedProfileName(undefined);
+        setHasCertifiedProfile(true);
         setIsShellProfileLoading(true);
 
         try {
@@ -218,17 +227,20 @@ export function AppShell({
           if (!profile) {
             setResolvedManageAccountKind("user");
             setResolvedProfileName(null);
+            setHasCertifiedProfile(true);
             setIsShellProfileLoading(false);
             return;
           }
 
           setResolvedManageAccountKind(profile.manageAccountKind);
           setResolvedProfileName(profile.profileName);
+          setHasCertifiedProfile(profile.hasCertifiedProfile !== false);
           setIsShellProfileLoading(false);
         } catch {
           if (cancelled) return;
           setResolvedManageAccountKind("user");
           setResolvedProfileName(null);
+          setHasCertifiedProfile(true);
           setIsShellProfileLoading(false);
         }
       } catch {
@@ -236,6 +248,7 @@ export function AppShell({
         setResolvedAuthSession({ isLoggedIn: false });
         setResolvedManageAccountKind("user");
         setResolvedProfileName(null);
+        setHasCertifiedProfile(true);
         setIsShellProfileLoading(false);
       }
     }
@@ -272,11 +285,80 @@ export function AppShell({
         </MobileNavDrawer>
         <main className="relative flex-1 overflow-y-auto">
           <Header authSession={resolvedAuthSession} profileName={resolvedProfileName} onOpenMobileNav={() => setMobileNavOpen(true)} />
+          <FreshAccountOnboardingPrompt
+            authSession={resolvedAuthSession}
+            isProfileLoading={isProfileLoading}
+            hasCertifiedProfile={hasCertifiedProfile}
+          />
           {children}
         </main>
       </div>
     </HeaderSlotsProvider>
   );
+}
+
+function FreshAccountOnboardingPrompt({
+  authSession,
+  isProfileLoading,
+  hasCertifiedProfile,
+}: {
+  authSession: AuthSession | null;
+  isProfileLoading: boolean;
+  hasCertifiedProfile: boolean;
+}) {
+  const modal = useModal();
+  const router = useRouter();
+  const pathname = usePathname() ?? "/";
+
+  useEffect(() => {
+    if (!authSession?.isLoggedIn || isProfileLoading || hasCertifiedProfile) return;
+    const onboardingMode = new URLSearchParams(window.location.search).get("mode")?.startsWith("onboard") === true;
+    if (onboardingMode) return;
+    if (modal.stack.length > 0) return;
+
+    modal.pushModal(
+      {
+        id: ONBOARDING_PROMPT_MODAL_ID,
+        content: (
+          <ModalContent dismissible={false} className="py-2">
+            <div className="flex flex-col items-center pt-4 text-center">
+              <motion.div
+                className="relative h-20 w-20"
+                transition={{ duration: 0.75, type: "spring" }}
+                layoutId="gainforest-icon"
+                initial={{ scale: 0.2, filter: "blur(20px)", opacity: 0 }}
+                animate={{ scale: 1, filter: "blur(0px)", opacity: 1 }}
+              >
+                <Image className="drop-shadow-2xl" src="/assets/media/images/app-icon.png" fill alt="GainForest" />
+              </motion.div>
+              <ModalTitle className="mt-4">Set up your profile</ModalTitle>
+              <ModalDescription className="mt-1 max-w-sm">
+                Welcome to GainForest. Create your personal profile to start managing your projects, records, and organizations.
+              </ModalDescription>
+              <ModalFooter className="mt-6 w-full">
+                <Button
+                  type="button"
+                  size="lg"
+                  className="w-full"
+                  onClick={() => {
+                    void modal.hide().then(() => modal.clear());
+                    router.push("/manage?mode=onboard-user");
+                  }}
+                >
+                  Continue
+                  <ArrowRightIcon />
+                </Button>
+              </ModalFooter>
+            </div>
+          </ModalContent>
+        ),
+      },
+      true,
+    );
+    void modal.show();
+  }, [authSession, hasCertifiedProfile, isProfileLoading, modal, pathname, router]);
+
+  return null;
 }
 
 function UnifiedSidebar({
@@ -572,10 +654,18 @@ function ManageSection({
     {
       kind: "leaf",
       id: "organization",
-      text: isGroupManageContext ? "Group Home" : "My Organization",
+      text: isGroupManageContext ? "Organization Home" : "My Organization",
       Icon: Building2Icon,
       href: basePath,
       pathCheck: { equals: basePath },
+    },
+    {
+      kind: "leaf",
+      id: "organizations-manage",
+      text: "Manage Organizations",
+      Icon: Building2Icon,
+      href: "/manage/organizations",
+      pathCheck: { startsWith: "/manage/organizations" },
     },
     {
       kind: "leaf",
@@ -634,6 +724,14 @@ function ManageSection({
       Icon: FolderKanbanIcon,
       href: manageHref({ basePath }, "projects"),
       pathCheck: { startsWith: manageHref({ basePath }, "projects") },
+    },
+    {
+      kind: "leaf",
+      id: "organizations-manage",
+      text: "Manage Organizations",
+      Icon: Building2Icon,
+      href: "/manage/organizations",
+      pathCheck: { startsWith: "/manage/organizations" },
     },
     {
       kind: "leaf",

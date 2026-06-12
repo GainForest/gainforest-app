@@ -28,7 +28,21 @@ export type CgsMembersResponse = {
   cursor?: string;
 };
 
+export type RegisterCgsGroupResponse = {
+  groupDid: string;
+  handle?: string | null;
+  accountPassword?: string | null;
+};
+
 type CgsMutationPayload =
+  | {
+      operation: "registerGroup";
+      handle: string;
+      ownerDid: string;
+      displayName?: string;
+      description?: string;
+      website?: string;
+    }
   | { operation: "listMembers"; repo: string; cursor?: string; limit?: number }
   | { operation: "addMember"; repo: string; memberDid: string; role: "member" | "admin" }
   | { operation: "removeMember"; repo: string; memberDid: string }
@@ -48,7 +62,7 @@ async function parseJsonResponse<T>(res: Response, fallback: string): Promise<T>
 
 export async function fetchCgsGroups(): Promise<CgsGroupsResponse> {
   const res = await fetch("/api/cgs/groups", { cache: "no-store" });
-  return parseJsonResponse<CgsGroupsResponse>(res, "Could not load groups.");
+  return parseJsonResponse<CgsGroupsResponse>(res, "Could not load organizations.");
 }
 
 export async function callCgs<T>(payload: CgsMutationPayload): Promise<T> {
@@ -58,6 +72,16 @@ export async function callCgs<T>(payload: CgsMutationPayload): Promise<T> {
     body: JSON.stringify(payload),
   });
   return parseJsonResponse<T>(res, "Group request failed.");
+}
+
+export async function registerCgsGroup(input: {
+  handle: string;
+  ownerDid: string;
+  displayName?: string;
+  description?: string;
+  website?: string;
+}): Promise<RegisterCgsGroupResponse> {
+  return callCgs<RegisterCgsGroupResponse>({ operation: "registerGroup", ...input });
 }
 
 export async function listCgsMembers(repo: string): Promise<CgsMembersResponse> {

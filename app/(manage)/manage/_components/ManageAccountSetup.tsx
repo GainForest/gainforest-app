@@ -7,16 +7,12 @@ import { AnimatePresence, motion, type Variants } from "framer-motion";
 import {
   ArrowLeftIcon,
   ArrowRightIcon,
-  Building2Icon,
   CalendarIcon,
-  ChevronRight,
   GlobeIcon,
   ImageIcon,
   Loader2Icon,
   MapPinHouseIcon,
   SparklesIcon,
-  UserIcon,
-  type LucideIcon,
 } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { Button } from "@/components/ui/button";
@@ -34,6 +30,7 @@ import { useModal } from "@/components/ui/modal/context";
 import { countryFlag } from "@/app/_lib/format";
 import { cn } from "@/lib/utils";
 import { putRecord, uploadBlob } from "../_lib/mutations";
+import { registerCgsGroup } from "../_lib/cgs";
 import { createCountryLocationStrongRef } from "../_lib/country-location";
 import { ImageEditorModal } from "@/components/modals/image-editor";
 import CountrySelectorModal from "@/components/modals/country-selector";
@@ -91,6 +88,19 @@ function normalizeWebsite(url: string): string | undefined {
   return trimmed.startsWith("http") ? trimmed : `https://${trimmed}`;
 }
 
+function organizationHandleFromName(name: string): string {
+  const label = name
+    .trim()
+    .toLowerCase()
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 48)
+    .replace(/-+$/g, "");
+  return label || "organization";
+}
+
 // ── GainForest mark ──────────────────────────────────────────────────────────
 
 function GainForestMark({ className, alt = "" }: { className?: string; alt?: string }) {
@@ -102,93 +112,6 @@ function GainForestMark({ className, alt = "" }: { className?: string; alt?: str
     >
       <Image className="drop-shadow-2xl" src={APP_ICON_SRC} fill alt={alt} />
     </motion.div>
-  );
-}
-
-// ── Choice step ─────────────────────────────────────────────────────────────
-
-type OnboardingRoleOption = {
-  Icon: LucideIcon;
-  optionName: string;
-  optionDescription: string;
-  onClick: () => void;
-};
-
-function OnboardingRoleOptionCard({ onClick, Icon, optionName, optionDescription }: OnboardingRoleOption) {
-  return (
-    <Button
-      variant="secondary"
-      className="group relative h-auto w-full max-w-md flex-col items-start justify-between rounded-xl shadow-none hover:bg-primary/10"
-      onClick={onClick}
-    >
-      <span className="flex items-center gap-1.5 text-2xl italic font-instrument">
-        <Icon className="text-primary opacity-50" />
-        {optionName}
-      </span>
-      <span className="text-left text-muted-foreground text-pretty">{optionDescription}</span>
-      <span className="absolute right-3 top-3 -translate-x-2 text-primary opacity-0 transition-all group-hover:translate-x-0 group-hover:opacity-100">
-        <ChevronRight />
-      </span>
-    </Button>
-  );
-}
-
-function OnboardingRoleSelector({
-  title,
-  description,
-  options,
-  className,
-}: {
-  title: string;
-  description: string;
-  options: OnboardingRoleOption[];
-  className?: string;
-}) {
-  return (
-    <div className={cn("flex flex-col items-center pt-8", className)}>
-      <GainForestMark />
-      <h1 className="mt-3 text-center text-xl font-medium">{title}</h1>
-      <p className="text-center text-sm text-muted-foreground">{description}</p>
-      <div className="mt-4 grid w-full gap-2">
-        {options.map((option) => (
-          <OnboardingRoleOptionCard key={option.optionName} {...option} />
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function AccountSetupChoiceStep({
-  onChooseUser,
-  onChooseOrganization,
-}: {
-  onChooseUser: () => void;
-  onChooseOrganization: () => void;
-}) {
-  return (
-    <div className="flex min-h-[calc(100vh-10rem)] items-center justify-center">
-      <OnboardingRoleSelector
-        className="w-full max-w-md"
-        title="Choose your setup"
-        description="Pick the kind of profile you want to create on GainForest."
-        options={[
-          {
-            onClick: onChooseUser,
-            Icon: UserIcon,
-            optionName: "User",
-            optionDescription:
-              "Create a personal profile with your avatar, banner, name and bio.",
-          },
-          {
-            onClick: onChooseOrganization,
-            Icon: Building2Icon,
-            optionName: "Organization",
-            optionDescription:
-              "Set up your organization profile and let GainForest prefill what it can from your website.",
-          },
-        ]}
-      />
-    </div>
   );
 }
 
@@ -476,9 +399,11 @@ const organizationStepVariants = {
 
 function AccountSetupForm({
   kind,
+  ownerDid,
   onBack,
 }: {
   kind: OnboardingKind;
+  ownerDid: string;
   onBack: () => void;
 }) {
   const router = useRouter();
@@ -626,14 +551,24 @@ function AccountSetupForm({
     setSubmitError(null);
 
     try {
-      const [avatarBlob, bannerBlob] = await Promise.all([
-        primaryImage ? uploadBlob(primaryImage) : Promise.resolve(null),
-        bannerImage ? uploadBlob(bannerImage) : Promise.resolve(null),
-      ]);
-
       const trimmedName = displayName.trim();
       const trimmedBio = shortDescription.trim();
       const normalizedWebsite = kind === "organization" ? normalizeWebsite(website) : undefined;
+      const registeredOrganization = kind === "organization"
+        ? await registerCgsGroup({
+            handle: organizationHandleFromName(trimmedName),
+            ownerDid,
+            displayName: trimmedName,
+            description: trimmedBio,
+            ...(normalizedWebsite ? { website: normalizedWebsite } : {}),
+          })
+        : null;
+      const writeOptions = registeredOrganization ? { repo: registeredOrganization.groupDid } : undefined;
+
+      const [avatarBlob, bannerBlob] = await Promise.all([
+        primaryImage ? uploadBlob(primaryImage, writeOptions) : Promise.resolve(null),
+        bannerImage ? uploadBlob(bannerImage, writeOptions) : Promise.resolve(null),
+      ]);
 
       const profileRecord: Record<string, unknown> = {
         $type: "app.bsky.actor.profile",
@@ -660,17 +595,17 @@ function AccountSetupForm({
       if (bannerBlob) profileRecord.banner = bannerBlob;
 
       await Promise.all([
-        putRecord("app.bsky.actor.profile", "self", profileRecord),
-        putRecord("app.certified.actor.profile", "self", certifiedProfileRecord),
+        putRecord("app.bsky.actor.profile", "self", profileRecord, writeOptions),
+        putRecord("app.certified.actor.profile", "self", certifiedProfileRecord, writeOptions),
       ]);
 
-      if (kind === "organization") {
+      if (registeredOrganization) {
         const orgRecord: Record<string, unknown> = {
           $type: "app.certified.actor.organization",
           visibility: "public",
           createdAt: new Date().toISOString(),
         };
-        if (country.trim()) orgRecord.location = await createCountryLocationStrongRef(country);
+        if (country.trim()) orgRecord.location = await createCountryLocationStrongRef(country, writeOptions);
         if (startDate) orgRecord.foundedDate = `${startDate}T00:00:00.000Z`;
         if (longDescription.trim()) {
           orgRecord.longDescription = {
@@ -678,10 +613,12 @@ function AccountSetupForm({
             value: longDescription.trim(),
           };
         }
-        await putRecord("app.certified.actor.organization", "self", orgRecord);
+        await putRecord("app.certified.actor.organization", "self", orgRecord, writeOptions);
       }
 
-      router.push("/manage");
+      router.push(registeredOrganization
+        ? `/manage/groups/${encodeURIComponent(registeredOrganization.handle?.trim() || registeredOrganization.groupDid)}`
+        : "/manage");
       router.refresh();
     } catch (err) {
       setSubmitError(err instanceof Error ? err.message : "Failed to complete setup.");
@@ -695,6 +632,7 @@ function AccountSetupForm({
     isOrganizationDetailsStep,
     kind,
     longDescription,
+    ownerDid,
     primaryImage,
     router,
     shortDescription,
@@ -940,10 +878,9 @@ function AccountSetupForm({
 
 // ── Page wrapper ──────────────────────────────────────────────────────────────
 
-export function ManageAccountSetup({ did: _did, mode }: { did: string; mode: ManageMode | null }) {
+export function ManageAccountSetup({ did, mode }: { did: string; mode: ManageMode | null }) {
   const router = useRouter();
-  const onboardingKind: OnboardingKind | null =
-    mode === "onboard-user" ? "user" : mode === "onboard-org" ? "organization" : null;
+  const onboardingKind: OnboardingKind = mode === "onboard-org" ? "organization" : "user";
 
   return (
     <motion.div
@@ -953,30 +890,15 @@ export function ManageAccountSetup({ did: _did, mode }: { did: string; mode: Man
       transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
     >
       <AnimatePresence mode="wait">
-        {onboardingKind ? (
-          <motion.div
-            key={onboardingKind}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -12 }}
-            transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
-          >
-            <AccountSetupForm kind={onboardingKind} onBack={() => router.push("/manage")} />
-          </motion.div>
-        ) : (
-          <motion.div
-            key="choice"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -12 }}
-            transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
-          >
-            <AccountSetupChoiceStep
-              onChooseUser={() => router.push("/manage?mode=onboard-user")}
-              onChooseOrganization={() => router.push("/manage?mode=onboard-org")}
-            />
-          </motion.div>
-        )}
+        <motion.div
+          key={onboardingKind}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -12 }}
+          transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
+        >
+          <AccountSetupForm kind={onboardingKind} ownerDid={did} onBack={() => router.push("/manage")} />
+        </motion.div>
       </AnimatePresence>
     </motion.div>
   );

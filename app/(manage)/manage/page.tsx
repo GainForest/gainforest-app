@@ -4,7 +4,7 @@ import { ManageHomeSection } from "./_sections";
 
 export const metadata: Metadata = {
   title: "Manage — GainForest",
-  description: "Manage your GainForest profile, records, groups, and settings.",
+  description: "Manage your GainForest profile, organizations, records, and settings.",
 };
 
 export default async function ManagePage() {

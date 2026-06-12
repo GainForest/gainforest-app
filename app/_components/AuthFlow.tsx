@@ -12,6 +12,7 @@ import {
   LockIcon,
   LockOpenIcon,
   LogOutIcon,
+  PlusIcon,
   SettingsIcon,
   ShieldCheckIcon,
   UserIcon,
@@ -517,7 +518,7 @@ function groupManageHref(group: MenuGroup): string {
 }
 
 function groupName(group: MenuGroup): string {
-  return group.displayName?.trim() || "Group account";
+  return group.displayName?.trim() || "Organization account";
 }
 
 function roleLabel(role: CgsGroupMembership["role"]): string {
@@ -739,13 +740,13 @@ function AuthenticatedMenu({
 
               {groupsStatus === "loading" ? (
                 <div className="flex items-center gap-2 px-2.5 py-3 text-sm text-muted-foreground">
-                  <Loader2 className="h-4 w-4 animate-spin text-primary" /> Loading groups…
+                  <Loader2 className="h-4 w-4 animate-spin text-primary" /> Loading organizations…
                 </div>
               ) : null}
 
               {groupsStatus === "error" ? (
                 <div className="rounded-xl bg-destructive/10 px-3 py-2 text-xs text-destructive">
-                  <p>Couldn’t load your groups.</p>
+                  <p>Couldn’t load your organizations.</p>
                   <button type="button" onClick={() => void loadAccounts()} className="mt-1 font-medium underline underline-offset-2">
                     Try again
                   </button>
@@ -753,7 +754,7 @@ function AuthenticatedMenu({
               ) : null}
 
               {groupsStatus === "ready" && groups.length === 0 ? (
-                <p className="px-2.5 py-2 text-xs text-muted-foreground">No groups yet.</p>
+                <p className="px-2.5 py-2 text-xs text-muted-foreground">No organizations yet.</p>
               ) : null}
 
               {groups.map((group) => (
@@ -772,12 +773,21 @@ function AuthenticatedMenu({
               <div className="my-2 h-px bg-border/60" />
 
               <Link
-                href="/manage/groups"
+                href="/manage/organizations"
                 onClick={() => setOpen(false)}
                 className="flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm text-foreground transition-colors hover:bg-muted/60"
               >
                 <ShieldCheckIcon className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-                View all groups
+                View all organizations
+              </Link>
+
+              <Link
+                href="/manage?mode=onboard-org"
+                onClick={() => setOpen(false)}
+                className="flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm text-foreground transition-colors hover:bg-muted/60"
+              >
+                <PlusIcon className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                Create an organization
               </Link>
 
               <Link

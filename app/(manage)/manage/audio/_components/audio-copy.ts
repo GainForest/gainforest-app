@@ -14,7 +14,7 @@ const MESSAGES = {
       confirm: "Confirm",
       add: "Add",
       cancel: "Cancel",
-      registerOrganization: "Register as an Organization",
+      registerOrganization: "Create an Organization",
       apply: "Apply",
       clear: "Clear",
     },

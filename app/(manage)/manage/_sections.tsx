@@ -125,7 +125,7 @@ export function SettingsSection({ target }: { target: ManageTarget }) {
       <Container className="pt-4 pb-8">
         <div className="mb-6">
           <h1 className="text-2xl font-medium">Group settings</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Group account settings are managed from the group overview and member management screens.</p>
+          <p className="mt-1 text-sm text-muted-foreground">Organization account settings are managed from the overview and member management screens.</p>
         </div>
       </Container>
     );

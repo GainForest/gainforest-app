@@ -1,12 +1,11 @@
 import type { AccountKind } from "@/app/account/_lib/account-route";
 
-export const MANAGE_MODE_VALUES = ["onboard", "onboard-user", "onboard-org"] as const;
+export const MANAGE_MODE_VALUES = ["onboard-user", "onboard-org"] as const;
 export type ManageMode = (typeof MANAGE_MODE_VALUES)[number];
 
 export function parseManageMode(value: string | string[] | undefined): ManageMode | null {
   const normalized = Array.isArray(value) ? value[0] : value;
   switch (normalized) {
-    case "onboard":
     case "onboard-user":
     case "onboard-org":
       return normalized;
@@ -19,7 +18,7 @@ export function resolveDashboardMode(options: {
   currentKind: AccountKind;
   mode: ManageMode | null;
 }): ManageMode | null {
-  if (options.currentKind === "organization" && (options.mode === "onboard" || options.mode === "onboard-user" || options.mode === "onboard-org")) {
+  if (options.currentKind === "organization" && (options.mode === "onboard-user" || options.mode === "onboard-org")) {
     return null;
   }
 

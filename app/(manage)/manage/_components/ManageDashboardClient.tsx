@@ -380,12 +380,12 @@ function EditableHero({
   );
 }
 
-function RegisterOrganizationButton() {
+function CreateOrganizationButton() {
   return (
     <Button asChild variant="secondary">
       <Link href="/manage?mode=onboard-org">
         <Building2Icon />
-        Register as an Organization
+        Create an Organization
       </Link>
     </Button>
   );
@@ -413,18 +413,21 @@ export function ManageDashboardClient({
   const hasCompletedSetup = account.summary.hasCertifiedProfile || account.summary.hasCertifiedOrg;
   const resolvedMode = hasCompletedSetup
     ? resolveDashboardMode({ currentKind: account.kind, mode: parsedMode })
-    : parsedMode;
+    : parsedMode ?? "onboard-user";
   const isAccountManageRoute = pathname === basePath || decodePath(pathname) === decodePath(basePath);
 
   useEffect(() => {
     if (!isAccountManageRoute || mode !== undefined) return;
-    if (hasCompletedSetup) {
-      if (!shouldClearDashboardMode({ currentKind: account.kind, rawMode })) return;
-    } else if (rawMode === undefined || parseManageMode(rawMode) !== null) {
+    const nextSearchParams = new URLSearchParams(searchParams.toString());
+
+    if (!hasCompletedSetup) {
+      if (rawMode === "onboard-user") return;
+      nextSearchParams.set("mode", "onboard-user");
+      router.replace(`${pathname}?${nextSearchParams.toString()}`);
       return;
     }
 
-    const nextSearchParams = new URLSearchParams(searchParams.toString());
+    if (!shouldClearDashboardMode({ currentKind: account.kind, rawMode })) return;
     nextSearchParams.delete("mode");
     const query = nextSearchParams.toString();
     router.replace(query ? `${pathname}?${query}` : pathname);
@@ -446,7 +449,7 @@ export function ManageDashboardClient({
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
 
-  const isOnboarding = resolvedMode === "onboard" || resolvedMode === "onboard-user" || resolvedMode === "onboard-org" || !hasCompletedSetup;
+  const isOnboarding = resolvedMode === "onboard-user" || resolvedMode === "onboard-org" || !hasCompletedSetup;
 
   const editState: HeroEditState = {
     displayName: editDisplayName,
@@ -461,7 +464,7 @@ export function ManageDashboardClient({
     coverFile,
   };
 
-  const registerOrganizationHeaderAction = useMemo(() => <RegisterOrganizationButton />, []);
+  const createOrganizationHeaderAction = useMemo(() => <CreateOrganizationButton />, []);
 
   const applyState = (next: HeroEditState) => {
     setEditDisplayName(next.displayName);
@@ -698,7 +701,7 @@ export function ManageDashboardClient({
 
   return (
     <>
-      {account.kind === "user" ? <HeaderContent right={registerOrganizationHeaderAction} /> : null}
+      {account.kind === "user" ? <HeaderContent right={createOrganizationHeaderAction} /> : null}
       <Container className="space-y-6 pt-4 pb-12">
         <EditableHero
           account={account}

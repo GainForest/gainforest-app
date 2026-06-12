@@ -37,7 +37,12 @@ function cleanText(value: string | null | undefined): string | null {
   return trimmed ? trimmed : null;
 }
 
-async function fetchShellProfile(did: string): Promise<{ manageAccountKind: ManageAccountKind; profileName: string | null }> {
+async function fetchShellProfile(did: string): Promise<{
+  manageAccountKind: ManageAccountKind;
+  profileName: string | null;
+  hasCertifiedProfile: boolean;
+  hasCertifiedOrg: boolean;
+}> {
   const response = await fetch(INDEXER_URL, {
     method: "POST",
     headers: { "content-type": "application/json" },
@@ -71,6 +76,8 @@ async function fetchShellProfile(did: string): Promise<{ manageAccountKind: Mana
   return {
     manageAccountKind: certOrg ? "organization" : "user",
     profileName,
+    hasCertifiedProfile: Boolean(certProfile),
+    hasCertifiedOrg: Boolean(certOrg),
   };
 }
 
@@ -78,12 +85,19 @@ export async function GET() {
   const session = await fetchAuthSession();
 
   if (!session.isLoggedIn) {
-    return NextResponse.json({ manageAccountKind: "user", profileName: null });
+    return NextResponse.json({
+      manageAccountKind: "user",
+      profileName: null,
+      hasCertifiedProfile: false,
+      hasCertifiedOrg: false,
+    });
   }
 
   const profile = await fetchShellProfile(session.did).catch(() => ({
     manageAccountKind: "user" as ManageAccountKind,
     profileName: null,
+    hasCertifiedProfile: true,
+    hasCertifiedOrg: false,
   }));
 
   return NextResponse.json(profile);

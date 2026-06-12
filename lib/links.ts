@@ -29,7 +29,8 @@ export type ManageSectionId =
   | "observations"
   | "donations"
   | "settings"
-  | "groups";
+  | "groups"
+  | "organizations";
 
 export const ACTIVE_MANAGE_CONTEXT_KEY = "gainforest-active-account-context";
 
@@ -45,6 +46,7 @@ const SECTION_PATHS: Record<ManageSectionId, string> = {
   donations: "donations",
   settings: "settings",
   groups: "groups",
+  organizations: "organizations",
 };
 
 function trimSlashes(value: string): string {
@@ -177,6 +179,7 @@ export const links = {
   manage: {
     home: "/manage",
     groups: "/manage/groups",
+    organizations: "/manage/organizations",
     edit: "/manage?mode=edit",
     onboardUser: "/manage?mode=onboard-user",
     onboardOrganization: "/manage?mode=onboard-org",

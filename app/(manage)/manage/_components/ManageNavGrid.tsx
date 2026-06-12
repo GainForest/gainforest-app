@@ -11,7 +11,7 @@
  *   Audio         → /manage/audio
  *   Trees         → /manage/trees
  *   Bumicerts     → /manage/bumicerts
- *   Groups        → /manage/groups
+ *   Organizations → /manage/organizations
  */
 
 import Link from "next/link";
@@ -21,7 +21,7 @@ import {
   MapPinIcon,
   MicIcon,
   TreesIcon,
-  UsersIcon,
+  Building2Icon,
 } from "lucide-react";
 import BumicertIcon from "@/icons/BumicertIcon";
 import type { ComponentType } from "react";
@@ -31,7 +31,7 @@ type AccountKind = "organization" | "user";
 
 interface NavCard {
   id: string;
-  label: "Sites" | "Audio" | "Trees" | "Bumicerts" | "Groups";
+  label: "Sites" | "Audio" | "Trees" | "Bumicerts" | "Organizations";
   description: string;
   href: string;
   Icon: LucideIcon | ComponentType<{ className?: string }>;
@@ -67,11 +67,11 @@ const ORG_NAV_CARDS: NavCard[] = [
     Icon: BumicertIcon,
   },
   {
-    id: "groups",
-    label: "Groups",
-    description: "Open CGS group accounts and manage members.",
-    href: "/manage/groups",
-    Icon: UsersIcon,
+    id: "organizations",
+    label: "Organizations",
+    description: "Open CGS organization accounts and manage members.",
+    href: "/manage/organizations",
+    Icon: Building2Icon,
   },
 ];
 
@@ -82,7 +82,7 @@ export function ManageNavGrid({
 }) {
   const cards = accountKind === "organization"
     ? ORG_NAV_CARDS
-    : ORG_NAV_CARDS.filter((card) => card.id === "groups");
+    : ORG_NAV_CARDS.filter((card) => card.id === "organizations");
   if (cards.length === 0) return null;
 
   return (
