@@ -188,18 +188,19 @@ export const getAccountRouteData = cache(async (
 
 /**
  * Slim profile card for a DID, read straight from `app.certified.actor.profile`.
- * Used by the account picker on /auth/complete where we only need a name +
+ * Used by account pickers/cards where we only need basic profile copy +
  * avatar per group and don't want the full indexer/AppView hydration.
  */
 export const getCertifiedProfileCard = cache(
-  async (did: string): Promise<{ displayName: string | null; avatarUrl: string | null; handle: string | null }> => {
-    if (!did.startsWith("did:")) return { displayName: null, avatarUrl: null, handle: null };
+  async (did: string): Promise<{ displayName: string | null; description: string | null; avatarUrl: string | null; handle: string | null }> => {
+    if (!did.startsWith("did:")) return { displayName: null, description: null, avatarUrl: null, handle: null };
     const [profile, appViewProfile] = await Promise.all([
       fetchDirectCertifiedProfile(did).catch(() => null),
       fetchAppViewProfile(did).catch(() => null),
     ]);
     return {
       displayName: profile?.displayName ?? appViewProfile?.displayName ?? null,
+      description: profile?.description ?? appViewProfile?.description ?? null,
       avatarUrl: profile?.avatarUrl ?? appViewProfile?.avatar ?? null,
       handle: appViewProfile?.handle ?? null,
     };

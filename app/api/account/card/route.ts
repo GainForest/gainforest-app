@@ -22,8 +22,8 @@ export async function GET(request: Request) {
   const normalized = normalizeDid(identifier);
   const did = normalized.startsWith("did:") ? normalized : await resolveIdentifierToDid(normalized).catch(() => null);
   if (!did?.startsWith("did:")) {
-    return Response.json({ displayName: null, avatarUrl: null, handle: null }, { status: 400 });
+    return Response.json({ displayName: null, description: null, avatarUrl: null, handle: null }, { status: 400 });
   }
-  const card = await getCertifiedProfileCard(did).catch(() => ({ displayName: null, avatarUrl: null, handle: null }));
+  const card = await getCertifiedProfileCard(did).catch(() => ({ displayName: null, description: null, avatarUrl: null, handle: null }));
   return Response.json(card, { headers: { "cache-control": "private, max-age=300" } });
 }

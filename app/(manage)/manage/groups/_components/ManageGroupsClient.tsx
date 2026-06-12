@@ -18,6 +18,10 @@ function groupName(group: CgsGroupMembership): string {
   return group.displayName?.trim() || "Organization account";
 }
 
+function groupDescription(group: CgsGroupMembership): string {
+  return group.description?.trim() || "No description yet";
+}
+
 function groupHref(group: CgsGroupMembership): string {
   return `/manage/groups/${encodeURIComponent(group.handle?.trim() || group.groupDid)}`;
 }
@@ -70,7 +74,7 @@ function OrgCard({ group }: { group: CgsGroupMembership }) {
           <p className="truncate text-base font-medium text-foreground transition-colors group-hover:text-primary">
             {groupName(group)}
           </p>
-          <p className="truncate text-sm text-muted-foreground">Organization account</p>
+          <p className="mt-1 line-clamp-2 text-sm leading-relaxed text-muted-foreground">{groupDescription(group)}</p>
         </div>
 
         <span className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-primary">
