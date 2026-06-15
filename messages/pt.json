@@ -1,0 +1,125 @@
+{
+  "landing": {
+    "nav": {
+      "home": "Início",
+      "explore": "Explorar",
+      "organizations": "Organizações",
+      "create": "Criar",
+      "launchApp": "Abrir app",
+      "menu": "Menu",
+      "navigation": "Navegação",
+      "close": "Fechar",
+      "theme": "Tema"
+    },
+    "hero": {
+      "imageAlt": "Vale de floresta tropical com neblina",
+      "headingLine1": "Impacto verificado",
+      "headingLine2": "começa com",
+      "headingEmphasis1": "Comunidades",
+      "headingEmphasis2": "reais",
+      "description": "Financie projetos regenerativos diretamente. Cada Bumicert é um registro verificado de trabalho ambiental real, apoiado por fotos, locais e guardiões comunitários.",
+      "cta": "Explorar projetos",
+      "proofPoints": {
+        "communityLed": "Liderado por comunidades",
+        "photoVerified": "Verificado por fotos",
+        "geolocated": "Geolocalizado"
+      }
+    },
+    "features": {
+      "eyebrow": "Sobre nós",
+      "items": {
+        "verified": {
+          "number": "01",
+          "title": "Impacto ambiental verificado",
+          "description": "Cada certificado é apoiado por fotos, dados de geolocalização e verificação comunitária."
+        },
+        "direct": {
+          "number": "02",
+          "title": "Financiamento direto às comunidades",
+          "description": "Seu apoio vai direto para os guardiões que fazem a restauração em campo."
+        },
+        "transparent": {
+          "number": "03",
+          "title": "Descentralizado e transparente",
+          "description": "Seu trabalho, verificado. Prova imutável de restauração que fortalece sua reputação junto a doadores e comunidades."
+        }
+      }
+    },
+    "paths": {
+      "title": "Escolha seu caminho",
+      "description": "Se você veio financiar impacto ou mostrar seu trabalho, há um lugar para você.",
+      "cards": {
+        "funders": {
+          "label": "Para financiadores",
+          "title": "Quero apoiar",
+          "emphasis": "um projeto",
+          "description": "Explore certificados verificados e financie o momento exato da restauração.",
+          "cta": "Explorar Bumicerts",
+          "alt": "Rio serpenteando pela floresta tropical"
+        },
+        "organizations": {
+          "label": "Para organizações",
+          "title": "Sou guardião",
+          "emphasis": "da natureza",
+          "description": "Mostre seu trabalho regenerativo e conecte-se com financiadores que se importam.",
+          "cta": "Criar um Bumicert",
+          "alt": "Cachoeira em uma floresta tropical"
+        }
+      }
+    },
+    "certificate": {
+      "eyebrow": "O certificado",
+      "titleLine1": "O que exatamente é",
+      "titleLine2": "um Bumicert?",
+      "faqItems": {
+        "digitalCertificate": {
+          "id": "1",
+          "question": "Um certificado digital de impacto",
+          "answer": "Um Bumicert registra uma ação ambiental específica, dando a ela uma identidade permanente e verificável em uma rede aberta e descentralizada."
+        },
+        "evidence": {
+          "id": "2",
+          "question": "Apoiado por evidências reais",
+          "answer": "Fotos, geolocalização, registros de tempo e dados de monitoramento. Toda afirmação é verificável: não é promessa futura, é prova de trabalho realizado."
+        },
+        "communities": {
+          "id": "3",
+          "question": "Uma linha direta com comunidades",
+          "answer": "Ao financiar um Bumicert, seu dinheiro chega às pessoas que fazem a restauração. Sem intermediários absorvendo taxas ou custos vagos."
+        },
+        "story": {
+          "id": "4",
+          "question": "Sua participação na história",
+          "answer": "Ter um Bumicert significa fazer parte daquele momento: uma árvore plantada, um recife restaurado, um ecossistema revivido. Você pode compartilhar, guardar ou presentear."
+        }
+      },
+      "previewTitle": "Reflorestamento do monte Halimun",
+      "previewDescription": "Restauração comunitária de floresta nativa em Java Ocidental, Indonésia. 5.000 árvores plantadas em 12 hectares.",
+      "objectives": {
+        "primary": "Reflorestamento",
+        "secondary": "Biodiversidade"
+      }
+    },
+    "footer": {
+      "tagline": "Conectando comunidades a financiadores.",
+      "infrastructure": "Infraestrutura aberta. Criado com GainForest.",
+      "documentation": "Documentação",
+      "copyright": "Código aberto, movido pela comunidade."
+    },
+    "maEarthBanner": {
+      "label": "Rodada de financiamento 3 da Ma Earth",
+      "deadline": "Aberta até 31 de maio",
+      "title": "Inscreva-se na Rodada de financiamento 3 da Ma Earth",
+      "description": "Comunidades da GainForest podem usar histórias de projeto verificadas, evidências e registros de impacto dos Bumicerts ao se inscrever na rodada de financiamento comunitária da Ma Earth.",
+      "highlights": {
+        "matchingPool": "Fundo de contrapartida de US$ 500 mil",
+        "projects": "Projetos baseados na natureza",
+        "record": "Prepare seu registro Bumicert"
+      },
+      "actions": {
+        "apply": "Inscrever-se na Ma Earth",
+        "learn": "Saiba mais sobre a rodada"
+      }
+    }
+  }
+}

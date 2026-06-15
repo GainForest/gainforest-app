@@ -2,6 +2,7 @@
 
 import { CheckIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import FileDropStep from "./FileDropStep";
 import ColumnMappingStep from "./ColumnMappingStep";
 import PreviewStep from "./PreviewStep";
@@ -127,6 +128,7 @@ function StepIndicator({ currentStep }: { currentStep: 1 | 2 | 3 | 4 }) {
 }
 
 export function TreeUploadWizard({ did, target, onDone }: { did: string; target: ManageTarget; onDone: () => void }) {
+  const t = useTranslations("upload.trees.wizard");
   const [initial] = useState(() => initWizard(did));
   const [state, setState] = useState<WizardState>(initial.state);
   const [uploadId, setUploadId] = useState(initial.uploadId);
@@ -225,9 +227,9 @@ export function TreeUploadWizard({ did, target, onDone }: { did: string; target:
   return (
     <div className="max-w-3xl mx-auto px-4 py-8">
       <div className="mb-6">
-        <h1 className="font-instrument text-2xl font-medium italic tracking-[-0.03em] text-foreground sm:text-3xl">Upload Trees</h1>
+        <h1 className="font-instrument text-2xl font-medium italic tracking-[-0.03em] text-foreground sm:text-3xl">{t("title")}</h1>
         <p className="text-sm text-muted-foreground mt-1">
-          Upload a spreadsheet export of tree information to GainForest.
+          {t("description")}
         </p>
       </div>
       <StepIndicator currentStep={currentStep} />

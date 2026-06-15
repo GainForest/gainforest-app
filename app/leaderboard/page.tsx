@@ -1,13 +1,17 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { Suspense } from "react";
 import { LeaderboardClient } from "./LeaderboardClient";
 
-export const metadata: Metadata = {
-  title: "Leaderboard — GainForest",
-  description:
-    "See the top donors making an impact on GainForest. Our Impact Champions are ranked by their total funding contributions.",
-  alternates: { canonical: "/leaderboard" },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("marketplace.leaderboard.metadata");
+
+  return {
+    title: t("title"),
+    description: t("description"),
+    alternates: { canonical: "/leaderboard" },
+  };
+}
 
 export default function LeaderboardPage() {
   return (

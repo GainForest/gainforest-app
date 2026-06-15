@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import { useTranslations } from "next-intl";
 import { AlertTriangle, CheckCircle2, CircleAlertIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { TREE_UPLOAD_EVENTS } from "@/lib/analytics/events";
@@ -46,6 +47,7 @@ type Props = {
 };
 
 export default function ColumnMappingStep({ uploadId, headers, mappings, sampleData, onMappingsChange, onBack, onNext }: Props) {
+  const t = useTranslations("upload.trees.mapping");
   const koboDetection = useMemo(() => detectKoboFormat(headers), [headers]);
 
   const targetToSources = useMemo(() => {
@@ -107,15 +109,15 @@ export default function ColumnMappingStep({ uploadId, headers, mappings, sampleD
   return (
     <div className="space-y-5">
       <div>
-        <h2 className="text-lg font-semibold">Match File Headings</h2>
+        <h2 className="text-lg font-semibold">{t("matchHeadingsTitle")}</h2>
         <p className="text-sm text-muted-foreground mt-0.5">
-          Match your file headings to the tree information GainForest needs. {headers.length} headings detected.
+          {t("matchHeadingsDescription", { count: headers.length })}
         </p>
       </div>
 
       {!allRequiredMapped && (
         <div className="rounded-md border border-destructive/50 bg-destructive/10 p-3 text-sm text-destructive space-y-1">
-          <p className="font-medium">Required information not matched:</p>
+          <p className="font-medium">{t("requiredNotMatched")}</p>
           <ul className="list-disc list-inside space-y-0.5">
             {missingRequired.map((f) => <li key={f}>{getTargetFieldLabel(f)}</li>)}
           </ul>
@@ -126,8 +128,8 @@ export default function ColumnMappingStep({ uploadId, headers, mappings, sampleD
         <div className="flex items-start gap-2 rounded-md border border-yellow-500/40 bg-yellow-500/10 p-3 text-sm text-yellow-700 dark:text-yellow-300">
           <CircleAlertIcon className="h-4 w-4 mt-0.5 shrink-0" />
           <div>
-            <p className="font-medium">Review unmatched headings</p>
-            <p className="text-yellow-700/90 dark:text-yellow-300/90">{skippedColumnsNeedingReview.length} heading{skippedColumnsNeedingReview.length !== 1 ? "s" : ""} will not be saved.</p>
+            <p className="font-medium">{t("reviewUnmatchedHeadings")}</p>
+            <p className="text-yellow-700/90 dark:text-yellow-300/90">{t("unmatchedHeadingsWillSkip", { count: skippedColumnsNeedingReview.length })}</p>
           </div>
         </div>
       )}
@@ -135,15 +137,15 @@ export default function ColumnMappingStep({ uploadId, headers, mappings, sampleD
       {expectedSkippedKoboCount > 0 && (
         <div className="flex items-start gap-2 rounded-md border border-border bg-muted/30 p-3 text-sm text-muted-foreground">
           <CheckCircle2 className="h-4 w-4 mt-0.5 shrink-0" />
-          <p>{expectedSkippedKoboCount} field-form note{expectedSkippedKoboCount !== 1 ? "s" : ""} automatically skipped.</p>
+          <p>{t("fieldFormNotesSkipped", { count: expectedSkippedKoboCount })}</p>
         </div>
       )}
 
       <div className="rounded-lg border overflow-hidden">
         <div className="grid grid-cols-[1fr_1fr_1fr] gap-0 bg-muted/50 px-4 py-2 text-xs font-medium text-muted-foreground uppercase tracking-wide">
-          <span>File heading</span>
-          <span>Sample value</span>
-          <span>Map to</span>
+          <span>{t("fileHeading")}</span>
+          <span>{t("sampleValue")}</span>
+          <span>{t("mapTo")}</span>
         </div>
         <div className="divide-y divide-border">
           {headers.map((header) => {
@@ -173,32 +175,32 @@ export default function ColumnMappingStep({ uploadId, headers, mappings, sampleD
                   {sample ? (
                     <span className="text-xs text-muted-foreground font-mono truncate block max-w-[180px]">{sample}</span>
                   ) : (
-                    <span className="text-xs text-muted-foreground/50 italic">(empty)</span>
+                    <span className="text-xs text-muted-foreground/50 italic">{t("emptyValue")}</span>
                   )}
                 </div>
                 <div className="flex items-center gap-2">
                   <Select value={currentTarget} onValueChange={(val) => handleSelectChange(header, val)}>
                     <SelectTrigger className="h-8 text-xs flex-1">
-                      <SelectValue placeholder="Skip" />
+                      <SelectValue placeholder={t("skip")} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value={SKIP_SENTINEL}><span className="text-muted-foreground">Skip this heading</span></SelectItem>
+                      <SelectItem value={SKIP_SENTINEL}><span className="text-muted-foreground">{t("skipHeading")}</span></SelectItem>
                       <SelectGroup>
-                        <SelectLabel>Required information</SelectLabel>
+                        <SelectLabel>{t("requiredInformation")}</SelectLabel>
                         {OCCURRENCE_REQUIRED.map((f) => (
                           <SelectItem key={f.field} value={f.field}>{getTargetFieldLabel(f.field)} <span className="text-destructive ml-1">*</span></SelectItem>
                         ))}
                       </SelectGroup>
                       <SelectGroup>
-                        <SelectLabel>Optional information</SelectLabel>
+                        <SelectLabel>{t("optionalInformation")}</SelectLabel>
                         {OCCURRENCE_OPTIONAL.map((f) => <SelectItem key={f.field} value={f.field}>{getTargetFieldLabel(f.field)}</SelectItem>)}
                       </SelectGroup>
                       <SelectGroup>
-                        <SelectLabel>Tree measurements</SelectLabel>
+                        <SelectLabel>{t("treeMeasurements")}</SelectLabel>
                         {MEASUREMENTS.map((f) => <SelectItem key={f.field} value={f.field}>{getTargetFieldLabel(f.field)}</SelectItem>)}
                       </SelectGroup>
                       <SelectGroup>
-                        <SelectLabel>Photos</SelectLabel>
+                        <SelectLabel>{t("photos")}</SelectLabel>
                         {MEDIA.map((f) => <SelectItem key={f.field} value={f.field}>{getTargetFieldLabel(f.field)}</SelectItem>)}
                       </SelectGroup>
                     </SelectContent>
@@ -227,20 +229,20 @@ export default function ColumnMappingStep({ uploadId, headers, mappings, sampleD
       {duplicateSourceColumns.size > 0 && (
         <div className="flex items-start gap-2 rounded-md border border-yellow-500/40 bg-yellow-500/10 p-3 text-sm text-yellow-600 dark:text-yellow-400">
           <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
-          <span>Some headings match the same information. Only the first match will be used.</span>
+          <span>{t("duplicateWarningShort")}</span>
         </div>
       )}
 
       <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
-        <span className="flex items-center gap-1"><CheckCircle2 className="h-3.5 w-3.5 text-primary" />Matched</span>
-        <span className="flex items-center gap-1"><CircleAlertIcon className="h-3.5 w-3.5 text-yellow-500" />Skipped — will not be saved</span>
-        <span className="flex items-center gap-1"><AlertTriangle className="h-3.5 w-3.5 text-yellow-500" />Duplicate target</span>
-        <span className="flex items-center gap-1"><span className="text-destructive font-medium">*</span>Required field</span>
+        <span className="flex items-center gap-1"><CheckCircle2 className="h-3.5 w-3.5 text-primary" />{t("matched")}</span>
+        <span className="flex items-center gap-1"><CircleAlertIcon className="h-3.5 w-3.5 text-yellow-500" />{t("skippedWillNotSave")}</span>
+        <span className="flex items-center gap-1"><AlertTriangle className="h-3.5 w-3.5 text-yellow-500" />{t("duplicateTarget")}</span>
+        <span className="flex items-center gap-1"><span className="text-destructive font-medium">*</span>{t("requiredField")}</span>
       </div>
 
       <div className="flex items-center justify-between pt-2 border-t border-border">
-        <Button variant="outline" onClick={onBack}>Back</Button>
-        <Button onClick={handleNext} disabled={!allRequiredMapped}>Continue to preview</Button>
+        <Button variant="outline" onClick={onBack}>{t("back")}</Button>
+        <Button onClick={handleNext} disabled={!allRequiredMapped}>{t("continueToPreview")}</Button>
       </div>
     </div>
   );

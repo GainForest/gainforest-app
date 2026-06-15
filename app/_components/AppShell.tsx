@@ -43,9 +43,11 @@ import {
   groupManageBasePath,
   manageHref,
 } from "@/lib/links";
+import { stripLocaleFromPathname } from "@/lib/i18n/routing";
 import { AuthButton, SignInPrompt } from "./AuthFlow";
 import { ManageContextSwitcher } from "./ManageContextSwitcher";
 import { HeaderSlotsProvider, useHeaderSlots } from "./HeaderSlots";
+import { LanguageSelector } from "@/components/i18n/LanguageSelector";
 import { ModalContent, ModalDescription, ModalFooter, ModalTitle } from "@/components/ui/modal/modal";
 import { useModal } from "@/components/ui/modal/context";
 
@@ -153,8 +155,18 @@ function readContextualManageBasePath(): string {
   return activeContextToManagePath(window.localStorage.getItem(ACTIVE_MANAGE_CONTEXT_KEY));
 }
 
+function canonicalPathname(pathname: string): string {
+  // usePathname() returns the browser-visible locale prefix (for example
+  // /en/manage), while the app routes live at /manage after proxy rewrite.
+  return stripLocaleFromPathname(pathname);
+}
+
+function useCanonicalPathname(): string {
+  return canonicalPathname(usePathname() ?? "/");
+}
+
 function useContextualManageBasePath(): string {
-  const pathname = usePathname() ?? "/";
+  const pathname = useCanonicalPathname();
   const groupIdentifier = groupIdentifierFromManagePath(pathname);
   const [basePath, setBasePath] = useState(readContextualManageBasePath);
 
@@ -186,7 +198,7 @@ export function AppShell({
   authSession: AuthSession | null;
   manageAccountKind: ManageAccountKind;
 }) {
-  const pathname = usePathname() ?? "/";
+  const pathname = useCanonicalPathname();
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [resolvedAuthSession, setResolvedAuthSession] = useState<AuthSession | null>(authSession);
   const [resolvedManageAccountKind, setResolvedManageAccountKind] = useState<ManageAccountKind>(manageAccountKind);
@@ -371,7 +383,7 @@ function UnifiedSidebar({
   manageAccountKind: ManageAccountKind;
   isProfileLoading: boolean;
 }) {
-  const pathname = usePathname() ?? "/";
+  const pathname = useCanonicalPathname();
   const activeTab: SidebarTab = pathname.startsWith("/manage") ? "manage" : "explore";
 
   return (
@@ -490,7 +502,7 @@ function SidebarTabs({ activeTab }: { activeTab: SidebarTab }) {
 }
 
 function ExploreNav() {
-  const pathname = usePathname() ?? "/";
+  const pathname = useCanonicalPathname();
   const items = NAV_ITEMS.flatMap((section) => section.items);
 
   return (
@@ -650,7 +662,7 @@ function ManageSection({
   manageAccountKind: ManageAccountKind;
   isProfileLoading: boolean;
 }) {
-  const pathname = usePathname() ?? "/";
+  const pathname = useCanonicalPathname();
   const searchParams = useSearchParams();
   const groupIdentifier = groupIdentifierFromManagePath(pathname);
   const isGroupManageContext = Boolean(groupIdentifier);
@@ -899,7 +911,8 @@ function Header({
   profileName?: string | null;
   onOpenMobileNav: () => void;
 }) {
-  const pathname = usePathname() ?? "/";
+  const rawPathname = usePathname() ?? "/";
+  const pathname = canonicalPathname(rawPathname);
   const showBumicertTabs = isBumicertDetailPath(pathname);
   const { leftContent, rightContent, subHeaderContent } = useHeaderSlots();
   const routeActions = getRouteHeaderActions(pathname, authSession ?? { isLoggedIn: false });
@@ -955,7 +968,7 @@ function Header({
             <AnimatePresence mode="wait">
               {rightContent ?? routeActions ? (
                 <motion.div
-                  key={rightContent ? "right-content" : `route-actions-${pathname}`}
+                  key={rightContent ? "right-content" : `route-actions-${rawPathname}`}
                   initial={{ opacity: 0, x: 4 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: 4 }}
@@ -965,6 +978,7 @@ function Header({
                 </motion.div>
               ) : null}
             </AnimatePresence>
+            <LanguageSelector />
             <AuthButton session={authSession} profileName={profileName} isProfileNameLoading={profileName === undefined} />
           </div>
         </div>
@@ -983,7 +997,7 @@ function Header({
         ) : showBumicertTabs ? (
           <div className="overflow-hidden px-4 pb-1">
             <Suspense fallback={<BumicertHeaderTabsSkeleton />}>
-              <BumicertHeaderTabs pathname={pathname} />
+              <BumicertHeaderTabs pathname={rawPathname} />
             </Suspense>
           </div>
         ) : null}

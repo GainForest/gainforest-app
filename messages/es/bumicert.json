@@ -1,0 +1,511 @@
+{
+  "detail": {
+    "actions": {
+      "deleteBumicert": "Eliminar Bumicert"
+    },
+    "error": {
+      "loadTitle": "No se pudo cargar este bumicert",
+      "loadDescription": "Tuvimos problemas para obtener los datos de este bumicert. Inténtelo de nuevo o regrese a la página de inicio."
+    },
+    "timeline": {
+      "title": "Cronología de la evidencia",
+      "itemCount": "{count, plural, =0 {0 elementos} =1 {1 elemento} other {# elementos}}",
+      "linked": "vinculado {window}",
+      "linkedWindow": "Ventana vinculada: {window}",
+      "emptyFiltered": "Ninguna evidencia coincide con este filtro.",
+      "emptyTitle": "Aún no se han cargado pruebas",
+      "emptyDescription": "Los informes de evidencia, auditorías y notas de campo publicados por esta organización aparecerán aquí.",
+      "filters": {
+        "all": "Todos",
+        "tree": "Árbol",
+        "audio": "Audio",
+        "biodiversity": "Biodiversidad",
+        "document": "Documento"
+      },
+      "ownerTools": "Herramientas del propietario",
+      "linkEvidenceTitle": "Vincular evidencia",
+      "linkEvidenceDescription": "Adjunta registros o archivos existentes a {title}. Los elementos vinculados aparecen en la cronología pública de evidencias a continuación.",
+      "notTimelineYet": "Aún no forma parte de la cronología",
+      "linkedTitle": "Cronología de evidencia vinculada",
+      "linkedItemCount": "{count, plural, =0 {0 elementos vinculados a esta actividad de bumicert} =1 {1 elemento vinculado a esta actividad de bumicert} other {# elementos vinculados a esta actividad de bumicert}}",
+      "linkedDescription": "Revisa los registros, archivos y capas del mapa que ya forman parte de la cronología pública de evidencias.",
+      "pageOf": "Página {current} de {total}",
+      "previousPage": "Página anterior",
+      "nextPage": "Página siguiente"
+    },
+    "evidenceAdder": {
+      "title": "Agregar evidencia",
+      "selectType": "Seleccione el tipo de evidencia a agregar.",
+      "selectEvidence": "Seleccione la evidencia a agregar.",
+      "addType": "Agregar {type}",
+      "tabs": {
+        "audio": "Audio",
+        "trees": "Árboles",
+        "biodiversity": "Biodiversidad",
+        "files": "Documentos"
+      },
+      "linking": "Vinculando…",
+      "selectToLink": "Seleccione la evidencia para vincular",
+      "linkItems": "{count, plural, =1 {Vincular 1 elemento} other {Vincular # elementos}}",
+      "optionalNote": "Nota opcional",
+      "optionalNotePlaceholder": "Agregar contexto sobre esta evidencia...",
+      "authError": "Algo salió mal. Por favor actualice la página.",
+      "contentType": "Tipo de contenido",
+      "selectContentType": "Seleccione el tipo de contenido",
+      "addFilePlaceholder": "Agregar un archivo como evidencia",
+      "externalLink": "Enlace externo",
+      "addLink": "Agregar",
+      "externalLinkHelp": "Vincule informes, sitios web, paneles o plataformas de evidencia externas.",
+      "invalidUrlProtocol": "Utilice una URL http o https.",
+      "invalidUrl": "Introduzca una URL válida.",
+      "remove": "Eliminar",
+      "noFilesSelected": "Aún no se han seleccionado archivos ni enlaces.",
+      "contentTypes": {
+        "document": "Documento",
+        "report": "Informe",
+        "audit": "Auditoría",
+        "evidence": "Evidencia",
+        "testimonial": "Testimonio",
+        "methodology": "Metodología",
+        "photo": "Foto",
+        "video": "Video",
+        "dataset": "Conjunto de datos",
+        "certificate": "Certificado",
+        "audio": "Audio",
+        "other": "Otros permisos",
+        "treeDataset": "Conjunto de datos de árbol",
+        "biodiversity": "Biodiversidad",
+        "occurrence": "Árbol"
+      },
+      "emptyUploaded": "Aún no se ha subido ningún {type}.",
+      "uploadType": "Subir {type}",
+      "manage": "Administrar",
+      "untitledRecording": "Grabación sin título",
+      "unnamedTreeDataset": "Conjunto de datos de árbol sin nombre",
+      "unknownObservation": "Observación desconocida",
+      "treeCount": "{count, plural, =1 {1 árbol} other {# árboles}}",
+      "speciesCount": "{count, plural, =1 {1 especie} other {# especies}}",
+      "siteContextLabel": "Sitio: {siteName}",
+      "siteContextReady": "Contexto del sitio listo",
+      "siteContextMixed": "Hay varios sitios en este conjunto de datos; adjunta conjuntos de datos específicos por sitio.",
+      "siteContextIncomplete": "A algunos árboles les falta contexto del sitio",
+      "siteContextUnresolved": "No se pudo resolver el registro del sitio",
+      "siteContextUnavailable": "Contexto del sitio no disponible",
+      "incompleteBumicertReference": "No se puede vincular evidencia porque la referencia del bumicert está incompleta. Actualiza la página y vuelve a intentarlo.",
+      "partialLinkSuccess": "Se vincularon {createdCount, plural, =1 {1 adjunto} other {# adjuntos}}, pero no se completaron todos los {totalCount, plural, =1 {1 grupo} other {# grupos}}. {error}",
+      "emptyLabels": {
+        "audio": "grabaciones de audio",
+        "trees": "conjuntos de datos de árboles",
+        "biodiversity": "observaciones de biodiversidad"
+      },
+      "attachmentTitles": {
+        "audio": "Grabaciones de audio",
+        "trees": "Conjunto de datos de árboles",
+        "biodiversity": "Observaciones de biodiversidad"
+      },
+      "chooseEvidenceType": "Elige el tipo de evidencia",
+      "selectSourceToLink": "Selecciona una fuente para vincular evidencia existente a esta cronología.",
+      "linkType": "Vincular {type}",
+      "selectRecordsToLink": "Selecciona registros de evidencia para vincularlos a esta cronología.",
+      "alreadyLinkedDataset": "Ya está vinculado a esta cronología",
+      "checkingExistingLinks": "Comprobando los vínculos existentes de la cronología…",
+      "unableToVerifyExistingLinks": "No se pudieron verificar los vínculos existentes de la cronología. Actualiza la página para vincular conjuntos de datos de árboles."
+    },
+    "metadata": {
+      "notFound": "Bumicert no encontrado"
+    },
+    "timelineEntry": {
+      "kind": {
+        "tree": "Conjunto de datos de árbol",
+        "audio": "Datos acústicos",
+        "biodiversity": "Observaciones de biodiversidad",
+        "document": "Documento",
+        "site": "Sitio",
+        "other": "Evidencia"
+      },
+      "notSpecified": "No especificado",
+      "resolvingDate": "Fecha de resolución de evidencia...",
+      "linked": "vinculado {date}",
+      "treeCount": "{count, plural, =1 {1 árbol} other {# árboles}}",
+      "speciesCount": "{count, plural, =1 {1 especie} other {# especies}}",
+      "observationCount": "{count, plural, =1 {1 observación} other {# observaciones}}",
+      "recordingCount": "{count, plural, =1 {1 grabación} other {# grabaciones}}",
+      "itemCount": "{count, plural, =1 {1 elemento} other {# elementos}}",
+      "openGreenGlobe": "Abrir en globo verde",
+      "removeEvidence": "Eliminar evidencia",
+      "collapseEvidence": "Contraer evidencia",
+      "expandEvidence": "Ampliar evidencia",
+      "resolvingRecords": "Resolución de registros de evidencia vinculados...",
+      "selectedObservations": "Observaciones seleccionadas",
+      "more": "+{count} más",
+      "viewGreenGlobe": "Ver en Green Globe",
+      "evidenceItem": "Elemento de evidencia",
+      "greenGlobePreview": "Vista previa de Green Globe",
+      "open": "Abierto",
+      "greenGlobeFallback": "Si la vista previa no se carga, abra Green Globe en una nueva pestaña. Detalles del impacto",
+      "sharedGreenGlobePreviewHint": "Usa el mapa compartido de Green Globe de arriba para previsualizar las capas del conjunto de datos.",
+      "greenGlobeMapTitle": "Mapa de Green Globe",
+      "resolvingSpatialLayers": "Resolviendo capas de evidencia espacial…",
+      "activeLayerCount": "{count, plural, =1 {1 capa activa} other {# capas activas}}",
+      "showOnMapHint": "Usa Mostrar en el mapa en las tarjetas de conjuntos de datos de árboles para previsualizar las capas aquí.",
+      "greenGlobeIframeTitle": "Vista previa de evidencia en Green Globe",
+      "treeDatasetMapLayers": "Capas del mapa del conjunto de datos de árboles",
+      "showDatasetOnGreenGlobeMap": "Mostrar {title} en el mapa de Green Globe",
+      "hideDatasetFromGreenGlobeMap": "Ocultar {title} del mapa de Green Globe",
+      "showOnMap": "Mostrar en el mapa",
+      "hideFromMap": "Ocultar del mapa",
+      "deleteConfirm": {
+        "title": "¿Eliminar evidencia?",
+        "body": "¿Quitar “{title}”? Esto no se puede deshacer.",
+        "removing": "Eliminando…",
+        "remove": "Eliminar",
+        "cancel": "Cancelar"
+      },
+      "activeHiddenLayerSummary": "{activeCount} activas · {hiddenCount} ocultas",
+      "activeHiddenLayerSummaryWithHint": "{activeCount} activas · {hiddenCount} ocultas — usa Mostrar capa en las tarjetas de conjuntos de datos de árboles para previsualizar las capas aquí.",
+      "showLayerHint": "Usa Mostrar capa en las tarjetas de conjuntos de datos de árboles para previsualizar las capas aquí.",
+      "activeLayerBadge": "{count, plural, =1 {1 activa} other {# activas}}",
+      "hiddenLayerBadge": "{count, plural, =1 {1 oculta} other {# ocultas}}",
+      "activeLayersInPreview": "Capas activas en la vista previa",
+      "hiddenLayerPrefix": "Oculta: {title}",
+      "activeOnMap": "Activa en el mapa",
+      "hiddenFromMap": "Oculta del mapa",
+      "visibleLayerDescription": "Esta capa del conjunto de datos está visible en la vista previa de Green Globe.",
+      "hiddenLayerDescription": "Esta capa del conjunto de datos está disponible, pero actualmente está oculta.",
+      "showLayer": "Mostrar capa",
+      "hideLayer": "Ocultar capa"
+    },
+    "reference": {
+      "linkedRecord": "Registro vinculado",
+      "linkedAudioRecord": "Registro de audio vinculado",
+      "audioEvidence": "Evidencia de audio",
+      "playRecording": "Reproducir grabación",
+      "linkedDataset": "Conjunto de datos vinculado",
+      "viewGreenGlobe": "Ver en Green Globe",
+      "linkedTreeRecord": "Registro de árbol vinculado",
+      "linkedSiteRecord": "Registro de sitio vinculado",
+      "siteEvidence": "Evidencia de sitio",
+      "openSiteMap": "Abrir mapa del sitio",
+      "recordCount": "{count, plural, =1 {1 registro} other {# registros}}",
+      "speciesCount": "{count, plural, =1 {1 especie} other {# especies}}",
+      "individualCount": "{count, plural, =1 {1 individuo} other {# individuos}}"
+    },
+    "overview": {
+      "aboutOrganization": "Acerca de la organización",
+      "aboutCreator": "Acerca del creador",
+      "profile": "Perfil",
+      "certifiedProfile": "Perfil certificado",
+      "moreFromCreator": "Más Bumicerts de este creador",
+      "moreFromOrganization": "Más Bumicerts de esta organización",
+      "viewAll": "Ver todo",
+      "ongoing": "en curso",
+      "noDescription": "No se proporcionó descripción.",
+      "projectDetails": "Detalles del proyecto",
+      "activityPeriod": "Periodo de actividad",
+      "published": "Publicado",
+      "firstSiteBoundary": "Primer límite del sitio",
+      "firstSiteBoundaryMap": "Mapa del primer límite del sitio",
+      "contributors": "Colaboradores"
+    }
+  },
+  "create": {
+    "actions": {
+      "createBumicert": "Cree un Bumicert"
+    },
+    "landing": {
+      "hero": {
+        "titleLine1": "Crear impacto.",
+        "titleLine2": "Certificar cambio.",
+        "description": "Cree un Bumicert para mostrar su compromiso con la sostenibilidad e inspirar un cambio real."
+      },
+      "explainer": {
+        "title": "¿Qué es un Bumicert?",
+        "body1": "Un Bumicert es su historia de impacto: prueba de su contribución a las personas, las comunidades y el planeta.",
+        "body2": "Le ayuda a documentar, compartir y celebrar su impacto positivo con transparencia y credibilidad.",
+        "learnMore": "Obtenga más información"
+      }
+    },
+    "tabs": {
+      "ariaLabel": "Vistas de creación de Bumicert",
+      "recent": "Bumicerts recientes",
+      "drafts": "Borradores"
+    },
+    "recent": {
+      "errorTitle": "No se pudo cargar Bumicerts",
+      "errorFallback": "Inténtelo de nuevo en un momento.",
+      "emptyTitle": "Aún no hay Bumicerts recientes",
+      "emptyLine1": "Aún no has creado ningún Bumicert.",
+      "emptyLine2": "Crea tu primer Bumicert para empezar.",
+      "createFirst": "Crea tu primer Bumicert"
+    },
+    "drafts": {
+      "untitledDraft": "Borrador sin título",
+      "signedOutTitle": "Inicie sesión para ver borradores",
+      "signedOutDescription": "Los borradores Bumicerts se guardan en tu cuenta para que puedas continuar tu trabajo más tarde.",
+      "loadingTitle": "Cargando borradores",
+      "loadingDescription": "Estamos verificando si hay aplicaciones Bumicert guardadas.",
+      "errorTitle": "No se pudieron cargar borradores",
+      "errorFallback": "Error al cargar borradores. Por favor inténtalo de nuevo.",
+      "emptyTitle": "Aún no hay borradores",
+      "emptyDescription": "Inicie un nuevo Bumicert y guárdelo como borrador cuando desee volver más tarde.",
+      "deleteAria": "Eliminar {title}"
+    },
+    "draft": {
+      "actions": {
+        "tips": "Consejos",
+        "closeTips": "Cerrar sugerencias",
+        "saveAsDraft": "Guardar como borrador",
+        "continue": "Continuar"
+      },
+      "validation": {
+        "required": "Requerido",
+        "maxCharacters": "No se permiten más de {count} caracteres",
+        "descriptionRequired": "Se requiere descripción",
+        "contributorNameRequired": "Todos los contribuyentes deben tener un nombre",
+        "coverImageMaxSize": "La imagen de portada debe tener 4 MB o menos",
+        "coverImageType": "La imagen de portada debe ser JPG, PNG o WebP"
+      },
+      "sidebar": {
+        "previewTitle": "Vista previa de Bumicert",
+        "generatingPreview": "Generando metadatos de vista previa...",
+        "completeFirstStep": "Complete el primer paso para generar la vista previa.",
+        "tipsTitle": "Consejos para esta sección"
+      },
+      "steps": {
+        "cover": {
+          "title": "Detalles de portada",
+          "tips": {
+            "bullets": [
+              "Utilice un nombre corto y descriptivo para su bumicert.",
+              "Incluya un sitio web o un enlace social a su bumicert para facilitar el acceso."
+            ],
+            "pre": "",
+            "post": ""
+          }
+        },
+        "impact": {
+          "title": "Detalles de impacto",
+          "tips": {
+            "pre": "Al escribir su historia de impacto, utilice este marco STAR:",
+            "bullets": [
+              "Situación: ¿Qué estaba sucediendo y quién o qué se vio afectado?",
+              "Tarea — ¿Cuál fue el papel de su organización, grupo o comunidad? ¿Quién más estuvo involucrado?",
+              "Acción: describa lo que hizo su organización o comunidad.",
+              "Resultado: ¿Qué sucedió como resultado? Incluya cifras si están disponibles y mencione resultados tangibles y no tangibles. Esto estará respaldado por los datos de impacto que proporcione más adelante."
+            ],
+            "post": "Escriba libremente. Se aceptan historias más largas."
+          }
+        },
+        "site": {
+          "title": "Detalles del sitio",
+          "tips": {
+            "bullets": [
+              "Agregue primero su propia comunidad u organización, luego otras personas o grupos que se unieron.",
+              "Asegúrese de que todos estén de acuerdo en ser incluidos.",
+              "Cargue el límite de su sitio en formato GeoJSON para que se muestre en el mapa."
+            ],
+            "pre": "",
+            "post": ""
+          }
+        },
+        "review": {
+          "title": "Revisar",
+          "tips": {
+            "bullets": [
+              "Asegúrate de haber completado todos los pasos anteriores.",
+              "Revise el aspecto de su bumicert antes de enviarlo."
+            ],
+            "pre": "",
+            "post": ""
+          }
+        },
+        "submit": {
+          "title": "Enviar",
+          "tips": {
+            "bullets": [
+              "¡Has completado todos los pasos! No más consejos para esta sección."
+            ],
+            "pre": "",
+            "post": ""
+          }
+        }
+      },
+      "stepForms": {
+        "cover": {
+          "heading": "Comparta su impacto de un vistazo.",
+          "coverImage": {
+            "label": "Imagen de portada",
+            "info": "Elige la imagen que mejor represente tu trabajo",
+            "placeholder": "Cargue o arrastre y suelte una imagen"
+          },
+          "title": {
+            "label": "Título de Bumicert",
+            "info": "Dale a tu bumicert un título claro y descriptivo",
+            "placeholder": "Mi Bumicert increíble"
+          },
+          "dateRange": {
+            "label": "Rango de fechas de Bumicert",
+            "info": "Seleccione el período en el que tuvo lugar su trabajo e impacto",
+            "ongoing": "En curso",
+            "ongoingCheckbox": "Este trabajo aún está en curso"
+          },
+          "workType": {
+            "label": "¿Qué tipo de trabajo estás haciendo?",
+            "info": "Siéntase libre de elegir más de uno",
+            "options": {
+              "ecologicalRestoration": "Restauración Ecológica",
+              "agroforestry": "Agroforestería",
+              "climateAdaptation": "Adaptación climática",
+              "biodiversityMonitoring": "Monitoreo de biodiversidad",
+              "environmentalEducation": "Educación ambiental",
+              "indigenousLocalKnowledge": "Conocimiento indígena y local",
+              "environmentalJustice": "Justicia ambiental"
+            }
+          }
+        },
+        "impact": {
+          "heading": "Comparte tu historia de impacto.",
+          "story": {
+            "label": "Tu historia de impacto",
+            "description": "Cuéntenos sobre su impacto: qué cambió, quiénes participaron y cómo está ayudando. Tome su tiempo. Tu historia ayuda a inspirar a otros y verificar tu trabajo.",
+            "info": "Cuéntanos qué hiciste y qué pasó como resultado",
+            "placeholder": "Describe tu historia de impacto..."
+          },
+          "shortDescription": {
+            "label": "Descripción breve",
+            "description": "Una breve descripción de su historia de impacto. Esto se utilizará como breve descripción del bumicert.",
+            "info": "Resuma su trabajo y sus resultados en unas pocas líneas",
+            "placeholder": "Un breve resumen sobre este bumicert.",
+            "generateTitle": "Generar una descripción breve con IA",
+            "generateDisabledTitle": "Escriba primero su historia de impacto"
+          }
+        },
+        "site": {
+          "heading": "Comparta sus colaboradores y sitios.",
+          "contributors": {
+            "label": "Lista de colaboradores",
+            "description": "Agregar a todos los involucrados en este bumicert, incluida su propia comunidad u organización y sus colaboradores. Consejo: comience agregando su propio grupo antes de incluir a sus socios o seguidores.",
+            "info": "Enumere las personas u organizaciones que contribuyeron a este trabajo."
+          },
+          "boundaries": {
+            "label": "Límites del sitio",
+            "description": "Cargue los límites de su sitio en formato GeoJSON para que podamos visualizar su bumicert en el mapa.",
+            "info": "Agregue los límites que mejor representen el lugar donde se llevó a cabo el trabajo.",
+            "selectHelp": "Seleccione los límites para este bumicert o agregue otros nuevos.",
+            "manageSites": "Administrar sitios",
+            "loading": "Cargando sus sitios...",
+            "loadError": "No se pueden cargar los sitios.",
+            "empty": "No se encontró ningún sitio.",
+            "addSite": "Agregar un sitio",
+            "unnamedSite": "Sitio sin nombre",
+            "invalidLocation": "Ubicación no válida"
+          },
+          "permissions": {
+            "label": "Permisos",
+            "confirm": "Confirmo que todos los contribuyentes enumerados dieron su permiso para incluir su trabajo en este Bumicert.",
+            "terms": "Acepto los términos y condiciones."
+          }
+        },
+        "submit": {
+          "signedInRequired": "Debes iniciar sesión para publicar.",
+          "prepareError": "No se pudieron preparar los datos de publicación.",
+          "authenticatedTitle": "Autenticado",
+          "checkingAuth": "Estamos comprobando si está autenticado.",
+          "notSignedIn": "No ha iniciado sesión. Por favor, inicie sesión para continuar.",
+          "failedTitle": "No se pudo publicar.",
+          "publishingTitle": "Publicando su bumicert",
+          "readyTitle": "Listo para publicar su bumicert",
+          "publishingDescription": "Estamos publicando su bumicert.",
+          "readyDescription": "Haga clic en el botón a continuación para publicar su bumicert.",
+          "retry": "Reintentar",
+          "publishAction": "Publicar Bumicert",
+          "editDetails": "Editar detalles",
+          "successTitle": "¡Su Bumicert se publicó correctamente!",
+          "linkEvidenceNow": "Vincule evidencia ahora",
+          "viewBumicert": "Ver Bumicert",
+          "setUpDonations": "Configurar donaciones",
+          "shareFeedback": "Compartir comentarios",
+          "createAnother": "Crear otro bumicert"
+        }
+      },
+      "modals": {
+        "saveDraft": {
+          "title": "Guardar como borrador",
+          "description": "Guarde su progreso actual como borrador.",
+          "successDescription": "Su borrador se ha guardado correctamente.",
+          "saveProgressFor": "Guarda tu progreso para",
+          "untitledDraft": "Borrador sin título",
+          "saving": "Guardando...",
+          "saveAction": "Guardar borrador",
+          "savedBody": "Su borrador ha sido guardado. Puedes seguir trabajando en ello más tarde.",
+          "close": "Cerrar"
+        },
+        "deleteDraft": {
+          "title": "Eliminar borrador",
+          "description": "Confirme su selección para eliminar el borrador.",
+          "successDescription": "El borrador se ha eliminado correctamente.",
+          "missingDraftDescription": "No se puede determinar qué borrador eliminar.",
+          "confirmBody": "¿Está seguro de que desea <destructive>eliminar</destructive> el borrador, <strong>{title}?</strong><br></br>Esta acción no se puede deshacer.",
+          "untitledDraft": "Borrador sin título",
+          "cancel": "Cancelar",
+          "deleting": "Eliminando...",
+          "deleteAction": "Eliminar borrador",
+          "deletedBody": "El borrador se ha eliminado correctamente.",
+          "close": "Cerrar"
+        },
+        "uploadLogo": {
+          "title": "Cargar logotipo",
+          "description": "Cargar un logotipo para su cuenta.",
+          "placeholder": "Cargar un logotipo para su cuenta",
+          "authRequired": "El usuario no está autenticado",
+          "logoRequired": "Se requiere el logotipo",
+          "done": "Listo",
+          "uploading": "Subiendo...",
+          "upload": "Cargar"
+        }
+      },
+      "review": {
+        "heading": "Revisar la información.",
+        "uploaded": "Subido",
+        "notUploaded": "No cargado",
+        "dateRange": "De {start} a {end}",
+        "notSelected": "No seleccionado",
+        "impactStoryAdded": "Historia de impacto agregada",
+        "sitesSelected": "{count, plural, =1 {1 sitio seleccionado} other {# sitios seleccionados}}",
+        "yes": "Sí",
+        "no": "No",
+        "edit": "Editar",
+        "missingFields": "Faltan los siguientes campos:",
+        "fieldsWithErrors": "Los siguientes campos encontraron errores:",
+        "fixIssues": "Solucione estos problemas para continuar.",
+        "allFieldsCorrect": "Todos los campos están llenos correctamente.",
+        "fix": "Reparar",
+        "preview": {
+          "title": "Vista previa de su bumicert",
+          "missingLogo": "Tu cuenta no tiene logotipo. ¿Quieres agregar uno?",
+          "generating": "Generando la vista previa...",
+          "completeFirstStep": "Complete el primer paso para obtener una vista previa de su bumicert."
+        }
+      },
+      "hydration": {
+        "errorTitle": "Error",
+        "errorDescription": "No pudimos cargar los datos que guardaste. Ponte en contacto con soporte.",
+        "close": "Cerrar",
+        "back": "Atrás",
+        "coverImageTitle": "No se pudo cargar la imagen de portada",
+        "coverImageDescription": "Los datos de tu borrador se restauraron correctamente, pero no se pudo obtener la imagen de portada. Vuelve a subir la imagen de portada para continuar.",
+        "gotIt": "Entendido"
+      }
+    },
+    "auth": {
+      "signedOutTitle": "No ha iniciado sesión.",
+      "signedOutDescription": "Inicie sesión para crear un bumicert.",
+      "accountErrorTitle": "No se pudo cargar su cuenta",
+      "accountErrorDescription": "Tuvimos problemas para cargar su cuenta. Por favor inténtalo de nuevo.",
+      "accountSetupTitle": "Su cuenta aún no está configurada.",
+      "accountSetupDescription": "Complete la información de su cuenta para crear un bumicert.",
+      "manageAccount": "Administrar mi cuenta",
+      "pleaseWait": "Por favor espere..."
+    }
+  }
+}

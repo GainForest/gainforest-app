@@ -1,0 +1,881 @@
+{
+  "explore": {
+    "metadata": {
+      "title": "Explore Bumicerts — Verified Regenerative Impact Projects",
+      "description": "Browse verified environmental impact certificates from nature stewards around the world. Filter by country, organization, and impact area."
+    },
+    "structuredData": {
+      "name": "Explore Bumicerts",
+      "description": "Verified environmental impact certificates from nature stewards around the world."
+    },
+    "hero": {
+      "eyebrow": "Explore Bumicerts",
+      "titlePrefix": "Discover",
+      "titleEmphasis": "Regenerative Impact",
+      "description": "Browse Bumicerts from communities and organizations restoring ecosystems, strengthening livelihoods, and building a more resilient future."
+    },
+    "actions": {
+      "createBumicert": "Create Bumicert",
+      "allProjects": "All Projects",
+      "allFilters": "All filters",
+      "clearAll": "Clear all",
+      "applyFilters": "Apply filters",
+      "applyFiltersWithCount": "Apply filters ({count})",
+      "clearCategory": "Clear {category}"
+    },
+    "filters": {
+      "allTitle": "All Filters",
+      "description": "Show Bumicerts with photos, project places, named people, work dates, or donations.",
+      "organization": "Organization",
+      "bioregion": "Bioregion",
+      "country": "Country",
+      "impactArea": "Impact Area",
+      "allBumicerts": "All Bumicerts",
+      "allFilters": "All filters",
+      "allFiltersAria": "All filters",
+      "updateHint": "Filters update as you choose.",
+      "images": "Shows photos",
+      "locations": "Shows project places",
+      "contributors": "Shows named people",
+      "active": "Shows work dates",
+      "donations": "Accepts donations"
+    },
+    "sort": {
+      "newest": "Newest",
+      "oldest": "Oldest",
+      "az": "A → Z",
+      "za": "Z → A"
+    },
+    "search": {
+      "ariaLabel": "Search Bumicerts",
+      "placeholder": "Search Bumicerts by name or description",
+      "sortAriaLabel": "Sort projects"
+    },
+    "empty": {
+      "eyebrow": "No Results",
+      "title": "No Bumicerts found",
+      "description": "Try adjusting your search or filters to find more project stories."
+    },
+    "resultsFound": "{count, plural, one {# project found} other {# projects found}}",
+    "view": {
+      "cards": "Cards",
+      "list": "List",
+      "map": "Map"
+    },
+    "stats": {
+      "published": "Published Bumicerts",
+      "withLocations": "Bumicerts with locations",
+      "contributors": "Contributors across Bumicerts",
+      "withCover": "Bumicerts with a cover"
+    },
+    "footer": {
+      "showing": "Showing {shown} of {total} Bumicerts.",
+      "showMore": "Show more",
+      "end": "You have reached the end."
+    },
+    "card": {
+      "open": "Open project: {title}",
+      "noCover": "No cover image",
+      "showDetails": "Show details",
+      "missingImage": "Missing image",
+      "projectSteward": "Project steward",
+      "peopleNamed": "{count, plural, one {# person named} other {# people named}}",
+      "projectPlaces": "{count, plural, one {# project place} other {# project places}}",
+      "natureSightings": "{count, plural, one {# nature sighting} other {# nature sightings}}",
+      "natureSightingsShared": "{count, plural, one {# nature sighting shared by this organization} other {# nature sightings shared by this organization}}",
+      "datesAdded": "Project dates added",
+      "raised": "{amount} raised",
+      "donations": "Donations",
+      "acceptingDonations": "Accepting donations",
+      "acceptingDonationsRaised": "Accepting donations — {amount} raised so far"
+    }
+  },
+  "organizations": {
+    "metadata": {
+      "title": "Organizations — GainForest",
+      "description": "Browse nature steward organizations creating verified environmental impact with GainForest."
+    },
+    "hero": {
+      "imageAltLight": "Misty mountain forest at sunrise",
+      "imageAltDark": "Misty mountain forest at dusk",
+      "eyebrow": "Organizations",
+      "titleAriaLabel": "Nature Stewards",
+      "titleFirst": "Nature",
+      "titleSecond": "Stewards",
+      "description": "Discover organizations leading environmental stewardship and community-driven change."
+    },
+    "search": {
+      "placeholder": "Search organizations",
+      "sortAriaLabel": "Sort"
+    },
+    "sort": {
+      "bumicerts": "Most Bumicerts",
+      "alpha": "Alphabetical",
+      "newest": "Newest first",
+      "oldest": "Oldest first",
+      "az": "A → Z",
+      "za": "Z → A"
+    },
+    "empty": {
+      "title": "No organizations found",
+      "description": "Try adjusting your search or filters."
+    },
+    "error": {
+      "title": "Something went wrong",
+      "description": "We were unable to load the organizations. Please try refreshing the page."
+    },
+    "view": {
+      "cards": "Cards",
+      "list": "List",
+      "map": "Map"
+    },
+    "quickFilters": {
+      "observations": "Has observations",
+      "bumicerts": "Has Bumicerts"
+    },
+    "facets": {
+      "category": "Category",
+      "country": "Country"
+    },
+    "stats": {
+      "profiles": "Public organization profiles",
+      "withBumicerts": "Organizations with project stories",
+      "withObservations": "Organizations with nature sightings",
+      "locations": "Locations across organizations"
+    },
+    "actions": {
+      "clear": "Clear",
+      "clearFilters": "Clear filters",
+      "showMore": "Show more"
+    },
+    "footer": {
+      "showing": "Showing {shown} of {total} organizations.",
+      "end": "You have reached the end."
+    },
+    "card": {
+      "joined": "Joined {year}",
+      "publicProfile": "Public profile",
+      "showDetails": "Show details",
+      "descriptionWithType": "A {types} advancing community-led environmental stewardship{where}.",
+      "descriptionDefault": "A nature steward protecting and restoring local ecosystems{where}.",
+      "where": " in {country}"
+    },
+    "loading": "Loading organizations"
+  },
+  "leaderboard": {
+    "metadata": {
+      "title": "Leaderboard — GainForest",
+      "description": "See the top donors making an impact on GainForest. Our Impact Champions are ranked by their total funding contributions."
+    },
+    "hero": {
+      "eyebrow": "Leaderboard",
+      "titlePrefix": "Impact",
+      "titleEmphasis": "Champions",
+      "description": "Celebrating the generous contributors driving regenerative change for communities and the planet."
+    },
+    "periods": {
+      "all": "All Time",
+      "month": "This Month",
+      "week": "This Week"
+    },
+    "donorFilters": {
+      "all": "All Donors",
+      "anonymous": "Anonymous Only",
+      "known": "Known Only"
+    },
+    "sort": {
+      "label": "Sort by",
+      "totalRaised": "Total raised",
+      "donationCount": "Donation count",
+      "recentDonation": "Recent donation"
+    },
+    "stats": {
+      "totalRaised": "Total Raised",
+      "totalRaisedDetail": "All time across the platform",
+      "totalDonors": "Total Donors",
+      "totalDonorsDetail": "Generous impact champions",
+      "projectsSupported": "Projects Supported",
+      "projectsSupportedDetail": "Restoring ecosystems & livelihoods",
+      "uniqueDonors": "Unique Donors",
+      "bumicertsFunded": "Bumicerts Funded",
+      "donationCount": "No. of Donations"
+    },
+    "empty": {
+      "title": "No donations yet",
+      "description": "Be the first to make an impact."
+    },
+    "card": {
+      "rankAriaLabel": "Rank {rank}",
+      "anonymous": "Anonymous ({address})",
+      "donationSummary": "{count, plural, one {# donation} other {# donations}}",
+      "lastDonation": "Last donation {relativeTime}",
+      "topDonor": "Top Donor",
+      "natureChampion": "Nature Champion",
+      "consistentGiver": "Consistent Giver",
+      "risingSupporter": "Rising Supporter",
+      "openWallet": "Open {wallet} on BaseScan",
+      "openAccount": "Open donor account in a new tab",
+      "anonymousSupporter": "Anonymous supporter",
+      "donationSummaryWithTime": "{count, plural, one {# donation} other {# donations}} · Last donation {relativeTime}",
+      "openPayment": "Open payment details",
+      "openSupporter": "Open supporter profile in a new tab"
+    },
+    "donorFiltersShort": {
+      "all": "All",
+      "anonymous": "Anonymous",
+      "known": "Known"
+    },
+    "error": {
+      "title": "Could not load leaderboard",
+      "description": "Please try again in a moment."
+    }
+  },
+  "dashboard": {
+    "metadata": {
+      "title": "Donations Overview — GainForest",
+      "description": "Donation activity across GainForest: total raised, supporters, funding trends, and recent donations.",
+      "measurementTechnique": "Donation receipts indexed from org.hypercerts.funding.receipt records."
+    },
+    "hero": {
+      "eyebrow": "Giving Activity",
+      "title": "Donations",
+      "accent": "Overview",
+      "imageAlt": "Misty regenerative landscape for donation activity",
+      "lede": "Track giving across GainForest: total raised, supporter activity, places reached, funding trends, and recent donations."
+    },
+    "periods": {
+      "all": "All Time",
+      "month": "Past 30 Days",
+      "week": "Past 7 Days"
+    },
+    "kpis": {
+      "totalRaised": "Total Raised",
+      "totalRaisedSub": "All USD donations",
+      "totalDonations": "Total Donations",
+      "totalDonationsSub": "Receipts recorded",
+      "uniqueDonors": "Unique Donors",
+      "uniqueDonorsSub": "By DID or wallet",
+      "avgDonation": "Avg Donation",
+      "avgDonationSub": "Per transaction",
+      "activeBumicerts": "Active Bumicerts",
+      "activeBumicertsSub": "Have received funds",
+      "totalDonated": "Total donated",
+      "completedDonations": "Completed donations",
+      "donors": "donors",
+      "bumicertsWithDonations": "Bumicerts with donations",
+      "averageDonation": "Average donation amount",
+      "countriesWithBumicerts": "Countries with Bumicerts"
+    },
+    "geo": {
+      "title": "Geographic Reach",
+      "countriesRepresented": "Countries represented",
+      "topCountries": "Top Countries",
+      "empty": "No geographic data available.",
+      "organizationCount": "{count, plural, one {# organization} other {# organizations}}"
+    },
+    "chart": {
+      "title": "Giving Over Time",
+      "raisedPer": "USD raised per {granularity}",
+      "empty": "No donation data for this period.",
+      "donationCount": "{count, plural, one {# donation} other {# donations}}",
+      "granularities": {
+        "day": "Daily",
+        "week": "Weekly",
+        "month": "Monthly"
+      }
+    },
+    "tables": {
+      "topDonors": "Top Donors",
+      "byOrganization": "By Organization",
+      "recentTransactions": "Recent Transactions",
+      "noDonations": "No donations yet.",
+      "noTransactions": "No transactions yet.",
+      "donor": "Donor",
+      "totalDonated": "Total Donated",
+      "donations": "Donations",
+      "lastDonation": "Last Donation",
+      "organization": "Organization",
+      "totalRaised": "Total Raised",
+      "bumicerts": "Bumicerts",
+      "donors": "Donors",
+      "date": "Date",
+      "amount": "Amount",
+      "bumicert": "Bumicert",
+      "txHash": "Tx Hash",
+      "anonymous": "Anonymous",
+      "anonymousWallet": "Anonymous ({address})",
+      "allTimeDonations": "All time · {count, plural, one {# donation} other {# donations}}",
+      "showingLatest": "showing latest {count}",
+      "viewBumicert": "View bumicert",
+      "topCountries": "Top Countries",
+      "recentDonations": "Recent Donations",
+      "showingAll": "showing all",
+      "anonymousSupporter": "Anonymous supporter",
+      "view": "View",
+      "showFirst": "Show first {count}",
+      "showAll": "Show all {count}",
+      "loadingCountries": "Loading countries"
+    },
+    "error": {
+      "title": "Donation data is unavailable",
+      "description": "We could not load donation information. Try again in a moment.",
+      "action": "Open donations overview"
+    }
+  },
+  "account": {
+    "metadata": {
+      "accountTitle": "Account — Bumicerts",
+      "bumicertsTitle": "Bumicerts — Bumicerts",
+      "donationsTitle": "Donation History — Bumicerts",
+      "accountFallback": "Account",
+      "profileDescription": "{displayName} on Bumicerts",
+      "organizationDescription": "{displayName} on Bumicerts.",
+      "bumicertsPageTitle": "{displayName} Bumicerts — Bumicerts",
+      "bumicertsPageDescription": "Browse all Bumicerts created by {displayName}.",
+      "donationsPageTitle": "{displayName} Donation History — Bumicerts",
+      "donationsPageDescription": "Browse the public donation history for {displayName}."
+    },
+    "errors": {
+      "loadOwnTitle": "Couldn't load your account",
+      "loadOwnDescription": "We had trouble fetching your account data. Please try again.",
+      "loadAccountTitle": "Couldn't load this account",
+      "loadAccountDescription": "We had trouble fetching this account's data. Please try again.",
+      "loadBumicertsTitle": "Couldn't load this account's Bumicerts",
+      "loadBumicertsDescription": "We had trouble fetching this account's Bumicerts. Please try again."
+    },
+    "onboarding": {
+      "title": "Onboarding required",
+      "description": "You are signed in, but your Bumicerts account is not set up yet. Complete onboarding to continue.",
+      "action": "Start onboarding"
+    },
+    "tabs": {
+      "home": "Home",
+      "bumicerts": "Bumicerts",
+      "donationHistory": "Donation History",
+      "leaderboard": "Leaderboard",
+      "evidenceTimeline": "Evidence Timeline",
+      "settings": "Settings"
+    },
+    "setupPrompt": {
+      "title": "Set up your organization",
+      "description": "Before you can upload content, you need to set up your organization profile. This only takes a few minutes.",
+      "action": "Set Up Organization"
+    },
+    "wallet": {
+      "setUpDonations": "Set Up Donations",
+      "signInDescription": "Sign in to link your wallet and receive donations.",
+      "enabled": "Donations Enabled ✓",
+      "walletLabel": "Wallet:",
+      "enabledDescription": "Donors can now send USDC to your organization via Bumicerts.",
+      "setupDescription": "Link a wallet to receive USDC donations from supporters.",
+      "stepConnect": "Step 1: Connect your wallet",
+      "connectWallet": "Connect Wallet",
+      "stepSwitch": "Step 2: Switch to Base network",
+      "switching": "Switching...",
+      "switchToBase": "Switch to Base",
+      "linkedSuccess": "✓ Wallet linked successfully!",
+      "linkedSuccessDescription": "It may take a moment for the indexer to process your attestation.",
+      "refresh": "Refresh",
+      "stepLink": "Step 3: Link your wallet",
+      "waitingSignature": "Waiting for signature…",
+      "writingAttestation": "Writing attestation…",
+      "errorLinking": "Error linking wallet",
+      "signInWallet": "Sign in wallet…",
+      "writingToAtproto": "Writing to ATProto…",
+      "retry": "Retry",
+      "signAndLink": "Sign & Link Wallet",
+      "signing": "Signing…",
+      "saving": "Saving…"
+    },
+    "bumicerts": {
+      "emptyEyebrow": "No Bumicerts",
+      "emptyDescription": "This account hasn’t published any Bumicerts yet.",
+      "unknownCreator": "Unknown"
+    },
+    "sidebar": {
+      "achievements": "Achievements",
+      "viewAllAchievements": "View all achievements",
+      "donationUnavailable": "Donation records are not available right now",
+      "noPublicDonationsRecorded": "No public donations recorded yet",
+      "supportedOrganizations": "Supported {count} {count, plural, one {organization} other {organizations}}",
+      "noPublicDonationsReceived": "No public donations received yet",
+      "receivedDonations": "Received {count} {count, plural, one {donation} other {donations}}",
+      "setupPublicProfile": "Set up a public Bumicerts profile",
+      "completedProfileDetails": "Completed {count} profile {count, plural, one {detail} other {details}}",
+      "bumicertUnavailable": "Bumicert records are not available right now",
+      "publishedBumicerts": "Published {count} {count, plural, one {Bumicert} other {Bumicerts}}",
+      "noBumicertsPublished": "No Bumicerts published yet",
+      "profileReady": "Profile Ready",
+      "bumicertSteward": "Bumicert Steward",
+      "creatorSeed": "Creator Seed",
+      "communityBacked": "Community Backed",
+      "impactSupporter": "Impact Supporter",
+      "inviteCollaborators": "Invite collaborators",
+      "inviteCollaboratorsDescription": "Bring supporters and collaborators into your Bumicerts work and grow your regenerative impact together.",
+      "inviteFriends": "Invite friends",
+      "inviteFriendsDescription": "Invite your friends to join Bumicerts and create a positive impact together.",
+      "shareOrganization": "Explore {displayName}’s Bumicerts profile: {pageUrl}",
+      "shareUser": "Join me on Bumicerts and support regenerative impact: {pageUrl}",
+      "totalBumicerts": "Total Bumicerts",
+      "donationsReceived": "Donations Received",
+      "totalDonations": "Total Donations"
+    },
+    "hero": {
+      "coverImageAlt": "{displayName} cover image",
+      "copyLink": "Copy link",
+      "copied": "Copied!",
+      "share": "Share",
+      "editProfile": "Edit profile",
+      "edit": "Edit",
+      "since": "Since {date}"
+    },
+    "settings": {
+      "profile": {
+        "title": "Edit Profile",
+        "description": "Update your display name, bio, and profile images.",
+        "displayNameLabel": "Display Name",
+        "displayNamePlaceholder": "Your name",
+        "bioLabel": "Bio",
+        "bioPlaceholder": "A short introduction to who you are.",
+        "changeBanner": "Change banner",
+        "addBanner": "Add banner",
+        "changeAvatar": "Change avatar",
+        "avatarEditorDescription": "Choose a clear avatar for your profile.",
+        "bannerEditorDescription": "Choose a banner that sets the tone for your profile.",
+        "saveChanges": "Save Changes",
+        "saving": "Saving...",
+        "saved": "Saved!"
+      },
+      "account": {
+        "title": "Account",
+        "description": "Your account identifiers on the AT Protocol network.",
+        "handleLabel": "Handle",
+        "didLabel": "Decentralized Identifier (DID)"
+      },
+      "password": {
+        "title": "Password",
+        "description": "Reset your account password via a verification code sent to your email.",
+        "emailLabel": "Email address",
+        "emailPlaceholder": "you@example.com",
+        "sendCodeDescription": "We'll send a reset code to the email address on your account.",
+        "sendCode": "Send Reset Code",
+        "sending": "Sending...",
+        "codeSent": "A reset code was sent to {email}. Check your inbox.",
+        "codeLabel": "Reset Code",
+        "codePlaceholder": "Enter the code from your email",
+        "newPasswordLabel": "New Password",
+        "newPasswordPlaceholder": "Min. 8 characters",
+        "confirmPasswordLabel": "Confirm Password",
+        "confirmPasswordPlaceholder": "Repeat new password",
+        "changePassword": "Change Password",
+        "saving": "Saving...",
+        "cancel": "Cancel",
+        "confirmMismatch": "Passwords do not match.",
+        "lengthError": "Password must be between 8 and 256 characters.",
+        "requestError": "Failed to send reset email. Please try again.",
+        "resetError": "Failed to reset password. Check the code and try again.",
+        "successMessage": "Password changed successfully."
+      },
+      "wallets": {
+        "title": "Linked Wallets",
+        "addWallet": "Add Wallet",
+        "empty": "No wallets linked yet.",
+        "verified": "Verified",
+        "unverified": "Unverified",
+        "description": "Connect your Ethereum wallet to receive USDC donations and prove wallet ownership.",
+        "edit": "Edit wallet",
+        "delete": "Delete wallet"
+      }
+    }
+  },
+  "sidebar": {
+    "sections": {
+      "explore": "EXPLORE",
+      "manage": "MANAGE"
+    },
+    "items": {
+      "bumicerts": "Bumicerts",
+      "organizations": "Organizations",
+      "leaderboard": "Leaderboard",
+      "organization": "Organization",
+      "sites": "Sites",
+      "audio": "Audio",
+      "trees": "Trees",
+      "profile": "Profile"
+    },
+    "createBumicert": "Create a Bumicert",
+    "prompts": {
+      "signInDescription": "Sign in to manage your account and content.",
+      "signInAction": "Sign In",
+      "accountError": "Couldn't load your account right now.",
+      "checkingAccount": "Checking your account...",
+      "onboardingDescription": "Complete onboarding to manage your account.",
+      "onboardingAction": "Onboard"
+    },
+    "social": {
+      "documentation": "Documentation",
+      "github": "GitHub",
+      "twitter": "X (Twitter)",
+      "gainforest": "GainForest"
+    }
+  },
+  "maEarthFundingRound": {
+    "metadata": {
+      "title": "Apply for Ma Earth Funding Round 3 — Bumicerts",
+      "description": "Learn how GainForest communities can use Bumicerts to prepare for Ma Earth Funding Round 3 and the $500,000 matching pool."
+    },
+    "hero": {
+      "logoAlt": "Ma Earth",
+      "title": "Prepare your Bumicert for Ma Earth Funding Round 3",
+      "description": "Ma Earth is running a community-backed funding round with a $500,000 matching pool for nature-based projects. If your organization already documents impact through Bumicerts, use your public Bumicert as a reference when you apply on Ma Earth."
+    },
+    "actions": {
+      "applyOnMaEarth": "Apply on Ma Earth",
+      "createBumicertFirst": "Create a Bumicert first"
+    },
+    "matchingPool": {
+      "value": "$500,000",
+      "label": "Matching pool",
+      "description": "Ma Earth uses quadratic funding: broader supporter participation can matter more than one large contribution."
+    },
+    "facts": {
+      "matchingPool": {
+        "label": "Matching pool",
+        "value": "$500,000",
+        "description": "Community support is amplified through Ma Earth’s matching model."
+      },
+      "fundingRange": {
+        "label": "Project funding range",
+        "value": "$2k–$15k",
+        "description": "For specific, feasible nature-based work with clear reporting."
+      },
+      "applicationWindow": {
+        "label": "Application window",
+        "value": "Open till May 31st",
+        "description": "Applications are open through May 31, 2026."
+      }
+    },
+    "why": {
+      "eyebrow": "Why prepare with a Bumicert?",
+      "title": "Your impact record should travel with your application.",
+      "description": "A Bumicert gathers the project story, organization context, location, photos, and evidence that funders need to trust the work. It helps bridge verified community work to Ma Earth’s funding process."
+    },
+    "includeItems": {
+      "story": "Project story and short description",
+      "identity": "Organization identity and public profile",
+      "evidence": "Photos, evidence, and documented impact claims",
+      "location": "Location or site references when available",
+      "publicLink": "A public Bumicert link you can include in your application"
+    },
+    "eligibility": {
+      "title": "Who is eligible?",
+      "items": {
+        "nature": "Nature-based restoration, conservation, agriculture, water, soil, biodiversity, or community projects.",
+        "plan": "A specific plan with goals, timeframe, reporting capacity, and authentic success claims.",
+        "fundingNeed": "A funding need between USD $2,000 and $15,000 for project-specific work.",
+        "stripe": "A Stripe-supported country setup or a fiscal host partner that can receive funds."
+      }
+    },
+    "timeline": {
+      "title": "Round timeline",
+      "items": {
+        "applicationsClose": {
+          "date": "May 31",
+          "event": "Applications close"
+        },
+        "applicantsNotified": {
+          "date": "June 15",
+          "event": "Applicants notified"
+        },
+        "acceptedProjects": {
+          "date": "July 1",
+          "event": "Accepted projects join the round"
+        },
+        "roundCloses": {
+          "date": "July 21",
+          "event": "Round closes and funding is paid"
+        }
+      }
+    },
+    "flow": {
+      "eyebrow": "Application flow",
+      "title": "Apply directly on Ma Earth, with your Bumicert ready.",
+      "description": "Bumicerts cannot submit your application automatically. Open the Ma Earth fundraise page, apply there, and include your public Bumicert link wherever it helps explain your project and evidence."
+    }
+  },
+  "projects": {
+    "metadata": {
+      "title": "Explore Projects — Verified Regenerative Impact Work",
+      "description": "Browse project collections from communities and organizations, each grouping the Bumicerts that document their regenerative impact."
+    },
+    "hero": {
+      "eyebrow": "Explore Projects",
+      "title": "Discover project collections for",
+      "accent": "Regenerative Impact",
+      "description": "Projects group related Bumicerts from communities and organizations, so you can browse work at the parent-project level before diving into individual certificates."
+    },
+    "search": {
+      "ariaLabel": "Search projects",
+      "placeholder": "Search projects by name or keyword",
+      "sortAriaLabel": "Sort projects"
+    },
+    "view": {
+      "cards": "Cards",
+      "list": "List",
+      "map": "Map"
+    },
+    "sort": {
+      "newest": "Newest",
+      "oldest": "Oldest",
+      "az": "A → Z",
+      "za": "Z → A"
+    },
+    "stats": {
+      "projects": "Projects",
+      "withBumicerts": "Projects with Bumicerts",
+      "bumicerts": "Bumicerts in projects",
+      "withImages": "Projects with images"
+    },
+    "filters": {
+      "allProjects": "All Projects",
+      "allFilters": "All filters",
+      "description": "Show projects with images or a project place.",
+      "updateHint": "Filters update as you choose.",
+      "images": "Shows images",
+      "locations": "Has a place"
+    },
+    "empty": {
+      "eyebrow": "No Results",
+      "title": "No projects found",
+      "description": "Try adjusting your search or filters to find more project collections."
+    },
+    "footer": {
+      "showing": "Showing {shown} of {total} projects.",
+      "showMore": "Show more",
+      "end": "You have reached the end."
+    },
+    "card": {
+      "open": "Open project: {title}",
+      "projectSteward": "Project steward",
+      "bumicertCount": "{count, plural, one {# Bumicert} other {# Bumicerts}}",
+      "projectPlace": "Project place",
+      "showDetails": "Show details",
+      "loading": "Loading projects"
+    }
+  },
+  "browseGrid": {
+    "heading": "Ways to Explore",
+    "description": "Four ways into GainForest work, shaped for funders, stewards, and field teams.",
+    "cards": {
+      "bumicerts": {
+        "label": "Verified projects",
+        "title": "Bumicerts",
+        "blurb": "Browse project stories with photos, places, people, and context.",
+        "statLabel": "stories"
+      },
+      "organizations": {
+        "label": "Nature stewards",
+        "title": "Organizations",
+        "blurb": "Find the communities and organizations caring for ecosystems around the world.",
+        "statLabel": "profiles"
+      },
+      "observations": {
+        "label": "Biodiversity",
+        "title": "Observations",
+        "blurb": "Explore species sightings, places, and photos or sounds from GainForest.",
+        "statLabel": "sightings"
+      },
+      "leaderboard": {
+        "label": "Impact champions",
+        "title": "Leaderboard",
+        "blurb": "See the donors helping communities through Bumicerts.",
+        "statLabel": "raised"
+      }
+    }
+  },
+  "recordExplorer": {
+    "kind": {
+      "occurrence": {
+        "eyebrow": "Nature sightings",
+        "title": "Browse",
+        "accent": "nature sightings",
+        "lede": "Explore plants, animals, photos, and field sound recordings shared from project places.",
+        "search": "Search by common name, place, or plant/animal"
+      },
+      "site": {
+        "eyebrow": "Project Sites",
+        "title": "Project",
+        "accent": "sites",
+        "lede": "Explore nature stewardship groups, where they work, and the stories they share.",
+        "search": "Filter by organization or country"
+      },
+      "bumicert": {
+        "eyebrow": "Explore Projects",
+        "title": "Discover",
+        "accent": "Regenerative Impact",
+        "lede": "Browse projects from communities and organizations restoring ecosystems, strengthening livelihoods, and building a more resilient future.",
+        "search": "Filter Bumicerts by title or description"
+      },
+      "project": {
+        "eyebrow": "Projects",
+        "title": "Browse",
+        "accent": "project collections",
+        "lede": "Explore project collections and the Bumicerts they group together.",
+        "search": "Filter projects by title or description"
+      }
+    },
+    "view": {
+      "cards": "Cards",
+      "list": "List",
+      "map": "Map"
+    },
+    "sort": {
+      "newest": "Newest first",
+      "oldest": "Oldest first",
+      "az": "A → Z",
+      "za": "Z → A",
+      "aria": "Sort sightings"
+    },
+    "filters": {
+      "photos": "Photos",
+      "fieldSounds": "Field sounds",
+      "allMedia": "All media",
+      "allNature": "All nature",
+      "plants": "Plants",
+      "trees": "Trees",
+      "birds": "Birds",
+      "flowers": "Flowers"
+    },
+    "empty": {
+      "loadTitle": "Could not load this page",
+      "loadBody": "GainForest did not respond. It may be a temporary issue; visit the status page and try again.",
+      "noMatchesTitle": "No matches here",
+      "noMatchesBody": "Try a different name, place, or country; or show more to widen the search.",
+      "clearSearch": "Clear search",
+      "noCategoryTitle": "No {category} sightings in this view",
+      "noCategoryBody": "Try all nature sightings or show more results to widen the view.",
+      "showAllNature": "Show all nature",
+      "noMediaTitle": "No {media} sightings found nearby",
+      "photo": "photo",
+      "fieldSound": "field sound",
+      "noMediaBody": "The newest sightings do not always include photos or field sound recordings. Remove filters to browse everything.",
+      "removeFilters": "Remove filters",
+      "nothingTitle": "Nothing here yet",
+      "nothingBody": "There is nothing to show right now."
+    },
+    "loadingMore": "Loading more…",
+    "showMore": "Show more",
+    "end": "You have reached the end.",
+    "card": {
+      "shared": "Shared {date}",
+      "showDetails": "Show details",
+      "playSound": "Play sound",
+      "pauseSound": "Pause sound",
+      "verified": "Verified",
+      "gainforest": "GainForest",
+      "project": "Project",
+      "bumicert": "Bumicert",
+      "projectPlace": "Project place",
+      "noCover": "No cover image",
+      "peopleNamed": "{count, plural, one {# person named} other {# people named}}",
+      "projectPlaces": "{count, plural, one {# project place} other {# project places}}",
+      "natureSoundRecording": "Nature sound recording",
+      "unidentifiedSighting": "Unidentified sighting",
+      "media": {
+        "image": "Photo",
+        "audio": "Field sound",
+        "video": "Video",
+        "spectrogram": "Sound view"
+      }
+    }
+  },
+  "recordDrawer": {
+    "actions": {
+      "donate": "Donate",
+      "view": "View",
+      "viewProfile": "View profile",
+      "copyLink": "Copy link",
+      "copied": "Copied!",
+      "close": "Close",
+      "edit": "Edit",
+      "cancel": "Cancel",
+      "saveChanges": "Save changes"
+    },
+    "kind": {
+      "occurrence": "Nature sighting",
+      "bumicert": "Bumicert",
+      "project": "Project",
+      "site": "Project site",
+      "organization": "Organization"
+    },
+    "bumicertStats": {
+      "peopleNamed": "People named",
+      "locations": "Locations",
+      "workPeriod": "Work period"
+    },
+    "projectBumicerts": {
+      "title": "Bumicerts in this project",
+      "view": "View Bumicert",
+      "showing": "Showing {shown} of {total} linked Bumicerts.",
+      "empty": "This project does not have linked Bumicerts yet.",
+      "loading": "Loading linked Bumicerts"
+    },
+    "observation": {
+      "ownerTitle": "Your sighting",
+      "ownerDescription": "You can change the saved details or remove this sighting.",
+      "saved": "Sighting saved.",
+      "saveError": "This sighting could not be saved. Please try again.",
+      "deleteError": "This sighting could not be deleted. Please try again.",
+      "deleteTitle": "Delete this sighting?",
+      "deleteDescription": "This removes the sighting and linked photos, field sounds, and saved details. This cannot be undone.",
+      "keep": "Keep sighting",
+      "delete": "Delete sighting",
+      "fields": {
+        "scientificName": "Plant or animal name",
+        "vernacularName": "Common name",
+        "eventDate": "Date seen",
+        "recordedBy": "Shared by",
+        "latitude": "Latitude",
+        "longitude": "Longitude",
+        "place": "Place",
+        "country": "Country",
+        "habitat": "Habitat",
+        "notes": "Notes"
+      },
+      "validation": {
+        "name": "Enter a plant or animal name.",
+        "date": "Enter when it was seen.",
+        "location": "Enter a valid map location."
+      }
+    },
+    "media": {
+      "image": "Photo",
+      "audio": "Field sound",
+      "video": "Video",
+      "spectrogram": "Sound view"
+    },
+    "fields": {
+      "family": "Family",
+      "genus": "Genus",
+      "kingdom": "Kingdom",
+      "basisOfRecord": "What was seen",
+      "count": "Count",
+      "sharedBy": "Shared by",
+      "location": "Location",
+      "mapLocation": "Map location",
+      "observed": "Observed",
+      "media": "Photos or field sounds",
+      "remarks": "Remarks",
+      "peopleNamed": "People named",
+      "projectPlaces": "Project places",
+      "start": "Start",
+      "end": "End",
+      "bumicerts": "Bumicerts",
+      "projectPlace": "Project place",
+      "added": "Added",
+      "country": "Country",
+      "type": "Type"
+    },
+    "audioHero": "Play sound for {title}"
+  }
+}

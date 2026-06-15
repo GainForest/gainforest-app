@@ -1,0 +1,125 @@
+{
+  "landing": {
+    "nav": {
+      "home": "Home",
+      "explore": "Explore",
+      "organizations": "Organizations",
+      "create": "Create",
+      "launchApp": "Launch App",
+      "menu": "Menu",
+      "navigation": "Navigation",
+      "close": "Close",
+      "theme": "Theme"
+    },
+    "hero": {
+      "imageAlt": "Misty rainforest valley",
+      "headingLine1": "Verified Impact",
+      "headingLine2": "starts with",
+      "headingEmphasis1": "Real",
+      "headingEmphasis2": "Communities",
+      "description": "Fund regenerative projects directly. Every Bumicert is a verified record of real environmental work — backed by photos, locations, and community stewards.",
+      "cta": "Explore Projects",
+      "proofPoints": {
+        "communityLed": "Community-led",
+        "photoVerified": "Photo-verified",
+        "geolocated": "Geolocated"
+      }
+    },
+    "features": {
+      "eyebrow": "About Us",
+      "items": {
+        "verified": {
+          "number": "01",
+          "title": "Verified environmental impact",
+          "description": "Every certificate is backed by photos, geolocation data, and community verification."
+        },
+        "direct": {
+          "number": "02",
+          "title": "Direct community funding",
+          "description": "Your support goes straight to the stewards doing on-ground restoration work."
+        },
+        "transparent": {
+          "number": "03",
+          "title": "Decentralized & transparent",
+          "description": "Your work, verified. Unchangeable proof of restoration that builds your reputation with donors and communities."
+        }
+      }
+    },
+    "paths": {
+      "title": "Choose Your Path",
+      "description": "Whether you're here to fund impact or showcase your work, there's a place for you.",
+      "cards": {
+        "funders": {
+          "label": "For Funders",
+          "title": "I want to support",
+          "emphasis": "a project",
+          "description": "Browse verified certificates and fund the exact moment of restoration.",
+          "cta": "Explore Bumicerts",
+          "alt": "River winding through rainforest"
+        },
+        "organizations": {
+          "label": "For Organizations",
+          "title": "I am a nature",
+          "emphasis": "steward",
+          "description": "Showcase your regenerative work and connect with funders who care.",
+          "cta": "Create a Bumicert",
+          "alt": "Waterfall in a tropical forest"
+        }
+      }
+    },
+    "certificate": {
+      "eyebrow": "The Certificate",
+      "titleLine1": "What exactly is",
+      "titleLine2": "a Bumicert?",
+      "faqItems": {
+        "digitalCertificate": {
+          "id": "1",
+          "question": "A digital certificate of impact",
+          "answer": "A Bumicert records a specific environmental action — giving it a permanent, verifiable identity on an open, decentralized network (the same technology that powers Bluesky)."
+        },
+        "evidence": {
+          "id": "2",
+          "question": "Backed by real evidence",
+          "answer": "Photos, geolocation, timestamps, monitoring data. Every claim is verifiable. This isn't a promise of future impact — it's proof of work already done."
+        },
+        "communities": {
+          "id": "3",
+          "question": "A direct line to communities",
+          "answer": "When you fund a Bumicert, your money reaches the exact people doing the restoration. No intermediaries skimming fees. No vague overhead."
+        },
+        "story": {
+          "id": "4",
+          "question": "Your claim to the story",
+          "answer": "Owning a Bumicert means you're part of that moment. A tree planted. A reef restored. An ecosystem revived. It's yours to share, hold, or gift."
+        }
+      },
+      "previewTitle": "Reforestation of Mount Halimun",
+      "previewDescription": "Community-led restoration of native forest in West Java, Indonesia. 5,000 trees planted across 12 hectares.",
+      "objectives": {
+        "primary": "Reforestation",
+        "secondary": "Biodiversity"
+      }
+    },
+    "footer": {
+      "tagline": "Connecting communities with funders.",
+      "infrastructure": "Open infrastructure. Built with GainForest.",
+      "documentation": "Documentation",
+      "copyright": "Open source, community-powered."
+    },
+    "maEarthBanner": {
+      "label": "Ma Earth Funding Round 3",
+      "deadline": "Open till May 31st",
+      "title": "Apply for the Ma Earth Funding Round 3",
+      "description": "GainForest communities can use verified project stories, evidence, and impact records from Bumicerts while applying on Ma Earth’s community-backed funding round.",
+      "highlights": {
+        "matchingPool": "$500k matching pool",
+        "projects": "Nature-based projects",
+        "record": "Prepare your Bumicert record"
+      },
+      "actions": {
+        "apply": "Apply on Ma Earth",
+        "learn": "Learn about the round"
+      }
+    }
+  }
+}

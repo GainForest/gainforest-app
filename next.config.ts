@@ -1,7 +1,11 @@
 import type { NextConfig } from "next";
+import createNextIntlPlugin from "next-intl/plugin";
+
+const withNextIntl = createNextIntlPlugin();
 
 const nextConfig: NextConfig = {
   devIndicators: false,
+  skipProxyUrlNormalize: true,
   allowedDevOrigins: ["local.gainforest.app", "local2.gainforest.app", "local-e2e.gainforest.app"],
   experimental: {
     dynamicOnHover: true,
@@ -26,4 +30,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default withNextIntl(nextConfig);

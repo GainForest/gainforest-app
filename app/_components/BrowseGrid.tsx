@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { ArrowUpRightIcon, LeafIcon } from "lucide-react";
 import type { ExplorerKpis } from "../_lib/kpis";
 import { formatCompact, formatCompactUsd } from "../_lib/format";
@@ -7,6 +8,7 @@ import { formatCompact, formatCompactUsd } from "../_lib/format";
 // home sections: max-w-6xl, centered editorial heading, rounded cards, and the
 // same restrained primary accents instead of the old wide dashboard band.
 export function BrowseGrid({ kpis }: { kpis: ExplorerKpis }) {
+  const t = useTranslations("common.browseGrid");
   const cards: Array<{
     href: string;
     label: string;
@@ -17,35 +19,35 @@ export function BrowseGrid({ kpis }: { kpis: ExplorerKpis }) {
   }> = [
     {
       href: "/bumicerts",
-      label: "Verified projects",
-      title: "Bumicerts",
-      blurb: "Browse project stories with photos, places, people, and context.",
+      label: t("cards.bumicerts.label"),
+      title: t("cards.bumicerts.title"),
+      blurb: t("cards.bumicerts.blurb"),
       stat: formatCompact(kpis.bumicerts),
-      statLabel: "stories",
+      statLabel: t("cards.bumicerts.statLabel"),
     },
     {
       href: "/organizations",
-      label: "Nature stewards",
-      title: "Organizations",
-      blurb: "Find the communities and organizations caring for ecosystems around the world.",
+      label: t("cards.organizations.label"),
+      title: t("cards.organizations.title"),
+      blurb: t("cards.organizations.blurb"),
       stat: formatCompact(kpis.sites),
-      statLabel: "profiles",
+      statLabel: t("cards.organizations.statLabel"),
     },
     {
       href: "/observations",
-      label: "Biodiversity",
-      title: "Observations",
-      blurb: "Explore species sightings, places, and photos or sounds from GainForest.",
+      label: t("cards.observations.label"),
+      title: t("cards.observations.title"),
+      blurb: t("cards.observations.blurb"),
       stat: formatCompact(kpis.occurrences),
-      statLabel: "sightings",
+      statLabel: t("cards.observations.statLabel"),
     },
     {
       href: "/leaderboard",
-      label: "Impact champions",
-      title: "Leaderboard",
-      blurb: "See the donors helping communities through Bumicerts.",
+      label: t("cards.leaderboard.label"),
+      title: t("cards.leaderboard.title"),
+      blurb: t("cards.leaderboard.blurb"),
       stat: formatCompactUsd(kpis.totalRaised),
-      statLabel: "raised",
+      statLabel: t("cards.leaderboard.statLabel"),
     },
   ];
 
@@ -59,10 +61,10 @@ export function BrowseGrid({ kpis }: { kpis: ExplorerKpis }) {
             <span className="h-px w-8 bg-border" />
           </div>
           <h2 className="font-garamond text-4xl font-light tracking-[-0.01em] text-foreground md:text-5xl">
-            Ways to Explore
+            {t("title")}
           </h2>
           <p className="mx-auto mt-3 max-w-xl text-base leading-relaxed text-muted-foreground">
-            Four ways into GainForest work, shaped for funders, stewards, and field teams.
+            {t("description")}
           </p>
         </div>
 

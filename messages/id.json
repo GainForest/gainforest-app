@@ -1,0 +1,125 @@
+{
+  "landing": {
+    "nav": {
+      "home": "Beranda",
+      "explore": "Jelajahi",
+      "organizations": "Organisasi",
+      "create": "Buat",
+      "launchApp": "Buka aplikasi",
+      "menu": "Menu",
+      "navigation": "Navigasi",
+      "close": "Tutup",
+      "theme": "Tema"
+    },
+    "hero": {
+      "imageAlt": "Lembah hutan hujan berkabut",
+      "headingLine1": "Dampak terverifikasi",
+      "headingLine2": "dimulai dari",
+      "headingEmphasis1": "Komunitas",
+      "headingEmphasis2": "nyata",
+      "description": "Danai proyek regeneratif secara langsung. Setiap Bumicert adalah catatan terverifikasi atas kerja lingkungan nyata, didukung foto, lokasi, dan pengelola komunitas.",
+      "cta": "Jelajahi proyek",
+      "proofPoints": {
+        "communityLed": "Dipimpin komunitas",
+        "photoVerified": "Diverifikasi foto",
+        "geolocated": "Bergeolokasi"
+      }
+    },
+    "features": {
+      "eyebrow": "Tentang kami",
+      "items": {
+        "verified": {
+          "number": "01",
+          "title": "Dampak lingkungan terverifikasi",
+          "description": "Setiap sertifikat didukung foto, data geolokasi, dan verifikasi komunitas."
+        },
+        "direct": {
+          "number": "02",
+          "title": "Pendanaan langsung ke komunitas",
+          "description": "Dukungan Anda langsung menuju para pengelola yang melakukan restorasi di lapangan."
+        },
+        "transparent": {
+          "number": "03",
+          "title": "Terdesentralisasi dan transparan",
+          "description": "Karya Anda, terverifikasi. Bukti pemulihan yang tidak dapat diubah yang membangun reputasi Anda di mata donor dan komunitas."
+        }
+      }
+    },
+    "paths": {
+      "title": "Pilih jalan Anda",
+      "description": "Baik Anda ingin mendanai dampak atau menampilkan karya Anda, ada tempat untuk Anda.",
+      "cards": {
+        "funders": {
+          "label": "Untuk pendana",
+          "title": "Saya ingin mendukung",
+          "emphasis": "sebuah proyek",
+          "description": "Jelajahi sertifikat terverifikasi dan danai momen restorasi yang tepat.",
+          "cta": "Jelajahi Bumicerts",
+          "alt": "Sungai berkelok melalui hutan hujan"
+        },
+        "organizations": {
+          "label": "Untuk organisasi",
+          "title": "Saya adalah penjaga",
+          "emphasis": "alam",
+          "description": "Tampilkan kerja regeneratif Anda dan terhubung dengan pendana yang peduli.",
+          "cta": "Buat Bumicert",
+          "alt": "Air terjun di hutan tropis"
+        }
+      }
+    },
+    "certificate": {
+      "eyebrow": "Sertifikat",
+      "titleLine1": "Apa sebenarnya",
+      "titleLine2": "Bumicert itu?",
+      "faqItems": {
+        "digitalCertificate": {
+          "id": "1",
+          "question": "Sertifikat digital untuk dampak",
+          "answer": "Bumicert mencatat tindakan lingkungan tertentu dan memberinya identitas permanen yang dapat diverifikasi di jaringan terbuka dan terdesentralisasi."
+        },
+        "evidence": {
+          "id": "2",
+          "question": "Didukung bukti nyata",
+          "answer": "Foto, geolokasi, cap waktu, dan data pemantauan. Setiap klaim dapat diverifikasi: bukan janji dampak masa depan, melainkan bukti kerja yang telah dilakukan."
+        },
+        "communities": {
+          "id": "3",
+          "question": "Jalur langsung ke komunitas",
+          "answer": "Saat Anda mendanai Bumicert, dana Anda sampai ke orang-orang yang melakukan restorasi. Tanpa perantara yang mengambil biaya atau overhead yang kabur."
+        },
+        "story": {
+          "id": "4",
+          "question": "Klaim Anda atas cerita ini",
+          "answer": "Memiliki Bumicert berarti Anda menjadi bagian dari momen itu: pohon yang ditanam, terumbu yang dipulihkan, ekosistem yang dihidupkan kembali. Anda dapat membagikan, menyimpan, atau menghadiahkannya."
+        }
+      },
+      "previewTitle": "Reforestasi Gunung Halimun",
+      "previewDescription": "Restorasi hutan asli yang dipimpin komunitas di Jawa Barat, Indonesia. 5.000 pohon ditanam di 12 hektare.",
+      "objectives": {
+        "primary": "Reforestasi",
+        "secondary": "Keanekaragaman hayati"
+      }
+    },
+    "footer": {
+      "tagline": "Menghubungkan komunitas dengan pendana.",
+      "infrastructure": "Infrastruktur terbuka. Dibangun bersama GainForest.",
+      "documentation": "Dokumentasi",
+      "copyright": "Sumber terbuka, digerakkan komunitas."
+    },
+    "maEarthBanner": {
+      "label": "Putaran Pendanaan Ma Earth 3",
+      "deadline": "Dibuka hingga 31 Mei",
+      "title": "Daftar ke Putaran Pendanaan Ma Earth 3",
+      "description": "Komunitas GainForest dapat menggunakan cerita proyek terverifikasi, bukti, dan catatan dampak dari Bumicerts saat mendaftar ke putaran pendanaan berbasis komunitas Ma Earth.",
+      "highlights": {
+        "matchingPool": "Dana pencocokan $500k",
+        "projects": "Proyek berbasis alam",
+        "record": "Siapkan catatan Bumicert Anda"
+      },
+      "actions": {
+        "apply": "Daftar di Ma Earth",
+        "learn": "Pelajari putaran ini"
+      }
+    }
+  }
+}

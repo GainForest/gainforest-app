@@ -1,15 +1,19 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { Suspense } from "react";
 import { OrganizationsClient } from "./OrganizationsClient";
 
 export const revalidate = 60;
 
-export const metadata: Metadata = {
-  title: "Organizations — GainForest",
-  description:
-    "Browse nature steward organizations creating verified environmental impact with GainForest.",
-  alternates: { canonical: "/organizations" },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("marketplace.organizations.metadata");
+
+  return {
+    title: t("title"),
+    description: t("description"),
+    alternates: { canonical: "/organizations" },
+  };
+}
 
 export default function OrganizationsPage() {
   return (

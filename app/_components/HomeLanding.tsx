@@ -18,6 +18,7 @@ import {
   Share2Icon,
 } from "lucide-react";
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import type { ExplorerKpis } from "../_lib/kpis";
 import { formatCompact, formatCompactUsd } from "../_lib/format";
 import { StatsTileGrid, type StatsTileItem } from "./StatsTile";
@@ -27,108 +28,51 @@ type HomeLandingProps = {
   kpis?: ExplorerKpis | null;
 };
 
-const FEATURE_ITEMS = [
-  {
-    number: "01",
-    title: "Verified environmental impact",
-    description: "Every certificate is backed by photos, map locations, and community review.",
-  },
-  {
-    number: "02",
-    title: "Direct community funding",
-    description: "Your support goes straight to the stewards doing on-ground restoration work.",
-  },
-  {
-    number: "03",
-    title: "Clear and trustworthy",
-    description:
-      "Your restoration work is easy to verify and simple to share with donors and communities.",
-  },
-] as const;
+const FEATURE_ITEMS = ["verified", "direct", "transparent"] as const;
 
 const OPTION_CARDS = [
   {
     key: "funders",
     href: "/bumicerts",
     image: "/assets/media/images/landing/supporter-river.jpg",
-    alt: "River winding through rainforest",
-    label: "For Funders",
-    title: "I want to support",
-    emphasis: "a project",
-    description: "Browse verified certificates and fund a real restoration moment.",
-    cta: "Explore Bumicerts",
   },
   {
     key: "organizations",
     href: "/manage/bumicerts",
     image: "/assets/media/images/landing/steward-waterfall.jpg",
-    alt: "Waterfall in a tropical forest",
-    label: "For Organizations",
-    title: "I am a nature",
-    emphasis: "steward",
-    description: "Showcase your regenerative work and connect with funders who care.",
-    cta: "Create a Bumicert",
   },
 ] as const;
 
-const FAQ_ITEMS = [
-  {
-    key: "digitalCertificate",
-    question: "A digital certificate of impact",
-    answer:
-      "A Bumicert tells the story of one real environmental action, with proof that people can revisit and share.",
-  },
-  {
-    key: "evidence",
-    question: "Backed by real evidence",
-    answer:
-      "Photos, map locations, dates, and field updates help people verify what happened. This isn't a promise about the future — it's proof of work already done.",
-  },
-  {
-    key: "communities",
-    question: "A direct line to communities",
-    answer:
-      "When you fund a Bumicert, your money reaches the exact people doing the restoration. No intermediaries skimming fees. No vague overhead.",
-  },
-  {
-    key: "story",
-    question: "Your place in the story",
-    answer:
-      "Owning a Bumicert means you're part of that moment. A tree planted. A reef restored. An ecosystem revived. It's yours to share and keep."
-  },
-] as const;
+const FAQ_ITEMS = ["digitalCertificate", "evidence", "communities", "story"] as const;
 
 const NETWORK_APPS = [
   {
-    key: "ma-earth",
+    key: "maEarth",
     name: "Ma Earth",
-    blurb: "Regeneration funding & monitoring",
     logo: "/assets/media/images/landing/partners/ma-earth.png",
     isSelf: false,
   },
   {
     key: "gainforest",
     name: "GainForest",
-    blurb: "Verified impact certificates",
     logo: null,
     isSelf: true,
   },
   {
     key: "hypercerts",
     name: "Hypercerts",
-    blurb: "Impact certificates & retroactive funding",
     logo: "/assets/media/images/landing/partners/hypercerts.png",
     isSelf: false,
   },
 ] as const;
 
 const NETWORK_POINTS = [
-  { key: "portable", label: "Portable records", icon: ArrowLeftRightIcon },
-  { key: "owned", label: "You own your data", icon: KeyRoundIcon },
-  { key: "shared", label: "Readable everywhere", icon: Share2Icon },
+  { key: "portable", icon: ArrowLeftRightIcon },
+  { key: "owned", icon: KeyRoundIcon },
+  { key: "shared", icon: Share2Icon },
 ] as const;
 
-type FaqKey = (typeof FAQ_ITEMS)[number]["key"];
+type FaqKey = (typeof FAQ_ITEMS)[number];
 
 export function HomeLanding({ kpis = null }: HomeLandingProps) {
   return (
@@ -147,6 +91,7 @@ export function HomeLanding({ kpis = null }: HomeLandingProps) {
 }
 
 function LandingTopNavbar() {
+  const t = useTranslations("landing");
   return (
     <motion.header
       initial={{ opacity: 0 }}
@@ -164,7 +109,7 @@ function LandingTopNavbar() {
           <motion.div whileHover={{ scale: 1.05 }} transition={{ type: "spring", stiffness: 400, damping: 25 }}>
             <Image
               src="/assets/media/images/app-icon.png"
-              alt="GainForest"
+              alt={t("brand.alt")}
               width={28}
               height={28}
               className="drop-shadow-md"
@@ -186,7 +131,7 @@ function LandingTopNavbar() {
               href="/bumicerts"
               className="inline-flex h-9 shrink-0 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-lg shadow-primary/15 transition-colors hover:bg-primary/90 focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none"
             >
-              Open GainForest
+              {t("nav.launchApp")}
             </Link>
           </motion.div>
 
@@ -198,6 +143,7 @@ function LandingTopNavbar() {
 }
 
 function LandingHero() {
+  const t = useTranslations("landing.hero");
   return (
     <section className="relative flex min-h-[100dvh] flex-col overflow-hidden bg-background">
       <div className="absolute inset-y-0 right-0 w-full overflow-hidden">
@@ -209,7 +155,7 @@ function LandingHero() {
         >
           <Image
             src="/assets/media/images/landing/hero-rainforest@2x.webp"
-            alt="Misty rainforest valley"
+            alt={t("imageAlt")}
             fill
             priority
             quality={95}
@@ -230,13 +176,13 @@ function LandingHero() {
             className="flex max-w-[620px] flex-col items-center text-center md:items-start md:text-left"
           >
             <h1 className="font-garamond text-5xl leading-[1.08] font-medium tracking-[-0.02em] text-foreground md:text-7xl">
-              <span className="relative inline-block">Verified Impact</span>
+              <span className="relative inline-block">{t("headingLine1")}</span>
               <br />
-              <span className="relative inline-block">starts with</span>
+              <span className="relative inline-block">{t("headingLine2")}</span>
               <br />
               <span className="font-instrument text-primary italic dark:brightness-150">
                 <span className="relative inline-block">
-                  Real
+                  {t("headingEmphasis1")}
                   <svg
                     aria-hidden="true"
                     viewBox="0 0 178 16"
@@ -252,7 +198,7 @@ function LandingHero() {
                     />
                   </svg>
                 </span>{" "}
-                Communities
+                {t("headingEmphasis2")}
               </span>
             </h1>
 
@@ -262,8 +208,7 @@ function LandingHero() {
               transition={{ duration: 0.65, delay: 0.38, ease: [0.25, 0.1, 0.25, 1] }}
               className="mt-6 max-w-[500px] text-lg leading-relaxed text-foreground/80 md:mt-8 md:text-xl"
             >
-              Fund regenerative projects directly. Every Bumicert is a verified story of real environmental work —
-              backed by photos, places, and community stewards.
+{t("description")}
             </motion.p>
 
             <motion.div
@@ -276,7 +221,7 @@ function LandingHero() {
                 href="/bumicerts"
                 className="inline-flex h-12 shrink-0 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-full bg-primary px-6 py-2 text-sm font-medium text-primary-foreground shadow-lg shadow-primary/20 transition-colors hover:bg-primary/90 focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50"
               >
-                Explore Projects
+                {t("cta")}
                 <motion.span
                   className="inline-flex"
                   animate={{ x: [0, 3, 0] }}
@@ -295,17 +240,17 @@ function LandingHero() {
             >
               <span className="inline-flex items-center gap-3">
                 <LeafIcon className="size-6 stroke-[1.5]" />
-                Community-led
+                {t("proofPoints.communityLed")}
               </span>
               <span className="hidden h-8 w-px bg-foreground/20 sm:block" />
               <span className="inline-flex items-center gap-3">
                 <CameraIcon className="size-6 stroke-[1.5]" />
-                Photo-backed
+                {t("proofPoints.photoVerified")}
               </span>
               <span className="hidden h-8 w-px bg-foreground/20 sm:block" />
               <span className="inline-flex items-center gap-3">
                 <MapPinIcon className="size-6 stroke-[1.5]" />
-                Locations shown
+                {t("proofPoints.geolocated")}
               </span>
             </motion.div>
           </motion.div>
@@ -317,6 +262,7 @@ function LandingHero() {
 }
 
 function HomeStats({ kpis }: { kpis: ExplorerKpis | null }) {
+  const t = useTranslations("landing.stats");
   if (!kpis) return null;
 
   const stats: StatsTileItem[] = [];
@@ -324,7 +270,7 @@ function HomeStats({ kpis }: { kpis: ExplorerKpis | null }) {
   if (kpis.bumicerts != null) {
     stats.push({
       value: formatCompact(kpis.bumicerts),
-      label: "Bumicerts shared",
+      label: t("bumicertsShared"),
       href: "/bumicerts",
       icon: <CompassIcon />,
       accent: true,
@@ -333,7 +279,7 @@ function HomeStats({ kpis }: { kpis: ExplorerKpis | null }) {
   if (kpis.sites != null) {
     stats.push({
       value: formatCompact(kpis.sites),
-      label: "Organization profiles",
+      label: t("organizationProfiles"),
       href: "/organizations",
       icon: <Building2Icon />,
     });
@@ -341,7 +287,7 @@ function HomeStats({ kpis }: { kpis: ExplorerKpis | null }) {
   if (kpis.occurrences != null) {
     stats.push({
       value: formatCompact(kpis.occurrences),
-      label: "Nature sightings shared",
+      label: t("natureSightingsShared"),
       href: "/observations",
       icon: <BinocularsIcon />,
     });
@@ -349,7 +295,7 @@ function HomeStats({ kpis }: { kpis: ExplorerKpis | null }) {
   if (kpis.totalRaised != null) {
     stats.push({
       value: formatCompactUsd(kpis.totalRaised),
-      label: "Raised for projects",
+      label: t("raisedForProjects"),
       href: "/leaderboard",
       icon: <HandHeartIcon />,
       accent: true,
@@ -368,6 +314,7 @@ function HomeStats({ kpis }: { kpis: ExplorerKpis | null }) {
 }
 
 function FeaturesSection() {
+  const t = useTranslations("landing.features");
   return (
     <section className="px-6 pt-8 pb-10 sm:px-12 sm:pt-10 sm:pb-12 md:px-6 md:pt-8 md:pb-10">
       <div className="mx-auto max-w-6xl">
@@ -379,13 +326,13 @@ function FeaturesSection() {
           className="mb-5 flex items-center gap-2"
         >
           <LeafIcon className="size-4 text-primary" />
-          <span className="text-xs font-semibold tracking-[0.16em] text-primary uppercase">About Us</span>
+          <span className="text-xs font-semibold tracking-[0.16em] text-primary uppercase">{t("eyebrow")}</span>
         </motion.div>
 
         <div className="grid grid-cols-1 gap-12 sm:grid-cols-3 sm:gap-8">
           {FEATURE_ITEMS.map((feature, index) => (
             <motion.div
-              key={feature.title}
+              key={feature}
               initial={{ opacity: 0, y: 22 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -398,10 +345,10 @@ function FeaturesSection() {
               )}
             >
               <span className="font-garamond block text-5xl leading-none font-light tracking-tight text-primary/65 dark:text-primary/90">
-                {feature.number}.
+                {t(`items.${feature}.number`)}.
               </span>
-              <h3 className="font-instrument mt-4 text-lg leading-tight text-foreground">{feature.title}</h3>
-              <p className="mt-3 text-[15px] leading-relaxed text-muted-foreground dark:text-foreground/75">{feature.description}</p>
+              <h3 className="font-instrument mt-4 text-lg leading-tight text-foreground">{t(`items.${feature}.title`)}</h3>
+              <p className="mt-3 text-[15px] leading-relaxed text-muted-foreground dark:text-foreground/75">{t(`items.${feature}.description`)}</p>
             </motion.div>
           ))}
         </div>
@@ -411,6 +358,7 @@ function FeaturesSection() {
 }
 
 function UserOptionCards() {
+  const t = useTranslations("landing.paths");
   return (
     <section className="px-6 pt-8 pb-10 sm:px-12 sm:pt-10 sm:pb-12 md:px-6 md:pt-8 md:pb-12">
       <div className="mx-auto max-w-6xl">
@@ -427,10 +375,10 @@ function UserOptionCards() {
             <span className="h-px w-8 bg-border" />
           </div>
           <h2 className="font-garamond text-4xl font-light tracking-[-0.01em] text-foreground md:text-5xl">
-            Choose Your Path
+            {t("title")}
           </h2>
           <p className="mx-auto mt-3 max-w-xl text-base leading-relaxed text-muted-foreground">
-            Whether you're here to fund impact or showcase your work, there's a place for you.
+            {t("description")}
           </p>
         </motion.div>
 
@@ -447,7 +395,7 @@ function UserOptionCards() {
                 <div className="relative h-[320px] overflow-hidden rounded-2xl border border-border bg-card shadow-lg shadow-foreground/5 transition-all duration-500 hover:border-primary/20 hover:shadow-xl sm:h-[360px]">
                   <Image
                     src={card.image}
-                    alt={card.alt}
+                    alt={t(`cards.${card.key}.alt`)}
                     fill
                     sizes="(min-width: 640px) 50vw, calc(100vw - 3rem)"
                     className="object-cover transition-transform duration-700 group-hover:scale-105"
@@ -462,20 +410,20 @@ function UserOptionCards() {
                           : "bg-background/75 px-3 py-1 text-foreground/70 shadow-sm",
                       )}
                     >
-                      {card.label}
+                      {t(`cards.${card.key}.label`)}
                     </span>
                     <h3 className="font-garamond mt-4 text-4xl leading-[1.05] font-light tracking-[-0.015em] text-foreground">
-                      {card.title}
+                      {t(`cards.${card.key}.title`)}
                       <br />
-                      <span className="font-instrument text-primary italic">{card.emphasis}</span>
+                      <span className="font-instrument text-primary italic">{t(`cards.${card.key}.emphasis`)}</span>
                     </h3>
-                    <p className="mt-4 max-w-sm text-base leading-relaxed text-muted-foreground dark:text-foreground/75">{card.description}</p>
+                    <p className="mt-4 max-w-sm text-base leading-relaxed text-muted-foreground dark:text-foreground/75">{t(`cards.${card.key}.description`)}</p>
                     <motion.div
                       className="mt-5 flex items-center gap-2 text-sm font-semibold text-foreground transition-colors group-hover:text-primary"
                       whileHover={{ x: 4 }}
                       transition={{ type: "spring", stiffness: 400, damping: 25 }}
                     >
-                      {card.cta}
+                      {t(`cards.${card.key}.cta`)}
                       <ArrowUpRightIcon className="size-3.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
                     </motion.div>
                   </div>
@@ -490,6 +438,7 @@ function UserOptionCards() {
 }
 
 function WhatIsBumicert() {
+  const t = useTranslations("landing.certificate");
   const [openItem, setOpenItem] = useState<FaqKey>("digitalCertificate");
 
   return (
@@ -504,23 +453,23 @@ function WhatIsBumicert() {
           >
             <div className="mb-4 flex items-center gap-2 text-primary">
               <LeafIcon className="size-4" />
-              <span className="text-xs font-bold tracking-[0.15em] uppercase">The Certificate</span>
+              <span className="text-xs font-bold tracking-[0.15em] uppercase">{t("eyebrow")}</span>
             </div>
 
             <h2 className="font-garamond mb-5 text-4xl leading-[1.04] font-light tracking-[-0.015em] text-foreground md:text-5xl">
-              What exactly is
+              {t("titleLine1")}
               <br />
-              <span className="font-instrument text-foreground italic">a Bumicert?</span>
+              <span className="font-instrument text-foreground italic">{t("titleLine2")}</span>
             </h2>
 
             <div>
               {FAQ_ITEMS.map((item, index) => (
                 <AccordionItem
-                  key={item.key}
+                  key={item}
                   item={item}
                   index={index}
-                  isOpen={openItem === item.key}
-                  onToggle={() => setOpenItem(item.key)}
+                  isOpen={openItem === item}
+                  onToggle={() => setOpenItem(item)}
                 />
               ))}
             </div>
@@ -539,10 +488,10 @@ function WhatIsBumicert() {
                 className="relative shadow-xl shadow-foreground/10 [&_h3]:text-xl [&_h3]:leading-tight [&_p]:text-sm [&_p]:leading-relaxed"
                 logoUrl="/assets/media/images/app-icon.png"
                 coverImage="/assets/media/images/landing/certificate-river.jpg"
-                title="Reforestation of Mount Halimun"
-                description="Community-led restoration of native forest in West Java, Indonesia. 5,000 trees planted across 12 hectares."
+                title={t("previewTitle")}
+                description={t("previewDescription")}
                 organizationName="GainForest"
-                objectives={["Reforestation", "Biodiversity"]}
+                objectives={[t("objectives.primary"), t("objectives.secondary")]}
               />
             </div>
           </motion.div>
@@ -553,6 +502,7 @@ function WhatIsBumicert() {
 }
 
 function OpenNetworkSection() {
+  const t = useTranslations("landing.openNetwork");
   return (
     <section className="px-6 pt-8 pb-12 sm:px-12 sm:pt-10 sm:pb-14 md:px-6 md:pt-8 md:pb-16">
       <div className="mx-auto max-w-6xl">
@@ -569,12 +519,10 @@ function OpenNetworkSection() {
             <span className="h-px w-8 bg-border" />
           </div>
           <h2 className="font-garamond text-4xl font-light tracking-[-0.01em] text-foreground md:text-5xl">
-            Built for <span className="font-instrument text-primary italic">collective impact</span>
+            {t("titlePrefix")} <span className="font-instrument text-primary italic">{t("titleEmphasis")}</span>
           </h2>
           <p className="mx-auto mt-3 max-w-2xl text-base leading-relaxed text-muted-foreground">
-            GainForest uses the open AT Protocol network, so your impact data stays yours.
-            The same records can be shared with apps like Ma&nbsp;Earth and Hypercerts —
-            easy to move, easy to read.
+{t("description")}
           </p>
         </motion.div>
 
@@ -587,8 +535,8 @@ function OpenNetworkSection() {
         >
           <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-2 text-sm font-medium text-primary shadow-sm">
             <NetworkIcon className="size-4" />
-            AT Protocol
-            <span className="text-primary/55">· open network</span>
+            {t("protocol.name")}
+            <span className="text-primary/55">· {t("protocol.description")}</span>
           </div>
 
           <div aria-hidden="true" className="hidden h-8 border-l border-dashed border-border sm:block" />
@@ -616,7 +564,7 @@ function OpenNetworkSection() {
                 >
                   {app.isSelf && (
                     <span className="absolute top-3 right-3 rounded-full bg-primary px-2 py-0.5 text-[10px] font-bold tracking-wider text-primary-foreground uppercase">
-                      You
+                      {t("youBadge")}
                     </span>
                   )}
                   <div className="flex h-9 items-center justify-center">
@@ -646,7 +594,7 @@ function OpenNetworkSection() {
                     )}
                   </div>
                   <p className="text-sm leading-relaxed text-muted-foreground dark:text-foreground/75">
-                    {app.blurb}
+                    {t(`apps.${app.key}.blurb`)}
                   </p>
                 </motion.div>
               ))}
@@ -657,7 +605,7 @@ function OpenNetworkSection() {
             {NETWORK_POINTS.map((point) => (
               <span key={point.key} className="inline-flex items-center gap-2">
                 <point.icon className="size-4 text-primary/70" />
-                {point.label}
+                {t(`points.${point.key}`)}
               </span>
             ))}
           </div>
@@ -678,6 +626,7 @@ function AccordionItem({
   onToggle: () => void;
   index: number;
 }) {
+  const t = useTranslations("landing.certificate.faqItems");
   return (
     <div className="border-b border-border last:border-0">
       <button
@@ -689,7 +638,7 @@ function AccordionItem({
         <div className="flex items-center gap-4">
           <span className="font-garamond text-2xl font-light text-primary/70 dark:text-primary/95">0{index + 1}</span>
           <span className="font-instrument text-[17px] leading-snug text-foreground transition-colors duration-200 group-hover:text-primary">
-            {item.question}
+            {t(`${item}.question`)}
           </span>
         </div>
         <span className="shrink-0 text-base text-muted-foreground transition-colors group-hover:text-foreground">
@@ -706,7 +655,7 @@ function AccordionItem({
             transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
             className="overflow-hidden"
           >
-            <p className="max-w-lg pb-4 pl-11 text-[15px] leading-relaxed text-muted-foreground dark:text-foreground/75">{item.answer}</p>
+            <p className="max-w-lg pb-4 pl-11 text-[15px] leading-relaxed text-muted-foreground dark:text-foreground/75">{t(`${item}.answer`)}</p>
           </motion.div>
         )}
       </AnimatePresence>

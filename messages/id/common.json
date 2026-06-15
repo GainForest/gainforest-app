@@ -1,0 +1,133 @@
+{
+  "seo": {
+    "title": "Bumicerts — Danai dampak regeneratif",
+    "description": "Bumicerts menghubungkan pendana dengan penjaga alam yang melakukan kerja regeneratif di lapangan. Danai dampak lingkungan terverifikasi secara langsung."
+  },
+  "language": {
+    "label": "Bahasa",
+    "changeAria": "Ubah bahasa",
+    "currentLanguage": "Bahasa saat ini"
+  },
+  "navigation": {
+    "navigation": "Navigasi",
+    "openNavigation": "Buka navigasi"
+  },
+  "theme": {
+    "toggle": "Ganti tema"
+  },
+  "cart": {
+    "aria": "Keranjang",
+    "ariaWithCount": "Keranjang ({count, plural, one {# item} other {# item}})"
+  },
+  "auth": {
+    "getStarted": "Mulai",
+    "unknown": "Tidak diketahui",
+    "completeOnboarding": "Selesaikan orientasi",
+    "organizationAccount": "Akun organisasi",
+    "userAccount": "Akun pengguna",
+    "myAccount": "Akun saya",
+    "signOut": "Keluar",
+    "settings": "Pengaturan"
+  },
+  "errorPage": {
+    "title": "Terjadi kesalahan.",
+    "description": "Maaf, terjadi kesalahan saat memproses permintaan Anda.",
+    "tryAgain": "Coba lagi",
+    "home": "Beranda"
+  },
+  "notFound": {
+    "description": "Halaman ini tidak ada. Mungkin sudah dipindahkan, atau mungkin memang tidak pernah ada.",
+    "backHome": "Kembali ke beranda"
+  },
+  "sidebar": {
+    "sections": {
+      "explore": "JELAJAHI",
+      "manage": "KELOLA"
+    },
+    "items": {
+      "bumicerts": "Bumicerts",
+      "organizations": "Organisasi",
+      "leaderboard": "Papan peringkat",
+      "organization": "Organisasi",
+      "sites": "Lokasi",
+      "audio": "Audio",
+      "trees": "Pohon",
+      "profile": "Profil",
+      "settings": "Pengaturan"
+    },
+    "prompts": {
+      "signInDescription": "Masuk untuk mengelola akun dan konten Anda.",
+      "signIn": "Masuk",
+      "onboardingDescription": "Selesaikan orientasi untuk mengelola akun Anda.",
+      "onboard": "Mulai orientasi",
+      "accountLoadError": "Tidak dapat memuat akun Anda saat ini.",
+      "checkingAccount": "Memeriksa akun Anda..."
+    },
+    "creationCard": {
+      "createBumicert": "Buat Bumicert"
+    }
+  },
+  "bumicertCard": {
+    "missingImage": "Gambar Bumicert tidak tersedia",
+    "additionalObjectives": "{count, plural, one {# tujuan tambahan} other {# tujuan tambahan}}"
+  },
+  "pagination": {
+    "loadMore": "Muat lagi",
+    "loading": "Memuat",
+    "end": "Anda telah mencapai akhir."
+  },
+  "footer": {
+    "brandAlt": "GainForest",
+    "tagline": "Menghubungkan komunitas dengan penyandang dana.",
+    "builtWith": "Infrastruktur terbuka. Dibangun dengan GainForest.",
+    "dataCollectionsAria": "Koleksi data",
+    "footerLinksAria": "Tautan footer",
+    "copyright": "Sumber terbuka, digerakkan komunitas.",
+    "nonprofit": "Asosiasi nirlaba Swiss terdaftar",
+    "swissRegistration": "Registrasi Swiss",
+    "bottomTagline": "Dibangun untuk dampak kolektif",
+    "links": {
+      "gainforest": "GainForest",
+      "documentation": "Dokumentasi",
+      "twitter": "X (Twitter)",
+      "github": "GitHub",
+      "bumicerts": "Bumicerts",
+      "organizations": "Organisasi",
+      "observations": "Observasi",
+      "leaderboard": "Papan peringkat",
+      "greenGlobe": "Green Globe",
+      "status": "Status"
+    }
+  },
+  "browseGrid": {
+    "title": "Cara Menjelajah",
+    "description": "Empat jalan masuk ke karya GainForest, dibuat untuk pendana, penjaga alam, dan tim lapangan.",
+    "loadingAria": "Memuat tautan jelajah",
+    "cards": {
+      "bumicerts": {
+        "label": "Proyek terverifikasi",
+        "title": "Bumicerts",
+        "blurb": "Jelajahi cerita proyek dengan foto, tempat, orang, dan konteks.",
+        "statLabel": "cerita"
+      },
+      "organizations": {
+        "label": "Penjaga alam",
+        "title": "Organisasi",
+        "blurb": "Temukan komunitas dan organisasi yang merawat ekosistem di seluruh dunia.",
+        "statLabel": "profil"
+      },
+      "observations": {
+        "label": "Biodiversitas",
+        "title": "Observasi",
+        "blurb": "Jelajahi temuan spesies, tempat, dan foto atau suara dari GainForest.",
+        "statLabel": "temuan"
+      },
+      "leaderboard": {
+        "label": "Juara dampak",
+        "title": "Papan peringkat",
+        "blurb": "Lihat para donatur yang membantu komunitas melalui Bumicerts.",
+        "statLabel": "terkumpul"
+      }
+    }
+  }
+}

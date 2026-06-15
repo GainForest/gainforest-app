@@ -1,27 +1,29 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ExternalLinkIcon, FileTextIcon, GlobeIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { GAINFOREST_URL, GLOBE_URL, STATUS_URL } from "../_lib/urls";
 
 const PRIMARY_LINKS = [
-  { href: GAINFOREST_URL, label: "GainForest", Icon: GlobeIcon, external: true },
-  { href: "https://docs.fund.gainforest.app/", label: "Documentation", Icon: FileTextIcon, external: true },
-  { href: "https://www.x.com/GainForestNow", label: "Twitter", Icon: TwitterIcon, external: true },
-  { href: "https://github.com/GainForest/gainforest-explorer", label: "GitHub", Icon: GithubIcon, external: true },
+  { href: GAINFOREST_URL, key: "gainforest", Icon: GlobeIcon, external: true },
+  { href: "https://docs.fund.gainforest.app/", key: "documentation", Icon: FileTextIcon, external: true },
+  { href: "https://www.x.com/GainForestNow", key: "twitter", Icon: TwitterIcon, external: true },
+  { href: "https://github.com/GainForest/gainforest-explorer", key: "github", Icon: GithubIcon, external: true },
 ] as const;
 
 const DATA_LINKS = [
-  { href: "/bumicerts", label: "Bumicerts" },
-  { href: "/organizations", label: "Organizations" },
-  { href: "/observations", label: "Observations" },
-  { href: "/leaderboard", label: "Leaderboard" },
-  { href: GLOBE_URL, label: "Green Globe" },
-  { href: STATUS_URL, label: "Status" },
+  { href: "/bumicerts", key: "bumicerts" },
+  { href: "/organizations", key: "organizations" },
+  { href: "/observations", key: "observations" },
+  { href: "/leaderboard", key: "leaderboard" },
+  { href: GLOBE_URL, key: "greenGlobe" },
+  { href: STATUS_URL, key: "status" },
 ] as const;
 
 // Mixed footer: GainForest's light, minimal brand block plus the explorer's data
 // source/legal details and GainForest social presence.
 export function Footer() {
+  const t = useTranslations("common.footer");
   const year = new Date().getFullYear();
 
   return (
@@ -32,7 +34,7 @@ export function Footer() {
             <div className="flex items-center gap-2.5">
               <Image
                 src="/assets/media/images/app-icon.png"
-                alt="GainForest"
+                alt={t("brandAlt")}
                 width={28}
                 height={28}
                 className="drop-shadow-md"
@@ -43,14 +45,14 @@ export function Footer() {
               className="text-sm text-muted-foreground"
               style={{ fontFamily: "var(--font-instrument-serif-var)", fontStyle: "italic" }}
             >
-              Connecting communities with funders.
+              {t("tagline")}
             </p>
             <p className="mt-1 text-xs text-muted-foreground/60">
-              Built with GainForest to make environmental work easier to find, understand, and support.
+              {t("builtWith")}
             </p>
           </div>
 
-          <nav className="mt-5 flex flex-wrap gap-x-5 gap-y-2 text-[13px] text-muted-foreground" aria-label="Data collections">
+          <nav className="mt-5 flex flex-wrap gap-x-5 gap-y-2 text-[13px] text-muted-foreground" aria-label={t("dataCollectionsAria")}>
             {DATA_LINKS.map((link) => (
               <Link
                 key={link.href}
@@ -59,13 +61,13 @@ export function Footer() {
                 rel={link.href.startsWith("http") ? "noreferrer" : undefined}
                 className="transition-colors hover:text-foreground"
               >
-                {link.label}
+                {t(`links.${link.key}`)}
               </Link>
             ))}
           </nav>
         </div>
 
-        <nav className="flex flex-col gap-1" aria-label="Footer links">
+        <nav className="flex flex-col gap-1" aria-label={t("footerLinksAria")}>
           {PRIMARY_LINKS.map((link) => (
             <Link
               key={link.href}
@@ -75,7 +77,7 @@ export function Footer() {
               className="flex items-center gap-2 py-0.5 text-sm text-muted-foreground transition-colors duration-150 hover:text-foreground"
             >
               <link.Icon className="h-3.5 w-3.5" />
-              <span>{link.label}</span>
+              <span>{t(`links.${link.key}`)}</span>
               {link.external && <ExternalLinkIcon className="h-3 w-3 opacity-50" />}
             </Link>
           ))}
@@ -86,7 +88,7 @@ export function Footer() {
         <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
           <div className="flex flex-col gap-1.5 leading-[1.55]">
             <span>
-              © {year} GainForest. Community-powered.
+              © {year} {t("copyright")}
             </span>
             <span>
               <span className="font-medium text-muted-foreground/80">GainForest e.V.</span>
@@ -94,7 +96,7 @@ export function Footer() {
               Schwandenacker 35, 8052 Zurich, Switzerland
             </span>
             <span>
-              Tax-exempt non-profit
+              {t("nonprofit")}
               <span className="text-muted-foreground/35"> · </span>
               <Link
                 href="https://www.uid.admin.ch/Detail.aspx?uid_id=CHE181901605"
@@ -102,7 +104,7 @@ export function Footer() {
                 rel="noreferrer"
                 className="underline-offset-4 transition-colors hover:text-primary hover:underline"
               >
-                Swiss registration: CHE-181.901.605
+                {t("swissRegistration")}
               </Link>
               <span className="text-muted-foreground/35"> · </span>
               <Link href="mailto:team@gainforest.net" className="underline-offset-4 transition-colors hover:text-primary hover:underline">
@@ -111,7 +113,7 @@ export function Footer() {
             </span>
           </div>
           <span className="text-[12px] text-muted-foreground/40">
-            Built to connect communities with funders.
+            {t("bottomTagline")}
           </span>
         </div>
       </div>

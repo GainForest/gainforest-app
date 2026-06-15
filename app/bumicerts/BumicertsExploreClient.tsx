@@ -18,6 +18,7 @@ import {
   UsersIcon,
 } from "lucide-react";
 import { memo, useCallback, useDeferredValue, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useLocale, useTranslations } from "next-intl";
 import { parseAsString, parseAsStringEnum, useQueryState } from "nuqs";
 import { BumicertOwnerAvatar } from "@/components/bumicert/BumicertOwnerAvatar";
 import { BumicertPillRows, type BumicertCardPill } from "@/components/bumicert/BumicertPillRows";
@@ -53,38 +54,39 @@ type FilterChip = {
   predicate: (record: BumicertRecord) => boolean;
 };
 
-const FILTER_CHIPS: FilterChip[] = [
-  { key: "images", label: "Shows photos", predicate: (record) => Boolean(record.imageUrl) },
-  { key: "locations", label: "Shows project places", predicate: (record) => record.locationCount > 0 },
-  { key: "contributors", label: "Shows named people", predicate: (record) => record.contributorCount > 0 },
-  { key: "active", label: "Shows work dates", predicate: (record) => Boolean(record.startDate || record.endDate) },
-  // "donations" is checked against the funding index in visibleRecords (the
-  // server fetch path also pushes it down to the funding-config stream).
-  { key: "donations", label: "Accepts donations", predicate: () => true },
-];
-
 const FILTER_KEYS: FilterKey[] = ["images", "locations", "contributors", "active", "donations"];
 const SORT_MODES: SortMode[] = ["newest", "oldest", "az", "za"];
 const VIEW_MODES: ViewMode[] = ["cards", "list", "map"];
 const QUERY_STATE_OPTIONS = { history: "replace", scroll: false, shallow: true } as const;
 const SEARCH_QUERY_STATE_OPTIONS = { ...QUERY_STATE_OPTIONS, throttleMs: 200 } as const;
 
-const SORT_OPTIONS: Array<{ value: SortMode; label: string }> = [
-  { value: "newest", label: "Newest" },
-  { value: "oldest", label: "Oldest" },
-  { value: "az", label: "A → Z" },
-  { value: "za", label: "Z → A" },
-];
-
-const SORT_LABELS: Record<SortMode, string> = Object.fromEntries(
-  SORT_OPTIONS.map((option) => [option.value, option.label]),
-) as Record<SortMode, string>;
 
 const BUMICERTS_PAGE_SIZE = 48;
 const INITIAL_CARD_LIMIT = 96;
 const CARD_BATCH_SIZE = 96;
 
 export function BumicertsExploreClient({ records: initialRecords = [] }: { records?: BumicertRecord[] }) {
+  const t = useTranslations("marketplace.explore");
+  const locale = useLocale();
+  const filterChips = useMemo<FilterChip[]>(() => [
+    { key: "images", label: t("filters.images"), predicate: (record) => Boolean(record.imageUrl) },
+    { key: "locations", label: t("filters.locations"), predicate: (record) => record.locationCount > 0 },
+    { key: "contributors", label: t("filters.contributors"), predicate: (record) => record.contributorCount > 0 },
+    { key: "active", label: t("filters.active"), predicate: (record) => Boolean(record.startDate || record.endDate) },
+    { key: "donations", label: t("filters.donations"), predicate: () => true },
+  ], [t]);
+  const sortOptions = useMemo<Array<{ value: SortMode; label: string }>>(() => [
+    { value: "newest", label: t("sort.newest") },
+    { value: "oldest", label: t("sort.oldest") },
+    { value: "az", label: t("sort.az") },
+    { value: "za", label: t("sort.za") },
+  ], [t]);
+  const sortLabels = useMemo(() => Object.fromEntries(sortOptions.map((option) => [option.value, option.label])) as Record<SortMode, string>, [sortOptions]);
+  const viewOptions = useMemo(() => [
+    { id: "cards", label: t("view.cards"), Icon: LayoutGridIcon },
+    { id: "list", label: t("view.list"), Icon: ListIcon },
+    { id: "map", label: t("view.map"), Icon: MapIcon },
+  ] as const, [t]);
   const [records, setRecords] = useState<BumicertRecord[]>(initialRecords);
   const [cursor, setCursor] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState(initialRecords.length === 0);
@@ -238,7 +240,7 @@ export function BumicertsExploreClient({ records: initialRecords = [] }: { recor
         // Until the funding index resolves, trust the server-side filter.
         return fundingIndex ? fundingIndex.get(record.atUri)?.accepting === true : true;
       }
-      return FILTER_CHIPS.find((chip) => chip.key === key)?.predicate(record) ?? true;
+      return filterChips.find((chip) => chip.key === key)?.predicate(record) ?? true;
     })).toSorted((a, b) => {
       switch (sort) {
         case "oldest":
@@ -252,7 +254,7 @@ export function BumicertsExploreClient({ records: initialRecords = [] }: { recor
           return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
       }
     });
-  }, [records, deferredQuery, sort, filters, fundingIndex]);
+  }, [records, sort, filters, fundingIndex, filterChips]);
 
   const renderedRecords = useMemo(
     () => (view === "map" ? visibleRecords : visibleRecords.slice(0, cardLimit)),
@@ -268,23 +270,23 @@ export function BumicertsExploreClient({ records: initialRecords = [] }: { recor
   const stats = useMemo(
     () => [
       {
-        label: "Published Bumicerts",
+        label: t("stats.published"),
         value: totalStats?.totalBumicerts ?? null,
       },
       {
-        label: "Bumicerts with locations",
+        label: t("stats.withLocations"),
         value: totalStats?.certifiedPlaces ?? null,
       },
       {
-        label: "Contributors across Bumicerts",
+        label: t("stats.contributors"),
         value: totalStats?.contributors ?? null,
       },
       {
-        label: "Bumicerts with a cover",
+        label: t("stats.withCover"),
         value: totalStats?.projectPhotos ?? null,
       },
     ],
-    [totalStats],
+    [totalStats, t],
   );
 
   useEffect(() => {
@@ -388,14 +390,14 @@ export function BumicertsExploreClient({ records: initialRecords = [] }: { recor
             <div className="mb-5 flex items-center gap-2.5">
               <LeafIcon className="h-4 w-4 text-primary" />
               <span className="text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
-                Explore Bumicerts
+                {t("hero.eyebrow")}
               </span>
             </div>
             <h1
               className="max-w-4xl text-4xl font-light leading-[0.98] tracking-[-0.035em] text-foreground sm:text-5xl md:text-6xl lg:text-7xl"
               style={{ fontFamily: "var(--font-garamond-var)" }}
             >
-              Discover{" "}
+              {t("hero.titlePrefix")}{" "}
               <span
                 className="whitespace-nowrap text-foreground/85"
                 style={{
@@ -403,12 +405,11 @@ export function BumicertsExploreClient({ records: initialRecords = [] }: { recor
                   fontStyle: "italic",
                 }}
               >
-                Regenerative Impact
+                {t("hero.titleEmphasis")}
               </span>
             </h1>
             <p className="mt-7 max-w-2xl text-base leading-8 text-muted-foreground md:text-lg">
-              Browse Bumicerts from communities and organizations restoring ecosystems,
-              strengthening livelihoods, and building a more resilient future.
+              {t("hero.description")}
             </p>
           </div>
         </div>
@@ -429,19 +430,15 @@ export function BumicertsExploreClient({ records: initialRecords = [] }: { recor
                     type="text"
                     value={query}
                     onChange={(event) => void setQuery(event.target.value)}
-                    aria-label="Search Bumicerts"
-                    placeholder="Search Bumicerts by name or description"
+                    aria-label={t("search.ariaLabel")}
+                    placeholder={t("search.placeholder")}
                     className="min-w-0 flex-1 truncate border-0 bg-transparent px-3 py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground"
                   />
                 </div>
 
                 <div className="hidden h-10 shrink-0 items-center rounded-full border border-border bg-background/50 p-0.5 backdrop-blur sm:inline-flex">
                   {(
-                    [
-                      { id: "cards", label: "Cards", Icon: LayoutGridIcon },
-                      { id: "list", label: "List", Icon: ListIcon },
-                      { id: "map", label: "Map", Icon: MapIcon },
-                    ] as const
+                    viewOptions
                   ).map((option) => (
                     <button
                       key={option.id}
@@ -467,18 +464,18 @@ export function BumicertsExploreClient({ records: initialRecords = [] }: { recor
                       setOpenSort((value) => !value);
                     }}
                     type="button"
-                    aria-label="Sort projects"
+                    aria-label={t("search.sortAriaLabel")}
                     aria-expanded={openSort}
                     className="inline-flex h-10 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-full border border-border bg-background px-8 text-sm font-medium transition-colors hover:bg-muted hover:text-foreground hover:shadow-sm disabled:pointer-events-none disabled:opacity-50 has-[>svg]:px-4"
                   >
                     <ArrowUpDownIcon className="h-4 w-4" />
-                    <span className="hidden sm:inline">{SORT_LABELS[sort]}</span>
+                    <span className="hidden sm:inline">{sortLabels[sort]}</span>
                     <ChevronDownIcon className={`h-4 w-4 transition-transform ${openSort ? "rotate-180" : ""}`} />
                   </button>
 
                   {openSort && (
                     <div className="absolute right-0 top-full z-[1000] mt-2 w-36 rounded-2xl border border-border bg-popover py-1.5 shadow-xl animate-in">
-                      {SORT_OPTIONS.map((option) => (
+                      {sortOptions.map((option) => (
                         <button
                           key={option.value}
                           type="button"
@@ -503,11 +500,7 @@ export function BumicertsExploreClient({ records: initialRecords = [] }: { recor
               <div className="relative z-20 flex items-center justify-between gap-3 sm:justify-start">
                 <div className="inline-flex h-10 shrink-0 items-center rounded-full border border-border bg-background/50 p-0.5 backdrop-blur sm:hidden">
                   {(
-                    [
-                      { id: "cards", label: "Cards", Icon: LayoutGridIcon },
-                      { id: "list", label: "List", Icon: ListIcon },
-                      { id: "map", label: "Map", Icon: MapIcon },
-                    ] as const
+                    viewOptions
                   ).map((option) => (
                     <button
                       key={option.id}
@@ -535,9 +528,9 @@ export function BumicertsExploreClient({ records: initialRecords = [] }: { recor
                       size="sm"
                       className="h-10 text-sm"
                     >
-                      All Bumicerts
+                      {t("filters.allBumicerts")}
                     </Button>
-                    {FILTER_CHIPS.map((chip) => {
+                    {filterChips.map((chip) => {
                       const selected = filters.includes(chip.key);
                       return (
                         <Button
@@ -569,7 +562,7 @@ export function BumicertsExploreClient({ records: initialRecords = [] }: { recor
                     className="h-10 text-sm"
                   >
                     <SlidersHorizontalIcon className="h-3.5 w-3.5" />
-                    <span>All filters</span>
+                    <span>{t("filters.allFilters")}</span>
                     {filters.length > 0 && (
                       <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-primary-foreground px-1 text-[10px] text-primary">
                         {filters.length}
@@ -579,17 +572,17 @@ export function BumicertsExploreClient({ records: initialRecords = [] }: { recor
 
                   {openFilters && (
                     <div
-                      aria-label="All filters"
+                      aria-label={t("filters.allFiltersAria")}
                       className="quick-popover-in absolute right-0 top-full z-[1000] mt-2 w-[min(18rem,calc(100vw-2rem))] rounded-2xl border border-primary/20 bg-popover p-4 shadow-[0_18px_45px_color-mix(in_oklab,var(--primary)_16%,transparent)]"
                     >
                       <div className="mb-3">
-                        <h2 className="text-base font-medium text-foreground">All filters</h2>
+                        <h2 className="text-base font-medium text-foreground">{t("filters.allFilters")}</h2>
                         <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-                          Show Bumicerts with photos, project places, named people, work dates, or donations.
+                          {t("filters.description")}
                         </p>
                       </div>
                       <div className="flex flex-wrap gap-2">
-                        {FILTER_CHIPS.map((chip) => (
+                        {filterChips.map((chip) => (
                           <Button
                             key={chip.key}
                             type="button"
@@ -604,9 +597,9 @@ export function BumicertsExploreClient({ records: initialRecords = [] }: { recor
                         ))}
                       </div>
                       <div className="mt-4 flex items-center justify-between border-t border-primary/15 pt-3">
-                        <p className="text-xs text-accent-foreground/75">Filters update as you choose.</p>
+                        <p className="text-xs text-accent-foreground/75">{t("filters.updateHint")}</p>
                         <Button type="button" onClick={clearFilters} variant="ghost" size="sm">
-                          Clear all
+                          {t("actions.clearAll")}
                         </Button>
                       </div>
                     </div>
@@ -630,7 +623,7 @@ export function BumicertsExploreClient({ records: initialRecords = [] }: { recor
             <div className="mt-10 flex flex-col items-center gap-3">
               {view !== "map" && visibleRecords.length > renderedRecords.length && (
                 <p className="text-sm text-muted-foreground">
-                  Showing {renderedRecords.length} of {visibleRecords.length} Bumicerts.
+                  {t("footer.showing", { shown: renderedRecords.length, total: visibleRecords.length })}
                 </p>
               )}
               {hasMoreCardsToShow ? (
@@ -639,7 +632,7 @@ export function BumicertsExploreClient({ records: initialRecords = [] }: { recor
                   onClick={() => setCardLimit((current) => current + CARD_BATCH_SIZE)}
                   className="inline-flex items-center justify-center rounded-full border border-border bg-background px-6 py-3 text-sm font-medium text-foreground transition-colors hover:bg-muted"
                 >
-                  Show more
+                  {t("footer.showMore")}
                 </button>
               ) : hasMore ? (
                 <AutoLoadMoreButton
@@ -648,10 +641,13 @@ export function BumicertsExploreClient({ records: initialRecords = [] }: { recor
                   onLoadMore={loadMore}
                   autoLoad={autoLoadMore}
                   onAutoLoadChange={setAutoLoadMore}
+                  idleLabel={t("footer.showMore")}
+                  loadingLabel={t("footer.showMore")}
+                  endLabel={t("footer.end")}
                   className="inline-flex items-center justify-center rounded-full border border-border bg-background px-6 py-3 text-sm font-medium text-foreground transition-colors hover:bg-muted disabled:opacity-60"
                 />
               ) : (
-                <span className="text-sm italic text-muted-foreground">You have reached the end.</span>
+                <span className="text-sm italic text-muted-foreground">{t("footer.end")}</span>
               )}
             </div>
           )}
@@ -697,6 +693,7 @@ function StatsBand({
   stats: Array<{ label: string; value: number | null }>;
   loading: boolean;
 }) {
+  const locale = useLocale();
   if (loading || stats.every((stat) => stat.value === null)) return null;
 
   const icons = [
@@ -711,7 +708,7 @@ function StatsBand({
       columns={4}
       items={stats.map((stat, index) => ({
         label: stat.label,
-        value: stat.value === null ? null : formatStat(stat.value),
+        value: stat.value === null ? null : formatStat(stat.value, locale),
         icon: icons[index] ?? <LeafIcon />,
         accent: index % 2 === 0,
       }))}
@@ -719,8 +716,8 @@ function StatsBand({
   );
 }
 
-function formatStat(value: number): string {
-  return new Intl.NumberFormat("en", { notation: Math.abs(value) >= 1000 ? "compact" : "standard" }).format(value);
+function formatStat(value: number, locale: string): string {
+  return new Intl.NumberFormat(locale, { notation: Math.abs(value) >= 1000 ? "compact" : "standard" }).format(value);
 }
 
 function mergeBumicertRecords(base: BumicertRecord[], incoming: BumicertRecord[]): BumicertRecord[] {
@@ -741,6 +738,7 @@ const BumicertGrid = memo(function BumicertGrid({
   fundingIndex: FundingSummaryIndex | null;
   sightingCounts: Map<string, number>;
 }) {
+  const t = useTranslations("marketplace.explore");
   if (loading && records.length === 0) {
     return <BumicertGridSkeleton />;
   }
@@ -757,20 +755,20 @@ const BumicertGrid = memo(function BumicertGrid({
         <div className="mb-3 flex items-center gap-2">
           <SearchIcon className="h-4 w-4 text-primary" />
           <span className="text-xs font-medium uppercase tracking-[0.15em] text-muted-foreground">
-            No Results
+            {t("empty.eyebrow")}
           </span>
         </div>
         <h3
           className="mb-3 text-2xl font-light text-foreground md:text-3xl"
           style={{ fontFamily: "var(--font-garamond-var)" }}
         >
-          No Bumicerts found
+          {t("empty.title")}
         </h3>
         <p
           className="max-w-md text-base leading-relaxed text-foreground/80"
           style={{ fontFamily: "var(--font-instrument-serif-var)", fontStyle: "italic" }}
         >
-          Try adjusting your search or filters to find more project stories.
+          {t("empty.description")}
         </p>
       </div>
     );
@@ -787,7 +785,7 @@ const BumicertGrid = memo(function BumicertGrid({
           <button
             type="button"
             onClick={() => onOpen(record)}
-            aria-label={`Open project: ${record.title}`}
+            aria-label={t("card.open", { title: record.title })}
             className="block h-full w-full text-left"
           >
             <BumicertCardVisual
@@ -804,8 +802,9 @@ const BumicertGrid = memo(function BumicertGrid({
 });
 
 function BumicertGridSkeleton() {
+  const t = useTranslations("marketplace.projects");
   return (
-    <div className="mt-4 grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] items-stretch gap-6 lg:gap-8" aria-label="Loading projects">
+    <div className="mt-4 grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] items-stretch gap-6 lg:gap-8" aria-label={t("card.loading")}>
       {Array.from({ length: 12 }).map((_, index) => (
         <div key={index} className="relative flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-card">
           {/* Image */}
@@ -878,18 +877,19 @@ const BumicertList = memo(function BumicertList({
 });
 
 const BumicertListItem = memo(function BumicertListItem({ record, priority, onOpen, funding, sightingCount }: { record: BumicertRecord; priority: boolean; onOpen: (record: BumicertRecord) => void; funding?: BumicertFundingSummary; sightingCount?: number }) {
+  const t = useTranslations("marketplace.explore");
   const [imgError, setImgError] = useState(false);
   const hasImage = Boolean(record.imageUrl) && !imgError;
-  const placeLabel = record.locationCount > 0 ? `${record.locationCount} project place${record.locationCount === 1 ? "" : "s"}` : null;
-  const peopleLabel = record.contributorCount > 0 ? formatPeopleNamed(record.contributorCount) : null;
-  const fundingLabel = formatFundingLabel(funding);
-  const sightingsLabel = sightingCount && sightingCount > 0 ? `${formatStat(sightingCount)} nature sightings` : null;
+  const placeLabel = record.locationCount > 0 ? t("card.projectPlaces", { count: record.locationCount }) : null;
+  const peopleLabel = record.contributorCount > 0 ? t("card.peopleNamed", { count: record.contributorCount }) : null;
+  const fundingLabel = formatFundingLabel(funding, t);
+  const sightingsLabel = sightingCount && sightingCount > 0 ? t("card.natureSightings", { count: sightingCount }) : null;
 
   return (
     <button
       type="button"
       onClick={() => onOpen(record)}
-      aria-label={`Open project: ${record.title}`}
+      aria-label={t("card.open", { title: record.title })}
       className="group flex w-full gap-3 rounded-2xl px-1 py-3 text-left outline-none transition-colors duration-300 hover:bg-surface-sunken focus-visible:ring-2 focus-visible:ring-primary/60 sm:gap-4 sm:px-2 sm:py-4"
     >
       <span className="relative h-24 w-24 shrink-0 overflow-hidden rounded-xl bg-muted sm:h-28 sm:w-36">
@@ -906,7 +906,7 @@ const BumicertListItem = memo(function BumicertListItem({ record, priority, onOp
             className="object-cover transition-transform duration-500 group-hover:scale-105"
           />
         ) : (
-          <span className="grid h-full place-items-center font-garamond text-sm italic text-muted-foreground">No cover image</span>
+          <span className="grid h-full place-items-center font-garamond text-sm italic text-muted-foreground">{t("card.noCover")}</span>
         )}
       </span>
       <span className="flex min-w-0 flex-1 flex-col justify-between py-1">
@@ -921,7 +921,7 @@ const BumicertListItem = memo(function BumicertListItem({ record, priority, onOp
             {placeLabel ? <span>{placeLabel}</span> : null}
             {sightingsLabel ? <span>{sightingsLabel}</span> : null}
           </span>
-          <span className="shrink-0 text-xs font-medium text-foreground transition-colors group-hover:text-primary">Show details</span>
+          <span className="shrink-0 text-xs font-medium text-foreground transition-colors group-hover:text-primary">{t("card.showDetails")}</span>
         </span>
       </span>
     </button>
@@ -929,8 +929,10 @@ const BumicertListItem = memo(function BumicertListItem({ record, priority, onOp
 });
 
 const BumicertCardVisual = memo(function BumicertCardVisual({ record, priority, funding, sightingCount }: { record: BumicertRecord; priority: boolean; funding?: BumicertFundingSummary; sightingCount?: number }) {
-  const { scopeItems, iconItems } = useMemo(() => buildPillRows(record, funding, sightingCount), [record, funding, sightingCount]);
-  const organizationName = record.creatorName ?? "Project steward";
+  const t = useTranslations("marketplace.explore");
+  const locale = useLocale();
+  const { scopeItems, iconItems } = useMemo(() => buildPillRows(record, funding, sightingCount, t, locale), [record, funding, sightingCount, t, locale]);
+  const organizationName = record.creatorName ?? t("card.projectSteward");
   const [imgError, setImgError] = useState(false);
   const hasImage = Boolean(record.imageUrl) && !imgError;
 
@@ -954,7 +956,7 @@ const BumicertCardVisual = memo(function BumicertCardVisual({ record, priority, 
             className="scale-110 object-cover transition-all duration-300 group-hover:scale-100"
           />
         ) : (
-          <div className="absolute inset-0 bg-muted" aria-label="Missing image" />
+          <div className="absolute inset-0 bg-muted" aria-label={t("card.missingImage")} />
         )}
       </div>
 
@@ -992,17 +994,15 @@ const BumicertCardVisual = memo(function BumicertCardVisual({ record, priority, 
   );
 });
 
-function formatPeopleNamed(count: number): string {
-  return `${count} ${count === 1 ? "person" : "people"} named`;
-}
+type ExploreT = ReturnType<typeof useTranslations>;
 
-function formatFundingLabel(funding?: BumicertFundingSummary): string | null {
+function formatFundingLabel(funding: BumicertFundingSummary | undefined, t: ExploreT): string | null {
   if (!funding?.accepting) return null;
   // Whole dollars keep the pill narrow enough to survive the overflow fitter.
-  return funding.raisedUsd >= 1 ? `${formatCompactUsd(Math.round(funding.raisedUsd))} raised` : "Donations";
+  return funding.raisedUsd >= 1 ? t("card.raised", { amount: formatCompactUsd(Math.round(funding.raisedUsd)) }) : t("card.donations");
 }
 
-function buildPillRows(record: BumicertRecord, funding?: BumicertFundingSummary, sightingCount?: number): {
+function buildPillRows(record: BumicertRecord, funding: BumicertFundingSummary | undefined, sightingCount: number | undefined, t: ExploreT, locale: string): {
   scopeItems: BumicertCardPill[];
   iconItems: BumicertCardPill[];
 } {
@@ -1013,7 +1013,7 @@ function buildPillRows(record: BumicertRecord, funding?: BumicertFundingSummary,
 
   const iconItems: BumicertCardPill[] = [];
 
-  const fundingLabel = formatFundingLabel(funding);
+  const fundingLabel = formatFundingLabel(funding, t);
   if (fundingLabel) {
     iconItems.push({
       key: "funding",
@@ -1024,8 +1024,8 @@ function buildPillRows(record: BumicertRecord, funding?: BumicertFundingSummary,
         </>
       ),
       ariaLabel: funding && funding.raisedUsd >= 1
-        ? `Accepting donations — ${formatCompactUsd(funding.raisedUsd)} raised so far`
-        : "Accepting donations",
+        ? t("card.acceptingDonationsRaised", { amount: formatCompactUsd(funding.raisedUsd) })
+        : t("card.acceptingDonations"),
       emphasis: true,
     });
   }
@@ -1036,10 +1036,10 @@ function buildPillRows(record: BumicertRecord, funding?: BumicertFundingSummary,
       content: (
         <>
           <MapPinIcon className="h-3.5 w-3.5" aria-hidden />
-          <span>{formatStat(record.locationCount)}</span>
+          <span>{formatStat(record.locationCount, locale)}</span>
         </>
       ),
-      ariaLabel: `${record.locationCount} project place${record.locationCount === 1 ? "" : "s"}`,
+      ariaLabel: t("card.projectPlaces", { count: record.locationCount }),
     });
   }
 
@@ -1049,10 +1049,10 @@ function buildPillRows(record: BumicertRecord, funding?: BumicertFundingSummary,
       content: (
         <>
           <UsersIcon className="h-3.5 w-3.5" aria-hidden />
-          <span>{formatStat(record.contributorCount)}</span>
+          <span>{formatStat(record.contributorCount, locale)}</span>
         </>
       ),
-      ariaLabel: formatPeopleNamed(record.contributorCount),
+      ariaLabel: t("card.peopleNamed", { count: record.contributorCount }),
     });
   }
 
@@ -1062,10 +1062,10 @@ function buildPillRows(record: BumicertRecord, funding?: BumicertFundingSummary,
       content: (
         <>
           <LeafIcon className="h-3.5 w-3.5" aria-hidden />
-          <span>{formatStat(sightingCount)}</span>
+          <span>{formatStat(sightingCount, locale)}</span>
         </>
       ),
-      ariaLabel: `${sightingCount} nature sighting${sightingCount === 1 ? "" : "s"} shared by this organization`,
+      ariaLabel: t("card.natureSightingsShared", { count: sightingCount }),
     });
   }
 
@@ -1073,7 +1073,7 @@ function buildPillRows(record: BumicertRecord, funding?: BumicertFundingSummary,
     iconItems.push({
       key: "dates",
       content: <CalendarDaysIcon className="h-3.5 w-3.5" aria-hidden />,
-      ariaLabel: "Project dates added",
+      ariaLabel: t("card.datesAdded"),
     });
   }
 

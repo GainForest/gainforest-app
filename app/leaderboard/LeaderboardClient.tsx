@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { useLocale, useTranslations } from "next-intl";
 import { motion } from "framer-motion";
 import {
   ArrowDownWideNarrowIcon,
@@ -30,7 +31,7 @@ import { AuthorInline } from "../_components/AuthorChip";
 import { PreferredAccountLink } from "../_components/PreferredLinks";
 import { StatsTileGrid, type StatsTileItem } from "../_components/StatsTile";
 import { fetchReceipts, type FundingReceipt } from "../_lib/dashboard";
-import { formatCompact, formatCompactUsd } from "../_lib/format";
+import { formatCompactUsd } from "../_lib/format";
 
 type Period = "all" | "month" | "week";
 type DonorFilter = "all" | "anonymous" | "known";
@@ -57,20 +58,15 @@ const PERIODS: Period[] = ["all", "month", "week"];
 const DONOR_FILTER_VALUES: DonorFilter[] = ["all", "anonymous", "known"];
 const SORT_VALUES: SortMode[] = ["total-raised", "donation-count", "recent-donation"];
 const QUERY_STATE_OPTIONS = { history: "replace", scroll: false, shallow: true } as const;
-const DONOR_FILTERS: Array<{ value: DonorFilter; Icon: typeof UsersRoundIcon; label: string; shortLabel: string }> = [
-  { value: "all", Icon: UsersRoundIcon, label: "All Donors", shortLabel: "All" },
-  { value: "anonymous", Icon: UserRoundXIcon, label: "Anonymous Only", shortLabel: "Anonymous" },
-  { value: "known", Icon: UserRoundCheckIcon, label: "Known Only", shortLabel: "Known" },
-];
-const SORT_OPTIONS: Array<{ value: SortMode; label: string }> = [
-  { value: "total-raised", label: "Total raised" },
-  { value: "donation-count", label: "Donation count" },
-  { value: "recent-donation", label: "Recent donation" },
-];
-const PERIOD_LABELS: Record<Period, string> = {
-  all: "All Time",
-  month: "This Month",
-  week: "This Week",
+const DONOR_FILTER_ICONS: Record<DonorFilter, typeof UsersRoundIcon> = {
+  all: UsersRoundIcon,
+  anonymous: UserRoundXIcon,
+  known: UserRoundCheckIcon,
+};
+const SORT_TRANSLATION_KEYS: Record<SortMode, "totalRaised" | "donationCount" | "recentDonation"> = {
+  "total-raised": "totalRaised",
+  "donation-count": "donationCount",
+  "recent-donation": "recentDonation",
 };
 
 export function LeaderboardClient() {
@@ -143,6 +139,7 @@ export function LeaderboardClient() {
 }
 
 function PeriodChips({ period, onPeriodChange }: { period: Period; onPeriodChange: (period: Period) => void }) {
+  const t = useTranslations("marketplace.leaderboard.periods");
   return (
     <div className="grid h-12 grid-cols-3 rounded-full bg-muted/55 p-1 shadow-sm shadow-primary/5 ring-1 ring-foreground/5 backdrop-blur">
       {PERIODS.map((option) => {
@@ -160,7 +157,7 @@ function PeriodChips({ period, onPeriodChange }: { period: Period; onPeriodChang
                 : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
             )}
           >
-            {PERIOD_LABELS[option]}
+            {t(option)}
           </button>
         );
       })}
@@ -175,9 +172,13 @@ function DonorTypeTabs({
   donorFilter: DonorFilter;
   onDonorFilterChange: (donorFilter: DonorFilter) => void;
 }) {
+  const t = useTranslations("marketplace.leaderboard");
   return (
     <div className="grid h-12 grid-cols-3 rounded-full bg-muted/55 p-1 shadow-sm shadow-primary/5 ring-1 ring-foreground/5 backdrop-blur">
-      {DONOR_FILTERS.map(({ value, Icon, label, shortLabel }) => {
+      {DONOR_FILTER_VALUES.map((value) => {
+        const Icon = DONOR_FILTER_ICONS[value];
+        const label = t(`donorFilters.${value}`);
+        const shortLabel = t(`donorFiltersShort.${value}`);
         const isSelected = donorFilter === value;
         return (
           <button
@@ -203,6 +204,8 @@ function DonorTypeTabs({
 }
 
 function SortControl({ sortBy, onSortChange }: { sortBy: SortMode; onSortChange: (sortBy: SortMode) => void }) {
+  const t = useTranslations("marketplace.leaderboard.sort");
+  const sortOptions = SORT_VALUES.map((value) => ({ value, label: t(SORT_TRANSLATION_KEYS[value]) }));
   return (
     <div className="flex h-12 items-center justify-between gap-3 rounded-full bg-muted/55 py-1.5 pr-1.5 pl-4 shadow-sm shadow-primary/5 ring-1 ring-foreground/5 backdrop-blur">
       <span
@@ -210,7 +213,7 @@ function SortControl({ sortBy, onSortChange }: { sortBy: SortMode; onSortChange:
         className="inline-flex shrink-0 items-center gap-2 whitespace-nowrap text-sm font-medium text-muted-foreground"
       >
         <ArrowDownWideNarrowIcon className="size-4" />
-        Sort by
+        {t("label")}
       </span>
       <Select
         value={sortBy}
@@ -225,7 +228,7 @@ function SortControl({ sortBy, onSortChange }: { sortBy: SortMode; onSortChange:
           <SelectValue />
         </SelectTrigger>
         <SelectContent align="end" className="rounded-2xl">
-          {SORT_OPTIONS.map((option) => (
+          {sortOptions.map((option) => (
             <SelectItem key={option.value} value={option.value} className="rounded-xl">
               {option.label}
             </SelectItem>
@@ -278,29 +281,31 @@ function StatsSummary({
   totalDonationCount: number;
   loading: boolean;
 }) {
+  const t = useTranslations("marketplace.leaderboard.stats");
+  const locale = useLocale();
   if (loading) return null;
 
   const stats: StatsTileItem[] = [
     {
-      label: "Total Raised",
+      label: t("totalRaised"),
       value: formatCompactUsd(totalRaised),
       icon: <LeafIcon />,
       accent: true,
     },
     {
-      label: "Unique Donors",
-      value: formatCompact(totalDonors),
+      label: t("uniqueDonors"),
+      value: formatCompactNumber(totalDonors, locale),
       icon: <UsersRoundIcon />,
     },
     {
-      label: "Bumicerts Funded",
-      value: formatCompact(totalProjectsSupported),
+      label: t("bumicertsFunded"),
+      value: formatCompactNumber(totalProjectsSupported, locale),
       icon: <SproutIcon />,
       accent: true,
     },
     {
-      label: "No. of Donations",
-      value: formatCompact(totalDonationCount),
+      label: t("donationCount"),
+      value: formatCompactNumber(totalDonationCount, locale),
       icon: <GiftIcon />,
     },
   ];
@@ -337,6 +342,7 @@ function LeaderboardShell({
   loading?: boolean;
   children?: ReactNode;
 }) {
+  const t = useTranslations("marketplace.leaderboard.hero");
   return (
     <section className="relative -mt-14 overflow-hidden pb-20 pt-0 md:pb-28">
       <div className="absolute inset-x-0 top-0 h-80 bg-gradient-to-b from-primary/[0.08] via-transparent to-transparent dark:from-primary/[0.12]" />
@@ -351,13 +357,13 @@ function LeaderboardShell({
         >
           <div className="mb-5 flex items-center gap-2.5">
             <TrophyIcon className="h-4 w-4 text-primary" />
-            <span className="text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">Leaderboard</span>
+            <span className="text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">{t("eyebrow")}</span>
           </div>
           <h1 className="font-garamond max-w-4xl text-4xl font-light leading-[0.98] tracking-[-0.035em] text-foreground sm:text-5xl md:text-6xl lg:text-7xl">
-            Impact <span className="font-instrument italic text-foreground/85">Champions</span>
+            {t("titlePrefix")} <span className="font-instrument italic text-foreground/85">{t("titleEmphasis")}</span>
           </h1>
           <p className="mt-7 max-w-2xl text-base leading-8 text-muted-foreground md:text-lg">
-            Celebrating the generous contributors driving regenerative change for communities and the planet.
+            {t("description")}
           </p>
         </motion.header>
       </div>
@@ -400,14 +406,15 @@ function LeaderboardShell({
 }
 
 function LeaderboardGrid({ entries }: { entries: LeaderboardEntry[] }) {
+  const t = useTranslations("marketplace.leaderboard.empty");
   if (entries.length === 0) {
     return (
       <div className="flex flex-col items-center gap-3 rounded-3xl bg-card/75 py-16 text-center text-muted-foreground shadow-sm shadow-primary/5 ring-1 ring-foreground/5 backdrop-blur">
         <div className="flex size-16 items-center justify-center rounded-full bg-primary/10 text-primary">
           <TrophyIcon className="size-8 opacity-60" />
         </div>
-        <p className="font-garamond text-3xl font-light text-foreground">No donations yet</p>
-        <p className="font-instrument max-w-sm text-base italic text-foreground/70">Be the first to make an impact.</p>
+        <p className="font-garamond text-3xl font-light text-foreground">{t("title")}</p>
+        <p className="font-instrument max-w-sm text-base italic text-foreground/70">{t("description")}</p>
       </div>
     );
   }
@@ -440,13 +447,14 @@ function LeaderboardSkeleton() {
 }
 
 function LeaderboardError() {
+  const t = useTranslations("marketplace.leaderboard.error");
   return (
     <div className="flex flex-col items-center gap-3 rounded-3xl bg-card/75 py-16 text-center text-muted-foreground shadow-sm shadow-primary/5 ring-1 ring-foreground/5 backdrop-blur">
       <div className="flex size-16 items-center justify-center rounded-full bg-primary/10 text-primary">
         <TrophyIcon className="size-8 opacity-60" />
       </div>
-      <p className="font-garamond text-3xl font-light text-foreground">Could not load leaderboard</p>
-      <p className="font-instrument max-w-sm text-base italic text-foreground/70">Please try again in a moment.</p>
+      <p className="font-garamond text-3xl font-light text-foreground">{t("title")}</p>
+      <p className="font-instrument max-w-sm text-base italic text-foreground/70">{t("description")}</p>
     </div>
   );
 }
@@ -458,9 +466,10 @@ const RANK_TIERS: Record<number, string> = {
 };
 
 function RankBadge({ rank }: { rank: number }) {
+  const t = useTranslations("marketplace.leaderboard.card");
   return (
     <span
-      aria-label={`Rank ${rank}`}
+      aria-label={t("rankAriaLabel", { rank })}
       className={cn(
         "flex size-9 shrink-0 items-center justify-center rounded-full text-sm font-bold tabular-nums ring-1",
         RANK_TIERS[rank] ?? "bg-muted/50 text-muted-foreground ring-foreground/5",
@@ -471,27 +480,30 @@ function RankBadge({ rank }: { rank: number }) {
   );
 }
 
-const RANK_BADGES: Record<number, { Icon: typeof CrownIcon; label: string }> = {
-  1: { Icon: CrownIcon, label: "Top Donor" },
-  2: { Icon: SparklesIcon, label: "Consistent Giver" },
-  3: { Icon: SproutIcon, label: "Rising Supporter" },
+const RANK_BADGES: Record<number, { Icon: typeof CrownIcon; labelKey: "topDonor" | "consistentGiver" | "risingSupporter" }> = {
+  1: { Icon: CrownIcon, labelKey: "topDonor" },
+  2: { Icon: SparklesIcon, labelKey: "consistentGiver" },
+  3: { Icon: SproutIcon, labelKey: "risingSupporter" },
 };
 
 function DonorBadge({ rank }: { rank: number }) {
+  const t = useTranslations("marketplace.leaderboard.card");
   const badge = RANK_BADGES[rank];
   if (!badge) return null;
-  const { Icon, label } = badge;
+  const { Icon, labelKey } = badge;
   return (
     <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-medium leading-none text-primary">
       <Icon className="size-3" />
-      {label}
+      {t(labelKey)}
     </span>
   );
 }
 
 function DonorCard({ entry }: { entry: LeaderboardEntry }) {
+  const t = useTranslations("marketplace.leaderboard.card");
+  const locale = useLocale();
   const isWallet = entry.donorType === "wallet";
-  const relativeTime = entry.lastDonatedAt ? formatRelativeTimeFromNow(new Date(entry.lastDonatedAt)) : null;
+  const relativeTime = entry.lastDonatedAt ? formatRelativeTimeFromNow(new Date(entry.lastDonatedAt), locale) : null;
   const className = "group flex items-start gap-3.5 px-4 py-[18px] transition-colors duration-200 hover:bg-primary/[0.04] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:gap-4 sm:px-5 sm:py-5";
   const content = (
     <>
@@ -502,7 +514,7 @@ function DonorCard({ entry }: { entry: LeaderboardEntry }) {
           {isWallet ? (
             <>
               <WalletIcon className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
-              <span className="min-w-0 truncate">Anonymous supporter</span>
+              <span className="min-w-0 truncate">{t("anonymousSupporter")}</span>
             </>
           ) : (
             <span className="min-w-0 truncate">
@@ -512,7 +524,7 @@ function DonorCard({ entry }: { entry: LeaderboardEntry }) {
         </p>
         <div className="flex min-w-0 flex-col items-start gap-1 text-[13px] leading-snug text-muted-foreground">
           <DonorBadge rank={entry.rank} />
-          <span className="w-full min-w-0 whitespace-normal break-words">{donationSummary(entry.donationCount, relativeTime)}</span>
+          <span className="w-full min-w-0 whitespace-normal break-words">{relativeTime ? t("donationSummaryWithTime", { count: entry.donationCount, relativeTime }) : t("donationSummary", { count: entry.donationCount })}</span>
         </div>
       </div>
 
@@ -533,7 +545,7 @@ function DonorCard({ entry }: { entry: LeaderboardEntry }) {
         href={basescanAddress(entry.donorId)}
         target="_blank"
         rel="noopener noreferrer"
-        aria-label="Open payment details"
+        aria-label={t("openPayment")}
         className={className}
       >
         {content}
@@ -546,7 +558,7 @@ function DonorCard({ entry }: { entry: LeaderboardEntry }) {
       did={entry.donorId}
       target="_blank"
       rel="noopener noreferrer"
-      aria-label="Open supporter profile in a new tab"
+      aria-label={t("openSupporter")}
       className={className}
     >
       {content}
@@ -646,16 +658,15 @@ function dateTimeValue(date: string | null): number {
   return Number.isNaN(time) ? 0 : time;
 }
 
-function donationSummary(count: number, relativeTime: string | null): string {
-  const donationCount = `${count.toLocaleString("en")} ${count === 1 ? "donation" : "donations"}`;
-  return relativeTime ? `${donationCount} · Last donation ${relativeTime}` : donationCount;
+function formatCompactNumber(value: number, locale: string): string {
+  return new Intl.NumberFormat(locale, { notation: Math.abs(value) >= 1000 ? "compact" : "standard" }).format(value);
 }
 
-function formatRelativeTimeFromNow(date: Date): string | null {
+function formatRelativeTimeFromNow(date: Date, locale: string): string | null {
   if (Number.isNaN(date.getTime())) return null;
   const diffInSeconds = Math.round((date.getTime() - Date.now()) / 1000);
   const abs = Math.abs(diffInSeconds);
-  const formatter = new Intl.RelativeTimeFormat("en", { numeric: "auto" });
+  const formatter = new Intl.RelativeTimeFormat(locale, { numeric: "auto" });
   if (abs < 60) return formatter.format(diffInSeconds, "second");
   if (abs < 3600) return formatter.format(Math.round(diffInSeconds / 60), "minute");
   if (abs < 86400) return formatter.format(Math.round(diffInSeconds / 3600), "hour");

@@ -1,0 +1,133 @@
+{
+  "seo": {
+    "title": "Bumicerts — Financia impacto regenerativo",
+    "description": "Bumicerts conecta financiadores con guardianes de la naturaleza que realizan trabajo regenerativo en el terreno. Financia impacto ambiental verificado directamente."
+  },
+  "language": {
+    "label": "Idioma",
+    "changeAria": "Cambiar idioma",
+    "currentLanguage": "Idioma actual"
+  },
+  "navigation": {
+    "navigation": "Navegación",
+    "openNavigation": "Abrir navegación"
+  },
+  "theme": {
+    "toggle": "Cambiar tema"
+  },
+  "cart": {
+    "aria": "Carrito",
+    "ariaWithCount": "Carrito ({count, plural, one {# artículo} other {# artículos}})"
+  },
+  "auth": {
+    "getStarted": "Empezar",
+    "unknown": "Desconocido",
+    "completeOnboarding": "Completar incorporación",
+    "organizationAccount": "Cuenta de organización",
+    "userAccount": "Cuenta de usuario",
+    "myAccount": "Mi cuenta",
+    "signOut": "Cerrar sesión",
+    "settings": "Configuración"
+  },
+  "errorPage": {
+    "title": "Algo salió mal.",
+    "description": "Lo sentimos, ocurrió un error al procesar tu solicitud.",
+    "tryAgain": "Intentar de nuevo",
+    "home": "Inicio"
+  },
+  "notFound": {
+    "description": "Esta página no existe. Tal vez se movió, o tal vez nunca existió.",
+    "backHome": "Volver al inicio"
+  },
+  "sidebar": {
+    "sections": {
+      "explore": "EXPLORAR",
+      "manage": "GESTIONAR"
+    },
+    "items": {
+      "bumicerts": "Bumicerts",
+      "organizations": "Organizaciones",
+      "leaderboard": "Clasificación",
+      "organization": "Organización",
+      "sites": "Sitios",
+      "audio": "Audio",
+      "trees": "Árboles",
+      "profile": "Perfil",
+      "settings": "Configuración"
+    },
+    "prompts": {
+      "signInDescription": "Inicia sesión para gestionar tu cuenta y contenido.",
+      "signIn": "Iniciar sesión",
+      "onboardingDescription": "Completa la incorporación para gestionar tu cuenta.",
+      "onboard": "Incorporarse",
+      "accountLoadError": "No pudimos cargar tu cuenta en este momento.",
+      "checkingAccount": "Comprobando tu cuenta..."
+    },
+    "creationCard": {
+      "createBumicert": "Crear un Bumicert"
+    }
+  },
+  "bumicertCard": {
+    "missingImage": "Imagen del Bumicert no disponible",
+    "additionalObjectives": "{count, plural, one {# objetivo adicional} other {# objetivos adicionales}}"
+  },
+  "pagination": {
+    "loadMore": "Cargar más",
+    "loading": "Cargando",
+    "end": "Has llegado al final."
+  },
+  "footer": {
+    "brandAlt": "GainForest",
+    "tagline": "Conectando comunidades con financiadores.",
+    "builtWith": "Infraestructura abierta. Construido con GainForest.",
+    "dataCollectionsAria": "Colecciones de datos",
+    "footerLinksAria": "Enlaces del pie de página",
+    "copyright": "Código abierto, impulsado por la comunidad.",
+    "nonprofit": "Asociación suiza sin fines de lucro registrada",
+    "swissRegistration": "Registro suizo",
+    "bottomTagline": "Construido para el impacto colectivo",
+    "links": {
+      "gainforest": "GainForest",
+      "documentation": "Documentación",
+      "twitter": "X (Twitter)",
+      "github": "GitHub",
+      "bumicerts": "Bumicerts",
+      "organizations": "Organizaciones",
+      "observations": "Observaciones",
+      "leaderboard": "Clasificación",
+      "greenGlobe": "Green Globe",
+      "status": "Estado"
+    }
+  },
+  "browseGrid": {
+    "title": "Formas de explorar",
+    "description": "Cuatro entradas al trabajo de GainForest, pensadas para financiadores, guardianes y equipos de campo.",
+    "loadingAria": "Cargando enlaces de exploración",
+    "cards": {
+      "bumicerts": {
+        "label": "Proyectos verificados",
+        "title": "Bumicerts",
+        "blurb": "Explora historias de proyectos con fotos, lugares, personas y contexto.",
+        "statLabel": "historias"
+      },
+      "organizations": {
+        "label": "Guardianes de la naturaleza",
+        "title": "Organizaciones",
+        "blurb": "Encuentra comunidades y organizaciones que cuidan ecosistemas en todo el mundo.",
+        "statLabel": "perfiles"
+      },
+      "observations": {
+        "label": "Biodiversidad",
+        "title": "Observaciones",
+        "blurb": "Explora avistamientos de especies, lugares y fotos o sonidos de GainForest.",
+        "statLabel": "avistamientos"
+      },
+      "leaderboard": {
+        "label": "Campeones de impacto",
+        "title": "Clasificación",
+        "blurb": "Mira a los donantes que ayudan a comunidades mediante Bumicerts.",
+        "statLabel": "recaudado"
+      }
+    }
+  }
+}

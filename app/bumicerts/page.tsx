@@ -1,15 +1,18 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { Suspense } from "react";
 import { BumicertsExploreClient } from "./BumicertsExploreClient";
 
 export const revalidate = 60;
 
-export const metadata: Metadata = {
-  title: "Explore Bumicerts — Verified Regenerative Impact Projects",
-  description:
-    "Browse verified environmental impact certificates from nature stewards around the world. Filter by country, organization, and impact area.",
-  alternates: { canonical: "/bumicerts" },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("marketplace.explore.metadata");
+  return {
+    title: t("title"),
+    description: t("description"),
+    alternates: { canonical: "/bumicerts" },
+  };
+}
 
 export default function BumicertsPage() {
   return (

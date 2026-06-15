@@ -1,0 +1,133 @@
+{
+  "seo": {
+    "title": "Bumicerts — Fund Regenerative Impact",
+    "description": "Bumicerts connects funders with nature stewards doing on-ground regenerative work. Fund verified environmental impact directly."
+  },
+  "language": {
+    "label": "Language",
+    "changeAria": "Change language",
+    "currentLanguage": "Current language"
+  },
+  "navigation": {
+    "navigation": "Navigation",
+    "openNavigation": "Open navigation"
+  },
+  "theme": {
+    "toggle": "Toggle theme"
+  },
+  "cart": {
+    "aria": "Cart",
+    "ariaWithCount": "Cart ({count, plural, one {# item} other {# items}})"
+  },
+  "auth": {
+    "getStarted": "Get started",
+    "unknown": "Unknown",
+    "completeOnboarding": "Complete onboarding",
+    "organizationAccount": "Organization account",
+    "userAccount": "User account",
+    "myAccount": "My Account",
+    "signOut": "Sign out",
+    "settings": "Settings"
+  },
+  "errorPage": {
+    "title": "Something went wrong.",
+    "description": "We're sorry, but an error occurred while processing your request.",
+    "tryAgain": "Try again",
+    "home": "Home"
+  },
+  "notFound": {
+    "description": "This page doesn't exist. Maybe it was moved, or maybe it never existed at all.",
+    "backHome": "Back to Home"
+  },
+  "sidebar": {
+    "sections": {
+      "explore": "EXPLORE",
+      "manage": "MANAGE"
+    },
+    "items": {
+      "bumicerts": "Bumicerts",
+      "organizations": "Organizations",
+      "leaderboard": "Leaderboard",
+      "organization": "Organization",
+      "sites": "Sites",
+      "audio": "Audio",
+      "trees": "Trees",
+      "profile": "Profile",
+      "settings": "Settings"
+    },
+    "prompts": {
+      "signInDescription": "Sign in to manage your account and content.",
+      "signIn": "Sign In",
+      "onboardingDescription": "Complete onboarding to manage your account.",
+      "onboard": "Onboard",
+      "accountLoadError": "Couldn't load your account right now.",
+      "checkingAccount": "Checking your account..."
+    },
+    "creationCard": {
+      "createBumicert": "Create a Bumicert"
+    }
+  },
+  "bumicertCard": {
+    "missingImage": "Bumicert image unavailable",
+    "additionalObjectives": "{count, plural, one {# additional objective} other {# additional objectives}}"
+  },
+  "pagination": {
+    "loadMore": "Load more",
+    "loading": "Loading",
+    "end": "You have reached the end."
+  },
+  "footer": {
+    "brandAlt": "GainForest",
+    "tagline": "Connecting communities with funders.",
+    "builtWith": "Open infrastructure. Built with GainForest.",
+    "dataCollectionsAria": "Data collections",
+    "footerLinksAria": "Footer links",
+    "copyright": "Open source, community-powered.",
+    "nonprofit": "Registered Swiss nonprofit association",
+    "swissRegistration": "Swiss registration",
+    "bottomTagline": "Built for collective impact",
+    "links": {
+      "gainforest": "GainForest",
+      "documentation": "Documentation",
+      "twitter": "X (Twitter)",
+      "github": "GitHub",
+      "bumicerts": "Bumicerts",
+      "organizations": "Organizations",
+      "observations": "Observations",
+      "leaderboard": "Leaderboard",
+      "greenGlobe": "Green Globe",
+      "status": "Status"
+    }
+  },
+  "browseGrid": {
+    "title": "Ways to Explore",
+    "description": "Four ways into GainForest work, shaped for funders, stewards, and field teams.",
+    "loadingAria": "Explore links loading",
+    "cards": {
+      "bumicerts": {
+        "label": "Verified projects",
+        "title": "Bumicerts",
+        "blurb": "Browse project stories with photos, places, people, and context.",
+        "statLabel": "stories"
+      },
+      "organizations": {
+        "label": "Nature stewards",
+        "title": "Organizations",
+        "blurb": "Find the communities and organizations caring for ecosystems around the world.",
+        "statLabel": "profiles"
+      },
+      "observations": {
+        "label": "Biodiversity",
+        "title": "Observations",
+        "blurb": "Explore species sightings, places, and photos or sounds from GainForest.",
+        "statLabel": "sightings"
+      },
+      "leaderboard": {
+        "label": "Impact champions",
+        "title": "Leaderboard",
+        "blurb": "See the donors helping communities through Bumicerts.",
+        "statLabel": "raised"
+      }
+    }
+  }
+}

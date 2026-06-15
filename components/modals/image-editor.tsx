@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/modal/modal";
 import { useEffect, useState } from "react";
 import { Loader2Icon } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { useModal } from "@/components/ui/modal/context";
 
@@ -41,6 +42,7 @@ export const ImageEditorModal = ({
   initialImage: File | string | undefined;
   onImageChange: (image: File | undefined) => void;
 }) => {
+  const t = useTranslations("modals.imageEditor");
   const { popModal, stack, hide } = useModal();
 
   const initialUri = typeof initialImage === "string" ? initialImage : null;
@@ -91,7 +93,7 @@ export const ImageEditorModal = ({
         {isInitialUriLoading ? (
           <div className="w-full h-40 rounded-lg bg-muted flex flex-col gap-1 items-center justify-center">
             <Loader2Icon className="size-5 animate-spin" />
-            <span className="text-sm text-muted-foreground">Loading...</span>
+            <span className="text-sm text-muted-foreground">{t("loading")}</span>
           </div>
         ) : (
           <FileInput
@@ -108,7 +110,7 @@ export const ImageEditorModal = ({
         )}
       </div>
       <ModalFooter>
-        <Button onClick={handleDone}>Done</Button>
+        <Button onClick={handleDone}>{t("done")}</Button>
       </ModalFooter>
     </ModalContent>
   );

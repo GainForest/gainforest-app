@@ -3,21 +3,23 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { MenuIcon, XIcon } from "lucide-react";
 import { LogoMark } from "./Logo";
 import { StatusPill } from "./StatusPill";
+import { LanguageSelector } from "@/components/i18n/LanguageSelector";
 import { ThemeToggle } from "./ThemeToggle";
 import type { StatusSnapshot } from "../_lib/status";
 import { GLOBE_URL } from "../_lib/urls";
 
 const NAV = [
-  { href: "/observations", label: "Observations" },
-  { href: "/organizations", label: "Organizations" },
-  { href: "/bumicerts", label: "Bumicerts" },
-  { href: "/projects", label: "Projects" },
-  { href: "/leaderboard", label: "Leaderboard" },
-  { href: "/devices", label: "Devices" },
-  { href: "/status", label: "Status" },
+  { href: "/observations", key: "observations" },
+  { href: "/organizations", key: "organizations" },
+  { href: "/bumicerts", key: "bumicerts" },
+  { href: "/projects", key: "projects" },
+  { href: "/leaderboard", key: "leaderboard" },
+  { href: "/devices", key: "devices" },
+  { href: "/status", key: "status" },
 ] as const;
 
 // Route-aware top nav. Each section of the explorer is its own page now, so
@@ -25,6 +27,7 @@ const NAV = [
 // blurred over the cream background, matching gainforest-app's rhythm. The
 // live status pill links out to the instatus page.
 export function TopNav({ status }: { status: StatusSnapshot }) {
+  const t = useTranslations("common");
   const pathname = usePathname() ?? "/";
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -56,7 +59,7 @@ export function TopNav({ status }: { status: StatusSnapshot }) {
           <Link
             href="/"
             className="flex shrink-0 items-center gap-2.5 transition-opacity hover:opacity-80"
-            aria-label="GainForest home"
+            aria-label={t("navigation.homeAria")}
           >
             <LogoMark className="h-6 w-6 text-brand lg:h-7 lg:w-7" title="GainForest" />
             <span className="font-garamond text-[20px] font-semibold tracking-tight text-foreground lg:text-[22px]">
@@ -66,7 +69,7 @@ export function TopNav({ status }: { status: StatusSnapshot }) {
 
           <nav
             className="hidden items-center gap-0.5 rounded-full border border-border-soft bg-background/70 p-1 lg:flex"
-            aria-label="Sections"
+            aria-label={t("navigation.sectionsAria")}
           >
             {NAV.map((item) => (
               <Link
@@ -79,7 +82,7 @@ export function TopNav({ status }: { status: StatusSnapshot }) {
                     : "text-foreground/60 hover:bg-foreground/[0.04] hover:text-foreground"
                 }`}
               >
-                {item.label}
+                {t(`sidebar.items.${item.key}`)}
               </Link>
             ))}
           </nav>
@@ -89,11 +92,12 @@ export function TopNav({ status }: { status: StatusSnapshot }) {
               <StatusPill snapshot={status} />
             </span>
             <ThemeToggle />
+            <LanguageSelector />
             <button
               type="button"
               onClick={() => setMenuOpen((v) => !v)}
               aria-expanded={menuOpen}
-              aria-label={menuOpen ? "Close menu" : "Open menu"}
+              aria-label={menuOpen ? t("navigation.closeMenu") : t("navigation.openMenu")}
               className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-border-soft text-foreground/75 transition-colors hover:border-foreground/35 hover:text-foreground lg:hidden"
             >
               {menuOpen ? <XIcon className="h-4 w-4" aria-hidden /> : <MenuIcon className="h-[18px] w-[18px]" aria-hidden />}
@@ -108,7 +112,7 @@ export function TopNav({ status }: { status: StatusSnapshot }) {
           <nav
             onClick={(e) => e.stopPropagation()}
             className="relative border-b border-border-soft bg-background/95 px-5 pb-6 pt-4 shadow-[0_18px_60px_-36px_rgba(40,50,30,0.35)] animate-[drawerIn_180ms_ease-out] sm:px-8"
-            aria-label="Sections"
+            aria-label={t("navigation.sectionsAria")}
           >
             <div className="mb-3 sm:hidden">
               <StatusPill snapshot={status} />
@@ -123,7 +127,7 @@ export function TopNav({ status }: { status: StatusSnapshot }) {
                     isActive(item.href) ? "text-primary" : "text-foreground hover:text-primary"
                   }`}
                 >
-                  <span>{item.label}</span>
+                  <span>{t(`sidebar.items.${item.key}`)}</span>
                   <span aria-hidden className="text-foreground/35 transition-transform group-hover:translate-x-1 group-hover:text-primary">
                     →
                   </span>
@@ -132,7 +136,7 @@ export function TopNav({ status }: { status: StatusSnapshot }) {
             </div>
             <div className="mt-5 flex flex-wrap gap-x-5 gap-y-2 text-[13px] text-foreground/60">
               <Link href={GLOBE_URL} target="_blank" rel="noreferrer" className="hover:text-primary">
-                Green Globe ↗
+                {t("navigation.greenGlobeExternal")}
               </Link>
               <Link href="/bumicerts" className="hover:text-primary">
                 Bumicerts

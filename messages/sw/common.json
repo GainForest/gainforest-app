@@ -1,0 +1,133 @@
+{
+  "seo": {
+    "title": "Bumicerts — Fadhili athari ya urejeshaji",
+    "description": "Bumicerts huwaunganisha wafadhili na walinzi wa mazingira wanaofanya kazi ya urejeshaji ardhini. Fadhili athari ya mazingira iliyothibitishwa moja kwa moja."
+  },
+  "language": {
+    "label": "Lugha",
+    "changeAria": "Badilisha lugha",
+    "currentLanguage": "Lugha ya sasa"
+  },
+  "navigation": {
+    "navigation": "Urambazaji",
+    "openNavigation": "Fungua urambazaji"
+  },
+  "theme": {
+    "toggle": "Badilisha mandhari"
+  },
+  "cart": {
+    "aria": "Kikapu",
+    "ariaWithCount": "Kikapu ({count, plural, one {# bidhaa} other {# bidhaa}})"
+  },
+  "auth": {
+    "getStarted": "Anza",
+    "unknown": "Haijulikani",
+    "completeOnboarding": "Kamilisha utangulizi",
+    "organizationAccount": "Akaunti ya shirika",
+    "userAccount": "Akaunti ya mtumiaji",
+    "myAccount": "Akaunti yangu",
+    "signOut": "Ondoka",
+    "settings": "Mipangilio"
+  },
+  "errorPage": {
+    "title": "Hitilafu imetokea.",
+    "description": "Samahani, hitilafu ilitokea wakati wa kushughulikia ombi lako.",
+    "tryAgain": "Jaribu tena",
+    "home": "Nyumbani"
+  },
+  "notFound": {
+    "description": "Ukurasa huu haupo. Labda ulihamishwa, au labda haukuwahi kuwepo.",
+    "backHome": "Rudi nyumbani"
+  },
+  "sidebar": {
+    "sections": {
+      "explore": "GUNDUA",
+      "manage": "SIMAMIA"
+    },
+    "items": {
+      "bumicerts": "Bumicerts",
+      "organizations": "Mashirika",
+      "leaderboard": "Jedwali la viongozi",
+      "organization": "Shirika",
+      "sites": "Maeneo",
+      "audio": "Sauti",
+      "trees": "Miti",
+      "profile": "Wasifu",
+      "settings": "Mipangilio"
+    },
+    "prompts": {
+      "signInDescription": "Ingia ili kusimamia akaunti na maudhui yako.",
+      "signIn": "Ingia",
+      "onboardingDescription": "Kamilisha utangulizi ili kusimamia akaunti yako.",
+      "onboard": "Anza utangulizi",
+      "accountLoadError": "Hatukuweza kupakia akaunti yako kwa sasa.",
+      "checkingAccount": "Tunakagua akaunti yako..."
+    },
+    "creationCard": {
+      "createBumicert": "Unda Bumicert"
+    }
+  },
+  "bumicertCard": {
+    "missingImage": "Picha ya Bumicert haipatikani",
+    "additionalObjectives": "{count, plural, one {lengo # la ziada} other {malengo # ya ziada}}"
+  },
+  "pagination": {
+    "loadMore": "Pakia zaidi",
+    "loading": "Inapakia",
+    "end": "Umefika mwisho."
+  },
+  "footer": {
+    "brandAlt": "GainForest",
+    "tagline": "Kuunganisha jamii na wafadhili.",
+    "builtWith": "Miundombinu wazi. Imejengwa na GainForest.",
+    "dataCollectionsAria": "Mikusanyiko ya data",
+    "footerLinksAria": "Viungo vya kijachini",
+    "copyright": "Chanzo huria, kinachoendeshwa na jamii.",
+    "nonprofit": "Chama cha Uswisi kisicho cha faida kilichosajiliwa",
+    "swissRegistration": "Usajili wa Uswisi",
+    "bottomTagline": "Imejengwa kwa athari ya pamoja",
+    "links": {
+      "gainforest": "GainForest",
+      "documentation": "Nyaraka",
+      "twitter": "X (Twitter)",
+      "github": "GitHub",
+      "bumicerts": "Bumicerts",
+      "organizations": "Mashirika",
+      "observations": "Uchunguzi",
+      "leaderboard": "Ubao wa wanaoongoza",
+      "greenGlobe": "Green Globe",
+      "status": "Hali"
+    }
+  },
+  "browseGrid": {
+    "title": "Njia za kuchunguza",
+    "description": "Njia nne za kuingia kwenye kazi ya GainForest, kwa wafadhili, watunzaji na timu za nyanjani.",
+    "loadingAria": "Inapakia viungo vya kuchunguza",
+    "cards": {
+      "bumicerts": {
+        "label": "Miradi iliyothibitishwa",
+        "title": "Bumicerts",
+        "blurb": "Vinjari hadithi za miradi zenye picha, maeneo, watu na muktadha.",
+        "statLabel": "hadithi"
+      },
+      "organizations": {
+        "label": "Watunzaji wa asili",
+        "title": "Mashirika",
+        "blurb": "Pata jamii na mashirika yanayotunza mifumo ikolojia duniani kote.",
+        "statLabel": "wasifu"
+      },
+      "observations": {
+        "label": "Bioanuwai",
+        "title": "Uchunguzi",
+        "blurb": "Chunguza uonaji wa spishi, maeneo, na picha au sauti kutoka GainForest.",
+        "statLabel": "uonekano"
+      },
+      "leaderboard": {
+        "label": "Mabingwa wa athari",
+        "title": "Ubao wa wanaoongoza",
+        "blurb": "Waone wafadhili wanaosaidia jamii kupitia Bumicerts.",
+        "statLabel": "imekusanywa"
+      }
+    }
+  }
+}

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 
 export function AutoLoadMoreButton({
@@ -8,9 +9,9 @@ export function AutoLoadMoreButton({
   onLoadMore,
   className,
   endClassName,
-  idleLabel = "Load more",
-  loadingLabel = "Loading",
-  endLabel = "You have reached the end.",
+  idleLabel,
+  loadingLabel,
+  endLabel,
   autoLoad,
   onAutoLoadChange,
 }: {
@@ -25,6 +26,10 @@ export function AutoLoadMoreButton({
   autoLoad?: boolean;
   onAutoLoadChange?: (enabled: boolean) => void;
 }) {
+  const t = useTranslations("common.pagination");
+  const resolvedIdleLabel = idleLabel ?? t("loadMore");
+  const resolvedLoadingLabel = loadingLabel ?? t("loading");
+  const resolvedEndLabel = endLabel ?? t("end");
   const buttonRef = useRef<HTMLButtonElement | null>(null);
   const lockedRef = useRef(false);
   const [uncontrolledAutoLoad, setUncontrolledAutoLoad] = useState(false);
@@ -70,7 +75,7 @@ export function AutoLoadMoreButton({
   }, [hasMore]);
 
   if (!hasMore) {
-    return <span className={endClassName}>{endLabel}</span>;
+    return <span className={endClassName}>{resolvedEndLabel}</span>;
   }
 
   const handleClick = () => {
@@ -89,7 +94,7 @@ export function AutoLoadMoreButton({
       aria-busy={loading}
       className={className}
     >
-      {loading ? loadingLabel : idleLabel}
+      {loading ? resolvedLoadingLabel : resolvedIdleLabel}
     </button>
   );
 }

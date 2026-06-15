@@ -11,6 +11,7 @@ import {
 import { countries, type Country } from "@/app/_lib/countries";
 import { cn } from "@/lib/utils";
 import { forwardRef, useEffect, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 
 const allCountries = Object.entries(countries);
 
@@ -21,6 +22,7 @@ const CountrySelectorModal = ({
   initialCountryCode: string;
   onCountryChange: (country: string) => void;
 }) => {
+  const t = useTranslations("modals.countrySelector");
   const [countryCode, setCountryCode] = useState(initialCountryCode);
   const { popModal, stack, hide } = useModal();
   const selectedCountryRef = useRef<HTMLButtonElement>(null);
@@ -53,13 +55,13 @@ const CountrySelectorModal = ({
   return (
     <ModalContent>
       <ModalHeader>
-        <ModalTitle>Select Country</ModalTitle>
+        <ModalTitle>{t("title")}</ModalTitle>
         <ModalDescription>
-          Select the country for your organization.
+          {t("description")}
         </ModalDescription>
       </ModalHeader>
       <Input
-        placeholder="Search country"
+        placeholder={t("searchPlaceholder")}
         value={searchText}
         onChange={(e) => setSearchText(e.target.value)}
       />
@@ -86,7 +88,7 @@ const CountrySelectorModal = ({
       </div>
 
       <ModalFooter className="mt-4 flex justify-end">
-        <Button onClick={() => handleDone(countryCode)}>Done</Button>
+        <Button onClick={() => handleDone(countryCode)}>{t("done")}</Button>
       </ModalFooter>
     </ModalContent>
   );

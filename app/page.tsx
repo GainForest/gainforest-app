@@ -64,13 +64,11 @@ function HomeFallback() {
 
 function BrowseGridFallback() {
   return (
-    <section className="bg-background px-6 pt-10 pb-14 sm:px-12 sm:pt-12 md:px-6 md:pt-10 md:pb-16" aria-label="Explore links loading">
+    <section className="bg-background px-6 pt-10 pb-14 sm:px-12 sm:pt-12 md:px-6 md:pt-10 md:pb-16">
       <div className="mx-auto max-w-6xl">
-        <div className="mb-6 text-center md:mb-8">
-          <h2 className="font-garamond text-4xl font-light tracking-[-0.01em] text-foreground md:text-5xl">Ways to Explore</h2>
-          <p className="mx-auto mt-3 max-w-xl text-base leading-relaxed text-muted-foreground">
-            Four ways into GainForest work, shaped for funders, stewards, and field teams.
-          </p>
+        <div className="mb-6 flex flex-col items-center md:mb-8">
+          <Skeleton className="h-12 w-64 rounded-full" />
+          <Skeleton className="mt-4 h-5 w-full max-w-xl rounded-full" />
         </div>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {Array.from({ length: 4 }).map((_, index) => (

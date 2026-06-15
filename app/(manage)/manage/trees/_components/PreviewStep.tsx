@@ -1,6 +1,7 @@
 "use client";
 
 import { Fragment, useEffect, useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import { Camera, ChevronDown, ChevronRight, CheckCircle2, XCircle, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { TREE_UPLOAD_EVENTS } from "@/lib/analytics/events";
@@ -41,6 +42,7 @@ function buildErrorSummary(errors: { index: number; issues: { path: string; mess
 }
 
 export default function PreviewStep({ uploadId, parsedData, mappings, koboMediaZipIndex, siteSelection, onBack, onNext }: Props) {
+  const t = useTranslations("upload.trees.preview");
   const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set());
   const [errorSectionOpen, setErrorSectionOpen] = useState(false);
   const [siteBoundary, setSiteBoundary] = useState<SiteBoundaryGeoJson | null>(null);
@@ -155,48 +157,48 @@ export default function PreviewStep({ uploadId, parsedData, mappings, koboMediaZ
   return (
     <div className="space-y-5">
       <div>
-        <h2 className="text-lg font-semibold">Review & Verify</h2>
-        <p className="text-sm text-muted-foreground mt-0.5">Review your tree information before saving.</p>
+        <h2 className="text-lg font-semibold">{t("reviewVerifyTitle")}</h2>
+        <p className="text-sm text-muted-foreground mt-0.5">{t("reviewVerifyDescription")}</p>
       </div>
 
       {/* Summary banner */}
       {siteSelection === null ? (
         <div className="flex items-center gap-2 rounded-md border border-destructive/50 bg-destructive/10 p-3 text-sm text-destructive">
           <XCircle className="h-4 w-4 shrink-0" />
-          <span>No site selected. Go back and choose or create a site boundary.</span>
+          <span>{t("noSiteSelected")}</span>
         </div>
       ) : boundaryLoading ? (
         <div className="flex items-center gap-2 rounded-md border border-yellow-500/40 bg-yellow-500/10 p-3 text-sm text-yellow-600 dark:text-yellow-400">
           <AlertTriangle className="h-4 w-4 shrink-0" />
-          <span>Checking drawn map area for {siteSelection.name}…</span>
+          <span>{t("checkingMapAreaFor", { siteName: siteSelection.name })}</span>
         </div>
       ) : boundaryError ? (
         <div className="flex items-center gap-2 rounded-md border border-destructive/50 bg-destructive/10 p-3 text-sm text-destructive">
           <AlertTriangle className="h-4 w-4 shrink-0" />
-          <span>Could not check the selected drawn map area ({boundaryError}). Go back, choose or create a site boundary, then try again.</span>
+          <span>{t("boundaryCheckError", { error: boundaryError })}</span>
         </div>
       ) : allValid ? (
         <div className="flex items-center gap-2 rounded-md border border-primary/40 bg-primary/10 p-3 text-sm text-primary">
           <CheckCircle2 className="h-4 w-4 shrink-0" />
-          <span>All {totalRows} row{totalRows !== 1 ? "s" : ""} ready — ready to save to {siteSelection.name}.</span>
+          <span>{t("allRowsReady", { count: totalRows, siteName: siteSelection.name })}</span>
         </div>
       ) : allInvalid ? (
         <div className="flex items-center gap-2 rounded-md border border-destructive/50 bg-destructive/10 p-3 text-sm text-destructive">
           <XCircle className="h-4 w-4 shrink-0" />
-          <span>No valid rows found. Fix errors and try again.</span>
+          <span>{t("noValidRows")}</span>
         </div>
       ) : (
         <div className="flex items-center gap-2 rounded-md border border-yellow-500/40 bg-yellow-500/10 p-3 text-sm text-yellow-600 dark:text-yellow-400">
           <AlertTriangle className="h-4 w-4 shrink-0" />
-          <span>{validCount} ready, {errorCount} need fixes. Rows with problems will be skipped.</span>
+          <span>{t("partialRowsReady", { validCount, errorCount })}</span>
         </div>
       )}
 
       {/* Data preview table */}
       <div>
         <div className="flex items-center justify-between mb-2">
-          <h3 className="text-sm font-medium">Tree information preview</h3>
-          {showingNote && <span className="text-xs text-muted-foreground">Showing first {MAX_PREVIEW_ROWS} of {totalRows} rows</span>}
+          <h3 className="text-sm font-medium">{t("treeInformationPreview")}</h3>
+          {showingNote && <span className="text-xs text-muted-foreground">{t("showingFirstRows", { maxRows: MAX_PREVIEW_ROWS, totalRows })}</span>}
         </div>
         <div className="rounded-lg border overflow-x-auto">
           <table className="w-full text-xs">
@@ -205,11 +207,11 @@ export default function PreviewStep({ uploadId, parsedData, mappings, koboMediaZ
                 <th className="px-3 py-2 text-left font-medium text-muted-foreground uppercase tracking-wide w-8">#</th>
                 {mappedHeaders.map((h) => (
                   <th key={h} className="px-3 py-2 text-left font-medium text-muted-foreground uppercase tracking-wide whitespace-nowrap">
-                    {h === "siteBoundary" ? "Site boundary" : getTargetFieldLabel(h)}
+                    {h === "siteBoundary" ? t("siteBoundaryField") : getTargetFieldLabel(h)}
                   </th>
                 ))}
-                {hasAnyPhotos && <th className="px-3 py-2 text-left font-medium text-muted-foreground uppercase tracking-wide whitespace-nowrap">Photos</th>}
-                <th className="px-3 py-2 text-left font-medium text-muted-foreground uppercase tracking-wide w-16">Status</th>
+                {hasAnyPhotos && <th className="px-3 py-2 text-left font-medium text-muted-foreground uppercase tracking-wide whitespace-nowrap">{t("photos")}</th>}
+                <th className="px-3 py-2 text-left font-medium text-muted-foreground uppercase tracking-wide w-16">{t("status")}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -281,14 +283,14 @@ export default function PreviewStep({ uploadId, parsedData, mappings, koboMediaZ
           >
             <span className="flex items-center gap-2 text-destructive">
               <XCircle className="h-4 w-4 shrink-0" />
-              {errorCount} row{errorCount !== 1 ? "s" : ""} with errors
+              {t("rowsWithErrors", { count: errorCount })}
             </span>
             {errorSectionOpen ? <ChevronDown className="h-4 w-4 text-muted-foreground" /> : <ChevronRight className="h-4 w-4 text-muted-foreground" />}
           </button>
           {errorSectionOpen && (
             <div className="border-t border-destructive/20 px-4 py-3 space-y-4">
               <div>
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">Common issues</p>
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">{t("commonIssues")}</p>
                 <ul className="space-y-1">
                   {errorSummary.map((item) => (
                     <li key={item.path} className="text-sm flex items-start gap-2">
@@ -299,11 +301,11 @@ export default function PreviewStep({ uploadId, parsedData, mappings, koboMediaZ
                 </ul>
               </div>
               <div>
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">Error rows</p>
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">{t("errorRows")}</p>
                 <ul className="space-y-2 max-h-48 overflow-y-auto">
                   {errors.map((err) => (
                     <li key={err.index} className="text-xs border border-destructive/20 rounded-md p-2 space-y-0.5">
-                      <p className="font-medium">Row {err.index + 1}</p>
+                      <p className="font-medium">{t("rowNumber", { number: err.index + 1 })}</p>
                       {err.issues.map((issue, i) => (
                         <p key={i} className="text-muted-foreground">
                           <span className="text-destructive font-medium">{getTargetFieldLabel(issue.path)}:</span> {issue.message}
@@ -319,9 +321,9 @@ export default function PreviewStep({ uploadId, parsedData, mappings, koboMediaZ
       )}
 
       <div className="flex items-center justify-between pt-2 border-t border-border">
-        <Button variant="outline" onClick={onBack}>Back to matched headings</Button>
+        <Button variant="outline" onClick={onBack}>{t("backToMatchedHeadings")}</Button>
         <Button onClick={handleNext} disabled={!canContinue}>
-          Upload {validCount} valid row{validCount !== 1 ? "s" : ""}
+          {t("uploadValidRows", { count: validCount })}
         </Button>
       </div>
     </div>

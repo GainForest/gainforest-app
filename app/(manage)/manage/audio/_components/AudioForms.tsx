@@ -583,7 +583,7 @@ export function AudioForm(
       />
       {event && (
         <p className="flex items-center gap-2 rounded-xl bg-muted/50 p-3 text-sm text-muted-foreground">
-          <MapPinIcon className="size-4" /> {t("linkedEvent", { eventId: event.record.eventID })}
+          <MapPinIcon className="size-4" /> {t("linkedEvent", { eventId: event.record.eventID ?? "—" })}
         </p>
       )}
       <TextField

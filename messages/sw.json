@@ -1,0 +1,125 @@
+{
+  "landing": {
+    "nav": {
+      "home": "Nyumbani",
+      "explore": "Gundua",
+      "organizations": "Mashirika",
+      "create": "Unda",
+      "launchApp": "Fungua programu",
+      "menu": "Menyu",
+      "navigation": "Urambazaji",
+      "close": "Funga",
+      "theme": "Mandhari"
+    },
+    "hero": {
+      "imageAlt": "Bonde la msitu wa mvua lenye ukungu",
+      "headingLine1": "Athari iliyothibitishwa",
+      "headingLine2": "huanza na",
+      "headingEmphasis1": "Jamii",
+      "headingEmphasis2": "halisi",
+      "description": "Fadhili miradi ya urejeshaji moja kwa moja. Kila Bumicert ni rekodi iliyothibitishwa ya kazi halisi ya mazingira, ikiungwa mkono na picha, maeneo na walezi wa jamii.",
+      "cta": "Gundua miradi",
+      "proofPoints": {
+        "communityLed": "Inaongozwa na jamii",
+        "photoVerified": "Imethibitishwa kwa picha",
+        "geolocated": "Ina eneo kamili"
+      }
+    },
+    "features": {
+      "eyebrow": "Kuhusu sisi",
+      "items": {
+        "verified": {
+          "number": "01",
+          "title": "Athari ya mazingira iliyothibitishwa",
+          "description": "Kila cheti kinaungwa mkono na picha, data ya eneo na uthibitisho wa jamii."
+        },
+        "direct": {
+          "number": "02",
+          "title": "Ufadhili wa moja kwa moja kwa jamii",
+          "description": "Msaada wako huenda moja kwa moja kwa wale wanaofanya kazi ya urejeshaji ardhini."
+        },
+        "transparent": {
+          "number": "03",
+          "title": "Iliyogatuliwa na wazi",
+          "description": "Kazi yako, imethibitishwa. Ushahidi usiobadilika wa urejeshaji unaojenga sifa yako kwa wafadhili na jamii."
+        }
+      }
+    },
+    "paths": {
+      "title": "Chagua njia yako",
+      "description": "Iwe uko hapa kufadhili athari au kuonyesha kazi yako, kuna nafasi kwa ajili yako.",
+      "cards": {
+        "funders": {
+          "label": "Kwa wafadhili",
+          "title": "Nataka kusaidia",
+          "emphasis": "mradi",
+          "description": "Vinjari vyeti vilivyothibitishwa na ufadhili wakati mahususi wa urejeshaji.",
+          "cta": "Gundua Bumicerts",
+          "alt": "Mto ukipinda ndani ya msitu wa mvua"
+        },
+        "organizations": {
+          "label": "Kwa mashirika",
+          "title": "Mimi ni mlezi",
+          "emphasis": "wa mazingira",
+          "description": "Onyesha kazi yako ya urejeshaji na ungana na wafadhili wanaojali.",
+          "cta": "Unda Bumicert",
+          "alt": "Maporomoko ya maji katika msitu wa kitropiki"
+        }
+      }
+    },
+    "certificate": {
+      "eyebrow": "Cheti",
+      "titleLine1": "Bumicert ni nini",
+      "titleLine2": "hasa?",
+      "faqItems": {
+        "digitalCertificate": {
+          "id": "1",
+          "question": "Cheti cha kidijitali cha athari",
+          "answer": "Bumicert hurekodi tendo mahususi la mazingira na kulipa utambulisho wa kudumu unaoweza kuthibitishwa kwenye mtandao wazi na uliogatuliwa."
+        },
+        "evidence": {
+          "id": "2",
+          "question": "Inaungwa mkono na ushahidi halisi",
+          "answer": "Picha, eneo, muda na data ya ufuatiliaji. Kila dai linaweza kuthibitishwa: si ahadi ya baadaye, bali ni ushahidi wa kazi iliyofanyika."
+        },
+        "communities": {
+          "id": "3",
+          "question": "Njia ya moja kwa moja kwa jamii",
+          "answer": "Unapofadhili Bumicert, pesa zako huwafikia watu wanaofanya urejeshaji. Hakuna wapatanishi wanaochukua ada au gharama zisizo wazi."
+        },
+        "story": {
+          "id": "4",
+          "question": "Sehemu yako katika hadithi",
+          "answer": "Kumiliki Bumicert kunamaanisha kuwa sehemu ya wakati huo: mti uliopandwa, mwamba wa matumbawe uliorejeshwa, mfumo wa ikolojia ulihuishwa. Unaweza kushiriki, kuhifadhi au kutoa kama zawadi."
+        }
+      },
+      "previewTitle": "Upandaji upya wa misitu wa Mlima Halimun",
+      "previewDescription": "Urejeshaji unaoongozwa na jamii wa msitu asilia Java Magharibi, Indonesia. Miti 5,000 imepandwa katika hekta 12.",
+      "objectives": {
+        "primary": "Upandaji misitu",
+        "secondary": "Bioanuwai"
+      }
+    },
+    "footer": {
+      "tagline": "Kuunganisha jamii na wafadhili.",
+      "infrastructure": "Miundombinu wazi. Imejengwa na GainForest.",
+      "documentation": "Nyaraka",
+      "copyright": "Chanzo wazi, inaendeshwa na jamii."
+    },
+    "maEarthBanner": {
+      "label": "Awamu wa 3 wa Ufadhili wa Ma Earth",
+      "deadline": "Wazi hadi Mei 31",
+      "title": "Omba Awamu wa 3 wa Ufadhili wa Ma Earth",
+      "description": "Jamii za GainForest zinaweza kutumia hadithi za miradi zilizothibitishwa, ushahidi, na rekodi za athari kutoka Bumicerts wanapoomba kwenye awamu ya ufadhili wa kijamii ya Ma Earth.",
+      "highlights": {
+        "matchingPool": "Dimbwi la kulinganisha la $500k",
+        "projects": "Miradi inayotegemea mazingira",
+        "record": "Andaa rekodi yako ya Bumicert"
+      },
+      "actions": {
+        "apply": "Omba kwenye Ma Earth",
+        "learn": "Jifunze kuhusu awamu hii"
+      }
+    }
+  }
+}

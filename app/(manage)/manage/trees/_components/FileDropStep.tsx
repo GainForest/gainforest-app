@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import { Archive, CirclePlus, FileSpreadsheet, Upload, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -110,6 +111,7 @@ type FileDropStepProps = {
 export default function FileDropStep({
   uploadId, did, target, initialEstablishmentMeans, initialDatasetSelection, initialSiteSelection, onFileAndMappings,
 }: FileDropStepProps) {
+  const t = useTranslations("upload.trees.fileDrop");
   const modal = useModal();
   const { parsedData, headers, rowCount, error, isParsing, parseFile, reset } = useCsvParser();
 
@@ -450,8 +452,8 @@ export default function FileDropStep({
     <div className="space-y-5">
       {/* Drop zone */}
       <div>
-        <h2 className="text-lg font-semibold">Choose your tree file</h2>
-        <p className="text-sm text-muted-foreground mt-0.5">Drag and drop a spreadsheet export file, or click to browse.</p>
+        <h2 className="text-lg font-semibold">{t("chooseFileTitle")}</h2>
+        <p className="text-sm text-muted-foreground mt-0.5">{t("chooseFileDescription")}</p>
       </div>
 
       <div className="space-y-3">
@@ -473,7 +475,7 @@ export default function FileDropStep({
           {isParsing ? (
             <div className="flex flex-col items-center gap-2 text-muted-foreground">
               <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-              <span className="text-sm">Reading file…</span>
+              <span className="text-sm">{t("readingFile")}</span>
             </div>
           ) : selectedFile && isParsed ? (
             <div className="flex flex-col items-center gap-2">
@@ -484,8 +486,8 @@ export default function FileDropStep({
           ) : (
             <div className="flex flex-col items-center gap-2 text-muted-foreground">
               <Upload className="h-10 w-10" />
-              <span className="text-sm font-medium">Drag & drop or click to browse</span>
-              <span className="text-xs">Spreadsheet export, max 10 MB</span>
+              <span className="text-sm font-medium">{t("dragDropBrowse")}</span>
+              <span className="text-xs">{t("spreadsheetMax")}</span>
             </div>
           )}
         </div>
@@ -493,21 +495,21 @@ export default function FileDropStep({
       <input ref={inputRef} type="file" accept=".csv,.tsv,text/csv,text/tab-separated-values" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFile(f); e.target.value = ""; }} />
 
       {fileError && <p className="text-sm text-destructive">{fileError}</p>}
-      {error && <p className="text-sm text-destructive">Could not read file: {error}</p>}
+      {error && <p className="text-sm text-destructive">{t("readFileError", { error })}</p>}
 
       {isParsed && !error && !fileError && (
         <div className="rounded-md border border-border bg-muted/30 p-4 grid grid-cols-3 gap-2 text-xs text-muted-foreground">
-          <div><span className="block font-medium text-foreground text-sm">{rowCount.toLocaleString()}</span>rows</div>
-          <div><span className="block font-medium text-foreground text-sm">{headers.length}</span>file headings</div>
-          <div><span className="block font-medium text-foreground text-sm">{detectKoboFormat(headers).isKobo ? "Field form" : "Spreadsheet"}</span>file type</div>
+          <div><span className="block font-medium text-foreground text-sm">{rowCount.toLocaleString()}</span>{t("rows")}</div>
+          <div><span className="block font-medium text-foreground text-sm">{headers.length}</span>{t("fileHeadings")}</div>
+          <div><span className="block font-medium text-foreground text-sm">{detectKoboFormat(headers).isKobo ? t("fieldForm") : t("spreadsheet")}</span>{t("fileType")}</div>
         </div>
       )}
 
       {/* Kobo media ZIP */}
       <div className="space-y-2 rounded-xl border border-border bg-muted/20 p-4">
         <div>
-          <h3 className="text-sm font-medium">Photo folder (optional)</h3>
-          <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">If your field form export includes photos, choose the matching photo folder to include them.</p>
+          <h3 className="text-sm font-medium">{t("photoFolderTitle")}</h3>
+          <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">{t("photoFolderDescription")}</p>
         </div>
         <div
           className="cursor-pointer rounded-lg border border-dashed bg-background transition-colors hover:border-primary/60 hover:bg-muted/30"
@@ -518,8 +520,8 @@ export default function FileDropStep({
               <div className="flex items-center gap-3 text-muted-foreground">
                 <div className="h-5 w-5 animate-spin rounded-full border-2 border-primary border-t-transparent" />
                 <div>
-                  <p className="text-sm font-medium">Reading photo folder…</p>
-                  <p className="text-xs">Large photo folders can take a few minutes. Keep this page open.</p>
+                  <p className="text-sm font-medium">{t("readingPhotoFolder")}</p>
+                  <p className="text-xs">{t("largePhotoFolderWait")}</p>
                 </div>
               </div>
             ) : selectedMediaZipFile && mediaZipIndex ? (
@@ -534,15 +536,15 @@ export default function FileDropStep({
               <div className="flex items-center gap-3 text-muted-foreground">
                 <Archive className="h-5 w-5 shrink-0" />
                 <div>
-                  <p className="text-sm font-medium">Click to select photo folder</p>
-                  <p className="text-xs">Large photo folders are supported. Only matched photos will be uploaded.</p>
+                  <p className="text-sm font-medium">{t("selectPhotoFolder")}</p>
+                  <p className="text-xs">{t("photoFolderSupported")}</p>
                 </div>
               </div>
             )}
             {(selectedMediaZipFile || mediaZipError) && (
               <Button type="button" variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); mediaZipParseRequestRef.current++; setSelectedMediaZipFile(null); setMediaZipIndex(null); setMediaZipError(null); }}>
                 <X className="h-4 w-4" />
-                {selectedMediaZipFile ? "Remove" : "Clear"}
+                {selectedMediaZipFile ? t("remove") : t("clear")}
               </Button>
             )}
           </div>
@@ -554,8 +556,8 @@ export default function FileDropStep({
       {/* Site selection (required) */}
       <div className="space-y-3 rounded-xl border border-border bg-muted/20 p-4">
         <div>
-          <label htmlFor="site-select" className="text-sm font-medium">Site boundary <span className="text-destructive">*</span></label>
-          <p className="text-xs text-muted-foreground mt-0.5">Each upload uses one site boundary. Trees outside its drawn map area will be skipped.</p>
+          <label htmlFor="site-select" className="text-sm font-medium">{t("siteBoundaryLabel")} <span className="text-destructive">*</span></label>
+          <p className="text-xs text-muted-foreground mt-0.5">{t("siteBoundaryHelp")}</p>
         </div>
         {sitesLoading ? (
           <Skeleton className="h-9 w-full rounded-md" />
@@ -564,27 +566,27 @@ export default function FileDropStep({
             <p className="text-sm text-destructive">{sitesError}</p>
             <div className="flex flex-wrap gap-2">
               <Button type="button" variant="outline" size="sm" onClick={() => void loadSites()}>
-                Retry
+                {t("retry")}
               </Button>
               <Button type="button" variant="outline" size="sm" onClick={() => openSiteBoundaryModal()}>
                 <CirclePlus className="h-4 w-4" />
-                Add site boundary
+                {t("addSiteBoundary")}
               </Button>
             </div>
           </div>
         ) : uploadSites.length === 0 ? (
           <div className="space-y-2">
-            <p className="text-sm text-muted-foreground">No sites yet. Add a site boundary here to keep going.</p>
+            <p className="text-sm text-muted-foreground">{t("noSites")}</p>
             <Button type="button" variant="outline" size="sm" onClick={() => openSiteBoundaryModal()}>
               <CirclePlus className="h-4 w-4" />
-              Add site boundary
+              {t("addSiteBoundary")}
             </Button>
           </div>
         ) : (
           <>
             <Select value={selectedSite?.uri ?? ""} onValueChange={setSelectedSiteUri}>
               <SelectTrigger id="site-select">
-                <SelectValue placeholder="Select a site…" />
+                <SelectValue placeholder={t("selectSitePlaceholder")} />
               </SelectTrigger>
               <SelectContent>
                 {uploadSites.map((site) => {
@@ -594,8 +596,8 @@ export default function FileDropStep({
                   return (
                     <SelectItem key={site.uri} value={site.uri} disabled={isSyncing}>
                       {site.name}
-                      {isDefault ? " (default)" : ""}
-                      {isSyncing ? " — preparing map area…" : !hasBoundary ? " — needs map area" : ""}
+                      {isDefault ? t("defaultSuffix") : ""}
+                      {isSyncing ? t("preparingMapAreaSuffix") : !hasBoundary ? t("needsMapAreaSuffix") : ""}
                     </SelectItem>
                   );
                 })}
@@ -604,61 +606,61 @@ export default function FileDropStep({
             <div className="flex flex-wrap gap-2">
               <Button type="button" variant="outline" size="sm" onClick={() => openSiteBoundaryModal()}>
                 <CirclePlus className="h-4 w-4" />
-                Add site boundary
+                {t("addSiteBoundary")}
               </Button>
               {selectedManagedSite && (!selectedSiteHasBoundary || selectedSiteBoundaryFailed) && (
                 <Button type="button" variant="outline" size="sm" onClick={() => openSiteBoundaryModal(selectedManagedSite)}>
-                  Add map area to selected site
+                  {t("addMapAreaToSelected")}
                 </Button>
               )}
             </div>
             {selectedSite && (
               <div className="rounded-lg border border-border bg-background p-3 text-sm">
                 <p className="font-medium text-foreground">{selectedSite.name}</p>
-                <p className="mt-1 text-xs text-muted-foreground">Trees will be checked against this one drawn map area.</p>
+                <p className="mt-1 text-xs text-muted-foreground">{t("selectedSiteCheckHelp")}</p>
               </div>
             )}
             {selectedSiteBoundarySyncing && (
-              <p className="text-sm text-muted-foreground">This drawn map area is still being prepared. Try again in a moment.</p>
+              <p className="text-sm text-muted-foreground">{t("mapAreaPreparing")}</p>
             )}
             {selectedSite && selectedSiteHasBoundary && selectedSiteBoundaryLoading && (
-              <p className="text-xs text-muted-foreground">Checking drawn map area…</p>
+              <p className="text-xs text-muted-foreground">{t("checkingMapArea")}</p>
             )}
             {selectedSite && selectedSiteHasBoundary && selectedSiteBoundaryFailed && (
-              <p className="text-sm text-destructive">Could not load this drawn map area. Add a new area to the selected site or choose another site boundary.</p>
+              <p className="text-sm text-destructive">{t("mapAreaLoadError")}</p>
             )}
             {allBoundaryCandidatesFailed && (
-              <p className="text-sm text-destructive">None of the existing drawn map areas could be checked. Add a new site boundary or replace one before continuing.</p>
+              <p className="text-sm text-destructive">{t("allMapAreasFailed")}</p>
             )}
             {hasUnavailableSiteSelection && (
-              <p className="text-sm text-destructive">The selected site is no longer available. Choose another site boundary.</p>
+              <p className="text-sm text-destructive">{t("selectedSiteUnavailable")}</p>
             )}
             {selectedSite && !selectedSiteHasBoundary && !selectedSiteBoundarySyncing && (
-              <p className="text-sm text-destructive">This site has no drawn map area. Add one here before continuing.</p>
+              <p className="text-sm text-destructive">{t("siteNoMapArea")}</p>
             )}
             {!selectedSite && !hasUnavailableSiteSelection && (
-              <p className="text-sm text-muted-foreground">Choose one site for this upload, then add a drawn map area if needed. If the file covers more than one site, split it into separate uploads.</p>
+              <p className="text-sm text-muted-foreground">{t("chooseSiteHelp")}</p>
             )}
             {showCreateSiteBoundaryAction && (
               <div className="space-y-3 rounded-lg border border-dashed border-primary/40 bg-primary/5 p-4">
                 <div className="space-y-1">
                   <p className="text-sm font-medium text-foreground">
-                    {allBoundaryCandidatesFailed ? "No usable site boundaries found" : "Need a site boundary?"}
+                    {allBoundaryCandidatesFailed ? t("noUsableSiteBoundaries") : t("needSiteBoundary")}
                   </p>
                   <p className="text-xs leading-relaxed text-muted-foreground">
                     {allBoundaryCandidatesFailed
-                      ? "Add a new site boundary or replace the selected drawn map area so trees can be checked before upload."
-                      : "Add a site boundary here without leaving the upload."}
+                      ? t("addOrReplaceBoundaryHelp")
+                      : t("addBoundaryInlineHelp")}
                   </p>
                 </div>
                 <div className="flex flex-wrap gap-2">
                   <Button type="button" variant="outline" size="sm" onClick={() => openSiteBoundaryModal()}>
                     <CirclePlus className="h-4 w-4" />
-                    Add site boundary
+                    {t("addSiteBoundary")}
                   </Button>
                   {selectedManagedSite && (allBoundaryCandidatesFailed || !selectedSiteHasBoundary || selectedSiteBoundaryFailed) && (
                     <Button type="button" variant="outline" size="sm" onClick={() => openSiteBoundaryModal(selectedManagedSite)}>
-                      Replace selected map area
+                      {t("replaceSelectedMapArea")}
                     </Button>
                   )}
                 </div>
@@ -671,14 +673,14 @@ export default function FileDropStep({
       {/* Dataset selection */}
       <div className="space-y-3">
         <div>
-          <label className="text-sm font-medium">Tree group</label>
-          <p className="text-xs text-muted-foreground mt-0.5">Optionally group these trees together.</p>
+          <label className="text-sm font-medium">{t("treeGroupLabel")}</label>
+          <p className="text-xs text-muted-foreground mt-0.5">{t("treeGroupHelp")}</p>
         </div>
         <div className="grid gap-3 md:grid-cols-3">
           {([
-            { mode: "none" as const, title: "No group", description: "Add trees without grouping them." },
-            { mode: "new" as const, title: "Create new group", description: "Create a named group for these trees." },
-            { mode: "existing" as const, title: "Add to existing", description: "Add trees to an existing group." },
+            { mode: "none" as const, title: t("datasetModes.noneTitle"), description: t("datasetModes.noneDescription") },
+            { mode: "new" as const, title: t("datasetModes.newTitle"), description: t("datasetModes.newDescription") },
+            { mode: "existing" as const, title: t("datasetModes.existingTitle"), description: t("datasetModes.existingDescription") },
           ]).map((option) => (
             <button
               key={option.mode}
@@ -698,12 +700,12 @@ export default function FileDropStep({
         {datasetMode === "new" && (
           <div className="space-y-3 rounded-xl border border-border bg-muted/20 p-4">
             <div className="space-y-1.5">
-              <label htmlFor="dataset-name" className="text-sm font-medium">Group name <span className="text-destructive">*</span></label>
-              <Input id="dataset-name" value={datasetName} onChange={(e) => setDatasetName(e.target.value)} placeholder="e.g. Amazon Plot Survey 2024" />
+              <label htmlFor="dataset-name" className="text-sm font-medium">{t("groupNameLabel")} <span className="text-destructive">*</span></label>
+              <Input id="dataset-name" value={datasetName} onChange={(e) => setDatasetName(e.target.value)} placeholder={t("groupNamePlaceholder")} />
             </div>
             <div className="space-y-1.5">
-              <label htmlFor="dataset-desc" className="text-sm font-medium">Description <span className="text-muted-foreground font-normal">(optional)</span></label>
-              <Textarea id="dataset-desc" value={datasetDescription} onChange={(e) => setDatasetDescription(e.target.value)} placeholder="Describe this group…" rows={2} className="resize-none" />
+              <label htmlFor="dataset-desc" className="text-sm font-medium">{t("descriptionLabel")} <span className="text-muted-foreground font-normal">{t("optional")}</span></label>
+              <Textarea id="dataset-desc" value={datasetDescription} onChange={(e) => setDatasetDescription(e.target.value)} placeholder={t("groupDescriptionPlaceholder")} rows={2} className="resize-none" />
             </div>
           </div>
         )}
@@ -711,20 +713,20 @@ export default function FileDropStep({
         {datasetMode === "existing" && (
           <div className="space-y-3 rounded-xl border border-border bg-muted/20 p-4">
             <div>
-              <label className="text-sm font-medium">Choose group</label>
-              <p className="text-xs text-muted-foreground mt-0.5">Trees will be added to this group.</p>
+              <label className="text-sm font-medium">{t("chooseGroupLabel")}</label>
+              <p className="text-xs text-muted-foreground mt-0.5">{t("chooseGroupHelp")}</p>
             </div>
             {datasetsLoading ? (
               <Skeleton className="h-9 w-full rounded-md" />
             ) : datasetsError ? (
               <p className="text-sm text-destructive">{datasetsError}</p>
             ) : existingDatasets.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No groups found. Create one first.</p>
+              <p className="text-sm text-muted-foreground">{t("noGroupsFound")}</p>
             ) : (
               <>
                 <Select value={selectedExistingDatasetUri} onValueChange={setSelectedExistingDatasetUri}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select a group…" />
+                    <SelectValue placeholder={t("selectGroupPlaceholder")} />
                   </SelectTrigger>
                   <SelectContent>
                     {existingDatasets.map((d) => (
@@ -737,7 +739,7 @@ export default function FileDropStep({
                 {selectedExistingDataset && (
                   <div className="rounded-lg border border-border bg-background p-3 text-sm">
                     <p className="font-medium">{selectedExistingDataset.name}</p>
-                    <p className="text-xs text-muted-foreground mt-1">{selectedExistingDataset.description ?? "No description"}</p>
+                    <p className="text-xs text-muted-foreground mt-1">{selectedExistingDataset.description ?? t("noDescription")}</p>
                   </div>
                 )}
               </>
@@ -749,8 +751,8 @@ export default function FileDropStep({
       {/* Establishment means */}
       <div className="space-y-3">
         <div>
-          <label className="text-sm font-medium">How were these trees established? <span className="text-muted-foreground font-normal">(optional)</span></label>
-          <p className="text-xs text-muted-foreground mt-0.5">This describes how trees came to be at this site.</p>
+          <label className="text-sm font-medium">{t("establishmentLabel")} <span className="text-muted-foreground font-normal">{t("optional")}</span></label>
+          <p className="text-xs text-muted-foreground mt-0.5">{t("establishmentHelp")}</p>
         </div>
         <div className="overflow-hidden rounded-xl border border-border">
           {PARTNER_ESTABLISHMENT_MEANS_OPTIONS.map((option) => {
@@ -768,10 +770,10 @@ export default function FileDropStep({
                 <span className={cn("mt-1 flex size-4 shrink-0 rounded-full border transition-colors", isSelected ? "border-primary bg-primary" : "border-muted-foreground/40 bg-background")} />
                 <span className="min-w-0 flex-1">
                   <span className="flex flex-wrap items-center gap-2">
-                    <span className="text-sm font-medium">{option.label}</span>
+                    <span className="text-sm font-medium">{t(`establishment.${option.value}.label`)}</span>
                     <span className="px-1.5 py-0.5 rounded-full bg-muted text-muted-foreground text-[10px] font-mono">{option.gbifCodeLabel}</span>
                   </span>
-                  <span className="mt-0.5 block text-xs text-muted-foreground leading-relaxed">{option.description}</span>
+                  <span className="mt-0.5 block text-xs text-muted-foreground leading-relaxed">{t(`establishment.${option.value}.description`)}</span>
                 </span>
               </button>
             );
@@ -781,7 +783,7 @@ export default function FileDropStep({
 
       <div className="flex items-center justify-end pt-2 border-t border-border">
         <Button onClick={handleContinue} disabled={!canContinue}>
-          Continue to match headings
+          {t("continueToMatch")}
         </Button>
       </div>
     </div>

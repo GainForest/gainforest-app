@@ -1,13 +1,18 @@
 import type { MetadataRoute } from "next";
 import { INDEXER_URL, SITE_URL } from "./_lib/urls";
+import { SUPPORTED_LOCALES, type SupportedLanguageCode } from "@/lib/i18n/languages";
+import { getLocalizedPathnames, withLocalePrefix } from "@/lib/i18n/routing";
 
 export const revalidate = 3600;
+
+type SitemapEntry = MetadataRoute.Sitemap[number];
+type ChangeFrequency = NonNullable<SitemapEntry["changeFrequency"]>;
 
 // Section pages plus every Bumicert detail page: each project page is a
 // crawlable marketplace landing page (server-rendered title, description,
 // OpenGraph, and JSON-LD). DID-based URLs redirect (308) to the handle-based
 // canonical, which also carries the canonical <link>.
-const ROUTES: Array<{ path: string; priority: number; changeFrequency: MetadataRoute.Sitemap[number]["changeFrequency"] }> = [
+const ROUTES: Array<{ path: string; priority: number; changeFrequency: ChangeFrequency }> = [
   { path: "", priority: 1, changeFrequency: "daily" },
   { path: "/observations", priority: 0.8, changeFrequency: "daily" },
   { path: "/bumicerts", priority: 0.8, changeFrequency: "daily" },
@@ -28,6 +33,39 @@ const BUMICERT_URIS_QUERY = `
 `;
 
 type SitemapBumicertNode = { did?: string | null; rkey?: string | null; createdAt?: string | null };
+
+function buildAbsoluteUrl(pathname: string): string {
+  return new URL(pathname, SITE_URL).toString();
+}
+
+function buildAlternates(pathname: string): Record<SupportedLanguageCode, string> {
+  const localizedPathnames = getLocalizedPathnames(pathname);
+  return Object.fromEntries(
+    Object.entries(localizedPathnames).map(([locale, path]) => [
+      locale,
+      buildAbsoluteUrl(path),
+    ]),
+  ) as Record<SupportedLanguageCode, string>;
+}
+
+function buildLocalizedEntries(options: {
+  pathname: string;
+  lastModified?: string | Date;
+  changeFrequency: ChangeFrequency;
+  priority: number;
+}): MetadataRoute.Sitemap {
+  const alternates = buildAlternates(options.pathname);
+
+  return SUPPORTED_LOCALES.map((locale) => ({
+    url: buildAbsoluteUrl(withLocalePrefix(options.pathname, locale)),
+    lastModified: options.lastModified,
+    changeFrequency: options.changeFrequency,
+    priority: options.priority,
+    alternates: {
+      languages: alternates,
+    },
+  }));
+}
 
 async function fetchBumicertEntries(): Promise<MetadataRoute.Sitemap> {
   const entries: MetadataRoute.Sitemap = [];
@@ -55,12 +93,14 @@ async function fetchBumicertEntries(): Promise<MetadataRoute.Sitemap> {
       for (const edge of connection.edges ?? []) {
         const node = edge.node;
         if (!node?.did || !node.rkey) continue;
-        entries.push({
-          url: `${SITE_URL}/bumicert/${encodeURIComponent(node.did)}/${encodeURIComponent(node.rkey)}`,
-          lastModified: node.createdAt ? new Date(node.createdAt) : undefined,
-          changeFrequency: "weekly",
-          priority: 0.6,
-        });
+        entries.push(
+          ...buildLocalizedEntries({
+            pathname: `/bumicert/${encodeURIComponent(node.did)}/${encodeURIComponent(node.rkey)}`,
+            lastModified: node.createdAt ? new Date(node.createdAt) : undefined,
+            changeFrequency: "weekly",
+            priority: 0.6,
+          }),
+        );
       }
 
       if (!connection.pageInfo?.hasNextPage || !connection.pageInfo.endCursor) break;
@@ -75,12 +115,14 @@ async function fetchBumicertEntries(): Promise<MetadataRoute.Sitemap> {
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const lastModified = new Date();
-  const sections: MetadataRoute.Sitemap = ROUTES.map(({ path, priority, changeFrequency }) => ({
-    url: `${SITE_URL}${path}`,
-    lastModified,
-    changeFrequency,
-    priority,
-  }));
+  const sections = ROUTES.flatMap(({ path, priority, changeFrequency }) =>
+    buildLocalizedEntries({
+      pathname: path || "/",
+      lastModified,
+      changeFrequency,
+      priority,
+    }),
+  );
   const bumicerts = await fetchBumicertEntries();
   return [...sections, ...bumicerts];
 }

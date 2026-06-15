@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { useLocale, useTranslations } from "next-intl";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   ArrowUpDownIcon,
@@ -44,23 +45,16 @@ const QUICK_FILTERS: QuickFilter[] = ["observations", "bumicerts"];
 const QUERY_STATE_OPTIONS = { history: "replace", scroll: false, shallow: true } as const;
 const SEARCH_QUERY_STATE_OPTIONS = { ...QUERY_STATE_OPTIONS, throttleMs: 200 } as const;
 
-const SORT_OPTIONS: Array<{ value: SortMode; label: string }> = [
-  { value: "newest", label: "Newest first" },
-  { value: "oldest", label: "Oldest first" },
-  { value: "az", label: "A → Z" },
-  { value: "za", label: "Z → A" },
-];
-
-const QUICK_CHIPS: Array<{ value: QuickFilter; label: string }> = [
-  { value: "observations", label: "Has observations" },
-  { value: "bumicerts", label: "Has Bumicerts" },
-];
+const SORT_OPTION_VALUES: SortMode[] = ["newest", "oldest", "az", "za"];
+const QUICK_CHIP_VALUES: QuickFilter[] = ["observations", "bumicerts"];
 
 const ORGANIZATIONS_PAGE_SIZE = 24;
 const INITIAL_CARD_LIMIT = 96;
 const CARD_BATCH_SIZE = 96;
 
 export function OrganizationsClient({ records: initialRecords = [] }: { records?: SiteRecord[] }) {
+  const t = useTranslations("marketplace.organizations");
+  const locale = useLocale();
   const [records, setRecords] = useState<SiteRecord[]>(initialRecords);
   const [cursor, setCursor] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState(initialRecords.length === 0);
@@ -195,9 +189,9 @@ export function OrganizationsClient({ records: initialRecords = [] }: { records?
     const statsCodes = totalStats?.countryCodes ?? [];
 
     return Array.from(new Set([...statsCodes, ...loadedCodes]))
-      .map((code) => ({ code, name: countryName(code), emoji: countryFlag(code) }))
+      .map((code) => ({ code, name: countryName(code, locale), emoji: countryFlag(code) }))
       .sort((a, b) => Number(b.code === countryFilter) - Number(a.code === countryFilter) || a.name.localeCompare(b.name));
-  }, [records, countryFilter, totalStats?.countryCodes]);
+  }, [records, countryFilter, locale, totalStats?.countryCodes]);
 
   const typeChips = useMemo(() => {
     const counts = new Map<string, number>();
@@ -217,7 +211,7 @@ export function OrganizationsClient({ records: initialRecords = [] }: { records?
       if (quickFilters.includes("observations") && (record.observationCount ?? 0) <= 0) return false;
       if (quickFilters.includes("bumicerts") && (record.bumicertCount ?? 0) <= 0) return false;
       if (!normalizedQuery) return true;
-      const haystack = [record.name, record.country, countryNameOrEmpty(record.country), record.orgType, record.source]
+      const haystack = [record.name, record.country, countryNameOrEmpty(record.country, locale), record.orgType, record.source]
         .filter(Boolean)
         .join(" ")
         .toLowerCase();
@@ -237,28 +231,28 @@ export function OrganizationsClient({ records: initialRecords = [] }: { records?
           return siteTime(b.createdAt) - siteTime(a.createdAt);
       }
     });
-  }, [countryFilter, deferredQuery, quickFilters, records, sort, typeFilter]);
+  }, [countryFilter, deferredQuery, locale, quickFilters, records, sort, typeFilter]);
 
   const stats = useMemo(
     () => [
       {
-        label: "Public organization profiles",
+        label: t("stats.profiles"),
         value: totalStats?.organizations ?? null,
       },
       {
-        label: "Organizations with project stories",
+        label: t("stats.withBumicerts"),
         value: totalStats?.withBumicerts ?? null,
       },
       {
-        label: "Organizations with nature sightings",
+        label: t("stats.withObservations"),
         value: totalStats?.withObservations ?? null,
       },
       {
-        label: "Locations across organizations",
+        label: t("stats.locations"),
         value: totalStats?.mappedPlaces ?? null,
       },
     ],
-    [totalStats],
+    [t, totalStats],
   );
 
   const renderedRecords = useMemo(
@@ -341,7 +335,7 @@ export function OrganizationsClient({ records: initialRecords = [] }: { records?
                   type="text"
                   value={query}
                   onChange={(event) => void setQuery(event.target.value)}
-                  placeholder="Search organizations"
+                  placeholder={t("search.placeholder")}
                   className="min-w-0 flex-1 truncate border-0 bg-transparent px-2.5 py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground"
                 />
               </div>
@@ -356,19 +350,19 @@ export function OrganizationsClient({ records: initialRecords = [] }: { records?
               style={{ animationDelay: "120ms" }}
             >
               <div className="flex items-center gap-1.5 pb-1 pr-8">
-                {QUICK_CHIPS.map(({ value, label }) => (
+                {QUICK_CHIP_VALUES.map((value) => (
                   <FilterChip
                     key={value}
                     selected={quickFilters.includes(value)}
                     onClick={() => toggleQuickFilter(value)}
                   >
-                    {label}
+                    {t(`quickFilters.${value}`)}
                   </FilterChip>
                 ))}
 
                 {typeChips.length > 0 && (
                   <FacetDropdown
-                    label="Category"
+                    label={t("facets.category")}
                     value={typeFilter}
                     options={typeChips.map((type) => ({ value: type.value, label: type.label, count: type.count }))}
                     onChange={(nextType) => void setTypeFilter(nextType)}
@@ -377,7 +371,7 @@ export function OrganizationsClient({ records: initialRecords = [] }: { records?
 
                 {countryChips.length > 0 && (
                   <FacetDropdown
-                    label="Country"
+                    label={t("facets.country")}
                     value={countryFilter}
                     options={countryChips.map((country) => ({ value: country.code, label: country.name, emoji: country.emoji }))}
                     onChange={(nextCountry) => void setCountryFilter(nextCountry)}
@@ -391,7 +385,7 @@ export function OrganizationsClient({ records: initialRecords = [] }: { records?
                     className="inline-flex h-9 shrink-0 items-center gap-1 rounded-full px-2.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
                   >
                     <XIcon className="h-3.5 w-3.5" />
-                    Clear
+                    {t("actions.clear")}
                   </button>
                 )}
               </div>
@@ -420,7 +414,7 @@ export function OrganizationsClient({ records: initialRecords = [] }: { records?
             <div className="mt-10 flex flex-col items-center gap-3">
               {view !== "map" && visibleRecords.length > renderedRecords.length && (
                 <p className="text-sm text-muted-foreground">
-                  Showing {renderedRecords.length} of {visibleRecords.length} organizations.
+                  {t("footer.showing", { shown: renderedRecords.length, total: visibleRecords.length })}
                 </p>
               )}
               {hasMoreCardsToShow ? (
@@ -429,7 +423,7 @@ export function OrganizationsClient({ records: initialRecords = [] }: { records?
                   onClick={() => setCardLimit((current) => current + CARD_BATCH_SIZE)}
                   className="inline-flex items-center justify-center rounded-full border border-border bg-background px-6 py-3 text-sm font-medium text-foreground transition-colors hover:bg-muted"
                 >
-                  Show more
+                  {t("actions.showMore")}
                 </button>
               ) : hasMore ? (
                 <AutoLoadMoreButton
@@ -441,7 +435,7 @@ export function OrganizationsClient({ records: initialRecords = [] }: { records?
                   className="inline-flex items-center justify-center rounded-full border border-border bg-background px-6 py-3 text-sm font-medium text-foreground transition-colors hover:bg-muted disabled:opacity-60"
                 />
               ) : (
-                <span className="text-sm italic text-muted-foreground">You have reached the end.</span>
+                <span className="text-sm italic text-muted-foreground">{t("footer.end")}</span>
               )}
             </div>
           )}
@@ -454,12 +448,14 @@ export function OrganizationsClient({ records: initialRecords = [] }: { records?
 }
 
 function OrganizationsHero() {
+  const t = useTranslations("marketplace.organizations.hero");
+
   return (
     <div className="relative min-h-[330px] overflow-hidden bg-card animate-in">
       <div className="absolute inset-0">
         <Image
           src="/assets/organizations/organizations-hero-light@2x.webp"
-          alt="Misty mountain forest at sunrise"
+          alt={t("imageAltLight")}
           fill
           priority
           quality={95}
@@ -468,7 +464,7 @@ function OrganizationsHero() {
         />
         <Image
           src="/assets/organizations/organizations-hero-dark@2x.webp"
-          alt="Misty mountain forest at dusk"
+          alt={t("imageAltDark")}
           fill
           priority
           quality={95}
@@ -484,26 +480,26 @@ function OrganizationsHero() {
         <div className="mb-5 flex items-center gap-2.5">
           <UsersIcon className="h-4 w-4 text-primary" />
           <span className="text-xs font-medium tracking-[0.22em] text-muted-foreground uppercase">
-            Organizations
+            {t("eyebrow")}
           </span>
         </div>
         <h1
-          aria-label="Nature Stewards"
+          aria-label={t("titleAriaLabel")}
           className="max-w-4xl text-4xl leading-[0.98] font-light tracking-[-0.035em] text-foreground sm:text-5xl md:text-6xl lg:text-7xl"
           style={{ fontFamily: "var(--font-garamond-var)" }}
         >
           <span aria-hidden="true">
-            Nature{" "}
+            {t("titleFirst")}{" "}
             <span
               className="text-foreground/90"
               style={{ fontFamily: "var(--font-instrument-serif-var)", fontStyle: "italic" }}
             >
-              Stewards
+              {t("titleSecond")}
             </span>
           </span>
         </h1>
         <p className="mt-7 max-w-2xl text-base leading-8 text-muted-foreground md:text-lg">
-          Discover organizations leading environmental stewardship and community-driven change.
+          {t("description")}
         </p>
       </div>
     </div>
@@ -511,12 +507,13 @@ function OrganizationsHero() {
 }
 
 function ViewToggle({ view, setView }: { view: ViewMode; setView: (view: ViewMode) => void }) {
+  const t = useTranslations("marketplace.organizations.view");
   return (
     <div className="inline-flex h-10 shrink-0 items-center rounded-full border border-border bg-background/70 p-0.5 backdrop-blur">
       {([
-        { id: "cards", label: "Cards", Icon: LayoutGridIcon },
-        { id: "list", label: "List", Icon: ListIcon },
-        { id: "map", label: "Map", Icon: MapIcon },
+        { id: "cards", label: t("cards"), Icon: LayoutGridIcon },
+        { id: "list", label: t("list"), Icon: ListIcon },
+        { id: "map", label: t("map"), Icon: MapIcon },
       ] as const).map(({ id, label, Icon }) => (
         <button
           key={id}
@@ -548,6 +545,8 @@ function SortControl({
   open: boolean;
   setOpen: (updater: (open: boolean) => boolean) => void;
 }) {
+  const t = useTranslations("marketplace.organizations");
+  const sortOptions = SORT_OPTION_VALUES.map((value) => ({ value, label: t(`sort.${value}`) }));
   const containerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -576,11 +575,11 @@ function SortControl({
         type="button"
         onClick={() => setOpen((value) => !value)}
         aria-expanded={open}
-        aria-label="Sort"
+        aria-label={t("search.sortAriaLabel")}
         className="inline-flex h-10 cursor-pointer items-center justify-center gap-1.5 whitespace-nowrap rounded-full border border-border bg-background px-3 text-sm font-medium transition-colors hover:bg-muted hover:text-foreground hover:shadow-sm"
       >
         <ArrowUpDownIcon className="h-4 w-4" />
-        <span className="hidden md:inline">{SORT_OPTIONS.find((option) => option.value === sort)?.label}</span>
+        <span className="hidden md:inline">{sortOptions.find((option) => option.value === sort)?.label}</span>
         <ChevronDownIcon className={`hidden h-4 w-4 transition-transform md:inline ${open ? "rotate-180" : ""}`} />
       </button>
 
@@ -593,7 +592,7 @@ function SortControl({
               exit={{ opacity: 0, y: -8 }}
               className="absolute top-full right-0 z-[1000] mt-2 w-44 rounded-2xl border border-border bg-popover py-1.5 shadow-xl"
             >
-              {SORT_OPTIONS.map((option) => (
+              {sortOptions.map((option) => (
                 <button
                   key={option.value}
                   onClick={() => {
@@ -712,6 +711,7 @@ function FacetDropdown({
 }
 
 function StatsBand({ stats, loading }: { stats: Array<{ label: string; value: number | null }>; loading: boolean }) {
+  const locale = useLocale();
   if (loading || stats.every((stat) => stat.value === null)) return null;
 
   const icons = [
@@ -726,7 +726,7 @@ function StatsBand({ stats, loading }: { stats: Array<{ label: string; value: nu
       columns={4}
       items={stats.map((stat, index) => ({
         label: stat.label,
-        value: stat.value === null ? null : formatStat(stat.value),
+        value: stat.value === null ? null : formatStat(stat.value, locale),
         icon: icons[index] ?? <LeafIcon />,
         accent: index % 2 === 0,
       }))}
@@ -735,8 +735,9 @@ function StatsBand({ stats, loading }: { stats: Array<{ label: string; value: nu
 }
 
 function OrganizationsGridSkeleton() {
+  const t = useTranslations("marketplace.organizations");
   return (
-    <div className="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-2 lg:gap-4" aria-label="Loading organizations">
+    <div className="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-2 lg:gap-4" aria-label={t("loading")}>
       {Array.from({ length: 12 }).map((_, index) => (
         <div key={index} className="flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-card">
           {/* Cover */}
@@ -780,11 +781,13 @@ const OrganizationList = memo(function OrganizationList({ records, onOpen }: { r
 });
 
 const OrganizationListItem = memo(function OrganizationListItem({ record, onOpen }: { record: SiteRecord; onOpen: (record: SiteRecord) => void }) {
+  const t = useTranslations("marketplace.organizations.card");
+  const locale = useLocale();
   const country = normalizeCountry(record.country);
-  const countryLabel = country ? countryName(country) : null;
+  const countryLabel = country ? countryName(country, locale) : null;
   const types = orgTypes(record).map(titleCase);
   const primaryType = types[0] ?? null;
-  const description = orgDescription(types, countryLabel);
+  const description = orgDescription(types, countryLabel, t);
   const bannerUrl = organizationBannerUrl(record);
   const avatarUrl = organizationAvatarUrl(record);
   const joinedYear = createdYear(record.createdAt);
@@ -827,8 +830,8 @@ const OrganizationListItem = memo(function OrganizationListItem({ record, onOpen
           <span className="mt-1 line-clamp-2 block text-sm leading-relaxed text-muted-foreground">{description}</span>
         </span>
         <span className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-border/60 pt-2">
-          <span className="text-xs text-muted-foreground">{joinedYear ? `Joined ${joinedYear}` : "Public profile"}</span>
-          <span className="shrink-0 text-xs font-medium text-foreground transition-colors group-hover:text-primary">Show details</span>
+          <span className="text-xs text-muted-foreground">{joinedYear ? t("joined", { year: joinedYear }) : t("publicProfile")}</span>
+          <span className="shrink-0 text-xs font-medium text-foreground transition-colors group-hover:text-primary">{t("showDetails")}</span>
         </span>
       </span>
     </button>
@@ -836,11 +839,13 @@ const OrganizationListItem = memo(function OrganizationListItem({ record, onOpen
 });
 
 const OrganizationCard = memo(function OrganizationCard({ record, onOpen }: { record: SiteRecord; onOpen: (record: SiteRecord) => void }) {
+  const t = useTranslations("marketplace.organizations.card");
+  const locale = useLocale();
   const country = normalizeCountry(record.country);
-  const countryLabel = country ? countryName(country) : null;
+  const countryLabel = country ? countryName(country, locale) : null;
   const types = orgTypes(record).map(titleCase);
   const primaryType = types[0] ?? null;
-  const description = orgDescription(types, countryLabel);
+  const description = orgDescription(types, countryLabel, t);
   const joinedYear = createdYear(record.createdAt);
   const bannerUrl = organizationBannerUrl(record);
   const avatarUrl = organizationAvatarUrl(record);
@@ -905,10 +910,10 @@ const OrganizationCard = memo(function OrganizationCard({ record, onOpen }: { re
           <div className="min-h-5 flex-1" />
           <div className="flex items-center justify-between gap-3 border-t border-border/60 pt-2.5">
             <div className="flex min-w-0 items-center gap-2 text-xs text-muted-foreground">
-              {joinedYear && <span className="shrink-0">Joined {joinedYear}</span>}
+              {joinedYear && <span className="shrink-0">{t("joined", { year: joinedYear })}</span>}
             </div>
             <span className="flex shrink-0 items-center gap-1.5 text-xs font-medium text-foreground">
-              <span className="transition-colors group-hover:text-primary">Show details</span>
+              <span className="transition-colors group-hover:text-primary">{t("showDetails")}</span>
               <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary transition-all duration-300 group-hover:bg-primary group-hover:text-primary-foreground">
                 <ArrowUpRightIcon className="size-4 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
               </span>
@@ -920,15 +925,20 @@ const OrganizationCard = memo(function OrganizationCard({ record, onOpen }: { re
   );
 });
 
-function orgDescription(types: string[], countryLabel: string | null): string {
-  const where = countryLabel ? ` in ${countryLabel}` : "";
+function orgDescription(
+  types: string[],
+  countryLabel: string | null,
+  t: ReturnType<typeof useTranslations<"marketplace.organizations.card">>,
+): string {
+  const where = countryLabel ? t("where", { country: countryLabel }) : "";
   if (types.length) {
-    return `A ${types.join(" & ").toLowerCase()} advancing community-led environmental stewardship${where}.`;
+    return t("descriptionWithType", { types: types.join(" & ").toLowerCase(), where });
   }
-  return `A nature steward protecting and restoring local ecosystems${where}.`;
+  return t("descriptionDefault", { where });
 }
 
 function EmptyState({ onClear, hasActiveFilters }: { onClear: () => void; hasActiveFilters: boolean }) {
+  const t = useTranslations("marketplace.organizations");
   return (
     <div className="flex flex-col items-center justify-center py-28 text-center">
       <span
@@ -941,13 +951,13 @@ function EmptyState({ onClear, hasActiveFilters }: { onClear: () => void; hasAct
         className="mb-3 text-2xl font-light text-foreground md:text-3xl"
         style={{ fontFamily: "var(--font-garamond-var)" }}
       >
-        No organizations found
+        {t("empty.title")}
       </h3>
       <p
         className="max-w-md text-base leading-relaxed text-foreground/80"
         style={{ fontFamily: "var(--font-instrument-serif-var)", fontStyle: "italic" }}
       >
-        Try adjusting your search or filters.
+        {t("empty.description")}
       </p>
       {hasActiveFilters && (
         <button
@@ -955,7 +965,7 @@ function EmptyState({ onClear, hasActiveFilters }: { onClear: () => void; hasAct
           onClick={onClear}
           className="mt-5 rounded-full bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
         >
-          Clear filters
+          {t("actions.clearFilters")}
         </button>
       )}
     </div>
@@ -968,17 +978,17 @@ function normalizeCountry(country: string | null | undefined): string | null {
   return /^[A-Z]{2}$/.test(code) ? code : null;
 }
 
-function countryName(code: string): string {
+function countryName(code: string, locale: string): string {
   try {
-    return new Intl.DisplayNames(["en"], { type: "region" }).of(code) ?? code;
+    return new Intl.DisplayNames([locale], { type: "region" }).of(code) ?? code;
   } catch {
     return code;
   }
 }
 
-function countryNameOrEmpty(country: string | null | undefined): string {
+function countryNameOrEmpty(country: string | null | undefined, locale: string): string {
   const code = normalizeCountry(country);
-  return code ? countryName(code) : "";
+  return code ? countryName(code, locale) : "";
 }
 
 function createdYear(iso: string | null | undefined): string | null {
@@ -1009,8 +1019,8 @@ function organizationAvatarUrl(record: SiteRecord): string | null {
   return record.avatarUrl ?? (!record.coverRef && record.logoRef ? record.imageUrl : null);
 }
 
-function formatStat(value: number): string {
-  return new Intl.NumberFormat("en", { notation: Math.abs(value) >= 1000 ? "compact" : "standard" }).format(value);
+function formatStat(value: number, locale: string): string {
+  return new Intl.NumberFormat(locale, { notation: Math.abs(value) >= 1000 ? "compact" : "standard" }).format(value);
 }
 
 function mergeSiteRecords(base: SiteRecord[], incoming: SiteRecord[]): SiteRecord[] {

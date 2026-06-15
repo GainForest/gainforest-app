@@ -15,6 +15,7 @@ import {
   SlidersHorizontalIcon,
 } from "lucide-react";
 import { memo, useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
+import { useLocale, useTranslations } from "next-intl";
 import { parseAsString, parseAsStringEnum, useQueryState } from "nuqs";
 import { BumicertOwnerAvatar } from "@/components/bumicert/BumicertOwnerAvatar";
 import { Button } from "@/components/ui/button";
@@ -44,23 +45,27 @@ const VIEW_MODES: ViewMode[] = ["cards", "list", "map"];
 const QUERY_STATE_OPTIONS = { history: "replace", scroll: false, shallow: true } as const;
 const SEARCH_QUERY_STATE_OPTIONS = { ...QUERY_STATE_OPTIONS, throttleMs: 200 } as const;
 
-const SORT_OPTIONS: Array<{ value: ExplorerSortMode; label: string }> = [
-  { value: "newest", label: "Newest" },
-  { value: "oldest", label: "Oldest" },
-  { value: "az", label: "A → Z" },
-  { value: "za", label: "Z → A" },
-];
 
-const SORT_LABELS: Record<ExplorerSortMode, string> = Object.fromEntries(
-  SORT_OPTIONS.map((option) => [option.value, option.label]),
-) as Record<ExplorerSortMode, string>;
-
-const FILTER_CHIPS: Array<{ key: ProjectIndexFilter; label: string; predicate: (record: ProjectRecord) => boolean }> = [
-  { key: "images", label: "Shows images", predicate: (record) => Boolean(record.imageUrl) },
-  { key: "locations", label: "Has a place", predicate: (record) => Boolean(record.locationUri) },
-];
 
 export function ProjectsExploreClient({ records: initialRecords = [] }: { records?: ProjectRecord[] }) {
+  const t = useTranslations("marketplace.projects");
+  const locale = useLocale();
+  const filterChips = useMemo<Array<{ key: ProjectIndexFilter; label: string; predicate: (record: ProjectRecord) => boolean }>>(() => [
+    { key: "images", label: t("filters.images"), predicate: (record) => Boolean(record.imageUrl) },
+    { key: "locations", label: t("filters.locations"), predicate: (record) => Boolean(record.locationUri) },
+  ], [t]);
+  const sortOptions = useMemo<Array<{ value: ExplorerSortMode; label: string }>>(() => [
+    { value: "newest", label: t("sort.newest") },
+    { value: "oldest", label: t("sort.oldest") },
+    { value: "az", label: t("sort.az") },
+    { value: "za", label: t("sort.za") },
+  ], [t]);
+  const sortLabels = useMemo(() => Object.fromEntries(sortOptions.map((option) => [option.value, option.label])) as Record<ExplorerSortMode, string>, [sortOptions]);
+  const viewOptions = useMemo(() => [
+    { id: "cards", label: t("view.cards"), Icon: LayoutGridIcon },
+    { id: "list", label: t("view.list"), Icon: ListIcon },
+    { id: "map", label: t("view.map"), Icon: MapIcon },
+  ] as const, [t]);
   const [records, setRecords] = useState<ProjectRecord[]>(initialRecords);
   const [cursor, setCursor] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState(initialRecords.length === 0);
@@ -180,9 +185,9 @@ export function ProjectsExploreClient({ records: initialRecords = [] }: { record
 
   const visibleRecords = useMemo(() => {
     return records
-      .filter((record) => filters.every((key) => FILTER_CHIPS.find((chip) => chip.key === key)?.predicate(record)))
+      .filter((record) => filters.every((key) => filterChips.find((chip) => chip.key === key)?.predicate(record)))
       .toSorted((a, b) => compareProjects(a, b, sort));
-  }, [records, filters, sort]);
+  }, [records, filters, sort, filterChips]);
   const renderedRecords = useMemo(
     () => (view === "map" ? visibleRecords : visibleRecords.slice(0, cardLimit)),
     [cardLimit, view, visibleRecords],
@@ -191,12 +196,12 @@ export function ProjectsExploreClient({ records: initialRecords = [] }: { record
 
   const statItems = useMemo(
     () => [
-      { label: "Projects", value: stats?.totalProjects ?? null },
-      { label: "Projects with Bumicerts", value: stats?.projectsWithBumicerts ?? null },
-      { label: "Bumicerts in projects", value: stats?.bumicerts ?? null },
-      { label: "Projects with images", value: stats?.projectsWithImages ?? null },
+      { label: t("stats.projects"), value: stats?.totalProjects ?? null },
+      { label: t("stats.withBumicerts"), value: stats?.projectsWithBumicerts ?? null },
+      { label: t("stats.bumicerts"), value: stats?.bumicerts ?? null },
+      { label: t("stats.withImages"), value: stats?.projectsWithImages ?? null },
     ],
-    [stats],
+    [stats, t],
   );
 
   const updateFilters = useCallback((nextFilters: ProjectIndexFilter[]) => {
@@ -245,23 +250,23 @@ export function ProjectsExploreClient({ records: initialRecords = [] }: { record
           <div className="mb-5 flex items-center gap-2.5">
             <FolderKanbanIcon className="h-4 w-4 text-primary" />
             <span className="text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
-              Explore Projects
+              {t("hero.eyebrow")}
             </span>
           </div>
           <h1
             className="max-w-4xl text-4xl font-light leading-[0.98] tracking-[-0.035em] text-foreground sm:text-5xl md:text-6xl lg:text-7xl"
             style={{ fontFamily: "var(--font-garamond-var)" }}
           >
-            Discover project collections for{" "}
+            {t("hero.title")}{" "}
             <span
               className="whitespace-nowrap text-foreground/85"
               style={{ fontFamily: "var(--font-instrument-serif-var)", fontStyle: "italic" }}
             >
-              Regenerative Impact
+              {t("hero.accent")}
             </span>
           </h1>
           <p className="mt-7 max-w-2xl text-base leading-8 text-muted-foreground md:text-lg">
-            Projects group related Bumicerts from communities and organizations, so you can browse work at the parent-project level before diving into individual certificates.
+            {t("hero.description")}
           </p>
         </div>
       </div>
@@ -281,18 +286,14 @@ export function ProjectsExploreClient({ records: initialRecords = [] }: { record
                 type="text"
                 value={query}
                 onChange={(event) => void setQuery(event.target.value)}
-                aria-label="Search projects"
-                placeholder="Search projects by name or keyword"
+                aria-label={t("search.ariaLabel")}
+                placeholder={t("search.placeholder")}
                 className="min-w-0 flex-1 truncate border-0 bg-transparent px-3 py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground"
               />
             </div>
 
             <div className="hidden h-10 shrink-0 items-center rounded-full border border-border bg-background/50 p-0.5 backdrop-blur sm:inline-flex">
-              {([
-                { id: "cards", label: "Cards", Icon: LayoutGridIcon },
-                { id: "list", label: "List", Icon: ListIcon },
-                { id: "map", label: "Map", Icon: MapIcon },
-              ] as const).map((option) => (
+              {viewOptions.map((option) => (
                 <button
                   key={option.id}
                   type="button"
@@ -317,18 +318,18 @@ export function ProjectsExploreClient({ records: initialRecords = [] }: { record
                   setOpenSort((value) => !value);
                 }}
                 type="button"
-                aria-label="Sort projects"
+                aria-label={t("search.sortAriaLabel")}
                 aria-expanded={openSort}
                 className="inline-flex h-10 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-full border border-border bg-background px-8 text-sm font-medium transition-colors hover:bg-muted hover:text-foreground hover:shadow-sm disabled:pointer-events-none disabled:opacity-50 has-[>svg]:px-4"
               >
                 <ArrowUpDownIcon className="h-4 w-4" />
-                <span className="hidden sm:inline">{SORT_LABELS[sort]}</span>
+                <span className="hidden sm:inline">{sortLabels[sort]}</span>
                 <ChevronDownIcon className={`h-4 w-4 transition-transform ${openSort ? "rotate-180" : ""}`} />
               </button>
 
               {openSort && (
                 <div className="absolute right-0 top-full z-[1000] mt-2 w-36 rounded-2xl border border-border bg-popover py-1.5 shadow-xl animate-in">
-                  {SORT_OPTIONS.map((option) => (
+                  {sortOptions.map((option) => (
                     <button
                       key={option.value}
                       type="button"
@@ -352,11 +353,7 @@ export function ProjectsExploreClient({ records: initialRecords = [] }: { record
 
           <div className="relative z-20 flex items-center justify-between gap-3 sm:justify-start">
             <div className="inline-flex h-10 shrink-0 items-center rounded-full border border-border bg-background/50 p-0.5 backdrop-blur sm:hidden">
-              {([
-                { id: "cards", label: "Cards", Icon: LayoutGridIcon },
-                { id: "list", label: "List", Icon: ListIcon },
-                { id: "map", label: "Map", Icon: MapIcon },
-              ] as const).map((option) => (
+              {viewOptions.map((option) => (
                 <button
                   key={option.id}
                   type="button"
@@ -377,9 +374,9 @@ export function ProjectsExploreClient({ records: initialRecords = [] }: { record
             <div className="scroll-mask-right scrollbar-hidden hidden min-w-0 flex-1 overflow-x-auto pb-px sm:block">
               <div className="flex items-center gap-2 pr-8">
                 <Button type="button" onClick={clearFilters} variant={filters.length === 0 ? "default" : "outline"} size="sm" className="h-10 text-sm">
-                  All Projects
+                  {t("filters.allProjects")}
                 </Button>
-                {FILTER_CHIPS.map((chip) => {
+                {filterChips.map((chip) => {
                   const selected = filters.includes(chip.key);
                   return (
                     <Button key={chip.key} type="button" onClick={() => toggleFilter(chip.key)} variant={selected ? "default" : "outline"} size="sm" className="h-10 text-sm">
@@ -404,7 +401,7 @@ export function ProjectsExploreClient({ records: initialRecords = [] }: { record
                 className="h-10 text-sm"
               >
                 <SlidersHorizontalIcon className="h-3.5 w-3.5" />
-                <span>All filters</span>
+                <span>{t("filters.allFilters")}</span>
                 {filters.length > 0 && (
                   <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-primary-foreground px-1 text-[10px] text-primary">
                     {filters.length}
@@ -413,24 +410,24 @@ export function ProjectsExploreClient({ records: initialRecords = [] }: { record
               </Button>
 
               {openFilters && (
-                <div aria-label="All filters" className="quick-popover-in absolute right-0 top-full z-[1000] mt-2 w-[min(18rem,calc(100vw-2rem))] rounded-2xl border border-primary/20 bg-popover p-4 shadow-[0_18px_45px_color-mix(in_oklab,var(--primary)_16%,transparent)]">
+                <div aria-label={t("filters.allFilters")} className="quick-popover-in absolute right-0 top-full z-[1000] mt-2 w-[min(18rem,calc(100vw-2rem))] rounded-2xl border border-primary/20 bg-popover p-4 shadow-[0_18px_45px_color-mix(in_oklab,var(--primary)_16%,transparent)]">
                   <div className="mb-3">
-                    <h2 className="text-base font-medium text-foreground">All filters</h2>
+                    <h2 className="text-base font-medium text-foreground">{t("filters.allFilters")}</h2>
                     <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-                      Show projects with images or a project place.
+                      {t("filters.description")}
                     </p>
                   </div>
                   <div className="flex flex-wrap gap-2">
-                    {FILTER_CHIPS.map((chip) => (
+                    {filterChips.map((chip) => (
                       <Button key={chip.key} type="button" aria-pressed={filters.includes(chip.key)} onClick={() => toggleFilter(chip.key)} variant={filters.includes(chip.key) ? "default" : "outline"} size="sm" className="h-10 text-sm">
                         {chip.label}
                       </Button>
                     ))}
                   </div>
                   <div className="mt-4 flex items-center justify-between border-t border-primary/15 pt-3">
-                    <p className="text-xs text-accent-foreground/75">Filters update as you choose.</p>
+                    <p className="text-xs text-accent-foreground/75">{t("filters.updateHint")}</p>
                     <Button type="button" onClick={clearFilters} variant="ghost" size="sm">
-                      Clear all
+                      {t("actions.clearAll")}
                     </Button>
                   </div>
                 </div>
@@ -453,7 +450,7 @@ export function ProjectsExploreClient({ records: initialRecords = [] }: { record
           <div className="mt-10 flex flex-col items-center gap-3">
             {view !== "map" && visibleRecords.length > renderedRecords.length && (
               <p className="text-sm text-muted-foreground">
-                Showing {renderedRecords.length} of {visibleRecords.length} projects.
+                {t("footer.showing", { shown: renderedRecords.length, total: visibleRecords.length })}
               </p>
             )}
             {hasMoreCardsToShow ? (
@@ -462,7 +459,7 @@ export function ProjectsExploreClient({ records: initialRecords = [] }: { record
                 onClick={() => setCardLimit((current) => current + CARD_BATCH_SIZE)}
                 className="inline-flex items-center justify-center rounded-full border border-border bg-background px-6 py-3 text-sm font-medium text-foreground transition-colors hover:bg-muted"
               >
-                Show more
+                {t("footer.showMore")}
               </button>
             ) : hasMore ? (
               <AutoLoadMoreButton
@@ -471,10 +468,13 @@ export function ProjectsExploreClient({ records: initialRecords = [] }: { record
                 onLoadMore={loadMore}
                 autoLoad={autoLoadMore}
                 onAutoLoadChange={setAutoLoadMore}
+                idleLabel={t("footer.showMore")}
+                loadingLabel={t("footer.showMore")}
+                endLabel={t("footer.end")}
                 className="inline-flex items-center justify-center rounded-full border border-border bg-background px-6 py-3 text-sm font-medium text-foreground transition-colors hover:bg-muted disabled:opacity-60"
               />
             ) : (
-              <span className="text-sm italic text-muted-foreground">You have reached the end.</span>
+              <span className="text-sm italic text-muted-foreground">{t("footer.end")}</span>
             )}
           </div>
         )}
@@ -514,6 +514,7 @@ function HeroBackdrop() {
 }
 
 function StatsBand({ stats, loading }: { stats: Array<{ label: string; value: number | null }>; loading: boolean }) {
+  const locale = useLocale();
   if (loading || stats.every((stat) => stat.value === null)) return null;
   const icons = [
     <FolderKanbanIcon key="projects" />,
@@ -526,7 +527,7 @@ function StatsBand({ stats, loading }: { stats: Array<{ label: string; value: nu
       columns={4}
       items={stats.map((stat, index) => ({
         label: stat.label,
-        value: stat.value === null ? null : formatStat(stat.value),
+        value: stat.value === null ? null : formatStat(stat.value, locale),
         icon: icons[index] ?? <FolderKanbanIcon />,
         accent: index % 2 === 0,
       }))}
@@ -543,6 +544,7 @@ const ProjectGrid = memo(function ProjectGrid({
   loading: boolean;
   onOpen: (record: ProjectRecord) => void;
 }) {
+  const t = useTranslations("marketplace.projects");
   if (loading && records.length === 0) return <ProjectGridSkeleton />;
 
   if (records.length === 0) {
@@ -553,13 +555,13 @@ const ProjectGrid = memo(function ProjectGrid({
         </span>
         <div className="mb-3 flex items-center gap-2">
           <SearchIcon className="h-4 w-4 text-primary" />
-          <span className="text-xs font-medium uppercase tracking-[0.15em] text-muted-foreground">No Results</span>
+          <span className="text-xs font-medium uppercase tracking-[0.15em] text-muted-foreground">{t("empty.eyebrow")}</span>
         </div>
         <h3 className="mb-3 text-2xl font-light text-foreground md:text-3xl" style={{ fontFamily: "var(--font-garamond-var)" }}>
-          No projects found
+          {t("empty.title")}
         </h3>
         <p className="max-w-md text-base leading-relaxed text-foreground/80" style={{ fontFamily: "var(--font-instrument-serif-var)", fontStyle: "italic" }}>
-          Try adjusting your search or filters to find more project collections.
+          {t("empty.description")}
         </p>
       </div>
     );
@@ -598,6 +600,7 @@ const ProjectList = memo(function ProjectList({
 });
 
 function ProjectListItem({ record, priority, onOpen }: { record: ProjectRecord; priority: boolean; onOpen: (record: ProjectRecord) => void }) {
+  const t = useTranslations("marketplace.projects.card");
   const [imgError, setImgError] = useState(false);
   const hasImage = Boolean(record.imageUrl) && !imgError;
 
@@ -633,10 +636,10 @@ function ProjectListItem({ record, priority, onOpen }: { record: ProjectRecord; 
         </span>
         <span className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-border/60 pt-2">
           <span className="flex min-w-0 flex-wrap gap-2 text-xs text-muted-foreground">
-            <span>{record.bumicertCount} Bumicert{record.bumicertCount === 1 ? "" : "s"}</span>
-            {record.locationUri ? <span>Project place</span> : null}
+            <span>{t("bumicertCount", { count: record.bumicertCount })}</span>
+            {record.locationUri ? <span>{t("projectPlace")}</span> : null}
           </span>
-          <span className="shrink-0 text-xs font-medium text-foreground transition-colors group-hover:text-primary">Show details</span>
+          <span className="shrink-0 text-xs font-medium text-foreground transition-colors group-hover:text-primary">{t("showDetails")}</span>
         </span>
       </span>
     </button>
@@ -644,8 +647,9 @@ function ProjectListItem({ record, priority, onOpen }: { record: ProjectRecord; 
 }
 
 function ProjectGridSkeleton() {
+  const t = useTranslations("marketplace.projects.card");
   return (
-    <div className="mt-5 grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] items-stretch gap-6 lg:gap-8" aria-label="Loading projects">
+    <div className="mt-5 grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] items-stretch gap-6 lg:gap-8" aria-label={t("loading")}>
       {Array.from({ length: 12 }).map((_, index) => (
         <div key={index} className="overflow-hidden rounded-3xl border border-border bg-card">
           <Skeleton className="aspect-[16/10] rounded-none" />
@@ -675,6 +679,7 @@ function ProjectCard({
   index: number;
   onOpen: (record: ProjectRecord) => void;
 }) {
+  const t = useTranslations("marketplace.projects.card");
   const [imgError, setImgError] = useState(false);
   const hasImage = Boolean(record.imageUrl) && !imgError;
 
@@ -699,9 +704,9 @@ function ProjectCard({
           </div>
         )}
         <div className="absolute left-3 top-3 flex max-w-[calc(100%-1.5rem)] items-center gap-1.5 overflow-hidden rounded-full bg-background/75 p-1 pr-3 shadow-lg backdrop-blur-lg">
-          <BumicertOwnerAvatar did={record.did} avatarRef={record.creatorAvatarRef} label={record.creatorName ?? "Project steward"} className="h-7 w-7 shrink-0 shadow-sm" />
+          <BumicertOwnerAvatar did={record.did} avatarRef={record.creatorAvatarRef} label={record.creatorName ?? t("projectSteward")} className="h-7 w-7 shrink-0 shadow-sm" />
           <span className="min-w-0 truncate text-xs font-medium text-foreground">
-            {record.creatorName ?? "Project steward"}
+            {record.creatorName ?? t("projectSteward")}
           </span>
         </div>
       </div>
@@ -717,12 +722,12 @@ function ProjectCard({
         <div className="mt-4 flex flex-wrap gap-2 border-t border-border/70 pt-3 text-xs text-muted-foreground">
           <span className="inline-flex items-center gap-1.5 rounded-full bg-secondary px-2.5 py-1 text-secondary-foreground">
             <Layers3Icon className="h-3.5 w-3.5" />
-            {record.bumicertCount} Bumicert{record.bumicertCount === 1 ? "" : "s"}
+            {t("bumicertCount", { count: record.bumicertCount })}
           </span>
           {record.locationUri ? (
             <span className="inline-flex items-center gap-1.5 rounded-full bg-secondary px-2.5 py-1 text-secondary-foreground">
               <MapPinIcon className="h-3.5 w-3.5" />
-              Project place
+              {t("projectPlace")}
             </span>
           ) : null}
         </div>
@@ -762,6 +767,6 @@ function mergeProjectRecords(base: ProjectRecord[], incoming: ProjectRecord[]): 
   return [...base, ...incoming.filter((record) => !seen.has(record.id))];
 }
 
-function formatStat(value: number): string {
-  return new Intl.NumberFormat("en", { notation: Math.abs(value) >= 1000 ? "compact" : "standard" }).format(value);
+function formatStat(value: number, locale: string): string {
+  return new Intl.NumberFormat(locale, { notation: Math.abs(value) >= 1000 ? "compact" : "standard" }).format(value);
 }

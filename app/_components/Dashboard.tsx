@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { motion } from "framer-motion";
 import { useEffect, useMemo, useState } from "react";
 import { parseAsStringEnum, useQueryState } from "nuqs";
@@ -56,24 +57,14 @@ import { PreferredAccountLink, PreferredBumicertLink } from "./PreferredLinks";
 import { StatsTile } from "./StatsTile";
 import { PictureHero } from "./PictureHero";
 
-const PERIODS: Array<{ id: Period; label: string }> = [
-  { id: "all", label: "All Time" },
-  { id: "month", label: "Past 30 Days" },
-  { id: "week", label: "Past 7 Days" },
-];
+const PERIODS: Period[] = ["all", "month", "week"];
 
-const GRANULARITIES: TimeGranularity[] = ["day", "week", "month"];
+const GRANULARITIES: TimeGranularity[] = ["day", "week", "month"]; 
 const PERIOD_VALUES: Period[] = ["all", "month", "week"];
 const SORT_DIRECTIONS: Array<"asc" | "desc"> = ["asc", "desc"];
 const DONOR_SORT_KEYS: Array<"rank" | "totalAmount" | "donationCount" | "lastDonatedAt"> = ["rank", "totalAmount", "donationCount", "lastDonatedAt"];
 const ORG_SORT_KEYS: Array<"totalRaised" | "bumicertCount" | "donorCount"> = ["totalRaised", "bumicertCount", "donorCount"];
 const QUERY_STATE_OPTIONS = { history: "replace", scroll: false, shallow: true } as const;
-
-const GRANULARITY_LABELS: Record<TimeGranularity, string> = {
-  day: "Daily",
-  week: "Weekly",
-  month: "Monthly",
-};
 
 // Shared surface treatment matching the app's modern pages (leaderboard, explorer):
 // soft card tint, primary-tinted shadow, hairline ring, and backdrop blur.
@@ -205,17 +196,18 @@ export function Dashboard() {
 }
 
 function DashboardShell({ children, periodFilter }: { children: React.ReactNode; periodFilter: React.ReactNode }) {
+  const t = useTranslations("marketplace.dashboard.hero");
   return (
     <section className="-mt-14 bg-background pb-20 md:pb-28">
       <PictureHero
         lightSrc="/assets/media/images/donations/donations-hero-light@2x.webp"
         darkSrc="/assets/media/images/donations/donations-hero-dark@2x.webp"
-        imageAlt="Misty regenerative landscape for donation activity"
-        eyebrow="Giving Activity"
+        imageAlt={t("imageAlt")}
+        eyebrow={t("eyebrow")}
         icon={<BarChart3Icon />}
-        title="Donations"
-        accent="Overview"
-        lede="Track giving across GainForest: total raised, supporter activity, places reached, funding trends, and recent donations."
+        title={t("title")}
+        accent={t("accent")}
+        lede={t("lede")}
         actions={periodFilter}
       />
 
@@ -236,19 +228,20 @@ function useDashboardPeriod() {
 }
 
 function PeriodFilter({ period, onPeriodChange }: { period: Period; onPeriodChange: (period: Period) => void }) {
+  const t = useTranslations("marketplace.dashboard.periods");
   return (
     <div className={PILL_GROUP}>
       {PERIODS.map((item) => {
-        const active = period === item.id;
+        const active = period === item;
         return (
           <button
-            key={item.id}
+            key={item}
             type="button"
             aria-pressed={active}
-            onClick={() => onPeriodChange(item.id)}
+            onClick={() => onPeriodChange(item)}
             className={pillButton(active)}
           >
-            {item.label}
+            {t(item)}
           </button>
         );
       })}
@@ -257,36 +250,37 @@ function PeriodFilter({ period, onPeriodChange }: { period: Period; onPeriodChan
 }
 
 function KPISummary({ kpis, geoStats, geoLoading }: { kpis: DashboardKpis; geoStats: GeoStats; geoLoading: boolean }) {
+  const t = useTranslations("marketplace.dashboard.kpis");
   return (
     <div className="grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-4">
       <StatCard
         icon={<CoinsIcon className="h-4 w-4" />}
-        label="Total donated"
+        label={t("totalDonated")}
         value={formatCompactUsd(kpis.totalRaised)}
       />
       <StatCard
         icon={<HandHeartIcon className="h-4 w-4" />}
-        label="Completed donations"
+        label={t("completedDonations")}
         value={formatCompact(kpis.totalDonations)}
       />
       <StatCard
         icon={<UsersRoundIcon className="h-4 w-4" />}
-        label="donors"
+        label={t("donors")}
         value={formatCompact(kpis.uniqueDonors)}
       />
       <StatCard
         icon={<SproutIcon className="h-4 w-4" />}
-        label="Bumicerts with donations"
+        label={t("bumicertsWithDonations")}
         value={formatCompact(kpis.activeBumicerts)}
       />
       <StatCard
         icon={<GaugeIcon className="h-4 w-4" />}
-        label="Average donation amount"
+        label={t("averageDonation")}
         value={formatCompactUsd(kpis.avgDonation)}
       />
       <StatCard
         icon={<GlobeIcon className="h-4 w-4" />}
-        label="Countries with Bumicerts"
+        label={t("countriesWithBumicerts")}
         value={geoLoading ? "…" : formatCompact(geoStats.countriesRepresented)}
       />
     </div>
@@ -294,10 +288,11 @@ function KPISummary({ kpis, geoStats, geoLoading }: { kpis: DashboardKpis; geoSt
 }
 
 function StatCard({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
-  return <StatsTile icon={icon} label={label} value={value} accent={label === "Total donated" || label === "Bumicerts with donations"} />;
+  return <StatsTile icon={icon} label={label} value={value} />;
 }
 
 function TopCountriesTable({ stats, loading }: { stats: GeoStats; loading: boolean }) {
+  const t = useTranslations("marketplace.dashboard");
   const [expanded, setExpanded] = useState(false);
   const visibleCountries = expanded ? stats.topCountries : stats.topCountries.slice(0, DEFAULT_SECTION_LIMIT);
 
@@ -306,12 +301,12 @@ function TopCountriesTable({ stats, loading }: { stats: GeoStats; loading: boole
       <div className="flex items-center gap-2 px-5 pt-5 pb-3">
         <GlobeIcon className="h-4 w-4 text-primary" />
         <span className="text-xs font-medium tracking-[0.15em] text-muted-foreground uppercase">
-          Top Countries
+          {t("geo.topCountries")}
         </span>
       </div>
 
       {loading && stats.topCountries.length === 0 ? (
-        <ul className="space-y-2 px-5 pb-5" aria-label="Loading countries">
+        <ul className="space-y-2 px-5 pb-5" aria-label={t("tables.loadingCountries")}> 
           {Array.from({ length: 5 }).map((_, index) => (
             <li key={index} className="flex items-center justify-between gap-4">
               <span className="flex min-w-0 flex-1 items-center gap-2">
@@ -323,7 +318,7 @@ function TopCountriesTable({ stats, loading }: { stats: GeoStats; loading: boole
           ))}
         </ul>
       ) : stats.topCountries.length === 0 ? (
-        <p className="px-5 pb-5 text-sm text-muted-foreground">No geographic data available.</p>
+        <p className="px-5 pb-5 text-sm text-muted-foreground">{t("geo.empty")}</p>
       ) : (
         <>
           <ul className="space-y-2 px-5 pb-5">
@@ -337,7 +332,7 @@ function TopCountriesTable({ stats, loading }: { stats: GeoStats; loading: boole
                   <span className="truncate">{country.name}</span>
                 </span>
                 <span className="shrink-0 font-medium text-foreground tabular-nums">
-                  {country.orgCount} {country.orgCount === 1 ? "organization" : "organizations"}
+                  {t("geo.organizationCount", { count: country.orgCount })}
                 </span>
               </li>
             ))}
@@ -362,6 +357,7 @@ function DonationsVolumeChart({
   granularity: TimeGranularity;
   onGranularityChange: (granularity: TimeGranularity) => void;
 }) {
+  const t = useTranslations("marketplace.dashboard.chart");
   const formatted = data.map((point) => ({
     ...point,
     label: formatChartDate(point.date, granularity),
@@ -374,10 +370,10 @@ function DonationsVolumeChart({
           <div className="flex items-center gap-2">
             <TrendingUpIcon className="h-4 w-4 text-primary" />
             <span className="text-xs font-medium tracking-[0.15em] text-muted-foreground uppercase">
-              Giving Over Time
+              {t("title")}
             </span>
           </div>
-          <p className="mt-0.5 text-sm text-muted-foreground">USD raised per {granularity}</p>
+          <p className="mt-0.5 text-sm text-muted-foreground">{t("raisedPer", { granularity })}</p>
         </div>
         <div className={PILL_GROUP}>
           {GRANULARITIES.map((item) => {
@@ -390,7 +386,7 @@ function DonationsVolumeChart({
                 onClick={() => onGranularityChange(item)}
                 className={pillButton(active)}
               >
-                {GRANULARITY_LABELS[item]}
+                {t(`granularities.${item}`)}
               </button>
             );
           })}
@@ -399,7 +395,7 @@ function DonationsVolumeChart({
 
       {data.length === 0 ? (
         <div className="flex h-48 items-center justify-center text-sm text-muted-foreground">
-          No donation data for this period.
+          {t("empty")}
         </div>
       ) : (
         <ResponsiveContainer width="100%" height={240}>
@@ -443,6 +439,7 @@ function DonationsVolumeChart({
 }
 
 function ChartTooltip({ active, payload, label }: { active?: boolean; payload?: Array<{ value?: number; payload?: TimePoint }>; label?: string }) {
+  const t = useTranslations("marketplace.dashboard.chart");
   if (!active || !payload?.length) return null;
   const amount = payload[0]?.value ?? 0;
   const count = payload[0]?.payload?.count ?? 0;
@@ -450,12 +447,13 @@ function ChartTooltip({ active, payload, label }: { active?: boolean; payload?: 
     <div className="rounded-xl bg-card/95 px-3 py-2 text-xs shadow-md shadow-primary/10 ring-1 ring-foreground/10 backdrop-blur">
       <p className="font-medium text-foreground">{label}</p>
       <p className="mt-0.5 text-muted-foreground">{formatCompactUsd(amount)}</p>
-      <p className="text-muted-foreground">{count} {count === 1 ? "donation" : "donations"}</p>
+      <p className="text-muted-foreground">{t("donationCount", { count })}</p>
     </div>
   );
 }
 
 function TopDonorsTable({ rows }: { rows: TopDonor[] }) {
+  const t = useTranslations("marketplace.dashboard.tables");
   const [sortKey, setSortKey] = useQueryState(
     "donorSort",
     parseAsStringEnum<(typeof DONOR_SORT_KEYS)[number]>(DONOR_SORT_KEYS).withDefault("rank").withOptions(QUERY_STATE_OPTIONS),
@@ -491,11 +489,11 @@ function TopDonorsTable({ rows }: { rows: TopDonor[] }) {
     <div className={`overflow-hidden ${SURFACE}`}>
       <div className="flex items-center gap-2 px-5 pt-5 pb-3">
         <UsersIcon className="h-4 w-4 text-primary" />
-        <span className="text-xs font-medium tracking-[0.15em] text-muted-foreground uppercase">Top Donors</span>
+        <span className="text-xs font-medium tracking-[0.15em] text-muted-foreground uppercase">{t("topDonors")}</span>
       </div>
 
       {rows.length === 0 ? (
-        <p className="px-5 pb-5 text-sm text-muted-foreground">No donations yet.</p>
+        <p className="px-5 pb-5 text-sm text-muted-foreground">{t("noDonations")}</p>
       ) : (
         <>
           <div className="overflow-x-auto">
@@ -503,10 +501,10 @@ function TopDonorsTable({ rows }: { rows: TopDonor[] }) {
               <thead>
                 <tr className="border-t border-border/60">
                   <SortableCol col="rank" sortKey={sortKey} sortDir={sortDir} onSort={sort}>#</SortableCol>
-                  <th className="px-3 py-2 text-left text-xs font-medium tracking-[0.12em] text-muted-foreground uppercase">Donor</th>
-                  <SortableCol col="totalAmount" sortKey={sortKey} sortDir={sortDir} onSort={sort}>Total Donated</SortableCol>
-                  <SortableCol col="donationCount" sortKey={sortKey} sortDir={sortDir} onSort={sort}>Donations</SortableCol>
-                  <SortableCol col="lastDonatedAt" sortKey={sortKey} sortDir={sortDir} onSort={sort}>Last Donation</SortableCol>
+                  <th className="px-3 py-2 text-left text-xs font-medium tracking-[0.12em] text-muted-foreground uppercase">{t("donor")}</th>
+                  <SortableCol col="totalAmount" sortKey={sortKey} sortDir={sortDir} onSort={sort}>{t("totalDonated")}</SortableCol>
+                  <SortableCol col="donationCount" sortKey={sortKey} sortDir={sortDir} onSort={sort}>{t("donations")}</SortableCol>
+                  <SortableCol col="lastDonatedAt" sortKey={sortKey} sortDir={sortDir} onSort={sort}>{t("lastDonation")}</SortableCol>
                 </tr>
               </thead>
               <tbody>
@@ -534,6 +532,7 @@ function TopDonorsTable({ rows }: { rows: TopDonor[] }) {
 }
 
 function OrganizationsTable({ rows }: { rows: OrgRow[] }) {
+  const t = useTranslations("marketplace.dashboard.tables");
   const [sortKey, setSortKey] = useQueryState(
     "orgSort",
     parseAsStringEnum<(typeof ORG_SORT_KEYS)[number]>(ORG_SORT_KEYS).withDefault("totalRaised").withOptions(QUERY_STATE_OPTIONS),
@@ -568,21 +567,21 @@ function OrganizationsTable({ rows }: { rows: OrgRow[] }) {
     <div className={`overflow-hidden ${SURFACE}`}>
       <div className="flex items-center gap-2 px-5 pt-5 pb-3">
         <BuildingIcon className="h-4 w-4 text-primary" />
-        <span className="text-xs font-medium tracking-[0.15em] text-muted-foreground uppercase">By Organization</span>
+        <span className="text-xs font-medium tracking-[0.15em] text-muted-foreground uppercase">{t("byOrganization")}</span>
       </div>
 
       {rows.length === 0 ? (
-        <p className="px-5 pb-5 text-sm text-muted-foreground">No donations yet.</p>
+        <p className="px-5 pb-5 text-sm text-muted-foreground">{t("noDonations")}</p>
       ) : (
         <>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-t border-border/60">
-                  <th className="px-3 py-2 text-left text-xs font-medium tracking-[0.12em] text-muted-foreground uppercase">Organization</th>
-                  <SortableCol col="totalRaised" sortKey={sortKey} sortDir={sortDir} onSort={sort}>Total raised</SortableCol>
-                  <SortableCol col="bumicertCount" sortKey={sortKey} sortDir={sortDir} onSort={sort}>Bumicerts</SortableCol>
-                  <SortableCol col="donorCount" sortKey={sortKey} sortDir={sortDir} onSort={sort}>Donors</SortableCol>
+                  <th className="px-3 py-2 text-left text-xs font-medium tracking-[0.12em] text-muted-foreground uppercase">{t("organization")}</th>
+                  <SortableCol col="totalRaised" sortKey={sortKey} sortDir={sortDir} onSort={sort}>{t("totalRaised")}</SortableCol>
+                  <SortableCol col="bumicertCount" sortKey={sortKey} sortDir={sortDir} onSort={sort}>{t("bumicerts")}</SortableCol>
+                  <SortableCol col="donorCount" sortKey={sortKey} sortDir={sortDir} onSort={sort}>{t("donors")}</SortableCol>
                 </tr>
               </thead>
               <tbody>
@@ -619,9 +618,10 @@ function OrganizationsTable({ rows }: { rows: OrgRow[] }) {
 }
 
 function RecentTransactionsTable({ rows }: { rows: TxRow[] }) {
+  const t = useTranslations("marketplace.dashboard.tables");
   const [expanded, setExpanded] = useState(false);
   const visibleRows = expanded ? rows : rows.slice(0, DEFAULT_SECTION_LIMIT);
-  const displaySummary = expanded || rows.length <= DEFAULT_SECTION_LIMIT ? "showing all" : `showing latest ${DEFAULT_SECTION_LIMIT}`;
+  const displaySummary = expanded || rows.length <= DEFAULT_SECTION_LIMIT ? t("showingAll") : t("showingLatest", { count: DEFAULT_SECTION_LIMIT });
 
   return (
     <div className={`overflow-hidden ${SURFACE}`}>
@@ -629,27 +629,27 @@ function RecentTransactionsTable({ rows }: { rows: TxRow[] }) {
         <div>
           <div className="flex items-center gap-2">
             <ClockIcon className="h-4 w-4 text-primary" />
-            <span className="text-xs font-medium tracking-[0.15em] text-muted-foreground uppercase">Recent Donations</span>
+            <span className="text-xs font-medium tracking-[0.15em] text-muted-foreground uppercase">{t("recentDonations")}</span>
           </div>
           <p className="mt-0.5 text-xs text-muted-foreground">
-            All time · {rows.length} {rows.length === 1 ? "donation" : "donations"}
+            {t("allTimeDonations", { count: rows.length })}
           </p>
         </div>
         {rows.length > 0 && <span className="mt-1 shrink-0 text-[10px] text-muted-foreground/50">{displaySummary}</span>}
       </div>
 
       {rows.length === 0 ? (
-        <p className="px-5 pb-5 text-sm text-muted-foreground">No donations yet.</p>
+        <p className="px-5 pb-5 text-sm text-muted-foreground">{t("noDonations")}</p>
       ) : (
         <>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-t border-border/60">
-                  <th className="px-3 py-2 text-left text-xs font-medium tracking-[0.12em] text-muted-foreground uppercase">Date</th>
-                  <th className="px-3 py-2 text-left text-xs font-medium tracking-[0.12em] text-muted-foreground uppercase">Donor</th>
-                  <th className="px-3 py-2 text-left text-xs font-medium tracking-[0.12em] text-muted-foreground uppercase">Amount</th>
-                  <th className="px-3 py-2 text-left text-xs font-medium tracking-[0.12em] text-muted-foreground uppercase">Bumicert</th>
+                  <th className="px-3 py-2 text-left text-xs font-medium tracking-[0.12em] text-muted-foreground uppercase">{t("date")}</th>
+                  <th className="px-3 py-2 text-left text-xs font-medium tracking-[0.12em] text-muted-foreground uppercase">{t("donor")}</th>
+                  <th className="px-3 py-2 text-left text-xs font-medium tracking-[0.12em] text-muted-foreground uppercase">{t("amount")}</th>
+                  <th className="px-3 py-2 text-left text-xs font-medium tracking-[0.12em] text-muted-foreground uppercase">{t("bumicert")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -657,7 +657,7 @@ function RecentTransactionsTable({ rows }: { rows: TxRow[] }) {
                   <tr key={row.uri} className="border-t border-border/40 transition-colors hover:bg-primary/[0.04]">
                     <td className="whitespace-nowrap px-3 py-2.5 text-xs text-muted-foreground">{formatTableDate(row.date)}</td>
                     <td className="px-3 py-2.5">
-                      {row.donorId ? <DonorCell id={row.donorId} type={row.donorType ?? "wallet"} /> : <span className="text-xs text-foreground">Anonymous</span>}
+                      {row.donorId ? <DonorCell id={row.donorId} type={row.donorType ?? "wallet"} /> : <span className="text-xs text-foreground">{t("anonymous")}</span>}
                     </td>
                     <td className="whitespace-nowrap px-3 py-2.5 font-medium text-foreground tabular-nums">{formatUsd(row.amount)}</td>
                     <td className="px-3 py-2.5 text-xs text-muted-foreground">
@@ -680,6 +680,7 @@ function RecentTransactionsTable({ rows }: { rows: TxRow[] }) {
 }
 
 function SectionLimitButton({ expanded, total, onToggle }: { expanded: boolean; total: number; onToggle: () => void }) {
+  const t = useTranslations("marketplace.dashboard.tables");
   if (total <= DEFAULT_SECTION_LIMIT) return null;
 
   return (
@@ -689,7 +690,7 @@ function SectionLimitButton({ expanded, total, onToggle }: { expanded: boolean; 
         onClick={onToggle}
         className="text-sm font-medium text-primary transition-colors hover:text-primary/80"
       >
-        {expanded ? `Show first ${DEFAULT_SECTION_LIMIT}` : `Show all ${formatCompact(total)}`}
+        {expanded ? t("showFirst", { count: DEFAULT_SECTION_LIMIT }) : t("showAll", { count: formatCompact(total) })}
       </button>
     </div>
   );
@@ -727,8 +728,9 @@ function SortIcon<T extends string>({ col, sortKey, sortDir }: { col: T; sortKey
 }
 
 function DonorCell({ id, type }: { id: string; type: "did" | "wallet" }) {
+  const t = useTranslations("marketplace.dashboard.tables");
   if (type === "wallet") {
-    return <span className="text-xs text-foreground">Anonymous supporter</span>;
+    return <span className="text-xs text-foreground">{t("anonymousSupporter")}</span>;
   }
 
   return (
@@ -739,12 +741,13 @@ function DonorCell({ id, type }: { id: string; type: "did" | "wallet" }) {
 }
 
 function BumicertLink({ uri }: { uri: string | null }) {
+  const t = useTranslations("marketplace.dashboard.tables");
   if (!uri) return <>—</>;
   const parsed = parseBumicertUri(uri);
   if (!parsed) return <>—</>;
   return (
-    <PreferredBumicertLink did={parsed.did} rkey={parsed.rkey} className="text-primary hover:underline" title="View bumicert">
-      View
+    <PreferredBumicertLink did={parsed.did} rkey={parsed.rkey} className="text-primary hover:underline" title={t("viewBumicert")}>
+      {t("view")}
     </PreferredBumicertLink>
   );
 }
@@ -833,6 +836,7 @@ function DashboardSkeleton() {
 }
 
 function DashboardError() {
+  const t = useTranslations("marketplace.dashboard.error");
   return (
     <div className={`mt-10 flex flex-col items-center gap-3 ${SURFACE} px-6 py-16 text-center`}>
       <div className="flex size-16 items-center justify-center rounded-full bg-primary/10 text-primary">
@@ -842,19 +846,19 @@ function DashboardError() {
         className="text-3xl font-light text-foreground"
         style={{ fontFamily: "var(--font-garamond-var)" }}
       >
-        Donation data is unavailable
+        {t("title")}
       </p>
       <p
         className="max-w-sm text-base text-foreground/70"
         style={{ fontFamily: "var(--font-instrument-serif-var)", fontStyle: "italic" }}
       >
-        We could not load donation information. Try again in a moment.
+        {t("description")}
       </p>
       <Link
         href="/donations"
         className="mt-3 rounded-full bg-primary px-5 py-2.5 text-[13.5px] font-medium text-primary-foreground shadow-sm shadow-primary/20 transition-colors hover:bg-primary/90"
       >
-        Open donations overview
+        {t("action")}
       </Link>
     </div>
   );

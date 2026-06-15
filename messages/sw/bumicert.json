@@ -1,0 +1,511 @@
+{
+  "detail": {
+    "actions": {
+      "deleteBumicert": "Futa Bumicert"
+    },
+    "error": {
+      "loadTitle": "Haikuweza kupakia bumicert hii",
+      "loadDescription": "Tulikuwa na tatizo la kuleta data ya bumicert hii. Tafadhali jaribu tena au rudi kwenye ukurasa wa nyumbani."
+    },
+    "timeline": {
+      "title": "Muda wa Ushahidi",
+      "itemCount": "{count, plural, =0 {vipengee 0} =1 {kipengee 1} other {vipengee #}}",
+      "linked": "iliyounganishwa {window}",
+      "linkedWindow": "Dirisha lililounganishwa: {window}",
+      "emptyFiltered": "Hakuna ushahidi unaolingana na kichujio hiki.",
+      "emptyTitle": "Bado hakuna ushahidi uliopakiwa",
+      "emptyDescription": "Ripoti za ushahidi, ukaguzi na vidokezo vilivyochapishwa na shirika hili vitaonekana hapa.",
+      "filters": {
+        "all": "Wote",
+        "tree": "Mti",
+        "audio": "Sauti",
+        "biodiversity": "Bioanuwai",
+        "document": "Hati"
+      },
+      "ownerTools": "Zana za mmiliki",
+      "linkEvidenceTitle": "Unganisha ushahidi",
+      "linkEvidenceDescription": "Ambatisha rekodi au faili zilizopo kwenye {title}. Vipengee vilivyounganishwa vitaonekana kwenye ratiba ya ushahidi ya umma hapa chini.",
+      "notTimelineYet": "Bado si sehemu ya ratiba",
+      "linkedTitle": "Ratiba ya ushahidi uliounganishwa",
+      "linkedItemCount": "{count, plural, =0 {vipengee 0 vilivyounganishwa na shughuli hii ya bumicert} =1 {kipengee 1 kimeunganishwa na shughuli hii ya bumicert} other {vipengee # vimeunganishwa na shughuli hii ya bumicert}}",
+      "linkedDescription": "Kagua rekodi, faili na tabaka za ramani ambazo tayari ni sehemu ya ratiba ya ushahidi ya umma.",
+      "pageOf": "Ukurasa {current} kati ya {total}",
+      "previousPage": "Ukurasa uliopita",
+      "nextPage": "Ukurasa unaofuata"
+    },
+    "evidenceAdder": {
+      "title": "Ongeza Ushahidi",
+      "selectType": "Chagua aina ya ushahidi wa kuongeza.",
+      "selectEvidence": "Chagua ushahidi wa kuongeza.",
+      "addType": "Ongeza {type}",
+      "tabs": {
+        "audio": "Sauti",
+        "trees": "Miti",
+        "biodiversity": "Bioanuwai",
+        "files": "Nyaraka"
+      },
+      "linking": "Inaunganisha...",
+      "selectToLink": "Chagua ushahidi wa kuunganisha",
+      "linkItems": "{count, plural, =1 {Unganisha kipengee 1} other {Unganisha vipengee #}}",
+      "optionalNote": "Dokezo la Hiari",
+      "optionalNotePlaceholder": "Ongeza muktadha kuhusu ushahidi huu...",
+      "authError": "Hitilafu fulani imetokea. Tafadhali onyesha upya ukurasa.",
+      "contentType": "Aina ya maudhui",
+      "selectContentType": "Chagua aina ya maudhui",
+      "addFilePlaceholder": "Ongeza faili kama ushahidi",
+      "externalLink": "Kiungo cha nje",
+      "addLink": "Ongeza",
+      "externalLinkHelp": "Unganisha ripoti, tovuti, dashibodi au mifumo ya ushahidi wa nje.",
+      "invalidUrlProtocol": "Tumia URL ya http au https.",
+      "invalidUrl": "Weka URL halali.",
+      "remove": "Ondoa",
+      "noFilesSelected": "Bado hakuna faili au viungo vilivyochaguliwa.",
+      "contentTypes": {
+        "document": "Hati",
+        "report": "Ripoti",
+        "audit": "Ukaguzi",
+        "evidence": "Ushahidi",
+        "testimonial": "Ushuhuda",
+        "methodology": "Mbinu",
+        "photo": "Picha",
+        "video": "Video ya ushahidi",
+        "dataset": "Seti ya data",
+        "certificate": "Cheti",
+        "audio": "Sauti",
+        "other": "Nyingine",
+        "treeDataset": "Seti ya data ya mti",
+        "biodiversity": "Bioanuwai",
+        "occurrence": "Mti"
+      },
+      "emptyUploaded": "Bado hakuna {type} iliyopakiwa.",
+      "uploadType": "Pakia {type}",
+      "manage": "Dhibiti",
+      "untitledRecording": "Kurekodi bila jina",
+      "unnamedTreeDataset": "Seti ya data ya mti isiyo na jina",
+      "unknownObservation": "Uchunguzi usiojulikana",
+      "treeCount": "{count, plural, =1 {mti 1} other {miti #}}",
+      "speciesCount": "{count, plural, =1 {spishi 1} other {spishi #}}",
+      "siteContextLabel": "Eneo: {siteName}",
+      "siteContextReady": "Muktadha wa eneo uko tayari",
+      "siteContextMixed": "Kuna maeneo mengi katika mkusanyiko huu wa data; ambatisha mikusanyiko ya data mahususi kwa eneo.",
+      "siteContextIncomplete": "Baadhi ya miti haina muktadha wa eneo",
+      "siteContextUnresolved": "Rekodi ya eneo haikuweza kutatuliwa",
+      "siteContextUnavailable": "Muktadha wa eneo haupatikani",
+      "incompleteBumicertReference": "Haiwezi kuunganisha ushahidi kwa sababu rejeleo la bumicert halijakamilika. Onyesha upya ukurasa na ujaribu tena.",
+      "partialLinkSuccess": "{createdCount, plural, =1 {Kiambatisho 1 kimeunganishwa} other {Viambatisho # vimeunganishwa}}, lakini si {totalCount, plural, =1 {kundi 1 lote} other {makundi # yote}} yaliyokamilika. {error}",
+      "emptyLabels": {
+        "audio": "rekodi za sauti",
+        "trees": "seti za data za mti",
+        "biodiversity": "uchunguzi wa bioanuwai"
+      },
+      "attachmentTitles": {
+        "audio": "Rekodi za sauti",
+        "trees": "Seti ya data ya miti",
+        "biodiversity": "Uchunguzi wa bioanuwai"
+      },
+      "chooseEvidenceType": "Chagua aina ya ushahidi",
+      "selectSourceToLink": "Chagua chanzo ili kuunganisha ushahidi uliopo kwenye ratiba hii.",
+      "linkType": "Unganisha {type}",
+      "selectRecordsToLink": "Chagua rekodi za ushahidi za kuunganisha kwenye ratiba hii.",
+      "alreadyLinkedDataset": "Tayari imeunganishwa kwenye ratiba hii",
+      "checkingExistingLinks": "Inakagua viungo vilivyopo vya ratiba…",
+      "unableToVerifyExistingLinks": "Haiwezi kuthibitisha viungo vilivyopo vya ratiba. Onyesha upya ili kuunganisha seti za data za miti."
+    },
+    "metadata": {
+      "notFound": "Bumicert Haijapatikana"
+    },
+    "timelineEntry": {
+      "kind": {
+        "tree": "Seti ya data ya mti",
+        "audio": "Data ya akustisk",
+        "biodiversity": "Uchunguzi wa viumbe hai",
+        "document": "Hati",
+        "site": "Tovuti",
+        "other": "Ushahidi"
+      },
+      "notSpecified": "Haijabainishwa",
+      "resolvingDate": "Inatatua tarehe ya ushahidi...",
+      "linked": "iliyounganishwa {date}",
+      "treeCount": "{count, plural, =1 {mti 1} other {miti #}}",
+      "speciesCount": "{count, plural, =1 {spishi 1} other {spishi #}}",
+      "observationCount": "{count, plural, =1 {uchunguzi 1} other {uchunguzi #}}",
+      "recordingCount": "{count, plural, =1 {rekodi 1} other {rekodi #}}",
+      "itemCount": "{count, plural, =1 {kipengee 1} other {vipengee #}}",
+      "openGreenGlobe": "Fungua katika Green Globe",
+      "removeEvidence": "Ondoa ushahidi",
+      "collapseEvidence": "Kunja ushahidi",
+      "expandEvidence": "Panua ushahidi",
+      "resolvingRecords": "Inatatua rekodi za ushahidi zilizounganishwa...",
+      "selectedObservations": "Uchunguzi uliochaguliwa",
+      "more": "+{count} zaidi",
+      "viewGreenGlobe": "Tazama kwenye Green Globe",
+      "evidenceItem": "Kipengee cha ushahidi",
+      "greenGlobePreview": "Onyesho la kukagua Green Globe",
+      "open": "Fungua",
+      "greenGlobeFallback": "Ikiwa onyesho la kuchungulia halipakii, fungua Green Globe kwenye kichupo kipya.",
+      "sharedGreenGlobePreviewHint": "Tumia ramani ya pamoja ya Green Globe hapo juu kuhakiki tabaka za mkusanyiko wa data.",
+      "greenGlobeMapTitle": "Ramani ya Green Globe",
+      "resolvingSpatialLayers": "Inatatua tabaka za ushahidi wa kijiografia…",
+      "activeLayerCount": "{count, plural, =1 {tabaka 1 linalotumika} other {tabaka # zinazotumika}}",
+      "showOnMapHint": "Tumia Onyesha kwenye ramani kwenye kadi za mikusanyiko ya data ya miti ili kuhakiki tabaka hapa.",
+      "greenGlobeIframeTitle": "Hakikisho la ushahidi la Green Globe",
+      "treeDatasetMapLayers": "Tabaka za ramani za mkusanyiko wa data ya miti",
+      "showDatasetOnGreenGlobeMap": "Onyesha {title} kwenye ramani ya Green Globe",
+      "hideDatasetFromGreenGlobeMap": "Ficha {title} kutoka kwenye ramani ya Green Globe",
+      "showOnMap": "Onyesha kwenye ramani",
+      "hideFromMap": "Ficha kutoka kwenye ramani",
+      "deleteConfirm": {
+        "title": "Ondoa ushahidi?",
+        "body": "Ungependa kuondoa \"{title}\"? Hili haliwezi kutenduliwa.",
+        "removing": "Inaondoa...",
+        "remove": "Ondoa",
+        "cancel": "Ghairi"
+      },
+      "activeHiddenLayerSummary": "{activeCount} yanayotumika · {hiddenCount} yaliyofichwa",
+      "activeHiddenLayerSummaryWithHint": "{activeCount} yanayotumika · {hiddenCount} yaliyofichwa — tumia Onyesha tabaka kwenye kadi za seti za data za miti ili kuhakiki tabaka hapa.",
+      "showLayerHint": "Tumia Onyesha tabaka kwenye kadi za seti za data za miti ili kuhakiki tabaka hapa.",
+      "activeLayerBadge": "{count} yanayotumika",
+      "hiddenLayerBadge": "{count} yaliyofichwa",
+      "activeLayersInPreview": "Tabaka zinazotumika kwenye onyesho la awali",
+      "hiddenLayerPrefix": "Imefichwa: {title}",
+      "activeOnMap": "Inatumika kwenye ramani",
+      "hiddenFromMap": "Imefichwa kwenye ramani",
+      "visibleLayerDescription": "Tabaka hili la seti ya data linaonekana kwenye onyesho la awali la Green Globe.",
+      "hiddenLayerDescription": "Tabaka hili la seti ya data linapatikana lakini limefichwa kwa sasa.",
+      "showLayer": "Onyesha tabaka",
+      "hideLayer": "Ficha tabaka"
+    },
+    "reference": {
+      "linkedRecord": "Rekodi iliyounganishwa",
+      "linkedAudioRecord": "Rekodi ya sauti iliyounganishwa",
+      "audioEvidence": "Ushahidi wa sauti",
+      "playRecording": "Cheza rekodi",
+      "linkedDataset": "Seti ya data iliyounganishwa",
+      "viewGreenGlobe": "Tazama kwenye Green Globe",
+      "linkedTreeRecord": "Rekodi ya mti iliyounganishwa",
+      "linkedSiteRecord": "Rekodi ya eneo iliyounganishwa",
+      "siteEvidence": "Ushahidi wa eneo",
+      "openSiteMap": "Fungua ramani ya eneo",
+      "recordCount": "{count, plural, =1 {rekodi 1} other {rekodi #}}",
+      "speciesCount": "{count, plural, =1 {spishi 1} other {spishi #}}",
+      "individualCount": "{count, plural, =1 {mtu mmoja} other {watu #}}"
+    },
+    "overview": {
+      "aboutOrganization": "Kuhusu Shirika",
+      "aboutCreator": "Kuhusu Muundaji",
+      "profile": "Wasifu",
+      "certifiedProfile": "Wasifu uliothibitishwa",
+      "moreFromCreator": "Bumicerts zaidi kutoka kwa muundaji huyu",
+      "moreFromOrganization": "Bumicerts zaidi kutoka kwa shirika hili",
+      "viewAll": "Tazama zote",
+      "ongoing": "inaendelea",
+      "noDescription": "Hakuna maelezo yaliyotolewa.",
+      "projectDetails": "Maelezo ya mradi",
+      "activityPeriod": "Kipindi cha shughuli",
+      "published": "Imechapishwa",
+      "firstSiteBoundary": "Mpaka wa kwanza wa tovuti",
+      "firstSiteBoundaryMap": "Ramani ya mpaka wa kwanza wa tovuti",
+      "contributors": "Wachangiaji"
+    }
+  },
+  "create": {
+    "actions": {
+      "createBumicert": "Unda Bumicert"
+    },
+    "landing": {
+      "hero": {
+        "titleLine1": "Unda athari.",
+        "titleLine2": "Thibitisha mabadiliko.",
+        "description": "Unda Bumicert ili kuonyesha kujitolea kwako kwa uendelevu na kuhamasisha mabadiliko ya kweli."
+      },
+      "explainer": {
+        "title": "Bumicert ni nini?",
+        "body1": "Bumicert ni hadithi yako ya athari—uthibitisho wa mchango wako kwa watu, jumuiya na sayari.",
+        "body2": "Inakusaidia kuandika, kushiriki na kusherehekea athari yako nzuri kwa uwazi na uaminifu.",
+        "learnMore": "Jifunze zaidi"
+      }
+    },
+    "tabs": {
+      "ariaLabel": "Mionekano ya uundaji wa Bumicert",
+      "recent": "Bumicerts za hivi karibuni",
+      "drafts": "Rasimu"
+    },
+    "recent": {
+      "errorTitle": "Haikuweza kupakia Bumicerts",
+      "errorFallback": "Tafadhali jaribu tena baada ya muda mfupi.",
+      "emptyTitle": "Bado hakuna Bumicerts za hivi majuzi",
+      "emptyLine1": "Bado hujaunda Bumicerts zozote.",
+      "emptyLine2": "Unda Bumicert yako ya kwanza ili kuanza.",
+      "createFirst": "Unda Bumicert yako ya kwanza"
+    },
+    "drafts": {
+      "untitledDraft": "Rasimu Isiyo na Kichwa",
+      "signedOutTitle": "Ingia ili kutazama rasimu",
+      "signedOutDescription": "Rasimu ya Bumicerts huhifadhiwa kwenye akaunti yako ili uweze kuendelea na kazi yako baadaye.",
+      "loadingTitle": "Inapakia rasimu",
+      "loadingDescription": "Tunatafuta programu zilizohifadhiwa za Bumicert.",
+      "errorTitle": "Haikuweza kupakia rasimu",
+      "errorFallback": "Imeshindwa kupakia rasimu. Tafadhali jaribu tena.",
+      "emptyTitle": "Bado hakuna rasimu",
+      "emptyDescription": "Anzisha Bumicert mpya na uihifadhi kama rasimu unapotaka kurejea baadaye.",
+      "deleteAria": "Futa {title}"
+    },
+    "draft": {
+      "actions": {
+        "tips": "Vidokezo",
+        "closeTips": "Funga vidokezo",
+        "saveAsDraft": "Hifadhi kama Rasimu",
+        "continue": "Endelea"
+      },
+      "validation": {
+        "required": "Inahitajika",
+        "maxCharacters": "Hairuhusiwi zaidi ya vibambo vya {count}",
+        "descriptionRequired": "Maelezo inahitajika",
+        "contributorNameRequired": "Wachangiaji wote lazima wawe na jina",
+        "coverImageMaxSize": "Picha ya jalada lazima iwe 4MB au ndogo zaidi",
+        "coverImageType": "Picha ya jalada lazima iwe JPG, PNG, au WebP"
+      },
+      "sidebar": {
+        "previewTitle": "Hakiki Bumicert",
+        "generatingPreview": "Inazalisha metadata ya onyesho la kukagua...",
+        "completeFirstStep": "Tafadhali kamilisha hatua ya kwanza ili kutoa onyesho la kukagua.",
+        "tipsTitle": "Vidokezo vya sehemu hii"
+      },
+      "steps": {
+        "cover": {
+          "title": "Maelezo ya Jalada",
+          "tips": {
+            "bullets": [
+              "Tumia jina fupi na la ufafanuzi kwa bumicert yako.",
+              "Jumuisha tovuti au kiungo cha kijamii kwa bumicert yako kwa ufikiaji rahisi."
+            ],
+            "pre": "",
+            "post": ""
+          }
+        },
+        "impact": {
+          "title": "Maelezo ya Athari",
+          "tips": {
+            "pre": "Unapoandika hadithi yako ya athari, tumia mfumo huu wa STAR:",
+            "bullets": [
+              "Hali - Ni nini kilikuwa kinatokea na ni nani au ni nini kiliathiriwa?",
+              "Kazi - Je, jukumu la shirika lako, kikundi au jumuiya yako lilikuwa gani? Nani mwingine alihusika?",
+              "Kitendo - Eleza kile ambacho shirika au jumuiya yako ilifanya.",
+              "Matokeo - Nini kilitokea kama matokeo? Jumuisha nambari kama zinapatikana, na utaje matokeo yanayoonekana na yasiyoonekana. Hii itaauniwa na data ya athari utakayotoa baadaye."
+            ],
+            "post": "Andika kwa uhuru. Hadithi ndefu zaidi zinakaribishwa."
+          }
+        },
+        "site": {
+          "title": "Maelezo ya Tovuti",
+          "tips": {
+            "bullets": [
+              "Ongeza jumuiya au shirika lako kwanza, kisha watu au vikundi vingine vilivyojiunga.",
+              "Hakikisha kila mtu anakubali kujumuishwa.",
+              "Pakia mpaka wa tovuti yako katika umbizo la GeoJSON ili ionekane kwenye ramani."
+            ],
+            "pre": "",
+            "post": ""
+          }
+        },
+        "review": {
+          "title": "Kagua",
+          "tips": {
+            "bullets": [
+              "Hakikisha umekamilisha hatua zote za awali.",
+              "Kagua mwonekano wa bumicert yako kabla ya kuwasilisha."
+            ],
+            "pre": "",
+            "post": ""
+          }
+        },
+        "submit": {
+          "title": "Wasilisha",
+          "tips": {
+            "bullets": [
+              "Umekamilisha hatua zote! Hakuna vidokezo zaidi vya sehemu hii."
+            ],
+            "pre": "",
+            "post": ""
+          }
+        }
+      },
+      "stepForms": {
+        "cover": {
+          "heading": "Shiriki athari yako kwa muhtasari.",
+          "coverImage": {
+            "label": "Picha ya Jalada",
+            "info": "Chagua picha inayowakilisha vyema kazi yako",
+            "placeholder": "Pakia au buruta na udondoshe picha"
+          },
+          "title": {
+            "label": "Kichwa cha Bumicert",
+            "info": "Mpe bumicert yako mada iliyo wazi na yenye maelezo",
+            "placeholder": "Bumicert Yangu ya Kushangaza"
+          },
+          "dateRange": {
+            "label": "Muda wa Tarehe ya Bumicert",
+            "info": "Chagua kipindi ambacho kazi yako na athari zilifanyika",
+            "ongoing": "Inaendelea",
+            "ongoingCheckbox": "Kazi hii bado inaendelea"
+          },
+          "workType": {
+            "label": "Unafanya kazi gani?",
+            "info": "Jisikie huru kuchagua zaidi ya moja",
+            "options": {
+              "ecologicalRestoration": "Urejesho wa Kiikolojia",
+              "agroforestry": "Kilimo mseto",
+              "climateAdaptation": "Kukabiliana na Hali ya Hewa",
+              "biodiversityMonitoring": "Ufuatiliaji wa Bioanuwai",
+              "environmentalEducation": "Elimu ya Mazingira",
+              "indigenousLocalKnowledge": "Maarifa Asilia na Mitaa",
+              "environmentalJustice": "Haki ya Mazingira"
+            }
+          }
+        },
+        "impact": {
+          "heading": "Shiriki hadithi yako ya athari.",
+          "story": {
+            "label": "Hadithi Yako ya Athari",
+            "description": "Tuambie kuhusu athari yako - nini kilibadilika, ni nani aliyehusika na jinsi inavyosaidia. Chukua wakati wako. Hadithi yako husaidia kuhamasisha wengine na kuthibitisha kazi yako.",
+            "info": "Tuambie ulifanya nini na matokeo yake ni nini",
+            "placeholder": "Eleza hadithi yako ya athari..."
+          },
+          "shortDescription": {
+            "label": "Maelezo Fupi",
+            "description": "Maelezo mafupi ya hadithi yako ya athari. Hii itatumika kama maelezo mafupi ya bumicert.",
+            "info": "Fanya muhtasari wa kazi yako na matokeo yake katika mistari michache",
+            "placeholder": "Muhtasari wa haraka kuhusu bumicert hii.",
+            "generateTitle": "Tengeneza maelezo mafupi na AI",
+            "generateDisabledTitle": "Andika hadithi yako ya athari kwanza"
+          }
+        },
+        "site": {
+          "heading": "Shiriki wachangiaji na tovuti zako.",
+          "contributors": {
+            "label": "Orodha ya Wachangiaji",
+            "description": "Ongeza kila mtu anayehusika katika bumicert hii - ikijumuisha jumuiya au shirika lako na washirika wowote. Kidokezo: Anza kwa kuongeza kikundi chako kwanza kabla ya kuorodhesha washirika au wafuasi wako.",
+            "info": "Orodhesha watu binafsi au mashirika yoyote yaliyochangia kazi hii."
+          },
+          "boundaries": {
+            "label": "Mipaka ya tovuti",
+            "description": "Tafadhali pakia mpaka wa tovuti yako katika umbizo la GeoJSON ili tuweze kuona taswira bumicert yako kwenye ramani.",
+            "info": "Ongeza mipaka inayowakilisha vyema zaidi mahali kazi ilifanyika.",
+            "selectHelp": "Chagua mipaka ya bumicert hii, au ongeza mpya.",
+            "manageSites": "Dhibiti tovuti",
+            "loading": "Inapakia tovuti zako...",
+            "loadError": "Imeshindwa kupakia tovuti.",
+            "empty": "Hakuna tovuti iliyopatikana.",
+            "addSite": "Ongeza tovuti",
+            "unnamedSite": "Tovuti isiyo na jina",
+            "invalidLocation": "Mahali si sahihi"
+          },
+          "permissions": {
+            "label": "Ruhusa",
+            "confirm": "Ninathibitisha kuwa wachangiaji wote walioorodheshwa walitoa idhini yao ya kujumuisha kazi zao kwenye Bumicert hii.",
+            "terms": "Ninakubali Sheria na Masharti."
+          }
+        },
+        "submit": {
+          "signedInRequired": "Lazima uwe umeingia ili kuchapisha.",
+          "prepareError": "Imeshindwa kuandaa data ya uchapishaji.",
+          "authenticatedTitle": "Imethibitishwa",
+          "checkingAuth": "Tunaangalia ikiwa umeidhinishwa.",
+          "notSignedIn": "Hujaingia. Tafadhali ingia ili kuendelea.",
+          "failedTitle": "Imeshindwa kuchapisha.",
+          "publishingTitle": "Kuchapisha bumicert yako",
+          "readyTitle": "Tayari kuchapisha bumicert yako",
+          "publishingDescription": "Tunachapisha bumicert yako.",
+          "readyDescription": "Tafadhali bofya kitufe kilicho hapa chini ili kuchapisha bumicert yako.",
+          "retry": "Jaribu tena",
+          "publishAction": "Chapisha Bumicert",
+          "editDetails": "Hariri maelezo",
+          "successTitle": "Bumicert yako imechapishwa!",
+          "linkEvidenceNow": "Unganisha ushahidi sasa",
+          "viewBumicert": "Tazama Bumicert",
+          "setUpDonations": "Weka Michango",
+          "shareFeedback": "Shiriki Maoni",
+          "createAnother": "Unda bumicert nyingine"
+        }
+      },
+      "modals": {
+        "saveDraft": {
+          "title": "Hifadhi kama Rasimu",
+          "description": "Hifadhi maendeleo yako ya sasa kama rasimu.",
+          "successDescription": "Rasimu yako imehifadhiwa.",
+          "saveProgressFor": "Hifadhi maendeleo yako kwa",
+          "untitledDraft": "Rasimu Isiyo na Kichwa",
+          "saving": "Inahifadhi...",
+          "saveAction": "Hifadhi Rasimu",
+          "savedBody": "Rasimu yako imehifadhiwa. Unaweza kuendelea kulifanyia kazi baadaye.",
+          "close": "Funga"
+        },
+        "deleteDraft": {
+          "title": "Futa Rasimu",
+          "description": "Thibitisha uteuzi wako ili kufuta rasimu.",
+          "successDescription": "Rasimu imefutwa.",
+          "missingDraftDescription": "Imeshindwa kubainisha ni rasimu ipi ya kufuta.",
+          "confirmBody": "Je, una uhakika kwamba unataka <destructive>kufuta</destructive> rasimu, <strong>{title}?</strong><br></br>Kitendo hiki hakiwezi kutenduliwa.",
+          "untitledDraft": "Rasimu Isiyo na Kichwa",
+          "cancel": "Ghairi",
+          "deleting": "Inafuta...",
+          "deleteAction": "Futa Rasimu",
+          "deletedBody": "Rasimu imefutwa.",
+          "close": "Funga"
+        },
+        "uploadLogo": {
+          "title": "Pakia Nembo",
+          "description": "Pakia nembo ya akaunti yako.",
+          "placeholder": "Pakia nembo ya akaunti yako",
+          "authRequired": "Mtumiaji hajaidhinishwa",
+          "logoRequired": "Nembo inahitajika",
+          "done": "Imekamilika",
+          "uploading": "Inapakia...",
+          "upload": "Pakia"
+        }
+      },
+      "review": {
+        "heading": "Kagua habari.",
+        "uploaded": "Imepakiwa",
+        "notUploaded": "Haijapakiwa",
+        "dateRange": "Kutoka {start} hadi {end}",
+        "notSelected": "Haijachaguliwa",
+        "impactStoryAdded": "Hadithi ya athari imeongezwa",
+        "sitesSelected": "{count, plural, =1 {eneo 1 limechaguliwa} other {maeneo # yamechaguliwa}}",
+        "yes": "Ndiyo",
+        "no": "Hapana",
+        "edit": "Hariri",
+        "missingFields": "Sehemu zifuatazo hazipo:",
+        "fieldsWithErrors": "Sehemu zifuatazo zilipata hitilafu:",
+        "fixIssues": "Tafadhali rekebisha matatizo haya ili kuendelea.",
+        "allFieldsCorrect": "Mashamba yote yamejazwa kwa usahihi.",
+        "fix": "Rekebisha",
+        "preview": {
+          "title": "Hakiki bumicert yako",
+          "missingLogo": "Akaunti yako haina nembo. Je, ungependa kuongeza moja?",
+          "generating": "Inazalisha onyesho la kukagua...",
+          "completeFirstStep": "Kamilisha hatua ya kwanza ili kuhakiki bumicert yako."
+        }
+      },
+      "hydration": {
+        "errorTitle": "Hitilafu",
+        "errorDescription": "Hatukuweza kupakia data uliyohifadhi. Tafadhali wasiliana na usaidizi.",
+        "close": "Funga",
+        "back": "Rudi",
+        "coverImageTitle": "Picha ya jalada haikuweza kupakiwa",
+        "coverImageDescription": "Data ya rasimu yako imerejeshwa kwa mafanikio, lakini picha ya jalada haikuweza kupatikana. Tafadhali pakia tena picha ya jalada ili kuendelea.",
+        "gotIt": "Nimeelewa"
+      }
+    },
+    "auth": {
+      "signedOutTitle": "Hujaingia.",
+      "signedOutDescription": "Tafadhali ingia ili kuunda bumicert.",
+      "accountErrorTitle": "Haikuweza kupakia akaunti yako",
+      "accountErrorDescription": "Tulikuwa na tatizo la kupakia akaunti yako. Tafadhali jaribu tena.",
+      "accountSetupTitle": "Akaunti yako bado haijawekwa.",
+      "accountSetupDescription": "Tafadhali kamilisha maelezo ya akaunti yako ili kuunda bumicert.",
+      "manageAccount": "Dhibiti akaunti yangu",
+      "pleaseWait": "Tafadhali subiri..."
+    }
+  }
+}
