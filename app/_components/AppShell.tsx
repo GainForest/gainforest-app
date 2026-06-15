@@ -387,7 +387,7 @@ function UnifiedSidebar({
   const activeTab: SidebarTab = pathname.startsWith("/manage") ? "manage" : "explore";
 
   return (
-    <nav className="relative isolate flex h-full w-[240px] flex-col overflow-hidden border-r border-border bg-foreground/3 p-4">
+    <nav className="relative isolate flex h-full w-[256px] flex-col overflow-hidden border-r border-border bg-foreground/3 p-4">
       <AnimatePresence>
         <motion.div
           key={activeTab}
