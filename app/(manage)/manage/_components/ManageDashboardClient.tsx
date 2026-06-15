@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
@@ -157,6 +158,7 @@ function AboutSection({
   onSave: () => void;
   onCancel: () => void;
 }) {
+  const t = useTranslations("upload.dashboardClient");
   const text = value.trim();
   return (
     <motion.section
@@ -165,13 +167,13 @@ function AboutSection({
       transition={{ duration: 0.4, delay: 0.1, ease: SECTION_EASE }}
     >
       <div className="flex items-center gap-2">
-        <h2 className="font-instrument text-2xl italic leading-none text-foreground">About</h2>
+        <h2 className="font-instrument text-2xl italic leading-none text-foreground">{t("about.title")}</h2>
         {isEditing ? null : (
           <button
             type="button"
             onClick={onEdit}
             className="rounded-full p-1 text-foreground/40 transition-colors hover:bg-muted hover:text-foreground"
-            aria-label="Edit about"
+            aria-label={t("about.editAria")}
           >
             <PencilIcon className="size-4" />
           </button>
@@ -182,7 +184,7 @@ function AboutSection({
           <textarea
             value={draft}
             onChange={(e) => onChange(e.target.value)}
-            placeholder="Tell people about this organization…"
+            placeholder={t("about.placeholder")}
             rows={6}
             className="w-full resize-none rounded-xl border border-border/50 bg-transparent p-3 text-sm leading-relaxed text-foreground outline-none transition-colors field-sizing-content placeholder:text-muted-foreground/60 focus:border-primary/60"
             autoFocus
@@ -192,7 +194,7 @@ function AboutSection({
         </div>
       ) : (
         <p className={cn("mt-3 max-w-2xl whitespace-pre-line text-sm leading-relaxed", text ? "text-muted-foreground" : "text-muted-foreground/60")}>
-          {text || "No long description provided."}
+          {text || t("about.empty")}
         </p>
       )}
     </motion.section>
@@ -208,14 +210,15 @@ function InlineEditActions({
   onSave: () => void;
   onCancel: () => void;
 }) {
+  const t = useTranslations("upload.dashboardClient");
   return (
     <span className="mt-2 flex items-center gap-1.5">
       <Button type="button" size="sm" onClick={onSave} disabled={isSaving}>
         {isSaving ? <Loader2Icon className="animate-spin" /> : <CheckIcon />}
-        Save
+        {t("actions.save")}
       </Button>
       <Button type="button" size="sm" variant="ghost" onClick={onCancel} disabled={isSaving}>
-        <XIcon /> Cancel
+        <XIcon /> {t("actions.cancel")}
       </Button>
     </span>
   );
@@ -260,6 +263,7 @@ function EditableHero({
   onEditOrgType: () => void;
   onEditSocials: () => void;
 }) {
+  const t = useTranslations("upload.dashboardClient");
   const logoObjectUrl = useMemo(
     () => (editState.logoFile ? URL.createObjectURL(editState.logoFile) : null),
     [editState.logoFile],
@@ -291,7 +295,7 @@ function EditableHero({
           type="button"
           onClick={onEditCover}
           className="group/cover absolute inset-0 block w-full overflow-hidden"
-          aria-label={coverImageUrl ? "Change cover image" : "Add cover image"}
+          aria-label={coverImageUrl ? t("hero.changeCoverImage") : t("hero.addCoverImage")}
         >
           {coverImageUrl ? (
             <Image src={coverImageUrl} alt={`${account.displayName} cover image`} fill priority unoptimized className="object-cover object-center" sizes="(max-width: 1152px) 100vw, 1152px" />
@@ -310,7 +314,7 @@ function EditableHero({
             )}
           >
             <ImagePlusIcon className={cn("size-5", coverImageUrl ? "text-white drop-shadow" : "text-muted-foreground")} />
-            {!coverImageUrl ? <span className="text-xs font-medium text-muted-foreground">Add cover image</span> : null}
+            {!coverImageUrl ? <span className="text-xs font-medium text-muted-foreground">{t("hero.addCoverImage")}</span> : null}
           </div>
         </button>
 
@@ -318,8 +322,8 @@ function EditableHero({
         <Link
           href={`${basePath}/settings`}
           className="absolute right-3 top-3 z-10 flex size-9 items-center justify-center rounded-full border border-border/50 bg-background/65 text-foreground/70 shadow-sm backdrop-blur-xl transition-colors hover:bg-background/90 hover:text-foreground"
-          aria-label="Settings"
-          title="Settings"
+          aria-label={t("hero.settings")}
+          title={t("hero.settings")}
         >
           <SettingsIcon className="size-4" />
         </Link>
@@ -332,7 +336,7 @@ function EditableHero({
           type="button"
           onClick={onEditLogo}
           className="group/avatar relative block size-24 shrink-0 overflow-hidden rounded-full border border-border/60 bg-muted ring-4 ring-card"
-          aria-label={logoUrl ? (account.kind === "organization" ? "Change logo" : "Change photo") : (account.kind === "organization" ? "Add logo" : "Add photo")}
+          aria-label={logoUrl ? (account.kind === "organization" ? t("hero.changeLogo") : t("hero.changePhoto")) : (account.kind === "organization" ? t("hero.addLogo") : t("hero.addPhoto"))}
         >
           {logoUrl ? (
             <Image src={logoUrl} alt={account.displayName} fill unoptimized className="object-cover" />
@@ -356,14 +360,14 @@ function EditableHero({
                 type="text"
                 value={editState.displayName}
                 onChange={(e) => onChange("displayName", e.target.value)}
-                placeholder={account.kind === "organization" ? "Organization name" : "Display name"}
+                placeholder={account.kind === "organization" ? t("hero.organizationName") : t("hero.displayName")}
                 className="w-full border-b-2 border-border/50 bg-transparent font-instrument text-3xl font-light italic leading-[1.1] tracking-[-0.02em] text-foreground outline-none transition-colors placeholder:text-foreground/40 focus:border-primary/60 md:text-4xl"
                 autoFocus
               />
               <textarea
                 value={editState.description}
                 onChange={(e) => onChange("description", e.target.value)}
-                placeholder="Short bio…"
+                placeholder={t("hero.shortBioPlaceholder")}
                 rows={3}
                 className="w-full resize-none border-b border-border/40 bg-transparent text-sm leading-relaxed text-muted-foreground outline-none transition-colors field-sizing-content placeholder:text-muted-foreground/60 focus:border-primary/60"
               />
@@ -375,12 +379,12 @@ function EditableHero({
                 <h1 className="font-instrument text-3xl font-light italic leading-[1.1] tracking-[-0.02em] text-foreground md:text-4xl">
                   {editState.displayName || account.displayName}
                 </h1>
-                <button type="button" onClick={() => onEditField("profile")} className="mt-1 rounded-full p-1 text-foreground/40 transition-colors hover:bg-muted hover:text-foreground" aria-label="Edit name and bio">
+                <button type="button" onClick={() => onEditField("profile")} className="mt-1 rounded-full p-1 text-foreground/40 transition-colors hover:bg-muted hover:text-foreground" aria-label={t("hero.editProfileAria")}>
                   <PencilIcon className="size-4" />
                 </button>
               </div>
               <p className={cn("mt-1.5 line-clamp-2 text-sm leading-relaxed", editState.description ? "text-muted-foreground" : "text-muted-foreground/60")}>
-                {editState.description || "No bio provided."}
+                {editState.description || t("hero.noBio")}
               </p>
             </>
           )}
@@ -392,23 +396,23 @@ function EditableHero({
         <div className="mt-5 flex flex-wrap items-center gap-2">
           {isOrg ? (
             <Button variant="outline" onClick={onEditOrgType} className={cn(!editState.orgType.trim() && "text-muted-foreground")}>
-              <Building2Icon /> {editState.orgType.trim() || "Add type"}
+              <Building2Icon /> {editState.orgType.trim() || t("hero.addType")}
             </Button>
           ) : null}
           {isOrg ? (
             <Button variant="outline" onClick={onEditCountry} className={cn(!countryLabel && "text-muted-foreground")}>
               {flag ? <span className="text-base leading-none" aria-hidden="true">{flag}</span> : <MapPinIcon />}
-              {countryLabel ?? "Add country"}
+              {countryLabel ?? t("hero.addCountry")}
             </Button>
           ) : null}
           {isOrg ? (
             <Button variant="outline" onClick={onEditStartDate} className={cn(sinceDate.state === "empty" && "text-muted-foreground")}>
               <CalendarIcon />
-              {sinceDate.state === "valid" ? `Since ${sinceDate.label}` : sinceDate.state === "invalid" ? "Invalid date" : "Add start date"}
+              {sinceDate.state === "valid" ? t("hero.sinceDate", { date: sinceDate.label ?? "" }) : sinceDate.state === "invalid" ? t("hero.invalidDate") : t("hero.addStartDate")}
             </Button>
           ) : null}
           <Button variant="outline" onClick={onEditWebsite} className={cn(!resolvedWebsite && "text-muted-foreground")}>
-            <GlobeIcon /> {resolvedWebsite ? formatWebsite(resolvedWebsite) : "Add website"}
+            <GlobeIcon /> {resolvedWebsite ? formatWebsite(resolvedWebsite) : t("hero.addWebsite")}
           </Button>
           {isOrg ? (
             <Button variant="outline" onClick={onEditVisibility}>
@@ -421,7 +425,7 @@ function EditableHero({
                 editState.socials.map((url) => <SocialGlyph key={url} platform={classifySocial(url)} />)
               ) : (
                 <>
-                  <Link2Icon /> Add social links
+                  <Link2Icon /> {t("hero.addSocialLinks")}
                 </>
               )}
             </Button>
@@ -433,11 +437,12 @@ function EditableHero({
 }
 
 function CreateOrganizationButton() {
+  const t = useTranslations("upload.dashboardClient");
   return (
     <Button asChild variant="secondary">
       <Link href="/manage?mode=onboard-org">
         <Building2Icon />
-        Create an Organization
+        {t("actions.createOrganization")}
       </Link>
     </Button>
   );
@@ -468,6 +473,7 @@ export function ManageDashboardClient({
   const canonicalPathname = stripLocaleFromPathname(pathname);
   const searchParams = useSearchParams();
   const modal = useModal();
+  const t = useTranslations("upload.dashboardClient");
   const rawMode = mode === undefined ? searchParams.get("mode") ?? undefined : mode ?? undefined;
   const parsedMode = mode === undefined ? parseManageMode(rawMode) : mode;
   const hasCompletedSetup = account.summary.hasCertifiedProfile || account.summary.hasCertifiedOrg;
@@ -577,15 +583,15 @@ export function ManageDashboardClient({
     if (isSaving) return;
     const next: HeroEditState = { ...editState, ...overrides };
     if (!next.displayName.trim()) {
-      setSaveError("Add a name before saving.");
+      setSaveError(t("errors.nameRequired"));
       return;
     }
     if (!isValidWebsite(next.website)) {
-      setSaveError("Enter a valid website address.");
+      setSaveError(t("errors.invalidWebsite"));
       return;
     }
     if (account.kind === "organization" && next.country.trim() && !normalizeCountryCode(next.country)) {
-      setSaveError("Choose a country from the list.");
+      setSaveError(t("errors.invalidCountry"));
       return;
     }
 
@@ -701,7 +707,7 @@ export function ManageDashboardClient({
       setCoverFile(null);
       router.refresh();
     } catch (err) {
-      setSaveError(err instanceof Error ? err.message : "Failed to save. Please try again.");
+      setSaveError(err instanceof Error ? err.message : t("errors.saveFailed"));
     } finally {
       setIsSaving(false);
     }
@@ -715,8 +721,8 @@ export function ManageDashboardClient({
   const openLogoModal = () => openDashboardModal(
     "manage-logo-editor",
     <ImageEditorModal
-      title={account.kind === "organization" ? "Edit logo" : "Edit photo"}
-      description={account.kind === "organization" ? "Choose a square logo for this profile." : "Choose a square photo for this profile."}
+      title={account.kind === "organization" ? t("modals.editLogo") : t("modals.editPhoto")}
+      description={account.kind === "organization" ? t("modals.logoDescription") : t("modals.photoDescription")}
       initialImage={account.avatarUrl ?? undefined}
       onImageChange={(image) => { if (image) void saveChanges({ logoFile: image }); }}
     />,
@@ -725,8 +731,8 @@ export function ManageDashboardClient({
   const openCoverModal = () => openDashboardModal(
     "manage-cover-editor",
     <ImageEditorModal
-      title="Edit cover image"
-      description="Choose a wide banner image for the top of your profile."
+      title={t("modals.editCoverImage")}
+      description={t("modals.coverDescription")}
       initialImage={account.coverUrl ?? undefined}
       onImageChange={(image) => { if (image) void saveChanges({ coverFile: image }); }}
     />,

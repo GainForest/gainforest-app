@@ -13,7 +13,9 @@
     "openNavigation": "Open navigation"
   },
   "theme": {
-    "toggle": "Toggle theme"
+    "toggle": "Toggle theme",
+    "switchLight": "Switch to light mode",
+    "switchDark": "Switch to dark mode"
   },
   "cart": {
     "aria": "Cart",
@@ -53,7 +55,18 @@
       "audio": "Audio",
       "trees": "Trees",
       "profile": "Profile",
-      "settings": "Settings"
+      "settings": "Settings",
+      "projects": "Projects",
+      "observations": "Observations",
+      "donations": "Donations",
+      "organizationHome": "Organization Home",
+      "myOrganization": "My Organization",
+      "myOrganizations": "My Organizations",
+      "mySites": "My Sites",
+      "myAudio": "My Audio",
+      "myProjects": "My Projects",
+      "myTrees": "My Trees",
+      "myProfile": "My Profile"
     },
     "prompts": {
       "signInDescription": "Sign in to manage your account and content.",
@@ -64,7 +77,12 @@
       "checkingAccount": "Checking your account..."
     },
     "creationCard": {
-      "createBumicert": "Create a Bumicert"
+      "createBumicert": "Create a Bumicert",
+      "createProject": "Create a Project"
+    },
+    "tabs": {
+      "explore": "Explore",
+      "manage": "Manage"
     }
   },
   "bumicertCard": {
@@ -129,5 +147,27 @@
         "statLabel": "raised"
       }
     }
+  },
+  "onboardingPrompt": {
+    "title": "Set up your profile",
+    "description": "Welcome to GainForest. Create your personal profile to start managing your projects, records, and organizations.",
+    "continue": "Continue"
+  },
+  "fileInput": {
+    "pasteFromClipboard": "Paste from clipboard",
+    "uploadFromDevice": "Upload from device",
+    "remove": "Remove",
+    "dropToReplaceImage": "Drop to replace image",
+    "dropToReplaceFile": "Drop to replace file",
+    "noImageInClipboard": "No image found in clipboard",
+    "clipboardReadFailed": "Failed to read from clipboard",
+    "fileTooLarge": "File size exceeds {maxSizeInMB} MB.",
+    "unsupportedFileType": "Unsupported file type.",
+    "placeholder": "Upload or drag and drop your file"
+  },
+  "signInPrompt": {
+    "description": "Save your project sites, tree information, and Bumicerts in one place.",
+    "failed": "We couldn’t finish signing you in. Please try again.",
+    "getStarted": "Get started"
   }
 }

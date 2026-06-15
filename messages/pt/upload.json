@@ -612,5 +612,109 @@
       "title": "Enviar árvores",
       "description": "Envie uma exportação de planilha com informações de árvores para a GainForest."
     }
+  },
+  "settings": {
+    "organizationTitle": "Configurações da organização",
+    "organizationDescription": "Gerencie membros e controle quem pode fazer alterações nesta organização.",
+    "personalTitle": "Configurações",
+    "personalDescription": "Gerencie links da conta, segurança e ferramentas de exportação."
+  },
+  "dashboardClient": {
+    "actions": {
+      "save": "Salvar",
+      "cancel": "Cancelar",
+      "createOrganization": "Criar uma organização"
+    },
+    "about": {
+      "title": "Sobre",
+      "editAria": "Editar sobre",
+      "placeholder": "Conte às pessoas sobre esta organização…",
+      "empty": "Nenhuma descrição longa fornecida."
+    },
+    "hero": {
+      "changeCoverImage": "Alterar imagem de capa",
+      "addCoverImage": "Adicionar imagem de capa",
+      "settings": "Configurações",
+      "changeLogo": "Alterar logotipo",
+      "changePhoto": "Alterar foto",
+      "addLogo": "Adicionar logotipo",
+      "addPhoto": "Adicionar foto",
+      "organizationName": "Nome da organização",
+      "displayName": "Nome de exibição",
+      "shortBioPlaceholder": "Biografia curta…",
+      "editProfileAria": "Editar nome e biografia",
+      "noBio": "Nenhuma biografia fornecida.",
+      "addType": "Adicionar tipo",
+      "addCountry": "Adicionar país",
+      "sinceDate": "Desde {date}",
+      "invalidDate": "Data inválida",
+      "addStartDate": "Adicionar data de início",
+      "addWebsite": "Adicionar site",
+      "addSocialLinks": "Adicionar links sociais"
+    },
+    "errors": {
+      "nameRequired": "Adicione um nome antes de salvar.",
+      "invalidWebsite": "Insira um endereço de site válido.",
+      "invalidCountry": "Escolha um país na lista.",
+      "saveFailed": "Não foi possível salvar. Tente novamente."
+    },
+    "modals": {
+      "editLogo": "Editar logotipo",
+      "editPhoto": "Editar foto",
+      "logoDescription": "Escolha um logotipo quadrado para este perfil.",
+      "photoDescription": "Escolha uma foto quadrada para este perfil.",
+      "editCoverImage": "Editar imagem de capa",
+      "coverDescription": "Escolha uma imagem ampla para o topo do seu perfil."
+    }
+  },
+  "dashboardModals": {
+    "actions": {
+      "save": "Salvar",
+      "remove": "Remover",
+      "cancel": "Cancelar",
+      "confirm": "Confirmar",
+      "clear": "Limpar"
+    },
+    "website": {
+      "title": "Site",
+      "description": "Informe o endereço do site da sua organização.",
+      "placeholder": "https://suaorganizacao.com",
+      "invalid": "Insira uma URL válida (ex.: https://suaorg.com)"
+    },
+    "startDate": {
+      "title": "Data de fundação",
+      "description": "Selecione a data em que sua organização foi fundada ou começou a operar."
+    },
+    "orgType": {
+      "title": "Tipo de organização",
+      "description": "Descreva que tipo de organização é.",
+      "placeholder": "ex.: Sem fins lucrativos",
+      "suggestions": {
+        "nonprofit": "Sem fins lucrativos",
+        "ngo": "ONG",
+        "communityGroup": "Grupo comunitário",
+        "cooperative": "Cooperativa",
+        "researchInstitute": "Instituto de pesquisa",
+        "governmentAgency": "Agência governamental",
+        "forProfit": "Com fins lucrativos",
+        "foundation": "Fundação"
+      }
+    },
+    "socialLinks": {
+      "title": "Links sociais",
+      "description": "Adicione links para seus perfis sociais e outras páginas.",
+      "placeholder": "https://instagram.com/suaorg",
+      "invalid": "Um dos links não é uma URL válida.",
+      "removeLink": "Remover link",
+      "addAnother": "Adicionar outro link"
+    },
+    "visibility": {
+      "title": "Visibilidade",
+      "description": "Escolha quem pode descobrir sua organização.",
+      "public": "Pública",
+      "publicDescription": "Visível para todos. Aparece em listagens de organizações e resultados de busca.",
+      "unlisted": "Não listada",
+      "unlistedDescription": "Acessível apenas por link direto. Não aparece publicamente nem em buscas."
+    }
   }
 }

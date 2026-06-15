@@ -13,7 +13,9 @@
     "openNavigation": "Abrir navegação"
   },
   "theme": {
-    "toggle": "Alternar tema"
+    "toggle": "Alternar tema",
+    "switchLight": "Mudar para modo claro",
+    "switchDark": "Mudar para modo escuro"
   },
   "cart": {
     "aria": "Carrinho",
@@ -53,7 +55,18 @@
       "audio": "Áudio",
       "trees": "Árvores",
       "profile": "Perfil",
-      "settings": "Configurações"
+      "settings": "Configurações",
+      "projects": "Projetos",
+      "observations": "Observações",
+      "donations": "Doações",
+      "organizationHome": "Início da organização",
+      "myOrganization": "Minha organização",
+      "myOrganizations": "Minhas organizações",
+      "mySites": "Meus locais",
+      "myAudio": "Meu áudio",
+      "myProjects": "Meus projetos",
+      "myTrees": "Minhas árvores",
+      "myProfile": "Meu perfil"
     },
     "prompts": {
       "signInDescription": "Entre para gerenciar sua conta e conteúdo.",
@@ -64,7 +77,12 @@
       "checkingAccount": "Verificando sua conta..."
     },
     "creationCard": {
-      "createBumicert": "Criar um Bumicert"
+      "createBumicert": "Criar um Bumicert",
+      "createProject": "Criar um projeto"
+    },
+    "tabs": {
+      "explore": "Explorar",
+      "manage": "Gerenciar"
     }
   },
   "bumicertCard": {
@@ -129,5 +147,27 @@
         "statLabel": "arrecadado"
       }
     }
+  },
+  "onboardingPrompt": {
+    "title": "Configure seu perfil",
+    "description": "Boas-vindas ao GainForest. Crie seu perfil pessoal para começar a gerenciar seus projetos, registros e organizações.",
+    "continue": "Continuar"
+  },
+  "fileInput": {
+    "pasteFromClipboard": "Colar da área de transferência",
+    "uploadFromDevice": "Enviar do dispositivo",
+    "remove": "Remover",
+    "dropToReplaceImage": "Solte para substituir a imagem",
+    "dropToReplaceFile": "Solte para substituir o arquivo",
+    "noImageInClipboard": "Nenhuma imagem encontrada na área de transferência",
+    "clipboardReadFailed": "Não foi possível ler a área de transferência",
+    "fileTooLarge": "O arquivo excede {maxSizeInMB} MB.",
+    "unsupportedFileType": "Tipo de arquivo não compatível.",
+    "placeholder": "Envie ou arraste e solte seu arquivo"
+  },
+  "signInPrompt": {
+    "description": "Salve seus locais de projeto, informações de árvores e Bumicerts em um só lugar.",
+    "failed": "Não conseguimos concluir seu login. Tente novamente.",
+    "getStarted": "Começar"
   }
 }

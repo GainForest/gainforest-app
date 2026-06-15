@@ -612,5 +612,109 @@
       "title": "Pakia miti",
       "description": "Pakia faili la lahajedwali lenye taarifa za miti kwenye GainForest."
     }
+  },
+  "settings": {
+    "organizationTitle": "Mipangilio ya shirika",
+    "organizationDescription": "Dhibiti wanachama na udhibiti nani anaweza kufanya mabadiliko katika shirika hili.",
+    "personalTitle": "Mipangilio",
+    "personalDescription": "Dhibiti viungo vya akaunti, usalama na zana za kuhamisha data."
+  },
+  "dashboardClient": {
+    "actions": {
+      "save": "Hifadhi",
+      "cancel": "Ghairi",
+      "createOrganization": "Unda shirika"
+    },
+    "about": {
+      "title": "Kuhusu",
+      "editAria": "Hariri kuhusu",
+      "placeholder": "Waambie watu kuhusu shirika hili…",
+      "empty": "Hakuna maelezo marefu yaliyotolewa."
+    },
+    "hero": {
+      "changeCoverImage": "Badilisha picha ya jalada",
+      "addCoverImage": "Ongeza picha ya jalada",
+      "settings": "Mipangilio",
+      "changeLogo": "Badilisha nembo",
+      "changePhoto": "Badilisha picha",
+      "addLogo": "Ongeza nembo",
+      "addPhoto": "Ongeza picha",
+      "organizationName": "Jina la shirika",
+      "displayName": "Jina la kuonyesha",
+      "shortBioPlaceholder": "Wasifu mfupi…",
+      "editProfileAria": "Hariri jina na wasifu",
+      "noBio": "Hakuna wasifu uliotolewa.",
+      "addType": "Ongeza aina",
+      "addCountry": "Ongeza nchi",
+      "sinceDate": "Tangu {date}",
+      "invalidDate": "Tarehe si sahihi",
+      "addStartDate": "Ongeza tarehe ya kuanza",
+      "addWebsite": "Ongeza tovuti",
+      "addSocialLinks": "Ongeza viungo vya kijamii"
+    },
+    "errors": {
+      "nameRequired": "Ongeza jina kabla ya kuhifadhi.",
+      "invalidWebsite": "Weka anwani halali ya tovuti.",
+      "invalidCountry": "Chagua nchi kutoka kwenye orodha.",
+      "saveFailed": "Imeshindikana kuhifadhi. Jaribu tena."
+    },
+    "modals": {
+      "editLogo": "Hariri nembo",
+      "editPhoto": "Hariri picha",
+      "logoDescription": "Chagua nembo ya mraba kwa wasifu huu.",
+      "photoDescription": "Chagua picha ya mraba kwa wasifu huu.",
+      "editCoverImage": "Hariri picha ya jalada",
+      "coverDescription": "Chagua picha pana kwa sehemu ya juu ya wasifu wako."
+    }
+  },
+  "dashboardModals": {
+    "actions": {
+      "save": "Hifadhi",
+      "remove": "Ondoa",
+      "cancel": "Ghairi",
+      "confirm": "Thibitisha",
+      "clear": "Futa"
+    },
+    "website": {
+      "title": "Tovuti",
+      "description": "Weka anwani ya tovuti ya shirika lako.",
+      "placeholder": "https://shirikolako.com",
+      "invalid": "Weka URL halali (mf. https://shirikolako.com)"
+    },
+    "startDate": {
+      "title": "Tarehe ya kuanzishwa",
+      "description": "Chagua tarehe ambayo shirika lako lilianzishwa au lilianza kufanya kazi."
+    },
+    "orgType": {
+      "title": "Aina ya shirika",
+      "description": "Eleza aina ya shirika hili.",
+      "placeholder": "mf. Lisilo la faida",
+      "suggestions": {
+        "nonprofit": "Lisilo la faida",
+        "ngo": "AZAKI",
+        "communityGroup": "Kikundi cha jamii",
+        "cooperative": "Ushirika",
+        "researchInstitute": "Taasisi ya utafiti",
+        "governmentAgency": "Wakala wa serikali",
+        "forProfit": "La kibiashara",
+        "foundation": "Wakfu"
+      }
+    },
+    "socialLinks": {
+      "title": "Viungo vya kijamii",
+      "description": "Ongeza viungo vya wasifu wako wa kijamii na kurasa nyingine.",
+      "placeholder": "https://instagram.com/shirikolako",
+      "invalid": "Moja ya viungo si URL halali.",
+      "removeLink": "Ondoa kiungo",
+      "addAnother": "Ongeza kiungo kingine"
+    },
+    "visibility": {
+      "title": "Kuonekana",
+      "description": "Chagua nani anaweza kugundua shirika lako.",
+      "public": "Hadharani",
+      "publicDescription": "Linaonekana kwa kila mtu. Linaonekana kwenye orodha za mashirika na matokeo ya utafutaji.",
+      "unlisted": "Halijaorodheshwa",
+      "unlistedDescription": "Linapatikana kwa kiungo cha moja kwa moja pekee. Halionekani hadharani wala kwenye utafutaji."
+    }
   }
 }

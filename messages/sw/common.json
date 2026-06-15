@@ -13,7 +13,9 @@
     "openNavigation": "Fungua urambazaji"
   },
   "theme": {
-    "toggle": "Badilisha mandhari"
+    "toggle": "Badilisha mandhari",
+    "switchLight": "Badilisha kwenda hali angavu",
+    "switchDark": "Badilisha kwenda hali nyeusi"
   },
   "cart": {
     "aria": "Kikapu",
@@ -47,13 +49,24 @@
     "items": {
       "bumicerts": "Bumicerts",
       "organizations": "Mashirika",
-      "leaderboard": "Jedwali la viongozi",
+      "leaderboard": "Ubao wa wanaoongoza",
       "organization": "Shirika",
       "sites": "Maeneo",
       "audio": "Sauti",
       "trees": "Miti",
       "profile": "Wasifu",
-      "settings": "Mipangilio"
+      "settings": "Mipangilio",
+      "projects": "Miradi",
+      "observations": "Uchunguzi",
+      "donations": "Michango",
+      "organizationHome": "Nyumbani kwa shirika",
+      "myOrganization": "Shirika langu",
+      "myOrganizations": "Mashirika yangu",
+      "mySites": "Maeneo yangu",
+      "myAudio": "Sauti zangu",
+      "myProjects": "Miradi yangu",
+      "myTrees": "Miti yangu",
+      "myProfile": "Wasifu wangu"
     },
     "prompts": {
       "signInDescription": "Ingia ili kusimamia akaunti na maudhui yako.",
@@ -64,7 +77,12 @@
       "checkingAccount": "Tunakagua akaunti yako..."
     },
     "creationCard": {
-      "createBumicert": "Unda Bumicert"
+      "createBumicert": "Unda Bumicert",
+      "createProject": "Unda mradi"
+    },
+    "tabs": {
+      "explore": "Gundua",
+      "manage": "Simamia"
     }
   },
   "bumicertCard": {
@@ -129,5 +147,27 @@
         "statLabel": "imekusanywa"
       }
     }
+  },
+  "onboardingPrompt": {
+    "title": "Sanidi wasifu wako",
+    "description": "Karibu GainForest. Unda wasifu wako binafsi ili kuanza kusimamia miradi, rekodi na mashirika yako.",
+    "continue": "Endelea"
+  },
+  "fileInput": {
+    "pasteFromClipboard": "Bandika kutoka ubao nakili",
+    "uploadFromDevice": "Pakia kutoka kifaa",
+    "remove": "Ondoa",
+    "dropToReplaceImage": "Achia hapa kubadilisha picha",
+    "dropToReplaceFile": "Achia hapa kubadilisha faili",
+    "noImageInClipboard": "Hakuna picha iliyopatikana kwenye ubao nakili",
+    "clipboardReadFailed": "Imeshindikana kusoma ubao nakili",
+    "fileTooLarge": "Faili linazidi {maxSizeInMB} MB.",
+    "unsupportedFileType": "Aina ya faili haitumiki.",
+    "placeholder": "Pakia au buruta na udondoshe faili lako"
+  },
+  "signInPrompt": {
+    "description": "Hifadhi maeneo ya miradi, taarifa za miti na Bumicerts zako mahali pamoja.",
+    "failed": "Hatukuweza kukamilisha kuingia kwako. Jaribu tena.",
+    "getStarted": "Anza"
   }
 }

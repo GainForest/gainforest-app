@@ -29,6 +29,7 @@ import {
   UserIcon,
 } from "lucide-react";
 import { Suspense, useEffect, useState, type MouseEvent, type SVGProps } from "react";
+import { useTranslations } from "next-intl";
 import type { AuthSession } from "../_lib/auth";
 import packageJson from "@/package.json";
 import { BumicertsBumicertCard, type BumicertsBumicertCardRecord } from "@/components/bumicert/BumicertsBumicertCard";
@@ -322,6 +323,7 @@ function FreshAccountOnboardingPrompt({
   const modal = useModal();
   const router = useRouter();
   const pathname = usePathname() ?? "/";
+  const t = useTranslations("common.onboardingPrompt");
 
   useEffect(() => {
     if (!authSession?.isLoggedIn || isProfileLoading || hasCertifiedProfile) return;
@@ -344,9 +346,9 @@ function FreshAccountOnboardingPrompt({
               >
                 <Image className="drop-shadow-2xl" src="/assets/media/images/app-icon.png" fill alt="GainForest" />
               </motion.div>
-              <ModalTitle className="mt-4">Set up your profile</ModalTitle>
+              <ModalTitle className="mt-4">{t("title")}</ModalTitle>
               <ModalDescription className="mt-1 max-w-sm">
-                Welcome to GainForest. Create your personal profile to start managing your projects, records, and organizations.
+                {t("description")}
               </ModalDescription>
               <ModalFooter className="mt-6 w-full">
                 <Button
@@ -358,7 +360,7 @@ function FreshAccountOnboardingPrompt({
                     router.push("/manage?mode=onboard-user");
                   }}
                 >
-                  Continue
+                  {t("continue")}
                   <ArrowRightIcon />
                 </Button>
               </ModalFooter>
@@ -369,7 +371,7 @@ function FreshAccountOnboardingPrompt({
       true,
     );
     void modal.show();
-  }, [authSession, hasCertifiedProfile, isProfileLoading, modal, pathname, router]);
+  }, [authSession, hasCertifiedProfile, isProfileLoading, modal, pathname, router, t]);
 
   return null;
 }
@@ -465,6 +467,7 @@ const SIDEBAR_TABS: {
 
 function SidebarTabs({ activeTab }: { activeTab: SidebarTab }) {
   const manageBasePath = useContextualManageBasePath();
+  const t = useTranslations("common.sidebar.tabs");
   return (
     <LayoutGroup id="sidebar-tabs">
       <div className="flex rounded-full border border-border bg-foreground/5 p-1">
@@ -491,7 +494,7 @@ function SidebarTabs({ activeTab }: { activeTab: SidebarTab }) {
                 )}
               >
                 <tab.Icon className="h-4 w-4 shrink-0 opacity-50" />
-                {tab.label}
+                {t(tab.id)}
               </span>
             </Link>
           );
@@ -503,6 +506,7 @@ function SidebarTabs({ activeTab }: { activeTab: SidebarTab }) {
 
 function ExploreNav() {
   const pathname = useCanonicalPathname();
+  const t = useTranslations("common.sidebar.items");
   const items = NAV_ITEMS.flatMap((section) => section.items);
 
   return (
@@ -510,7 +514,7 @@ function ExploreNav() {
       {items.map((item, index) => (
         <NavLeaf
           key={item.id}
-          item={item}
+          item={{ ...item, text: t(item.id) }}
           isActive={isLeafActive(item.pathCheck, pathname)}
           index={index + 1}
         />
@@ -602,6 +606,7 @@ function NavLeaf({ item, isActive, index }: { item: NavLeaf; isActive: boolean; 
 
 function BumicertCreationCard() {
   const manageBasePath = useContextualManageBasePath();
+  const t = useTranslations("common.sidebar.creationCard");
   return (
     <div className="group flex flex-col w-full h-20 border border-border bg-background rounded-2xl p-1">
       <div className="flex-1 relative">
@@ -647,7 +652,7 @@ function BumicertCreationCard() {
           "relative z-2 w-full bg-background hover:bg-primary hover:text-primary-foreground",
         )}
       >
-        <PlusIcon /> Create a Project
+        <PlusIcon /> {t("createProject")}
       </Link>
     </div>
   );
@@ -664,6 +669,7 @@ function ManageSection({
 }) {
   const pathname = useCanonicalPathname();
   const searchParams = useSearchParams();
+  const t = useTranslations("common.sidebar.items");
   const groupIdentifier = groupIdentifierFromManagePath(pathname);
   const isGroupManageContext = Boolean(groupIdentifier);
   const basePath = groupIdentifier ? groupManageBasePath(groupIdentifier) : "/manage";
@@ -673,7 +679,7 @@ function ManageSection({
     {
       kind: "leaf",
       id: "organization",
-      text: isGroupManageContext ? "Organization Home" : "My Organization",
+      text: isGroupManageContext ? t("organizationHome") : t("myOrganization"),
       Icon: Building2Icon,
       href: basePath,
       pathCheck: { equals: basePath },
@@ -686,7 +692,7 @@ function ManageSection({
           {
             kind: "leaf" as const,
             id: "organizations-manage",
-            text: "My Organizations",
+            text: t("myOrganizations"),
             Icon: Building2Icon,
             href: "/manage/organizations",
             pathCheck: { startsWith: "/manage/organizations" },
@@ -695,7 +701,7 @@ function ManageSection({
     {
       kind: "leaf",
       id: "sites",
-      text: "My Sites",
+      text: t("mySites"),
       Icon: MapPinIcon,
       href: manageHref({ basePath }, "sites"),
       pathCheck: { startsWith: manageHref({ basePath }, "sites") },
@@ -703,7 +709,7 @@ function ManageSection({
     {
       kind: "leaf",
       id: "audio",
-      text: "My Audio",
+      text: t("myAudio"),
       Icon: MicIcon,
       href: manageHref({ basePath }, "audio"),
       pathCheck: { startsWith: manageHref({ basePath }, "audio") },
@@ -711,7 +717,7 @@ function ManageSection({
     {
       kind: "leaf",
       id: "projects-manage",
-      text: "My Projects",
+      text: t("myProjects"),
       Icon: FolderKanbanIcon,
       href: manageHref({ basePath }, "projects"),
       pathCheck: { startsWith: manageHref({ basePath }, "projects") },
@@ -719,7 +725,7 @@ function ManageSection({
     {
       kind: "leaf",
       id: "trees",
-      text: "My Trees",
+      text: t("myTrees"),
       Icon: TreePineIcon,
       href: manageHref({ basePath }, "trees"),
       pathCheck: { startsWith: manageHref({ basePath }, "trees") },
@@ -727,7 +733,7 @@ function ManageSection({
     {
       kind: "leaf",
       id: "settings",
-      text: "Settings",
+      text: t("settings"),
       Icon: SettingsIcon,
       href: manageHref({ basePath }, "settings"),
       pathCheck: { startsWith: manageHref({ basePath }, "settings") },
@@ -737,7 +743,7 @@ function ManageSection({
     {
       kind: "leaf",
       id: "profile",
-      text: "My Profile",
+      text: t("myProfile"),
       Icon: UserIcon,
       href: basePath,
       pathCheck: { equals: basePath },
@@ -745,7 +751,7 @@ function ManageSection({
     {
       kind: "leaf",
       id: "organizations-manage",
-      text: "My Organizations",
+      text: t("myOrganizations"),
       Icon: Building2Icon,
       href: "/manage/organizations",
       pathCheck: { startsWith: "/manage/organizations" },
@@ -753,7 +759,7 @@ function ManageSection({
     {
       kind: "leaf",
       id: "settings",
-      text: "Settings",
+      text: t("settings"),
       Icon: SettingsIcon,
       href: manageHref({ basePath }, "settings"),
       pathCheck: { startsWith: manageHref({ basePath }, "settings") },

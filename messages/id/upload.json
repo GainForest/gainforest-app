@@ -612,5 +612,109 @@
       "title": "Unggah pohon",
       "description": "Unggah ekspor spreadsheet berisi informasi pohon ke GainForest."
     }
+  },
+  "settings": {
+    "organizationTitle": "Pengaturan organisasi",
+    "organizationDescription": "Kelola anggota dan tentukan siapa yang dapat membuat perubahan untuk organisasi ini.",
+    "personalTitle": "Pengaturan",
+    "personalDescription": "Kelola tautan akun, keamanan, dan alat ekspor."
+  },
+  "dashboardClient": {
+    "actions": {
+      "save": "Simpan",
+      "cancel": "Batal",
+      "createOrganization": "Buat organisasi"
+    },
+    "about": {
+      "title": "Tentang",
+      "editAria": "Edit tentang",
+      "placeholder": "Ceritakan tentang organisasi ini…",
+      "empty": "Belum ada deskripsi panjang."
+    },
+    "hero": {
+      "changeCoverImage": "Ganti gambar sampul",
+      "addCoverImage": "Tambahkan gambar sampul",
+      "settings": "Pengaturan",
+      "changeLogo": "Ganti logo",
+      "changePhoto": "Ganti foto",
+      "addLogo": "Tambahkan logo",
+      "addPhoto": "Tambahkan foto",
+      "organizationName": "Nama organisasi",
+      "displayName": "Nama tampilan",
+      "shortBioPlaceholder": "Bio singkat…",
+      "editProfileAria": "Edit nama dan bio",
+      "noBio": "Belum ada bio.",
+      "addType": "Tambahkan jenis",
+      "addCountry": "Tambahkan negara",
+      "sinceDate": "Sejak {date}",
+      "invalidDate": "Tanggal tidak valid",
+      "addStartDate": "Tambahkan tanggal mulai",
+      "addWebsite": "Tambahkan situs web",
+      "addSocialLinks": "Tambahkan tautan sosial"
+    },
+    "errors": {
+      "nameRequired": "Tambahkan nama sebelum menyimpan.",
+      "invalidWebsite": "Masukkan alamat situs web yang valid.",
+      "invalidCountry": "Pilih negara dari daftar.",
+      "saveFailed": "Gagal menyimpan. Coba lagi."
+    },
+    "modals": {
+      "editLogo": "Ubah logo",
+      "editPhoto": "Edit foto",
+      "logoDescription": "Pilih logo persegi untuk profil ini.",
+      "photoDescription": "Pilih foto persegi untuk profil ini.",
+      "editCoverImage": "Edit gambar sampul",
+      "coverDescription": "Pilih gambar lebar untuk bagian atas profil Anda."
+    }
+  },
+  "dashboardModals": {
+    "actions": {
+      "save": "Simpan",
+      "remove": "Hapus",
+      "cancel": "Batal",
+      "confirm": "Konfirmasi",
+      "clear": "Bersihkan"
+    },
+    "website": {
+      "title": "Situs web",
+      "description": "Masukkan alamat situs web organisasi Anda.",
+      "placeholder": "https://organisasianda.com",
+      "invalid": "Masukkan URL yang valid (mis. https://organda.com)"
+    },
+    "startDate": {
+      "title": "Tanggal pendirian",
+      "description": "Pilih tanggal saat organisasi Anda didirikan atau mulai beroperasi."
+    },
+    "orgType": {
+      "title": "Jenis organisasi",
+      "description": "Jelaskan jenis organisasi ini.",
+      "placeholder": "mis. Nirlaba",
+      "suggestions": {
+        "nonprofit": "Nirlaba",
+        "ngo": "LSM",
+        "communityGroup": "Kelompok komunitas",
+        "cooperative": "Koperasi",
+        "researchInstitute": "Lembaga penelitian",
+        "governmentAgency": "Lembaga pemerintah",
+        "forProfit": "Berorientasi laba",
+        "foundation": "Yayasan"
+      }
+    },
+    "socialLinks": {
+      "title": "Tautan sosial",
+      "description": "Tambahkan tautan ke profil sosial dan halaman lain.",
+      "placeholder": "https://instagram.com/organda",
+      "invalid": "Salah satu tautan bukan URL yang valid.",
+      "removeLink": "Hapus tautan",
+      "addAnother": "Tambahkan tautan lain"
+    },
+    "visibility": {
+      "title": "Visibilitas",
+      "description": "Pilih siapa yang dapat menemukan organisasi Anda.",
+      "public": "Publik",
+      "publicDescription": "Terlihat oleh semua orang. Muncul di daftar organisasi dan hasil pencarian.",
+      "unlisted": "Tidak terdaftar",
+      "unlistedDescription": "Hanya dapat diakses melalui tautan langsung. Tidak ditampilkan secara publik atau dalam pencarian."
+    }
   }
 }

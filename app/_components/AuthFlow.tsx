@@ -25,6 +25,7 @@ import {
   useState,
   type FormEvent,
 } from "react";
+import { useTranslations } from "next-intl";
 import type { CgsGroupMembership } from "@/app/(manage)/manage/_lib/cgs";
 import { groupIdentifierFromManagePath, groupManageBasePath, manageHref } from "@/lib/links";
 import {
@@ -379,6 +380,7 @@ function LoginModal() {
 
 export function SignInPrompt() {
   const { pushModal, show } = useModal();
+  const t = useTranslations("common.signInPrompt");
   const [signInFailed, setSignInFailed] = useState(false);
 
   useEffect(() => {
@@ -429,17 +431,17 @@ export function SignInPrompt() {
       </div>
 
       <p className="px-2 pb-1.5 pt-2 text-center text-[11px] leading-snug text-muted-foreground">
-        Save your project sites, tree information, and Bumicerts in one place.
+        {t("description")}
       </p>
 
       {signInFailed ? (
         <p className="mx-2 mb-2 rounded-lg border border-destructive/20 bg-destructive/10 px-3 py-2 text-center text-xs text-destructive">
-          We couldn’t finish signing you in. Please try again.
+          {t("failed")}
         </p>
       ) : null}
 
       <Button size="sm" onClick={handleSignIn} className="w-full">
-        Get started
+        {t("getStarted")}
         <ChevronRightIcon />
       </Button>
     </motion.div>
@@ -460,6 +462,7 @@ function AuthSkeleton() {
 
 function UnauthenticatedButtons() {
   const { pushModal, show } = useModal();
+  const t = useTranslations("common.signInPrompt");
 
   const openAuth = () => {
     pushModal(
@@ -480,7 +483,7 @@ function UnauthenticatedButtons() {
       transition={{ type: "spring", stiffness: 400, damping: 25 }}
       className="text-sm font-medium bg-primary text-primary-foreground rounded-full px-3.5 py-1.5 hover:bg-primary/90 transition-colors cursor-pointer"
     >
-      Get started
+      {t("getStarted")}
     </motion.button>
   );
 }

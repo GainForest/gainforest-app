@@ -612,5 +612,109 @@
       "title": "Upload Trees",
       "description": "Upload a spreadsheet export of tree information to GainForest."
     }
+  },
+  "settings": {
+    "organizationTitle": "Organization settings",
+    "organizationDescription": "Manage members and control who can make changes for this organization.",
+    "personalTitle": "Settings",
+    "personalDescription": "Manage account links, security, and export tools."
+  },
+  "dashboardClient": {
+    "actions": {
+      "save": "Save",
+      "cancel": "Cancel",
+      "createOrganization": "Create an Organization"
+    },
+    "about": {
+      "title": "About",
+      "editAria": "Edit about",
+      "placeholder": "Tell people about this organization…",
+      "empty": "No long description provided."
+    },
+    "hero": {
+      "changeCoverImage": "Change cover image",
+      "addCoverImage": "Add cover image",
+      "settings": "Settings",
+      "changeLogo": "Change logo",
+      "changePhoto": "Change photo",
+      "addLogo": "Add logo",
+      "addPhoto": "Add photo",
+      "organizationName": "Organization name",
+      "displayName": "Display name",
+      "shortBioPlaceholder": "Short bio…",
+      "editProfileAria": "Edit name and bio",
+      "noBio": "No bio provided.",
+      "addType": "Add type",
+      "addCountry": "Add country",
+      "sinceDate": "Since {date}",
+      "invalidDate": "Invalid date",
+      "addStartDate": "Add start date",
+      "addWebsite": "Add website",
+      "addSocialLinks": "Add social links"
+    },
+    "errors": {
+      "nameRequired": "Add a name before saving.",
+      "invalidWebsite": "Enter a valid website address.",
+      "invalidCountry": "Choose a country from the list.",
+      "saveFailed": "Failed to save. Please try again."
+    },
+    "modals": {
+      "editLogo": "Edit logo",
+      "editPhoto": "Edit photo",
+      "logoDescription": "Choose a square logo for this profile.",
+      "photoDescription": "Choose a square photo for this profile.",
+      "editCoverImage": "Edit cover image",
+      "coverDescription": "Choose a wide banner image for the top of your profile."
+    }
+  },
+  "dashboardModals": {
+    "actions": {
+      "save": "Save",
+      "remove": "Remove",
+      "cancel": "Cancel",
+      "confirm": "Confirm",
+      "clear": "Clear"
+    },
+    "website": {
+      "title": "Website",
+      "description": "Enter your organization's website address.",
+      "placeholder": "https://yourorganization.com",
+      "invalid": "Please enter a valid URL (e.g. https://yourorg.com)"
+    },
+    "startDate": {
+      "title": "Founding Date",
+      "description": "Select the date your organization was founded or began operations."
+    },
+    "orgType": {
+      "title": "Organization type",
+      "description": "Describe the kind of organization this is.",
+      "placeholder": "e.g. Nonprofit",
+      "suggestions": {
+        "nonprofit": "Nonprofit",
+        "ngo": "NGO",
+        "communityGroup": "Community group",
+        "cooperative": "Cooperative",
+        "researchInstitute": "Research institute",
+        "governmentAgency": "Government agency",
+        "forProfit": "For-profit",
+        "foundation": "Foundation"
+      }
+    },
+    "socialLinks": {
+      "title": "Social links",
+      "description": "Add links to your social profiles and other pages.",
+      "placeholder": "https://instagram.com/yourorg",
+      "invalid": "One of the links isn't a valid URL.",
+      "removeLink": "Remove link",
+      "addAnother": "Add another link"
+    },
+    "visibility": {
+      "title": "Discoverability",
+      "description": "Choose who can discover your organization.",
+      "public": "Public",
+      "publicDescription": "Visible to everyone. Appears in organization listings and search results.",
+      "unlisted": "Unlisted",
+      "unlistedDescription": "Only accessible via direct link. Not listed publicly or in search."
+    }
   }
 }

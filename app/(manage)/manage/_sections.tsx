@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { fetchReceipts } from "@/app/_lib/dashboard";
 import {
   fetchAudioByDid,
@@ -131,14 +132,15 @@ export async function NewBumicertSection({ target, searchParams }: { target: Man
 }
 
 export async function SettingsSection({ target }: { target: ManageTarget }) {
+  const t = await getTranslations("upload.settings");
   if (target.kind === "group") {
     const role: CgsRole = target.role === "owner" ? "owner" : target.role === "admin" ? "admin" : "member";
     const initialMembers = await loadInitialGroupMembers(target.did);
     return (
       <Container className="pt-4 pb-8">
         <div className="mb-6">
-          <h1 className="font-instrument text-3xl font-light italic leading-tight tracking-[-0.02em] text-foreground">Organization settings</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Manage members and control who can make changes for this organization.</p>
+          <h1 className="font-instrument text-3xl font-light italic leading-tight tracking-[-0.02em] text-foreground">{t("organizationTitle")}</h1>
+          <p className="mt-1 text-sm text-muted-foreground">{t("organizationDescription")}</p>
         </div>
         <GroupMembers
           groupDid={target.did}
@@ -154,8 +156,8 @@ export async function SettingsSection({ target }: { target: ManageTarget }) {
   return (
     <Container className="pt-4 pb-8">
       <div className="mb-6">
-        <h1 className="text-2xl font-medium">Settings</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Manage account links, security, and export tools.</p>
+        <h1 className="text-2xl font-medium">{t("personalTitle")}</h1>
+        <p className="mt-1 text-sm text-muted-foreground">{t("personalDescription")}</p>
       </div>
       <AccountSettingsSections did={target.did} />
     </Container>

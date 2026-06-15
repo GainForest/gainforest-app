@@ -13,7 +13,9 @@
     "openNavigation": "Abrir navegación"
   },
   "theme": {
-    "toggle": "Cambiar tema"
+    "toggle": "Cambiar tema",
+    "switchLight": "Cambiar al modo claro",
+    "switchDark": "Cambiar al modo oscuro"
   },
   "cart": {
     "aria": "Carrito",
@@ -53,7 +55,18 @@
       "audio": "Audio",
       "trees": "Árboles",
       "profile": "Perfil",
-      "settings": "Configuración"
+      "settings": "Configuración",
+      "projects": "Proyectos",
+      "observations": "Observaciones",
+      "donations": "Donaciones",
+      "organizationHome": "Inicio de la organización",
+      "myOrganization": "Mi organización",
+      "myOrganizations": "Mis organizaciones",
+      "mySites": "Mis sitios",
+      "myAudio": "Mi audio",
+      "myProjects": "Mis proyectos",
+      "myTrees": "Mis árboles",
+      "myProfile": "Mi perfil"
     },
     "prompts": {
       "signInDescription": "Inicia sesión para gestionar tu cuenta y contenido.",
@@ -64,7 +77,12 @@
       "checkingAccount": "Comprobando tu cuenta..."
     },
     "creationCard": {
-      "createBumicert": "Crear un Bumicert"
+      "createBumicert": "Crear un Bumicert",
+      "createProject": "Crear un proyecto"
+    },
+    "tabs": {
+      "explore": "Explorar",
+      "manage": "Gestionar"
     }
   },
   "bumicertCard": {
@@ -129,5 +147,27 @@
         "statLabel": "recaudado"
       }
     }
+  },
+  "onboardingPrompt": {
+    "title": "Configura tu perfil",
+    "description": "Bienvenido a GainForest. Crea tu perfil personal para empezar a gestionar tus proyectos, registros y organizaciones.",
+    "continue": "Continuar"
+  },
+  "fileInput": {
+    "pasteFromClipboard": "Pegar desde el portapapeles",
+    "uploadFromDevice": "Subir desde el dispositivo",
+    "remove": "Eliminar",
+    "dropToReplaceImage": "Suelta para reemplazar la imagen",
+    "dropToReplaceFile": "Suelta para reemplazar el archivo",
+    "noImageInClipboard": "No se encontró ninguna imagen en el portapapeles",
+    "clipboardReadFailed": "No se pudo leer el portapapeles",
+    "fileTooLarge": "El archivo supera {maxSizeInMB} MB.",
+    "unsupportedFileType": "Tipo de archivo no compatible.",
+    "placeholder": "Sube o arrastra y suelta tu archivo"
+  },
+  "signInPrompt": {
+    "description": "Guarda tus sitios de proyecto, información de árboles y Bumicerts en un solo lugar.",
+    "failed": "No pudimos completar tu inicio de sesión. Inténtalo de nuevo.",
+    "getStarted": "Empezar"
   }
 }

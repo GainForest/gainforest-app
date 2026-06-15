@@ -2,6 +2,7 @@
 import { ClipboardIcon, FolderUpIcon, FileIcon, Trash2Icon } from "lucide-react";
 import React, { useState, useRef, useCallback, useEffect } from "react";
 import { motion } from "framer-motion";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import useDragAndDrop from "./useDragAndDrop";
 import QuickTooltip from "@/components/ui/quick-tooltip";
@@ -160,14 +161,27 @@ interface FileInputProps {
 }
 
 const FileInput = ({
-  placeholder = "Upload or drag and drop your file",
+  placeholder,
   supportedFileTypes = DEFAULT_SUPPORTED_FILE_TYPES,
   onFileChange,
   value,
   maxSizeInMB = 10,
   className,
-  labels = DEFAULT_LABELS,
+  labels,
 }: FileInputProps) => {
+  const t = useTranslations("common.fileInput");
+  const resolvedLabels: FileInputLabels = labels ?? {
+    pasteFromClipboard: t("pasteFromClipboard"),
+    uploadFromDevice: t("uploadFromDevice"),
+    remove: t("remove"),
+    dropToReplaceImage: t("dropToReplaceImage"),
+    dropToReplaceFile: t("dropToReplaceFile"),
+    noImageInClipboard: t("noImageInClipboard"),
+    clipboardReadFailed: t("clipboardReadFailed"),
+    fileTooLarge: (maxSizeInMB) => t("fileTooLarge", { maxSizeInMB }),
+    unsupportedFileType: t("unsupportedFileType"),
+  };
+  const resolvedPlaceholder = placeholder ?? t("placeholder");
   const normalizedValue =
     value instanceof File && value.size === 0 ? null : value;
 
@@ -196,7 +210,7 @@ const FileInput = ({
       setError("");
       let validationError: null | Error = null;
       try {
-        validateFile(file, maxSizeInMB, supportedFileTypes, labels);
+        validateFile(file, maxSizeInMB, supportedFileTypes, resolvedLabels);
       } catch (error) {
         validationError = error as Error;
       }
@@ -237,7 +251,7 @@ const FileInput = ({
       supportedFileTypes,
       previewUrl,
       handleRemoveFile,
-      labels,
+      resolvedLabels,
     ]
   );
 
@@ -261,9 +275,9 @@ const FileInput = ({
         }
       }
 
-      setError(labels.noImageInClipboard);
+      setError(resolvedLabels.noImageInClipboard);
     } catch {
-      setError(labels.clipboardReadFailed);
+      setError(resolvedLabels.clipboardReadFailed);
     }
   };
 
@@ -336,7 +350,7 @@ const FileInput = ({
           >
             <Trash2Icon className="size-3 text-foreground" />
             <span className="text-xs font-medium text-red-700 dark:text-red-300">
-              {labels.remove}
+              {resolvedLabels.remove}
             </span>
           </button>
         )}
@@ -353,7 +367,7 @@ const FileInput = ({
             {isDragOver && (
               <div className="absolute inset-0 bg-primary/20 flex items-center justify-center">
                 <div className="text-primary font-medium">
-                  {labels.dropToReplaceImage}
+                  {resolvedLabels.dropToReplaceImage}
                 </div>
               </div>
             )}
@@ -378,7 +392,7 @@ const FileInput = ({
             {isDragOver && (
               <div className="absolute inset-0 bg-primary/20 flex items-center justify-center rounded-md">
                 <div className="text-primary font-medium">
-                  {labels.dropToReplaceFile}
+                  {resolvedLabels.dropToReplaceFile}
                 </div>
               </div>
             )}
@@ -389,20 +403,20 @@ const FileInput = ({
         {!normalizedValue && (
           <div className="w-full h-full flex flex-col items-center justify-center gap-2">
             <div className="flex items-center gap-1">
-              <QuickTooltip content={labels.pasteFromClipboard} asChild>
+              <QuickTooltip content={resolvedLabels.pasteFromClipboard} asChild>
                 <button
                   type="button"
-                  aria-label={labels.pasteFromClipboard}
+                  aria-label={resolvedLabels.pasteFromClipboard}
                   className="h-7 w-7 flex items-center justify-center bg-foreground/10 rounded-full text-muted-foreground hover:text-foreground cursor-pointer"
                   onClick={handlePasteFromClipboard}
                 >
                   <ClipboardIcon className="size-4" />
                 </button>
               </QuickTooltip>
-              <QuickTooltip content={labels.uploadFromDevice} asChild>
+              <QuickTooltip content={resolvedLabels.uploadFromDevice} asChild>
                 <button
                   type="button"
-                  aria-label={labels.uploadFromDevice}
+                  aria-label={resolvedLabels.uploadFromDevice}
                   className="h-7 w-7 flex items-center justify-center bg-foreground/10 rounded-full text-muted-foreground hover:text-foreground cursor-pointer"
                   onClick={handleUploadClick}
                 >
@@ -412,7 +426,7 @@ const FileInput = ({
             </div>
 
             <span className="text-sm text-center px-2 text-muted-foreground origin-center">
-              {placeholder}
+              {resolvedPlaceholder}
             </span>
           </div>
         )}
