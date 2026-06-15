@@ -12,6 +12,7 @@ import {
 import { resolveBlobUrl, resolvePdsHost } from "@/app/_lib/pds";
 import { RecordExplorer } from "@/app/_components/RecordExplorer";
 import { getAccountRouteData } from "@/app/account/_lib/account-route";
+import { formatCgsErrorMessage } from "@/app/_lib/cgs-errors";
 import { fetchCgsMembersForRequest } from "@/app/_lib/cgs-server";
 import { AccountSettingsSections } from "@/app/account/_components/AccountSettingsSections";
 import Container from "@/components/ui/container";
@@ -197,7 +198,7 @@ async function loadInitialGroupMembers(groupDid: string): Promise<InitialGroupMe
   } catch (error) {
     return {
       members: [],
-      error: error instanceof Error ? error.message : "Could not load members.",
+      error: formatCgsErrorMessage(error, "Could not load members."),
     };
   }
 }

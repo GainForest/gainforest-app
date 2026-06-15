@@ -1,4 +1,5 @@
 import { headers } from "next/headers";
+import { formatCgsErrorMessage } from "./cgs-errors";
 import { getAuthBaseUrl, getAuthForwardCookie } from "./auth";
 
 export type CgsServerRole = "owner" | "admin" | "member";
@@ -61,11 +62,12 @@ function normalizeMembers(value: unknown): CgsServerMember[] {
 }
 
 function errorMessage(payload: RawMembersResponse | null, fallback: string): string {
-  return typeof payload?.message === "string"
+  const raw = typeof payload?.message === "string"
     ? payload.message
     : typeof payload?.error === "string"
       ? payload.error
       : fallback;
+  return formatCgsErrorMessage(raw, fallback);
 }
 
 async function resolveCgsRepoIdentifier(repo: string): Promise<string> {

@@ -7,6 +7,7 @@
  * organization-owned writes.
  */
 
+import { formatCgsErrorMessage } from "@/app/_lib/cgs-errors";
 import type {
   AppendExistingDatasetResponse,
   AppendExistingDatasetRowInput,
@@ -142,23 +143,27 @@ const MUTATION_TIMEOUT_MS = 45_000;
 async function callProxy<T>(payload: MutationPayload): Promise<T> {
   const controller = new AbortController();
   const timeout = window.setTimeout(() => controller.abort(), MUTATION_TIMEOUT_MS);
+  const isGroupScoped = "repo" in payload && typeof payload.repo === "string" && payload.repo.length > 0;
 
   try {
-    const isGroupScoped = "repo" in payload && typeof payload.repo === "string" && payload.repo.length > 0;
     const res = await fetch(isGroupScoped ? "/api/cgs/mutation" : "/api/manage/proxy", {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify(payload),
       signal: controller.signal,
     });
-    const data = (await res.json()) as T & { error?: string };
+    const data = (await res.json()) as T & { error?: string; message?: string };
     if (!res.ok || data.error) {
-      throw new Error(data.error ?? `Saving failed (${res.status})`);
+      const fallback = isGroupScoped ? "Organization request failed." : `Saving failed (${res.status})`;
+      throw new Error(isGroupScoped ? formatCgsErrorMessage(data.message ?? data.error, fallback) : data.error ?? fallback);
     }
     return data;
   } catch (error) {
     if (error instanceof DOMException && error.name === "AbortError") {
       throw new Error("Saving timed out. Please try again.");
+    }
+    if (isGroupScoped) {
+      throw new Error(formatCgsErrorMessage(error, "Organization request failed."));
     }
     throw error;
   } finally {

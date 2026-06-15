@@ -1,5 +1,7 @@
 "use client";
 
+import { formatCgsErrorMessage } from "@/app/_lib/cgs-errors";
+
 export type CgsRole = "owner" | "admin" | "member";
 
 export type CgsGroupMembership = {
@@ -104,7 +106,7 @@ type CgsMutationPayload =
 async function parseJsonResponse<T>(res: Response, fallback: string): Promise<T> {
   const data = (await res.json().catch(() => ({}))) as T & { error?: string; message?: string };
   if (!res.ok || data.error) {
-    throw new Error(data.message ?? data.error ?? fallback);
+    throw new Error(formatCgsErrorMessage(data.message ?? data.error, fallback));
   }
   return data;
 }

@@ -7,6 +7,7 @@ import { Loader2Icon, LockIcon, RefreshCwIcon, Trash2Icon, UserPlusIcon, UsersIc
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { formatCgsErrorMessage } from "@/app/_lib/cgs-errors";
 import { monogram, resolveDidProfile, type DidProfile } from "@/app/_lib/did-profile";
 import {
   addCgsMember,
@@ -35,6 +36,10 @@ function formatDate(value?: string | null) {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return null;
   return date.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+}
+
+function memberErrorMessage(error: unknown, fallback: string): string {
+  return formatCgsErrorMessage(error, fallback);
 }
 
 function MemberAvatar({ did, profile }: { did: string; profile?: DidProfile }) {
@@ -151,7 +156,7 @@ export function GroupMembers({
         const result = await listCgsMembers(groupDid);
         setMembers(result.members ?? []);
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Could not load members.");
+        setError(memberErrorMessage(err, "Could not load members."));
       } finally {
         setLoaded(true);
       }
@@ -193,7 +198,7 @@ export function GroupMembers({
         const result = await listCgsMembers(groupDid);
         setMembers(result.members ?? []);
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Could not add member.");
+        setError(memberErrorMessage(err, "Could not add member."));
       }
     });
   };
@@ -206,7 +211,7 @@ export function GroupMembers({
         await setCgsMemberRole(groupDid, did, nextRole);
         setMembers((current) => current.map((member) => (member.did === did ? { ...member, role: nextRole } : member)));
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Could not update role.");
+        setError(memberErrorMessage(err, "Could not update role."));
       }
     });
   };
@@ -219,7 +224,7 @@ export function GroupMembers({
         await removeCgsMember(groupDid, did);
         setMembers((current) => current.filter((member) => member.did !== did));
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Could not remove member.");
+        setError(memberErrorMessage(err, "Could not remove member."));
       }
     });
   };
