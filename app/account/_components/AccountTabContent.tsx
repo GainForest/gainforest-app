@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { ChevronRightIcon } from "lucide-react";
+import { ProjectGalleryViewer } from "../../_components/ProjectGalleryViewer";
 import { RichText } from "../../_components/RichText";
 import { RecordExplorer } from "../../_components/RecordExplorer";
 import { AccountBumicertsGrid } from "./AccountBumicertsGrid";
@@ -9,7 +10,7 @@ import { AccountContentColumns, AccountSidebar } from "./AccountSidebar";
 import { AccountSettingsSections } from "./AccountSettingsSections";
 import { DonationHistory } from "./DonationHistory";
 import { fetchReceipts } from "../../_lib/dashboard";
-import { fetchBumicertsByDid } from "../../_lib/indexer";
+import { attachProjectTitlesToGalleries, fetchBumicertsByDid, fetchProjectImageGalleriesByDid, fetchProjectsByDid } from "../../_lib/indexer";
 import type { AccountRouteData } from "../_lib/account-route";
 
 type ManageAction = {
@@ -110,6 +111,20 @@ export function AccountObservationsTabContent({ account, did }: { account: Accou
       <RecordExplorer kind="occurrence" ownerDid={did} showHero={false} />
     </Suspense>
   );
+}
+
+export async function AccountGalleryTabContent({ account, did }: { account: AccountRouteData; did: string }) {
+  if (account.kind !== "organization") {
+    notFound();
+  }
+
+  const [rawGalleries, projects] = await Promise.all([
+    fetchProjectImageGalleriesByDid(did).catch(() => []),
+    fetchProjectsByDid(did, 1000).then((page) => page.records).catch(() => []),
+  ]);
+  const galleries = attachProjectTitlesToGalleries(rawGalleries, projects);
+
+  return <ProjectGalleryViewer galleries={galleries} variant="account" />;
 }
 
 export function AccountSettingsTabContent({ account }: { account: AccountRouteData }) {

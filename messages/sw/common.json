@@ -251,5 +251,34 @@
       "minutesAgo": "dakika {count, plural, one {#} other {#}} zilizopita",
       "hoursAgo": "saa {count, plural, one {#} other {#}} zilizopita"
     }
+  },
+  "accountTabs": {
+    "home": "Nyumbani",
+    "bumicerts": "Bumicerts",
+    "donationHistory": "Historia ya michango",
+    "observations": "Uchunguzi",
+    "gallery": "Matunzio",
+    "settings": "Mipangilio"
+  },
+  "projectGallery": {
+    "accountTitle": "Matunzio",
+    "accountDescription": "Picha za miradi zilizoshirikiwa na akaunti hii. Tumia vitufe kuchagua mradi mmoja, au acha Miradi yote ikiwa imechaguliwa.",
+    "bumicertTitle": "Matunzio ya mradi",
+    "bumicertDescription": "Picha zilizoshirikiwa kwa mradi ambao Bumicert hii inahusiana nao.",
+    "defaultTitle": "Matunzio",
+    "defaultDescription": "Picha zilizoshirikiwa na mradi huu.",
+    "emptyTitle": "Bado hakuna picha za matunzio",
+    "emptyBody": "Akaunti hii bado haijashiriki picha zozote za matunzio ya miradi.",
+    "allProjects": "Miradi yote",
+    "defaultProjectTitle": "Matunzio ya mradi",
+    "imageCount": "{count, plural, one {picha #} other {picha #}}",
+    "projectImageCount": "{count, number}",
+    "openImage": "Fungua picha ya matunzio ya {projectTitle}",
+    "imageAlt": "Picha {index, number} ya matunzio ya {projectTitle}",
+    "closeImage": "Funga picha",
+    "previousImage": "Picha iliyotangulia",
+    "nextImage": "Picha inayofuata",
+    "accountMetadataTitle": "{name} — Matunzio",
+    "accountMetadataDescription": "Picha za matunzio ya miradi zilizoshirikiwa na {name}."
   }
 }

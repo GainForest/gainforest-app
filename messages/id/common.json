@@ -251,5 +251,34 @@
       "minutesAgo": "{count, plural, one {# menit lalu} other {# menit lalu}}",
       "hoursAgo": "{count, plural, one {# jam lalu} other {# jam lalu}}"
     }
+  },
+  "accountTabs": {
+    "home": "Beranda",
+    "bumicerts": "Bumicerts",
+    "donationHistory": "Riwayat donasi",
+    "observations": "Observasi",
+    "gallery": "Galeri",
+    "settings": "Pengaturan"
+  },
+  "projectGallery": {
+    "accountTitle": "Galeri",
+    "accountDescription": "Foto proyek yang dibagikan oleh akun ini. Gunakan tombol untuk memilih galeri proyek tertentu, atau biarkan Semua proyek dipilih.",
+    "bumicertTitle": "Galeri proyek",
+    "bumicertDescription": "Gambar yang dibagikan untuk proyek yang terkait dengan Bumicert ini.",
+    "defaultTitle": "Galeri",
+    "defaultDescription": "Foto yang dibagikan oleh proyek ini.",
+    "emptyTitle": "Belum ada gambar galeri",
+    "emptyBody": "Akun ini belum membagikan gambar galeri proyek.",
+    "allProjects": "Semua proyek",
+    "defaultProjectTitle": "Galeri proyek",
+    "imageCount": "{count, plural, one {# gambar} other {# gambar}}",
+    "projectImageCount": "{count, number}",
+    "openImage": "Buka gambar galeri {projectTitle}",
+    "imageAlt": "Gambar galeri {projectTitle} {index, number}",
+    "closeImage": "Tutup gambar",
+    "previousImage": "Gambar sebelumnya",
+    "nextImage": "Gambar berikutnya",
+    "accountMetadataTitle": "{name} — Galeri",
+    "accountMetadataDescription": "Gambar galeri proyek yang dibagikan oleh {name}."
   }
 }

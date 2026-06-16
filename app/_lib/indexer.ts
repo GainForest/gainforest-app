@@ -3787,6 +3787,163 @@ export async function fetchTimelineLocationByUri(
   });
 }
 
+// ── 10. Project image galleries ────────────────────────────────────────────
+
+export type ProjectGalleryImage = {
+  id: string;
+  url: string;
+  mimeType: string | null;
+  size: number | null;
+  cid: string | null;
+  attachmentUri: string;
+  projectUri: string;
+};
+
+export type ProjectImageGallery = {
+  id: string;
+  attachmentUri: string;
+  attachmentTitle: string | null;
+  shortDescription: string | null;
+  createdAt: string | null;
+  projectUri: string;
+  projectCid: string | null;
+  projectTitle: string | null;
+  images: ProjectGalleryImage[];
+};
+
+const PROJECT_GALLERIES_BY_DID_QUERY = `
+  query ProjectGalleriesByDid($did: String!, $first: Int!, $after: String) {
+    orgHypercertsContextAttachment(
+      where: { did: { eq: $did }, contentType: { eq: "gallery" } }
+      first: $first
+      after: $after
+      sortDirection: DESC
+      sortBy: createdAt
+    ) {
+      pageInfo { hasNextPage endCursor }
+      edges {
+        node {
+          did uri rkey cid createdAt title shortDescription contentType
+          subjects { uri cid }
+          content {
+            __typename
+            ... on OrgHypercertsDefsUri { uri }
+            ... on OrgHypercertsDefsSmallBlob { blob { ref mimeType size } }
+          }
+        }
+      }
+    }
+  }
+`;
+
+type RawProjectGalleryAttachment = {
+  did?: string | null;
+  uri?: string | null;
+  rkey?: string | null;
+  createdAt?: string | null;
+  title?: string | null;
+  shortDescription?: string | null;
+  contentType?: string | null;
+  subjects?: Array<{ uri?: string | null; cid?: string | null } | null> | null;
+  content?: Array<{
+    __typename?: string | null;
+    uri?: string | null;
+    blob?: { ref?: string | null; mimeType?: string | null; size?: number | null } | null;
+  } | null> | null;
+};
+
+function projectSubjectFromAttachment(subjects: RawProjectGalleryAttachment["subjects"]): { uri: string; cid: string | null } | null {
+  const subject = subjects?.find((item) => typeof item?.uri === "string" && item.uri.includes("/org.hypercerts.collection/"));
+  return subject?.uri ? { uri: subject.uri, cid: subject.cid ?? null } : null;
+}
+
+function isGalleryImageMimeType(mimeType: string | null | undefined): boolean {
+  return typeof mimeType === "string" && mimeType.toLowerCase().startsWith("image/");
+}
+
+function isLikelyGalleryImageUri(uri: string): boolean {
+  if (uri.startsWith("data:image/")) return true;
+  try {
+    return /\.(avif|gif|jpe?g|png|svg|webp)$/i.test(new URL(uri).pathname);
+  } catch {
+    return /\.(avif|gif|jpe?g|png|svg|webp)(?:[?#].*)?$/i.test(uri);
+  }
+}
+
+async function mapProjectGalleryAttachment(
+  node: RawProjectGalleryAttachment,
+  signal?: AbortSignal,
+): Promise<ProjectImageGallery | null> {
+  const did = node.did ?? null;
+  const attachmentUri = node.uri ?? (did && node.rkey ? `at://${did}/org.hypercerts.context.attachment/${node.rkey}` : null);
+  const subject = projectSubjectFromAttachment(node.subjects);
+  if (!did || !attachmentUri || !subject || node.contentType?.toLowerCase() !== "gallery") return null;
+
+  const images = (await Promise.all((node.content ?? []).map(async (item, index): Promise<ProjectGalleryImage | null> => {
+    if (!item?.__typename) return null;
+    if (item.__typename === "OrgHypercertsDefsSmallBlob") {
+      const cid = normaliseRef(item.blob?.ref);
+      if (!cid || !isGalleryImageMimeType(item.blob?.mimeType)) return null;
+      try {
+        const url = await resolveBlobUrl(did, cid, signal);
+        return url ? { id: `${attachmentUri}#${cid}`, url, cid, mimeType: item.blob?.mimeType ?? null, size: item.blob?.size ?? null, attachmentUri, projectUri: subject.uri } : null;
+      } catch (error) {
+        if ((error as Error).name === "AbortError") throw error;
+        return null;
+      }
+    }
+    if (item.__typename === "OrgHypercertsDefsUri") {
+      const url = item.uri?.trim();
+      if (!url || !isLikelyGalleryImageUri(url)) return null;
+      return { id: `${attachmentUri}#uri-${index}`, url, cid: null, mimeType: null, size: null, attachmentUri, projectUri: subject.uri };
+    }
+    return null;
+  }))).filter((image): image is ProjectGalleryImage => Boolean(image));
+
+  if (images.length === 0) return null;
+  return {
+    id: attachmentUri,
+    attachmentUri,
+    attachmentTitle: node.title?.trim() || null,
+    shortDescription: node.shortDescription?.trim() || null,
+    createdAt: node.createdAt ?? null,
+    projectUri: subject.uri,
+    projectCid: subject.cid,
+    projectTitle: null,
+    images,
+  };
+}
+
+export async function fetchProjectImageGalleriesByDid(
+  did: string,
+  signal?: AbortSignal,
+): Promise<ProjectImageGallery[]> {
+  const all: ProjectImageGallery[] = [];
+  let cursor: string | null = null;
+  for (let page = 0; page < 50; page += 1) {
+    type GalleryPage = { orgHypercertsContextAttachment?: Connection<RawProjectGalleryAttachment> };
+    const data: GalleryPage | null = await indexerQuery<GalleryPage>(PROJECT_GALLERIES_BY_DID_QUERY, { did, first: 100, after: cursor }, signal);
+    const conn: Connection<RawProjectGalleryAttachment> | undefined = data?.orgHypercertsContextAttachment;
+    const nodes = (conn?.edges ?? []).map((edge) => edge?.node).filter((node): node is RawProjectGalleryAttachment => Boolean(node));
+    const galleries = await Promise.all(nodes.map((node) => mapProjectGalleryAttachment(node, signal)));
+    all.push(...galleries.filter((gallery): gallery is ProjectImageGallery => Boolean(gallery)));
+    if (!conn?.pageInfo?.hasNextPage || !conn.pageInfo.endCursor) break;
+    cursor = conn.pageInfo.endCursor;
+  }
+  return all;
+}
+
+export function attachProjectTitlesToGalleries(
+  galleries: ProjectImageGallery[],
+  projects: ProjectRecord[],
+): ProjectImageGallery[] {
+  const projectTitles = new Map(projects.map((project) => [project.atUri, project.title]));
+  return galleries.map((gallery) => ({
+    ...gallery,
+    projectTitle: projectTitles.get(gallery.projectUri) ?? gallery.projectTitle,
+  }));
+}
+
 // ── Unified record type for the detail drawer ──────────────────────────────
 
 export type ExplorerRecord = OccurrenceRecord | BumicertRecord | ProjectRecord | SiteRecord;

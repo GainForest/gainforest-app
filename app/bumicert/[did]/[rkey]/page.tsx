@@ -24,6 +24,7 @@ import {
 import { BumicertsBumicertCard } from "@/components/bumicert/BumicertsBumicertCard";
 import { AuthorInline } from "../../../_components/AuthorChip";
 import { PreferredAccountLink } from "../../../_components/PreferredLinks";
+import { ProjectGalleryViewer } from "../../../_components/ProjectGalleryViewer";
 import { RichText } from "../../../_components/RichText";
 import { SocialGlyph } from "../../../_components/SocialIcon";
 import { StatsTileGrid, type StatsTileItem } from "../../../_components/StatsTile";
@@ -31,12 +32,15 @@ import { fetchReceipts, type DonorRef, type FundingReceipt } from "../../../_lib
 import { formatCompact, formatCompactUsd, formatCountry, formatDate, formatDateTime, formatNumber, formatRelative } from "../../../_lib/format";
 import { fetchReviewCounts, fetchReviewsForSubject, type BumicertReviews, type ReviewComment, type ReviewCounts } from "../../../_lib/reviews";
 import {
+  attachProjectTitlesToGalleries,
   fetchAudioByDid,
   fetchBumicertsByDid,
   fetchImageOccurrencesByDid,
   fetchLocationsByDid,
   fetchObservationSummaryByDid,
   fetchOccurrencesByDid,
+  fetchProjectImageGalleriesByDid,
+  fetchProjectsByDid,
   fetchRecordByUri,
   fetchRecordDetail,
   fetchTimelineAttachmentsByDid,
@@ -45,6 +49,7 @@ import {
   type DetailBadge,
   type ObservationSummary,
   type OccurrenceRecord,
+  type ProjectImageGallery,
   type TimelineAttachmentItem,
 } from "../../../_lib/indexer";
 import { isPdsBlobUrl } from "../../../_lib/pds";
@@ -148,7 +153,7 @@ export default async function BumicertDetailPage({
 
   const isOverviewTab = activeTab === "overview";
   const showsDetailSidebar = activeTab !== "timeline";
-  const [moreBumicerts, observations, observationSummary, linkedTimelineCount, reviewCounts] = isOverviewTab
+  const [moreBumicerts, observations, observationSummary, linkedTimelineCount, reviewCounts, projectGalleries] = isOverviewTab
     ? await Promise.all([
         fetchBumicertsByDid(record.did, 6)
           .then((page) => page.records.filter((item) => item.id !== record.id).slice(0, 5))
@@ -159,8 +164,9 @@ export default async function BumicertDetailPage({
           .then((items) => items.filter((item) => item.record.subjects?.[0]?.uri === record.atUri).length)
           .catch(() => null),
         fetchReviewCounts(record.atUri).catch(() => null),
+        fetchGalleriesForBumicertProject(record.did, record.atUri).catch(() => []),
       ])
-    : [[], [] as OccurrenceRecord[], null, null, null];
+    : [[], [] as OccurrenceRecord[], null, null, null, [] as ProjectImageGallery[]];
 
   const reviews = activeTab === "reviews"
     ? await fetchReviewsForSubject(record.atUri).catch(() => ({ evaluations: [], comments: [] }))
@@ -244,6 +250,7 @@ export default async function BumicertDetailPage({
                 detail={detail}
                 description={description}
                 observations={observations}
+                projectGalleries={projectGalleries}
                 evidence={{
                   boundaries: record.locationUris.length,
                   observationSummary,
@@ -289,6 +296,22 @@ export default async function BumicertDetailPage({
         </section>
       </main>
     </>
+  );
+}
+
+async function fetchGalleriesForBumicertProject(
+  did: string,
+  bumicertUri: string,
+): Promise<ProjectImageGallery[]> {
+  const [projects, galleries] = await Promise.all([
+    fetchProjectsByDid(did, 1000).then((page) => page.records),
+    fetchProjectImageGalleriesByDid(did),
+  ]);
+  const project = projects.find((item) => item.bumicertUris.includes(bumicertUri));
+  if (!project) return [];
+  return attachProjectTitlesToGalleries(
+    galleries.filter((gallery) => gallery.projectUri === project.atUri),
+    [project],
   );
 }
 
@@ -798,12 +821,14 @@ function OverviewPanel({
   detail,
   description,
   observations,
+  projectGalleries,
   evidence,
 }: {
   record: BumicertRecord;
   detail: RouteData["detail"];
   description: string | null | undefined;
   observations: OccurrenceRecord[];
+  projectGalleries: ProjectImageGallery[];
   evidence: EvidenceInfo;
 }) {
   return (
@@ -856,6 +881,14 @@ function OverviewPanel({
       )}
 
       <EvidenceSection evidence={evidence} />
+
+      <ProjectGalleryViewer
+        galleries={projectGalleries}
+        variant="bumicert"
+        showProjectFilter={false}
+        hideWhenEmpty
+        compact
+      />
 
       <BumicertObservationsGallery observations={observations} />
     </article>

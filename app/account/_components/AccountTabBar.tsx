@@ -1,21 +1,25 @@
 "use client";
 
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { usePathname, useSearchParams } from "next/navigation";
-import { BadgeIcon, HeartIcon, HomeIcon, LeafIcon, SettingsIcon } from "lucide-react";
+import { BadgeIcon, HeartIcon, HomeIcon, ImageIcon, LeafIcon, SettingsIcon } from "lucide-react";
 import { stripLocaleFromPathname } from "@/lib/i18n/routing";
 import { cn } from "@/lib/utils";
 import type { AccountKind } from "../_lib/account-route";
 import {
   accountBumicertsPath,
   accountDonationsPath,
+  accountGalleryPath,
   accountObservationsPath,
   accountPath,
   accountSettingsPath,
 } from "../_lib/account-route";
 
+type TabLabelKey = "home" | "bumicerts" | "donationHistory" | "observations" | "gallery" | "settings";
+
 interface Tab {
-  label: "Home" | "Bumicerts" | "Donation History" | "Observations" | "Settings";
+  labelKey: TabLabelKey;
   href: string;
   icon: React.ElementType;
   exact: boolean;
@@ -29,6 +33,7 @@ type TabPaths = {
   bumicerts: string;
   donations: string;
   activity: string;
+  gallery: string;
   settings: string;
 };
 
@@ -39,6 +44,7 @@ function buildTabPaths(did: string, scope: AccountTabBarScope, manageBasePath = 
       bumicerts: `${manageBasePath}?tab=bumicerts`,
       donations: `${manageBasePath}?tab=donations`,
       activity: `${manageBasePath}?tab=observations`,
+      gallery: `${manageBasePath}?tab=gallery`,
       settings: `${manageBasePath}?tab=settings`,
     };
   }
@@ -48,6 +54,7 @@ function buildTabPaths(did: string, scope: AccountTabBarScope, manageBasePath = 
     bumicerts: accountBumicertsPath(did),
     donations: accountDonationsPath(did),
     activity: accountObservationsPath(did),
+    gallery: accountGalleryPath(did),
     settings: accountSettingsPath(did),
   };
 }
@@ -61,7 +68,7 @@ function buildTabs(
 ): Tab[] {
   const paths = buildTabPaths(did, scope, manageBasePath);
   const settingsTab: Tab = {
-    label: "Settings",
+    labelKey: "settings",
     href: paths.settings,
     icon: SettingsIcon,
     exact: false,
@@ -70,13 +77,13 @@ function buildTabs(
   if (accountKind === "user") {
     const tabs: Tab[] = [
       {
-        label: "Bumicerts",
+        labelKey: "bumicerts",
         href: paths.bumicerts,
         icon: BadgeIcon,
         exact: false,
       },
       {
-        label: "Donation History",
+        labelKey: "donationHistory",
         href: paths.donations,
         icon: HeartIcon,
         exact: false,
@@ -88,24 +95,32 @@ function buildTabs(
 
   const tabs: Tab[] = [
     {
-      label: "Home",
+      labelKey: "home",
       href: paths.home,
       icon: HomeIcon,
       exact: true,
     },
     {
-      label: "Bumicerts",
+      labelKey: "bumicerts",
       href: paths.bumicerts,
       icon: BadgeIcon,
       exact: false,
     },
     {
-      label: "Observations",
+      labelKey: "observations",
       href: paths.activity,
       icon: LeafIcon,
       exact: false,
     },
   ];
+  if (scope === "account") {
+    tabs.push({
+      labelKey: "gallery",
+      href: paths.gallery,
+      icon: ImageIcon,
+      exact: false,
+    });
+  }
   if (includeSettings) tabs.push(settingsTab);
   return tabs;
 }
@@ -125,6 +140,7 @@ export function AccountTabBar({
   includeSettings = false,
   manageBasePath,
 }: OrgTabBarProps) {
+  const t = useTranslations("common.accountTabs");
   const pathname = stripLocaleFromPathname(usePathname() ?? "/");
   const searchParams = useSearchParams();
   const tabs = buildTabs(did, accountKind, scope, includeSettings, manageBasePath);
@@ -169,7 +185,7 @@ export function AccountTabBar({
                 )}
               >
                 <Icon className="h-3.5 w-3.5 shrink-0" />
-                {tab.label}
+                {t(tab.labelKey)}
 
                 {active && (
                   <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-foreground rounded-full" />

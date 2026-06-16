@@ -251,5 +251,34 @@
       "minutesAgo": "hace {count, plural, one {# minuto} other {# minutos}}",
       "hoursAgo": "hace {count, plural, one {# hora} other {# horas}}"
     }
+  },
+  "accountTabs": {
+    "home": "Inicio",
+    "bumicerts": "Bumicerts",
+    "donationHistory": "Historial de donaciones",
+    "observations": "Observaciones",
+    "gallery": "Galería",
+    "settings": "Configuración"
+  },
+  "projectGallery": {
+    "accountTitle": "Galería",
+    "accountDescription": "Fotos de proyectos compartidas por esta cuenta. Usa los botones para ver un proyecto concreto, o deja seleccionado Todos los proyectos.",
+    "bumicertTitle": "Galería del proyecto",
+    "bumicertDescription": "Imágenes compartidas para el proyecto al que pertenece este Bumicert.",
+    "defaultTitle": "Galería",
+    "defaultDescription": "Fotos compartidas por este proyecto.",
+    "emptyTitle": "Aún no hay imágenes en la galería",
+    "emptyBody": "Esta cuenta aún no ha compartido imágenes de galerías de proyectos.",
+    "allProjects": "Todos los proyectos",
+    "defaultProjectTitle": "Galería del proyecto",
+    "imageCount": "{count, plural, one {# imagen} other {# imágenes}}",
+    "projectImageCount": "{count, number}",
+    "openImage": "Abrir imagen de la galería de {projectTitle}",
+    "imageAlt": "Imagen {index, number} de la galería de {projectTitle}",
+    "closeImage": "Cerrar imagen",
+    "previousImage": "Imagen anterior",
+    "nextImage": "Imagen siguiente",
+    "accountMetadataTitle": "{name} — Galería",
+    "accountMetadataDescription": "Imágenes de galerías de proyectos compartidas por {name}."
   }
 }

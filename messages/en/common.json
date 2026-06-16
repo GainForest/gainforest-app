@@ -251,5 +251,34 @@
       "minutesAgo": "{count, plural, one {# minute ago} other {# minutes ago}}",
       "hoursAgo": "{count, plural, one {# hour ago} other {# hours ago}}"
     }
+  },
+  "accountTabs": {
+    "home": "Home",
+    "bumicerts": "Bumicerts",
+    "donationHistory": "Donation History",
+    "observations": "Observations",
+    "gallery": "Gallery",
+    "settings": "Settings"
+  },
+  "projectGallery": {
+    "accountTitle": "Gallery",
+    "accountDescription": "Project photos shared by this account. Use the buttons to focus on one project, or leave All projects selected.",
+    "bumicertTitle": "Project gallery",
+    "bumicertDescription": "Images shared for the project this Bumicert belongs to.",
+    "defaultTitle": "Gallery",
+    "defaultDescription": "Photos shared by this project.",
+    "emptyTitle": "No gallery images yet",
+    "emptyBody": "This account has not shared any project gallery images yet.",
+    "allProjects": "All projects",
+    "defaultProjectTitle": "Project gallery",
+    "imageCount": "{count, plural, one {# image} other {# images}}",
+    "projectImageCount": "{count, number}",
+    "openImage": "Open {projectTitle} gallery image",
+    "imageAlt": "{projectTitle} gallery image {index, number}",
+    "closeImage": "Close image",
+    "previousImage": "Previous image",
+    "nextImage": "Next image",
+    "accountMetadataTitle": "{name} — Gallery",
+    "accountMetadataDescription": "Project gallery images shared by {name}."
   }
 }
