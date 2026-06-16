@@ -21,7 +21,7 @@ async function visibleForm(page: Page): Promise<Locator> {
 }
 
 function isPlainManageUrl(url: URL): boolean {
-  return url.pathname === "/manage" && !url.searchParams.has("mode");
+  return url.pathname.endsWith("/manage") && !url.searchParams.has("mode");
 }
 
 async function clickAndWaitForPlainManage(page: Page, button: Locator): Promise<void> {
@@ -32,8 +32,31 @@ async function clickAndWaitForPlainManage(page: Page, button: Locator): Promise<
   await navigation;
 }
 
+async function clickAndWaitForRefresh(page: Page, button: Locator): Promise<void> {
+  const response = page.waitForResponse((res) => res.request().method() !== "GET" && res.ok(), { timeout: 90_000 }).catch(() => null);
+  await button.click({ timeout: 10_000 });
+  await response;
+  await page.waitForLoadState("networkidle").catch(() => undefined);
+}
+
+async function waitForProfileOnManage(page: Page, name: RegExp, timeoutMs = 180_000): Promise<void> {
+  const deadline = Date.now() + timeoutMs;
+  let lastText = "";
+
+  while (Date.now() <= deadline) {
+    await page.goto("/manage", { waitUntil: "domcontentloaded" });
+    await page.waitForLoadState("networkidle").catch(() => undefined);
+    if (await page.getByText(name).first().isVisible({ timeout: 5_000 }).catch(() => false)) return;
+    lastText = await bodyText(page).catch(() => "");
+    await page.waitForTimeout(5_000);
+  }
+
+  throw new Error(`Timed out waiting for profile ${name} on /manage. Last page text: ${lastText.slice(0, 500)}`);
+}
+
 export async function completeUserOnboarding(page: Page, testInfo: TestInfo): Promise<void> {
-  await page.goto("/manage", { waitUntil: "domcontentloaded" });
+  await page.goto("/manage?mode=onboard-user", { waitUntil: "domcontentloaded" });
+  await expect(page.getByRole("dialog", { name: /set up your profile/i })).not.toBeVisible({ timeout: 10_000 });
   await expect(page.getByRole("heading", { name: /^user$/i })).toBeVisible({ timeout: 60_000 });
   await screenshotStep(page, testInfo, "user-onboarding-direct");
 
@@ -49,16 +72,16 @@ export async function completeUserOnboarding(page: Page, testInfo: TestInfo): Pr
   await screenshotStep(page, testInfo, "user-onboarding-ready");
 
   await clickAndWaitForPlainManage(page, form.getByRole("button", { name: /^continue/i }));
-  await page.waitForLoadState("networkidle").catch(() => undefined);
-  await expect(page.getByText(/Disposable E2E Profile/i).first()).toBeVisible({ timeout: 30_000 });
+  await waitForProfileOnManage(page, /Disposable E2E Profile/i);
   await screenshotStep(page, testInfo, "user-onboarding-complete");
 }
 
 export async function editProfile(page: Page, testInfo: TestInfo): Promise<void> {
-  await page.goto("/manage?mode=edit", { waitUntil: "domcontentloaded" });
+  await waitForProfileOnManage(page, /Disposable E2E Profile/i);
   await screenshotStep(page, testInfo, "profile-edit-open");
 
-  const nameInput = page.locator('input[placeholder="Organization name"], input[placeholder="Display name"]').filter({ visible: true }).first();
+  await page.getByRole("button", { name: /edit name and bio/i }).click();
+  const nameInput = page.locator('input[placeholder="Display name"]:visible').first();
   await expect(nameInput).toBeVisible({ timeout: 30_000 });
   await nameInput.fill("");
   await page.getByRole("button", { name: /^save$/i }).first().click();
@@ -66,127 +89,31 @@ export async function editProfile(page: Page, testInfo: TestInfo): Promise<void>
   await screenshotStep(page, testInfo, "profile-edit-empty-name-error");
 
   await nameInput.fill("Disposable E2E Profile Edited");
-  await page.locator('textarea[placeholder="Short description…"]:visible').first().fill("Edited profile description from disposable browser testing.");
+  await page.locator('textarea[placeholder="Short bio…"]:visible').first().fill("Edited profile description from disposable browser testing.");
+  await screenshotStep(page, testInfo, "profile-edit-ready");
+  await clickAndWaitForRefresh(page, page.getByRole("button", { name: /^save$/i }).first());
+  await expect(page.getByText(/Disposable E2E Profile Edited/i).first()).toBeVisible({ timeout: 30_000 });
 
   const websiteChip = page.getByRole("button", { name: /add website|website/i }).first();
-  if (await websiteChip.isVisible({ timeout: 2_000 }).catch(() => false)) {
-    await websiteChip.click();
-    const websiteInput = page.getByPlaceholder(/yourorganization/i).first();
-    await expect(websiteInput).toBeVisible({ timeout: 10_000 });
-    await websiteInput.fill("bad");
-    const websiteDialog = page.locator('[role="dialog"]:visible').last();
-    await websiteDialog.getByRole("button", { name: /^save$/i }).click();
-    await expect(websiteDialog.getByText(/please enter a valid url/i)).toBeVisible({ timeout: 10_000 });
-    await screenshotStep(page, testInfo, "profile-edit-invalid-website");
-    await websiteInput.fill("example.org");
-    await websiteDialog.getByRole("button", { name: /^save$/i }).click();
-    await expect(websiteDialog).not.toBeVisible({ timeout: 15_000 });
-  }
+  await expect(websiteChip).toBeVisible({ timeout: 30_000 });
+  await websiteChip.click();
+  const websiteInput = page.getByPlaceholder(/yourorganization/i).first();
+  await expect(websiteInput).toBeVisible({ timeout: 10_000 });
+  await websiteInput.fill("bad");
+  const websiteDialog = page.locator('[role="dialog"]:visible').last();
+  await websiteDialog.getByRole("button", { name: /^save$/i }).click();
+  await expect(websiteDialog.getByText(/please enter a valid url/i)).toBeVisible({ timeout: 10_000 });
+  await screenshotStep(page, testInfo, "profile-edit-invalid-website");
+  await websiteInput.fill("example.org");
+  await clickAndWaitForRefresh(page, websiteDialog.getByRole("button", { name: /^save$/i }));
+  await expect(websiteDialog).not.toBeVisible({ timeout: 15_000 });
 
-  await screenshotStep(page, testInfo, "profile-edit-ready");
-  await clickAndWaitForPlainManage(page, page.getByRole("button", { name: /^save$/i }).first());
-  await page.waitForLoadState("networkidle").catch(() => undefined);
   await expect(page.getByText(/example\.org/i).first()).toBeVisible({ timeout: 30_000 });
   await screenshotStep(page, testInfo, "profile-edit-saved");
 }
 
-export async function convertToOrganization(page: Page, testInfo: TestInfo): Promise<void> {
-  await page.goto("/manage?mode=onboard-org", { waitUntil: "domcontentloaded" });
-  let form = await visibleForm(page);
-  await screenshotStep(page, testInfo, "org-conversion-step-one-empty");
-  await expectDisabled(form.getByRole("button", { name: /^continue/i }), "empty organization continue");
-
-  await form.getByPlaceholder(/your-organization/i).fill("bad");
-  await expect(page.getByText(/enter a valid website url/i)).toBeVisible({ timeout: 10_000 });
-  await expectDisabled(form.getByRole("button", { name: /^continue/i }), "invalid organization website submit");
-  await screenshotStep(page, testInfo, "org-conversion-invalid-website");
-
-  await form.getByPlaceholder(/your-organization/i).fill("https://example.org");
-  await form.getByPlaceholder(/organization name/i).fill("Disposable E2E Forest Organization");
-  await form.getByPlaceholder(/short introduction/i).fill("Disposable organization setup for browser checklist testing.");
-  await form.locator("label").filter({ hasText: /code of conduct/i }).click();
-  await form.getByRole("button", { name: /^continue/i }).click();
-
-  form = await visibleForm(page);
-  await screenshotStep(page, testInfo, "org-conversion-ready");
-
-  await clickAndWaitForPlainManage(page, form.getByRole("button", { name: /^(skip and continue|continue)/i }));
-  await page.waitForLoadState("networkidle").catch(() => undefined);
-  await expect(page.getByRole("heading", { name: /Disposable E2E Forest Organization/i }).first()).toBeVisible({ timeout: 30_000 });
-  await screenshotStep(page, testInfo, "org-conversion-complete");
-}
-
-export async function editOrganization(page: Page, testInfo: TestInfo): Promise<void> {
-  const targetName = "Disposable E2E Forest Org Edited";
-  let lastError: unknown = null;
-
-  for (let attempt = 1; attempt <= 3; attempt += 1) {
-    await page.goto("/manage?mode=edit", { waitUntil: "domcontentloaded" });
-    await screenshotStep(page, testInfo, attempt === 1 ? "org-edit-open" : `org-edit-open-retry-${attempt}`);
-
-    const nameInput = page.locator('input[placeholder="Organization name"]:visible').first();
-    await expect(nameInput).toBeVisible({ timeout: 30_000 });
-    await nameInput.fill(targetName);
-    await page.locator('textarea[placeholder="Short description…"]:visible').first().fill("Edited organization summary from disposable testing.");
-    await screenshotStep(page, testInfo, attempt === 1 ? "org-edit-ready" : `org-edit-ready-retry-${attempt}`);
-
-    const saveButton = page.getByRole("button", { name: /^save$/i }).first();
-    const saveEnabled = await saveButton.isEnabled().catch(() => false);
-    if (!saveEnabled) {
-      await page.goto("/manage", { waitUntil: "domcontentloaded" });
-      try {
-        await expect(page.getByText(new RegExp(targetName, "i")).first()).toBeVisible({ timeout: 30_000 });
-        await screenshotStep(page, testInfo, "org-edit-saved");
-        return;
-      } catch (error) {
-        lastError = error;
-        await screenshotStep(page, testInfo, `org-edit-no-save-changes-${attempt}`);
-        continue;
-      }
-    }
-
-    const navigation = page.waitForURL(isPlainManageUrl, { timeout: 45_000 }).catch((error: unknown) => {
-      lastError = error;
-      return null;
-    });
-    try {
-      await saveButton.click({ noWaitAfter: true, timeout: 10_000 });
-    } catch (error) {
-      lastError = error;
-      if ((await bodyText(page)).includes(targetName)) {
-        await screenshotStep(page, testInfo, "org-edit-saved");
-        return;
-      }
-      await screenshotStep(page, testInfo, `org-edit-save-click-failed-${attempt}`);
-      continue;
-    }
-    const navigated = await navigation;
-    if (!navigated) {
-      await screenshotStep(page, testInfo, `org-edit-save-stalled-${attempt}`);
-      continue;
-    }
-
-    await page.waitForLoadState("domcontentloaded").catch(() => undefined);
-    try {
-      await expect(page.getByText(new RegExp(targetName, "i")).first()).toBeVisible({ timeout: 30_000 });
-      await screenshotStep(page, testInfo, "org-edit-saved");
-      return;
-    } catch (error) {
-      lastError = error;
-      await screenshotStep(page, testInfo, `org-edit-save-not-visible-${attempt}`);
-    }
-  }
-
-  if ((await bodyText(page)).includes(targetName)) {
-    await screenshotStep(page, testInfo, "org-edit-saved");
-    return;
-  }
-
-  throw lastError instanceof Error ? lastError : new Error("Organization edit did not finish after 3 attempts.");
-}
-
 export async function checkSettings(page: Page, testInfo: TestInfo): Promise<void> {
-  await page.goto("/manage?tab=settings", { waitUntil: "domcontentloaded" });
+  await page.goto("/manage/settings", { waitUntil: "domcontentloaded" });
   await screenshotStep(page, testInfo, "settings-open");
   const text = await bodyText(page);
   for (const disallowedVisibleText of ["DID", "pdsls.dev", "atproto.at"]) {

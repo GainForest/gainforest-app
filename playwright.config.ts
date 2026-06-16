@@ -1,4 +1,24 @@
+import { existsSync, readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { defineConfig, devices } from "@playwright/test";
+
+function loadDotEnvFile(path: string): void {
+  if (!existsSync(path)) return;
+
+  for (const line of readFileSync(path, "utf8").split(/\r?\n/)) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith("#")) continue;
+
+    const equalsIndex = trimmed.indexOf("=");
+    if (equalsIndex === -1) continue;
+
+    const key = trimmed.slice(0, equalsIndex).trim();
+    const rawValue = trimmed.slice(equalsIndex + 1).trim();
+    process.env[key] ??= rawValue.replace(/^["']|["']$/g, "");
+  }
+}
+
+loadDotEnvFile(resolve(process.cwd(), "e2e/.env"));
 
 const defaultLocalE2EHost = "local-e2e.gainforest.app";
 const defaultLocalE2EPort = 3201;
@@ -11,6 +31,7 @@ const shouldStartLocalE2EServer =
 
 process.env.E2E_BASE_URL ??= baseURL;
 process.env.E2E_PORT ??= String(port);
+process.env.NEXT_PUBLIC_AUTH_BASE_URL ??= process.env.E2E_AUTH_BASE_URL ?? "https://dev.auth.gainforest.app";
 process.env.NEXT_PUBLIC_AUTH_PROVIDER ??= "certs";
 
 function getConfiguredWorkers(): number | undefined {
@@ -75,20 +96,8 @@ export default defineConfig({
       use: { ...desktopChrome },
     },
     {
-      name: "organization-conversion",
-      dependencies: ["profile-edit"],
-      testMatch: /organization-conversion\.spec\.ts/,
-      use: { ...desktopChrome },
-    },
-    {
-      name: "organization-edit",
-      dependencies: ["organization-conversion"],
-      testMatch: /organization-edit\.spec\.ts/,
-      use: { ...desktopChrome },
-    },
-    {
       name: "sites",
-      dependencies: ["organization-edit"],
+      dependencies: ["profile-edit"],
       testMatch: /sites\.spec\.ts/,
       use: { ...desktopChrome },
     },

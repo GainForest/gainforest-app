@@ -121,7 +121,7 @@ async function createObservationFromUpload(page: Page, testInfo: TestInfo, siteN
   await continueToPreview.click();
 
   await expect(page.getByRole("heading", { name: /review & verify/i })).toBeVisible({ timeout: 15_000 });
-  await expect(page.getByText(/all 1 row ready/i)).toBeVisible({ timeout: 60_000 });
+  await expect(page.getByText(/all\s+1\s+row(?:\s+is)?\s+ready/i)).toBeVisible({ timeout: 60_000 });
   await screenshotStep(page, testInfo, "observation-upload-preview");
   await page.getByRole("button", { name: /upload 1 valid row/i }).click();
 

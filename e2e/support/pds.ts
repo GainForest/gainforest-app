@@ -136,6 +136,9 @@ async function createStaticSessionAccount(): Promise<PdsReadAccount> {
       ? normalizeServiceEndpoint(env.testPdsDomain.startsWith("http") ? env.testPdsDomain : `https://${env.testPdsDomain}`)
       : null;
     if (!serviceEndpoint) throw new Error("E2E_TEST_DID or E2E_TEST_PDS_DOMAIN is required for direct PDS checks.");
+    if (!env.testHandle || !env.testPassword) {
+      throw new Error("E2E_TEST_HANDLE and E2E_TEST_PASSWORD are required for static direct PDS checks.");
+    }
     const session = await fetchJson(`${serviceEndpoint}/xrpc/com.atproto.server.createSession`, {
       method: "POST",
       headers: { "content-type": "application/json" },

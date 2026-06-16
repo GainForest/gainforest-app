@@ -49,9 +49,26 @@ export async function expectProjectRecordFields(project: CreatedProject, expecte
   expect(projectItemUris(record)).toEqual(expectedItems);
 }
 
+async function ensureProfilePromptIsCleared(page: Page): Promise<void> {
+  if (!(await page.getByRole("dialog", { name: /set up your profile/i }).isVisible({ timeout: 5_000 }).catch(() => false))) return;
+
+  await page.goto("/manage?mode=onboard-user", { waitUntil: "domcontentloaded" });
+  const form = page.locator("form:visible").first();
+  if (await form.isVisible({ timeout: 20_000 }).catch(() => false)) {
+    await form.getByPlaceholder(/your name/i).fill("Disposable E2E Profile Edited");
+    await form.getByPlaceholder(/short introduction/i).fill("Disposable browser test profile for full end-to-end checks.");
+    const response = page.waitForResponse((res) => res.request().method() !== "GET" && res.ok(), { timeout: 90_000 }).catch(() => null);
+    await form.getByRole("button", { name: /^continue/i }).click();
+    await response;
+    await page.waitForLoadState("networkidle").catch(() => undefined);
+  }
+}
+
 export async function createProject(page: Page, testInfo: TestInfo): Promise<CreatedProject> {
   const title = `E2E Project ${Date.now()}-${testInfo.workerIndex}-${testInfo.retry}`;
 
+  await page.goto("/manage/projects?mode=new", { waitUntil: "domcontentloaded" });
+  await ensureProfilePromptIsCleared(page);
   await page.goto("/manage/projects?mode=new", { waitUntil: "domcontentloaded" });
   await expect(page.getByRole("heading", { name: /create new project/i })).toBeVisible({ timeout: 60_000 });
   await screenshotStep(page, testInfo, "project-create-empty");

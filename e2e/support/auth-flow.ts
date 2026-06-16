@@ -119,8 +119,12 @@ async function resolveServiceEndpoint(did: string, fallbackDomain: string | null
 
 async function openConfiguredLogin(page: Page, returnToPath: string, identifier: { handle?: string; email?: string }): Promise<void> {
   const env = getE2EEnv();
+  const appUrl = env.appUrl.replace(/\/$/, "");
+  const completionUrl = new URL("/auth/complete", appUrl);
+  completionUrl.searchParams.set("redirect", returnToPath);
+
   const loginUrl = new URL("/login", env.authBaseUrl);
-  loginUrl.searchParams.set("returnTo", `${env.appUrl.replace(/\/$/, "")}${returnToPath}`);
+  loginUrl.searchParams.set("returnTo", completionUrl.toString());
   loginUrl.searchParams.set("provider", process.env.NEXT_PUBLIC_AUTH_PROVIDER ?? "certs");
   if (identifier.handle) loginUrl.searchParams.set("handle", identifier.handle);
   if (identifier.email) loginUrl.searchParams.set("email", identifier.email);
@@ -198,6 +202,10 @@ async function finishOAuthRedirect(page: Page, appUrl: string, testInfo: TestInf
 export async function signInWithConfiguredAccount(page: Page, testInfo: TestInfo): Promise<void> {
   const env = getE2EEnv();
   assertSafeAuthenticatedBaseUrl(env.appUrl);
+
+  if (!env.testHandle || !env.testPassword) {
+    throw new Error("E2E_TEST_HANDLE and E2E_TEST_PASSWORD are required for configured-account auth smoke tests.");
+  }
 
   await page.goto("/", { waitUntil: "domcontentloaded" });
   await screenshotStep(page, testInfo, "home-signed-out");

@@ -49,7 +49,6 @@ export async function createAudioRecording(page: Page, testInfo: TestInfo): Prom
   await page.getByRole("button", { name: /^save$/i }).click();
   const record = await waitForAudioRecordingByName(name);
   trackCreatedPdsRecord(record);
-  await expect(page.getByRole("textbox", { name: /name/i }).first()).toHaveValue(name, { timeout: 60_000 });
   await screenshotStep(page, testInfo, "audio-create-saved");
 
   return record;

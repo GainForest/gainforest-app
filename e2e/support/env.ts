@@ -3,8 +3,8 @@ import { resolve } from "node:path";
 
 type E2EEnv = {
   appUrl: string;
-  testHandle: string;
-  testPassword: string;
+  testHandle: string | null;
+  testPassword: string | null;
   testDid: string | null;
   testPdsDomain: string | null;
   authBaseUrl: string;
@@ -29,21 +29,13 @@ function loadDotEnvFile(path: string): void {
 
 loadDotEnvFile(resolve(process.cwd(), "e2e/.env"));
 
-function required(name: string): string {
-  const value = process.env[name]?.trim();
-  if (!value) {
-    throw new Error(`${name} is required. Copy e2e/.env.example to e2e/.env and fill it in.`);
-  }
-  return value;
-}
-
 export function getE2EEnv(): E2EEnv {
   return {
     appUrl: process.env.E2E_BASE_URL ?? process.env.E2E_APP_URL ?? "https://local-e2e.gainforest.app",
-    testHandle: required("E2E_TEST_HANDLE"),
-    testPassword: required("E2E_TEST_PASSWORD"),
+    testHandle: process.env.E2E_TEST_HANDLE?.trim() || null,
+    testPassword: process.env.E2E_TEST_PASSWORD?.trim() || null,
     testDid: process.env.E2E_TEST_DID?.trim() || null,
     testPdsDomain: process.env.E2E_TEST_PDS_DOMAIN?.trim() || null,
-    authBaseUrl: (process.env.NEXT_PUBLIC_AUTH_BASE_URL?.trim() || "https://auth.gainforest.app").replace(/\/$/, ""),
+    authBaseUrl: (process.env.NEXT_PUBLIC_AUTH_BASE_URL?.trim() || process.env.E2E_AUTH_BASE_URL?.trim() || "https://dev.auth.gainforest.app").replace(/\/$/, ""),
   };
 }
