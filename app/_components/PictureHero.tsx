@@ -12,6 +12,7 @@ type PictureHeroProps = {
   lede: string;
   actions?: ReactNode;
   priority?: boolean;
+  compact?: boolean;
 };
 
 export function PictureHero({
@@ -19,15 +20,15 @@ export function PictureHero({
   darkSrc,
   imageAlt = "",
   eyebrow,
-  icon,
   title,
   accent,
   lede,
   actions,
   priority = true,
+  compact = false,
 }: PictureHeroProps) {
   return (
-    <div className="relative isolate min-h-[330px] overflow-hidden bg-card">
+    <div className={compact ? "relative isolate min-h-[240px] overflow-hidden bg-card" : "relative isolate min-h-[330px] overflow-hidden bg-card"}>
       <div className="absolute inset-0" aria-hidden={!imageAlt}>
         <Image
           src={lightSrc}
@@ -53,17 +54,11 @@ export function PictureHero({
       <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-background/80 to-transparent" />
       <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-background via-background/70 to-transparent" />
 
-      <div className="relative z-10 mx-auto flex max-w-6xl flex-col px-8 pt-[86px] pb-14 sm:px-10 lg:px-9">
+      <div className={compact ? "relative z-10 mx-auto flex max-w-6xl flex-col px-8 pt-[64px] pb-8 sm:px-10 lg:px-9" : "relative z-10 mx-auto flex max-w-6xl flex-col px-8 pt-[86px] pb-14 sm:px-10 lg:px-9"}>
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-4xl">
-            <div className="mb-5 flex items-center gap-2.5">
-              {icon ? <span className="text-primary [&_svg]:h-4 [&_svg]:w-4">{icon}</span> : null}
-              <span className="text-xs font-medium tracking-[0.22em] text-muted-foreground uppercase dark:text-white/55">
-                {eyebrow}
-              </span>
-            </div>
             <h1
-              className="max-w-4xl text-4xl leading-[0.98] font-light tracking-[-0.035em] text-foreground drop-shadow-sm dark:text-white sm:text-5xl md:text-6xl lg:text-7xl"
+              className={compact ? "max-w-4xl text-4xl leading-[0.98] font-light tracking-[-0.035em] text-foreground drop-shadow-sm dark:text-white sm:text-5xl md:text-5xl lg:text-6xl" : "max-w-4xl text-4xl leading-[0.98] font-light tracking-[-0.035em] text-foreground drop-shadow-sm dark:text-white sm:text-5xl md:text-6xl lg:text-7xl"}
               style={{ fontFamily: "var(--font-garamond-var)" }}
             >
               {title}{" "}
@@ -76,11 +71,11 @@ export function PictureHero({
                 </span>
               ) : null}
             </h1>
-            <p className="mt-7 max-w-2xl text-base leading-8 text-muted-foreground dark:text-white/70 md:text-lg">
+            <p className={compact ? "mt-4 max-w-2xl text-base leading-7 text-muted-foreground dark:text-white/70 md:text-base" : "mt-7 max-w-2xl text-base leading-8 text-muted-foreground dark:text-white/70 md:text-lg"}>
               {lede}
             </p>
           </div>
-          {actions ? <div className="shrink-0 lg:pb-2">{actions}</div> : null}
+          {actions ? <div className={compact ? "shrink-0" : "shrink-0 lg:pb-2"}>{actions}</div> : null}
         </div>
       </div>
     </div>

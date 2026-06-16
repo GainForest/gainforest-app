@@ -348,21 +348,17 @@ function LeaderboardShell({
       <div className="absolute inset-x-0 top-0 h-80 bg-gradient-to-b from-primary/[0.08] via-transparent to-transparent dark:from-primary/[0.12]" />
       <HeroLandscapeArt />
 
-      <div className="relative min-h-[330px]">
+      <div className="relative min-h-[240px]">
         <motion.header
           initial={animate ? { opacity: 0, y: 16 } : false}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
-          className="mx-auto mb-0 flex max-w-6xl flex-col px-8 pb-14 pt-[86px] sm:px-10 lg:px-9"
+          className="mx-auto mb-0 flex max-w-6xl flex-col px-8 pb-8 pt-[64px] sm:px-10 lg:px-9"
         >
-          <div className="mb-5 flex items-center gap-2.5">
-            <TrophyIcon className="h-4 w-4 text-primary" />
-            <span className="text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">{t("eyebrow")}</span>
-          </div>
-          <h1 className="font-garamond max-w-4xl text-4xl font-light leading-[0.98] tracking-[-0.035em] text-foreground sm:text-5xl md:text-6xl lg:text-7xl">
+          <h1 className="font-garamond max-w-4xl text-4xl font-light leading-[0.98] tracking-[-0.035em] text-foreground sm:text-5xl md:text-5xl lg:text-6xl">
             {t("titlePrefix")} <span className="font-instrument italic text-foreground/85">{t("titleEmphasis")}</span>
           </h1>
-          <p className="mt-7 max-w-2xl text-base leading-8 text-muted-foreground md:text-lg">
+          <p className="mt-4 max-w-2xl text-base leading-7 text-muted-foreground md:text-base">
             {t("description")}
           </p>
         </motion.header>

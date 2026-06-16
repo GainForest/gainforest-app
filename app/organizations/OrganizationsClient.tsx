@@ -8,13 +8,11 @@ import {
   ArrowUpRightIcon,
   CheckIcon,
   ChevronDownIcon,
-  GlobeIcon,
   LayoutGridIcon,
   LeafIcon,
   ListIcon,
   MapIcon,
   SearchIcon,
-  UsersIcon,
   XIcon,
 } from "lucide-react";
 import { memo, useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
@@ -24,13 +22,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { AutoLoadMoreButton } from "../_components/AutoLoadMoreButton";
 import { RecordDrawer } from "../_components/RecordDrawer";
 import { RecordMap } from "../_components/RecordMap";
-import { StatsTileGrid } from "../_components/StatsTile";
 import {
   fetchCertifiedLocationCountriesByUri,
-  fetchOrganizationStats,
   fetchSites,
   type ExplorerRecord,
-  type OrganizationStats,
   type SiteRecord,
 } from "../_lib/indexer";
 import { countryFlag } from "../_lib/format";
@@ -89,45 +84,9 @@ export function OrganizationsClient({ records: initialRecords = [] }: { records?
   const [drawer, setDrawer] = useState<SiteRecord | null>(null);
   const [cardLimit, setCardLimit] = useState(INITIAL_CARD_LIMIT);
   const [autoLoadMore, setAutoLoadMore] = useState(false);
-  const [totalStats, setTotalStats] = useState<OrganizationStats | null>(null);
-  const [statsLoading, setStatsLoading] = useState(true);
   const deferredQuery = useDeferredValue(query);
   const requestSeqRef = useRef(0);
   const countryHydrationKeyRef = useRef("");
-  // One-way gate: flips true once the first card page has rendered (or the
-  // first load settled), then stays true so the stats fetch runs exactly once.
-  const [statsEnabled, setStatsEnabled] = useState(false);
-  const hasLoadedRecords = records.length > 0;
-
-  // The stats walk pages every organization plus per-org count batches, so
-  // let the first card page win the connection: start it only after records
-  // have rendered (or the first load settled empty).
-  useEffect(() => {
-    if (!statsEnabled && (hasLoadedRecords || !loading)) setStatsEnabled(true);
-  }, [statsEnabled, hasLoadedRecords, loading]);
-
-  useEffect(() => {
-    if (!statsEnabled) return;
-    const controller = new AbortController();
-    const timer = window.setTimeout(() => {
-      setStatsLoading(true);
-      fetchOrganizationStats("both", controller.signal)
-        .then((nextStats) => setTotalStats(nextStats))
-        .catch((error) => {
-          if ((error as Error).name !== "AbortError") {
-            console.warn("[organizations] stats fetch failed", error);
-            setTotalStats(null);
-          }
-        })
-        .finally(() => {
-          if (!controller.signal.aborted) setStatsLoading(false);
-        });
-    }, 300);
-    return () => {
-      window.clearTimeout(timer);
-      controller.abort();
-    };
-  }, [statsEnabled]);
 
   useEffect(() => {
     if (initialRecords.length > 0) return;
@@ -186,12 +145,10 @@ export function OrganizationsClient({ records: initialRecords = [] }: { records?
     const loadedCodes = records
       .map((record) => normalizeCountry(record.country))
       .filter((code): code is string => Boolean(code));
-    const statsCodes = totalStats?.countryCodes ?? [];
-
-    return Array.from(new Set([...statsCodes, ...loadedCodes]))
+    return Array.from(new Set(loadedCodes))
       .map((code) => ({ code, name: countryName(code, locale), emoji: countryFlag(code) }))
       .sort((a, b) => Number(b.code === countryFilter) - Number(a.code === countryFilter) || a.name.localeCompare(b.name));
-  }, [records, countryFilter, locale, totalStats?.countryCodes]);
+  }, [records, countryFilter, locale]);
 
   const typeChips = useMemo(() => {
     const counts = new Map<string, number>();
@@ -232,28 +189,6 @@ export function OrganizationsClient({ records: initialRecords = [] }: { records?
       }
     });
   }, [countryFilter, deferredQuery, locale, quickFilters, records, sort, typeFilter]);
-
-  const stats = useMemo(
-    () => [
-      {
-        label: t("stats.profiles"),
-        value: totalStats?.organizations ?? null,
-      },
-      {
-        label: t("stats.withBumicerts"),
-        value: totalStats?.withBumicerts ?? null,
-      },
-      {
-        label: t("stats.withObservations"),
-        value: totalStats?.withObservations ?? null,
-      },
-      {
-        label: t("stats.locations"),
-        value: totalStats?.mappedPlaces ?? null,
-      },
-    ],
-    [t, totalStats],
-  );
 
   const renderedRecords = useMemo(
     () => (view === "map" ? visibleRecords : visibleRecords.slice(0, cardLimit)),
@@ -321,11 +256,7 @@ export function OrganizationsClient({ records: initialRecords = [] }: { records?
         <OrganizationsHero />
 
         <div className="mx-auto max-w-6xl px-6">
-          <div className="relative z-20 -mt-10">
-            <StatsBand stats={stats} loading={statsLoading} />
-          </div>
-
-          <div className="relative z-20 mt-4 mb-0 space-y-2.5">
+          <div className="relative z-20 mt-5 mb-0 space-y-2.5">
             <div className="relative z-30 flex items-center gap-2 animate-in" style={{ animationDelay: "80ms" }}>
               <div className="group/input-group border-input relative flex h-10 min-w-0 flex-1 items-center rounded-full border bg-background/50 shadow-xs backdrop-blur transition-[color,box-shadow] outline-none focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50">
                 <div className="flex h-auto cursor-text items-center justify-center gap-2 py-1.5 pl-3.5 text-sm font-medium text-muted-foreground select-none">
@@ -451,7 +382,7 @@ function OrganizationsHero() {
   const t = useTranslations("marketplace.organizations.hero");
 
   return (
-    <div className="relative min-h-[330px] overflow-hidden bg-card animate-in">
+    <div className="relative min-h-[240px] overflow-hidden bg-card animate-in">
       <div className="absolute inset-0">
         <Image
           src="/assets/organizations/organizations-hero-light@2x.webp"
@@ -476,16 +407,10 @@ function OrganizationsHero() {
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_76%_36%,color-mix(in_oklab,var(--primary)_16%,transparent)_0%,transparent_28%),linear-gradient(90deg,color-mix(in_oklab,var(--background)_58%,transparent)_0%,color-mix(in_oklab,var(--background)_42%,transparent)_26%,transparent_58%),linear-gradient(180deg,color-mix(in_oklab,var(--background)_46%,transparent)_0%,transparent_42%,var(--background)_100%)]" />
       <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-background via-background/70 to-transparent" />
 
-      <div className="relative z-10 mx-auto flex max-w-6xl flex-col px-8 pt-[86px] pb-14 sm:px-10 lg:px-9">
-        <div className="mb-5 flex items-center gap-2.5">
-          <UsersIcon className="h-4 w-4 text-primary" />
-          <span className="text-xs font-medium tracking-[0.22em] text-muted-foreground uppercase">
-            {t("eyebrow")}
-          </span>
-        </div>
+      <div className="relative z-10 mx-auto flex max-w-6xl flex-col px-8 pt-[64px] pb-8 sm:px-10 lg:px-9">
         <h1
           aria-label={t("titleAriaLabel")}
-          className="max-w-4xl text-4xl leading-[0.98] font-light tracking-[-0.035em] text-foreground sm:text-5xl md:text-6xl lg:text-7xl"
+          className="max-w-4xl text-4xl leading-[0.98] font-light tracking-[-0.035em] text-foreground sm:text-5xl md:text-5xl lg:text-6xl"
           style={{ fontFamily: "var(--font-garamond-var)" }}
         >
           <span aria-hidden="true">
@@ -498,7 +423,7 @@ function OrganizationsHero() {
             </span>
           </span>
         </h1>
-        <p className="mt-7 max-w-2xl text-base leading-8 text-muted-foreground md:text-lg">
+        <p className="mt-4 max-w-2xl text-base leading-7 text-muted-foreground md:text-base">
           {t("description")}
         </p>
       </div>
@@ -707,30 +632,6 @@ function FacetDropdown({
         </div>
       </PopoverContent>
     </Popover>
-  );
-}
-
-function StatsBand({ stats, loading }: { stats: Array<{ label: string; value: number | null }>; loading: boolean }) {
-  const locale = useLocale();
-  if (loading || stats.every((stat) => stat.value === null)) return null;
-
-  const icons = [
-    <UsersIcon key="organizations" />,
-    <GlobeIcon key="bumicerts" />,
-    <LeafIcon key="observations" />,
-    <MapIcon key="mapped" />,
-  ];
-
-  return (
-    <StatsTileGrid
-      columns={4}
-      items={stats.map((stat, index) => ({
-        label: stat.label,
-        value: stat.value === null ? null : formatStat(stat.value, locale),
-        icon: icons[index] ?? <LeafIcon />,
-        accent: index % 2 === 0,
-      }))}
-    />
   );
 }
 
@@ -1017,10 +918,6 @@ function organizationBannerUrl(record: SiteRecord): string | null {
 
 function organizationAvatarUrl(record: SiteRecord): string | null {
   return record.avatarUrl ?? (!record.coverRef && record.logoRef ? record.imageUrl : null);
-}
-
-function formatStat(value: number, locale: string): string {
-  return new Intl.NumberFormat(locale, { notation: Math.abs(value) >= 1000 ? "compact" : "standard" }).format(value);
 }
 
 function mergeSiteRecords(base: SiteRecord[], incoming: SiteRecord[]): SiteRecord[] {

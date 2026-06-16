@@ -196,6 +196,7 @@ export function RecordExplorer({
   ownerDid?: string;
 }) {
   const meta = KIND_META[kind];
+  const showStatsOverview = !showHero || Boolean(ownerDid);
   const [query, setQuery] = useQueryState(
     "q",
     parseAsString.withDefault("").withOptions(SEARCH_QUERY_STATE_OPTIONS),
@@ -235,7 +236,7 @@ export function RecordExplorer({
   const [sortOpen, setSortOpen] = useState(false);
   const [walking, setWalking] = useState(false);
   const [occurrenceStats, setOccurrenceStats] = useState<OccurrenceStats | null>(null);
-  const [occurrenceStatsLoading, setOccurrenceStatsLoading] = useState(kind === "occurrence" && !ownerDid);
+  const [occurrenceStatsLoading, setOccurrenceStatsLoading] = useState(showStatsOverview && kind === "occurrence" && !ownerDid);
   // Gate the first load until the URL has been read, so a shared link's filter
   // params (media/source) are applied before the initial fetch.
   const [hydrated, setHydrated] = useState(false);
@@ -254,7 +255,7 @@ export function RecordExplorer({
   const hasLoadedRecords = records.length > 0;
 
   useEffect(() => {
-    if (kind !== "occurrence" || ownerDid || !hasLoadedRecords || occurrenceStatsStartedRef.current) return;
+    if (!showStatsOverview || kind !== "occurrence" || ownerDid || !hasLoadedRecords || occurrenceStatsStartedRef.current) return;
     occurrenceStatsStartedRef.current = true;
     const ctrl = new AbortController();
     const timer = window.setTimeout(() => {
@@ -272,7 +273,7 @@ export function RecordExplorer({
       window.clearTimeout(timer);
       ctrl.abort();
     };
-  }, [hasLoadedRecords, kind, ownerDid]);
+  }, [hasLoadedRecords, kind, ownerDid, showStatsOverview]);
   // Latest values for the load closure without re-creating it each render.
   const stateRef = useRef({ records, cursor, hasMore, phase });
   stateRef.current = { records, cursor, hasMore, phase };
@@ -466,14 +467,12 @@ export function RecordExplorer({
   useEffect(() => {
     setCardLimit(INITIAL_CARD_LIMIT);
   }, [deferredQuery, kind, occCategory, occMedia, siteSource, sort, view]);
-  // Observations use fast total counters from the index, matching the dedicated
-  // Bumicerts and organizations pages. Other embedded explorer uses still fall
-  // back to loaded-record summaries.
+  // Embedded account/manage explorers keep compact loaded-record summaries.
   const stats = useMemo(
-    () => (kind === "occurrence" && !ownerDid && occurrenceStats ? computeOccurrenceTotalStats(occurrenceStats, records) : computeStats(records, kind)),
-    [kind, occurrenceStats, ownerDid, records],
+    () => showStatsOverview ? (kind === "occurrence" && !ownerDid && occurrenceStats ? computeOccurrenceTotalStats(occurrenceStats, records) : computeStats(records, kind)) : [],
+    [kind, occurrenceStats, ownerDid, records, showStatsOverview],
   );
-  const showStats = kind === "occurrence" ? ownerDid ? records.length > 0 : Boolean(occurrenceStats) || (!occurrenceStatsLoading && records.length > 0) : records.length > 0;
+  const showStats = showStatsOverview && (kind === "occurrence" ? ownerDid ? records.length > 0 : Boolean(occurrenceStats) || (!occurrenceStatsLoading && records.length > 0) : records.length > 0);
   const gridCls = kind === "occurrence" ? GALLERY_GRID_CLS : GRID_CLS;
 
   return (
@@ -488,11 +487,12 @@ export function RecordExplorer({
           accent={meta.accent}
           lede={meta.lede}
           imageAlt={`${meta.eyebrow} nature landscape`}
+          compact
         />
       )}
 
       <div className="relative z-10 mx-auto max-w-6xl px-6">
-        {/* Stats overview — observations use total counters, while older embedded views keep loaded summaries. */}
+        {/* Stats overview — only embedded account/manage views show summaries here. */}
         {showStats && (
           <div className={`relative z-20 ${showHero ? "-mt-10" : "mt-6"}`}>
             <StatBand stats={stats.slice(0, 4)} />

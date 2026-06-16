@@ -610,8 +610,8 @@
     },
     "hero": {
       "eyebrow": "Explore Projects",
-      "title": "Discover project collections for",
-      "accent": "Regenerative Impact",
+      "title": "Browse",
+      "accent": "Projects",
       "description": "Projects group related Bumicerts from communities and organizations, so you can browse work at the parent-project level before diving into individual certificates."
     },
     "search": {

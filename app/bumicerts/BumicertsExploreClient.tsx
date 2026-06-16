@@ -7,7 +7,6 @@ import {
   CalendarDaysIcon,
   ChevronDownIcon,
   HandHeartIcon,
-  ImageIcon,
   LayoutGridIcon,
   LeafIcon,
   ListIcon,
@@ -27,13 +26,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { AutoLoadMoreButton } from "../_components/AutoLoadMoreButton";
 import { RecordDrawer } from "../_components/RecordDrawer";
 import { RecordMap } from "../_components/RecordMap";
-import { StatsTileGrid } from "../_components/StatsTile";
 import {
-  fetchBumicertStats,
   fetchBumicerts,
   fetchObservationCountsByDid,
   type BumicertRecord,
-  type BumicertStats,
   type ExplorerRecord,
 } from "../_lib/indexer";
 import {
@@ -117,18 +113,12 @@ export function BumicertsExploreClient({ records: initialRecords = [] }: { recor
   const [drawer, setDrawer] = useState<BumicertRecord | null>(null);
   const [cardLimit, setCardLimit] = useState(INITIAL_CARD_LIMIT);
   const [autoLoadMore, setAutoLoadMore] = useState(false);
-  const [totalStats, setTotalStats] = useState<BumicertStats | null>(null);
-  const [statsLoading, setStatsLoading] = useState(true);
   const [fundingIndex, setFundingIndex] = useState<FundingSummaryIndex | null>(null);
   const [sightingCounts, setSightingCounts] = useState<Map<string, number>>(new Map());
   const sightingDidsRequestedRef = useRef<Set<string>>(new Set());
   const sortMenuRef = useRef<HTMLDivElement | null>(null);
   const filtersMenuRef = useRef<HTMLDivElement | null>(null);
   const requestSeqRef = useRef(0);
-  // One-way gate: flips true once the first card page has rendered (or the
-  // first load settled), then stays true so the stats fetch runs exactly once.
-  const [statsEnabled, setStatsEnabled] = useState(false);
-  const hasLoadedRecords = records.length > 0;
 
   useLayoutEffect(() => {
     const locationView = readViewFromLocation();
@@ -140,13 +130,6 @@ export function BumicertsExploreClient({ records: initialRecords = [] }: { recor
     const nextView = pendingViewRef.current ?? locationView ?? queryView;
     setLocalView((currentView) => currentView === nextView ? currentView : nextView);
   }, [queryView]);
-
-  // The stats walk pages the whole activity stream, so let the first card
-  // page win the connection: start it only after records have rendered (or
-  // the first load settled empty).
-  useEffect(() => {
-    if (!statsEnabled && (hasLoadedRecords || !loading)) setStatsEnabled(true);
-  }, [statsEnabled, hasLoadedRecords, loading]);
 
   // Funding state for the cards ("Accepting donations", "$X raised") — one
   // cached index for the whole catalog, no per-card requests.
@@ -183,29 +166,6 @@ export function BumicertsExploreClient({ records: initialRecords = [] }: { recor
       });
     return () => controller.abort();
   }, [records]);
-
-  useEffect(() => {
-    if (!statsEnabled) return;
-    const controller = new AbortController();
-    const timer = window.setTimeout(() => {
-      setStatsLoading(true);
-      fetchBumicertStats(controller.signal)
-        .then((nextStats) => setTotalStats(nextStats))
-        .catch((error) => {
-          if ((error as Error).name !== "AbortError") {
-            console.warn("[bumicerts] stats fetch failed", error);
-            setTotalStats(null);
-          }
-        })
-        .finally(() => {
-          if (!controller.signal.aborted) setStatsLoading(false);
-        });
-    }, 300);
-    return () => {
-      window.clearTimeout(timer);
-      controller.abort();
-    };
-  }, [statsEnabled]);
 
   useEffect(() => {
     if (initialRecords.length > 0) return;
@@ -266,28 +226,6 @@ export function BumicertsExploreClient({ records: initialRecords = [] }: { recor
   useEffect(() => {
     setCardLimit(INITIAL_CARD_LIMIT);
   }, [deferredQuery, filters, sort, view]);
-
-  const stats = useMemo(
-    () => [
-      {
-        label: t("stats.published"),
-        value: totalStats?.totalBumicerts ?? null,
-      },
-      {
-        label: t("stats.withLocations"),
-        value: totalStats?.certifiedPlaces ?? null,
-      },
-      {
-        label: t("stats.contributors"),
-        value: totalStats?.contributors ?? null,
-      },
-      {
-        label: t("stats.withCover"),
-        value: totalStats?.projectPhotos ?? null,
-      },
-    ],
-    [totalStats, t],
-  );
 
   useEffect(() => {
     if (!openSort) return;
@@ -384,17 +322,11 @@ export function BumicertsExploreClient({ records: initialRecords = [] }: { recor
   return (
     <>
       <section className="-mt-14 pb-20 md:pb-28">
-        <div className="relative isolate min-h-[330px] overflow-hidden">
+        <div className="relative isolate min-h-[240px] overflow-hidden">
           <HeroBackdrop />
-          <div className="relative z-10 mx-auto flex max-w-6xl flex-col px-8 pb-14 pt-[86px] sm:px-10 lg:px-9 animate-in">
-            <div className="mb-5 flex items-center gap-2.5">
-              <LeafIcon className="h-4 w-4 text-primary" />
-              <span className="text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
-                {t("hero.eyebrow")}
-              </span>
-            </div>
+          <div className="relative z-10 mx-auto flex max-w-6xl flex-col px-8 pb-8 pt-[64px] sm:px-10 lg:px-9 animate-in">
             <h1
-              className="max-w-4xl text-4xl font-light leading-[0.98] tracking-[-0.035em] text-foreground sm:text-5xl md:text-6xl lg:text-7xl"
+              className="max-w-4xl text-4xl font-light leading-[0.98] tracking-[-0.035em] text-foreground sm:text-5xl md:text-5xl lg:text-6xl"
               style={{ fontFamily: "var(--font-garamond-var)" }}
             >
               {t("hero.titlePrefix")}{" "}
@@ -408,18 +340,14 @@ export function BumicertsExploreClient({ records: initialRecords = [] }: { recor
                 {t("hero.titleEmphasis")}
               </span>
             </h1>
-            <p className="mt-7 max-w-2xl text-base leading-8 text-muted-foreground md:text-lg">
+            <p className="mt-4 max-w-2xl text-base leading-7 text-muted-foreground md:text-base">
               {t("hero.description")}
             </p>
           </div>
         </div>
 
         <div className="relative z-10 mx-auto max-w-6xl px-6">
-          <div className="relative z-20 -mt-10">
-            <StatsBand stats={stats} loading={statsLoading} />
-          </div>
-
-          <div className="relative z-20 mt-4 mb-0 space-y-3">
+          <div className="relative z-20 mt-5 mb-0 space-y-3">
             <div className="space-y-3 animate-in" style={{ animationDelay: "80ms" }}>
               <div className="relative z-30 flex items-center gap-3">
                 <div className="group/input-group border-input relative flex h-10 min-w-0 flex-1 items-center rounded-full border bg-background/50 shadow-xs backdrop-blur transition-[color,box-shadow] outline-none focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50">
@@ -681,38 +609,8 @@ function HeroBackdrop() {
       />
       <div className="absolute inset-0 bg-linear-to-r from-background/92 via-background/55 to-background/5 dark:from-background/78 dark:via-background/42 dark:to-background/0" />
       <div className="absolute inset-x-0 top-0 h-24 bg-linear-to-b from-background/80 to-transparent" />
-      <div className="absolute inset-x-0 bottom-0 h-44 bg-linear-to-b from-transparent via-background/70 to-background" />
+      <div className="absolute inset-x-0 bottom-0 h-32 bg-linear-to-b from-transparent via-background/70 to-background" />
     </div>
-  );
-}
-
-function StatsBand({
-  stats,
-  loading,
-}: {
-  stats: Array<{ label: string; value: number | null }>;
-  loading: boolean;
-}) {
-  const locale = useLocale();
-  if (loading || stats.every((stat) => stat.value === null)) return null;
-
-  const icons = [
-    <LayoutGridIcon key="projects" />,
-    <MapIcon key="places" />,
-    <UsersIcon key="contributors" />,
-    <ImageIcon key="photos" />,
-  ];
-
-  return (
-    <StatsTileGrid
-      columns={4}
-      items={stats.map((stat, index) => ({
-        label: stat.label,
-        value: stat.value === null ? null : formatStat(stat.value, locale),
-        icon: icons[index] ?? <LeafIcon />,
-        accent: index % 2 === 0,
-      }))}
-    />
   );
 }
 

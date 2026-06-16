@@ -5,7 +5,6 @@ import {
   ArrowUpDownIcon,
   ChevronDownIcon,
   FolderKanbanIcon,
-  ImageIcon,
   Layers3Icon,
   LayoutGridIcon,
   ListIcon,
@@ -15,7 +14,7 @@ import {
   SlidersHorizontalIcon,
 } from "lucide-react";
 import { memo, useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 import { parseAsString, parseAsStringEnum, useQueryState } from "nuqs";
 import { BumicertOwnerAvatar } from "@/components/bumicert/BumicertOwnerAvatar";
 import { Button } from "@/components/ui/button";
@@ -23,15 +22,12 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { AutoLoadMoreButton } from "../_components/AutoLoadMoreButton";
 import { RecordDrawer } from "../_components/RecordDrawer";
 import { RecordMap } from "../_components/RecordMap";
-import { StatsTileGrid } from "../_components/StatsTile";
 import {
-  fetchProjectStats,
   fetchProjects,
   type ExplorerRecord,
   type ExplorerSortMode,
   type ProjectIndexFilter,
   type ProjectRecord,
-  type ProjectStats,
 } from "../_lib/indexer";
 import { isPdsBlobUrl } from "../_lib/pds";
 
@@ -49,7 +45,6 @@ const SEARCH_QUERY_STATE_OPTIONS = { ...QUERY_STATE_OPTIONS, throttleMs: 200 } a
 
 export function ProjectsExploreClient({ records: initialRecords = [] }: { records?: ProjectRecord[] }) {
   const t = useTranslations("marketplace.projects");
-  const locale = useLocale();
   const filterChips = useMemo<Array<{ key: ProjectIndexFilter; label: string; predicate: (record: ProjectRecord) => boolean }>>(() => [
     { key: "images", label: t("filters.images"), predicate: (record) => Boolean(record.imageUrl) },
     { key: "locations", label: t("filters.locations"), predicate: (record) => Boolean(record.locationUri) },
@@ -76,8 +71,6 @@ export function ProjectsExploreClient({ records: initialRecords = [] }: { record
   const [openSort, setOpenSort] = useState(false);
   const [openFilters, setOpenFilters] = useState(false);
   const [drawer, setDrawer] = useState<ProjectRecord | null>(null);
-  const [stats, setStats] = useState<ProjectStats | null>(null);
-  const [statsLoading, setStatsLoading] = useState(true);
   const sortMenuRef = useRef<HTMLDivElement | null>(null);
   const filtersMenuRef = useRef<HTMLDivElement | null>(null);
   const requestSeqRef = useRef(0);
@@ -100,23 +93,6 @@ export function ProjectsExploreClient({ records: initialRecords = [] }: { record
     parseAsString.withOptions(QUERY_STATE_OPTIONS),
   );
   const filters = useMemo(() => parseFilterParam(filtersParam), [filtersParam]);
-
-  useEffect(() => {
-    const controller = new AbortController();
-    setStatsLoading(true);
-    fetchProjectStats(controller.signal)
-      .then((nextStats) => setStats(nextStats))
-      .catch((error) => {
-        if ((error as Error).name !== "AbortError") {
-          console.warn("[projects] stats fetch failed", error);
-          setStats(null);
-        }
-      })
-      .finally(() => {
-        if (!controller.signal.aborted) setStatsLoading(false);
-      });
-    return () => controller.abort();
-  }, []);
 
   useEffect(() => {
     if (initialRecords.length > 0) return;
@@ -194,16 +170,6 @@ export function ProjectsExploreClient({ records: initialRecords = [] }: { record
   );
   const hasMoreCardsToShow = view !== "map" && renderedRecords.length < visibleRecords.length;
 
-  const statItems = useMemo(
-    () => [
-      { label: t("stats.projects"), value: stats?.totalProjects ?? null },
-      { label: t("stats.withBumicerts"), value: stats?.projectsWithBumicerts ?? null },
-      { label: t("stats.bumicerts"), value: stats?.bumicerts ?? null },
-      { label: t("stats.withImages"), value: stats?.projectsWithImages ?? null },
-    ],
-    [stats, t],
-  );
-
   const updateFilters = useCallback((nextFilters: ProjectIndexFilter[]) => {
     void setFiltersParam(serializeFilterParam(nextFilters));
   }, [setFiltersParam]);
@@ -244,17 +210,11 @@ export function ProjectsExploreClient({ records: initialRecords = [] }: { record
   return (
     <>
     <section className="-mt-14 pb-20 md:pb-28">
-      <div className="relative isolate min-h-[330px] overflow-hidden">
+      <div className="relative isolate min-h-[240px] overflow-hidden">
         <HeroBackdrop />
-        <div className="relative z-10 mx-auto flex max-w-6xl flex-col px-8 pb-14 pt-[86px] sm:px-10 lg:px-9 animate-in">
-          <div className="mb-5 flex items-center gap-2.5">
-            <FolderKanbanIcon className="h-4 w-4 text-primary" />
-            <span className="text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
-              {t("hero.eyebrow")}
-            </span>
-          </div>
+        <div className="relative z-10 mx-auto flex max-w-6xl flex-col px-8 pb-8 pt-[64px] sm:px-10 lg:px-9 animate-in">
           <h1
-            className="max-w-4xl text-4xl font-light leading-[0.98] tracking-[-0.035em] text-foreground sm:text-5xl md:text-6xl lg:text-7xl"
+            className="max-w-4xl text-4xl font-light leading-[0.98] tracking-[-0.035em] text-foreground sm:text-5xl md:text-5xl lg:text-6xl"
             style={{ fontFamily: "var(--font-garamond-var)" }}
           >
             {t("hero.title")}{" "}
@@ -265,18 +225,14 @@ export function ProjectsExploreClient({ records: initialRecords = [] }: { record
               {t("hero.accent")}
             </span>
           </h1>
-          <p className="mt-7 max-w-2xl text-base leading-8 text-muted-foreground md:text-lg">
+          <p className="mt-4 max-w-2xl text-base leading-7 text-muted-foreground md:text-base">
             {t("hero.description")}
           </p>
         </div>
       </div>
 
       <div className="relative z-10 mx-auto max-w-6xl px-6">
-        <div className="relative z-20 -mt-10">
-          <StatsBand stats={statItems} loading={statsLoading} />
-        </div>
-
-        <div className="relative z-20 mt-4 space-y-3">
+        <div className="relative z-20 mt-5 space-y-3">
           <div className="relative z-30 flex items-center gap-3 animate-in" style={{ animationDelay: "80ms" }}>
             <div className="group/input-group border-input relative flex h-10 min-w-0 flex-1 items-center rounded-full border bg-background/50 shadow-xs backdrop-blur transition-[color,box-shadow] outline-none focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50">
               <div className="flex h-auto cursor-text items-center justify-center gap-2 py-1.5 pl-3 text-sm font-medium text-muted-foreground select-none">
@@ -508,30 +464,8 @@ function HeroBackdrop() {
       />
       <div className="absolute inset-0 bg-linear-to-r from-background/92 via-background/55 to-background/5 dark:from-background/78 dark:via-background/42 dark:to-background/0" />
       <div className="absolute inset-x-0 top-0 h-24 bg-linear-to-b from-background/80 to-transparent" />
-      <div className="absolute inset-x-0 bottom-0 h-44 bg-linear-to-b from-transparent via-background/70 to-background" />
+      <div className="absolute inset-x-0 bottom-0 h-32 bg-linear-to-b from-transparent via-background/70 to-background" />
     </div>
-  );
-}
-
-function StatsBand({ stats, loading }: { stats: Array<{ label: string; value: number | null }>; loading: boolean }) {
-  const locale = useLocale();
-  if (loading || stats.every((stat) => stat.value === null)) return null;
-  const icons = [
-    <FolderKanbanIcon key="projects" />,
-    <Layers3Icon key="linked" />,
-    <LayoutGridIcon key="bumicerts" />,
-    <ImageIcon key="images" />,
-  ];
-  return (
-    <StatsTileGrid
-      columns={4}
-      items={stats.map((stat, index) => ({
-        label: stat.label,
-        value: stat.value === null ? null : formatStat(stat.value, locale),
-        icon: icons[index] ?? <FolderKanbanIcon />,
-        accent: index % 2 === 0,
-      }))}
-    />
   );
 }
 
@@ -767,6 +701,3 @@ function mergeProjectRecords(base: ProjectRecord[], incoming: ProjectRecord[]): 
   return [...base, ...incoming.filter((record) => !seen.has(record.id))];
 }
 
-function formatStat(value: number, locale: string): string {
-  return new Intl.NumberFormat(locale, { notation: Math.abs(value) >= 1000 ? "compact" : "standard" }).format(value);
-}

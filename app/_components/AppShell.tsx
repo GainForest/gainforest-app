@@ -103,19 +103,19 @@ const NAV_ITEMS: NavSection[] = [
       },
       {
         kind: "leaf",
-        id: "leaderboard",
-        text: "Leaderboard",
-        Icon: TrophyIcon,
-        href: "/leaderboard",
-        pathCheck: { startsWith: "/leaderboard" },
-      },
-      {
-        kind: "leaf",
         id: "observations",
         text: "Observations",
         Icon: BinocularsIcon,
         href: "/observations",
         pathCheck: { startsWith: "/observations" },
+      },
+      {
+        kind: "leaf",
+        id: "leaderboard",
+        text: "Leaderboard",
+        Icon: TrophyIcon,
+        href: "/leaderboard",
+        pathCheck: { startsWith: "/leaderboard" },
       },
       {
         kind: "leaf",
