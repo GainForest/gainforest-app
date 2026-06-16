@@ -144,7 +144,9 @@ export function AudioClient({ did, target }: AudioClientProps) {
           <div className="flex shrink-0 flex-col items-end gap-1.5">
             <Button asChild size="sm">
               <Link href={TELEGRAM_BOT_URL} target="_blank" rel="noreferrer">
-                <TelegramIcon /> {t("useTaina")}
+                <TelegramIcon />
+                <span className="sm:hidden">{t("useTaina")}</span>
+                <span className="hidden sm:inline">{t("useTainaLong")}</span>
               </Link>
             </Button>
             <Popover>
