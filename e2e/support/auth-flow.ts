@@ -117,18 +117,51 @@ async function resolveServiceEndpoint(did: string, fallbackDomain: string | null
   return fallback;
 }
 
-async function openConfiguredLogin(page: Page, returnToPath: string, identifier: { handle?: string; email?: string }): Promise<void> {
-  const env = getE2EEnv();
-  const appUrl = env.appUrl.replace(/\/$/, "");
-  const completionUrl = new URL("/auth/complete", appUrl);
-  completionUrl.searchParams.set("redirect", returnToPath);
+type LoginIdentifier = { handle: string; email?: never } | { email: string; handle?: never };
 
-  const loginUrl = new URL("/login", env.authBaseUrl);
-  loginUrl.searchParams.set("returnTo", completionUrl.toString());
-  loginUrl.searchParams.set("provider", process.env.NEXT_PUBLIC_AUTH_PROVIDER ?? "certs");
-  if (identifier.handle) loginUrl.searchParams.set("handle", identifier.handle);
-  if (identifier.email) loginUrl.searchParams.set("email", identifier.email);
-  await page.goto(loginUrl.toString(), { waitUntil: "domcontentloaded" });
+export function hasConfiguredAccountCredentials(): boolean {
+  const env = getE2EEnv();
+  return Boolean(env.testHandle && env.testPassword);
+}
+
+async function openAppLogin(
+  page: Page,
+  testInfo: TestInfo,
+  returnToPath: string,
+  identifier: LoginIdentifier,
+  labelPrefix: string,
+): Promise<void> {
+  const env = getE2EEnv();
+
+  await page.goto(returnToPath, { waitUntil: "domcontentloaded" });
+  await page.waitForLoadState("networkidle", { timeout: 20_000 }).catch(() => undefined);
+  await screenshotStep(page, testInfo, `${labelPrefix}-app-sign-in-prompt`);
+
+  const getStarted = page.getByRole("button", { name: /get started/i }).first();
+  await expect(getStarted).toBeVisible({ timeout: 60_000 });
+  await getStarted.click();
+
+  const dialog = page.getByRole("dialog").last();
+  await expect(dialog).toBeVisible({ timeout: 15_000 });
+  await screenshotStep(page, testInfo, `${labelPrefix}-app-login-modal`);
+
+  if (typeof identifier.handle === "string") {
+    await dialog.getByRole("button", { name: /username/i }).click();
+    await dialog.locator("#login-handle").fill(identifier.handle);
+    await screenshotStep(page, testInfo, `${labelPrefix}-app-handle-filled`);
+  } else {
+    await dialog.getByRole("button", { name: /^email$/i }).click();
+    await dialog.locator("#login-email").fill(identifier.email);
+    await screenshotStep(page, testInfo, `${labelPrefix}-app-email-filled`);
+  }
+
+  await Promise.all([
+    page.waitForURL((url) => !isAppUrl(url.toString(), env.appUrl), {
+      timeout: 60_000,
+      waitUntil: "domcontentloaded",
+    }),
+    dialog.getByRole("button", { name: /^continue$/i }).click(),
+  ]);
 }
 
 async function fillPasswordIfVisible(page: Page, password: string): Promise<boolean> {
@@ -207,9 +240,7 @@ export async function signInWithConfiguredAccount(page: Page, testInfo: TestInfo
     throw new Error("E2E_TEST_HANDLE and E2E_TEST_PASSWORD are required for configured-account auth smoke tests.");
   }
 
-  await page.goto("/", { waitUntil: "domcontentloaded" });
-  await screenshotStep(page, testInfo, "home-signed-out");
-  await openConfiguredLogin(page, "/manage", { handle: env.testHandle });
+  await openAppLogin(page, testInfo, "/manage", { handle: env.testHandle }, "auth-handle");
   await screenshotStep(page, testInfo, "auth-handle-login-started");
 
   if (!isExpectedOAuthUrl(new URL(page.url()), env.appUrl, env.testPdsDomain)) {
@@ -247,7 +278,7 @@ export async function signInWithDisposableEmailAccount(page: Page, testInfo: Tes
   });
   const beforeMessages = new Set((await listDisposableEmailMessages(inbox)).map((message) => message.id));
 
-  await openConfiguredLogin(page, "/manage", { email: inbox.email });
+  await openAppLogin(page, testInfo, "/manage", { email: inbox.email }, "auth-disposable");
   await screenshotStep(page, testInfo, "auth-disposable-email-started");
 
   if (await page.getByRole("heading", { name: /enter your code/i }).isVisible({ timeout: 45_000 }).catch(() => false)) {
