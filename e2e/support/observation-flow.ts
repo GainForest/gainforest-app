@@ -196,7 +196,7 @@ export async function createEditDeleteObservation(page: Page, testInfo: TestInfo
     await screenshotStep(page, testInfo, "observation-drawer-owner-controls");
 
     await dialog.getByRole("button", { name: /^edit$/i }).click();
-    await dialog.getByLabel(/plant or animal name/i).fill(observation.updatedScientificName);
+    await dialog.getByLabel(/scientific name/i).fill(observation.updatedScientificName);
     await dialog.getByLabel(/common name/i).fill(observation.updatedVernacularName);
     await dialog.getByLabel(/notes/i).fill("Edited by the disposable browser test before deleting this sighting.");
     await screenshotStep(page, testInfo, "observation-drawer-edit-ready");

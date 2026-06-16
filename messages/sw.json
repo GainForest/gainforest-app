@@ -133,9 +133,9 @@
     "openNetwork": {
       "titlePrefix": "Imejengwa juu ya",
       "titleEmphasis": "mtandao wazi",
-      "description": "Bumicerts ni rekodi za athari zinazobebeka kati ya programu, jamii na zana za ufadhili — si hifadhidata iliyofungwa.",
+      "description": "Bumicerts ni rekodi za athari zinazobebeka kati ya programu, jamii na zana za ufadhili — si hifadhidata iliyofungwa. Usaidizi wa Silvi na majukwaa mengine utakuja hivi karibuni.",
       "protocol": {
-        "name": "Itifaki ya AT",
+        "name": "Certified",
         "description": "data ya kijamii inayobebeka"
       },
       "youBadge": "Wewe",

@@ -23,6 +23,7 @@ export type FloraMeasurementFields = {
 type UpdateOccurrenceData = {
   scientificName?: string;
   vernacularName?: string;
+  kingdom?: string;
   eventDate?: string;
   recordedBy?: string;
   decimalLatitude?: string;

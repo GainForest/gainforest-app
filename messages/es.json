@@ -133,9 +133,9 @@
     "openNetwork": {
       "titlePrefix": "Construido sobre una",
       "titleEmphasis": "red abierta",
-      "description": "Los Bumicerts son registros de impacto portátiles que pueden viajar entre aplicaciones, comunidades y herramientas de financiación, no una base de datos cerrada.",
+      "description": "Los Bumicerts son registros de impacto portátiles que pueden viajar entre aplicaciones, comunidades y herramientas de financiación, no una base de datos cerrada. Pronto habrá soporte para Silvi y otras plataformas.",
       "protocol": {
-        "name": "Protocolo AT",
+        "name": "Certified",
         "description": "datos sociales portátiles"
       },
       "youBadge": "Tú",

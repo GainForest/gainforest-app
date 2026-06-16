@@ -133,9 +133,9 @@
     "openNetwork": {
       "titlePrefix": "Dibangun di atas",
       "titleEmphasis": "jaringan terbuka",
-      "description": "Bumicerts adalah catatan dampak portabel yang dapat berpindah antar aplikasi, komunitas, dan alat pendanaan — bukan basis data tertutup.",
+      "description": "Bumicerts adalah catatan dampak portabel yang dapat berpindah antar aplikasi, komunitas, dan alat pendanaan — bukan basis data tertutup. Dukungan untuk Silvi dan platform lain akan segera hadir.",
       "protocol": {
-        "name": "Protokol AT",
+        "name": "Certified",
         "description": "data sosial portabel"
       },
       "youBadge": "Anda",

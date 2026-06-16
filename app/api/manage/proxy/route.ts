@@ -21,6 +21,7 @@ type FloraMeasurementFields = {
 type UpdateOccurrenceData = {
   scientificName?: string;
   vernacularName?: string;
+  kingdom?: string;
   eventDate?: string;
   recordedBy?: string;
   decimalLatitude?: string;
@@ -337,6 +338,7 @@ function isFloraMeasurementFields(value: unknown): value is FloraMeasurementFiel
 const UPDATE_OCCURRENCE_DATA_FIELDS = new Set([
   "scientificName",
   "vernacularName",
+  "kingdom",
   "eventDate",
   "recordedBy",
   "decimalLatitude",
@@ -395,6 +397,7 @@ function isUpdateOccurrenceData(value: unknown): value is UpdateOccurrenceData {
   return (
     isOptionalString(value.scientificName) &&
     isOptionalString(value.vernacularName) &&
+    isOptionalString(value.kingdom) &&
     isOptionalString(value.eventDate) &&
     isOptionalString(value.recordedBy) &&
     isOptionalString(value.decimalLatitude) &&

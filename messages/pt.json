@@ -133,9 +133,9 @@
     "openNetwork": {
       "titlePrefix": "Construído sobre uma",
       "titleEmphasis": "rede aberta",
-      "description": "Bumicerts são registros de impacto portáteis que podem circular entre apps, comunidades e ferramentas de financiamento — não um banco de dados fechado.",
+      "description": "Bumicerts são registros de impacto portáteis que podem circular entre apps, comunidades e ferramentas de financiamento — não um banco de dados fechado. O suporte para Silvi e outras plataformas chegará em breve.",
       "protocol": {
-        "name": "Protocolo AT",
+        "name": "Certified",
         "description": "dados sociais portáteis"
       },
       "youBadge": "Você",

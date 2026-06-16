@@ -133,9 +133,9 @@
     "openNetwork": {
       "titlePrefix": "Built on an",
       "titleEmphasis": "open network",
-      "description": "Bumicerts are portable impact records that can travel across apps, communities, and funding tools — not a closed database.",
+      "description": "Bumicerts are portable impact records that can travel across apps, communities, and funding tools — not a closed database. Support for Silvi and other platforms is coming soon.",
       "protocol": {
-        "name": "AT Protocol",
+        "name": "Certified",
         "description": "portable social data"
       },
       "youBadge": "You",

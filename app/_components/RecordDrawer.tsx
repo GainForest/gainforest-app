@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
+import type { Map as LeafletMap, Marker, TileLayer } from "leaflet";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowUpRightIcon, CalendarRangeIcon, CheckIcon, HeartIcon, ImageOffIcon, Layers3Icon, Loader2Icon, MapPinIcon, PencilIcon, Share2Icon, Trash2Icon, UsersIcon, XIcon } from "lucide-react";
@@ -17,6 +18,7 @@ import { formatCompact, formatDate, formatNumber, countryFlag, formatCountry } f
 import { AuthorChip } from "./AuthorChip";
 import { usePreferredDidIdentifier } from "./PreferredLinks";
 import { RecordLocationMap } from "./RecordLocationMap";
+import { mapTileUrl } from "../_lib/coords";
 import { RichText } from "./RichText";
 import { SocialGlyph, socialLabel } from "./SocialIcon";
 import { RecordDrawerStatsTile } from "./StatsTile";
@@ -57,6 +59,7 @@ export function RecordDrawer({
   const [occurrenceDraft, setOccurrenceDraft] = useState<ObservationDraft>(EMPTY_OBSERVATION_DRAFT);
   const [occurrenceFeedback, setOccurrenceFeedback] = useState<string | null>(null);
   const [savingOccurrence, setSavingOccurrence] = useState(false);
+  const [locationPickerOpen, setLocationPickerOpen] = useState(false);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [deletingOccurrence, setDeletingOccurrence] = useState(false);
   const [projectBumicerts, setProjectBumicerts] = useState<BumicertRecord[] | null>(null);
@@ -104,7 +107,12 @@ export function RecordDrawer({
   useEffect(() => {
     if (!record) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key !== "Escape") return;
+      if (locationPickerOpen) {
+        setLocationPickerOpen(false);
+        return;
+      }
+      onClose();
     };
     document.addEventListener("keydown", onKey);
     const original = document.body.style.overflow;
@@ -113,7 +121,7 @@ export function RecordDrawer({
       document.removeEventListener("keydown", onKey);
       document.body.style.overflow = original;
     };
-  }, [record, onClose]);
+  }, [record, onClose, locationPickerOpen]);
 
   // Fetch the full, drawer-ready detail for the opened record. The list query
   // stays lean (1000 records); the deep field set is pulled per record here.
@@ -159,6 +167,7 @@ export function RecordDrawer({
     setDeleteConfirmOpen(false);
     setSavingOccurrence(false);
     setDeletingOccurrence(false);
+    setLocationPickerOpen(false);
     setOccurrenceDraft(record?.kind === "occurrence" ? observationDraftFromRecord(record) : EMPTY_OBSERVATION_DRAFT);
   }, [recordIdentity]);
 
@@ -442,10 +451,28 @@ export function RecordDrawer({
                 setDeleteConfirmOpen(false);
                 setIsEditingOccurrence(true);
               }}
+              onOpenLocationPicker={() => setLocationPickerOpen(true)}
               onSave={(event) => void handleSaveOccurrence(event)}
               onStopDelete={() => setDeleteConfirmOpen(false)}
             />
           )}
+
+          {record.kind === "occurrence" && canManageOccurrence && locationPickerOpen ? (
+            <ObservationLocationPickerModal
+              latitude={coordinateFromDraft(occurrenceDraft.decimalLatitude)}
+              longitude={coordinateFromDraft(occurrenceDraft.decimalLongitude)}
+              onClose={() => setLocationPickerOpen(false)}
+              onSelect={(lat, lon) => {
+                setOccurrenceFeedback(null);
+                setOccurrenceDraft((current) => ({
+                  ...current,
+                  decimalLatitude: formatCoordinateInput(lat),
+                  decimalLongitude: formatCoordinateInput(lon),
+                }));
+                setLocationPickerOpen(false);
+              }}
+            />
+          ) : null}
 
           {/* Headline numbers for a Bumicert */}
           {record.kind === "bumicert" && <BumicertStatStrip record={record} />}
@@ -508,6 +535,7 @@ export function RecordDrawer({
 type ObservationDraft = {
   scientificName: string;
   vernacularName: string;
+  kingdom: string;
   eventDate: string;
   recordedBy: string;
   decimalLatitude: string;
@@ -521,6 +549,7 @@ type ObservationDraft = {
 const EMPTY_OBSERVATION_DRAFT: ObservationDraft = {
   scientificName: "",
   vernacularName: "",
+  kingdom: "",
   eventDate: "",
   recordedBy: "",
   decimalLatitude: "",
@@ -543,6 +572,10 @@ const OPTIONAL_OBSERVATION_FIELDS: Array<keyof ObservationDraft> = [
 const INPUT_CLASS = "mt-1.5 h-10 w-full rounded-xl border border-border-soft bg-background px-3 text-[14px] text-foreground outline-none transition-colors placeholder:text-muted-foreground/60 focus:border-primary/50 focus:ring-2 focus:ring-primary/10";
 const TEXTAREA_CLASS = "mt-1.5 min-h-20 w-full rounded-xl border border-border-soft bg-background px-3 py-2 text-[14px] leading-5 text-foreground outline-none transition-colors placeholder:text-muted-foreground/60 focus:border-primary/50 focus:ring-2 focus:ring-primary/10";
 const LABEL_CLASS = "text-[11px] font-medium uppercase tracking-[0.08em] text-foreground/45";
+const OBSERVATION_KIND_OPTIONS = [
+  { value: "Plantae", label: "Plant" },
+  { value: "Animalia", label: "Animal" },
+] as const;
 
 function ObservationOwnerControls({
   draft,
@@ -558,6 +591,7 @@ function ObservationOwnerControls({
   onConfirmDelete,
   onDeleteClick,
   onEditClick,
+  onOpenLocationPicker,
   onSave,
   onStopDelete,
 }: {
@@ -574,6 +608,7 @@ function ObservationOwnerControls({
   onConfirmDelete: () => void;
   onDeleteClick: () => void;
   onEditClick: () => void;
+  onOpenLocationPicker: () => void;
   onSave: (event: FormEvent<HTMLFormElement>) => void;
   onStopDelete: () => void;
 }) {
@@ -601,12 +636,22 @@ function ObservationOwnerControls({
       {isEditing ? (
         <form onSubmit={onSave} className="mt-4 space-y-4">
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <TextField label="Plant or animal name" value={draft.scientificName} onChange={(value) => onChange("scientificName", value)} required />
+            <TextField label="Scientific name" value={draft.scientificName} onChange={(value) => onChange("scientificName", value)} required />
             <TextField label="Common name" value={draft.vernacularName} onChange={(value) => onChange("vernacularName", value)} />
+            <SelectField
+              label="Plant or animal"
+              value={draft.kingdom}
+              onChange={(value) => onChange("kingdom", value)}
+              required
+              options={OBSERVATION_KIND_OPTIONS}
+            />
             <TextField label="Date seen" value={draft.eventDate} onChange={(value) => onChange("eventDate", value)} placeholder="YYYY-MM-DD" required />
             <TextField label="Shared by" value={draft.recordedBy} onChange={(value) => onChange("recordedBy", value)} />
-            <TextField label="Latitude" value={draft.decimalLatitude} onChange={(value) => onChange("decimalLatitude", value)} inputMode="decimal" required />
-            <TextField label="Longitude" value={draft.decimalLongitude} onChange={(value) => onChange("decimalLongitude", value)} inputMode="decimal" required />
+            <LocationField
+              latitude={draft.decimalLatitude}
+              longitude={draft.decimalLongitude}
+              onOpenMap={onOpenLocationPicker}
+            />
             <TextField label="Place" value={draft.locality} onChange={(value) => onChange("locality", value)} />
             <TextField label="Country" value={draft.country} onChange={(value) => onChange("country", value)} />
           </div>
@@ -712,6 +757,62 @@ function TextField({
   );
 }
 
+function SelectField({
+  label,
+  value,
+  onChange,
+  options,
+  required,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  options: ReadonlyArray<{ value: string; label: string }>;
+  required?: boolean;
+}) {
+  return (
+    <label className="block">
+      <span className={LABEL_CLASS}>{label}</span>
+      <select
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        required={required}
+        className={INPUT_CLASS}
+      >
+        <option value="">Choose one</option>
+        {options.map((option) => (
+          <option key={option.value} value={option.value}>{option.label}</option>
+        ))}
+      </select>
+    </label>
+  );
+}
+
+function LocationField({ latitude, longitude, onOpenMap }: { latitude: string; longitude: string; onOpenMap: () => void }) {
+  const lat = coordinateFromDraft(latitude);
+  const lon = coordinateFromDraft(longitude);
+  const locationText = lat != null && lon != null
+    ? `${formatCoordinateInput(lat)}, ${formatCoordinateInput(lon)}`
+    : "Choose a map location.";
+
+  return (
+    <div className="sm:col-span-2">
+      <span className={LABEL_CLASS}>Map location</span>
+      <div className="mt-1.5 flex flex-col gap-2 rounded-xl border border-border-soft bg-background p-3 sm:flex-row sm:items-center sm:justify-between">
+        <span className="text-[13px] text-foreground/75">{locationText}</span>
+        <button
+          type="button"
+          onClick={onOpenMap}
+          className="inline-flex h-9 items-center justify-center gap-1.5 rounded-full border border-border-soft bg-surface px-3 text-[13px] font-medium text-foreground transition-colors hover:border-primary/40 hover:text-primary"
+        >
+          <MapPinIcon className="h-3.5 w-3.5" />
+          Choose on map
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function TextAreaField({ label, value, onChange }: { label: string; value: string; onChange: (value: string) => void }) {
   return (
     <label className="block">
@@ -721,14 +822,180 @@ function TextAreaField({ label, value, onChange }: { label: string; value: strin
   );
 }
 
+function ObservationLocationPickerModal({
+  latitude,
+  longitude,
+  onClose,
+  onSelect,
+}: {
+  latitude: number | null;
+  longitude: number | null;
+  onClose: () => void;
+  onSelect: (lat: number, lon: number) => void;
+}) {
+  const elRef = useRef<HTMLDivElement>(null);
+  const mapRef = useRef<LeafletMap | null>(null);
+  const markerRef = useRef<Marker | null>(null);
+  const tileRef = useRef<TileLayer | null>(null);
+  const selectedRef = useRef<{ lat: number; lon: number } | null>(
+    latitude != null && longitude != null ? { lat: latitude, lon: longitude } : null,
+  );
+  const [selected, setSelected] = useState<{ lat: number; lon: number } | null>(selectedRef.current);
+  const [isDark, setIsDark] = useState(false);
+
+  useEffect(() => {
+    selectedRef.current = selected;
+  }, [selected]);
+
+  useEffect(() => {
+    const root = document.documentElement;
+    const sync = () => setIsDark(root.classList.contains("dark"));
+    sync();
+    const observer = new MutationObserver(sync);
+    observer.observe(root, { attributes: true, attributeFilter: ["class"] });
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    tileRef.current?.setUrl(mapTileUrl(isDark));
+  }, [isDark]);
+
+  useEffect(() => {
+    if (!elRef.current) return;
+    let cancelled = false;
+
+    (async () => {
+      const L = (await import("leaflet")).default;
+      if (cancelled || !elRef.current) return;
+
+      const initial = selectedRef.current ?? { lat: 0, lon: 0 };
+      const initialZoom = selectedRef.current ? 12 : 2;
+      const pinIcon = L.divIcon({
+        className: "gf-pin",
+        html: "",
+        iconSize: [14, 14],
+        iconAnchor: [7, 7],
+      });
+
+      const map = L.map(elRef.current, {
+        worldCopyJump: true,
+        minZoom: 1,
+        zoomControl: true,
+      }).setView([initial.lat, initial.lon], initialZoom);
+      tileRef.current = L.tileLayer(mapTileUrl(document.documentElement.classList.contains("dark")), {
+        attribution:
+          '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
+        subdomains: "abcd",
+        maxZoom: 19,
+      }).addTo(map);
+      mapRef.current = map;
+
+      const placeMarker = (lat: number, lon: number) => {
+        markerRef.current?.remove();
+        markerRef.current = L.marker([lat, lon], { icon: pinIcon }).addTo(map);
+      };
+
+      if (selectedRef.current) placeMarker(selectedRef.current.lat, selectedRef.current.lon);
+      map.on("click", (event) => {
+        const next = { lat: event.latlng.lat, lon: event.latlng.lng };
+        placeMarker(next.lat, next.lon);
+        setSelected(next);
+      });
+      setTimeout(() => map.invalidateSize(), 60);
+    })();
+
+    return () => {
+      cancelled = true;
+      mapRef.current?.remove();
+      mapRef.current = null;
+      markerRef.current = null;
+      tileRef.current = null;
+    };
+  }, []);
+
+  return (
+    <div className="fixed inset-0 z-[110] grid place-items-center px-4 py-6" role="dialog" aria-modal="true" aria-label="Choose map location">
+      <button
+        type="button"
+        aria-label="Close map location chooser"
+        className="absolute inset-0 bg-foreground/35 backdrop-blur-[2px]"
+        onClick={onClose}
+      />
+      <div className="relative z-[1] flex w-full max-w-[440px] flex-col overflow-hidden rounded-3xl border border-border-soft bg-background shadow-2xl">
+        <div className="flex items-start justify-between gap-3 px-5 py-4">
+          <div>
+            <h3 className="text-[16px] font-medium text-foreground">Choose map location</h3>
+            <p className="mt-1 text-[13px] leading-5 text-muted-foreground">Click the map to move the sighting pin.</p>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="grid h-8 w-8 shrink-0 place-items-center rounded-full border border-border-soft text-foreground/70 transition-colors hover:text-foreground"
+          >
+            <XIcon className="h-4 w-4" />
+          </button>
+        </div>
+        <div ref={elRef} className="h-80 w-full border-y border-border-soft bg-surface-sunken" />
+        <div className="flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-[13px] text-muted-foreground">
+            {selected ? `${formatCoordinateInput(selected.lat)}, ${formatCoordinateInput(selected.lon)}` : "No map location chosen yet."}
+          </p>
+          <div className="flex justify-end gap-2">
+            <button
+              type="button"
+              onClick={onClose}
+              className="inline-flex h-10 items-center rounded-full border border-border-soft bg-background px-4 text-[13px] font-medium text-foreground/80 transition-colors hover:border-foreground/30"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              disabled={!selected}
+              onClick={() => selected && onSelect(selected.lat, selected.lon)}
+              className="inline-flex h-10 items-center gap-2 rounded-full bg-primary px-4 text-[13px] font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-60"
+            >
+              <CheckIcon className="h-3.5 w-3.5" />
+              Use location
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function isEditableObservationRecord(record: ExplorerRecord): record is Extract<ExplorerRecord, { kind: "occurrence" }> {
   return record.kind === "occurrence" && record.atUri.includes("/app.gainforest.dwc.occurrence/");
+}
+
+function observationKindFromKingdom(value: string | null | undefined): string {
+  const normalized = value?.trim().toLowerCase();
+  if (normalized === "plantae" || normalized === "plant" || normalized === "flora") return "Plantae";
+  if (normalized === "animalia" || normalized === "animal" || normalized === "fauna") return "Animalia";
+  return "";
+}
+
+function observationKindLabel(value: string | null | undefined): string | null {
+  const kind = observationKindFromKingdom(value);
+  if (kind === "Plantae") return "Plant";
+  if (kind === "Animalia") return "Animal";
+  return null;
+}
+
+function coordinateFromDraft(value: string): number | null {
+  const number = Number(normalizeDraftValue(value));
+  return Number.isFinite(number) ? number : null;
+}
+
+function formatCoordinateInput(value: number): string {
+  return Number.isInteger(value) ? String(value) : Number(value.toFixed(6)).toString();
 }
 
 function observationDraftFromRecord(record: Extract<ExplorerRecord, { kind: "occurrence" }>): ObservationDraft {
   return {
     scientificName: record.scientificName ?? "",
     vernacularName: record.vernacularName ?? "",
+    kingdom: observationKindFromKingdom(record.kingdom),
     eventDate: record.eventDate ?? "",
     recordedBy: record.recordedBy ?? "",
     decimalLatitude: record.lat != null ? String(record.lat) : "",
@@ -749,7 +1016,8 @@ function observationDraftsEqual(a: ObservationDraft, b: ObservationDraft): boole
 }
 
 function validateObservationDraft(draft: ObservationDraft): string | null {
-  if (!normalizeDraftValue(draft.scientificName)) return "Enter a plant or animal name.";
+  if (!normalizeDraftValue(draft.scientificName)) return "Enter a scientific name.";
+  if (!observationKindFromKingdom(draft.kingdom)) return "Choose whether this is a plant or animal.";
   if (!normalizeDraftValue(draft.eventDate)) return "Enter when it was seen.";
 
   const lat = Number(normalizeDraftValue(draft.decimalLatitude));
@@ -770,6 +1038,7 @@ function observationPatchFromDraft(draft: ObservationDraft): {
   data: {
     scientificName: string;
     vernacularName?: string;
+    kingdom: string;
     eventDate: string;
     recordedBy?: string;
     decimalLatitude: string;
@@ -783,6 +1052,7 @@ function observationPatchFromDraft(draft: ObservationDraft): {
 } {
   const data = {
     scientificName: normalizeDraftValue(draft.scientificName),
+    kingdom: observationKindFromKingdom(draft.kingdom),
     eventDate: normalizeDraftValue(draft.eventDate),
     decimalLatitude: normalizeDraftValue(draft.decimalLatitude),
     decimalLongitude: normalizeDraftValue(draft.decimalLongitude),
@@ -808,6 +1078,7 @@ function applyObservationDraft(
     cid,
     scientificName: normalizeDraftValue(draft.scientificName),
     vernacularName: optionalDraftValue(draft.vernacularName) ?? null,
+    kingdom: observationKindFromKingdom(draft.kingdom) || null,
     eventDate: normalizeDraftValue(draft.eventDate),
     recordedBy: optionalDraftValue(draft.recordedBy) ?? null,
     lat: Number(normalizeDraftValue(draft.decimalLatitude)),
@@ -1103,7 +1374,8 @@ function buildFields(r: ExplorerRecord): Field[] {
   if (r.kind === "occurrence") {
     if (r.family) fields.push({ label: "Family", value: r.family });
     if (r.genus) fields.push({ label: "Genus", value: r.genus });
-    if (r.kingdom) fields.push({ label: "Kingdom", value: r.kingdom });
+    const observationKind = observationKindLabel(r.kingdom);
+    if (observationKind) fields.push({ label: "Plant or animal", value: observationKind });
     if (r.basisOfRecord) fields.push({ label: "What was seen", value: r.basisOfRecord });
     if (r.individualCount != null)
       fields.push({ label: "Count", value: formatNumber(r.individualCount) });

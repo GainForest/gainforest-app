@@ -1326,15 +1326,12 @@ function BumicertIcon(props: SVGProps<SVGSVGElement>) {
 }
 
 function ExploreArt() {
-  // Two climbing vines hugging either edge at different heights — growth
-  // creeping up the sides of the sidebar.
+  // Two climbing vines hugging either edge — growth creeping up the sides of
+  // the sidebar.
   return (
     <>
-      {/* Half the smaller vine, hugging each edge */}
       <Vine side="left" className="bottom-0 left-0 h-26 w-5" />
       <Vine side="right" className="bottom-0 right-0 h-26 w-5" />
-      {/* 1.5x the bigger vine, centered */}
-      <Vine side="left" className="bottom-0 left-1/2 h-108 w-18 -translate-x-1/2" />
     </>
   );
 }
