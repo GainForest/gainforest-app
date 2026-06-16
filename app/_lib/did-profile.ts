@@ -5,11 +5,13 @@
  * public Bluesky AppView (`public.api.bsky.app`, CORS-open). It resolves any
  * ATProto DID's handle even when the repo lives on a GainForest PDS
  * (certified.one / climateai.org), e.g. did:plc:t3ev… → reforestrees.climateai.org.
+ * If AppView has no name, fall back to this app's `app.certified.actor.profile`
+ * reader so CGS members still show their Certified profile name.
  *
  * Two refinements over a naive per-card fetch:
  *   - Results are cached for the session and in-flight requests are deduped.
- *   - Requests are micro-batched (60ms window) into `getProfiles` calls of up
- *     to 25 actors, so a grid of 24 cards costs one or two round-trips, not 24.
+ *   - Requests are micro-batched (60ms window) into `getProfiles` calls and a
+ *     same-origin certified-profile fallback, so grids avoid per-card waterfalls.
  *
  * Avatars: GainForest community/org DIDs usually have no app.bsky.actor.profile
  * avatar, so `avatar` is frequently null; callers render a deterministic
@@ -27,6 +29,9 @@ const APPVIEW = "https://public.api.bsky.app/xrpc/app.bsky.actor.getProfiles";
 const BATCH_WINDOW_MS = 60;
 const BATCH_SIZE = 25;
 
+type AppViewProfile = { did?: string; handle?: string; displayName?: string; avatar?: string };
+type AccountCardProfile = { did?: string; handle?: string | null; displayName?: string | null; avatar?: string | null };
+
 const cache = new Map<string, DidProfile>();
 const inflight = new Map<string, Promise<DidProfile>>();
 const waiters = new Map<string, Array<(p: DidProfile) => void>>();
@@ -35,6 +40,26 @@ let scheduled = false;
 
 function fallback(did: string): DidProfile {
   return { did, handle: null, displayName: null, avatar: null };
+}
+
+function nonEmpty(value: string | null | undefined): string | null {
+  const trimmed = value?.trim();
+  return trimmed ? trimmed : null;
+}
+
+async function fetchCertifiedCards(dids: string[]): Promise<Map<string, AccountCardProfile>> {
+  if (dids.length === 0) return new Map();
+  const params = new URLSearchParams();
+  for (const did of dids) params.append("did", did);
+
+  try {
+    const res = await fetch(`/api/account/cards?${params.toString()}`, { headers: { accept: "application/json" } });
+    if (!res.ok) return new Map();
+    const data = (await res.json()) as { profiles?: AccountCardProfile[] };
+    return new Map((data.profiles ?? []).filter((profile) => typeof profile.did === "string").map((profile) => [profile.did!, profile]));
+  } catch {
+    return new Map();
+  }
 }
 
 function settle(did: string, profile: DidProfile) {
@@ -53,32 +78,50 @@ async function flush() {
   queue = [];
   for (let i = 0; i < batch.length; i += BATCH_SIZE) {
     const chunk = batch.slice(i, i + BATCH_SIZE);
-    let profiles: Array<{ did?: string; handle?: string; displayName?: string; avatar?: string }> = [];
+    let profiles: AppViewProfile[] = [];
     try {
       const params = chunk.map((d) => `actors=${encodeURIComponent(d)}`).join("&");
       const res = await fetch(`${APPVIEW}?${params}`);
       if (res.ok) {
-        const data = (await res.json()) as { profiles?: typeof profiles };
+        const data = (await res.json()) as { profiles?: AppViewProfile[] };
         profiles = data.profiles ?? [];
       }
     } catch {
-      /* network error → everyone in the chunk gets the fallback below */
+      /* network error → the certified-profile fallback below still gets a chance */
     }
-    const byDid = new Map(profiles.filter((p) => p.did).map((p) => [p.did!, p]));
+
+    const appViewByDid = new Map(profiles.filter((p) => p.did).map((p) => [p.did!, p]));
+    const resolved = new Map<string, DidProfile>();
     for (const did of chunk) {
-      const p = byDid.get(did);
-      settle(
+      const profile = appViewByDid.get(did);
+      resolved.set(
         did,
-        p
+        profile
           ? {
               did,
-              handle: p.handle ?? null,
-              displayName: p.displayName ?? null,
-              avatar: p.avatar ?? null,
+              handle: nonEmpty(profile.handle),
+              displayName: nonEmpty(profile.displayName),
+              avatar: nonEmpty(profile.avatar),
             }
           : fallback(did),
       );
     }
+
+    const missingNames = chunk.filter((did) => !resolved.get(did)?.displayName);
+    const certifiedByDid = await fetchCertifiedCards(missingNames);
+    for (const did of missingNames) {
+      const certified = certifiedByDid.get(did);
+      if (!certified) continue;
+      const current = resolved.get(did) ?? fallback(did);
+      resolved.set(did, {
+        did,
+        handle: current.handle ?? nonEmpty(certified.handle),
+        displayName: current.displayName || nonEmpty(certified.displayName),
+        avatar: current.avatar ?? nonEmpty(certified.avatar),
+      });
+    }
+
+    for (const did of chunk) settle(did, resolved.get(did) ?? fallback(did));
   }
 }
 

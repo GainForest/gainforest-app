@@ -75,17 +75,18 @@ function MemberRow({
   const locked = member.role === "owner";
   const editable = canManage && !locked;
   const name = profile?.displayName?.trim();
-  const primary = name || "Member";
+  const handle = profile?.handle?.trim();
+  const primary = name || handle || "Member";
   const joined = formatDate(member.addedAt);
+  const detailParts = [name && handle ? handle : null, joined ? `Joined ${joined}` : null].filter(Boolean);
+  const secondary = detailParts.join(" · ") || (profile ? member.did : "Resolving profile…");
 
   return (
     <div className="flex items-center gap-3 rounded-xl px-3 py-3 transition-colors hover:bg-muted/40">
       <MemberAvatar did={member.did} profile={profile} />
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm font-medium text-foreground">{primary}</p>
-        <p className="truncate text-xs text-muted-foreground">
-          {joined ? `Joined ${joined}` : "Organization member"}
-        </p>
+        <p className="truncate text-xs text-muted-foreground">{secondary}</p>
       </div>
 
       {editable ? (
