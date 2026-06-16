@@ -26,6 +26,7 @@ export type ManageSectionId =
   | "sites"
   | "trees"
   | "audio"
+  | "drone"
   | "bumicerts"
   | "newBumicert"
   | "observations"
@@ -42,6 +43,7 @@ const SECTION_PATHS: Record<ManageSectionId, string> = {
   sites: "sites",
   trees: "trees",
   audio: "audio",
+  drone: "drone",
   bumicerts: "bumicerts",
   newBumicert: "bumicerts/new",
   observations: "observations",
@@ -203,6 +205,7 @@ export const links = {
     onboardOrganization: "/manage?mode=onboard-org",
     sites: "/manage/sites",
     audio: "/manage/audio",
+    drone: "/manage/drone",
     projects: "/manage/projects",
     bumicerts: "/manage/bumicerts",
     newBumicert: "/manage/bumicerts/new",
