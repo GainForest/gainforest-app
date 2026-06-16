@@ -107,6 +107,7 @@ type UploadStepProps = {
   establishmentMeans: string | null;
   datasetSelection: UploadDatasetSelection;
   siteSelection: UploadSiteSelection | null;
+  mutationDisabledReason?: string | null;
   backLabel: string;
   onBack: () => void;
   onUploadMore: () => void;
@@ -209,6 +210,7 @@ export default function UploadStep({
   establishmentMeans,
   datasetSelection,
   siteSelection,
+  mutationDisabledReason = null,
   backLabel,
   onBack,
   onUploadMore,
@@ -271,6 +273,13 @@ export default function UploadStep({
     if (uploadRef.current) return;
     uploadRef.current = true;
     const uploadStartMs = Date.now();
+    if (mutationDisabledReason) {
+      setClockMs(uploadStartMs);
+      setUploadStarted(true);
+      setUploadFatalError(mutationDisabledReason);
+      setUploadDone(true);
+      return;
+    }
     const previewSkippedCount = previewSkippedRows.length;
     const sourceTotalRows = validRows.length + previewSkippedCount;
     setClockMs(uploadStartMs);
@@ -743,7 +752,7 @@ export default function UploadStep({
     });
     setClockMs(completedAtMs);
     setUploadDone(true);
-  }, [datasetSelection, establishmentMeans, koboMediaZipFile, photoFetchQueue.length, previewSkippedRows.length, siteSelection, uploadId, validRows, writeOptions]);
+  }, [datasetSelection, establishmentMeans, koboMediaZipFile, mutationDisabledReason, photoFetchQueue.length, previewSkippedRows.length, siteSelection, uploadId, validRows, writeOptions]);
 
   const runPhotoFetch = useCallback(async () => {
     if (photoFetchRef.current) return;
@@ -1024,6 +1033,7 @@ export default function UploadStep({
             {datasetSelection.mode === "existing" ? `Adding to ${selectedDatasetName}.` : `Creating group "${selectedDatasetName}".`}
           </p>
         )}
+        {mutationDisabledReason && !uploadDone ? <p className="mt-2 text-sm text-muted-foreground">{mutationDisabledReason}</p> : null}
       </div>
 
       {isUploadInProgress && (

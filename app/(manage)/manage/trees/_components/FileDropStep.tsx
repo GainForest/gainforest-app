@@ -101,6 +101,8 @@ type FileDropStepProps = {
   initialEstablishmentMeans: string | null;
   initialDatasetSelection: UploadDatasetSelection;
   initialSiteSelection: UploadSiteSelection | null;
+  createDisabledReason?: string | null;
+  updateDisabledReason?: string | null;
   onFileAndMappings: (
     file: File, koboMediaZipFile: File | null, koboMediaZipIndex: KoboMediaZipIndex | null,
     parsedData: Record<string, string>[], headers: string[], mappings: ColumnMapping[],
@@ -109,7 +111,8 @@ type FileDropStepProps = {
 };
 
 export default function FileDropStep({
-  uploadId, did, target, initialEstablishmentMeans, initialDatasetSelection, initialSiteSelection, onFileAndMappings,
+  uploadId, did, target, initialEstablishmentMeans, initialDatasetSelection, initialSiteSelection,
+  createDisabledReason = null, updateDisabledReason = null, onFileAndMappings,
 }: FileDropStepProps) {
   const t = useTranslations("upload.trees.fileDrop");
   const modal = useModal();
@@ -123,7 +126,9 @@ export default function FileDropStep({
   const [isDragging, setIsDragging] = useState(false);
   const [isMediaZipParsing, setIsMediaZipParsing] = useState(false);
   const [establishmentMeans, setEstablishmentMeans] = useState<string | null>(initialEstablishmentMeans);
-  const [datasetMode, setDatasetMode] = useState<UploadDatasetSelection["mode"]>(initialDatasetSelection.mode);
+  const [datasetMode, setDatasetMode] = useState<UploadDatasetSelection["mode"]>(
+    initialDatasetSelection.mode === "existing" && updateDisabledReason ? "none" : initialDatasetSelection.mode,
+  );
   const [datasetName, setDatasetName] = useState(initialDatasetSelection.mode === "new" ? initialDatasetSelection.name : "");
   const [datasetDescription, setDatasetDescription] = useState(initialDatasetSelection.mode === "new" ? initialDatasetSelection.description : "");
   const [selectedExistingDatasetUri, setSelectedExistingDatasetUri] = useState(
@@ -224,6 +229,8 @@ export default function FileDropStep({
   });
 
   const openSiteBoundaryModal = useCallback((siteToEdit: ManagedLocation | null = null) => {
+    if (siteToEdit && updateDisabledReason) return;
+    if (!siteToEdit && createDisabledReason) return;
     modal.pushModal(
       {
         id: siteToEdit ? `${SiteEditorModalId}-upload-${siteToEdit.metadata.rkey}` : `${SiteEditorModalId}-upload-new`,
@@ -252,7 +259,7 @@ export default function FileDropStep({
       true,
     );
     void modal.show();
-  }, [did, loadSites, modal, selectedSiteBoundaryFailed, target]);
+  }, [createDisabledReason, did, loadSites, modal, selectedSiteBoundaryFailed, target, updateDisabledReason]);
 
   // Validate every existing site boundary so the upload can detect when none can be used.
   useEffect(() => {
@@ -311,6 +318,13 @@ export default function FileDropStep({
     const match = existingDatasets.find((d) => d.uri === selectedExistingDatasetUri);
     return match ? toExistingDatasetSelection(match) : null;
   }, [existingDatasets, selectedExistingDatasetUri]);
+
+  useEffect(() => {
+    if (datasetMode === "existing" && updateDisabledReason) {
+      setDatasetMode("none");
+      setSelectedExistingDatasetUri("");
+    }
+  }, [datasetMode, updateDisabledReason]);
 
   const handleFile = useCallback((file: File) => {
     setFileError(null);
@@ -413,6 +427,8 @@ export default function FileDropStep({
 
   const handleContinue = () => {
     if (!selectedFile || parsedData.length === 0 || !selectedSite) return;
+    if (createDisabledReason) return;
+    if (datasetMode === "existing" && updateDisabledReason) return;
     const koboResult = detectKoboFormat(headers);
     const mappings = koboResult.isKobo ? koboResult.mappings : autoDetectMappings(headers);
     const datasetSelection: UploadDatasetSelection =
@@ -445,7 +461,8 @@ export default function FileDropStep({
     isParsed && !error && !fileError && !mediaZipError && !isMediaZipParsing &&
     selectedSite !== null && selectedSiteBoundaryReady &&
     (datasetMode !== "new" || datasetName.trim().length > 0) &&
-    (datasetMode !== "existing" || selectedExistingDataset !== null);
+    (datasetMode !== "existing" || (selectedExistingDataset !== null && !updateDisabledReason)) &&
+    !createDisabledReason;
   const hasUnavailableSiteSelection = selectedSiteUri !== null && !sitesLoading && !sitesError && selectedSite === null;
 
   return (
@@ -568,7 +585,7 @@ export default function FileDropStep({
               <Button type="button" variant="outline" size="sm" onClick={() => void loadSites()}>
                 {t("retry")}
               </Button>
-              <Button type="button" variant="outline" size="sm" onClick={() => openSiteBoundaryModal()}>
+              <Button type="button" variant="outline" size="sm" onClick={() => openSiteBoundaryModal()} disabled={Boolean(createDisabledReason)} title={createDisabledReason ?? undefined}>
                 <CirclePlus className="h-4 w-4" />
                 {t("addSiteBoundary")}
               </Button>
@@ -577,7 +594,7 @@ export default function FileDropStep({
         ) : uploadSites.length === 0 ? (
           <div className="space-y-2">
             <p className="text-sm text-muted-foreground">{t("noSites")}</p>
-            <Button type="button" variant="outline" size="sm" onClick={() => openSiteBoundaryModal()}>
+            <Button type="button" variant="outline" size="sm" onClick={() => openSiteBoundaryModal()} disabled={Boolean(createDisabledReason)} title={createDisabledReason ?? undefined}>
               <CirclePlus className="h-4 w-4" />
               {t("addSiteBoundary")}
             </Button>
@@ -604,12 +621,12 @@ export default function FileDropStep({
               </SelectContent>
             </Select>
             <div className="flex flex-wrap gap-2">
-              <Button type="button" variant="outline" size="sm" onClick={() => openSiteBoundaryModal()}>
+              <Button type="button" variant="outline" size="sm" onClick={() => openSiteBoundaryModal()} disabled={Boolean(createDisabledReason)} title={createDisabledReason ?? undefined}>
                 <CirclePlus className="h-4 w-4" />
                 {t("addSiteBoundary")}
               </Button>
               {selectedManagedSite && (!selectedSiteHasBoundary || selectedSiteBoundaryFailed) && (
-                <Button type="button" variant="outline" size="sm" onClick={() => openSiteBoundaryModal(selectedManagedSite)}>
+                <Button type="button" variant="outline" size="sm" onClick={() => openSiteBoundaryModal(selectedManagedSite)} disabled={Boolean(updateDisabledReason)} title={updateDisabledReason ?? undefined}>
                   {t("addMapAreaToSelected")}
                 </Button>
               )}
@@ -654,12 +671,12 @@ export default function FileDropStep({
                   </p>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  <Button type="button" variant="outline" size="sm" onClick={() => openSiteBoundaryModal()}>
+                  <Button type="button" variant="outline" size="sm" onClick={() => openSiteBoundaryModal()} disabled={Boolean(createDisabledReason)} title={createDisabledReason ?? undefined}>
                     <CirclePlus className="h-4 w-4" />
                     {t("addSiteBoundary")}
                   </Button>
                   {selectedManagedSite && (allBoundaryCandidatesFailed || !selectedSiteHasBoundary || selectedSiteBoundaryFailed) && (
-                    <Button type="button" variant="outline" size="sm" onClick={() => openSiteBoundaryModal(selectedManagedSite)}>
+                    <Button type="button" variant="outline" size="sm" onClick={() => openSiteBoundaryModal(selectedManagedSite)} disabled={Boolean(updateDisabledReason)} title={updateDisabledReason ?? undefined}>
                       {t("replaceSelectedMapArea")}
                     </Button>
                   )}
@@ -681,20 +698,26 @@ export default function FileDropStep({
             { mode: "none" as const, title: t("datasetModes.noneTitle"), description: t("datasetModes.noneDescription") },
             { mode: "new" as const, title: t("datasetModes.newTitle"), description: t("datasetModes.newDescription") },
             { mode: "existing" as const, title: t("datasetModes.existingTitle"), description: t("datasetModes.existingDescription") },
-          ]).map((option) => (
-            <button
-              key={option.mode}
-              type="button"
-              onClick={() => setDatasetMode(option.mode)}
-              className={cn(
-                "rounded-xl border p-4 text-left transition-colors",
-                datasetMode === option.mode ? "border-primary bg-primary/5" : "border-border bg-background hover:bg-muted/30",
-              )}
-            >
-              <p className="text-sm font-medium">{option.title}</p>
-              <p className="mt-1 text-xs text-muted-foreground leading-relaxed">{option.description}</p>
-            </button>
-          ))}
+          ]).map((option) => {
+            const disabledReason = option.mode === "existing" ? updateDisabledReason : null;
+            const disabled = Boolean(disabledReason);
+            return (
+              <button
+                key={option.mode}
+                type="button"
+                onClick={() => { if (!disabled) setDatasetMode(option.mode); }}
+                disabled={disabled}
+                title={disabledReason ?? undefined}
+                className={cn(
+                  "rounded-xl border p-4 text-left transition-colors disabled:cursor-not-allowed disabled:opacity-60",
+                  datasetMode === option.mode ? "border-primary bg-primary/5" : "border-border bg-background hover:bg-muted/30",
+                )}
+              >
+                <p className="text-sm font-medium">{option.title}</p>
+                <p className="mt-1 text-xs text-muted-foreground leading-relaxed">{disabledReason ?? option.description}</p>
+              </button>
+            );
+          })}
         </div>
 
         {datasetMode === "new" && (
@@ -782,7 +805,7 @@ export default function FileDropStep({
       </div>
 
       <div className="flex items-center justify-end pt-2 border-t border-border">
-        <Button onClick={handleContinue} disabled={!canContinue}>
+        <Button onClick={handleContinue} disabled={!canContinue} title={createDisabledReason ?? (datasetMode === "existing" ? updateDisabledReason ?? undefined : undefined)}>
           {t("continueToMatch")}
         </Button>
       </div>

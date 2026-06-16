@@ -21,6 +21,27 @@ function isLikelyEmail(value: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
 }
 
+function memberHandleCandidates(identifier: string): string[] {
+  const cleaned = identifier.trim().replace(/^@+/, "");
+  if (!cleaned || cleaned.startsWith("did:")) return [cleaned];
+
+  const candidates = [cleaned];
+  const defaultDomain = (process.env.NEXT_PUBLIC_DEFAULT_PDS_DOMAIN || process.env.DEFAULT_PDS_DOMAIN || "certified.one")
+    .trim()
+    .replace(/^@+|\.+$/g, "");
+  if (!cleaned.includes(".") && defaultDomain) candidates.push(`${cleaned}.${defaultDomain}`);
+  return Array.from(new Set(candidates));
+}
+
+async function resolveMemberDid(identifier: string): Promise<string | null> {
+  if (identifier.startsWith("did:")) return identifier;
+  for (const candidate of memberHandleCandidates(identifier)) {
+    const did = await resolveIdentifierToDid(candidate).catch(() => null);
+    if (did?.startsWith("did:")) return did;
+  }
+  return null;
+}
+
 export async function GET(request: Request) {
   const identifier = normalizeIdentifier(new URL(request.url).searchParams.get("identifier") ?? "");
   if (!identifier) {
@@ -29,17 +50,15 @@ export async function GET(request: Request) {
 
   if (isLikelyEmail(identifier)) {
     return Response.json(
-      { error: "Email invitations are not connected yet. Ask this person for their GainForest username, then add them here." },
+      { error: "Email invitations are not connected yet. Use this person’s GainForest username for now." },
       { status: 422 },
     );
   }
 
-  const did = identifier.startsWith("did:")
-    ? identifier
-    : await resolveIdentifierToDid(identifier).catch(() => null);
+  const did = await resolveMemberDid(identifier);
 
   if (!did?.startsWith("did:")) {
-    return Response.json({ error: "We could not find that member. Check the username and try again." }, { status: 404 });
+    return Response.json({ error: "We could not find that member. Check the email or username and try again." }, { status: 404 });
   }
 
   const card = await getCertifiedProfileCard(did).catch(() => ({

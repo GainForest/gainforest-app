@@ -23,6 +23,7 @@ export function ListPanel(props: {
   recordings: AudioRecordingItem[];
   onNew: () => void;
   onOpenDetail: (section: Section, uri: string) => void;
+  createDisabledReason?: string | null;
 }) {
   const t = useTranslations("upload.audio");
   const [view, setView] = useState<ViewMode>("cards");
@@ -92,7 +93,7 @@ export function ListPanel(props: {
         </div>
         <div className="flex shrink-0 items-center gap-2">
           <ViewToggle view={view} setView={setView} />
-          <Button onClick={props.onNew} className="rounded-full">
+          <Button onClick={props.onNew} className="rounded-full" disabled={Boolean(props.createDisabledReason)} title={props.createDisabledReason ?? undefined}>
             <CirclePlusIcon className="size-4" /> {t("list.new")}
           </Button>
         </div>
@@ -242,11 +243,13 @@ export function CreatePanel(props: {
   deployments: AudioDeploymentItem[];
   onCreated: () => void;
   onOpenDetail: (section: Section, uri: string) => void;
+  createDisabledReason?: string | null;
 }) {
   if (props.section === "events")
     return (
       <EventForm
         mode="create"
+        disabledReason={props.createDisabledReason}
         onSaved={(uri) => {
           props.onCreated();
           props.onOpenDetail("events", uri);
@@ -258,6 +261,7 @@ export function CreatePanel(props: {
       <DeploymentForm
         mode="create"
         events={props.events}
+        disabledReason={props.createDisabledReason}
         onSaved={(uri) => {
           props.onCreated();
           props.onOpenDetail("deployments", uri);
@@ -269,6 +273,7 @@ export function CreatePanel(props: {
       mode="create"
       events={props.events}
       deployments={props.deployments}
+      disabledReason={props.createDisabledReason}
       onSaved={(uri) => {
         props.onCreated();
         props.onOpenDetail("recordings", uri);
@@ -287,6 +292,7 @@ export function DetailPanel(props: {
   recordings: AudioRecordingItem[];
   onUpdated: () => void;
   onOpenDetail: (section: Section, uri: string) => void;
+  updateDisabledReason?: string | null;
 }) {
   const t = useTranslations("upload.audio.detail");
 
@@ -306,6 +312,7 @@ export function DetailPanel(props: {
         <EventForm
           mode="edit"
           event={props.selectedEvent}
+          disabledReason={props.updateDisabledReason}
           onSaved={() => props.onUpdated()}
         />
         <RelationshipPanel title={t("inThisEvent")}>
@@ -353,6 +360,7 @@ export function DetailPanel(props: {
           mode="edit"
           deployment={props.selectedDeployment}
           events={props.events}
+          disabledReason={props.updateDisabledReason}
           onSaved={() => props.onUpdated()}
         />
         <RelationshipPanel title={t("relatedItems")}>
@@ -400,6 +408,7 @@ export function DetailPanel(props: {
           recording={props.selectedRecording}
           events={props.events}
           deployments={props.deployments}
+          disabledReason={props.updateDisabledReason}
           onSaved={() => props.onUpdated()}
         />
         <RelationshipPanel title={t("audioContext")}>

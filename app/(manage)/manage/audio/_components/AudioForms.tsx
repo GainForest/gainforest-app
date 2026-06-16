@@ -40,9 +40,10 @@ function useAsyncMutation<Input, Result>(
 }
 
 export function EventForm(
-  props:
+  props: (
     | { mode: "create"; onSaved: (uri: string) => void }
-    | { mode: "edit"; event: AudioEventItem; onSaved: (uri: string) => void },
+    | { mode: "edit"; event: AudioEventItem; onSaved: (uri: string) => void }
+  ) & { disabledReason?: string | null },
 ) {
   const t = useTranslations("upload.audio.forms");
   const record = props.mode === "edit" ? props.event.record : null;
@@ -74,6 +75,10 @@ export function EventForm(
 
   const save = async () => {
     setError(null);
+    if (props.disabledReason) {
+      setError(props.disabledReason);
+      return;
+    }
     const data = {
       eventID: eventID.trim(),
       eventDate: eventDate.trim(),
@@ -116,6 +121,7 @@ export function EventForm(
       error={error}
       isPending={isPending}
       disabled={!eventID.trim() || !eventDate.trim()}
+      disabledReason={props.disabledReason}
       onSave={() => void save()}
     >
       <Field
@@ -162,7 +168,7 @@ export function EventForm(
 }
 
 export function DeploymentForm(
-  props:
+  props: (
     | {
         mode: "create";
         events: AudioEventItem[];
@@ -173,7 +179,8 @@ export function DeploymentForm(
         deployment: AudioDeploymentItem;
         events: AudioEventItem[];
         onSaved: (uri: string) => void;
-      },
+      }
+  ) & { disabledReason?: string | null },
 ) {
   const t = useTranslations("upload.audio.forms");
   const record = props.mode === "edit" ? props.deployment.record : null;
@@ -210,6 +217,10 @@ export function DeploymentForm(
 
   const save = async () => {
     setError(null);
+    if (props.disabledReason) {
+      setError(props.disabledReason);
+      return;
+    }
     const data = {
       name: name.trim(),
       deviceModel: deviceModel.trim(),
@@ -259,6 +270,7 @@ export function DeploymentForm(
       error={error}
       isPending={isPending}
       disabled={!name.trim() || !deviceModel.trim() || !deployedAt}
+      disabledReason={props.disabledReason}
       onSave={() => void save()}
     >
       <Field
@@ -327,7 +339,7 @@ export function DeploymentForm(
 }
 
 export function AudioForm(
-  props:
+  props: (
     | {
         mode: "create";
         events: AudioEventItem[];
@@ -340,7 +352,8 @@ export function AudioForm(
         events: AudioEventItem[];
         deployments: AudioDeploymentItem[];
         onSaved: (uri: string) => void;
-      },
+      }
+  ) & { disabledReason?: string | null },
 ) {
   const t = useTranslations("upload.audio.forms");
   const record = props.mode === "edit" ? props.recording.record : null;
@@ -429,6 +442,10 @@ export function AudioForm(
 
   const save = async () => {
     setError(null);
+    if (props.disabledReason) {
+      setError(props.disabledReason);
+      return;
+    }
     if (fileError) return;
     const recordedAtDate = new Date(recordedAt);
     if (!recordedAt || isNaN(recordedAtDate.getTime())) {
@@ -541,6 +558,7 @@ export function AudioForm(
         (props.mode === "create" &&
           (!audioFile || !metadata || Boolean(fileError)))
       }
+      disabledReason={props.disabledReason}
       onSave={() => void save()}
     >
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_360px]">

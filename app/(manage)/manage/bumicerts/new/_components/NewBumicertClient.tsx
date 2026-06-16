@@ -37,7 +37,7 @@ import {
 } from "react";
 import { format } from "date-fns";
 import { localBumicertHref, hyperscanRecordHref } from "@/app/_lib/urls";
-import { canUpdateRecord } from "@/app/(manage)/manage/_lib/cgs-permissions";
+import { canCreateRecord, canUpdateRecord } from "@/app/(manage)/manage/_lib/cgs-permissions";
 import { createRecord, putRecord, uploadBlob } from "@/app/(manage)/manage/_lib/mutations";
 import { useModal } from "@/components/ui/modal/context";
 import {
@@ -764,6 +764,7 @@ function PeopleStep({
   contributorProfiles,
   setContributorProfile,
   onSiteCreated,
+  createPermissionReason = null,
   issues,
   onFieldChange,
 }: {
@@ -778,6 +779,7 @@ function PeopleStep({
   contributorProfiles: Record<string, ActorResult>;
   setContributorProfile: (identity: string, actor: ActorResult | null) => void;
   onSiteCreated: (site: ManagedLocation) => void;
+  createPermissionReason?: string | null;
   issues: Partial<Record<FormField, FormIssue>>;
   onFieldChange: (field: FormField) => void;
 }) {
@@ -839,7 +841,10 @@ function PeopleStep({
             type="button"
             variant="outline"
             size="sm"
+            disabled={Boolean(createPermissionReason)}
+            title={createPermissionReason ?? undefined}
             onClick={() => {
+              if (createPermissionReason) return;
               pushModal(
                 {
                   id: SiteEditorModalId,
@@ -1181,6 +1186,7 @@ export function NewBumicertClient({
   const [isPublishing, setIsPublishing] = useState(false);
   const [publishResult, setPublishResult] = useState<PublishResult | null>(null);
   const [mobileSheet, setMobileSheet] = useState<"preview" | null>(null);
+  const publishPermission = canCreateRecord(target);
   const linkedProjectUpdatePermission = canUpdateRecord(target);
   const canLinkToProject = Boolean(linkedProject?.canLink && linkedProjectUpdatePermission.allowed);
   const autosaveTimer = useRef<number | null>(null);
@@ -1374,6 +1380,10 @@ export function NewBumicertClient({
       setPublishError(validation);
       return;
     }
+    if (!publishPermission.allowed) {
+      setPublishError(publishPermission.reason ?? "You cannot publish for this organization.");
+      return;
+    }
     setIsPublishing(true);
     setPublishError(null);
     try {
@@ -1486,6 +1496,7 @@ export function NewBumicertClient({
                     contributorProfiles={contributorProfiles}
                     setContributorProfile={setContributorProfile}
                     onSiteCreated={handleSiteCreated}
+                    createPermissionReason={publishPermission.reason}
                     issues={fieldIssues}
                     onFieldChange={markFieldChanged}
                   />
@@ -1498,7 +1509,7 @@ export function NewBumicertClient({
 
                 <div className="mt-10 flex flex-wrap items-center justify-between gap-3">
                   <span className="hidden text-xs text-muted-foreground sm:block">{activeDraftId ? "Saved" : "Not saved yet"}</span>
-                  <Button type="submit" size="lg" disabled={isPublishing}>
+                  <Button type="submit" size="lg" disabled={isPublishing || !publishPermission.allowed} title={publishPermission.reason ?? undefined}>
                     {isPublishing ? <Loader2Icon className="size-4 animate-spin" /> : <LeafIcon className="size-4" />}
                     {isPublishing ? "Publishing…" : canLinkToProject ? "Publish to the project" : "Publish"}
                   </Button>

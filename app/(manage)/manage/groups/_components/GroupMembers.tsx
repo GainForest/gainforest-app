@@ -248,7 +248,7 @@ export function GroupMembers({
         <Input
           value={memberIdentifier}
           onChange={(event) => setMemberIdentifier(event.target.value)}
-          placeholder="name@example.com"
+          placeholder="name@example.com or username"
           autoComplete="email"
           disabled={isPending}
           aria-label="Member email or username"
@@ -269,9 +269,11 @@ export function GroupMembers({
           <UserPlusIcon /> Add
         </Button>
       </form>
-      {canSetRoles ? null : (
-        <p className="text-xs text-muted-foreground">Admins can add regular members. Ask an owner to change roles or add another admin.</p>
-      )}
+      <p className="text-xs text-muted-foreground">
+        {canSetRoles
+          ? "Use an email when available. If lookup is not connected for that account yet, use their GainForest username."
+          : "Admins can add regular members. Ask an owner to change roles or add another admin."}
+      </p>
     </div>
   ) : (
     <p className="flex items-center gap-2 rounded-2xl bg-muted/50 px-3.5 py-2.5 text-sm text-muted-foreground">

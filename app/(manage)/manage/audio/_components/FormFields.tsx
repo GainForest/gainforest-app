@@ -33,6 +33,7 @@ export function FormShell(props: {
   error: string | null;
   isPending: boolean;
   disabled: boolean;
+  disabledReason?: string | null;
   onSave: () => void;
 }) {
   const t = useTranslations("upload.actions");
@@ -41,8 +42,9 @@ export function FormShell(props: {
       <h2 className="font-instrument text-xl font-semibold italic">{props.title}</h2>
       <div className="space-y-4">{props.children}</div>
       {props.error && <p className="text-sm text-destructive">{props.error}</p>}
+      {props.disabledReason && <p className="text-sm text-muted-foreground">{props.disabledReason}</p>}
       <div className="flex justify-end">
-        <Button onClick={props.onSave} disabled={props.disabled || props.isPending}>
+        <Button onClick={props.onSave} disabled={props.disabled || props.isPending || Boolean(props.disabledReason)} title={props.disabledReason ?? undefined}>
           {props.isPending && <Loader2Icon className="mr-2 size-4 animate-spin" />}
           {props.isPending ? t("saving") : t("save")}
         </Button>

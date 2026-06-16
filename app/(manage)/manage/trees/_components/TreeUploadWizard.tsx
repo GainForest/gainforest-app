@@ -17,6 +17,7 @@ import { NO_UPLOAD_DATASET_SELECTION, type UploadDatasetSelection } from "../../
 import type { UploadSiteSelection } from "../../_lib/upload/site-selection";
 import { clearPendingUpload, readPendingUpload } from "./upload-session";
 import type { ManageTarget } from "@/lib/links";
+import { canCreateRecord, canUpdateRecord } from "../../_lib/cgs-permissions";
 
 type WizardState = {
   currentStep: 1 | 2 | 3 | 4;
@@ -136,6 +137,8 @@ export function TreeUploadWizard({ did, target, onDone }: { did: string; target:
   const lastViewedStepRef = useRef<string | null>(null);
   const restoredPendingUploadRef = useRef(initial.restoredPendingUpload);
   const analyticsConsent = useAnalyticsConsent();
+  const createPermission = canCreateRecord(target);
+  const updatePermission = canUpdateRecord(target);
 
   useEffect(() => {
     if (analyticsConsent !== "granted") return;
@@ -242,6 +245,8 @@ export function TreeUploadWizard({ did, target, onDone }: { did: string; target:
           initialEstablishmentMeans={establishmentMeans}
           initialDatasetSelection={datasetSelection}
           initialSiteSelection={siteSelection}
+          createDisabledReason={createPermission.reason}
+          updateDisabledReason={updatePermission.reason}
           onFileAndMappings={handleFileAndMappings}
         />
       )}
@@ -281,6 +286,7 @@ export function TreeUploadWizard({ did, target, onDone }: { did: string; target:
           establishmentMeans={establishmentMeans}
           datasetSelection={datasetSelection}
           siteSelection={siteSelection}
+          mutationDisabledReason={datasetSelection.mode === "existing" ? updatePermission.reason : createPermission.reason}
           backLabel={parsedData !== null ? "Back to preview" : "Start over"}
           onBack={handleBackToStep3}
           onUploadMore={handleUploadMore}
