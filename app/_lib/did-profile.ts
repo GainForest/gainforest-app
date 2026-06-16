@@ -1,17 +1,14 @@
 /**
  * DID → profile (handle + display name + avatar) resolution.
  *
- * Same approach hyperscan and simocracy-v2 use: hydrate identities through the
- * public Bluesky AppView (`public.api.bsky.app`, CORS-open). It resolves any
- * ATProto DID's handle even when the repo lives on a GainForest PDS
- * (certified.one / climateai.org), e.g. did:plc:t3ev… → reforestrees.climateai.org.
- * If AppView has no name, fall back to this app's `app.certified.actor.profile`
- * reader so CGS members still show their Certified profile name.
+ * Hydrate identities from the app's indexed Certified profiles plus the public
+ * Bluesky AppView (`public.api.bsky.app`, CORS-open). Certified profile names
+ * and avatars win; AppView fills in handles and Bluesky-native fallbacks.
  *
  * Two refinements over a naive per-card fetch:
  *   - Results are cached for the session and in-flight requests are deduped.
  *   - Requests are micro-batched (60ms window) into `getProfiles` calls and a
- *     same-origin certified-profile fallback, so grids avoid per-card waterfalls.
+ *     same-origin Certified profile fallback, so grids avoid per-card waterfalls.
  *
  * Avatars: GainForest community/org DIDs usually have no app.bsky.actor.profile
  * avatar, so `avatar` is frequently null; callers render a deterministic
@@ -78,50 +75,31 @@ async function flush() {
   queue = [];
   for (let i = 0; i < batch.length; i += BATCH_SIZE) {
     const chunk = batch.slice(i, i + BATCH_SIZE);
-    let profiles: AppViewProfile[] = [];
-    try {
-      const params = chunk.map((d) => `actors=${encodeURIComponent(d)}`).join("&");
-      const res = await fetch(`${APPVIEW}?${params}`);
-      if (res.ok) {
+    const appViewPromise = (async () => {
+      try {
+        const params = chunk.map((d) => `actors=${encodeURIComponent(d)}`).join("&");
+        const res = await fetch(`${APPVIEW}?${params}`);
+        if (!res.ok) return [] as AppViewProfile[];
         const data = (await res.json()) as { profiles?: AppViewProfile[] };
-        profiles = data.profiles ?? [];
+        return data.profiles ?? [];
+      } catch {
+        return [] as AppViewProfile[];
       }
-    } catch {
-      /* network error → the certified-profile fallback below still gets a chance */
-    }
+    })();
+    const certifiedPromise = fetchCertifiedCards(chunk);
+    const [profiles, certifiedByDid] = await Promise.all([appViewPromise, certifiedPromise]);
 
     const appViewByDid = new Map(profiles.filter((p) => p.did).map((p) => [p.did!, p]));
-    const resolved = new Map<string, DidProfile>();
     for (const did of chunk) {
-      const profile = appViewByDid.get(did);
-      resolved.set(
-        did,
-        profile
-          ? {
-              did,
-              handle: nonEmpty(profile.handle),
-              displayName: nonEmpty(profile.displayName),
-              avatar: nonEmpty(profile.avatar),
-            }
-          : fallback(did),
-      );
-    }
-
-    const missingNames = chunk.filter((did) => !resolved.get(did)?.displayName);
-    const certifiedByDid = await fetchCertifiedCards(missingNames);
-    for (const did of missingNames) {
+      const appView = appViewByDid.get(did);
       const certified = certifiedByDid.get(did);
-      if (!certified) continue;
-      const current = resolved.get(did) ?? fallback(did);
-      resolved.set(did, {
+      settle(did, {
         did,
-        handle: current.handle ?? nonEmpty(certified.handle),
-        displayName: current.displayName || nonEmpty(certified.displayName),
-        avatar: current.avatar ?? nonEmpty(certified.avatar),
+        handle: nonEmpty(appView?.handle) ?? nonEmpty(certified?.handle),
+        displayName: nonEmpty(certified?.displayName) ?? nonEmpty(appView?.displayName),
+        avatar: nonEmpty(certified?.avatar) ?? nonEmpty(appView?.avatar),
       });
     }
-
-    for (const did of chunk) settle(did, resolved.get(did) ?? fallback(did));
   }
 }
 

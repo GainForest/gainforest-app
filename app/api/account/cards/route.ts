@@ -1,4 +1,5 @@
 import { getCertifiedProfileCard } from "@/app/account/_lib/account-route";
+import { fetchIndexedCertifiedProfileCards, type IndexedCertifiedProfileCard } from "@/app/_lib/indexer";
 
 export const runtime = "nodejs";
 
@@ -9,6 +10,12 @@ type AccountCardProfile = {
   handle: string | null;
   displayName: string | null;
   avatar: string | null;
+};
+
+type DirectAccountCard = {
+  handle: string | null;
+  displayName: string | null;
+  avatarUrl: string | null;
 };
 
 function nonEmpty(value: string | null | undefined): string | null {
@@ -31,6 +38,10 @@ function normalizeDid(value: string): string {
   return current;
 }
 
+function isSafeDid(value: string): boolean {
+  return /^did:[a-z0-9]+:[A-Za-z0-9._%:-]+$/.test(value);
+}
+
 function requestedDids(request: Request): string[] {
   const { searchParams } = new URL(request.url);
   const raw = [
@@ -39,7 +50,7 @@ function requestedDids(request: Request): string[] {
   ];
   const dids = raw
     .map(normalizeDid)
-    .filter((value) => value.startsWith("did:"));
+    .filter(isSafeDid);
   return [...new Set(dids)].slice(0, MAX_BATCH_SIZE);
 }
 
@@ -49,21 +60,31 @@ export async function GET(request: Request) {
     return Response.json({ profiles: [] as AccountCardProfile[] }, { status: 400 });
   }
 
-  const profiles = await Promise.all(
-    dids.map(async (did): Promise<AccountCardProfile> => {
-      const card = await getCertifiedProfileCard(did).catch(() => ({
-        displayName: null,
-        avatarUrl: null,
-        handle: null,
-      }));
-      return {
-        did,
-        handle: nonEmpty(card.handle),
-        displayName: nonEmpty(card.displayName),
-        avatar: nonEmpty(card.avatarUrl),
-      };
-    }),
+  const indexedByDid = await fetchIndexedCertifiedProfileCards(dids).catch(
+    () => new Map<string, IndexedCertifiedProfileCard>(),
   );
+  const needsDirectRead = dids.filter((did) => {
+    const indexed = indexedByDid.get(did);
+    return !indexed?.displayName || !indexed?.avatarUrl;
+  });
+  const directEntries = await Promise.all(
+    needsDirectRead.map(async (did): Promise<[string, DirectAccountCard]> => [
+      did,
+      await getCertifiedProfileCard(did).catch(() => ({ displayName: null, avatarUrl: null, handle: null })),
+    ]),
+  );
+  const directByDid = new Map(directEntries);
+
+  const profiles = dids.map((did): AccountCardProfile => {
+    const indexed = indexedByDid.get(did);
+    const direct = directByDid.get(did);
+    return {
+      did,
+      handle: nonEmpty(direct?.handle),
+      displayName: nonEmpty(indexed?.displayName) ?? nonEmpty(direct?.displayName),
+      avatar: nonEmpty(indexed?.avatarUrl) ?? nonEmpty(direct?.avatarUrl),
+    };
+  });
 
   return Response.json({ profiles }, { headers: { "cache-control": "private, max-age=300" } });
 }

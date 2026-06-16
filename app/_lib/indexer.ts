@@ -2042,6 +2042,11 @@ type RawCertOrg = {
 
 type CertProfileInfo = { name: string | null; avatarRef: string | null };
 
+export type IndexedCertifiedProfileCard = {
+  displayName: string | null;
+  avatarUrl: string | null;
+};
+
 /** Profile selection shared by the list join + the drawer detail. */
 const CERT_PROFILE_SELECTION = `{
   displayName
@@ -2122,9 +2127,33 @@ async function fetchCertProfiles(
       });
     }
   } catch {
-    /* names/avatars are best-effort; fall back to the DID */
+    /* names/avatars are best-effort */
   }
   return map;
+}
+
+export async function fetchIndexedCertifiedProfileCards(
+  dids: string[],
+  signal?: AbortSignal,
+): Promise<Map<string, IndexedCertifiedProfileCard>> {
+  const profiles = await fetchCertProfiles(dids, signal);
+  const cards = new Map<string, IndexedCertifiedProfileCard>();
+
+  await Promise.all(
+    [...profiles].map(async ([did, profile]) => {
+      let avatarUrl: string | null = null;
+      if (profile.avatarRef) {
+        try {
+          avatarUrl = await resolveBlobUrl(did, profile.avatarRef, signal);
+        } catch (error) {
+          if ((error as Error).name === "AbortError") throw error;
+        }
+      }
+      cards.set(did, { displayName: profile.name, avatarUrl });
+    }),
+  );
+
+  return cards;
 }
 
 function mapCertOrg(n: RawCertOrg, profile: CertProfileInfo | undefined): SiteRecord {

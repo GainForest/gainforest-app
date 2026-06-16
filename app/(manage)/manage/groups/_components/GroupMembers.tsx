@@ -43,7 +43,7 @@ function memberErrorMessage(error: unknown, fallback: string): string {
 }
 
 function MemberAvatar({ did, profile }: { did: string; profile?: DidProfile }) {
-  const mono = useMemo(() => monogram(profile?.handle ?? null, did), [profile?.handle, did]);
+  const mono = useMemo(() => monogram(profile?.displayName?.trim() || "Member", did), [profile?.displayName, did]);
   return (
     <div className="relative flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-full text-sm font-semibold text-white">
       {profile?.avatar ? (
@@ -75,11 +75,9 @@ function MemberRow({
   const locked = member.role === "owner";
   const editable = canManage && !locked;
   const name = profile?.displayName?.trim();
-  const handle = profile?.handle?.trim();
-  const primary = name || handle || "Member";
+  const primary = name || "Team member";
   const joined = formatDate(member.addedAt);
-  const detailParts = [name && handle ? handle : null, joined ? `Joined ${joined}` : null].filter(Boolean);
-  const secondary = detailParts.join(" · ") || (profile ? member.did : "Resolving profile…");
+  const secondary = !profile ? "Loading name…" : joined ? `Joined ${joined}` : "Organization member";
 
   return (
     <div className="flex items-center gap-3 rounded-xl px-3 py-3 transition-colors hover:bg-muted/40">
