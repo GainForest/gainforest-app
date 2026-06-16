@@ -31,6 +31,7 @@ import { ModalContent, ModalDescription, ModalFooter, ModalHeader, ModalTitle } 
 import { MODAL_IDS } from "@/components/global/modals/ids";
 import { cn } from "@/lib/utils";
 import { manageApiHref, type ManageTarget } from "@/lib/links";
+import { canCreateRecord, canDeleteRecord, canUpdateRecord } from "../../_lib/cgs-permissions";
 import type {
   OccurrenceRecord,
   TreeMeasurementRecord,
@@ -528,6 +529,10 @@ export function TreesClient({ did, target, onUpload }: TreesClientProps) {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const lastDraftResetKeyRef = useRef<string | null>(null);
   const selectedDraftTreeRkeyRef = useRef<string | null>(null);
+  const writeOptions = target.kind === "group" ? { repo: target.did } : undefined;
+  const createPermission = canCreateRecord(target);
+  const updatePermission = canUpdateRecord(target);
+  const deletePermission = canDeleteRecord(target);
 
   const loadAll = useCallback(async (signal?: AbortSignal) => {
     setIsLoading(true);
@@ -854,6 +859,10 @@ export function TreesClient({ did, target, onUpload }: TreesClientProps) {
   const handleSaveOccurrence = async () => {
     const tree = selectedTree?.occurrence;
     if (!tree) return;
+    if (!updatePermission.allowed) {
+      setOccurrenceError(updatePermission.reason ?? "You cannot edit this tree.");
+      return;
+    }
     const validationError = validateOccurrenceDraft(occurrenceDraft);
     if (validationError) {
       setOccurrenceError(validationError);
@@ -894,7 +903,7 @@ export function TreesClient({ did, target, onUpload }: TreesClientProps) {
 
     setSavingOccurrence(true);
     try {
-      await updateOccurrence({ rkey: tree.rkey, data, unset });
+      await updateOccurrence({ rkey: tree.rkey, data, unset }, writeOptions);
       setTrees((current) => current.map((item) => item.rkey === tree.rkey ? {
         ...item,
         scientificName: normalizedCurrent.scientificName || null,
@@ -931,6 +940,12 @@ export function TreesClient({ did, target, onUpload }: TreesClientProps) {
       return;
     }
 
+    const mutationPermission = measurementRkey ? updatePermission : createPermission;
+    if (!mutationPermission.allowed) {
+      setMeasurementError(mutationPermission.reason ?? "You cannot save measurements for this tree.");
+      return;
+    }
+
     const validationError = validateMeasurementDraft(measurementDraft);
     if (validationError) {
       setMeasurementError(validationError);
@@ -955,7 +970,7 @@ export function TreesClient({ did, target, onUpload }: TreesClientProps) {
           rkey: measurementRkey,
           data: { result: floraPayload ?? toFloraMeasurementPayload(normalizedCurrent, { includeEmpty: true }) ?? undefined },
           resultUnset,
-        });
+        }, writeOptions);
         const nextItem = measurementItemFromResult(did, occurrenceUri, result);
         setMeasurements((current) => current.map((item) => item.metadata.rkey === measurementRkey ? nextItem : item));
         setMeasurementFeedback(floraPayload ? "Measurements saved." : "Shown measurements removed.");
@@ -972,7 +987,7 @@ export function TreesClient({ did, target, onUpload }: TreesClientProps) {
             basalDiameter: floraPayload.basalDiameter,
             canopyCoverPercent: floraPayload.canopyCoverPercent,
           },
-        });
+        }, writeOptions);
         setMeasurements((current) => [measurementItemFromResult(did, occurrenceUri, result), ...current]);
         setMeasurementFeedback("Measurements added.");
       }
@@ -989,6 +1004,10 @@ export function TreesClient({ did, target, onUpload }: TreesClientProps) {
   const handleAddPhotoFile = async (file: File | null) => {
     const tree = selectedTree;
     if (!tree || !file) return;
+    if (!createPermission.allowed) {
+      setPhotoError(createPermission.reason ?? "You cannot add photos to this tree.");
+      return;
+    }
     setSavingPhoto(true);
     setPhotoError(null);
     setPhotoFeedback(null);
@@ -1000,7 +1019,7 @@ export function TreesClient({ did, target, onUpload }: TreesClientProps) {
         siteRef: tree.occurrence.siteRef ?? undefined,
         subjectPart: "wholeTree",
         caption: newPhotoCaption.trim() || undefined,
-      });
+      }, writeOptions);
       setPhotos((current) => [photoItemFromResult(did, tree.occurrence.atUri, result, previewUrl), ...current]);
       setNewPhotoCaption("");
       setPhotoFeedback("Photo added.");
@@ -1017,6 +1036,10 @@ export function TreesClient({ did, target, onUpload }: TreesClientProps) {
     const tree = selectedTree;
     const url = newPhotoUrl.trim();
     if (!tree || !url) return;
+    if (!createPermission.allowed) {
+      setPhotoError(createPermission.reason ?? "You cannot add photos to this tree.");
+      return;
+    }
     setSavingPhoto(true);
     setPhotoError(null);
     setPhotoFeedback(null);
@@ -1027,7 +1050,7 @@ export function TreesClient({ did, target, onUpload }: TreesClientProps) {
         siteRef: tree.occurrence.siteRef ?? undefined,
         subjectPart: "wholeTree",
         caption: newPhotoCaption.trim() || undefined,
-      });
+      }, writeOptions);
       setPhotos((current) => [photoItemFromResult(did, tree.occurrence.atUri, result, url), ...current]);
       setNewPhotoUrl("");
       setNewPhotoCaption("");
@@ -1048,6 +1071,10 @@ export function TreesClient({ did, target, onUpload }: TreesClientProps) {
       setPhotoCaptionDraft("");
       return;
     }
+    if (!updatePermission.allowed) {
+      setPhotoCaptionError(updatePermission.reason ?? "You cannot edit this photo.");
+      return;
+    }
     setSavingPhotoCaptionRkey(rkey);
     setPhotoCaptionError(null);
     try {
@@ -1055,7 +1082,7 @@ export function TreesClient({ did, target, onUpload }: TreesClientProps) {
         rkey,
         data: normalizedCaption ? { caption: normalizedCaption } : {},
         unset: normalizedCaption ? [] : ["caption"],
-      });
+      }, writeOptions);
       setPhotos((current) => current.map((item) => item.metadata.rkey === rkey ? {
         ...item,
         record: { ...item.record, caption: normalizedCaption || null },
@@ -1071,7 +1098,8 @@ export function TreesClient({ did, target, onUpload }: TreesClientProps) {
   };
 
   const handleConfirmDeletePhoto = async (photo: TreeMultimediaRecord) => {
-    await deleteMultimedia(photo.metadata.rkey);
+    if (!deletePermission.allowed) throw new Error(deletePermission.reason ?? "You cannot delete this photo.");
+    await deleteMultimedia(photo.metadata.rkey, writeOptions);
     setPhotos((current) => current.filter((item) => item.metadata.rkey !== photo.metadata.rkey));
     if (editingPhotoRkey === photo.metadata.rkey) {
       setEditingPhotoRkey(null);
@@ -1083,7 +1111,8 @@ export function TreesClient({ did, target, onUpload }: TreesClientProps) {
   const handleConfirmDeleteTree = async (item: TreeManagerItem) => {
     const target = getTreeDeletionTarget(item);
     if (!target) throw new Error("Choose a tree to delete.");
-    const result = await deleteOccurrenceCascade(target.occurrenceRkey);
+    if (!deletePermission.allowed) throw new Error(deletePermission.reason ?? "You cannot delete this tree.");
+    const result = await deleteOccurrenceCascade(target.occurrenceRkey, writeOptions);
     const deletedMeasurementRkeys = new Set(result.deletedMeasurementRkeys);
     const deletedPhotoRkeys = new Set(result.deletedMultimediaRkeys);
     setTrees((current) => current.filter((tree) => tree.rkey !== target.occurrenceRkey));
@@ -1105,7 +1134,8 @@ export function TreesClient({ did, target, onUpload }: TreesClientProps) {
   };
 
   const handleConfirmDeleteTreeGroup = async (target: TreeGroupDeletionTarget) => {
-    const result = await deleteTreeGroupCascade(target.treeGroup.rkey);
+    if (!deletePermission.allowed) throw new Error(deletePermission.reason ?? "You cannot delete this tree group.");
+    const result = await deleteTreeGroupCascade(target.treeGroup.rkey, writeOptions);
     const deletedTreeRkeys = new Set(result.deletedTreeRkeys);
     const deletedTreeUris = new Set(result.deletedTreeUris);
     const deletedMeasurementRkeys = new Set(result.deletedMeasurementRkeys);
@@ -1184,6 +1214,7 @@ export function TreesClient({ did, target, onUpload }: TreesClientProps) {
   const handleAttachTreesToTreeGroup = async (occurrenceRkeys: string[], treeGroup: UploadTreeDatasetRecord) => {
     const uniqueRkeys = Array.from(new Set(occurrenceRkeys.filter(Boolean)));
     if (uniqueRkeys.length === 0) throw new Error("Choose at least one ungrouped tree.");
+    if (!updatePermission.allowed) throw new Error(updatePermission.reason ?? "You cannot add existing trees to a tree group.");
 
     setTreeGroupAttachPending(true);
     try {
@@ -1202,7 +1233,7 @@ export function TreesClient({ did, target, onUpload }: TreesClientProps) {
 
       for (const [chunkIndex, chunk] of chunks.entries()) {
         try {
-          const result = await attachExistingOccurrences({ datasetRkey: treeGroup.rkey, occurrenceRkeys: chunk });
+          const result = await attachExistingOccurrences({ datasetRkey: treeGroup.rkey, occurrenceRkeys: chunk }, writeOptions);
           aggregate.datasetUri = result.datasetUri;
           aggregate.datasetRkey = result.datasetRkey;
           aggregate.attachedCount += result.attachedCount;
@@ -1235,6 +1266,10 @@ export function TreesClient({ did, target, onUpload }: TreesClientProps) {
   };
 
   const openAddToTreeGroupModal = (items: TreeManagerItem[]) => {
+    if (!updatePermission.allowed) {
+      setTreeGroupAttachFeedback(updatePermission.reason ?? "You cannot add existing trees to a tree group.");
+      return;
+    }
     if (datasets.length === 0) {
       setTreeGroupAttachFeedback("Create a tree group during tree upload before adding ungrouped trees to it.");
       return;
@@ -1266,6 +1301,10 @@ export function TreesClient({ did, target, onUpload }: TreesClientProps) {
   };
 
   const openDeleteTreeGroupConfirm = (treeGroupId: string) => {
+    if (!deletePermission.allowed) {
+      setDeletedFeedback({ tone: "warn", message: deletePermission.reason ?? "You cannot delete this tree group." });
+      return;
+    }
     if (treeGroupId === UNGROUPED_DATASET_FILTER) return;
     const treeGroup = datasetLookup.get(treeGroupId);
     if (!treeGroup) {
@@ -1410,7 +1449,7 @@ export function TreesClient({ did, target, onUpload }: TreesClientProps) {
             focusedSiteRef={selectedTreeGroupPreviewFocusedSiteRef}
           />
           <div className="flex justify-end">
-            <Button variant="destructive" size="sm" onClick={() => openDeleteTreeGroupConfirm(selectedTreeGroup.uri)}>
+            <Button variant="destructive" size="sm" onClick={() => openDeleteTreeGroupConfirm(selectedTreeGroup.uri)} disabled={!deletePermission.allowed} title={deletePermission.reason ?? undefined}>
               <Trash2Icon />
               Delete tree group
             </Button>
@@ -1449,7 +1488,7 @@ export function TreesClient({ did, target, onUpload }: TreesClientProps) {
               <Button variant="outline" onClick={() => setTreeGroupSearchQuery("")}>Clear search</Button>
             </div>
           ) : (
-            <DatasetLandingSection datasetCards={filteredTreeGroupCards} onOpen={handleDatasetChange} onDelete={openDeleteTreeGroupConfirm} />
+            <DatasetLandingSection datasetCards={filteredTreeGroupCards} onOpen={handleDatasetChange} onDelete={openDeleteTreeGroupConfirm} deleteDisabledReason={deletePermission.reason} />
           )}
         </div>
       ) : filteredTrees.length === 0 ? (
@@ -1491,7 +1530,8 @@ export function TreesClient({ did, target, onUpload }: TreesClientProps) {
                     variant="outline"
                     size="sm"
                     onClick={() => openAddToTreeGroupModal(selectedUngroupedTrees)}
-                    disabled={selectedUngroupedTreeCount === 0 || datasets.length === 0 || treeGroupAttachPending}
+                    disabled={selectedUngroupedTreeCount === 0 || datasets.length === 0 || treeGroupAttachPending || !updatePermission.allowed}
+                    title={updatePermission.reason ?? undefined}
                     className="w-full sm:w-auto"
                   >
                     {treeGroupAttachPending ? <Loader2Icon className="animate-spin" /> : <DatabaseIcon />}
@@ -1581,7 +1621,8 @@ export function TreesClient({ did, target, onUpload }: TreesClientProps) {
                         variant="outline"
                         size="sm"
                         onClick={() => openAddToTreeGroupModal([selectedTree])}
-                        disabled={datasets.length === 0 || treeGroupAttachPending}
+                        disabled={datasets.length === 0 || treeGroupAttachPending || !updatePermission.allowed}
+                        title={updatePermission.reason ?? undefined}
                       >
                         {treeGroupAttachPending ? <Loader2Icon className="animate-spin" /> : <DatabaseIcon />}
                         Add to tree group
@@ -1662,7 +1703,7 @@ export function TreesClient({ did, target, onUpload }: TreesClientProps) {
                       <span className="text-muted-foreground">{occurrenceFeedback}</span>
                     ) : null}
                   </div>
-                  <Button onClick={() => void handleSaveOccurrence()} disabled={!occurrenceHasChanges || Boolean(occurrenceValidationError) || savingOccurrence}>
+                  <Button onClick={() => void handleSaveOccurrence()} disabled={!occurrenceHasChanges || Boolean(occurrenceValidationError) || savingOccurrence || !updatePermission.allowed} title={updatePermission.reason ?? undefined}>
                     {savingOccurrence ? <Loader2Icon className="animate-spin" /> : <CheckIcon />}
                     Save tree information
                   </Button>
@@ -1717,8 +1758,10 @@ export function TreesClient({ did, target, onUpload }: TreesClientProps) {
                           !measurementHasChanges ||
                           Boolean(measurementValidationError) ||
                           savingMeasurement ||
-                          (!selectedTree.preferredMeasurement && !hasAnyMeasurementValue(measurementDraft))
+                          (!selectedTree.preferredMeasurement && !hasAnyMeasurementValue(measurementDraft)) ||
+                          !(selectedTree.preferredMeasurement ? updatePermission.allowed : createPermission.allowed)
                         }
+                        title={(selectedTree.preferredMeasurement ? updatePermission.reason : createPermission.reason) ?? undefined}
                       >
                         {savingMeasurement ? <Loader2Icon className="animate-spin" /> : <CheckIcon />}
                         {selectedTree.preferredMeasurement && !hasAnyMeasurementValue(measurementDraft)
@@ -1747,7 +1790,7 @@ export function TreesClient({ did, target, onUpload }: TreesClientProps) {
                         className="hidden"
                         onChange={(event) => void handleAddPhotoFile(event.currentTarget.files?.[0] ?? null)}
                       />
-                      <Button type="button" onClick={() => fileInputRef.current?.click()} disabled={savingPhoto}>
+                      <Button type="button" onClick={() => fileInputRef.current?.click()} disabled={savingPhoto || !createPermission.allowed} title={createPermission.reason ?? undefined}>
                         {savingPhoto ? <Loader2Icon className="animate-spin" /> : <CameraIcon />}
                         Choose photo
                       </Button>
@@ -1755,7 +1798,7 @@ export function TreesClient({ did, target, onUpload }: TreesClientProps) {
                   </div>
                   <div className="flex flex-col gap-2 md:flex-row">
                     <Input value={newPhotoUrl} onChange={(event) => setNewPhotoUrl(event.target.value)} placeholder="Or paste a photo link" />
-                    <Button type="button" variant="outline" onClick={() => void handleAddPhotoUrl()} disabled={savingPhoto || !newPhotoUrl.trim()}>
+                    <Button type="button" variant="outline" onClick={() => void handleAddPhotoUrl()} disabled={savingPhoto || !newPhotoUrl.trim() || !createPermission.allowed} title={createPermission.reason ?? undefined}>
                       Add linked photo
                     </Button>
                   </div>
@@ -1793,7 +1836,7 @@ export function TreesClient({ did, target, onUpload }: TreesClientProps) {
                                     <Textarea value={photoCaptionDraft} onChange={(event) => { setPhotoCaptionDraft(event.target.value); setPhotoCaptionError(null); }} rows={3} className="resize-none text-sm" />
                                     {photoCaptionError ? <p className="text-xs text-destructive">{photoCaptionError}</p> : null}
                                     <div className="flex flex-wrap gap-2">
-                                      <Button size="sm" onClick={() => void handleSavePhotoCaption(photo)} disabled={isSavingCaption}>
+                                      <Button size="sm" onClick={() => void handleSavePhotoCaption(photo)} disabled={isSavingCaption || !updatePermission.allowed} title={updatePermission.reason ?? undefined}>
                                         {isSavingCaption ? <Loader2Icon className="animate-spin" /> : <CheckIcon />}
                                         Save caption
                                       </Button>
@@ -1806,14 +1849,14 @@ export function TreesClient({ did, target, onUpload }: TreesClientProps) {
                                 ) : (
                                   <div className="space-y-2">
                                     <p className={cn("text-sm break-words", !photo.record.caption && "text-muted-foreground")}>{photo.record.caption ?? "No caption added."}</p>
-                                    <Button type="button" variant="outline" size="sm" onClick={() => { setEditingPhotoRkey(photo.metadata.rkey); setPhotoCaptionDraft(photo.record.caption ?? ""); setPhotoCaptionError(null); }} disabled={savingPhotoCaptionRkey !== null}>
+                                    <Button type="button" variant="outline" size="sm" onClick={() => { setEditingPhotoRkey(photo.metadata.rkey); setPhotoCaptionDraft(photo.record.caption ?? ""); setPhotoCaptionError(null); }} disabled={savingPhotoCaptionRkey !== null || !updatePermission.allowed} title={updatePermission.reason ?? undefined}>
                                       <PencilIcon />
                                       {photo.record.caption ? "Edit caption" : "Add caption"}
                                     </Button>
                                   </div>
                                 )}
                               </div>
-                              <Button variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-destructive" aria-label="Delete photo" onClick={() => setConfirmTarget({ type: "photo", photo })}>
+                              <Button variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-destructive" aria-label="Delete photo" onClick={() => setConfirmTarget({ type: "photo", photo })} disabled={!deletePermission.allowed} title={deletePermission.reason ?? undefined}>
                                 <Trash2Icon />
                               </Button>
                             </div>
@@ -1836,7 +1879,7 @@ export function TreesClient({ did, target, onUpload }: TreesClientProps) {
                         : "This tree cannot be deleted until its details finish loading."}
                     </p>
                   </div>
-                  <Button variant="destructive" disabled={!activeDeletionTarget} onClick={() => setConfirmTarget({ type: "tree", item: selectedTree })}>
+                  <Button variant="destructive" disabled={!activeDeletionTarget || !deletePermission.allowed} title={deletePermission.reason ?? undefined} onClick={() => setConfirmTarget({ type: "tree", item: selectedTree })}>
                     <Trash2Icon />
                     Delete tree
                   </Button>

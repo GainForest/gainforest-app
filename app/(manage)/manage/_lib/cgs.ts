@@ -26,6 +26,13 @@ export type CgsMember = {
   addedAt?: string | null;
 };
 
+export type CgsMemberIdentity = {
+  did: string;
+  displayName?: string | null;
+  avatarUrl?: string | null;
+  handle?: string | null;
+};
+
 export type CgsMembersResponse = {
   members: CgsMember[];
   cursor?: string;
@@ -180,6 +187,12 @@ export async function listCgsMembers(repo: string): Promise<CgsMembersResponse> 
   const res = await fetch(`/api/cgs/members?${params.toString()}`, { cache: "no-store" });
   const data = await parseJsonResponse<CgsMembersResponse>(res, "Could not load members.");
   return { ...data, members: normalizeCgsMembers(data.members) };
+}
+
+export async function resolveCgsMemberIdentity(identifier: string): Promise<CgsMemberIdentity> {
+  const params = new URLSearchParams({ identifier });
+  const res = await fetch(`/api/cgs/member-identity?${params.toString()}`, { cache: "no-store" });
+  return parseJsonResponse<CgsMemberIdentity>(res, "Could not find that member.");
 }
 
 export async function addCgsMember(repo: string, memberDid: string, role: "member" | "admin") {

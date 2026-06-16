@@ -211,10 +211,12 @@ export function DatasetLandingSection({
   datasetCards,
   onOpen,
   onDelete,
+  deleteDisabledReason = null,
 }: {
   datasetCards: DatasetLandingCard[];
   onOpen: (treeGroupId: string) => void;
   onDelete?: (treeGroupId: string) => void;
+  deleteDisabledReason?: string | null;
 }) {
   return (
     <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
@@ -268,6 +270,8 @@ export function DatasetLandingSection({
                 size="sm"
                 className="text-destructive hover:text-destructive"
                 onClick={() => onDelete(card.id)}
+                disabled={Boolean(deleteDisabledReason)}
+                title={deleteDisabledReason ?? undefined}
                 aria-label={`Delete tree group ${card.name}`}
               >
                 <Trash2Icon />

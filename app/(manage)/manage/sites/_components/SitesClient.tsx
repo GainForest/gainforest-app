@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { manageApiHref, manageHref, type ManageTarget } from "@/lib/links";
 import { useModal } from "@/components/ui/modal/context";
 import Container from "@/components/ui/container";
+import { canCreateRecord, canDeleteRecord, canUpdateRecord } from "../../_lib/cgs-permissions";
 import { deleteRecord, putRecord } from "../../_lib/mutations";
 import type { ManagedLocation } from "@/app/_lib/indexer";
 import { SitesSkeleton } from "./SitesSkeleton";
@@ -93,6 +94,9 @@ export function SitesClient({ did, target }: { did: string; target: ManageTarget
   const [previewingRkey, setPreviewingRkey] = useState<string | null>(searchParams.get("rkey"));
   const [iframeUrl, setIframeUrl] = useState<string | null>(null);
   const [view, setView] = useState<ViewMode>("cards");
+  const createPermission = canCreateRecord(target);
+  const updatePermission = canUpdateRecord(target);
+  const deletePermission = canDeleteRecord(target);
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
 
   const loadDefaultSite = useCallback(async () => {
@@ -181,6 +185,10 @@ export function SitesClient({ did, target }: { did: string; target: ManageTarget
   const canShowPreview = currentSiteIndex >= 0 && Boolean(iframeUrl);
 
   const handleOpenAdd = () => {
+    if (!createPermission.allowed) {
+      setFetchError(createPermission.reason ?? "You cannot add sites for this organization.");
+      return;
+    }
     modal.pushModal(
       {
         id: SiteEditorModalId,
@@ -200,6 +208,10 @@ export function SitesClient({ did, target }: { did: string; target: ManageTarget
   };
 
   const handleOpenEdit = (site: ManagedLocation) => {
+    if (!updatePermission.allowed) {
+      if (site.metadata.rkey) setCardError(site.metadata.rkey, updatePermission.reason ?? "You cannot edit this site.");
+      return;
+    }
     const rkey = site.metadata.rkey;
     modal.pushModal(
       {
@@ -238,6 +250,10 @@ export function SitesClient({ did, target }: { did: string; target: ManageTarget
     const rkey = site.metadata.rkey;
     const siteUri = site.metadata.uri;
     if (!rkey || !siteUri) return;
+    if (!updatePermission.allowed) {
+      setCardError(rkey, updatePermission.reason ?? "You cannot change the default site.");
+      return;
+    }
     setSettingDefaultRkey(rkey);
     setCardError(rkey, null);
     const previousDefault = defaultSiteUri;
@@ -262,6 +278,10 @@ export function SitesClient({ did, target }: { did: string; target: ManageTarget
     if (!rkey) return;
     if (site.metadata.uri && site.metadata.uri === defaultSiteUri) {
       setCardError(rkey, "Choose another default site before deleting this one.");
+      return;
+    }
+    if (!deletePermission.allowed) {
+      setCardError(rkey, deletePermission.reason ?? "You cannot delete this site.");
       return;
     }
 
@@ -297,7 +317,7 @@ export function SitesClient({ did, target }: { did: string; target: ManageTarget
         </div>
         <div className="flex shrink-0 items-center gap-2">
           {sites.length > 0 ? <ViewToggle view={view} setView={setView} /> : null}
-          <Button size="sm" className="rounded-full" onClick={handleOpenAdd}>
+          <Button size="sm" className="rounded-full" onClick={handleOpenAdd} disabled={!createPermission.allowed} title={createPermission.reason ?? undefined}>
             <CirclePlusIcon />
             Add site
           </Button>
@@ -370,7 +390,7 @@ export function SitesClient({ did, target }: { did: string; target: ManageTarget
           <p className="max-w-sm text-sm text-muted-foreground">
             Add your first field location to get started.
           </p>
-          <Button variant="outline" size="sm" onClick={handleOpenAdd}>
+          <Button variant="outline" size="sm" onClick={handleOpenAdd} disabled={!createPermission.allowed} title={createPermission.reason ?? undefined}>
             <CirclePlusIcon />
             Add a site
           </Button>
@@ -394,6 +414,8 @@ export function SitesClient({ did, target }: { did: string; target: ManageTarget
                   isDeleting={deletingRkey === rkey}
                   error={cardErrors[rkey] ?? null}
                   variant={view === "list" ? "list" : "card"}
+                  updateDisabledReason={updatePermission.reason}
+                  deleteDisabledReason={deletePermission.reason}
                 />
               );
               return view === "list" ? (

@@ -35,6 +35,8 @@ type SiteCardProps = {
   isDeleting: boolean;
   error?: string | null;
   variant?: "card" | "list";
+  updateDisabledReason?: string | null;
+  deleteDisabledReason?: string | null;
 };
 
 export function SiteCard({
@@ -49,6 +51,8 @@ export function SiteCard({
   isDeleting,
   error,
   variant = "card",
+  updateDisabledReason = null,
+  deleteDisabledReason = null,
 }: SiteCardProps) {
   const locationUrl = useMemo(() => getSiteLocationUrl(site), [site]);
   const inlineCoord = useMemo(() => getInlineSiteCoordinate(site), [site]);
@@ -202,13 +206,14 @@ export function SiteCard({
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={onEdit} disabled={disableActions}>
+            <DropdownMenuItem onClick={onEdit} disabled={disableActions || Boolean(updateDisabledReason)} title={updateDisabledReason ?? undefined}>
               <PencilIcon className="mr-2 h-3.5 w-3.5" />
               Edit
             </DropdownMenuItem>
             <DropdownMenuItem
               onClick={onSetDefault}
-              disabled={isDefault || disableActions}
+              disabled={isDefault || disableActions || Boolean(updateDisabledReason)}
+              title={updateDisabledReason ?? undefined}
             >
               <BadgeCheckIcon className="mr-2 h-3.5 w-3.5" />
               {isDefault ? "Already default" : "Make default"}
@@ -217,7 +222,8 @@ export function SiteCard({
             <DropdownMenuItem
               variant="destructive"
               onClick={onDelete}
-              disabled={isDefault || disableActions}
+              disabled={isDefault || disableActions || Boolean(deleteDisabledReason)}
+              title={deleteDisabledReason ?? undefined}
             >
               <Trash2Icon className="mr-2 h-3.5 w-3.5" />
               Delete

@@ -13,6 +13,7 @@ import {
   addCgsMember,
   listCgsMembers,
   removeCgsMember,
+  resolveCgsMemberIdentity,
   setCgsMemberRole,
   type CgsMember,
   type CgsRole,
@@ -60,20 +61,23 @@ function MemberAvatar({ did, profile }: { did: string; profile?: DidProfile }) {
 function MemberRow({
   member,
   profile,
-  canManage,
+  canRemove,
+  canSetRoles,
   isPending,
   onRoleChange,
   onRemove,
 }: {
   member: CgsMember;
   profile?: DidProfile;
-  canManage: boolean;
+  canRemove: boolean;
+  canSetRoles: boolean;
   isPending: boolean;
   onRoleChange: (did: string, role: RoleInput) => void;
   onRemove: (did: string) => void;
 }) {
   const locked = member.role === "owner";
-  const editable = canManage && !locked;
+  const roleEditable = canSetRoles && !locked;
+  const removable = canRemove && !locked;
   const name = profile?.displayName?.trim();
   const primary = name || "Team member";
   const joined = formatDate(member.addedAt);
@@ -87,7 +91,7 @@ function MemberRow({
         <p className="truncate text-xs text-muted-foreground">{secondary}</p>
       </div>
 
-      {editable ? (
+      {roleEditable ? (
         <select
           className="h-8 rounded-full border border-border bg-background px-3 text-xs font-medium capitalize text-foreground outline-none transition-colors focus:border-primary/60"
           value={member.role === "admin" ? "admin" : "member"}
@@ -104,7 +108,7 @@ function MemberRow({
         </span>
       )}
 
-      {editable ? (
+      {removable ? (
         <Button
           type="button"
           variant="ghost"
@@ -137,12 +141,13 @@ export function GroupMembers({
   initialMembers?: CgsMember[];
   initialError?: string | null;
 }) {
-  const canManage = currentRole === "owner" || currentRole === "admin";
+  const canAddRemove = currentRole === "owner" || currentRole === "admin";
+  const canSetRoles = currentRole === "owner";
   const hasInitialMembers = initialMembers !== undefined;
 
   const [members, setMembers] = useState<CgsMember[]>(() => initialMembers ?? []);
   const [profiles, setProfiles] = useState<Record<string, DidProfile>>({});
-  const [memberDid, setMemberDid] = useState("");
+  const [memberIdentifier, setMemberIdentifier] = useState("");
   const [role, setRole] = useState<RoleInput>("member");
   const [error, setError] = useState<string | null>(initialError);
   const [loaded, setLoaded] = useState(hasInitialMembers || Boolean(initialError));
@@ -186,14 +191,16 @@ export function GroupMembers({
 
   const handleAdd = (event: FormEvent) => {
     event.preventDefault();
-    if (!canManage) return;
-    const did = memberDid.trim();
-    if (!did) return;
+    if (!canAddRemove) return;
+    const identifier = memberIdentifier.trim();
+    if (!identifier) return;
+    const nextRole = canSetRoles ? role : "member";
     startTransition(async () => {
       setError(null);
       try {
-        await addCgsMember(groupDid, did, role);
-        setMemberDid("");
+        const identity = await resolveCgsMemberIdentity(identifier);
+        await addCgsMember(groupDid, identity.did, nextRole);
+        setMemberIdentifier("");
         const result = await listCgsMembers(groupDid);
         setMembers(result.members ?? []);
       } catch (err) {
@@ -203,7 +210,7 @@ export function GroupMembers({
   };
 
   const updateRole = (did: string, nextRole: RoleInput) => {
-    if (!canManage) return;
+    if (!canSetRoles) return;
     startTransition(async () => {
       setError(null);
       try {
@@ -216,7 +223,7 @@ export function GroupMembers({
   };
 
   const remove = (did: string) => {
-    if (!canManage) return;
+    if (!canAddRemove) return;
     startTransition(async () => {
       setError(null);
       try {
@@ -235,28 +242,37 @@ export function GroupMembers({
 
   const count = members.length;
 
-  const addForm = canManage ? (
-    <form onSubmit={handleAdd} className="grid gap-2 sm:grid-cols-[1fr_auto_auto]">
-      <Input
-        value={memberDid}
-        onChange={(event) => setMemberDid(event.target.value)}
-        placeholder="Member username"
-        disabled={isPending}
-      />
-      <select
-        className="h-9 rounded-full border border-border bg-background px-4 text-sm capitalize text-foreground outline-none transition-colors focus:border-primary/60"
-        value={role}
-        onChange={(event) => setRole(event.target.value as RoleInput)}
-        disabled={isPending}
-        aria-label="Role for new member"
-      >
-        <option value="member">Member</option>
-        <option value="admin">Admin</option>
-      </select>
-      <Button type="submit" disabled={isPending || !memberDid.trim()}>
-        <UserPlusIcon /> Add
-      </Button>
-    </form>
+  const addForm = canAddRemove ? (
+    <div className="space-y-2">
+      <form onSubmit={handleAdd} className={cn("grid gap-2", canSetRoles ? "sm:grid-cols-[1fr_auto_auto]" : "sm:grid-cols-[1fr_auto]")}>
+        <Input
+          value={memberIdentifier}
+          onChange={(event) => setMemberIdentifier(event.target.value)}
+          placeholder="name@example.com"
+          autoComplete="email"
+          disabled={isPending}
+          aria-label="Member email or username"
+        />
+        {canSetRoles ? (
+          <select
+            className="h-9 rounded-full border border-border bg-background px-4 text-sm capitalize text-foreground outline-none transition-colors focus:border-primary/60"
+            value={role}
+            onChange={(event) => setRole(event.target.value as RoleInput)}
+            disabled={isPending}
+            aria-label="Role for new member"
+          >
+            <option value="member">Member</option>
+            <option value="admin">Admin</option>
+          </select>
+        ) : null}
+        <Button type="submit" disabled={isPending || !memberIdentifier.trim()}>
+          <UserPlusIcon /> Add
+        </Button>
+      </form>
+      {canSetRoles ? null : (
+        <p className="text-xs text-muted-foreground">Admins can add regular members. Ask an owner to change roles or add another admin.</p>
+      )}
+    </div>
   ) : (
     <p className="flex items-center gap-2 rounded-2xl bg-muted/50 px-3.5 py-2.5 text-sm text-muted-foreground">
       <LockIcon className="size-3.5 shrink-0" /> Only owners and admins can add or remove members.
@@ -285,7 +301,8 @@ export function GroupMembers({
             key={member.did}
             member={member}
             profile={profiles[member.did]}
-            canManage={canManage}
+            canRemove={canAddRemove}
+            canSetRoles={canSetRoles}
             isPending={isPending}
             onRoleChange={updateRole}
             onRemove={remove}
@@ -336,9 +353,11 @@ export function GroupMembers({
               ) : null}
             </div>
             <p className="text-sm text-muted-foreground">
-              {canManage
-                ? "Add or remove people and control who can make changes for this organization."
-                : "You can view members but not change them."}
+              {canSetRoles
+                ? "Add people and control who can make changes for this organization."
+                : canAddRemove
+                  ? "Add or remove regular members. Only owners can change roles."
+                  : "You can view members but not change them."}
             </p>
           </div>
         </div>

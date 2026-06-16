@@ -110,7 +110,7 @@ function friendlyKnownCgsMessage(message: string, fallback: string): string | nu
   }
 
   if (normalized.includes("invalid did") || normalized.includes("invalid member")) {
-    return "Enter a valid Bluesky handle or DID.";
+    return "Enter a valid member email or username.";
   }
 
   if (normalized.includes("failed to fetch") || normalized.includes("networkerror") || normalized === "load failed") {

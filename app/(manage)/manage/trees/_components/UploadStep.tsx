@@ -215,7 +215,7 @@ export default function UploadStep({
   onDone,
 }: UploadStepProps) {
   const { pushModal, show } = useModal();
-  const writeOptions = target.kind === "group" ? { repo: target.did } : undefined;
+  const writeOptions = useMemo(() => target.kind === "group" ? { repo: target.did } : undefined, [target.did, target.kind]);
   const [uploadStarted, setUploadStarted] = useState(false);
   const [uploadDone, setUploadDone] = useState(false);
   const [uploadStartedAtMs, setUploadStartedAtMs] = useState<number | null>(null);
@@ -471,7 +471,7 @@ export default function UploadStep({
           }
 
           try {
-            await detachOccurrenceFromDataset(rkey);
+            await detachOccurrenceFromDataset(rkey, writeOptions);
             if (status.state === "success") demotedSuccesses += 1;
             statuses[index] = { state: "partial", occurrenceUri: status.occurrenceUri, photoCount: status.photoCount, error: nextBaseError };
           } catch {
@@ -517,7 +517,7 @@ export default function UploadStep({
             datasetRkey: datasetSelection.dataset.rkey,
             rows: chunkRows,
             establishmentMeans,
-          });
+          }, writeOptions);
           const handledIndexes = new Set<number>();
           setUploadedDatasetUri(response.datasetBecameUnavailable ? null : response.datasetUri);
 
@@ -723,7 +723,7 @@ export default function UploadStep({
       }
     } else if (datasetSelection.mode === "new" && datasetRkey && persistedOccurrences > 0) {
       try {
-        await incrementDatasetRecordCount(datasetRkey, persistedOccurrences);
+        await incrementDatasetRecordCount(datasetRkey, persistedOccurrences, writeOptions);
       } catch {
         setDatasetUpdateWarning("Tree group created, but its tree count could not be updated.");
       }
@@ -743,7 +743,7 @@ export default function UploadStep({
     });
     setClockMs(completedAtMs);
     setUploadDone(true);
-  }, [datasetSelection, establishmentMeans, koboMediaZipFile, photoFetchQueue.length, previewSkippedRows.length, siteSelection, uploadId, validRows]);
+  }, [datasetSelection, establishmentMeans, koboMediaZipFile, photoFetchQueue.length, previewSkippedRows.length, siteSelection, uploadId, validRows, writeOptions]);
 
   const runPhotoFetch = useCallback(async () => {
     if (photoFetchRef.current) return;
@@ -814,7 +814,7 @@ export default function UploadStep({
               occurrenceRef: occurrenceUri,
               siteRef: siteSelection?.uri,
               subjectPart: photo.subjectPart,
-            })
+            }, writeOptions)
           : await (async () => {
               const archivePromise = getKoboMediaArchive();
               if (!archivePromise) {
@@ -834,7 +834,7 @@ export default function UploadStep({
                 subjectPart: photo.subjectPart,
                 caption: `Imported from photo folder: ${photo.fileName}`,
                 format: photoFile.type,
-              });
+              }, writeOptions);
             })();
 
         successes += 1;
@@ -895,7 +895,7 @@ export default function UploadStep({
     });
     setClockMs(completedAtMs);
     setPhotoFetchDone(true);
-  }, [datasetSelection.mode, koboMediaZipFile, photoFetchQueue, rowStatuses, siteSelection?.uri, uploadId, validRows.length]);
+  }, [datasetSelection.mode, koboMediaZipFile, photoFetchQueue, rowStatuses, siteSelection?.uri, uploadId, validRows.length, writeOptions]);
 
   const { current, total: uploadTotal, successes, partials, failures, currentRow } = progress;
   const completedRows = successes + partials + failures;

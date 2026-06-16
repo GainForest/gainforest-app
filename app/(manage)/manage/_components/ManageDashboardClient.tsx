@@ -37,6 +37,7 @@ import { countryFlag } from "@/app/_lib/format";
 import { resolvePdsHost } from "@/app/_lib/pds";
 import { putRecord, uploadBlob } from "../_lib/mutations";
 import { createCountryLocationStrongRef, normalizeCountryCode } from "../_lib/country-location";
+import { canEditGroupProfile } from "../_lib/cgs-permissions";
 import Container from "@/components/ui/container";
 import { useModal } from "@/components/ui/modal/context";
 import {
@@ -147,6 +148,7 @@ function AboutSection({
   onChange,
   onSave,
   onCancel,
+  editDisabledReason = null,
 }: {
   value: string;
   draft: string;
@@ -157,6 +159,7 @@ function AboutSection({
   onChange: (value: string) => void;
   onSave: () => void;
   onCancel: () => void;
+  editDisabledReason?: string | null;
 }) {
   const t = useTranslations("upload.dashboardClient");
   const text = value.trim();
@@ -168,7 +171,7 @@ function AboutSection({
     >
       <div className="flex items-center gap-2">
         <h2 className="font-instrument text-2xl italic leading-none text-foreground">{t("about.title")}</h2>
-        {isEditing ? null : (
+        {isEditing || editDisabledReason ? null : (
           <button
             type="button"
             onClick={onEdit}
@@ -193,9 +196,12 @@ function AboutSection({
           {saveError ? <p className="text-sm text-destructive">{saveError}</p> : null}
         </div>
       ) : (
-        <p className={cn("mt-3 max-w-2xl whitespace-pre-line text-sm leading-relaxed", text ? "text-muted-foreground" : "text-muted-foreground/60")}>
-          {text || t("about.empty")}
-        </p>
+        <>
+          <p className={cn("mt-3 max-w-2xl whitespace-pre-line text-sm leading-relaxed", text ? "text-muted-foreground" : "text-muted-foreground/60")}>
+            {text || t("about.empty")}
+          </p>
+          {editDisabledReason ? <p className="mt-2 text-xs text-muted-foreground">{editDisabledReason}</p> : null}
+        </>
       )}
     </motion.section>
   );
@@ -243,6 +249,7 @@ function EditableHero({
   onEditVisibility,
   onEditOrgType,
   onEditSocials,
+  editDisabledReason = null,
 }: {
   account: AccountRouteData;
   basePath: string;
@@ -262,6 +269,7 @@ function EditableHero({
   onEditVisibility: () => void;
   onEditOrgType: () => void;
   onEditSocials: () => void;
+  editDisabledReason?: string | null;
 }) {
   const t = useTranslations("upload.dashboardClient");
   const logoObjectUrl = useMemo(
@@ -279,6 +287,7 @@ function EditableHero({
   const logoUrl = logoObjectUrl ?? account.avatarUrl;
 
   const editing = inlineField === "profile";
+  const canEdit = !editDisabledReason;
 
   const isOrg = account.kind === "organization";
   const resolvedWebsite = editState.website || account.website;
@@ -293,8 +302,10 @@ function EditableHero({
       <div className="relative h-32 sm:h-40 md:h-44">
         <button
           type="button"
-          onClick={onEditCover}
-          className="group/cover absolute inset-0 block w-full overflow-hidden"
+          onClick={canEdit ? onEditCover : undefined}
+          disabled={!canEdit}
+          title={editDisabledReason ?? undefined}
+          className="group/cover absolute inset-0 block w-full overflow-hidden disabled:cursor-not-allowed"
           aria-label={coverImageUrl ? t("hero.changeCoverImage") : t("hero.addCoverImage")}
         >
           {coverImageUrl ? (
@@ -334,8 +345,10 @@ function EditableHero({
         <div className="-mt-12 flex flex-col gap-4 md:flex-row md:items-end md:gap-5">
         <button
           type="button"
-          onClick={onEditLogo}
-          className="group/avatar relative block size-24 shrink-0 overflow-hidden rounded-full border border-border/60 bg-muted ring-4 ring-card"
+          onClick={canEdit ? onEditLogo : undefined}
+          disabled={!canEdit}
+          title={editDisabledReason ?? undefined}
+          className="group/avatar relative block size-24 shrink-0 overflow-hidden rounded-full border border-border/60 bg-muted ring-4 ring-card disabled:cursor-not-allowed"
           aria-label={logoUrl ? (account.kind === "organization" ? t("hero.changeLogo") : t("hero.changePhoto")) : (account.kind === "organization" ? t("hero.addLogo") : t("hero.addPhoto"))}
         >
           {logoUrl ? (
@@ -379,13 +392,16 @@ function EditableHero({
                 <h1 className="font-instrument text-3xl font-light italic leading-[1.1] tracking-[-0.02em] text-foreground md:text-4xl">
                   {editState.displayName || account.displayName}
                 </h1>
-                <button type="button" onClick={() => onEditField("profile")} className="mt-1 rounded-full p-1 text-foreground/40 transition-colors hover:bg-muted hover:text-foreground" aria-label={t("hero.editProfileAria")}>
-                  <PencilIcon className="size-4" />
-                </button>
+                {canEdit ? (
+                  <button type="button" onClick={() => onEditField("profile")} className="mt-1 rounded-full p-1 text-foreground/40 transition-colors hover:bg-muted hover:text-foreground" aria-label={t("hero.editProfileAria")}>
+                    <PencilIcon className="size-4" />
+                  </button>
+                ) : null}
               </div>
               <p className={cn("mt-1.5 line-clamp-2 text-sm leading-relaxed", editState.description ? "text-muted-foreground" : "text-muted-foreground/60")}>
                 {editState.description || t("hero.noBio")}
               </p>
+              {editDisabledReason ? <p className="mt-2 text-xs text-muted-foreground">{editDisabledReason}</p> : null}
             </>
           )}
           {saveError ? <p className="mt-2 text-sm text-destructive">{saveError}</p> : null}
@@ -395,32 +411,32 @@ function EditableHero({
         {/* Detail buttons */}
         <div className="mt-5 flex flex-wrap items-center gap-2">
           {isOrg ? (
-            <Button variant="outline" onClick={onEditOrgType} className={cn(!editState.orgType.trim() && "text-muted-foreground")}>
+            <Button variant="outline" onClick={onEditOrgType} disabled={!canEdit} title={editDisabledReason ?? undefined} className={cn(!editState.orgType.trim() && "text-muted-foreground")}>
               <Building2Icon /> {editState.orgType.trim() || t("hero.addType")}
             </Button>
           ) : null}
           {isOrg ? (
-            <Button variant="outline" onClick={onEditCountry} className={cn(!countryLabel && "text-muted-foreground")}>
+            <Button variant="outline" onClick={onEditCountry} disabled={!canEdit} title={editDisabledReason ?? undefined} className={cn(!countryLabel && "text-muted-foreground")}>
               {flag ? <span className="text-base leading-none" aria-hidden="true">{flag}</span> : <MapPinIcon />}
               {countryLabel ?? t("hero.addCountry")}
             </Button>
           ) : null}
           {isOrg ? (
-            <Button variant="outline" onClick={onEditStartDate} className={cn(sinceDate.state === "empty" && "text-muted-foreground")}>
+            <Button variant="outline" onClick={onEditStartDate} disabled={!canEdit} title={editDisabledReason ?? undefined} className={cn(sinceDate.state === "empty" && "text-muted-foreground")}>
               <CalendarIcon />
               {sinceDate.state === "valid" ? t("hero.sinceDate", { date: sinceDate.label ?? "" }) : sinceDate.state === "invalid" ? t("hero.invalidDate") : t("hero.addStartDate")}
             </Button>
           ) : null}
-          <Button variant="outline" onClick={onEditWebsite} className={cn(!resolvedWebsite && "text-muted-foreground")}>
+          <Button variant="outline" onClick={onEditWebsite} disabled={!canEdit} title={editDisabledReason ?? undefined} className={cn(!resolvedWebsite && "text-muted-foreground")}>
             <GlobeIcon /> {resolvedWebsite ? formatWebsite(resolvedWebsite) : t("hero.addWebsite")}
           </Button>
           {isOrg ? (
-            <Button variant="outline" onClick={onEditVisibility}>
+            <Button variant="outline" onClick={onEditVisibility} disabled={!canEdit} title={editDisabledReason ?? undefined}>
               {editState.visibility === "Unlisted" ? <LockIcon /> : <EyeIcon />} {editState.visibility}
             </Button>
           ) : null}
           {isOrg ? (
-            <Button variant="outline" onClick={onEditSocials} className={cn(!editState.socials.length && "text-muted-foreground")}>
+            <Button variant="outline" onClick={onEditSocials} disabled={!canEdit} title={editDisabledReason ?? undefined} className={cn(!editState.socials.length && "text-muted-foreground")}>
               {editState.socials.length ? (
                 editState.socials.map((url) => <SocialGlyph key={url} platform={classifySocial(url)} />)
               ) : (
@@ -517,6 +533,9 @@ export function ManageDashboardClient({
   const [saveError, setSaveError] = useState<string | null>(null);
 
   const isOnboarding = resolvedMode === "onboard-user" || resolvedMode === "onboard-org" || !hasCompletedSetup;
+  const profileEditPermission = writeRepoDid
+    ? canEditGroupProfile({ kind: "group", role: groupRole })
+    : { allowed: true, reason: null };
 
   const editState: HeroEditState = {
     displayName: editDisplayName,
@@ -581,6 +600,10 @@ export function ManageDashboardClient({
 
   const saveChanges = async (overrides: Partial<HeroEditState> = {}) => {
     if (isSaving) return;
+    if (!profileEditPermission.allowed) {
+      setSaveError(profileEditPermission.reason);
+      return;
+    }
     const next: HeroEditState = { ...editState, ...overrides };
     if (!next.displayName.trim()) {
       setSaveError(t("errors.nameRequired"));
@@ -803,6 +826,7 @@ export function ManageDashboardClient({
           onEditVisibility={openVisibilityModal}
           onEditOrgType={openOrgTypeModal}
           onEditSocials={openSocialsModal}
+          editDisabledReason={profileEditPermission.reason}
         />
         {account.kind === "organization" ? (
           <>
@@ -816,6 +840,7 @@ export function ManageDashboardClient({
               onChange={setEditLongDescription}
               onSave={() => void saveChanges({ longDescription: editLongDescription })}
               onCancel={() => { setEditLongDescription(account.longDescription ?? ""); setSaveError(null); setInlineField(null); }}
+              editDisabledReason={profileEditPermission.reason}
             />
             {writeRepoDid && groupRole ? (
               <GroupMembers

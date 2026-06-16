@@ -74,11 +74,11 @@ export type DeleteTreeGroupCascadeResult = {
   errors: string[];
 };
 
-type MutationPayload =
-  | ({ operation: "createRecord"; collection: string; rkey?: string; record: Record<string, unknown> } & GroupScoped)
-  | ({ operation: "putRecord"; collection: string; rkey: string; record: Record<string, unknown>; swapRecord?: string } & GroupScoped)
-  | ({ operation: "deleteRecord"; collection: string; rkey: string } & GroupScoped)
-  | ({ operation: "uploadBlob"; blobData: string; blobMimeType: string } & GroupScoped)
+type MutationPayload = GroupScoped & (
+  | { operation: "createRecord"; collection: string; rkey?: string; record: Record<string, unknown> }
+  | { operation: "putRecord"; collection: string; rkey: string; record: Record<string, unknown>; swapRecord?: string }
+  | { operation: "deleteRecord"; collection: string; rkey: string }
+  | { operation: "uploadBlob"; blobData: string; blobMimeType: string }
   | { operation: "createMultimediaFromFile"; blobData: string; blobMimeType: string; occurrenceRef: string; siteRef?: string; subjectPart: string; caption?: string }
   | { operation: "getDatasetRecord"; rkey: string }
   | { operation: "getCertifiedLocationRecord"; rkey: string }
@@ -104,7 +104,8 @@ type MutationPayload =
       siteRef?: string;
       subjectPart: string;
       caption?: string;
-    };
+    }
+);
 
 type CreateResult = { uri: string; cid: string };
 type RecordMutationResult = { uri: string; cid: string; rkey: string; record?: Record<string, unknown> };
@@ -139,14 +140,16 @@ type CreateMultimediaFromUrlInput = CreateMultimediaInput & {
 
 const MULTIMEDIA_COLLECTION = "app.gainforest.ac.multimedia";
 const MUTATION_TIMEOUT_MS = 45_000;
+const DIRECT_CGS_OPERATIONS = new Set<MutationPayload["operation"]>(["createRecord", "putRecord", "deleteRecord", "uploadBlob"]);
 
 async function callProxy<T>(payload: MutationPayload): Promise<T> {
   const controller = new AbortController();
   const timeout = window.setTimeout(() => controller.abort(), MUTATION_TIMEOUT_MS);
   const isGroupScoped = "repo" in payload && typeof payload.repo === "string" && payload.repo.length > 0;
+  const useDirectCgs = isGroupScoped && DIRECT_CGS_OPERATIONS.has(payload.operation);
 
   try {
-    const res = await fetch(isGroupScoped ? "/api/cgs/mutation" : "/api/manage/proxy", {
+    const res = await fetch(useDirectCgs ? "/api/cgs/mutation" : "/api/manage/proxy", {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify(payload),
@@ -206,16 +209,16 @@ export async function deleteRecord(collection: string, rkey: string, options?: {
   await callProxy({ operation: "deleteRecord", collection, rkey, ...(options?.repo ? { repo: options.repo } : {}) });
 }
 
-export async function getDatasetRecord(rkey: string): Promise<DatasetRecordResult> {
-  return callProxy({ operation: "getDatasetRecord", rkey });
+export async function getDatasetRecord(rkey: string, options?: { repo?: string }): Promise<DatasetRecordResult> {
+  return callProxy({ operation: "getDatasetRecord", rkey, ...(options?.repo ? { repo: options.repo } : {}) });
 }
 
-export async function getCertifiedLocationRecord(rkey: string): Promise<CertifiedLocationRecordResult> {
-  return callProxy({ operation: "getCertifiedLocationRecord", rkey });
+export async function getCertifiedLocationRecord(rkey: string, options?: { repo?: string }): Promise<CertifiedLocationRecordResult> {
+  return callProxy({ operation: "getCertifiedLocationRecord", rkey, ...(options?.repo ? { repo: options.repo } : {}) });
 }
 
-export async function incrementDatasetRecordCount(rkey: string, increment: number): Promise<DatasetRecordResult> {
-  return callProxy({ operation: "incrementDatasetRecordCount", rkey, increment });
+export async function incrementDatasetRecordCount(rkey: string, increment: number, options?: { repo?: string }): Promise<DatasetRecordResult> {
+  return callProxy({ operation: "incrementDatasetRecordCount", rkey, increment, ...(options?.repo ? { repo: options.repo } : {}) });
 }
 
 export async function createMeasurement(input: {
@@ -224,7 +227,7 @@ export async function createMeasurement(input: {
 }, options?: { repo?: string }): Promise<RecordMutationResult> {
   if (options?.repo) {
     const basalDiameter = input.flora.basalDiameter;
-    return createRecord("app.gainforest.dwc.measurement", {
+    const record = {
       $type: "app.gainforest.dwc.measurement",
       occurrenceRef: input.occurrenceRef,
       result: {
@@ -235,7 +238,9 @@ export async function createMeasurement(input: {
         canopyCoverPercent: input.flora.canopyCoverPercent,
       },
       createdAt: new Date().toISOString(),
-    }, undefined, options) as Promise<RecordMutationResult>;
+    };
+    const result = await createRecord("app.gainforest.dwc.measurement", record, undefined, options);
+    return { ...result, rkey: result.uri.split("/").pop() ?? "", record };
   }
   return callProxy({ operation: "createMeasurement", ...input });
 }
@@ -245,59 +250,59 @@ export async function updateMeasurement(input: {
   data: UpdateMeasurementData;
   unset?: string[];
   resultUnset?: string[];
-}): Promise<RecordMutationResult> {
-  return callProxy({ operation: "updateMeasurement", ...input });
+}, options?: { repo?: string }): Promise<RecordMutationResult> {
+  return callProxy({ operation: "updateMeasurement", ...input, ...(options?.repo ? { repo: options.repo } : {}) });
 }
 
-export async function deleteMeasurement(rkey: string): Promise<void> {
-  await deleteRecord("app.gainforest.dwc.measurement", rkey);
+export async function deleteMeasurement(rkey: string, options?: { repo?: string }): Promise<void> {
+  await deleteRecord("app.gainforest.dwc.measurement", rkey, options);
 }
 
 export async function updateOccurrence(input: {
   rkey: string;
   data: UpdateOccurrenceData;
   unset?: string[];
-}): Promise<RecordMutationResult> {
-  return callProxy({ operation: "updateOccurrence", ...input });
+}, options?: { repo?: string }): Promise<RecordMutationResult> {
+  return callProxy({ operation: "updateOccurrence", ...input, ...(options?.repo ? { repo: options.repo } : {}) });
 }
 
 export async function appendExistingDataset(input: {
   datasetRkey: string;
   rows: AppendExistingDatasetRowInput[];
   establishmentMeans?: string | null;
-}): Promise<AppendExistingDatasetResponse> {
-  return callProxy({ operation: "appendExistingDataset", ...input });
+}, options?: { repo?: string }): Promise<AppendExistingDatasetResponse> {
+  return callProxy({ operation: "appendExistingDataset", ...input, ...(options?.repo ? { repo: options.repo } : {}) });
 }
 
-export async function detachOccurrenceFromDataset(rkey: string): Promise<RecordMutationResult> {
-  return callProxy({ operation: "detachOccurrenceFromDataset", rkey });
+export async function detachOccurrenceFromDataset(rkey: string, options?: { repo?: string }): Promise<RecordMutationResult> {
+  return callProxy({ operation: "detachOccurrenceFromDataset", rkey, ...(options?.repo ? { repo: options.repo } : {}) });
 }
 
 export async function attachExistingOccurrences(input: {
   datasetRkey: string;
   occurrenceRkeys: string[];
-}): Promise<AttachExistingOccurrencesResult> {
-  return callProxy({ operation: "attachExistingOccurrences", ...input });
+}, options?: { repo?: string }): Promise<AttachExistingOccurrencesResult> {
+  return callProxy({ operation: "attachExistingOccurrences", ...input, ...(options?.repo ? { repo: options.repo } : {}) });
 }
 
 export async function updateMultimedia(input: {
   rkey: string;
   data: UpdateMultimediaData;
   unset?: string[];
-}): Promise<RecordMutationResult> {
-  return callProxy({ operation: "updateMultimedia", ...input });
+}, options?: { repo?: string }): Promise<RecordMutationResult> {
+  return callProxy({ operation: "updateMultimedia", ...input, ...(options?.repo ? { repo: options.repo } : {}) });
 }
 
-export async function deleteMultimedia(rkey: string): Promise<void> {
-  await deleteRecord(MULTIMEDIA_COLLECTION, rkey);
+export async function deleteMultimedia(rkey: string, options?: { repo?: string }): Promise<void> {
+  await deleteRecord(MULTIMEDIA_COLLECTION, rkey, options);
 }
 
-export async function deleteOccurrenceCascade(rkey: string): Promise<CascadeDeleteResult> {
-  return callProxy({ operation: "deleteOccurrenceCascade", rkey });
+export async function deleteOccurrenceCascade(rkey: string, options?: { repo?: string }): Promise<CascadeDeleteResult> {
+  return callProxy({ operation: "deleteOccurrenceCascade", rkey, ...(options?.repo ? { repo: options.repo } : {}) });
 }
 
-export async function deleteTreeGroupCascade(datasetRkey: string): Promise<DeleteTreeGroupCascadeResult> {
-  return callProxy({ operation: "deleteTreeGroupCascade", datasetRkey });
+export async function deleteTreeGroupCascade(datasetRkey: string, options?: { repo?: string }): Promise<DeleteTreeGroupCascadeResult> {
+  return callProxy({ operation: "deleteTreeGroupCascade", datasetRkey, ...(options?.repo ? { repo: options.repo } : {}) });
 }
 
 function bytesToBase64(bytes: Uint8Array): string {
@@ -320,7 +325,7 @@ export async function uploadBlob(file: File, options?: { repo?: string }): Promi
   });
 }
 
-export async function createMultimediaFromFile(input: CreateMultimediaFromFileInput): Promise<MultimediaResult> {
+export async function createMultimediaFromFile(input: CreateMultimediaFromFileInput, options?: { repo?: string }): Promise<MultimediaResult> {
   const buf = await input.imageFile.arrayBuffer();
   const b64 = bytesToBase64(new Uint8Array(buf));
   return callProxy({
@@ -331,10 +336,11 @@ export async function createMultimediaFromFile(input: CreateMultimediaFromFileIn
     ...(input.siteRef ? { siteRef: input.siteRef } : {}),
     subjectPart: input.subjectPart,
     ...(input.caption ? { caption: input.caption } : {}),
+    ...(options?.repo ? { repo: options.repo } : {}),
   });
 }
 
-export async function createMultimediaFromUrl(input: CreateMultimediaFromUrlInput): Promise<MultimediaResult> {
+export async function createMultimediaFromUrl(input: CreateMultimediaFromUrlInput, options?: { repo?: string }): Promise<MultimediaResult> {
   return callProxy({
     operation: "createMultimediaFromUrl",
     url: input.url,
@@ -342,5 +348,6 @@ export async function createMultimediaFromUrl(input: CreateMultimediaFromUrlInpu
     ...(input.siteRef ? { siteRef: input.siteRef } : {}),
     subjectPart: input.subjectPart,
     ...(input.caption ? { caption: input.caption } : {}),
+    ...(options?.repo ? { repo: options.repo } : {}),
   });
 }

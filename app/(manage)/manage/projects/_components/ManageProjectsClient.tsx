@@ -30,6 +30,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { manageApiHref, manageHref, type ManageTarget } from "@/lib/links";
 import type { BumicertRecord } from "@/app/_lib/indexer";
+import { canCreateRecord, canDeleteRecord, canUpdateRecord } from "../../_lib/cgs-permissions";
 import { createRecord, deleteRecord, putRecord, uploadBlob } from "../../_lib/mutations";
 
 const PROJECT_COLLECTION = "org.hypercerts.collection";
@@ -98,6 +99,8 @@ export function ManageProjectsClient({ target, bumicerts }: { target: ManageTarg
     QUERY_STATE_OPTIONS,
   );
   const [query, setQuery] = useState("");
+  const createPermission = canCreateRecord(target);
+  const updatePermission = canUpdateRecord(target);
 
   const loadProjects = useCallback(async () => {
     setLoading(true);
@@ -138,10 +141,18 @@ export function ManageProjectsClient({ target, bumicerts }: { target: ManageTarg
   );
 
   const openNew = () => {
+    if (!createPermission.allowed) {
+      setError(createPermission.reason ?? "You cannot create projects for this organization.");
+      return;
+    }
     void setProjectState({ mode: "new", project: null });
   };
 
   const openEdit = (project: ManagedProject) => {
+    if (!updatePermission.allowed) {
+      setError(updatePermission.reason ?? "You cannot edit this project.");
+      return;
+    }
     void setProjectState({ mode: "edit", project: project.rkey });
   };
 
@@ -203,7 +214,7 @@ export function ManageProjectsClient({ target, bumicerts }: { target: ManageTarg
                   className="min-w-0 flex-1 truncate border-0 bg-transparent px-3 py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground"
                 />
               </div>
-              <Button type="button" onClick={openNew} className="shrink-0">
+              <Button type="button" onClick={openNew} disabled={!createPermission.allowed} title={createPermission.reason ?? undefined} className="shrink-0">
                 <CirclePlusIcon />
                 Add project
               </Button>
@@ -224,6 +235,7 @@ export function ManageProjectsClient({ target, bumicerts }: { target: ManageTarg
                       project={project}
                       index={index}
                       onEdit={() => openEdit(project)}
+                      disabledReason={updatePermission.reason}
                     />
                   ))}
                 </AnimatePresence>
@@ -255,20 +267,24 @@ function ProjectCard({
   project,
   index,
   onEdit,
+  disabledReason = null,
 }: {
   project: ManagedProject;
   index: number;
   onEdit: () => void;
+  disabledReason?: string | null;
 }) {
   const hasImage = Boolean(project.imageUrl);
+  const disabled = Boolean(disabledReason);
 
   return (
     <motion.article
       layout
       role="button"
       tabIndex={0}
-      onClick={onEdit}
+      onClick={disabled ? undefined : onEdit}
       onKeyDown={(event) => {
+        if (disabled) return;
         if (event.key === "Enter" || event.key === " ") {
           event.preventDefault();
           onEdit();
@@ -278,7 +294,11 @@ function ProjectCard({
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.98 }}
       transition={{ duration: 0.35, delay: Math.min(index, 10) * 0.025, ease: [0.25, 0.1, 0.25, 1] }}
-      className="group flex cursor-pointer gap-3 rounded-2xl bg-card/45 px-1 py-3 transition-colors duration-300 hover:bg-surface-sunken focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/45 sm:gap-4 sm:px-2 sm:py-4"
+      title={disabledReason ?? undefined}
+      className={cn(
+        "group flex gap-3 rounded-2xl bg-card/45 px-1 py-3 transition-colors duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/45 sm:gap-4 sm:px-2 sm:py-4",
+        disabled ? "cursor-not-allowed opacity-75" : "cursor-pointer hover:bg-surface-sunken",
+      )}
     >
       <div className="relative h-28 w-28 shrink-0 overflow-hidden rounded-xl bg-muted sm:h-36 sm:w-52">
         {hasImage ? (
@@ -307,8 +327,10 @@ function ProjectCard({
               size="icon-lg"
               onClick={(event) => {
                 event.stopPropagation();
-                onEdit();
+                if (!disabled) onEdit();
               }}
+              disabled={disabled}
+              title={disabledReason ?? undefined}
               aria-label={`Edit ${project.title}`}
               className="shrink-0 text-muted-foreground/60 hover:text-foreground"
             >
@@ -369,6 +391,8 @@ function ProjectEditor({
   const modal = useModal();
   const isEdit = state.mode === "edit";
   const isInline = presentation === "inline";
+  const savePermission = isEdit ? canUpdateRecord(target) : canCreateRecord(target);
+  const deletePermission = canDeleteRecord(target);
   const issues = getProjectIssues(draft);
   const visibleIssues = saveAttempted ? issues : issues.filter((issue) => changedFields.has(issue.field));
   const issuesByName = issuesByProjectField(visibleIssues);
@@ -412,6 +436,10 @@ function ProjectEditor({
 
   const handleDeleteProject = async () => {
     if (!isEdit) return;
+    if (!deletePermission.allowed) {
+      setError(deletePermission.reason ?? "You cannot delete this project.");
+      return;
+    }
     modal.pushModal(
       {
         id: `delete-project-${state.project.rkey}`,
@@ -436,6 +464,10 @@ function ProjectEditor({
     setSaveAttempted(true);
     if (issues.length > 0) {
       setError(issues[0]?.message ?? "Check the highlighted fields.");
+      return;
+    }
+    if (!savePermission.allowed) {
+      setError(savePermission.reason ?? "You cannot save this project.");
       return;
     }
 
@@ -563,7 +595,7 @@ function ProjectEditor({
 
           <div className="mt-10 flex flex-wrap items-center justify-between gap-3">
             {isEdit ? (
-              <Button type="button" variant="destructive" size="lg" onClick={() => void handleDeleteProject()} disabled={saving}>
+              <Button type="button" variant="destructive" size="lg" onClick={() => void handleDeleteProject()} disabled={saving || !deletePermission.allowed} title={deletePermission.reason ?? undefined}>
                 <Trash2Icon className="size-4" />
                 Delete project
               </Button>
@@ -572,7 +604,7 @@ function ProjectEditor({
               <Button type="button" variant="outline" size="lg" onClick={onClose} disabled={saving}>
                 Cancel
               </Button>
-              <Button type="submit" size="lg" disabled={saving}>
+              <Button type="submit" size="lg" disabled={saving || !savePermission.allowed} title={savePermission.reason ?? undefined}>
                 {saving ? <Loader2Icon className="size-4 animate-spin" /> : <FolderKanbanIcon className="size-4" />}
                 {saving ? "Saving…" : isEdit ? "Save changes" : "Save project"}
               </Button>

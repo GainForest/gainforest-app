@@ -37,6 +37,7 @@ import {
 } from "react";
 import { format } from "date-fns";
 import { localBumicertHref, hyperscanRecordHref } from "@/app/_lib/urls";
+import { canUpdateRecord } from "@/app/(manage)/manage/_lib/cgs-permissions";
 import { createRecord, putRecord, uploadBlob } from "@/app/(manage)/manage/_lib/mutations";
 import { useModal } from "@/components/ui/modal/context";
 import {
@@ -1180,6 +1181,8 @@ export function NewBumicertClient({
   const [isPublishing, setIsPublishing] = useState(false);
   const [publishResult, setPublishResult] = useState<PublishResult | null>(null);
   const [mobileSheet, setMobileSheet] = useState<"preview" | null>(null);
+  const linkedProjectUpdatePermission = canUpdateRecord(target);
+  const canLinkToProject = Boolean(linkedProject?.canLink && linkedProjectUpdatePermission.allowed);
   const autosaveTimer = useRef<number | null>(null);
 
   useEffect(() => {
@@ -1401,7 +1404,7 @@ export function NewBumicertClient({
         createdAt: new Date().toISOString(),
       };
       const result = await createRecord(COLLECTION, record, undefined, target.kind === "group" ? { repo: target.did } : undefined);
-      if (linkedProject?.canLink) await appendBumicertToProject(linkedProject, result, target);
+      if (linkedProject?.canLink && linkedProjectUpdatePermission.allowed) await appendBumicertToProject(linkedProject, result, target);
       setPublishResult({ uri: result.uri, cid: result.cid, rkey: extractRkey(result.uri) });
       if (activeDraftId) handleDeleteDraft(activeDraftId);
     } catch (error) {
@@ -1497,7 +1500,7 @@ export function NewBumicertClient({
                   <span className="hidden text-xs text-muted-foreground sm:block">{activeDraftId ? "Saved" : "Not saved yet"}</span>
                   <Button type="submit" size="lg" disabled={isPublishing}>
                     {isPublishing ? <Loader2Icon className="size-4 animate-spin" /> : <LeafIcon className="size-4" />}
-                    {isPublishing ? "Publishing…" : linkedProject?.canLink ? "Publish to the project" : "Publish"}
+                    {isPublishing ? "Publishing…" : canLinkToProject ? "Publish to the project" : "Publish"}
                   </Button>
                 </div>
               </div>
