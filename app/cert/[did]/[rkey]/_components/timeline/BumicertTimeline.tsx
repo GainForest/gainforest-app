@@ -471,9 +471,10 @@ function occurrenceTitle(item: OccurrenceRecord): string {
 function getSafeRecorderDisplayName(value: string): string | null {
   const trimmed = value.trim();
   if (!trimmed) return null;
-  if (/^(did:|at:\/\/|https?:\/\/|www\.)/i.test(trimmed)) return null;
+  if (/^[a-z][a-z0-9+.-]*:/i.test(trimmed)) return null;
+  if (/^(\/\/|www\.)/i.test(trimmed)) return null;
   if (/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(trimmed)) return null;
-  if (!trimmed.includes(" ") && /^[a-z0-9._-]+\.[a-z]{2,}$/i.test(trimmed)) return null;
+  if (!trimmed.includes(" ") && /^@?[a-z0-9._-]+\.[a-z]{2,}$/i.test(trimmed)) return null;
   return trimmed;
 }
 
@@ -509,7 +510,7 @@ function occurrenceSearchText(item: OccurrenceRecord, datasetName?: string | nul
     item.genus,
     item.locality,
     item.country,
-    item.recordedBy,
+    item.recordedBy ? getSafeRecorderDisplayName(item.recordedBy) : null,
     item.eventDate,
     datasetName ?? item.datasetName,
   ].filter((value): value is string => typeof value === "string" && value.length > 0).join(" ").toLowerCase();
@@ -536,12 +537,13 @@ function buildBiodiversityDatasetGroups(datasets: UploadTreeDatasetRecord[], occ
     const name = dataset?.name ?? records.find((item) => item.datasetName)?.datasetName ?? "Grouped biodiversity data";
     const description = dataset?.description ?? null;
     const dateRange = formatDateRangeFromValues(records.map((item) => item.eventDate ?? item.createdAt));
+    const searchableRecordedByValues = recordedByValues.map(getSafeRecorderDisplayName).filter((value): value is string => Boolean(value));
     const searchText = [
       name,
       description,
       dateRange,
       dataset?.createdAt,
-      recordedByValues.join(" "),
+      searchableRecordedByValues.join(" "),
       ...records.map((item) => occurrenceSearchText(item, name)),
     ].filter((value): value is string => typeof value === "string" && value.length > 0).join(" ").toLowerCase();
 
@@ -898,6 +900,9 @@ function TimelineEntryCard({
       {expanded ? (
         <div id={panelId} className="space-y-3 border-t border-border/50 p-4 pt-3">
           {note ? <div className="rounded-xl bg-muted/20 px-3 py-2 text-sm leading-6 text-foreground/80">{note}</div> : null}
+          {canManageEvidence && rkey && !canDeleteEvidence && deleteDisabledReason ? (
+            <p className="rounded-xl border border-warn/20 bg-warn/10 px-3 py-2 text-xs text-warn">{deleteDisabledReason}</p>
+          ) : null}
           {kind === "nature" && biodiversityRefs.length > 0 ? (
             <div className="rounded-xl bg-muted/20 p-3">
               <p className="text-xs text-muted-foreground">{entryT("displayedBiodiversityData")}</p>
@@ -1271,7 +1276,7 @@ function BiodiversityPicker({
     return occurrenceSearchText(item, item.datasetRef ? datasetNameByUri.get(item.datasetRef) : null).includes(normalizedSearch);
   }), [datasetNameByUri, normalizedRecordedBy, normalizedSearch, rows]);
   const displayedDatasets = useMemo(() => datasetGroups.map((group) => {
-    const groupDetailsSearchText = [group.name, group.description, group.dateRange, group.recordedByValues.join(" ")]
+    const groupDetailsSearchText = [group.name, group.description, group.dateRange, group.recordedByValues.map(getSafeRecorderDisplayName).filter(Boolean).join(" ")]
       .filter((value): value is string => typeof value === "string" && value.length > 0)
       .join(" ")
       .toLowerCase();

@@ -23,6 +23,25 @@ export const UNGROUPED_DATASET_FILTER = "__ungrouped__";
 
 type StatusTone = "neutral" | "good" | "warn";
 
+export type DatasetLandingBuildCopy = {
+  dateUnavailable: string;
+  locationNotSet: string;
+  additionalLocations: (count: number) => string;
+  ungroupedTrees: string;
+  unnamedTreeGroup: string;
+  statusNoTrees: string;
+  statusNeedsCleanup: string;
+  statusMigrationNeeded: string;
+  statusMeasurementsReady: string;
+  statusPartlyMeasured: string;
+  statusNoMeasurements: string;
+};
+
+export type DatasetLandingBuildOptions = {
+  locale: string;
+  copy: DatasetLandingBuildCopy;
+};
+
 export type DatasetLandingCard = {
   id: string;
   name: string;
@@ -38,11 +57,11 @@ export type DatasetLandingCard = {
   canDelete: boolean;
 };
 
-function formatUploadDate(value: string | null | undefined): string {
-  if (!value) return "Date unavailable";
+function formatUploadDate(value: string | null | undefined, options: DatasetLandingBuildOptions): string {
+  if (!value) return options.copy.dateUnavailable;
   const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "Date unavailable";
-  return date.toLocaleDateString("en-US", {
+  if (Number.isNaN(date.getTime())) return options.copy.dateUnavailable;
+  return date.toLocaleDateString(options.locale, {
     month: "short",
     day: "numeric",
     year: "numeric",
@@ -74,7 +93,7 @@ function getLatestTreeCreatedAt(trees: TreeManagerItem[]): string | null {
   return getLatestTimestampValue(trees.map((tree) => tree.occurrence.createdAt));
 }
 
-function getTreeGroupLocationLabel(trees: TreeManagerItem[]): string {
+function getTreeGroupLocationLabel(trees: TreeManagerItem[], copy: DatasetLandingBuildCopy): string {
   const uniqueLocations = Array.from(
     new Set(
       trees
@@ -83,9 +102,9 @@ function getTreeGroupLocationLabel(trees: TreeManagerItem[]): string {
     ),
   );
 
-  if (uniqueLocations.length === 0) return "Location not set";
-  if (uniqueLocations.length === 1) return uniqueLocations[0] ?? "Location not set";
-  return `${uniqueLocations[0]} + ${uniqueLocations.length - 1} more`;
+  if (uniqueLocations.length === 0) return copy.locationNotSet;
+  if (uniqueLocations.length === 1) return uniqueLocations[0] ?? copy.locationNotSet;
+  return `${uniqueLocations[0]} ${copy.additionalLocations(uniqueLocations.length - 1)}`;
 }
 
 function getTreeGroupRecordedByValues(trees: TreeManagerItem[]): string[] {
@@ -104,9 +123,10 @@ function getTreeGroupRecordedByValues(trees: TreeManagerItem[]): string[] {
 export function getSafeRecordedByDisplayName(value: string): string | null {
   const trimmed = value.trim();
   if (!trimmed) return null;
-  if (/^(did:|at:\/\/|https?:\/\/|www\.)/i.test(trimmed)) return null;
+  if (/^[a-z][a-z0-9+.-]*:/i.test(trimmed)) return null;
+  if (/^(\/\/|www\.)/i.test(trimmed)) return null;
   if (/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(trimmed)) return null;
-  if (!trimmed.includes(" ") && /^[a-z0-9._-]+\.[a-z]{2,}$/i.test(trimmed)) return null;
+  if (!trimmed.includes(" ") && /^@?[a-z0-9._-]+\.[a-z]{2,}$/i.test(trimmed)) return null;
   return trimmed;
 }
 
@@ -118,22 +138,22 @@ function formatRecordedByLabel(values: string[], options: { fallback: string; mu
   return options.firstAndMore(displayValues[0] ?? options.fallback, values.length - 1);
 }
 
-function getTreeGroupStatus(trees: TreeManagerItem[]): { label: string; tone: StatusTone } {
-  if (trees.length === 0) return { label: "No trees yet", tone: "neutral" };
+function getTreeGroupStatus(trees: TreeManagerItem[], copy: DatasetLandingBuildCopy): { label: string; tone: StatusTone } {
+  if (trees.length === 0) return { label: copy.statusNoTrees, tone: "neutral" };
 
   if (trees.some((tree) => tree.hasDuplicateBundledMeasurements)) {
-    return { label: "Needs cleanup", tone: "warn" };
+    return { label: copy.statusNeedsCleanup, tone: "warn" };
   }
 
   if (trees.some((tree) => tree.hasLegacyMeasurements || tree.hasUnsupportedMeasurements)) {
-    return { label: "Migration needed", tone: "warn" };
+    return { label: copy.statusMigrationNeeded, tone: "warn" };
   }
 
   const measuredCount = trees.filter((tree) => hasAnyMeasurementValue(getTreeMeasurementDraft(tree.floraMeasurement))).length;
 
-  if (measuredCount === trees.length) return { label: "Measurements ready", tone: "good" };
-  if (measuredCount > 0) return { label: "Partly measured", tone: "neutral" };
-  return { label: "No measurements yet", tone: "neutral" };
+  if (measuredCount === trees.length) return { label: copy.statusMeasurementsReady, tone: "good" };
+  if (measuredCount > 0) return { label: copy.statusPartlyMeasured, tone: "neutral" };
+  return { label: copy.statusNoMeasurements, tone: "neutral" };
 }
 
 function createTreeGroupLandingCard(options: {
@@ -141,21 +161,24 @@ function createTreeGroupLandingCard(options: {
   treeGroup: UploadTreeDatasetRecord | null;
   trees: TreeManagerItem[];
   isUngrouped: boolean;
+  buildOptions: DatasetLandingBuildOptions;
 }): DatasetLandingCard {
-  const { id, treeGroup, trees, isUngrouped } = options;
+  const { id, treeGroup, trees, isUngrouped, buildOptions } = options;
+  const copy = buildOptions.copy;
   const createdAt = treeGroup?.createdAt ?? getLatestTreeCreatedAt(trees);
   const treeCount = Math.max(trees.length, treeGroup?.recordCount ?? 0);
-  const { label: statusLabel, tone: statusTone } = getTreeGroupStatus(trees);
-  const name = isUngrouped ? "Ungrouped trees" : treeGroup?.name ?? "Unnamed tree group";
-  const locationLabel = getTreeGroupLocationLabel(trees);
+  const { label: statusLabel, tone: statusTone } = getTreeGroupStatus(trees, copy);
+  const name = isUngrouped ? copy.ungroupedTrees : treeGroup?.name ?? copy.unnamedTreeGroup;
+  const locationLabel = getTreeGroupLocationLabel(trees, copy);
   const recordedByValues = getTreeGroupRecordedByValues(trees);
-  const uploadDateLabel = formatUploadDate(createdAt);
+  const searchableRecordedByValues = recordedByValues.map(getSafeRecordedByDisplayName).filter((value): value is string => Boolean(value));
+  const uploadDateLabel = formatUploadDate(createdAt, buildOptions);
   const searchText = [
     name,
     treeGroup?.description,
     `${treeCount}`,
     locationLabel,
-    recordedByValues.join(" "),
+    searchableRecordedByValues.join(" "),
     statusLabel,
     uploadDateLabel,
   ]
@@ -182,6 +205,7 @@ function createTreeGroupLandingCard(options: {
 export function buildDatasetLandingCards(
   treeGroups: UploadTreeDatasetRecord[],
   trees: TreeManagerItem[],
+  buildOptions: DatasetLandingBuildOptions,
 ): DatasetLandingCard[] {
   const treesByGroup = new Map<string, TreeManagerItem[]>();
 
@@ -203,6 +227,7 @@ export function buildDatasetLandingCards(
         treeGroup,
         trees: treesByGroup.get(treeGroup.uri) ?? [],
         isUngrouped: false,
+        buildOptions,
       }),
     );
   }
@@ -216,6 +241,7 @@ export function buildDatasetLandingCards(
         treeGroup: null,
         trees: groupedTrees,
         isUngrouped: id === UNGROUPED_DATASET_FILTER,
+        buildOptions,
       }),
     );
   }

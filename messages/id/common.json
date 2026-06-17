@@ -305,7 +305,20 @@
       "firstRecorderAndMore": "{name} + {count, plural, =1 {1 lainnya} other {# lainnya}}",
       "openTreeGroup": "Buka kelompok pohon",
       "deleteTreeGroup": "Hapus kelompok pohon",
-      "deleteTreeGroupNamed": "Hapus kelompok pohon {name}"
+      "deleteTreeGroupNamed": "Hapus kelompok pohon {name}",
+      "dateUnavailable": "Tanggal tidak tersedia",
+      "locationNotSet": "Lokasi belum diatur",
+      "additionalLocations": "+ {count, plural, =1 {1 lainnya} other {# lainnya}}",
+      "ungroupedTrees": "Pohon tanpa kelompok",
+      "unnamedTreeGroup": "Kelompok pohon tanpa nama",
+      "statuses": {
+        "noTrees": "Belum ada pohon",
+        "needsCleanup": "Perlu dibersihkan",
+        "migrationNeeded": "Perlu migrasi",
+        "measurementsReady": "Pengukuran siap",
+        "partlyMeasured": "Sebagian terukur",
+        "noMeasurements": "Belum ada pengukuran"
+      }
     }
   }
 }

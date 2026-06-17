@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import {
   AlertTriangleIcon,
   CalendarIcon,
@@ -51,6 +51,7 @@ import {
   DatasetLandingSection,
   getSafeRecordedByDisplayName,
   UNGROUPED_DATASET_FILTER,
+  type DatasetLandingBuildOptions,
 } from "./DatasetLandingSection";
 import {
   CANOPY_COVER_PERCENT_MAX,
@@ -489,7 +490,9 @@ function mergeTreeDetail(existing: OccurrenceRecord, detail: Partial<OccurrenceR
 }
 
 export function TreesClient({ did, target, onUpload }: TreesClientProps) {
+  const locale = useLocale();
   const treeFilterT = useTranslations("common.manageTrees.filters");
+  const datasetLandingT = useTranslations("common.manageTrees.datasetLanding");
   const {
     searchQuery,
     selectedTreeRkey,
@@ -588,9 +591,25 @@ export function TreesClient({ did, target, onUpload }: TreesClientProps) {
     [measurements, photos, trees],
   );
 
+  const datasetLandingBuildOptions = useMemo<DatasetLandingBuildOptions>(() => ({
+    locale,
+    copy: {
+      dateUnavailable: datasetLandingT("dateUnavailable"),
+      locationNotSet: datasetLandingT("locationNotSet"),
+      additionalLocations: (count) => datasetLandingT("additionalLocations", { count }),
+      ungroupedTrees: datasetLandingT("ungroupedTrees"),
+      unnamedTreeGroup: datasetLandingT("unnamedTreeGroup"),
+      statusNoTrees: datasetLandingT("statuses.noTrees"),
+      statusNeedsCleanup: datasetLandingT("statuses.needsCleanup"),
+      statusMigrationNeeded: datasetLandingT("statuses.migrationNeeded"),
+      statusMeasurementsReady: datasetLandingT("statuses.measurementsReady"),
+      statusPartlyMeasured: datasetLandingT("statuses.partlyMeasured"),
+      statusNoMeasurements: datasetLandingT("statuses.noMeasurements"),
+    },
+  }), [datasetLandingT, locale]);
   const treeGroupCards = useMemo(
-    () => buildDatasetLandingCards(datasets, treeItems),
-    [datasets, treeItems],
+    () => buildDatasetLandingCards(datasets, treeItems, datasetLandingBuildOptions),
+    [datasetLandingBuildOptions, datasets, treeItems],
   );
   const showTreeGroupLanding = !datasetFilter && treeGroupCards.length > 0;
   const treeGroupRecorderOptions = useMemo(() => {

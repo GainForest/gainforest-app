@@ -305,7 +305,20 @@
       "firstRecorderAndMore": "{name} + {count, plural, =1 {1 más} other {# más}}",
       "openTreeGroup": "Abrir grupo de árboles",
       "deleteTreeGroup": "Eliminar grupo de árboles",
-      "deleteTreeGroupNamed": "Eliminar grupo de árboles {name}"
+      "deleteTreeGroupNamed": "Eliminar grupo de árboles {name}",
+      "dateUnavailable": "Fecha no disponible",
+      "locationNotSet": "Ubicación no definida",
+      "additionalLocations": "+ {count, plural, =1 {1 más} other {# más}}",
+      "ungroupedTrees": "Árboles sin grupo",
+      "unnamedTreeGroup": "Grupo de árboles sin nombre",
+      "statuses": {
+        "noTrees": "Aún no hay árboles",
+        "needsCleanup": "Necesita limpieza",
+        "migrationNeeded": "Migración necesaria",
+        "measurementsReady": "Mediciones listas",
+        "partlyMeasured": "Medido parcialmente",
+        "noMeasurements": "Aún no hay mediciones"
+      }
     }
   }
 }

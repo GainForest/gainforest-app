@@ -305,7 +305,20 @@
       "firstRecorderAndMore": "{name} + {count, plural, =1 {mwingine 1} other {wengine #}}",
       "openTreeGroup": "Fungua kikundi cha miti",
       "deleteTreeGroup": "Futa kikundi cha miti",
-      "deleteTreeGroupNamed": "Futa kikundi cha miti {name}"
+      "deleteTreeGroupNamed": "Futa kikundi cha miti {name}",
+      "dateUnavailable": "Tarehe haipatikani",
+      "locationNotSet": "Mahali hapajawekwa",
+      "additionalLocations": "+ {count, plural, =1 {mwingine 1} other {wengine #}}",
+      "ungroupedTrees": "Miti isiyo kwenye kikundi",
+      "unnamedTreeGroup": "Kikundi cha miti kisicho na jina",
+      "statuses": {
+        "noTrees": "Bado hakuna miti",
+        "needsCleanup": "Inahitaji kusafishwa",
+        "migrationNeeded": "Uhamishaji unahitajika",
+        "measurementsReady": "Vipimo viko tayari",
+        "partlyMeasured": "Imepimwa kwa sehemu",
+        "noMeasurements": "Bado hakuna vipimo"
+      }
     }
   }
 }
