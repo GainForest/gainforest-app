@@ -17,10 +17,11 @@
       "emptyDescription": "Ripoti za ushahidi, ukaguzi na vidokezo vilivyochapishwa na shirika hili vitaonekana hapa.",
       "filters": {
         "all": "Wote",
-        "tree": "Mti",
+        "tree": "Miti",
         "audio": "Sauti",
         "biodiversity": "Bioanuwai",
-        "document": "Hati"
+        "document": "Hati",
+        "file": "Faili"
       },
       "ownerTools": "Zana za mmiliki",
       "linkEvidenceTitle": "Unganisha ushahidi",
@@ -31,7 +32,10 @@
       "linkedDescription": "Kagua rekodi, faili na tabaka za ramani ambazo tayari ni sehemu ya ratiba ya ushahidi ya umma.",
       "pageOf": "Ukurasa {current} kati ya {total}",
       "previousPage": "Ukurasa uliopita",
-      "nextPage": "Ukurasa unaofuata"
+      "nextPage": "Ukurasa unaofuata",
+      "timelineTools": "Zana za mstari wa wakati",
+      "linksUnavailable": "Viungo vilivyopo vya mstari wa wakati havikuweza kukaguliwa. Onyesha upya kabla ya kuongeza vikundi vya miti.",
+      "linkSuccess": "Imeunganishwa kwenye mstari wa wakati wa umma. Inaweza kuchukua muda kuonekana kwa kila mtu."
     },
     "evidenceAdder": {
       "title": "Ongeza Ushahidi",
@@ -109,7 +113,50 @@
       "selectRecordsToLink": "Chagua rekodi za ushahidi za kuunganisha kwenye ratiba hii.",
       "alreadyLinkedDataset": "Tayari imeunganishwa kwenye ratiba hii",
       "checkingExistingLinks": "Inakagua viungo vilivyopo vya ratiba…",
-      "unableToVerifyExistingLinks": "Haiwezi kuthibitisha viungo vilivyopo vya ratiba. Onyesha upya ili kuunganisha seti za data za miti."
+      "unableToVerifyExistingLinks": "Haiwezi kuthibitisha viungo vilivyopo vya ratiba. Onyesha upya ili kuunganisha seti za data za miti.",
+      "tabDescriptions": {
+        "audio": "Ongeza rekodi za sauti zilizohifadhiwa na shirika hili.",
+        "trees": "Ongeza taarifa za miti zilizopangwa kwa eneo la mradi.",
+        "biodiversity": "Chuja uchunguzi na uongeze data inayoonekana au vikundi vilivyohifadhiwa.",
+        "files": "Ongeza ripoti, picha, video, au kurasa za wavuti."
+      },
+      "permissions": {
+        "signIn": "Ingia kwa akaunti inayoweza kusimamia mstari huu wa wakati.",
+        "notMember": "Badili kwenda akaunti ya shirika inayoweza kusimamia mstari huu wa wakati.",
+        "createDenied": "Huwezi kuunganisha ushahidi kwenye mstari huu wa wakati.",
+        "deleteDenied": "Huwezi kuondoa ushahidi kwenye mstari huu wa wakati."
+      },
+      "linkError": "Imeshindikana kuunganisha ushahidi huu. Tafadhali jaribu tena.",
+      "manageType": "Simamia {type}",
+      "biodiversity": {
+        "attachmentGroupTitle": "Kikundi cha bioanuai",
+        "attachmentObservationsTitle": "Uchunguzi wa bioanuai",
+        "emptyLabel": "data ya bioanuai",
+        "searchLabel": "Tafuta",
+        "searchPlaceholder": "Tafuta bioanuai",
+        "recorderLabel": "Mrekodi",
+        "allRecorders": "Warekodi wote",
+        "recorderOptionFallback": "Mrekodi {number}",
+        "displayedTitle": "Data ya bioanuai inayoonyeshwa",
+        "displayedSummary": "{shown} kati ya {total, plural, =1 {uchunguzi 1} other {uchunguzi #}} zinaonyeshwa. Chagua uchunguzi kutoka mwonekano huu uliochujwa.",
+        "clearDisplayed": "Futa zinazoonyeshwa",
+        "selectDisplayed": "Chagua zinazoonyeshwa",
+        "noDataMatches": "Hakuna data ya bioanuai inayolingana na vichujio hivi.",
+        "recordedBy": "Imerekodiwa na {name}",
+        "recorderFallback": "mrekodi aliyehifadhiwa",
+        "alreadyLinked": "Tayari imeunganishwa",
+        "coveredByGroup": "Imejumuishwa kwenye kikundi",
+        "groupsTitle": "Vikundi vya bioanuai",
+        "groupsDescription": "Vikundi hutumia vichujio vilevile vya mrekodi na utafutaji.",
+        "noGroupsMatch": "Hakuna kikundi cha bioanuai kinacholingana na vichujio hivi.",
+        "multipleRecorders": "{count, plural, =1 {mrekodi 1} other {warekodi #}}",
+        "firstRecorderAndMore": "{name} + {count, plural, =1 {mwingine 1} other {wengine #}}",
+        "shownCount": "{count} zinaonyeshwa",
+        "totalCount": "jumla {count}",
+        "speciesCount": "{count, plural, =1 {spishi 1} other {spishi #}}",
+        "groupStatus": "Data iliyopangwa",
+        "manageData": "Simamia data ya bioanuai"
+      }
     },
     "metadata": {
       "notFound": "cheti Haijapatikana"
@@ -173,7 +220,10 @@
       "visibleLayerDescription": "Tabaka hili la seti ya data linaonekana kwenye onyesho la awali la Green Globe.",
       "hiddenLayerDescription": "Tabaka hili la seti ya data linapatikana lakini limefichwa kwa sasa.",
       "showLayer": "Onyesha tabaka",
-      "hideLayer": "Ficha tabaka"
+      "hideLayer": "Ficha tabaka",
+      "deleteUnavailable": "Huwezi kuondoa ushahidi huu.",
+      "deleteError": "Imeshindikana kuondoa kipengee hiki.",
+      "displayedBiodiversityData": "Data ya bioanuai inayoonyeshwa"
     },
     "reference": {
       "linkedRecord": "Rekodi iliyounganishwa",

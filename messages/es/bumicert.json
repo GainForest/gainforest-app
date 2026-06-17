@@ -17,10 +17,11 @@
       "emptyDescription": "Los informes de evidencia, auditorías y notas de campo publicados por esta organización aparecerán aquí.",
       "filters": {
         "all": "Todos",
-        "tree": "Árbol",
+        "tree": "Árboles",
         "audio": "Audio",
         "biodiversity": "Biodiversidad",
-        "document": "Documento"
+        "document": "Documento",
+        "file": "Archivos"
       },
       "ownerTools": "Herramientas del propietario",
       "linkEvidenceTitle": "Vincular evidencia",
@@ -31,7 +32,10 @@
       "linkedDescription": "Revisa los registros, archivos y capas del mapa que ya forman parte de la cronología pública de evidencias.",
       "pageOf": "Página {current} de {total}",
       "previousPage": "Página anterior",
-      "nextPage": "Página siguiente"
+      "nextPage": "Página siguiente",
+      "timelineTools": "Herramientas de la línea de tiempo",
+      "linksUnavailable": "No se pudieron comprobar los enlaces existentes de la línea de tiempo. Actualiza antes de añadir grupos de árboles.",
+      "linkSuccess": "Vinculado a la línea de tiempo pública. Puede tardar un momento en aparecer para todos."
     },
     "evidenceAdder": {
       "title": "Agregar evidencia",
@@ -109,7 +113,50 @@
       "selectRecordsToLink": "Selecciona registros de evidencia para vincularlos a esta cronología.",
       "alreadyLinkedDataset": "Ya está vinculado a esta cronología",
       "checkingExistingLinks": "Comprobando los vínculos existentes de la cronología…",
-      "unableToVerifyExistingLinks": "No se pudieron verificar los vínculos existentes de la cronología. Actualiza la página para vincular conjuntos de datos de árboles."
+      "unableToVerifyExistingLinks": "No se pudieron verificar los vínculos existentes de la cronología. Actualiza la página para vincular conjuntos de datos de árboles.",
+      "tabDescriptions": {
+        "audio": "Añade grabaciones ya guardadas por esta organización.",
+        "trees": "Añade información de árboles agrupada por lugar del proyecto.",
+        "biodiversity": "Filtra observaciones y añade datos mostrados o grupos guardados.",
+        "files": "Añade informes, fotos, videos o páginas web."
+      },
+      "permissions": {
+        "signIn": "Inicia sesión con una cuenta que pueda gestionar esta línea de tiempo.",
+        "notMember": "Cambia a una cuenta de organización que pueda gestionar esta línea de tiempo.",
+        "createDenied": "No puedes vincular evidencia a esta línea de tiempo.",
+        "deleteDenied": "No puedes eliminar evidencia de esta línea de tiempo."
+      },
+      "linkError": "No se pudo vincular esta evidencia. Inténtalo de nuevo.",
+      "manageType": "Gestionar {type}",
+      "biodiversity": {
+        "attachmentGroupTitle": "Grupo de biodiversidad",
+        "attachmentObservationsTitle": "Observaciones de biodiversidad",
+        "emptyLabel": "datos de biodiversidad",
+        "searchLabel": "Buscar",
+        "searchPlaceholder": "Buscar biodiversidad",
+        "recorderLabel": "Registrador",
+        "allRecorders": "Todos los registradores",
+        "recorderOptionFallback": "Registrador {number}",
+        "displayedTitle": "Datos de biodiversidad mostrados",
+        "displayedSummary": "Se muestran {shown} de {total, plural, =1 {1 observación} other {# observaciones}}. Elige observaciones de esta vista filtrada.",
+        "clearDisplayed": "Borrar mostrados",
+        "selectDisplayed": "Seleccionar mostrados",
+        "noDataMatches": "Ningún dato de biodiversidad coincide con estos filtros.",
+        "recordedBy": "Registrado por {name}",
+        "recorderFallback": "un registrador guardado",
+        "alreadyLinked": "Ya vinculado",
+        "coveredByGroup": "Cubierto por el grupo",
+        "groupsTitle": "Grupos de biodiversidad",
+        "groupsDescription": "Los grupos usan los mismos filtros de registrador y búsqueda.",
+        "noGroupsMatch": "Ningún grupo de biodiversidad coincide con estos filtros.",
+        "multipleRecorders": "{count, plural, =1 {1 registrador} other {# registradores}}",
+        "firstRecorderAndMore": "{name} + {count, plural, =1 {1 más} other {# más}}",
+        "shownCount": "{count} mostrados",
+        "totalCount": "{count} en total",
+        "speciesCount": "{count, plural, =1 {1 especie} other {# especies}}",
+        "groupStatus": "Datos agrupados",
+        "manageData": "Gestionar datos de biodiversidad"
+      }
     },
     "metadata": {
       "notFound": "certificado no encontrado"
@@ -173,7 +220,10 @@
       "visibleLayerDescription": "Esta capa del conjunto de datos está visible en la vista previa de Green Globe.",
       "hiddenLayerDescription": "Esta capa del conjunto de datos está disponible, pero actualmente está oculta.",
       "showLayer": "Mostrar capa",
-      "hideLayer": "Ocultar capa"
+      "hideLayer": "Ocultar capa",
+      "deleteUnavailable": "No puedes eliminar esta evidencia.",
+      "deleteError": "No se pudo eliminar este elemento.",
+      "displayedBiodiversityData": "Datos de biodiversidad mostrados"
     },
     "reference": {
       "linkedRecord": "Registro vinculado",

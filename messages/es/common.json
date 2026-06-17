@@ -280,5 +280,45 @@
     "nextImage": "Imagen siguiente",
     "accountMetadataTitle": "{name} — Galería",
     "accountMetadataDescription": "Imágenes de galerías de proyectos compartidas por {name}."
+  },
+  "manageTrees": {
+    "filters": {
+      "searchTreeGroups": "Buscar grupos de árboles",
+      "searchTrees": "Buscar por especie, lugar o persona…",
+      "recorder": "Registrador",
+      "filterByRecorder": "Filtrar grupos de árboles por registrador",
+      "allRecorders": "Todos",
+      "recorderOptionFallback": "Registrador {number}",
+      "treeGroupCount": "{shown} de {total, plural, =1 {1 grupo de árboles} other {# grupos de árboles}}",
+      "treeCount": "{shown} de {total, plural, =1 {1 árbol} other {# árboles}}",
+      "noTreeGroupsTitle": "Ningún grupo de árboles coincide con tus filtros",
+      "noTreeGroupsDescription": "Prueba con otro nombre, lugar, estado o registrador.",
+      "clearFilters": "Borrar filtros"
+    },
+    "datasetLanding": {
+      "needsTreeGroup": "Necesita un grupo de árboles",
+      "treeGroup": "Grupo de árboles",
+      "treeCount": "{count, plural, =1 {1 árbol} other {# árboles}}",
+      "recordedBy": "Registrado por {name}",
+      "recorderFallback": "un registrador guardado",
+      "multipleRecorders": "{count, plural, =1 {1 registrador} other {# registradores}}",
+      "firstRecorderAndMore": "{name} + {count, plural, =1 {1 más} other {# más}}",
+      "openTreeGroup": "Abrir grupo de árboles",
+      "deleteTreeGroup": "Eliminar grupo de árboles",
+      "deleteTreeGroupNamed": "Eliminar grupo de árboles {name}",
+      "dateUnavailable": "Fecha no disponible",
+      "locationNotSet": "Ubicación no definida",
+      "additionalLocations": "+ {count, plural, =1 {1 más} other {# más}}",
+      "ungroupedTrees": "Árboles sin grupo",
+      "unnamedTreeGroup": "Grupo de árboles sin nombre",
+      "statuses": {
+        "noTrees": "Aún no hay árboles",
+        "needsCleanup": "Necesita limpieza",
+        "migrationNeeded": "Migración necesaria",
+        "measurementsReady": "Mediciones listas",
+        "partlyMeasured": "Medido parcialmente",
+        "noMeasurements": "Aún no hay mediciones"
+      }
+    }
   }
 }

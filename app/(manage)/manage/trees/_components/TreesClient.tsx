@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useLocale, useTranslations } from "next-intl";
 import {
   AlertTriangleIcon,
   CalendarIcon,
@@ -18,12 +19,14 @@ import {
   SearchIcon,
   Trash2Icon,
   TreesIcon,
+  UserRoundIcon,
   XIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import Container from "@/components/ui/container";
 import { useModal } from "@/components/ui/modal/context";
@@ -46,7 +49,9 @@ import AddToTreeGroupModal from "./AddToTreeGroupModal";
 import {
   buildDatasetLandingCards,
   DatasetLandingSection,
+  getSafeRecordedByDisplayName,
   UNGROUPED_DATASET_FILTER,
+  type DatasetLandingBuildOptions,
 } from "./DatasetLandingSection";
 import {
   CANOPY_COVER_PERCENT_MAX,
@@ -152,6 +157,7 @@ const OPTIONAL_OCCURRENCE_FIELDS: Array<keyof TreeOccurrenceDraft> = [
 ];
 
 const ATTACH_EXISTING_TREE_GROUP_MAX_TREES = 50;
+const ALL_RECORDERS_FILTER_VALUE = "__all_recorders__";
 
 function isUngroupedTree(item: TreeManagerItem): boolean {
   return !item.occurrence.datasetRef;
@@ -484,6 +490,9 @@ function mergeTreeDetail(existing: OccurrenceRecord, detail: Partial<OccurrenceR
 }
 
 export function TreesClient({ did, target, onUpload }: TreesClientProps) {
+  const locale = useLocale();
+  const treeFilterT = useTranslations("common.manageTrees.filters");
+  const datasetLandingT = useTranslations("common.manageTrees.datasetLanding");
   const {
     searchQuery,
     selectedTreeRkey,
@@ -525,6 +534,7 @@ export function TreesClient({ did, target, onUpload }: TreesClientProps) {
   const [treeGroupAttachFeedback, setTreeGroupAttachFeedback] = useState<string | null>(null);
   const [treeGroupAttachPending, setTreeGroupAttachPending] = useState(false);
   const [treeGroupSearchQuery, setTreeGroupSearchQuery] = useState("");
+  const [treeGroupRecordedByFilter, setTreeGroupRecordedByFilter] = useState("");
   const [selectedUngroupedTreeRkeys, setSelectedUngroupedTreeRkeys] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const lastDraftResetKeyRef = useRef<string | null>(null);
@@ -581,16 +591,47 @@ export function TreesClient({ did, target, onUpload }: TreesClientProps) {
     [measurements, photos, trees],
   );
 
+  const datasetLandingBuildOptions = useMemo<DatasetLandingBuildOptions>(() => ({
+    locale,
+    copy: {
+      dateUnavailable: datasetLandingT("dateUnavailable"),
+      locationNotSet: datasetLandingT("locationNotSet"),
+      additionalLocations: (count) => datasetLandingT("additionalLocations", { count }),
+      ungroupedTrees: datasetLandingT("ungroupedTrees"),
+      unnamedTreeGroup: datasetLandingT("unnamedTreeGroup"),
+      statusNoTrees: datasetLandingT("statuses.noTrees"),
+      statusNeedsCleanup: datasetLandingT("statuses.needsCleanup"),
+      statusMigrationNeeded: datasetLandingT("statuses.migrationNeeded"),
+      statusMeasurementsReady: datasetLandingT("statuses.measurementsReady"),
+      statusPartlyMeasured: datasetLandingT("statuses.partlyMeasured"),
+      statusNoMeasurements: datasetLandingT("statuses.noMeasurements"),
+    },
+  }), [datasetLandingT, locale]);
   const treeGroupCards = useMemo(
-    () => buildDatasetLandingCards(datasets, treeItems),
-    [datasets, treeItems],
+    () => buildDatasetLandingCards(datasets, treeItems, datasetLandingBuildOptions),
+    [datasetLandingBuildOptions, datasets, treeItems],
   );
   const showTreeGroupLanding = !datasetFilter && treeGroupCards.length > 0;
+  const treeGroupRecorderOptions = useMemo(() => {
+    const values = new Map<string, string>();
+    for (const card of treeGroupCards) {
+      for (const recordedBy of card.recordedByValues) {
+        const key = recordedBy.toLowerCase();
+        if (!values.has(key)) values.set(key, recordedBy);
+      }
+    }
+    return Array.from(values.values()).sort((left, right) => left.localeCompare(right));
+  }, [treeGroupCards]);
+
   const filteredTreeGroupCards = useMemo(() => {
     const query = treeGroupSearchQuery.trim().toLowerCase();
-    if (!query) return treeGroupCards;
-    return treeGroupCards.filter((card) => card.searchText.includes(query));
-  }, [treeGroupCards, treeGroupSearchQuery]);
+    const recordedBy = treeGroupRecordedByFilter.trim().toLowerCase();
+    return treeGroupCards.filter((card) => {
+      const matchesQuery = !query || card.searchText.includes(query);
+      const matchesRecorder = !recordedBy || card.recordedByValues.some((value) => value.toLowerCase() === recordedBy);
+      return matchesQuery && matchesRecorder;
+    });
+  }, [treeGroupCards, treeGroupRecordedByFilter, treeGroupSearchQuery]);
 
   const datasetScopedTrees = useMemo(() => {
     if (datasetFilter === UNGROUPED_DATASET_FILTER) return treeItems.filter(isUngroupedTree);
@@ -661,6 +702,12 @@ export function TreesClient({ did, target, onUpload }: TreesClientProps) {
     if (!showTreeGroupLanding || !selectedTreeRkey) return;
     setQueryValues({ tree: null });
   }, [selectedTreeRkey, setQueryValues, showTreeGroupLanding]);
+
+  useEffect(() => {
+    if (!treeGroupRecordedByFilter) return;
+    const stillAvailable = treeGroupRecorderOptions.some((value) => value === treeGroupRecordedByFilter);
+    if (!stillAvailable) setTreeGroupRecordedByFilter("");
+  }, [treeGroupRecordedByFilter, treeGroupRecorderOptions]);
 
   useEffect(() => {
     if (datasetFilter !== UNGROUPED_DATASET_FILTER) {
@@ -1416,22 +1463,49 @@ export function TreesClient({ did, target, onUpload }: TreesClientProps) {
 
       {treeGroupCards.length > 0 || treeItems.length > 0 ? (
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-          <div className="relative w-full lg:max-w-sm">
-            <SearchIcon className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              value={showTreeGroupLanding ? treeGroupSearchQuery : searchQuery}
-              onChange={(event) => {
-                if (showTreeGroupLanding) setTreeGroupSearchQuery(event.target.value);
-                else handleTreeSearchChange(event.target.value);
-              }}
-              placeholder={showTreeGroupLanding ? "Search tree groups…" : "Search by species, place, or person…"}
-              className="pl-9"
-            />
+          <div className="flex w-full flex-col gap-2 sm:flex-row lg:max-w-2xl">
+            <div className="relative w-full sm:max-w-sm">
+              <SearchIcon className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                value={showTreeGroupLanding ? treeGroupSearchQuery : searchQuery}
+                onChange={(event) => {
+                  if (showTreeGroupLanding) setTreeGroupSearchQuery(event.target.value);
+                  else handleTreeSearchChange(event.target.value);
+                }}
+                placeholder={showTreeGroupLanding ? treeFilterT("searchTreeGroups") : treeFilterT("searchTrees")}
+                className="pl-9"
+              />
+            </div>
+            {showTreeGroupLanding && treeGroupRecorderOptions.length > 0 ? (
+              <div className="flex h-10 w-full items-center gap-2 rounded-md border border-input bg-background px-3 text-sm shadow-xs transition-colors focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50 sm:w-80">
+                <UserRoundIcon className="size-4 shrink-0 text-muted-foreground" />
+                <span className="shrink-0 text-muted-foreground">{treeFilterT("recorder")}</span>
+                <Select
+                  value={treeGroupRecordedByFilter || ALL_RECORDERS_FILTER_VALUE}
+                  onValueChange={(value) => setTreeGroupRecordedByFilter(value === ALL_RECORDERS_FILTER_VALUE ? "" : value)}
+                >
+                  <SelectTrigger
+                    aria-label={treeFilterT("filterByRecorder")}
+                    className="h-auto min-w-0 flex-1 border-0 bg-transparent p-0 text-left shadow-none ring-offset-0 focus:ring-0 [&>svg]:ml-2 [&>svg]:size-4"
+                  >
+                    <SelectValue placeholder={treeFilterT("allRecorders")} />
+                  </SelectTrigger>
+                  <SelectContent align="start" className="min-w-80 max-w-[calc(100vw-2rem)]">
+                    <SelectItem value={ALL_RECORDERS_FILTER_VALUE}>{treeFilterT("allRecorders")}</SelectItem>
+                    {treeGroupRecorderOptions.map((recordedBy, index) => (
+                      <SelectItem key={recordedBy} value={recordedBy}>
+                        <span className="block max-w-[30rem] whitespace-normal leading-5">{getSafeRecordedByDisplayName(recordedBy) ?? treeFilterT("recorderOptionFallback", { number: index + 1 })}</span>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            ) : null}
           </div>
           <p className="text-sm text-muted-foreground">
             {showTreeGroupLanding
-              ? `${filteredTreeGroupCards.length} of ${treeGroupCards.length} tree group${treeGroupCards.length === 1 ? "" : "s"}`
-              : `${filteredTrees.length} of ${datasetScopedTrees.length} tree${datasetScopedTrees.length === 1 ? "" : "s"}`}
+              ? treeFilterT("treeGroupCount", { shown: filteredTreeGroupCards.length, total: treeGroupCards.length })
+              : treeFilterT("treeCount", { shown: filteredTrees.length, total: datasetScopedTrees.length })}
           </p>
         </div>
       ) : null}
@@ -1483,9 +1557,9 @@ export function TreesClient({ did, target, onUpload }: TreesClientProps) {
 
           {filteredTreeGroupCards.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-56 gap-3 rounded-2xl border border-dashed border-border text-center px-6">
-              <p className="text-2xl text-muted-foreground font-garamond">No tree groups match your search</p>
-              <p className="text-sm text-muted-foreground">Try a different name, place, or status.</p>
-              <Button variant="outline" onClick={() => setTreeGroupSearchQuery("")}>Clear search</Button>
+              <p className="text-2xl text-muted-foreground font-garamond">{treeFilterT("noTreeGroupsTitle")}</p>
+              <p className="text-sm text-muted-foreground">{treeFilterT("noTreeGroupsDescription")}</p>
+              <Button variant="outline" onClick={() => { setTreeGroupSearchQuery(""); setTreeGroupRecordedByFilter(""); }}>{treeFilterT("clearFilters")}</Button>
             </div>
           ) : (
             <DatasetLandingSection datasetCards={filteredTreeGroupCards} onOpen={handleDatasetChange} onDelete={openDeleteTreeGroupConfirm} deleteDisabledReason={deletePermission.reason} />

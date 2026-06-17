@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
+import { getTranslations } from "next-intl/server";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
@@ -55,7 +56,9 @@ import {
 import { isPdsBlobUrl } from "../../../_lib/pds";
 import { blockExplorerUrl, INDEXER_URL, localBumicertHref, SITE_URL } from "../../../_lib/urls";
 import { fetchAuthSession } from "../../../_lib/auth-server";
-import { getAccountRouteData, readAccountRouteParams } from "../../../account/_lib/account-route";
+import type { AuthSession } from "../../../_lib/auth";
+import { fetchUserCgsGroups } from "../../../_lib/manage-server";
+import { getAccountRouteData, readAccountRouteParams, type AccountKind } from "../../../account/_lib/account-route";
 import { Separator } from "@/components/ui/separator";
 import { BumicertHeaderTitleBridge } from "./_components/BumicertHeaderTitleBridge";
 import { BumicertShareButton } from "./_components/BumicertShareButton";
@@ -63,6 +66,7 @@ import { BumicertObservationsGallery } from "./_components/BumicertObservationsG
 import { DonateButton } from "./_components/donate/DonateButton";
 import { FundingStatus } from "./_components/donate/FundingStatus";
 import { BumicertTimeline } from "./_components/timeline/BumicertTimeline";
+import { canCreateRecord, canDeleteRecord } from "@/app/(manage)/manage/_lib/cgs-permissions";
 
 export const revalidate = 60;
 
@@ -91,6 +95,65 @@ type RouteData = {
   routeIdentifier: string;
   urlIdentifier: string;
 };
+
+type TimelinePermission = { allowed: boolean; reason: string | null };
+type TimelineAccess = {
+  canManageEvidence: boolean;
+  createPermission: TimelinePermission;
+  deletePermission: TimelinePermission;
+  mutationRepo?: string;
+};
+type TimelinePermissionCopy = {
+  signIn: string;
+  notMember: string;
+  createDenied: string;
+  deleteDenied: string;
+};
+
+const TIMELINE_DENIED: TimelineAccess = {
+  canManageEvidence: false,
+  createPermission: { allowed: false, reason: null },
+  deletePermission: { allowed: false, reason: null },
+};
+
+async function resolveTimelineAccess(recordDid: string, ownerKind: AccountKind, authSession: AuthSession, copy: TimelinePermissionCopy): Promise<TimelineAccess> {
+  if (!authSession.isLoggedIn) {
+    return {
+      ...TIMELINE_DENIED,
+      createPermission: { allowed: false, reason: copy.signIn },
+      deletePermission: { allowed: false, reason: copy.signIn },
+    };
+  }
+
+  if (ownerKind === "organization") {
+    const groups = await fetchUserCgsGroups();
+    const membership = groups.find((group) => group.groupDid === recordDid);
+    if (!membership) {
+      return {
+        ...TIMELINE_DENIED,
+        createPermission: { allowed: false, reason: copy.notMember },
+        deletePermission: { allowed: false, reason: copy.notMember },
+      };
+    }
+
+    const target = { kind: "group" as const, role: membership.role };
+    const create = canCreateRecord(target);
+    const remove = canDeleteRecord(target);
+    return {
+      canManageEvidence: true,
+      createPermission: { allowed: create.allowed, reason: create.allowed ? null : copy.createDenied },
+      deletePermission: { allowed: remove.allowed, reason: remove.allowed ? null : copy.deleteDenied },
+      mutationRepo: recordDid,
+    };
+  }
+
+  const ownsPersonalRecord = authSession.did === recordDid;
+  return {
+    canManageEvidence: ownsPersonalRecord,
+    createPermission: { allowed: ownsPersonalRecord, reason: ownsPersonalRecord ? null : copy.signIn },
+    deletePermission: { allowed: ownsPersonalRecord, reason: ownsPersonalRecord ? null : copy.signIn },
+  };
+}
 
 const BADGE_TONE: Record<DetailBadge["tone"], string> = {
   ok: "bg-ok/15 text-ok",
@@ -182,8 +245,10 @@ export default async function BumicertDetailPage({
     places: Awaited<ReturnType<typeof fetchLocationsByDid>>;
   } = emptyTimelineSources;
 
+  let timelineAccess = TIMELINE_DENIED;
+
   if (activeTab === "timeline") {
-    const [attachmentsResult, audio, occurrencePage, treeGroups, places] = await Promise.all([
+    const [attachmentsResult, audio, occurrencePage, treeGroups, places, permissionT] = await Promise.all([
       fetchTimelineAttachmentsByDid(record.did).then(
         (items) => ({ ok: true as const, items }),
         () => ({ ok: false as const, items: [] as TimelineAttachmentItem[] }),
@@ -192,10 +257,17 @@ export default async function BumicertDetailPage({
       fetchOccurrencesByDid(record.did, 1000).catch(() => ({ records: [] as OccurrenceRecord[], cursor: null, hasMore: false })),
       fetchTreeDatasetsByDid(record.did).catch(() => []),
       fetchLocationsByDid(record.did).catch(() => []),
+      getTranslations("bumicert.detail.evidenceAdder.permissions"),
     ]);
     timelineAttachments = attachmentsResult.items;
     timelineAttachmentsUnavailable = !attachmentsResult.ok;
     timelineSources = { audio, occurrences: occurrencePage.records, treeGroups, places };
+    timelineAccess = await resolveTimelineAccess(record.did, owner.kind, authSession, {
+      signIn: permissionT("signIn"),
+      notMember: permissionT("notMember"),
+      createDenied: permissionT("createDenied"),
+      deleteDenied: permissionT("deleteDenied"),
+    });
   }
 
   const jsonLd = buildBumicertJsonLd(record, owner, fundingConfig, detailHref, description ?? null);
@@ -279,7 +351,10 @@ export default async function BumicertDetailPage({
                 activityUri={record.atUri}
                 activityCid={record.cid ?? ""}
                 bumicertTitle={record.title}
-                isOwner={authSession.isLoggedIn && authSession.did === record.did}
+                canManageEvidence={timelineAccess.canManageEvidence}
+                createPermission={timelineAccess.createPermission}
+                deletePermission={timelineAccess.deletePermission}
+                mutationRepo={timelineAccess.mutationRepo}
                 initialEntries={timelineAttachments}
                 sources={timelineSources}
                 attachmentsUnavailable={timelineAttachmentsUnavailable}

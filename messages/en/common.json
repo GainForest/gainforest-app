@@ -280,5 +280,45 @@
     "nextImage": "Next image",
     "accountMetadataTitle": "{name} — Gallery",
     "accountMetadataDescription": "Project gallery images shared by {name}."
+  },
+  "manageTrees": {
+    "filters": {
+      "searchTreeGroups": "Search tree groups",
+      "searchTrees": "Search by species, place, or person…",
+      "recorder": "Recorder",
+      "filterByRecorder": "Filter tree groups by recorder",
+      "allRecorders": "All",
+      "recorderOptionFallback": "Recorder {number}",
+      "treeGroupCount": "{shown} of {total, plural, =1 {1 tree group} other {# tree groups}}",
+      "treeCount": "{shown} of {total, plural, =1 {1 tree} other {# trees}}",
+      "noTreeGroupsTitle": "No tree groups match your filters",
+      "noTreeGroupsDescription": "Try a different name, place, status, or recorder.",
+      "clearFilters": "Clear filters"
+    },
+    "datasetLanding": {
+      "needsTreeGroup": "Needs a tree group",
+      "treeGroup": "Tree group",
+      "treeCount": "{count, plural, =1 {1 tree} other {# trees}}",
+      "recordedBy": "Recorded by {name}",
+      "recorderFallback": "a saved recorder",
+      "multipleRecorders": "{count, plural, =1 {1 recorder} other {# recorders}}",
+      "firstRecorderAndMore": "{name} + {count, plural, =1 {1 more} other {# more}}",
+      "openTreeGroup": "Open tree group",
+      "deleteTreeGroup": "Delete tree group",
+      "deleteTreeGroupNamed": "Delete tree group {name}",
+      "dateUnavailable": "Date unavailable",
+      "locationNotSet": "Location not set",
+      "additionalLocations": "+ {count, plural, =1 {1 more} other {# more}}",
+      "ungroupedTrees": "Ungrouped trees",
+      "unnamedTreeGroup": "Unnamed tree group",
+      "statuses": {
+        "noTrees": "No trees yet",
+        "needsCleanup": "Needs cleanup",
+        "migrationNeeded": "Migration needed",
+        "measurementsReady": "Measurements ready",
+        "partlyMeasured": "Partly measured",
+        "noMeasurements": "No measurements yet"
+      }
+    }
   }
 }

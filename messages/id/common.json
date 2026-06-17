@@ -280,5 +280,45 @@
     "nextImage": "Gambar berikutnya",
     "accountMetadataTitle": "{name} — Galeri",
     "accountMetadataDescription": "Gambar galeri proyek yang dibagikan oleh {name}."
+  },
+  "manageTrees": {
+    "filters": {
+      "searchTreeGroups": "Cari kelompok pohon",
+      "searchTrees": "Cari menurut spesies, tempat, atau orang…",
+      "recorder": "Pencatat",
+      "filterByRecorder": "Filter kelompok pohon menurut pencatat",
+      "allRecorders": "Semua",
+      "recorderOptionFallback": "Pencatat {number}",
+      "treeGroupCount": "{shown} dari {total, plural, =1 {1 kelompok pohon} other {# kelompok pohon}}",
+      "treeCount": "{shown} dari {total, plural, =1 {1 pohon} other {# pohon}}",
+      "noTreeGroupsTitle": "Tidak ada kelompok pohon yang cocok dengan filter",
+      "noTreeGroupsDescription": "Coba nama, tempat, status, atau pencatat lain.",
+      "clearFilters": "Hapus filter"
+    },
+    "datasetLanding": {
+      "needsTreeGroup": "Perlu kelompok pohon",
+      "treeGroup": "Kelompok pohon",
+      "treeCount": "{count, plural, =1 {1 pohon} other {# pohon}}",
+      "recordedBy": "Dicatat oleh {name}",
+      "recorderFallback": "pencatat tersimpan",
+      "multipleRecorders": "{count, plural, =1 {1 pencatat} other {# pencatat}}",
+      "firstRecorderAndMore": "{name} + {count, plural, =1 {1 lainnya} other {# lainnya}}",
+      "openTreeGroup": "Buka kelompok pohon",
+      "deleteTreeGroup": "Hapus kelompok pohon",
+      "deleteTreeGroupNamed": "Hapus kelompok pohon {name}",
+      "dateUnavailable": "Tanggal tidak tersedia",
+      "locationNotSet": "Lokasi belum diatur",
+      "additionalLocations": "+ {count, plural, =1 {1 lainnya} other {# lainnya}}",
+      "ungroupedTrees": "Pohon tanpa kelompok",
+      "unnamedTreeGroup": "Kelompok pohon tanpa nama",
+      "statuses": {
+        "noTrees": "Belum ada pohon",
+        "needsCleanup": "Perlu dibersihkan",
+        "migrationNeeded": "Perlu migrasi",
+        "measurementsReady": "Pengukuran siap",
+        "partlyMeasured": "Sebagian terukur",
+        "noMeasurements": "Belum ada pengukuran"
+      }
+    }
   }
 }

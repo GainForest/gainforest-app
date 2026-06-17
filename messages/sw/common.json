@@ -280,5 +280,45 @@
     "nextImage": "Picha inayofuata",
     "accountMetadataTitle": "{name} — Matunzio",
     "accountMetadataDescription": "Picha za matunzio ya miradi zilizoshirikiwa na {name}."
+  },
+  "manageTrees": {
+    "filters": {
+      "searchTreeGroups": "Tafuta vikundi vya miti",
+      "searchTrees": "Tafuta kwa spishi, mahali, au mtu…",
+      "recorder": "Mrekodi",
+      "filterByRecorder": "Chuja vikundi vya miti kwa mrekodi",
+      "allRecorders": "Wote",
+      "recorderOptionFallback": "Mrekodi {number}",
+      "treeGroupCount": "{shown} kati ya {total, plural, =1 {kikundi 1 cha miti} other {vikundi # vya miti}}",
+      "treeCount": "{shown} kati ya {total, plural, =1 {mti 1} other {miti #}}",
+      "noTreeGroupsTitle": "Hakuna kikundi cha miti kinacholingana na vichujio vyako",
+      "noTreeGroupsDescription": "Jaribu jina, mahali, hali, au mrekodi mwingine.",
+      "clearFilters": "Futa vichujio"
+    },
+    "datasetLanding": {
+      "needsTreeGroup": "Inahitaji kikundi cha miti",
+      "treeGroup": "Kikundi cha miti",
+      "treeCount": "{count, plural, =1 {mti 1} other {miti #}}",
+      "recordedBy": "Imerekodiwa na {name}",
+      "recorderFallback": "mrekodi aliyehifadhiwa",
+      "multipleRecorders": "{count, plural, =1 {mrekodi 1} other {warekodi #}}",
+      "firstRecorderAndMore": "{name} + {count, plural, =1 {mwingine 1} other {wengine #}}",
+      "openTreeGroup": "Fungua kikundi cha miti",
+      "deleteTreeGroup": "Futa kikundi cha miti",
+      "deleteTreeGroupNamed": "Futa kikundi cha miti {name}",
+      "dateUnavailable": "Tarehe haipatikani",
+      "locationNotSet": "Mahali hapajawekwa",
+      "additionalLocations": "+ {count, plural, =1 {mwingine 1} other {wengine #}}",
+      "ungroupedTrees": "Miti isiyo kwenye kikundi",
+      "unnamedTreeGroup": "Kikundi cha miti kisicho na jina",
+      "statuses": {
+        "noTrees": "Bado hakuna miti",
+        "needsCleanup": "Inahitaji kusafishwa",
+        "migrationNeeded": "Uhamishaji unahitajika",
+        "measurementsReady": "Vipimo viko tayari",
+        "partlyMeasured": "Imepimwa kwa sehemu",
+        "noMeasurements": "Bado hakuna vipimo"
+      }
+    }
   }
 }

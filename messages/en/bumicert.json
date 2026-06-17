@@ -17,10 +17,11 @@
       "emptyDescription": "Evidence reports, audits, and field notes published by this organization will appear here.",
       "filters": {
         "all": "All",
-        "tree": "Tree",
+        "tree": "Trees",
         "audio": "Audio",
         "biodiversity": "Biodiversity",
-        "document": "Document"
+        "document": "Document",
+        "file": "Files"
       },
       "ownerTools": "Owner tools",
       "linkEvidenceTitle": "Link evidence",
@@ -31,7 +32,10 @@
       "linkedDescription": "Review the records, files, and map layers that are already part of the public evidence timeline.",
       "pageOf": "Page {current} of {total}",
       "previousPage": "Previous page",
-      "nextPage": "Next page"
+      "nextPage": "Next page",
+      "timelineTools": "Timeline tools",
+      "linksUnavailable": "Existing timeline links could not be checked. Refresh before adding tree groups.",
+      "linkSuccess": "Linked to the public timeline. It may take a moment to appear for everyone."
     },
     "evidenceAdder": {
       "title": "Add Evidence",
@@ -109,7 +113,50 @@
       "selectRecordsToLink": "Select evidence records to link to this timeline.",
       "alreadyLinkedDataset": "Already linked to this timeline",
       "checkingExistingLinks": "Checking existing timeline links…",
-      "unableToVerifyExistingLinks": "Unable to verify existing timeline links. Refresh to link tree datasets."
+      "unableToVerifyExistingLinks": "Unable to verify existing timeline links. Refresh to link tree datasets.",
+      "tabDescriptions": {
+        "audio": "Add recordings already saved by this organization.",
+        "trees": "Add tree information grouped by project place.",
+        "biodiversity": "Filter observations and add displayed data or saved groups.",
+        "files": "Add reports, photos, videos, or web pages."
+      },
+      "permissions": {
+        "signIn": "Sign in with an account that can manage this timeline.",
+        "notMember": "Switch to an organization account that can manage this timeline.",
+        "createDenied": "You cannot link evidence for this timeline.",
+        "deleteDenied": "You cannot remove evidence from this timeline."
+      },
+      "linkError": "Unable to link this evidence. Please try again.",
+      "manageType": "Manage {type}",
+      "biodiversity": {
+        "attachmentGroupTitle": "Biodiversity group",
+        "attachmentObservationsTitle": "Biodiversity observations",
+        "emptyLabel": "biodiversity data",
+        "searchLabel": "Search",
+        "searchPlaceholder": "Search biodiversity",
+        "recorderLabel": "Recorder",
+        "allRecorders": "All recorders",
+        "recorderOptionFallback": "Recorder {number}",
+        "displayedTitle": "Displayed biodiversity data",
+        "displayedSummary": "{shown} of {total, plural, =1 {1 observation} other {# observations}} shown. Choose observations from this filtered view.",
+        "clearDisplayed": "Clear displayed",
+        "selectDisplayed": "Select displayed",
+        "noDataMatches": "No biodiversity data matches these filters.",
+        "recordedBy": "Recorded by {name}",
+        "recorderFallback": "a saved recorder",
+        "alreadyLinked": "Already linked",
+        "coveredByGroup": "Covered by group",
+        "groupsTitle": "Biodiversity groups",
+        "groupsDescription": "Groups use the same recorder and search filters.",
+        "noGroupsMatch": "No biodiversity groups match these filters.",
+        "multipleRecorders": "{count, plural, =1 {1 recorder} other {# recorders}}",
+        "firstRecorderAndMore": "{name} + {count, plural, =1 {1 more} other {# more}}",
+        "shownCount": "{count} shown",
+        "totalCount": "{count} total",
+        "speciesCount": "{count, plural, =1 {1 species} other {# species}}",
+        "groupStatus": "Grouped data",
+        "manageData": "Manage biodiversity data"
+      }
     },
     "metadata": {
       "notFound": "Cert Not Found"
@@ -173,7 +220,10 @@
       "visibleLayerDescription": "This dataset layer is visible in the Green Globe preview.",
       "hiddenLayerDescription": "This dataset layer is available but currently hidden.",
       "showLayer": "Show layer",
-      "hideLayer": "Hide layer"
+      "hideLayer": "Hide layer",
+      "deleteUnavailable": "You cannot remove this evidence.",
+      "deleteError": "Unable to remove this item.",
+      "displayedBiodiversityData": "Displayed biodiversity data"
     },
     "reference": {
       "linkedRecord": "Linked record",

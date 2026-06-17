@@ -280,5 +280,45 @@
     "nextImage": "Próxima imagem",
     "accountMetadataTitle": "{name} — Galeria",
     "accountMetadataDescription": "Imagens de galerias de projetos compartilhadas por {name}."
+  },
+  "manageTrees": {
+    "filters": {
+      "searchTreeGroups": "Pesquisar grupos de árvores",
+      "searchTrees": "Pesquisar por espécie, lugar ou pessoa…",
+      "recorder": "Registrador",
+      "filterByRecorder": "Filtrar grupos de árvores por registrador",
+      "allRecorders": "Todos",
+      "recorderOptionFallback": "Registrador {number}",
+      "treeGroupCount": "{shown} de {total, plural, =1 {1 grupo de árvores} other {# grupos de árvores}}",
+      "treeCount": "{shown} de {total, plural, =1 {1 árvore} other {# árvores}}",
+      "noTreeGroupsTitle": "Nenhum grupo de árvores corresponde aos filtros",
+      "noTreeGroupsDescription": "Tente outro nome, lugar, status ou registrador.",
+      "clearFilters": "Limpar filtros"
+    },
+    "datasetLanding": {
+      "needsTreeGroup": "Precisa de um grupo de árvores",
+      "treeGroup": "Grupo de árvores",
+      "treeCount": "{count, plural, =1 {1 árvore} other {# árvores}}",
+      "recordedBy": "Registrado por {name}",
+      "recorderFallback": "um registrador salvo",
+      "multipleRecorders": "{count, plural, =1 {1 registrador} other {# registradores}}",
+      "firstRecorderAndMore": "{name} + {count, plural, =1 {1 a mais} other {# a mais}}",
+      "openTreeGroup": "Abrir grupo de árvores",
+      "deleteTreeGroup": "Excluir grupo de árvores",
+      "deleteTreeGroupNamed": "Excluir grupo de árvores {name}",
+      "dateUnavailable": "Data indisponível",
+      "locationNotSet": "Local não definido",
+      "additionalLocations": "+ {count, plural, =1 {1 a mais} other {# a mais}}",
+      "ungroupedTrees": "Árvores sem grupo",
+      "unnamedTreeGroup": "Grupo de árvores sem nome",
+      "statuses": {
+        "noTrees": "Ainda não há árvores",
+        "needsCleanup": "Precisa de limpeza",
+        "migrationNeeded": "Migração necessária",
+        "measurementsReady": "Medições prontas",
+        "partlyMeasured": "Parcialmente medido",
+        "noMeasurements": "Ainda não há medições"
+      }
+    }
   }
 }
