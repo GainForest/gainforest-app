@@ -57,10 +57,10 @@ export function StatsDashboardClient() {
     const data = stats.bumicerts.data;
     if (!data) return [];
     return [
-      tile(explore("stats.published"), data.totalBumicerts, locale, <LayoutGridIcon />, true, "/bumicerts"),
-      tile(explore("stats.withLocations"), data.certifiedPlaces, locale, <MapIcon />, false, "/bumicerts"),
-      tile(explore("stats.contributors"), data.contributors, locale, <UsersIcon />, true, "/bumicerts"),
-      tile(explore("stats.withCover"), data.projectPhotos, locale, <ImageIcon />, false, "/bumicerts"),
+      tile(explore("stats.published"), data.totalBumicerts, locale, <LayoutGridIcon />, true, "/certs"),
+      tile(explore("stats.withLocations"), data.certifiedPlaces, locale, <MapIcon />, false, "/certs"),
+      tile(explore("stats.contributors"), data.contributors, locale, <UsersIcon />, true, "/certs"),
+      tile(explore("stats.withCover"), data.projectPhotos, locale, <ImageIcon />, false, "/certs"),
     ];
   }, [explore, locale, stats.bumicerts.data]);
 
@@ -100,7 +100,7 @@ export function StatsDashboardClient() {
   return (
     <div className="mx-auto max-w-6xl space-y-10 px-6 pb-20 md:pb-28">
       <DashboardStatsSection
-        title="Bumicerts"
+        title="Certs"
         description="Published project stories and the evidence attached to them."
         state={stats.bumicerts}
         items={bumicertItems}
@@ -119,7 +119,7 @@ export function StatsDashboardClient() {
       />
       <DashboardStatsSection
         title="Projects"
-        description="Project collections and the Bumicerts grouped inside them."
+        description="Project collections and the Certs grouped inside them."
         state={stats.projects}
         items={projectItems}
       />

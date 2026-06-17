@@ -1,7 +1,7 @@
 {
   "seo": {
-    "title": "Bumicerts — Fadhili athari ya urejeshaji",
-    "description": "Bumicerts huwaunganisha wafadhili na walinzi wa mazingira wanaofanya kazi ya urejeshaji ardhini. Fadhili athari ya mazingira iliyothibitishwa moja kwa moja."
+    "title": "vyeti — Fadhili athari ya urejeshaji",
+    "description": "vyeti huwaunganisha wafadhili na walinzi wa mazingira wanaofanya kazi ya urejeshaji ardhini. Fadhili athari ya mazingira iliyothibitishwa moja kwa moja."
   },
   "language": {
     "label": "Lugha",
@@ -52,7 +52,7 @@
       "manage": "SIMAMIA"
     },
     "items": {
-      "bumicerts": "Bumicerts",
+      "bumicerts": "vyeti",
       "organizations": "Mashirika",
       "leaderboard": "Ubao wa wanaoongoza",
       "organization": "Shirika",
@@ -82,7 +82,7 @@
       "checkingAccount": "Tunakagua akaunti yako..."
     },
     "creationCard": {
-      "createBumicert": "Unda Bumicert",
+      "createBumicert": "Unda cheti",
       "createProject": "Unda mradi"
     },
     "tabs": {
@@ -91,7 +91,7 @@
     }
   },
   "bumicertCard": {
-    "missingImage": "Picha ya Bumicert haipatikani",
+    "missingImage": "Picha ya cheti haipatikani",
     "additionalObjectives": "{count, plural, one {lengo # la ziada} other {malengo # ya ziada}}"
   },
   "pagination": {
@@ -114,7 +114,7 @@
       "documentation": "Nyaraka",
       "twitter": "X (Twitter)",
       "github": "GitHub",
-      "bumicerts": "Bumicerts",
+      "bumicerts": "vyeti",
       "organizations": "Mashirika",
       "observations": "Uchunguzi",
       "leaderboard": "Ubao wa wanaoongoza",
@@ -129,7 +129,7 @@
     "cards": {
       "bumicerts": {
         "label": "Miradi iliyothibitishwa",
-        "title": "Bumicerts",
+        "title": "vyeti",
         "blurb": "Vinjari hadithi za miradi zenye picha, maeneo, watu na muktadha.",
         "statLabel": "hadithi"
       },
@@ -148,7 +148,7 @@
       "leaderboard": {
         "label": "Mabingwa wa athari",
         "title": "Ubao wa wanaoongoza",
-        "blurb": "Waone wafadhili wanaosaidia jamii kupitia Bumicerts.",
+        "blurb": "Waone wafadhili wanaosaidia jamii kupitia vyeti.",
         "statLabel": "imekusanywa"
       }
     }
@@ -171,7 +171,7 @@
     "placeholder": "Pakia au buruta na udondoshe faili lako"
   },
   "signInPrompt": {
-    "description": "Hifadhi maeneo ya miradi, taarifa za miti na Bumicerts zako mahali pamoja.",
+    "description": "Hifadhi maeneo ya miradi, taarifa za miti na vyeti zako mahali pamoja.",
     "failed": "Hatukuweza kukamilisha kuingia kwako. Jaribu tena.",
     "getStarted": "Anza"
   },
@@ -207,7 +207,7 @@
       },
       "website": {
         "name": "Programu ya wavuti",
-        "detail": "Kiolesura cha Bumicerts"
+        "detail": "Kiolesura cha vyeti"
       },
       "api": {
         "name": "API ya programu",
@@ -225,7 +225,7 @@
       "eyebrow": "Hali ya moja kwa moja",
       "title": "GainForest",
       "accent": "afya ya mfumo",
-      "lede": "Upatikanaji wa sasa wa Bumicerts, huduma za data na miundombinu inayounga mkono."
+      "lede": "Upatikanaji wa sasa wa vyeti, huduma za data na miundombinu inayounga mkono."
     },
     "unavailable": {
       "title": "Hali haipatikani kwa muda",
@@ -254,7 +254,7 @@
   },
   "accountTabs": {
     "home": "Nyumbani",
-    "bumicerts": "Bumicerts",
+    "bumicerts": "vyeti",
     "donationHistory": "Historia ya michango",
     "observations": "Uchunguzi",
     "gallery": "Matunzio",
@@ -264,7 +264,7 @@
     "accountTitle": "Matunzio",
     "accountDescription": "Picha za miradi zilizoshirikiwa na akaunti hii. Tumia vitufe kuchagua mradi mmoja, au acha Miradi yote ikiwa imechaguliwa.",
     "bumicertTitle": "Matunzio ya mradi",
-    "bumicertDescription": "Picha zilizoshirikiwa kwa mradi ambao Bumicert hii inahusiana nao.",
+    "bumicertDescription": "Picha zilizoshirikiwa kwa mradi ambao cheti hii inahusiana nao.",
     "defaultTitle": "Matunzio",
     "defaultDescription": "Picha zilizoshirikiwa na mradi huu.",
     "emptyTitle": "Bado hakuna picha za matunzio",

@@ -1,8 +1,8 @@
 # TODO — Marketplace / Evaluation Platform Improvements
 
 Source: full UI/UX review (2026-06-10) of the site as a marketplace + evaluation
-platform for environmental credits (Bumicerts). Reviewed: home, /bumicerts,
-/organizations, /observations, /donations, /leaderboard, bumicert detail pages,
+platform for environmental credits (Certs). Reviewed: home, /certs,
+/organizations, /observations, /donations, /leaderboard, cert detail pages,
 donate modal, sign-in, map/list views, dark + light themes, mobile viewport.
 
 **Core finding:** the site reads as a story gallery, not a marketplace. Buyers
@@ -19,7 +19,7 @@ Legend: `[ ]` open · `[x]` done · `[~]` partially done
 - [x] **Funding signals on explorer cards** — cards showed zero commerce state
   even though an "Accepts donations" filter exists. Added a cached funding
   index (open funding configs + receipt totals) and an "Accepting donations /
-  $X raised" pill on `/bumicerts` cards and list rows.
+  $X raised" pill on `/certs` cards and list rows.
 - [x] **Fix the "Accepts donations" client-side filter** — its predicate was
   `() => true` (every loaded record passed). Now checks the funding index.
 - [x] **Remove dead donate UI on non-donation projects** — detail page showed

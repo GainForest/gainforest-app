@@ -73,7 +73,7 @@ export function accountPath(didOrHandle: string): string {
 }
 
 export function accountBumicertsPath(didOrHandle: string): string {
-  return `${accountPath(didOrHandle)}/bumicerts`;
+  return `${accountPath(didOrHandle)}/certs`;
 }
 
 export function accountDonationsPath(didOrHandle: string): string {

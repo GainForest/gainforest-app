@@ -7,7 +7,7 @@ export const revalidate = 60;
 export const metadata: Metadata = {
   title: "Explore Projects — Verified Regenerative Impact Work",
   description:
-    "Browse project collections from communities and organizations, each grouping the Bumicerts that document their regenerative impact.",
+    "Browse project collections from communities and organizations, each grouping the Certs that document their regenerative impact.",
   alternates: { canonical: "/projects" },
 };
 

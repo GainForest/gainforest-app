@@ -16,6 +16,7 @@ const allowedExactValues = new Set([
   "Bumicert",
   "Bumicerts",
   "Bumicerts — Bumicerts",
+  "Certified",
   "GainForest",
   "Green Globe",
   "Ma Earth",
@@ -67,6 +68,7 @@ const allowedExactValues = new Set([
   "Schwandenacker 35, 8052 Zurich, Switzerland",
   "team@gainforest.net",
   "{balance} USDC",
+  "{count, number}",
   "{count, plural, one {# Bumicert} other {# Bumicerts}}",
 ]);
 

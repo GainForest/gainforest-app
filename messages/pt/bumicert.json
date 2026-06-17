@@ -1,11 +1,11 @@
 {
   "detail": {
     "actions": {
-      "deleteBumicert": "Excluir Bumicert"
+      "deleteBumicert": "Excluir certificado"
     },
     "error": {
-      "loadTitle": "Não foi possível carregar este bumicert",
-      "loadDescription": "Tivemos problemas ao buscar os dados deste bumicert. Por favor, tente novamente ou volte para a página inicial."
+      "loadTitle": "Não foi possível carregar este certificado",
+      "loadDescription": "Tivemos problemas ao buscar os dados deste certificado. Por favor, tente novamente ou volte para a página inicial."
     },
     "timeline": {
       "title": "Cronograma da Evidência",
@@ -27,7 +27,7 @@
       "linkEvidenceDescription": "Anexe registros ou arquivos existentes a {title}. Os itens vinculados aparecem na linha do tempo pública de evidências abaixo.",
       "notTimelineYet": "Ainda não faz parte da linha do tempo",
       "linkedTitle": "Linha do tempo de evidências vinculadas",
-      "linkedItemCount": "{count, plural, =0 {0 itens vinculados a esta atividade do bumicert} =1 {1 item vinculado a esta atividade do bumicert} other {# itens vinculados a esta atividade do bumicert}}",
+      "linkedItemCount": "{count, plural, =0 {0 itens vinculados a esta atividade do certificado} =1 {1 item vinculado a esta atividade do certificado} other {# itens vinculados a esta atividade do certificado}}",
       "linkedDescription": "Revise os registros, arquivos e camadas do mapa que já fazem parte da linha do tempo pública de evidências.",
       "pageOf": "Página {current} de {total}",
       "previousPage": "Página anterior",
@@ -91,7 +91,7 @@
       "siteContextIncomplete": "Algumas árvores estão sem contexto do local",
       "siteContextUnresolved": "Não foi possível resolver o registro do local",
       "siteContextUnavailable": "Contexto do local indisponível",
-      "incompleteBumicertReference": "Não é possível vincular evidências porque a referência do bumicert está incompleta. Atualize a página e tente novamente.",
+      "incompleteBumicertReference": "Não é possível vincular evidências porque a referência do certificado está incompleta. Atualize a página e tente novamente.",
       "partialLinkSuccess": "{createdCount, plural, =1 {1 anexo foi vinculado} other {# anexos foram vinculados}}, mas nem todos os {totalCount, plural, =1 {1 grupo} other {# grupos}} foram concluídos. {error}",
       "emptyLabels": {
         "audio": "gravações de áudio",
@@ -112,7 +112,7 @@
       "unableToVerifyExistingLinks": "Não foi possível verificar os vínculos existentes da linha do tempo. Atualize para vincular conjuntos de dados de árvores."
     },
     "metadata": {
-      "notFound": "Bumicert não encontrado"
+      "notFound": "certificado não encontrado"
     },
     "timelineEntry": {
       "kind": {
@@ -195,8 +195,8 @@
       "aboutCreator": "Sobre o criador",
       "profile": "Perfil",
       "certifiedProfile": "Perfil certificado",
-      "moreFromCreator": "Mais Bumicerts deste criador",
-      "moreFromOrganization": "Mais Bumicerts desta organização",
+      "moreFromCreator": "Mais certificados deste criador",
+      "moreFromOrganization": "Mais certificados desta organização",
       "viewAll": "Ver tudo",
       "ongoing": "em andamento",
       "noDescription": "Nenhuma descrição fornecida.",
@@ -210,44 +210,44 @@
   },
   "create": {
     "actions": {
-      "createBumicert": "Crie um Bumicert"
+      "createBumicert": "Crie um certificado"
     },
     "landing": {
       "hero": {
         "titleLine1": "Crie impacto.",
         "titleLine2": "Certificar alteração.",
-        "description": "Crie um Bumicert para mostrar seu compromisso com a sustentabilidade e inspirar mudanças reais."
+        "description": "Crie um certificado para mostrar seu compromisso com a sustentabilidade e inspirar mudanças reais."
       },
       "explainer": {
-        "title": "O que é um Bumicert?",
-        "body1": "A Bumicert é a sua história de impacto – prova de sua contribuição para as pessoas, as comunidades e o planeta.",
+        "title": "O que é um certificado?",
+        "body1": "A certificado é a sua história de impacto – prova de sua contribuição para as pessoas, as comunidades e o planeta.",
         "body2": "Ajuda você a documentar, compartilhar e celebrar seu impacto positivo com transparência e credibilidade.",
         "learnMore": "Saiba mais"
       }
     },
     "tabs": {
-      "ariaLabel": "Visualizações de criação do Bumicert",
-      "recent": "Bumicerts recentes",
+      "ariaLabel": "Visualizações de criação do certificado",
+      "recent": "certificados recentes",
       "drafts": "Rascunhos"
     },
     "recent": {
-      "errorTitle": "Não foi possível carregar os Bumicerts",
+      "errorTitle": "Não foi possível carregar os certificados",
       "errorFallback": "Tente novamente em alguns instantes.",
-      "emptyTitle": "Nenhum Bumicerts recente ainda",
-      "emptyLine1": "Você ainda não criou nenhum Bumicerts.",
-      "emptyLine2": "Crie seu primeiro Bumicert para começar. Conjunto de dados",
-      "createFirst": "Crie seu primeiro Bumicert"
+      "emptyTitle": "Nenhum certificados recente ainda",
+      "emptyLine1": "Você ainda não criou nenhum certificados.",
+      "emptyLine2": "Crie seu primeiro certificado para começar. Conjunto de dados",
+      "createFirst": "Crie seu primeiro certificado"
     },
     "drafts": {
       "untitledDraft": "Rascunho sem título",
       "signedOutTitle": "Faça login para visualizar rascunhos",
-      "signedOutDescription": "Rascunho Bumicerts são salvos em sua conta para que você possa continuar seu trabalho mais tarde.",
+      "signedOutDescription": "Rascunho certificados são salvos em sua conta para que você possa continuar seu trabalho mais tarde.",
       "loadingTitle": "Carregando rascunhos",
-      "loadingDescription": "Estamos verificando se há aplicativos Bumicert salvos.",
+      "loadingDescription": "Estamos verificando se há aplicativos certificado salvos.",
       "errorTitle": "Não foi possível carregar os rascunhos",
       "errorFallback": "Falha ao carregar rascunhos. Por favor, tente novamente.",
       "emptyTitle": "Ainda não há rascunhos",
-      "emptyDescription": "Inicie um novo Bumicert e salve-o como rascunho quando quiser retornar mais tarde.",
+      "emptyDescription": "Inicie um novo certificado e salve-o como rascunho quando quiser retornar mais tarde.",
       "deleteAria": "Excluir {title}"
     },
     "draft": {
@@ -266,7 +266,7 @@
         "coverImageType": "A imagem da capa deve ser JPG, PNG ou WebP"
       },
       "sidebar": {
-        "previewTitle": "Visualizar Bumicert",
+        "previewTitle": "Visualizar certificado",
         "generatingPreview": "Gerando metadados de visualização...",
         "completeFirstStep": "Conclua a primeira etapa para gerar a visualização.",
         "tipsTitle": "Dicas para esta seção Árvore"
@@ -276,8 +276,8 @@
           "title": "Detalhes da capa",
           "tips": {
             "bullets": [
-              "Use um nome curto e descritivo para seu bumicert.",
-              "Inclua um site ou link social para seu bumicert para fácil acesso."
+              "Use um nome curto e descritivo para seu certificado.",
+              "Inclua um site ou link social para seu certificado para fácil acesso."
             ],
             "pre": "",
             "post": ""
@@ -313,7 +313,7 @@
           "tips": {
             "bullets": [
               "Certifique-se de ter concluído todas as etapas anteriores.",
-              "Revise a aparência do seu bumicert antes de enviar."
+              "Revise a aparência do seu certificado antes de enviar."
             ],
             "pre": "",
             "post": ""
@@ -339,12 +339,12 @@
             "placeholder": "Carregar ou arrastar e soltar uma imagem"
           },
           "title": {
-            "label": "Título do Bumicert",
-            "info": "Dê ao seu bumicert um título claro e descritivo",
-            "placeholder": "Meu incrível Bumicert"
+            "label": "Título do certificado",
+            "info": "Dê ao seu certificado um título claro e descritivo",
+            "placeholder": "Meu incrível certificado"
           },
           "dateRange": {
-            "label": "Bumicert Intervalo de datas",
+            "label": "certificado Intervalo de datas",
             "info": "Selecione o período em que seu trabalho e impacto ocorreram",
             "ongoing": "Em andamento",
             "ongoingCheckbox": "Este trabalho ainda está em andamento Dicas"
@@ -373,9 +373,9 @@
           },
           "shortDescription": {
             "label": "Breve descrição",
-            "description": "Uma breve descrição da sua história de impacto. Isso será usado como uma breve descrição do bumicert.",
+            "description": "Uma breve descrição da sua história de impacto. Isso será usado como uma breve descrição do certificado.",
             "info": "Resuma seu trabalho e seus resultados em poucas linhas",
-            "placeholder": "Um rápido resumo sobre este bumicert.",
+            "placeholder": "Um rápido resumo sobre este certificado.",
             "generateTitle": "Gerar uma breve descrição com IA",
             "generateDisabledTitle": "Escreva sua história de impacto primeiro"
           }
@@ -384,14 +384,14 @@
           "heading": "Compartilhe seus colaboradores e locais.",
           "contributors": {
             "label": "Lista de colaboradores",
-            "description": "Adicionar todos os envolvidos neste bumicert — incluindo sua própria comunidade ou organização e quaisquer colaboradores. Dica: comece adicionando seu próprio grupo antes de listar seus parceiros ou apoiadores.",
+            "description": "Adicionar todos os envolvidos neste certificado — incluindo sua própria comunidade ou organização e quaisquer colaboradores. Dica: comece adicionando seu próprio grupo antes de listar seus parceiros ou apoiadores.",
             "info": "Liste quaisquer indivíduos ou organizações que contribuíram para este trabalho."
           },
           "boundaries": {
             "label": "Limites do local",
-            "description": "Envie o limite do seu local no formato GeoJSON para que possamos visualizar seu bumicert no mapa.",
+            "description": "Envie o limite do seu local no formato GeoJSON para que possamos visualizar seu certificado no mapa.",
             "info": "Adicione os limites que melhor representam onde o trabalho foi realizado.",
-            "selectHelp": "Selecione os limites para este bumicert ou adicione novos.",
+            "selectHelp": "Selecione os limites para este certificado ou adicione novos.",
             "manageSites": "Gerenciar locais",
             "loading": "Carregando seus locais...",
             "loadError": "Não foi possível carregar locais.",
@@ -402,7 +402,7 @@
           },
           "permissions": {
             "label": "Permissões",
-            "confirm": "Confirmo que todos os colaboradores listados deram permissão para incluir seu trabalho neste Bumicert.",
+            "confirm": "Confirmo que todos os colaboradores listados deram permissão para incluir seu trabalho neste certificado.",
             "terms": "Concordo com os Termos e Condições."
           }
         },
@@ -413,19 +413,19 @@
           "checkingAuth": "Estamos verificando se você está autenticado.",
           "notSignedIn": "Você não está conectado. Faça login para continuar.",
           "failedTitle": "Falha ao publicar.",
-          "publishingTitle": "Publicar seu bumicert",
-          "readyTitle": "Pronto para publicar seu bumicert",
-          "publishingDescription": "Estamos publicando seu bumicert.",
-          "readyDescription": "Clique no botão abaixo para publicar seu bumicert.",
+          "publishingTitle": "Publicar seu certificado",
+          "readyTitle": "Pronto para publicar seu certificado",
+          "publishingDescription": "Estamos publicando seu certificado.",
+          "readyDescription": "Clique no botão abaixo para publicar seu certificado.",
           "retry": "Tentar novamente",
-          "publishAction": "Publicar Bumicert",
+          "publishAction": "Publicar certificado",
           "editDetails": "Editar detalhes",
-          "successTitle": "Seu Bumicert foi publicado com sucesso!",
+          "successTitle": "Seu certificado foi publicado com sucesso!",
           "linkEvidenceNow": "Vincule evidências agora",
-          "viewBumicert": "Visualizar Bumicert",
+          "viewBumicert": "Visualizar certificado",
           "setUpDonations": "Configurar doações",
           "shareFeedback": "Compartilhar comentários",
-          "createAnother": "Crie outro bumicert"
+          "createAnother": "Crie outro certificado"
         }
       },
       "modals": {
@@ -481,10 +481,10 @@
         "allFieldsCorrect": "Todos os campos estão preenchidos corretamente.",
         "fix": "Correção",
         "preview": {
-          "title": "Visualizar seu bumicert",
+          "title": "Visualizar seu certificado",
           "missingLogo": "Sua conta não possui logotipo. Você quer adicionar um?",
           "generating": "Gerando a visualização...",
-          "completeFirstStep": "Conclua a primeira etapa para visualizar seu bumicert."
+          "completeFirstStep": "Conclua a primeira etapa para visualizar seu certificado."
         }
       },
       "hydration": {
@@ -499,11 +499,11 @@
     },
     "auth": {
       "signedOutTitle": "Você não está conectado.",
-      "signedOutDescription": "Faça login para criar um bumicert.",
+      "signedOutDescription": "Faça login para criar um certificado.",
       "accountErrorTitle": "Não foi possível carregar sua conta",
       "accountErrorDescription": "Tivemos problemas para carregar sua conta. Por favor, tente novamente.",
       "accountSetupTitle": "Sua conta ainda não está configurada.",
-      "accountSetupDescription": "Preencha as informações da sua conta para criar um bumicert.",
+      "accountSetupDescription": "Preencha as informações da sua conta para criar um certificado.",
       "manageAccount": "Gerenciar minha conta",
       "pleaseWait": "Aguarde..."
     }

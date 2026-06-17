@@ -5,7 +5,9 @@ import {
   createDisposableInbox,
   listDisposableEmailMessages,
   waitForInboxOtp,
-  writeDisposableAccountMetadata,
+  writeDisposableAccountMetadataAt,
+  disposableAccountMetadataPath,
+  type DisposableAccountMetadata,
   type DisposableInbox,
 } from "./disposable-email";
 
@@ -261,13 +263,27 @@ export async function signInWithConfiguredAccount(page: Page, testInfo: TestInfo
   await finishOAuthRedirect(page, env.appUrl, testInfo);
 }
 
-export async function signInWithDisposableEmailAccount(page: Page, testInfo: TestInfo): Promise<void> {
+export async function signInWithDisposableEmailAccount(
+  page: Page,
+  testInfo: TestInfo,
+  options: { metadataPath?: string; labelPrefix?: string; returnToPath?: string } = {},
+): Promise<DisposableAccountMetadata> {
   const env = getE2EEnv();
   assertSafeAuthenticatedBaseUrl(env.appUrl);
 
+  const metadataPath = options.metadataPath ?? disposableAccountMetadataPath;
+  const labelPrefix = options.labelPrefix ?? "auth-disposable";
+  const returnToPath = options.returnToPath ?? "/manage";
+  await page.context().clearCookies();
+  await page.goto("/", { waitUntil: "domcontentloaded" }).catch(() => undefined);
+  await page.evaluate(() => {
+    window.localStorage.clear();
+    window.sessionStorage.clear();
+  }).catch(() => undefined);
+
   const inbox = await createDisposableInbox();
   console.log(`[e2e] Created disposable inbox ${inbox.email}.`);
-  await writeDisposableAccountMetadata({
+  await writeDisposableAccountMetadataAt(metadataPath, {
     source: "disposable-email-auth",
     createdAt: new Date().toISOString(),
     email: inbox.email,
@@ -278,21 +294,20 @@ export async function signInWithDisposableEmailAccount(page: Page, testInfo: Tes
   });
   const beforeMessages = new Set((await listDisposableEmailMessages(inbox)).map((message) => message.id));
 
-  await openAppLogin(page, testInfo, "/manage", { email: inbox.email }, "auth-disposable");
-  await screenshotStep(page, testInfo, "auth-disposable-email-started");
+  await openAppLogin(page, testInfo, returnToPath, { email: inbox.email }, labelPrefix);
+  await screenshotStep(page, testInfo, `${labelPrefix}-email-started`);
 
   if (await page.getByRole("heading", { name: /enter your code/i }).isVisible({ timeout: 45_000 }).catch(() => false)) {
     const otp = await waitForInboxOtp(inbox, beforeMessages);
     await fillOtp(page, otp);
-    await screenshotStep(page, testInfo, "auth-disposable-code-filled");
+    await screenshotStep(page, testInfo, `${labelPrefix}-code-filled`);
   }
 
   await finishOAuthRedirect(page, env.appUrl, testInfo);
   await page.waitForLoadState("networkidle", { timeout: 20_000 }).catch(() => undefined);
   const session = await waitForSignedInSession(page);
   const serviceEndpoint = await resolveServiceEndpoint(session.did, env.testPdsDomain);
-
-  await writeDisposableAccountMetadata({
+  const metadata: DisposableAccountMetadata = {
     source: "disposable-email-auth",
     createdAt: new Date().toISOString(),
     email: inbox.email,
@@ -300,9 +315,12 @@ export async function signInWithDisposableEmailAccount(page: Page, testInfo: Tes
     did: session.did,
     handle: session.handle,
     serviceEndpoint,
-  });
+  };
 
-  await screenshotStep(page, testInfo, "auth-disposable-complete-signed-in");
+  await writeDisposableAccountMetadataAt(metadataPath, metadata);
+
+  await screenshotStep(page, testInfo, `${labelPrefix}-complete-signed-in`);
+  return metadata;
 }
 
 export type { DisposableInbox };

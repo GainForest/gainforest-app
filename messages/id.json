@@ -17,7 +17,7 @@
       "headingLine2": "dimulai dari",
       "headingEmphasis1": "Komunitas",
       "headingEmphasis2": "nyata",
-      "description": "Danai proyek regeneratif secara langsung. Setiap Bumicert adalah catatan terverifikasi atas kerja lingkungan nyata, didukung foto, lokasi, dan pengelola komunitas.",
+      "description": "Danai proyek regeneratif secara langsung. Setiap sertifikat adalah catatan terverifikasi atas kerja lingkungan nyata, didukung foto, lokasi, dan pengelola komunitas.",
       "cta": "Jelajahi proyek",
       "proofPoints": {
         "communityLed": "Dipimpin komunitas",
@@ -54,7 +54,7 @@
           "title": "Saya ingin mendukung",
           "emphasis": "sebuah proyek",
           "description": "Jelajahi sertifikat terverifikasi dan danai momen restorasi yang tepat.",
-          "cta": "Jelajahi Bumicerts",
+          "cta": "Jelajahi sertifikat",
           "alt": "Sungai berkelok melalui hutan hujan"
         },
         "organizations": {
@@ -62,7 +62,7 @@
           "title": "Saya adalah penjaga",
           "emphasis": "alam",
           "description": "Tampilkan kerja regeneratif Anda dan terhubung dengan pendana yang peduli.",
-          "cta": "Buat Bumicert",
+          "cta": "Buat sertifikat",
           "alt": "Air terjun di hutan tropis"
         }
       }
@@ -70,12 +70,12 @@
     "certificate": {
       "eyebrow": "Sertifikat",
       "titleLine1": "Apa sebenarnya",
-      "titleLine2": "Bumicert itu?",
+      "titleLine2": "sertifikat itu?",
       "faqItems": {
         "digitalCertificate": {
           "id": "1",
           "question": "Sertifikat digital untuk dampak",
-          "answer": "Bumicert mencatat tindakan lingkungan tertentu dan memberinya identitas permanen yang dapat diverifikasi di jaringan terbuka dan terdesentralisasi."
+          "answer": "sertifikat mencatat tindakan lingkungan tertentu dan memberinya identitas permanen yang dapat diverifikasi di jaringan terbuka dan terdesentralisasi."
         },
         "evidence": {
           "id": "2",
@@ -85,12 +85,12 @@
         "communities": {
           "id": "3",
           "question": "Jalur langsung ke komunitas",
-          "answer": "Saat Anda mendanai Bumicert, dana Anda sampai ke orang-orang yang melakukan restorasi. Tanpa perantara yang mengambil biaya atau overhead yang kabur."
+          "answer": "Saat Anda mendanai sertifikat, dana Anda sampai ke orang-orang yang melakukan restorasi. Tanpa perantara yang mengambil biaya atau overhead yang kabur."
         },
         "story": {
           "id": "4",
           "question": "Klaim Anda atas cerita ini",
-          "answer": "Memiliki Bumicert berarti Anda menjadi bagian dari momen itu: pohon yang ditanam, terumbu yang dipulihkan, ekosistem yang dihidupkan kembali. Anda dapat membagikan, menyimpan, atau menghadiahkannya."
+          "answer": "Memiliki sertifikat berarti Anda menjadi bagian dari momen itu: pohon yang ditanam, terumbu yang dipulihkan, ekosistem yang dihidupkan kembali. Anda dapat membagikan, menyimpan, atau menghadiahkannya."
         }
       },
       "previewTitle": "Reforestasi Gunung Halimun",
@@ -110,11 +110,11 @@
       "label": "Putaran Pendanaan Ma Earth 3",
       "deadline": "Dibuka hingga 31 Mei",
       "title": "Daftar ke Putaran Pendanaan Ma Earth 3",
-      "description": "Komunitas GainForest dapat menggunakan cerita proyek terverifikasi, bukti, dan catatan dampak dari Bumicerts saat mendaftar ke putaran pendanaan berbasis komunitas Ma Earth.",
+      "description": "Komunitas GainForest dapat menggunakan cerita proyek terverifikasi, bukti, dan catatan dampak dari sertifikat saat mendaftar ke putaran pendanaan berbasis komunitas Ma Earth.",
       "highlights": {
         "matchingPool": "Dana pencocokan $500k",
         "projects": "Proyek berbasis alam",
-        "record": "Siapkan catatan Bumicert Anda"
+        "record": "Siapkan catatan sertifikat Anda"
       },
       "actions": {
         "apply": "Daftar di Ma Earth",
@@ -125,7 +125,7 @@
       "alt": "Ikon aplikasi GainForest"
     },
     "stats": {
-      "bumicertsShared": "Bumicert dibagikan",
+      "bumicertsShared": "sertifikat dibagikan",
       "organizationProfiles": "profil organisasi",
       "natureSightingsShared": "temuan alam dibagikan",
       "raisedForProjects": "terkumpul untuk proyek"
@@ -133,15 +133,15 @@
     "openNetwork": {
       "titlePrefix": "Dibangun di atas",
       "titleEmphasis": "jaringan terbuka",
-      "description": "Bumicerts adalah catatan dampak portabel yang dapat berpindah antar aplikasi, komunitas, dan alat pendanaan — bukan basis data tertutup.",
+      "description": "sertifikat adalah catatan dampak portabel yang dapat berpindah antar aplikasi, komunitas, dan alat pendanaan — bukan basis data tertutup. Dukungan untuk Silvi dan platform lain akan segera hadir.",
       "protocol": {
-        "name": "Protokol AT",
+        "name": "Certified",
         "description": "data sosial portabel"
       },
       "youBadge": "Anda",
       "apps": {
         "maEarth": {
-          "blurb": "Komunitas dapat memakai bukti Bumicert saat mendaftar ke putaran pendanaan yang didukung komunitas."
+          "blurb": "Komunitas dapat memakai bukti sertifikat saat mendaftar ke putaran pendanaan yang didukung komunitas."
         },
         "gainforest": {
           "blurb": "GainForest membantu penjaga alam menerbitkan kerja terverifikasi, lokasi, pohon, observasi, dan cerita proyek."

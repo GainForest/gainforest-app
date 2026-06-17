@@ -3,7 +3,7 @@
     "organization": "Shirika",
     "sites": "Maeneo",
     "audio": "Sauti",
-    "bumicerts": "Bumicerts",
+    "bumicerts": "vyeti",
     "trees": "Miti",
     "manage": "Simamia",
     "yourOrganizationData": "data za shirika lako",
@@ -79,7 +79,13 @@
     "deleteConfirmDescription": "Kitendo hiki hakiwezi kutenduliwa.",
     "howDoesThisWork": "Hii hufanya kazi vipi?",
     "useTaina": "Tumia Taina",
+    "useTainaLong": "Tumia Taina kupakia AudioMoth",
     "fileSizeNote": "Faili zinazopakiwa hapa lazima ziwe 4MB au ndogo zaidi. Kwa faili kubwa za AudioMoth, tafadhali tumia Taina.",
+    "intro": "Hifadhi rekodi zako za uwandani mahali pamoja. Kila moja huunganishwa na wapi, lini, na jinsi ilivyorekodiwa.",
+    "whatIsTaina": "Taina ni nini?",
+    "tainaTitle": "Kutana na Taina",
+    "tainaBody": "Taina ni msaidizi wetu kwenye Telegram. Piga gumzo kutuma rekodi moja kwa moja kutoka uwandani. Yeye hushughulikia faili kubwa za AudioMoth zisizoweza kupakiwa hapa.",
+    "tainaCta": "Fungua Taina kwenye Telegram",
     "loading": "Inapakia nafasi ya kazi ya sauti…",
     "backTo": "Rudi kwenye {section}",
     "sections": {
@@ -623,7 +629,7 @@
     "actions": {
       "save": "Hifadhi",
       "cancel": "Ghairi",
-      "createOrganization": "Unda shirika"
+      "createOrganization": "Unda shirika jipya"
     },
     "about": {
       "title": "Kuhusu",

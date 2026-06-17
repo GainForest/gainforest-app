@@ -1,6 +1,7 @@
 import { expect, type Page, type TestInfo } from "@playwright/test";
 import { screenshotStep } from "./artifacts";
 import { trackCreatedPdsRecord, waitForAudioRecordingByName, type PdsRepoRecord } from "./pds";
+import { groupManageBasePath, readCgsOrgMetadata } from "./cgs-org";
 
 function makeTinyWavBuffer(): Buffer {
   const sampleRate = 8_000;
@@ -26,10 +27,15 @@ function makeTinyWavBuffer(): Buffer {
   return buffer;
 }
 
+function manageBasePath(): string {
+  const org = readCgsOrgMetadata();
+  return org ? groupManageBasePath(org) : "/manage";
+}
+
 export async function createAudioRecording(page: Page, testInfo: TestInfo): Promise<PdsRepoRecord> {
   const name = `E2E Audio Recording ${Date.now()}-${testInfo.workerIndex}-${testInfo.retry}`;
 
-  await page.goto("/manage/audio?section=recordings&mode=new", { waitUntil: "domcontentloaded" });
+  await page.goto(`${manageBasePath()}/audio?section=recordings&mode=new`, { waitUntil: "domcontentloaded" });
   await expect(page.getByRole("heading", { name: /upload audio recording/i })).toBeVisible({ timeout: 60_000 });
   await screenshotStep(page, testInfo, "audio-create-open");
 

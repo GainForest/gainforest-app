@@ -1,11 +1,11 @@
 {
   "detail": {
     "actions": {
-      "deleteBumicert": "Futa Bumicert"
+      "deleteBumicert": "Futa cheti"
     },
     "error": {
-      "loadTitle": "Haikuweza kupakia bumicert hii",
-      "loadDescription": "Tulikuwa na tatizo la kuleta data ya bumicert hii. Tafadhali jaribu tena au rudi kwenye ukurasa wa nyumbani."
+      "loadTitle": "Haikuweza kupakia cheti hii",
+      "loadDescription": "Tulikuwa na tatizo la kuleta data ya cheti hii. Tafadhali jaribu tena au rudi kwenye ukurasa wa nyumbani."
     },
     "timeline": {
       "title": "Muda wa Ushahidi",
@@ -27,7 +27,7 @@
       "linkEvidenceDescription": "Ambatisha rekodi au faili zilizopo kwenye {title}. Vipengee vilivyounganishwa vitaonekana kwenye ratiba ya ushahidi ya umma hapa chini.",
       "notTimelineYet": "Bado si sehemu ya ratiba",
       "linkedTitle": "Ratiba ya ushahidi uliounganishwa",
-      "linkedItemCount": "{count, plural, =0 {vipengee 0 vilivyounganishwa na shughuli hii ya bumicert} =1 {kipengee 1 kimeunganishwa na shughuli hii ya bumicert} other {vipengee # vimeunganishwa na shughuli hii ya bumicert}}",
+      "linkedItemCount": "{count, plural, =0 {vipengee 0 vilivyounganishwa na shughuli hii ya cheti} =1 {kipengee 1 kimeunganishwa na shughuli hii ya cheti} other {vipengee # vimeunganishwa na shughuli hii ya cheti}}",
       "linkedDescription": "Kagua rekodi, faili na tabaka za ramani ambazo tayari ni sehemu ya ratiba ya ushahidi ya umma.",
       "pageOf": "Ukurasa {current} kati ya {total}",
       "previousPage": "Ukurasa uliopita",
@@ -91,7 +91,7 @@
       "siteContextIncomplete": "Baadhi ya miti haina muktadha wa eneo",
       "siteContextUnresolved": "Rekodi ya eneo haikuweza kutatuliwa",
       "siteContextUnavailable": "Muktadha wa eneo haupatikani",
-      "incompleteBumicertReference": "Haiwezi kuunganisha ushahidi kwa sababu rejeleo la bumicert halijakamilika. Onyesha upya ukurasa na ujaribu tena.",
+      "incompleteBumicertReference": "Haiwezi kuunganisha ushahidi kwa sababu rejeleo la cheti halijakamilika. Onyesha upya ukurasa na ujaribu tena.",
       "partialLinkSuccess": "{createdCount, plural, =1 {Kiambatisho 1 kimeunganishwa} other {Viambatisho # vimeunganishwa}}, lakini si {totalCount, plural, =1 {kundi 1 lote} other {makundi # yote}} yaliyokamilika. {error}",
       "emptyLabels": {
         "audio": "rekodi za sauti",
@@ -112,7 +112,7 @@
       "unableToVerifyExistingLinks": "Haiwezi kuthibitisha viungo vilivyopo vya ratiba. Onyesha upya ili kuunganisha seti za data za miti."
     },
     "metadata": {
-      "notFound": "Bumicert Haijapatikana"
+      "notFound": "cheti Haijapatikana"
     },
     "timelineEntry": {
       "kind": {
@@ -195,8 +195,8 @@
       "aboutCreator": "Kuhusu Muundaji",
       "profile": "Wasifu",
       "certifiedProfile": "Wasifu uliothibitishwa",
-      "moreFromCreator": "Bumicerts zaidi kutoka kwa muundaji huyu",
-      "moreFromOrganization": "Bumicerts zaidi kutoka kwa shirika hili",
+      "moreFromCreator": "vyeti zaidi kutoka kwa muundaji huyu",
+      "moreFromOrganization": "vyeti zaidi kutoka kwa shirika hili",
       "viewAll": "Tazama zote",
       "ongoing": "inaendelea",
       "noDescription": "Hakuna maelezo yaliyotolewa.",
@@ -210,44 +210,44 @@
   },
   "create": {
     "actions": {
-      "createBumicert": "Unda Bumicert"
+      "createBumicert": "Unda cheti"
     },
     "landing": {
       "hero": {
         "titleLine1": "Unda athari.",
         "titleLine2": "Thibitisha mabadiliko.",
-        "description": "Unda Bumicert ili kuonyesha kujitolea kwako kwa uendelevu na kuhamasisha mabadiliko ya kweli."
+        "description": "Unda cheti ili kuonyesha kujitolea kwako kwa uendelevu na kuhamasisha mabadiliko ya kweli."
       },
       "explainer": {
-        "title": "Bumicert ni nini?",
-        "body1": "Bumicert ni hadithi yako ya athari—uthibitisho wa mchango wako kwa watu, jumuiya na sayari.",
+        "title": "cheti ni nini?",
+        "body1": "cheti ni hadithi yako ya athari—uthibitisho wa mchango wako kwa watu, jumuiya na sayari.",
         "body2": "Inakusaidia kuandika, kushiriki na kusherehekea athari yako nzuri kwa uwazi na uaminifu.",
         "learnMore": "Jifunze zaidi"
       }
     },
     "tabs": {
-      "ariaLabel": "Mionekano ya uundaji wa Bumicert",
-      "recent": "Bumicerts za hivi karibuni",
+      "ariaLabel": "Mionekano ya uundaji wa cheti",
+      "recent": "vyeti za hivi karibuni",
       "drafts": "Rasimu"
     },
     "recent": {
-      "errorTitle": "Haikuweza kupakia Bumicerts",
+      "errorTitle": "Haikuweza kupakia vyeti",
       "errorFallback": "Tafadhali jaribu tena baada ya muda mfupi.",
-      "emptyTitle": "Bado hakuna Bumicerts za hivi majuzi",
-      "emptyLine1": "Bado hujaunda Bumicerts zozote.",
-      "emptyLine2": "Unda Bumicert yako ya kwanza ili kuanza.",
-      "createFirst": "Unda Bumicert yako ya kwanza"
+      "emptyTitle": "Bado hakuna vyeti za hivi majuzi",
+      "emptyLine1": "Bado hujaunda vyeti zozote.",
+      "emptyLine2": "Unda cheti yako ya kwanza ili kuanza.",
+      "createFirst": "Unda cheti yako ya kwanza"
     },
     "drafts": {
       "untitledDraft": "Rasimu Isiyo na Kichwa",
       "signedOutTitle": "Ingia ili kutazama rasimu",
-      "signedOutDescription": "Rasimu ya Bumicerts huhifadhiwa kwenye akaunti yako ili uweze kuendelea na kazi yako baadaye.",
+      "signedOutDescription": "Rasimu ya vyeti huhifadhiwa kwenye akaunti yako ili uweze kuendelea na kazi yako baadaye.",
       "loadingTitle": "Inapakia rasimu",
-      "loadingDescription": "Tunatafuta programu zilizohifadhiwa za Bumicert.",
+      "loadingDescription": "Tunatafuta programu zilizohifadhiwa za cheti.",
       "errorTitle": "Haikuweza kupakia rasimu",
       "errorFallback": "Imeshindwa kupakia rasimu. Tafadhali jaribu tena.",
       "emptyTitle": "Bado hakuna rasimu",
-      "emptyDescription": "Anzisha Bumicert mpya na uihifadhi kama rasimu unapotaka kurejea baadaye.",
+      "emptyDescription": "Anzisha cheti mpya na uihifadhi kama rasimu unapotaka kurejea baadaye.",
       "deleteAria": "Futa {title}"
     },
     "draft": {
@@ -266,7 +266,7 @@
         "coverImageType": "Picha ya jalada lazima iwe JPG, PNG, au WebP"
       },
       "sidebar": {
-        "previewTitle": "Hakiki Bumicert",
+        "previewTitle": "Hakiki cheti",
         "generatingPreview": "Inazalisha metadata ya onyesho la kukagua...",
         "completeFirstStep": "Tafadhali kamilisha hatua ya kwanza ili kutoa onyesho la kukagua.",
         "tipsTitle": "Vidokezo vya sehemu hii"
@@ -276,8 +276,8 @@
           "title": "Maelezo ya Jalada",
           "tips": {
             "bullets": [
-              "Tumia jina fupi na la ufafanuzi kwa bumicert yako.",
-              "Jumuisha tovuti au kiungo cha kijamii kwa bumicert yako kwa ufikiaji rahisi."
+              "Tumia jina fupi na la ufafanuzi kwa cheti yako.",
+              "Jumuisha tovuti au kiungo cha kijamii kwa cheti yako kwa ufikiaji rahisi."
             ],
             "pre": "",
             "post": ""
@@ -313,7 +313,7 @@
           "tips": {
             "bullets": [
               "Hakikisha umekamilisha hatua zote za awali.",
-              "Kagua mwonekano wa bumicert yako kabla ya kuwasilisha."
+              "Kagua mwonekano wa cheti yako kabla ya kuwasilisha."
             ],
             "pre": "",
             "post": ""
@@ -339,12 +339,12 @@
             "placeholder": "Pakia au buruta na udondoshe picha"
           },
           "title": {
-            "label": "Kichwa cha Bumicert",
-            "info": "Mpe bumicert yako mada iliyo wazi na yenye maelezo",
-            "placeholder": "Bumicert Yangu ya Kushangaza"
+            "label": "Kichwa cha cheti",
+            "info": "Mpe cheti yako mada iliyo wazi na yenye maelezo",
+            "placeholder": "cheti Yangu ya Kushangaza"
           },
           "dateRange": {
-            "label": "Muda wa Tarehe ya Bumicert",
+            "label": "Muda wa Tarehe ya cheti",
             "info": "Chagua kipindi ambacho kazi yako na athari zilifanyika",
             "ongoing": "Inaendelea",
             "ongoingCheckbox": "Kazi hii bado inaendelea"
@@ -373,9 +373,9 @@
           },
           "shortDescription": {
             "label": "Maelezo Fupi",
-            "description": "Maelezo mafupi ya hadithi yako ya athari. Hii itatumika kama maelezo mafupi ya bumicert.",
+            "description": "Maelezo mafupi ya hadithi yako ya athari. Hii itatumika kama maelezo mafupi ya cheti.",
             "info": "Fanya muhtasari wa kazi yako na matokeo yake katika mistari michache",
-            "placeholder": "Muhtasari wa haraka kuhusu bumicert hii.",
+            "placeholder": "Muhtasari wa haraka kuhusu cheti hii.",
             "generateTitle": "Tengeneza maelezo mafupi na AI",
             "generateDisabledTitle": "Andika hadithi yako ya athari kwanza"
           }
@@ -384,14 +384,14 @@
           "heading": "Shiriki wachangiaji na tovuti zako.",
           "contributors": {
             "label": "Orodha ya Wachangiaji",
-            "description": "Ongeza kila mtu anayehusika katika bumicert hii - ikijumuisha jumuiya au shirika lako na washirika wowote. Kidokezo: Anza kwa kuongeza kikundi chako kwanza kabla ya kuorodhesha washirika au wafuasi wako.",
+            "description": "Ongeza kila mtu anayehusika katika cheti hii - ikijumuisha jumuiya au shirika lako na washirika wowote. Kidokezo: Anza kwa kuongeza kikundi chako kwanza kabla ya kuorodhesha washirika au wafuasi wako.",
             "info": "Orodhesha watu binafsi au mashirika yoyote yaliyochangia kazi hii."
           },
           "boundaries": {
             "label": "Mipaka ya tovuti",
-            "description": "Tafadhali pakia mpaka wa tovuti yako katika umbizo la GeoJSON ili tuweze kuona taswira bumicert yako kwenye ramani.",
+            "description": "Tafadhali pakia mpaka wa tovuti yako katika umbizo la GeoJSON ili tuweze kuona taswira cheti yako kwenye ramani.",
             "info": "Ongeza mipaka inayowakilisha vyema zaidi mahali kazi ilifanyika.",
-            "selectHelp": "Chagua mipaka ya bumicert hii, au ongeza mpya.",
+            "selectHelp": "Chagua mipaka ya cheti hii, au ongeza mpya.",
             "manageSites": "Dhibiti tovuti",
             "loading": "Inapakia tovuti zako...",
             "loadError": "Imeshindwa kupakia tovuti.",
@@ -402,7 +402,7 @@
           },
           "permissions": {
             "label": "Ruhusa",
-            "confirm": "Ninathibitisha kuwa wachangiaji wote walioorodheshwa walitoa idhini yao ya kujumuisha kazi zao kwenye Bumicert hii.",
+            "confirm": "Ninathibitisha kuwa wachangiaji wote walioorodheshwa walitoa idhini yao ya kujumuisha kazi zao kwenye cheti hii.",
             "terms": "Ninakubali Sheria na Masharti."
           }
         },
@@ -413,19 +413,19 @@
           "checkingAuth": "Tunaangalia ikiwa umeidhinishwa.",
           "notSignedIn": "Hujaingia. Tafadhali ingia ili kuendelea.",
           "failedTitle": "Imeshindwa kuchapisha.",
-          "publishingTitle": "Kuchapisha bumicert yako",
-          "readyTitle": "Tayari kuchapisha bumicert yako",
-          "publishingDescription": "Tunachapisha bumicert yako.",
-          "readyDescription": "Tafadhali bofya kitufe kilicho hapa chini ili kuchapisha bumicert yako.",
+          "publishingTitle": "Kuchapisha cheti yako",
+          "readyTitle": "Tayari kuchapisha cheti yako",
+          "publishingDescription": "Tunachapisha cheti yako.",
+          "readyDescription": "Tafadhali bofya kitufe kilicho hapa chini ili kuchapisha cheti yako.",
           "retry": "Jaribu tena",
-          "publishAction": "Chapisha Bumicert",
+          "publishAction": "Chapisha cheti",
           "editDetails": "Hariri maelezo",
-          "successTitle": "Bumicert yako imechapishwa!",
+          "successTitle": "cheti yako imechapishwa!",
           "linkEvidenceNow": "Unganisha ushahidi sasa",
-          "viewBumicert": "Tazama Bumicert",
+          "viewBumicert": "Tazama cheti",
           "setUpDonations": "Weka Michango",
           "shareFeedback": "Shiriki Maoni",
-          "createAnother": "Unda bumicert nyingine"
+          "createAnother": "Unda cheti nyingine"
         }
       },
       "modals": {
@@ -481,10 +481,10 @@
         "allFieldsCorrect": "Mashamba yote yamejazwa kwa usahihi.",
         "fix": "Rekebisha",
         "preview": {
-          "title": "Hakiki bumicert yako",
+          "title": "Hakiki cheti yako",
           "missingLogo": "Akaunti yako haina nembo. Je, ungependa kuongeza moja?",
           "generating": "Inazalisha onyesho la kukagua...",
-          "completeFirstStep": "Kamilisha hatua ya kwanza ili kuhakiki bumicert yako."
+          "completeFirstStep": "Kamilisha hatua ya kwanza ili kuhakiki cheti yako."
         }
       },
       "hydration": {
@@ -499,11 +499,11 @@
     },
     "auth": {
       "signedOutTitle": "Hujaingia.",
-      "signedOutDescription": "Tafadhali ingia ili kuunda bumicert.",
+      "signedOutDescription": "Tafadhali ingia ili kuunda cheti.",
       "accountErrorTitle": "Haikuweza kupakia akaunti yako",
       "accountErrorDescription": "Tulikuwa na tatizo la kupakia akaunti yako. Tafadhali jaribu tena.",
       "accountSetupTitle": "Akaunti yako bado haijawekwa.",
-      "accountSetupDescription": "Tafadhali kamilisha maelezo ya akaunti yako ili kuunda bumicert.",
+      "accountSetupDescription": "Tafadhali kamilisha maelezo ya akaunti yako ili kuunda cheti.",
       "manageAccount": "Dhibiti akaunti yangu",
       "pleaseWait": "Tafadhali subiri..."
     }

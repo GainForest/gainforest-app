@@ -1,12 +1,12 @@
 "use client";
 
 /**
- * New Bumicert creation flow.
+ * New Cert creation flow.
  *
  * Editorial, border-free layout: open page, soft sage wash, Instrument Serif
  * italic display type, soft filled surfaces. The step bar lives in the sticky
  * sub-header; "Start over" lives in the header. The cover photo is set directly
- * on the live Bumicert card preview. Contributors support actor autocomplete.
+ * on the live Cert card preview. Contributors support actor autocomplete.
  */
 
 import Link from "next/link";
@@ -227,7 +227,7 @@ function saveDrafts(drafts: Draft[]) {
   window.localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(drafts.slice(0, 12)));
 }
 function titleFromDraft(draft: Draft) {
-  return draft.values.title.trim() || "Untitled Bumicert";
+  return draft.values.title.trim() || "Untitled Cert";
 }
 function formatDraftDate(value: string) {
   try {
@@ -645,9 +645,9 @@ function BasicsStep({
 
   return (
     <div className="space-y-8">
-      <Field label="Title" hint="what people will recognise" htmlFor="bumicert-title" error={issues.title?.message}>
+      <Field label="Title" hint="what people will recognise" htmlFor="cert-title" error={issues.title?.message}>
         <input
-          id="bumicert-title"
+          id="cert-title"
           value={values.title}
           maxLength={TITLE_MAX}
           onChange={(e) => {
@@ -976,7 +976,7 @@ function ConfirmStep({
           className="mt-0.5"
         />
         <span className="text-[13px] leading-6 text-foreground">
-          I confirm I have permission to create this Bumicert for the work and sites above, and that the details are accurate.
+          I confirm I have permission to create this Cert for the work and sites above, and that the details are accurate.
           {fieldIssues.confirmedRights ? <span className="mt-2 inline-flex items-center gap-1.5 rounded-lg bg-warn/10 px-2.5 py-1.5 text-xs font-medium text-foreground/75"><TriangleAlertIcon className="size-3.5 text-warn" /> {fieldIssues.confirmedRights.message}</span> : null}
         </span>
       </label>
@@ -997,7 +997,7 @@ function ConfirmStep({
       </label>
 
       <p className="text-[13px] leading-6 text-muted-foreground">
-        Publishing adds this Bumicert to your public profile — it becomes visible to everyone.
+        Publishing adds this Cert to your public profile — it becomes visible to everyone.
       </p>
 
       {publishError ? <div className="rounded-2xl bg-destructive/10 px-5 py-3.5 text-[13px] leading-6 text-destructive">{publishError}</div> : null}
@@ -1049,7 +1049,7 @@ function PreviewContent({
           coverImage={coverPreview}
           logoUrl={profile.avatarUrl}
           ownerDid={did}
-          title={values.title.trim() || "Your Bumicert title"}
+          title={values.title.trim() || "Your Cert title"}
           organizationName={profile.name}
           objectives={scopeList(values)}
           description={clampDescription(values.shortDescription) || undefined}
@@ -1134,13 +1134,13 @@ function PublishedView({ result, target, ownerIdentifier, onReset }: { result: P
       </motion.div>
       <p className="mt-6 text-xs font-medium uppercase tracking-[0.22em] text-primary/70">Published</p>
       <h2 className="mt-2 font-instrument text-5xl italic tracking-[-0.01em] text-foreground">It’s live.</h2>
-      <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-muted-foreground">Your Bumicert is on your public profile now. It may take a moment to appear everywhere.</p>
+      <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-muted-foreground">Your Cert is on your public profile now. It may take a moment to appear everywhere.</p>
       <div className="mt-7 flex flex-wrap justify-center gap-3">
         <Button asChild>
-          <Link href={detailHref}>Open Bumicert <ArrowRightIcon className="size-4" /></Link>
+          <Link href={detailHref}>Open Cert <ArrowRightIcon className="size-4" /></Link>
         </Button>
         <Button asChild variant="secondary">
-          <Link href={manageHref(target, "bumicerts")}>Back to Bumicerts</Link>
+          <Link href={manageHref(target, "bumicerts")}>Back to Certs</Link>
         </Button>
         {hyperscanHref ? (
           <Button asChild variant="ghost">
@@ -1429,7 +1429,7 @@ export function NewBumicertClient({
       setPublishResult({ uri: result.uri, cid: result.cid, rkey: extractRkey(result.uri) });
       if (activeDraftId) handleDeleteDraft(activeDraftId);
     } catch (error) {
-      setPublishError(error instanceof Error ? error.message : "Could not publish the Bumicert.");
+      setPublishError(error instanceof Error ? error.message : "Could not publish the Cert.");
     } finally {
       setIsPublishing(false);
     }

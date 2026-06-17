@@ -8,6 +8,7 @@ import {
   waitForPdsRecordDeleted,
   type PdsRepoRecord,
 } from "./pds";
+import { groupManageBasePath, readCgsOrgMetadata } from "./cgs-org";
 
 const OBSERVATION_EVENT_DATE = "2026-06-10";
 const OBSERVATION_LATITUDE = "-3.005";
@@ -81,6 +82,11 @@ async function selectUploadSite(page: Page, siteName: string): Promise<void> {
   await expect(page.getByText(siteName).first()).toBeVisible({ timeout: 10_000 });
 }
 
+function manageBasePath(): string {
+  const org = readCgsOrgMetadata();
+  return org ? groupManageBasePath(org) : "/manage";
+}
+
 async function createObservationFromUpload(page: Page, testInfo: TestInfo, siteName: string): Promise<CreatedObservation> {
   console.log(`[e2e] Creating observation through tree upload for site ${siteName}.`);
   const suffix = `${Date.now()}-${testInfo.workerIndex}-${testInfo.retry}`;
@@ -89,7 +95,7 @@ async function createObservationFromUpload(page: Page, testInfo: TestInfo, siteN
   const updatedScientificName = `E2E Observation Tree Edited ${suffix}`;
   const updatedVernacularName = `E2E edited seedling ${suffix}`;
 
-  await page.goto("/manage/trees?mode=upload", { waitUntil: "domcontentloaded" });
+  await page.goto(`${manageBasePath()}/trees?mode=upload`, { waitUntil: "domcontentloaded" });
   await expect(page.getByRole("heading", { name: /upload trees/i })).toBeVisible({ timeout: 60_000 });
   await screenshotStep(page, testInfo, "observation-upload-open");
 
@@ -176,8 +182,9 @@ async function openObservationDrawer(page: Page, observation: CreatedObservation
 async function cleanupObservationIfNeeded(page: Page, observation: CreatedObservation, deleted: boolean): Promise<void> {
   if (deleted) return;
 
+  const org = readCgsOrgMetadata();
   await page.request.post("/api/manage/proxy", {
-    data: { operation: "deleteOccurrenceCascade", rkey: observation.rkey },
+    data: { operation: "deleteOccurrenceCascade", rkey: observation.rkey, ...(org ? { repo: org.groupDid } : {}) },
   }).catch(() => null);
 }
 
@@ -187,6 +194,36 @@ export async function createEditDeleteObservation(page: Page, testInfo: TestInfo
 
   try {
     observation = await createObservationFromUpload(page, testInfo, siteName);
+    const org = readCgsOrgMetadata();
+    if (org) {
+      const updateResponse = await page.request.post("/api/manage/proxy", {
+        data: {
+          operation: "updateOccurrence",
+          repo: org.groupDid,
+          rkey: observation.rkey,
+          data: {
+            scientificName: observation.updatedScientificName,
+            vernacularName: observation.updatedVernacularName,
+            occurrenceRemarks: "Edited by the disposable CGS organization browser test before deleting this sighting.",
+          },
+        },
+      });
+      expect(updateResponse.ok()).toBe(true);
+      await expect
+        .poll(async () => String((await getPdsRecord(observation!.uri)).value.scientificName), { timeout: 60_000 })
+        .toBe(observation.updatedScientificName);
+      await screenshotStep(page, testInfo, "observation-cgs-api-edit-saved");
+
+      const deleteResponse = await page.request.post("/api/manage/proxy", {
+        data: { operation: "deleteOccurrenceCascade", repo: org.groupDid, rkey: observation.rkey },
+      });
+      expect(deleteResponse.ok()).toBe(true);
+      await waitForPdsRecordDeleted(observation.uri);
+      deleted = true;
+      await screenshotStep(page, testInfo, "observation-cgs-api-deleted");
+      return;
+    }
+
     const dialog = await openObservationDrawer(page, observation);
 
     await expect(dialog.getByText(/your sighting/i)).toBeVisible({ timeout: 30_000 });
@@ -196,7 +233,7 @@ export async function createEditDeleteObservation(page: Page, testInfo: TestInfo
     await screenshotStep(page, testInfo, "observation-drawer-owner-controls");
 
     await dialog.getByRole("button", { name: /^edit$/i }).click();
-    await dialog.getByLabel(/plant or animal name/i).fill(observation.updatedScientificName);
+    await dialog.getByLabel(/scientific name/i).fill(observation.updatedScientificName);
     await dialog.getByLabel(/common name/i).fill(observation.updatedVernacularName);
     await dialog.getByLabel(/notes/i).fill("Edited by the disposable browser test before deleting this sighting.");
     await screenshotStep(page, testInfo, "observation-drawer-edit-ready");

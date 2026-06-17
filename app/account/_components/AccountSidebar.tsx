@@ -219,7 +219,7 @@ function buildSidebarData(account: AccountRouteData, bumicertCount: number, dona
     achievementsHref: `${accountBumicertsPath(account.urlIdentifier)}#account-achievements`,
     stats: [
       {
-        label: "Total Bumicerts",
+        label: "Total Certs",
         value: formatCompact(bumicertCount),
         icon: "bumicert",
       },
@@ -236,8 +236,8 @@ function buildSidebarData(account: AccountRouteData, bumicertCount: number, dona
         icon: "profile",
       },
       {
-        label: account.kind === "organization" ? "Bumicert Steward" : "Creator Seed",
-        description: bumicertCount > 0 ? `Published ${formatNumber(bumicertCount)} Bumicerts` : "No Bumicerts published",
+        label: account.kind === "organization" ? "Cert Steward" : "Creator Seed",
+        description: bumicertCount > 0 ? `Published ${formatNumber(bumicertCount)} Certs` : "No Certs published",
         icon: "bumicert",
       },
       {

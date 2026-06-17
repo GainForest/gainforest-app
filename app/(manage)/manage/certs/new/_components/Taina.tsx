@@ -24,8 +24,8 @@ import { cn } from "@/lib/utils";
 // English copy (ported from gainforest-app's i18n `taina.*` keys, retuned
 // from "welcome a landing visitor" to "help write a Bumicert").
 const COPY = {
-  role: "Your Bumicert writing companion",
-  greetingHello: "Hi; I'm Taina. Writing a Bumicert? I can help you make it land.",
+  role: "Your Cert writing companion",
+  greetingHello: "Hi; I'm Taina. Writing a Cert? I can help you make it land.",
   greetingHint:
     "Ask me how to title it, what to lead the summary with, or what evidence funders look for — or paste a draft and I'll react.",
   placeholder: "Ask me for tips…",

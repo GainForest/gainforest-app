@@ -1,21 +1,21 @@
 {
   "explore": {
     "metadata": {
-      "title": "Jelajahi Bumicerts — Proyek dampak regeneratif terverifikasi",
+      "title": "Jelajahi sertifikat — Proyek dampak regeneratif terverifikasi",
       "description": "Jelajahi sertifikat dampak lingkungan terverifikasi dari penjaga alam di seluruh dunia. Filter berdasarkan negara, organisasi, dan area dampak."
     },
     "structuredData": {
-      "name": "Jelajahi Bumicerts",
+      "name": "Jelajahi sertifikat",
       "description": "Sertifikat dampak lingkungan terverifikasi dari penjaga alam di seluruh dunia."
     },
     "hero": {
-      "eyebrow": "Jelajahi Bumicerts",
+      "eyebrow": "Jelajahi sertifikat",
       "titlePrefix": "Temukan",
       "titleEmphasis": "Dampak regeneratif",
-      "description": "Jelajahi Bumicerts dari komunitas dan organisasi yang memulihkan ekosistem, memperkuat penghidupan, dan membangun masa depan yang lebih tangguh."
+      "description": "Jelajahi sertifikat dari komunitas dan organisasi yang memulihkan ekosistem, memperkuat penghidupan, dan membangun masa depan yang lebih tangguh."
     },
     "actions": {
-      "createBumicert": "Buat Bumicert",
+      "createBumicert": "Buat sertifikat",
       "allProjects": "Semua proyek",
       "allFilters": "Semua filter",
       "clearAll": "Hapus semua",
@@ -25,12 +25,12 @@
     },
     "filters": {
       "allTitle": "Semua filter",
-      "description": "Tampilkan Bumicerts dengan foto, tempat proyek, orang yang disebutkan, tanggal kerja, atau donasi.",
+      "description": "Tampilkan sertifikat dengan foto, tempat proyek, orang yang disebutkan, tanggal kerja, atau donasi.",
       "organization": "Organisasi",
       "bioregion": "Wilayah hayati",
       "country": "Negara",
       "impactArea": "Area dampak",
-      "allBumicerts": "Semua Bumicerts",
+      "allBumicerts": "Semua sertifikat",
       "allFilters": "Semua filter",
       "allFiltersAria": "Semua filter",
       "updateHint": "Filter diperbarui saat Anda memilih.",
@@ -47,13 +47,13 @@
       "za": "Z → A"
     },
     "search": {
-      "ariaLabel": "Cari Bumicerts",
-      "placeholder": "Cari Bumicerts berdasarkan nama atau deskripsi",
+      "ariaLabel": "Cari sertifikat",
+      "placeholder": "Cari sertifikat berdasarkan nama atau deskripsi",
       "sortAriaLabel": "Urutkan proyek"
     },
     "empty": {
       "eyebrow": "Tidak ada hasil",
-      "title": "Tidak ada Bumicert ditemukan",
+      "title": "Tidak ada sertifikat ditemukan",
       "description": "Coba sesuaikan pencarian atau filter untuk menemukan lebih banyak cerita proyek."
     },
     "resultsFound": "{count, plural, one {# proyek ditemukan} other {# proyek ditemukan}}",
@@ -63,13 +63,13 @@
       "map": "Peta"
     },
     "stats": {
-      "published": "Bumicerts yang diterbitkan",
-      "withLocations": "Bumicerts dengan lokasi",
-      "contributors": "Kontributor di seluruh Bumicerts",
-      "withCover": "Bumicerts dengan sampul"
+      "published": "sertifikat yang diterbitkan",
+      "withLocations": "sertifikat dengan lokasi",
+      "contributors": "Kontributor di seluruh sertifikat",
+      "withCover": "sertifikat dengan sampul"
     },
     "footer": {
-      "showing": "Menampilkan {shown} dari {total} Bumicerts.",
+      "showing": "Menampilkan {shown} dari {total} sertifikat.",
       "showMore": "Tampilkan lebih banyak",
       "end": "Anda telah mencapai akhir."
     },
@@ -109,7 +109,7 @@
       "sortAriaLabel": "Urutkan"
     },
     "sort": {
-      "bumicerts": "Bumicerts terbanyak",
+      "bumicerts": "sertifikat terbanyak",
       "alpha": "Alfabetis",
       "newest": "Terbaru dulu",
       "oldest": "Terlama dulu",
@@ -131,7 +131,7 @@
     },
     "quickFilters": {
       "observations": "Memiliki observasi",
-      "bumicerts": "Memiliki Bumicerts"
+      "bumicerts": "Memiliki sertifikat"
     },
     "facets": {
       "category": "Kategori",
@@ -197,7 +197,7 @@
       "projectsSupported": "Proyek yang didukung",
       "projectsSupportedDetail": "Memulihkan ekosistem dan penghidupan",
       "uniqueDonors": "Donatur unik",
-      "bumicertsFunded": "Bumicerts yang didanai",
+      "bumicertsFunded": "sertifikat yang didanai",
       "donationCount": "Jumlah donasi"
     },
     "empty": {
@@ -257,14 +257,14 @@
       "uniqueDonorsSub": "Berdasarkan DID atau dompet",
       "avgDonation": "Rata-rata donasi",
       "avgDonationSub": "Per transaksi",
-      "activeBumicerts": "Bumicerts aktif",
+      "activeBumicerts": "sertifikat aktif",
       "activeBumicertsSub": "Telah menerima dana",
       "totalDonated": "Total didonasikan",
       "completedDonations": "Donasi selesai",
       "donors": "donatur",
-      "bumicertsWithDonations": "Bumicerts dengan donasi",
+      "bumicertsWithDonations": "sertifikat dengan donasi",
       "averageDonation": "Rata-rata jumlah donasi",
-      "countriesWithBumicerts": "Negara dengan Bumicerts"
+      "countriesWithBumicerts": "Negara dengan sertifikat"
     },
     "geo": {
       "title": "Jangkauan geografis",
@@ -296,17 +296,17 @@
       "lastDonation": "Donasi terakhir",
       "organization": "Organisasi",
       "totalRaised": "Total terkumpul",
-      "bumicerts": "Bumicerts",
+      "bumicerts": "sertifikat",
       "donors": "Donatur",
       "date": "Tanggal",
       "amount": "Jumlah",
-      "bumicert": "Bumicert",
+      "bumicert": "sertifikat",
       "txHash": "Hash tx",
       "anonymous": "Anonim",
       "anonymousWallet": "Anonim ({address})",
       "allTimeDonations": "Sepanjang waktu · {count, plural, one {# donasi} other {# donasi}}",
       "showingLatest": "menampilkan {count} terbaru",
-      "viewBumicert": "Lihat bumicert",
+      "viewBumicert": "Lihat sertifikat",
       "topCountries": "Negara teratas",
       "recentDonations": "Donasi terbaru",
       "showingAll": "menampilkan semua",
@@ -324,15 +324,15 @@
   },
   "account": {
     "metadata": {
-      "accountTitle": "Akun — Bumicerts",
-      "bumicertsTitle": "Bumicerts — Bumicerts",
-      "donationsTitle": "Riwayat donasi — Bumicerts",
+      "accountTitle": "Akun — sertifikat",
+      "bumicertsTitle": "sertifikat — sertifikat",
+      "donationsTitle": "Riwayat donasi — sertifikat",
       "accountFallback": "Akun",
-      "profileDescription": "{displayName} di Bumicerts",
-      "organizationDescription": "{displayName} di Bumicerts.",
-      "bumicertsPageTitle": "Bumicerts {displayName} — Bumicerts",
-      "bumicertsPageDescription": "Jelajahi semua Bumicerts yang dibuat oleh {displayName}.",
-      "donationsPageTitle": "Riwayat donasi {displayName} — Bumicerts",
+      "profileDescription": "{displayName} di sertifikat",
+      "organizationDescription": "{displayName} di sertifikat.",
+      "bumicertsPageTitle": "sertifikat {displayName} — sertifikat",
+      "bumicertsPageDescription": "Jelajahi semua sertifikat yang dibuat oleh {displayName}.",
+      "donationsPageTitle": "Riwayat donasi {displayName} — sertifikat",
       "donationsPageDescription": "Jelajahi riwayat donasi publik untuk {displayName}."
     },
     "errors": {
@@ -340,17 +340,17 @@
       "loadOwnDescription": "Kami kesulitan mengambil data akun Anda. Coba lagi.",
       "loadAccountTitle": "Tidak dapat memuat akun ini",
       "loadAccountDescription": "Kami kesulitan mengambil data akun ini. Coba lagi.",
-      "loadBumicertsTitle": "Tidak dapat memuat Bumicerts akun ini",
-      "loadBumicertsDescription": "Kami kesulitan mengambil Bumicerts akun ini. Coba lagi."
+      "loadBumicertsTitle": "Tidak dapat memuat sertifikat akun ini",
+      "loadBumicertsDescription": "Kami kesulitan mengambil sertifikat akun ini. Coba lagi."
     },
     "onboarding": {
       "title": "Orientasi diperlukan",
-      "description": "Anda sudah masuk, tetapi akun Bumicerts Anda belum disiapkan. Selesaikan orientasi untuk melanjutkan.",
+      "description": "Anda sudah masuk, tetapi akun sertifikat Anda belum disiapkan. Selesaikan orientasi untuk melanjutkan.",
       "action": "Mulai orientasi"
     },
     "tabs": {
       "home": "Beranda",
-      "bumicerts": "Bumicerts",
+      "bumicerts": "sertifikat",
       "donationHistory": "Riwayat donasi",
       "evidenceTimeline": "Linimasa bukti",
       "settings": "Pengaturan",
@@ -366,7 +366,7 @@
       "signInDescription": "Masuk untuk menautkan dompet Anda dan menerima donasi.",
       "enabled": "Donasi diaktifkan ✓",
       "walletLabel": "Dompet:",
-      "enabledDescription": "Donatur kini dapat mengirim USDC ke organisasi Anda melalui Bumicerts.",
+      "enabledDescription": "Donatur kini dapat mengirim USDC ke organisasi Anda melalui sertifikat.",
       "setupDescription": "Tautkan dompet untuk menerima donasi USDC dari pendukung.",
       "stepConnect": "Langkah 1: Hubungkan dompet Anda",
       "connectWallet": "Hubungkan dompet",
@@ -388,8 +388,8 @@
       "saving": "Menyimpan…"
     },
     "bumicerts": {
-      "emptyEyebrow": "Tidak ada Bumicerts",
-      "emptyDescription": "Akun ini belum menerbitkan Bumicerts.",
+      "emptyEyebrow": "Tidak ada sertifikat",
+      "emptyDescription": "Akun ini belum menerbitkan sertifikat.",
       "unknownCreator": "Tidak diketahui"
     },
     "sidebar": {
@@ -400,23 +400,23 @@
       "supportedOrganizations": "Mendukung {count} {count, plural, one {organisasi} other {organisasi}}",
       "noPublicDonationsReceived": "Belum ada donasi publik diterima",
       "receivedDonations": "Menerima {count} {count, plural, one {donasi} other {donasi}}",
-      "setupPublicProfile": "Siapkan profil Bumicerts publik",
+      "setupPublicProfile": "Siapkan profil sertifikat publik",
       "completedProfileDetails": "Menyelesaikan {count} {count, plural, one {detail} other {detail}} profil",
-      "bumicertUnavailable": "Catatan Bumicert tidak tersedia saat ini",
-      "publishedBumicerts": "Menerbitkan {count} {count, plural, one {Bumicert} other {Bumicerts}}",
-      "noBumicertsPublished": "Belum ada Bumicerts diterbitkan",
+      "bumicertUnavailable": "Catatan sertifikat tidak tersedia saat ini",
+      "publishedBumicerts": "Menerbitkan {count} {count, plural, one {sertifikat} other {sertifikat}}",
+      "noBumicertsPublished": "Belum ada sertifikat diterbitkan",
       "profileReady": "Profil siap",
-      "bumicertSteward": "Penjaga Bumicert",
+      "bumicertSteward": "Penjaga sertifikat",
       "creatorSeed": "Benih kreator",
       "communityBacked": "Didukung komunitas",
       "impactSupporter": "Pendukung dampak",
       "inviteCollaborators": "Undang kolaborator",
-      "inviteCollaboratorsDescription": "Ajak pendukung dan kolaborator ke karya Bumicerts Anda dan tumbuhkan dampak regeneratif bersama.",
+      "inviteCollaboratorsDescription": "Ajak pendukung dan kolaborator ke karya sertifikat Anda dan tumbuhkan dampak regeneratif bersama.",
       "inviteFriends": "Undang teman",
-      "inviteFriendsDescription": "Undang teman Anda bergabung dengan Bumicerts dan menciptakan dampak positif bersama.",
-      "shareOrganization": "Jelajahi profil Bumicerts {displayName}: {pageUrl}",
-      "shareUser": "Bergabunglah dengan saya di Bumicerts dan dukung dampak regeneratif: {pageUrl}",
-      "totalBumicerts": "Jumlah Bumicerts",
+      "inviteFriendsDescription": "Undang teman Anda bergabung dengan sertifikat dan menciptakan dampak positif bersama.",
+      "shareOrganization": "Jelajahi profil sertifikat {displayName}: {pageUrl}",
+      "shareUser": "Bergabunglah dengan saya di sertifikat dan dukung dampak regeneratif: {pageUrl}",
+      "totalBumicerts": "Jumlah sertifikat",
       "donationsReceived": "Donasi diterima",
       "totalDonations": "Total donasi"
     },
@@ -494,7 +494,7 @@
       "manage": "KELOLA"
     },
     "items": {
-      "bumicerts": "Bumicerts",
+      "bumicerts": "sertifikat",
       "organizations": "Organisasi",
       "leaderboard": "Papan peringkat",
       "organization": "Organisasi",
@@ -503,7 +503,7 @@
       "trees": "Pohon",
       "profile": "Profil"
     },
-    "createBumicert": "Buat Bumicert",
+    "createBumicert": "Buat sertifikat",
     "prompts": {
       "signInDescription": "Masuk untuk mengelola akun dan konten Anda.",
       "signInAction": "Masuk",
@@ -521,17 +521,17 @@
   },
   "maEarthFundingRound": {
     "metadata": {
-      "title": "Daftar ke Putaran Pendanaan Ma Earth 3 — Bumicerts",
-      "description": "Pelajari bagaimana komunitas GainForest dapat menggunakan Bumicerts untuk bersiap mengikuti Putaran Pendanaan Ma Earth 3 dan dana pencocokan $500.000."
+      "title": "Daftar ke Putaran Pendanaan Ma Earth 3 — sertifikat",
+      "description": "Pelajari bagaimana komunitas GainForest dapat menggunakan sertifikat untuk bersiap mengikuti Putaran Pendanaan Ma Earth 3 dan dana pencocokan $500.000."
     },
     "hero": {
       "logoAlt": "Ma Earth",
-      "title": "Siapkan Bumicert Anda untuk Putaran Pendanaan Ma Earth 3",
-      "description": "Ma Earth menjalankan putaran pendanaan yang didukung komunitas dengan dana pencocokan $500.000 untuk proyek berbasis alam. Jika organisasi Anda sudah mendokumentasikan dampak melalui Bumicerts, gunakan Bumicert publik Anda sebagai referensi saat mendaftar di Ma Earth."
+      "title": "Siapkan sertifikat Anda untuk Putaran Pendanaan Ma Earth 3",
+      "description": "Ma Earth menjalankan putaran pendanaan yang didukung komunitas dengan dana pencocokan $500.000 untuk proyek berbasis alam. Jika organisasi Anda sudah mendokumentasikan dampak melalui sertifikat, gunakan sertifikat publik Anda sebagai referensi saat mendaftar di Ma Earth."
     },
     "actions": {
       "applyOnMaEarth": "Daftar di Ma Earth",
-      "createBumicertFirst": "Buat Bumicert terlebih dahulu"
+      "createBumicertFirst": "Buat sertifikat terlebih dahulu"
     },
     "matchingPool": {
       "value": "$500.000",
@@ -556,16 +556,16 @@
       }
     },
     "why": {
-      "eyebrow": "Mengapa bersiap dengan Bumicert?",
+      "eyebrow": "Mengapa bersiap dengan sertifikat?",
       "title": "Catatan dampak Anda seharusnya ikut bersama aplikasi Anda.",
-      "description": "Bumicert mengumpulkan cerita proyek, konteks organisasi, lokasi, foto, dan bukti yang dibutuhkan pemberi dana untuk memercayai pekerjaan tersebut. Ini membantu menjembatani kerja komunitas terverifikasi dengan proses pendanaan Ma Earth."
+      "description": "sertifikat mengumpulkan cerita proyek, konteks organisasi, lokasi, foto, dan bukti yang dibutuhkan pemberi dana untuk memercayai pekerjaan tersebut. Ini membantu menjembatani kerja komunitas terverifikasi dengan proses pendanaan Ma Earth."
     },
     "includeItems": {
       "story": "Cerita proyek dan deskripsi singkat",
       "identity": "Identitas organisasi dan profil publik",
       "evidence": "Foto, bukti, dan klaim dampak terdokumentasi",
       "location": "Referensi lokasi atau situs jika tersedia",
-      "publicLink": "Tautan Bumicert publik yang dapat Anda sertakan dalam aplikasi"
+      "publicLink": "Tautan sertifikat publik yang dapat Anda sertakan dalam aplikasi"
     },
     "eligibility": {
       "title": "Siapa yang memenuhi syarat?",
@@ -599,20 +599,20 @@
     },
     "flow": {
       "eyebrow": "Alur aplikasi",
-      "title": "Daftar langsung di Ma Earth, dengan Bumicert Anda siap.",
-      "description": "Bumicerts tidak dapat mengirimkan aplikasi Anda secara otomatis. Buka halaman penggalangan dana Ma Earth, daftar di sana, dan sertakan tautan Bumicert publik Anda di mana pun itu membantu menjelaskan proyek dan bukti Anda."
+      "title": "Daftar langsung di Ma Earth, dengan sertifikat Anda siap.",
+      "description": "sertifikat tidak dapat mengirimkan aplikasi Anda secara otomatis. Buka halaman penggalangan dana Ma Earth, daftar di sana, dan sertakan tautan sertifikat publik Anda di mana pun itu membantu menjelaskan proyek dan bukti Anda."
     }
   },
   "projects": {
     "metadata": {
       "title": "Jelajahi proyek — Karya dampak regeneratif terverifikasi",
-      "description": "Jelajahi koleksi proyek dari komunitas dan organisasi, masing-masing mengelompokkan Bumicerts yang mendokumentasikan dampak regeneratif mereka."
+      "description": "Jelajahi koleksi proyek dari komunitas dan organisasi, masing-masing mengelompokkan sertifikat yang mendokumentasikan dampak regeneratif mereka."
     },
     "hero": {
       "eyebrow": "Jelajahi proyek",
       "title": "Jelajahi",
       "accent": "Proyek",
-      "description": "Proyek mengelompokkan Bumicerts terkait dari komunitas dan organisasi, sehingga Anda dapat menelusuri pekerjaan pada tingkat proyek sebelum masuk ke sertifikat individual."
+      "description": "Proyek mengelompokkan sertifikat terkait dari komunitas dan organisasi, sehingga Anda dapat menelusuri pekerjaan pada tingkat proyek sebelum masuk ke sertifikat individual."
     },
     "search": {
       "ariaLabel": "Cari proyek",
@@ -632,8 +632,8 @@
     },
     "stats": {
       "projects": "Proyek",
-      "withBumicerts": "Proyek dengan Bumicerts",
-      "bumicerts": "Bumicerts dalam proyek",
+      "withBumicerts": "Proyek dengan sertifikat",
+      "bumicerts": "sertifikat dalam proyek",
       "withImages": "Proyek dengan gambar"
     },
     "filters": {
@@ -657,7 +657,7 @@
     "card": {
       "open": "Buka proyek: {title}",
       "projectSteward": "Pengelola proyek",
-      "bumicertCount": "{count, plural, one {# Bumicert} other {# Bumicerts}}",
+      "bumicertCount": "{count, plural, one {# sertifikat} other {# sertifikat}}",
       "projectPlace": "Tempat proyek",
       "showDetails": "Tampilkan detail",
       "loading": "Memuat proyek"
@@ -672,7 +672,7 @@
     "cards": {
       "bumicerts": {
         "label": "Proyek terverifikasi",
-        "title": "Bumicerts",
+        "title": "sertifikat",
         "blurb": "Jelajahi cerita proyek dengan foto, tempat, orang, dan konteks.",
         "statLabel": "cerita"
       },
@@ -691,7 +691,7 @@
       "leaderboard": {
         "label": "Juara dampak",
         "title": "Papan peringkat",
-        "blurb": "Lihat para donatur yang membantu komunitas melalui Bumicerts.",
+        "blurb": "Lihat para donatur yang membantu komunitas melalui sertifikat.",
         "statLabel": "terkumpul"
       }
     }
@@ -717,13 +717,13 @@
         "title": "Temukan",
         "accent": "Dampak regeneratif",
         "lede": "Jelajahi proyek dari komunitas dan organisasi yang memulihkan ekosistem, memperkuat penghidupan, dan membangun masa depan yang lebih tangguh.",
-        "search": "Filter Bumicerts berdasarkan judul atau deskripsi"
+        "search": "Filter sertifikat berdasarkan judul atau deskripsi"
       },
       "project": {
         "eyebrow": "Proyek",
         "title": "Jelajahi",
         "accent": "koleksi proyek",
-        "lede": "Jelajahi koleksi proyek dan Bumicerts yang dikelompokkannya.",
+        "lede": "Jelajahi koleksi proyek dan sertifikat yang dikelompokkannya.",
         "search": "Filter proyek berdasarkan judul atau deskripsi"
       }
     },
@@ -777,7 +777,7 @@
       "verified": "Terverifikasi",
       "gainforest": "GainForest",
       "project": "Proyek",
-      "bumicert": "Bumicert",
+      "bumicert": "sertifikat",
       "projectPlace": "Tempat proyek",
       "noCover": "Tidak ada gambar sampul",
       "peopleNamed": "{count, plural, one {# orang disebutkan} other {# orang disebutkan}}",
@@ -806,7 +806,7 @@
     },
     "kind": {
       "occurrence": "Temuan alam",
-      "bumicert": "Bumicert",
+      "bumicert": "sertifikat",
       "project": "Proyek",
       "site": "Situs proyek",
       "organization": "Organisasi"
@@ -817,11 +817,11 @@
       "workPeriod": "Periode kerja"
     },
     "projectBumicerts": {
-      "title": "Bumicerts dalam proyek ini",
-      "view": "Lihat Bumicert",
-      "showing": "Menampilkan {shown} dari {total} Bumicerts tertaut.",
-      "empty": "Proyek ini belum memiliki Bumicerts tertaut.",
-      "loading": "Memuat Bumicerts tertaut"
+      "title": "sertifikat dalam proyek ini",
+      "view": "Lihat sertifikat",
+      "showing": "Menampilkan {shown} dari {total} sertifikat tertaut.",
+      "empty": "Proyek ini belum memiliki sertifikat tertaut.",
+      "loading": "Memuat sertifikat tertaut"
     },
     "observation": {
       "ownerTitle": "Temuan Anda",
@@ -843,13 +843,30 @@
         "place": "Tempat",
         "country": "Negara",
         "habitat": "Habitat",
-        "notes": "Catatan"
+        "notes": "Catatan",
+        "kind": "Tumbuhan atau hewan",
+        "mapLocation": "Lokasi peta"
       },
       "validation": {
         "name": "Masukkan nama tumbuhan atau hewan.",
         "date": "Masukkan kapan terlihat.",
-        "location": "Masukkan lokasi peta yang valid."
-      }
+        "location": "Masukkan lokasi peta yang valid.",
+        "kind": "Pilih apakah ini tumbuhan atau hewan."
+      },
+      "kindOptions": {
+        "plant": "Tumbuhan",
+        "animal": "Hewan"
+      },
+      "chooseOne": "Pilih satu",
+      "chooseMapLocation": "Pilih lokasi di peta.",
+      "chooseOnMap": "Pilih di peta",
+      "chooseMapLocationTitle": "Pilih lokasi peta",
+      "closeMapLocationChooser": "Tutup pemilih lokasi peta",
+      "movePin": "Klik peta untuk memindahkan pin pengamatan.",
+      "noMapLocation": "Belum ada lokasi peta yang dipilih.",
+      "useLocation": "Gunakan lokasi",
+      "natureSoundRecording": "Rekaman suara alam",
+      "unidentifiedSighting": "Pengamatan tidak teridentifikasi"
     },
     "media": {
       "image": "Foto",
@@ -873,12 +890,51 @@
       "projectPlaces": "Tempat proyek",
       "start": "Mulai",
       "end": "Selesai",
-      "bumicerts": "Bumicerts",
+      "bumicerts": "sertifikat",
       "projectPlace": "Tempat proyek",
       "added": "Ditambahkan",
       "country": "Negara",
       "type": "Jenis"
     },
-    "audioHero": "Putar suara untuk {title}"
+    "audioHero": "Putar suara untuk {title}",
+    "detailLabels": {
+      "nameDetails": "Detail nama",
+      "nameRank": "Peringkat nama",
+      "natureGroup": "Kelompok alam",
+      "sightingDetails": "Detail pengamatan",
+      "sightingType": "Jenis pengamatan",
+      "lifeStage": "Tahap hidup",
+      "sex": "Jenis kelamin",
+      "reproductiveCondition": "Kondisi reproduksi",
+      "behavior": "Perilaku",
+      "placeName": "Nama tempat",
+      "cityOrTown": "Kota atau desa",
+      "area": "Wilayah",
+      "stateProvince": "Negara bagian / provinsi",
+      "elevation": "Ketinggian",
+      "sharedDetails": "Detail berbagi",
+      "observedBy": "Diamati oleh",
+      "namedBy": "Diidentifikasi oleh",
+      "dateNamed": "Tanggal identifikasi",
+      "shared": "Dibagikan",
+      "sourceDetails": "Detail sumber",
+      "sourceName": "Nama sumber",
+      "organizationCode": "Kode organisasi",
+      "sourceGroup": "Kelompok sumber",
+      "surveyMethod": "Metode survei",
+      "license": "Lisensi",
+      "rightsHolder": "Pemegang hak",
+      "sightingId": "ID pengamatan"
+    }
+  },
+  "manageProjects": {
+    "hero": {
+      "title": "Proyek Saya",
+      "description": "Buat dan kelola proyek yang dapat berisi beberapa sertifikat, bersama foto, video, dan media lain yang menunjukkan pekerjaannya."
+    },
+    "metadata": {
+      "title": "Kelola Proyek — GainForest",
+      "description": "Buat dan kelola koleksi proyek untuk sertifikat Anda."
+    }
   }
 }

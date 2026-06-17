@@ -23,7 +23,7 @@ Each surface is its own route (shared `TopNav` + `Footer` in the root layout):
 | `/` | `app/_lib/kpis.ts` (server) | hero KPI band + a six-card "Browse the commons" grid |
 | `/observations` | `app/_lib/indexer.ts` `walkOccurrences()` (client) | `appGainforestDwcOccurrence` Darwin Core records, image/audio-forward with a media filter |
 | `/sites` | `app/_lib/indexer.ts` `fetchSites()` (client) | `appCertifiedActorOrganization` organizations with profile image + country |
-| `/bumicerts` | `app/_lib/indexer.ts` `fetchBumicerts()` (client) | `orgHypercertsClaimActivity` impact claim activities |
+| `/certs` | `app/_lib/indexer.ts` `fetchBumicerts()` (client) | `orgHypercertsClaimActivity` impact claim activities |
 | `/donations` | `app/_lib/dashboard.ts` (client) | `orgHypercertsFundingReceipt` from the facilitator repo, re-aggregated exactly like the bumicerts monorepo's `/dashboard` |
 | `/devices` | `app/_lib/devices.ts` (server) + `/api/devices` | Tainá field-Pi liveness, ported from [pi-taina-monitor](https://github.com/GainForest/pi-taina-monitor): healthchecks.io heartbeats + embedded system/taina stats |
 | `/status` | `app/_lib/status.ts` | instatus `summary.json` + `v2/components.json`, re-polled every 60s |

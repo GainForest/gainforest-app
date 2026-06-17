@@ -149,7 +149,7 @@ export function AccountTabBar({
   function isActive(tab: Tab): boolean {
     if (scope === "manage") {
       const currentTab = searchParams.get("tab");
-      const tabName = new URL(tab.href, "https://bumicerts.local").searchParams.get("tab");
+      const tabName = new URL(tab.href, "https://certs.local").searchParams.get("tab");
       return currentTab ? currentTab === tabName : tab.href === tabs[0]?.href;
     }
 

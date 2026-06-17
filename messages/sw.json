@@ -17,7 +17,7 @@
       "headingLine2": "huanza na",
       "headingEmphasis1": "Jamii",
       "headingEmphasis2": "halisi",
-      "description": "Fadhili miradi ya urejeshaji moja kwa moja. Kila Bumicert ni rekodi iliyothibitishwa ya kazi halisi ya mazingira, ikiungwa mkono na picha, maeneo na walezi wa jamii.",
+      "description": "Fadhili miradi ya urejeshaji moja kwa moja. Kila cheti ni rekodi iliyothibitishwa ya kazi halisi ya mazingira, ikiungwa mkono na picha, maeneo na walezi wa jamii.",
       "cta": "Gundua miradi",
       "proofPoints": {
         "communityLed": "Inaongozwa na jamii",
@@ -54,7 +54,7 @@
           "title": "Nataka kusaidia",
           "emphasis": "mradi",
           "description": "Vinjari vyeti vilivyothibitishwa na ufadhili wakati mahususi wa urejeshaji.",
-          "cta": "Gundua Bumicerts",
+          "cta": "Gundua vyeti",
           "alt": "Mto ukipinda ndani ya msitu wa mvua"
         },
         "organizations": {
@@ -62,20 +62,20 @@
           "title": "Mimi ni mlezi",
           "emphasis": "wa mazingira",
           "description": "Onyesha kazi yako ya urejeshaji na ungana na wafadhili wanaojali.",
-          "cta": "Unda Bumicert",
+          "cta": "Unda cheti",
           "alt": "Maporomoko ya maji katika msitu wa kitropiki"
         }
       }
     },
     "certificate": {
       "eyebrow": "Cheti",
-      "titleLine1": "Bumicert ni nini",
+      "titleLine1": "cheti ni nini",
       "titleLine2": "hasa?",
       "faqItems": {
         "digitalCertificate": {
           "id": "1",
           "question": "Cheti cha kidijitali cha athari",
-          "answer": "Bumicert hurekodi tendo mahususi la mazingira na kulipa utambulisho wa kudumu unaoweza kuthibitishwa kwenye mtandao wazi na uliogatuliwa."
+          "answer": "cheti hurekodi tendo mahususi la mazingira na kulipa utambulisho wa kudumu unaoweza kuthibitishwa kwenye mtandao wazi na uliogatuliwa."
         },
         "evidence": {
           "id": "2",
@@ -85,12 +85,12 @@
         "communities": {
           "id": "3",
           "question": "Njia ya moja kwa moja kwa jamii",
-          "answer": "Unapofadhili Bumicert, pesa zako huwafikia watu wanaofanya urejeshaji. Hakuna wapatanishi wanaochukua ada au gharama zisizo wazi."
+          "answer": "Unapofadhili cheti, pesa zako huwafikia watu wanaofanya urejeshaji. Hakuna wapatanishi wanaochukua ada au gharama zisizo wazi."
         },
         "story": {
           "id": "4",
           "question": "Sehemu yako katika hadithi",
-          "answer": "Kumiliki Bumicert kunamaanisha kuwa sehemu ya wakati huo: mti uliopandwa, mwamba wa matumbawe uliorejeshwa, mfumo wa ikolojia ulihuishwa. Unaweza kushiriki, kuhifadhi au kutoa kama zawadi."
+          "answer": "Kumiliki cheti kunamaanisha kuwa sehemu ya wakati huo: mti uliopandwa, mwamba wa matumbawe uliorejeshwa, mfumo wa ikolojia ulihuishwa. Unaweza kushiriki, kuhifadhi au kutoa kama zawadi."
         }
       },
       "previewTitle": "Upandaji upya wa misitu wa Mlima Halimun",
@@ -110,11 +110,11 @@
       "label": "Awamu wa 3 wa Ufadhili wa Ma Earth",
       "deadline": "Wazi hadi Mei 31",
       "title": "Omba Awamu wa 3 wa Ufadhili wa Ma Earth",
-      "description": "Jamii za GainForest zinaweza kutumia hadithi za miradi zilizothibitishwa, ushahidi, na rekodi za athari kutoka Bumicerts wanapoomba kwenye awamu ya ufadhili wa kijamii ya Ma Earth.",
+      "description": "Jamii za GainForest zinaweza kutumia hadithi za miradi zilizothibitishwa, ushahidi, na rekodi za athari kutoka vyeti wanapoomba kwenye awamu ya ufadhili wa kijamii ya Ma Earth.",
       "highlights": {
         "matchingPool": "Dimbwi la kulinganisha la $500k",
         "projects": "Miradi inayotegemea mazingira",
-        "record": "Andaa rekodi yako ya Bumicert"
+        "record": "Andaa rekodi yako ya cheti"
       },
       "actions": {
         "apply": "Omba kwenye Ma Earth",
@@ -125,7 +125,7 @@
       "alt": "Aikoni ya programu ya GainForest"
     },
     "stats": {
-      "bumicertsShared": "Bumicerts zilizoshirikiwa",
+      "bumicertsShared": "vyeti zilizoshirikiwa",
       "organizationProfiles": "wasifu wa mashirika",
       "natureSightingsShared": "matukio ya asili yaliyoshirikiwa",
       "raisedForProjects": "zimekusanywa kwa miradi"
@@ -133,15 +133,15 @@
     "openNetwork": {
       "titlePrefix": "Imejengwa juu ya",
       "titleEmphasis": "mtandao wazi",
-      "description": "Bumicerts ni rekodi za athari zinazobebeka kati ya programu, jamii na zana za ufadhili — si hifadhidata iliyofungwa.",
+      "description": "vyeti ni rekodi za athari zinazobebeka kati ya programu, jamii na zana za ufadhili — si hifadhidata iliyofungwa. Usaidizi wa Silvi na majukwaa mengine utakuja hivi karibuni.",
       "protocol": {
-        "name": "Itifaki ya AT",
+        "name": "Certified",
         "description": "data ya kijamii inayobebeka"
       },
       "youBadge": "Wewe",
       "apps": {
         "maEarth": {
-          "blurb": "Jamii zinaweza kutumia ushahidi wa Bumicert wanapoomba awamu za ufadhili zinazoungwa mkono na jamii."
+          "blurb": "Jamii zinaweza kutumia ushahidi wa cheti wanapoomba awamu za ufadhili zinazoungwa mkono na jamii."
         },
         "gainforest": {
           "blurb": "GainForest huwasaidia walezi wa mazingira kuchapisha kazi iliyothibitishwa, maeneo, miti, uchunguzi na hadithi za miradi."

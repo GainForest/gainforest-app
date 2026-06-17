@@ -45,7 +45,7 @@ const instrument = Instrument_Serif({
 const SITE_NAME = "GainForest";
 const OG_IMAGE = "/og/bumicerts-og.png";
 const OG_ALT =
-  "GainForest — a warm cream editorial card about environmental impact, with observations, places, Bumicerts, and donations beside a vintage natural-history collage.";
+  "GainForest — a warm cream editorial card about environmental impact, with observations, places, Certs, and donations beside a vintage natural-history collage.";
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = resolveSupportedLanguage(await getLocale());
@@ -66,7 +66,7 @@ export async function generateMetadata(): Promise<Metadata> {
     publisher: "GainForest",
     keywords: [
       "GainForest",
-      "Bumicerts",
+      "Certs",
       "biodiversity",
       "explorer",
       "impact certification",

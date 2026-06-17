@@ -1,7 +1,7 @@
 {
   "seo": {
-    "title": "Bumicerts — Fund Regenerative Impact",
-    "description": "Bumicerts connects funders with nature stewards doing on-ground regenerative work. Fund verified environmental impact directly."
+    "title": "Certs — Fund Regenerative Impact",
+    "description": "Certs connects funders with nature stewards doing on-ground regenerative work. Fund verified environmental impact directly."
   },
   "language": {
     "label": "Language",
@@ -52,7 +52,7 @@
       "manage": "MANAGE"
     },
     "items": {
-      "bumicerts": "Bumicerts",
+      "bumicerts": "Certs",
       "organizations": "Organizations",
       "leaderboard": "Leaderboard",
       "organization": "Organization",
@@ -82,7 +82,7 @@
       "checkingAccount": "Checking your account..."
     },
     "creationCard": {
-      "createBumicert": "Create a Bumicert",
+      "createBumicert": "Create a Cert",
       "createProject": "Create a Project"
     },
     "tabs": {
@@ -91,7 +91,7 @@
     }
   },
   "bumicertCard": {
-    "missingImage": "Bumicert image unavailable",
+    "missingImage": "Cert image unavailable",
     "additionalObjectives": "{count, plural, one {# additional objective} other {# additional objectives}}"
   },
   "pagination": {
@@ -114,7 +114,7 @@
       "documentation": "Documentation",
       "twitter": "X (Twitter)",
       "github": "GitHub",
-      "bumicerts": "Bumicerts",
+      "bumicerts": "Certs",
       "organizations": "Organizations",
       "observations": "Observations",
       "leaderboard": "Leaderboard",
@@ -129,7 +129,7 @@
     "cards": {
       "bumicerts": {
         "label": "Verified projects",
-        "title": "Bumicerts",
+        "title": "Certs",
         "blurb": "Browse project stories with photos, places, people, and context.",
         "statLabel": "stories"
       },
@@ -148,7 +148,7 @@
       "leaderboard": {
         "label": "Impact champions",
         "title": "Leaderboard",
-        "blurb": "See the donors helping communities through Bumicerts.",
+        "blurb": "See the donors helping communities through Certs.",
         "statLabel": "raised"
       }
     }
@@ -171,7 +171,7 @@
     "placeholder": "Upload or drag and drop your file"
   },
   "signInPrompt": {
-    "description": "Save your project sites, tree information, and Bumicerts in one place.",
+    "description": "Save your project sites, tree information, and Certs in one place.",
     "failed": "We couldn’t finish signing you in. Please try again.",
     "getStarted": "Get started"
   },
@@ -207,7 +207,7 @@
       },
       "website": {
         "name": "Web app",
-        "detail": "Bumicerts interface"
+        "detail": "Certs interface"
       },
       "api": {
         "name": "API",
@@ -225,7 +225,7 @@
       "eyebrow": "Live status",
       "title": "GainForest",
       "accent": "system health",
-      "lede": "Current availability for Bumicerts, data services, and supporting infrastructure."
+      "lede": "Current availability for Certs, data services, and supporting infrastructure."
     },
     "unavailable": {
       "title": "Status is temporarily unavailable",
@@ -254,7 +254,7 @@
   },
   "accountTabs": {
     "home": "Home",
-    "bumicerts": "Bumicerts",
+    "bumicerts": "Certs",
     "donationHistory": "Donation History",
     "observations": "Observations",
     "gallery": "Gallery",
@@ -264,7 +264,7 @@
     "accountTitle": "Gallery",
     "accountDescription": "Project photos shared by this account. Use the buttons to focus on one project, or leave All projects selected.",
     "bumicertTitle": "Project gallery",
-    "bumicertDescription": "Images shared for the project this Bumicert belongs to.",
+    "bumicertDescription": "Images shared for the project this Cert belongs to.",
     "defaultTitle": "Gallery",
     "defaultDescription": "Photos shared by this project.",
     "emptyTitle": "No gallery images yet",

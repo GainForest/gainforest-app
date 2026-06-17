@@ -45,7 +45,7 @@ export function Hero({
     },
     {
       value: formatCompact(kpis.bumicerts),
-      label: "Bumicerts",
+      label: "Certs",
       sub: "Verified project stories",
       series: trends.bumicerts,
       format: "number",
@@ -60,7 +60,7 @@ export function Hero({
     {
       value: formatCompactUsd(kpis.totalRaised),
       label: "Funding raised",
-      sub: "Across all Bumicerts",
+      sub: "Across all Certs",
       series: trends.totalRaised,
       format: "usd",
     },

@@ -3,6 +3,7 @@ import { mkdir, rm, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 
 export const disposableAccountMetadataPath = "e2e/.auth/disposable-account.json";
+export const memberDisposableAccountMetadataPath = "e2e/.auth/member-account.json";
 
 type GuerrillaMailMessage = {
   id: string;
@@ -160,26 +161,36 @@ export async function waitForInboxPasswordResetToken(
 export async function waitForInboxDeletionToken(
   inbox: DisposableInbox,
   ignoredMessageIds = new Set<string>(),
+  timeoutMs?: number,
 ): Promise<string> {
   return waitForInboxMatch({
     inbox,
     ignoredMessageIds,
+    timeoutMs,
     description: "account deletion token",
     extract: extractAccountActionToken,
   });
 }
 
+export async function writeDisposableAccountMetadataAt(path: string, metadata: DisposableAccountMetadata): Promise<void> {
+  await mkdir(dirname(path), { recursive: true });
+  await writeFile(path, `${JSON.stringify(metadata, null, 2)}\n`, "utf8");
+}
+
 export async function writeDisposableAccountMetadata(metadata: DisposableAccountMetadata): Promise<void> {
-  await mkdir(dirname(disposableAccountMetadataPath), { recursive: true });
-  await writeFile(disposableAccountMetadataPath, `${JSON.stringify(metadata, null, 2)}\n`, "utf8");
+  await writeDisposableAccountMetadataAt(disposableAccountMetadataPath, metadata);
+}
+
+export async function clearDisposableAccountMetadataAt(path: string): Promise<void> {
+  await rm(path, { force: true });
 }
 
 export async function clearDisposableAccountMetadata(): Promise<void> {
-  await rm(disposableAccountMetadataPath, { force: true });
+  await clearDisposableAccountMetadataAt(disposableAccountMetadataPath);
 }
 
-export function readDisposableAccountMetadata(): DisposableAccountMetadata | null {
-  const path = resolve(process.cwd(), disposableAccountMetadataPath);
+export function readDisposableAccountMetadataAt(metadataPath: string): DisposableAccountMetadata | null {
+  const path = resolve(process.cwd(), metadataPath);
   if (!existsSync(path)) return null;
 
   let parsed: unknown;
@@ -215,4 +226,8 @@ export function readDisposableAccountMetadata(): DisposableAccountMetadata | nul
     handle: typeof parsed.handle === "string" ? parsed.handle : null,
     serviceEndpoint: typeof parsed.serviceEndpoint === "string" ? parsed.serviceEndpoint : null,
   };
+}
+
+export function readDisposableAccountMetadata(): DisposableAccountMetadata | null {
+  return readDisposableAccountMetadataAt(disposableAccountMetadataPath);
 }

@@ -48,7 +48,7 @@ export function AccountBumicertsGrid({ bumicerts, organizationIdentifier, organi
         <div className="flex items-center gap-2 mb-3">
           <BadgeIcon className="h-4 w-4 text-primary" />
           <span className="text-xs uppercase tracking-[0.15em] text-muted-foreground font-medium">
-            No public Bumicerts
+            No public Certs
           </span>
         </div>
         <p
@@ -58,7 +58,7 @@ export function AccountBumicertsGrid({ bumicerts, organizationIdentifier, organi
             fontStyle: "italic",
           }}
         >
-          This account has not published any public Bumicerts yet.
+          This account has not published any public Certs yet.
         </p>
       </div>
     );

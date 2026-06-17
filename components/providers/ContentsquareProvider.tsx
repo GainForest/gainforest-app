@@ -136,7 +136,7 @@ function ContentsquareConsentCard({
               Help us improve tree uploads
             </p>
             <p id="contentsquare-consent-description" className="text-xs leading-relaxed text-muted-foreground">
-              With your permission, Bumicerts can save a short video of your
+              With your permission, Certs can save a short video of your
               screen during tree uploads. This helps us see where the flow is
               confusing and turn feedback into fixes. You can say no and keep
               using the upload.

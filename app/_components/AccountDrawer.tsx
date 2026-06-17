@@ -193,7 +193,7 @@ function AccountDrawer({ did, onClose }: { did: string | null; onClose: () => vo
           {summary && (
             <div className="mt-5 grid grid-cols-2 gap-3">
               <StatTile
-                label="Bumicerts"
+                label="Certs"
                 value={formatCompact(summary.bumicertCount)}
                 hint="impact stories created"
               />

@@ -33,12 +33,12 @@ const FEATURE_ITEMS = ["verified", "direct", "transparent"] as const;
 const OPTION_CARDS = [
   {
     key: "funders",
-    href: "/bumicerts",
+    href: "/certs",
     image: "/assets/media/images/landing/supporter-river.jpg",
   },
   {
     key: "organizations",
-    href: "/manage/bumicerts",
+    href: "/manage/certs",
     image: "/assets/media/images/landing/steward-waterfall.jpg",
   },
 ] as const;
@@ -128,7 +128,7 @@ function LandingTopNavbar() {
             transition={{ type: "spring", stiffness: 400, damping: 25 }}
           >
             <Link
-              href="/bumicerts"
+              href="/certs"
               className="inline-flex h-9 shrink-0 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-lg shadow-primary/15 transition-colors hover:bg-primary/90 focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none"
             >
               {t("nav.launchApp")}
@@ -218,7 +218,7 @@ function LandingHero() {
               className="mt-8"
             >
               <Link
-                href="/bumicerts"
+                href="/certs"
                 className="inline-flex h-12 shrink-0 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-full bg-primary px-6 py-2 text-sm font-medium text-primary-foreground shadow-lg shadow-primary/20 transition-colors hover:bg-primary/90 focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50"
               >
                 {t("cta")}
@@ -271,7 +271,7 @@ function HomeStats({ kpis }: { kpis: ExplorerKpis | null }) {
     stats.push({
       value: formatCompact(kpis.bumicerts),
       label: t("bumicertsShared"),
-      href: "/bumicerts",
+      href: "/certs",
       icon: <CompassIcon />,
       accent: true,
     });

@@ -12,7 +12,7 @@ const PRIMARY_LINKS = [
 ] as const;
 
 const DATA_LINKS = [
-  { href: "/bumicerts", key: "bumicerts" },
+  { href: "/certs", key: "bumicerts" },
   { href: "/organizations", key: "organizations" },
   { href: "/observations", key: "observations" },
   { href: "/leaderboard", key: "leaderboard" },

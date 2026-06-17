@@ -4,9 +4,10 @@ import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { parseAsString, parseAsStringEnum, useQueryState } from "nuqs";
 import { useTranslations } from "./audio-copy";
-import { ChevronLeftIcon } from "lucide-react";
+import { ChevronLeftIcon, HelpCircleIcon } from "lucide-react";
 import Container from "@/components/ui/container";
 import { Button } from "@/components/ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import TelegramIcon from "@/icons/TelegramIcon";
 import { AudioSectionTabs } from "./AudioSectionTabs";
 import { CreatePanel, DetailPanel, ListPanel } from "./AudioPanels";
@@ -136,17 +137,49 @@ export function AudioClient({ did, target }: AudioClientProps) {
     <Container className="pt-4 pb-10 space-y-6">
       <header className="space-y-3">
         <div className="flex items-start justify-between gap-3">
-          <div>
+          <div className="max-w-xl">
             <h1 className="font-instrument text-2xl font-medium italic tracking-[-0.03em] text-foreground sm:text-3xl">My Audio</h1>
-            <p className="mt-2 text-sm leading-6 text-muted-foreground">{t("howDoesThisWork")}</p>
+            <p className="mt-2 text-sm leading-6 text-muted-foreground">{t("intro")}</p>
           </div>
-          <Button asChild size="sm" className="shrink-0">
-            <Link href={TELEGRAM_BOT_URL} target="_blank" rel="noreferrer">
-              <TelegramIcon /> {t("useTaina")}
-            </Link>
-          </Button>
+          <div className="flex shrink-0 flex-col items-end gap-1.5">
+            <Button asChild size="sm">
+              <Link href={TELEGRAM_BOT_URL} target="_blank" rel="noreferrer">
+                <TelegramIcon />
+                <span className="sm:hidden">{t("useTaina")}</span>
+                <span className="hidden sm:inline">{t("useTainaLong")}</span>
+              </Link>
+            </Button>
+            <Popover>
+              <PopoverTrigger asChild>
+                <button
+                  type="button"
+                  className="inline-flex items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-foreground"
+                >
+                  <HelpCircleIcon className="size-3.5" />
+                  {t("whatIsTaina")}
+                </button>
+              </PopoverTrigger>
+              <PopoverContent align="end" className="space-y-2.5">
+                <div className="flex items-center gap-2">
+                  <TelegramIcon className="size-4 text-primary" />
+                  <span className="font-instrument text-base font-medium italic text-foreground">
+                    {t("tainaTitle")}
+                  </span>
+                </div>
+                <p className="text-sm leading-6 text-muted-foreground">{t("tainaBody")}</p>
+                <Button asChild size="sm" variant="outline" className="w-full">
+                  <Link href={TELEGRAM_BOT_URL} target="_blank" rel="noreferrer">
+                    <TelegramIcon /> {t("tainaCta")}
+                  </Link>
+                </Button>
+              </PopoverContent>
+            </Popover>
+          </div>
         </div>
         <div className="rounded-2xl bg-muted p-1 text-sm text-muted-foreground">
+          <p className="px-3 pt-1 pb-2 text-center text-[0.7rem] font-medium uppercase tracking-[0.12em] text-muted-foreground/70">
+            {t("howDoesThisWork")}
+          </p>
           <FlowChart />
           <p className="px-3 mt-1 text-center">{t("fileSizeNote")}</p>
         </div>

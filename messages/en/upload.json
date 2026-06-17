@@ -3,7 +3,7 @@
     "organization": "Organization",
     "sites": "Sites",
     "audio": "Audio",
-    "bumicerts": "Bumicerts",
+    "bumicerts": "Certs",
     "trees": "Trees",
     "manage": "Manage",
     "yourOrganizationData": "your organization data",
@@ -79,7 +79,13 @@
     "deleteConfirmDescription": "This action cannot be undone.",
     "howDoesThisWork": "How does this work?",
     "useTaina": "Use Taina",
+    "useTainaLong": "Use Taina to upload AudioMoth",
     "fileSizeNote": "Files uploaded here must be 4MB or smaller. For larger AudioMoth files, please use Taina.",
+    "intro": "Keep your field recordings in one place. Each one is tied to where, when, and how it was captured.",
+    "whatIsTaina": "What's Taina?",
+    "tainaTitle": "Meet Taina",
+    "tainaBody": "Taina is our helper on Telegram. Chat to send recordings straight from the field. She handles large AudioMoth files that won't upload here.",
+    "tainaCta": "Open Taina on Telegram",
     "loading": "Loading audio workspace…",
     "backTo": "Back to {section}",
     "sections": {
@@ -623,7 +629,7 @@
     "actions": {
       "save": "Save",
       "cancel": "Cancel",
-      "createOrganization": "Create an Organization"
+      "createOrganization": "Create new Organization"
     },
     "about": {
       "title": "About",

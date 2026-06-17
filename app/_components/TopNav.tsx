@@ -16,7 +16,7 @@ import { GLOBE_URL } from "../_lib/urls";
 const NAV = [
   { href: "/observations", key: "observations" },
   { href: "/organizations", key: "organizations" },
-  { href: "/bumicerts", key: "bumicerts" },
+  { href: "/certs", key: "bumicerts" },
   { href: "/projects", key: "projects" },
   { href: "/leaderboard", key: "leaderboard" },
   { href: "/devices", key: "devices" },
@@ -139,8 +139,8 @@ export function TopNav({ status }: { status: StatusSnapshot }) {
               <Link href={GLOBE_URL} target="_blank" rel="noreferrer" className="hover:text-primary">
                 {t("navigation.greenGlobeExternal")}
               </Link>
-              <Link href="/bumicerts" className="hover:text-primary">
-                Bumicerts
+              <Link href="/certs" className="hover:text-primary">
+                Certs
               </Link>
             </div>
           </nav>

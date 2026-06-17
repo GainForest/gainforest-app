@@ -30,7 +30,7 @@ export default function DashboardPage() {
         icon={<LayoutDashboardIcon />}
         title="Platform"
         accent="overview"
-        lede="A single place for the totals from Bumicerts, organizations, observations, and projects."
+        lede="A single place for the totals from Certs, organizations, observations, and projects."
       />
       <div className="relative z-10 -mt-8">
         <Suspense fallback={null}>

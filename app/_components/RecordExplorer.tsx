@@ -86,7 +86,7 @@ const KIND_META: Record<RecordKind, KindMeta> = {
     title: "Discover",
     accent: "Regenerative Impact",
     lede: "Browse projects from communities and organizations restoring ecosystems, strengthening livelihoods, and building a more resilient future.",
-    search: "Filter Bumicerts by title or description",
+    search: "Filter Certs by title or description",
     heroLight: "/images/explore/explore-hero-light@2x.webp",
     heroDark: "/images/explore/explore-hero-dark@2x.webp",
   },
@@ -94,7 +94,7 @@ const KIND_META: Record<RecordKind, KindMeta> = {
     eyebrow: "Projects",
     title: "Browse",
     accent: "project collections",
-    lede: "Explore project collections and the Bumicerts they group together.",
+    lede: "Explore project collections and the Certs they group together.",
     search: "Filter projects by title or description",
     heroLight: "/images/explore/explore-hero-light@2x.webp",
     heroDark: "/images/explore/explore-hero-dark@2x.webp",
@@ -1334,7 +1334,7 @@ function cardView(record: ExplorerRecord): CardView {
       pills: (
         <>
           <Pill accent>
-            {formatCompact(record.bumicertCount)} Bumicert{record.bumicertCount === 1 ? "" : "s"}
+            {formatCompact(record.bumicertCount)} Cert{record.bumicertCount === 1 ? "" : "s"}
           </Pill>
           {record.locationUri ? <Pill>Project place</Pill> : null}
         </>
@@ -1372,7 +1372,7 @@ function cardView(record: ExplorerRecord): CardView {
     badge: (
       <span className="inline-flex items-center gap-1 rounded-full bg-background/85 px-2 py-0.5 text-[9.5px] font-medium uppercase tracking-[0.1em] text-brand-dark backdrop-blur-md">
         <span aria-hidden className="pulse-dot inline-block h-1.5 w-1.5 rounded-full bg-brand text-brand" />
-        Bumicert
+        Cert
       </span>
     ),
     placeholder: (
@@ -1581,12 +1581,12 @@ function computeStats(records: ExplorerRecord[], kind: RecordKind): Stat[] {
     const sites = b.reduce((s, r) => s + r.locationCount, 0);
     const withCover = b.filter((r) => r.imageUrl).length;
     return [
-      { label: "Loaded Bumicerts", value: n(b.length), icon: <LayoutGridIcon />, accent: true },
-      { label: "Bumicerts from last 30 days", value: n(last30), icon: <LeafIcon /> },
-      { label: "People named in loaded Bumicerts", value: n(contributors), icon: <LeafIcon />, accent: true },
-      { label: "Project places in loaded Bumicerts", value: n(sites), icon: <MapIcon /> },
-      { label: "Loaded Bumicerts with pictures", value: n(withCover), icon: <ImageIcon /> },
-      { label: "Bumicerts from this week", value: n(last7), icon: <AudioLinesIcon /> },
+      { label: "Loaded Certs", value: n(b.length), icon: <LayoutGridIcon />, accent: true },
+      { label: "Certs from last 30 days", value: n(last30), icon: <LeafIcon /> },
+      { label: "People named in loaded Certs", value: n(contributors), icon: <LeafIcon />, accent: true },
+      { label: "Project places in loaded Certs", value: n(sites), icon: <MapIcon /> },
+      { label: "Loaded Certs with pictures", value: n(withCover), icon: <ImageIcon /> },
+      { label: "Certs from this week", value: n(last7), icon: <AudioLinesIcon /> },
     ];
   }
 
@@ -1598,7 +1598,7 @@ function computeStats(records: ExplorerRecord[], kind: RecordKind): Stat[] {
     return [
       { label: "Loaded projects", value: n(p.length), icon: <LayoutGridIcon />, accent: true },
       { label: "Projects from last 30 days", value: n(last30), icon: <LeafIcon /> },
-      { label: "Bumicerts in loaded projects", value: n(bumicerts), icon: <LeafIcon />, accent: true },
+      { label: "Certs in loaded projects", value: n(bumicerts), icon: <LeafIcon />, accent: true },
       { label: "Loaded projects with places", value: n(withPlace), icon: <MapIcon /> },
       { label: "Loaded projects with pictures", value: n(withImg), icon: <ImageIcon /> },
       { label: "Projects from this week", value: n(last7), icon: <AudioLinesIcon /> },

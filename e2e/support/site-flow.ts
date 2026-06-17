@@ -1,6 +1,7 @@
 import { expect, type Locator, type Page, type TestInfo } from "@playwright/test";
 import { screenshotStep } from "./artifacts";
 import { waitForCertifiedLocationByName } from "./pds";
+import { groupManageBasePath, readCgsOrgMetadata } from "./cgs-org";
 
 const VALID_SITE_MAP = JSON.stringify({
   type: "Feature",
@@ -15,9 +16,14 @@ async function expectDisabled(locator: Locator, label: string): Promise<void> {
   await expect(locator, `${label} should be disabled`).toBeDisabled();
 }
 
+function manageBasePath(): string {
+  const org = readCgsOrgMetadata();
+  return org ? groupManageBasePath(org) : "/manage";
+}
+
 export async function createSiteByUpload(page: Page, testInfo: TestInfo): Promise<string> {
   const siteName = `Uploaded Map Site ${Date.now()}`;
-  await page.goto("/manage/sites", { waitUntil: "domcontentloaded" });
+  await page.goto(`${manageBasePath()}/sites`, { waitUntil: "domcontentloaded" });
   await expect(page.getByRole("heading", { name: /^(my )?sites$/i })).toBeVisible({ timeout: 60_000 });
   await screenshotStep(page, testInfo, "sites-open");
 
@@ -48,7 +54,7 @@ export async function createSiteByUpload(page: Page, testInfo: TestInfo): Promis
 
 export async function createSiteByDrawing(page: Page, testInfo: TestInfo): Promise<string> {
   const siteName = `Drawn Map Site ${Date.now()}`;
-  await page.goto("/manage/sites", { waitUntil: "domcontentloaded" });
+  await page.goto(`${manageBasePath()}/sites`, { waitUntil: "domcontentloaded" });
   await page.getByRole("button", { name: /add (a )?site/i }).first().click();
   const dialog = page.locator('[role="dialog"]:visible').last();
   await expect(dialog.getByRole("heading", { name: /add site/i }).first()).toBeVisible({ timeout: 15_000 });

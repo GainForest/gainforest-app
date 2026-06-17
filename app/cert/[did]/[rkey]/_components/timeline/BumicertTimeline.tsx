@@ -541,7 +541,7 @@ export function BumicertTimeline({
               <div>
                 <h2 id="timeline-heading" className="text-2xl tracking-tight text-foreground">Linked evidence timeline</h2>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  {entries.length === 1 ? "1 item linked to this Bumicert" : `${formatNumber(entries.length)} items linked to this Bumicert`}
+                  {entries.length === 1 ? "1 item linked to this Cert" : `${formatNumber(entries.length)} items linked to this Cert`}
                   {linkedWindow ? ` · linked ${linkedWindow}` : ""}
                 </p>
                 <p className="mt-1 text-xs text-muted-foreground">Review files, field notes, tree information, sounds, and map layers already added to this public timeline.</p>
@@ -865,7 +865,7 @@ function EvidenceAdder({
     const items = (Array.isArray(drafts) ? drafts : [drafts]).filter((draft) => draft.contents.length > 0);
     if (items.length === 0) return;
     if (!activityCid) {
-      setError("This Bumicert is still loading its timeline details. Refresh and try again.");
+      setError("This Cert is still loading its timeline details. Refresh and try again.");
       return;
     }
     setError(null);

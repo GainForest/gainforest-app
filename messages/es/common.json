@@ -1,7 +1,7 @@
 {
   "seo": {
-    "title": "Bumicerts — Financia impacto regenerativo",
-    "description": "Bumicerts conecta financiadores con guardianes de la naturaleza que realizan trabajo regenerativo en el terreno. Financia impacto ambiental verificado directamente."
+    "title": "certificados — Financia impacto regenerativo",
+    "description": "certificados conecta financiadores con guardianes de la naturaleza que realizan trabajo regenerativo en el terreno. Financia impacto ambiental verificado directamente."
   },
   "language": {
     "label": "Idioma",
@@ -52,7 +52,7 @@
       "manage": "GESTIONAR"
     },
     "items": {
-      "bumicerts": "Bumicerts",
+      "bumicerts": "certificados",
       "organizations": "Organizaciones",
       "leaderboard": "Clasificación",
       "organization": "Organización",
@@ -82,7 +82,7 @@
       "checkingAccount": "Comprobando tu cuenta..."
     },
     "creationCard": {
-      "createBumicert": "Crear un Bumicert",
+      "createBumicert": "Crear un certificado",
       "createProject": "Crear un proyecto"
     },
     "tabs": {
@@ -91,7 +91,7 @@
     }
   },
   "bumicertCard": {
-    "missingImage": "Imagen del Bumicert no disponible",
+    "missingImage": "Imagen del certificado no disponible",
     "additionalObjectives": "{count, plural, one {# objetivo adicional} other {# objetivos adicionales}}"
   },
   "pagination": {
@@ -114,7 +114,7 @@
       "documentation": "Documentación",
       "twitter": "X (Twitter)",
       "github": "GitHub",
-      "bumicerts": "Bumicerts",
+      "bumicerts": "certificados",
       "organizations": "Organizaciones",
       "observations": "Observaciones",
       "leaderboard": "Clasificación",
@@ -129,7 +129,7 @@
     "cards": {
       "bumicerts": {
         "label": "Proyectos verificados",
-        "title": "Bumicerts",
+        "title": "certificados",
         "blurb": "Explora historias de proyectos con fotos, lugares, personas y contexto.",
         "statLabel": "historias"
       },
@@ -148,7 +148,7 @@
       "leaderboard": {
         "label": "Campeones de impacto",
         "title": "Clasificación",
-        "blurb": "Mira a los donantes que ayudan a comunidades mediante Bumicerts.",
+        "blurb": "Mira a los donantes que ayudan a comunidades mediante certificados.",
         "statLabel": "recaudado"
       }
     }
@@ -171,7 +171,7 @@
     "placeholder": "Sube o arrastra y suelta tu archivo"
   },
   "signInPrompt": {
-    "description": "Guarda tus sitios de proyecto, información de árboles y Bumicerts en un solo lugar.",
+    "description": "Guarda tus sitios de proyecto, información de árboles y certificados en un solo lugar.",
     "failed": "No pudimos completar tu inicio de sesión. Inténtalo de nuevo.",
     "getStarted": "Empezar"
   },
@@ -207,7 +207,7 @@
       },
       "website": {
         "name": "App web",
-        "detail": "Interfaz de Bumicerts"
+        "detail": "Interfaz de certificados"
       },
       "api": {
         "name": "API de la aplicación",
@@ -225,7 +225,7 @@
       "eyebrow": "Estado en vivo",
       "title": "GainForest",
       "accent": "salud del sistema",
-      "lede": "Disponibilidad actual de Bumicerts, servicios de datos e infraestructura de apoyo."
+      "lede": "Disponibilidad actual de certificados, servicios de datos e infraestructura de apoyo."
     },
     "unavailable": {
       "title": "El estado no está disponible temporalmente",
@@ -254,7 +254,7 @@
   },
   "accountTabs": {
     "home": "Inicio",
-    "bumicerts": "Bumicerts",
+    "bumicerts": "certificados",
     "donationHistory": "Historial de donaciones",
     "observations": "Observaciones",
     "gallery": "Galería",
@@ -264,7 +264,7 @@
     "accountTitle": "Galería",
     "accountDescription": "Fotos de proyectos compartidas por esta cuenta. Usa los botones para ver un proyecto concreto, o deja seleccionado Todos los proyectos.",
     "bumicertTitle": "Galería del proyecto",
-    "bumicertDescription": "Imágenes compartidas para el proyecto al que pertenece este Bumicert.",
+    "bumicertDescription": "Imágenes compartidas para el proyecto al que pertenece este certificado.",
     "defaultTitle": "Galería",
     "defaultDescription": "Fotos compartidas por este proyecto.",
     "emptyTitle": "Aún no hay imágenes en la galería",

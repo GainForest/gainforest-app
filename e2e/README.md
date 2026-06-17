@@ -2,7 +2,7 @@
 
 Authenticated E2E tests run through central sign-in on an HTTPS `*.gainforest.app` host so cookie and redirect behavior matches production.
 
-The setup project starts both login paths from the app sign-in UI: first a handle/password sanity login when `E2E_TEST_HANDLE` and `E2E_TEST_PASSWORD` are configured, then the real disposable-email login. The disposable login creates a fresh disposable email account and saves that account's browser state for the focused e2e specs. The authenticated specs are chained in Playwright project order so account setup, profile edits, sites, observations, project creation, bumicert creation, audio, and settings checks run as separate files while sharing the disposable account. Teardown deletes the run-owned disposable account automatically.
+The setup project starts both login paths from the app sign-in UI: first a handle/password sanity login when `E2E_TEST_HANDLE` and `E2E_TEST_PASSWORD` are configured, then the real disposable-email login. The disposable login creates a fresh disposable email account and saves that account's browser state for the focused e2e specs. The authenticated specs are chained in Playwright project order: user onboarding/profile checks run on the personal disposable account, organization onboarding creates a CGS-backed organization, and sites, observations, project creation, Cert creation, and audio run against that organization account. A second disposable account is created as a member for CGS permission checks. Teardown deletes the run-owned disposable accounts and attempts to remove the CGS organization state/account.
 
 Local default:
 

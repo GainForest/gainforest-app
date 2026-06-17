@@ -80,10 +80,10 @@ const NAV_ITEMS: NavSection[] = [
       {
         kind: "leaf",
         id: "bumicerts",
-        text: "Bumicerts",
+        text: "Certs",
         Icon: BumicertIcon,
-        href: "/bumicerts",
-        pathCheck: { startsWith: "/bumicerts" },
+        href: "/certs",
+        pathCheck: { startsWith: "/certs" },
       },
       {
         kind: "leaf",
@@ -464,7 +464,7 @@ const SIDEBAR_TABS: {
   href: string;
   Icon: React.ComponentType<{ className?: string }>;
 }[] = [
-  { id: "explore", label: "Explore", href: "/bumicerts", Icon: CompassIcon },
+  { id: "explore", label: "Explore", href: "/certs", Icon: CompassIcon },
   { id: "manage", label: "Manage", href: "/manage", Icon: LayoutDashboardIcon },
 ];
 
@@ -883,7 +883,7 @@ function ProgressiveBlur({
 }
 
 function getRouteHeaderActions(pathname: string, authSession: AuthSession) {
-  if (pathname === "/bumicerts") {
+  if (pathname === "/certs") {
     return <CreateBumicertHeaderButton isUnauthenticated={!authSession.isLoggedIn} />;
   }
 
@@ -1026,7 +1026,7 @@ const BUMICERT_DETAIL_TABS = [
 type BumicertDetailTab = (typeof BUMICERT_DETAIL_TABS)[number]["id"];
 
 function isBumicertDetailPath(pathname: string): boolean {
-  return /^\/bumicert\/[^/]+\/[^/]+\/?$/.test(pathname);
+  return /^\/cert\/[^/]+\/[^/]+\/?$/.test(pathname);
 }
 
 function parseBumicertTab(value: string | null): BumicertDetailTab {
@@ -1326,15 +1326,12 @@ function BumicertIcon(props: SVGProps<SVGSVGElement>) {
 }
 
 function ExploreArt() {
-  // Two climbing vines hugging either edge at different heights — growth
-  // creeping up the sides of the sidebar.
+  // Two climbing vines hugging either edge — growth creeping up the sides of
+  // the sidebar.
   return (
     <>
-      {/* Half the smaller vine, hugging each edge */}
       <Vine side="left" className="bottom-0 left-0 h-26 w-5" />
       <Vine side="right" className="bottom-0 right-0 h-26 w-5" />
-      {/* 1.5x the bigger vine, centered */}
-      <Vine side="left" className="bottom-0 left-1/2 h-108 w-18 -translate-x-1/2" />
     </>
   );
 }

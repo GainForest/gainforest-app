@@ -18,7 +18,7 @@ export function BrowseGrid({ kpis }: { kpis: ExplorerKpis }) {
     statLabel: string;
   }> = [
     {
-      href: "/bumicerts",
+      href: "/certs",
       label: t("cards.bumicerts.label"),
       title: t("cards.bumicerts.title"),
       blurb: t("cards.bumicerts.blurb"),

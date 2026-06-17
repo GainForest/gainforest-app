@@ -2,6 +2,7 @@ import { appendFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } fr
 import { dirname } from "node:path";
 import { getE2EEnv } from "./env";
 import { readDisposableAccountMetadata } from "./disposable-email";
+import { readCgsOrgMetadata } from "./cgs-org";
 
 export const E2E_PDS_COLLECTIONS = {
   claimActivity: "org.hypercerts.claim.activity",
@@ -22,7 +23,7 @@ export type PdsRepoRecord = {
 type PdsReadAccount = {
   did: string;
   serviceEndpoint: string;
-  source: "disposable-email" | "static-env";
+  source: "cgs-organization" | "disposable-email" | "static-env";
 };
 
 type ParsedAtUri = {
@@ -155,6 +156,15 @@ async function createStaticSessionAccount(): Promise<PdsReadAccount> {
 }
 
 async function getDefaultReadAccount(): Promise<PdsReadAccount> {
+  const org = readCgsOrgMetadata();
+  if (org?.groupDid) {
+    return {
+      did: org.groupDid,
+      serviceEndpoint: await resolveServiceEndpoint(org.groupDid, getE2EEnv().testPdsDomain),
+      source: "cgs-organization",
+    };
+  }
+
   const disposable = readDisposableAccountMetadata();
   if (disposable?.did) {
     return {
@@ -198,11 +208,15 @@ async function listPdsRecords(collection: string): Promise<PdsRepoRecord[]> {
 }
 
 export async function getPdsRecord(uri: string): Promise<PdsRepoRecord> {
-  const account = await getDefaultReadAccount();
+  const defaultAccount = await getDefaultReadAccount();
   const parsed = parseAtUri(uri);
-  if (parsed.did !== account.did) {
-    throw new Error(`Refusing to read a record for ${parsed.did} while checking ${account.did}.`);
-  }
+  const account = parsed.did === defaultAccount.did
+    ? defaultAccount
+    : {
+        did: parsed.did,
+        serviceEndpoint: await resolveServiceEndpoint(parsed.did, getE2EEnv().testPdsDomain),
+        source: defaultAccount.source,
+      };
 
   const search = new URLSearchParams({ repo: account.did, collection: parsed.collection, rkey: parsed.rkey });
   const value = await fetchJson(`${account.serviceEndpoint}/xrpc/com.atproto.repo.getRecord?${search.toString()}`);
@@ -334,7 +348,7 @@ function readTrackedCreatedRecords(): ListedCreatedRecord[] {
 export async function cleanupCreatedPdsRecords(): Promise<{ deleted: number; failed: number; skipped: number }> {
   const tracked = readTrackedCreatedRecords();
 
-  if (readDisposableAccountMetadata()) {
+  if (readCgsOrgMetadata() || readDisposableAccountMetadata()) {
     // Current policy: disposable accounts are kept for inspection unless the user
     // explicitly asks otherwise. Do not delete the account or its records here.
     if (tracked.length > 0) {

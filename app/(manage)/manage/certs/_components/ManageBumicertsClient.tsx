@@ -45,12 +45,12 @@ function CreateHeroCard({ target }: { target: ManageTarget }) {
 
         <div className="relative z-30 flex min-h-[6rem] flex-col gap-4 px-6 py-4 sm:flex-row sm:items-center sm:justify-between sm:gap-6 sm:px-8 lg:px-9">
           <p className="w-full text-sm leading-5 text-muted-foreground sm:max-w-[30rem]">
-            Bumicerts are public impact stories that connect a project to people, places, time periods, and supporting photos or notes. Use them to make field work easier to review, share, and fund.
+            Certs are public impact stories that connect a project to people, places, time periods, and supporting photos or notes. Use them to make field work easier to review, share, and fund.
           </p>
           <Button size="sm" asChild className="shrink-0 self-start sm:self-auto">
             <Link href={manageHref(target, "newBumicert")}>
               <CirclePlusIcon />
-              Create Bumicert
+              Create Cert
             </Link>
           </Button>
         </div>
@@ -93,17 +93,17 @@ function RecentBumicerts({ target, bumicerts, did, ownerIdentifier }: { target: 
           <LeafIcon className="mb-4 size-10 text-primary" />
           <div className="space-y-2">
             <p className="font-serif text-2xl font-medium leading-tight tracking-[-0.02em] text-foreground">
-              No Bumicerts yet
+              No Certs yet
             </p>
             <p className="text-sm leading-6 text-muted-foreground">
-              Your published Bumicerts will appear here.
+              Your published Certs will appear here.
               <br />Create your first one when you are ready.
             </p>
           </div>
           <Button variant="outline" size="sm" asChild className="mt-5">
             <Link href={manageHref(target, "newBumicert")}>
               <CirclePlusIcon />
-              Create first Bumicert
+              Create first Cert
             </Link>
           </Button>
         </motion.div>
@@ -221,7 +221,7 @@ export function ManageBumicertsClient({ target, did, ownerIdentifier, bumicerts,
         <section className="-mx-4 px-4 py-1 sm:-mx-6 sm:px-6">
           <div className="max-w-2xl">
             <h1 className="font-instrument text-2xl font-medium italic tracking-[-0.03em] text-foreground sm:text-3xl">
-              My Bumicerts
+              My Certs
             </h1>
             <p className="mt-2 max-w-xl text-sm leading-6 text-muted-foreground">
               Create and manage the verified impact stories connected to your work.
@@ -238,7 +238,7 @@ export function ManageBumicertsClient({ target, did, ownerIdentifier, bumicerts,
           >
             <TriangleAlertIcon className="size-8 text-muted-foreground opacity-60" />
             <div className="space-y-1">
-              <p className="font-serif text-2xl font-medium text-foreground">Could not load recent Bumicerts</p>
+              <p className="font-serif text-2xl font-medium text-foreground">Could not load recent Certs</p>
               <p className="text-sm text-muted-foreground">{error}</p>
             </div>
           </motion.div>

@@ -8,14 +8,14 @@ export const revalidate = 3600;
 type SitemapEntry = MetadataRoute.Sitemap[number];
 type ChangeFrequency = NonNullable<SitemapEntry["changeFrequency"]>;
 
-// Section pages plus every Bumicert detail page: each project page is a
+// Section pages plus every Cert detail page: each project page is a
 // crawlable marketplace landing page (server-rendered title, description,
 // OpenGraph, and JSON-LD). DID-based URLs redirect (308) to the handle-based
 // canonical, which also carries the canonical <link>.
 const ROUTES: Array<{ path: string; priority: number; changeFrequency: ChangeFrequency }> = [
   { path: "", priority: 1, changeFrequency: "daily" },
   { path: "/observations", priority: 0.8, changeFrequency: "daily" },
-  { path: "/bumicerts", priority: 0.8, changeFrequency: "daily" },
+  { path: "/certs", priority: 0.8, changeFrequency: "daily" },
   { path: "/organizations", priority: 0.8, changeFrequency: "weekly" },
   { path: "/leaderboard", priority: 0.7, changeFrequency: "weekly" },
   { path: "/donations", priority: 0.7, changeFrequency: "daily" },
@@ -95,7 +95,7 @@ async function fetchBumicertEntries(): Promise<MetadataRoute.Sitemap> {
         if (!node?.did || !node.rkey) continue;
         entries.push(
           ...buildLocalizedEntries({
-            pathname: `/bumicert/${encodeURIComponent(node.did)}/${encodeURIComponent(node.rkey)}`,
+            pathname: `/cert/${encodeURIComponent(node.did)}/${encodeURIComponent(node.rkey)}`,
             lastModified: node.createdAt ? new Date(node.createdAt) : undefined,
             changeFrequency: "weekly",
             priority: 0.6,

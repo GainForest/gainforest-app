@@ -5,6 +5,7 @@ import {
   readDisposableAccountMetadata,
   waitForInboxPasswordResetToken,
 } from "./disposable-email";
+import { groupManageBasePath, writeCgsOrgMetadata, type CgsOrgMetadata } from "./cgs-org";
 
 async function bodyText(page: Page): Promise<string> {
   return page.locator("body").innerText();
@@ -39,6 +40,16 @@ async function clickAndWaitForRefresh(page: Page, button: Locator): Promise<void
   await page.waitForLoadState("networkidle").catch(() => undefined);
 }
 
+type RegisterCgsResponse = {
+  groupDid?: unknown;
+  handle?: unknown;
+  accountPassword?: unknown;
+};
+
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
 async function waitForProfileOnManage(page: Page, name: RegExp, timeoutMs = 180_000): Promise<void> {
   const deadline = Date.now() + timeoutMs;
   let lastText = "";
@@ -54,7 +65,11 @@ async function waitForProfileOnManage(page: Page, name: RegExp, timeoutMs = 180_
   throw new Error(`Timed out waiting for profile ${name} on /manage. Last page text: ${lastText.slice(0, 500)}`);
 }
 
-export async function completeUserOnboarding(page: Page, testInfo: TestInfo): Promise<void> {
+export async function completeUserOnboarding(
+  page: Page,
+  testInfo: TestInfo,
+  options: { displayName?: string; description?: string } = {},
+): Promise<void> {
   await page.goto("/manage?mode=onboard-user", { waitUntil: "domcontentloaded" });
   await expect(page.getByRole("dialog", { name: /set up your profile/i })).not.toBeVisible({ timeout: 10_000 });
   await expect(page.getByRole("heading", { name: /^user$/i })).toBeVisible({ timeout: 60_000 });
@@ -67,13 +82,175 @@ export async function completeUserOnboarding(page: Page, testInfo: TestInfo): Pr
   await form.getByPlaceholder(/your name/i).fill("Disposable E2E Profile With A Very Long Name That Should Show A Helpful Error 1234567890");
   await expect(page.getByText(/name must be 64 characters or fewer/i)).toBeVisible({ timeout: 10_000 });
   await expectDisabled(form.getByRole("button", { name: /^continue/i }), "too-long user onboarding submit");
-  await form.getByPlaceholder(/your name/i).fill("Disposable E2E Profile");
-  await form.getByPlaceholder(/short introduction/i).fill("Disposable browser test profile for full end-to-end checks.");
+  const displayName = options.displayName ?? "Disposable E2E Profile";
+  const description = options.description ?? "Disposable browser test profile for full end-to-end checks.";
+  await form.getByPlaceholder(/your name/i).fill(displayName);
+  await form.getByPlaceholder(/short introduction/i).fill(description);
   await screenshotStep(page, testInfo, "user-onboarding-ready");
 
   await clickAndWaitForPlainManage(page, form.getByRole("button", { name: /^continue/i }));
-  await waitForProfileOnManage(page, /Disposable E2E Profile/i);
+  await waitForProfileOnManage(page, new RegExp(escapeRegExp(displayName), "i"));
   await screenshotStep(page, testInfo, "user-onboarding-complete");
+}
+
+export async function completeOrganizationOnboarding(page: Page, testInfo: TestInfo): Promise<CgsOrgMetadata> {
+  const owner = readDisposableAccountMetadata();
+  if (!owner?.did) throw new Error("Disposable owner account metadata is required before creating an organization.");
+
+  const displayName = `E2E Org ${Date.now().toString(36)}`;
+  const description = "Disposable organization for CGS-backed browser end-to-end checks.";
+
+  await page.goto("/manage?mode=onboard-org", { waitUntil: "domcontentloaded" });
+  await expect(page.getByRole("heading", { name: /^organization$/i })).toBeVisible({ timeout: 60_000 });
+  await screenshotStep(page, testInfo, "organization-onboarding-open");
+
+  const form = await visibleForm(page);
+  await expectDisabled(form.getByRole("button", { name: /^continue$/i }), "empty organization onboarding submit");
+  await form.getByPlaceholder(/organization name/i).fill(displayName);
+  await form.locator("textarea").first().fill(description);
+  await form.locator("#organization-code-of-conduct").click({ force: true });
+  await screenshotStep(page, testInfo, "organization-onboarding-ready");
+  await form.getByRole("button", { name: /^continue$/i }).click();
+
+  await expect(page.getByText(/long description/i).first()).toBeVisible({ timeout: 30_000 });
+  await page.locator("textarea").first().fill(
+    "This disposable CGS organization exists only for end-to-end testing project, cert, site, tree, and audio flows before teardown removes it.",
+  );
+  await screenshotStep(page, testInfo, "organization-onboarding-details-ready");
+
+  const registerResponsePromise = page.waitForResponse(async (response) => {
+    if (!response.ok() || !response.url().includes("/api/cgs/mutation") || response.request().method() !== "POST") return false;
+    const postData = response.request().postData() ?? "";
+    return postData.includes('"registerGroup"');
+  }, { timeout: 120_000 });
+
+  await page.getByRole("button", { name: /^(skip and )?continue$/i }).click();
+  await expect(page).toHaveURL(/\/manage\/groups\//, { timeout: 120_000 });
+  const response = await registerResponsePromise;
+  const payload = await response.json().catch(() => null) as RegisterCgsResponse | null;
+  if (!response.ok() || typeof payload?.groupDid !== "string") {
+    throw new Error(`Organization registration response had an unexpected shape (${response.status()}).`);
+  }
+
+  const metadata: CgsOrgMetadata = {
+    source: "cgs-organization",
+    createdAt: new Date().toISOString(),
+    groupDid: payload.groupDid,
+    handle: typeof payload.handle === "string" ? payload.handle : null,
+    accountPassword: typeof payload.accountPassword === "string" ? payload.accountPassword : null,
+    displayName,
+    ownerDid: owner.did,
+  };
+  await writeCgsOrgMetadata(metadata);
+  await expect(page.getByText(displayName).first()).toBeVisible({ timeout: 60_000 });
+  await screenshotStep(page, testInfo, "organization-onboarding-complete");
+  return metadata;
+}
+
+export async function editOrganizationProfile(page: Page, testInfo: TestInfo, org: CgsOrgMetadata): Promise<void> {
+  const basePath = groupManageBasePath(org);
+  await page.goto(basePath, { waitUntil: "domcontentloaded" });
+  await expect(page.getByText(org.displayName).first()).toBeVisible({ timeout: 60_000 });
+  await screenshotStep(page, testInfo, "organization-profile-open");
+
+  await page.getByRole("button", { name: /edit name and bio/i }).first().click();
+  const nameInput = page.locator('input[placeholder="Organization name"]:visible, input[placeholder="Display name"]:visible').first();
+  await expect(nameInput).toBeVisible({ timeout: 30_000 });
+  const editedName = `${org.displayName} Edited`;
+  await nameInput.fill(editedName);
+  await page.locator('textarea:visible').first().fill("Edited organization summary from CGS browser testing.");
+  await screenshotStep(page, testInfo, "organization-profile-edit-ready");
+  await clickAndWaitForRefresh(page, page.getByRole("button", { name: /^save$/i }).first());
+  await expect(page.getByText(editedName).first()).toBeVisible({ timeout: 60_000 });
+  await screenshotStep(page, testInfo, "organization-profile-edited");
+}
+
+type OrganizationMemberRole = "admin" | "member";
+
+type CgsMembersResponse = {
+  members?: Array<{ did?: unknown; memberDid?: unknown; role?: unknown }>;
+};
+
+async function waitForOrganizationMemberRole(
+  page: Page,
+  org: CgsOrgMetadata,
+  memberDid: string,
+  role: OrganizationMemberRole,
+): Promise<void> {
+  await expect
+    .poll(async () => {
+      const params = new URLSearchParams({ repo: org.groupDid });
+      const response = await page.request.get(`/api/cgs/members?${params.toString()}`).catch(() => null);
+      if (!response?.ok()) return false;
+      const body = await response.json().catch(() => null) as CgsMembersResponse | null;
+      return body?.members?.some((member) => {
+        const did = member.did === memberDid || member.memberDid === memberDid;
+        return did && member.role === role;
+      }) ?? false;
+    }, { timeout: 90_000 })
+    .toBe(true);
+}
+
+export async function addOrganizationMember(
+  page: Page,
+  testInfo: TestInfo,
+  org: CgsOrgMetadata,
+  memberIdentifier: string,
+  expectedMemberDid?: string | null,
+  role: OrganizationMemberRole = "member",
+): Promise<void> {
+  await page.goto(`${groupManageBasePath(org)}/settings`, { waitUntil: "domcontentloaded" });
+  await expect(page.getByRole("heading", { name: /organization settings/i })).toBeVisible({ timeout: 60_000 });
+  await page.getByLabel(/member username/i).fill(memberIdentifier);
+  await page.getByLabel(/role for new member/i).selectOption(role);
+  await screenshotStep(page, testInfo, `organization-member-add-${role}-ready`);
+  await page.getByRole("button", { name: /^add$/i }).click();
+  if (expectedMemberDid) {
+    await waitForOrganizationMemberRole(page, org, expectedMemberDid, role);
+  } else {
+    await expect(page.getByText(/organization member|joined|team member/i).first()).toBeVisible({ timeout: 90_000 });
+  }
+  await screenshotStep(page, testInfo, `organization-member-added-${role}`);
+}
+
+export async function setOrganizationMemberRole(
+  page: Page,
+  testInfo: TestInfo,
+  org: CgsOrgMetadata,
+  memberDid: string,
+  role: OrganizationMemberRole,
+): Promise<void> {
+  await page.goto(`${groupManageBasePath(org)}/settings`, { waitUntil: "domcontentloaded" });
+  await expect(page.getByRole("heading", { name: /organization settings/i })).toBeVisible({ timeout: 60_000 });
+  await expect(page.getByLabel("Member role").first()).toBeVisible({ timeout: 60_000 });
+  await screenshotStep(page, testInfo, `organization-member-role-${role}-ready`);
+  await page.getByLabel("Member role").first().selectOption(role);
+  await waitForOrganizationMemberRole(page, org, memberDid, role);
+  await screenshotStep(page, testInfo, `organization-member-role-${role}-saved`);
+}
+
+export async function expectMemberOrganizationRestrictions(page: Page, testInfo: TestInfo, org: CgsOrgMetadata): Promise<void> {
+  await page.goto(groupManageBasePath(org), { waitUntil: "domcontentloaded" });
+  await expect(page.getByText(/only organization owners and admins can edit this profile/i).first()).toBeVisible({ timeout: 60_000 });
+  await screenshotStep(page, testInfo, "organization-member-profile-restricted");
+
+  const response = await page.request.post("/api/cgs/mutation", {
+    data: {
+      operation: "putRecord",
+      repo: org.groupDid,
+      collection: "app.bsky.actor.profile",
+      rkey: "self",
+      record: {
+        $type: "app.bsky.actor.profile",
+        displayName: "Member Should Not Rename Org",
+        description: "A member should not be allowed to edit the organization profile.",
+      },
+    },
+  });
+  expect(response.ok()).toBe(false);
+  const body = await response.json().catch(() => ({})) as { error?: string; message?: string };
+  expect(`${body.message ?? ""} ${body.error ?? ""}`).toMatch(/permission|forbidden|admin|owner|role/i);
+  await screenshotStep(page, testInfo, "organization-member-forbidden-error-propagated");
 }
 
 export async function editProfile(page: Page, testInfo: TestInfo): Promise<void> {

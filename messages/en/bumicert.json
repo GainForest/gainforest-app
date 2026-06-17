@@ -1,11 +1,11 @@
 {
   "detail": {
     "actions": {
-      "deleteBumicert": "Delete Bumicert"
+      "deleteBumicert": "Delete Cert"
     },
     "error": {
-      "loadTitle": "Couldn't load this bumicert",
-      "loadDescription": "We had trouble fetching this bumicert's data. Please try again or go back to the homepage."
+      "loadTitle": "Couldn't load this cert",
+      "loadDescription": "We had trouble fetching this cert's data. Please try again or go back to the homepage."
     },
     "timeline": {
       "title": "Evidence Timeline",
@@ -27,7 +27,7 @@
       "linkEvidenceDescription": "Attach existing records or files to {title}. Linked items appear in the public evidence timeline below.",
       "notTimelineYet": "Not part of the timeline yet",
       "linkedTitle": "Linked evidence timeline",
-      "linkedItemCount": "{count, plural, =0 {0 items linked to this bumicert activity} =1 {1 item linked to this bumicert activity} other {# items linked to this bumicert activity}}",
+      "linkedItemCount": "{count, plural, =0 {0 items linked to this cert activity} =1 {1 item linked to this cert activity} other {# items linked to this cert activity}}",
       "linkedDescription": "Review the records, files, and map layers that are already part of the public evidence timeline.",
       "pageOf": "Page {current} of {total}",
       "previousPage": "Previous page",
@@ -91,7 +91,7 @@
       "siteContextIncomplete": "Some trees are missing site context",
       "siteContextUnresolved": "Site record could not be resolved",
       "siteContextUnavailable": "Site context unavailable",
-      "incompleteBumicertReference": "Cannot link evidence because the bumicert reference is incomplete. Refresh the page and try again.",
+      "incompleteBumicertReference": "Cannot link evidence because the cert reference is incomplete. Refresh the page and try again.",
       "partialLinkSuccess": "{createdCount, plural, =1 {1 attachment} other {# attachments}} linked, but not all {totalCount, plural, =1 {1 group} other {# groups}} completed. {error}",
       "emptyLabels": {
         "audio": "audio recordings",
@@ -112,7 +112,7 @@
       "unableToVerifyExistingLinks": "Unable to verify existing timeline links. Refresh to link tree datasets."
     },
     "metadata": {
-      "notFound": "Bumicert Not Found"
+      "notFound": "Cert Not Found"
     },
     "timelineEntry": {
       "kind": {
@@ -195,8 +195,8 @@
       "aboutCreator": "About Creator",
       "profile": "Profile",
       "certifiedProfile": "Certified profile",
-      "moreFromCreator": "More Bumicerts from this creator",
-      "moreFromOrganization": "More Bumicerts from this organization",
+      "moreFromCreator": "More Certs from this creator",
+      "moreFromOrganization": "More Certs from this organization",
       "viewAll": "View all",
       "ongoing": "ongoing",
       "noDescription": "No description provided.",
@@ -210,44 +210,44 @@
   },
   "create": {
     "actions": {
-      "createBumicert": "Create a Bumicert"
+      "createBumicert": "Create a Cert"
     },
     "landing": {
       "hero": {
         "titleLine1": "Create impact.",
         "titleLine2": "Certify change.",
-        "description": "Create a Bumicert to showcase your commitment to sustainability and inspire real change."
+        "description": "Create a Cert to showcase your commitment to sustainability and inspire real change."
       },
       "explainer": {
-        "title": "What is a Bumicert?",
-        "body1": "A Bumicert is your impact story—proof of your contribution to people, communities, and the planet.",
+        "title": "What is a Cert?",
+        "body1": "A Cert is your impact story—proof of your contribution to people, communities, and the planet.",
         "body2": "It helps you document, share, and celebrate your positive impact with transparency and credibility.",
         "learnMore": "Learn more"
       }
     },
     "tabs": {
-      "ariaLabel": "Bumicert creation views",
-      "recent": "Recent Bumicerts",
+      "ariaLabel": "Cert creation views",
+      "recent": "Recent Certs",
       "drafts": "Drafts"
     },
     "recent": {
-      "errorTitle": "Couldn't load Bumicerts",
+      "errorTitle": "Couldn't load Certs",
       "errorFallback": "Please try again in a moment.",
-      "emptyTitle": "No recent Bumicerts yet",
-      "emptyLine1": "You haven't created any Bumicerts yet.",
-      "emptyLine2": "Create your first Bumicert to get started.",
-      "createFirst": "Create your first Bumicert"
+      "emptyTitle": "No recent Certs yet",
+      "emptyLine1": "You haven't created any Certs yet.",
+      "emptyLine2": "Create your first Cert to get started.",
+      "createFirst": "Create your first Cert"
     },
     "drafts": {
       "untitledDraft": "Untitled Draft",
       "signedOutTitle": "Sign in to view drafts",
-      "signedOutDescription": "Draft Bumicerts are saved to your account so you can continue your work later.",
+      "signedOutDescription": "Draft Certs are saved to your account so you can continue your work later.",
       "loadingTitle": "Loading drafts",
-      "loadingDescription": "We are checking for saved Bumicert applications.",
+      "loadingDescription": "We are checking for saved Cert applications.",
       "errorTitle": "Couldn't load drafts",
       "errorFallback": "Failed to load drafts. Please try again.",
       "emptyTitle": "No drafts yet",
-      "emptyDescription": "Start a new Bumicert and save it as a draft when you want to return later.",
+      "emptyDescription": "Start a new Cert and save it as a draft when you want to return later.",
       "deleteAria": "Delete {title}"
     },
     "draft": {
@@ -266,7 +266,7 @@
         "coverImageType": "Cover image must be JPG, PNG, or WebP"
       },
       "sidebar": {
-        "previewTitle": "Preview Bumicert",
+        "previewTitle": "Preview Cert",
         "generatingPreview": "Generating preview metadata...",
         "completeFirstStep": "Please complete the first step to generate the preview.",
         "tipsTitle": "Tips for this section"
@@ -276,8 +276,8 @@
           "title": "Cover Details",
           "tips": {
             "bullets": [
-              "Use a short and descriptive name for your bumicert.",
-              "Include a website or social link to your bumicert for easy access."
+              "Use a short and descriptive name for your cert.",
+              "Include a website or social link to your cert for easy access."
             ],
             "pre": "",
             "post": ""
@@ -313,7 +313,7 @@
           "tips": {
             "bullets": [
               "Make sure you have completed all the previous steps.",
-              "Review the look of your bumicert before submitting."
+              "Review the look of your cert before submitting."
             ],
             "pre": "",
             "post": ""
@@ -339,12 +339,12 @@
             "placeholder": "Upload or drag and drop an image"
           },
           "title": {
-            "label": "Bumicert Title",
-            "info": "Give your bumicert a clear, descriptive title",
-            "placeholder": "My Awesome Bumicert"
+            "label": "Cert Title",
+            "info": "Give your cert a clear, descriptive title",
+            "placeholder": "My Awesome Cert"
           },
           "dateRange": {
-            "label": "Bumicert Date Range",
+            "label": "Cert Date Range",
             "info": "Select the period when your work and impact took place",
             "ongoing": "Ongoing",
             "ongoingCheckbox": "This work is still ongoing"
@@ -373,9 +373,9 @@
           },
           "shortDescription": {
             "label": "Short Description",
-            "description": "A short description of your impact story. This will be used as the short description of the bumicert.",
+            "description": "A short description of your impact story. This will be used as the short description of the cert.",
             "info": "Summarize your work and its results in a few lines",
-            "placeholder": "A quick summary about this bumicert.",
+            "placeholder": "A quick summary about this cert.",
             "generateTitle": "Generate short description with AI",
             "generateDisabledTitle": "Write your impact story first"
           }
@@ -384,14 +384,14 @@
           "heading": "Share your contributors and sites.",
           "contributors": {
             "label": "List of Contributors",
-            "description": "Add everyone involved in this bumicert — including your own community or organization and any collaborators. Tip: Start by adding your own group first before listing your partners or supporters.",
+            "description": "Add everyone involved in this cert — including your own community or organization and any collaborators. Tip: Start by adding your own group first before listing your partners or supporters.",
             "info": "List any individuals or organizations that contributed to this work."
           },
           "boundaries": {
             "label": "Site Boundaries",
-            "description": "Please upload your site boundary in GeoJSON format so we can visualize your bumicert on the map.",
+            "description": "Please upload your site boundary in GeoJSON format so we can visualize your cert on the map.",
             "info": "Add the boundaries that best represent where the work took place.",
-            "selectHelp": "Select the boundaries for this bumicert, or add new ones.",
+            "selectHelp": "Select the boundaries for this cert, or add new ones.",
             "manageSites": "Manage sites",
             "loading": "Loading your sites...",
             "loadError": "Unable to load sites.",
@@ -402,7 +402,7 @@
           },
           "permissions": {
             "label": "Permissions",
-            "confirm": "I confirm that all listed contributors gave their permission to include their work in this Bumicert.",
+            "confirm": "I confirm that all listed contributors gave their permission to include their work in this Cert.",
             "terms": "I agree to the Terms & Conditions."
           }
         },
@@ -413,19 +413,19 @@
           "checkingAuth": "We are checking if you are authenticated.",
           "notSignedIn": "You are not signed in. Please sign in to continue.",
           "failedTitle": "Failed to publish.",
-          "publishingTitle": "Publishing your bumicert",
-          "readyTitle": "Ready to publish your bumicert",
-          "publishingDescription": "We are publishing your bumicert.",
-          "readyDescription": "Please click the button below to publish your bumicert.",
+          "publishingTitle": "Publishing your cert",
+          "readyTitle": "Ready to publish your cert",
+          "publishingDescription": "We are publishing your cert.",
+          "readyDescription": "Please click the button below to publish your cert.",
           "retry": "Retry",
-          "publishAction": "Publish Bumicert",
+          "publishAction": "Publish Cert",
           "editDetails": "Edit details",
-          "successTitle": "Your Bumicert was published successfully!",
+          "successTitle": "Your Cert was published successfully!",
           "linkEvidenceNow": "Link evidence now",
-          "viewBumicert": "View Bumicert",
+          "viewBumicert": "View Cert",
           "setUpDonations": "Set Up Donations",
           "shareFeedback": "Share Feedback",
-          "createAnother": "Create another bumicert"
+          "createAnother": "Create another cert"
         }
       },
       "modals": {
@@ -481,10 +481,10 @@
         "allFieldsCorrect": "All the fields are filled correctly.",
         "fix": "Fix",
         "preview": {
-          "title": "Preview your bumicert",
+          "title": "Preview your cert",
           "missingLogo": "Your account doesn't have a logo. Do you want to add one?",
           "generating": "Generating the preview...",
-          "completeFirstStep": "Complete the first step to preview your bumicert."
+          "completeFirstStep": "Complete the first step to preview your cert."
         }
       },
       "hydration": {
@@ -499,11 +499,11 @@
     },
     "auth": {
       "signedOutTitle": "You are not signed in.",
-      "signedOutDescription": "Please sign in to create a bumicert.",
+      "signedOutDescription": "Please sign in to create a cert.",
       "accountErrorTitle": "Couldn't load your account",
       "accountErrorDescription": "We had trouble loading your account. Please try again.",
       "accountSetupTitle": "Your account is not set up yet.",
-      "accountSetupDescription": "Please complete your account information to create a bumicert.",
+      "accountSetupDescription": "Please complete your account information to create a cert.",
       "manageAccount": "Manage my account",
       "pleaseWait": "Please wait..."
     }

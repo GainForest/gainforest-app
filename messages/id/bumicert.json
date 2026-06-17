@@ -1,11 +1,11 @@
 {
   "detail": {
     "actions": {
-      "deleteBumicert": "Hapus Bumicert"
+      "deleteBumicert": "Hapus sertifikat"
     },
     "error": {
-      "loadTitle": "Tidak dapat memuat bumicert ini",
-      "loadDescription": "Kami kesulitan mengambil data bumicert ini. Silakan coba lagi atau kembali ke beranda."
+      "loadTitle": "Tidak dapat memuat sertifikat ini",
+      "loadDescription": "Kami kesulitan mengambil data sertifikat ini. Silakan coba lagi atau kembali ke beranda."
     },
     "timeline": {
       "title": "Garis Waktu Bukti",
@@ -27,7 +27,7 @@
       "linkEvidenceDescription": "Lampirkan catatan atau file yang sudah ada ke {title}. Item yang ditautkan akan muncul di linimasa bukti publik di bawah.",
       "notTimelineYet": "Belum menjadi bagian dari linimasa",
       "linkedTitle": "Linimasa bukti tertaut",
-      "linkedItemCount": "{count, plural, =0 {0 item tertaut ke aktivitas bumicert ini} =1 {1 item tertaut ke aktivitas bumicert ini} other {# item tertaut ke aktivitas bumicert ini}}",
+      "linkedItemCount": "{count, plural, =0 {0 item tertaut ke aktivitas sertifikat ini} =1 {1 item tertaut ke aktivitas sertifikat ini} other {# item tertaut ke aktivitas sertifikat ini}}",
       "linkedDescription": "Tinjau catatan, file, dan lapisan peta yang sudah menjadi bagian dari linimasa bukti publik.",
       "pageOf": "Halaman {current} dari {total}",
       "previousPage": "Halaman sebelumnya",
@@ -91,7 +91,7 @@
       "siteContextIncomplete": "Beberapa pohon belum memiliki konteks situs",
       "siteContextUnresolved": "Catatan situs tidak dapat ditemukan",
       "siteContextUnavailable": "Konteks situs tidak tersedia",
-      "incompleteBumicertReference": "Tidak dapat menautkan bukti karena referensi bumicert tidak lengkap. Muat ulang halaman dan coba lagi.",
+      "incompleteBumicertReference": "Tidak dapat menautkan bukti karena referensi sertifikat tidak lengkap. Muat ulang halaman dan coba lagi.",
       "partialLinkSuccess": "{createdCount, plural, =1 {1 lampiran ditautkan} other {# lampiran ditautkan}}, tetapi tidak semua {totalCount, plural, =1 {1 grup} other {# grup}} selesai. {error}",
       "emptyLabels": {
         "audio": "rekaman audio",
@@ -112,7 +112,7 @@
       "unableToVerifyExistingLinks": "Tidak dapat memverifikasi tautan linimasa yang sudah ada. Muat ulang untuk menautkan set data pohon."
     },
     "metadata": {
-      "notFound": "Bumicert Tidak Ditemukan"
+      "notFound": "sertifikat Tidak Ditemukan"
     },
     "timelineEntry": {
       "kind": {
@@ -195,8 +195,8 @@
       "aboutCreator": "Tentang Pembuat",
       "profile": "Profil",
       "certifiedProfile": "Profil tersertifikasi",
-      "moreFromCreator": "Bumicerts lainnya dari pembuat ini",
-      "moreFromOrganization": "Bumicerts lainnya dari organisasi ini",
+      "moreFromCreator": "sertifikat lainnya dari pembuat ini",
+      "moreFromOrganization": "sertifikat lainnya dari organisasi ini",
       "viewAll": "Lihat semua",
       "ongoing": "sedang berlangsung",
       "noDescription": "Tidak ada deskripsi.",
@@ -210,44 +210,44 @@
   },
   "create": {
     "actions": {
-      "createBumicert": "Buat Bumicert"
+      "createBumicert": "Buat sertifikat"
     },
     "landing": {
       "hero": {
         "titleLine1": "Ciptakan dampak.",
         "titleLine2": "Sertifikasi perubahan.",
-        "description": "Buat Bumicert untuk menunjukkan komitmen Anda terhadap keberlanjutan dan menginspirasi perubahan nyata."
+        "description": "Buat sertifikat untuk menunjukkan komitmen Anda terhadap keberlanjutan dan menginspirasi perubahan nyata."
       },
       "explainer": {
-        "title": "Apa itu Bumicert?",
-        "body1": "Bumicert adalah kisah dampak Anda—bukti kontribusi Anda terhadap manusia, komunitas, dan planet ini.",
+        "title": "Apa itu sertifikat?",
+        "body1": "sertifikat adalah kisah dampak Anda—bukti kontribusi Anda terhadap manusia, komunitas, dan planet ini.",
         "body2": "Ini membantu Anda mendokumentasikan, berbagi, dan merayakan dampak positif Anda dengan transparansi dan kredibilitas.",
         "learnMore": "Pelajari lebih lanjut"
       }
     },
     "tabs": {
-      "ariaLabel": "Tampilan pembuatan bumicert",
-      "recent": "Bumicert terbaru",
+      "ariaLabel": "Tampilan pembuatan sertifikat",
+      "recent": "sertifikat terbaru",
       "drafts": "Draf"
     },
     "recent": {
-      "errorTitle": "Tidak dapat memuat Bumicerts",
+      "errorTitle": "Tidak dapat memuat sertifikat",
       "errorFallback": "Silakan coba lagi sebentar lagi.",
-      "emptyTitle": "Belum ada Bumicert terbaru",
-      "emptyLine1": "Anda belum membuat Bumicert apa pun.",
-      "emptyLine2": "Buat Bumicert pertama Anda untuk memulai.",
-      "createFirst": "Buat Bumicert pertama Anda"
+      "emptyTitle": "Belum ada sertifikat terbaru",
+      "emptyLine1": "Anda belum membuat sertifikat apa pun.",
+      "emptyLine2": "Buat sertifikat pertama Anda untuk memulai.",
+      "createFirst": "Buat sertifikat pertama Anda"
     },
     "drafts": {
       "untitledDraft": "Draf Tanpa Judul",
       "signedOutTitle": "Masuk untuk melihat draf",
-      "signedOutDescription": "Draf Bumicert disimpan ke akun Anda sehingga Anda dapat melanjutkan pekerjaan Anda nanti.",
+      "signedOutDescription": "Draf sertifikat disimpan ke akun Anda sehingga Anda dapat melanjutkan pekerjaan Anda nanti.",
       "loadingTitle": "Memuat draf",
-      "loadingDescription": "Kami sedang memeriksa aplikasi Bumicert yang disimpan.",
+      "loadingDescription": "Kami sedang memeriksa aplikasi sertifikat yang disimpan.",
       "errorTitle": "Tidak dapat memuat draf",
       "errorFallback": "Gagal memuat draf. Silakan coba lagi.",
       "emptyTitle": "Belum ada konsep",
-      "emptyDescription": "Mulai Bumicert baru dan simpan sebagai draf bila Anda ingin kembali lagi nanti.",
+      "emptyDescription": "Mulai sertifikat baru dan simpan sebagai draf bila Anda ingin kembali lagi nanti.",
       "deleteAria": "Hapus {title}"
     },
     "draft": {
@@ -266,7 +266,7 @@
         "coverImageType": "Gambar sampul harus JPG, PNG, atau WebP"
       },
       "sidebar": {
-        "previewTitle": "Pratinjau Bumicert",
+        "previewTitle": "Pratinjau sertifikat",
         "generatingPreview": "Menghasilkan metadata pratinjau...",
         "completeFirstStep": "Silakan selesaikan langkah pertama untuk membuat pratinjau.",
         "tipsTitle": "Tips untuk bagian ini"
@@ -276,8 +276,8 @@
           "title": "Detail Sampul",
           "tips": {
             "bullets": [
-              "Gunakan nama pendek dan deskriptif untuk bumicert Anda.",
-              "Sertakan situs web atau tautan sosial ke bumicert Anda untuk memudahkan akses."
+              "Gunakan nama pendek dan deskriptif untuk sertifikat Anda.",
+              "Sertakan situs web atau tautan sosial ke sertifikat Anda untuk memudahkan akses."
             ],
             "pre": "",
             "post": ""
@@ -313,7 +313,7 @@
           "tips": {
             "bullets": [
               "Pastikan Anda telah menyelesaikan semua langkah sebelumnya.",
-              "Tinjau tampilan bumicert Anda sebelum mengirimkan."
+              "Tinjau tampilan sertifikat Anda sebelum mengirimkan."
             ],
             "pre": "",
             "post": ""
@@ -339,12 +339,12 @@
             "placeholder": "Unggah atau seret dan lepas gambar"
           },
           "title": {
-            "label": "Bumicert Judul",
-            "info": "Beri bumicert Anda judul yang jelas dan deskriptif",
-            "placeholder": "Bumicert Saya yang Luar Biasa"
+            "label": "sertifikat Judul",
+            "info": "Beri sertifikat Anda judul yang jelas dan deskriptif",
+            "placeholder": "sertifikat Saya yang Luar Biasa"
           },
           "dateRange": {
-            "label": "Bumicert Rentang Tanggal",
+            "label": "sertifikat Rentang Tanggal",
             "info": "Pilih periode saat pekerjaan dan dampak Anda terjadi",
             "ongoing": "Sedang Berlangsung",
             "ongoingCheckbox": "Pekerjaan ini masih berlangsung"
@@ -373,9 +373,9 @@
           },
           "shortDescription": {
             "label": "Deskripsi Singkat",
-            "description": "Deskripsi singkat tentang kisah pengaruh Anda. Ini yang akan dijadikan gambaran singkat tentang bumicert.",
+            "description": "Deskripsi singkat tentang kisah pengaruh Anda. Ini yang akan dijadikan gambaran singkat tentang sertifikat.",
             "info": "Ringkas pekerjaan Anda dan hasilnya dalam beberapa baris",
-            "placeholder": "Ringkasan singkat tentang bumicert ini.",
+            "placeholder": "Ringkasan singkat tentang sertifikat ini.",
             "generateTitle": "Buat deskripsi singkat dengan AI",
             "generateDisabledTitle": "Tulis kisah pengaruh Anda terlebih dahulu"
           }
@@ -384,14 +384,14 @@
           "heading": "Bagikan kontributor dan situs Anda.",
           "contributors": {
             "label": "Daftar Kontributor",
-            "description": "Tambahkan semua orang yang terlibat dalam bumicert ini — termasuk komunitas atau organisasi Anda sendiri dan kolaborator mana pun. Tip: Mulailah dengan menambahkan grup Anda sendiri terlebih dahulu sebelum mencantumkan mitra atau pendukung Anda.",
+            "description": "Tambahkan semua orang yang terlibat dalam sertifikat ini — termasuk komunitas atau organisasi Anda sendiri dan kolaborator mana pun. Tip: Mulailah dengan menambahkan grup Anda sendiri terlebih dahulu sebelum mencantumkan mitra atau pendukung Anda.",
             "info": "Cantumkan setiap individu atau organisasi yang berkontribusi pada pekerjaan ini."
           },
           "boundaries": {
             "label": "Batas Situs",
-            "description": "Harap unggah batas situs Anda dalam format GeoJSON agar kami dapat memvisualisasikan bumicert Anda di peta.",
+            "description": "Harap unggah batas situs Anda dalam format GeoJSON agar kami dapat memvisualisasikan sertifikat Anda di peta.",
             "info": "Tambahkan batasan yang paling mewakili tempat pekerjaan dilakukan.",
-            "selectHelp": "Pilih batas bumicert ini, atau tambahkan yang baru.",
+            "selectHelp": "Pilih batas sertifikat ini, atau tambahkan yang baru.",
             "manageSites": "Kelola situs",
             "loading": "Memuat situs Anda...",
             "loadError": "Tidak dapat memuat situs.",
@@ -402,7 +402,7 @@
           },
           "permissions": {
             "label": "Izin",
-            "confirm": "Saya mengonfirmasi bahwa semua kontributor yang terdaftar telah memberikan izin untuk memasukkan karyanya ke dalam Bumicert ini.",
+            "confirm": "Saya mengonfirmasi bahwa semua kontributor yang terdaftar telah memberikan izin untuk memasukkan karyanya ke dalam sertifikat ini.",
             "terms": "Saya menyetujui Syarat & Ketentuan."
           }
         },
@@ -413,19 +413,19 @@
           "checkingAuth": "Kami sedang memeriksa apakah Anda diautentikasi.",
           "notSignedIn": "Anda belum masuk. Harap masuk untuk melanjutkan.",
           "failedTitle": "Gagal dipublikasikan.",
-          "publishingTitle": "Publikasikan bumicert Anda",
-          "readyTitle": "Siap terbitkan bumicert Anda",
-          "publishingDescription": "Kami menerbitkan bumicert Anda.",
-          "readyDescription": "Silakan klik tombol di bawah untuk mempublikasikan bumicert Anda.",
+          "publishingTitle": "Publikasikan sertifikat Anda",
+          "readyTitle": "Siap terbitkan sertifikat Anda",
+          "publishingDescription": "Kami menerbitkan sertifikat Anda.",
+          "readyDescription": "Silakan klik tombol di bawah untuk mempublikasikan sertifikat Anda.",
           "retry": "Coba lagi",
-          "publishAction": "Publikasikan Bumicert",
+          "publishAction": "Publikasikan sertifikat",
           "editDetails": "Edit detail",
-          "successTitle": "Bumicert Anda berhasil diterbitkan!",
+          "successTitle": "sertifikat Anda berhasil diterbitkan!",
           "linkEvidenceNow": "Tautkan bukti sekarang",
-          "viewBumicert": "Lihat Bumicert",
+          "viewBumicert": "Lihat sertifikat",
           "setUpDonations": "Siapkan Donasi",
           "shareFeedback": "Bagikan Masukan",
-          "createAnother": "Ciptakan bumicert lain"
+          "createAnother": "Ciptakan sertifikat lain"
         }
       },
       "modals": {
@@ -481,10 +481,10 @@
         "allFieldsCorrect": "Semua kolom diisi dengan benar.",
         "fix": "Perbaiki",
         "preview": {
-          "title": "Pratinjau bumicert Anda",
+          "title": "Pratinjau sertifikat Anda",
           "missingLogo": "Akun Anda tidak memiliki logo. Apakah Anda ingin menambahkan satu?",
           "generating": "Membuat pratinjau...",
-          "completeFirstStep": "Selesaikan langkah pertama untuk melihat pratinjau bumicert Anda."
+          "completeFirstStep": "Selesaikan langkah pertama untuk melihat pratinjau sertifikat Anda."
         }
       },
       "hydration": {
@@ -499,11 +499,11 @@
     },
     "auth": {
       "signedOutTitle": "Anda belum masuk.",
-      "signedOutDescription": "Silakan masuk untuk membuat bumicert.",
+      "signedOutDescription": "Silakan masuk untuk membuat sertifikat.",
       "accountErrorTitle": "Tidak dapat memuat akun Anda",
       "accountErrorDescription": "Kami mengalami masalah saat memuat akun Anda. Silakan coba lagi.",
       "accountSetupTitle": "Akun Anda belum disiapkan.",
-      "accountSetupDescription": "Silakan lengkapi informasi akun Anda untuk membuat bumicert.",
+      "accountSetupDescription": "Silakan lengkapi informasi akun Anda untuk membuat sertifikat.",
       "manageAccount": "Kelola akun saya",
       "pleaseWait": "Mohon tunggu..."
     }

@@ -1,21 +1,21 @@
 {
   "explore": {
     "metadata": {
-      "title": "Gundua Bumicerts — Miradi Iliyothibitishwa ya Athari ya Urejeshaji",
+      "title": "Gundua vyeti — Miradi Iliyothibitishwa ya Athari ya Urejeshaji",
       "description": "Vinjari vyeti vilivyothibitishwa vya athari za mazingira kutoka kwa watunzaji wa asili duniani kote. Chuja kwa nchi, shirika na eneo la athari."
     },
     "structuredData": {
-      "name": "Chunguza Bumicerts",
+      "name": "Chunguza vyeti",
       "description": "Vyeti vilivyothibitishwa vya athari za mazingira kutoka kwa walinda mazingira duniani kote."
     },
     "hero": {
-      "eyebrow": "Gundua Bumicerts",
+      "eyebrow": "Gundua vyeti",
       "titlePrefix": "Gundua",
       "titleEmphasis": "Athari endelevu",
-      "description": "Vinjari Bumicerts kutoka jamii na mashirika yanayorejesha mifumo ya ikolojia, kuimarisha maisha, na kujenga mustakabali imara zaidi."
+      "description": "Vinjari vyeti kutoka jamii na mashirika yanayorejesha mifumo ya ikolojia, kuimarisha maisha, na kujenga mustakabali imara zaidi."
     },
     "actions": {
-      "createBumicert": "Unda Bumicert",
+      "createBumicert": "Unda cheti",
       "allProjects": "Miradi yote",
       "allFilters": "Vichujio vyote",
       "clearAll": "Futa yote",
@@ -25,12 +25,12 @@
     },
     "filters": {
       "allTitle": "Vichujio vyote",
-      "description": "Onyesha Bumicerts zenye picha, maeneo ya mradi, watu waliotajwa, tarehe za kazi au michango.",
+      "description": "Onyesha vyeti zenye picha, maeneo ya mradi, watu waliotajwa, tarehe za kazi au michango.",
       "organization": "Shirika",
       "bioregion": "Eneo la kibaolojia",
       "country": "Nchi",
       "impactArea": "Eneo la athari",
-      "allBumicerts": "Bumicerts zote",
+      "allBumicerts": "vyeti zote",
       "allFilters": "Vichujio vyote",
       "allFiltersAria": "Vichujio vyote",
       "updateHint": "Vichujio husasishwa unapochagua.",
@@ -47,13 +47,13 @@
       "za": "Z → A"
     },
     "search": {
-      "ariaLabel": "Tafuta Bumicerts",
-      "placeholder": "Tafuta Bumicerts kwa jina au maelezo",
+      "ariaLabel": "Tafuta vyeti",
+      "placeholder": "Tafuta vyeti kwa jina au maelezo",
       "sortAriaLabel": "Panga miradi"
     },
     "empty": {
       "eyebrow": "Hakuna matokeo",
-      "title": "Hakuna Bumicerts zilizopatikana",
+      "title": "Hakuna vyeti zilizopatikana",
       "description": "Jaribu kubadilisha utafutaji au vichujio ili kupata hadithi zaidi za miradi."
     },
     "resultsFound": "{count, plural, one {mradi # umepatikana} other {miradi # imepatikana}}",
@@ -63,13 +63,13 @@
       "map": "Ramani"
     },
     "stats": {
-      "published": "Bumicerts zilizochapishwa",
-      "withLocations": "Bumicerts zenye maeneo",
-      "contributors": "Wachangiaji katika Bumicerts",
-      "withCover": "Bumicerts zenye picha ya jalada"
+      "published": "vyeti zilizochapishwa",
+      "withLocations": "vyeti zenye maeneo",
+      "contributors": "Wachangiaji katika vyeti",
+      "withCover": "vyeti zenye picha ya jalada"
     },
     "footer": {
-      "showing": "Inaonyesha Bumicerts {shown} kati ya {total}.",
+      "showing": "Inaonyesha vyeti {shown} kati ya {total}.",
       "showMore": "Onyesha zaidi",
       "end": "Umefika mwisho."
     },
@@ -109,7 +109,7 @@
       "sortAriaLabel": "Panga"
     },
     "sort": {
-      "bumicerts": "Bumicerts nyingi zaidi",
+      "bumicerts": "vyeti nyingi zaidi",
       "alpha": "Kwa alfabeti",
       "newest": "Mpya zaidi kwanza",
       "oldest": "Za zamani zaidi kwanza",
@@ -131,7 +131,7 @@
     },
     "quickFilters": {
       "observations": "Ina uchunguzi",
-      "bumicerts": "Ina Bumicerts"
+      "bumicerts": "Ina vyeti"
     },
     "facets": {
       "category": "Kategoria",
@@ -197,7 +197,7 @@
       "projectsSupported": "Miradi iliyosaidiwa",
       "projectsSupportedDetail": "Kurejesha mifumo ikolojia na riziki",
       "uniqueDonors": "Wafadhili wa kipekee",
-      "bumicertsFunded": "Bumicerts zilizofadhiliwa",
+      "bumicertsFunded": "vyeti zilizofadhiliwa",
       "donationCount": "Idadi ya michango"
     },
     "empty": {
@@ -257,14 +257,14 @@
       "uniqueDonorsSub": "Kwa DID au pochi",
       "avgDonation": "Wastani wa mchango",
       "avgDonationSub": "Kwa kila muamala",
-      "activeBumicerts": "Bumicerts hai",
+      "activeBumicerts": "vyeti hai",
       "activeBumicertsSub": "Zimepokea fedha",
       "totalDonated": "Jumla iliyochangiwa",
       "completedDonations": "Michango iliyokamilika",
       "donors": "wachangiaji",
-      "bumicertsWithDonations": "Bumicerts zenye michango",
+      "bumicertsWithDonations": "vyeti zenye michango",
       "averageDonation": "Wastani wa kiasi cha mchango",
-      "countriesWithBumicerts": "Nchi zenye Bumicerts"
+      "countriesWithBumicerts": "Nchi zenye vyeti"
     },
     "geo": {
       "title": "Ufikiaji wa kijiografia",
@@ -296,17 +296,17 @@
       "lastDonation": "Mchango wa mwisho",
       "organization": "Shirika",
       "totalRaised": "Jumla iliyokusanywa",
-      "bumicerts": "Bumicerts",
+      "bumicerts": "vyeti",
       "donors": "Wachangiaji",
       "date": "Tarehe",
       "amount": "Kiasi",
-      "bumicert": "Bumicert",
+      "bumicert": "cheti",
       "txHash": "Hash ya tx",
       "anonymous": "Asiyejulikana",
       "anonymousWallet": "Asiyejulikana ({address})",
       "allTimeDonations": "Wakati wote · {count, plural, one {mchango #} other {michango #}}",
       "showingLatest": "inaonyesha {count} za karibuni",
-      "viewBumicert": "Tazama bumicert",
+      "viewBumicert": "Tazama cheti",
       "topCountries": "Nchi zinazoongoza",
       "recentDonations": "Michango ya karibuni",
       "showingAll": "inaonyesha zote",
@@ -324,15 +324,15 @@
   },
   "account": {
     "metadata": {
-      "accountTitle": "Akaunti — Bumicerts",
-      "bumicertsTitle": "Bumicerts — Bumicerts",
-      "donationsTitle": "Historia ya michango — Bumicerts",
+      "accountTitle": "Akaunti — vyeti",
+      "bumicertsTitle": "vyeti — vyeti",
+      "donationsTitle": "Historia ya michango — vyeti",
       "accountFallback": "Akaunti",
-      "profileDescription": "{displayName} kwenye Bumicerts",
-      "organizationDescription": "{displayName} kwenye Bumicerts.",
-      "bumicertsPageTitle": "Bumicerts za {displayName} — Bumicerts",
-      "bumicertsPageDescription": "Vinjari Bumicerts zote zilizoundwa na {displayName}.",
-      "donationsPageTitle": "Historia ya michango ya {displayName} — Bumicerts",
+      "profileDescription": "{displayName} kwenye vyeti",
+      "organizationDescription": "{displayName} kwenye vyeti.",
+      "bumicertsPageTitle": "vyeti za {displayName} — vyeti",
+      "bumicertsPageDescription": "Vinjari vyeti zote zilizoundwa na {displayName}.",
+      "donationsPageTitle": "Historia ya michango ya {displayName} — vyeti",
       "donationsPageDescription": "Vinjari historia ya michango ya umma ya {displayName}."
     },
     "errors": {
@@ -340,17 +340,17 @@
       "loadOwnDescription": "Tulipata tatizo kupata data ya akaunti yako. Tafadhali jaribu tena.",
       "loadAccountTitle": "Haikuweza kupakia akaunti hii",
       "loadAccountDescription": "Tulipata tatizo kupata data ya akaunti hii. Tafadhali jaribu tena.",
-      "loadBumicertsTitle": "Haikuweza kupakia Bumicerts za akaunti hii",
-      "loadBumicertsDescription": "Tulipata tatizo kupata Bumicerts za akaunti hii. Tafadhali jaribu tena."
+      "loadBumicertsTitle": "Haikuweza kupakia vyeti za akaunti hii",
+      "loadBumicertsDescription": "Tulipata tatizo kupata vyeti za akaunti hii. Tafadhali jaribu tena."
     },
     "onboarding": {
       "title": "Usajili wa kuanza unahitajika",
-      "description": "Umeingia, lakini akaunti yako ya Bumicerts bado haijasanidiwa. Kamilisha hatua za kuanza ili kuendelea.",
+      "description": "Umeingia, lakini akaunti yako ya vyeti bado haijasanidiwa. Kamilisha hatua za kuanza ili kuendelea.",
       "action": "Anza usajili"
     },
     "tabs": {
       "home": "Nyumbani",
-      "bumicerts": "Bumicerts",
+      "bumicerts": "vyeti",
       "donationHistory": "Historia ya michango",
       "evidenceTimeline": "Ratiba ya ushahidi",
       "settings": "Mipangilio",
@@ -366,7 +366,7 @@
       "signInDescription": "Ingia ili kuunganisha pochi yako na kupokea michango.",
       "enabled": "Michango imewezeshwa ✓",
       "walletLabel": "Pochi:",
-      "enabledDescription": "Wachangiaji sasa wanaweza kutuma USDC kwa shirika lako kupitia Bumicerts.",
+      "enabledDescription": "Wachangiaji sasa wanaweza kutuma USDC kwa shirika lako kupitia vyeti.",
       "setupDescription": "Unganisha pochi ili kupokea michango ya USDC kutoka kwa waungaji mkono.",
       "stepConnect": "Hatua ya 1: Unganisha pochi yako",
       "connectWallet": "Unganisha pochi",
@@ -388,8 +388,8 @@
       "saving": "Inahifadhi…"
     },
     "bumicerts": {
-      "emptyEyebrow": "Hakuna Bumicerts",
-      "emptyDescription": "Akaunti hii bado haijachapisha Bumicerts zozote.",
+      "emptyEyebrow": "Hakuna vyeti",
+      "emptyDescription": "Akaunti hii bado haijachapisha vyeti zozote.",
       "unknownCreator": "Haijulikani"
     },
     "sidebar": {
@@ -400,23 +400,23 @@
       "supportedOrganizations": "Iliunga mkono {count} {count, plural, one {shirika} other {mashirika}}",
       "noPublicDonationsReceived": "Bado hakuna michango ya umma iliyopokelewa",
       "receivedDonations": "Ilipokea {count} {count, plural, one {mchango} other {michango}}",
-      "setupPublicProfile": "Sanidi wasifu wa umma wa Bumicerts",
+      "setupPublicProfile": "Sanidi wasifu wa umma wa vyeti",
       "completedProfileDetails": "Imekamilisha {count} {count, plural, one {kipengele} other {vipengele}} vya wasifu",
-      "bumicertUnavailable": "Rekodi za Bumicert hazipatikani kwa sasa",
-      "publishedBumicerts": "Ilichapisha {count} {count, plural, one {Bumicert} other {Bumicerts}}",
-      "noBumicertsPublished": "Bado hakuna Bumicerts zilizochapishwa",
+      "bumicertUnavailable": "Rekodi za cheti hazipatikani kwa sasa",
+      "publishedBumicerts": "Ilichapisha {count} {count, plural, one {cheti} other {vyeti}}",
+      "noBumicertsPublished": "Bado hakuna vyeti zilizochapishwa",
       "profileReady": "Wasifu uko tayari",
-      "bumicertSteward": "Msimamizi wa Bumicert",
+      "bumicertSteward": "Msimamizi wa cheti",
       "creatorSeed": "Mbegu ya mtayarishi",
       "communityBacked": "Inaungwa mkono na jamii",
       "impactSupporter": "Msaidizi wa athari",
       "inviteCollaborators": "Alika washirika",
-      "inviteCollaboratorsDescription": "Walete waungaji mkono na washirika kwenye kazi yako ya Bumicerts na kukuza athari endelevu pamoja.",
+      "inviteCollaboratorsDescription": "Walete waungaji mkono na washirika kwenye kazi yako ya vyeti na kukuza athari endelevu pamoja.",
       "inviteFriends": "Alika marafiki",
-      "inviteFriendsDescription": "Waalike marafiki zako kujiunga na Bumicerts na kuunda athari chanya pamoja.",
-      "shareOrganization": "Chunguza wasifu wa Bumicerts wa {displayName}: {pageUrl}",
-      "shareUser": "Jiunge nami kwenye Bumicerts na uunge mkono athari endelevu: {pageUrl}",
-      "totalBumicerts": "Jumla ya Bumicerts",
+      "inviteFriendsDescription": "Waalike marafiki zako kujiunga na vyeti na kuunda athari chanya pamoja.",
+      "shareOrganization": "Chunguza wasifu wa vyeti wa {displayName}: {pageUrl}",
+      "shareUser": "Jiunge nami kwenye vyeti na uunge mkono athari endelevu: {pageUrl}",
+      "totalBumicerts": "Jumla ya vyeti",
       "donationsReceived": "Michango iliyopokelewa",
       "totalDonations": "Jumla ya michango"
     },
@@ -494,7 +494,7 @@
       "manage": "DHIBITI"
     },
     "items": {
-      "bumicerts": "Bumicerts",
+      "bumicerts": "vyeti",
       "organizations": "Mashirika",
       "leaderboard": "Bao la wanaoongoza",
       "organization": "Shirika",
@@ -503,7 +503,7 @@
       "trees": "Miti",
       "profile": "Wasifu"
     },
-    "createBumicert": "Unda Bumicert",
+    "createBumicert": "Unda cheti",
     "prompts": {
       "signInDescription": "Ingia ili kudhibiti akaunti na maudhui yako.",
       "signInAction": "Ingia",
@@ -521,17 +521,17 @@
   },
   "maEarthFundingRound": {
     "metadata": {
-      "title": "Omba Awamu wa 3 wa Ufadhili wa Ma Earth — Bumicerts",
-      "description": "Jifunze jinsi jamii za GainForest zinaweza kutumia Bumicerts kujiandaa kwa Awamu wa 3 wa Ufadhili wa Ma Earth na dimbwi la kulinganisha la $500,000."
+      "title": "Omba Awamu wa 3 wa Ufadhili wa Ma Earth — vyeti",
+      "description": "Jifunze jinsi jamii za GainForest zinaweza kutumia vyeti kujiandaa kwa Awamu wa 3 wa Ufadhili wa Ma Earth na dimbwi la kulinganisha la $500,000."
     },
     "hero": {
       "logoAlt": "Ma Earth",
-      "title": "Andaa Bumicert yako kwa Awamu wa 3 wa Ufadhili wa Ma Earth",
-      "description": "Ma Earth inaendesha awamu ya ufadhili inayoungwa mkono na jamii yenye dimbwi la kulinganisha la $500,000 kwa miradi inayotegemea mazingira. Ikiwa shirika lako tayari linaandika athari kupitia Bumicerts, tumia Bumicert yako ya umma kama rejeleo unapoomba kwenye Ma Earth."
+      "title": "Andaa cheti yako kwa Awamu wa 3 wa Ufadhili wa Ma Earth",
+      "description": "Ma Earth inaendesha awamu ya ufadhili inayoungwa mkono na jamii yenye dimbwi la kulinganisha la $500,000 kwa miradi inayotegemea mazingira. Ikiwa shirika lako tayari linaandika athari kupitia vyeti, tumia cheti yako ya umma kama rejeleo unapoomba kwenye Ma Earth."
     },
     "actions": {
       "applyOnMaEarth": "Omba kwenye Ma Earth",
-      "createBumicertFirst": "Unda Bumicert kwanza"
+      "createBumicertFirst": "Unda cheti kwanza"
     },
     "matchingPool": {
       "value": "$500,000",
@@ -556,16 +556,16 @@
       }
     },
     "why": {
-      "eyebrow": "Kwa nini ujiandae na Bumicert?",
+      "eyebrow": "Kwa nini ujiandae na cheti?",
       "title": "Rekodi yako ya athari inapaswa kusafiri pamoja na ombi lako.",
-      "description": "Bumicert hukusanya hadithi ya mradi, muktadha wa shirika, eneo, picha na ushahidi ambao wafadhili wanahitaji ili kuamini kazi hiyo. Husaidia kuunganisha kazi ya jamii iliyothibitishwa na mchakato wa ufadhili wa Ma Earth."
+      "description": "cheti hukusanya hadithi ya mradi, muktadha wa shirika, eneo, picha na ushahidi ambao wafadhili wanahitaji ili kuamini kazi hiyo. Husaidia kuunganisha kazi ya jamii iliyothibitishwa na mchakato wa ufadhili wa Ma Earth."
     },
     "includeItems": {
       "story": "Hadithi ya mradi na maelezo mafupi",
       "identity": "Utambulisho wa shirika na wasifu wa umma",
       "evidence": "Picha, ushahidi, na madai ya athari yaliyoandikwa",
       "location": "Marejeleo ya eneo au tovuti yanapopatikana",
-      "publicLink": "Kiungo cha umma cha Bumicert unachoweza kujumuisha kwenye ombi lako"
+      "publicLink": "Kiungo cha umma cha cheti unachoweza kujumuisha kwenye ombi lako"
     },
     "eligibility": {
       "title": "Nani anastahiki?",
@@ -599,20 +599,20 @@
     },
     "flow": {
       "eyebrow": "Mtiririko wa ombi",
-      "title": "Omba moja kwa moja kwenye Ma Earth, ukiwa na Bumicert yako tayari.",
-      "description": "Bumicerts haiwezi kuwasilisha ombi lako kiotomatiki. Fungua ukurasa wa kuchangisha fedha wa Ma Earth, omba huko, na uweke kiungo chako cha Bumicert ya umma popote kinaposaidia kueleza mradi na ushahidi wako."
+      "title": "Omba moja kwa moja kwenye Ma Earth, ukiwa na cheti yako tayari.",
+      "description": "vyeti haiwezi kuwasilisha ombi lako kiotomatiki. Fungua ukurasa wa kuchangisha fedha wa Ma Earth, omba huko, na uweke kiungo chako cha cheti ya umma popote kinaposaidia kueleza mradi na ushahidi wako."
     }
   },
   "projects": {
     "metadata": {
       "title": "Gundua Miradi — Kazi Iliyothibitishwa ya Athari ya Urejeshaji",
-      "description": "Vinjari mikusanyiko ya miradi kutoka kwa jamii na mashirika, kila mkusanyiko ukiweka pamoja Bumicerts zinazoandika athari zao za urejeshaji."
+      "description": "Vinjari mikusanyiko ya miradi kutoka kwa jamii na mashirika, kila mkusanyiko ukiweka pamoja vyeti zinazoandika athari zao za urejeshaji."
     },
     "hero": {
       "eyebrow": "Gundua miradi",
       "title": "Gundua",
       "accent": "Miradi",
-      "description": "Miradi huweka pamoja Bumicerts zinazohusiana kutoka jamii na mashirika, ili uweze kuvinjari kazi katika kiwango cha mradi kabla ya kuangalia vyeti binafsi."
+      "description": "Miradi huweka pamoja vyeti zinazohusiana kutoka jamii na mashirika, ili uweze kuvinjari kazi katika kiwango cha mradi kabla ya kuangalia vyeti binafsi."
     },
     "search": {
       "ariaLabel": "Tafuta miradi",
@@ -632,8 +632,8 @@
     },
     "stats": {
       "projects": "Miradi",
-      "withBumicerts": "Miradi yenye Bumicerts",
-      "bumicerts": "Bumicerts katika miradi",
+      "withBumicerts": "Miradi yenye vyeti",
+      "bumicerts": "vyeti katika miradi",
       "withImages": "Miradi yenye picha"
     },
     "filters": {
@@ -657,7 +657,7 @@
     "card": {
       "open": "Fungua mradi: {title}",
       "projectSteward": "Msimamizi wa mradi",
-      "bumicertCount": "{count, plural, one {# Bumicert} other {# Bumicerts}}",
+      "bumicertCount": "{count, plural, one {# cheti} other {# vyeti}}",
       "projectPlace": "Eneo la mradi",
       "showDetails": "Onyesha maelezo",
       "loading": "Inapakia miradi"
@@ -672,7 +672,7 @@
     "cards": {
       "bumicerts": {
         "label": "Miradi iliyothibitishwa",
-        "title": "Bumicerts",
+        "title": "vyeti",
         "blurb": "Vinjari hadithi za miradi zenye picha, maeneo, watu na muktadha.",
         "statLabel": "hadithi"
       },
@@ -691,7 +691,7 @@
       "leaderboard": {
         "label": "Mabingwa wa athari",
         "title": "Ubao wa wanaoongoza",
-        "blurb": "Waone wafadhili wanaosaidia jamii kupitia Bumicerts.",
+        "blurb": "Waone wafadhili wanaosaidia jamii kupitia vyeti.",
         "statLabel": "imekusanywa"
       }
     }
@@ -717,13 +717,13 @@
         "title": "Gundua",
         "accent": "Athari ya urejeshaji",
         "lede": "Vinjari miradi kutoka kwa jamii na mashirika yanayorejesha mifumo ikolojia, kuimarisha riziki, na kujenga mustakabali imara zaidi.",
-        "search": "Chuja Bumicerts kwa kichwa au maelezo"
+        "search": "Chuja vyeti kwa kichwa au maelezo"
       },
       "project": {
         "eyebrow": "Miradi",
         "title": "Vinjari",
         "accent": "mikusanyiko ya miradi",
-        "lede": "Gundua mikusanyiko ya miradi na Bumicerts inazoziweka pamoja.",
+        "lede": "Gundua mikusanyiko ya miradi na vyeti inazoziweka pamoja.",
         "search": "Chuja miradi kwa kichwa au maelezo"
       }
     },
@@ -777,7 +777,7 @@
       "verified": "Imethibitishwa",
       "gainforest": "GainForest",
       "project": "Mradi",
-      "bumicert": "Bumicert",
+      "bumicert": "cheti",
       "projectPlace": "Eneo la mradi",
       "noCover": "Hakuna picha ya jalada",
       "peopleNamed": "{count, plural, one {mtu # ametajwa} other {watu # wametajwa}}",
@@ -806,7 +806,7 @@
     },
     "kind": {
       "occurrence": "Uonekano wa asili",
-      "bumicert": "Bumicert",
+      "bumicert": "cheti",
       "project": "Mradi",
       "site": "Eneo la mradi",
       "organization": "Shirika"
@@ -817,11 +817,11 @@
       "workPeriod": "Kipindi cha kazi"
     },
     "projectBumicerts": {
-      "title": "Bumicerts katika mradi huu",
-      "view": "Tazama Bumicert",
-      "showing": "Inaonyesha Bumicerts {shown} kati ya {total} zilizounganishwa.",
-      "empty": "Mradi huu bado hauna Bumicerts zilizounganishwa.",
-      "loading": "Inapakia Bumicerts zilizounganishwa"
+      "title": "vyeti katika mradi huu",
+      "view": "Tazama cheti",
+      "showing": "Inaonyesha vyeti {shown} kati ya {total} zilizounganishwa.",
+      "empty": "Mradi huu bado hauna vyeti zilizounganishwa.",
+      "loading": "Inapakia vyeti zilizounganishwa"
     },
     "observation": {
       "ownerTitle": "Uonekano wako",
@@ -843,13 +843,30 @@
         "place": "Mahali",
         "country": "Nchi",
         "habitat": "Makazi",
-        "notes": "Madokezo"
+        "notes": "Madokezo",
+        "kind": "Mmea au mnyama",
+        "mapLocation": "Eneo kwenye ramani"
       },
       "validation": {
         "name": "Weka jina la mmea au mnyama.",
         "date": "Weka wakati ulipoonekana.",
-        "location": "Weka eneo halali la ramani."
-      }
+        "location": "Weka eneo halali la ramani.",
+        "kind": "Chagua kama hii ni mmea au mnyama."
+      },
+      "kindOptions": {
+        "plant": "Mmea",
+        "animal": "Mnyama"
+      },
+      "chooseOne": "Chagua moja",
+      "chooseMapLocation": "Chagua eneo kwenye ramani.",
+      "chooseOnMap": "Chagua kwenye ramani",
+      "chooseMapLocationTitle": "Chagua eneo kwenye ramani",
+      "closeMapLocationChooser": "Funga kichagua eneo la ramani",
+      "movePin": "Bofya ramani kusogeza alama ya muono.",
+      "noMapLocation": "Hakuna eneo la ramani lililochaguliwa bado.",
+      "useLocation": "Tumia eneo",
+      "natureSoundRecording": "Rekodi ya sauti ya asili",
+      "unidentifiedSighting": "Muono usiotambuliwa"
     },
     "media": {
       "image": "Picha",
@@ -873,12 +890,51 @@
       "projectPlaces": "Maeneo ya mradi",
       "start": "Mwanzo",
       "end": "Mwisho",
-      "bumicerts": "Bumicerts",
+      "bumicerts": "vyeti",
       "projectPlace": "Eneo la mradi",
       "added": "Imeongezwa",
       "country": "Nchi",
       "type": "Aina"
     },
-    "audioHero": "Cheza sauti ya {title}"
+    "audioHero": "Cheza sauti ya {title}",
+    "detailLabels": {
+      "nameDetails": "Maelezo ya jina",
+      "nameRank": "Daraja la jina",
+      "natureGroup": "Kundi la asili",
+      "sightingDetails": "Maelezo ya muono",
+      "sightingType": "Aina ya muono",
+      "lifeStage": "Hatua ya maisha",
+      "sex": "Jinsia",
+      "reproductiveCondition": "Hali ya uzazi",
+      "behavior": "Tabia",
+      "placeName": "Jina la mahali",
+      "cityOrTown": "Mji au kijiji",
+      "area": "Eneo",
+      "stateProvince": "Jimbo / mkoa",
+      "elevation": "Mwinuko",
+      "sharedDetails": "Maelezo yaliyoshirikiwa",
+      "observedBy": "Imeonwa na",
+      "namedBy": "Imetambuliwa na",
+      "dateNamed": "Tarehe ya utambuzi",
+      "shared": "Imeshirikiwa",
+      "sourceDetails": "Maelezo ya chanzo",
+      "sourceName": "Jina la chanzo",
+      "organizationCode": "Msimbo wa shirika",
+      "sourceGroup": "Kundi la chanzo",
+      "surveyMethod": "Mbinu ya uchunguzi",
+      "license": "Leseni",
+      "rightsHolder": "Mmiliki wa haki",
+      "sightingId": "ID ya muono"
+    }
+  },
+  "manageProjects": {
+    "hero": {
+      "title": "Miradi Yangu",
+      "description": "Unda na usimamie miradi inayoweza kuwa na cheti kadhaa, pamoja na picha, video na midia nyingine zinazoonyesha kazi hiyo."
+    },
+    "metadata": {
+      "title": "Simamia Miradi — GainForest",
+      "description": "Unda na usimamie mikusanyiko ya miradi kwa cheti zako."
+    }
   }
 }

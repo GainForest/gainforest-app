@@ -3,7 +3,7 @@
     "organization": "Organisasi",
     "sites": "Lokasi",
     "audio": "Audio",
-    "bumicerts": "Bumicerts",
+    "bumicerts": "sertifikat",
     "trees": "Pohon",
     "manage": "Kelola",
     "yourOrganizationData": "data organisasi Anda",
@@ -79,7 +79,13 @@
     "deleteConfirmDescription": "Tindakan ini tidak dapat dibatalkan.",
     "howDoesThisWork": "Bagaimana cara kerjanya?",
     "useTaina": "Gunakan Taina",
+    "useTainaLong": "Gunakan Taina untuk mengunggah AudioMoth",
     "fileSizeNote": "File yang diunggah di sini harus berukuran 4MB atau lebih kecil. Untuk file AudioMoth yang lebih besar, gunakan Taina.",
+    "intro": "Simpan rekaman lapangan Anda di satu tempat. Setiap rekaman terhubung dengan di mana, kapan, dan bagaimana rekaman itu diambil.",
+    "whatIsTaina": "Apa itu Taina?",
+    "tainaTitle": "Kenalan dengan Taina",
+    "tainaBody": "Taina adalah asisten kami di Telegram. Mengobrollah untuk mengirim rekaman langsung dari lapangan. Dia menangani file AudioMoth besar yang tidak bisa diunggah di sini.",
+    "tainaCta": "Buka Taina di Telegram",
     "loading": "Memuat ruang kerja audio…",
     "backTo": "Kembali ke {section}",
     "sections": {
@@ -623,7 +629,7 @@
     "actions": {
       "save": "Simpan",
       "cancel": "Batal",
-      "createOrganization": "Buat organisasi"
+      "createOrganization": "Buat organisasi baru"
     },
     "about": {
       "title": "Tentang",

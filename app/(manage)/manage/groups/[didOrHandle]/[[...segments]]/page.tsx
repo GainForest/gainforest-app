@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { resolveGroupManageAccess } from "@/app/_lib/manage-server";
 import Container from "@/components/ui/container";
 import {
@@ -84,8 +84,16 @@ export default async function ManageGroupScopedPage({ params, searchParams }: Pa
   if (first === "sites" && !second) return <SitesSection target={target} />;
   if (first === "trees" && !second) return <TreesSection target={target} />;
   if (first === "audio" && !second) return <AudioSection target={target} />;
-  if (first === "bumicerts" && !second) return <BumicertsSection target={target} />;
-  if (first === "bumicerts" && second === "new") return <NewBumicertSection target={target} searchParams={await searchParams} />;
+  if (first === "certs" && !second) return <BumicertsSection target={target} />;
+  if (first === "certs" && second === "new") return <NewBumicertSection target={target} searchParams={await searchParams} />;
+  if (first === "bumicerts") {
+    const search = new URLSearchParams();
+    for (const [key, value] of Object.entries(await searchParams)) {
+      if (typeof value === "string") search.set(key, value);
+    }
+    const query = search.toString();
+    redirect(`${target.basePath}/certs${second === "new" ? "/new" : ""}${query ? `?${query}` : ""}`);
+  }
   if (first === "observations" && !second) return <ObservationsSection target={target} />;
   if (first === "settings" && !second) return <SettingsSection target={target} />;
 

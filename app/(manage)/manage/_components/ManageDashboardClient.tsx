@@ -52,6 +52,7 @@ import { ImageEditorModal } from "@/components/modals/image-editor";
 import { SocialGlyph } from "@/app/_components/SocialIcon";
 import { GroupMembers } from "../groups/_components/GroupMembers";
 import { ManageGroupsClient } from "../groups/_components/ManageGroupsClient";
+import { useAccountList } from "@/app/_lib/account-switcher";
 import type { CgsMember, CgsRole } from "../_lib/cgs";
 
 function decodePath(value: string): string {
@@ -464,6 +465,13 @@ function CreateOrganizationButton() {
   );
 }
 
+function CreateOrganizationHeaderSlot({ did }: { did: string }) {
+  const { groups, status } = useAccountList(did);
+  const showCreateOrganization = status === "ready" && groups.length === 0;
+
+  return <HeaderContent right={showCreateOrganization ? <CreateOrganizationButton /> : null} />;
+}
+
 export function ManageDashboardClient({
   account,
   mode,
@@ -552,8 +560,6 @@ export function ManageDashboardClient({
     logoFile,
     coverFile,
   };
-
-  const createOrganizationHeaderAction = useMemo(() => <CreateOrganizationButton />, []);
 
   const applyState = (next: HeroEditState) => {
     setEditDisplayName(next.displayName);
@@ -807,7 +813,7 @@ export function ManageDashboardClient({
 
   return (
     <>
-      {account.kind === "user" ? <HeaderContent right={createOrganizationHeaderAction} /> : null}
+      {account.kind === "user" ? <CreateOrganizationHeaderSlot did={account.did} /> : null}
       <Container className="space-y-6 pt-4 pb-12">
         <EditableHero
           account={account}

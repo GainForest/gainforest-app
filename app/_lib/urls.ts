@@ -79,7 +79,7 @@ export const STATUS_URL = "https://gainforest-status.instatus.com";
  *  donations across every org land in this DID's PDS, so the donations
  *  dashboard reads `orgHypercertsFundingReceipt(where: { did: { eq } })`
  *  against it. Mirrors the bumicerts monorepo's NEXT_PUBLIC_FACILITATOR_DID
- *  (apps/bumicerts/app/(marketplace)/dashboard/_components/DashboardClient.tsx). */
+ *  (apps/certs/app/(marketplace)/dashboard/_components/DashboardClient.tsx). */
 export const FACILITATOR_DID = process.env.NEXT_PUBLIC_FACILITATOR_DID || "did:plc:edod7rboajioq3jbyxsgeicc";
 
 /** The platform (facilitator) wallet address that signs the EVM-link platform
@@ -103,9 +103,9 @@ export function preferredDidIdentifier(did: string, handle?: string | null): str
   return cleanHandle && !cleanHandle.startsWith("did:") ? cleanHandle : did;
 }
 
-/** Build a Bumicerts detail page URL in this app from a DID/handle + rkey. */
+/** Build a Cert detail page URL in this app from a DID/handle + rkey. */
 export function localBumicertHref(didOrHandle: string, rkey: string): string {
-  return `/bumicert/${encodeURIComponent(didOrHandle)}/${encodeURIComponent(rkey)}`;
+  return `/cert/${encodeURIComponent(didOrHandle)}/${encodeURIComponent(rkey)}`;
 }
 
 /** Build a local GainForest account page URL from a DID or handle. */

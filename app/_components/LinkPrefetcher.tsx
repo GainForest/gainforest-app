@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef } from "react";
 
 const IMPORTANT_ROUTES = [
-  "/bumicerts",
+  "/certs",
   "/organizations",
   "/observations",
   "/leaderboard",
@@ -12,8 +12,8 @@ const IMPORTANT_ROUTES = [
   "/status",
   "/donations",
   "/manage",
-  "/manage/bumicerts",
-  "/manage/bumicerts/new",
+  "/manage/certs",
+  "/manage/certs/new",
   "/manage/sites",
   "/manage/trees",
 ] as const;

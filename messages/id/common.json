@@ -1,7 +1,7 @@
 {
   "seo": {
-    "title": "Bumicerts — Danai dampak regeneratif",
-    "description": "Bumicerts menghubungkan pendana dengan penjaga alam yang melakukan kerja regeneratif di lapangan. Danai dampak lingkungan terverifikasi secara langsung."
+    "title": "sertifikat — Danai dampak regeneratif",
+    "description": "sertifikat menghubungkan pendana dengan penjaga alam yang melakukan kerja regeneratif di lapangan. Danai dampak lingkungan terverifikasi secara langsung."
   },
   "language": {
     "label": "Bahasa",
@@ -52,7 +52,7 @@
       "manage": "KELOLA"
     },
     "items": {
-      "bumicerts": "Bumicerts",
+      "bumicerts": "sertifikat",
       "organizations": "Organisasi",
       "leaderboard": "Papan peringkat",
       "organization": "Organisasi",
@@ -82,7 +82,7 @@
       "checkingAccount": "Memeriksa akun Anda..."
     },
     "creationCard": {
-      "createBumicert": "Buat Bumicert",
+      "createBumicert": "Buat sertifikat",
       "createProject": "Buat proyek"
     },
     "tabs": {
@@ -91,7 +91,7 @@
     }
   },
   "bumicertCard": {
-    "missingImage": "Gambar Bumicert tidak tersedia",
+    "missingImage": "Gambar sertifikat tidak tersedia",
     "additionalObjectives": "{count, plural, one {# tujuan tambahan} other {# tujuan tambahan}}"
   },
   "pagination": {
@@ -114,7 +114,7 @@
       "documentation": "Dokumentasi",
       "twitter": "X (Twitter)",
       "github": "GitHub",
-      "bumicerts": "Bumicerts",
+      "bumicerts": "sertifikat",
       "organizations": "Organisasi",
       "observations": "Observasi",
       "leaderboard": "Papan peringkat",
@@ -129,7 +129,7 @@
     "cards": {
       "bumicerts": {
         "label": "Proyek terverifikasi",
-        "title": "Bumicerts",
+        "title": "sertifikat",
         "blurb": "Jelajahi cerita proyek dengan foto, tempat, orang, dan konteks.",
         "statLabel": "cerita"
       },
@@ -148,7 +148,7 @@
       "leaderboard": {
         "label": "Juara dampak",
         "title": "Papan peringkat",
-        "blurb": "Lihat para donatur yang membantu komunitas melalui Bumicerts.",
+        "blurb": "Lihat para donatur yang membantu komunitas melalui sertifikat.",
         "statLabel": "terkumpul"
       }
     }
@@ -171,7 +171,7 @@
     "placeholder": "Unggah atau seret dan lepaskan file Anda"
   },
   "signInPrompt": {
-    "description": "Simpan situs proyek, informasi pohon, dan Bumicerts Anda di satu tempat.",
+    "description": "Simpan situs proyek, informasi pohon, dan sertifikat Anda di satu tempat.",
     "failed": "Kami tidak dapat menyelesaikan proses masuk Anda. Coba lagi.",
     "getStarted": "Mulai"
   },
@@ -207,7 +207,7 @@
       },
       "website": {
         "name": "Aplikasi web",
-        "detail": "Antarmuka Bumicerts"
+        "detail": "Antarmuka sertifikat"
       },
       "api": {
         "name": "API aplikasi",
@@ -225,7 +225,7 @@
       "eyebrow": "Status langsung",
       "title": "GainForest",
       "accent": "kesehatan sistem",
-      "lede": "Ketersediaan terkini untuk Bumicerts, layanan data, dan infrastruktur pendukung."
+      "lede": "Ketersediaan terkini untuk sertifikat, layanan data, dan infrastruktur pendukung."
     },
     "unavailable": {
       "title": "Status sementara tidak tersedia",
@@ -254,7 +254,7 @@
   },
   "accountTabs": {
     "home": "Beranda",
-    "bumicerts": "Bumicerts",
+    "bumicerts": "sertifikat",
     "donationHistory": "Riwayat donasi",
     "observations": "Observasi",
     "gallery": "Galeri",
@@ -264,7 +264,7 @@
     "accountTitle": "Galeri",
     "accountDescription": "Foto proyek yang dibagikan oleh akun ini. Gunakan tombol untuk memilih galeri proyek tertentu, atau biarkan Semua proyek dipilih.",
     "bumicertTitle": "Galeri proyek",
-    "bumicertDescription": "Gambar yang dibagikan untuk proyek yang terkait dengan Bumicert ini.",
+    "bumicertDescription": "Gambar yang dibagikan untuk proyek yang terkait dengan sertifikat ini.",
     "defaultTitle": "Galeri",
     "defaultDescription": "Foto yang dibagikan oleh proyek ini.",
     "emptyTitle": "Belum ada gambar galeri",

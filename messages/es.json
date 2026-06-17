@@ -17,7 +17,7 @@
       "headingLine2": "empieza con",
       "headingEmphasis1": "Comunidades",
       "headingEmphasis2": "reales",
-      "description": "Financia proyectos regenerativos directamente. Cada Bumicert es un registro verificado de trabajo ambiental real, respaldado por fotos, ubicaciones y comunidades guardianas.",
+      "description": "Financia proyectos regenerativos directamente. Cada certificado es un registro verificado de trabajo ambiental real, respaldado por fotos, ubicaciones y comunidades guardianas.",
       "cta": "Explorar proyectos",
       "proofPoints": {
         "communityLed": "Liderado por comunidades",
@@ -54,7 +54,7 @@
           "title": "Quiero apoyar",
           "emphasis": "un proyecto",
           "description": "Explora certificados verificados y financia el momento exacto de la restauración.",
-          "cta": "Explorar Bumicerts",
+          "cta": "Explorar certificados",
           "alt": "Río serpenteando por la selva tropical"
         },
         "organizations": {
@@ -62,7 +62,7 @@
           "title": "Soy una persona",
           "emphasis": "guardiana de la naturaleza",
           "description": "Muestra tu trabajo regenerativo y conecta con financiadores comprometidos.",
-          "cta": "Crear un Bumicert",
+          "cta": "Crear un certificado",
           "alt": "Cascada en un bosque tropical"
         }
       }
@@ -70,12 +70,12 @@
     "certificate": {
       "eyebrow": "El certificado",
       "titleLine1": "¿Qué es exactamente",
-      "titleLine2": "un Bumicert?",
+      "titleLine2": "un certificado?",
       "faqItems": {
         "digitalCertificate": {
           "id": "1",
           "question": "Un certificado digital de impacto",
-          "answer": "Un Bumicert registra una acción ambiental específica y le da una identidad permanente y verificable en una red abierta y descentralizada."
+          "answer": "Un certificado registra una acción ambiental específica y le da una identidad permanente y verificable en una red abierta y descentralizada."
         },
         "evidence": {
           "id": "2",
@@ -85,12 +85,12 @@
         "communities": {
           "id": "3",
           "question": "Una línea directa con las comunidades",
-          "answer": "Cuando financias un Bumicert, tu dinero llega a las personas que hacen la restauración. Sin intermediarios que absorban comisiones ni costos difusos."
+          "answer": "Cuando financias un certificado, tu dinero llega a las personas que hacen la restauración. Sin intermediarios que absorban comisiones ni costos difusos."
         },
         "story": {
           "id": "4",
           "question": "Tu vínculo con la historia",
-          "answer": "Tener un Bumicert significa formar parte de ese momento: un árbol plantado, un arrecife restaurado, un ecosistema revivido. Puedes compartirlo, conservarlo o regalarlo."
+          "answer": "Tener un certificado significa formar parte de ese momento: un árbol plantado, un arrecife restaurado, un ecosistema revivido. Puedes compartirlo, conservarlo o regalarlo."
         }
       },
       "previewTitle": "Reforestación del monte Halimun",
@@ -110,11 +110,11 @@
       "label": "Ronda de financiación 3 de Ma Earth",
       "deadline": "Abierta hasta el 31 de mayo",
       "title": "Postula a la Ronda de financiación 3 de Ma Earth",
-      "description": "Las comunidades de GainForest pueden usar historias de proyecto verificadas, evidencia y registros de impacto de Bumicerts al postular en la ronda de financiación comunitaria de Ma Earth.",
+      "description": "Las comunidades de GainForest pueden usar historias de proyecto verificadas, evidencia y registros de impacto de certificados al postular en la ronda de financiación comunitaria de Ma Earth.",
       "highlights": {
         "matchingPool": "Fondo de contrapartida de $500k",
         "projects": "Proyectos basados en la naturaleza",
-        "record": "Prepara tu registro de Bumicert"
+        "record": "Prepara tu registro de certificado"
       },
       "actions": {
         "apply": "Postular en Ma Earth",
@@ -125,7 +125,7 @@
       "alt": "Ícono de la app GainForest"
     },
     "stats": {
-      "bumicertsShared": "Bumicerts compartidos",
+      "bumicertsShared": "certificados compartidos",
       "organizationProfiles": "perfiles de organizaciones",
       "natureSightingsShared": "avistamientos de naturaleza compartidos",
       "raisedForProjects": "recaudados para proyectos"
@@ -133,15 +133,15 @@
     "openNetwork": {
       "titlePrefix": "Construido sobre una",
       "titleEmphasis": "red abierta",
-      "description": "Los Bumicerts son registros de impacto portátiles que pueden viajar entre aplicaciones, comunidades y herramientas de financiación, no una base de datos cerrada.",
+      "description": "Los certificados son registros de impacto portátiles que pueden viajar entre aplicaciones, comunidades y herramientas de financiación, no una base de datos cerrada. Pronto habrá soporte para Silvi y otras plataformas.",
       "protocol": {
-        "name": "Protocolo AT",
+        "name": "Certified",
         "description": "datos sociales portátiles"
       },
       "youBadge": "Tú",
       "apps": {
         "maEarth": {
-          "blurb": "Las comunidades pueden usar evidencia de Bumicert al postular a rondas de financiación respaldadas por la comunidad."
+          "blurb": "Las comunidades pueden usar evidencia de certificado al postular a rondas de financiación respaldadas por la comunidad."
         },
         "gainforest": {
           "blurb": "GainForest ayuda a guardianes de la naturaleza a publicar trabajo verificado, sitios, árboles, observaciones e historias de proyectos."

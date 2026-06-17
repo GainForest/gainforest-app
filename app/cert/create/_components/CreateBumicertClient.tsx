@@ -146,7 +146,7 @@ function saveDrafts(drafts: Draft[]) {
 }
 
 function titleFromDraft(draft: Draft) {
-  return draft.values.title.trim() || "Untitled Bumicert";
+  return draft.values.title.trim() || "Untitled Cert";
 }
 
 function formatDraftDate(value: string) {
@@ -344,7 +344,7 @@ function CreateHero({ session }: { session: AuthSession }) {
               Impact story studio
             </div>
             <h1 className="font-serif text-5xl font-medium leading-[0.92] tracking-[-0.04em] text-foreground sm:text-6xl">
-              Create a<br />Bumicert
+              Create a<br />Cert
             </h1>
             <p className="mt-5 max-w-[22rem] text-base leading-7 text-muted-foreground">
               Turn field work, restoration evidence, and community stewardship into a publishable impact story — without leaving GainForest.
@@ -513,7 +513,7 @@ function DraftRail({
       </div>
       {drafts.length === 0 ? (
         <div className="mt-4 rounded-2xl border border-dashed border-border bg-muted/35 p-4 text-sm leading-6 text-muted-foreground">
-          Your saved Bumicert drafts will appear here after you start editing.
+          Your saved Cert drafts will appear here after you start editing.
         </div>
       ) : (
         <div className="mt-4 grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
@@ -590,7 +590,7 @@ function BasicsStep({
           </label>
           <div className="flex flex-col justify-center rounded-3xl border border-border bg-muted/35 p-5">
             <p className="text-sm leading-6 text-muted-foreground">
-              A strong visual helps the Bumicert feel trustworthy and complete. The image is added only when you publish.
+              A strong visual helps the Cert feel trustworthy and complete. The image is added only when you publish.
             </p>
             {coverFile ? (
               <div className="mt-4 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
@@ -760,7 +760,7 @@ function NetworkStep({
         </Button>
       </FieldShell>
 
-      <FieldShell label="Sites" hint="Attach sites from your account. You can publish without them, but site-linked Bumicerts are easier to understand.">
+      <FieldShell label="Sites" hint="Attach sites from your account. You can publish without them, but site-linked Certs are easier to understand.">
         <div className="rounded-3xl border border-border bg-background/70 p-3">
           {sitesStatus === "loading" ? (
             <div className="flex items-center gap-3 p-4 text-sm text-muted-foreground">
@@ -768,7 +768,7 @@ function NetworkStep({
             </div>
           ) : sitesStatus === "unauthorized" ? (
             <div className="rounded-2xl border border-dashed border-border p-5 text-sm leading-6 text-muted-foreground">
-              Sign in to attach certified locations from your GainForest account. You can still draft the Bumicert locally before signing in.
+              Sign in to attach certified locations from your GainForest account. You can still draft the Cert locally before signing in.
             </div>
           ) : sitesStatus === "error" ? (
             <div className="space-y-3 p-4 text-sm text-muted-foreground">
@@ -777,7 +777,7 @@ function NetworkStep({
             </div>
           ) : sites.length === 0 ? (
             <div className="rounded-2xl border border-dashed border-border p-5 text-sm leading-6 text-muted-foreground">
-              No certified locations found yet. Publish this Bumicert now, or create site boundaries under <Link href="/manage/sites" className="text-primary hover:underline">Manage → Sites</Link> and come back.
+              No certified locations found yet. Publish this Cert now, or create site boundaries under <Link href="/manage/sites" className="text-primary hover:underline">Manage → Sites</Link> and come back.
             </div>
           ) : (
             <div className="grid gap-2 md:grid-cols-2">
@@ -833,7 +833,7 @@ function ReviewStep({ values, sites, publishError }: { values: FormValues; sites
           <div>
             <h3 className="font-semibold text-foreground">{validation ? "One more thing" : "Ready to publish"}</h3>
             <p className="mt-1 text-sm leading-6 text-muted-foreground">
-              {validation || "Publishing adds this Bumicert to your public profile."}
+              {validation || "Publishing adds this Cert to your public profile."}
             </p>
           </div>
         </div>
@@ -867,13 +867,13 @@ function PublishSuccess({ result, session, onReset }: { result: PublishResult; s
       <div className="mx-auto mb-4 flex size-16 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/20">
         <PartyPopperIcon className="size-8" />
       </div>
-      <h2 className="font-serif text-4xl font-medium tracking-[-0.03em] text-foreground">Bumicert published</h2>
+      <h2 className="font-serif text-4xl font-medium tracking-[-0.03em] text-foreground">Cert published</h2>
       <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-muted-foreground">
-        Your Bumicert was published. It can take a moment to appear everywhere.
+        Your Cert was published. It can take a moment to appear everywhere.
       </p>
       <div className="mt-6 flex flex-wrap justify-center gap-3">
         <Button asChild>
-          <Link href={detailHref}>Open Bumicert <ArrowRightIcon /></Link>
+          <Link href={detailHref}>Open Cert <ArrowRightIcon /></Link>
         </Button>
         {hyperscanHref ? (
           <Button variant="outline" asChild>
@@ -1049,7 +1049,7 @@ export function CreateBumicertClient({ session }: { session: AuthSession }) {
   const handlePublish = async (event: FormEvent) => {
     event.preventDefault();
     if (!session.isLoggedIn) {
-      setPublishError("Sign in before publishing a Bumicert.");
+      setPublishError("Sign in before publishing a Cert.");
       return;
     }
     const validation = validateAll(values);
@@ -1103,7 +1103,7 @@ export function CreateBumicertClient({ session }: { session: AuthSession }) {
       setPublishResult(published);
       if (activeDraftId) handleDeleteDraft(activeDraftId);
     } catch (error) {
-      setPublishError(error instanceof Error ? error.message : "Could not publish the Bumicert.");
+      setPublishError(error instanceof Error ? error.message : "Could not publish the Cert.");
     } finally {
       setIsPublishing(false);
     }
@@ -1120,7 +1120,7 @@ export function CreateBumicertClient({ session }: { session: AuthSession }) {
             <div className="mb-6 flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary">Create studio</p>
-                <h2 className="mt-2 font-serif text-4xl font-medium tracking-[-0.03em] text-foreground">Guided Bumicert builder</h2>
+                <h2 className="mt-2 font-serif text-4xl font-medium tracking-[-0.03em] text-foreground">Guided Cert builder</h2>
               </div>
               <Button type="button" variant="outline" size="sm" onClick={resetForm}>
                 <SproutIcon /> Fresh start
@@ -1199,7 +1199,7 @@ export function CreateBumicertClient({ session }: { session: AuthSession }) {
                 {activeStep === "review" ? (
                   <Button type="submit" disabled={Boolean(validateAll(values)) || isPublishing || !session.isLoggedIn} className="min-w-44 shadow-lg shadow-primary/15">
                     {isPublishing ? <Loader2Icon className="animate-spin" /> : <CheckCircle2Icon />}
-                    {isPublishing ? "Publishing…" : "Publish Bumicert"}
+                    {isPublishing ? "Publishing…" : "Publish Cert"}
                   </Button>
                 ) : (
                   <Button type="button" onClick={goNext} disabled={Boolean(currentStepError) || isPublishing}>
