@@ -114,14 +114,14 @@ export default defineConfig({
       use: { ...desktopChrome },
     },
     {
-      name: "bumicert-create",
+      name: "cert-create",
       dependencies: ["projects"],
-      testMatch: /bumicert-create\.spec\.ts/,
+      testMatch: /cert-create\.spec\.ts/,
       use: { ...desktopChrome },
     },
     {
       name: "audio-recordings",
-      dependencies: ["bumicert-create"],
+      dependencies: ["cert-create"],
       testMatch: /audio-recordings\.spec\.ts/,
       use: { ...desktopChrome },
     },

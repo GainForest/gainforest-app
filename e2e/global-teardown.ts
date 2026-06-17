@@ -165,7 +165,7 @@ async function deleteDisposableAccount(): Promise<void> {
 async function globalTeardown(): Promise<void> {
   const result = await cleanupCreatedPdsRecords();
   console.log(
-    `[e2e] Deleted ${result.deleted} test Bumicert record(s)${result.skipped ? `; disposable records are handled by account deletion (${result.skipped} tracked)` : ""}${result.failed ? `; ${result.failed} failed` : ""}.`,
+    `[e2e] Deleted ${result.deleted} test Cert record(s)${result.skipped ? `; disposable records are handled by account deletion (${result.skipped} tracked)` : ""}${result.failed ? `; ${result.failed} failed` : ""}.`,
   );
 
   try {

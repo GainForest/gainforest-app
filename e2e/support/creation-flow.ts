@@ -2,12 +2,12 @@ import { expect, type Page, type TestInfo } from "@playwright/test";
 import { screenshotStep } from "./artifacts";
 import { getPdsRecord, parseAtUri, trackCreatedPdsRecord, waitForClaimActivityByTitle, type PdsRepoRecord } from "./pds";
 
-export const E2E_BUMICERT_SCOPE = "Reforestation";
-export const E2E_BUMICERT_SHORT_DESCRIPTION =
+export const E2E_CERT_SCOPE = "Reforestation";
+export const E2E_CERT_SHORT_DESCRIPTION =
   "E2E restoration impact summary with field-ready details for reviewers.";
-export const E2E_BUMICERT_CONTRIBUTOR = "E2E Steward Organization";
+export const E2E_CERT_CONTRIBUTOR = "E2E Steward Organization";
 
-export type CreatedBumicert = {
+export type CreatedCert = {
   title: string;
   uri: string;
   cid: string;
@@ -16,20 +16,20 @@ export type CreatedBumicert = {
   record: PdsRepoRecord;
 };
 
-export type FillBumicertFormOptions = {
+export type FillCertFormOptions = {
   forProject?: string;
   skipValidationEdgeCases?: boolean;
 };
 
-const publishButtonName = /^publish(?: bumicert| to the project)?$/i;
+const publishButtonName = /^publish(?: cert| to the project)?$/i;
 
-function newBumicertUrl(options: FillBumicertFormOptions): string {
+function newCertUrl(options: FillCertFormOptions): string {
   return options.forProject
-    ? `/manage/bumicerts/new?forProject=${encodeURIComponent(options.forProject)}`
-    : "/manage/bumicerts/new";
+    ? `/manage/certs/new?forProject=${encodeURIComponent(options.forProject)}`
+    : "/manage/certs/new";
 }
 
-export async function expectBumicertPublishValidationEdgeCases(page: Page, testInfo: TestInfo): Promise<void> {
+export async function expectCertPublishValidationEdgeCases(page: Page, testInfo: TestInfo): Promise<void> {
   await page.getByRole("button", { name: publishButtonName }).click();
   await expect(page.getByText(/add a title with at least 4 characters/i).first()).toBeVisible({ timeout: 10_000 });
   await expect(page.getByText(/pick at least one type of work/i).first()).toBeVisible();
@@ -40,8 +40,8 @@ export async function expectBumicertPublishValidationEdgeCases(page: Page, testI
   await expect(page.getByText(/agree to the terms before publishing/i).first()).toBeVisible();
   await screenshotStep(page, testInfo, "create-empty-publish-errors");
 
-  await page.locator("#bumicert-title").first().fill("Bad");
-  await page.getByRole("button", { name: E2E_BUMICERT_SCOPE }).first().click();
+  await page.locator("#cert-title").first().fill("Bad");
+  await page.getByRole("button", { name: E2E_CERT_SCOPE }).first().click();
   await page.locator("#summary").first().fill("Too short");
   await page.locator("#description").first().fill("Also too short.");
   await page.getByPlaceholder(/search e\.g\.|name or/i).first().fill("");
@@ -52,25 +52,25 @@ export async function expectBumicertPublishValidationEdgeCases(page: Page, testI
   await screenshotStep(page, testInfo, "create-short-content-publish-errors");
 }
 
-export async function fillBumicertForm(page: Page, testInfo: TestInfo, options: FillBumicertFormOptions = {}): Promise<CreatedBumicert> {
-  const title = `E2E Bumicert ${Date.now()}-${testInfo.workerIndex}-${testInfo.retry}`;
+export async function fillCertForm(page: Page, testInfo: TestInfo, options: FillCertFormOptions = {}): Promise<CreatedCert> {
+  const title = `E2E Cert ${Date.now()}-${testInfo.workerIndex}-${testInfo.retry}`;
 
-  await page.goto(newBumicertUrl(options), { waitUntil: "domcontentloaded" });
+  await page.goto(newCertUrl(options), { waitUntil: "domcontentloaded" });
   await expect(page.getByRole("heading", { name: /the basics/i }).first()).toBeVisible({ timeout: 60_000 });
   await screenshotStep(page, testInfo, "create-form-empty");
-  if (!options.skipValidationEdgeCases) await expectBumicertPublishValidationEdgeCases(page, testInfo);
+  if (!options.skipValidationEdgeCases) await expectCertPublishValidationEdgeCases(page, testInfo);
 
-  await page.locator("#bumicert-title").first().fill(title);
-  if (options.skipValidationEdgeCases) await page.getByRole("button", { name: E2E_BUMICERT_SCOPE }).first().click();
+  await page.locator("#cert-title").first().fill(title);
+  if (options.skipValidationEdgeCases) await page.getByRole("button", { name: E2E_CERT_SCOPE }).first().click();
   await screenshotStep(page, testInfo, "create-basics-complete");
 
-  await page.locator("#summary").first().fill(E2E_BUMICERT_SHORT_DESCRIPTION);
+  await page.locator("#summary").first().fill(E2E_CERT_SHORT_DESCRIPTION);
   await page.locator("#description").first().fill(
-    "This E2E Bumicert documents restoration work with durable local benefits, clear field evidence, practical follow-up notes, and a simple story that reviewers can understand quickly.",
+    "This E2E Cert documents restoration work with durable local benefits, clear field evidence, practical follow-up notes, and a simple story that reviewers can understand quickly.",
   );
   await screenshotStep(page, testInfo, "create-story-complete");
 
-  await page.getByPlaceholder(/search e\.g\.|name or/i).first().fill(E2E_BUMICERT_CONTRIBUTOR);
+  await page.getByPlaceholder(/search e\.g\.|name or/i).first().fill(E2E_CERT_CONTRIBUTOR);
   await screenshotStep(page, testInfo, "create-people-complete");
 
   await page.locator("label").filter({ hasText: /I confirm I have permission/i }).first().click();
@@ -79,7 +79,7 @@ export async function fillBumicertForm(page: Page, testInfo: TestInfo, options: 
 
   await page.getByRole("button", { name: publishButtonName }).click();
   await expect(page.getByText(/it’s live|it's live/i).first()).toBeVisible({ timeout: 120_000 });
-  await expect(page.getByRole("link", { name: /open bumicert/i })).toBeVisible({ timeout: 10_000 });
+  await expect(page.getByRole("link", { name: /open cert/i })).toBeVisible({ timeout: 10_000 });
   await screenshotStep(page, testInfo, "create-published-successfully");
 
   const record = await waitForClaimActivityByTitle(title);

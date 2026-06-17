@@ -5,7 +5,7 @@ import { getPdsRecord, parseAtUri, trackCreatedPdsRecord, waitForProjectByTitle,
 export const E2E_PROJECT_SHORT_DESCRIPTION =
   "E2E project summary for restoration work, field evidence, and public impact review.";
 export const E2E_PROJECT_DESCRIPTION =
-  "This E2E project groups Bumicerts for restoration work with practical field notes, verifiable progress, and enough narrative detail for reviewers to understand what changed on the ground.";
+  "This E2E project groups Certs for restoration work with practical field notes, verifiable progress, and enough narrative detail for reviewers to understand what changed on the ground.";
 
 export type CreatedProject = {
   title: string;

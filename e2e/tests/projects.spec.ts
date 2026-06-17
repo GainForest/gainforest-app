@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { fillBumicertForm } from "../support/creation-flow";
+import { fillCertForm } from "../support/creation-flow";
 import {
   createProject,
   expectProjectRecordFields,
@@ -12,10 +12,10 @@ const authStatePath = "e2e/.auth/user.json";
 test.use({ storageState: authStatePath });
 test.describe.configure({ mode: "serial" });
 
-async function expectProjectContainsBumicert(projectUri: string, bumicertUri: string): Promise<void> {
+async function expectProjectContainsCert(projectUri: string, certUri: string): Promise<void> {
   await expect
     .poll(async () => projectItemUris(await getPdsRecord(projectUri)), { timeout: 90_000 })
-    .toContain(bumicertUri);
+    .toContain(certUri);
 }
 
 test("creates a project successfully and persists expected direct PDS fields", async ({ page }, testInfo) => {
@@ -26,22 +26,22 @@ test("creates a project successfully and persists expected direct PDS fields", a
   await expectProjectRecordFields(project, []);
 });
 
-test("creates a project and attaches the first Bumicert from the success CTA", async ({ page }, testInfo) => {
+test("creates a project and attaches the first Cert from the success CTA", async ({ page }, testInfo) => {
   test.setTimeout(360_000);
   const project = await createProject(page, testInfo);
 
-  const addFirstBumicert = page.getByRole("link", { name: /add the first bumicert/i });
-  await expect(addFirstBumicert).toHaveAttribute("href", /\/manage\/bumicerts\/new\?forProject=/);
+  const addFirstCert = page.getByRole("link", { name: /add the first cert/i });
+  await expect(addFirstCert).toHaveAttribute("href", /\/manage\/certs\/new\?forProject=/);
   await Promise.all([
     page.waitForURL((url) =>
-      url.pathname.endsWith("/manage/bumicerts/new") && url.searchParams.get("forProject") === project.identity,
+      url.pathname.endsWith("/manage/certs/new") && url.searchParams.get("forProject") === project.identity,
     ),
-    addFirstBumicert.click(),
+    addFirstCert.click(),
   ]);
 
-  const bumicert = await fillBumicertForm(page, testInfo, {
+  const cert = await fillCertForm(page, testInfo, {
     forProject: project.identity,
     skipValidationEdgeCases: true,
   });
-  await expectProjectContainsBumicert(project.uri, bumicert.uri);
+  await expectProjectContainsCert(project.uri, cert.uri);
 });
