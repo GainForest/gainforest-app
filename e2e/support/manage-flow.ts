@@ -165,32 +165,68 @@ export async function editOrganizationProfile(page: Page, testInfo: TestInfo, or
   await screenshotStep(page, testInfo, "organization-profile-edited");
 }
 
+type OrganizationMemberRole = "admin" | "member";
+
+type CgsMembersResponse = {
+  members?: Array<{ did?: unknown; memberDid?: unknown; role?: unknown }>;
+};
+
+async function waitForOrganizationMemberRole(
+  page: Page,
+  org: CgsOrgMetadata,
+  memberDid: string,
+  role: OrganizationMemberRole,
+): Promise<void> {
+  await expect
+    .poll(async () => {
+      const params = new URLSearchParams({ repo: org.groupDid });
+      const response = await page.request.get(`/api/cgs/members?${params.toString()}`).catch(() => null);
+      if (!response?.ok()) return false;
+      const body = await response.json().catch(() => null) as CgsMembersResponse | null;
+      return body?.members?.some((member) => {
+        const did = member.did === memberDid || member.memberDid === memberDid;
+        return did && member.role === role;
+      }) ?? false;
+    }, { timeout: 90_000 })
+    .toBe(true);
+}
+
 export async function addOrganizationMember(
   page: Page,
   testInfo: TestInfo,
   org: CgsOrgMetadata,
   memberIdentifier: string,
   expectedMemberDid?: string | null,
+  role: OrganizationMemberRole = "member",
 ): Promise<void> {
   await page.goto(`${groupManageBasePath(org)}/settings`, { waitUntil: "domcontentloaded" });
   await expect(page.getByRole("heading", { name: /organization settings/i })).toBeVisible({ timeout: 60_000 });
   await page.getByLabel(/member username/i).fill(memberIdentifier);
-  await screenshotStep(page, testInfo, "organization-member-add-ready");
+  await page.getByLabel(/role for new member/i).selectOption(role);
+  await screenshotStep(page, testInfo, `organization-member-add-${role}-ready`);
   await page.getByRole("button", { name: /^add$/i }).click();
   if (expectedMemberDid) {
-    await expect
-      .poll(async () => {
-        const params = new URLSearchParams({ repo: org.groupDid });
-        const response = await page.request.get(`/api/cgs/members?${params.toString()}`).catch(() => null);
-        if (!response?.ok()) return false;
-        const body = await response.json().catch(() => null) as { members?: Array<{ did?: unknown; memberDid?: unknown }> } | null;
-        return body?.members?.some((member) => member.did === expectedMemberDid || member.memberDid === expectedMemberDid) ?? false;
-      }, { timeout: 90_000 })
-      .toBe(true);
+    await waitForOrganizationMemberRole(page, org, expectedMemberDid, role);
   } else {
     await expect(page.getByText(/organization member|joined|team member/i).first()).toBeVisible({ timeout: 90_000 });
   }
-  await screenshotStep(page, testInfo, "organization-member-added");
+  await screenshotStep(page, testInfo, `organization-member-added-${role}`);
+}
+
+export async function setOrganizationMemberRole(
+  page: Page,
+  testInfo: TestInfo,
+  org: CgsOrgMetadata,
+  memberDid: string,
+  role: OrganizationMemberRole,
+): Promise<void> {
+  await page.goto(`${groupManageBasePath(org)}/settings`, { waitUntil: "domcontentloaded" });
+  await expect(page.getByRole("heading", { name: /organization settings/i })).toBeVisible({ timeout: 60_000 });
+  await expect(page.getByLabel("Member role").first()).toBeVisible({ timeout: 60_000 });
+  await screenshotStep(page, testInfo, `organization-member-role-${role}-ready`);
+  await page.getByLabel("Member role").first().selectOption(role);
+  await waitForOrganizationMemberRole(page, org, memberDid, role);
+  await screenshotStep(page, testInfo, `organization-member-role-${role}-saved`);
 }
 
 export async function expectMemberOrganizationRestrictions(page: Page, testInfo: TestInfo, org: CgsOrgMetadata): Promise<void> {

@@ -9,6 +9,7 @@ import {
   addOrganizationMember,
   completeUserOnboarding,
   expectMemberOrganizationRestrictions,
+  setOrganizationMemberRole,
 } from "../support/manage-flow";
 
 const ownerAuthStatePath = "e2e/.auth/user.json";
@@ -16,7 +17,7 @@ const memberAuthStatePath = "e2e/.auth/member.json";
 
 test.use({ storageState: ownerAuthStatePath });
 
-test("adds a disposable member and verifies member-only CGS permissions", async ({ browser, page }, testInfo) => {
+test("adds a disposable admin, downgrades to member, and verifies member-only CGS permissions", async ({ browser, page }, testInfo) => {
   test.setTimeout(420_000);
   const env = getE2EEnv();
   const contextOptions = {
@@ -45,7 +46,8 @@ test("adds a disposable member and verifies member-only CGS permissions", async 
 
   const memberIdentifier = member.handle ?? member.did;
   expect(memberIdentifier).toBeTruthy();
-  await addOrganizationMember(page, testInfo, org, memberIdentifier, member.did);
+  await addOrganizationMember(page, testInfo, org, memberIdentifier, member.did, "admin");
+  await setOrganizationMemberRole(page, testInfo, org, member.did, "member");
 
   const restrictedContext = await browser.newContext({ ...contextOptions, storageState: memberAuthStatePath });
   const restrictedPage = await restrictedContext.newPage();
