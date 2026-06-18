@@ -46,6 +46,7 @@ test("adds a disposable admin, downgrades to member, and verifies member-only CG
 
   const memberIdentifier = member.handle ?? member.did;
   expect(memberIdentifier).toBeTruthy();
+  if (!memberIdentifier || !member.did) throw new Error("Disposable member account did not return an identifier.");
   await addOrganizationMember(page, testInfo, org, memberIdentifier, member.did, "admin");
   await setOrganizationMemberRole(page, testInfo, org, member.did, "member");
 

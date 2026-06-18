@@ -280,5 +280,93 @@
     "nextImage": "Next image",
     "accountMetadataTitle": "{name} — Gallery",
     "accountMetadataDescription": "Project gallery images shared by {name}."
+  },
+  "internalBadges": {
+    "eyebrow": "Internal team tools",
+    "title": "Badge desk",
+    "description": "Create badges, award them to accounts, and keep email assignments pending until a person claims an account.",
+    "pendingEmail": "Pending email",
+    "pendingChip": "pending",
+    "unknownBadge": "Unknown badge",
+    "stats": {
+      "badges": "Badges",
+      "awards": "Awards",
+      "pending": "Pending"
+    },
+    "types": {
+      "endorsement": "Endorsement",
+      "verification": "Verification",
+      "participation": "Participation",
+      "certification": "Certification",
+      "affiliation": "Affiliation",
+      "recognition": "Recognition"
+    },
+    "badgeForm": {
+      "createTitle": "Create a badge",
+      "editTitle": "Edit badge",
+      "nameLabel": "Name",
+      "namePlaceholder": "Community verifier",
+      "typeLabel": "Badge type",
+      "descriptionLabel": "Description",
+      "descriptionPlaceholder": "What does this badge mean?",
+      "iconLabel": "Icon",
+      "create": "Create badge",
+      "save": "Save badge",
+      "cancel": "Cancel"
+    },
+    "awardForm": {
+      "title": "Assign a badge",
+      "badgeLabel": "Badge",
+      "noBadges": "Create a badge first",
+      "recipientLabel": "Handle, DID, or email",
+      "recipientPlaceholder": "name.certified.one or person@example.com",
+      "noteLabel": "Note",
+      "notePlaceholder": "Why are they receiving this?",
+      "urlLabel": "Link",
+      "urlPlaceholder": "https://example.org/evidence",
+      "assign": "Assign badge"
+    },
+    "badges": {
+      "title": "Badges",
+      "empty": "No badges yet. Create the first badge to start assigning it.",
+      "editAria": "Edit {title}",
+      "deleteAria": "Delete {title}"
+    },
+    "recipients": {
+      "title": "People and badges",
+      "empty": "No badge assignments yet.",
+      "removeAward": "Remove badge assignment"
+    },
+    "confirm": {
+      "deleteBadge": "Delete “{title}”? Existing assignments may still reference it.",
+      "deleteAward": "Remove this badge assignment?"
+    },
+    "messages": {
+      "badgeCreated": "Badge created.",
+      "badgeUpdated": "Badge updated.",
+      "badgeDeleted": "Badge deleted.",
+      "awardCreated": "Badge assigned.",
+      "pendingCreated": "Email assignment saved as pending.",
+      "awardDeleted": "Badge assignment removed."
+    },
+    "errors": {
+      "generic": "Something went wrong.",
+      "refresh": "Could not refresh badge data.",
+      "titleRequired": "Enter a badge name.",
+      "badgeRequired": "Choose a badge."
+    },
+    "access": {
+      "signedOutTitle": "Sign in required",
+      "signedOutDescription": "Only approved team members can use the badge dashboard.",
+      "signIn": "Sign in",
+      "notConfiguredTitle": "Dashboard not configured",
+      "notConfiguredDescription": "Add team members to the internal badge dashboard allowlist before using this page.",
+      "deniedTitle": "No access",
+      "deniedDescription": "Your account is not on the internal badge dashboard allowlist."
+    },
+    "meta": {
+      "title": "Internal badges — GainForest",
+      "description": "Manage internal badge definitions and awards."
+    }
   }
 }

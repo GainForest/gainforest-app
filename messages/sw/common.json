@@ -280,5 +280,93 @@
     "nextImage": "Picha inayofuata",
     "accountMetadataTitle": "{name} — Matunzio",
     "accountMetadataDescription": "Picha za matunzio ya miradi zilizoshirikiwa na {name}."
+  },
+  "internalBadges": {
+    "eyebrow": "Zana za ndani",
+    "title": "Dawati la beji",
+    "description": "Unda beji, zipe kwa akaunti, na uhifadhi barua pepe kama zinazosubiri hadi mtu adai akaunti.",
+    "pendingEmail": "Barua pepe inasubiri",
+    "pendingChip": "inasubiri",
+    "unknownBadge": "Beji haijulikani",
+    "stats": {
+      "badges": "Beji",
+      "awards": "Zilizotolewa",
+      "pending": "Zinasubiri"
+    },
+    "types": {
+      "endorsement": "Uidhinishaji",
+      "verification": "Uthibitishaji",
+      "participation": "Ushiriki",
+      "certification": "Cheti",
+      "affiliation": "Uhusiano",
+      "recognition": "Utambuzi"
+    },
+    "badgeForm": {
+      "createTitle": "Unda beji",
+      "editTitle": "Hariri beji",
+      "nameLabel": "Jina",
+      "namePlaceholder": "Mthibitishaji wa jamii",
+      "typeLabel": "Aina ya beji",
+      "descriptionLabel": "Maelezo",
+      "descriptionPlaceholder": "Beji hii inamaanisha nini?",
+      "iconLabel": "Ikoni",
+      "create": "Unda beji",
+      "save": "Hifadhi beji",
+      "cancel": "Ghairi"
+    },
+    "awardForm": {
+      "title": "Toa beji",
+      "badgeLabel": "Beji",
+      "noBadges": "Unda beji kwanza",
+      "recipientLabel": "Jina, DID, au barua pepe",
+      "recipientPlaceholder": "jina.certified.one au mtu@example.com",
+      "noteLabel": "Dokezo",
+      "notePlaceholder": "Kwa nini anaipokea?",
+      "urlLabel": "Kiungo",
+      "urlPlaceholder": "https://example.org/ushahidi",
+      "assign": "Toa beji"
+    },
+    "badges": {
+      "title": "Beji",
+      "empty": "Hakuna beji bado. Unda ya kwanza ili uanze kuitoa.",
+      "editAria": "Hariri {title}",
+      "deleteAria": "Futa {title}"
+    },
+    "recipients": {
+      "title": "Watu na beji",
+      "empty": "Hakuna utoaji wa beji bado.",
+      "removeAward": "Ondoa utoaji wa beji"
+    },
+    "confirm": {
+      "deleteBadge": "Ufute “{title}”? Utoaji uliopo bado unaweza kuirejelea.",
+      "deleteAward": "Ondoa utoaji huu wa beji?"
+    },
+    "messages": {
+      "badgeCreated": "Beji imeundwa.",
+      "badgeUpdated": "Beji imesasishwa.",
+      "badgeDeleted": "Beji imefutwa.",
+      "awardCreated": "Beji imetolewa.",
+      "pendingCreated": "Utoaji kwa barua pepe umehifadhiwa ukisubiri.",
+      "awardDeleted": "Utoaji umeondolewa."
+    },
+    "errors": {
+      "generic": "Hitilafu imetokea.",
+      "refresh": "Haikuwezekana kusasisha data ya beji.",
+      "titleRequired": "Weka jina la beji.",
+      "badgeRequired": "Chagua beji."
+    },
+    "access": {
+      "signedOutTitle": "Ingia kwanza",
+      "signedOutDescription": "Ni wanatimu walioidhinishwa tu wanaoweza kutumia dashibodi ya beji.",
+      "signIn": "Ingia",
+      "notConfiguredTitle": "Dashibodi haijasanidiwa",
+      "notConfiguredDescription": "Ongeza wanatimu kwenye orodha iliyoruhusiwa kabla ya kutumia ukurasa huu.",
+      "deniedTitle": "Huna ufikiaji",
+      "deniedDescription": "Akaunti yako haiko kwenye orodha iliyoruhusiwa ya dashibodi ya ndani ya beji."
+    },
+    "meta": {
+      "title": "Beji za ndani — GainForest",
+      "description": "Dhibiti ufafanuzi na utoaji wa beji za ndani."
+    }
   }
 }

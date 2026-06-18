@@ -280,5 +280,93 @@
     "nextImage": "Gambar berikutnya",
     "accountMetadataTitle": "{name} — Galeri",
     "accountMetadataDescription": "Gambar galeri proyek yang dibagikan oleh {name}."
+  },
+  "internalBadges": {
+    "eyebrow": "Alat tim internal",
+    "title": "Meja lencana",
+    "description": "Buat lencana, tetapkan ke akun, dan simpan penetapan email sebagai tertunda sampai orang tersebut mengklaim akun.",
+    "pendingEmail": "Email tertunda",
+    "pendingChip": "tertunda",
+    "unknownBadge": "Lencana tidak dikenal",
+    "stats": {
+      "badges": "Lencana",
+      "awards": "Ditetapkan",
+      "pending": "Tertunda"
+    },
+    "types": {
+      "endorsement": "Dukungan",
+      "verification": "Verifikasi",
+      "participation": "Partisipasi",
+      "certification": "Sertifikasi",
+      "affiliation": "Afiliasi",
+      "recognition": "Pengakuan"
+    },
+    "badgeForm": {
+      "createTitle": "Buat lencana",
+      "editTitle": "Edit lencana",
+      "nameLabel": "Nama",
+      "namePlaceholder": "Verifikator komunitas",
+      "typeLabel": "Jenis lencana",
+      "descriptionLabel": "Deskripsi",
+      "descriptionPlaceholder": "Apa arti lencana ini?",
+      "iconLabel": "Ikon",
+      "create": "Buat lencana",
+      "save": "Simpan lencana",
+      "cancel": "Batal"
+    },
+    "awardForm": {
+      "title": "Tetapkan lencana",
+      "badgeLabel": "Lencana",
+      "noBadges": "Buat lencana terlebih dahulu",
+      "recipientLabel": "Handle, DID, atau email",
+      "recipientPlaceholder": "nama.certified.one atau orang@example.com",
+      "noteLabel": "Catatan",
+      "notePlaceholder": "Mengapa mereka menerimanya?",
+      "urlLabel": "Tautan",
+      "urlPlaceholder": "https://example.org/bukti",
+      "assign": "Tetapkan lencana"
+    },
+    "badges": {
+      "title": "Lencana",
+      "empty": "Belum ada lencana. Buat lencana pertama untuk mulai menetapkannya.",
+      "editAria": "Ubah {title}",
+      "deleteAria": "Hapus {title}"
+    },
+    "recipients": {
+      "title": "Orang dan lencana",
+      "empty": "Belum ada penetapan lencana.",
+      "removeAward": "Hapus penetapan lencana"
+    },
+    "confirm": {
+      "deleteBadge": "Hapus “{title}”? Penetapan yang ada mungkin masih merujuknya.",
+      "deleteAward": "Hapus penetapan lencana ini?"
+    },
+    "messages": {
+      "badgeCreated": "Lencana dibuat.",
+      "badgeUpdated": "Lencana diperbarui.",
+      "badgeDeleted": "Lencana dihapus.",
+      "awardCreated": "Lencana ditetapkan.",
+      "pendingCreated": "Penetapan email disimpan sebagai tertunda.",
+      "awardDeleted": "Penetapan dihapus."
+    },
+    "errors": {
+      "generic": "Terjadi kesalahan.",
+      "refresh": "Tidak dapat memuat ulang data lencana.",
+      "titleRequired": "Masukkan nama lencana.",
+      "badgeRequired": "Pilih lencana."
+    },
+    "access": {
+      "signedOutTitle": "Harus masuk",
+      "signedOutDescription": "Hanya anggota tim yang disetujui yang dapat menggunakan dasbor lencana.",
+      "signIn": "Masuk",
+      "notConfiguredTitle": "Dasbor belum dikonfigurasi",
+      "notConfiguredDescription": "Tambahkan anggota tim ke daftar izin sebelum menggunakan halaman ini.",
+      "deniedTitle": "Tidak ada akses",
+      "deniedDescription": "Akun Anda tidak ada di daftar izin dasbor lencana internal."
+    },
+    "meta": {
+      "title": "Lencana internal — GainForest",
+      "description": "Kelola definisi dan penetapan lencana internal."
+    }
   }
 }
