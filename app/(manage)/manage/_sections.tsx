@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { fetchReceipts } from "@/app/_lib/dashboard";
@@ -9,6 +10,7 @@ import {
   fetchProjectsByDid,
   fetchTreeDatasetsByDid,
 } from "@/app/_lib/indexer";
+import { droneAppHref } from "@/app/_lib/urls";
 import { resolveBlobUrl, resolvePdsHost } from "@/app/_lib/pds";
 import { RecordExplorer } from "@/app/_components/RecordExplorer";
 import { getAccountRouteData } from "@/app/account/_lib/account-route";
@@ -27,6 +29,7 @@ import { TreesPageClient } from "./trees/_components/TreesPageClient";
 import { AudioClient } from "./audio/_components/AudioClient";
 import { ManageBumicertsClient } from "./certs/_components/ManageBumicertsClient";
 import { NewBumicertClient, type LinkedProjectPrefill } from "./certs/new/_components/NewBumicertClient";
+import { DroneAppFrame } from "./drone/_components/DroneAppFrame";
 import type { ManageTarget } from "@/lib/links";
 
 export async function ManageHomeSection({ target, wrapDashboard = true }: { target: ManageTarget; wrapDashboard?: boolean }) {
@@ -109,6 +112,32 @@ export function AudioSection({ target }: { target: ManageTarget }) {
       <AudioClient target={target} did={target.did} />
     </Suspense>
   );
+}
+
+export function DroneSection({ target }: { target: ManageTarget }) {
+  if (target.accountKind !== "organization") {
+    return (
+      <Container className="flex min-h-[50vh] items-center justify-center py-12">
+        <section className="max-w-xl rounded-3xl border border-border bg-card p-6 text-center shadow-sm sm:p-8">
+          <p className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">Drone viewer</p>
+          <h1 className="mt-3 font-instrument text-3xl font-light italic tracking-[-0.02em] text-foreground">
+            Select an organization to view drone evidence
+          </h1>
+          <p className="mt-3 text-sm leading-6 text-muted-foreground">
+            Drone layers are attached to organization accounts. Choose an organization you manage to open its drone workspace.
+          </p>
+          <div className="mt-6 flex justify-center">
+            <Link href="/manage/organizations" className="rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90">
+              View my organizations
+            </Link>
+          </div>
+        </section>
+      </Container>
+    );
+  }
+
+  const src = droneAppHref({ projectDid: target.did, view3d: false });
+  return <DroneAppFrame src={src} title="GainForest drone viewer" organizationName={target.displayName} />;
 }
 
 export async function BumicertsSection({ target }: { target: ManageTarget }) {

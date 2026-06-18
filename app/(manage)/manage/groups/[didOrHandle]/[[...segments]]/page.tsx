@@ -6,6 +6,7 @@ import Container from "@/components/ui/container";
 import {
   AudioSection,
   BumicertsSection,
+  DroneSection,
   ManageHomeSection,
   NewBumicertSection,
   ObservationsSection,
@@ -84,6 +85,7 @@ export default async function ManageGroupScopedPage({ params, searchParams }: Pa
   if (first === "sites" && !second) return <SitesSection target={target} />;
   if (first === "trees" && !second) return <TreesSection target={target} />;
   if (first === "audio" && !second) return <AudioSection target={target} />;
+  if (first === "drone" && !second) return <DroneSection target={target} />;
   if (first === "certs" && !second) return <BumicertsSection target={target} />;
   if (first === "certs" && second === "new") return <NewBumicertSection target={target} searchParams={await searchParams} />;
   if (first === "bumicerts") {

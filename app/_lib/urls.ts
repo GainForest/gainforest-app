@@ -16,6 +16,30 @@ export const INDEXER_URL = "https://dev-api-hi.gainforest.app/graphql";
 /** Green Globe live map (data.gainforest.app). */
 export const GLOBE_URL = "https://data.gainforest.app";
 
+/** Drone/orthophoto/point-cloud viewer. */
+export const DRONE_APP_URL = (process.env.NEXT_PUBLIC_DRONE_APP_URL || "https://drone.gainforest.app").replace(/\/$/, "");
+
+export function droneAppHref(options?: {
+  projectDid?: string | null;
+  siteUri?: string | null;
+  view3d?: boolean;
+  demo?: boolean;
+}): string {
+  const query = new URLSearchParams();
+
+  if (options?.projectDid && !options.demo) {
+    query.set("atprotoProject", options.projectDid);
+    query.set("view3d", String(options.view3d ?? false));
+    query.set("basemap", "false");
+    if (options.siteUri) query.set("project-site-id", options.siteUri);
+  } else {
+    query.set("p", "drone-demo");
+    query.set("view3d", String(options?.view3d ?? true));
+  }
+
+  return `${DRONE_APP_URL}/project/Showcase?${query.toString()}`;
+}
+
 const LOCAL_GREEN_GLOBE_PREVIEW_BASE_URL = "http://localhost:8910";
 
 /** Green Globe embedded preview base URL. Override for hosted Green Globe testing. */

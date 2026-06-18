@@ -10,6 +10,7 @@ import {
   Building2Icon,
   CheckIcon,
   CompassIcon,
+  DroneIcon,
   FolderKanbanIcon,
   HeartHandshakeIcon,
   HeartIcon,
@@ -716,6 +717,14 @@ function ManageSection({
       Icon: MicIcon,
       href: manageHref({ basePath }, "audio"),
       pathCheck: { startsWith: manageHref({ basePath }, "audio") },
+    },
+    {
+      kind: "leaf",
+      id: "drone",
+      text: t("myDrone"),
+      Icon: DroneIcon,
+      href: manageHref({ basePath }, "drone"),
+      pathCheck: { startsWith: manageHref({ basePath }, "drone") },
     },
     {
       kind: "leaf",
