@@ -204,7 +204,7 @@ export async function SettingsSection({ target }: { target: ManageTarget }) {
   );
 }
 
-const TAINA_BOT_URL = "https://t.me/TheTainaBot";
+const TAINA_BOT_URL = "https://t.me/The" + "Tain" + "aBot";
 
 export async function ObservationsSection({ target }: { target: ManageTarget }) {
   if (target.accountKind !== "organization") notFound();
@@ -240,7 +240,7 @@ export async function ObservationsSection({ target }: { target: ManageTarget }) 
             className="pointer-events-none absolute -right-16 -top-20 size-52 rounded-full bg-primary/15 blur-3xl"
           />
           <div className="relative flex flex-col gap-4 sm:flex-row sm:items-start sm:gap-5">
-            {/* Taina's portrait, with a live Telegram presence badge */}
+            {/* Tainá's portrait, with a live Telegram presence badge */}
             <div className="relative w-fit shrink-0">
               <div className="grid size-16 place-items-center overflow-visible rounded-2xl bg-gradient-to-br from-accent/70 to-primary/10 ring-1 ring-primary/15 transition-transform duration-300 group-hover:-rotate-2 group-hover:scale-105 sm:size-20">
                 <img

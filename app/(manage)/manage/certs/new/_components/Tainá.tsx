@@ -7,29 +7,29 @@ import { renderPetAnimated, type CodexPetState } from "@/app/_lib/codex-pet";
 import { TAINA_SIM } from "@/app/_lib/taina-sim";
 import { cn } from "@/lib/utils";
 
-// Taina — the Bumicert writing companion (chat ported from gainforest-app's
-// FloatingTaina). She replaces the old static "Tips" list on the
+// Tainá — the Bumicert writing companion (chat ported from gainforest-app's
+// FloatingTainá). She replaces the old static "Tips" list on the
 // create-a-Bumicert page. Two surfaces, one shared chat card:
 //
-//   - Desktop (`<TainaChatDock />`): the chat is shown inline, docked in the
+//   - Desktop (`<TaináChatDock />`): the chat is shown inline, docked in the
 //     sticky sidebar just below the live-preview card. No sprite, no drag —
 //     it's always open.
-//   - Phones (`<TainaMobileTrigger />`): a fixed sprite button pinned just
+//   - Phones (`<TaináMobileTrigger />`): a fixed sprite button pinned just
 //     above the "Preview" button; tapping it opens the same chat in a bottom
 //     sheet.
 //
 // Chat streams from `/api/sim-chat`, which builds the system prompt from
-// Taina's constitution + style records on her owner's PDS.
+// Tainá's constitution + style records on her owner's PDS.
 
 // English copy (ported from gainforest-app's i18n `taina.*` keys, retuned
 // from "welcome a landing visitor" to "help write a Bumicert").
 const COPY = {
   role: "Your Cert writing companion",
-  greetingHello: "Hi; I'm Taina. Writing a Cert? I can help you make it land.",
+  greetingHello: "Hi; I'm Tainá. Writing a Cert? I can help you make it land.",
   greetingHint:
     "Ask me how to title it, what to lead the summary with, or what evidence funders look for — or paste a draft and I'll react.",
   placeholder: "Ask me for tips…",
-  thinking: "Taina is thinking…",
+  thinking: "Tainá is thinking…",
 } as const;
 
 interface ChatMessage {
@@ -84,7 +84,7 @@ function ProgressiveBlur({
 }
 
 // ─── Animated sprite ────────────────────────────────────────────────
-function TainaSprite({
+function TaináSprite({
   size,
   state = "idle",
   className,
@@ -111,7 +111,7 @@ function TainaSprite({
 }
 
 // ─── Shared chat card (header + messages + input + streaming logic) ──
-function TainaChatCard({
+function TaináChatCard({
   className,
   onClose,
 }: {
@@ -151,9 +151,9 @@ function TainaChatCard({
         const reason = err.error || "Something went wrong.";
         const friendly =
           res.status === 503
-            ? "I'm not wired up yet; Taina's chat is not set up on this server."
+            ? "I'm not wired up yet; Tainá's chat is not set up on this server."
             : res.status === 502
-              ? "Taina's chat is briefly unreachable. Try again in a moment."
+              ? "Tainá's chat is briefly unreachable. Try again in a moment."
               : reason;
         setMessages((prev) => [
           ...prev,
@@ -214,13 +214,13 @@ function TainaChatCard({
         });
       }
     } catch (err) {
-      console.error("[Taina] chat failed", err);
+      console.error("[Tainá] chat failed", err);
       setMessages((prev) => [
         ...prev,
         {
           role: "assistant",
           content:
-            "⚠️ Could not reach Taina's chat; check your connection and try again.",
+            "⚠️ Could not reach Tainá's chat; check your connection and try again.",
         },
       ]);
     } finally {
@@ -270,7 +270,7 @@ function TainaChatCard({
         className="pointer-events-none absolute inset-x-0 top-0 z-10 h-[84px] bg-gradient-to-b from-background/85 to-background/0"
       />
       <div className="absolute inset-x-0 top-0 z-20 flex items-center gap-3 px-3 pt-3 pb-2">
-        <TainaSprite size={36} state={streaming ? "review" : "idle"} className="shrink-0" />
+        <TaináSprite size={36} state={streaming ? "review" : "idle"} className="shrink-0" />
         <div className="min-w-0 flex-1">
           <div className="text-[15px] font-medium text-foreground">
             {TAINA_SIM.name}
@@ -297,7 +297,7 @@ function TainaChatCard({
       />
       <div
         role="form"
-        aria-label="Ask Taina"
+        aria-label="Ask Tainá"
         className="absolute inset-x-0 bottom-0 z-20 flex items-end gap-2 px-3 pt-2 pb-3"
       >
         <textarea
@@ -329,13 +329,13 @@ function TainaChatCard({
 }
 
 // ─── Desktop: inline docked chat below the live preview ──────────────
-export function TainaChatDock() {
+export function TaináChatDock() {
   return (
     <div>
       <p className="mb-3 text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground/70">
-        Tips from Taina
+        Tips from Tainá
       </p>
-      <TainaChatCard className="h-[26rem]" />
+      <TaináChatCard className="h-[26rem]" />
     </div>
   );
 }
@@ -343,7 +343,7 @@ export function TainaChatDock() {
 // ─── Mobile: fixed sprite trigger + bottom-sheet chat ────────────────
 // Render this inside the page's fixed bottom-right button stack, above the
 // "Preview" button, so it sits exactly where the old "Tips" button did.
-export function TainaMobileTrigger() {
+export function TaináMobileTrigger() {
   const [open, setOpen] = useState(false);
 
   // Lock body scroll while the sheet is open (matches the Preview sheet).
@@ -361,10 +361,10 @@ export function TainaMobileTrigger() {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        aria-label="Ask Taina for tips"
+        aria-label="Ask Tainá for tips"
         className="grid size-14 place-items-center rounded-full border border-border-soft bg-background shadow-lg"
       >
-        <TainaSprite size={44} />
+        <TaináSprite size={44} />
       </button>
 
       <AnimatePresence>
@@ -385,7 +385,7 @@ export function TainaMobileTrigger() {
               transition={{ type: "spring", stiffness: 320, damping: 34 }}
             >
               <div className="mx-auto mb-3 h-1.5 w-10 rounded-full bg-muted-foreground/25" />
-              <TainaChatCard className="h-[68vh] border-0" onClose={() => setOpen(false)} />
+              <TaináChatCard className="h-[68vh] border-0" onClose={() => setOpen(false)} />
             </motion.div>
           </motion.div>
         ) : null}

@@ -5,7 +5,7 @@ import type { AudioEventItem } from "@/app/_lib/indexer";
 export const SECTIONS = ["events", "deployments", "recordings"] as const;
 export const MODES = ["list", "detail", "new"] as const;
 export const MAX_AUDIO_BYTES = 4 * 1024 * 1024;
-export const TELEGRAM_BOT_URL = "https://t.me/TheTainaBot";
+export const TELEGRAM_BOT_URL = "https://t.me/The" + "Tain" + "aBot";
 export const AUDIO_MIME_TYPES = [
   "audio/wav",
   "audio/x-wav",

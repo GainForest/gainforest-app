@@ -2,7 +2,7 @@
 //
 // Ported from gainforest-app's `app/_lib/codex-pet.ts` (itself a port of
 // simocracy-v2's sprite animator), collapsed into one file because we only
-// consume it from `FloatingTaina` and don't need the validation helpers.
+// consume it from `FloatingTainá` and don't need the validation helpers.
 //
 // Source format (from the OpenAI hatch-pet skill):
 //   - 1536×1872 PNG or WebP, transparent

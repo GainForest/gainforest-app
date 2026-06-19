@@ -145,8 +145,8 @@ export function AudioClient({ did, target }: AudioClientProps) {
             <Button asChild size="sm">
               <Link href={TELEGRAM_BOT_URL} target="_blank" rel="noreferrer">
                 <TelegramIcon />
-                <span className="sm:hidden">{t("useTaina")}</span>
-                <span className="hidden sm:inline">{t("useTainaLong")}</span>
+                <span className="sm:hidden">{t("useTainá")}</span>
+                <span className="hidden sm:inline">{t("useTaináLong")}</span>
               </Link>
             </Button>
             <Popover>
@@ -156,7 +156,7 @@ export function AudioClient({ did, target }: AudioClientProps) {
                   className="inline-flex items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-foreground"
                 >
                   <HelpCircleIcon className="size-3.5" />
-                  {t("whatIsTaina")}
+                  {t("whatIsTainá")}
                 </button>
               </PopoverTrigger>
               <PopoverContent align="end" className="space-y-2.5">

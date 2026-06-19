@@ -46,7 +46,7 @@ import {
   SiteEditorModalId,
 } from "@/app/(manage)/manage/_modals/SiteEditorModal";
 import { BumicertCardVisual } from "@/components/bumicert/BumicertCard";
-import { TainaChatDock, TainaMobileTrigger } from "./Taina";
+import { TaináChatDock, TaináMobileTrigger } from "./Tainá";
 import { HeaderContent } from "@/app/_components/HeaderSlots";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -1543,7 +1543,7 @@ export function NewBumicertClient({
                 </div>
               </div>
 
-              {/* Desktop sidebar: live preview, with Taina's chat docked
+              {/* Desktop sidebar: live preview, with Tainá's chat docked
                   just below it (where the static Tips list used to be). */}
               <aside className="hidden xl:sticky xl:top-20 xl:block xl:self-start">
                 <div className="space-y-8">
@@ -1551,7 +1551,7 @@ export function NewBumicertClient({
                     <p className="mb-3 text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground/70">Live preview</p>
                     <PreviewContent {...previewProps} />
                   </div>
-                  <TainaChatDock />
+                  <TaináChatDock />
                 </div>
               </aside>
             </form>
@@ -1563,9 +1563,9 @@ export function NewBumicertClient({
       {!publishResult ? (
         <>
           <div className="fixed bottom-5 right-5 z-40 flex flex-col items-end gap-3 xl:hidden">
-            {/* Taina sits just above the Preview button — where the old
+            {/* Tainá sits just above the Preview button — where the old
                 "Tips" button used to be. Tapping opens her chat in a sheet. */}
-            <TainaMobileTrigger />
+            <TaináMobileTrigger />
             <Button type="button" variant="outline" size="sm" onClick={() => setMobileSheet("preview")} className="shadow-lg">
               <EyeIcon className="size-4" /> Preview
             </Button>

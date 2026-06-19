@@ -23,7 +23,7 @@ import { PictureHero } from "./PictureHero";
 //
 // The signal we lead with is liveness: a status dot + "last seen Xm ago",
 // then the system vitals the agent embeds (CPU temp, RAM, disk, load, uptime)
-// and the local Taina draft queue.
+// and the local Tainá draft queue.
 
 const POLL_MS = 60_000;
 const MONITOR_URL = "https://github.com/GainForest/pi-taina-monitor";

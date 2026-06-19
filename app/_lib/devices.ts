@@ -2,7 +2,7 @@
  * Field Raspberry Pi liveness — a port of GainForest/pi-taina-monitor's
  * `dashboard/lib/healthchecks.ts`, narrowed to the liveness signals.
  *
- * Each field Pi running Taina pings healthchecks.io every 60s via a systemd
+ * Each field Pi running Tainá pings healthchecks.io every 60s via a systemd
  * timer. Healthchecks.io stores last-ping + status; the heartbeat body embeds
  * two JSON blocks the agent emits — `== system-stats-json ==` (temp / RAM /
  * disk / load / uptime) and `== taina-stats-json ==` (the atproto handle +
@@ -33,7 +33,7 @@ export type DeviceSystem = {
   throttled: boolean;
 };
 
-export type DeviceTaina = {
+export type DeviceTainá = {
   handle: string | null;
   drafts: number | null;
   draftsWithImages: number | null;
@@ -52,7 +52,7 @@ export type Device = {
   nPings: number;
   tags: string[];
   system: DeviceSystem | null;
-  taina: DeviceTaina | null;
+  taina: DeviceTainá | null;
 };
 
 export type DevicesSnapshot = {
@@ -118,7 +118,7 @@ type RawSystemStats = {
   disk?: { total_b?: number | null; used_b?: number | null } | null;
 };
 
-type RawTainaStats = {
+type RawTaináStats = {
   version?: string | null;
   atproto?: { handle?: string | null };
   drafts?: { total?: number; with_images?: number; users?: number; oldest_iso?: string | null };
@@ -142,7 +142,7 @@ function mapSystem(raw: RawSystemStats | null): DeviceSystem | null {
   };
 }
 
-function mapTaina(raw: RawTainaStats | null): DeviceTaina | null {
+function mapTainá(raw: RawTaináStats | null): DeviceTainá | null {
   if (!raw) return null;
   return {
     handle: raw.atproto?.handle ?? null,
@@ -201,7 +201,7 @@ export async function fetchDevices(): Promise<DevicesSnapshot> {
         const uuid = checkUuid(check);
         const body = uuid ? await getLastPingBody(uuid, apiKey) : null;
         const system = mapSystem(parseEmbeddedJson<RawSystemStats>(body, "== system-stats-json =="));
-        const taina = mapTaina(parseEmbeddedJson<RawTainaStats>(body, "== taina-stats-json =="));
+        const taina = mapTainá(parseEmbeddedJson<RawTaináStats>(body, "== taina-stats-json =="));
         return {
           id: uuid ?? check.slug ?? check.name ?? crypto.randomUUID(),
           name: check.name || check.slug || "unnamed",

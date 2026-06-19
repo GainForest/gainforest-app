@@ -1,4 +1,4 @@
-// Taina sim — the Simocracy sim at
+// Tainá sim — the Simocracy sim at
 //   https://www.simocracy.org/sims/taina
 //   at://did:plc:qc42fmqqlsmdq7jiypiiigww/org.simocracy.sim/3ml7iunv6pp2m
 //
@@ -11,9 +11,9 @@
 // `buildSystemPrompt` moved from "welcome the landing visitor" to "help the
 // author write this Cert".
 //
-// Taina is GainForest's community-facing AI assistant, born during the
+// Tainá is GainForest's community-facing AI assistant, born during the
 // XPRIZE Rainforest in Greater Manaus, where the Indigenous communities
-// renamed her from "Dora the Explorer" to "Taina" — the Indigenous
+// renamed her from "Dora the Explorer" to "Tainá" — the Indigenous
 // Brazilian Dora. Her constitution centres data sovereignty, storytelling,
 // and Indigenous Peoples & Local Communities (IPLCs).
 
@@ -21,7 +21,7 @@ export const TAINA_SIM = {
   did: "did:plc:qc42fmqqlsmdq7jiypiiigww",
   rkey: "3ml7iunv6pp2m",
   uri: "at://did:plc:qc42fmqqlsmdq7jiypiiigww/org.simocracy.sim/3ml7iunv6pp2m",
-  name: "Taina",
+  name: "Tainá",
   // Local copies of the sim's blob assets (downloaded from the owner's
   // PDS). Avoids a ~1.9 MB cross-origin fetch every page load and keeps
   // the codex-pet sheet next to all our other static assets.
@@ -84,7 +84,7 @@ async function listRecords(
 // Return the agents (constitution) + style records that target this sim.
 // We walk all records in each collection on the sim owner's PDS and match
 // on `value.sim.uri` — the same join simocracy's indexer does.
-export async function getTainaPersona(): Promise<SimPersona> {
+export async function getTaináPersona(): Promise<SimPersona> {
   const pds = await resolvePds(TAINA_SIM.did);
   if (!pds) return { shortDescription: null, description: null, style: null };
 
@@ -112,7 +112,7 @@ export async function getTainaPersona(): Promise<SimPersona> {
   };
 }
 
-// Build the system prompt the chat route hands to the LLM. Keeps Taina's
+// Build the system prompt the chat route hands to the LLM. Keeps Tainá's
 // identity/constitution/style verbatim from gainforest-app, but reframes her
 // job around the Cert creation page she's now sitting on.
 export function buildSystemPrompt(persona: SimPersona): string {
@@ -128,8 +128,8 @@ export function buildSystemPrompt(persona: SimPersona): string {
   if (persona.style) {
     prompt += `## Your Speaking Style\n${persona.style}\n\n`;
   }
-  // Origin story Taina can share when asked who she is / why she's here.
-  prompt += `## Page Lore (use only when asked)\nYou started life as "Dora the Explorer" — a Telegram-bot prototype the GainForest team brought to Greater Manaus during the XPRIZE Rainforest. The Indigenous communities there renamed you Taina (the Indigenous Brazilian Dora) and that is the name you carry now. GainForest itself is a Swiss non-profit that works on nature funding and research alongside Indigenous Peoples and local communities. Share this story (in your own voice) when an author asks who you are or where you come from. Don't volunteer it unprompted.\n\n`;
+  // Origin story Tainá can share when asked who she is / why she's here.
+  prompt += `## Page Lore (use only when asked)\nYou started life as "Dora the Explorer" — a Telegram-bot prototype the GainForest team brought to Greater Manaus during the XPRIZE Rainforest. The Indigenous communities there renamed you Tainá (the Indigenous Brazilian Dora) and that is the name you carry now. GainForest itself is a Swiss non-profit that works on nature funding and research alongside Indigenous Peoples and local communities. Share this story (in your own voice) when an author asks who you are or where you come from. Don't volunteer it unprompted.\n\n`;
   prompt += "## Your Job Right Now\nYou're sitting in the corner of the Cert creation page, helping the author write a clear, trustworthy Cert. Offer concrete, practical tips when asked — and gentle nudges if they share a draft. Your core guidance:\n";
   prompt += `- A clear, recognisable title travels further than a clever one.\n`;
   prompt += `- The summary leads with the outcome, not the method.\n`;

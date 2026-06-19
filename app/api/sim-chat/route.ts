@@ -1,16 +1,16 @@
-import { buildSystemPrompt, getTainaPersona, TAINA_SIM } from "@/app/_lib/taina-sim";
+import { buildSystemPrompt, getTaináPersona, TAINA_SIM } from "@/app/_lib/taina-sim";
 import { openRouterChat } from "@/app/_lib/openrouter";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-// `/api/sim-chat` — streams a chat reply in the Taina sim's voice.
+// `/api/sim-chat` — streams a chat reply in the Tainá sim's voice.
 //
 // Ported from gainforest-app's `app/api/sim-chat/route.ts`, trimmed for this
 // app: the Bumicert authoring companion is English-only, so the locale /
 // language-directive machinery is dropped. The system prompt is built fresh
 // per request, but the persona fetch is cached by Next ISR via fetch()
-// revalidate inside `getTainaPersona`.
+// revalidate inside `getTaináPersona`.
 
 const MAX_MESSAGES = 20;
 const MAX_CONTENT_CHARS = 4000;
@@ -63,13 +63,13 @@ export async function POST(request: Request) {
         content: String(m.content).slice(0, MAX_CONTENT_CHARS),
       }));
 
-    const persona = await getTainaPersona();
+    const persona = await getTaináPersona();
     const systemPrompt = buildSystemPrompt(persona);
 
     if (!process.env.OPENROUTER_API_KEY) {
       return Response.json(
         {
-          error: "Taina is not set up on this server yet.",
+          error: "Tainá is not set up on this server yet.",
         },
         { status: 503 },
       );
@@ -85,7 +85,7 @@ export async function POST(request: Request) {
     if (!res.ok) {
       const err = await res.text().catch(() => "");
       console.error("[sim-chat] OpenRouter error", res.status, err);
-      return Response.json({ error: "Taina is briefly unreachable." }, { status: 502 });
+      return Response.json({ error: "Tainá is briefly unreachable." }, { status: 502 });
     }
 
     return new Response(res.body, {
@@ -97,6 +97,6 @@ export async function POST(request: Request) {
     });
   } catch (err) {
     console.error("[sim-chat] failed", err);
-    return Response.json({ error: "Taina could not reply right now." }, { status: 500 });
+    return Response.json({ error: "Tainá could not reply right now." }, { status: 500 });
   }
 }
