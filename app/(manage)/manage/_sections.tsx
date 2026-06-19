@@ -13,6 +13,8 @@ import {
 import { droneAppHref } from "@/app/_lib/urls";
 import { resolveBlobUrl, resolvePdsHost } from "@/app/_lib/pds";
 import { RecordExplorer } from "@/app/_components/RecordExplorer";
+import { Button } from "@/components/ui/button";
+import TelegramIcon from "@/icons/TelegramIcon";
 import { getAccountRouteData } from "@/app/account/_lib/account-route";
 import { formatCgsErrorMessage } from "@/app/_lib/cgs-errors";
 import { fetchAuthSession } from "@/app/_lib/auth-server";
@@ -200,18 +202,50 @@ export async function SettingsSection({ target }: { target: ManageTarget }) {
   );
 }
 
+const TAINA_BOT_URL = "https://t.me/TheTainaBot";
+
 export function ObservationsSection({ target }: { target: ManageTarget }) {
   if (target.accountKind !== "organization") notFound();
   return (
-    <Container className="pt-4 pb-8">
-      <div className="mb-6">
-        <h1 className="text-2xl font-medium">Observations</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Review occurrence records attached to this organization.</p>
+    <div className="bg-background pb-4">
+      {/* Hero — aligned to the RecordExplorer's max-w-6xl px-6 column below. */}
+      <div className="mx-auto max-w-6xl px-6 pt-4">
+        <header className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div className="max-w-xl">
+            <h1 className="font-instrument text-2xl font-medium italic tracking-[-0.03em] text-foreground sm:text-3xl">
+              Observations
+            </h1>
+            <p className="mt-2 text-sm leading-6 text-muted-foreground">
+              Review the biodiversity occurrence records attached to this organization.
+            </p>
+          </div>
+        </header>
+
+        <div className="mt-5 flex items-start gap-3 rounded-2xl border border-border bg-muted/40 p-4">
+          <span className="grid size-9 shrink-0 place-items-center rounded-full bg-primary/10 text-primary">
+            <TelegramIcon className="size-4" />
+          </span>
+          <div className="min-w-0">
+            <p className="font-instrument text-base font-medium italic text-foreground">Meet Taina</p>
+            <p className="mt-1 text-sm leading-6 text-muted-foreground">
+              Taina is our helper on Telegram. Chat with her to upload observations straight from the
+              field — photos, sightings, and field sound recordings land in this organization&apos;s
+              account automatically, even the large AudioMoth files that won&apos;t upload here.
+            </p>
+            <Button asChild variant="outline" size="sm" className="mt-3">
+              <Link href={TAINA_BOT_URL} target="_blank" rel="noreferrer">
+                <TelegramIcon />
+                Open Taina on Telegram
+              </Link>
+            </Button>
+          </div>
+        </div>
       </div>
+
       <Suspense fallback={null}>
         <RecordExplorer kind="occurrence" ownerDid={target.did} showHero={false} />
       </Suspense>
-    </Container>
+    </div>
   );
 }
 
