@@ -130,6 +130,7 @@ export async function resolveGroupManageAccess(identifier: string): Promise<Grou
       role: membership.role,
       displayName: account.displayName || membership.displayName || null,
       avatarUrl: account.avatarUrl || membership.avatarUrl || null,
+      currentUserDid: session.did,
     }),
   };
 }

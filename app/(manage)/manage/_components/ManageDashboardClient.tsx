@@ -53,7 +53,7 @@ import { SocialGlyph } from "@/app/_components/SocialIcon";
 import { GroupMembers } from "../groups/_components/GroupMembers";
 import { ManageGroupsClient } from "../groups/_components/ManageGroupsClient";
 import { useAccountList } from "@/app/_lib/account-switcher";
-import type { CgsMember, CgsRole } from "../_lib/cgs";
+import type { CgsRole } from "../_lib/cgs";
 
 function decodePath(value: string): string {
   try {
@@ -335,23 +335,17 @@ function EditableHero({
         </button>
 
         <div className="absolute right-3 top-3 z-10 flex items-center gap-2">
-          <Link
-            href={publicAccountHref(account.urlIdentifier)}
-            className="flex h-9 items-center gap-1.5 rounded-full border border-border/50 bg-background/65 px-3 text-sm font-medium text-foreground/70 shadow-sm backdrop-blur-xl transition-colors hover:bg-background/90 hover:text-foreground"
-            aria-label={t("hero.viewPublicPage")}
-            title={t("hero.viewPublicPage")}
-          >
-            <EyeIcon className="size-4" />
-            <span className="hidden sm:inline">{t("hero.viewPublicPage")}</span>
-          </Link>
-          <Link
-            href={`${basePath}/settings`}
-            className="flex size-9 items-center justify-center rounded-full border border-border/50 bg-background/65 text-foreground/70 shadow-sm backdrop-blur-xl transition-colors hover:bg-background/90 hover:text-foreground"
-            aria-label={t("hero.settings")}
-            title={t("hero.settings")}
-          >
-            <SettingsIcon className="size-4" />
-          </Link>
+          <Button asChild variant="outline" size="sm" aria-label={t("hero.viewPublicPage")} title={t("hero.viewPublicPage")}>
+            <Link href={publicAccountHref(account.urlIdentifier)}>
+              <EyeIcon />
+              <span className="hidden sm:inline">{t("hero.viewPublicPage")}</span>
+            </Link>
+          </Button>
+          <Button asChild variant="outline" size="icon" aria-label={t("hero.settings")} title={t("hero.settings")}>
+            <Link href={`${basePath}/settings`}>
+              <SettingsIcon />
+            </Link>
+          </Button>
         </div>
       </div>
 
@@ -408,9 +402,9 @@ function EditableHero({
                   {editState.displayName || account.displayName}
                 </h1>
                 {canEdit ? (
-                  <button type="button" onClick={() => onEditField("profile")} className="mt-1 rounded-full p-1 text-foreground/40 transition-colors hover:bg-muted hover:text-foreground" aria-label={t("hero.editProfileAria")}>
-                    <PencilIcon className="size-4" />
-                  </button>
+                  <Button type="button" variant="ghost" size="icon-sm" onClick={() => onEditField("profile")} aria-label={t("hero.editProfileAria")}>
+                    <PencilIcon />
+                  </Button>
                 ) : null}
               </div>
               <p className={cn("mt-1.5 line-clamp-2 text-sm leading-relaxed", editState.description ? "text-muted-foreground" : "text-muted-foreground/60")}>
@@ -452,13 +446,13 @@ function EditableHero({
           ) : null}
           {isOrg ? (
             <Button variant="outline" onClick={onEditSocials} disabled={!canEdit} title={editDisabledReason ?? undefined} className={cn(!editState.socials.length && "text-muted-foreground")}>
+              <Link2Icon />
+              {t("hero.addSocialLinks")}
               {editState.socials.length ? (
-                editState.socials.map((url) => <SocialGlyph key={url} platform={classifySocial(url)} />)
-              ) : (
-                <>
-                  <Link2Icon /> {t("hero.addSocialLinks")}
-                </>
-              )}
+                <span className="flex items-center gap-1">
+                  {editState.socials.map((url) => <SocialGlyph key={url} platform={classifySocial(url)} />)}
+                </span>
+              ) : null}
             </Button>
           ) : null}
         </div>
@@ -493,8 +487,6 @@ export function ManageDashboardClient({
   writeRepoDid,
   groupRole,
   currentUserDid,
-  initialGroupMembers,
-  initialGroupMembersError,
   children,
 }: {
   account: AccountRouteData;
@@ -504,8 +496,6 @@ export function ManageDashboardClient({
   /** When scoped into an organization, the current user's role — enables the members list. */
   groupRole?: CgsRole;
   currentUserDid?: string | null;
-  initialGroupMembers?: CgsMember[];
-  initialGroupMembersError?: string | null;
   children?: React.ReactNode;
 }) {
   const router = useRouter();
@@ -870,8 +860,7 @@ export function ManageDashboardClient({
                 currentRole={groupRole}
                 currentUserDid={currentUserDid}
                 variant="section"
-                initialMembers={initialGroupMembers}
-                initialError={initialGroupMembersError}
+                showDataCouncil
               />
             ) : null}
           </>

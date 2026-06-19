@@ -442,5 +442,11 @@
       "assigningBadge": "Menetapkan lencana…",
       "removingAward": "Menghapus penetapan lencana…"
     }
+  },
+  "accountDataCouncil": {
+    "title": "Dewan Data",
+    "description": "Orang dengan badge ini membantu mengelola data dan bukti bersama milik organisasi.",
+    "empty": "Belum ada anggota Dewan Data yang tercantum.",
+    "memberFallback": "Anggota tim"
   }
 }

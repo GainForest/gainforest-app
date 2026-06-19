@@ -652,7 +652,8 @@
       "errors": {
         "load": "Tidak dapat memuat Dewan Data.",
         "save": "Tidak dapat menyimpan perubahan Dewan Data."
-      }
+      },
+      "addLabel": "Tambahkan ke Dewan Data"
     }
   },
   "dashboardClient": {

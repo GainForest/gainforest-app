@@ -442,5 +442,11 @@
       "assigningBadge": "Atribuindo distintivo…",
       "removingAward": "Removendo atribuição de distintivo…"
     }
+  },
+  "accountDataCouncil": {
+    "title": "Conselho de Dados",
+    "description": "Pessoas com este distintivo ajudam a cuidar dos dados e evidências compartilhados da organização.",
+    "empty": "Ainda não há membros do Conselho de Dados listados.",
+    "memberFallback": "Membro da equipe"
   }
 }

@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react";
 import { motion } from "framer-motion";
 import { useTranslations } from "next-intl";
-import { Loader2Icon, LockIcon, RefreshCwIcon, Trash2Icon, UserPlusIcon, UsersIcon } from "lucide-react";
+import { CheckIcon, Loader2Icon, LockIcon, RefreshCwIcon, Trash2Icon, UserPlusIcon, UsersIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
@@ -12,7 +12,6 @@ import { formatCgsErrorMessage } from "@/app/_lib/cgs-errors";
 import { monogram, resolveDidProfile, type DidProfile } from "@/app/_lib/did-profile";
 import {
   addCgsMember,
-  listCgsMembers,
   removeCgsMember,
   resolveCgsMemberIdentity,
   setCgsMemberRole,
@@ -29,11 +28,19 @@ type DataCouncilResponse = {
   canWriteBadges: boolean;
 };
 
+type GroupSettingsResponse = {
+  members: CgsMember[];
+  profiles?: DidProfile[];
+  dataCouncil?: DataCouncilResponse | null;
+  dataCouncilError?: string | null;
+};
+
 type DataCouncilRowState = {
   checked: boolean;
   disabled: boolean;
   pending: boolean;
   label: string;
+  addLabel: string;
   addAria: string;
   removeAria: string;
   onToggle: (did: string, selected: boolean) => void;
@@ -58,6 +65,11 @@ function formatDate(value?: string | null) {
 
 function memberErrorMessage(error: unknown, fallback: string): string {
   return formatCgsErrorMessage(error, fallback);
+}
+
+function profilesByDid(profiles?: DidProfile[]): Record<string, DidProfile> {
+  if (!profiles?.length) return {};
+  return Object.fromEntries(profiles.map((profile) => [profile.did, profile]));
 }
 
 async function parseJsonResponse<T>(response: Response, fallback: string): Promise<T> {
@@ -134,21 +146,18 @@ function MemberRow({
       )}
 
       {dataCouncil ? (
-        <label className={cn(
-          "inline-flex h-8 shrink-0 items-center gap-2 rounded-full border border-border bg-background px-3 text-xs font-medium text-foreground transition-colors",
-          dataCouncil.disabled ? "opacity-60" : "cursor-pointer hover:border-primary/50 hover:bg-primary/5",
-        )}>
-          {dataCouncil.pending ? <Loader2Icon className="size-3.5 animate-spin text-muted-foreground" /> : null}
-          <input
-            type="checkbox"
-            className="size-3.5 accent-primary"
-            checked={dataCouncil.checked}
-            disabled={dataCouncil.disabled}
-            onChange={(event) => dataCouncil.onToggle(member.did, event.target.checked)}
-            aria-label={dataCouncil.checked ? dataCouncil.removeAria : dataCouncil.addAria}
-          />
-          {dataCouncil.label}
-        </label>
+        <Button
+          type="button"
+          variant={dataCouncil.checked ? "secondary" : "ghost"}
+          size="sm"
+          disabled={dataCouncil.disabled}
+          onClick={() => dataCouncil.onToggle(member.did, !dataCouncil.checked)}
+          aria-label={dataCouncil.checked ? dataCouncil.removeAria : dataCouncil.addAria}
+          className={cn("h-8 shrink-0 rounded-full px-3 text-xs", !dataCouncil.checked && "text-muted-foreground")}
+        >
+          {dataCouncil.pending ? <Loader2Icon className="animate-spin" /> : dataCouncil.checked ? <CheckIcon /> : null}
+          {dataCouncil.checked ? dataCouncil.label : dataCouncil.addLabel}
+        </Button>
       ) : null}
 
       {removable ? (
@@ -221,20 +230,29 @@ export function GroupMembers({
     setDataCouncilLoaded(true);
   }, []);
 
-  const loadDataCouncil = useCallback(async () => {
-    if (!canUseDataCouncil) return;
+  const loadGroupSettings = useCallback(async () => {
     const params = new URLSearchParams({ repo: groupDid });
-    const response = await fetch(`/api/manage/data-council?${params.toString()}`, { cache: "no-store" });
-    applyDataCouncilState(await parseJsonResponse<DataCouncilResponse>(response, dataCouncilLoadError));
+    if (canUseDataCouncil) params.set("dataCouncil", "1");
+    const response = await fetch(`/api/manage/group-settings?${params.toString()}`, { cache: "no-store" });
+    const data = await parseJsonResponse<GroupSettingsResponse>(response, "Could not load members.");
+    setMembers(data.members ?? []);
+    setProfiles((current) => ({ ...current, ...profilesByDid(data.profiles) }));
+    if (canUseDataCouncil) {
+      if (data.dataCouncil) applyDataCouncilState(data.dataCouncil);
+      else {
+        setDataCouncilSelected(new Set());
+        setDataCouncilCanWrite(false);
+        setDataCouncilLoaded(true);
+      }
+      if (data.dataCouncilError) setError(memberErrorMessage(data.dataCouncilError, dataCouncilLoadError));
+    }
   }, [applyDataCouncilState, canUseDataCouncil, dataCouncilLoadError, groupDid]);
 
   const refresh = useCallback(() => {
     runPending(async () => {
       setError(null);
       try {
-        const result = await listCgsMembers(groupDid);
-        setMembers(result.members ?? []);
-        if (canUseDataCouncil) await loadDataCouncil();
+        await loadGroupSettings();
       } catch (err) {
         setError(memberErrorMessage(err, "Could not load members."));
         if (canUseDataCouncil) setDataCouncilLoaded(true);
@@ -242,32 +260,25 @@ export function GroupMembers({
         setLoaded(true);
       }
     });
-  }, [canUseDataCouncil, groupDid, loadDataCouncil, runPending]);
+  }, [canUseDataCouncil, loadGroupSettings, runPending]);
 
   useEffect(() => {
     setMembers(initialMembers ?? []);
     setError(initialError);
     setLoaded(hasInitialMembers || Boolean(initialError));
+    setDataCouncilLoaded(!canUseDataCouncil);
+    setDataCouncilSelected(new Set());
+    setDataCouncilCanWrite(false);
     if (!hasInitialMembers && !initialError) refresh();
-  }, [groupDid, hasInitialMembers, initialError, initialMembers, refresh]);
+  }, [canUseDataCouncil, groupDid, hasInitialMembers, initialError, initialMembers, refresh]);
 
   useEffect(() => {
     if (!canUseDataCouncil) {
       setDataCouncilLoaded(true);
       setDataCouncilSelected(new Set());
       setDataCouncilCanWrite(false);
-      return;
     }
-    setDataCouncilLoaded(false);
-    runPending(async () => {
-      try {
-        await loadDataCouncil();
-      } catch (err) {
-        setError(memberErrorMessage(err, dataCouncilLoadError));
-        setDataCouncilLoaded(true);
-      }
-    });
-  }, [canUseDataCouncil, dataCouncilLoadError, loadDataCouncil, runPending]);
+  }, [canUseDataCouncil]);
 
   // Hydrate member identities (name + avatar) from the app's account-card endpoint.
   useEffect(() => {
@@ -292,13 +303,31 @@ export function GroupMembers({
     const nextRole = canSetRoles ? role : "member";
     runPending(async () => {
       setError(null);
+      const previousMembers = members;
       try {
         const identity = await resolveCgsMemberIdentity(identifier);
-        await addCgsMember(groupDid, identity.did, nextRole);
+        const optimisticMember: CgsMember = {
+          did: identity.did,
+          role: nextRole,
+          addedBy: currentUserDid,
+          addedAt: new Date().toISOString(),
+        };
+        setProfiles((current) => ({
+          ...current,
+          [identity.did]: {
+            did: identity.did,
+            handle: identity.handle ?? null,
+            displayName: identity.displayName ?? null,
+            avatar: identity.avatarUrl ?? null,
+          },
+        }));
+        setMembers((current) => current.some((member) => member.did === identity.did)
+          ? current.map((member) => (member.did === identity.did ? { ...member, role: nextRole } : member))
+          : [...current, optimisticMember]);
         setMemberIdentifier("");
-        const result = await listCgsMembers(groupDid);
-        setMembers(result.members ?? []);
+        await addCgsMember(groupDid, identity.did, nextRole);
       } catch (err) {
+        setMembers(previousMembers);
         setError(memberErrorMessage(err, "Could not add member."));
       }
     });
@@ -308,10 +337,14 @@ export function GroupMembers({
     if (!canSetRoles) return;
     runPending(async () => {
       setError(null);
+      const previousRole = members.find((member) => member.did === did)?.role ?? null;
+      setMembers((current) => current.map((member) => (member.did === did ? { ...member, role: nextRole } : member)));
       try {
         await setCgsMemberRole(groupDid, did, nextRole);
-        setMembers((current) => current.map((member) => (member.did === did ? { ...member, role: nextRole } : member)));
       } catch (err) {
+        if (previousRole) {
+          setMembers((current) => current.map((member) => (member.did === did ? { ...member, role: previousRole } : member)));
+        }
         setError(memberErrorMessage(err, "Could not update role."));
       }
     });
@@ -322,15 +355,19 @@ export function GroupMembers({
     if (!canAddRemove && !isSelf) return;
     runPending(async () => {
       setError(null);
+      const previousMembers = members;
+      const previousCouncil = dataCouncilSelected;
+      setMembers((current) => current.filter((member) => member.did !== did));
+      setDataCouncilSelected((current) => {
+        const next = new Set(current);
+        next.delete(did);
+        return next;
+      });
       try {
         await removeCgsMember(groupDid, did);
-        setMembers((current) => current.filter((member) => member.did !== did));
-        setDataCouncilSelected((current) => {
-          const next = new Set(current);
-          next.delete(did);
-          return next;
-        });
       } catch (err) {
+        setMembers(previousMembers);
+        setDataCouncilSelected(previousCouncil);
         setError(memberErrorMessage(err, "Could not remove member."));
       }
     });
@@ -339,6 +376,13 @@ export function GroupMembers({
   const toggleDataCouncil = (did: string, selected: boolean) => {
     if (!canUseDataCouncil || !dataCouncilCanWrite || dataCouncilSavingDid) return;
     setDataCouncilSavingDid(did);
+    const previousCouncil = dataCouncilSelected;
+    setDataCouncilSelected((current) => {
+      const next = new Set(current);
+      if (selected) next.add(did);
+      else next.delete(did);
+      return next;
+    });
     runPending(async () => {
       setError(null);
       try {
@@ -347,8 +391,11 @@ export function GroupMembers({
           headers: { "content-type": "application/json" },
           body: JSON.stringify({ repo: groupDid, memberDid: did, selected }),
         });
-        applyDataCouncilState(await parseJsonResponse<DataCouncilResponse>(response, dataCouncilSaveError));
+        const data = await parseJsonResponse<DataCouncilResponse>(response, dataCouncilSaveError);
+        setDataCouncilSelected(new Set(data.awardedDids ?? []));
+        setDataCouncilCanWrite(data.canWriteBadges);
       } catch (err) {
+        setDataCouncilSelected(previousCouncil);
         setError(memberErrorMessage(err, dataCouncilSaveError));
       } finally {
         setDataCouncilSavingDid(null);
@@ -408,7 +455,7 @@ export function GroupMembers({
 
   const dataCouncilNotice = canUseDataCouncil && dataCouncilLoaded && !dataCouncilCanWrite ? (
     <p className="flex items-center gap-2 rounded-2xl bg-muted/50 px-3.5 py-2.5 text-sm text-muted-foreground">
-      <LockIcon className="size-3.5 shrink-0" /> {dataCouncilT("lockedBadges")}
+      <LockIcon className="size-3.5 shrink-0" /> {dataCouncilT("lockedRole")}
     </p>
   ) : null;
 
@@ -442,6 +489,7 @@ export function GroupMembers({
                 disabled: isPending || !dataCouncilLoaded || !dataCouncilCanWrite,
                 pending: dataCouncilSavingDid === member.did,
                 label: dataCouncilT("title"),
+                addLabel: dataCouncilT("addLabel"),
                 addAria: dataCouncilT("addAria", { name: displayName }),
                 removeAria: dataCouncilT("removeAria", { name: displayName }),
                 onToggle: toggleDataCouncil,

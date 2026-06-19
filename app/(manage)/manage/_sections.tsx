@@ -18,15 +18,13 @@ import { RecordExplorer } from "@/app/_components/RecordExplorer";
 import { Button } from "@/components/ui/button";
 import TelegramIcon from "@/icons/TelegramIcon";
 import { getAccountRouteData } from "@/app/account/_lib/account-route";
-import { formatCgsErrorMessage } from "@/app/_lib/cgs-errors";
 import { fetchAuthSession } from "@/app/_lib/auth-server";
-import { fetchCgsMembersForRequest } from "@/app/_lib/cgs-server";
 import { AccountSettingsSections } from "@/app/account/_components/AccountSettingsSections";
 import Container from "@/components/ui/container";
 import { ManageOverview } from "./_components/ManageOverview";
 import { ManageDashboard } from "./_components/ManageDashboard";
 import { GroupMembers } from "./groups/_components/GroupMembers";
-import type { CgsMember, CgsRole } from "./_lib/cgs";
+import type { CgsRole } from "./_lib/cgs";
 import { ManageProjectsClient } from "./projects/_components/ManageProjectsClient";
 import { SitesClient } from "./sites/_components/SitesClient";
 import { TreesPageClient } from "./trees/_components/TreesPageClient";
@@ -73,10 +71,7 @@ export async function ManageHomeSection({ target, wrapDashboard = true }: { targ
   const groupRole: CgsRole | undefined = target.kind === "group"
     ? target.role === "owner" ? "owner" : target.role === "admin" ? "admin" : "member"
     : undefined;
-  const [initialMembers, session] = await Promise.all([
-    target.kind === "group" ? loadInitialGroupMembers(target.did) : Promise.resolve(null),
-    target.kind === "group" ? fetchAuthSession() : Promise.resolve(null),
-  ]);
+  const session = target.kind === "group" && !target.currentUserDid ? await fetchAuthSession() : null;
 
   return (
     <ManageDashboard
@@ -84,9 +79,7 @@ export async function ManageHomeSection({ target, wrapDashboard = true }: { targ
       basePath={target.basePath}
       writeRepoDid={target.kind === "group" ? target.did : undefined}
       groupRole={groupRole}
-      currentUserDid={session?.isLoggedIn ? session.did : null}
-      initialGroupMembers={initialMembers?.members}
-      initialGroupMembersError={initialMembers?.error ?? null}
+      currentUserDid={target.currentUserDid ?? (session?.isLoggedIn ? session.did : null)}
     >
       {overview}
     </ManageDashboard>
@@ -174,7 +167,11 @@ export async function SettingsSection({ target }: { target: ManageTarget }) {
   const t = await getTranslations("upload.settings");
   if (target.kind === "group") {
     const role: CgsRole = target.role === "owner" ? "owner" : target.role === "admin" ? "admin" : "member";
-    const [initialMembers, session] = await Promise.all([loadInitialGroupMembers(target.did), fetchAuthSession()]);
+    let currentUserDid = target.currentUserDid ?? null;
+    if (!currentUserDid) {
+      const session = await fetchAuthSession();
+      currentUserDid = session.isLoggedIn ? session.did : null;
+    }
     return (
       <Container className="pt-4 pb-8">
         <div className="mb-6">
@@ -184,10 +181,8 @@ export async function SettingsSection({ target }: { target: ManageTarget }) {
         <GroupMembers
           groupDid={target.did}
           currentRole={role}
-          currentUserDid={session.isLoggedIn ? session.did : null}
+          currentUserDid={currentUserDid}
           variant="section"
-          initialMembers={initialMembers.members}
-          initialError={initialMembers.error}
           showDataCouncil
         />
       </Container>
@@ -293,23 +288,6 @@ type PdsRecordResponse = {
   cid?: string;
   value?: Record<string, unknown>;
 };
-
-type InitialGroupMembers = {
-  members: CgsMember[];
-  error: string | null;
-};
-
-async function loadInitialGroupMembers(groupDid: string): Promise<InitialGroupMembers> {
-  try {
-    const result = await fetchCgsMembersForRequest(groupDid);
-    return { members: result.members, error: null };
-  } catch (error) {
-    return {
-      members: [],
-      error: formatCgsErrorMessage(error, "Could not load members."),
-    };
-  }
-}
 
 function projectParam(value: string | string[] | undefined): string | null {
   const raw = Array.isArray(value) ? value[0] : value;

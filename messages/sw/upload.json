@@ -652,7 +652,8 @@
       "errors": {
         "load": "Haikuweza kupakia Baraza la Data.",
         "save": "Haikuweza kuhifadhi mabadiliko ya Baraza la Data."
-      }
+      },
+      "addLabel": "Ongeza kwenye Baraza la Data"
     }
   },
   "dashboardClient": {

@@ -442,5 +442,11 @@
       "assigningBadge": "Inatoa beji…",
       "removingAward": "Inaondoa utoaji wa beji…"
     }
+  },
+  "accountDataCouncil": {
+    "title": "Baraza la Data",
+    "description": "Watu walio na beji hii husaidia kusimamia data na ushahidi wa pamoja wa shirika.",
+    "empty": "Bado hakuna wanachama wa Baraza la Data walioorodheshwa.",
+    "memberFallback": "Mwanachama wa timu"
   }
 }

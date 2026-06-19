@@ -1,7 +1,9 @@
+import Image from "next/image";
 import Link from "next/link";
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { ChevronRightIcon } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 import { ProjectGalleryViewer } from "../../_components/ProjectGalleryViewer";
 import { RichText } from "../../_components/RichText";
 import { RecordExplorer } from "../../_components/RecordExplorer";
@@ -10,6 +12,8 @@ import { AccountContentColumns, AccountSidebar } from "./AccountSidebar";
 import { AccountSettingsSections } from "./AccountSettingsSections";
 import { DonationHistory } from "./DonationHistory";
 import { fetchReceipts } from "../../_lib/dashboard";
+import { fetchPublicDataCouncilMembers, type PublicDataCouncilMember } from "../../_lib/data-council";
+import { monogram } from "../../_lib/did-profile";
 import { attachProjectTitlesToGalleries, fetchBumicertsByDid, fetchProjectImageGalleriesByDid, fetchProjectsByDid } from "../../_lib/indexer";
 import type { AccountRouteData } from "../_lib/account-route";
 
@@ -36,19 +40,70 @@ function ManageActionRow({ action }: { action?: ManageAction | null }) {
   );
 }
 
-export function AccountHomeTabContent({ account }: { account: AccountRouteData }) {
-  if (!account.detail?.richBody?.length && !account.detail?.blurb) return null;
+function DataCouncilAvatar({ member }: { member: PublicDataCouncilMember }) {
+  const mono = monogram(member.displayName?.trim() || "Member", member.did);
+  return (
+    <div className="relative flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-full text-sm font-semibold text-white">
+      {member.avatarUrl ? (
+        <Image src={member.avatarUrl} alt="" fill className="object-cover" unoptimized />
+      ) : (
+        <span aria-hidden style={{ backgroundColor: mono.bg }} className="flex size-full items-center justify-center">
+          {mono.char}
+        </span>
+      )}
+    </div>
+  );
+}
+
+async function AccountDataCouncilSection({ did }: { did: string }) {
+  const [t, members] = await Promise.all([
+    getTranslations("common.accountDataCouncil"),
+    fetchPublicDataCouncilMembers(did).catch(() => []),
+  ]);
 
   return (
-    <section className="py-1 md:py-2 org-animate org-fade-in-up org-delay-1">
-      {account.detail?.richBody?.length ? (
-        <RichText blocks={account.detail.richBody} />
+    <section className="mt-8 rounded-3xl border border-border/60 bg-card p-5 org-animate org-fade-in-up org-delay-2 sm:p-6">
+      <div className="flex items-baseline gap-2">
+        <h2 className="font-instrument text-2xl italic leading-none text-foreground">{t("title")}</h2>
+        {members.length > 0 ? <span className="text-sm text-muted-foreground">{members.length}</span> : null}
+      </div>
+      <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">{t("description")}</p>
+      {members.length > 0 ? (
+        <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+          {members.map((member) => (
+            <div key={member.did} className="flex items-center gap-3 rounded-2xl border border-border/60 bg-background/60 px-3 py-3">
+              <DataCouncilAvatar member={member} />
+              <p className="min-w-0 truncate text-sm font-medium text-foreground">
+                {member.displayName?.trim() || t("memberFallback")}
+              </p>
+            </div>
+          ))}
+        </div>
       ) : (
-        <p className="mt-5 max-w-3xl text-[14px] leading-[1.62] text-foreground/80">
-          {account.detail?.blurb}
-        </p>
+        <p className="mt-4 rounded-2xl bg-muted/50 px-3.5 py-2.5 text-sm text-muted-foreground">{t("empty")}</p>
       )}
     </section>
+  );
+}
+
+export async function AccountHomeTabContent({ account }: { account: AccountRouteData }) {
+  const hasAbout = Boolean(account.detail?.richBody?.length || account.detail?.blurb);
+
+  return (
+    <>
+      {hasAbout ? (
+        <section className="py-1 md:py-2 org-animate org-fade-in-up org-delay-1">
+          {account.detail?.richBody?.length ? (
+            <RichText blocks={account.detail.richBody} />
+          ) : (
+            <p className="mt-5 max-w-3xl text-[14px] leading-[1.62] text-foreground/80">
+              {account.detail?.blurb}
+            </p>
+          )}
+        </section>
+      ) : null}
+      {account.kind === "organization" ? <AccountDataCouncilSection did={account.did} /> : null}
+    </>
   );
 }
 

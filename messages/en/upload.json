@@ -652,7 +652,8 @@
       "errors": {
         "load": "Could not load the Data Council.",
         "save": "Could not save Data Council changes."
-      }
+      },
+      "addLabel": "Add to data council"
     }
   },
   "dashboardClient": {

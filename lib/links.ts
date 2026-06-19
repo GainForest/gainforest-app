@@ -18,6 +18,7 @@ export type ManageTarget = {
   role?: "owner" | "admin" | "member" | string | null;
   displayName?: string | null;
   avatarUrl?: string | null;
+  currentUserDid?: string | null;
 };
 
 export type ManageSectionId =
@@ -99,6 +100,7 @@ export function groupManageTarget(options: {
   role?: ManageTarget["role"];
   displayName?: string | null;
   avatarUrl?: string | null;
+  currentUserDid?: string | null;
 }): ManageTarget {
   const identifier = options.identifier?.trim() || options.did;
   return {
@@ -110,6 +112,7 @@ export function groupManageTarget(options: {
     role: options.role ?? null,
     displayName: options.displayName ?? null,
     avatarUrl: options.avatarUrl ?? null,
+    currentUserDid: options.currentUserDid ?? null,
   };
 }
 

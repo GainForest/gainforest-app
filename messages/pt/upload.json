@@ -652,7 +652,8 @@
       "errors": {
         "load": "Não foi possível carregar o Conselho de Dados.",
         "save": "Não foi possível salvar as alterações do Conselho de Dados."
-      }
+      },
+      "addLabel": "Adicionar ao Conselho de Dados"
     }
   },
   "dashboardClient": {

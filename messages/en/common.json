@@ -442,5 +442,11 @@
       "assigningBadge": "Assigning badge…",
       "removingAward": "Removing badge assignment…"
     }
+  },
+  "accountDataCouncil": {
+    "title": "Data Council",
+    "description": "People with this badge help steward the organization’s shared data and evidence.",
+    "empty": "No Data Council members are listed yet.",
+    "memberFallback": "Team member"
   }
 }
