@@ -342,13 +342,14 @@ function normalizePendingAward(entry: ListedRecord, definitions: Map<string, Bad
   };
 }
 
-async function fetchIndexedBadgeRecords(repoDid: string): Promise<{ definitions: BadgeDefinitionRecord[]; awards: BadgeAwardRecord[] } | null> {
+async function fetchIndexedBadgeRecords(repoDid: string, includeAwards: boolean): Promise<{ definitions: BadgeDefinitionRecord[]; awards: BadgeAwardRecord[] } | null> {
   const definitionNodes: BadgeDefinitionNode[] = [];
   const awardNodes: BadgeAwardNode[] = [];
   let afterDefinitions: string | null = null;
   let afterAwards: string | null = null;
 
   for (let page = 0; page < 10; page += 1) {
+    const shouldCollectDefinitions: boolean = page === 0 || Boolean(afterDefinitions);
     const payload: BadgeIndexerPayload | null = await indexerQuery<BadgeIndexerPayload>(BADGE_INDEXER_QUERY, {
       repo: repoDid,
       first: 100,
@@ -359,50 +360,69 @@ async function fetchIndexedBadgeRecords(repoDid: string): Promise<{ definitions:
 
     const definitionsPage: IndexerConnection<BadgeDefinitionNode> | null | undefined = payload.appCertifiedBadgeDefinition;
     const awardsPage: IndexerConnection<BadgeAwardNode> | null | undefined = payload.appCertifiedBadgeAward;
-    definitionNodes.push(...((definitionsPage?.edges ?? []).flatMap((edge: { node?: BadgeDefinitionNode | null } | null) => edge?.node ? [edge.node] : [])));
-    awardNodes.push(...((awardsPage?.edges ?? []).flatMap((edge: { node?: BadgeAwardNode | null } | null) => edge?.node ? [edge.node] : [])));
+    if (shouldCollectDefinitions) {
+      definitionNodes.push(...((definitionsPage?.edges ?? []).flatMap((edge: { node?: BadgeDefinitionNode | null } | null) => edge?.node ? [edge.node] : [])));
+    }
+    if (includeAwards) {
+      awardNodes.push(...((awardsPage?.edges ?? []).flatMap((edge: { node?: BadgeAwardNode | null } | null) => edge?.node ? [edge.node] : [])));
+    }
 
-    afterDefinitions = definitionsPage?.pageInfo?.hasNextPage ? definitionsPage.pageInfo.endCursor ?? null : null;
-    afterAwards = awardsPage?.pageInfo?.hasNextPage ? awardsPage.pageInfo.endCursor ?? null : null;
+    afterDefinitions = shouldCollectDefinitions && definitionsPage?.pageInfo?.hasNextPage ? definitionsPage.pageInfo.endCursor ?? null : null;
+    afterAwards = includeAwards && awardsPage?.pageInfo?.hasNextPage ? awardsPage.pageInfo.endCursor ?? null : null;
 
     if (!afterDefinitions && !afterAwards) break;
   }
 
-  const definitions = (await Promise.all(definitionNodes.map((node) => normalizeIndexerDefinition(repoDid, node))))
+  const definitions = uniqueByUri(await Promise.all(definitionNodes.map((node) => normalizeIndexerDefinition(repoDid, node))))
     .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
   const definitionsByUri = new Map(definitions.map((definition) => [definition.uri, definition]));
-  const awards = (await Promise.all(awardNodes.map((node) => normalizeIndexerAward(node, definitionsByUri))))
-    .filter((entry): entry is BadgeAwardRecord => Boolean(entry))
-    .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  const awards = includeAwards
+    ? uniqueByUri((await Promise.all(awardNodes.map((node) => normalizeIndexerAward(node, definitionsByUri))))
+        .filter((entry): entry is BadgeAwardRecord => Boolean(entry)))
+        .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+    : [];
 
   return { definitions, awards };
 }
 
-async function fetchDirectBadgeRecords(repoDid: string): Promise<{ definitions: BadgeDefinitionRecord[]; awards: BadgeAwardRecord[] }> {
+async function fetchDirectBadgeRecords(repoDid: string, includeAwards: boolean): Promise<{ definitions: BadgeDefinitionRecord[]; awards: BadgeAwardRecord[] }> {
   const [definitionEntries, awardEntries] = await Promise.all([
     listCollection(repoDid, BADGE_DEFINITION_COLLECTION).catch(() => []),
-    listCollection(repoDid, BADGE_AWARD_COLLECTION).catch(() => []),
+    includeAwards ? listCollection(repoDid, BADGE_AWARD_COLLECTION).catch(() => []) : Promise.resolve([]),
   ]);
 
-  const definitions = (await Promise.all(definitionEntries.map((entry) => normalizeDefinition(repoDid, entry))))
-    .filter((entry): entry is BadgeDefinitionRecord => Boolean(entry))
+  const definitions = uniqueByUri((await Promise.all(definitionEntries.map((entry) => normalizeDefinition(repoDid, entry))))
+    .filter((entry): entry is BadgeDefinitionRecord => Boolean(entry)))
     .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
   const definitionsByUri = new Map(definitions.map((definition) => [definition.uri, definition]));
 
-  const awards = (await Promise.all(awardEntries.map((entry) => normalizeAward(entry, definitionsByUri))))
-    .filter((entry): entry is BadgeAwardRecord => Boolean(entry))
-    .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  const awards = includeAwards
+    ? uniqueByUri((await Promise.all(awardEntries.map((entry) => normalizeAward(entry, definitionsByUri))))
+        .filter((entry): entry is BadgeAwardRecord => Boolean(entry)))
+        .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+    : [];
   return { definitions, awards };
+}
+
+function uniqueByUri<T extends { uri: string }>(entries: T[]): T[] {
+  const seen = new Set<string>();
+  return entries.filter((entry) => {
+    if (seen.has(entry.uri)) return false;
+    seen.add(entry.uri);
+    return true;
+  });
 }
 
 function mergeByUri<T extends { uri: string }>(preferred: T[], fallback: T[]): T[] {
-  const seen = new Set(preferred.map((entry) => entry.uri));
-  return [...preferred, ...fallback.filter((entry) => !seen.has(entry.uri))];
+  const dedupedPreferred = uniqueByUri(preferred);
+  const seen = new Set(dedupedPreferred.map((entry) => entry.uri));
+  return [...dedupedPreferred, ...fallback.filter((entry) => !seen.has(entry.uri))];
 }
 
-export async function fetchInternalBadgeData(repoDid: string): Promise<InternalBadgeData> {
-  const indexed = await fetchIndexedBadgeRecords(repoDid).catch(() => null);
-  const direct = await fetchDirectBadgeRecords(repoDid).catch(() => ({ definitions: [], awards: [] }));
+export async function fetchInternalBadgeData(repoDid: string, options: { includeAwards?: boolean } = {}): Promise<InternalBadgeData> {
+  const includeAwards = options.includeAwards ?? true;
+  const indexed = await fetchIndexedBadgeRecords(repoDid, includeAwards).catch(() => null);
+  const direct = await fetchDirectBadgeRecords(repoDid, includeAwards).catch(() => ({ definitions: [], awards: [] }));
   const canonical = indexed
     ? {
         definitions: mergeByUri(indexed.definitions, direct.definitions).sort((a, b) => b.createdAt.localeCompare(a.createdAt)),
@@ -410,7 +430,7 @@ export async function fetchInternalBadgeData(repoDid: string): Promise<InternalB
       }
     : direct;
   const definitionsByUri = new Map(canonical.definitions.map((definition) => [definition.uri, definition]));
-  const pendingEntries = await listCollection(repoDid, BADGE_PENDING_AWARD_COLLECTION).catch(() => []);
+  const pendingEntries = includeAwards ? await listCollection(repoDid, BADGE_PENDING_AWARD_COLLECTION).catch(() => []) : [];
   const pendingAwards = pendingEntries
     .map((entry) => normalizePendingAward(entry, definitionsByUri))
     .filter((entry): entry is PendingBadgeAwardRecord => Boolean(entry))

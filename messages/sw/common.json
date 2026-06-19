@@ -422,12 +422,12 @@
     },
     "access": {
       "signedOutTitle": "Ingia kwanza",
-      "signedOutDescription": "Ni wanatimu walioidhinishwa tu wanaoweza kutumia dashibodi ya beji.",
+      "signedOutDescription": "Ingia kwa akaunti ya mmiliki au msimamizi wa shirika ili kutumia dashibodi ya beji.",
       "signIn": "Ingia",
       "notConfiguredTitle": "Dashibodi haijasanidiwa",
-      "notConfiguredDescription": "Ongeza wanatimu kwenye orodha iliyoruhusiwa kabla ya kutumia ukurasa huu.",
+      "notConfiguredDescription": "Sanidi akaunti ya shirika la GainForest kabla ya kutumia ukurasa huu.",
       "deniedTitle": "Huna ufikiaji",
-      "deniedDescription": "Akaunti yako haiko kwenye orodha iliyoruhusiwa ya dashibodi ya ndani ya beji."
+      "deniedDescription": "Ni wamiliki na wasimamizi wa shirika la GainForest pekee wanaoweza kutumia dashibodi ya beji."
     },
     "meta": {
       "title": "Beji za ndani — GainForest",

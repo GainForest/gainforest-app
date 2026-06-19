@@ -422,12 +422,12 @@
     },
     "access": {
       "signedOutTitle": "Sign in required",
-      "signedOutDescription": "Only approved team members can use the badge dashboard.",
+      "signedOutDescription": "Sign in with an organization owner or admin account to use the badge dashboard.",
       "signIn": "Sign in",
       "notConfiguredTitle": "Dashboard not configured",
-      "notConfiguredDescription": "Add team members to the internal badge dashboard allowlist before using this page.",
+      "notConfiguredDescription": "Set the GainForest organization account before using this page.",
       "deniedTitle": "No access",
-      "deniedDescription": "Your account is not on the internal badge dashboard allowlist."
+      "deniedDescription": "Only GainForest organization owners and admins can use the badge dashboard."
     },
     "meta": {
       "title": "Internal badges — GainForest",

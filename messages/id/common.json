@@ -422,12 +422,12 @@
     },
     "access": {
       "signedOutTitle": "Harus masuk",
-      "signedOutDescription": "Hanya anggota tim yang disetujui yang dapat menggunakan dasbor lencana.",
+      "signedOutDescription": "Masuk dengan akun pemilik atau admin organisasi untuk menggunakan dasbor lencana.",
       "signIn": "Masuk",
       "notConfiguredTitle": "Dasbor belum dikonfigurasi",
-      "notConfiguredDescription": "Tambahkan anggota tim ke daftar izin sebelum menggunakan halaman ini.",
+      "notConfiguredDescription": "Atur akun organisasi GainForest sebelum menggunakan halaman ini.",
       "deniedTitle": "Tidak ada akses",
-      "deniedDescription": "Akun Anda tidak ada di daftar izin dasbor lencana internal."
+      "deniedDescription": "Hanya pemilik dan admin organisasi GainForest yang dapat menggunakan dasbor lencana."
     },
     "meta": {
       "title": "Lencana internal — GainForest",

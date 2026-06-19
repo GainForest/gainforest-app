@@ -422,12 +422,12 @@
     },
     "access": {
       "signedOutTitle": "Debes iniciar sesión",
-      "signedOutDescription": "Solo miembros aprobados del equipo pueden usar el panel de insignias.",
+      "signedOutDescription": "Inicia sesión con una cuenta propietaria o administradora de la organización para usar el panel de insignias.",
       "signIn": "Iniciar sesión",
       "notConfiguredTitle": "Panel no configurado",
-      "notConfiguredDescription": "Agrega miembros del equipo a la lista permitida antes de usar esta página.",
+      "notConfiguredDescription": "Configura la cuenta de la organización GainForest antes de usar esta página.",
       "deniedTitle": "Sin acceso",
-      "deniedDescription": "Tu cuenta no está en la lista permitida del panel interno de insignias."
+      "deniedDescription": "Solo propietarios y administradores de la organización GainForest pueden usar el panel de insignias."
     },
     "meta": {
       "title": "Insignias internas — GainForest",

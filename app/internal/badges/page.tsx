@@ -29,6 +29,6 @@ export default async function InternalBadgesPage() {
     return <AccessNotice title={t("deniedTitle")} description={t("deniedDescription")} />;
   }
 
-  const data = await fetchInternalBadgeData(access.repoDid);
+  const data = await fetchInternalBadgeData(access.repoDid, { includeAwards: false });
   return <InternalBadgesDashboard initialData={data} writeRepo={access.writeRepo} />;
 }

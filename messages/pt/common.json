@@ -422,12 +422,12 @@
     },
     "access": {
       "signedOutTitle": "Login necessário",
-      "signedOutDescription": "Somente membros aprovados da equipe podem usar o painel de badges.",
+      "signedOutDescription": "Entre com uma conta de proprietário ou administrador da organização para usar o painel de badges.",
       "signIn": "Entrar",
       "notConfiguredTitle": "Painel não configurado",
-      "notConfiguredDescription": "Adicione membros da equipe à lista permitida antes de usar esta página.",
+      "notConfiguredDescription": "Configure a conta da organização GainForest antes de usar esta página.",
       "deniedTitle": "Sem acesso",
-      "deniedDescription": "Sua conta não está na lista permitida do painel interno de badges."
+      "deniedDescription": "Somente proprietários e administradores da organização GainForest podem usar o painel de badges."
     },
     "meta": {
       "title": "Badges internos — GainForest",

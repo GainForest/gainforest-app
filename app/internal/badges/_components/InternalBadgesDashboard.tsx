@@ -233,7 +233,8 @@ export function InternalBadgesDashboard({
   }, [selectedDefinition]);
 
   async function refresh(nextNotice?: { tone: "success" | "error" | "loading"; text: string }) {
-    const response = await fetch("/api/internal/badges", { cache: "no-store" });
+    const includeAwards = selectedBadgeRkey ? "?includeAwards=1" : "";
+    const response = await fetch(`/api/internal/badges${includeAwards}`, { cache: "no-store" });
     const payload = (await response.json().catch(() => null)) as (BadgeData & { error?: string }) | null;
     if (!response.ok || !payload || payload.error) throw new Error(payload?.error ?? t("errors.refresh"));
     setData(payload);
