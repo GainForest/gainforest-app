@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { motion } from "framer-motion";
 import { BinocularsIcon, HeartIcon, LayersIcon, MapPinIcon, TreePineIcon } from "lucide-react";
 import type { AccountRouteData } from "@/app/account/_lib/account-route";
@@ -159,13 +160,14 @@ export function ManageOverview({
   account: AccountRouteData;
   stats: OverviewStats;
 }) {
+  const t = useTranslations("common.sidebar.items");
   const tiles = buildTiles(account, stats, target);
   if (tiles.length === 0) return null;
 
   return (
     <div className="grid grid-cols-2 gap-x-3 gap-y-4 sm:grid-cols-3 lg:grid-cols-4">
       {tiles.map((tile, index) => (
-        <Folder key={tile.id} tile={tile} index={index} />
+        <Folder key={tile.id} tile={tile.id === "observations" ? { ...tile, title: t("myObservations") } : tile} index={index} />
       ))}
     </div>
   );

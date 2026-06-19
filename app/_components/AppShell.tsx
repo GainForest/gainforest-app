@@ -736,6 +736,14 @@ function ManageSection({
     },
     {
       kind: "leaf",
+      id: "observations-manage",
+      text: t("myObservations"),
+      Icon: BinocularsIcon,
+      href: manageHref({ basePath }, "observations"),
+      pathCheck: { startsWith: manageHref({ basePath }, "observations") },
+    },
+    {
+      kind: "leaf",
       id: "trees",
       text: t("myTrees"),
       Icon: TreePineIcon,
