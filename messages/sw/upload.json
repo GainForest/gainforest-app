@@ -628,7 +628,32 @@
     "organizationTitle": "Mipangilio ya shirika",
     "organizationDescription": "Dhibiti wanachama na udhibiti nani anaweza kufanya mabadiliko katika shirika hili.",
     "personalTitle": "Mipangilio",
-    "personalDescription": "Dhibiti viungo vya akaunti, usalama na zana za kuhamisha data."
+    "personalDescription": "Dhibiti viungo vya akaunti, usalama na zana za kuhamisha data.",
+    "dataCouncil": {
+      "title": "Baraza la Data",
+      "description": "Chagua wanachama waliopo wanaopaswa kupata beji ya Baraza la Data.",
+      "badgeLabel": "Beji: {title}",
+      "selectedCount": "{count, plural, =0 {Hakuna wanachama} one {mwanachama #} other {wanachama #}}",
+      "refresh": "Onyesha upya",
+      "loading": "Inapakia Baraza la Data…",
+      "empty": "Ongeza wanachama kabla ya kuchagua Baraza la Data.",
+      "memberFallback": "Mwanachama wa timu",
+      "included": "Amejumuishwa",
+      "notIncluded": "Hajajumuishwa",
+      "lockedRole": "Wamiliki na wasimamizi wa shirika pekee wanaweza kudhibiti Baraza la Data.",
+      "lockedBadges": "Wamiliki na wasimamizi wa nafasi ya beji ya GainForest pekee wanaweza kuhifadhi mabadiliko ya Baraza la Data.",
+      "addAria": "Ongeza {name} kwenye Baraza la Data",
+      "removeAria": "Ondoa {name} kwenye Baraza la Data",
+      "roles": {
+        "owner": "Mmiliki",
+        "admin": "Msimamizi",
+        "member": "Mwanachama"
+      },
+      "errors": {
+        "load": "Haikuweza kupakia Baraza la Data.",
+        "save": "Haikuweza kuhifadhi mabadiliko ya Baraza la Data."
+      }
+    }
   },
   "dashboardClient": {
     "actions": {

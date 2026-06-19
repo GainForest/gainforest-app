@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react";
 import { motion } from "framer-motion";
+import { useTranslations } from "next-intl";
 import { Loader2Icon, LockIcon, RefreshCwIcon, Trash2Icon, UserPlusIcon, UsersIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,6 +22,22 @@ import {
 
 type RoleInput = "member" | "admin";
 type Variant = "section" | "panel";
+
+type DataCouncilResponse = {
+  members: CgsMember[];
+  awardedDids: string[];
+  canWriteBadges: boolean;
+};
+
+type DataCouncilRowState = {
+  checked: boolean;
+  disabled: boolean;
+  pending: boolean;
+  label: string;
+  addAria: string;
+  removeAria: string;
+  onToggle: (did: string, selected: boolean) => void;
+};
 
 const SECTION_EASE = [0.25, 0.1, 0.25, 1] as const;
 
@@ -41,6 +58,12 @@ function formatDate(value?: string | null) {
 
 function memberErrorMessage(error: unknown, fallback: string): string {
   return formatCgsErrorMessage(error, fallback);
+}
+
+async function parseJsonResponse<T>(response: Response, fallback: string): Promise<T> {
+  const data = (await response.json().catch(() => ({}))) as T & { error?: string; message?: string };
+  if (!response.ok || data.error) throw new Error(data.message ?? data.error ?? fallback);
+  return data;
 }
 
 function MemberAvatar({ did, profile }: { did: string; profile?: DidProfile }) {
@@ -64,6 +87,7 @@ function MemberRow({
   canRemove,
   canSetRoles,
   isPending,
+  dataCouncil,
   onRoleChange,
   onRemove,
 }: {
@@ -72,6 +96,7 @@ function MemberRow({
   canRemove: boolean;
   canSetRoles: boolean;
   isPending: boolean;
+  dataCouncil?: DataCouncilRowState;
   onRoleChange: (did: string, role: RoleInput) => void;
   onRemove: (did: string) => void;
 }) {
@@ -108,6 +133,24 @@ function MemberRow({
         </span>
       )}
 
+      {dataCouncil ? (
+        <label className={cn(
+          "inline-flex h-8 shrink-0 items-center gap-2 rounded-full border border-border bg-background px-3 text-xs font-medium text-foreground transition-colors",
+          dataCouncil.disabled ? "opacity-60" : "cursor-pointer hover:border-primary/50 hover:bg-primary/5",
+        )}>
+          {dataCouncil.pending ? <Loader2Icon className="size-3.5 animate-spin text-muted-foreground" /> : null}
+          <input
+            type="checkbox"
+            className="size-3.5 accent-primary"
+            checked={dataCouncil.checked}
+            disabled={dataCouncil.disabled}
+            onChange={(event) => dataCouncil.onToggle(member.did, event.target.checked)}
+            aria-label={dataCouncil.checked ? dataCouncil.removeAria : dataCouncil.addAria}
+          />
+          {dataCouncil.label}
+        </label>
+      ) : null}
+
       {removable ? (
         <Button
           type="button"
@@ -135,6 +178,7 @@ export function GroupMembers({
   variant = "panel",
   initialMembers,
   initialError = null,
+  showDataCouncil = false,
 }: {
   groupDid: string;
   currentRole: CgsRole;
@@ -142,9 +186,14 @@ export function GroupMembers({
   variant?: Variant;
   initialMembers?: CgsMember[];
   initialError?: string | null;
+  showDataCouncil?: boolean;
 }) {
+  const dataCouncilT = useTranslations("upload.settings.dataCouncil");
+  const dataCouncilLoadError = dataCouncilT("errors.load");
+  const dataCouncilSaveError = dataCouncilT("errors.save");
   const canAddRemove = currentRole === "owner" || currentRole === "admin";
   const canSetRoles = currentRole === "owner";
+  const canUseDataCouncil = showDataCouncil && canAddRemove;
   const hasInitialMembers = initialMembers !== undefined;
 
   const [members, setMembers] = useState<CgsMember[]>(() => initialMembers ?? []);
@@ -154,6 +203,10 @@ export function GroupMembers({
   const [error, setError] = useState<string | null>(initialError);
   const [loaded, setLoaded] = useState(hasInitialMembers || Boolean(initialError));
   const [pendingCount, setPendingCount] = useState(0);
+  const [dataCouncilLoaded, setDataCouncilLoaded] = useState(!canUseDataCouncil);
+  const [dataCouncilSelected, setDataCouncilSelected] = useState<Set<string>>(() => new Set());
+  const [dataCouncilCanWrite, setDataCouncilCanWrite] = useState(false);
+  const [dataCouncilSavingDid, setDataCouncilSavingDid] = useState<string | null>(null);
   const isPending = pendingCount > 0;
 
   const runPending = useCallback((task: () => Promise<void>) => {
@@ -161,19 +214,35 @@ export function GroupMembers({
     void task().finally(() => setPendingCount((count) => Math.max(0, count - 1)));
   }, []);
 
+  const applyDataCouncilState = useCallback((data: DataCouncilResponse) => {
+    setMembers(data.members ?? []);
+    setDataCouncilSelected(new Set(data.awardedDids ?? []));
+    setDataCouncilCanWrite(data.canWriteBadges);
+    setDataCouncilLoaded(true);
+  }, []);
+
+  const loadDataCouncil = useCallback(async () => {
+    if (!canUseDataCouncil) return;
+    const params = new URLSearchParams({ repo: groupDid });
+    const response = await fetch(`/api/manage/data-council?${params.toString()}`, { cache: "no-store" });
+    applyDataCouncilState(await parseJsonResponse<DataCouncilResponse>(response, dataCouncilLoadError));
+  }, [applyDataCouncilState, canUseDataCouncil, dataCouncilLoadError, groupDid]);
+
   const refresh = useCallback(() => {
     runPending(async () => {
       setError(null);
       try {
         const result = await listCgsMembers(groupDid);
         setMembers(result.members ?? []);
+        if (canUseDataCouncil) await loadDataCouncil();
       } catch (err) {
         setError(memberErrorMessage(err, "Could not load members."));
+        if (canUseDataCouncil) setDataCouncilLoaded(true);
       } finally {
         setLoaded(true);
       }
     });
-  }, [groupDid, runPending]);
+  }, [canUseDataCouncil, groupDid, loadDataCouncil, runPending]);
 
   useEffect(() => {
     setMembers(initialMembers ?? []);
@@ -182,7 +251,25 @@ export function GroupMembers({
     if (!hasInitialMembers && !initialError) refresh();
   }, [groupDid, hasInitialMembers, initialError, initialMembers, refresh]);
 
-  // Hydrate member identities (name + avatar) from the public AppView.
+  useEffect(() => {
+    if (!canUseDataCouncil) {
+      setDataCouncilLoaded(true);
+      setDataCouncilSelected(new Set());
+      setDataCouncilCanWrite(false);
+      return;
+    }
+    setDataCouncilLoaded(false);
+    runPending(async () => {
+      try {
+        await loadDataCouncil();
+      } catch (err) {
+        setError(memberErrorMessage(err, dataCouncilLoadError));
+        setDataCouncilLoaded(true);
+      }
+    });
+  }, [canUseDataCouncil, dataCouncilLoadError, loadDataCouncil, runPending]);
+
+  // Hydrate member identities (name + avatar) from the app's account-card endpoint.
   useEffect(() => {
     let active = true;
     for (const member of members) {
@@ -238,8 +325,33 @@ export function GroupMembers({
       try {
         await removeCgsMember(groupDid, did);
         setMembers((current) => current.filter((member) => member.did !== did));
+        setDataCouncilSelected((current) => {
+          const next = new Set(current);
+          next.delete(did);
+          return next;
+        });
       } catch (err) {
         setError(memberErrorMessage(err, "Could not remove member."));
+      }
+    });
+  };
+
+  const toggleDataCouncil = (did: string, selected: boolean) => {
+    if (!canUseDataCouncil || !dataCouncilCanWrite || dataCouncilSavingDid) return;
+    setDataCouncilSavingDid(did);
+    runPending(async () => {
+      setError(null);
+      try {
+        const response = await fetch("/api/manage/data-council", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ repo: groupDid, memberDid: did, selected }),
+        });
+        applyDataCouncilState(await parseJsonResponse<DataCouncilResponse>(response, dataCouncilSaveError));
+      } catch (err) {
+        setError(memberErrorMessage(err, dataCouncilSaveError));
+      } finally {
+        setDataCouncilSavingDid(null);
       }
     });
   };
@@ -294,6 +406,12 @@ export function GroupMembers({
     <p className="rounded-2xl bg-destructive/10 px-3.5 py-2.5 text-sm text-destructive">{error}</p>
   ) : null;
 
+  const dataCouncilNotice = canUseDataCouncil && dataCouncilLoaded && !dataCouncilCanWrite ? (
+    <p className="flex items-center gap-2 rounded-2xl bg-muted/50 px-3.5 py-2.5 text-sm text-muted-foreground">
+      <LockIcon className="size-3.5 shrink-0" /> {dataCouncilT("lockedBadges")}
+    </p>
+  ) : null;
+
   const list = (
     <div className="divide-y divide-border/60">
       {sortedMembers.length === 0 ? (
@@ -307,18 +425,32 @@ export function GroupMembers({
           )}
         </p>
       ) : (
-        sortedMembers.map((member) => (
-          <MemberRow
-            key={member.did}
-            member={member}
-            profile={profiles[member.did]}
-            canRemove={canAddRemove || Boolean(currentUserDid && member.did === currentUserDid)}
-            canSetRoles={canSetRoles}
-            isPending={isPending}
-            onRoleChange={updateRole}
-            onRemove={remove}
-          />
-        ))
+        sortedMembers.map((member) => {
+          const profile = profiles[member.did];
+          const displayName = profile?.displayName?.trim() || "Team member";
+          const councilChecked = dataCouncilSelected.has(member.did);
+          return (
+            <MemberRow
+              key={member.did}
+              member={member}
+              profile={profile}
+              canRemove={canAddRemove || Boolean(currentUserDid && member.did === currentUserDid)}
+              canSetRoles={canSetRoles}
+              isPending={isPending}
+              dataCouncil={canUseDataCouncil ? {
+                checked: councilChecked,
+                disabled: isPending || !dataCouncilLoaded || !dataCouncilCanWrite,
+                pending: dataCouncilSavingDid === member.did,
+                label: dataCouncilT("title"),
+                addAria: dataCouncilT("addAria", { name: displayName }),
+                removeAria: dataCouncilT("removeAria", { name: displayName }),
+                onToggle: toggleDataCouncil,
+              } : undefined}
+              onRoleChange={updateRole}
+              onRemove={remove}
+            />
+          );
+        })
       )}
     </div>
   );
@@ -342,6 +474,7 @@ export function GroupMembers({
         </div>
         <div className="mt-4 space-y-3">
           {addForm}
+          {dataCouncilNotice}
           {errorBanner}
           {list}
         </div>
@@ -379,6 +512,7 @@ export function GroupMembers({
       </div>
       <div className="mt-5 space-y-3">
         {addForm}
+        {dataCouncilNotice}
         {errorBanner}
         {list}
       </div>

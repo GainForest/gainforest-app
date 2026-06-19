@@ -628,7 +628,32 @@
     "organizationTitle": "Pengaturan organisasi",
     "organizationDescription": "Kelola anggota dan tentukan siapa yang dapat membuat perubahan untuk organisasi ini.",
     "personalTitle": "Pengaturan",
-    "personalDescription": "Kelola tautan akun, keamanan, dan alat ekspor."
+    "personalDescription": "Kelola tautan akun, keamanan, dan alat ekspor.",
+    "dataCouncil": {
+      "title": "Dewan Data",
+      "description": "Pilih anggota yang ada untuk menerima badge Dewan Data.",
+      "badgeLabel": "Lencana: {title}",
+      "selectedCount": "{count, plural, =0 {Tidak ada anggota} one {# anggota} other {# anggota}}",
+      "refresh": "Muat ulang",
+      "loading": "Memuat Dewan Data…",
+      "empty": "Tambahkan anggota sebelum memilih Dewan Data.",
+      "memberFallback": "Anggota tim",
+      "included": "Disertakan",
+      "notIncluded": "Tidak disertakan",
+      "lockedRole": "Hanya pemilik dan admin organisasi yang dapat mengelola Dewan Data.",
+      "lockedBadges": "Hanya pemilik dan admin ruang badge GainForest yang dapat menyimpan perubahan Dewan Data.",
+      "addAria": "Tambahkan {name} ke Dewan Data",
+      "removeAria": "Hapus {name} dari Dewan Data",
+      "roles": {
+        "owner": "Pemilik",
+        "admin": "Admin",
+        "member": "Anggota"
+      },
+      "errors": {
+        "load": "Tidak dapat memuat Dewan Data.",
+        "save": "Tidak dapat menyimpan perubahan Dewan Data."
+      }
+    }
   },
   "dashboardClient": {
     "actions": {

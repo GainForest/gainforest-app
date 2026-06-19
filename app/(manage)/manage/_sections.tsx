@@ -188,6 +188,7 @@ export async function SettingsSection({ target }: { target: ManageTarget }) {
           variant="section"
           initialMembers={initialMembers.members}
           initialError={initialMembers.error}
+          showDataCouncil
         />
       </Container>
     );

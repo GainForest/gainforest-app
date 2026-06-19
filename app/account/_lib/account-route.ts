@@ -37,15 +37,6 @@ export type AccountRouteData = {
   detail: RecordDetail | null;
 };
 
-type AppViewProfile = {
-  did?: string;
-  handle?: string;
-  displayName?: string;
-  description?: string;
-  avatar?: string;
-  banner?: string;
-};
-
 type DirectCertifiedProfile = {
   displayName: string | null;
   description: string | null;
@@ -117,22 +108,21 @@ export const getAccountRouteData = cache(async (
   did: string,
   urlIdentifier = did,
 ): Promise<AccountRouteData> => {
-  const [summaryResult, appViewProfile, directCertifiedProfile, directCertifiedOrganization] = await Promise.all([
+  const [summaryResult, directCertifiedProfile, directCertifiedOrganization] = await Promise.all([
     fetchAccountSummary(did).catch((error) => {
       console.warn("[account] Failed to read indexer account summary", did, error);
       return null;
     }),
-    fetchAppViewProfile(did).catch(() => null),
     fetchDirectCertifiedProfile(did).catch(() => null),
     fetchDirectCertifiedOrganization(did).catch(() => null),
   ]);
 
   const fallbackSummary: AccountSummary = {
     did,
-    handle: appViewProfile?.handle ?? null,
-    displayName: appViewProfile?.displayName ?? null,
-    avatarUrl: appViewProfile?.avatar ?? null,
-    bio: appViewProfile?.description ?? null,
+    handle: null,
+    displayName: null,
+    avatarUrl: null,
+    bio: null,
     website: null,
     country: null,
     createdAt: null,
@@ -163,19 +153,17 @@ export const getAccountRouteData = cache(async (
   const detail = await readBestAccountDetail(did, summary);
   const displayName =
     summary.displayName?.trim() ||
-    appViewProfile?.displayName?.trim() ||
     summary.handle ||
-    appViewProfile?.handle ||
     shortDid(did);
 
   return {
     did,
-    urlIdentifier: preferredDidIdentifier(did, summary.handle ?? appViewProfile?.handle ?? (urlIdentifier === did ? null : urlIdentifier)),
+    urlIdentifier: preferredDidIdentifier(did, summary.handle ?? (urlIdentifier === did ? null : urlIdentifier)),
     displayName,
-    handle: summary.handle ?? appViewProfile?.handle ?? null,
-    avatarUrl: summary.avatarUrl ?? appViewProfile?.avatar ?? null,
-    coverUrl: appViewProfile?.banner ?? null,
-    description: summary.bio ?? appViewProfile?.description ?? detail?.blurb ?? null,
+    handle: summary.handle ?? null,
+    avatarUrl: summary.avatarUrl ?? null,
+    coverUrl: null,
+    description: summary.bio ?? detail?.blurb ?? null,
     longDescription: directCertifiedOrganization?.longDescription ?? null,
     website: summary.website,
     country: summary.country,
@@ -193,20 +181,17 @@ export const getAccountRouteData = cache(async (
 /**
  * Slim profile card for a DID, read straight from `app.certified.actor.profile`.
  * Used by account pickers/cards where we only need basic profile copy +
- * avatar per group and don't want the full indexer/AppView hydration.
+ * avatar per group and should not fan out to Bluesky AppView.
  */
 export const getCertifiedProfileCard = cache(
   async (did: string): Promise<{ displayName: string | null; description: string | null; avatarUrl: string | null; handle: string | null }> => {
     if (!did.startsWith("did:")) return { displayName: null, description: null, avatarUrl: null, handle: null };
-    const [profile, appViewProfile] = await Promise.all([
-      fetchDirectCertifiedProfile(did).catch(() => null),
-      fetchAppViewProfile(did).catch(() => null),
-    ]);
+    const profile = await fetchDirectCertifiedProfile(did).catch(() => null);
     return {
-      displayName: profile?.displayName ?? appViewProfile?.displayName ?? null,
-      description: profile?.description ?? appViewProfile?.description ?? null,
-      avatarUrl: profile?.avatarUrl ?? appViewProfile?.avatar ?? null,
-      handle: appViewProfile?.handle ?? null,
+      displayName: profile?.displayName ?? null,
+      description: profile?.description ?? null,
+      avatarUrl: profile?.avatarUrl ?? null,
+      handle: null,
     };
   },
 );
@@ -220,22 +205,52 @@ function safeDecode(value: string): string {
 }
 
 export async function resolveIdentifierToDid(identifier: string): Promise<string | null> {
-  if (identifier.startsWith("did:")) return identifier;
+  const normalized = identifier.trim().replace(/^@+/, "").toLowerCase();
+  if (normalized.startsWith("did:")) return normalized;
 
-  const appViewProfile = await fetchAppViewProfile(identifier).catch(() => null);
-  if (appViewProfile?.did?.startsWith("did:")) return appViewProfile.did;
+  const wellKnownDid = await resolveHandleWithWellKnown(normalized).catch(() => null);
+  if (wellKnownDid?.startsWith("did:")) return wellKnownDid;
 
-  const plcDid = await resolveHandleWithPlc(identifier).catch(() => null);
+  const dnsDid = await resolveHandleWithDns(normalized).catch(() => null);
+  if (dnsDid?.startsWith("did:")) return dnsDid;
+
+  const plcDid = await resolveHandleWithPlc(normalized).catch(() => null);
   return plcDid?.startsWith("did:") ? plcDid : null;
 }
 
-async function fetchAppViewProfile(actor: string): Promise<AppViewProfile | null> {
-  const response = await fetch(
-    `https://public.api.bsky.app/xrpc/app.bsky.actor.getProfile?actor=${encodeURIComponent(actor)}`,
-    { next: { revalidate: 300 } },
-  );
+function asDid(value: string | null | undefined): string | null {
+  const did = value?.trim();
+  return did?.startsWith("did:") ? did : null;
+}
+
+async function resolveHandleWithWellKnown(handle: string): Promise<string | null> {
+  if (!handle || handle.includes("/") || handle.includes(":")) return null;
+  const response = await fetch(`https://${handle}/.well-known/atproto-did`, {
+    headers: { accept: "text/plain" },
+    next: { revalidate: 300 },
+    signal: AbortSignal.timeout(5000),
+  });
   if (!response.ok) return null;
-  return (await response.json()) as AppViewProfile;
+  return asDid(await response.text());
+}
+
+async function resolveHandleWithDns(handle: string): Promise<string | null> {
+  if (!handle || handle.includes("/") || handle.includes(":")) return null;
+  const params = new URLSearchParams({ name: `_atproto.${handle}`, type: "TXT" });
+  const response = await fetch(`https://cloudflare-dns.com/dns-query?${params.toString()}`, {
+    headers: { accept: "application/dns-json" },
+    next: { revalidate: 300 },
+    signal: AbortSignal.timeout(5000),
+  });
+  if (!response.ok) return null;
+  const payload = (await response.json().catch(() => null)) as { Answer?: Array<{ data?: unknown }> } | null;
+  for (const answer of payload?.Answer ?? []) {
+    const value = typeof answer.data === "string" ? answer.data.replace(/^"|"$/g, "").trim() : "";
+    const did = value.startsWith("did=") ? value.slice(4) : value;
+    const normalized = asDid(did);
+    if (normalized) return normalized;
+  }
+  return null;
 }
 
 async function fetchDirectRecordValue(did: string, collection: string): Promise<Record<string, unknown> | null> {

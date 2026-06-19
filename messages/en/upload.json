@@ -628,7 +628,32 @@
     "organizationTitle": "Organization settings",
     "organizationDescription": "Manage members and control who can make changes for this organization.",
     "personalTitle": "Settings",
-    "personalDescription": "Manage account links, security, and export tools."
+    "personalDescription": "Manage account links, security, and export tools.",
+    "dataCouncil": {
+      "title": "Data Council",
+      "description": "Choose existing members who should receive the Data Council badge.",
+      "badgeLabel": "Badge: {title}",
+      "selectedCount": "{count, plural, =0 {No members} one {# member} other {# members}}",
+      "refresh": "Refresh",
+      "loading": "Loading Data Council…",
+      "empty": "Add members before choosing a Data Council.",
+      "memberFallback": "Team member",
+      "included": "Included",
+      "notIncluded": "Not included",
+      "lockedRole": "Only organization owners and admins can manage the Data Council.",
+      "lockedBadges": "Only GainForest badge workspace owners and admins can save Data Council changes.",
+      "addAria": "Add {name} to the Data Council",
+      "removeAria": "Remove {name} from the Data Council",
+      "roles": {
+        "owner": "Owner",
+        "admin": "Admin",
+        "member": "Member"
+      },
+      "errors": {
+        "load": "Could not load the Data Council.",
+        "save": "Could not save Data Council changes."
+      }
+    }
   },
   "dashboardClient": {
     "actions": {

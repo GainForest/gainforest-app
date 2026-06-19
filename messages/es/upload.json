@@ -628,7 +628,32 @@
     "organizationTitle": "Configuración de la organización",
     "organizationDescription": "Gestiona miembros y controla quién puede hacer cambios en esta organización.",
     "personalTitle": "Configuración",
-    "personalDescription": "Gestiona enlaces de cuenta, seguridad y herramientas de exportación."
+    "personalDescription": "Gestiona enlaces de cuenta, seguridad y herramientas de exportación.",
+    "dataCouncil": {
+      "title": "Consejo de Datos",
+      "description": "Elige qué miembros actuales deben recibir la insignia del Consejo de Datos.",
+      "badgeLabel": "Insignia: {title}",
+      "selectedCount": "{count, plural, =0 {Sin miembros} one {# miembro} other {# miembros}}",
+      "refresh": "Actualizar",
+      "loading": "Cargando el Consejo de Datos…",
+      "empty": "Añade miembros antes de elegir un Consejo de Datos.",
+      "memberFallback": "Miembro del equipo",
+      "included": "Incluido",
+      "notIncluded": "No incluido",
+      "lockedRole": "Solo propietarios y administradores de la organización pueden gestionar el Consejo de Datos.",
+      "lockedBadges": "Solo propietarios y administradores del espacio de insignias de GainForest pueden guardar cambios del Consejo de Datos.",
+      "addAria": "Añadir a {name} al Consejo de Datos",
+      "removeAria": "Quitar a {name} del Consejo de Datos",
+      "roles": {
+        "owner": "Propietario",
+        "admin": "Admin",
+        "member": "Miembro"
+      },
+      "errors": {
+        "load": "No se pudo cargar el Consejo de Datos.",
+        "save": "No se pudieron guardar los cambios del Consejo de Datos."
+      }
+    }
   },
   "dashboardClient": {
     "actions": {
