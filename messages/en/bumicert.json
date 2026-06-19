@@ -63,6 +63,7 @@
       "contentType": "Content type",
       "selectContentType": "Select content type",
       "addFilePlaceholder": "Add a file as evidence",
+      "fileHelp": "Files up to {maxSize}.",
       "externalLink": "External link",
       "addLink": "Add",
       "externalLinkHelp": "Link reports, websites, dashboards, or external evidence platforms.",
@@ -164,7 +165,13 @@
         "manageData": "Manage nature data",
         "groupedNatureDataFallback": "Grouped nature data"
       },
-      "unableToVerifyTreeSiteContext": "Could not check all trees. Refresh before linking tree groups."
+      "unableToVerifyTreeSiteContext": "Could not check all trees. Refresh before linking tree groups.",
+      "validation": {
+        "fileTooLarge": "Choose a file up to {maxSize}.",
+        "fileTypeNotAllowed": "Choose a supported file type.",
+        "tooManyItems": "Link fewer items at a time.",
+        "invalidContext": "This tree group needs a project place. Refresh and try again."
+      }
     },
     "metadata": {
       "notFound": "Cert Not Found"
@@ -231,6 +238,7 @@
       "hideLayer": "Hide layer",
       "deleteUnavailable": "You cannot remove this evidence.",
       "deleteError": "Unable to remove this item.",
+      "deleteAlreadyRemoved": "This evidence was already removed. Refresh the page.",
       "displayedBiodiversityData": "Displayed nature data",
       "natureObservationsFallback": "Nature observations"
     },

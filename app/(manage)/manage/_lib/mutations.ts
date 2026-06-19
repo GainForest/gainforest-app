@@ -327,7 +327,7 @@ export async function uploadBlob(file: File, options?: { repo?: string }): Promi
   return callProxy({
     operation: "uploadBlob",
     blobData: b64,
-    blobMimeType: file.type,
+    blobMimeType: file.type || "application/octet-stream",
     ...(options?.repo ? { repo: options.repo } : {}),
   });
 }

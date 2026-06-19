@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useId, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { motion } from "framer-motion";
@@ -33,7 +34,6 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
-import { createRecord, deleteRecord, uploadBlob } from "@/app/(manage)/manage/_lib/mutations";
 import { formatDate, formatNumber } from "@/app/_lib/format";
 import {
   fetchAudioByDid,
@@ -59,7 +59,14 @@ import {
 } from "./datasetEvidenceSelection";
 import { parseAtUri } from "./atUri";
 import { parseAttachmentContent } from "./attachmentContentParser";
-import { isAttachmentForActivity, type AttachmentSubjectInfo } from "./attachmentSubjects";
+import { isAttachmentForActivity } from "./attachmentSubjects";
+import {
+  ATTACHMENT_MAX_FILE_BYTES,
+  createContextAttachment,
+  deleteContextAttachment,
+  isAttachmentMutationInputError,
+  type AttachmentDraft,
+} from "./contextAttachmentMutations";
 import {
   getOccurrenceDatasetRef,
   hasTreeDatasetMetadata,
@@ -73,7 +80,6 @@ import {
   type TimelineReferenceCopy,
 } from "./timelineReferences";
 
-const ATTACHMENT_COLLECTION = "org.hypercerts.context.attachment";
 const CONTENT_TYPE_TREE_DATASET = "tree-dataset";
 const CONTENT_TYPE_BIODIVERSITY = "biodiversity";
 const CONTENT_TYPE_BIODIVERSITY_DATASET = "biodiversity-dataset";
@@ -130,14 +136,6 @@ type PreviewPayload = {
 };
 type TileKind = "site" | "tree" | "nature" | "audio" | "image" | "video" | "pdf" | "file" | "link" | "item";
 type TimelineTile = { id: string; kind: TileKind; title: string; caption: string; preview: PreviewPayload | null };
-type AttachmentContentInput = string | File;
-type AttachmentDraft = {
-  title: string;
-  contentType: string;
-  contents: AttachmentContentInput[];
-  note?: string;
-  contextualSubjects?: AttachmentSubjectInfo[];
-};
 type KnownFileContentType = "document" | "report" | "evidence" | "testimonial" | "methodology" | "photo" | "video" | "audio" | "other";
 
 const FILTERS: Array<{ id: Exclude<EvidenceKind, "site" | "other"> }> = [
@@ -155,16 +153,16 @@ const EVIDENCE_TABS: Array<{ id: EvidenceTab; icon: LucideIcon }> = [
   { id: "files", icon: FileTextIcon },
 ];
 
-const FILE_CONTENT_TYPES: Array<{ value: KnownFileContentType; label: string }> = [
-  { value: "document", label: "Document" },
-  { value: "report", label: "Report" },
-  { value: "evidence", label: "Evidence" },
-  { value: "testimonial", label: "Testimonial" },
-  { value: "methodology", label: "Method" },
-  { value: "photo", label: "Photo" },
-  { value: "video", label: "Video" },
-  { value: "audio", label: "Audio" },
-  { value: "other", label: "Other" },
+const FILE_CONTENT_TYPES: KnownFileContentType[] = [
+  "document",
+  "report",
+  "evidence",
+  "testimonial",
+  "methodology",
+  "photo",
+  "video",
+  "audio",
+  "other",
 ];
 
 function cleanText(value: string | null | undefined): string | null {
@@ -305,8 +303,9 @@ function buildTiles(entryId: string, content: unknown, references: TimelineRefer
     const id = `${entryId}-${index}`;
     if (item.kind === "blob") {
       if (!item.uri) return;
-      const preview = previewFromHref(item.uri, item.mimeType, item.cid);
-      tiles.push({ id, kind: tileKindFromPreview(preview), title: preview.title, caption: preview.fileName ?? item.cid ?? "Linked file", preview });
+      const fileName = item.name ?? item.cid;
+      const preview = previewFromHref(item.uri, item.mimeType, fileName);
+      tiles.push({ id, kind: tileKindFromPreview(preview), title: preview.title, caption: preview.fileName ?? fileName ?? "Linked file", preview });
       return;
     }
     if (item.kind !== "uri") return;
@@ -406,19 +405,6 @@ function formatFileSize(bytes: number): string {
 
 function toFileKey(file: File): string {
   return `${file.name}:${file.size}:${file.lastModified}`;
-}
-
-function makeLocalRkey(): string {
-  return `local-${Date.now()}-${Math.random().toString(36).slice(2)}`;
-}
-
-function toStrongRefs(subjects: AttachmentSubjectInfo[]) {
-  const seen = new Set<string>();
-  return subjects.filter((subject) => {
-    if (!subject.uri || !subject.cid || seen.has(subject.uri)) return false;
-    seen.add(subject.uri);
-    return true;
-  }).map((subject) => ({ $type: "com.atproto.repo.strongRef", uri: subject.uri, cid: subject.cid }));
 }
 
 type BiodiversityDatasetGroup = {
@@ -530,31 +516,6 @@ function buildBiodiversityDatasetGroups(datasets: UploadTreeDatasetRecord[], occ
   }).sort((left, right) => right.recordCount - left.recordCount || left.name.localeCompare(right.name));
 }
 
-function buildOptimisticAttachment(args: {
-  organizationDid: string;
-  created: { uri: string; cid: string; rkey: string };
-  title: string;
-  contentType: string;
-  note?: string;
-  contents: unknown[];
-  subjects: AttachmentSubjectInfo[];
-}): TimelineAttachmentItem {
-  const createdAt = new Date().toISOString();
-  return {
-    metadata: { did: args.organizationDid, uri: args.created.uri, rkey: args.created.rkey, cid: args.created.cid, createdAt, indexedAt: null },
-    creatorInfo: { did: args.organizationDid, organizationName: null, organizationLogo: null },
-    record: {
-      title: args.title,
-      shortDescription: null,
-      description: args.note ? { $type: "org.hypercerts.defs#descriptionString", value: args.note } : null,
-      contentType: args.contentType,
-      subjects: args.subjects,
-      content: args.contents,
-      createdAt,
-    },
-  };
-}
-
 export function BumicertTimeline({
   organizationDid,
   activityUri,
@@ -569,6 +530,7 @@ export function BumicertTimeline({
   references = [],
   attachmentsUnavailable,
 }: BumicertTimelineProps) {
+  const router = useRouter();
   const timelineT = useTranslations("bumicert.detail.timeline");
   const entryT = useTranslations("bumicert.detail.timelineEntry");
   const referenceT = useTranslations("bumicert.detail.reference");
@@ -635,6 +597,7 @@ export function BumicertTimeline({
 
   function handleDeleted(rkey: string) {
     setEntries((current) => current.filter((entry) => entry.metadata.rkey !== rkey));
+    router.refresh();
   }
 
   return (
@@ -670,6 +633,7 @@ export function BumicertTimeline({
                 createPermission={createPermission}
                 mutationRepo={mutationRepo}
                 onCreated={handleCreated}
+                onChanged={() => router.refresh()}
               />
             </div>
             {status ? <p className="mt-3 text-sm text-primary">{status}</p> : null}
@@ -859,11 +823,18 @@ function TimelineEntryCard({
     setDeleteError(null);
     setIsDeleting(true);
     try {
-      await deleteRecord(ATTACHMENT_COLLECTION, rkey, mutationRepo ? { repo: mutationRepo } : undefined);
+      await deleteContextAttachment({ rkey, repo: mutationRepo });
       onDeleted(rkey);
       setShowDeleteConfirm(false);
     } catch (error) {
-      setDeleteError(error instanceof Error ? error.message : entryT("deleteError"));
+      if (isAttachmentMutationInputError(error) && error.code === "not-found") {
+        setDeleteError(entryT("deleteAlreadyRemoved"));
+        onDeleted(rkey);
+        setShowDeleteConfirm(false);
+        return;
+      }
+      console.error("Unable to remove timeline evidence", error);
+      setDeleteError(entryT("deleteError"));
     } finally {
       setIsDeleting(false);
     }
@@ -1022,6 +993,7 @@ function EvidenceAdder({
   createPermission,
   mutationRepo,
   onCreated,
+  onChanged,
 }: {
   organizationDid: string;
   activityUri: string;
@@ -1032,6 +1004,7 @@ function EvidenceAdder({
   createPermission: TimelineMutationPermission;
   mutationRepo?: string;
   onCreated: (entry: TimelineAttachmentItem) => void;
+  onChanged: () => void;
 }) {
   const evidenceT = useTranslations("bumicert.detail.evidenceAdder");
   const [activeTab, setActiveTab] = useState<EvidenceTab | null>(null);
@@ -1091,6 +1064,30 @@ function EvidenceAdder({
     };
   }, [activeTab, organizationDid]);
 
+  function mutationErrorMessage(error: unknown): string {
+    if (!isAttachmentMutationInputError(error)) {
+      console.error("Unable to link timeline evidence", error);
+      return evidenceT("linkError");
+    }
+
+    switch (error.code) {
+      case "file-too-large":
+        return evidenceT("validation.fileTooLarge", { maxSize: formatFileSize(ATTACHMENT_MAX_FILE_BYTES) });
+      case "file-type-not-allowed":
+        return evidenceT("validation.fileTypeNotAllowed");
+      case "invalid-link":
+        return evidenceT("invalidUrl");
+      case "too-many-items":
+        return evidenceT("validation.tooManyItems");
+      case "invalid-activity":
+        return evidenceT("incompleteBumicertReference");
+      case "invalid-context":
+        return evidenceT("validation.invalidContext");
+      default:
+        return evidenceT("linkError");
+    }
+  }
+
   async function submitDrafts(drafts: AttachmentDraft | AttachmentDraft[], onSuccess?: () => void) {
     const items = (Array.isArray(drafts) ? drafts : [drafts]).filter((draft) => draft.contents.length > 0);
     if (items.length === 0) return;
@@ -1105,40 +1102,29 @@ function EvidenceAdder({
     setError(null);
     setIsSubmitting(true);
     const created: TimelineAttachmentItem[] = [];
+    const activitySubject = { uri: activityUri, cid: activityCid };
     try {
       for (const draft of items) {
-        const resolvedContents: unknown[] = [];
-        const recordContents = [];
-        for (const content of draft.contents) {
-          if (typeof content === "string") {
-            recordContents.push({ $type: "org.hypercerts.defs#uri", uri: content });
-            resolvedContents.push({ $type: "org.hypercerts.defs#uri", uri: content });
-          } else {
-            const uploaded = await uploadBlob(content, mutationRepo ? { repo: mutationRepo } : undefined);
-            recordContents.push({ $type: "org.hypercerts.defs#smallBlob", blob: { $type: "blob", ...uploaded, mimeType: content.type || uploaded.mimeType } });
-            resolvedContents.push({ $type: "org.hypercerts.defs#smallBlob", blob: { $type: "blob", uri: URL.createObjectURL(content), cid: content.name, mimeType: content.type || uploaded.mimeType, size: content.size } });
-          }
-        }
-        const subjects = [{ uri: activityUri, cid: activityCid }, ...(draft.contextualSubjects ?? [])];
-        const record: Record<string, unknown> = {
-          $type: ATTACHMENT_COLLECTION,
-          title: draft.title,
-          contentType: draft.contentType,
-          subjects: toStrongRefs(subjects),
-          content: recordContents,
-          ...(draft.note?.trim() ? { description: { $type: "org.hypercerts.defs#descriptionString", value: draft.note.trim(), facets: [] } } : {}),
-          createdAt: new Date().toISOString(),
-        };
-        const result = await createRecord(ATTACHMENT_COLLECTION, record, undefined, mutationRepo ? { repo: mutationRepo } : undefined);
-        const rkey = result.uri.split("/").pop() ?? makeLocalRkey();
-        const optimistic = buildOptimisticAttachment({ organizationDid, created: { uri: result.uri, cid: result.cid, rkey }, title: draft.title, contentType: draft.contentType, note: draft.note, contents: resolvedContents, subjects });
-        created.push(optimistic);
-        onCreated(optimistic);
+        const result = await createContextAttachment({
+          draft,
+          activitySubject,
+          organizationDid,
+          repo: mutationRepo,
+        });
+        created.push(result.optimisticItem);
+        onCreated(result.optimisticItem);
       }
+      if (created.length > 0) onChanged();
       onSuccess?.();
     } catch (err) {
-      setError(err instanceof Error ? err.message : evidenceT("linkError"));
-      if (created.length > 0) onSuccess?.();
+      const message = mutationErrorMessage(err);
+      if (created.length > 0) {
+        setError(evidenceT("partialLinkSuccess", { createdCount: created.length, totalCount: items.length, error: message }));
+        onChanged();
+        onSuccess?.();
+      } else {
+        setError(message);
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -1594,6 +1580,7 @@ function BiodiversityPicker({
 }
 
 function FilePicker({ isSubmitting, submitDrafts }: { isSubmitting: boolean; submitDrafts: (draft: AttachmentDraft, onSuccess?: () => void) => void }) {
+  const evidenceT = useTranslations("bumicert.detail.evidenceAdder");
   const [selectedContentType, setSelectedContentType] = useState<KnownFileContentType>("document");
   const [files, setFiles] = useState<File[]>([]);
   const [links, setLinks] = useState<string[]>([]);
@@ -1601,6 +1588,17 @@ function FilePicker({ isSubmitting, submitDrafts }: { isSubmitting: boolean; sub
   const [linkError, setLinkError] = useState<string | null>(null);
   const [note, setNote] = useState("");
   const inputId = useId();
+  const contentTypeLabels: Record<KnownFileContentType, string> = {
+    document: evidenceT("contentTypes.document"),
+    report: evidenceT("contentTypes.report"),
+    evidence: evidenceT("contentTypes.evidence"),
+    testimonial: evidenceT("contentTypes.testimonial"),
+    methodology: evidenceT("contentTypes.methodology"),
+    photo: evidenceT("contentTypes.photo"),
+    video: evidenceT("contentTypes.video"),
+    audio: evidenceT("contentTypes.audio"),
+    other: evidenceT("contentTypes.other"),
+  };
 
   function appendFileList(fileList: FileList | null) {
     if (!fileList) return;
@@ -1621,48 +1619,48 @@ function FilePicker({ isSubmitting, submitDrafts }: { isSubmitting: boolean; sub
     try {
       const parsed = new URL(trimmed);
       if (parsed.protocol !== "https:" && parsed.protocol !== "http:") {
-        setLinkError("Use a web link that starts with http or https.");
+        setLinkError(evidenceT("invalidUrlProtocol"));
         return;
       }
       const normalized = parsed.toString();
       setLinks((current) => current.includes(normalized) ? current : [...current, normalized]);
       setLinkInput("");
     } catch {
-      setLinkError("Enter a valid web link.");
+      setLinkError(evidenceT("invalidUrl"));
     }
   }
-  const title = FILE_CONTENT_TYPES.find((item) => item.value === selectedContentType)?.label ?? "Evidence";
+  const title = contentTypeLabels[selectedContentType] ?? evidenceT("contentTypes.evidence");
   return (
     <>
       <div className="flex flex-col gap-2">
         <div className="flex flex-col gap-1.5">
-          <label className="text-sm font-medium">File kind</label>
+          <label className="text-sm font-medium">{evidenceT("contentType")}</label>
           <Select value={selectedContentType} onValueChange={(value) => setSelectedContentType(value as KnownFileContentType)} disabled={isSubmitting}>
-            <SelectTrigger><SelectValue placeholder="Select file kind" /></SelectTrigger>
-            <SelectContent>{FILE_CONTENT_TYPES.map((item) => <SelectItem key={item.value} value={item.value}>{item.label}</SelectItem>)}</SelectContent>
+            <SelectTrigger><SelectValue placeholder={evidenceT("selectContentType")} /></SelectTrigger>
+            <SelectContent>{FILE_CONTENT_TYPES.map((value) => <SelectItem key={value} value={value}>{contentTypeLabels[value]}</SelectItem>)}</SelectContent>
           </Select>
         </div>
         <label htmlFor={inputId} className={cn("grid min-h-[120px] cursor-pointer place-items-center rounded-2xl border border-dashed border-border/70 bg-muted/30 px-4 py-6 text-center transition-colors hover:border-primary/40", isSubmitting && "pointer-events-none opacity-70")}>
-          <span><PaperclipIcon className="mx-auto h-6 w-6 text-muted-foreground" /><span className="mt-2 block text-sm font-medium text-foreground">Add a file as evidence</span><span className="mt-1 block text-xs text-muted-foreground">Photos, sounds, videos, reports, and notes up to 4 MB.</span></span>
+          <span><PaperclipIcon className="mx-auto h-6 w-6 text-muted-foreground" /><span className="mt-2 block text-sm font-medium text-foreground">{evidenceT("addFilePlaceholder")}</span><span className="mt-1 block text-xs text-muted-foreground">{evidenceT("fileHelp", { maxSize: formatFileSize(ATTACHMENT_MAX_FILE_BYTES) })}</span></span>
           <input id={inputId} type="file" className="sr-only" multiple accept="image/*,audio/*,video/*,application/*,text/*" disabled={isSubmitting} onChange={(event) => { appendFileList(event.target.files); event.currentTarget.value = ""; }} />
         </label>
         <div className="flex flex-col gap-1.5 rounded-xl border border-border/60 bg-background p-3">
-          <label className="text-sm font-medium">Web link</label>
+          <label className="text-sm font-medium">{evidenceT("externalLink")}</label>
           <div className="flex gap-2">
             <Input value={linkInput} placeholder="https://example.org/report" disabled={isSubmitting} aria-invalid={linkError ? true : undefined} onChange={(event) => setLinkInput(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") { event.preventDefault(); addLink(); } }} />
-            <Button type="button" variant="secondary" onClick={addLink} disabled={isSubmitting || linkInput.trim().length === 0}>Add</Button>
+            <Button type="button" variant="secondary" onClick={addLink} disabled={isSubmitting || linkInput.trim().length === 0}>{evidenceT("addLink")}</Button>
           </div>
-          <p className={cn("text-xs", linkError ? "text-destructive" : "text-muted-foreground")}>{linkError ?? "Link reports, websites, or external project notes."}</p>
+          <p className={cn("text-xs", linkError ? "text-destructive" : "text-muted-foreground")}>{linkError ?? evidenceT("externalLinkHelp")}</p>
         </div>
         {files.length > 0 || links.length > 0 ? (
           <div className="grid gap-2">
             {files.map((file) => {
               const key = toFileKey(file);
-              return <SelectedItem key={key} title={file.name} detail={`${formatFileSize(file.size)}${file.type ? ` · ${file.type}` : ""}`} onRemove={() => setFiles((current) => current.filter((item) => toFileKey(item) !== key))} disabled={isSubmitting} />;
+              return <SelectedItem key={key} title={file.name} detail={`${formatFileSize(file.size)}${file.type ? ` · ${file.type}` : ""}`} onRemove={() => setFiles((current) => current.filter((item) => toFileKey(item) !== key))} disabled={isSubmitting} removeLabel={evidenceT("remove")} />;
             })}
-            {links.map((link) => <SelectedItem key={link} title="Web link" detail={link} onRemove={() => setLinks((current) => current.filter((item) => item !== link))} disabled={isSubmitting} />)}
+            {links.map((link) => <SelectedItem key={link} title={evidenceT("externalLink")} detail={link} onRemove={() => setLinks((current) => current.filter((item) => item !== link))} disabled={isSubmitting} removeLabel={evidenceT("remove")} />)}
           </div>
-        ) : <div className="rounded-xl bg-muted/60 px-3 py-2 text-center text-xs text-muted-foreground">No files or links selected yet.</div>}
+        ) : <div className="rounded-xl bg-muted/60 px-3 py-2 text-center text-xs text-muted-foreground">{evidenceT("noFilesSelected")}</div>}
       </div>
       <OptionalNote value={note} onChange={setNote} disabled={isSubmitting} />
       <SubmitButton count={files.length + links.length} isSubmitting={isSubmitting} onClick={() => submitDrafts({ title, contentType: selectedContentType, contents: [...files, ...links], note }, () => { setFiles([]); setLinks([]); setLinkInput(""); setNote(""); })} />
@@ -1670,14 +1668,14 @@ function FilePicker({ isSubmitting, submitDrafts }: { isSubmitting: boolean; sub
   );
 }
 
-function SelectedItem({ title, detail, onRemove, disabled }: { title: string; detail: string; onRemove: () => void; disabled?: boolean }) {
+function SelectedItem({ title, detail, onRemove, disabled, removeLabel }: { title: string; detail: string; onRemove: () => void; disabled?: boolean; removeLabel: string }) {
   return (
     <div className="flex w-full items-center gap-2.5 rounded-xl border bg-background px-3 py-2">
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm font-medium text-foreground">{title}</p>
         <p className="truncate text-xs text-muted-foreground">{detail}</p>
       </div>
-      <button type="button" className="rounded-md p-1 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive" onClick={onRemove} disabled={disabled} aria-label="Remove"><XIcon className="h-4 w-4" /></button>
+      <button type="button" className="rounded-md p-1 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive" onClick={onRemove} disabled={disabled} aria-label={removeLabel}><XIcon className="h-4 w-4" /></button>
     </div>
   );
 }

@@ -63,6 +63,7 @@
       "contentType": "Tipo de contenido",
       "selectContentType": "Seleccione el tipo de contenido",
       "addFilePlaceholder": "Agregar un archivo como evidencia",
+      "fileHelp": "Archivos de hasta {maxSize}.",
       "externalLink": "Enlace externo",
       "addLink": "Agregar",
       "externalLinkHelp": "Vincule informes, sitios web, paneles o plataformas de evidencia externas.",
@@ -164,7 +165,13 @@
         "manageData": "Gestionar datos de naturaleza",
         "groupedNatureDataFallback": "Datos de naturaleza agrupados"
       },
-      "unableToVerifyTreeSiteContext": "No se pudieron comprobar todos los árboles. Actualiza antes de vincular grupos de árboles."
+      "unableToVerifyTreeSiteContext": "No se pudieron comprobar todos los árboles. Actualiza antes de vincular grupos de árboles.",
+      "validation": {
+        "fileTooLarge": "Elige un archivo de hasta {maxSize}.",
+        "fileTypeNotAllowed": "Elige un tipo de archivo admitido.",
+        "tooManyItems": "Vincula menos elementos a la vez.",
+        "invalidContext": "Este grupo de árboles necesita un lugar del proyecto. Actualiza y vuelve a intentarlo."
+      }
     },
     "metadata": {
       "notFound": "certificado no encontrado"
@@ -231,6 +238,7 @@
       "hideLayer": "Ocultar capa",
       "deleteUnavailable": "No puedes eliminar esta evidencia.",
       "deleteError": "No se pudo eliminar este elemento.",
+      "deleteAlreadyRemoved": "Esta evidencia ya fue eliminada. Actualiza la página.",
       "displayedBiodiversityData": "Datos de naturaleza mostrados",
       "natureObservationsFallback": "Observaciones de naturaleza"
     },
