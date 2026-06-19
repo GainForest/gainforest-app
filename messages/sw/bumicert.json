@@ -50,7 +50,7 @@
         "audio": "Sauti",
         "trees": "Miti",
         "biodiversity": "Asili",
-        "files": "Nyaraka"
+        "files": "Faili"
       },
       "linking": "Inaunganisha...",
       "loadingSources": "Inapakia ushahidi...",
@@ -65,11 +65,14 @@
       "addFilePlaceholder": "Ongeza faili kama ushahidi",
       "fileHelp": "Faili hadi {maxSize}.",
       "externalLink": "Kiungo cha nje",
+      "externalLinkPlaceholder": "https://example.org/report",
       "addLink": "Ongeza",
       "externalLinkHelp": "Unganisha ripoti, tovuti, dashibodi au mifumo ya ushahidi wa nje.",
       "invalidUrlProtocol": "Tumia URL ya http au https.",
       "invalidUrl": "Weka URL halali.",
       "remove": "Ondoa",
+      "removeFile": "Ondoa {name}",
+      "removeExternalLink": "Ondoa kiungo cha nje",
       "noFilesSelected": "Bado hakuna faili au viungo vilivyochaguliwa.",
       "contentTypes": {
         "document": "Hati",
@@ -93,7 +96,7 @@
       "manage": "Dhibiti",
       "untitledRecording": "Kurekodi bila jina",
       "unnamedTreeDataset": "Kikundi cha miti kisicho na jina",
-      "unknownObservation": "Uchunguzi usiojulikana",
+      "unknownObservation": "Mwonekano wa asili usiojulikana",
       "treeCount": "{count, plural, =1 {mti 1} other {miti #}}",
       "speciesCount": "{count, plural, =1 {spishi 1} other {spishi #}}",
       "siteContextLabel": "Eneo la mradi: {siteName}",
@@ -107,24 +110,25 @@
       "emptyLabels": {
         "audio": "rekodi za sauti",
         "trees": "vikundi vya miti",
-        "biodiversity": "uchunguzi wa asili"
+        "biodiversity": "mionekano ya asili"
       },
       "attachmentTitles": {
         "audio": "Rekodi za sauti",
         "trees": "Kikundi cha miti",
-        "biodiversity": "Uchunguzi wa asili"
+        "biodiversity": "Mionekano ya asili"
       },
       "chooseEvidenceType": "Chagua aina ya ushahidi",
       "selectSourceToLink": "Chagua chanzo ili kuunganisha ushahidi uliopo kwenye ratiba hii.",
       "linkType": "Unganisha {type}",
       "selectRecordsToLink": "Chagua rekodi za ushahidi za kuunganisha kwenye ratiba hii.",
+      "backToEvidenceTypes": "Rudi kwenye aina za ushahidi",
       "alreadyLinkedDataset": "Tayari imeunganishwa kwenye ratiba hii",
       "checkingExistingLinks": "Inakagua viungo vilivyopo vya ratiba…",
       "unableToVerifyExistingLinks": "Viungo vilivyopo havikuweza kukaguliwa. Onyesha upya kabla ya kuunganisha vikundi vya miti.",
       "tabDescriptions": {
-        "audio": "Ongeza rekodi za sauti zilizohifadhiwa na shirika hili.",
+        "audio": "Ongeza sauti ambazo tayari zimehifadhiwa na shirika hili.",
         "trees": "Ongeza taarifa za miti zilizopangwa kwa eneo la mradi.",
-        "biodiversity": "Chuja uchunguzi na uongeze data ya asili inayoonyeshwa au vikundi vilivyohifadhiwa.",
+        "biodiversity": "Chuja mionekano na uongeze rekodi za asili zinazoonyeshwa au vikundi vilivyohifadhiwa.",
         "files": "Ongeza ripoti, picha, video, au kurasa za wavuti."
       },
       "permissions": {
@@ -137,7 +141,7 @@
       "manageType": "Simamia {type}",
       "biodiversity": {
         "attachmentGroupTitle": "Kikundi cha asili",
-        "attachmentObservationsTitle": "Uchunguzi wa asili",
+        "attachmentObservationsTitle": "Mionekano ya asili",
         "emptyLabel": "data ya asili",
         "searchLabel": "Tafuta",
         "searchPlaceholder": "Tafuta asili",
@@ -145,7 +149,7 @@
         "allRecorders": "Warekodi wote",
         "recorderOptionFallback": "Mrekodi {number}",
         "displayedTitle": "Data ya asili inayoonyeshwa",
-        "displayedSummary": "{shown} kati ya {total, plural, =1 {uchunguzi 1} other {uchunguzi #}} zinaonyeshwa. Chagua uchunguzi kutoka mwonekano huu uliochujwa.",
+        "displayedSummary": "{shown} kati ya {total, plural, =1 {mwonekano 1} other {mionekano #}} zinaonyeshwa. Chagua mionekano kutoka mwonekano huu uliochujwa.",
         "clearDisplayed": "Futa zinazoonyeshwa",
         "selectDisplayed": "Chagua zinazoonyeshwa",
         "noDataMatches": "Hakuna data ya asili inayolingana na vichujio hivi.",
@@ -180,7 +184,7 @@
       "kind": {
         "tree": "Seti ya data ya mti",
         "audio": "Data ya akustisk",
-        "biodiversity": "Uchunguzi wa asili",
+        "biodiversity": "Mionekano ya asili",
         "document": "Hati",
         "site": "Tovuti",
         "other": "Ushahidi"
@@ -190,15 +194,36 @@
       "linked": "iliyounganishwa {date}",
       "treeCount": "{count, plural, =1 {mti 1} other {miti #}}",
       "speciesCount": "{count, plural, =1 {spishi 1} other {spishi #}}",
-      "observationCount": "{count, plural, =1 {uchunguzi 1} other {uchunguzi #}}",
+      "observationCount": "{count, plural, =1 {mwonekano 1} other {mionekano #}}",
       "recordingCount": "{count, plural, =1 {rekodi 1} other {rekodi #}}",
       "itemCount": "{count, plural, =1 {kipengee 1} other {vipengee #}}",
+      "dataGroupCount": "{count, plural, =1 {kikundi 1 cha data} other {vikundi # vya data}}",
+      "linkedFile": "Faili iliyounganishwa",
+      "previewKinds": {
+        "image": "Picha",
+        "video": "Video",
+        "audio": "Sauti",
+        "pdf": "Faili ya PDF",
+        "document": "Hati"
+      },
+      "linkedTreeInformation": "Taarifa za miti zilizounganishwa",
+      "linkedItem": "Ushahidi uliounganishwa",
+      "linkedProjectPlace": "Eneo la mradi lililounganishwa",
+      "linkedTreeGroup": "Kikundi cha miti kilichounganishwa",
+      "linkedSound": "Sauti iliyounganishwa",
+      "groupedData": "Data iliyopangwa",
+      "mapPreviewTitle": "Hakikisho la ramani",
+      "mapPreviewDescription": "Hakiki vikundi vya miti vilivyounganishwa kwenye ratiba hii.",
+      "treeGroupMapPreview": "Hakikisho la ramani ya kikundi cha miti",
+      "openMap": "Fungua ramani",
+      "openMapLayer": "Fungua tabaka la ramani",
+      "viewMap": "Tazama ramani",
       "openGreenGlobe": "Fungua katika Green Globe",
       "removeEvidence": "Ondoa ushahidi",
       "collapseEvidence": "Kunja ushahidi",
       "expandEvidence": "Panua ushahidi",
       "resolvingRecords": "Inatatua rekodi za ushahidi zilizounganishwa...",
-      "selectedObservations": "Uchunguzi uliochaguliwa",
+      "selectedObservations": "Mionekano iliyochaguliwa",
       "more": "+{count} zaidi",
       "viewGreenGlobe": "Tazama kwenye Green Globe",
       "evidenceItem": "Kipengee cha ushahidi",
@@ -211,7 +236,7 @@
       "activeLayerCount": "{count, plural, =1 {tabaka 1 linalotumika} other {tabaka # zinazotumika}}",
       "showOnMapHint": "Tumia Onyesha kwenye ramani kwenye kadi za mikusanyiko ya data ya miti ili kuhakiki tabaka hapa.",
       "greenGlobeIframeTitle": "Hakikisho la ushahidi la Green Globe",
-      "treeDatasetMapLayers": "Tabaka za ramani za mkusanyiko wa data ya miti",
+      "treeDatasetMapLayers": "Tabaka za ramani za kikundi cha miti",
       "showDatasetOnGreenGlobeMap": "Onyesha {title} kwenye ramani ya Green Globe",
       "hideDatasetFromGreenGlobeMap": "Ficha {title} kutoka kwenye ramani ya Green Globe",
       "showOnMap": "Onyesha kwenye ramani",
@@ -239,8 +264,8 @@
       "deleteUnavailable": "Huwezi kuondoa ushahidi huu.",
       "deleteError": "Imeshindikana kuondoa kipengee hiki.",
       "deleteAlreadyRemoved": "Ushahidi huu tayari umeondolewa. Onyesha upya ukurasa.",
-      "displayedBiodiversityData": "Data ya asili inayoonyeshwa",
-      "natureObservationsFallback": "Uchunguzi wa asili"
+      "displayedBiodiversityData": "Rekodi za asili zinazoonyeshwa",
+      "natureObservationsFallback": "Mionekano ya asili"
     },
     "reference": {
       "linkedRecord": "Rekodi iliyounganishwa",
