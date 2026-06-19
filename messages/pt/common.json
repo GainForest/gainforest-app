@@ -367,6 +367,13 @@
     "meta": {
       "title": "Badges internos — GainForest",
       "description": "Gerencie definições e atribuições internas de badges."
+    },
+    "status": {
+      "creatingBadge": "Criando distintivo…",
+      "updatingBadge": "Salvando distintivo…",
+      "deletingBadge": "Excluindo distintivo…",
+      "assigningBadge": "Atribuindo distintivo…",
+      "removingAward": "Removendo atribuição de distintivo…"
     }
   }
 }

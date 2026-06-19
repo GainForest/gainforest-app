@@ -367,6 +367,13 @@
     "meta": {
       "title": "Beji za ndani — GainForest",
       "description": "Dhibiti ufafanuzi na utoaji wa beji za ndani."
+    },
+    "status": {
+      "creatingBadge": "Inaunda beji…",
+      "updatingBadge": "Inahifadhi beji…",
+      "deletingBadge": "Inafuta beji…",
+      "assigningBadge": "Inatoa beji…",
+      "removingAward": "Inaondoa utoaji wa beji…"
     }
   }
 }

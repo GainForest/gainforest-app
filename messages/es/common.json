@@ -367,6 +367,13 @@
     "meta": {
       "title": "Insignias internas — GainForest",
       "description": "Gestiona definiciones y asignaciones internas de insignias."
+    },
+    "status": {
+      "creatingBadge": "Creando insignia…",
+      "updatingBadge": "Guardando insignia…",
+      "deletingBadge": "Eliminando insignia…",
+      "assigningBadge": "Asignando insignia…",
+      "removingAward": "Quitando asignación de insignia…"
     }
   }
 }

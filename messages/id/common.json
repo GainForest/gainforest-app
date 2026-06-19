@@ -367,6 +367,13 @@
     "meta": {
       "title": "Lencana internal — GainForest",
       "description": "Kelola definisi dan penetapan lencana internal."
+    },
+    "status": {
+      "creatingBadge": "Membuat lencana…",
+      "updatingBadge": "Menyimpan lencana…",
+      "deletingBadge": "Menghapus lencana…",
+      "assigningBadge": "Menetapkan lencana…",
+      "removingAward": "Menghapus penetapan lencana…"
     }
   }
 }
