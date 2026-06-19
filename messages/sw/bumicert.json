@@ -63,6 +63,7 @@
       "contentType": "Aina ya maudhui",
       "selectContentType": "Chagua aina ya maudhui",
       "addFilePlaceholder": "Ongeza faili kama ushahidi",
+      "fileHelp": "Faili hadi {maxSize}.",
       "externalLink": "Kiungo cha nje",
       "addLink": "Ongeza",
       "externalLinkHelp": "Unganisha ripoti, tovuti, dashibodi au mifumo ya ushahidi wa nje.",
@@ -164,7 +165,13 @@
         "manageData": "Dhibiti data ya asili",
         "groupedNatureDataFallback": "Data ya asili iliyopangwa pamoja"
       },
-      "unableToVerifyTreeSiteContext": "Haikuwezekana kukagua miti yote. Onyesha upya kabla ya kuunganisha vikundi vya miti."
+      "unableToVerifyTreeSiteContext": "Haikuwezekana kukagua miti yote. Onyesha upya kabla ya kuunganisha vikundi vya miti.",
+      "validation": {
+        "fileTooLarge": "Chagua faili isiyozidi {maxSize}.",
+        "fileTypeNotAllowed": "Chagua aina ya faili inayokubalika.",
+        "tooManyItems": "Unganisha vipengee vichache kwa wakati mmoja.",
+        "invalidContext": "Kikundi hiki cha miti kinahitaji eneo la mradi. Onyesha upya na ujaribu tena."
+      }
     },
     "metadata": {
       "notFound": "cheti Haijapatikana"
@@ -231,6 +238,7 @@
       "hideLayer": "Ficha tabaka",
       "deleteUnavailable": "Huwezi kuondoa ushahidi huu.",
       "deleteError": "Imeshindikana kuondoa kipengee hiki.",
+      "deleteAlreadyRemoved": "Ushahidi huu tayari umeondolewa. Onyesha upya ukurasa.",
       "displayedBiodiversityData": "Data ya asili inayoonyeshwa",
       "natureObservationsFallback": "Uchunguzi wa asili"
     },

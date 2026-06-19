@@ -63,6 +63,7 @@
       "contentType": "Jenis konten",
       "selectContentType": "Pilih jenis konten",
       "addFilePlaceholder": "Tambahkan file sebagai bukti",
+      "fileHelp": "Berkas hingga {maxSize}.",
       "externalLink": "Tautan eksternal",
       "addLink": "Tambahkan",
       "externalLinkHelp": "Tautkan laporan, situs web, dasbor, atau platform bukti eksternal.",
@@ -164,7 +165,13 @@
         "manageData": "Kelola data alam",
         "groupedNatureDataFallback": "Data alam yang dikelompokkan"
       },
-      "unableToVerifyTreeSiteContext": "Tidak dapat memeriksa semua pohon. Muat ulang sebelum menautkan grup pohon."
+      "unableToVerifyTreeSiteContext": "Tidak dapat memeriksa semua pohon. Muat ulang sebelum menautkan grup pohon.",
+      "validation": {
+        "fileTooLarge": "Pilih berkas hingga {maxSize}.",
+        "fileTypeNotAllowed": "Pilih jenis berkas yang didukung.",
+        "tooManyItems": "Tautkan lebih sedikit item sekaligus.",
+        "invalidContext": "Grup pohon ini memerlukan lokasi proyek. Muat ulang dan coba lagi."
+      }
     },
     "metadata": {
       "notFound": "sertifikat Tidak Ditemukan"
@@ -231,6 +238,7 @@
       "hideLayer": "Sembunyikan lapisan",
       "deleteUnavailable": "Anda tidak dapat menghapus bukti ini.",
       "deleteError": "Item ini tidak dapat dihapus.",
+      "deleteAlreadyRemoved": "Bukti ini sudah dihapus. Muat ulang halaman.",
       "displayedBiodiversityData": "Data alam yang ditampilkan",
       "natureObservationsFallback": "Pengamatan alam"
     },
