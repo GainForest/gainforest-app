@@ -67,6 +67,10 @@ function formatWebsite(url: string): string {
   return url.replace(/^https?:\/\//, "").replace(/\/$/, "");
 }
 
+function publicAccountHref(identifier: string): string {
+  return `/account/${encodeURIComponent(identifier)}`;
+}
+
 function isValidWebsite(value: string): boolean {
   if (!value.trim()) return true;
   try {
@@ -330,15 +334,25 @@ function EditableHero({
           </div>
         </button>
 
-        {/* Settings shortcut */}
-        <Link
-          href={`${basePath}/settings`}
-          className="absolute right-3 top-3 z-10 flex size-9 items-center justify-center rounded-full border border-border/50 bg-background/65 text-foreground/70 shadow-sm backdrop-blur-xl transition-colors hover:bg-background/90 hover:text-foreground"
-          aria-label={t("hero.settings")}
-          title={t("hero.settings")}
-        >
-          <SettingsIcon className="size-4" />
-        </Link>
+        <div className="absolute right-3 top-3 z-10 flex items-center gap-2">
+          <Link
+            href={publicAccountHref(account.urlIdentifier)}
+            className="flex h-9 items-center gap-1.5 rounded-full border border-border/50 bg-background/65 px-3 text-sm font-medium text-foreground/70 shadow-sm backdrop-blur-xl transition-colors hover:bg-background/90 hover:text-foreground"
+            aria-label={t("hero.viewPublicPage")}
+            title={t("hero.viewPublicPage")}
+          >
+            <EyeIcon className="size-4" />
+            <span className="hidden sm:inline">{t("hero.viewPublicPage")}</span>
+          </Link>
+          <Link
+            href={`${basePath}/settings`}
+            className="flex size-9 items-center justify-center rounded-full border border-border/50 bg-background/65 text-foreground/70 shadow-sm backdrop-blur-xl transition-colors hover:bg-background/90 hover:text-foreground"
+            aria-label={t("hero.settings")}
+            title={t("hero.settings")}
+          >
+            <SettingsIcon className="size-4" />
+          </Link>
+        </div>
       </div>
 
       {/* Identity */}

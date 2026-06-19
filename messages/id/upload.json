@@ -656,7 +656,8 @@
       "invalidDate": "Tanggal tidak valid",
       "addStartDate": "Tambahkan tanggal mulai",
       "addWebsite": "Tambahkan situs web",
-      "addSocialLinks": "Tambahkan tautan sosial"
+      "addSocialLinks": "Tambahkan tautan sosial",
+      "viewPublicPage": "Lihat halaman publik"
     },
     "errors": {
       "nameRequired": "Tambahkan nama sebelum menyimpan.",

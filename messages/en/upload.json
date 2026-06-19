@@ -656,7 +656,8 @@
       "invalidDate": "Invalid date",
       "addStartDate": "Add start date",
       "addWebsite": "Add website",
-      "addSocialLinks": "Add social links"
+      "addSocialLinks": "Add social links",
+      "viewPublicPage": "View public page"
     },
     "errors": {
       "nameRequired": "Add a name before saving.",

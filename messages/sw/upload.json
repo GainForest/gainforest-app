@@ -656,7 +656,8 @@
       "invalidDate": "Tarehe si sahihi",
       "addStartDate": "Ongeza tarehe ya kuanza",
       "addWebsite": "Ongeza tovuti",
-      "addSocialLinks": "Ongeza viungo vya kijamii"
+      "addSocialLinks": "Ongeza viungo vya kijamii",
+      "viewPublicPage": "Tazama ukurasa wa umma"
     },
     "errors": {
       "nameRequired": "Ongeza jina kabla ya kuhifadhi.",
