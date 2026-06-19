@@ -19,6 +19,7 @@ import {
   Trash2Icon,
   UserRoundIcon,
 } from "lucide-react";
+import { formatCgsErrorMessage } from "@/app/_lib/cgs-errors";
 import { Button } from "@/components/ui/button";
 import { useModal } from "@/components/ui/modal/context";
 import { ModalContent, ModalDescription, ModalFooter, ModalHeader, ModalTitle } from "@/components/ui/modal/modal";
@@ -75,6 +76,8 @@ type BusyAction =
   | { kind: "deleteBadge"; rkey: string }
   | { kind: "deleteAward"; id: string };
 
+type ActionResult = { ok: true } | { ok: false; error: string };
+
 type HolderRow = {
   key: string;
   label: string;
@@ -94,8 +97,8 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 function toErrorMessage(value: unknown, fallback: string): string {
-  if (value instanceof Error && value.message) return value.message;
-  if (isRecord(value) && typeof value.message === "string") return value.message;
+  if (value instanceof Error && value.message) return formatCgsErrorMessage(value.message, fallback);
+  if (isRecord(value) && typeof value.message === "string") return formatCgsErrorMessage(value.message, fallback);
   return fallback;
 }
 
@@ -130,7 +133,7 @@ async function callMutation<T>(payload: Record<string, unknown>): Promise<T> {
   });
   const data = (await response.json().catch(() => null)) as (T & { error?: string; message?: string }) | null;
   if (!response.ok || !data || data.error) {
-    throw new Error(data?.message ?? data?.error ?? "Request failed.");
+    throw new Error(formatCgsErrorMessage(data?.message ?? data?.error, "Request failed."));
   }
   return data;
 }
@@ -242,15 +245,16 @@ export function InternalBadgesDashboard({
     return payload;
   }
 
-  async function run(actionState: BusyAction, statusText: string, action: () => Promise<void>): Promise<boolean> {
+  async function run(actionState: BusyAction, statusText: string, action: () => Promise<void>): Promise<ActionResult> {
     setBusyAction(actionState);
     setNotice({ tone: "loading", text: statusText });
     try {
       await action();
-      return true;
+      return { ok: true };
     } catch (error) {
-      setNotice({ tone: "error", text: toErrorMessage(error, t("errors.generic")) });
-      return false;
+      const message = toErrorMessage(error, t("errors.generic"));
+      setNotice({ tone: "error", text: message });
+      return { ok: false, error: message };
     } finally {
       setBusyAction((current) => sameBusyAction(current, actionState) ? null : current);
     }
@@ -278,7 +282,7 @@ export function InternalBadgesDashboard({
     void modal.show();
   }
 
-  async function saveBadge(form: BadgeForm): Promise<boolean> {
+  async function saveBadge(form: BadgeForm): Promise<ActionResult> {
     const editing = Boolean(form.editing);
     return run({ kind: "badgeForm" }, t(editing ? "status.updatingBadge" : "status.creatingBadge"), async () => {
       const title = form.title.trim();
@@ -318,7 +322,7 @@ export function InternalBadgesDashboard({
     void modal.show();
   }
 
-  async function deleteBadge(definition: BadgeDefinitionRecord): Promise<boolean> {
+  async function deleteBadge(definition: BadgeDefinitionRecord): Promise<ActionResult> {
     return run({ kind: "deleteBadge", rkey: definition.rkey }, t("status.deletingBadge"), async () => {
       await callMutation({ operation: "deleteRecord", collection: BADGE_DEFINITION_COLLECTION, rkey: definition.rkey });
       await refresh({ tone: "success", text: t("messages.badgeDeleted") });
@@ -384,7 +388,7 @@ export function InternalBadgesDashboard({
     void modal.show();
   }
 
-  async function deleteAward(target: DeleteAwardTarget): Promise<boolean> {
+  async function deleteAward(target: DeleteAwardTarget): Promise<ActionResult> {
     const id = `${target.collection}:${target.rkey}`;
     return run({ kind: "deleteAward", id }, t("status.removingAward"), async () => {
       await callMutation({ operation: "deleteRecord", collection: target.collection, rkey: target.rkey });
@@ -588,17 +592,25 @@ function BadgeFormModal({
 }: {
   initialForm: BadgeForm;
   onCancel: () => void;
-  onSave: (form: BadgeForm) => Promise<boolean>;
+  onSave: (form: BadgeForm) => Promise<ActionResult>;
 }) {
   const t = useTranslations("common.internalBadges");
   const [form, setForm] = useState(initialForm);
   const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   async function handleSave() {
     setBusy(true);
-    const saved = await onSave(form);
-    setBusy(false);
-    if (saved) onCancel();
+    setError(null);
+    try {
+      const result = await onSave(form);
+      if (result.ok) onCancel();
+      else setError(result.error);
+    } catch (caught) {
+      setError(toErrorMessage(caught, t("errors.generic")));
+    } finally {
+      setBusy(false);
+    }
   }
 
   return (
@@ -607,6 +619,7 @@ function BadgeFormModal({
         <ModalTitle>{form.editing ? t("badgeForm.editTitle") : t("badgeForm.createTitle")}</ModalTitle>
         <ModalDescription>{t("badgeForm.modalDescription")}</ModalDescription>
       </ModalHeader>
+      <StatusNotice notice={error ? { tone: "error", text: error } : null} />
       <div className="space-y-4 pt-1">
         <Field label={t("badgeForm.nameLabel")}>
           <Input value={form.title} onChange={(event) => setForm((current) => ({ ...current, title: event.target.value }))} placeholder={t("badgeForm.namePlaceholder")} disabled={busy} />
@@ -648,16 +661,24 @@ function ConfirmActionModal({
   description: string;
   actionLabel: string;
   onCancel: () => void;
-  onConfirm: () => Promise<boolean>;
+  onConfirm: () => Promise<ActionResult>;
 }) {
   const t = useTranslations("common.internalBadges");
   const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   async function handleConfirm() {
     setBusy(true);
-    const confirmed = await onConfirm();
-    setBusy(false);
-    if (confirmed) onCancel();
+    setError(null);
+    try {
+      const result = await onConfirm();
+      if (result.ok) onCancel();
+      else setError(result.error);
+    } catch (caught) {
+      setError(toErrorMessage(caught, t("errors.generic")));
+    } finally {
+      setBusy(false);
+    }
   }
 
   return (
@@ -666,6 +687,7 @@ function ConfirmActionModal({
         <ModalTitle>{title}</ModalTitle>
         <ModalDescription>{description}</ModalDescription>
       </ModalHeader>
+      <StatusNotice notice={error ? { tone: "error", text: error } : null} />
       <ModalFooter>
         <Button type="button" variant="destructive" onClick={() => void handleConfirm()} disabled={busy} className="w-full">
           {busy ? <Loader2Icon className="size-4 animate-spin" /> : <Trash2Icon className="size-4" />}

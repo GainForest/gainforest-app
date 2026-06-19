@@ -93,7 +93,7 @@ function friendlyKnownCgsMessage(message: string, fallback: string): string | nu
     return "Please sign in again, then retry this action.";
   }
 
-  if (normalized.includes("jwt audience does not match service did")) {
+  if (normalized.includes("jwt audience does not match service did") || normalized.includes("invalid audience")) {
     return "This organization request could not be authenticated. Refresh the page and try again.";
   }
 
