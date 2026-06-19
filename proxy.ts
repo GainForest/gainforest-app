@@ -26,10 +26,13 @@ function isLocaleRoutedPath(pathname: string): boolean {
 }
 
 function getSeoLinkHeader(request: NextRequest, pathname: string): string {
-  const canonicalUrl = new URL(pathname, request.url);
+  const host = request.headers.get("host") ?? request.nextUrl.host;
+  const proto = request.headers.get("x-forwarded-proto") ?? request.nextUrl.protocol.replace(/:$/, "");
+  const origin = `${proto}://${host}`;
+  const canonicalUrl = new URL(pathname, origin);
   const alternateLinks = Object.entries(getLocalizedPathnames(pathname)).map(
     ([locale, localizedPathname]) => {
-      const url = new URL(localizedPathname, request.url);
+      const url = new URL(localizedPathname, origin);
       return `<${url.toString()}>; rel="alternate"; hreflang="${locale}"`;
     },
   );

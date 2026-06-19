@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
-import { INDEXER_URL, SITE_URL } from "./_lib/urls";
+import { INDEXER_URL } from "./_lib/urls";
+import { getRequestOrigin } from "./_lib/request-origin";
 import { SUPPORTED_LOCALES, type SupportedLanguageCode } from "@/lib/i18n/languages";
 import { getLocalizedPathnames, withLocalePrefix } from "@/lib/i18n/routing";
 
@@ -34,30 +35,31 @@ const BUMICERT_URIS_QUERY = `
 
 type SitemapBumicertNode = { did?: string | null; rkey?: string | null; createdAt?: string | null };
 
-function buildAbsoluteUrl(pathname: string): string {
-  return new URL(pathname, SITE_URL).toString();
+function buildAbsoluteUrl(pathname: string, origin: string): string {
+  return new URL(pathname, origin).toString();
 }
 
-function buildAlternates(pathname: string): Record<SupportedLanguageCode, string> {
+function buildAlternates(pathname: string, origin: string): Record<SupportedLanguageCode, string> {
   const localizedPathnames = getLocalizedPathnames(pathname);
   return Object.fromEntries(
     Object.entries(localizedPathnames).map(([locale, path]) => [
       locale,
-      buildAbsoluteUrl(path),
+      buildAbsoluteUrl(path, origin),
     ]),
   ) as Record<SupportedLanguageCode, string>;
 }
 
 function buildLocalizedEntries(options: {
+  origin: string;
   pathname: string;
   lastModified?: string | Date;
   changeFrequency: ChangeFrequency;
   priority: number;
 }): MetadataRoute.Sitemap {
-  const alternates = buildAlternates(options.pathname);
+  const alternates = buildAlternates(options.pathname, options.origin);
 
   return SUPPORTED_LOCALES.map((locale) => ({
-    url: buildAbsoluteUrl(withLocalePrefix(options.pathname, locale)),
+    url: buildAbsoluteUrl(withLocalePrefix(options.pathname, locale), options.origin),
     lastModified: options.lastModified,
     changeFrequency: options.changeFrequency,
     priority: options.priority,
@@ -67,7 +69,7 @@ function buildLocalizedEntries(options: {
   }));
 }
 
-async function fetchBumicertEntries(): Promise<MetadataRoute.Sitemap> {
+async function fetchBumicertEntries(origin: string): Promise<MetadataRoute.Sitemap> {
   const entries: MetadataRoute.Sitemap = [];
   let after: string | null = null;
 
@@ -95,6 +97,7 @@ async function fetchBumicertEntries(): Promise<MetadataRoute.Sitemap> {
         if (!node?.did || !node.rkey) continue;
         entries.push(
           ...buildLocalizedEntries({
+            origin,
             pathname: `/cert/${encodeURIComponent(node.did)}/${encodeURIComponent(node.rkey)}`,
             lastModified: node.createdAt ? new Date(node.createdAt) : undefined,
             changeFrequency: "weekly",
@@ -114,15 +117,17 @@ async function fetchBumicertEntries(): Promise<MetadataRoute.Sitemap> {
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const origin = await getRequestOrigin();
   const lastModified = new Date();
   const sections = ROUTES.flatMap(({ path, priority, changeFrequency }) =>
     buildLocalizedEntries({
+      origin,
       pathname: path || "/",
       lastModified,
       changeFrequency,
       priority,
     }),
   );
-  const bumicerts = await fetchBumicertEntries();
+  const bumicerts = await fetchBumicertEntries(origin);
   return [...sections, ...bumicerts];
 }

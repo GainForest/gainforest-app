@@ -13,7 +13,7 @@ import { RouteChangeIndicator } from "./_components/RouteChangeIndicator";
 import { ModalProvider } from "@/components/ui/modal/context";
 import { WagmiProvider } from "@/components/providers/WagmiProvider";
 import { resolveSupportedLanguage } from "@/lib/i18n/languages";
-import { SITE_URL } from "./_lib/urls";
+import { getRequestOrigin } from "./_lib/request-origin";
 
 const geistSans = Geist({
   subsets: ["latin"],
@@ -52,9 +52,10 @@ export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("common.seo");
   const title = t("title");
   const description = t("description");
+  const origin = await getRequestOrigin();
 
   return {
-    metadataBase: new URL(SITE_URL),
+    metadataBase: new URL(origin),
     title: {
       default: title,
       template: `%s · ${SITE_NAME}`,
@@ -80,7 +81,7 @@ export async function generateMetadata(): Promise<Metadata> {
       siteName: SITE_NAME,
       title,
       description,
-      url: SITE_URL,
+      url: origin,
       images: [{ url: OG_IMAGE, width: 1200, height: 630, alt: OG_ALT }],
     },
     twitter: {

@@ -51,7 +51,8 @@ import {
   type TimelineAttachmentItem,
 } from "../../../_lib/indexer";
 import { isPdsBlobUrl } from "../../../_lib/pds";
-import { blockExplorerUrl, INDEXER_URL, localBumicertHref, SITE_URL } from "../../../_lib/urls";
+import { blockExplorerUrl, INDEXER_URL, localBumicertHref } from "../../../_lib/urls";
+import { getRequestOrigin } from "../../../_lib/request-origin";
 import { fetchAuthSession } from "../../../_lib/auth-server";
 import type { AuthSession } from "../../../_lib/auth";
 import { fetchUserCgsGroups } from "../../../_lib/manage-server";
@@ -196,9 +197,10 @@ export default async function BumicertDetailPage({
   params: BumicertPageParams;
   searchParams: BumicertSearchParams;
 }) {
-  const [{ record, detail, owner, fundingConfig, authSession, routeIdentifier, urlIdentifier }, search] = await Promise.all([
+  const [{ record, detail, owner, fundingConfig, authSession, routeIdentifier, urlIdentifier }, search, origin] = await Promise.all([
     readRouteData(params),
     searchParams,
+    getRequestOrigin(),
   ]);
   const activeTab = parseDetailTab(search.tab);
   const workScopeT = await getTranslations("common.workScopes");
@@ -302,11 +304,12 @@ export default async function BumicertDetailPage({
     timelineReferences = await referencePromise;
   }
 
-  const jsonLd = buildBumicertJsonLd(record, owner, fundingConfig, detailHref, description ?? null);
+  const jsonLd = buildBumicertJsonLd(record, owner, fundingConfig, detailHref, description ?? null, origin);
 
   return (
     <>
       <script
+        id="bumicert-json-ld"
         type="application/ld+json"
         // eslint-disable-next-line react/no-danger
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -430,9 +433,10 @@ function buildBumicertJsonLd(
   fundingConfig: BumicertFundingConfig,
   detailHref: string,
   description: string | null,
+  origin: string,
 ): Record<string, unknown> {
   const accepting = Boolean(fundingConfig?.receivingWallet?.uri) && (fundingConfig?.status ?? "open") === "open";
-  const url = `${SITE_URL}${detailHref}`;
+  const url = `${origin}${detailHref}`;
   return {
     "@context": "https://schema.org",
     "@type": "Project",
@@ -444,7 +448,7 @@ function buildBumicertJsonLd(
     parentOrganization: {
       "@type": "Organization",
       name: owner.displayName,
-      url: `${SITE_URL}/account/${encodeURIComponent(owner.urlIdentifier)}`,
+      url: `${origin}/account/${encodeURIComponent(owner.urlIdentifier)}`,
     },
     ...(accepting
       ? {

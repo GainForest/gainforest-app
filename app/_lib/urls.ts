@@ -3,10 +3,6 @@
  * data endpoints. Kept in one place so a host change is a single edit.
  */
 
-/** GainForest's own canonical origin. Drives metadataBase, canonical/OG
- * URLs, the sitemap, and robots. Configure this per deployment. */
-export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || "https://certs-rewrite.gainforest.app").replace(/\/$/, "");
-
 /** Hyperindex GraphQL endpoint. Serves `access-control-allow-origin: *`
  *  so the browser can query it directly (no API proxy needed).
  *  The dev API includes certified profile data on records, which lets cards

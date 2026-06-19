@@ -11,7 +11,7 @@ import { ModalContent, ModalDescription, ModalFooter, ModalHeader, ModalTitle } 
 import type { AuthSession } from "@/app/_lib/auth";
 import { usePreferredDidIdentifier } from "@/app/_components/PreferredLinks";
 import { SocialGlyph } from "@/app/_components/SocialIcon";
-import { SITE_URL, blockExplorerUrl, localBumicertHref } from "@/app/_lib/urls";
+import { blockExplorerUrl, localBumicertHref } from "@/app/_lib/urls";
 import {
   BASE_CHAIN_NAME,
   BASE_RPC_URL,
@@ -86,8 +86,7 @@ function shortWallet(value: string): string {
 }
 
 function absoluteLocalUrl(path: string): string {
-  const origin = typeof window !== "undefined" ? window.location.origin : SITE_URL;
-  return `${origin}${path}`;
+  return typeof window !== "undefined" ? `${window.location.origin}${path}` : path;
 }
 
 function socialShareUrl(platform: "x" | "bluesky" | "telegram", text: string): string {

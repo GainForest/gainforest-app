@@ -1,6 +1,8 @@
 // Minimal OpenRouter client. Ported from gainforest-app's
 // `app/_lib/openrouter.ts`.
 
+import { getRequestOrigin } from "./request-origin";
+
 export const DEFAULT_CHAT_MODEL =
   process.env.DEFAULT_CHAT_MODEL ?? "google/gemini-2.5-flash";
 
@@ -38,13 +40,14 @@ export async function openRouterChat(
   if (opts.maxTokens !== undefined) payload.max_tokens = opts.maxTokens;
   if (opts.temperature !== undefined) payload.temperature = opts.temperature;
 
+  const origin = await getRequestOrigin();
+
   return fetch("https://openrouter.ai/api/v1/chat/completions", {
     method: "POST",
     headers: {
       Authorization: `Bearer ${apiKey}`,
       "Content-Type": "application/json",
-      "HTTP-Referer":
-        process.env.NEXT_PUBLIC_SITE_URL ?? "http://127.0.0.1:3040",
+      "HTTP-Referer": origin,
       "X-Title": opts.title ?? "GainForest",
     },
     body: JSON.stringify(payload),
