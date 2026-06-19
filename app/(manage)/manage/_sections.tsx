@@ -6,6 +6,7 @@ import { fetchReceipts } from "@/app/_lib/dashboard";
 import {
   fetchAudioByDid,
   fetchBumicertsByDid,
+  walkOccurrences,
   fetchLocationsByDid,
   fetchProjectsByDid,
   fetchTreeDatasetsByDid,
@@ -207,7 +208,16 @@ const TAINA_BOT_URL = "https://t.me/TheTainaBot";
 
 export async function ObservationsSection({ target }: { target: ManageTarget }) {
   if (target.accountKind !== "organization") notFound();
-  const t = await getTranslations("upload.observations");
+  const [t, initialObservations] = await Promise.all([
+    getTranslations("upload.observations"),
+    walkOccurrences({
+      media: "all",
+      target: 24,
+      after: null,
+      ownerDid: target.did,
+      resolveMedia: false,
+    }).catch(() => ({ records: [], cursor: null, hasMore: false })),
+  ]);
   return (
     <div className="bg-background pb-4">
       {/* Hero — aligned to the RecordExplorer's max-w-6xl px-6 column below. */}
@@ -271,7 +281,7 @@ export async function ObservationsSection({ target }: { target: ManageTarget }) 
       </div>
 
       <Suspense fallback={null}>
-        <RecordExplorer kind="occurrence" ownerDid={target.did} showHero={false} />
+        <RecordExplorer kind="occurrence" ownerDid={target.did} showHero={false} initialPage={initialObservations} defaultOccurrenceMedia="all" />
       </Suspense>
     </div>
   );

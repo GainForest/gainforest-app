@@ -189,11 +189,13 @@ export function RecordExplorer({
   initialPage,
   showHero = true,
   ownerDid,
+  defaultOccurrenceMedia = DEFAULT_OCCURRENCE_MEDIA,
 }: {
   kind: RecordKind;
   initialPage?: InitialExplorerPage;
   showHero?: boolean;
   ownerDid?: string;
+  defaultOccurrenceMedia?: OccurrenceFilter;
 }) {
   const meta = KIND_META[kind];
   const showStatsOverview = !showHero || Boolean(ownerDid);
@@ -208,7 +210,7 @@ export function RecordExplorer({
   );
   const [occMedia, setOccMedia] = useQueryState(
     "media",
-    parseAsStringEnum<OccurrenceFilter>(OCCURRENCE_MEDIA_FILTERS).withDefault(DEFAULT_OCCURRENCE_MEDIA).withOptions(QUERY_STATE_OPTIONS),
+    parseAsStringEnum<OccurrenceFilter>(OCCURRENCE_MEDIA_FILTERS).withDefault(defaultOccurrenceMedia).withOptions(QUERY_STATE_OPTIONS),
   );
   const [occCategory, setOccCategory] = useQueryState(
     "category",
@@ -227,7 +229,7 @@ export function RecordExplorer({
     parseAsString.withOptions(QUERY_STATE_OPTIONS),
   );
   const initialRecords = initialPage?.records ?? [];
-  const shouldLoadFromUrl = Boolean(query.trim()) || sort !== "newest" || (kind === "occurrence" && occMedia !== DEFAULT_OCCURRENCE_MEDIA) || (kind === "site" && siteSource !== "both");
+  const shouldLoadFromUrl = Boolean(query.trim()) || sort !== "newest" || (kind === "occurrence" && occMedia !== defaultOccurrenceMedia) || (kind === "site" && siteSource !== "both");
 
   const [records, setRecords] = useState<ExplorerRecord[]>(shouldLoadFromUrl ? [] : initialRecords);
   const [cursor, setCursor] = useState<string | null>(shouldLoadFromUrl ? null : initialPage?.cursor ?? null);
