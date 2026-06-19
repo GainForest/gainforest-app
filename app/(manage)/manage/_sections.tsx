@@ -11,6 +11,7 @@ import {
   fetchTreeDatasetsByDid,
 } from "@/app/_lib/indexer";
 import { droneAppHref } from "@/app/_lib/urls";
+import { TAINA_SIM } from "@/app/_lib/taina-sim";
 import { resolveBlobUrl, resolvePdsHost } from "@/app/_lib/pds";
 import { RecordExplorer } from "@/app/_components/RecordExplorer";
 import { Button } from "@/components/ui/button";
@@ -204,8 +205,9 @@ export async function SettingsSection({ target }: { target: ManageTarget }) {
 
 const TAINA_BOT_URL = "https://t.me/TheTainaBot";
 
-export function ObservationsSection({ target }: { target: ManageTarget }) {
+export async function ObservationsSection({ target }: { target: ManageTarget }) {
   if (target.accountKind !== "organization") notFound();
+  const t = await getTranslations("upload.observations");
   return (
     <div className="bg-background pb-4">
       {/* Hero — aligned to the RecordExplorer's max-w-6xl px-6 column below. */}
@@ -221,23 +223,49 @@ export function ObservationsSection({ target }: { target: ManageTarget }) {
           </div>
         </header>
 
-        <div className="mt-5 flex items-start gap-3 rounded-2xl border border-border bg-muted/40 p-4">
-          <span className="grid size-9 shrink-0 place-items-center rounded-full bg-primary/10 text-primary">
-            <TelegramIcon className="size-4" />
-          </span>
-          <div className="min-w-0">
-            <p className="font-instrument text-base font-medium italic text-foreground">Meet Taina</p>
-            <p className="mt-1 text-sm leading-6 text-muted-foreground">
-              Taina is our helper on Telegram. Chat with her to upload observations straight from the
-              field — photos, sightings, and field sound recordings land in this organization&apos;s
-              account automatically, even the large AudioMoth files that won&apos;t upload here.
-            </p>
-            <Button asChild variant="outline" size="sm" className="mt-3">
-              <Link href={TAINA_BOT_URL} target="_blank" rel="noreferrer">
-                <TelegramIcon />
-                Open Taina on Telegram
-              </Link>
-            </Button>
+        <div className="group relative mt-5 overflow-hidden rounded-3xl border border-dashed border-primary/20 bg-gradient-to-br from-primary/[0.07] via-accent/30 to-background p-5 sm:p-6">
+          {/* Soft brand glow, top-right */}
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -right-16 -top-20 size-52 rounded-full bg-primary/15 blur-3xl"
+          />
+          <div className="relative flex flex-col gap-4 sm:flex-row sm:items-start sm:gap-5">
+            {/* Taina's portrait, with a live Telegram presence badge */}
+            <div className="relative w-fit shrink-0">
+              <div className="grid size-16 place-items-center overflow-visible rounded-2xl bg-gradient-to-br from-accent/70 to-primary/10 ring-1 ring-primary/15 transition-transform duration-300 group-hover:-rotate-2 group-hover:scale-105 sm:size-20">
+                <img
+                  src={TAINA_SIM.posterUrl}
+                  alt={TAINA_SIM.name}
+                  width={80}
+                  height={80}
+                  loading="lazy"
+                  className="h-[115%] w-[115%] -translate-y-2 object-contain sm:-translate-y-3"
+                />
+              </div>
+              <span className="absolute -bottom-1.5 -right-1.5 grid size-7 place-items-center rounded-full bg-[#229ED9] text-white ring-2 ring-background">
+                <TelegramIcon className="size-3.5" />
+              </span>
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <p className="font-instrument text-xl font-medium italic tracking-[-0.02em] text-foreground sm:text-2xl">
+                  {t("tainaTitle")}
+                </p>
+                <Button asChild className="hidden sm:inline-flex sm:shrink-0">
+                  <Link href={TAINA_BOT_URL} target="_blank" rel="noreferrer">
+                    <TelegramIcon />
+                    {t("tainaCta")}
+                  </Link>
+                </Button>
+              </div>
+              <p className="mt-1.5 max-w-prose text-sm leading-6 text-muted-foreground">{t("tainaBody")}</p>
+              <Button asChild className="mt-4 w-full sm:hidden">
+                <Link href={TAINA_BOT_URL} target="_blank" rel="noreferrer">
+                  <TelegramIcon />
+                  {t("tainaCta")}
+                </Link>
+              </Button>
+            </div>
           </div>
         </div>
       </div>

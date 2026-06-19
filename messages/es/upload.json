@@ -619,6 +619,11 @@
       "description": "Sube una exportación de hoja de cálculo con información de árboles a GainForest."
     }
   },
+  "observations": {
+    "tainaTitle": "Saluda a Taina",
+    "tainaBody": "Taina está en Telegram. Envíale tus fotos del campo, avistamientos y grabaciones, y ella las pondrá en esta organización por ti. Los archivos grandes de AudioMoth también son bienvenidos.",
+    "tainaCta": "Saludar en Telegram"
+  },
   "settings": {
     "organizationTitle": "Configuración de la organización",
     "organizationDescription": "Gestiona miembros y controla quién puede hacer cambios en esta organización.",

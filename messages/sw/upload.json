@@ -619,6 +619,11 @@
       "description": "Pakia faili la lahajedwali lenye taarifa za miti kwenye GainForest."
     }
   },
+  "observations": {
+    "tainaTitle": "Msalimie Taina",
+    "tainaBody": "Taina yuko Telegram. Mtumie picha zako za uwandani, viumbe ulioona na rekodi za sauti, naye ataziweka kwenye shirika hili kwa ajili yako. Faili kubwa za AudioMoth zinakaribishwa pia.",
+    "tainaCta": "Salimia Telegram"
+  },
   "settings": {
     "organizationTitle": "Mipangilio ya shirika",
     "organizationDescription": "Dhibiti wanachama na udhibiti nani anaweza kufanya mabadiliko katika shirika hili.",

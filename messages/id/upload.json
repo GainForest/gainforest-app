@@ -619,6 +619,11 @@
       "description": "Unggah ekspor spreadsheet berisi informasi pohon ke GainForest."
     }
   },
+  "observations": {
+    "tainaTitle": "Sapa Taina",
+    "tainaBody": "Taina ada di Telegram. Kirimkan foto lapangan, temuan satwa atau tumbuhan, dan rekaman suara kepadanya, lalu ia akan memasukkannya ke organisasi ini untukmu. File AudioMoth besar juga boleh.",
+    "tainaCta": "Sapa di Telegram"
+  },
   "settings": {
     "organizationTitle": "Pengaturan organisasi",
     "organizationDescription": "Kelola anggota dan tentukan siapa yang dapat membuat perubahan untuk organisasi ini.",

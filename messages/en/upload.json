@@ -619,6 +619,11 @@
       "description": "Upload a spreadsheet export of tree information to GainForest."
     }
   },
+  "observations": {
+    "tainaTitle": "Say hi to Taina",
+    "tainaBody": "Taina hangs out on Telegram. Send her your field photos, sightings, and sound recordings, and she will pop them into this organization for you. Big AudioMoth files are welcome too.",
+    "tainaCta": "Say hi on Telegram"
+  },
   "settings": {
     "organizationTitle": "Organization settings",
     "organizationDescription": "Manage members and control who can make changes for this organization.",
