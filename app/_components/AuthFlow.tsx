@@ -476,15 +476,9 @@ function UnauthenticatedButtons() {
   };
 
   return (
-    <motion.button
-      onClick={openAuth}
-      whileHover={{ scale: 1.02 }}
-      whileTap={{ scale: 0.97 }}
-      transition={{ type: "spring", stiffness: 400, damping: 25 }}
-      className="text-sm font-medium bg-primary text-primary-foreground rounded-full px-3.5 py-1.5 hover:bg-primary/90 transition-colors cursor-pointer"
-    >
+    <Button size="sm" onClick={openAuth}>
       {t("getStarted")}
-    </motion.button>
+    </Button>
   );
 }
 
@@ -515,15 +509,19 @@ function AccountDot({
   avatarUrl,
   label,
   icon,
+  className,
+  imageSizes = "32px",
 }: {
   avatarUrl?: string | null;
   label: string;
   icon: React.ReactNode;
+  className?: string;
+  imageSizes?: string;
 }) {
   return (
-    <span className="relative flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-primary/10 text-primary">
+    <span className={cn("relative flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-primary/10 text-primary", className)}>
       {avatarUrl ? (
-        <Image src={avatarUrl} alt={label} fill unoptimized sizes="32px" className="object-cover" />
+        <Image src={avatarUrl} alt={label} fill unoptimized sizes={imageSizes} className="object-cover" />
       ) : icon}
     </span>
   );
@@ -652,24 +650,21 @@ function AuthenticatedMenu({
 
   return (
     <div ref={containerRef} className="relative" onBlur={handleBlur}>
-      <button
-        onClick={() => setOpen((value) => !value)}
-        className="flex items-center gap-2 px-2 py-1 rounded-xl hover:bg-muted/60 transition-colors cursor-pointer group"
-      >
-        <AccountDot avatarUrl={triggerAvatarUrl} label={displayLabel} icon={triggerIcon} />
+      <Button type="button" variant="ghost" className="px-2" onClick={() => setOpen((value) => !value)}>
+        <AccountDot avatarUrl={triggerAvatarUrl} label={displayLabel} icon={triggerIcon} className="h-7 w-7" imageSizes="28px" />
 
-        <span className="hidden sm:block text-sm font-medium text-foreground max-w-[120px] truncate">
+        <span className="hidden max-w-[120px] truncate sm:block">
           {displayLabel}
         </span>
 
-        <motion.div
+        <motion.span
           className="hidden sm:block"
           animate={{ rotate: open ? 180 : 0 }}
           transition={{ duration: 0.2 }}
         >
-          <ChevronDownIcon className="h-3.5 w-3.5 text-muted-foreground" />
-        </motion.div>
-      </button>
+          <ChevronDownIcon className="size-3.5 text-muted-foreground" />
+        </motion.span>
+      </Button>
 
       <AnimatePresence>
         {open && (
