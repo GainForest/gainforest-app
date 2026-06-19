@@ -1,12 +1,16 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import {
+  ArrowLeftIcon,
   AwardIcon,
   BadgeCheckIcon,
+  Building2Icon,
   Edit3Icon,
   Loader2Icon,
   MailIcon,
@@ -16,6 +20,8 @@ import {
   UserRoundIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useModal } from "@/components/ui/modal/context";
+import { ModalContent, ModalDescription, ModalFooter, ModalHeader, ModalTitle } from "@/components/ui/modal/modal";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -58,7 +64,7 @@ type BadgeForm = {
 
 type AwardForm = {
   badgeUri: string;
-  recipient: string;
+  recipients: string;
   note: string;
   url: string;
 };
@@ -68,6 +74,20 @@ type BusyAction =
   | { kind: "awardForm" }
   | { kind: "deleteBadge"; rkey: string }
   | { kind: "deleteAward"; id: string };
+
+type HolderRow = {
+  key: string;
+  label: string;
+  sublabel: string | null;
+  kind: "account" | "organization" | "email" | "record";
+  awards: BadgeAwardRecord[];
+  pending: PendingBadgeAwardRecord[];
+};
+
+type DeleteAwardTarget = {
+  collection: typeof BADGE_AWARD_COLLECTION | typeof BADGE_PENDING_AWARD_COLLECTION;
+  rkey: string;
+};
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
@@ -136,7 +156,7 @@ function emptyBadgeForm(): BadgeForm {
 }
 
 function emptyAwardForm(badgeUri = ""): AwardForm {
-  return { badgeUri, recipient: "", note: "", url: "" };
+  return { badgeUri, recipients: "", note: "", url: "" };
 }
 
 function strongRef(definition: BadgeDefinitionRecord): StrongRef {
@@ -156,38 +176,61 @@ function sameBusyAction(a: BusyAction | null, b: BusyAction): boolean {
   return true;
 }
 
-export function InternalBadgesDashboard({ initialData, writeRepo }: { initialData: InternalBadgeData; writeRepo: string | null }) {
+function uniqueRecipients(value: string): string[] {
+  return Array.from(new Set(value.split(/[\n,;]+/).map((entry) => entry.trim()).filter(Boolean)));
+}
+
+export function InternalBadgesDashboard({
+  initialData,
+  writeRepo,
+  selectedBadgeRkey,
+}: {
+  initialData: InternalBadgeData;
+  writeRepo: string | null;
+  selectedBadgeRkey?: string;
+}) {
   const t = useTranslations("common.internalBadges");
   const locale = useLocale();
+  const router = useRouter();
+  const modal = useModal();
   const [data, setData] = useState<BadgeData>({ ...initialData, writeRepo });
-  const [badgeForm, setBadgeForm] = useState<BadgeForm>(() => emptyBadgeForm());
-  const [awardForm, setAwardForm] = useState<AwardForm>(() => emptyAwardForm(initialData.definitions[0]?.uri ?? ""));
+  const [awardForm, setAwardForm] = useState<AwardForm>(() => emptyAwardForm(initialData.definitions.find((definition) => definition.rkey === selectedBadgeRkey)?.uri ?? ""));
   const [notice, setNotice] = useState<{ tone: "success" | "error" | "loading"; text: string } | null>(null);
   const [busyAction, setBusyAction] = useState<BusyAction | null>(null);
   const isBusy = Boolean(busyAction);
-  const isBadgeFormBusy = busyAction?.kind === "badgeForm";
   const isAwardFormBusy = busyAction?.kind === "awardForm";
 
-  const definitionsByUri = useMemo(() => new Map(data.definitions.map((definition) => [definition.uri, definition])), [data.definitions]);
+  const selectedDefinition = useMemo(
+    () => data.definitions.find((definition) => definition.rkey === selectedBadgeRkey) ?? null,
+    [data.definitions, selectedBadgeRkey],
+  );
+  const isDetailPage = Boolean(selectedBadgeRkey && selectedDefinition);
   const badgeTypeLabel = (type: string) => (BADGE_TYPE_SET.has(type) ? t(`types.${type}`) : type);
-  const groupedRecipients = useMemo(() => {
-    const rows = new Map<string, { label: string; sublabel: string | null; awards: BadgeAwardRecord[]; pending: PendingBadgeAwardRecord[] }>();
-    data.awards.forEach((award) => {
-      const key = award.subjectDid ?? award.subjectLabel;
-      const existing = rows.get(key) ?? { label: award.subjectLabel, sublabel: award.subjectHandle, awards: [], pending: [] };
+  const holderRows = useMemo(() => {
+    if (!selectedDefinition) return [];
+    const rows = new Map<string, HolderRow>();
+    data.awards.filter((award) => award.badge.uri === selectedDefinition.uri).forEach((award) => {
+      const key = award.subjectDid ? `account:${award.subjectDid}` : `${award.subjectKind}:${award.subjectLabel}`;
+      const kind: HolderRow["kind"] = award.subjectKind === "record" ? "record" : "account";
+      const existing = rows.get(key) ?? { key, label: award.subjectLabel, sublabel: award.subjectHandle, kind, awards: [], pending: [] };
       existing.awards.push(award);
       rows.set(key, existing);
     });
-    data.pendingAwards.forEach((award) => {
+    data.pendingAwards.filter((award) => award.badge.uri === selectedDefinition.uri).forEach((award) => {
       const key = `email:${award.email}`;
-      const existing = rows.get(key) ?? { label: award.email, sublabel: t("pendingEmail"), awards: [], pending: [] };
+      const existing = rows.get(key) ?? { key, label: award.email, sublabel: t("pendingEmail"), kind: "email" as const, awards: [], pending: [] };
       existing.pending.push(award);
       rows.set(key, existing);
     });
     return Array.from(rows.values());
-  }, [data.awards, data.pendingAwards, t]);
+  }, [data.awards, data.pendingAwards, selectedDefinition, t]);
   const isDeletingBadge = (rkey: string) => busyAction?.kind === "deleteBadge" && busyAction.rkey === rkey;
   const isDeletingAward = (collection: string, rkey: string) => busyAction?.kind === "deleteAward" && busyAction.id === `${collection}:${rkey}`;
+
+  useEffect(() => {
+    if (!selectedDefinition) return;
+    setAwardForm((form) => form.badgeUri === selectedDefinition.uri ? form : emptyAwardForm(selectedDefinition.uri));
+  }, [selectedDefinition]);
 
   async function refresh(nextNotice?: { tone: "success" | "error" | "loading"; text: string }) {
     const response = await fetch("/api/internal/badges", { cache: "no-store" });
@@ -195,118 +238,155 @@ export function InternalBadgesDashboard({ initialData, writeRepo }: { initialDat
     if (!response.ok || !payload || payload.error) throw new Error(payload?.error ?? t("errors.refresh"));
     setData(payload);
     if (nextNotice) setNotice(nextNotice);
+    return payload;
   }
 
-  async function run(actionState: BusyAction, statusText: string, action: () => Promise<void>) {
+  async function run(actionState: BusyAction, statusText: string, action: () => Promise<void>): Promise<boolean> {
     setBusyAction(actionState);
     setNotice({ tone: "loading", text: statusText });
     try {
       await action();
+      return true;
     } catch (error) {
       setNotice({ tone: "error", text: toErrorMessage(error, t("errors.generic")) });
+      return false;
     } finally {
       setBusyAction((current) => sameBusyAction(current, actionState) ? null : current);
     }
   }
 
-  function editBadge(definition: BadgeDefinitionRecord) {
-    setBadgeForm({
-      editing: definition,
-      title: definition.title,
-      badgeType: definition.badgeType,
-      description: definition.description ?? "",
-      iconFile: null,
-    });
-    setNotice(null);
+  function closeModal() {
+    void modal.hide().then(() => modal.popModal());
   }
 
-  function saveBadge() {
-    const editing = Boolean(badgeForm.editing);
-    void run({ kind: "badgeForm" }, t(editing ? "status.updatingBadge" : "status.creatingBadge"), async () => {
-      const title = badgeForm.title.trim();
+  function openCreateBadge() {
+    setNotice(null);
+    modal.pushModal({
+      id: "internal-badge-create",
+      content: <BadgeFormModal initialForm={emptyBadgeForm()} onCancel={closeModal} onSave={saveBadge} />,
+    }, true);
+    void modal.show();
+  }
+
+  function openEditBadge(definition: BadgeDefinitionRecord) {
+    setNotice(null);
+    modal.pushModal({
+      id: `internal-badge-edit-${definition.rkey}`,
+      content: <BadgeFormModal initialForm={{ editing: definition, title: definition.title, badgeType: definition.badgeType, description: definition.description ?? "", iconFile: null }} onCancel={closeModal} onSave={saveBadge} />,
+    }, true);
+    void modal.show();
+  }
+
+  async function saveBadge(form: BadgeForm): Promise<boolean> {
+    const editing = Boolean(form.editing);
+    return run({ kind: "badgeForm" }, t(editing ? "status.updatingBadge" : "status.creatingBadge"), async () => {
+      const title = form.title.trim();
       if (!title) throw new Error(t("errors.titleRequired"));
-      let icon: unknown | null | undefined = badgeForm.editing ? undefined : null;
-      if (badgeForm.iconFile) icon = toLexBlobRef(await uploadIcon(badgeForm.iconFile), badgeForm.iconFile);
+      let icon: unknown | null | undefined = form.editing ? undefined : null;
+      if (form.iconFile) icon = toLexBlobRef(await uploadIcon(form.iconFile), form.iconFile);
       const record: Record<string, unknown> = {
         $type: BADGE_DEFINITION_COLLECTION,
         title,
-        badgeType: badgeForm.badgeType.trim() || "recognition",
-        description: badgeForm.description.trim() || undefined,
-        createdAt: badgeForm.editing?.createdAt ?? new Date().toISOString(),
+        badgeType: form.badgeType.trim() || "recognition",
+        description: form.description.trim() || undefined,
+        createdAt: form.editing?.createdAt ?? new Date().toISOString(),
       };
       if (icon) record.icon = icon;
-      if (badgeForm.editing && icon === undefined && badgeForm.editing.icon) record.icon = badgeForm.editing.icon;
+      if (form.editing && icon === undefined && form.editing.icon) record.icon = form.editing.icon;
 
-      if (badgeForm.editing) {
+      if (form.editing) {
         await callMutation<MutationResult>({
           operation: "putRecord",
           collection: BADGE_DEFINITION_COLLECTION,
-          rkey: badgeForm.editing.rkey,
+          rkey: form.editing.rkey,
           record,
-          swapRecord: badgeForm.editing.cid,
+          swapRecord: form.editing.cid,
         });
       } else {
         await callMutation<MutationResult>({ operation: "createRecord", collection: BADGE_DEFINITION_COLLECTION, record });
       }
-      setBadgeForm(emptyBadgeForm());
       await refresh({ tone: "success", text: t(editing ? "messages.badgeUpdated" : "messages.badgeCreated") });
     });
   }
 
-  function deleteBadge(definition: BadgeDefinitionRecord) {
-    if (!window.confirm(t("confirm.deleteBadge", { title: definition.title }))) return;
-    void run({ kind: "deleteBadge", rkey: definition.rkey }, t("status.deletingBadge"), async () => {
+  function openDeleteBadge(definition: BadgeDefinitionRecord) {
+    modal.pushModal({
+      id: `internal-badge-delete-${definition.rkey}`,
+      content: <ConfirmActionModal title={t("confirm.deleteBadgeTitle")} description={t("confirm.deleteBadge", { title: definition.title })} actionLabel={t("confirm.deleteBadgeAction")} onCancel={closeModal} onConfirm={() => deleteBadge(definition)} />,
+    }, true);
+    void modal.show();
+  }
+
+  async function deleteBadge(definition: BadgeDefinitionRecord): Promise<boolean> {
+    return run({ kind: "deleteBadge", rkey: definition.rkey }, t("status.deletingBadge"), async () => {
       await callMutation({ operation: "deleteRecord", collection: BADGE_DEFINITION_COLLECTION, rkey: definition.rkey });
       await refresh({ tone: "success", text: t("messages.badgeDeleted") });
+      if (selectedBadgeRkey === definition.rkey) router.push("/internal/badges");
+    });
+  }
+
+  async function createAwardForRecipient(definition: BadgeDefinitionRecord, recipientText: string, note: string, url: string) {
+    const recipient = await resolveRecipient(recipientText);
+    if (recipient.kind === "email") {
+      await callMutation<MutationResult>({
+        operation: "createRecord",
+        collection: BADGE_PENDING_AWARD_COLLECTION,
+        record: {
+          $type: BADGE_PENDING_AWARD_COLLECTION,
+          badge: strongRef(definition),
+          email: recipient.email,
+          note: note || undefined,
+          createdAt: new Date().toISOString(),
+        },
+      });
+      return;
+    }
+
+    await callMutation<MutationResult>({
+      operation: "createRecord",
+      collection: BADGE_AWARD_COLLECTION,
+      record: {
+        $type: BADGE_AWARD_COLLECTION,
+        badge: strongRef(definition),
+        subject: { $type: "app.certified.defs#did", did: recipient.did },
+        note: note || undefined,
+        url: url || undefined,
+        createdAt: new Date().toISOString(),
+      },
     });
   }
 
   function assignBadge() {
     void run({ kind: "awardForm" }, t("status.assigningBadge"), async () => {
-      const definition = definitionsByUri.get(awardForm.badgeUri);
+      const definition = selectedDefinition ?? data.definitions.find((entry) => entry.uri === awardForm.badgeUri);
       if (!definition) throw new Error(t("errors.badgeRequired"));
-      const recipient = await resolveRecipient(awardForm.recipient);
+      const recipients = uniqueRecipients(awardForm.recipients);
+      if (recipients.length === 0) throw new Error(t("errors.recipientRequired"));
       const note = awardForm.note.trim();
       const url = awardForm.url.trim();
-      if (recipient.kind === "email") {
-        await callMutation<MutationResult>({
-          operation: "createRecord",
-          collection: BADGE_PENDING_AWARD_COLLECTION,
-          record: {
-            $type: BADGE_PENDING_AWARD_COLLECTION,
-            badge: strongRef(definition),
-            email: recipient.email,
-            note: note || undefined,
-            createdAt: new Date().toISOString(),
-          },
-        });
-        setAwardForm(emptyAwardForm(definition.uri));
-        await refresh({ tone: "success", text: t("messages.pendingCreated") });
-        return;
+      for (const recipient of recipients) {
+        await createAwardForRecipient(definition, recipient, note, url);
       }
-
-      await callMutation<MutationResult>({
-        operation: "createRecord",
-        collection: BADGE_AWARD_COLLECTION,
-        record: {
-          $type: BADGE_AWARD_COLLECTION,
-          badge: strongRef(definition),
-          subject: { $type: "app.certified.defs#did", did: recipient.did },
-          note: note || undefined,
-          url: url || undefined,
-          createdAt: new Date().toISOString(),
-        },
-      });
       setAwardForm(emptyAwardForm(definition.uri));
-      await refresh({ tone: "success", text: t("messages.awardCreated") });
+      await refresh({
+        tone: "success",
+        text: recipients.length === 1 ? t("messages.awardCreated") : t("messages.awardsCreated", { count: recipients.length }),
+      });
     });
   }
 
-  function deleteAward(collection: string, rkey: string) {
-    if (!window.confirm(t("confirm.deleteAward"))) return;
-    const id = `${collection}:${rkey}`;
-    void run({ kind: "deleteAward", id }, t("status.removingAward"), async () => {
-      await callMutation({ operation: "deleteRecord", collection, rkey });
+  function openDeleteAward(target: DeleteAwardTarget) {
+    modal.pushModal({
+      id: `internal-badge-assignment-delete-${target.collection}-${target.rkey}`,
+      content: <ConfirmActionModal title={t("confirm.deleteAwardTitle")} description={t("confirm.deleteAward")} actionLabel={t("confirm.deleteAwardAction")} onCancel={closeModal} onConfirm={() => deleteAward(target)} />,
+    }, true);
+    void modal.show();
+  }
+
+  async function deleteAward(target: DeleteAwardTarget): Promise<boolean> {
+    const id = `${target.collection}:${target.rkey}`;
+    return run({ kind: "deleteAward", id }, t("status.removingAward"), async () => {
+      await callMutation({ operation: "deleteRecord", collection: target.collection, rkey: target.rkey });
       await refresh({ tone: "success", text: t("messages.awardDeleted") });
     });
   }
@@ -314,153 +394,285 @@ export function InternalBadgesDashboard({ initialData, writeRepo }: { initialDat
   return (
     <main className="min-h-screen bg-background px-4 py-6 text-foreground sm:px-6 lg:px-8" aria-busy={isBusy}>
       <div className="mx-auto flex max-w-7xl flex-col gap-5">
-        <section className="rounded-3xl bg-card p-5 md:p-6">
-          <div className="grid gap-4">
-            <div>
-              <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
-                <ShieldCheckIcon className="size-3.5" />
-                {t("eyebrow")}
-              </div>
-              <h1 className="mt-3 font-instrument text-4xl font-light italic tracking-[-0.04em] md:text-5xl">{t("title")}</h1>
-              <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">{t("description")}</p>
-            </div>
-            <div className="grid grid-cols-3 gap-3">
-              <Stat label={t("stats.badges")} value={data.definitions.length} />
-              <Stat label={t("stats.awards")} value={data.awards.length} />
-              <Stat label={t("stats.pending")} value={data.pendingAwards.length} />
-            </div>
-          </div>
-        </section>
+        {isDetailPage && selectedDefinition ? (
+          <BadgeDetailHeader
+            definition={selectedDefinition}
+            badgeTypeLabel={badgeTypeLabel(selectedDefinition.badgeType)}
+            createdAt={formatDate(locale, selectedDefinition.createdAt)}
+            onEdit={() => openEditBadge(selectedDefinition)}
+            onDelete={() => openDeleteBadge(selectedDefinition)}
+            deleting={isDeletingBadge(selectedDefinition.rkey)}
+          />
+        ) : (
+          <BadgesIndexHeader onCreate={openCreateBadge} />
+        )}
 
         <StatusNotice notice={notice} />
 
-        <div className="grid gap-5">
-          <Panel title={badgeForm.editing ? t("badgeForm.editTitle") : t("badgeForm.createTitle")} icon={<BadgeCheckIcon className="size-5" />}>
-            <div className="space-y-4">
-              <Field label={t("badgeForm.nameLabel")}>
-                <Input value={badgeForm.title} onChange={(event) => setBadgeForm((form) => ({ ...form, title: event.target.value }))} placeholder={t("badgeForm.namePlaceholder")} disabled={isBadgeFormBusy} />
-              </Field>
-              <Field label={t("badgeForm.typeLabel")}>
-                <Select value={badgeForm.badgeType} onValueChange={(value) => setBadgeForm((form) => ({ ...form, badgeType: value }))} disabled={isBadgeFormBusy}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    {BADGE_TYPES.map((type) => <SelectItem key={type} value={type}>{t(`types.${type}`)}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-              </Field>
-              <Field label={t("badgeForm.descriptionLabel")}>
-                <Textarea value={badgeForm.description} onChange={(event) => setBadgeForm((form) => ({ ...form, description: event.target.value }))} className="min-h-28" placeholder={t("badgeForm.descriptionPlaceholder")} disabled={isBadgeFormBusy} />
-              </Field>
-              <Field label={t("badgeForm.iconLabel")}>
-                <Input type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" onChange={(event) => setBadgeForm((form) => ({ ...form, iconFile: event.target.files?.[0] ?? null }))} disabled={isBadgeFormBusy} aria-label={t("badgeForm.iconLabel")} />
-              </Field>
-              <div className="flex flex-wrap gap-2">
-                <Button type="button" onClick={saveBadge} disabled={isBadgeFormBusy} className="shadow-none">
-                  {isBadgeFormBusy ? <Loader2Icon className="size-4 animate-spin" /> : <PlusIcon className="size-4" />}
-                  {badgeForm.editing ? t("badgeForm.save") : t("badgeForm.create")}
-                </Button>
-                {badgeForm.editing ? <Button type="button" onClick={() => setBadgeForm(emptyBadgeForm())} variant="secondary" disabled={isBadgeFormBusy}>{t("badgeForm.cancel")}</Button> : null}
+        {isDetailPage && selectedDefinition ? (
+          <div className="grid gap-5">
+            <Panel title={t("awardForm.titleForBadge")} icon={<AwardIcon className="size-5" />}>
+              <div className="grid gap-4 md:grid-cols-2">
+                <Field label={t("awardForm.recipientsLabel")}>
+                  <Textarea
+                    value={awardForm.recipients}
+                    onChange={(event) => setAwardForm((form) => ({ ...form, recipients: event.target.value }))}
+                    className="min-h-28"
+                    placeholder={t("awardForm.recipientsPlaceholder")}
+                    disabled={isAwardFormBusy}
+                  />
+                </Field>
+                <div className="grid gap-4">
+                  <Field label={t("awardForm.noteLabel")}>
+                    <Input value={awardForm.note} onChange={(event) => setAwardForm((form) => ({ ...form, note: event.target.value }))} placeholder={t("awardForm.notePlaceholder")} disabled={isAwardFormBusy} />
+                  </Field>
+                  <Field label={t("awardForm.urlLabel")}>
+                    <Input value={awardForm.url} onChange={(event) => setAwardForm((form) => ({ ...form, url: event.target.value }))} placeholder={t("awardForm.urlPlaceholder")} disabled={isAwardFormBusy} />
+                  </Field>
+                </div>
               </div>
-            </div>
-          </Panel>
+              <Button type="button" onClick={assignBadge} disabled={isAwardFormBusy} className="mt-4 shadow-none">
+                {isAwardFormBusy ? <Loader2Icon className="size-4 animate-spin" /> : <AwardIcon className="size-4" />}
+                {t("awardForm.assign")}
+              </Button>
+            </Panel>
 
-          <Panel title={t("awardForm.title")} icon={<AwardIcon className="size-5" />}>
-            <div className="grid gap-4 md:grid-cols-2">
-              <Field label={t("awardForm.badgeLabel")}>
-                <Select value={awardForm.badgeUri} onValueChange={(value) => setAwardForm((form) => ({ ...form, badgeUri: value }))} disabled={isAwardFormBusy || data.definitions.length === 0}>
-                  <SelectTrigger><SelectValue placeholder={data.definitions.length === 0 ? t("awardForm.noBadges") : undefined} /></SelectTrigger>
-                  <SelectContent>
-                    {data.definitions.map((definition) => <SelectItem key={definition.uri} value={definition.uri}>{definition.title}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-              </Field>
-              <Field label={t("awardForm.recipientLabel")}>
-                <Input value={awardForm.recipient} onChange={(event) => setAwardForm((form) => ({ ...form, recipient: event.target.value }))} placeholder={t("awardForm.recipientPlaceholder")} disabled={isAwardFormBusy} />
-              </Field>
-              <Field label={t("awardForm.noteLabel")}>
-                <Input value={awardForm.note} onChange={(event) => setAwardForm((form) => ({ ...form, note: event.target.value }))} placeholder={t("awardForm.notePlaceholder")} disabled={isAwardFormBusy} />
-              </Field>
-              <Field label={t("awardForm.urlLabel")}>
-                <Input value={awardForm.url} onChange={(event) => setAwardForm((form) => ({ ...form, url: event.target.value }))} placeholder={t("awardForm.urlPlaceholder")} disabled={isAwardFormBusy} />
-              </Field>
-            </div>
-            <Button type="button" onClick={assignBadge} disabled={isAwardFormBusy || data.definitions.length === 0} className="mt-4 shadow-none">
-              {isAwardFormBusy ? <Loader2Icon className="size-4 animate-spin" /> : <AwardIcon className="size-4" />}
-              {t("awardForm.assign")}
-            </Button>
-          </Panel>
-        </div>
-
-        <div className="grid gap-5">
+            <Panel title={t("recipients.title")} icon={<UserRoundIcon className="size-5" />}>
+              {holderRows.length === 0 ? <Empty text={t("recipients.emptyForBadge")} /> : (
+                <div className="space-y-3">
+                  {holderRows.map((row) => (
+                    <article key={row.key} className="rounded-2xl bg-background p-4">
+                      <div className="flex items-start gap-3">
+                        <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-muted">
+                          {row.kind === "email" ? <MailIcon className="size-4" /> : row.kind === "record" || row.kind === "organization" ? <Building2Icon className="size-4" /> : <UserRoundIcon className="size-4" />}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <h3 className="truncate font-medium">{row.label}</h3>
+                          {row.sublabel ? <p className="mt-0.5 text-xs text-muted-foreground">{row.sublabel}</p> : null}
+                          <div className="mt-3 flex flex-wrap gap-2">
+                            {row.awards.map((award) => (
+                              <AwardChip
+                                key={award.uri}
+                                title={selectedDefinition.title}
+                                detail={formatDate(locale, award.createdAt)}
+                                deleting={isDeletingAward(BADGE_AWARD_COLLECTION, award.rkey)}
+                                onDelete={() => openDeleteAward({ collection: BADGE_AWARD_COLLECTION, rkey: award.rkey })}
+                                deleteLabel={t("recipients.removeAward")}
+                              />
+                            ))}
+                            {row.pending.map((award) => (
+                              <AwardChip
+                                key={award.uri}
+                                title={selectedDefinition.title}
+                                detail={t("pendingChip")}
+                                deleting={isDeletingAward(BADGE_PENDING_AWARD_COLLECTION, award.rkey)}
+                                onDelete={() => openDeleteAward({ collection: BADGE_PENDING_AWARD_COLLECTION, rkey: award.rkey })}
+                                deleteLabel={t("recipients.removeAward")}
+                              />
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              )}
+            </Panel>
+          </div>
+        ) : (
           <Panel title={t("badges.title")} icon={<BadgeCheckIcon className="size-5" />}>
             {data.definitions.length === 0 ? <Empty text={t("badges.empty")} /> : (
-              <div className="space-y-3">
+              <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
                 {data.definitions.map((definition) => (
-                  <article key={definition.uri} className="rounded-2xl bg-background p-4">
+                  <Link
+                    key={definition.uri}
+                    href={`/internal/badges/${encodeURIComponent(definition.rkey)}`}
+                    className="group rounded-2xl bg-background p-4 transition-colors hover:bg-muted/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    aria-label={t("badges.openAria", { title: definition.title })}
+                  >
                     <div className="flex gap-4">
                       <div className="flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-muted">
                         {definition.iconUrl ? <Image src={definition.iconUrl} alt="" width={56} height={56} unoptimized className="size-full object-cover" /> : <BadgeCheckIcon className="size-6 text-muted-foreground" />}
                       </div>
                       <div className="min-w-0 flex-1">
-                        <div className="flex flex-wrap items-start justify-between gap-3">
-                          <div>
-                            <h3 className="font-medium">{definition.title}</h3>
-                            <p className="mt-1 text-xs uppercase tracking-[0.18em] text-muted-foreground">{badgeTypeLabel(definition.badgeType)}</p>
-                          </div>
-                          <div className="flex gap-1">
-                            <Button type="button" onClick={() => editBadge(definition)} variant="ghost" size="icon-sm" disabled={isDeletingBadge(definition.rkey)} aria-label={t("badges.editAria", { title: definition.title })}><Edit3Icon className="size-4" /></Button>
-                            <Button type="button" onClick={() => deleteBadge(definition)} variant="ghost" size="icon-sm" disabled={isDeletingBadge(definition.rkey)} aria-label={t("badges.deleteAria", { title: definition.title })}>{isDeletingBadge(definition.rkey) ? <Loader2Icon className="size-4 animate-spin text-destructive" /> : <Trash2Icon className="size-4 text-destructive" />}</Button>
-                          </div>
-                        </div>
-                        {definition.description ? <p className="mt-3 text-sm leading-6 text-muted-foreground">{definition.description}</p> : null}
+                        <h3 className="font-medium group-hover:text-primary">{definition.title}</h3>
+                        <p className="mt-1 text-xs uppercase tracking-[0.18em] text-muted-foreground">{badgeTypeLabel(definition.badgeType)}</p>
+                        {definition.description ? <p className="mt-3 line-clamp-3 text-sm leading-6 text-muted-foreground">{definition.description}</p> : null}
                         <p className="mt-3 text-xs text-muted-foreground">{formatDate(locale, definition.createdAt)}</p>
                       </div>
                     </div>
-                  </article>
+                  </Link>
                 ))}
               </div>
             )}
           </Panel>
-
-          <Panel title={t("recipients.title")} icon={<UserRoundIcon className="size-5" />}>
-            {groupedRecipients.length === 0 ? <Empty text={t("recipients.empty")} /> : (
-              <div className="space-y-3">
-                {groupedRecipients.map((row) => (
-                  <article key={`${row.label}-${row.sublabel ?? ""}`} className="rounded-2xl bg-background p-4">
-                    <div className="flex items-start gap-3">
-                      <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-muted">
-                        {row.pending.length > 0 && row.awards.length === 0 ? <MailIcon className="size-4" /> : <UserRoundIcon className="size-4" />}
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <h3 className="truncate font-medium">{row.label}</h3>
-                        {row.sublabel ? <p className="mt-0.5 text-xs text-muted-foreground">{row.sublabel}</p> : null}
-                        <div className="mt-3 flex flex-wrap gap-2">
-                          {row.awards.map((award) => (
-                            <AwardChip key={award.uri} title={award.badgeTitle ?? t("unknownBadge")} detail={formatDate(locale, award.createdAt)} deleting={isDeletingAward(BADGE_AWARD_COLLECTION, award.rkey)} onDelete={() => deleteAward(BADGE_AWARD_COLLECTION, award.rkey)} deleteLabel={t("recipients.removeAward")} />
-                          ))}
-                          {row.pending.map((award) => (
-                            <AwardChip key={award.uri} title={award.badgeTitle ?? t("unknownBadge")} detail={t("pendingChip")} deleting={isDeletingAward(BADGE_PENDING_AWARD_COLLECTION, award.rkey)} onDelete={() => deleteAward(BADGE_PENDING_AWARD_COLLECTION, award.rkey)} deleteLabel={t("recipients.removeAward")} />
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  </article>
-                ))}
-              </div>
-            )}
-          </Panel>
-        </div>
+        )}
       </div>
+
     </main>
   );
 }
 
-function Stat({ label, value }: { label: string; value: number }) {
+function BadgesIndexHeader({ onCreate }: { onCreate: () => void }) {
+  const t = useTranslations("common.internalBadges");
   return (
-    <div className="rounded-2xl bg-background p-4">
-      <div className="font-instrument text-4xl italic tracking-[-0.04em]">{value}</div>
-      <div className="mt-1 text-xs uppercase tracking-[0.18em] text-muted-foreground">{label}</div>
-    </div>
+    <section className="rounded-3xl bg-card p-5 md:p-6">
+      <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+        <div>
+          <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
+            <ShieldCheckIcon className="size-3.5" />
+            {t("eyebrow")}
+          </div>
+          <h1 className="mt-3 font-instrument text-4xl font-light italic tracking-[-0.04em] md:text-5xl">{t("title")}</h1>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">{t("description")}</p>
+        </div>
+        <Button type="button" onClick={onCreate} className="self-start shadow-none">
+          <PlusIcon className="size-4" />
+          {t("badgeForm.create")}
+        </Button>
+      </div>
+    </section>
+  );
+}
+
+function BadgeDetailHeader({
+  definition,
+  badgeTypeLabel,
+  createdAt,
+  onEdit,
+  onDelete,
+  deleting,
+}: {
+  definition: BadgeDefinitionRecord;
+  badgeTypeLabel: string;
+  createdAt: string;
+  onEdit: () => void;
+  onDelete: () => void;
+  deleting: boolean;
+}) {
+  const t = useTranslations("common.internalBadges");
+  return (
+    <section className="rounded-3xl bg-card p-5 md:p-6">
+      <Button asChild variant="ghost" size="sm" className="mb-4 w-fit">
+        <Link href="/internal/badges"><ArrowLeftIcon className="size-4" />{t("badges.back")}</Link>
+      </Button>
+      <div className="flex flex-col gap-5 md:flex-row md:items-start md:justify-between">
+        <div className="flex gap-4">
+          <div className="flex size-20 shrink-0 items-center justify-center overflow-hidden rounded-3xl bg-muted">
+            {definition.iconUrl ? <Image src={definition.iconUrl} alt="" width={80} height={80} unoptimized className="size-full object-cover" /> : <BadgeCheckIcon className="size-8 text-muted-foreground" />}
+          </div>
+          <div className="min-w-0">
+            <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">{badgeTypeLabel}</p>
+            <h1 className="mt-2 font-instrument text-4xl font-light italic tracking-[-0.04em] md:text-5xl">{definition.title}</h1>
+            {definition.description ? <p className="mt-3 max-w-3xl text-sm leading-6 text-muted-foreground">{definition.description}</p> : null}
+            <p className="mt-3 text-xs text-muted-foreground">{createdAt}</p>
+          </div>
+        </div>
+        <div className="flex shrink-0 gap-2">
+          <Button type="button" onClick={onEdit} variant="secondary" disabled={deleting} className="shadow-none"><Edit3Icon className="size-4" />{t("badges.edit")}</Button>
+          <Button type="button" onClick={onDelete} variant="destructive" disabled={deleting} className="shadow-none">
+            {deleting ? <Loader2Icon className="size-4 animate-spin" /> : <Trash2Icon className="size-4" />}
+            {t("badges.delete")}
+          </Button>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function BadgeFormModal({
+  initialForm,
+  onCancel,
+  onSave,
+}: {
+  initialForm: BadgeForm;
+  onCancel: () => void;
+  onSave: (form: BadgeForm) => Promise<boolean>;
+}) {
+  const t = useTranslations("common.internalBadges");
+  const [form, setForm] = useState(initialForm);
+  const [busy, setBusy] = useState(false);
+
+  async function handleSave() {
+    setBusy(true);
+    const saved = await onSave(form);
+    setBusy(false);
+    if (saved) onCancel();
+  }
+
+  return (
+    <ModalContent dismissible={!busy}>
+      <ModalHeader>
+        <ModalTitle>{form.editing ? t("badgeForm.editTitle") : t("badgeForm.createTitle")}</ModalTitle>
+        <ModalDescription>{t("badgeForm.modalDescription")}</ModalDescription>
+      </ModalHeader>
+      <div className="space-y-4 pt-1">
+        <Field label={t("badgeForm.nameLabel")}>
+          <Input value={form.title} onChange={(event) => setForm((current) => ({ ...current, title: event.target.value }))} placeholder={t("badgeForm.namePlaceholder")} disabled={busy} />
+        </Field>
+        <Field label={t("badgeForm.typeLabel")}>
+          <Select value={form.badgeType} onValueChange={(value) => setForm((current) => ({ ...current, badgeType: value }))} disabled={busy}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              {BADGE_TYPES.map((type) => <SelectItem key={type} value={type}>{t(`types.${type}`)}</SelectItem>)}
+            </SelectContent>
+          </Select>
+        </Field>
+        <Field label={t("badgeForm.descriptionLabel")}>
+          <Textarea value={form.description} onChange={(event) => setForm((current) => ({ ...current, description: event.target.value }))} className="min-h-28" placeholder={t("badgeForm.descriptionPlaceholder")} disabled={busy} />
+        </Field>
+        <Field label={t("badgeForm.iconLabel")}>
+          <Input type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" onChange={(event) => setForm((current) => ({ ...current, iconFile: event.target.files?.[0] ?? null }))} disabled={busy} aria-label={t("badgeForm.iconLabel")} />
+        </Field>
+      </div>
+      <ModalFooter>
+        <Button type="button" onClick={() => void handleSave()} disabled={busy} className="w-full shadow-none">
+          {busy ? <Loader2Icon className="size-4 animate-spin" /> : <PlusIcon className="size-4" />}
+          {form.editing ? t("badgeForm.save") : t("badgeForm.create")}
+        </Button>
+        <Button type="button" variant="outline" onClick={onCancel} disabled={busy} className="w-full">{t("badgeForm.cancel")}</Button>
+      </ModalFooter>
+    </ModalContent>
+  );
+}
+
+function ConfirmActionModal({
+  title,
+  description,
+  actionLabel,
+  onCancel,
+  onConfirm,
+}: {
+  title: string;
+  description: string;
+  actionLabel: string;
+  onCancel: () => void;
+  onConfirm: () => Promise<boolean>;
+}) {
+  const t = useTranslations("common.internalBadges");
+  const [busy, setBusy] = useState(false);
+
+  async function handleConfirm() {
+    setBusy(true);
+    const confirmed = await onConfirm();
+    setBusy(false);
+    if (confirmed) onCancel();
+  }
+
+  return (
+    <ModalContent dismissible={!busy}>
+      <ModalHeader>
+        <ModalTitle>{title}</ModalTitle>
+        <ModalDescription>{description}</ModalDescription>
+      </ModalHeader>
+      <ModalFooter>
+        <Button type="button" variant="destructive" onClick={() => void handleConfirm()} disabled={busy} className="w-full">
+          {busy ? <Loader2Icon className="size-4 animate-spin" /> : <Trash2Icon className="size-4" />}
+          {actionLabel}
+        </Button>
+        <Button type="button" variant="outline" onClick={onCancel} disabled={busy} className="w-full">{t("confirm.cancel")}</Button>
+      </ModalFooter>
+    </ModalContent>
   );
 }
 

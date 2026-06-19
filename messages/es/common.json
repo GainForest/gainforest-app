@@ -312,7 +312,8 @@
       "iconLabel": "Icono",
       "create": "Crear insignia",
       "save": "Guardar insignia",
-      "cancel": "Cancelar"
+      "cancel": "Cancelar",
+      "modalDescription": "Completa los detalles de la insignia. Puedes actualizarlos después desde la página de la insignia."
     },
     "awardForm": {
       "title": "Asignar una insignia",
@@ -324,22 +325,35 @@
       "notePlaceholder": "¿Por qué la recibe?",
       "urlLabel": "Enlace",
       "urlPlaceholder": "https://ejemplo.org/evidencia",
-      "assign": "Asignar insignia"
+      "assign": "Asignar insignia",
+      "titleForBadge": "Asignar esta insignia",
+      "recipientsLabel": "Cuentas o correos",
+      "recipientsPlaceholder": "Agrega uno por línea o sepáralos con comas."
     },
     "badges": {
       "title": "Insignias",
       "empty": "Aún no hay insignias. Crea la primera para empezar a asignarla.",
       "editAria": "Editar {title}",
-      "deleteAria": "Eliminar {title}"
+      "deleteAria": "Eliminar {title}",
+      "openAria": "Abrir {title}",
+      "back": "Volver a insignias",
+      "edit": "Editar insignia",
+      "delete": "Eliminar insignia"
     },
     "recipients": {
       "title": "Personas e insignias",
       "empty": "Aún no hay asignaciones.",
-      "removeAward": "Quitar asignación de insignia"
+      "removeAward": "Quitar asignación de insignia",
+      "emptyForBadge": "Nadie tiene esta insignia todavía."
     },
     "confirm": {
       "deleteBadge": "¿Eliminar “{title}”? Las asignaciones existentes aún pueden hacer referencia a ella.",
-      "deleteAward": "¿Quitar esta asignación de insignia?"
+      "deleteAward": "¿Quitar esta asignación de insignia?",
+      "deleteBadgeTitle": "¿Eliminar insignia?",
+      "deleteAwardTitle": "¿Quitar asignación?",
+      "cancel": "Cancelar",
+      "deleteBadgeAction": "Eliminar insignia",
+      "deleteAwardAction": "Quitar asignación"
     },
     "messages": {
       "badgeCreated": "Insignia creada.",
@@ -347,13 +361,15 @@
       "badgeDeleted": "Insignia eliminada.",
       "awardCreated": "Insignia asignada.",
       "pendingCreated": "Asignación por correo guardada como pendiente.",
-      "awardDeleted": "Asignación eliminada."
+      "awardDeleted": "Asignación eliminada.",
+      "awardsCreated": "{count, plural, one {Insignia asignada.} other {# insignias asignadas.}}"
     },
     "errors": {
       "generic": "Algo salió mal.",
       "refresh": "No se pudieron actualizar los datos de insignias.",
       "titleRequired": "Ingresa un nombre para la insignia.",
-      "badgeRequired": "Elige una insignia."
+      "badgeRequired": "Elige una insignia.",
+      "recipientRequired": "Agrega al menos una cuenta o correo."
     },
     "access": {
       "signedOutTitle": "Debes iniciar sesión",
@@ -366,7 +382,8 @@
     },
     "meta": {
       "title": "Insignias internas — GainForest",
-      "description": "Gestiona definiciones y asignaciones internas de insignias."
+      "description": "Gestiona definiciones y asignaciones internas de insignias.",
+      "detailTitle": "Detalles de la insignia — GainForest"
     },
     "status": {
       "creatingBadge": "Creando insignia…",

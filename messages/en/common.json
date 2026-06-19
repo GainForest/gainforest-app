@@ -312,7 +312,8 @@
       "iconLabel": "Icon",
       "create": "Create badge",
       "save": "Save badge",
-      "cancel": "Cancel"
+      "cancel": "Cancel",
+      "modalDescription": "Fill in the badge details. You can update these later from the badge page."
     },
     "awardForm": {
       "title": "Assign a badge",
@@ -324,22 +325,35 @@
       "notePlaceholder": "Why are they receiving this?",
       "urlLabel": "Link",
       "urlPlaceholder": "https://example.org/evidence",
-      "assign": "Assign badge"
+      "assign": "Assign badge",
+      "titleForBadge": "Assign this badge",
+      "recipientsLabel": "Accounts or emails",
+      "recipientsPlaceholder": "Add one per line, or separate them with commas."
     },
     "badges": {
       "title": "Badges",
       "empty": "No badges yet. Create the first badge to start assigning it.",
       "editAria": "Edit {title}",
-      "deleteAria": "Delete {title}"
+      "deleteAria": "Delete {title}",
+      "openAria": "Open {title}",
+      "back": "Back to badges",
+      "edit": "Edit badge",
+      "delete": "Delete badge"
     },
     "recipients": {
       "title": "People and badges",
       "empty": "No badge assignments yet.",
-      "removeAward": "Remove badge assignment"
+      "removeAward": "Remove badge assignment",
+      "emptyForBadge": "No one has this badge yet."
     },
     "confirm": {
       "deleteBadge": "Delete “{title}”? Existing assignments may still reference it.",
-      "deleteAward": "Remove this badge assignment?"
+      "deleteAward": "Remove this badge assignment?",
+      "deleteBadgeTitle": "Delete badge?",
+      "deleteAwardTitle": "Remove assignment?",
+      "cancel": "Cancel",
+      "deleteBadgeAction": "Delete badge",
+      "deleteAwardAction": "Remove assignment"
     },
     "messages": {
       "badgeCreated": "Badge created.",
@@ -347,13 +361,15 @@
       "badgeDeleted": "Badge deleted.",
       "awardCreated": "Badge assigned.",
       "pendingCreated": "Email assignment saved as pending.",
-      "awardDeleted": "Badge assignment removed."
+      "awardDeleted": "Badge assignment removed.",
+      "awardsCreated": "{count, plural, one {Badge assigned.} other {# badges assigned.}}"
     },
     "errors": {
       "generic": "Something went wrong.",
       "refresh": "Could not refresh badge data.",
       "titleRequired": "Enter a badge name.",
-      "badgeRequired": "Choose a badge."
+      "badgeRequired": "Choose a badge.",
+      "recipientRequired": "Add at least one account or email."
     },
     "access": {
       "signedOutTitle": "Sign in required",
@@ -366,7 +382,8 @@
     },
     "meta": {
       "title": "Internal badges — GainForest",
-      "description": "Manage internal badge definitions and awards."
+      "description": "Manage internal badge definitions and awards.",
+      "detailTitle": "Badge details — GainForest"
     },
     "status": {
       "creatingBadge": "Creating badge…",

@@ -312,7 +312,8 @@
       "iconLabel": "Ikon",
       "create": "Buat lencana",
       "save": "Simpan lencana",
-      "cancel": "Batal"
+      "cancel": "Batal",
+      "modalDescription": "Isi detail lencana. Anda dapat memperbaruinya nanti dari halaman lencana."
     },
     "awardForm": {
       "title": "Tetapkan lencana",
@@ -324,22 +325,35 @@
       "notePlaceholder": "Mengapa mereka menerimanya?",
       "urlLabel": "Tautan",
       "urlPlaceholder": "https://example.org/bukti",
-      "assign": "Tetapkan lencana"
+      "assign": "Tetapkan lencana",
+      "titleForBadge": "Tetapkan lencana ini",
+      "recipientsLabel": "Akun atau email",
+      "recipientsPlaceholder": "Tambahkan satu per baris, atau pisahkan dengan koma."
     },
     "badges": {
       "title": "Lencana",
       "empty": "Belum ada lencana. Buat lencana pertama untuk mulai menetapkannya.",
       "editAria": "Ubah {title}",
-      "deleteAria": "Hapus {title}"
+      "deleteAria": "Hapus {title}",
+      "openAria": "Buka {title}",
+      "back": "Kembali ke lencana",
+      "edit": "Edit lencana",
+      "delete": "Hapus lencana"
     },
     "recipients": {
       "title": "Orang dan lencana",
       "empty": "Belum ada penetapan lencana.",
-      "removeAward": "Hapus penetapan lencana"
+      "removeAward": "Hapus penetapan lencana",
+      "emptyForBadge": "Belum ada yang memiliki lencana ini."
     },
     "confirm": {
       "deleteBadge": "Hapus “{title}”? Penetapan yang ada mungkin masih merujuknya.",
-      "deleteAward": "Hapus penetapan lencana ini?"
+      "deleteAward": "Hapus penetapan lencana ini?",
+      "deleteBadgeTitle": "Hapus lencana?",
+      "deleteAwardTitle": "Hapus penetapan?",
+      "cancel": "Batal",
+      "deleteBadgeAction": "Hapus lencana",
+      "deleteAwardAction": "Hapus penetapan"
     },
     "messages": {
       "badgeCreated": "Lencana dibuat.",
@@ -347,13 +361,15 @@
       "badgeDeleted": "Lencana dihapus.",
       "awardCreated": "Lencana ditetapkan.",
       "pendingCreated": "Penetapan email disimpan sebagai tertunda.",
-      "awardDeleted": "Penetapan dihapus."
+      "awardDeleted": "Penetapan dihapus.",
+      "awardsCreated": "{count, plural, one {Lencana ditetapkan.} other {# lencana ditetapkan.}}"
     },
     "errors": {
       "generic": "Terjadi kesalahan.",
       "refresh": "Tidak dapat memuat ulang data lencana.",
       "titleRequired": "Masukkan nama lencana.",
-      "badgeRequired": "Pilih lencana."
+      "badgeRequired": "Pilih lencana.",
+      "recipientRequired": "Tambahkan setidaknya satu akun atau email."
     },
     "access": {
       "signedOutTitle": "Harus masuk",
@@ -366,7 +382,8 @@
     },
     "meta": {
       "title": "Lencana internal — GainForest",
-      "description": "Kelola definisi dan penetapan lencana internal."
+      "description": "Kelola definisi dan penetapan lencana internal.",
+      "detailTitle": "Detail lencana — GainForest"
     },
     "status": {
       "creatingBadge": "Membuat lencana…",

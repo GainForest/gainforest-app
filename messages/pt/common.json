@@ -312,7 +312,8 @@
       "iconLabel": "Ícone",
       "create": "Criar badge",
       "save": "Salvar badge",
-      "cancel": "Cancelar"
+      "cancel": "Cancelar",
+      "modalDescription": "Preencha os detalhes do badge. Você pode atualizá-los depois na página do badge."
     },
     "awardForm": {
       "title": "Atribuir um badge",
@@ -324,22 +325,35 @@
       "notePlaceholder": "Por que esta pessoa está recebendo?",
       "urlLabel": "Ligação",
       "urlPlaceholder": "https://exemplo.org/evidencia",
-      "assign": "Atribuir badge"
+      "assign": "Atribuir badge",
+      "titleForBadge": "Atribuir este badge",
+      "recipientsLabel": "Contas ou emails",
+      "recipientsPlaceholder": "Adicione um por linha ou separe com vírgulas."
     },
     "badges": {
       "title": "Distintivos",
       "empty": "Ainda não há badges. Crie o primeiro para começar.",
       "editAria": "Editar {title}",
-      "deleteAria": "Excluir {title}"
+      "deleteAria": "Excluir {title}",
+      "openAria": "Abrir {title}",
+      "back": "Voltar aos badges",
+      "edit": "Editar badge",
+      "delete": "Excluir badge"
     },
     "recipients": {
       "title": "Pessoas e badges",
       "empty": "Ainda não há atribuições.",
-      "removeAward": "Remover atribuição de badge"
+      "removeAward": "Remover atribuição de badge",
+      "emptyForBadge": "Ninguém tem este badge ainda."
     },
     "confirm": {
       "deleteBadge": "Excluir “{title}”? Atribuições existentes ainda podem referenciá-lo.",
-      "deleteAward": "Remover esta atribuição de badge?"
+      "deleteAward": "Remover esta atribuição de badge?",
+      "deleteBadgeTitle": "Excluir badge?",
+      "deleteAwardTitle": "Remover atribuição?",
+      "cancel": "Cancelar",
+      "deleteBadgeAction": "Excluir badge",
+      "deleteAwardAction": "Remover atribuição"
     },
     "messages": {
       "badgeCreated": "Badge criado.",
@@ -347,13 +361,15 @@
       "badgeDeleted": "Badge excluído.",
       "awardCreated": "Badge atribuído.",
       "pendingCreated": "Atribuição por email salva como pendente.",
-      "awardDeleted": "Atribuição removida."
+      "awardDeleted": "Atribuição removida.",
+      "awardsCreated": "{count, plural, one {Badge atribuído.} other {# badges atribuídos.}}"
     },
     "errors": {
       "generic": "Algo deu errado.",
       "refresh": "Não foi possível atualizar os dados de badges.",
       "titleRequired": "Insira um nome para o badge.",
-      "badgeRequired": "Escolha um badge."
+      "badgeRequired": "Escolha um badge.",
+      "recipientRequired": "Adicione pelo menos uma conta ou email."
     },
     "access": {
       "signedOutTitle": "Login necessário",
@@ -366,7 +382,8 @@
     },
     "meta": {
       "title": "Badges internos — GainForest",
-      "description": "Gerencie definições e atribuições internas de badges."
+      "description": "Gerencie definições e atribuições internas de badges.",
+      "detailTitle": "Detalhes do badge — GainForest"
     },
     "status": {
       "creatingBadge": "Criando distintivo…",

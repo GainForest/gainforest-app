@@ -312,7 +312,8 @@
       "iconLabel": "Ikoni",
       "create": "Unda beji",
       "save": "Hifadhi beji",
-      "cancel": "Ghairi"
+      "cancel": "Ghairi",
+      "modalDescription": "Jaza maelezo ya beji. Unaweza kuyasasisha baadaye kwenye ukurasa wa beji."
     },
     "awardForm": {
       "title": "Toa beji",
@@ -324,22 +325,35 @@
       "notePlaceholder": "Kwa nini anaipokea?",
       "urlLabel": "Kiungo",
       "urlPlaceholder": "https://example.org/ushahidi",
-      "assign": "Toa beji"
+      "assign": "Toa beji",
+      "titleForBadge": "Toa beji hii",
+      "recipientsLabel": "Akaunti au barua pepe",
+      "recipientsPlaceholder": "Ongeza moja kwa kila mstari, au zitenganishe kwa koma."
     },
     "badges": {
       "title": "Beji",
       "empty": "Hakuna beji bado. Unda ya kwanza ili uanze kuitoa.",
       "editAria": "Hariri {title}",
-      "deleteAria": "Futa {title}"
+      "deleteAria": "Futa {title}",
+      "openAria": "Fungua {title}",
+      "back": "Rudi kwenye beji",
+      "edit": "Hariri beji",
+      "delete": "Futa beji"
     },
     "recipients": {
       "title": "Watu na beji",
       "empty": "Hakuna utoaji wa beji bado.",
-      "removeAward": "Ondoa utoaji wa beji"
+      "removeAward": "Ondoa utoaji wa beji",
+      "emptyForBadge": "Hakuna aliye na beji hii bado."
     },
     "confirm": {
       "deleteBadge": "Ufute “{title}”? Utoaji uliopo bado unaweza kuirejelea.",
-      "deleteAward": "Ondoa utoaji huu wa beji?"
+      "deleteAward": "Ondoa utoaji huu wa beji?",
+      "deleteBadgeTitle": "Ufute beji?",
+      "deleteAwardTitle": "Ondoa utoaji?",
+      "cancel": "Ghairi",
+      "deleteBadgeAction": "Futa beji",
+      "deleteAwardAction": "Ondoa utoaji"
     },
     "messages": {
       "badgeCreated": "Beji imeundwa.",
@@ -347,13 +361,15 @@
       "badgeDeleted": "Beji imefutwa.",
       "awardCreated": "Beji imetolewa.",
       "pendingCreated": "Utoaji kwa barua pepe umehifadhiwa ukisubiri.",
-      "awardDeleted": "Utoaji umeondolewa."
+      "awardDeleted": "Utoaji umeondolewa.",
+      "awardsCreated": "{count, plural, one {Beji imetolewa.} other {Beji # zimetolewa.}}"
     },
     "errors": {
       "generic": "Hitilafu imetokea.",
       "refresh": "Haikuwezekana kusasisha data ya beji.",
       "titleRequired": "Weka jina la beji.",
-      "badgeRequired": "Chagua beji."
+      "badgeRequired": "Chagua beji.",
+      "recipientRequired": "Ongeza angalau akaunti moja au barua pepe."
     },
     "access": {
       "signedOutTitle": "Ingia kwanza",
@@ -366,7 +382,8 @@
     },
     "meta": {
       "title": "Beji za ndani — GainForest",
-      "description": "Dhibiti ufafanuzi na utoaji wa beji za ndani."
+      "description": "Dhibiti ufafanuzi na utoaji wa beji za ndani.",
+      "detailTitle": "Maelezo ya beji — GainForest"
     },
     "status": {
       "creatingBadge": "Inaunda beji…",
