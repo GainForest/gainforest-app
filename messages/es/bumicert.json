@@ -19,7 +19,7 @@
         "all": "Todos",
         "tree": "Árboles",
         "audio": "Audio",
-        "biodiversity": "Biodiversidad",
+        "biodiversity": "Naturaleza",
         "document": "Documento",
         "file": "Archivos"
       },
@@ -35,7 +35,11 @@
       "nextPage": "Página siguiente",
       "timelineTools": "Herramientas de la línea de tiempo",
       "linksUnavailable": "No se pudieron comprobar los enlaces existentes de la línea de tiempo. Actualiza antes de añadir grupos de árboles.",
-      "linkSuccess": "Vinculado a la línea de tiempo pública. Puede tardar un momento en aparecer para todos."
+      "linkSuccess": "Vinculado a la línea de tiempo pública. Puede tardar un momento en aparecer para todos.",
+      "fallbacks": {
+        "linkedNatureDataGroup": "Grupo de datos de naturaleza vinculado",
+        "linkedNatureData": "Datos de naturaleza vinculados"
+      }
     },
     "evidenceAdder": {
       "title": "Agregar evidencia",
@@ -45,7 +49,7 @@
       "tabs": {
         "audio": "Audio",
         "trees": "Árboles",
-        "biodiversity": "Biodiversidad",
+        "biodiversity": "Naturaleza",
         "files": "Documentos"
       },
       "linking": "Vinculando…",
@@ -78,34 +82,34 @@
         "audio": "Audio",
         "other": "Otros permisos",
         "treeDataset": "Conjunto de datos de árbol",
-        "biodiversity": "Biodiversidad",
+        "biodiversity": "Naturaleza",
         "occurrence": "Árbol"
       },
       "emptyUploaded": "Aún no se ha subido ningún {type}.",
       "uploadType": "Subir {type}",
       "manage": "Administrar",
       "untitledRecording": "Grabación sin título",
-      "unnamedTreeDataset": "Conjunto de datos de árbol sin nombre",
+      "unnamedTreeDataset": "Grupo de árboles sin nombre",
       "unknownObservation": "Observación desconocida",
       "treeCount": "{count, plural, =1 {1 árbol} other {# árboles}}",
       "speciesCount": "{count, plural, =1 {1 especie} other {# especies}}",
-      "siteContextLabel": "Sitio: {siteName}",
-      "siteContextReady": "Contexto del sitio listo",
-      "siteContextMixed": "Hay varios sitios en este conjunto de datos; adjunta conjuntos de datos específicos por sitio.",
-      "siteContextIncomplete": "A algunos árboles les falta contexto del sitio",
-      "siteContextUnresolved": "No se pudo resolver el registro del sitio",
-      "siteContextUnavailable": "Contexto del sitio no disponible",
+      "siteContextLabel": "Lugar del proyecto: {siteName}",
+      "siteContextReady": "Lugar del proyecto listo",
+      "siteContextMixed": "Este grupo de árboles cubre más de un lugar del proyecto",
+      "siteContextIncomplete": "A algunos árboles les falta un lugar del proyecto",
+      "siteContextUnresolved": "No se pudo comprobar el lugar del proyecto",
+      "siteContextUnavailable": "Falta el lugar del proyecto",
       "incompleteBumicertReference": "No se puede vincular evidencia porque la referencia del certificado está incompleta. Actualiza la página y vuelve a intentarlo.",
       "partialLinkSuccess": "Se vincularon {createdCount, plural, =1 {1 adjunto} other {# adjuntos}}, pero no se completaron todos los {totalCount, plural, =1 {1 grupo} other {# grupos}}. {error}",
       "emptyLabels": {
         "audio": "grabaciones de audio",
-        "trees": "conjuntos de datos de árboles",
-        "biodiversity": "observaciones de biodiversidad"
+        "trees": "grupos de árboles",
+        "biodiversity": "observaciones de naturaleza"
       },
       "attachmentTitles": {
         "audio": "Grabaciones de audio",
-        "trees": "Conjunto de datos de árboles",
-        "biodiversity": "Observaciones de biodiversidad"
+        "trees": "Grupo de árboles",
+        "biodiversity": "Observaciones de naturaleza"
       },
       "chooseEvidenceType": "Elige el tipo de evidencia",
       "selectSourceToLink": "Selecciona una fuente para vincular evidencia existente a esta cronología.",
@@ -113,11 +117,11 @@
       "selectRecordsToLink": "Selecciona registros de evidencia para vincularlos a esta cronología.",
       "alreadyLinkedDataset": "Ya está vinculado a esta cronología",
       "checkingExistingLinks": "Comprobando los vínculos existentes de la cronología…",
-      "unableToVerifyExistingLinks": "No se pudieron verificar los vínculos existentes de la cronología. Actualiza la página para vincular conjuntos de datos de árboles.",
+      "unableToVerifyExistingLinks": "No se pudieron comprobar los enlaces existentes. Actualiza antes de vincular grupos de árboles.",
       "tabDescriptions": {
         "audio": "Añade grabaciones ya guardadas por esta organización.",
         "trees": "Añade información de árboles agrupada por lugar del proyecto.",
-        "biodiversity": "Filtra observaciones y añade datos mostrados o grupos guardados.",
+        "biodiversity": "Filtra observaciones y añade datos de naturaleza mostrados o grupos guardados.",
         "files": "Añade informes, fotos, videos o páginas web."
       },
       "permissions": {
@@ -129,34 +133,36 @@
       "linkError": "No se pudo vincular esta evidencia. Inténtalo de nuevo.",
       "manageType": "Gestionar {type}",
       "biodiversity": {
-        "attachmentGroupTitle": "Grupo de biodiversidad",
-        "attachmentObservationsTitle": "Observaciones de biodiversidad",
-        "emptyLabel": "datos de biodiversidad",
+        "attachmentGroupTitle": "Grupo de naturaleza",
+        "attachmentObservationsTitle": "Observaciones de naturaleza",
+        "emptyLabel": "datos de naturaleza",
         "searchLabel": "Buscar",
-        "searchPlaceholder": "Buscar biodiversidad",
+        "searchPlaceholder": "Buscar naturaleza",
         "recorderLabel": "Registrador",
         "allRecorders": "Todos los registradores",
         "recorderOptionFallback": "Registrador {number}",
-        "displayedTitle": "Datos de biodiversidad mostrados",
+        "displayedTitle": "Datos de naturaleza mostrados",
         "displayedSummary": "Se muestran {shown} de {total, plural, =1 {1 observación} other {# observaciones}}. Elige observaciones de esta vista filtrada.",
         "clearDisplayed": "Borrar mostrados",
         "selectDisplayed": "Seleccionar mostrados",
-        "noDataMatches": "Ningún dato de biodiversidad coincide con estos filtros.",
+        "noDataMatches": "Ningún dato de naturaleza coincide con estos filtros.",
         "recordedBy": "Registrado por {name}",
         "recorderFallback": "un registrador guardado",
         "alreadyLinked": "Ya vinculado",
         "coveredByGroup": "Cubierto por el grupo",
-        "groupsTitle": "Grupos de biodiversidad",
+        "groupsTitle": "Grupos de naturaleza",
         "groupsDescription": "Los grupos usan los mismos filtros de registrador y búsqueda.",
-        "noGroupsMatch": "Ningún grupo de biodiversidad coincide con estos filtros.",
+        "noGroupsMatch": "Ningún grupo de naturaleza coincide con estos filtros.",
         "multipleRecorders": "{count, plural, =1 {1 registrador} other {# registradores}}",
         "firstRecorderAndMore": "{name} + {count, plural, =1 {1 más} other {# más}}",
         "shownCount": "{count} mostrados",
         "totalCount": "{count} en total",
         "speciesCount": "{count, plural, =1 {1 especie} other {# especies}}",
         "groupStatus": "Datos agrupados",
-        "manageData": "Gestionar datos de biodiversidad"
-      }
+        "manageData": "Gestionar datos de naturaleza",
+        "groupedNatureDataFallback": "Datos de naturaleza agrupados"
+      },
+      "unableToVerifyTreeSiteContext": "No se pudieron comprobar todos los árboles. Actualiza antes de vincular grupos de árboles."
     },
     "metadata": {
       "notFound": "certificado no encontrado"
@@ -165,7 +171,7 @@
       "kind": {
         "tree": "Conjunto de datos de árbol",
         "audio": "Datos acústicos",
-        "biodiversity": "Observaciones de biodiversidad",
+        "biodiversity": "Observaciones de naturaleza",
         "document": "Documento",
         "site": "Sitio",
         "other": "Evidencia"
@@ -223,7 +229,8 @@
       "hideLayer": "Ocultar capa",
       "deleteUnavailable": "No puedes eliminar esta evidencia.",
       "deleteError": "No se pudo eliminar este elemento.",
-      "displayedBiodiversityData": "Datos de biodiversidad mostrados"
+      "displayedBiodiversityData": "Datos de naturaleza mostrados",
+      "natureObservationsFallback": "Observaciones de naturaleza"
     },
     "reference": {
       "linkedRecord": "Registro vinculado",
@@ -406,7 +413,7 @@
               "ecologicalRestoration": "Restauración Ecológica",
               "agroforestry": "Agroforestería",
               "climateAdaptation": "Adaptación climática",
-              "biodiversityMonitoring": "Monitoreo de biodiversidad",
+              "biodiversityMonitoring": "Monitoreo de naturaleza",
               "environmentalEducation": "Educación ambiental",
               "indigenousLocalKnowledge": "Conocimiento indígena y local",
               "environmentalJustice": "Justicia ambiental"

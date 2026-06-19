@@ -25,6 +25,7 @@ import { SocialGlyph, socialLabel } from "./SocialIcon";
 import { RecordDrawerStatsTile } from "./StatsTile";
 import { isPdsBlobUrl, resolveBlobUrl } from "../_lib/pds";
 import { pauseOtherAudio } from "../_lib/audio-coordinator";
+import { formatWorkScopeTag, type WorkScopeLabels } from "../_lib/work-scope-labels";
 import type { AuthSession } from "../_lib/auth";
 import { deleteOccurrenceCascade, updateOccurrence } from "@/app/(manage)/manage/_lib/mutations";
 import {
@@ -67,6 +68,15 @@ export function RecordDrawer({
   const [deletingOccurrence, setDeletingOccurrence] = useState(false);
   const [projectBumicerts, setProjectBumicerts] = useState<BumicertRecord[] | null>(null);
   const t = useTranslations("marketplace.recordDrawer");
+  const workScopeT = useTranslations("common.workScopes");
+  const workScopeLabels: WorkScopeLabels = useMemo(() => ({
+    reforestation: workScopeT("reforestation"),
+    forest_protection: workScopeT("forestProtection"),
+    biodiversity_monitoring: workScopeT("natureMonitoring"),
+    community_stewardship: workScopeT("communityStewardship"),
+    carbon_removal: workScopeT("carbonRemoval"),
+    restoration_maintenance: workScopeT("restorationMaintenance"),
+  }), [workScopeT]);
   // Whether this Bumicert is currently accepting donations — drives the Donate
   // button. `null` while we don't yet know (loading / non-bumicert).
   const [donatable, setDonatable] = useState<boolean | null>(null);
@@ -349,7 +359,7 @@ export function RecordDrawer({
                   key={`${tag}-${i}`}
                   className="inline-flex h-7 items-center rounded-full bg-muted px-3 text-[13px] font-medium text-muted-foreground"
                 >
-                  {formatScopeTag(tag)}
+                  {formatWorkScopeTag(tag, workScopeLabels)}
                 </span>
               ))}
             </div>
@@ -1358,11 +1368,6 @@ function occurrenceSecondaryName(record: Extract<ExplorerRecord, { kind: "occurr
   return record.vernacularName.toLowerCase() === record.scientificName.toLowerCase()
     ? null
     : record.scientificName;
-}
-
-function formatScopeTag(tag: string): string {
-  const clean = tag.replace(/[_-]+/g, " ").replace(/\s+/g, " ").trim();
-  return clean ? clean.charAt(0).toUpperCase() + clean.slice(1) : tag;
 }
 
 function KindBadge({ record, floating = false }: { record: ExplorerRecord; floating?: boolean }) {

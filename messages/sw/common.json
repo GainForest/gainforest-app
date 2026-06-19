@@ -321,5 +321,13 @@
         "noMeasurements": "Bado hakuna vipimo"
       }
     }
+  },
+  "workScopes": {
+    "reforestation": "Upandaji upya wa misitu",
+    "forestProtection": "Ulinzi wa misitu",
+    "natureMonitoring": "Ufuatiliaji wa asili",
+    "communityStewardship": "Utunzaji wa jamii",
+    "carbonRemoval": "Uondoaji wa kaboni",
+    "restorationMaintenance": "Matengenezo ya urejeshaji"
   }
 }

@@ -1,12 +1,14 @@
 "use client";
 
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 import { motion } from "framer-motion";
 import { CalendarDaysIcon, MapPinIcon, UsersIcon } from "lucide-react";
 import { isPdsBlobUrl } from "@/app/_lib/pds";
 import { cn } from "@/lib/utils";
 import { BumicertOwnerAvatar } from "./BumicertOwnerAvatar";
 import { BumicertPillRows, type BumicertCardPill } from "./BumicertPillRows";
+import { formatWorkScopeTag, type WorkScopeLabels } from "@/app/_lib/work-scope-labels";
 
 export type BumicertsBumicertCardRecord = {
   did: string;
@@ -52,7 +54,16 @@ export function BumicertsBumicertCard({
   priority?: boolean;
   className?: string;
 }) {
-  const { scopeItems, iconItems } = buildPillRows(record);
+  const workScopeT = useTranslations("common.workScopes");
+  const workScopeLabels: WorkScopeLabels = {
+    reforestation: workScopeT("reforestation"),
+    forest_protection: workScopeT("forestProtection"),
+    biodiversity_monitoring: workScopeT("natureMonitoring"),
+    community_stewardship: workScopeT("communityStewardship"),
+    carbon_removal: workScopeT("carbonRemoval"),
+    restoration_maintenance: workScopeT("restorationMaintenance"),
+  };
+  const { scopeItems, iconItems } = buildPillRows(record, workScopeLabels);
   const organizationName = record.creatorName ?? "Project steward";
   const hasImage = Boolean(record.imageUrl);
 
@@ -116,13 +127,13 @@ export function BumicertsBumicertCard({
   );
 }
 
-function buildPillRows(record: BumicertsBumicertCardRecord): {
+function buildPillRows(record: BumicertsBumicertCardRecord, workScopeLabels: WorkScopeLabels): {
   scopeItems: BumicertCardPill[];
   iconItems: BumicertCardPill[];
 } {
   const scopeItems: BumicertCardPill[] = (record.scopeTags ?? []).map((tag, index) => ({
     key: `scope-${index}-${tag}`,
-    content: <span>{formatScopeTag(tag)}</span>,
+    content: <span>{formatWorkScopeTag(tag, workScopeLabels)}</span>,
   }));
 
   const iconItems: BumicertCardPill[] = [];
@@ -162,11 +173,6 @@ function buildPillRows(record: BumicertsBumicertCardRecord): {
   }
 
   return { scopeItems, iconItems };
-}
-
-function formatScopeTag(tag: string): string {
-  const clean = tag.replace(/[_-]+/g, " ").replace(/\s+/g, " ").trim();
-  return clean ? clean.charAt(0).toUpperCase() + clean.slice(1) : tag;
 }
 
 function formatCompactCount(value: number): string {

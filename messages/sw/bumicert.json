@@ -19,7 +19,7 @@
         "all": "Wote",
         "tree": "Miti",
         "audio": "Sauti",
-        "biodiversity": "Bioanuwai",
+        "biodiversity": "Asili",
         "document": "Hati",
         "file": "Faili"
       },
@@ -35,7 +35,11 @@
       "nextPage": "Ukurasa unaofuata",
       "timelineTools": "Zana za mstari wa wakati",
       "linksUnavailable": "Viungo vilivyopo vya mstari wa wakati havikuweza kukaguliwa. Onyesha upya kabla ya kuongeza vikundi vya miti.",
-      "linkSuccess": "Imeunganishwa kwenye mstari wa wakati wa umma. Inaweza kuchukua muda kuonekana kwa kila mtu."
+      "linkSuccess": "Imeunganishwa kwenye mstari wa wakati wa umma. Inaweza kuchukua muda kuonekana kwa kila mtu.",
+      "fallbacks": {
+        "linkedNatureDataGroup": "Kikundi cha data ya asili kilichounganishwa",
+        "linkedNatureData": "Data ya asili iliyounganishwa"
+      }
     },
     "evidenceAdder": {
       "title": "Ongeza Ushahidi",
@@ -45,7 +49,7 @@
       "tabs": {
         "audio": "Sauti",
         "trees": "Miti",
-        "biodiversity": "Bioanuwai",
+        "biodiversity": "Asili",
         "files": "Nyaraka"
       },
       "linking": "Inaunganisha...",
@@ -78,34 +82,34 @@
         "audio": "Sauti",
         "other": "Nyingine",
         "treeDataset": "Seti ya data ya mti",
-        "biodiversity": "Bioanuwai",
+        "biodiversity": "Asili",
         "occurrence": "Mti"
       },
       "emptyUploaded": "Bado hakuna {type} iliyopakiwa.",
       "uploadType": "Pakia {type}",
       "manage": "Dhibiti",
       "untitledRecording": "Kurekodi bila jina",
-      "unnamedTreeDataset": "Seti ya data ya mti isiyo na jina",
+      "unnamedTreeDataset": "Kikundi cha miti kisicho na jina",
       "unknownObservation": "Uchunguzi usiojulikana",
       "treeCount": "{count, plural, =1 {mti 1} other {miti #}}",
       "speciesCount": "{count, plural, =1 {spishi 1} other {spishi #}}",
-      "siteContextLabel": "Eneo: {siteName}",
-      "siteContextReady": "Muktadha wa eneo uko tayari",
-      "siteContextMixed": "Kuna maeneo mengi katika mkusanyiko huu wa data; ambatisha mikusanyiko ya data mahususi kwa eneo.",
-      "siteContextIncomplete": "Baadhi ya miti haina muktadha wa eneo",
-      "siteContextUnresolved": "Rekodi ya eneo haikuweza kutatuliwa",
-      "siteContextUnavailable": "Muktadha wa eneo haupatikani",
+      "siteContextLabel": "Eneo la mradi: {siteName}",
+      "siteContextReady": "Eneo la mradi liko tayari",
+      "siteContextMixed": "Kikundi hiki cha miti kinahusu zaidi ya eneo moja la mradi",
+      "siteContextIncomplete": "Baadhi ya miti haina eneo la mradi",
+      "siteContextUnresolved": "Eneo la mradi halikuweza kukaguliwa",
+      "siteContextUnavailable": "Eneo la mradi halipo",
       "incompleteBumicertReference": "Haiwezi kuunganisha ushahidi kwa sababu rejeleo la cheti halijakamilika. Onyesha upya ukurasa na ujaribu tena.",
       "partialLinkSuccess": "{createdCount, plural, =1 {Kiambatisho 1 kimeunganishwa} other {Viambatisho # vimeunganishwa}}, lakini si {totalCount, plural, =1 {kundi 1 lote} other {makundi # yote}} yaliyokamilika. {error}",
       "emptyLabels": {
         "audio": "rekodi za sauti",
-        "trees": "seti za data za mti",
-        "biodiversity": "uchunguzi wa bioanuwai"
+        "trees": "vikundi vya miti",
+        "biodiversity": "uchunguzi wa asili"
       },
       "attachmentTitles": {
         "audio": "Rekodi za sauti",
-        "trees": "Seti ya data ya miti",
-        "biodiversity": "Uchunguzi wa bioanuwai"
+        "trees": "Kikundi cha miti",
+        "biodiversity": "Uchunguzi wa asili"
       },
       "chooseEvidenceType": "Chagua aina ya ushahidi",
       "selectSourceToLink": "Chagua chanzo ili kuunganisha ushahidi uliopo kwenye ratiba hii.",
@@ -113,11 +117,11 @@
       "selectRecordsToLink": "Chagua rekodi za ushahidi za kuunganisha kwenye ratiba hii.",
       "alreadyLinkedDataset": "Tayari imeunganishwa kwenye ratiba hii",
       "checkingExistingLinks": "Inakagua viungo vilivyopo vya ratiba…",
-      "unableToVerifyExistingLinks": "Haiwezi kuthibitisha viungo vilivyopo vya ratiba. Onyesha upya ili kuunganisha seti za data za miti.",
+      "unableToVerifyExistingLinks": "Viungo vilivyopo havikuweza kukaguliwa. Onyesha upya kabla ya kuunganisha vikundi vya miti.",
       "tabDescriptions": {
         "audio": "Ongeza rekodi za sauti zilizohifadhiwa na shirika hili.",
         "trees": "Ongeza taarifa za miti zilizopangwa kwa eneo la mradi.",
-        "biodiversity": "Chuja uchunguzi na uongeze data inayoonekana au vikundi vilivyohifadhiwa.",
+        "biodiversity": "Chuja uchunguzi na uongeze data ya asili inayoonyeshwa au vikundi vilivyohifadhiwa.",
         "files": "Ongeza ripoti, picha, video, au kurasa za wavuti."
       },
       "permissions": {
@@ -129,34 +133,36 @@
       "linkError": "Imeshindikana kuunganisha ushahidi huu. Tafadhali jaribu tena.",
       "manageType": "Simamia {type}",
       "biodiversity": {
-        "attachmentGroupTitle": "Kikundi cha bioanuai",
-        "attachmentObservationsTitle": "Uchunguzi wa bioanuai",
-        "emptyLabel": "data ya bioanuai",
+        "attachmentGroupTitle": "Kikundi cha asili",
+        "attachmentObservationsTitle": "Uchunguzi wa asili",
+        "emptyLabel": "data ya asili",
         "searchLabel": "Tafuta",
-        "searchPlaceholder": "Tafuta bioanuai",
+        "searchPlaceholder": "Tafuta asili",
         "recorderLabel": "Mrekodi",
         "allRecorders": "Warekodi wote",
         "recorderOptionFallback": "Mrekodi {number}",
-        "displayedTitle": "Data ya bioanuai inayoonyeshwa",
+        "displayedTitle": "Data ya asili inayoonyeshwa",
         "displayedSummary": "{shown} kati ya {total, plural, =1 {uchunguzi 1} other {uchunguzi #}} zinaonyeshwa. Chagua uchunguzi kutoka mwonekano huu uliochujwa.",
         "clearDisplayed": "Futa zinazoonyeshwa",
         "selectDisplayed": "Chagua zinazoonyeshwa",
-        "noDataMatches": "Hakuna data ya bioanuai inayolingana na vichujio hivi.",
+        "noDataMatches": "Hakuna data ya asili inayolingana na vichujio hivi.",
         "recordedBy": "Imerekodiwa na {name}",
         "recorderFallback": "mrekodi aliyehifadhiwa",
         "alreadyLinked": "Tayari imeunganishwa",
         "coveredByGroup": "Imejumuishwa kwenye kikundi",
-        "groupsTitle": "Vikundi vya bioanuai",
+        "groupsTitle": "Vikundi vya asili",
         "groupsDescription": "Vikundi hutumia vichujio vilevile vya mrekodi na utafutaji.",
-        "noGroupsMatch": "Hakuna kikundi cha bioanuai kinacholingana na vichujio hivi.",
+        "noGroupsMatch": "Hakuna vikundi vya asili vinavyolingana na vichujio hivi.",
         "multipleRecorders": "{count, plural, =1 {mrekodi 1} other {warekodi #}}",
         "firstRecorderAndMore": "{name} + {count, plural, =1 {mwingine 1} other {wengine #}}",
         "shownCount": "{count} zinaonyeshwa",
         "totalCount": "jumla {count}",
         "speciesCount": "{count, plural, =1 {spishi 1} other {spishi #}}",
         "groupStatus": "Data iliyopangwa",
-        "manageData": "Simamia data ya bioanuai"
-      }
+        "manageData": "Dhibiti data ya asili",
+        "groupedNatureDataFallback": "Data ya asili iliyopangwa pamoja"
+      },
+      "unableToVerifyTreeSiteContext": "Haikuwezekana kukagua miti yote. Onyesha upya kabla ya kuunganisha vikundi vya miti."
     },
     "metadata": {
       "notFound": "cheti Haijapatikana"
@@ -165,7 +171,7 @@
       "kind": {
         "tree": "Seti ya data ya mti",
         "audio": "Data ya akustisk",
-        "biodiversity": "Uchunguzi wa viumbe hai",
+        "biodiversity": "Uchunguzi wa asili",
         "document": "Hati",
         "site": "Tovuti",
         "other": "Ushahidi"
@@ -223,7 +229,8 @@
       "hideLayer": "Ficha tabaka",
       "deleteUnavailable": "Huwezi kuondoa ushahidi huu.",
       "deleteError": "Imeshindikana kuondoa kipengee hiki.",
-      "displayedBiodiversityData": "Data ya bioanuai inayoonyeshwa"
+      "displayedBiodiversityData": "Data ya asili inayoonyeshwa",
+      "natureObservationsFallback": "Uchunguzi wa asili"
     },
     "reference": {
       "linkedRecord": "Rekodi iliyounganishwa",
@@ -406,7 +413,7 @@
               "ecologicalRestoration": "Urejesho wa Kiikolojia",
               "agroforestry": "Kilimo mseto",
               "climateAdaptation": "Kukabiliana na Hali ya Hewa",
-              "biodiversityMonitoring": "Ufuatiliaji wa Bioanuwai",
+              "biodiversityMonitoring": "Ufuatiliaji wa asili",
               "environmentalEducation": "Elimu ya Mazingira",
               "indigenousLocalKnowledge": "Maarifa Asilia na Mitaa",
               "environmentalJustice": "Haki ya Mazingira"

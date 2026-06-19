@@ -19,7 +19,7 @@
         "all": "All",
         "tree": "Trees",
         "audio": "Audio",
-        "biodiversity": "Biodiversity",
+        "biodiversity": "Nature",
         "document": "Document",
         "file": "Files"
       },
@@ -35,7 +35,11 @@
       "nextPage": "Next page",
       "timelineTools": "Timeline tools",
       "linksUnavailable": "Existing timeline links could not be checked. Refresh before adding tree groups.",
-      "linkSuccess": "Linked to the public timeline. It may take a moment to appear for everyone."
+      "linkSuccess": "Linked to the public timeline. It may take a moment to appear for everyone.",
+      "fallbacks": {
+        "linkedNatureDataGroup": "Linked nature data group",
+        "linkedNatureData": "Linked nature data"
+      }
     },
     "evidenceAdder": {
       "title": "Add Evidence",
@@ -45,7 +49,7 @@
       "tabs": {
         "audio": "Audio",
         "trees": "Trees",
-        "biodiversity": "Biodiversity",
+        "biodiversity": "Nature",
         "files": "Documents"
       },
       "linking": "Linking…",
@@ -78,34 +82,34 @@
         "audio": "Audio",
         "other": "Other",
         "treeDataset": "Tree dataset",
-        "biodiversity": "Biodiversity",
+        "biodiversity": "Nature",
         "occurrence": "Tree"
       },
       "emptyUploaded": "No {type} uploaded yet.",
       "uploadType": "Upload {type}",
       "manage": "Manage",
       "untitledRecording": "Untitled recording",
-      "unnamedTreeDataset": "Unnamed tree dataset",
+      "unnamedTreeDataset": "Unnamed tree group",
       "unknownObservation": "Unknown observation",
       "treeCount": "{count, plural, =1 {1 tree} other {# trees}}",
       "speciesCount": "{count, plural, =1 {1 species} other {# species}}",
-      "siteContextLabel": "Site: {siteName}",
-      "siteContextReady": "Site context ready",
-      "siteContextMixed": "Multiple sites in this dataset; attach site-specific datasets instead",
-      "siteContextIncomplete": "Some trees are missing site context",
-      "siteContextUnresolved": "Site record could not be resolved",
-      "siteContextUnavailable": "Site context unavailable",
+      "siteContextLabel": "Project place: {siteName}",
+      "siteContextReady": "Project place ready",
+      "siteContextMixed": "This tree group covers more than one project place",
+      "siteContextIncomplete": "Some trees are missing a project place",
+      "siteContextUnresolved": "Project place could not be checked",
+      "siteContextUnavailable": "Project place is missing",
       "incompleteBumicertReference": "Cannot link evidence because the cert reference is incomplete. Refresh the page and try again.",
       "partialLinkSuccess": "{createdCount, plural, =1 {1 attachment} other {# attachments}} linked, but not all {totalCount, plural, =1 {1 group} other {# groups}} completed. {error}",
       "emptyLabels": {
         "audio": "audio recordings",
-        "trees": "tree datasets",
-        "biodiversity": "biodiversity observations"
+        "trees": "tree groups",
+        "biodiversity": "nature observations"
       },
       "attachmentTitles": {
         "audio": "Audio Recordings",
-        "trees": "Tree Data Set",
-        "biodiversity": "Biodiversity Observations"
+        "trees": "Tree group",
+        "biodiversity": "Nature observations"
       },
       "chooseEvidenceType": "Choose evidence type",
       "selectSourceToLink": "Select a source to link existing evidence to this timeline.",
@@ -113,11 +117,11 @@
       "selectRecordsToLink": "Select evidence records to link to this timeline.",
       "alreadyLinkedDataset": "Already linked to this timeline",
       "checkingExistingLinks": "Checking existing timeline links…",
-      "unableToVerifyExistingLinks": "Unable to verify existing timeline links. Refresh to link tree datasets.",
+      "unableToVerifyExistingLinks": "Existing links could not be checked. Refresh before linking tree groups.",
       "tabDescriptions": {
         "audio": "Add recordings already saved by this organization.",
         "trees": "Add tree information grouped by project place.",
-        "biodiversity": "Filter observations and add displayed data or saved groups.",
+        "biodiversity": "Filter observations and add displayed nature data or saved groups.",
         "files": "Add reports, photos, videos, or web pages."
       },
       "permissions": {
@@ -129,34 +133,36 @@
       "linkError": "Unable to link this evidence. Please try again.",
       "manageType": "Manage {type}",
       "biodiversity": {
-        "attachmentGroupTitle": "Biodiversity group",
-        "attachmentObservationsTitle": "Biodiversity observations",
-        "emptyLabel": "biodiversity data",
+        "attachmentGroupTitle": "Nature group",
+        "attachmentObservationsTitle": "Nature observations",
+        "emptyLabel": "nature data",
         "searchLabel": "Search",
-        "searchPlaceholder": "Search biodiversity",
+        "searchPlaceholder": "Search nature",
         "recorderLabel": "Recorder",
         "allRecorders": "All recorders",
         "recorderOptionFallback": "Recorder {number}",
-        "displayedTitle": "Displayed biodiversity data",
+        "displayedTitle": "Displayed nature data",
         "displayedSummary": "{shown} of {total, plural, =1 {1 observation} other {# observations}} shown. Choose observations from this filtered view.",
         "clearDisplayed": "Clear displayed",
         "selectDisplayed": "Select displayed",
-        "noDataMatches": "No biodiversity data matches these filters.",
+        "noDataMatches": "No nature data matches these filters.",
         "recordedBy": "Recorded by {name}",
         "recorderFallback": "a saved recorder",
         "alreadyLinked": "Already linked",
         "coveredByGroup": "Covered by group",
-        "groupsTitle": "Biodiversity groups",
+        "groupsTitle": "Nature groups",
         "groupsDescription": "Groups use the same recorder and search filters.",
-        "noGroupsMatch": "No biodiversity groups match these filters.",
+        "noGroupsMatch": "No nature groups match these filters.",
         "multipleRecorders": "{count, plural, =1 {1 recorder} other {# recorders}}",
         "firstRecorderAndMore": "{name} + {count, plural, =1 {1 more} other {# more}}",
         "shownCount": "{count} shown",
         "totalCount": "{count} total",
         "speciesCount": "{count, plural, =1 {1 species} other {# species}}",
         "groupStatus": "Grouped data",
-        "manageData": "Manage biodiversity data"
-      }
+        "manageData": "Manage nature data",
+        "groupedNatureDataFallback": "Grouped nature data"
+      },
+      "unableToVerifyTreeSiteContext": "Could not check all trees. Refresh before linking tree groups."
     },
     "metadata": {
       "notFound": "Cert Not Found"
@@ -165,7 +171,7 @@
       "kind": {
         "tree": "Tree dataset",
         "audio": "Acoustic data",
-        "biodiversity": "Biodiversity observations",
+        "biodiversity": "Nature observations",
         "document": "Document",
         "site": "Site",
         "other": "Evidence"
@@ -223,7 +229,8 @@
       "hideLayer": "Hide layer",
       "deleteUnavailable": "You cannot remove this evidence.",
       "deleteError": "Unable to remove this item.",
-      "displayedBiodiversityData": "Displayed biodiversity data"
+      "displayedBiodiversityData": "Displayed nature data",
+      "natureObservationsFallback": "Nature observations"
     },
     "reference": {
       "linkedRecord": "Linked record",
@@ -406,7 +413,7 @@
               "ecologicalRestoration": "Ecological Restoration",
               "agroforestry": "Agroforestry",
               "climateAdaptation": "Climate Adaptation",
-              "biodiversityMonitoring": "Biodiversity Monitoring",
+              "biodiversityMonitoring": "Nature Monitoring",
               "environmentalEducation": "Environmental Education",
               "indigenousLocalKnowledge": "Indigenous & Local Knowledge",
               "environmentalJustice": "Environmental Justice"

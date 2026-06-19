@@ -321,5 +321,13 @@
         "noMeasurements": "Ainda não há medições"
       }
     }
+  },
+  "workScopes": {
+    "reforestation": "Reflorestamento",
+    "forestProtection": "Proteção florestal",
+    "natureMonitoring": "Monitoramento da natureza",
+    "communityStewardship": "Cuidado comunitário",
+    "carbonRemoval": "Remoção de carbono",
+    "restorationMaintenance": "Manutenção da restauração"
   }
 }

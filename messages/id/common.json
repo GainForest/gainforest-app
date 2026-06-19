@@ -321,5 +321,13 @@
         "noMeasurements": "Belum ada pengukuran"
       }
     }
+  },
+  "workScopes": {
+    "reforestation": "Reforestasi",
+    "forestProtection": "Perlindungan hutan",
+    "natureMonitoring": "Pemantauan alam",
+    "communityStewardship": "Pengelolaan komunitas",
+    "carbonRemoval": "Penghilangan karbon",
+    "restorationMaintenance": "Pemeliharaan restorasi"
   }
 }

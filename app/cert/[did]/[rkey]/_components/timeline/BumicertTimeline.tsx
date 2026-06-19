@@ -43,6 +43,22 @@ import type {
   TimelineDatasetRecord,
   UploadTreeDatasetRecord,
 } from "@/app/_lib/indexer";
+import {
+  buildDatasetSiteContexts,
+  getDatasetSiteContext,
+  groupDatasetUrisBySite,
+  type DatasetSiteContext,
+} from "./datasetSiteContext";
+import {
+  buildSelectableTreeDatasetUris,
+  getTreeDatasetSelectionState,
+  type DatasetSelectionDisabledReason,
+} from "./datasetEvidenceSelection";
+import {
+  getOccurrenceDatasetRef,
+  hasTreeDatasetMetadata,
+  isTreeDatasetOccurrence,
+} from "./treeEvidenceClassification";
 
 const ATTACHMENT_COLLECTION = "org.hypercerts.context.attachment";
 const CONTENT_TYPE_TREE_DATASET = "tree-dataset";
@@ -53,6 +69,7 @@ const PAGE_SIZE = 8;
 type TimelineSourceData = {
   audio: ManagedAudio[];
   occurrences: OccurrenceRecord[];
+  occurrencesIncomplete: boolean;
   treeGroups: UploadTreeDatasetRecord[];
   places: ManagedLocation[];
 };
@@ -195,8 +212,6 @@ function parseAttachmentContent(content: unknown): ParsedAttachmentContent[] {
 function getLinkedTreeGroupUris(entries: TimelineAttachmentItem[]): Set<string> {
   const linked = new Set<string>();
   for (const entry of entries) {
-    const normalized = entry.record.contentType?.trim().toLowerCase();
-    if (normalized && normalized !== CONTENT_TYPE_TREE_DATASET) continue;
     for (const item of parseAttachmentContent(entry.record.content)) {
       if (item.kind === "uri" && parseAtUri(item.uri)?.collection === "app.gainforest.dwc.dataset") {
         linked.add(item.uri);
@@ -294,10 +309,10 @@ function previewFromHref(href: string, mimeType: string | null, fileName?: strin
   return { kind: "link", href, title: name, fileName: name, mimeType };
 }
 
-function previewForReference(uri: string, reference: TimelineReference | undefined): PreviewPayload | null {
+function previewForReference(uri: string, reference: TimelineReference | undefined, copy: { linkedNatureDataGroup: string }): PreviewPayload | null {
   if (reference?.kind === "location" && reference.actionHref) return { kind: "site", href: reference.actionHref, title: reference.title, body: reference.description };
   if (reference?.kind === "tree") return { kind: "text", href: "", title: reference.title, body: reference.description ?? "Linked tree information" };
-  if (reference?.kind === "biodiversityDataset") return { kind: "text", href: "", title: reference.title, body: reference.description ?? "Linked biodiversity data group" };
+  if (reference?.kind === "biodiversityDataset") return { kind: "text", href: "", title: reference.title, body: reference.description ?? copy.linkedNatureDataGroup };
   if (reference?.kind === "audio" && reference.actionHref) return { kind: "audio", href: reference.actionHref, title: reference.title, body: reference.description };
   if (reference?.actionHref) return { kind: "link", href: reference.actionHref, title: reference.title, body: reference.description };
   if (reference) return { kind: "text", href: "", title: reference.title, body: reference.description ?? "Linked item" };
@@ -316,7 +331,7 @@ function tileKindFromPreview(preview: PreviewPayload): TileKind {
   return preview.kind;
 }
 
-function buildTiles(entryId: string, content: unknown, references: TimelineReference[]): TimelineTile[] {
+function buildTiles(entryId: string, content: unknown, references: TimelineReference[], copy: { linkedNatureDataGroup: string }): TimelineTile[] {
   const refs = new Map(references.map((ref) => [ref.id, ref]));
   const tiles: TimelineTile[] = [];
   parseAttachmentContent(content).forEach((item, index) => {
@@ -333,7 +348,7 @@ function buildTiles(entryId: string, content: unknown, references: TimelineRefer
       return;
     }
     const reference = refs.get(item.uri);
-    const preview = previewForReference(item.uri, reference);
+    const preview = previewForReference(item.uri, reference, copy);
     const parsed = parseAtUri(item.uri);
     const kind: TileKind = reference?.kind === "tree" ? "tree" : reference?.kind === "occurrence" || reference?.kind === "biodiversityDataset" ? "nature" : reference?.kind === "audio" ? "audio" : reference?.kind === "location" ? "site" : "item";
     const title = reference?.title ?? (parsed?.collection === "app.gainforest.dwc.dataset" ? "Grouped data" : "Linked item");
@@ -355,21 +370,21 @@ function noteFromDescription(description: unknown): string | null {
   return null;
 }
 
-function kindLabel(kind: EvidenceKind): string {
-  if (kind === "tree") return "Tree group";
-  if (kind === "audio") return "Field sound";
-  if (kind === "nature") return "Biodiversity";
-  if (kind === "site") return "Project place";
-  if (kind === "file") return "File";
-  return "Evidence";
+type EntryCopy = {
+  kindLabels: Record<EvidenceKind, string>;
+  natureObservationsFallback: string;
+};
+
+function kindLabel(kind: EvidenceKind, labels: Record<EvidenceKind, string>): string {
+  return labels[kind] ?? labels.other;
 }
 
-function titleForEntry(item: TimelineAttachmentItem, kind: EvidenceKind, references: TimelineReference[]): string {
+function titleForEntry(item: TimelineAttachmentItem, kind: EvidenceKind, references: TimelineReference[], copy: EntryCopy): string {
   const explicit = cleanText(item.record.title);
   const treeRef = references.find((ref) => ref.kind === "tree");
   if (kind === "tree" && treeRef) return treeRef.title;
-  if (kind === "nature") return explicit ?? "Biodiversity observations";
-  return explicit ?? kindLabel(kind);
+  if (kind === "nature") return explicit ?? copy.natureObservationsFallback;
+  return explicit ?? kindLabel(kind, copy.kindLabels);
 }
 
 function recordedDateForEntry(kind: EvidenceKind, references: TimelineReference[]): string {
@@ -439,17 +454,9 @@ function toStrongRefs(subjects: AttachmentSubjectInfo[]) {
 }
 
 function getTreeGroupStats(treeGroupUri: string, occurrences: OccurrenceRecord[]): { itemCount: number; speciesCount: number; dateRange: string | null } {
-  const items = occurrences.filter((item) => item.datasetRef === treeGroupUri);
+  const items = occurrences.filter((item) => getOccurrenceDatasetRef(item) === treeGroupUri);
   const species = new Set(items.map((item) => (item.scientificName ?? item.vernacularName ?? "").trim().toLowerCase()).filter(Boolean));
   return { itemCount: items.length, speciesCount: species.size, dateRange: formatDateRangeFromValues(items.map((item) => item.eventDate ?? item.createdAt)) };
-}
-
-function getPlaceForTreeGroup(treeGroupUri: string, occurrences: OccurrenceRecord[], places: ManagedLocation[]): AttachmentSubjectInfo | null {
-  const siteRefs = new Set(occurrences.filter((item) => item.datasetRef === treeGroupUri).map((item) => item.siteRef).filter((value): value is string => Boolean(value)));
-  if (siteRefs.size !== 1) return null;
-  const [siteRef] = Array.from(siteRefs);
-  const place = places.find((item) => item.metadata.uri === siteRef);
-  return place ? { uri: place.metadata.uri, cid: place.metadata.cid } : null;
 }
 
 type BiodiversityDatasetGroup = {
@@ -516,7 +523,7 @@ function occurrenceSearchText(item: OccurrenceRecord, datasetName?: string | nul
   ].filter((value): value is string => typeof value === "string" && value.length > 0).join(" ").toLowerCase();
 }
 
-function buildBiodiversityDatasetGroups(datasets: UploadTreeDatasetRecord[], occurrences: OccurrenceRecord[]): BiodiversityDatasetGroup[] {
+function buildBiodiversityDatasetGroups(datasets: UploadTreeDatasetRecord[], occurrences: OccurrenceRecord[], fallbackGroupName: string): BiodiversityDatasetGroup[] {
   const datasetLookup = new Map(datasets.map((dataset) => [dataset.uri, dataset]));
   const recordsByDataset = new Map<string, OccurrenceRecord[]>();
 
@@ -534,7 +541,7 @@ function buildBiodiversityDatasetGroups(datasets: UploadTreeDatasetRecord[], occ
     const dataset = datasetLookup.get(uri);
     const species = new Set(records.map((item) => occurrenceTitle(item).trim().toLowerCase()).filter(Boolean));
     const recordedByValues = uniqueRecordedByValues(records);
-    const name = dataset?.name ?? records.find((item) => item.datasetName)?.datasetName ?? "Grouped biodiversity data";
+    const name = dataset?.name ?? records.find((item) => item.datasetName)?.datasetName ?? fallbackGroupName;
     const description = dataset?.description ?? null;
     const dateRange = formatDateRangeFromValues(records.map((item) => item.eventDate ?? item.createdAt));
     const searchableRecordedByValues = recordedByValues.map(getSafeRecorderDisplayName).filter((value): value is string => Boolean(value));
@@ -613,6 +620,10 @@ export function BumicertTimeline({
   const [currentPage, setCurrentPage] = useState(1);
   const [status, setStatus] = useState<string | null>(null);
   const linkedWindow = useMemo(() => formatLinkedWindow(entries), [entries]);
+  const timelineFallbacks = useMemo(() => ({
+    linkedNatureDataGroup: timelineT("fallbacks.linkedNatureDataGroup"),
+    linkedNatureData: timelineT("fallbacks.linkedNatureData"),
+  }), [timelineT]);
   const providedReferencesById = useMemo(() => new Map(references.map((ref) => [ref.id, ref])), [references]);
   const entryModels = useMemo(() => entries.map((item, index) => {
     const entryId = getEntryId(item, index);
@@ -622,6 +633,7 @@ export function BumicertTimeline({
       occurrences: sources.occurrences,
       treeGroups: sources.treeGroups,
       places: sources.places,
+      copy: { linkedNatureData: timelineFallbacks.linkedNatureData },
     });
     const refsById = new Map(providedReferencesById);
     for (const ref of builtReferences) refsById.set(ref.id, ref);
@@ -630,8 +642,8 @@ export function BumicertTimeline({
       .map((content) => refsById.get(content.uri))
       .filter((ref): ref is TimelineReference => Boolean(ref));
     const kind = evidenceKind(item.record.contentType, item.record.content);
-    return { item, index, entryId, refs: entryRefs, kind, tiles: buildTiles(entryId, item.record.content, entryRefs) };
-  }), [entries, providedReferencesById, sources.audio, sources.occurrences, sources.places, sources.treeGroups]);
+    return { item, index, entryId, refs: entryRefs, kind, tiles: buildTiles(entryId, item.record.content, entryRefs, timelineFallbacks) };
+  }), [entries, providedReferencesById, sources.audio, sources.occurrences, sources.places, sources.treeGroups, timelineFallbacks]);
   const counts = useMemo(() => new Map(FILTERS.map((filter) => [filter.id, entryModels.filter((entry) => matchesFilter(entry.kind, filter.id)).length])), [entryModels]);
   const filteredEntries = entryModels.filter((entry) => matchesFilter(entry.kind, activeFilter));
   const totalPages = Math.max(1, Math.ceil(filteredEntries.length / PAGE_SIZE));
@@ -677,6 +689,7 @@ export function BumicertTimeline({
                 activityCid={activityCid}
                 sources={sources}
                 entries={entries}
+                attachmentsUnavailable={attachmentsUnavailable}
                 createPermission={createPermission}
                 mutationRepo={mutationRepo}
                 onCreated={handleCreated}
@@ -837,7 +850,19 @@ function TimelineEntryCard({
   const [activeTileId, setActiveTileId] = useState<string | null>(null);
   const panelId = useId();
   const rkey = item.metadata.rkey;
-  const title = titleForEntry(item, kind, refs);
+  const entryCopy: EntryCopy = {
+    kindLabels: {
+      all: entryT("kind.other"),
+      tree: entryT("kind.tree"),
+      audio: entryT("kind.audio"),
+      nature: entryT("kind.biodiversity"),
+      file: entryT("kind.document"),
+      site: entryT("kind.site"),
+      other: entryT("kind.other"),
+    },
+    natureObservationsFallback: entryT("natureObservationsFallback"),
+  };
+  const title = titleForEntry(item, kind, refs, entryCopy);
   const badges = metricBadges(kind, refs, tiles.length);
   const linkedDate = formatDate(item.record.createdAt ?? item.metadata.createdAt) || entryT("notSpecified");
   const recordedDate = recordedDateForEntry(kind, refs);
@@ -877,7 +902,7 @@ function TimelineEntryCard({
       <div className="flex items-start gap-3 p-4">
         <button type="button" aria-expanded={expanded} aria-controls={panelId} onClick={() => setExpanded((value) => !value)} className="min-w-0 flex-1 text-left">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="text-xs text-primary">{kindLabel(kind)}</span>
+            <span className="text-xs text-primary">{kindLabel(kind, entryCopy.kindLabels)}</span>
             {badges.map((badge) => <span key={badge} className="rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary">{badge}</span>)}
           </div>
           <h3 className="mt-1 text-base text-foreground">{title}</h3>
@@ -1016,6 +1041,7 @@ function EvidenceAdder({
   activityCid,
   sources,
   entries,
+  attachmentsUnavailable,
   createPermission,
   mutationRepo,
   onCreated,
@@ -1025,6 +1051,7 @@ function EvidenceAdder({
   activityCid: string;
   sources: TimelineSourceData;
   entries: TimelineAttachmentItem[];
+  attachmentsUnavailable: boolean;
   createPermission: TimelineMutationPermission;
   mutationRepo?: string;
   onCreated: (entry: TimelineAttachmentItem) => void;
@@ -1134,7 +1161,7 @@ function EvidenceAdder({
       </div>
       <div className="mt-4 flex flex-col gap-2">
         {activeTab === "audio" ? <AudioPicker data={sources.audio} isSubmitting={isSubmitting} submitDrafts={submitDrafts} /> : null}
-        {activeTab === "trees" ? <TreeGroupPicker data={sources.treeGroups} occurrences={sources.occurrences} places={sources.places} linkedTreeGroups={linkedTreeGroups} isSubmitting={isSubmitting} submitDrafts={submitDrafts} /> : null}
+        {activeTab === "trees" ? <TreeGroupPicker data={sources.treeGroups} occurrences={sources.occurrences} places={sources.places} linkedTreeGroups={linkedTreeGroups} timelineAttachmentsUnavailable={attachmentsUnavailable} occurrenceCoverageIncomplete={sources.occurrencesIncomplete} isSubmitting={isSubmitting} submitDrafts={submitDrafts} /> : null}
         {activeTab === "nature" ? <BiodiversityPicker occurrences={sources.occurrences} datasets={sources.treeGroups} linkedUris={linkedBiodiversityUris} isSubmitting={isSubmitting} submitDrafts={submitDrafts} /> : null}
         {activeTab === "files" ? <FilePicker isSubmitting={isSubmitting} submitDrafts={submitDrafts} /> : null}
         {error ? <p className="text-sm text-destructive">{error}</p> : null}
@@ -1204,42 +1231,121 @@ function AudioPicker({ data, isSubmitting, submitDrafts }: { data: ManagedAudio[
   );
 }
 
-function TreeGroupPicker({ data, occurrences, places, linkedTreeGroups, isSubmitting, submitDrafts }: { data: UploadTreeDatasetRecord[]; occurrences: OccurrenceRecord[]; places: ManagedLocation[]; linkedTreeGroups: Set<string>; isSubmitting: boolean; submitDrafts: (drafts: AttachmentDraft[], onSuccess?: () => void) => void }) {
+function TreeGroupPicker({
+  data,
+  occurrences,
+  places,
+  linkedTreeGroups,
+  timelineAttachmentsUnavailable,
+  occurrenceCoverageIncomplete,
+  isSubmitting,
+  submitDrafts,
+}: {
+  data: UploadTreeDatasetRecord[];
+  occurrences: OccurrenceRecord[];
+  places: ManagedLocation[];
+  linkedTreeGroups: Set<string>;
+  timelineAttachmentsUnavailable: boolean;
+  occurrenceCoverageIncomplete: boolean;
+  isSubmitting: boolean;
+  submitDrafts: (drafts: AttachmentDraft[], onSuccess?: () => void) => void;
+}) {
+  const evidenceT = useTranslations("bumicert.detail.evidenceAdder");
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [note, setNote] = useState("");
-  const rows = data.filter((item) => item.uri);
+  const treeDatasetMetadataUris = useMemo(() => new Set(
+    data.filter(hasTreeDatasetMetadata).map((item) => item.uri),
+  ), [data]);
+  const treeOccurrences = useMemo(() => occurrences.filter((occurrence) => isTreeDatasetOccurrence(
+    occurrence,
+    { treeDatasetUrisWithMetadata: treeDatasetMetadataUris },
+  )), [occurrences, treeDatasetMetadataUris]);
+  const treeDatasetUris = useMemo(() => new Set(
+    treeOccurrences.map(getOccurrenceDatasetRef).filter((uri): uri is string => Boolean(uri)),
+  ), [treeOccurrences]);
+  const rows = useMemo(() => data.filter((item) => item.uri && (hasTreeDatasetMetadata(item) || treeDatasetUris.has(item.uri))), [data, treeDatasetUris]);
+  const siteContextsByDataset = useMemo(() => buildDatasetSiteContexts({
+    occurrences: treeOccurrences.flatMap((occurrence) => {
+      const datasetUri = getOccurrenceDatasetRef(occurrence);
+      return datasetUri ? [{ datasetUri, siteRef: occurrence.siteRef }] : [];
+    }),
+    locations: places,
+  }), [treeOccurrences, places]);
+  const selectableUris = useMemo(() => buildSelectableTreeDatasetUris({
+    rows,
+    siteContextsByDataset,
+    linkedDatasetUris: linkedTreeGroups,
+    timelineAttachmentsUnavailable,
+    siteContextsUnavailable: occurrenceCoverageIncomplete,
+  }), [linkedTreeGroups, occurrenceCoverageIncomplete, rows, siteContextsByDataset, timelineAttachmentsUnavailable]);
+  const selectedDatasetUris = Array.from(selected).filter((uri) => selectableUris.has(uri));
+  const groupedSelections = groupDatasetUrisBySite({ datasetUris: selectedDatasetUris, contexts: siteContextsByDataset });
+  const drafts = groupedSelections.map((group) => ({
+    title: evidenceT("attachmentTitles.trees"),
+    contentType: CONTENT_TYPE_TREE_DATASET,
+    contents: group.datasetUris,
+    note,
+    contextualSubjects: [group.siteSubject],
+  }) satisfies AttachmentDraft);
+
+  function siteContextLabel(context: DatasetSiteContext): string {
+    if (context.status === "ready") {
+      return context.siteName
+        ? evidenceT("siteContextLabel", { siteName: context.siteName })
+        : evidenceT("siteContextReady");
+    }
+    if (context.status === "mixed-site-refs") return evidenceT("siteContextMixed");
+    if (context.status === "incomplete-site-ref") return evidenceT("siteContextIncomplete");
+    if (context.status === "unresolved-site") return evidenceT("siteContextUnresolved");
+    return evidenceT("siteContextUnavailable");
+  }
+
+  function disabledReasonLabel(reason: DatasetSelectionDisabledReason | null, context: DatasetSiteContext): string | null {
+    if (reason === "already-linked") return evidenceT("alreadyLinkedDataset");
+    if (reason === "checking-existing-links") return evidenceT("checkingExistingLinks");
+    if (reason === "unable-to-verify-existing-links") return evidenceT("unableToVerifyExistingLinks");
+    if (reason === "unable-to-verify-site-context") return evidenceT("unableToVerifyTreeSiteContext");
+    if (reason) return siteContextLabel(context);
+    return null;
+  }
+
   function toggle(uri: string) {
-    if (linkedTreeGroups.has(uri)) return;
+    if (!selectableUris.has(uri)) return;
     setSelected((current) => {
       const next = new Set(current);
       if (next.has(uri)) next.delete(uri); else next.add(uri);
       return next;
     });
   }
-  if (rows.length === 0) return <PickerEmpty label="tree groups" href="/manage/trees" />;
-  const drafts = Array.from(selected).map((uri) => {
-    const place = getPlaceForTreeGroup(uri, occurrences, places);
-    return { title: "Tree group", contentType: CONTENT_TYPE_TREE_DATASET, contents: [uri], note, contextualSubjects: place ? [place] : [] } satisfies AttachmentDraft;
-  });
+
+  if (rows.length === 0) return <PickerEmpty label={evidenceT("emptyLabels.trees")} href="/manage/trees" />;
+
   return (
     <>
       <div className="grid gap-2">
         {rows.map((item) => {
-          const stats = getTreeGroupStats(item.uri, occurrences);
-          const place = getPlaceForTreeGroup(item.uri, occurrences, places);
+          const stats = getTreeGroupStats(item.uri, treeOccurrences);
+          const siteContext = getDatasetSiteContext(siteContextsByDataset, item.uri);
+          const selectionState = getTreeDatasetSelectionState({
+            uri: item.uri,
+            siteContext,
+            linkedDatasetUris: linkedTreeGroups,
+            timelineAttachmentsUnavailable,
+            siteContextsUnavailable: occurrenceCoverageIncomplete,
+          });
+          const status = disabledReasonLabel(selectionState.disabledReason, siteContext);
           const secondary = [
-            `${formatNumber(stats.itemCount || item.recordCount || 0)} trees`,
-            stats.speciesCount > 0 ? `${formatNumber(stats.speciesCount)} species` : null,
+            evidenceT("treeCount", { count: stats.itemCount || item.recordCount || 0 }),
+            stats.speciesCount > 0 ? evidenceT("speciesCount", { count: stats.speciesCount }) : null,
             stats.dateRange,
-            place ? "Project place ready" : "Project place not confirmed",
+            siteContext.status === "ready" ? siteContextLabel(siteContext) : null,
           ].filter(Boolean).join(" · ");
-          const alreadyLinked = linkedTreeGroups.has(item.uri);
-          return <CheckRow key={item.uri} selected={!alreadyLinked && selected.has(item.uri)} onToggle={() => toggle(item.uri)} icon={TreesIcon} primary={item.name || "Unnamed tree group"} secondary={secondary} status={alreadyLinked ? "Already linked" : undefined} disabled={isSubmitting || alreadyLinked} />;
+          return <CheckRow key={item.uri} selected={selectionState.canSelect && selected.has(item.uri)} onToggle={() => toggle(item.uri)} icon={TreesIcon} primary={item.name || evidenceT("unnamedTreeDataset")} secondary={secondary} status={status ?? undefined} disabled={isSubmitting || !selectionState.canSelect} />;
         })}
       </div>
-      <ManageLink href="/manage/trees" label="Manage tree information" />
+      <ManageLink href="/manage/trees" label={evidenceT("manageType", { type: evidenceT("emptyLabels.trees") })} />
       <OptionalNote value={note} onChange={setNote} disabled={isSubmitting} />
-      <SubmitButton count={selected.size} isSubmitting={isSubmitting} onClick={() => submitDrafts(drafts, () => { setSelected(new Set()); setNote(""); })} />
+      <SubmitButton count={selectedDatasetUris.length} isSubmitting={isSubmitting} onClick={() => submitDrafts(drafts, () => { setSelected(new Set()); setNote(""); })} />
     </>
   );
 }
@@ -1264,7 +1370,7 @@ function BiodiversityPicker({
   const [searchQuery, setSearchQuery] = useState("");
   const [note, setNote] = useState("");
   const rows = useMemo(() => occurrences.filter((item) => item.atUri), [occurrences]);
-  const datasetGroups = useMemo(() => buildBiodiversityDatasetGroups(datasets, rows), [datasets, rows]);
+  const datasetGroups = useMemo(() => buildBiodiversityDatasetGroups(datasets, rows, biodiversityT("groupedNatureDataFallback")), [biodiversityT, datasets, rows]);
   const datasetByUri = useMemo(() => new Map(datasetGroups.map((group) => [group.uri, group])), [datasetGroups]);
   const datasetNameByUri = useMemo(() => new Map(datasetGroups.map((group) => [group.uri, group.name])), [datasetGroups]);
   const recordedByOptions = useMemo(() => uniqueRecordedByValues(rows), [rows]);
@@ -1587,6 +1693,7 @@ export function buildTimelineReferences(args: {
   occurrences: OccurrenceRecord[];
   treeGroups: Array<UploadTreeDatasetRecord | TimelineDatasetRecord>;
   places: ManagedLocation[];
+  copy: { linkedNatureData: string };
 }): TimelineReference[] {
   const audioByUri = new Map(args.audio.map((item) => [item.metadata.uri, item]));
   const occurrenceByUri = new Map(args.occurrences.map((item) => [item.atUri, item]));
@@ -1612,7 +1719,7 @@ export function buildTimelineReferences(args: {
       const item = treeByUri.get(uri);
       const stats = getTreeGroupStats(uri, args.occurrences);
       const purpose = datasetPurposes.get(uri) ?? "tree";
-      const title = item?.name ?? (purpose === "biodiversity" ? "Linked biodiversity data" : "Linked tree group");
+      const title = item?.name ?? (purpose === "biodiversity" ? args.copy.linkedNatureData : "Linked tree group");
       const count = stats.itemCount || item?.recordCount || 0;
       if (purpose === "biodiversity") {
         return {

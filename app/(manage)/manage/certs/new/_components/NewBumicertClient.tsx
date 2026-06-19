@@ -10,6 +10,7 @@
  */
 
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   ArrowRightIcon,
@@ -53,6 +54,7 @@ import { CalendarRange } from "@/components/ui/calendar-range";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { manageApiHref, manageHref, type ManageTarget } from "@/lib/links";
+import { WORK_SCOPE_MESSAGE_KEYS, type KnownWorkScopeKey, type WorkScopeLabels } from "@/app/_lib/work-scope-labels";
 
 /* ── Types ──────────────────────────────────────────────────────────────── */
 
@@ -122,14 +124,14 @@ const EMPTY_FORM: FormValues = {
   acceptedTerms: false,
 };
 
-const WORK_SCOPES = [
-  { key: "reforestation", label: "Reforestation" },
-  { key: "forest_protection", label: "Forest protection" },
-  { key: "biodiversity_monitoring", label: "Biodiversity monitoring" },
-  { key: "community_stewardship", label: "Community stewardship" },
-  { key: "carbon_removal", label: "Carbon removal" },
-  { key: "restoration_maintenance", label: "Restoration maintenance" },
-] as const;
+const WORK_SCOPE_KEYS: KnownWorkScopeKey[] = [
+  "reforestation",
+  "forest_protection",
+  "biodiversity_monitoring",
+  "community_stewardship",
+  "carbon_removal",
+  "restoration_maintenance",
+];
 
 const STEPS: Array<{ id: StepId; label: string; title: string; subtitle: string }> = [
   { id: "basics", label: "Basics", title: "the basics", subtitle: "Name the work and set the dates. Add a cover photo on the card." },
@@ -245,16 +247,16 @@ function dateToIso(date: string) {
 function extractRkey(uri: string) {
   return uri.split("/").filter(Boolean).pop() ?? "";
 }
-function scopeList(values: FormValues) {
+function scopeList(values: FormValues, labels: WorkScopeLabels) {
   const active = new Set(values.scopes);
-  return WORK_SCOPES.filter((scope) => active.has(scope.key)).map((scope) => scope.label);
+  return WORK_SCOPE_KEYS.filter((scope) => active.has(scope)).map((scope) => labels[scope]);
 }
 function scopeKeys(values: FormValues) {
   const active = new Set(values.scopes);
-  return WORK_SCOPES.filter((scope) => active.has(scope.key));
+  return WORK_SCOPE_KEYS.filter((scope) => active.has(scope));
 }
 function buildWorkScopeExpression(values: FormValues) {
-  const keys = scopeKeys(values).map((scope) => `'${scope.key}'`).join(", ");
+  const keys = scopeKeys(values).map((scope) => `'${scope}'`).join(", ");
   return `scope.hasAny([${keys}])`;
 }
 function contributorList(values: FormValues) {
@@ -632,11 +634,13 @@ function BasicsStep({
   setValues,
   issues,
   onFieldChange,
+  workScopeLabels,
 }: {
   values: FormValues;
   setValues: React.Dispatch<React.SetStateAction<FormValues>>;
   issues: Partial<Record<FormField, FormIssue>>;
   onFieldChange: (field: FormField) => void;
+  workScopeLabels: WorkScopeLabels;
 }) {
   const toggleScope = (scopeKey: string) => {
     onFieldChange("scopes");
@@ -662,8 +666,8 @@ function BasicsStep({
 
       <Field label="Type of work" hint="pick everything this covers" error={issues.scopes?.message}>
         <div className={cn("flex flex-wrap gap-2 rounded-2xl transition-colors", issues.scopes && "border-2 border-destructive p-3 ring-2 ring-destructive/20")}>
-          {WORK_SCOPES.map((scope) => (
-            <ScopeTag key={scope.key} label={scope.label} active={values.scopes.includes(scope.key)} onClick={() => toggleScope(scope.key)} />
+          {WORK_SCOPE_KEYS.map((scope) => (
+            <ScopeTag key={scope} label={workScopeLabels[scope]} active={values.scopes.includes(scope)} onClick={() => toggleScope(scope)} />
           ))}
         </div>
       </Field>
@@ -1017,6 +1021,7 @@ function PreviewContent({
   onCoverFile,
   onCoverClear,
   coverError,
+  workScopeLabels,
 }: {
   values: FormValues;
   coverPreview: string | null;
@@ -1027,6 +1032,7 @@ function PreviewContent({
   onCoverFile: (file: File | null) => void;
   onCoverClear: () => void;
   coverError: string | null;
+  workScopeLabels: WorkScopeLabels;
 }) {
   const [dragging, setDragging] = useState(false);
   void sites;
@@ -1051,7 +1057,7 @@ function PreviewContent({
           ownerDid={did}
           title={values.title.trim() || "Your Cert title"}
           organizationName={profile.name}
-          objectives={scopeList(values)}
+          objectives={scopeList(values, workScopeLabels)}
           description={clampDescription(values.shortDescription) || undefined}
         />
 
@@ -1169,6 +1175,15 @@ export function NewBumicertClient({
   profile: ProfilePreview;
   linkedProject?: LinkedProjectPrefill | null;
 }) {
+  const workScopeT = useTranslations("common.workScopes");
+  const workScopeLabels: WorkScopeLabels = {
+    reforestation: workScopeT(WORK_SCOPE_MESSAGE_KEYS.reforestation),
+    forest_protection: workScopeT(WORK_SCOPE_MESSAGE_KEYS.forest_protection),
+    biodiversity_monitoring: workScopeT(WORK_SCOPE_MESSAGE_KEYS.biodiversity_monitoring),
+    community_stewardship: workScopeT(WORK_SCOPE_MESSAGE_KEYS.community_stewardship),
+    carbon_removal: workScopeT(WORK_SCOPE_MESSAGE_KEYS.carbon_removal),
+    restoration_maintenance: workScopeT(WORK_SCOPE_MESSAGE_KEYS.restoration_maintenance),
+  };
   const [values, setValues] = useState<FormValues>(() => initialFormValues(linkedProject));
   const [drafts, setDrafts] = useState<Draft[]>([]);
   const [activeDraftId, setActiveDraftId] = useState<string | null>(null);
@@ -1357,19 +1372,19 @@ export function NewBumicertClient({
     const refs = await Promise.all(scopeKeys(values).map(async (scope) => {
       const record = {
         $type: WORK_SCOPE_TAG_COLLECTION,
-        key: scope.key,
-        name: scope.label,
+        key: scope,
+        name: workScopeLabels[scope],
         category: "topic",
         createdAt,
       };
-      const existing = await getRecord(WORK_SCOPE_TAG_COLLECTION, scope.key, writeOptions).catch(() => null);
+      const existing = await getRecord(WORK_SCOPE_TAG_COLLECTION, scope, writeOptions).catch(() => null);
       if (existing) return { uri: existing.uri, cid: existing.cid };
 
       try {
-        const result = await createRecord(WORK_SCOPE_TAG_COLLECTION, record, scope.key, writeOptions);
+        const result = await createRecord(WORK_SCOPE_TAG_COLLECTION, record, scope, writeOptions);
         return { uri: result.uri, cid: result.cid };
       } catch (error) {
-        const racedExisting = await getRecord(WORK_SCOPE_TAG_COLLECTION, scope.key, writeOptions).catch(() => null);
+        const racedExisting = await getRecord(WORK_SCOPE_TAG_COLLECTION, scope, writeOptions).catch(() => null);
         if (racedExisting) return { uri: racedExisting.uri, cid: racedExisting.cid };
         throw error;
       }
@@ -1445,6 +1460,7 @@ export function NewBumicertClient({
     onCoverFile: applyCoverFile,
     onCoverClear: clearCover,
     coverError,
+    workScopeLabels,
   };
 
   return (
@@ -1477,7 +1493,7 @@ export function NewBumicertClient({
               <div className="min-w-0">
                 <section>
                   <SectionHeader eyebrow="Basics" title={STEPS[0].title} subtitle={STEPS[0].subtitle} />
-                  <BasicsStep values={values} setValues={setValues} issues={fieldIssues} onFieldChange={markFieldChanged} />
+                  <BasicsStep values={values} setValues={setValues} issues={fieldIssues} onFieldChange={markFieldChanged} workScopeLabels={workScopeLabels} />
 
                   {/* Mobile: live preview shown inline */}
                   <div className="mt-10 xl:hidden">

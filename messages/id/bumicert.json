@@ -19,7 +19,7 @@
         "all": "Semua",
         "tree": "Pohon",
         "audio": "Audio",
-        "biodiversity": "Keanekaragaman Hayati",
+        "biodiversity": "Alam",
         "document": "Dokumen",
         "file": "Berkas"
       },
@@ -35,7 +35,11 @@
       "nextPage": "Halaman berikutnya",
       "timelineTools": "Alat lini waktu",
       "linksUnavailable": "Tautan lini waktu yang ada tidak dapat diperiksa. Muat ulang sebelum menambahkan kelompok pohon.",
-      "linkSuccess": "Tersambung ke lini waktu publik. Mungkin perlu beberapa saat agar terlihat oleh semua orang."
+      "linkSuccess": "Tersambung ke lini waktu publik. Mungkin perlu beberapa saat agar terlihat oleh semua orang.",
+      "fallbacks": {
+        "linkedNatureDataGroup": "Grup data alam tertaut",
+        "linkedNatureData": "Data alam tertaut"
+      }
     },
     "evidenceAdder": {
       "title": "Tambahkan Bukti",
@@ -45,7 +49,7 @@
       "tabs": {
         "audio": "Audio",
         "trees": "Pohon",
-        "biodiversity": "Keanekaragaman Hayati",
+        "biodiversity": "Alam",
         "files": "Dokumen"
       },
       "linking": "Menghubungkan…",
@@ -78,34 +82,34 @@
         "audio": "Audio",
         "other": "Lainnya",
         "treeDataset": "Dataset pohon",
-        "biodiversity": "Keanekaragaman Hayati",
+        "biodiversity": "Alam",
         "occurrence": "Pohon"
       },
       "emptyUploaded": "Belum ada {type} yang diunggah.",
       "uploadType": "Unggah {type}",
       "manage": "Kelola",
       "untitledRecording": "Rekaman tanpa judul",
-      "unnamedTreeDataset": "Kumpulan data pohon tanpa nama",
+      "unnamedTreeDataset": "Grup pohon tanpa nama",
       "unknownObservation": "Pengamatan tidak diketahui",
       "treeCount": "{count, plural, =1 {1 pohon} other {# pohon}}",
       "speciesCount": "{count, plural, =1 {1 spesies} other {# spesies}}",
-      "siteContextLabel": "Situs: {siteName}",
-      "siteContextReady": "Konteks situs siap",
-      "siteContextMixed": "Ada beberapa situs dalam dataset ini; lampirkan dataset khusus situs sebagai gantinya.",
-      "siteContextIncomplete": "Beberapa pohon belum memiliki konteks situs",
-      "siteContextUnresolved": "Catatan situs tidak dapat ditemukan",
-      "siteContextUnavailable": "Konteks situs tidak tersedia",
+      "siteContextLabel": "Lokasi proyek: {siteName}",
+      "siteContextReady": "Lokasi proyek siap",
+      "siteContextMixed": "Grup pohon ini mencakup lebih dari satu lokasi proyek",
+      "siteContextIncomplete": "Sebagian pohon belum memiliki lokasi proyek",
+      "siteContextUnresolved": "Lokasi proyek tidak dapat diperiksa",
+      "siteContextUnavailable": "Lokasi proyek belum ada",
       "incompleteBumicertReference": "Tidak dapat menautkan bukti karena referensi sertifikat tidak lengkap. Muat ulang halaman dan coba lagi.",
       "partialLinkSuccess": "{createdCount, plural, =1 {1 lampiran ditautkan} other {# lampiran ditautkan}}, tetapi tidak semua {totalCount, plural, =1 {1 grup} other {# grup}} selesai. {error}",
       "emptyLabels": {
         "audio": "rekaman audio",
-        "trees": "kumpulan data pohon",
-        "biodiversity": "observasi keanekaragaman hayati"
+        "trees": "grup pohon",
+        "biodiversity": "pengamatan alam"
       },
       "attachmentTitles": {
         "audio": "Rekaman audio",
-        "trees": "Dataset pohon",
-        "biodiversity": "Observasi keanekaragaman hayati"
+        "trees": "Grup pohon",
+        "biodiversity": "Pengamatan alam"
       },
       "chooseEvidenceType": "Pilih jenis bukti",
       "selectSourceToLink": "Pilih sumber untuk menautkan bukti yang sudah ada ke linimasa ini.",
@@ -113,11 +117,11 @@
       "selectRecordsToLink": "Pilih catatan bukti untuk ditautkan ke linimasa ini.",
       "alreadyLinkedDataset": "Sudah ditautkan ke linimasa ini",
       "checkingExistingLinks": "Memeriksa tautan linimasa yang sudah ada…",
-      "unableToVerifyExistingLinks": "Tidak dapat memverifikasi tautan linimasa yang sudah ada. Muat ulang untuk menautkan set data pohon.",
+      "unableToVerifyExistingLinks": "Tautan yang ada tidak dapat diperiksa. Muat ulang sebelum menautkan grup pohon.",
       "tabDescriptions": {
         "audio": "Tambahkan rekaman yang sudah disimpan oleh organisasi ini.",
         "trees": "Tambahkan informasi pohon yang dikelompokkan berdasarkan lokasi proyek.",
-        "biodiversity": "Filter observasi dan tambahkan data yang terlihat atau kelompok tersimpan.",
+        "biodiversity": "Filter pengamatan dan tambahkan data alam yang ditampilkan atau grup tersimpan.",
         "files": "Tambahkan laporan, foto, video, atau halaman web."
       },
       "permissions": {
@@ -129,34 +133,36 @@
       "linkError": "Bukti ini tidak dapat ditautkan. Coba lagi.",
       "manageType": "Kelola {type}",
       "biodiversity": {
-        "attachmentGroupTitle": "Kelompok biodiversitas",
-        "attachmentObservationsTitle": "Observasi biodiversitas",
-        "emptyLabel": "data biodiversitas",
+        "attachmentGroupTitle": "Grup alam",
+        "attachmentObservationsTitle": "Pengamatan alam",
+        "emptyLabel": "data alam",
         "searchLabel": "Cari",
-        "searchPlaceholder": "Cari biodiversitas",
+        "searchPlaceholder": "Cari alam",
         "recorderLabel": "Pencatat",
         "allRecorders": "Semua pencatat",
         "recorderOptionFallback": "Pencatat {number}",
-        "displayedTitle": "Data biodiversitas yang ditampilkan",
+        "displayedTitle": "Data alam yang ditampilkan",
         "displayedSummary": "{shown} dari {total, plural, =1 {1 observasi} other {# observasi}} ditampilkan. Pilih observasi dari tampilan yang difilter ini.",
         "clearDisplayed": "Hapus yang ditampilkan",
         "selectDisplayed": "Pilih yang ditampilkan",
-        "noDataMatches": "Tidak ada data biodiversitas yang cocok dengan filter ini.",
+        "noDataMatches": "Tidak ada data alam yang cocok dengan filter ini.",
         "recordedBy": "Dicatat oleh {name}",
         "recorderFallback": "pencatat tersimpan",
         "alreadyLinked": "Sudah ditautkan",
         "coveredByGroup": "Dicakup oleh kelompok",
-        "groupsTitle": "Kelompok biodiversitas",
+        "groupsTitle": "Grup alam",
         "groupsDescription": "Kelompok memakai filter pencatat dan pencarian yang sama.",
-        "noGroupsMatch": "Tidak ada kelompok biodiversitas yang cocok dengan filter ini.",
+        "noGroupsMatch": "Tidak ada grup alam yang cocok dengan filter ini.",
         "multipleRecorders": "{count, plural, =1 {1 pencatat} other {# pencatat}}",
         "firstRecorderAndMore": "{name} + {count, plural, =1 {1 lainnya} other {# lainnya}}",
         "shownCount": "{count} ditampilkan",
         "totalCount": "total {count}",
         "speciesCount": "{count, plural, =1 {1 spesies} other {# spesies}}",
         "groupStatus": "Data dikelompokkan",
-        "manageData": "Kelola data biodiversitas"
-      }
+        "manageData": "Kelola data alam",
+        "groupedNatureDataFallback": "Data alam yang dikelompokkan"
+      },
+      "unableToVerifyTreeSiteContext": "Tidak dapat memeriksa semua pohon. Muat ulang sebelum menautkan grup pohon."
     },
     "metadata": {
       "notFound": "sertifikat Tidak Ditemukan"
@@ -165,7 +171,7 @@
       "kind": {
         "tree": "Dataset pohon",
         "audio": "Data akustik",
-        "biodiversity": "Pengamatan keanekaragaman hayati",
+        "biodiversity": "Pengamatan alam",
         "document": "Dokumen",
         "site": "Situs",
         "other": "Bukti"
@@ -223,7 +229,8 @@
       "hideLayer": "Sembunyikan lapisan",
       "deleteUnavailable": "Anda tidak dapat menghapus bukti ini.",
       "deleteError": "Item ini tidak dapat dihapus.",
-      "displayedBiodiversityData": "Data biodiversitas yang ditampilkan"
+      "displayedBiodiversityData": "Data alam yang ditampilkan",
+      "natureObservationsFallback": "Pengamatan alam"
     },
     "reference": {
       "linkedRecord": "Catatan tertaut",
@@ -406,7 +413,7 @@
               "ecologicalRestoration": "Restorasi Ekologis",
               "agroforestry": "Agroforestri",
               "climateAdaptation": "Adaptasi Iklim",
-              "biodiversityMonitoring": "Pemantauan Keanekaragaman Hayati",
+              "biodiversityMonitoring": "Pemantauan alam",
               "environmentalEducation": "Pendidikan Lingkungan Hidup",
               "indigenousLocalKnowledge": "Pengetahuan Adat & Lokal",
               "environmentalJustice": "Keadilan Lingkungan"

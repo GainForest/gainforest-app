@@ -31,6 +31,7 @@ import { SocialGlyph } from "../../../_components/SocialIcon";
 import { StatsTileGrid, type StatsTileItem } from "../../../_components/StatsTile";
 import { fetchReceipts, type DonorRef, type FundingReceipt } from "../../../_lib/dashboard";
 import { formatCompact, formatCompactUsd, formatCountry, formatDate, formatDateTime, formatNumber, formatRelative } from "../../../_lib/format";
+import { formatWorkScopeTag, type WorkScopeLabels } from "../../../_lib/work-scope-labels";
 import { fetchReviewCounts, fetchReviewsForSubject, type BumicertReviews, type ReviewComment, type ReviewCounts } from "../../../_lib/reviews";
 import {
   attachProjectTitlesToGalleries,
@@ -125,6 +126,14 @@ async function resolveTimelineAccess(recordDid: string, ownerKind: AccountKind, 
     };
   }
 
+  if (authSession.did === recordDid) {
+    return {
+      canManageEvidence: true,
+      createPermission: { allowed: true, reason: null },
+      deletePermission: { allowed: true, reason: null },
+    };
+  }
+
   if (ownerKind === "organization") {
     const groups = await fetchUserCgsGroups();
     const membership = groups.find((group) => group.groupDid === recordDid);
@@ -193,6 +202,15 @@ export default async function BumicertDetailPage({
     searchParams,
   ]);
   const activeTab = parseDetailTab(search.tab);
+  const workScopeT = await getTranslations("common.workScopes");
+  const workScopeLabels: WorkScopeLabels = {
+    reforestation: workScopeT("reforestation"),
+    forest_protection: workScopeT("forestProtection"),
+    biodiversity_monitoring: workScopeT("natureMonitoring"),
+    community_stewardship: workScopeT("communityStewardship"),
+    carbon_removal: workScopeT("carbonRemoval"),
+    restoration_maintenance: workScopeT("restorationMaintenance"),
+  };
   const detailHref = localBumicertHref(urlIdentifier, record.rkey);
   if (routeIdentifier !== urlIdentifier) {
     redirect(activeTab === "overview" ? detailHref : `${detailHref}?tab=${activeTab}`);
@@ -237,10 +255,11 @@ export default async function BumicertDetailPage({
 
   let timelineAttachments: TimelineAttachmentItem[] = [];
   let timelineAttachmentsUnavailable = false;
-  const emptyTimelineSources = { audio: [], occurrences: [], treeGroups: [], places: [] };
+  const emptyTimelineSources = { audio: [], occurrences: [], occurrencesIncomplete: false, treeGroups: [], places: [] };
   let timelineSources: {
     audio: Awaited<ReturnType<typeof fetchAudioByDid>>;
     occurrences: OccurrenceRecord[];
+    occurrencesIncomplete: boolean;
     treeGroups: Awaited<ReturnType<typeof fetchTreeDatasetsByDid>>;
     places: Awaited<ReturnType<typeof fetchLocationsByDid>>;
   } = emptyTimelineSources;
@@ -254,14 +273,14 @@ export default async function BumicertDetailPage({
         () => ({ ok: false as const, items: [] as TimelineAttachmentItem[] }),
       ),
       fetchAudioByDid(record.did).catch(() => []),
-      fetchOccurrencesByDid(record.did, 1000).catch(() => ({ records: [] as OccurrenceRecord[], cursor: null, hasMore: false })),
+      fetchOccurrencesByDid(record.did, 10000).catch(() => ({ records: [] as OccurrenceRecord[], cursor: null, hasMore: true })),
       fetchTreeDatasetsByDid(record.did).catch(() => []),
       fetchLocationsByDid(record.did).catch(() => []),
       getTranslations("bumicert.detail.evidenceAdder.permissions"),
     ]);
     timelineAttachments = attachmentsResult.items;
     timelineAttachmentsUnavailable = !attachmentsResult.ok;
-    timelineSources = { audio, occurrences: occurrencePage.records, treeGroups, places };
+    timelineSources = { audio, occurrences: occurrencePage.records, occurrencesIncomplete: occurrencePage.hasMore, treeGroups, places };
     timelineAccess = await resolveTimelineAccess(record.did, owner.kind, authSession, {
       signIn: permissionT("signIn"),
       notMember: permissionT("notMember"),
@@ -331,6 +350,7 @@ export default async function BumicertDetailPage({
                   detailHref,
                   ownerHref: `/account/${encodeURIComponent(owner.urlIdentifier)}`,
                 }}
+                workScopeLabels={workScopeLabels}
               />
             )}
             {activeTab === "site-boundaries" && <SiteBoundariesPanel record={record} />}
@@ -874,10 +894,10 @@ function socialPlatformDescription(platform: string, organizationName: string, h
   return descriptions[platform] ?? `Open ${host} for more from ${organizationName}.`;
 }
 
-function Badge({ badge }: { badge: DetailBadge }) {
+function Badge({ badge, workScopeLabels }: { badge: DetailBadge; workScopeLabels: WorkScopeLabels }) {
   return (
     <span className={`inline-flex items-center rounded-full px-3.5 py-1.5 text-sm font-medium ${BADGE_TONE[badge.tone]}`}>
-      {badge.label}
+      {formatWorkScopeTag(badge.label, workScopeLabels)}
     </span>
   );
 }
@@ -898,6 +918,7 @@ function OverviewPanel({
   observations,
   projectGalleries,
   evidence,
+  workScopeLabels,
 }: {
   record: BumicertRecord;
   detail: RouteData["detail"];
@@ -905,6 +926,7 @@ function OverviewPanel({
   observations: OccurrenceRecord[];
   projectGalleries: ProjectImageGallery[];
   evidence: EvidenceInfo;
+  workScopeLabels: WorkScopeLabels;
 }) {
   return (
     <article className="py-1">
@@ -918,7 +940,7 @@ function OverviewPanel({
       {detail?.badges && detail.badges.length > 0 && (
         <div className="mb-6 mt-6 flex flex-wrap gap-2.5">
           {detail.badges.map((badge, index) => (
-            <Badge key={`${badge.label}-${index}`} badge={badge} />
+            <Badge key={`${badge.label}-${index}`} badge={badge} workScopeLabels={workScopeLabels} />
           ))}
         </div>
       )}
@@ -1395,10 +1417,12 @@ function TimelinePanel({
   record,
   detail,
   period,
+  workScopeLabels,
 }: {
   record: BumicertRecord;
   detail: RouteData["detail"];
   period: string;
+  workScopeLabels: WorkScopeLabels;
 }) {
   const events = [
     {
@@ -1444,7 +1468,7 @@ function TimelinePanel({
           </p>
           <div className="flex flex-wrap gap-2">
             {detail.badges.map((badge, index) => (
-              <Badge key={`${badge.label}-${index}`} badge={badge} />
+              <Badge key={`${badge.label}-${index}`} badge={badge} workScopeLabels={workScopeLabels} />
             ))}
           </div>
         </div>

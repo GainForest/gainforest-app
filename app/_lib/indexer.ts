@@ -210,7 +210,7 @@ const OCCURRENCE_NODE_FIELDS = `
   scientificName vernacularName kingdom family genus
   basisOfRecord recordedBy individualCount
   datasetName country countryCode stateProvince locality decimalLatitude decimalLongitude
-  habitat siteRef datasetRef dynamicProperties
+  habitat siteRef datasetRef dynamicProperties establishmentMeans
   occurrenceRemarks fieldNotes
   thumbnailUrl speciesImageUrl associatedMedia
   imageEvidence { file { ref } }
@@ -334,7 +334,7 @@ function mapOccurrence(n: RawOccurrence): OccurrenceRecord {
     datasetRef: n.datasetRef?.trim() || null,
     datasetName: n.datasetName?.trim() || null,
     dynamicProperties: n.dynamicProperties?.trim() || null,
-    establishmentMeans: null,
+    establishmentMeans: n.establishmentMeans?.trim() || null,
     createdAt: n.createdAt,
     creatorName: profileName(n.certifiedProfileData),
     creatorAvatarRef: profileAvatarRef(n.certifiedProfileData),
@@ -984,19 +984,6 @@ function splitWorkScopeString(value?: string | null): string[] {
     .filter(Boolean);
 }
 
-const WORK_SCOPE_LABELS: Record<string, string> = {
-  reforestation: "Reforestation",
-  forest_protection: "Forest protection",
-  biodiversity_monitoring: "Biodiversity monitoring",
-  community_stewardship: "Community stewardship",
-  carbon_removal: "Carbon removal",
-  restoration_maintenance: "Restoration maintenance",
-};
-
-function displayWorkScopeTag(value: string): string {
-  return WORK_SCOPE_LABELS[value] ?? value.replace(/_/g, " ").replace(/^\w/, (letter) => letter.toUpperCase());
-}
-
 function extractWorkScopeTags(workScope?: { __typename?: string; scope?: string | null; expression?: string | null } | null): string[] {
   const stringTags = splitWorkScopeString(workScope?.scope);
   if (stringTags.length > 0) return stringTags.map(normalizeScopeTag).filter((tag): tag is string => Boolean(tag));
@@ -1005,8 +992,8 @@ function extractWorkScopeTags(workScope?: { __typename?: string; scope?: string 
   if (!expression) return [];
 
   return [...expression.matchAll(/(["'])(.*?)\1/g)]
-    .map((match) => displayWorkScopeTag(match[2]?.trim() ?? ""))
-    .filter(Boolean);
+    .map((match) => normalizeScopeTag(match[2]?.trim() ?? ""))
+    .filter((tag): tag is string => Boolean(tag));
 }
 
 /** "⭔ 24164249 ha" → "⭔ 24.2M ha"; obviously bad areas are dropped. */
@@ -3141,6 +3128,7 @@ export type UploadTreeDatasetRecord = {
   description: string | null;
   recordCount: number | null;
   createdAt: string | null;
+  establishmentMeans?: string | null;
 };
 
 const TREE_DATASET_BY_DID_QUERY = `
@@ -3153,7 +3141,7 @@ const TREE_DATASET_BY_DID_QUERY = `
       sortDirection: DESC
     ) {
       pageInfo { hasNextPage endCursor }
-      edges { node { did uri rkey name description recordCount createdAt ${CERTIFIED_PROFILE_DATA_FIELDS} } }
+      edges { node { did uri rkey name description recordCount createdAt establishmentMeans ${CERTIFIED_PROFILE_DATA_FIELDS} } }
     }
   }
 `;
@@ -3165,6 +3153,7 @@ type RawTreeDatasetNode = {
   description?: string | null;
   recordCount?: number | null;
   createdAt?: string | null;
+  establishmentMeans?: string | null;
   certifiedProfileData?: CertifiedProfileData;
 };
 
@@ -3195,6 +3184,7 @@ export async function fetchTreeDatasetsByDid(
         description: node.description?.trim() || null,
         recordCount: typeof node.recordCount === "number" ? node.recordCount : null,
         createdAt: node.createdAt ?? null,
+        establishmentMeans: node.establishmentMeans?.trim() || null,
       })),
     );
 
@@ -4632,7 +4622,7 @@ function buildBumicertDetail(
   const scopeTags = extractWorkScopeTags(n.workScope);
   const badges: DetailBadge[] = scopeTags
     .slice(0, 6)
-    .map((s) => ({ label: cap(s), tone: "info" }));
+    .map((s) => ({ label: s, tone: "info" }));
 
   const contributors = Array.isArray(n.contributors) ? n.contributors.length : 0;
   const sites = Array.isArray(n.locations) ? n.locations.length : 0;

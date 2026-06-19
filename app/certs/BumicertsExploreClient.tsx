@@ -39,6 +39,7 @@ import {
 } from "../_lib/funding-summary";
 import { formatCompactUsd } from "../_lib/format";
 import { isPdsBlobUrl } from "../_lib/pds";
+import { formatWorkScopeTag, type WorkScopeLabels } from "../_lib/work-scope-labels";
 
 type FilterKey = "images" | "locations" | "contributors" | "active" | "donations";
 type SortMode = "newest" | "oldest" | "az" | "za";
@@ -828,8 +829,17 @@ const BumicertListItem = memo(function BumicertListItem({ record, priority, onOp
 
 const BumicertCardVisual = memo(function BumicertCardVisual({ record, priority, funding, sightingCount }: { record: BumicertRecord; priority: boolean; funding?: BumicertFundingSummary; sightingCount?: number }) {
   const t = useTranslations("marketplace.explore");
+  const workScopeT = useTranslations("common.workScopes");
   const locale = useLocale();
-  const { scopeItems, iconItems } = useMemo(() => buildPillRows(record, funding, sightingCount, t, locale), [record, funding, sightingCount, t, locale]);
+  const workScopeLabels: WorkScopeLabels = useMemo(() => ({
+    reforestation: workScopeT("reforestation"),
+    forest_protection: workScopeT("forestProtection"),
+    biodiversity_monitoring: workScopeT("natureMonitoring"),
+    community_stewardship: workScopeT("communityStewardship"),
+    carbon_removal: workScopeT("carbonRemoval"),
+    restoration_maintenance: workScopeT("restorationMaintenance"),
+  }), [workScopeT]);
+  const { scopeItems, iconItems } = useMemo(() => buildPillRows(record, funding, sightingCount, t, locale, workScopeLabels), [record, funding, sightingCount, t, locale, workScopeLabels]);
   const organizationName = record.creatorName ?? t("card.projectSteward");
   const [imgError, setImgError] = useState(false);
   const hasImage = Boolean(record.imageUrl) && !imgError;
@@ -900,13 +910,13 @@ function formatFundingLabel(funding: BumicertFundingSummary | undefined, t: Expl
   return funding.raisedUsd >= 1 ? t("card.raised", { amount: formatCompactUsd(Math.round(funding.raisedUsd)) }) : t("card.donations");
 }
 
-function buildPillRows(record: BumicertRecord, funding: BumicertFundingSummary | undefined, sightingCount: number | undefined, t: ExploreT, locale: string): {
+function buildPillRows(record: BumicertRecord, funding: BumicertFundingSummary | undefined, sightingCount: number | undefined, t: ExploreT, locale: string, workScopeLabels: WorkScopeLabels): {
   scopeItems: BumicertCardPill[];
   iconItems: BumicertCardPill[];
 } {
   const scopeItems: BumicertCardPill[] = (record.scopeTags ?? []).map((tag, index) => ({
     key: `scope-${index}-${tag}`,
-    content: <span>{formatScopeTag(tag)}</span>,
+    content: <span>{formatWorkScopeTag(tag, workScopeLabels)}</span>,
   }));
 
   const iconItems: BumicertCardPill[] = [];
@@ -976,11 +986,6 @@ function buildPillRows(record: BumicertRecord, funding: BumicertFundingSummary |
   }
 
   return { scopeItems, iconItems };
-}
-
-function formatScopeTag(tag: string): string {
-  const clean = tag.replace(/[_-]+/g, " ").replace(/\s+/g, " ").trim();
-  return clean ? clean.charAt(0).toUpperCase() + clean.slice(1) : tag;
 }
 
 function parseFilterParam(value: string | null): FilterKey[] {

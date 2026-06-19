@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   ArrowLeftIcon,
@@ -45,6 +46,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
+import { WORK_SCOPE_MESSAGE_KEYS, type KnownWorkScopeKey } from "@/app/_lib/work-scope-labels";
 
 type ManagedLocation = {
   metadata: {
@@ -108,14 +110,14 @@ const EMPTY_FORM: FormValues = {
   selectedLocationUris: [],
 };
 
-const WORK_SCOPES = [
-  "Reforestation",
-  "Forest protection",
-  "Biodiversity monitoring",
-  "Community stewardship",
-  "Carbon removal",
-  "Restoration maintenance",
-] as const;
+const WORK_SCOPE_KEYS: KnownWorkScopeKey[] = [
+  "reforestation",
+  "forest_protection",
+  "biodiversity_monitoring",
+  "community_stewardship",
+  "carbon_removal",
+  "restoration_maintenance",
+];
 
 const STEPS: Array<{
   id: StepId;
@@ -545,6 +547,7 @@ function BasicsStep({
   coverPreview,
   onCoverChange,
   onCoverClear,
+  workScopes,
 }: {
   values: FormValues;
   setValues: React.Dispatch<React.SetStateAction<FormValues>>;
@@ -552,6 +555,7 @@ function BasicsStep({
   coverPreview: string | null;
   onCoverChange: (event: ChangeEvent<HTMLInputElement>) => void;
   onCoverClear: () => void;
+  workScopes: string[];
 }) {
   const toggleScope = (scope: string) => {
     setValues((current) => ({
@@ -607,7 +611,7 @@ function BasicsStep({
 
       <FieldShell label="Work scope" hint="Choose every outcome category that applies.">
         <div className="flex flex-wrap gap-2">
-          {WORK_SCOPES.map((scope) => (
+          {workScopes.map((scope) => (
             <ScopeChip key={scope} label={scope} active={values.scopes.includes(scope)} onClick={() => toggleScope(scope)} />
           ))}
         </div>
@@ -888,6 +892,8 @@ function PublishSuccess({ result, session, onReset }: { result: PublishResult; s
 }
 
 export function CreateBumicertClient({ session }: { session: AuthSession }) {
+  const workScopeT = useTranslations("common.workScopes");
+  const workScopes = WORK_SCOPE_KEYS.map((key) => workScopeT(WORK_SCOPE_MESSAGE_KEYS[key]));
   const [values, setValues] = useState<FormValues>(EMPTY_FORM);
   const [activeStep, setActiveStep] = useState<StepId>("basics");
   const [drafts, setDrafts] = useState<Draft[]>([]);
@@ -1160,6 +1166,7 @@ export function CreateBumicertClient({ session }: { session: AuthSession }) {
                     coverPreview={coverPreview}
                     onCoverChange={handleCoverChange}
                     onCoverClear={clearCover}
+                    workScopes={workScopes}
                   />
                 ) : null}
                 {activeStep === "story" ? <StoryStep values={values} setValues={setValues} /> : null}
