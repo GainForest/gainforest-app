@@ -447,11 +447,11 @@ function ViewToggle({ view, setView }: { view: ViewMode; setView: (view: ViewMod
           aria-pressed={view === id}
           aria-label={label}
           title={label}
-          className={`inline-flex h-9 items-center gap-1.5 rounded-full px-2.5 text-sm font-medium transition-colors sm:px-3 ${
+          className={`inline-flex h-9 w-9 items-center justify-center rounded-full p-0 text-sm font-medium transition-colors sm:w-auto sm:gap-1.5 sm:px-3 ${
             view === id ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
           }`}
         >
-          <Icon className="h-4 w-4" />
+          <Icon className="h-4 w-4" aria-hidden />
           <span className="hidden sm:inline">{label}</span>
         </button>
       ))}

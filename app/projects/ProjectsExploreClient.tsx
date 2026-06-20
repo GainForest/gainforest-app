@@ -315,14 +315,15 @@ export function ProjectsExploreClient({ records: initialRecords = [] }: { record
                   type="button"
                   onClick={() => void setView(option.id)}
                   aria-pressed={view === option.id}
-                  className={`inline-flex h-9 items-center gap-1.5 rounded-full px-3 text-sm font-medium transition-colors ${
+                  aria-label={option.label}
+                  title={option.label}
+                  className={`inline-flex h-9 w-9 items-center justify-center rounded-full p-0 text-sm font-medium transition-colors ${
                     view === option.id
                       ? "bg-primary text-primary-foreground"
                       : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
-                  <option.Icon className="h-3.5 w-3.5" />
-                  {option.label}
+                  <option.Icon className="h-3.5 w-3.5" aria-hidden />
                 </button>
               ))}
             </div>
