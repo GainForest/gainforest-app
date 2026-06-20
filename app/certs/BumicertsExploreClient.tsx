@@ -59,8 +59,8 @@ const SEARCH_QUERY_STATE_OPTIONS = { ...QUERY_STATE_OPTIONS, throttleMs: 200 } a
 
 
 const BUMICERTS_PAGE_SIZE = 48;
-const INITIAL_CARD_LIMIT = 96;
-const CARD_BATCH_SIZE = 96;
+const INITIAL_CARD_LIMIT = BUMICERTS_PAGE_SIZE;
+const CARD_BATCH_SIZE = BUMICERTS_PAGE_SIZE;
 
 export function BumicertsExploreClient({ records: initialRecords = [] }: { records?: BumicertRecord[] }) {
   const t = useTranslations("marketplace.explore");
@@ -172,7 +172,7 @@ export function BumicertsExploreClient({ records: initialRecords = [] }: { recor
     if (initialRecords.length > 0) return;
     const controller = new AbortController();
     const requestSeq = ++requestSeqRef.current;
-    const options = { query: deferredQuery, filters, sort };
+    const options = { query: deferredQuery, filters, sort, featuredBadgesOnly: true };
     const isCurrent = () => requestSeqRef.current === requestSeq && !controller.signal.aborted;
     setLoading(true);
     setLoadingMore(false);
@@ -301,7 +301,7 @@ export function BumicertsExploreClient({ records: initialRecords = [] }: { recor
     const isCurrent = () => requestSeqRef.current === requestSeq && !controller.signal.aborted;
     const base = records;
     setLoadingMore(true);
-    fetchBumicerts(BUMICERTS_PAGE_SIZE, cursor, controller.signal, undefined, { query: deferredQuery, filters, sort })
+    fetchBumicerts(BUMICERTS_PAGE_SIZE, cursor, controller.signal, undefined, { query: deferredQuery, filters, sort, featuredBadgesOnly: true })
       .then((page) => {
         if (!isCurrent()) return;
         setRecords(mergeBumicertRecords(base, page.records));

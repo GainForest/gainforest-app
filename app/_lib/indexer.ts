@@ -946,6 +946,45 @@ const FUNDING_CONFIG_QUERY = `
   }
 `;
 
+const FEATURED_BADGE_REPO_DID = "did:plc:yjck2sybksyigp3zvbq7bfki";
+const FEATURED_BADGE_TITLES = new Set(["gainforest", "maearth"]);
+const FEATURED_BADGE_INDEX_CACHE_MS = 10 * 60 * 1000;
+const FEATURED_BADGE_FILTER_IN_LIMIT = 100;
+
+const FEATURED_BADGE_INDEX_QUERY = `
+  query ExplorerFeaturedBadgeIndex($repo: String!, $first: Int!, $afterDefinitions: String, $afterAwards: String) {
+    appCertifiedBadgeDefinition(
+      first: $first
+      after: $afterDefinitions
+      where: { did: { eq: $repo } }
+      sortBy: createdAt
+      sortDirection: DESC
+    ) {
+      pageInfo { hasNextPage endCursor }
+      edges { node { uri title } }
+    }
+    appCertifiedBadgeAward(
+      first: $first
+      after: $afterAwards
+      where: { did: { eq: $repo } }
+      sortBy: createdAt
+      sortDirection: DESC
+    ) {
+      pageInfo { hasNextPage endCursor }
+      edges {
+        node {
+          badge { uri }
+          subject {
+            __typename
+            ... on AppCertifiedDefsDid { did }
+            ... on ComAtprotoRepoStrongRef { uri }
+          }
+        }
+      }
+    }
+  }
+`;
+
 type RawActivityImage =
   | { __typename: "OrgHypercertsDefsUri"; uri?: string | null }
   | { __typename: "OrgHypercertsDefsSmallImage"; image?: { ref?: string | null } | null }
@@ -975,6 +1014,26 @@ type RawFundingConfig = {
   status?: string | null;
   certifiedProfileData?: CertifiedProfileData;
   receivingWallet?: { uri?: string | null } | null;
+};
+
+type RawFeaturedBadgeDefinition = {
+  uri?: string | null;
+  title?: string | null;
+};
+
+type RawFeaturedBadgeAward = {
+  badge?: { uri?: string | null } | null;
+  subject?: ({ __typename?: string; did?: string | null; uri?: string | null }) | null;
+};
+
+type FeaturedBadgeIndex = {
+  dids: string[];
+  recordUris: string[];
+};
+
+type FeaturedBadgeIndexPayload = {
+  appCertifiedBadgeDefinition?: Connection<RawFeaturedBadgeDefinition> | null;
+  appCertifiedBadgeAward?: Connection<RawFeaturedBadgeAward> | null;
 };
 
 function splitWorkScopeString(value?: string | null): string[] {
@@ -1032,6 +1091,94 @@ function sanitizeShortDescription(value: string | null | undefined): string | nu
   if (!trimmed) return null;
   if (PLACEHOLDER_DESCRIPTION_PATTERNS.some((pattern) => pattern.test(trimmed))) return null;
   return trimmed;
+}
+
+function normalizeFeaturedBadgeTitle(title: string | null | undefined): string {
+  return (title ?? "").toLowerCase().replace(/[^a-z0-9]+/g, "");
+}
+
+function uniqueSorted(values: Iterable<string>): string[] {
+  return Array.from(new Set(values)).sort();
+}
+
+function chunkStrings(values: string[], size: number): string[][] {
+  const chunks: string[][] = [];
+  for (let index = 0; index < values.length; index += size) {
+    chunks.push(values.slice(index, index + size));
+  }
+  return chunks;
+}
+
+function activityUriForDidRkey(did: string, rkey: string): string {
+  return `at://${did}/org.hypercerts.claim.activity/${rkey}`;
+}
+
+async function fetchFeaturedBadgeIndexUncached(signal?: AbortSignal): Promise<FeaturedBadgeIndex> {
+  const definitions: RawFeaturedBadgeDefinition[] = [];
+  const awards: RawFeaturedBadgeAward[] = [];
+  let afterDefinitions: string | null = null;
+  let afterAwards: string | null = null;
+
+  for (let page = 0; page < 20; page += 1) {
+    if (signal?.aborted) throw new DOMException("aborted", "AbortError");
+    const shouldCollectDefinitions: boolean = page === 0 || Boolean(afterDefinitions);
+    const payload: FeaturedBadgeIndexPayload | null = await indexerQuery<FeaturedBadgeIndexPayload>(
+      FEATURED_BADGE_INDEX_QUERY,
+      {
+        repo: FEATURED_BADGE_REPO_DID,
+        first: INDEXER_MAX_PAGE,
+        afterDefinitions,
+        afterAwards,
+      },
+      signal,
+    );
+
+    const definitionsPage: Connection<RawFeaturedBadgeDefinition> | null | undefined = payload?.appCertifiedBadgeDefinition;
+    const awardsPage: Connection<RawFeaturedBadgeAward> | null | undefined = payload?.appCertifiedBadgeAward;
+    if (shouldCollectDefinitions) {
+      definitions.push(...((definitionsPage?.edges ?? []).flatMap((edge: { node?: RawFeaturedBadgeDefinition | null } | null) => edge?.node ? [edge.node] : [])));
+    }
+    awards.push(...((awardsPage?.edges ?? []).flatMap((edge: { node?: RawFeaturedBadgeAward | null } | null) => edge?.node ? [edge.node] : [])));
+
+    afterDefinitions = shouldCollectDefinitions && definitionsPage?.pageInfo?.hasNextPage ? definitionsPage.pageInfo.endCursor ?? null : null;
+    afterAwards = awardsPage?.pageInfo?.hasNextPage ? awardsPage.pageInfo.endCursor ?? null : null;
+    if (!afterDefinitions && !afterAwards) break;
+  }
+
+  const targetBadgeUris = new Set(
+    definitions
+      .filter((definition) => FEATURED_BADGE_TITLES.has(normalizeFeaturedBadgeTitle(definition.title)))
+      .map((definition) => definition.uri)
+      .filter((uri): uri is string => typeof uri === "string" && uri.length > 0),
+  );
+  if (targetBadgeUris.size === 0) return { dids: [], recordUris: [] };
+
+  const dids: string[] = [];
+  const recordUris: string[] = [];
+  for (const award of awards) {
+    const badgeUri = award.badge?.uri;
+    if (!badgeUri || !targetBadgeUris.has(badgeUri)) continue;
+    const subject = award.subject;
+    if (subject?.__typename === "AppCertifiedDefsDid" && subject.did) {
+      dids.push(subject.did);
+    } else if (subject?.__typename === "ComAtprotoRepoStrongRef" && subject.uri?.includes("/org.hypercerts.claim.activity/")) {
+      recordUris.push(subject.uri);
+    }
+  }
+
+  return {
+    dids: uniqueSorted(dids),
+    recordUris: uniqueSorted(recordUris),
+  };
+}
+
+function fetchFeaturedBadgeIndex(signal?: AbortSignal): Promise<FeaturedBadgeIndex> {
+  return cachedAsync(
+    "featured-badge-index:gainforest-maearth:v1",
+    FEATURED_BADGE_INDEX_CACHE_MS,
+    () => fetchFeaturedBadgeIndexUncached(signal),
+    signal,
+  );
 }
 
 /**
@@ -1110,6 +1257,7 @@ type ActivityQueryOptions = {
   query?: string;
   filters?: BumicertIndexFilter[];
   sort?: ExplorerSortMode;
+  featuredBadgesOnly?: boolean;
 };
 
 type ActivityWhere = Record<string, unknown>;
@@ -1153,12 +1301,28 @@ function activityDateWhere(filters: BumicertIndexFilter[] | undefined): Activity
   return [{ startDate: { isNull: false } }, { endDate: { isNull: false } }];
 }
 
-function activityWhereVariants(options?: ActivityQueryOptions): ActivityWhere[] {
+function featuredBadgeWhereVariants(index?: FeaturedBadgeIndex): ActivityWhere[] {
+  if (!index) return [{}];
+  const variants: ActivityWhere[] = [];
+  for (const dids of chunkStrings(index.dids, FEATURED_BADGE_FILTER_IN_LIMIT)) {
+    variants.push({ did: { in: dids } });
+  }
+  for (const recordUris of chunkStrings(index.recordUris, FEATURED_BADGE_FILTER_IN_LIMIT)) {
+    variants.push({ uri: { in: recordUris } });
+  }
+  return variants;
+}
+
+function activityWhereVariants(options?: ActivityQueryOptions, badgeIndex?: FeaturedBadgeIndex): ActivityWhere[] {
+  const badgeWheres = featuredBadgeWhereVariants(badgeIndex);
+  if (badgeWheres.length === 0) return [];
   const base = activityFilterWhere(options?.filters);
   const variants: ActivityWhere[] = [];
-  for (const searchWhere of activitySearchWhere(options?.query)) {
-    for (const dateWhere of activityDateWhere(options?.filters)) {
-      variants.push(mergeWhere(base, searchWhere, dateWhere) ?? {});
+  for (const badgeWhere of badgeWheres) {
+    for (const searchWhere of activitySearchWhere(options?.query)) {
+      for (const dateWhere of activityDateWhere(options?.filters)) {
+        variants.push(mergeWhere(base, badgeWhere, searchWhere, dateWhere) ?? {});
+      }
     }
   }
   return variants;
@@ -1283,6 +1447,13 @@ async function fetchDonationEnabledBumicerts(
   _onProgress?: (records: BumicertRecord[]) => void,
   options?: ActivityQueryOptions,
 ): Promise<Page<BumicertRecord>> {
+  const badgeIndex = options?.featuredBadgesOnly ? await fetchFeaturedBadgeIndex(signal) : null;
+  const allowedDids = badgeIndex ? new Set(badgeIndex.dids) : null;
+  const allowedRecordUris = badgeIndex ? new Set(badgeIndex.recordUris) : null;
+  if (badgeIndex && allowedDids?.size === 0 && allowedRecordUris?.size === 0) {
+    return { records: [], cursor: null, hasMore: false };
+  }
+
   const records: BumicertRecord[] = [];
   let cursor = after;
   let hasMore = true;
@@ -1293,12 +1464,19 @@ async function fetchDonationEnabledBumicerts(
     cursor = page.cursor;
     hasMore = page.hasMore && Boolean(page.cursor);
 
-    for (let index = 0; index < page.records.length && records.length < target; index += batchSize) {
+    const eligibleConfigs = badgeIndex
+      ? page.records.filter((config) => {
+          const activityUri = activityUriForDidRkey(config.did, config.rkey);
+          return allowedDids?.has(config.did) || allowedRecordUris?.has(activityUri);
+        })
+      : page.records;
+
+    for (let index = 0; index < eligibleConfigs.length && records.length < target; index += batchSize) {
       if (signal?.aborted) throw new DOMException("aborted", "AbortError");
-      const batch = page.records.slice(index, index + batchSize);
+      const batch = eligibleConfigs.slice(index, index + batchSize);
       const activities = await Promise.all(
         batch.map((config) =>
-          fetchActivityByUriRecord(`at://${config.did}/org.hypercerts.claim.activity/${config.rkey}`, signal).catch(() => null),
+          fetchActivityByUriRecord(activityUriForDidRkey(config.did, config.rkey), signal).catch(() => null),
         ),
       );
       for (const activity of activities) {
@@ -1324,7 +1502,9 @@ async function fetchBumicertsFromActivity(
   onProgress?: (records: BumicertRecord[]) => void,
   options?: ActivityQueryOptions,
 ): Promise<Page<BumicertRecord>> {
-  const variants = activityWhereVariants(options);
+  const badgeIndex = options?.featuredBadgesOnly ? await fetchFeaturedBadgeIndex(signal) : undefined;
+  const variants = activityWhereVariants(options, badgeIndex);
+  if (variants.length === 0) return { records: [], cursor: null, hasMore: false };
   if (variants.length === 1) {
     return collectPaged(
       (first, cursor, nextSignal) => fetchActivityPage(first, cursor, nextSignal, variants[0], options?.sort),
