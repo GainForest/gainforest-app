@@ -25,7 +25,7 @@
     },
     "filters": {
       "allTitle": "All Filters",
-      "description": "Show Certs with photos, project places, named people, work dates, or donations.",
+      "description": "Show Certs by source badge, photos, project places, named people, work dates, or donations.",
       "organization": "Organization",
       "bioregion": "Bioregion",
       "country": "Country",
@@ -38,7 +38,13 @@
       "locations": "Shows project places",
       "contributors": "Shows named people",
       "active": "Shows work dates",
-      "donations": "Accepts donations"
+      "donations": "Accepts donations",
+      "badges": {
+        "gainforest": "GainForest",
+        "maearth": "Ma Earth",
+        "maearthRound1": "Ma Earth Round 1",
+        "maearthRound2": "Ma Earth Round 2"
+      }
     },
     "sort": {
       "newest": "Newest",

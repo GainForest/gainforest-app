@@ -946,8 +946,19 @@ const FUNDING_CONFIG_QUERY = `
   }
 `;
 
+export type BumicertBadgeFilter = "gainforest" | "maearth" | "maearth-round-1" | "maearth-round-2";
+
 const FEATURED_BADGE_REPO_DID = "did:plc:yjck2sybksyigp3zvbq7bfki";
-const FEATURED_BADGE_TITLES = new Set(["gainforest", "maearth"]);
+const FEATURED_BADGES: Array<{ key: BumicertBadgeFilter; title: string }> = [
+  { key: "gainforest", title: "GainForest" },
+  { key: "maearth", title: "Ma Earth" },
+  { key: "maearth-round-1", title: "Ma Earth Round 1" },
+  { key: "maearth-round-2", title: "Ma Earth Round 2" },
+];
+const FEATURED_BADGE_KEYS = new Set(FEATURED_BADGES.map((badge) => badge.key));
+const FEATURED_BADGE_KEY_BY_TITLE = new Map(
+  FEATURED_BADGES.map((badge) => [normalizeFeaturedBadgeTitle(badge.title), badge.key]),
+);
 const FEATURED_BADGE_INDEX_CACHE_MS = 10 * 60 * 1000;
 const FEATURED_BADGE_FILTER_IN_LIMIT = 100;
 
@@ -1026,9 +1037,13 @@ type RawFeaturedBadgeAward = {
   subject?: ({ __typename?: string; did?: string | null; uri?: string | null }) | null;
 };
 
-type FeaturedBadgeIndex = {
+type FeaturedBadgeValues = {
   dids: string[];
   recordUris: string[];
+};
+
+type FeaturedBadgeIndex = FeaturedBadgeValues & {
+  byBadge: Record<BumicertBadgeFilter, FeaturedBadgeValues>;
 };
 
 type FeaturedBadgeIndexPayload = {
@@ -1145,36 +1160,54 @@ async function fetchFeaturedBadgeIndexUncached(signal?: AbortSignal): Promise<Fe
     if (!afterDefinitions && !afterAwards) break;
   }
 
-  const targetBadgeUris = new Set(
-    definitions
-      .filter((definition) => FEATURED_BADGE_TITLES.has(normalizeFeaturedBadgeTitle(definition.title)))
-      .map((definition) => definition.uri)
-      .filter((uri): uri is string => typeof uri === "string" && uri.length > 0),
+  const targetBadgeUris = new Map(
+    definitions.flatMap((definition) => {
+      const key = FEATURED_BADGE_KEY_BY_TITLE.get(normalizeFeaturedBadgeTitle(definition.title));
+      return key && definition.uri ? [[definition.uri, key] as const] : [];
+    }),
   );
-  if (targetBadgeUris.size === 0) return { dids: [], recordUris: [] };
+  const emptyByBadge = Object.fromEntries(
+    FEATURED_BADGES.map((badge) => [badge.key, { dids: [], recordUris: [] }]),
+  ) as unknown as Record<BumicertBadgeFilter, FeaturedBadgeValues>;
+  if (targetBadgeUris.size === 0) return { dids: [], recordUris: [], byBadge: emptyByBadge };
 
   const dids: string[] = [];
   const recordUris: string[] = [];
+  const byBadge = Object.fromEntries(
+    FEATURED_BADGES.map((badge) => [badge.key, { dids: [] as string[], recordUris: [] as string[] }]),
+  ) as Record<BumicertBadgeFilter, { dids: string[]; recordUris: string[] }>;
   for (const award of awards) {
     const badgeUri = award.badge?.uri;
-    if (!badgeUri || !targetBadgeUris.has(badgeUri)) continue;
+    const badgeKey = badgeUri ? targetBadgeUris.get(badgeUri) : undefined;
+    if (!badgeKey) continue;
     const subject = award.subject;
     if (subject?.__typename === "AppCertifiedDefsDid" && subject.did) {
       dids.push(subject.did);
+      byBadge[badgeKey].dids.push(subject.did);
     } else if (subject?.__typename === "ComAtprotoRepoStrongRef" && subject.uri?.includes("/org.hypercerts.claim.activity/")) {
       recordUris.push(subject.uri);
+      byBadge[badgeKey].recordUris.push(subject.uri);
     }
   }
 
   return {
     dids: uniqueSorted(dids),
     recordUris: uniqueSorted(recordUris),
+    byBadge: Object.fromEntries(
+      FEATURED_BADGES.map((badge) => [
+        badge.key,
+        {
+          dids: uniqueSorted(byBadge[badge.key].dids),
+          recordUris: uniqueSorted(byBadge[badge.key].recordUris),
+        },
+      ]),
+    ) as Record<BumicertBadgeFilter, FeaturedBadgeValues>,
   };
 }
 
 function fetchFeaturedBadgeIndex(signal?: AbortSignal): Promise<FeaturedBadgeIndex> {
   return cachedAsync(
-    "featured-badge-index:gainforest-maearth:v1",
+    "featured-badge-index:gainforest-maearth:v2",
     FEATURED_BADGE_INDEX_CACHE_MS,
     () => fetchFeaturedBadgeIndexUncached(signal),
     signal,
@@ -1258,6 +1291,7 @@ type ActivityQueryOptions = {
   filters?: BumicertIndexFilter[];
   sort?: ExplorerSortMode;
   featuredBadgesOnly?: boolean;
+  badgeFilters?: BumicertBadgeFilter[];
 };
 
 type ActivityWhere = Record<string, unknown>;
@@ -1301,20 +1335,35 @@ function activityDateWhere(filters: BumicertIndexFilter[] | undefined): Activity
   return [{ startDate: { isNull: false } }, { endDate: { isNull: false } }];
 }
 
-function featuredBadgeWhereVariants(index?: FeaturedBadgeIndex): ActivityWhere[] {
+function normalizeBadgeFilters(filters: BumicertBadgeFilter[] | undefined): BumicertBadgeFilter[] {
+  if (!filters?.length) return [];
+  return Array.from(new Set(filters)).filter((filter) => FEATURED_BADGE_KEYS.has(filter));
+}
+
+function featuredBadgeValues(index: FeaturedBadgeIndex, filters: BumicertBadgeFilter[] | undefined): FeaturedBadgeValues {
+  const selected = normalizeBadgeFilters(filters);
+  if (selected.length === 0) return { dids: index.dids, recordUris: index.recordUris };
+  return {
+    dids: uniqueSorted(selected.flatMap((filter) => index.byBadge[filter].dids)),
+    recordUris: uniqueSorted(selected.flatMap((filter) => index.byBadge[filter].recordUris)),
+  };
+}
+
+function featuredBadgeWhereVariants(index?: FeaturedBadgeIndex, filters?: BumicertBadgeFilter[]): ActivityWhere[] {
   if (!index) return [{}];
+  const values = featuredBadgeValues(index, filters);
   const variants: ActivityWhere[] = [];
-  for (const dids of chunkStrings(index.dids, FEATURED_BADGE_FILTER_IN_LIMIT)) {
+  for (const dids of chunkStrings(values.dids, FEATURED_BADGE_FILTER_IN_LIMIT)) {
     variants.push({ did: { in: dids } });
   }
-  for (const recordUris of chunkStrings(index.recordUris, FEATURED_BADGE_FILTER_IN_LIMIT)) {
+  for (const recordUris of chunkStrings(values.recordUris, FEATURED_BADGE_FILTER_IN_LIMIT)) {
     variants.push({ uri: { in: recordUris } });
   }
   return variants;
 }
 
 function activityWhereVariants(options?: ActivityQueryOptions, badgeIndex?: FeaturedBadgeIndex): ActivityWhere[] {
-  const badgeWheres = featuredBadgeWhereVariants(badgeIndex);
+  const badgeWheres = featuredBadgeWhereVariants(badgeIndex, options?.badgeFilters);
   if (badgeWheres.length === 0) return [];
   const base = activityFilterWhere(options?.filters);
   const variants: ActivityWhere[] = [];
@@ -1448,8 +1497,9 @@ async function fetchDonationEnabledBumicerts(
   options?: ActivityQueryOptions,
 ): Promise<Page<BumicertRecord>> {
   const badgeIndex = options?.featuredBadgesOnly ? await fetchFeaturedBadgeIndex(signal) : null;
-  const allowedDids = badgeIndex ? new Set(badgeIndex.dids) : null;
-  const allowedRecordUris = badgeIndex ? new Set(badgeIndex.recordUris) : null;
+  const badgeValues = badgeIndex ? featuredBadgeValues(badgeIndex, options?.badgeFilters) : null;
+  const allowedDids = badgeValues ? new Set(badgeValues.dids) : null;
+  const allowedRecordUris = badgeValues ? new Set(badgeValues.recordUris) : null;
   if (badgeIndex && allowedDids?.size === 0 && allowedRecordUris?.size === 0) {
     return { records: [], cursor: null, hasMore: false };
   }

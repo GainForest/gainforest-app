@@ -29,6 +29,7 @@ import { RecordMap } from "../_components/RecordMap";
 import {
   fetchBumicerts,
   fetchObservationCountsByDid,
+  type BumicertBadgeFilter,
   type BumicertRecord,
   type ExplorerRecord,
 } from "../_lib/indexer";
@@ -45,6 +46,12 @@ type FilterKey = "images" | "locations" | "contributors" | "active" | "donations
 type SortMode = "newest" | "oldest" | "az" | "za";
 type ViewMode = "cards" | "list" | "map";
 
+type BadgeFilterOption = {
+  key: BumicertBadgeFilter;
+  label: string;
+  logoSrc: string;
+};
+
 type FilterChip = {
   key: FilterKey;
   label: string;
@@ -52,6 +59,7 @@ type FilterChip = {
 };
 
 const FILTER_KEYS: FilterKey[] = ["images", "locations", "contributors", "active", "donations"];
+const BADGE_FILTER_KEYS: BumicertBadgeFilter[] = ["gainforest", "maearth", "maearth-round-1", "maearth-round-2"];
 const SORT_MODES: SortMode[] = ["newest", "oldest", "az", "za"];
 const VIEW_MODES: ViewMode[] = ["cards", "list", "map"];
 const QUERY_STATE_OPTIONS = { history: "replace", scroll: false, shallow: true } as const;
@@ -71,6 +79,12 @@ export function BumicertsExploreClient({ records: initialRecords = [] }: { recor
     { key: "contributors", label: t("filters.contributors"), predicate: (record) => record.contributorCount > 0 },
     { key: "active", label: t("filters.active"), predicate: (record) => Boolean(record.startDate || record.endDate) },
     { key: "donations", label: t("filters.donations"), predicate: () => true },
+  ], [t]);
+  const badgeFilterOptions = useMemo<BadgeFilterOption[]>(() => [
+    { key: "gainforest", label: t("filters.badges.gainforest"), logoSrc: "/assets/media/images/gainforest-logo.svg" },
+    { key: "maearth", label: t("filters.badges.maearth"), logoSrc: "/assets/media/images/badges/ma-earth-logo.webp" },
+    { key: "maearth-round-1", label: t("filters.badges.maearthRound1"), logoSrc: "/assets/media/images/badges/ma-earth-logo.webp" },
+    { key: "maearth-round-2", label: t("filters.badges.maearthRound2"), logoSrc: "/assets/media/images/badges/ma-earth-logo.webp" },
   ], [t]);
   const sortOptions = useMemo<Array<{ value: SortMode; label: string }>>(() => [
     { value: "newest", label: t("sort.newest") },
@@ -103,6 +117,12 @@ export function BumicertsExploreClient({ records: initialRecords = [] }: { recor
     parseAsString.withOptions(QUERY_STATE_OPTIONS),
   );
   const filters = useMemo(() => parseFilterParam(filtersParam), [filtersParam]);
+  const [badgesParam, setBadgesParam] = useQueryState(
+    "badges",
+    parseAsString.withOptions(QUERY_STATE_OPTIONS),
+  );
+  const badgeFilters = useMemo(() => parseBadgeFilterParam(badgesParam), [badgesParam]);
+  const activeFilterCount = filters.length + badgeFilters.length;
   const [queryView, setQueryView] = useQueryState(
     "view",
     parseAsStringEnum<ViewMode>(VIEW_MODES).withDefault("cards").withOptions(QUERY_STATE_OPTIONS),
@@ -172,7 +192,7 @@ export function BumicertsExploreClient({ records: initialRecords = [] }: { recor
     if (initialRecords.length > 0) return;
     const controller = new AbortController();
     const requestSeq = ++requestSeqRef.current;
-    const options = { query: deferredQuery, filters, sort, featuredBadgesOnly: true };
+    const options = { query: deferredQuery, filters, sort, featuredBadgesOnly: true, badgeFilters };
     const isCurrent = () => requestSeqRef.current === requestSeq && !controller.signal.aborted;
     setLoading(true);
     setLoadingMore(false);
@@ -193,7 +213,7 @@ export function BumicertsExploreClient({ records: initialRecords = [] }: { recor
         if (isCurrent()) setLoading(false);
       });
     return () => controller.abort();
-  }, [initialRecords.length, deferredQuery, filters, sort]);
+  }, [initialRecords.length, deferredQuery, filters, sort, badgeFilters]);
 
   const visibleRecords = useMemo(() => {
     return records.filter((record) => filters.every((key) => {
@@ -226,7 +246,7 @@ export function BumicertsExploreClient({ records: initialRecords = [] }: { recor
 
   useEffect(() => {
     setCardLimit(INITIAL_CARD_LIMIT);
-  }, [deferredQuery, filters, sort, view]);
+  }, [deferredQuery, filters, badgeFilters, sort, view]);
 
   useEffect(() => {
     if (!openSort) return;
@@ -292,7 +312,18 @@ export function BumicertsExploreClient({ records: initialRecords = [] }: { recor
     updateFilters(filters.includes(key) ? filters.filter((value) => value !== key) : [...filters, key]);
   }, [filters, updateFilters]);
 
-  const clearFilters = useCallback(() => updateFilters([]), [updateFilters]);
+  const updateBadgeFilters = useCallback((nextFilters: BumicertBadgeFilter[]) => {
+    void setBadgesParam(serializeBadgeFilterParam(nextFilters));
+  }, [setBadgesParam]);
+
+  const toggleBadgeFilter = useCallback((key: BumicertBadgeFilter) => {
+    updateBadgeFilters(badgeFilters.includes(key) ? badgeFilters.filter((value) => value !== key) : [...badgeFilters, key]);
+  }, [badgeFilters, updateBadgeFilters]);
+
+  const clearFilters = useCallback(() => {
+    updateFilters([]);
+    updateBadgeFilters([]);
+  }, [updateFilters, updateBadgeFilters]);
   const loadMore = useCallback(() => {
     if (loading || loadingMore || !hasMore) return;
 
@@ -301,7 +332,7 @@ export function BumicertsExploreClient({ records: initialRecords = [] }: { recor
     const isCurrent = () => requestSeqRef.current === requestSeq && !controller.signal.aborted;
     const base = records;
     setLoadingMore(true);
-    fetchBumicerts(BUMICERTS_PAGE_SIZE, cursor, controller.signal, undefined, { query: deferredQuery, filters, sort, featuredBadgesOnly: true })
+    fetchBumicerts(BUMICERTS_PAGE_SIZE, cursor, controller.signal, undefined, { query: deferredQuery, filters, sort, featuredBadgesOnly: true, badgeFilters })
       .then((page) => {
         if (!isCurrent()) return;
         setRecords(mergeBumicertRecords(base, page.records));
@@ -314,7 +345,7 @@ export function BumicertsExploreClient({ records: initialRecords = [] }: { recor
       .finally(() => {
         if (isCurrent()) setLoadingMore(false);
       });
-  }, [cursor, deferredQuery, filters, hasMore, loading, loadingMore, records, sort]);
+  }, [cursor, deferredQuery, filters, badgeFilters, hasMore, loading, loadingMore, records, sort]);
   const openRecord = useCallback((record: BumicertRecord) => setDrawer(record), []);
   const openMapRecord = useCallback((record: ExplorerRecord) => {
     if (record.kind === "bumicert") setDrawer(record);
@@ -453,12 +484,20 @@ export function BumicertsExploreClient({ records: initialRecords = [] }: { recor
                     <Button
                       type="button"
                       onClick={clearFilters}
-                      variant={filters.length === 0 ? "default" : "outline"}
+                      variant={activeFilterCount === 0 ? "default" : "outline"}
                       size="sm"
                       className="h-10 text-sm"
                     >
                       {t("filters.allBumicerts")}
                     </Button>
+                    {badgeFilterOptions.map((badge) => (
+                      <BadgeFilterButton
+                        key={badge.key}
+                        badge={badge}
+                        selected={badgeFilters.includes(badge.key)}
+                        onClick={() => toggleBadgeFilter(badge.key)}
+                      />
+                    ))}
                     {filterChips.map((chip) => {
                       const selected = filters.includes(chip.key);
                       return (
@@ -486,15 +525,15 @@ export function BumicertsExploreClient({ records: initialRecords = [] }: { recor
                     }}
                     aria-haspopup="true"
                     aria-expanded={openFilters}
-                    variant={openFilters || filters.length > 0 ? "default" : "outline"}
+                    variant={openFilters || activeFilterCount > 0 ? "default" : "outline"}
                     size="sm"
                     className="h-10 text-sm"
                   >
                     <SlidersHorizontalIcon className="h-3.5 w-3.5" />
                     <span>{t("filters.allFilters")}</span>
-                    {filters.length > 0 && (
+                    {activeFilterCount > 0 && (
                       <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-primary-foreground px-1 text-[10px] text-primary">
-                        {filters.length}
+                        {activeFilterCount}
                       </span>
                     )}
                   </Button>
@@ -511,6 +550,14 @@ export function BumicertsExploreClient({ records: initialRecords = [] }: { recor
                         </p>
                       </div>
                       <div className="flex flex-wrap gap-2">
+                        {badgeFilterOptions.map((badge) => (
+                          <BadgeFilterButton
+                            key={badge.key}
+                            badge={badge}
+                            selected={badgeFilters.includes(badge.key)}
+                            onClick={() => toggleBadgeFilter(badge.key)}
+                          />
+                        ))}
                         {filterChips.map((chip) => (
                           <Button
                             key={chip.key}
@@ -904,6 +951,24 @@ const BumicertCardVisual = memo(function BumicertCardVisual({ record, priority, 
 
 type ExploreT = ReturnType<typeof useTranslations>;
 
+function BadgeFilterButton({ badge, selected, onClick }: { badge: BadgeFilterOption; selected: boolean; onClick: () => void }) {
+  return (
+    <Button
+      type="button"
+      aria-pressed={selected}
+      onClick={onClick}
+      variant={selected ? "default" : "outline"}
+      size="sm"
+      className="h-10 gap-2 pr-3 text-sm"
+    >
+      <span className="flex h-5 w-5 items-center justify-center overflow-hidden rounded-full bg-background/80 ring-1 ring-border/60">
+        <Image src={badge.logoSrc} width={20} height={20} alt="" className="h-5 w-5 object-contain" />
+      </span>
+      {badge.label}
+    </Button>
+  );
+}
+
 function formatFundingLabel(funding: BumicertFundingSummary | undefined, t: ExploreT): string | null {
   if (!funding?.accepting) return null;
   // Whole dollars keep the pill narrow enough to survive the overflow fitter.
@@ -997,6 +1062,16 @@ function parseFilterParam(value: string | null): FilterKey[] {
 }
 
 function serializeFilterParam(filters: FilterKey[]): string | null {
+  return filters.length > 0 ? filters.join(",") : null;
+}
+
+function parseBadgeFilterParam(value: string | null): BumicertBadgeFilter[] {
+  if (value === null || value === "none") return [];
+  const parsed = value.split(",").filter((item): item is BumicertBadgeFilter => BADGE_FILTER_KEYS.includes(item as BumicertBadgeFilter));
+  return [...new Set(parsed)];
+}
+
+function serializeBadgeFilterParam(filters: BumicertBadgeFilter[]): string | null {
   return filters.length > 0 ? filters.join(",") : null;
 }
 

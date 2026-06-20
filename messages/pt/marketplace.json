@@ -25,7 +25,7 @@
     },
     "filters": {
       "allTitle": "Todos os filtros",
-      "description": "Mostre certificados com fotos, locais de projeto, pessoas identificadas, datas de trabalho ou doações.",
+      "description": "Mostre Certs por selo de origem, fotos, locais do projeto, pessoas nomeadas, datas de trabalho ou doações.",
       "organization": "Organização",
       "bioregion": "Biorregião",
       "country": "País",
@@ -38,7 +38,13 @@
       "locations": "Mostra locais de projeto",
       "contributors": "Mostra pessoas identificadas",
       "active": "Mostra datas de trabalho",
-      "donations": "Aceita doações"
+      "donations": "Aceita doações",
+      "badges": {
+        "gainforest": "GainForest",
+        "maearth": "Ma Earth",
+        "maearthRound1": "Ma Earth Rodada 1",
+        "maearthRound2": "Ma Earth Rodada 2"
+      }
     },
     "sort": {
       "newest": "Mais recentes",

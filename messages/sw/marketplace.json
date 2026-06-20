@@ -25,7 +25,7 @@
     },
     "filters": {
       "allTitle": "Vichujio vyote",
-      "description": "Onyesha vyeti zenye picha, maeneo ya mradi, watu waliotajwa, tarehe za kazi au michango.",
+      "description": "Onyesha Certs kwa beji ya chanzo, picha, maeneo ya mradi, watu waliotajwa, tarehe za kazi, au michango.",
       "organization": "Shirika",
       "bioregion": "Eneo la kibaolojia",
       "country": "Nchi",
@@ -38,7 +38,13 @@
       "locations": "Huonyesha maeneo ya mradi",
       "contributors": "Huonyesha watu waliotajwa",
       "active": "Huonyesha tarehe za kazi",
-      "donations": "Hupokea michango"
+      "donations": "Hupokea michango",
+      "badges": {
+        "gainforest": "GainForest",
+        "maearth": "Ma Earth",
+        "maearthRound1": "Ma Earth Raundi 1",
+        "maearthRound2": "Ma Earth Raundi 2"
+      }
     },
     "sort": {
       "newest": "Mpya zaidi",
