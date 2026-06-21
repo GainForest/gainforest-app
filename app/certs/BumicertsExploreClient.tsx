@@ -67,8 +67,6 @@ const SEARCH_QUERY_STATE_OPTIONS = { ...QUERY_STATE_OPTIONS, throttleMs: 200 } a
 
 
 const BUMICERTS_PAGE_SIZE = 48;
-const INITIAL_CARD_LIMIT = BUMICERTS_PAGE_SIZE;
-const CARD_BATCH_SIZE = BUMICERTS_PAGE_SIZE;
 
 export function BumicertsExploreClient({ records: initialRecords = [] }: { records?: BumicertRecord[] }) {
   const t = useTranslations("marketplace.explore");
@@ -132,7 +130,6 @@ export function BumicertsExploreClient({ records: initialRecords = [] }: { recor
   const [openSort, setOpenSort] = useState(false);
   const [openFilters, setOpenFilters] = useState(false);
   const [drawer, setDrawer] = useState<BumicertRecord | null>(null);
-  const [cardLimit, setCardLimit] = useState(INITIAL_CARD_LIMIT);
   const [autoLoadMore, setAutoLoadMore] = useState(false);
   const [fundingIndex, setFundingIndex] = useState<FundingSummaryIndex | null>(null);
   const [sightingCounts, setSightingCounts] = useState<Map<string, number>>(new Map());
@@ -237,16 +234,7 @@ export function BumicertsExploreClient({ records: initialRecords = [] }: { recor
     });
   }, [records, sort, filters, fundingIndex, filterChips]);
 
-  const renderedRecords = useMemo(
-    () => (view === "map" ? visibleRecords : visibleRecords.slice(0, cardLimit)),
-    [cardLimit, view, visibleRecords],
-  );
-
-  const hasMoreCardsToShow = view !== "map" && renderedRecords.length < visibleRecords.length;
-
-  useEffect(() => {
-    setCardLimit(INITIAL_CARD_LIMIT);
-  }, [deferredQuery, filters, badgeFilters, sort, view]);
+  const renderedRecords = visibleRecords;
 
   useEffect(() => {
     if (!openSort) return;
@@ -598,20 +586,7 @@ export function BumicertsExploreClient({ records: initialRecords = [] }: { recor
 
           {records.length > 0 && (
             <div className="mt-10 flex flex-col items-center gap-3">
-              {view !== "map" && visibleRecords.length > renderedRecords.length && (
-                <p className="text-sm text-muted-foreground">
-                  {t("footer.showing", { shown: renderedRecords.length, total: visibleRecords.length })}
-                </p>
-              )}
-              {hasMoreCardsToShow ? (
-                <button
-                  type="button"
-                  onClick={() => setCardLimit((current) => current + CARD_BATCH_SIZE)}
-                  className="inline-flex items-center justify-center rounded-full border border-border bg-background px-6 py-3 text-sm font-medium text-foreground transition-colors hover:bg-muted"
-                >
-                  {t("footer.showMore")}
-                </button>
-              ) : hasMore ? (
+              {hasMore ? (
                 <AutoLoadMoreButton
                   hasMore={hasMore}
                   loading={loadingMore}

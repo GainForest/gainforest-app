@@ -1566,23 +1566,44 @@ async function fetchBumicertsFromActivity(
   }
 
   const previous = parseMultiCursor(after, variants.length);
-  const pages = await Promise.all(
-    variants.map((where, index) => {
-      if (!previous.more[index]) return Promise.resolve({ records: [], cursor: null, hasMore: false } satisfies Page<BumicertRecord>);
-      return collectPaged(
-        (first, cursor, nextSignal) => fetchActivityPage(first, cursor, nextSignal, where, options?.sort),
-        target,
-        previous.cursors[index] ?? null,
-        signal,
-      );
-    }),
-  );
-  const records = uniqueBumicerts(pages.flatMap((page) => page.records), options?.sort);
-  onProgress?.(records);
+  const cursors = [...previous.cursors];
+  const more = [...previous.more];
+  let records: BumicertRecord[] = [];
+
+  while (records.length < target && more.some(Boolean)) {
+    if (signal?.aborted) throw new DOMException("aborted", "AbortError");
+    const activeIndexes = more.flatMap((isActive, index) => (isActive ? [index] : []));
+    const remaining = target - records.length;
+    const basePageSize = Math.floor(remaining / activeIndexes.length);
+    const extra = remaining % activeIndexes.length;
+    const pages = await Promise.all(
+      activeIndexes.map((variantIndex, order) => {
+        const first = basePageSize + (order < extra ? 1 : 0);
+        if (first <= 0) return Promise.resolve({ variantIndex, page: null });
+        return fetchActivityPage(first, cursors[variantIndex] ?? null, signal, variants[variantIndex], options?.sort)
+          .then((page) => ({ variantIndex, page }));
+      }),
+    );
+
+    let madeProgress = false;
+    for (const { variantIndex, page } of pages) {
+      if (!page) continue;
+      const previousCursor = cursors[variantIndex];
+      const previousMore = more[variantIndex];
+      records.push(...page.records);
+      cursors[variantIndex] = page.cursor;
+      more[variantIndex] = page.hasMore && Boolean(page.cursor);
+      madeProgress ||= page.records.length > 0 || cursors[variantIndex] !== previousCursor || more[variantIndex] !== previousMore;
+    }
+    records = uniqueBumicerts(records, options?.sort);
+    if (!madeProgress) break;
+    onProgress?.(records);
+  }
+
   return {
     records,
-    cursor: encodeMultiCursor({ cursors: pages.map((page) => page.cursor), more: pages.map((page) => page.hasMore) }),
-    hasMore: pages.some((page) => page.hasMore),
+    cursor: encodeMultiCursor({ cursors, more }),
+    hasMore: more.some(Boolean),
   };
 }
 
