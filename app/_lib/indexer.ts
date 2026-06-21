@@ -925,6 +925,46 @@ const ACTIVITY_BY_URI_QUERY = `
   }
 `;
 
+const ACTIVITY_COUNT_NODE_FIELDS = `
+  did rkey uri title
+`;
+
+const ACTIVITY_MATCH_NODE_FIELDS = `
+  did rkey uri title shortDescription startDate endDate
+  contributors { contributorIdentity { __typename } }
+  locations { uri }
+  image {
+    __typename
+    ... on OrgHypercertsDefsUri { uri }
+    ... on OrgHypercertsDefsSmallImage { image { ref } }
+  }
+`;
+
+const ACTIVITY_COUNT_QUERY = `
+  query ExplorerActivityCount(
+    $first: Int!
+    $after: String
+    $where: OrgHypercertsClaimActivityWhereInput
+  ) {
+    orgHypercertsClaimActivity(
+      first: $first
+      after: $after
+      where: $where
+      sortBy: createdAt
+      sortDirection: DESC
+    ) {
+      pageInfo { hasNextPage endCursor }
+      edges { node { ${ACTIVITY_COUNT_NODE_FIELDS} } }
+    }
+  }
+`;
+
+const ACTIVITY_COUNT_BY_URI_QUERY = `
+  query ExplorerActivityCountByUri($uri: String!) {
+    orgHypercertsClaimActivityByUri(uri: $uri) { ${ACTIVITY_MATCH_NODE_FIELDS} }
+  }
+`;
+
 const FUNDING_CONFIG_QUERY = `
   query ExplorerFundingConfigs($first: Int!, $after: String) {
     appGainforestFundingConfig(
@@ -1017,6 +1057,10 @@ type RawActivity = {
   image?: RawActivityImage;
   certifiedProfileData?: CertifiedProfileData;
 };
+
+type RawActivityCountIdentity = Pick<RawActivity, "did" | "rkey" | "uri">;
+type RawActivityCount = RawActivityCountIdentity & Pick<RawActivity, "title">;
+type RawActivityMatch = RawActivityCountIdentity & Pick<RawActivity, "title" | "shortDescription" | "startDate" | "endDate" | "contributors" | "locations" | "image">;
 
 type RawFundingConfig = {
   did: string;
@@ -1222,8 +1266,10 @@ function fetchFeaturedBadgeIndex(signal?: AbortSignal): Promise<FeaturedBadgeInd
  */
 export function isLikelyTestRecordName(name: string | null | undefined): boolean {
   if (!name) return false;
-  if (/disposable/i.test(name) && /\be2e\b/i.test(name)) return true;
-  return /^e2e bumicert \d/i.test(name.trim());
+  const trimmed = name.trim();
+  if (/disposable/i.test(trimmed) && /\be2e\b/i.test(trimmed)) return true;
+  if (/^e2e org\b/i.test(trimmed)) return true;
+  return /^e2e bumicert \d/i.test(trimmed);
 }
 
 function mapActivity(n: RawActivity): BumicertRecord {
@@ -1377,6 +1423,30 @@ function activityWhereVariants(options?: ActivityQueryOptions, badgeIndex?: Feat
   return variants;
 }
 
+function activityCountId(n: RawActivityCountIdentity): string {
+  return n.uri || activityUriForDidRkey(n.did, n.rkey);
+}
+
+function activityCountMatchesOptions(n: RawActivityMatch, options?: ActivityQueryOptions): boolean {
+  const q = options?.query?.trim().toLowerCase();
+  if (q) {
+    const shortDescription = sanitizeShortDescription(n.shortDescription);
+    const haystack = `${n.title ?? ""} ${shortDescription ?? ""}`.toLowerCase();
+    if (!haystack.includes(q)) return false;
+  }
+  const filters = options?.filters ?? [];
+  const hasImage = n.image?.__typename === "OrgHypercertsDefsUri"
+    ? Boolean(n.image.uri?.trim())
+    : n.image?.__typename === "OrgHypercertsDefsSmallImage"
+      ? Boolean(normaliseRef(n.image.image?.ref))
+      : false;
+  if (filters.includes("images") && !hasImage) return false;
+  if (filters.includes("locations") && (!Array.isArray(n.locations) || n.locations.length === 0)) return false;
+  if (filters.includes("contributors") && (!Array.isArray(n.contributors) || n.contributors.length === 0)) return false;
+  if (filters.includes("active") && !n.startDate?.trim() && !n.endDate?.trim()) return false;
+  return true;
+}
+
 function activityMatchesOptions(record: BumicertRecord, options?: ActivityQueryOptions): boolean {
   const q = options?.query?.trim().toLowerCase();
   if (q) {
@@ -1435,6 +1505,38 @@ async function fetchActivityByDidPage(
     orgHypercertsClaimActivity?: Connection<RawActivity>;
   }>(ACTIVITY_BY_DID_QUERY, { did, first, after }, signal);
   return mapActivityConnection(data?.orgHypercertsClaimActivity, signal);
+}
+
+async function fetchActivityCountPage(
+  first: number,
+  after: string | null,
+  signal?: AbortSignal,
+  where?: ActivityWhere,
+): Promise<Page<RawActivityCount>> {
+  const data = await indexerQuery<{
+    orgHypercertsClaimActivity?: Connection<RawActivityCount>;
+  }>(ACTIVITY_COUNT_QUERY, { first, after, where: where ?? null }, signal);
+  const conn = data?.orgHypercertsClaimActivity;
+  const records = (conn?.edges ?? [])
+    .map((edge) => edge?.node)
+    .filter((node): node is RawActivityCount => Boolean(node?.did && node.rkey))
+    .filter((node) => !isLikelyTestRecordName(node.title));
+  return {
+    records,
+    cursor: conn?.pageInfo?.endCursor ?? null,
+    hasMore: Boolean(conn?.pageInfo?.hasNextPage),
+  };
+}
+
+async function fetchActivityCountByUri(uri: string, signal?: AbortSignal): Promise<RawActivityMatch | null> {
+  const data = await indexerQuery<{ orgHypercertsClaimActivityByUri?: RawActivityMatch | null }>(
+    ACTIVITY_COUNT_BY_URI_QUERY,
+    { uri },
+    signal,
+  );
+  const node = data?.orgHypercertsClaimActivityByUri;
+  if (!node || isLikelyTestRecordName(node.title)) return null;
+  return node;
 }
 
 type MultiCursor = { cursors: Array<string | null>; more: boolean[] };
@@ -1543,6 +1645,74 @@ async function fetchDonationEnabledBumicerts(
     cursor,
     hasMore,
   };
+}
+
+async function fetchDonationEnabledBumicertCount(signal?: AbortSignal, options?: ActivityQueryOptions): Promise<number> {
+  const badgeIndex = options?.featuredBadgesOnly ? await fetchFeaturedBadgeIndex(signal) : null;
+  const badgeValues = badgeIndex ? featuredBadgeValues(badgeIndex, options?.badgeFilters) : null;
+  const allowedDids = badgeValues ? new Set(badgeValues.dids) : null;
+  const allowedRecordUris = badgeValues ? new Set(badgeValues.recordUris) : null;
+  if (badgeIndex && allowedDids?.size === 0 && allowedRecordUris?.size === 0) return 0;
+
+  const seen = new Set<string>();
+  let cursor: string | null = null;
+  let hasMore = true;
+  const batchSize = 12;
+
+  while (hasMore) {
+    if (signal?.aborted) throw new DOMException("aborted", "AbortError");
+    const page = await fetchFundingConfigPage(INDEXER_MAX_PAGE, cursor, signal);
+    cursor = page.cursor;
+    hasMore = page.hasMore && Boolean(page.cursor);
+
+    const eligibleConfigs = badgeIndex
+      ? page.records.filter((config) => {
+          const activityUri = activityUriForDidRkey(config.did, config.rkey);
+          return allowedDids?.has(config.did) || allowedRecordUris?.has(activityUri);
+        })
+      : page.records;
+
+    for (let index = 0; index < eligibleConfigs.length; index += batchSize) {
+      if (signal?.aborted) throw new DOMException("aborted", "AbortError");
+      const batch = eligibleConfigs.slice(index, index + batchSize);
+      const activities = await Promise.all(
+        batch.map((config) => fetchActivityCountByUri(activityUriForDidRkey(config.did, config.rkey), signal).catch(() => null)),
+      );
+      for (const activity of activities) {
+        if (!activity || !activityCountMatchesOptions(activity, options)) continue;
+        seen.add(activityCountId(activity));
+      }
+    }
+  }
+
+  return seen.size;
+}
+
+async function fetchBumicertsFromActivityCount(signal?: AbortSignal, options?: ActivityQueryOptions): Promise<number> {
+  const badgeIndex = options?.featuredBadgesOnly ? await fetchFeaturedBadgeIndex(signal) : undefined;
+  const variants = activityWhereVariants(options, badgeIndex);
+  if (variants.length === 0) return 0;
+
+  const seen = new Set<string>();
+  for (const where of variants) {
+    let cursor: string | null = null;
+    let hasMore = true;
+    while (hasMore) {
+      if (signal?.aborted) throw new DOMException("aborted", "AbortError");
+      const page = await fetchActivityCountPage(INDEXER_MAX_PAGE, cursor, signal, where);
+      for (const record of page.records) seen.add(activityCountId(record));
+      cursor = page.cursor;
+      hasMore = page.hasMore && Boolean(page.cursor);
+    }
+  }
+  return seen.size;
+}
+
+export async function fetchBumicertTotalCount(signal?: AbortSignal, options?: ActivityQueryOptions): Promise<number> {
+  if (options?.filters?.includes("donations")) {
+    return fetchDonationEnabledBumicertCount(signal, options);
+  }
+  return fetchBumicertsFromActivityCount(signal, options);
 }
 
 async function fetchBumicertsFromActivity(

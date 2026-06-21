@@ -28,6 +28,7 @@ import { RecordDrawer } from "../_components/RecordDrawer";
 import { RecordMap } from "../_components/RecordMap";
 import {
   fetchBumicerts,
+  fetchBumicertTotalCount,
   fetchObservationCountsByDid,
   type BumicertBadgeFilter,
   type BumicertRecord,
@@ -101,6 +102,7 @@ export function BumicertsExploreClient({ records: initialRecords = [] }: { recor
   const [hasMore, setHasMore] = useState(initialRecords.length === 0);
   const [loading, setLoading] = useState(initialRecords.length === 0);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [totalCount, setTotalCount] = useState<number | null>(null);
   const [query, setQuery] = useQueryState(
     "q",
     parseAsString.withDefault("").withOptions(SEARCH_QUERY_STATE_OPTIONS),
@@ -137,6 +139,7 @@ export function BumicertsExploreClient({ records: initialRecords = [] }: { recor
   const sortMenuRef = useRef<HTMLDivElement | null>(null);
   const filtersMenuRef = useRef<HTMLDivElement | null>(null);
   const requestSeqRef = useRef(0);
+  const countSeqRef = useRef(0);
 
   useLayoutEffect(() => {
     const locationView = readViewFromLocation();
@@ -184,6 +187,22 @@ export function BumicertsExploreClient({ records: initialRecords = [] }: { recor
       });
     return () => controller.abort();
   }, [records]);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    const requestSeq = ++countSeqRef.current;
+    const options = { query: deferredQuery, filters, featuredBadgesOnly: true, badgeFilters };
+    const isCurrent = () => countSeqRef.current === requestSeq && !controller.signal.aborted;
+    setTotalCount(null);
+    fetchBumicertTotalCount(controller.signal, options)
+      .then((count) => {
+        if (isCurrent()) setTotalCount(count);
+      })
+      .catch((error) => {
+        if ((error as Error).name !== "AbortError") console.warn("[bumicerts] count failed", error);
+      });
+    return () => controller.abort();
+  }, [deferredQuery, filters, badgeFilters]);
 
   useEffect(() => {
     if (initialRecords.length > 0) return;
@@ -586,6 +605,11 @@ export function BumicertsExploreClient({ records: initialRecords = [] }: { recor
 
           {records.length > 0 && (
             <div className="mt-10 flex flex-col items-center gap-3">
+              {totalCount !== null && (
+                <p className="text-sm text-muted-foreground">
+                  {t("footer.showing", { shown: visibleRecords.length, total: totalCount })}
+                </p>
+              )}
               {hasMore ? (
                 <AutoLoadMoreButton
                   hasMore={hasMore}
