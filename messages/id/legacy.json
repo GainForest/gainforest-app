@@ -10,6 +10,7 @@
   "authFailedDescription": "Kami tidak dapat menyelesaikan proses masuk Anda. Coba lagi dan kami akan membawa Anda kembali ke sini.",
   "authGoBack": "Kembali",
   "authOrganizationsFailed": "Sudah masuk, tetapi organisasi tidak dimuat",
+  "authAsRole": "sebagai {role}",
   "authSignInTitle": "Masuk ke GainForest",
   "authSignInDescription": "Masuk atau buat akun untuk mengakses GainForest.",
   "authUsername": "Nama pengguna",

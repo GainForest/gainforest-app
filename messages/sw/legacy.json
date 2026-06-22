@@ -10,6 +10,7 @@
   "authFailedDescription": "Hatukuweza kukamilisha kukuingiza. Jaribu tena nasi tutakurudisha hapa.",
   "authGoBack": "Rudi",
   "authOrganizationsFailed": "Umeingia, lakini mashirika hayakupakia",
+  "authAsRole": "kama {role}",
   "authSignInTitle": "Ingia kwenye GainForest",
   "authSignInDescription": "Ingia au fungua akaunti ili kufikia GainForest.",
   "authUsername": "Jina la mtumiaji",

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
@@ -48,8 +49,8 @@ function rememberContext(context: ActiveContext) {
   }
 }
 
-function roleLabel(role: CgsGroupMembership["role"]): string {
-  return role === "owner" ? "Owner" : role === "admin" ? "Admin" : "Member";
+function roleLabel(role: CgsGroupMembership["role"], tRoles: ReturnType<typeof useTranslations<"upload.settings.dataCouncil.roles">>): string {
+  return role === "owner" ? tRoles("owner") : role === "admin" ? tRoles("admin") : tRoles("member");
 }
 
 function normalizeDid(value: string): string {
@@ -76,8 +77,8 @@ function groupManageHref(group: GroupOption): string {
   return `/manage/groups/${accountSegment(identifier)}`;
 }
 
-function bestGroupName(group: GroupOption): string {
-  return group.displayName?.trim() || "Organization account";
+function bestGroupName(group: GroupOption, organizationAccountLabel: string): string {
+  return group.displayName?.trim() || organizationAccountLabel;
 }
 
 function redirectGroupIdentifier(redirectTo: string): string | null {
@@ -190,7 +191,15 @@ function OptionCard({
   );
 }
 
-function SigningInView({ redirectTo }: { redirectTo: string }) {
+function SigningInView({
+  redirectTo,
+  signingInLabel,
+  redirectHelpLabel,
+}: {
+  redirectTo: string;
+  signingInLabel: string;
+  redirectHelpLabel: string;
+}) {
   return (
     <div className="flex flex-col items-center">
       <AppMark showAnimations />
@@ -201,7 +210,7 @@ function SigningInView({ redirectTo }: { redirectTo: string }) {
         className="mt-12 flex flex-col items-center gap-1 font-medium"
       >
         <Loader2Icon className="size-6 animate-spin text-primary" />
-        Signing you in...
+        {signingInLabel}
         <motion.div
           initial={{ opacity: 0, y: -4 }}
           animate={{ opacity: 1, y: 0 }}
@@ -209,7 +218,7 @@ function SigningInView({ redirectTo }: { redirectTo: string }) {
           className="mt-2"
         >
           <Button size="sm" variant="link" asChild>
-            <Link href={redirectTo}>Taking too long? Click here to redirect.</Link>
+            <Link href={redirectTo}>{redirectHelpLabel}</Link>
           </Button>
         </motion.div>
       </motion.div>
@@ -222,13 +231,23 @@ function GroupChoiceView({
   session,
   groups,
   redirectTo,
+  labels,
 }: {
   account: AuthCompleteAccount;
   session: NonNullable<AuthCompleteSession>;
   groups: GroupOption[];
   redirectTo: string;
+  labels: {
+    continueAs: string;
+    chooseAccount: string;
+    yourAccount: string;
+    yourOrganizations: string;
+    personalAccount: string;
+    organizationAccount: string;
+    asRole: (role: CgsGroupMembership["role"]) => string;
+  };
 }) {
-  const personalName = account?.displayName?.trim() || "Personal Account";
+  const personalName = account?.displayName?.trim() || labels.personalAccount;
 
   const continuePersonal = () => {
     rememberContext({ type: "personal", did: session.did, selectedAt: new Date().toISOString() });
@@ -249,18 +268,18 @@ function GroupChoiceView({
       className="flex w-full flex-col items-center pt-8"
     >
       <AppMark showAnimations />
-      <h1 className="mt-4 text-center text-xl font-medium">Continue as</h1>
-      <p className="text-center text-sm text-muted-foreground">Choose an account for this session.</p>
+      <h1 className="mt-4 text-center text-xl font-medium">{labels.continueAs}</h1>
+      <p className="text-center text-sm text-muted-foreground">{labels.chooseAccount}</p>
 
       <div className="mt-6 w-full space-y-5">
         <section>
-          <p className="mb-1.5 px-1 text-xs font-medium text-muted-foreground">Your account</p>
+          <p className="mb-1.5 px-1 text-xs font-medium text-muted-foreground">{labels.yourAccount}</p>
           <div className="flex flex-col gap-1.5">
             <OptionCard
               did={session.did}
               name={personalName}
               avatarUrl={account?.avatarUrl ?? null}
-              sublabel="Personal Account"
+              sublabel={labels.personalAccount}
               onClick={continuePersonal}
               rounded={cornerClass(0, 1)}
             />
@@ -269,15 +288,15 @@ function GroupChoiceView({
 
         {groups.length > 0 ? (
           <section>
-            <p className="mb-1.5 px-1 text-xs font-medium text-muted-foreground">Your organizations</p>
+            <p className="mb-1.5 px-1 text-xs font-medium text-muted-foreground">{labels.yourOrganizations}</p>
             <div className="flex flex-col gap-1.5">
               {groups.map((group, index) => (
                 <OptionCard
                   key={group.groupDid}
                   did={normalizeDid(group.groupDid)}
-                  name={bestGroupName(group)}
+                  name={bestGroupName(group, labels.organizationAccount)}
                   avatarUrl={group.avatarUrl}
-                  sublabel={`as ${roleLabel(group.role)}`}
+                  sublabel={labels.asRole(group.role)}
                   onClick={() => continueGroup(group)}
                   rounded={cornerClass(index, groups.length)}
                 />
@@ -290,17 +309,21 @@ function GroupChoiceView({
   );
 }
 
-function ErrorView({ redirectTo }: { redirectTo: string }) {
+function ErrorView({
+  redirectTo,
+  labels,
+}: {
+  redirectTo: string;
+  labels: { title: string; description: string; goBack: string; tryAgain: string };
+}) {
   return (
     <div className="flex flex-col items-center text-center">
       <AppMark showAnimations />
-      <h1 className="mt-6 text-xl font-medium">That didn’t work</h1>
-      <p className="mt-1 max-w-xs text-sm text-muted-foreground">
-        We couldn’t finish signing you in. Try again and we’ll bring you back here.
-      </p>
+      <h1 className="mt-6 text-xl font-medium">{labels.title}</h1>
+      <p className="mt-1 max-w-xs text-sm text-muted-foreground">{labels.description}</p>
       <div className="mt-6 flex justify-center gap-2">
-        <Button asChild variant="secondary" size="sm"><Link href={redirectTo}>Go back</Link></Button>
-        <Button asChild size="sm"><Link href="/manage">Try again</Link></Button>
+        <Button asChild variant="secondary" size="sm"><Link href={redirectTo}>{labels.goBack}</Link></Button>
+        <Button asChild size="sm"><Link href="/manage">{labels.tryAgain}</Link></Button>
       </div>
     </div>
   );
@@ -310,21 +333,21 @@ function GroupLookupErrorView({
   message,
   redirectTo,
   onRetry,
+  labels,
 }: {
   message: string | null;
   redirectTo: string;
   onRetry: () => void;
+  labels: { title: string; description: string; retry: string; continue: string };
 }) {
   return (
     <div className="flex flex-col items-center text-center">
       <AppMark showAnimations />
-      <h1 className="mt-6 text-xl font-medium">Signed in, but organizations didn’t load</h1>
-      <p className="mt-1 max-w-xs text-sm text-muted-foreground">
-        {message || "We couldn’t load your organizations. You can retry or continue with your personal account."}
-      </p>
+      <h1 className="mt-6 text-xl font-medium">{labels.title}</h1>
+      <p className="mt-1 max-w-xs text-sm text-muted-foreground">{message || labels.description}</p>
       <div className="mt-6 flex justify-center gap-2">
-        <Button type="button" variant="secondary" size="sm" onClick={onRetry}>Retry</Button>
-        <Button type="button" size="sm" onClick={() => window.location.assign(redirectTo)}>Continue</Button>
+        <Button type="button" variant="secondary" size="sm" onClick={onRetry}>{labels.retry}</Button>
+        <Button type="button" size="sm" onClick={() => window.location.assign(redirectTo)}>{labels.continue}</Button>
       </div>
     </div>
   );
@@ -339,6 +362,11 @@ export function AuthCompleteClient({
   account: AuthCompleteAccount;
   redirectTo: string;
 }) {
+  const tLegacy = useTranslations("legacy");
+  const tCommonAuth = useTranslations("common.auth");
+  const tCommonError = useTranslations("common.errorPage");
+  const tOnboardingPrompt = useTranslations("common.onboardingPrompt");
+  const tRoles = useTranslations("upload.settings.dataCouncil.roles");
   const [groups, setGroups] = useState<GroupOption[]>([]);
   const [groupError, setGroupError] = useState<string | null>(null);
   const [choiceRedirect, setChoiceRedirect] = useState<string | null>(null);
@@ -442,14 +470,54 @@ export function AuthCompleteClient({
   }, [retryNonce, safeRedirect, session]);
 
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-md flex-col items-center justify-center px-6 py-12">
-      {status === "loading" || status === "success" ? <SigningInView redirectTo={safeRedirect} /> : null}
-      {status === "choices" && session ? (
-        <GroupChoiceView account={account} session={session} groups={groups} redirectTo={choiceRedirect ?? safeRedirect} />
+    <main data-no-dom-translate className="mx-auto flex min-h-screen w-full max-w-md flex-col items-center justify-center px-6 py-12">
+      {status === "loading" || status === "success" ? (
+        <SigningInView
+          redirectTo={safeRedirect}
+          signingInLabel={tLegacy("authSigningIn")}
+          redirectHelpLabel={tLegacy("authRedirectHelp")}
+        />
       ) : null}
-      {status === "error" ? <ErrorView redirectTo={safeRedirect} /> : null}
+      {status === "choices" && session ? (
+        <GroupChoiceView
+          account={account}
+          session={session}
+          groups={groups}
+          redirectTo={choiceRedirect ?? safeRedirect}
+          labels={{
+            continueAs: tLegacy("authContinueAs"),
+            chooseAccount: tLegacy("authChooseAccount"),
+            yourAccount: tLegacy("authYourAccount"),
+            yourOrganizations: tLegacy("authYourOrganizations"),
+            personalAccount: tLegacy("personalAccount"),
+            organizationAccount: tCommonAuth("organizationAccount"),
+            asRole: (role) => tLegacy("authAsRole", { role: roleLabel(role, tRoles) }),
+          }}
+        />
+      ) : null}
+      {status === "error" ? (
+        <ErrorView
+          redirectTo={safeRedirect}
+          labels={{
+            title: tLegacy("authFailedTitle"),
+            description: tLegacy("authFailedDescription"),
+            goBack: tLegacy("authGoBack"),
+            tryAgain: tCommonError("tryAgain"),
+          }}
+        />
+      ) : null}
       {status === "group-error" ? (
-        <GroupLookupErrorView message={groupError} redirectTo={safeRedirect} onRetry={() => setRetryNonce((value) => value + 1)} />
+        <GroupLookupErrorView
+          message={groupError}
+          redirectTo={safeRedirect}
+          onRetry={() => setRetryNonce((value) => value + 1)}
+          labels={{
+            title: tLegacy("authOrganizationsFailed"),
+            description: tLegacy("authLoadOrganizationsFailed"),
+            retry: tCommonError("tryAgain"),
+            continue: tOnboardingPrompt("continue"),
+          }}
+        />
       ) : null}
     </main>
   );

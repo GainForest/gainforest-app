@@ -10,6 +10,7 @@
   "authFailedDescription": "No pudimos terminar de iniciar tu sesión. Inténtalo de nuevo y te traeremos de vuelta aquí.",
   "authGoBack": "Volver",
   "authOrganizationsFailed": "Sesión iniciada, pero no se cargaron las organizaciones",
+  "authAsRole": "como {role}",
   "authSignInTitle": "Inicia sesión en GainForest",
   "authSignInDescription": "Inicia sesión o crea tu cuenta para acceder a GainForest.",
   "authUsername": "Nombre de usuario",

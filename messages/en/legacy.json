@@ -10,6 +10,7 @@
   "authFailedDescription": "We couldn’t finish signing you in. Try again and we’ll bring you back here.",
   "authGoBack": "Go back",
   "authOrganizationsFailed": "Signed in, but organizations didn’t load",
+  "authAsRole": "as {role}",
   "authSignInTitle": "Sign in to GainForest",
   "authSignInDescription": "Sign in or create your account to access GainForest.",
   "authUsername": "Username",
