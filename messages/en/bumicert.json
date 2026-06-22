@@ -520,6 +520,8 @@
           "successTitle": "Your Cert was published successfully!",
           "linkEvidenceNow": "Link evidence now",
           "viewBumicert": "View Cert",
+          "viewProject": "View Project",
+          "viewProjects": "View Projects",
           "setUpDonations": "Set Up Donations",
           "shareFeedback": "Share Feedback",
           "createAnother": "Create another cert"

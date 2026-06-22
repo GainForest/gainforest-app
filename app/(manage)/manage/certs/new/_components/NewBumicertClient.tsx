@@ -37,7 +37,7 @@ import {
   type ReactNode,
 } from "react";
 import { format } from "date-fns";
-import { localBumicertHref, hyperscanRecordHref } from "@/app/_lib/urls";
+import { localBumicertHref } from "@/app/_lib/urls";
 import { canCreateRecord, canUpdateRecord } from "@/app/(manage)/manage/_lib/cgs-permissions";
 import { createRecord, getRecord, putRecord, uploadBlob } from "@/app/(manage)/manage/_lib/mutations";
 import { useModal } from "@/components/ui/modal/context";
@@ -1125,9 +1125,12 @@ function DraftsSubheader({
 
 /* ── Published ──────────────────────────────────────────────────────────── */
 
-function PublishedView({ result, target, ownerIdentifier, onReset }: { result: PublishResult; target: ManageTarget; ownerIdentifier: string; onReset: () => void }) {
+function PublishedView({ result, target, ownerIdentifier, linkedProject, onReset }: { result: PublishResult; target: ManageTarget; ownerIdentifier: string; linkedProject: LinkedProjectPrefill | null; onReset: () => void }) {
+  const actionT = useTranslations("bumicert.create.draft.stepForms.submit");
   const detailHref = localBumicertHref(ownerIdentifier, result.rkey);
-  const hyperscanHref = hyperscanRecordHref(result.uri);
+  const projectHref = linkedProject
+    ? manageHref(target, "projects", { mode: "edit", project: linkedProject.rkey })
+    : manageHref(target, "projects");
   return (
     <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }} className="mx-auto max-w-xl py-16 text-center">
       <motion.div
@@ -1146,13 +1149,8 @@ function PublishedView({ result, target, ownerIdentifier, onReset }: { result: P
           <Link href={detailHref}>Open Cert <ArrowRightIcon className="size-4" /></Link>
         </Button>
         <Button asChild variant="secondary">
-          <Link href={manageHref(target, "bumicerts")}>Back to Certs</Link>
+          <Link href={projectHref}>{linkedProject ? actionT("viewProject") : actionT("viewProjects")}</Link>
         </Button>
-        {hyperscanHref ? (
-          <Button asChild variant="ghost">
-            <a href={hyperscanHref} target="_blank" rel="noreferrer">View public details</a>
-          </Button>
-        ) : null}
         <Button variant="ghost" onClick={onReset}>Create another</Button>
       </div>
 
@@ -1486,7 +1484,7 @@ export function NewBumicertClient({
 
       <div className="mx-auto w-full max-w-5xl px-4 py-7 sm:px-6 sm:py-9">
         {publishResult ? (
-          <PublishedView result={publishResult} target={target} ownerIdentifier={ownerIdentifier} onReset={resetForm} />
+          <PublishedView result={publishResult} target={target} ownerIdentifier={ownerIdentifier} linkedProject={canLinkToProject ? linkedProject : null} onReset={resetForm} />
         ) : (
           <>
             <form onSubmit={handlePublish} className="mt-2 grid gap-x-14 gap-y-12 xl:grid-cols-[minmax(0,1fr)_18rem]">

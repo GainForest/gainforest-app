@@ -39,7 +39,7 @@ import {
 } from "react";
 import type { AuthSession } from "@/app/_lib/auth";
 import { AuthButton } from "@/app/_components/AuthFlow";
-import { localBumicertHref, hyperscanRecordHref } from "@/app/_lib/urls";
+import { localBumicertHref } from "@/app/_lib/urls";
 import { createRecord, uploadBlob } from "@/app/(manage)/manage/_lib/mutations";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -860,8 +860,8 @@ function ReviewStep({ values, sites, publishError }: { values: FormValues; sites
 }
 
 function PublishSuccess({ result, session, onReset }: { result: PublishResult; session: Extract<AuthSession, { isLoggedIn: true }>; onReset: () => void }) {
+  const actionT = useTranslations("bumicert.create.draft.stepForms.submit");
   const detailHref = localBumicertHref(session.handle || session.did, result.rkey);
-  const hyperscanHref = hyperscanRecordHref(result.uri);
   return (
     <motion.div
       initial={{ opacity: 0, y: 18, scale: 0.98 }}
@@ -879,11 +879,9 @@ function PublishSuccess({ result, session, onReset }: { result: PublishResult; s
         <Button asChild>
           <Link href={detailHref}>Open Cert <ArrowRightIcon /></Link>
         </Button>
-        {hyperscanHref ? (
-          <Button variant="outline" asChild>
-            <a href={hyperscanHref} target="_blank" rel="noreferrer">Open public entry</a>
-          </Button>
-        ) : null}
+        <Button variant="outline" asChild>
+          <Link href="/projects">{actionT("viewProjects")}</Link>
+        </Button>
         <Button type="button" variant="outline" onClick={onReset}>Create another</Button>
       </div>
 

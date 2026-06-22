@@ -520,6 +520,8 @@
           "successTitle": "¡Su certificado se publicó correctamente!",
           "linkEvidenceNow": "Vincule evidencia ahora",
           "viewBumicert": "Ver certificado",
+          "viewProject": "Ver proyecto",
+          "viewProjects": "Ver proyectos",
           "setUpDonations": "Configurar donaciones",
           "shareFeedback": "Compartir comentarios",
           "createAnother": "Crear otro certificado"
