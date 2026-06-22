@@ -18,7 +18,7 @@
       "filters": {
         "all": "All",
         "tree": "Trees",
-        "audio": "Audio",
+        "audio": "Sounds",
         "biodiversity": "Nature",
         "document": "Document",
         "file": "Files"
@@ -182,11 +182,11 @@
     },
     "timelineEntry": {
       "kind": {
-        "tree": "Tree dataset",
-        "audio": "Acoustic data",
-        "biodiversity": "Nature sightings",
-        "document": "Document",
-        "site": "Site",
+        "tree": "Trees",
+        "audio": "Sounds",
+        "biodiversity": "Nature",
+        "document": "Files",
+        "site": "Project place",
         "other": "Evidence"
       },
       "notSpecified": "Not specified",
@@ -265,7 +265,12 @@
       "deleteError": "Unable to remove this item.",
       "deleteAlreadyRemoved": "This evidence was already removed. Refresh the page.",
       "displayedBiodiversityData": "Displayed nature records",
-      "natureObservationsFallback": "Nature sightings"
+      "natureObservationsFallback": "Nature sightings",
+      "openLinkedFile": "Open linked file",
+      "openFile": "Open file",
+      "downloadFile": "Download file",
+      "previewUnavailable": "This file cannot be previewed here.",
+      "unresolvedReferenceBody": "This linked evidence could not be loaded yet."
     },
     "reference": {
       "linkedRecord": "Linked record",

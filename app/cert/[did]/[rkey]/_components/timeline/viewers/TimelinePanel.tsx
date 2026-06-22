@@ -1,0 +1,229 @@
+"use client";
+
+import { useMemo, useState } from "react";
+import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
+import type { TimelineAttachmentItem } from "@/app/_lib/indexer";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import type { TimelineMutationPermission, TimelineSourceData } from "../EvidenceAdder";
+import type { TimelineReference, TimelineReferenceCopy } from "../timelineReferences";
+import {
+  TIMELINE_EVIDENCE_FILTERS,
+  type TimelineEvidenceFilter,
+} from "../shared/evidenceKind";
+import type { TimelineFeedCopy } from "../shared/timelineFeedViewModel";
+import { formatLinkedWindow } from "../shared/timelineDates";
+import {
+  buildTimelineEntryViewModels,
+  getFilteredTimelineEntries,
+  getTimelineFilterCounts,
+  paginateTimelineEntries,
+} from "../shared/timelineViewModel";
+import { TimelineEntryList } from "./TimelineEntryList";
+import { TimelineEmpty } from "./shared/TimelineEmpty";
+import { TimelineMapPreview } from "./shared/TimelineMapPreview";
+
+const DEFAULT_PAGE_SIZE = 8;
+
+export function TimelinePanel({
+  entries,
+  sources,
+  references,
+  canManageEvidence,
+  deletePermission,
+  mutationRepo,
+  onDeleted,
+  pageSize = DEFAULT_PAGE_SIZE,
+}: {
+  entries: TimelineAttachmentItem[];
+  sources: TimelineSourceData;
+  references: TimelineReference[];
+  canManageEvidence: boolean;
+  deletePermission: TimelineMutationPermission;
+  mutationRepo?: string;
+  onDeleted: (rkey: string) => void;
+  pageSize?: number;
+}) {
+  const timelineT = useTranslations("bumicert.detail.timeline");
+  const entryT = useTranslations("bumicert.detail.timelineEntry");
+  const referenceT = useTranslations("bumicert.detail.reference");
+  const locale = useLocale();
+  const [activeFilter, setActiveFilter] = useState<TimelineEvidenceFilter>("all");
+  const [currentPage, setCurrentPage] = useState(1);
+  const linkedWindow = useMemo(() => formatLinkedWindow(entries, locale), [entries, locale]);
+  const referenceCopy = useMemo<TimelineReferenceCopy>(
+    () => ({
+      linkedRecord: referenceT("linkedRecord"),
+      linkedAudioRecord: referenceT("linkedAudioRecord"),
+      audioEvidence: referenceT("audioEvidence"),
+      linkedDataset: referenceT("linkedDataset"),
+      linkedTreeRecord: referenceT("linkedTreeRecord"),
+      linkedSiteRecord: referenceT("linkedSiteRecord"),
+      siteEvidence: referenceT("siteEvidence"),
+      linkedNatureData: timelineT("fallbacks.linkedNatureData"),
+      treeCount: (count: number) => entryT("treeCount", { count }),
+      speciesCount: (count: number) => entryT("speciesCount", { count }),
+      observationCount: (count: number) => entryT("observationCount", { count }),
+      individualCount: (count: number) => referenceT("individualCount", { count }),
+    }),
+    [entryT, referenceT, timelineT],
+  );
+  const feedCopy = useMemo<TimelineFeedCopy>(
+    () => ({
+      linkedNatureDataGroup: timelineT("fallbacks.linkedNatureDataGroup"),
+      linkedNatureData: timelineT("fallbacks.linkedNatureData"),
+      linkedFile: entryT("linkedFile"),
+      image: entryT("previewKinds.image"),
+      video: entryT("previewKinds.video"),
+      audio: entryT("previewKinds.audio"),
+      pdf: entryT("previewKinds.pdf"),
+      document: entryT("previewKinds.document"),
+      linkedTreeInformation: entryT("linkedTreeInformation"),
+      linkedItem: entryT("linkedItem"),
+      linkedProjectPlace: entryT("linkedProjectPlace"),
+      linkedTreeGroup: entryT("linkedTreeGroup"),
+      linkedSound: entryT("linkedSound"),
+      groupedData: entryT("groupedData"),
+      unresolvedReferenceBody: entryT("unresolvedReferenceBody"),
+    }),
+    [entryT, timelineT],
+  );
+  const entryModels = useMemo(
+    () =>
+      buildTimelineEntryViewModels({
+        entries,
+        sources,
+        providedReferences: references,
+        referenceCopy,
+        feedCopy,
+      }),
+    [entries, feedCopy, referenceCopy, references, sources],
+  );
+  const counts = useMemo(() => getTimelineFilterCounts(entryModels), [entryModels]);
+  const filteredEntries = useMemo(
+    () => getFilteredTimelineEntries(entryModels, activeFilter),
+    [activeFilter, entryModels],
+  );
+  const { totalPages, safePage, visibleItems } = useMemo(
+    () => paginateTimelineEntries(filteredEntries, currentPage, pageSize),
+    [currentPage, filteredEntries, pageSize],
+  );
+  const mapRefs = useMemo(
+    () => entryModels.flatMap((entry) => entry.refs.filter((ref) => ref.kind === "tree" && ref.mapHref)),
+    [entryModels],
+  );
+
+  function handleFilterChange(filter: TimelineEvidenceFilter) {
+    setActiveFilter(filter);
+    setCurrentPage(1);
+  }
+
+  const filterLabels: Record<TimelineEvidenceFilter, string> = {
+    all: timelineT("filters.all"),
+    tree: timelineT("filters.tree"),
+    audio: timelineT("filters.audio"),
+    nature: timelineT("filters.biodiversity"),
+    file: timelineT("filters.file"),
+  };
+
+  return (
+    <section className="space-y-4" aria-labelledby="timeline-heading">
+      <div className="rounded-2xl border border-border/50 bg-background p-4">
+        <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+          <div>
+            <h2 id="timeline-heading" className="text-2xl tracking-tight text-foreground">
+              {timelineT("linkedTitle")}
+            </h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {timelineT("linkedItemCount", { count: entries.length })}
+              {linkedWindow ? ` · ${timelineT("linked", { window: linkedWindow })}` : ""}
+            </p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              {timelineT("linkedDescription")}
+            </p>
+          </div>
+          {linkedWindow ? (
+            <p className="text-xs text-muted-foreground">
+              {timelineT("linkedWindow", { window: linkedWindow })}
+            </p>
+          ) : null}
+        </div>
+
+        <div className="mt-4 flex flex-wrap gap-2">
+          {TIMELINE_EVIDENCE_FILTERS.map((filter) => {
+            const isActive = activeFilter === filter.id;
+            const count = counts.get(filter.id) ?? 0;
+            return (
+              <button
+                key={filter.id}
+                type="button"
+                aria-pressed={isActive}
+                onClick={() => handleFilterChange(filter.id)}
+                className={cn(
+                  "rounded-md border px-3 py-1.5 text-xs font-medium transition-colors",
+                  isActive
+                    ? "border-primary bg-primary text-primary-foreground"
+                    : "border-border bg-background text-muted-foreground hover:bg-muted/60 hover:text-foreground",
+                )}
+              >
+                {filterLabels[filter.id]}
+                {filter.id !== "all" && count > 0 ? ` ${count}` : ""}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {mapRefs.length > 0 ? <TimelineMapPreview refs={mapRefs} /> : null}
+
+      {entries.length === 0 ? (
+        <TimelineEmpty />
+      ) : filteredEntries.length === 0 ? (
+        <div className="rounded-2xl border border-dashed border-border/70 py-10 text-center text-sm text-muted-foreground">
+          {timelineT("emptyFiltered")}
+        </div>
+      ) : (
+        <>
+          <TimelineEntryList
+            entries={visibleItems}
+            canManageEvidence={canManageEvidence}
+            canDeleteEvidence={deletePermission.allowed}
+            deleteDisabledReason={deletePermission.reason}
+            mutationRepo={mutationRepo}
+            onDeleted={onDeleted}
+          />
+          {totalPages > 1 ? (
+            <div className="flex items-center justify-between pt-2">
+              <p className="text-sm text-muted-foreground">
+                {timelineT("pageOf", { current: safePage, total: totalPages })}
+              </p>
+              <div className="flex items-center gap-1">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon-sm"
+                  onClick={() => setCurrentPage(Math.max(1, safePage - 1))}
+                  disabled={safePage <= 1}
+                  aria-label={timelineT("previousPage")}
+                >
+                  <ChevronLeftIcon />
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon-sm"
+                  onClick={() => setCurrentPage(Math.min(totalPages, safePage + 1))}
+                  disabled={safePage >= totalPages}
+                  aria-label={timelineT("nextPage")}
+                >
+                  <ChevronRightIcon />
+                </Button>
+              </div>
+            </div>
+          ) : null}
+        </>
+      )}
+    </section>
+  );
+}

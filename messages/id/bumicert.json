@@ -18,7 +18,7 @@
       "filters": {
         "all": "Semua",
         "tree": "Pohon",
-        "audio": "Audio",
+        "audio": "Suara",
         "biodiversity": "Alam",
         "document": "Dokumen",
         "file": "Berkas"
@@ -182,11 +182,11 @@
     },
     "timelineEntry": {
       "kind": {
-        "tree": "Dataset pohon",
-        "audio": "Data akustik",
-        "biodiversity": "Temuan alam",
-        "document": "Dokumen",
-        "site": "Situs",
+        "tree": "Pohon",
+        "audio": "Suara",
+        "biodiversity": "Alam",
+        "document": "Berkas",
+        "site": "Lokasi proyek",
         "other": "Bukti"
       },
       "notSpecified": "Tidak ditentukan",
@@ -265,7 +265,12 @@
       "deleteError": "Item ini tidak dapat dihapus.",
       "deleteAlreadyRemoved": "Bukti ini sudah dihapus. Muat ulang halaman.",
       "displayedBiodiversityData": "Catatan alam yang ditampilkan",
-      "natureObservationsFallback": "Temuan alam"
+      "natureObservationsFallback": "Temuan alam",
+      "openLinkedFile": "Buka berkas tertaut",
+      "openFile": "Buka berkas",
+      "downloadFile": "Unduh berkas",
+      "previewUnavailable": "Berkas ini tidak dapat dipratinjau di sini.",
+      "unresolvedReferenceBody": "Bukti tertaut ini belum dapat dimuat."
     },
     "reference": {
       "linkedRecord": "Catatan tertaut",

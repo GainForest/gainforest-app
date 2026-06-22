@@ -18,7 +18,7 @@
       "filters": {
         "all": "Todos",
         "tree": "Árvores",
-        "audio": "Áudio",
+        "audio": "Sons",
         "biodiversity": "Natureza",
         "document": "Documento",
         "file": "Arquivos"
@@ -182,11 +182,11 @@
     },
     "timelineEntry": {
       "kind": {
-        "tree": "Conjunto de dados de árvore",
-        "audio": "Dados acústicos",
-        "biodiversity": "Avistamentos da natureza",
-        "document": "Documento",
-        "site": "Local",
+        "tree": "Árvores",
+        "audio": "Sons",
+        "biodiversity": "Natureza",
+        "document": "Arquivos",
+        "site": "Local do projeto",
         "other": "Evidência"
       },
       "notSpecified": "Não especificado",
@@ -265,7 +265,12 @@
       "deleteError": "Não foi possível remover este item.",
       "deleteAlreadyRemoved": "Esta evidência já foi removida. Atualize a página.",
       "displayedBiodiversityData": "Registros de natureza exibidos",
-      "natureObservationsFallback": "Avistamentos da natureza"
+      "natureObservationsFallback": "Avistamentos da natureza",
+      "openLinkedFile": "Abrir arquivo vinculado",
+      "openFile": "Abrir arquivo",
+      "downloadFile": "Baixar arquivo",
+      "previewUnavailable": "Este arquivo não pode ser pré-visualizado aqui.",
+      "unresolvedReferenceBody": "Esta evidência vinculada ainda não pôde ser carregada."
     },
     "reference": {
       "linkedRecord": "Registro vinculado",

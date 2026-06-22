@@ -182,11 +182,11 @@
     },
     "timelineEntry": {
       "kind": {
-        "tree": "Seti ya data ya mti",
-        "audio": "Data ya akustisk",
-        "biodiversity": "Mionekano ya asili",
-        "document": "Hati",
-        "site": "Tovuti",
+        "tree": "Miti",
+        "audio": "Sauti",
+        "biodiversity": "Asili",
+        "document": "Faili",
+        "site": "Eneo la mradi",
         "other": "Ushahidi"
       },
       "notSpecified": "Haijabainishwa",
@@ -265,7 +265,12 @@
       "deleteError": "Imeshindikana kuondoa kipengee hiki.",
       "deleteAlreadyRemoved": "Ushahidi huu tayari umeondolewa. Onyesha upya ukurasa.",
       "displayedBiodiversityData": "Rekodi za asili zinazoonyeshwa",
-      "natureObservationsFallback": "Mionekano ya asili"
+      "natureObservationsFallback": "Mionekano ya asili",
+      "openLinkedFile": "Fungua faili iliyounganishwa",
+      "openFile": "Fungua faili",
+      "downloadFile": "Pakua faili",
+      "previewUnavailable": "Faili hii haiwezi kuhakikiwa hapa.",
+      "unresolvedReferenceBody": "Ushahidi huu uliounganishwa haukuweza kupakiwa bado."
     },
     "reference": {
       "linkedRecord": "Rekodi iliyounganishwa",
