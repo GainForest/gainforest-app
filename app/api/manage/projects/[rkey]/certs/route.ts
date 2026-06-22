@@ -21,6 +21,11 @@ type ListedRecord = {
   value?: Record<string, unknown>;
 };
 
+type ListedRecordsResponse = {
+  cursor?: string;
+  records?: ListedRecord[];
+};
+
 type GetRecordResponse = {
   uri: string;
   cid: string;
@@ -39,19 +44,22 @@ export async function GET(
   if (!rkey) return Response.json({ error: "Missing project." }, { status: 400 });
 
   try {
-    const [indexedProjects, directProject, indexedBumicerts] = await Promise.all([
+    const [indexedProjects, directProject, indexedBumicerts, directBumicerts] = await Promise.all([
       fetchProjectsByDid(target.did, 500).then((page) => page.records).catch(() => []),
       fetchDirectProject(target.did, rkey).catch(() => null),
       fetchBumicertsByDid(target.did, 500).then((page) => page.records).catch(() => []),
+      fetchDirectBumicerts(target.did).catch(() => []),
     ]);
     const indexedProject = indexedProjects.find((project) => project.rkey === rkey) ?? null;
     const project = mergeProject(indexedProject, directProject);
     if (!project) return Response.json({ error: "Project not found." }, { status: 404 });
 
     const linkedUris = new Set(project.bumicertUris);
-    const missingLinkedUris = project.bumicertUris.filter((uri) => !indexedBumicerts.some((cert) => cert.atUri === uri));
+    const knownUris = new Set([...indexedBumicerts, ...directBumicerts].map((cert) => cert.atUri));
+    const missingLinkedUris = project.bumicertUris.filter((uri) => !knownUris.has(uri));
     const directLinkedBumicerts = await Promise.all(missingLinkedUris.map((uri) => fetchDirectBumicertFromUri(uri).catch(() => null)));
-    const certs = mergeBumicerts(indexedBumicerts, directLinkedBumicerts.filter((cert): cert is BumicertRecord => Boolean(cert)), linkedUris);
+    const directCerts = [...directBumicerts, ...directLinkedBumicerts.filter((cert): cert is BumicertRecord => Boolean(cert))];
+    const certs = mergeBumicerts(indexedBumicerts, directCerts, linkedUris);
 
     return Response.json({ project, certs });
   } catch (error) {
@@ -174,6 +182,26 @@ function mergeProject(indexed: ProjectRecord | null, direct: ManagedProject | nu
     bumicertCount: direct ? direct.bumicertUris.length : indexed.bumicertCount,
     locationUri: indexed.locationUri ?? direct?.locationUri ?? null,
   };
+}
+
+async function fetchDirectBumicerts(did: string): Promise<BumicertRecord[]> {
+  const all: BumicertRecord[] = [];
+  let cursor: string | null = null;
+
+  for (let page = 0; page < 50; page += 1) {
+    const params = new URLSearchParams({ repo: did, collection: BUMICERT_COLLECTION, limit: "100" });
+    if (cursor) params.set("cursor", cursor);
+    const data = await fetchPdsJson<ListedRecordsResponse>(did, "com.atproto.repo.listRecords", params);
+    if (!data) break;
+
+    const certs = await Promise.all((data.records ?? []).map((record) => directBumicertFromRecord(did, record)));
+    all.push(...certs.filter((cert): cert is BumicertRecord => Boolean(cert)));
+
+    if (!data.cursor) break;
+    cursor = data.cursor;
+  }
+
+  return all;
 }
 
 async function fetchDirectBumicertFromUri(uri: string): Promise<BumicertRecord | null> {
