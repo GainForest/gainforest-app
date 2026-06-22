@@ -755,5 +755,14 @@
       "unlisted": "Unlisted",
       "unlistedDescription": "Only accessible via direct link. Not listed publicly or in search."
     }
+  },
+  "accountSetup": {
+    "recoveryEmail": {
+      "advanced": "Advanced",
+      "label": "Recovery email (optional)",
+      "description": "Leave this blank and we’ll create a recovery address from your account email.",
+      "placeholder": "recovery@example.com",
+      "invalid": "Enter a valid email address."
+    }
   }
 }

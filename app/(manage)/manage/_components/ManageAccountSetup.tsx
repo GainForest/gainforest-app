@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useCallback, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { AnimatePresence, motion, type Variants } from "framer-motion";
 import {
   ArrowLeftIcon,
@@ -15,6 +16,7 @@ import {
   SparklesIcon,
 } from "lucide-react";
 import { format, parseISO } from "date-fns";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
@@ -86,6 +88,40 @@ function normalizeWebsite(url: string): string | undefined {
   const trimmed = url.trim();
   if (!trimmed) return undefined;
   return trimmed.startsWith("http") ? trimmed : `https://${trimmed}`;
+}
+
+function validateEmail(email: string): boolean {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+}
+
+function slugifyEmailAliasPart(value: string): string {
+  return value
+    .trim()
+    .toLowerCase()
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+function buildOrganizationRecoveryEmail(baseEmail: string | null | undefined, organizationName: string, salt: string): string {
+  const trimmedEmail = baseEmail?.trim();
+  if (!trimmedEmail || !validateEmail(trimmedEmail)) return "";
+
+  const atIndex = trimmedEmail.lastIndexOf("@");
+  const localPart = trimmedEmail.slice(0, atIndex);
+  const domain = trimmedEmail.slice(atIndex + 1);
+  const normalizedSalt = slugifyEmailAliasPart(salt).slice(0, 8) || "org";
+  const maxSuffixLength = 64 - localPart.length - 1;
+  if (maxSuffixLength < normalizedSalt.length) return "";
+
+  const namePart = slugifyEmailAliasPart(organizationName).slice(0, 24) || "organization";
+  const maxNameLength = maxSuffixLength - normalizedSalt.length - 1;
+  const suffix = maxNameLength >= 1
+    ? `${namePart.slice(0, maxNameLength).replace(/-+$/g, "") || "org"}-${normalizedSalt}`
+    : normalizedSalt;
+
+  return `${localPart}+${suffix}@${domain}`;
 }
 
 // ── GainForest mark ──────────────────────────────────────────────────────────
@@ -222,6 +258,9 @@ function OrganizationSetupDetailsPanel({
   country,
   startDate,
   longDescription,
+  recoveryEmail,
+  recoveryEmailError,
+  advancedValue,
   canSubmit,
   showAiGeneratedReviewNotice,
   isSubmitting,
@@ -231,10 +270,15 @@ function OrganizationSetupDetailsPanel({
   onCountryChange,
   onStartDateChange,
   onLongDescriptionChange,
+  onRecoveryEmailChange,
+  onAdvancedValueChange,
 }: {
   country: string;
   startDate: string;
   longDescription: string;
+  recoveryEmail: string;
+  recoveryEmailError?: string;
+  advancedValue: string;
   canSubmit: boolean;
   showAiGeneratedReviewNotice: boolean;
   isSubmitting: boolean;
@@ -244,8 +288,11 @@ function OrganizationSetupDetailsPanel({
   onCountryChange: (value: string) => void;
   onStartDateChange: (value: string) => void;
   onLongDescriptionChange: (value: string) => void;
+  onRecoveryEmailChange: (value: string) => void;
+  onAdvancedValueChange: (value: string) => void;
 }) {
   const modal = useModal();
+  const recoveryT = useTranslations("upload.accountSetup.recoveryEmail");
   const selectedDate = useMemo(
     () => (startDate ? parseISO(startDate) : undefined),
     [startDate],
@@ -348,6 +395,36 @@ function OrganizationSetupDetailsPanel({
         />
       </div>
 
+      <Accordion
+        type="single"
+        collapsible
+        value={advancedValue}
+        onValueChange={onAdvancedValueChange}
+        className="rounded-2xl border bg-background/70 px-4"
+      >
+        <AccordionItem value="advanced" className="border-0">
+          <AccordionTrigger className="py-3 text-sm font-medium text-muted-foreground hover:text-foreground hover:no-underline">
+            {recoveryT("advanced")}
+          </AccordionTrigger>
+          <AccordionContent className="space-y-3 pb-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">{recoveryT("label")}</label>
+              <InputGroup className="rounded-full">
+                <InputGroupInput
+                  type="email"
+                  value={recoveryEmail}
+                  onChange={(event) => onRecoveryEmailChange(event.target.value)}
+                  placeholder={recoveryT("placeholder")}
+                  aria-invalid={recoveryEmailError ? true : undefined}
+                />
+              </InputGroup>
+              <p className="text-xs text-muted-foreground">{recoveryT("description")}</p>
+              <FieldError error={recoveryEmailError} />
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
+
       {submitError ? <p className="text-sm text-destructive">{submitError}</p> : null}
 
       {showAiGeneratedReviewNotice ? (
@@ -396,6 +473,7 @@ function AccountSetupForm({
   onBack: () => void;
 }) {
   const router = useRouter();
+  const recoveryT = useTranslations("upload.accountSetup.recoveryEmail");
 
   const [displayName, setDisplayName] = useState("");
   const [shortDescription, setShortDescription] = useState("");
@@ -421,11 +499,26 @@ function AccountSetupForm({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [onboardingStep, setOnboardingStep] = useState(0);
   const [stepDirection, setStepDirection] = useState<1 | -1>(1);
+  const [recoveryEmailSalt] = useState(() => Math.random().toString(36).slice(2, 8));
+  const [recoveryEmailDraft, setRecoveryEmailDraft] = useState("");
+  const [recoveryEmailServerError, setRecoveryEmailServerError] = useState<string | undefined>();
+  const [advancedValue, setAdvancedValue] = useState("");
 
   const isOrganizationFlow = kind === "organization";
   const isOrganizationDetailsStep = isOrganizationFlow && onboardingStep === 1;
 
   const domain = useMemo(() => extractDomain(website), [website]);
+  const generatedRecoveryEmail = useMemo(
+    () => (kind === "organization" ? buildOrganizationRecoveryEmail(recoveryEmail, displayName, recoveryEmailSalt) : ""),
+    [displayName, kind, recoveryEmail, recoveryEmailSalt],
+  );
+  const organizationRecoveryEmail = recoveryEmailDraft;
+  const recoveryEmailError = useMemo(() => {
+    if (kind !== "organization") return undefined;
+    const trimmedEmail = organizationRecoveryEmail.trim();
+    if (trimmedEmail.length > 0 && !validateEmail(trimmedEmail)) return recoveryT("invalid");
+    return recoveryEmailServerError;
+  }, [kind, organizationRecoveryEmail, recoveryEmailServerError, recoveryT]);
 
   const fieldErrors = useMemo(() => {
     const errors: { displayName?: string; shortDescription?: string; website?: string } = {};
@@ -443,7 +536,7 @@ function AccountSetupForm({
     return errors;
   }, [displayName, shortDescription, website, kind]);
 
-  const canSubmit = Object.keys(fieldErrors).length === 0 && !isSubmitting;
+  const canSubmit = Object.keys(fieldErrors).length === 0 && !recoveryEmailError && !isSubmitting;
   const canFetchBrandInfo =
     kind === "organization" &&
     website.trim().length > 0 &&
@@ -452,7 +545,10 @@ function AccountSetupForm({
     !isFetchingBrandInfo;
   const hasSuccessfulPrefill = brandfetchFeedback?.tone === "success";
   const isOrganizationOptionalStepEmpty =
-    country.trim().length === 0 && startDate.length === 0 && longDescription.trim().length === 0;
+    country.trim().length === 0 &&
+    startDate.length === 0 &&
+    longDescription.trim().length === 0 &&
+    organizationRecoveryEmail.trim().length === 0;
 
   const visibleDisplayNameError = touchedFields.displayName ? fieldErrors.displayName : undefined;
   const visibleShortDescriptionError = touchedFields.shortDescription ? fieldErrors.shortDescription : undefined;
@@ -528,8 +624,8 @@ function AccountSetupForm({
       ...(kind === "organization" ? { website: true } : {}),
     });
 
-    if (Object.keys(fieldErrors).length > 0) {
-      if (isOrganizationDetailsStep) {
+    if (Object.keys(fieldErrors).length > 0 || recoveryEmailError) {
+      if (Object.keys(fieldErrors).length > 0 && isOrganizationDetailsStep) {
         setStepDirection(-1);
         setOnboardingStep(0);
       }
@@ -543,12 +639,13 @@ function AccountSetupForm({
       const trimmedName = displayName.trim();
       const trimmedBio = shortDescription.trim();
       const normalizedWebsite = kind === "organization" ? normalizeWebsite(website) : undefined;
+      const trimmedRecoveryEmail = organizationRecoveryEmail.trim() || generatedRecoveryEmail;
       const registeredOrganization = kind === "organization"
         ? await registerCgsGroup({
             ownerDid,
             displayName: trimmedName,
             description: trimmedBio,
-            ...(recoveryEmail?.trim() ? { email: recoveryEmail.trim() } : {}),
+            ...(trimmedRecoveryEmail ? { email: trimmedRecoveryEmail } : {}),
             ...(normalizedWebsite ? { website: normalizedWebsite } : {}),
           })
         : null;
@@ -610,7 +707,15 @@ function AccountSetupForm({
         : "/manage");
       router.refresh();
     } catch (err) {
-      setSubmitError(err instanceof Error ? err.message : "Failed to complete setup.");
+      const message = err instanceof Error ? err.message : "Failed to complete setup.";
+      if (kind === "organization" && message.toLowerCase().includes("email already taken")) {
+        if (!organizationRecoveryEmail.trim() && generatedRecoveryEmail) setRecoveryEmailDraft(generatedRecoveryEmail);
+        setAdvancedValue("advanced");
+        setRecoveryEmailServerError(message);
+        setSubmitError(null);
+      } else {
+        setSubmitError(message);
+      }
       setIsSubmitting(false);
     }
   }, [
@@ -619,11 +724,13 @@ function AccountSetupForm({
     displayName,
     fieldErrors,
     isOrganizationDetailsStep,
+    generatedRecoveryEmail,
     kind,
     longDescription,
+    organizationRecoveryEmail,
     ownerDid,
     primaryImage,
-    recoveryEmail,
+    recoveryEmailError,
     router,
     shortDescription,
     startDate,
@@ -660,7 +767,8 @@ function AccountSetupForm({
               <GlobeIcon />
             </InputGroupAddon>
             <InputGroupInput
-              type="url"
+              type="text"
+              inputMode="url"
               value={website}
               onChange={(event) => {
                 setWebsite(event.target.value);
@@ -715,6 +823,7 @@ function AccountSetupForm({
         onDisplayNameChange={(value) => {
           setDisplayName(value);
           setTouchedFields((current) => ({ ...current, displayName: true }));
+          setRecoveryEmailServerError(undefined);
           setSubmitError(null);
         }}
       />
@@ -796,6 +905,9 @@ function AccountSetupForm({
                   country={country}
                   startDate={startDate}
                   longDescription={longDescription}
+                  recoveryEmail={organizationRecoveryEmail}
+                  recoveryEmailError={recoveryEmailError}
+                  advancedValue={advancedValue}
                   canSubmit={canSubmit}
                   showAiGeneratedReviewNotice={hasSuccessfulPrefill}
                   isSubmitting={isSubmitting}
@@ -808,6 +920,12 @@ function AccountSetupForm({
                   onCountryChange={setCountry}
                   onStartDateChange={setStartDate}
                   onLongDescriptionChange={setLongDescription}
+                  onRecoveryEmailChange={(value) => {
+                    setRecoveryEmailDraft(value);
+                    setRecoveryEmailServerError(undefined);
+                    setSubmitError(null);
+                  }}
+                  onAdvancedValueChange={setAdvancedValue}
                 />
               ) : (
                 <>

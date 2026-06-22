@@ -755,5 +755,14 @@
       "unlisted": "Halijaorodheshwa",
       "unlistedDescription": "Linapatikana kwa kiungo cha moja kwa moja pekee. Halionekani hadharani wala kwenye utafutaji."
     }
+  },
+  "accountSetup": {
+    "recoveryEmail": {
+      "advanced": "Ya kina",
+      "label": "Barua pepe ya kurejesha (si lazima)",
+      "description": "Acha tupu na tutaunda anwani ya kurejesha kutoka barua pepe ya akaunti yako.",
+      "placeholder": "rejesha@example.com",
+      "invalid": "Weka barua pepe halali."
+    }
   }
 }

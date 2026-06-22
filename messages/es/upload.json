@@ -755,5 +755,14 @@
       "unlisted": "No listada",
       "unlistedDescription": "Solo accesible mediante enlace directo. No aparece públicamente ni en búsquedas."
     }
+  },
+  "accountSetup": {
+    "recoveryEmail": {
+      "advanced": "Avanzado",
+      "label": "Correo de recuperación (opcional)",
+      "description": "Déjalo en blanco y crearemos una dirección de recuperación a partir del correo de tu cuenta.",
+      "placeholder": "recuperacion@ejemplo.com",
+      "invalid": "Introduce un correo válido."
+    }
   }
 }

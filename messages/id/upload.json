@@ -755,5 +755,14 @@
       "unlisted": "Tidak terdaftar",
       "unlistedDescription": "Hanya dapat diakses melalui tautan langsung. Tidak ditampilkan secara publik atau dalam pencarian."
     }
+  },
+  "accountSetup": {
+    "recoveryEmail": {
+      "advanced": "Lanjutan",
+      "label": "Email pemulihan (opsional)",
+      "description": "Biarkan kosong dan kami akan membuat alamat pemulihan dari email akun Anda.",
+      "placeholder": "pemulihan@example.com",
+      "invalid": "Masukkan alamat email yang valid."
+    }
   }
 }
