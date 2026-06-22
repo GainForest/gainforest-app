@@ -7,7 +7,6 @@ import { AnimatePresence, motion } from "framer-motion";
 import { parseAsString, parseAsStringEnum, useQueryStates } from "nuqs";
 import {
   BadgeCheckIcon,
-  CheckIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
   CirclePlusIcon,
@@ -22,7 +21,7 @@ import {
   TriangleAlertIcon,
   XIcon,
 } from "lucide-react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import type { ChangeEvent, FormEvent, ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { ModalContent, ModalDescription, ModalFooter, ModalHeader, ModalTitle } from "@/components/ui/modal/modal";
@@ -30,7 +29,6 @@ import { useModal } from "@/components/ui/modal/context";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { manageApiHref, manageHref, type ManageTarget } from "@/lib/links";
-import type { BumicertRecord } from "@/app/_lib/indexer";
 import { canCreateRecord, canDeleteRecord, canUpdateRecord } from "../../_lib/cgs-permissions";
 import { createRecord, deleteRecord, putRecord, uploadBlob } from "../../_lib/mutations";
 
@@ -71,7 +69,6 @@ type ProjectDraft = {
   title: string;
   shortDescription: string;
   description: string;
-  bumicertUris: string[];
 };
 
 type UploadedBlobLike = {
@@ -92,10 +89,9 @@ const emptyDraft: ProjectDraft = {
   title: "",
   shortDescription: "",
   description: "",
-  bumicertUris: [],
 };
 
-export function ManageProjectsClient({ target, bumicerts }: { target: ManageTarget; bumicerts: BumicertRecord[] }) {
+export function ManageProjectsClient({ target }: { target: ManageTarget }) {
   const [projects, setProjects] = useState<ManagedProject[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -178,7 +174,6 @@ export function ManageProjectsClient({ target, bumicerts }: { target: ManageTarg
             key="new-project"
             state={{ mode: "create", project: null }}
             target={target}
-            bumicerts={bumicerts}
             presentation="inline"
             onClose={backToList}
             onSaved={() => {
@@ -194,7 +189,6 @@ export function ManageProjectsClient({ target, bumicerts }: { target: ManageTarg
               key={selectedProject.atUri}
               state={{ mode: "edit", project: selectedProject }}
               target={target}
-              bumicerts={bumicerts}
               presentation="inline"
               onClose={backToList}
               onSaved={() => {
@@ -243,6 +237,7 @@ export function ManageProjectsClient({ target, bumicerts }: { target: ManageTarg
                       project={project}
                       index={index}
                       galleryHref={`${target.basePath}/projects/${encodeURIComponent(project.rkey)}/gallery`}
+                      certsHref={`${target.basePath}/projects/${encodeURIComponent(project.rkey)}/certs`}
                       onEdit={() => openEdit(project)}
                       disabledReason={updatePermission.reason}
                     />
@@ -278,15 +273,18 @@ function ProjectCard({
   project,
   index,
   galleryHref,
+  certsHref,
   onEdit,
   disabledReason = null,
 }: {
   project: ManagedProject;
   index: number;
   galleryHref: string;
+  certsHref: string;
   onEdit: () => void;
   disabledReason?: string | null;
 }) {
+  const t = useTranslations("marketplace.manageProjects.actions");
   const hasImage = Boolean(project.imageUrl);
   const disabled = Boolean(disabledReason);
 
@@ -358,23 +356,21 @@ function ProjectCard({
           <p className="mt-2 truncate text-xs text-muted-foreground/75">{project.atUri}</p>
         </div>
 
-        <div className="mt-3 flex flex-wrap items-center justify-between gap-2 pt-2">
-          <div className="flex min-w-0 flex-wrap gap-2 text-xs text-muted-foreground">
-            <span>{project.bumicertCount > 0 ? `${project.bumicertCount} linked stor${project.bumicertCount === 1 ? "y" : "ies"}` : "No linked stories"}</span>
-            <span>Created {formatProjectDate(project.createdAt)}</span>
-            {project.imageUrl || project.imageRef ? (
-              <span className="inline-flex items-center gap-1">
-                <ImageIcon className="h-3.5 w-3.5" />
-                Photo
-              </span>
-            ) : null}
+        <div className="mt-3 flex flex-wrap justify-end gap-2 pt-2">
+          <div className="flex shrink-0 flex-wrap gap-2">
+            <Button asChild type="button" variant="outline" size="sm" className="h-8" onClick={(event) => event.stopPropagation()}>
+              <Link href={certsHref} aria-label={t("manageCertsFor", { title: project.title })}>
+                <LeafIcon className="size-3.5" />
+                {t("manageCerts")}
+              </Link>
+            </Button>
+            <Button asChild type="button" variant="outline" size="sm" className="h-8" onClick={(event) => event.stopPropagation()}>
+              <Link href={galleryHref} aria-label={t("manageGalleryFor", { title: project.title })}>
+                <ImageIcon className="size-3.5" />
+                {t("manageGallery")}
+              </Link>
+            </Button>
           </div>
-          <Button asChild type="button" variant="outline" size="sm" className="h-8" onClick={(event) => event.stopPropagation()}>
-            <Link href={galleryHref} aria-label={`Manage gallery for ${project.title}`}>
-              <ImageIcon className="size-3.5" />
-              Manage gallery
-            </Link>
-          </Button>
         </div>
       </div>
     </motion.article>
@@ -384,7 +380,6 @@ function ProjectCard({
 function ProjectEditor({
   state,
   target,
-  bumicerts,
   onClose,
   onSaved,
   onDeleted,
@@ -392,7 +387,6 @@ function ProjectEditor({
 }: {
   state: EditorState;
   target: ManageTarget;
-  bumicerts: BumicertRecord[];
   onClose: () => void;
   onSaved: () => void;
   onDeleted?: () => void;
@@ -412,6 +406,7 @@ function ProjectEditor({
   const isInline = presentation === "inline";
   const savePermission = isEdit ? canUpdateRecord(target) : canCreateRecord(target);
   const deletePermission = canDeleteRecord(target);
+  const actionT = useTranslations("marketplace.manageProjects.actions");
   const issues = getProjectIssues(draft);
   const visibleIssues = saveAttempted ? issues : issues.filter((issue) => changedFields.has(issue.field));
   const issuesByName = issuesByProjectField(visibleIssues);
@@ -519,7 +514,7 @@ function ProjectEditor({
           projectTitle={draft.title.trim()}
           target={target}
           projectUri={savedProjectUri}
-          showAddBumicert={draft.bumicertUris.length === 0}
+          showAddBumicert={!isEdit}
         />
       ) : (
     <motion.form
@@ -557,6 +552,22 @@ function ProjectEditor({
         <div className="min-w-0">
           <section>
             <SectionHeader title={isEdit ? "Edit project" : "Create new project"} />
+            {isEdit ? (
+              <div className="mb-8 flex flex-wrap gap-2">
+                <Button asChild type="button" variant="outline">
+                  <Link href={`${target.basePath}/projects/${encodeURIComponent(state.project.rkey)}/certs`} aria-label={actionT("manageCertsFor", { title: state.project.title })}>
+                    <LeafIcon className="size-4" />
+                    {actionT("manageCerts")}
+                  </Link>
+                </Button>
+                <Button asChild type="button" variant="outline">
+                  <Link href={`${target.basePath}/projects/${encodeURIComponent(state.project.rkey)}/gallery`} aria-label={actionT("manageGalleryFor", { title: state.project.title })}>
+                    <ImageIcon className="size-4" />
+                    {actionT("manageGallery")}
+                  </Link>
+                </Button>
+              </div>
+            ) : null}
             <div className="space-y-8">
               <Field label="Project name" hint="use a name people will understand" htmlFor="project-title" error={issuesByName.title?.message}>
                 <input
@@ -598,42 +609,37 @@ function ProjectEditor({
                 </div>
               </Field>
 
-              <BumicertPicker
-                bumicerts={bumicerts}
-                selectedUris={draft.bumicertUris}
-                onChange={(bumicertUris) => setDraft((current) => ({ ...current, bumicertUris }))}
-              />
             </div>
           </section>
-
-          {error ? (
-            <p className={cn(ERROR_MESSAGE, "mt-10")}>
-              <TriangleAlertIcon className="size-3.5 text-warn" /> {error}
-            </p>
-          ) : null}
-
-          <div className="mt-10 flex flex-wrap items-center justify-between gap-3">
-            {isEdit ? (
-              <Button type="button" variant="destructive" size="lg" onClick={() => void handleDeleteProject()} disabled={saving || !deletePermission.allowed} title={deletePermission.reason ?? undefined}>
-                <Trash2Icon className="size-4" />
-                Delete project
-              </Button>
-            ) : <span />}
-            <div className="flex flex-wrap justify-end gap-2">
-              <Button type="button" variant="outline" size="lg" onClick={onClose} disabled={saving}>
-                Cancel
-              </Button>
-              <Button type="submit" size="lg" disabled={saving || !savePermission.allowed} title={savePermission.reason ?? undefined}>
-                {saving ? <Loader2Icon className="size-4 animate-spin" /> : <FolderKanbanIcon className="size-4" />}
-                {saving ? "Saving…" : isEdit ? "Save changes" : "Save project"}
-              </Button>
-            </div>
-          </div>
         </div>
 
         <aside className="xl:sticky xl:top-20 xl:self-start">
           <PhotoPanel coverUrl={coverUrl} onChange={handleCoverChange} />
         </aside>
+      </div>
+
+      {error ? (
+        <p className={cn(ERROR_MESSAGE, "mt-10")}>
+          <TriangleAlertIcon className="size-3.5 text-warn" /> {error}
+        </p>
+      ) : null}
+
+      <div className="mt-10 flex flex-wrap items-center justify-between gap-3">
+        {isEdit ? (
+          <Button type="button" variant="destructive" size="lg" onClick={() => void handleDeleteProject()} disabled={saving || !deletePermission.allowed} title={deletePermission.reason ?? undefined}>
+            <Trash2Icon className="size-4" />
+            Delete project
+          </Button>
+        ) : <span />}
+        <div className="flex flex-wrap justify-end gap-2">
+          <Button type="button" variant="outline" size="lg" onClick={onClose} disabled={saving}>
+            Cancel
+          </Button>
+          <Button type="submit" size="lg" disabled={saving || !savePermission.allowed} title={savePermission.reason ?? undefined}>
+            {saving ? <Loader2Icon className="size-4 animate-spin" /> : <FolderKanbanIcon className="size-4" />}
+            {saving ? "Saving…" : isEdit ? "Save changes" : "Save project"}
+          </Button>
+        </div>
       </div>
     </motion.form>
       )}
@@ -880,99 +886,6 @@ function DeleteProjectModal({ projectTitle, onConfirm }: { projectTitle: string;
   );
 }
 
-function BumicertPicker({
-  bumicerts,
-  selectedUris,
-  onChange,
-}: {
-  bumicerts: BumicertRecord[];
-  selectedUris: string[];
-  onChange: (uris: string[]) => void;
-}) {
-  const selectedSet = useMemo(() => new Set(selectedUris), [selectedUris]);
-  const initialSelectedSetRef = useRef<Set<string> | null>(null);
-  if (initialSelectedSetRef.current === null) {
-    initialSelectedSetRef.current = new Set(selectedUris);
-  }
-  const orderedBumicerts = useMemo(() => {
-    const initialSelectedSet = initialSelectedSetRef.current ?? new Set<string>();
-    return [...bumicerts].sort((a, b) => Number(initialSelectedSet.has(b.atUri)) - Number(initialSelectedSet.has(a.atUri)));
-  }, [bumicerts]);
-
-  const toggleBumicert = (uri: string) => {
-    if (selectedSet.has(uri)) {
-      onChange(selectedUris.filter((selectedUri) => selectedUri !== uri));
-    } else {
-      onChange([...selectedUris, uri]);
-    }
-  };
-
-  return (
-    <section className="space-y-2.5">
-      <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
-        <label className="block text-sm font-medium text-foreground">
-          Certs in this project
-          <span className="ml-2 font-normal text-muted-foreground">pick from your published Certs</span>
-        </label>
-        <span className="text-xs text-muted-foreground">{selectedUris.length} selected</span>
-      </div>
-
-      {bumicerts.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-border px-4 py-8 text-center">
-          <LeafIcon className="mx-auto mb-3 size-8 text-primary/70" />
-          <p className="font-instrument text-xl italic text-foreground">No Certs yet</p>
-          <p className="mt-1 text-sm text-muted-foreground">Create a Cert first, then add it to a project.</p>
-        </div>
-      ) : (
-        <div className="relative overflow-hidden rounded-2xl bg-muted p-2">
-          <div className="grid max-h-96 grid-cols-1 gap-2 overflow-y-auto pr-1 [mask-image:linear-gradient(to_bottom,black_calc(100%-2.5rem),transparent)] md:grid-cols-2">
-            {orderedBumicerts.map((bumicert) => {
-              const selected = selectedSet.has(bumicert.atUri);
-              return (
-                <button
-                  key={bumicert.atUri}
-                  type="button"
-                  onClick={() => toggleBumicert(bumicert.atUri)}
-                  aria-pressed={selected}
-                  className={cn(
-                    "group relative flex w-full items-center gap-3 rounded-xl bg-background/70 p-2 pr-10 text-left transition-colors hover:bg-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40",
-                    selected && "bg-primary/[0.08] ring-1 ring-primary/25",
-                  )}
-                >
-                  <span className="relative h-14 w-14 shrink-0 overflow-hidden rounded-lg bg-muted">
-                    {bumicert.imageUrl ? (
-                      <Image src={bumicert.imageUrl} alt={bumicert.title} fill unoptimized sizes="56px" className="object-cover transition-transform duration-500 group-hover:scale-105" />
-                    ) : (
-                      <span className="grid h-full place-items-center text-primary/55">
-                        <LeafIcon className="size-5" />
-                      </span>
-                    )}
-                  </span>
-                  <span className="min-w-0 flex-1">
-                    <span className="block truncate text-sm font-medium text-foreground">{bumicert.title}</span>
-                  </span>
-                  <span
-                    className={cn(
-                      "absolute right-3 top-1/2 grid size-6 -translate-y-1/2 place-items-center rounded-full border transition-colors",
-                      selected
-                        ? "border-primary bg-primary text-primary-foreground"
-                        : "border-border bg-background text-transparent group-hover:text-muted-foreground",
-                    )}
-                    aria-hidden
-                  >
-                    <CheckIcon className="size-4" />
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-          <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-muted to-transparent" />
-        </div>
-      )}
-    </section>
-  );
-}
-
 function ProjectsSkeleton() {
   return (
     <div className="space-y-2" aria-label="Loading projects">
@@ -1052,7 +965,6 @@ function draftFromProject(project: ManagedProject | null): ProjectDraft {
     title: project.title,
     shortDescription: project.shortDescription ?? "",
     description: descriptionText(project.rawRecord?.description),
-    bumicertUris: project.bumicertUris,
   };
 }
 
@@ -1083,9 +995,12 @@ function buildProjectRecord(
     $type: PROJECT_COLLECTION,
     title: draft.title.trim(),
     type: "project",
-    items: draft.bumicertUris.map((uri) => ({ itemIdentifier: { uri } })),
     createdAt: stringValue(project?.rawRecord?.createdAt) ?? project?.createdAt ?? new Date().toISOString(),
   };
+
+  if (!Array.isArray(project?.rawRecord?.items) && project?.bumicertUris.length) {
+    nextRecord.items = project.bumicertUris.map((uri) => ({ itemIdentifier: { uri } }));
+  }
 
   const summary = draft.shortDescription.trim();
   if (summary) nextRecord.shortDescription = summary;
@@ -1110,12 +1025,6 @@ function descriptionText(value: unknown): string {
 
 function stringValue(value: unknown): string | null {
   return typeof value === "string" && value.trim().length > 0 ? value : null;
-}
-
-function formatProjectDate(value: string): string {
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "recently";
-  return new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric", year: "numeric" }).format(date);
 }
 
 function projectIdentityFromUri(uri: string): string | null {

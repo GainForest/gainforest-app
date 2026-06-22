@@ -27,6 +27,7 @@ import { GroupMembers } from "./groups/_components/GroupMembers";
 import type { CgsRole } from "./_lib/cgs";
 import { ManageProjectsClient } from "./projects/_components/ManageProjectsClient";
 import { ProjectGalleryManagerClient } from "./projects/[rkey]/gallery/_components/ProjectGalleryManagerClient";
+import { ProjectCertsManagerClient } from "./projects/[rkey]/certs/_components/ProjectCertsManagerClient";
 import { SitesClient } from "./sites/_components/SitesClient";
 import { TreesPageClient } from "./trees/_components/TreesPageClient";
 import { AudioClient } from "./audio/_components/AudioClient";
@@ -88,11 +89,10 @@ export async function ManageHomeSection({ target, wrapDashboard = true }: { targ
   );
 }
 
-export async function ProjectsSection({ target }: { target: ManageTarget }) {
-  const bumicerts = await fetchBumicertsByDid(target.did, 500).then((page) => page.records).catch(() => []);
+export function ProjectsSection({ target }: { target: ManageTarget }) {
   return (
     <Suspense fallback={null}>
-      <ManageProjectsClient target={target} bumicerts={bumicerts} />
+      <ManageProjectsClient target={target} />
     </Suspense>
   );
 }
@@ -101,6 +101,14 @@ export function ProjectGallerySection({ target, projectRkey }: { target: ManageT
   return (
     <Suspense fallback={null}>
       <ProjectGalleryManagerClient target={target} projectRkey={projectRkey} />
+    </Suspense>
+  );
+}
+
+export function ProjectCertsSection({ target, projectRkey }: { target: ManageTarget; projectRkey: string }) {
+  return (
+    <Suspense fallback={null}>
+      <ProjectCertsManagerClient target={target} projectRkey={projectRkey} />
     </Suspense>
   );
 }

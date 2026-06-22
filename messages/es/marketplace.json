@@ -941,11 +941,72 @@
     "metadata": {
       "title": "Gestionar proyectos — GainForest",
       "description": "Crea y gestiona colecciones de proyectos para tus certificados."
+    },
+    "actions": {
+      "manageCerts": "Gestionar Certs",
+      "manageCertsFor": "Gestionar Certs de {title}",
+      "manageGallery": "Gestionar galería",
+      "manageGalleryFor": "Gestionar galería de {title}"
     }
   },
   "observations": {
     "footer": {
       "showing": "Mostrando {shown} de {total} observaciones de naturaleza."
+    }
+  },
+  "manageProjectCerts": {
+    "metadata": {
+      "title": "Gestionar Certs del proyecto — GainForest",
+      "description": "Elige qué Certs pertenecen a un proyecto."
+    },
+    "nav": {
+      "projects": "Proyectos",
+      "refresh": "Actualizar"
+    },
+    "hero": {
+      "description": "Elige qué Certs pertenecen a este proyecto. Agregar o quitar un Cert actualiza la página del proyecto, pero no elimina el Cert."
+    },
+    "stats": {
+      "linked": "{count, plural, one {# Cert vinculado} other {# Certs vinculados}}",
+      "available": "{count, plural, one {# Cert disponible} other {# Certs disponibles}}"
+    },
+    "search": {
+      "ariaLabel": "Buscar Certs",
+      "placeholder": "Buscar Certs"
+    },
+    "actions": {
+      "create": "Crear Cert",
+      "retry": "Reintentar",
+      "add": "Agregar",
+      "saving": "Guardando…",
+      "view": "Ver",
+      "unlink": "Desvincular"
+    },
+    "errors": {
+      "loadTitle": "No se pudieron cargar los Certs",
+      "loadFallback": "No se pudieron cargar los Certs del proyecto.",
+      "network": "No se pudo conectar con el servidor.",
+      "noPermission": "No puedes cambiar este proyecto.",
+      "projectUnavailable": "Aún no pudimos preparar este proyecto. Actualiza la página e inténtalo de nuevo.",
+      "updateFallback": "No se pudieron actualizar los Certs del proyecto."
+    },
+    "status": {
+      "linked": "Vinculado"
+    },
+    "card": {
+      "noSummary": "Aún no hay resumen."
+    },
+    "empty": {
+      "noCertsTitle": "Aún no hay Certs",
+      "noCertsDescription": "Crea un Cert para este proyecto o agrega uno de tus Certs publicados.",
+      "noMatchingTitle": "No hay Certs coincidentes",
+      "noMatchingDescription": "Prueba otro término de búsqueda o borra el campo de búsqueda."
+    },
+    "details": {
+      "sites": "{count, plural, one {# sitio} other {# sitios}}",
+      "contributors": "{count, plural, one {# colaborador} other {# colaboradores}}",
+      "impactPeriod": "Periodo de impacto",
+      "created": "Creado {date}"
     }
   }
 }

@@ -941,11 +941,72 @@
     "metadata": {
       "title": "Simamia Miradi — GainForest",
       "description": "Unda na usimamie mikusanyiko ya miradi kwa cheti zako."
+    },
+    "actions": {
+      "manageCerts": "Dhibiti Certs",
+      "manageCertsFor": "Dhibiti Certs za {title}",
+      "manageGallery": "Dhibiti matunzio",
+      "manageGalleryFor": "Dhibiti matunzio ya {title}"
     }
   },
   "observations": {
     "footer": {
       "showing": "Inaonyesha uchunguzi wa asili {shown} kati ya {total}."
+    }
+  },
+  "manageProjectCerts": {
+    "metadata": {
+      "title": "Dhibiti Certs za Mradi — GainForest",
+      "description": "Chagua Certs zipi ni za mradi."
+    },
+    "nav": {
+      "projects": "Miradi",
+      "refresh": "Onyesha upya"
+    },
+    "hero": {
+      "description": "Chagua Certs zipi ni za mradi huu. Kuongeza au kuondoa Cert hubadilisha ukurasa wa mradi, lakini haifuti Cert."
+    },
+    "stats": {
+      "linked": "{count, plural, one {# Cert iliyounganishwa} other {# Certs zilizounganishwa}}",
+      "available": "{count, plural, one {# Cert inayopatikana} other {# Certs zinazopatikana}}"
+    },
+    "search": {
+      "ariaLabel": "Tafuta Certs",
+      "placeholder": "Tafuta Certs"
+    },
+    "actions": {
+      "create": "Unda Cert",
+      "retry": "Jaribu tena",
+      "add": "Ongeza",
+      "saving": "Inahifadhi…",
+      "view": "Tazama",
+      "unlink": "Tenganisha"
+    },
+    "errors": {
+      "loadTitle": "Imeshindikana kupakia Certs",
+      "loadFallback": "Imeshindikana kupakia Certs za mradi.",
+      "network": "Imeshindikana kufikia seva.",
+      "noPermission": "Huwezi kubadilisha mradi huu.",
+      "projectUnavailable": "Bado hatujaweza kuandaa mradi huu. Onyesha upya ukurasa na ujaribu tena.",
+      "updateFallback": "Imeshindikana kusasisha Certs za mradi."
+    },
+    "status": {
+      "linked": "Imeunganishwa"
+    },
+    "card": {
+      "noSummary": "Hakuna muhtasari bado."
+    },
+    "empty": {
+      "noCertsTitle": "Hakuna Certs bado",
+      "noCertsDescription": "Unda Cert kwa mradi huu au ongeza moja kutoka Certs zako zilizochapishwa.",
+      "noMatchingTitle": "Hakuna Certs zinazolingana",
+      "noMatchingDescription": "Jaribu neno lingine la utafutaji au futa uga wa utafutaji."
+    },
+    "details": {
+      "sites": "{count, plural, one {# eneo} other {# maeneo}}",
+      "contributors": "{count, plural, one {# mchangiaji} other {# wachangiaji}}",
+      "impactPeriod": "Kipindi cha athari",
+      "created": "Imeundwa {date}"
     }
   }
 }

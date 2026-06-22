@@ -10,6 +10,7 @@ import {
   ManageHomeSection,
   NewBumicertSection,
   ObservationsSection,
+  ProjectCertsSection,
   ProjectGallerySection,
   ProjectsSection,
   SettingsSection,
@@ -84,6 +85,7 @@ export default async function ManageGroupScopedPage({ params, searchParams }: Pa
   if (!first) return <ManageHomeSection target={target} />;
   if (first === "projects" && !second) return <ProjectsSection target={target} />;
   if (first === "projects" && second && third === "gallery") return <ProjectGallerySection target={target} projectRkey={decodeURIComponent(second)} />;
+  if (first === "projects" && second && third === "certs") return <ProjectCertsSection target={target} projectRkey={decodeURIComponent(second)} />;
   if (first === "sites" && !second) return <SitesSection target={target} />;
   if (first === "trees" && !second) return <TreesSection target={target} />;
   if (first === "audio" && !second) return <AudioSection target={target} />;
