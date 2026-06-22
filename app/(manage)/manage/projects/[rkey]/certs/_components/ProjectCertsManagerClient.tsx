@@ -76,31 +76,35 @@ export function ProjectCertsManagerClient({ target, projectRkey }: { target: Man
   const [error, setError] = useState<string | null>(null);
   const [query, setQuery] = useState("");
   const [pending, setPending] = useState<PendingAction>(null);
+  const [refreshing, setRefreshing] = useState(false);
   const updatePermission = canUpdateRecord(target);
   const repoOptions = target.kind === "group" ? { repo: target.did } : undefined;
 
-  const loadCerts = useCallback(async () => {
-    setLoading(true);
+  const loadCerts = useCallback(async (options?: { showLoading?: boolean }) => {
+    const showLoading = options?.showLoading ?? true;
+    if (showLoading) setLoading(true);
+    else setRefreshing(true);
     setError(null);
     try {
       const response = await fetch(manageApiHref(`/api/manage/projects/${encodeURIComponent(projectRkey)}/certs`, target), { cache: "no-store" });
       const result = (await response.json()) as ProjectCertsResponse | { error?: string };
       if (!response.ok || !("project" in result)) {
         setError("error" in result && result.error ? result.error : t("errors.loadFallback"));
-        setData(null);
+        if (showLoading) setData(null);
         return;
       }
       setData(result);
     } catch {
       setError(t("errors.network"));
-      setData(null);
+      if (showLoading) setData(null);
     } finally {
-      setLoading(false);
+      if (showLoading) setLoading(false);
+      else setRefreshing(false);
     }
   }, [projectRkey, target, t]);
 
   useEffect(() => {
-    void loadCerts();
+    void loadCerts({ showLoading: true });
   }, [loadCerts]);
 
   const filteredCerts = useMemo(() => {
@@ -134,7 +138,8 @@ export function ProjectCertsManagerClient({ target, projectRkey }: { target: Man
         ...(project.cid ? { swapRecord: project.cid } : {}),
         ...(repoOptions ?? {}),
       });
-      await loadCerts();
+      setData((current) => current ? projectCertsWithLocalChange(current, cert, record, action === "add") : current);
+      void loadCerts({ showLoading: false });
     } catch (toggleError) {
       setError(toggleError instanceof Error ? toggleError.message : t("errors.updateFallback"));
     } finally {
@@ -151,8 +156,8 @@ export function ProjectCertsManagerClient({ target, projectRkey }: { target: Man
             {t("nav.projects")}
           </Link>
         </Button>
-        <Button type="button" variant="ghost" size="sm" onClick={() => void loadCerts()} disabled={loading || pending !== null}>
-          <RefreshCcwIcon className={cn("size-4", loading && "animate-spin")} />
+        <Button type="button" variant="ghost" size="sm" onClick={() => void loadCerts({ showLoading: false })} disabled={loading || refreshing || pending !== null}>
+          <RefreshCcwIcon className={cn("size-4", (loading || refreshing) && "animate-spin")} />
           {t("nav.refresh")}
         </Button>
       </div>
@@ -160,7 +165,7 @@ export function ProjectCertsManagerClient({ target, projectRkey }: { target: Man
       {loading ? (
         <CertsSkeleton />
       ) : error && !project ? (
-        <ErrorState title={t("errors.loadTitle")} message={error} retryLabel={t("actions.retry")} onRetry={() => void loadCerts()} />
+        <ErrorState title={t("errors.loadTitle")} message={error} retryLabel={t("actions.retry")} onRetry={() => void loadCerts({ showLoading: true })} />
       ) : project ? (
         <div className="space-y-6">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
@@ -374,6 +379,27 @@ function certDetails(cert: ManagedCert, t: ReturnType<typeof useTranslations>): 
     cert.startDate || cert.endDate ? t("details.impactPeriod") : null,
     !cert.locationCount && !cert.contributorCount && !cert.startDate && !cert.endDate ? createdDetail(cert.createdAt, t) : null,
   ].filter((detail): detail is string => Boolean(detail));
+}
+
+function projectCertsWithLocalChange(
+  current: ProjectCertsResponse,
+  cert: ManagedCert,
+  nextRecord: Record<string, unknown>,
+  linked: boolean,
+): ProjectCertsResponse {
+  const bumicertUris = Array.isArray(nextRecord.items)
+    ? nextRecord.items.map(projectItemUri).filter((uri): uri is string => Boolean(uri))
+    : current.project.bumicertUris;
+
+  return {
+    project: {
+      ...current.project,
+      rawRecord: nextRecord,
+      bumicertUris,
+      bumicertCount: bumicertUris.length,
+    },
+    certs: current.certs.map((item) => item.atUri === cert.atUri ? { ...item, linked } : item),
+  };
 }
 
 function projectRecordWithCert(project: ManagedProject, cert: ManagedCert, action: "add" | "unlink"): Record<string, unknown> {
