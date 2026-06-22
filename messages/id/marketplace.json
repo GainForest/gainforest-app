@@ -645,7 +645,7 @@
     "filters": {
       "allProjects": "Semua proyek",
       "allFilters": "Semua filter",
-      "description": "Tampilkan proyek dengan gambar atau tempat proyek.",
+      "description": "Tampilkan proyek berdasarkan lencana sumber, gambar, atau tempat proyek.",
       "updateHint": "Filter diperbarui saat Anda memilih.",
       "images": "Menampilkan gambar",
       "locations": "Memiliki tempat"
@@ -941,6 +941,11 @@
     "metadata": {
       "title": "Kelola Proyek — GainForest",
       "description": "Buat dan kelola koleksi proyek untuk sertifikat Anda."
+    }
+  },
+  "observations": {
+    "footer": {
+      "showing": "Menampilkan {shown} dari {total} observasi alam."
     }
   }
 }

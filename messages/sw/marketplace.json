@@ -645,7 +645,7 @@
     "filters": {
       "allProjects": "Miradi yote",
       "allFilters": "Vichujio vyote",
-      "description": "Onyesha miradi yenye picha au eneo la mradi.",
+      "description": "Onyesha miradi kwa beji ya chanzo, picha, au eneo la mradi.",
       "updateHint": "Vichujio husasishwa unapochagua.",
       "images": "Huonyesha picha",
       "locations": "Ina eneo"
@@ -941,6 +941,11 @@
     "metadata": {
       "title": "Simamia Miradi — GainForest",
       "description": "Unda na usimamie mikusanyiko ya miradi kwa cheti zako."
+    }
+  },
+  "observations": {
+    "footer": {
+      "showing": "Inaonyesha uchunguzi wa asili {shown} kati ya {total}."
     }
   }
 }

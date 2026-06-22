@@ -645,7 +645,7 @@
     "filters": {
       "allProjects": "All Projects",
       "allFilters": "All filters",
-      "description": "Show projects with images or a project place.",
+      "description": "Show projects by source badge, images, or a project place.",
       "updateHint": "Filters update as you choose.",
       "images": "Shows images",
       "locations": "Has a place"
@@ -941,6 +941,11 @@
     "metadata": {
       "title": "Manage Projects — GainForest",
       "description": "Create and manage project collections for your Certs."
+    }
+  },
+  "observations": {
+    "footer": {
+      "showing": "Showing {shown} of {total} nature sightings."
     }
   }
 }

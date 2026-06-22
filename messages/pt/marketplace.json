@@ -645,7 +645,7 @@
     "filters": {
       "allProjects": "Todos os projetos",
       "allFilters": "Todos os filtros",
-      "description": "Mostre projetos com imagens ou um local de projeto.",
+      "description": "Mostre projetos por selo de origem, imagens ou um local de projeto.",
       "updateHint": "Os filtros são atualizados conforme você escolhe.",
       "images": "Mostra imagens",
       "locations": "Tem um local"
@@ -941,6 +941,11 @@
     "metadata": {
       "title": "Gerenciar projetos — GainForest",
       "description": "Crie e gerencie coleções de projetos para seus certificados."
+    }
+  },
+  "observations": {
+    "footer": {
+      "showing": "Mostrando {shown} de {total} observações da natureza."
     }
   }
 }

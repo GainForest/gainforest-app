@@ -404,9 +404,17 @@ function filterWhereVariants(media: OccurrenceFilter): Array<Record<string, unkn
   return [undefined];
 }
 
-function occurrenceWhereVariants(media: OccurrenceFilter, query?: string, ownerDid?: string): Record<string, unknown>[] {
+function occurrenceWhereVariants(
+  media: OccurrenceFilter,
+  query?: string,
+  ownerDid?: string,
+  badgeIndex?: FeaturedBadgeIndex,
+  badgeFilters?: BumicertBadgeFilter[],
+): Record<string, unknown>[] {
   const ownerWhere = ownerDid ? { did: { eq: ownerDid } } : undefined;
-  const bases = filterWhereVariants(media).map((base) => mergeWhere(ownerWhere, base) ?? {});
+  const badgeWheres = featuredBadgeRecordWhereVariants<Record<string, unknown>>(badgeIndex, "app.gainforest.dwc.occurrence", badgeFilters);
+  if (badgeWheres.length === 0) return [];
+  const bases = badgeWheres.flatMap((badgeWhere) => filterWhereVariants(media).map((base) => mergeWhere(ownerWhere, badgeWhere, base) ?? {}));
   const q = query?.trim();
   if (!q) return bases;
   const queryWheres = [
@@ -617,26 +625,52 @@ async function walkAudioRecords(opts: {
   after: string | null;
   query?: string;
   ownerDid?: string;
+  badgeIndex?: FeaturedBadgeIndex;
+  badgeFilters?: BumicertBadgeFilter[];
   signal?: AbortSignal;
   onProgress?: (records: OccurrenceRecord[]) => void;
 }): Promise<OccurrenceWalkResult> {
   const q = opts.query?.trim();
   const ownerWhere = opts.ownerDid ? { did: { eq: opts.ownerDid } } : undefined;
-  const where = mergeWhere(ownerWhere, q ? { name: { contains: q } } : undefined, { blob: { isNull: false } }) ?? { blob: { isNull: false } };
-  const collected: OccurrenceRecord[] = [];
-  let cursor: string | null = opts.after;
-  let hasNextPage = true;
-  while (collected.length < opts.target) {
-    if (opts.signal?.aborted) throw new DOMException("aborted", "AbortError");
-    const page = await fetchAudioPage(Math.min(INDEXER_MAX_PAGE, Math.max(opts.target, 24)), cursor, opts.signal, where);
-    cursor = page.cursor;
-    hasNextPage = page.hasNextPage;
-    const mapped = await mapAudioRecords(page.nodes.slice(0, opts.target - collected.length), opts.signal);
-    collected.push(...mapped);
-    opts.onProgress?.(collected.slice(0, opts.target));
-    if (!hasNextPage || !cursor) break;
-  }
-  return { records: collected.slice(0, opts.target), cursor, hasMore: hasNextPage && Boolean(cursor) };
+  const baseWhere = mergeWhere(ownerWhere, q ? { name: { contains: q } } : undefined, { blob: { isNull: false } }) ?? { blob: { isNull: false } };
+  const badgeWheres = featuredBadgeRecordWhereVariants<Record<string, unknown>>(opts.badgeIndex, "app.gainforest.ac.audio", opts.badgeFilters);
+  if (badgeWheres.length === 0) return { records: [], cursor: null, hasMore: false };
+  const variants = badgeWheres.map((badgeWhere) => mergeWhere(baseWhere, badgeWhere) ?? baseWhere);
+
+  const walkOne = async (where: Record<string, unknown>, after: string | null): Promise<OccurrenceWalkResult> => {
+    const collected: OccurrenceRecord[] = [];
+    let cursor: string | null = after;
+    let hasNextPage = true;
+    while (collected.length < opts.target) {
+      if (opts.signal?.aborted) throw new DOMException("aborted", "AbortError");
+      const page = await fetchAudioPage(Math.min(INDEXER_MAX_PAGE, Math.max(opts.target, 24)), cursor, opts.signal, where);
+      cursor = page.cursor;
+      hasNextPage = page.hasNextPage;
+      const mapped = await mapAudioRecords(page.nodes.slice(0, opts.target - collected.length), opts.signal);
+      collected.push(...mapped);
+      opts.onProgress?.(collected.slice(0, opts.target));
+      if (!hasNextPage || !cursor) break;
+    }
+    return { records: collected.slice(0, opts.target), cursor, hasMore: hasNextPage && Boolean(cursor) };
+  };
+
+  if (variants.length === 1) return walkOne(variants[0]!, opts.after);
+
+  const previous = parseMultiCursor(opts.after, variants.length);
+  const pages = await Promise.all(
+    variants.map((where, index) => {
+      if (!previous.more[index]) return Promise.resolve({ records: [], cursor: null, hasMore: false } satisfies OccurrenceWalkResult);
+      return walkOne(where, previous.cursors[index] ?? null);
+    }),
+  );
+  const seen = new Map<string, OccurrenceRecord>();
+  for (const record of pages.flatMap((page) => page.records)) seen.set(record.id, record);
+  const records = [...seen.values()].sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt));
+  return {
+    records,
+    cursor: encodeMultiCursor({ cursors: pages.map((page) => page.cursor), more: pages.map((page) => page.hasMore) }),
+    hasMore: pages.some((page) => page.hasMore),
+  };
 }
 
 async function fetchOccurrenceStatsUncached(signal?: AbortSignal): Promise<OccurrenceStats> {
@@ -654,6 +688,70 @@ async function fetchOccurrenceStatsUncached(signal?: AbortSignal): Promise<Occur
 
 export async function fetchOccurrenceStats(signal?: AbortSignal): Promise<OccurrenceStats> {
   return fetchOccurrenceStatsUncached(signal);
+}
+
+export async function fetchOccurrenceTotalCount(options: {
+  media: OccurrenceFilter;
+  query?: string;
+  ownerDid?: string;
+  featuredBadgesOnly?: boolean;
+  badgeFilters?: BumicertBadgeFilter[];
+  signal?: AbortSignal;
+}): Promise<number> {
+  const badgeIndex = options.featuredBadgesOnly ? await fetchFeaturedBadgeIndex(options.signal) : undefined;
+  const variants = occurrenceWhereVariants(options.media, options.query, options.ownerDid, badgeIndex, options.badgeFilters);
+  if (variants.length === 0) return 0;
+
+  const seen = new Set<string>();
+  for (const where of variants) {
+    let cursor: string | null = null;
+    let hasMore = true;
+    while (hasMore) {
+      if (options.signal?.aborted) throw new DOMException("aborted", "AbortError");
+      const page = await fetchOccurrencePage(INDEXER_MAX_PAGE, cursor, options.signal, where);
+      for (const node of page.nodes) {
+        if (matchesFilter(node, options.media)) seen.add(node.uri || `at://${node.did}/app.gainforest.dwc.occurrence/${node.rkey}`);
+      }
+      cursor = page.cursor;
+      hasMore = page.hasNextPage && Boolean(page.cursor);
+    }
+  }
+
+  if (options.media === "audio") {
+    const audioPage = await walkAudioRecordIdsForCount(options, badgeIndex);
+    for (const id of audioPage) seen.add(id);
+  }
+
+  return seen.size;
+}
+
+async function walkAudioRecordIdsForCount(
+  options: {
+    query?: string;
+    ownerDid?: string;
+    badgeFilters?: BumicertBadgeFilter[];
+    signal?: AbortSignal;
+  },
+  badgeIndex?: FeaturedBadgeIndex,
+): Promise<Set<string>> {
+  const q = options.query?.trim();
+  const ownerWhere = options.ownerDid ? { did: { eq: options.ownerDid } } : undefined;
+  const baseWhere = mergeWhere(ownerWhere, q ? { name: { contains: q } } : undefined, { blob: { isNull: false } }) ?? { blob: { isNull: false } };
+  const badgeWheres = featuredBadgeRecordWhereVariants<Record<string, unknown>>(badgeIndex, "app.gainforest.ac.audio", options.badgeFilters);
+  const seen = new Set<string>();
+  for (const badgeWhere of badgeWheres) {
+    const where = mergeWhere(baseWhere, badgeWhere) ?? baseWhere;
+    let cursor: string | null = null;
+    let hasMore = true;
+    while (hasMore) {
+      if (options.signal?.aborted) throw new DOMException("aborted", "AbortError");
+      const page = await fetchAudioPage(INDEXER_MAX_PAGE, cursor, options.signal, where);
+      for (const node of page.nodes) seen.add(node.uri || `at://${node.did}/app.gainforest.ac.audio/${node.rkey}`);
+      cursor = page.cursor;
+      hasMore = page.hasNextPage && Boolean(page.cursor);
+    }
+  }
+  return seen;
 }
 
 /**
@@ -677,9 +775,13 @@ export async function walkOccurrences(opts: {
   onProgress?: (records: OccurrenceRecord[]) => void;
   signal?: AbortSignal;
   resolveMedia?: boolean;
+  featuredBadgesOnly?: boolean;
+  badgeFilters?: BumicertBadgeFilter[];
 }): Promise<OccurrenceWalkResult> {
   const { media, target, signal } = opts;
-  const whereVariants = occurrenceWhereVariants(media, opts.query, opts.ownerDid);
+  const badgeIndex = opts.featuredBadgesOnly ? await fetchFeaturedBadgeIndex(signal) : undefined;
+  const whereVariants = occurrenceWhereVariants(media, opts.query, opts.ownerDid, badgeIndex, opts.badgeFilters);
+  if (whereVariants.length === 0) return { records: [], cursor: null, hasMore: false };
 
   async function walkOne(where: Record<string, unknown> | undefined, after: string | null): Promise<OccurrenceWalkResult> {
     // With a server-side filter every returned node already matches, so the
@@ -762,6 +864,8 @@ export async function walkOccurrences(opts: {
                 after: previous.cursors[whereVariants.length] ?? null,
                 query: opts.query,
                 ownerDid: opts.ownerDid,
+                badgeIndex,
+                badgeFilters: opts.badgeFilters,
                 signal,
                 onProgress: opts.onProgress,
               })
@@ -1228,9 +1332,10 @@ async function fetchFeaturedBadgeIndexUncached(signal?: AbortSignal): Promise<Fe
     if (subject?.__typename === "AppCertifiedDefsDid" && subject.did) {
       dids.push(subject.did);
       byBadge[badgeKey].dids.push(subject.did);
-    } else if (subject?.__typename === "ComAtprotoRepoStrongRef" && subject.uri?.includes("/org.hypercerts.claim.activity/")) {
-      recordUris.push(subject.uri);
-      byBadge[badgeKey].recordUris.push(subject.uri);
+    } else if (subject?.__typename === "ComAtprotoRepoStrongRef" && subject.uri?.trim()) {
+      const uri = subject.uri.trim();
+      recordUris.push(uri);
+      byBadge[badgeKey].recordUris.push(uri);
     }
   }
 
@@ -1395,17 +1500,33 @@ function featuredBadgeValues(index: FeaturedBadgeIndex, filters: BumicertBadgeFi
   };
 }
 
-function featuredBadgeWhereVariants(index?: FeaturedBadgeIndex, filters?: BumicertBadgeFilter[]): ActivityWhere[] {
-  if (!index) return [{}];
+function featuredBadgeCollectionValues(index: FeaturedBadgeIndex, collection: string, filters?: BumicertBadgeFilter[]): FeaturedBadgeValues {
   const values = featuredBadgeValues(index, filters);
-  const variants: ActivityWhere[] = [];
+  return {
+    dids: values.dids,
+    recordUris: values.recordUris.filter((uri) => uri.includes(`/${collection}/`)),
+  };
+}
+
+function featuredBadgeRecordWhereVariants<W extends Record<string, unknown>>(
+  index: FeaturedBadgeIndex | undefined,
+  collection: string,
+  filters?: BumicertBadgeFilter[],
+): W[] {
+  if (!index) return [{} as W];
+  const values = featuredBadgeCollectionValues(index, collection, filters);
+  const variants: W[] = [];
   for (const dids of chunkStrings(values.dids, FEATURED_BADGE_FILTER_IN_LIMIT)) {
-    variants.push({ did: { in: dids } });
+    variants.push({ did: { in: dids } } as unknown as W);
   }
   for (const recordUris of chunkStrings(values.recordUris, FEATURED_BADGE_FILTER_IN_LIMIT)) {
-    variants.push({ uri: { in: recordUris } });
+    variants.push({ uri: { in: recordUris } } as unknown as W);
   }
   return variants;
+}
+
+function featuredBadgeWhereVariants(index?: FeaturedBadgeIndex, filters?: BumicertBadgeFilter[]): ActivityWhere[] {
+  return featuredBadgeRecordWhereVariants<ActivityWhere>(index, "org.hypercerts.claim.activity", filters);
 }
 
 function activityWhereVariants(options?: ActivityQueryOptions, badgeIndex?: FeaturedBadgeIndex): ActivityWhere[] {
@@ -1996,6 +2117,8 @@ type ProjectQueryOptions = {
   query?: string;
   filters?: ProjectIndexFilter[];
   sort?: ExplorerSortMode;
+  featuredBadgesOnly?: boolean;
+  badgeFilters?: BumicertBadgeFilter[];
 };
 
 type ProjectWhere = Record<string, unknown>;
@@ -2039,6 +2162,29 @@ function mapProjectCollection(n: RawProjectCollection): ProjectRecord {
     locationUri: n.location?.uri ?? null,
   };
 }
+
+type RawProjectCount = Pick<RawProjectCollection, "did" | "rkey" | "uri" | "title">;
+
+const PROJECT_COLLECTION_COUNT_QUERY = `
+  query ExplorerProjectCountRows(
+    $first: Int!
+    $after: String
+    $where: OrgHypercertsCollectionWhereInput
+    $sortBy: OrgHypercertsCollectionSortField
+    $sortDirection: SortDirection
+  ) {
+    orgHypercertsCollection(
+      first: $first
+      after: $after
+      where: $where
+      sortBy: $sortBy
+      sortDirection: $sortDirection
+    ) {
+      pageInfo { hasNextPage endCursor }
+      edges { node { did rkey uri title } }
+    }
+  }
+`;
 
 async function mapProjectConnection(
   conn: Connection<RawProjectCollection> | null | undefined,
@@ -2093,9 +2239,17 @@ function projectSearchWhere(query: string | undefined): ProjectWhere[] {
   return [{ title: { contains: q } }, { shortDescription: { contains: q } }];
 }
 
-function projectWhereVariants(options?: ProjectQueryOptions): ProjectWhere[] {
+function projectWhereVariants(options?: ProjectQueryOptions, badgeIndex?: FeaturedBadgeIndex): ProjectWhere[] {
+  const badgeWheres = featuredBadgeRecordWhereVariants<ProjectWhere>(badgeIndex, "org.hypercerts.collection", options?.badgeFilters);
+  if (badgeWheres.length === 0) return [];
   const base = mergeProjectWhere(PROJECT_TYPE_WHERE, projectFilterWhere(options?.filters));
-  return projectSearchWhere(options?.query).map((searchWhere) => mergeProjectWhere(base, searchWhere));
+  const variants: ProjectWhere[] = [];
+  for (const badgeWhere of badgeWheres) {
+    for (const searchWhere of projectSearchWhere(options?.query)) {
+      variants.push(mergeProjectWhere(base, badgeWhere, searchWhere));
+    }
+  }
+  return variants;
 }
 
 function compareProjects(a: ProjectRecord, b: ProjectRecord, sort: ExplorerSortMode | undefined): number {
@@ -2132,6 +2286,29 @@ async function fetchProjectPage(
   return mapProjectConnection(data?.orgHypercertsCollection, signal);
 }
 
+async function fetchProjectCountPage(
+  first: number,
+  after: string | null,
+  signal?: AbortSignal,
+  where?: ProjectWhere,
+  sort: ExplorerSortMode = "newest",
+): Promise<Page<RawProjectCount>> {
+  const { sortBy, sortDirection } = projectSort(sort);
+  const data = await indexerQuery<{
+    orgHypercertsCollection?: Connection<RawProjectCount>;
+  }>(PROJECT_COLLECTION_COUNT_QUERY, { first, after, where: where ?? null, sortBy, sortDirection }, signal);
+  const conn = data?.orgHypercertsCollection;
+  const records = (conn?.edges ?? [])
+    .map((edge) => edge?.node)
+    .filter((node): node is RawProjectCount => Boolean(node?.did && node.rkey))
+    .filter((node) => !isLikelyTestRecordName(node.title));
+  return {
+    records,
+    cursor: conn?.pageInfo?.endCursor ?? null,
+    hasMore: Boolean(conn?.pageInfo?.hasNextPage),
+  };
+}
+
 async function fetchProjectByDidPage(
   did: string,
   first: number,
@@ -2151,7 +2328,9 @@ async function fetchProjectsFromCollections(
   onProgress?: (records: ProjectRecord[]) => void,
   options?: ProjectQueryOptions,
 ): Promise<Page<ProjectRecord>> {
-  const variants = projectWhereVariants(options);
+  const badgeIndex = options?.featuredBadgesOnly ? await fetchFeaturedBadgeIndex(signal) : undefined;
+  const variants = projectWhereVariants(options, badgeIndex);
+  if (variants.length === 0) return { records: [], cursor: null, hasMore: false };
   if (variants.length === 1) {
     return collectPaged(
       (first, cursor, nextSignal) => fetchProjectPage(first, cursor, nextSignal, variants[0], options?.sort),
@@ -2181,6 +2360,26 @@ async function fetchProjectsFromCollections(
     cursor: encodeMultiCursor({ cursors: pages.map((page) => page.cursor), more: pages.map((page) => page.hasMore) }),
     hasMore: pages.some((page) => page.hasMore),
   };
+}
+
+export async function fetchProjectTotalCount(signal?: AbortSignal, options?: ProjectQueryOptions): Promise<number> {
+  const badgeIndex = options?.featuredBadgesOnly ? await fetchFeaturedBadgeIndex(signal) : undefined;
+  const variants = projectWhereVariants(options, badgeIndex);
+  if (variants.length === 0) return 0;
+
+  const seen = new Set<string>();
+  for (const where of variants) {
+    let cursor: string | null = null;
+    let hasMore = true;
+    while (hasMore) {
+      if (signal?.aborted) throw new DOMException("aborted", "AbortError");
+      const page = await fetchProjectCountPage(INDEXER_MAX_PAGE, cursor, signal, where, options?.sort);
+      for (const record of page.records) seen.add(record.uri || `at://${record.did}/org.hypercerts.collection/${record.rkey}`);
+      cursor = page.cursor;
+      hasMore = page.hasMore && Boolean(page.cursor);
+    }
+  }
+  return seen.size;
 }
 
 /** Load org.hypercerts.collection records whose type is Project/project. */
@@ -2363,6 +2562,8 @@ export type SiteQueryOptions = {
   orgType?: string | null;
   quickFilters?: SiteIndexQuickFilter[];
   sort?: ExplorerSortMode;
+  featuredBadgesOnly?: boolean;
+  badgeFilters?: BumicertBadgeFilter[];
 };
 
 type SiteWhere = Record<string, unknown>;
@@ -2592,6 +2793,7 @@ async function hydrateCertOrgs(
   signal?: AbortSignal,
   includeBumicertCounts = false,
   includeObservationCounts = false,
+  includeImages = true,
 ): Promise<SiteRecord[]> {
   const missingProfileDids = nodes
     .filter((n) => !profileName(n.certifiedProfileData) && !profileAvatarRef(n.certifiedProfileData))
@@ -2620,13 +2822,15 @@ async function hydrateCertOrgs(
     name: profileName(n.certifiedProfileData) ?? profiles.get(n.did)?.name ?? null,
     avatarRef: profileAvatarRef(n.certifiedProfileData) ?? profiles.get(n.did)?.avatarRef ?? null,
   }));
-  records = await resolveImages(
-    records,
-    (r) => (r.logoRef ? { did: r.did, ref: r.logoRef } : null),
-    (r, url) => ({ ...r, avatarUrl: url, imageUrl: url ?? r.imageUrl }),
-    signal,
-    SITE_IMAGE_RESOLVE_LIMIT,
-  );
+  if (includeImages) {
+    records = await resolveImages(
+      records,
+      (r) => (r.logoRef ? { did: r.did, ref: r.logoRef } : null),
+      (r, url) => ({ ...r, avatarUrl: url, imageUrl: url ?? r.imageUrl }),
+      signal,
+      SITE_IMAGE_RESOLVE_LIMIT,
+    );
+  }
   const countryByLocation = await countriesPromise;
   records = records.map((record) => ({
     ...record,
@@ -2651,6 +2855,17 @@ function certifiedWhere(options?: SiteQueryOptions): SiteWhere | undefined {
   return Object.keys(where).length > 0 ? where : undefined;
 }
 
+function mergeSiteWhere(...parts: Array<SiteWhere | undefined>): SiteWhere {
+  return Object.assign({}, ...parts.filter(Boolean));
+}
+
+function siteWhereVariants(options?: SiteQueryOptions, badgeIndex?: FeaturedBadgeIndex): SiteWhere[] {
+  const badgeWheres = featuredBadgeRecordWhereVariants<SiteWhere>(badgeIndex, "app.certified.actor.organization", options?.badgeFilters);
+  if (badgeWheres.length === 0) return [];
+  const base = certifiedWhere(options);
+  return badgeWheres.map((badgeWhere) => mergeSiteWhere(base, badgeWhere));
+}
+
 async function fetchCertOrgPage(
   first: number,
   after: string | null,
@@ -2659,6 +2874,7 @@ async function fetchCertOrgPage(
   sort?: ExplorerSortMode,
   includeBumicertCounts = false,
   includeObservationCounts = false,
+  includeImages = true,
 ): Promise<Page<SiteRecord>> {
   const { sortBy, sortDirection } = certifiedOrgSort(sort);
   const data = await indexerQuery<{
@@ -2668,7 +2884,7 @@ async function fetchCertOrgPage(
   const nodes = (conn?.edges ?? [])
     .map((e) => e?.node)
     .filter((n): n is RawCertOrg => Boolean(n?.did));
-  const records = (await hydrateCertOrgs(nodes, signal, includeBumicertCounts, includeObservationCounts))
+  const records = (await hydrateCertOrgs(nodes, signal, includeBumicertCounts, includeObservationCounts, includeImages))
     .filter((record) => !isLikelyTestRecordName(record.name));
   return {
     records,
@@ -2836,6 +3052,30 @@ function siteTime(iso: string | null | undefined): number {
   return Number.isFinite(t) ? t : 0;
 }
 
+export async function fetchSiteTotalCount(signal?: AbortSignal, options?: SiteQueryOptions): Promise<number> {
+  const includeBumicertCounts = options?.quickFilters?.includes("bumicerts") ?? false;
+  const includeObservationCounts = options?.quickFilters?.includes("observations") ?? false;
+  const badgeIndex = options?.featuredBadgesOnly ? await fetchFeaturedBadgeIndex(signal) : undefined;
+  const variants = siteWhereVariants(options, badgeIndex);
+  if (variants.length === 0) return 0;
+
+  const seen = new Map<string, SiteRecord>();
+  for (const where of variants) {
+    let cursor: string | null = null;
+    let hasMore = true;
+    while (hasMore) {
+      if (signal?.aborted) throw new DOMException("aborted", "AbortError");
+      const page = await fetchCertOrgPage(INDEXER_MAX_PAGE, cursor, signal, where, options?.sort, includeBumicertCounts, includeObservationCounts, false);
+      for (const record of page.records) {
+        if (siteMatchesOptions(record, options)) seen.set(record.id, record);
+      }
+      cursor = page.cursor;
+      hasMore = page.hasMore && Boolean(page.cursor);
+    }
+  }
+  return seen.size;
+}
+
 /**
  * Load up to `target` organization profiles. Legacy organization records are
  * intentionally ignored; the optional `source` argument is kept so older call
@@ -2873,30 +3113,64 @@ export async function fetchSites(
     includeObservationCounts,
   );
   const collectAllForNameSort = options?.sort === "az" || options?.sort === "za";
-  const records: SiteRecord[] = [];
-  let cursor = after;
-  let hasMore = true;
+  const badgeIndex = options?.featuredBadgesOnly ? await fetchFeaturedBadgeIndex(signal) : undefined;
+  const variants = siteWhereVariants(options, badgeIndex);
+  if (variants.length === 0) return { records: [], cursor: null, hasMore: false };
 
-  while (hasMore && (collectAllForNameSort || hasClientSideFilters || sortSites(records).length < target)) {
-    if (signal?.aborted) throw new DOMException("aborted", "AbortError");
-    const previousCursor = cursor;
-    const matchedCount = sortSites(records).length;
-    const first = collectAllForNameSort || hasClientSideFilters
-      ? INDEXER_MAX_PAGE
-      : Math.min(INDEXER_MAX_PAGE, Math.max(1, target - matchedCount));
-    const page = await fetchCertOrgPage(first, cursor, signal, certifiedWhere(options), options?.sort, includeBumicertCounts, includeObservationCounts);
-    records.push(...page.records);
-    cursor = page.cursor;
-    const advanced = Boolean(cursor) && cursor !== previousCursor;
-    hasMore = page.hasMore && advanced;
-    onProgress?.(sortSites(records).slice(0, target));
-    if (!advanced) break;
+  const uniqueSites = (records: SiteRecord[]) => {
+    const map = new Map<string, SiteRecord>();
+    for (const record of records) map.set(record.id, record);
+    return [...map.values()];
+  };
+
+  const collectForWhere = async (where: SiteWhere, initialCursor: string | null): Promise<Page<SiteRecord>> => {
+    const records: SiteRecord[] = [];
+    let cursor = initialCursor;
+    let hasMore = true;
+
+    while (hasMore && (collectAllForNameSort || hasClientSideFilters || sortSites(records).length < target)) {
+      if (signal?.aborted) throw new DOMException("aborted", "AbortError");
+      const previousCursor = cursor;
+      const matchedCount = sortSites(records).length;
+      const first = collectAllForNameSort || hasClientSideFilters
+        ? INDEXER_MAX_PAGE
+        : Math.min(INDEXER_MAX_PAGE, Math.max(1, target - matchedCount));
+      const page = await fetchCertOrgPage(first, cursor, signal, where, options?.sort, includeBumicertCounts, includeObservationCounts);
+      records.push(...page.records);
+      cursor = page.cursor;
+      const advanced = Boolean(cursor) && cursor !== previousCursor;
+      hasMore = page.hasMore && advanced;
+      if (!advanced) break;
+    }
+
+    const sorted = sortSites(uniqueSites(records));
+    return {
+      records: (collectAllForNameSort || hasClientSideFilters) ? sorted : sorted.slice(0, target),
+      cursor,
+      hasMore,
+    };
+  };
+
+  if (variants.length === 1) {
+    const page = await collectForWhere(variants[0]!, after);
+    onProgress?.(page.records.slice(0, target));
+    return page;
   }
 
+  const previous = parseMultiCursor(after, variants.length);
+  const pages = await Promise.all(
+    variants.map((where, index) => {
+      if (!previous.more[index]) return Promise.resolve({ records: [], cursor: null, hasMore: false } satisfies Page<SiteRecord>);
+      return collectForWhere(where, previous.cursors[index] ?? null);
+    }),
+  );
+  const sorted = sortSites(uniqueSites(pages.flatMap((page) => page.records)));
+  const records = (collectAllForNameSort || hasClientSideFilters) ? sorted : sorted.slice(0, target);
+  onProgress?.(records.slice(0, target));
   return {
-    records: (collectAllForNameSort || hasClientSideFilters) ? sortSites(records) : sortSites(records).slice(0, target),
-    cursor,
-    hasMore,
+    records,
+    cursor: encodeMultiCursor({ cursors: pages.map((page) => page.cursor), more: pages.map((page) => page.hasMore) }),
+    hasMore: pages.some((page) => page.hasMore),
   };
 }
 

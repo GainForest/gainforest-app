@@ -24,7 +24,9 @@ import { RecordDrawer } from "../_components/RecordDrawer";
 import { RecordMap } from "../_components/RecordMap";
 import {
   fetchCertifiedLocationCountriesByUri,
+  fetchSiteTotalCount,
   fetchSites,
+  type BumicertBadgeFilter,
   type ExplorerRecord,
   type SiteRecord,
 } from "../_lib/indexer";
@@ -37,6 +39,7 @@ type QuickFilter = "observations" | "bumicerts";
 const SORT_MODES: SortMode[] = ["newest", "oldest", "az", "za"];
 const VIEW_MODES: ViewMode[] = ["cards", "list", "map"];
 const QUICK_FILTERS: QuickFilter[] = ["observations", "bumicerts"];
+const BADGE_FILTER_KEYS: BumicertBadgeFilter[] = ["gainforest", "maearth", "maearth-round-1", "maearth-round-2"];
 const QUERY_STATE_OPTIONS = { history: "replace", scroll: false, shallow: true } as const;
 const SEARCH_QUERY_STATE_OPTIONS = { ...QUERY_STATE_OPTIONS, throttleMs: 200 } as const;
 
@@ -47,14 +50,22 @@ const ORGANIZATIONS_PAGE_SIZE = 24;
 const INITIAL_CARD_LIMIT = 96;
 const CARD_BATCH_SIZE = 96;
 
+type BadgeFilterOption = {
+  key: BumicertBadgeFilter;
+  label: string;
+  logoSrc: string;
+};
+
 export function OrganizationsClient({ records: initialRecords = [] }: { records?: SiteRecord[] }) {
   const t = useTranslations("marketplace.organizations");
+  const exploreT = useTranslations("marketplace.explore");
   const locale = useLocale();
   const [records, setRecords] = useState<SiteRecord[]>(initialRecords);
   const [cursor, setCursor] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState(initialRecords.length === 0);
   const [loading, setLoading] = useState(initialRecords.length === 0);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [totalCount, setTotalCount] = useState<number | null>(null);
   const [query, setQuery] = useQueryState(
     "q",
     parseAsString.withDefault("").withOptions(SEARCH_QUERY_STATE_OPTIONS),
@@ -76,6 +87,11 @@ export function OrganizationsClient({ records: initialRecords = [] }: { records?
     parseAsString.withOptions(QUERY_STATE_OPTIONS),
   );
   const quickFilters = useMemo(() => parseQuickFiltersParam(quickFiltersParam), [quickFiltersParam]);
+  const [badgesParam, setBadgesParam] = useQueryState(
+    "badges",
+    parseAsString.withOptions(QUERY_STATE_OPTIONS),
+  );
+  const badgeFilters = useMemo(() => parseBadgeFilterParam(badgesParam), [badgesParam]);
   const [view, setView] = useQueryState(
     "view",
     parseAsStringEnum<ViewMode>(VIEW_MODES).withDefault("cards").withOptions(QUERY_STATE_OPTIONS),
@@ -87,13 +103,19 @@ export function OrganizationsClient({ records: initialRecords = [] }: { records?
   const deferredQuery = useDeferredValue(query);
   const requestSeqRef = useRef(0);
   const countryHydrationKeyRef = useRef("");
+  const badgeFilterOptions = useMemo<BadgeFilterOption[]>(() => [
+    { key: "gainforest", label: exploreT("filters.badges.gainforest"), logoSrc: "/assets/media/images/gainforest-logo.svg" },
+    { key: "maearth", label: exploreT("filters.badges.maearth"), logoSrc: "/assets/media/images/badges/ma-earth-logo.webp" },
+    { key: "maearth-round-1", label: exploreT("filters.badges.maearthRound1"), logoSrc: "/assets/media/images/badges/ma-earth-logo.webp" },
+    { key: "maearth-round-2", label: exploreT("filters.badges.maearthRound2"), logoSrc: "/assets/media/images/badges/ma-earth-logo.webp" },
+  ], [exploreT]);
 
   useEffect(() => {
     if (initialRecords.length > 0) return;
     const controller = new AbortController();
     const requestSeq = ++requestSeqRef.current;
     const isCurrent = () => requestSeqRef.current === requestSeq && !controller.signal.aborted;
-    const options = { query: deferredQuery, country: countryFilter, orgType: typeFilter, quickFilters, sort };
+    const options = { query: deferredQuery, country: countryFilter, orgType: typeFilter, quickFilters, sort, featuredBadgesOnly: true, badgeFilters };
     setLoading(true);
     setLoadingMore(false);
     setRecords([]);
@@ -113,7 +135,18 @@ export function OrganizationsClient({ records: initialRecords = [] }: { records?
         if (isCurrent()) setLoading(false);
       });
     return () => controller.abort();
-  }, [countryFilter, deferredQuery, initialRecords.length, quickFilters, sort, typeFilter]);
+  }, [countryFilter, deferredQuery, initialRecords.length, quickFilters, sort, typeFilter, badgeFilters]);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    setTotalCount(null);
+    fetchSiteTotalCount(controller.signal, { query: deferredQuery, country: countryFilter, orgType: typeFilter, quickFilters, sort, featuredBadgesOnly: true, badgeFilters })
+      .then((count) => setTotalCount(count))
+      .catch((error) => {
+        if ((error as Error).name !== "AbortError") console.warn("[organizations] count failed", error);
+      });
+    return () => controller.abort();
+  }, [countryFilter, deferredQuery, quickFilters, sort, typeFilter, badgeFilters]);
 
   useEffect(() => {
     const missing = records
@@ -200,13 +233,14 @@ export function OrganizationsClient({ records: initialRecords = [] }: { records?
   const activeFilterCount =
     (countryFilter ? 1 : 0) +
     (typeFilter ? 1 : 0) +
-    quickFilters.length;
+    quickFilters.length +
+    badgeFilters.length;
 
   const hasActiveFilters = query.trim().length > 0 || activeFilterCount > 0;
 
   useEffect(() => {
     setCardLimit(INITIAL_CARD_LIMIT);
-  }, [deferredQuery, sort, countryFilter, typeFilter, quickFilters, view]);
+  }, [deferredQuery, sort, countryFilter, typeFilter, quickFilters, badgeFilters, view]);
 
   const updateQuickFilters = (nextFilters: QuickFilter[]) => {
     void setQuickFiltersParam(serializeQuickFiltersParam(nextFilters));
@@ -216,11 +250,20 @@ export function OrganizationsClient({ records: initialRecords = [] }: { records?
     updateQuickFilters(quickFilters.includes(filter) ? quickFilters.filter((value) => value !== filter) : [...quickFilters, filter]);
   };
 
+  const updateBadgeFilters = (nextFilters: BumicertBadgeFilter[]) => {
+    void setBadgesParam(serializeBadgeFilterParam(nextFilters));
+  };
+
+  const toggleBadgeFilter = (filter: BumicertBadgeFilter) => {
+    updateBadgeFilters(badgeFilters.includes(filter) ? badgeFilters.filter((value) => value !== filter) : [...badgeFilters, filter]);
+  };
+
   const clearAll = () => {
     void setQuery("");
     void setCountryFilter(null);
     void setTypeFilter(null);
     updateQuickFilters([]);
+    updateBadgeFilters([]);
   };
 
   const loadMore = useCallback(() => {
@@ -231,7 +274,7 @@ export function OrganizationsClient({ records: initialRecords = [] }: { records?
     const isCurrent = () => requestSeqRef.current === requestSeq && !controller.signal.aborted;
     const base = records;
     setLoadingMore(true);
-    fetchSites(ORGANIZATIONS_PAGE_SIZE, cursor, controller.signal, undefined, "both", { query: deferredQuery, country: countryFilter, orgType: typeFilter, quickFilters, sort })
+    fetchSites(ORGANIZATIONS_PAGE_SIZE, cursor, controller.signal, undefined, "both", { query: deferredQuery, country: countryFilter, orgType: typeFilter, quickFilters, sort, featuredBadgesOnly: true, badgeFilters })
       .then((page) => {
         if (!isCurrent()) return;
         setRecords(mergeSiteRecords(base, page.records));
@@ -244,7 +287,7 @@ export function OrganizationsClient({ records: initialRecords = [] }: { records?
       .finally(() => {
         if (isCurrent()) setLoadingMore(false);
       });
-  }, [countryFilter, cursor, deferredQuery, hasMore, loading, loadingMore, quickFilters, records, sort, typeFilter]);
+  }, [countryFilter, cursor, deferredQuery, hasMore, loading, loadingMore, quickFilters, badgeFilters, records, sort, typeFilter]);
 
   const openMapRecord = (record: ExplorerRecord) => {
     if (record.kind === "site") setDrawer(record);
@@ -281,6 +324,19 @@ export function OrganizationsClient({ records: initialRecords = [] }: { records?
               style={{ animationDelay: "120ms" }}
             >
               <div className="flex items-center gap-1.5 pb-1 pr-8">
+                {badgeFilterOptions.map((badge) => (
+                  <FilterChip
+                    key={badge.key}
+                    selected={badgeFilters.includes(badge.key)}
+                    onClick={() => toggleBadgeFilter(badge.key)}
+                  >
+                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-background/80">
+                      <Image src={badge.logoSrc} width={20} height={20} alt="" className="h-5 w-5 object-contain" />
+                    </span>
+                    {badge.label}
+                  </FilterChip>
+                ))}
+
                 {QUICK_CHIP_VALUES.map((value) => (
                   <FilterChip
                     key={value}
@@ -343,9 +399,9 @@ export function OrganizationsClient({ records: initialRecords = [] }: { records?
 
           {(records.length > 0 || (!loading && hasMore && hasActiveFilters)) && (
             <div className="mt-10 flex flex-col items-center gap-3">
-              {view !== "map" && visibleRecords.length > renderedRecords.length && (
+              {totalCount !== null && (
                 <p className="text-sm text-muted-foreground">
-                  {t("footer.showing", { shown: renderedRecords.length, total: visibleRecords.length })}
+                  {t("footer.showing", { shown: visibleRecords.length, total: totalCount })}
                 </p>
               )}
               {hasMoreCardsToShow ? (
@@ -941,6 +997,16 @@ function parseQuickFiltersParam(value: string | null): QuickFilter[] {
 }
 
 function serializeQuickFiltersParam(filters: QuickFilter[]): string | null {
+  return filters.length > 0 ? filters.join(",") : null;
+}
+
+function parseBadgeFilterParam(value: string | null): BumicertBadgeFilter[] {
+  if (!value) return [];
+  const parsed = value.split(",").filter((item): item is BumicertBadgeFilter => BADGE_FILTER_KEYS.includes(item as BumicertBadgeFilter));
+  return [...new Set(parsed)];
+}
+
+function serializeBadgeFilterParam(filters: BumicertBadgeFilter[]): string | null {
   return filters.length > 0 ? filters.join(",") : null;
 }
 

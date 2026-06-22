@@ -23,7 +23,9 @@ import { AutoLoadMoreButton } from "../_components/AutoLoadMoreButton";
 import { RecordDrawer } from "../_components/RecordDrawer";
 import { RecordMap } from "../_components/RecordMap";
 import {
+  fetchProjectTotalCount,
   fetchProjects,
+  type BumicertBadgeFilter,
   type ExplorerRecord,
   type ExplorerSortMode,
   type ProjectIndexFilter,
@@ -35,6 +37,7 @@ const PROJECTS_PAGE_SIZE = 48;
 const INITIAL_CARD_LIMIT = 96;
 const CARD_BATCH_SIZE = 96;
 const FILTER_KEYS: ProjectIndexFilter[] = ["images", "locations"];
+const BADGE_FILTER_KEYS: BumicertBadgeFilter[] = ["gainforest", "maearth", "maearth-round-1", "maearth-round-2"];
 const SORT_MODES: ExplorerSortMode[] = ["newest", "oldest", "az", "za"];
 type ViewMode = "cards" | "list" | "map";
 const VIEW_MODES: ViewMode[] = ["cards", "list", "map"];
@@ -43,12 +46,25 @@ const SEARCH_QUERY_STATE_OPTIONS = { ...QUERY_STATE_OPTIONS, throttleMs: 200 } a
 
 
 
+type BadgeFilterOption = {
+  key: BumicertBadgeFilter;
+  label: string;
+  logoSrc: string;
+};
+
 export function ProjectsExploreClient({ records: initialRecords = [] }: { records?: ProjectRecord[] }) {
   const t = useTranslations("marketplace.projects");
+  const exploreT = useTranslations("marketplace.explore");
   const filterChips = useMemo<Array<{ key: ProjectIndexFilter; label: string; predicate: (record: ProjectRecord) => boolean }>>(() => [
     { key: "images", label: t("filters.images"), predicate: (record) => Boolean(record.imageUrl) },
     { key: "locations", label: t("filters.locations"), predicate: (record) => Boolean(record.locationUri) },
   ], [t]);
+  const badgeFilterOptions = useMemo<BadgeFilterOption[]>(() => [
+    { key: "gainforest", label: exploreT("filters.badges.gainforest"), logoSrc: "/assets/media/images/gainforest-logo.svg" },
+    { key: "maearth", label: exploreT("filters.badges.maearth"), logoSrc: "/assets/media/images/badges/ma-earth-logo.webp" },
+    { key: "maearth-round-1", label: exploreT("filters.badges.maearthRound1"), logoSrc: "/assets/media/images/badges/ma-earth-logo.webp" },
+    { key: "maearth-round-2", label: exploreT("filters.badges.maearthRound2"), logoSrc: "/assets/media/images/badges/ma-earth-logo.webp" },
+  ], [exploreT]);
   const sortOptions = useMemo<Array<{ value: ExplorerSortMode; label: string }>>(() => [
     { value: "newest", label: t("sort.newest") },
     { value: "oldest", label: t("sort.oldest") },
@@ -66,6 +82,7 @@ export function ProjectsExploreClient({ records: initialRecords = [] }: { record
   const [hasMore, setHasMore] = useState(initialRecords.length === 0);
   const [loading, setLoading] = useState(initialRecords.length === 0);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [totalCount, setTotalCount] = useState<number | null>(null);
   const [cardLimit, setCardLimit] = useState(INITIAL_CARD_LIMIT);
   const [autoLoadMore, setAutoLoadMore] = useState(false);
   const [openSort, setOpenSort] = useState(false);
@@ -93,12 +110,18 @@ export function ProjectsExploreClient({ records: initialRecords = [] }: { record
     parseAsString.withOptions(QUERY_STATE_OPTIONS),
   );
   const filters = useMemo(() => parseFilterParam(filtersParam), [filtersParam]);
+  const [badgesParam, setBadgesParam] = useQueryState(
+    "badges",
+    parseAsString.withOptions(QUERY_STATE_OPTIONS),
+  );
+  const badgeFilters = useMemo(() => parseBadgeFilterParam(badgesParam), [badgesParam]);
+  const activeFilterCount = filters.length + badgeFilters.length;
 
   useEffect(() => {
     if (initialRecords.length > 0) return;
     const controller = new AbortController();
     const requestSeq = ++requestSeqRef.current;
-    const options = { query: deferredQuery, filters, sort };
+    const options = { query: deferredQuery, filters, sort, featuredBadgesOnly: true, badgeFilters };
     const isCurrent = () => requestSeqRef.current === requestSeq && !controller.signal.aborted;
     setLoading(true);
     setLoadingMore(false);
@@ -119,11 +142,22 @@ export function ProjectsExploreClient({ records: initialRecords = [] }: { record
         if (isCurrent()) setLoading(false);
       });
     return () => controller.abort();
-  }, [initialRecords.length, deferredQuery, filters, sort]);
+  }, [initialRecords.length, deferredQuery, filters, sort, badgeFilters]);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    setTotalCount(null);
+    fetchProjectTotalCount(controller.signal, { query: deferredQuery, filters, sort, featuredBadgesOnly: true, badgeFilters })
+      .then((count) => setTotalCount(count))
+      .catch((error) => {
+        if ((error as Error).name !== "AbortError") console.warn("[projects] count failed", error);
+      });
+    return () => controller.abort();
+  }, [deferredQuery, filters, sort, badgeFilters]);
 
   useEffect(() => {
     setCardLimit(INITIAL_CARD_LIMIT);
-  }, [deferredQuery, filters, sort, view]);
+  }, [deferredQuery, filters, badgeFilters, sort, view]);
 
   useEffect(() => {
     if (!openSort) return;
@@ -178,7 +212,18 @@ export function ProjectsExploreClient({ records: initialRecords = [] }: { record
     updateFilters(filters.includes(key) ? filters.filter((value) => value !== key) : [...filters, key]);
   }, [filters, updateFilters]);
 
-  const clearFilters = useCallback(() => updateFilters([]), [updateFilters]);
+  const updateBadgeFilters = useCallback((nextFilters: BumicertBadgeFilter[]) => {
+    void setBadgesParam(serializeBadgeFilterParam(nextFilters));
+  }, [setBadgesParam]);
+
+  const toggleBadgeFilter = useCallback((key: BumicertBadgeFilter) => {
+    updateBadgeFilters(badgeFilters.includes(key) ? badgeFilters.filter((value) => value !== key) : [...badgeFilters, key]);
+  }, [badgeFilters, updateBadgeFilters]);
+
+  const clearFilters = useCallback(() => {
+    updateFilters([]);
+    updateBadgeFilters([]);
+  }, [updateFilters, updateBadgeFilters]);
 
   const openRecord = useCallback((record: ProjectRecord) => setDrawer(record), []);
   const openMapRecord = useCallback((record: ExplorerRecord) => {
@@ -192,7 +237,7 @@ export function ProjectsExploreClient({ records: initialRecords = [] }: { record
     const base = records;
     const isCurrent = () => requestSeqRef.current === requestSeq && !controller.signal.aborted;
     setLoadingMore(true);
-    fetchProjects(PROJECTS_PAGE_SIZE, cursor, controller.signal, undefined, { query: deferredQuery, filters, sort })
+    fetchProjects(PROJECTS_PAGE_SIZE, cursor, controller.signal, undefined, { query: deferredQuery, filters, sort, featuredBadgesOnly: true, badgeFilters })
       .then((page) => {
         if (!isCurrent()) return;
         setRecords(mergeProjectRecords(base, page.records));
@@ -205,7 +250,7 @@ export function ProjectsExploreClient({ records: initialRecords = [] }: { record
       .finally(() => {
         if (isCurrent()) setLoadingMore(false);
       });
-  }, [cursor, deferredQuery, filters, hasMore, loading, loadingMore, records, sort]);
+  }, [cursor, deferredQuery, filters, badgeFilters, hasMore, loading, loadingMore, records, sort]);
 
   return (
     <>
@@ -330,9 +375,17 @@ export function ProjectsExploreClient({ records: initialRecords = [] }: { record
 
             <div className="scroll-mask-right scrollbar-hidden hidden min-w-0 flex-1 overflow-x-auto pb-px sm:block">
               <div className="flex items-center gap-2 pr-8">
-                <Button type="button" onClick={clearFilters} variant={filters.length === 0 ? "default" : "outline"} size="sm" className="h-10 text-sm">
+                <Button type="button" onClick={clearFilters} variant={activeFilterCount === 0 ? "default" : "outline"} size="sm" className="h-10 text-sm">
                   {t("filters.allProjects")}
                 </Button>
+                {badgeFilterOptions.map((badge) => (
+                  <BadgeFilterButton
+                    key={badge.key}
+                    badge={badge}
+                    selected={badgeFilters.includes(badge.key)}
+                    onClick={() => toggleBadgeFilter(badge.key)}
+                  />
+                ))}
                 {filterChips.map((chip) => {
                   const selected = filters.includes(chip.key);
                   return (
@@ -353,15 +406,15 @@ export function ProjectsExploreClient({ records: initialRecords = [] }: { record
                 }}
                 aria-haspopup="true"
                 aria-expanded={openFilters}
-                variant={openFilters || filters.length > 0 ? "default" : "outline"}
+                variant={openFilters || activeFilterCount > 0 ? "default" : "outline"}
                 size="sm"
                 className="h-10 text-sm"
               >
                 <SlidersHorizontalIcon className="h-3.5 w-3.5" />
                 <span>{t("filters.allFilters")}</span>
-                {filters.length > 0 && (
+                {activeFilterCount > 0 && (
                   <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-primary-foreground px-1 text-[10px] text-primary">
-                    {filters.length}
+                    {activeFilterCount}
                   </span>
                 )}
               </Button>
@@ -375,6 +428,14 @@ export function ProjectsExploreClient({ records: initialRecords = [] }: { record
                     </p>
                   </div>
                   <div className="flex flex-wrap gap-2">
+                    {badgeFilterOptions.map((badge) => (
+                      <BadgeFilterButton
+                        key={badge.key}
+                        badge={badge}
+                        selected={badgeFilters.includes(badge.key)}
+                        onClick={() => toggleBadgeFilter(badge.key)}
+                      />
+                    ))}
                     {filterChips.map((chip) => (
                       <Button key={chip.key} type="button" aria-pressed={filters.includes(chip.key)} onClick={() => toggleFilter(chip.key)} variant={filters.includes(chip.key) ? "default" : "outline"} size="sm" className="h-10 text-sm">
                         {chip.label}
@@ -405,9 +466,9 @@ export function ProjectsExploreClient({ records: initialRecords = [] }: { record
 
         {records.length > 0 && (
           <div className="mt-10 flex flex-col items-center gap-3">
-            {view !== "map" && visibleRecords.length > renderedRecords.length && (
+            {totalCount !== null && (
               <p className="text-sm text-muted-foreground">
-                {t("footer.showing", { shown: renderedRecords.length, total: visibleRecords.length })}
+                {t("footer.showing", { shown: visibleRecords.length, total: totalCount })}
               </p>
             )}
             {hasMoreCardsToShow ? (
@@ -672,6 +733,24 @@ function ProjectCard({
   );
 }
 
+function BadgeFilterButton({ badge, selected, onClick }: { badge: BadgeFilterOption; selected: boolean; onClick: () => void }) {
+  return (
+    <Button
+      type="button"
+      onClick={onClick}
+      variant={selected ? "default" : "outline"}
+      size="sm"
+      className="h-10 gap-2 text-sm"
+      aria-pressed={selected}
+    >
+      <span className="flex h-5 w-5 items-center justify-center rounded-full bg-background/80">
+        <Image src={badge.logoSrc} width={20} height={20} alt="" className="h-5 w-5 object-contain" />
+      </span>
+      {badge.label}
+    </Button>
+  );
+}
+
 function compareProjects(a: ProjectRecord, b: ProjectRecord, sort: ExplorerSortMode): number {
   switch (sort) {
     case "oldest":
@@ -694,6 +773,16 @@ function parseFilterParam(value: string | null): ProjectIndexFilter[] {
 }
 
 function serializeFilterParam(filters: ProjectIndexFilter[]): string | null {
+  return filters.length > 0 ? filters.join(",") : null;
+}
+
+function parseBadgeFilterParam(value: string | null): BumicertBadgeFilter[] {
+  if (!value) return [];
+  const parsed = value.split(",").filter((item): item is BumicertBadgeFilter => BADGE_FILTER_KEYS.includes(item as BumicertBadgeFilter));
+  return [...new Set(parsed)];
+}
+
+function serializeBadgeFilterParam(filters: BumicertBadgeFilter[]): string | null {
   return filters.length > 0 ? filters.join(",") : null;
 }
 
