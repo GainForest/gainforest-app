@@ -45,6 +45,7 @@ import { resolveDidProfile, getCachedProfile } from "../_lib/did-profile";
 import { formatCompact, countryFlag, formatCountry, formatDate } from "../_lib/format";
 import { AutoLoadMoreButton } from "./AutoLoadMoreButton";
 import { PictureHero } from "./PictureHero";
+import { useStableQueryView } from "../_lib/use-stable-query-view";
 
 // Single-stream record explorer. One of the three GainForest record types
 // (Darwin Core occurrences, project sites, Bumicerts) paged straight from
@@ -237,10 +238,16 @@ export function RecordExplorer({
     parseAsString.withOptions(QUERY_STATE_OPTIONS),
   );
   const badgeFilters = useMemo(() => parseBadgeFilterParam(badgesParam), [badgesParam]);
-  const [view, setView] = useQueryState(
+  const [queryView, setQueryView] = useQueryState(
     "view",
     parseAsStringEnum<ViewMode>(VIEW_MODES).withDefault("cards").withOptions(QUERY_STATE_OPTIONS),
   );
+  const [view, setView] = useStableQueryView({
+    queryValue: queryView,
+    setQueryValue: setQueryView,
+    values: VIEW_MODES,
+    defaultValue: "cards",
+  });
   const [recordParamValue, setRecordParamValue] = useQueryState(
     "record",
     parseAsString.withOptions(QUERY_STATE_OPTIONS),

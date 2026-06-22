@@ -32,6 +32,7 @@ import {
   type ProjectRecord,
 } from "../_lib/indexer";
 import { isPdsBlobUrl } from "../_lib/pds";
+import { useStableQueryView } from "../_lib/use-stable-query-view";
 
 const PROJECTS_PAGE_SIZE = 48;
 const INITIAL_CARD_LIMIT = 96;
@@ -101,10 +102,16 @@ export function ProjectsExploreClient({ records: initialRecords = [] }: { record
     "sort",
     parseAsStringEnum<ExplorerSortMode>(SORT_MODES).withDefault("newest").withOptions(QUERY_STATE_OPTIONS),
   );
-  const [view, setView] = useQueryState(
+  const [queryView, setQueryView] = useQueryState(
     "view",
     parseAsStringEnum<ViewMode>(VIEW_MODES).withDefault("cards").withOptions(QUERY_STATE_OPTIONS),
   );
+  const [view, setView] = useStableQueryView({
+    queryValue: queryView,
+    setQueryValue: setQueryView,
+    values: VIEW_MODES,
+    defaultValue: "cards",
+  });
   const [filtersParam, setFiltersParam] = useQueryState(
     "filters",
     parseAsString.withOptions(QUERY_STATE_OPTIONS),

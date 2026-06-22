@@ -31,6 +31,7 @@ import {
   type SiteRecord,
 } from "../_lib/indexer";
 import { countryFlag } from "../_lib/format";
+import { useStableQueryView } from "../_lib/use-stable-query-view";
 
 type SortMode = "newest" | "oldest" | "az" | "za";
 type ViewMode = "cards" | "list" | "map";
@@ -92,10 +93,16 @@ export function OrganizationsClient({ records: initialRecords = [] }: { records?
     parseAsString.withOptions(QUERY_STATE_OPTIONS),
   );
   const badgeFilters = useMemo(() => parseBadgeFilterParam(badgesParam), [badgesParam]);
-  const [view, setView] = useQueryState(
+  const [queryView, setQueryView] = useQueryState(
     "view",
     parseAsStringEnum<ViewMode>(VIEW_MODES).withDefault("cards").withOptions(QUERY_STATE_OPTIONS),
   );
+  const [view, setView] = useStableQueryView({
+    queryValue: queryView,
+    setQueryValue: setQueryView,
+    values: VIEW_MODES,
+    defaultValue: "cards",
+  });
   const [openDropdown, setOpenDropdown] = useState(false);
   const [drawer, setDrawer] = useState<SiteRecord | null>(null);
   const [cardLimit, setCardLimit] = useState(INITIAL_CARD_LIMIT);
