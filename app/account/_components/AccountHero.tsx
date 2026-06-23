@@ -17,6 +17,7 @@ import {
 import type { AccountRouteData } from "../_lib/account-route";
 import { formatCountry } from "../../_lib/format";
 import { SocialGlyph } from "@/app/_components/SocialIcon";
+import { TrustedByBadges } from "@/app/_components/TrustedByBadges";
 import { Button } from "@/components/ui/button";
 
 function formatWebsite(url: string): string {
@@ -158,6 +159,7 @@ export function AccountHero({ account, editHref = null }: { account: AccountRout
             <h1 className="font-instrument text-3xl font-light italic leading-[1.1] tracking-[-0.02em] text-foreground md:text-4xl">
               {account.displayName}
             </h1>
+            <TrustedByBadges did={account.did} className="mt-2" />
             <p className="mt-1.5 line-clamp-2 text-sm leading-relaxed text-muted-foreground">
               {account.description ?? ""}
             </p>

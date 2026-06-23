@@ -17,6 +17,7 @@ import {
 } from "../_lib/indexer";
 import { formatCompact, formatDate, formatNumber, countryFlag, formatCountry } from "../_lib/format";
 import { AuthorChip } from "./AuthorChip";
+import { TrustedByBadges } from "./TrustedByBadges";
 import { usePreferredDidIdentifier } from "./PreferredLinks";
 import { RecordLocationMap } from "./RecordLocationMap";
 import { mapTileUrl } from "../_lib/coords";
@@ -406,6 +407,7 @@ export function RecordDrawer({
               avatarRefOverride={ownerAvatarRefOverride}
               nameOverride={ownerNameOverride}
             />
+            <TrustedByBadges did={record.did} className="mt-3" />
             <Link
               href={ownerHref}
               className="mt-3 flex h-9 items-center justify-center gap-1.5 rounded-full border border-border-soft bg-background text-[13px] font-medium text-foreground/80 transition-colors hover:border-primary/40 hover:text-primary"

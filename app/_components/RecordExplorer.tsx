@@ -45,6 +45,7 @@ import { resolveDidProfile, getCachedProfile } from "../_lib/did-profile";
 import { formatCompact, countryFlag, formatCountry, formatDate } from "../_lib/format";
 import { AutoLoadMoreButton } from "./AutoLoadMoreButton";
 import { PictureHero } from "./PictureHero";
+import { TrustedByBadges } from "./TrustedByBadges";
 import { useStableQueryView } from "../_lib/use-stable-query-view";
 
 // Single-stream record explorer. One of the three GainForest record types
@@ -1063,6 +1064,7 @@ const GenericCard = memo(function GenericCard({ record, onOpen }: { record: Expl
           {v.pills ? (
             <div className="mt-2 flex flex-wrap items-center gap-1">{v.pills}</div>
           ) : null}
+          {record.kind === "site" ? <TrustedByBadges did={record.did} className="mt-2" /> : null}
         </div>
 
         {record.createdAt ? (
@@ -1193,7 +1195,10 @@ const RecordListItem = memo(function RecordListItem({ record, onOpen }: { record
           {v.subtitle ? <span className="mt-1 block truncate text-sm text-foreground/65">{v.subtitle}</span> : null}
         </span>
         <span className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-border-soft pt-2">
-          <span className="min-w-0 truncate text-xs text-foreground/55">{ownerLabel}</span>
+          <span className="min-w-0 space-y-0.5 text-xs text-foreground/55">
+            <span className="block truncate">{ownerLabel}</span>
+            {record.kind === "site" ? <TrustedByBadges did={record.did} size="sm" /> : null}
+          </span>
           <span className="shrink-0 text-xs font-medium text-foreground transition-colors group-hover:text-primary">Show details</span>
         </span>
       </span>

@@ -1125,6 +1125,7 @@ const FUNDING_CONFIG_QUERY = `
 `;
 
 export type BumicertBadgeFilter = "gainforest" | "maearth" | "maearth-round-1" | "maearth-round-2";
+export type TrustedOrganizationBadge = "gainforest" | "maearth";
 
 const FEATURED_BADGE_REPO_DID = "did:plc:yjck2sybksyigp3zvbq7bfki";
 const FEATURED_BADGES: Array<{ key: BumicertBadgeFilter; title: string }> = [
@@ -1399,6 +1400,24 @@ function fetchFeaturedBadgeIndex(signal?: AbortSignal): Promise<FeaturedBadgeInd
     () => fetchFeaturedBadgeIndexUncached(),
     signal,
   );
+}
+
+export async function fetchTrustedOrganizationBadges(
+  did: string,
+  signal?: AbortSignal,
+): Promise<TrustedOrganizationBadge[]> {
+  if (!did.startsWith("did:")) return [];
+  const index = await fetchFeaturedBadgeIndex(signal);
+  const badges: TrustedOrganizationBadge[] = [];
+  if (index.byBadge.gainforest.dids.includes(did)) badges.push("gainforest");
+  if (
+    index.byBadge.maearth.dids.includes(did) ||
+    index.byBadge["maearth-round-1"].dids.includes(did) ||
+    index.byBadge["maearth-round-2"].dids.includes(did)
+  ) {
+    badges.push("maearth");
+  }
+  return badges;
 }
 
 /**

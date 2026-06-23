@@ -22,6 +22,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { AutoLoadMoreButton } from "../_components/AutoLoadMoreButton";
 import { RecordDrawer } from "../_components/RecordDrawer";
 import { RecordMap } from "../_components/RecordMap";
+import { TrustedByBadges } from "../_components/TrustedByBadges";
 import {
   fetchCertifiedLocationCountriesByUri,
   fetchSiteTotalCount,
@@ -796,6 +797,7 @@ const OrganizationListItem = memo(function OrganizationListItem({ record, onOpen
             </span>
             <span className="block min-w-0 truncate font-instrument text-2xl italic leading-tight text-foreground">{record.name}</span>
           </span>
+          <TrustedByBadges did={record.did} className="mt-1.5" />
           <span className="mt-1 line-clamp-2 block text-sm leading-relaxed text-muted-foreground">{description}</span>
         </span>
         <span className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-border/60 pt-2">
@@ -874,6 +876,7 @@ const OrganizationCard = memo(function OrganizationCard({ record, onOpen }: { re
           <h3 className="line-clamp-1 font-instrument text-2xl italic leading-tight text-foreground">
             {record.name}
           </h3>
+          <TrustedByBadges did={record.did} className="mt-1.5" />
           <p className="mt-1.5 line-clamp-2 text-sm leading-relaxed text-muted-foreground">{description}</p>
 
           <div className="min-h-5 flex-1" />
