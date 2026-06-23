@@ -350,6 +350,7 @@ export function RecordDrawer({
         )}
 
         <div className={`px-6 pb-12 ${showHero ? "-mt-10" : "pt-5"}`}>
+          {record.kind === "site" ? <TrustedByBadges did={record.did} className="relative mb-3" variant="compact" /> : null}
           <h2 className="relative font-instrument text-[30px] italic leading-[1.08] tracking-[-0.01em] text-foreground">
             {title}
           </h2>
@@ -407,7 +408,6 @@ export function RecordDrawer({
               avatarRefOverride={ownerAvatarRefOverride}
               nameOverride={ownerNameOverride}
             />
-            <TrustedByBadges did={record.did} className="mt-3" />
             <Link
               href={ownerHref}
               className="mt-3 flex h-9 items-center justify-center gap-1.5 rounded-full border border-border-soft bg-background text-[13px] font-medium text-foreground/80 transition-colors hover:border-primary/40 hover:text-primary"

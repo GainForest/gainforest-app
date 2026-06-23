@@ -6,7 +6,6 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  BadgeCheckIcon,
   Building2Icon,
   CalendarIcon,
   CheckIcon,
@@ -104,12 +103,7 @@ export function AccountHero({ account, editHref = null }: { account: AccountRout
           <div className="pointer-events-none absolute inset-x-0 bottom-0 h-14 bg-linear-to-t from-card to-transparent" />
         </motion.div>
 
-        <TrustedByBadges
-          did={account.did}
-          className="absolute left-3 top-3 z-10 w-fit rounded-full bg-accent/50 p-1 pl-3 text-lg backdrop-blur-lg"
-          labelClassName="leading-none"
-          leadingIcon={<BadgeCheckIcon className="size-5" aria-hidden />}
-        />
+        <TrustedByBadges did={account.did} className="absolute left-3 top-3 z-10 w-fit" />
 
         <div className="absolute right-3 top-3 z-10 flex items-center gap-2">
           <Button type="button" variant="outline" size="sm" onClick={handleShare} aria-label="Copy link">

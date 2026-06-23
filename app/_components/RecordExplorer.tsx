@@ -1040,9 +1040,13 @@ const GenericCard = memo(function GenericCard({ record, onOpen }: { record: Expl
           v.placeholder
         )}
 
-        <div className="absolute left-1.5 top-1.5 z-10 inline-flex max-w-[calc(100%-0.75rem)] items-center rounded-full bg-background/75 px-2 py-1 text-[10px] font-medium text-foreground/65 shadow-sm backdrop-blur-md">
-          <span className="truncate">{record.kind === "bumicert" || record.kind === "project" ? record.creatorName ?? "Project steward" : record.kind === "site" ? record.name : "Shared profile"}</span>
-        </div>
+        {record.kind === "site" ? (
+          <TrustedByBadges did={record.did} className="absolute left-1.5 top-1.5 z-10 max-w-[70%]" variant="compact" />
+        ) : (
+          <div className="absolute left-1.5 top-1.5 z-10 inline-flex max-w-[calc(100%-0.75rem)] items-center rounded-full bg-background/75 px-2 py-1 text-[10px] font-medium text-foreground/65 shadow-sm backdrop-blur-md">
+            <span className="truncate">{record.kind === "bumicert" || record.kind === "project" ? record.creatorName ?? "Project steward" : "Shared profile"}</span>
+          </div>
+        )}
 
         {v.badge ? <div className="absolute right-1.5 top-1.5 z-10">{v.badge}</div> : null}
       </div>
@@ -1064,7 +1068,6 @@ const GenericCard = memo(function GenericCard({ record, onOpen }: { record: Expl
           {v.pills ? (
             <div className="mt-2 flex flex-wrap items-center gap-1">{v.pills}</div>
           ) : null}
-          {record.kind === "site" ? <TrustedByBadges did={record.did} className="mt-2" /> : null}
         </div>
 
         {record.createdAt ? (
@@ -1197,7 +1200,7 @@ const RecordListItem = memo(function RecordListItem({ record, onOpen }: { record
         <span className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-border-soft pt-2">
           <span className="min-w-0 space-y-0.5 text-xs text-foreground/55">
             <span className="block truncate">{ownerLabel}</span>
-            {record.kind === "site" ? <TrustedByBadges did={record.did} size="sm" /> : null}
+            {record.kind === "site" ? <TrustedByBadges did={record.did} variant="compact" /> : null}
           </span>
           <span className="shrink-0 text-xs font-medium text-foreground transition-colors group-hover:text-primary">Show details</span>
         </span>

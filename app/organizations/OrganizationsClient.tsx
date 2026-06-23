@@ -797,7 +797,7 @@ const OrganizationListItem = memo(function OrganizationListItem({ record, onOpen
             </span>
             <span className="block min-w-0 truncate font-instrument text-2xl italic leading-tight text-foreground">{record.name}</span>
           </span>
-          <TrustedByBadges did={record.did} className="mt-1.5" />
+          <TrustedByBadges did={record.did} className="mt-1.5" variant="compact" />
           <span className="mt-1 line-clamp-2 block text-sm leading-relaxed text-muted-foreground">{description}</span>
         </span>
         <span className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-border/60 pt-2">
@@ -844,6 +844,8 @@ const OrganizationCard = memo(function OrganizationCard({ record, onOpen }: { re
           )}
           <div className="absolute inset-0 bg-linear-to-t from-card via-card/40 to-transparent" />
 
+          <TrustedByBadges did={record.did} className="absolute left-2.5 top-2.5 z-10 max-w-[70%]" variant="compact" />
+
           {countryLabel && (
             <span className="absolute top-2.5 right-2.5 flex items-center gap-1 rounded-full bg-background/70 px-2 py-0.5 text-xs text-foreground/80 backdrop-blur-sm">
               <span>{countryFlag(country)}</span>
@@ -876,7 +878,6 @@ const OrganizationCard = memo(function OrganizationCard({ record, onOpen }: { re
           <h3 className="line-clamp-1 font-instrument text-2xl italic leading-tight text-foreground">
             {record.name}
           </h3>
-          <TrustedByBadges did={record.did} className="mt-1.5" />
           <p className="mt-1.5 line-clamp-2 text-sm leading-relaxed text-muted-foreground">{description}</p>
 
           <div className="min-h-5 flex-1" />

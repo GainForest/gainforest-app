@@ -157,7 +157,7 @@ function AccountDrawer({ did, onClose }: { did: string | null; onClose: () => vo
               {handle && (
                 <p className="mt-0.5 truncate text-[13px] text-primary">{handle}</p>
               )}
-              <TrustedByBadges did={did} className="mt-1" size="xs" />
+              <TrustedByBadges did={did} className="mt-2" variant="compact" />
             </div>
           </div>
 

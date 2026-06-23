@@ -1,7 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useState } from "react";
+import { BadgeCheckIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import QuickTooltip from "@/components/ui/quick-tooltip";
 import {
@@ -34,8 +35,7 @@ type TrustedByBadgesProps = {
   labelClassName?: string;
   iconClassName?: string;
   size?: keyof typeof ICON_SIZE_CLASS;
-  leadingIcon?: ReactNode;
-  trailingIcon?: ReactNode;
+  variant?: "default" | "compact";
 };
 
 export function TrustedByBadges({
@@ -43,9 +43,8 @@ export function TrustedByBadges({
   className = "",
   labelClassName = "",
   iconClassName = "",
-  size = "md",
-  leadingIcon,
-  trailingIcon,
+  size,
+  variant = "default",
 }: TrustedByBadgesProps) {
   const t = useTranslations("common.trust");
   const [badges, setBadges] = useState<TrustedOrganizationBadge[]>([]);
@@ -73,22 +72,27 @@ export function TrustedByBadges({
   if (badges.length === 0) return null;
 
   const names = badges.map((badge) => BADGE_META[badge].label).join(", ");
+  const resolvedSize = size ?? (variant === "compact" ? "xs" : "md");
+  const variantClass = variant === "compact"
+    ? "gap-1.5 rounded-full bg-accent/50 p-0.5 pl-2 text-sm"
+    : "gap-2 rounded-full bg-accent/50 p-1 pl-3 text-lg";
+  const checkIconClass = variant === "compact" ? "size-4" : "size-5";
 
   return (
     <span
-      className={`inline-flex min-w-0 items-center gap-2 text-sm font-medium text-muted-foreground ${className}`}
+      className={`inline-flex min-w-0 items-center overflow-hidden font-medium text-muted-foreground backdrop-blur-lg ${variantClass} ${className}`}
       aria-label={t("aria", { names })}
     >
-      {leadingIcon ? <span className="shrink-0 text-primary">{leadingIcon}</span> : null}
-      <span className={`shrink-0 whitespace-nowrap ${labelClassName}`}>{t("trustedBy")}</span>
+      <BadgeCheckIcon className={`${checkIconClass} shrink-0 text-primary`} aria-hidden />
+      <span className={`shrink-0 whitespace-nowrap leading-none ${labelClassName}`}>{t("trustedBy")}</span>
       <span className="inline-flex shrink-0 items-center -space-x-1">
         {badges.map((badge) => {
           const meta = BADGE_META[badge];
-          const pixels = ICON_PIXEL_SIZE[size];
+          const pixels = ICON_PIXEL_SIZE[resolvedSize];
           return (
             <QuickTooltip key={badge} content={t("aria", { names: meta.label })} asChild>
               <span
-                className={`grid ${ICON_SIZE_CLASS[size]} place-items-center overflow-hidden rounded-full bg-background shadow-sm ring-1 ring-border/70 ${iconClassName}`}
+                className={`grid ${ICON_SIZE_CLASS[resolvedSize]} place-items-center overflow-hidden rounded-full bg-background shadow-sm ring-1 ring-border/70 ${iconClassName}`}
               >
                 <Image
                   src={meta.src}
@@ -102,7 +106,6 @@ export function TrustedByBadges({
           );
         })}
       </span>
-      {trailingIcon ? <span className="shrink-0 text-primary">{trailingIcon}</span> : null}
     </span>
   );
 }
