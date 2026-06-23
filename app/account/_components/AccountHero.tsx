@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { motion, AnimatePresence } from "framer-motion";
 import {
+  BadgeCheckIcon,
   Building2Icon,
   CalendarIcon,
   CheckIcon,
@@ -103,6 +104,13 @@ export function AccountHero({ account, editHref = null }: { account: AccountRout
           <div className="pointer-events-none absolute inset-x-0 bottom-0 h-14 bg-linear-to-t from-card to-transparent" />
         </motion.div>
 
+        <TrustedByBadges
+          did={account.did}
+          className="absolute left-3 top-3 z-10 w-fit rounded-full bg-accent/50 p-1 pl-3 text-lg backdrop-blur-lg"
+          labelClassName="leading-none"
+          leadingIcon={<BadgeCheckIcon className="size-5" aria-hidden />}
+        />
+
         <div className="absolute right-3 top-3 z-10 flex items-center gap-2">
           <Button type="button" variant="outline" size="sm" onClick={handleShare} aria-label="Copy link">
             <AnimatePresence mode="wait" initial={false}>
@@ -159,7 +167,6 @@ export function AccountHero({ account, editHref = null }: { account: AccountRout
             <h1 className="font-instrument text-3xl font-light italic leading-[1.1] tracking-[-0.02em] text-foreground md:text-4xl">
               {account.displayName}
             </h1>
-            <TrustedByBadges did={account.did} className="mt-2" />
             <p className="mt-1.5 line-clamp-2 text-sm leading-relaxed text-muted-foreground">
               {account.description ?? ""}
             </p>
@@ -193,20 +200,18 @@ export function AccountHero({ account, editHref = null }: { account: AccountRout
               </Button>
             ) : null}
             {account.website ? (
-              <Button asChild variant="outline">
-                <Link href={account.website} target="_blank" rel="noopener noreferrer">
+              <Button asChild variant="outline" size="icon" title={formatWebsite(account.website)} aria-label={heroT("openSocialLink", { link: formatWebsite(account.website) })}>
+                <Link href={externalHref(account.website)} target="_blank" rel="noopener noreferrer">
                   <GlobeIcon />
-                  {formatWebsite(account.website)}
                 </Link>
               </Button>
             ) : null}
             {account.socialLinks.map((url) => {
               const label = formatWebsite(url);
               return (
-                <Button key={url} asChild variant="outline" className="max-w-full min-w-0 shrink" aria-label={heroT("openSocialLink", { link: label })}>
+                <Button key={url} asChild variant="outline" size="icon" title={label} aria-label={heroT("openSocialLink", { link: label })}>
                   <Link href={externalHref(url)} target="_blank" rel="noopener noreferrer">
                     <SocialGlyph platform={classifySocial(url)} />
-                    <span className="truncate">{label}</span>
                   </Link>
                 </Button>
               );

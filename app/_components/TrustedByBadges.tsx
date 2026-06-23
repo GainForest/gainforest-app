@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import QuickTooltip from "@/components/ui/quick-tooltip";
 import {
@@ -34,6 +34,8 @@ type TrustedByBadgesProps = {
   labelClassName?: string;
   iconClassName?: string;
   size?: keyof typeof ICON_SIZE_CLASS;
+  leadingIcon?: ReactNode;
+  trailingIcon?: ReactNode;
 };
 
 export function TrustedByBadges({
@@ -42,6 +44,8 @@ export function TrustedByBadges({
   labelClassName = "",
   iconClassName = "",
   size = "md",
+  leadingIcon,
+  trailingIcon,
 }: TrustedByBadgesProps) {
   const t = useTranslations("common.trust");
   const [badges, setBadges] = useState<TrustedOrganizationBadge[]>([]);
@@ -75,6 +79,7 @@ export function TrustedByBadges({
       className={`inline-flex min-w-0 items-center gap-2 text-sm font-medium text-muted-foreground ${className}`}
       aria-label={t("aria", { names })}
     >
+      {leadingIcon ? <span className="shrink-0 text-primary">{leadingIcon}</span> : null}
       <span className={`shrink-0 whitespace-nowrap ${labelClassName}`}>{t("trustedBy")}</span>
       <span className="inline-flex shrink-0 items-center -space-x-1">
         {badges.map((badge) => {
@@ -97,6 +102,7 @@ export function TrustedByBadges({
           );
         })}
       </span>
+      {trailingIcon ? <span className="shrink-0 text-primary">{trailingIcon}</span> : null}
     </span>
   );
 }

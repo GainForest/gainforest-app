@@ -175,7 +175,7 @@ export const getAccountRouteData = cache(async (
     handle: summary.handle ?? appViewProfile?.handle ?? null,
     avatarUrl: summary.avatarUrl ?? appViewProfile?.avatar ?? null,
     coverUrl: appViewProfile?.banner ?? null,
-    description: summary.bio ?? appViewProfile?.description ?? detail?.blurb ?? null,
+    description: summary.bio ?? appViewProfile?.description ?? null,
     longDescription: directCertifiedOrganization?.longDescription ?? null,
     website: summary.website,
     country: summary.country,

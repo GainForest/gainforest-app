@@ -283,7 +283,7 @@ function AboutSection({
         </div>
       ) : (
         <>
-          <p className={cn("mt-3 max-w-2xl whitespace-pre-line text-sm leading-relaxed", text ? "text-muted-foreground" : "text-muted-foreground/60")}>
+          <p className={cn("mt-3 max-w-3xl whitespace-pre-line text-lg leading-8 md:text-xl md:leading-9", text ? "text-foreground/85" : "text-muted-foreground/60")}>
             {text || t("about.empty")}
           </p>
           {editDisabledReason ? <p className="mt-2 text-xs text-muted-foreground">{editDisabledReason}</p> : null}
@@ -517,8 +517,17 @@ function EditableHero({
               {sinceDate.state === "valid" ? t("hero.sinceDate", { date: sinceDate.label ?? "" }) : sinceDate.state === "invalid" ? t("hero.invalidDate") : t("hero.addStartDate")}
             </Button>
           ) : null}
-          <Button variant="outline" onClick={onEditWebsite} disabled={!canEdit} title={editDisabledReason ?? undefined} className={cn(!resolvedWebsite && "text-muted-foreground")}>
-            <GlobeIcon /> {resolvedWebsite ? formatWebsite(resolvedWebsite) : t("hero.addWebsite")}
+          <Button
+            variant="outline"
+            size={resolvedWebsite ? "icon" : "default"}
+            onClick={onEditWebsite}
+            disabled={!canEdit}
+            title={resolvedWebsite ? formatWebsite(resolvedWebsite) : editDisabledReason ?? undefined}
+            aria-label={resolvedWebsite ? formatWebsite(resolvedWebsite) : undefined}
+            className={cn(!resolvedWebsite && "text-muted-foreground")}
+          >
+            <GlobeIcon />
+            {resolvedWebsite ? null : t("hero.addWebsite")}
           </Button>
           {isOrg ? (
             <Button variant="outline" onClick={onEditVisibility} disabled={!canEdit} title={editDisabledReason ?? undefined}>
@@ -530,10 +539,9 @@ function EditableHero({
               {editState.socials.map((url) => {
                 const label = formatWebsite(url);
                 return (
-                  <Button key={url} asChild variant="outline" className="max-w-full min-w-0 shrink" aria-label={t("hero.openSocialLink", { link: label })}>
+                  <Button key={url} asChild variant="outline" size="icon" title={label} aria-label={t("hero.openSocialLink", { link: label })}>
                     <Link href={externalHref(url)} target="_blank" rel="noopener noreferrer">
                       <SocialGlyph platform={classifySocial(url)} />
-                      <span className="truncate">{label}</span>
                     </Link>
                   </Button>
                 );
