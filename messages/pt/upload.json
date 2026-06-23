@@ -644,6 +644,8 @@
     "aiConfidence": "Confiança da IA: {confidence}%",
     "uploadOne": "Enviar",
     "removeImage": "Remover imagem",
+    "editDetails": "Editar detalhes",
+    "hideDetails": "Ocultar detalhes",
     "selectForUpload": "Selecionar para enviar",
     "progressLabel": "{progress}% concluído",
     "noReadySelected": "Selecione pelo menos uma imagem analisada antes de enviar.",

@@ -4,7 +4,20 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Suspense, useEffect, useRef, useState, type ChangeEvent, type ComponentProps } from "react";
 import { parseAsStringEnum, useQueryState } from "nuqs";
-import { CheckCircle2Icon, ChevronLeftIcon, ImagePlusIcon, Loader2Icon, UploadCloudIcon, XIcon } from "lucide-react";
+import {
+  AlertTriangleIcon,
+  CheckCircle2Icon,
+  ChevronDownIcon,
+  ChevronLeftIcon,
+  ImagePlusIcon,
+  Layers2Icon,
+  Loader2Icon,
+  SparklesIcon,
+  UngroupIcon,
+  UploadCloudIcon,
+  XIcon,
+} from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
 import { useTranslations } from "next-intl";
 import { RecordExplorer } from "@/app/_components/RecordExplorer";
 import { TAINA_SIM } from "@/app/_lib/taina-sim";
@@ -12,6 +25,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import Container from "@/components/ui/container";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import TelegramIcon from "@/icons/TelegramIcon";
 import { manageHref, type ManageTarget } from "@/lib/links";
@@ -527,87 +541,103 @@ function ObservationBulkAddPanel({
   }
 
   return (
-    <Container className="space-y-6 pt-4 pb-10">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <div>
-          <Button variant="ghost" onClick={onBack} className="-ml-2 mb-2">
-            <ChevronLeftIcon className="size-4" /> {t("backToObservations")}
-          </Button>
-          <h1 className="font-instrument text-2xl font-medium italic tracking-[-0.03em] text-foreground sm:text-3xl">
-            {t("bulkTitle")}
-          </h1>
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">{t("bulkIntro")}</p>
-        </div>
-        <div className="flex gap-2">
-          <input ref={fileInputRef} type="file" accept="image/*" multiple onChange={onFilesChanged} className="sr-only" />
-          <Button variant="outline" onClick={() => fileInputRef.current?.click()} disabled={isPreparing}>
-            {isPreparing ? <Loader2Icon className="size-4 animate-spin" /> : <ImagePlusIcon className="size-4" />}
-            {isPreparing ? t("preparingImages") : items.length > 0 ? t("chooseMoreImages") : t("chooseImages")}
-          </Button>
-          <Button onClick={() => void uploadSelected()} disabled={isBulkUploading || readySelectedItems.length === 0 || Boolean(disabledReason)} title={disabledReason ?? undefined}>
-            {isBulkUploading ? <Loader2Icon className="size-4 animate-spin" /> : <UploadCloudIcon className="size-4" />}
-            {isBulkUploading ? t("uploadingSelected") : t("uploadSelected")}
-          </Button>
+    <Container className="space-y-6 pt-4 pb-12">
+      <div>
+        <Button variant="ghost" onClick={onBack} className="-ml-2 mb-3 text-muted-foreground hover:text-foreground">
+          <ChevronLeftIcon className="size-4" /> {t("backToObservations")}
+        </Button>
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div className="max-w-2xl">
+            <h1 className="font-instrument text-2xl font-medium italic tracking-[-0.03em] text-foreground sm:text-3xl">
+              {t("bulkTitle")}
+            </h1>
+            <p className="mt-2 text-sm leading-6 text-muted-foreground">{t("bulkIntro")}</p>
+          </div>
+          <div className="flex shrink-0 gap-2">
+            <input ref={fileInputRef} type="file" accept="image/*" multiple onChange={onFilesChanged} className="sr-only" />
+            <Button variant="outline" onClick={() => fileInputRef.current?.click()} disabled={isPreparing}>
+              {isPreparing ? <Loader2Icon className="size-4 animate-spin" /> : <ImagePlusIcon className="size-4" />}
+              {isPreparing ? t("preparingImages") : items.length > 0 ? t("chooseMoreImages") : t("chooseImages")}
+            </Button>
+            {items.length > 0 ? (
+              <Button onClick={() => void uploadSelected()} disabled={isBulkUploading || readySelectedItems.length === 0 || Boolean(disabledReason)} title={disabledReason ?? undefined}>
+                {isBulkUploading ? <Loader2Icon className="size-4 animate-spin" /> : <UploadCloudIcon className="size-4" />}
+                {isBulkUploading ? t("uploadingSelected") : t("uploadSelected")}
+              </Button>
+            ) : null}
+          </div>
         </div>
       </div>
 
       {bulkError || disabledReason ? (
-        <div className="rounded-2xl border border-destructive/20 bg-destructive/5 p-4 text-sm text-destructive">
-          {bulkError ?? disabledReason}
+        <div className="flex items-start gap-2.5 rounded-2xl border border-destructive/20 bg-destructive/5 p-4 text-sm text-destructive">
+          <AlertTriangleIcon className="mt-0.5 size-4 shrink-0" />
+          <span>{bulkError ?? disabledReason}</span>
         </div>
       ) : null}
-
-      <div className="rounded-2xl border bg-muted/30 p-4 text-sm text-muted-foreground">
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <span>{t("fileRequirements")}</span>
-          <span>{t("uploadedCount", { uploaded: uploadedCount, total: items.length })}</span>
-        </div>
-        {items.length > 0 ? (
-          <div className="mt-3 flex flex-col gap-3 border-t pt-3 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-xs leading-5 text-muted-foreground">{t("groupingHelp")}</p>
-            <div className="flex flex-wrap gap-2">
-              <Button variant="outline" size="sm" onClick={groupSelected} disabled={selectedEditableItems.length < 2}>
-                {t("groupSelected")}
-              </Button>
-              <Button variant="ghost" size="sm" onClick={ungroupSelected} disabled={selectedEditableItems.length === 0}>
-                {t("ungroupSelected")}
-              </Button>
-            </div>
-          </div>
-        ) : null}
-        {items.length > 0 ? <ProgressBar value={overallProgress} label={t("progressLabel", { progress: overallProgress })} className="mt-3" /> : null}
-      </div>
 
       {items.length === 0 ? (
         <button
           type="button"
           onClick={() => fileInputRef.current?.click()}
-          className="flex min-h-[320px] w-full flex-col items-center justify-center rounded-3xl border border-dashed border-primary/30 bg-primary/[0.03] p-8 text-center transition hover:bg-primary/[0.06]"
+          className="group flex min-h-[340px] w-full flex-col items-center justify-center rounded-3xl border border-dashed border-primary/25 bg-gradient-to-b from-primary/[0.04] to-transparent p-8 text-center transition-colors hover:border-primary/40 hover:from-primary/[0.07]"
         >
-          <ImagePlusIcon className="mb-4 size-10 text-primary" />
-          <span className="font-instrument text-2xl font-medium italic">{t("emptyUploadTitle")}</span>
+          <span className="mb-5 grid size-16 place-items-center rounded-2xl bg-primary/10 text-primary ring-1 ring-primary/15 transition-transform duration-300 group-hover:scale-105">
+            <ImagePlusIcon className="size-7" />
+          </span>
+          <span className="font-instrument text-2xl font-medium italic tracking-[-0.02em]">{t("emptyUploadTitle")}</span>
           <span className="mt-2 max-w-md text-sm leading-6 text-muted-foreground">{t("emptyUploadDescription")}</span>
+          <span className="mt-5 text-xs text-muted-foreground/80">{t("fileRequirements")}</span>
         </button>
       ) : (
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <h2 className="text-sm font-medium uppercase tracking-[0.14em] text-muted-foreground">{t("listTitle")}</h2>
-            <span className="text-sm text-muted-foreground">{t("selectedCount", { selected: readySelectedItems.length, total: uploadableCount })}</span>
+        <>
+          <div className="rounded-2xl border bg-card p-4 shadow-xs sm:p-5">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-center gap-3">
+                <span className="grid size-10 shrink-0 place-items-center rounded-full bg-primary/10 text-primary">
+                  <UploadCloudIcon className="size-5" />
+                </span>
+                <div className="min-w-0">
+                  <p className="text-sm font-medium text-foreground">
+                    {t("uploadedCount", { uploaded: uploadedCount, total: items.length })}
+                  </p>
+                  <p className="text-xs text-muted-foreground">{t("fileRequirements")}</p>
+                </div>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <Button variant="outline" size="sm" onClick={groupSelected} disabled={selectedEditableItems.length < 2}>
+                  <Layers2Icon className="size-4" /> {t("groupSelected")}
+                </Button>
+                <Button variant="ghost" size="sm" onClick={ungroupSelected} disabled={selectedEditableItems.length === 0}>
+                  <UngroupIcon className="size-4" /> {t("ungroupSelected")}
+                </Button>
+              </div>
+            </div>
+            <ProgressBar value={overallProgress} label={t("progressLabel", { progress: overallProgress })} className="mt-4" />
+            <p className="mt-3 text-xs leading-5 text-muted-foreground">{t("groupingHelp")}</p>
           </div>
-          {items.map((item) => (
-            <ObservationListItem
-              key={item.id}
-              item={item}
-              groupOptions={groupOptions}
-              disabledReason={disabledReason}
-              onAnalysisChange={updateAnalysis}
-              onGroupChange={(groupId) => updateGroup(item.id, groupId)}
-              onToggleSelected={(checked) => setItems((current) => current.map((candidate) => candidate.id === item.id ? { ...candidate, selected: checked } : candidate))}
-              onUpload={() => void uploadGroup(item.groupId)}
-              onRemove={() => removeItem(item.id)}
-            />
-          ))}
-        </div>
+
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground">{t("listTitle")}</h2>
+              <span className="text-sm text-muted-foreground">{t("selectedCount", { selected: readySelectedItems.length, total: uploadableCount })}</span>
+            </div>
+            {items.map((item, index) => (
+              <ObservationListItem
+                key={item.id}
+                item={item}
+                index={index}
+                groupOptions={groupOptions}
+                disabledReason={disabledReason}
+                onAnalysisChange={updateAnalysis}
+                onGroupChange={(groupId) => updateGroup(item.id, groupId)}
+                onToggleSelected={(checked) => setItems((current) => current.map((candidate) => candidate.id === item.id ? { ...candidate, selected: checked } : candidate))}
+                onUpload={() => void uploadGroup(item.groupId)}
+                onRemove={() => removeItem(item.id)}
+              />
+            ))}
+          </div>
+        </>
       )}
     </Container>
   );
@@ -615,6 +645,7 @@ function ObservationBulkAddPanel({
 
 function ObservationListItem({
   item,
+  index,
   groupOptions,
   disabledReason,
   onAnalysisChange,
@@ -624,6 +655,7 @@ function ObservationListItem({
   onRemove,
 }: {
   item: ObservationUploadItem;
+  index: number;
   groupOptions: Array<{ id: string; number: number; count: number }>;
   disabledReason?: string | null;
   onAnalysisChange: (id: string, patch: Partial<ObservationAnalysis>) => void;
@@ -633,96 +665,179 @@ function ObservationListItem({
   onRemove: () => void;
 }) {
   const t = useTranslations("upload.observations");
+  const [expanded, setExpanded] = useState(false);
   const canUpload = itemCanUpload(item) && !disabledReason;
   const showAnalysis = item.status === "ready" || item.status === "uploading" || item.status === "uploaded" || item.status === "uploadError";
   const currentGroup = groupOptions.find((group) => group.id === item.groupId);
   const groupedCount = currentGroup?.count ?? 1;
   const groupLabel = currentGroup ? t("groupName", { number: currentGroup.number }) : t("newObservationGroup");
   const groupingDisabled = item.status === "uploading" || item.status === "uploaded";
+  const isUploaded = item.status === "uploaded";
+  const showUploadAction = item.status === "ready" || item.status === "uploadError";
+
+  const title = item.analysis.scientificName.trim() || cleanFileName(item.file.name);
+  const summaryBits = [
+    item.analysis.vernacularName.trim(),
+    item.analysis.eventDate.trim(),
+    (item.analysis.locality || item.analysis.country).trim(),
+  ].filter(Boolean);
+  const subtitle = showAnalysis && summaryBits.length > 0
+    ? summaryBits.join(" · ")
+    : `${item.file.name} · ${formatBytes(item.file.size)}`;
+
   return (
-    <article className="rounded-2xl border bg-background p-3 transition hover:border-primary/40">
-      <div className="flex gap-3">
-        <div className="h-24 w-24 shrink-0 overflow-hidden rounded-xl bg-muted">
+    <motion.article
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1], delay: Math.min(index * 0.04, 0.24) }}
+      className={`overflow-hidden rounded-2xl border bg-card transition-colors ${expanded ? "border-primary/40" : isUploaded ? "border-primary/30" : "hover:border-primary/30"}`}
+    >
+      <div className="flex items-center gap-3 p-3">
+        <Checkbox
+          checked={item.selected}
+          disabled={!itemCanUpload(item)}
+          onCheckedChange={(value) => onToggleSelected(value === true)}
+          aria-label={t("selectForUpload")}
+          className="shrink-0"
+        />
+        <div className="relative size-14 shrink-0 overflow-hidden rounded-lg bg-muted ring-1 ring-border">
           <img src={item.previewUrl} alt={item.file.name} className="h-full w-full object-cover" />
+          {groupedCount > 1 ? (
+            <span className="absolute left-1 top-1 inline-flex items-center gap-0.5 rounded-full bg-background/90 px-1.5 py-0.5 text-[0.6rem] font-medium text-primary shadow-sm backdrop-blur">
+              <Layers2Icon className="size-2.5" /> {groupedCount}
+            </span>
+          ) : null}
         </div>
-        <div className="min-w-0 flex-1">
-          <div className="flex items-start justify-between gap-2">
-            <div className="min-w-0">
-              <h3 className="truncate text-sm font-medium">{item.analysis.scientificName || cleanFileName(item.file.name)}</h3>
-              <p className="mt-1 truncate text-xs text-muted-foreground">
-                {item.file.name} · {formatBytes(item.file.size)}
-                {item.compressed ? ` · ${t("compressedFrom", { size: formatBytes(item.originalSize) })}` : ""}
-              </p>
-            </div>
-            <button type="button" onClick={onRemove} aria-label={t("removeImage")} className="rounded-full p-1 text-muted-foreground transition hover:bg-muted hover:text-foreground">
-              <XIcon className="size-4" />
-            </button>
+
+        {showAnalysis ? (
+          <button
+            type="button"
+            onClick={() => setExpanded((value) => !value)}
+            aria-expanded={expanded}
+            className="min-w-0 flex-1 text-left"
+          >
+            <ItemSummary title={title} subtitle={subtitle} />
+          </button>
+        ) : (
+          <div className="min-w-0 flex-1">
+            <ItemSummary title={title} subtitle={subtitle} />
           </div>
-          <div className="mt-3 flex flex-wrap items-center gap-2">
-            <label className="inline-flex items-center gap-2 text-xs text-muted-foreground">
-              <Checkbox checked={item.selected} disabled={!itemCanUpload(item)} onCheckedChange={(value) => onToggleSelected(value === true)} aria-label={t("selectForUpload")} />
-              {t("selectForUpload")}
-            </label>
-            <StatusPill status={item.status} />
-            {groupedCount > 1 ? <span className="rounded-full bg-primary/10 px-2 py-1 text-xs text-primary">{groupLabel} · {groupedCount}</span> : null}
-          </div>
-          {item.status === "uploading" ? <ProgressBar value={item.progress} label={t("progressLabel", { progress: item.progress })} className="mt-3" /> : null}
-          {item.error ? <p className="mt-2 text-xs text-destructive">{item.error}</p> : null}
+        )}
+
+        <div className="flex shrink-0 items-center gap-1.5">
+          {groupedCount > 1 ? (
+            <span className="hidden rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary sm:inline">{groupLabel}</span>
+          ) : null}
+          <StatusPill status={item.status} />
+          {showUploadAction ? (
+            <Button size="sm" disabled={!canUpload} title={disabledReason ?? undefined} onClick={onUpload}>
+              <UploadCloudIcon className="size-4" />
+              <span className="hidden sm:inline">{groupedCount > 1 ? t("uploadGroup") : t("uploadOne")}</span>
+            </Button>
+          ) : null}
+          {showAnalysis ? (
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              onClick={() => setExpanded((value) => !value)}
+              aria-expanded={expanded}
+              aria-label={expanded ? t("hideDetails") : t("editDetails")}
+              title={expanded ? t("hideDetails") : t("editDetails")}
+            >
+              <ChevronDownIcon className={`size-4 transition-transform duration-200 ${expanded ? "rotate-180" : ""}`} />
+            </Button>
+          ) : null}
+          <button type="button" onClick={onRemove} aria-label={t("removeImage")} className="rounded-full p-1.5 text-muted-foreground transition hover:bg-muted hover:text-foreground">
+            <XIcon className="size-4" />
+          </button>
         </div>
       </div>
 
-      {showAnalysis ? (
-        <div className="mt-4 rounded-2xl border bg-muted/20 p-4">
-          <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <h4 className="font-instrument text-lg font-medium italic tracking-[-0.02em]">{t("analysisPanelTitle")}</h4>
-              {item.analysis.confidence !== null ? (
-                <p className="mt-1 text-xs text-muted-foreground">{t("aiConfidence", { confidence: Math.round(item.analysis.confidence * 100) })}</p>
-              ) : null}
-            </div>
-            {item.status === "ready" || item.status === "uploadError" ? (
-              <Button size="sm" disabled={!canUpload} title={disabledReason ?? undefined} onClick={onUpload}>
-                <UploadCloudIcon className="size-4" /> {groupedCount > 1 ? t("uploadGroup") : t("uploadOne")}
-              </Button>
-            ) : null}
-          </div>
-          <div className="mb-4 grid gap-3 rounded-xl bg-background/70 p-3 sm:grid-cols-[220px_minmax(0,1fr)] sm:items-center">
-            <label className="space-y-1.5 text-sm">
-              <span className="font-medium text-foreground">{t("groupControlLabel")}</span>
-              <select
-                value={item.groupId}
-                disabled={groupingDisabled}
-                onChange={(event) => onGroupChange(event.target.value)}
-                className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm shadow-xs outline-none transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                <option value={item.id}>{item.groupId === item.id ? groupLabel : t("newObservationGroup")}</option>
-                {groupOptions.filter((group) => group.id !== item.id).map((group) => (
-                  <option key={group.id} value={group.id}>
-                    {t("groupName", { number: group.number })} · {group.count}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <p className="text-xs leading-5 text-muted-foreground">{t("groupItemHelp")}</p>
-          </div>
-          <ObservationAnalysisFields item={item} onChange={(patch) => onAnalysisChange(item.id, patch)} />
+      {item.status === "uploading" ? (
+        <div className="px-3 pb-3">
+          <ProgressBar value={item.progress} label={t("progressLabel", { progress: item.progress })} />
         </div>
       ) : null}
-    </article>
+      {item.error ? (
+        <p className="flex items-center gap-1.5 px-3 pb-3 text-xs text-destructive">
+          <AlertTriangleIcon className="size-3.5 shrink-0" /> {item.error}
+        </p>
+      ) : null}
+
+      <AnimatePresence initial={false}>
+        {expanded && showAnalysis ? (
+          <motion.div
+            key="details"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
+            className="overflow-hidden"
+          >
+            <div className="border-t bg-muted/20 p-4 sm:p-5">
+              <div className="mb-4 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
+                <SparklesIcon className="size-3.5 shrink-0 text-primary" />
+                <span className="min-w-0 truncate">
+                  {item.file.name} · {formatBytes(item.file.size)}
+                  {item.compressed ? ` · ${t("compressedFrom", { size: formatBytes(item.originalSize) })}` : ""}
+                </span>
+                {item.analysis.confidence !== null ? (
+                  <span className="rounded-full bg-primary/10 px-2 py-0.5 font-medium text-primary">
+                    {t("aiConfidence", { confidence: Math.round(item.analysis.confidence * 100) })}
+                  </span>
+                ) : null}
+              </div>
+              <div className="mb-5 flex flex-col gap-3 rounded-xl border bg-background p-3 sm:flex-row sm:items-center sm:gap-4">
+                <div className="flex items-center gap-2 sm:w-48 sm:shrink-0">
+                  <Layers2Icon className="size-4 text-muted-foreground" />
+                  <span className="text-sm font-medium text-foreground">{t("groupControlLabel")}</span>
+                </div>
+                <Select value={item.groupId} onValueChange={onGroupChange} disabled={groupingDisabled}>
+                  <SelectTrigger className="sm:max-w-xs">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value={item.id}>{item.groupId === item.id ? groupLabel : t("newObservationGroup")}</SelectItem>
+                    {groupOptions.filter((group) => group.id !== item.id).map((group) => (
+                      <SelectItem key={group.id} value={group.id}>
+                        {t("groupName", { number: group.number })} · {group.count}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-xs leading-5 text-muted-foreground">{t("groupItemHelp")}</p>
+              </div>
+              <ObservationAnalysisFields item={item} onChange={(patch) => onAnalysisChange(item.id, patch)} />
+            </div>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
+    </motion.article>
+  );
+}
+
+function ItemSummary({ title, subtitle }: { title: string; subtitle: string }) {
+  return (
+    <>
+      <span className="block truncate text-sm font-medium text-foreground">{title}</span>
+      <span className="mt-0.5 block truncate text-xs text-muted-foreground">{subtitle}</span>
+    </>
   );
 }
 
 function StatusPill({ status }: { status: ItemStatus }) {
   const t = useTranslations("upload.observations.status");
+  const isError = status === "error" || status === "uploadError";
   const className = status === "uploaded"
-    ? "bg-primary/10 text-primary"
-    : status === "error" || status === "uploadError"
-      ? "bg-destructive/10 text-destructive"
-      : "bg-muted text-muted-foreground";
+    ? "bg-primary/10 text-primary ring-primary/20"
+    : isError
+      ? "bg-destructive/10 text-destructive ring-destructive/20"
+      : "bg-muted text-muted-foreground ring-border";
   return (
-    <span className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs ${className}`}>
+    <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium ring-1 ring-inset ${className}`}>
       {status === "analyzing" || status === "uploading" ? <Loader2Icon className="size-3 animate-spin" /> : null}
       {status === "uploaded" ? <CheckCircle2Icon className="size-3" /> : null}
+      {isError ? <AlertTriangleIcon className="size-3" /> : null}
       {t(status)}
     </span>
   );
@@ -733,26 +848,26 @@ function ObservationAnalysisFields({ item, onChange }: { item: ObservationUpload
   const disabled = item.status === "uploading" || item.status === "uploaded";
   return (
     <div className="space-y-4">
-      <div className="grid gap-3 lg:grid-cols-2">
+      <div className="grid gap-x-4 gap-y-4 lg:grid-cols-2">
         <Field label={t("fields.scientificName")} value={item.analysis.scientificName} disabled={disabled} onChange={(value) => onChange({ scientificName: value })} required />
         <Field label={t("fields.commonName")} value={item.analysis.vernacularName} disabled={disabled} onChange={(value) => onChange({ vernacularName: value })} />
       </div>
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-x-4 gap-y-4 sm:grid-cols-2 lg:grid-cols-4">
         <Field label={t("fields.eventDate")} type="date" value={item.analysis.eventDate} disabled={disabled} onChange={(value) => onChange({ eventDate: value })} required />
         <Field label={t("fields.kingdom")} value={item.analysis.kingdom} disabled={disabled} onChange={(value) => onChange({ kingdom: value })} />
         <Field label={t("fields.latitude")} value={item.analysis.decimalLatitude} disabled={disabled} onChange={(value) => onChange({ decimalLatitude: value })} />
         <Field label={t("fields.longitude")} value={item.analysis.decimalLongitude} disabled={disabled} onChange={(value) => onChange({ decimalLongitude: value })} />
       </div>
-      <div className="grid gap-3 lg:grid-cols-3">
+      <div className="grid gap-x-4 gap-y-4 lg:grid-cols-3">
         <Field label={t("fields.recordedBy")} value={item.analysis.recordedBy} disabled={disabled} onChange={(value) => onChange({ recordedBy: value })} />
         <Field label={t("fields.country")} value={item.analysis.country} disabled={disabled} onChange={(value) => onChange({ country: value })} />
         <Field label={t("fields.locality")} value={item.analysis.locality} disabled={disabled} onChange={(value) => onChange({ locality: value })} />
       </div>
-      <div className="grid gap-3 lg:grid-cols-2">
+      <div className="grid gap-x-4 gap-y-4 lg:grid-cols-2">
         <Field label={t("fields.subjectPart")} value={item.analysis.subjectPart} disabled={disabled} onChange={(value) => onChange({ subjectPart: value })} />
         <TextareaField label={t("fields.caption")} value={item.analysis.caption} disabled={disabled} onChange={(value) => onChange({ caption: value })} />
       </div>
-      <div className="grid gap-3 lg:grid-cols-2">
+      <div className="grid gap-x-4 gap-y-4 lg:grid-cols-2">
         <TextareaField label={t("fields.habitat")} value={item.analysis.habitat} disabled={disabled} onChange={(value) => onChange({ habitat: value })} />
         <TextareaField label={t("fields.remarks")} value={item.analysis.occurrenceRemarks} disabled={disabled} onChange={(value) => onChange({ occurrenceRemarks: value })} />
       </div>
@@ -763,7 +878,10 @@ function ObservationAnalysisFields({ item, onChange }: { item: ObservationUpload
 function Field({ label, value, onChange, type = "text", disabled, required }: { label: string; value: string; onChange: (value: string) => void; type?: string; disabled?: boolean; required?: boolean }) {
   return (
     <label className="block space-y-1.5 text-sm">
-      <span className="font-medium text-foreground">{label}{required ? " *" : ""}</span>
+      <span className="text-xs font-medium text-muted-foreground">
+        {label}
+        {required ? <span className="text-destructive"> *</span> : null}
+      </span>
       <Input type={type} value={value} disabled={disabled} onChange={(event) => onChange(event.target.value)} />
     </label>
   );
@@ -772,7 +890,7 @@ function Field({ label, value, onChange, type = "text", disabled, required }: { 
 function TextareaField({ label, value, onChange, disabled }: { label: string; value: string; onChange: (value: string) => void; disabled?: boolean }) {
   return (
     <label className="block space-y-1.5 text-sm">
-      <span className="font-medium text-foreground">{label}</span>
+      <span className="text-xs font-medium text-muted-foreground">{label}</span>
       <Textarea value={value} disabled={disabled} rows={3} onChange={(event) => onChange(event.target.value)} />
     </label>
   );

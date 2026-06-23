@@ -644,6 +644,8 @@
     "aiConfidence": "Uhakika wa AI: {confidence}%",
     "uploadOne": "Pakia",
     "removeImage": "Ondoa picha",
+    "editDetails": "Hariri maelezo",
+    "hideDetails": "Ficha maelezo",
     "selectForUpload": "Chagua kwa kupakia",
     "progressLabel": "{progress}% imekamilika",
     "noReadySelected": "Chagua angalau picha moja iliyochambuliwa kabla ya kupakia.",

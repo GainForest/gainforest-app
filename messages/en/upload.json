@@ -644,6 +644,8 @@
     "aiConfidence": "AI confidence: {confidence}%",
     "uploadOne": "Upload",
     "removeImage": "Remove image",
+    "editDetails": "Edit details",
+    "hideDetails": "Hide details",
     "selectForUpload": "Select for upload",
     "progressLabel": "{progress}% complete",
     "noReadySelected": "Select at least one analyzed image before uploading.",

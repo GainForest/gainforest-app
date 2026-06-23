@@ -644,6 +644,8 @@
     "aiConfidence": "Keyakinan AI: {confidence}%",
     "uploadOne": "Unggah",
     "removeImage": "Hapus gambar",
+    "editDetails": "Edit detail",
+    "hideDetails": "Sembunyikan detail",
     "selectForUpload": "Pilih untuk diunggah",
     "progressLabel": "{progress}% selesai",
     "noReadySelected": "Pilih setidaknya satu gambar yang sudah dianalisis sebelum mengunggah.",

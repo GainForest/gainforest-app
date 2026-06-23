@@ -644,6 +644,8 @@
     "aiConfidence": "Confianza de IA: {confidence}%",
     "uploadOne": "Subir",
     "removeImage": "Quitar imagen",
+    "editDetails": "Editar detalles",
+    "hideDetails": "Ocultar detalles",
     "selectForUpload": "Seleccionar para subir",
     "progressLabel": "{progress}% completado",
     "noReadySelected": "Selecciona al menos una imagen analizada antes de subir.",
