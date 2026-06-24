@@ -71,6 +71,10 @@ function getSnapshot(): AccountListState {
   return state;
 }
 
+export function getAccountListSnapshot(): AccountListState {
+  return state;
+}
+
 function getServerSnapshot(): AccountListState {
   return SERVER_STATE;
 }

@@ -47,6 +47,12 @@ import {
 } from "@/lib/links";
 import { stripLocaleFromPathname } from "@/lib/i18n/routing";
 import { AuthButton, SignInPrompt } from "./AuthFlow";
+import {
+  getAccountListSnapshot,
+  switcherGroupIdentifier,
+  useAccountList,
+  useActiveAccountContext,
+} from "../_lib/account-switcher";
 import { ManageContextSwitcher } from "./ManageContextSwitcher";
 import { HeaderSlotsProvider, useHeaderSlots } from "./HeaderSlots";
 import { LanguageSelector } from "@/components/i18n/LanguageSelector";
@@ -466,7 +472,7 @@ function UnifiedSidebar({
             </LayoutGroup>
 
             <div className="mt-auto flex flex-col gap-3 pt-4">
-              {authSession?.isLoggedIn ? <BumicertCreationCard /> : <SignInPrompt />}
+              {authSession?.isLoggedIn ? <BumicertCreationCard sessionDid={authSession.did} /> : <SignInPrompt />}
             </div>
           </>
         ) : (
@@ -640,8 +646,96 @@ function NavLeaf({ item, isActive, index }: { item: NavLeaf; isActive: boolean; 
   );
 }
 
-function BumicertCreationCard() {
-  const manageBasePath = useContextualManageBasePath();
+const ONBOARD_ORGANIZATION_HREF = "/manage?mode=onboard-org";
+
+function createProjectHrefForGroup(identifier: string): string {
+  return manageHref({ basePath: groupManageBasePath(identifier) }, "projects", { mode: "new" });
+}
+
+function CreateProjectLink({
+  sessionDid,
+  className,
+  children,
+}: {
+  sessionDid: string | null;
+  className?: string;
+  children: React.ReactNode;
+}) {
+  if (!sessionDid) {
+    return (
+      <Link href={manageHref({ basePath: "/manage" }, "projects", { mode: "new" })} className={className}>
+        {children}
+      </Link>
+    );
+  }
+
+  return (
+    <AuthenticatedCreateProjectLink sessionDid={sessionDid} className={className}>
+      {children}
+    </AuthenticatedCreateProjectLink>
+  );
+}
+
+function AuthenticatedCreateProjectLink({
+  sessionDid,
+  className,
+  children,
+}: {
+  sessionDid: string;
+  className?: string;
+  children: React.ReactNode;
+}) {
+  const router = useRouter();
+  const { groups, reload } = useAccountList(sessionDid);
+  const [activeContext, setActiveContext] = useActiveAccountContext(sessionDid);
+
+  const activeGroup = activeContext.type === "group" ? groups.find((group) => group.groupDid === activeContext.did) ?? null : null;
+  const href = activeContext.type === "group"
+    ? createProjectHrefForGroup(activeGroup ? switcherGroupIdentifier(activeGroup) : activeContext.identifier?.trim() || activeContext.did)
+    : groups[0]
+      ? createProjectHrefForGroup(switcherGroupIdentifier(groups[0]))
+      : ONBOARD_ORGANIZATION_HREF;
+
+  const handleClick = async (event: MouseEvent<HTMLAnchorElement>) => {
+    if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+
+    event.preventDefault();
+
+    if (activeContext.type === "group") {
+      const identifier = activeGroup ? switcherGroupIdentifier(activeGroup) : activeContext.identifier?.trim() || activeContext.did;
+      if (activeGroup) {
+        setActiveContext({ type: "group", did: activeGroup.groupDid, identifier, role: activeGroup.role });
+      }
+      router.push(createProjectHrefForGroup(identifier));
+      return;
+    }
+
+    let nextGroups = groups;
+    if (nextGroups.length === 0) {
+      await reload();
+      const latest = getAccountListSnapshot();
+      if (latest.sessionDid === sessionDid) nextGroups = latest.groups;
+    }
+
+    const firstGroup = nextGroups[0];
+    if (!firstGroup) {
+      router.push(ONBOARD_ORGANIZATION_HREF);
+      return;
+    }
+
+    const identifier = switcherGroupIdentifier(firstGroup);
+    setActiveContext({ type: "group", did: firstGroup.groupDid, identifier, role: firstGroup.role });
+    router.push(createProjectHrefForGroup(identifier));
+  };
+
+  return (
+    <Link href={href} onClick={handleClick} className={className}>
+      {children}
+    </Link>
+  );
+}
+
+function BumicertCreationCard({ sessionDid }: { sessionDid: string }) {
   const t = useTranslations("common.sidebar.creationCard");
   return (
     <div className="group flex flex-col w-full h-20 border border-border bg-background rounded-2xl p-1">
@@ -681,15 +775,15 @@ function BumicertCreationCard() {
       </div>
 
       {/*CTA*/}
-      <Link
-        href={manageHref({ basePath: manageBasePath }, "projects", { mode: "new" })}
+      <CreateProjectLink
+        sessionDid={sessionDid}
         className={cn(
           buttonVariants({ variant: "outline", size: "sm" }),
           "relative z-2 w-full bg-background hover:bg-primary hover:text-primary-foreground",
         )}
       >
         <PlusIcon /> {t("createProject")}
-      </Link>
+      </CreateProjectLink>
     </div>
   );
 }
@@ -933,21 +1027,22 @@ function ProgressiveBlur({
 
 function getRouteHeaderActions(pathname: string, authSession: AuthSession) {
   if (pathname === "/certs") {
-    return <CreateBumicertHeaderButton isUnauthenticated={!authSession.isLoggedIn} />;
+    return <CreateBumicertHeaderButton authSession={authSession} />;
   }
 
   return null;
 }
 
-function CreateBumicertHeaderButton({ isUnauthenticated }: { isUnauthenticated: boolean }) {
-  const manageBasePath = useContextualManageBasePath();
+function CreateBumicertHeaderButton({ authSession }: { authSession: AuthSession }) {
+  const t = useTranslations("common.sidebar.creationCard");
   return (
-    <Button asChild size="sm" variant={isUnauthenticated ? "outline" : "default"}>
-      <Link href={manageHref({ basePath: manageBasePath }, "projects", { mode: "new" })}>
-        <PlusIcon />
-        <span className="hidden sm:inline">Create Project</span>
-      </Link>
-    </Button>
+    <CreateProjectLink
+      sessionDid={authSession.isLoggedIn ? authSession.did : null}
+      className={cn(buttonVariants({ variant: authSession.isLoggedIn ? "default" : "outline", size: "sm" }))}
+    >
+      <PlusIcon />
+      <span className="hidden sm:inline">{t("createProject")}</span>
+    </CreateProjectLink>
   );
 }
 
