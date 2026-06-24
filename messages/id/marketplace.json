@@ -645,7 +645,7 @@
     "filters": {
       "allProjects": "Semua proyek",
       "allFilters": "Semua filter",
-      "description": "Tampilkan proyek dengan gambar atau tempat proyek.",
+      "description": "Tampilkan proyek berdasarkan lencana sumber, gambar, atau tempat proyek.",
       "updateHint": "Filter diperbarui saat Anda memilih.",
       "images": "Menampilkan gambar",
       "locations": "Memiliki tempat"
@@ -941,6 +941,72 @@
     "metadata": {
       "title": "Kelola Proyek — GainForest",
       "description": "Buat dan kelola koleksi proyek untuk sertifikat Anda."
+    },
+    "actions": {
+      "manageCerts": "Kelola Cert",
+      "manageCertsFor": "Kelola Cert untuk {title}",
+      "manageGallery": "Kelola galeri",
+      "manageGalleryFor": "Kelola galeri untuk {title}"
+    }
+  },
+  "observations": {
+    "footer": {
+      "showing": "Menampilkan {shown} dari {total} observasi alam."
+    }
+  },
+  "manageProjectCerts": {
+    "metadata": {
+      "title": "Kelola Cert Proyek — GainForest",
+      "description": "Pilih Cert yang termasuk dalam sebuah proyek."
+    },
+    "nav": {
+      "projects": "Proyek",
+      "refresh": "Muat ulang"
+    },
+    "hero": {
+      "description": "Pilih Cert yang termasuk dalam proyek ini. Menambahkan atau menghapus Cert akan memperbarui halaman proyek, tetapi tidak menghapus Cert."
+    },
+    "stats": {
+      "linked": "{count, plural, one {# Cert tertaut} other {# Cert tertaut}}",
+      "available": "{count, plural, one {# Cert tersedia} other {# Cert tersedia}}"
+    },
+    "search": {
+      "ariaLabel": "Cari Cert",
+      "placeholder": "Cari Cert"
+    },
+    "actions": {
+      "create": "Buat Cert",
+      "retry": "Coba lagi",
+      "add": "Tambah",
+      "saving": "Menyimpan…",
+      "view": "Lihat",
+      "unlink": "Putuskan tautan"
+    },
+    "errors": {
+      "loadTitle": "Cert tidak dapat dimuat",
+      "loadFallback": "Gagal memuat Cert proyek.",
+      "network": "Tidak dapat menjangkau server.",
+      "noPermission": "Anda tidak dapat mengubah proyek ini.",
+      "projectUnavailable": "Kami belum dapat menyiapkan proyek ini. Muat ulang halaman dan coba lagi.",
+      "updateFallback": "Gagal memperbarui Cert proyek."
+    },
+    "status": {
+      "linked": "Tertaut"
+    },
+    "card": {
+      "noSummary": "Belum ada ringkasan."
+    },
+    "empty": {
+      "noCertsTitle": "Belum ada Cert",
+      "noCertsDescription": "Buat Cert untuk proyek ini atau tambahkan dari Cert yang sudah Anda terbitkan.",
+      "noMatchingTitle": "Tidak ada Cert yang cocok",
+      "noMatchingDescription": "Coba kata pencarian lain atau kosongkan kolom pencarian."
+    },
+    "details": {
+      "sites": "{count, plural, one {# lokasi} other {# lokasi}}",
+      "contributors": "{count, plural, one {# kontributor} other {# kontributor}}",
+      "impactPeriod": "Periode dampak",
+      "created": "Dibuat {date}"
     }
   }
 }

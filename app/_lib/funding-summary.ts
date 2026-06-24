@@ -12,7 +12,7 @@
  * "Accepts donations" filter actually check funding state client-side.
  */
 
-import { cachedAsync } from "./async-cache";
+import { publicExploreCache, PUBLIC_EXPLORE_CACHE_TTL_MS } from "./public-explore-cache";
 import { fetchReceipts } from "./dashboard";
 import { INDEXER_URL } from "./urls";
 
@@ -29,7 +29,7 @@ export type BumicertFundingSummary = {
 
 export type FundingSummaryIndex = Map<string, BumicertFundingSummary>;
 
-const FUNDING_SUMMARY_CACHE_MS = 5 * 60 * 1000;
+const FUNDING_SUMMARY_CACHE_MS = PUBLIC_EXPLORE_CACHE_TTL_MS;
 const USD_CURRENCIES = new Set(["USD", "USDC"]);
 
 const FUNDING_CONFIGS_QUERY = `
@@ -133,5 +133,5 @@ async function fetchFundingSummariesUncached(): Promise<FundingSummaryIndex> {
 
 /** Cached funding summary index keyed by bumicert at-uri. */
 export function fetchFundingSummaries(signal?: AbortSignal): Promise<FundingSummaryIndex> {
-  return cachedAsync("bumicert-funding-summaries", FUNDING_SUMMARY_CACHE_MS, fetchFundingSummariesUncached, signal);
+  return publicExploreCache("bumicert-funding-summaries", { ttl: FUNDING_SUMMARY_CACHE_MS }, fetchFundingSummariesUncached, signal);
 }

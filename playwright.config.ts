@@ -31,7 +31,12 @@ const shouldStartLocalE2EServer =
 
 process.env.E2E_BASE_URL ??= baseURL;
 process.env.E2E_PORT ??= String(port);
-process.env.NEXT_PUBLIC_AUTH_BASE_URL ??= process.env.E2E_AUTH_BASE_URL ?? "https://dev.auth.gainforest.app";
+
+const authBaseUrl = process.env.NEXT_PUBLIC_AUTH_BASE_URL?.trim();
+if (!authBaseUrl) {
+  throw new Error("NEXT_PUBLIC_AUTH_BASE_URL is required for E2E tests");
+}
+process.env.NEXT_PUBLIC_AUTH_BASE_URL = authBaseUrl.replace(/\/$/, "");
 process.env.NEXT_PUBLIC_AUTH_PROVIDER ??= "certs";
 
 function getConfiguredWorkers(): number | undefined {

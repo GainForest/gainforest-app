@@ -17,6 +17,7 @@ import {
 import type { AccountRouteData } from "../_lib/account-route";
 import { formatCountry } from "../../_lib/format";
 import { SocialGlyph } from "@/app/_components/SocialIcon";
+import { TrustedByBadges } from "@/app/_components/TrustedByBadges";
 import { Button } from "@/components/ui/button";
 
 function formatWebsite(url: string): string {
@@ -101,6 +102,8 @@ export function AccountHero({ account, editHref = null }: { account: AccountRout
           )}
           <div className="pointer-events-none absolute inset-x-0 bottom-0 h-14 bg-linear-to-t from-card to-transparent" />
         </motion.div>
+
+        <TrustedByBadges did={account.did} className="absolute left-3 top-3 z-10 w-fit" />
 
         <div className="absolute right-3 top-3 z-10 flex items-center gap-2">
           <Button type="button" variant="outline" size="sm" onClick={handleShare} aria-label="Copy link">
@@ -191,20 +194,18 @@ export function AccountHero({ account, editHref = null }: { account: AccountRout
               </Button>
             ) : null}
             {account.website ? (
-              <Button asChild variant="outline">
-                <Link href={account.website} target="_blank" rel="noopener noreferrer">
+              <Button asChild variant="outline" size="icon" title={formatWebsite(account.website)} aria-label={heroT("openSocialLink", { link: formatWebsite(account.website) })}>
+                <Link href={externalHref(account.website)} target="_blank" rel="noopener noreferrer">
                   <GlobeIcon />
-                  {formatWebsite(account.website)}
                 </Link>
               </Button>
             ) : null}
             {account.socialLinks.map((url) => {
               const label = formatWebsite(url);
               return (
-                <Button key={url} asChild variant="outline" className="max-w-full min-w-0 shrink" aria-label={heroT("openSocialLink", { link: label })}>
+                <Button key={url} asChild variant="outline" size="icon" title={label} aria-label={heroT("openSocialLink", { link: label })}>
                   <Link href={externalHref(url)} target="_blank" rel="noopener noreferrer">
                     <SocialGlyph platform={classifySocial(url)} />
-                    <span className="truncate">{label}</span>
                   </Link>
                 </Button>
               );

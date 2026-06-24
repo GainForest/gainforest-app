@@ -448,5 +448,9 @@
     "description": "People with this badge help steward the organization’s shared data and evidence.",
     "empty": "No Data Council members are listed yet.",
     "memberFallback": "Team member"
+  },
+  "trust": {
+    "trustedBy": "Trusted by",
+    "aria": "Trusted by {names}"
   }
 }

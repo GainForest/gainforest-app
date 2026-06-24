@@ -4,20 +4,19 @@ import { resolveBlobUrl, resolvePdsHost } from "@/app/_lib/pds";
 
 export const runtime = "nodejs";
 
+const INDEXER_TIMEOUT_MS = 8_000;
+const DIRECT_PDS_TIMEOUT_MS = 8_000;
+
 export async function GET(request: Request) {
   const target = await resolveManageApiTarget(request);
   if (isResponse(target)) return target;
 
-  try {
-    const [indexedLocations, directLocations] = await Promise.all([
-      fetchLocationsByDid(target.did),
-      fetchDirectLocations(target.did).catch(() => []),
-    ]);
-    return Response.json(mergeLocations(indexedLocations, directLocations));
-  } catch (err) {
-    const message = err instanceof Error ? err.message : "Failed to fetch sites";
-    return Response.json({ error: message }, { status: 500 });
-  }
+  const [indexedLocations, directLocations] = await Promise.all([
+    fetchWithTimeout(INDEXER_TIMEOUT_MS, (signal) => fetchLocationsByDid(target.did, signal)),
+    fetchWithTimeout(DIRECT_PDS_TIMEOUT_MS, (signal) => fetchDirectLocations(target.did, signal)),
+  ]);
+
+  return Response.json(mergeLocations(indexedLocations, directLocations));
 }
 
 type ListedRecord = {
@@ -47,14 +46,14 @@ function extractBlobRef(value: unknown): string | null {
   return null;
 }
 
-async function directLocationFromRecord(did: string, record: ListedRecord): Promise<ManagedLocation | null> {
+async function directLocationFromRecord(did: string, record: ListedRecord, signal?: AbortSignal): Promise<ManagedLocation | null> {
   const value = record.value;
   if (!value) return null;
   const locationType = typeof value.locationType === "string" ? value.locationType : null;
   const rawLocation = isRecord(value.location) ? value.location : null;
   const locationUrl = typeof rawLocation?.uri === "string"
     ? rawLocation.uri
-    : await resolveBlobUrl(did, extractBlobRef(rawLocation?.blob), undefined).catch(() => null);
+    : await resolveBlobUrl(did, extractBlobRef(rawLocation?.blob), signal).catch(() => null);
   return {
     metadata: {
       did,
@@ -75,19 +74,32 @@ async function directLocationFromRecord(did: string, record: ListedRecord): Prom
   };
 }
 
-async function fetchDirectLocations(did: string): Promise<ManagedLocation[]> {
-  const host = await resolvePdsHost(did);
+async function fetchDirectLocations(did: string, signal?: AbortSignal): Promise<ManagedLocation[]> {
+  const host = await resolvePdsHost(did, signal);
   if (!host) return [];
   const params = new URLSearchParams({ repo: did, collection: "app.certified.location", limit: "100" });
   const response = await fetch(`https://${host}/xrpc/com.atproto.repo.listRecords?${params.toString()}`, {
     cache: "no-store",
+    signal,
   });
   if (!response.ok) return [];
   const data = (await response.json()) as ListedRecordsResponse;
   const locations = await Promise.all(
-    (data.records ?? []).map((record) => directLocationFromRecord(did, record)),
+    (data.records ?? []).map((record) => directLocationFromRecord(did, record, signal)),
   );
   return locations.filter((location): location is ManagedLocation => Boolean(location));
+}
+
+async function fetchWithTimeout<T>(ms: number, load: (signal: AbortSignal) => Promise<T[]>): Promise<T[]> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), ms);
+  try {
+    return await load(controller.signal);
+  } catch {
+    return [];
+  } finally {
+    clearTimeout(timeout);
+  }
 }
 
 function mergeLocations(indexed: ManagedLocation[], direct: ManagedLocation[]): ManagedLocation[] {

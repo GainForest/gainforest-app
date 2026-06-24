@@ -645,7 +645,7 @@
     "filters": {
       "allProjects": "All Projects",
       "allFilters": "All filters",
-      "description": "Show projects with images or a project place.",
+      "description": "Show projects by source badge, images, or a project place.",
       "updateHint": "Filters update as you choose.",
       "images": "Shows images",
       "locations": "Has a place"
@@ -941,6 +941,72 @@
     "metadata": {
       "title": "Manage Projects — GainForest",
       "description": "Create and manage project collections for your Certs."
+    },
+    "actions": {
+      "manageCerts": "Manage Certs",
+      "manageCertsFor": "Manage Certs for {title}",
+      "manageGallery": "Manage gallery",
+      "manageGalleryFor": "Manage gallery for {title}"
+    }
+  },
+  "observations": {
+    "footer": {
+      "showing": "Showing {shown} of {total} nature sightings."
+    }
+  },
+  "manageProjectCerts": {
+    "metadata": {
+      "title": "Manage Project Certs — GainForest",
+      "description": "Choose which Certs belong to a project."
+    },
+    "nav": {
+      "projects": "Projects",
+      "refresh": "Refresh"
+    },
+    "hero": {
+      "description": "Choose which Certs belong to this project. Adding or removing a Cert updates the project page, but does not delete the Cert."
+    },
+    "stats": {
+      "linked": "{count, plural, one {# linked Cert} other {# linked Certs}}",
+      "available": "{count, plural, one {# available Cert} other {# available Certs}}"
+    },
+    "search": {
+      "ariaLabel": "Search Certs",
+      "placeholder": "Search Certs"
+    },
+    "actions": {
+      "create": "Create Cert",
+      "retry": "Retry",
+      "add": "Add",
+      "saving": "Saving…",
+      "view": "View",
+      "unlink": "Unlink"
+    },
+    "errors": {
+      "loadTitle": "Could not load Certs",
+      "loadFallback": "Failed to load project Certs.",
+      "network": "Could not reach the server.",
+      "noPermission": "You cannot change this project.",
+      "projectUnavailable": "We could not prepare this project yet. Refresh the page and try again.",
+      "updateFallback": "Failed to update project Certs."
+    },
+    "status": {
+      "linked": "Linked"
+    },
+    "card": {
+      "noSummary": "No summary yet."
+    },
+    "empty": {
+      "noCertsTitle": "No Certs yet",
+      "noCertsDescription": "Create a Cert for this project or add one from your published Certs.",
+      "noMatchingTitle": "No matching Certs",
+      "noMatchingDescription": "Try another search term or clear the search field."
+    },
+    "details": {
+      "sites": "{count, plural, one {# site} other {# sites}}",
+      "contributors": "{count, plural, one {# contributor} other {# contributors}}",
+      "impactPeriod": "Impact period",
+      "created": "Created {date}"
     }
   }
 }

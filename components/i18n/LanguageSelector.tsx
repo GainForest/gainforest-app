@@ -22,6 +22,8 @@ import {
 } from "@/lib/i18n/languages";
 import { withLocalePrefix } from "@/lib/i18n/routing";
 
+const LANGUAGE_MENU_TRIGGER_ID = "language-selector-trigger";
+
 function persistLocale(locale: SupportedLanguageCode) {
   const maxAge = 60 * 60 * 24 * 365;
   const secure = window.location.protocol === "https:" ? "; Secure" : "";
@@ -36,7 +38,7 @@ export function LanguageSelector() {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
+      <DropdownMenuTrigger asChild id={LANGUAGE_MENU_TRIGGER_ID}>
         <Button
           type="button"
           variant="ghost"
@@ -47,7 +49,11 @@ export function LanguageSelector() {
           <span className="text-xs font-semibold uppercase">{locale}</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-56">
+      <DropdownMenuContent
+        align="end"
+        aria-labelledby={LANGUAGE_MENU_TRIGGER_ID}
+        className="w-56"
+      >
         <DropdownMenuLabel>{t("label")}</DropdownMenuLabel>
         <DropdownMenuRadioGroup
           value={locale}

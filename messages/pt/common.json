@@ -448,5 +448,9 @@
     "description": "Pessoas com este distintivo ajudam a cuidar dos dados e evidências compartilhados da organização.",
     "empty": "Ainda não há membros do Conselho de Dados listados.",
     "memberFallback": "Membro da equipe"
+  },
+  "trust": {
+    "trustedBy": "Com a confiança de",
+    "aria": "Com a confiança de {names}"
   }
 }

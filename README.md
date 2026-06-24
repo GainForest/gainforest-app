@@ -50,8 +50,8 @@ disk, load, uptime, and the local Tainá draft queue.
 
 ## GainForest auth
 
-The sidebar and header auth UI are wired to the central auth service
-(`auth.gainforest.app`). The app forwards the incoming `Cookie` header
+The sidebar and header auth UI are wired to the central auth service configured
+by `NEXT_PUBLIC_AUTH_BASE_URL`. The app forwards the incoming `Cookie` header
 server-side to `/api/auth/session`, then redirects users to `/login` or
 `/logout` with the current page as `returnTo`.
 
@@ -71,9 +71,8 @@ pnpm dev
 pnpm dev:proxy
 ```
 
-Open **https://local.gainforest.app**. Keep
-`NEXT_PUBLIC_AUTH_BASE_URL=https://auth.gainforest.app` locally and in hosted
-environments.
+Open **https://local.gainforest.app**. Set `NEXT_PUBLIC_AUTH_BASE_URL` locally
+and in hosted environments; the app intentionally has no hardcoded fallback.
 
 ## Design system
 

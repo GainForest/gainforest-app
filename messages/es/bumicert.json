@@ -18,7 +18,7 @@
       "filters": {
         "all": "Todos",
         "tree": "Árboles",
-        "audio": "Audio",
+        "audio": "Sonidos",
         "biodiversity": "Naturaleza",
         "document": "Documento",
         "file": "Archivos"
@@ -182,11 +182,11 @@
     },
     "timelineEntry": {
       "kind": {
-        "tree": "Conjunto de datos de árbol",
-        "audio": "Datos acústicos",
-        "biodiversity": "Avistamientos de naturaleza",
-        "document": "Documento",
-        "site": "Sitio",
+        "tree": "Árboles",
+        "audio": "Sonidos",
+        "biodiversity": "Naturaleza",
+        "document": "Archivos",
+        "site": "Lugar del proyecto",
         "other": "Evidencia"
       },
       "notSpecified": "No especificado",
@@ -265,7 +265,12 @@
       "deleteError": "No se pudo eliminar este elemento.",
       "deleteAlreadyRemoved": "Esta evidencia ya fue eliminada. Actualiza la página.",
       "displayedBiodiversityData": "Registros de naturaleza mostrados",
-      "natureObservationsFallback": "Avistamientos de naturaleza"
+      "natureObservationsFallback": "Avistamientos de naturaleza",
+      "openLinkedFile": "Abrir archivo vinculado",
+      "openFile": "Abrir archivo",
+      "downloadFile": "Descargar archivo",
+      "previewUnavailable": "Este archivo no se puede previsualizar aquí.",
+      "unresolvedReferenceBody": "Esta evidencia vinculada aún no se pudo cargar."
     },
     "reference": {
       "linkedRecord": "Registro vinculado",
@@ -515,6 +520,8 @@
           "successTitle": "¡Su certificado se publicó correctamente!",
           "linkEvidenceNow": "Vincule evidencia ahora",
           "viewBumicert": "Ver certificado",
+          "viewProject": "Ver proyecto",
+          "viewProjects": "Ver proyectos",
           "setUpDonations": "Configurar donaciones",
           "shareFeedback": "Compartir comentarios",
           "createAnother": "Crear otro certificado"

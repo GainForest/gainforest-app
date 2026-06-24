@@ -10,6 +10,7 @@ export function ManageDashboard({
   writeRepoDid,
   groupRole,
   currentUserDid,
+  recoveryEmail,
   children,
 }: {
   account: AccountRouteData;
@@ -18,6 +19,7 @@ export function ManageDashboard({
   writeRepoDid?: string;
   groupRole?: CgsRole;
   currentUserDid?: string | null;
+  recoveryEmail?: string | null;
   children?: React.ReactNode;
 }) {
   return (
@@ -28,6 +30,7 @@ export function ManageDashboard({
       writeRepoDid={writeRepoDid}
       groupRole={groupRole}
       currentUserDid={currentUserDid}
+      recoveryEmail={recoveryEmail}
     >
       {children}
     </ManageDashboardClient>

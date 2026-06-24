@@ -23,10 +23,9 @@ test.beforeAll(async () => {
 });
 
 test("sanity checks handle and password login", async ({ page }, testInfo) => {
-  test.skip(
-    !hasConfiguredAccountCredentials(),
-    "Set E2E_TEST_HANDLE and E2E_TEST_PASSWORD to run the handle/password login sanity check.",
-  );
+  if (!hasConfiguredAccountCredentials()) {
+    throw new Error("E2E_TEST_HANDLE and E2E_TEST_PASSWORD are required for the mandatory handle/password login sanity check.");
+  }
 
   test.setTimeout(240_000);
   await signInWithConfiguredAccount(page, testInfo);

@@ -151,6 +151,32 @@ type ShellProfileResponse = {
 };
 
 const ONBOARDING_PROMPT_MODAL_ID = "fresh-account-onboarding";
+const ONBOARDING_PROMPT_SESSION_KEY_PREFIX = "gainforest:onboarding-prompt-shown:";
+const shownOnboardingPromptKeys = new Set<string>();
+
+function onboardingPromptSessionKey(did: string): string {
+  return `${ONBOARDING_PROMPT_SESSION_KEY_PREFIX}${did}`;
+}
+
+function hasOnboardingPromptBeenShown(key: string): boolean {
+  if (shownOnboardingPromptKeys.has(key)) return true;
+
+  try {
+    return window.sessionStorage.getItem(key) === "1";
+  } catch {
+    return false;
+  }
+}
+
+function markOnboardingPromptShown(key: string) {
+  shownOnboardingPromptKeys.add(key);
+
+  try {
+    window.sessionStorage.setItem(key, "1");
+  } catch {
+    // In-memory state still prevents repeat prompts when sessionStorage is unavailable.
+  }
+}
 
 function readContextualManageBasePath(): string {
   if (typeof window === "undefined") return "/manage";
@@ -331,9 +357,14 @@ function FreshAccountOnboardingPrompt({
 
   useEffect(() => {
     if (!authSession?.isLoggedIn || isProfileLoading || hasCertifiedProfile) return;
+    const promptSessionKey = onboardingPromptSessionKey(authSession.did);
+    if (hasOnboardingPromptBeenShown(promptSessionKey)) return;
+
     const onboardingMode = new URLSearchParams(window.location.search).get("mode")?.startsWith("onboard") === true;
     if (onboardingMode) return;
     if (modal.stack.length > 0) return;
+
+    markOnboardingPromptShown(promptSessionKey);
 
     modal.pushModal(
       {
@@ -360,6 +391,7 @@ function FreshAccountOnboardingPrompt({
                   size="lg"
                   className="w-full"
                   onClick={() => {
+                    markOnboardingPromptShown(promptSessionKey);
                     void modal.hide().then(() => modal.clear());
                     router.push("/manage?mode=onboard-user");
                   }}

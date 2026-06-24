@@ -2236,7 +2236,7 @@ async function resolveMutationTarget(body: MutationBody, sessionDid: string): Pr
 }
 
 /**
- * Thin proxy from app routes → auth.gainforest.app/api/atproto/mutation.
+ * Thin proxy from app routes → configured auth service mutation endpoints.
  *
  * The client sends mutation payloads to this route; the route validates the
  * local session and forwards the request to the auth server with the same

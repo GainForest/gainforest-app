@@ -6,6 +6,12 @@
       "sourceType": "github",
       "skillPath": ".agents/skills/app-development-with-cgs/SKILL.md",
       "computedHash": "7cd1dd8068445c529dcba23d3171a6925cff2f1063062787690dee2820d8e7fc"
+    },
+    "epds-login": {
+      "source": "hypercerts-org/ePDS",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/epds-login/SKILL.md",
+      "computedHash": "5245f6dd593e8304619b7ab98e0c39dfaa3965eaf314c25d14a0bd8da0a8c53b"
     }
   }
 }

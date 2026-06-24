@@ -30,12 +30,17 @@ function loadDotEnvFile(path: string): void {
 loadDotEnvFile(resolve(process.cwd(), "e2e/.env"));
 
 export function getE2EEnv(): E2EEnv {
+  const authBaseUrl = process.env.NEXT_PUBLIC_AUTH_BASE_URL?.trim();
+  if (!authBaseUrl) {
+    throw new Error("NEXT_PUBLIC_AUTH_BASE_URL is required for E2E tests");
+  }
+
   return {
     appUrl: process.env.E2E_BASE_URL ?? process.env.E2E_APP_URL ?? "https://local-e2e.gainforest.app",
     testHandle: process.env.E2E_TEST_HANDLE?.trim() || null,
     testPassword: process.env.E2E_TEST_PASSWORD?.trim() || null,
     testDid: process.env.E2E_TEST_DID?.trim() || null,
     testPdsDomain: process.env.E2E_TEST_PDS_DOMAIN?.trim() || null,
-    authBaseUrl: (process.env.NEXT_PUBLIC_AUTH_BASE_URL?.trim() || process.env.E2E_AUTH_BASE_URL?.trim() || "https://dev.auth.gainforest.app").replace(/\/$/, ""),
+    authBaseUrl: authBaseUrl.replace(/\/$/, ""),
   };
 }

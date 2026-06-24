@@ -97,6 +97,7 @@ type CgsMutationPayload =
       operation: "registerGroup";
       handle: string;
       ownerDid: string;
+      email?: string;
       displayName?: string;
       description?: string;
       website?: string;
@@ -135,6 +136,7 @@ export async function callCgs<T>(payload: CgsMutationPayload): Promise<T> {
 export async function registerCgsGroup(input: {
   handle?: string;
   ownerDid: string;
+  email?: string;
   displayName?: string;
   description?: string;
   website?: string;

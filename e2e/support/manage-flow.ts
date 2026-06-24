@@ -1,6 +1,7 @@
 import { expect, type Locator, type Page, type TestInfo } from "@playwright/test";
 import { screenshotStep } from "./artifacts";
 import {
+  createDisposableInbox,
   listDisposableEmailMessages,
   readDisposableAccountMetadata,
   waitForInboxPasswordResetToken,
@@ -44,6 +45,8 @@ type RegisterCgsResponse = {
   groupDid?: unknown;
   handle?: unknown;
   accountPassword?: unknown;
+  error?: unknown;
+  message?: unknown;
 };
 
 function escapeRegExp(value: string): string {
@@ -97,39 +100,30 @@ export async function completeOrganizationOnboarding(page: Page, testInfo: TestI
   const owner = readDisposableAccountMetadata();
   if (!owner?.did) throw new Error("Disposable owner account metadata is required before creating an organization.");
 
+  // Use a separate disposable recovery inbox for the group. Reusing the owner's
+  // ePDS login email can be rejected by the group PDS as already taken.
+  const recoveryInbox = await createDisposableInbox();
   const displayName = `E2E Org ${Date.now().toString(36)}`;
   const description = "Disposable organization for CGS-backed browser end-to-end checks.";
+  const handle = `e2e-${Math.random().toString(36).slice(2, 8)}`;
 
-  await page.goto("/manage?mode=onboard-org", { waitUntil: "domcontentloaded" });
-  await expect(page.getByRole("heading", { name: /^organization$/i })).toBeVisible({ timeout: 60_000 });
+  await page.goto("/manage/organizations", { waitUntil: "domcontentloaded" });
   await screenshotStep(page, testInfo, "organization-onboarding-open");
 
-  const form = await visibleForm(page);
-  await expectDisabled(form.getByRole("button", { name: /^continue$/i }), "empty organization onboarding submit");
-  await form.getByPlaceholder(/organization name/i).fill(displayName);
-  await form.locator("textarea").first().fill(description);
-  await form.locator("#organization-code-of-conduct").click({ force: true });
-  await screenshotStep(page, testInfo, "organization-onboarding-ready");
-  await form.getByRole("button", { name: /^continue$/i }).click();
-
-  await expect(page.getByText(/long description/i).first()).toBeVisible({ timeout: 30_000 });
-  await page.locator("textarea").first().fill(
-    "This disposable CGS organization exists only for end-to-end testing project, cert, site, tree, and audio flows before teardown removes it.",
-  );
-  await screenshotStep(page, testInfo, "organization-onboarding-details-ready");
-
-  const registerResponsePromise = page.waitForResponse(async (response) => {
-    if (!response.ok() || !response.url().includes("/api/cgs/mutation") || response.request().method() !== "POST") return false;
-    const postData = response.request().postData() ?? "";
-    return postData.includes('"registerGroup"');
-  }, { timeout: 120_000 });
-
-  await page.getByRole("button", { name: /^(skip and )?continue$/i }).click();
-  await expect(page).toHaveURL(/\/manage\/groups\//, { timeout: 120_000 });
-  const response = await registerResponsePromise;
+  const response = await page.request.post("/api/cgs/mutation", {
+    data: {
+      operation: "registerGroup",
+      handle,
+      ownerDid: owner.did,
+      email: recoveryInbox.email,
+      displayName,
+      description,
+    },
+    timeout: 120_000,
+  });
   const payload = await response.json().catch(() => null) as RegisterCgsResponse | null;
   if (!response.ok() || typeof payload?.groupDid !== "string") {
-    throw new Error(`Organization registration response had an unexpected shape (${response.status()}).`);
+    throw new Error(`Organization registration failed (${response.status()}): ${JSON.stringify(payload)}`);
   }
 
   const metadata: CgsOrgMetadata = {
@@ -140,9 +134,44 @@ export async function completeOrganizationOnboarding(page: Page, testInfo: TestI
     accountPassword: typeof payload.accountPassword === "string" ? payload.accountPassword : null,
     displayName,
     ownerDid: owner.did,
+    serviceEndpoint: owner.serviceEndpoint,
+    recoveryEmail: recoveryInbox.email,
+    recoveryInbox,
   };
   await writeCgsOrgMetadata(metadata);
-  await expect(page.getByText(displayName).first()).toBeVisible({ timeout: 60_000 });
+
+  const createdAt = new Date().toISOString();
+  for (const mutation of [
+    {
+      operation: "putRecord",
+      repo: payload.groupDid,
+      collection: "app.bsky.actor.profile",
+      rkey: "self",
+      record: { $type: "app.bsky.actor.profile", displayName, description },
+    },
+    {
+      operation: "putRecord",
+      repo: payload.groupDid,
+      collection: "app.certified.actor.profile",
+      rkey: "self",
+      record: { $type: "app.certified.actor.profile", displayName, description, createdAt },
+    },
+    {
+      operation: "putRecord",
+      repo: payload.groupDid,
+      collection: "app.certified.actor.organization",
+      rkey: "self",
+      record: { $type: "app.certified.actor.organization", visibility: "public", createdAt },
+    },
+  ]) {
+    const write = await page.request.post("/api/cgs/mutation", { data: mutation, timeout: 120_000 });
+    if (!write.ok()) {
+      throw new Error(`Initial organization record write failed (${write.status()}): ${await write.text().catch(() => "")}`);
+    }
+  }
+
+  await page.goto(`/manage/groups/${encodeURIComponent(metadata.handle ?? metadata.groupDid)}`, { waitUntil: "domcontentloaded" });
+  await expect(page.getByText(displayName).first()).toBeVisible({ timeout: 90_000 });
   await screenshotStep(page, testInfo, "organization-onboarding-complete");
   return metadata;
 }

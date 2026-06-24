@@ -2,6 +2,7 @@
 
 import { memo, useCallback, useDeferredValue, useEffect, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent, type ReactNode } from "react";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 import { parseAsString, parseAsStringEnum, useQueryState } from "nuqs";
 import {
   AudioLinesIcon,
@@ -20,9 +21,11 @@ import {
 import {
   walkOccurrences,
   fetchOccurrenceStats,
+  fetchOccurrenceTotalCount,
   fetchSites,
   fetchBumicerts,
   fetchRecordByUri,
+  type BumicertBadgeFilter,
   type ExplorerRecord,
   type OccurrenceRecord,
   type BumicertRecord,
@@ -42,6 +45,8 @@ import { resolveDidProfile, getCachedProfile } from "../_lib/did-profile";
 import { formatCompact, countryFlag, formatCountry, formatDate } from "../_lib/format";
 import { AutoLoadMoreButton } from "./AutoLoadMoreButton";
 import { PictureHero } from "./PictureHero";
+import { TrustedByBadges } from "./TrustedByBadges";
+import { useStableQueryView } from "../_lib/use-stable-query-view";
 
 // Single-stream record explorer. One of the three GainForest record types
 // (Darwin Core occurrences, project sites, Bumicerts) paged straight from
@@ -153,6 +158,7 @@ const SORT_MODES: SortMode[] = ["newest", "oldest", "az", "za"];
 const VIEW_MODES: ViewMode[] = ["cards", "list", "map"];
 const OCCURRENCE_MEDIA_FILTERS: OccurrenceFilter[] = ["image", "audio", "all"];
 const OCCURRENCE_CATEGORIES: OccurrenceCategory[] = ["all", "plants", "trees", "birds", "flowers"];
+const BADGE_FILTER_KEYS: BumicertBadgeFilter[] = ["gainforest", "maearth", "maearth-round-1", "maearth-round-2"];
 const SITE_SOURCE_FILTERS: SiteSourceFilter[] = ["both", "certified"];
 
 type InitialExplorerPage = {
@@ -177,6 +183,12 @@ const OCCURRENCE_CATEGORY_OPTIONS: Array<{ id: OccurrenceCategory; label: string
   { id: "birds", label: "Birds" },
   { id: "flowers", label: "Flowers" },
 ];
+type BadgeFilterOption = {
+  key: BumicertBadgeFilter;
+  label: string;
+  logoSrc: string;
+};
+
 const SORT_OPTIONS: Array<{ value: SortMode; label: string }> = [
   { value: "newest", label: "Newest first" },
   { value: "oldest", label: "Oldest first" },
@@ -198,6 +210,8 @@ export function RecordExplorer({
   defaultOccurrenceMedia?: OccurrenceFilter;
 }) {
   const meta = KIND_META[kind];
+  const exploreT = useTranslations("marketplace.explore");
+  const observationsT = useTranslations("marketplace.observations");
   const showStatsOverview = !showHero || Boolean(ownerDid);
   const [query, setQuery] = useQueryState(
     "q",
@@ -220,10 +234,21 @@ export function RecordExplorer({
     "source",
     parseAsStringEnum<SiteSourceFilter>(SITE_SOURCE_FILTERS).withDefault("both").withOptions(QUERY_STATE_OPTIONS),
   );
-  const [view, setView] = useQueryState(
+  const [badgesParam, setBadgesParam] = useQueryState(
+    "badges",
+    parseAsString.withOptions(QUERY_STATE_OPTIONS),
+  );
+  const badgeFilters = useMemo(() => parseBadgeFilterParam(badgesParam), [badgesParam]);
+  const [queryView, setQueryView] = useQueryState(
     "view",
     parseAsStringEnum<ViewMode>(VIEW_MODES).withDefault("cards").withOptions(QUERY_STATE_OPTIONS),
   );
+  const [view, setView] = useStableQueryView({
+    queryValue: queryView,
+    setQueryValue: setQueryView,
+    values: VIEW_MODES,
+    defaultValue: "cards",
+  });
   const [recordParamValue, setRecordParamValue] = useQueryState(
     "record",
     parseAsString.withOptions(QUERY_STATE_OPTIONS),
@@ -238,6 +263,7 @@ export function RecordExplorer({
   const [sortOpen, setSortOpen] = useState(false);
   const [walking, setWalking] = useState(false);
   const [occurrenceStats, setOccurrenceStats] = useState<OccurrenceStats | null>(null);
+  const [totalCount, setTotalCount] = useState<number | null>(null);
   const [occurrenceStatsLoading, setOccurrenceStatsLoading] = useState(showStatsOverview && kind === "occurrence" && !ownerDid);
   // Gate the first load until the URL has been read, so a shared link's filter
   // params (media/source) are applied before the initial fetch.
@@ -253,8 +279,15 @@ export function RecordExplorer({
 
   const controller = useRef<AbortController | null>(null);
   const loadSeqRef = useRef(0);
+  const totalCountSeqRef = useRef(0);
   const occurrenceStatsStartedRef = useRef(false);
   const hasLoadedRecords = records.length > 0;
+  const badgeFilterOptions = useMemo<BadgeFilterOption[]>(() => [
+    { key: "gainforest", label: exploreT("filters.badges.gainforest"), logoSrc: "/assets/media/images/gainforest-logo.svg" },
+    { key: "maearth", label: exploreT("filters.badges.maearth"), logoSrc: "/assets/media/images/badges/ma-earth-logo.webp" },
+    { key: "maearth-round-1", label: exploreT("filters.badges.maearthRound1"), logoSrc: "/assets/media/images/badges/ma-earth-logo.webp" },
+    { key: "maearth-round-2", label: exploreT("filters.badges.maearthRound2"), logoSrc: "/assets/media/images/badges/ma-earth-logo.webp" },
+  ], [exploreT]);
 
   useEffect(() => {
     if (!showStatsOverview || kind !== "occurrence" || ownerDid || !hasLoadedRecords || occurrenceStatsStartedRef.current) return;
@@ -311,6 +344,8 @@ export function RecordExplorer({
           after,
           query: deferredQuery,
           ownerDid,
+          featuredBadgesOnly: !ownerDid,
+          badgeFilters,
           signal: ctrl.signal,
           resolveMedia: false,
           onProgress: (progressRecords) => {
@@ -338,8 +373,8 @@ export function RecordExplorer({
 
       const request: Promise<Page<ExplorerRecord>> =
         kind === "site"
-          ? fetchSites(target, after, ctrl.signal, undefined, siteSource, { query: deferredQuery, sort })
-          : fetchBumicerts(target, after, ctrl.signal, undefined, { query: deferredQuery, sort });
+          ? fetchSites(target, after, ctrl.signal, undefined, siteSource, { query: deferredQuery, sort, featuredBadgesOnly: !ownerDid, badgeFilters })
+          : fetchBumicerts(target, after, ctrl.signal, undefined, { query: deferredQuery, sort, featuredBadgesOnly: !ownerDid, badgeFilters });
 
       request
         .then((page) => {
@@ -358,7 +393,7 @@ export function RecordExplorer({
           if (isCurrent()) setWalking(false);
         });
     },
-    [deferredQuery, kind, occMedia, ownerDid, siteSource, sort],
+    [deferredQuery, kind, occMedia, ownerDid, siteSource, sort, badgeFilters],
   );
 
   // Once nuqs has read the URL, allow the first load and resolve any shared
@@ -407,6 +442,14 @@ export function RecordExplorer({
     void setOccCategory(next);
   }
 
+  function updateBadgeFilters(nextFilters: BumicertBadgeFilter[]) {
+    void setBadgesParam(serializeBadgeFilterParam(nextFilters));
+  }
+
+  function toggleBadgeFilter(filter: BumicertBadgeFilter) {
+    updateBadgeFilters(badgeFilters.includes(filter) ? badgeFilters.filter((value) => value !== filter) : [...badgeFilters, filter]);
+  }
+
   function handleDrawerRecordUpdated(nextRecord: ExplorerRecord) {
     setDrawer(nextRecord);
     setRecords((current) => current.map((record) => (record.atUri === nextRecord.atUri ? nextRecord : record)));
@@ -444,14 +487,41 @@ export function RecordExplorer({
     setCursor(null);
     setHasMore(true);
     setPhase("idle");
-  }, [deferredQuery, hydrated, occMedia, siteSource, sort]);
+  }, [deferredQuery, hydrated, occMedia, siteSource, sort, badgeFilters]);
 
   // First load (once hydrated) and any time a filter reset drops us back to
   // idle, kick off a walk. Gated on `hydrated` so the URL's filter params are
   // applied to the initial fetch.
   useEffect(() => {
     if (hydrated && phase === "idle" && records.length === 0) load("first");
-  }, [hydrated, load, occMedia, phase, records.length, siteSource]);
+  }, [hydrated, load, occMedia, phase, records.length, siteSource, badgeFilters]);
+
+  const canShowTotalCount = kind === "occurrence" && !ownerDid && occCategory === "all";
+  useEffect(() => {
+    const requestSeq = ++totalCountSeqRef.current;
+    if (!canShowTotalCount) {
+      setTotalCount(null);
+      return;
+    }
+    const controller = new AbortController();
+    const isCurrent = () => totalCountSeqRef.current === requestSeq && !controller.signal.aborted;
+    setTotalCount(null);
+    fetchOccurrenceTotalCount({
+      media: occMedia,
+      query: deferredQuery,
+      ownerDid,
+      featuredBadgesOnly: !ownerDid,
+      badgeFilters,
+      signal: controller.signal,
+    })
+      .then((count) => {
+        if (isCurrent()) setTotalCount(count);
+      })
+      .catch((error) => {
+        if ((error as Error).name !== "AbortError") console.warn("[explorer] occurrence count failed", error);
+      });
+    return () => controller.abort();
+  }, [badgeFilters, canShowTotalCount, deferredQuery, occMedia, ownerDid]);
 
   const filtered = useMemo(() => {
     const searched = filterRecords(records, deferredQuery);
@@ -468,7 +538,7 @@ export function RecordExplorer({
 
   useEffect(() => {
     setCardLimit(INITIAL_CARD_LIMIT);
-  }, [deferredQuery, kind, occCategory, occMedia, siteSource, sort, view]);
+  }, [deferredQuery, kind, occCategory, occMedia, siteSource, sort, badgeFilters, view]);
   // Embedded account/manage explorers keep compact loaded-record summaries.
   const stats = useMemo(
     () => showStatsOverview ? (kind === "occurrence" && !ownerDid && occurrenceStats ? computeOccurrenceTotalStats(occurrenceStats, records) : computeStats(records, kind)) : [],
@@ -555,6 +625,21 @@ export function RecordExplorer({
               style={{ animationDelay: "120ms" }}
             >
               <div className="flex items-center gap-1.5 pb-1 pr-8">
+                {badgeFilterOptions.map((badge) => (
+                  <FilterPill
+                    key={badge.key}
+                    selected={badgeFilters.includes(badge.key)}
+                    onClick={() => toggleBadgeFilter(badge.key)}
+                  >
+                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-background/80">
+                      <Image src={badge.logoSrc} width={20} height={20} alt="" className="h-5 w-5 object-contain" />
+                    </span>
+                    {badge.label}
+                  </FilterPill>
+                ))}
+
+                <span className="mx-1 h-5 w-px shrink-0 bg-border-soft" aria-hidden />
+
                 {(
                   [
                     { id: "image", label: "Photos" },
@@ -650,6 +735,11 @@ export function RecordExplorer({
         {/* Load more */}
         {records.length > 0 && (
           <div className="mt-10 flex flex-col items-center gap-3">
+            {totalCount !== null && (
+              <p className="text-sm text-muted-foreground">
+                {observationsT("footer.showing", { shown: filtered.length, total: totalCount })}
+              </p>
+            )}
             {hasMoreCardsToShow ? (
               <button
                 type="button"
@@ -950,9 +1040,13 @@ const GenericCard = memo(function GenericCard({ record, onOpen }: { record: Expl
           v.placeholder
         )}
 
-        <div className="absolute left-1.5 top-1.5 z-10 inline-flex max-w-[calc(100%-0.75rem)] items-center rounded-full bg-background/75 px-2 py-1 text-[10px] font-medium text-foreground/65 shadow-sm backdrop-blur-md">
-          <span className="truncate">{record.kind === "bumicert" || record.kind === "project" ? record.creatorName ?? "Project steward" : record.kind === "site" ? record.name : "Shared profile"}</span>
-        </div>
+        {record.kind === "site" ? (
+          <TrustedByBadges did={record.did} className="absolute left-1.5 top-1.5 z-10 max-w-[70%]" variant="compact" />
+        ) : (
+          <div className="absolute left-1.5 top-1.5 z-10 inline-flex max-w-[calc(100%-0.75rem)] items-center rounded-full bg-background/75 px-2 py-1 text-[10px] font-medium text-foreground/65 shadow-sm backdrop-blur-md">
+            <span className="truncate">{record.kind === "bumicert" || record.kind === "project" ? record.creatorName ?? "Project steward" : "Shared profile"}</span>
+          </div>
+        )}
 
         {v.badge ? <div className="absolute right-1.5 top-1.5 z-10">{v.badge}</div> : null}
       </div>
@@ -1104,7 +1198,10 @@ const RecordListItem = memo(function RecordListItem({ record, onOpen }: { record
           {v.subtitle ? <span className="mt-1 block truncate text-sm text-foreground/65">{v.subtitle}</span> : null}
         </span>
         <span className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-border-soft pt-2">
-          <span className="min-w-0 truncate text-xs text-foreground/55">{ownerLabel}</span>
+          <span className="min-w-0 space-y-0.5 text-xs text-foreground/55">
+            <span className="block truncate">{ownerLabel}</span>
+            {record.kind === "site" ? <TrustedByBadges did={record.did} variant="compact" /> : null}
+          </span>
           <span className="shrink-0 text-xs font-medium text-foreground transition-colors group-hover:text-primary">Show details</span>
         </span>
       </span>
@@ -1386,6 +1483,16 @@ function cardView(record: ExplorerRecord): CardView {
 }
 
 // ── Filtering ──────────────────────────────────────────────────────────────
+
+function parseBadgeFilterParam(value: string | null): BumicertBadgeFilter[] {
+  if (!value) return [];
+  const parsed = value.split(",").filter((item): item is BumicertBadgeFilter => BADGE_FILTER_KEYS.includes(item as BumicertBadgeFilter));
+  return [...new Set(parsed)];
+}
+
+function serializeBadgeFilterParam(filters: BumicertBadgeFilter[]): string | null {
+  return filters.length > 0 ? filters.join(",") : null;
+}
 
 function filterRecords(records: ExplorerRecord[], query: string): ExplorerRecord[] {
   const q = query.trim().toLowerCase();

@@ -87,16 +87,23 @@ async function AccountDataCouncilSection({ did }: { did: string }) {
 }
 
 export async function AccountHomeTabContent({ account }: { account: AccountRouteData }) {
-  const hasAbout = Boolean(account.detail?.richBody?.length || account.detail?.blurb);
+  const organizationAbout = account.kind === "organization" ? account.longDescription?.trim() ?? "" : "";
+  const hasAbout = account.kind === "organization"
+    ? organizationAbout.length > 0
+    : Boolean(account.detail?.richBody?.length || account.detail?.blurb);
 
   return (
     <>
       {hasAbout ? (
         <section className="py-1 md:py-2 org-animate org-fade-in-up org-delay-1">
-          {account.detail?.richBody?.length ? (
+          {account.kind === "organization" ? (
+            <p className="mt-5 max-w-3xl whitespace-pre-line text-lg leading-8 text-foreground/85 md:text-xl md:leading-9">
+              {organizationAbout}
+            </p>
+          ) : account.detail?.richBody?.length ? (
             <RichText blocks={account.detail.richBody} />
           ) : (
-            <p className="mt-5 max-w-3xl text-[14px] leading-[1.62] text-foreground/80">
+            <p className="mt-5 max-w-3xl text-lg leading-8 text-foreground/85 md:text-xl md:leading-9">
               {account.detail?.blurb}
             </p>
           )}

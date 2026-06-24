@@ -136,7 +136,8 @@
       "description": "Certs are portable impact records that can travel across apps, communities, and funding tools — not a closed database. Support for Silvi and other platforms is coming soon.",
       "protocol": {
         "name": "Certified",
-        "description": "portable social data"
+        "description": "portable social data",
+        "poweredBy": "Powered by Certified"
       },
       "youBadge": "You",
       "apps": {

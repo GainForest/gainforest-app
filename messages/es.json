@@ -136,7 +136,8 @@
       "description": "Los certificados son registros de impacto portátiles que pueden viajar entre aplicaciones, comunidades y herramientas de financiación, no una base de datos cerrada. Pronto habrá soporte para Silvi y otras plataformas.",
       "protocol": {
         "name": "Certified",
-        "description": "datos sociales portátiles"
+        "description": "datos sociales portátiles",
+        "poweredBy": "Impulsado por Certified"
       },
       "youBadge": "Tú",
       "apps": {

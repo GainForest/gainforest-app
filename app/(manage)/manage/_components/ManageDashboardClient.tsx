@@ -124,8 +124,85 @@ type HeroEditState = {
 };
 
 type InlineField = "profile" | "about" | null;
+type OptimisticField = keyof HeroEditState;
+
+type PendingOptimisticSave = {
+  state: HeroEditState;
+  fields: OptimisticField[];
+  previousAvatarUrl: string | null;
+  previousCoverUrl: string | null;
+};
 
 const SECTION_EASE = [0.25, 0.1, 0.25, 1] as const;
+
+function startDateInputValue(value: string | null): string {
+  return value ? new Date(value).toISOString().slice(0, 10) : "";
+}
+
+function visibilityInputValue(value: AccountRouteData["visibility"]): "Public" | "Unlisted" {
+  return value ?? "Public";
+}
+
+function heroStateFromAccount(account: AccountRouteData): HeroEditState {
+  return {
+    displayName: account.displayName,
+    description: account.description ?? "",
+    longDescription: account.longDescription ?? "",
+    website: account.website ?? "",
+    country: account.country ?? "",
+    startDate: startDateInputValue(account.foundedDate),
+    visibility: visibilityInputValue(account.visibility),
+    orgType: account.orgType ?? "",
+    socials: account.socialLinks ?? [],
+    logoFile: null,
+    coverFile: null,
+  };
+}
+
+function canonicalText(value: string): string {
+  return value.trim();
+}
+
+function canonicalUrl(value: string): string {
+  const trimmed = value.trim();
+  return trimmed ? (trimmed.startsWith("http") ? trimmed : `https://${trimmed}`) : "";
+}
+
+function sameStringList(left: string[], right: string[]): boolean {
+  return left.length === right.length && left.every((value, index) => value === right[index]);
+}
+
+function accountCaughtUpWithOptimisticSave(account: AccountRouteData, pending: PendingOptimisticSave): boolean {
+  const current = heroStateFromAccount(account);
+
+  return pending.fields.every((field) => {
+    switch (field) {
+      case "displayName":
+      case "description":
+      case "longDescription":
+      case "orgType":
+        return canonicalText(current[field]) === canonicalText(pending.state[field]);
+      case "website":
+        return canonicalUrl(current.website) === canonicalUrl(pending.state.website);
+      case "country":
+        return current.country.toUpperCase() === pending.state.country.toUpperCase();
+      case "startDate":
+      case "visibility":
+        return current[field] === pending.state[field];
+      case "socials":
+        return sameStringList(current.socials, pending.state.socials);
+      case "logoFile":
+        return !pending.state.logoFile || (Boolean(account.avatarUrl) && account.avatarUrl !== pending.previousAvatarUrl);
+      case "coverFile":
+        return !pending.state.coverFile || (Boolean(account.coverUrl) && account.coverUrl !== pending.previousCoverUrl);
+    }
+  });
+}
+
+function optimisticFieldsForSave(overrides: Partial<HeroEditState>): OptimisticField[] {
+  const fields = Object.keys(overrides) as OptimisticField[];
+  return fields.length ? fields : ["displayName", "description", "website", "logoFile", "coverFile"];
+}
 
 /** Classify a URL into a social-icon platform key (mirrors the indexer). */
 function classifySocial(url: string): string {
@@ -206,7 +283,7 @@ function AboutSection({
         </div>
       ) : (
         <>
-          <p className={cn("mt-3 max-w-2xl whitespace-pre-line text-sm leading-relaxed", text ? "text-muted-foreground" : "text-muted-foreground/60")}>
+          <p className={cn("mt-3 max-w-3xl whitespace-pre-line text-lg leading-8 md:text-xl md:leading-9", text ? "text-foreground/85" : "text-muted-foreground/60")}>
             {text || t("about.empty")}
           </p>
           {editDisabledReason ? <p className="mt-2 text-xs text-muted-foreground">{editDisabledReason}</p> : null}
@@ -299,8 +376,8 @@ function EditableHero({
   const canEdit = !editDisabledReason;
 
   const isOrg = account.kind === "organization";
-  const resolvedWebsite = editState.website || account.website;
-  const resolvedCountry = editState.country || account.country;
+  const resolvedWebsite = editState.website;
+  const resolvedCountry = editState.country;
   const countryLabel = resolvedCountry ? countryName(resolvedCountry) : null;
   const flag = resolvedCountry ? countryFlag(resolvedCountry) : "";
   const sinceDate = formatSinceDate(editState.startDate);
@@ -440,8 +517,17 @@ function EditableHero({
               {sinceDate.state === "valid" ? t("hero.sinceDate", { date: sinceDate.label ?? "" }) : sinceDate.state === "invalid" ? t("hero.invalidDate") : t("hero.addStartDate")}
             </Button>
           ) : null}
-          <Button variant="outline" onClick={onEditWebsite} disabled={!canEdit} title={editDisabledReason ?? undefined} className={cn(!resolvedWebsite && "text-muted-foreground")}>
-            <GlobeIcon /> {resolvedWebsite ? formatWebsite(resolvedWebsite) : t("hero.addWebsite")}
+          <Button
+            variant="outline"
+            size={resolvedWebsite ? "icon" : "default"}
+            onClick={onEditWebsite}
+            disabled={!canEdit}
+            title={resolvedWebsite ? formatWebsite(resolvedWebsite) : editDisabledReason ?? undefined}
+            aria-label={resolvedWebsite ? formatWebsite(resolvedWebsite) : undefined}
+            className={cn(!resolvedWebsite && "text-muted-foreground")}
+          >
+            <GlobeIcon />
+            {resolvedWebsite ? null : t("hero.addWebsite")}
           </Button>
           {isOrg ? (
             <Button variant="outline" onClick={onEditVisibility} disabled={!canEdit} title={editDisabledReason ?? undefined}>
@@ -453,10 +539,9 @@ function EditableHero({
               {editState.socials.map((url) => {
                 const label = formatWebsite(url);
                 return (
-                  <Button key={url} asChild variant="outline" className="max-w-full min-w-0 shrink" aria-label={t("hero.openSocialLink", { link: label })}>
+                  <Button key={url} asChild variant="outline" size="icon" title={label} aria-label={t("hero.openSocialLink", { link: label })}>
                     <Link href={externalHref(url)} target="_blank" rel="noopener noreferrer">
                       <SocialGlyph platform={classifySocial(url)} />
-                      <span className="truncate">{label}</span>
                     </Link>
                   </Button>
                 );
@@ -499,6 +584,7 @@ export function ManageDashboardClient({
   writeRepoDid,
   groupRole,
   currentUserDid,
+  recoveryEmail,
   children,
 }: {
   account: AccountRouteData;
@@ -508,6 +594,7 @@ export function ManageDashboardClient({
   /** When scoped into an organization, the current user's role — enables the members list. */
   groupRole?: CgsRole;
   currentUserDid?: string | null;
+  recoveryEmail?: string | null;
   children?: React.ReactNode;
 }) {
   const router = useRouter();
@@ -541,22 +628,22 @@ export function ManageDashboardClient({
     router.replace(query ? `${pathname}?${query}` : pathname);
   }, [account.kind, hasCompletedSetup, isAccountManageRoute, mode, pathname, rawMode, router, searchParams]);
 
-  const [editDisplayName, setEditDisplayName] = useState(account.displayName);
-  const [editDescription, setEditDescription] = useState(account.description ?? "");
-  const [editLongDescription, setEditLongDescription] = useState(account.longDescription ?? "");
-  const [editWebsite, setEditWebsite] = useState(account.website ?? "");
-  const [editCountry, setEditCountry] = useState(account.country ?? "");
-  const initialStartDate = account.foundedDate ? new Date(account.foundedDate).toISOString().slice(0, 10) : "";
-  const initialVisibility = account.visibility ?? "Public";
-  const [editStartDate, setEditStartDate] = useState(initialStartDate);
-  const [editVisibility, setEditVisibility] = useState<"Public" | "Unlisted">(initialVisibility);
-  const [editOrgType, setEditOrgType] = useState(account.orgType ?? "");
-  const [editSocials, setEditSocials] = useState<string[]>(account.socialLinks ?? []);
+  const accountState = useMemo(() => heroStateFromAccount(account), [account]);
+  const [editDisplayName, setEditDisplayName] = useState(accountState.displayName);
+  const [editDescription, setEditDescription] = useState(accountState.description);
+  const [editLongDescription, setEditLongDescription] = useState(accountState.longDescription);
+  const [editWebsite, setEditWebsite] = useState(accountState.website);
+  const [editCountry, setEditCountry] = useState(accountState.country);
+  const [editStartDate, setEditStartDate] = useState(accountState.startDate);
+  const [editVisibility, setEditVisibility] = useState<"Public" | "Unlisted">(accountState.visibility);
+  const [editOrgType, setEditOrgType] = useState(accountState.orgType);
+  const [editSocials, setEditSocials] = useState<string[]>(accountState.socials);
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [coverFile, setCoverFile] = useState<File | null>(null);
   const [inlineField, setInlineField] = useState<InlineField>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [pendingOptimisticSave, setPendingOptimisticSave] = useState<PendingOptimisticSave | null>(null);
 
   const isOnboarding = resolvedMode === "onboard-user" || resolvedMode === "onboard-org" || !hasCompletedSetup;
   const profileEditPermission = writeRepoDid
@@ -591,20 +678,23 @@ export function ManageDashboardClient({
     setCoverFile(next.coverFile);
   };
 
+  useEffect(() => {
+    if (inlineField !== null || isSaving) return;
+    if (pendingOptimisticSave) {
+      if (!accountCaughtUpWithOptimisticSave(account, pendingOptimisticSave)) return;
+      setPendingOptimisticSave(null);
+    }
+    applyState(accountState);
+  }, [
+    account,
+    accountState,
+    inlineField,
+    isSaving,
+    pendingOptimisticSave,
+  ]);
+
   const resetState = () => {
-    applyState({
-      displayName: account.displayName,
-      description: account.description ?? "",
-      longDescription: account.longDescription ?? "",
-      website: account.website ?? "",
-      country: account.country ?? "",
-      startDate: initialStartDate,
-      visibility: initialVisibility,
-      orgType: account.orgType ?? "",
-      socials: account.socialLinks ?? [],
-      logoFile: null,
-      coverFile: null,
-    });
+    applyState(pendingOptimisticSave?.state ?? accountState);
     setInlineField(null);
     setSaveError(null);
   };
@@ -749,9 +839,13 @@ export function ManageDashboardClient({
         await putRecord("app.certified.actor.organization", "self", orgRecord, writeOptions);
       }
 
+      setPendingOptimisticSave({
+        state: next,
+        fields: optimisticFieldsForSave(overrides),
+        previousAvatarUrl: account.avatarUrl,
+        previousCoverUrl: account.coverUrl,
+      });
       setInlineField(null);
-      setLogoFile(null);
-      setCoverFile(null);
       router.refresh();
     } catch (err) {
       setSaveError(err instanceof Error ? err.message : t("errors.saveFailed"));
@@ -822,7 +916,7 @@ export function ManageDashboardClient({
   if (isOnboarding) {
     return (
       <Container className="pt-4 pb-8">
-        <ManageAccountSetup did={account.did} mode={resolvedMode} />
+        <ManageAccountSetup did={account.did} mode={resolvedMode} recoveryEmail={recoveryEmail} />
       </Container>
     );
   }
@@ -855,30 +949,30 @@ export function ManageDashboardClient({
         {account.kind === "organization" ? (
           <>
             <AboutSection
-              value={account.longDescription ?? ""}
+              value={editLongDescription}
               draft={editLongDescription}
               isEditing={inlineField === "about"}
               isSaving={isSaving}
               saveError={inlineField === "about" ? saveError : null}
-              onEdit={() => { setEditLongDescription(account.longDescription ?? ""); setSaveError(null); setInlineField("about"); }}
+              onEdit={() => { setSaveError(null); setInlineField("about"); }}
               onChange={setEditLongDescription}
               onSave={() => void saveChanges({ longDescription: editLongDescription })}
-              onCancel={() => { setEditLongDescription(account.longDescription ?? ""); setSaveError(null); setInlineField(null); }}
+              onCancel={() => { setEditLongDescription((pendingOptimisticSave?.state ?? accountState).longDescription); setSaveError(null); setInlineField(null); }}
               editDisabledReason={profileEditPermission.reason}
             />
-            {writeRepoDid && groupRole ? (
-              <GroupMembers
-                groupDid={writeRepoDid}
-                currentRole={groupRole}
-                currentUserDid={currentUserDid}
-                variant="section"
-                showDataCouncil
-              />
-            ) : null}
           </>
         ) : null}
         {account.kind === "user" ? <ManageGroupsClient sessionDid={account.did} /> : null}
         {children}
+        {account.kind === "organization" && writeRepoDid && groupRole ? (
+          <GroupMembers
+            groupDid={writeRepoDid}
+            currentRole={groupRole}
+            currentUserDid={currentUserDid}
+            variant="section"
+            showDataCouncil
+          />
+        ) : null}
       </Container>
     </>
   );

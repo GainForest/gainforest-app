@@ -17,6 +17,7 @@ import {
 } from "../_lib/indexer";
 import { formatCompact, formatDate, formatNumber, countryFlag, formatCountry } from "../_lib/format";
 import { AuthorChip } from "./AuthorChip";
+import { TrustedByBadges } from "./TrustedByBadges";
 import { usePreferredDidIdentifier } from "./PreferredLinks";
 import { RecordLocationMap } from "./RecordLocationMap";
 import { mapTileUrl } from "../_lib/coords";
@@ -349,6 +350,7 @@ export function RecordDrawer({
         )}
 
         <div className={`px-6 pb-12 ${showHero ? "-mt-10" : "pt-5"}`}>
+          {record.kind === "site" ? <TrustedByBadges did={record.did} className="relative mb-3" variant="compact" /> : null}
           <h2 className="relative font-instrument text-[30px] italic leading-[1.08] tracking-[-0.01em] text-foreground">
             {title}
           </h2>

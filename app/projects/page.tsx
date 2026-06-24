@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { ProjectsExploreClient } from "./ProjectsExploreClient";
 
-export const revalidate = 60;
+export const revalidate = 86400;
 
 export const metadata: Metadata = {
   title: "Explore Projects — Verified Regenerative Impact Work",

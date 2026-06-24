@@ -136,7 +136,8 @@
       "description": "sertifikat adalah catatan dampak portabel yang dapat berpindah antar aplikasi, komunitas, dan alat pendanaan — bukan basis data tertutup. Dukungan untuk Silvi dan platform lain akan segera hadir.",
       "protocol": {
         "name": "Certified",
-        "description": "data sosial portabel"
+        "description": "data sosial portabel",
+        "poweredBy": "Didukung oleh Certified"
       },
       "youBadge": "Anda",
       "apps": {

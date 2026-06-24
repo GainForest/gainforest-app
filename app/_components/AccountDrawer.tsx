@@ -22,6 +22,7 @@ import {
   formatRelative,
   formatCountry,
 } from "../_lib/format";
+import { TrustedByBadges } from "./TrustedByBadges";
 
 // A second, higher-stacked drawer that profiles an *account* (a did:plc) rather
 // than a single record. Opened by clicking any handle/owner chip. It sits at
@@ -156,6 +157,7 @@ function AccountDrawer({ did, onClose }: { did: string | null; onClose: () => vo
               {handle && (
                 <p className="mt-0.5 truncate text-[13px] text-primary">{handle}</p>
               )}
+              <TrustedByBadges did={did} className="mt-2" variant="compact" />
             </div>
           </div>
 

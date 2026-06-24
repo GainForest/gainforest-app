@@ -2,9 +2,9 @@
 
 /**
  * Client-side helper for publish mutations routed through
- * /api/manage/proxy → auth.gainforest.app/api/atproto/mutation for personal
- * repo writes, or /api/cgs/mutation → auth.gainforest.app/api/cgs/mutation for
- * organization-owned writes.
+ * /api/manage/proxy for personal repo writes, or /api/cgs/mutation for
+ * organization-owned writes. Server routes forward to the configured auth
+ * service.
  */
 
 import { formatCgsErrorMessage } from "@/app/_lib/cgs-errors";
@@ -111,7 +111,7 @@ type MutationPayload = GroupScoped & (
 
 type CreateResult = { uri: string; cid: string };
 type RecordMutationResult = { uri: string; cid: string; rkey: string; record?: Record<string, unknown> };
-type UploadBlobResult = { ref: unknown; mimeType: string; size: number; blob?: unknown };
+type UploadBlobResult = { ref: unknown; mimeType: string; size: number; blob?: unknown; $type?: string };
 type MultimediaResult = { uri: string; cid: string; rkey: string; record?: Record<string, unknown> };
 type RecordReadResult = { uri: string; cid: string; rkey: string; record: Record<string, unknown> };
 type DatasetRecordResult = { uri: string; cid: string; rkey: string; record: Record<string, unknown> };
@@ -321,15 +321,34 @@ function bytesToBase64(bytes: Uint8Array): string {
   return btoa(binary);
 }
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
+export function normalizeUploadBlobResult(value: unknown): UploadBlobResult {
+  const candidate = isRecord(value) && isRecord(value.blob) ? value.blob : value;
+  if (!isRecord(candidate) || !("ref" in candidate)) {
+    throw new Error("We could not upload this photo. Please try again.");
+  }
+
+  return {
+    $type: typeof candidate.$type === "string" ? candidate.$type : "blob",
+    ref: candidate.ref,
+    mimeType: typeof candidate.mimeType === "string" ? candidate.mimeType : "application/octet-stream",
+    size: typeof candidate.size === "number" ? candidate.size : 0,
+  };
+}
+
 export async function uploadBlob(file: File, options?: { repo?: string }): Promise<UploadBlobResult> {
   const buf = await file.arrayBuffer();
   const b64 = bytesToBase64(new Uint8Array(buf));
-  return callProxy({
+  const result = await callProxy<unknown>({
     operation: "uploadBlob",
     blobData: b64,
     blobMimeType: file.type || "application/octet-stream",
     ...(options?.repo ? { repo: options.repo } : {}),
   });
+  return normalizeUploadBlobResult(result);
 }
 
 export async function createMultimediaFromFile(input: CreateMultimediaFromFileInput, options?: { repo?: string }): Promise<MultimediaResult> {

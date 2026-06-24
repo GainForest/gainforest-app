@@ -1,11 +1,11 @@
-import { cachedAsync } from "./async-cache";
+import { publicExploreCache, PUBLIC_EXPLORE_CACHE_TTL_MS } from "./public-explore-cache";
 import { countryFlag } from "./format";
 import { fetchCertifiedLocationCountriesByUri } from "./indexer";
 import { INDEXER_URL, FACILITATOR_DID, blockExplorerUrl } from "./urls";
 
 // ── Raw receipt fetch ──────────────────────────────────────────────────────
 
-const TOTAL_STATS_CACHE_MS = 15 * 60 * 1000;
+const TOTAL_STATS_CACHE_MS = PUBLIC_EXPLORE_CACHE_TTL_MS;
 
 export type DonorRef =
   | { type: "did"; id: string }
@@ -150,7 +150,7 @@ async function fetchReceiptsUncached(): Promise<FundingReceipt[]> {
 }
 
 export async function fetchReceipts(signal?: AbortSignal): Promise<FundingReceipt[]> {
-  return cachedAsync("funding-receipts-total-source", TOTAL_STATS_CACHE_MS, fetchReceiptsUncached, signal);
+  return publicExploreCache("funding-receipts", { ttl: TOTAL_STATS_CACHE_MS }, fetchReceiptsUncached, signal);
 }
 
 // ── Aggregations ported from the GainForest donations view ────────────────
@@ -445,7 +445,7 @@ async function fetchOrgCountryMapUncached(): Promise<Map<string, string>> {
 }
 
 export async function fetchOrgCountryMap(signal?: AbortSignal): Promise<Map<string, string>> {
-  return cachedAsync("organization-country-map", TOTAL_STATS_CACHE_MS, fetchOrgCountryMapUncached, signal);
+  return publicExploreCache("organization-country-map", { ttl: TOTAL_STATS_CACHE_MS }, fetchOrgCountryMapUncached, signal);
 }
 
 export function computeGeoStats(orgCountryMap: Map<string, string>, limit = 5): GeoStats {

@@ -136,7 +136,8 @@
       "description": "vyeti ni rekodi za athari zinazobebeka kati ya programu, jamii na zana za ufadhili — si hifadhidata iliyofungwa. Usaidizi wa Silvi na majukwaa mengine utakuja hivi karibuni.",
       "protocol": {
         "name": "Certified",
-        "description": "data ya kijamii inayobebeka"
+        "description": "data ya kijamii inayobebeka",
+        "poweredBy": "Inaendeshwa na Certified"
       },
       "youBadge": "Wewe",
       "apps": {

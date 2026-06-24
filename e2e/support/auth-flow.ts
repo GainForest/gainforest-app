@@ -290,7 +290,9 @@ export async function signInWithDisposableEmailAccount(
     inbox,
     did: null,
     handle: null,
-    serviceEndpoint: "https://certified.one",
+    serviceEndpoint: env.testPdsDomain
+      ? (env.testPdsDomain.startsWith("http") ? env.testPdsDomain.replace(/\/$/, "") : `https://${env.testPdsDomain.replace(/\/$/, "")}`)
+      : null,
   });
   const beforeMessages = new Set((await listDisposableEmailMessages(inbox)).map((message) => message.id));
 

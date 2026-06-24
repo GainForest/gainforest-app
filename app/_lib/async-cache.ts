@@ -29,6 +29,12 @@ export function withAbort<T>(promise: Promise<T>, signal?: AbortSignal): Promise
   });
 }
 
+/**
+ * Cache an async value while still letting each caller stop waiting via its own
+ * AbortSignal. Keep `loader` independent from caller-specific abort signals;
+ * a cached promise is shared, so wiring one caller's signal into the loader can
+ * cancel work that other current callers are still awaiting.
+ */
 export function cachedAsync<T>(
   key: string,
   ttlMs: number,

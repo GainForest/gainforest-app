@@ -448,5 +448,9 @@
     "description": "Las personas con esta insignia ayudan a cuidar los datos y la evidencia compartidos de la organización.",
     "empty": "Aún no hay miembros del Consejo de Datos.",
     "memberFallback": "Miembro del equipo"
+  },
+  "trust": {
+    "trustedBy": "Con la confianza de",
+    "aria": "Con la confianza de {names}"
   }
 }
