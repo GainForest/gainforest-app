@@ -463,8 +463,11 @@
       "adminHelp": "Admin dapat mengundang anggota biasa melalui email atau menambahkannya dengan nama pengguna. Minta pemilik menambahkan admin lain.",
       "locked": "Hanya pemilik dan admin yang dapat menambah atau menghapus anggota.",
       "sent": "Undangan dikirim ke {email}.",
-      "sendError": "Tidak dapat mengirim undangan.",
-      "addError": "Tidak dapat menambahkan anggota."
+      "sendError": "Kami tidak dapat mengirim undangan itu. Coba lagi.",
+      "addError": "Tidak dapat menambahkan anggota.",
+      "roleMember": "anggota",
+      "roleAdmin": "administrator",
+      "pendingStatus": "Diundang sebagai {role}. Menunggu mereka menerima."
     },
     "menu": {
       "title": "Undangan",

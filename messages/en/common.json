@@ -463,8 +463,11 @@
       "adminHelp": "Admins can invite regular members by email or add them by username. Ask an owner to add another admin.",
       "locked": "Only owners and admins can add or remove members.",
       "sent": "Invitation sent to {email}.",
-      "sendError": "Could not send invitation.",
-      "addError": "Could not add member."
+      "sendError": "We couldn’t send that invitation. Please try again.",
+      "addError": "Could not add member.",
+      "roleMember": "member",
+      "roleAdmin": "admin",
+      "pendingStatus": "Invited as {role}. Waiting for them to accept."
     },
     "menu": {
       "title": "Invitations",

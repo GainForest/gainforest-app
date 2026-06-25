@@ -463,8 +463,11 @@
       "adminHelp": "Wasimamizi wanaweza kualika wanachama wa kawaida kwa barua pepe au kuwaongeza kwa jina la mtumiaji. Mwombe mmiliki kuongeza msimamizi mwingine.",
       "locked": "Wamiliki na wasimamizi pekee wanaweza kuongeza au kuondoa wanachama.",
       "sent": "Mwaliko umetumwa kwa {email}.",
-      "sendError": "Haikuwezekana kutuma mwaliko.",
-      "addError": "Haikuwezekana kuongeza mwanachama."
+      "sendError": "Hatukuweza kutuma mwaliko huo. Jaribu tena.",
+      "addError": "Haikuwezekana kuongeza mwanachama.",
+      "roleMember": "mwanachama",
+      "roleAdmin": "msimamizi",
+      "pendingStatus": "Amealikwa kama {role}. Tunasubiri akubali."
     },
     "menu": {
       "title": "Mialiko",

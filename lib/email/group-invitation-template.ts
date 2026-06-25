@@ -15,13 +15,11 @@ export type GroupInvitationEmailRenderResult = {
 type InviteCopy = {
   subject: string;
   heroKicker: string;
-  heading: string;
-  fallbackName: string;
+  appLine: string;
   fallbackOrganizationName: string;
-  greeting: string;
   intro: string;
   introWithInviter: string;
-  roleLabel: string;
+  roles: Record<"member" | "admin", string>;
   cta: string;
   nextHeading: string;
   actions: Array<{ emoji: string; title: string; body: string }>;
@@ -34,19 +32,17 @@ const copyByLocale = {
   en: {
     subject: "You’re invited to join {organizationName} on GainForest",
     heroKicker: "Invitation to",
-    heading: "GainForest",
-    fallbackName: "there",
+    appLine: "on GainForest app",
     fallbackOrganizationName: "an organization",
-    greeting: "Hi {name},",
-    intro: "An organization admin invited you to collaborate with {organizationName} on GainForest.",
-    introWithInviter: "{inviterName} invited you to collaborate with {organizationName} on GainForest.",
-    roleLabel: "Role: {role}",
+    intro: "An organization admin invited you to collaborate with {organizationName} on GainForest as a {role}.",
+    introWithInviter: "{inviterName} invited you to collaborate with {organizationName} on GainForest as a {role}.",
+    roles: { member: "member", admin: "admin" },
     cta: "Accept invitation",
     nextHeading: "What you can do after joining:",
     actions: [
-      { emoji: "▣", title: "Collaborate from one shared space", body: "Work with the organization account without sharing passwords or recovery details." },
-      { emoji: "▤", title: "Create and update Certs", body: "Help document project progress with evidence, stories, and verified records." },
-      { emoji: "↑", title: "Upload field evidence", body: "Attach observations, trees, images, audio, and reports to the organization’s work." },
+      { emoji: "🤝", title: "Collaborate from one shared space", body: "Work with the organization account without sharing passwords or recovery details." },
+      { emoji: "📝", title: "Create and update Certs", body: "Help document project progress with evidence, stories, and verified records." },
+      { emoji: "🌿", title: "Upload field evidence", body: "Attach observations, trees, images, audio, and reports to the organization’s work." },
     ],
     signoff: "Welcome aboard,",
     teamName: "The GainForest Team",
@@ -55,19 +51,17 @@ const copyByLocale = {
   es: {
     subject: "Te invitaron a unirte a {organizationName} en GainForest",
     heroKicker: "Invitación a",
-    heading: "GainForest",
-    fallbackName: "amigo/a",
+    appLine: "en la app GainForest",
     fallbackOrganizationName: "una organización",
-    greeting: "Hola {name},",
-    intro: "Una persona administradora te invitó a colaborar con {organizationName} en GainForest.",
-    introWithInviter: "{inviterName} te invitó a colaborar con {organizationName} en GainForest.",
-    roleLabel: "Rol: {role}",
+    intro: "Una persona administradora te invitó a colaborar con {organizationName} en GainForest como {role}.",
+    introWithInviter: "{inviterName} te invitó a colaborar con {organizationName} en GainForest como {role}.",
+    roles: { member: "miembro", admin: "administrador" },
     cta: "Aceptar invitación",
     nextHeading: "Qué puedes hacer después de unirte:",
     actions: [
-      { emoji: "▣", title: "Colaborar en un espacio compartido", body: "Trabaja con la cuenta de la organización sin compartir contraseñas ni datos de recuperación." },
-      { emoji: "▤", title: "Crear y actualizar Certs", body: "Ayuda a documentar el progreso del proyecto con evidencia, historias y registros verificados." },
-      { emoji: "↑", title: "Subir evidencia de campo", body: "Adjunta observaciones, árboles, imágenes, audio e informes al trabajo de la organización." },
+      { emoji: "🤝", title: "Colaborar en un espacio compartido", body: "Trabaja con la cuenta de la organización sin compartir contraseñas ni datos de recuperación." },
+      { emoji: "📝", title: "Crear y actualizar Certs", body: "Ayuda a documentar el progreso del proyecto con evidencia, historias y registros verificados." },
+      { emoji: "🌿", title: "Subir evidencia de campo", body: "Adjunta observaciones, árboles, imágenes, audio e informes al trabajo de la organización." },
     ],
     signoff: "Bienvenido a bordo,",
     teamName: "El equipo de GainForest",
@@ -76,19 +70,17 @@ const copyByLocale = {
   pt: {
     subject: "Você foi convidado para entrar em {organizationName} no GainForest",
     heroKicker: "Convite para",
-    heading: "GainForest",
-    fallbackName: "amigo/a",
+    appLine: "no app GainForest",
     fallbackOrganizationName: "uma organização",
-    greeting: "Olá {name},",
-    intro: "Uma pessoa administradora convidou você para colaborar com {organizationName} no GainForest.",
-    introWithInviter: "{inviterName} convidou você para colaborar com {organizationName} no GainForest.",
-    roleLabel: "Função: {role}",
+    intro: "Uma pessoa administradora convidou você para colaborar com {organizationName} no GainForest como {role}.",
+    introWithInviter: "{inviterName} convidou você para colaborar com {organizationName} no GainForest como {role}.",
+    roles: { member: "membro", admin: "administrador" },
     cta: "Aceitar convite",
     nextHeading: "O que você pode fazer depois de entrar:",
     actions: [
-      { emoji: "▣", title: "Colaborar em um espaço compartilhado", body: "Trabalhe com a conta da organização sem compartilhar senhas ou detalhes de recuperação." },
-      { emoji: "▤", title: "Criar e atualizar Certs", body: "Ajude a documentar o progresso do projeto com evidências, histórias e registros verificados." },
-      { emoji: "↑", title: "Enviar evidências de campo", body: "Anexe observações, árvores, imagens, áudio e relatórios ao trabalho da organização." },
+      { emoji: "🤝", title: "Colaborar em um espaço compartilhado", body: "Trabalhe com a conta da organização sem compartilhar senhas ou detalhes de recuperação." },
+      { emoji: "📝", title: "Criar e atualizar Certs", body: "Ajude a documentar o progresso do projeto com evidências, histórias e registros verificados." },
+      { emoji: "🌿", title: "Enviar evidências de campo", body: "Anexe observações, árvores, imagens, áudio e relatórios ao trabalho da organização." },
     ],
     signoff: "Boas-vindas,",
     teamName: "Equipe GainForest",
@@ -97,19 +89,17 @@ const copyByLocale = {
   sw: {
     subject: "Umealikwa kujiunga na {organizationName} kwenye GainForest",
     heroKicker: "Mwaliko wa",
-    heading: "GainForest",
-    fallbackName: "rafiki",
+    appLine: "kwenye programu ya GainForest",
     fallbackOrganizationName: "shirika",
-    greeting: "Habari {name},",
-    intro: "Msimamizi wa shirika alikualika kushirikiana na {organizationName} kwenye GainForest.",
-    introWithInviter: "{inviterName} alikualika kushirikiana na {organizationName} kwenye GainForest.",
-    roleLabel: "Jukumu: {role}",
+    intro: "Msimamizi wa shirika alikualika kushirikiana na {organizationName} kwenye GainForest kama {role}.",
+    introWithInviter: "{inviterName} alikualika kushirikiana na {organizationName} kwenye GainForest kama {role}.",
+    roles: { member: "mwanachama", admin: "msimamizi" },
     cta: "Kubali mwaliko",
     nextHeading: "Unachoweza kufanya baada ya kujiunga:",
     actions: [
-      { emoji: "▣", title: "Shirikiana kwenye nafasi moja", body: "Fanya kazi kupitia akaunti ya shirika bila kushiriki nywila au maelezo ya urejeshaji." },
-      { emoji: "▤", title: "Unda na usasishe Certs", body: "Saidia kurekodi maendeleo ya mradi kwa ushahidi, hadithi na rekodi zilizothibitishwa." },
-      { emoji: "↑", title: "Pakia ushahidi wa nyanjani", body: "Ambatisha uchunguzi, miti, picha, sauti na ripoti kwenye kazi ya shirika." },
+      { emoji: "🤝", title: "Shirikiana kwenye nafasi moja", body: "Fanya kazi kupitia akaunti ya shirika bila kushiriki nywila au maelezo ya urejeshaji." },
+      { emoji: "📝", title: "Unda na usasishe Certs", body: "Saidia kurekodi maendeleo ya mradi kwa ushahidi, hadithi na rekodi zilizothibitishwa." },
+      { emoji: "🌿", title: "Pakia ushahidi wa nyanjani", body: "Ambatisha uchunguzi, miti, picha, sauti na ripoti kwenye kazi ya shirika." },
     ],
     signoff: "Karibu sana,",
     teamName: "Timu ya GainForest",
@@ -118,19 +108,17 @@ const copyByLocale = {
   id: {
     subject: "Anda diundang bergabung dengan {organizationName} di GainForest",
     heroKicker: "Undangan ke",
-    heading: "GainForest",
-    fallbackName: "teman",
+    appLine: "di aplikasi GainForest",
     fallbackOrganizationName: "organisasi",
-    greeting: "Hai {name},",
-    intro: "Admin organisasi mengundang Anda untuk berkolaborasi dengan {organizationName} di GainForest.",
-    introWithInviter: "{inviterName} mengundang Anda untuk berkolaborasi dengan {organizationName} di GainForest.",
-    roleLabel: "Peran: {role}",
+    intro: "Admin organisasi mengundang Anda untuk berkolaborasi dengan {organizationName} di GainForest sebagai {role}.",
+    introWithInviter: "{inviterName} mengundang Anda untuk berkolaborasi dengan {organizationName} di GainForest sebagai {role}.",
+    roles: { member: "anggota", admin: "admin" },
     cta: "Terima undangan",
     nextHeading: "Yang dapat Anda lakukan setelah bergabung:",
     actions: [
-      { emoji: "▣", title: "Berkolaborasi di satu ruang bersama", body: "Bekerja dengan akun organisasi tanpa berbagi kata sandi atau detail pemulihan." },
-      { emoji: "▤", title: "Membuat dan memperbarui Certs", body: "Bantu mendokumentasikan kemajuan proyek dengan bukti, cerita, dan catatan terverifikasi." },
-      { emoji: "↑", title: "Unggah bukti lapangan", body: "Lampirkan observasi, pohon, gambar, audio, dan laporan ke pekerjaan organisasi." },
+      { emoji: "🤝", title: "Berkolaborasi di satu ruang bersama", body: "Bekerja dengan akun organisasi tanpa berbagi kata sandi atau detail pemulihan." },
+      { emoji: "📝", title: "Membuat dan memperbarui Certs", body: "Bantu mendokumentasikan kemajuan proyek dengan bukti, cerita, dan catatan terverifikasi." },
+      { emoji: "🌿", title: "Unggah bukti lapangan", body: "Lampirkan observasi, pohon, gambar, audio, dan laporan ke pekerjaan organisasi." }
     ],
     signoff: "Selamat bergabung,",
     teamName: "Tim GainForest",
@@ -149,6 +137,10 @@ function escapeHtml(value: string): string {
 
 function interpolate(template: string, values: Record<string, string>): string {
   return template.replace(/\{(\w+)\}/g, (_, key: string) => values[key] ?? "");
+}
+
+function interpolateHtml(template: string, values: Record<string, string>, htmlValues: Record<string, string> = {}): string {
+  return template.replace(/\{(\w+)\}/g, (_, key: string) => htmlValues[key] ?? escapeHtml(values[key] ?? ""));
 }
 
 function absoluteUrl(siteUrl: string, path: string): string {
@@ -191,9 +183,7 @@ function renderText(copy: InviteCopy, values: Record<string, string>, acceptUrl:
   return [
     interpolate(copy.subject, values),
     "",
-    interpolate(copy.greeting, values),
     interpolate(values.inviterName ? copy.introWithInviter : copy.intro, values),
-    interpolate(copy.roleLabel, values),
     "",
     `${copy.cta}: ${acceptUrl}`,
     "",
@@ -212,6 +202,7 @@ export function renderGroupInvitationEmailTemplate({
   invitedEmail,
   organizationName,
   inviterName,
+  inviterUrl,
   role,
   acceptUrl,
   appName = "GainForest",
@@ -222,6 +213,7 @@ export function renderGroupInvitationEmailTemplate({
   invitedEmail: string;
   organizationName?: string | null;
   inviterName?: string | null;
+  inviterUrl?: string | null;
   role: "member" | "admin";
   acceptUrl: string;
   appName?: string;
@@ -229,13 +221,17 @@ export function renderGroupInvitationEmailTemplate({
   siteUrl?: string;
 }): GroupInvitationEmailRenderResult {
   const copy = copyByLocale[locale];
-  const safeName = invitedEmail.split("@")[0]?.trim() || copy.fallbackName;
   const safeOrganizationName = organizationName?.trim() || copy.fallbackOrganizationName;
   const safeInviterName = inviterName?.trim() || "";
-  const values = { name: safeName, organizationName: safeOrganizationName, inviterName: safeInviterName, role };
+  const roleLabel = copy.roles[role];
+  const values = { organizationName: safeOrganizationName, inviterName: safeInviterName, role: roleLabel };
   const subject = interpolate(copy.subject, values);
-  const intro = interpolate(safeInviterName ? copy.introWithInviter : copy.intro, values);
-  const resolvedLogoUri = logoUri?.trim() || absoluteUrl(siteUrl, "/assets/media/images/app-icon.png");
+  const inviterHref = inviterUrl?.trim() || "";
+  const inviterHtml = inviterHref
+    ? `<a href="${escapeHtml(inviterHref)}" style="color: #315a43; font-weight: 700; text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px;">${escapeHtml(safeInviterName)}</a>`
+    : escapeHtml(safeInviterName);
+  const introHtml = interpolateHtml(safeInviterName ? copy.introWithInviter : copy.intro, values, safeInviterName ? { inviterName: inviterHtml } : {});
+  const resolvedLogoUri = logoUri?.trim() || absoluteUrl(siteUrl, "/icons/icon-192.png");
   const logo = `<table cellpadding="0" cellspacing="0" border="0" role="presentation" style="margin: 0 auto;">
     <tr>
       <td width="38" align="center" valign="middle" style="width: 38px; padding: 0 12px 0 0;">
@@ -276,12 +272,10 @@ export function renderGroupInvitationEmailTemplate({
             <td class="email-body" style="padding: 40px 36px 24px; text-align: center;">
               <h1 style="margin: 0 0 18px; color: #0f1f16; font-weight: 400; letter-spacing: -0.02em; font-family: 'Instrument Serif', Georgia, 'Times New Roman', serif; font-style: italic; text-align: center;">
                 <span style="display: block; margin: 0 0 4px; font-size: 20px; line-height: 1.2; font-weight: 400;">${escapeHtml(copy.heroKicker)}</span>
-                <span style="display: block; font-size: 32px; line-height: 1.1; font-weight: 400;">${escapeHtml(copy.heading)}</span>
+                <span style="display: block; font-size: 36px; line-height: 1.05; font-weight: 400;">${escapeHtml(safeOrganizationName)}</span>
+                <span style="display: block; margin: 8px 0 0; font-size: 16px; line-height: 1.25; font-weight: 400; color: #5f6964;">${escapeHtml(copy.appLine)}</span>
               </h1>
-              <p style="margin: 0 0 6px; color: #0f1f16; font-size: 15px; line-height: 1.5; font-family: 'Instrument Serif', Georgia, 'Times New Roman', serif; font-style: italic;">${escapeHtml(interpolate(copy.greeting, values))}</p>
-              <span style="display: inline-block; margin: 10px 0 14px; border-radius: 999px; background: #eef7f1; color: #3e7053; padding: 5px 12px; font-size: 12px; line-height: 1.3; font-weight: 700; letter-spacing: -0.01em;">${escapeHtml(safeOrganizationName)}</span>
-              <p style="margin: 0 0 18px; color: #5f6964; font-size: 15px; line-height: 1.7; font-family: 'Instrument Serif', Georgia, 'Times New Roman', serif; font-style: italic;">${escapeHtml(intro)}</p>
-              <p style="margin: 0 0 28px; color: #315a43; font-size: 13px; line-height: 1.5; font-weight: 700;">${escapeHtml(interpolate(copy.roleLabel, values))}</p>
+              <p style="margin: 8px 0 28px; color: #5f6964; font-size: 15px; line-height: 1.7; font-family: 'Instrument Serif', Georgia, 'Times New Roman', serif; font-style: italic;">${introHtml}</p>
               <a href="${escapeHtml(acceptUrl)}" style="display: inline-block; margin: 0 0 34px; color: #ffffff; background: #3e7053; font-size: 13px; line-height: 1; font-weight: 700; text-decoration: none; padding: 12px 22px; border-radius: 999px;">${escapeHtml(copy.cta)} &#8594;</a>
 
               <p style="margin: 0 0 20px; color: #0f1f16; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; text-align: center;">${escapeHtml(copy.nextHeading)}</p>

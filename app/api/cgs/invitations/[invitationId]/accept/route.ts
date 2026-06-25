@@ -4,7 +4,7 @@ import { acceptGroupInvitation, GroupInvitationError } from "@/app/_lib/cgs-invi
 export const runtime = "nodejs";
 
 function jsonError(error: unknown, fallback: string, status = 400) {
-  const message = error instanceof Error ? error.message : fallback;
+  const message = error instanceof GroupInvitationError ? error.message : fallback;
   const code = error instanceof GroupInvitationError ? error.status : status;
   return Response.json({ error: message }, { status: code, headers: { "cache-control": "no-store" } });
 }

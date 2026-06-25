@@ -7,8 +7,10 @@ import {
   GroupInvitationError,
   isInvitationRole,
   listPendingGroupInvitationsForEmail,
+  listPendingGroupInvitationsForRepo,
   normalizeInvitationEmail,
 } from "@/app/_lib/cgs-invitations";
+import { fetchCgsMembersWithCookie } from "@/app/_lib/cgs-server";
 
 export const runtime = "nodejs";
 
@@ -19,21 +21,39 @@ const createInvitationSchema = z.object({
 });
 
 function jsonError(error: unknown, fallback: string, status = 400) {
-  const message = error instanceof Error ? error.message : fallback;
+  const message = error instanceof GroupInvitationError ? error.message : fallback;
   const code = error instanceof GroupInvitationError ? error.status : status;
   return Response.json({ error: message }, { status: code, headers: { "cache-control": "no-store" } });
 }
 
-export async function GET() {
+function canViewPendingInvitations(role: string | null | undefined): boolean {
+  return role === "owner" || role === "admin";
+}
+
+export async function GET(request: Request) {
   const session = await fetchAuthSession();
   if (!session.isLoggedIn) {
     return Response.json({ invitations: [] }, { headers: { "cache-control": "no-store" } });
   }
-  if (!session.email) {
-    return Response.json({ invitations: [] }, { headers: { "cache-control": "no-store" } });
-  }
+
+  const url = new URL(request.url);
+  const repo = url.searchParams.get("repo")?.trim() ?? "";
 
   try {
+    if (repo) {
+      const headerList = await headers();
+      const cookie = getAuthForwardCookie(headerList.get("cookie"));
+      if (!cookie) throw new GroupInvitationError("Please sign in and try again.", 401);
+      const memberResult = await fetchCgsMembersWithCookie({ repo, cookie, limit: 100 });
+      const actorRole = memberResult.members.find((member) => member.did === session.did)?.role ?? null;
+      if (!canViewPendingInvitations(actorRole)) throw new GroupInvitationError("Only organization owners and admins can view pending invitations.", 403);
+      const invitations = await listPendingGroupInvitationsForRepo(repo);
+      return Response.json({ invitations }, { headers: { "cache-control": "no-store" } });
+    }
+
+    if (!session.email) {
+      return Response.json({ invitations: [] }, { headers: { "cache-control": "no-store" } });
+    }
     const invitations = await listPendingGroupInvitationsForEmail(normalizeInvitationEmail(session.email));
     return Response.json({ invitations }, { headers: { "cache-control": "no-store" } });
   } catch (error) {

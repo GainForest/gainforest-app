@@ -17,6 +17,7 @@ import {
   resolveCgsMemberIdentity,
   setCgsMemberRole,
   type CgsMember,
+  type CgsPendingInvitation,
   type CgsRole,
 } from "../../_lib/cgs";
 
@@ -32,6 +33,7 @@ type DataCouncilResponse = {
 type GroupSettingsResponse = {
   members: CgsMember[];
   profiles?: DidProfile[];
+  invitations?: CgsPendingInvitation[];
   dataCouncil?: DataCouncilResponse | null;
   dataCouncilError?: string | null;
 };
@@ -77,6 +79,12 @@ function profilesByDid(profiles?: DidProfile[]): Record<string, DidProfile> {
   return Object.fromEntries(profiles.map((profile) => [profile.did, profile]));
 }
 
+function upsertInvitation(current: CgsPendingInvitation[], invitation: CgsPendingInvitation): CgsPendingInvitation[] {
+  const exists = current.some((item) => item.id === invitation.id || item.email === invitation.email);
+  if (!exists) return [invitation, ...current];
+  return current.map((item) => (item.id === invitation.id || item.email === invitation.email ? invitation : item));
+}
+
 async function parseJsonResponse<T>(response: Response, fallback: string): Promise<T> {
   const data = (await response.json().catch(() => ({}))) as T & { error?: string; message?: string };
   if (!response.ok || data.error) throw new Error(data.message ?? data.error ?? fallback);
@@ -94,6 +102,31 @@ function MemberAvatar({ did, profile }: { did: string; profile?: DidProfile }) {
           {mono.char}
         </span>
       )}
+    </div>
+  );
+}
+
+function InvitationAvatar({ email }: { email: string }) {
+  const mono = useMemo(() => monogram(email, email), [email]);
+  return (
+    <div className="flex size-10 shrink-0 items-center justify-center rounded-full text-sm font-semibold text-white" style={{ backgroundColor: mono.bg }}>
+      <MailIcon className="size-4" aria-hidden />
+    </div>
+  );
+}
+
+function PendingInvitationRow({ invitation, roleLabel, statusLabel }: { invitation: CgsPendingInvitation; roleLabel: string; statusLabel: string }) {
+  return (
+    <div className="flex items-center gap-3 rounded-xl px-3 py-3 transition-colors hover:bg-muted/40">
+      <InvitationAvatar email={invitation.email} />
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-sm font-medium text-foreground">{invitation.email}</p>
+        <p className="truncate text-xs text-muted-foreground">{statusLabel}</p>
+      </div>
+      <span className={cn("rounded-full px-2.5 py-1 text-xs font-medium capitalize", roleBadge(invitation.role))}>
+        {roleLabel}
+      </span>
+      <span className="w-7 shrink-0" aria-hidden />
     </div>
   );
 }
@@ -212,6 +245,7 @@ export function GroupMembers({
   const hasInitialMembers = initialMembers !== undefined;
 
   const [members, setMembers] = useState<CgsMember[]>(() => initialMembers ?? []);
+  const [pendingInvitations, setPendingInvitations] = useState<CgsPendingInvitation[]>([]);
   const [profiles, setProfiles] = useState<Record<string, DidProfile>>({});
   const [memberIdentifier, setMemberIdentifier] = useState("");
   const [role, setRole] = useState<RoleInput>("member");
@@ -243,6 +277,7 @@ export function GroupMembers({
     const response = await fetch(`/api/manage/group-settings?${params.toString()}`, { cache: "no-store" });
     const data = await parseJsonResponse<GroupSettingsResponse>(response, "Could not load members.");
     setMembers(data.members ?? []);
+    setPendingInvitations(data.invitations ?? []);
     setProfiles((current) => ({ ...current, ...profilesByDid(data.profiles) }));
     if (canUseDataCouncil) {
       if (data.dataCouncil) applyDataCouncilState(data.dataCouncil);
@@ -271,6 +306,7 @@ export function GroupMembers({
 
   useEffect(() => {
     setMembers(initialMembers ?? []);
+    setPendingInvitations([]);
     setError(initialError);
     setLoaded(hasInitialMembers || Boolean(initialError));
     setDataCouncilLoaded(!canUseDataCouncil);
@@ -314,7 +350,8 @@ export function GroupMembers({
       const previousMembers = members;
       try {
         if (isLikelyEmail(identifier)) {
-          await inviteCgsMember(groupDid, identifier, nextRole);
+          const { invitation } = await inviteCgsMember(groupDid, identifier, nextRole);
+          setPendingInvitations((current) => upsertInvitation(current, invitation));
           setMemberIdentifier("");
           setSuccess(invitationsT("sent", { email: identifier }));
           return;
@@ -423,7 +460,9 @@ export function GroupMembers({
     return [...members].sort((a, b) => rank[a.role] - rank[b.role]);
   }, [members]);
 
-  const count = members.length;
+  const sortedInvitations = useMemo(() => [...pendingInvitations].sort((a, b) => a.email.localeCompare(b.email)), [pendingInvitations]);
+
+  const count = members.length + sortedInvitations.length;
 
   const addForm = canAddRemove ? (
     <div className="space-y-2">
@@ -480,7 +519,7 @@ export function GroupMembers({
 
   const list = (
     <div className="divide-y divide-border/60">
-      {sortedMembers.length === 0 ? (
+      {sortedMembers.length === 0 && sortedInvitations.length === 0 ? (
         <p className="flex items-center gap-2 px-4 py-6 text-sm text-muted-foreground">
           {isPending || !loaded ? (
             <>
@@ -491,33 +530,43 @@ export function GroupMembers({
           )}
         </p>
       ) : (
-        sortedMembers.map((member) => {
-          const profile = profiles[member.did];
-          const displayName = profile?.displayName?.trim() || "Team member";
-          const councilChecked = dataCouncilSelected.has(member.did);
-          return (
-            <MemberRow
-              key={member.did}
-              member={member}
-              profile={profile}
-              canRemove={canAddRemove || Boolean(currentUserDid && member.did === currentUserDid)}
-              canSetRoles={canSetRoles}
-              isPending={isPending}
-              dataCouncil={canUseDataCouncil ? {
-                checked: councilChecked,
-                disabled: isPending || !dataCouncilLoaded || !dataCouncilCanWrite,
-                pending: dataCouncilSavingDid === member.did,
-                label: dataCouncilT("title"),
-                addLabel: dataCouncilT("addLabel"),
-                addAria: dataCouncilT("addAria", { name: displayName }),
-                removeAria: dataCouncilT("removeAria", { name: displayName }),
-                onToggle: toggleDataCouncil,
-              } : undefined}
-              onRoleChange={updateRole}
-              onRemove={remove}
+        <>
+          {sortedMembers.map((member) => {
+            const profile = profiles[member.did];
+            const displayName = profile?.displayName?.trim() || "Team member";
+            const councilChecked = dataCouncilSelected.has(member.did);
+            return (
+              <MemberRow
+                key={member.did}
+                member={member}
+                profile={profile}
+                canRemove={canAddRemove || Boolean(currentUserDid && member.did === currentUserDid)}
+                canSetRoles={canSetRoles}
+                isPending={isPending}
+                dataCouncil={canUseDataCouncil ? {
+                  checked: councilChecked,
+                  disabled: isPending || !dataCouncilLoaded || !dataCouncilCanWrite,
+                  pending: dataCouncilSavingDid === member.did,
+                  label: dataCouncilT("title"),
+                  addLabel: dataCouncilT("addLabel"),
+                  addAria: dataCouncilT("addAria", { name: displayName }),
+                  removeAria: dataCouncilT("removeAria", { name: displayName }),
+                  onToggle: toggleDataCouncil,
+                } : undefined}
+                onRoleChange={updateRole}
+                onRemove={remove}
+              />
+            );
+          })}
+          {sortedInvitations.map((invitation) => (
+            <PendingInvitationRow
+              key={invitation.id}
+              invitation={invitation}
+              roleLabel={invitationsT(invitation.role === "admin" ? "roleAdmin" : "roleMember")}
+              statusLabel={invitationsT("pendingStatus", { role: invitationsT(invitation.role === "admin" ? "roleAdmin" : "roleMember") })}
             />
-          );
-        })
+          ))}
+        </>
       )}
     </div>
   );

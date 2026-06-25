@@ -645,9 +645,15 @@ function AuthenticatedMenu({
   useEffect(() => {
     if (!open || invitationsStatus !== "idle") return;
     let active = true;
+    const controller = new AbortController();
+    const timeout = window.setTimeout(() => controller.abort(), 8000);
     setInvitationsStatus("loading");
-    fetch("/api/cgs/invitations", { cache: "no-store" })
-      .then((response) => response.json() as Promise<{ invitations?: MenuInvitation[] }>)
+    fetch("/api/cgs/invitations", { cache: "no-store", signal: controller.signal })
+      .then(async (response) => {
+        const data = await response.json().catch(() => ({})) as { invitations?: MenuInvitation[]; error?: string };
+        if (!response.ok || data.error) throw new Error(data.error || invitationT("loadError"));
+        return data;
+      })
       .then((data) => {
         if (!active) return;
         setInvitations(Array.isArray(data.invitations) ? data.invitations : []);
@@ -655,11 +661,14 @@ function AuthenticatedMenu({
       })
       .catch(() => {
         if (active) setInvitationsStatus("error");
-      });
+      })
+      .finally(() => window.clearTimeout(timeout));
     return () => {
       active = false;
+      controller.abort();
+      window.clearTimeout(timeout);
     };
-  }, [invitationsStatus, open]);
+  }, [invitationsStatus, invitationT, open]);
 
   const acceptInvitation = async (invitation: MenuInvitation) => {
     setAcceptingInvitationId(invitation.id);

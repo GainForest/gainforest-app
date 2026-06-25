@@ -1,4 +1,4 @@
-import { getCertifiedProfileCard } from "@/app/account/_lib/account-route";
+import { accountPath, getCertifiedProfileCard } from "@/app/account/_lib/account-route";
 import { getAuthBaseUrl } from "@/app/_lib/auth";
 import { fetchCgsMembersWithCookie, type CgsServerRole } from "@/app/_lib/cgs-server";
 import { renderGroupInvitationEmailTemplate, resolveGroupInvitationEmailLocale } from "@/lib/email/group-invitation-template";
@@ -168,8 +168,33 @@ export async function listPendingGroupInvitationsForEmail(email: string): Promis
   return normalizeInvitations(rows);
 }
 
+export async function listPendingGroupInvitationsForRepo(repo: string): Promise<GroupInvitation[]> {
+  const rows = await supabaseSelect<RawInvitation>(invitationQuery([
+    `repo=eq.${supabaseFilterValue(repo)}`,
+    "status=eq.pending",
+    `expires_at=gt.${supabaseFilterValue(new Date().toISOString())}`,
+    "order=created_at.desc",
+    "limit=100",
+  ].join("&")));
+  return normalizeInvitations(rows);
+}
+
+function publicBaseUrl(origin: string): string {
+  return (process.env.NEXT_PUBLIC_SITE_URL?.trim() || origin).replace(/\/$/, "");
+}
+
 function publicInvitationUrl(origin: string, invitationId: string): string {
-  return new URL(`/invite/${encodeURIComponent(invitationId)}`, origin).toString();
+  return new URL(`/invite/${encodeURIComponent(invitationId)}`, publicBaseUrl(origin)).toString();
+}
+
+async function inviterDisplay(invitation: GroupInvitation, origin: string): Promise<{ name: string; url: string | null }> {
+  const card = await getCertifiedProfileCard(invitation.inviterDid).catch(() => null);
+  const name = card?.displayName?.trim() || "Unknown User";
+  const identifier = invitation.inviterHandle?.trim() || card?.handle?.trim() || invitation.inviterDid;
+  return {
+    name,
+    url: identifier ? new URL(accountPath(identifier), publicBaseUrl(origin)).toString() : null,
+  };
 }
 
 async function groupDisplay(repo: string): Promise<{ name: string | null; handle: string | null; avatarUrl: string | null }> {
@@ -208,14 +233,16 @@ async function sendInvitationEmail({
   }
 
   const acceptUrl = publicInvitationUrl(origin, invitation.id);
+  const inviter = await inviterDisplay(invitation, origin);
   const rendered = renderGroupInvitationEmailTemplate({
     locale: resolveGroupInvitationEmailLocale({ acceptLanguage }),
     invitedEmail: invitation.email,
     organizationName: invitation.groupName,
-    inviterName: invitation.inviterHandle ?? invitation.inviterEmail,
+    inviterName: inviter.name,
+    inviterUrl: inviter.url,
     role: invitation.role,
     acceptUrl,
-    siteUrl: origin,
+    siteUrl: publicBaseUrl(origin),
   });
 
   const response = await fetch("https://api.resend.com/emails", {
@@ -239,7 +266,7 @@ async function sendInvitationEmail({
 
 async function addMemberViaAuthService(invitation: GroupInvitation, memberDid: string): Promise<void> {
   const internalKey = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim();
-  if (!internalKey) throw new GroupInvitationError("SUPABASE_SERVICE_ROLE_KEY is required to accept invitations.", 500);
+  if (!internalKey) throw new GroupInvitationError("We couldn’t add you to the organization right now. Please try again later.", 500);
 
   const response = await fetch(new URL("/api/internal/cgs/member-add", getAuthBaseUrl()), {
     method: "POST",
@@ -257,7 +284,7 @@ async function addMemberViaAuthService(invitation: GroupInvitation, memberDid: s
   });
   const data = await response.json().catch(() => null) as { message?: string; error?: string } | null;
   if (!response.ok || data?.error) {
-    throw new GroupInvitationError(data?.message ?? data?.error ?? "Could not add you to this organization.", response.status || 502);
+    throw new GroupInvitationError("We couldn’t add you to the organization right now. Please try again later.", response.status || 502);
   }
 }
 
@@ -330,11 +357,11 @@ export async function createGroupInvitation({
     });
     return normalizeInvitations(updated)[0] ?? invitation;
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Invitation email could not be sent.";
+    const internalMessage = error instanceof Error ? error.message : "Invitation email could not be sent.";
     await supabasePatch<RawInvitation>(`/${TABLE}?id=eq.${supabaseFilterValue(invitation.id)}`, {
-      last_email_error: message,
+      last_email_error: internalMessage,
     }).catch(() => undefined);
-    throw new GroupInvitationError(message, 502);
+    throw new GroupInvitationError("We couldn’t send the invitation email. Please try again in a few minutes.", 502);
   }
 }
 

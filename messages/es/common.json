@@ -463,8 +463,11 @@
       "adminHelp": "Los administradores pueden invitar miembros normales por correo o agregarlos por usuario. Pide a una persona propietaria que agregue otro administrador.",
       "locked": "Solo propietarios y administradores pueden agregar o quitar miembros.",
       "sent": "Invitación enviada a {email}.",
-      "sendError": "No se pudo enviar la invitación.",
-      "addError": "No se pudo agregar el miembro."
+      "sendError": "No pudimos enviar esa invitación. Inténtalo de nuevo.",
+      "addError": "No se pudo agregar el miembro.",
+      "roleMember": "miembro",
+      "roleAdmin": "administrador",
+      "pendingStatus": "Invitado como {role}. Esperando a que acepte."
     },
     "menu": {
       "title": "Invitaciones",

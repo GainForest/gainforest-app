@@ -463,8 +463,11 @@
       "adminHelp": "Administradores podem convidar membros comuns por email ou adicioná-los por usuário. Peça a um proprietário para adicionar outro administrador.",
       "locked": "Somente proprietários e administradores podem adicionar ou remover membros.",
       "sent": "Convite enviado para {email}.",
-      "sendError": "Não foi possível enviar o convite.",
-      "addError": "Não foi possível adicionar o membro."
+      "sendError": "Não conseguimos enviar esse convite. Tente novamente.",
+      "addError": "Não foi possível adicionar o membro.",
+      "roleMember": "membro",
+      "roleAdmin": "administrador",
+      "pendingStatus": "Convidado como {role}. Aguardando aceite."
     },
     "menu": {
       "title": "Convites",
