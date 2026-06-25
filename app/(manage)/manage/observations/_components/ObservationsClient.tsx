@@ -13,6 +13,7 @@ import {
   Layers2Icon,
   Loader2Icon,
   MapPinIcon,
+  PencilIcon,
   RotateCcwIcon,
   SparklesIcon,
   Trash2Icon,
@@ -23,6 +24,8 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useTranslations } from "next-intl";
 import { RecordExplorer } from "@/app/_components/RecordExplorer";
 import { TAINA_SIM } from "@/app/_lib/taina-sim";
+import type { ExplorerRecord, OccurrenceRecord } from "@/app/_lib/indexer";
+import { resolveBlobUrl } from "@/app/_lib/pds";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import Container from "@/components/ui/container";
@@ -39,7 +42,16 @@ import {
   createObservationOccurrence,
   createObservationPhoto,
   formatObservationMutationError,
+  setObservationPrimaryImage,
+  type ObservationBlobRef,
 } from "./observation-mutations";
+import { LocationPickerModal, LocationPickerModalId } from "./LocationPickerModal";
+import {
+  fetchDefaultObservationCenter,
+  isValidLocation,
+  type PickedLocation,
+} from "./default-location";
+import { clearDraft, loadDraft, saveDraft } from "./observation-draft-store";
 
 type InitialPage = NonNullable<ComponentProps<typeof RecordExplorer>["initialPage"]>;
 type Mode = "list" | "add";
@@ -79,6 +91,22 @@ type ObservationUploadItem = {
 
 type SharedOccurrenceKey = Exclude<keyof ObservationAnalysis, "subjectPart" | "caption" | "confidence">;
 
+// The slice of an upload item that is safe to persist to IndexedDB between
+// visits (the File blob is structured-cloneable). Transient fields — preview
+// object URL, progress, uploaded URI — are rebuilt on restore.
+type DraftItemStatus = "analyzing" | "ready" | "error" | "uploadError";
+type DraftItem = {
+  id: string;
+  file: File;
+  originalSize: number;
+  compressed: boolean;
+  groupId: string;
+  selected: boolean;
+  status: DraftItemStatus;
+  error: string | null;
+  analysis: ObservationAnalysis;
+};
+
 const TAINA_BOT_URL = "https://t.me/The" + "Tain" + "aBot";
 const QUERY_STATE_OPTIONS = { history: "replace", scroll: false, shallow: true } as const;
 // Shared column template so the table header and each row line up. Columns are
@@ -88,6 +116,10 @@ const QUERY_STATE_OPTIONS = { history: "replace", scroll: false, shallow: true }
 const ROW_GRID =
   "grid items-center gap-x-3 grid-cols-[1.5rem_2.5rem_minmax(0,1fr)_6.5rem] md:grid-cols-[1.5rem_2.5rem_minmax(0,1.7fr)_6.5rem_minmax(0,1.15fr)_6.5rem] lg:grid-cols-[1.5rem_2.5rem_minmax(0,1.5fr)_6.5rem_minmax(0,1fr)_5.5rem_minmax(0,0.85fr)_6.5rem] xl:grid-cols-[1.5rem_2.5rem_minmax(0,1.45fr)_6.5rem_minmax(0,1fr)_5.5rem_minmax(0,0.85fr)_5.5rem_6.5rem]";
 const MAX_IMAGE_BYTES = 4 * 1024 * 1024;
+// Hard ceiling on how many images one add session can hold, to keep the browser
+// (and the per-photo PDS writes) from being overwhelmed.
+const MAX_IMAGES = 100;
+const UNIDENTIFIED_NAME = "Unidentified organism";
 // The analyze route already retries Gemini internally; this is a thin extra
 // layer so a flaky client network connection also recovers on its own.
 const ANALYZE_CLIENT_ATTEMPTS = 3;
@@ -373,9 +405,116 @@ function observationGroups(items: ObservationUploadItem[]): ObservationGroup[] {
   });
 }
 
+/** Normalized identity for auto-grouping: a confident, named identification.
+ *  Empty for blanks or the "Unidentified organism" placeholder so unknowns
+ *  never collapse into one another. */
+function speciesGroupKey(analysis: ObservationAnalysis): string {
+  const name = analysis.scientificName.trim().toLowerCase();
+  if (!name || name === UNIDENTIFIED_NAME.toLowerCase()) return "";
+  return name;
+}
+
+function refToCid(ref: unknown): string | null {
+  if (typeof ref === "string") return ref || null;
+  if (ref && typeof ref === "object" && "$link" in (ref as Record<string, unknown>)) {
+    const link = (ref as Record<string, unknown>).$link;
+    return typeof link === "string" ? link : null;
+  }
+  return null;
+}
+
+/**
+ * Build a placeholder explorer record for a just-uploaded observation so it shows
+ * in the listing immediately, before the indexer has caught up. Resolves the PDS
+ * blob URL up front (the in-memory object URL is revoked when the add panel
+ * unmounts). Shares the indexer's `${did}-${rkey}` id so the indexed copy dedupes
+ * cleanly once it lands.
+ */
+async function buildOptimisticOccurrence(input: {
+  did: string;
+  uri: string;
+  rkey: string;
+  analysis: ObservationAnalysis;
+  blobRef: ObservationBlobRef | null;
+  isoTimestamp: string;
+}): Promise<OccurrenceRecord> {
+  const { did, uri, rkey, analysis } = input;
+  const lat = Number.parseFloat(analysis.decimalLatitude);
+  const lon = Number.parseFloat(analysis.decimalLongitude);
+  const cid = refToCid(input.blobRef?.ref);
+  const imageUrl = cid ? await resolveBlobUrl(did, cid).catch(() => null) : null;
+  return {
+    kind: "occurrence",
+    id: `${did}-${rkey}`,
+    did,
+    rkey,
+    cid: null,
+    atUri: uri,
+    scientificName: analysis.scientificName.trim() || null,
+    vernacularName: analysis.vernacularName.trim() || null,
+    kingdom: analysis.kingdom.trim() || null,
+    family: null,
+    genus: null,
+    basisOfRecord: "MachineObservation",
+    recordedBy: analysis.recordedBy.trim() || null,
+    individualCount: null,
+    country: analysis.country.trim() || null,
+    countryCode: null,
+    stateProvince: null,
+    locality: analysis.locality.trim() || null,
+    lat: Number.isFinite(lat) ? lat : null,
+    lon: Number.isFinite(lon) ? lon : null,
+    eventDate: analysis.eventDate.trim() || null,
+    habitat: analysis.habitat.trim() || null,
+    siteRef: null,
+    datasetRef: null,
+    datasetName: null,
+    dynamicProperties: null,
+    establishmentMeans: null,
+    createdAt: input.isoTimestamp,
+    creatorName: null,
+    creatorAvatarRef: null,
+    remarks: analysis.occurrenceRemarks.trim() || null,
+    imageUrl,
+    imageRef: cid,
+    audioRef: null,
+    audioUrl: null,
+    media: ["image"],
+  };
+}
+
 function sharedOccurrencePatch(patch: Partial<ObservationAnalysis>): Partial<ObservationAnalysis> {
   const { subjectPart: _subjectPart, caption: _caption, confidence: _confidence, ...shared } = patch;
   return shared;
+}
+
+/**
+ * After a photo is analyzed, merge it into an existing observation that shares
+ * the same confident identification. Only auto-groups a still-solo photo into the
+ * first matching group, so it never overrides manual grouping or pulls photos out
+ * of an existing group. Returns the items unchanged when there is no match.
+ */
+function autoGroupByIdentification(items: ObservationUploadItem[], analyzedId: string): ObservationUploadItem[] {
+  const me = items.find((item) => item.id === analyzedId);
+  if (!me) return items;
+  const key = speciesGroupKey(me.analysis);
+  if (!key) return items;
+  // Leave it alone if the user already grouped this photo with others.
+  if (items.filter((item) => item.groupId === me.groupId).length > 1) return items;
+  const match = items.find(
+    (item) =>
+      item.id !== me.id &&
+      item.groupId !== me.groupId &&
+      item.status !== "uploading" &&
+      item.status !== "uploaded" &&
+      speciesGroupKey(item.analysis) === key,
+  );
+  if (!match) return items;
+  const targetItems = items.filter((item) => item.groupId === match.groupId);
+  const shared = sharedOccurrenceAnalysis(occurrenceAnalysisForUpload([...targetItems, me]));
+  return items.map((item) =>
+    item.id === me.id ? { ...item, groupId: match.groupId, analysis: { ...item.analysis, ...shared } } : item,
+  );
 }
 
 function sharedOccurrenceAnalysis(analysis: ObservationAnalysis): Partial<ObservationAnalysis> {
@@ -420,6 +559,9 @@ export function ObservationsClient({ target, initialPage }: { target: ManageTarg
     "mode",
     parseAsStringEnum<Mode>(["list", "add"]).withDefault("list").withOptions(QUERY_STATE_OPTIONS),
   );
+  // Observations created in this session, kept so the list shows them on return
+  // even before the indexer has caught up. Newest first; deduped by id.
+  const [freshRecords, setFreshRecords] = useState<ExplorerRecord[]>([]);
   const createPermission = canCreateRecord(target);
 
   useEffect(() => {
@@ -432,6 +574,12 @@ export function ObservationsClient({ target, initialPage }: { target: ManageTarg
       <ObservationBulkAddPanel
         target={target}
         disabledReason={createPermission.reason}
+        onUploaded={(records) =>
+          setFreshRecords((prev) => {
+            const seen = new Set(records.map((record) => record.id));
+            return [...records, ...prev.filter((record) => !seen.has(record.id))];
+          })
+        }
         onBack={() => {
           void setMode("list").then(() => router.refresh());
         }}
@@ -497,6 +645,7 @@ export function ObservationsClient({ target, initialPage }: { target: ManageTarg
           ownerDid={target.did}
           showHero={false}
           initialPage={initialPage}
+          extraInitialRecords={freshRecords}
           defaultOccurrenceMedia="all"
           leadingCard={<AddObservationTile target={target} disabledReason={createPermission.reason} />}
           emptyState={<ObservationEmptyState target={target} disabledReason={createPermission.reason} />}
@@ -567,11 +716,14 @@ function ObservationEmptyState({ target, disabledReason }: { target: ManageTarge
 }
 
 function ObservationBulkAddPanel({
+  target,
   disabledReason,
+  onUploaded,
   onBack,
 }: {
   target: ManageTarget;
   disabledReason?: string | null;
+  onUploaded: (records: OccurrenceRecord[]) => void;
   onBack: () => void;
 }) {
   const t = useTranslations("upload.observations");
@@ -583,20 +735,167 @@ function ObservationBulkAddPanel({
   const [isBulkUploading, setIsBulkUploading] = useState(false);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  // The mandatory observation location chosen before any image can be added.
+  const [chosenLocation, setChosenLocation] = useState<PickedLocation | null>(null);
+  // Best-effort starting point for the picker (default site → any site).
+  const [defaultCenter, setDefaultCenter] = useState<PickedLocation | null>(null);
+  // True once we have a draft restored from a previous visit (shows the notice).
+  const [draftRestored, setDraftRestored] = useState(false);
 
   const itemsRef = useRef<ObservationUploadItem[]>([]);
+  const chosenLocationRef = useRef<PickedLocation | null>(null);
+  // Gate persistence until the initial draft load has run, so the empty initial
+  // state never clobbers a saved draft before it is restored.
+  const draftLoadedRef = useRef(false);
   // Counts enter/leave events so nested children don't flicker the drop overlay.
   const dragDepth = useRef(0);
+  const hasLocation = isValidLocation(chosenLocation);
 
   useEffect(() => {
     itemsRef.current = items;
   }, [items]);
 
   useEffect(() => {
+    chosenLocationRef.current = chosenLocation;
+  }, [chosenLocation]);
+
+  // Restore any in-progress draft for this target once, on mount.
+  useEffect(() => {
+    let cancelled = false;
+    void loadDraft<DraftItem>(target.did)
+      .then((draft) => {
+        if (cancelled) {
+          draftLoadedRef.current = true;
+          return;
+        }
+        if (draft && draft.items.length > 0) {
+          const restored: ObservationUploadItem[] = draft.items.map((stored) => ({
+            ...stored,
+            previewUrl: URL.createObjectURL(stored.file),
+            progress: 0,
+            uploadedUri: null,
+          }));
+          setItems(restored);
+          if (isValidLocation(draft.chosenLocation)) setChosenLocation(draft.chosenLocation);
+          setDraftRestored(true);
+          // Resume any analysis that was interrupted mid-flight.
+          for (const item of restored) if (item.status === "analyzing") void analyzeItem(item);
+        }
+        draftLoadedRef.current = true;
+      })
+      .catch(() => {
+        draftLoadedRef.current = true;
+      });
+    return () => {
+      cancelled = true;
+    };
+    // Restore is intentionally a once-per-mount effect.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [target.did]);
+
+  // Persist the draft (debounced) whenever the reviewable items or chosen
+  // location change. Uploaded items are dropped; an empty draft is cleared.
+  useEffect(() => {
+    if (!draftLoadedRef.current) return;
+    const timer = window.setTimeout(() => {
+      const persistItems: DraftItem[] = items
+        .filter((item) => item.status !== "uploaded")
+        .map((item) => ({
+          id: item.id,
+          file: item.file,
+          originalSize: item.originalSize,
+          compressed: item.compressed,
+          groupId: item.groupId,
+          selected: item.selected,
+          status: item.status === "uploading" || item.status === "uploaded" ? "ready" : item.status,
+          error: item.error,
+          analysis: item.analysis,
+        }));
+      if (persistItems.length === 0) {
+        void clearDraft(target.did);
+      } else {
+        void saveDraft<DraftItem>({
+          did: target.did,
+          chosenLocation,
+          items: persistItems,
+          updatedAt: Date.now(),
+        });
+      }
+    }, 600);
+    return () => window.clearTimeout(timer);
+  }, [items, chosenLocation, target.did]);
+
+  function discardDraft() {
+    setItems((current) => {
+      for (const item of current) URL.revokeObjectURL(item.previewUrl);
+      return [];
+    });
+    setExpandedId(null);
+    setDraftRestored(false);
+    setBulkError(null);
+    void clearDraft(target.did);
+  }
+
+  // Seed the picker's default centre from the owner's default site once.
+  useEffect(() => {
+    const controller = new AbortController();
+    void fetchDefaultObservationCenter(target.did, controller.signal)
+      .then((center) => {
+        if (center) setDefaultCenter(center);
+      })
+      .catch(() => {});
+    return () => controller.abort();
+  }, [target.did]);
+
+  useEffect(() => {
     return () => {
       for (const item of itemsRef.current) URL.revokeObjectURL(item.previewUrl);
     };
   }, []);
+
+  function openLocationPicker(opts: { initial?: PickedLocation | null; onSelect: (location: PickedLocation) => void }) {
+    modal.pushModal(
+      {
+        id: LocationPickerModalId,
+        dialogWidth: "max-w-2xl",
+        content: (
+          <LocationPickerModal
+            initial={opts.initial ?? null}
+            defaultCenter={defaultCenter}
+            onSelect={opts.onSelect}
+          />
+        ),
+      },
+      true,
+    );
+    void modal.show();
+  }
+
+  function chooseObservationLocation() {
+    openLocationPicker({
+      initial: chosenLocation,
+      onSelect: (location) => {
+        setChosenLocation(location);
+        setBulkError(null);
+      },
+    });
+  }
+
+  function changeItemLocation(itemId: string) {
+    const item = itemsRef.current.find((candidate) => candidate.id === itemId);
+    const lat = Number.parseFloat(item?.analysis.decimalLatitude ?? "");
+    const lng = Number.parseFloat(item?.analysis.decimalLongitude ?? "");
+    const initial = Number.isFinite(lat) && Number.isFinite(lng) ? { lat, lng } : chosenLocation;
+    openLocationPicker({
+      initial,
+      onSelect: (location) => {
+        updateAnalysis(itemId, {
+          decimalLatitude: String(location.lat),
+          decimalLongitude: String(location.lng),
+        });
+      },
+    });
+  }
 
   const readySelectedItems = items.filter((item) => item.selected && itemCanUpload(item));
   const editableItems = items.filter((item) => item.status !== "uploading" && item.status !== "uploaded");
@@ -637,6 +936,10 @@ function ObservationBulkAddPanel({
     dragDepth.current = 0;
     setIsDragging(false);
     if (!dragHasFiles(event)) return;
+    if (!hasLocation) {
+      setBulkError(t("location.locationRequired"));
+      return;
+    }
     void addFiles(event.dataTransfer.files);
   }
 
@@ -671,17 +974,20 @@ function ObservationBulkAddPanel({
           return;
         }
 
-        setItems((current) => current.map((candidate) =>
-          candidate.id === item.id
-            ? {
-                ...candidate,
-                status: "ready",
-                analysis: mergeAnalysisWithDefaults(normalizeAnalysis(data.analysis, item.file), candidate.analysis),
-                error: null,
-                selected: candidate.selected,
-              }
-            : candidate,
-        ));
+        setItems((current) => {
+          const updated = current.map((candidate) =>
+            candidate.id === item.id
+              ? {
+                  ...candidate,
+                  status: "ready" as const,
+                  analysis: mergeAnalysisWithDefaults(normalizeAnalysis(data.analysis, item.file), candidate.analysis),
+                  error: null,
+                  selected: candidate.selected,
+                }
+              : candidate,
+          );
+          return autoGroupByIdentification(updated, item.id);
+        });
         return;
       } catch {
         // Thrown fetch == network/connection blip; retry a couple of times.
@@ -701,19 +1007,37 @@ function ObservationBulkAddPanel({
   }
 
   async function addFiles(fileList: FileList | null) {
-    const files = Array.from(fileList ?? []).filter((file) => file.type.startsWith("image/"));
+    // A location must be chosen first; every photo without its own GPS inherits it.
+    const location = chosenLocationRef.current;
+    if (!isValidLocation(location)) {
+      setBulkError(t("location.locationRequired"));
+      return;
+    }
+    const imageFiles = Array.from(fileList ?? []).filter((file) => file.type.startsWith("image/"));
+    if (imageFiles.length === 0) return;
+
+    // Cap the total at MAX_IMAGES; tell the user how many were dropped.
+    const remainingSlots = Math.max(0, MAX_IMAGES - itemsRef.current.length);
+    const files = imageFiles.slice(0, remainingSlots);
+    const ignored = imageFiles.length - files.length;
+    if (ignored > 0) setBulkError(t("tooManyImages", { max: MAX_IMAGES, ignored }));
+    else setBulkError(null);
     if (files.length === 0) return;
+
     setIsPreparing(true);
     try {
-      const batchGroupId = crypto.randomUUID();
+      const fallbackLat = String(location.lat);
+      const fallbackLng = String(location.lng);
       const nextItems = await Promise.all(files.map(async (sourceFile) => {
+        // Each photo starts as its own observation (groupId === id); identical
+        // identifications are auto-grouped after analysis. No batch grouping.
         const id = `${sourceFile.name}-${sourceFile.size}-${sourceFile.lastModified}-${crypto.randomUUID()}`;
         const metadata = await imageMetadata(sourceFile);
         const analysis = {
           ...EMPTY_ANALYSIS,
           eventDate: metadata.eventDate || dateFromFile(sourceFile),
-          decimalLatitude: metadata.decimalLatitude || "",
-          decimalLongitude: metadata.decimalLongitude || "",
+          decimalLatitude: metadata.decimalLatitude || fallbackLat,
+          decimalLongitude: metadata.decimalLongitude || fallbackLng,
           caption: cleanFileName(sourceFile.name),
         };
         try {
@@ -724,7 +1048,7 @@ function ObservationBulkAddPanel({
             previewUrl: URL.createObjectURL(prepared.file),
             originalSize: prepared.originalSize,
             compressed: prepared.compressed,
-            groupId: batchGroupId,
+            groupId: id,
             selected: true,
             status: "analyzing" as const,
             progress: 0,
@@ -739,7 +1063,7 @@ function ObservationBulkAddPanel({
             previewUrl: URL.createObjectURL(sourceFile),
             originalSize: sourceFile.size,
             compressed: false,
-            groupId: batchGroupId,
+            groupId: id,
             selected: true,
             status: "error" as const,
             progress: 0,
@@ -847,23 +1171,26 @@ function ObservationBulkAddPanel({
     setBulkError(null);
   }
 
-  async function uploadGroup(groupId: string, itemIds?: Set<string>) {
+  async function uploadGroup(groupId: string, itemIds?: Set<string>): Promise<OccurrenceRecord | null> {
     const snapshot = itemsRef.current;
     const groupItems = snapshot.filter((item) => item.groupId === groupId && (!itemIds || itemIds.has(item.id)));
     const uploadItems = groupItems.filter(itemCanUpload);
     if (uploadItems.length === 0 || disabledReason) {
       if (disabledReason) setBulkError(disabledReason);
-      return;
+      return null;
     }
 
     const uploadIds = new Set(uploadItems.map((item) => item.id));
+    const data = occurrenceAnalysisForUpload(uploadItems);
     setBulkError(null);
     try {
       setItems((current) => current.map((candidate) => uploadIds.has(candidate.id) ? { ...candidate, status: "uploading", progress: 15, error: null } : candidate));
       const existingOccurrenceUri = snapshot.find((item) => item.groupId === groupId && item.uploadedUri)?.uploadedUri ?? null;
       let occurrenceUri = existingOccurrenceUri;
+      // Only fresh occurrences carry the record/cid we need to set imageEvidence
+      // and to build an optimistic listing entry.
+      let occurrenceContext: { rkey: string; cid: string; record: Record<string, unknown> } | null = null;
       if (!occurrenceUri) {
-        const data = occurrenceAnalysisForUpload(uploadItems);
         const occurrence = await createObservationOccurrence({
           basisOfRecord: "MachineObservation",
           scientificName: data.scientificName.trim(),
@@ -880,23 +1207,50 @@ function ObservationBulkAddPanel({
           associatedMedia: uploadItems.map((item) => item.file.name).join(", "),
         });
         occurrenceUri = occurrence.uri;
+        occurrenceContext = { rkey: occurrence.rkey, cid: occurrence.cid, record: occurrence.record ?? {} };
       }
       if (!occurrenceUri) throw new Error(t("analysisFailed"));
 
+      let primaryBlobRef: ObservationBlobRef | null = null;
       for (const item of uploadItems) {
         setItems((current) => current.map((candidate) => candidate.id === item.id ? { ...candidate, progress: 60 } : candidate));
-        await createObservationPhoto({
+        const photo = await createObservationPhoto({
           imageFile: item.file,
           occurrenceRef: occurrenceUri,
           subjectPart: item.analysis.subjectPart.trim() || "wholeOrganism",
           caption: item.analysis.caption.trim() || undefined,
         });
+        if (!primaryBlobRef && photo.blobRef) primaryBlobRef = photo.blobRef;
         setItems((current) => current.map((candidate) =>
           candidate.id === item.id
             ? { ...candidate, status: "uploaded", progress: 100, selected: false, uploadedUri: occurrenceUri, error: null }
             : candidate,
         ));
       }
+
+      // The explorer surfaces a photo through the occurrence's own imageEvidence,
+      // so copy the first uploaded blob there. Non-fatal: the photos are already
+      // saved as ac.multimedia records either way.
+      if (occurrenceContext && primaryBlobRef) {
+        await setObservationPrimaryImage({
+          rkey: occurrenceContext.rkey,
+          record: occurrenceContext.record,
+          swapCid: occurrenceContext.cid,
+          blobRef: primaryBlobRef,
+        }).catch(() => {});
+      }
+
+      if (occurrenceContext) {
+        return await buildOptimisticOccurrence({
+          did: target.did,
+          uri: occurrenceUri,
+          rkey: occurrenceContext.rkey,
+          analysis: data,
+          blobRef: primaryBlobRef,
+          isoTimestamp: new Date().toISOString(),
+        }).catch(() => null);
+      }
+      return null;
     } catch (error) {
       const message = formatObservationMutationError(error);
       setItems((current) => current.map((candidate) =>
@@ -904,6 +1258,7 @@ function ObservationBulkAddPanel({
           ? { ...candidate, status: "uploadError", progress: 0, error: message }
           : candidate,
       ));
+      return null;
     }
   }
 
@@ -916,8 +1271,19 @@ function ObservationBulkAddPanel({
     try {
       const selectedIds = new Set(readySelectedItems.map((item) => item.id));
       const groupIds = Array.from(new Set(readySelectedItems.map((item) => item.groupId)));
+      const created: OccurrenceRecord[] = [];
       for (const groupId of groupIds) {
-        await uploadGroup(groupId, selectedIds);
+        const record = await uploadGroup(groupId, selectedIds);
+        if (record) created.push(record);
+      }
+      // Surface the new observations in the list right away (the indexer lags).
+      if (created.length > 0) onUploaded([...created].reverse());
+      // Mirror the audio flow: once everything is uploaded, clear the saved draft
+      // and return to the list.
+      const remaining = itemsRef.current;
+      if (remaining.length > 0 && remaining.every((item) => item.status === "uploaded")) {
+        void clearDraft(target.did);
+        onBack();
       }
     } finally {
       setIsBulkUploading(false);
@@ -946,7 +1312,12 @@ function ObservationBulkAddPanel({
             </div>
             <div className="flex shrink-0 gap-2">
               <input ref={fileInputRef} type="file" accept="image/*" multiple onChange={onFilesChanged} className="sr-only" />
-              <Button variant="outline" onClick={() => fileInputRef.current?.click()} disabled={isPreparing}>
+              <Button
+                variant="outline"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isPreparing || !hasLocation}
+                title={!hasLocation ? t("location.locationRequired") : undefined}
+              >
                 {isPreparing ? <Loader2Icon className="size-4 animate-spin" /> : <ImagePlusIcon className="size-4" />}
                 {isPreparing ? t("preparingImages") : items.length > 0 ? t("chooseMoreImages") : t("chooseImages")}
               </Button>
@@ -961,7 +1332,29 @@ function ObservationBulkAddPanel({
           </div>
         ) : null}
 
-        {items.length === 0 ? (
+        {draftRestored && items.length > 0 ? (
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-primary/20 bg-primary/[0.05] px-4 py-3 text-sm">
+            <span className="flex items-center gap-2 text-foreground">
+              <RotateCcwIcon className="size-4 shrink-0 text-primary" /> {t("draftRestored")}
+            </span>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={discardDraft}
+              className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+            >
+              <Trash2Icon className="size-4" /> {t("discardDraft")}
+            </Button>
+          </div>
+        ) : null}
+
+        {hasLocation ? (
+          <LocationBar location={chosenLocation!} onChange={chooseObservationLocation} />
+        ) : null}
+
+        {!hasLocation ? (
+          <LocationStep onChoose={chooseObservationLocation} />
+        ) : items.length === 0 ? (
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
@@ -1028,6 +1421,7 @@ function ObservationBulkAddPanel({
                       onRetry={(id) => retryAnalysis(id)}
                       onSeparateItem={(id) => separateItemFromGroup(id, group.id)}
                       onAddItem={addItemToGroup}
+                      onChangeLocation={changeItemLocation}
                     />
                   ))}
                 </div>
@@ -1055,6 +1449,70 @@ function ObservationBulkAddPanel({
           </motion.div>
         ) : null}
       </AnimatePresence>
+    </div>
+  );
+}
+
+function LocationStep({ onChoose }: { onChoose: () => void }) {
+  const t = useTranslations("upload.observations.location");
+  return (
+    <div className="flex min-h-[280px] flex-col items-center justify-center rounded-3xl border border-dashed border-primary/30 bg-gradient-to-b from-primary/[0.06] to-transparent p-8 text-center">
+      <span className="mb-5 grid size-16 place-items-center rounded-2xl bg-primary/10 text-primary ring-1 ring-primary/15">
+        <MapPinIcon className="size-7" />
+      </span>
+      <h2 className="font-instrument text-2xl font-medium italic tracking-[-0.02em] text-foreground">{t("stepTitle")}</h2>
+      <p className="mt-2 max-w-md text-sm leading-6 text-muted-foreground">{t("stepBody")}</p>
+      <Button className="mt-5" onClick={onChoose}>
+        <MapPinIcon className="size-4" /> {t("setLocation")}
+      </Button>
+    </div>
+  );
+}
+
+function LocationBar({ location, onChange }: { location: PickedLocation; onChange: () => void }) {
+  const t = useTranslations("upload.observations.location");
+  return (
+    <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-primary/15 bg-primary/[0.04] px-4 py-3">
+      <div className="flex min-w-0 items-center gap-2.5 text-sm">
+        <span className="grid size-9 shrink-0 place-items-center rounded-full bg-primary/10 text-primary">
+          <MapPinIcon className="size-4" />
+        </span>
+        <span className="truncate text-foreground tabular-nums">
+          {t("locationReady", { lat: location.lat, lng: location.lng })}
+        </span>
+      </div>
+      <Button variant="outline" size="sm" onClick={onChange}>
+        <PencilIcon className="size-4" /> {t("changeLocation")}
+      </Button>
+    </div>
+  );
+}
+
+function ObservationLocationRow({
+  analysis,
+  disabled,
+  onChange,
+}: {
+  analysis: ObservationAnalysis;
+  disabled: boolean;
+  onChange: () => void;
+}) {
+  const t = useTranslations("upload.observations.location");
+  const lat = analysis.decimalLatitude.trim();
+  const lng = analysis.decimalLongitude.trim();
+  const hasCoords = Boolean(lat && lng);
+  return (
+    <div className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border/70 bg-background px-4 py-3">
+      <div className="flex min-w-0 items-center gap-2.5 text-sm">
+        <MapPinIcon className={`size-4 shrink-0 ${hasCoords ? "text-primary" : "text-muted-foreground/50"}`} />
+        <span className="min-w-0">
+          <span className="block text-xs font-medium text-muted-foreground">{t("itemLocation")}</span>
+          <span className="block truncate text-foreground tabular-nums">{hasCoords ? `${lat}, ${lng}` : "—"}</span>
+        </span>
+      </div>
+      <Button variant="outline" size="sm" onClick={onChange} disabled={disabled}>
+        <MapPinIcon className="size-4" /> {t("editItemLocation")}
+      </Button>
     </div>
   );
 }
@@ -1101,6 +1559,7 @@ function ObservationListItem({
   onRetry,
   onSeparateItem,
   onAddItem,
+  onChangeLocation,
 }: {
   group: ObservationGroup;
   groups: ObservationGroup[];
@@ -1112,6 +1571,7 @@ function ObservationListItem({
   onRetry: (id: string) => void;
   onSeparateItem: (id: string) => void;
   onAddItem: (groupId: string, itemId: string) => void;
+  onChangeLocation: (id: string) => void;
 }) {
   const t = useTranslations("upload.observations");
   const [item] = group.items;
@@ -1249,6 +1709,13 @@ function ObservationListItem({
                 ) : null}
               </div>
               <GroupMediaEditor group={group} groups={groups} onSeparateItem={onSeparateItem} onAddItem={onAddItem} />
+              {item ? (
+                <ObservationLocationRow
+                  analysis={analysis}
+                  disabled={item.status === "uploading" || item.status === "uploaded"}
+                  onChange={() => onChangeLocation(item.id)}
+                />
+              ) : null}
               {item ? <ObservationAnalysisFields item={item} onChange={(patch) => onAnalysisChange(item.id, patch)} /> : null}
             </div>
           </motion.div>
