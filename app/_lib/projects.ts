@@ -23,7 +23,7 @@ import { GLOBE_URL as GLOBE_ORIGIN } from "./urls";
 
 const INDEXER_URL =
   process.env.NEXT_PUBLIC_INDEXER_URL?.trim() ||
-  "https://hi.gainforest.app/graphql";
+  "https://dev.hi.gainforest.app/graphql";
 
 export type ProjectPin = {
   did: string;

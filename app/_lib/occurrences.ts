@@ -24,7 +24,7 @@
 
 const INDEXER_URL =
   process.env.NEXT_PUBLIC_INDEXER_URL?.trim() ||
-  "https://hi.gainforest.app/graphql";
+  "https://dev.hi.gainforest.app/graphql";
 
 /** Revalidate the count every 15 minutes; matches bumicerts.ts. */
 const REVALIDATE_SECONDS = 60 * 15;
