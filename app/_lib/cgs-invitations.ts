@@ -227,7 +227,7 @@ async function sendInvitationEmail({
   acceptLanguage: string | null;
 }): Promise<void> {
   const apiKey = process.env.RESEND_API_KEY?.trim();
-  const from = process.env.INVITATION_FROM_EMAIL?.trim() || process.env.FROM_EMAIL?.trim() || "GainForest <noreply@gainforest.id>";
+  const from = process.env.EMAIL_FROM?.trim() || "GainForest <noreply@gainforest.id>";
   if (!apiKey) {
     throw new Error("RESEND_API_KEY is required to send invitations.");
   }
