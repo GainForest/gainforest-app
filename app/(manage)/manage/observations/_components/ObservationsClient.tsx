@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Suspense, useEffect, useRef, useState, type ChangeEvent, type ComponentProps } from "react";
+import { Suspense, useEffect, useRef, useState, type ChangeEvent, type ComponentProps, type DragEvent } from "react";
 import { parseAsStringEnum, useQueryState } from "nuqs";
 import {
   AlertTriangleIcon,
@@ -14,6 +14,7 @@ import {
   Loader2Icon,
   MapPinIcon,
   PencilIcon,
+  RotateCcwIcon,
   SparklesIcon,
   UngroupIcon,
   UploadCloudIcon,
@@ -86,6 +87,10 @@ const QUERY_STATE_OPTIONS = { history: "replace", scroll: false, shallow: true }
 const ROW_GRID =
   "grid items-center gap-x-3 grid-cols-[1.5rem_2.5rem_minmax(0,1fr)_8.5rem] md:grid-cols-[1.5rem_2.5rem_minmax(0,2fr)_6.5rem_minmax(0,1.3fr)_8.5rem]";
 const MAX_IMAGE_BYTES = 4 * 1024 * 1024;
+// The analyze route already retries Gemini internally; this is a thin extra
+// layer so a flaky client network connection also recovers on its own.
+const ANALYZE_CLIENT_ATTEMPTS = 3;
+const sleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
 const EMPTY_ANALYSIS: ObservationAnalysis = {
   scientificName: "",
   vernacularName: "",
@@ -520,8 +525,11 @@ function ObservationBulkAddPanel({
   const [isPreparing, setIsPreparing] = useState(false);
   const [isBulkUploading, setIsBulkUploading] = useState(false);
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
 
   const itemsRef = useRef<ObservationUploadItem[]>([]);
+  // Counts enter/leave events so nested children don't flicker the drop overlay.
+  const dragDepth = useRef(0);
 
   useEffect(() => {
     itemsRef.current = items;
@@ -540,33 +548,96 @@ function ObservationBulkAddPanel({
   const overallProgress = items.length > 0 ? Math.round((uploadedCount / items.length) * 100) : 0;
   const groupOptions = observationGroupOptions(items);
 
+  function dragHasFiles(event: DragEvent<HTMLDivElement>): boolean {
+    return Array.from(event.dataTransfer?.types ?? []).includes("Files");
+  }
+
+  function onDragEnter(event: DragEvent<HTMLDivElement>) {
+    if (!dragHasFiles(event)) return;
+    event.preventDefault();
+    dragDepth.current += 1;
+    setIsDragging(true);
+  }
+
+  function onDragOver(event: DragEvent<HTMLDivElement>) {
+    if (!dragHasFiles(event)) return;
+    event.preventDefault();
+    event.dataTransfer.dropEffect = "copy";
+  }
+
+  function onDragLeave(event: DragEvent<HTMLDivElement>) {
+    if (!dragHasFiles(event)) return;
+    event.preventDefault();
+    dragDepth.current = Math.max(0, dragDepth.current - 1);
+    if (dragDepth.current === 0) setIsDragging(false);
+  }
+
+  function onDrop(event: DragEvent<HTMLDivElement>) {
+    event.preventDefault();
+    dragDepth.current = 0;
+    setIsDragging(false);
+    if (!dragHasFiles(event)) return;
+    void addFiles(event.dataTransfer.files);
+  }
+
+  function markItemError(id: string, message: string) {
+    setItems((current) => current.map((candidate) =>
+      candidate.id === id ? { ...candidate, status: "error", error: message, selected: false } : candidate,
+    ));
+  }
+
   async function analyzeItem(item: ObservationUploadItem) {
-    try {
-      const formData = new FormData();
-      formData.set("image", item.file);
-      const response = await fetch("/api/manage/observations/analyze", {
-        method: "POST",
-        body: formData,
-      });
-      const data = (await response.json().catch(() => ({}))) as AnalyzeResponse;
-      if (!response.ok || data.error) throw new Error(analysisErrorMessage(data.error, t));
-      setItems((current) => current.map((candidate) =>
-        candidate.id === item.id
-          ? {
-              ...candidate,
-              status: "ready",
-              analysis: mergeAnalysisWithDefaults(normalizeAnalysis(data.analysis, item.file), candidate.analysis),
-              error: null,
-              selected: true,
-            }
-          : candidate,
-      ));
-    } catch (error) {
-      const message = error instanceof Error ? error.message : t("analysisFailed");
-      setItems((current) => current.map((candidate) =>
-        candidate.id === item.id ? { ...candidate, status: "error", error: message, selected: false } : candidate,
-      ));
+    setItems((current) => current.map((candidate) =>
+      candidate.id === item.id ? { ...candidate, status: "analyzing", error: null } : candidate,
+    ));
+
+    let lastMessage = t("analysisFailed");
+    for (let attempt = 0; attempt < ANALYZE_CLIENT_ATTEMPTS; attempt += 1) {
+      try {
+        const formData = new FormData();
+        formData.set("image", item.file);
+        const response = await fetch("/api/manage/observations/analyze", { method: "POST", body: formData });
+        const data = (await response.json().catch(() => ({}))) as AnalyzeResponse;
+
+        if (!response.ok || data.error) {
+          lastMessage = analysisErrorMessage(data.error, t);
+          // 429/5xx are transient — give it another go before surfacing an error.
+          const retryable = response.status === 429 || response.status >= 500;
+          if (retryable && attempt < ANALYZE_CLIENT_ATTEMPTS - 1) {
+            await sleep(700 * (attempt + 1));
+            continue;
+          }
+          markItemError(item.id, lastMessage);
+          return;
+        }
+
+        setItems((current) => current.map((candidate) =>
+          candidate.id === item.id
+            ? {
+                ...candidate,
+                status: "ready",
+                analysis: mergeAnalysisWithDefaults(normalizeAnalysis(data.analysis, item.file), candidate.analysis),
+                error: null,
+                selected: true,
+              }
+            : candidate,
+        ));
+        return;
+      } catch {
+        // Thrown fetch == network/connection blip; retry a couple of times.
+        lastMessage = t("analysisFailed");
+        if (attempt < ANALYZE_CLIENT_ATTEMPTS - 1) {
+          await sleep(700 * (attempt + 1));
+          continue;
+        }
+      }
     }
+    markItemError(item.id, lastMessage);
+  }
+
+  function retryAnalysis(id: string) {
+    const item = itemsRef.current.find((candidate) => candidate.id === id);
+    if (item) void analyzeItem(item);
   }
 
   async function addFiles(fileList: FileList | null) {
@@ -760,115 +831,139 @@ function ObservationBulkAddPanel({
   }
 
   return (
-    <Container className="space-y-6 pt-4 pb-12">
-      <div>
-        <Button variant="ghost" onClick={onBack} className="-ml-2 mb-3 text-muted-foreground hover:text-foreground">
-          <ChevronLeftIcon className="size-4" /> {t("backToObservations")}
-        </Button>
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-          <div className="max-w-2xl">
-            <h1 className="font-instrument text-2xl font-medium italic tracking-[-0.03em] text-foreground sm:text-3xl">
-              {t("bulkTitle")}
-            </h1>
-            <p className="mt-2 text-sm leading-6 text-muted-foreground">{t("bulkIntro")}</p>
-          </div>
-          <div className="flex shrink-0 gap-2">
-            <input ref={fileInputRef} type="file" accept="image/*" multiple onChange={onFilesChanged} className="sr-only" />
-            <Button variant="outline" onClick={() => fileInputRef.current?.click()} disabled={isPreparing}>
-              {isPreparing ? <Loader2Icon className="size-4 animate-spin" /> : <ImagePlusIcon className="size-4" />}
-              {isPreparing ? t("preparingImages") : items.length > 0 ? t("chooseMoreImages") : t("chooseImages")}
-            </Button>
-            {items.length > 0 ? (
-              <Button onClick={() => void uploadSelected()} disabled={isBulkUploading || readySelectedItems.length === 0 || Boolean(disabledReason)} title={disabledReason ?? undefined}>
-                {isBulkUploading ? <Loader2Icon className="size-4 animate-spin" /> : <UploadCloudIcon className="size-4" />}
-                {isBulkUploading ? t("uploadingSelected") : t("uploadSelected")}
+    <div
+      className="relative"
+      onDragEnter={onDragEnter}
+      onDragOver={onDragOver}
+      onDragLeave={onDragLeave}
+      onDrop={onDrop}
+    >
+      <Container className="space-y-6 pt-4 pb-12">
+        <div>
+          <Button variant="ghost" onClick={onBack} className="-ml-2 mb-3 text-muted-foreground hover:text-foreground">
+            <ChevronLeftIcon className="size-4" /> {t("backToObservations")}
+          </Button>
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+            <div className="max-w-2xl">
+              <h1 className="font-instrument text-2xl font-medium italic tracking-[-0.03em] text-foreground sm:text-3xl">
+                {t("bulkTitle")}
+              </h1>
+              <p className="mt-2 text-sm leading-6 text-muted-foreground">{t("bulkIntro")}</p>
+            </div>
+            <div className="flex shrink-0 gap-2">
+              <input ref={fileInputRef} type="file" accept="image/*" multiple onChange={onFilesChanged} className="sr-only" />
+              <Button variant="outline" onClick={() => fileInputRef.current?.click()} disabled={isPreparing}>
+                {isPreparing ? <Loader2Icon className="size-4 animate-spin" /> : <ImagePlusIcon className="size-4" />}
+                {isPreparing ? t("preparingImages") : items.length > 0 ? t("chooseMoreImages") : t("chooseImages")}
               </Button>
-            ) : null}
+              {items.length > 0 ? (
+                <Button onClick={() => void uploadSelected()} disabled={isBulkUploading || readySelectedItems.length === 0 || Boolean(disabledReason)} title={disabledReason ?? undefined}>
+                  {isBulkUploading ? <Loader2Icon className="size-4 animate-spin" /> : <UploadCloudIcon className="size-4" />}
+                  {isBulkUploading ? t("uploadingSelected") : t("uploadSelected")}
+                </Button>
+              ) : null}
+            </div>
           </div>
         </div>
-      </div>
 
-      {bulkError || disabledReason ? (
-        <div className="flex items-start gap-2.5 rounded-2xl border border-destructive/20 bg-destructive/5 p-4 text-sm text-destructive">
-          <AlertTriangleIcon className="mt-0.5 size-4 shrink-0" />
-          <span>{bulkError ?? disabledReason}</span>
-        </div>
-      ) : null}
+        {bulkError || disabledReason ? (
+          <div className="flex items-start gap-2.5 rounded-2xl border border-destructive/20 bg-destructive/5 p-4 text-sm text-destructive">
+            <AlertTriangleIcon className="mt-0.5 size-4 shrink-0" />
+            <span>{bulkError ?? disabledReason}</span>
+          </div>
+        ) : null}
 
-      {items.length === 0 ? (
-        <button
-          type="button"
-          onClick={() => fileInputRef.current?.click()}
-          className="group flex min-h-[340px] w-full flex-col items-center justify-center rounded-3xl border border-dashed border-primary/25 bg-gradient-to-b from-primary/[0.04] to-transparent p-8 text-center transition-colors hover:border-primary/40 hover:from-primary/[0.07]"
-        >
-          <span className="mb-5 grid size-16 place-items-center rounded-2xl bg-primary/10 text-primary ring-1 ring-primary/15 transition-transform duration-300 group-hover:scale-105">
-            <ImagePlusIcon className="size-7" />
-          </span>
-          <span className="font-instrument text-2xl font-medium italic tracking-[-0.02em]">{t("emptyUploadTitle")}</span>
-          <span className="mt-2 max-w-md text-sm leading-6 text-muted-foreground">{t("emptyUploadDescription")}</span>
-          <span className="mt-5 text-xs text-muted-foreground/80">{t("fileRequirements")}</span>
-        </button>
-      ) : (
-        <>
-          <div className="rounded-2xl border bg-card p-4 shadow-xs sm:p-5">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <div className="flex items-center gap-3">
-                <span className="grid size-10 shrink-0 place-items-center rounded-full bg-primary/10 text-primary">
-                  <UploadCloudIcon className="size-5" />
-                </span>
-                <div className="min-w-0">
-                  <p className="text-sm font-medium text-foreground">
-                    {t("uploadedCount", { uploaded: uploadedCount, total: items.length })}
-                  </p>
-                  <p className="text-xs text-muted-foreground">{t("fileRequirements")}</p>
+        {items.length === 0 ? (
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            className={`group flex min-h-[340px] w-full flex-col items-center justify-center rounded-3xl border border-dashed p-8 text-center transition-colors ${isDragging ? "border-primary/60 bg-primary/[0.08]" : "border-primary/25 bg-gradient-to-b from-primary/[0.04] to-transparent hover:border-primary/40 hover:from-primary/[0.07]"}`}
+          >
+            <span className="mb-5 grid size-16 place-items-center rounded-2xl bg-primary/10 text-primary ring-1 ring-primary/15 transition-transform duration-300 group-hover:scale-105">
+              <ImagePlusIcon className="size-7" />
+            </span>
+            <span className="font-instrument text-2xl font-medium italic tracking-[-0.02em]">{t("emptyUploadTitle")}</span>
+            <span className="mt-2 max-w-md text-sm leading-6 text-muted-foreground">{t("emptyUploadHint")}</span>
+            <span className="mt-5 text-xs text-muted-foreground/80">{t("fileRequirements")}</span>
+          </button>
+        ) : (
+          <>
+            <div className="rounded-2xl border bg-card p-4 shadow-xs sm:p-5">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex items-center gap-3">
+                  <span className="grid size-10 shrink-0 place-items-center rounded-full bg-primary/10 text-primary">
+                    <UploadCloudIcon className="size-5" />
+                  </span>
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-foreground">
+                      {t("uploadedCount", { uploaded: uploadedCount, total: items.length })}
+                    </p>
+                    <p className="text-xs text-muted-foreground">{t("selectedCount", { selected: readySelectedItems.length, total: uploadableCount })}</p>
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <Button variant="outline" size="sm" onClick={groupSelected} disabled={selectedEditableItems.length < 2}>
+                    <Layers2Icon className="size-4" /> {t("groupSelected")}
+                  </Button>
+                  <Button variant="ghost" size="sm" onClick={ungroupSelected} disabled={selectedEditableItems.length === 0}>
+                    <UngroupIcon className="size-4" /> {t("ungroupSelected")}
+                  </Button>
                 </div>
               </div>
-              <div className="flex flex-wrap gap-2">
-                <Button variant="outline" size="sm" onClick={groupSelected} disabled={selectedEditableItems.length < 2}>
-                  <Layers2Icon className="size-4" /> {t("groupSelected")}
-                </Button>
-                <Button variant="ghost" size="sm" onClick={ungroupSelected} disabled={selectedEditableItems.length === 0}>
-                  <UngroupIcon className="size-4" /> {t("ungroupSelected")}
-                </Button>
-              </div>
+              <ProgressBar value={overallProgress} label={t("progressLabel", { progress: overallProgress })} className="mt-4" />
             </div>
-            <ProgressBar value={overallProgress} label={t("progressLabel", { progress: overallProgress })} className="mt-4" />
-            <p className="mt-3 text-xs leading-5 text-muted-foreground">{t("groupingHelp")}</p>
-          </div>
 
-          <div className="space-y-2">
-            <div className="flex items-center justify-between px-1">
-              <h2 className="text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground">{t("listTitle")}</h2>
-              <span className="text-sm text-muted-foreground">{t("selectedCount", { selected: readySelectedItems.length, total: uploadableCount })}</span>
-            </div>
-            <div className="overflow-hidden rounded-2xl border bg-card shadow-xs">
-              <ObservationListHeader />
-              <div className="divide-y divide-border/60">
-                {items.map((item, index) => (
-                  <ObservationListItem
-                    key={item.id}
-                    item={item}
-                    index={index}
-                    groupOptions={groupOptions}
-                    expanded={item.id === expandedId}
-                    disabledReason={disabledReason}
-                    onToggleExpanded={() => setExpandedId((current) => (current === item.id ? null : item.id))}
-                    onAnalysisChange={updateAnalysis}
-                    onGroupChange={(groupId) => updateGroup(item.id, groupId)}
-                    onToggleSelected={(checked) => setItems((current) => current.map((candidate) => candidate.id === item.id ? { ...candidate, selected: checked } : candidate))}
-                    onUpload={() => void uploadGroup(item.groupId)}
-                    onRemove={() => {
-                      if (item.id === expandedId) setExpandedId(null);
-                      removeItem(item.id);
-                    }}
-                  />
-                ))}
+            <div className="space-y-2">
+              <h2 className="px-1 text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground">{t("listTitle")}</h2>
+              <div className="overflow-hidden rounded-2xl border bg-card shadow-xs">
+                <ObservationListHeader />
+                <div className="divide-y divide-border/60">
+                  {items.map((item, index) => (
+                    <ObservationListItem
+                      key={item.id}
+                      item={item}
+                      index={index}
+                      groupOptions={groupOptions}
+                      expanded={item.id === expandedId}
+                      disabledReason={disabledReason}
+                      onToggleExpanded={() => setExpandedId((current) => (current === item.id ? null : item.id))}
+                      onAnalysisChange={updateAnalysis}
+                      onGroupChange={(groupId) => updateGroup(item.id, groupId)}
+                      onToggleSelected={(checked) => setItems((current) => current.map((candidate) => candidate.id === item.id ? { ...candidate, selected: checked } : candidate))}
+                      onUpload={() => void uploadGroup(item.groupId)}
+                      onRetry={() => retryAnalysis(item.id)}
+                      onRemove={() => {
+                        if (item.id === expandedId) setExpandedId(null);
+                        removeItem(item.id);
+                      }}
+                    />
+                  ))}
+                </div>
               </div>
             </div>
-          </div>
-        </>
-      )}
-    </Container>
+          </>
+        )}
+      </Container>
+
+      <AnimatePresence>
+        {isDragging ? (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15 }}
+            className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center bg-background/70 backdrop-blur-sm"
+          >
+            <div className="flex flex-col items-center gap-3 rounded-3xl border-2 border-dashed border-primary/50 bg-card/80 px-10 py-8 text-center">
+              <span className="grid size-14 place-items-center rounded-2xl bg-primary/10 text-primary">
+                <UploadCloudIcon className="size-7" />
+              </span>
+              <span className="font-instrument text-2xl italic tracking-[-0.02em] text-foreground">{t("dropToAdd")}</span>
+            </div>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
+    </div>
   );
 }
 
@@ -897,6 +992,7 @@ function ObservationListItem({
   onGroupChange,
   onToggleSelected,
   onUpload,
+  onRetry,
   onRemove,
 }: {
   item: ObservationUploadItem;
@@ -909,10 +1005,12 @@ function ObservationListItem({
   onGroupChange: (groupId: string) => void;
   onToggleSelected: (checked: boolean) => void;
   onUpload: () => void;
+  onRetry: () => void;
   onRemove: () => void;
 }) {
   const t = useTranslations("upload.observations");
   const canUpload = itemCanUpload(item) && !disabledReason;
+  const showRetry = item.status === "error";
   const showAnalysis = item.status === "ready" || item.status === "uploading" || item.status === "uploaded" || item.status === "uploadError";
   const currentGroup = groupOptions.find((group) => group.id === item.groupId);
   const groupedCount = currentGroup?.count ?? 1;
@@ -981,6 +1079,18 @@ function ObservationListItem({
         {/* Trailing: status · actions */}
         <div className="flex shrink-0 items-center justify-end gap-0.5">
           <StatusIcon status={item.status} />
+          {showRetry ? (
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              onClick={onRetry}
+              aria-label={t("retryAnalysis")}
+              title={t("retryAnalysis")}
+              className="text-muted-foreground hover:text-primary"
+            >
+              <RotateCcwIcon className="size-4" />
+            </Button>
+          ) : null}
           {showUploadAction ? (
             <Button
               size="icon-sm"
