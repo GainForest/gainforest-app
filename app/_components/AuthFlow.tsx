@@ -617,6 +617,8 @@ function AuthenticatedMenu({
     ?? (activeContext.type === "group" ? activeContext.identifier || activeContext.did : null);
   const [invitations, setInvitations] = useState<MenuInvitation[]>([]);
   const [invitationsStatus, setInvitationsStatus] = useState<"idle" | "loading" | "ready" | "error">("idle");
+  const invitationsStatusRef = useRef(invitationsStatus);
+  const [invitationRequestKey, setInvitationRequestKey] = useState(0);
   const [acceptingInvitationId, setAcceptingInvitationId] = useState<string | null>(null);
 
   useManagePathContextSync({ pathname, sessionDid: session.did, groups, activeContext, setActiveContext });
@@ -643,7 +645,11 @@ function AuthenticatedMenu({
   };
 
   useEffect(() => {
-    if (!open || invitationsStatus !== "idle") return;
+    invitationsStatusRef.current = invitationsStatus;
+  }, [invitationsStatus]);
+
+  useEffect(() => {
+    if (!open || invitationsStatusRef.current !== "idle") return;
     let active = true;
     const controller = new AbortController();
     const timeout = window.setTimeout(() => controller.abort(), 8000);
@@ -651,7 +657,7 @@ function AuthenticatedMenu({
     fetch("/api/cgs/invitations", { cache: "no-store", signal: controller.signal })
       .then(async (response) => {
         const data = await response.json().catch(() => ({})) as { invitations?: MenuInvitation[]; error?: string };
-        if (!response.ok || data.error) throw new Error(data.error || invitationT("loadError"));
+        if (!response.ok || data.error) throw new Error(data.error || "Could not load invitations.");
         return data;
       })
       .then((data) => {
@@ -668,7 +674,7 @@ function AuthenticatedMenu({
       controller.abort();
       window.clearTimeout(timeout);
     };
-  }, [invitationsStatus, invitationT, open]);
+  }, [invitationRequestKey, open]);
 
   const acceptInvitation = async (invitation: MenuInvitation) => {
     setAcceptingInvitationId(invitation.id);
@@ -799,7 +805,14 @@ function AuthenticatedMenu({
               {invitationsStatus === "error" ? (
                 <div className="rounded-xl bg-destructive/10 px-3 py-2 text-xs text-destructive">
                   <p>{invitationT("loadError")}</p>
-                  <button type="button" onClick={() => setInvitationsStatus("idle")} className="mt-1 font-medium underline underline-offset-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setInvitationsStatus("idle");
+                      setInvitationRequestKey((key) => key + 1);
+                    }}
+                    className="mt-1 font-medium underline underline-offset-2"
+                  >
                     {invitationT("tryAgain")}
                   </button>
                 </div>
