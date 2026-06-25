@@ -8,6 +8,7 @@ import {
   COFOUNDERS,
   CORE_TEAM,
   ADVISORS,
+  DATA_COUNCIL,
   pickLocale,
   type TeamMember,
 } from "../_data";
@@ -28,6 +29,7 @@ export function AboutTeam() {
   const cofounders = COFOUNDERS.map((m) => pickLocale(m, locale));
   const coreTeam = CORE_TEAM.map((m) => pickLocale(m, locale));
   const advisors = ADVISORS.map((m) => pickLocale(m, locale));
+  const dataCouncil = DATA_COUNCIL.map((m) => pickLocale(m, locale));
 
   const before = t("about.team.heading.before").trim();
   const italic = t("about.team.heading.italic").trim();
@@ -71,6 +73,11 @@ export function AboutTeam() {
 
         {/* Core team — 3-column grid. */}
         <TeamGroup label={t("about.team.core")} members={coreTeam} />
+
+        {/* Data council — the elected regional representatives of the
+            GainForest Data Council (the GainForest staff reps are
+            already shown as co-founders / core team above). */}
+        <TeamGroup label={t("about.team.dataCouncil")} members={dataCouncil} />
       </div>
     </section>
   );

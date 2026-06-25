@@ -292,13 +292,13 @@ export const CORE_TEAM: ReadonlyArray<Translated<TeamMember>> = [
     },
   },
 ];
-// Data council & advisors. Independent scientists and platform leads
-// who steer GainForest's open-data and conservation-AI work. Roles and
-// affiliations collected from public sources (Columbia Engineering /
-// Data Science Institute, ETH Environmental Policy Lab, iNaturalist
-// team page). Like the core team these cards are intentionally inert;
-// Ken-Ichi's iNaturalist profile (inaturalist.org/people/kueda) is the
-// public reference but is not rendered as a link per team direction.
+// Advisors. Independent scientists who steer GainForest's open-data and
+// conservation-AI work. Roles and affiliations collected from public
+// sources (Columbia Engineering / Data Science Institute, ETH
+// Environmental Policy Lab, iNaturalist / Heinz Awards). Like the core
+// team these cards are intentionally inert; Ken-Ichi's iNaturalist
+// profile (inaturalist.org/people/kueda) is the public reference but is
+// not rendered as a link per team direction.
 export const ADVISORS: ReadonlyArray<Translated<TeamMember>> = [
   {
     name: "Lily Xu",
@@ -384,6 +384,76 @@ export const ADVISORS: ReadonlyArray<Translated<TeamMember>> = [
         role: "Pendiri bersama, iNaturalist",
         location: "Amerika Serikat",
         bio: "Turut mendirikan iNaturalist, platform global tempat jutaan naturalis mendokumentasikan dan berbagi observasi keanekaragaman hayati yang menjadi dasar data ekologi terbuka.",
+      },
+    },
+  },
+];
+
+// GainForest Data Council; the community-elected body that co-creates
+// GainForest's data-governance policy (datasoil.org). Per the docs
+// (docs.gainforest.earth/community/gainforest-data-council) it pairs
+// three GainForest representatives (David Dao, Sharfy Adamantine,
+// Nurfatin Hamzah; already shown above as co-founders / core team) with
+// three elected regional representatives. We list the regional reps
+// here so the about page doesn't duplicate the GainForest staff cards.
+// Bios collected from the Substack announcement + each rep's public
+// profile (Bees & Trees Uganda, Masungi Georeserve).
+export const DATA_COUNCIL: ReadonlyArray<Translated<TeamMember>> = [
+  {
+    name: "Simon Peter Okoth",
+    role: "Regional representative, Africa",
+    location: "Uganda",
+    bio: "Chief Operations Officer at Bees & Trees Uganda. Leads landscape restoration and tree-mapping across Ugandan districts, training young people on the field-data tools that feed Green Globe.",
+    photo: "/team/simon-peter-okoth.webp",
+    i18n: {
+      es: {
+        role: "Representante regional, África",
+        location: "Uganda",
+        bio: "Director de operaciones en Bees & Trees Uganda. Lidera la restauración de paisajes y el mapeo de árboles en distritos de Uganda, formando a jóvenes en las herramientas de datos de campo que alimentan Green Globe.",
+      },
+      pt: {
+        role: "Representante regional, África",
+        location: "Uganda",
+        bio: "Diretor de operações na Bees & Trees Uganda. Lidera a restauração de paisagens e o mapeamento de árvores em distritos de Uganda, formando jovens nas ferramentas de dados de campo que alimentam o Green Globe.",
+      },
+      sw: {
+        role: "Mwakilishi wa kanda, Afrika",
+        location: "Uganda",
+        bio: "Afisa Mkuu wa Uendeshaji katika Bees & Trees Uganda. Anaongoza urejeshaji wa mandhari na uchoraji ramani wa miti katika wilaya za Uganda, akifundisha vijana zana za data za nyanjani zinazolisha Green Globe.",
+      },
+      id: {
+        role: "Perwakilan regional, Afrika",
+        location: "Uganda",
+        bio: "Chief Operations Officer di Bees & Trees Uganda. Memimpin restorasi lanskap dan pemetaan pohon di berbagai distrik Uganda, melatih kaum muda pada perangkat data lapangan yang mengisi Green Globe.",
+      },
+    },
+  },
+  {
+    name: "Justine Bual",
+    role: "Regional representative, Asia-Pacific",
+    location: "Philippines",
+    bio: "Forestry graduate from UP Los Baños working with the award-winning Masungi Georeserve on environmental education and geotourism, and on bringing Masungi's fieldwork into Green Globe.",
+    photo: "/team/justine-bual.webp",
+    i18n: {
+      es: {
+        role: "Representante regional, Asia-Pacífico",
+        location: "Filipinas",
+        bio: "Graduada en ciencias forestales por UP Los Baños, trabaja con la galardonada Reserva Masungi en educación ambiental y geoturismo, y en llevar el trabajo de campo de Masungi a Green Globe.",
+      },
+      pt: {
+        role: "Representante regional, Ásia-Pacífico",
+        location: "Filipinas",
+        bio: "Graduada em engenharia florestal pela UP Los Baños, trabalha com a premiada Reserva Masungi em educação ambiental e geoturismo, e em levar o trabalho de campo de Masungi ao Green Globe.",
+      },
+      sw: {
+        role: "Mwakilishi wa kanda, Asia-Pasifiki",
+        location: "Ufilipino",
+        bio: "Mhitimu wa misitu kutoka UP Los Baños anayefanya kazi na Hifadhi ya Masungi iliyotuzwa katika elimu ya mazingira na utalii wa kijiolojia, na kuingiza kazi za nyanjani za Masungi kwenye Green Globe.",
+      },
+      id: {
+        role: "Perwakilan regional, Asia-Pasifik",
+        location: "Filipina",
+        bio: "Lulusan kehutanan dari UP Los Baños yang bekerja dengan Masungi Georeserve yang berpenghargaan pada pendidikan lingkungan dan geowisata, serta membawa kerja lapangan Masungi ke Green Globe.",
       },
     },
   },

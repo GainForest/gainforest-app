@@ -56,6 +56,7 @@ type AboutMessages = {
   "about.team.cofounders": string;
   "about.team.core": string;
   "about.team.advisors": string;
+  "about.team.dataCouncil": string;
 
   // Recognition
   "about.recognition.eyebrow": string;
@@ -118,7 +119,8 @@ const EN: AboutMessages = {
     "We're a distributed team of researchers, engineers, ecologists, and community organisers spread across Switzerland, France, Mexico, India, Bhutan, Nigeria, the Philippines, Malaysia, and beyond.",
   "about.team.cofounders": "Co-founders",
   "about.team.core": "Core team",
-  "about.team.advisors": "Data council & advisors",
+  "about.team.advisors": "Advisors",
+  "about.team.dataCouncil": "Data council",
 
   "about.recognition.eyebrow": "Recognition",
   "about.recognition.heading": "Backed by friends who believe in this future.",
@@ -177,7 +179,8 @@ const ES: AboutMessages = {
     "Somos un equipo distribuido de investigadoras, ingenieros, ecólogas y organizadoras comunitarias repartidos entre Suiza, Francia, México, India, Bután, Nigeria, Filipinas, Malasia y más allá.",
   "about.team.cofounders": "Cofundadores",
   "about.team.core": "Equipo principal",
-  "about.team.advisors": "Consejo de datos y asesores",
+  "about.team.advisors": "Asesores",
+  "about.team.dataCouncil": "Consejo de datos",
 
   "about.recognition.eyebrow": "Reconocimientos",
   "about.recognition.heading": "Respaldados por amigos que creen en este futuro.",
@@ -236,7 +239,8 @@ const PT: AboutMessages = {
     "Somos uma equipe distribuída de pesquisadoras, engenheiros, ecólogas e organizadoras comunitárias espalhadas pela Suíça, França, México, Índia, Butão, Nigéria, Filipinas, Malásia e além.",
   "about.team.cofounders": "Cofundadores",
   "about.team.core": "Equipe principal",
-  "about.team.advisors": "Conselho de dados e consultores",
+  "about.team.advisors": "Consultores",
+  "about.team.dataCouncil": "Conselho de dados",
 
   "about.recognition.eyebrow": "Reconhecimento",
   "about.recognition.heading": "Apoiados por amigos que acreditam neste futuro.",
@@ -295,7 +299,8 @@ const SW: AboutMessages = {
     "Sisi ni timu iliyosambazwa ya watafiti, wahandisi, wanaikolojia, na waratibu wa jamii waliosambazwa Uswisi, Ufaransa, Mexico, India, Bhutan, Nigeria, Ufilipino, Malesia na kwingineko.",
   "about.team.cofounders": "Waanzilishi wenza",
   "about.team.core": "Timu kuu",
-  "about.team.advisors": "Baraza la data na washauri",
+  "about.team.advisors": "Washauri",
+  "about.team.dataCouncil": "Baraza la data",
 
   "about.recognition.eyebrow": "Utambuzi",
   "about.recognition.heading": "Tunaungwa mkono na marafiki wanaoamini katika hii ya baadaye.",
@@ -354,7 +359,8 @@ const ID: AboutMessages = {
     "Kami adalah tim terdistribusi yang terdiri dari peneliti, insinyur, ekolog, dan organisator komunitas yang tersebar di Swiss, Prancis, Meksiko, India, Bhutan, Nigeria, Filipina, Malaysia, dan sekitarnya.",
   "about.team.cofounders": "Pendiri bersama",
   "about.team.core": "Tim inti",
-  "about.team.advisors": "Dewan data & penasihat",
+  "about.team.advisors": "Penasihat",
+  "about.team.dataCouncil": "Dewan data",
 
   "about.recognition.eyebrow": "Pengakuan",
   "about.recognition.heading": "Didukung oleh teman-teman yang percaya pada masa depan ini.",
