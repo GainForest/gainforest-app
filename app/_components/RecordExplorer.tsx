@@ -202,12 +202,16 @@ export function RecordExplorer({
   showHero = true,
   ownerDid,
   defaultOccurrenceMedia = DEFAULT_OCCURRENCE_MEDIA,
+  leadingCard,
+  emptyState,
 }: {
   kind: RecordKind;
   initialPage?: InitialExplorerPage;
   showHero?: boolean;
   ownerDid?: string;
   defaultOccurrenceMedia?: OccurrenceFilter;
+  leadingCard?: ReactNode;
+  emptyState?: ReactNode;
 }) {
   const meta = KIND_META[kind];
   const exploreT = useTranslations("marketplace.explore");
@@ -709,6 +713,8 @@ export function RecordExplorer({
                 onRetry={() => changeMedia("all")}
                 retryLabel="Remove filters"
               />
+            ) : emptyState ? (
+              emptyState
             ) : (
               <EmptyState title="Nothing here yet" body="There is nothing to show right now." />
             )
@@ -716,8 +722,13 @@ export function RecordExplorer({
             <RecordList records={renderedRecords} onOpen={setDrawer} />
           ) : (
             <ul role="list" className={gridCls}>
+              {leadingCard ? (
+                <li className="animate-in" style={{ animationDelay: "0ms" }}>
+                  {leadingCard}
+                </li>
+              ) : null}
               {renderedRecords.map((r, i) => (
-                <li key={r.id} className="animate-in" style={{ animationDelay: `${Math.min(i, 12) * 18}ms` }}>
+                <li key={r.id} className="animate-in" style={{ animationDelay: `${Math.min(i + (leadingCard ? 1 : 0), 12) * 18}ms` }}>
                   <RecordCard record={r} onOpen={setDrawer} />
                 </li>
               ))}
