@@ -304,6 +304,7 @@ export const ADVISORS: ReadonlyArray<Translated<TeamMember>> = [
     name: "Lily Xu",
     role: "Assistant Professor, Columbia",
     location: "United States",
+    photo: "/team/lily-xu.webp",
     bio: "Builds AI across machine learning and optimization for biodiversity conservation at Columbia, and leads the AI work behind the SMART protected-area partnership.",
     i18n: {
       es: {
@@ -332,6 +333,7 @@ export const ADVISORS: ReadonlyArray<Translated<TeamMember>> = [
     name: "Millie Chapman",
     role: "Assistant Professor, ETH Zürich",
     location: "Switzerland",
+    photo: "/team/millie-chapman.webp",
     bio: "Leads the Environmental Policy Lab at ETH Zürich, working where decision theory, ecology, and data justice meet to make biodiversity policy effective and equitable.",
     i18n: {
       es: {
@@ -360,6 +362,7 @@ export const ADVISORS: ReadonlyArray<Translated<TeamMember>> = [
     name: "Ken-Ichi Ueda",
     role: "Co-founder, iNaturalist",
     location: "United States",
+    photo: "/team/ken-ichi-ueda.webp",
     bio: "Co-founded iNaturalist, the global platform where millions of naturalists document and share the biodiversity observations that ground open ecological data.",
     i18n: {
       es: {
