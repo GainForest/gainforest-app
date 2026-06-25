@@ -269,7 +269,13 @@ export function NatureEvidencePicker({
   }
 
   if (rows.length === 0 && datasetGroups.length === 0) {
-    return <PickerEmpty label={natureT("emptyLabel")} href="/manage/trees" />;
+    return (
+      <PickerEmpty
+        label={natureT("emptyLabel")}
+        href="/manage/observations"
+        manageLabel={natureT("manageData")}
+      />
+    );
   }
 
   return (
@@ -450,7 +456,7 @@ export function NatureEvidencePicker({
           )}
         </section>
       </div>
-      <ManageLink href="/manage/trees" label={natureT("manageData")} />
+      <ManageLink href="/manage/observations" label={natureT("manageData")} />
       <OptionalNote value={note} onChange={setNote} disabled={isSubmitting} />
       <SubmitButton count={selectedCount} isSubmitting={isSubmitting} onClick={submitSelection} />
     </>

@@ -17,9 +17,10 @@ import { formatDateRangeFromValues } from "../shared/timelineDates";
 import type { TimelineEntryViewModel } from "../shared/timelineViewModel";
 import { getTimelineDeleteControlState } from "../shared/timelineDeleteControls";
 import { TimelineDeleteConfirm } from "./shared/TimelineDeleteConfirm";
+import { TimelineDatasetMapLayerCards } from "./shared/TimelineDatasetMapLayerCards";
 import { TimelinePreviewPanel } from "./shared/TimelinePreviewPanel";
 import { TimelineTileRow } from "./shared/TimelineTileRow";
-import { TimelineTreeMapCards } from "./shared/TimelineMapPreview";
+import type { TimelineMapLayer } from "./shared/timelineMapLayers";
 
 type EntryKindLabels = Record<TimelineEvidenceKind, string>;
 
@@ -145,6 +146,7 @@ function metricBadges(
 
 export function TimelineEntry({
   entry,
+  mapLayers,
   canManageEvidence,
   canDeleteEvidence,
   deleteDisabledReason,
@@ -152,6 +154,7 @@ export function TimelineEntry({
   onDeleted,
 }: {
   entry: TimelineEntryViewModel;
+  mapLayers: TimelineMapLayer[];
   canManageEvidence: boolean;
   canDeleteEvidence: boolean;
   deleteDisabledReason: string | null;
@@ -214,7 +217,6 @@ export function TimelineEntry({
   const natureRefs = entry.refs.filter(
     (ref) => ref.kind === "occurrence" || ref.kind === "biodiversityDataset",
   );
-  const treeMapRefs = entry.refs.filter((ref) => ref.kind === "tree" && ref.mapHref);
   const deleteControl = getTimelineDeleteControlState({
     canManageEvidence,
     canDeleteEvidence,
@@ -359,7 +361,7 @@ export function TimelineEntry({
               </div>
             </div>
           ) : null}
-          {treeMapRefs.length > 0 ? <TimelineTreeMapCards refs={treeMapRefs} /> : null}
+          <TimelineDatasetMapLayerCards layers={mapLayers} />
           <TimelinePreviewPanel preview={activePreview} />
           {previewTiles.length > 1 ? (
             <TimelineTileRow

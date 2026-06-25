@@ -21,9 +21,11 @@ export function ListLayout({ children }: { children: React.ReactNode }) {
 export function PickerEmpty({
   label,
   href,
+  manageLabel,
 }: {
   label: string;
   href?: string;
+  manageLabel?: string;
 }) {
   const evidenceT = useTranslations("bumicert.detail.evidenceAdder");
 
@@ -33,7 +35,7 @@ export function PickerEmpty({
         {evidenceT("emptyUploaded", { type: label })}
       </p>
       {href ? (
-        <ManageLink href={href} label={evidenceT("manageType", { type: label })} />
+        <ManageLink href={href} label={manageLabel ?? evidenceT("manageType", { type: label })} />
       ) : null}
     </div>
   );
