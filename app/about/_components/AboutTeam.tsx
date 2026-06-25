@@ -7,6 +7,7 @@ import { getAboutT } from "../_messages";
 import {
   COFOUNDERS,
   CORE_TEAM,
+  ADVISORS,
   pickLocale,
   type TeamMember,
 } from "../_data";
@@ -26,6 +27,7 @@ export function AboutTeam() {
   // dumb mapping over already-translated records.
   const cofounders = COFOUNDERS.map((m) => pickLocale(m, locale));
   const coreTeam = CORE_TEAM.map((m) => pickLocale(m, locale));
+  const advisors = ADVISORS.map((m) => pickLocale(m, locale));
 
   const before = t("about.team.heading.before").trim();
   const italic = t("about.team.heading.italic").trim();
@@ -65,6 +67,10 @@ export function AboutTeam() {
 
         {/* Core team — 3-column grid. */}
         <TeamGroup label={t("about.team.core")} members={coreTeam} />
+
+        {/* Data council & advisors — independent scientists / platform
+            leads, same 3-column grid as the core team. */}
+        <TeamGroup label={t("about.team.advisors")} members={advisors} />
       </div>
     </section>
   );

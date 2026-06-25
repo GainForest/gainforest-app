@@ -292,6 +292,100 @@ export const CORE_TEAM: ReadonlyArray<Translated<TeamMember>> = [
     },
   },
 ];
+// Data council & advisors. Independent scientists and platform leads
+// who steer GainForest's open-data and conservation-AI work. Roles and
+// affiliations collected from public sources (Columbia Engineering /
+// Data Science Institute, ETH Environmental Policy Lab, iNaturalist
+// team page). Like the core team these cards are intentionally inert;
+// Ken-Ichi's iNaturalist profile (inaturalist.org/people/kueda) is the
+// public reference but is not rendered as a link per team direction.
+export const ADVISORS: ReadonlyArray<Translated<TeamMember>> = [
+  {
+    name: "Lily Xu",
+    role: "Assistant Professor, Columbia",
+    location: "United States",
+    bio: "Builds AI across machine learning and optimization for biodiversity conservation at Columbia, and leads the AI work behind the SMART protected-area partnership.",
+    i18n: {
+      es: {
+        role: "Profesora adjunta, Columbia",
+        location: "Estados Unidos",
+        bio: "Desarrolla IA en aprendizaje automático y optimización para la conservación de la biodiversidad en Columbia, y lidera el trabajo de IA detrás de la alianza de áreas protegidas SMART.",
+      },
+      pt: {
+        role: "Professora adjunta, Columbia",
+        location: "Estados Unidos",
+        bio: "Desenvolve IA em aprendizado de máquina e otimização para a conservação da biodiversidade em Columbia, e lidera o trabalho de IA por trás da parceria de áreas protegidas SMART.",
+      },
+      sw: {
+        role: "Profesa Msaidizi, Columbia",
+        location: "Marekani",
+        bio: "Anajenga AI katika ujifunzaji wa mashine na uboreshaji kwa ajili ya uhifadhi wa bayoanuwai huko Columbia, na anaongoza kazi ya AI nyuma ya ushirikiano wa maeneo yaliyohifadhiwa wa SMART.",
+      },
+      id: {
+        role: "Asisten Profesor, Columbia",
+        location: "Amerika Serikat",
+        bio: "Membangun AI lintas pembelajaran mesin dan optimisasi untuk konservasi keanekaragaman hayati di Columbia, dan memimpin kerja AI di balik kemitraan kawasan lindung SMART.",
+      },
+    },
+  },
+  {
+    name: "Millie Chapman",
+    role: "Assistant Professor, ETH Zürich",
+    location: "Switzerland",
+    bio: "Leads the Environmental Policy Lab at ETH Zürich, working where decision theory, ecology, and data justice meet to make biodiversity policy effective and equitable.",
+    i18n: {
+      es: {
+        role: "Profesora adjunta, ETH Zúrich",
+        location: "Suiza",
+        bio: "Dirige el Laboratorio de Política Ambiental en ETH Zúrich, trabajando donde se encuentran la teoría de la decisión, la ecología y la justicia de datos para hacer la política de biodiversidad eficaz y equitativa.",
+      },
+      pt: {
+        role: "Professora adjunta, ETH Zurique",
+        location: "Suíça",
+        bio: "Dirige o Laboratório de Política Ambiental na ETH Zurique, atuando onde se encontram a teoria da decisão, a ecologia e a justiça de dados para tornar a política de biodiversidade eficaz e equitativa.",
+      },
+      sw: {
+        role: "Profesa Msaidizi, ETH Zürich",
+        location: "Uswisi",
+        bio: "Anaongoza Maabara ya Sera ya Mazingira katika ETH Zürich, akifanya kazi mahali ambapo nadharia ya maamuzi, ikolojia, na haki ya data hukutana ili kufanya sera ya bayoanuwai kuwa yenye ufanisi na ya haki.",
+      },
+      id: {
+        role: "Asisten Profesor, ETH Zürich",
+        location: "Swiss",
+        bio: "Memimpin Lab Kebijakan Lingkungan di ETH Zürich, bekerja di titik temu teori keputusan, ekologi, dan keadilan data untuk membuat kebijakan keanekaragaman hayati efektif dan adil.",
+      },
+    },
+  },
+  {
+    name: "Ken-Ichi Ueda",
+    role: "Co-founder & Co-director, iNaturalist",
+    location: "United States",
+    bio: "Co-founded iNaturalist, the global platform where millions of naturalists document and share the biodiversity observations that ground open ecological data.",
+    i18n: {
+      es: {
+        role: "Cofundador y codirector, iNaturalist",
+        location: "Estados Unidos",
+        bio: "Cofundó iNaturalist, la plataforma global donde millones de naturalistas documentan y comparten las observaciones de biodiversidad que sustentan los datos ecológicos abiertos.",
+      },
+      pt: {
+        role: "Cofundador e codiretor, iNaturalist",
+        location: "Estados Unidos",
+        bio: "Cofundou o iNaturalist, a plataforma global onde milhões de naturalistas documentam e partilham as observações de biodiversidade que sustentam os dados ecológicos abertos.",
+      },
+      sw: {
+        role: "Mwanzilishi mwenza na Mkurugenzi mwenza, iNaturalist",
+        location: "Marekani",
+        bio: "Alianzisha iNaturalist, jukwaa la kimataifa ambapo mamilioni ya wanasayansi wa asili huandika na kushiriki uchunguzi wa bayoanuwai unaohimili data huria ya ikolojia.",
+      },
+      id: {
+        role: "Pendiri bersama & Co-direktur, iNaturalist",
+        location: "Amerika Serikat",
+        bio: "Turut mendirikan iNaturalist, platform global tempat jutaan naturalis mendokumentasikan dan berbagi observasi keanekaragaman hayati yang menjadi dasar data ekologi terbuka.",
+      },
+    },
+  },
+];
+
 // Marina Mura is already credited on the landing's <NatureGuild />
 // (Inhaã-bé, Brazil) and the <TainaFeature /> caption, so we don't
 // duplicate her on the About core team. The Nature Guild block is
