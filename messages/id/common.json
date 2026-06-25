@@ -452,5 +452,53 @@
   "trust": {
     "trustedBy": "Dipercaya oleh",
     "aria": "Dipercaya oleh {names}"
+  },
+  "groupInvitations": {
+    "members": {
+      "inputPlaceholder": "Nama pengguna atau email GainForest",
+      "inputAria": "Nama pengguna atau email anggota",
+      "invite": "Undang",
+      "add": "Tambah",
+      "ownerHelp": "Masukkan email untuk mengirim undangan, atau nama pengguna untuk menambahkan akun yang sudah ada sekarang.",
+      "adminHelp": "Admin dapat mengundang anggota biasa melalui email atau menambahkannya dengan nama pengguna. Minta pemilik menambahkan admin lain.",
+      "locked": "Hanya pemilik dan admin yang dapat menambah atau menghapus anggota.",
+      "sent": "Undangan dikirim ke {email}.",
+      "sendError": "Tidak dapat mengirim undangan.",
+      "addError": "Tidak dapat menambahkan anggota."
+    },
+    "menu": {
+      "title": "Undangan",
+      "loading": "Memuat undangan…",
+      "empty": "Tidak ada undangan tertunda.",
+      "loadError": "Tidak dapat memuat undangan.",
+      "tryAgain": "Coba lagi",
+      "accept": "Terima",
+      "accepting": "Menerima…",
+      "acceptError": "Tidak dapat menerima undangan.",
+      "role": "Undangan {role}"
+    },
+    "invitePage": {
+      "eyebrow": "Undangan organisasi",
+      "organizationFallback": "organisasi ini",
+      "signedOutTitle": "Masuk untuk menerima",
+      "signedOutDescription": "Masuk dengan email yang diundang untuk bergabung dengan {organization}.",
+      "signIn": "Masuk",
+      "acceptingTitle": "Menerima undangan…",
+      "acceptingDescription": "Kami menambahkan Anda dengan aman ke {organization}.",
+      "acceptedTitle": "Anda bergabung dengan organisasi",
+      "acceptedDescription": "Anda sekarang dapat berkolaborasi dengan {organization}.",
+      "goToOrganization": "Buka organisasi",
+      "errorTitle": "Tidak dapat menerima undangan",
+      "acceptError": "Tidak dapat menerima undangan.",
+      "tryAgain": "Coba lagi",
+      "notFoundTitle": "Undangan tidak ditemukan",
+      "notFoundDescription": "Tautan undangan ini tidak valid atau telah dihapus.",
+      "expiredTitle": "Undangan kedaluwarsa",
+      "expiredDescription": "Minta admin organisasi mengirim undangan baru.",
+      "canceledTitle": "Undangan dibatalkan",
+      "canceledDescription": "Undangan ini tidak berlaku lagi.",
+      "alreadyAcceptedTitle": "Sudah diterima",
+      "alreadyAcceptedDescription": "Undangan ini sudah diterima."
+    }
   }
 }

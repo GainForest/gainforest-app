@@ -452,5 +452,53 @@
   "trust": {
     "trustedBy": "Con la confianza de",
     "aria": "Con la confianza de {names}"
+  },
+  "groupInvitations": {
+    "members": {
+      "inputPlaceholder": "Usuario o correo de GainForest",
+      "inputAria": "Usuario o correo del miembro",
+      "invite": "Invitar",
+      "add": "Agregar",
+      "ownerHelp": "Ingresa un correo para enviar una invitación, o un usuario para agregar una cuenta existente ahora.",
+      "adminHelp": "Los administradores pueden invitar miembros normales por correo o agregarlos por usuario. Pide a una persona propietaria que agregue otro administrador.",
+      "locked": "Solo propietarios y administradores pueden agregar o quitar miembros.",
+      "sent": "Invitación enviada a {email}.",
+      "sendError": "No se pudo enviar la invitación.",
+      "addError": "No se pudo agregar el miembro."
+    },
+    "menu": {
+      "title": "Invitaciones",
+      "loading": "Cargando invitaciones…",
+      "empty": "No hay invitaciones pendientes.",
+      "loadError": "No se pudieron cargar las invitaciones.",
+      "tryAgain": "Intentar de nuevo",
+      "accept": "Aceptar",
+      "accepting": "Aceptando…",
+      "acceptError": "No se pudo aceptar la invitación.",
+      "role": "Invitación de {role}"
+    },
+    "invitePage": {
+      "eyebrow": "Invitación de organización",
+      "organizationFallback": "esta organización",
+      "signedOutTitle": "Inicia sesión para aceptar",
+      "signedOutDescription": "Inicia sesión con el correo invitado para unirte a {organization}.",
+      "signIn": "Iniciar sesión",
+      "acceptingTitle": "Aceptando invitación…",
+      "acceptingDescription": "Te estamos agregando de forma segura a {organization}.",
+      "acceptedTitle": "Te uniste a la organización",
+      "acceptedDescription": "Ahora puedes colaborar con {organization}.",
+      "goToOrganization": "Abrir organización",
+      "errorTitle": "No se pudo aceptar la invitación",
+      "acceptError": "No se pudo aceptar la invitación.",
+      "tryAgain": "Intentar de nuevo",
+      "notFoundTitle": "Invitación no encontrada",
+      "notFoundDescription": "Este enlace de invitación no es válido o fue eliminado.",
+      "expiredTitle": "Invitación vencida",
+      "expiredDescription": "Pide a un administrador de la organización que envíe una nueva invitación.",
+      "canceledTitle": "Invitación cancelada",
+      "canceledDescription": "Esta invitación ya no es válida.",
+      "alreadyAcceptedTitle": "Ya aceptada",
+      "alreadyAcceptedDescription": "Esta invitación ya fue aceptada."
+    }
   }
 }

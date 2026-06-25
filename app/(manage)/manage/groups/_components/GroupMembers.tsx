@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react";
 import { motion } from "framer-motion";
 import { useTranslations } from "next-intl";
-import { CheckIcon, Loader2Icon, LockIcon, RefreshCwIcon, Trash2Icon, UserPlusIcon, UsersIcon } from "lucide-react";
+import { CheckIcon, Loader2Icon, LockIcon, MailIcon, RefreshCwIcon, Trash2Icon, UserPlusIcon, UsersIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
@@ -12,6 +12,7 @@ import { formatCgsErrorMessage } from "@/app/_lib/cgs-errors";
 import { monogram, resolveDidProfile, type DidProfile } from "@/app/_lib/did-profile";
 import {
   addCgsMember,
+  inviteCgsMember,
   removeCgsMember,
   resolveCgsMemberIdentity,
   setCgsMemberRole,
@@ -65,6 +66,10 @@ function formatDate(value?: string | null) {
 
 function memberErrorMessage(error: unknown, fallback: string): string {
   return formatCgsErrorMessage(error, fallback);
+}
+
+function isLikelyEmail(value: string): boolean {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
 }
 
 function profilesByDid(profiles?: DidProfile[]): Record<string, DidProfile> {
@@ -198,6 +203,7 @@ export function GroupMembers({
   showDataCouncil?: boolean;
 }) {
   const dataCouncilT = useTranslations("upload.settings.dataCouncil");
+  const invitationsT = useTranslations("common.groupInvitations.members");
   const dataCouncilLoadError = dataCouncilT("errors.load");
   const dataCouncilSaveError = dataCouncilT("errors.save");
   const canAddRemove = currentRole === "owner" || currentRole === "admin";
@@ -210,6 +216,7 @@ export function GroupMembers({
   const [memberIdentifier, setMemberIdentifier] = useState("");
   const [role, setRole] = useState<RoleInput>("member");
   const [error, setError] = useState<string | null>(initialError);
+  const [success, setSuccess] = useState<string | null>(null);
   const [loaded, setLoaded] = useState(hasInitialMembers || Boolean(initialError));
   const [pendingCount, setPendingCount] = useState(0);
   const [dataCouncilLoaded, setDataCouncilLoaded] = useState(!canUseDataCouncil);
@@ -303,8 +310,16 @@ export function GroupMembers({
     const nextRole = canSetRoles ? role : "member";
     runPending(async () => {
       setError(null);
+      setSuccess(null);
       const previousMembers = members;
       try {
+        if (isLikelyEmail(identifier)) {
+          await inviteCgsMember(groupDid, identifier, nextRole);
+          setMemberIdentifier("");
+          setSuccess(invitationsT("sent", { email: identifier }));
+          return;
+        }
+
         const identity = await resolveCgsMemberIdentity(identifier);
         const optimisticMember: CgsMember = {
           did: identity.did,
@@ -328,7 +343,7 @@ export function GroupMembers({
         await addCgsMember(groupDid, identity.did, nextRole);
       } catch (err) {
         setMembers(previousMembers);
-        setError(memberErrorMessage(err, "Could not add member."));
+        setError(memberErrorMessage(err, isLikelyEmail(identifier) ? invitationsT("sendError") : invitationsT("addError")));
       }
     });
   };
@@ -416,10 +431,10 @@ export function GroupMembers({
         <Input
           value={memberIdentifier}
           onChange={(event) => setMemberIdentifier(event.target.value)}
-          placeholder="GainForest username"
-          autoComplete="username"
+          placeholder={invitationsT("inputPlaceholder")}
+          autoComplete="email username"
           disabled={isPending}
-          aria-label="Member username"
+          aria-label={invitationsT("inputAria")}
         />
         {canSetRoles ? (
           <select
@@ -434,23 +449,27 @@ export function GroupMembers({
           </select>
         ) : null}
         <Button type="submit" disabled={isPending || !memberIdentifier.trim()}>
-          <UserPlusIcon /> Add
+          {isLikelyEmail(memberIdentifier) ? <MailIcon /> : <UserPlusIcon />} {isLikelyEmail(memberIdentifier) ? invitationsT("invite") : invitationsT("add")}
         </Button>
       </form>
       <p className="text-xs text-muted-foreground">
         {canSetRoles
-          ? "Email invitations are not connected yet. Add people by their GainForest username for now."
-          : "Admins can add regular members. Ask an owner to change roles or add another admin."}
+          ? invitationsT("ownerHelp")
+          : invitationsT("adminHelp")}
       </p>
     </div>
   ) : (
     <p className="flex items-center gap-2 rounded-2xl bg-muted/50 px-3.5 py-2.5 text-sm text-muted-foreground">
-      <LockIcon className="size-3.5 shrink-0" /> Only owners and admins can add or remove members.
+      <LockIcon className="size-3.5 shrink-0" /> {invitationsT("locked")}
     </p>
   );
 
   const errorBanner = error ? (
     <p className="rounded-2xl bg-destructive/10 px-3.5 py-2.5 text-sm text-destructive">{error}</p>
+  ) : null;
+
+  const successBanner = success ? (
+    <p className="rounded-2xl bg-emerald-500/10 px-3.5 py-2.5 text-sm text-emerald-700 dark:text-emerald-300">{success}</p>
   ) : null;
 
   const dataCouncilNotice = canUseDataCouncil && dataCouncilLoaded && !dataCouncilCanWrite ? (
@@ -523,6 +542,7 @@ export function GroupMembers({
         <div className="mt-4 space-y-3">
           {addForm}
           {dataCouncilNotice}
+          {successBanner}
           {errorBanner}
           {list}
         </div>
@@ -561,6 +581,7 @@ export function GroupMembers({
       <div className="mt-5 space-y-3">
         {addForm}
         {dataCouncilNotice}
+        {successBanner}
         {errorBanner}
         {list}
       </div>

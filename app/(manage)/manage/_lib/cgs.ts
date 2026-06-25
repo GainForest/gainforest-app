@@ -201,6 +201,15 @@ export async function addCgsMember(repo: string, memberDid: string, role: "membe
   return callCgs({ operation: "addMember", repo, memberDid, role });
 }
 
+export async function inviteCgsMember(repo: string, email: string, role: "member" | "admin") {
+  const res = await fetch("/api/cgs/invitations", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ repo, email, role }),
+  });
+  return parseJsonResponse<{ invitation: { id: string; email: string; role: "member" | "admin" } }>(res, "Could not send invitation.");
+}
+
 export async function removeCgsMember(repo: string, memberDid: string) {
   return callCgs({ operation: "removeMember", repo, memberDid });
 }

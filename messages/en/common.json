@@ -452,5 +452,53 @@
   "trust": {
     "trustedBy": "Trusted by",
     "aria": "Trusted by {names}"
+  },
+  "groupInvitations": {
+    "members": {
+      "inputPlaceholder": "GainForest username or email",
+      "inputAria": "Member username or email",
+      "invite": "Invite",
+      "add": "Add",
+      "ownerHelp": "Enter an email to send an invite, or a username to add an existing account now.",
+      "adminHelp": "Admins can invite regular members by email or add them by username. Ask an owner to add another admin.",
+      "locked": "Only owners and admins can add or remove members.",
+      "sent": "Invitation sent to {email}.",
+      "sendError": "Could not send invitation.",
+      "addError": "Could not add member."
+    },
+    "menu": {
+      "title": "Invitations",
+      "loading": "Loading invitations…",
+      "empty": "No pending invitations.",
+      "loadError": "Could not load invitations.",
+      "tryAgain": "Try again",
+      "accept": "Accept",
+      "accepting": "Accepting…",
+      "acceptError": "Could not accept invitation.",
+      "role": "{role} invite"
+    },
+    "invitePage": {
+      "eyebrow": "Organization invitation",
+      "organizationFallback": "this organization",
+      "signedOutTitle": "Sign in to accept",
+      "signedOutDescription": "Sign in with the invited email address to join {organization}.",
+      "signIn": "Sign in",
+      "acceptingTitle": "Accepting invitation…",
+      "acceptingDescription": "We are securely adding you to {organization}.",
+      "acceptedTitle": "You joined the organization",
+      "acceptedDescription": "You can now collaborate with {organization}.",
+      "goToOrganization": "Open organization",
+      "errorTitle": "Could not accept invitation",
+      "acceptError": "Could not accept invitation.",
+      "tryAgain": "Try again",
+      "notFoundTitle": "Invitation not found",
+      "notFoundDescription": "This invitation link is not valid or has been removed.",
+      "expiredTitle": "Invitation expired",
+      "expiredDescription": "Ask an organization admin to send a new invitation.",
+      "canceledTitle": "Invitation canceled",
+      "canceledDescription": "This invitation is no longer valid.",
+      "alreadyAcceptedTitle": "Already accepted",
+      "alreadyAcceptedDescription": "This invitation has already been accepted."
+    }
   }
 }

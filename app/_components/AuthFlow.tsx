@@ -13,6 +13,7 @@ import {
   LockIcon,
   LockOpenIcon,
   LogOutIcon,
+  MailIcon,
   PlusIcon,
   SettingsIcon,
   ShieldCheckIcon,
@@ -485,6 +486,15 @@ function UnauthenticatedButtons() {
 type ProfileCard = AccountCard;
 type MenuGroup = SwitcherGroup;
 
+type MenuInvitation = {
+  id: string;
+  repo: string;
+  role: "member" | "admin";
+  groupName?: string | null;
+  groupHandle?: string | null;
+  expiresAt: string;
+};
+
 function isActiveContext(active: ActiveAccountContext, type: "personal" | "group", did: string): boolean {
   return active.type === type && active.did === did;
 }
@@ -581,6 +591,7 @@ function AuthenticatedMenu({
   const { personal: personalCard, groups, status: groupsStatus, reload } = useAccountList(session.did);
   const [activeContext, setActiveContext] = useActiveAccountContext(session.did);
   const t = useTranslations("legacy");
+  const invitationT = useTranslations("common.groupInvitations.menu");
   const cleanProfileName = profileName?.trim() || personalCard?.displayName?.trim() || null;
   const profileNameLoading = isProfileNameLoading && profileName === undefined;
   const personalDisplayLabel = cleanProfileName ?? (profileNameLoading ? "Account" : "Personal account");
@@ -604,6 +615,9 @@ function AuthenticatedMenu({
   const settingsGroupIdentifier = routeGroupIdentifier
     ?? (currentGroup ? switcherGroupIdentifier(currentGroup) : null)
     ?? (activeContext.type === "group" ? activeContext.identifier || activeContext.did : null);
+  const [invitations, setInvitations] = useState<MenuInvitation[]>([]);
+  const [invitationsStatus, setInvitationsStatus] = useState<"idle" | "loading" | "ready" | "error">("idle");
+  const [acceptingInvitationId, setAcceptingInvitationId] = useState<string | null>(null);
 
   useManagePathContextSync({ pathname, sessionDid: session.did, groups, activeContext, setActiveContext });
 
@@ -625,6 +639,40 @@ function AuthenticatedMenu({
   const handleBlur = (event: React.FocusEvent) => {
     if (!containerRef.current?.contains(event.relatedTarget as Node)) {
       setOpen(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!open || invitationsStatus !== "idle") return;
+    let active = true;
+    setInvitationsStatus("loading");
+    fetch("/api/cgs/invitations", { cache: "no-store" })
+      .then((response) => response.json() as Promise<{ invitations?: MenuInvitation[] }>)
+      .then((data) => {
+        if (!active) return;
+        setInvitations(Array.isArray(data.invitations) ? data.invitations : []);
+        setInvitationsStatus("ready");
+      })
+      .catch(() => {
+        if (active) setInvitationsStatus("error");
+      });
+    return () => {
+      active = false;
+    };
+  }, [invitationsStatus, open]);
+
+  const acceptInvitation = async (invitation: MenuInvitation) => {
+    setAcceptingInvitationId(invitation.id);
+    try {
+      const response = await fetch(`/api/cgs/invitations/${encodeURIComponent(invitation.id)}/accept`, { method: "POST", cache: "no-store" });
+      const data = await response.json().catch(() => null) as { error?: string } | null;
+      if (!response.ok || data?.error) throw new Error(data?.error ?? invitationT("acceptError"));
+      setInvitations((current) => current.filter((item) => item.id !== invitation.id));
+      void reload();
+    } catch {
+      setInvitationsStatus("error");
+    } finally {
+      setAcceptingInvitationId(null);
     }
   };
 
@@ -728,6 +776,50 @@ function AuthenticatedMenu({
                   onSelect={() => selectGroup(group)}
                 />
               ))}
+
+              <div className="my-2 h-px bg-border/60" />
+
+              <div className="px-2 pb-1 pt-1 text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
+                {invitationT("title")}
+              </div>
+              {invitationsStatus === "loading" ? (
+                <div className="flex items-center gap-2 px-2.5 py-3 text-sm text-muted-foreground">
+                  <Loader2 className="h-4 w-4 animate-spin text-primary" /> {invitationT("loading")}
+                </div>
+              ) : null}
+              {invitationsStatus === "error" ? (
+                <div className="rounded-xl bg-destructive/10 px-3 py-2 text-xs text-destructive">
+                  <p>{invitationT("loadError")}</p>
+                  <button type="button" onClick={() => setInvitationsStatus("idle")} className="mt-1 font-medium underline underline-offset-2">
+                    {invitationT("tryAgain")}
+                  </button>
+                </div>
+              ) : null}
+              {invitationsStatus === "ready" && invitations.length === 0 ? (
+                <p className="px-2.5 py-2 text-xs text-muted-foreground">{invitationT("empty")}</p>
+              ) : null}
+              {invitations.map((invitation) => {
+                const label = invitation.groupName || invitation.groupHandle || invitation.repo;
+                const accepting = acceptingInvitationId === invitation.id;
+                return (
+                  <div key={invitation.id} className="flex items-center gap-3 rounded-xl px-2.5 py-2 text-left">
+                    <AccountDot label={label} icon={<MailIcon className="h-4 w-4" />} />
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate text-sm font-medium text-foreground">{label}</span>
+                      <span className="block truncate text-xs text-muted-foreground">{invitationT("role", { role: roleLabel(invitation.role) })}</span>
+                    </span>
+                    <button
+                      type="button"
+                      disabled={accepting || Boolean(acceptingInvitationId)}
+                      onClick={() => void acceptInvitation(invitation)}
+                      className="inline-flex h-7 shrink-0 items-center gap-1 rounded-full bg-primary px-2.5 text-xs font-medium text-primary-foreground disabled:opacity-60"
+                    >
+                      {accepting ? <Loader2 className="h-3 w-3 animate-spin" /> : null}
+                      {accepting ? invitationT("accepting") : invitationT("accept")}
+                    </button>
+                  </div>
+                );
+              })}
 
               <div className="my-2 h-px bg-border/60" />
 
