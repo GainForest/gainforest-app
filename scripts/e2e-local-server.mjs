@@ -15,6 +15,7 @@ function loadDotEnvFile(path) {
   }
 }
 
+loadDotEnvFile(".env.local");
 loadDotEnvFile("e2e/.env");
 
 const port = process.env.E2E_PORT || "3201";

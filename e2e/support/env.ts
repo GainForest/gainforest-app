@@ -27,12 +27,13 @@ function loadDotEnvFile(path: string): void {
   }
 }
 
+loadDotEnvFile(resolve(process.cwd(), ".env.local"));
 loadDotEnvFile(resolve(process.cwd(), "e2e/.env"));
 
 export function getE2EEnv(): E2EEnv {
   const authBaseUrl = process.env.NEXT_PUBLIC_AUTH_BASE_URL?.trim();
   if (!authBaseUrl) {
-    throw new Error("NEXT_PUBLIC_AUTH_BASE_URL is required for E2E tests");
+    throw new Error("Could not infer the app auth base URL. Set NEXT_PUBLIC_AUTH_BASE_URL in the app environment, such as .env.local or the deployment environment.");
   }
 
   return {
