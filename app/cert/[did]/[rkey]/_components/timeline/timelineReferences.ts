@@ -6,6 +6,7 @@ import type {
   TimelineDatasetRecord,
   UploadTreeDatasetRecord,
 } from "@/app/_lib/indexer";
+import { greenGlobeTreePreviewHref } from "@/app/_lib/urls";
 import { formatDate, formatNumber } from "../../../../../_lib/format";
 import { parseAtUri } from "./atUri";
 import { parseAttachmentContent } from "./attachmentContentParser";
@@ -204,8 +205,7 @@ export function getTreeGroupStats(
 }
 
 function greenGlobeTreePreview(did: string, treeGroupUri: string): string {
-  const params = new URLSearchParams({ orgDid: did, datasetRef: treeGroupUri });
-  return `https://greenglobe.gainforest.earth/tree-preview?${params.toString()}`;
+  return greenGlobeTreePreviewHref(did, { datasetRef: treeGroupUri });
 }
 
 function polygonsViewHref(locationUri: string): string {

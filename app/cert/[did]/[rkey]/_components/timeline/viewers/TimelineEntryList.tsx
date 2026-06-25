@@ -1,7 +1,12 @@
 "use client";
 
 import type { TimelineEntryViewModel } from "../shared/timelineViewModel";
+import type { TimelineMapLayer } from "./shared/timelineMapLayers";
 import { TimelineEntry } from "./TimelineEntry";
+
+type TimelineEntryListItem = TimelineEntryViewModel & {
+  mapLayers: TimelineMapLayer[];
+};
 
 export function TimelineEntryList({
   entries,
@@ -11,7 +16,7 @@ export function TimelineEntryList({
   mutationRepo,
   onDeleted,
 }: {
-  entries: TimelineEntryViewModel[];
+  entries: TimelineEntryListItem[];
   canManageEvidence: boolean;
   canDeleteEvidence: boolean;
   deleteDisabledReason: string | null;
@@ -24,6 +29,7 @@ export function TimelineEntryList({
         <TimelineEntry
           key={entry.entryId}
           entry={entry}
+          mapLayers={entry.mapLayers}
           canManageEvidence={canManageEvidence}
           canDeleteEvidence={canDeleteEvidence}
           deleteDisabledReason={deleteDisabledReason}

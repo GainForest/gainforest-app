@@ -120,6 +120,7 @@ export function BumicertTimeline({
         ) : null}
 
         <TimelinePanel
+          organizationDid={organizationDid}
           entries={entries}
           sources={sources}
           references={references}

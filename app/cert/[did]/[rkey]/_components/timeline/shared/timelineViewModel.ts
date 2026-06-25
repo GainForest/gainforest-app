@@ -92,10 +92,10 @@ export function getTimelineFilterCounts(
   );
 }
 
-export function getFilteredTimelineEntries(
-  entries: TimelineEntryViewModel[],
+export function getFilteredTimelineEntries<T extends Pick<TimelineEntryViewModel, "kind">>(
+  entries: T[],
   filter: TimelineEvidenceFilter,
-): TimelineEntryViewModel[] {
+): T[] {
   return entries.filter((entry) => matchesTimelineFilter(entry.kind, filter));
 }
 
