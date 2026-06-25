@@ -389,73 +389,54 @@ export const ADVISORS: ReadonlyArray<Translated<TeamMember>> = [
   },
 ];
 
-// GainForest Data Council; the community-elected body that co-creates
-// GainForest's data-governance policy (datasoil.org). Per the docs
-// (docs.gainforest.earth/community/gainforest-data-council) it pairs
-// three GainForest representatives (David Dao, Sharfy Adamantine,
-// Nurfatin Hamzah; already shown above as co-founders / core team) with
-// three elected regional representatives. We list the regional reps
-// here so the about page doesn't duplicate the GainForest staff cards.
-// Bios collected from the Substack announcement + each rep's public
-// profile (Bees & Trees Uganda, Masungi Georeserve).
-export const DATA_COUNCIL: ReadonlyArray<Translated<TeamMember>> = [
+// Nature Guild; GainForest's rotating circle of community scientists,
+// ecologists, and field leads, and the canonical surface for the
+// Indigenous & local data council. Names, affiliations, and headshots
+// are a verbatim mirror of gainforest.earth's Nature Guild grid (see
+// the landing's <NatureGuild /> at app/_components/NatureGuild.tsx,
+// which is the source of truth). Proper nouns aren't translated, so the
+// affiliation rides in `role` and only the group label is localised.
+// The portraits are reused from public/nature-guild/.
+export const NATURE_GUILD: ReadonlyArray<Translated<TeamMember>> = [
   {
-    name: "Simon Peter Okoth",
-    role: "Regional representative, Africa",
-    location: "Uganda",
-    bio: "Chief Operations Officer at Bees & Trees Uganda. Leads landscape restoration and tree-mapping across Ugandan districts, training young people on the field-data tools that feed Green Globe.",
-    photo: "/team/simon-peter-okoth.webp",
-    i18n: {
-      es: {
-        role: "Representante regional, África",
-        location: "Uganda",
-        bio: "Director de operaciones en Bees & Trees Uganda. Lidera la restauración de paisajes y el mapeo de árboles en distritos de Uganda, formando a jóvenes en las herramientas de datos de campo que alimentan Green Globe.",
-      },
-      pt: {
-        role: "Representante regional, África",
-        location: "Uganda",
-        bio: "Diretor de operações na Bees & Trees Uganda. Lidera a restauração de paisagens e o mapeamento de árvores em distritos de Uganda, formando jovens nas ferramentas de dados de campo que alimentam o Green Globe.",
-      },
-      sw: {
-        role: "Mwakilishi wa kanda, Afrika",
-        location: "Uganda",
-        bio: "Afisa Mkuu wa Uendeshaji katika Bees & Trees Uganda. Anaongoza urejeshaji wa mandhari na uchoraji ramani wa miti katika wilaya za Uganda, akifundisha vijana zana za data za nyanjani zinazolisha Green Globe.",
-      },
-      id: {
-        role: "Perwakilan regional, Afrika",
-        location: "Uganda",
-        bio: "Chief Operations Officer di Bees & Trees Uganda. Memimpin restorasi lanskap dan pemetaan pohon di berbagai distrik Uganda, melatih kaum muda pada perangkat data lapangan yang mengisi Green Globe.",
-      },
-    },
+    name: "Stephen Bright Sakwa",
+    role: "Bees & Trees, Uganda",
+    photo: "/nature-guild/stephen-bright-sakwa.png",
   },
   {
-    name: "Justine Bual",
-    role: "Regional representative, Asia-Pacific",
-    location: "Philippines",
-    bio: "Forestry graduate from UP Los Baños working with the award-winning Masungi Georeserve on environmental education and geotourism, and on bringing Masungi's fieldwork into Green Globe.",
-    photo: "/team/justine-bual.webp",
-    i18n: {
-      es: {
-        role: "Representante regional, Asia-Pacífico",
-        location: "Filipinas",
-        bio: "Graduada en ciencias forestales por UP Los Baños, trabaja con la galardonada Reserva Masungi en educación ambiental y geoturismo, y en llevar el trabajo de campo de Masungi a Green Globe.",
-      },
-      pt: {
-        role: "Representante regional, Ásia-Pacífico",
-        location: "Filipinas",
-        bio: "Graduada em engenharia florestal pela UP Los Baños, trabalha com a premiada Reserva Masungi em educação ambiental e geoturismo, e em levar o trabalho de campo de Masungi ao Green Globe.",
-      },
-      sw: {
-        role: "Mwakilishi wa kanda, Asia-Pasifiki",
-        location: "Ufilipino",
-        bio: "Mhitimu wa misitu kutoka UP Los Baños anayefanya kazi na Hifadhi ya Masungi iliyotuzwa katika elimu ya mazingira na utalii wa kijiolojia, na kuingiza kazi za nyanjani za Masungi kwenye Green Globe.",
-      },
-      id: {
-        role: "Perwakilan regional, Asia-Pasifik",
-        location: "Filipina",
-        bio: "Lulusan kehutanan dari UP Los Baños yang bekerja dengan Masungi Georeserve yang berpenghargaan pada pendidikan lingkungan dan geowisata, serta membawa kerja lapangan Masungi ke Green Globe.",
-      },
-    },
+    name: "Jaya Kandir",
+    role: "Darukaa Earth, India",
+    photo: "/nature-guild/jaya-kandir.png",
+  },
+  {
+    name: "Esayu Daniel",
+    role: "YLEC, Uganda",
+    photo: "/nature-guild/esayu-daniel.png",
+  },
+  {
+    name: "Njambi Njoroge",
+    role: "Grassroots Economics, Kenya",
+    photo: "/nature-guild/njambi-njoroge.png",
+  },
+  {
+    name: "Simon Peter Okoth",
+    role: "Climatica Foundation, Uganda",
+    photo: "/nature-guild/simon-peter-okoth.png",
+  },
+  {
+    name: "Marina Mura",
+    role: "Inhaã-bé, Brazil",
+    photo: "/nature-guild/marina-mura.jpg",
+  },
+  {
+    name: "Nurfatin Hamzah",
+    role: "GainForest, Malaysia",
+    photo: "/nature-guild/nurfatin-hamzah.jpg",
+  },
+  {
+    name: "Tin Dalida",
+    role: "WOVOKA, the Philippines",
+    photo: "/nature-guild/tin-dalida.jpg",
   },
 ];
 

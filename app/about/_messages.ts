@@ -56,7 +56,7 @@ type AboutMessages = {
   "about.team.cofounders": string;
   "about.team.core": string;
   "about.team.advisors": string;
-  "about.team.dataCouncil": string;
+  "about.team.guild": string;
 
   // Recognition
   "about.recognition.eyebrow": string;
@@ -120,7 +120,7 @@ const EN: AboutMessages = {
   "about.team.cofounders": "Co-founders",
   "about.team.core": "Core team",
   "about.team.advisors": "Advisors",
-  "about.team.dataCouncil": "Data council",
+  "about.team.guild": "Nature Guild",
 
   "about.recognition.eyebrow": "Recognition",
   "about.recognition.heading": "Backed by friends who believe in this future.",
@@ -180,7 +180,7 @@ const ES: AboutMessages = {
   "about.team.cofounders": "Cofundadores",
   "about.team.core": "Equipo principal",
   "about.team.advisors": "Asesores",
-  "about.team.dataCouncil": "Consejo de datos",
+  "about.team.guild": "Gremio de la Naturaleza",
 
   "about.recognition.eyebrow": "Reconocimientos",
   "about.recognition.heading": "Respaldados por amigos que creen en este futuro.",
@@ -240,7 +240,7 @@ const PT: AboutMessages = {
   "about.team.cofounders": "Cofundadores",
   "about.team.core": "Equipe principal",
   "about.team.advisors": "Consultores",
-  "about.team.dataCouncil": "Conselho de dados",
+  "about.team.guild": "Conselho da Natureza",
 
   "about.recognition.eyebrow": "Reconhecimento",
   "about.recognition.heading": "Apoiados por amigos que acreditam neste futuro.",
@@ -300,7 +300,7 @@ const SW: AboutMessages = {
   "about.team.cofounders": "Waanzilishi wenza",
   "about.team.core": "Timu kuu",
   "about.team.advisors": "Washauri",
-  "about.team.dataCouncil": "Baraza la data",
+  "about.team.guild": "Baraza la Asili",
 
   "about.recognition.eyebrow": "Utambuzi",
   "about.recognition.heading": "Tunaungwa mkono na marafiki wanaoamini katika hii ya baadaye.",
@@ -360,7 +360,7 @@ const ID: AboutMessages = {
   "about.team.cofounders": "Pendiri bersama",
   "about.team.core": "Tim inti",
   "about.team.advisors": "Penasihat",
-  "about.team.dataCouncil": "Dewan data",
+  "about.team.guild": "Dewan Alam",
 
   "about.recognition.eyebrow": "Pengakuan",
   "about.recognition.heading": "Didukung oleh teman-teman yang percaya pada masa depan ini.",
