@@ -950,12 +950,6 @@ function ObservationBulkAddPanel({
                 {isPreparing ? <Loader2Icon className="size-4 animate-spin" /> : <ImagePlusIcon className="size-4" />}
                 {isPreparing ? t("preparingImages") : items.length > 0 ? t("chooseMoreImages") : t("chooseImages")}
               </Button>
-              {items.length > 0 ? (
-                <Button onClick={() => void uploadSelected()} disabled={isBulkUploading || readySelectedItems.length === 0 || Boolean(disabledReason)} title={disabledReason ?? undefined}>
-                  {isBulkUploading ? <Loader2Icon className="size-4 animate-spin" /> : <UploadCloudIcon className="size-4" />}
-                  {isBulkUploading ? t("uploadingSelected") : t("uploadSelected")}
-                </Button>
-              ) : null}
             </div>
           </div>
         </div>
@@ -982,7 +976,7 @@ function ObservationBulkAddPanel({
           </button>
         ) : (
           <>
-            <div className="space-y-4">
+            <div className="space-y-4 rounded-2xl bg-muted/45 p-4 sm:p-5">
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div className="min-w-0">
                   <p className="text-sm font-medium text-foreground">
@@ -997,6 +991,10 @@ function ObservationBulkAddPanel({
                 <div className="flex flex-wrap gap-2">
                   <Button variant="ghost" size="sm" onClick={openRemoveSelectedModal} disabled={selectedEditableItems.length === 0} className="text-destructive hover:bg-destructive/10 hover:text-destructive">
                     <Trash2Icon className="size-4" /> {t("removeSelected")}
+                  </Button>
+                  <Button size="sm" onClick={() => void uploadSelected()} disabled={isBulkUploading || readySelectedItems.length === 0 || Boolean(disabledReason)} title={disabledReason ?? undefined}>
+                    {isBulkUploading ? <Loader2Icon className="size-4 animate-spin" /> : <UploadCloudIcon className="size-4" />}
+                    {isBulkUploading ? t("uploadingSelected") : t("uploadSelected")}
                   </Button>
                 </div>
               </div>
