@@ -65,12 +65,12 @@ export function AboutTeam() {
         {/* Co-founders — featured cards (wider, with bios). */}
         <TeamGroup label={t("about.team.cofounders")} members={cofounders} featured />
 
+        {/* Data council & advisors — independent scientists / platform
+            leads, between co-founders and the core team. */}
+        <TeamGroup label={t("about.team.advisors")} members={advisors} />
+
         {/* Core team — 3-column grid. */}
         <TeamGroup label={t("about.team.core")} members={coreTeam} />
-
-        {/* Data council & advisors — independent scientists / platform
-            leads, same 3-column grid as the core team. */}
-        <TeamGroup label={t("about.team.advisors")} members={advisors} />
       </div>
     </section>
   );
