@@ -358,27 +358,27 @@ export const ADVISORS: ReadonlyArray<Translated<TeamMember>> = [
   },
   {
     name: "Ken-Ichi Ueda",
-    role: "Co-founder & Co-director, iNaturalist",
+    role: "Co-founder, iNaturalist",
     location: "United States",
     bio: "Co-founded iNaturalist, the global platform where millions of naturalists document and share the biodiversity observations that ground open ecological data.",
     i18n: {
       es: {
-        role: "Cofundador y codirector, iNaturalist",
+        role: "Cofundador, iNaturalist",
         location: "Estados Unidos",
         bio: "Cofundó iNaturalist, la plataforma global donde millones de naturalistas documentan y comparten las observaciones de biodiversidad que sustentan los datos ecológicos abiertos.",
       },
       pt: {
-        role: "Cofundador e codiretor, iNaturalist",
+        role: "Cofundador, iNaturalist",
         location: "Estados Unidos",
         bio: "Cofundou o iNaturalist, a plataforma global onde milhões de naturalistas documentam e partilham as observações de biodiversidade que sustentam os dados ecológicos abertos.",
       },
       sw: {
-        role: "Mwanzilishi mwenza na Mkurugenzi mwenza, iNaturalist",
+        role: "Mwanzilishi mwenza, iNaturalist",
         location: "Marekani",
         bio: "Alianzisha iNaturalist, jukwaa la kimataifa ambapo mamilioni ya wanasayansi wa asili huandika na kushiriki uchunguzi wa bayoanuwai unaohimili data huria ya ikolojia.",
       },
       id: {
-        role: "Pendiri bersama & Co-direktur, iNaturalist",
+        role: "Pendiri bersama, iNaturalist",
         location: "Amerika Serikat",
         bio: "Turut mendirikan iNaturalist, platform global tempat jutaan naturalis mendokumentasikan dan berbagi observasi keanekaragaman hayati yang menjadi dasar data ekologi terbuka.",
       },
