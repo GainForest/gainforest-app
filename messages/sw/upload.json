@@ -694,7 +694,10 @@
     "keepSeparate": "Uchunguzi wake mwenyewe",
     "unidentified": "Haijatambuliwa",
     "photoCount": "{count, plural, one {picha #} other {picha #}}",
-    "uploadGroup": "Pakia kikundi"
+    "uploadGroup": "Pakia kikundi",
+    "retryAnalysis": "Jaribu tena",
+    "dropToAdd": "Achia ili kuongeza",
+    "emptyUploadHint": "Buruta picha hapa, au bofya kuchagua."
   },
   "settings": {
     "organizationTitle": "Mipangilio ya shirika",

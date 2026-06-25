@@ -694,7 +694,10 @@
     "keepSeparate": "Observasi tersendiri",
     "unidentified": "Belum teridentifikasi",
     "photoCount": "{count, plural, other {# foto}}",
-    "uploadGroup": "Unggah kelompok"
+    "uploadGroup": "Unggah kelompok",
+    "retryAnalysis": "Coba lagi",
+    "dropToAdd": "Lepas untuk menambah",
+    "emptyUploadHint": "Seret foto ke sini, atau klik untuk memilih."
   },
   "settings": {
     "organizationTitle": "Pengaturan organisasi",

@@ -6,6 +6,21 @@ const MAX_IMAGE_BYTES = 4 * 1024 * 1024;
 const ACCEPTED_IMAGE_TYPES = new Set(["image/jpeg", "image/jpg", "image/png", "image/webp", "image/heic", "image/heif"]);
 const DEFAULT_GEMINI_MODEL = "gemini-2.5-flash-lite";
 
+// Gemini (especially the -lite tier) returns the occasional 429/5xx, empty
+// candidate, or non-JSON body. Those are transient: a quick retry almost always
+// succeeds. We retry the whole call a few times with jittered backoff and abort
+// any single attempt that stalls, so the client sees a stable result.
+const MAX_ATTEMPTS = 3;
+const ATTEMPT_TIMEOUT_MS = 22_000;
+const RETRY_STATUS = new Set([408, 409, 425, 429, 500, 502, 503, 504]);
+
+const sleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
+
+// 400ms, then ~1s, with jitter so simultaneous uploads don't retry in lockstep.
+function backoffDelay(attempt: number): number {
+  return Math.round((400 * 2 ** attempt) * (0.7 + Math.random() * 0.6));
+}
+
 type GeminiAnalysis = {
   scientificName?: string | null;
   vernacularName?: string | null;
@@ -125,15 +140,52 @@ async function callGemini(auth: GeminiAuth, prompt: string, mimeType: string, im
     },
   });
 
-  return fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(auth.model)}:generateContent?key=${encodeURIComponent(auth.key)}`,
-    {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body,
-      cache: "no-store",
-    },
-  );
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), ATTEMPT_TIMEOUT_MS);
+  try {
+    return await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(auth.model)}:generateContent?key=${encodeURIComponent(auth.key)}`,
+      {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body,
+        cache: "no-store",
+        signal: controller.signal,
+      },
+    );
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+type AttemptResult =
+  | { ok: true; analysis: GeminiAnalysis }
+  | { ok: false; retryable: boolean };
+
+// One full request → parse cycle. Network/abort errors, retryable HTTP statuses,
+// empty candidates, and unparseable bodies are all reported as retryable so the
+// caller can try again; anything else is a hard failure.
+async function analyzeOnce(auth: GeminiAuth, prompt: string, mimeType: string, bytes: Buffer): Promise<AttemptResult> {
+  let response: Response;
+  try {
+    response = await callGemini(auth, prompt, mimeType, bytes);
+  } catch {
+    return { ok: false, retryable: true };
+  }
+
+  const data = (await response.json().catch(() => null)) as GeminiResponse | null;
+  if (!response.ok || data?.error) {
+    return { ok: false, retryable: RETRY_STATUS.has(response.status) };
+  }
+
+  const text = data?.candidates?.[0]?.content?.parts?.find((part) => typeof part.text === "string")?.text;
+  if (!text) return { ok: false, retryable: true };
+
+  try {
+    return { ok: true, analysis: normalizeAnalysis(extractJson(text)) };
+  } catch {
+    return { ok: false, retryable: true };
+  }
 }
 
 export async function POST(request: Request) {
@@ -151,16 +203,12 @@ export async function POST(request: Request) {
   const bytes = Buffer.from(await file.arrayBuffer());
   const prompt = `Analyze this field observation photo and return only JSON. Fill fields for a biodiversity observation record. If a value is not visible, use null, except scientificName should be "Unidentified organism" when uncertain and eventDate may be null. Use ISO dates when possible. Coordinates must be decimal strings if visible in metadata or image context. Choose subjectPart like wholeOrganism, leaf, flower, fruit, bark, stem, seed, animal, fungus. Include a short caption and occurrenceRemarks that explain what is visible. Return keys: scientificName, vernacularName, kingdom, eventDate, recordedBy, decimalLatitude, decimalLongitude, country, locality, habitat, occurrenceRemarks, subjectPart, caption, confidence.`;
 
-  const response = await callGemini(auth, prompt, mimeType, bytes);
-  const data = (await response.json().catch(() => null)) as GeminiResponse | null;
-  if (!response.ok || data?.error) return jsonError("analysis_failed", 502);
-
-  const text = data?.candidates?.[0]?.content?.parts?.find((part) => typeof part.text === "string")?.text;
-  if (!text) return jsonError("analysis_failed", 502);
-
-  try {
-    return NextResponse.json({ analysis: normalizeAnalysis(extractJson(text)) });
-  } catch {
-    return jsonError("analysis_failed", 502);
+  for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt += 1) {
+    const result = await analyzeOnce(auth, prompt, mimeType, bytes);
+    if (result.ok) return NextResponse.json({ analysis: result.analysis });
+    if (!result.retryable || attempt === MAX_ATTEMPTS - 1) break;
+    await sleep(backoffDelay(attempt));
   }
+
+  return jsonError("analysis_failed", 502);
 }

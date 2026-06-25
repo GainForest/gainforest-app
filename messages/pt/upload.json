@@ -694,7 +694,10 @@
     "keepSeparate": "Observação própria",
     "unidentified": "Não identificado",
     "photoCount": "{count, plural, one {# foto} other {# fotos}}",
-    "uploadGroup": "Enviar grupo"
+    "uploadGroup": "Enviar grupo",
+    "retryAnalysis": "Tentar de novo",
+    "dropToAdd": "Solte para adicionar",
+    "emptyUploadHint": "Arraste fotos aqui ou clique para escolher."
   },
   "settings": {
     "organizationTitle": "Configurações da organização",
