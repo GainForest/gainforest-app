@@ -108,6 +108,31 @@
       "fallbackName": "Wasifu wako"
     }
   },
+  "settings": {
+    "handle": {
+      "title": "Jina la mtumiaji",
+      "description": "Jina lako la mtumiaji ni jina lako la umma katika programu nzima — libadilishe hapa nalo litasasishwa kila mahali.",
+      "edit": "Hariri",
+      "newLabel": "Jina jipya la mtumiaji",
+      "placeholder": "jinalako",
+      "prefixHint": "Herufi 3–18. Herufi, nambari na vistari pekee.",
+      "save": "Hifadhi",
+      "saving": "Inahifadhi…",
+      "cancel": "Ghairi",
+      "useOwnDomain": "Tumia kikoa changu mwenyewe",
+      "useSubdomain": "Tumia jina la .{suffix}",
+      "customLabel": "Jina kamili la mtumiaji (kikoa chako mwenyewe)",
+      "customHint": "Ili kutumia kikoa chako mwenyewe, ongeza rekodi ya DNS TXT kwenye _atproto inayoelekeza kwenye Kitambulisho cha akaunti yako, kisha uhifadhi.",
+      "customRecord": "Kitambulisho cha akaunti",
+      "success": "Jina la mtumiaji limesasishwa kuwa {handle}",
+      "errors": {
+        "length": "Jina la mtumiaji lazima liwe na herufi 3–18.",
+        "prefixChars": "Tumia herufi ndogo, nambari na vistari pekee. Haliwezi kuanza au kuishia na kistari.",
+        "full": "Weka jina kamili la mtumiaji kama alice.example.com.",
+        "generic": "Haikuwezekana kusasisha jina lako la mtumiaji. Tafadhali jaribu tena."
+      }
+    }
+  },
   "bumicertCard": {
     "missingImage": "Picha ya cheti haipatikani",
     "additionalObjectives": "{count, plural, one {lengo # la ziada} other {malengo # ya ziada}}"

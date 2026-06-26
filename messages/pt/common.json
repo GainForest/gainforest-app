@@ -108,6 +108,31 @@
       "fallbackName": "Seu perfil"
     }
   },
+  "settings": {
+    "handle": {
+      "title": "Nome de usuário",
+      "description": "Seu nome de usuário é seu nome público em todo o app — altere-o aqui e ele é atualizado em todos os lugares.",
+      "edit": "Editar",
+      "newLabel": "Novo nome de usuário",
+      "placeholder": "seunome",
+      "prefixHint": "De 3 a 18 caracteres. Apenas letras, números e hifens.",
+      "save": "Salvar",
+      "saving": "Salvando…",
+      "cancel": "Cancelar",
+      "useOwnDomain": "Usar meu próprio domínio",
+      "useSubdomain": "Usar um nome .{suffix}",
+      "customLabel": "Nome de usuário completo (seu próprio domínio)",
+      "customHint": "Para usar seu próprio domínio, adicione um registro DNS TXT em _atproto apontando para o ID da sua conta e depois salve.",
+      "customRecord": "ID da conta",
+      "success": "Nome de usuário atualizado para {handle}",
+      "errors": {
+        "length": "O nome de usuário deve ter entre 3 e 18 caracteres.",
+        "prefixChars": "Use apenas letras minúsculas, números e hifens. Não pode começar nem terminar com hífen.",
+        "full": "Digite um nome de usuário completo como alice.example.com.",
+        "generic": "Não foi possível atualizar seu nome de usuário. Tente novamente."
+      }
+    }
+  },
   "bumicertCard": {
     "missingImage": "Imagem do certificado indisponível",
     "additionalObjectives": "{count, plural, one {# objetivo adicional} other {# objetivos adicionais}}"

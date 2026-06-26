@@ -1,17 +1,20 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import { blo } from "blo";
 import {
   AlertTriangleIcon,
   ArrowRightIcon,
+  AtSignIcon,
   CheckCircle2Icon,
   CheckIcon,
   ChevronRight,
   ExternalLinkIcon,
   EyeIcon,
   EyeOffIcon,
+  GlobeIcon,
   KeyRoundIcon,
   Loader2Icon,
   PencilIcon,
@@ -78,6 +81,205 @@ async function resolvePdsUrl(did: string): Promise<string> {
   const data = (await response.json().catch(() => null)) as { pdsUrl?: string; error?: string } | null;
   if (!response.ok || !data?.pdsUrl) throw new Error(data?.error ?? "Failed to resolve account server");
   return data.pdsUrl;
+}
+
+// ── Username (handle) ────────────────────────────────────────────────────────
+
+// Subdomain prefix (the "alice" in alice.gainforest.app). Full handle = a
+// hostname; used when the account is on its own domain.
+const PREFIX_REGEX = /^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/;
+const FULL_HANDLE_REGEX =
+  /^([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]([a-z0-9-]{0,61}[a-z0-9])?$/;
+
+type HandleMode = "display" | "prefix" | "custom";
+
+function HandleSection({ did, handle: initialHandle }: { did: string; handle: string }) {
+  const t = useTranslations("common.settings.handle");
+  const [handle, setHandle] = useState(initialHandle);
+  const [mode, setMode] = useState<HandleMode>("display");
+  const [prefix, setPrefix] = useState("");
+  const [customHandle, setCustomHandle] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [justSaved, setJustSaved] = useState(false);
+
+  // "alice.gainforest.app" -> prefix "alice", suffix "gainforest.app".
+  // Two-segment handles (alice.com) are custom domains -> no prefix mode.
+  const suffix = useMemo(() => {
+    const parts = handle.split(".");
+    return parts.length >= 3 ? parts.slice(1).join(".") : null;
+  }, [handle]);
+
+  function startEdit() {
+    setError(null);
+    setJustSaved(false);
+    if (suffix) {
+      setPrefix(handle.split(".")[0]);
+      setMode("prefix");
+    } else {
+      setCustomHandle(handle);
+      setMode("custom");
+    }
+  }
+
+  function cancel() {
+    setMode("display");
+    setError(null);
+  }
+
+  async function submit(newHandle: string) {
+    setSaving(true);
+    setError(null);
+    try {
+      const response = await fetch("/api/account/handle", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ handle: newHandle }),
+      });
+      const data = (await response.json().catch(() => null)) as { error?: string } | null;
+      if (!response.ok || data?.error) throw new Error(data?.error ?? t("errors.generic"));
+      setHandle(newHandle);
+      setMode("display");
+      setJustSaved(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t("errors.generic"));
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  function savePrefix() {
+    if (!suffix) return;
+    const trimmed = prefix.trim().toLowerCase();
+    if (trimmed.length < 3 || trimmed.length > 18) {
+      setError(t("errors.length"));
+      return;
+    }
+    if (!PREFIX_REGEX.test(trimmed)) {
+      setError(t("errors.prefixChars"));
+      return;
+    }
+    void submit(`${trimmed}.${suffix}`);
+  }
+
+  function saveCustom() {
+    const trimmed = customHandle.trim().toLowerCase().replace(/^@/, "");
+    if (!FULL_HANDLE_REGEX.test(trimmed)) {
+      setError(t("errors.full"));
+      return;
+    }
+    void submit(trimmed);
+  }
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center gap-2">
+        <AtSignIcon className="h-4 w-4 text-foreground/70" />
+        <h2 className="text-sm font-medium">{t("title")}</h2>
+      </div>
+
+      <div className="bg-muted rounded-xl p-1 w-full">
+        <div className="flex flex-col gap-3 px-3 py-3">
+          {mode === "display" ? (
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <p className="text-base font-medium text-foreground break-all">@{handle}</p>
+                <p className="mt-1 text-xs text-muted-foreground">{t("description")}</p>
+                {justSaved ? (
+                  <p className="mt-2 flex items-center gap-1 text-xs text-green-700 dark:text-green-400">
+                    <CheckIcon className="h-3.5 w-3.5 shrink-0" /> {t("success", { handle: `@${handle}` })}
+                  </p>
+                ) : null}
+              </div>
+              <Button size="sm" variant="ghost" onClick={startEdit} className="shrink-0">
+                <PencilIcon className="h-3.5 w-3.5" /> {t("edit")}
+              </Button>
+            </div>
+          ) : null}
+
+          {mode === "prefix" && suffix ? (
+            <div className="space-y-2">
+              <Label htmlFor="handle-prefix">{t("newLabel")}</Label>
+              <div className="flex items-center gap-2">
+                <Input
+                  id="handle-prefix"
+                  value={prefix}
+                  autoFocus
+                  disabled={saving}
+                  onChange={(e) => setPrefix(e.target.value.replace(/[^a-zA-Z0-9-]/g, ""))}
+                  placeholder={t("placeholder")}
+                  className="bg-background max-w-[16rem]"
+                />
+                <span className="whitespace-nowrap text-sm text-muted-foreground">.{suffix}</span>
+              </div>
+              <p className="text-xs text-muted-foreground">{t("prefixHint")}</p>
+              {error ? <p className="text-xs text-destructive">{error}</p> : null}
+              <div className="flex items-center gap-2 pt-1">
+                <Button size="sm" onClick={savePrefix} disabled={saving}>
+                  {saving ? <Loader2Icon className="h-3.5 w-3.5 animate-spin" /> : null}
+                  {saving ? t("saving") : t("save")}
+                </Button>
+                <Button size="sm" variant="ghost" onClick={cancel} disabled={saving}>
+                  {t("cancel")}
+                </Button>
+                <button
+                  type="button"
+                  disabled={saving}
+                  onClick={() => {
+                    setCustomHandle("");
+                    setError(null);
+                    setMode("custom");
+                  }}
+                  className="ml-auto inline-flex items-center gap-1 text-xs text-muted-foreground underline-offset-2 hover:underline disabled:opacity-50"
+                >
+                  <GlobeIcon className="h-3 w-3" /> {t("useOwnDomain")}
+                </button>
+              </div>
+            </div>
+          ) : null}
+
+          {mode === "custom" ? (
+            <div className="space-y-2">
+              <Label htmlFor="handle-custom">{t("customLabel")}</Label>
+              <Input
+                id="handle-custom"
+                value={customHandle}
+                autoFocus
+                disabled={saving}
+                onChange={(e) => setCustomHandle(e.target.value.replace(/[^a-zA-Z0-9.-]/g, ""))}
+                placeholder="alice.example.com"
+                className="bg-background"
+              />
+              <p className="text-xs text-muted-foreground">{t("customHint")}</p>
+              <p className="text-[11px] font-mono break-all text-muted-foreground/80">
+                {t("customRecord")}: {did}
+              </p>
+              {error ? <p className="text-xs text-destructive">{error}</p> : null}
+              <div className="flex items-center gap-2 pt-1">
+                <Button size="sm" onClick={saveCustom} disabled={saving}>
+                  {saving ? <Loader2Icon className="h-3.5 w-3.5 animate-spin" /> : null}
+                  {saving ? t("saving") : t("save")}
+                </Button>
+                <Button size="sm" variant="ghost" onClick={cancel} disabled={saving}>
+                  {t("cancel")}
+                </Button>
+                {suffix ? (
+                  <button
+                    type="button"
+                    disabled={saving}
+                    onClick={startEdit}
+                    className="ml-auto inline-flex items-center gap-1 text-xs text-muted-foreground underline-offset-2 hover:underline disabled:opacity-50"
+                  >
+                    <AtSignIcon className="h-3 w-3" /> {t("useSubdomain", { suffix })}
+                  </button>
+                ) : null}
+              </div>
+            </div>
+          ) : null}
+        </div>
+      </div>
+    </div>
+  );
 }
 
 // ── Password ────────────────────────────────────────────────────────────────
@@ -618,9 +820,10 @@ function AccountSection({ did }: { did: string }) {
   );
 }
 
-export function AccountSettingsSections({ did }: { did: string }) {
+export function AccountSettingsSections({ did, handle }: { did: string; handle?: string | null }) {
   return (
     <div className="mx-auto mt-8 mb-20 space-y-8">
+      {handle ? <HandleSection did={did} handle={handle} /> : null}
       <PasswordSection did={did} />
       <WalletsSection did={did} />
       <Accordion type="single" collapsible>

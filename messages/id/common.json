@@ -108,6 +108,31 @@
       "fallbackName": "Profil Anda"
     }
   },
+  "settings": {
+    "handle": {
+      "title": "Nama pengguna",
+      "description": "Nama pengguna adalah nama publik Anda di seluruh aplikasi — ubah di sini dan akan diperbarui di mana saja.",
+      "edit": "Sunting",
+      "newLabel": "Nama pengguna baru",
+      "placeholder": "namaanda",
+      "prefixHint": "3–18 karakter. Hanya huruf, angka, dan tanda hubung.",
+      "save": "Simpan",
+      "saving": "Menyimpan…",
+      "cancel": "Batal",
+      "useOwnDomain": "Gunakan domain saya sendiri",
+      "useSubdomain": "Gunakan nama .{suffix}",
+      "customLabel": "Nama pengguna lengkap (domain Anda sendiri)",
+      "customHint": "Untuk menggunakan domain Anda sendiri, tambahkan catatan DNS TXT di _atproto yang mengarah ke ID akun Anda, lalu simpan.",
+      "customRecord": "ID akun",
+      "success": "Nama pengguna diperbarui menjadi {handle}",
+      "errors": {
+        "length": "Nama pengguna harus 3–18 karakter.",
+        "prefixChars": "Gunakan hanya huruf kecil, angka, dan tanda hubung. Tidak boleh diawali atau diakhiri tanda hubung.",
+        "full": "Masukkan nama pengguna lengkap seperti alice.example.com.",
+        "generic": "Tidak dapat memperbarui nama pengguna Anda. Silakan coba lagi."
+      }
+    }
+  },
   "bumicertCard": {
     "missingImage": "Gambar sertifikat tidak tersedia",
     "additionalObjectives": "{count, plural, one {# tujuan tambahan} other {# tujuan tambahan}}"

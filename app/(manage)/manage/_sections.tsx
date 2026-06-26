@@ -216,13 +216,19 @@ export async function SettingsSection({ target }: { target: ManageTarget }) {
     );
   }
 
+  // The username editor only makes sense for the signed-in user's own
+  // account, so the current handle is resolved from the session here and
+  // passed down; other (read-only) settings views omit it.
+  const personalSession = await fetchAuthSession();
+  const currentHandle = personalSession.isLoggedIn ? personalSession.handle : null;
+
   return (
     <Container className="pt-4 pb-8">
       <div className="mb-6">
         <h1 className="text-2xl font-medium">{t("personalTitle")}</h1>
         <p className="mt-1 text-sm text-muted-foreground">{t("personalDescription")}</p>
       </div>
-      <AccountSettingsSections did={target.did} />
+      <AccountSettingsSections did={target.did} handle={currentHandle} />
     </Container>
   );
 }

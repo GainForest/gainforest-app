@@ -108,6 +108,31 @@
       "fallbackName": "Your profile"
     }
   },
+  "settings": {
+    "handle": {
+      "title": "Username",
+      "description": "Your username is your public name across the app — change it here and it updates everywhere.",
+      "edit": "Edit",
+      "newLabel": "New username",
+      "placeholder": "yourname",
+      "prefixHint": "3–18 characters. Letters, numbers, and hyphens only.",
+      "save": "Save",
+      "saving": "Saving…",
+      "cancel": "Cancel",
+      "useOwnDomain": "Use my own domain",
+      "useSubdomain": "Use a .{suffix} username",
+      "customLabel": "Full username (your own domain)",
+      "customHint": "To use your own domain, add a DNS TXT record at _atproto pointing to your account ID, then save.",
+      "customRecord": "Account ID",
+      "success": "Username updated to {handle}",
+      "errors": {
+        "length": "Username must be 3–18 characters.",
+        "prefixChars": "Use only lowercase letters, numbers, and hyphens. It can’t start or end with a hyphen.",
+        "full": "Enter a full username like alice.example.com.",
+        "generic": "Could not update your username. Please try again."
+      }
+    }
+  },
   "bumicertCard": {
     "missingImage": "Cert image unavailable",
     "additionalObjectives": "{count, plural, one {# additional objective} other {# additional objectives}}"
