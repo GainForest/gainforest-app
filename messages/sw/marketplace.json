@@ -241,6 +241,12 @@
       "title": "Changamoto ya BioBlitz ya Wiki — GainForest",
       "description": "Toka nje, piga picha viumbe hai, na ongeza uoni wako. Kila wiki, mkusanyaji bora na picha bora hushinda zawadi."
     },
+    "banner": {
+      "message": "Changamoto ya BioBlitz ya Wiki inaendelea. Piga picha asili na ushinde zawadi.",
+      "cta": "Jifunze zaidi",
+      "dismiss": "Ondoa tangazo hili",
+      "close": "Funga"
+    },
     "hero": {
       "eyebrow": "Changamoto ya BioBlitz ya Wiki",
       "titlePrefix": "Changamoto ya",

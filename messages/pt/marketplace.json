@@ -241,6 +241,12 @@
       "title": "Desafio BioBlitz Semanal — GainForest",
       "description": "Saia, fotografe seres vivos e adicione seus registros. A cada semana, quem mais registrar e a melhor foto ganham um prêmio."
     },
+    "banner": {
+      "message": "O Desafio BioBlitz Semanal está no ar. Fotografe a natureza e ganhe prêmios.",
+      "cta": "Saiba mais",
+      "dismiss": "Dispensar este aviso",
+      "close": "Fechar"
+    },
     "hero": {
       "eyebrow": "Desafio BioBlitz Semanal",
       "titlePrefix": "Desafio",

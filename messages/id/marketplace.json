@@ -241,6 +241,12 @@
       "title": "Tantangan BioBlitz Mingguan — GainForest",
       "description": "Keluar rumah, foto makhluk hidup, dan tambahkan pengamatanmu. Setiap minggu, pengumpul terbanyak dan foto terbaik memenangkan hadiah."
     },
+    "banner": {
+      "message": "Tantangan BioBlitz Mingguan sedang berlangsung. Foto alam dan menangkan hadiah.",
+      "cta": "Pelajari selengkapnya",
+      "dismiss": "Tutup spanduk ini",
+      "close": "Tutup"
+    },
     "hero": {
       "eyebrow": "Tantangan BioBlitz Mingguan",
       "titlePrefix": "Tantangan",
