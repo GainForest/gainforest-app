@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { createPortal } from "react-dom";
 import { usePathname, useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
@@ -33,6 +34,13 @@ function groupName(group: SwitcherGroup): string {
   return group.displayName?.trim() || "Organization account";
 }
 
+/** Renders children into document.body so the flyout escapes the sidebar's
+ *  `overflow-hidden`, which otherwise clips it when the sidebar is collapsed. */
+function FlyoutPortal({ children }: { children: React.ReactNode }) {
+  if (typeof document === "undefined") return null;
+  return createPortal(children, document.body);
+}
+
 function AccountAvatar({ avatarUrl, label, icon }: { avatarUrl?: string | null; label: string; icon: React.ReactNode }) {
   return (
     <span className="relative flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-primary/10 text-primary">
@@ -54,6 +62,8 @@ export function ManageContextSwitcher({
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const [menuPosition, setMenuPosition] = useState<{ top: number; left: number; width: number } | null>(null);
 
   const { personal, groups, status, reload } = useAccountList(sessionDid);
   const [activeContext, setActiveContext] = useActiveAccountContext(sessionDid);
@@ -63,7 +73,9 @@ export function ManageContextSwitcher({
   useEffect(() => {
     if (!open) return;
     const handlePointerDown = (event: PointerEvent) => {
-      if (containerRef.current?.contains(event.target as Node)) return;
+      const target = event.target as Node;
+      if (containerRef.current?.contains(target)) return;
+      if (menuRef.current?.contains(target)) return;
       setOpen(false);
     };
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -76,6 +88,24 @@ export function ManageContextSwitcher({
       document.removeEventListener("keydown", handleKeyDown);
     };
   }, [open]);
+
+  // Keep the portaled flyout anchored to the trigger across scroll/resize.
+  useEffect(() => {
+    if (!open) return;
+    const update = () => {
+      const el = containerRef.current;
+      if (!el) return;
+      const rect = el.getBoundingClientRect();
+      setMenuPosition({ top: rect.bottom + 6, left: rect.left, width: collapsed ? 256 : rect.width });
+    };
+    update();
+    window.addEventListener("resize", update);
+    window.addEventListener("scroll", update, true);
+    return () => {
+      window.removeEventListener("resize", update);
+      window.removeEventListener("scroll", update, true);
+    };
+  }, [open, collapsed]);
 
   const activeGroup =
     activeContext.type === "group" ? groups.find((group) => group.groupDid === activeContext.did) ?? null : null;
@@ -119,16 +149,16 @@ export function ManageContextSwitcher({
       </button>
 
       <AnimatePresence>
-        {open ? (
+        {open && menuPosition ? (
+          <FlyoutPortal key="manage-context-switcher-flyout">
           <motion.div
+            ref={menuRef}
             initial={{ opacity: 0, scale: 0.97, y: -4 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.97, y: -4 }}
             transition={{ duration: 0.14, ease: [0.25, 0.1, 0.25, 1] }}
-            className={cn(
-              "absolute top-full z-50 mt-1.5 overflow-hidden rounded-xl border border-border bg-background/95 shadow-xl shadow-black/10 backdrop-blur-sm",
-              collapsed ? "left-0 w-64" : "left-0 right-0",
-            )}
+            style={{ position: "fixed", top: menuPosition.top, left: menuPosition.left, width: menuPosition.width }}
+            className="z-50 overflow-hidden rounded-xl border border-border bg-background/95 shadow-xl shadow-black/10 backdrop-blur-sm"
           >
             <div className="max-h-[min(60vh,28rem)] overflow-y-auto p-1.5">
               <button
@@ -206,6 +236,7 @@ export function ManageContextSwitcher({
               </Link>
             </div>
           </motion.div>
+          </FlyoutPortal>
         ) : null}
       </AnimatePresence>
     </div>
