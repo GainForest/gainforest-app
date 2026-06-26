@@ -1,8 +1,6 @@
 "use client";
 
-import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
-import { motion } from "framer-motion";
 import {
   ArrowDownWideNarrowIcon,
   ChevronRightIcon,
@@ -29,7 +27,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { AuthorInline } from "../_components/AuthorChip";
 import { PreferredAccountLink } from "../_components/PreferredLinks";
-import { StatsTileGrid, type StatsTileItem } from "../_components/StatsTile";
+import { PictureHero } from "../_components/PictureHero";
 import { fetchReceipts, type FundingReceipt } from "../_lib/dashboard";
 import { formatCompactUsd } from "../_lib/format";
 
@@ -114,7 +112,6 @@ export function LeaderboardClient({ embedded = false }: { embedded?: boolean }) 
 
   return (
     <LeaderboardShell
-      animate={false}
       embedded={embedded}
       period={period}
       onPeriodChange={(nextPeriod) => void setPeriod(nextPeriod)}
@@ -141,8 +138,10 @@ export function LeaderboardClient({ embedded = false }: { embedded?: boolean }) 
 
 function PeriodChips({ period, onPeriodChange }: { period: Period; onPeriodChange: (period: Period) => void }) {
   const t = useTranslations("marketplace.leaderboard.periods");
+  // Matches the Donations overview PeriodFilter so the hero control is identical
+  // across the Overview ↔ Leaderboard switch.
   return (
-    <div className="grid h-12 grid-cols-3 rounded-full bg-muted/55 p-1 shadow-sm shadow-primary/5 ring-1 ring-foreground/5 backdrop-blur">
+    <div className="flex items-center gap-1 rounded-full bg-muted/55 p-1 shadow-sm shadow-primary/5 ring-1 ring-foreground/5 backdrop-blur">
       {PERIODS.map((option) => {
         const isSelected = period === option;
         return (
@@ -152,7 +151,7 @@ function PeriodChips({ period, onPeriodChange }: { period: Period; onPeriodChang
             aria-pressed={isSelected}
             onClick={() => onPeriodChange(option)}
             className={cn(
-              "inline-flex h-10 items-center justify-center whitespace-nowrap rounded-full px-4 text-sm font-medium transition-all duration-200",
+              "rounded-full px-3.5 py-1.5 text-sm font-medium transition-all duration-200",
               isSelected
                 ? "bg-primary text-primary-foreground shadow-sm shadow-primary/20"
                 : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
@@ -175,7 +174,7 @@ function DonorTypeTabs({
 }) {
   const t = useTranslations("marketplace.leaderboard");
   return (
-    <div className="grid h-12 grid-cols-3 rounded-full bg-muted/55 p-1 shadow-sm shadow-primary/5 ring-1 ring-foreground/5 backdrop-blur">
+    <div className="grid h-10 w-full grid-cols-3 rounded-full bg-muted/55 p-1 shadow-sm shadow-primary/5 ring-1 ring-foreground/5 backdrop-blur">
       {DONOR_FILTER_VALUES.map((value) => {
         const Icon = DONOR_FILTER_ICONS[value];
         const label = t(`donorFilters.${value}`);
@@ -188,13 +187,13 @@ function DonorTypeTabs({
             aria-pressed={isSelected}
             onClick={() => onDonorFilterChange(value)}
             className={cn(
-              "inline-flex h-10 items-center justify-center gap-1.5 whitespace-nowrap rounded-full px-2 text-sm font-medium transition-all duration-200 sm:gap-2 sm:px-4",
+              "inline-flex h-8 items-center justify-center gap-1.5 whitespace-nowrap rounded-full px-2 text-[13px] font-medium transition-all duration-200 sm:px-3",
               isSelected
                 ? "bg-primary text-primary-foreground shadow-sm shadow-primary/20"
                 : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
             )}
           >
-            <Icon className="hidden size-4 sm:block" />
+            <Icon className="hidden size-3.5 sm:block" />
             <span className="sm:hidden">{shortLabel}</span>
             <span className="hidden sm:inline">{label}</span>
           </button>
@@ -208,12 +207,12 @@ function SortControl({ sortBy, onSortChange }: { sortBy: SortMode; onSortChange:
   const t = useTranslations("marketplace.leaderboard.sort");
   const sortOptions = SORT_VALUES.map((value) => ({ value, label: t(SORT_TRANSLATION_KEYS[value]) }));
   return (
-    <div className="flex h-12 items-center justify-between gap-3 rounded-full bg-muted/55 py-1.5 pr-1.5 pl-4 shadow-sm shadow-primary/5 ring-1 ring-foreground/5 backdrop-blur">
+    <div className="flex h-10 items-center justify-between gap-2 rounded-full bg-muted/55 py-1 pr-1 pl-3.5 shadow-sm shadow-primary/5 ring-1 ring-foreground/5 backdrop-blur">
       <span
         id="leaderboard-sort-label"
-        className="inline-flex shrink-0 items-center gap-2 whitespace-nowrap text-sm font-medium text-muted-foreground"
+        className="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap text-[13px] font-medium text-muted-foreground"
       >
-        <ArrowDownWideNarrowIcon className="size-4" />
+        <ArrowDownWideNarrowIcon className="size-3.5" />
         {t("label")}
       </span>
       <Select
@@ -224,7 +223,7 @@ function SortControl({ sortBy, onSortChange }: { sortBy: SortMode; onSortChange:
       >
         <SelectTrigger
           aria-labelledby="leaderboard-sort-label"
-          className="h-9 min-w-[10.5rem] rounded-full border-0 bg-background/70 px-3 text-sm font-medium text-foreground shadow-none ring-1 ring-foreground/5 focus:ring-1 focus:ring-ring"
+          className="h-8 min-w-[9.5rem] rounded-full border-0 bg-background/70 px-3 text-[13px] font-medium text-foreground shadow-none ring-1 ring-foreground/5 focus:ring-1 focus:ring-ring"
         >
           <SelectValue />
         </SelectTrigger>
@@ -236,35 +235,6 @@ function SortControl({ sortBy, onSortChange }: { sortBy: SortMode; onSortChange:
           ))}
         </SelectContent>
       </Select>
-    </div>
-  );
-}
-
-function HeroLandscapeArt() {
-  return (
-    <div className="pointer-events-none absolute inset-x-0 top-0 h-[22rem] overflow-hidden">
-      <Image
-        src="/assets/media/images/leaderboard/hero-landscape-light@2x.webp"
-        alt=""
-        fill
-        priority
-        quality={95}
-        sizes="(min-width: 768px) calc(100vw - 15rem), 100vw"
-        aria-hidden="true"
-        className="object-cover object-center opacity-90 dark:hidden"
-      />
-      <Image
-        src="/assets/media/images/leaderboard/hero-landscape-dark@2x.webp"
-        alt=""
-        fill
-        priority
-        quality={95}
-        sizes="(min-width: 768px) calc(100vw - 15rem), 100vw"
-        aria-hidden="true"
-        className="hidden object-cover object-center opacity-80 dark:block"
-      />
-      <div className="absolute inset-y-0 left-0 w-[54%] bg-gradient-to-r from-background via-background/90 to-transparent" />
-      <div className="absolute inset-x-0 bottom-0 h-36 bg-gradient-to-t from-background via-background/80 to-transparent" />
     </div>
   );
 }
@@ -286,36 +256,41 @@ function StatsSummary({
   const locale = useLocale();
   if (loading) return null;
 
-  const stats: StatsTileItem[] = [
-    {
-      label: t("totalRaised"),
-      value: formatCompactUsd(totalRaised),
-      icon: <LeafIcon />,
-      accent: true,
-    },
-    {
-      label: t("uniqueDonors"),
-      value: formatCompactNumber(totalDonors, locale),
-      icon: <UsersRoundIcon />,
-    },
-    {
-      label: t("bumicertsFunded"),
-      value: formatCompactNumber(totalProjectsSupported, locale),
-      icon: <SproutIcon />,
-      accent: true,
-    },
-    {
-      label: t("donationCount"),
-      value: formatCompactNumber(totalDonationCount, locale),
-      icon: <GiftIcon />,
-    },
+  const stats: { label: string; value: string; Icon: typeof LeafIcon; accent?: boolean }[] = [
+    { label: t("totalRaised"), value: formatCompactUsd(totalRaised), Icon: LeafIcon, accent: true },
+    { label: t("uniqueDonors"), value: formatCompactNumber(totalDonors, locale), Icon: UsersRoundIcon },
+    { label: t("bumicertsFunded"), value: formatCompactNumber(totalProjectsSupported, locale), Icon: SproutIcon, accent: true },
+    { label: t("donationCount"), value: formatCompactNumber(totalDonationCount, locale), Icon: GiftIcon },
   ];
 
-  return <StatsTileGrid items={stats} columns={4} />;
+  // Slim hairline-separated strip instead of four oversized tiles — the same
+  // gap-px band the home hero uses, so the numbers read at a glance and the
+  // controls + leaderboard stay above the fold.
+  return (
+    <div className="grid grid-cols-2 gap-px overflow-hidden rounded-2xl bg-border/60 shadow-sm shadow-primary/5 ring-1 ring-foreground/5 sm:grid-cols-4">
+      {stats.map(({ label, value, Icon, accent }) => (
+        <div key={label} className="flex items-center gap-2.5 bg-card/80 px-4 py-3">
+          <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary [&_svg]:size-4">
+            <Icon />
+          </span>
+          <div className="min-w-0">
+            <div
+              className={cn(
+                "truncate text-lg font-semibold tracking-[-0.02em] tabular-nums sm:text-xl",
+                accent ? "text-primary" : "text-foreground",
+              )}
+            >
+              {value}
+            </div>
+            <p className="truncate text-[11px] leading-tight text-muted-foreground first-letter:uppercase">{label}</p>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
 }
 
 function LeaderboardShell({
-  animate = true,
   embedded = false,
   period = "all",
   onPeriodChange,
@@ -330,14 +305,13 @@ function LeaderboardShell({
   loading = false,
   children,
 }: {
-  animate?: boolean;
+  embedded?: boolean;
   period?: Period;
   onPeriodChange: (period: Period) => void;
   donorFilter?: DonorFilter;
   onDonorFilterChange: (donorFilter: DonorFilter) => void;
   sortBy?: SortMode;
   onSortChange: (sortBy: SortMode) => void;
-  embedded?: boolean;
   totalDonors?: number;
   totalRaised?: number;
   totalProjectsSupported?: number;
@@ -347,58 +321,35 @@ function LeaderboardShell({
 }) {
   const t = useTranslations("marketplace.leaderboard.hero");
   return (
-    <section className={`relative overflow-hidden pb-20 pt-0 md:pb-28 ${embedded ? "" : "-mt-14"}`}>
-      <div className="absolute inset-x-0 top-0 h-80 bg-gradient-to-b from-primary/[0.08] via-transparent to-transparent dark:from-primary/[0.12]" />
-      <HeroLandscapeArt />
+    <section className={`bg-background pb-20 md:pb-28 ${embedded ? "" : "-mt-14"}`}>
+      <PictureHero
+        lightSrc="/assets/media/images/leaderboard/hero-landscape-light@2x.webp"
+        darkSrc="/assets/media/images/leaderboard/hero-landscape-dark@2x.webp"
+        eyebrow={t("eyebrow")}
+        icon={<TrophyIcon />}
+        title={t("titlePrefix")}
+        accent={t("titleEmphasis")}
+        lede={t("description")}
+        actions={<PeriodChips period={period} onPeriodChange={onPeriodChange} />}
+      />
 
-      <div className="relative min-h-[240px]">
-        <motion.header
-          initial={animate ? { opacity: 0, y: 16 } : false}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
-          className="mx-auto mb-0 flex max-w-6xl flex-col px-8 pb-8 pt-[64px] sm:px-10 lg:px-9"
-        >
-          <h1 className="font-garamond max-w-4xl text-4xl font-light leading-[0.98] tracking-[-0.035em] text-foreground sm:text-5xl md:text-5xl lg:text-6xl">
-            {t("titlePrefix")} <span className="font-instrument italic text-foreground/85">{t("titleEmphasis")}</span>
-          </h1>
-          <p className="mt-4 max-w-2xl text-base leading-7 text-muted-foreground md:text-base">
-            {t("description")}
-          </p>
-        </motion.header>
-      </div>
-
-      <div className="relative z-10 mx-auto max-w-6xl px-6">
-        <div className="relative z-20 -mt-6 mb-0 space-y-3">
-          <motion.div
-            initial={animate ? { opacity: 0, y: 12 } : false}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.1, ease: [0.25, 0.1, 0.25, 1] }}
-            className="mb-5 grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center xl:grid-cols-[1.15fr_minmax(0,1fr)_auto]"
-          >
-            <div className="sm:col-span-2 xl:col-span-1">
-              <DonorTypeTabs donorFilter={donorFilter} onDonorFilterChange={onDonorFilterChange} />
-            </div>
-            <PeriodChips period={period} onPeriodChange={onPeriodChange} />
-            <SortControl sortBy={sortBy} onSortChange={onSortChange} />
-          </motion.div>
-
-          <motion.div
-            initial={animate ? { opacity: 0, y: 12 } : false}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.16, ease: [0.25, 0.1, 0.25, 1] }}
-            className="mb-5"
-          >
-            <StatsSummary
-              totalDonors={totalDonors}
-              totalRaised={totalRaised}
-              totalProjectsSupported={totalProjectsSupported}
-              totalDonationCount={totalDonationCount}
-              loading={loading}
-            />
-          </motion.div>
-
-          {children}
+      <div className="relative z-10 mx-auto max-w-6xl px-6 pt-6">
+        <div className="mb-4 grid gap-2.5 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
+          <DonorTypeTabs donorFilter={donorFilter} onDonorFilterChange={onDonorFilterChange} />
+          <SortControl sortBy={sortBy} onSortChange={onSortChange} />
         </div>
+
+        <div className="mb-4">
+          <StatsSummary
+            totalDonors={totalDonors}
+            totalRaised={totalRaised}
+            totalProjectsSupported={totalProjectsSupported}
+            totalDonationCount={totalDonationCount}
+            loading={loading}
+          />
+        </div>
+
+        {children}
       </div>
     </section>
   );
@@ -408,7 +359,7 @@ function LeaderboardGrid({ entries }: { entries: LeaderboardEntry[] }) {
   const t = useTranslations("marketplace.leaderboard.empty");
   if (entries.length === 0) {
     return (
-      <div className="flex flex-col items-center gap-3 rounded-3xl bg-card/75 py-16 text-center text-muted-foreground shadow-sm shadow-primary/5 ring-1 ring-foreground/5 backdrop-blur">
+      <div className="flex flex-col items-center gap-3 rounded-2xl bg-card/75 py-16 text-center text-muted-foreground shadow-sm shadow-primary/5 ring-1 ring-foreground/5 backdrop-blur">
         <div className="flex size-16 items-center justify-center rounded-full bg-primary/10 text-primary">
           <TrophyIcon className="size-8 opacity-60" />
         </div>
@@ -419,7 +370,7 @@ function LeaderboardGrid({ entries }: { entries: LeaderboardEntry[] }) {
   }
 
   return (
-    <div className="overflow-hidden rounded-3xl bg-card/70 shadow-sm shadow-primary/5 ring-1 ring-foreground/5 backdrop-blur divide-y divide-border/60">
+    <div className="divide-y divide-border/50 overflow-hidden rounded-2xl bg-card/70 shadow-sm shadow-primary/5 ring-1 ring-foreground/5 backdrop-blur">
       {entries.map((entry) => (
         <DonorCard key={entry.donorId} entry={entry} />
       ))}
@@ -429,16 +380,16 @@ function LeaderboardGrid({ entries }: { entries: LeaderboardEntry[] }) {
 
 function LeaderboardSkeleton() {
   return (
-    <div className="overflow-hidden rounded-3xl bg-card/70 shadow-sm shadow-primary/5 ring-1 ring-foreground/5 backdrop-blur divide-y divide-border/60">
-      {Array.from({ length: 8 }).map((_, index) => (
-        <div key={index} className="flex items-start gap-3.5 px-4 py-[18px] sm:gap-4 sm:px-5 sm:py-5">
-          <Skeleton className="size-9 shrink-0 rounded-full" />
+    <div className="divide-y divide-border/50 overflow-hidden rounded-2xl bg-card/70 shadow-sm shadow-primary/5 ring-1 ring-foreground/5 backdrop-blur">
+      {Array.from({ length: 9 }).map((_, index) => (
+        <div key={index} className="flex items-center gap-3 px-4 py-3 sm:px-5 sm:py-3.5">
+          <Skeleton className="size-8 shrink-0 rounded-full" />
           <div className="min-w-0 flex-1 space-y-1.5">
-            <Skeleton className="h-[18px] w-40 max-w-full" />
-            <Skeleton className="h-4 w-52 max-w-full" />
+            <Skeleton className="h-[15px] w-36 max-w-full" />
+            <Skeleton className="h-3 w-48 max-w-full" />
           </div>
-          <Skeleton className="mt-0.5 h-5 w-16 shrink-0" />
-          <Skeleton className="mt-1 size-4 shrink-0 rounded-full sm:size-5" />
+          <Skeleton className="h-4 w-14 shrink-0" />
+          <Skeleton className="size-4 shrink-0 rounded-full" />
         </div>
       ))}
     </div>
@@ -448,7 +399,7 @@ function LeaderboardSkeleton() {
 function LeaderboardError() {
   const t = useTranslations("marketplace.leaderboard.error");
   return (
-    <div className="flex flex-col items-center gap-3 rounded-3xl bg-card/75 py-16 text-center text-muted-foreground shadow-sm shadow-primary/5 ring-1 ring-foreground/5 backdrop-blur">
+    <div className="flex flex-col items-center gap-3 rounded-2xl bg-card/75 py-16 text-center text-muted-foreground shadow-sm shadow-primary/5 ring-1 ring-foreground/5 backdrop-blur">
       <div className="flex size-16 items-center justify-center rounded-full bg-primary/10 text-primary">
         <TrophyIcon className="size-8 opacity-60" />
       </div>
@@ -470,7 +421,7 @@ function RankBadge({ rank }: { rank: number }) {
     <span
       aria-label={t("rankAriaLabel", { rank })}
       className={cn(
-        "flex size-9 shrink-0 items-center justify-center rounded-full text-sm font-bold tabular-nums ring-1",
+        "flex size-8 shrink-0 items-center justify-center rounded-full text-[13px] font-bold tabular-nums ring-1",
         RANK_TIERS[rank] ?? "bg-muted/50 text-muted-foreground ring-foreground/5",
       )}
     >
@@ -503,37 +454,36 @@ function DonorCard({ entry }: { entry: LeaderboardEntry }) {
   const locale = useLocale();
   const isWallet = entry.donorType === "wallet";
   const relativeTime = entry.lastDonatedAt ? formatRelativeTimeFromNow(new Date(entry.lastDonatedAt), locale) : null;
-  const className = "group flex items-start gap-3.5 px-4 py-[18px] transition-colors duration-200 hover:bg-primary/[0.04] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:gap-4 sm:px-5 sm:py-5";
+  const className = cn(
+    "group flex items-center gap-3 px-4 py-3 transition-colors duration-200 hover:bg-primary/[0.05] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:px-5 sm:py-3.5",
+    entry.rank === 1 && "bg-primary/[0.035]",
+  );
   const content = (
     <>
       <RankBadge rank={entry.rank} />
 
-      <div className="min-w-0 flex-1 space-y-1.5">
-        <p className="flex min-w-0 items-center gap-1.5 text-[15px] font-semibold text-foreground">
-          {isWallet ? (
-            <>
-              <WalletIcon className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
-              <span className="min-w-0 truncate">{t("anonymousSupporter")}</span>
-            </>
-          ) : (
-            <span className="min-w-0 truncate">
-              <AuthorInline did={entry.donorId} />
-            </span>
-          )}
-        </p>
-        <div className="flex min-w-0 flex-col items-start gap-1 text-[13px] leading-snug text-muted-foreground">
+      <div className="min-w-0 flex-1">
+        <div className="flex min-w-0 items-center gap-2">
+          {isWallet ? <WalletIcon className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" /> : null}
+          <span className="min-w-0 truncate text-[14.5px] font-semibold text-foreground">
+            {isWallet ? t("anonymousSupporter") : <AuthorInline did={entry.donorId} />}
+          </span>
           <DonorBadge rank={entry.rank} />
-          <span className="w-full min-w-0 whitespace-normal break-words">{relativeTime ? t("donationSummaryWithTime", { count: entry.donationCount, relativeTime }) : t("donationSummary", { count: entry.donationCount })}</span>
         </div>
+        <p className="mt-0.5 truncate text-[12.5px] leading-snug text-muted-foreground">
+          {relativeTime
+            ? t("donationSummaryWithTime", { count: entry.donationCount, relativeTime })
+            : t("donationSummary", { count: entry.donationCount })}
+        </p>
       </div>
 
-      <span className="shrink-0 whitespace-nowrap pt-0.5 text-[15px] font-bold tabular-nums text-primary sm:text-[17px]">
+      <span className="shrink-0 whitespace-nowrap text-[15px] font-bold tabular-nums text-primary sm:text-base">
         {formatCompactUsd(entry.totalAmount)}
       </span>
 
       <ChevronRightIcon
         aria-hidden="true"
-        className="mt-1 size-4 shrink-0 text-muted-foreground/40 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-primary sm:size-5"
+        className="size-4 shrink-0 text-muted-foreground/40 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-primary"
       />
     </>
   );
