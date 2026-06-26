@@ -3,11 +3,13 @@
  * data endpoints. Kept in one place so a host change is a single edit.
  */
 
+const DEFAULT_INDEXER_URL = "https://api.hi.gainforest.app/graphql";
+
 /** Hyperindex GraphQL endpoint. Serves `access-control-allow-origin: *`
- *  so the browser can query it directly (no API proxy needed).
- *  The dev API includes certified profile data on records, which lets cards
- *  show organization names without an extra profile lookup. */
-export const INDEXER_URL = "https://dev-api-hi.gainforest.app/graphql";
+ *  so the browser can query it directly (no API proxy needed). Set
+ *  `NEXT_PUBLIC_INDEXER_URL` at build time to point previews or local builds at
+ *  another indexer; blank values fall back to the production API. */
+export const INDEXER_URL = process.env.NEXT_PUBLIC_INDEXER_URL?.trim() || DEFAULT_INDEXER_URL;
 
 /** Green Globe live map (data.gainforest.app). */
 export const GLOBE_URL = "https://data.gainforest.app";
