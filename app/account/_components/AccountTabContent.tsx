@@ -18,7 +18,8 @@ import { DonationHistory } from "./DonationHistory";
 import { fetchReceipts } from "../../_lib/dashboard";
 import { fetchPublicDataCouncilMembers, type PublicDataCouncilMember } from "../../_lib/data-council";
 import { fetchAuthSession } from "../../_lib/auth-server";
-import { fetchUserCgsGroups } from "../../_lib/manage-server";
+import { fetchUserCgsGroups, resolveAccountManageAccess } from "../../_lib/manage-server";
+import { ObservationsSection, ProjectsSection } from "../../(manage)/manage/_sections";
 import { monogram } from "../../_lib/did-profile";
 import { attachProjectTitlesToGalleries, fetchBumicertsByDid, fetchIndexedCertifiedProfileCards, fetchObservationSummaryByDid, fetchProjectImageGalleriesByDid, fetchProjectsByDid } from "../../_lib/indexer";
 import type { AccountRouteData } from "../_lib/account-route";
@@ -249,7 +250,16 @@ export async function AccountDonationsTabContent({ account, did }: { account: Ac
   );
 }
 
-export function AccountObservationsTabContent({ did }: { account: AccountRouteData; did: string }) {
+// Stewards manage their projects/observations right here on the public profile
+// tab — the same surface as the old /manage URL — so they never need to leave
+// for a separate manage page. Anyone without manage access sees the read-only
+// public view instead.
+export async function AccountObservationsTabContent({ account, did }: { account: AccountRouteData; did: string }) {
+  const access = await resolveAccountManageAccess(account.urlIdentifier).catch(() => null);
+  if (access?.status === "allowed") {
+    return <ObservationsSection target={access.target} />;
+  }
+
   return (
     <Suspense fallback={null}>
       <RecordExplorer kind="occurrence" ownerDid={did} showHero={false} />
@@ -257,7 +267,12 @@ export function AccountObservationsTabContent({ did }: { account: AccountRouteDa
   );
 }
 
-export async function AccountProjectsTabContent({ did }: { account: AccountRouteData; did: string }) {
+export async function AccountProjectsTabContent({ account, did }: { account: AccountRouteData; did: string }) {
+  const access = await resolveAccountManageAccess(account.urlIdentifier).catch(() => null);
+  if (access?.status === "allowed") {
+    return <ProjectsSection target={access.target} />;
+  }
+
   const projects = await fetchProjectsByDid(did, 1000).then((page) => page.records).catch(() => []);
   return <AccountProjectsGrid projects={projects} />;
 }
