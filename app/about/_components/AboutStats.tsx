@@ -4,15 +4,19 @@ import { useLocale } from "../../_components/LocaleProvider";
 import { getAboutT } from "../_messages";
 
 // Live stats band for /about. Numbers are NOT inline mocks; they're
-// passed in from the server-side `app/about/page.tsx` which calls
-// the same `fetchProjectPins()` + `fetchLiveBumicerts()` pipelines
-// the landing page uses (Green Globe API for the project pin count,
-// hyperlabel + Hyperindex for the Bumicerts total).
+// passed in from the server-side `app/about/page.tsx`:
+//
+//   • communitiesCount = fetchCommunitiesTotal()  — the true count of
+//     indexed GainForest orgs (appGainforestOrganizationInfo.totalCount),
+//     NOT pins.length. Only a subset of orgs resolve to map coordinates,
+//     so pins.length undercounts the real community total.
+//   • bumicertsCount   = snapshot.bumicertsTotal   — individual Bumicerts
+//     (orgHypercertsClaimActivity.totalCount), so the number matches the
+//     "Bumicerts" label. (orgsTotal counts org PROJECTS / collections and
+//     stays reserved for the landing card's "X projects found" footer.)
 //
 // Layout: four big numbers in Cormorant Garamond on a cream surface,
-// hairline rules between cells, italic labels underneath. The
-// "communities" number is the centrepiece — it's the same count the
-// Nature Guild + Partners section shows, sourced from Green Globe.
+// hairline rules between cells, italic labels underneath.
 //
 // Hard rule (AGENTS.md #1): no inline mock numbers in components.
 // The fallback for `communitiesCount` of 0 means the upstream is

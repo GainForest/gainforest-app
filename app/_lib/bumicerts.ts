@@ -63,6 +63,16 @@ export type LiveBumicertsSnapshot = {
    * mean "high-quality bumicerts shown in the carousel".
    */
   orgsTotal: number;
+  /**
+   * Total individual Bumicerts (claim activities) signed on ATProto;
+   * counted from `orgHypercertsClaimActivity.totalCount`. A "Bumicert" is
+   * an `org.hypercerts.claim.activity` record — the thing each
+   * `/bumicert/<did>-<rkey>` page renders — so this is the right number
+   * whenever the label literally says "Bumicerts". It differs from
+   * `orgsTotal`, which counts org PROJECTS (`orgHypercertsCollection`) and
+   * backs the landing card's "X projects found" footer.
+   */
+  bumicertsTotal: number;
   bumicerts: LiveBumicert[];
   /** True when we served the static fallback because the upstream was unreachable. */
   fromFallback: boolean;
@@ -154,6 +164,41 @@ async function fetchOrgsTotal(): Promise<number | null> {
       data?: { orgHypercertsCollection?: { totalCount?: number | null } | null };
     };
     const n = json.data?.orgHypercertsCollection?.totalCount;
+    return typeof n === "number" ? n : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Honest count of individual Bumicerts (claim activities) signed on ATProto.
+ * A Bumicert is an `org.hypercerts.claim.activity` record (what each
+ * `/bumicert/<did>-<rkey>` page renders), NOT an `org.hypercerts.collection`
+ * (which counts org projects and backs `fetchOrgsTotal`). This connection's
+ * `totalCount` is uncapped, so it is the truthful "Bumicerts signed on
+ * ATProto" number for the /about stat.
+ */
+async function fetchBumicertsTotal(): Promise<number | null> {
+  try {
+    const res = await fetch(INDEXER_URL, {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        "ngrok-skip-browser-warning": "true",
+      },
+      body: JSON.stringify({
+        operationName: "LandingBumicertsTotal",
+        query: `query LandingBumicertsTotal { orgHypercertsClaimActivity { totalCount } }`,
+      }),
+      next: { revalidate: REVALIDATE_SECONDS },
+    });
+    if (!res.ok) return null;
+    const json = (await res.json()) as {
+      data?: {
+        orgHypercertsClaimActivity?: { totalCount?: number | null } | null;
+      };
+    };
+    const n = json.data?.orgHypercertsClaimActivity?.totalCount;
     return typeof n === "number" ? n : null;
   } catch {
     return null;
@@ -287,11 +332,14 @@ export async function fetchLiveBumicerts(
     // Hyperlabel + orgs-total run in parallel — they hit different upstreams
     // (hyperlabel-production vs hi.gainforest.app) and the orgs-total query
     // is small so it never holds up the carousel render.
-    const [{ activities: hq, total }, orgsTotalRaw] = await Promise.all([
-      fetchHighQualityHyperlabels(),
-      fetchOrgsTotal(),
-    ]);
+    const [{ activities: hq, total }, orgsTotalRaw, bumicertsTotalRaw] =
+      await Promise.all([
+        fetchHighQualityHyperlabels(),
+        fetchOrgsTotal(),
+        fetchBumicertsTotal(),
+      ]);
     const orgsTotal = orgsTotalRaw ?? FALLBACK_SNAPSHOT.orgsTotal;
+    const bumicertsTotal = bumicertsTotalRaw ?? FALLBACK_SNAPSHOT.bumicertsTotal;
     // Take a slightly larger window than `count` so we can drop any URIs the
     // indexer no longer resolves without coming up short.
     const window = hq.slice(0, Math.max(count * 2, 24));
@@ -340,6 +388,7 @@ export async function fetchLiveBumicerts(
         ...FALLBACK_SNAPSHOT,
         total: total || FALLBACK_SNAPSHOT.total,
         orgsTotal,
+        bumicertsTotal,
         fromFallback: true,
       };
     }
@@ -347,6 +396,7 @@ export async function fetchLiveBumicerts(
     return {
       total,
       orgsTotal,
+      bumicertsTotal,
       bumicerts,
       fromFallback: false,
     };
@@ -364,6 +414,9 @@ const FALLBACK_SNAPSHOT: LiveBumicertsSnapshot = {
   // commons-wide count from `orgHypercertsCollection.totalCount`.
   total: 157,
   orgsTotal: 315,
+  // `bumicertsTotal` = individual claim activities (org.hypercerts.claim.activity);
+  // last observed ~1544 and always larger than `orgsTotal` (projects).
+  bumicertsTotal: 1544,
   fromFallback: true,
   bumicerts: [
     {

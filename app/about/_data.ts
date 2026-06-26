@@ -147,35 +147,6 @@ export const CORE_TEAM: ReadonlyArray<Translated<TeamMember>> = [
     },
   },
   {
-    name: "Niña Cerilla",
-    role: "Operations Lead",
-    location: "Philippines",
-    bio: "Runs operations across the global team and leads delivery on the Klarna AI for Climate Resilience grant. Keeps the organisation moving day to day.",
-    photo: "/team/nina-cerilla.webp",
-    i18n: {
-      es: {
-        role: "Responsable de Operaciones",
-        location: "Filipinas",
-        bio: "Lidera las operaciones del equipo global y la ejecución de la beca Klarna AI for Climate Resilience. Mantiene a la organización en marcha día a día.",
-      },
-      pt: {
-        role: "Líder de Operações",
-        location: "Filipinas",
-        bio: "Lidera as operações da equipe global e a entrega da bolsa Klarna AI for Climate Resilience. Mantém a organização em movimento todos os dias.",
-      },
-      sw: {
-        role: "Kiongozi wa Uendeshaji",
-        location: "Ufilipino",
-        bio: "Anaongoza uendeshaji wa timu ya kimataifa na utekelezaji wa ruzuku ya Klarna AI for Climate Resilience. Hudumisha shirika kusonga mbele kila siku.",
-      },
-      id: {
-        role: "Pemimpin Operasi",
-        location: "Filipina",
-        bio: "Memimpin operasi tim global dan pelaksanaan hibah Klarna AI for Climate Resilience. Membuat organisasi tetap bergerak hari demi hari.",
-      },
-    },
-  },
-  {
     name: "Diego Rivera Buendia",
     role: "Engineering & AI",
     location: "Mexico",

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { TopNav } from "../_components/TopNav";
 import { Footer } from "../_components/Footer";
-import { fetchProjectPins } from "../_lib/projects";
+import { fetchProjectPins, fetchCommunitiesTotal } from "../_lib/projects";
 import { fetchLiveBumicerts } from "../_lib/bumicerts";
 import { AboutHero } from "./_components/AboutHero";
 import { AboutStats } from "./_components/AboutStats";
@@ -94,10 +94,17 @@ export default async function AboutPage() {
   // Match the landing's parallel-fetch pattern so the two upstreams
   // race rather than serialise; both already revalidate at the HTTP
   // cache layer, so this is cheap.
-  const [pins, snapshot] = await Promise.all([
+  const [pins, snapshot, communitiesTotal] = await Promise.all([
     fetchProjectPins(),
     fetchLiveBumicerts(12),
+    fetchCommunitiesTotal(),
   ]);
+
+  // The "frontline communities" stat is the count of indexed GainForest
+  // orgs (fetchCommunitiesTotal), NOT pins.length — only a subset of orgs
+  // resolve to map coordinates, so pins.length undercounts. We floor at
+  // pins.length so the stat is never smaller than what the globe plots.
+  const communitiesCount = Math.max(communitiesTotal, pins.length);
 
   return (
     <div id="top" className="min-h-screen bg-background">
@@ -107,10 +114,10 @@ export default async function AboutPage() {
             partner spotlight) in its right column, fed by the same
             `pins` array used by AboutStats and the landing's Partners
             section. One fetch, three downstream consumers. */}
-        <AboutHero pins={pins} />
+        <AboutHero pins={pins} communitiesTotal={communitiesCount} />
         <AboutStats
-          communitiesCount={pins.length}
-          bumicertsCount={snapshot.orgsTotal}
+          communitiesCount={communitiesCount}
+          bumicertsCount={snapshot.bumicertsTotal}
         />
         <AboutMission />
         <AboutStory />

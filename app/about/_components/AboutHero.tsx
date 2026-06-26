@@ -60,7 +60,18 @@ function uniqueCommunities(pins: ProjectPin[]): Community[] {
   return list.sort((a, b) => a.name.localeCompare(b.name));
 }
 
-export function AboutHero({ pins }: { pins: ProjectPin[] }) {
+export function AboutHero({
+  pins,
+  // True count of indexed GainForest communities (from the server's
+  // fetchCommunitiesTotal). The globe still plots only the mappable
+  // `pins`, but the LIVE badge reports the honest community total so it
+  // agrees with the AboutStats "frontline communities" number rather than
+  // the smaller mappable-pin subset.
+  communitiesTotal,
+}: {
+  pins: ProjectPin[];
+  communitiesTotal: number;
+}) {
   const { locale } = useLocale();
   const t = getAboutT(locale);
 
@@ -200,7 +211,7 @@ export function AboutHero({ pins }: { pins: ProjectPin[] }) {
                 aria-hidden
                 className="inline-block h-1.5 w-1.5 rounded-full bg-brand animate-pulse"
               />
-              {t("about.live.label")} · {communities.length || pins.length}
+              {t("about.live.label")} · {communitiesTotal || communities.length || pins.length}
             </div>
 
             <div

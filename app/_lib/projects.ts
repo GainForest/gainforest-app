@@ -184,6 +184,53 @@ async function fetchOrganizationRecordMeta(): Promise<
   }
 }
 
+// Last-known community total, used only when the indexer is unreachable.
+const FALLBACK_COMMUNITIES_TOTAL = 79;
+
+/**
+ * Honest count of GainForest communities/organisations indexed on ATProto.
+ *
+ * This is intentionally NOT `fetchProjectPins().length`. That array is only
+ * the subset of orgs Green Globe can place on the map — each pin needs a
+ * resolvable centroid, and the upstream mapPoint join frequently drops orgs
+ * whose PDS isn't climateai.org (see the long note inside `fetchProjectPins`),
+ * so it routinely undercounts (e.g. 20 mappable pins out of ~79 real orgs).
+ *
+ * The "how many frontline communities exist" stat on /about should reflect
+ * every indexed org, not just the mappable ones, so we read the connection's
+ * `totalCount` directly. Unlike `orgHypercertsCollection`, this count is not a
+ * paginated subset — it's the true total of `app.gainforest.organization.info`
+ * records.
+ */
+export async function fetchCommunitiesTotal(): Promise<number> {
+  try {
+    const res = await fetch(INDEXER_URL, {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        "ngrok-skip-browser-warning": "true",
+      },
+      body: JSON.stringify({
+        operationName: "LandingCommunitiesTotal",
+        query: `query LandingCommunitiesTotal { appGainforestOrganizationInfo { totalCount } }`,
+      }),
+      next: { revalidate: 60 * 15 },
+    });
+    if (!res.ok) throw new Error(`indexer ${res.status}`);
+    const json = (await res.json()) as {
+      data?: {
+        appGainforestOrganizationInfo?: { totalCount?: number | null } | null;
+      };
+    };
+    const n = json.data?.appGainforestOrganizationInfo?.totalCount;
+    if (typeof n !== "number" || n <= 0) throw new Error("no totalCount");
+    return n;
+  } catch (err) {
+    console.warn("[about] communities total fetch failed, using fallback", err);
+    return FALLBACK_COMMUNITIES_TOTAL;
+  }
+}
+
 export async function fetchProjectPins(): Promise<ProjectPin[]> {
   try {
     const url = `${GLOBE_ORIGIN}/api/list-organizations?info=true&mapPoint=true`;
