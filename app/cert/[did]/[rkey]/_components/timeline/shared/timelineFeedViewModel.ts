@@ -4,6 +4,8 @@ import {
   type ParsedAttachmentContent,
 } from "../attachmentContentParser";
 import type { TimelineReference } from "../timelineReferences";
+import { classifyAttachmentPreview } from "./evidenceContentTypeRegistry";
+import type { TimelineDocumentFormat } from "./timelineDocumentFormats";
 
 type ParsedAttachmentBlobItem = Extract<ParsedAttachmentContent, { kind: "blob" }>;
 
@@ -27,6 +29,7 @@ export type TimelinePreviewPayload = {
   mimeType?: string | null;
   fileName?: string | null;
   extension?: string | null;
+  documentFormat?: TimelineDocumentFormat | null;
 };
 
 export type TimelineFeedTile = {
@@ -68,7 +71,7 @@ function getFileNameFromHref(href: string, fallback: string): string {
     if (fileName && fileName !== "com.atproto.sync.getBlob") {
       return decodeURIComponent(fileName);
     }
-    return parsed.searchParams.get("cid") ?? fallback;
+    return fallback;
   } catch {
     return fallback;
   }
@@ -88,12 +91,17 @@ function getPathExtensionFromHref(href: string, fileName?: string | null): strin
   return null;
 }
 
-function isSpecificMimeType(mimeType: string): boolean {
-  return (
-    mimeType.length > 0 &&
-    mimeType !== "application/octet-stream" &&
-    mimeType !== "binary/octet-stream"
-  );
+function titleForPreviewKind(
+  kind: TimelinePreviewPayload["kind"],
+  fileName: string,
+  copy: TimelineFeedCopy,
+): string {
+  if (kind === "image") return copy.image;
+  if (kind === "video") return copy.video;
+  if (kind === "audio") return copy.audio;
+  if (kind === "pdf") return copy.pdf;
+  if (kind === "document") return copy.document;
+  return fileName;
 }
 
 function getPreviewFromHref(
@@ -102,51 +110,20 @@ function getPreviewFromHref(
   copy: TimelineFeedCopy,
   fileName?: string | null,
 ): TimelinePreviewPayload {
-  const normalizedMime = mimeType?.toLowerCase() ?? "";
   const extension = getPathExtensionFromHref(href, fileName);
   const normalizedFileName = cleanText(fileName) ?? getFileNameFromHref(href, copy.linkedFile);
+  const classification = classifyAttachmentPreview(mimeType, extension);
+  const kind = classification.kind;
 
-  if (isSpecificMimeType(normalizedMime)) {
-    if (normalizedMime.startsWith("image/")) {
-      return { kind: "image", href, title: copy.image, fileName: normalizedFileName, mimeType };
-    }
-    if (normalizedMime.startsWith("video/")) {
-      return { kind: "video", href, title: copy.video, fileName: normalizedFileName, mimeType };
-    }
-    if (normalizedMime.startsWith("audio/")) {
-      return { kind: "audio", href, title: copy.audio, fileName: normalizedFileName, mimeType };
-    }
-    if (normalizedMime.includes("pdf")) {
-      return { kind: "pdf", href, title: copy.pdf, fileName: normalizedFileName, mimeType, extension };
-    }
-    if (
-      normalizedMime.startsWith("text/") ||
-      normalizedMime.includes("document") ||
-      normalizedMime.includes("spreadsheet") ||
-      normalizedMime.includes("presentation") ||
-      normalizedMime.includes("rtf")
-    ) {
-      return { kind: "document", href, title: copy.document, fileName: normalizedFileName, mimeType, extension };
-    }
-  }
-
-  if (["jpg", "jpeg", "png", "gif", "webp", "avif", "svg"].includes(extension ?? "")) {
-    return { kind: "image", href, title: copy.image, fileName: normalizedFileName, mimeType };
-  }
-  if (["mp4", "webm", "mov", "m4v"].includes(extension ?? "")) {
-    return { kind: "video", href, title: copy.video, fileName: normalizedFileName, mimeType };
-  }
-  if (["mp3", "wav", "m4a", "ogg", "flac"].includes(extension ?? "")) {
-    return { kind: "audio", href, title: copy.audio, fileName: normalizedFileName, mimeType };
-  }
-  if (extension === "pdf") {
-    return { kind: "pdf", href, title: copy.pdf, fileName: normalizedFileName, mimeType, extension };
-  }
-  if (["doc", "docx", "odt", "xls", "xlsx", "csv", "ods", "ppt", "pptx", "odp", "txt", "rtf", "md", "html", "htm"].includes(extension ?? "")) {
-    return { kind: "document", href, title: copy.document, fileName: normalizedFileName, mimeType, extension };
-  }
-
-  return { kind: "link", href, title: normalizedFileName, fileName: normalizedFileName, mimeType, extension };
+  return {
+    kind,
+    href,
+    title: titleForPreviewKind(kind, normalizedFileName, copy),
+    fileName: normalizedFileName,
+    mimeType,
+    extension,
+    documentFormat: classification.documentFormat,
+  };
 }
 
 function tileKindFromPreview(preview: TimelinePreviewPayload): FeedTileKind {
@@ -256,7 +233,7 @@ function fromBlob(
 ): TimelineFeedTile | null {
   if (!item.uri || item.uriKind !== "http-url") return null;
 
-  const fileName = cleanText(item.name) ?? cleanText(item.cid) ?? getFileNameFromHref(item.uri, copy.linkedFile);
+  const fileName = cleanText(item.name) ?? getFileNameFromHref(item.uri, copy.linkedFile);
   const preview = getPreviewFromHref(item.uri, item.mimeType, copy, fileName);
 
   return {

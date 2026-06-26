@@ -266,7 +266,29 @@
       "openFile": "Abrir archivo",
       "downloadFile": "Descargar archivo",
       "previewUnavailable": "Este archivo no se puede previsualizar aquí.",
-      "unresolvedReferenceBody": "Esta evidencia vinculada aún no se pudo cargar."
+      "unresolvedReferenceBody": "Esta evidencia vinculada aún no se pudo cargar.",
+      "preparingFile": "Preparando…",
+      "documentPreviewLoading": "Cargando vista previa del archivo…",
+      "documentPreviewPdfError": "No se pudo preparar el PDF para la vista previa.",
+      "documentPreviewPdfUnavailable": "Este PDF se puede abrir o descargar, pero no se puede ver aquí.",
+      "documentPreviewEmpty": "{title} está vacío.",
+      "documentPreviewTruncated": "Vista previa acortada. Abra o descargue el archivo para ver todo.",
+      "documentPreviewTextError": "El texto del archivo no se pudo cargar aquí.",
+      "documentPreviewTextUnavailable": "Este archivo se puede abrir o descargar, pero no se puede ver aquí.",
+      "documentPreviewHtmlError": "El archivo de página web no se pudo cargar aquí.",
+      "documentPreviewHtmlUnavailable": "Este archivo de página web se puede abrir o descargar, pero no se puede ver aquí.",
+      "documentPreviewUnsupported": "Este tipo de archivo se reconoce, pero no se puede ver aquí. Abra o descargue el archivo para verlo.",
+      "documentFormats": {
+        "pdf": "Archivo PDF",
+        "text": "Archivo de texto",
+        "markdown": "Archivo Markdown",
+        "html": "Archivo de página web",
+        "rtf": "Archivo RTF",
+        "word": "Archivo Word",
+        "spreadsheet": "Hoja de cálculo",
+        "presentation": "Presentación",
+        "document": "Documento"
+      }
     },
     "reference": {
       "linkedRecord": "Registro vinculado",

@@ -266,7 +266,29 @@
       "openFile": "Fungua faili",
       "downloadFile": "Pakua faili",
       "previewUnavailable": "Faili hii haiwezi kuhakikiwa hapa.",
-      "unresolvedReferenceBody": "Ushahidi huu uliounganishwa haukuweza kupakiwa bado."
+      "unresolvedReferenceBody": "Ushahidi huu uliounganishwa haukuweza kupakiwa bado.",
+      "preparingFile": "Inaandaa…",
+      "documentPreviewLoading": "Inapakia hakikisho la faili…",
+      "documentPreviewPdfError": "PDF haikuweza kutayarishwa kwa hakikisho.",
+      "documentPreviewPdfUnavailable": "PDF hii inaweza kufunguliwa au kupakuliwa, lakini haiwezi kuhakikiwa hapa.",
+      "documentPreviewEmpty": "{title} haina maudhui.",
+      "documentPreviewTruncated": "Hakikisho limefupishwa. Fungua au pakua faili kuona yote.",
+      "documentPreviewTextError": "Maandishi ya faili hayakuweza kupakiwa hapa.",
+      "documentPreviewTextUnavailable": "Faili hii inaweza kufunguliwa au kupakuliwa, lakini haiwezi kuhakikiwa hapa.",
+      "documentPreviewHtmlError": "Faili ya ukurasa wa wavuti haikuweza kupakiwa hapa.",
+      "documentPreviewHtmlUnavailable": "Faili hii ya ukurasa wa wavuti inaweza kufunguliwa au kupakuliwa, lakini haiwezi kuhakikiwa hapa.",
+      "documentPreviewUnsupported": "Aina hii ya faili inatambulika, lakini haiwezi kuhakikiwa hapa. Fungua au pakua faili ili kuitazama.",
+      "documentFormats": {
+        "pdf": "Faili ya PDF",
+        "text": "Faili ya maandishi",
+        "markdown": "Faili ya Markdown",
+        "html": "Faili ya ukurasa wa wavuti",
+        "rtf": "Faili ya RTF",
+        "word": "Faili ya Word",
+        "spreadsheet": "Lahajedwali",
+        "presentation": "Wasilisho",
+        "document": "Hati"
+      }
     },
     "reference": {
       "linkedRecord": "Rekodi iliyounganishwa",
