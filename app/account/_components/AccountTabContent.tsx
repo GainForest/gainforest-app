@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
-import { BadgeIcon, ChevronRightIcon, FolderKanbanIcon, HeartIcon, LeafIcon } from "lucide-react";
+import { ChevronRightIcon } from "lucide-react";
 import { getLocale, getTranslations } from "next-intl/server";
 import { ProjectGalleryViewer } from "../../_components/ProjectGalleryViewer";
 import { RichText } from "../../_components/RichText";
@@ -17,7 +17,6 @@ import { DonationHistory } from "./DonationHistory";
 import { fetchReceipts } from "../../_lib/dashboard";
 import { fetchPublicDataCouncilMembers, type PublicDataCouncilMember } from "../../_lib/data-council";
 import { monogram } from "../../_lib/did-profile";
-import { formatCompact } from "../../_lib/format";
 import { attachProjectTitlesToGalleries, fetchBumicertsByDid, fetchObservationSummaryByDid, fetchProjectImageGalleriesByDid, fetchProjectsByDid } from "../../_lib/indexer";
 import type { AccountRouteData } from "../_lib/account-route";
 import { accountBumicertsPath, accountDonationsPath, accountGalleryPath, accountObservationsPath, accountPath, accountProjectsPath } from "../_lib/account-route";
@@ -141,14 +140,6 @@ export async function AccountHomeTabContent({ account }: { account: AccountRoute
   );
 }
 
-type OverviewTile = {
-  key: string;
-  label: string;
-  value: number;
-  href: string;
-  Icon: typeof BadgeIcon;
-};
-
 // Compact, full-width profile landing for personal accounts: a short bio, a row
 // of at-a-glance stat tiles that link into each tab, and a slim share card.
 // Replaces the bulky right-hand sidebar that used to crowd the Certs page.
@@ -165,11 +156,11 @@ export async function AccountOverviewTabContent({ account, did }: { account: Acc
   const donationCount = receipts.filter((receipt) => receipt.from?.type === "did" && receipt.from.id === did).length;
   const hasAbout = Boolean(account.detail?.richBody?.length || account.detail?.blurb);
 
-  const tiles: OverviewTile[] = [
-    { key: "projects", label: tabsT("projects"), value: projects.length, href: accountProjectsPath(account.urlIdentifier), Icon: FolderKanbanIcon },
-    { key: "certs", label: tabsT("bumicerts"), value: bumicerts.length, href: accountBumicertsPath(account.urlIdentifier), Icon: BadgeIcon },
-    { key: "observations", label: tabsT("observations"), value: observationSummary?.count ?? 0, href: accountObservationsPath(account.urlIdentifier), Icon: LeafIcon },
-    { key: "donations", label: tabsT("donations"), value: donationCount, href: accountDonationsPath(account.urlIdentifier), Icon: HeartIcon },
+  const folderTiles: OverviewFolderTile[] = [
+    { id: "projects", title: tabsT("projects"), href: accountProjectsPath(account.urlIdentifier), count: projects.length },
+    { id: "certs", title: tabsT("bumicerts"), href: accountBumicertsPath(account.urlIdentifier), count: bumicerts.length },
+    { id: "observations", title: tabsT("observations"), href: accountObservationsPath(account.urlIdentifier), count: observationSummary?.count ?? 0 },
+    { id: "donations", title: tabsT("donations"), href: accountDonationsPath(account.urlIdentifier), count: donationCount },
   ];
 
   return (
@@ -184,23 +175,8 @@ export async function AccountOverviewTabContent({ account, did }: { account: Acc
         </section>
       ) : null}
 
-      <section className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        {tiles.map(({ key, label, value, href, Icon }) => (
-          <Link
-            key={key}
-            href={href}
-            className="group rounded-2xl border border-border bg-card/80 p-4 transition-colors hover:bg-surface-sunken focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/45"
-          >
-            <div className="flex items-center justify-between">
-              <span className="flex size-9 items-center justify-center rounded-xl border border-primary/15 bg-primary/[0.08]">
-                <Icon className="size-4 text-primary" />
-              </span>
-              <ChevronRightIcon className="size-4 text-muted-foreground/40 transition-colors group-hover:text-primary" />
-            </div>
-            <p className="mt-3 text-2xl font-semibold tracking-tight text-foreground">{formatCompact(value)}</p>
-            <p className="text-xs text-muted-foreground">{label}</p>
-          </Link>
-        ))}
+      <section className="org-animate org-fade-in-up org-delay-1">
+        <OverviewFolders tiles={folderTiles} />
       </section>
 
       <section className="rounded-2xl border border-border bg-card/80 p-4 sm:flex sm:items-center sm:justify-between sm:gap-4">
