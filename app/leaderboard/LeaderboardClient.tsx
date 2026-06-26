@@ -69,7 +69,7 @@ const SORT_TRANSLATION_KEYS: Record<SortMode, "totalRaised" | "donationCount" | 
   "recent-donation": "recentDonation",
 };
 
-export function LeaderboardClient() {
+export function LeaderboardClient({ embedded = false }: { embedded?: boolean }) {
   const [receipts, setReceipts] = useState<FundingReceipt[] | null>(null);
   const [error, setError] = useState(false);
   const [period, setPeriod] = useQueryState(
@@ -115,6 +115,7 @@ export function LeaderboardClient() {
   return (
     <LeaderboardShell
       animate={false}
+      embedded={embedded}
       period={period}
       onPeriodChange={(nextPeriod) => void setPeriod(nextPeriod)}
       donorFilter={donorFilter}
@@ -315,6 +316,7 @@ function StatsSummary({
 
 function LeaderboardShell({
   animate = true,
+  embedded = false,
   period = "all",
   onPeriodChange,
   donorFilter = "all",
@@ -335,6 +337,7 @@ function LeaderboardShell({
   onDonorFilterChange: (donorFilter: DonorFilter) => void;
   sortBy?: SortMode;
   onSortChange: (sortBy: SortMode) => void;
+  embedded?: boolean;
   totalDonors?: number;
   totalRaised?: number;
   totalProjectsSupported?: number;
@@ -344,7 +347,7 @@ function LeaderboardShell({
 }) {
   const t = useTranslations("marketplace.leaderboard.hero");
   return (
-    <section className="relative -mt-14 overflow-hidden pb-20 pt-0 md:pb-28">
+    <section className={`relative overflow-hidden pb-20 pt-0 md:pb-28 ${embedded ? "" : "-mt-14"}`}>
       <div className="absolute inset-x-0 top-0 h-80 bg-gradient-to-b from-primary/[0.08] via-transparent to-transparent dark:from-primary/[0.12]" />
       <HeroLandscapeArt />
 

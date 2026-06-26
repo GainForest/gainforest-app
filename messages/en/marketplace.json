@@ -448,6 +448,13 @@
       "action": "Open donations overview"
     }
   },
+  "donationsHub": {
+    "tabs": {
+      "overview": "Overview",
+      "leaderboard": "Leaderboard",
+      "ariaLabel": "Donation views"
+    }
+  },
   "account": {
     "metadata": {
       "accountTitle": "Account — Certs",

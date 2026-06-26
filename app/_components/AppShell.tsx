@@ -28,7 +28,6 @@ import {
   SparkleIcon,
   SunIcon,
   TreePineIcon,
-  TrophyIcon,
   UserIcon,
 } from "lucide-react";
 import { createContext, Suspense, useContext, useEffect, useState, type MouseEvent, type SVGProps } from "react";
@@ -134,14 +133,6 @@ const NAV_ITEMS: NavSection[] = [
         Icon: HeartHandshakeIcon,
         href: "/donations",
         pathCheck: { startsWith: "/donations" },
-      },
-      {
-        kind: "leaf",
-        id: "leaderboard",
-        text: "Leaderboard",
-        Icon: TrophyIcon,
-        href: "/leaderboard",
-        pathCheck: { startsWith: "/leaderboard" },
       },
     ],
   },
@@ -667,10 +658,9 @@ function ExploreNav() {
           item={{ ...item, text: t(item.id) }}
           isActive={isLeafActive(item.pathCheck, pathname)}
           index={index + 1}
-          // Certs hang under Projects (they're minted from a Project) and the
-          // Leaderboard hangs under Donations (it ranks donors) — both pair to
-          // the row directly above them.
-          paired={item.id === "bumicerts" || item.id === "leaderboard"}
+          // Certs are minted from a Project, so visually hang Certs under
+          // Projects (which sits directly above it).
+          paired={item.id === "bumicerts"}
         />
       ))}
     </ul>

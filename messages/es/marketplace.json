@@ -448,6 +448,13 @@
       "action": "Abrir resumen de donaciones"
     }
   },
+  "donationsHub": {
+    "tabs": {
+      "overview": "Resumen",
+      "leaderboard": "Clasificación",
+      "ariaLabel": "Vistas de donaciones"
+    }
+  },
   "account": {
     "metadata": {
       "accountTitle": "Cuenta — certificados",

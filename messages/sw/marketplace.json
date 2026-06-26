@@ -448,6 +448,13 @@
       "action": "Fungua muhtasari wa michango"
     }
   },
+  "donationsHub": {
+    "tabs": {
+      "overview": "Muhtasari",
+      "leaderboard": "Bao la wanaoongoza",
+      "ariaLabel": "Mwonekano wa michango"
+    }
+  },
   "account": {
     "metadata": {
       "accountTitle": "Akaunti — vyeti",

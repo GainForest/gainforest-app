@@ -97,7 +97,7 @@ const itemVariants = {
   },
 };
 
-export function Dashboard() {
+export function Dashboard({ embedded = false }: { embedded?: boolean }) {
   const { period, setPeriod } = useDashboardPeriod();
   const [granularity, setGranularity] = useQueryState(
     "granularity",
@@ -155,7 +155,7 @@ export function Dashboard() {
   const recentTx = useMemo(() => computeRecentTransactions(allReceipts, Number.POSITIVE_INFINITY), [allReceipts]);
 
   return (
-    <DashboardShell periodFilter={<PeriodFilter period={period} onPeriodChange={(nextPeriod) => void setPeriod(nextPeriod)} />}>
+    <DashboardShell embedded={embedded} periodFilter={<PeriodFilter period={period} onPeriodChange={(nextPeriod) => void setPeriod(nextPeriod)} />}>
       {error ? (
         <DashboardError />
       ) : receipts === null ? (
@@ -195,10 +195,10 @@ export function Dashboard() {
   );
 }
 
-function DashboardShell({ children, periodFilter }: { children: React.ReactNode; periodFilter: React.ReactNode }) {
+function DashboardShell({ children, periodFilter, embedded = false }: { children: React.ReactNode; periodFilter: React.ReactNode; embedded?: boolean }) {
   const t = useTranslations("marketplace.dashboard.hero");
   return (
-    <section className="-mt-14 bg-background pb-20 md:pb-28">
+    <section className={`bg-background pb-20 md:pb-28 ${embedded ? "" : "-mt-14"}`}>
       <PictureHero
         lightSrc="/assets/media/images/donations/donations-hero-light@2x.webp"
         darkSrc="/assets/media/images/donations/donations-hero-dark@2x.webp"

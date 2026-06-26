@@ -448,6 +448,13 @@
       "action": "Buka ikhtisar donasi"
     }
   },
+  "donationsHub": {
+    "tabs": {
+      "overview": "Ikhtisar",
+      "leaderboard": "Papan peringkat",
+      "ariaLabel": "Tampilan donasi"
+    }
+  },
   "account": {
     "metadata": {
       "accountTitle": "Akun — sertifikat",

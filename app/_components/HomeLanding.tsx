@@ -220,13 +220,9 @@ function LandingHero() {
             className="flex max-w-[620px] flex-col items-center text-center md:items-start md:text-left"
           >
             <h1 className="font-garamond text-5xl leading-[1.08] font-medium tracking-[-0.02em] text-foreground md:text-7xl">
-              <span className="relative inline-block">{t("headingLine1")}</span>
-              <br />
-              <span className="relative inline-block">{t("headingLine2")}</span>
-              <br />
               <span className="font-instrument text-primary italic dark:brightness-150">
                 <span className="relative inline-block">
-                  {t("headingEmphasis1")}
+                  {t("headingUnderlined")}
                   <svg
                     aria-hidden="true"
                     viewBox="0 0 178 16"
@@ -241,9 +237,9 @@ function LandingHero() {
                       strokeWidth="2.25"
                     />
                   </svg>
-                </span>{" "}
-                {t("headingEmphasis2")}
-              </span>
+                </span>
+              </span>{" "}
+              <span className="relative inline-block">{t("headingRest")}</span>
             </h1>
 
             <motion.p

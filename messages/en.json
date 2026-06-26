@@ -14,10 +14,8 @@
     },
     "hero": {
       "imageAlt": "Misty rainforest valley",
-      "headingLine1": "Verified Impact",
-      "headingLine2": "starts with",
-      "headingEmphasis1": "Real",
-      "headingEmphasis2": "Communities",
+      "headingUnderlined": "Certified",
+      "headingRest": "impact for nature stewards",
       "description": "Fund regenerative projects directly. Every Cert is a verified record of real environmental work — backed by photos, locations, and community stewards.",
       "cta": "Explore Projects",
       "proofPoints": {
