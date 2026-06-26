@@ -193,7 +193,7 @@ function RecentBumicerts({ target, bumicerts, did, ownerIdentifier }: { target: 
                     <CertDeleteButton
                       title={bumicert.title}
                       onClick={() => requestDelete(bumicert)}
-                      className="absolute right-3 top-3 z-10 opacity-100 transition-opacity focus-visible:opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
+                      className="absolute right-3 top-3 z-10"
                     />
                   ) : null}
                 </motion.div>
@@ -269,7 +269,7 @@ function ManageBumicertListItem({ bumicert, did, ownerIdentifier, onDelete }: { 
         <CertDeleteButton
           title={bumicert.title}
           onClick={onDelete}
-          className="absolute right-2 top-2 z-10 opacity-100 transition-opacity focus-visible:opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
+          className="absolute right-2 top-2 z-10"
         />
       ) : null}
     </div>

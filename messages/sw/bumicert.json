@@ -1,7 +1,14 @@
 {
   "detail": {
     "actions": {
-      "deleteBumicert": "Futa cheti"
+      "deleteBumicert": "Futa cheti",
+      "manage": "Dhibiti",
+      "deleteHint": "Kufuta huondoa cheti hiki kwa kila mtu.",
+      "deleteConfirmTitle": "Futa cheti?",
+      "deleteConfirmDescription": "Hii itaondoa “{title}” kabisa. Kitendo hiki hakiwezi kutenduliwa.",
+      "deleteConfirmCancel": "Ghairi",
+      "deleteConfirmConfirm": "Futa cheti",
+      "deleteError": "Cheti hiki hakikuweza kufutwa. Tafadhali jaribu tena."
     },
     "error": {
       "loadTitle": "Haikuweza kupakia cheti hii",

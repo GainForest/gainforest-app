@@ -1,7 +1,14 @@
 {
   "detail": {
     "actions": {
-      "deleteBumicert": "Eliminar certificado"
+      "deleteBumicert": "Eliminar certificado",
+      "manage": "Gestionar",
+      "deleteHint": "Al eliminarlo, este certificado desaparece para todos.",
+      "deleteConfirmTitle": "¿Eliminar certificado?",
+      "deleteConfirmDescription": "Esto eliminará permanentemente «{title}». Esta acción no se puede deshacer.",
+      "deleteConfirmCancel": "Cancelar",
+      "deleteConfirmConfirm": "Eliminar certificado",
+      "deleteError": "No se pudo eliminar este certificado. Inténtalo de nuevo."
     },
     "error": {
       "loadTitle": "No se pudo cargar este certificado",

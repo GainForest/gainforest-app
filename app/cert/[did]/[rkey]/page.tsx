@@ -61,6 +61,7 @@ import { Separator } from "@/components/ui/separator";
 import { BumicertHeaderTitleBridge } from "./_components/BumicertHeaderTitleBridge";
 import { BumicertShareButton } from "./_components/BumicertShareButton";
 import { BumicertObservationsGallery } from "./_components/BumicertObservationsGallery";
+import { BumicertDeleteAction } from "./_components/BumicertDeleteAction";
 import { DonateButton } from "./_components/donate/DonateButton";
 import { FundingStatus } from "./_components/donate/FundingStatus";
 import { BumicertTimeline } from "./_components/timeline/BumicertTimeline";
@@ -164,6 +165,29 @@ async function resolveTimelineAccess(recordDid: string, ownerKind: AccountKind, 
   };
 }
 
+type CertManageAccess = {
+  canDelete: boolean;
+  /** Org DID for group-owned writes; undefined for personal repos. */
+  mutationRepo?: string;
+};
+
+/**
+ * Whether the signed-in viewer is allowed to delete this Cert: the personal
+ * owner always can; for organization-owned Certs we check CGS membership/role.
+ */
+async function resolveCertManageAccess(recordDid: string, ownerKind: AccountKind, authSession: AuthSession): Promise<CertManageAccess> {
+  if (!authSession.isLoggedIn) return { canDelete: false };
+  if (authSession.did === recordDid) return { canDelete: true };
+  if (ownerKind === "organization") {
+    const groups = await fetchUserCgsGroups();
+    const membership = groups.find((group) => group.groupDid === recordDid);
+    if (!membership) return { canDelete: false };
+    const remove = canDeleteRecord({ kind: "group", role: membership.role });
+    return { canDelete: remove.allowed, mutationRepo: recordDid };
+  }
+  return { canDelete: false };
+}
+
 const BADGE_TONE: Record<DetailBadge["tone"], string> = {
   ok: "bg-ok/15 text-ok",
   warn: "bg-warn/15 text-warn",
@@ -221,6 +245,8 @@ export default async function BumicertDetailPage({
     ? `${record.startDate ? formatDate(record.startDate) : "—"} → ${record.endDate ? formatDate(record.endDate) : "—"}`
     : "Not specified";
   const description = detail?.blurb ?? record.shortDescription;
+  const certManageAccess = await resolveCertManageAccess(record.did, owner.kind, authSession);
+  const ownerProfileHref = `/account/${encodeURIComponent(owner.urlIdentifier)}`;
 
   let donationReceipts: FundingReceipt[] = [];
   let donationsUnavailable = false;
@@ -345,6 +371,9 @@ export default async function BumicertDetailPage({
                   donationsUnavailable={donationsUnavailable}
                   fundingConfig={fundingConfig}
                   authSession={authSession}
+                  canDelete={certManageAccess.canDelete}
+                  mutationRepo={certManageAccess.mutationRepo}
+                  deleteRedirectHref={ownerProfileHref}
                 />
               </div>
             </aside>
@@ -571,6 +600,9 @@ function OverviewSidebar({
   donationsUnavailable,
   fundingConfig,
   authSession,
+  canDelete,
+  mutationRepo,
+  deleteRedirectHref,
 }: {
   record: BumicertRecord;
   detail: RouteData["detail"];
@@ -579,6 +611,9 @@ function OverviewSidebar({
   donationsUnavailable: boolean;
   fundingConfig: BumicertFundingConfig;
   authSession: RouteData["authSession"];
+  canDelete: boolean;
+  mutationRepo?: string;
+  deleteRedirectHref: string;
 }) {
   const orgLinks = buildOrganizationLinks(owner, detail);
 
@@ -642,6 +677,18 @@ function OverviewSidebar({
         fundingConfig={fundingConfig}
         authSession={authSession}
       />
+
+      {canDelete ? (
+        <>
+          <Separator />
+          <BumicertDeleteAction
+            rkey={record.rkey}
+            title={record.title}
+            mutationRepo={mutationRepo}
+            redirectHref={deleteRedirectHref}
+          />
+        </>
+      ) : null}
     </div>
   );
 }

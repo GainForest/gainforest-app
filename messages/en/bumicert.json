@@ -1,7 +1,14 @@
 {
   "detail": {
     "actions": {
-      "deleteBumicert": "Delete Cert"
+      "deleteBumicert": "Delete Cert",
+      "manage": "Manage",
+      "deleteHint": "Deleting removes this Cert for everyone.",
+      "deleteConfirmTitle": "Delete Cert?",
+      "deleteConfirmDescription": "This permanently removes “{title}”. This action cannot be undone.",
+      "deleteConfirmCancel": "Cancel",
+      "deleteConfirmConfirm": "Delete Cert",
+      "deleteError": "This Cert could not be deleted. Please try again."
     },
     "error": {
       "loadTitle": "Couldn't load this cert",

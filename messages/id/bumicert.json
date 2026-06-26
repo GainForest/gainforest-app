@@ -1,7 +1,14 @@
 {
   "detail": {
     "actions": {
-      "deleteBumicert": "Hapus sertifikat"
+      "deleteBumicert": "Hapus sertifikat",
+      "manage": "Kelola",
+      "deleteHint": "Menghapus akan menghilangkan sertifikat ini untuk semua orang.",
+      "deleteConfirmTitle": "Hapus sertifikat?",
+      "deleteConfirmDescription": "Ini akan menghapus “{title}” secara permanen. Tindakan ini tidak dapat dibatalkan.",
+      "deleteConfirmCancel": "Batal",
+      "deleteConfirmConfirm": "Hapus sertifikat",
+      "deleteError": "Sertifikat ini tidak dapat dihapus. Silakan coba lagi."
     },
     "error": {
       "loadTitle": "Tidak dapat memuat sertifikat ini",
