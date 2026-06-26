@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { usePathname, useSearchParams } from "next/navigation";
-import { BadgeIcon, HeartIcon, HomeIcon, ImageIcon, LeafIcon, SettingsIcon } from "lucide-react";
+import { BadgeIcon, HeartIcon, HomeIcon, ImageIcon, LeafIcon, PaperclipIcon, SettingsIcon } from "lucide-react";
 import { stripLocaleFromPathname } from "@/lib/i18n/routing";
 import { cn } from "@/lib/utils";
 import type { AccountKind } from "../_lib/account-route";
@@ -14,9 +14,10 @@ import {
   accountObservationsPath,
   accountPath,
   accountSettingsPath,
+  accountTimelinePath,
 } from "../_lib/account-route";
 
-type TabLabelKey = "home" | "bumicerts" | "donationHistory" | "observations" | "gallery" | "settings";
+type TabLabelKey = "home" | "bumicerts" | "donationHistory" | "observations" | "timeline" | "gallery" | "settings";
 
 interface Tab {
   labelKey: TabLabelKey;
@@ -33,6 +34,7 @@ type TabPaths = {
   bumicerts: string;
   donations: string;
   activity: string;
+  timeline: string;
   gallery: string;
   settings: string;
 };
@@ -44,6 +46,7 @@ function buildTabPaths(did: string, scope: AccountTabBarScope, manageBasePath = 
       bumicerts: `${manageBasePath}?tab=bumicerts`,
       donations: `${manageBasePath}?tab=donations`,
       activity: `${manageBasePath}?tab=observations`,
+      timeline: `${manageBasePath}/timeline`,
       gallery: `${manageBasePath}?tab=gallery`,
       settings: `${manageBasePath}?tab=settings`,
     };
@@ -54,6 +57,7 @@ function buildTabPaths(did: string, scope: AccountTabBarScope, manageBasePath = 
     bumicerts: accountBumicertsPath(did),
     donations: accountDonationsPath(did),
     activity: accountObservationsPath(did),
+    timeline: accountTimelinePath(did),
     gallery: accountGalleryPath(did),
     settings: accountSettingsPath(did),
   };
@@ -114,12 +118,20 @@ function buildTabs(
     },
   ];
   if (scope === "account") {
-    tabs.push({
-      labelKey: "gallery",
-      href: paths.gallery,
-      icon: ImageIcon,
-      exact: false,
-    });
+    tabs.push(
+      {
+        labelKey: "timeline",
+        href: paths.timeline,
+        icon: PaperclipIcon,
+        exact: false,
+      },
+      {
+        labelKey: "gallery",
+        href: paths.gallery,
+        icon: ImageIcon,
+        exact: false,
+      },
+    );
   }
   if (includeSettings) tabs.push(settingsTab);
   return tabs;

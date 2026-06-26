@@ -46,6 +46,7 @@ export function TimelinePanel({
   mutationRepo,
   onDeleted,
   pageSize = DEFAULT_PAGE_SIZE,
+  summaryScope = "activity",
 }: {
   organizationDid: string;
   entries: TimelineAttachmentItem[];
@@ -56,6 +57,7 @@ export function TimelinePanel({
   mutationRepo?: string;
   onDeleted: (rkey: string) => void;
   pageSize?: number;
+  summaryScope?: "activity" | "organization";
 }) {
   const timelineT = useTranslations("bumicert.detail.timeline");
   const entryT = useTranslations("bumicert.detail.timelineEntry");
@@ -166,10 +168,10 @@ export function TimelinePanel({
         <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
           <div>
             <h2 id="timeline-heading" className="text-2xl tracking-tight text-foreground">
-              {timelineT("linkedTitle")}
+              {timelineT(summaryScope === "organization" ? "title" : "linkedTitle")}
             </h2>
             <p className="mt-1 text-sm text-muted-foreground">
-              {timelineT("linkedItemCount", { count: entries.length })}
+              {timelineT(summaryScope === "organization" ? "itemCount" : "linkedItemCount", { count: entries.length })}
               {linkedWindow ? ` · ${timelineT("linked", { window: linkedWindow })}` : ""}
             </p>
             <p className="mt-1 text-xs text-muted-foreground">
