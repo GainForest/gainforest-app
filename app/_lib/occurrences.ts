@@ -8,7 +8,7 @@
  * Core biodiversity-observation format GainForest indexes across
  * partner PDS instances.
  *
- * Schema discovery: introspecting the indexer at hi.gainforest.app
+ * Schema discovery: introspecting the indexer at api.hi.gainforest.app
  * shows the connection exposes `edges`, `pageInfo`, and `totalCount`
  * (Relay-cursor style). We only need `totalCount`, so we request
  * `first: 0` to avoid pulling any actual edge rows.
@@ -24,7 +24,7 @@
 
 const INDEXER_URL =
   process.env.NEXT_PUBLIC_INDEXER_URL?.trim() ||
-  "https://dev.hi.gainforest.app/graphql";
+  "https://api.hi.gainforest.app/graphql";
 
 /** Revalidate the count every 15 minutes; matches bumicerts.ts. */
 const REVALIDATE_SECONDS = 60 * 15;

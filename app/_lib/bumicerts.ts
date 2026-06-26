@@ -25,12 +25,12 @@
 
 import { BUMICERTS_URL as BUMICERTS_BASE } from "./urls";
 
-// Dev indexer. We default to the dev host (dev.hi.gainforest.app) and
-// let an env override (NEXT_PUBLIC_INDEXER_URL) point at the production
-// host (hi.gainforest.app) when needed.
+// Indexer. We default to the api host (api.hi.gainforest.app) and
+// let an env override (NEXT_PUBLIC_INDEXER_URL) point at another
+// host when needed.
 const INDEXER_URL =
   process.env.NEXT_PUBLIC_INDEXER_URL?.trim() ||
-  "https://dev.hi.gainforest.app/graphql";
+  "https://api.hi.gainforest.app/graphql";
 
 const HYPERLABEL_URL =
   process.env.NEXT_PUBLIC_HYPERLABEL_URL?.trim() ||
