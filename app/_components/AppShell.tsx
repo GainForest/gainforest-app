@@ -326,12 +326,6 @@ export function AppShell({
     };
   }, []);
 
-  if (pathname === "/") {
-    return <>{children}</>;
-  }
-
-  const isProfileLoading = resolvedAuthSession?.isLoggedIn === true && isShellProfileLoading;
-
   useEffect(() => {
     try {
       setSidebarCollapsed(window.localStorage.getItem(SIDEBAR_COLLAPSED_STORAGE_KEY) === "1");
@@ -339,6 +333,12 @@ export function AppShell({
       // Ignore storage access errors (private windows).
     }
   }, []);
+
+  if (pathname === "/") {
+    return <>{children}</>;
+  }
+
+  const isProfileLoading = resolvedAuthSession?.isLoggedIn === true && isShellProfileLoading;
 
   const toggleSidebarCollapsed = () => {
     setSidebarCollapsed((value) => {
