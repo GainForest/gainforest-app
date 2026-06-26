@@ -224,7 +224,7 @@
   "signInPrompt": {
     "description": "Save your project sites, tree information, and Certs in one place.",
     "failed": "We couldn’t finish signing you in. Please try again.",
-    "getStarted": "Get started"
+    "getStarted": "Sign in"
   },
   "status": {
     "pillTitle": "System status",

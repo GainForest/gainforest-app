@@ -224,7 +224,7 @@
   "signInPrompt": {
     "description": "Guarda tus sitios de proyecto, información de árboles y certificados en un solo lugar.",
     "failed": "No pudimos completar tu inicio de sesión. Inténtalo de nuevo.",
-    "getStarted": "Empezar"
+    "getStarted": "Iniciar sesión"
   },
   "status": {
     "pillTitle": "Estado del sistema",

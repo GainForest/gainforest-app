@@ -27,6 +27,7 @@ import { formatCompact, formatCompactUsd } from "../_lib/format";
 import { StatsTileGrid, type StatsTileItem } from "./StatsTile";
 import { ThemeToggle } from "./ThemeToggle";
 import { AuthModal } from "./AuthFlow";
+import { LanguageSelector } from "@/components/i18n/LanguageSelector";
 import { useModal } from "@/components/ui/modal/context";
 
 type HomeLandingProps = {
@@ -138,7 +139,8 @@ function LandingTopNavbar() {
           </span>
         </Link>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
+          <LanguageSelector />
           <ThemeToggle className="hidden sm:inline-flex" />
           <motion.div
             whileHover={{ scale: 1.02 }}

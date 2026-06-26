@@ -224,7 +224,7 @@
   "signInPrompt": {
     "description": "Hifadhi maeneo ya miradi, taarifa za miti na vyeti zako mahali pamoja.",
     "failed": "Hatukuweza kukamilisha kuingia kwako. Jaribu tena.",
-    "getStarted": "Anza"
+    "getStarted": "Ingia"
   },
   "status": {
     "pillTitle": "Hali ya mfumo",

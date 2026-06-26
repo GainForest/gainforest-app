@@ -224,7 +224,7 @@
   "signInPrompt": {
     "description": "Simpan situs proyek, informasi pohon, dan sertifikat Anda di satu tempat.",
     "failed": "Kami tidak dapat menyelesaikan proses masuk Anda. Coba lagi.",
-    "getStarted": "Mulai"
+    "getStarted": "Masuk"
   },
   "status": {
     "pillTitle": "Status sistem",

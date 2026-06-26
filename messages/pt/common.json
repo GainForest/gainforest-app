@@ -224,7 +224,7 @@
   "signInPrompt": {
     "description": "Salve seus locais de projeto, informações de árvores e certificados em um só lugar.",
     "failed": "Não conseguimos concluir seu login. Tente novamente.",
-    "getStarted": "Começar"
+    "getStarted": "Entrar"
   },
   "status": {
     "pillTitle": "Estado do sistema",
