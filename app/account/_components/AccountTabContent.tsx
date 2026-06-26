@@ -2,8 +2,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
-import { ChevronRightIcon } from "lucide-react";
-import { getTranslations } from "next-intl/server";
+import { BadgeIcon, ChevronRightIcon, FolderKanbanIcon, HeartIcon, LeafIcon } from "lucide-react";
+import { getLocale, getTranslations } from "next-intl/server";
 import { ProjectGalleryViewer } from "../../_components/ProjectGalleryViewer";
 import { RichText } from "../../_components/RichText";
 import { RecordExplorer } from "../../_components/RecordExplorer";
@@ -11,12 +11,15 @@ import { AccountBumicertsGrid } from "./AccountBumicertsGrid";
 import { AccountProjectsGrid } from "./AccountProjectsGrid";
 import { AccountContentColumns, AccountSidebar } from "./AccountSidebar";
 import { AccountSettingsSections } from "./AccountSettingsSections";
+import { ShareProfileButton } from "./ShareProfileButton";
 import { DonationHistory } from "./DonationHistory";
 import { fetchReceipts } from "../../_lib/dashboard";
 import { fetchPublicDataCouncilMembers, type PublicDataCouncilMember } from "../../_lib/data-council";
 import { monogram } from "../../_lib/did-profile";
-import { attachProjectTitlesToGalleries, fetchBumicertsByDid, fetchProjectImageGalleriesByDid, fetchProjectsByDid } from "../../_lib/indexer";
+import { formatCompact } from "../../_lib/format";
+import { attachProjectTitlesToGalleries, fetchBumicertsByDid, fetchObservationSummaryByDid, fetchProjectImageGalleriesByDid, fetchProjectsByDid } from "../../_lib/indexer";
 import type { AccountRouteData } from "../_lib/account-route";
+import { accountBumicertsPath, accountDonationsPath, accountObservationsPath, accountPath, accountProjectsPath } from "../_lib/account-route";
 
 type ManageAction = {
   href: string;
@@ -115,6 +118,85 @@ export async function AccountHomeTabContent({ account }: { account: AccountRoute
   );
 }
 
+type OverviewTile = {
+  key: string;
+  label: string;
+  value: number;
+  href: string;
+  Icon: typeof BadgeIcon;
+};
+
+// Compact, full-width profile landing for personal accounts: a short bio, a row
+// of at-a-glance stat tiles that link into each tab, and a slim share card.
+// Replaces the bulky right-hand sidebar that used to crowd the Certs page.
+export async function AccountOverviewTabContent({ account, did }: { account: AccountRouteData; did: string }) {
+  const [tabsT, shareT, locale, bumicerts, projects, receipts, observationSummary] = await Promise.all([
+    getTranslations("common.accountTabs"),
+    getTranslations("marketplace.account.sidebar"),
+    getLocale(),
+    fetchBumicertsByDid(did, 1000).then((page) => page.records).catch(() => []),
+    fetchProjectsByDid(did, 1000).then((page) => page.records).catch(() => []),
+    fetchReceipts().catch(() => []),
+    fetchObservationSummaryByDid(did).catch(() => null),
+  ]);
+  const donationCount = receipts.filter((receipt) => receipt.from?.type === "did" && receipt.from.id === did).length;
+  const hasAbout = Boolean(account.detail?.richBody?.length || account.detail?.blurb);
+
+  const tiles: OverviewTile[] = [
+    { key: "projects", label: tabsT("projects"), value: projects.length, href: accountProjectsPath(account.urlIdentifier), Icon: FolderKanbanIcon },
+    { key: "certs", label: tabsT("bumicerts"), value: bumicerts.length, href: accountBumicertsPath(account.urlIdentifier), Icon: BadgeIcon },
+    { key: "observations", label: tabsT("observations"), value: observationSummary?.count ?? 0, href: accountObservationsPath(account.urlIdentifier), Icon: LeafIcon },
+    { key: "donations", label: tabsT("donations"), value: donationCount, href: accountDonationsPath(account.urlIdentifier), Icon: HeartIcon },
+  ];
+
+  return (
+    <div className="space-y-5 py-2">
+      {hasAbout ? (
+        <section className="org-animate org-fade-in-up org-delay-1">
+          {account.detail?.richBody?.length ? (
+            <RichText blocks={account.detail.richBody} />
+          ) : (
+            <p className="max-w-3xl text-lg leading-8 text-foreground/85 md:text-xl md:leading-9">{account.detail?.blurb}</p>
+          )}
+        </section>
+      ) : null}
+
+      <section className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        {tiles.map(({ key, label, value, href, Icon }) => (
+          <Link
+            key={key}
+            href={href}
+            className="group rounded-2xl border border-border bg-card/80 p-4 transition-colors hover:bg-surface-sunken focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/45"
+          >
+            <div className="flex items-center justify-between">
+              <span className="flex size-9 items-center justify-center rounded-xl border border-primary/15 bg-primary/[0.08]">
+                <Icon className="size-4 text-primary" />
+              </span>
+              <ChevronRightIcon className="size-4 text-muted-foreground/40 transition-colors group-hover:text-primary" />
+            </div>
+            <p className="mt-3 text-2xl font-semibold tracking-tight text-foreground">{formatCompact(value)}</p>
+            <p className="text-xs text-muted-foreground">{label}</p>
+          </Link>
+        ))}
+      </section>
+
+      <section className="rounded-2xl border border-border bg-card/80 p-4 sm:flex sm:items-center sm:justify-between sm:gap-4">
+        <div className="min-w-0">
+          <h2 className="text-sm font-semibold text-foreground">{shareT("shareProfileTitle")}</h2>
+          <p className="mt-0.5 text-sm leading-relaxed text-muted-foreground">{shareT("shareProfileBody")}</p>
+        </div>
+        <div className="mt-3 shrink-0 sm:mt-0">
+          <ShareProfileButton
+            profilePath={`/${locale}${accountPath(account.urlIdentifier)}`}
+            label={shareT("copyProfileLink")}
+            copiedLabel={shareT("profileLinkCopied")}
+          />
+        </div>
+      </section>
+    </div>
+  );
+}
+
 export async function AccountBumicertsTabContent({
   account,
   did,
@@ -124,22 +206,28 @@ export async function AccountBumicertsTabContent({
   did: string;
   manageAction?: ManageAction | null;
 }) {
-  const [bumicerts, receipts] = await Promise.all([
-    fetchBumicertsByDid(did, 1000).then((page) => page.records).catch(() => []),
-    fetchReceipts().catch(() => []),
-  ]);
-  const donationCount = receipts.filter((receipt) =>
-    account.kind === "organization"
-      ? receipt.orgDid === did
-      : receipt.from?.type === "did" && receipt.from.id === did,
-  ).length;
+  const bumicerts = await fetchBumicertsByDid(did, 1000).then((page) => page.records).catch(() => []);
+  const grid = (
+    <>
+      <ManageActionRow action={manageAction} />
+      <AccountBumicertsGrid bumicerts={bumicerts} organizationIdentifier={account.urlIdentifier} organizationName={account.displayName} logoUrl={account.avatarUrl} />
+    </>
+  );
+
+  // Personal profiles render the Certs grid full-width; the at-a-glance stats
+  // now live on the Overview tab instead of a crowding sidebar.
+  if (account.kind !== "organization") {
+    return <div className="py-2">{grid}</div>;
+  }
+
+  const receipts = await fetchReceipts().catch(() => []);
+  const donationCount = receipts.filter((receipt) => receipt.orgDid === did).length;
 
   return (
     <AccountContentColumns
       sidebar={<AccountSidebar account={account} bumicertCount={bumicerts.length} donationCount={donationCount} />}
     >
-      <ManageActionRow action={manageAction} />
-      <AccountBumicertsGrid bumicerts={bumicerts} organizationIdentifier={account.urlIdentifier} organizationName={account.displayName} logoUrl={account.avatarUrl} />
+      {grid}
     </AccountContentColumns>
   );
 }
@@ -149,18 +237,13 @@ export async function AccountDonationsTabContent({ account, did }: { account: Ac
     notFound();
   }
 
-  const [receipts, bumicerts] = await Promise.all([
-    fetchReceipts().catch(() => []),
-    fetchBumicertsByDid(did, 1000).then((page) => page.records).catch(() => []),
-  ]);
+  const receipts = await fetchReceipts().catch(() => []);
   const userDonations = receipts.filter((receipt) => receipt.from?.type === "did" && receipt.from.id === did);
 
   return (
-    <AccountContentColumns sidebar={<AccountSidebar account={account} bumicertCount={bumicerts.length} donationCount={userDonations.length} />}>
-      <section className="py-6">
-        <DonationHistory receipts={userDonations} />
-      </section>
-    </AccountContentColumns>
+    <section className="py-6">
+      <DonationHistory receipts={userDonations} />
+    </section>
   );
 }
 

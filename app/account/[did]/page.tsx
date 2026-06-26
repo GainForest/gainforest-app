@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
-import { AccountHomeTabContent } from "../_components/AccountTabContent";
-import { accountBumicertsPath, accountPath, getAccountRouteData, readAccountRouteParams } from "../_lib/account-route";
+import { AccountHomeTabContent, AccountOverviewTabContent } from "../_components/AccountTabContent";
+import { accountPath, getAccountRouteData, readAccountRouteParams } from "../_lib/account-route";
 
 export default async function AccountByDidPage({ params }: { params: Promise<{ did: string }> }) {
   const { did, urlIdentifier } = await readAccountRouteParams(params);
@@ -11,7 +11,7 @@ export default async function AccountByDidPage({ params }: { params: Promise<{ d
   }
 
   if (account.kind === "user") {
-    redirect(accountBumicertsPath(account.urlIdentifier));
+    return <AccountOverviewTabContent account={account} did={did} />;
   }
 
   return <AccountHomeTabContent account={account} />;

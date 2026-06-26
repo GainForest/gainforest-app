@@ -305,6 +305,8 @@
   },
   "accountTabs": {
     "home": "Início",
+    "overview": "Visão geral",
+    "donations": "Doações",
     "bumicerts": "certificados",
     "projects": "Projetos",
     "donationHistory": "Histórico de doações",

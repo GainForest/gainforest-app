@@ -305,6 +305,8 @@
   },
   "accountTabs": {
     "home": "Nyumbani",
+    "overview": "Muhtasari",
+    "donations": "Michango",
     "bumicerts": "vyeti",
     "projects": "Miradi",
     "donationHistory": "Historia ya michango",

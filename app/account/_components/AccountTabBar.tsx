@@ -18,7 +18,7 @@ import {
   accountTimelinePath,
 } from "../_lib/account-route";
 
-type TabLabelKey = "home" | "bumicerts" | "projects" | "donationHistory" | "observations" | "timeline" | "gallery" | "settings";
+type TabLabelKey = "home" | "overview" | "bumicerts" | "projects" | "donationHistory" | "observations" | "timeline" | "gallery" | "settings";
 
 interface Tab {
   labelKey: TabLabelKey;
@@ -83,32 +83,22 @@ function buildTabs(
   };
 
   if (accountKind === "user") {
-    const tabs: Tab[] = [
-      {
-        labelKey: "bumicerts",
-        href: paths.bumicerts,
-        icon: BadgeIcon,
-        exact: false,
-      },
-      {
-        labelKey: "projects",
-        href: paths.projects,
-        icon: FolderKanbanIcon,
-        exact: false,
-      },
-      {
-        labelKey: "observations",
-        href: paths.activity,
-        icon: LeafIcon,
-        exact: false,
-      },
-      {
-        labelKey: "donationHistory",
-        href: paths.donations,
-        icon: HeartIcon,
-        exact: false,
-      },
-    ];
+    const certsTab: Tab = { labelKey: "bumicerts", href: paths.bumicerts, icon: BadgeIcon, exact: false };
+    const projectsTab: Tab = { labelKey: "projects", href: paths.projects, icon: FolderKanbanIcon, exact: false };
+    const observationsTab: Tab = { labelKey: "observations", href: paths.activity, icon: LeafIcon, exact: false };
+    const donationsTab: Tab = { labelKey: "donationHistory", href: paths.donations, icon: HeartIcon, exact: false };
+
+    // Public profile leads with a compact Overview, then Projects, Certs,
+    // Observations, Donations. The manage dashboard keeps its own order.
+    const tabs: Tab[] = scope === "account"
+      ? [
+          { labelKey: "overview", href: paths.home, icon: HomeIcon, exact: true },
+          projectsTab,
+          certsTab,
+          observationsTab,
+          donationsTab,
+        ]
+      : [certsTab, projectsTab, observationsTab, donationsTab];
     if (includeSettings) tabs.push(settingsTab);
     return tabs;
   }
@@ -178,21 +168,12 @@ export function AccountTabBar({
   const pathname = stripLocaleFromPathname(usePathname() ?? "/");
   const searchParams = useSearchParams();
   const tabs = buildTabs(did, accountKind, scope, includeSettings, manageBasePath);
-  const paths = buildTabPaths(did, scope, manageBasePath);
 
   function isActive(tab: Tab): boolean {
     if (scope === "manage") {
       const currentTab = searchParams.get("tab");
       const tabName = new URL(tab.href, "https://certs.local").searchParams.get("tab");
       return currentTab ? currentTab === tabName : tab.href === tabs[0]?.href;
-    }
-
-    if (
-      accountKind === "user" &&
-      tab.href === paths.bumicerts &&
-      pathname === paths.home
-    ) {
-      return true;
     }
 
     return tab.exact ? pathname === tab.href : pathname.startsWith(tab.href);

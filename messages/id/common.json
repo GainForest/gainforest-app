@@ -305,6 +305,8 @@
   },
   "accountTabs": {
     "home": "Beranda",
+    "overview": "Ringkasan",
+    "donations": "Donasi",
     "bumicerts": "sertifikat",
     "projects": "Proyek",
     "donationHistory": "Riwayat donasi",
