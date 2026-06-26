@@ -365,8 +365,18 @@ function analysisErrorMessage(code: string | undefined, t: ReturnType<typeof use
   return t("analysisFailed");
 }
 
+function isUnidentifiedScientificName(name: string): boolean {
+  const normalized = name.trim().toLowerCase();
+  return normalized === UNIDENTIFIED_NAME.toLowerCase() || normalized === "unidentified organisms";
+}
+
+function analysisCanUpload(analysis: ObservationAnalysis): boolean {
+  const scientificName = analysis.scientificName.trim();
+  return scientificName.length > 0 && !isUnidentifiedScientificName(scientificName) && analysis.eventDate.trim().length > 0;
+}
+
 function itemCanUpload(item: ObservationUploadItem): boolean {
-  return (item.status === "ready" || item.status === "uploadError") && item.analysis.scientificName.trim().length > 0 && item.analysis.eventDate.trim().length > 0;
+  return (item.status === "ready" || item.status === "uploadError") && analysisCanUpload(item.analysis);
 }
 
 type ObservationGroup = { id: string; number: number; items: ObservationUploadItem[]; label: string; previewUrls: string[] };
@@ -649,6 +659,7 @@ export function ObservationsClient({ target, initialPage }: { target: ManageTarg
           defaultOccurrenceMedia="all"
           leadingCard={<AddObservationTile target={target} disabledReason={createPermission.reason} />}
           emptyState={<ObservationEmptyState target={target} disabledReason={createPermission.reason} />}
+          showStatsOverview={false}
         />
       </Suspense>
     </div>
@@ -733,6 +744,7 @@ function ObservationBulkAddPanel({
   const [bulkError, setBulkError] = useState<string | null>(null);
   const [isPreparing, setIsPreparing] = useState(false);
   const [isBulkUploading, setIsBulkUploading] = useState(false);
+  const [uploadProgressIds, setUploadProgressIds] = useState<Set<string>>(() => new Set());
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   // The mandatory observation location chosen before any image can be added.
@@ -769,12 +781,15 @@ function ObservationBulkAddPanel({
           return;
         }
         if (draft && draft.items.length > 0) {
-          const restored: ObservationUploadItem[] = draft.items.map((stored) => ({
-            ...stored,
-            previewUrl: URL.createObjectURL(stored.file),
-            progress: 0,
-            uploadedUri: null,
-          }));
+          const restored: ObservationUploadItem[] = draft.items.map((stored) => {
+            const item = {
+              ...stored,
+              previewUrl: URL.createObjectURL(stored.file),
+              progress: 0,
+              uploadedUri: null,
+            };
+            return item;
+          });
           setItems(restored);
           if (isValidLocation(draft.chosenLocation)) setChosenLocation(draft.chosenLocation);
           setDraftRestored(true);
@@ -831,6 +846,7 @@ function ObservationBulkAddPanel({
       return [];
     });
     setExpandedId(null);
+    setUploadProgressIds(new Set());
     setDraftRestored(false);
     setBulkError(null);
     void clearDraft(target.did);
@@ -902,7 +918,9 @@ function ObservationBulkAddPanel({
   const selectedEditableItems = editableItems.filter((item) => item.selected);
   const uploadedCount = items.filter((item) => item.status === "uploaded").length;
   const uploadableCount = items.filter(itemCanUpload).length;
-  const overallProgress = items.length > 0 ? Math.round((uploadedCount / items.length) * 100) : 0;
+  const uploadProgressItems = uploadProgressIds.size > 0 ? items.filter((item) => uploadProgressIds.has(item.id)) : [];
+  const showUploadProgress = isBulkUploading && uploadProgressItems.length > 0;
+  const overallProgress = uploadProgressItems.length > 0 ? Math.round(uploadProgressItems.reduce((sum, item) => sum + item.progress, 0) / uploadProgressItems.length) : 0;
   const groups = observationGroups(items);
   const allEditableSelected = editableItems.length > 0 && selectedEditableItems.length === editableItems.length;
   const someEditableSelected = selectedEditableItems.length > 0 && !allEditableSelected;
@@ -945,7 +963,7 @@ function ObservationBulkAddPanel({
 
   function markItemError(id: string, message: string) {
     setItems((current) => current.map((candidate) =>
-      candidate.id === id ? { ...candidate, status: "error", error: message } : candidate,
+      candidate.id === id ? { ...candidate, status: "error", error: message, selected: false } : candidate,
     ));
   }
 
@@ -975,17 +993,17 @@ function ObservationBulkAddPanel({
         }
 
         setItems((current) => {
-          const updated = current.map((candidate) =>
-            candidate.id === item.id
-              ? {
-                  ...candidate,
-                  status: "ready" as const,
-                  analysis: mergeAnalysisWithDefaults(normalizeAnalysis(data.analysis, item.file), candidate.analysis),
-                  error: null,
-                  selected: candidate.selected,
-                }
-              : candidate,
-          );
+          const updated = current.map((candidate) => {
+            if (candidate.id !== item.id) return candidate;
+            const analysis = mergeAnalysisWithDefaults(normalizeAnalysis(data.analysis, item.file), candidate.analysis);
+            return {
+              ...candidate,
+              status: "ready" as const,
+              analysis,
+              error: null,
+              selected: analysisCanUpload(analysis),
+            };
+          });
           return autoGroupByIdentification(updated, item.id);
         });
         return;
@@ -1049,7 +1067,7 @@ function ObservationBulkAddPanel({
             originalSize: prepared.originalSize,
             compressed: prepared.compressed,
             groupId: id,
-            selected: true,
+            selected: false,
             status: "analyzing" as const,
             progress: 0,
             analysis,
@@ -1064,7 +1082,7 @@ function ObservationBulkAddPanel({
             originalSize: sourceFile.size,
             compressed: false,
             groupId: id,
-            selected: true,
+            selected: false,
             status: "error" as const,
             progress: 0,
             analysis,
@@ -1109,6 +1127,7 @@ function ObservationBulkAddPanel({
       return current.filter((candidate) => !ids.has(candidate.id));
     });
     setExpandedId((current) => current && ids.has(current) ? null : current);
+    setUploadProgressIds((current) => new Set(Array.from(current).filter((id) => !ids.has(id))));
     setBulkError(null);
   }
 
@@ -1153,7 +1172,7 @@ function ObservationBulkAddPanel({
 
   function separateItemFromGroup(itemId: string, sourceGroupId: string) {
     const nextGroupId = itemId === sourceGroupId ? crypto.randomUUID() : itemId;
-    setItems((current) => current.map((item) => item.id === itemId ? { ...item, groupId: nextGroupId, selected: true } : item));
+    setItems((current) => current.map((item) => item.id === itemId ? { ...item, groupId: nextGroupId } : item));
     setExpandedId(nextGroupId);
     setBulkError(null);
   }
@@ -1162,10 +1181,11 @@ function ObservationBulkAddPanel({
     setItems((current) => {
       const targetItems = current.filter((item) => item.groupId === groupId);
       const shared = targetItems.length > 0 ? sharedOccurrenceAnalysis(occurrenceAnalysisForUpload(targetItems)) : null;
-      return current.map((item) => item.id === itemId
-        ? { ...item, groupId, selected: true, analysis: shared ? { ...item.analysis, ...shared } : item.analysis }
-        : item,
-      );
+      return current.map((item) => {
+        if (item.id !== itemId) return item;
+        const analysis = shared ? { ...item.analysis, ...shared } : item.analysis;
+        return { ...item, groupId, analysis };
+      });
     });
     setExpandedId(groupId);
     setBulkError(null);
@@ -1267,9 +1287,10 @@ function ObservationBulkAddPanel({
       setBulkError(t("noReadySelected"));
       return;
     }
+    const selectedIds = new Set(readySelectedItems.map((item) => item.id));
+    setUploadProgressIds(selectedIds);
     setIsBulkUploading(true);
     try {
-      const selectedIds = new Set(readySelectedItems.map((item) => item.id));
       const groupIds = Array.from(new Set(readySelectedItems.map((item) => item.groupId)));
       const created: OccurrenceRecord[] = [];
       for (const groupId of groupIds) {
@@ -1391,7 +1412,9 @@ function ObservationBulkAddPanel({
                   </Button>
                 </div>
               </div>
-              <ProgressBar value={overallProgress} label={t("progressLabel", { progress: overallProgress })} />
+              {showUploadProgress ? (
+                <ProgressBar value={overallProgress} label={t("progressLabel", { progress: overallProgress })} />
+              ) : null}
             </div>
 
             <div>
@@ -1416,7 +1439,7 @@ function ObservationBulkAddPanel({
                       onAnalysisChange={updateAnalysis}
                       onToggleSelected={(checked) => {
                         const groupItemIds = new Set(group.items.map((item) => item.id));
-                        setItems((current) => current.map((candidate) => groupItemIds.has(candidate.id) ? { ...candidate, selected: checked } : candidate));
+                        setItems((current) => current.map((candidate) => groupItemIds.has(candidate.id) && candidate.status !== "uploading" && candidate.status !== "uploaded" ? { ...candidate, selected: checked } : candidate));
                       }}
                       onRetry={(id) => retryAnalysis(id)}
                       onSeparateItem={(id) => separateItemFromGroup(id, group.id)}
@@ -1586,7 +1609,8 @@ function ObservationListItem({
   const primaryStatus = groupStatus(group.items);
   const retryItem = group.items.find((candidate) => candidate.status === "error");
 
-  const organism = analysis.scientificName.trim() || group.label || (item ? cleanFileName(item.file.name) : t("unidentified"));
+  const isUnidentified = isUnidentifiedScientificName(analysis.scientificName);
+  const organism = isUnidentified ? t("unidentifiedOrganism") : analysis.scientificName.trim() || group.label || (item ? cleanFileName(item.file.name) : t("unidentified"));
   const commonName = analysis.vernacularName.trim();
   const dateText = analysis.eventDate.trim();
   const locationText = (analysis.locality || analysis.country).trim();
@@ -1623,11 +1647,11 @@ function ObservationListItem({
         {/* Organism */}
         {canEdit ? (
           <button type="button" onClick={onToggleExpanded} aria-expanded={expanded} className="group/name min-w-0 text-left" title={t("editDetails")}>
-            <OrganismCell organism={organism} commonName={commonName} metaBits={metaBits} interactive />
+            <OrganismCell organism={organism} commonName={commonName} metaBits={metaBits} unidentified={isUnidentified} interactive />
           </button>
         ) : (
           <div className="min-w-0">
-            <OrganismCell organism={organism} commonName={commonName} metaBits={metaBits} />
+            <OrganismCell organism={organism} commonName={commonName} metaBits={metaBits} unidentified={isUnidentified} />
           </div>
         )}
 
@@ -1850,10 +1874,10 @@ function GroupMediaEditor({
   );
 }
 
-function OrganismCell({ organism, commonName, metaBits, interactive }: { organism: string; commonName: string; metaBits: string[]; interactive?: boolean }) {
+function OrganismCell({ organism, commonName, metaBits, unidentified, interactive }: { organism: string; commonName: string; metaBits: string[]; unidentified?: boolean; interactive?: boolean }) {
   return (
     <>
-      <span className={`block truncate text-sm font-medium text-foreground ${interactive ? "underline-offset-2 group-hover/name:text-primary group-hover/name:underline group-hover/name:decoration-dotted" : ""}`}>
+      <span className={`block truncate text-sm font-medium ${unidentified ? "text-destructive" : "text-foreground"} ${interactive ? "underline-offset-2 group-hover/name:underline group-hover/name:decoration-dotted" : ""} ${interactive && !unidentified ? "group-hover/name:text-primary" : ""}`}>
         {organism}
       </span>
       {commonName ? <span className="block truncate text-xs italic text-muted-foreground">{commonName}</span> : null}

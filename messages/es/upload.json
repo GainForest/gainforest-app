@@ -628,7 +628,7 @@
     "addObservation": "Agregar observación",
     "backToObservations": "Volver a observaciones",
     "bulkTitle": "Agregar observaciones desde imágenes",
-    "bulkIntro": "Añade tus fotos de campo y leemos cada una para completar lo que podamos. Nuestras estimaciones no siempre son correctas, así que revisa cada detalle y edita lo que parezca incorrecto antes de subir.",
+    "bulkIntro": "Agrega aquí hasta 100 fotos de observaciones. Completaremos los detalles que podamos, y podrás revisar y editar antes de subirlas.",
     "chooseImages": "Elegir imágenes",
     "chooseMoreImages": "Elegir más imágenes",
     "fileRequirements": "Imágenes JPG, PNG, WebP, HEIC o HEIF. Las imágenes de más de 4 MB se comprimen antes del análisis y la subida.",
@@ -755,7 +755,8 @@
       "editItemLocation": "Cambiar la ubicación de esta foto"
     },
     "draftRestored": "Recuperamos tus fotos sin guardar de la última vez.",
-    "discardDraft": "Descartar borrador"
+    "discardDraft": "Descartar borrador",
+    "unidentifiedOrganism": "Organismo no identificado"
   },
   "settings": {
     "organizationTitle": "Configuración de la organización",

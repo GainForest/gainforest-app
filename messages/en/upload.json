@@ -628,7 +628,7 @@
     "addObservation": "Add observation",
     "backToObservations": "Back to observations",
     "bulkTitle": "Add observations from images",
-    "bulkIntro": "Add your field photos and we read each one to fill in what we can. Our guesses are not always right, so please review every detail and edit anything that looks off before you upload.",
+    "bulkIntro": "Add up to 100 observation photos here. We will fill in the details we can, and you can review and edit before you upload.",
     "chooseImages": "Choose images",
     "chooseMoreImages": "Choose more images",
     "fileRequirements": "JPG, PNG, WebP, or HEIC. Large photos are resized for you.",
@@ -755,7 +755,8 @@
       "editItemLocation": "Change this photo's location"
     },
     "draftRestored": "We brought back your unsaved photos from last time.",
-    "discardDraft": "Discard draft"
+    "discardDraft": "Discard draft",
+    "unidentifiedOrganism": "Unidentified Organism"
   },
   "settings": {
     "organizationTitle": "Organization settings",

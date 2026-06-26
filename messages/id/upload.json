@@ -628,7 +628,7 @@
     "addObservation": "Tambah temuan",
     "backToObservations": "Kembali ke temuan",
     "bulkTitle": "Tambah temuan dari gambar",
-    "bulkIntro": "Tambahkan foto lapangan Anda dan kami membaca setiap foto untuk mengisi yang kami bisa. Tebakan kami tidak selalu benar, jadi tinjau setiap detail dan ubah apa pun yang tampak keliru sebelum Anda mengunggah.",
+    "bulkIntro": "Tambahkan hingga 100 foto temuan di sini. Kami akan mengisi detail yang kami bisa, dan Anda dapat meninjau serta mengedit sebelum mengunggah.",
     "chooseImages": "Pilih gambar",
     "chooseMoreImages": "Pilih gambar lain",
     "fileRequirements": "Gambar JPG, PNG, WebP, HEIC, atau HEIF. Gambar di atas 4 MB dikompresi sebelum analisis dan unggah.",
@@ -755,7 +755,8 @@
       "editItemLocation": "Ubah lokasi foto ini"
     },
     "draftRestored": "Kami memulihkan foto Anda yang belum tersimpan dari sebelumnya.",
-    "discardDraft": "Buang draf"
+    "discardDraft": "Buang draf",
+    "unidentifiedOrganism": "Organisme tidak teridentifikasi"
   },
   "settings": {
     "organizationTitle": "Pengaturan organisasi",

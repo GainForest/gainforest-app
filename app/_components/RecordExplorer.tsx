@@ -205,6 +205,7 @@ export function RecordExplorer({
   defaultOccurrenceMedia = DEFAULT_OCCURRENCE_MEDIA,
   leadingCard,
   emptyState,
+  showStatsOverview = true,
 }: {
   kind: RecordKind;
   initialPage?: InitialExplorerPage;
@@ -216,11 +217,12 @@ export function RecordExplorer({
   defaultOccurrenceMedia?: OccurrenceFilter;
   leadingCard?: ReactNode;
   emptyState?: ReactNode;
+  showStatsOverview?: boolean;
 }) {
   const meta = KIND_META[kind];
   const exploreT = useTranslations("marketplace.explore");
   const observationsT = useTranslations("marketplace.observations");
-  const showStatsOverview = !showHero || Boolean(ownerDid);
+  const shouldShowStatsOverview = showStatsOverview && (!showHero || Boolean(ownerDid));
   const [query, setQuery] = useQueryState(
     "q",
     parseAsString.withDefault("").withOptions(SEARCH_QUERY_STATE_OPTIONS),
@@ -556,10 +558,10 @@ export function RecordExplorer({
   }, [deferredQuery, kind, occCategory, occMedia, siteSource, sort, badgeFilters, view]);
   // Embedded account/manage explorers keep compact loaded-record summaries.
   const stats = useMemo(
-    () => showStatsOverview ? (kind === "occurrence" && !ownerDid && occurrenceStats ? computeOccurrenceTotalStats(occurrenceStats, records) : computeStats(records, kind)) : [],
-    [kind, occurrenceStats, ownerDid, records, showStatsOverview],
+    () => shouldShowStatsOverview ? (kind === "occurrence" && !ownerDid && occurrenceStats ? computeOccurrenceTotalStats(occurrenceStats, records) : computeStats(records, kind)) : [],
+    [kind, occurrenceStats, ownerDid, records, shouldShowStatsOverview],
   );
-  const showStats = showStatsOverview && (kind === "occurrence" ? ownerDid ? records.length > 0 : Boolean(occurrenceStats) || (!occurrenceStatsLoading && records.length > 0) : records.length > 0);
+  const showStats = shouldShowStatsOverview && (kind === "occurrence" ? ownerDid ? records.length > 0 : Boolean(occurrenceStats) || (!occurrenceStatsLoading && records.length > 0) : records.length > 0);
   const gridCls = kind === "occurrence" ? GALLERY_GRID_CLS : GRID_CLS;
 
   return (

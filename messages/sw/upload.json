@@ -628,7 +628,7 @@
     "addObservation": "Ongeza uchunguzi",
     "backToObservations": "Rudi kwenye uchunguzi",
     "bulkTitle": "Ongeza uchunguzi kutoka picha",
-    "bulkIntro": "Ongeza picha zako za uwandani na tutasoma kila moja ili kujaza tunayoweza. Makadirio yetu si sahihi kila wakati, kwa hivyo kagua kila kipengele na hariri chochote kinachoonekana si sahihi kabla ya kupakia.",
+    "bulkIntro": "Ongeza hapa hadi picha 100 za uchunguzi. Tutajaza maelezo tunayoweza, na unaweza kukagua na kuhariri kabla ya kupakia.",
     "chooseImages": "Chagua picha",
     "chooseMoreImages": "Chagua picha zaidi",
     "fileRequirements": "Picha za JPG, PNG, WebP, HEIC au HEIF. Picha kubwa kuliko MB 4 hubanwa kabla ya uchambuzi na upakiaji.",
@@ -755,7 +755,8 @@
       "editItemLocation": "Badilisha eneo la picha hii"
     },
     "draftRestored": "Tumerejesha picha zako ambazo hazikuhifadhiwa kutoka mara iliyopita.",
-    "discardDraft": "Tupa rasimu"
+    "discardDraft": "Tupa rasimu",
+    "unidentifiedOrganism": "Kiumbe kisichotambuliwa"
   },
   "settings": {
     "organizationTitle": "Mipangilio ya shirika",
