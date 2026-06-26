@@ -248,6 +248,15 @@
       "description": "Uma corrida semanal e amistosa para registrar a natureza. Fotografe qualquer ser vivo — uma planta, ave, inseto ou fungo —, adicione ao GainForest e suba no ranking. Nova rodada e novos prêmios toda semana.",
       "program": "Parte do programa Klarna AI for Climate Resilience, com a GainForest."
     },
+    "rsvp": {
+      "button": "Inscreva-se para participar",
+      "note": "Inscreva-se para que possamos acompanhar suas entradas e enviar seu prêmio se você ganhar."
+    },
+    "help": {
+      "prompt": "Dúvidas?",
+      "officeHours": "Participe do plantão de dúvidas",
+      "community": "Pergunte no chat do grupo"
+    },
     "status": {
       "live": "Ao vivo",
       "upcoming": "Começa em breve",
@@ -1023,15 +1032,15 @@
   "manageProjects": {
     "hero": {
       "title": "Meus projetos",
-      "description": "Crie e gerencie projetos que podem conter vários certificados, junto com fotos, vídeos e outras mídias que mostram o trabalho."
+      "description": "Crie e gerencie seus projetos. Cada projeto conta a história do seu trabalho — e a partir dele você pode emitir certificados de impacto (Certs) para solicitar financiamento."
     },
     "metadata": {
       "title": "Gerenciar projetos — GainForest",
-      "description": "Crie e gerencie coleções de projetos para seus certificados."
+      "description": "Crie e gerencie seus projetos e emita certificados de impacto a partir deles."
     },
     "actions": {
-      "manageCerts": "Gerenciar Certs",
-      "manageCertsFor": "Gerenciar Certs de {title}",
+      "manageCerts": "Certs",
+      "manageCertsFor": "Certs de {title}",
       "manageGallery": "Gerenciar galeria",
       "manageGalleryFor": "Gerenciar galeria de {title}"
     }
@@ -1043,19 +1052,20 @@
   },
   "manageProjectCerts": {
     "metadata": {
-      "title": "Gerenciar Certs do projeto — GainForest",
-      "description": "Escolha quais Certs pertencem a um projeto."
+      "title": "Certs do projeto — GainForest",
+      "description": "Emita e gerencie os certificados de impacto de um projeto."
     },
     "nav": {
       "projects": "Projetos",
       "refresh": "Atualizar"
     },
     "hero": {
-      "description": "Escolha quais Certs pertencem a este projeto. Adicionar ou remover um Cert atualiza a página do projeto, mas não exclui o Cert."
+      "description": "Certificados de impacto (Certs) que você emite a partir deste projeto. Cada um reúne provas — fotos, locais, datas e colaboradores — para que financiadores possam apoiar o trabalho."
     },
     "stats": {
       "linked": "{count, plural, one {# Cert vinculado} other {# Certs vinculados}}",
-      "available": "{count, plural, one {# Cert disponível} other {# Certs disponíveis}}"
+      "available": "{count, plural, one {# Cert pode ser vinculado} other {# Certs podem ser vinculados}}",
+      "minted": "{count, plural, one {# Cert emitido} other {# Certs emitidos}}"
     },
     "search": {
       "ariaLabel": "Pesquisar Certs",
@@ -1067,7 +1077,10 @@
       "add": "Adicionar",
       "saving": "Salvando…",
       "view": "Ver",
-      "unlink": "Desvincular"
+      "unlink": "Desvincular",
+      "mint": "Emitir um Cert",
+      "mintFirst": "Emita seu primeiro Cert",
+      "link": "Vincular"
     },
     "errors": {
       "loadTitle": "Não foi possível carregar os Certs",
@@ -1084,8 +1097,8 @@
       "noSummary": "Ainda sem resumo."
     },
     "empty": {
-      "noCertsTitle": "Ainda não há Certs",
-      "noCertsDescription": "Crie um Cert para este projeto ou adicione um dos seus Certs publicados.",
+      "noCertsTitle": "Nenhum Cert emitido ainda",
+      "noCertsDescription": "Um certificado de impacto (Cert) transforma este projeto em uma história financiável — a prova de uma contribuição, com fotos, datas, locais e as pessoas envolvidas. Emita o primeiro para solicitar financiamento.",
       "noMatchingTitle": "Nenhum Cert encontrado",
       "noMatchingDescription": "Tente outro termo de busca ou limpe o campo de busca."
     },
@@ -1094,6 +1107,30 @@
       "contributors": "{count, plural, one {# colaborador} other {# colaboradores}}",
       "impactPeriod": "Período de impacto",
       "created": "Criado em {date}"
+    },
+    "linkExisting": {
+      "toggle": "Vincular um Cert existente",
+      "hide": "Ocultar",
+      "title": "Vincular um Cert existente",
+      "description": "Já emitiu um Cert em outro lugar? Vincule-o a este projeto. Isso atualiza a página do projeto; não move nem exclui o Cert.",
+      "empty": "Você não tem outros Certs para vincular no momento."
+    }
+  },
+  "newCert": {
+    "gate": {
+      "title": "Para qual projeto é este Cert?",
+      "subtitle": "Um Cert é um certificado de impacto que você emite a partir de um projeto. Escolha o projeto ao qual ele pertence.",
+      "searchPlaceholder": "Pesquisar seus projetos",
+      "searchAria": "Pesquisar seus projetos",
+      "loading": "Carregando seus projetos…",
+      "errorTitle": "Não foi possível carregar seus projetos",
+      "retry": "Tentar novamente",
+      "mintFrom": "Emitir um Cert deste projeto",
+      "noMatch": "Nenhum projeto correspondente",
+      "noProjectsTitle": "Crie um projeto primeiro",
+      "noProjectsDescription": "Os Certs são emitidos a partir de um projeto. Crie um projeto para descrever seu trabalho e depois emita certificados de impacto para solicitar financiamento.",
+      "createProject": "Criar um projeto",
+      "skip": "Emitir sem vincular a um projeto"
     }
   }
 }

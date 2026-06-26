@@ -722,7 +722,7 @@ function ProjectSuccessPanel({
             className="mt-4 max-w-xs text-sm leading-6 text-muted-foreground"
           >
             {showAddBumicert
-              ? "Add a Cert next to apply for donations and attach field data."
+              ? "When you're ready, mint an impact certificate (Cert) from this project to apply for funding. This step is optional."
               : "Your project changes have been saved."}
           </motion.p>
 
@@ -766,10 +766,10 @@ function ProjectSuccessPanel({
                 <div className="relative z-10 w-full">
                   <div className="min-w-0">
                     <h4 className="font-instrument text-2xl font-medium italic leading-tight tracking-[-0.03em] text-foreground sm:text-3xl">
-                      Add the first Cert
+                      Mint your first Cert
                     </h4>
                     <p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-muted-foreground sm:mx-0">
-                      Turn {projectTitle || "this project"} into a fundable story with proof of work, field data, photos, dates, and places.
+                      An impact certificate minted from {projectTitle || "this project"} — proof of one contribution, with photos, dates, places, and contributors, so funders can support it.
                     </p>
                   </div>
                 </div>

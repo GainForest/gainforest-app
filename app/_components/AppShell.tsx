@@ -48,7 +48,6 @@ import {
 import { stripLocaleFromPathname } from "@/lib/i18n/routing";
 import { AuthButton, SignInPrompt } from "./AuthFlow";
 import {
-  getAccountListSnapshot,
   switcherGroupIdentifier,
   useAccountList,
   useActiveAccountContext,
@@ -654,7 +653,7 @@ function NavLeaf({ item, isActive, index }: { item: NavLeaf; isActive: boolean; 
   );
 }
 
-const ONBOARD_ORGANIZATION_HREF = "/manage?mode=onboard-org";
+const PERSONAL_PROJECT_NEW_HREF = manageHref({ basePath: "/manage" }, "projects", { mode: "new" });
 
 function createProjectHrefForGroup(identifier: string): string {
   return manageHref({ basePath: groupManageBasePath(identifier) }, "projects", { mode: "new" });
@@ -694,45 +693,29 @@ function AuthenticatedCreateProjectLink({
   children: React.ReactNode;
 }) {
   const router = useRouter();
-  const { groups, reload } = useAccountList(sessionDid);
+  const { groups } = useAccountList(sessionDid);
   const [activeContext, setActiveContext] = useActiveAccountContext(sessionDid);
 
   const activeGroup = activeContext.type === "group" ? groups.find((group) => group.groupDid === activeContext.did) ?? null : null;
+  // Honor the active account context: an organization context creates the
+  // project in that organization, a personal context creates it in the
+  // signed-in user's own account — no organization required.
   const href = activeContext.type === "group"
     ? createProjectHrefForGroup(activeGroup ? switcherGroupIdentifier(activeGroup) : activeContext.identifier?.trim() || activeContext.did)
-    : groups[0]
-      ? createProjectHrefForGroup(switcherGroupIdentifier(groups[0]))
-      : ONBOARD_ORGANIZATION_HREF;
+    : PERSONAL_PROJECT_NEW_HREF;
 
-  const handleClick = async (event: MouseEvent<HTMLAnchorElement>) => {
+  const handleClick = (event: MouseEvent<HTMLAnchorElement>) => {
     if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
 
+    // Personal context: let the Link navigate to the personal "new project"
+    // route without any organization detour.
+    if (activeContext.type !== "group") return;
+
     event.preventDefault();
-
-    if (activeContext.type === "group") {
-      const identifier = activeGroup ? switcherGroupIdentifier(activeGroup) : activeContext.identifier?.trim() || activeContext.did;
-      if (activeGroup) {
-        setActiveContext({ type: "group", did: activeGroup.groupDid, identifier, role: activeGroup.role });
-      }
-      router.push(createProjectHrefForGroup(identifier));
-      return;
+    const identifier = activeGroup ? switcherGroupIdentifier(activeGroup) : activeContext.identifier?.trim() || activeContext.did;
+    if (activeGroup) {
+      setActiveContext({ type: "group", did: activeGroup.groupDid, identifier, role: activeGroup.role });
     }
-
-    let nextGroups = groups;
-    if (nextGroups.length === 0) {
-      await reload();
-      const latest = getAccountListSnapshot();
-      if (latest.sessionDid === sessionDid) nextGroups = latest.groups;
-    }
-
-    const firstGroup = nextGroups[0];
-    if (!firstGroup) {
-      router.push(ONBOARD_ORGANIZATION_HREF);
-      return;
-    }
-
-    const identifier = switcherGroupIdentifier(firstGroup);
-    setActiveContext({ type: "group", did: firstGroup.groupDid, identifier, role: firstGroup.role });
     router.push(createProjectHrefForGroup(identifier));
   };
 
@@ -901,6 +884,14 @@ function ManageSection({
       Icon: UserIcon,
       href: basePath,
       pathCheck: { equals: basePath },
+    },
+    {
+      kind: "leaf",
+      id: "projects-manage",
+      text: t("myProjects"),
+      Icon: FolderKanbanIcon,
+      href: manageHref({ basePath }, "projects"),
+      pathCheck: { startsWith: manageHref({ basePath }, "projects") },
     },
     {
       kind: "leaf",

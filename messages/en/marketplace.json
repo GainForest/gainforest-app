@@ -248,6 +248,15 @@
       "description": "A friendly weekly race to record nature. Photograph any living thing — a plant, bird, bug, or fungus — add it to GainForest, and climb the board. New round, new prizes, every week.",
       "program": "Part of the Klarna AI for Climate Resilience program, with GainForest."
     },
+    "rsvp": {
+      "button": "Register to take part",
+      "note": "Register so we can track your entries and send your prize if you win."
+    },
+    "help": {
+      "prompt": "Questions?",
+      "officeHours": "Join office hours",
+      "community": "Ask in the group chat"
+    },
     "status": {
       "live": "Live now",
       "upcoming": "Starting soon",
@@ -1023,15 +1032,15 @@
   "manageProjects": {
     "hero": {
       "title": "My Projects",
-      "description": "Create and manage projects that can contain multiple Certs, along with the photos, videos, and other media that show the work."
+      "description": "Create and manage your projects. Each project tells the story of your work — then you can mint impact certificates (Certs) from it to apply for funding."
     },
     "metadata": {
       "title": "Manage Projects — GainForest",
-      "description": "Create and manage project collections for your Certs."
+      "description": "Create and manage your projects and mint impact certificates from them."
     },
     "actions": {
-      "manageCerts": "Manage Certs",
-      "manageCertsFor": "Manage Certs for {title}",
+      "manageCerts": "Certs",
+      "manageCertsFor": "Certs for {title}",
       "manageGallery": "Manage gallery",
       "manageGalleryFor": "Manage gallery for {title}"
     }
@@ -1043,19 +1052,20 @@
   },
   "manageProjectCerts": {
     "metadata": {
-      "title": "Manage Project Certs — GainForest",
-      "description": "Choose which Certs belong to a project."
+      "title": "Project Certs — GainForest",
+      "description": "Mint and manage the impact certificates for a project."
     },
     "nav": {
       "projects": "Projects",
       "refresh": "Refresh"
     },
     "hero": {
-      "description": "Choose which Certs belong to this project. Adding or removing a Cert updates the project page, but does not delete the Cert."
+      "description": "Impact certificates (Certs) you mint from this project. Each one bundles proof — photos, places, dates, and contributors — so funders can support the work."
     },
     "stats": {
       "linked": "{count, plural, one {# linked Cert} other {# linked Certs}}",
-      "available": "{count, plural, one {# available Cert} other {# available Certs}}"
+      "available": "{count, plural, one {# Cert can be linked} other {# Certs can be linked}}",
+      "minted": "{count, plural, one {# Cert minted} other {# Certs minted}}"
     },
     "search": {
       "ariaLabel": "Search Certs",
@@ -1067,7 +1077,10 @@
       "add": "Add",
       "saving": "Saving…",
       "view": "View",
-      "unlink": "Unlink"
+      "unlink": "Unlink",
+      "mint": "Mint a Cert",
+      "mintFirst": "Mint your first Cert",
+      "link": "Link"
     },
     "errors": {
       "loadTitle": "Could not load Certs",
@@ -1084,8 +1097,8 @@
       "noSummary": "No summary yet."
     },
     "empty": {
-      "noCertsTitle": "No Certs yet",
-      "noCertsDescription": "Create a Cert for this project or add one from your published Certs.",
+      "noCertsTitle": "No Certs minted yet",
+      "noCertsDescription": "An impact certificate (Cert) turns this project into a fundable story — proof of one contribution, with photos, dates, places, and the people involved. Mint your first one to apply for funding.",
       "noMatchingTitle": "No matching Certs",
       "noMatchingDescription": "Try another search term or clear the search field."
     },
@@ -1094,6 +1107,30 @@
       "contributors": "{count, plural, one {# contributor} other {# contributors}}",
       "impactPeriod": "Impact period",
       "created": "Created {date}"
+    },
+    "linkExisting": {
+      "toggle": "Link an existing Cert",
+      "hide": "Hide",
+      "title": "Link an existing Cert",
+      "description": "Already minted a Cert somewhere else? Link it to this project. This updates the project page; it doesn't move or delete the Cert.",
+      "empty": "You have no other Certs to link right now."
+    }
+  },
+  "newCert": {
+    "gate": {
+      "title": "Which project is this Cert for?",
+      "subtitle": "A Cert is an impact certificate you mint from a project. Choose the project this one belongs to.",
+      "searchPlaceholder": "Search your projects",
+      "searchAria": "Search your projects",
+      "loading": "Loading your projects…",
+      "errorTitle": "Could not load your projects",
+      "retry": "Retry",
+      "mintFrom": "Mint a Cert from this project",
+      "noMatch": "No matching projects",
+      "noProjectsTitle": "Create a project first",
+      "noProjectsDescription": "Certs are minted from a project. Create a project to describe your work, then mint impact certificates from it to apply for funding.",
+      "createProject": "Create a project",
+      "skip": "Mint without linking to a project"
     }
   }
 }

@@ -110,7 +110,11 @@ const ART: Record<string, ReactNode> = {
 
 function buildTiles(account: AccountRouteData, stats: OverviewStats, target: ManageTarget): FolderTile[] {
   if (account.kind === "user") {
-    return [];
+    // Personal accounts can own projects without creating an organization, so
+    // surface a Projects folder on the personal home.
+    return [
+      { id: "projects", title: "Projects", href: manageHref(target, "projects"), count: stats.projects, unit: "collections" },
+    ];
   }
   return [
     { id: "projects", title: "Projects", href: manageHref(target, "projects"), count: stats.projects, unit: "collections" },
@@ -164,10 +168,15 @@ export function ManageOverview({
   const tiles = buildTiles(account, stats, target);
   if (tiles.length === 0) return null;
 
+  const titleOverrides: Record<string, string> = {
+    observations: t("myObservations"),
+    projects: t("projects"),
+  };
+
   return (
     <div className="grid grid-cols-2 gap-x-3 gap-y-4 sm:grid-cols-3 lg:grid-cols-4">
       {tiles.map((tile, index) => (
-        <Folder key={tile.id} tile={tile.id === "observations" ? { ...tile, title: t("myObservations") } : tile} index={index} />
+        <Folder key={tile.id} tile={titleOverrides[tile.id] ? { ...tile, title: titleOverrides[tile.id] } : tile} index={index} />
       ))}
     </div>
   );
