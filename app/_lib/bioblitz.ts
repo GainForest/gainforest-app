@@ -174,21 +174,32 @@ const ROUND_COLLECTORS_QUERY = `
 const MAX_PAGES = 6;
 const PAGE_SIZE = 1000;
 
+/** Which window the board tallies: just the active round, or every observation
+ *  contributed to the challenge so far. */
+export type BoardScope = "round" | "all";
+
 /**
- * Tally the collectors who uploaded photo observations inside a round window.
- * The query filters to image-bearing occurrences created on/after the round
- * start; the round end is applied client-side. A round is one week, so this is
- * almost always a single page, but we walk a few pages defensively.
+ * Tally the collectors who uploaded photo observations.
+ *
+ * Scope "round" counts image-bearing occurrences inside the round window
+ * (created on/after the round start, filtered to the round end client-side).
+ * Scope "all" counts every image observation in the program, newest-first, so
+ * the board can show the most active collectors overall. A round is one week,
+ * so a single page usually covers it; we walk a few pages defensively.
  */
 export async function fetchRoundCollectors(
   round: BioblitzRound,
+  scope: BoardScope = "round",
   signal?: AbortSignal,
 ): Promise<RoundBoard> {
-  const startMs = Date.parse(round.start);
-  const endMs = Date.parse(round.end);
+  const startMs = scope === "all" ? Number.NEGATIVE_INFINITY : Date.parse(round.start);
+  const endMs = scope === "all" ? Number.POSITIVE_INFINITY : Date.parse(round.end);
   // The whole `where` is passed as a typed variable (matching indexer.ts) so the
   // `createdAt` DateTime bound coerces correctly from its JSON string value.
-  const where = { imageEvidence: { isNull: false }, createdAt: { gte: round.start } };
+  const where =
+    scope === "all"
+      ? { imageEvidence: { isNull: false } }
+      : { imageEvidence: { isNull: false }, createdAt: { gte: round.start } };
 
   const tally = new Map<string, RoundCollector>();
   let total = 0;

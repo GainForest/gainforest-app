@@ -305,6 +305,11 @@
       "subtitleLive": "Quién lidera el premio a más observaciones ahora mismo.",
       "subtitleEnded": "Clasificación final de esta ronda.",
       "subtitleUpcoming": "Sé la primera persona en la tabla cuando abra la ronda.",
+      "subtitleAll": "Quienes más registran en todo el reto.",
+      "scope": {
+        "round": "Esta ronda",
+        "all": "Histórico"
+      },
       "leader": "En cabeza",
       "observations": "{count, plural, one {# observación} other {# observaciones}}",
       "openCollector": "Abrir el perfil en una pestaña nueva",
@@ -323,6 +328,7 @@
       },
       "stats": {
         "observations": "Observaciones esta ronda",
+        "observationsAll": "Observaciones (histórico)",
         "collectors": "Participantes",
         "timeLeft": "Tiempo restante"
       },

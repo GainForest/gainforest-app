@@ -36,6 +36,7 @@ import {
   fetchRoundCollectors,
   roundStatus,
   type BioblitzRound,
+  type BoardScope,
   type CollectorOrg,
   type RoundBoard,
   type RoundStatus,
@@ -76,16 +77,18 @@ export function BioblitzClient() {
 
   const [board, setBoard] = useState<RoundBoard | null>(null);
   const [error, setError] = useState(false);
+  // Which window the board tallies: the active round, or all-time.
+  const [scope, setScope] = useState<BoardScope>("round");
   // Organisation membership per collector account, resolved after the board
   // loads and merged in progressively so the standings never wait on it.
   const [orgs, setOrgs] = useState<Map<string, CollectorOrg>>(new Map());
 
-  // Reset to the loading state whenever the active round changes.
+  // Reset to the loading state whenever the active round or scope changes.
   useEffect(() => {
     setBoard(null);
     setError(false);
     setOrgs(new Map());
-  }, [round.id]);
+  }, [round.id, scope]);
 
   // Resolve organisation labels for the collectors currently on the board.
   useEffect(() => {
@@ -110,7 +113,7 @@ export function BioblitzClient() {
     const controller = new AbortController();
     let cancelled = false;
     const load = () => {
-      fetchRoundCollectors(round, controller.signal)
+      fetchRoundCollectors(round, scope, controller.signal)
         .then((result) => {
           if (!cancelled) {
             setBoard(result);
@@ -129,7 +132,7 @@ export function BioblitzClient() {
       controller.abort();
       clearInterval(id);
     };
-  }, [round]);
+  }, [round, scope]);
 
   return (
     <section className="relative overflow-hidden pb-20 pt-0 md:pb-28">
@@ -142,7 +145,16 @@ export function BioblitzClient() {
 
         <HowItWorks />
 
-        <Board round={round} status={status} board={board} orgs={orgs} error={error} now={now} />
+        <Board
+          round={round}
+          status={status}
+          board={board}
+          orgs={orgs}
+          error={error}
+          now={now}
+          scope={scope}
+          onScope={setScope}
+        />
 
         {past.length > 0 ? <Winners rounds={past} /> : null}
       </div>
@@ -398,6 +410,40 @@ function HowItWorks() {
 /** How many collectors the board renders (and resolves org labels for). */
 const BOARD_LIMIT = 20;
 
+/** Segmented "This round / All time" control for the board window. */
+function ScopeToggle({
+  scope,
+  onScope,
+}: {
+  scope: BoardScope;
+  onScope: (scope: BoardScope) => void;
+}) {
+  const t = useTranslations("marketplace.bioblitz.board.scope");
+  const options: BoardScope[] = ["round", "all"];
+  return (
+    <div className="inline-flex rounded-full bg-muted/60 p-0.5 ring-1 ring-foreground/5">
+      {options.map((option) => {
+        const selected = scope === option;
+        return (
+          <button
+            key={option}
+            type="button"
+            aria-pressed={selected}
+            onClick={() => onScope(option)}
+            className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+              selected
+                ? "bg-primary text-primary-foreground shadow-sm shadow-primary/20"
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            {t(option)}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 function Board({
   round,
   status,
@@ -405,6 +451,8 @@ function Board({
   orgs,
   error,
   now,
+  scope,
+  onScope,
 }: {
   round: BioblitzRound;
   status: RoundStatus;
@@ -412,14 +460,18 @@ function Board({
   orgs: Map<string, CollectorOrg>;
   error: boolean;
   now: number | null;
+  scope: BoardScope;
+  onScope: (scope: BoardScope) => void;
 }) {
   const t = useTranslations("marketplace.bioblitz.board");
   const subtitle =
-    status === "ended"
-      ? t("subtitleEnded")
-      : status === "upcoming"
-        ? t("subtitleUpcoming")
-        : t("subtitleLive");
+    scope === "all"
+      ? t("subtitleAll")
+      : status === "ended"
+        ? t("subtitleEnded")
+        : status === "upcoming"
+          ? t("subtitleUpcoming")
+          : t("subtitleLive");
 
   const timeLeft = useMemo(() => {
     if (now == null || status === "ended") return "—";
@@ -429,7 +481,7 @@ function Board({
 
   const stats: StatsTileItem[] = [
     {
-      label: t("stats.observations"),
+      label: scope === "all" ? t("stats.observationsAll") : t("stats.observations"),
       value: board ? formatNumber(board.totalObservations) : "—",
       icon: <BinocularsIcon />,
       accent: true,
@@ -448,17 +500,20 @@ function Board({
 
   return (
     <section className="mt-12">
-      <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-        <h2 className="font-garamond text-2xl font-light text-foreground sm:text-3xl">{t("title")}</h2>
-        {status === "live" ? (
-          <span className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.12em] text-primary">
-            <span aria-hidden className="relative flex size-2">
-              <span className="absolute inline-flex size-2 animate-ping rounded-full bg-current opacity-60" />
-              <span className="relative inline-flex size-2 rounded-full bg-current" />
+      <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+        <div className="flex items-baseline gap-3">
+          <h2 className="font-garamond text-2xl font-light text-foreground sm:text-3xl">{t("title")}</h2>
+          {scope === "round" && status === "live" ? (
+            <span className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.12em] text-primary">
+              <span aria-hidden className="relative flex size-2">
+                <span className="absolute inline-flex size-2 animate-ping rounded-full bg-current opacity-60" />
+                <span className="relative inline-flex size-2 rounded-full bg-current" />
+              </span>
+              {t("live")}
             </span>
-            {t("live")}
-          </span>
-        ) : null}
+          ) : null}
+        </div>
+        <ScopeToggle scope={scope} onScope={onScope} />
       </div>
       <p className="mt-1 text-sm text-muted-foreground">{subtitle}</p>
 

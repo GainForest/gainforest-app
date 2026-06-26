@@ -305,6 +305,11 @@
       "subtitleLive": "Siapa yang memimpin hadiah pengamatan terbanyak saat ini.",
       "subtitleEnded": "Klasemen akhir ronde ini.",
       "subtitleUpcoming": "Jadilah yang pertama di papan saat ronde dibuka.",
+      "subtitleAll": "Pengumpul paling aktif sepanjang tantangan.",
+      "scope": {
+        "round": "Ronde ini",
+        "all": "Sepanjang waktu"
+      },
       "leader": "Memimpin",
       "observations": "{count, plural, one {# pengamatan} other {# pengamatan}}",
       "openCollector": "Buka profil pengumpul di tab baru",
@@ -323,6 +328,7 @@
       },
       "stats": {
         "observations": "Pengamatan ronde ini",
+        "observationsAll": "Pengamatan (sepanjang waktu)",
         "collectors": "Pengumpul",
         "timeLeft": "Sisa waktu"
       },

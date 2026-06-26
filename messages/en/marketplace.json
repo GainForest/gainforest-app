@@ -305,6 +305,11 @@
       "subtitleLive": "Who is leading the most-observations prize right now.",
       "subtitleEnded": "Final standings for this round.",
       "subtitleUpcoming": "Be the first to get on the board when the round opens.",
+      "subtitleAll": "The most active data collectors across the challenge.",
+      "scope": {
+        "round": "This round",
+        "all": "All time"
+      },
       "leader": "In the lead",
       "observations": "{count, plural, one {# observation} other {# observations}}",
       "openCollector": "Open collector profile in a new tab",
@@ -323,6 +328,7 @@
       },
       "stats": {
         "observations": "Observations this round",
+        "observationsAll": "Observations (all time)",
         "collectors": "Collectors",
         "timeLeft": "Time left"
       },

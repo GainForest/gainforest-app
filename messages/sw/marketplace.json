@@ -305,6 +305,11 @@
       "subtitleLive": "Nani anaongoza zawadi ya uoni mwingi zaidi sasa hivi.",
       "subtitleEnded": "Matokeo ya mwisho ya raundi hii.",
       "subtitleUpcoming": "Kuwa wa kwanza kwenye ubao raundi itakapoanza.",
+      "subtitleAll": "Wakusanyaji hai zaidi katika changamoto nzima.",
+      "scope": {
+        "round": "Raundi hii",
+        "all": "Wakati wote"
+      },
       "leader": "Anaongoza",
       "observations": "{count, plural, one {# uoni} other {# uoni}}",
       "openCollector": "Fungua wasifu wa mkusanyaji katika kichupo kipya",
@@ -323,6 +328,7 @@
       },
       "stats": {
         "observations": "Uoni katika raundi hii",
+        "observationsAll": "Uoni (wakati wote)",
         "collectors": "Wakusanyaji",
         "timeLeft": "Muda uliosalia"
       },
