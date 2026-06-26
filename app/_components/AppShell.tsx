@@ -33,6 +33,7 @@ import {
 import { createContext, Suspense, useContext, useEffect, useState, type MouseEvent, type SVGProps } from "react";
 import { useTranslations } from "next-intl";
 import type { AuthSession } from "../_lib/auth";
+import { BioblitzPromoBanner } from "./BioblitzPromoBanner";
 import packageJson from "@/package.json";
 import { BumicertsBumicertCard, type BumicertsBumicertCardRecord } from "@/components/bumicert/BumicertsBumicertCard";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -354,32 +355,35 @@ export function AppShell({
 
   return (
     <HeaderSlotsProvider>
-      <div className="flex h-screen overflow-hidden">
-        <div className="relative hidden md:block">
-          <UnifiedSidebar
-            authSession={resolvedAuthSession}
-            manageAccountKind={resolvedManageAccountKind}
-            isProfileLoading={isProfileLoading}
-            collapsed={sidebarCollapsed}
-          />
-          <SidebarCollapseToggle collapsed={sidebarCollapsed} onToggle={toggleSidebarCollapsed} />
+      <div className="flex h-screen flex-col overflow-hidden">
+        {pathname !== "/bioblitz" ? <BioblitzPromoBanner /> : null}
+        <div className="flex min-h-0 flex-1 overflow-hidden">
+          <div className="relative hidden md:block">
+            <UnifiedSidebar
+              authSession={resolvedAuthSession}
+              manageAccountKind={resolvedManageAccountKind}
+              isProfileLoading={isProfileLoading}
+              collapsed={sidebarCollapsed}
+            />
+            <SidebarCollapseToggle collapsed={sidebarCollapsed} onToggle={toggleSidebarCollapsed} />
+          </div>
+          <MobileNavDrawer open={mobileNavOpen} onOpenChange={setMobileNavOpen}>
+            <UnifiedSidebar
+              authSession={resolvedAuthSession}
+              manageAccountKind={resolvedManageAccountKind}
+              isProfileLoading={isProfileLoading}
+            />
+          </MobileNavDrawer>
+          <main className="relative flex-1 overflow-y-auto">
+            <Header authSession={resolvedAuthSession} profileName={resolvedProfileName} onOpenMobileNav={() => setMobileNavOpen(true)} />
+            <FreshAccountOnboardingPrompt
+              authSession={resolvedAuthSession}
+              isProfileLoading={isProfileLoading}
+              hasCertifiedProfile={hasCertifiedProfile}
+            />
+            {children}
+          </main>
         </div>
-        <MobileNavDrawer open={mobileNavOpen} onOpenChange={setMobileNavOpen}>
-          <UnifiedSidebar
-            authSession={resolvedAuthSession}
-            manageAccountKind={resolvedManageAccountKind}
-            isProfileLoading={isProfileLoading}
-          />
-        </MobileNavDrawer>
-        <main className="relative flex-1 overflow-y-auto">
-          <Header authSession={resolvedAuthSession} profileName={resolvedProfileName} onOpenMobileNav={() => setMobileNavOpen(true)} />
-          <FreshAccountOnboardingPrompt
-            authSession={resolvedAuthSession}
-            isProfileLoading={isProfileLoading}
-            hasCertifiedProfile={hasCertifiedProfile}
-          />
-          {children}
-        </main>
       </div>
     </HeaderSlotsProvider>
   );

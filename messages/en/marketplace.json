@@ -241,11 +241,17 @@
       "title": "Weekly BioBlitz Challenge — GainForest",
       "description": "Go outside, photograph living things, and add your sightings. Each week the top collector and the best photo win a prize."
     },
+    "banner": {
+      "message": "The Weekly BioBlitz Challenge is live. Photograph nature and win prizes.",
+      "cta": "Learn more",
+      "dismiss": "Dismiss this banner",
+      "close": "Close"
+    },
     "hero": {
       "eyebrow": "Weekly BioBlitz Challenge",
       "titlePrefix": "BioBlitz",
       "titleEmphasis": "Challenge",
-      "description": "A friendly weekly race to record nature. Photograph any living thing — a plant, bird, bug, or fungus — add it to GainForest, and climb the board. New round, new prizes, every week.",
+      "description": "A friendly weekly race to record nature. Photograph any living thing you find, add it to GainForest, and climb the board.",
       "program": "Part of the Klarna AI for Climate Resilience program, with GainForest."
     },
     "rsvp": {
@@ -302,7 +308,7 @@
     "board": {
       "title": "This round's board",
       "live": "Live",
-      "subtitleLive": "Who is leading the most-observations prize right now.",
+      "subtitleLive": "Who is leading the most observations prize right now.",
       "subtitleEnded": "Final standings for this round.",
       "subtitleUpcoming": "Be the first to get on the board when the round opens.",
       "leader": "In the lead",
