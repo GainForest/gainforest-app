@@ -13,13 +13,15 @@ import {
   SearchIcon,
   SlidersHorizontalIcon,
 } from "lucide-react";
-import { memo, useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
+import { memo, useCallback, useDeferredValue, useEffect, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type MouseEvent as ReactMouseEvent } from "react";
 import { useTranslations } from "next-intl";
+import { cn } from "@/lib/utils";
 import { parseAsString, parseAsStringEnum, useQueryState } from "nuqs";
 import { BumicertOwnerAvatar } from "@/components/bumicert/BumicertOwnerAvatar";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AutoLoadMoreButton } from "../_components/AutoLoadMoreButton";
+import { OwnerFilterBanner, OwnerFilterButton, useOwnerFilter } from "../_components/OwnerFilter";
 import { RecordDrawer } from "../_components/RecordDrawer";
 import { RecordMap } from "../_components/RecordMap";
 import {
@@ -123,13 +125,14 @@ export function ProjectsExploreClient({ records: initialRecords = [] }: { record
     parseAsString.withOptions(QUERY_STATE_OPTIONS),
   );
   const badgeFilters = useMemo(() => parseBadgeFilterParam(badgesParam), [badgesParam]);
+  const { ownerDid, setOwnerDid } = useOwnerFilter();
   const activeFilterCount = filters.length + badgeFilters.length;
 
   useEffect(() => {
     if (initialRecords.length > 0) return;
     const controller = new AbortController();
     const requestSeq = ++requestSeqRef.current;
-    const options = { query: deferredQuery, filters, sort, featuredBadgesOnly: true, badgeFilters };
+    const options = { query: deferredQuery, filters, sort, featuredBadgesOnly: !ownerDid, badgeFilters, creatorDid: ownerDid };
     const isCurrent = () => requestSeqRef.current === requestSeq && !controller.signal.aborted;
     setLoading(true);
     setLoadingMore(false);
@@ -150,14 +153,14 @@ export function ProjectsExploreClient({ records: initialRecords = [] }: { record
         if (isCurrent()) setLoading(false);
       });
     return () => controller.abort();
-  }, [initialRecords.length, deferredQuery, filters, sort, badgeFilters]);
+  }, [initialRecords.length, deferredQuery, filters, sort, badgeFilters, ownerDid]);
 
   useEffect(() => {
     const controller = new AbortController();
     const requestSeq = ++countSeqRef.current;
     const isCurrent = () => countSeqRef.current === requestSeq && !controller.signal.aborted;
     setTotalCount(null);
-    fetchProjectTotalCount(controller.signal, { query: deferredQuery, filters, sort, featuredBadgesOnly: true, badgeFilters })
+    fetchProjectTotalCount(controller.signal, { query: deferredQuery, filters, sort, featuredBadgesOnly: !ownerDid, badgeFilters, creatorDid: ownerDid })
       .then((count) => {
         if (isCurrent()) setTotalCount(count);
       })
@@ -165,11 +168,11 @@ export function ProjectsExploreClient({ records: initialRecords = [] }: { record
         if ((error as Error).name !== "AbortError") console.warn("[projects] count failed", error);
       });
     return () => controller.abort();
-  }, [deferredQuery, filters, sort, badgeFilters]);
+  }, [deferredQuery, filters, sort, badgeFilters, ownerDid]);
 
   useEffect(() => {
     setCardLimit(INITIAL_CARD_LIMIT);
-  }, [deferredQuery, filters, badgeFilters, sort, view]);
+  }, [deferredQuery, filters, badgeFilters, sort, view, ownerDid]);
 
   useEffect(() => {
     if (!openSort) return;
@@ -249,7 +252,7 @@ export function ProjectsExploreClient({ records: initialRecords = [] }: { record
     const base = records;
     const isCurrent = () => requestSeqRef.current === requestSeq && !controller.signal.aborted;
     setLoadingMore(true);
-    fetchProjects(PROJECTS_PAGE_SIZE, cursor, controller.signal, undefined, { query: deferredQuery, filters, sort, featuredBadgesOnly: true, badgeFilters })
+    fetchProjects(PROJECTS_PAGE_SIZE, cursor, controller.signal, undefined, { query: deferredQuery, filters, sort, featuredBadgesOnly: !ownerDid, badgeFilters, creatorDid: ownerDid })
       .then((page) => {
         if (!isCurrent()) return;
         setRecords(mergeProjectRecords(base, page.records));
@@ -262,7 +265,7 @@ export function ProjectsExploreClient({ records: initialRecords = [] }: { record
       .finally(() => {
         if (isCurrent()) setLoadingMore(false);
       });
-  }, [cursor, deferredQuery, filters, badgeFilters, hasMore, loading, loadingMore, records, sort]);
+  }, [cursor, deferredQuery, filters, badgeFilters, hasMore, loading, loadingMore, records, sort, ownerDid]);
 
   return (
     <>
@@ -323,6 +326,8 @@ export function ProjectsExploreClient({ records: initialRecords = [] }: { record
                 </button>
               ))}
             </div>
+
+            <OwnerFilterButton ownerDid={ownerDid} onChange={setOwnerDid} />
 
             <div ref={sortMenuRef} className="relative shrink-0">
               <button
@@ -466,13 +471,19 @@ export function ProjectsExploreClient({ records: initialRecords = [] }: { record
           </div>
         </div>
 
+        {ownerDid ? (
+          <div className="mt-4">
+            <OwnerFilterBanner ownerDid={ownerDid} onClear={() => setOwnerDid(null)} />
+          </div>
+        ) : null}
+
         <div className="mt-5">
           {view === "map" ? (
             <RecordMap records={visibleRecords} kind="project" onOpen={openMapRecord} />
           ) : view === "list" ? (
             <ProjectList records={renderedRecords} loading={loading} onOpen={openRecord} />
           ) : (
-            <ProjectGrid records={renderedRecords} loading={loading} onOpen={openRecord} />
+            <ProjectGrid records={renderedRecords} loading={loading} onOpen={openRecord} onFilterOwner={setOwnerDid} />
           )}
         </div>
 
@@ -547,10 +558,12 @@ const ProjectGrid = memo(function ProjectGrid({
   records,
   loading,
   onOpen,
+  onFilterOwner,
 }: {
   records: ProjectRecord[];
   loading: boolean;
   onOpen: (record: ProjectRecord) => void;
+  onFilterOwner?: (did: string) => void;
 }) {
   const t = useTranslations("marketplace.projects");
   if (loading && records.length === 0) return <ProjectGridSkeleton />;
@@ -578,7 +591,7 @@ const ProjectGrid = memo(function ProjectGrid({
   return (
     <div className="mt-5 grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] items-stretch gap-6 lg:gap-8">
       {records.map((record, index) => (
-        <ProjectCard key={record.id} record={record} priority={index < 6} index={index} onOpen={onOpen} />
+        <ProjectCard key={record.id} record={record} priority={index < 6} index={index} onOpen={onOpen} onFilterOwner={onFilterOwner} />
       ))}
     </div>
   );
@@ -681,15 +694,20 @@ function ProjectCard({
   priority,
   index,
   onOpen,
+  onFilterOwner,
 }: {
   record: ProjectRecord;
   priority: boolean;
   index: number;
   onOpen: (record: ProjectRecord) => void;
+  onFilterOwner?: (did: string) => void;
 }) {
   const t = useTranslations("marketplace.projects.card");
+  const ownerFilterT = useTranslations("marketplace.ownerFilter");
   const [imgError, setImgError] = useState(false);
   const hasImage = Boolean(record.imageUrl) && !imgError;
+  const ownerName = record.creatorName ?? t("projectSteward");
+  const canFilterOwner = Boolean(onFilterOwner) && Boolean(record.did);
 
   return (
     <button type="button" onClick={() => onOpen(record)} className="group flex h-full flex-col overflow-hidden rounded-3xl border border-border bg-card text-left shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 animate-in" style={{ animationDelay: `${Math.min(index, 10) * 35}ms` }}>
@@ -711,12 +729,36 @@ function ProjectCard({
             <FolderKanbanIcon className="h-12 w-12" />
           </div>
         )}
-        <div className="absolute left-3 top-3 flex max-w-[calc(100%-1.5rem)] items-center gap-1.5 overflow-hidden rounded-full bg-background/75 p-1 pr-3 shadow-lg backdrop-blur-lg">
-          <BumicertOwnerAvatar did={record.did} avatarRef={record.creatorAvatarRef} label={record.creatorName ?? t("projectSteward")} className="h-7 w-7 shrink-0 shadow-sm" />
+        <span
+          {...(canFilterOwner
+            ? {
+                role: "button" as const,
+                tabIndex: 0,
+                "aria-label": ownerFilterT("filterByThis"),
+                title: ownerFilterT("filterByThis"),
+                onClick: (event: ReactMouseEvent) => {
+                  event.stopPropagation();
+                  onFilterOwner?.(record.did);
+                },
+                onKeyDown: (event: ReactKeyboardEvent) => {
+                  if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    onFilterOwner?.(record.did);
+                  }
+                },
+              }
+            : {})}
+          className={cn(
+            "absolute left-3 top-3 z-10 flex max-w-[calc(100%-1.5rem)] items-center gap-1.5 overflow-hidden rounded-full bg-background/75 p-1 pr-3 shadow-lg backdrop-blur-lg",
+            canFilterOwner && "cursor-pointer transition-colors hover:bg-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60",
+          )}
+        >
+          <BumicertOwnerAvatar did={record.did} avatarRef={record.creatorAvatarRef} label={ownerName} className="h-7 w-7 shrink-0 shadow-sm" />
           <span className="min-w-0 truncate text-xs font-medium text-foreground">
-            {record.creatorName ?? t("projectSteward")}
+            {ownerName}
           </span>
-        </div>
+        </span>
       </div>
 
       <div className="flex flex-1 flex-col p-4">

@@ -786,6 +786,19 @@
       "clearAll": "Futa yote"
     }
   },
+  "ownerFilter": {
+    "button": "Mmiliki",
+    "ariaLabel": "Chuja kwa aliyechapisha",
+    "searchPlaceholder": "Tafuta watu na mashirika",
+    "hint": "Andika jina ili kuchuja kwa aliyechapisha",
+    "searching": "Inatafuta…",
+    "noResults": "Hakuna watu au mashirika yanayolingana",
+    "showAll": "Onyesha wote",
+    "showing": "Inaonyesha {name}",
+    "clear": "Ondoa kichujio cha mmiliki",
+    "selectedFallback": "Akaunti iliyochaguliwa",
+    "filterByThis": "Onyesha mmiliki huyu pekee"
+  },
   "browseGrid": {
     "heading": "Njia za kugundua",
     "description": "Njia nne za kuingia kwenye kazi ya GainForest, zilizoundwa kwa wafadhili, watunzaji na timu za nyanjani.",

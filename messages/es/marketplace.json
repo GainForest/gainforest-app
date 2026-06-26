@@ -786,6 +786,19 @@
       "clearAll": "Borrar todo"
     }
   },
+  "ownerFilter": {
+    "button": "Autor",
+    "ariaLabel": "Filtrar por quién lo publicó",
+    "searchPlaceholder": "Buscar personas y organizaciones",
+    "hint": "Escribe un nombre para filtrar por quién lo publicó",
+    "searching": "Buscando…",
+    "noResults": "No hay personas ni organizaciones coincidentes",
+    "showAll": "Mostrar a todos",
+    "showing": "Mostrando {name}",
+    "clear": "Quitar el filtro de autor",
+    "selectedFallback": "Cuenta seleccionada",
+    "filterByThis": "Mostrar solo este autor"
+  },
   "browseGrid": {
     "heading": "Formas de explorar",
     "description": "Cuatro entradas al trabajo de GainForest, pensadas para financiadores, guardianes y equipos de campo.",

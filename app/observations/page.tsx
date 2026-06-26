@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 export default function ObservationsPage() {
   return (
     <Suspense fallback={null}>
-      <RecordExplorer kind="occurrence" />
+      <RecordExplorer kind="occurrence" enableOwnerFilter />
     </Suspense>
   );
 }

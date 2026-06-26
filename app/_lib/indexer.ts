@@ -1434,6 +1434,62 @@ export function isLikelyTestRecordName(name: string | null | undefined): boolean
   return /^e2e bumicert \d/i.test(trimmed);
 }
 
+/** A user or organization account, matched by display name, for the owner
+ *  filter's type-ahead picker on the explore pages. */
+export type AccountSearchResult = {
+  did: string;
+  displayName: string;
+  avatarRef: string | null;
+};
+
+const ACCOUNT_SEARCH_QUERY = `
+  query OwnerAccountSearch($first: Int!, $where: AppCertifiedActorProfileWhereInput) {
+    appCertifiedActorProfile(first: $first, where: $where, sortBy: displayName, sortDirection: ASC) {
+      edges {
+        node {
+          did
+          displayName
+          avatar { __typename ... on OrgHypercertsDefsSmallImage { image { ref } } }
+        }
+      }
+    }
+  }
+`;
+
+type RawAccountSearchNode = {
+  did?: string | null;
+  displayName?: string | null;
+  avatar?: { image?: { ref?: string | null } | null } | null;
+};
+
+/** Search accounts (people + organizations) by display name. Powers the owner
+ *  filter picker; returns at most `limit` distinct, non-test accounts. */
+export async function searchAccountsByName(
+  query: string,
+  limit = 8,
+  signal?: AbortSignal,
+): Promise<AccountSearchResult[]> {
+  const q = query.trim();
+  if (q.length < 2) return [];
+  const data = await indexerQuery<{ appCertifiedActorProfile?: Connection<RawAccountSearchNode> }>(
+    ACCOUNT_SEARCH_QUERY,
+    { first: Math.max(1, Math.min(limit * 3, 40)), where: { displayName: { contains: q } } },
+    signal,
+  );
+  const seen = new Set<string>();
+  const results: AccountSearchResult[] = [];
+  for (const edge of data?.appCertifiedActorProfile?.edges ?? []) {
+    const node = edge?.node;
+    const did = node?.did?.trim();
+    const displayName = node?.displayName?.trim();
+    if (!did || !displayName || seen.has(did) || isLikelyTestRecordName(displayName)) continue;
+    seen.add(did);
+    results.push({ did, displayName, avatarRef: normaliseRef(node?.avatar?.image?.ref) });
+    if (results.length >= limit) break;
+  }
+  return results;
+}
+
 function mapActivity(n: RawActivity): BumicertRecord {
   let imageUrl: string | null = null;
   let imageRef: string | null = null;
@@ -1500,7 +1556,15 @@ type ActivityQueryOptions = {
   sort?: ExplorerSortMode;
   featuredBadgesOnly?: boolean;
   badgeFilters?: BumicertBadgeFilter[];
+  /** Scope results to a single owner account (DID). Callers should also set
+   *  featuredBadgesOnly:false so the account's full catalog is returned. */
+  creatorDid?: string | null;
 };
+
+function creatorWhere(creatorDid: string | null | undefined): ActivityWhere | undefined {
+  const did = creatorDid?.trim();
+  return did ? { did: { in: [did] } } : undefined;
+}
 
 type ActivityWhere = Record<string, unknown>;
 
@@ -1589,7 +1653,7 @@ function featuredBadgeWhereVariants(index?: FeaturedBadgeIndex, filters?: Bumice
 function activityWhereVariants(options?: ActivityQueryOptions, badgeIndex?: FeaturedBadgeIndex): ActivityWhere[] {
   const badgeWheres = featuredBadgeWhereVariants(badgeIndex, options?.badgeFilters);
   if (badgeWheres.length === 0) return [];
-  const base = activityFilterWhere(options?.filters);
+  const base = mergeWhere(activityFilterWhere(options?.filters), creatorWhere(options?.creatorDid));
   const variants: ActivityWhere[] = [];
   for (const badgeWhere of badgeWheres) {
     for (const searchWhere of activitySearchWhere(options?.query)) {
@@ -2186,6 +2250,9 @@ type ProjectQueryOptions = {
   sort?: ExplorerSortMode;
   featuredBadgesOnly?: boolean;
   badgeFilters?: BumicertBadgeFilter[];
+  /** Scope results to a single owner account (DID). Callers should also set
+   *  featuredBadgesOnly:false so the account's full catalog is returned. */
+  creatorDid?: string | null;
 };
 
 type ProjectWhere = Record<string, unknown>;
@@ -2309,7 +2376,10 @@ function projectSearchWhere(query: string | undefined): ProjectWhere[] {
 function projectWhereVariants(options?: ProjectQueryOptions, badgeIndex?: FeaturedBadgeIndex): ProjectWhere[] {
   const badgeWheres = featuredBadgeRecordWhereVariants<ProjectWhere>(badgeIndex, "org.hypercerts.collection", options?.badgeFilters);
   if (badgeWheres.length === 0) return [];
-  const base = mergeProjectWhere(PROJECT_TYPE_WHERE, projectFilterWhere(options?.filters));
+  const projectCreatorWhere: ProjectWhere | undefined = options?.creatorDid?.trim()
+    ? { did: { in: [options.creatorDid.trim()] } }
+    : undefined;
+  const base = mergeProjectWhere(PROJECT_TYPE_WHERE, projectFilterWhere(options?.filters), projectCreatorWhere);
   const variants: ProjectWhere[] = [];
   for (const badgeWhere of badgeWheres) {
     for (const searchWhere of projectSearchWhere(options?.query)) {

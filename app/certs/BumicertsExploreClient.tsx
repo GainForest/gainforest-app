@@ -16,14 +16,16 @@ import {
   SlidersHorizontalIcon,
   UsersIcon,
 } from "lucide-react";
-import { memo, useCallback, useDeferredValue, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { memo, useCallback, useDeferredValue, useEffect, useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type MouseEvent as ReactMouseEvent } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { parseAsString, parseAsStringEnum, useQueryState } from "nuqs";
+import { cn } from "@/lib/utils";
 import { BumicertOwnerAvatar } from "@/components/bumicert/BumicertOwnerAvatar";
 import { BumicertPillRows, type BumicertCardPill } from "@/components/bumicert/BumicertPillRows";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AutoLoadMoreButton } from "../_components/AutoLoadMoreButton";
+import { OwnerFilterBanner, OwnerFilterButton, useOwnerFilter } from "../_components/OwnerFilter";
 import { RecordDrawer } from "../_components/RecordDrawer";
 import { RecordMap } from "../_components/RecordMap";
 import {
@@ -122,6 +124,7 @@ export function BumicertsExploreClient({ records: initialRecords = [] }: { recor
     parseAsString.withOptions(QUERY_STATE_OPTIONS),
   );
   const badgeFilters = useMemo(() => parseBadgeFilterParam(badgesParam), [badgesParam]);
+  const { ownerDid, setOwnerDid } = useOwnerFilter();
   const activeFilterCount = filters.length + badgeFilters.length;
   const [queryView, setQueryView] = useQueryState(
     "view",
@@ -191,7 +194,7 @@ export function BumicertsExploreClient({ records: initialRecords = [] }: { recor
   useEffect(() => {
     const controller = new AbortController();
     const requestSeq = ++countSeqRef.current;
-    const options = { query: deferredQuery, filters, featuredBadgesOnly: true, badgeFilters };
+    const options = { query: deferredQuery, filters, featuredBadgesOnly: !ownerDid, badgeFilters, creatorDid: ownerDid };
     const isCurrent = () => countSeqRef.current === requestSeq && !controller.signal.aborted;
     setTotalCount(null);
     fetchBumicertTotalCount(controller.signal, options)
@@ -202,13 +205,13 @@ export function BumicertsExploreClient({ records: initialRecords = [] }: { recor
         if ((error as Error).name !== "AbortError") console.warn("[bumicerts] count failed", error);
       });
     return () => controller.abort();
-  }, [deferredQuery, filters, badgeFilters]);
+  }, [deferredQuery, filters, badgeFilters, ownerDid]);
 
   useEffect(() => {
     if (initialRecords.length > 0) return;
     const controller = new AbortController();
     const requestSeq = ++requestSeqRef.current;
-    const options = { query: deferredQuery, filters, sort, featuredBadgesOnly: true, badgeFilters };
+    const options = { query: deferredQuery, filters, sort, featuredBadgesOnly: !ownerDid, badgeFilters, creatorDid: ownerDid };
     const isCurrent = () => requestSeqRef.current === requestSeq && !controller.signal.aborted;
     setLoading(true);
     setLoadingMore(false);
@@ -229,7 +232,7 @@ export function BumicertsExploreClient({ records: initialRecords = [] }: { recor
         if (isCurrent()) setLoading(false);
       });
     return () => controller.abort();
-  }, [initialRecords.length, deferredQuery, filters, sort, badgeFilters]);
+  }, [initialRecords.length, deferredQuery, filters, sort, badgeFilters, ownerDid]);
 
   const visibleRecords = useMemo(() => {
     return records.filter((record) => filters.every((key) => {
@@ -339,7 +342,7 @@ export function BumicertsExploreClient({ records: initialRecords = [] }: { recor
     const isCurrent = () => requestSeqRef.current === requestSeq && !controller.signal.aborted;
     const base = records;
     setLoadingMore(true);
-    fetchBumicerts(BUMICERTS_PAGE_SIZE, cursor, controller.signal, undefined, { query: deferredQuery, filters, sort, featuredBadgesOnly: true, badgeFilters })
+    fetchBumicerts(BUMICERTS_PAGE_SIZE, cursor, controller.signal, undefined, { query: deferredQuery, filters, sort, featuredBadgesOnly: !ownerDid, badgeFilters, creatorDid: ownerDid })
       .then((page) => {
         if (!isCurrent()) return;
         setRecords(mergeBumicertRecords(base, page.records));
@@ -352,7 +355,7 @@ export function BumicertsExploreClient({ records: initialRecords = [] }: { recor
       .finally(() => {
         if (isCurrent()) setLoadingMore(false);
       });
-  }, [cursor, deferredQuery, filters, badgeFilters, hasMore, loading, loadingMore, records, sort]);
+  }, [cursor, deferredQuery, filters, badgeFilters, hasMore, loading, loadingMore, records, sort, ownerDid]);
   const openRecord = useCallback((record: BumicertRecord) => setDrawer(record), []);
   const openMapRecord = useCallback((record: ExplorerRecord) => {
     if (record.kind === "bumicert") setDrawer(record);
@@ -423,6 +426,8 @@ export function BumicertsExploreClient({ records: initialRecords = [] }: { recor
                     </button>
                   ))}
                 </div>
+
+                <OwnerFilterButton ownerDid={ownerDid} onChange={setOwnerDid} />
 
                 <div ref={sortMenuRef} className="relative shrink-0">
                   <button
@@ -593,13 +598,19 @@ export function BumicertsExploreClient({ records: initialRecords = [] }: { recor
             </div>
           </div>
 
+          {ownerDid ? (
+            <div className="mt-4">
+              <OwnerFilterBanner ownerDid={ownerDid} onClear={() => setOwnerDid(null)} />
+            </div>
+          ) : null}
+
           <div className="mt-5">
             {view === "map" ? (
               <RecordMap records={visibleRecords} kind="bumicert" onOpen={openMapRecord} />
             ) : view === "list" ? (
               <BumicertList records={renderedRecords} loading={loading} onOpen={openRecord} fundingIndex={fundingIndex} sightingCounts={sightingCounts} />
             ) : (
-              <BumicertGrid records={renderedRecords} loading={loading} onOpen={openRecord} fundingIndex={fundingIndex} sightingCounts={sightingCounts} />
+              <BumicertGrid records={renderedRecords} loading={loading} onOpen={openRecord} onFilterOwner={setOwnerDid} fundingIndex={fundingIndex} sightingCounts={sightingCounts} />
             )}
           </div>
 
@@ -675,12 +686,14 @@ const BumicertGrid = memo(function BumicertGrid({
   records,
   loading,
   onOpen,
+  onFilterOwner,
   fundingIndex,
   sightingCounts,
 }: {
   records: BumicertRecord[];
   loading: boolean;
   onOpen: (record: BumicertRecord) => void;
+  onFilterOwner?: (did: string) => void;
   fundingIndex: FundingSummaryIndex | null;
   sightingCounts: Map<string, number>;
 }) {
@@ -737,6 +750,7 @@ const BumicertGrid = memo(function BumicertGrid({
             <BumicertCardVisual
               record={record}
               priority={index < 8}
+              onFilterOwner={onFilterOwner}
               funding={fundingIndex?.get(record.atUri)}
               sightingCount={sightingCounts.get(record.did)}
             />
@@ -874,8 +888,9 @@ const BumicertListItem = memo(function BumicertListItem({ record, priority, onOp
   );
 });
 
-const BumicertCardVisual = memo(function BumicertCardVisual({ record, priority, funding, sightingCount }: { record: BumicertRecord; priority: boolean; funding?: BumicertFundingSummary; sightingCount?: number }) {
+const BumicertCardVisual = memo(function BumicertCardVisual({ record, priority, funding, sightingCount, onFilterOwner }: { record: BumicertRecord; priority: boolean; funding?: BumicertFundingSummary; sightingCount?: number; onFilterOwner?: (did: string) => void }) {
   const t = useTranslations("marketplace.explore");
+  const ownerFilterT = useTranslations("marketplace.ownerFilter");
   const workScopeT = useTranslations("common.workScopes");
   const locale = useLocale();
   const workScopeLabels: WorkScopeLabels = useMemo(() => ({
@@ -888,6 +903,7 @@ const BumicertCardVisual = memo(function BumicertCardVisual({ record, priority, 
   }), [workScopeT]);
   const { scopeItems, iconItems } = useMemo(() => buildPillRows(record, funding, sightingCount, t, locale, workScopeLabels), [record, funding, sightingCount, t, locale, workScopeLabels]);
   const organizationName = record.creatorName ?? t("card.projectSteward");
+  const canFilterOwner = Boolean(onFilterOwner) && Boolean(record.did);
   const [imgError, setImgError] = useState(false);
   const hasImage = Boolean(record.imageUrl) && !imgError;
 
@@ -931,7 +947,31 @@ const BumicertCardVisual = memo(function BumicertCardVisual({ record, priority, 
         <BumicertPillRows scopeItems={scopeItems} iconItems={iconItems} />
       </div>
 
-      <div className="absolute left-2 top-2 flex max-w-[calc(100%-1rem)] min-w-0 items-center gap-1 overflow-hidden rounded-full bg-background/70 p-1 shadow-lg backdrop-blur-lg">
+      <span
+        {...(canFilterOwner
+          ? {
+              role: "button" as const,
+              tabIndex: 0,
+              "aria-label": ownerFilterT("filterByThis"),
+              title: ownerFilterT("filterByThis"),
+              onClick: (event: ReactMouseEvent) => {
+                event.stopPropagation();
+                onFilterOwner?.(record.did);
+              },
+              onKeyDown: (event: ReactKeyboardEvent) => {
+                if (event.key === "Enter" || event.key === " ") {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  onFilterOwner?.(record.did);
+                }
+              },
+            }
+          : {})}
+        className={cn(
+          "absolute left-2 top-2 z-10 flex max-w-[calc(100%-1rem)] min-w-0 items-center gap-1 overflow-hidden rounded-full bg-background/70 p-1 shadow-lg backdrop-blur-lg",
+          canFilterOwner && "cursor-pointer transition-colors hover:bg-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60",
+        )}
+      >
         <BumicertOwnerAvatar
           did={record.did}
           avatarRef={record.creatorAvatarRef}
@@ -944,7 +984,7 @@ const BumicertCardVisual = memo(function BumicertCardVisual({ record, priority, 
         >
           {organizationName}
         </motion.span>
-      </div>
+      </span>
     </motion.div>
   );
 });

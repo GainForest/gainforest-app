@@ -792,6 +792,19 @@
       "clearAll": "Clear all"
     }
   },
+  "ownerFilter": {
+    "button": "Owner",
+    "ariaLabel": "Filter by who published it",
+    "searchPlaceholder": "Search people & organizations",
+    "hint": "Type a name to filter by who published it",
+    "searching": "Searching…",
+    "noResults": "No matching people or organizations",
+    "showAll": "Show everyone",
+    "showing": "Showing {name}",
+    "clear": "Clear owner filter",
+    "selectedFallback": "Selected account",
+    "filterByThis": "Show only this owner"
+  },
   "browseGrid": {
     "heading": "Ways to Explore",
     "description": "Four ways into GainForest work, shaped for funders, stewards, and field teams.",

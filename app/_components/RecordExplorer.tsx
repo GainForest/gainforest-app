@@ -45,6 +45,7 @@ import { pauseOtherAudio, playExclusiveAudio, registerAudioElement } from "../_l
 import { resolveDidProfile, getCachedProfile } from "../_lib/did-profile";
 import { formatCompact, countryFlag, formatCountry, formatDate } from "../_lib/format";
 import { AutoLoadMoreButton } from "./AutoLoadMoreButton";
+import { OwnerFilterBanner, OwnerFilterButton, useOwnerFilter } from "./OwnerFilter";
 import { PictureHero } from "./PictureHero";
 import { TrustedByBadges } from "./TrustedByBadges";
 import { useStableQueryView } from "../_lib/use-stable-query-view";
@@ -202,7 +203,8 @@ export function RecordExplorer({
   initialPage,
   extraInitialRecords,
   showHero = true,
-  ownerDid,
+  ownerDid: ownerDidProp,
+  enableOwnerFilter = false,
   defaultOccurrenceMedia = DEFAULT_OCCURRENCE_MEDIA,
   leadingCard,
   emptyState,
@@ -221,6 +223,9 @@ export function RecordExplorer({
   extraInitialRecords?: ExplorerRecord[];
   showHero?: boolean;
   ownerDid?: string;
+  /** When true (and no explicit ownerDid prop), the explorer reads the shareable
+   *  `?by=<did>` owner filter and shows the owner picker + chip. */
+  enableOwnerFilter?: boolean;
   defaultOccurrenceMedia?: OccurrenceFilter;
   leadingCard?: ReactNode;
   emptyState?: ReactNode;
@@ -241,7 +246,14 @@ export function RecordExplorer({
   const meta = KIND_META[kind];
   const exploreT = useTranslations("marketplace.explore");
   const observationsT = useTranslations("marketplace.observations");
-  const shouldShowStatsOverview = showStatsOverview && (!showHero || Boolean(ownerDid));
+  // An explicit ownerDid prop (account pages) wins; otherwise the explore page
+  // can opt into the shareable `?by=` owner filter.
+  const { ownerDid: ownerFilterDid, setOwnerDid } = useOwnerFilter();
+  const ownerFilterActive = enableOwnerFilter && !ownerDidProp;
+  const ownerDid = ownerDidProp ?? (ownerFilterActive ? ownerFilterDid ?? undefined : undefined);
+  // Stats band is for embedded account/manage views (explicit ownerDid prop),
+  // not the explore owner filter — keep explore consistent across kinds.
+  const shouldShowStatsOverview = showStatsOverview && (!showHero || Boolean(ownerDidProp));
   const [query, setQuery] = useQueryState(
     "q",
     parseAsString.withDefault("").withOptions(SEARCH_QUERY_STATE_OPTIONS),
@@ -647,6 +659,8 @@ export function RecordExplorer({
               />
             </div>
 
+            {ownerFilterActive ? <OwnerFilterButton ownerDid={ownerDid ?? null} onChange={setOwnerDid} /> : null}
+
             <SortControl sort={sort} setSort={(nextSort) => void setSort(nextSort)} open={sortOpen} setOpen={setSortOpen} />
 
             {/* Cards / List / Map view toggle */}
@@ -677,6 +691,10 @@ export function RecordExplorer({
               ))}
             </div>
           </div>
+
+          {ownerFilterActive && ownerDid ? (
+            <OwnerFilterBanner ownerDid={ownerDid} onClear={() => setOwnerDid(null)} />
+          ) : null}
 
           {kind === "occurrence" && (
             <div

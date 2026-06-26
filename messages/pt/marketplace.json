@@ -786,6 +786,19 @@
       "clearAll": "Limpar tudo"
     }
   },
+  "ownerFilter": {
+    "button": "Autor",
+    "ariaLabel": "Filtrar por quem publicou",
+    "searchPlaceholder": "Buscar pessoas e organizações",
+    "hint": "Digite um nome para filtrar por quem publicou",
+    "searching": "Buscando…",
+    "noResults": "Nenhuma pessoa ou organização correspondente",
+    "showAll": "Mostrar todos",
+    "showing": "Mostrando {name}",
+    "clear": "Remover filtro de autor",
+    "selectedFallback": "Conta selecionada",
+    "filterByThis": "Mostrar apenas este autor"
+  },
   "browseGrid": {
     "heading": "Formas de explorar",
     "description": "Quatro caminhos para o trabalho da GainForest, pensados para financiadores, guardiões e equipes de campo.",

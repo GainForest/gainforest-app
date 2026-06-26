@@ -786,6 +786,19 @@
       "clearAll": "Hapus semua"
     }
   },
+  "ownerFilter": {
+    "button": "Pemilik",
+    "ariaLabel": "Saring berdasarkan penerbit",
+    "searchPlaceholder": "Cari orang & organisasi",
+    "hint": "Ketik nama untuk menyaring berdasarkan penerbit",
+    "searching": "Mencari…",
+    "noResults": "Tidak ada orang atau organisasi yang cocok",
+    "showAll": "Tampilkan semua",
+    "showing": "Menampilkan {name}",
+    "clear": "Hapus saringan pemilik",
+    "selectedFallback": "Akun terpilih",
+    "filterByThis": "Tampilkan hanya pemilik ini"
+  },
   "browseGrid": {
     "heading": "Cara menjelajah",
     "description": "Empat jalan masuk ke karya GainForest, dibuat untuk pendana, penjaga alam, dan tim lapangan.",
