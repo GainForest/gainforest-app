@@ -638,6 +638,7 @@
     "uploadSelected": "Upload selected",
     "uploadingSelected": "Uploading selected…",
     "uploadedCount": "{uploaded} of {total} uploaded",
+    "analyzingCount": "Analyzing {count} of {total}",
     "listTitle": "Images",
     "analysisPanelTitle": "Analyzed observation data",
     "selectImagePrompt": "Select an image to review its observation data.",
@@ -754,7 +755,7 @@
       "itemLocation": "Location for this photo",
       "editItemLocation": "Change this photo's location"
     },
-    "draftRestored": "We brought back your unsaved photos from last time.",
+    "draftRestored": "Draft restored",
     "discardDraft": "Discard draft",
     "unidentifiedOrganism": "Unidentified Organism"
   },

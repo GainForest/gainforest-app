@@ -638,6 +638,7 @@
     "uploadSelected": "Pakia zilizochaguliwa",
     "uploadingSelected": "Inapakia zilizochaguliwa…",
     "uploadedCount": "{uploaded} kati ya {total} zimepakiwa",
+    "analyzingCount": "Inachambua {count} kati ya {total}",
     "listTitle": "Picha",
     "analysisPanelTitle": "Data ya uchunguzi iliyochambuliwa",
     "selectImagePrompt": "Chagua picha ili kukagua data yake ya uchunguzi.",
@@ -754,7 +755,7 @@
       "itemLocation": "Eneo la picha hii",
       "editItemLocation": "Badilisha eneo la picha hii"
     },
-    "draftRestored": "Tumerejesha picha zako ambazo hazikuhifadhiwa kutoka mara iliyopita.",
+    "draftRestored": "Rasimu imerejeshwa",
     "discardDraft": "Tupa rasimu",
     "unidentifiedOrganism": "Kiumbe kisichotambuliwa"
   },

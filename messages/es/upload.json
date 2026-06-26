@@ -638,6 +638,7 @@
     "uploadSelected": "Subir seleccionadas",
     "uploadingSelected": "Subiendo seleccionadas…",
     "uploadedCount": "{uploaded} de {total} subidas",
+    "analyzingCount": "Analizando {count} de {total}",
     "listTitle": "Imágenes",
     "analysisPanelTitle": "Datos de observación analizados",
     "selectImagePrompt": "Selecciona una imagen para revisar sus datos de observación.",
@@ -754,7 +755,7 @@
       "itemLocation": "Ubicación de esta foto",
       "editItemLocation": "Cambiar la ubicación de esta foto"
     },
-    "draftRestored": "Recuperamos tus fotos sin guardar de la última vez.",
+    "draftRestored": "Borrador recuperado",
     "discardDraft": "Descartar borrador",
     "unidentifiedOrganism": "Organismo no identificado"
   },

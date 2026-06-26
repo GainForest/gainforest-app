@@ -918,6 +918,7 @@ function ObservationBulkAddPanel({
   const selectedEditableItems = editableItems.filter((item) => item.selected);
   const uploadedCount = items.filter((item) => item.status === "uploaded").length;
   const uploadableCount = items.filter(itemCanUpload).length;
+  const analyzingCount = items.filter((item) => item.status === "analyzing").length;
   const uploadProgressItems = uploadProgressIds.size > 0 ? items.filter((item) => uploadProgressIds.has(item.id)) : [];
   const showUploadProgress = isBulkUploading && uploadProgressItems.length > 0;
   const overallProgress = uploadProgressItems.length > 0 ? Math.round(uploadProgressItems.reduce((sum, item) => sum + item.progress, 0) / uploadProgressItems.length) : 0;
@@ -1321,26 +1322,52 @@ function ObservationBulkAddPanel({
     >
       <Container className="space-y-4 pt-3 pb-12">
         <div>
-          <Button variant="ghost" size="sm" onClick={onBack} className="-ml-2 mb-1 h-7 text-muted-foreground hover:text-foreground">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onBack}
+            className="-ml-2 mb-2 h-8 gap-1 px-2 text-muted-foreground hover:text-foreground"
+          >
             <ChevronLeftIcon className="size-4" /> {t("backToObservations")}
           </Button>
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-            <div className="max-w-2xl">
-              <h1 className="font-instrument text-xl font-medium italic tracking-[-0.03em] text-foreground sm:text-2xl">
-                {t("bulkTitle")}
-              </h1>
-              <p className="mt-0.5 text-sm leading-snug text-muted-foreground">{t("bulkIntro")}</p>
-            </div>
-            <div className="flex shrink-0 gap-2">
+          <div>
+            <h1 className="font-instrument text-xl font-medium italic tracking-[-0.03em] text-foreground sm:text-2xl">
+              {t("bulkTitle")}
+            </h1>
+            <p className="mt-1 text-sm leading-snug text-muted-foreground">{t("bulkIntro")}</p>
+          </div>
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            {draftRestored && items.length > 0 ? (
+              <span className="inline-flex h-8 items-center gap-1.5 pr-1 text-xs font-medium text-foreground">
+                <RotateCcwIcon className="size-3.5 shrink-0 text-primary" />
+                {t("draftRestored")}
+                <button
+                  type="button"
+                  onClick={discardDraft}
+                  title={t("discardDraft")}
+                  aria-label={t("discardDraft")}
+                  className="grid size-6 shrink-0 place-items-center rounded text-destructive transition-colors hover:bg-destructive/10"
+                >
+                  <Trash2Icon className="size-3.5" />
+                </button>
+              </span>
+            ) : null}
+            <div className="ml-auto flex flex-wrap items-center gap-2">
+              {hasLocation ? (
+                <LocationBar location={chosenLocation!} onChange={chooseObservationLocation} />
+              ) : null}
               <input ref={fileInputRef} type="file" accept="image/*" multiple onChange={onFilesChanged} className="sr-only" />
               <Button
                 variant="outline"
+                size="sm"
                 onClick={() => fileInputRef.current?.click()}
                 disabled={isPreparing || !hasLocation}
                 title={!hasLocation ? t("location.locationRequired") : undefined}
               >
                 {isPreparing ? <Loader2Icon className="size-4 animate-spin" /> : <ImagePlusIcon className="size-4" />}
-                {isPreparing ? t("preparingImages") : items.length > 0 ? t("chooseMoreImages") : t("chooseImages")}
+                <span className="hidden sm:inline">
+                  {isPreparing ? t("preparingImages") : items.length > 0 ? t("chooseMoreImages") : t("chooseImages")}
+                </span>
               </Button>
             </div>
           </div>
@@ -1351,26 +1378,6 @@ function ObservationBulkAddPanel({
             <AlertTriangleIcon className="mt-0.5 size-4 shrink-0" />
             <span>{bulkError ?? disabledReason}</span>
           </div>
-        ) : null}
-
-        {draftRestored && items.length > 0 ? (
-          <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-primary/20 bg-primary/[0.05] px-3.5 py-1.5 text-sm">
-            <span className="flex items-center gap-2 text-foreground">
-              <RotateCcwIcon className="size-4 shrink-0 text-primary" /> {t("draftRestored")}
-            </span>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={discardDraft}
-              className="h-7 text-destructive hover:bg-destructive/10 hover:text-destructive"
-            >
-              <Trash2Icon className="size-4" /> {t("discardDraft")}
-            </Button>
-          </div>
-        ) : null}
-
-        {hasLocation ? (
-          <LocationBar location={chosenLocation!} onChange={chooseObservationLocation} />
         ) : null}
 
         {!hasLocation ? (
@@ -1393,14 +1400,23 @@ function ObservationBulkAddPanel({
             <div className="space-y-4 rounded-2xl bg-muted/45 p-4 sm:p-5">
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div className="min-w-0">
-                  <p className="text-sm font-medium text-foreground">
-                    {t("uploadedCount", { uploaded: uploadedCount, total: items.length })}
-                  </p>
-                  <p className="text-xs leading-5 text-muted-foreground">
-                    {t("selectedCount", { selected: readySelectedItems.length, total: uploadableCount })}
-                    <span className="mx-1.5 text-muted-foreground/50">·</span>
-                    {t("mediaGroupHint")}
-                  </p>
+                  {analyzingCount > 0 ? (
+                    <p className="flex items-center gap-2 text-sm font-medium text-foreground">
+                      <Loader2Icon className="size-4 shrink-0 animate-spin text-primary" />
+                      {t("analyzingCount", { count: analyzingCount, total: items.length })}
+                    </p>
+                  ) : (
+                    <>
+                      <p className="text-sm font-medium text-foreground">
+                        {t("uploadedCount", { uploaded: uploadedCount, total: items.length })}
+                      </p>
+                      <p className="text-xs leading-5 text-muted-foreground">
+                        {t("selectedCount", { selected: readySelectedItems.length, total: uploadableCount })}
+                        <span className="mx-1.5 text-muted-foreground/50">·</span>
+                        {t("mediaGroupHint")}
+                      </p>
+                    </>
+                  )}
                 </div>
                 <div className="flex flex-wrap gap-2">
                   <Button variant="ghost" size="sm" onClick={openRemoveSelectedModal} disabled={selectedEditableItems.length === 0} className="text-destructive hover:bg-destructive/10 hover:text-destructive">
@@ -1495,17 +1511,19 @@ function LocationStep({ onChoose }: { onChoose: () => void }) {
 function LocationBar({ location, onChange }: { location: PickedLocation; onChange: () => void }) {
   const t = useTranslations("upload.observations.location");
   return (
-    <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-primary/15 bg-primary/[0.04] px-3.5 py-1.5">
-      <div className="flex min-w-0 items-center gap-2 text-sm">
-        <MapPinIcon className="size-4 shrink-0 text-primary" />
-        <span className="truncate text-foreground tabular-nums">
-          {t("locationReady", { lat: location.lat, lng: location.lng })}
-        </span>
-      </div>
-      <Button variant="outline" size="sm" onClick={onChange} className="h-7">
-        <PencilIcon className="size-4" /> {t("changeLocation")}
-      </Button>
-    </div>
+    <Button
+      variant="outline"
+      size="sm"
+      onClick={onChange}
+      title={t("changeLocation")}
+      className="max-w-full gap-1.5"
+    >
+      <MapPinIcon className="size-3.5 shrink-0 text-primary" />
+      <span className="truncate tabular-nums">
+        {location.lat.toFixed(4)}, {location.lng.toFixed(4)}
+      </span>
+      <PencilIcon className="size-3 shrink-0 text-muted-foreground" />
+    </Button>
   );
 }
 

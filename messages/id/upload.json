@@ -638,6 +638,7 @@
     "uploadSelected": "Unggah yang dipilih",
     "uploadingSelected": "Mengunggah yang dipilih…",
     "uploadedCount": "{uploaded} dari {total} diunggah",
+    "analyzingCount": "Menganalisis {count} dari {total}",
     "listTitle": "Gambar",
     "analysisPanelTitle": "Data temuan hasil analisis",
     "selectImagePrompt": "Pilih gambar untuk meninjau data temuannya.",
@@ -754,7 +755,7 @@
       "itemLocation": "Lokasi untuk foto ini",
       "editItemLocation": "Ubah lokasi foto ini"
     },
-    "draftRestored": "Kami memulihkan foto Anda yang belum tersimpan dari sebelumnya.",
+    "draftRestored": "Draf dipulihkan",
     "discardDraft": "Buang draf",
     "unidentifiedOrganism": "Organisme tidak teridentifikasi"
   },
