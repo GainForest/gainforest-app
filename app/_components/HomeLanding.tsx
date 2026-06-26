@@ -536,13 +536,13 @@ function WhatIsBumicert() {
 
   useEffect(() => {
     const controller = new AbortController();
-    // Only verified Ma Earth certs: certs created by an org carrying the
-    // "Ma Earth" featured badge (all rounds). To scope to a single round once
-    // it's verified, swap badgeFilters to e.g. ["maearth-round-3"].
+    // Verified certs only: records created by an org carrying the "Ma Earth"
+    // or "GainForest" featured badge (badge filters are OR'd). To scope to a
+    // single Ma Earth round, swap badgeFilters to e.g. ["maearth-round-3"].
     fetchBumicerts(60, null, controller.signal, undefined, {
       sort: "newest",
       featuredBadgesOnly: true,
-      badgeFilters: ["maearth"],
+      badgeFilters: ["maearth", "gainforest"],
     })
       .then((page) => {
         const usable = page.records
