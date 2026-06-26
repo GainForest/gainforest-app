@@ -1124,7 +1124,7 @@ const FUNDING_CONFIG_QUERY = `
   }
 `;
 
-export type BumicertBadgeFilter = "gainforest" | "maearth" | "maearth-round-1" | "maearth-round-2";
+export type BumicertBadgeFilter = "gainforest" | "maearth" | "maearth-round-1" | "maearth-round-2" | "maearth-round-3";
 export type TrustedOrganizationBadge = "gainforest" | "maearth";
 
 const FEATURED_BADGE_REPO_DID = "did:plc:yjck2sybksyigp3zvbq7bfki";
@@ -1133,6 +1133,10 @@ const FEATURED_BADGES: Array<{ key: BumicertBadgeFilter; title: string }> = [
   { key: "maearth", title: "Ma Earth" },
   { key: "maearth-round-1", title: "Ma Earth Round 1" },
   { key: "maearth-round-2", title: "Ma Earth Round 2" },
+  // Round 3 is open for applications; no badge definition/awards exist yet, so
+  // filtering to it returns nothing until Ma Earth verifies the round. Listed
+  // here so it lights up automatically once that badge lands in the repo.
+  { key: "maearth-round-3", title: "Ma Earth Round 3" },
 ];
 const FEATURED_BADGE_KEYS = new Set(FEATURED_BADGES.map((badge) => badge.key));
 const FEATURED_BADGE_KEY_BY_TITLE = new Map(
@@ -1392,7 +1396,7 @@ async function fetchFeaturedBadgeIndexUncached(signal?: AbortSignal): Promise<Fe
 function fetchFeaturedBadgeIndex(signal?: AbortSignal): Promise<FeaturedBadgeIndex> {
   return publicExploreCache(
     "featured-badge-index",
-    { version: "gainforest-maearth:v2", ttl: FEATURED_BADGE_INDEX_CACHE_MS },
+    { version: "gainforest-maearth:v3", ttl: FEATURED_BADGE_INDEX_CACHE_MS },
     // The featured-badge index is shared by count and list requests across the
     // public Explore pages. Keep the cached loader independent from any one
     // component effect's abort signal; otherwise an aborted count refresh can
