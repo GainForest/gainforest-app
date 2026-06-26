@@ -239,7 +239,7 @@ export function ManageProjectsClient({ target }: { target: ManageTarget }) {
                       index={index}
                       galleryHref={`${target.basePath}/projects/${encodeURIComponent(project.rkey)}/gallery`}
                       certsHref={`${target.basePath}/projects/${encodeURIComponent(project.rkey)}/certs`}
-                      observationsHref={manageHref(target, "observations", { mode: "add", forProject: `${project.did}/${project.rkey}` })}
+                      observationsHref={manageHref(target, "observations", { project: project.atUri })}
                       onEdit={() => openEdit(project)}
                       disabledReason={updatePermission.reason}
                     />
@@ -571,7 +571,7 @@ function ProjectEditor({
                   </Link>
                 </Button>
                 <Button asChild type="button" variant="outline">
-                  <Link href={manageHref(target, "observations", { mode: "add", forProject: `${state.project.did}/${state.project.rkey}` })} aria-label={actionT("manageObservationsFor", { title: state.project.title })}>
+                  <Link href={manageHref(target, "observations", { project: state.project.atUri })} aria-label={actionT("manageObservationsFor", { title: state.project.title })}>
                     <BinocularsIcon className="size-4" />
                     {actionT("manageObservations")}
                   </Link>

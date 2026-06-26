@@ -1044,7 +1044,7 @@
       "manageGallery": "Gestionar galería",
       "manageGalleryFor": "Gestionar galería de {title}",
       "manageObservations": "Observaciones",
-      "manageObservationsFor": "Recopilar observaciones para {title}"
+      "manageObservationsFor": "Observaciones de {title}"
     }
   },
   "observations": {

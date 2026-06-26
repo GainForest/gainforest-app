@@ -702,7 +702,11 @@
     "projectLabel": "Collect for a project",
     "projectHelp": "Optional. Attach these observations to one of your projects so they're ready to use as evidence.",
     "projectNone": "No project",
-    "projectAttached": "These observations will be collected for {project}."
+    "projectAttached": "These observations will be collected for {project}.",
+    "filterAllProjects": "All projects",
+    "filterByProject": "Filter observations by project",
+    "filterEmptyTitle": "No observations for this project yet",
+    "filterEmptyBody": "Collect observations and attach them to this project to see them here."
   },
   "settings": {
     "organizationTitle": "Organization settings",

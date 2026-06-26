@@ -202,12 +202,20 @@ export function RecordExplorer({
   showHero = true,
   ownerDid,
   defaultOccurrenceMedia = DEFAULT_OCCURRENCE_MEDIA,
+  filterUris = null,
+  emptyFilteredTitle,
+  emptyFilteredBody,
 }: {
   kind: RecordKind;
   initialPage?: InitialExplorerPage;
   showHero?: boolean;
   ownerDid?: string;
   defaultOccurrenceMedia?: OccurrenceFilter;
+  /** When set, only records whose at:// URI is in this set are shown, and the
+   *  stream auto-walks to completion so every match is found. */
+  filterUris?: ReadonlySet<string> | null;
+  emptyFilteredTitle?: string;
+  emptyFilteredBody?: string;
 }) {
   const meta = KIND_META[kind];
   const exploreT = useTranslations("marketplace.explore");
@@ -496,6 +504,13 @@ export function RecordExplorer({
     if (hydrated && phase === "idle" && records.length === 0) load("first");
   }, [hydrated, load, occMedia, phase, records.length, siteSource, badgeFilters]);
 
+  // When constrained to a project (URI allowlist), walk the whole stream so
+  // every matching record is found instead of relying on manual "Load more".
+  useEffect(() => {
+    if (!filterUris) return;
+    if (phase === "ready" && hasMore && !walking) load("more");
+  }, [filterUris, hasMore, load, phase, walking]);
+
   const canShowTotalCount = kind === "occurrence" && !ownerDid && occCategory === "all";
   useEffect(() => {
     const requestSeq = ++totalCountSeqRef.current;
@@ -524,12 +539,13 @@ export function RecordExplorer({
   }, [badgeFilters, canShowTotalCount, deferredQuery, occMedia, ownerDid]);
 
   const filtered = useMemo(() => {
-    const searched = filterRecords(records, deferredQuery);
+    const allowed = filterUris ? records.filter((r) => filterUris.has(r.atUri)) : records;
+    const searched = filterRecords(allowed, deferredQuery);
     const categorized = kind === "occurrence"
       ? filterOccurrenceCategory(searched as OccurrenceRecord[], occCategory)
       : searched;
     return sortRecords(categorized, sort);
-  }, [deferredQuery, kind, occCategory, records, sort]);
+  }, [deferredQuery, filterUris, kind, occCategory, records, sort]);
   const renderedRecords = useMemo(
     () => (view === "map" ? filtered : filtered.slice(0, cardLimit)),
     [cardLimit, filtered, view],
@@ -546,6 +562,9 @@ export function RecordExplorer({
   );
   const showStats = showStatsOverview && (kind === "occurrence" ? ownerDid ? records.length > 0 : Boolean(occurrenceStats) || (!occurrenceStatsLoading && records.length > 0) : records.length > 0);
   const gridCls = kind === "occurrence" ? GALLERY_GRID_CLS : GRID_CLS;
+  // While a project filter is active and the stream is still walking, keep the
+  // skeleton up so a partial page doesn't briefly read as "nothing here".
+  const showSkeleton = ((phase === "idle" || phase === "loading") && records.length === 0) || Boolean(filterUris && filtered.length === 0 && (walking || hasMore));
 
   return (
     <section className={`${showHero ? "-mt-14 " : ""}bg-background pb-20 md:pb-28`}>
@@ -676,7 +695,7 @@ export function RecordExplorer({
         <div className="mt-6">
           {view === "map" ? (
             <RecordMap records={filtered} kind={kind} onOpen={setDrawer} />
-          ) : (phase === "idle" || phase === "loading") && records.length === 0 ? (
+          ) : showSkeleton ? (
             <SkeletonGrid kind={kind} />
           ) : phase === "error" && records.length === 0 ? (
             <EmptyState
@@ -708,6 +727,11 @@ export function RecordExplorer({
                 body="The newest sightings do not always include photos or field sound recordings. Remove filters to browse everything."
                 onRetry={() => changeMedia("all")}
                 retryLabel="Remove filters"
+              />
+            ) : filterUris ? (
+              <EmptyState
+                title={emptyFilteredTitle ?? "Nothing here yet"}
+                body={emptyFilteredBody ?? "There is nothing to show right now."}
               />
             ) : (
               <EmptyState title="Nothing here yet" body="There is nothing to show right now." />

@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Suspense, useEffect, useRef, useState, type ChangeEvent, type ComponentProps } from "react";
-import { parseAsStringEnum, useQueryState } from "nuqs";
+import { Suspense, useEffect, useMemo, useRef, useState, type ChangeEvent, type ComponentProps, type ReactNode } from "react";
+import { parseAsString, parseAsStringEnum, useQueryState } from "nuqs";
 import {
   AlertTriangleIcon,
   CalendarIcon,
@@ -32,6 +32,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import TelegramIcon from "@/icons/TelegramIcon";
 import { manageApiHref, manageHref, type ManageTarget } from "@/lib/links";
+import { cn } from "@/lib/utils";
 import { canCreateRecord } from "../../_lib/cgs-permissions";
 import {
   configureObservationMutationRepo,
@@ -41,6 +42,13 @@ import {
 } from "./observation-mutations";
 
 type InitialPage = NonNullable<ComponentProps<typeof RecordExplorer>["initialPage"]>;
+type ObservationProjectGroup = { projectUri: string; title: string; count: number; uris: string[] };
+
+/** at://did/org.hypercerts.collection/rkey -> "did/rkey" for the forProject param. */
+function projectIdentityFromUri(uri: string): string | null {
+  const match = uri.match(/^at:\/\/([^/]+)\/org\.hypercerts\.collection\/([^/]+)$/);
+  return match?.[1] && match[2] ? `${match[1]}/${match[2]}` : null;
+}
 type Mode = "list" | "add";
 type ItemStatus = "analyzing" | "ready" | "error" | "uploading" | "uploaded" | "uploadError";
 
@@ -416,11 +424,38 @@ export function ObservationsClient({ target, initialPage, forProject = null }: {
     parseAsStringEnum<Mode>(["list", "add"]).withDefault("list").withOptions(QUERY_STATE_OPTIONS),
   );
   const createPermission = canCreateRecord(target);
+  const [projectFilter, setProjectFilter] = useQueryState("project", parseAsString.withOptions(QUERY_STATE_OPTIONS));
+  const [projectGroups, setProjectGroups] = useState<ObservationProjectGroup[]>([]);
 
   useEffect(() => {
     configureObservationMutationRepo(target.kind === "group" ? target.did : null);
     return () => configureObservationMutationRepo(null);
   }, [target]);
+
+  // Group the steward's observations by the project they were collected for so
+  // the list can be filtered per project (read straight from projectRef).
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const response = await fetch(manageApiHref("/api/manage/observations/projects", target), { cache: "no-store" });
+        const data = (await response.json()) as { groups?: ObservationProjectGroup[] };
+        if (cancelled || !response.ok || !Array.isArray(data?.groups)) return;
+        setProjectGroups(data.groups);
+      } catch {
+        // Filtering is an enhancement; ignore load failures.
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [target]);
+
+  const activeGroup = projectGroups.find((group) => group.projectUri === projectFilter) ?? null;
+  const filterUris = useMemo(() => (activeGroup ? new Set(activeGroup.uris) : null), [activeGroup]);
+  // When viewing a single project's observations, keep "Add observation"
+  // anchored to that project so newly collected records stay attached.
+  const addForProject = activeGroup ? projectIdentityFromUri(activeGroup.projectUri) : null;
 
   if (mode === "add") {
     return (
@@ -447,7 +482,7 @@ export function ObservationsClient({ target, initialPage, forProject = null }: {
           </div>
           {createPermission.allowed ? (
             <Button asChild>
-              <Link href={manageHref(target, "observations", { mode: "add" })}>
+              <Link href={manageHref(target, "observations", { mode: "add", ...(addForProject ? { forProject: addForProject } : {}) })}>
                 <ImagePlusIcon className="size-4" /> {t("addObservation")}
               </Link>
             </Button>
@@ -500,10 +535,79 @@ export function ObservationsClient({ target, initialPage, forProject = null }: {
         </div>
       </div>
 
+      {projectGroups.length > 0 ? (
+        <div className="mx-auto mt-5 max-w-6xl px-6">
+          <ObservationProjectFilter
+            groups={projectGroups}
+            value={projectFilter ?? null}
+            onChange={(next) => void setProjectFilter(next)}
+            allLabel={t("filterAllProjects")}
+            ariaLabel={t("filterByProject")}
+          />
+        </div>
+      ) : null}
+
       <Suspense fallback={null}>
-        <RecordExplorer kind="occurrence" ownerDid={target.did} showHero={false} initialPage={initialPage} defaultOccurrenceMedia="all" />
+        <RecordExplorer
+          kind="occurrence"
+          ownerDid={target.did}
+          showHero={false}
+          initialPage={activeGroup ? undefined : initialPage}
+          defaultOccurrenceMedia="all"
+          filterUris={filterUris}
+          emptyFilteredTitle={t("filterEmptyTitle")}
+          emptyFilteredBody={t("filterEmptyBody")}
+        />
       </Suspense>
     </div>
+  );
+}
+
+function ObservationProjectFilter({
+  groups,
+  value,
+  onChange,
+  allLabel,
+  ariaLabel,
+}: {
+  groups: ObservationProjectGroup[];
+  value: string | null;
+  onChange: (next: string | null) => void;
+  allLabel: string;
+  ariaLabel: string;
+}) {
+  return (
+    <div role="group" aria-label={ariaLabel} className="scrollbar-hidden flex items-center gap-1.5 overflow-x-auto pb-1">
+      <ObservationFilterPill selected={!value} onClick={() => onChange(null)}>
+        {allLabel}
+      </ObservationFilterPill>
+      {groups.map((group) => (
+        <ObservationFilterPill key={group.projectUri} selected={value === group.projectUri} onClick={() => onChange(group.projectUri)}>
+          <span className="max-w-[12rem] truncate">{group.title}</span>
+          <span className={cn("ml-1 rounded-full px-1.5 text-[11px] tabular-nums", value === group.projectUri ? "bg-primary-foreground/20" : "bg-foreground/10")}>
+            {group.count}
+          </span>
+        </ObservationFilterPill>
+      ))}
+    </div>
+  );
+}
+
+function ObservationFilterPill({ selected, onClick, children }: { selected: boolean; onClick: () => void; children: ReactNode }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={selected}
+      className={cn(
+        "inline-flex shrink-0 items-center gap-1 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50",
+        selected
+          ? "border-primary bg-primary text-primary-foreground"
+          : "border-border bg-background text-muted-foreground hover:border-primary/40 hover:text-foreground",
+      )}
+    >
+      {children}
+    </button>
   );
 }
 

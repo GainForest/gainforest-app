@@ -702,7 +702,11 @@
     "projectLabel": "Kusanya kwa ajili ya mradi",
     "projectHelp": "Si lazima. Unganisha uchunguzi huu na mojawapo ya miradi yako ili uwe tayari kutumika kama ushahidi.",
     "projectNone": "Hakuna mradi",
-    "projectAttached": "Uchunguzi huu utakusanywa kwa ajili ya {project}."
+    "projectAttached": "Uchunguzi huu utakusanywa kwa ajili ya {project}.",
+    "filterAllProjects": "Miradi yote",
+    "filterByProject": "Chuja uchunguzi kwa mradi",
+    "filterEmptyTitle": "Bado hakuna uchunguzi kwa mradi huu",
+    "filterEmptyBody": "Kusanya uchunguzi na uunganishe na mradi huu ili kuuona hapa."
   },
   "settings": {
     "organizationTitle": "Mipangilio ya shirika",

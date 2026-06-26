@@ -702,7 +702,11 @@
     "projectLabel": "Kumpulkan untuk proyek",
     "projectHelp": "Opsional. Tautkan observasi ini ke salah satu proyek Anda agar siap digunakan sebagai bukti.",
     "projectNone": "Tanpa proyek",
-    "projectAttached": "Observasi ini akan dikumpulkan untuk {project}."
+    "projectAttached": "Observasi ini akan dikumpulkan untuk {project}.",
+    "filterAllProjects": "Semua proyek",
+    "filterByProject": "Filter observasi berdasarkan proyek",
+    "filterEmptyTitle": "Belum ada observasi untuk proyek ini",
+    "filterEmptyBody": "Kumpulkan observasi dan tautkan ke proyek ini untuk melihatnya di sini."
   },
   "settings": {
     "organizationTitle": "Pengaturan organisasi",

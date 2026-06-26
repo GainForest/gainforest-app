@@ -702,7 +702,11 @@
     "projectLabel": "Coletar para um projeto",
     "projectHelp": "Opcional. Vincule estas observações a um dos seus projetos para deixá-las prontas como evidência.",
     "projectNone": "Sem projeto",
-    "projectAttached": "Estas observações serão coletadas para {project}."
+    "projectAttached": "Estas observações serão coletadas para {project}.",
+    "filterAllProjects": "Todos os projetos",
+    "filterByProject": "Filtrar observações por projeto",
+    "filterEmptyTitle": "Ainda não há observações para este projeto",
+    "filterEmptyBody": "Colete observações e vincule-as a este projeto para vê-las aqui."
   },
   "settings": {
     "organizationTitle": "Configurações da organização",
