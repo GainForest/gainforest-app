@@ -84,7 +84,8 @@ fonts, and the favicon + icon set (`public/icons/`, copied from the landing).
 
 ## Why client-side fetching
 
-Hyperindex (`hi.gainforest.app/graphql`) and `plc.directory` both serve
+The configured Hyperindex endpoint (`NEXT_PUBLIC_INDEXER_URL`, defaulting to
+`https://api.hi.gainforest.app/graphql`) and `plc.directory` both serve
 `access-control-allow-origin: *`, so the record grids page the indexer and
 resolve PDS blob images straight from the browser. The server only prefetches
 the cheap KPI `totalCount`s and the status snapshot (both cached via
@@ -95,7 +96,7 @@ walks) — cards stream in as they're found.
 
 ## Data endpoints
 
-- Indexer: `https://hi.gainforest.app/graphql`
+- Indexer: `NEXT_PUBLIC_INDEXER_URL` or `https://api.hi.gainforest.app/graphql`
 - Facilitator (all donations): `did:plc:edod7rboajioq3jbyxsgeicc`
 - Status: `https://gainforest-status.instatus.com`
 - Links out: `data.gainforest.app` (GainForest links stay in this app)
