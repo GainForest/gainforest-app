@@ -935,7 +935,9 @@
       "close": "Tutup",
       "edit": "Ubah",
       "cancel": "Batal",
-      "saveChanges": "Simpan perubahan"
+      "saveChanges": "Simpan perubahan",
+      "viewObservation": "Lihat halaman pengamatan",
+      "openFullPage": "Buka halaman penuh"
     },
     "kind": {
       "occurrence": "Temuan alam",
@@ -1064,6 +1066,29 @@
       "rightsHolder": "Pemegang hak",
       "sightingId": "ID pengamatan"
     }
+  },
+  "observationPage": {
+    "back": "Semua pengamatan",
+    "kind": "Pengamatan alam",
+    "sharedBy": "Dibagikan oleh",
+    "viewProfile": "Lihat profil",
+    "observed": "Diamati",
+    "shared": "Dibagikan",
+    "place": "Tempat",
+    "notRecorded": "Tidak tercatat",
+    "detailsTitle": "Detail",
+    "notesTitle": "Catatan",
+    "fieldSound": "Suara lapangan",
+    "previous": "Foto sebelumnya",
+    "next": "Foto berikutnya",
+    "showPhoto": "Tampilkan foto {number}",
+    "zoom": "Perbesar foto",
+    "close": "Tutup",
+    "audioUnsupported": "Browser Anda tidak mendukung pemutaran audio.",
+    "metaTitle": "{name} — Pengamatan alam",
+    "metaFallback": "Pengamatan alam yang dibagikan di GainForest.",
+    "natureSound": "Rekaman suara alam",
+    "unidentified": "Pengamatan tidak teridentifikasi"
   },
   "manageProjects": {
     "hero": {

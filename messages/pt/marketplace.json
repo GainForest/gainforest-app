@@ -935,7 +935,9 @@
       "close": "Fechar",
       "edit": "Editar",
       "cancel": "Cancelar",
-      "saveChanges": "Salvar alterações"
+      "saveChanges": "Salvar alterações",
+      "viewObservation": "Ver página da observação",
+      "openFullPage": "Abrir página completa"
     },
     "kind": {
       "occurrence": "Avistamento da natureza",
@@ -1064,6 +1066,29 @@
       "rightsHolder": "Titular dos direitos",
       "sightingId": "ID da observação"
     }
+  },
+  "observationPage": {
+    "back": "Todos os avistamentos",
+    "kind": "Avistamento de natureza",
+    "sharedBy": "Compartilhado por",
+    "viewProfile": "Ver perfil",
+    "observed": "Observado",
+    "shared": "Compartilhado",
+    "place": "Local",
+    "notRecorded": "Não registrado",
+    "detailsTitle": "Detalhes",
+    "notesTitle": "Notas",
+    "fieldSound": "Som de campo",
+    "previous": "Foto anterior",
+    "next": "Próxima foto",
+    "showPhoto": "Mostrar foto {number}",
+    "zoom": "Ampliar foto",
+    "close": "Fechar",
+    "audioUnsupported": "Seu navegador não suporta a reprodução de áudio.",
+    "metaTitle": "{name} — Avistamento de natureza",
+    "metaFallback": "Um avistamento de natureza compartilhado no GainForest.",
+    "natureSound": "Gravação de som da natureza",
+    "unidentified": "Avistamento não identificado"
   },
   "manageProjects": {
     "hero": {

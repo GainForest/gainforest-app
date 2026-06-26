@@ -133,6 +133,12 @@ export function accountHref(didOrHandle: string): string {
   return `/account/${encodeURIComponent(didOrHandle)}`;
 }
 
+/** Build a dedicated nature-sighting (occurrence) detail page URL in this app
+ *  from a DID/handle + rkey. */
+export function localObservationHref(didOrHandle: string, rkey: string): string {
+  return `/observations/${encodeURIComponent(didOrHandle)}/${encodeURIComponent(rkey)}`;
+}
+
 /** Block-explorer transaction URLs by payment network. Mirrors the
  *  bumicerts dashboard's BLOCK_EXPLORERS map. */
 const BLOCK_EXPLORERS: Record<string, (tx: string) => string> = {

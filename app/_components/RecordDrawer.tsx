@@ -5,7 +5,7 @@ import type { Map as LeafletMap, Marker, TileLayer } from "leaflet";
 import Image from "next/image";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { ArrowUpRightIcon, AudioLinesIcon, CalendarRangeIcon, CheckIcon, HeartIcon, ImageOffIcon, Layers3Icon, Loader2Icon, MapPinIcon, PencilIcon, Share2Icon, Trash2Icon, UsersIcon, XIcon } from "lucide-react";
+import { ArrowUpRightIcon, AudioLinesIcon, CalendarRangeIcon, CheckIcon, HeartIcon, ImageOffIcon, Layers3Icon, Loader2Icon, Maximize2Icon, MapPinIcon, PencilIcon, Share2Icon, Trash2Icon, UsersIcon, XIcon } from "lucide-react";
 import {
   fetchObservationMedia,
   fetchRecordByUri,
@@ -36,6 +36,7 @@ import {
   INDEXER_URL,
   accountHref,
   localBumicertHref,
+  localObservationHref,
 } from "../_lib/urls";
 
 type RecordDrawerT = ReturnType<typeof useTranslations<"marketplace.recordDrawer">>;
@@ -266,6 +267,10 @@ export function RecordDrawer({
       : [];
   const badges = record.kind === "bumicert" ? [] : [...(detail?.badges ?? []), ...mediaBadges];
   const detailHref = record.kind === "bumicert" ? localBumicertHref(preferredOwnerIdentifier, record.rkey) : null;
+  const observationHref =
+    record.kind === "occurrence" && record.atUri.includes("/app.gainforest.dwc.occurrence/")
+      ? localObservationHref(preferredOwnerIdentifier, record.rkey)
+      : null;
   const ownerHref = accountHref(preferredOwnerIdentifier);
   const managingGroupRole = isEditableObservationRecord(record)
     ? groupMemberships.find((group) => group.groupDid === record.did)?.role ?? null
@@ -366,7 +371,8 @@ export function RecordDrawer({
               <div className="pointer-events-auto">
                 <KindBadge record={record} floating />
               </div>
-              <div className="pointer-events-auto">
+              <div className="pointer-events-auto flex items-center gap-2">
+                {observationHref ? <MaximizeButton href={observationHref} /> : null}
                 <CloseButton onClose={onClose} floating />
               </div>
             </div>
@@ -374,7 +380,10 @@ export function RecordDrawer({
         ) : (
           <div className="sticky top-0 z-10 flex items-center justify-between gap-3 border-b border-border-soft bg-background/90 px-5 py-4 backdrop-blur-xl">
             <KindBadge record={record} />
-            <CloseButton onClose={onClose} />
+            <div className="flex items-center gap-2">
+              {observationHref ? <MaximizeButton href={observationHref} /> : null}
+              <CloseButton onClose={onClose} />
+            </div>
           </div>
         )}
 
@@ -397,6 +406,20 @@ export function RecordDrawer({
           )}
           {record.kind === "occurrence" && occurrenceSecondaryName(record, t) && (
             <p className="mt-1.5 text-[14px] italic text-foreground/65">{occurrenceSecondaryName(record, t)}</p>
+          )}
+
+          {/* Open the dedicated, iNaturalist-style observation page. */}
+          {observationHref && (
+            <div className="mt-5 flex items-center gap-2.5">
+              <Link
+                href={observationHref}
+                className="inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-full bg-primary px-4 text-[14px] font-medium text-primary-foreground shadow-sm transition-all hover:bg-primary/90 hover:shadow-md"
+              >
+                <Maximize2Icon className="h-4 w-4" />
+                {t("actions.viewObservation")}
+              </Link>
+              <ShareIconButton path={observationHref} />
+            </div>
           )}
           {shortLead && (
             <p className="mt-2.5 text-[14.5px] leading-[1.55] text-foreground/72">
@@ -1265,6 +1288,20 @@ function AudioHero({ src, title }: { src: string | null; title: string }) {
         ) : null}
       </div>
     </div>
+  );
+}
+
+function MaximizeButton({ href }: { href: string }) {
+  const t = useTranslations("marketplace.recordDrawer");
+  return (
+    <Link
+      href={href}
+      aria-label={t("actions.openFullPage")}
+      title={t("actions.openFullPage")}
+      className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-background/80 text-foreground/70 shadow-sm backdrop-blur-md transition-colors hover:bg-background hover:text-primary"
+    >
+      <Maximize2Icon className="h-[15px] w-[15px]" aria-hidden />
+    </Link>
   );
 }
 

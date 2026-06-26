@@ -935,7 +935,9 @@
       "close": "Funga",
       "edit": "Hariri",
       "cancel": "Ghairi",
-      "saveChanges": "Hifadhi mabadiliko"
+      "saveChanges": "Hifadhi mabadiliko",
+      "viewObservation": "Tazama ukurasa wa uchunguzi",
+      "openFullPage": "Fungua ukurasa kamili"
     },
     "kind": {
       "occurrence": "Uonekano wa asili",
@@ -1064,6 +1066,29 @@
       "rightsHolder": "Mmiliki wa haki",
       "sightingId": "ID ya muono"
     }
+  },
+  "observationPage": {
+    "back": "Uchunguzi wote",
+    "kind": "Uchunguzi wa asili",
+    "sharedBy": "Imeshirikiwa na",
+    "viewProfile": "Tazama wasifu",
+    "observed": "Imeonekana",
+    "shared": "Imeshirikiwa",
+    "place": "Mahali",
+    "notRecorded": "Haijarekodiwa",
+    "detailsTitle": "Maelezo",
+    "notesTitle": "Madokezo",
+    "fieldSound": "Sauti ya shambani",
+    "previous": "Picha iliyotangulia",
+    "next": "Picha inayofuata",
+    "showPhoto": "Onyesha picha {number}",
+    "zoom": "Kuza picha",
+    "close": "Funga",
+    "audioUnsupported": "Kivinjari chako hakitumii uchezaji wa sauti.",
+    "metaTitle": "{name} — Uchunguzi wa asili",
+    "metaFallback": "Uchunguzi wa asili ulioshirikiwa kwenye GainForest.",
+    "natureSound": "Rekodi ya sauti ya asili",
+    "unidentified": "Uchunguzi usiotambulika"
   },
   "manageProjects": {
     "hero": {

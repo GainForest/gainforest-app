@@ -941,7 +941,9 @@
       "close": "Close",
       "edit": "Edit",
       "cancel": "Cancel",
-      "saveChanges": "Save changes"
+      "saveChanges": "Save changes",
+      "viewObservation": "View observation page",
+      "openFullPage": "Open full page"
     },
     "kind": {
       "occurrence": "Nature sighting",
@@ -1070,6 +1072,29 @@
       "rightsHolder": "Rights holder",
       "sightingId": "Sighting ID"
     }
+  },
+  "observationPage": {
+    "back": "All sightings",
+    "kind": "Nature sighting",
+    "sharedBy": "Shared by",
+    "viewProfile": "View profile",
+    "observed": "Observed",
+    "shared": "Shared",
+    "place": "Place",
+    "notRecorded": "Not recorded",
+    "detailsTitle": "Details",
+    "notesTitle": "Notes",
+    "fieldSound": "Field sound",
+    "previous": "Previous photo",
+    "next": "Next photo",
+    "showPhoto": "Show photo {number}",
+    "zoom": "Zoom photo",
+    "close": "Close",
+    "audioUnsupported": "Your browser does not support audio playback.",
+    "metaTitle": "{name} — Nature sighting",
+    "metaFallback": "A nature sighting shared on GainForest.",
+    "natureSound": "Nature sound recording",
+    "unidentified": "Unidentified sighting"
   },
   "manageProjects": {
     "hero": {
