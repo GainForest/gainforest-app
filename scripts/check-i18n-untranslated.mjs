@@ -20,6 +20,7 @@ const allowedExactValues = new Set([
   "GainForest",
   "Green Globe",
   "Ma Earth",
+  "BioBlitz",
   "GitHub",
   "X (Twitter)",
   "Telegram",

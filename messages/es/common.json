@@ -55,6 +55,7 @@
       "bumicerts": "certificados",
       "organizations": "Organizaciones",
       "leaderboard": "Clasificación",
+      "bioblitz": "BioBlitz",
       "organization": "Organización",
       "sites": "Sitios",
       "audio": "Audio",
@@ -120,6 +121,7 @@
       "organizations": "Organizaciones",
       "observations": "Observaciones",
       "leaderboard": "Clasificación",
+      "bioblitz": "BioBlitz",
       "greenGlobe": "Green Globe",
       "status": "Estado"
     }

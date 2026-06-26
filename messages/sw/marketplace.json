@@ -236,6 +236,93 @@
       "description": "Tafadhali jaribu tena baada ya muda mfupi."
     }
   },
+  "bioblitz": {
+    "metadata": {
+      "title": "Changamoto ya BioBlitz ya Wiki — GainForest",
+      "description": "Toka nje, piga picha viumbe hai, na ongeza uoni wako. Kila wiki, mkusanyaji bora na picha bora hushinda zawadi."
+    },
+    "hero": {
+      "eyebrow": "Changamoto ya BioBlitz ya Wiki",
+      "titlePrefix": "Changamoto ya",
+      "titleEmphasis": "BioBlitz",
+      "description": "Mashindano ya kirafiki ya kila wiki ya kurekodi asili. Piga picha kiumbe chochote hai — mmea, ndege, mdudu au kuvu —, kiongeze kwenye GainForest, na upande kwenye ubao. Raundi mpya, zawadi mpya, kila wiki.",
+      "program": "Sehemu ya programu ya Klarna AI for Climate Resilience, pamoja na GainForest."
+    },
+    "status": {
+      "live": "Inaendelea",
+      "upcoming": "Inaanza hivi karibuni",
+      "ended": "Imekamilika"
+    },
+    "round": {
+      "startsIn": "Inaanza baada ya",
+      "endsIn": "Inaisha baada ya",
+      "ended": "Raundi imekamilika",
+      "days": "{count, plural, one {siku #} other {siku #}}",
+      "hours": "{count, plural, one {saa #} other {saa #}}",
+      "minutes": "{count, plural, one {dakika #} other {dakika #}}"
+    },
+    "prizes": {
+      "title": "Zawadi kila raundi",
+      "badgeNote": "Pamoja na beji ya kudumu ya mshindi kwenye wasifu wako.",
+      "mostObservations": {
+        "title": "Uoni mwingi zaidi",
+        "blurb": "Kwa mkusanyaji mwenye uoni halali mwingi zaidi katika raundi."
+      },
+      "bestPicture": {
+        "title": "Picha bora",
+        "blurb": "Kwa picha ya asili inayovutia zaidi ya wiki, iliyochaguliwa na timu."
+      }
+    },
+    "how": {
+      "title": "Jinsi inavyofanya kazi",
+      "steps": {
+        "outside": {
+          "title": "Toka nje",
+          "blurb": "Msitu, shamba au uwanja wako — kiumbe chochote hai kinahesabika."
+        },
+        "upload": {
+          "title": "Ongeza uoni wako",
+          "blurb": "Piga picha na uiongeze kutoka ukurasa wa Uoni."
+        },
+        "review": {
+          "title": "Angalia jina la spishi",
+          "blurb": "Thibitisha au sahihisha jina lililopendekezwa — maarifa yako ni muhimu."
+        }
+      }
+    },
+    "board": {
+      "title": "Ubao wa raundi hii",
+      "live": "Moja kwa moja",
+      "subtitleLive": "Nani anaongoza zawadi ya uoni mwingi zaidi sasa hivi.",
+      "subtitleEnded": "Matokeo ya mwisho ya raundi hii.",
+      "subtitleUpcoming": "Kuwa wa kwanza kwenye ubao raundi itakapoanza.",
+      "leader": "Anaongoza",
+      "observations": "{count, plural, one {# uoni} other {# uoni}}",
+      "openCollector": "Fungua wasifu wa mkusanyaji katika kichupo kipya",
+      "rankAriaLabel": "Nafasi ya {rank}",
+      "stats": {
+        "observations": "Uoni katika raundi hii",
+        "collectors": "Wakusanyaji",
+        "timeLeft": "Muda uliosalia"
+      },
+      "empty": {
+        "title": "Bado hakuna uoni",
+        "description": "Kuwa wa kwanza kuongeza uoni katika raundi hii."
+      },
+      "error": {
+        "title": "Haikuweza kupakia ubao",
+        "description": "Tafadhali jaribu tena baada ya muda mfupi."
+      },
+      "cta": "Ongeza uoni wako"
+    },
+    "winners": {
+      "title": "Washindi waliopita",
+      "description": "Kumbukumbu ya kudumu ya mabingwa wa kila raundi.",
+      "mostObservations": "Uoni mwingi zaidi",
+      "bestPicture": "Picha bora",
+      "pending": "Itatangazwa"
+    }
+  },
   "dashboard": {
     "metadata": {
       "title": "Michango Muhtasari — GainForest",

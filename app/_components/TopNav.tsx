@@ -20,6 +20,7 @@ const NAV = [
   { href: "/certs", key: "bumicerts" },
   { href: "/projects", key: "projects" },
   { href: "/leaderboard", key: "leaderboard" },
+  { href: "/bioblitz", key: "bioblitz" },
   { href: "/devices", key: "devices" },
   { href: "/status", key: "status" },
 ] as const;

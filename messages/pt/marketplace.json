@@ -236,6 +236,93 @@
       "description": "Tente novamente em instantes."
     }
   },
+  "bioblitz": {
+    "metadata": {
+      "title": "Desafio BioBlitz Semanal — GainForest",
+      "description": "Saia, fotografe seres vivos e adicione seus registros. A cada semana, quem mais registrar e a melhor foto ganham um prêmio."
+    },
+    "hero": {
+      "eyebrow": "Desafio BioBlitz Semanal",
+      "titlePrefix": "Desafio",
+      "titleEmphasis": "BioBlitz",
+      "description": "Uma corrida semanal e amistosa para registrar a natureza. Fotografe qualquer ser vivo — uma planta, ave, inseto ou fungo —, adicione ao GainForest e suba no ranking. Nova rodada e novos prêmios toda semana.",
+      "program": "Parte do programa Klarna AI for Climate Resilience, com a GainForest."
+    },
+    "status": {
+      "live": "Ao vivo",
+      "upcoming": "Começa em breve",
+      "ended": "Encerrado"
+    },
+    "round": {
+      "startsIn": "Começa em",
+      "endsIn": "Termina em",
+      "ended": "Rodada encerrada",
+      "days": "{count, plural, one {# dia} other {# dias}}",
+      "hours": "{count, plural, one {# hora} other {# horas}}",
+      "minutes": "{count, plural, one {# minuto} other {# minutos}}"
+    },
+    "prizes": {
+      "title": "Prêmios a cada rodada",
+      "badgeNote": "Além de um selo permanente de vencedor no seu perfil.",
+      "mostObservations": {
+        "title": "Mais observações",
+        "blurb": "Para quem registrar mais avistamentos válidos na rodada."
+      },
+      "bestPicture": {
+        "title": "Melhor foto",
+        "blurb": "Para a foto de natureza mais marcante da semana, escolhida pela equipe."
+      }
+    },
+    "how": {
+      "title": "Como funciona",
+      "steps": {
+        "outside": {
+          "title": "Vá para fora",
+          "blurb": "Floresta, campo ou seu quintal: qualquer ser vivo conta."
+        },
+        "upload": {
+          "title": "Adicione seus registros",
+          "blurb": "Tire uma foto e adicione na página de Observações."
+        },
+        "review": {
+          "title": "Confira o nome da espécie",
+          "blurb": "Confirme ou corrija o nome sugerido: seu conhecimento importa."
+        }
+      }
+    },
+    "board": {
+      "title": "Ranking desta rodada",
+      "live": "Ao vivo",
+      "subtitleLive": "Quem está liderando o prêmio de mais observações agora.",
+      "subtitleEnded": "Classificação final desta rodada.",
+      "subtitleUpcoming": "Seja o primeiro no ranking quando a rodada abrir.",
+      "leader": "Na liderança",
+      "observations": "{count, plural, one {# observação} other {# observações}}",
+      "openCollector": "Abrir o perfil em uma nova aba",
+      "rankAriaLabel": "Posição {rank}",
+      "stats": {
+        "observations": "Observações nesta rodada",
+        "collectors": "Participantes",
+        "timeLeft": "Tempo restante"
+      },
+      "empty": {
+        "title": "Ainda sem avistamentos",
+        "description": "Seja o primeiro a adicionar uma observação nesta rodada."
+      },
+      "error": {
+        "title": "Não foi possível carregar o ranking",
+        "description": "Tente novamente em instantes."
+      },
+      "cta": "Adicionar suas observações"
+    },
+    "winners": {
+      "title": "Vencedores anteriores",
+      "description": "Um registro permanente dos campeões de cada rodada.",
+      "mostObservations": "Mais observações",
+      "bestPicture": "Melhor foto",
+      "pending": "A anunciar"
+    }
+  },
   "dashboard": {
     "metadata": {
       "title": "Visão geral de doações — GainForest",

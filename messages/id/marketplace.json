@@ -236,6 +236,93 @@
       "description": "Coba lagi sebentar lagi."
     }
   },
+  "bioblitz": {
+    "metadata": {
+      "title": "Tantangan BioBlitz Mingguan — GainForest",
+      "description": "Keluar rumah, foto makhluk hidup, dan tambahkan pengamatanmu. Setiap minggu, pengumpul terbanyak dan foto terbaik memenangkan hadiah."
+    },
+    "hero": {
+      "eyebrow": "Tantangan BioBlitz Mingguan",
+      "titlePrefix": "Tantangan",
+      "titleEmphasis": "BioBlitz",
+      "description": "Lomba mingguan yang menyenangkan untuk mencatat alam. Foto makhluk hidup apa pun — tumbuhan, burung, serangga, atau jamur —, tambahkan ke GainForest, dan naik di papan peringkat. Ronde baru, hadiah baru, setiap minggu.",
+      "program": "Bagian dari program Klarna AI for Climate Resilience, bersama GainForest."
+    },
+    "status": {
+      "live": "Berlangsung",
+      "upcoming": "Segera dimulai",
+      "ended": "Selesai"
+    },
+    "round": {
+      "startsIn": "Mulai dalam",
+      "endsIn": "Berakhir dalam",
+      "ended": "Ronde selesai",
+      "days": "{count, plural, one {# hari} other {# hari}}",
+      "hours": "{count, plural, one {# jam} other {# jam}}",
+      "minutes": "{count, plural, one {# menit} other {# menit}}"
+    },
+    "prizes": {
+      "title": "Hadiah setiap ronde",
+      "badgeNote": "Plus lencana pemenang permanen di profilmu.",
+      "mostObservations": {
+        "title": "Pengamatan terbanyak",
+        "blurb": "Untuk pengumpul dengan pengamatan valid terbanyak dalam ronde."
+      },
+      "bestPicture": {
+        "title": "Foto terbaik",
+        "blurb": "Untuk foto alam paling memukau minggu ini, dipilih oleh tim."
+      }
+    },
+    "how": {
+      "title": "Cara kerjanya",
+      "steps": {
+        "outside": {
+          "title": "Keluarlah",
+          "blurb": "Hutan, ladang, atau halaman rumahmu — semua makhluk hidup dihitung."
+        },
+        "upload": {
+          "title": "Tambahkan pengamatanmu",
+          "blurb": "Ambil foto dan tambahkan dari halaman Pengamatan."
+        },
+        "review": {
+          "title": "Periksa nama spesies",
+          "blurb": "Konfirmasi atau perbaiki nama yang disarankan — pengetahuanmu penting."
+        }
+      }
+    },
+    "board": {
+      "title": "Papan ronde ini",
+      "live": "Langsung",
+      "subtitleLive": "Siapa yang memimpin hadiah pengamatan terbanyak saat ini.",
+      "subtitleEnded": "Klasemen akhir ronde ini.",
+      "subtitleUpcoming": "Jadilah yang pertama di papan saat ronde dibuka.",
+      "leader": "Memimpin",
+      "observations": "{count, plural, one {# pengamatan} other {# pengamatan}}",
+      "openCollector": "Buka profil pengumpul di tab baru",
+      "rankAriaLabel": "Peringkat {rank}",
+      "stats": {
+        "observations": "Pengamatan ronde ini",
+        "collectors": "Pengumpul",
+        "timeLeft": "Sisa waktu"
+      },
+      "empty": {
+        "title": "Belum ada pengamatan",
+        "description": "Jadilah yang pertama menambahkan pengamatan di ronde ini."
+      },
+      "error": {
+        "title": "Tidak dapat memuat papan",
+        "description": "Coba lagi sebentar lagi."
+      },
+      "cta": "Tambahkan pengamatanmu"
+    },
+    "winners": {
+      "title": "Pemenang sebelumnya",
+      "description": "Catatan permanen para juara setiap ronde.",
+      "mostObservations": "Pengamatan terbanyak",
+      "bestPicture": "Foto terbaik",
+      "pending": "Akan diumumkan"
+    }
+  },
   "dashboard": {
     "metadata": {
       "title": "Ikhtisar donasi — GainForest",

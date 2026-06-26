@@ -126,6 +126,14 @@ const NAV_ITEMS: NavSection[] = [
       },
       {
         kind: "leaf",
+        id: "bioblitz",
+        text: "BioBlitz",
+        Icon: LeafIcon,
+        href: "/bioblitz",
+        pathCheck: { startsWith: "/bioblitz" },
+      },
+      {
+        kind: "leaf",
         id: "donations",
         text: "Donations",
         Icon: HeartHandshakeIcon,
