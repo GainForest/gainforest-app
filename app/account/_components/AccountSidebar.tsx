@@ -1,19 +1,19 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { getLocale, getTranslations } from "next-intl/server";
 import {
   AwardIcon,
   BadgeCheckIcon,
   HandHeartIcon,
   LeafIcon,
-  Share2Icon,
   SproutIcon,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import BumicertIcon from "@/icons/BumicertIcon";
 import { cn } from "@/lib/utils";
 import { formatCompact, formatNumber } from "../../_lib/format";
 import type { AccountRouteData } from "../_lib/account-route";
-import { accountBumicertsPath } from "../_lib/account-route";
+import { accountBumicertsPath, accountPath } from "../_lib/account-route";
+import { ShareProfileButton } from "./ShareProfileButton";
 
 type AccountContentColumnsProps = {
   children: ReactNode;
@@ -35,13 +35,17 @@ type Achievement = {
 type SidebarData = {
   accountKind: "user" | "organization";
   displayName: string;
-  inviteTitle: string;
-  inviteDescription: string;
-  inviteActionLabel: string;
-  inviteHref: string;
   achievementsHref: string;
   stats: SidebarStat[];
   achievements: Achievement[];
+};
+
+type ShareCardData = {
+  title: string;
+  description: string;
+  profilePath: string;
+  buttonLabel: string;
+  copiedLabel: string;
 };
 
 type AchievementIconName = Achievement["icon"];
@@ -179,7 +183,7 @@ function DecorativeLeafCluster() {
   );
 }
 
-function InviteCard({ data }: { data: SidebarData }) {
+function ShareCard({ data }: { data: ShareCardData }) {
   return (
     <SidebarCard className="relative overflow-hidden p-5">
       <DecorativeLeafCluster />
@@ -188,20 +192,19 @@ function InviteCard({ data }: { data: SidebarData }) {
           <div className="flex items-center gap-3">
             <LeafIcon className="size-5 text-primary" />
             <h2 className="text-lg font-semibold text-foreground">
-              {data.inviteTitle}
+              {data.title}
             </h2>
           </div>
           <p className="text-sm leading-relaxed text-muted-foreground">
-            {data.inviteDescription}
+            {data.description}
           </p>
         </div>
 
-        <Button asChild variant="outline" size="sm" className="bg-background/70">
-          <a href={data.inviteHref} target="_blank" rel="noopener noreferrer">
-            <Share2Icon />
-            {data.inviteActionLabel}
-          </a>
-        </Button>
+        <ShareProfileButton
+          profilePath={data.profilePath}
+          label={data.buttonLabel}
+          copiedLabel={data.copiedLabel}
+        />
       </div>
     </SidebarCard>
   );
@@ -212,10 +215,6 @@ function buildSidebarData(account: AccountRouteData, bumicertCount: number, dona
   return {
     accountKind: account.kind,
     displayName,
-    inviteTitle: account.kind === "organization" ? "Invite collaborators" : "Invite friends",
-    inviteDescription: account.kind === "organization" ? "Share this organization profile with collaborators and funders." : "Share your public impact profile with friends.",
-    inviteActionLabel: account.kind === "organization" ? "Invite collaborators" : "Invite friends",
-    inviteHref: `https://x.com/intent/tweet?text=${encodeURIComponent(`Explore ${displayName} on GainForest`)}`,
     achievementsHref: `${accountBumicertsPath(account.urlIdentifier)}#account-achievements`,
     stats: [
       {
@@ -249,8 +248,20 @@ function buildSidebarData(account: AccountRouteData, bumicertCount: number, dona
   };
 }
 
-export function AccountSidebar({ account, bumicertCount, donationCount }: { account: AccountRouteData; bumicertCount: number; donationCount: number }) {
+export async function AccountSidebar({ account, bumicertCount, donationCount }: { account: AccountRouteData; bumicertCount: number; donationCount: number }) {
   const data = buildSidebarData(account, bumicertCount, donationCount);
+  const [t, locale] = await Promise.all([
+    getTranslations("marketplace.account.sidebar"),
+    getLocale(),
+  ]);
+  const isOrganization = account.kind === "organization";
+  const shareData: ShareCardData = {
+    title: isOrganization ? t("shareProfileTitleOrganization") : t("shareProfileTitle"),
+    description: isOrganization ? t("shareProfileBodyOrganization") : t("shareProfileBody"),
+    profilePath: `/${locale}${accountPath(account.urlIdentifier)}`,
+    buttonLabel: t("copyProfileLink"),
+    copiedLabel: t("profileLinkCopied"),
+  };
   return (
     <div className="space-y-5">
       <StatsCard stats={data.stats} />
@@ -258,7 +269,7 @@ export function AccountSidebar({ account, bumicertCount, donationCount }: { acco
         achievements={data.achievements}
         achievementsHref={data.achievementsHref}
       />
-      <InviteCard data={data} />
+      <ShareCard data={shareData} />
     </div>
   );
 }
