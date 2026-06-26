@@ -27,9 +27,10 @@ const fetchHomeKpis = unstable_cache(fetchKpis, ["home-page-kpis"], {
 // kpis fetch is wrapped in its own Suspense with a home-shaped fallback instead.
 export default async function HomePage() {
   // Already signed in? Skip the marketing landing and go straight to the app.
+  // The locale prefix (e.g. /en) is added by the proxy middleware.
   const session = await fetchAuthSession();
   if (session.isLoggedIn) {
-    redirect("/manage");
+    redirect("/projects");
   }
 
   return (
