@@ -71,7 +71,7 @@ type ManageAccountKind = "organization" | "user";
 const NAV_ITEMS: NavSection[] = [
   {
     kind: "section",
-    id: "marketplace",
+    id: "explore",
     text: "EXPLORE",
     items: [
       {
@@ -106,6 +106,13 @@ const NAV_ITEMS: NavSection[] = [
         href: "/observations",
         pathCheck: { startsWith: "/observations" },
       },
+    ],
+  },
+  {
+    kind: "section",
+    id: "funding",
+    text: "FUNDING",
+    items: [
       {
         kind: "leaf",
         id: "bioblitz",
@@ -508,22 +515,40 @@ function UnifiedSidebar({
 function ExploreNav() {
   const pathname = useCanonicalPathname();
   const t = useTranslations("common.sidebar.items");
-  const items = NAV_ITEMS.flatMap((section) => section.items);
+  const sectionsT = useTranslations("common.sidebar.sections");
+  const collapsed = useSidebarCollapsed();
+  let leafIndex = 0;
 
   return (
-    <ul className="flex flex-col gap-0.5">
-      {items.map((item, index) => (
-        <NavLeaf
-          key={item.id}
-          item={{ ...item, text: t(item.id) }}
-          isActive={isLeafActive(item.pathCheck, pathname)}
-          index={index + 1}
-          // Certs are minted from a Project, so visually hang Certs under
-          // Projects (which sits directly above it).
-          paired={item.id === "bumicerts"}
-        />
+    <div className="flex flex-col gap-3">
+      {NAV_ITEMS.map((section, sectionIndex) => (
+        <div key={section.id} className="flex flex-col gap-0.5">
+          {collapsed ? (
+            sectionIndex > 0 ? <div aria-hidden className="mx-auto my-1 h-px w-6 rounded-full bg-border" /> : null
+          ) : (
+            <p className="px-2.5 pb-1 text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
+              {sectionsT(section.id)}
+            </p>
+          )}
+          <ul className="flex flex-col gap-0.5">
+            {section.items.map((item) => {
+              leafIndex += 1;
+              return (
+                <NavLeaf
+                  key={item.id}
+                  item={{ ...item, text: t(item.id) }}
+                  isActive={isLeafActive(item.pathCheck, pathname)}
+                  index={leafIndex}
+                  // Certs are minted from a Project, so visually hang Certs
+                  // under Projects (which sits directly above it).
+                  paired={item.id === "bumicerts"}
+                />
+              );
+            })}
+          </ul>
+        </div>
       ))}
-    </ul>
+    </div>
   );
 }
 

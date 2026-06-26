@@ -49,6 +49,7 @@
   "sidebar": {
     "sections": {
       "explore": "EXPLORE",
+      "funding": "FUNDING",
       "manage": "MANAGE"
     },
     "items": {

@@ -49,6 +49,7 @@
   "sidebar": {
     "sections": {
       "explore": "EXPLORAR",
+      "funding": "FINANCIACIÓN",
       "manage": "GESTIONAR"
     },
     "items": {
