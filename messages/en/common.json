@@ -102,7 +102,11 @@
     },
     "manageGroupTitle": "Manage {account}",
     "collapse": "Collapse sidebar",
-    "expand": "Expand sidebar"
+    "expand": "Expand sidebar",
+    "profileRow": {
+      "viewProfile": "View profile",
+      "fallbackName": "Your profile"
+    }
   },
   "bumicertCard": {
     "missingImage": "Cert image unavailable",

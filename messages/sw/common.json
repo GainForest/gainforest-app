@@ -102,7 +102,11 @@
     },
     "manageGroupTitle": "Simamia {account}",
     "collapse": "Kunja menyu ya kando",
-    "expand": "Panua menyu ya kando"
+    "expand": "Panua menyu ya kando",
+    "profileRow": {
+      "viewProfile": "Tazama wasifu",
+      "fallbackName": "Wasifu wako"
+    }
   },
   "bumicertCard": {
     "missingImage": "Picha ya cheti haipatikani",

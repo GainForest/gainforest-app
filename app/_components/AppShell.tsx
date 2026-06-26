@@ -21,6 +21,7 @@ import {
   Share2Icon,
   SparkleIcon,
   SunIcon,
+  UserIcon,
 } from "lucide-react";
 import { createContext, Suspense, useContext, useEffect, useState, type MouseEvent, type SVGProps } from "react";
 import { useTranslations } from "next-intl";
@@ -488,6 +489,7 @@ function UnifiedSidebar({
       <div className="mt-3 border-t border-border" />
 
       <div className={cn("flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto pt-3", collapsed ? "overflow-x-hidden" : "pr-1")}>
+        {authSession?.isLoggedIn ? <SidebarProfileRow did={authSession.did} /> : null}
         <LayoutGroup id="unified-sidebar-nav">
           <ExploreNav />
         </LayoutGroup>
@@ -509,6 +511,44 @@ function UnifiedSidebar({
       </div>
     </nav>
     </SidebarCollapsedContext.Provider>
+  );
+}
+
+function SidebarProfileRow({ did }: { did: string }) {
+  const t = useTranslations("common.sidebar.profileRow");
+  const collapsed = useSidebarCollapsed();
+  const { personal } = useAccountList(did);
+  const name = personal?.displayName?.trim() || t("fallbackName");
+  const identifier = personal?.handle?.trim() || did;
+  const href = `/account/${encodeURIComponent(identifier)}`;
+  const avatarUrl = personal?.avatarUrl ?? null;
+
+  return (
+    <SidebarTooltip label={name}>
+      <Link
+        href={href}
+        aria-label={collapsed ? name : t("viewProfile")}
+        className={cn(
+          buttonVariants({ variant: "ghost" }),
+          "group w-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50",
+          collapsed ? "h-auto justify-center px-0 py-1.5" : "h-auto justify-start gap-2.5 px-2 py-1.5",
+        )}
+      >
+        <span className="relative flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-primary/10 text-primary">
+          {avatarUrl ? (
+            <Image src={avatarUrl} alt="" fill unoptimized sizes="32px" className="object-cover" />
+          ) : (
+            <UserIcon className="size-4" />
+          )}
+        </span>
+        {collapsed ? null : (
+          <span className="flex min-w-0 flex-1 flex-col text-left">
+            <span className="truncate text-sm font-medium text-foreground">{name}</span>
+            <span className="truncate text-xs text-muted-foreground">{t("viewProfile")}</span>
+          </span>
+        )}
+      </Link>
+    </SidebarTooltip>
   );
 }
 

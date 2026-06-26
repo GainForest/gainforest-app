@@ -102,7 +102,11 @@
     },
     "manageGroupTitle": "Gerenciar {account}",
     "collapse": "Recolher barra lateral",
-    "expand": "Expandir barra lateral"
+    "expand": "Expandir barra lateral",
+    "profileRow": {
+      "viewProfile": "Ver perfil",
+      "fallbackName": "Seu perfil"
+    }
   },
   "bumicertCard": {
     "missingImage": "Imagem do certificado indisponível",

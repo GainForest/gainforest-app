@@ -102,7 +102,11 @@
     },
     "manageGroupTitle": "Kelola {account}",
     "collapse": "Ciutkan bilah sisi",
-    "expand": "Bentangkan bilah sisi"
+    "expand": "Bentangkan bilah sisi",
+    "profileRow": {
+      "viewProfile": "Lihat profil",
+      "fallbackName": "Profil Anda"
+    }
   },
   "bumicertCard": {
     "missingImage": "Gambar sertifikat tidak tersedia",
