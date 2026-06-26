@@ -91,7 +91,9 @@
     "tabs": {
       "explore": "Explore",
       "manage": "Manage"
-    }
+    },
+    "collapse": "Collapse sidebar",
+    "expand": "Expand sidebar"
   },
   "bumicertCard": {
     "missingImage": "Cert image unavailable",

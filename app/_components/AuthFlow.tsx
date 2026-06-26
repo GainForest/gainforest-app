@@ -41,6 +41,7 @@ import {
 import type { AuthSession } from "../_lib/auth";
 import { buildLoginUrl, redirectToLogout } from "../_lib/auth-client";
 import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { ModalContent, ModalDescription, ModalTitle } from "@/components/ui/modal/modal";
 import { useModal } from "@/components/ui/modal/context";
 
@@ -378,7 +379,7 @@ function LoginModal() {
   );
 }
 
-export function SignInPrompt() {
+export function SignInPrompt({ collapsed = false }: { collapsed?: boolean }) {
   const { pushModal, show } = useModal();
   const t = useTranslations("common.signInPrompt");
   const [signInFailed, setSignInFailed] = useState(false);
@@ -401,6 +402,23 @@ export function SignInPrompt() {
     });
     show();
   };
+
+  if (collapsed) {
+    return (
+      <TooltipProvider delayDuration={0}>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button size="icon" onClick={handleSignIn} aria-label={t("getStarted")} className="mx-auto">
+              <LockIcon />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="right" sideOffset={10}>
+            {t("getStarted")}
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    );
+  }
 
   return (
     <motion.div

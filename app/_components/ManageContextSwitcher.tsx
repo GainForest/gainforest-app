@@ -15,6 +15,7 @@ import {
   UsersIcon,
 } from "lucide-react";
 import { groupManageBasePath } from "@/lib/links";
+import { cn } from "@/lib/utils";
 import {
   switcherGroupIdentifier,
   useAccountList,
@@ -43,9 +44,11 @@ function AccountAvatar({ avatarUrl, label, icon }: { avatarUrl?: string | null; 
 export function ManageContextSwitcher({
   sessionDid,
   profileName,
+  collapsed = false,
 }: {
   sessionDid: string;
   profileName?: string | null;
+  collapsed?: boolean;
 }) {
   const pathname = usePathname() ?? "/";
   const router = useRouter();
@@ -96,14 +99,23 @@ export function ManageContextSwitcher({
       <button
         type="button"
         onClick={() => setOpen((value) => !value)}
-        className="flex w-full items-center gap-2.5 rounded-xl border border-border bg-background/70 px-2.5 py-2 text-left transition-colors hover:bg-muted/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+        aria-label={collapsed ? triggerLabel : undefined}
+        title={collapsed ? triggerLabel : undefined}
+        className={cn(
+          "flex items-center rounded-xl border border-border bg-background/70 transition-colors hover:bg-muted/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50",
+          collapsed ? "justify-center p-1.5" : "w-full gap-2.5 px-2.5 py-2 text-left",
+        )}
       >
         <AccountAvatar avatarUrl={triggerAvatar} label={triggerLabel} icon={triggerIcon} />
-        <span className="min-w-0 flex-1">
-          <span className="block truncate text-sm font-medium text-foreground">{triggerLabel}</span>
-          <span className="block truncate text-xs text-muted-foreground">{triggerSubtitle}</span>
-        </span>
-        <ChevronsUpDownIcon className="size-4 shrink-0 text-muted-foreground" />
+        {collapsed ? null : (
+          <>
+            <span className="min-w-0 flex-1">
+              <span className="block truncate text-sm font-medium text-foreground">{triggerLabel}</span>
+              <span className="block truncate text-xs text-muted-foreground">{triggerSubtitle}</span>
+            </span>
+            <ChevronsUpDownIcon className="size-4 shrink-0 text-muted-foreground" />
+          </>
+        )}
       </button>
 
       <AnimatePresence>
@@ -113,7 +125,10 @@ export function ManageContextSwitcher({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.97, y: -4 }}
             transition={{ duration: 0.14, ease: [0.25, 0.1, 0.25, 1] }}
-            className="absolute left-0 right-0 top-full z-50 mt-1.5 overflow-hidden rounded-xl border border-border bg-background/95 shadow-xl shadow-black/10 backdrop-blur-sm"
+            className={cn(
+              "absolute top-full z-50 mt-1.5 overflow-hidden rounded-xl border border-border bg-background/95 shadow-xl shadow-black/10 backdrop-blur-sm",
+              collapsed ? "left-0 w-64" : "left-0 right-0",
+            )}
           >
             <div className="max-h-[min(60vh,28rem)] overflow-y-auto p-1.5">
               <button

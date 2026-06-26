@@ -91,7 +91,9 @@
     "tabs": {
       "explore": "Jelajahi",
       "manage": "Kelola"
-    }
+    },
+    "collapse": "Ciutkan bilah sisi",
+    "expand": "Bentangkan bilah sisi"
   },
   "bumicertCard": {
     "missingImage": "Gambar sertifikat tidak tersedia",

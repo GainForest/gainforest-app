@@ -91,7 +91,9 @@
     "tabs": {
       "explore": "Gundua",
       "manage": "Simamia"
-    }
+    },
+    "collapse": "Kunja menyu ya kando",
+    "expand": "Panua menyu ya kando"
   },
   "bumicertCard": {
     "missingImage": "Picha ya cheti haipatikani",
