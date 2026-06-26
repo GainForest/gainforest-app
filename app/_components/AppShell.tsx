@@ -517,8 +517,8 @@ function UnifiedSidebar({
     <SidebarCollapsedContext.Provider value={collapsed}>
     <nav
       className={cn(
-        "relative isolate flex h-full flex-col overflow-hidden border-r border-border bg-foreground/3 transition-[width,padding] duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)] motion-reduce:transition-none",
-        collapsed ? "w-[76px] p-3" : "w-[256px] p-4",
+        "relative isolate z-30 flex h-full flex-col border-r border-border bg-foreground/3 transition-[width,padding] duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)] motion-reduce:transition-none",
+        collapsed ? "w-[76px] overflow-visible p-3" : "w-[256px] overflow-hidden p-4",
       )}
     >
       <AnimatePresence>
@@ -603,7 +603,7 @@ function SidebarTabs({ activeTab }: { activeTab: SidebarTab }) {
   const t = useTranslations("common.sidebar.tabs");
   return (
     <LayoutGroup id="sidebar-tabs">
-      <div className={cn("flex rounded-full border border-border bg-foreground/5 p-1", collapsed && "flex-col gap-1")}>
+      <div className={cn("flex rounded-full border border-border bg-foreground/5 p-1", collapsed && "flex-col gap-1 rounded-2xl")}>
         {SIDEBAR_TABS.map((tab) => {
           const isActive = tab.id === activeTab;
           return (
@@ -731,14 +731,14 @@ function NavLeaf({ item, isActive, index }: { item: NavLeaf; isActive: boolean; 
             className={cn(
               buttonVariants({ variant: isActive ? "default" : "ghost" }),
               "relative w-full",
-              collapsed ? "justify-center px-0" : "justify-start pl-1",
+              collapsed ? "justify-center px-1" : "justify-start pl-1",
               !isActive && "text-muted-foreground group-hover:text-primary hover:text-primary",
             )}
           >
             <span
               className={cn(
                 "flex h-7 shrink-0 items-center justify-center rounded-full transition-colors",
-                collapsed ? "w-7" : "px-3",
+                collapsed ? "w-full" : "px-3",
                 isActive ? "bg-primary-foreground text-primary" : "bg-primary/10 text-muted-foreground group-hover:text-primary",
               )}
             >
@@ -1074,8 +1074,8 @@ function ManageSectionSkeleton() {
   return (
     <ul className="flex flex-col gap-0.5" aria-hidden="true">
       {labelWidths.map((width, index) => (
-        <li key={index} className={cn("flex h-9 items-center gap-2", collapsed ? "justify-center px-0" : "pl-1")}>
-          <Skeleton className="sidebar-skeleton h-7 w-7 shrink-0 rounded-full" />
+        <li key={index} className={cn("flex h-9 items-center gap-2", collapsed ? "justify-center px-1" : "pl-1")}>
+          <Skeleton className={cn("sidebar-skeleton h-7 shrink-0 rounded-full", collapsed ? "w-full" : "w-7")} />
           {collapsed ? null : <Skeleton className={`sidebar-skeleton h-3.5 rounded-full ${width}`} />}
         </li>
       ))}
