@@ -236,6 +236,102 @@
       "description": "Coba lagi sebentar lagi."
     }
   },
+  "bioblitz": {
+    "metadata": {
+      "title": "Tantangan BioBlitz Mingguan — GainForest",
+      "description": "Keluar rumah, foto makhluk hidup, dan tambahkan pengamatanmu. Setiap minggu, pengumpul terbanyak dan foto terbaik memenangkan hadiah."
+    },
+    "hero": {
+      "eyebrow": "Tantangan BioBlitz Mingguan",
+      "titlePrefix": "Tantangan",
+      "titleEmphasis": "BioBlitz",
+      "description": "Lomba mingguan yang menyenangkan untuk mencatat alam. Foto makhluk hidup apa pun — tumbuhan, burung, serangga, atau jamur —, tambahkan ke GainForest, dan naik di papan peringkat. Ronde baru, hadiah baru, setiap minggu.",
+      "program": "Bagian dari program Klarna AI for Climate Resilience, bersama GainForest."
+    },
+    "rsvp": {
+      "button": "Daftar untuk ikut serta",
+      "note": "Daftar agar kami bisa mencatat kontribusimu dan mengirim hadiah jika kamu menang."
+    },
+    "help": {
+      "prompt": "Ada pertanyaan?",
+      "officeHours": "Ikuti jam konsultasi",
+      "community": "Tanya di obrolan grup"
+    },
+    "status": {
+      "live": "Berlangsung",
+      "upcoming": "Segera dimulai",
+      "ended": "Selesai"
+    },
+    "round": {
+      "startsIn": "Mulai dalam",
+      "endsIn": "Berakhir dalam",
+      "ended": "Ronde selesai",
+      "days": "{count, plural, one {# hari} other {# hari}}",
+      "hours": "{count, plural, one {# jam} other {# jam}}",
+      "minutes": "{count, plural, one {# menit} other {# menit}}"
+    },
+    "prizes": {
+      "title": "Hadiah setiap ronde",
+      "badgeNote": "Plus lencana pemenang permanen di profilmu.",
+      "mostObservations": {
+        "title": "Pengamatan terbanyak",
+        "blurb": "Untuk pengumpul dengan pengamatan valid terbanyak dalam ronde."
+      },
+      "bestPicture": {
+        "title": "Foto terbaik",
+        "blurb": "Untuk foto alam paling memukau minggu ini, dipilih oleh tim."
+      }
+    },
+    "how": {
+      "title": "Cara kerjanya",
+      "steps": {
+        "outside": {
+          "title": "Keluarlah",
+          "blurb": "Hutan, ladang, atau halaman rumahmu — semua makhluk hidup dihitung."
+        },
+        "upload": {
+          "title": "Unggah foto kamu",
+          "blurb": "Tambahkan di halaman Observasi saya, atau lewat Tainá — juga ada di GainForest."
+        },
+        "review": {
+          "title": "Periksa nama spesies",
+          "blurb": "Konfirmasi atau perbaiki nama yang disarankan — pengetahuanmu penting."
+        }
+      }
+    },
+    "board": {
+      "title": "Papan ronde ini",
+      "live": "Langsung",
+      "subtitleLive": "Siapa yang memimpin hadiah pengamatan terbanyak saat ini.",
+      "subtitleEnded": "Klasemen akhir ronde ini.",
+      "subtitleUpcoming": "Jadilah yang pertama di papan saat ronde dibuka.",
+      "leader": "Memimpin",
+      "observations": "{count, plural, one {# pengamatan} other {# pengamatan}}",
+      "openCollector": "Buka profil pengumpul di tab baru",
+      "rankAriaLabel": "Peringkat {rank}",
+      "stats": {
+        "observations": "Pengamatan ronde ini",
+        "collectors": "Pengumpul",
+        "timeLeft": "Sisa waktu"
+      },
+      "empty": {
+        "title": "Belum ada pengamatan",
+        "description": "Jadilah yang pertama menambahkan pengamatan di ronde ini."
+      },
+      "error": {
+        "title": "Tidak dapat memuat papan",
+        "description": "Coba lagi sebentar lagi."
+      },
+      "cta": "Tambahkan pengamatanmu"
+    },
+    "winners": {
+      "title": "Pemenang sebelumnya",
+      "description": "Catatan permanen para juara setiap ronde.",
+      "mostObservations": "Pengamatan terbanyak",
+      "bestPicture": "Foto terbaik",
+      "pending": "Akan diumumkan"
+    }
+  },
   "dashboard": {
     "metadata": {
       "title": "Ikhtisar donasi — GainForest",
@@ -941,17 +1037,19 @@
   "manageProjects": {
     "hero": {
       "title": "Proyek Saya",
-      "description": "Buat dan kelola proyek yang dapat berisi beberapa sertifikat, bersama foto, video, dan media lain yang menunjukkan pekerjaannya."
+      "description": "Buat dan kelola proyek Anda. Setiap proyek menceritakan kisah pekerjaan Anda — lalu Anda dapat menerbitkan sertifikat dampak (Cert) darinya untuk mengajukan pendanaan."
     },
     "metadata": {
       "title": "Kelola Proyek — GainForest",
-      "description": "Buat dan kelola koleksi proyek untuk sertifikat Anda."
+      "description": "Buat dan kelola proyek Anda serta terbitkan sertifikat dampak darinya."
     },
     "actions": {
-      "manageCerts": "Kelola Cert",
-      "manageCertsFor": "Kelola Cert untuk {title}",
+      "manageCerts": "Cert",
+      "manageCertsFor": "Cert untuk {title}",
       "manageGallery": "Kelola galeri",
-      "manageGalleryFor": "Kelola galeri untuk {title}"
+      "manageGalleryFor": "Kelola galeri untuk {title}",
+      "manageObservations": "Observasi",
+      "manageObservationsFor": "Observasi untuk {title}"
     }
   },
   "observations": {
@@ -961,19 +1059,20 @@
   },
   "manageProjectCerts": {
     "metadata": {
-      "title": "Kelola Cert Proyek — GainForest",
-      "description": "Pilih Cert yang termasuk dalam sebuah proyek."
+      "title": "Cert proyek — GainForest",
+      "description": "Terbitkan dan kelola sertifikat dampak untuk sebuah proyek."
     },
     "nav": {
       "projects": "Proyek",
       "refresh": "Muat ulang"
     },
     "hero": {
-      "description": "Pilih Cert yang termasuk dalam proyek ini. Menambahkan atau menghapus Cert akan memperbarui halaman proyek, tetapi tidak menghapus Cert."
+      "description": "Sertifikat dampak (Cert) yang Anda terbitkan dari proyek ini. Masing-masing menggabungkan bukti — foto, lokasi, tanggal, dan kontributor — agar pendana dapat mendukung pekerjaan ini."
     },
     "stats": {
       "linked": "{count, plural, one {# Cert tertaut} other {# Cert tertaut}}",
-      "available": "{count, plural, one {# Cert tersedia} other {# Cert tersedia}}"
+      "available": "{count, plural, one {# Cert dapat ditautkan} other {# Cert dapat ditautkan}}",
+      "minted": "{count, plural, one {# Cert diterbitkan} other {# Cert diterbitkan}}"
     },
     "search": {
       "ariaLabel": "Cari Cert",
@@ -985,7 +1084,10 @@
       "add": "Tambah",
       "saving": "Menyimpan…",
       "view": "Lihat",
-      "unlink": "Putuskan tautan"
+      "unlink": "Putuskan tautan",
+      "mint": "Terbitkan Cert",
+      "mintFirst": "Terbitkan Cert pertama Anda",
+      "link": "Tautkan"
     },
     "errors": {
       "loadTitle": "Cert tidak dapat dimuat",
@@ -1002,8 +1104,8 @@
       "noSummary": "Belum ada ringkasan."
     },
     "empty": {
-      "noCertsTitle": "Belum ada Cert",
-      "noCertsDescription": "Buat Cert untuk proyek ini atau tambahkan dari Cert yang sudah Anda terbitkan.",
+      "noCertsTitle": "Belum ada Cert yang diterbitkan",
+      "noCertsDescription": "Sertifikat dampak (Cert) mengubah proyek ini menjadi kisah yang dapat didanai — bukti satu kontribusi, dengan foto, tanggal, lokasi, dan orang-orang yang terlibat. Terbitkan yang pertama untuk mengajukan pendanaan.",
       "noMatchingTitle": "Tidak ada Cert yang cocok",
       "noMatchingDescription": "Coba kata pencarian lain atau kosongkan kolom pencarian."
     },
@@ -1012,6 +1114,30 @@
       "contributors": "{count, plural, one {# kontributor} other {# kontributor}}",
       "impactPeriod": "Periode dampak",
       "created": "Dibuat {date}"
+    },
+    "linkExisting": {
+      "toggle": "Tautkan Cert yang sudah ada",
+      "hide": "Sembunyikan",
+      "title": "Tautkan Cert yang sudah ada",
+      "description": "Sudah menerbitkan Cert di tempat lain? Tautkan ke proyek ini. Ini memperbarui halaman proyek; tidak memindahkan atau menghapus Cert.",
+      "empty": "Anda belum punya Cert lain untuk ditautkan saat ini."
+    }
+  },
+  "newCert": {
+    "gate": {
+      "title": "Cert ini untuk proyek yang mana?",
+      "subtitle": "Cert adalah sertifikat dampak yang Anda terbitkan dari sebuah proyek. Pilih proyek yang menjadi induknya.",
+      "searchPlaceholder": "Cari proyek Anda",
+      "searchAria": "Cari proyek Anda",
+      "loading": "Memuat proyek Anda…",
+      "errorTitle": "Tidak dapat memuat proyek Anda",
+      "retry": "Coba lagi",
+      "mintFrom": "Terbitkan Cert dari proyek ini",
+      "noMatch": "Tidak ada proyek yang cocok",
+      "noProjectsTitle": "Buat proyek terlebih dahulu",
+      "noProjectsDescription": "Cert diterbitkan dari sebuah proyek. Buat proyek untuk menjelaskan pekerjaan Anda, lalu terbitkan sertifikat dampak untuk mengajukan pendanaan.",
+      "createProject": "Buat proyek",
+      "skip": "Terbitkan tanpa menautkan ke proyek"
     }
   },
   "observationGrid": {

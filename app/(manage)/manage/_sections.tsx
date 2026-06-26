@@ -1,6 +1,5 @@
 import { Suspense } from "react";
 import Link from "next/link";
-import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { fetchReceipts } from "@/app/_lib/dashboard";
 import {
@@ -32,6 +31,7 @@ import { AudioClient } from "./audio/_components/AudioClient";
 import { ObservationsClient } from "./observations/_components/ObservationsClient";
 import { ManageBumicertsClient } from "./certs/_components/ManageBumicertsClient";
 import { NewBumicertClient, type LinkedProjectPrefill } from "./certs/new/_components/NewBumicertClient";
+import { MintCertProjectGate } from "./certs/new/_components/MintCertProjectGate";
 import { DroneAppFrame } from "./drone/_components/DroneAppFrame";
 import type { ManageTarget } from "@/lib/links";
 
@@ -39,7 +39,9 @@ export async function ManageHomeSection({ target, wrapDashboard = true }: { targ
   const account = await getAccountRouteData(target.did, target.identifier);
   const [receipts, projects, sites, trees, audio] = await Promise.all([
     fetchReceipts().catch(() => []),
-    account.kind === "organization" ? fetchProjectsByDid(target.did, 500).then((page) => page.records).catch(() => []) : Promise.resolve([]),
+    // Personal accounts can own projects too, so fetch the project count for
+    // both account kinds.
+    fetchProjectsByDid(target.did, 500).then((page) => page.records).catch(() => []),
     account.kind === "organization" ? fetchLocationsByDid(target.did).catch(() => []) : Promise.resolve([]),
     account.kind === "organization" ? fetchTreeDatasetsByDid(target.did).catch(() => []) : Promise.resolve([]),
     account.kind === "organization" ? fetchAudioByDid(target.did).catch(() => []) : Promise.resolve([]),
@@ -169,6 +171,14 @@ export async function NewBumicertSection({ target, searchParams }: { target: Man
   const account = await getAccountRouteData(target.did, target.identifier);
   const linkedProject = await fetchLinkedProjectPrefill(target.did, projectParam(searchParams.forProject));
 
+  // Certs are minted from a project. When no project is bound (and the steward
+  // hasn't explicitly chosen to skip), show a project chooser first instead of
+  // a blank Cert form.
+  const skipProject = projectParam(searchParams.noProject) === "1";
+  if (!linkedProject && !skipProject) {
+    return <MintCertProjectGate target={target} />;
+  }
+
   return (
     <NewBumicertClient
       target={target}
@@ -217,8 +227,9 @@ export async function SettingsSection({ target }: { target: ManageTarget }) {
   );
 }
 
-export async function ObservationsSection({ target }: { target: ManageTarget }) {
-  if (target.accountKind !== "organization") notFound();
+export async function ObservationsSection({ target, forProject }: { target: ManageTarget; forProject?: string | null }) {
+  // Observations are available to personal accounts and organizations alike,
+  // so the steward can collect field data without first creating an org.
   const initialObservations = await walkOccurrences({
     media: "all",
     target: 24,
@@ -226,7 +237,7 @@ export async function ObservationsSection({ target }: { target: ManageTarget }) 
     ownerDid: target.did,
     resolveMedia: false,
   }).catch(() => ({ records: [], cursor: null, hasMore: false }));
-  return <ObservationsClient target={target} initialPage={initialObservations} />;
+  return <ObservationsClient target={target} initialPage={initialObservations} forProject={forProject ?? null} />;
 }
 
 type PdsRecordResponse = {

@@ -50,7 +50,7 @@ function CreateHeroCard({ target }: { target: ManageTarget }) {
           <Button size="sm" asChild className="shrink-0 self-start sm:self-auto">
             <Link href={manageHref(target, "newBumicert")}>
               <CirclePlusIcon />
-              Create Cert
+              Mint a Cert
             </Link>
           </Button>
         </div>
@@ -103,7 +103,7 @@ function RecentBumicerts({ target, bumicerts, did, ownerIdentifier }: { target: 
           <Button variant="outline" size="sm" asChild className="mt-5">
             <Link href={manageHref(target, "newBumicert")}>
               <CirclePlusIcon />
-              Create first Cert
+              Mint your first Cert
             </Link>
           </Button>
         </motion.div>

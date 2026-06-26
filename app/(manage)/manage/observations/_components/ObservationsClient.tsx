@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Suspense, useCallback, useEffect, useMemo, useRef, useState, type ChangeEvent, type ComponentProps, type DragEvent } from "react";
-import { parseAsStringEnum, useQueryState } from "nuqs";
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState, type ChangeEvent, type ComponentProps, type DragEvent, type ReactNode } from "react";
+import { parseAsString, parseAsStringEnum, useQueryState } from "nuqs";
 import {
   AlertTriangleIcon,
   CalendarIcon,
   CheckCircle2Icon,
   ChevronLeftIcon,
+  FolderKanbanIcon,
   ImagePlusIcon,
   Layers2Icon,
   Loader2Icon,
@@ -30,11 +31,13 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import Container from "@/components/ui/container";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useModal } from "@/components/ui/modal/context";
 import QuickTooltip from "@/components/ui/quick-tooltip";
 import TelegramIcon from "@/icons/TelegramIcon";
-import { manageHref, type ManageTarget } from "@/lib/links";
+import { manageApiHref, manageHref, type ManageTarget } from "@/lib/links";
+import { cn } from "@/lib/utils";
 import { ManageConfirmModal } from "../../_components/ManageConfirmModal";
 import { canCreateRecord, canDeleteRecord } from "../../_lib/cgs-permissions";
 import { deleteOccurrenceCascade } from "../../_lib/mutations";
@@ -55,6 +58,13 @@ import {
 import { clearDraft, loadDraft, saveDraft } from "./observation-draft-store";
 
 type InitialPage = NonNullable<ComponentProps<typeof RecordExplorer>["initialPage"]>;
+type ObservationProjectGroup = { projectUri: string; title: string; count: number; uris: string[] };
+
+/** at://did/org.hypercerts.collection/rkey -> "did/rkey" for the forProject param. */
+function projectIdentityFromUri(uri: string): string | null {
+  const match = uri.match(/^at:\/\/([^/]+)\/org\.hypercerts\.collection\/([^/]+)$/);
+  return match?.[1] && match[2] ? `${match[1]}/${match[2]}` : null;
+}
 type Mode = "list" | "add";
 type ItemStatus = "analyzing" | "ready" | "error" | "uploading" | "uploaded" | "uploadError";
 
@@ -568,7 +578,7 @@ function occurrenceAnalysisForUpload(items: ObservationUploadItem[]): Observatio
   return analysis;
 }
 
-export function ObservationsClient({ target, initialPage }: { target: ManageTarget; initialPage: InitialPage }) {
+export function ObservationsClient({ target, initialPage, forProject = null }: { target: ManageTarget; initialPage: InitialPage; forProject?: string | null }) {
   const t = useTranslations("upload.observations");
   const router = useRouter();
   const modal = useModal();
@@ -584,6 +594,8 @@ export function ObservationsClient({ target, initialPage }: { target: ManageTarg
   const [deletedRecordIds, setDeletedRecordIds] = useState<Set<string>>(() => new Set());
   const [isDeletingSelected, setIsDeletingSelected] = useState(false);
   const createPermission = canCreateRecord(target);
+  const [projectFilter, setProjectFilter] = useQueryState("project", parseAsString.withOptions(QUERY_STATE_OPTIONS));
+  const [projectGroups, setProjectGroups] = useState<ObservationProjectGroup[]>([]);
   const deletePermission = canDeleteRecord(target, { ownRecord: target.kind === "personal" });
   const deleteDisabledReason = deletePermission.allowed ? null : deletePermission.reason;
   const selectedIds = useMemo(() => new Set(selectedRecords.keys()), [selectedRecords]);
@@ -592,6 +604,31 @@ export function ObservationsClient({ target, initialPage }: { target: ManageTarg
     configureObservationMutationRepo(target.kind === "group" ? target.did : null);
     return () => configureObservationMutationRepo(null);
   }, [target]);
+
+  // Group the steward's observations by the project they were collected for so
+  // the list can be filtered per project (read straight from projectRef).
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const response = await fetch(manageApiHref("/api/manage/observations/projects", target), { cache: "no-store" });
+        const data = (await response.json()) as { groups?: ObservationProjectGroup[] };
+        if (cancelled || !response.ok || !Array.isArray(data?.groups)) return;
+        setProjectGroups(data.groups);
+      } catch {
+        // Filtering is an enhancement; ignore load failures.
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [target]);
+
+  const activeGroup = projectGroups.find((group) => group.projectUri === projectFilter) ?? null;
+  const filterUris = useMemo(() => (activeGroup ? new Set(activeGroup.uris) : null), [activeGroup]);
+  // When viewing a single project's observations, keep "Add observation"
+  // anchored to that project so newly collected records stay attached.
+  const addForProject = activeGroup ? projectIdentityFromUri(activeGroup.projectUri) : null;
 
   const handleVisibleRecordsChange = useCallback((records: OccurrenceRecord[]) => {
     setVisibleRecords(records);
@@ -661,6 +698,7 @@ export function ObservationsClient({ target, initialPage }: { target: ManageTarg
     return (
       <ObservationBulkAddPanel
         target={target}
+        forProject={forProject}
         disabledReason={createPermission.reason}
         onUploaded={(records) =>
           setFreshRecords((prev) => {
@@ -678,11 +716,24 @@ export function ObservationsClient({ target, initialPage }: { target: ManageTarg
   return (
     <div className="bg-background pb-4">
       <div className="mx-auto max-w-6xl px-6 pt-4">
-        <header className="max-w-xl">
-          <h1 className="font-instrument text-2xl font-medium italic tracking-[-0.03em] text-foreground sm:text-3xl">
-            {t("title")}
-          </h1>
-          <p className="mt-2 text-sm leading-6 text-muted-foreground">{t("description")}</p>
+        <header className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div className="max-w-xl">
+            <h1 className="font-instrument text-2xl font-medium italic tracking-[-0.03em] text-foreground sm:text-3xl">
+              {t("title")}
+            </h1>
+            <p className="mt-2 text-sm leading-6 text-muted-foreground">{t("description")}</p>
+          </div>
+          {createPermission.allowed ? (
+            <Button asChild>
+              <Link href={manageHref(target, "observations", { mode: "add", ...(addForProject ? { forProject: addForProject } : {}) })}>
+                <ImagePlusIcon className="size-4" /> {t("addObservation")}
+              </Link>
+            </Button>
+          ) : (
+            <Button disabled title={createPermission.reason ?? undefined}>
+              <ImagePlusIcon className="size-4" /> {t("addObservation")}
+            </Button>
+          )}
         </header>
 
         <div className="group relative mt-5 overflow-hidden rounded-3xl border border-dashed border-primary/20 bg-gradient-to-br from-primary/[0.07] via-accent/30 to-background p-5 sm:p-6">
@@ -755,16 +806,31 @@ export function ObservationsClient({ target, initialPage }: { target: ManageTarg
         </div>
       </div>
 
+      {projectGroups.length > 0 ? (
+        <div className="mx-auto mt-5 max-w-6xl px-6">
+          <ObservationProjectFilter
+            groups={projectGroups}
+            value={projectFilter ?? null}
+            onChange={(next) => void setProjectFilter(next)}
+            allLabel={t("filterAllProjects")}
+            ariaLabel={t("filterByProject")}
+          />
+        </div>
+      ) : null}
+
       <Suspense fallback={null}>
         <RecordExplorer
           kind="occurrence"
           ownerDid={target.did}
           showHero={false}
-          initialPage={initialPage}
+          initialPage={activeGroup ? undefined : initialPage}
           extraInitialRecords={freshRecords}
           defaultOccurrenceMedia="all"
-          leadingCard={<AddObservationTile target={target} disabledReason={createPermission.reason} />}
-          emptyState={<ObservationEmptyState target={target} disabledReason={createPermission.reason} />}
+          filterUris={filterUris}
+          emptyFilteredTitle={t("filterEmptyTitle")}
+          emptyFilteredBody={t("filterEmptyBody")}
+          leadingCard={<AddObservationTile target={target} forProject={addForProject} disabledReason={createPermission.reason} />}
+          emptyState={<ObservationEmptyState target={target} forProject={addForProject} disabledReason={createPermission.reason} />}
           showStatsOverview={false}
           hiddenRecordIds={deletedRecordIds}
           observationSelection={{
@@ -779,7 +845,7 @@ export function ObservationsClient({ target, initialPage }: { target: ManageTarg
   );
 }
 
-function AddObservationTile({ target, disabledReason }: { target: ManageTarget; disabledReason?: string | null }) {
+function AddObservationTile({ target, forProject, disabledReason }: { target: ManageTarget; forProject?: string | null; disabledReason?: string | null }) {
   const t = useTranslations("upload.observations");
   const content = (
     <>
@@ -805,13 +871,13 @@ function AddObservationTile({ target, disabledReason }: { target: ManageTarget; 
   }
 
   return (
-    <Link href={manageHref(target, "observations", { mode: "add" })} className={className}>
+    <Link href={manageHref(target, "observations", { mode: "add", ...(forProject ? { forProject } : {}) })} className={className}>
       {content}
     </Link>
   );
 }
 
-function ObservationEmptyState({ target, disabledReason }: { target: ManageTarget; disabledReason?: string | null }) {
+function ObservationEmptyState({ target, forProject, disabledReason }: { target: ManageTarget; forProject?: string | null; disabledReason?: string | null }) {
   const t = useTranslations("upload.observations");
   return (
     <div className="flex min-h-[300px] flex-col items-center justify-center rounded-3xl border border-dashed border-primary/20 bg-gradient-to-b from-primary/[0.04] to-transparent p-8 text-center">
@@ -830,7 +896,7 @@ function ObservationEmptyState({ target, disabledReason }: { target: ManageTarge
         </Button>
       ) : (
         <Button asChild className="mt-5">
-          <Link href={manageHref(target, "observations", { mode: "add" })}>
+          <Link href={manageHref(target, "observations", { mode: "add", ...(forProject ? { forProject } : {}) })}>
             <ImagePlusIcon className="size-4" /> {t("addObservation")}
           </Link>
         </Button>
@@ -839,13 +905,65 @@ function ObservationEmptyState({ target, disabledReason }: { target: ManageTarge
   );
 }
 
+function ObservationProjectFilter({
+  groups,
+  value,
+  onChange,
+  allLabel,
+  ariaLabel,
+}: {
+  groups: ObservationProjectGroup[];
+  value: string | null;
+  onChange: (next: string | null) => void;
+  allLabel: string;
+  ariaLabel: string;
+}) {
+  return (
+    <div role="group" aria-label={ariaLabel} className="scrollbar-hidden flex items-center gap-1.5 overflow-x-auto pb-1">
+      <ObservationFilterPill selected={!value} onClick={() => onChange(null)}>
+        {allLabel}
+      </ObservationFilterPill>
+      {groups.map((group) => (
+        <ObservationFilterPill key={group.projectUri} selected={value === group.projectUri} onClick={() => onChange(group.projectUri)}>
+          <span className="max-w-[12rem] truncate">{group.title}</span>
+          <span className={cn("ml-1 rounded-full px-1.5 text-[11px] tabular-nums", value === group.projectUri ? "bg-primary-foreground/20" : "bg-foreground/10")}>
+            {group.count}
+          </span>
+        </ObservationFilterPill>
+      ))}
+    </div>
+  );
+}
+
+function ObservationFilterPill({ selected, onClick, children }: { selected: boolean; onClick: () => void; children: ReactNode }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={selected}
+      className={cn(
+        "inline-flex shrink-0 items-center gap-1 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50",
+        selected
+          ? "border-primary bg-primary text-primary-foreground"
+          : "border-border bg-background text-muted-foreground hover:border-primary/40 hover:text-foreground",
+      )}
+    >
+      {children}
+    </button>
+  );
+}
+
+type ObservationProject = { rkey: string; did: string; atUri: string; title: string; imageUrl: string | null; locationUri: string | null };
+
 function ObservationBulkAddPanel({
   target,
+  forProject,
   disabledReason,
   onUploaded,
   onBack,
 }: {
   target: ManageTarget;
+  forProject?: string | null;
   disabledReason?: string | null;
   onUploaded: (records: OccurrenceRecord[]) => void;
   onBack: () => void;
@@ -865,6 +983,8 @@ function ObservationBulkAddPanel({
   const [uploadSession, setUploadSession] = useState<{ total: number; uploadableTotal: number } | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [projects, setProjects] = useState<ObservationProject[]>([]);
+  const [projectUri, setProjectUri] = useState<string>("");
   // The mandatory observation location chosen before any image can be added.
   const [chosenLocation, setChosenLocation] = useState<PickedLocation | null>(null);
   // Best-effort starting point for the picker (default site → any site).
@@ -883,6 +1003,49 @@ function ObservationBulkAddPanel({
   // fire against a torn-down component.
   const pendingTimers = useRef<Set<number>>(new Set());
   const hasLocation = isValidLocation(chosenLocation);
+
+  // Load the steward's projects so observations can be collected for one of
+  // them (writes projectRef + siteRef onto each occurrence). Optional: leaving
+  // "No project" keeps the observation unattached.
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const response = await fetch(manageApiHref("/api/manage/projects", target), { cache: "no-store" });
+        const data = (await response.json()) as Array<Record<string, unknown>> | { error?: string };
+        if (cancelled || !response.ok || !Array.isArray(data)) return;
+        const mapped = data
+          .map((raw) => {
+            const did = typeof raw.did === "string" ? raw.did : null;
+            const rkey = typeof raw.rkey === "string" ? raw.rkey : null;
+            const atUri = typeof raw.atUri === "string" ? raw.atUri : null;
+            if (!did || !rkey || !atUri) return null;
+            return {
+              rkey,
+              did,
+              atUri,
+              title: typeof raw.title === "string" && raw.title.trim() ? raw.title : "Untitled project",
+              imageUrl: typeof raw.imageUrl === "string" ? raw.imageUrl : null,
+              locationUri: typeof raw.locationUri === "string" ? raw.locationUri : null,
+            } satisfies ObservationProject;
+          })
+          .filter((project): project is ObservationProject => Boolean(project));
+        setProjects(mapped);
+        if (forProject) {
+          const [forDid, forRkey] = forProject.split("/");
+          const match = mapped.find((project) => project.did === forDid && project.rkey === forRkey);
+          if (match) setProjectUri(match.atUri);
+        }
+      } catch {
+        // Project attachment is optional; ignore load failures.
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [target, forProject]);
+
+  const selectedProject = projects.find((project) => project.atUri === projectUri) ?? null;
 
   useEffect(() => {
     itemsRef.current = items;
@@ -1401,6 +1564,8 @@ function ObservationBulkAddPanel({
           habitat: data.habitat.trim(),
           occurrenceRemarks: data.occurrenceRemarks.trim(),
           associatedMedia: uploadItems.map((item) => item.file.name).join(", "),
+          ...(selectedProject ? { projectRef: selectedProject.atUri } : {}),
+          ...(selectedProject?.locationUri ? { siteRef: selectedProject.locationUri } : {}),
         });
         occurrenceUri = occurrence.uri;
         occurrenceContext = { rkey: occurrence.rkey, cid: occurrence.cid, record: occurrence.record ?? {} };
@@ -1415,6 +1580,7 @@ function ObservationBulkAddPanel({
           occurrenceRef: occurrenceUri,
           subjectPart: item.analysis.subjectPart.trim() || "wholeOrganism",
           caption: item.analysis.caption.trim() || undefined,
+          siteRef: selectedProject?.locationUri ?? undefined,
         });
         if (!primaryBlobRef && photo.blobRef) primaryBlobRef = photo.blobRef;
         setItems((current) => current.map((candidate) =>
@@ -1558,8 +1724,51 @@ function ObservationBulkAddPanel({
           </div>
         </div>
 
+        {projects.length > 0 ? (
+          <div className="rounded-2xl border bg-card p-4 shadow-xs sm:p-5">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-start gap-3">
+                <span className="grid size-10 shrink-0 place-items-center rounded-full bg-primary/10 text-primary">
+                  <FolderKanbanIcon className="size-5" />
+                </span>
+                <div className="min-w-0">
+                  <p className="text-sm font-medium text-foreground">{t("projectLabel")}</p>
+                  <p className="text-xs leading-5 text-muted-foreground">{t("projectHelp")}</p>
+                </div>
+              </div>
+              <Select value={projectUri || "none"} onValueChange={(value) => setProjectUri(value === "none" ? "" : value)}>
+                <SelectTrigger className="w-full sm:w-72">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">{t("projectNone")}</SelectItem>
+                  {projects.map((project) => (
+                    <SelectItem key={project.atUri} value={project.atUri}>
+                      <span className="flex items-center gap-2">
+                        {project.imageUrl ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={project.imageUrl} alt="" className="size-5 shrink-0 rounded object-cover ring-1 ring-border" />
+                        ) : (
+                          <FolderKanbanIcon className="size-4 shrink-0 text-muted-foreground" />
+                        )}
+                        <span className="truncate">{project.title}</span>
+                      </span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            {selectedProject ? (
+              <p className="mt-3 flex items-center gap-1.5 text-xs text-primary">
+                <CheckCircle2Icon className="size-3.5 shrink-0" />
+                {t("projectAttached", { project: selectedProject.title })}
+              </p>
+            ) : null}
+          </div>
+        ) : null}
+
         {bulkError || disabledReason ? (
-          <div className="flex items-start gap-2.5 rounded-xl border border-destructive/20 bg-destructive/5 px-3.5 py-2.5 text-sm text-destructive">
+          <div className="flex items-start gap-2.5 rounded-2xl border border-destructive/20 bg-destructive/5 p-4 text-sm text-destructive">
             <AlertTriangleIcon className="mt-0.5 size-4 shrink-0" />
             <span>{bulkError ?? disabledReason}</span>
           </div>

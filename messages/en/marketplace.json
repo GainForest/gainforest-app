@@ -236,6 +236,102 @@
       "description": "Please try again in a moment."
     }
   },
+  "bioblitz": {
+    "metadata": {
+      "title": "Weekly BioBlitz Challenge — GainForest",
+      "description": "Go outside, photograph living things, and add your sightings. Each week the top collector and the best photo win a prize."
+    },
+    "hero": {
+      "eyebrow": "Weekly BioBlitz Challenge",
+      "titlePrefix": "BioBlitz",
+      "titleEmphasis": "Challenge",
+      "description": "A friendly weekly race to record nature. Photograph any living thing — a plant, bird, bug, or fungus — add it to GainForest, and climb the board. New round, new prizes, every week.",
+      "program": "Part of the Klarna AI for Climate Resilience program, with GainForest."
+    },
+    "rsvp": {
+      "button": "Register to take part",
+      "note": "Register so we can track your entries and send your prize if you win."
+    },
+    "help": {
+      "prompt": "Questions?",
+      "officeHours": "Join office hours",
+      "community": "Ask in the group chat"
+    },
+    "status": {
+      "live": "Live now",
+      "upcoming": "Starting soon",
+      "ended": "Finished"
+    },
+    "round": {
+      "startsIn": "Starts in",
+      "endsIn": "Ends in",
+      "ended": "Round finished",
+      "days": "{count, plural, one {# day} other {# days}}",
+      "hours": "{count, plural, one {# hour} other {# hours}}",
+      "minutes": "{count, plural, one {# minute} other {# minutes}}"
+    },
+    "prizes": {
+      "title": "Prizes every round",
+      "badgeNote": "Plus a permanent winner badge on your profile.",
+      "mostObservations": {
+        "title": "Most observations",
+        "blurb": "For the collector with the most valid sightings in the round."
+      },
+      "bestPicture": {
+        "title": "Best picture",
+        "blurb": "For the most striking nature photo of the week, picked by the team."
+      }
+    },
+    "how": {
+      "title": "How it works",
+      "steps": {
+        "outside": {
+          "title": "Head outside",
+          "blurb": "Forest, field, or your backyard — any living thing counts."
+        },
+        "upload": {
+          "title": "Upload your photos",
+          "blurb": "Add them on your My Observations page, or with Tainá — also on GainForest."
+        },
+        "review": {
+          "title": "Check the species name",
+          "blurb": "Confirm or correct the suggested name — your knowledge matters."
+        }
+      }
+    },
+    "board": {
+      "title": "This round's board",
+      "live": "Live",
+      "subtitleLive": "Who is leading the most-observations prize right now.",
+      "subtitleEnded": "Final standings for this round.",
+      "subtitleUpcoming": "Be the first to get on the board when the round opens.",
+      "leader": "In the lead",
+      "observations": "{count, plural, one {# observation} other {# observations}}",
+      "openCollector": "Open collector profile in a new tab",
+      "rankAriaLabel": "Rank {rank}",
+      "stats": {
+        "observations": "Observations this round",
+        "collectors": "Collectors",
+        "timeLeft": "Time left"
+      },
+      "empty": {
+        "title": "No sightings yet",
+        "description": "Be the first to add an observation this round."
+      },
+      "error": {
+        "title": "Could not load the board",
+        "description": "Please try again in a moment."
+      },
+      "cta": "Add your observations"
+    },
+    "winners": {
+      "title": "Past winners",
+      "description": "A permanent record of every round's champions.",
+      "mostObservations": "Most observations",
+      "bestPicture": "Best picture",
+      "pending": "To be announced"
+    }
+  },
   "dashboard": {
     "metadata": {
       "title": "Donations Overview — GainForest",
@@ -941,17 +1037,19 @@
   "manageProjects": {
     "hero": {
       "title": "My Projects",
-      "description": "Create and manage projects that can contain multiple Certs, along with the photos, videos, and other media that show the work."
+      "description": "Create and manage your projects. Each project tells the story of your work — then you can mint impact certificates (Certs) from it to apply for funding."
     },
     "metadata": {
       "title": "Manage Projects — GainForest",
-      "description": "Create and manage project collections for your Certs."
+      "description": "Create and manage your projects and mint impact certificates from them."
     },
     "actions": {
-      "manageCerts": "Manage Certs",
-      "manageCertsFor": "Manage Certs for {title}",
+      "manageCerts": "Certs",
+      "manageCertsFor": "Certs for {title}",
       "manageGallery": "Manage gallery",
-      "manageGalleryFor": "Manage gallery for {title}"
+      "manageGalleryFor": "Manage gallery for {title}",
+      "manageObservations": "Observations",
+      "manageObservationsFor": "Observations for {title}"
     }
   },
   "observations": {
@@ -961,19 +1059,20 @@
   },
   "manageProjectCerts": {
     "metadata": {
-      "title": "Manage Project Certs — GainForest",
-      "description": "Choose which Certs belong to a project."
+      "title": "Project Certs — GainForest",
+      "description": "Mint and manage the impact certificates for a project."
     },
     "nav": {
       "projects": "Projects",
       "refresh": "Refresh"
     },
     "hero": {
-      "description": "Choose which Certs belong to this project. Adding or removing a Cert updates the project page, but does not delete the Cert."
+      "description": "Impact certificates (Certs) you mint from this project. Each one bundles proof — photos, places, dates, and contributors — so funders can support the work."
     },
     "stats": {
       "linked": "{count, plural, one {# linked Cert} other {# linked Certs}}",
-      "available": "{count, plural, one {# available Cert} other {# available Certs}}"
+      "available": "{count, plural, one {# Cert can be linked} other {# Certs can be linked}}",
+      "minted": "{count, plural, one {# Cert minted} other {# Certs minted}}"
     },
     "search": {
       "ariaLabel": "Search Certs",
@@ -985,7 +1084,10 @@
       "add": "Add",
       "saving": "Saving…",
       "view": "View",
-      "unlink": "Unlink"
+      "unlink": "Unlink",
+      "mint": "Mint a Cert",
+      "mintFirst": "Mint your first Cert",
+      "link": "Link"
     },
     "errors": {
       "loadTitle": "Could not load Certs",
@@ -1002,8 +1104,8 @@
       "noSummary": "No summary yet."
     },
     "empty": {
-      "noCertsTitle": "No Certs yet",
-      "noCertsDescription": "Create a Cert for this project or add one from your published Certs.",
+      "noCertsTitle": "No Certs minted yet",
+      "noCertsDescription": "An impact certificate (Cert) turns this project into a fundable story — proof of one contribution, with photos, dates, places, and the people involved. Mint your first one to apply for funding.",
       "noMatchingTitle": "No matching Certs",
       "noMatchingDescription": "Try another search term or clear the search field."
     },
@@ -1012,6 +1114,30 @@
       "contributors": "{count, plural, one {# contributor} other {# contributors}}",
       "impactPeriod": "Impact period",
       "created": "Created {date}"
+    },
+    "linkExisting": {
+      "toggle": "Link an existing Cert",
+      "hide": "Hide",
+      "title": "Link an existing Cert",
+      "description": "Already minted a Cert somewhere else? Link it to this project. This updates the project page; it doesn't move or delete the Cert.",
+      "empty": "You have no other Certs to link right now."
+    }
+  },
+  "newCert": {
+    "gate": {
+      "title": "Which project is this Cert for?",
+      "subtitle": "A Cert is an impact certificate you mint from a project. Choose the project this one belongs to.",
+      "searchPlaceholder": "Search your projects",
+      "searchAria": "Search your projects",
+      "loading": "Loading your projects…",
+      "errorTitle": "Could not load your projects",
+      "retry": "Retry",
+      "mintFrom": "Mint a Cert from this project",
+      "noMatch": "No matching projects",
+      "noProjectsTitle": "Create a project first",
+      "noProjectsDescription": "Certs are minted from a project. Create a project to describe your work, then mint impact certificates from it to apply for funding.",
+      "createProject": "Create a project",
+      "skip": "Mint without linking to a project"
     }
   },
   "observationGrid": {

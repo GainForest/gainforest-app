@@ -46,7 +46,7 @@ test("creates a project and attaches the first Cert from the success CTA", async
   test.setTimeout(360_000);
   const project = await createProject(page, testInfo);
 
-  const addFirstCert = page.getByRole("link", { name: /add the first cert/i });
+  const addFirstCert = page.getByRole("link", { name: /mint your first cert/i });
   const basePath = currentManageBasePath();
   await expect(addFirstCert).toHaveAttribute("href", new RegExp(`${escapeRegExp(basePath)}/certs/new\\?forProject=`));
   await Promise.all([
@@ -74,7 +74,7 @@ test("links, unlinks, and relinks an existing Cert from project Cert management"
   const projectCard = page.locator("article").filter({ hasText: project.title }).first();
   await expect(projectCard).toBeVisible({ timeout: 60_000 });
   const manageCertsLink = projectCard.getByRole("link", {
-    name: new RegExp(`manage certs for ${escapeRegExp(project.title)}`, "i"),
+    name: new RegExp(`certs for ${escapeRegExp(project.title)}`, "i"),
   });
   await expect(manageCertsLink).toHaveAttribute("href", `${basePath}/projects/${encodeURIComponent(project.rkey)}/certs`);
   await Promise.all([
@@ -83,21 +83,24 @@ test("links, unlinks, and relinks an existing Cert from project Cert management"
   ]);
 
   await expect(page.getByRole("heading", { name: project.title })).toBeVisible({ timeout: 60_000 });
+  // The Cert was minted without a project, so it starts in the secondary
+  // "Link an existing Cert" panel. Reveal it, then link it to the project.
+  await page.getByRole("button", { name: /link an existing cert/i }).first().click();
   await page.getByLabel(/search certs/i).fill(cert.title);
   const certTile = page.getByRole("listitem").filter({ hasText: cert.title }).first();
   await expect(certTile).toBeVisible({ timeout: 90_000 });
 
-  await certTile.getByRole("button", { name: /^add$/i }).click();
+  await certTile.getByRole("button", { name: /^link$/i }).click();
   await expect(certTile.getByText(/^linked$/i)).toBeVisible({ timeout: 30_000 });
   await expect(page.getByRole("button", { name: /refresh/i })).toBeEnabled({ timeout: 90_000 });
   await expectProjectContainsCert(project.uri, cert.uri);
 
   await certTile.getByRole("button", { name: /^unlink$/i }).click();
   await expect(page.getByRole("button", { name: /refresh/i })).toBeEnabled({ timeout: 90_000 });
-  await expect(certTile.getByRole("button", { name: /^add$/i })).toBeVisible({ timeout: 30_000 });
+  await expect(certTile.getByRole("button", { name: /^link$/i })).toBeVisible({ timeout: 30_000 });
   await expectProjectExcludesCert(project.uri, cert.uri);
 
-  await certTile.getByRole("button", { name: /^add$/i }).click();
+  await certTile.getByRole("button", { name: /^link$/i }).click();
   await expect(certTile.getByText(/^linked$/i)).toBeVisible({ timeout: 30_000 });
   await expectProjectContainsCert(project.uri, cert.uri);
 });

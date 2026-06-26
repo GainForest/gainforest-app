@@ -6,9 +6,11 @@ import { useTranslations } from "next-intl";
 import {
   ArrowLeftIcon,
   CheckIcon,
+  ChevronDownIcon,
   CirclePlusIcon,
   EyeIcon,
   LeafIcon,
+  Link2Icon,
   Loader2Icon,
   RefreshCcwIcon,
   SearchIcon,
@@ -77,6 +79,7 @@ export function ProjectCertsManagerClient({ target, projectRkey }: { target: Man
   const [query, setQuery] = useState("");
   const [pending, setPending] = useState<PendingAction>(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [showLink, setShowLink] = useState(false);
   const updatePermission = canUpdateRecord(target);
   const repoOptions = target.kind === "group" ? { repo: target.did } : undefined;
 
@@ -107,14 +110,23 @@ export function ProjectCertsManagerClient({ target, projectRkey }: { target: Man
     void loadCerts({ showLoading: true });
   }, [loadCerts]);
 
-  const filteredCerts = useMemo(() => {
-    const normalized = query.trim().toLowerCase();
-    const certs = data?.certs ?? [];
-    if (!normalized) return certs;
-    return certs.filter((cert) => `${cert.title} ${cert.shortDescription ?? ""}`.toLowerCase().includes(normalized));
-  }, [data?.certs, query]);
+  const matchesQuery = useCallback(
+    (cert: ManagedCert) => {
+      const normalized = query.trim().toLowerCase();
+      if (!normalized) return true;
+      return `${cert.title} ${cert.shortDescription ?? ""}`.toLowerCase().includes(normalized);
+    },
+    [query],
+  );
 
-  const linkedCount = data?.certs.filter((cert) => cert.linked).length ?? 0;
+  const allCerts = useMemo(() => data?.certs ?? [], [data?.certs]);
+  // "Minted from this project" = Certs currently attached to it. "Linkable" =
+  // the steward's other Certs that could be attached as a secondary action.
+  const mintedCerts = useMemo(() => allCerts.filter((cert) => cert.linked && matchesQuery(cert)), [allCerts, matchesQuery]);
+  const linkableAll = useMemo(() => allCerts.filter((cert) => !cert.linked), [allCerts]);
+  const linkableCerts = useMemo(() => linkableAll.filter(matchesQuery), [linkableAll, matchesQuery]);
+  const mintedCount = allCerts.filter((cert) => cert.linked).length;
+  const hasQuery = query.trim().length > 0;
   const project = data?.project ?? null;
   const newCertHref = project ? manageHref(target, "newBumicert", { forProject: `${project.did}/${project.rkey}` }) : manageHref(target, "newBumicert");
 
@@ -177,8 +189,7 @@ export function ProjectCertsManagerClient({ target, projectRkey }: { target: Man
                 {t("hero.description")}
               </p>
               <div className="mt-3 flex flex-wrap gap-2 text-xs text-muted-foreground">
-                <span className="rounded-full bg-muted px-3 py-1">{t("stats.linked", { count: linkedCount })}</span>
-                <span className="rounded-full bg-muted px-3 py-1">{t("stats.available", { count: data?.certs.length ?? 0 })}</span>
+                <span className="rounded-full bg-muted px-3 py-1">{t("stats.minted", { count: mintedCount })}</span>
               </div>
             </div>
             <div className="flex shrink-0 flex-wrap items-center gap-2">
@@ -195,7 +206,7 @@ export function ProjectCertsManagerClient({ target, projectRkey }: { target: Man
               <Button asChild>
                 <Link href={newCertHref}>
                   <CirclePlusIcon className="size-4" />
-                  {t("actions.create")}
+                  {t("actions.mint")}
                 </Link>
               </Button>
             </div>
@@ -215,11 +226,16 @@ export function ProjectCertsManagerClient({ target, projectRkey }: { target: Man
             </div>
           ) : null}
 
-          {filteredCerts.length === 0 ? (
-            <EmptyState hasQuery={query.trim().length > 0} createHref={newCertHref} />
+          {mintedCerts.length === 0 ? (
+            <EmptyState
+              hasQuery={hasQuery}
+              createHref={newCertHref}
+              canLink={updatePermission.allowed && linkableAll.length > 0}
+              onLink={() => setShowLink(true)}
+            />
           ) : (
             <ul className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3" role="list">
-              {filteredCerts.map((cert) => (
+              {mintedCerts.map((cert) => (
                 <CertTile
                   key={cert.atUri}
                   cert={cert}
@@ -231,6 +247,20 @@ export function ProjectCertsManagerClient({ target, projectRkey }: { target: Man
               ))}
             </ul>
           )}
+
+          {updatePermission.allowed && linkableAll.length > 0 ? (
+            <LinkExistingSection
+              open={showLink}
+              onToggle={() => setShowLink((value) => !value)}
+              certs={linkableCerts}
+              hasQuery={hasQuery}
+              availableCount={linkableAll.length}
+              pending={pending}
+              disabled={pending !== null}
+              disabledReason={updatePermission.reason}
+              onAdd={(cert) => void toggleCert(cert)}
+            />
+          ) : null}
         </div>
       ) : null}
     </div>
@@ -302,8 +332,8 @@ function CertTile({
                 onClick={onToggle}
                 className="h-8"
               >
-                {pending ? <Loader2Icon className="size-3.5 animate-spin" /> : cert.linked ? <XIcon className="size-3.5" /> : <CheckIcon className="size-3.5" />}
-                {pending ? t("actions.saving") : cert.linked ? t("actions.unlink") : t("actions.add")}
+                {pending ? <Loader2Icon className="size-3.5 animate-spin" /> : cert.linked ? <XIcon className="size-3.5" /> : <Link2Icon className="size-3.5" />}
+                {pending ? t("actions.saving") : cert.linked ? t("actions.unlink") : t("actions.link")}
               </Button>
             </div>
           </div>
@@ -336,7 +366,17 @@ function CertsSkeleton() {
   );
 }
 
-function EmptyState({ hasQuery, createHref }: { hasQuery: boolean; createHref: string }) {
+function EmptyState({
+  hasQuery,
+  createHref,
+  canLink,
+  onLink,
+}: {
+  hasQuery: boolean;
+  createHref: string;
+  canLink: boolean;
+  onLink: () => void;
+}) {
   const t = useTranslations("marketplace.manageProjectCerts");
   return (
     <div className="flex min-h-72 flex-col items-center justify-center rounded-[2rem] border border-dashed border-border bg-muted/20 px-6 text-center">
@@ -348,14 +388,86 @@ function EmptyState({ hasQuery, createHref }: { hasQuery: boolean; createHref: s
         {hasQuery ? t("empty.noMatchingDescription") : t("empty.noCertsDescription")}
       </p>
       {!hasQuery ? (
-        <Button asChild variant="outline" size="sm" className="mt-5">
-          <Link href={createHref}>
-            <CirclePlusIcon className="size-4" />
-            {t("actions.create")}
-          </Link>
-        </Button>
+        <div className="mt-5 flex flex-col items-center gap-2">
+          <Button asChild size="sm">
+            <Link href={createHref}>
+              <CirclePlusIcon className="size-4" />
+              {t("actions.mintFirst")}
+            </Link>
+          </Button>
+          {canLink ? (
+            <Button type="button" variant="ghost" size="sm" onClick={onLink} className="text-muted-foreground">
+              <Link2Icon className="size-4" />
+              {t("linkExisting.toggle")}
+            </Button>
+          ) : null}
+        </div>
       ) : null}
     </div>
+  );
+}
+
+function LinkExistingSection({
+  open,
+  onToggle,
+  certs,
+  hasQuery,
+  availableCount,
+  pending,
+  disabled,
+  disabledReason,
+  onAdd,
+}: {
+  open: boolean;
+  onToggle: () => void;
+  certs: ManagedCert[];
+  hasQuery: boolean;
+  availableCount: number;
+  pending: PendingAction;
+  disabled: boolean;
+  disabledReason: string | null;
+  onAdd: (cert: ManagedCert) => void;
+}) {
+  const t = useTranslations("marketplace.manageProjectCerts");
+  return (
+    <section className="overflow-hidden rounded-3xl border border-border/60 bg-card/40">
+      <button
+        type="button"
+        onClick={onToggle}
+        aria-expanded={open}
+        className="flex w-full items-center justify-between gap-3 px-4 py-3.5 text-left transition-colors hover:bg-muted/40 sm:px-5"
+      >
+        <span className="flex min-w-0 flex-wrap items-center gap-2">
+          <Link2Icon className="size-4 shrink-0 text-muted-foreground" />
+          <span className="font-instrument text-xl italic text-foreground">{t("linkExisting.title")}</span>
+          <span className="rounded-full bg-muted px-2.5 py-0.5 text-xs text-muted-foreground">{t("stats.available", { count: availableCount })}</span>
+        </span>
+        <ChevronDownIcon className={cn("size-5 shrink-0 text-muted-foreground transition-transform", open && "rotate-180")} />
+      </button>
+      {open ? (
+        <div className="border-t border-border/60 px-4 py-4 sm:px-5">
+          <p className="mb-4 max-w-2xl text-sm leading-6 text-muted-foreground">{t("linkExisting.description")}</p>
+          {certs.length === 0 ? (
+            <p className="rounded-2xl bg-muted/40 px-4 py-6 text-center text-sm text-muted-foreground">
+              {hasQuery ? t("empty.noMatchingDescription") : t("linkExisting.empty")}
+            </p>
+          ) : (
+            <ul className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3" role="list">
+              {certs.map((cert) => (
+                <CertTile
+                  key={cert.atUri}
+                  cert={cert}
+                  pending={pending && pending.uri === cert.atUri ? pending.action : null}
+                  disabled={disabled}
+                  disabledReason={disabledReason}
+                  onToggle={() => onAdd(cert)}
+                />
+              ))}
+            </ul>
+          )}
+        </div>
+      ) : null}
+    </section>
   );
 }
 

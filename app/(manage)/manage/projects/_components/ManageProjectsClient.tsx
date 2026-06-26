@@ -7,6 +7,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { parseAsString, parseAsStringEnum, useQueryStates } from "nuqs";
 import {
   BadgeCheckIcon,
+  BinocularsIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
   CirclePlusIcon,
@@ -238,6 +239,7 @@ export function ManageProjectsClient({ target }: { target: ManageTarget }) {
                       index={index}
                       galleryHref={`${target.basePath}/projects/${encodeURIComponent(project.rkey)}/gallery`}
                       certsHref={`${target.basePath}/projects/${encodeURIComponent(project.rkey)}/certs`}
+                      observationsHref={manageHref(target, "observations", { project: project.atUri })}
                       onEdit={() => openEdit(project)}
                       disabledReason={updatePermission.reason}
                     />
@@ -274,6 +276,7 @@ function ProjectCard({
   index,
   galleryHref,
   certsHref,
+  observationsHref,
   onEdit,
   disabledReason = null,
 }: {
@@ -281,6 +284,7 @@ function ProjectCard({
   index: number;
   galleryHref: string;
   certsHref: string;
+  observationsHref: string;
   onEdit: () => void;
   disabledReason?: string | null;
 }) {
@@ -362,6 +366,12 @@ function ProjectCard({
               <Link href={certsHref} aria-label={t("manageCertsFor", { title: project.title })}>
                 <LeafIcon className="size-3.5" />
                 {t("manageCerts")}
+              </Link>
+            </Button>
+            <Button asChild type="button" variant="outline" size="sm" className="h-8" onClick={(event) => event.stopPropagation()}>
+              <Link href={observationsHref} aria-label={t("manageObservationsFor", { title: project.title })}>
+                <BinocularsIcon className="size-3.5" />
+                {t("manageObservations")}
               </Link>
             </Button>
             <Button asChild type="button" variant="outline" size="sm" className="h-8" onClick={(event) => event.stopPropagation()}>
@@ -561,6 +571,12 @@ function ProjectEditor({
                   </Link>
                 </Button>
                 <Button asChild type="button" variant="outline">
+                  <Link href={manageHref(target, "observations", { project: state.project.atUri })} aria-label={actionT("manageObservationsFor", { title: state.project.title })}>
+                    <BinocularsIcon className="size-4" />
+                    {actionT("manageObservations")}
+                  </Link>
+                </Button>
+                <Button asChild type="button" variant="outline">
                   <Link href={`${target.basePath}/projects/${encodeURIComponent(state.project.rkey)}/gallery`} aria-label={actionT("manageGalleryFor", { title: state.project.title })}>
                     <ImageIcon className="size-4" />
                     {actionT("manageGallery")}
@@ -722,7 +738,7 @@ function ProjectSuccessPanel({
             className="mt-4 max-w-xs text-sm leading-6 text-muted-foreground"
           >
             {showAddBumicert
-              ? "Add a Cert next to apply for donations and attach field data."
+              ? "When you're ready, mint an impact certificate (Cert) from this project to apply for funding. This step is optional."
               : "Your project changes have been saved."}
           </motion.p>
 
@@ -766,10 +782,10 @@ function ProjectSuccessPanel({
                 <div className="relative z-10 w-full">
                   <div className="min-w-0">
                     <h4 className="font-instrument text-2xl font-medium italic leading-tight tracking-[-0.03em] text-foreground sm:text-3xl">
-                      Add the first Cert
+                      Mint your first Cert
                     </h4>
                     <p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-muted-foreground sm:mx-0">
-                      Turn {projectTitle || "this project"} into a fundable story with proof of work, field data, photos, dates, and places.
+                      An impact certificate minted from {projectTitle || "this project"} — proof of one contribution, with photos, dates, places, and contributors, so funders can support it.
                     </p>
                   </div>
                 </div>

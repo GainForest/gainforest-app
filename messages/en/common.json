@@ -55,6 +55,7 @@
       "bumicerts": "Certs",
       "organizations": "Organizations",
       "leaderboard": "Leaderboard",
+      "bioblitz": "BioBlitz",
       "organization": "Organization",
       "sites": "Sites",
       "audio": "Audio",
@@ -90,7 +91,9 @@
     "tabs": {
       "explore": "Explore",
       "manage": "Manage"
-    }
+    },
+    "collapse": "Collapse sidebar",
+    "expand": "Expand sidebar"
   },
   "bumicertCard": {
     "missingImage": "Cert image unavailable",
@@ -120,6 +123,7 @@
       "organizations": "Organizations",
       "observations": "Observations",
       "leaderboard": "Leaderboard",
+      "bioblitz": "BioBlitz",
       "greenGlobe": "Green Globe",
       "status": "Status"
     }

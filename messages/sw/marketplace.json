@@ -236,6 +236,102 @@
       "description": "Tafadhali jaribu tena baada ya muda mfupi."
     }
   },
+  "bioblitz": {
+    "metadata": {
+      "title": "Changamoto ya BioBlitz ya Wiki — GainForest",
+      "description": "Toka nje, piga picha viumbe hai, na ongeza uoni wako. Kila wiki, mkusanyaji bora na picha bora hushinda zawadi."
+    },
+    "hero": {
+      "eyebrow": "Changamoto ya BioBlitz ya Wiki",
+      "titlePrefix": "Changamoto ya",
+      "titleEmphasis": "BioBlitz",
+      "description": "Mashindano ya kirafiki ya kila wiki ya kurekodi asili. Piga picha kiumbe chochote hai — mmea, ndege, mdudu au kuvu —, kiongeze kwenye GainForest, na upande kwenye ubao. Raundi mpya, zawadi mpya, kila wiki.",
+      "program": "Sehemu ya programu ya Klarna AI for Climate Resilience, pamoja na GainForest."
+    },
+    "rsvp": {
+      "button": "Jisajili ili kushiriki",
+      "note": "Jisajili ili tuweze kufuatilia michango yako na kukutumia zawadi ukishinda."
+    },
+    "help": {
+      "prompt": "Una maswali?",
+      "officeHours": "Jiunge na saa za maswali",
+      "community": "Uliza kwenye gumzo la kikundi"
+    },
+    "status": {
+      "live": "Inaendelea",
+      "upcoming": "Inaanza hivi karibuni",
+      "ended": "Imekamilika"
+    },
+    "round": {
+      "startsIn": "Inaanza baada ya",
+      "endsIn": "Inaisha baada ya",
+      "ended": "Raundi imekamilika",
+      "days": "{count, plural, one {siku #} other {siku #}}",
+      "hours": "{count, plural, one {saa #} other {saa #}}",
+      "minutes": "{count, plural, one {dakika #} other {dakika #}}"
+    },
+    "prizes": {
+      "title": "Zawadi kila raundi",
+      "badgeNote": "Pamoja na beji ya kudumu ya mshindi kwenye wasifu wako.",
+      "mostObservations": {
+        "title": "Uoni mwingi zaidi",
+        "blurb": "Kwa mkusanyaji mwenye uoni halali mwingi zaidi katika raundi."
+      },
+      "bestPicture": {
+        "title": "Picha bora",
+        "blurb": "Kwa picha ya asili inayovutia zaidi ya wiki, iliyochaguliwa na timu."
+      }
+    },
+    "how": {
+      "title": "Jinsi inavyofanya kazi",
+      "steps": {
+        "outside": {
+          "title": "Toka nje",
+          "blurb": "Msitu, shamba au uwanja wako — kiumbe chochote hai kinahesabika."
+        },
+        "upload": {
+          "title": "Pakia picha zako",
+          "blurb": "Ziongeze kwenye ukurasa wako wa Uchunguzi wangu, au kwa Tainá — pia kwenye GainForest."
+        },
+        "review": {
+          "title": "Angalia jina la spishi",
+          "blurb": "Thibitisha au sahihisha jina lililopendekezwa — maarifa yako ni muhimu."
+        }
+      }
+    },
+    "board": {
+      "title": "Ubao wa raundi hii",
+      "live": "Moja kwa moja",
+      "subtitleLive": "Nani anaongoza zawadi ya uoni mwingi zaidi sasa hivi.",
+      "subtitleEnded": "Matokeo ya mwisho ya raundi hii.",
+      "subtitleUpcoming": "Kuwa wa kwanza kwenye ubao raundi itakapoanza.",
+      "leader": "Anaongoza",
+      "observations": "{count, plural, one {# uoni} other {# uoni}}",
+      "openCollector": "Fungua wasifu wa mkusanyaji katika kichupo kipya",
+      "rankAriaLabel": "Nafasi ya {rank}",
+      "stats": {
+        "observations": "Uoni katika raundi hii",
+        "collectors": "Wakusanyaji",
+        "timeLeft": "Muda uliosalia"
+      },
+      "empty": {
+        "title": "Bado hakuna uoni",
+        "description": "Kuwa wa kwanza kuongeza uoni katika raundi hii."
+      },
+      "error": {
+        "title": "Haikuweza kupakia ubao",
+        "description": "Tafadhali jaribu tena baada ya muda mfupi."
+      },
+      "cta": "Ongeza uoni wako"
+    },
+    "winners": {
+      "title": "Washindi waliopita",
+      "description": "Kumbukumbu ya kudumu ya mabingwa wa kila raundi.",
+      "mostObservations": "Uoni mwingi zaidi",
+      "bestPicture": "Picha bora",
+      "pending": "Itatangazwa"
+    }
+  },
   "dashboard": {
     "metadata": {
       "title": "Michango Muhtasari — GainForest",
@@ -941,17 +1037,19 @@
   "manageProjects": {
     "hero": {
       "title": "Miradi Yangu",
-      "description": "Unda na usimamie miradi inayoweza kuwa na cheti kadhaa, pamoja na picha, video na midia nyingine zinazoonyesha kazi hiyo."
+      "description": "Unda na simamia miradi yako. Kila mradi unasimulia hadithi ya kazi yako — kisha unaweza kutoa vyeti vya athari (Certs) kutoka kwake ili kuomba ufadhili."
     },
     "metadata": {
       "title": "Simamia Miradi — GainForest",
-      "description": "Unda na usimamie mikusanyiko ya miradi kwa cheti zako."
+      "description": "Unda na simamia miradi yako na utoe vyeti vya athari kutoka kwayo."
     },
     "actions": {
-      "manageCerts": "Dhibiti Certs",
-      "manageCertsFor": "Dhibiti Certs za {title}",
+      "manageCerts": "Vyeti",
+      "manageCertsFor": "Vyeti vya {title}",
       "manageGallery": "Dhibiti matunzio",
-      "manageGalleryFor": "Dhibiti matunzio ya {title}"
+      "manageGalleryFor": "Dhibiti matunzio ya {title}",
+      "manageObservations": "Uchunguzi",
+      "manageObservationsFor": "Uchunguzi wa {title}"
     }
   },
   "observations": {
@@ -961,19 +1059,20 @@
   },
   "manageProjectCerts": {
     "metadata": {
-      "title": "Dhibiti Certs za Mradi — GainForest",
-      "description": "Chagua Certs zipi ni za mradi."
+      "title": "Certs za mradi — GainForest",
+      "description": "Toa na simamia vyeti vya athari vya mradi."
     },
     "nav": {
       "projects": "Miradi",
       "refresh": "Onyesha upya"
     },
     "hero": {
-      "description": "Chagua Certs zipi ni za mradi huu. Kuongeza au kuondoa Cert hubadilisha ukurasa wa mradi, lakini haifuti Cert."
+      "description": "Vyeti vya athari (Certs) unavyotoa kutoka mradi huu. Kila kimoja hukusanya ushahidi — picha, maeneo, tarehe, na wachangiaji — ili wafadhili waweze kuunga mkono kazi hii."
     },
     "stats": {
       "linked": "{count, plural, one {# Cert iliyounganishwa} other {# Certs zilizounganishwa}}",
-      "available": "{count, plural, one {# Cert inayopatikana} other {# Certs zinazopatikana}}"
+      "available": "{count, plural, one {# Cert kinaweza kuunganishwa} other {# Certs zinaweza kuunganishwa}}",
+      "minted": "{count, plural, one {# Cert kimetolewa} other {# Certs zimetolewa}}"
     },
     "search": {
       "ariaLabel": "Tafuta Certs",
@@ -985,7 +1084,10 @@
       "add": "Ongeza",
       "saving": "Inahifadhi…",
       "view": "Tazama",
-      "unlink": "Tenganisha"
+      "unlink": "Tenganisha",
+      "mint": "Toa Cert",
+      "mintFirst": "Toa Cert yako ya kwanza",
+      "link": "Unganisha"
     },
     "errors": {
       "loadTitle": "Imeshindikana kupakia Certs",
@@ -1002,8 +1104,8 @@
       "noSummary": "Hakuna muhtasari bado."
     },
     "empty": {
-      "noCertsTitle": "Hakuna Certs bado",
-      "noCertsDescription": "Unda Cert kwa mradi huu au ongeza moja kutoka Certs zako zilizochapishwa.",
+      "noCertsTitle": "Hakuna Certs zilizotolewa bado",
+      "noCertsDescription": "Cheti cha athari (Cert) hubadilisha mradi huu kuwa hadithi inayoweza kufadhiliwa — ushahidi wa mchango mmoja, wenye picha, tarehe, maeneo, na watu waliohusika. Toa cha kwanza ili kuomba ufadhili.",
       "noMatchingTitle": "Hakuna Certs zinazolingana",
       "noMatchingDescription": "Jaribu neno lingine la utafutaji au futa uga wa utafutaji."
     },
@@ -1012,6 +1114,30 @@
       "contributors": "{count, plural, one {# mchangiaji} other {# wachangiaji}}",
       "impactPeriod": "Kipindi cha athari",
       "created": "Imeundwa {date}"
+    },
+    "linkExisting": {
+      "toggle": "Unganisha Cert iliyopo",
+      "hide": "Ficha",
+      "title": "Unganisha Cert iliyopo",
+      "description": "Tayari umetoa Cert mahali pengine? Iunganishe na mradi huu. Hii husasisha ukurasa wa mradi; haiondoi wala kufuta Cert.",
+      "empty": "Huna Certs nyingine za kuunganisha kwa sasa."
+    }
+  },
+  "newCert": {
+    "gate": {
+      "title": "Cert hii ni ya mradi gani?",
+      "subtitle": "Cert ni cheti cha athari unachotoa kutoka mradi. Chagua mradi ambao hii inahusiana nao.",
+      "searchPlaceholder": "Tafuta miradi yako",
+      "searchAria": "Tafuta miradi yako",
+      "loading": "Inapakia miradi yako…",
+      "errorTitle": "Imeshindwa kupakia miradi yako",
+      "retry": "Jaribu tena",
+      "mintFrom": "Toa Cert kutoka mradi huu",
+      "noMatch": "Hakuna miradi inayolingana",
+      "noProjectsTitle": "Unda mradi kwanza",
+      "noProjectsDescription": "Certs hutolewa kutoka mradi. Unda mradi kuelezea kazi yako, kisha utoe vyeti vya athari ili kuomba ufadhili.",
+      "createProject": "Unda mradi",
+      "skip": "Toa bila kuunganisha na mradi"
     }
   },
   "observationGrid": {

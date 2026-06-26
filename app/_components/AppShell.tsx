@@ -9,6 +9,7 @@ import {
   BinocularsIcon,
   Building2Icon,
   CheckIcon,
+  ChevronLeftIcon,
   CompassIcon,
   DroneIcon,
   FolderKanbanIcon,
@@ -29,7 +30,7 @@ import {
   TrophyIcon,
   UserIcon,
 } from "lucide-react";
-import { Suspense, useEffect, useState, type MouseEvent, type SVGProps } from "react";
+import { createContext, Suspense, useContext, useEffect, useState, type MouseEvent, type SVGProps } from "react";
 import { useTranslations } from "next-intl";
 import type { AuthSession } from "../_lib/auth";
 import packageJson from "@/package.json";
@@ -37,6 +38,7 @@ import { BumicertsBumicertCard, type BumicertsBumicertCardRecord } from "@/compo
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import {
   ACTIVE_MANAGE_CONTEXT_KEY,
@@ -48,7 +50,6 @@ import {
 import { stripLocaleFromPathname } from "@/lib/i18n/routing";
 import { AuthButton, SignInPrompt } from "./AuthFlow";
 import {
-  getAccountListSnapshot,
   switcherGroupIdentifier,
   useAccountList,
   useActiveAccountContext,
@@ -126,6 +127,14 @@ const NAV_ITEMS: NavSection[] = [
       },
       {
         kind: "leaf",
+        id: "bioblitz",
+        text: "BioBlitz",
+        Icon: LeafIcon,
+        href: "/bioblitz",
+        pathCheck: { startsWith: "/bioblitz" },
+      },
+      {
+        kind: "leaf",
         id: "donations",
         text: "Donations",
         Icon: HeartHandshakeIcon,
@@ -137,6 +146,12 @@ const NAV_ITEMS: NavSection[] = [
 ];
 
 const APP_VERSION = packageJson.version;
+
+const SIDEBAR_COLLAPSED_STORAGE_KEY = "gainforest-sidebar-collapsed";
+const SidebarCollapsedContext = createContext(false);
+function useSidebarCollapsed(): boolean {
+  return useContext(SidebarCollapsedContext);
+}
 
 const RIPPLE_DURATION_MS = 1200;
 const STORAGE_KEY = "bumicerts-theme";
@@ -237,6 +252,7 @@ export function AppShell({
 }) {
   const pathname = useCanonicalPathname();
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [resolvedAuthSession, setResolvedAuthSession] = useState<AuthSession | null>(authSession);
   const [resolvedManageAccountKind, setResolvedManageAccountKind] = useState<ManageAccountKind>(manageAccountKind);
   const [resolvedProfileName, setResolvedProfileName] = useState<string | null | undefined>(
@@ -310,21 +326,43 @@ export function AppShell({
     };
   }, []);
 
+  useEffect(() => {
+    try {
+      setSidebarCollapsed(window.localStorage.getItem(SIDEBAR_COLLAPSED_STORAGE_KEY) === "1");
+    } catch {
+      // Ignore storage access errors (private windows).
+    }
+  }, []);
+
   if (pathname === "/") {
     return <>{children}</>;
   }
 
   const isProfileLoading = resolvedAuthSession?.isLoggedIn === true && isShellProfileLoading;
 
+  const toggleSidebarCollapsed = () => {
+    setSidebarCollapsed((value) => {
+      const next = !value;
+      try {
+        window.localStorage.setItem(SIDEBAR_COLLAPSED_STORAGE_KEY, next ? "1" : "0");
+      } catch {
+        // Private windows can block storage; in-memory state still works.
+      }
+      return next;
+    });
+  };
+
   return (
     <HeaderSlotsProvider>
       <div className="flex h-screen overflow-hidden">
-        <div className="hidden md:block">
+        <div className="relative hidden md:block">
           <UnifiedSidebar
             authSession={resolvedAuthSession}
             manageAccountKind={resolvedManageAccountKind}
             isProfileLoading={isProfileLoading}
+            collapsed={sidebarCollapsed}
           />
+          <SidebarCollapseToggle collapsed={sidebarCollapsed} onToggle={toggleSidebarCollapsed} />
         </div>
         <MobileNavDrawer open={mobileNavOpen} onOpenChange={setMobileNavOpen}>
           <UnifiedSidebar
@@ -418,20 +456,71 @@ function FreshAccountOnboardingPrompt({
   return null;
 }
 
+/** Wraps a trigger with a right-anchored tooltip, but only when the sidebar is
+ *  collapsed to an icon rail (otherwise the label is already visible). */
+function SidebarTooltip({ label, children }: { label: string; children: React.ReactNode }) {
+  const collapsed = useSidebarCollapsed();
+  if (!collapsed) return <>{children}</>;
+  return (
+    <TooltipProvider delayDuration={0}>
+      <Tooltip>
+        <TooltipTrigger asChild>{children}</TooltipTrigger>
+        <TooltipContent side="right" sideOffset={10}>
+          {label}
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
+}
+
+/** Circular chevron that straddles the sidebar's right edge to collapse/expand. */
+function SidebarCollapseToggle({ collapsed, onToggle }: { collapsed: boolean; onToggle: () => void }) {
+  const t = useTranslations("common.sidebar");
+  const label = collapsed ? t("expand") : t("collapse");
+  return (
+    <TooltipProvider delayDuration={200}>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <button
+            type="button"
+            onClick={onToggle}
+            aria-label={label}
+            aria-expanded={!collapsed}
+            className="absolute -right-3 top-7 z-40 grid size-6 place-items-center rounded-full border border-border bg-background text-muted-foreground shadow-sm transition-colors hover:border-primary/40 hover:text-primary hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+          >
+            <ChevronLeftIcon className={cn("size-3.5 transition-transform duration-300 motion-reduce:transition-none", collapsed && "rotate-180")} />
+          </button>
+        </TooltipTrigger>
+        <TooltipContent side="right" sideOffset={8}>
+          {label}
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
+}
+
 function UnifiedSidebar({
   authSession,
   manageAccountKind,
   isProfileLoading,
+  collapsed = false,
 }: {
   authSession: AuthSession | null;
   manageAccountKind: ManageAccountKind;
   isProfileLoading: boolean;
+  collapsed?: boolean;
 }) {
   const pathname = useCanonicalPathname();
   const activeTab: SidebarTab = pathname.startsWith("/manage") ? "manage" : "explore";
 
   return (
-    <nav className="relative isolate flex h-full w-[256px] flex-col overflow-hidden border-r border-border bg-foreground/3 p-4">
+    <SidebarCollapsedContext.Provider value={collapsed}>
+    <nav
+      className={cn(
+        "relative isolate flex h-full flex-col overflow-hidden border-r border-border bg-foreground/3 transition-[width,padding] duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)] motion-reduce:transition-none",
+        collapsed ? "w-[76px] p-3" : "w-[256px] p-4",
+      )}
+    >
       <AnimatePresence>
         <motion.div
           key={activeTab}
@@ -458,13 +547,13 @@ function UnifiedSidebar({
 
       {authSession?.isLoggedIn ? (
         <div className="mt-3">
-          <ManageContextSwitcher sessionDid={authSession.did} />
+          <ManageContextSwitcher sessionDid={authSession.did} collapsed={collapsed} />
         </div>
       ) : null}
 
       <div className="mt-3 border-t border-border" />
 
-      <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto pr-1 pt-3">
+      <div className={cn("flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto pt-3", collapsed ? "overflow-x-hidden" : "pr-1")}>
         {activeTab === "explore" ? (
           <>
             <LayoutGroup id="unified-sidebar-nav">
@@ -472,7 +561,7 @@ function UnifiedSidebar({
             </LayoutGroup>
 
             <div className="mt-auto flex flex-col gap-3 pt-4">
-              {authSession?.isLoggedIn ? <BumicertCreationCard sessionDid={authSession.did} /> : <SignInPrompt />}
+              {authSession?.isLoggedIn ? <BumicertCreationCard sessionDid={authSession.did} /> : <SignInPrompt collapsed={collapsed} />}
             </div>
           </>
         ) : (
@@ -492,6 +581,7 @@ function UnifiedSidebar({
         <SocialFooter />
       </div>
     </nav>
+    </SidebarCollapsedContext.Provider>
   );
 }
 
@@ -509,36 +599,42 @@ const SIDEBAR_TABS: {
 
 function SidebarTabs({ activeTab }: { activeTab: SidebarTab }) {
   const manageBasePath = useContextualManageBasePath();
+  const collapsed = useSidebarCollapsed();
   const t = useTranslations("common.sidebar.tabs");
   return (
     <LayoutGroup id="sidebar-tabs">
-      <div className="flex rounded-full border border-border bg-foreground/5 p-1">
+      <div className={cn("flex rounded-full border border-border bg-foreground/5 p-1", collapsed && "flex-col gap-1")}>
         {SIDEBAR_TABS.map((tab) => {
           const isActive = tab.id === activeTab;
           return (
-            <Link
-              key={tab.id}
-              href={tab.id === "manage" ? manageBasePath : tab.href}
-              aria-current={isActive ? "page" : undefined}
-              className="relative flex-1 rounded-full px-3 py-1.5 text-center text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
-            >
-              {isActive ? (
-                <motion.span
-                  layoutId="sidebar-tab-active"
-                  className="absolute inset-0 rounded-full bg-background shadow-sm ring-1 ring-border"
-                  transition={{ type: "spring", stiffness: 400, damping: 32 }}
-                />
-              ) : null}
-              <span
+            <SidebarTooltip key={tab.id} label={t(tab.id)}>
+              <Link
+                href={tab.id === "manage" ? manageBasePath : tab.href}
+                aria-current={isActive ? "page" : undefined}
+                aria-label={collapsed ? t(tab.id) : undefined}
                 className={cn(
-                  "relative z-10 flex items-center justify-center gap-1.5 transition-colors",
-                  isActive ? "text-foreground" : "text-muted-foreground hover:text-foreground",
+                  "relative rounded-full text-center text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50",
+                  collapsed ? "flex items-center justify-center py-1.5" : "flex-1 px-3 py-1.5",
                 )}
               >
-                <tab.Icon className="h-4 w-4 shrink-0 opacity-50" />
-                {t(tab.id)}
-              </span>
-            </Link>
+                {isActive ? (
+                  <motion.span
+                    layoutId="sidebar-tab-active"
+                    className="absolute inset-0 rounded-full bg-background shadow-sm ring-1 ring-border"
+                    transition={{ type: "spring", stiffness: 400, damping: 32 }}
+                  />
+                ) : null}
+                <span
+                  className={cn(
+                    "relative z-10 flex items-center justify-center gap-1.5 transition-colors",
+                    isActive ? "text-foreground" : "text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  <tab.Icon className="h-4 w-4 shrink-0 opacity-50" />
+                  {collapsed ? null : t(tab.id)}
+                </span>
+              </Link>
+            </SidebarTooltip>
           );
         })}
       </div>
@@ -566,9 +662,10 @@ function ExploreNav() {
 }
 
 function SidebarHeader() {
+  const collapsed = useSidebarCollapsed();
   return (
-    <div className="mb-4 flex w-full flex-col gap-2">
-      <Link className="flex items-center gap-2.5 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50" href="/" aria-label="GainForest home">
+    <div className={cn("mb-4 flex w-full flex-col gap-2", collapsed && "items-center")}>
+      <Link className={cn("flex items-center rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50", collapsed ? "justify-center" : "gap-2.5")} href="/" aria-label="GainForest home">
         <motion.div
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
@@ -590,24 +687,27 @@ function SidebarHeader() {
           />
         </motion.div>
 
-        <motion.span
-          initial={{ opacity: 0, x: -8 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{
-            duration: 0.4,
-            delay: 0.15,
-            ease: [0.25, 0.1, 0.25, 1],
-          }}
-          className="font-serif text-xl font-bold tracking-tight text-foreground"
-        >
-          GainForest
-        </motion.span>
+        {collapsed ? null : (
+          <motion.span
+            initial={{ opacity: 0, x: -8 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{
+              duration: 0.4,
+              delay: 0.15,
+              ease: [0.25, 0.1, 0.25, 1],
+            }}
+            className="font-serif text-xl font-bold tracking-tight text-foreground"
+          >
+            GainForest
+          </motion.span>
+        )}
       </Link>
     </div>
   );
 }
 
 function NavLeaf({ item, isActive, index }: { item: NavLeaf; isActive: boolean; index: number }) {
+  const collapsed = useSidebarCollapsed();
   return (
     <motion.li
       initial={{ opacity: 0, x: -8 }}
@@ -618,35 +718,41 @@ function NavLeaf({ item, isActive, index }: { item: NavLeaf; isActive: boolean; 
         ease: [0.25, 0.1, 0.25, 1],
       }}
     >
-      <Link
-        href={item.href}
-        className="group block rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
-      >
-        <motion.div
-          whileHover={{ x: 2 }}
-          transition={{ type: "spring", stiffness: 400, damping: 30 }}
-          className={cn(
-            buttonVariants({ variant: isActive ? "default" : "ghost" }),
-            "relative w-full justify-start pl-1",
-            !isActive && "text-muted-foreground group-hover:text-primary hover:text-primary",
-          )}
+      <SidebarTooltip label={item.text}>
+        <Link
+          href={item.href}
+          aria-label={collapsed ? item.text : undefined}
+          aria-current={isActive ? "page" : undefined}
+          className="group block rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
         >
-          <span
+          <motion.div
+            whileHover={collapsed ? undefined : { x: 2 }}
+            transition={{ type: "spring", stiffness: 400, damping: 30 }}
             className={cn(
-              "flex h-7 shrink-0 items-center justify-center rounded-full px-3 transition-colors",
-              isActive ? "bg-primary-foreground text-primary" : "bg-primary/10 text-muted-foreground group-hover:text-primary",
+              buttonVariants({ variant: isActive ? "default" : "ghost" }),
+              "relative w-full",
+              collapsed ? "justify-center px-0" : "justify-start pl-1",
+              !isActive && "text-muted-foreground group-hover:text-primary hover:text-primary",
             )}
           >
-            <item.Icon className="h-4 w-4 shrink-0" />
-          </span>
-          <span className="flex-1 text-left">{item.text}</span>
-        </motion.div>
-      </Link>
+            <span
+              className={cn(
+                "flex h-7 shrink-0 items-center justify-center rounded-full transition-colors",
+                collapsed ? "w-7" : "px-3",
+                isActive ? "bg-primary-foreground text-primary" : "bg-primary/10 text-muted-foreground group-hover:text-primary",
+              )}
+            >
+              <item.Icon className="h-4 w-4 shrink-0" />
+            </span>
+            {collapsed ? null : <span className="flex-1 text-left">{item.text}</span>}
+          </motion.div>
+        </Link>
+      </SidebarTooltip>
     </motion.li>
   );
 }
 
-const ONBOARD_ORGANIZATION_HREF = "/manage?mode=onboard-org";
+const PERSONAL_PROJECT_NEW_HREF = manageHref({ basePath: "/manage" }, "projects", { mode: "new" });
 
 function createProjectHrefForGroup(identifier: string): string {
   return manageHref({ basePath: groupManageBasePath(identifier) }, "projects", { mode: "new" });
@@ -686,45 +792,29 @@ function AuthenticatedCreateProjectLink({
   children: React.ReactNode;
 }) {
   const router = useRouter();
-  const { groups, reload } = useAccountList(sessionDid);
+  const { groups } = useAccountList(sessionDid);
   const [activeContext, setActiveContext] = useActiveAccountContext(sessionDid);
 
   const activeGroup = activeContext.type === "group" ? groups.find((group) => group.groupDid === activeContext.did) ?? null : null;
+  // Honor the active account context: an organization context creates the
+  // project in that organization, a personal context creates it in the
+  // signed-in user's own account — no organization required.
   const href = activeContext.type === "group"
     ? createProjectHrefForGroup(activeGroup ? switcherGroupIdentifier(activeGroup) : activeContext.identifier?.trim() || activeContext.did)
-    : groups[0]
-      ? createProjectHrefForGroup(switcherGroupIdentifier(groups[0]))
-      : ONBOARD_ORGANIZATION_HREF;
+    : PERSONAL_PROJECT_NEW_HREF;
 
-  const handleClick = async (event: MouseEvent<HTMLAnchorElement>) => {
+  const handleClick = (event: MouseEvent<HTMLAnchorElement>) => {
     if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
 
+    // Personal context: let the Link navigate to the personal "new project"
+    // route without any organization detour.
+    if (activeContext.type !== "group") return;
+
     event.preventDefault();
-
-    if (activeContext.type === "group") {
-      const identifier = activeGroup ? switcherGroupIdentifier(activeGroup) : activeContext.identifier?.trim() || activeContext.did;
-      if (activeGroup) {
-        setActiveContext({ type: "group", did: activeGroup.groupDid, identifier, role: activeGroup.role });
-      }
-      router.push(createProjectHrefForGroup(identifier));
-      return;
+    const identifier = activeGroup ? switcherGroupIdentifier(activeGroup) : activeContext.identifier?.trim() || activeContext.did;
+    if (activeGroup) {
+      setActiveContext({ type: "group", did: activeGroup.groupDid, identifier, role: activeGroup.role });
     }
-
-    let nextGroups = groups;
-    if (nextGroups.length === 0) {
-      await reload();
-      const latest = getAccountListSnapshot();
-      if (latest.sessionDid === sessionDid) nextGroups = latest.groups;
-    }
-
-    const firstGroup = nextGroups[0];
-    if (!firstGroup) {
-      router.push(ONBOARD_ORGANIZATION_HREF);
-      return;
-    }
-
-    const identifier = switcherGroupIdentifier(firstGroup);
-    setActiveContext({ type: "group", did: firstGroup.groupDid, identifier, role: firstGroup.role });
     router.push(createProjectHrefForGroup(identifier));
   };
 
@@ -737,6 +827,27 @@ function AuthenticatedCreateProjectLink({
 
 function BumicertCreationCard({ sessionDid }: { sessionDid: string }) {
   const t = useTranslations("common.sidebar.creationCard");
+  const collapsed = useSidebarCollapsed();
+
+  if (collapsed) {
+    return (
+      <SidebarTooltip label={t("createProject")}>
+        <span className="mx-auto flex w-fit">
+          <CreateProjectLink
+            sessionDid={sessionDid}
+            className={cn(
+              buttonVariants({ variant: "outline", size: "icon" }),
+              "bg-background hover:bg-primary hover:text-primary-foreground",
+            )}
+          >
+            <PlusIcon />
+            <span className="sr-only">{t("createProject")}</span>
+          </CreateProjectLink>
+        </span>
+      </SidebarTooltip>
+    );
+  }
+
   return (
     <div className="group flex flex-col w-full h-20 border border-border bg-background rounded-2xl p-1">
       <div className="flex-1 relative">
@@ -799,6 +910,7 @@ function ManageSection({
 }) {
   const pathname = useCanonicalPathname();
   const searchParams = useSearchParams();
+  const collapsed = useSidebarCollapsed();
   const t = useTranslations("common.sidebar.items");
   const groupIdentifier = groupIdentifierFromManagePath(pathname);
   const isGroupManageContext = Boolean(groupIdentifier);
@@ -896,6 +1008,22 @@ function ManageSection({
     },
     {
       kind: "leaf",
+      id: "projects-manage",
+      text: t("myProjects"),
+      Icon: FolderKanbanIcon,
+      href: manageHref({ basePath }, "projects"),
+      pathCheck: { startsWith: manageHref({ basePath }, "projects") },
+    },
+    {
+      kind: "leaf",
+      id: "observations-manage",
+      text: t("myObservations"),
+      Icon: BinocularsIcon,
+      href: manageHref({ basePath }, "observations"),
+      pathCheck: { startsWith: manageHref({ basePath }, "observations") },
+    },
+    {
+      kind: "leaf",
       id: "organizations-manage",
       text: t("myOrganizations"),
       Icon: Building2Icon,
@@ -931,7 +1059,7 @@ function ManageSection({
           ))}
         </ul>
       ) : (
-        <SignInPrompt />
+        <SignInPrompt collapsed={collapsed} />
       )}
     </div>
   );
@@ -941,13 +1069,14 @@ function ManageSectionSkeleton() {
   // Mirrors the real <ul className="flex flex-col gap-0.5"> of NavLeaf rows:
   // each row is an h-9 button-shaped pill with a leading h-7 icon chip and a
   // label bar. Account kind isn't known yet, so we show a representative count.
+  const collapsed = useSidebarCollapsed();
   const labelWidths = ["w-24", "w-16", "w-20", "w-16"];
   return (
     <ul className="flex flex-col gap-0.5" aria-hidden="true">
       {labelWidths.map((width, index) => (
-        <li key={index} className="flex h-9 items-center gap-2 pl-1">
-          <Skeleton className="sidebar-skeleton h-7 w-[42px] shrink-0 rounded-full" />
-          <Skeleton className={`sidebar-skeleton h-3.5 rounded-full ${width}`} />
+        <li key={index} className={cn("flex h-9 items-center gap-2", collapsed ? "justify-center px-0" : "pl-1")}>
+          <Skeleton className="sidebar-skeleton h-7 w-7 shrink-0 rounded-full" />
+          {collapsed ? null : <Skeleton className={`sidebar-skeleton h-3.5 rounded-full ${width}`} />}
         </li>
       ))}
     </ul>
@@ -955,9 +1084,10 @@ function ManageSectionSkeleton() {
 }
 
 function SocialFooter() {
+  const collapsed = useSidebarCollapsed();
   return (
-    <div className="flex items-center justify-between px-1">
-      <span className="text-xs font-medium text-muted-foreground">GainForest v{APP_VERSION}</span>
+    <div className={cn("flex items-center px-1", collapsed ? "justify-center" : "justify-between")}>
+      {collapsed ? null : <span className="text-xs font-medium text-muted-foreground">GainForest v{APP_VERSION}</span>}
       <ThemeToggle />
     </div>
   );

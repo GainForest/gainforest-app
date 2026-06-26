@@ -624,7 +624,7 @@
     "tainaBody": "Tainá fica no Telegram. Envie para ela suas fotos de campo, avistamentos e gravações de som, e ela coloca tudo nesta organização para você. Arquivos grandes do AudioMoth também são bem vindos.",
     "tainaCta": "Dizer oi no Telegram",
     "title": "Observações",
-    "description": "Revise os registros de biodiversidade vinculados a esta organização.",
+    "description": "Colete e envie fotos de campo com espécies, datas e locais. Vincule-as a um projeto para reutilizá-las como evidência ao emitir um Cert.",
     "addObservation": "Adicionar observação",
     "backToObservations": "Voltar às observações",
     "bulkTitle": "Adicionar observações por imagens",
@@ -769,7 +769,19 @@
     "deleteSelectedTitle": "Excluir observações selecionadas?",
     "deleteSelectedDescription": "{count, plural, one {Isto remove # observação selecionada e suas mídias vinculadas. Não pode ser desfeito.} other {Isto remove # observações selecionadas e suas mídias vinculadas. Não pode ser desfeito.}}",
     "deleteSelectedConfirm": "Excluir selecionadas",
-    "deletingSelected": "Excluindo…"
+    "deletingSelected": "Excluindo…",
+    "metadata": {
+      "title": "Observações — GainForest",
+      "description": "Colete e envie observações de campo e vincule-as aos seus projetos."
+    },
+    "projectLabel": "Coletar para um projeto",
+    "projectHelp": "Opcional. Vincule estas observações a um dos seus projetos para deixá-las prontas como evidência.",
+    "projectNone": "Sem projeto",
+    "projectAttached": "Estas observações serão coletadas para {project}.",
+    "filterAllProjects": "Todos os projetos",
+    "filterByProject": "Filtrar observações por projeto",
+    "filterEmptyTitle": "Ainda não há observações para este projeto",
+    "filterEmptyBody": "Colete observações e vincule-as a este projeto para vê-las aqui."
   },
   "settings": {
     "organizationTitle": "Configurações da organização",

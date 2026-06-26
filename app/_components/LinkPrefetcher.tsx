@@ -8,6 +8,7 @@ const IMPORTANT_ROUTES = [
   "/organizations",
   "/observations",
   "/leaderboard",
+  "/bioblitz",
   "/devices",
   "/status",
   "/donations",

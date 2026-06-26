@@ -624,7 +624,7 @@
     "tainaBody": "Tainá yuko Telegram. Mtumie picha zako za uwandani, viumbe ulioona na rekodi za sauti, naye ataziweka kwenye shirika hili kwa ajili yako. Faili kubwa za AudioMoth zinakaribishwa pia.",
     "tainaCta": "Salimia Telegram",
     "title": "Uchunguzi",
-    "description": "Kagua rekodi za bioanuwai zilizounganishwa na shirika hili.",
+    "description": "Kusanya na pakia picha za shambani zenye spishi, tarehe, na maeneo. Ziunganishe na mradi ili kuzitumia tena kama ushahidi unapotoa Cert.",
     "addObservation": "Ongeza uchunguzi",
     "backToObservations": "Rudi kwenye uchunguzi",
     "bulkTitle": "Ongeza uchunguzi kutoka picha",
@@ -769,7 +769,19 @@
     "deleteSelectedTitle": "Futa uchunguzi uliochaguliwa?",
     "deleteSelectedDescription": "{count, plural, one {Hii itaondoa uchunguzi # uliochaguliwa na media iliyounganishwa. Haiwezi kutenduliwa.} other {Hii itaondoa uchunguzi # uliochaguliwa na media zilizounganishwa. Haiwezi kutenduliwa.}}",
     "deleteSelectedConfirm": "Futa vilivyochaguliwa",
-    "deletingSelected": "Inafuta…"
+    "deletingSelected": "Inafuta…",
+    "metadata": {
+      "title": "Uchunguzi — GainForest",
+      "description": "Kusanya na pakia uchunguzi wa shambani na uunganishe na miradi yako."
+    },
+    "projectLabel": "Kusanya kwa ajili ya mradi",
+    "projectHelp": "Si lazima. Unganisha uchunguzi huu na mojawapo ya miradi yako ili uwe tayari kutumika kama ushahidi.",
+    "projectNone": "Hakuna mradi",
+    "projectAttached": "Uchunguzi huu utakusanywa kwa ajili ya {project}.",
+    "filterAllProjects": "Miradi yote",
+    "filterByProject": "Chuja uchunguzi kwa mradi",
+    "filterEmptyTitle": "Bado hakuna uchunguzi kwa mradi huu",
+    "filterEmptyBody": "Kusanya uchunguzi na uunganishe na mradi huu ili kuuona hapa."
   },
   "settings": {
     "organizationTitle": "Mipangilio ya shirika",

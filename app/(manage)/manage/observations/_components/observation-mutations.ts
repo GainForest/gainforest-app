@@ -80,6 +80,7 @@ export async function createObservationPhoto(input: {
   occurrenceRef: string;
   subjectPart: string;
   caption?: string;
+  siteRef?: string;
 }): Promise<ObservationPhotoResult> {
   const result = await createMultimediaFromFile(
     {
@@ -87,6 +88,7 @@ export async function createObservationPhoto(input: {
       occurrenceRef: input.occurrenceRef,
       subjectPart: input.subjectPart,
       caption: input.caption,
+      siteRef: input.siteRef,
     },
     mutationOptions(),
   );

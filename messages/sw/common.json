@@ -55,6 +55,7 @@
       "bumicerts": "vyeti",
       "organizations": "Mashirika",
       "leaderboard": "Ubao wa wanaoongoza",
+      "bioblitz": "BioBlitz",
       "organization": "Shirika",
       "sites": "Maeneo",
       "audio": "Sauti",
@@ -90,7 +91,9 @@
     "tabs": {
       "explore": "Gundua",
       "manage": "Simamia"
-    }
+    },
+    "collapse": "Kunja menyu ya kando",
+    "expand": "Panua menyu ya kando"
   },
   "bumicertCard": {
     "missingImage": "Picha ya cheti haipatikani",
@@ -120,6 +123,7 @@
       "organizations": "Mashirika",
       "observations": "Uchunguzi",
       "leaderboard": "Ubao wa wanaoongoza",
+      "bioblitz": "BioBlitz",
       "greenGlobe": "Green Globe",
       "status": "Hali"
     }

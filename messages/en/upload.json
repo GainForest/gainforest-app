@@ -624,7 +624,7 @@
     "tainaBody": "Prefer chat? Send your photos and recordings to Tainá on Telegram and she will add them here for you.",
     "tainaCta": "Say hi on Telegram",
     "title": "Observations",
-    "description": "Review the biodiversity records attached to this organization.",
+    "description": "Collect and upload field photos with species, dates, and places. Attach them to a project to reuse as evidence when you mint a Cert.",
     "addObservation": "Add observation",
     "backToObservations": "Back to observations",
     "bulkTitle": "Add observations from images",
@@ -769,7 +769,19 @@
     "deleteSelectedTitle": "Delete selected observations?",
     "deleteSelectedDescription": "{count, plural, one {This removes # selected observation and its linked media. This cannot be undone.} other {This removes # selected observations and their linked media. This cannot be undone.}}",
     "deleteSelectedConfirm": "Delete selected",
-    "deletingSelected": "Deleting…"
+    "deletingSelected": "Deleting…",
+    "metadata": {
+      "title": "Observations — GainForest",
+      "description": "Collect and upload field observations and attach them to your projects."
+    },
+    "projectLabel": "Collect for a project",
+    "projectHelp": "Optional. Attach these observations to one of your projects so they're ready to use as evidence.",
+    "projectNone": "No project",
+    "projectAttached": "These observations will be collected for {project}.",
+    "filterAllProjects": "All projects",
+    "filterByProject": "Filter observations by project",
+    "filterEmptyTitle": "No observations for this project yet",
+    "filterEmptyBody": "Collect observations and attach them to this project to see them here."
   },
   "settings": {
     "organizationTitle": "Organization settings",

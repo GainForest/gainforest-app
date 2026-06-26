@@ -222,6 +222,20 @@ function classifySocial(url: string): string {
   return "website";
 }
 
+function DashboardSection({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <motion.section
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, delay: 0.1, ease: SECTION_EASE }}
+      className="space-y-4"
+    >
+      <h2 className="font-instrument text-2xl italic leading-none text-foreground">{title}</h2>
+      {children}
+    </motion.section>
+  );
+}
+
 function AboutSection({
   value,
   draft,
@@ -582,6 +596,7 @@ export function ManageDashboardClient({
   const searchParams = useSearchParams();
   const modal = useModal();
   const t = useTranslations("upload.dashboardClient");
+  const navT = useTranslations("common.sidebar.items");
   const rawMode = mode === undefined ? searchParams.get("mode") ?? undefined : mode ?? undefined;
   const parsedMode = mode === undefined ? parseManageMode(rawMode) : mode;
   const hasCompletedSetup = account.summary.hasCertifiedProfile || account.summary.hasCertifiedOrg;
@@ -938,19 +953,25 @@ export function ManageDashboardClient({
               onCancel={() => { setEditLongDescription((pendingOptimisticSave?.state ?? accountState).longDescription); setSaveError(null); setInlineField(null); }}
               editDisabledReason={profileEditPermission.reason}
             />
+            {children}
+            {writeRepoDid && groupRole ? (
+              <GroupMembers
+                groupDid={writeRepoDid}
+                currentRole={groupRole}
+                currentUserDid={currentUserDid}
+                variant="section"
+                showDataCouncil
+              />
+            ) : null}
           </>
-        ) : null}
-        {account.kind === "user" ? <ManageGroupsClient sessionDid={account.did} /> : null}
-        {children}
-        {account.kind === "organization" && writeRepoDid && groupRole ? (
-          <GroupMembers
-            groupDid={writeRepoDid}
-            currentRole={groupRole}
-            currentUserDid={currentUserDid}
-            variant="section"
-            showDataCouncil
-          />
-        ) : null}
+        ) : (
+          <>
+            <DashboardSection title={navT("myProjects")}>{children}</DashboardSection>
+            <DashboardSection title={navT("myOrganizations")}>
+              <ManageGroupsClient sessionDid={account.did} />
+            </DashboardSection>
+          </>
+        )}
       </Container>
     </>
   );

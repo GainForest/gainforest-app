@@ -31,9 +31,12 @@ function manageBasePath(): string {
 
 function newCertUrl(options: FillCertFormOptions): string {
   const basePath = manageBasePath();
+  // Certs are minted from a project: hitting /certs/new with no project now
+  // shows a project chooser. forProject binds a project; noProject=1 is the
+  // explicit "mint without linking" path that lands straight on the form.
   return options.forProject
     ? `${basePath}/certs/new?forProject=${encodeURIComponent(options.forProject)}`
-    : `${basePath}/certs/new`;
+    : `${basePath}/certs/new?noProject=1`;
 }
 
 export async function expectCertPublishValidationEdgeCases(page: Page, testInfo: TestInfo): Promise<void> {

@@ -55,6 +55,7 @@
       "bumicerts": "sertifikat",
       "organizations": "Organisasi",
       "leaderboard": "Papan peringkat",
+      "bioblitz": "BioBlitz",
       "organization": "Organisasi",
       "sites": "Situs",
       "audio": "Audio",
@@ -90,7 +91,9 @@
     "tabs": {
       "explore": "Jelajahi",
       "manage": "Kelola"
-    }
+    },
+    "collapse": "Ciutkan bilah sisi",
+    "expand": "Bentangkan bilah sisi"
   },
   "bumicertCard": {
     "missingImage": "Gambar sertifikat tidak tersedia",
@@ -120,6 +123,7 @@
       "organizations": "Organisasi",
       "observations": "Observasi",
       "leaderboard": "Papan peringkat",
+      "bioblitz": "BioBlitz",
       "greenGlobe": "Green Globe",
       "status": "Status"
     }

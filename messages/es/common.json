@@ -55,6 +55,7 @@
       "bumicerts": "certificados",
       "organizations": "Organizaciones",
       "leaderboard": "Clasificación",
+      "bioblitz": "BioBlitz",
       "organization": "Organización",
       "sites": "Sitios",
       "audio": "Audio",
@@ -90,7 +91,9 @@
     "tabs": {
       "explore": "Explorar",
       "manage": "Gestionar"
-    }
+    },
+    "collapse": "Contraer barra lateral",
+    "expand": "Expandir barra lateral"
   },
   "bumicertCard": {
     "missingImage": "Imagen del certificado no disponible",
@@ -120,6 +123,7 @@
       "organizations": "Organizaciones",
       "observations": "Observaciones",
       "leaderboard": "Clasificación",
+      "bioblitz": "BioBlitz",
       "greenGlobe": "Green Globe",
       "status": "Estado"
     }
