@@ -42,6 +42,9 @@ export type BioblitzRound = {
   start: string;
   /** Inclusive UTC end instant (ISO) — the final moment of the last day. */
   end: string;
+  /** External registration page for the round (Luma). Registering is how a
+   *  participant is tracked for prize eligibility. */
+  rsvpUrl?: string;
   /** Set once the round closes and the observations winner is confirmed. */
   mostObservations?: RoundWinner | null;
   /** Set once the round's best-picture pick is confirmed. */
@@ -58,8 +61,18 @@ export const BIOBLITZ_ROUNDS: BioblitzRound[] = [
     label: "Round 1 · Pilot",
     start: "2026-06-26T00:00:00.000Z",
     end: "2026-07-03T23:59:59.999Z",
+    rsvpUrl: "https://luma.com/0yujr98x",
   },
 ];
+
+/**
+ * Program-wide support links (the same across rounds): a live "ask us anything"
+ * office-hours calendar and the community chat for questions.
+ */
+export const BIOBLITZ_LINKS = {
+  officeHours: "https://calendar.app.google/Ki7h3s5ufAXv4mr48",
+  community: "https://t.me/+i15G35wxQT5jNTA1",
+} as const;
 
 export type RoundStatus = "upcoming" | "live" | "ended";
 

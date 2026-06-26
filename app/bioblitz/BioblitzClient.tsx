@@ -8,10 +8,13 @@ import {
   ArrowRightIcon,
   BadgeCheckIcon,
   BinocularsIcon,
+  CalendarCheckIcon,
+  CalendarClockIcon,
   CameraIcon,
   ClockIcon,
   CrownIcon,
   MapPinnedIcon,
+  MessagesSquareIcon,
   ScanSearchIcon,
   TrophyIcon,
   UploadIcon,
@@ -23,6 +26,7 @@ import { PreferredAccountLink } from "../_components/PreferredLinks";
 import { StatsTileGrid, type StatsTileItem } from "../_components/StatsTile";
 import { formatNumber } from "../_lib/format";
 import {
+  BIOBLITZ_LINKS,
   BIOBLITZ_PRIZES,
   countdownTo,
   endedRounds,
@@ -157,8 +161,53 @@ function Hero({
         </span>
       </div>
 
-      <p className="mt-3 text-xs text-muted-foreground/80">{t("hero.program")}</p>
+      {/* Register CTA (round-specific) + program-wide help links */}
+      {round.rsvpUrl && status !== "ended" ? (
+        <div className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-2">
+          <a
+            href={round.rsvpUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm shadow-primary/20 transition-colors hover:bg-primary-dark"
+          >
+            <CalendarCheckIcon className="size-4" aria-hidden />
+            {t("rsvp.button")}
+          </a>
+          <span className="text-sm text-muted-foreground">{t("rsvp.note")}</span>
+        </div>
+      ) : null}
+
+      <HelpLinks />
+
+      <p className="mt-4 text-xs text-muted-foreground/80">{t("hero.program")}</p>
     </motion.header>
+  );
+}
+
+function HelpLinks() {
+  const t = useTranslations("marketplace.bioblitz.help");
+  return (
+    <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-sm text-muted-foreground">
+      <span className="font-medium text-foreground/70">{t("prompt")}</span>
+      <a
+        href={BIOBLITZ_LINKS.officeHours}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="inline-flex items-center gap-1.5 font-medium text-primary underline-offset-4 hover:underline"
+      >
+        <CalendarClockIcon className="size-4" aria-hidden />
+        {t("officeHours")}
+      </a>
+      <a
+        href={BIOBLITZ_LINKS.community}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="inline-flex items-center gap-1.5 font-medium text-primary underline-offset-4 hover:underline"
+      >
+        <MessagesSquareIcon className="size-4" aria-hidden />
+        {t("community")}
+      </a>
+    </div>
   );
 }
 
