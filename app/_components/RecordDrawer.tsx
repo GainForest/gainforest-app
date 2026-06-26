@@ -37,6 +37,7 @@ import {
   accountHref,
   localBumicertHref,
   localObservationHref,
+  localProjectHref,
 } from "../_lib/urls";
 
 type RecordDrawerT = ReturnType<typeof useTranslations<"marketplace.recordDrawer">>;
@@ -271,6 +272,7 @@ export function RecordDrawer({
     record.kind === "occurrence" && record.atUri.includes("/app.gainforest.dwc.occurrence/")
       ? localObservationHref(preferredOwnerIdentifier, record.rkey)
       : null;
+  const projectHref = record.kind === "project" ? localProjectHref(preferredOwnerIdentifier, record.rkey) : null;
   const ownerHref = accountHref(preferredOwnerIdentifier);
   const managingGroupRole = isEditableObservationRecord(record)
     ? groupMemberships.find((group) => group.groupDid === record.did)?.role ?? null
@@ -372,7 +374,7 @@ export function RecordDrawer({
                 <KindBadge record={record} floating />
               </div>
               <div className="pointer-events-auto flex items-center gap-2">
-                {observationHref ? <MaximizeButton href={observationHref} /> : null}
+                {(observationHref ?? projectHref) ? <MaximizeButton href={(observationHref ?? projectHref)!} /> : null}
                 <CloseButton onClose={onClose} floating />
               </div>
             </div>
@@ -381,7 +383,7 @@ export function RecordDrawer({
           <div className="sticky top-0 z-10 flex items-center justify-between gap-3 border-b border-border-soft bg-background/90 px-5 py-4 backdrop-blur-xl">
             <KindBadge record={record} />
             <div className="flex items-center gap-2">
-              {observationHref ? <MaximizeButton href={observationHref} /> : null}
+              {(observationHref ?? projectHref) ? <MaximizeButton href={(observationHref ?? projectHref)!} /> : null}
               <CloseButton onClose={onClose} />
             </div>
           </div>
@@ -487,11 +489,25 @@ export function RecordDrawer({
           </div>
 
           {record.kind === "project" && (
-            <ProjectBumicertList
-              records={projectBumicerts}
-              totalCount={record.bumicertCount}
-              requestedCount={record.bumicertUris.length}
-            />
+            <>
+              {projectHref && (
+                <div className="mt-5 flex items-center gap-2.5">
+                  <Link
+                    href={projectHref}
+                    className="inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-full bg-primary px-4 text-[14px] font-medium text-primary-foreground shadow-sm transition-all hover:bg-primary/90 hover:shadow-md"
+                  >
+                    <Maximize2Icon className="h-4 w-4" />
+                    {t("actions.viewProject")}
+                  </Link>
+                  <ShareIconButton path={projectHref} />
+                </div>
+              )}
+              <ProjectBumicertList
+                records={projectBumicerts}
+                totalCount={record.bumicertCount}
+                requestedCount={record.bumicertUris.length}
+              />
+            </>
           )}
 
           {record.kind === "occurrence" && (

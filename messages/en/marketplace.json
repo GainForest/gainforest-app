@@ -956,6 +956,7 @@
       "cancel": "Cancel",
       "saveChanges": "Save changes",
       "viewObservation": "View observation page",
+      "viewProject": "View project page",
       "openFullPage": "Open full page"
     },
     "kind": {
@@ -1085,6 +1086,18 @@
       "rightsHolder": "Rights holder",
       "sightingId": "Sighting ID"
     }
+  },
+  "projectPage": {
+    "back": "All projects",
+    "kind": "Project",
+    "ledBy": "Project by",
+    "viewProfile": "View profile",
+    "created": "Created",
+    "certs": "Certs",
+    "certsTitle": "Certs in this project",
+    "noCerts": "No Certs have been added to this project yet.",
+    "metaTitle": "{name} — Project",
+    "metaFallback": "A project shared on GainForest."
   },
   "observationPage": {
     "back": "All sightings",

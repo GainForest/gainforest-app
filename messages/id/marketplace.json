@@ -956,6 +956,7 @@
       "cancel": "Batal",
       "saveChanges": "Simpan perubahan",
       "viewObservation": "Lihat halaman pengamatan",
+      "viewProject": "Lihat halaman proyek",
       "openFullPage": "Buka halaman penuh"
     },
     "kind": {
@@ -1085,6 +1086,18 @@
       "rightsHolder": "Pemegang hak",
       "sightingId": "ID pengamatan"
     }
+  },
+  "projectPage": {
+    "back": "Semua proyek",
+    "kind": "Proyek",
+    "ledBy": "Proyek oleh",
+    "viewProfile": "Lihat profil",
+    "created": "Dibuat",
+    "certs": "Sertifikat",
+    "certsTitle": "Sertifikat di proyek ini",
+    "noCerts": "Belum ada sertifikat yang ditambahkan ke proyek ini.",
+    "metaTitle": "{name} — Proyek",
+    "metaFallback": "Sebuah proyek yang dibagikan di GainForest."
   },
   "observationPage": {
     "back": "Semua pengamatan",

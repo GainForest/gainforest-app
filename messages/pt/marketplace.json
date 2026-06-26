@@ -956,6 +956,7 @@
       "cancel": "Cancelar",
       "saveChanges": "Salvar alterações",
       "viewObservation": "Ver página da observação",
+      "viewProject": "Ver página do projeto",
       "openFullPage": "Abrir página completa"
     },
     "kind": {
@@ -1085,6 +1086,18 @@
       "rightsHolder": "Titular dos direitos",
       "sightingId": "ID da observação"
     }
+  },
+  "projectPage": {
+    "back": "Todos os projetos",
+    "kind": "Projeto",
+    "ledBy": "Projeto de",
+    "viewProfile": "Ver perfil",
+    "created": "Criado",
+    "certs": "Certificados",
+    "certsTitle": "Certificados deste projeto",
+    "noCerts": "Nenhum certificado foi adicionado a este projeto ainda.",
+    "metaTitle": "{name} — Projeto",
+    "metaFallback": "Um projeto compartilhado no GainForest."
   },
   "observationPage": {
     "back": "Todos os avistamentos",

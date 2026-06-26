@@ -956,6 +956,7 @@
       "cancel": "Ghairi",
       "saveChanges": "Hifadhi mabadiliko",
       "viewObservation": "Tazama ukurasa wa uchunguzi",
+      "viewProject": "Tazama ukurasa wa mradi",
       "openFullPage": "Fungua ukurasa kamili"
     },
     "kind": {
@@ -1085,6 +1086,18 @@
       "rightsHolder": "Mmiliki wa haki",
       "sightingId": "ID ya muono"
     }
+  },
+  "projectPage": {
+    "back": "Miradi yote",
+    "kind": "Mradi",
+    "ledBy": "Mradi wa",
+    "viewProfile": "Tazama wasifu",
+    "created": "Imeundwa",
+    "certs": "Vyeti",
+    "certsTitle": "Vyeti vya mradi huu",
+    "noCerts": "Hakuna vyeti vilivyoongezwa kwenye mradi huu bado.",
+    "metaTitle": "{name} — Mradi",
+    "metaFallback": "Mradi ulioshirikiwa kwenye GainForest."
   },
   "observationPage": {
     "back": "Uchunguzi wote",
