@@ -99,6 +99,7 @@
       "explore": "Jelajahi",
       "manage": "Kelola"
     },
+    "manageGroupTitle": "Kelola {account}",
     "collapse": "Ciutkan bilah sisi",
     "expand": "Bentangkan bilah sisi"
   },

@@ -99,6 +99,7 @@
       "explore": "Explorar",
       "manage": "Gestionar"
     },
+    "manageGroupTitle": "Gestionar {account}",
     "collapse": "Contraer barra lateral",
     "expand": "Expandir barra lateral"
   },

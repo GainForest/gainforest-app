@@ -99,6 +99,7 @@
       "explore": "Gundua",
       "manage": "Simamia"
     },
+    "manageGroupTitle": "Simamia {account}",
     "collapse": "Kunja menyu ya kando",
     "expand": "Panua menyu ya kando"
   },

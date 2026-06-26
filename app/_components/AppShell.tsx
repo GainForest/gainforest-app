@@ -10,25 +10,17 @@ import {
   Building2Icon,
   CheckIcon,
   ChevronLeftIcon,
-  CompassIcon,
-  DroneIcon,
   FolderKanbanIcon,
   HeartHandshakeIcon,
   HeartIcon,
   ImagePlusIcon,
-  LayoutDashboardIcon,
   LeafIcon,
-  MapPinIcon,
   MenuIcon,
-  MicIcon,
   MoonIcon,
   PlusIcon,
-  SettingsIcon,
   Share2Icon,
   SparkleIcon,
   SunIcon,
-  TreePineIcon,
-  UserIcon,
 } from "lucide-react";
 import { createContext, Suspense, useContext, useEffect, useState, type MouseEvent, type SVGProps } from "react";
 import { useTranslations } from "next-intl";
@@ -42,9 +34,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import {
-  ACTIVE_MANAGE_CONTEXT_KEY,
-  activeContextToManagePath,
-  groupIdentifierFromManagePath,
   groupManageBasePath,
   manageHref,
 } from "@/lib/links";
@@ -55,7 +44,6 @@ import {
   useAccountList,
   useActiveAccountContext,
 } from "../_lib/account-switcher";
-import { ManageContextSwitcher } from "./ManageContextSwitcher";
 import { HeaderSlotsProvider, useHeaderSlots } from "./HeaderSlots";
 import { LanguageSelector } from "@/components/i18n/LanguageSelector";
 import { ModalContent, ModalDescription, ModalFooter, ModalTitle } from "@/components/ui/modal/modal";
@@ -192,11 +180,6 @@ function markOnboardingPromptShown(key: string) {
   }
 }
 
-function readContextualManageBasePath(): string {
-  if (typeof window === "undefined") return "/manage";
-  return activeContextToManagePath(window.localStorage.getItem(ACTIVE_MANAGE_CONTEXT_KEY));
-}
-
 function canonicalPathname(pathname: string): string {
   // usePathname() returns the browser-visible locale prefix (for example
   // /en/manage), while the app routes live at /manage after proxy rewrite.
@@ -205,33 +188,6 @@ function canonicalPathname(pathname: string): string {
 
 function useCanonicalPathname(): string {
   return canonicalPathname(usePathname() ?? "/");
-}
-
-function useContextualManageBasePath(): string {
-  const pathname = useCanonicalPathname();
-  const groupIdentifier = groupIdentifierFromManagePath(pathname);
-  // Keep the server render and the first client render identical. Reading
-  // localStorage in the state initializer makes links hydrate as /manage on the
-  // server but /manage/groups/... on the client when a group context is saved.
-  const [basePath, setBasePath] = useState("/manage");
-
-  useEffect(() => {
-    if (groupIdentifier) return;
-
-    const refresh = () => setBasePath(readContextualManageBasePath());
-    refresh();
-    const handleStorage = (event: StorageEvent) => {
-      if (event.key === ACTIVE_MANAGE_CONTEXT_KEY) refresh();
-    };
-    window.addEventListener("storage", handleStorage);
-    window.addEventListener("gainforest-active-account-context", refresh);
-    return () => {
-      window.removeEventListener("storage", handleStorage);
-      window.removeEventListener("gainforest-active-account-context", refresh);
-    };
-  }, [groupIdentifier]);
-
-  return groupIdentifier ? groupManageBasePath(groupIdentifier) : basePath;
 }
 
 export function AppShell({
@@ -353,21 +309,20 @@ export function AppShell({
           <div className="relative hidden md:block">
             <UnifiedSidebar
               authSession={resolvedAuthSession}
-              manageAccountKind={resolvedManageAccountKind}
-              isProfileLoading={isProfileLoading}
               collapsed={sidebarCollapsed}
             />
             <SidebarCollapseToggle collapsed={sidebarCollapsed} onToggle={toggleSidebarCollapsed} />
           </div>
           <MobileNavDrawer open={mobileNavOpen} onOpenChange={setMobileNavOpen}>
-            <UnifiedSidebar
-              authSession={resolvedAuthSession}
-              manageAccountKind={resolvedManageAccountKind}
-              isProfileLoading={isProfileLoading}
-            />
+            <UnifiedSidebar authSession={resolvedAuthSession} />
           </MobileNavDrawer>
           <main className="relative flex-1 overflow-y-auto">
-            <Header authSession={resolvedAuthSession} profileName={resolvedProfileName} onOpenMobileNav={() => setMobileNavOpen(true)} />
+            <Header
+              authSession={resolvedAuthSession}
+              profileName={resolvedProfileName}
+              manageAccountKind={resolvedManageAccountKind}
+              onOpenMobileNav={() => setMobileNavOpen(true)}
+            />
             <FreshAccountOnboardingPrompt
               authSession={resolvedAuthSession}
               isProfileLoading={isProfileLoading}
@@ -497,18 +452,11 @@ function SidebarCollapseToggle({ collapsed, onToggle }: { collapsed: boolean; on
 
 function UnifiedSidebar({
   authSession,
-  manageAccountKind,
-  isProfileLoading,
   collapsed = false,
 }: {
   authSession: AuthSession | null;
-  manageAccountKind: ManageAccountKind;
-  isProfileLoading: boolean;
   collapsed?: boolean;
 }) {
-  const pathname = useCanonicalPathname();
-  const activeTab: SidebarTab = pathname.startsWith("/manage") ? "manage" : "explore";
-
   return (
     <SidebarCollapsedContext.Provider value={collapsed}>
     <nav
@@ -517,67 +465,36 @@ function UnifiedSidebar({
         collapsed ? "w-[76px] overflow-visible p-3" : "w-[256px] overflow-hidden p-4",
       )}
     >
-      <AnimatePresence>
-        <motion.div
-          key={activeTab}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-x-0 bottom-0 -z-10 h-108 overflow-hidden"
-        >
-          {/* Ambient glow — present in both modes */}
-          <div className="absolute -bottom-24 left-1/2 h-56 w-[160%] -translate-x-1/2 rounded-[50%] bg-primary/20 blur-3xl" />
-          <div className="absolute bottom-0 left-1/3 h-32 w-32 -translate-x-1/2 rounded-full bg-primary/[0.12] blur-2xl" />
-          {/* Mode-specific line art that bleeds off the bottom edge */}
-          {activeTab === "manage" ? <ManageArt /> : <ExploreArt />}
-        </motion.div>
-      </AnimatePresence>
-
-      <SidebarHeader />
-
-      <div className="mt-2">
-        <SidebarTabs activeTab={activeTab} />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 bottom-0 -z-10 h-108 overflow-hidden"
+      >
+        {/* Ambient glow */}
+        <div className="absolute -bottom-24 left-1/2 h-56 w-[160%] -translate-x-1/2 rounded-[50%] bg-primary/20 blur-3xl" />
+        <div className="absolute bottom-0 left-1/3 h-32 w-32 -translate-x-1/2 rounded-full bg-primary/[0.12] blur-2xl" />
+        {/* Climbing-vine line art that bleeds off the bottom edge */}
+        <ExploreArt />
       </div>
 
-      {authSession?.isLoggedIn ? (
-        <div className="mt-3">
-          <ManageContextSwitcher sessionDid={authSession.did} collapsed={collapsed} />
-        </div>
-      ) : null}
+      <SidebarHeader />
 
       <div className="mt-3 border-t border-border" />
 
       <div className={cn("flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto pt-3", collapsed ? "overflow-x-hidden" : "pr-1")}>
-        {activeTab === "explore" ? (
-          <>
-            <LayoutGroup id="unified-sidebar-nav">
-              <ExploreNav />
-            </LayoutGroup>
+        <LayoutGroup id="unified-sidebar-nav">
+          <ExploreNav />
+        </LayoutGroup>
 
-            <div className="mt-auto flex flex-col gap-3 pt-4">
-              {authSession?.isLoggedIn ? (
-                <>
-                  <BumicertCreationCard sessionDid={authSession.did} />
-                  <ObservationCreationCard sessionDid={authSession.did} />
-                </>
-              ) : (
-                <SignInPrompt collapsed={collapsed} />
-              )}
-            </div>
-          </>
-        ) : (
-          <LayoutGroup id="unified-sidebar-nav-manage">
-            <Suspense fallback={<ManageSectionSkeleton />}>
-              <ManageSection
-                authSession={authSession}
-                manageAccountKind={manageAccountKind}
-                isProfileLoading={isProfileLoading}
-              />
-            </Suspense>
-          </LayoutGroup>
-        )}
+        <div className="mt-auto flex flex-col gap-3 pt-4">
+          {authSession?.isLoggedIn ? (
+            <>
+              <BumicertCreationCard sessionDid={authSession.did} />
+              <ObservationCreationCard sessionDid={authSession.did} />
+            </>
+          ) : (
+            <SignInPrompt collapsed={collapsed} />
+          )}
+        </div>
       </div>
 
       <div className="mt-3 border-t border-border pt-3">
@@ -585,63 +502,6 @@ function UnifiedSidebar({
       </div>
     </nav>
     </SidebarCollapsedContext.Provider>
-  );
-}
-
-type SidebarTab = "explore" | "manage";
-
-const SIDEBAR_TABS: {
-  id: SidebarTab;
-  label: string;
-  href: string;
-  Icon: React.ComponentType<{ className?: string }>;
-}[] = [
-  { id: "explore", label: "Explore", href: "/certs", Icon: CompassIcon },
-  { id: "manage", label: "Manage", href: "/manage", Icon: LayoutDashboardIcon },
-];
-
-function SidebarTabs({ activeTab }: { activeTab: SidebarTab }) {
-  const manageBasePath = useContextualManageBasePath();
-  const collapsed = useSidebarCollapsed();
-  const t = useTranslations("common.sidebar.tabs");
-  return (
-    <LayoutGroup id="sidebar-tabs">
-      <div className={cn("flex rounded-full border border-border bg-foreground/5 p-1", collapsed && "flex-col gap-1 rounded-2xl")}>
-        {SIDEBAR_TABS.map((tab) => {
-          const isActive = tab.id === activeTab;
-          return (
-            <SidebarTooltip key={tab.id} label={t(tab.id)}>
-              <Link
-                href={tab.id === "manage" ? manageBasePath : tab.href}
-                aria-current={isActive ? "page" : undefined}
-                aria-label={collapsed ? t(tab.id) : undefined}
-                className={cn(
-                  "relative rounded-full text-center text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50",
-                  collapsed ? "flex items-center justify-center py-1.5" : "flex-1 px-3 py-1.5",
-                )}
-              >
-                {isActive ? (
-                  <motion.span
-                    layoutId="sidebar-tab-active"
-                    className="absolute inset-0 rounded-full bg-background shadow-sm ring-1 ring-border"
-                    transition={{ type: "spring", stiffness: 400, damping: 32 }}
-                  />
-                ) : null}
-                <span
-                  className={cn(
-                    "relative z-10 flex items-center justify-center gap-1.5 transition-colors",
-                    isActive ? "text-foreground" : "text-muted-foreground hover:text-foreground",
-                  )}
-                >
-                  <tab.Icon className="h-4 w-4 shrink-0 opacity-50" />
-                  {collapsed ? null : t(tab.id)}
-                </span>
-              </Link>
-            </SidebarTooltip>
-          );
-        })}
-      </div>
-    </LayoutGroup>
   );
 }
 
@@ -1030,190 +890,6 @@ function ObservationCreationCard({ sessionDid }: { sessionDid: string }) {
   );
 }
 
-function ManageSection({
-  authSession,
-  manageAccountKind,
-  isProfileLoading,
-}: {
-  authSession: AuthSession | null;
-  manageAccountKind: ManageAccountKind;
-  isProfileLoading: boolean;
-}) {
-  const pathname = useCanonicalPathname();
-  const searchParams = useSearchParams();
-  const collapsed = useSidebarCollapsed();
-  const t = useTranslations("common.sidebar.items");
-  const groupIdentifier = groupIdentifierFromManagePath(pathname);
-  const isGroupManageContext = Boolean(groupIdentifier);
-  const basePath = groupIdentifier ? groupManageBasePath(groupIdentifier) : "/manage";
-  const resolvedAccountKind = isGroupManageContext ? "organization" : manageAccountKind;
-
-  const organizationItems: NavLeaf[] = [
-    {
-      kind: "leaf",
-      id: "organization",
-      text: isGroupManageContext ? t("organizationHome") : t("myOrganization"),
-      Icon: Building2Icon,
-      href: basePath,
-      pathCheck: { equals: basePath },
-    },
-    // "My Organizations" is the cross-org switcher — hidden once you're scoped
-    // into a single organization's manage section.
-    ...(isGroupManageContext
-      ? []
-      : [
-          {
-            kind: "leaf" as const,
-            id: "organizations-manage",
-            text: t("myOrganizations"),
-            Icon: Building2Icon,
-            href: "/manage/organizations",
-            pathCheck: { startsWith: "/manage/organizations" },
-          },
-        ]),
-    {
-      kind: "leaf",
-      id: "sites",
-      text: t("mySites"),
-      Icon: MapPinIcon,
-      href: manageHref({ basePath }, "sites"),
-      pathCheck: { startsWith: manageHref({ basePath }, "sites") },
-    },
-    {
-      kind: "leaf",
-      id: "audio",
-      text: t("myAudio"),
-      Icon: MicIcon,
-      href: manageHref({ basePath }, "audio"),
-      pathCheck: { startsWith: manageHref({ basePath }, "audio") },
-    },
-    {
-      kind: "leaf",
-      id: "drone",
-      text: t("myDrone"),
-      Icon: DroneIcon,
-      href: manageHref({ basePath }, "drone"),
-      pathCheck: { startsWith: manageHref({ basePath }, "drone") },
-    },
-    {
-      kind: "leaf",
-      id: "projects-manage",
-      text: t("myProjects"),
-      Icon: FolderKanbanIcon,
-      href: manageHref({ basePath }, "projects"),
-      pathCheck: { startsWith: manageHref({ basePath }, "projects") },
-    },
-    {
-      kind: "leaf",
-      id: "observations-manage",
-      text: t("myObservations"),
-      Icon: BinocularsIcon,
-      href: manageHref({ basePath }, "observations"),
-      pathCheck: { startsWith: manageHref({ basePath }, "observations") },
-    },
-    {
-      kind: "leaf",
-      id: "trees",
-      text: t("myTrees"),
-      Icon: TreePineIcon,
-      href: manageHref({ basePath }, "trees"),
-      pathCheck: { startsWith: manageHref({ basePath }, "trees") },
-    },
-    {
-      kind: "leaf",
-      id: "settings",
-      text: t("settings"),
-      Icon: SettingsIcon,
-      href: manageHref({ basePath }, "settings"),
-      pathCheck: { startsWith: manageHref({ basePath }, "settings") },
-    },
-  ];
-  const userItems: NavLeaf[] = [
-    {
-      kind: "leaf",
-      id: "profile",
-      text: t("myProfile"),
-      Icon: UserIcon,
-      href: basePath,
-      pathCheck: { equals: basePath },
-    },
-    {
-      kind: "leaf",
-      id: "projects-manage",
-      text: t("myProjects"),
-      Icon: FolderKanbanIcon,
-      href: manageHref({ basePath }, "projects"),
-      pathCheck: { startsWith: manageHref({ basePath }, "projects") },
-    },
-    {
-      kind: "leaf",
-      id: "observations-manage",
-      text: t("myObservations"),
-      Icon: BinocularsIcon,
-      href: manageHref({ basePath }, "observations"),
-      pathCheck: { startsWith: manageHref({ basePath }, "observations") },
-    },
-    {
-      kind: "leaf",
-      id: "organizations-manage",
-      text: t("myOrganizations"),
-      Icon: Building2Icon,
-      href: "/manage/organizations",
-      pathCheck: { startsWith: "/manage/organizations" },
-    },
-    {
-      kind: "leaf",
-      id: "settings",
-      text: t("settings"),
-      Icon: SettingsIcon,
-      href: manageHref({ basePath }, "settings"),
-      pathCheck: { startsWith: manageHref({ basePath }, "settings") },
-    },
-  ];
-  const items: NavLeaf[] = authSession?.isLoggedIn
-    ? resolvedAccountKind === "organization" ? organizationItems : userItems
-    : [];
-
-  return (
-    <div className="flex flex-col gap-2">
-      {authSession == null || isProfileLoading ? (
-        <ManageSectionSkeleton />
-      ) : authSession.isLoggedIn ? (
-        <ul className="flex flex-col gap-0.5">
-          {items.map((item, index) => (
-            <NavLeaf
-              key={item.id}
-              item={item}
-              isActive={isManageLeafActive(item, pathname, searchParams.get("tab"))}
-              index={index + 1}
-            />
-          ))}
-        </ul>
-      ) : (
-        <SignInPrompt collapsed={collapsed} />
-      )}
-    </div>
-  );
-}
-
-function ManageSectionSkeleton() {
-  // Mirrors the real <ul className="flex flex-col gap-0.5"> of NavLeaf rows:
-  // each row is an h-8 row with a leading size-6 icon and a label bar.
-  // Account kind isn't known yet, so we show a representative count.
-  const collapsed = useSidebarCollapsed();
-  const labelWidths = ["w-24", "w-16", "w-20", "w-16"];
-  return (
-    <ul className="flex flex-col gap-0.5" aria-hidden="true">
-      {labelWidths.map((width, index) => (
-        <li key={index} className={cn("flex h-8 items-center gap-2.5", collapsed ? "justify-center px-0" : "px-2.5")}>
-          <Skeleton className="sidebar-skeleton size-6 shrink-0 rounded-full" />
-          {collapsed ? null : <Skeleton className={`sidebar-skeleton h-3.5 rounded-full ${width}`} />}
-        </li>
-      ))}
-    </ul>
-  );
-}
-
 function SocialFooter() {
   const collapsed = useSidebarCollapsed();
   return (
@@ -1337,10 +1013,12 @@ function MyRecordsHeaderButton({ route }: { route: MyRecordsRoute }) {
 function Header({
   authSession,
   profileName,
+  manageAccountKind,
   onOpenMobileNav,
 }: {
   authSession: AuthSession | null;
   profileName?: string | null;
+  manageAccountKind: ManageAccountKind;
   onOpenMobileNav: () => void;
 }) {
   const rawPathname = usePathname() ?? "/";
@@ -1411,7 +1089,12 @@ function Header({
               ) : null}
             </AnimatePresence>
             <LanguageSelector />
-            <AuthButton session={authSession} profileName={profileName} isProfileNameLoading={profileName === undefined} />
+            <AuthButton
+              session={authSession}
+              profileName={profileName}
+              isProfileNameLoading={profileName === undefined}
+              manageAccountKind={manageAccountKind}
+            />
           </div>
         </div>
 
@@ -1780,45 +1463,10 @@ function Vine({ side, className }: { side: "left" | "right"; className?: string 
   );
 }
 
-function ManageArt() {
-  // A wild forest horizon: rolling hills with scattered pines.
-  return (
-    <svg
-      className="absolute inset-x-0 bottom-0 w-full text-primary"
-      viewBox="0 0 240 120"
-      fill="none"
-      preserveAspectRatio="xMidYMax meet"
-    >
-      {/* Far hill */}
-      <path
-        d="M0 78 C 44 58 84 74 120 66 C 168 56 204 66 240 76 L240 120 L0 120 Z"
-        className="fill-primary/[0.06]"
-      />
-      {/* Near hill */}
-      <path
-        d="M0 100 C 52 84 92 98 140 92 C 188 86 216 96 240 100 L240 120 L0 120 Z"
-        className="fill-primary/[0.11]"
-      />
-      {/* Scattered pines along the ridge */}
-      <g className="fill-primary/20">
-        <path d="M40 80 L33 96 L47 96 Z M40 70 L31 86 L49 86 Z" />
-        <path d="M70 86 L65 98 L75 98 Z M70 78 L63 90 L77 90 Z" />
-        <path d="M176 84 L170 98 L182 98 Z M176 75 L168 89 L184 89 Z" />
-        <path d="M208 90 L203 100 L213 100 Z M208 83 L201 94 L215 94 Z" />
-      </g>
-    </svg>
-  );
-}
-
 function isLeafActive(pathCheck: { equals?: string; startsWith?: string }, pathname: string): boolean {
   if (pathCheck.equals) return pathname === pathCheck.equals;
   if (pathCheck.startsWith) return pathname.startsWith(pathCheck.startsWith);
   return false;
-}
-
-function isManageLeafActive(item: NavLeaf, pathname: string, activeTab: string | null): boolean {
-  if (item.tabCheck) return pathname === item.pathCheck.equals && activeTab === item.tabCheck;
-  return isLeafActive(item.pathCheck, pathname) && !(pathname === "/manage" && activeTab === "settings");
 }
 
 function getEventOrigin(event: MouseEvent<HTMLButtonElement>) {

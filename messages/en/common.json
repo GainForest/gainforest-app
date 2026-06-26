@@ -99,6 +99,7 @@
       "explore": "Explore",
       "manage": "Manage"
     },
+    "manageGroupTitle": "Manage {account}",
     "collapse": "Collapse sidebar",
     "expand": "Expand sidebar"
   },
