@@ -38,6 +38,14 @@ export type CgsMembersResponse = {
   cursor?: string;
 };
 
+export type CgsPendingInvitation = {
+  id: string;
+  email: string;
+  role: "member" | "admin";
+  status: "pending" | "accepted" | "canceled" | "expired";
+  createdAt?: string | null;
+};
+
 type RawCgsMember = {
   did?: unknown;
   memberDid?: unknown;
@@ -199,6 +207,15 @@ export async function resolveCgsMemberIdentity(identifier: string): Promise<CgsM
 
 export async function addCgsMember(repo: string, memberDid: string, role: "member" | "admin") {
   return callCgs({ operation: "addMember", repo, memberDid, role });
+}
+
+export async function inviteCgsMember(repo: string, email: string, role: "member" | "admin") {
+  const res = await fetch("/api/cgs/invitations", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ repo, email, role }),
+  });
+  return parseJsonResponse<{ invitation: CgsPendingInvitation }>(res, "Could not send invitation.");
 }
 
 export async function removeCgsMember(repo: string, memberDid: string) {

@@ -7,6 +7,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { ChevronRight, Loader2Icon } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { stripLocaleFromPathname } from "@/lib/i18n/routing";
 import { groupIdentifierFromManagePath } from "@/lib/links";
 import { cn } from "@/lib/utils";
 import { monogram } from "@/app/_lib/did-profile";
@@ -84,9 +85,20 @@ function bestGroupName(group: GroupOption, organizationAccountLabel: string): st
 function redirectGroupIdentifier(redirectTo: string): string | null {
   try {
     const url = new URL(redirectTo, window.location.origin);
-    return groupIdentifierFromManagePath(url.pathname)?.trim() || null;
+    return groupIdentifierFromManagePath(stripLocaleFromPathname(url.pathname))?.trim() || null;
   } catch {
     return null;
+  }
+}
+
+function isInviteRedirect(redirectTo: string): boolean {
+  try {
+    const url = new URL(redirectTo, window.location.origin);
+    const pathname = stripLocaleFromPathname(url.pathname);
+    const [section, invitationId] = pathname.split("/").filter(Boolean);
+    return section === "invite" && Boolean(invitationId);
+  } catch {
+    return false;
   }
 }
 
@@ -379,6 +391,18 @@ export function AuthCompleteClient({
     const activeSession = session;
     let cancelled = false;
     let redirectTimer: ReturnType<typeof setTimeout> | null = null;
+
+    if (isInviteRedirect(safeRedirect)) {
+      rememberContext({ type: "personal", did: activeSession.did, selectedAt: new Date().toISOString() });
+      setStatus("success");
+      redirectTimer = setTimeout(() => {
+        window.location.assign(safeRedirect);
+      }, 250);
+      return () => {
+        cancelled = true;
+        if (redirectTimer) clearTimeout(redirectTimer);
+      };
+    }
 
     async function resolveProfiles(memberships: CgsGroupMembership[]): Promise<GroupOption[]> {
       return Promise.all(

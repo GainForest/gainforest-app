@@ -462,5 +462,58 @@
   "trust": {
     "trustedBy": "Con la confianza de",
     "aria": "Con la confianza de {names}"
+  },
+  "groupInvitations": {
+    "members": {
+      "inputPlaceholder": "Correo electrónico",
+      "inputAria": "Correo electrónico del miembro",
+      "invite": "Invitar",
+      "ownerHelp": "Ingresa un correo electrónico para enviar una invitación.",
+      "adminHelp": "Los administradores pueden invitar miembros normales por correo. Pide a una persona propietaria que invite a otro administrador.",
+      "locked": "Solo propietarios y administradores pueden invitar o quitar miembros.",
+      "ownerDescription": "Invita personas y controla quién puede hacer cambios para esta organización.",
+      "adminDescription": "Invita o quita miembros normales. Solo propietarios pueden cambiar roles.",
+      "viewerDescription": "Puedes ver los miembros, pero no cambiarlos.",
+      "sent": "Invitación enviada a {email}.",
+      "sendError": "No pudimos enviar esa invitación. Inténtalo de nuevo.",
+      "invalidEmail": "Ingresa un correo electrónico válido.",
+      "roleMember": "miembro",
+      "roleAdmin": "administrador",
+      "pendingStatus": "Invitado como {role}. Esperando a que acepte."
+    },
+    "menu": {
+      "title": "Invitaciones",
+      "loading": "Cargando invitaciones…",
+      "empty": "No hay invitaciones pendientes.",
+      "loadError": "No se pudieron cargar las invitaciones.",
+      "tryAgain": "Intentar de nuevo",
+      "accept": "Aceptar",
+      "accepting": "Aceptando…",
+      "acceptError": "No se pudo aceptar la invitación.",
+      "role": "Invitación de {role}"
+    },
+    "invitePage": {
+      "eyebrow": "Invitación de organización",
+      "organizationFallback": "esta organización",
+      "signedOutTitle": "Inicia sesión para aceptar",
+      "signedOutDescription": "Inicia sesión con el correo invitado para unirte a {organization}.",
+      "signIn": "Iniciar sesión",
+      "acceptingTitle": "Aceptando invitación…",
+      "acceptingDescription": "Te estamos agregando de forma segura a {organization}.",
+      "acceptedTitle": "Te uniste a la organización",
+      "acceptedDescription": "Ahora puedes colaborar con {organization}.",
+      "goToOrganization": "Abrir organización",
+      "errorTitle": "No se pudo aceptar la invitación",
+      "acceptError": "No se pudo aceptar la invitación.",
+      "tryAgain": "Intentar de nuevo",
+      "notFoundTitle": "Invitación no encontrada",
+      "notFoundDescription": "Este enlace de invitación no es válido o fue eliminado.",
+      "expiredTitle": "Invitación vencida",
+      "expiredDescription": "Pide a un administrador de la organización que envíe una nueva invitación.",
+      "canceledTitle": "Invitación cancelada",
+      "canceledDescription": "Esta invitación ya no es válida.",
+      "alreadyAcceptedTitle": "Ya aceptada",
+      "alreadyAcceptedDescription": "Esta invitación ya fue aceptada."
+    }
   }
 }

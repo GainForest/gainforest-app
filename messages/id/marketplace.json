@@ -944,8 +944,8 @@
       "loading": "Memuat sertifikat tertaut"
     },
     "observation": {
-      "ownerTitle": "Temuan Anda",
-      "ownerDescription": "Anda dapat mengubah detail yang disimpan atau menghapus temuan ini.",
+      "ownerTitle": "Detail observasi",
+      "ownerDescription": "Ubah detail yang tersimpan atau hapus observasi ini jika Anda memiliki izin.",
       "saved": "Temuan disimpan.",
       "saveError": "Temuan ini tidak dapat disimpan. Coba lagi.",
       "deleteError": "Temuan ini tidak dapat dihapus. Coba lagi.",
@@ -986,7 +986,12 @@
       "noMapLocation": "Belum ada lokasi peta yang dipilih.",
       "useLocation": "Gunakan lokasi",
       "natureSoundRecording": "Rekaman suara alam",
-      "unidentifiedSighting": "Pengamatan tidak teridentifikasi"
+      "unidentifiedSighting": "Pengamatan tidak teridentifikasi",
+      "mediaTitle": "Media dalam observasi ini",
+      "mediaCount": "{count, plural, one {# item} other {# item}}",
+      "primaryMedia": "Media utama",
+      "fieldSound": "Suara lapangan",
+      "mediaThumbnail": "Media observasi"
     },
     "media": {
       "image": "Foto",
@@ -1152,5 +1157,16 @@
       "createProject": "Buat proyek",
       "skip": "Terbitkan tanpa menautkan ke proyek"
     }
+  },
+  "observationGrid": {
+    "sectionTitle": "Observasi",
+    "openDetails": "Buka detail observasi: {name}",
+    "mediaCount": "{count, plural, one {# item media} other {# item media}}",
+    "selectObservation": "Pilih observasi",
+    "deselectObservation": "Batalkan pilihan observasi",
+    "playSound": "Putar suara",
+    "pauseSound": "Jeda suara",
+    "natureSoundRecording": "Rekaman suara alam",
+    "unidentifiedSighting": "Penampakan belum teridentifikasi"
   }
 }

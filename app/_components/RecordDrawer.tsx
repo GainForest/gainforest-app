@@ -5,12 +5,14 @@ import type { Map as LeafletMap, Marker, TileLayer } from "leaflet";
 import Image from "next/image";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { ArrowUpRightIcon, CalendarRangeIcon, CheckIcon, HeartIcon, ImageOffIcon, Layers3Icon, Loader2Icon, MapPinIcon, PencilIcon, Share2Icon, Trash2Icon, UsersIcon, XIcon } from "lucide-react";
+import { ArrowUpRightIcon, AudioLinesIcon, CalendarRangeIcon, CheckIcon, HeartIcon, ImageOffIcon, Layers3Icon, Loader2Icon, MapPinIcon, PencilIcon, Share2Icon, Trash2Icon, UsersIcon, XIcon } from "lucide-react";
 import {
+  fetchObservationMedia,
   fetchRecordByUri,
   fetchRecordDetail,
   type BumicertRecord,
   type ExplorerRecord,
+  type ObservationMediaItem,
   type RecordDetail,
   type DetailSection,
   type DetailBadge,
@@ -28,6 +30,7 @@ import { isPdsBlobUrl, resolveBlobUrl } from "../_lib/pds";
 import { pauseOtherAudio } from "../_lib/audio-coordinator";
 import { formatWorkScopeTag, type WorkScopeLabels } from "../_lib/work-scope-labels";
 import type { AuthSession } from "../_lib/auth";
+import { fetchCgsGroups, type CgsGroupMembership } from "@/app/(manage)/manage/_lib/cgs";
 import { deleteOccurrenceCascade, updateOccurrence } from "@/app/(manage)/manage/_lib/mutations";
 import {
   INDEXER_URL,
@@ -59,7 +62,9 @@ export function RecordDrawer({
   const [resolvedOccurrenceImageUrl, setResolvedOccurrenceImageUrl] = useState<string | null>(null);
   const [resolvedOccurrenceAudioUrl, setResolvedOccurrenceAudioUrl] = useState<string | null>(null);
   const [detail, setDetail] = useState<RecordDetail | null>(null);
+  const [occurrenceMedia, setOccurrenceMedia] = useState<ObservationMediaItem[] | null>(null);
   const [authSession, setAuthSession] = useState<AuthSession | null>(null);
+  const [groupMemberships, setGroupMemberships] = useState<CgsGroupMembership[]>([]);
   const [isEditingOccurrence, setIsEditingOccurrence] = useState(false);
   const [occurrenceDraft, setOccurrenceDraft] = useState<ObservationDraft>(EMPTY_OBSERVATION_DRAFT);
   const [occurrenceFeedback, setOccurrenceFeedback] = useState<string | null>(null);
@@ -151,6 +156,16 @@ export function RecordDrawer({
   }, [record]);
 
   useEffect(() => {
+    setOccurrenceMedia(null);
+    if (!record || record.kind !== "occurrence") return;
+    const ctrl = new AbortController();
+    fetchObservationMedia(record.did, record.atUri, ctrl.signal)
+      .then((items) => setOccurrenceMedia(items))
+      .catch(() => setOccurrenceMedia([]));
+    return () => ctrl.abort();
+  }, [record]);
+
+  useEffect(() => {
     setProjectBumicerts(null);
     if (!record || record.kind !== "project") return;
     if (record.bumicertUris.length === 0) {
@@ -188,6 +203,7 @@ export function RecordDrawer({
 
   useEffect(() => {
     setAuthSession(null);
+    setGroupMemberships([]);
     if (!record || !isEditableObservationRecord(record)) return;
 
     let cancelled = false;
@@ -198,6 +214,13 @@ export function RecordDrawer({
       })
       .catch(() => {
         if (!cancelled) setAuthSession({ isLoggedIn: false });
+      });
+    fetchCgsGroups()
+      .then((payload) => {
+        if (!cancelled) setGroupMemberships(payload.groups);
+      })
+      .catch(() => {
+        if (!cancelled) setGroupMemberships([]);
       });
     return () => {
       cancelled = true;
@@ -244,7 +267,13 @@ export function RecordDrawer({
   const badges = record.kind === "bumicert" ? [] : [...(detail?.badges ?? []), ...mediaBadges];
   const detailHref = record.kind === "bumicert" ? localBumicertHref(preferredOwnerIdentifier, record.rkey) : null;
   const ownerHref = accountHref(preferredOwnerIdentifier);
-  const canManageOccurrence = isEditableObservationRecord(record) && authSession?.isLoggedIn === true && authSession.did === record.did;
+  const managingGroupRole = isEditableObservationRecord(record)
+    ? groupMemberships.find((group) => group.groupDid === record.did)?.role ?? null
+    : null;
+  const canManageOccurrence = isEditableObservationRecord(record) && authSession?.isLoggedIn === true && (
+    authSession.did === record.did || managingGroupRole === "owner" || managingGroupRole === "admin"
+  );
+  const occurrenceMutationOptions = managingGroupRole === "owner" || managingGroupRole === "admin" ? { repo: record.did } : undefined;
   const occurrenceValidationError = record.kind === "occurrence" ? validateObservationDraft(occurrenceDraft, t) : null;
   const occurrenceHasChanges = record.kind === "occurrence" && !observationDraftsEqual(occurrenceDraft, observationDraftFromRecord(record));
 
@@ -264,7 +293,7 @@ export function RecordDrawer({
       const result = await updateOccurrence({
         rkey: activeRecord.rkey,
         ...observationPatchFromDraft(occurrenceDraft),
-      });
+      }, occurrenceMutationOptions);
       const nextRecord = applyObservationDraft(activeRecord, occurrenceDraft, typeof result.cid === "string" ? result.cid : activeRecord.cid);
       onRecordUpdated?.(nextRecord);
       setDetail(null);
@@ -283,7 +312,7 @@ export function RecordDrawer({
     setDeletingOccurrence(true);
     setOccurrenceFeedback(null);
     try {
-      await deleteOccurrenceCascade(activeRecord.rkey);
+      await deleteOccurrenceCascade(activeRecord.rkey, occurrenceMutationOptions);
       onRecordDeleted?.(activeRecord);
       onClose();
     } catch {
@@ -442,6 +471,10 @@ export function RecordDrawer({
             />
           )}
 
+          {record.kind === "occurrence" && (
+            <ObservationMediaStrip record={record} media={occurrenceMedia} fallbackImageUrl={heroUrl} audioUrl={occurrenceAudioUrl} />
+          )}
+
           {record.kind === "occurrence" && canManageOccurrence && (
             <ObservationOwnerControls
               draft={occurrenceDraft}
@@ -544,6 +577,89 @@ export function RecordDrawer({
 
         </div>
       </div>
+    </div>
+  );
+}
+
+function ObservationMediaStrip({
+  record,
+  media,
+  fallbackImageUrl,
+  audioUrl,
+}: {
+  record: Extract<ExplorerRecord, { kind: "occurrence" }>;
+  media: ObservationMediaItem[] | null;
+  fallbackImageUrl: string | null;
+  audioUrl: string | null;
+}) {
+  const t = useTranslations("marketplace.recordDrawer.observation");
+  const items = media ?? [];
+  const fallbackItems = items.length > 0
+    ? []
+    : [
+        ...(fallbackImageUrl ? [{ key: "fallback-image", kind: "image" as const, url: fallbackImageUrl, label: t("primaryMedia") }] : []),
+        ...(audioUrl ? [{ key: "fallback-audio", kind: "audio" as const, url: audioUrl, label: t("fieldSound") }] : []),
+      ];
+  const count = items.length || Math.max(record.media.length, fallbackItems.length);
+  if (items.length === 0 && fallbackItems.length === 0) return null;
+  if (count <= 1 && fallbackItems.length <= 1) return null;
+
+  return (
+    <div className="mt-5 rounded-2xl border border-border-soft bg-surface/60 p-3.5">
+      <div className="mb-3 flex items-center justify-between gap-3">
+        <p className="text-[13px] font-medium text-foreground">{t("mediaTitle")}</p>
+        <span className="inline-flex items-center gap-1 rounded-full bg-background px-2.5 py-1 text-[12px] font-medium text-muted-foreground">
+          <Layers3Icon className="h-3.5 w-3.5" aria-hidden />
+          {t("mediaCount", { count })}
+        </span>
+      </div>
+      <div className="grid grid-cols-4 gap-2">
+        {items.length > 0 ? items.map((item) => (
+          <ObservationMediaThumb key={item.metadata.uri} item={item} />
+        )) : fallbackItems.map((item) => (
+          <div key={item.key} className="relative aspect-square overflow-hidden rounded-xl bg-background ring-1 ring-border-soft">
+            {item.kind === "image" ? (
+              <Image
+                src={item.url}
+                alt={item.label}
+                fill
+                sizes="110px"
+                unoptimized={!isPdsBlobUrl(item.url)}
+                className="object-cover"
+              />
+            ) : (
+              <div className="absolute inset-0 grid place-items-center bg-primary/10 text-primary">
+                <AudioLinesIcon className="h-6 w-6" aria-hidden />
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function ObservationMediaThumb({ item }: { item: ObservationMediaItem }) {
+  const t = useTranslations("marketplace.recordDrawer.observation");
+  const url = item.record.accessUri;
+  const format = item.record.format?.toLowerCase() ?? "";
+  const isImage = Boolean(url && (format.startsWith("image/") || !format || /\.(?:jpe?g|png|webp|gif)(?:[?#]|$)/i.test(url)));
+  return (
+    <div className="relative aspect-square overflow-hidden rounded-xl bg-background ring-1 ring-border-soft" title={item.record.caption ?? undefined}>
+      {url && isImage ? (
+        <Image
+          src={url}
+          alt={item.record.caption || t("mediaThumbnail")}
+          fill
+          sizes="110px"
+          unoptimized={!isPdsBlobUrl(url)}
+          className="object-cover"
+        />
+      ) : (
+        <div className="absolute inset-0 grid place-items-center bg-primary/10 text-primary">
+          <AudioLinesIcon className="h-6 w-6" aria-hidden />
+        </div>
+      )}
     </div>
   );
 }

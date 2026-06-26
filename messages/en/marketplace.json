@@ -241,11 +241,17 @@
       "title": "Weekly BioBlitz Challenge — GainForest",
       "description": "Go outside, photograph living things, and add your sightings. Each week the top collector and the best photo win a prize."
     },
+    "banner": {
+      "message": "The Weekly BioBlitz Challenge is live. Photograph nature and win prizes.",
+      "cta": "Learn more",
+      "dismiss": "Dismiss this banner",
+      "close": "Close"
+    },
     "hero": {
       "eyebrow": "Weekly BioBlitz Challenge",
       "titlePrefix": "BioBlitz",
       "titleEmphasis": "Challenge",
-      "description": "A friendly weekly race to record nature. Photograph any living thing — a plant, bird, bug, or fungus — add it to GainForest, and climb the board. New round, new prizes, every week.",
+      "description": "A friendly weekly race to record nature. Photograph any living thing you find, add it to GainForest, and climb the board.",
       "program": "Part of the Klarna AI for Climate Resilience program, with GainForest."
     },
     "rsvp": {
@@ -302,7 +308,7 @@
     "board": {
       "title": "This round's board",
       "live": "Live",
-      "subtitleLive": "Who is leading the most-observations prize right now.",
+      "subtitleLive": "Who is leading the most observations prize right now.",
       "subtitleEnded": "Final standings for this round.",
       "subtitleUpcoming": "Be the first to get on the board when the round opens.",
       "subtitleAll": "The most active data collectors across the challenge.",
@@ -944,8 +950,8 @@
       "loading": "Loading linked Certs"
     },
     "observation": {
-      "ownerTitle": "Your sighting",
-      "ownerDescription": "You can change the saved details or remove this sighting.",
+      "ownerTitle": "Sighting details",
+      "ownerDescription": "Change the saved details or remove this sighting if you have permission.",
       "saved": "Sighting saved.",
       "saveError": "This sighting could not be saved. Please try again.",
       "deleteError": "This sighting could not be deleted. Please try again.",
@@ -986,7 +992,12 @@
       "noMapLocation": "No map location chosen yet.",
       "useLocation": "Use location",
       "natureSoundRecording": "Nature sound recording",
-      "unidentifiedSighting": "Unidentified sighting"
+      "unidentifiedSighting": "Unidentified sighting",
+      "mediaTitle": "Media in this sighting",
+      "mediaCount": "{count, plural, one {# item} other {# items}}",
+      "primaryMedia": "Primary media",
+      "fieldSound": "Field sound",
+      "mediaThumbnail": "Observation media"
     },
     "media": {
       "image": "Photo",
@@ -1152,5 +1163,16 @@
       "createProject": "Create a project",
       "skip": "Mint without linking to a project"
     }
+  },
+  "observationGrid": {
+    "sectionTitle": "Observations",
+    "openDetails": "Open observation details: {name}",
+    "mediaCount": "{count, plural, one {# media item} other {# media items}}",
+    "selectObservation": "Select observation",
+    "deselectObservation": "Deselect observation",
+    "playSound": "Play sound",
+    "pauseSound": "Pause sound",
+    "natureSoundRecording": "Nature sound recording",
+    "unidentifiedSighting": "Unidentified sighting"
   }
 }

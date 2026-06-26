@@ -95,7 +95,7 @@ export function ManageContextSwitcher({
   const isPersonalActive = activeContext.type === "personal";
 
   return (
-    <div ref={containerRef} className="relative">
+    <div ref={containerRef} className={cn("relative", collapsed && "flex justify-center")}>
       <button
         type="button"
         onClick={() => setOpen((value) => !value)}

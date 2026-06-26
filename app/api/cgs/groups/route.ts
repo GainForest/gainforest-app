@@ -2,6 +2,8 @@ import { headers } from "next/headers";
 import { getCertifiedProfileCard } from "@/app/account/_lib/account-route";
 import { fetchIndexedCertifiedProfileCards, type IndexedCertifiedProfileCard } from "@/app/_lib/indexer";
 import { getAuthBaseUrl, getAuthForwardCookie } from "@/app/_lib/auth";
+import { LANGUAGE_COOKIE_NAME, isSupportedLanguageCode } from "@/lib/i18n/languages";
+import { LOCALE_REQUEST_HEADER_NAME } from "@/lib/i18n/routing";
 
 export const runtime = "nodejs";
 
@@ -11,6 +13,20 @@ type RawCgsGroupsPayload = Record<string, unknown> & { groups?: unknown };
 
 function nonEmptyString(value: unknown): string | null {
   return typeof value === "string" && value.trim() ? value.trim() : null;
+}
+
+function readCookieValue(cookieHeader: string | null, name: string): string | null {
+  if (!cookieHeader) return null;
+  for (const part of cookieHeader.split(";")) {
+    const [rawName, ...rawValueParts] = part.trim().split("=");
+    if (rawName !== name || rawValueParts.length === 0) continue;
+    try {
+      return decodeURIComponent(rawValueParts.join("="));
+    } catch {
+      return rawValueParts.join("=");
+    }
+  }
+  return null;
 }
 
 async function hydrateGroup(group: RawCgsGroup, indexed?: IndexedCertifiedProfileCard): Promise<RawCgsGroup> {
@@ -53,13 +69,28 @@ async function hydrateGroupsBody(body: string): Promise<string> {
 
 export async function GET(request: Request) {
   const headerList = await headers();
-  const cookie = getAuthForwardCookie(headerList.get("cookie"));
+  const rawCookie = headerList.get("cookie");
+  const cookie = getAuthForwardCookie(rawCookie);
+  const headerLocale = headerList.get(LOCALE_REQUEST_HEADER_NAME)?.trim();
+  const cookieLocale = readCookieValue(rawCookie, LANGUAGE_COOKIE_NAME)?.trim();
+  const locale = headerLocale && isSupportedLanguageCode(headerLocale)
+    ? headerLocale
+    : cookieLocale && isSupportedLanguageCode(cookieLocale)
+      ? cookieLocale
+      : null;
+  const acceptLanguage = headerList.get("accept-language");
   const sourceUrl = new URL(request.url);
   const upstreamUrl = new URL("/api/cgs/groups", getAuthBaseUrl());
   upstreamUrl.search = sourceUrl.search;
 
+  const upstreamHeaders: Record<string, string> = {
+    ...(cookie ? { cookie } : {}),
+    ...(locale ? { "x-gainforest-locale": locale } : {}),
+    ...(acceptLanguage ? { "accept-language": acceptLanguage } : {}),
+  };
+
   const upstream = await fetch(upstreamUrl, {
-    headers: cookie ? { cookie } : undefined,
+    headers: Object.keys(upstreamHeaders).length ? upstreamHeaders : undefined,
     cache: "no-store",
   });
   const body = await upstream.text();
@@ -68,11 +99,20 @@ export async function GET(request: Request) {
     ? await hydrateGroupsBody(body).catch(() => body)
     : body;
 
-  return new Response(responseBody, {
+  const response = new Response(responseBody, {
     status: upstream.status,
     headers: {
       "content-type": contentType,
       "cache-control": "no-store",
     },
   });
+
+  const getSetCookie = (upstream.headers as Headers & { getSetCookie?: () => string[] }).getSetCookie;
+  const setCookies = typeof getSetCookie === "function" ? getSetCookie.call(upstream.headers) : [];
+  const fallbackSetCookie = upstream.headers.get("set-cookie");
+  for (const cookieValue of setCookies.length > 0 ? setCookies : fallbackSetCookie ? [fallbackSetCookie] : []) {
+    response.headers.append("set-cookie", cookieValue);
+  }
+
+  return response;
 }

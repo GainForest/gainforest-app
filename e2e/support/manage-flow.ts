@@ -200,6 +200,14 @@ type CgsMembersResponse = {
   members?: Array<{ did?: unknown; memberDid?: unknown; role?: unknown }>;
 };
 
+type CgsInvitationsResponse = {
+  invitations?: Array<{ id?: unknown; repo?: unknown; email?: unknown; role?: unknown; status?: unknown }>;
+};
+
+function normalizeTestEmail(value: string): string {
+  return value.trim().toLowerCase();
+}
+
 async function waitForOrganizationMemberRole(
   page: Page,
   org: CgsOrgMetadata,
@@ -220,26 +228,84 @@ async function waitForOrganizationMemberRole(
     .toBe(true);
 }
 
-export async function addOrganizationMember(
+async function waitForPendingOrganizationInvitation(
+  page: Page,
+  org: CgsOrgMetadata,
+  email: string,
+  role: OrganizationMemberRole,
+): Promise<string> {
+  const normalizedEmail = normalizeTestEmail(email);
+  let invitationId: string | null = null;
+
+  await expect
+    .poll(async () => {
+      const params = new URLSearchParams({ repo: org.groupDid });
+      const response = await page.request.get(`/api/cgs/invitations?${params.toString()}`).catch(() => null);
+      if (!response?.ok()) return false;
+      const body = await response.json().catch(() => null) as CgsInvitationsResponse | null;
+      const invitation = body?.invitations?.find((item) => (
+        item.repo === org.groupDid &&
+        item.email === normalizedEmail &&
+        item.role === role &&
+        item.status === "pending" &&
+        typeof item.id === "string"
+      ));
+      invitationId = typeof invitation?.id === "string" ? invitation.id : null;
+      return Boolean(invitationId);
+    }, { timeout: 90_000 })
+    .toBe(true);
+
+  if (!invitationId) throw new Error(`Pending invitation for ${normalizedEmail} was not found.`);
+  return invitationId;
+}
+
+export async function inviteOrganizationMember(
   page: Page,
   testInfo: TestInfo,
   org: CgsOrgMetadata,
-  memberIdentifier: string,
-  expectedMemberDid?: string | null,
+  email: string,
   role: OrganizationMemberRole = "member",
-): Promise<void> {
+): Promise<string> {
+  const normalizedEmail = normalizeTestEmail(email);
   await page.goto(`${groupManageBasePath(org)}/settings`, { waitUntil: "domcontentloaded" });
   await expect(page.getByRole("heading", { name: /organization settings/i })).toBeVisible({ timeout: 60_000 });
-  await page.getByLabel(/member username/i).fill(memberIdentifier);
-  await page.getByLabel(/role for new member/i).selectOption(role);
-  await screenshotStep(page, testInfo, `organization-member-add-${role}-ready`);
-  await page.getByRole("button", { name: /^add$/i }).click();
-  if (expectedMemberDid) {
-    await waitForOrganizationMemberRole(page, org, expectedMemberDid, role);
-  } else {
-    await expect(page.getByText(/organization member|joined|team member/i).first()).toBeVisible({ timeout: 90_000 });
+  await page.getByLabel(/member email address/i).fill(normalizedEmail);
+  const roleSelect = page.getByLabel(/role for new member/i);
+  if (await roleSelect.isVisible({ timeout: 5_000 }).catch(() => false)) {
+    await roleSelect.selectOption(role);
   }
-  await screenshotStep(page, testInfo, `organization-member-added-${role}`);
+  await screenshotStep(page, testInfo, `organization-invite-${role}-ready`);
+  await page.getByRole("button", { name: /^invite$/i }).click();
+  await expect(page.getByText(new RegExp(`Invitation sent to ${escapeRegExp(normalizedEmail)}`, "i"))).toBeVisible({ timeout: 60_000 });
+  await expect(page.getByText(new RegExp(escapeRegExp(normalizedEmail), "i")).first()).toBeVisible({ timeout: 60_000 });
+  const invitationId = await waitForPendingOrganizationInvitation(page, org, normalizedEmail, role);
+  await screenshotStep(page, testInfo, `organization-invite-${role}-sent`);
+  return invitationId;
+}
+
+export async function acceptOrganizationInvitationFromAccountMenu(
+  page: Page,
+  testInfo: TestInfo,
+  org: CgsOrgMetadata,
+  memberDid: string,
+  role: OrganizationMemberRole = "member",
+): Promise<void> {
+  await page.goto("/manage", { waitUntil: "domcontentloaded" });
+  await page.waitForLoadState("networkidle", { timeout: 20_000 }).catch(() => undefined);
+
+  const accountMenu = page.getByRole("button", { name: /disposable e2e member|personal account|account/i }).last();
+  await expect(accountMenu).toBeVisible({ timeout: 60_000 });
+  await accountMenu.click();
+
+  await expect(page.getByText(/^invitations$/i)).toBeVisible({ timeout: 15_000 });
+  await expect(page.getByText(new RegExp(escapeRegExp(org.displayName), "i")).first()).toBeVisible({ timeout: 60_000 });
+  await expect(page.getByText(new RegExp(`${role === "admin" ? "Admin" : "Member"} invite`, "i")).first()).toBeVisible({ timeout: 30_000 });
+  await screenshotStep(page, testInfo, `organization-invite-${role}-menu-ready`);
+
+  await page.getByRole("button", { name: /^accept$/i }).first().click();
+  await waitForOrganizationMemberRole(page, org, memberDid, role);
+  await expect(page.getByText(/no pending invitations/i)).toBeVisible({ timeout: 60_000 });
+  await screenshotStep(page, testInfo, `organization-invite-${role}-accepted`);
 }
 
 export async function setOrganizationMemberRole(
@@ -314,7 +380,7 @@ export async function editProfile(page: Page, testInfo: TestInfo): Promise<void>
   await clickAndWaitForRefresh(page, websiteDialog.getByRole("button", { name: /^save$/i }));
   await expect(websiteDialog).not.toBeVisible({ timeout: 15_000 });
 
-  await expect(page.getByText(/example\.org/i).first()).toBeVisible({ timeout: 30_000 });
+  await expect(page.getByRole("button", { name: /example\.org/i }).first()).toBeVisible({ timeout: 30_000 });
   await screenshotStep(page, testInfo, "profile-edit-saved");
 }
 

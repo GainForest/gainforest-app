@@ -475,6 +475,12 @@ body {
 .gf-pin:hover {
   transform: scale(1.25);
 }
+.gf-pin--picker {
+  cursor: grab;
+}
+.gf-pin--picker:active {
+  cursor: grabbing;
+}
 
 /* The divIcon wrapper Leaflet creates around our cluster markup. */
 .gf-cluster-wrap {

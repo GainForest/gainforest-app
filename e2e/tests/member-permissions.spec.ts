@@ -6,9 +6,10 @@ import { memberDisposableAccountMetadataPath } from "../support/disposable-email
 import { readCgsOrgMetadata } from "../support/cgs-org";
 import { getE2EEnv } from "../support/env";
 import {
-  addOrganizationMember,
+  acceptOrganizationInvitationFromAccountMenu,
   completeUserOnboarding,
   expectMemberOrganizationRestrictions,
+  inviteOrganizationMember,
   setOrganizationMemberRole,
 } from "../support/manage-flow";
 
@@ -17,7 +18,7 @@ const memberAuthStatePath = "e2e/.auth/member.json";
 
 test.use({ storageState: ownerAuthStatePath });
 
-test("adds a disposable admin, downgrades to member, and verifies member-only CGS permissions", async ({ browser, page }, testInfo) => {
+test("invites a disposable admin, downgrades to member, and verifies member-only CGS permissions", async ({ browser, page }, testInfo) => {
   test.setTimeout(420_000);
   const env = getE2EEnv();
   const contextOptions = {
@@ -44,10 +45,15 @@ test("adds a disposable admin, downgrades to member, and verifies member-only CG
   await memberContext.storageState({ path: memberAuthStatePath });
   await memberContext.close();
 
-  const memberIdentifier = member.handle ?? member.did;
-  expect(memberIdentifier).toBeTruthy();
-  if (!memberIdentifier || !member.did) throw new Error("Disposable member account did not return an identifier.");
-  await addOrganizationMember(page, testInfo, org, memberIdentifier, member.did, "admin");
+  expect(member.email).toBeTruthy();
+  if (!member.email || !member.did) throw new Error("Disposable member account did not return an invitation email and DID.");
+  await inviteOrganizationMember(page, testInfo, org, member.email, "admin");
+
+  const inviteContext = await browser.newContext({ ...contextOptions, storageState: memberAuthStatePath });
+  const invitePage = await inviteContext.newPage();
+  await acceptOrganizationInvitationFromAccountMenu(invitePage, testInfo, org, member.did, "admin");
+  await inviteContext.close();
+
   await setOrganizationMemberRole(page, testInfo, org, member.did, "member");
 
   const restrictedContext = await browser.newContext({ ...contextOptions, storageState: memberAuthStatePath });

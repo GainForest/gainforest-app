@@ -38,7 +38,7 @@ const OPTION_CARDS = [
   },
   {
     key: "organizations",
-    href: "/manage/certs",
+    href: "/manage/organizations",
     image: "/assets/media/images/landing/steward-waterfall.jpg",
   },
 ] as const;

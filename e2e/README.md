@@ -14,7 +14,7 @@ pnpm test:e2e
 Defaults:
 
 - URL: `https://local-e2e.gainforest.app`
-- Auth: required via `NEXT_PUBLIC_AUTH_BASE_URL`
+- Auth: inferred from the app environment (`NEXT_PUBLIC_AUTH_BASE_URL` in `.env.local` or deployment env)
 - PDS: `https://dev.certified.app`
 - Disposable email provider: Mail.tm by default, so CGS recovery email can be set and later used for deletion
 - Next.js port: `3201`
@@ -22,7 +22,7 @@ Defaults:
 
 Useful overrides:
 
-- `E2E_BASE_URL=https://preview.example.gainforest.app E2E_SKIP_WEB_SERVER=1 NEXT_PUBLIC_AUTH_BASE_URL=<auth-origin> pnpm test:e2e`
+- `E2E_BASE_URL=https://preview.example.gainforest.app E2E_SKIP_WEB_SERVER=1 pnpm test:e2e`
 - `E2E_PORT=3202 pnpm test:e2e`
 - `pnpm test:e2e:headed`
 

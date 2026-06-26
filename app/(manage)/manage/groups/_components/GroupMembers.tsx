@@ -4,18 +4,18 @@ import Image from "next/image";
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react";
 import { motion } from "framer-motion";
 import { useTranslations } from "next-intl";
-import { CheckIcon, Loader2Icon, LockIcon, RefreshCwIcon, Trash2Icon, UserPlusIcon, UsersIcon } from "lucide-react";
+import { CheckIcon, Loader2Icon, LockIcon, MailIcon, RefreshCwIcon, Trash2Icon, UsersIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { formatCgsErrorMessage } from "@/app/_lib/cgs-errors";
 import { monogram, resolveDidProfile, type DidProfile } from "@/app/_lib/did-profile";
 import {
-  addCgsMember,
+  inviteCgsMember,
   removeCgsMember,
-  resolveCgsMemberIdentity,
   setCgsMemberRole,
   type CgsMember,
+  type CgsPendingInvitation,
   type CgsRole,
 } from "../../_lib/cgs";
 
@@ -31,6 +31,7 @@ type DataCouncilResponse = {
 type GroupSettingsResponse = {
   members: CgsMember[];
   profiles?: DidProfile[];
+  invitations?: CgsPendingInvitation[];
   dataCouncil?: DataCouncilResponse | null;
   dataCouncilError?: string | null;
 };
@@ -67,9 +68,19 @@ function memberErrorMessage(error: unknown, fallback: string): string {
   return formatCgsErrorMessage(error, fallback);
 }
 
+function isLikelyEmail(value: string): boolean {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
+}
+
 function profilesByDid(profiles?: DidProfile[]): Record<string, DidProfile> {
   if (!profiles?.length) return {};
   return Object.fromEntries(profiles.map((profile) => [profile.did, profile]));
+}
+
+function upsertInvitation(current: CgsPendingInvitation[], invitation: CgsPendingInvitation): CgsPendingInvitation[] {
+  const exists = current.some((item) => item.id === invitation.id || item.email === invitation.email);
+  if (!exists) return [invitation, ...current];
+  return current.map((item) => (item.id === invitation.id || item.email === invitation.email ? invitation : item));
 }
 
 async function parseJsonResponse<T>(response: Response, fallback: string): Promise<T> {
@@ -89,6 +100,31 @@ function MemberAvatar({ did, profile }: { did: string; profile?: DidProfile }) {
           {mono.char}
         </span>
       )}
+    </div>
+  );
+}
+
+function InvitationAvatar({ email }: { email: string }) {
+  const mono = useMemo(() => monogram(email, email), [email]);
+  return (
+    <div className="flex size-10 shrink-0 items-center justify-center rounded-full text-sm font-semibold text-white" style={{ backgroundColor: mono.bg }}>
+      <MailIcon className="size-4" aria-hidden />
+    </div>
+  );
+}
+
+function PendingInvitationRow({ invitation, roleLabel, statusLabel }: { invitation: CgsPendingInvitation; roleLabel: string; statusLabel: string }) {
+  return (
+    <div className="flex items-center gap-3 rounded-xl px-3 py-3 transition-colors hover:bg-muted/40">
+      <InvitationAvatar email={invitation.email} />
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-sm font-medium text-foreground">{invitation.email}</p>
+        <p className="truncate text-xs text-muted-foreground">{statusLabel}</p>
+      </div>
+      <span className={cn("rounded-full px-2.5 py-1 text-xs font-medium capitalize", roleBadge(invitation.role))}>
+        {roleLabel}
+      </span>
+      <span className="w-7 shrink-0" aria-hidden />
     </div>
   );
 }
@@ -198,6 +234,7 @@ export function GroupMembers({
   showDataCouncil?: boolean;
 }) {
   const dataCouncilT = useTranslations("upload.settings.dataCouncil");
+  const invitationsT = useTranslations("common.groupInvitations.members");
   const dataCouncilLoadError = dataCouncilT("errors.load");
   const dataCouncilSaveError = dataCouncilT("errors.save");
   const canAddRemove = currentRole === "owner" || currentRole === "admin";
@@ -206,10 +243,12 @@ export function GroupMembers({
   const hasInitialMembers = initialMembers !== undefined;
 
   const [members, setMembers] = useState<CgsMember[]>(() => initialMembers ?? []);
+  const [pendingInvitations, setPendingInvitations] = useState<CgsPendingInvitation[]>([]);
   const [profiles, setProfiles] = useState<Record<string, DidProfile>>({});
   const [memberIdentifier, setMemberIdentifier] = useState("");
   const [role, setRole] = useState<RoleInput>("member");
   const [error, setError] = useState<string | null>(initialError);
+  const [success, setSuccess] = useState<string | null>(null);
   const [loaded, setLoaded] = useState(hasInitialMembers || Boolean(initialError));
   const [pendingCount, setPendingCount] = useState(0);
   const [dataCouncilLoaded, setDataCouncilLoaded] = useState(!canUseDataCouncil);
@@ -236,6 +275,7 @@ export function GroupMembers({
     const response = await fetch(`/api/manage/group-settings?${params.toString()}`, { cache: "no-store" });
     const data = await parseJsonResponse<GroupSettingsResponse>(response, "Could not load members.");
     setMembers(data.members ?? []);
+    setPendingInvitations(data.invitations ?? []);
     setProfiles((current) => ({ ...current, ...profilesByDid(data.profiles) }));
     if (canUseDataCouncil) {
       if (data.dataCouncil) applyDataCouncilState(data.dataCouncil);
@@ -264,6 +304,7 @@ export function GroupMembers({
 
   useEffect(() => {
     setMembers(initialMembers ?? []);
+    setPendingInvitations([]);
     setError(initialError);
     setLoaded(hasInitialMembers || Boolean(initialError));
     setDataCouncilLoaded(!canUseDataCouncil);
@@ -298,37 +339,24 @@ export function GroupMembers({
   const handleAdd = (event: FormEvent) => {
     event.preventDefault();
     if (!canAddRemove) return;
-    const identifier = memberIdentifier.trim();
-    if (!identifier) return;
+    const email = memberIdentifier.trim();
+    if (!email) return;
+    if (!isLikelyEmail(email)) {
+      setSuccess(null);
+      setError(invitationsT("invalidEmail"));
+      return;
+    }
     const nextRole = canSetRoles ? role : "member";
     runPending(async () => {
       setError(null);
-      const previousMembers = members;
+      setSuccess(null);
       try {
-        const identity = await resolveCgsMemberIdentity(identifier);
-        const optimisticMember: CgsMember = {
-          did: identity.did,
-          role: nextRole,
-          addedBy: currentUserDid,
-          addedAt: new Date().toISOString(),
-        };
-        setProfiles((current) => ({
-          ...current,
-          [identity.did]: {
-            did: identity.did,
-            handle: identity.handle ?? null,
-            displayName: identity.displayName ?? null,
-            avatar: identity.avatarUrl ?? null,
-          },
-        }));
-        setMembers((current) => current.some((member) => member.did === identity.did)
-          ? current.map((member) => (member.did === identity.did ? { ...member, role: nextRole } : member))
-          : [...current, optimisticMember]);
+        const { invitation } = await inviteCgsMember(groupDid, email, nextRole);
+        setPendingInvitations((current) => upsertInvitation(current, invitation));
         setMemberIdentifier("");
-        await addCgsMember(groupDid, identity.did, nextRole);
+        setSuccess(invitationsT("sent", { email }));
       } catch (err) {
-        setMembers(previousMembers);
-        setError(memberErrorMessage(err, "Could not add member."));
+        setError(memberErrorMessage(err, invitationsT("sendError")));
       }
     });
   };
@@ -408,7 +436,9 @@ export function GroupMembers({
     return [...members].sort((a, b) => rank[a.role] - rank[b.role]);
   }, [members]);
 
-  const count = members.length;
+  const sortedInvitations = useMemo(() => [...pendingInvitations].sort((a, b) => a.email.localeCompare(b.email)), [pendingInvitations]);
+
+  const count = members.length + sortedInvitations.length;
 
   const addForm = canAddRemove ? (
     <div className="space-y-2">
@@ -416,10 +446,11 @@ export function GroupMembers({
         <Input
           value={memberIdentifier}
           onChange={(event) => setMemberIdentifier(event.target.value)}
-          placeholder="GainForest username"
-          autoComplete="username"
+          placeholder={invitationsT("inputPlaceholder")}
+          type="email"
+          autoComplete="email"
           disabled={isPending}
-          aria-label="Member username"
+          aria-label={invitationsT("inputAria")}
         />
         {canSetRoles ? (
           <select
@@ -434,23 +465,27 @@ export function GroupMembers({
           </select>
         ) : null}
         <Button type="submit" disabled={isPending || !memberIdentifier.trim()}>
-          <UserPlusIcon /> Add
+          <MailIcon /> {invitationsT("invite")}
         </Button>
       </form>
       <p className="text-xs text-muted-foreground">
         {canSetRoles
-          ? "Email invitations are not connected yet. Add people by their GainForest username for now."
-          : "Admins can add regular members. Ask an owner to change roles or add another admin."}
+          ? invitationsT("ownerHelp")
+          : invitationsT("adminHelp")}
       </p>
     </div>
   ) : (
     <p className="flex items-center gap-2 rounded-2xl bg-muted/50 px-3.5 py-2.5 text-sm text-muted-foreground">
-      <LockIcon className="size-3.5 shrink-0" /> Only owners and admins can add or remove members.
+      <LockIcon className="size-3.5 shrink-0" /> {invitationsT("locked")}
     </p>
   );
 
   const errorBanner = error ? (
     <p className="rounded-2xl bg-destructive/10 px-3.5 py-2.5 text-sm text-destructive">{error}</p>
+  ) : null;
+
+  const successBanner = success ? (
+    <p className="rounded-2xl bg-emerald-500/10 px-3.5 py-2.5 text-sm text-emerald-700 dark:text-emerald-300">{success}</p>
   ) : null;
 
   const dataCouncilNotice = canUseDataCouncil && dataCouncilLoaded && !dataCouncilCanWrite ? (
@@ -461,7 +496,7 @@ export function GroupMembers({
 
   const list = (
     <div className="divide-y divide-border/60">
-      {sortedMembers.length === 0 ? (
+      {sortedMembers.length === 0 && sortedInvitations.length === 0 ? (
         <p className="flex items-center gap-2 px-4 py-6 text-sm text-muted-foreground">
           {isPending || !loaded ? (
             <>
@@ -472,33 +507,43 @@ export function GroupMembers({
           )}
         </p>
       ) : (
-        sortedMembers.map((member) => {
-          const profile = profiles[member.did];
-          const displayName = profile?.displayName?.trim() || "Team member";
-          const councilChecked = dataCouncilSelected.has(member.did);
-          return (
-            <MemberRow
-              key={member.did}
-              member={member}
-              profile={profile}
-              canRemove={canAddRemove || Boolean(currentUserDid && member.did === currentUserDid)}
-              canSetRoles={canSetRoles}
-              isPending={isPending}
-              dataCouncil={canUseDataCouncil ? {
-                checked: councilChecked,
-                disabled: isPending || !dataCouncilLoaded || !dataCouncilCanWrite,
-                pending: dataCouncilSavingDid === member.did,
-                label: dataCouncilT("title"),
-                addLabel: dataCouncilT("addLabel"),
-                addAria: dataCouncilT("addAria", { name: displayName }),
-                removeAria: dataCouncilT("removeAria", { name: displayName }),
-                onToggle: toggleDataCouncil,
-              } : undefined}
-              onRoleChange={updateRole}
-              onRemove={remove}
+        <>
+          {sortedMembers.map((member) => {
+            const profile = profiles[member.did];
+            const displayName = profile?.displayName?.trim() || "Team member";
+            const councilChecked = dataCouncilSelected.has(member.did);
+            return (
+              <MemberRow
+                key={member.did}
+                member={member}
+                profile={profile}
+                canRemove={canAddRemove || Boolean(currentUserDid && member.did === currentUserDid)}
+                canSetRoles={canSetRoles}
+                isPending={isPending}
+                dataCouncil={canUseDataCouncil ? {
+                  checked: councilChecked,
+                  disabled: isPending || !dataCouncilLoaded || !dataCouncilCanWrite,
+                  pending: dataCouncilSavingDid === member.did,
+                  label: dataCouncilT("title"),
+                  addLabel: dataCouncilT("addLabel"),
+                  addAria: dataCouncilT("addAria", { name: displayName }),
+                  removeAria: dataCouncilT("removeAria", { name: displayName }),
+                  onToggle: toggleDataCouncil,
+                } : undefined}
+                onRoleChange={updateRole}
+                onRemove={remove}
+              />
+            );
+          })}
+          {sortedInvitations.map((invitation) => (
+            <PendingInvitationRow
+              key={invitation.id}
+              invitation={invitation}
+              roleLabel={invitationsT(invitation.role === "admin" ? "roleAdmin" : "roleMember")}
+              statusLabel={invitationsT("pendingStatus", { role: invitationsT(invitation.role === "admin" ? "roleAdmin" : "roleMember") })}
             />
-          );
-        })
+          ))}
+        </>
       )}
     </div>
   );
@@ -523,6 +568,7 @@ export function GroupMembers({
         <div className="mt-4 space-y-3">
           {addForm}
           {dataCouncilNotice}
+          {successBanner}
           {errorBanner}
           {list}
         </div>
@@ -546,10 +592,10 @@ export function GroupMembers({
             </div>
             <p className="text-sm text-muted-foreground">
               {canSetRoles
-                ? "Add people and control who can make changes for this organization."
+                ? invitationsT("ownerDescription")
                 : canAddRemove
-                  ? "Add or remove regular members. Only owners can change roles."
-                  : "You can view members but not change them."}
+                  ? invitationsT("adminDescription")
+                  : invitationsT("viewerDescription")}
             </p>
           </div>
         </div>
@@ -561,6 +607,7 @@ export function GroupMembers({
       <div className="mt-5 space-y-3">
         {addForm}
         {dataCouncilNotice}
+        {successBanner}
         {errorBanner}
         {list}
       </div>

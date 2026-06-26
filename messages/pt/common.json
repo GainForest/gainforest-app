@@ -462,5 +462,58 @@
   "trust": {
     "trustedBy": "Com a confiança de",
     "aria": "Com a confiança de {names}"
+  },
+  "groupInvitations": {
+    "members": {
+      "inputPlaceholder": "Endereço de email",
+      "inputAria": "Endereço de email do membro",
+      "invite": "Convidar",
+      "ownerHelp": "Insira um endereço de email para enviar um convite.",
+      "adminHelp": "Administradores podem convidar membros comuns por email. Peça a um proprietário para convidar outro administrador.",
+      "locked": "Somente proprietários e administradores podem convidar ou remover membros.",
+      "ownerDescription": "Convide pessoas e controle quem pode fazer alterações para esta organização.",
+      "adminDescription": "Convide ou remova membros comuns. Somente proprietários podem alterar funções.",
+      "viewerDescription": "Você pode ver os membros, mas não alterá-los.",
+      "sent": "Convite enviado para {email}.",
+      "sendError": "Não conseguimos enviar esse convite. Tente novamente.",
+      "invalidEmail": "Insira um endereço de email válido.",
+      "roleMember": "membro",
+      "roleAdmin": "administrador",
+      "pendingStatus": "Convidado como {role}. Aguardando aceite."
+    },
+    "menu": {
+      "title": "Convites",
+      "loading": "Carregando convites…",
+      "empty": "Nenhum convite pendente.",
+      "loadError": "Não foi possível carregar os convites.",
+      "tryAgain": "Tentar novamente",
+      "accept": "Aceitar",
+      "accepting": "Aceitando…",
+      "acceptError": "Não foi possível aceitar o convite.",
+      "role": "Convite de {role}"
+    },
+    "invitePage": {
+      "eyebrow": "Convite de organização",
+      "organizationFallback": "esta organização",
+      "signedOutTitle": "Entre para aceitar",
+      "signedOutDescription": "Entre com o email convidado para participar de {organization}.",
+      "signIn": "Entrar",
+      "acceptingTitle": "Aceitando convite…",
+      "acceptingDescription": "Estamos adicionando você com segurança a {organization}.",
+      "acceptedTitle": "Você entrou na organização",
+      "acceptedDescription": "Agora você pode colaborar com {organization}.",
+      "goToOrganization": "Abrir organização",
+      "errorTitle": "Não foi possível aceitar o convite",
+      "acceptError": "Não foi possível aceitar o convite.",
+      "tryAgain": "Tentar novamente",
+      "notFoundTitle": "Convite não encontrado",
+      "notFoundDescription": "Este link de convite não é válido ou foi removido.",
+      "expiredTitle": "Convite expirado",
+      "expiredDescription": "Peça a um administrador da organização para enviar um novo convite.",
+      "canceledTitle": "Convite cancelado",
+      "canceledDescription": "Este convite não é mais válido.",
+      "alreadyAcceptedTitle": "Já aceito",
+      "alreadyAcceptedDescription": "Este convite já foi aceito."
+    }
   }
 }

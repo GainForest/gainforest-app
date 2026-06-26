@@ -18,6 +18,7 @@ function loadDotEnvFile(path: string): void {
   }
 }
 
+loadDotEnvFile(resolve(process.cwd(), ".env.local"));
 loadDotEnvFile(resolve(process.cwd(), "e2e/.env"));
 
 const defaultLocalE2EHost = "local-e2e.gainforest.app";
@@ -33,10 +34,9 @@ process.env.E2E_BASE_URL ??= baseURL;
 process.env.E2E_PORT ??= String(port);
 
 const authBaseUrl = process.env.NEXT_PUBLIC_AUTH_BASE_URL?.trim();
-if (!authBaseUrl) {
-  throw new Error("NEXT_PUBLIC_AUTH_BASE_URL is required for E2E tests");
+if (authBaseUrl) {
+  process.env.NEXT_PUBLIC_AUTH_BASE_URL = authBaseUrl.replace(/\/$/, "");
 }
-process.env.NEXT_PUBLIC_AUTH_BASE_URL = authBaseUrl.replace(/\/$/, "");
 process.env.NEXT_PUBLIC_AUTH_PROVIDER ??= "certs";
 
 function getConfiguredWorkers(): number | undefined {

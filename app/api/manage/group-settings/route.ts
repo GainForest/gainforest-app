@@ -4,6 +4,7 @@ import { fetchAuthSession } from "@/app/_lib/auth-server";
 import { fetchCgsMembersWithCookie, type CgsServerMember, type CgsServerRole } from "@/app/_lib/cgs-server";
 import { fetchIndexedCertifiedProfileCards, type IndexedCertifiedProfileCard } from "@/app/_lib/indexer";
 import { loadFastDataCouncilState, type DataCouncilState } from "@/app/_lib/data-council";
+import { listPendingGroupInvitationsForRepo, type GroupInvitation } from "@/app/_lib/cgs-invitations";
 
 export const runtime = "nodejs";
 
@@ -17,6 +18,7 @@ type AccountCardProfile = {
 type GroupSettingsResponse = {
   members: CgsServerMember[];
   profiles: AccountCardProfile[];
+  invitations: GroupInvitation[];
   dataCouncil: DataCouncilState | null;
   dataCouncilError: string | null;
 };
@@ -63,6 +65,9 @@ export async function GET(request: Request) {
 
     const profilesPromise = fetchIndexedCertifiedProfileCards(memberDids).catch(() => new Map<string, IndexedCertifiedProfileCard>());
     const canWrite = canWriteDataCouncil(members, userDid);
+    const invitationsPromise = canWrite
+      ? listPendingGroupInvitationsForRepo(repo).catch(() => [])
+      : Promise.resolve([] as GroupInvitation[]);
     const dataCouncilPromise = includeDataCouncil
       ? loadFastDataCouncilState(repo, members, canWrite).then(
           (state): { state: DataCouncilState | null; error: string | null } => ({
@@ -76,10 +81,11 @@ export async function GET(request: Request) {
         )
       : Promise.resolve({ state: null, error: null });
 
-    const [profilesByDid, dataCouncilResult] = await Promise.all([profilesPromise, dataCouncilPromise]);
+    const [profilesByDid, invitations, dataCouncilResult] = await Promise.all([profilesPromise, invitationsPromise, dataCouncilPromise]);
     const body: GroupSettingsResponse = {
       members,
       profiles: profilesFromIndex(members, profilesByDid),
+      invitations,
       dataCouncil: dataCouncilResult.state,
       dataCouncilError: dataCouncilResult.error,
     };

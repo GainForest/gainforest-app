@@ -462,5 +462,58 @@
   "trust": {
     "trustedBy": "Dipercaya oleh",
     "aria": "Dipercaya oleh {names}"
+  },
+  "groupInvitations": {
+    "members": {
+      "inputPlaceholder": "Alamat email",
+      "inputAria": "Alamat email anggota",
+      "invite": "Undang",
+      "ownerHelp": "Masukkan alamat email untuk mengirim undangan.",
+      "adminHelp": "Admin dapat mengundang anggota biasa melalui email. Minta pemilik mengundang administrator lain.",
+      "locked": "Hanya pemilik dan admin yang dapat mengundang atau menghapus anggota.",
+      "ownerDescription": "Undang orang dan atur siapa yang dapat membuat perubahan untuk organisasi ini.",
+      "adminDescription": "Undang atau hapus anggota biasa. Hanya pemilik yang dapat mengubah peran.",
+      "viewerDescription": "Anda dapat melihat anggota, tetapi tidak dapat mengubahnya.",
+      "sent": "Undangan dikirim ke {email}.",
+      "sendError": "Kami tidak dapat mengirim undangan itu. Coba lagi.",
+      "invalidEmail": "Masukkan alamat email yang valid.",
+      "roleMember": "anggota",
+      "roleAdmin": "administrator",
+      "pendingStatus": "Diundang sebagai {role}. Menunggu mereka menerima."
+    },
+    "menu": {
+      "title": "Undangan",
+      "loading": "Memuat undangan…",
+      "empty": "Tidak ada undangan tertunda.",
+      "loadError": "Tidak dapat memuat undangan.",
+      "tryAgain": "Coba lagi",
+      "accept": "Terima",
+      "accepting": "Menerima…",
+      "acceptError": "Tidak dapat menerima undangan.",
+      "role": "Undangan {role}"
+    },
+    "invitePage": {
+      "eyebrow": "Undangan organisasi",
+      "organizationFallback": "organisasi ini",
+      "signedOutTitle": "Masuk untuk menerima",
+      "signedOutDescription": "Masuk dengan email yang diundang untuk bergabung dengan {organization}.",
+      "signIn": "Masuk",
+      "acceptingTitle": "Menerima undangan…",
+      "acceptingDescription": "Kami menambahkan Anda dengan aman ke {organization}.",
+      "acceptedTitle": "Anda bergabung dengan organisasi",
+      "acceptedDescription": "Anda sekarang dapat berkolaborasi dengan {organization}.",
+      "goToOrganization": "Buka organisasi",
+      "errorTitle": "Tidak dapat menerima undangan",
+      "acceptError": "Tidak dapat menerima undangan.",
+      "tryAgain": "Coba lagi",
+      "notFoundTitle": "Undangan tidak ditemukan",
+      "notFoundDescription": "Tautan undangan ini tidak valid atau telah dihapus.",
+      "expiredTitle": "Undangan kedaluwarsa",
+      "expiredDescription": "Minta admin organisasi mengirim undangan baru.",
+      "canceledTitle": "Undangan dibatalkan",
+      "canceledDescription": "Undangan ini tidak berlaku lagi.",
+      "alreadyAcceptedTitle": "Sudah diterima",
+      "alreadyAcceptedDescription": "Undangan ini sudah diterima."
+    }
   }
 }

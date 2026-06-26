@@ -37,6 +37,7 @@ import {
   type SiteSourceFilter,
 } from "../_lib/indexer";
 import { RecordDrawer } from "./RecordDrawer";
+import { ObservationGrid } from "./ObservationGrid";
 import { RecordMap } from "./RecordMap";
 import { StatsTileGrid } from "./StatsTile";
 import { isPdsBlobUrl, resolveBlobUrl } from "../_lib/pds";
@@ -199,18 +200,38 @@ const SORT_OPTIONS: Array<{ value: SortMode; label: string }> = [
 export function RecordExplorer({
   kind,
   initialPage,
+  extraInitialRecords,
   showHero = true,
   ownerDid,
   defaultOccurrenceMedia = DEFAULT_OCCURRENCE_MEDIA,
+  leadingCard,
+  emptyState,
+  showStatsOverview = true,
+  hiddenRecordIds,
+  observationSelection,
+  onObservationVisibleRecordsChange,
   filterUris = null,
   emptyFilteredTitle,
   emptyFilteredBody,
 }: {
   kind: RecordKind;
   initialPage?: InitialExplorerPage;
+  /** Records to surface ahead of the server page — e.g. just-uploaded items that
+   *  the indexer has not picked up yet. Deduped against the server page by id. */
+  extraInitialRecords?: ExplorerRecord[];
   showHero?: boolean;
   ownerDid?: string;
   defaultOccurrenceMedia?: OccurrenceFilter;
+  leadingCard?: ReactNode;
+  emptyState?: ReactNode;
+  showStatsOverview?: boolean;
+  hiddenRecordIds?: ReadonlySet<string>;
+  observationSelection?: {
+    selectedIds: ReadonlySet<string>;
+    onToggle: (record: OccurrenceRecord, selected: boolean) => void;
+    getDisabledReason?: (record: OccurrenceRecord) => string | null;
+  };
+  onObservationVisibleRecordsChange?: (records: OccurrenceRecord[]) => void;
   /** When set, only records whose at:// URI is in this set are shown, and the
    *  stream auto-walks to completion so every match is found. */
   filterUris?: ReadonlySet<string> | null;
@@ -220,7 +241,7 @@ export function RecordExplorer({
   const meta = KIND_META[kind];
   const exploreT = useTranslations("marketplace.explore");
   const observationsT = useTranslations("marketplace.observations");
-  const showStatsOverview = !showHero || Boolean(ownerDid);
+  const shouldShowStatsOverview = showStatsOverview && (!showHero || Boolean(ownerDid));
   const [query, setQuery] = useQueryState(
     "q",
     parseAsString.withDefault("").withOptions(SEARCH_QUERY_STATE_OPTIONS),
@@ -261,7 +282,14 @@ export function RecordExplorer({
     "record",
     parseAsString.withOptions(QUERY_STATE_OPTIONS),
   );
-  const initialRecords = initialPage?.records ?? [];
+  const initialRecords = useMemo(() => {
+    const base = initialPage?.records ?? [];
+    if (!extraInitialRecords?.length) return base;
+    const seen = new Set(extraInitialRecords.map((record) => record.id));
+    return [...extraInitialRecords, ...base.filter((record) => !seen.has(record.id))];
+    // Seeded once at mount (useState initializer below); the panel remounts when
+    // returning from add mode, so a changing `extraInitialRecords` is picked up then.
+  }, [initialPage, extraInitialRecords]);
   const shouldLoadFromUrl = Boolean(query.trim()) || sort !== "newest" || (kind === "occurrence" && occMedia !== defaultOccurrenceMedia) || (kind === "site" && siteSource !== "both");
 
   const [records, setRecords] = useState<ExplorerRecord[]>(shouldLoadFromUrl ? [] : initialRecords);
@@ -539,13 +567,16 @@ export function RecordExplorer({
   }, [badgeFilters, canShowTotalCount, deferredQuery, occMedia, ownerDid]);
 
   const filtered = useMemo(() => {
-    const allowed = filterUris ? records.filter((r) => filterUris.has(r.atUri)) : records;
+    const visibleRecords = hiddenRecordIds?.size
+      ? records.filter((record) => !hiddenRecordIds.has(record.id))
+      : records;
+    const allowed = filterUris ? visibleRecords.filter((record) => filterUris.has(record.atUri)) : visibleRecords;
     const searched = filterRecords(allowed, deferredQuery);
     const categorized = kind === "occurrence"
       ? filterOccurrenceCategory(searched as OccurrenceRecord[], occCategory)
       : searched;
     return sortRecords(categorized, sort);
-  }, [deferredQuery, filterUris, kind, occCategory, records, sort]);
+  }, [deferredQuery, filterUris, hiddenRecordIds, kind, occCategory, records, sort]);
   const renderedRecords = useMemo(
     () => (view === "map" ? filtered : filtered.slice(0, cardLimit)),
     [cardLimit, filtered, view],
@@ -553,17 +584,22 @@ export function RecordExplorer({
   const hasMoreCardsToShow = view !== "map" && renderedRecords.length < filtered.length;
 
   useEffect(() => {
+    if (kind !== "occurrence" || !onObservationVisibleRecordsChange) return;
+    onObservationVisibleRecordsChange(renderedRecords as OccurrenceRecord[]);
+  }, [kind, onObservationVisibleRecordsChange, renderedRecords]);
+
+  useEffect(() => {
     setCardLimit(INITIAL_CARD_LIMIT);
   }, [deferredQuery, kind, occCategory, occMedia, siteSource, sort, badgeFilters, view]);
   // Embedded account/manage explorers keep compact loaded-record summaries.
   const stats = useMemo(
-    () => showStatsOverview ? (kind === "occurrence" && !ownerDid && occurrenceStats ? computeOccurrenceTotalStats(occurrenceStats, records) : computeStats(records, kind)) : [],
-    [kind, occurrenceStats, ownerDid, records, showStatsOverview],
+    () => shouldShowStatsOverview ? (kind === "occurrence" && !ownerDid && occurrenceStats ? computeOccurrenceTotalStats(occurrenceStats, records) : computeStats(records, kind)) : [],
+    [kind, occurrenceStats, ownerDid, records, shouldShowStatsOverview],
   );
-  const showStats = showStatsOverview && (kind === "occurrence" ? ownerDid ? records.length > 0 : Boolean(occurrenceStats) || (!occurrenceStatsLoading && records.length > 0) : records.length > 0);
+  const showStats = shouldShowStatsOverview && (kind === "occurrence" ? ownerDid ? records.length > 0 : Boolean(occurrenceStats) || (!occurrenceStatsLoading && records.length > 0) : records.length > 0);
   const gridCls = kind === "occurrence" ? GALLERY_GRID_CLS : GRID_CLS;
   // While a project filter is active and the stream is still walking, keep the
-  // skeleton up so a partial page doesn't briefly read as "nothing here".
+  // skeleton up so a partial page does not briefly read as empty.
   const showSkeleton = ((phase === "idle" || phase === "loading") && records.length === 0) || Boolean(filterUris && filtered.length === 0 && (walking || hasMore));
 
   return (
@@ -592,7 +628,11 @@ export function RecordExplorer({
 
         {/* Toolbar */}
         <div className="relative z-20 mt-5 space-y-2.5">
-          <div className="flex items-center gap-2 animate-in" style={{ animationDelay: "80ms" }}>
+          {/* z-30 keeps the sort popover above the filter-pill row below it: both
+              rows freeze a `transform` once `animate-in` settles, so each becomes
+              its own stacking context. Without this the filter row's z-20 would
+              paint over the popover regardless of its own high z-index. */}
+          <div className="relative z-30 flex items-center gap-2 animate-in" style={{ animationDelay: "80ms" }}>
             <div className="group/input-group relative flex h-10 min-w-0 flex-1 items-center rounded-full border border-border-soft bg-surface shadow-xs backdrop-blur transition-colors focus-within:border-primary/40">
               <SearchIcon
                 aria-hidden
@@ -714,6 +754,8 @@ export function RecordExplorer({
                 onRetry={() => void setQuery("")}
                 retryLabel="Clear search"
               />
+            ) : emptyState ? (
+              emptyState
             ) : kind === "occurrence" && occCategory !== "all" ? (
               <EmptyState
                 title={`No ${occurrenceCategoryLabel(occCategory).toLowerCase()} sightings in this view`}
@@ -738,10 +780,23 @@ export function RecordExplorer({
             )
           ) : view === "list" ? (
             <RecordList records={renderedRecords} onOpen={setDrawer} />
+          ) : kind === "occurrence" ? (
+            <ObservationGrid
+              records={renderedRecords as OccurrenceRecord[]}
+              onOpen={setDrawer}
+              className={gridCls}
+              leadingCard={leadingCard}
+              selection={observationSelection}
+            />
           ) : (
             <ul role="list" className={gridCls}>
+              {leadingCard ? (
+                <li className="animate-in" style={{ animationDelay: "0ms" }}>
+                  {leadingCard}
+                </li>
+              ) : null}
               {renderedRecords.map((r, i) => (
-                <li key={r.id} className="animate-in" style={{ animationDelay: `${Math.min(i, 12) * 18}ms` }}>
+                <li key={r.id} className="animate-in" style={{ animationDelay: `${Math.min(i + (leadingCard ? 1 : 0), 12) * 18}ms` }}>
                   <RecordCard record={r} onOpen={setDrawer} />
                 </li>
               ))}
@@ -858,7 +913,7 @@ const OccurrenceCard = memo(function OccurrenceCard({
   const name = occurrenceDisplayName(record);
   const subtitle = occurrenceSecondaryName(record);
   const place = occurrencePlace(record);
-  const creatorLabel = record.creatorName ?? profile?.handle ?? profile?.displayName ?? null;
+  const creatorLabel = record.creatorName ?? profile?.displayName ?? profile?.handle ?? null;
   const date = record.eventDate || record.createdAt;
 
   useEffect(() => {

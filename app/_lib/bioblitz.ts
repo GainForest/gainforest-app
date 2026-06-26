@@ -58,7 +58,7 @@ export type BioblitzRound = {
 export const BIOBLITZ_ROUNDS: BioblitzRound[] = [
   {
     id: 1,
-    label: "Round 1 · Pilot",
+    label: "Pilot Round",
     start: "2026-06-26T00:00:00.000Z",
     end: "2026-07-03T23:59:59.999Z",
     rsvpUrl: "https://luma.com/0yujr98x",

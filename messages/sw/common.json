@@ -462,5 +462,58 @@
   "trust": {
     "trustedBy": "Inaaminiwa na",
     "aria": "Inaaminiwa na {names}"
+  },
+  "groupInvitations": {
+    "members": {
+      "inputPlaceholder": "Anwani ya barua pepe",
+      "inputAria": "Anwani ya barua pepe ya mwanachama",
+      "invite": "Alika",
+      "ownerHelp": "Weka anwani ya barua pepe ili kutuma mwaliko.",
+      "adminHelp": "Wasimamizi wanaweza kualika wanachama wa kawaida kwa barua pepe. Mwombe mmiliki kumwalika msimamizi mwingine.",
+      "locked": "Wamiliki na wasimamizi pekee wanaweza kualika au kuondoa wanachama.",
+      "ownerDescription": "Alika watu na udhibiti nani anaweza kufanya mabadiliko kwa shirika hili.",
+      "adminDescription": "Alika au ondoa wanachama wa kawaida. Wamiliki pekee wanaweza kubadilisha majukumu.",
+      "viewerDescription": "Unaweza kuona wanachama, lakini huwezi kuwabadilisha.",
+      "sent": "Mwaliko umetumwa kwa {email}.",
+      "sendError": "Hatukuweza kutuma mwaliko huo. Jaribu tena.",
+      "invalidEmail": "Weka anwani halali ya barua pepe.",
+      "roleMember": "mwanachama",
+      "roleAdmin": "msimamizi",
+      "pendingStatus": "Amealikwa kama {role}. Tunasubiri akubali."
+    },
+    "menu": {
+      "title": "Mialiko",
+      "loading": "Inapakia mialiko…",
+      "empty": "Hakuna mialiko inayosubiri.",
+      "loadError": "Haikuwezekana kupakia mialiko.",
+      "tryAgain": "Jaribu tena",
+      "accept": "Kubali",
+      "accepting": "Inakubali…",
+      "acceptError": "Haikuwezekana kukubali mwaliko.",
+      "role": "Mwaliko wa {role}"
+    },
+    "invitePage": {
+      "eyebrow": "Mwaliko wa shirika",
+      "organizationFallback": "shirika hili",
+      "signedOutTitle": "Ingia ili kukubali",
+      "signedOutDescription": "Ingia kwa barua pepe iliyoalikwa ili kujiunga na {organization}.",
+      "signIn": "Ingia",
+      "acceptingTitle": "Inakubali mwaliko…",
+      "acceptingDescription": "Tunakukuongeza kwa usalama kwenye {organization}.",
+      "acceptedTitle": "Umejiunga na shirika",
+      "acceptedDescription": "Sasa unaweza kushirikiana na {organization}.",
+      "goToOrganization": "Fungua shirika",
+      "errorTitle": "Haikuwezekana kukubali mwaliko",
+      "acceptError": "Haikuwezekana kukubali mwaliko.",
+      "tryAgain": "Jaribu tena",
+      "notFoundTitle": "Mwaliko haukupatikana",
+      "notFoundDescription": "Kiungo hiki cha mwaliko si halali au kimeondolewa.",
+      "expiredTitle": "Mwaliko umeisha muda",
+      "expiredDescription": "Mwombe msimamizi wa shirika akutumie mwaliko mpya.",
+      "canceledTitle": "Mwaliko umeghairiwa",
+      "canceledDescription": "Mwaliko huu si halali tena.",
+      "alreadyAcceptedTitle": "Tayari umekubaliwa",
+      "alreadyAcceptedDescription": "Mwaliko huu tayari umekubaliwa."
+    }
   }
 }

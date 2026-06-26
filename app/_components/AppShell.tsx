@@ -33,6 +33,7 @@ import {
 import { createContext, Suspense, useContext, useEffect, useState, type MouseEvent, type SVGProps } from "react";
 import { useTranslations } from "next-intl";
 import type { AuthSession } from "../_lib/auth";
+import { BioblitzPromoBanner } from "./BioblitzPromoBanner";
 import packageJson from "@/package.json";
 import { BumicertsBumicertCard, type BumicertsBumicertCardRecord } from "@/components/bumicert/BumicertsBumicertCard";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -354,32 +355,35 @@ export function AppShell({
 
   return (
     <HeaderSlotsProvider>
-      <div className="flex h-screen overflow-hidden">
-        <div className="relative hidden md:block">
-          <UnifiedSidebar
-            authSession={resolvedAuthSession}
-            manageAccountKind={resolvedManageAccountKind}
-            isProfileLoading={isProfileLoading}
-            collapsed={sidebarCollapsed}
-          />
-          <SidebarCollapseToggle collapsed={sidebarCollapsed} onToggle={toggleSidebarCollapsed} />
+      <div className="flex h-screen flex-col overflow-hidden">
+        {pathname !== "/bioblitz" ? <BioblitzPromoBanner /> : null}
+        <div className="flex min-h-0 flex-1 overflow-hidden">
+          <div className="relative hidden md:block">
+            <UnifiedSidebar
+              authSession={resolvedAuthSession}
+              manageAccountKind={resolvedManageAccountKind}
+              isProfileLoading={isProfileLoading}
+              collapsed={sidebarCollapsed}
+            />
+            <SidebarCollapseToggle collapsed={sidebarCollapsed} onToggle={toggleSidebarCollapsed} />
+          </div>
+          <MobileNavDrawer open={mobileNavOpen} onOpenChange={setMobileNavOpen}>
+            <UnifiedSidebar
+              authSession={resolvedAuthSession}
+              manageAccountKind={resolvedManageAccountKind}
+              isProfileLoading={isProfileLoading}
+            />
+          </MobileNavDrawer>
+          <main className="relative flex-1 overflow-y-auto">
+            <Header authSession={resolvedAuthSession} profileName={resolvedProfileName} onOpenMobileNav={() => setMobileNavOpen(true)} />
+            <FreshAccountOnboardingPrompt
+              authSession={resolvedAuthSession}
+              isProfileLoading={isProfileLoading}
+              hasCertifiedProfile={hasCertifiedProfile}
+            />
+            {children}
+          </main>
         </div>
-        <MobileNavDrawer open={mobileNavOpen} onOpenChange={setMobileNavOpen}>
-          <UnifiedSidebar
-            authSession={resolvedAuthSession}
-            manageAccountKind={resolvedManageAccountKind}
-            isProfileLoading={isProfileLoading}
-          />
-        </MobileNavDrawer>
-        <main className="relative flex-1 overflow-y-auto">
-          <Header authSession={resolvedAuthSession} profileName={resolvedProfileName} onOpenMobileNav={() => setMobileNavOpen(true)} />
-          <FreshAccountOnboardingPrompt
-            authSession={resolvedAuthSession}
-            isProfileLoading={isProfileLoading}
-            hasCertifiedProfile={hasCertifiedProfile}
-          />
-          {children}
-        </main>
       </div>
     </HeaderSlotsProvider>
   );
@@ -517,8 +521,8 @@ function UnifiedSidebar({
     <SidebarCollapsedContext.Provider value={collapsed}>
     <nav
       className={cn(
-        "relative isolate flex h-full flex-col overflow-hidden border-r border-border bg-foreground/3 transition-[width,padding] duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)] motion-reduce:transition-none",
-        collapsed ? "w-[76px] p-3" : "w-[256px] p-4",
+        "relative isolate z-30 flex h-full flex-col border-r border-border bg-foreground/3 transition-[width,padding] duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)] motion-reduce:transition-none",
+        collapsed ? "w-[76px] overflow-visible p-3" : "w-[256px] overflow-hidden p-4",
       )}
     >
       <AnimatePresence>
@@ -603,7 +607,7 @@ function SidebarTabs({ activeTab }: { activeTab: SidebarTab }) {
   const t = useTranslations("common.sidebar.tabs");
   return (
     <LayoutGroup id="sidebar-tabs">
-      <div className={cn("flex rounded-full border border-border bg-foreground/5 p-1", collapsed && "flex-col gap-1")}>
+      <div className={cn("flex rounded-full border border-border bg-foreground/5 p-1", collapsed && "flex-col gap-1 rounded-2xl")}>
         {SIDEBAR_TABS.map((tab) => {
           const isActive = tab.id === activeTab;
           return (

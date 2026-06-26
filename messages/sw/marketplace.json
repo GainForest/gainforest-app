@@ -944,8 +944,8 @@
       "loading": "Inapakia vyeti zilizounganishwa"
     },
     "observation": {
-      "ownerTitle": "Uonekano wako",
-      "ownerDescription": "Unaweza kubadilisha maelezo yaliyohifadhiwa au kuondoa uonekano huu.",
+      "ownerTitle": "Maelezo ya uchunguzi",
+      "ownerDescription": "Badilisha maelezo yaliyohifadhiwa au ondoa uchunguzi huu ikiwa una ruhusa.",
       "saved": "Uonekano umehifadhiwa.",
       "saveError": "Uonekano huu haukuweza kuhifadhiwa. Tafadhali jaribu tena.",
       "deleteError": "Uonekano huu haukuweza kufutwa. Tafadhali jaribu tena.",
@@ -986,7 +986,12 @@
       "noMapLocation": "Hakuna eneo la ramani lililochaguliwa bado.",
       "useLocation": "Tumia eneo",
       "natureSoundRecording": "Rekodi ya sauti ya asili",
-      "unidentifiedSighting": "Muono usiotambuliwa"
+      "unidentifiedSighting": "Muono usiotambuliwa",
+      "mediaTitle": "Media katika uchunguzi huu",
+      "mediaCount": "{count, plural, one {kipengee #} other {vipengee #}}",
+      "primaryMedia": "Media kuu",
+      "fieldSound": "Sauti ya uwanjani",
+      "mediaThumbnail": "Media ya uchunguzi"
     },
     "media": {
       "image": "Picha",
@@ -1057,8 +1062,8 @@
       "description": "Unda na simamia miradi yako na utoe vyeti vya athari kutoka kwayo."
     },
     "actions": {
-      "manageCerts": "Certs",
-      "manageCertsFor": "Certs za {title}",
+      "manageCerts": "Vyeti",
+      "manageCertsFor": "Vyeti vya {title}",
       "manageGallery": "Dhibiti matunzio",
       "manageGalleryFor": "Dhibiti matunzio ya {title}",
       "manageObservations": "Uchunguzi",
@@ -1152,5 +1157,16 @@
       "createProject": "Unda mradi",
       "skip": "Toa bila kuunganisha na mradi"
     }
+  },
+  "observationGrid": {
+    "sectionTitle": "Uchunguzi",
+    "openDetails": "Fungua maelezo ya uchunguzi: {name}",
+    "mediaCount": "{count, plural, one {kipengee # cha media} other {vipengee # vya media}}",
+    "selectObservation": "Chagua uchunguzi",
+    "deselectObservation": "Ondoa uteuzi wa uchunguzi",
+    "playSound": "Cheza sauti",
+    "pauseSound": "Sitisha sauti",
+    "natureSoundRecording": "Rekodi ya sauti ya asili",
+    "unidentifiedSighting": "Uchunguzi ambao haujatambuliwa"
   }
 }

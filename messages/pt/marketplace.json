@@ -944,8 +944,8 @@
       "loading": "Carregando certificados vinculados"
     },
     "observation": {
-      "ownerTitle": "Seu avistamento",
-      "ownerDescription": "Você pode alterar os detalhes salvos ou remover este avistamento.",
+      "ownerTitle": "Detalhes da observação",
+      "ownerDescription": "Altere os detalhes salvos ou remova esta observação se tiver permissão.",
       "saved": "Avistamento salvo.",
       "saveError": "Não foi possível salvar este avistamento. Tente novamente.",
       "deleteError": "Não foi possível excluir este avistamento. Tente novamente.",
@@ -986,7 +986,12 @@
       "noMapLocation": "Nenhuma localização no mapa escolhida ainda.",
       "useLocation": "Usar localização",
       "natureSoundRecording": "Gravação de som da natureza",
-      "unidentifiedSighting": "Observação não identificada"
+      "unidentifiedSighting": "Observação não identificada",
+      "mediaTitle": "Mídia nesta observação",
+      "mediaCount": "{count, plural, one {# item} other {# itens}}",
+      "primaryMedia": "Mídia principal",
+      "fieldSound": "Som de campo",
+      "mediaThumbnail": "Mídia da observação"
     },
     "media": {
       "image": "Foto",
@@ -1057,8 +1062,8 @@
       "description": "Crie e gerencie seus projetos e emita certificados de impacto a partir deles."
     },
     "actions": {
-      "manageCerts": "Certs",
-      "manageCertsFor": "Certs de {title}",
+      "manageCerts": "Certificados",
+      "manageCertsFor": "Certificados de {title}",
       "manageGallery": "Gerenciar galeria",
       "manageGalleryFor": "Gerenciar galeria de {title}",
       "manageObservations": "Observações",
@@ -1152,5 +1157,16 @@
       "createProject": "Criar um projeto",
       "skip": "Emitir sem vincular a um projeto"
     }
+  },
+  "observationGrid": {
+    "sectionTitle": "Observações",
+    "openDetails": "Abrir detalhes da observação: {name}",
+    "mediaCount": "{count, plural, one {# item de mídia} other {# itens de mídia}}",
+    "selectObservation": "Selecionar observação",
+    "deselectObservation": "Desmarcar observação",
+    "playSound": "Reproduzir som",
+    "pauseSound": "Pausar som",
+    "natureSoundRecording": "Gravação de som da natureza",
+    "unidentifiedSighting": "Avistamento não identificado"
   }
 }

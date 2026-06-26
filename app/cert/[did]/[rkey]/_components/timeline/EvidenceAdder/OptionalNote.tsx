@@ -16,6 +16,8 @@ export function OptionalNote({
   const evidenceT = useTranslations("bumicert.detail.evidenceAdder");
   const noteId = useId();
 
+  // Existing rich notes are rendered in the timeline. New notes stay plain text
+  // for now so evidence creation remains simple and reliable.
   return (
     <div className="flex flex-col gap-1.5">
       <label htmlFor={noteId} className="text-sm font-medium">

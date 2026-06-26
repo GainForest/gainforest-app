@@ -4226,6 +4226,14 @@ export type TreeMultimediaRecord = {
   };
 };
 
+export type ObservationMediaItem = TreeMultimediaRecord;
+
+const MULTIMEDIA_NODE_FIELDS = `
+  did uri rkey cid createdAt occurrenceRef siteRef subjectPart subjectPartUri subjectOrientation
+  file { ref mimeType size }
+  format accessUri variantLiteral caption creator createDate
+`;
+
 const TREE_MULTIMEDIA_BY_DID_QUERY = `
   query TreeMultimediaByDid($did: String!, $first: Int!, $after: String) {
     appGainforestAcMultimedia(
@@ -4236,13 +4244,22 @@ const TREE_MULTIMEDIA_BY_DID_QUERY = `
       sortBy: createdAt
     ) {
       pageInfo { hasNextPage endCursor }
-      edges {
-        node {
-          did uri rkey cid createdAt occurrenceRef siteRef subjectPart subjectPartUri subjectOrientation
-          file { ref mimeType size }
-          format accessUri variantLiteral caption creator createDate
-        }
-      }
+      edges { node { ${MULTIMEDIA_NODE_FIELDS} } }
+    }
+  }
+`;
+
+const OCCURRENCE_MULTIMEDIA_QUERY = `
+  query ObservationMedia($did: String!, $occurrenceRef: String!, $first: Int!, $after: String) {
+    appGainforestAcMultimedia(
+      where: { did: { eq: $did }, occurrenceRef: { eq: $occurrenceRef } }
+      first: $first
+      after: $after
+      sortDirection: DESC
+      sortBy: createdAt
+    ) {
+      pageInfo { hasNextPage endCursor }
+      edges { node { ${MULTIMEDIA_NODE_FIELDS} } }
     }
   }
 `;
@@ -4341,6 +4358,60 @@ export async function fetchMultimediaByDid(
   return all;
 }
 
+export async function fetchObservationMedia(
+  did: string,
+  occurrenceRef: string,
+  signal?: AbortSignal,
+): Promise<ObservationMediaItem[]> {
+  const all: ObservationMediaItem[] = [];
+  let cursor: string | null = null;
+
+  try {
+    for (let page = 0; page < 10; page += 1) {
+      type MultimediaPage = { appGainforestAcMultimedia?: Connection<RawTreeMultimediaNode> };
+      const data: MultimediaPage | null = await indexerQuery<MultimediaPage>(
+        OCCURRENCE_MULTIMEDIA_QUERY,
+        { did, occurrenceRef, first: 50, after: cursor },
+        signal,
+      );
+      const conn: Connection<RawTreeMultimediaNode> | undefined = data?.appGainforestAcMultimedia;
+      const nodes = (conn?.edges ?? [])
+        .map((edge) => edge?.node)
+        .filter((node): node is RawTreeMultimediaNode => Boolean(node?.did && node?.uri && node?.rkey));
+      all.push(...(await Promise.all(nodes.map((node) => mapTreeMultimedia(node, signal)))));
+      if (!conn?.pageInfo?.hasNextPage || !conn.pageInfo.endCursor) break;
+      cursor = conn.pageInfo.endCursor;
+    }
+  } catch (error) {
+    if (isUnsupportedMultimediaError(error)) return [];
+    throw error;
+  }
+
+  return all;
+}
+
+export async function fetchObservationMediaCounts(
+  occurrenceRefs: string[],
+  signal?: AbortSignal,
+): Promise<Map<string, number>> {
+  const counts = new Map<string, number>();
+  const unique = Array.from(new Set(occurrenceRefs.filter(Boolean)));
+  try {
+    for (let start = 0; start < unique.length; start += 40) {
+      const batch = unique.slice(start, start + 40);
+      const query = `query ObservationMediaCounts {\n${batch.map((uri, index) =>
+        `c${index}: appGainforestAcMultimedia(first: 0, where: { occurrenceRef: { eq: ${JSON.stringify(uri)} } }) { totalCount }`,
+      ).join("\n")}\n}`;
+      const data = await indexerQuery<Record<string, { totalCount?: number | null } | null>>(query, {}, signal);
+      batch.forEach((uri, index) => counts.set(uri, data?.[`c${index}`]?.totalCount ?? 0));
+    }
+  } catch (error) {
+    if (isUnsupportedMultimediaError(error)) return counts;
+    throw error;
+  }
+  return counts;
+}
+
 // ── 9. Bumicert evidence timeline attachments ─────────────────────────────
 
 export type TimelineAttachmentSubject = { uri: string | null; cid: string | null };
@@ -4375,7 +4446,50 @@ export type TimelineDatasetRecord = {
   record: { name: string; description: string | null; recordCount: number | null; createdAt: string | null };
 };
 
+const TIMELINE_ATTACHMENT_LEAFLET_FACETS_FRAGMENT = `
+  fragment TimelineAttachmentLeafletFacets on PubLeafletRichtextFacet {
+    index { byteStart byteEnd }
+    features {
+      __typename
+      ... on PubLeafletRichtextFacetLink { uri }
+      ... on PubLeafletRichtextFacetAtMention { href }
+    }
+  }
+`;
+
+const TIMELINE_ATTACHMENT_LEAFLET_BLOCKS_SELECTION = `
+  blocks {
+    alignment
+    block {
+      __typename
+      ... on PubLeafletBlocksHeader { level plaintext facets { ...TimelineAttachmentLeafletFacets } }
+      ... on PubLeafletBlocksText { plaintext facets { ...TimelineAttachmentLeafletFacets } }
+      ... on PubLeafletBlocksBlockquote { plaintext facets { ...TimelineAttachmentLeafletFacets } }
+      ... on PubLeafletBlocksCode { plaintext language }
+      ... on PubLeafletBlocksImage { alt image { ref mimeType size } aspectRatio { width height } }
+      ... on PubLeafletBlocksIframe { url height aspectRatio { width height } }
+      ... on PubLeafletBlocksWebsite { src title description previewImage { ref } }
+      ... on PubLeafletBlocksButton { text url }
+      ... on PubLeafletBlocksHorizontalRule { empty }
+      ... on PubLeafletBlocksUnorderedList {
+        children { content {
+          __typename
+          ... on PubLeafletBlocksText { plaintext facets { ...TimelineAttachmentLeafletFacets } }
+          ... on PubLeafletBlocksHeader { plaintext }
+        } }
+      }
+      ... on PubLeafletBlocksOrderedList {
+        children { content {
+          __typename
+          ... on PubLeafletBlocksText { plaintext facets { ...TimelineAttachmentLeafletFacets } }
+        } }
+      }
+    }
+  }
+`;
+
 const TIMELINE_ATTACHMENTS_BY_DID_QUERY = `
+  ${TIMELINE_ATTACHMENT_LEAFLET_FACETS_FRAGMENT}
   query TimelineAttachmentsByDid($did: String!, $first: Int!, $after: String) {
     orgHypercertsContextAttachment(
       where: { did: { eq: $did } }
@@ -4393,8 +4507,19 @@ const TIMELINE_ATTACHMENTS_BY_DID_QUERY = `
           subjects { uri cid }
           description {
             __typename
-            ... on OrgHypercertsDefsDescriptionString { value }
+            ... on OrgHypercertsDefsDescriptionString {
+              value
+              facets {
+                index { byteStart byteEnd }
+                features {
+                  ... on AppBskyRichtextFacetMention { did }
+                  ... on AppBskyRichtextFacetLink { uri }
+                  ... on AppBskyRichtextFacetTag { tag }
+                }
+              }
+            }
             ... on ComAtprotoRepoStrongRef { uri cid }
+            ... on PubLeafletPagesLinearDocument { id ${TIMELINE_ATTACHMENT_LEAFLET_BLOCKS_SELECTION} }
           }
           content {
             __typename
@@ -4428,6 +4553,63 @@ const TIMELINE_LOCATION_BY_URI_QUERY = `
   }
 `;
 
+type RawTimelineBskyFacet = {
+  index?: { byteStart?: number | null; byteEnd?: number | null } | null;
+  features?: Array<{ did?: string | null; uri?: string | null; tag?: string | null } | null> | null;
+};
+
+type RawTimelineLeafletFacet = {
+  index?: { byteStart?: number | null; byteEnd?: number | null } | null;
+  features?: Array<{ __typename?: string | null; uri?: string | null; href?: string | null } | null> | null;
+};
+
+type RawTimelineLeafletContent = {
+  __typename?: string | null;
+  plaintext?: string | null;
+  facets?: RawTimelineLeafletFacet[] | null;
+};
+
+type RawTimelineBlobLike = {
+  ref?: string | null;
+  mimeType?: string | null;
+  size?: number | null;
+};
+
+type RawTimelineLeafletBlockValue = RawTimelineLeafletContent & {
+  level?: number | null;
+  language?: string | null;
+  alt?: string | null;
+  image?: RawTimelineBlobLike | null;
+  previewImage?: RawTimelineBlobLike | null;
+  aspectRatio?: { width?: number | null; height?: number | null } | null;
+  url?: string | null;
+  height?: number | null;
+  src?: string | null;
+  title?: string | null;
+  description?: string | null;
+  text?: string | null;
+  empty?: boolean | null;
+  children?: Array<{ content?: RawTimelineLeafletContent | null } | null> | null;
+};
+
+type RawTimelineLeafletBlock = {
+  alignment?: string | null;
+  block?: RawTimelineLeafletBlockValue | null;
+};
+
+type RawTimelineDescription =
+  | string
+  | {
+      __typename?: string | null;
+      value?: string | null;
+      facets?: RawTimelineBskyFacet[] | null;
+      uri?: string | null;
+      cid?: string | null;
+      id?: string | null;
+      blocks?: RawTimelineLeafletBlock[] | null;
+    }
+  | null;
+
 type RawTimelineAttachment = {
   did?: string | null;
   uri?: string | null;
@@ -4438,11 +4620,11 @@ type RawTimelineAttachment = {
   shortDescription?: string | null;
   contentType?: string | null;
   subjects?: Array<{ uri?: string | null; cid?: string | null } | null> | null;
-  description?: { __typename?: string | null; value?: string | null; uri?: string | null; cid?: string | null } | null;
+  description?: RawTimelineDescription;
   content?: Array<{
     __typename?: string | null;
     uri?: string | null;
-    blob?: { ref?: string | null; mimeType?: string | null; size?: number | null } | null;
+    blob?: RawTimelineBlobLike | null;
   } | null> | null;
   certifiedProfileData?: CertifiedProfileData;
 };
@@ -4470,13 +4652,183 @@ type RawTimelineLocation = {
   location?: { __typename?: string | null; string?: string | null; uri?: string | null } | null;
 };
 
-function normalizeTimelineDescription(value: RawTimelineAttachment["description"]): unknown {
+function normalizeTimelineBskyFacets(facets: RawTimelineBskyFacet[] | null | undefined): unknown[] {
+  return (facets ?? []).flatMap((facet) => {
+    if (!facet?.index) return [];
+
+    const features: unknown[] = [];
+    for (const feature of facet.features ?? []) {
+      if (!feature) continue;
+      if (typeof feature.did === "string") features.push({ $type: "app.bsky.richtext.facet#mention", did: feature.did });
+      if (typeof feature.uri === "string") features.push({ $type: "app.bsky.richtext.facet#link", uri: feature.uri });
+      if (typeof feature.tag === "string") features.push({ $type: "app.bsky.richtext.facet#tag", tag: feature.tag });
+    }
+
+    return [{
+      index: {
+        byteStart: facet.index.byteStart ?? 0,
+        byteEnd: facet.index.byteEnd ?? 0,
+      },
+      features,
+    }];
+  });
+}
+
+function normalizeTimelineLeafletFacets(facets: RawTimelineLeafletFacet[] | null | undefined): unknown[] {
+  return (facets ?? []).flatMap((facet) => {
+    if (!facet?.index) return [];
+    const features: unknown[] = [];
+    for (const feature of facet.features ?? []) {
+      if (!feature?.__typename) continue;
+      features.push({
+        __typename: feature.__typename,
+        ...(feature.uri ? { uri: feature.uri } : {}),
+        ...(feature.href ? { href: feature.href } : {}),
+      });
+    }
+    return [{
+      index: {
+        byteStart: facet.index.byteStart ?? 0,
+        byteEnd: facet.index.byteEnd ?? 0,
+      },
+      features,
+    }];
+  });
+}
+
+function normalizeTimelineAspectRatio(
+  value: { width?: number | null; height?: number | null } | null | undefined,
+): { width: number; height: number } | null {
+  return value?.width && value.height ? { width: value.width, height: value.height } : null;
+}
+
+async function resolveTimelineLeafletBlob(
+  blob: RawTimelineBlobLike | null | undefined,
+  did: string | null | undefined,
+  signal?: AbortSignal,
+): Promise<{ $type: "blob"; uri: string | null; cid: string | null; mimeType: string | null; size: number | null } | null> {
+  const ref = normaliseRef(blob?.ref);
+  let uri: string | null = null;
+  if (did && ref) {
+    try {
+      uri = await resolveBlobUrl(did, ref, signal);
+    } catch {
+      uri = null;
+    }
+  }
+  return blob || ref
+    ? { $type: "blob", uri, cid: ref, mimeType: blob?.mimeType ?? null, size: blob?.size ?? null }
+    : null;
+}
+
+function timelineLeafletBlockType(typename: string): string {
+  return typename
+    .replace(/^PubLeafletBlocks/, "pub.leaflet.blocks.")
+    .replace(/\.([A-Z])/, (_match, letter: string) => `.${letter.toLowerCase()}`);
+}
+
+async function normalizeTimelineLeafletContent(
+  value: RawTimelineLeafletContent | null | undefined,
+): Promise<unknown> {
+  if (!value?.__typename) return value ?? null;
+  return {
+    __typename: value.__typename,
+    $type: timelineLeafletBlockType(value.__typename),
+    plaintext: value.plaintext ?? "",
+    facets: normalizeTimelineLeafletFacets(value.facets),
+  };
+}
+
+async function normalizeTimelineLeafletBlock(
+  value: RawTimelineLeafletBlockValue | null | undefined,
+  did: string | null | undefined,
+  signal?: AbortSignal,
+): Promise<unknown> {
+  if (!value?.__typename) return value ?? null;
+  const base = {
+    __typename: value.__typename,
+    $type: timelineLeafletBlockType(value.__typename),
+  };
+
+  if (value.__typename === "PubLeafletBlocksText") {
+    return { ...base, plaintext: value.plaintext ?? "", facets: normalizeTimelineLeafletFacets(value.facets) };
+  }
+  if (value.__typename === "PubLeafletBlocksHeader") {
+    return { ...base, plaintext: value.plaintext ?? "", level: value.level ?? null, facets: normalizeTimelineLeafletFacets(value.facets) };
+  }
+  if (value.__typename === "PubLeafletBlocksBlockquote") {
+    return { ...base, plaintext: value.plaintext ?? "", facets: normalizeTimelineLeafletFacets(value.facets) };
+  }
+  if (value.__typename === "PubLeafletBlocksCode") {
+    return { ...base, plaintext: value.plaintext ?? "", language: value.language ?? null };
+  }
+  if (value.__typename === "PubLeafletBlocksImage") {
+    return {
+      ...base,
+      alt: value.alt ?? null,
+      image: await resolveTimelineLeafletBlob(value.image, did, signal),
+      aspectRatio: normalizeTimelineAspectRatio(value.aspectRatio),
+    };
+  }
+  if (value.__typename === "PubLeafletBlocksIframe") {
+    return { ...base, url: value.url ?? null, height: value.height ?? null, aspectRatio: normalizeTimelineAspectRatio(value.aspectRatio) };
+  }
+  if (value.__typename === "PubLeafletBlocksWebsite") {
+    return {
+      ...base,
+      src: value.src ?? null,
+      title: value.title ?? null,
+      description: value.description ?? null,
+      previewImage: await resolveTimelineLeafletBlob(value.previewImage, did, signal),
+    };
+  }
+  if (value.__typename === "PubLeafletBlocksButton") {
+    return { ...base, text: value.text ?? "", url: value.url ?? null };
+  }
+  if (value.__typename === "PubLeafletBlocksHorizontalRule") {
+    return { ...base, empty: value.empty ?? true };
+  }
+  if (value.__typename === "PubLeafletBlocksUnorderedList" || value.__typename === "PubLeafletBlocksOrderedList") {
+    return {
+      ...base,
+      children: await Promise.all((value.children ?? []).map(async (child) => ({
+        content: await normalizeTimelineLeafletContent(child?.content),
+      }))),
+    };
+  }
+
+  return value;
+}
+
+async function normalizeTimelineDescription(
+  value: RawTimelineAttachment["description"],
+  did: string | null | undefined,
+  signal?: AbortSignal,
+): Promise<unknown> {
   if (!value) return null;
+  if (typeof value === "string") {
+    return value.trim() ? { $type: "org.hypercerts.defs#descriptionString", value } : null;
+  }
   if (value.__typename === "OrgHypercertsDefsDescriptionString") {
-    return { $type: "org.hypercerts.defs#descriptionString", value: value.value ?? "" };
+    return {
+      $type: "org.hypercerts.defs#descriptionString",
+      value: value.value ?? "",
+      facets: normalizeTimelineBskyFacets(value.facets),
+    };
   }
   if (value.__typename === "ComAtprotoRepoStrongRef") {
-    return { $type: "com.atproto.repo.strongRef", uri: value.uri ?? null, cid: value.cid ?? null };
+    return { uri: value.uri ?? null, cid: value.cid ?? null };
+  }
+  if (value.__typename === "PubLeafletPagesLinearDocument" || Array.isArray(value.blocks)) {
+    return {
+      $type: "pub.leaflet.pages.linearDocument",
+      id: value.id ?? null,
+      blocks: await Promise.all((value.blocks ?? []).map(async (block) => ({
+        $type: "pub.leaflet.pages.linearDocument#block",
+        ...(block?.alignment ? { alignment: block.alignment } : {}),
+        block: await normalizeTimelineLeafletBlock(block?.block, did, signal),
+      }))),
+    };
   }
   return value;
 }
@@ -4552,7 +4904,7 @@ async function mapTimelineAttachment(
     record: {
       title: node.title?.trim() || null,
       shortDescription: node.shortDescription?.trim() || null,
-      description: normalizeTimelineDescription(node.description),
+      description: await normalizeTimelineDescription(node.description, did, signal),
       contentType: node.contentType?.trim() || null,
       subjects: (node.subjects ?? []).map((subject) => ({ uri: subject?.uri ?? null, cid: subject?.cid ?? null })),
       content: await normalizeTimelineContent(node.content, did, signal),

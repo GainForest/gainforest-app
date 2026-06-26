@@ -17,9 +17,11 @@ import { formatDateRangeFromValues } from "../shared/timelineDates";
 import type { TimelineEntryViewModel } from "../shared/timelineViewModel";
 import { getTimelineDeleteControlState } from "../shared/timelineDeleteControls";
 import { TimelineDeleteConfirm } from "./shared/TimelineDeleteConfirm";
+import { TimelineDatasetMapLayerCards } from "./shared/TimelineDatasetMapLayerCards";
+import { TimelineOptionalNote } from "./shared/TimelineOptionalNote";
 import { TimelinePreviewPanel } from "./shared/TimelinePreviewPanel";
 import { TimelineTileRow } from "./shared/TimelineTileRow";
-import { TimelineTreeMapCards } from "./shared/TimelineMapPreview";
+import type { TimelineMapLayer } from "./shared/timelineMapLayers";
 
 type EntryKindLabels = Record<TimelineEvidenceKind, string>;
 
@@ -35,18 +37,6 @@ type MetricCopy = {
 function cleanText(value: string | null | undefined): string | null {
   const text = value?.trim();
   return text ? text : null;
-}
-
-function noteFromDescription(description: unknown): string | null {
-  if (!description || typeof description !== "object") return null;
-  const record = description as Record<string, unknown>;
-  if (
-    record.$type === "org.hypercerts.defs#descriptionString" &&
-    typeof record.value === "string"
-  ) {
-    return cleanText(record.value);
-  }
-  return null;
 }
 
 function kindLabel(kind: TimelineEvidenceKind, labels: EntryKindLabels): string {
@@ -145,6 +135,7 @@ function metricBadges(
 
 export function TimelineEntry({
   entry,
+  mapLayers,
   canManageEvidence,
   canDeleteEvidence,
   deleteDisabledReason,
@@ -152,6 +143,7 @@ export function TimelineEntry({
   onDeleted,
 }: {
   entry: TimelineEntryViewModel;
+  mapLayers: TimelineMapLayer[];
   canManageEvidence: boolean;
   canDeleteEvidence: boolean;
   deleteDisabledReason: string | null;
@@ -196,7 +188,6 @@ export function TimelineEntry({
     entry.refs,
     entryT("notSpecified"),
   );
-  const note = noteFromDescription(entry.item.record.description);
   const mapHref = entry.refs.find((ref) => ref.mapHref)?.mapHref ?? null;
   const previewTiles = useMemo(
     () =>
@@ -214,7 +205,6 @@ export function TimelineEntry({
   const natureRefs = entry.refs.filter(
     (ref) => ref.kind === "occurrence" || ref.kind === "biodiversityDataset",
   );
-  const treeMapRefs = entry.refs.filter((ref) => ref.kind === "tree" && ref.mapHref);
   const deleteControl = getTimelineDeleteControlState({
     canManageEvidence,
     canDeleteEvidence,
@@ -327,11 +317,7 @@ export function TimelineEntry({
 
       {expanded ? (
         <div id={panelId} className="space-y-3 border-t border-border/50 p-4 pt-3">
-          {note ? (
-            <div className="rounded-xl bg-muted/20 px-3 py-2 text-sm leading-6 text-foreground/80">
-              {note}
-            </div>
-          ) : null}
+          <TimelineOptionalNote note={entry.item.record.description} />
           {deleteControl.showDeniedMessage ? (
             <p className="rounded-xl border border-warn/20 bg-warn/10 px-3 py-2 text-xs text-warn">
               {deleteControl.disabledReason}
@@ -359,7 +345,7 @@ export function TimelineEntry({
               </div>
             </div>
           ) : null}
-          {treeMapRefs.length > 0 ? <TimelineTreeMapCards refs={treeMapRefs} /> : null}
+          <TimelineDatasetMapLayerCards layers={mapLayers} />
           <TimelinePreviewPanel preview={activePreview} />
           {previewTiles.length > 1 ? (
             <TimelineTileRow

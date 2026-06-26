@@ -32,7 +32,6 @@ import {
   shouldClearDashboardMode,
   type ManageMode,
 } from "./manageDashboardMode";
-import { HeaderContent } from "@/app/_components/HeaderSlots";
 import { countryFlag } from "@/app/_lib/format";
 import { resolvePdsHost } from "@/app/_lib/pds";
 import { putRecord, uploadBlob } from "../_lib/mutations";
@@ -52,7 +51,6 @@ import { ImageEditorModal } from "@/components/modals/image-editor";
 import { SocialGlyph } from "@/app/_components/SocialIcon";
 import { GroupMembers } from "../groups/_components/GroupMembers";
 import { ManageGroupsClient } from "../groups/_components/ManageGroupsClient";
-import { useAccountList } from "@/app/_lib/account-switcher";
 import type { CgsRole } from "../_lib/cgs";
 
 function decodePath(value: string): string {
@@ -572,25 +570,6 @@ function EditableHero({
   );
 }
 
-function CreateOrganizationButton() {
-  const t = useTranslations("upload.dashboardClient");
-  return (
-    <Button asChild variant="secondary">
-      <Link href="/manage?mode=onboard-org">
-        <Building2Icon />
-        {t("actions.createOrganization")}
-      </Link>
-    </Button>
-  );
-}
-
-function CreateOrganizationHeaderSlot({ did }: { did: string }) {
-  const { groups, status } = useAccountList(did);
-  const showCreateOrganization = status === "ready" && groups.length === 0;
-
-  return <HeaderContent right={showCreateOrganization ? <CreateOrganizationButton /> : null} />;
-}
-
 export function ManageDashboardClient({
   account,
   mode,
@@ -938,7 +917,6 @@ export function ManageDashboardClient({
 
   return (
     <>
-      {account.kind === "user" ? <CreateOrganizationHeaderSlot did={account.did} /> : null}
       <Container className="space-y-6 pt-4 pb-12">
         <EditableHero
           account={account}

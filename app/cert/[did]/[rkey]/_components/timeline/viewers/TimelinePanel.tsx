@@ -19,14 +19,25 @@ import {
   getFilteredTimelineEntries,
   getTimelineFilterCounts,
   paginateTimelineEntries,
+  type TimelineEntryViewModel,
 } from "../shared/timelineViewModel";
 import { TimelineEntryList } from "./TimelineEntryList";
 import { TimelineEmpty } from "./shared/TimelineEmpty";
-import { TimelineMapPreview } from "./shared/TimelineMapPreview";
+import { TimelineGreenGlobePreview } from "./shared/TimelineGreenGlobePreview";
+import {
+  buildTimelineMapLayers,
+  type TimelineMapLayer,
+} from "./shared/timelineMapLayers";
+import { TimelineViewerStoreProvider } from "./shared/timelineViewerStore";
 
 const DEFAULT_PAGE_SIZE = 8;
 
+type TimelineEntryListItem = TimelineEntryViewModel & {
+  mapLayers: TimelineMapLayer[];
+};
+
 export function TimelinePanel({
+  organizationDid,
   entries,
   sources,
   references,
@@ -36,6 +47,7 @@ export function TimelinePanel({
   onDeleted,
   pageSize = DEFAULT_PAGE_SIZE,
 }: {
+  organizationDid: string;
   entries: TimelineAttachmentItem[];
   sources: TimelineSourceData;
   references: TimelineReference[];
@@ -100,18 +112,38 @@ export function TimelinePanel({
       }),
     [entries, feedCopy, referenceCopy, references, sources],
   );
+  const entryListItems = useMemo<TimelineEntryListItem[]>(
+    () =>
+      entryModels.map((entry) => ({
+        ...entry,
+        mapLayers: buildTimelineMapLayers([
+          { item: entry.item, references: entry.refs },
+        ]),
+      })),
+    [entryModels],
+  );
+  const mapLayers = useMemo<TimelineMapLayer[]>(() => {
+    const seenDatasetUris = new Set<string>();
+    const layers: TimelineMapLayer[] = [];
+
+    for (const entry of entryListItems) {
+      for (const layer of entry.mapLayers) {
+        if (seenDatasetUris.has(layer.datasetUri)) continue;
+        seenDatasetUris.add(layer.datasetUri);
+        layers.push(layer);
+      }
+    }
+
+    return layers;
+  }, [entryListItems]);
   const counts = useMemo(() => getTimelineFilterCounts(entryModels), [entryModels]);
   const filteredEntries = useMemo(
-    () => getFilteredTimelineEntries(entryModels, activeFilter),
-    [activeFilter, entryModels],
+    () => getFilteredTimelineEntries(entryListItems, activeFilter),
+    [activeFilter, entryListItems],
   );
   const { totalPages, safePage, visibleItems } = useMemo(
     () => paginateTimelineEntries(filteredEntries, currentPage, pageSize),
     [currentPage, filteredEntries, pageSize],
-  );
-  const mapRefs = useMemo(
-    () => entryModels.flatMap((entry) => entry.refs.filter((ref) => ref.kind === "tree" && ref.mapHref)),
-    [entryModels],
   );
 
   function handleFilterChange(filter: TimelineEvidenceFilter) {
@@ -128,7 +160,8 @@ export function TimelinePanel({
   };
 
   return (
-    <section className="space-y-4" aria-labelledby="timeline-heading">
+    <TimelineViewerStoreProvider>
+      <section className="space-y-4" aria-labelledby="timeline-heading">
       <div className="rounded-2xl border border-border/50 bg-background p-4">
         <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
           <div>
@@ -175,7 +208,11 @@ export function TimelinePanel({
         </div>
       </div>
 
-      {mapRefs.length > 0 ? <TimelineMapPreview refs={mapRefs} /> : null}
+      <TimelineGreenGlobePreview
+        organizationDid={organizationDid}
+        layers={mapLayers}
+        isLoading={false}
+      />
 
       {entries.length === 0 ? (
         <TimelineEmpty />
@@ -224,6 +261,7 @@ export function TimelinePanel({
           ) : null}
         </>
       )}
-    </section>
+      </section>
+    </TimelineViewerStoreProvider>
   );
 }

@@ -1,17 +1,18 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { motion } from "framer-motion";
 import {
-  ArrowRightIcon,
   BadgeCheckIcon,
   BinocularsIcon,
   Building2Icon,
   CalendarCheckIcon,
   CalendarClockIcon,
   CameraIcon,
+  ChevronRightIcon,
   ClockIcon,
   CrownIcon,
   MapPinnedIcon,
@@ -41,6 +42,10 @@ import {
   type RoundBoard,
   type RoundStatus,
 } from "../_lib/bioblitz";
+
+// Shared easing for entrance motion — a soft, confident ease-out.
+const EASE = [0.22, 1, 0.36, 1] as const;
+const IMG_SIZES = "(min-width: 768px) calc(100vw - 15rem), 100vw";
 
 /** Org-type tokens we have a friendly translated label for; anything else
  *  falls back to the generic "Organization" label. */
@@ -135,10 +140,10 @@ export function BioblitzClient() {
   }, [round, scope]);
 
   return (
-    <section className="relative overflow-hidden pb-20 pt-0 md:pb-28">
-      <div className="absolute inset-x-0 top-0 h-80 bg-gradient-to-b from-primary/[0.10] via-transparent to-transparent dark:from-primary/[0.14]" />
+    <section className="relative -mt-14 overflow-hidden pb-32">
+      <HeroBackdrop />
 
-      <div className="relative z-10 mx-auto max-w-6xl px-6">
+      <div className="relative z-10 mx-auto max-w-5xl px-6">
         <Hero round={round} status={status} now={now} />
 
         <Prizes />
@@ -157,8 +162,73 @@ export function BioblitzClient() {
         />
 
         {past.length > 0 ? <Winners rounds={past} /> : null}
+
+        <ClosingInvite />
       </div>
     </section>
+  );
+}
+
+/** A full nature banner behind the hero, fading into the page. Real imagery
+ *  carries the atmosphere so the type can stay sparse. */
+function HeroBackdrop() {
+  return (
+    <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-[34rem] overflow-hidden">
+      <Image
+        src="/assets/media/images/observations/observations-hero-light@2x.webp"
+        alt=""
+        fill
+        priority
+        quality={95}
+        sizes={IMG_SIZES}
+        className="object-cover object-center dark:hidden"
+      />
+      <Image
+        src="/assets/media/images/observations/observations-hero-dark@2x.webp"
+        alt=""
+        fill
+        priority
+        quality={95}
+        sizes={IMG_SIZES}
+        className="hidden object-cover object-center dark:block"
+      />
+      <div className="absolute inset-0 bg-gradient-to-b from-background/20 via-background/70 to-background" />
+    </div>
+  );
+}
+
+/** Centered section title with a brand accent mark above it. No kicker text. */
+function SectionHeading({ title }: { title: string }) {
+  return (
+    <div className="flex flex-col items-center gap-4 text-center">
+      <span aria-hidden className="h-1 w-12 rounded-full bg-primary/40" />
+      <h2 className="font-instrument text-3xl font-light italic leading-none tracking-[-0.02em] text-foreground sm:text-4xl">
+        {title}
+      </h2>
+    </div>
+  );
+}
+
+/** Scroll-triggered reveal for below-the-fold sections. */
+function Reveal({
+  children,
+  delay = 0,
+  className,
+}: {
+  children: ReactNode;
+  delay?: number;
+  className?: string;
+}) {
+  return (
+    <motion.section
+      className={className}
+      initial={{ opacity: 0, y: 24 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-80px" }}
+      transition={{ duration: 0.6, delay, ease: EASE }}
+    >
+      {children}
+    </motion.section>
   );
 }
 
@@ -179,54 +249,42 @@ function Hero({
 
   return (
     <motion.header
-      initial={{ opacity: 0, y: 16 }}
+      initial={{ opacity: 0, y: 18 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
-      className="flex flex-col pb-8 pt-[64px]"
+      transition={{ duration: 0.7, ease: EASE }}
+      className="flex flex-col items-center pb-4 pt-32 text-center"
     >
-      <span className="font-instrument text-sm uppercase tracking-[0.22em] text-primary/80">
-        {t("hero.eyebrow")}
-      </span>
-      <h1 className="font-garamond mt-3 max-w-4xl text-4xl font-light leading-[0.98] tracking-[-0.035em] text-foreground sm:text-5xl md:text-6xl">
-        {t("hero.titlePrefix")}{" "}
-        <span className="font-instrument italic text-foreground/85">{t("hero.titleEmphasis")}</span>
+      <h1 className="font-instrument max-w-3xl text-6xl font-light italic leading-[0.92] tracking-[-0.035em] text-foreground sm:text-7xl md:text-[5.5rem]">
+        {t("hero.titlePrefix")} <span className="text-primary">{t("hero.titleEmphasis")}</span>
       </h1>
-      <p className="mt-4 max-w-2xl text-base leading-7 text-muted-foreground">
-        {t("hero.description")}
-      </p>
+      <p className="mt-6 max-w-md text-base leading-7 text-muted-foreground">{t("hero.description")}</p>
 
-      {/* Round chip: label + dates + live status / countdown */}
-      <div className="mt-6 flex flex-wrap items-center gap-3 rounded-2xl bg-card/70 px-4 py-3 shadow-sm shadow-primary/5 ring-1 ring-foreground/5 backdrop-blur sm:px-5">
+      {/* Live status + round identity, centered. */}
+      <div className="mt-9 flex flex-col items-center gap-3">
         <StatusChip status={status} />
-        <span className="font-medium text-foreground">{round.label}</span>
-        <span aria-hidden className="hidden text-muted-foreground/50 sm:inline">
-          •
-        </span>
-        <span className="text-sm tabular-nums text-muted-foreground">{dates}</span>
-        <span className="ml-auto">
-          <Countdown round={round} status={status} now={now} />
-        </span>
+        <p className="font-instrument text-2xl italic leading-tight text-foreground sm:text-3xl">{round.label}</p>
+        <p className="text-sm tabular-nums text-muted-foreground">{dates}</p>
       </div>
 
-      {/* Register CTA (round-specific) + program-wide help links */}
+      <Countdown round={round} status={status} now={now} />
+
       {round.rsvpUrl && status !== "ended" ? (
-        <div className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-2">
-          <a
-            href={round.rsvpUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm shadow-primary/20 transition-colors hover:bg-primary-dark"
-          >
-            <CalendarCheckIcon className="size-4" aria-hidden />
-            {t("rsvp.button")}
-          </a>
-          <span className="text-sm text-muted-foreground">{t("rsvp.note")}</span>
-        </div>
+        <motion.a
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.3, ease: EASE }}
+          href={round.rsvpUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="group mt-10 inline-flex items-center gap-2 rounded-full bg-primary px-7 py-3.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-dark"
+        >
+          <CalendarCheckIcon className="size-4" aria-hidden />
+          {t("rsvp.button")}
+        </motion.a>
       ) : null}
 
       <HelpLinks />
-
-      <p className="mt-4 text-xs text-muted-foreground/80">{t("hero.program")}</p>
+      <p className="mt-12 text-xs text-muted-foreground/70">{t("hero.program")}</p>
     </motion.header>
   );
 }
@@ -234,8 +292,7 @@ function Hero({
 function HelpLinks() {
   const t = useTranslations("marketplace.bioblitz.help");
   return (
-    <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-sm text-muted-foreground">
-      <span className="font-medium text-foreground/70">{t("prompt")}</span>
+    <div className="mt-6 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-muted-foreground">
       <a
         href={BIOBLITZ_LINKS.officeHours}
         target="_blank"
@@ -261,13 +318,13 @@ function HelpLinks() {
 function StatusChip({ status }: { status: RoundStatus }) {
   const t = useTranslations("marketplace.bioblitz.status");
   const styles: Record<RoundStatus, string> = {
-    live: "bg-primary/12 text-primary",
-    upcoming: "bg-amber-500/12 text-amber-700 dark:text-amber-300",
-    ended: "bg-muted text-muted-foreground",
+    live: "bg-primary/15 text-primary",
+    upcoming: "bg-amber-500/15 text-amber-700 dark:text-amber-300",
+    ended: "bg-foreground/10 text-muted-foreground",
   };
   return (
     <span
-      className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ${styles[status]}`}
+      className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-semibold ${styles[status]}`}
     >
       {status === "live" ? (
         <span aria-hidden className="relative flex size-2">
@@ -280,6 +337,8 @@ function StatusChip({ status }: { status: RoundStatus }) {
   );
 }
 
+/** Large segmented countdown — the two most-significant units as centered
+ *  tiles. Shows placeholders until "now" resolves on the client. */
 function Countdown({
   round,
   status,
@@ -290,23 +349,42 @@ function Countdown({
   now: number | null;
 }) {
   const t = useTranslations("marketplace.bioblitz.round");
-  if (now == null) return null;
+
   if (status === "ended") {
-    return <span className="text-sm font-medium text-muted-foreground">{t("ended")}</span>;
+    return (
+      <p className="font-instrument mt-8 text-2xl italic text-muted-foreground sm:text-3xl">{t("ended")}</p>
+    );
   }
+
+  // Hold the countdown back until the client resolves "now", so it animates in
+  // cleanly rather than flashing placeholder values.
+  if (now == null) return null;
+
+  const label = status === "upcoming" ? t("startsIn") : t("endsIn");
   const target = status === "upcoming" ? round.start : round.end;
   const { days, hours, minutes } = countdownTo(target, now);
-  const label = status === "upcoming" ? t("startsIn") : t("endsIn");
   const parts =
     days > 0
       ? [t("days", { count: days }), t("hours", { count: hours })]
       : [t("hours", { count: hours }), t("minutes", { count: minutes })];
+
   return (
-    <span className="inline-flex items-center gap-1.5 text-sm">
-      <ClockIcon className="size-3.5 text-primary" aria-hidden />
-      <span className="text-muted-foreground">{label}</span>
-      <span className="font-semibold tabular-nums text-foreground">{parts.join(" · ")}</span>
-    </span>
+    <div className="mt-8 flex flex-col items-center gap-3">
+      <span className="inline-flex items-center gap-1.5 text-sm text-muted-foreground">
+        <ClockIcon className="size-4 text-primary" aria-hidden />
+        {label}
+      </span>
+      <div className="flex items-stretch justify-center gap-3">
+        {parts.map((part, index) => (
+          <span
+            key={index}
+            className="rounded-2xl bg-foreground/[0.06] px-5 py-3 text-2xl font-semibold tabular-nums tracking-tight text-foreground backdrop-blur sm:text-3xl"
+          >
+            {part}
+          </span>
+        ))}
+      </div>
+    </div>
   );
 }
 
@@ -316,27 +394,26 @@ function Prizes() {
   const t = useTranslations("marketplace.bioblitz.prizes");
   const locale = useLocale();
   return (
-    <section className="mt-10">
-      <h2 className="font-garamond text-2xl font-light text-foreground sm:text-3xl">{t("title")}</h2>
-      <div className="mt-4 grid gap-3 sm:grid-cols-2">
+    <Reveal className="mt-32">
+      <SectionHeading title={t("title")} />
+      <div className="mx-auto mt-10 grid max-w-3xl gap-5 sm:grid-cols-2">
         <PrizeCard
+          featured
           amount={formatPrize(BIOBLITZ_PRIZES.mostObservations, locale)}
           icon={<TrophyIcon />}
           title={t("mostObservations.title")}
-          blurb={t("mostObservations.blurb")}
         />
         <PrizeCard
           amount={formatPrize(BIOBLITZ_PRIZES.bestPicture, locale)}
           icon={<CameraIcon />}
           title={t("bestPicture.title")}
-          blurb={t("bestPicture.blurb")}
         />
       </div>
-      <p className="mt-3 inline-flex items-center gap-2 text-sm text-muted-foreground">
+      <p className="mt-6 flex items-center justify-center gap-2 text-center text-sm text-muted-foreground">
         <BadgeCheckIcon className="size-4 shrink-0 text-primary" aria-hidden />
         {t("badgeNote")}
       </p>
-    </section>
+    </Reveal>
   );
 }
 
@@ -344,25 +421,57 @@ function PrizeCard({
   amount,
   icon,
   title,
-  blurb,
+  featured = false,
 }: {
   amount: string;
   icon: ReactNode;
   title: string;
-  blurb: string;
+  featured?: boolean;
 }) {
   return (
-    <div className="relative flex items-start gap-4 overflow-hidden rounded-3xl bg-card/70 p-5 shadow-sm shadow-primary/5 ring-1 ring-foreground/5 backdrop-blur sm:p-6">
-      <div className="absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-primary/25 to-transparent" />
-      <span className="font-garamond text-4xl font-light tabular-nums text-primary sm:text-5xl">
-        {amount}
+    <div
+      className={`relative flex flex-col items-center gap-5 overflow-hidden rounded-[28px] px-6 py-10 text-center backdrop-blur transition-colors ${
+        featured
+          ? "bg-gradient-to-b from-primary/[0.18] via-primary/[0.06] to-transparent hover:from-primary/[0.24]"
+          : "bg-foreground/5 hover:bg-foreground/[0.08]"
+      }`}
+    >
+      {featured ? (
+        <Image
+          src="/assets/media/images/create-bumicert/plant-light.png"
+          alt=""
+          width={160}
+          height={200}
+          aria-hidden
+          className="pointer-events-none absolute -bottom-6 -right-6 w-28 opacity-20 dark:hidden"
+        />
+      ) : null}
+      {featured ? (
+        <Image
+          src="/assets/media/images/create-bumicert/plant-dark.png"
+          alt=""
+          width={160}
+          height={200}
+          aria-hidden
+          className="pointer-events-none absolute -bottom-6 -right-6 hidden w-28 opacity-25 dark:block"
+        />
+      ) : null}
+      <span
+        className={`relative flex size-12 items-center justify-center rounded-2xl text-primary [&_svg]:size-5 ${
+          featured ? "bg-primary/15" : "bg-primary/10"
+        }`}
+      >
+        {icon}
       </span>
-      <div className="min-w-0">
-        <div className="flex items-center gap-2">
-          <span className="flex shrink-0 items-center text-primary [&_svg]:size-4">{icon}</span>
-          <h3 className="text-base font-semibold text-foreground">{title}</h3>
+      <div className="relative">
+        <div
+          className={`font-instrument italic leading-none tracking-tight text-primary ${
+            featured ? "text-7xl" : "text-6xl"
+          }`}
+        >
+          {amount}
         </div>
-        <p className="mt-1 text-sm leading-snug text-muted-foreground">{blurb}</p>
+        <h3 className="mt-4 text-base font-semibold text-foreground">{title}</h3>
       </div>
     </div>
   );
@@ -378,30 +487,28 @@ function HowItWorks() {
     { key: "review", icon: <ScanSearchIcon /> },
   ] as const;
   return (
-    <section className="mt-12">
-      <h2 className="font-garamond text-2xl font-light text-foreground sm:text-3xl">{t("title")}</h2>
-      <ol className="mt-4 grid gap-3 sm:grid-cols-3">
+    <Reveal className="mt-32">
+      <SectionHeading title={t("title")} />
+      <ol className="mx-auto mt-10 grid max-w-3xl gap-5 sm:grid-cols-3">
         {steps.map((step, index) => (
           <li
             key={step.key}
-            className="relative overflow-hidden rounded-3xl bg-card/70 p-5 shadow-sm shadow-primary/5 ring-1 ring-foreground/5 backdrop-blur"
+            className="relative flex flex-col items-center gap-4 overflow-hidden rounded-[28px] bg-foreground/5 px-6 py-9 text-center backdrop-blur transition-colors hover:bg-foreground/[0.08]"
           >
-            <div className="flex items-center gap-3">
-              <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-bold tabular-nums text-primary">
-                {index + 1}
-              </span>
-              <span className="flex items-center text-primary [&_svg]:size-5">{step.icon}</span>
-            </div>
-            <h3 className="mt-3 text-base font-semibold text-foreground">
-              {t(`steps.${step.key}.title`)}
-            </h3>
-            <p className="mt-1 text-sm leading-snug text-muted-foreground">
-              {t(`steps.${step.key}.blurb`)}
-            </p>
+            <span
+              aria-hidden
+              className="font-instrument pointer-events-none absolute -top-4 right-3 select-none text-8xl italic leading-none text-primary/[0.07]"
+            >
+              {index + 1}
+            </span>
+            <span className="relative flex size-14 items-center justify-center rounded-full bg-primary/10 text-primary [&_svg]:size-6">
+              {step.icon}
+            </span>
+            <h3 className="relative text-base font-semibold text-foreground">{t(`steps.${step.key}.title`)}</h3>
           </li>
         ))}
       </ol>
-    </section>
+    </Reveal>
   );
 }
 
@@ -498,46 +605,60 @@ function Board({
     },
   ];
 
+  const collectors = board?.collectors.slice(0, BOARD_LIMIT) ?? [];
+  const [leader, ...rest] = collectors;
+
   return (
-    <section className="mt-12">
-      <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
-        <div className="flex items-baseline gap-3">
-          <h2 className="font-garamond text-2xl font-light text-foreground sm:text-3xl">{t("title")}</h2>
-          {scope === "round" && status === "live" ? (
-            <span className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.12em] text-primary">
-              <span aria-hidden className="relative flex size-2">
-                <span className="absolute inline-flex size-2 animate-ping rounded-full bg-current opacity-60" />
-                <span className="relative inline-flex size-2 rounded-full bg-current" />
-              </span>
-              {t("live")}
+    <Reveal className="mt-32">
+      <SectionHeading title={t("title")} />
+      <p className="mx-auto mt-4 max-w-md text-center text-sm text-muted-foreground">{subtitle}</p>
+      <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
+        {scope === "round" && status === "live" ? (
+          <span className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.12em] text-primary">
+            <span aria-hidden className="relative flex size-2">
+              <span className="absolute inline-flex size-2 animate-ping rounded-full bg-current opacity-60" />
+              <span className="relative inline-flex size-2 rounded-full bg-current" />
             </span>
-          ) : null}
-        </div>
+            {t("live")}
+          </span>
+        ) : null}
         <ScopeToggle scope={scope} onScope={onScope} />
       </div>
-      <p className="mt-1 text-sm text-muted-foreground">{subtitle}</p>
 
-      <div className="mt-4">
+      <div className="mx-auto mt-10 max-w-3xl">
         <StatsTileGrid items={stats} columns={3} />
       </div>
 
-      <div className="mt-4">
+      <div className="mx-auto mt-6 max-w-3xl">
         {board ? (
-          board.collectors.length === 0 ? (
+          collectors.length === 0 ? (
             <BoardMessage icon={<BinocularsIcon />} title={t("empty.title")} description={t("empty.description")} />
           ) : (
-            <div className="divide-y divide-border/60 overflow-hidden rounded-3xl bg-card/70 shadow-sm shadow-primary/5 ring-1 ring-foreground/5 backdrop-blur">
-              {board.collectors.slice(0, BOARD_LIMIT).map((collector, index) => (
-                <CollectorRow
-                  key={collector.did}
-                  rank={index + 1}
-                  did={collector.did}
-                  name={collector.displayName}
-                  avatarRef={collector.avatarRef}
-                  count={collector.count}
-                  org={orgs.get(collector.did)}
+            <div className="space-y-4">
+              {leader ? (
+                <LeaderCard
+                  did={leader.did}
+                  name={leader.displayName}
+                  avatarRef={leader.avatarRef}
+                  count={leader.count}
+                  org={orgs.get(leader.did)}
                 />
-              ))}
+              ) : null}
+              {rest.length > 0 ? (
+                <div className="space-y-1.5">
+                  {rest.map((collector, index) => (
+                    <CollectorRow
+                      key={collector.did}
+                      rank={index + 2}
+                      did={collector.did}
+                      name={collector.displayName}
+                      avatarRef={collector.avatarRef}
+                      count={collector.count}
+                      org={orgs.get(collector.did)}
+                    />
+                  ))}
+                </div>
+              ) : null}
             </div>
           )
         ) : error ? (
@@ -546,22 +667,52 @@ function Board({
           <BoardSkeleton />
         )}
       </div>
+    </Reveal>
+  );
+}
 
-      <Link
-        href="/manage/observations"
-        className="mt-5 inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm shadow-primary/20 transition-colors hover:bg-primary-dark"
-      >
-        {t("cta")}
-        <ArrowRightIcon className="size-4" aria-hidden />
-      </Link>
-    </section>
+/** The round leader, given a centered champion card so the board reads as a
+ *  contest with a clear front-runner. */
+function LeaderCard({
+  did,
+  name,
+  avatarRef,
+  count,
+  org,
+}: {
+  did: string;
+  name: string | null;
+  avatarRef: string | null;
+  count: number;
+  org?: CollectorOrg;
+}) {
+  const t = useTranslations("marketplace.bioblitz.board");
+  return (
+    <PreferredAccountLink
+      did={did}
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label={t("openCollector")}
+      className="group relative flex flex-col items-center gap-3 overflow-hidden rounded-[28px] bg-gradient-to-b from-primary/[0.18] via-primary/[0.06] to-transparent px-6 py-9 text-center backdrop-blur transition-colors hover:from-primary/[0.24] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
+    >
+      <span className="flex size-14 items-center justify-center rounded-full bg-primary/15 text-primary [&_svg]:size-7">
+        <CrownIcon aria-label={t("rankAriaLabel", { rank: 1 })} />
+      </span>
+      <div className="flex min-w-0 items-center gap-1.5 text-lg font-semibold text-foreground">
+        <AuthorInline did={did} nameOverride={name} avatarRefOverride={avatarRef} />
+      </div>
+      <OrgLabel org={org} />
+      <div className="font-instrument text-6xl italic leading-none tabular-nums text-primary">
+        {formatNumber(count)}
+      </div>
+      <div className="text-sm text-muted-foreground">{t("observations", { count })}</div>
+    </PreferredAccountLink>
   );
 }
 
 const RANK_TIERS: Record<number, string> = {
-  1: "bg-gradient-to-br from-amber-300/35 to-amber-500/10 text-amber-700 ring-amber-500/25 dark:text-amber-300",
-  2: "bg-gradient-to-br from-slate-300/40 to-slate-400/10 text-slate-600 ring-slate-400/25 dark:text-slate-300",
-  3: "bg-gradient-to-br from-orange-300/35 to-orange-500/10 text-orange-700 ring-orange-500/25 dark:text-orange-300",
+  2: "bg-slate-400/25 text-slate-600 dark:text-slate-300",
+  3: "bg-orange-400/20 text-orange-700 dark:text-orange-300",
 };
 
 function CollectorRow({
@@ -586,12 +737,12 @@ function CollectorRow({
       target="_blank"
       rel="noopener noreferrer"
       aria-label={t("openCollector")}
-      className="group flex items-center gap-3.5 px-4 py-[18px] transition-colors duration-200 hover:bg-primary/[0.04] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:gap-4 sm:px-5 sm:py-5"
+      className="group flex items-center gap-3.5 rounded-2xl bg-foreground/5 px-4 py-3.5 transition-colors duration-200 hover:bg-foreground/[0.08] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:gap-4 sm:px-5"
     >
       <span
         aria-label={t("rankAriaLabel", { rank })}
-        className={`flex size-9 shrink-0 items-center justify-center rounded-full text-sm font-bold tabular-nums ring-1 ${
-          RANK_TIERS[rank] ?? "bg-muted/50 text-muted-foreground ring-foreground/5"
+        className={`flex size-9 shrink-0 items-center justify-center rounded-full text-sm font-bold tabular-nums ${
+          RANK_TIERS[rank] ?? "bg-foreground/10 text-muted-foreground"
         }`}
       >
         {rank}
@@ -601,25 +752,17 @@ function CollectorRow({
         <span className="flex min-w-0 items-center gap-1.5 text-[15px] font-semibold text-foreground">
           <AuthorInline did={did} nameOverride={name} avatarRefOverride={avatarRef} />
         </span>
-        <div className="flex flex-wrap items-center gap-1.5">
-          {rank === 1 ? (
-            <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-medium leading-none text-primary">
-              <CrownIcon className="size-3" />
-              {t("leader")}
-            </span>
-          ) : null}
-          <OrgLabel org={org} />
-        </div>
+        <OrgLabel org={org} />
       </div>
 
-      <span className="shrink-0 whitespace-nowrap text-right text-sm font-medium text-muted-foreground">
+      <span className="shrink-0 whitespace-nowrap text-right">
         <span className="block text-[17px] font-bold tabular-nums text-primary">{formatNumber(count)}</span>
-        {t("observations", { count })}
+        <span className="text-xs text-muted-foreground">{t("observations", { count })}</span>
       </span>
 
-      <ArrowRightIcon
+      <ChevronRightIcon
         aria-hidden
-        className="size-4 shrink-0 text-muted-foreground/40 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-primary"
+        className="size-5 shrink-0 text-muted-foreground/40 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-primary"
       />
     </PreferredAccountLink>
   );
@@ -646,17 +789,24 @@ function OrgLabel({ org }: { org?: CollectorOrg }) {
 
 function BoardSkeleton() {
   return (
-    <div className="divide-y divide-border/60 overflow-hidden rounded-3xl bg-card/70 shadow-sm shadow-primary/5 ring-1 ring-foreground/5 backdrop-blur">
-      {Array.from({ length: 6 }).map((_, index) => (
-        <div key={index} className="flex items-center gap-3.5 px-4 py-[18px] sm:gap-4 sm:px-5 sm:py-5">
-          <Skeleton className="size-9 shrink-0 rounded-full" />
-          <div className="min-w-0 flex-1 space-y-1.5">
-            <Skeleton className="h-[18px] w-40 max-w-full" />
-            <Skeleton className="h-4 w-24 max-w-full" />
+    <div className="space-y-4">
+      <div className="flex flex-col items-center gap-3 rounded-[28px] bg-foreground/5 px-6 py-9">
+        <Skeleton className="size-14 rounded-full" />
+        <Skeleton className="h-5 w-44 max-w-full" />
+        <Skeleton className="h-12 w-20" />
+        <Skeleton className="h-4 w-28" />
+      </div>
+      <div className="space-y-1.5">
+        {Array.from({ length: 5 }).map((_, index) => (
+          <div key={index} className="flex items-center gap-3.5 rounded-2xl bg-foreground/5 px-4 py-3.5 sm:gap-4 sm:px-5">
+            <Skeleton className="size-9 shrink-0 rounded-full" />
+            <div className="min-w-0 flex-1">
+              <Skeleton className="h-[18px] w-40 max-w-full" />
+            </div>
+            <Skeleton className="h-6 w-12 shrink-0" />
           </div>
-          <Skeleton className="h-6 w-12 shrink-0" />
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
   );
 }
@@ -671,12 +821,12 @@ function BoardMessage({
   description: string;
 }) {
   return (
-    <div className="flex flex-col items-center gap-3 rounded-3xl bg-card/75 py-16 text-center text-muted-foreground shadow-sm shadow-primary/5 ring-1 ring-foreground/5 backdrop-blur">
+    <div className="flex flex-col items-center gap-3 rounded-[28px] bg-foreground/5 py-16 text-center text-muted-foreground backdrop-blur">
       <div className="flex size-16 items-center justify-center rounded-full bg-primary/10 text-primary [&_svg]:size-8 [&_svg]:opacity-60">
         {icon}
       </div>
-      <p className="font-garamond text-3xl font-light text-foreground">{title}</p>
-      <p className="font-instrument max-w-sm text-base italic text-foreground/70">{description}</p>
+      <p className="font-instrument text-3xl font-light italic text-foreground">{title}</p>
+      <p className="max-w-sm text-base text-muted-foreground">{description}</p>
     </div>
   );
 }
@@ -687,23 +837,19 @@ function Winners({ rounds }: { rounds: BioblitzRound[] }) {
   const t = useTranslations("marketplace.bioblitz.winners");
   const locale = useLocale();
   return (
-    <section className="mt-12">
-      <h2 className="font-garamond text-2xl font-light text-foreground sm:text-3xl">{t("title")}</h2>
-      <p className="mt-1 text-sm text-muted-foreground">{t("description")}</p>
+    <Reveal className="mt-32">
+      <SectionHeading title={t("title")} />
 
-      <div className="mt-4 space-y-3">
+      <div className="mx-auto mt-10 max-w-3xl space-y-4">
         {rounds.map((round) => (
-          <div
-            key={round.id}
-            className="rounded-3xl bg-card/70 p-5 shadow-sm shadow-primary/5 ring-1 ring-foreground/5 backdrop-blur sm:p-6"
-          >
-            <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
-              <h3 className="text-base font-semibold text-foreground">{round.label}</h3>
+          <div key={round.id} className="rounded-[28px] bg-foreground/5 p-7 backdrop-blur">
+            <div className="flex flex-col items-center gap-1 text-center">
+              <h3 className="font-instrument text-xl italic text-foreground">{round.label}</h3>
               <span className="text-xs tabular-nums text-muted-foreground">
                 {formatDateRange(round.start, round.end, locale)}
               </span>
             </div>
-            <div className="mt-3 grid gap-3 sm:grid-cols-2">
+            <div className="mt-5 grid gap-3 sm:grid-cols-2">
               <WinnerSlot
                 icon={<TrophyIcon />}
                 label={t("mostObservations")}
@@ -720,7 +866,7 @@ function Winners({ rounds }: { rounds: BioblitzRound[] }) {
           </div>
         ))}
       </div>
-    </section>
+    </Reveal>
   );
 }
 
@@ -736,12 +882,12 @@ function WinnerSlot({
   pending: string;
 }) {
   return (
-    <div className="flex items-center gap-3 rounded-2xl bg-foreground/5 px-4 py-3">
+    <div className="flex items-center gap-3 rounded-2xl bg-background/40 px-4 py-3.5">
       <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary [&_svg]:size-4">
         {icon}
       </span>
       <div className="min-w-0">
-        <p className="text-xs font-medium uppercase tracking-[0.08em] text-muted-foreground">{label}</p>
+        <p className="text-[13px] font-medium text-muted-foreground">{label}</p>
         <div className="mt-0.5 text-sm font-semibold text-foreground">
           {winner?.did ? (
             <AuthorInline did={winner.did} />
@@ -751,6 +897,34 @@ function WinnerSlot({
         </div>
       </div>
     </div>
+  );
+}
+
+// ── Closing invite ─────────────────────────────────────────────────────────────
+
+/** An immersive rainforest band that closes the page on the primary action. */
+function ClosingInvite() {
+  const t = useTranslations("marketplace.bioblitz.board");
+  return (
+    <Reveal className="relative mt-32 flex min-h-[18rem] items-center justify-center overflow-hidden rounded-[40px] px-6 py-16 text-center">
+      <Image
+        src="/assets/media/images/landing/hero-rainforest@2x.webp"
+        alt=""
+        fill
+        quality={95}
+        sizes={IMG_SIZES}
+        aria-hidden
+        className="object-cover object-center"
+      />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/45 to-black/35" />
+      <Link
+        href="/manage/observations"
+        className="group relative inline-flex items-center gap-2 rounded-full bg-primary px-8 py-4 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-dark"
+      >
+        {t("cta")}
+        <ChevronRightIcon className="size-5 transition-transform duration-200 group-hover:translate-x-0.5" aria-hidden />
+      </Link>
+    </Reveal>
   );
 }
 
@@ -781,5 +955,5 @@ function formatDateRange(startIso: string, endIso: string, locale: string): stri
     year: "numeric",
     timeZone: "UTC",
   }).format(end);
-  return `${startFmt} → ${endFmt}`;
+  return `${startFmt} to ${endFmt}`;
 }
