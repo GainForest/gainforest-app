@@ -624,7 +624,7 @@
     "tainaBody": "Tainá ada di Telegram. Kirimkan foto lapangan, temuan satwa atau tumbuhan, dan rekaman suara kepadanya, lalu ia akan memasukkannya ke organisasi ini untukmu. File AudioMoth besar juga boleh.",
     "tainaCta": "Sapa di Telegram",
     "title": "Temuan alam",
-    "description": "Tinjau catatan biodiversitas yang terhubung dengan organisasi ini.",
+    "description": "Kumpulkan dan unggah foto lapangan dengan spesies, tanggal, dan lokasi. Tautkan ke proyek untuk digunakan kembali sebagai bukti saat menerbitkan Cert.",
     "addObservation": "Tambah temuan",
     "backToObservations": "Kembali ke temuan",
     "bulkTitle": "Tambah temuan dari gambar",
@@ -694,7 +694,15 @@
     "keepSeparate": "Observasi tersendiri",
     "unidentified": "Belum teridentifikasi",
     "photoCount": "{count, plural, other {# foto}}",
-    "uploadGroup": "Unggah kelompok"
+    "uploadGroup": "Unggah kelompok",
+    "metadata": {
+      "title": "Observasi — GainForest",
+      "description": "Kumpulkan dan unggah observasi lapangan serta tautkan ke proyek Anda."
+    },
+    "projectLabel": "Kumpulkan untuk proyek",
+    "projectHelp": "Opsional. Tautkan observasi ini ke salah satu proyek Anda agar siap digunakan sebagai bukti.",
+    "projectNone": "Tanpa proyek",
+    "projectAttached": "Observasi ini akan dikumpulkan untuk {project}."
   },
   "settings": {
     "organizationTitle": "Pengaturan organisasi",

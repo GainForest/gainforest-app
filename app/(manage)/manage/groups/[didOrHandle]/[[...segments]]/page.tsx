@@ -100,7 +100,12 @@ export default async function ManageGroupScopedPage({ params, searchParams }: Pa
     const query = search.toString();
     redirect(`${target.basePath}/certs${second === "new" ? "/new" : ""}${query ? `?${query}` : ""}`);
   }
-  if (first === "observations" && !second) return <ObservationsSection target={target} />;
+  if (first === "observations" && !second) {
+    const params = await searchParams;
+    const rawForProject = params.forProject;
+    const forProject = Array.isArray(rawForProject) ? rawForProject[0] : rawForProject;
+    return <ObservationsSection target={target} forProject={forProject ?? null} />;
+  }
   if (first === "settings" && !second) return <SettingsSection target={target} />;
 
   notFound();

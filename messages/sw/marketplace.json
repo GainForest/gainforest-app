@@ -1042,7 +1042,9 @@
       "manageCerts": "Certs",
       "manageCertsFor": "Certs za {title}",
       "manageGallery": "Dhibiti matunzio",
-      "manageGalleryFor": "Dhibiti matunzio ya {title}"
+      "manageGalleryFor": "Dhibiti matunzio ya {title}",
+      "manageObservations": "Uchunguzi",
+      "manageObservationsFor": "Kusanya uchunguzi kwa ajili ya {title}"
     }
   },
   "observations": {

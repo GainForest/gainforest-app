@@ -7,6 +7,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { parseAsString, parseAsStringEnum, useQueryStates } from "nuqs";
 import {
   BadgeCheckIcon,
+  BinocularsIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
   CirclePlusIcon,
@@ -238,6 +239,7 @@ export function ManageProjectsClient({ target }: { target: ManageTarget }) {
                       index={index}
                       galleryHref={`${target.basePath}/projects/${encodeURIComponent(project.rkey)}/gallery`}
                       certsHref={`${target.basePath}/projects/${encodeURIComponent(project.rkey)}/certs`}
+                      observationsHref={manageHref(target, "observations", { mode: "add", forProject: `${project.did}/${project.rkey}` })}
                       onEdit={() => openEdit(project)}
                       disabledReason={updatePermission.reason}
                     />
@@ -274,6 +276,7 @@ function ProjectCard({
   index,
   galleryHref,
   certsHref,
+  observationsHref,
   onEdit,
   disabledReason = null,
 }: {
@@ -281,6 +284,7 @@ function ProjectCard({
   index: number;
   galleryHref: string;
   certsHref: string;
+  observationsHref: string;
   onEdit: () => void;
   disabledReason?: string | null;
 }) {
@@ -362,6 +366,12 @@ function ProjectCard({
               <Link href={certsHref} aria-label={t("manageCertsFor", { title: project.title })}>
                 <LeafIcon className="size-3.5" />
                 {t("manageCerts")}
+              </Link>
+            </Button>
+            <Button asChild type="button" variant="outline" size="sm" className="h-8" onClick={(event) => event.stopPropagation()}>
+              <Link href={observationsHref} aria-label={t("manageObservationsFor", { title: project.title })}>
+                <BinocularsIcon className="size-3.5" />
+                {t("manageObservations")}
               </Link>
             </Button>
             <Button asChild type="button" variant="outline" size="sm" className="h-8" onClick={(event) => event.stopPropagation()}>
@@ -558,6 +568,12 @@ function ProjectEditor({
                   <Link href={`${target.basePath}/projects/${encodeURIComponent(state.project.rkey)}/certs`} aria-label={actionT("manageCertsFor", { title: state.project.title })}>
                     <LeafIcon className="size-4" />
                     {actionT("manageCerts")}
+                  </Link>
+                </Button>
+                <Button asChild type="button" variant="outline">
+                  <Link href={manageHref(target, "observations", { mode: "add", forProject: `${state.project.did}/${state.project.rkey}` })} aria-label={actionT("manageObservationsFor", { title: state.project.title })}>
+                    <BinocularsIcon className="size-4" />
+                    {actionT("manageObservations")}
                   </Link>
                 </Button>
                 <Button asChild type="button" variant="outline">

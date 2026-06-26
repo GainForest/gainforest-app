@@ -57,6 +57,7 @@ export async function createObservationPhoto(input: {
   occurrenceRef: string;
   subjectPart: string;
   caption?: string;
+  siteRef?: string;
 }): Promise<MutationResult> {
   return createMultimediaFromFile(
     {
@@ -64,6 +65,7 @@ export async function createObservationPhoto(input: {
       occurrenceRef: input.occurrenceRef,
       subjectPart: input.subjectPart,
       caption: input.caption,
+      siteRef: input.siteRef,
     },
     mutationOptions(),
   );

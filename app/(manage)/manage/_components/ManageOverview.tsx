@@ -110,10 +110,11 @@ const ART: Record<string, ReactNode> = {
 
 function buildTiles(account: AccountRouteData, stats: OverviewStats, target: ManageTarget): FolderTile[] {
   if (account.kind === "user") {
-    // Personal accounts can own projects without creating an organization, so
-    // surface a Projects folder on the personal home.
+    // Personal accounts can own projects and collect observations without
+    // creating an organization, so surface both folders on the personal home.
     return [
       { id: "projects", title: "Projects", href: manageHref(target, "projects"), count: stats.projects, unit: "collections" },
+      { id: "observations", title: "Observations", href: manageHref(target, "observations"), count: stats.observations, unit: "records" },
     ];
   }
   return [

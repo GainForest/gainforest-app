@@ -624,7 +624,7 @@
     "tainaBody": "Tainá fica no Telegram. Envie para ela suas fotos de campo, avistamentos e gravações de som, e ela coloca tudo nesta organização para você. Arquivos grandes do AudioMoth também são bem vindos.",
     "tainaCta": "Dizer oi no Telegram",
     "title": "Observações",
-    "description": "Revise os registros de biodiversidade vinculados a esta organização.",
+    "description": "Colete e envie fotos de campo com espécies, datas e locais. Vincule-as a um projeto para reutilizá-las como evidência ao emitir um Cert.",
     "addObservation": "Adicionar observação",
     "backToObservations": "Voltar às observações",
     "bulkTitle": "Adicionar observações por imagens",
@@ -694,7 +694,15 @@
     "keepSeparate": "Observação própria",
     "unidentified": "Não identificado",
     "photoCount": "{count, plural, one {# foto} other {# fotos}}",
-    "uploadGroup": "Enviar grupo"
+    "uploadGroup": "Enviar grupo",
+    "metadata": {
+      "title": "Observações — GainForest",
+      "description": "Colete e envie observações de campo e vincule-as aos seus projetos."
+    },
+    "projectLabel": "Coletar para um projeto",
+    "projectHelp": "Opcional. Vincule estas observações a um dos seus projetos para deixá-las prontas como evidência.",
+    "projectNone": "Sem projeto",
+    "projectAttached": "Estas observações serão coletadas para {project}."
   },
   "settings": {
     "organizationTitle": "Configurações da organização",

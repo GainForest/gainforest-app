@@ -9,6 +9,7 @@ import {
   CalendarIcon,
   CheckCircle2Icon,
   ChevronLeftIcon,
+  FolderKanbanIcon,
   ImagePlusIcon,
   Layers2Icon,
   Loader2Icon,
@@ -30,7 +31,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import TelegramIcon from "@/icons/TelegramIcon";
-import { manageHref, type ManageTarget } from "@/lib/links";
+import { manageApiHref, manageHref, type ManageTarget } from "@/lib/links";
 import { canCreateRecord } from "../../_lib/cgs-permissions";
 import {
   configureObservationMutationRepo,
@@ -407,7 +408,7 @@ function occurrenceAnalysisForUpload(items: ObservationUploadItem[]): Observatio
   return analysis;
 }
 
-export function ObservationsClient({ target, initialPage }: { target: ManageTarget; initialPage: InitialPage }) {
+export function ObservationsClient({ target, initialPage, forProject = null }: { target: ManageTarget; initialPage: InitialPage; forProject?: string | null }) {
   const t = useTranslations("upload.observations");
   const router = useRouter();
   const [mode, setMode] = useQueryState(
@@ -425,6 +426,7 @@ export function ObservationsClient({ target, initialPage }: { target: ManageTarg
     return (
       <ObservationBulkAddPanel
         target={target}
+        forProject={forProject}
         disabledReason={createPermission.reason}
         onBack={() => {
           void setMode("list").then(() => router.refresh());
@@ -505,11 +507,16 @@ export function ObservationsClient({ target, initialPage }: { target: ManageTarg
   );
 }
 
+type ObservationProject = { rkey: string; did: string; atUri: string; title: string; imageUrl: string | null; locationUri: string | null };
+
 function ObservationBulkAddPanel({
+  target,
+  forProject,
   disabledReason,
   onBack,
 }: {
   target: ManageTarget;
+  forProject?: string | null;
   disabledReason?: string | null;
   onBack: () => void;
 }) {
@@ -520,8 +527,53 @@ function ObservationBulkAddPanel({
   const [isPreparing, setIsPreparing] = useState(false);
   const [isBulkUploading, setIsBulkUploading] = useState(false);
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [projects, setProjects] = useState<ObservationProject[]>([]);
+  const [projectUri, setProjectUri] = useState<string>("");
 
   const itemsRef = useRef<ObservationUploadItem[]>([]);
+
+  // Load the steward's projects so observations can be collected for one of
+  // them (writes projectRef + siteRef onto each occurrence). Optional: leaving
+  // "No project" keeps the observation unattached.
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const response = await fetch(manageApiHref("/api/manage/projects", target), { cache: "no-store" });
+        const data = (await response.json()) as Array<Record<string, unknown>> | { error?: string };
+        if (cancelled || !response.ok || !Array.isArray(data)) return;
+        const mapped = data
+          .map((raw) => {
+            const did = typeof raw.did === "string" ? raw.did : null;
+            const rkey = typeof raw.rkey === "string" ? raw.rkey : null;
+            const atUri = typeof raw.atUri === "string" ? raw.atUri : null;
+            if (!did || !rkey || !atUri) return null;
+            return {
+              rkey,
+              did,
+              atUri,
+              title: typeof raw.title === "string" && raw.title.trim() ? raw.title : "Untitled project",
+              imageUrl: typeof raw.imageUrl === "string" ? raw.imageUrl : null,
+              locationUri: typeof raw.locationUri === "string" ? raw.locationUri : null,
+            } satisfies ObservationProject;
+          })
+          .filter((project): project is ObservationProject => Boolean(project));
+        setProjects(mapped);
+        if (forProject) {
+          const [forDid, forRkey] = forProject.split("/");
+          const match = mapped.find((project) => project.did === forDid && project.rkey === forRkey);
+          if (match) setProjectUri(match.atUri);
+        }
+      } catch {
+        // Project attachment is optional; ignore load failures.
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [target, forProject]);
+
+  const selectedProject = projects.find((project) => project.atUri === projectUri) ?? null;
 
   useEffect(() => {
     itemsRef.current = items;
@@ -713,6 +765,8 @@ function ObservationBulkAddPanel({
           habitat: data.habitat.trim(),
           occurrenceRemarks: data.occurrenceRemarks.trim(),
           associatedMedia: uploadItems.map((item) => item.file.name).join(", "),
+          ...(selectedProject ? { projectRef: selectedProject.atUri } : {}),
+          ...(selectedProject?.locationUri ? { siteRef: selectedProject.locationUri } : {}),
         });
         occurrenceUri = occurrence.uri;
       }
@@ -725,6 +779,7 @@ function ObservationBulkAddPanel({
           occurrenceRef: occurrenceUri,
           subjectPart: item.analysis.subjectPart.trim() || "wholeOrganism",
           caption: item.analysis.caption.trim() || undefined,
+          siteRef: selectedProject?.locationUri ?? undefined,
         });
         setItems((current) => current.map((candidate) =>
           candidate.id === item.id
@@ -787,6 +842,49 @@ function ObservationBulkAddPanel({
           </div>
         </div>
       </div>
+
+      {projects.length > 0 ? (
+        <div className="rounded-2xl border bg-card p-4 shadow-xs sm:p-5">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-start gap-3">
+              <span className="grid size-10 shrink-0 place-items-center rounded-full bg-primary/10 text-primary">
+                <FolderKanbanIcon className="size-5" />
+              </span>
+              <div className="min-w-0">
+                <p className="text-sm font-medium text-foreground">{t("projectLabel")}</p>
+                <p className="text-xs leading-5 text-muted-foreground">{t("projectHelp")}</p>
+              </div>
+            </div>
+            <Select value={projectUri || "none"} onValueChange={(value) => setProjectUri(value === "none" ? "" : value)}>
+              <SelectTrigger className="w-full sm:w-72">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">{t("projectNone")}</SelectItem>
+                {projects.map((project) => (
+                  <SelectItem key={project.atUri} value={project.atUri}>
+                    <span className="flex items-center gap-2">
+                      {project.imageUrl ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={project.imageUrl} alt="" className="size-5 shrink-0 rounded object-cover ring-1 ring-border" />
+                      ) : (
+                        <FolderKanbanIcon className="size-4 shrink-0 text-muted-foreground" />
+                      )}
+                      <span className="truncate">{project.title}</span>
+                    </span>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          {selectedProject ? (
+            <p className="mt-3 flex items-center gap-1.5 text-xs text-primary">
+              <CheckCircle2Icon className="size-3.5 shrink-0" />
+              {t("projectAttached", { project: selectedProject.title })}
+            </p>
+          ) : null}
+        </div>
+      ) : null}
 
       {bulkError || disabledReason ? (
         <div className="flex items-start gap-2.5 rounded-2xl border border-destructive/20 bg-destructive/5 p-4 text-sm text-destructive">

@@ -1042,7 +1042,9 @@
       "manageCerts": "Cert",
       "manageCertsFor": "Cert untuk {title}",
       "manageGallery": "Kelola galeri",
-      "manageGalleryFor": "Kelola galeri untuk {title}"
+      "manageGalleryFor": "Kelola galeri untuk {title}",
+      "manageObservations": "Observasi",
+      "manageObservationsFor": "Kumpulkan observasi untuk {title}"
     }
   },
   "observations": {
