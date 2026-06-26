@@ -754,6 +754,8 @@ export function RecordExplorer({
                 onRetry={() => void setQuery("")}
                 retryLabel="Clear search"
               />
+            ) : emptyState ? (
+              emptyState
             ) : kind === "occurrence" && occCategory !== "all" ? (
               <EmptyState
                 title={`No ${occurrenceCategoryLabel(occCategory).toLowerCase()} sightings in this view`}
@@ -773,8 +775,6 @@ export function RecordExplorer({
                 title={emptyFilteredTitle ?? "Nothing here yet"}
                 body={emptyFilteredBody ?? "There is nothing to show right now."}
               />
-            ) : emptyState ? (
-              emptyState
             ) : (
               <EmptyState title="Nothing here yet" body="There is nothing to show right now." />
             )

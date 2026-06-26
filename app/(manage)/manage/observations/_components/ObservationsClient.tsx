@@ -716,24 +716,11 @@ export function ObservationsClient({ target, initialPage, forProject = null }: {
   return (
     <div className="bg-background pb-4">
       <div className="mx-auto max-w-6xl px-6 pt-4">
-        <header className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-          <div className="max-w-xl">
-            <h1 className="font-instrument text-2xl font-medium italic tracking-[-0.03em] text-foreground sm:text-3xl">
-              {t("title")}
-            </h1>
-            <p className="mt-2 text-sm leading-6 text-muted-foreground">{t("description")}</p>
-          </div>
-          {createPermission.allowed ? (
-            <Button asChild>
-              <Link href={manageHref(target, "observations", { mode: "add", ...(addForProject ? { forProject: addForProject } : {}) })}>
-                <ImagePlusIcon className="size-4" /> {t("addObservation")}
-              </Link>
-            </Button>
-          ) : (
-            <Button disabled title={createPermission.reason ?? undefined}>
-              <ImagePlusIcon className="size-4" /> {t("addObservation")}
-            </Button>
-          )}
+        <header>
+          <h1 className="font-instrument text-2xl font-medium italic tracking-[-0.03em] text-foreground sm:text-3xl">
+            {t("title")}
+          </h1>
+          <p className="mt-2 text-sm leading-6 text-muted-foreground">{t("description")}</p>
         </header>
 
         <div className="group relative mt-5 overflow-hidden rounded-3xl border border-dashed border-primary/20 bg-gradient-to-br from-primary/[0.07] via-accent/30 to-background p-5 sm:p-6">
@@ -984,7 +971,9 @@ function ObservationBulkAddPanel({
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [projects, setProjects] = useState<ObservationProject[]>([]);
+  const [projectsLoaded, setProjectsLoaded] = useState(false);
   const [projectUri, setProjectUri] = useState<string>("");
+  const [projectDecisionMade, setProjectDecisionMade] = useState(Boolean(forProject));
   // The mandatory observation location chosen before any image can be added.
   const [chosenLocation, setChosenLocation] = useState<PickedLocation | null>(null);
   // Best-effort starting point for the picker (default site → any site).
@@ -1003,12 +992,14 @@ function ObservationBulkAddPanel({
   // fire against a torn-down component.
   const pendingTimers = useRef<Set<number>>(new Set());
   const hasLocation = isValidLocation(chosenLocation);
+  const canChooseImages = projectDecisionMade && hasLocation;
 
   // Load the steward's projects so observations can be collected for one of
   // them (writes projectRef + siteRef onto each occurrence). Optional: leaving
   // "No project" keeps the observation unattached.
   useEffect(() => {
     let cancelled = false;
+    setProjectsLoaded(false);
     (async () => {
       try {
         const response = await fetch(manageApiHref("/api/manage/projects", target), { cache: "no-store" });
@@ -1034,10 +1025,15 @@ function ObservationBulkAddPanel({
         if (forProject) {
           const [forDid, forRkey] = forProject.split("/");
           const match = mapped.find((project) => project.did === forDid && project.rkey === forRkey);
-          if (match) setProjectUri(match.atUri);
+          if (match) {
+            setProjectUri(match.atUri);
+            setProjectDecisionMade(true);
+          }
         }
       } catch {
         // Project attachment is optional; ignore load failures.
+      } finally {
+        if (!cancelled) setProjectsLoaded(true);
       }
     })();
     return () => {
@@ -1046,6 +1042,24 @@ function ObservationBulkAddPanel({
   }, [target, forProject]);
 
   const selectedProject = projects.find((project) => project.atUri === projectUri) ?? null;
+
+  function chooseProject(nextProjectUri: string) {
+    setProjectUri(nextProjectUri);
+    setProjectDecisionMade(true);
+    setBulkError(null);
+  }
+
+  function skipProject() {
+    setProjectUri("");
+    setProjectDecisionMade(true);
+    setBulkError(null);
+  }
+
+  function changeProject() {
+    if (isBulkUploading) return;
+    setProjectDecisionMade(false);
+    setBulkError(null);
+  }
 
   useEffect(() => {
     itemsRef.current = items;
@@ -1075,6 +1089,8 @@ function ObservationBulkAddPanel({
             return item;
           });
           setItems(restored);
+          if (typeof draft.projectUri === "string") setProjectUri(draft.projectUri);
+          if (draft.projectDecisionMade || typeof draft.projectUri === "string" || restored.length > 0) setProjectDecisionMade(true);
           if (isValidLocation(draft.chosenLocation)) setChosenLocation(draft.chosenLocation);
           setDraftRestored(true);
           // Resume any analysis that was interrupted mid-flight.
@@ -1116,13 +1132,15 @@ function ObservationBulkAddPanel({
         void saveDraft<DraftItem>({
           did: target.did,
           chosenLocation,
+          projectUri: projectUri || null,
+          projectDecisionMade,
           items: persistItems,
           updatedAt: Date.now(),
         });
       }
     }, 600);
     return () => window.clearTimeout(timer);
-  }, [items, chosenLocation, target.did]);
+  }, [items, chosenLocation, projectDecisionMade, projectUri, target.did]);
 
   function discardDraft() {
     setItems((current) => {
@@ -1293,6 +1311,10 @@ function ObservationBulkAddPanel({
     dragDepth.current = 0;
     setIsDragging(false);
     if (!dragHasFiles(event)) return;
+    if (!projectDecisionMade) {
+      setBulkError(t("projectRequired"));
+      return;
+    }
     if (!hasLocation) {
       setBulkError(t("location.locationRequired"));
       return;
@@ -1364,6 +1386,10 @@ function ObservationBulkAddPanel({
   }
 
   async function addFiles(fileList: FileList | null) {
+    if (!projectDecisionMade) {
+      setBulkError(t("projectRequired"));
+      return;
+    }
     // A location must be chosen first; every photo without its own GPS inherits it.
     const location = chosenLocationRef.current;
     if (!isValidLocation(location)) {
@@ -1704,6 +1730,9 @@ function ObservationBulkAddPanel({
               </span>
             ) : null}
             <div className="ml-auto flex flex-wrap items-center gap-2">
+              {projectDecisionMade ? (
+                <ProjectBar project={selectedProject} hasProject={Boolean(projectUri)} onChange={changeProject} />
+              ) : null}
               {hasLocation ? (
                 <LocationBar location={chosenLocation!} onChange={chooseObservationLocation} />
               ) : null}
@@ -1712,8 +1741,8 @@ function ObservationBulkAddPanel({
                 variant="outline"
                 size="sm"
                 onClick={() => fileInputRef.current?.click()}
-                disabled={isPreparing || !hasLocation}
-                title={!hasLocation ? t("location.locationRequired") : undefined}
+                disabled={isPreparing || !canChooseImages}
+                title={!projectDecisionMade ? t("projectRequired") : !hasLocation ? t("location.locationRequired") : undefined}
               >
                 {isPreparing ? <Loader2Icon className="size-4 animate-spin" /> : <ImagePlusIcon className="size-4" />}
                 <span className="hidden sm:inline">
@@ -1724,49 +1753,6 @@ function ObservationBulkAddPanel({
           </div>
         </div>
 
-        {projects.length > 0 ? (
-          <div className="rounded-2xl border bg-card p-4 shadow-xs sm:p-5">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <div className="flex items-start gap-3">
-                <span className="grid size-10 shrink-0 place-items-center rounded-full bg-primary/10 text-primary">
-                  <FolderKanbanIcon className="size-5" />
-                </span>
-                <div className="min-w-0">
-                  <p className="text-sm font-medium text-foreground">{t("projectLabel")}</p>
-                  <p className="text-xs leading-5 text-muted-foreground">{t("projectHelp")}</p>
-                </div>
-              </div>
-              <Select value={projectUri || "none"} onValueChange={(value) => setProjectUri(value === "none" ? "" : value)}>
-                <SelectTrigger className="w-full sm:w-72">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">{t("projectNone")}</SelectItem>
-                  {projects.map((project) => (
-                    <SelectItem key={project.atUri} value={project.atUri}>
-                      <span className="flex items-center gap-2">
-                        {project.imageUrl ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img src={project.imageUrl} alt="" className="size-5 shrink-0 rounded object-cover ring-1 ring-border" />
-                        ) : (
-                          <FolderKanbanIcon className="size-4 shrink-0 text-muted-foreground" />
-                        )}
-                        <span className="truncate">{project.title}</span>
-                      </span>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            {selectedProject ? (
-              <p className="mt-3 flex items-center gap-1.5 text-xs text-primary">
-                <CheckCircle2Icon className="size-3.5 shrink-0" />
-                {t("projectAttached", { project: selectedProject.title })}
-              </p>
-            ) : null}
-          </div>
-        ) : null}
-
         {bulkError || disabledReason ? (
           <div className="flex items-start gap-2.5 rounded-2xl border border-destructive/20 bg-destructive/5 p-4 text-sm text-destructive">
             <AlertTriangleIcon className="mt-0.5 size-4 shrink-0" />
@@ -1774,7 +1760,15 @@ function ObservationBulkAddPanel({
           </div>
         ) : null}
 
-        {!hasLocation ? (
+        {!projectDecisionMade ? (
+          <ProjectStep
+            projects={projects}
+            loading={!projectsLoaded}
+            value={projectUri}
+            onChoose={chooseProject}
+            onSkip={skipProject}
+          />
+        ) : !hasLocation ? (
           <LocationStep onChoose={chooseObservationLocation} />
         ) : items.length === 0 && !uploadSession ? (
           <button
@@ -1896,6 +1890,80 @@ function ObservationBulkAddPanel({
         ) : null}
       </AnimatePresence>
     </div>
+  );
+}
+
+function ProjectStep({
+  projects,
+  loading,
+  value,
+  onChoose,
+  onSkip,
+}: {
+  projects: ObservationProject[];
+  loading: boolean;
+  value: string;
+  onChoose: (projectUri: string) => void;
+  onSkip: () => void;
+}) {
+  const t = useTranslations("upload.observations");
+  return (
+    <div className="flex min-h-[280px] flex-col items-center justify-center rounded-3xl border border-dashed border-primary/30 bg-gradient-to-b from-primary/[0.06] to-transparent p-8 text-center">
+      <span className="mb-5 grid size-16 place-items-center rounded-2xl bg-primary/10 text-primary ring-1 ring-primary/15">
+        <FolderKanbanIcon className="size-7" />
+      </span>
+      <h2 className="font-instrument text-2xl font-medium italic tracking-[-0.02em] text-foreground">{t("projectStepTitle")}</h2>
+      <p className="mt-2 max-w-md text-sm leading-6 text-muted-foreground">{t("projectStepBody")}</p>
+      <div className="mt-5 flex w-full max-w-md flex-col gap-2 sm:flex-row sm:items-center sm:justify-center">
+        {loading ? (
+          <Button disabled className="w-full sm:flex-1">
+            <Loader2Icon className="size-4 animate-spin" /> {t("projectLoading")}
+          </Button>
+        ) : projects.length > 0 ? (
+          <Select value={value || undefined} onValueChange={onChoose}>
+            <SelectTrigger className="h-10 w-full rounded-full bg-background text-left sm:flex-1">
+              <SelectValue placeholder={t("projectChoose")} />
+            </SelectTrigger>
+            <SelectContent>
+              {projects.map((project) => (
+                <SelectItem key={project.atUri} value={project.atUri}>
+                  <span className="flex items-center gap-2">
+                    {project.imageUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={project.imageUrl} alt="" className="size-5 shrink-0 rounded object-cover ring-1 ring-border" />
+                    ) : (
+                      <FolderKanbanIcon className="size-4 shrink-0 text-muted-foreground" />
+                    )}
+                    <span className="truncate">{project.title}</span>
+                  </span>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        ) : null}
+        <Button variant={projects.length > 0 ? "outline" : "default"} className="w-full sm:w-auto" onClick={onSkip} disabled={loading}>
+          {t("projectSkip")}
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+function ProjectBar({ project, hasProject, onChange }: { project: ObservationProject | null; hasProject: boolean; onChange: () => void }) {
+  const t = useTranslations("upload.observations");
+  const label = project?.title ?? (hasProject ? t("projectLoading") : t("projectNoneSelected"));
+  return (
+    <Button
+      variant="outline"
+      size="sm"
+      onClick={onChange}
+      title={t("changeProject")}
+      className="max-w-full gap-1.5"
+    >
+      <FolderKanbanIcon className="size-3.5 shrink-0 text-primary" />
+      <span className="truncate">{label}</span>
+      <PencilIcon className="size-3 shrink-0 text-muted-foreground" />
+    </Button>
   );
 }
 

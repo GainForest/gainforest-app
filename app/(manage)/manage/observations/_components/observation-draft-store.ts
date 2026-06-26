@@ -17,6 +17,8 @@ const VERSION = 1;
 export type StoredDraft<TItem> = {
   did: string;
   chosenLocation: { lat: number; lng: number } | null;
+  projectUri?: string | null;
+  projectDecisionMade?: boolean;
   items: TItem[];
   updatedAt: number;
 };
