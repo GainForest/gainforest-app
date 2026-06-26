@@ -951,6 +951,53 @@ export async function fetchObservationSummaryByDid(
   };
 }
 
+export type ProjectObservationSummary = {
+  /** Total observations linked to the project via `projectRef`. */
+  count: number;
+  /** Up to `target` image-bearing observations, ready to preview. */
+  records: OccurrenceRecord[];
+};
+
+/** Count + a few image previews for the observations attached to one project
+ *  (matched on the occurrence `projectRef`). Powers the project detail page's
+ *  observations summary. */
+export async function fetchProjectObservationSummary(
+  projectUri: string,
+  target = 12,
+  signal?: AbortSignal,
+): Promise<ProjectObservationSummary> {
+  if (!projectUri) return { count: 0, records: [] };
+
+  const countData = await indexerQuery<{ appGainforestDwcOccurrence?: { totalCount?: number | null } | null }>(
+    `query ProjectObservationCount($uri: String!) {
+      appGainforestDwcOccurrence(first: 1, where: { projectRef: { eq: $uri } }) { totalCount }
+    }`,
+    { uri: projectUri },
+    signal,
+  ).catch(() => null);
+  const count = countData?.appGainforestDwcOccurrence?.totalCount ?? 0;
+
+  const where = { projectRef: { eq: projectUri }, imageEvidence: { isNull: false } };
+  const page = await fetchOccurrencePage(Math.min(INDEXER_MAX_PAGE, Math.max(target, 24)), null, signal, where).catch(
+    () => ({ nodes: [] as RawOccurrence[], cursor: null, hasNextPage: false }),
+  );
+  const matches = page.nodes.filter((node) => Boolean(node.imageEvidence?.file?.ref));
+  let mapped = matches.map(mapOccurrence);
+  mapped = await resolveImages(
+    mapped,
+    (record) => {
+      if (record.imageUrl) return null;
+      const raw = matches.find((node) => node.rkey === record.rkey && node.did === record.did);
+      const ref = raw?.imageEvidence?.file?.ref ?? null;
+      return ref ? { did: record.did, ref } : null;
+    },
+    (record, url) => ({ ...record, imageUrl: url }),
+    signal,
+  );
+  const records = mapped.filter((record) => Boolean(record.imageUrl)).slice(0, target);
+  return { count, records };
+}
+
 /** Load recent image observations owned by a single DID. Used by Bumicert detail
  * pages to show a compact evidence gallery connected to the publishing
  * organization. */

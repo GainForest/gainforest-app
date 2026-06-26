@@ -4,13 +4,22 @@ import Link from "next/link";
 import Image from "next/image";
 import { notFound, redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
-import { ArrowLeftIcon, ArrowUpRightIcon, BadgeIcon, CalendarIcon, CompassIcon, FolderKanbanIcon, MapPinIcon, UsersIcon } from "lucide-react";
-import { fetchCertifiedLocationCountriesByUri, fetchRecordByUri, type BumicertRecord } from "../../../_lib/indexer";
+import { ArrowLeftIcon, ArrowUpRightIcon, BadgeIcon, CalendarIcon, CompassIcon, FolderKanbanIcon, ImageIcon, LeafIcon, MapPinIcon, UsersIcon } from "lucide-react";
+import {
+  fetchCertifiedLocationCountriesByUri,
+  fetchProjectImageGalleriesByDid,
+  fetchProjectObservationSummary,
+  fetchRecordByUri,
+  type BumicertRecord,
+  type OccurrenceRecord,
+  type ProjectGalleryImage,
+  type ProjectImageGallery,
+} from "../../../_lib/indexer";
 import { isPdsBlobUrl } from "../../../_lib/pds";
 import { formatCountry, formatDate, formatNumber } from "../../../_lib/format";
 import { formatWorkScopeTag, type WorkScopeLabels } from "../../../_lib/work-scope-labels";
 import { getAccountRouteData, readAccountRouteParams } from "../../../account/_lib/account-route";
-import { accountHref, localProjectHref } from "../../../_lib/urls";
+import { accountHref, localObservationHref, localProjectHref } from "../../../_lib/urls";
 import { AccountBumicertsGrid } from "../../../account/_components/AccountBumicertsGrid";
 
 export const revalidate = 60;
@@ -53,13 +62,15 @@ export default async function ProjectDetailPage({ params }: { params: ProjectPag
   const t = await getTranslations("marketplace.projectPage");
 
   const certUris = record.bumicertUris.slice(0, 100);
-  const [owner, certs] = await Promise.all([
+  const [owner, certs, rawGalleries, observations] = await Promise.all([
     getAccountRouteData(did, urlIdentifier).catch(() => null),
     certUris.length
       ? Promise.all(certUris.map((uri) => fetchRecordByUri(uri).catch(() => null))).then((records) =>
           records.filter((entry): entry is BumicertRecord => entry?.kind === "bumicert"),
         )
       : Promise.resolve([] as BumicertRecord[]),
+    fetchProjectImageGalleriesByDid(did).catch(() => [] as ProjectImageGallery[]),
+    fetchProjectObservationSummary(record.atUri, 10).catch(() => ({ count: 0, records: [] as OccurrenceRecord[] })),
   ]);
 
   // Canonicalise to the owner's handle URL when one is known (mirrors the
@@ -88,6 +99,15 @@ export default async function ProjectDetailPage({ params }: { params: ProjectPag
     ? await fetchCertifiedLocationCountriesByUri(locationUris).catch(() => new Map<string, string>())
     : new Map<string, string>();
   const overview = buildProjectOverview(certs, workScopeLabels, locationUris, countryMap);
+
+  // Linked galleries (matched by project URI) and observations (matched by
+  // projectRef) — summarised as counts plus a row of image previews.
+  const galleryImages = rawGalleries
+    .filter((gallery) => gallery.projectUri === record.atUri)
+    .flatMap((gallery) => gallery.images)
+    .filter((image) => Boolean(image.url));
+  const galleryPreview = galleryImages.slice(0, 10);
+  const observationPreview = observations.records.slice(0, 10);
 
   return (
     <main className="min-h-screen bg-background pb-20">
@@ -194,11 +214,13 @@ export default async function ProjectDetailPage({ params }: { params: ProjectPag
               {t("overviewLead", { certs: certs.length })}
             </p>
 
-            <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3">
               <OverviewStat icon={<BadgeIcon className="h-4 w-4" aria-hidden />} label={t("certs")} value={formatNumber(record.bumicertCount)} />
               <OverviewStat icon={<UsersIcon className="h-4 w-4" aria-hidden />} label={t("contributors")} value={formatNumber(overview.contributorTotal)} />
               <OverviewStat icon={<MapPinIcon className="h-4 w-4" aria-hidden />} label={t("places")} value={formatNumber(overview.placeCount)} />
               <OverviewStat icon={<CompassIcon className="h-4 w-4" aria-hidden />} label={t("focusAreasLabel")} value={formatNumber(overview.focusAreas.length)} />
+              <OverviewStat icon={<LeafIcon className="h-4 w-4" aria-hidden />} label={t("observations")} value={formatNumber(observations.count)} />
+              <OverviewStat icon={<ImageIcon className="h-4 w-4" aria-hidden />} label={t("photos")} value={formatNumber(galleryImages.length)} />
             </div>
 
             {overview.focusAreas.length > 0 ? (
@@ -234,6 +256,43 @@ export default async function ProjectDetailPage({ params }: { params: ProjectPag
                 ) : null}
               </dl>
             ) : null}
+          </section>
+        ) : null}
+
+        {galleryPreview.length > 0 ? (
+          <section className="mt-10 border-t border-border-soft pt-8">
+            <h2 className="mb-4 flex items-baseline gap-2 text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
+              {t("galleryTitle")}
+              <span className="text-foreground/40">{formatNumber(galleryImages.length)}</span>
+            </h2>
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+              {galleryPreview.map((image, index) => (
+                <GalleryThumb
+                  key={image.id}
+                  image={image}
+                  overflow={index === galleryPreview.length - 1 ? galleryImages.length - galleryPreview.length : 0}
+                />
+              ))}
+            </div>
+          </section>
+        ) : null}
+
+        {observationPreview.length > 0 ? (
+          <section className="mt-10 border-t border-border-soft pt-8">
+            <h2 className="mb-4 flex items-baseline gap-2 text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
+              {t("observationsTitle")}
+              <span className="text-foreground/40">{formatNumber(observations.count)}</span>
+            </h2>
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+              {observationPreview.map((observation, index) => (
+                <ObservationThumb
+                  key={observation.id}
+                  observation={observation}
+                  href={localObservationHref(ownerIdentifier, observation.rkey)}
+                  overflow={index === observationPreview.length - 1 ? observations.count - observationPreview.length : 0}
+                />
+              ))}
+            </div>
           </section>
         ) : null}
 
@@ -311,6 +370,47 @@ function formatActivePeriod(start: string | null, end: string | null): string {
   const endLabel = end ? formatDate(end) : null;
   if (startLabel && endLabel) return startLabel === endLabel ? startLabel : `${startLabel} – ${endLabel}`;
   return startLabel ?? endLabel ?? "";
+}
+
+function GalleryThumb({ image, overflow }: { image: ProjectGalleryImage; overflow: number }) {
+  return (
+    <div className="relative aspect-square overflow-hidden rounded-xl border border-border-soft bg-muted">
+      {/* eslint-disable-next-line @next/next/no-img-element -- gallery blobs come
+          from arbitrary PDS hosts; a plain img avoids widening remotePatterns. */}
+      <img src={image.url} alt="" loading="lazy" className="h-full w-full object-cover" />
+      {overflow > 0 ? (
+        <div className="absolute inset-0 grid place-items-center bg-foreground/55 text-lg font-semibold text-background">
+          +{formatNumber(overflow)}
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+function ObservationThumb({ observation, href, overflow }: { observation: OccurrenceRecord; href: string; overflow: number }) {
+  return (
+    <Link href={href} className="group relative block aspect-square overflow-hidden rounded-xl border border-border-soft bg-muted">
+      {observation.imageUrl ? (
+        <Image
+          src={observation.imageUrl}
+          alt={observation.vernacularName ?? observation.scientificName ?? ""}
+          fill
+          sizes="(max-width: 640px) 50vw, 200px"
+          unoptimized={!isPdsBlobUrl(observation.imageUrl)}
+          className="object-cover transition-transform duration-300 group-hover:scale-105"
+        />
+      ) : (
+        <div className="grid h-full w-full place-items-center text-primary/40">
+          <LeafIcon className="h-7 w-7" aria-hidden />
+        </div>
+      )}
+      {overflow > 0 ? (
+        <div className="absolute inset-0 grid place-items-center bg-foreground/55 text-lg font-semibold text-background">
+          +{formatNumber(overflow)}
+        </div>
+      ) : null}
+    </Link>
+  );
 }
 
 function OverviewStat({ icon, label, value }: { icon: ReactNode; label: string; value: string }) {
