@@ -1345,15 +1345,16 @@ function ObservationBulkAddPanel({
               <span className="inline-flex h-8 items-center gap-1.5 pr-1 text-xs font-medium text-foreground">
                 <RotateCcwIcon className="size-3.5 shrink-0 text-primary" />
                 {t("draftRestored")}
-                <button
-                  type="button"
-                  onClick={discardDraft}
-                  title={t("discardDraft")}
-                  aria-label={t("discardDraft")}
-                  className="grid size-6 shrink-0 place-items-center rounded text-destructive transition-colors hover:bg-destructive/10"
-                >
-                  <Trash2Icon className="size-3.5" />
-                </button>
+                <QuickTooltip content={t("discardDraft")} asChild>
+                  <button
+                    type="button"
+                    onClick={discardDraft}
+                    aria-label={t("discardDraft")}
+                    className="grid size-6 shrink-0 place-items-center rounded-full text-destructive transition-colors hover:bg-destructive/10"
+                  >
+                    <Trash2Icon className="size-3.5" />
+                  </button>
+                </QuickTooltip>
               </span>
             ) : null}
             <div className="ml-auto flex flex-wrap items-center gap-2">

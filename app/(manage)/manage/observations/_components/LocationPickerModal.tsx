@@ -3,9 +3,16 @@
 import "leaflet/dist/leaflet.css";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { LeafletMouseEvent, Map as LeafletMap, Marker, TileLayer } from "leaflet";
-import { ChevronLeftIcon, Loader2Icon, LocateFixedIcon, MapPinIcon, XIcon } from "lucide-react";
+import { ChevronLeftIcon, LayersIcon, Loader2Icon, LocateFixedIcon, MapPinIcon, XIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   ModalContent,
   ModalDescription,
@@ -14,10 +21,17 @@ import {
   ModalTitle,
 } from "@/components/ui/modal/modal";
 import { useModal } from "@/components/ui/modal/context";
-import { mapTileUrl } from "@/app/_lib/coords";
 import { isValidLocation, roundCoord, type PickedLocation } from "./default-location";
 
 export const LocationPickerModalId = "observation-location-picker";
+
+const LAYER_OPTIONS = [
+  { id: "streets", labelKey: "layerStreets" },
+  { id: "simple", labelKey: "layerSimple" },
+  { id: "satellite", labelKey: "layerSatellite" },
+  { id: "terrain", labelKey: "layerTerrain" },
+] as const;
+type LayerId = (typeof LAYER_OPTIONS)[number]["id"];
 
 export type LocationPickerModalProps = {
   /** Already-chosen pin to seed the map with, if any. */
@@ -42,10 +56,12 @@ export function LocationPickerModal({ initial, defaultCenter, onSelect }: Locati
   const mapRef = useRef<LeafletMap | null>(null);
   const markerRef = useRef<Marker | null>(null);
   const tileRef = useRef<TileLayer | null>(null);
+  const layersRef = useRef<Record<LayerId, TileLayer> | null>(null);
   const LRef = useRef<typeof import("leaflet") | null>(null);
   const geoWatchRef = useRef<number | null>(null);
   const geoTimeoutRef = useRef<number | null>(null);
   const [picked, setPicked] = useState<PickedLocation | null>(isValidLocation(initial) ? initial : null);
+  const [activeLayer, setActiveLayer] = useState<LayerId>("streets");
   const [ready, setReady] = useState(false);
   const [locating, setLocating] = useState(false);
   const [geoError, setGeoError] = useState<string | null>(null);
@@ -105,7 +121,6 @@ export function LocationPickerModal({ initial, defaultCenter, onSelect }: Locati
       const L = (await import("leaflet")).default;
       if (cancelled || !elRef.current || mapRef.current) return;
       LRef.current = L;
-      const dark = document.documentElement.classList.contains("dark");
       const start = isValidLocation(initial)
         ? initial
         : isValidLocation(defaultCenter)
@@ -117,12 +132,31 @@ export function LocationPickerModal({ initial, defaultCenter, onSelect }: Locati
         startZoom,
       );
       L.control.zoom({ position: "bottomright" }).addTo(map);
-      tileRef.current = L.tileLayer(mapTileUrl(dark), {
-        attribution:
-          '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
-        subdomains: "abcd",
-        maxZoom: 19,
-      }).addTo(map);
+      // Selectable basemaps; "Streets" (OpenStreetMap) is the default. The
+      // switcher UI is rendered in React (see the overlay buttons below).
+      const layers: Record<LayerId, TileLayer> = {
+        streets: L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+          maxZoom: 19,
+        }),
+        simple: L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", {
+          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
+          subdomains: "abcd",
+          maxZoom: 20,
+        }),
+        satellite: L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
+          attribution: "Imagery &copy; <a href=\"https://www.esri.com\">Esri</a>, Maxar, Earthstar Geographics",
+          maxZoom: 19,
+        }),
+        terrain: L.tileLayer("https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png", {
+          attribution: 'Map data: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>, SRTM | &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (CC-BY-SA)',
+          subdomains: "abc",
+          maxZoom: 17,
+        }),
+      };
+      layersRef.current = layers;
+      tileRef.current = layers.streets;
+      layers.streets.addTo(map);
       map.on("click", (event: LeafletMouseEvent) => placeMarker(event.latlng.lat, event.latlng.lng));
       mapRef.current = map;
       if (isValidLocation(initial)) placeMarker(initial.lat, initial.lng);
@@ -136,9 +170,20 @@ export function LocationPickerModal({ initial, defaultCenter, onSelect }: Locati
       mapRef.current = null;
       markerRef.current = null;
       tileRef.current = null;
+      layersRef.current = null;
     };
     // Intentionally run once; `initial`/`defaultCenter` only seed the first render.
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const selectLayer = useCallback((id: LayerId) => {
+    const map = mapRef.current;
+    const layers = layersRef.current;
+    if (!map || !layers) return;
+    if (tileRef.current && map.hasLayer(tileRef.current)) map.removeLayer(tileRef.current);
+    layers[id].addTo(map);
+    tileRef.current = layers[id];
+    setActiveLayer(id);
   }, []);
 
   const useMyLocation = useCallback(() => {
@@ -221,36 +266,30 @@ export function LocationPickerModal({ initial, defaultCenter, onSelect }: Locati
   }, [picked, onSelect, closeModal]);
 
   return (
-    <ModalContent className="px-0 py-0" dismissible={false}>
-      <div className="sr-only">
-        <ModalHeader>
-          <ModalTitle>{t("title")}</ModalTitle>
-          <ModalDescription>{t("description")}</ModalDescription>
-        </ModalHeader>
-      </div>
-      <div className="px-5 pt-5">
+    <ModalContent className="space-y-4" dismissible={false}>
+      <ModalHeader>
         <div className="flex items-start justify-between gap-3">
-          <h2 className="font-instrument text-xl font-medium italic tracking-[-0.02em] text-foreground">{t("title")}</h2>
+          <ModalTitle>{t("title")}</ModalTitle>
           <Button
             type="button"
-            variant="ghost"
+            variant="secondary"
             size="icon-sm"
             onClick={closeModal}
             aria-label={t("close")}
-            className="-mr-2 -mt-1 rounded-full text-muted-foreground hover:text-foreground"
+            className="-mr-1 -mt-1 rounded-full"
           >
             <XIcon className="size-4" />
           </Button>
         </div>
-        <p className="mt-1 text-sm leading-6 text-muted-foreground">{t("description")}</p>
-      </div>
-      <div className="relative mt-4 w-full">
+        <ModalDescription>{t("description")}</ModalDescription>
+      </ModalHeader>
+      <div className="relative w-full">
         {!ready && (
-          <div className="absolute inset-0 z-[1] flex items-center justify-center bg-muted">
+          <div className="absolute inset-0 z-[1] flex items-center justify-center rounded-xl bg-muted">
             <Loader2Icon className="animate-spin text-muted-foreground" />
           </div>
         )}
-        <div ref={elRef} className="h-[420px] w-full" style={{ zIndex: 0 }} />
+        <div ref={elRef} className="h-[420px] w-full overflow-hidden rounded-xl" style={{ zIndex: 0 }} />
         {stack.length > 1 && (
           <Button
             className="absolute left-3 top-3 z-[2] rounded-full"
@@ -272,16 +311,40 @@ export function LocationPickerModal({ initial, defaultCenter, onSelect }: Locati
           {locating ? <Loader2Icon className="size-4 animate-spin" /> : <LocateFixedIcon className="size-4" />}
           {t("useMyLocation")}
         </Button>
+        {ready && (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="absolute bottom-3 left-3 z-[2] bg-background/90 shadow-sm backdrop-blur"
+              >
+                <LayersIcon className="size-4" />
+                {t(LAYER_OPTIONS.find((option) => option.id === activeLayer)?.labelKey ?? "layerStreets")}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" side="top" className="z-[1000]">
+              <DropdownMenuRadioGroup value={activeLayer} onValueChange={(value) => selectLayer(value as LayerId)}>
+                {LAYER_OPTIONS.map((option) => (
+                  <DropdownMenuRadioItem key={option.id} value={option.id}>
+                    {t(option.labelKey)}
+                  </DropdownMenuRadioItem>
+                ))}
+              </DropdownMenuRadioGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
       </div>
-      <div className="flex items-center gap-2 px-5 pt-3 text-sm text-muted-foreground">
+      <div className="flex items-center gap-2 text-sm text-muted-foreground">
         <MapPinIcon className={`size-4 shrink-0 ${picked ? "text-primary" : "text-muted-foreground/50"}`} />
         {picked ? (
           <span className="tabular-nums">{t("picked", { lat: picked.lat, lng: picked.lng })}</span>
         ) : (
           <span>{t("hint")}</span>
         )}
+        {geoError ? <span className="ml-auto text-xs text-destructive">{geoError}</span> : null}
       </div>
-      {geoError ? <p className="px-5 pt-1.5 text-xs text-destructive">{geoError}</p> : null}
       <ModalFooter>
         <Button type="button" variant="outline" onClick={closeModal}>
           {t("cancel")}
