@@ -115,6 +115,10 @@ const QUERY_STATE_OPTIONS = { history: "replace", scroll: false, shallow: true }
 // disappear first on narrower screens.
 const ROW_GRID =
   "grid items-center gap-x-3 grid-cols-[1.5rem_2.5rem_minmax(0,1fr)_6.5rem] md:grid-cols-[1.5rem_2.5rem_minmax(0,1.7fr)_6.5rem_minmax(0,1.15fr)_6.5rem] lg:grid-cols-[1.5rem_2.5rem_minmax(0,1.5fr)_6.5rem_minmax(0,1fr)_5.5rem_minmax(0,0.85fr)_6.5rem] xl:grid-cols-[1.5rem_2.5rem_minmax(0,1.45fr)_6.5rem_minmax(0,1fr)_5.5rem_minmax(0,0.85fr)_5.5rem_6.5rem]";
+// How long a freshly uploaded row lingers in its green "Uploaded" state before
+// it animates out, and how long that exit animation runs.
+const UPLOADED_LINGER_MS = 850;
+const ROW_EXIT_MS = 350;
 const MAX_IMAGE_BYTES = 4 * 1024 * 1024;
 // Hard ceiling on how many images one add session can hold, to keep the browser
 // (and the per-photo PDS writes) from being overwhelmed.
@@ -745,6 +749,11 @@ function ObservationBulkAddPanel({
   const [isPreparing, setIsPreparing] = useState(false);
   const [isBulkUploading, setIsBulkUploading] = useState(false);
   const [uploadProgressIds, setUploadProgressIds] = useState<Set<string>>(() => new Set());
+  // A frozen snapshot of the counts shown in the status bar during an upload
+  // run. Once the user clicks "Upload", the totals stay put even as uploaded
+  // rows animate away, so the displayed total never appears to shrink. Cleared
+  // a moment after the run settles, when the counts can safely reflect reality.
+  const [uploadSession, setUploadSession] = useState<{ total: number; uploaded: number; uploadableTotal: number } | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   // The mandatory observation location chosen before any image can be added.
@@ -761,6 +770,9 @@ function ObservationBulkAddPanel({
   const draftLoadedRef = useRef(false);
   // Counts enter/leave events so nested children don't flicker the drop overlay.
   const dragDepth = useRef(0);
+  // Pending row-removal / navigation timeouts, cleared on unmount so they never
+  // fire against a torn-down component.
+  const pendingTimers = useRef<Set<number>>(new Set());
   const hasLocation = isValidLocation(chosenLocation);
 
   useEffect(() => {
@@ -864,10 +876,32 @@ function ObservationBulkAddPanel({
   }, [target.did]);
 
   useEffect(() => {
+    const timers = pendingTimers.current;
     return () => {
       for (const item of itemsRef.current) URL.revokeObjectURL(item.previewUrl);
+      for (const timer of timers) window.clearTimeout(timer);
     };
   }, []);
+
+  function scheduleTimer(fn: () => void, delay: number) {
+    const id = window.setTimeout(() => {
+      pendingTimers.current.delete(id);
+      fn();
+    }, delay);
+    pendingTimers.current.add(id);
+  }
+
+  // Drop fully-uploaded rows from state (and revoke their previews). Removing
+  // them from `items` also drops them from the persisted draft on the next save,
+  // so they never reappear on reload.
+  function dropItems(ids: Set<string>) {
+    setItems((current) => {
+      for (const item of current) {
+        if (ids.has(item.id)) URL.revokeObjectURL(item.previewUrl);
+      }
+      return current.filter((candidate) => !ids.has(candidate.id));
+    });
+  }
 
   function openLocationPicker(opts: { initial?: PickedLocation | null; onSelect: (location: PickedLocation) => void }) {
     modal.pushModal(
@@ -919,13 +953,22 @@ function ObservationBulkAddPanel({
   const uploadedCount = items.filter((item) => item.status === "uploaded").length;
   const uploadableCount = items.filter(itemCanUpload).length;
   const analyzingCount = items.filter((item) => item.status === "analyzing").length;
-  const uploadProgressItems = uploadProgressIds.size > 0 ? items.filter((item) => uploadProgressIds.has(item.id)) : [];
+  // While an upload run is in flight the status bar reads from the frozen
+  // snapshot so the totals never shrink as uploaded rows animate away; otherwise
+  // it tracks the live counts.
+  const displayTotal = uploadSession ? uploadSession.total : items.length;
+  const displayUploaded = uploadSession ? uploadSession.uploaded : uploadedCount;
+  const displayUploadableTotal = uploadSession ? uploadSession.uploadableTotal : uploadableCount;
+  // The set of items in the current run is frozen at upload time, so its size is
+  // a stable denominator even after uploaded rows are removed from `items`.
+  const runSize = uploadProgressIds.size;
+  const uploadProgressItems = runSize > 0 ? items.filter((item) => uploadProgressIds.has(item.id)) : [];
   const uploadFailedCount = uploadProgressItems.filter((item) => item.status === "uploadError").length;
   // Keep the bar visible after the run finishes when some uploads failed, so the
   // failed share can be shown in red (the all-success case navigates away).
-  const showUploadProgress = uploadProgressItems.length > 0 && (isBulkUploading || uploadFailedCount > 0);
-  const overallProgress = uploadProgressItems.length > 0 ? Math.round(uploadProgressItems.reduce((sum, item) => sum + item.progress, 0) / uploadProgressItems.length) : 0;
-  const failedProgress = uploadProgressItems.length > 0 ? Math.round((uploadFailedCount / uploadProgressItems.length) * 100) : 0;
+  const showUploadProgress = runSize > 0 && (isBulkUploading || uploadFailedCount > 0);
+  const overallProgress = displayTotal > 0 ? Math.round((displayUploaded / displayTotal) * 100) : 0;
+  const failedProgress = runSize > 0 ? Math.round((uploadFailedCount / runSize) * 100) : 0;
   const groups = observationGroups(items);
   const allEditableSelected = editableItems.length > 0 && selectedEditableItems.length === editableItems.length;
   const someEditableSelected = selectedEditableItems.length > 0 && !allEditableSelected;
@@ -1293,23 +1336,44 @@ function ObservationBulkAddPanel({
       return;
     }
     const selectedIds = new Set(readySelectedItems.map((item) => item.id));
+    // Collapse every expanded row and freeze the status-bar counts for the run.
+    setExpandedId(null);
     setUploadProgressIds(selectedIds);
     setIsBulkUploading(true);
+    setUploadSession({
+      total: items.length,
+      uploaded: items.filter((item) => item.status === "uploaded").length,
+      uploadableTotal: uploadableCount,
+    });
     try {
       const groupIds = Array.from(new Set(readySelectedItems.map((item) => item.groupId)));
       const created: OccurrenceRecord[] = [];
       for (const groupId of groupIds) {
         const record = await uploadGroup(groupId, selectedIds);
         if (record) created.push(record);
+        // The group's rows now read as "uploaded" — count them toward the frozen
+        // progress, then let them linger green before animating out.
+        const justUploaded = itemsRef.current
+          .filter((item) => item.groupId === groupId && selectedIds.has(item.id) && item.status === "uploaded")
+          .map((item) => item.id);
+        if (justUploaded.length > 0) {
+          const ids = new Set(justUploaded);
+          setUploadSession((session) => session ? { ...session, uploaded: session.uploaded + ids.size } : session);
+          scheduleTimer(() => dropItems(ids), UPLOADED_LINGER_MS);
+        }
       }
       // Surface the new observations in the list right away (the indexer lags).
       if (created.length > 0) onUploaded([...created].reverse());
       // Mirror the audio flow: once everything is uploaded, clear the saved draft
-      // and return to the list.
+      // and return to the list — but only after the green rows have animated out.
       const remaining = itemsRef.current;
       if (remaining.length > 0 && remaining.every((item) => item.status === "uploaded")) {
         void clearDraft(target.did);
-        onBack();
+        scheduleTimer(onBack, UPLOADED_LINGER_MS + ROW_EXIT_MS);
+      } else {
+        // Some rows remain (failed or unselected): thaw the counts once the
+        // uploaded rows have gone so the bar reflects what is actually left.
+        scheduleTimer(() => setUploadSession(null), UPLOADED_LINGER_MS + ROW_EXIT_MS);
       }
     } finally {
       setIsBulkUploading(false);
@@ -1387,7 +1451,7 @@ function ObservationBulkAddPanel({
 
         {!hasLocation ? (
           <LocationStep onChoose={chooseObservationLocation} />
-        ) : items.length === 0 ? (
+        ) : items.length === 0 && !uploadSession ? (
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
@@ -1413,10 +1477,10 @@ function ObservationBulkAddPanel({
                   ) : (
                     <>
                       <p className="text-sm font-medium text-foreground">
-                        {t("uploadedCount", { uploaded: uploadedCount, total: items.length })}
+                        {t("uploadedCount", { uploaded: displayUploaded, total: displayTotal })}
                       </p>
                       <p className="text-xs leading-5 text-muted-foreground">
-                        {t("selectedCount", { selected: readySelectedItems.length, total: uploadableCount })}
+                        {t("selectedCount", { selected: readySelectedItems.length, total: displayUploadableTotal })}
                         <span className="mx-1.5 text-muted-foreground/50">·</span>
                         {t("mediaGroupHint")}
                       </p>
@@ -1457,6 +1521,7 @@ function ObservationBulkAddPanel({
                   }}
                 />
                 <div className="divide-y divide-border/60">
+                  <AnimatePresence initial={false}>
                   {groups.map((group, index) => (
                     <ObservationListItem
                       key={group.id}
@@ -1464,7 +1529,10 @@ function ObservationBulkAddPanel({
                       groups={groups}
                       index={index}
                       expanded={group.id === expandedId}
-                      onToggleExpanded={() => setExpandedId((current) => (current === group.id ? null : group.id))}
+                      onToggleExpanded={() => {
+                        if (isBulkUploading) return;
+                        setExpandedId((current) => (current === group.id ? null : group.id));
+                      }}
                       onAnalysisChange={updateAnalysis}
                       onToggleSelected={(checked) => {
                         const groupItemIds = new Set(group.items.map((item) => item.id));
@@ -1476,6 +1544,7 @@ function ObservationBulkAddPanel({
                       onChangeLocation={changeItemLocation}
                     />
                   ))}
+                  </AnimatePresence>
                 </div>
               </div>
             </div>
@@ -1636,6 +1705,7 @@ function ObservationListItem({
   const showAnalysis = group.items.some((candidate) => candidate.status === "ready" || candidate.status === "uploading" || candidate.status === "uploaded" || candidate.status === "uploadError");
   const canEdit = group.items.some((candidate) => candidate.status === "ready" || candidate.status === "uploadError");
   const primaryStatus = groupStatus(group.items);
+  const isUploaded = primaryStatus === "uploaded";
   const retryItem = group.items.find((candidate) => candidate.status === "error");
 
   const isUnidentified = isUnidentifiedScientificName(analysis.scientificName);
@@ -1658,10 +1728,25 @@ function ObservationListItem({
   return (
     <motion.div
       initial={{ opacity: 0, y: 6 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1], delay: Math.min(index * 0.03, 0.18) }}
-      className={`group/row relative transition-colors ${expanded ? "bg-primary/[0.045]" : item.selected ? "bg-primary/[0.025]" : "hover:bg-muted/40"}`}
+      animate={{ opacity: 1, y: 0, transition: { duration: 0.25, ease: [0.25, 0.1, 0.25, 1], delay: Math.min(index * 0.03, 0.18) } }}
+      exit={{ opacity: 0, height: 0, transition: { duration: ROW_EXIT_MS / 1000, ease: [0.25, 0.1, 0.25, 1] } }}
+      className={`group/row relative transition-colors duration-300 ${isUploaded ? "overflow-hidden bg-primary text-primary-foreground" : expanded ? "bg-primary/[0.045]" : item.selected ? "bg-primary/[0.025]" : "hover:bg-muted/40"}`}
     >
+      {isUploaded ? (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.25, ease: "easeOut" }}
+          className="flex items-center gap-3 px-3 py-3.5"
+        >
+          <span className="grid size-9 shrink-0 place-items-center rounded-full bg-primary-foreground/15">
+            <CheckCircle2Icon className="size-5" />
+          </span>
+          <span className="min-w-0 flex-1 truncate text-sm font-semibold">{organism}</span>
+          <span className="shrink-0 text-sm font-semibold">{t("status.uploaded")}</span>
+        </motion.div>
+      ) : (
+      <>
       {expanded ? <span aria-hidden className="absolute inset-y-0 left-0 w-[3px] bg-primary" /> : null}
       <div className={`${ROW_GRID} gap-y-1 px-3 py-2`}>
         <Checkbox
@@ -1774,6 +1859,8 @@ function ObservationListItem({
           </motion.div>
         ) : null}
       </AnimatePresence>
+      </>
+      )}
     </motion.div>
   );
 }
