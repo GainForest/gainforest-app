@@ -266,7 +266,29 @@
       "openFile": "Buka berkas",
       "downloadFile": "Unduh berkas",
       "previewUnavailable": "Berkas ini tidak dapat dipratinjau di sini.",
-      "unresolvedReferenceBody": "Bukti tertaut ini belum dapat dimuat."
+      "unresolvedReferenceBody": "Bukti tertaut ini belum dapat dimuat.",
+      "preparingFile": "Menyiapkan…",
+      "documentPreviewLoading": "Memuat pratinjau berkas…",
+      "documentPreviewPdfError": "PDF tidak dapat disiapkan untuk pratinjau.",
+      "documentPreviewPdfUnavailable": "PDF ini dapat dibuka atau diunduh, tetapi tidak dapat dipratinjau di sini.",
+      "documentPreviewEmpty": "{title} kosong.",
+      "documentPreviewTruncated": "Pratinjau dipersingkat. Buka atau unduh berkas untuk melihat semuanya.",
+      "documentPreviewTextError": "Teks berkas tidak dapat dimuat di sini.",
+      "documentPreviewTextUnavailable": "Berkas ini dapat dibuka atau diunduh, tetapi tidak dapat dipratinjau di sini.",
+      "documentPreviewHtmlError": "Berkas halaman web tidak dapat dimuat di sini.",
+      "documentPreviewHtmlUnavailable": "Berkas halaman web ini dapat dibuka atau diunduh, tetapi tidak dapat dipratinjau di sini.",
+      "documentPreviewUnsupported": "Jenis berkas ini dikenali, tetapi tidak dapat dipratinjau di sini. Buka atau unduh berkas untuk melihatnya.",
+      "documentFormats": {
+        "pdf": "Berkas PDF",
+        "text": "Berkas teks",
+        "markdown": "Berkas Markdown",
+        "html": "Berkas halaman web",
+        "rtf": "Berkas RTF",
+        "word": "Berkas Word",
+        "spreadsheet": "Lembar kerja",
+        "presentation": "Presentasi",
+        "document": "Dokumen"
+      }
     },
     "reference": {
       "linkedRecord": "Catatan tertaut",

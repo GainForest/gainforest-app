@@ -17,33 +17,16 @@ import {
   ATTACHMENT_MAX_FILE_BYTES,
   type AttachmentDraft,
 } from "../contextAttachmentMutations";
+import {
+  getFilePickerEvidenceContentTypeOptions,
+  type FilePickerEvidenceContentType,
+} from "../shared/evidenceContentTypeRegistry";
 import { formatFileSize, toFileKey } from "./fileUtils";
 import { OptionalNote } from "./OptionalNote";
 import { SubmitButton } from "./SubmitButton";
 import type { EvidenceSubmitter } from "./types";
 
-type KnownFileContentType =
-  | "document"
-  | "report"
-  | "evidence"
-  | "testimonial"
-  | "methodology"
-  | "photo"
-  | "video"
-  | "audio"
-  | "other";
-
-const FILE_CONTENT_TYPES: KnownFileContentType[] = [
-  "document",
-  "report",
-  "evidence",
-  "testimonial",
-  "methodology",
-  "photo",
-  "video",
-  "audio",
-  "other",
-];
+const FILE_CONTENT_TYPE_OPTIONS = getFilePickerEvidenceContentTypeOptions();
 
 export function FileEvidencePicker({
   isSubmitting,
@@ -54,7 +37,7 @@ export function FileEvidencePicker({
 }) {
   const evidenceT = useTranslations("bumicert.detail.evidenceAdder");
   const [selectedContentType, setSelectedContentType] =
-    useState<KnownFileContentType>("document");
+    useState<FilePickerEvidenceContentType>("document");
   const [files, setFiles] = useState<File[]>([]);
   const [links, setLinks] = useState<string[]>([]);
   const [linkInput, setLinkInput] = useState("");
@@ -64,14 +47,17 @@ export function FileEvidencePicker({
   const contentTypeLabelId = useId();
   const externalLinkInputId = useId();
   const externalLinkHelpId = `${externalLinkInputId}-help`;
-  const contentTypeLabels: Record<KnownFileContentType, string> = {
+  const contentTypeLabels: Record<FilePickerEvidenceContentType, string> = {
     document: evidenceT("contentTypes.document"),
     report: evidenceT("contentTypes.report"),
+    audit: evidenceT("contentTypes.audit"),
     evidence: evidenceT("contentTypes.evidence"),
     testimonial: evidenceT("contentTypes.testimonial"),
     methodology: evidenceT("contentTypes.methodology"),
     photo: evidenceT("contentTypes.photo"),
     video: evidenceT("contentTypes.video"),
+    dataset: evidenceT("contentTypes.dataset"),
+    certificate: evidenceT("contentTypes.certificate"),
     audio: evidenceT("contentTypes.audio"),
     other: evidenceT("contentTypes.other"),
   };
@@ -132,7 +118,7 @@ export function FileEvidencePicker({
           <Select
             value={selectedContentType}
             onValueChange={(value) =>
-              setSelectedContentType(value as KnownFileContentType)
+              setSelectedContentType(value as FilePickerEvidenceContentType)
             }
             disabled={isSubmitting}
           >
@@ -140,9 +126,9 @@ export function FileEvidencePicker({
               <SelectValue placeholder={evidenceT("selectContentType")} />
             </SelectTrigger>
             <SelectContent>
-              {FILE_CONTENT_TYPES.map((value) => (
-                <SelectItem key={value} value={value}>
-                  {contentTypeLabels[value]}
+              {FILE_CONTENT_TYPE_OPTIONS.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {contentTypeLabels[option.value]}
                 </SelectItem>
               ))}
             </SelectContent>

@@ -266,7 +266,29 @@
       "openFile": "Open file",
       "downloadFile": "Download file",
       "previewUnavailable": "This file cannot be previewed here.",
-      "unresolvedReferenceBody": "This linked evidence could not be loaded yet."
+      "unresolvedReferenceBody": "This linked evidence could not be loaded yet.",
+      "preparingFile": "Preparing…",
+      "documentPreviewLoading": "Loading file preview…",
+      "documentPreviewPdfError": "The PDF could not be prepared for preview.",
+      "documentPreviewPdfUnavailable": "This PDF can be opened or downloaded, but it cannot be previewed here.",
+      "documentPreviewEmpty": "{title} is empty.",
+      "documentPreviewTruncated": "Preview shortened. Open or download the file to see everything.",
+      "documentPreviewTextError": "The file text could not be loaded here.",
+      "documentPreviewTextUnavailable": "This file can be opened or downloaded, but it cannot be previewed here.",
+      "documentPreviewHtmlError": "The web page file could not be loaded here.",
+      "documentPreviewHtmlUnavailable": "This web page file can be opened or downloaded, but it cannot be previewed here.",
+      "documentPreviewUnsupported": "This file type is recognized, but it cannot be previewed here. Open or download the file to view it.",
+      "documentFormats": {
+        "pdf": "PDF file",
+        "text": "Text file",
+        "markdown": "Markdown file",
+        "html": "Web page file",
+        "rtf": "RTF file",
+        "word": "Word file",
+        "spreadsheet": "Spreadsheet",
+        "presentation": "Presentation",
+        "document": "Document"
+      }
     },
     "reference": {
       "linkedRecord": "Linked record",

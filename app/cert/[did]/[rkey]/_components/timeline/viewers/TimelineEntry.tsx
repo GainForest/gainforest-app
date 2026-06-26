@@ -18,6 +18,7 @@ import type { TimelineEntryViewModel } from "../shared/timelineViewModel";
 import { getTimelineDeleteControlState } from "../shared/timelineDeleteControls";
 import { TimelineDeleteConfirm } from "./shared/TimelineDeleteConfirm";
 import { TimelineDatasetMapLayerCards } from "./shared/TimelineDatasetMapLayerCards";
+import { TimelineOptionalNote } from "./shared/TimelineOptionalNote";
 import { TimelinePreviewPanel } from "./shared/TimelinePreviewPanel";
 import { TimelineTileRow } from "./shared/TimelineTileRow";
 import type { TimelineMapLayer } from "./shared/timelineMapLayers";
@@ -36,18 +37,6 @@ type MetricCopy = {
 function cleanText(value: string | null | undefined): string | null {
   const text = value?.trim();
   return text ? text : null;
-}
-
-function noteFromDescription(description: unknown): string | null {
-  if (!description || typeof description !== "object") return null;
-  const record = description as Record<string, unknown>;
-  if (
-    record.$type === "org.hypercerts.defs#descriptionString" &&
-    typeof record.value === "string"
-  ) {
-    return cleanText(record.value);
-  }
-  return null;
 }
 
 function kindLabel(kind: TimelineEvidenceKind, labels: EntryKindLabels): string {
@@ -199,7 +188,6 @@ export function TimelineEntry({
     entry.refs,
     entryT("notSpecified"),
   );
-  const note = noteFromDescription(entry.item.record.description);
   const mapHref = entry.refs.find((ref) => ref.mapHref)?.mapHref ?? null;
   const previewTiles = useMemo(
     () =>
@@ -329,11 +317,7 @@ export function TimelineEntry({
 
       {expanded ? (
         <div id={panelId} className="space-y-3 border-t border-border/50 p-4 pt-3">
-          {note ? (
-            <div className="rounded-xl bg-muted/20 px-3 py-2 text-sm leading-6 text-foreground/80">
-              {note}
-            </div>
-          ) : null}
+          <TimelineOptionalNote note={entry.item.record.description} />
           {deleteControl.showDeniedMessage ? (
             <p className="rounded-xl border border-warn/20 bg-warn/10 px-3 py-2 text-xs text-warn">
               {deleteControl.disabledReason}
