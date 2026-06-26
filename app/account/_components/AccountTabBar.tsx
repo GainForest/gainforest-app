@@ -114,7 +114,7 @@ function buildTabs(
 
   const tabs: Tab[] = [
     {
-      labelKey: "home",
+      labelKey: "overview",
       href: paths.home,
       icon: HomeIcon,
       exact: true,

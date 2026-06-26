@@ -918,6 +918,20 @@ export function ManageDashboardClient({
   return (
     <>
       <Container className="space-y-6 pt-4 pb-12">
+        {account.kind === "organization" ? (
+          <AboutSection
+            value={editLongDescription}
+            draft={editLongDescription}
+            isEditing={inlineField === "about"}
+            isSaving={isSaving}
+            saveError={inlineField === "about" ? saveError : null}
+            onEdit={() => { setSaveError(null); setInlineField("about"); }}
+            onChange={setEditLongDescription}
+            onSave={() => void saveChanges({ longDescription: editLongDescription })}
+            onCancel={() => { setEditLongDescription((pendingOptimisticSave?.state ?? accountState).longDescription); setSaveError(null); setInlineField(null); }}
+            editDisabledReason={profileEditPermission.reason}
+          />
+        ) : null}
         <EditableHero
           account={account}
           basePath={basePath}
@@ -941,18 +955,6 @@ export function ManageDashboardClient({
         />
         {account.kind === "organization" ? (
           <>
-            <AboutSection
-              value={editLongDescription}
-              draft={editLongDescription}
-              isEditing={inlineField === "about"}
-              isSaving={isSaving}
-              saveError={inlineField === "about" ? saveError : null}
-              onEdit={() => { setSaveError(null); setInlineField("about"); }}
-              onChange={setEditLongDescription}
-              onSave={() => void saveChanges({ longDescription: editLongDescription })}
-              onCancel={() => { setEditLongDescription((pendingOptimisticSave?.state ?? accountState).longDescription); setSaveError(null); setInlineField(null); }}
-              editDisabledReason={profileEditPermission.reason}
-            />
             {children}
             {writeRepoDid && groupRole ? (
               <GroupMembers
