@@ -1192,7 +1192,9 @@ function Header({
               ) : null}
             </AnimatePresence>
             <GlobalSearch />
-            <LanguageSelector />
+            {/* Signed-in users get the language picker inside their account
+                menu (above Settings); signed-out users keep it in the bar. */}
+            {authSession?.isLoggedIn === false ? <LanguageSelector /> : null}
             <AuthButton
               session={authSession}
               profileName={profileName}

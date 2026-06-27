@@ -8,7 +8,6 @@ import {
   ArrowRightIcon,
   BinocularsIcon,
   CheckIcon,
-  ChevronDownIcon,
   ChevronRightIcon,
   DroneIcon,
   FolderKanbanIcon,
@@ -49,6 +48,7 @@ import {
 import type { AuthSession } from "../_lib/auth";
 import { buildLoginUrl, redirectToLogout } from "../_lib/auth-client";
 import { Button } from "@/components/ui/button";
+import { AccountMenuLanguageOptions } from "@/components/i18n/AccountMenuLanguageOptions";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { ModalContent, ModalDescription, ModalTitle } from "@/components/ui/modal/modal";
 import { useModal } from "@/components/ui/modal/context";
@@ -475,13 +475,10 @@ export function SignInPrompt({ collapsed = false }: { collapsed?: boolean }) {
 }
 
 function AuthSkeleton() {
-  // Mirrors the resolved AuthenticatedMenu trigger: gap-2 px-2 py-1 row with a
-  // round h-7 w-7 avatar, the sm-only name label, and the sm-only chevron.
+  // Mirrors the resolved AuthenticatedMenu trigger: a single round avatar.
   return (
-    <div className="flex items-center gap-2 px-2 py-1">
-      <div className="skeleton h-7 w-7 rounded-full" />
-      <div className="skeleton hidden h-3.5 w-20 rounded sm:block" />
-      <div className="skeleton hidden h-3.5 w-3.5 rounded sm:block" />
+    <div className="flex items-center p-1">
+      <div className="skeleton h-8 w-8 rounded-full" />
     </div>
   );
 }
@@ -682,6 +679,7 @@ function AuthenticatedMenu({
   const { personal: personalCard, groups, status: groupsStatus, reload } = useAccountList(session.did);
   const [activeContext, setActiveContext] = useActiveAccountContext(session.did);
   const t = useTranslations("legacy");
+  const authT = useTranslations("common.auth");
   const invitationT = useTranslations("common.groupInvitations.menu");
   const sidebarT = useTranslations("common.sidebar");
   const cleanProfileName = profileName?.trim() || personalCard?.displayName?.trim() || null;
@@ -813,21 +811,16 @@ function AuthenticatedMenu({
 
   return (
     <div ref={containerRef} className="relative" onBlur={handleBlur}>
-      <Button type="button" variant="ghost" className="px-2" onClick={() => setOpen((value) => !value)}>
-        <AccountDot avatarUrl={triggerAvatarUrl} label={displayLabel} icon={triggerIcon} className="h-7 w-7" imageSizes="28px" />
-
-        <span className="hidden max-w-[120px] truncate sm:block">
-          {displayLabel}
-        </span>
-
-        <motion.span
-          className="hidden sm:block"
-          animate={{ rotate: open ? 180 : 0 }}
-          transition={{ duration: 0.2 }}
-        >
-          <ChevronDownIcon className="size-3.5 text-muted-foreground" />
-        </motion.span>
-      </Button>
+      <button
+        type="button"
+        onClick={() => setOpen((value) => !value)}
+        aria-label={displayLabel}
+        aria-expanded={open}
+        aria-haspopup="menu"
+        className="rounded-full p-0.5 ring-1 ring-border transition-shadow hover:ring-primary/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+      >
+        <AccountDot avatarUrl={triggerAvatarUrl} label={displayLabel} icon={triggerIcon} className="h-8 w-8" imageSizes="32px" />
+      </button>
 
       <AnimatePresence>
         {open && (
@@ -979,13 +972,17 @@ function AuthenticatedMenu({
                 />
               ))}
 
+              <div className="my-2 h-px bg-border/60" />
+
+              <AccountMenuLanguageOptions onSelect={() => setOpen(false)} />
+
               <Link
                 href={settingsGroupIdentifier ? manageHref({ basePath: groupManageBasePath(settingsGroupIdentifier) }, "settings") : manageHref({ basePath: "/manage" }, "settings")}
                 onClick={() => setOpen(false)}
                 className="flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm text-foreground transition-colors hover:bg-muted/60"
               >
                 <SettingsIcon className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-                Settings
+                {authT("settings")}
               </Link>
 
               <div className="my-2 h-px bg-border/60" />
@@ -995,7 +992,7 @@ function AuthenticatedMenu({
                 className="flex w-full cursor-pointer items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-sm text-red-500 transition-colors hover:bg-red-50 dark:hover:bg-red-950/30"
               >
                 <LogOutIcon className="h-3.5 w-3.5 shrink-0" />
-                Sign out
+                {authT("signOut")}
               </button>
             </div>
           </motion.div>
