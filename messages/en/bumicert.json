@@ -6,6 +6,9 @@
       "deleteHint": "Deleting removes this Cert for everyone.",
       "deleteConfirmTitle": "Delete Cert?",
       "deleteConfirmDescription": "This permanently removes “{title}”. This action cannot be undone.",
+      "deleteConfirmPrompt": "To confirm, type the Cert name exactly as shown:",
+      "deleteConfirmInputAria": "Type the Cert name to confirm deletion",
+      "deleteConfirmMismatch": "The name doesn’t match yet.",
       "deleteConfirmCancel": "Cancel",
       "deleteConfirmConfirm": "Delete Cert",
       "deleteError": "This Cert could not be deleted. Please try again."

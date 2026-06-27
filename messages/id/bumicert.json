@@ -6,6 +6,9 @@
       "deleteHint": "Menghapus akan menghilangkan sertifikat ini untuk semua orang.",
       "deleteConfirmTitle": "Hapus sertifikat?",
       "deleteConfirmDescription": "Ini akan menghapus “{title}” secara permanen. Tindakan ini tidak dapat dibatalkan.",
+      "deleteConfirmPrompt": "Untuk mengonfirmasi, ketik nama sertifikat persis seperti yang ditampilkan:",
+      "deleteConfirmInputAria": "Ketik nama sertifikat untuk mengonfirmasi penghapusan",
+      "deleteConfirmMismatch": "Nama belum cocok.",
       "deleteConfirmCancel": "Batal",
       "deleteConfirmConfirm": "Hapus sertifikat",
       "deleteError": "Sertifikat ini tidak dapat dihapus. Silakan coba lagi."

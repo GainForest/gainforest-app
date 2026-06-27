@@ -6,6 +6,9 @@
       "deleteHint": "Excluir remove este certificado para todos.",
       "deleteConfirmTitle": "Excluir certificado?",
       "deleteConfirmDescription": "Isto removerá permanentemente “{title}”. Esta ação não pode ser desfeita.",
+      "deleteConfirmPrompt": "Para confirmar, digite o nome do certificado exatamente como mostrado:",
+      "deleteConfirmInputAria": "Digite o nome do certificado para confirmar a exclusão",
+      "deleteConfirmMismatch": "O nome ainda não corresponde.",
       "deleteConfirmCancel": "Cancelar",
       "deleteConfirmConfirm": "Excluir certificado",
       "deleteError": "Não foi possível excluir este certificado. Tente novamente."

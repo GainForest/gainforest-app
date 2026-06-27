@@ -6,6 +6,9 @@
       "deleteHint": "Kufuta huondoa cheti hiki kwa kila mtu.",
       "deleteConfirmTitle": "Futa cheti?",
       "deleteConfirmDescription": "Hii itaondoa “{title}” kabisa. Kitendo hiki hakiwezi kutenduliwa.",
+      "deleteConfirmPrompt": "Ili kuthibitisha, andika jina la cheti kama lilivyoonyeshwa:",
+      "deleteConfirmInputAria": "Andika jina la cheti ili kuthibitisha kufuta",
+      "deleteConfirmMismatch": "Jina bado halilingani.",
       "deleteConfirmCancel": "Ghairi",
       "deleteConfirmConfirm": "Futa cheti",
       "deleteError": "Cheti hiki hakikuweza kufutwa. Tafadhali jaribu tena."
