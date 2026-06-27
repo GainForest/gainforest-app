@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { BinocularsIcon, HeartIcon, ImageIcon, LeafIcon, MapPinIcon, TreePineIcon } from "lucide-react";
+import { BinocularsIcon, FolderKanbanIcon, HeartHandshakeIcon, ImageIcon, MapPinIcon, TreePineIcon } from "lucide-react";
 import BumicertIcon from "@/icons/BumicertIcon";
 import type { ReactNode } from "react";
 
@@ -47,8 +47,8 @@ function MedallionArt({ icon }: { icon: ReactNode }) {
 
 export const OVERVIEW_FOLDER_ART: Record<string, ReactNode> = {
   certs: <MedallionArt icon={<BumicertIcon className="size-4 text-primary/80" />} />,
-  donations: <MedallionArt icon={<HeartIcon className="size-4 text-primary/80" fill="currentColor" />} />,
-  projects: <CardArt header={<LeafIcon className="size-4 text-primary/80" />} lines={[7, 11]} />,
+  donations: <MedallionArt icon={<HeartHandshakeIcon className="size-4 text-primary/80" />} />,
+  projects: <CardArt header={<FolderKanbanIcon className="size-4 text-primary/80" />} lines={[7, 11]} />,
   gallery: (
     <div className="flex h-[52px] w-11 flex-col gap-1 rounded-lg border border-border/70 bg-background/85 p-1.5 shadow-md backdrop-blur-sm">
       <div className="flex h-6 w-full items-center justify-center rounded-md bg-primary/15">
