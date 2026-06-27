@@ -700,6 +700,15 @@ async function forwardMutationResponse(body: ForwardableMutationBody, did: strin
   const result = await upstream.json().catch(() => null);
   if (result) return Response.json(result, { status: upstream.status });
 
+  if (upstream.ok && body.operation === "deleteRecord") {
+    return Response.json({ success: true });
+  }
+
+  if (upstream.ok && body.operation === "putRecord") {
+    const repo = body.repo?.trim() || did;
+    return Response.json({ uri: `at://${repo}/${body.collection}/${body.rkey}`, cid: "", rkey: body.rkey });
+  }
+
   const fallback = isGroupScoped
     ? null
     : await runConfiguredPdsMutation(body, did).catch((error) => Response.json({ error: error instanceof Error ? error.message : String(error) }, { status: 502 }));
