@@ -2,7 +2,8 @@
 
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { BadgeIcon, LayoutGridIcon, ListIcon } from "lucide-react";
+import { LayoutGridIcon, ListIcon } from "lucide-react";
+import BumicertIcon from "@/icons/BumicertIcon";
 import Link from "next/link";
 import { useState } from "react";
 import {
@@ -46,7 +47,7 @@ export function AccountBumicertsGrid({ bumicerts, organizationIdentifier, organi
           0
         </span>
         <div className="flex items-center gap-2 mb-3">
-          <BadgeIcon className="h-4 w-4 text-primary" />
+          <BumicertIcon className="h-4 w-4 text-primary" />
           <span className="text-xs uppercase tracking-[0.15em] text-muted-foreground font-medium">
             No public Certs
           </span>

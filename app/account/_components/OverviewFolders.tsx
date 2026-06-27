@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { BadgeIcon, BinocularsIcon, HeartIcon, ImageIcon, LeafIcon, MapPinIcon, TreePineIcon } from "lucide-react";
+import { BinocularsIcon, HeartIcon, ImageIcon, LeafIcon, MapPinIcon, TreePineIcon } from "lucide-react";
+import BumicertIcon from "@/icons/BumicertIcon";
 import type { ReactNode } from "react";
 
 export type OverviewFolderTile = {
@@ -45,7 +46,7 @@ function MedallionArt({ icon }: { icon: ReactNode }) {
 }
 
 export const OVERVIEW_FOLDER_ART: Record<string, ReactNode> = {
-  certs: <MedallionArt icon={<BadgeIcon className="size-4 text-primary/80" />} />,
+  certs: <MedallionArt icon={<BumicertIcon className="size-4 text-primary/80" />} />,
   donations: <MedallionArt icon={<HeartIcon className="size-4 text-primary/80" fill="currentColor" />} />,
   projects: <CardArt header={<LeafIcon className="size-4 text-primary/80" />} lines={[7, 11]} />,
   gallery: (

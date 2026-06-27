@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { usePathname, useSearchParams } from "next/navigation";
-import { BadgeIcon, Building2Icon, FolderKanbanIcon, HeartIcon, HomeIcon, ImageIcon, LeafIcon, PaperclipIcon, SettingsIcon } from "lucide-react";
+import { Building2Icon, FolderKanbanIcon, HeartIcon, HomeIcon, ImageIcon, LeafIcon, PaperclipIcon, SettingsIcon } from "lucide-react";
+import BumicertIcon from "@/icons/BumicertIcon";
 import { stripLocaleFromPathname } from "@/lib/i18n/routing";
 import { cn } from "@/lib/utils";
 import type { AccountKind } from "../_lib/account-route";
@@ -88,7 +89,7 @@ function buildTabs(
   };
 
   if (accountKind === "user") {
-    const certsTab: Tab = { labelKey: "bumicerts", href: paths.bumicerts, icon: BadgeIcon, exact: false };
+    const certsTab: Tab = { labelKey: "bumicerts", href: paths.bumicerts, icon: BumicertIcon, exact: false };
     const projectsTab: Tab = { labelKey: "projects", href: paths.projects, icon: FolderKanbanIcon, exact: false };
     const organizationsTab: Tab = { labelKey: "organizations", href: paths.organizations, icon: Building2Icon, exact: false };
     const observationsTab: Tab = { labelKey: "observations", href: paths.activity, icon: LeafIcon, exact: false };
@@ -122,7 +123,7 @@ function buildTabs(
     {
       labelKey: "bumicerts",
       href: paths.bumicerts,
-      icon: BadgeIcon,
+      icon: BumicertIcon,
       exact: false,
     },
     {
