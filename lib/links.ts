@@ -126,13 +126,26 @@ export function groupManageTarget(options: {
   };
 }
 
+/**
+ * Maps an account manage base (/account/<id>/manage) to the public profile base
+ * (/account/<id>). Management now lives directly on the profile, so every
+ * in-app link targets the profile route instead of /manage. The bare "/manage"
+ * shim base (used by signed-out fallbacks that don't know the account yet) is
+ * left untouched so it can still redirect to sign-in.
+ */
+export function profileBasePath(target: Pick<ManageTarget, "basePath">): string {
+  const match = target.basePath.match(/^(\/account\/[^/]+)\/manage$/);
+  return match ? match[1] : target.basePath;
+}
+
 export function manageHref(
   target: Pick<ManageTarget, "basePath">,
   section: ManageSectionId = "home",
   query?: URLSearchParams | Record<string, string | number | boolean | null | undefined>,
 ): string {
   const suffix = SECTION_PATHS[section];
-  const path = suffix ? `${target.basePath}/${suffix}` : target.basePath;
+  const base = profileBasePath(target);
+  const path = suffix ? `${base}/${suffix}` : base;
   return appendQuery(path, query);
 }
 

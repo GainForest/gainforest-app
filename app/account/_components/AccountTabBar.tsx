@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { usePathname, useSearchParams } from "next/navigation";
-import { BinocularsIcon, Building2Icon, DroneIcon, FolderKanbanIcon, HeartHandshakeIcon, HomeIcon, ImageIcon, MapPinIcon, MicIcon, PaperclipIcon, SettingsIcon, TreePineIcon, UsersIcon } from "lucide-react";
+import { BinocularsIcon, Building2Icon, FolderKanbanIcon, HeartHandshakeIcon, HomeIcon, ImageIcon, MapPinIcon, PaperclipIcon, SettingsIcon, UsersIcon } from "lucide-react";
 import BumicertIcon from "@/icons/BumicertIcon";
 import { stripLocaleFromPathname } from "@/lib/i18n/routing";
 import { cn } from "@/lib/utils";
@@ -32,6 +32,12 @@ interface Tab {
   href: string;
   icon: React.ElementType;
   exact: boolean;
+  /**
+   * Extra route prefixes that should also mark this tab active — used so the
+   * Observations tab stays highlighted while you're on its Trees/Audio/Drone
+   * sub-views, which have their own routes.
+   */
+  matchPaths?: string[];
 }
 
 type AccountTabBarKind = "organization" | "user";
@@ -98,7 +104,14 @@ function buildTabs(
     const certsTab: Tab = { labelKey: "bumicerts", href: paths.bumicerts, icon: BumicertIcon, exact: false };
     const projectsTab: Tab = { labelKey: "projects", href: paths.projects, icon: FolderKanbanIcon, exact: false };
     const organizationsTab: Tab = { labelKey: "organizations", href: paths.organizations, icon: Building2Icon, exact: false };
-    const observationsTab: Tab = { labelKey: "observations", href: paths.activity, icon: BinocularsIcon, exact: false };
+    const observationsTab: Tab = {
+      labelKey: "observations",
+      href: paths.activity,
+      icon: BinocularsIcon,
+      exact: false,
+      // Trees / Audio / Drone are sub-views of Observations now.
+      matchPaths: scope === "account" ? [accountTreesPath(did), accountAudioPath(did), accountDronePath(did)] : undefined,
+    };
     const donationsTab: Tab = { labelKey: "donationHistory", href: paths.donations, icon: HeartHandshakeIcon, exact: false };
 
     // Public profile leads with a compact Overview, then Projects, Certs,
@@ -110,12 +123,7 @@ function buildTabs(
     // row. The only things that stay organization-only are Members + the Data
     // Council. The manage dashboard keeps its simpler order.
     const dataTabs: Tab[] = scope === "account" && showOrgData
-      ? [
-          { labelKey: "sites", href: accountSitesPath(did), icon: MapPinIcon, exact: false },
-          { labelKey: "trees", href: accountTreesPath(did), icon: TreePineIcon, exact: false },
-          { labelKey: "audio", href: accountAudioPath(did), icon: MicIcon, exact: false },
-          { labelKey: "drone", href: accountDronePath(did), icon: DroneIcon, exact: false },
-        ]
+      ? [{ labelKey: "sites", href: accountSitesPath(did), icon: MapPinIcon, exact: false }]
       : [];
     const tabs: Tab[] = scope === "account"
       ? [
@@ -158,15 +166,15 @@ function buildTabs(
       href: paths.activity,
       icon: BinocularsIcon,
       exact: false,
+      // Trees / Audio / Drone are sub-views of Observations now.
+      matchPaths: scope === "account" ? [accountTreesPath(did), accountAudioPath(did), accountDronePath(did)] : undefined,
     },
   ];
-  // Private org data + member tabs, shown only to managers on the profile.
+  // Private data + member tabs, shown only to managers on the profile. Trees,
+  // Audio and Drone are reached through the Observations sub-nav, not here.
   if (scope === "account" && showOrgData) {
     tabs.push(
       { labelKey: "sites", href: accountSitesPath(did), icon: MapPinIcon, exact: false },
-      { labelKey: "trees", href: accountTreesPath(did), icon: TreePineIcon, exact: false },
-      { labelKey: "audio", href: accountAudioPath(did), icon: MicIcon, exact: false },
-      { labelKey: "drone", href: accountDronePath(did), icon: DroneIcon, exact: false },
       { labelKey: "members", href: accountMembersPath(did), icon: UsersIcon, exact: false },
     );
   }
@@ -221,6 +229,7 @@ export function AccountTabBar({
       return currentTab ? currentTab === tabName : tab.href === tabs[0]?.href;
     }
 
+    if (tab.matchPaths?.some((path) => pathname === path || pathname.startsWith(`${path}/`))) return true;
     return tab.exact ? pathname === tab.href : pathname.startsWith(tab.href);
   }
 

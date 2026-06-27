@@ -40,6 +40,7 @@ import {
 import type { AuthSession } from "@/app/_lib/auth";
 import { AuthButton } from "@/app/_components/AuthFlow";
 import { localBumicertHref } from "@/app/_lib/urls";
+import { accountSitesPath } from "@/app/account/_lib/account-route";
 import { createRecord, uploadBlob } from "@/app/(manage)/manage/_lib/mutations";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -699,6 +700,7 @@ function NetworkStep({
   sitesStatus,
   sitesError,
   refreshSites,
+  sitesHref,
 }: {
   values: FormValues;
   setValues: React.Dispatch<React.SetStateAction<FormValues>>;
@@ -706,6 +708,7 @@ function NetworkStep({
   sitesStatus: SitesStatus;
   sitesError: string | null;
   refreshSites: () => void;
+  sitesHref: string;
 }) {
   const updateContributor = (index: number, value: string) => {
     setValues((current) => ({
@@ -781,7 +784,7 @@ function NetworkStep({
             </div>
           ) : sites.length === 0 ? (
             <div className="rounded-2xl border border-dashed border-border p-5 text-sm leading-6 text-muted-foreground">
-              No certified locations found yet. Publish this Cert now, or create site boundaries under <Link href="/manage/sites" className="text-primary hover:underline">Manage → Sites</Link> and come back.
+              No certified locations found yet. Publish this Cert now, or create site boundaries under <Link href={sitesHref} className="text-primary hover:underline">Manage → Sites</Link> and come back.
             </div>
           ) : (
             <div className="grid gap-2 md:grid-cols-2">
@@ -1176,6 +1179,7 @@ export function CreateBumicertClient({ session }: { session: AuthSession }) {
                     sitesStatus={sitesStatus}
                     sitesError={sitesError}
                     refreshSites={refreshSites}
+                    sitesHref={session.isLoggedIn ? accountSitesPath(session.handle || session.did) : "/manage/sites"}
                   />
                 ) : null}
                 {activeStep === "review" ? <ReviewStep values={values} sites={sites} publishError={publishError} /> : null}

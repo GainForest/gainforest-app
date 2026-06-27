@@ -18,7 +18,7 @@ import { ModalContent, ModalDescription, ModalFooter, ModalHeader, ModalTitle } 
 import { useModal } from "@/components/ui/modal/context";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
-import { manageApiHref, type ManageTarget } from "@/lib/links";
+import { manageApiHref, profileBasePath, type ManageTarget } from "@/lib/links";
 import { canCreateRecord, canDeleteRecord, canUpdateRecord } from "../../../../_lib/cgs-permissions";
 import { createRecord, deleteRecord, putRecord, uploadBlob } from "../../../../_lib/mutations";
 
@@ -294,7 +294,7 @@ export function ProjectGalleryManagerClient({ target, projectRkey }: { target: M
     <div className="mx-auto w-full max-w-[1440px] px-4 py-4 sm:px-6 sm:py-6">
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
         <Button asChild variant="outline" size="sm">
-          <Link href={`${target.basePath}/projects`}>
+          <Link href={`${profileBasePath(target)}/projects`}>
             <ArrowLeftIcon className="size-4" />
             Projects
           </Link>

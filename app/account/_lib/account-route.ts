@@ -76,6 +76,22 @@ export function accountBumicertsPath(didOrHandle: string): string {
   return `${accountPath(didOrHandle)}/certs`;
 }
 
+export function accountNewCertPath(didOrHandle: string): string {
+  return `${accountPath(didOrHandle)}/certs/new`;
+}
+
+export function accountAddDataPath(didOrHandle: string): string {
+  return `${accountPath(didOrHandle)}/add`;
+}
+
+export function accountProjectGalleryPath(didOrHandle: string, rkey: string): string {
+  return `${accountPath(didOrHandle)}/projects/${encodeURIComponent(rkey)}/gallery`;
+}
+
+export function accountProjectCertsPath(didOrHandle: string, rkey: string): string {
+  return `${accountPath(didOrHandle)}/projects/${encodeURIComponent(rkey)}/certs`;
+}
+
 export function accountDonationsPath(didOrHandle: string): string {
   return `${accountPath(didOrHandle)}/donations`;
 }

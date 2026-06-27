@@ -15,6 +15,7 @@ import {
   ImageIcon,
   LeafIcon,
   Loader2Icon,
+  MapPinIcon,
   RotateCcwIcon,
   SearchIcon,
   SparkleIcon,
@@ -29,7 +30,7 @@ import { ModalContent, ModalDescription, ModalFooter, ModalHeader, ModalTitle } 
 import { useModal } from "@/components/ui/modal/context";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
-import { manageApiHref, manageHref, type ManageTarget } from "@/lib/links";
+import { manageApiHref, manageHref, profileBasePath, type ManageTarget } from "@/lib/links";
 import { canCreateRecord, canDeleteRecord, canUpdateRecord } from "../../_lib/cgs-permissions";
 import { createRecord, deleteRecord, putRecord, uploadBlob } from "../../_lib/mutations";
 
@@ -235,9 +236,10 @@ export function ManageProjectsClient({ target }: { target: ManageTarget }) {
                       key={project.atUri}
                       project={project}
                       index={index}
-                      galleryHref={`${target.basePath}/projects/${encodeURIComponent(project.rkey)}/gallery`}
-                      certsHref={`${target.basePath}/projects/${encodeURIComponent(project.rkey)}/certs`}
+                      galleryHref={`${profileBasePath(target)}/projects/${encodeURIComponent(project.rkey)}/gallery`}
+                      certsHref={`${profileBasePath(target)}/projects/${encodeURIComponent(project.rkey)}/certs`}
                       observationsHref={manageHref(target, "observations", { project: project.atUri })}
+                      sitesHref={manageHref(target, "sites")}
                       onEdit={() => openEdit(project)}
                       disabledReason={updatePermission.reason}
                     />
@@ -275,6 +277,7 @@ function ProjectCard({
   galleryHref,
   certsHref,
   observationsHref,
+  sitesHref,
   onEdit,
   disabledReason = null,
 }: {
@@ -283,6 +286,7 @@ function ProjectCard({
   galleryHref: string;
   certsHref: string;
   observationsHref: string;
+  sitesHref: string;
   onEdit: () => void;
   disabledReason?: string | null;
 }) {
@@ -376,6 +380,12 @@ function ProjectCard({
               <Link href={galleryHref} aria-label={t("manageGalleryFor", { title: project.title })}>
                 <ImageIcon className="size-3.5" />
                 {t("manageGallery")}
+              </Link>
+            </Button>
+            <Button asChild type="button" variant="outline" size="sm" className="h-8" onClick={(event) => event.stopPropagation()}>
+              <Link href={sitesHref} aria-label={t("manageSitesFor", { title: project.title })}>
+                <MapPinIcon className="size-3.5" />
+                {t("manageSites")}
               </Link>
             </Button>
           </div>
@@ -563,7 +573,7 @@ function ProjectEditor({
             {isEdit ? (
               <div className="mb-8 flex flex-wrap gap-2">
                 <Button asChild type="button" variant="outline">
-                  <Link href={`${target.basePath}/projects/${encodeURIComponent(state.project.rkey)}/certs`} aria-label={actionT("manageCertsFor", { title: state.project.title })}>
+                  <Link href={`${profileBasePath(target)}/projects/${encodeURIComponent(state.project.rkey)}/certs`} aria-label={actionT("manageCertsFor", { title: state.project.title })}>
                     <LeafIcon className="size-4" />
                     {actionT("manageCerts")}
                   </Link>
@@ -575,9 +585,15 @@ function ProjectEditor({
                   </Link>
                 </Button>
                 <Button asChild type="button" variant="outline">
-                  <Link href={`${target.basePath}/projects/${encodeURIComponent(state.project.rkey)}/gallery`} aria-label={actionT("manageGalleryFor", { title: state.project.title })}>
+                  <Link href={`${profileBasePath(target)}/projects/${encodeURIComponent(state.project.rkey)}/gallery`} aria-label={actionT("manageGalleryFor", { title: state.project.title })}>
                     <ImageIcon className="size-4" />
                     {actionT("manageGallery")}
+                  </Link>
+                </Button>
+                <Button asChild type="button" variant="outline">
+                  <Link href={manageHref(target, "sites")} aria-label={actionT("manageSitesFor", { title: state.project.title })}>
+                    <MapPinIcon className="size-4" />
+                    {actionT("manageSites")}
                   </Link>
                 </Button>
               </div>

@@ -2,25 +2,23 @@ import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { resolveAccountManageAccess } from "@/app/_lib/manage-server";
 import {
+  accountAddDataPath,
   accountAudioPath,
   accountBumicertsPath,
   accountDronePath,
+  accountNewCertPath,
   accountObservationsPath,
   accountOrganizationsPath,
   accountPath,
+  accountProjectCertsPath,
+  accountProjectGalleryPath,
   accountProjectsPath,
   accountSettingsPath,
   accountSitesPath,
   accountTimelinePath,
   accountTreesPath,
 } from "@/app/account/_lib/account-route";
-import {
-  AddDataSection,
-  ManageHomeSection,
-  NewBumicertSection,
-  ProjectCertsSection,
-  ProjectGallerySection,
-} from "@/app/(manage)/manage/_sections";
+import { ManageHomeSection } from "@/app/(manage)/manage/_sections";
 
 export const metadata: Metadata = {
   title: "Manage — GainForest",
@@ -87,11 +85,21 @@ export default async function AccountManagePage({ params, searchParams }: PagePr
     redirect(accountPath(id));
   }
 
-  // Deep editing tools — no standalone profile tab, so they stay here.
-  if (first === "add" && !second) return <AddDataSection target={target} />;
-  if (first === "projects" && second && third === "gallery") return <ProjectGallerySection target={target} projectRkey={decodeURIComponent(second)} />;
-  if (first === "projects" && second && third === "certs") return <ProjectCertsSection target={target} projectRkey={decodeURIComponent(second)} />;
-  if (first === "certs" && second === "new") return <NewBumicertSection target={target} searchParams={await searchParams} />;
+  // Deep editing tools now live directly on the profile; forward the legacy
+  // /manage URLs (and preserve the cert wizard's query string).
+  if (first === "add" && !second) redirect(accountAddDataPath(id));
+  if (first === "projects" && second && third === "gallery") redirect(accountProjectGalleryPath(id, decodeURIComponent(second)));
+  if (first === "projects" && second && third === "certs") redirect(accountProjectCertsPath(id, decodeURIComponent(second)));
+  if (first === "certs" && second === "new") {
+    const sp = await searchParams;
+    const query = new URLSearchParams();
+    for (const [key, value] of Object.entries(sp)) {
+      const raw = Array.isArray(value) ? value[0] : value;
+      if (typeof raw === "string" && raw.length > 0) query.set(key, raw);
+    }
+    const queryString = query.toString();
+    redirect(queryString ? `${accountNewCertPath(id)}?${queryString}` : accountNewCertPath(id));
+  }
 
   // Top-level sections → their profile tab.
   if (first === "projects" && !second) redirect(accountProjectsPath(id));

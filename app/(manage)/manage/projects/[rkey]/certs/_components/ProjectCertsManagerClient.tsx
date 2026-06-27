@@ -21,7 +21,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
-import { manageApiHref, manageHref, type ManageTarget } from "@/lib/links";
+import { manageApiHref, manageHref, profileBasePath, type ManageTarget } from "@/lib/links";
 import { localBumicertHref } from "@/app/_lib/urls";
 import { canUpdateRecord } from "../../../../_lib/cgs-permissions";
 import { putRecord } from "../../../../_lib/mutations";
@@ -163,7 +163,7 @@ export function ProjectCertsManagerClient({ target, projectRkey }: { target: Man
     <div className="mx-auto w-full max-w-[1440px] px-4 py-4 sm:px-6 sm:py-6">
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
         <Button asChild variant="outline" size="sm">
-          <Link href={`${target.basePath}/projects`}>
+          <Link href={`${profileBasePath(target)}/projects`}>
             <ArrowLeftIcon className="size-4" />
             {t("nav.projects")}
           </Link>

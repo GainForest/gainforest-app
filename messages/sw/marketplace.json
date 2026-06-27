@@ -1173,7 +1173,9 @@
       "manageGallery": "Dhibiti matunzio",
       "manageGalleryFor": "Dhibiti matunzio ya {title}",
       "manageObservations": "Uchunguzi",
-      "manageObservationsFor": "Uchunguzi wa {title}"
+      "manageObservationsFor": "Uchunguzi wa {title}",
+      "manageSites": "Maeneo",
+      "manageSitesFor": "Maeneo ya {title}"
     }
   },
   "manageBumicerts": {

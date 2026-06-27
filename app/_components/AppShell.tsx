@@ -701,6 +701,9 @@ function NavLeaf({ item, isActive, index, paired = false }: { item: NavLeaf; isA
   );
 }
 
+// Signed-out fallback only: the bare /manage shim resolves to the signed-in
+// account (or shows sign-in). Signed-in links target the profile directly via
+// the did-based builders below.
 const PERSONAL_PROJECT_NEW_HREF = manageHref({ basePath: "/manage" }, "projects", { mode: "new" });
 const PERSONAL_ADD_DATA_HREF = manageHref({ basePath: "/manage" }, "add");
 
@@ -710,6 +713,16 @@ function createProjectHrefForGroup(identifier: string): string {
 
 function addDataHrefForGroup(identifier: string): string {
   return manageHref({ basePath: groupManageBasePath(identifier) }, "add");
+}
+
+// Personal context targets the signed-in user's own profile route directly
+// (manageHref maps /account/<id>/manage → /account/<id>), never /manage.
+function createProjectHrefForPersonal(did: string): string {
+  return manageHref({ basePath: groupManageBasePath(did) }, "projects", { mode: "new" });
+}
+
+function addDataHrefForPersonal(did: string): string {
+  return manageHref({ basePath: groupManageBasePath(did) }, "add");
 }
 
 type ContextLinkProps = {
@@ -723,6 +736,7 @@ function CreateProjectLink({ sessionDid, className, children }: ContextLinkProps
     <ManageContextLink
       sessionDid={sessionDid}
       personalHref={PERSONAL_PROJECT_NEW_HREF}
+      personalHrefForDid={createProjectHrefForPersonal}
       hrefForGroup={createProjectHrefForGroup}
       className={className}
     >
@@ -736,6 +750,7 @@ function AddDataLink({ sessionDid, className, children }: ContextLinkProps) {
     <ManageContextLink
       sessionDid={sessionDid}
       personalHref={PERSONAL_ADD_DATA_HREF}
+      personalHrefForDid={addDataHrefForPersonal}
       hrefForGroup={addDataHrefForGroup}
       className={className}
     >
@@ -747,11 +762,13 @@ function AddDataLink({ sessionDid, className, children }: ContextLinkProps) {
 function ManageContextLink({
   sessionDid,
   personalHref,
+  personalHrefForDid,
   hrefForGroup,
   className,
   children,
 }: ContextLinkProps & {
   personalHref: string;
+  personalHrefForDid: (did: string) => string;
   hrefForGroup: (identifier: string) => string;
 }) {
   if (!sessionDid) {
@@ -765,7 +782,7 @@ function ManageContextLink({
   return (
     <AuthenticatedManageContextLink
       sessionDid={sessionDid}
-      personalHref={personalHref}
+      personalHref={personalHrefForDid(sessionDid)}
       hrefForGroup={hrefForGroup}
       className={className}
     >
@@ -1103,6 +1120,7 @@ function MyRecordsHeaderButton({ route, sessionDid }: { route: MyRecordsRoute; s
       <ManageContextLink
         sessionDid={sessionDid}
         personalHref={manageHref({ basePath: "/manage" }, section)}
+        personalHrefForDid={(did) => manageHref({ basePath: groupManageBasePath(did) }, section)}
         hrefForGroup={(identifier) => manageHref({ basePath: groupManageBasePath(identifier) }, section)}
         className={className}
       >

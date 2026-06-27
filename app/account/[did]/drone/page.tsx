@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { OrgManageTabContent } from "../../_components/OrgManageTabContent";
+import { ObservationsSubNav } from "../../_components/ObservationsSubNav";
 import { accountDronePath, getAccountRouteData, readAccountRouteParams } from "../../_lib/account-route";
 
 export const metadata: Metadata = {
@@ -16,5 +17,10 @@ export default async function AccountDronePage({ params }: { params: Promise<{ d
     redirect(accountDronePath(account.urlIdentifier));
   }
 
-  return <OrgManageTabContent identifier={account.urlIdentifier} tab="drone" />;
+  return (
+    <>
+      <ObservationsSubNav identifier={account.urlIdentifier} showPrivate />
+      <OrgManageTabContent identifier={account.urlIdentifier} tab="drone" />
+    </>
+  );
 }

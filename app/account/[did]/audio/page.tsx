@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { OrgManageTabContent } from "../../_components/OrgManageTabContent";
+import { ObservationsSubNav } from "../../_components/ObservationsSubNav";
 import { accountAudioPath, getAccountRouteData, readAccountRouteParams } from "../../_lib/account-route";
 
 export const metadata: Metadata = {
@@ -16,5 +17,10 @@ export default async function AccountAudioPage({ params }: { params: Promise<{ d
     redirect(accountAudioPath(account.urlIdentifier));
   }
 
-  return <OrgManageTabContent identifier={account.urlIdentifier} tab="audio" />;
+  return (
+    <>
+      <ObservationsSubNav identifier={account.urlIdentifier} showPrivate />
+      <OrgManageTabContent identifier={account.urlIdentifier} tab="audio" />
+    </>
+  );
 }

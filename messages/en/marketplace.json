@@ -1173,7 +1173,9 @@
       "manageGallery": "Manage gallery",
       "manageGalleryFor": "Manage gallery for {title}",
       "manageObservations": "Observations",
-      "manageObservationsFor": "Observations for {title}"
+      "manageObservationsFor": "Observations for {title}",
+      "manageSites": "Sites",
+      "manageSitesFor": "Sites for {title}"
     }
   },
   "manageBumicerts": {

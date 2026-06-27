@@ -1173,7 +1173,9 @@
       "manageGallery": "Kelola galeri",
       "manageGalleryFor": "Kelola galeri untuk {title}",
       "manageObservations": "Observasi",
-      "manageObservationsFor": "Observasi untuk {title}"
+      "manageObservationsFor": "Observasi untuk {title}",
+      "manageSites": "Situs",
+      "manageSitesFor": "Situs untuk {title}"
     }
   },
   "manageBumicerts": {

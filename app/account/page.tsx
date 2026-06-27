@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
+import { resolvePersonalManageTarget } from "@/app/_lib/manage-server";
+import { accountPath } from "./_lib/account-route";
 
 export const metadata: Metadata = {
   title: "Account — GainForest",
@@ -7,6 +9,7 @@ export const metadata: Metadata = {
   robots: { index: false, follow: true },
 };
 
-export default function AccountPage() {
-  redirect("/manage");
+export default async function AccountPage() {
+  const target = await resolvePersonalManageTarget();
+  redirect(target ? accountPath(target.identifier) : "/manage");
 }

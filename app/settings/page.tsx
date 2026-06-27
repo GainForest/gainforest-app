@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { fetchAuthSession } from "@/app/_lib/auth-server";
+import { resolvePersonalManageTarget } from "@/app/_lib/manage-server";
+import { accountSettingsPath } from "@/app/account/_lib/account-route";
 
 export const metadata: Metadata = {
   title: "Settings — GainForest",
@@ -11,5 +13,6 @@ export const metadata: Metadata = {
 export default async function SettingsPage() {
   const session = await fetchAuthSession();
   if (!session.isLoggedIn) redirect("/");
-  redirect("/manage?tab=settings");
+  const target = await resolvePersonalManageTarget();
+  redirect(target ? accountSettingsPath(target.identifier) : "/manage?tab=settings");
 }
