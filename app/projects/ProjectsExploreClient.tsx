@@ -5,7 +5,6 @@ import {
   ArrowUpDownIcon,
   ChevronDownIcon,
   FolderKanbanIcon,
-  Layers3Icon,
   LayoutGridIcon,
   ListIcon,
   MapIcon,
@@ -17,6 +16,7 @@ import { memo, useCallback, useDeferredValue, useEffect, useMemo, useRef, useSta
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { parseAsString, parseAsStringEnum, useQueryState } from "nuqs";
+import BumicertIcon from "@/icons/BumicertIcon";
 import { BumicertOwnerAvatar } from "@/components/bumicert/BumicertOwnerAvatar";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -774,7 +774,7 @@ function ProjectCard({
 
         <div className="mt-4 flex flex-wrap gap-2 border-t border-border/70 pt-3 text-xs text-muted-foreground">
           <span className="inline-flex items-center gap-1.5 rounded-full bg-secondary px-2.5 py-1 text-secondary-foreground">
-            <Layers3Icon className="h-3.5 w-3.5" />
+            <BumicertIcon className="h-3.5 w-3.5" />
             {t("bumicertCount", { count: record.bumicertCount })}
           </span>
           {place ? (
