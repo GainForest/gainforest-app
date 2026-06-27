@@ -517,11 +517,22 @@ function UnifiedSidebar({
 function SidebarProfileRow({ did }: { did: string }) {
   const t = useTranslations("common.sidebar.profileRow");
   const collapsed = useSidebarCollapsed();
-  const { personal } = useAccountList(did);
-  const name = personal?.displayName?.trim() || t("fallbackName");
-  const identifier = personal?.handle?.trim() || did;
+  const { personal, groups } = useAccountList(did);
+  const [activeContext] = useActiveAccountContext(did);
+
+  // Reflect the account selected in the top-right switcher: when an
+  // organization context is active, show that org's name/avatar and link to its
+  // profile; otherwise fall back to the signed-in personal account.
+  const activeGroup = activeContext.type === "group"
+    ? groups.find((group) => group.groupDid === activeContext.did) ?? null
+    : null;
+  const isGroup = activeGroup != null;
+  const card = activeGroup ?? personal;
+
+  const name = card?.displayName?.trim() || t("fallbackName");
+  const identifier = activeGroup ? switcherGroupIdentifier(activeGroup) : card?.handle?.trim() || did;
   const href = `/account/${encodeURIComponent(identifier)}`;
-  const avatarUrl = personal?.avatarUrl ?? null;
+  const avatarUrl = card?.avatarUrl ?? null;
 
   return (
     <SidebarTooltip label={name}>
@@ -537,6 +548,8 @@ function SidebarProfileRow({ did }: { did: string }) {
         <span className="relative flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-primary/10 text-primary">
           {avatarUrl ? (
             <Image src={avatarUrl} alt="" fill unoptimized sizes="32px" className="object-cover" />
+          ) : isGroup ? (
+            <Building2Icon className="size-4" />
           ) : (
             <UserIcon className="size-4" />
           )}
