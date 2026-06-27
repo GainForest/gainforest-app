@@ -3166,7 +3166,6 @@ async function fetchCertifiedLocationCountriesByUriUncached(uris: string[]): Pro
   if (uris.length === 0) return countries;
 
   const fields = `{
-    name
     location {
       __typename
       ... on AppCertifiedLocationString { string }

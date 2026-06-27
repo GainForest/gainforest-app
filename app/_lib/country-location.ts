@@ -2,12 +2,10 @@ import { countryEntries, countries, type CountryCode } from "./countries";
 import { resolvePdsHost } from "./pds";
 
 export type CertifiedLocationLike = {
-  name?: string | null;
   location?: unknown;
 };
 
 const COORDINATE_EPSILON = 0.000001;
-const countryEntriesByName = new Map(countryEntries.map(([code, country]) => [country.name.toLowerCase(), code]));
 
 function parseAtUri(uri: string): { did: string; collection: string; rkey: string } | null {
   const match = uri.match(/^at:\/\/([^/]+)\/([^/]+)\/(.+)$/);
@@ -42,17 +40,10 @@ export function countryCodeFromCoordinates(latitude: number, longitude: number):
   return null;
 }
 
-export function countryCodeFromLocationName(name: string | null | undefined): CountryCode | null {
-  const normalized = name?.trim().toLowerCase();
-  if (!normalized) return null;
-  return countryEntriesByName.get(normalized) ?? null;
-}
-
+// Country is resolved strictly from coordinates — the record `name` is never
+// consulted because it is free-text and can be misleading.
 export function countryCodeFromCertifiedLocation(locationRecord: CertifiedLocationLike | null | undefined): CountryCode | null {
   if (!locationRecord) return null;
-
-  const nameMatch = countryCodeFromLocationName(locationRecord.name);
-  if (nameMatch) return nameMatch;
 
   const coordinateString = coordinateStringFromLocation(locationRecord.location);
   const coordinates = parseCoordinateDecimal(coordinateString);
