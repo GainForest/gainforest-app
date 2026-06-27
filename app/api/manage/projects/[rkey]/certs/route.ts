@@ -165,6 +165,7 @@ async function directProjectFromRecord(did: string, record: ListedRecord): Promi
     bumicertUris: items.map((item) => item.uri),
     bumicertCount: items.length,
     locationUri: location,
+    country: null,
     rawRecord: value,
   };
 }

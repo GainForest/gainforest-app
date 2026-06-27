@@ -2214,6 +2214,8 @@ export type ProjectRecord = {
   bumicertUris: string[];
   bumicertCount: number;
   locationUri: string | null;
+  /** ISO country code resolved from the project's location record, if any. */
+  country: string | null;
 };
 
 type RawCollectionImage =
@@ -2345,6 +2347,7 @@ function mapProjectCollection(n: RawProjectCollection): ProjectRecord {
     bumicertUris,
     bumicertCount: bumicertUris.length,
     locationUri: n.location?.uri ?? null,
+    country: null,
   };
 }
 
@@ -2385,6 +2388,19 @@ async function mapProjectConnection(
     (record, url) => ({ ...record, imageUrl: url ?? record.imageUrl }),
     signal,
   );
+  const locationUris = records
+    .map((record) => record.locationUri)
+    .filter((uri): uri is string => Boolean(uri));
+  if (locationUris.length > 0) {
+    const countryByLocation = await fetchCertifiedLocationCountriesByUri(locationUris, signal).catch(
+      () => new Map<string, string>(),
+    );
+    records = records.map((record) =>
+      record.locationUri && countryByLocation.has(record.locationUri)
+        ? { ...record, country: countryByLocation.get(record.locationUri) ?? null }
+        : record,
+    );
+  }
   return {
     records,
     cursor: conn?.pageInfo?.endCursor ?? null,

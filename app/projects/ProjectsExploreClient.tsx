@@ -34,6 +34,7 @@ import {
   type ProjectRecord,
 } from "../_lib/indexer";
 import { isPdsBlobUrl } from "../_lib/pds";
+import { countryName } from "../_lib/format";
 import { useStableQueryView } from "../_lib/use-stable-query-view";
 
 const PROJECTS_PAGE_SIZE = 48;
@@ -624,6 +625,7 @@ function ProjectListItem({ record, priority, onOpen }: { record: ProjectRecord; 
   const t = useTranslations("marketplace.projects.card");
   const [imgError, setImgError] = useState(false);
   const hasImage = Boolean(record.imageUrl) && !imgError;
+  const place = countryName(record.country);
 
   return (
     <button
@@ -658,7 +660,7 @@ function ProjectListItem({ record, priority, onOpen }: { record: ProjectRecord; 
         <span className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-border/60 pt-2">
           <span className="flex min-w-0 flex-wrap gap-2 text-xs text-muted-foreground">
             <span>{t("bumicertCount", { count: record.bumicertCount })}</span>
-            {record.locationUri ? <span>{t("projectPlace")}</span> : null}
+            {place ? <span>{place}</span> : null}
           </span>
           <span className="shrink-0 text-xs font-medium text-foreground transition-colors group-hover:text-primary">{t("showDetails")}</span>
         </span>
@@ -708,6 +710,7 @@ function ProjectCard({
   const hasImage = Boolean(record.imageUrl) && !imgError;
   const ownerName = record.creatorName ?? t("projectSteward");
   const canFilterOwner = Boolean(onFilterOwner) && Boolean(record.did);
+  const place = countryName(record.country);
 
   return (
     <button type="button" onClick={() => onOpen(record)} className="group flex h-full flex-col overflow-hidden rounded-3xl border border-border bg-card text-left shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 animate-in" style={{ animationDelay: `${Math.min(index, 10) * 35}ms` }}>
@@ -774,10 +777,10 @@ function ProjectCard({
             <Layers3Icon className="h-3.5 w-3.5" />
             {t("bumicertCount", { count: record.bumicertCount })}
           </span>
-          {record.locationUri ? (
+          {place ? (
             <span className="inline-flex items-center gap-1.5 rounded-full bg-secondary px-2.5 py-1 text-secondary-foreground">
               <MapPinIcon className="h-3.5 w-3.5" />
-              {t("projectPlace")}
+              {place}
             </span>
           ) : null}
         </div>
