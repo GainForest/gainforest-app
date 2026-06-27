@@ -79,7 +79,7 @@ export default async function AccountLayout({
               accountKind={account.kind}
               showOrganizations={showOrganizations}
               includeSettings={canManage}
-              showOrgData={canManage && account.kind === "organization"}
+              showOrgData={canManage}
             />
           </>
         }

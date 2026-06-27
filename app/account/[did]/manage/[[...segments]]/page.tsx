@@ -103,10 +103,7 @@ export default async function AccountManagePage({ params, searchParams }: PagePr
   if (first === "bumicerts" && !second) redirect(accountBumicertsPath(id));
   if (first === "observations" && !second) redirect(accountObservationsPath(id));
   if (first === "settings" && !second) redirect(accountSettingsPath(id));
-  if (first === "timeline" && !second) {
-    if (target.accountKind !== "organization") notFound();
-    redirect(accountTimelinePath(id));
-  }
+  if (first === "timeline" && !second) redirect(accountTimelinePath(id));
   if (first === "groups" && !second) redirect(accountOrganizationsPath(id));
   if (first === "organizations" && !second) {
     if (target.kind !== "personal") notFound();

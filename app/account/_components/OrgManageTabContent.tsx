@@ -13,14 +13,16 @@ import type { CgsRole } from "@/app/(manage)/manage/_lib/cgs";
 export type OrgTab = "sites" | "audio" | "drone" | "trees" | "members";
 
 /**
- * Org-only management tabs (Sites, Audio, Drone, Trees, Members) that now live
- * on the account profile. These are private surfaces: only a manager of the
- * organization can see them, and they 404 for everyone else (and for personal
- * accounts, which don't own these data types).
+ * Private management tabs (Sites, Audio, Drone, Trees, Members) that live on the
+ * account profile. These are private surfaces: only the account owner (personal
+ * profile) or a manager (organization) can see them, and they 404 for everyone
+ * else. Sites/Trees/Audio/Drone belong to personal accounts and organizations
+ * alike — they write to whichever repo the target points at. Members + the Data
+ * Council stay organization-only governance surfaces.
  */
 export async function OrgManageTabContent({ identifier, tab }: { identifier: string; tab: OrgTab }) {
   const access = await resolveAccountManageAccess(identifier);
-  if (access.status !== "allowed" || access.target.kind !== "group") notFound();
+  if (access.status !== "allowed") notFound();
   const target = access.target;
 
   switch (tab) {
@@ -33,6 +35,8 @@ export async function OrgManageTabContent({ identifier, tab }: { identifier: str
     case "trees":
       return <TreesSection target={target} />;
     case "members": {
+      // Members + Data Council are organization-only governance surfaces.
+      if (target.kind !== "group") notFound();
       const role: CgsRole = target.role === "owner" ? "owner" : target.role === "admin" ? "admin" : "member";
       const session = await fetchAuthSession();
       const currentUserDid = target.currentUserDid ?? (session.isLoggedIn ? session.did : null);

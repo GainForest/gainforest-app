@@ -102,9 +102,21 @@ function buildTabs(
     const donationsTab: Tab = { labelKey: "donationHistory", href: paths.donations, icon: HeartHandshakeIcon, exact: false };
 
     // Public profile leads with a compact Overview, then Projects, Certs,
-    // Observations, Donations. The Organizations tab sits between Certs and
-    // Observations, but only on your own profile (we can read your own
-    // memberships, not other people's). The manage dashboard keeps its order.
+    // Observations. The Organizations tab sits between Certs and Observations,
+    // but only on your own profile (we can read your own memberships, not other
+    // people's). Personal accounts own the same field data as organizations
+    // (Sites, Trees, Audio, Drone) — those private tabs show only to the owner
+    // (showOrgData). Timeline and Gallery are public, then Donations closes the
+    // row. The only things that stay organization-only are Members + the Data
+    // Council. The manage dashboard keeps its simpler order.
+    const dataTabs: Tab[] = scope === "account" && showOrgData
+      ? [
+          { labelKey: "sites", href: accountSitesPath(did), icon: MapPinIcon, exact: false },
+          { labelKey: "trees", href: accountTreesPath(did), icon: TreePineIcon, exact: false },
+          { labelKey: "audio", href: accountAudioPath(did), icon: MicIcon, exact: false },
+          { labelKey: "drone", href: accountDronePath(did), icon: DroneIcon, exact: false },
+        ]
+      : [];
     const tabs: Tab[] = scope === "account"
       ? [
           { labelKey: "overview", href: paths.home, icon: HomeIcon, exact: true },
@@ -112,6 +124,9 @@ function buildTabs(
           certsTab,
           ...(showOrganizations ? [organizationsTab] : []),
           observationsTab,
+          ...dataTabs,
+          { labelKey: "timeline", href: paths.timeline, icon: PaperclipIcon, exact: false },
+          { labelKey: "gallery", href: paths.gallery, icon: ImageIcon, exact: false },
           donationsTab,
         ]
       : [certsTab, projectsTab, observationsTab, donationsTab];

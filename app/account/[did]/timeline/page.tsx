@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
-import { notFound, redirect } from "next/navigation";
+import { redirect } from "next/navigation";
 import { fetchAuthSession } from "@/app/_lib/auth-server";
 import {
   fetchTimelineAttachmentsByDid,
@@ -76,10 +76,6 @@ export default async function AccountTimelinePage({
     getAccountRouteData(did, urlIdentifier),
     fetchAuthSession(),
   ]);
-
-  if (account.kind !== "organization") {
-    notFound();
-  }
 
   if (urlIdentifier !== account.urlIdentifier) {
     redirect(accountTimelinePath(account.urlIdentifier));

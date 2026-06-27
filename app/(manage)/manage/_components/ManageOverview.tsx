@@ -15,15 +15,9 @@ type OverviewStats = {
   audio?: number | null;
 };
 
-function buildTiles(account: AccountRouteData, stats: OverviewStats, target: ManageTarget): OverviewFolderTile[] {
-  if (account.kind === "user") {
-    // Personal accounts can own projects and collect observations without
-    // creating an organization, so surface both folders on the personal home.
-    return [
-      { id: "projects", title: "Projects", href: manageHref(target, "projects"), count: stats.projects },
-      { id: "observations", title: "Observations", href: manageHref(target, "observations"), count: stats.observations },
-    ];
-  }
+// Personal accounts and organizations own the same data, so both surface the
+// same folders on their manage home. Titles come from translations.
+function buildTiles(stats: OverviewStats, target: ManageTarget): OverviewFolderTile[] {
   return [
     { id: "projects", title: "Projects", href: manageHref(target, "projects"), count: stats.projects },
     { id: "observations", title: "Observations", href: manageHref(target, "observations"), count: stats.observations },
@@ -35,7 +29,6 @@ function buildTiles(account: AccountRouteData, stats: OverviewStats, target: Man
 
 export function ManageOverview({
   target,
-  account,
   stats,
 }: {
   target: ManageTarget;
@@ -43,11 +36,14 @@ export function ManageOverview({
   stats: OverviewStats;
 }) {
   const t = useTranslations("common.sidebar.items");
-  const tiles = buildTiles(account, stats, target);
+  const tiles = buildTiles(stats, target);
 
   const titleOverrides: Record<string, string> = {
     observations: t("myObservations"),
     projects: t("projects"),
+    sites: t("sites"),
+    trees: t("trees"),
+    audio: t("audio"),
   };
 
   return (

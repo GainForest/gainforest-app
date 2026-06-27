@@ -1,5 +1,4 @@
 import { Suspense } from "react";
-import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { fetchReceipts } from "@/app/_lib/dashboard";
 import {
@@ -40,12 +39,12 @@ export async function ManageHomeSection({ target, wrapDashboard = true }: { targ
   const account = await getAccountRouteData(target.did, target.identifier);
   const [receipts, projects, sites, trees, audio] = await Promise.all([
     fetchReceipts().catch(() => []),
-    // Personal accounts can own projects too, so fetch the project count for
-    // both account kinds.
+    // Personal accounts own the same field data as organizations, so fetch the
+    // counts for both account kinds.
     fetchProjectsByDid(target.did, 500).then((page) => page.records).catch(() => []),
-    account.kind === "organization" ? fetchLocationsByDid(target.did).catch(() => []) : Promise.resolve([]),
-    account.kind === "organization" ? fetchTreeDatasetsByDid(target.did).catch(() => []) : Promise.resolve([]),
-    account.kind === "organization" ? fetchAudioByDid(target.did).catch(() => []) : Promise.resolve([]),
+    fetchLocationsByDid(target.did).catch(() => []),
+    fetchTreeDatasetsByDid(target.did).catch(() => []),
+    fetchAudioByDid(target.did).catch(() => []),
   ]);
 
   const donationCount = receipts.filter((receipt) =>
@@ -140,27 +139,6 @@ export function AudioSection({ target }: { target: ManageTarget }) {
 }
 
 export function DroneSection({ target }: { target: ManageTarget }) {
-  if (target.accountKind !== "organization") {
-    return (
-      <Container className="flex min-h-[50vh] items-center justify-center py-12">
-        <section className="max-w-xl rounded-3xl border border-border bg-card p-6 text-center shadow-sm sm:p-8">
-          <p className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">Drone viewer</p>
-          <h1 className="mt-3 font-instrument text-3xl font-light italic tracking-[-0.02em] text-foreground">
-            Select an organization to view drone evidence
-          </h1>
-          <p className="mt-3 text-sm leading-6 text-muted-foreground">
-            Drone layers are attached to organization accounts. Choose an organization you manage to open its drone workspace.
-          </p>
-          <div className="mt-6 flex justify-center">
-            <Link href="/manage/organizations" className="rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90">
-              View my organizations
-            </Link>
-          </div>
-        </section>
-      </Container>
-    );
-  }
-
   const src = droneAppHref({ projectDid: target.did, view3d: false });
   return <DroneAppFrame src={src} title="GainForest drone viewer" organizationName={target.displayName} />;
 }

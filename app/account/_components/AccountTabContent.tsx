@@ -322,10 +322,6 @@ export async function AccountOrganizationsTabContent({ account }: { account: Acc
 }
 
 export async function AccountGalleryTabContent({ account, did }: { account: AccountRouteData; did: string }) {
-  if (account.kind !== "organization") {
-    notFound();
-  }
-
   const [rawGalleries, projects] = await Promise.all([
     fetchProjectImageGalleriesByDid(did).catch(() => []),
     fetchProjectsByDid(did, 1000).then((page) => page.records).catch(() => []),

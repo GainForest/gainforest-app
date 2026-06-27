@@ -27,17 +27,18 @@ const TAINA_BOT_URL = "https://t.me/The" + "Tain" + "aBot";
 type KindMeta = {
   kind: UploadKind;
   Icon: ComponentType<{ className?: string }>;
-  /** Only organizations own sites, trees and audio repos. */
-  orgOnly: boolean;
   /** This kind can be collected by chatting with the Telegram assistant. */
   telegram: boolean;
 };
 
+// Personal accounts and organizations own the same data types — each write
+// lands in whichever repo the target points at — so every kind is offered to
+// both.
 const KINDS: KindMeta[] = [
-  { kind: "observation", Icon: ImagePlusIcon, orgOnly: false, telegram: true },
-  { kind: "tree", Icon: TreesIcon, orgOnly: true, telegram: false },
-  { kind: "audio", Icon: MicIcon, orgOnly: true, telegram: true },
-  { kind: "site", Icon: MapPinIcon, orgOnly: true, telegram: false },
+  { kind: "observation", Icon: ImagePlusIcon, telegram: true },
+  { kind: "tree", Icon: TreesIcon, telegram: false },
+  { kind: "audio", Icon: MicIcon, telegram: true },
+  { kind: "site", Icon: MapPinIcon, telegram: false },
 ];
 
 function routeForKind(target: ManageTarget, kind: UploadKind): string {
@@ -66,11 +67,7 @@ export function AddDataClient({ target }: { target: ManageTarget }) {
   const [note, setNote] = useState<string | null>(null);
 
   const createPermission = canCreateRecord(target);
-  const isOrganization = target.accountKind === "organization";
-
-  // Personal accounts can only collect observations; sites/trees/audio live on
-  // organization repos. Hide what isn't available rather than showing dead ends.
-  const availableKinds = KINDS.filter((meta) => isOrganization || !meta.orgOnly);
+  const availableKinds = KINDS;
 
   function goToKind(kind: UploadKind, files?: File[]) {
     if (!createPermission.allowed) {
@@ -93,11 +90,6 @@ export function AddDataClient({ target }: { target: ManageTarget }) {
     // A confident single-kind drop routes straight into that flow with the
     // files preloaded — the whole point of "drop and we sort it out".
     if (!result.ambiguous && result.kind) {
-      if (!isOrganization && KINDS.find((meta) => meta.kind === result.kind)?.orgOnly) {
-        setNote(t("orgOnlyNote"));
-        setSuggestedKind(null);
-        return;
-      }
       goToKind(result.kind, result.files);
       return;
     }
@@ -242,9 +234,6 @@ export function AddDataClient({ target }: { target: ManageTarget }) {
             );
           })}
         </div>
-        {!isOrganization ? (
-          <p className="text-xs leading-5 text-muted-foreground">{t("orgOnlyHint")}</p>
-        ) : null}
       </section>
 
       {/* The Telegram assistant, surfaced once instead of in every section. */}
