@@ -40,33 +40,31 @@ export function BioblitzObservationsMap({ round }: { round: BioblitzRound }) {
   const hasMappable = records.some((record) => record.lat != null && record.lon != null);
 
   return (
-    <section className="border-t border-border/60 bg-background">
+    <section>
+      <div aria-hidden className="mx-auto h-px w-full max-w-6xl bg-border/60" />
       <div className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6">
-        <div className="flex items-center gap-2">
-          <span className="flex size-5 items-center justify-center text-primary [&_svg]:size-4">
+        <div className="flex items-start gap-2">
+          <span className="mt-1 flex size-5 items-center justify-center text-primary [&_svg]:size-4">
             <MapPinnedIcon aria-hidden />
           </span>
-          <h2 className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
-            {t("title")}
+          <h2 className="font-instrument text-2xl font-light italic leading-tight text-foreground">
+            {t("heading")}
           </h2>
         </div>
-        <p className="mt-1.5 font-instrument text-2xl font-light italic leading-tight text-foreground">
-          {t("heading")}
-        </p>
         <p className="mt-1 max-w-xl text-sm leading-snug text-muted-foreground">{t("subtitle")}</p>
 
         <div className="mt-5">
           {phase === "error" ? (
-            <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border px-6 py-16 text-center">
+            <div className="flex flex-col items-center justify-center rounded-2xl bg-foreground/5 px-6 py-16 text-center">
               <p className="font-instrument text-2xl font-light italic text-foreground">{t("error")}</p>
             </div>
           ) : phase === "ready" && !hasMappable ? (
-            <div className="rounded-2xl border border-dashed border-border px-6 py-14 text-center text-sm text-muted-foreground">
+            <div className="rounded-2xl bg-foreground/5 px-6 py-14 text-center text-sm text-muted-foreground">
               {t("empty")}
             </div>
           ) : phase === "loading" ? (
-            <div className="flex h-[68vh] min-h-[440px] w-full items-center justify-center rounded-2xl border border-border-soft bg-surface-sunken">
-              <span className="inline-flex items-center gap-2 rounded-full bg-background/90 px-4 py-2 text-sm font-medium text-muted-foreground shadow-sm">
+            <div className="flex h-[68vh] min-h-[440px] w-full items-center justify-center rounded-2xl bg-surface-sunken">
+              <span className="inline-flex items-center gap-2 rounded-full bg-background/90 px-4 py-2 text-sm font-medium text-muted-foreground">
                 <Spinner /> {t("loading")}
               </span>
             </div>

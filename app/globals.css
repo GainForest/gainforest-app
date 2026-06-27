@@ -211,8 +211,10 @@ body {
   }
 }
 
-* {
-  border-color: var(--border);
+@layer base {
+  * {
+    border-color: var(--border);
+  }
 }
 
 /* Editorial brushed underline — single arced cubic curve, ported verbatim

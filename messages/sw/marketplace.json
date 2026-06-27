@@ -338,6 +338,7 @@
       "rankAriaLabel": "Nafasi ya {rank}",
       "org": {
         "label": "Shirika",
+        "account": "Akaunti binafsi",
         "members": "{count, plural, one {mwanachama #} other {wanachama #}}",
         "types": {
           "nonprofit": "Isiyo ya faida",

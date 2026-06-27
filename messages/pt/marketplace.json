@@ -338,6 +338,7 @@
       "rankAriaLabel": "Posição {rank}",
       "org": {
         "label": "Organização",
+        "account": "Conta pessoal",
         "members": "{count, plural, one {# integrante} other {# integrantes}}",
         "types": {
           "nonprofit": "Sem fins lucrativos",

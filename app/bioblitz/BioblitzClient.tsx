@@ -144,20 +144,24 @@ export function BioblitzClient() {
 
   return (
     <>
-    <section className="relative flex min-h-[calc(100dvh-3.5rem)] flex-col overflow-hidden lg:h-[calc(100dvh-3.5rem)]">
+    <section className="relative -mt-14 flex min-h-[100dvh] flex-col overflow-hidden lg:h-[100dvh]">
       <BackgroundWash />
 
-      <div className="relative z-10 mx-auto flex w-full max-w-6xl flex-1 flex-col gap-3 px-4 pb-4 pt-3 sm:px-6 lg:min-h-0">
-        <HeroBand round={round} status={status} now={now} />
+      <div className="relative z-10 mx-auto flex w-full max-w-6xl flex-1 flex-col gap-5 px-4 pb-4 pt-[calc(3.5rem+0.75rem)] sm:px-6 lg:min-h-0">
+        <HeroBand round={round} status={status} />
 
-        <div className="grid flex-1 gap-3 lg:min-h-0 lg:grid-cols-12">
-          <div className="flex flex-col gap-3 lg:col-span-5 lg:min-h-0">
+        <div className="grid flex-1 gap-4 lg:min-h-0 lg:grid-cols-[minmax(0,5fr)_1px_minmax(0,7fr)]">
+          <div className="flex flex-col gap-4 lg:min-h-0">
             <Prizes />
+            <Separator />
             <HowItWorks />
+            <Separator />
             <CtaBlock />
           </div>
 
-          <div className="lg:col-span-7 lg:min-h-0">
+          <Separator orientation="vertical" className="hidden lg:block" />
+
+          <div className="lg:min-h-0">
             <Board
               round={round}
               status={status}
@@ -228,33 +232,30 @@ function FadeIn({
 }
 
 function Card({ children, className }: { children: ReactNode; className?: string }) {
+  return <div className={className}>{children}</div>;
+}
+
+function Separator({
+  orientation = "horizontal",
+  className,
+}: {
+  orientation?: "horizontal" | "vertical";
+  className?: string;
+}) {
   return (
     <div
-      className={`rounded-3xl border border-border/60 bg-background/50 p-3.5 backdrop-blur ${className ?? ""}`}
-    >
-      {children}
-    </div>
+      aria-hidden
+      className={`${orientation === "vertical" ? "h-full w-px" : "h-px w-full"} bg-border/60 ${className ?? ""}`}
+    />
   );
 }
 
-function SectionLabel({ icon, title }: { icon: ReactNode; title: string }) {
+function SectionTitle({ icon, title }: { icon: ReactNode; title: string }) {
   return (
     <div className="flex items-center gap-2">
       <span className="flex size-5 items-center justify-center text-primary [&_svg]:size-4">{icon}</span>
-      <h2 className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">{title}</h2>
+      <h2 className="font-instrument text-xl font-light italic leading-none text-foreground">{title}</h2>
     </div>
-  );
-}
-
-function LiveDot({ label }: { label: string }) {
-  return (
-    <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-primary">
-      <span aria-hidden className="relative flex size-2">
-        <span className="absolute inline-flex size-2 animate-ping rounded-full bg-current opacity-60" />
-        <span className="relative inline-flex size-2 rounded-full bg-current" />
-      </span>
-      {label}
-    </span>
   );
 }
 
@@ -263,34 +264,30 @@ function LiveDot({ label }: { label: string }) {
 function HeroBand({
   round,
   status,
-  now,
 }: {
   round: BioblitzRound;
   status: RoundStatus;
-  now: number | null;
 }) {
   const t = useTranslations("marketplace.bioblitz");
   const locale = useLocale();
   const dates = formatDateRange(round.start, round.end, locale);
 
   return (
-    <FadeIn className="flex flex-col gap-3 rounded-3xl border border-border/60 bg-background/50 px-5 py-3.5 backdrop-blur md:flex-row md:items-center md:justify-between md:gap-6">
+    <FadeIn className="flex flex-col gap-5 px-1 py-4 md:flex-row md:items-center md:justify-between md:gap-10">
       <div className="min-w-0">
-        <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-primary">
-          {t("hero.eyebrow")}
-        </span>
-        <h1 className="font-instrument mt-0.5 text-3xl font-light italic leading-[0.95] tracking-[-0.02em] text-foreground sm:text-4xl">
+        <h1 className="font-instrument text-3xl font-light italic leading-[0.95] tracking-[-0.02em] text-foreground sm:text-4xl">
           {t("hero.titlePrefix")} <span className="text-primary">{t("hero.titleEmphasis")}</span>
         </h1>
-        <p className="mt-1.5 max-w-md text-sm leading-snug text-muted-foreground">{t("hero.description")}</p>
+        <p className="mt-2 max-w-md text-sm leading-snug text-muted-foreground">{t("hero.description")}</p>
+        <div className="mt-3">
+          <StatusChip status={status} />
+        </div>
       </div>
 
-      <div className="flex shrink-0 flex-col items-start gap-2 md:items-end">
+      <div className="flex shrink-0 flex-col items-start gap-3 md:items-end">
         <div className="flex flex-wrap items-center gap-2">
-          <StatusChip status={status} />
           <span className="font-instrument text-lg italic leading-none text-foreground">{round.label}</span>
         </div>
-        <CompactCountdown round={round} status={status} now={now} />
         <span className="text-[11px] tabular-nums text-muted-foreground">{dates}</span>
         {round.rsvpUrl && status !== "ended" ? (
           <a
@@ -328,36 +325,6 @@ function StatusChip({ status }: { status: RoundStatus }) {
   );
 }
 
-/** Single-line countdown — "Ends in 2d 4h". Hidden until "now" resolves. */
-function CompactCountdown({
-  round,
-  status,
-  now,
-}: {
-  round: BioblitzRound;
-  status: RoundStatus;
-  now: number | null;
-}) {
-  const t = useTranslations("marketplace.bioblitz.round");
-  if (status === "ended") {
-    return <span className="text-sm font-medium text-muted-foreground">{t("ended")}</span>;
-  }
-  if (now == null) return null;
-
-  const label = status === "upcoming" ? t("startsIn") : t("endsIn");
-  const target = status === "upcoming" ? round.start : round.end;
-  const { days, hours, minutes } = countdownTo(target, now);
-  const value = days > 0 ? `${days}d ${hours}h` : `${hours}h ${minutes}m`;
-
-  return (
-    <span className="inline-flex items-center gap-1.5 rounded-full bg-foreground/[0.06] px-3 py-1 text-sm text-foreground">
-      <ClockIcon className="size-4 text-primary" aria-hidden />
-      <span className="text-muted-foreground">{label}</span>
-      <span className="font-semibold tabular-nums">{value}</span>
-    </span>
-  );
-}
-
 // ── Prizes ───────────────────────────────────────────────────────────────────
 
 function Prizes() {
@@ -366,7 +333,7 @@ function Prizes() {
   return (
     <FadeIn delay={0.05}>
       <Card>
-        <SectionLabel icon={<TrophyIcon />} title={t("title")} />
+        <SectionTitle icon={<TrophyIcon />} title={t("title")} />
         <div className="mt-2.5 grid grid-cols-2 gap-3">
           <PrizeTile
             featured
@@ -431,7 +398,7 @@ function HowItWorks() {
   return (
     <FadeIn delay={0.1}>
       <Card>
-        <SectionLabel icon={<BinocularsIcon />} title={t("title")} />
+        <SectionTitle icon={<BinocularsIcon />} title={t("title")} />
         <ol className="mt-2.5 space-y-1.5">
           {steps.map((step, index) => (
             <li key={step.key} className="flex items-center gap-3">
@@ -500,7 +467,7 @@ function ScopeToggle({
   const t = useTranslations("marketplace.bioblitz.board.scope");
   const options: BoardScope[] = ["round", "all"];
   return (
-    <div className="inline-flex rounded-full bg-muted/60 p-0.5 ring-1 ring-foreground/5">
+    <div className="inline-flex rounded-full bg-muted/60 p-0.5">
       {options.map((option) => {
         const selected = scope === option;
         return (
@@ -511,7 +478,7 @@ function ScopeToggle({
             onClick={() => onScope(option)}
             className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
               selected
-                ? "bg-primary text-primary-foreground shadow-sm shadow-primary/20"
+                ? "bg-primary text-primary-foreground"
                 : "text-muted-foreground hover:text-foreground"
             }`}
           >
@@ -585,7 +552,6 @@ function Board({
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <h2 className="font-instrument text-xl italic leading-none text-foreground">{t("title")}</h2>
-            {scope === "round" && status === "live" ? <LiveDot label={t("live")} /> : null}
           </div>
           <ScopeToggle scope={scope} onScope={onScope} />
         </div>
@@ -595,21 +561,29 @@ function Board({
           {stats.map((stat) => (
             <div
               key={stat.label}
-              className={`rounded-2xl px-3 py-2.5 text-center ${stat.accent ? "bg-primary/[0.08]" : "bg-foreground/5"}`}
+              className={`flex flex-col items-center gap-1 rounded-2xl px-3 py-3 text-center ${
+                stat.accent ? "bg-gradient-to-b from-primary/[0.16] via-primary/[0.05] to-transparent" : "bg-foreground/5"
+              }`}
             >
-              <span className="flex items-center justify-center text-primary [&_svg]:size-3.5">{stat.icon}</span>
-              <div className="mt-0.5 text-lg font-bold tabular-nums text-foreground">{stat.value}</div>
-              <div className="text-[10px] leading-tight text-muted-foreground">{stat.label}</div>
+              <span
+                className={`flex size-8 items-center justify-center rounded-xl text-primary [&_svg]:size-4 ${
+                  stat.accent ? "bg-primary/15" : "bg-primary/10"
+                }`}
+              >
+                {stat.icon}
+              </span>
+              <div className="font-instrument text-2xl italic leading-none tabular-nums text-primary">{stat.value}</div>
+              <div className="text-[10px] font-semibold leading-tight text-foreground">{stat.label}</div>
             </div>
           ))}
         </div>
 
-        <div className="mt-3 min-h-0 flex-1 overflow-hidden">
+        <div className="mt-3 min-h-0 flex-1 overflow-y-auto pr-1">
           {board ? (
             collectors.length === 0 ? (
               <BoardMessage icon={<BinocularsIcon />} title={t("empty.title")} description={t("empty.description")} />
             ) : (
-              <ul className="flex h-full flex-col gap-1.5 overflow-hidden">
+              <ul className="flex flex-col gap-1.5 rounded-2xl bg-muted p-2">
                 {collectors.map((collector, index) => (
                   <CollectorRow
                     key={collector.did}
@@ -640,6 +614,12 @@ const RANK_TIERS: Record<number, string> = {
   3: "bg-orange-400/20 text-orange-700 dark:text-orange-300",
 };
 
+const TOP_ROW_BORDERS: Record<number, string> = {
+  1: "border-primary",
+  2: "border-primary/60",
+  3: "border-primary/30",
+};
+
 function CollectorRow({
   rank,
   leader,
@@ -665,10 +645,8 @@ function CollectorRow({
         target="_blank"
         rel="noopener noreferrer"
         aria-label={t("openCollector")}
-        className={`group flex items-center gap-3 rounded-2xl px-3 py-2 transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring ${
-          leader
-            ? "bg-gradient-to-r from-primary/[0.16] via-primary/[0.05] to-transparent ring-1 ring-primary/20"
-            : "bg-foreground/5 hover:bg-foreground/[0.08]"
+        className={`group flex items-center gap-3 rounded-2xl border-[3px] bg-background px-3 py-2 text-foreground transition-colors duration-200 hover:bg-background/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring [&_.truncate]:text-foreground/85 ${
+          TOP_ROW_BORDERS[rank] ?? "border-transparent"
         }`}
       >
         <span
@@ -681,14 +659,14 @@ function CollectorRow({
         </span>
 
         <div className="min-w-0 flex-1">
-          <span className="flex min-w-0 items-center gap-1.5 text-sm font-semibold text-foreground">
+          <span className="flex min-w-0 items-center gap-1.5 text-lg font-medium text-foreground">
             <AuthorInline did={did} nameOverride={name} avatarRefOverride={avatarRef} />
           </span>
           <OrgLabel org={org} />
         </div>
 
         <span className="shrink-0 text-right">
-          <span className="block text-sm font-bold tabular-nums text-primary">{formatNumber(count)}</span>
+          <span className="font-instrument block text-sm italic leading-none tabular-nums text-primary">{formatNumber(count)}</span>
         </span>
 
         <ChevronRightIcon
@@ -703,7 +681,9 @@ function CollectorRow({
 /** Subtle organisation-membership chip shown under a collector's name. */
 function OrgLabel({ org }: { org?: CollectorOrg }) {
   const t = useTranslations("marketplace.bioblitz.board.org");
-  if (!org || !org.isOrganization) return null;
+  if (!org || !org.isOrganization) {
+    return <span className="mt-0.5 inline-flex text-[11px] font-medium leading-none text-muted-foreground">{t("account")}</span>;
+  }
   const typeLabel =
     org.orgType && KNOWN_ORG_TYPES.has(org.orgType) ? t(`types.${org.orgType}`) : t("label");
   const parts = [typeLabel];

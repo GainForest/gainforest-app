@@ -338,6 +338,7 @@
       "rankAriaLabel": "Peringkat {rank}",
       "org": {
         "label": "Organisasi",
+        "account": "Akun pribadi",
         "members": "{count, plural, one {# anggota} other {# anggota}}",
         "types": {
           "nonprofit": "Nirlaba",
