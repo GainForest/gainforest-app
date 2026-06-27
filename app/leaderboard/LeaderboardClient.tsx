@@ -15,7 +15,7 @@ import {
   UsersRoundIcon,
   WalletIcon,
 } from "lucide-react";
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { parseAsStringEnum, useQueryState } from "nuqs";
 import {
   Select,
@@ -27,7 +27,6 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { AuthorInline } from "../_components/AuthorChip";
 import { PreferredAccountLink } from "../_components/PreferredLinks";
-import { PictureHero } from "../_components/PictureHero";
 import { fetchReceipts, type FundingReceipt } from "../_lib/dashboard";
 import { formatCompactUsd } from "../_lib/format";
 
@@ -52,7 +51,6 @@ type LeaderboardResult = {
   totalDonationCount: number;
 };
 
-const PERIODS: Period[] = ["all", "month", "week"];
 const DONOR_FILTER_VALUES: DonorFilter[] = ["all", "anonymous", "known"];
 const SORT_VALUES: SortMode[] = ["total-raised", "donation-count", "recent-donation"];
 const QUERY_STATE_OPTIONS = { history: "replace", scroll: false, shallow: true } as const;
@@ -67,13 +65,12 @@ const SORT_TRANSLATION_KEYS: Record<SortMode, "totalRaised" | "donationCount" | 
   "recent-donation": "recentDonation",
 };
 
-export function LeaderboardClient({ embedded = false }: { embedded?: boolean }) {
+// Body-only leaderboard: the donations hero, view switcher and period filter
+// live in DonationsHub, so this renders just the donor-type/sort controls, the
+// summary strip and the ranked donor list for the period it's handed.
+export function LeaderboardBody({ period }: { period: Period }) {
   const [receipts, setReceipts] = useState<FundingReceipt[] | null>(null);
   const [error, setError] = useState(false);
-  const [period, setPeriod] = useQueryState(
-    "period",
-    parseAsStringEnum<Period>(PERIODS).withDefault("all").withOptions(QUERY_STATE_OPTIONS),
-  );
   const [donorFilter, setDonorFilter] = useQueryState(
     "donors",
     parseAsStringEnum<DonorFilter>(DONOR_FILTER_VALUES).withDefault("all").withOptions(QUERY_STATE_OPTIONS),
@@ -110,21 +107,25 @@ export function LeaderboardClient({ embedded = false }: { embedded?: boolean }) 
     return aggregateToLeaderboard(receipts, { period: "all", limit: 100, donorFilter: "all", sortBy: "total-raised" });
   }, [receipts]);
 
+  const loading = receipts === null && !error;
+
   return (
-    <LeaderboardShell
-      embedded={embedded}
-      period={period}
-      onPeriodChange={(nextPeriod) => void setPeriod(nextPeriod)}
-      donorFilter={donorFilter}
-      onDonorFilterChange={(nextDonorFilter) => void setDonorFilter(nextDonorFilter)}
-      sortBy={sortBy}
-      onSortChange={(nextSort) => void setSortBy(nextSort)}
-      loading={receipts === null && !error}
-      totalDonors={defaultTotals?.totalDonorsCount ?? 0}
-      totalRaised={defaultTotals?.totalAmountSum ?? 0}
-      totalProjectsSupported={defaultTotals?.totalProjectsSupported ?? 0}
-      totalDonationCount={defaultTotals?.totalDonationCount ?? 0}
-    >
+    <>
+      <div className="mb-4 grid gap-2.5 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
+        <DonorTypeTabs donorFilter={donorFilter} onDonorFilterChange={(nextDonorFilter) => void setDonorFilter(nextDonorFilter)} />
+        <SortControl sortBy={sortBy} onSortChange={(nextSort) => void setSortBy(nextSort)} />
+      </div>
+
+      <div className="mb-4">
+        <StatsSummary
+          totalDonors={defaultTotals?.totalDonorsCount ?? 0}
+          totalRaised={defaultTotals?.totalAmountSum ?? 0}
+          totalProjectsSupported={defaultTotals?.totalProjectsSupported ?? 0}
+          totalDonationCount={defaultTotals?.totalDonationCount ?? 0}
+          loading={loading}
+        />
+      </div>
+
       {error ? (
         <LeaderboardError />
       ) : receipts === null ? (
@@ -132,36 +133,7 @@ export function LeaderboardClient({ embedded = false }: { embedded?: boolean }) 
       ) : (
         <LeaderboardGrid entries={leaderboard?.entries ?? []} />
       )}
-    </LeaderboardShell>
-  );
-}
-
-function PeriodChips({ period, onPeriodChange }: { period: Period; onPeriodChange: (period: Period) => void }) {
-  const t = useTranslations("marketplace.leaderboard.periods");
-  // Matches the Donations overview PeriodFilter so the hero control is identical
-  // across the Overview ↔ Leaderboard switch.
-  return (
-    <div className="flex items-center gap-1 rounded-full bg-muted/55 p-1 shadow-sm shadow-primary/5 ring-1 ring-foreground/5 backdrop-blur">
-      {PERIODS.map((option) => {
-        const isSelected = period === option;
-        return (
-          <button
-            key={option}
-            type="button"
-            aria-pressed={isSelected}
-            onClick={() => onPeriodChange(option)}
-            className={cn(
-              "rounded-full px-3.5 py-1.5 text-sm font-medium transition-all duration-200",
-              isSelected
-                ? "bg-primary text-primary-foreground shadow-sm shadow-primary/20"
-                : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
-            )}
-          >
-            {t(option)}
-          </button>
-        );
-      })}
-    </div>
+    </>
   );
 }
 
@@ -287,71 +259,6 @@ function StatsSummary({
         </div>
       ))}
     </div>
-  );
-}
-
-function LeaderboardShell({
-  embedded = false,
-  period = "all",
-  onPeriodChange,
-  donorFilter = "all",
-  onDonorFilterChange,
-  sortBy = "total-raised",
-  onSortChange,
-  totalDonors = 0,
-  totalRaised = 0,
-  totalProjectsSupported = 0,
-  totalDonationCount = 0,
-  loading = false,
-  children,
-}: {
-  embedded?: boolean;
-  period?: Period;
-  onPeriodChange: (period: Period) => void;
-  donorFilter?: DonorFilter;
-  onDonorFilterChange: (donorFilter: DonorFilter) => void;
-  sortBy?: SortMode;
-  onSortChange: (sortBy: SortMode) => void;
-  totalDonors?: number;
-  totalRaised?: number;
-  totalProjectsSupported?: number;
-  totalDonationCount?: number;
-  loading?: boolean;
-  children?: ReactNode;
-}) {
-  const t = useTranslations("marketplace.leaderboard.hero");
-  return (
-    <section className={`bg-background pb-20 md:pb-28 ${embedded ? "" : "-mt-14"}`}>
-      <PictureHero
-        lightSrc="/assets/media/images/leaderboard/hero-landscape-light@2x.webp"
-        darkSrc="/assets/media/images/leaderboard/hero-landscape-dark@2x.webp"
-        eyebrow={t("eyebrow")}
-        icon={<TrophyIcon />}
-        title={t("titlePrefix")}
-        accent={t("titleEmphasis")}
-        lede={t("description")}
-        actions={<PeriodChips period={period} onPeriodChange={onPeriodChange} />}
-      />
-
-      <div className="relative z-10 mx-auto max-w-6xl px-6 pt-6">
-        <div className="mb-4 grid gap-2.5 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
-          <DonorTypeTabs donorFilter={donorFilter} onDonorFilterChange={onDonorFilterChange} />
-          <SortControl sortBy={sortBy} onSortChange={onSortChange} />
-        </div>
-
-        <div className="mb-4">
-          <StatsSummary
-            totalDonors={totalDonors}
-            totalRaised={totalRaised}
-            totalProjectsSupported={totalProjectsSupported}
-            totalDonationCount={totalDonationCount}
-            loading={loading}
-          />
-        </div>
-
-        {children}
-      </div>
-    </section>
   );
 }
 

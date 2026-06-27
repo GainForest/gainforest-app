@@ -55,12 +55,8 @@ import { formatCompact, formatCompactUsd, formatNumber, formatUsd } from "../_li
 import { AuthorInline } from "./AuthorChip";
 import { PreferredAccountLink, PreferredBumicertLink } from "./PreferredLinks";
 import { StatsTile } from "./StatsTile";
-import { PictureHero } from "./PictureHero";
-
-const PERIODS: Period[] = ["all", "month", "week"];
 
 const GRANULARITIES: TimeGranularity[] = ["day", "week", "month"]; 
-const PERIOD_VALUES: Period[] = ["all", "month", "week"];
 const SORT_DIRECTIONS: Array<"asc" | "desc"> = ["asc", "desc"];
 const DONOR_SORT_KEYS: Array<"rank" | "totalAmount" | "donationCount" | "lastDonatedAt"> = ["rank", "totalAmount", "donationCount", "lastDonatedAt"];
 const ORG_SORT_KEYS: Array<"totalRaised" | "bumicertCount" | "donorCount"> = ["totalRaised", "bumicertCount", "donorCount"];
@@ -97,8 +93,10 @@ const itemVariants = {
   },
 };
 
-export function Dashboard({ embedded = false }: { embedded?: boolean }) {
-  const { period, setPeriod } = useDashboardPeriod();
+// Body-only dashboard: the donations hero, view switcher and period filter now
+// live in DonationsHub, so this renders just the KPI/chart/table content for the
+// period it's handed. Receipts and geo data are fetched here.
+export function DashboardBody({ period }: { period: Period }) {
   const [granularity, setGranularity] = useQueryState(
     "granularity",
     parseAsStringEnum<TimeGranularity>(GRANULARITIES).withDefault("day").withOptions(QUERY_STATE_OPTIONS),
@@ -154,98 +152,39 @@ export function Dashboard({ embedded = false }: { embedded?: boolean }) {
   const perOrg = useMemo(() => computePerOrg(periodFiltered), [periodFiltered]);
   const recentTx = useMemo(() => computeRecentTransactions(allReceipts, Number.POSITIVE_INFINITY), [allReceipts]);
 
+  if (error) return <DashboardError />;
+  if (receipts === null) return <DashboardSkeleton />;
+
   return (
-    <DashboardShell embedded={embedded} periodFilter={<PeriodFilter period={period} onPeriodChange={(nextPeriod) => void setPeriod(nextPeriod)} />}>
-      {error ? (
-        <DashboardError />
-      ) : receipts === null ? (
-        <DashboardSkeleton />
-      ) : (
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          animate="show"
-          className="flex flex-col gap-12"
-        >
-          <motion.div variants={itemVariants}>
-            <KPISummary kpis={kpis} geoStats={geoStats} geoLoading={geoLoading} />
-          </motion.div>
-          <motion.div variants={itemVariants}>
-            <DonationsVolumeChart
-              data={timeSeries}
-              granularity={granularity}
-              onGranularityChange={(nextGranularity) => void setGranularity(nextGranularity)}
-            />
-          </motion.div>
-          <motion.div variants={itemVariants} className="flex flex-col gap-6 lg:flex-row">
-            <div className="min-w-0 flex-1">
-              <TopDonorsTable rows={topDonors} />
-            </div>
-            <div className="flex min-w-0 flex-col gap-6 lg:w-[42%]">
-              <TopCountriesTable stats={geoStats} loading={geoLoading} />
-              <OrganizationsTable rows={perOrg} />
-            </div>
-          </motion.div>
-          <motion.div variants={itemVariants}>
-            <RecentTransactionsTable rows={recentTx} />
-          </motion.div>
-        </motion.div>
-      )}
-    </DashboardShell>
-  );
-}
-
-function DashboardShell({ children, periodFilter, embedded = false }: { children: React.ReactNode; periodFilter: React.ReactNode; embedded?: boolean }) {
-  const t = useTranslations("marketplace.dashboard.hero");
-  return (
-    <section className={`bg-background pb-20 md:pb-28 ${embedded ? "" : "-mt-14"}`}>
-      <PictureHero
-        lightSrc="/assets/media/images/donations/donations-hero-light@2x.webp"
-        darkSrc="/assets/media/images/donations/donations-hero-dark@2x.webp"
-        imageAlt={t("imageAlt")}
-        eyebrow={t("eyebrow")}
-        icon={<BarChart3Icon />}
-        title={t("title")}
-        accent={t("accent")}
-        lede={t("lede")}
-        actions={periodFilter}
-      />
-
-      <div className="relative z-10 mx-auto max-w-6xl px-6 pt-6">
-        {children}
-      </div>
-    </section>
-  );
-}
-
-function useDashboardPeriod() {
-  const [period, setPeriod] = useQueryState(
-    "period",
-    parseAsStringEnum<Period>(PERIOD_VALUES).withDefault("all").withOptions(QUERY_STATE_OPTIONS),
-  );
-
-  return { period, setPeriod };
-}
-
-function PeriodFilter({ period, onPeriodChange }: { period: Period; onPeriodChange: (period: Period) => void }) {
-  const t = useTranslations("marketplace.dashboard.periods");
-  return (
-    <div className={PILL_GROUP}>
-      {PERIODS.map((item) => {
-        const active = period === item;
-        return (
-          <button
-            key={item}
-            type="button"
-            aria-pressed={active}
-            onClick={() => onPeriodChange(item)}
-            className={pillButton(active)}
-          >
-            {t(item)}
-          </button>
-        );
-      })}
-    </div>
+    <motion.div
+      variants={containerVariants}
+      initial="hidden"
+      animate="show"
+      className="flex flex-col gap-10"
+    >
+      <motion.div variants={itemVariants}>
+        <KPISummary kpis={kpis} geoStats={geoStats} geoLoading={geoLoading} />
+      </motion.div>
+      <motion.div variants={itemVariants}>
+        <DonationsVolumeChart
+          data={timeSeries}
+          granularity={granularity}
+          onGranularityChange={(nextGranularity) => void setGranularity(nextGranularity)}
+        />
+      </motion.div>
+      <motion.div variants={itemVariants} className="flex flex-col gap-6 lg:flex-row">
+        <div className="min-w-0 flex-1">
+          <TopDonorsTable rows={topDonors} />
+        </div>
+        <div className="flex min-w-0 flex-col gap-6 lg:w-[42%]">
+          <TopCountriesTable stats={geoStats} loading={geoLoading} />
+          <OrganizationsTable rows={perOrg} />
+        </div>
+      </motion.div>
+      <motion.div variants={itemVariants}>
+        <RecentTransactionsTable rows={recentTx} />
+      </motion.div>
+    </motion.div>
   );
 }
 
@@ -797,7 +736,7 @@ function TableSkeleton() {
 
 function DashboardSkeleton() {
   return (
-    <div className="flex flex-col gap-12">
+    <div className="flex flex-col gap-10">
       {/* KPI tiles — mirror StatsTile: icon chip + value on one row, label below. */}
       <div className="grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-4">
         {Array.from({ length: 6 }).map((_, index) => (
