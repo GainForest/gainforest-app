@@ -754,7 +754,7 @@ function AuthenticatedMenu({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 6 }}
             transition={{ duration: 0.15, ease: [0.25, 0.1, 0.25, 1] }}
-            className="absolute top-full right-0 z-[1000] mt-2 w-[min(22rem,calc(100vw-1.5rem))] overflow-hidden rounded-2xl border border-border bg-background/95 shadow-xl shadow-black/10 backdrop-blur-sm"
+            className="absolute top-full right-0 z-[1000] mt-2 w-[min(22rem,calc(100vw-1.5rem))] overflow-hidden rounded-2xl border border-border bg-background shadow-xl shadow-black/10"
           >
             <div className="border-b border-border px-3 py-3">
               <p className="text-sm font-medium text-foreground truncate">{displayLabel}</p>
