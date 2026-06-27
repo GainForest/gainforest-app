@@ -1289,5 +1289,21 @@
     "pauseSound": "Pause sound",
     "natureSoundRecording": "Nature sound recording",
     "unidentifiedSighting": "Unidentified sighting"
+  },
+  "measurements": {
+    "title": "Measurements",
+    "count": "{count, plural, one {# measurement} other {# measurements}}",
+    "fields": {
+      "dbh": "DBH",
+      "height": "Height",
+      "rootCollarDiameter": "Root collar diameter",
+      "canopyCover": "Canopy cover",
+      "girth": "Girth",
+      "stemCount": "Stem count",
+      "estimatedAge": "Estimated age",
+      "bodyMass": "Body mass",
+      "totalLength": "Total length",
+      "groupSize": "Group size"
+    }
   }
 }

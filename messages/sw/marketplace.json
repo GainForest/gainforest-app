@@ -1289,5 +1289,21 @@
     "pauseSound": "Sitisha sauti",
     "natureSoundRecording": "Rekodi ya sauti ya asili",
     "unidentifiedSighting": "Uchunguzi ambao haujatambuliwa"
+  },
+  "measurements": {
+    "title": "Vipimo",
+    "count": "{count, plural, one {kipimo #} other {vipimo #}}",
+    "fields": {
+      "dbh": "DBH",
+      "height": "Urefu",
+      "rootCollarDiameter": "Kipenyo cha shingo ya mzizi",
+      "canopyCover": "Kifuniko cha dari",
+      "girth": "Mzingo",
+      "stemCount": "Idadi ya vigogo",
+      "estimatedAge": "Umri unaokadiriwa",
+      "bodyMass": "Uzito wa mwili",
+      "totalLength": "Urefu jumla",
+      "groupSize": "Ukubwa wa kundi"
+    }
   }
 }

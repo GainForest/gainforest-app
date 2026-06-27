@@ -5,13 +5,16 @@ import type { Map as LeafletMap, Marker, TileLayer } from "leaflet";
 import Image from "next/image";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { ArrowUpRightIcon, AudioLinesIcon, CalendarRangeIcon, CheckIcon, HeartIcon, ImageOffIcon, Layers3Icon, Loader2Icon, Maximize2Icon, MapPinIcon, PencilIcon, Share2Icon, Trash2Icon, UsersIcon, XIcon } from "lucide-react";
+import { ArrowUpRightIcon, AudioLinesIcon, CalendarRangeIcon, CheckIcon, HeartIcon, ImageOffIcon, Layers3Icon, Loader2Icon, Maximize2Icon, MapPinIcon, PencilIcon, RulerIcon, Share2Icon, Trash2Icon, UsersIcon, XIcon } from "lucide-react";
 import {
+  fetchMeasurementsByOccurrence,
   fetchObservationMedia,
   fetchRecordByUri,
   fetchRecordDetail,
+  summarizeObservationMeasurements,
   type BumicertRecord,
   type ExplorerRecord,
+  type ObservationMeasurementFact,
   type ObservationMediaItem,
   type RecordDetail,
   type DetailSection,
@@ -66,6 +69,7 @@ export function RecordDrawer({
   const [resolvedOccurrenceAudioUrl, setResolvedOccurrenceAudioUrl] = useState<string | null>(null);
   const [detail, setDetail] = useState<RecordDetail | null>(null);
   const [occurrenceMedia, setOccurrenceMedia] = useState<ObservationMediaItem[] | null>(null);
+  const [occurrenceMeasurements, setOccurrenceMeasurements] = useState<ObservationMeasurementFact[]>([]);
   const [authSession, setAuthSession] = useState<AuthSession | null>(null);
   const [groupMemberships, setGroupMemberships] = useState<CgsGroupMembership[]>([]);
   const [isEditingOccurrence, setIsEditingOccurrence] = useState(false);
@@ -165,6 +169,16 @@ export function RecordDrawer({
     fetchObservationMedia(record.did, record.atUri, ctrl.signal)
       .then((items) => setOccurrenceMedia(items))
       .catch(() => setOccurrenceMedia([]));
+    return () => ctrl.abort();
+  }, [record]);
+
+  useEffect(() => {
+    setOccurrenceMeasurements([]);
+    if (!record || record.kind !== "occurrence") return;
+    const ctrl = new AbortController();
+    fetchMeasurementsByOccurrence(record.atUri, ctrl.signal)
+      .then((items) => setOccurrenceMeasurements(summarizeObservationMeasurements(items)))
+      .catch(() => setOccurrenceMeasurements([]));
     return () => ctrl.abort();
   }, [record]);
 
@@ -481,6 +495,10 @@ export function RecordDrawer({
             <ObservationMediaStrip record={record} media={occurrenceMedia} fallbackImageUrl={heroUrl} audioUrl={occurrenceAudioUrl} />
           )}
 
+          {record.kind === "occurrence" && occurrenceMeasurements.length > 0 && (
+            <ObservationMeasurementsPanel facts={occurrenceMeasurements} />
+          )}
+
           {record.kind === "occurrence" && canManageOccurrence && (
             <ObservationOwnerControls
               draft={occurrenceDraft}
@@ -641,6 +659,31 @@ function ObservationMediaStrip({
           </div>
         ))}
       </div>
+    </div>
+  );
+}
+
+function ObservationMeasurementsPanel({ facts }: { facts: ObservationMeasurementFact[] }) {
+  const t = useTranslations("marketplace.measurements");
+  return (
+    <div className="mt-5 rounded-2xl border border-border-soft bg-surface/60 p-3.5">
+      <div className="mb-3 flex items-center justify-between gap-3">
+        <p className="text-[13px] font-medium text-foreground">{t("title")}</p>
+        <span className="inline-flex items-center gap-1 rounded-full bg-background px-2.5 py-1 text-[12px] font-medium text-muted-foreground">
+          <RulerIcon className="h-3.5 w-3.5" aria-hidden />
+          {t("count", { count: facts.length })}
+        </span>
+      </div>
+      <dl className="grid grid-cols-2 gap-x-4 gap-y-3">
+        {facts.map((fact, index) => (
+          <div key={`${fact.key ?? fact.label ?? "m"}-${index}`}>
+            <dt className="text-[11px] font-medium uppercase tracking-[0.08em] text-foreground/45">
+              {fact.key ? t(`fields.${fact.key}`) : fact.label ?? ""}
+            </dt>
+            <dd className="mt-1 text-[14px] leading-[1.45] text-foreground">{fact.value}</dd>
+          </div>
+        ))}
+      </dl>
     </div>
   );
 }

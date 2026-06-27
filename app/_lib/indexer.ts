@@ -4548,6 +4548,204 @@ export async function fetchObservationMediaCounts(
   return counts;
 }
 
+// ── 8b. Measurements attached to a single observation ──────────────────────
+//
+// Trees (and any sighting that carries field data) are occurrences with one or
+// more linked measurement records. These helpers read those measurements so the
+// values can be shown inline on the sighting itself — both on the gallery card
+// and the detail view — instead of living in a separate "measurements" tab.
+
+const OCCURRENCE_MEASUREMENT_NODE_FIELDS = `
+  did uri rkey cid createdAt occurrenceRef measuredBy measuredByID measurementDate measurementMethod measurementRemarks
+  result {
+    __typename
+    ... on AppGainforestDwcMeasurementFloraMeasurement {
+      dbh totalHeight basalDiameter canopyCoverPercent girth stemCount estimatedAge
+    }
+    ... on AppGainforestDwcMeasurementFaunaMeasurement { bodyMass totalLength groupSize }
+    ... on AppGainforestDwcMeasurementGenericMeasurement { measurements { measurementType measurementValue measurementUnit measurementMethod measurementRemarks measurementAccuracy } }
+  }
+`;
+
+const OCCURRENCE_MEASUREMENTS_QUERY = `
+  query ObservationMeasurements($occurrenceRef: String!, $first: Int!, $after: String) {
+    appGainforestDwcMeasurement(
+      where: { occurrenceRef: { eq: $occurrenceRef } }
+      first: $first
+      after: $after
+      sortDirection: DESC
+      sortBy: createdAt
+    ) {
+      pageInfo { hasNextPage endCursor }
+      edges { node { ${OCCURRENCE_MEASUREMENT_NODE_FIELDS} } }
+    }
+  }
+`;
+
+function isUnsupportedMeasurementError(error: unknown): boolean {
+  const message = error instanceof Error ? error.message.toLowerCase() : String(error ?? "").toLowerCase();
+  return message.includes("measurement") && (message.includes("cannot query") || message.includes("unknown field") || message.includes("namespace"));
+}
+
+/** Measurement records linked to one occurrence (its `occurrenceRef`). */
+export async function fetchMeasurementsByOccurrence(
+  occurrenceRef: string,
+  signal?: AbortSignal,
+): Promise<TreeMeasurementRecord[]> {
+  if (!occurrenceRef) return [];
+  const all: TreeMeasurementRecord[] = [];
+  let cursor: string | null = null;
+  try {
+    for (let page = 0; page < 10; page += 1) {
+      type MeasurementPage = { appGainforestDwcMeasurement?: Connection<RawTreeMeasurementNode> };
+      const data: MeasurementPage | null = await indexerQuery<MeasurementPage>(
+        OCCURRENCE_MEASUREMENTS_QUERY,
+        { occurrenceRef, first: 50, after: cursor },
+        signal,
+      );
+      const conn: Connection<RawTreeMeasurementNode> | undefined = data?.appGainforestDwcMeasurement;
+      const nodes = (conn?.edges ?? [])
+        .map((edge) => edge?.node)
+        .filter((node): node is RawTreeMeasurementNode => Boolean(node?.did && node?.uri && node?.rkey));
+      all.push(...nodes.map(mapTreeMeasurement));
+      if (!conn?.pageInfo?.hasNextPage || !conn.pageInfo.endCursor) break;
+      cursor = conn.pageInfo.endCursor;
+    }
+  } catch (error) {
+    if (isUnsupportedMeasurementError(error)) return [];
+    throw error;
+  }
+  return all;
+}
+
+/** Measurements for many occurrences at once, keyed by `occurrenceRef`. Used by
+ *  the gallery so each card can show its sighting's measurements without N
+ *  round-trips. */
+export async function fetchObservationMeasurements(
+  occurrenceRefs: string[],
+  signal?: AbortSignal,
+): Promise<Map<string, TreeMeasurementRecord[]>> {
+  const byOccurrence = new Map<string, TreeMeasurementRecord[]>();
+  const unique = Array.from(new Set(occurrenceRefs.filter(Boolean)));
+  if (unique.length === 0) return byOccurrence;
+  try {
+    for (let start = 0; start < unique.length; start += 20) {
+      const batch = unique.slice(start, start + 20);
+      const query = `query ObservationMeasurementsBatch {\n${batch
+        .map((uri, index) =>
+          `m${index}: appGainforestDwcMeasurement(first: 20, where: { occurrenceRef: { eq: ${JSON.stringify(uri)} } }) { edges { node { ${OCCURRENCE_MEASUREMENT_NODE_FIELDS} } } }`,
+        )
+        .join("\n")}\n}`;
+      const data = await indexerQuery<Record<string, Connection<RawTreeMeasurementNode> | null>>(query, {}, signal);
+      batch.forEach((uri, index) => {
+        const conn = data?.[`m${index}`];
+        const nodes = (conn?.edges ?? [])
+          .map((edge) => edge?.node)
+          .filter((node): node is RawTreeMeasurementNode => Boolean(node?.did && node?.uri && node?.rkey));
+        byOccurrence.set(uri, nodes.map(mapTreeMeasurement));
+      });
+    }
+  } catch (error) {
+    if (isUnsupportedMeasurementError(error)) return byOccurrence;
+    throw error;
+  }
+  return byOccurrence;
+}
+
+/** A single display-ready measurement value for an observation. */
+export type ObservationMeasurementFact = {
+  /** Stable key for a well-known field, used for translated labels. Null for
+   *  free-form (generic) measurements, which carry their own label in `label`. */
+  key: string | null;
+  /** Human label for free-form generic measurements (user data, not translated). */
+  label: string | null;
+  /** Display value, with any unit already appended. */
+  value: string;
+};
+
+const FLORA_MEASUREMENT_FACTS: Array<{ field: string; key: string; unit?: string }> = [
+  { field: "dbh", key: "dbh", unit: "cm" },
+  { field: "totalHeight", key: "height", unit: "m" },
+  { field: "basalDiameter", key: "rootCollarDiameter", unit: "cm" },
+  { field: "canopyCoverPercent", key: "canopyCover", unit: "%" },
+  { field: "girth", key: "girth", unit: "cm" },
+  { field: "stemCount", key: "stemCount" },
+  { field: "estimatedAge", key: "estimatedAge", unit: "yr" },
+];
+
+const FAUNA_MEASUREMENT_FACTS: Array<{ field: string; key: string; unit?: string }> = [
+  { field: "bodyMass", key: "bodyMass", unit: "g" },
+  { field: "totalLength", key: "totalLength", unit: "cm" },
+  { field: "groupSize", key: "groupSize" },
+];
+
+function formatMeasurementValue(raw: unknown, unit?: string): string | null {
+  const text = typeof raw === "number" ? String(raw) : typeof raw === "string" ? raw.trim() : "";
+  if (!text) return null;
+  if (!unit) return text;
+  return unit === "%" ? `${text}%` : `${text} ${unit}`;
+}
+
+function isPlainMeasurementObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
+/** Flatten a sighting's measurement records into display-ready facts (deduped). */
+export function summarizeObservationMeasurements(records: TreeMeasurementRecord[]): ObservationMeasurementFact[] {
+  const facts: ObservationMeasurementFact[] = [];
+  const seen = new Set<string>();
+  const push = (fact: ObservationMeasurementFact) => {
+    const dedupeKey = `${fact.key ?? fact.label ?? ""}:${fact.value}`;
+    if (seen.has(dedupeKey)) return;
+    seen.add(dedupeKey);
+    facts.push(fact);
+  };
+
+  for (const record of records) {
+    const result = record.record.result;
+    if (!isPlainMeasurementObject(result)) continue;
+    const type = typeof result.$type === "string" ? result.$type : "";
+
+    if (type.includes("faunaMeasurement")) {
+      for (const def of FAUNA_MEASUREMENT_FACTS) {
+        const value = formatMeasurementValue(result[def.field], def.unit);
+        if (value) push({ key: def.key, label: null, value });
+      }
+      continue;
+    }
+
+    if (type.includes("genericMeasurement")) {
+      const entries = Array.isArray(result.measurements) ? result.measurements : [];
+      for (const entry of entries) {
+        if (!isPlainMeasurementObject(entry)) continue;
+        const measurementType = typeof entry.measurementType === "string" ? entry.measurementType.trim() : "";
+        const measurementValue = typeof entry.measurementValue === "string"
+          ? entry.measurementValue.trim()
+          : typeof entry.measurementValue === "number"
+            ? String(entry.measurementValue)
+            : "";
+        if (!measurementValue) continue;
+        const measurementUnit = typeof entry.measurementUnit === "string" ? entry.measurementUnit.trim() : "";
+        push({
+          key: null,
+          label: measurementType || null,
+          value: measurementUnit ? `${measurementValue} ${measurementUnit}` : measurementValue,
+        });
+      }
+      continue;
+    }
+
+    // Flora (the common tree case) and any unrecognised bundled measurement use
+    // the flora fields, which cover the standard tree data.
+    for (const def of FLORA_MEASUREMENT_FACTS) {
+      const value = formatMeasurementValue(result[def.field], def.unit);
+      if (value) push({ key: def.key, label: null, value });
+    }
+  }
+
+  return facts;
+}
+
 // ── 9. Bumicert evidence timeline attachments ─────────────────────────────
 
 export type TimelineAttachmentSubject = { uri: string | null; cid: string | null };

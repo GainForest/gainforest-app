@@ -3,10 +3,13 @@
 import { memo, useEffect, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent, type ReactNode } from "react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import { AudioLinesIcon, CheckIcon, Layers3Icon, Loader2Icon, PauseIcon, PlayIcon } from "lucide-react";
+import { AudioLinesIcon, CheckIcon, Layers3Icon, Loader2Icon, PauseIcon, PlayIcon, RulerIcon } from "lucide-react";
 import {
+  fetchObservationMeasurements,
   fetchObservationMediaCounts,
+  summarizeObservationMeasurements,
   type ExplorerRecord,
+  type ObservationMeasurementFact,
   type OccurrenceRecord,
 } from "../_lib/indexer";
 import { formatDate } from "../_lib/format";
@@ -36,6 +39,7 @@ export function ObservationGrid({
   selection?: ObservationSelection;
 }) {
   const counts = useObservationMediaCounts(records);
+  const measurements = useObservationMeasurements(records);
 
   return (
     <ul role="list" className={className}>
@@ -49,6 +53,7 @@ export function ObservationGrid({
           <ObservationCard
             record={record}
             mediaCount={Math.max(counts.get(record.atUri) ?? 0, record.media.length)}
+            measurements={measurements.get(record.atUri) ?? EMPTY_MEASUREMENTS}
             onOpen={onOpen}
             onFilterOwner={onFilterOwner}
             selection={selection}
@@ -57,6 +62,42 @@ export function ObservationGrid({
       ))}
     </ul>
   );
+}
+
+const EMPTY_MEASUREMENTS: ObservationMeasurementFact[] = [];
+
+// Field data (e.g. tree measurements) linked to the visible sightings, fetched
+// in one batched round-trip and keyed by occurrence so each card can show its
+// own measurements inline. Mirrors useObservationMediaCounts.
+function useObservationMeasurements(records: OccurrenceRecord[]): Map<string, ObservationMeasurementFact[]> {
+  const [facts, setFacts] = useState<Map<string, ObservationMeasurementFact[]>>(() => new Map());
+  const refsKey = useMemo(() => records.map((record) => record.atUri).sort().join("\n"), [records]);
+
+  useEffect(() => {
+    if (!records.length) {
+      setFacts(new Map());
+      return;
+    }
+    const ctrl = new AbortController();
+    fetchObservationMeasurements(records.map((record) => record.atUri), ctrl.signal)
+      .then((byOccurrence) => {
+        if (ctrl.signal.aborted) return;
+        const next = new Map<string, ObservationMeasurementFact[]>();
+        for (const [uri, items] of byOccurrence) {
+          const summary = summarizeObservationMeasurements(items);
+          if (summary.length > 0) next.set(uri, summary);
+        }
+        setFacts(next);
+      })
+      .catch((error) => {
+        if ((error as Error).name !== "AbortError") setFacts(new Map());
+      });
+    return () => ctrl.abort();
+    // `refsKey` is the stable primitive dependency for the current record set.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [refsKey]);
+
+  return facts;
 }
 
 function useObservationMediaCounts(records: OccurrenceRecord[]): Map<string, number> {
@@ -87,17 +128,20 @@ function useObservationMediaCounts(records: OccurrenceRecord[]): Map<string, num
 const ObservationCard = memo(function ObservationCard({
   record,
   mediaCount,
+  measurements,
   onOpen,
   onFilterOwner,
   selection,
 }: {
   record: OccurrenceRecord;
   mediaCount: number;
+  measurements: ObservationMeasurementFact[];
   onOpen: (record: ExplorerRecord) => void;
   onFilterOwner?: (did: string) => void;
   selection?: ObservationSelection;
 }) {
   const t = useTranslations("marketplace.observationGrid");
+  const measurementsT = useTranslations("marketplace.measurements");
   const ownerFilterT = useTranslations("marketplace.ownerFilter");
   const [imgError, setImgError] = useState(false);
   const [resolvedImageUrl, setResolvedImageUrl] = useState(record.imageUrl);
@@ -314,6 +358,25 @@ const ObservationCard = memo(function ObservationCard({
           <p className="mt-0.5 truncate text-[11.5px] leading-snug text-white/80">{place}</p>
         ) : null}
 
+        {measurements.length > 0 ? (
+          <div className="mt-1 flex flex-wrap items-center gap-1">
+            {measurements.slice(0, 2).map((fact, index) => (
+              <span
+                key={`${fact.key ?? fact.label ?? "m"}-${index}`}
+                className="inline-flex max-w-full items-center gap-1 truncate rounded-full bg-white/15 px-1.5 py-0.5 text-[10px] font-medium text-white/90 ring-1 ring-white/15 backdrop-blur-sm"
+              >
+                <RulerIcon className="h-2.5 w-2.5 shrink-0" aria-hidden />
+                <span className="truncate">{`${measurementFactLabel(fact, measurementsT)} ${fact.value}`.trim()}</span>
+              </span>
+            ))}
+            {measurements.length > 2 ? (
+              <span className="inline-flex items-center rounded-full bg-white/15 px-1.5 py-0.5 text-[10px] font-medium text-white/90 ring-1 ring-white/15 backdrop-blur-sm">
+                {`+${measurements.length - 2}`}
+              </span>
+            ) : null}
+          </div>
+        ) : null}
+
         {subtitle || date ? (
           <div className="grid grid-rows-[0fr] opacity-0 transition-all duration-300 ease-out group-hover:grid-rows-[1fr] group-hover:opacity-100 group-focus-visible:grid-rows-[1fr] group-focus-visible:opacity-100">
             <div className="overflow-hidden">
@@ -354,4 +417,12 @@ function occurrenceSecondaryName(record: OccurrenceRecord, t: ReturnType<typeof 
 
 function occurrencePlace(record: OccurrenceRecord): string | null {
   return [record.locality, record.country].filter(Boolean).join(", ") || null;
+}
+
+function measurementFactLabel(
+  fact: ObservationMeasurementFact,
+  t: ReturnType<typeof useTranslations<"marketplace.measurements">>,
+): string {
+  if (fact.key) return t(`fields.${fact.key}`);
+  return fact.label ?? "";
 }

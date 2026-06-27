@@ -1289,5 +1289,21 @@
     "pauseSound": "Pausar som",
     "natureSoundRecording": "Gravação de som da natureza",
     "unidentifiedSighting": "Avistamento não identificado"
+  },
+  "measurements": {
+    "title": "Medições",
+    "count": "{count, plural, one {# medição} other {# medições}}",
+    "fields": {
+      "dbh": "DAP",
+      "height": "Altura",
+      "rootCollarDiameter": "Diâmetro do colo",
+      "canopyCover": "Cobertura do dossel",
+      "girth": "Circunferência",
+      "stemCount": "Número de caules",
+      "estimatedAge": "Idade estimada",
+      "bodyMass": "Massa corporal",
+      "totalLength": "Comprimento total",
+      "groupSize": "Tamanho do grupo"
+    }
   }
 }

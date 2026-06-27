@@ -1289,5 +1289,21 @@
     "pauseSound": "Pausar sonido",
     "natureSoundRecording": "Grabación de sonido de la naturaleza",
     "unidentifiedSighting": "Avistamiento sin identificar"
+  },
+  "measurements": {
+    "title": "Mediciones",
+    "count": "{count, plural, one {# medición} other {# mediciones}}",
+    "fields": {
+      "dbh": "DAP",
+      "height": "Altura",
+      "rootCollarDiameter": "Diámetro del cuello de la raíz",
+      "canopyCover": "Cobertura del dosel",
+      "girth": "Circunferencia",
+      "stemCount": "Número de tallos",
+      "estimatedAge": "Edad estimada",
+      "bodyMass": "Masa corporal",
+      "totalLength": "Longitud total",
+      "groupSize": "Tamaño del grupo"
+    }
   }
 }

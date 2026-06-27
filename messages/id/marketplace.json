@@ -1289,5 +1289,21 @@
     "pauseSound": "Jeda suara",
     "natureSoundRecording": "Rekaman suara alam",
     "unidentifiedSighting": "Penampakan belum teridentifikasi"
+  },
+  "measurements": {
+    "title": "Pengukuran",
+    "count": "{count, plural, other {# pengukuran}}",
+    "fields": {
+      "dbh": "DBH",
+      "height": "Tinggi",
+      "rootCollarDiameter": "Diameter leher akar",
+      "canopyCover": "Tutupan kanopi",
+      "girth": "Lingkar batang",
+      "stemCount": "Jumlah batang",
+      "estimatedAge": "Perkiraan usia",
+      "bodyMass": "Massa tubuh",
+      "totalLength": "Panjang total",
+      "groupSize": "Ukuran kelompok"
+    }
   }
 }

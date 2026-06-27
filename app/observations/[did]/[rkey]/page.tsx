@@ -4,10 +4,13 @@ import Link from "next/link";
 import Image from "next/image";
 import { notFound, redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
-import { ArrowLeftIcon, ArrowUpRightIcon, CalendarIcon, LeafIcon, MapPinIcon } from "lucide-react";
+import { ArrowLeftIcon, ArrowUpRightIcon, CalendarIcon, LeafIcon, MapPinIcon, RulerIcon } from "lucide-react";
 import {
+  fetchMeasurementsByOccurrence,
   fetchObservationMedia,
   fetchRecordByUri,
+  summarizeObservationMeasurements,
+  type ObservationMeasurementFact,
   type ObservationMediaItem,
   type OccurrenceRecord,
 } from "../../../_lib/indexer";
@@ -60,12 +63,15 @@ export default async function ObservationDetailPage({ params }: { params: Observ
   const { record, did, rkey, urlIdentifier } = await loadObservation(params);
   const t = await getTranslations("marketplace.observationPage");
   const fieldsT = await getTranslations("marketplace.recordDrawer");
+  const measurementsT = await getTranslations("marketplace.measurements");
 
-  const [owner, media, resolvedAudio] = await Promise.all([
+  const [owner, media, resolvedAudio, measurementRecords] = await Promise.all([
     getAccountRouteData(did, urlIdentifier).catch(() => null),
     fetchObservationMedia(record.did, record.atUri).catch(() => [] as ObservationMediaItem[]),
     record.audioUrl ? Promise.resolve(record.audioUrl) : record.audioRef ? resolveBlobUrl(record.did, record.audioRef).catch(() => null) : Promise.resolve(null),
+    fetchMeasurementsByOccurrence(record.atUri).catch(() => []),
   ]);
+  const measurementFacts = summarizeObservationMeasurements(measurementRecords);
 
   // Canonicalise to the owner's handle URL when one is known (mirrors the Cert page).
   if (owner && owner.urlIdentifier !== urlIdentifier) {
@@ -175,6 +181,25 @@ export default async function ObservationDetailPage({ params }: { params: Observ
             <RecordLocationMap record={record} />
           </aside>
         </div>
+
+        {measurementFacts.length > 0 ? (
+          <section className="mt-10 border-t border-border-soft pt-8">
+            <h2 className="mb-5 flex items-center gap-2 text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
+              <RulerIcon className="h-3.5 w-3.5" aria-hidden />
+              {measurementsT("title")}
+            </h2>
+            <dl className="grid gap-x-6 gap-y-5 sm:grid-cols-2 lg:grid-cols-3">
+              {measurementFacts.map((fact, index) => (
+                <div key={`${fact.key ?? fact.label ?? "m"}-${index}`}>
+                  <dt className="text-[11px] font-medium uppercase tracking-[0.08em] text-foreground/45">
+                    {fact.key ? measurementsT(`fields.${fact.key}`) : fact.label ?? ""}
+                  </dt>
+                  <dd className="mt-1 text-[14.5px] leading-[1.5] text-foreground">{fact.value}</dd>
+                </div>
+              ))}
+            </dl>
+          </section>
+        ) : null}
 
         {fields.length > 0 ? (
           <section className="mt-10 border-t border-border-soft pt-8">
