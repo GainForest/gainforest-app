@@ -43,7 +43,9 @@ const instrument = Instrument_Serif({
 });
 
 const SITE_NAME = "GainForest";
-const OG_IMAGE = "/og/gainforest-og.png";
+// Versioned filename: social platforms (X/Telegram/Facebook) cache OG previews
+// by URL, so bump this suffix whenever the art changes to force a re-fetch.
+const OG_IMAGE = "/og/gainforest-og-2.png";
 const OG_ALT =
   "GainForest — certified impact for nature stewards. Fund regenerative projects directly, beside an aerial photo of humpback whales in turquoise water.";
 
