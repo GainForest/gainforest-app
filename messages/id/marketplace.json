@@ -1201,6 +1201,9 @@
       "description": "Buat dan kelola proyek Anda di GainForest."
     },
     "actions": {
+      "editProject": "Edit proyek",
+      "editProjectFor": "Edit {title}",
+      "viewProjectFor": "Buka {title}",
       "manageGallery": "Kelola galeri",
       "manageGalleryFor": "Kelola galeri untuk {title}",
       "manageObservations": "Observasi",

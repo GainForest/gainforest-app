@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { AnimatePresence, motion } from "framer-motion";
 import { parseAsString, parseAsStringEnum, useQueryStates } from "nuqs";
@@ -21,6 +22,7 @@ import {
   RotateCcwIcon,
   SearchIcon,
   SparklesIcon,
+  SquarePenIcon,
   Trash2Icon,
   TriangleAlertIcon,
   XIcon,
@@ -358,30 +360,32 @@ function ProjectCard({
   disabledReason?: string | null;
 }) {
   const t = useTranslations("marketplace.manageProjects.actions");
+  const router = useRouter();
   const hasImage = Boolean(project.imageUrl);
   const disabled = Boolean(disabledReason);
+  // Clicking the card now opens the public project page (better UX). Editing
+  // moved to an explicit "Edit project" button below.
+  const projectHref = localProjectHref(project.did, project.rkey);
 
   return (
     <motion.article
       layout
-      role="button"
+      role="link"
       tabIndex={0}
-      onClick={disabled ? undefined : onEdit}
+      onClick={() => router.push(projectHref)}
       onKeyDown={(event) => {
-        if (disabled) return;
         if (event.key === "Enter" || event.key === " ") {
           event.preventDefault();
-          onEdit();
+          router.push(projectHref);
         }
       }}
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.98 }}
       transition={{ duration: 0.35, delay: Math.min(index, 10) * 0.025, ease: [0.25, 0.1, 0.25, 1] }}
-      title={disabledReason ?? undefined}
+      aria-label={t("viewProjectFor", { title: project.title })}
       className={cn(
-        "group flex gap-3 rounded-2xl bg-card/45 px-1 py-3 transition-colors duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/45 sm:gap-4 sm:px-2 sm:py-4",
-        disabled ? "cursor-not-allowed opacity-75" : "cursor-pointer hover:bg-surface-sunken",
+        "group flex cursor-pointer gap-3 rounded-2xl bg-card/45 px-1 py-3 transition-colors duration-300 hover:bg-surface-sunken focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/45 sm:gap-4 sm:px-2 sm:py-4",
       )}
     >
       <div className="relative h-28 w-28 shrink-0 overflow-hidden rounded-xl bg-muted sm:h-36 sm:w-52">
@@ -405,21 +409,9 @@ function ProjectCard({
         <div className="min-w-0">
           <div className="flex items-start justify-between gap-3">
             <h2 className="line-clamp-2 font-instrument text-2xl italic leading-tight text-foreground sm:text-3xl">{project.title}</h2>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon-lg"
-              onClick={(event) => {
-                event.stopPropagation();
-                if (!disabled) onEdit();
-              }}
-              disabled={disabled}
-              title={disabledReason ?? undefined}
-              aria-label={`Edit ${project.title}`}
-              className="shrink-0 text-muted-foreground/60 hover:text-foreground"
-            >
+            <span aria-hidden className="shrink-0 text-muted-foreground/40 transition-colors group-hover:text-foreground/70">
               <ChevronRightIcon className="size-8" />
-            </Button>
+            </span>
           </div>
           {project.shortDescription ? (
             <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-muted-foreground">{project.shortDescription}</p>
@@ -428,7 +420,23 @@ function ProjectCard({
           )}
         </div>
 
-        <div className="mt-3 flex flex-wrap justify-end gap-2 pt-2">
+        <div className="mt-3 flex flex-wrap items-center justify-between gap-2 pt-2">
+          <Button
+            type="button"
+            variant="default"
+            size="sm"
+            className="h-8"
+            onClick={(event) => {
+              event.stopPropagation();
+              if (!disabled) onEdit();
+            }}
+            disabled={disabled}
+            title={disabledReason ?? undefined}
+            aria-label={t("editProjectFor", { title: project.title })}
+          >
+            <SquarePenIcon className="size-3.5" />
+            {t("editProject")}
+          </Button>
           <div className="flex shrink-0 flex-wrap gap-2">
             <Button asChild type="button" variant="outline" size="sm" className="h-8" onClick={(event) => event.stopPropagation()}>
               <Link href={observationsHref} aria-label={t("manageObservationsFor", { title: project.title })}>

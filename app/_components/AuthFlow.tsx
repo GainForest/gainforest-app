@@ -6,8 +6,10 @@ import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   ArrowRightIcon,
+  BinocularsIcon,
   CheckIcon,
   ChevronRightIcon,
+  FolderKanbanIcon,
   Loader2,
   LockIcon,
   LockOpenIcon,
@@ -28,7 +30,12 @@ import {
 import { useTranslations } from "next-intl";
 import type { CgsGroupMembership } from "@/app/(manage)/manage/_lib/cgs";
 import { accountIdentifierFromManagePath, type ManageAccountKind } from "@/lib/links";
-import { accountOrganizationsPath, accountPath, accountSettingsPath } from "@/app/account/_lib/account-route";
+import {
+  accountObservationsPath,
+  accountPath,
+  accountProjectsPath,
+  accountSettingsPath,
+} from "@/app/account/_lib/account-route";
 import {
   findSwitcherGroupByIdentifier,
   switcherGroupIdentifier,
@@ -628,6 +635,9 @@ function AuthenticatedMenu({
     ?? (activeContext.type === "group" ? activeContext.identifier || activeContext.did : null);
   // The active account's home is now its profile, where owners edit in place.
   const activeIdentifier = activeGroupIdentifier ?? personalCard?.handle?.trim() ?? session.did;
+  // Quick links always point at the *personal* account, regardless of which
+  // organization context is currently active.
+  const personalIdentifier = personalCard?.handle?.trim() ?? session.did;
   const profileHref = accountPath(activeIdentifier);
   const settingsHref = accountSettingsPath(activeIdentifier);
   const [invitations, setInvitations] = useState<MenuInvitation[]>([]);
@@ -874,12 +884,30 @@ function AuthenticatedMenu({
               <div className="my-2 h-px bg-border/60" />
 
               <Link
-                href={accountOrganizationsPath(personalCard?.handle?.trim() ?? session.did)}
+                href={accountObservationsPath(personalIdentifier)}
+                onClick={() => setOpen(false)}
+                className="flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm text-foreground transition-colors hover:bg-muted/60"
+              >
+                <BinocularsIcon className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                {sidebarT("profileRow.myObservations")}
+              </Link>
+
+              <Link
+                href={accountProjectsPath(personalIdentifier)}
+                onClick={() => setOpen(false)}
+                className="flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm text-foreground transition-colors hover:bg-muted/60"
+              >
+                <FolderKanbanIcon className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                {sidebarT("profileRow.myProjects")}
+              </Link>
+
+              <Link
+                href={accountPath(personalIdentifier)}
                 onClick={() => setOpen(false)}
                 className="flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm text-foreground transition-colors hover:bg-muted/60"
               >
                 <ShieldCheckIcon className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-                View all organizations
+                {sidebarT("profileRow.myOrganizations")}
               </Link>
 
               <Link

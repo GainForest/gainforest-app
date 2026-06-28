@@ -1201,6 +1201,9 @@
       "description": "Unda na simamia miradi yako kwenye GainForest."
     },
     "actions": {
+      "editProject": "Hariri mradi",
+      "editProjectFor": "Hariri {title}",
+      "viewProjectFor": "Fungua {title}",
       "manageGallery": "Dhibiti matunzio",
       "manageGalleryFor": "Dhibiti matunzio ya {title}",
       "manageObservations": "Uchunguzi",

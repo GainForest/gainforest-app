@@ -138,7 +138,10 @@
     "expand": "Bentangkan bilah sisi",
     "profileRow": {
       "viewProfile": "Lihat profil",
-      "fallbackName": "Profil Anda"
+      "fallbackName": "Profil Anda",
+      "myObservations": "Observasi saya",
+      "myProjects": "Proyek saya",
+      "myOrganizations": "Organisasi saya"
     }
   },
   "settings": {

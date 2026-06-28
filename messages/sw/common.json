@@ -138,7 +138,10 @@
     "expand": "Panua menyu ya kando",
     "profileRow": {
       "viewProfile": "Tazama wasifu",
-      "fallbackName": "Wasifu wako"
+      "fallbackName": "Wasifu wako",
+      "myObservations": "Uchunguzi wangu",
+      "myProjects": "Miradi yangu",
+      "myOrganizations": "Mashirika yangu"
     }
   },
   "settings": {

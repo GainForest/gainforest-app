@@ -1201,6 +1201,9 @@
       "description": "Crie e gerencie seus projetos no GainForest."
     },
     "actions": {
+      "editProject": "Editar projeto",
+      "editProjectFor": "Editar {title}",
+      "viewProjectFor": "Abrir {title}",
       "manageGallery": "Gerenciar galeria",
       "manageGalleryFor": "Gerenciar galeria de {title}",
       "manageObservations": "Observações",

@@ -138,7 +138,10 @@
     "expand": "Expandir barra lateral",
     "profileRow": {
       "viewProfile": "Ver perfil",
-      "fallbackName": "Seu perfil"
+      "fallbackName": "Seu perfil",
+      "myObservations": "Minhas observações",
+      "myProjects": "Meus projetos",
+      "myOrganizations": "Minhas organizações"
     }
   },
   "settings": {

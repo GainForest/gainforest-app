@@ -138,7 +138,10 @@
     "expand": "Expand sidebar",
     "profileRow": {
       "viewProfile": "View profile",
-      "fallbackName": "Your profile"
+      "fallbackName": "Your profile",
+      "myObservations": "My observations",
+      "myProjects": "My projects",
+      "myOrganizations": "My organizations"
     }
   },
   "settings": {
