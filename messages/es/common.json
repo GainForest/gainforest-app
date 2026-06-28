@@ -105,7 +105,8 @@
       "myProjects": "Proyectos",
       "myObservations": "Observaciones",
       "myTrees": "Árboles",
-      "myProfile": "Perfil"
+      "myProfile": "Perfil",
+      "feed": "Novedades"
     },
     "prompts": {
       "signInDescription": "Inicia sesión para gestionar tu cuenta y contenido.",
@@ -671,5 +672,39 @@
       "alreadyAcceptedTitle": "Ya aceptada",
       "alreadyAcceptedDescription": "Esta invitación ya fue aceptada."
     }
+  },
+  "feed": {
+    "meta": {
+      "title": "Actividad reciente",
+      "description": "Los proyectos, Certificados, avistamientos de naturaleza, organizaciones y donaciones más recientes en GainForest, en una sola transmisión en vivo."
+    },
+    "eyebrow": "Actividad en vivo",
+    "hero": {
+      "title": "Lo que está pasando en",
+      "accent": "GainForest",
+      "description": "Una transmisión en vivo de los proyectos, Certificados de impacto, avistamientos de naturaleza, organizaciones y donaciones más recientes, todo en un solo lugar."
+    },
+    "filters": {
+      "all": "Todo",
+      "project": "Proyectos",
+      "bumicert": "Certificados",
+      "observation": "Avistamientos",
+      "organization": "Organizaciones",
+      "donation": "Donaciones"
+    },
+    "verbs": {
+      "project": "publicó un proyecto",
+      "bumicert": "publicó un Certificado",
+      "observation": "compartió un avistamiento",
+      "organization": "registró una organización",
+      "donation": "hizo una donación"
+    },
+    "to": "a",
+    "anonymous": "Alguien",
+    "refresh": "Actualizar",
+    "retry": "Reintentar",
+    "error": "No se pudo cargar la actividad en este momento.",
+    "empty": "Todavía no hay actividad. ¡Sé el primero en compartir!",
+    "emptyFiltered": "Aún no hay actividad de este tipo."
   }
 }

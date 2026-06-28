@@ -105,7 +105,8 @@
       "myProjects": "Proyek",
       "myObservations": "Observasi",
       "myTrees": "Pohon",
-      "myProfile": "Profil"
+      "myProfile": "Profil",
+      "feed": "Aktivitas"
     },
     "prompts": {
       "signInDescription": "Masuk untuk mengelola akun dan konten Anda.",
@@ -671,5 +672,39 @@
       "alreadyAcceptedTitle": "Sudah diterima",
       "alreadyAcceptedDescription": "Undangan ini sudah diterima."
     }
+  },
+  "feed": {
+    "meta": {
+      "title": "Aktivitas terkini",
+      "description": "Proyek, Sertifikat, pengamatan alam, organisasi, dan donasi terbaru di GainForest, dalam satu aliran langsung."
+    },
+    "eyebrow": "Aktivitas langsung",
+    "hero": {
+      "title": "Apa yang terjadi di",
+      "accent": "GainForest",
+      "description": "Aliran langsung dari proyek, Sertifikat dampak, pengamatan alam, organisasi, dan donasi terbaru — semua dalam satu tempat."
+    },
+    "filters": {
+      "all": "Semua",
+      "project": "Proyek",
+      "bumicert": "Sertifikat",
+      "observation": "Pengamatan",
+      "organization": "Organisasi",
+      "donation": "Donasi"
+    },
+    "verbs": {
+      "project": "menerbitkan proyek",
+      "bumicert": "menerbitkan Sertifikat",
+      "observation": "berbagi pengamatan alam",
+      "organization": "mendaftarkan organisasi",
+      "donation": "memberi donasi"
+    },
+    "to": "untuk",
+    "anonymous": "Seseorang",
+    "refresh": "Segarkan",
+    "retry": "Coba lagi",
+    "error": "Tidak dapat memuat aktivitas saat ini.",
+    "empty": "Belum ada aktivitas. Jadilah yang pertama berbagi!",
+    "emptyFiltered": "Belum ada aktivitas jenis ini."
   }
 }

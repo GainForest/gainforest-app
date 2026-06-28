@@ -18,6 +18,7 @@ import {
   Loader2Icon,
   MenuIcon,
   MoonIcon,
+  NewspaperIcon,
   PlusIcon,
   Share2Icon,
   SparkleIcon,
@@ -83,6 +84,14 @@ const NAV_ITEMS: NavSection[] = [
     id: "explore",
     text: "EXPLORE",
     items: [
+      {
+        kind: "leaf",
+        id: "feed",
+        text: "Feed",
+        Icon: NewspaperIcon,
+        href: "/feed",
+        pathCheck: { startsWith: "/feed" },
+      },
       {
         kind: "leaf",
         id: "projects",

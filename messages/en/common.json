@@ -105,7 +105,8 @@
       "myProjects": "Projects",
       "myObservations": "Observations",
       "myTrees": "Trees",
-      "myProfile": "Profile"
+      "myProfile": "Profile",
+      "feed": "Feed"
     },
     "prompts": {
       "signInDescription": "Sign in to manage your account and content.",
@@ -671,5 +672,39 @@
       "alreadyAcceptedTitle": "Already accepted",
       "alreadyAcceptedDescription": "This invitation has already been accepted."
     }
+  },
+  "feed": {
+    "meta": {
+      "title": "Activity Feed",
+      "description": "The latest projects, Certs, nature sightings, organizations, and donations across GainForest, in one live stream."
+    },
+    "eyebrow": "Live activity",
+    "hero": {
+      "title": "What's happening on",
+      "accent": "GainForest",
+      "description": "A live stream of the newest projects, impact Certs, nature sightings, organizations, and donations — all in one place."
+    },
+    "filters": {
+      "all": "All",
+      "project": "Projects",
+      "bumicert": "Certs",
+      "observation": "Sightings",
+      "organization": "Organizations",
+      "donation": "Donations"
+    },
+    "verbs": {
+      "project": "published a project",
+      "bumicert": "published a Cert",
+      "observation": "shared a nature sighting",
+      "organization": "registered an organization",
+      "donation": "made a donation"
+    },
+    "to": "to",
+    "anonymous": "Someone",
+    "refresh": "Refresh feed",
+    "retry": "Try again",
+    "error": "Couldn't load the feed right now.",
+    "empty": "Nothing has happened yet. Be the first to share!",
+    "emptyFiltered": "No activity of this kind yet."
   }
 }

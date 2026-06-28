@@ -105,7 +105,8 @@
       "myProjects": "Miradi",
       "myObservations": "Uchunguzi",
       "myTrees": "Miti",
-      "myProfile": "Wasifu"
+      "myProfile": "Wasifu",
+      "feed": "Matukio"
     },
     "prompts": {
       "signInDescription": "Ingia ili kusimamia akaunti na maudhui yako.",
@@ -671,5 +672,39 @@
       "alreadyAcceptedTitle": "Tayari umekubaliwa",
       "alreadyAcceptedDescription": "Mwaliko huu tayari umekubaliwa."
     }
+  },
+  "feed": {
+    "meta": {
+      "title": "Shughuli za hivi punde",
+      "description": "Miradi, Vitambulisho, maonevu ya asili, mashirika na michango ya hivi karibuni kwenye GainForest, katika mtiririko mmoja wa moja kwa moja."
+    },
+    "eyebrow": "Shughuli zinazoendelea",
+    "hero": {
+      "title": "Kinachotokea kwenye",
+      "accent": "GainForest",
+      "description": "Mtiririko wa moja kwa moja wa miradi, Vitambulisho vya athari, maonevu ya asili, mashirika na michango ya hivi karibuni — yote mahali pamoja."
+    },
+    "filters": {
+      "all": "Yote",
+      "project": "Miradi",
+      "bumicert": "Vitambulisho",
+      "observation": "Maonevu",
+      "organization": "Mashirika",
+      "donation": "Michango"
+    },
+    "verbs": {
+      "project": "amechapisha mradi",
+      "bumicert": "amechapisha Kitambulisho",
+      "observation": "ameshiriki onevu la asili",
+      "organization": "amesajili shirika",
+      "donation": "ametoa mchango"
+    },
+    "to": "kwa",
+    "anonymous": "Mtu fulani",
+    "refresh": "Onyesha upya",
+    "retry": "Jaribu tena",
+    "error": "Haikuweza kupakia shughuli sasa hivi.",
+    "empty": "Bado hakuna shughuli. Kuwa wa kwanza kushiriki!",
+    "emptyFiltered": "Bado hakuna shughuli ya aina hii."
   }
 }
