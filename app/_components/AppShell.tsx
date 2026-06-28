@@ -38,10 +38,12 @@ import { cn } from "@/lib/utils";
 import {
   groupManageBasePath,
   groupManageTarget,
+  manageApiHref,
   manageHref,
   personalManageTarget,
   type ManageTarget,
 } from "@/lib/links";
+import { PROJECTS_CHANGED_EVENT, notifyProjectsChanged } from "../_lib/projects-events";
 import dynamic from "next/dynamic";
 import { stripLocaleFromPathname } from "@/lib/i18n/routing";
 import { AuthButton, SignInPrompt } from "./AuthFlow";
@@ -807,6 +809,7 @@ function AuthenticatedCreateProjectButton({
             onClose={closeModal}
             onSaved={() => {
               closeModal();
+              notifyProjectsChanged();
               router.push(projectsHref);
             }}
           />
@@ -917,9 +920,52 @@ function AuthenticatedManageContextLink({
   );
 }
 
+// Once the active account (the signed-in user or the selected organization)
+// already has at least one project, the sidebar "Create a project" card is
+// redundant — the Projects nav item and the in-page "Add" button cover further
+// creation — so we hide it. Until the check resolves we keep showing the card
+// so a first-time account never loses its obvious path to a first project.
+function useActiveContextHasProjects(sessionDid: string): boolean {
+  const [activeContext] = useActiveAccountContext(sessionDid);
+  const [hasProjects, setHasProjects] = useState(false);
+
+  const contextKind = activeContext.type === "group" ? "group" : "personal";
+  const contextDid = activeContext.did;
+
+  useEffect(() => {
+    let cancelled = false;
+    const load = () => {
+      const href = manageApiHref("/api/manage/projects", { kind: contextKind, did: contextDid });
+      void fetch(href, { cache: "no-store" })
+        .then((response) => (response.ok ? response.json() : null))
+        .then((data) => {
+          if (!cancelled) setHasProjects(Array.isArray(data) && data.length > 0);
+        })
+        .catch(() => {
+          if (!cancelled) setHasProjects(false);
+        });
+    };
+
+    // Re-show while we recheck a freshly selected account context.
+    setHasProjects(false);
+    load();
+    window.addEventListener(PROJECTS_CHANGED_EVENT, load);
+    return () => {
+      cancelled = true;
+      window.removeEventListener(PROJECTS_CHANGED_EVENT, load);
+    };
+  }, [contextKind, contextDid]);
+
+  return hasProjects;
+}
+
 function BumicertCreationCard({ sessionDid }: { sessionDid: string }) {
   const t = useTranslations("common.sidebar.creationCard");
   const collapsed = useSidebarCollapsed();
+  const hasProjects = useActiveContextHasProjects(sessionDid);
+
+  // Hide the create-project CTA once this account already has a project.
+  if (hasProjects) return null;
 
   if (collapsed) {
     return (

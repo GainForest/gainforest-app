@@ -34,6 +34,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { manageApiHref, manageHref, profileBasePath, type ManageTarget } from "@/lib/links";
 import { localProjectHref } from "@/app/_lib/urls";
+import { notifyProjectsChanged } from "@/app/_lib/projects-events";
 import { WORK_SCOPE_MESSAGE_KEYS, type KnownWorkScopeKey } from "@/app/_lib/work-scope-labels";
 import { canCreateRecord, canDeleteRecord, canUpdateRecord } from "../../_lib/cgs-permissions";
 import { createRecord, deleteRecord, getRecord, putRecord, uploadBlob } from "../../_lib/mutations";
@@ -142,6 +143,8 @@ export function ManageProjectsClient({ target }: { target: ManageTarget }) {
         return;
       }
       setProjects(data);
+      // Keep the sidebar's "Create a project" card in sync after creates/deletes.
+      notifyProjectsChanged();
     } catch {
       setError("Could not reach the server.");
       setProjects([]);
