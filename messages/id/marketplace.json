@@ -1006,10 +1006,9 @@
     "projectEvidence": {
       "title": "Bukti"
     },
-    "projectMap": {
-      "title": "Peta",
-      "view": "Lihat lokasi",
-      "alt": "Peta batas lokasi"
+    "projectGallery": {
+      "title": "Foto",
+      "count": "{count, plural, one {# foto} other {# foto}}"
     },
     "projectUpdates": {
       "title": "Pembaruan terbaru",

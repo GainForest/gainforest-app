@@ -1006,10 +1006,9 @@
     "projectEvidence": {
       "title": "Ushahidi"
     },
-    "projectMap": {
-      "title": "Ramani",
-      "view": "Tazama maeneo",
-      "alt": "Ramani ya mipaka ya eneo"
+    "projectGallery": {
+      "title": "Picha",
+      "count": "{count, plural, one {picha #} other {picha #}}"
     },
     "projectUpdates": {
       "title": "Masasisho ya hivi karibuni",

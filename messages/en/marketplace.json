@@ -1006,10 +1006,9 @@
     "projectEvidence": {
       "title": "Evidence"
     },
-    "projectMap": {
-      "title": "Map",
-      "view": "View places",
-      "alt": "Site boundary map"
+    "projectGallery": {
+      "title": "Photos",
+      "count": "{count, plural, one {# photo} other {# photos}}"
     },
     "projectUpdates": {
       "title": "Latest updates",

@@ -5,10 +5,11 @@ import type { Map as LeafletMap, Marker, TileLayer } from "leaflet";
 import Image from "next/image";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { ArrowUpRightIcon, AudioLinesIcon, CalendarRangeIcon, CheckIcon, ClipboardCheckIcon, HeartIcon, ImageOffIcon, Layers3Icon, Loader2Icon, Maximize2Icon, MapPinIcon, PencilIcon, RulerIcon, Share2Icon, Trash2Icon, UsersIcon, XIcon } from "lucide-react";
+import { ArrowUpRightIcon, AudioLinesIcon, CalendarRangeIcon, CheckIcon, ChevronLeftIcon, ChevronRightIcon, ClipboardCheckIcon, HeartIcon, ImageOffIcon, ImagesIcon, Layers3Icon, Loader2Icon, Maximize2Icon, MapPinIcon, PencilIcon, RulerIcon, Share2Icon, Trash2Icon, UsersIcon, XIcon } from "lucide-react";
 import {
   fetchMeasurementsByOccurrence,
   fetchObservationMedia,
+  fetchProjectImageGalleriesByDid,
   fetchRecordByUri,
   fetchRecordDetail,
   fetchTimelineAttachmentsByDid,
@@ -18,6 +19,8 @@ import {
   type ObservationMeasurementFact,
   type ObservationMediaItem,
   type ProjectEvidenceCounts,
+  type ProjectGalleryImage,
+  type ProjectImageGallery,
   type RecordDetail,
   type DetailSection,
   type DetailBadge,
@@ -85,6 +88,7 @@ export function RecordDrawer({
   const [deletingOccurrence, setDeletingOccurrence] = useState(false);
   const [projectBumicerts, setProjectBumicerts] = useState<BumicertRecord[] | null>(null);
   const [projectUpdates, setProjectUpdates] = useState<TimelineAttachmentItem[] | null>(null);
+  const [projectGalleries, setProjectGalleries] = useState<ProjectImageGallery[] | null>(null);
   const t = useTranslations("marketplace.recordDrawer");
   const workScopeT = useTranslations("common.workScopes");
   const workScopeLabels: WorkScopeLabels = useMemo(() => ({
@@ -249,6 +253,24 @@ export function RecordDrawer({
     return () => ctrl.abort();
   }, [record]);
 
+  // Gallery photos shared for this project — the headline visual the explorer
+  // drawer was missing. Filtered to galleries pinned to this exact project.
+  useEffect(() => {
+    setProjectGalleries(null);
+    if (!record || record.kind !== "project") return;
+
+    const ctrl = new AbortController();
+    fetchProjectImageGalleriesByDid(record.did, ctrl.signal)
+      .then((galleries) => {
+        if (ctrl.signal.aborted) return;
+        setProjectGalleries(galleries.filter((gallery) => gallery.projectUri === record.atUri));
+      })
+      .catch(() => {
+        if (!ctrl.signal.aborted) setProjectGalleries([]);
+      });
+    return () => ctrl.abort();
+  }, [record]);
+
   useEffect(() => {
     setIsEditingOccurrence(false);
     setOccurrenceFeedback(null);
@@ -329,10 +351,10 @@ export function RecordDrawer({
       ? localObservationHref(preferredOwnerIdentifier, record.rkey)
       : null;
   const projectHref = record.kind === "project" ? localProjectHref(preferredOwnerIdentifier, record.rkey) : null;
-  // Boundary map for the project drawer: the project's own location, falling
-  // back to its single Cert's first mapped location once that record loads.
-  const projectMapUri =
-    record.kind === "project" ? record.locationUri ?? projectBumicerts?.[0]?.locationUris[0] ?? null : null;
+  const projectGalleryImages = useMemo(
+    () => (projectGalleries ?? []).flatMap((gallery) => gallery.images),
+    [projectGalleries],
+  );
   const ownerHref = accountHref(preferredOwnerIdentifier);
   const managingGroupRole = isEditableObservationRecord(record)
     ? groupMemberships.find((group) => group.groupDid === record.did)?.role ?? null
@@ -551,9 +573,13 @@ export function RecordDrawer({
             />
           )}
 
-          {record.kind === "project" && projectHref && projectMapUri && (
-            <ProjectDrawerMap locationUri={projectMapUri} projectHref={projectHref} />
+          {record.kind === "project" && projectGalleryImages.length > 0 && (
+            <ProjectDrawerGallery images={projectGalleryImages} projectTitle={record.title} />
           )}
+
+          {/* One interactive boundary map (the shared RecordLocationMap), placed
+              inside the project flow so it doesn't render twice. */}
+          {record.kind === "project" && <RecordLocationMap record={record} />}
 
           {record.kind === "project" && projectHref && projectUpdates && projectUpdates.length > 0 && (
             <ProjectDrawerUpdates updates={projectUpdates} projectHref={projectHref} />
@@ -642,7 +668,8 @@ export function RecordDrawer({
             </div>
           )}
 
-          <RecordLocationMap record={record} />
+          {/* Projects render their own map higher up; everything else here. */}
+          {record.kind !== "project" && <RecordLocationMap record={record} />}
 
           {/* Grouped detail sections — rich once loaded, base fields meanwhile */}
           {sections.map((s, i) =>
@@ -1524,41 +1551,134 @@ function ProjectCertSummary({
   );
 }
 
-// Embeds the same interactive boundary preview the project page's at-a-glance
-// sidebar uses. Tapping anywhere opens the full Places section on the project
-// page.
-function polygonsViewHref(locationUri: string): string {
-  return `https://polygons-gainforest.vercel.app/view?${new URLSearchParams({
-    certifiedLocationRecordUri: locationUri,
-  }).toString()}`;
-}
-
-function ProjectDrawerMap({ locationUri, projectHref }: { locationUri: string; projectHref: string }) {
+// Project photo gallery for the drawer: a tight thumbnail grid sized for the
+// 480px sheet, with an in-drawer lightbox (arrow-key + swipe-free nav). The
+// last visible tile collapses any overflow into a "+N" affordance.
+function ProjectDrawerGallery({ images, projectTitle }: { images: ProjectGalleryImage[]; projectTitle: string }) {
   const t = useTranslations("marketplace.recordDrawer");
+  const galleryT = useTranslations("common.projectGallery");
+  const [activeIndex, setActiveIndex] = useState<number | null>(null);
+  const MAX_THUMBS = 6;
+  const thumbs = images.slice(0, MAX_THUMBS);
+  const overflow = images.length - thumbs.length;
+
+  useEffect(() => {
+    if (activeIndex === null) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "ArrowLeft") {
+        event.stopPropagation();
+        setActiveIndex((index) => (index === null ? index : (index - 1 + images.length) % images.length));
+      } else if (event.key === "ArrowRight") {
+        event.stopPropagation();
+        setActiveIndex((index) => (index === null ? index : (index + 1) % images.length));
+      } else if (event.key === "Escape") {
+        event.stopPropagation();
+        setActiveIndex(null);
+      }
+    };
+    document.addEventListener("keydown", onKey, true);
+    return () => document.removeEventListener("keydown", onKey, true);
+  }, [activeIndex, images.length]);
+
+  const active = activeIndex !== null ? images[activeIndex] ?? null : null;
+
   return (
-    <section className="mt-5 space-y-2.5">
-      <div className="flex items-center justify-between gap-2">
-        <h3 className="text-[13px] font-medium text-foreground">{t("projectMap.title")}</h3>
-        <Link
-          href={`${projectHref}#places`}
-          className="text-[12.5px] font-medium text-primary transition-colors hover:underline"
-        >
-          {t("projectMap.view")}
-        </Link>
+    <section className="mt-5">
+      <div className="mb-3 flex items-center justify-between gap-3">
+        <p className="text-[13px] font-medium text-foreground">{t("projectGallery.title")}</p>
+        <span className="inline-flex items-center gap-1 rounded-full bg-background px-2.5 py-1 text-[12px] font-medium text-muted-foreground">
+          <ImagesIcon className="h-3.5 w-3.5" aria-hidden />
+          {t("projectGallery.count", { count: images.length })}
+        </span>
       </div>
-      <Link
-        href={`${projectHref}#places`}
-        aria-label={t("projectMap.view")}
-        className="group relative block overflow-hidden rounded-2xl border border-border-soft"
-      >
-        <iframe
-          src={polygonsViewHref(locationUri)}
-          className="pointer-events-none h-44 w-full border-0"
-          loading="lazy"
-          title={t("projectMap.alt")}
-        />
-        <span aria-hidden className="absolute inset-0 transition-colors group-hover:bg-primary/[0.06]" />
-      </Link>
+      <ul className="grid grid-cols-3 gap-1.5">
+        {thumbs.map((image, index) => {
+          const isOverflowTile = index === thumbs.length - 1 && overflow > 0;
+          return (
+            <li key={image.id}>
+              <button
+                type="button"
+                onClick={() => setActiveIndex(index)}
+                aria-label={galleryT("openImage", { projectTitle })}
+                className="group relative block aspect-square w-full overflow-hidden rounded-xl bg-surface-sunken ring-1 ring-border-soft outline-none transition-all focus-visible:ring-2 focus-visible:ring-primary/60"
+              >
+                <Image
+                  src={image.url}
+                  alt={galleryT("imageAlt", { projectTitle, index: index + 1 })}
+                  fill
+                  sizes="150px"
+                  unoptimized={!isPdsBlobUrl(image.url)}
+                  className="object-cover transition-transform duration-500 group-hover:scale-105"
+                />
+                {isOverflowTile ? (
+                  <span className="absolute inset-0 grid place-items-center bg-foreground/60 text-[15px] font-semibold text-background">
+                    +{overflow}
+                  </span>
+                ) : null}
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+
+      {active ? (
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="fixed inset-0 z-[120] flex items-center justify-center bg-black/88 p-4"
+          onClick={() => setActiveIndex(null)}
+        >
+          <button
+            type="button"
+            onClick={() => setActiveIndex(null)}
+            aria-label={galleryT("closeImage")}
+            className="absolute right-4 top-4 z-10 grid h-10 w-10 place-items-center rounded-full bg-white/10 text-white ring-1 ring-white/20 backdrop-blur-md transition hover:bg-white/20"
+          >
+            <XIcon className="h-5 w-5" aria-hidden />
+          </button>
+          {images.length > 1 ? (
+            <>
+              <button
+                type="button"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  setActiveIndex((index) => (index === null ? index : (index - 1 + images.length) % images.length));
+                }}
+                aria-label={galleryT("previousImage")}
+                className="absolute left-4 top-1/2 z-10 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full bg-white/10 text-white ring-1 ring-white/20 backdrop-blur-md transition hover:bg-white/20"
+              >
+                <ChevronLeftIcon className="h-5 w-5" aria-hidden />
+              </button>
+              <button
+                type="button"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  setActiveIndex((index) => (index === null ? index : (index + 1) % images.length));
+                }}
+                aria-label={galleryT("nextImage")}
+                className="absolute right-4 top-1/2 z-10 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full bg-white/10 text-white ring-1 ring-white/20 backdrop-blur-md transition hover:bg-white/20"
+              >
+                <ChevronRightIcon className="h-5 w-5" aria-hidden />
+              </button>
+            </>
+          ) : null}
+          <div className="w-full max-w-4xl" onClick={(event) => event.stopPropagation()}>
+            <div className="relative h-[78vh] w-full">
+              <Image
+                src={active.url}
+                alt={galleryT("imageAlt", { projectTitle, index: (activeIndex ?? 0) + 1 })}
+                fill
+                sizes="90vw"
+                unoptimized={!isPdsBlobUrl(active.url)}
+                className="object-contain"
+              />
+            </div>
+            {images.length > 1 ? (
+              <p className="mt-3 text-center text-sm text-white/70">{(activeIndex ?? 0) + 1} / {images.length}</p>
+            ) : null}
+          </div>
+        </div>
+      ) : null}
     </section>
   );
 }
@@ -1781,9 +1901,9 @@ function buildFields(r: ExplorerRecord, t: RecordDrawerT): Field[] {
     if (r.startDate) fields.push({ label: t("fields.start"), value: formatDate(r.startDate) });
     if (r.endDate) fields.push({ label: t("fields.end"), value: formatDate(r.endDate) });
   } else if (r.kind === "project") {
-    // The project's single Cert is now summarised inline (stats + evidence), so
-    // a separate "Certs: 1" field would just repeat retired jargon.
-    if (r.locationUri) fields.push({ label: t("fields.projectPlace"), value: t("fields.added") });
+    // The project's single Cert is summarised inline (stats + evidence), its
+    // photos in the gallery, and its place on the map — so there are no extra
+    // fields worth repeating in a dl here.
   } else {
     if (r.country) fields.push({ label: t("fields.country"), value: formatCountry(r.country) });
     if (r.orgType) fields.push({ label: t("fields.type"), value: r.orgType });
