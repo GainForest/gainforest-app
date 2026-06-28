@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MODAL_IDS } from "@/components/global/modals/ids";
-import { useModal } from "@/components/ui/modal/context";
+import { useIsDrawer, useModal } from "@/components/ui/modal/context";
 import {
   ModalContent,
   ModalDescription,
@@ -23,6 +23,7 @@ import {
   type TreeUploadEventPayload,
 } from "@/lib/analytics/events";
 import { trackTreeUploadEvent } from "@/lib/analytics/hotjar";
+import { cn } from "@/lib/utils";
 import type { TreeUploadRowAttentionSummary } from "../../_lib/upload/types";
 import { getTreeUploadRowAttentionKindLabel } from "../../_lib/upload/row-attention";
 import { TreeUploadFeedbackModal } from "./TreeUploadFeedbackModal";
@@ -58,6 +59,9 @@ export function TreeUploadCompleteModal({
 }: TreeUploadCompleteModalProps) {
   const { hide, clear, pushModal } = useModal();
   const router = useRouter();
+  // In drawer mode the whole sheet scrolls; releasing this nested review list
+  // avoids a touch-scroll trap inside the drawer body.
+  const isDrawer = useIsDrawer();
 
   const hasRowAttention =
     partialCount > 0 || failedCount > 0 || rowAttentionSummaries.length > 0;
@@ -151,7 +155,7 @@ export function TreeUploadCompleteModal({
                     <p className="mb-2 text-xs font-medium text-foreground">
                       Rows needing review
                     </p>
-                    <ul className="max-h-44 space-y-2 overflow-y-auto pr-1 text-xs">
+                    <ul className={cn("space-y-2 pr-1 text-xs", !isDrawer && "max-h-44 overflow-y-auto")}>
                       {rowAttentionSummaries.map((summary) => (
                         <li
                           key={`${summary.kind}-${summary.sourceRowIndex}`}

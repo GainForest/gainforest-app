@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useModal } from "@/components/ui/modal/context";
+import { useIsDrawer, useModal } from "@/components/ui/modal/context";
 import {
   ModalContent,
   ModalDescription,
@@ -25,6 +25,9 @@ const CountrySelectorModal = ({
   const t = useTranslations("modals.countrySelector");
   const [countryCode, setCountryCode] = useState(initialCountryCode);
   const { popModal, stack, hide } = useModal();
+  // As a bottom drawer the whole sheet scrolls; don't add a nested scroller that
+  // would trap touch and leave the Done button hard to reach.
+  const isDrawer = useIsDrawer();
   const selectedCountryRef = useRef<HTMLButtonElement>(null);
 
   const handleDone = (country: string) => {
@@ -66,7 +69,12 @@ const CountrySelectorModal = ({
         onChange={(e) => setSearchText(e.target.value)}
       />
       <div className="relative mt-2">
-        <div className="w-full max-h-[max(45vh,500px)] overflow-y-auto overflow-x-hidden rounded-xl">
+        <div
+          className={cn(
+            "w-full overflow-x-hidden rounded-xl",
+            !isDrawer && "max-h-[max(45vh,500px)] overflow-y-auto",
+          )}
+        >
           <div className="grid grid-cols-2 gap-2 my-4">
             {filteredCountries.map((c) => {
               const isSelected = c[0] === countryCode;
@@ -83,8 +91,12 @@ const CountrySelectorModal = ({
             })}
           </div>
         </div>
-        <div className="absolute top-0 h-[4%] bg-linear-to-b from-background to-transparent w-full z-5 rounded-t-xl"></div>
-        <div className="absolute bottom-0 h-[4%] bg-linear-to-t from-foreground/10 to-transparent w-full z-5 rounded-b-xl"></div>
+        {!isDrawer && (
+          <>
+            <div className="absolute top-0 h-[4%] bg-linear-to-b from-background to-transparent w-full z-5 rounded-t-xl"></div>
+            <div className="absolute bottom-0 h-[4%] bg-linear-to-t from-foreground/10 to-transparent w-full z-5 rounded-b-xl"></div>
+          </>
+        )}
       </div>
 
       <ModalFooter className="mt-4 flex justify-end">

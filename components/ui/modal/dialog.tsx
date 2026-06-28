@@ -62,6 +62,11 @@ function DialogPlaceholder({
         data-slot="dialog-content"
         className={cn(
           "bg-background data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 fixed top-[50%] left-[50%] z-50 grid w-full translate-x-[-50%] translate-y-[-50%] gap-4 rounded-4xl border p-6 shadow-lg duration-200 transition-[max-width]",
+          // Never let a centered dialog grow past the viewport — cap it to the
+          // (dynamic) screen height and scroll its own content. Without this a
+          // tall dialog (e.g. a forceDialog modal on a phone) overflows above and
+          // below the screen and the title/footer become unreachable.
+          "max-h-[calc(100dvh-2rem)] overflow-x-hidden overflow-y-auto overscroll-contain",
           dialogWidth ?? "max-w-sm",
           className,
         )}

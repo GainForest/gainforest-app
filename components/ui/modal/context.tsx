@@ -75,7 +75,6 @@ const ModalStack = ({
     return (
       <Dialog open={isOpen} onOpenChange={onOpenChange}>
         <DialogPlaceholder
-          className="overflow-hidden"
           dialogWidth={dialogWidth}
           onEscapeKeyDown={(e) => {
             e.preventDefault();
@@ -257,3 +256,12 @@ export const useModal = () => {
   }
   return context;
 };
+
+/**
+ * True when the modal renders as a bottom drawer (small screens, no forceDialog).
+ * Modals use this to drop their own inner viewport-height scrollers in drawer
+ * mode so the drawer's single scroll body owns the gesture — a nested
+ * `overflow-y-auto` region otherwise traps touch scrolling and can leave the
+ * footer unreachable.
+ */
+export const useIsDrawer = () => useContext(ModalModeContext) === "drawer";

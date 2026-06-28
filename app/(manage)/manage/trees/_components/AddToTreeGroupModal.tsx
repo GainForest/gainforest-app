@@ -10,7 +10,7 @@ import {
   ModalFooter,
   ModalTitle,
 } from "@/components/ui/modal/modal";
-import { useModal } from "@/components/ui/modal/context";
+import { useIsDrawer, useModal } from "@/components/ui/modal/context";
 import { cn } from "@/lib/utils";
 import type { UploadTreeDatasetRecord } from "@/app/_lib/indexer";
 
@@ -55,6 +55,9 @@ export function AddToTreeGroupModal({
   onConfirm,
 }: AddToTreeGroupModalProps) {
   const { hide, popModal, stack } = useModal();
+  // In drawer mode the whole sheet scrolls; releasing the list's own scroll
+  // keeps the Cancel/Add footer reachable on touch.
+  const isDrawer = useIsDrawer();
   const selectableTreeGroups = useMemo(
     () => treeGroups.filter((treeGroup) => treeGroup.rkey.length > 0 && treeGroup.uri.length > 0),
     [treeGroups],
@@ -136,7 +139,7 @@ export function AddToTreeGroupModal({
               />
             </div>
 
-            <div className="max-h-72 overflow-y-auto rounded-xl border border-border">
+            <div className={cn("rounded-xl border border-border", !isDrawer && "max-h-72 overflow-y-auto")}>
               {filteredTreeGroups.length === 0 ? (
                 <div className="px-4 py-8 text-center text-sm text-muted-foreground">
                   No tree groups match your search.
