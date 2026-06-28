@@ -794,32 +794,19 @@ type AgentKey = {
   lastUsedAt?: string;
 };
 
-function authBaseUrlClient(): string {
-  return (process.env.NEXT_PUBLIC_AUTH_BASE_URL ?? "https://auth.gainforest.app").replace(/\/$/, "");
-}
+// Placeholder swapped for the real key once one is minted, so the preview shown
+// before generating reads naturally.
+const FIRST_PROMPT_PLACEHOLDER = "gf_pat_PASTE_YOUR_KEY_HERE";
 
 /**
- * A ready-to-paste setup prompt for any agent runtime: load /skill.md, store
- * the key under a canonical env var, then verify it. The origin is the live
- * site so the recipe works on any deployment.
+ * The ready-to-paste “first prompt” a user drops into their AI agent: it points
+ * the agent at the skill file, hands it the key, asks it to remember both, and
+ * suggests a first GainForest task — without acting until the user approves.
+ * `token` is a freshly minted key, or FIRST_PROMPT_PLACEHOLDER for the preview.
  */
-function buildAgentSetupPrompt(origin: string, token: string): string {
-  const auth = authBaseUrlClient();
-  return `You are connecting to GainForest, a nature-stewardship data platform on ATProto.
-
-1. Load the GainForest agent skill (read/write recipes):
-   curl -s ${origin}/skill.md
-
-2. Store this key as the env var GAINFOREST_API_KEY. Never hard-code it into
-   prompts, code, or records.
-
-   GAINFOREST_API_KEY=${token}
-
-3. Verify the key and learn your account id:
-   curl -s ${auth}/api/auth/session -H "Authorization: Bearer ${token}"
-   # → { "isLoggedIn": true, "did": "did:plc:…" } means you're connected.
-
-Then follow ${origin}/skill.md for every read/write recipe.`;
+function buildAgentFirstPrompt(origin: string, token: string): string {
+  const site = origin || "https://www.gainforest.app";
+  return `Read ${site}/skill.md and follow its setup. My GainForest API key: ${token} — store it as GAINFOREST_API_KEY and run the skill's whoami check to verify it. Remember where the key and the skill file live so you can help me whenever a GainForest task comes up. Then help me log a field observation (a species sighting, ideally with a photo), or start a project with its certificate and an evidence timeline — but don't create anything on GainForest until I approve it.`;
 }
 
 function formatKeyDate(iso: string): string {
@@ -841,6 +828,14 @@ function AgentKeysSection() {
   const [revokingId, setRevokingId] = useState<string | null>(null);
   const [freshToken, setFreshToken] = useState<{ name: string; token: string } | null>(null);
   const [copied, setCopied] = useState<"key" | "prompt" | null>(null);
+  const [origin, setOrigin] = useState("");
+
+  const promptText = buildAgentFirstPrompt(origin, freshToken?.token ?? FIRST_PROMPT_PLACEHOLDER);
+
+  function flashCopied(kind: "key" | "prompt") {
+    setCopied(kind);
+    setTimeout(() => setCopied(null), 2000);
+  }
 
   async function loadKeys() {
     setIsLoading(true);
@@ -858,16 +853,15 @@ function AgentKeysSection() {
   }
 
   useEffect(() => {
+    setOrigin(window.location.origin);
     void loadKeys();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  async function handleCreate() {
-    const name = draftName.trim();
-    if (!name) {
-      setCreateError(t("errors.nameRequired"));
-      return;
-    }
+  // Mint a key, then copy the first prompt with the key swapped in — one click
+  // gives the user a ready-to-paste message for their agent.
+  async function handleGenerate() {
+    const name = draftName.trim() || t("defaultKeyName");
     setCreating(true);
     setCreateError(null);
     try {
@@ -881,6 +875,12 @@ function AgentKeysSection() {
       setFreshToken({ name, token: data.token });
       setDraftName("");
       await loadKeys();
+      try {
+        await navigator.clipboard.writeText(buildAgentFirstPrompt(window.location.origin, data.token));
+        flashCopied("prompt");
+      } catch {
+        // Clipboard may be unavailable; the copy buttons below still work.
+      }
     } catch (err) {
       setCreateError(err instanceof Error ? err.message : t("errors.create"));
     } finally {
@@ -915,11 +915,10 @@ function AgentKeysSection() {
     const text =
       kind === "key"
         ? freshToken.token
-        : buildAgentSetupPrompt(window.location.origin, freshToken.token);
+        : buildAgentFirstPrompt(window.location.origin, freshToken.token);
     try {
       await navigator.clipboard.writeText(text);
-      setCopied(kind);
-      setTimeout(() => setCopied(null), 2000);
+      flashCopied(kind);
     } catch {
       setCreateError(t("errors.copy"));
     }
@@ -941,28 +940,53 @@ function AgentKeysSection() {
             </a>
           </p>
 
-          {freshToken ? (
-            <div className="rounded-lg border border-primary/30 bg-primary/5 p-3">
-              <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-                {t("freshTitle", { name: freshToken.name })}
-              </p>
-              <p className="mt-2 break-all font-mono text-xs text-foreground">{freshToken.token}</p>
-              <div className="mt-3 flex flex-wrap items-center gap-2">
-                <Button size="sm" onClick={() => void copy("key")}>
-                  <CopyIcon className="h-3.5 w-3.5" />
-                  {copied === "key" ? t("copied") : t("copyKey")}
-                </Button>
-                <Button size="sm" variant="outline" onClick={() => void copy("prompt")}>
-                  <CopyIcon className="h-3.5 w-3.5" />
-                  {copied === "prompt" ? t("copied") : t("copyPrompt")}
-                </Button>
-                <Button size="sm" variant="ghost" onClick={() => setFreshToken(null)}>
-                  {t("done")}
-                </Button>
-              </div>
-              <p className="mt-2 text-[11px] text-muted-foreground">{t("freshHint")}</p>
+          {/* Ready-to-paste connect prompt — the key is swapped in once generated. */}
+          <div className="rounded-lg border border-border bg-background/60 p-3">
+            <p className="text-[11px] text-muted-foreground">{t("connectCaption")}</p>
+            <p className="mt-2 max-h-44 overflow-auto whitespace-pre-wrap break-words rounded-md bg-muted/60 p-2.5 font-mono text-[11px] leading-relaxed text-foreground">
+              {promptText}
+            </p>
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              {freshToken ? (
+                <>
+                  <Button size="sm" onClick={() => void copy("prompt")}>
+                    <CopyIcon className="h-3.5 w-3.5" />
+                    {copied === "prompt" ? t("copied") : t("copyPrompt")}
+                  </Button>
+                  <Button size="sm" variant="outline" onClick={() => void copy("key")}>
+                    <CopyIcon className="h-3.5 w-3.5" />
+                    {copied === "key" ? t("copied") : t("copyKey")}
+                  </Button>
+                  <Button size="sm" variant="ghost" onClick={() => setFreshToken(null)}>
+                    {t("done")}
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button size="sm" onClick={() => void handleGenerate()} disabled={creating}>
+                    {creating ? <Loader2Icon className="h-3.5 w-3.5 animate-spin" /> : <CopyIcon className="h-3.5 w-3.5" />}
+                    {t("generateAndCopy")}
+                  </Button>
+                  <Input
+                    value={draftName}
+                    disabled={creating}
+                    maxLength={60}
+                    autoComplete="off"
+                    spellCheck={false}
+                    placeholder={t("namePlaceholder")}
+                    aria-label={t("newKeyLabel")}
+                    onChange={(e) => setDraftName(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") void handleGenerate();
+                    }}
+                    className="bg-background h-8 max-w-[11rem] text-xs"
+                  />
+                </>
+              )}
             </div>
-          ) : null}
+            {freshToken ? <p className="mt-2 text-[11px] text-muted-foreground">{t("freshHint")}</p> : null}
+            {createError ? <p className="mt-2 text-xs text-destructive">{createError}</p> : null}
+          </div>
 
           <div className="flex flex-col gap-0.5">
             {isLoading ? (
@@ -1004,31 +1028,7 @@ function AgentKeysSection() {
             )}
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="agent-key-name">{t("newKeyLabel")}</Label>
-            <div className="flex items-center gap-2">
-              <Input
-                id="agent-key-name"
-                value={draftName}
-                disabled={creating}
-                maxLength={60}
-                autoComplete="off"
-                spellCheck={false}
-                placeholder={t("namePlaceholder")}
-                onChange={(e) => setDraftName(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") void handleCreate();
-                }}
-                className="bg-background"
-              />
-              <Button size="sm" onClick={() => void handleCreate()} disabled={creating}>
-                {creating ? <Loader2Icon className="h-3.5 w-3.5 animate-spin" /> : <PlusIcon className="h-3.5 w-3.5" />}
-                {t("generate")}
-              </Button>
-            </div>
-            {createError ? <p className="text-xs text-destructive">{createError}</p> : null}
-            <p className="text-xs text-muted-foreground">{t("hint")}</p>
-          </div>
+          <p className="text-xs text-muted-foreground">{t("hint")}</p>
         </div>
       </div>
     </div>

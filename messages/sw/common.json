@@ -180,10 +180,10 @@
       "hint": "Funguo zinaweza kuongeza na kuhariri kumbukumbu zako, lakini haziwezi kamwe kubadilisha mipangilio ya akaunti yako au kudhibiti funguo nyingine. Kufuta ufunguo kunamzuia wakala mara moja.",
       "freshTitle": "{name} — nakili sasa, inaonyeshwa mara moja tu",
       "copyKey": "Nakili ufunguo",
-      "copyPrompt": "Nakili ufunguo + hatua za usanidi",
+      "copyPrompt": "Nakili ujumbe",
       "copied": "Imenakiliwa",
       "done": "Imekamilika",
-      "freshHint": "“Nakili ufunguo + hatua za usanidi” hunakili maandishi tayari kubandika yanayopakia mwongozo wa wakala na kusanidi ufunguo huu kwenye wakala wako.",
+      "freshHint": "Ufunguo wako unaonyeshwa mara moja tu na tayari umo kwenye ujumbe ulio juu — ubandike kwa wakala wako sasa. Dhibiti au batilisha funguo hapa chini.",
       "createdLabel": "iliundwa {date}",
       "lastUsedLabel": "ilitumika mwisho {date}",
       "neverUsed": "haijawahi kutumika",
@@ -196,7 +196,10 @@
         "revoke": "Imeshindwa kubatilisha ufunguo.",
         "copy": "Kunakili kumeshindikana — chagua maandishi mwenyewe.",
         "nameRequired": "Ipe ufunguo jina la wakala unayemkusudia."
-      }
+      },
+      "connectCaption": "Bandika hii kwenye wakala wako wa AI (ChatGPT, Claude, boti ya Telegram…) ili kuiunganisha na GainForest.",
+      "generateAndCopy": "Tengeneza ufunguo na unakili ujumbe",
+      "defaultKeyName": "Wakala wa AI"
     }
   },
   "bumicertCard": {

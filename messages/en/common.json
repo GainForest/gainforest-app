@@ -180,10 +180,10 @@
       "hint": "Keys can add and edit your stewardship records, but can never change your account settings or manage other keys. Revoking a key cuts the agent off instantly.",
       "freshTitle": "{name} — copy now, shown only once",
       "copyKey": "Copy key",
-      "copyPrompt": "Copy key + setup steps",
+      "copyPrompt": "Copy prompt",
       "copied": "Copied",
       "done": "Done",
-      "freshHint": "“Copy key + setup steps” copies a ready-to-paste prompt that loads the agent guide and wires this key into your agent.",
+      "freshHint": "Your key is shown once and is already in the prompt above — paste it into your agent now. Manage or revoke keys below.",
       "createdLabel": "created {date}",
       "lastUsedLabel": "last used {date}",
       "neverUsed": "never used",
@@ -196,7 +196,10 @@
         "revoke": "Could not revoke the key.",
         "copy": "Copy failed — select the text manually.",
         "nameRequired": "Name the key after the agent it's for."
-      }
+      },
+      "connectCaption": "Paste this into your AI agent (ChatGPT, Claude, a Telegram bot…) to connect it to GainForest.",
+      "generateAndCopy": "Generate key & copy prompt",
+      "defaultKeyName": "AI agent"
     }
   },
   "bumicertCard": {

@@ -180,10 +180,10 @@
       "hint": "Kunci dapat menambah dan mengedit catatan Anda, tetapi tidak akan pernah bisa mengubah pengaturan akun atau mengelola kunci lain. Mencabut kunci langsung memutus akses agen.",
       "freshTitle": "{name} — salin sekarang, hanya ditampilkan sekali",
       "copyKey": "Salin kunci",
-      "copyPrompt": "Salin kunci + langkah penyiapan",
+      "copyPrompt": "Salin pesan",
       "copied": "Tersalin",
       "done": "Selesai",
-      "freshHint": "“Salin kunci + langkah penyiapan” menyalin teks siap tempel yang memuat panduan agen dan memasang kunci ini ke agen Anda.",
+      "freshHint": "Kunci Anda ditampilkan sekali dan sudah ada di pesan di atas — tempel ke agen Anda sekarang. Kelola atau cabut kunci di bawah.",
       "createdLabel": "dibuat {date}",
       "lastUsedLabel": "terakhir dipakai {date}",
       "neverUsed": "belum pernah dipakai",
@@ -196,7 +196,10 @@
         "revoke": "Tidak dapat mencabut kunci.",
         "copy": "Gagal menyalin — pilih teks secara manual.",
         "nameRequired": "Beri nama kunci sesuai agen yang dituju."
-      }
+      },
+      "connectCaption": "Tempel ini ke agen AI Anda (ChatGPT, Claude, bot Telegram…) untuk menghubungkannya ke GainForest.",
+      "generateAndCopy": "Buat kunci & salin pesan",
+      "defaultKeyName": "Agen AI"
     }
   },
   "bumicertCard": {

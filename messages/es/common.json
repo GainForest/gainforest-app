@@ -180,10 +180,10 @@
       "hint": "Las claves pueden añadir y editar tus registros, pero nunca pueden cambiar la configuración de tu cuenta ni gestionar otras claves. Revocar una clave corta el acceso del agente al instante.",
       "freshTitle": "{name}: cópiala ahora, solo se muestra una vez",
       "copyKey": "Copiar clave",
-      "copyPrompt": "Copiar clave + pasos de configuración",
+      "copyPrompt": "Copiar mensaje",
       "copied": "Copiado",
       "done": "Listo",
-      "freshHint": "«Copiar clave + pasos de configuración» copia un texto listo para pegar que carga la guía para agentes y configura esta clave en tu agente.",
+      "freshHint": "Tu clave se muestra una sola vez y ya está incluida en el mensaje de arriba: pégalo en tu agente ahora. Gestiona o revoca las claves abajo.",
       "createdLabel": "creada el {date}",
       "lastUsedLabel": "último uso {date}",
       "neverUsed": "nunca usada",
@@ -196,7 +196,10 @@
         "revoke": "No se pudo revocar la clave.",
         "copy": "No se pudo copiar: selecciona el texto manualmente.",
         "nameRequired": "Ponle a la clave el nombre del agente al que pertenece."
-      }
+      },
+      "connectCaption": "Pega esto en tu agente de IA (ChatGPT, Claude, un bot de Telegram…) para conectarlo a GainForest.",
+      "generateAndCopy": "Generar clave y copiar mensaje",
+      "defaultKeyName": "Agente de IA"
     }
   },
   "bumicertCard": {
