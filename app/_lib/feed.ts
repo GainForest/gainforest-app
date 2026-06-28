@@ -86,11 +86,12 @@ export interface ActivityFeedPage {
 }
 
 /** Rows returned to the client per page. */
-const PAGE_SIZE = 20;
+const PAGE_SIZE = 50;
 /** Items fetched per stream per page. Must be >= PAGE_SIZE so the merged
  *  top-PAGE_SIZE is globally correct, with a little margin for boundary
- *  duplicate-timestamp rows that get filtered out by the compound cursor. */
-const STREAM_BATCH = PAGE_SIZE + 6;
+ *  duplicate-timestamp rows that get filtered out by the compound cursor. A
+ *  larger page means fewer round-trips when walking long same-owner runs. */
+const STREAM_BATCH = PAGE_SIZE + 10;
 const MAX_TEXT = 220;
 const FEED_CACHE_MS = 60_000; // 60s in-process memo — fresh enough for "live".
 
