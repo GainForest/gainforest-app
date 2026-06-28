@@ -1003,6 +1003,9 @@
       "locations": "Locais",
       "workPeriod": "Período de trabalho"
     },
+    "projectEvidence": {
+      "title": "Evidência"
+    },
     "projectBumicerts": {
       "title": "certificados neste projeto",
       "view": "Ver certificado",

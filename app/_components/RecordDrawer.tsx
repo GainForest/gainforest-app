@@ -5,7 +5,7 @@ import type { Map as LeafletMap, Marker, TileLayer } from "leaflet";
 import Image from "next/image";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { ArrowUpRightIcon, AudioLinesIcon, CalendarRangeIcon, CheckIcon, HeartIcon, ImageOffIcon, Layers3Icon, Loader2Icon, Maximize2Icon, MapPinIcon, PencilIcon, RulerIcon, Share2Icon, Trash2Icon, UsersIcon, XIcon } from "lucide-react";
+import { ArrowUpRightIcon, AudioLinesIcon, CalendarRangeIcon, CheckIcon, ClipboardCheckIcon, HeartIcon, ImageOffIcon, Layers3Icon, Loader2Icon, Maximize2Icon, MapPinIcon, PencilIcon, RulerIcon, Share2Icon, Trash2Icon, UsersIcon, XIcon } from "lucide-react";
 import {
   fetchMeasurementsByOccurrence,
   fetchObservationMedia,
@@ -16,6 +16,7 @@ import {
   type ExplorerRecord,
   type ObservationMeasurementFact,
   type ObservationMediaItem,
+  type ProjectEvidenceCounts,
   type RecordDetail,
   type DetailSection,
   type DetailBadge,
@@ -29,6 +30,7 @@ import { mapTileUrl } from "../_lib/coords";
 import { RichText } from "./RichText";
 import { SocialGlyph, socialLabel } from "./SocialIcon";
 import { RecordDrawerStatsTile } from "./StatsTile";
+import { ProjectEvidence } from "./ProjectEvidence";
 import { isPdsBlobUrl, resolveBlobUrl } from "../_lib/pds";
 import { pauseOtherAudio } from "../_lib/audio-coordinator";
 import { formatWorkScopeTag, type WorkScopeLabels } from "../_lib/work-scope-labels";
@@ -409,7 +411,7 @@ export function RecordDrawer({
           <h2 className="relative font-instrument text-[30px] italic leading-[1.08] tracking-[-0.01em] text-foreground">
             {title}
           </h2>
-          {record.kind === "bumicert" && record.scopeTags && record.scopeTags.length > 0 && (
+          {(record.kind === "bumicert" || record.kind === "project") && record.scopeTags && record.scopeTags.length > 0 && (
             <div className="mt-3 flex flex-wrap gap-2">
               {record.scopeTags.map((tag, i) => (
                 <span
@@ -463,7 +465,22 @@ export function RecordDrawer({
               avatarRefOverride={ownerAvatarRefOverride}
               nameOverride={ownerNameOverride}
             />
-            <DetailLink href={ownerHref} label={t("actions.viewProfile")} className="mt-3 w-full" />
+            {/* When the drawer record *is* an organization/person, opening
+                their profile is the primary action, so keep the full button.
+                For projects, observations and certs it is a secondary link —
+                rendered quietly so it is not mistaken for the "View project" /
+                "View observation" action above. */}
+            {record.kind === "site" ? (
+              <DetailLink href={ownerHref} label={t("actions.viewProfile")} className="mt-3 w-full" />
+            ) : (
+              <Link
+                href={ownerHref}
+                className="mt-2.5 inline-flex items-center gap-1 text-[13px] font-medium text-muted-foreground transition-colors hover:text-primary"
+              >
+                {t("actions.viewProfile")}
+                <ArrowUpRightIcon className="h-3.5 w-3.5" aria-hidden />
+              </Link>
+            )}
             {detail?.socials && detail.socials.length > 0 && (
               <div className="mt-3 flex flex-wrap items-center gap-2">
                 {detail.socials.map((s) => (
@@ -484,10 +501,10 @@ export function RecordDrawer({
           </div>
 
           {record.kind === "project" && (
-            <ProjectBumicertList
-              records={projectBumicerts}
-              totalCount={record.bumicertCount}
-              requestedCount={record.bumicertUris.length}
+            <ProjectCertSummary
+              cert={projectBumicerts?.[0] ?? null}
+              loading={projectBumicerts === null && record.bumicertUris.length > 0}
+              evidence={record.evidence}
             />
           )}
 
@@ -1407,94 +1424,52 @@ function ShareIconButton({ path }: { path: string }) {
   );
 }
 
-function ProjectBumicertList({
-  records,
-  totalCount,
-  requestedCount,
+// A project owns exactly one impact certificate, and the standalone Cert page
+// is being retired — so instead of listing the linked Cert as a card that opens
+// another page, surface the certificate's substance directly in the project
+// drawer: the headline stats (people named / places / work period) and the
+// at-a-glance evidence summary (boundaries / timeline / reviews).
+function ProjectCertSummary({
+  cert,
+  loading,
+  evidence,
 }: {
-  records: BumicertRecord[] | null;
-  totalCount: number;
-  requestedCount: number;
+  cert: BumicertRecord | null;
+  loading: boolean;
+  evidence?: ProjectEvidenceCounts;
 }) {
-  const t = useTranslations("marketplace.recordDrawer.projectBumicerts");
-  const loading = records === null && requestedCount > 0;
-  const shownCount = records?.length ?? 0;
+  const t = useTranslations("marketplace.recordDrawer");
+  const hasEvidence = Boolean(evidence);
+  if (!cert && !loading && !hasEvidence) return null;
 
   return (
-    <section className="mt-5 rounded-2xl border border-border-soft bg-foreground/[0.04] p-4">
-      <div className="flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2">
-          <Layers3Icon className="h-4 w-4 text-primary" aria-hidden />
-          <h3 className="text-[13px] font-medium text-foreground">{t("title")}</h3>
-        </div>
-        <span className="rounded-full bg-background px-2.5 py-1 text-[11.5px] font-medium text-muted-foreground">
-          {formatCompact(totalCount)}
-        </span>
-      </div>
-
+    <>
       {loading ? (
-        <div className="mt-3 space-y-2" aria-label={t("loading")}>
-          {Array.from({ length: Math.min(Math.max(totalCount, 1), 3) }).map((_, index) => (
-            <div key={index} className="flex gap-3 rounded-2xl bg-background/70 p-2">
-              <div className="h-14 w-16 shrink-0 animate-pulse rounded-xl bg-muted" />
-              <div className="min-w-0 flex-1 space-y-2 py-1">
-                <div className="h-3.5 w-3/4 animate-pulse rounded-full bg-muted" />
-                <div className="h-3 w-full animate-pulse rounded-full bg-muted" />
-              </div>
-            </div>
+        <div className="mt-5 grid grid-cols-2 gap-2.5" aria-hidden>
+          {Array.from({ length: 3 }).map((_, index) => (
+            <div
+              key={index}
+              className={`h-[72px] animate-pulse rounded-2xl bg-muted ${index === 2 ? "col-span-2" : ""}`}
+            />
           ))}
         </div>
-      ) : shownCount > 0 ? (
-        <div className="mt-3 space-y-2">
-          {records!.map((bumicert) => (
-            <Link
-              key={bumicert.id}
-              href={localBumicertHref(bumicert.did, bumicert.rkey)}
-              className="group flex gap-3 rounded-2xl bg-background/70 p-2 transition-colors hover:bg-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
-            >
-              <span className="relative h-14 w-16 shrink-0 overflow-hidden rounded-xl bg-muted">
-                {bumicert.imageUrl ? (
-                  <Image
-                    src={bumicert.imageUrl}
-                    alt=""
-                    fill
-                    sizes="64px"
-                    unoptimized={!isPdsBlobUrl(bumicert.imageUrl)}
-                    className="object-cover transition-transform duration-300 group-hover:scale-105"
-                  />
-                ) : (
-                  <span className="grid h-full place-items-center text-primary/45">
-                    <Layers3Icon className="h-5 w-5" />
-                  </span>
-                )}
-              </span>
-              <span className="min-w-0 flex-1 py-0.5">
-                <span className="line-clamp-1 block font-instrument text-lg italic leading-tight text-foreground">
-                  {bumicert.title}
-                </span>
-                {bumicert.shortDescription ? (
-                  <span className="mt-1 line-clamp-2 block text-[12.5px] leading-snug text-muted-foreground">
-                    {bumicert.shortDescription}
-                  </span>
-                ) : null}
-                <span className="mt-1.5 inline-flex text-[11.5px] font-medium text-primary">
-                  {t("view")}
-                </span>
-              </span>
-            </Link>
-          ))}
-          {requestedCount > shownCount ? (
-            <p className="px-1 pt-1 text-[12px] text-muted-foreground">
-              {t("showing", { shown: shownCount, total: requestedCount })}
-            </p>
-          ) : null}
-        </div>
-      ) : (
-        <p className="mt-3 text-[13px] leading-5 text-muted-foreground">
-          {t("empty")}
-        </p>
-      )}
-    </section>
+      ) : cert ? (
+        <BumicertStatStrip record={cert} />
+      ) : null}
+
+      {hasEvidence ? (
+        <section className="mt-5 rounded-2xl border border-border-soft bg-foreground/[0.04] p-4">
+          <div className="mb-3 flex items-center gap-2">
+            <ClipboardCheckIcon className="h-4 w-4 text-primary" aria-hidden />
+            <h3 className="text-[13px] font-medium text-foreground">{t("projectEvidence.title")}</h3>
+          </div>
+          <ProjectEvidence
+            evidence={evidence}
+            className="flex flex-wrap gap-x-4 gap-y-1.5 text-[12.5px] leading-5"
+          />
+        </section>
+      ) : null}
+    </>
   );
 }
 
@@ -1681,7 +1656,8 @@ function buildFields(r: ExplorerRecord, t: RecordDrawerT): Field[] {
     if (r.startDate) fields.push({ label: t("fields.start"), value: formatDate(r.startDate) });
     if (r.endDate) fields.push({ label: t("fields.end"), value: formatDate(r.endDate) });
   } else if (r.kind === "project") {
-    fields.push({ label: t("fields.bumicerts"), value: formatNumber(r.bumicertCount) });
+    // The project's single Cert is now summarised inline (stats + evidence), so
+    // a separate "Certs: 1" field would just repeat retired jargon.
     if (r.locationUri) fields.push({ label: t("fields.projectPlace"), value: t("fields.added") });
   } else {
     if (r.country) fields.push({ label: t("fields.country"), value: formatCountry(r.country) });
