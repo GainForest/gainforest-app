@@ -49,17 +49,11 @@ type LocationSearchResult = PickedLocation & {
   detail: string;
 };
 
-type RawLocationSearchResult = {
-  place_id?: number | string;
-  osm_id?: number | string;
-  display_name?: string;
-  name?: string;
-  lat?: string;
-  lon?: string;
+type LocationSearchResponse = {
+  results?: Array<Partial<LocationSearchResult> & { lat?: number | string; lng?: number | string }>;
 };
 
 const FALLBACK_CENTER: PickedLocation = { lat: 12, lng: 5 };
-const LOCATION_SEARCH_LIMIT = 5;
 const LOCATION_SEARCH_MIN_CHARS = 2;
 const LOCATION_SEARCH_ZOOM = 14;
 const GEOLOCATION_ATTEMPTS: PositionOptions[] = [
@@ -69,20 +63,16 @@ const GEOLOCATION_ATTEMPTS: PositionOptions[] = [
 const GEOLOCATION_WATCH_OPTIONS: PositionOptions = { enableHighAccuracy: false, maximumAge: 10 * 60_000 };
 const GEOLOCATION_TOTAL_TIMEOUT_MS = 60_000;
 
-function mapLocationSearchResult(raw: RawLocationSearchResult): LocationSearchResult | null {
-  const lat = Number.parseFloat(raw.lat ?? "");
-  const lng = Number.parseFloat(raw.lon ?? "");
-  const displayName = raw.display_name?.trim();
-  if (!Number.isFinite(lat) || !Number.isFinite(lng) || !displayName) return null;
-
-  const parts = displayName.split(",").map((part) => part.trim()).filter(Boolean);
-  const name = raw.name?.trim() || parts[0] || displayName;
-  const detail = parts.slice(name === parts[0] ? 1 : 0).join(", ");
+function mapLocationSearchResult(raw: Partial<LocationSearchResult> & { lat?: number | string; lng?: number | string }): LocationSearchResult | null {
+  const lat = typeof raw.lat === "number" ? raw.lat : Number.parseFloat(raw.lat ?? "");
+  const lng = typeof raw.lng === "number" ? raw.lng : Number.parseFloat(raw.lng ?? "");
+  const name = raw.name?.trim();
+  if (!Number.isFinite(lat) || !Number.isFinite(lng) || !name) return null;
 
   return {
-    id: String(raw.place_id ?? raw.osm_id ?? `${lat},${lng},${displayName}`),
+    id: raw.id?.trim() || `${lat},${lng},${name}`,
     name,
-    detail,
+    detail: raw.detail?.trim() || "",
     lat: roundCoord(lat),
     lng: roundCoord(lng),
   };
@@ -182,21 +172,16 @@ export function LocationPickerModal({ initial, defaultCenter, onSelect }: Locati
     setSearchStatus("loading");
 
     try {
-      const params = new URLSearchParams({
-        format: "jsonv2",
-        limit: String(LOCATION_SEARCH_LIMIT),
-        q: query,
-        "accept-language": locale,
-      });
-      const response = await fetch(`https://nominatim.openstreetmap.org/search?${params.toString()}`, {
+      const params = new URLSearchParams({ q: query, locale });
+      const response = await fetch(`/api/geocode?${params.toString()}`, {
         headers: { Accept: "application/json" },
         signal: controller.signal,
       });
       if (!response.ok) throw new Error("Location search failed");
-      const data: unknown = await response.json();
-      const results = Array.isArray(data)
-        ? data.map((item) => mapLocationSearchResult(item as RawLocationSearchResult)).filter((item): item is LocationSearchResult => Boolean(item))
-        : [];
+      const data = (await response.json()) as LocationSearchResponse;
+      const results = (data.results ?? [])
+        .map((item) => mapLocationSearchResult(item))
+        .filter((item): item is LocationSearchResult => Boolean(item));
       setSearchResults(results);
       setSearchStatus(results.length > 0 ? "success" : "empty");
     } catch (error) {
