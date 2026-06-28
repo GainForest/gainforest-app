@@ -120,8 +120,7 @@ Reads go through the indexer GraphQL endpoint (CORS-open):
 
 - **Indexer:** \`${indexer}\`
 
-Resolve a handle to a DID:
-\`https://public.api.bsky.app/xrpc/com.atproto.identity.resolveHandle?handle=<handle>\`.
+Resolve a handle to a DID with standard ATProto handle resolution (\`https://<handle>/.well-known/atproto-did\` or \`_atproto.<handle>\` DNS TXT). Do not read Bluesky profile records.
 List a user's existing sites/projects before creating duplicates, e.g. sites:
 
 \`\`\`bash

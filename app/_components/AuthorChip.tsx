@@ -13,11 +13,10 @@ import { useAccountDrawer } from "./AccountDrawer";
 
 // Owner identity + created date, shown on every record card / row / drawer.
 //
-// The did:plc is ALWAYS rendered (the canonical identity); the handle + avatar
-// are resolved through the Bluesky AppView and fill in when they land. When no
-// avatar exists (the common case for GainForest community/org DIDs) a
-// deterministic monogram is drawn instead. `avatarOverride` lets a card pass a
-// better picture it already has (e.g. an org's logo blob).
+// Certified profile names and avatars fill in when they land. When no avatar
+// exists (the common case for GainForest community/org DIDs) a deterministic
+// monogram is drawn instead. `avatarOverride` lets a card pass a better picture
+// it already has (e.g. an org's logo blob).
 
 type Size = "sm" | "md";
 

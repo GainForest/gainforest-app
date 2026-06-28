@@ -651,16 +651,8 @@ function AccountSetupForm({
         : null;
       const writeOptions = registeredOrganization ? { repo: registeredOrganization.groupDid } : undefined;
 
-      const [avatarBlob, bannerBlob] = await Promise.all([
-        primaryImage ? uploadBlob(primaryImage, writeOptions) : Promise.resolve(null),
-        bannerImage ? uploadBlob(bannerImage, writeOptions) : Promise.resolve(null),
-      ]);
+      const avatarBlob = primaryImage ? await uploadBlob(primaryImage, writeOptions) : null;
 
-      const profileRecord: Record<string, unknown> = {
-        $type: "app.bsky.actor.profile",
-        displayName: trimmedName,
-        description: trimmedBio,
-      };
       const certifiedProfileRecord: Record<string, unknown> = {
         $type: "app.certified.actor.profile",
         displayName: trimmedName,
@@ -668,22 +660,16 @@ function AccountSetupForm({
         createdAt: new Date().toISOString(),
       };
       if (normalizedWebsite) {
-        profileRecord.website = normalizedWebsite;
         certifiedProfileRecord.website = normalizedWebsite;
       }
       if (avatarBlob) {
-        profileRecord.avatar = avatarBlob;
         certifiedProfileRecord.avatar = {
           $type: "org.hypercerts.defs#smallImage",
           image: avatarBlob.ref,
         };
       }
-      if (bannerBlob) profileRecord.banner = bannerBlob;
 
-      await Promise.all([
-        putRecord("app.bsky.actor.profile", "self", profileRecord, writeOptions),
-        putRecord("app.certified.actor.profile", "self", certifiedProfileRecord, writeOptions),
-      ]);
+      await putRecord("app.certified.actor.profile", "self", certifiedProfileRecord, writeOptions);
 
       if (registeredOrganization) {
         const orgRecord: Record<string, unknown> = {

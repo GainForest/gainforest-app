@@ -1,4 +1,5 @@
 import { NextRequest } from "next/server";
+import { getCertifiedProfileCard, resolveIdentifierToDid } from "@/app/account/_lib/account-route";
 
 type ActorResult = {
   did: string;
@@ -13,22 +14,16 @@ export async function GET(request: NextRequest) {
   const q = request.nextUrl.searchParams.get("q")?.trim();
   if (!q) return Response.json({ actor: null });
 
-  try {
-    const url = `https://public.api.bsky.app/xrpc/app.bsky.actor.getProfile?actor=${encodeURIComponent(q)}`;
-    const res = await fetch(url, { next: { revalidate: 300 } });
-    if (!res.ok) return Response.json({ actor: null });
-    const actor = (await res.json()) as { did?: string; handle?: string; displayName?: string; avatar?: string };
-    if (!actor.did) return Response.json({ actor: null });
+  const did = await resolveIdentifierToDid(q).catch(() => null);
+  if (!did) return Response.json({ actor: null });
 
-    const result: ActorResult = {
-      did: actor.did,
-      handle: actor.handle ?? null,
-      displayName: actor.displayName ?? null,
-      avatar: actor.avatar ?? null,
-    };
+  const card = await getCertifiedProfileCard(did).catch(() => null);
+  const actor: ActorResult = {
+    did,
+    handle: card?.handle ?? null,
+    displayName: card?.displayName ?? null,
+    avatar: card?.avatarUrl ?? null,
+  };
 
-    return Response.json({ actor: result });
-  } catch {
-    return Response.json({ actor: null });
-  }
+  return Response.json({ actor });
 }

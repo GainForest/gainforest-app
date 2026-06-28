@@ -37,15 +37,6 @@ export type AccountRouteData = {
   detail: RecordDetail | null;
 };
 
-type AppViewProfile = {
-  did?: string;
-  handle?: string;
-  displayName?: string;
-  description?: string;
-  avatar?: string;
-  banner?: string;
-};
-
 type DirectCertifiedProfile = {
   displayName: string | null;
   description: string | null;
@@ -165,19 +156,18 @@ export const getAccountRouteData = cache(async (
   did: string,
   urlIdentifier = did,
 ): Promise<AccountRouteData> => {
-  const [summaryResult, appViewProfile, directCertifiedProfile, directCertifiedOrganization] = await Promise.all([
+  const [summaryResult, directCertifiedProfile, directCertifiedOrganization] = await Promise.all([
     fetchAccountSummary(did).catch((error) => {
       console.warn("[account] Failed to read indexer account summary", did, error);
       return null;
     }),
-    fetchAppViewProfile(did).catch(() => null),
     fetchDirectCertifiedProfile(did).catch(() => null),
     fetchDirectCertifiedOrganization(did).catch(() => null),
   ]);
 
   const fallbackSummary: AccountSummary = {
     did,
-    handle: appViewProfile?.handle ?? null,
+    handle: null,
     displayName: null,
     avatarUrl: null,
     bio: null,
@@ -196,9 +186,9 @@ export const getAccountRouteData = cache(async (
   const baseSummary = summaryResult ?? fallbackSummary;
   const summary = {
     ...baseSummary,
-    displayName: directCertifiedProfile?.displayName ?? baseSummary.displayName ?? appViewProfile?.displayName ?? null,
-    avatarUrl: directCertifiedProfile?.avatarUrl ?? baseSummary.avatarUrl ?? appViewProfile?.avatar ?? null,
-    bio: directCertifiedProfile?.description ?? baseSummary.bio ?? appViewProfile?.description ?? null,
+    displayName: directCertifiedProfile?.displayName ?? baseSummary.displayName ?? null,
+    avatarUrl: directCertifiedProfile?.avatarUrl ?? baseSummary.avatarUrl ?? null,
+    bio: directCertifiedProfile?.description ?? baseSummary.bio ?? null,
     website: directCertifiedProfile?.website ?? baseSummary.website ?? null,
     country: directCertifiedOrganization ? directCertifiedOrganization.country : baseSummary.country ?? null,
     createdAt: directCertifiedOrganization?.createdAt ?? directCertifiedProfile?.createdAt ?? baseSummary.createdAt ?? null,
@@ -211,19 +201,17 @@ export const getAccountRouteData = cache(async (
   const detail = await readBestAccountDetail(did, summary);
   const displayName =
     summary.displayName?.trim() ||
-    appViewProfile?.displayName?.trim() ||
     summary.handle ||
-    appViewProfile?.handle ||
     shortDid(did);
 
   return {
     did,
-    urlIdentifier: preferredDidIdentifier(did, summary.handle ?? appViewProfile?.handle ?? (urlIdentifier === did ? null : urlIdentifier)),
+    urlIdentifier: preferredDidIdentifier(did, summary.handle ?? (urlIdentifier === did ? null : urlIdentifier)),
     displayName,
-    handle: summary.handle ?? appViewProfile?.handle ?? null,
-    avatarUrl: summary.avatarUrl ?? appViewProfile?.avatar ?? null,
-    coverUrl: appViewProfile?.banner ?? null,
-    description: summary.bio ?? appViewProfile?.description ?? null,
+    handle: summary.handle ?? null,
+    avatarUrl: summary.avatarUrl ?? null,
+    coverUrl: null,
+    description: summary.bio ?? null,
     longDescription: directCertifiedOrganization?.longDescription ?? null,
     website: summary.website,
     country: summary.country,
@@ -241,21 +229,17 @@ export const getAccountRouteData = cache(async (
 /**
  * Slim profile card for a DID, read straight from `app.certified.actor.profile`.
  * Used by account pickers/cards where we only need basic profile copy +
- * avatar per group. Certified profile data wins; AppView fills in ordinary
- * account names/handles while the certified index catches up.
+ * avatar per group. Only app certified profile data is used.
  */
 export const getCertifiedProfileCard = cache(
   async (did: string): Promise<{ displayName: string | null; description: string | null; avatarUrl: string | null; handle: string | null }> => {
     if (!did.startsWith("did:")) return { displayName: null, description: null, avatarUrl: null, handle: null };
-    const [profile, appViewProfile] = await Promise.all([
-      fetchDirectCertifiedProfile(did).catch(() => null),
-      fetchAppViewProfile(did).catch(() => null),
-    ]);
+    const profile = await fetchDirectCertifiedProfile(did).catch(() => null);
     return {
-      displayName: profile?.displayName ?? appViewProfile?.displayName ?? null,
-      description: profile?.description ?? appViewProfile?.description ?? null,
-      avatarUrl: profile?.avatarUrl ?? appViewProfile?.avatar ?? null,
-      handle: appViewProfile?.handle ?? null,
+      displayName: profile?.displayName ?? null,
+      description: profile?.description ?? null,
+      avatarUrl: profile?.avatarUrl ?? null,
+      handle: null,
     };
   },
 );
@@ -271,9 +255,6 @@ function safeDecode(value: string): string {
 export async function resolveIdentifierToDid(identifier: string): Promise<string | null> {
   const normalized = identifier.trim().replace(/^@+/, "").toLowerCase();
   if (normalized.startsWith("did:")) return normalized;
-
-  const appViewProfile = await fetchAppViewProfile(normalized).catch(() => null);
-  if (appViewProfile?.did?.startsWith("did:")) return appViewProfile.did;
 
   const wellKnownDid = await resolveHandleWithWellKnown(normalized).catch(() => null);
   if (wellKnownDid?.startsWith("did:")) return wellKnownDid;
@@ -318,15 +299,6 @@ async function resolveHandleWithDns(handle: string): Promise<string | null> {
     if (normalized) return normalized;
   }
   return null;
-}
-
-async function fetchAppViewProfile(actor: string): Promise<AppViewProfile | null> {
-  const response = await fetch(
-    `https://public.api.bsky.app/xrpc/app.bsky.actor.getProfile?actor=${encodeURIComponent(actor)}`,
-    { next: { revalidate: 300 } },
-  );
-  if (!response.ok) return null;
-  return (await response.json()) as AppViewProfile;
 }
 
 async function fetchDirectRecordValue(did: string, collection: string): Promise<Record<string, unknown> | null> {

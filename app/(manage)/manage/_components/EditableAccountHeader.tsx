@@ -178,7 +178,7 @@ function accountCaughtUpWithOptimisticSave(account: AccountRouteData, pending: P
 
 function optimisticFieldsForSave(overrides: Partial<HeroEditState>): OptimisticField[] {
   const fields = Object.keys(overrides) as OptimisticField[];
-  return fields.length ? fields : ["displayName", "description", "website", "logoFile", "coverFile"];
+  return fields.length ? fields : ["displayName", "description", "website", "logoFile"];
 }
 
 /** Classify a URL into a social-icon platform key (mirrors the indexer). */
@@ -355,6 +355,7 @@ function EditableHero({
 
   const editing = inlineField === "profile";
   const canEdit = !editDisabledReason;
+  const canEditCover = false;
 
   const isOrg = account.kind === "organization";
   const resolvedWebsite = editState.website;
@@ -369,8 +370,8 @@ function EditableHero({
       <div className="relative h-32 sm:h-40 md:h-44">
         <button
           type="button"
-          onClick={canEdit ? onEditCover : undefined}
-          disabled={!canEdit}
+          onClick={canEditCover ? onEditCover : undefined}
+          disabled={!canEditCover}
           title={editDisabledReason ?? undefined}
           className="group/cover absolute inset-0 block w-full overflow-hidden disabled:cursor-not-allowed"
           aria-label={coverImageUrl ? t("hero.changeCoverImage") : t("hero.addCoverImage")}
@@ -383,17 +384,19 @@ function EditableHero({
           {/* gentle fade into the card at the bottom */}
           <div className="pointer-events-none absolute inset-x-0 bottom-0 h-14 bg-linear-to-t from-card to-transparent" />
           {/* hover/focus affordance */}
-          <div
-            className={cn(
-              "absolute inset-0 flex items-center justify-center gap-1.5 transition-all duration-300",
-              coverImageUrl
-                ? "bg-black/0 opacity-0 backdrop-blur-0 group-hover/cover:bg-black/30 group-hover/cover:opacity-100 group-hover/cover:backdrop-blur-[2px] group-focus-visible/cover:bg-black/30 group-focus-visible/cover:opacity-100 group-focus-visible/cover:backdrop-blur-[2px]"
-                : "opacity-100",
-            )}
-          >
-            <ImagePlusIcon className={cn("size-5", coverImageUrl ? "text-white drop-shadow" : "text-muted-foreground")} />
-            {!coverImageUrl ? <span className="text-xs font-medium text-muted-foreground">{t("hero.addCoverImage")}</span> : null}
-          </div>
+          {canEditCover ? (
+            <div
+              className={cn(
+                "absolute inset-0 flex items-center justify-center gap-1.5 transition-all duration-300",
+                coverImageUrl
+                  ? "bg-black/0 opacity-0 backdrop-blur-0 group-hover/cover:bg-black/30 group-hover/cover:opacity-100 group-hover/cover:backdrop-blur-[2px] group-focus-visible/cover:bg-black/30 group-focus-visible/cover:opacity-100 group-focus-visible/cover:backdrop-blur-[2px]"
+                  : "opacity-100",
+              )}
+            >
+              <ImagePlusIcon className={cn("size-5", coverImageUrl ? "text-white drop-shadow" : "text-muted-foreground")} />
+              {!coverImageUrl ? <span className="text-xs font-medium text-muted-foreground">{t("hero.addCoverImage")}</span> : null}
+            </div>
+          ) : null}
         </button>
 
         <div className="absolute right-3 top-3 z-10 flex items-center gap-2">
@@ -688,62 +691,44 @@ export function EditableAccountHeader({
 
     try {
       let avatarBlob: { ref: unknown; mimeType: string; size: number } | null = null;
-      let bannerBlob: { ref: unknown; mimeType: string; size: number } | null = null;
       const writeOptions = writeRepoDid ? { repo: writeRepoDid } : undefined;
       if (next.logoFile) avatarBlob = await uploadBlob(next.logoFile, writeOptions);
-      if (next.coverFile) bannerBlob = await uploadBlob(next.coverFile, writeOptions);
 
       const shouldWriteProfile = Object.keys(overrides).length === 0 || (
         "displayName" in overrides ||
         "description" in overrides ||
         "website" in overrides ||
-        "logoFile" in overrides ||
-        "coverFile" in overrides
+        "logoFile" in overrides
       );
       if (shouldWriteProfile) {
         const repo = writeRepoDid ?? account.did;
-        const [existingProfile, existingCertifiedProfile] = await Promise.all([
-          fetchExistingSelfRecord(repo, "app.bsky.actor.profile"),
-          fetchExistingSelfRecord(repo, "app.certified.actor.profile"),
-        ]);
-        const profileRecord: Record<string, unknown> = { ...existingProfile, $type: "app.bsky.actor.profile" };
+        const existingCertifiedProfile = await fetchExistingSelfRecord(repo, "app.certified.actor.profile");
         const certifiedProfileRecord: Record<string, unknown> = {
           ...existingCertifiedProfile,
           $type: "app.certified.actor.profile",
           createdAt: typeof existingCertifiedProfile.createdAt === "string" ? existingCertifiedProfile.createdAt : account.createdAt ?? new Date().toISOString(),
         };
         if (next.displayName.trim()) {
-          profileRecord.displayName = next.displayName.trim();
           certifiedProfileRecord.displayName = next.displayName.trim();
         } else {
-          delete profileRecord.displayName;
           delete certifiedProfileRecord.displayName;
         }
         if (next.description.trim()) {
-          profileRecord.description = next.description.trim();
           certifiedProfileRecord.description = next.description.trim();
         } else {
-          delete profileRecord.description;
           delete certifiedProfileRecord.description;
         }
         if (next.website.trim()) {
           const url = next.website.startsWith("http") ? next.website : `https://${next.website}`;
-          profileRecord.website = url.trim();
           certifiedProfileRecord.website = url.trim();
         } else {
-          delete profileRecord.website;
           delete certifiedProfileRecord.website;
         }
         if (avatarBlob) {
-          profileRecord.avatar = avatarBlob;
           certifiedProfileRecord.avatar = { $type: "org.hypercerts.defs#smallImage", image: avatarBlob.ref };
         }
-        if (bannerBlob) profileRecord.banner = bannerBlob;
 
-        await Promise.all([
-          putRecord("app.bsky.actor.profile", "self", profileRecord, writeOptions),
-          putRecord("app.certified.actor.profile", "self", certifiedProfileRecord, writeOptions),
-        ]);
+        await putRecord("app.certified.actor.profile", "self", certifiedProfileRecord, writeOptions);
       }
 
       const shouldWriteOrg = account.kind === "organization" && (
