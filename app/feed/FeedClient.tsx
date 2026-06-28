@@ -10,6 +10,7 @@ import {
   Building2Icon,
   FolderKanbanIcon,
   HeartHandshakeIcon,
+  HeartIcon,
   Loader2Icon,
   MegaphoneIcon,
   NewspaperIcon,
@@ -285,7 +286,11 @@ export function FeedClient({
             <ol className="relative divide-y divide-border/50">
               {entries.map((entry) =>
                 entry.type === "batch" ? (
-                  <ObservationBatchCard key={`batch:${entry.items[0].id}`} items={entry.items} />
+                  <ObservationBatchCard
+                    key={`batch:${entry.items[0].id}`}
+                    items={entry.items}
+                    interactions={interactions}
+                  />
                 ) : (
                   <FeedRow
                     key={entry.item.id}
@@ -587,10 +592,22 @@ function useOrgSightingTotal(did: string | null, fallback: number): number {
   return total != null ? Math.max(total, fallback) : fallback;
 }
 
-function ObservationBatchCard({ items }: { items: ActivityFeedItem[] }) {
+function ObservationBatchCard({
+  items,
+  interactions,
+}: {
+  items: ActivityFeedItem[];
+  interactions: FeedInteractions;
+}) {
   const t = useTranslations("common.feed");
   const head = items[0]; // newest in the run
   const actorName = head.actorName || (head.actorDid ? shortDid(head.actorDid) : t("anonymous"));
+
+  // Read-only engagement total summed across the loaded run only (the sightings
+  // shown here), NOT the org's full history — likes/comments live on each real
+  // sighting record, reached by clicking its thumbnail. Engagement for these
+  // ids is already prefetched by the FeedClient page effect.
+  const likeTotal = items.reduce((sum, it) => sum + interactions.getEngagement(it.id).likeCount, 0);
 
   // The real count comes from the org's sighting total, so a burst that is only
   // partially loaded still reads "shared 2,143 nature sightings", not the
@@ -615,64 +632,93 @@ function ObservationBatchCard({ items }: { items: ActivityFeedItem[] }) {
 
   const href = head.actorDid ? `/observations?by=${encodeURIComponent(head.actorDid)}` : "/observations";
 
+  // The card isn't a single record, so it carries no like/comment buttons of its
+  // own. Identity + summary and the "+N" tile go to the full set; each other
+  // thumbnail deep-links to its own sighting, where that real record can be
+  // liked or commented on.
   return (
     <li className="relative">
-      <Link href={href} className="group flex gap-3 rounded-2xl px-3 py-3.5 transition-colors hover:bg-muted/40">
-        <FeedAvatar item={head} />
+      <div className="group flex gap-3 rounded-2xl px-3 py-3.5 transition-colors hover:bg-muted/40">
+        <Link href={href} className="shrink-0" aria-label={t("batch.viewAll")}>
+          <FeedAvatar item={head} />
+        </Link>
 
         <div className="min-w-0 flex-1">
-          {/* Author line */}
-          <div className="flex items-center gap-1.5 text-sm">
-            <AccountHoverCard
-              did={head.actorDid}
-              name={head.actorName}
-              avatarRef={head.actorAvatarRef}
-              triggerClassName="min-w-0"
-            >
-              <span className="block truncate font-medium text-foreground hover:underline">{actorName}</span>
-            </AccountHoverCard>
-            <span className="text-muted-foreground/60">·</span>
-            <span className="shrink-0 text-xs text-muted-foreground/80" title={fullDate(head.createdAt)}>
-              {formatRelative(head.createdAt)}
-            </span>
-          </div>
+          {/* Identity + summary → the full set of sightings */}
+          <Link href={href} className="block">
+            {/* Author line */}
+            <div className="flex items-center gap-1.5 text-sm">
+              <AccountHoverCard
+                did={head.actorDid}
+                name={head.actorName}
+                avatarRef={head.actorAvatarRef}
+                triggerClassName="min-w-0"
+              >
+                <span className="block truncate font-medium text-foreground hover:underline">{actorName}</span>
+              </AccountHoverCard>
+              <span className="text-muted-foreground/60">·</span>
+              <span className="shrink-0 text-xs text-muted-foreground/80" title={fullDate(head.createdAt)}>
+                {formatRelative(head.createdAt)}
+              </span>
+            </div>
 
-          {/* Verb line with the count */}
-          <p className="mt-0.5 flex items-center gap-1.5 text-xs text-muted-foreground">
-            <BinocularsIcon className="size-3.5 shrink-0 text-primary/70" />
-            <span className="truncate">{t("batch.sightings", { count })}</span>
-          </p>
-
-          {/* Species summary */}
-          {shownSpecies.length > 0 ? (
-            <p className="mt-1.5 line-clamp-1 text-[15px] font-medium leading-snug text-foreground">
-              {shownSpecies.join(" · ")}
-              {moreSpecies > 0 ? (
-                <span className="text-muted-foreground">{" · "}{t("batch.moreSpecies", { count: moreSpecies })}</span>
-              ) : null}
+            {/* Verb line with the count */}
+            <p className="mt-0.5 flex items-center gap-1.5 text-xs text-muted-foreground">
+              <BinocularsIcon className="size-3.5 shrink-0 text-primary/70" />
+              <span className="truncate">{t("batch.sightings", { count })}</span>
             </p>
-          ) : null}
 
-          {/* Image montage */}
+            {/* Species summary */}
+            {shownSpecies.length > 0 ? (
+              <p className="mt-1.5 line-clamp-1 text-[15px] font-medium leading-snug text-foreground">
+                {shownSpecies.join(" · ")}
+                {moreSpecies > 0 ? (
+                  <span className="text-muted-foreground">{" · "}{t("batch.moreSpecies", { count: moreSpecies })}</span>
+                ) : null}
+              </p>
+            ) : null}
+          </Link>
+
+          {/* Image montage — each thumbnail deep-links to its own sighting so it
+              can be liked/commented; the final "+N" tile opens the full set. */}
           {thumbs.length > 0 ? (
             <div className="mt-2 grid grid-cols-4 gap-1.5 sm:gap-2">
-              {thumbs.map((it, idx) => (
-                <ObservationThumb
-                  key={it.id}
-                  item={it}
-                  overlay={idx === thumbs.length - 1 && remaining > 0 ? `+${formatCompact(remaining)}` : null}
-                />
-              ))}
+              {thumbs.map((it, idx) => {
+                const isOverlay = idx === thumbs.length - 1 && remaining > 0;
+                return (
+                  <Link
+                    key={it.id}
+                    href={isOverlay ? href : it.href}
+                    className="block rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
+                  >
+                    <ObservationThumb
+                      item={it}
+                      overlay={isOverlay ? `+${formatCompact(remaining)}` : null}
+                    />
+                  </Link>
+                );
+              })}
             </div>
           ) : null}
 
+          {/* Read-only engagement total across the sightings shown here. */}
+          {likeTotal > 0 ? (
+            <p className="mt-2 inline-flex items-center gap-1.5 text-xs text-muted-foreground">
+              <HeartIcon className="size-3.5 text-rose-500" />
+              <span className="tabular-nums">{t("batch.likesAcross", { count: likeTotal })}</span>
+            </p>
+          ) : null}
+
           {/* View-all affordance */}
-          <span className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-primary">
+          <Link
+            href={href}
+            className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
+          >
             {t("batch.viewAll")}
             <ArrowUpRightIcon className="size-3 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-          </span>
+          </Link>
         </div>
-      </Link>
+      </div>
     </li>
   );
 }
