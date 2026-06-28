@@ -828,6 +828,12 @@
     },
     "actions": {
       "clearAll": "Hapus semua"
+    },
+    "evidence": {
+      "boundaries": "{count, plural, =0 {Belum ada batas lokasi} other {# batas lokasi dipetakan}}",
+      "sightings": "{count, plural, =0 {Belum ada pengamatan alam} other {# pengamatan alam}}",
+      "timeline": "{count, plural, =0 {Belum ada bukti linimasa} other {# item linimasa}}",
+      "reviews": "{count, plural, =0 {Belum ada ulasan} other {# ulasan}}"
     }
   },
   "ownerFilter": {

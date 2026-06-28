@@ -325,3 +325,34 @@ export async function fetchReviewCounts(subjectUri: string, signal?: AbortSignal
   for (const comment of comments) commentCount += 1 + comment.replies.length;
   return { evaluations: evaluations.length, comments: commentCount };
 }
+
+/**
+ * Review counts for many subjects at once. Loads the shared (cached) evaluation
+ * + comment indexes a single time, then looks each subject up — so labelling a
+ * whole page of project cards costs no extra network beyond the one-time index
+ * load. Subjects with no reviews are omitted from the map.
+ */
+export async function fetchReviewCountsForSubjects(
+  subjectUris: string[],
+  signal?: AbortSignal,
+): Promise<Map<string, ReviewCounts>> {
+  const out = new Map<string, ReviewCounts>();
+  const uris = Array.from(new Set(subjectUris.filter(Boolean)));
+  if (uris.length === 0) return out;
+
+  const [evaluationIndex, commentIndex] = await Promise.all([
+    fetchEvaluationIndex(signal).catch(() => new Map<string, BumicertEvaluation[]>()),
+    fetchCommentIndex(signal).catch(() => new Map<string, ReviewComment[]>()),
+  ]);
+
+  for (const uri of uris) {
+    const evaluations = evaluationIndex.get(uri) ?? [];
+    const comments = commentIndex.get(uri) ?? [];
+    let commentCount = 0;
+    for (const comment of comments) commentCount += 1 + comment.replies.length;
+    if (evaluations.length > 0 || commentCount > 0) {
+      out.set(uri, { evaluations: evaluations.length, comments: commentCount });
+    }
+  }
+  return out;
+}

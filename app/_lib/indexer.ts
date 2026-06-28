@@ -2219,6 +2219,20 @@ export type ProjectRecord = {
   /** Work-scope / focus tags inherited from the project's single Cert. Only
    *  populated when the project was fetched with `withScopeTags`. */
   scopeTags?: string[];
+  /** At-a-glance evidence counts for card display. Only populated when fetched
+   *  with `withScopeTags`. */
+  evidence?: ProjectEvidenceCounts;
+};
+
+export type ProjectEvidenceCounts = {
+  /** Mapped site boundaries on the project's Cert. */
+  boundaries: number;
+  /** Nature sightings (occurrences) linked to the project. */
+  sightings: number;
+  /** Timeline evidence items (attachments, excluding galleries). */
+  timeline: number;
+  /** Evaluations + comments published about the project's Cert. */
+  reviews: number;
 };
 
 type RawCollectionImage =
@@ -2359,31 +2373,35 @@ function mapProjectCollection(n: RawProjectCollection): ProjectRecord {
 }
 
 const ACTIVITY_SCOPE_BATCH_SIZE = 50;
+const PROJECT_EVIDENCE_BATCH_SIZE = 25;
+
+export type ActivityCardMeta = { scopeTags: string[]; boundaries: number };
 
 /**
- * Batch-resolve the work-scope tags for a set of Cert (claim.activity) URIs.
- * Used to label project cards with their single Cert's focus areas instead of a
- * redundant "1 Cert" count. Returns Cert URI → normalized scope tags.
+ * Batch-resolve the focus tags + mapped-boundary count for a set of Cert
+ * (claim.activity) URIs. Used to label project cards with their single Cert's
+ * focus areas and site-boundary evidence. Returns Cert URI → meta.
  */
-export async function fetchActivityScopeTagsByUris(
+export async function fetchActivityCardMetaByUris(
   uris: string[],
   signal?: AbortSignal,
-): Promise<Map<string, string[]>> {
+): Promise<Map<string, ActivityCardMeta>> {
   const uniqueUris = Array.from(new Set(uris.filter(Boolean))).sort();
   return publicExploreCache(
-    "activity-scope-tags",
+    "activity-card-meta",
     { uris: uniqueUris },
-    () => fetchActivityScopeTagsByUrisUncached(uniqueUris),
+    () => fetchActivityCardMetaByUrisUncached(uniqueUris),
     signal,
   );
 }
 
-type RawActivityScopeNode = {
+type RawActivityMetaNode = {
   workScope?: { __typename?: string; scope?: string | null; expression?: string | null } | null;
+  locations?: Array<{ uri?: string | null } | null> | null;
 } | null;
 
-async function fetchActivityScopeTagsByUrisUncached(uris: string[]): Promise<Map<string, string[]>> {
-  const out = new Map<string, string[]>();
+async function fetchActivityCardMetaByUrisUncached(uris: string[]): Promise<Map<string, ActivityCardMeta>> {
+  const out = new Map<string, ActivityCardMeta>();
   if (uris.length === 0) return out;
 
   const fields = `{
@@ -2392,6 +2410,7 @@ async function fetchActivityScopeTagsByUrisUncached(uris: string[]): Promise<Map
       ... on OrgHypercertsClaimActivityWorkScopeString { scope }
       ... on OrgHypercertsWorkscopeCel { expression }
     }
+    locations { uri }
   }`;
 
   const batches = Array.from(
@@ -2400,14 +2419,93 @@ async function fetchActivityScopeTagsByUrisUncached(uris: string[]): Promise<Map
   );
 
   await Promise.all(batches.map(async (batch) => {
-    const query = `query ActivityScopeTags {\n${batch
+    const query = `query ActivityCardMeta {\n${batch
       .map((uri, index) => `a${index}: orgHypercertsClaimActivityByUri(uri: ${JSON.stringify(uri)}) ${fields}`)
       .join("\n")}\n}`;
 
-    const data = await indexerQuery<Record<string, RawActivityScopeNode>>(query, {});
+    const data = await indexerQuery<Record<string, RawActivityMetaNode>>(query, {});
     batch.forEach((uri, index) => {
-      const tags = extractWorkScopeTags(data?.[`a${index}`]?.workScope);
-      if (tags.length > 0) out.set(uri, tags);
+      const node = data?.[`a${index}`];
+      const scopeTags = extractWorkScopeTags(node?.workScope);
+      const boundaries = Array.isArray(node?.locations)
+        ? node!.locations.filter((loc) => Boolean(loc?.uri)).length
+        : 0;
+      out.set(uri, { scopeTags, boundaries });
+    });
+  }));
+
+  return out;
+}
+
+/** Batch nature-sighting counts for a set of project (collection) URIs. */
+async function fetchProjectSightingCountsByUris(
+  projectUris: string[],
+  signal?: AbortSignal,
+): Promise<Map<string, number>> {
+  const uniqueUris = Array.from(new Set(projectUris.filter(Boolean))).sort();
+  return publicExploreCache(
+    "project-sighting-counts",
+    { uris: uniqueUris },
+    () => fetchCountsByAlias(
+      uniqueUris,
+      (uri) => `appGainforestDwcOccurrence(first: 1, where: { projectRef: { eq: ${JSON.stringify(uri)} } }) { totalCount }`,
+    ),
+    signal,
+  );
+}
+
+/**
+ * Batch timeline-evidence counts. A project's evidence may be pinned to the
+ * project (collection) URI or its Cert URI, so we count attachments whose
+ * subject is either — excluding galleries, which are surfaced separately.
+ */
+async function fetchProjectTimelineCounts(
+  pairs: Array<{ projectUri: string; certUri?: string }>,
+  signal?: AbortSignal,
+): Promise<Map<string, number>> {
+  const keyed = pairs.filter((pair) => Boolean(pair.projectUri));
+  return publicExploreCache(
+    "project-timeline-counts",
+    { pairs: keyed.map((p) => `${p.projectUri}|${p.certUri ?? ""}`).sort() },
+    () => fetchCountsByAlias(
+      keyed.map((pair) => pair.projectUri),
+      (uri, index) => {
+        const certUri = keyed[index]?.certUri;
+        const subjectUris = [uri, ...(certUri ? [certUri] : [])];
+        return `orgHypercertsContextAttachment(first: 1, where: { subjects: { any: { uri: { in: ${JSON.stringify(subjectUris)} } } }, contentType: { neq: "gallery" } }) { totalCount }`;
+      },
+    ),
+    signal,
+  );
+}
+
+/**
+ * Run aliased `<field>(...) { totalCount }` selections in batches and return
+ * key URI → totalCount. The selection builder receives the URI + its index.
+ */
+async function fetchCountsByAlias(
+  keys: string[],
+  selection: (key: string, index: number) => string,
+): Promise<Map<string, number>> {
+  const out = new Map<string, number>();
+  if (keys.length === 0) return out;
+
+  const batches = Array.from(
+    { length: Math.ceil(keys.length / PROJECT_EVIDENCE_BATCH_SIZE) },
+    (_, batchIndex) => keys.slice(batchIndex * PROJECT_EVIDENCE_BATCH_SIZE, (batchIndex + 1) * PROJECT_EVIDENCE_BATCH_SIZE),
+  );
+
+  let globalIndex = 0;
+  await Promise.all(batches.map(async (batch) => {
+    const offset = globalIndex;
+    globalIndex += batch.length;
+    const query = `query AliasCounts {\n${batch
+      .map((key, i) => `c${i}: ${selection(key, offset + i)}`)
+      .join("\n")}\n}`;
+    const data = await indexerQuery<Record<string, { totalCount?: number | null } | null>>(query, {});
+    batch.forEach((key, i) => {
+      const count = data?.[`c${i}`]?.totalCount ?? 0;
+      if (count > 0) out.set(key, count);
     });
   }));
 
@@ -2469,16 +2567,40 @@ async function mapProjectConnection(
     const certUris = records
       .map((record) => record.bumicertUris[0])
       .filter((uri): uri is string => Boolean(uri));
-    if (certUris.length > 0) {
-      const scopeByCert = await fetchActivityScopeTagsByUris(certUris, signal).catch(
-        () => new Map<string, string[]>(),
-      );
-      records = records.map((record) => {
-        const firstCert = record.bumicertUris[0];
-        const tags = firstCert ? scopeByCert.get(firstCert) : undefined;
-        return tags && tags.length > 0 ? { ...record, scopeTags: tags } : record;
-      });
-    }
+    const projectUris = records.map((record) => record.atUri);
+    const timelinePairs = records.map((record) => ({
+      projectUri: record.atUri,
+      certUri: record.bumicertUris[0],
+    }));
+    // Dynamic import keeps reviews.ts (which imports from this module) out of a
+    // static circular dependency.
+    const { fetchReviewCountsForSubjects } = await import("./reviews");
+    const emptyReviews = () => new Map<string, { evaluations: number; comments: number }>();
+    const [certMeta, sightings, timeline, reviews] = await Promise.all([
+      certUris.length > 0
+        ? fetchActivityCardMetaByUris(certUris, signal).catch(() => new Map<string, ActivityCardMeta>())
+        : Promise.resolve(new Map<string, ActivityCardMeta>()),
+      fetchProjectSightingCountsByUris(projectUris, signal).catch(() => new Map<string, number>()),
+      fetchProjectTimelineCounts(timelinePairs, signal).catch(() => new Map<string, number>()),
+      certUris.length > 0
+        ? fetchReviewCountsForSubjects(certUris, signal).catch(emptyReviews)
+        : Promise.resolve(emptyReviews()),
+    ]);
+    records = records.map((record) => {
+      const cert = record.bumicertUris[0];
+      const meta = cert ? certMeta.get(cert) : undefined;
+      const review = cert ? reviews.get(cert) : undefined;
+      return {
+        ...record,
+        scopeTags: meta?.scopeTags && meta.scopeTags.length > 0 ? meta.scopeTags : record.scopeTags,
+        evidence: {
+          boundaries: meta?.boundaries ?? 0,
+          sightings: sightings.get(record.atUri) ?? 0,
+          timeline: timeline.get(record.atUri) ?? 0,
+          reviews: (review?.evaluations ?? 0) + (review?.comments ?? 0),
+        },
+      };
+    });
   }
   return {
     records,

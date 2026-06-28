@@ -828,6 +828,12 @@
     },
     "actions": {
       "clearAll": "Limpar tudo"
+    },
+    "evidence": {
+      "boundaries": "{count, plural, =0 {Sem limites de área ainda} one {# limite de área mapeado} other {# limites de área mapeados}}",
+      "sightings": "{count, plural, =0 {Sem avistamentos da natureza ainda} one {# avistamento da natureza} other {# avistamentos da natureza}}",
+      "timeline": "{count, plural, =0 {Sem evidências na linha do tempo ainda} one {# item na linha do tempo} other {# itens na linha do tempo}}",
+      "reviews": "{count, plural, =0 {Sem avaliações ainda} one {# avaliação} other {# avaliações}}"
     }
   },
   "ownerFilter": {

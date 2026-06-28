@@ -21,6 +21,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AutoLoadMoreButton } from "../_components/AutoLoadMoreButton";
 import { ProjectScopeTags } from "../_components/ProjectScopeTags";
+import { ProjectEvidence } from "../_components/ProjectEvidence";
 import { OwnerFilterBanner, OwnerFilterButton, useOwnerFilter } from "../_components/OwnerFilter";
 import { RecordDrawer } from "../_components/RecordDrawer";
 import { RecordMap } from "../_components/RecordMap";
@@ -658,9 +659,10 @@ function ProjectListItem({ record, priority, onOpen }: { record: ProjectRecord; 
           {record.shortDescription ? <span className="mt-1 line-clamp-2 block text-sm leading-relaxed text-muted-foreground">{record.shortDescription}</span> : null}
         </span>
         <span className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-border/60 pt-2">
-          <span className="flex min-w-0 flex-wrap gap-2 text-xs text-muted-foreground">
+          <span className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
             <ProjectScopeTags tags={record.scopeTags ?? []} variant="text" />
             {place ? <span>{place}</span> : null}
+            <ProjectEvidence evidence={record.evidence} className="inline-flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] leading-5" />
           </span>
           <span className="shrink-0 text-xs font-medium text-foreground transition-colors group-hover:text-primary">{t("showDetails")}</span>
         </span>
@@ -772,15 +774,20 @@ function ProjectCard({
           ) : null}
         </div>
 
-        {(record.scopeTags?.length ?? 0) > 0 || place ? (
-          <div className="mt-4 flex flex-wrap gap-2 border-t border-border/70 pt-3 text-xs text-muted-foreground">
-            <ProjectScopeTags tags={record.scopeTags ?? []} />
-            {place ? (
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-secondary px-2.5 py-1 text-secondary-foreground">
-                <MapPinIcon className="h-3.5 w-3.5" />
-                {place}
-              </span>
+        {(record.scopeTags?.length ?? 0) > 0 || place || record.evidence ? (
+          <div className="mt-4 space-y-2 border-t border-border/70 pt-3">
+            {(record.scopeTags?.length ?? 0) > 0 || place ? (
+              <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
+                <ProjectScopeTags tags={record.scopeTags ?? []} />
+                {place ? (
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-secondary px-2.5 py-1 text-secondary-foreground">
+                    <MapPinIcon className="h-3.5 w-3.5" />
+                    {place}
+                  </span>
+                ) : null}
+              </div>
             ) : null}
+            <ProjectEvidence evidence={record.evidence} />
           </div>
         ) : null}
 

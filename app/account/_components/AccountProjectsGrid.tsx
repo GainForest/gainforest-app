@@ -7,6 +7,7 @@ import { FolderKanbanIcon, MapPinIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { RecordDrawer } from "../../_components/RecordDrawer";
 import { ProjectScopeTags } from "../../_components/ProjectScopeTags";
+import { ProjectEvidence } from "../../_components/ProjectEvidence";
 import { isPdsBlobUrl } from "../../_lib/pds";
 import type { ProjectRecord } from "../../_lib/indexer";
 
@@ -103,15 +104,20 @@ function ProjectCard({ project, onOpen }: { project: ProjectRecord; onOpen: () =
           ) : null}
         </div>
 
-        {(project.scopeTags?.length ?? 0) > 0 || project.locationUri ? (
-          <div className="mt-4 flex flex-wrap gap-2 border-t border-border/70 pt-3 text-xs text-muted-foreground">
-            <ProjectScopeTags tags={project.scopeTags ?? []} />
-            {project.locationUri ? (
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-secondary px-2.5 py-1 text-secondary-foreground">
-                <MapPinIcon className="h-3.5 w-3.5" />
-                {t("projectPlace")}
-              </span>
+        {(project.scopeTags?.length ?? 0) > 0 || project.locationUri || project.evidence ? (
+          <div className="mt-4 space-y-2 border-t border-border/70 pt-3">
+            {(project.scopeTags?.length ?? 0) > 0 || project.locationUri ? (
+              <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
+                <ProjectScopeTags tags={project.scopeTags ?? []} />
+                {project.locationUri ? (
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-secondary px-2.5 py-1 text-secondary-foreground">
+                    <MapPinIcon className="h-3.5 w-3.5" />
+                    {t("projectPlace")}
+                  </span>
+                ) : null}
+              </div>
             ) : null}
+            <ProjectEvidence evidence={project.evidence} />
           </div>
         ) : null}
       </div>
