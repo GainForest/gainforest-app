@@ -768,6 +768,18 @@
       "moreSpecies": "+{count} lagi",
       "viewAll": "Lihat semua pengamatan"
     },
+    "profileCard": {
+      "unnamed": "Akun tanpa nama",
+      "organization": "Organisasi",
+      "member": "Anggota",
+      "verified": "Terverifikasi",
+      "loading": "Memuat detail…",
+      "unavailable": "Detail lainnya belum tersedia saat ini.",
+      "since": "Bergabung {date}",
+      "sightings": "{count, plural, other {# pengamatan}}",
+      "certs": "{count, plural, other {# Cert}}",
+      "viewProfile": "Lihat profil"
+    },
     "actions": {
       "like": "Suka",
       "liked": "Disukai",
@@ -796,5 +808,18 @@
       "postedTitle": "Terposting",
       "postedNote": "Kabar Anda sudah tayang dan akan muncul di feed sebentar lagi."
     }
+  },
+  "testAccount": {
+    "eyebrow": "Pengelola GainForest",
+    "visibleTitle": "Sembunyikan sebagai akun uji coba",
+    "visibleDescription": "Sembunyikan {name} sebagai akun uji coba agar proyek, pengamatan, dan aktivitas feed-nya tidak tampil untuk publik. Anda bisa membatalkannya kapan saja.",
+    "hideAction": "Sembunyikan sebagai akun uji coba",
+    "confirmHide": "Sembunyikan akun",
+    "confirmDescription": "Tindakan ini menghapus semua milik {name} — proyek, pengamatan, dan aktivitas feed — dari halaman publik. Anda bisa menampilkannya lagi kapan saja.",
+    "cancel": "Batal",
+    "flaggedTitle": "Disembunyikan sebagai akun uji coba",
+    "flaggedDescription": "Proyek, pengamatan, dan aktivitas feed milik {name} disembunyikan dari semua orang. Hanya pengelola GainForest yang bisa melihat akun ini di sini.",
+    "unhideAction": "Tampilkan kembali",
+    "genericError": "Terjadi kesalahan. Silakan coba lagi."
   }
 }

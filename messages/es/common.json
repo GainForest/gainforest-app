@@ -768,6 +768,18 @@
       "moreSpecies": "+{count} más",
       "viewAll": "Ver todos los avistamientos"
     },
+    "profileCard": {
+      "unnamed": "Cuenta sin nombre",
+      "organization": "Organización",
+      "member": "Miembro",
+      "verified": "Verificado",
+      "loading": "Cargando detalles…",
+      "unavailable": "Por ahora no hay más detalles disponibles.",
+      "since": "Se unió en {date}",
+      "sightings": "{count, plural, one {# avistamiento} other {# avistamientos}}",
+      "certs": "{count, plural, one {# Cert} other {# Certs}}",
+      "viewProfile": "Ver perfil"
+    },
     "actions": {
       "like": "Me gusta",
       "liked": "Te gusta",
@@ -796,5 +808,18 @@
       "postedTitle": "Publicado",
       "postedNote": "Tu novedad está activa y aparecerá en el feed en breve."
     }
+  },
+  "testAccount": {
+    "eyebrow": "Administración de GainForest",
+    "visibleTitle": "Ocultar como cuenta de prueba",
+    "visibleDescription": "Oculta a {name} como cuenta de prueba para que sus proyectos, observaciones y actividad del feed no aparezcan en público. Puedes deshacerlo cuando quieras.",
+    "hideAction": "Ocultar como cuenta de prueba",
+    "confirmHide": "Ocultar cuenta",
+    "confirmDescription": "Esto quita todo de {name} —proyectos, observaciones y actividad del feed— de las páginas públicas. Puedes volver a mostrarla en cualquier momento.",
+    "cancel": "Cancelar",
+    "flaggedTitle": "Oculta como cuenta de prueba",
+    "flaggedDescription": "Los proyectos, las observaciones y la actividad del feed de {name} están ocultos para todos. Solo el equipo de GainForest puede ver esta cuenta aquí.",
+    "unhideAction": "Volver a mostrar",
+    "genericError": "Algo salió mal. Inténtalo de nuevo."
   }
 }

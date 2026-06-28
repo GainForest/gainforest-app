@@ -768,6 +768,18 @@
       "moreSpecies": "+{count} more",
       "viewAll": "View all sightings"
     },
+    "profileCard": {
+      "unnamed": "Unnamed account",
+      "organization": "Organization",
+      "member": "Member",
+      "verified": "Verified",
+      "loading": "Loading details…",
+      "unavailable": "More details aren't available right now.",
+      "since": "Joined {date}",
+      "sightings": "{count, plural, one {# sighting} other {# sightings}}",
+      "certs": "{count, plural, one {# Cert} other {# Certs}}",
+      "viewProfile": "View profile"
+    },
     "actions": {
       "like": "Like",
       "liked": "Liked",
@@ -796,5 +808,18 @@
       "postedTitle": "Posted",
       "postedNote": "Your update is live and will show up in the feed shortly."
     }
+  },
+  "testAccount": {
+    "eyebrow": "GainForest steward",
+    "visibleTitle": "Hide as a test account",
+    "visibleDescription": "Hide {name} as a test account to keep its projects, observations and feed activity out of public view. You can undo this anytime.",
+    "hideAction": "Hide as test account",
+    "confirmHide": "Hide account",
+    "confirmDescription": "This removes everything from {name} — projects, observations and feed activity — from the public pages. You can make it visible again at any time.",
+    "cancel": "Cancel",
+    "flaggedTitle": "Hidden as a test account",
+    "flaggedDescription": "{name}'s projects, observations and feed activity are hidden from everyone. Only GainForest stewards can see this account here.",
+    "unhideAction": "Make visible again",
+    "genericError": "Something went wrong. Please try again."
   }
 }

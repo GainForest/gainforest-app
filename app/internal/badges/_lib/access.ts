@@ -1,6 +1,7 @@
 import { fetchAuthSession } from "@/app/_lib/auth-server";
 import { fetchCgsMembersForRequest, type CgsServerRole } from "@/app/_lib/cgs-server";
 import { resolveIdentifierToDid } from "@/app/account/_lib/account-route";
+import { GAINFOREST_MODERATION_REPO_DID } from "@/app/_lib/indexer";
 import type { AuthSession } from "@/app/_lib/auth";
 
 export type InternalBadgeAccess = {
@@ -33,6 +34,41 @@ async function getSessionRoleForGainForestOrg(session: AuthSession, repo: string
   const result = await fetchCgsMembersForRequest(repo).catch(() => null);
   const member = result?.members.find((entry) => entry.did === session.did);
   return member?.role ?? null;
+}
+
+export type GainForestModeratorAccess = {
+  isLoggedIn: boolean;
+  /** True when the signed-in user belongs to the GainForest group (any role). */
+  isModerator: boolean;
+  configured: boolean;
+  session: AuthSession;
+  /** DID of the GainForest group repo the moderation badges are written to. */
+  repoDid: string | null;
+  role: CgsServerRole | null;
+};
+
+/**
+ * Access for GainForest stewardship actions that any admin-group member may
+ * perform — notably flagging an account as a test account. Unlike the badge
+ * dashboard (owner/admin only), this allows every member of the admin account.
+ *
+ * The repo is pinned to the admin group account (admins-gxlw.certified.one) —
+ * the same repo the public hiding read scans — so a flag written here is always
+ * read back when filtering the explore surfaces.
+ */
+export async function getGainForestModeratorAccess(): Promise<GainForestModeratorAccess> {
+  const session = await fetchAuthSession();
+  const repoDid = GAINFOREST_MODERATION_REPO_DID;
+  const role = await getSessionRoleForGainForestOrg(session, repoDid);
+
+  return {
+    isLoggedIn: session.isLoggedIn,
+    isModerator: Boolean(role),
+    configured: true,
+    session,
+    repoDid,
+    role,
+  };
 }
 
 export async function getInternalBadgeAccess(): Promise<InternalBadgeAccess> {

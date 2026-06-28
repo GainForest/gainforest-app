@@ -768,6 +768,18 @@
       "moreSpecies": "+{count} zaidi",
       "viewAll": "Ona maonevu yote"
     },
+    "profileCard": {
+      "unnamed": "Akaunti isiyo na jina",
+      "organization": "Shirika",
+      "member": "Mwanachama",
+      "verified": "Imethibitishwa",
+      "loading": "Inapakia maelezo…",
+      "unavailable": "Maelezo zaidi hayapatikani kwa sasa.",
+      "since": "Alijiunga {date}",
+      "sightings": "{count, plural, one {onevu #} other {maonevu #}}",
+      "certs": "{count, plural, one {Cert #} other {Cert #}}",
+      "viewProfile": "Ona wasifu"
+    },
     "actions": {
       "like": "Penda",
       "liked": "Umependa",
@@ -796,5 +808,18 @@
       "postedTitle": "Imechapishwa",
       "postedNote": "Taarifa yako ipo hewani na itaonekana kwenye mlisho hivi karibuni."
     }
+  },
+  "testAccount": {
+    "eyebrow": "Msimamizi wa GainForest",
+    "visibleTitle": "Ficha kama akaunti ya majaribio",
+    "visibleDescription": "Ficha {name} kama akaunti ya majaribio ili miradi, uchunguzi na shughuli za mlisho zake zisionekane kwa umma. Unaweza kutendua wakati wowote.",
+    "hideAction": "Ficha kama akaunti ya majaribio",
+    "confirmHide": "Ficha akaunti",
+    "confirmDescription": "Hii huondoa kila kitu cha {name} — miradi, uchunguzi na shughuli za mlisho — kutoka kurasa za umma. Unaweza kuionyesha tena wakati wowote.",
+    "cancel": "Ghairi",
+    "flaggedTitle": "Imefichwa kama akaunti ya majaribio",
+    "flaggedDescription": "Miradi, uchunguzi na shughuli za mlisho za {name} zimefichwa kwa kila mtu. Ni wasimamizi wa GainForest pekee wanaoweza kuona akaunti hii hapa.",
+    "unhideAction": "Ionyeshe tena",
+    "genericError": "Hitilafu imetokea. Tafadhali jaribu tena."
   }
 }

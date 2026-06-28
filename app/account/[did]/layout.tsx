@@ -4,9 +4,12 @@ import { resolveAccountManageAccess } from "@/app/_lib/manage-server";
 import { canEditGroupProfile } from "@/app/(manage)/manage/_lib/cgs-permissions";
 import type { CgsRole } from "@/app/(manage)/manage/_lib/cgs";
 import { EditableAccountHeader } from "@/app/(manage)/manage/_components/EditableAccountHeader";
+import { fetchHiddenAccountDids } from "@/app/_lib/indexer";
+import { getGainForestModeratorAccess } from "@/app/internal/badges/_lib/access";
 import { AccountChrome } from "../_components/AccountChrome";
 import { AccountHero } from "../_components/AccountHero";
 import { AccountTabBar } from "../_components/AccountTabBar";
+import { TestAccountModerationControl } from "../_components/TestAccountModerationControl";
 import { loadAccountMemberships } from "../_components/AccountTabContent";
 import { accountSettingsPath, getAccountRouteData, readAccountRouteParams, readOptionalAccountRouteParams } from "../_lib/account-route";
 
@@ -59,11 +62,26 @@ export default async function AccountLayout({
   // the hero of your own profile (empty everywhere else).
   const memberships = await loadAccountMemberships(account, session);
 
+  // GainForest stewards (any group member) can hide an account as a test
+  // account. Only resolve the current flag state for actual moderators so the
+  // extra reads never run for ordinary visitors.
+  const moderator = session.isLoggedIn ? await getGainForestModeratorAccess().catch(() => null) : null;
+  const testAccountFlagged = moderator?.isModerator
+    ? await fetchHiddenAccountDids().then((dids) => dids.has(account.did)).catch(() => false)
+    : null;
+
   return (
     <main className="w-full">
       <AccountChrome
         hero={
           <>
+            {moderator?.isModerator && testAccountFlagged !== null ? (
+              <TestAccountModerationControl
+                did={account.did}
+                accountName={account.displayName}
+                initialFlagged={testAccountFlagged}
+              />
+            ) : null}
             {canEditProfile && target ? (
               <EditableAccountHeader
                 account={account}

@@ -24,7 +24,7 @@
  */
 
 import { cachedAsync } from "./async-cache";
-import { indexerQuery } from "./indexer";
+import { fetchHiddenAccountDids, indexerQuery } from "./indexer";
 import { normaliseRef } from "./pds";
 import { FACILITATOR_DID, accountHref, localObservationHref, localProjectHref } from "./urls";
 
@@ -727,6 +727,10 @@ async function buildFeedPageUncached(
 
   const { items: donationItems, certUriById } = mapDonations(receiptNodes);
 
+  // Accounts a GainForest steward flagged as "test" are hidden from the feed —
+  // every row owned by a flagged DID is dropped before the merge.
+  const hidden = await fetchHiddenAccountDids().catch(() => new Set<string>());
+
   // Merge every wanted kind into one pool ordered purely by recency — no
   // per-kind quota — then keep only rows strictly older than the cursor. A
   // single-kind filter drops the floor-fetched rows of the other streams here.
@@ -736,7 +740,7 @@ async function buildFeedPageUncached(
     ...mapOrganizations(orgNodes),
     ...mapPosts(postNodes),
     ...donationItems,
-  ].filter((item) => item.createdAt && (filter === "all" || item.kind === filter));
+  ].filter((item) => item.createdAt && (filter === "all" || item.kind === filter) && !hidden.has(item.actorDid));
   pool.sort(compareNewestFirst);
 
   const eligible = cursor ? pool.filter((it) => isStrictlyOlder(it, cursor)) : pool;

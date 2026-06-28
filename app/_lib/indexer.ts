@@ -724,6 +724,7 @@ async function fetchOccurrenceTotalCountUncached(options: OccurrenceTotalCountOp
   const badgeIndex = options.featuredBadgesOnly ? await fetchFeaturedBadgeIndex(options.signal) : undefined;
   const variants = occurrenceWhereVariants(options.media, options.query, options.ownerDid, badgeIndex, options.badgeFilters);
   if (variants.length === 0) return 0;
+  const hidden = await hiddenDidsForScope(Boolean(options.ownerDid), options.signal);
 
   const seen = new Set<string>();
   for (const where of variants) {
@@ -733,6 +734,7 @@ async function fetchOccurrenceTotalCountUncached(options: OccurrenceTotalCountOp
       if (options.signal?.aborted) throw new DOMException("aborted", "AbortError");
       const page = await fetchOccurrencePage(INDEXER_MAX_PAGE, cursor, options.signal, where);
       for (const node of page.nodes) {
+        if (hidden.has(node.did)) continue;
         if (matchesFilter(node, options.media)) seen.add(node.uri || `at://${node.did}/app.gainforest.dwc.occurrence/${node.rkey}`);
       }
       cursor = page.cursor;
@@ -741,7 +743,7 @@ async function fetchOccurrenceTotalCountUncached(options: OccurrenceTotalCountOp
   }
 
   if (options.media === "audio") {
-    const audioPage = await walkAudioRecordIdsForCount(options, badgeIndex);
+    const audioPage = await walkAudioRecordIdsForCount(options, badgeIndex, hidden);
     for (const id of audioPage) seen.add(id);
   }
 
@@ -756,6 +758,7 @@ async function walkAudioRecordIdsForCount(
     signal?: AbortSignal;
   },
   badgeIndex?: FeaturedBadgeIndex,
+  hidden: ReadonlySet<string> = EMPTY_DID_SET,
 ): Promise<Set<string>> {
   const q = options.query?.trim();
   const ownerWhere = options.ownerDid ? { did: { eq: options.ownerDid } } : undefined;
@@ -769,7 +772,10 @@ async function walkAudioRecordIdsForCount(
     while (hasMore) {
       if (options.signal?.aborted) throw new DOMException("aborted", "AbortError");
       const page = await fetchAudioPage(INDEXER_MAX_PAGE, cursor, options.signal, where);
-      for (const node of page.nodes) seen.add(node.uri || `at://${node.did}/app.gainforest.ac.audio/${node.rkey}`);
+      for (const node of page.nodes) {
+        if (hidden.has(node.did)) continue;
+        seen.add(node.uri || `at://${node.did}/app.gainforest.ac.audio/${node.rkey}`);
+      }
       cursor = page.cursor;
       hasMore = page.hasNextPage && Boolean(page.cursor);
     }
@@ -805,12 +811,20 @@ type OccurrenceWalkOptions = {
 export async function walkOccurrences(opts: OccurrenceWalkOptions): Promise<OccurrenceWalkResult> {
   if (!opts.ownerDid) {
     const { signal, onProgress, ...cacheOptions } = opts;
-    const pagePromise = publicExploreCache(
+    const rawPromise = publicExploreCache(
       "occurrences-page",
       cacheOptions,
       () => walkOccurrencesUncached({ ...cacheOptions, signal: undefined, onProgress: undefined }),
       signal,
     );
+    // Drop records owned by flagged test accounts. The unfiltered page stays in
+    // the shared cache; hiding is applied per-read from the short-lived hidden
+    // set, so a steward's flag takes effect without busting the page cache.
+    const pagePromise = rawPromise.then(async (page) => {
+      const hidden = await hiddenDidsForScope(false, signal);
+      if (hidden.size === 0) return page;
+      return { ...page, records: page.records.filter((record) => !hidden.has(record.did)) };
+    });
     if (onProgress) void pagePromise.then((page) => onProgress(page.records)).catch(() => {});
     return pagePromise;
   }
@@ -1478,6 +1492,102 @@ export async function fetchTrustedOrganizationBadges(
   return badges;
 }
 
+// ── Hidden (test) accounts ─────────────────────────────────────────────────
+//
+// GainForest stewards can flag an account as a "test" account from its profile.
+// A flag is a badge award titled `test-account`, written into the GainForest
+// group repo (the same repo the featured badges live in) with the flagged
+// account's DID as the award subject. The public explore surfaces (projects,
+// observations, feed) hide every record owned by a flagged DID — mirroring how
+// simocracy-v2 hides test sims via its `test-account` badge.
+
+/** The badge title that marks an account as a hidden test account. */
+export const TEST_ACCOUNT_BADGE_TITLE = "test-account";
+
+/** The admin group account (admins-gxlw.certified.one) that gates who may flag
+ *  test accounts and holds the `test-account` moderation badges. Its members
+ *  can flag/unflag; the public hiding read scans this same repo. Kept separate
+ *  from the public GainForest content repo and from FEATURED_BADGE_REPO_DID. */
+export const GAINFOREST_MODERATION_REPO_DID =
+  process.env.NEXT_PUBLIC_MODERATION_ACCOUNT_DID?.trim() || "did:plc:vfpcbimtprblyuubjako72qx";
+
+/** Short cache so a steward's flag/unflag propagates to the public grids within
+ *  a few minutes, without re-scanning the badge repo on every request. */
+const HIDDEN_ACCOUNTS_CACHE_MS = 5 * 60 * 1000;
+
+const EMPTY_DID_SET: ReadonlySet<string> = new Set<string>();
+
+async function fetchHiddenAccountDidsUncached(signal?: AbortSignal): Promise<Set<string>> {
+  const definitions: RawFeaturedBadgeDefinition[] = [];
+  const awards: RawFeaturedBadgeAward[] = [];
+  let afterDefinitions: string | null = null;
+  let afterAwards: string | null = null;
+
+  for (let page = 0; page < 20; page += 1) {
+    if (signal?.aborted) throw new DOMException("aborted", "AbortError");
+    const shouldCollectDefinitions: boolean = page === 0 || Boolean(afterDefinitions);
+    const payload: FeaturedBadgeIndexPayload | null = await indexerQuery<FeaturedBadgeIndexPayload>(
+      FEATURED_BADGE_INDEX_QUERY,
+      {
+        repo: GAINFOREST_MODERATION_REPO_DID,
+        first: INDEXER_MAX_PAGE,
+        afterDefinitions,
+        afterAwards,
+      },
+      signal,
+    );
+
+    const definitionsPage: Connection<RawFeaturedBadgeDefinition> | null | undefined = payload?.appCertifiedBadgeDefinition;
+    const awardsPage: Connection<RawFeaturedBadgeAward> | null | undefined = payload?.appCertifiedBadgeAward;
+    if (shouldCollectDefinitions) {
+      definitions.push(...((definitionsPage?.edges ?? []).flatMap((edge: { node?: RawFeaturedBadgeDefinition | null } | null) => (edge?.node ? [edge.node] : []))));
+    }
+    awards.push(...((awardsPage?.edges ?? []).flatMap((edge: { node?: RawFeaturedBadgeAward | null } | null) => (edge?.node ? [edge.node] : []))));
+
+    afterDefinitions = shouldCollectDefinitions && definitionsPage?.pageInfo?.hasNextPage ? definitionsPage.pageInfo.endCursor ?? null : null;
+    afterAwards = awardsPage?.pageInfo?.hasNextPage ? awardsPage.pageInfo.endCursor ?? null : null;
+    if (!afterDefinitions && !afterAwards) break;
+  }
+
+  const testBadgeUris = new Set(
+    definitions
+      .filter((definition) => normalizeFeaturedBadgeTitle(definition.title) === normalizeFeaturedBadgeTitle(TEST_ACCOUNT_BADGE_TITLE))
+      .flatMap((definition) => (definition.uri ? [definition.uri] : [])),
+  );
+  if (testBadgeUris.size === 0) return new Set<string>();
+
+  const dids = new Set<string>();
+  for (const award of awards) {
+    const badgeUri = award.badge?.uri;
+    if (!badgeUri || !testBadgeUris.has(badgeUri)) continue;
+    const subject = award.subject;
+    if (subject?.__typename === "AppCertifiedDefsDid" && subject.did) dids.add(subject.did);
+  }
+  return dids;
+}
+
+/**
+ * The set of account DIDs flagged as test accounts, hidden from the public
+ * projects / observations / feed surfaces. Returns an empty set on any error so
+ * a transient indexer hiccup never hides the whole catalog.
+ */
+export function fetchHiddenAccountDids(signal?: AbortSignal): Promise<Set<string>> {
+  return cachedAsync(
+    "hidden-account-dids:v1",
+    HIDDEN_ACCOUNTS_CACHE_MS,
+    () => fetchHiddenAccountDidsUncached().catch(() => new Set<string>()),
+    signal,
+  );
+}
+
+/** Resolve the hidden-account set unless the query is scoped to a single owner
+ *  account (profile drill-downs intentionally show that account's own records,
+ *  flagged or not). */
+async function hiddenDidsForScope(ownerScoped: boolean, signal?: AbortSignal): Promise<ReadonlySet<string>> {
+  if (ownerScoped) return EMPTY_DID_SET;
+  return fetchHiddenAccountDids(signal).catch(() => EMPTY_DID_SET);
+}
+
 /**
  * Disposable records created by the browser e2e suites (e.g. "Disposable
  * E2E Forest Org Edited", "E2E Bumicert 1749…-0-0") should not appear in the
@@ -1534,13 +1644,14 @@ export async function searchAccountsByName(
     { first: Math.max(1, Math.min(limit * 3, 40)), where: { displayName: { contains: q } } },
     signal,
   );
+  const hidden = await fetchHiddenAccountDids(signal).catch(() => EMPTY_DID_SET);
   const seen = new Set<string>();
   const results: AccountSearchResult[] = [];
   for (const edge of data?.appCertifiedActorProfile?.edges ?? []) {
     const node = edge?.node;
     const did = node?.did?.trim();
     const displayName = node?.displayName?.trim();
-    if (!did || !displayName || seen.has(did) || isLikelyTestRecordName(displayName)) continue;
+    if (!did || !displayName || seen.has(did) || hidden.has(did) || isLikelyTestRecordName(displayName)) continue;
     seen.add(did);
     results.push({ did, displayName, avatarRef: normaliseRef(node?.avatar?.image?.ref) });
     if (results.length >= limit) break;
@@ -1920,6 +2031,7 @@ async function fetchDonationEnabledBumicerts(
   if (badgeIndex && allowedDids?.size === 0 && allowedRecordUris?.size === 0) {
     return { records: [], cursor: null, hasMore: false };
   }
+  const hidden = await hiddenDidsForScope(Boolean(options?.creatorDid?.trim()), signal);
 
   const records: BumicertRecord[] = [];
   let cursor = after;
@@ -1931,12 +2043,12 @@ async function fetchDonationEnabledBumicerts(
     cursor = page.cursor;
     hasMore = page.hasMore && Boolean(page.cursor);
 
-    const eligibleConfigs = badgeIndex
+    const eligibleConfigs = (badgeIndex
       ? page.records.filter((config) => {
           const activityUri = activityUriForDidRkey(config.did, config.rkey);
           return allowedDids?.has(config.did) || allowedRecordUris?.has(activityUri);
         })
-      : page.records;
+      : page.records).filter((config) => !hidden.has(config.did));
 
     for (let index = 0; index < eligibleConfigs.length && records.length < target; index += batchSize) {
       if (signal?.aborted) throw new DOMException("aborted", "AbortError");
@@ -1968,6 +2080,7 @@ async function fetchDonationEnabledBumicertCount(signal?: AbortSignal, options?:
   const allowedDids = badgeValues ? new Set(badgeValues.dids) : null;
   const allowedRecordUris = badgeValues ? new Set(badgeValues.recordUris) : null;
   if (badgeIndex && allowedDids?.size === 0 && allowedRecordUris?.size === 0) return 0;
+  const hidden = await hiddenDidsForScope(Boolean(options?.creatorDid?.trim()), signal);
 
   const seen = new Set<string>();
   let cursor: string | null = null;
@@ -1980,12 +2093,12 @@ async function fetchDonationEnabledBumicertCount(signal?: AbortSignal, options?:
     cursor = page.cursor;
     hasMore = page.hasMore && Boolean(page.cursor);
 
-    const eligibleConfigs = badgeIndex
+    const eligibleConfigs = (badgeIndex
       ? page.records.filter((config) => {
           const activityUri = activityUriForDidRkey(config.did, config.rkey);
           return allowedDids?.has(config.did) || allowedRecordUris?.has(activityUri);
         })
-      : page.records;
+      : page.records).filter((config) => !hidden.has(config.did));
 
     for (let index = 0; index < eligibleConfigs.length; index += batchSize) {
       if (signal?.aborted) throw new DOMException("aborted", "AbortError");
@@ -2007,6 +2120,7 @@ async function fetchBumicertsFromActivityCount(signal?: AbortSignal, options?: A
   const badgeIndex = options?.featuredBadgesOnly ? await fetchFeaturedBadgeIndex(signal) : undefined;
   const variants = activityWhereVariants(options, badgeIndex);
   if (variants.length === 0) return 0;
+  const hidden = await hiddenDidsForScope(Boolean(options?.creatorDid?.trim()), signal);
 
   const seen = new Set<string>();
   for (const where of variants) {
@@ -2015,7 +2129,10 @@ async function fetchBumicertsFromActivityCount(signal?: AbortSignal, options?: A
     while (hasMore) {
       if (signal?.aborted) throw new DOMException("aborted", "AbortError");
       const page = await fetchActivityCountPage(INDEXER_MAX_PAGE, cursor, signal, where);
-      for (const record of page.records) seen.add(activityCountId(record));
+      for (const record of page.records) {
+        if (hidden.has(record.did)) continue;
+        seen.add(activityCountId(record));
+      }
       cursor = page.cursor;
       hasMore = page.hasMore && Boolean(page.cursor);
     }
@@ -2104,7 +2221,7 @@ export async function fetchBumicerts(
   onProgress?: (records: BumicertRecord[]) => void,
   options?: ActivityQueryOptions,
 ): Promise<Page<BumicertRecord>> {
-  const pagePromise = publicExploreCache(
+  const rawPromise = publicExploreCache(
     "bumicerts-page",
     { target, after, options },
     () => options?.filters?.includes("donations")
@@ -2112,6 +2229,14 @@ export async function fetchBumicerts(
       : fetchBumicertsFromActivity(target, after, undefined, undefined, options),
     signal,
   );
+  // Hide Bumicerts owned by flagged test accounts on the public catalog, but
+  // keep them when scoped to a single owner (their own profile / drill-down).
+  const ownerScoped = Boolean(options?.creatorDid?.trim());
+  const pagePromise = rawPromise.then(async (page) => {
+    const hidden = await hiddenDidsForScope(ownerScoped, signal);
+    if (hidden.size === 0) return page;
+    return { ...page, records: page.records.filter((record) => !hidden.has(record.did)) };
+  });
   if (onProgress) void pagePromise.then((page) => onProgress(page.records)).catch(() => {});
   return pagePromise;
 }
@@ -2757,6 +2882,7 @@ async function fetchProjectTotalCountUncached(signal?: AbortSignal, options?: Pr
   const badgeIndex = options?.featuredBadgesOnly ? await fetchFeaturedBadgeIndex(signal) : undefined;
   const variants = projectWhereVariants(options, badgeIndex);
   if (variants.length === 0) return 0;
+  const hidden = await hiddenDidsForScope(Boolean(options?.creatorDid?.trim()), signal);
 
   const seen = new Set<string>();
   for (const where of variants) {
@@ -2765,7 +2891,10 @@ async function fetchProjectTotalCountUncached(signal?: AbortSignal, options?: Pr
     while (hasMore) {
       if (signal?.aborted) throw new DOMException("aborted", "AbortError");
       const page = await fetchProjectCountPage(INDEXER_MAX_PAGE, cursor, signal, where, options?.sort);
-      for (const record of page.records) seen.add(record.uri || `at://${record.did}/org.hypercerts.collection/${record.rkey}`);
+      for (const record of page.records) {
+        if (hidden.has(record.did)) continue;
+        seen.add(record.uri || `at://${record.did}/org.hypercerts.collection/${record.rkey}`);
+      }
       cursor = page.cursor;
       hasMore = page.hasMore && Boolean(page.cursor);
     }
@@ -2781,12 +2910,20 @@ export async function fetchProjects(
   onProgress?: (records: ProjectRecord[]) => void,
   options?: ProjectQueryOptions,
 ): Promise<Page<ProjectRecord>> {
-  const pagePromise = publicExploreCache(
+  const rawPromise = publicExploreCache(
     "projects-page",
     { target, after, options },
     () => fetchProjectsFromCollections(target, after, undefined, undefined, options),
     signal,
   );
+  // Hide projects owned by flagged test accounts on the public catalog, but keep
+  // them when the query is scoped to a single owner (their own profile).
+  const ownerScoped = Boolean(options?.creatorDid?.trim());
+  const pagePromise = rawPromise.then(async (page) => {
+    const hidden = await hiddenDidsForScope(ownerScoped, signal);
+    if (hidden.size === 0) return page;
+    return { ...page, records: page.records.filter((record) => !hidden.has(record.did)) };
+  });
   if (onProgress) void pagePromise.then((page) => onProgress(page.records)).catch(() => {});
   return pagePromise;
 }
