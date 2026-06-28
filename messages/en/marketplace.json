@@ -151,6 +151,12 @@
       "list": "List",
       "map": "Map"
     },
+    "list": {
+      "colOrganization": "Organization",
+      "colType": "Type",
+      "colPlace": "Place",
+      "colJoined": "Joined"
+    },
     "quickFilters": {
       "observations": "Has observations",
       "bumicerts": "Has Certs"
@@ -1372,6 +1378,11 @@
   "observations": {
     "footer": {
       "showing": "Showing {shown} of {total} nature sightings."
+    },
+    "list": {
+      "colSighting": "Sighting",
+      "colObserver": "Observer",
+      "colDate": "Date"
     }
   },
   "manageProjectCerts": {

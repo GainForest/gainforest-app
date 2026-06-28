@@ -5,6 +5,7 @@ import { Suspense, useCallback, useEffect, useMemo, useRef, useState, type Chang
 import { parseAsString, parseAsStringEnum, useQueryState } from "nuqs";
 import {
   AlertTriangleIcon,
+  BinocularsIcon,
   CalendarIcon,
   CheckCircle2Icon,
   ChevronLeftIcon,
@@ -644,7 +645,7 @@ function AddObservationTile({ onAdd, disabledReason }: { onAdd: () => void; disa
   const content = (
     <>
       <span className="grid size-12 place-items-center rounded-2xl bg-primary/10 text-primary ring-1 ring-primary/15 transition-transform duration-300 group-hover/tile:scale-105">
-        <ImagePlusIcon className="size-6" />
+        <BinocularsIcon className="size-6" />
       </span>
       <span className="mt-3 block font-instrument text-xl font-medium italic tracking-[-0.02em] text-foreground">
         {t("addTileTitle")}
@@ -676,7 +677,7 @@ function ObservationEmptyState({ onAdd, disabledReason }: { onAdd: () => void; d
       description={t("emptyHeroDescription")}
       ctaLabel={t("addTileTitle")}
       onCtaClick={onAdd}
-      ctaIcon={<ImagePlusIcon />}
+      ctaIcon={<BinocularsIcon />}
       ctaDisabled={Boolean(disabledReason)}
       ctaDisabledReason={disabledReason}
     />

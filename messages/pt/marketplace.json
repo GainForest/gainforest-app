@@ -151,6 +151,12 @@
       "list": "Lista",
       "map": "Mapa"
     },
+    "list": {
+      "colOrganization": "Organização",
+      "colType": "Tipo",
+      "colPlace": "Local",
+      "colJoined": "Entrou"
+    },
     "quickFilters": {
       "observations": "Tem observações",
       "bumicerts": "Tem certificados"
@@ -1372,6 +1378,11 @@
   "observations": {
     "footer": {
       "showing": "Mostrando {shown} de {total} observações da natureza."
+    },
+    "list": {
+      "colSighting": "Observação",
+      "colObserver": "Observador",
+      "colDate": "Data"
     }
   },
   "manageProjectCerts": {

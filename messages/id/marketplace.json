@@ -151,6 +151,12 @@
       "list": "Daftar",
       "map": "Peta"
     },
+    "list": {
+      "colOrganization": "Organisasi",
+      "colType": "Tipe",
+      "colPlace": "Tempat",
+      "colJoined": "Bergabung"
+    },
     "quickFilters": {
       "observations": "Memiliki observasi",
       "bumicerts": "Memiliki sertifikat"
@@ -1372,6 +1378,11 @@
   "observations": {
     "footer": {
       "showing": "Menampilkan {shown} dari {total} observasi alam."
+    },
+    "list": {
+      "colSighting": "Observasi",
+      "colObserver": "Pengamat",
+      "colDate": "Tanggal"
     }
   },
   "manageProjectCerts": {

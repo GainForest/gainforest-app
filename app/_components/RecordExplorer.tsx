@@ -8,6 +8,7 @@ import {
   AudioLinesIcon,
   ArrowUpDownIcon,
   ChevronDownIcon,
+  ChevronRightIcon,
   ImageIcon,
   LayoutGridIcon,
   LeafIcon,
@@ -1195,15 +1196,40 @@ const GenericCard = memo(function GenericCard({ record, onOpen }: { record: Expl
   );
 });
 
+// Shared track template for the compact observation list. The header and every
+// row use the same definition so columns line up. Hidden columns must be
+// matched by the track count at each breakpoint:
+//   base : thumb | sighting | chevron
+//   sm   : thumb | sighting | observer | date | chevron
+const RECORD_LIST_GRID =
+  "grid-cols-[2.75rem_minmax(0,1fr)_1rem] " +
+  "sm:grid-cols-[3rem_minmax(0,1fr)_minmax(0,10rem)_minmax(0,7rem)_1rem]";
+
+function RecordListHeader() {
+  const t = useTranslations("marketplace.observations.list");
+  return (
+    <div className={`hidden items-center gap-3 px-2 pb-2 text-[11px] font-medium uppercase tracking-[0.08em] text-foreground/45 sm:grid sm:gap-4 sm:px-3 ${RECORD_LIST_GRID}`}>
+      <span aria-hidden />
+      <span>{t("colSighting")}</span>
+      <span>{t("colObserver")}</span>
+      <span>{t("colDate")}</span>
+      <span aria-hidden />
+    </div>
+  );
+}
+
 const RecordList = memo(function RecordList({ records, onOpen }: { records: ExplorerRecord[]; onOpen: (record: ExplorerRecord) => void }) {
   return (
-    <ul role="list">
-      {records.map((record, index) => (
-        <li key={record.id} className="relative animate-in after:absolute after:inset-x-4 after:bottom-0 after:h-px after:bg-border-soft last:after:hidden" style={{ animationDelay: `${Math.min(index, 12) * 18}ms` }}>
-          <RecordListItem record={record} onOpen={onOpen} />
-        </li>
-      ))}
-    </ul>
+    <div>
+      <RecordListHeader />
+      <ul role="list" className="border-t border-border-soft">
+        {records.map((record, index) => (
+          <li key={record.id} className="relative animate-in after:absolute after:inset-x-2 after:bottom-0 after:h-px after:bg-border-soft last:after:hidden sm:after:inset-x-3" style={{ animationDelay: `${Math.min(index, 12) * 18}ms` }}>
+            <RecordListItem record={record} onOpen={onOpen} />
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 });
 
@@ -1291,18 +1317,19 @@ const RecordListItem = memo(function RecordListItem({ record, onOpen }: { record
           open();
         }
       }}
-      className="group flex w-full cursor-pointer items-stretch gap-3 rounded-2xl px-1 py-3 text-left outline-none transition-colors duration-300 hover:bg-surface-sunken focus-visible:ring-2 focus-visible:ring-primary/60 sm:gap-4 sm:px-2 sm:py-4"
+      className={`group grid w-full cursor-pointer items-center gap-3 px-2 py-2 text-left outline-none transition-colors hover:bg-surface-sunken focus-visible:bg-surface-sunken focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/50 sm:gap-4 sm:px-3 ${RECORD_LIST_GRID}`}
     >
-      <span className="relative h-20 w-20 shrink-0 overflow-hidden rounded-xl bg-surface-sunken sm:h-24 sm:w-28">
+      {/* Thumbnail (with audio toggle for sightings) */}
+      <span className="relative h-11 w-11 shrink-0 overflow-hidden rounded-md bg-surface-sunken">
         {hasImage ? (
           <Image
             src={imageUrl!}
             alt={v.alt}
             fill
-            sizes="112px"
+            sizes="44px"
             unoptimized={!isPdsBlobUrl(imageUrl)}
             onError={() => setImgError(true)}
-            className="object-cover transition-transform duration-500 group-hover:scale-105"
+            className="object-cover"
           />
         ) : (
           v.placeholder
@@ -1312,34 +1339,44 @@ const RecordListItem = memo(function RecordListItem({ record, onOpen }: { record
             type="button"
             onClick={toggleAudio}
             aria-label={audioState === "playing" ? "Pause sound" : "Play sound"}
-            className="absolute left-1/2 top-1/2 z-10 grid h-10 w-10 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-white text-[#0b2015] shadow-[0_8px_24px_-6px_rgba(0,0,0,0.5)] transition hover:scale-105"
+            className="absolute left-1/2 top-1/2 z-10 grid h-7 w-7 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-white text-[#0b2015] shadow-[0_4px_12px_-4px_rgba(0,0,0,0.5)] transition hover:scale-105"
           >
             {audioState === "loading" ? (
-              <Loader2Icon className="h-4 w-4 animate-spin" aria-hidden />
+              <Loader2Icon className="h-3.5 w-3.5 animate-spin" aria-hidden />
             ) : audioState === "playing" ? (
-              <PauseIcon className="h-4 w-4" aria-hidden />
+              <PauseIcon className="h-3.5 w-3.5" aria-hidden />
             ) : (
-              <PlayIcon className="h-4 w-4 translate-x-[1px]" aria-hidden />
+              <PlayIcon className="h-3.5 w-3.5 translate-x-[1px]" aria-hidden />
             )}
           </button>
         ) : null}
       </span>
-      <span className="flex min-w-0 flex-1 flex-col justify-between py-0.5">
-        <span className="min-w-0">
-          {record.createdAt ? <span className="mb-1 block text-xs text-foreground/45">Shared {formatDate(record.createdAt)}</span> : null}
-          <span className="block truncate font-instrument text-xl italic leading-tight text-foreground sm:text-2xl">
-            {v.title}
-          </span>
-          {v.subtitle ? <span className="mt-1 block truncate text-sm text-foreground/65">{v.subtitle}</span> : null}
+
+      {/* Sighting: title + secondary meta */}
+      <span className="flex min-w-0 flex-col">
+        <span className="truncate text-sm font-medium leading-snug text-foreground group-hover:underline">{v.title}</span>
+        {/* Mobile: observer · place. Desktop: place/subtitle. */}
+        <span className="mt-0.5 truncate text-xs leading-snug text-foreground/55 sm:hidden">
+          {[ownerLabel, v.subtitle].filter(Boolean).join(" \u00b7 ")}
         </span>
-        <span className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-border-soft pt-2">
-          <span className="min-w-0 space-y-0.5 text-xs text-foreground/55">
-            <span className="block truncate">{ownerLabel}</span>
-            {record.kind === "site" ? <TrustedByBadges did={record.did} variant="compact" /> : null}
-          </span>
-          <span className="shrink-0 text-xs font-medium text-foreground transition-colors group-hover:text-primary">Show details</span>
-        </span>
+        {v.subtitle ? (
+          <span className="mt-0.5 hidden truncate text-xs leading-snug text-foreground/55 sm:block">{v.subtitle}</span>
+        ) : null}
       </span>
+
+      {/* Observer */}
+      <span className="hidden min-w-0 flex-col justify-center text-xs text-foreground/55 sm:flex">
+        <span className="truncate">{ownerLabel}</span>
+        {record.kind === "site" ? <TrustedByBadges did={record.did} variant="compact" /> : null}
+      </span>
+
+      {/* Date */}
+      <span className="hidden min-w-0 truncate text-xs text-foreground/50 sm:block">
+        {record.createdAt ? formatDate(record.createdAt) : ""}
+      </span>
+
+      {/* Affordance */}
+      <ChevronRightIcon className="h-4 w-4 shrink-0 justify-self-end text-foreground/40 transition-colors group-hover:text-foreground" aria-hidden />
     </div>
   );
 });

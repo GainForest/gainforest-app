@@ -151,6 +151,12 @@
       "list": "Orodha",
       "map": "Ramani"
     },
+    "list": {
+      "colOrganization": "Shirika",
+      "colType": "Aina",
+      "colPlace": "Eneo",
+      "colJoined": "Alijiunga"
+    },
     "quickFilters": {
       "observations": "Ina uchunguzi",
       "bumicerts": "Ina vyeti"
@@ -1372,6 +1378,11 @@
   "observations": {
     "footer": {
       "showing": "Inaonyesha uchunguzi wa asili {shown} kati ya {total}."
+    },
+    "list": {
+      "colSighting": "Uchunguzi",
+      "colObserver": "Mwangalizi",
+      "colDate": "Tarehe"
     }
   },
   "manageProjectCerts": {

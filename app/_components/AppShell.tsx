@@ -1125,7 +1125,7 @@ function AddObservationsCard({ sessionDid }: { sessionDid: string }) {
               "bg-background hover:bg-primary hover:text-primary-foreground",
             )}
           >
-            <ImagePlusIcon />
+            <BinocularsIcon />
             <span className="sr-only">{t("addObservations")}</span>
           </AddObservationsButton>
         </span>
@@ -1178,7 +1178,7 @@ function AddObservationsCard({ sessionDid }: { sessionDid: string }) {
           "relative z-2 w-full bg-background hover:bg-primary hover:text-primary-foreground",
         )}
       >
-        <ImagePlusIcon /> {t("addObservations")}
+        <BinocularsIcon /> {t("addObservations")}
       </AddObservationsButton>
     </div>
   );

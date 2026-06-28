@@ -8,6 +8,7 @@ import {
   ArrowUpRightIcon,
   CheckIcon,
   ChevronDownIcon,
+  ChevronRightIcon,
   LayoutGridIcon,
   LeafIcon,
   ListIcon,
@@ -736,15 +737,43 @@ function OrganizationsGridSkeleton() {
   );
 }
 
+// Shared track template for the compact organisation list. Header + rows use
+// the same definition so columns line up; hidden columns are matched by the
+// track count at each breakpoint:
+//   base : logo | org | chevron
+//   sm   : logo | org | type | place | chevron
+//   lg   : logo | org | type | place | joined | chevron
+const ORG_LIST_GRID =
+  "grid-cols-[2.75rem_minmax(0,1fr)_1rem] " +
+  "sm:grid-cols-[3rem_minmax(0,1fr)_minmax(0,8rem)_minmax(0,8rem)_1rem] " +
+  "lg:grid-cols-[3rem_minmax(0,1fr)_minmax(0,8rem)_minmax(0,9rem)_minmax(0,6rem)_1rem]";
+
+function OrganizationListHeader() {
+  const t = useTranslations("marketplace.organizations.list");
+  return (
+    <div className={`hidden items-center gap-3 px-2 pb-2 text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground sm:grid sm:gap-4 sm:px-3 ${ORG_LIST_GRID}`}>
+      <span aria-hidden />
+      <span>{t("colOrganization")}</span>
+      <span>{t("colType")}</span>
+      <span>{t("colPlace")}</span>
+      <span className="hidden lg:block">{t("colJoined")}</span>
+      <span aria-hidden />
+    </div>
+  );
+}
+
 const OrganizationList = memo(function OrganizationList({ records, onOpen }: { records: SiteRecord[]; onOpen: (record: SiteRecord) => void }) {
   return (
-    <ul role="list">
-      {records.map((record) => (
-        <li key={record.id} className="relative after:absolute after:inset-x-4 after:bottom-0 after:h-px after:bg-border last:after:hidden">
-          <OrganizationListItem record={record} onOpen={onOpen} />
-        </li>
-      ))}
-    </ul>
+    <div>
+      <OrganizationListHeader />
+      <ul role="list" className="border-t border-border">
+        {records.map((record) => (
+          <li key={record.id} className="relative after:absolute after:inset-x-2 after:bottom-0 after:h-px after:bg-border last:after:hidden sm:after:inset-x-3">
+            <OrganizationListItem record={record} onOpen={onOpen} />
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 });
 
@@ -756,7 +785,6 @@ const OrganizationListItem = memo(function OrganizationListItem({ record, onOpen
   const types = orgTypes(record).map(titleCase);
   const primaryType = types[0] ?? null;
   const description = orgDescription(types, countryLabel, t);
-  const bannerUrl = organizationBannerUrl(record);
   const avatarUrl = organizationAvatarUrl(record);
   const joinedYear = createdYear(record.createdAt);
 
@@ -764,52 +792,52 @@ const OrganizationListItem = memo(function OrganizationListItem({ record, onOpen
     <button
       type="button"
       onClick={() => onOpen(record)}
-      className="group flex w-full gap-3 rounded-2xl px-1 py-3 text-left outline-none transition-colors duration-300 hover:bg-surface-sunken focus-visible:ring-2 focus-visible:ring-primary/60 sm:gap-4 sm:px-2 sm:py-4"
+      className={`group grid w-full items-center gap-3 px-2 py-2 text-left outline-none transition-colors hover:bg-surface-sunken focus-visible:bg-surface-sunken focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/50 sm:gap-4 sm:px-3 ${ORG_LIST_GRID}`}
     >
-      <span className="relative h-24 w-24 shrink-0 overflow-hidden rounded-xl bg-muted sm:h-28 sm:w-36">
-        {bannerUrl ? (
+      {/* Logo */}
+      <span aria-hidden className="grid size-10 shrink-0 place-items-center overflow-hidden rounded-full bg-primary/15 text-xs font-semibold text-primary">
+        {avatarUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={bannerUrl} alt="" loading="lazy" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+          <img src={avatarUrl} alt="" loading="lazy" className="h-full w-full object-cover" />
         ) : (
-          // No cover banner: most organizations still have a logo, so show it
-          // centered on a tinted panel rather than a generic leaf placeholder.
-          <span className="grid h-full place-items-center bg-[radial-gradient(circle_at_30%_20%,color-mix(in_oklab,var(--primary)_22%,transparent),transparent_70%),linear-gradient(135deg,var(--muted),var(--card))] text-primary/40">
-            {avatarUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={avatarUrl} alt="" loading="lazy" className="size-14 rounded-xl object-cover transition-transform duration-500 group-hover:scale-105" />
-            ) : (
-              <LeafIcon className="size-9" aria-hidden strokeWidth={1.25} />
-            )}
-          </span>
+          initials(record.name)
         )}
       </span>
-      <span className="flex min-w-0 flex-1 flex-col justify-between py-1">
-        <span className="min-w-0">
-          {(primaryType || countryLabel) ? (
-            <span className="mb-1 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-              {primaryType ? <span>{primaryType}</span> : null}
-              {countryLabel ? <span>{countryFlag(country)} {countryLabel}</span> : null}
-            </span>
-          ) : null}
-          <span className="flex min-w-0 items-center gap-2">
-            <span aria-hidden className="grid size-9 shrink-0 place-items-center overflow-hidden rounded-full bg-primary/15 text-xs font-semibold text-primary">
-              {avatarUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={avatarUrl} alt="" loading="lazy" className="h-full w-full object-cover" />
-              ) : (
-                initials(record.name)
-              )}
-            </span>
-            <span className="block min-w-0 truncate font-instrument text-2xl italic leading-tight text-foreground">{record.name}</span>
-          </span>
-          <TrustedByBadges did={record.did} className="mt-1.5" variant="compact" />
-          <span className="mt-1 line-clamp-2 block text-sm leading-relaxed text-muted-foreground">{description}</span>
+
+      {/* Organisation: name + secondary meta */}
+      <span className="flex min-w-0 flex-col">
+        <span className="truncate text-sm font-medium leading-snug text-foreground group-hover:underline">{record.name}</span>
+        {/* Mobile: type · place. Desktop: description. */}
+        <span className="mt-0.5 truncate text-xs leading-snug text-muted-foreground sm:hidden">
+          {[primaryType, countryLabel ? `${countryFlag(country)} ${countryLabel}` : null].filter(Boolean).join(" \u00b7 ") || description}
         </span>
-        <span className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-border/60 pt-2">
-          <span className="text-xs text-muted-foreground">{joinedYear ? t("joined", { year: joinedYear }) : t("publicProfile")}</span>
-          <span className="shrink-0 text-xs font-medium text-foreground transition-colors group-hover:text-primary">{t("showDetails")}</span>
-        </span>
+        <span className="mt-0.5 hidden truncate text-xs leading-snug text-muted-foreground sm:block">{description}</span>
       </span>
+
+      {/* Type */}
+      <span className="hidden min-w-0 truncate text-xs text-muted-foreground sm:block">
+        {primaryType ?? <span className="text-muted-foreground/45">—</span>}
+      </span>
+
+      {/* Place */}
+      <span className="hidden min-w-0 items-center gap-1 text-xs text-muted-foreground sm:flex">
+        {countryLabel ? (
+          <>
+            <span aria-hidden>{countryFlag(country)}</span>
+            <span className="truncate">{countryLabel}</span>
+          </>
+        ) : (
+          <span className="text-muted-foreground/45">—</span>
+        )}
+      </span>
+
+      {/* Joined */}
+      <span className="hidden min-w-0 truncate text-xs text-muted-foreground lg:block">
+        {joinedYear ?? <span className="text-muted-foreground/45">—</span>}
+      </span>
+
+      {/* Affordance */}
+      <ChevronRightIcon className="h-4 w-4 shrink-0 justify-self-end text-muted-foreground/50 transition-colors group-hover:text-foreground" aria-hidden />
     </button>
   );
 });
