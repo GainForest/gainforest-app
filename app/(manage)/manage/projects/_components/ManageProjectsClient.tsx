@@ -25,7 +25,7 @@ import {
   TriangleAlertIcon,
   XIcon,
 } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { ChangeEvent, FormEvent, ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { ModalContent, ModalDescription, ModalFooter, ModalHeader, ModalTitle } from "@/components/ui/modal/modal";
@@ -128,6 +128,7 @@ export function ManageProjectsClient({ target }: { target: ManageTarget }) {
   const [query, setQuery] = useState("");
   const createPermission = canCreateRecord(target);
   const updatePermission = canUpdateRecord(target);
+  const modal = useModal();
 
   const loadProjects = useCallback(async () => {
     setLoading(true);
@@ -153,6 +154,40 @@ export function ManageProjectsClient({ target }: { target: ManageTarget }) {
     void loadProjects();
   }, [loadProjects]);
 
+  // Project creation opens as a popup over the list rather than replacing the
+  // page, so the steward keeps their projects in view.
+  const openCreateModal = useCallback(() => {
+    const close = (didChange: boolean) => {
+      void modal.hide().then(() => modal.clear());
+      if (didChange) void loadProjects();
+    };
+    modal.pushModal(
+      {
+        id: "create-project",
+        dialogWidth: "max-w-3xl",
+        content: (
+          <CreateProjectModal
+            target={target}
+            onClose={() => close(false)}
+            onSaved={() => close(true)}
+          />
+        ),
+      },
+      true,
+    );
+    void modal.show();
+  }, [modal, target, loadProjects]);
+
+  // Honor a ?mode=new deep link (e.g. the /cert/create redirect) by opening the
+  // create popup once, then clearing the param so the list shows behind it.
+  const autoOpenedRef = useRef(false);
+  useEffect(() => {
+    if (mode !== "new" || autoOpenedRef.current) return;
+    autoOpenedRef.current = true;
+    if (createPermission.allowed) openCreateModal();
+    void setProjectState({ mode: "list", project: null });
+  }, [mode, createPermission.allowed, openCreateModal, setProjectState]);
+
   const filteredProjects = useMemo(() => {
     const normalized = query.trim().toLowerCase();
     if (!normalized) return projects;
@@ -172,7 +207,7 @@ export function ManageProjectsClient({ target }: { target: ManageTarget }) {
       setError(createPermission.reason ?? "You cannot create projects for this organization.");
       return;
     }
-    void setProjectState({ mode: "new", project: null });
+    openCreateModal();
   };
 
   const openEdit = (project: ManagedProject) => {
@@ -190,20 +225,9 @@ export function ManageProjectsClient({ target }: { target: ManageTarget }) {
   return (
     <div className="mx-auto w-full max-w-[1440px] px-4 py-4 sm:px-6 sm:py-6">
       <div className="space-y-5">
-        {mode === "list" ? <ProjectHero /> : null}
+        {mode !== "edit" ? <ProjectHero /> : null}
 
-        {mode === "new" ? (
-          <ProjectEditor
-            key="new-project"
-            state={{ mode: "create", project: null }}
-            target={target}
-            onClose={backToList}
-            onSaved={() => {
-              backToList();
-              void loadProjects();
-            }}
-          />
-        ) : mode === "edit" ? (
+        {mode === "edit" ? (
           loading ? (
             <ProjectsSkeleton />
           ) : selectedProject ? (
@@ -465,6 +489,33 @@ function ProjectCreateHero() {
         className="pointer-events-none absolute bottom-0 right-[3%] z-20 hidden h-[24rem] w-auto max-w-[48%] object-contain dark:md:block"
       />
     </section>
+  );
+}
+
+function CreateProjectModal({
+  target,
+  onClose,
+  onSaved,
+}: {
+  target: ManageTarget;
+  onClose: () => void;
+  onSaved: () => void;
+}) {
+  // Non-dismissible: the wizard owns its own exits ("Back to My Projects",
+  // success panel) so closing always routes through onClose/onSaved and the
+  // list refreshes. The scroll container keeps the multi-step flow inside the
+  // dialog on shorter viewports.
+  return (
+    <ModalContent dismissible={false} className="w-full">
+      <div className="max-h-[82vh] overflow-y-auto px-0.5 pb-1">
+        <ProjectEditor
+          state={{ mode: "create", project: null }}
+          target={target}
+          onClose={onClose}
+          onSaved={onSaved}
+        />
+      </div>
+    </ModalContent>
   );
 }
 

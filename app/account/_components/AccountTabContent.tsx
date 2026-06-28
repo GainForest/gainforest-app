@@ -105,7 +105,6 @@ async function AccountOverviewFolders({ account }: { account: AccountRouteData }
 
   const tiles: OverviewFolderTile[] = [
     { id: "projects", title: tabsT("projects"), href: accountProjectsPath(account.urlIdentifier), count: projects.length },
-    { id: "certs", title: tabsT("bumicerts"), href: accountBumicertsPath(account.urlIdentifier), count: account.summary.bumicertCount },
     { id: "observations", title: tabsT("observations"), href: accountObservationsPath(account.urlIdentifier), count: account.summary.observationCount },
     { id: "gallery", title: tabsT("gallery"), href: accountGalleryPath(account.urlIdentifier), count: galleries.length },
   ];
@@ -150,11 +149,10 @@ export async function AccountHomeTabContent({ account }: { account: AccountRoute
 // of at-a-glance stat tiles that link into each tab, and a slim share card.
 // Replaces the bulky right-hand sidebar that used to crowd the Certs page.
 export async function AccountOverviewTabContent({ account, did }: { account: AccountRouteData; did: string }) {
-  const [tabsT, shareT, locale, bumicerts, projects, receipts, observationSummary] = await Promise.all([
+  const [tabsT, shareT, locale, projects, receipts, observationSummary] = await Promise.all([
     getTranslations("common.accountTabs"),
     getTranslations("marketplace.account.sidebar"),
     getLocale(),
-    fetchBumicertsByDid(did, 1000).then((page) => page.records).catch(() => []),
     fetchProjectsByDid(did, 1000).then((page) => page.records).catch(() => []),
     fetchReceipts().catch(() => []),
     fetchObservationSummaryByDid(did).catch(() => null),
@@ -164,7 +162,6 @@ export async function AccountOverviewTabContent({ account, did }: { account: Acc
 
   const folderTiles: OverviewFolderTile[] = [
     { id: "projects", title: tabsT("projects"), href: accountProjectsPath(account.urlIdentifier), count: projects.length },
-    { id: "certs", title: tabsT("bumicerts"), href: accountBumicertsPath(account.urlIdentifier), count: bumicerts.length },
     { id: "observations", title: tabsT("observations"), href: accountObservationsPath(account.urlIdentifier), count: observationSummary?.count ?? 0 },
     { id: "donations", title: tabsT("donations"), href: accountDonationsPath(account.urlIdentifier), count: donationCount },
   ];

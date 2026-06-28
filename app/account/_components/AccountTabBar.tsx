@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { usePathname, useSearchParams } from "next/navigation";
 import { BinocularsIcon, Building2Icon, FolderKanbanIcon, HeartHandshakeIcon, HomeIcon, ImageIcon, SettingsIcon, UsersIcon } from "lucide-react";
-import BumicertIcon from "@/icons/BumicertIcon";
 import { stripLocaleFromPathname } from "@/lib/i18n/routing";
 import { cn } from "@/lib/utils";
 import type { AccountKind } from "../_lib/account-route";
@@ -96,7 +95,6 @@ function buildTabs(
   };
 
   if (accountKind === "user") {
-    const certsTab: Tab = { labelKey: "bumicerts", href: paths.bumicerts, icon: BumicertIcon, exact: false };
     const projectsTab: Tab = { labelKey: "projects", href: paths.projects, icon: FolderKanbanIcon, exact: false };
     const organizationsTab: Tab = { labelKey: "organizations", href: paths.organizations, icon: Building2Icon, exact: false };
     const observationsTab: Tab = {
@@ -109,22 +107,22 @@ function buildTabs(
     };
     const donationsTab: Tab = { labelKey: "donationHistory", href: paths.donations, icon: HeartHandshakeIcon, exact: false };
 
-    // Public profile leads with a compact Overview, then Projects, Certs,
-    // Observations, Gallery, and Donations. Sites and Timeline are no longer
-    // profile sections — they live on each project, where they belong. The
-    // only things that stay organization-only are Members + the Data Council.
-    // The manage dashboard keeps its simpler order.
+    // Public profile leads with a compact Overview, then Projects,
+    // Observations, Gallery, and Donations. Certs are no longer a separate
+    // profile section — each project carries its own impact certificate.
+    // Sites and Timeline live on each project. The only things that stay
+    // organization-only are Members + the Data Council. The manage dashboard
+    // keeps its simpler order.
     const tabs: Tab[] = scope === "account"
       ? [
           { labelKey: "overview", href: paths.home, icon: HomeIcon, exact: true },
           projectsTab,
-          certsTab,
           ...(showOrganizations ? [organizationsTab] : []),
           observationsTab,
           { labelKey: "gallery", href: paths.gallery, icon: ImageIcon, exact: false },
           donationsTab,
         ]
-      : [certsTab, projectsTab, observationsTab, donationsTab];
+      : [projectsTab, observationsTab, donationsTab];
     if (includeSettings) tabs.push(settingsTab);
     return tabs;
   }
@@ -135,12 +133,6 @@ function buildTabs(
       href: paths.home,
       icon: HomeIcon,
       exact: true,
-    },
-    {
-      labelKey: "bumicerts",
-      href: paths.bumicerts,
-      icon: BumicertIcon,
-      exact: false,
     },
     {
       labelKey: "projects",
