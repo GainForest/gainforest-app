@@ -181,6 +181,10 @@ export type OccurrenceRecord = {
   locality: string | null;
   lat: number | null;
   lon: number | null;
+  /** DwC coordinateUncertaintyInMeters — radius of the location's circle. Set
+   *  when a record's coordinates were generalised (e.g. privacy-fuzzed), so the
+   *  map can draw the approximate area rather than a misleadingly precise pin. */
+  coordinateUncertaintyInMeters: number | null;
   eventDate: string | null;
   habitat: string | null;
   siteRef: string | null;
@@ -210,7 +214,7 @@ const OCCURRENCE_NODE_FIELDS = `
   ${CERTIFIED_PROFILE_DATA_FIELDS}
   scientificName vernacularName kingdom family genus
   basisOfRecord recordedBy individualCount
-  datasetName country countryCode stateProvince locality decimalLatitude decimalLongitude
+  datasetName country countryCode stateProvince locality decimalLatitude decimalLongitude coordinateUncertaintyInMeters
   habitat siteRef datasetRef dynamicProperties
   occurrenceRemarks fieldNotes
   thumbnailUrl speciesImageUrl associatedMedia
@@ -257,6 +261,7 @@ type RawOccurrence = {
   locality?: string | null;
   decimalLatitude?: number | string | null;
   decimalLongitude?: number | string | null;
+  coordinateUncertaintyInMeters?: number | string | null;
   habitat?: string | null;
   siteRef?: string | null;
   datasetRef?: string | null;
@@ -329,6 +334,7 @@ function mapOccurrence(n: RawOccurrence): OccurrenceRecord {
     locality: n.locality?.trim() || null,
     lat: asNumber(n.decimalLatitude),
     lon: asNumber(n.decimalLongitude),
+    coordinateUncertaintyInMeters: asNumber(n.coordinateUncertaintyInMeters),
     eventDate: n.eventDate?.trim() || null,
     habitat: n.habitat?.trim() || null,
     siteRef: n.siteRef?.trim() || null,
@@ -587,6 +593,7 @@ function mapAudioRecord(n: RawAudioRecord, audioRef: string | null, audioUrl: st
     locality: null,
     lat: null,
     lon: null,
+    coordinateUncertaintyInMeters: null,
     eventDate: n.metadata?.recordedAt ?? null,
     habitat: null,
     siteRef: n.siteRef?.trim() || null,

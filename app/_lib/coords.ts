@@ -18,6 +18,7 @@
 
 import { INDEXER_URL } from "./urls";
 import { resolvePdsHost } from "./pds";
+import { circleGeoJson } from "./geo-circle";
 import type { ExplorerRecord, RecordKind } from "./indexer";
 
 export type MapPoint = {
@@ -201,6 +202,22 @@ async function loadSitePointMap(): Promise<Map<string, SitePoint>> {
 
 // ── Public: resolve points for records ────────────────────────────────────
 
+/**
+ * GeoJSON circle for an occurrence whose coordinates carry a Darwin Core
+ * `coordinateUncertaintyInMeters` — i.e. the location is an *area*, not a point
+ * (privacy-generalised observations set this to the obscuring radius). The
+ * circle is derived on the fly from the centroid + radius; nothing custom is
+ * stored on the record.
+ */
+function occurrenceUncertaintyCircle(
+  record: Extract<ExplorerRecord, { kind: "occurrence" }>,
+): GeoJSON.GeoJSON | null {
+  if (record.lat == null || record.lon == null) return null;
+  const radius = record.coordinateUncertaintyInMeters;
+  if (typeof radius !== "number" || !Number.isFinite(radius) || radius <= 0) return null;
+  return circleGeoJson(record.lat, record.lon, radius);
+}
+
 export async function resolvePointForRecord(
   record: ExplorerRecord,
   signal?: AbortSignal,
@@ -213,6 +230,7 @@ export async function resolvePointForRecord(
       label: record.scientificName || record.vernacularName || "Unidentified",
       did: record.did,
       recordId: record.id,
+      geojson: occurrenceUncertaintyCircle(record),
     };
   }
 
@@ -269,6 +287,7 @@ export async function resolvePointsFor(
           label: r.scientificName || r.vernacularName || "Unidentified",
           did: r.did,
           recordId: r.id,
+          geojson: occurrenceUncertaintyCircle(r),
         });
       }
     }

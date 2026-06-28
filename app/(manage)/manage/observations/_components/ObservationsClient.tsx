@@ -304,6 +304,7 @@ async function buildOptimisticOccurrence(input: {
     locality: analysis.locality.trim() || null,
     lat: Number.isFinite(lat) ? lat : null,
     lon: Number.isFinite(lon) ? lon : null,
+    coordinateUncertaintyInMeters: null,
     eventDate: analysis.eventDate.trim() || null,
     habitat: analysis.habitat.trim() || null,
     siteRef: null,

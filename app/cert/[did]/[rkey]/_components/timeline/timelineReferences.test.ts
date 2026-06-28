@@ -59,6 +59,7 @@ function occurrence(overrides: Partial<OccurrenceRecord> = {}): OccurrenceRecord
     locality: null,
     lat: null,
     lon: null,
+    coordinateUncertaintyInMeters: null,
     eventDate: "2024-05-01",
     habitat: null,
     siteRef: "at://did:example:org/app.certified.location/site-1",

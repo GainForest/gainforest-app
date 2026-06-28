@@ -5,6 +5,8 @@ import "leaflet.markercluster/dist/MarkerCluster.css";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type {
   DivIcon,
+  Layer,
+  LayerGroup,
   Map as LeafletMap,
   Marker,
   MarkerClusterGroup,
@@ -87,6 +89,14 @@ function fracToLabel(min: number, max: number, frac: number): string {
   return spanLabel(min, max, min + (max - min) * frac);
 }
 
+// Accent colour for the uncertainty circles, read from the live CSS variable so
+// it follows light/dark. Falls back to the brand green if unavailable (SSR).
+function readPrimaryColor(): string {
+  if (typeof window === "undefined") return "#2f6b3a";
+  const value = getComputedStyle(document.documentElement).getPropertyValue("--primary").trim();
+  return value || "#2f6b3a";
+}
+
 function clusterTier(n: number): { tier: string; size: number } {
   if (n < 10) return { tier: "sm", size: 36 };
   if (n < 100) return { tier: "md", size: 44 };
@@ -107,6 +117,12 @@ export function RecordMap({
   const elRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<LeafletMap | null>(null);
   const layerRef = useRef<MarkerClusterGroup | null>(null);
+  // Uncertainty circles live in a plain (non-clustered) layer group beneath the
+  // markers; timed circles are tracked by the same index as their marker so they
+  // appear/disappear together as the timeline window moves.
+  const circleLayerRef = useRef<LayerGroup | null>(null);
+  const timedCirclesRef = useRef<Map<number, Layer>>(new Map());
+  const accentRef = useRef<string>("#2f6b3a");
   const tileRef = useRef<TileLayer | null>(null);
   const pinIconRef = useRef<DivIcon | null>(null);
   const LRef = useRef<typeof import("leaflet") | null>(null);
@@ -190,6 +206,12 @@ export function RecordMap({
         subdomains: "abcd",
         maxZoom: 19,
       }).addTo(map);
+      // Vector layer for the approximate-area circles. Leaflet renders vectors
+      // in the overlay pane, below the marker pane, so circles sit under pins
+      // automatically. Added before the cluster purely for readability.
+      accentRef.current = readPrimaryColor();
+      const circleLayer = L.layerGroup().addTo(map);
+      circleLayerRef.current = circleLayer;
       const cluster = L.markerClusterGroup({
         // Coverage polygons add visual noise on the cream palette; the count
         // bubble + zoom-on-click already communicate density.
@@ -223,6 +245,7 @@ export function RecordMap({
       mapRef.current?.remove();
       mapRef.current = null;
       layerRef.current = null;
+      circleLayerRef.current = null;
       tileRef.current = null;
     };
   }, []);
@@ -240,6 +263,7 @@ export function RecordMap({
 
   useEffect(() => {
     tileRef.current?.setUrl(mapTileUrl(isDark));
+    accentRef.current = readPrimaryColor();
   }, [isDark]);
 
   // Resolve points whenever the record set changes. A new data set re-enables
@@ -291,6 +315,20 @@ export function RecordMap({
     return marker;
   }
 
+  /** Approximate-area circle for a point, or null when it has none. Only drawn
+   *  for occurrences (whose `geojson` is a privacy/uncertainty circle); site &
+   *  project boundaries keep their plain pins on the cluster map. The layer is
+   *  non-interactive so it never steals a click from the marker on top of it. */
+  function makeCircle(point: MapPoint): Layer | null {
+    const L = LRef.current;
+    if (!L || kind !== "occurrence" || !point.geojson) return null;
+    const accent = accentRef.current;
+    return L.geoJSON(point.geojson, {
+      interactive: false,
+      style: { color: accent, weight: 1, fillColor: accent, fillOpacity: 0.12 },
+    });
+  }
+
   /** Histogram of datable points per time bucket (track backdrop). */
   function buildHisto(pts: TimedPoint[], min: number, max: number): number[] {
     const buckets = new Array<number>(HISTO_BUCKETS).fill(0);
@@ -340,6 +378,8 @@ export function RecordMap({
     const prevTo = shownToRef.current;
     if (lo === prevFrom && hi === prevTo) return;
     const markers = timedMarkersRef.current;
+    const circles = timedCirclesRef.current;
+    const circleLayer = circleLayerRef.current;
     const toRemove: Marker[] = [];
     const toAdd: Marker[] = [];
     for (let i = prevFrom; i < prevTo; i++) {
@@ -348,6 +388,11 @@ export function RecordMap({
         if (m) {
           toRemove.push(m);
           markers.delete(i);
+        }
+        const c = circles.get(i);
+        if (c) {
+          circleLayer?.removeLayer(c);
+          circles.delete(i);
         }
       }
     }
@@ -358,6 +403,11 @@ export function RecordMap({
         if (m) {
           markers.set(i, m);
           toAdd.push(m);
+        }
+        const c = makeCircle(tp.point);
+        if (c && circleLayer) {
+          circles.set(i, c);
+          circleLayer.addLayer(c);
         }
       }
     }
@@ -452,7 +502,9 @@ export function RecordMap({
     map.invalidateSize();
     stopLoop();
     cluster.clearLayers();
+    circleLayerRef.current?.clearLayers();
     timedMarkersRef.current = new Map();
+    timedCirclesRef.current = new Map();
     shownFromRef.current = 0;
     shownToRef.current = 0;
 
@@ -507,13 +559,21 @@ export function RecordMap({
     }
     staticPointsRef.current = staticPts.map((s) => s.point);
 
-    // Static markers go in once and stay for the life of this data set.
+    // Static markers go in once and stay for the life of this data set; their
+    // approximate-area circles ride along in the dedicated vector layer.
     const staticMarkers: Marker[] = [];
     for (const s of staticPts) {
       const m = makeMarker(s.record, s.point);
       if (m) staticMarkers.push(m);
     }
     if (staticMarkers.length) cluster.addLayers(staticMarkers);
+    const circleLayer = circleLayerRef.current;
+    if (circleLayer) {
+      for (const s of staticPts) {
+        const c = makeCircle(s.point);
+        if (c) circleLayer.addLayer(c);
+      }
+    }
 
     // Reset the window to "everything", play-head parked at the end.
     winRef.current = { start: 0, end: 1 };

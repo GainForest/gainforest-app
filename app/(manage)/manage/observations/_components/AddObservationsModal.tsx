@@ -9,13 +9,22 @@ import {
   ImagePlusIcon,
   Loader2Icon,
   MapPinIcon,
+  ShieldCheckIcon,
   SparklesIcon,
   UploadCloudIcon,
   XIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { ModalContent, ModalHeader, ModalTitle, ModalDescription } from "@/components/ui/modal/modal";
 import { useModal } from "@/components/ui/modal/context";
 import { cn } from "@/lib/utils";
@@ -37,6 +46,13 @@ import {
 } from "./observation-mutations";
 import { LocationPickerModal, LocationPickerModalId } from "./LocationPickerModal";
 import { fetchDefaultObservationCenter, isValidLocation, type PickedLocation } from "./default-location";
+import {
+  buildObservationLocationFields,
+  DEFAULT_FUZZY_AREA,
+  FUZZY_AREA_OPTIONS,
+  radiusForArea,
+  type FuzzyAreaId,
+} from "./fuzzy-location";
 
 // Keep one quick-add session light; the rich bulk panel handles big imports.
 const MAX_PHOTOS = 20;
@@ -112,6 +128,10 @@ export function AddObservationsModal({
   const [error, setError] = useState<string | null>(null);
   const [addedCount, setAddedCount] = useState<number | null>(null);
   const [defaultCenter, setDefaultCenter] = useState<PickedLocation | null>(null);
+  // Privacy: when on, each observation is published as an approximate circle
+  // centred on a randomised point rather than the exact pin.
+  const [obscureLocation, setObscureLocation] = useState(false);
+  const [fuzzyArea, setFuzzyArea] = useState<FuzzyAreaId>(DEFAULT_FUZZY_AREA);
 
   const createPermission = canCreateRecord(target);
   const disabledReason = createPermission.allowed ? null : createPermission.reason;
@@ -332,16 +352,23 @@ export function AddObservationsModal({
   const submittableCount = items.filter(canSubmitItem).length;
 
   async function uploadItem(item: QuickItem): Promise<boolean> {
+    // Resolve the location into Darwin Core fields, swapping the precise pin for
+    // a randomised circle when the observer opted to keep their location private.
+    const locationFields = item.location
+      ? buildObservationLocationFields(item.location, {
+          obscure: obscureLocation,
+          radiusMeters: radiusForArea(fuzzyArea),
+        })
+      : { decimalLatitude: "", decimalLongitude: "" };
     const occurrence = await createObservationOccurrence({
       basisOfRecord: "MachineObservation",
       scientificName: item.scientificName.trim(),
       vernacularName: item.vernacularName.trim(),
       kingdom: item.kingdom.trim() || "Plantae",
       eventDate: item.eventDate.trim(),
-      decimalLatitude: item.location ? String(item.location.lat) : "",
-      decimalLongitude: item.location ? String(item.location.lng) : "",
       occurrenceRemarks: item.notes.trim(),
       associatedMedia: item.file.name,
+      ...locationFields,
       ...(projectRef ? { projectRef } : {}),
     });
     let primaryBlobRef: ObservationBlobRef | null = null;
@@ -508,6 +535,48 @@ export function AddObservationsModal({
       </div>
 
       <input ref={fileInputRef} type="file" accept="image/*" multiple className="hidden" onChange={onInputChange} />
+
+      {!showEmptyState ? (
+        <div className="rounded-2xl border border-border bg-muted/30 p-3">
+          <label className="flex cursor-pointer items-start gap-3">
+            <Checkbox
+              checked={obscureLocation}
+              onCheckedChange={(checked) => setObscureLocation(checked === true)}
+              disabled={isSubmitting}
+              className="mt-0.5"
+              aria-label={t("obscureLabel")}
+            />
+            <span className="min-w-0 flex-1">
+              <span className="flex items-center gap-1.5 text-sm font-medium text-foreground">
+                <ShieldCheckIcon className="size-4 shrink-0 text-primary" />
+                {t("obscureLabel")}
+              </span>
+              <span className="mt-0.5 block text-xs leading-5 text-muted-foreground">{t("obscureHint")}</span>
+            </span>
+          </label>
+          {obscureLocation ? (
+            <div className="mt-3 flex flex-col gap-1.5 border-t border-border/60 pt-3 sm:flex-row sm:items-center sm:justify-between">
+              <span className="text-xs font-medium text-muted-foreground">{t("obscureAreaLabel")}</span>
+              <Select
+                value={fuzzyArea}
+                onValueChange={(value) => setFuzzyArea(value as FuzzyAreaId)}
+                disabled={isSubmitting}
+              >
+                <SelectTrigger className="h-8 w-full sm:w-56" aria-label={t("obscureAreaLabel")}>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {FUZZY_AREA_OPTIONS.map((option) => (
+                    <SelectItem key={option.id} value={option.id}>
+                      {t(`obscureArea_${option.id}`)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          ) : null}
+        </div>
+      ) : null}
 
       {error ? (
         <p className="rounded-xl border border-destructive/30 bg-destructive/5 px-3 py-2 text-sm text-destructive">{error}</p>
