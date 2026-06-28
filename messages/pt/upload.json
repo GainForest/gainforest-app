@@ -682,6 +682,23 @@
       "uploadFailed": "Não foi possível adicionar estas observações. Tente novamente.",
       "doneTitle": "{count, plural, one {# observação adicionada} other {# observações adicionadas}}",
       "doneBody": "Elas aparecerão nas suas observações em instantes.",
+      "addObservation": "Adicionar outra observação",
+      "addPhoto": "Adicionar foto",
+      "photosTitle": "{count, plural, one {# foto} other {# fotos}}",
+      "coverBadge": "Capa",
+      "photoPartLabel": "O que esta foto mostra",
+      "removeObservation": "Remover observação",
+      "tooManyPerObservation": "Você pode adicionar até {max} fotos por observação.",
+      "subjectParts": {
+        "wholeOrganism": "Organismo inteiro",
+        "leaf": "Folha",
+        "leafUnderside": "Parte de baixo da folha",
+        "bark": "Casca",
+        "flower": "Flor",
+        "fruit": "Fruto ou semente",
+        "habitat": "Habitat",
+        "other": "Outro detalhe"
+      },
       "viewObservations": "Ver observações"
     },
     "tainaTitle": "Diga oi para Tainá",

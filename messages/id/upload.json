@@ -682,6 +682,23 @@
       "uploadFailed": "Kami tidak dapat menambahkan observasi ini. Silakan coba lagi.",
       "doneTitle": "{count, plural, other {# observasi ditambahkan}}",
       "doneBody": "Akan muncul di observasi Anda sebentar lagi.",
+      "addObservation": "Tambah observasi lain",
+      "addPhoto": "Tambah foto",
+      "photosTitle": "{count, plural, other {# foto}}",
+      "coverBadge": "Sampul",
+      "photoPartLabel": "Apa yang ditampilkan foto ini",
+      "removeObservation": "Hapus observasi",
+      "tooManyPerObservation": "Anda dapat menambahkan hingga {max} foto per observasi.",
+      "subjectParts": {
+        "wholeOrganism": "Seluruh organisme",
+        "leaf": "Daun",
+        "leafUnderside": "Bagian bawah daun",
+        "bark": "Kulit kayu",
+        "flower": "Bunga",
+        "fruit": "Buah atau biji",
+        "habitat": "Habitat",
+        "other": "Detail lain"
+      },
       "viewObservations": "Lihat observasi"
     },
     "tainaTitle": "Sapa Tainá",
