@@ -725,13 +725,15 @@
       "project": "Proyek",
       "observation": "Pengamatan",
       "organization": "Organisasi",
-      "donation": "Donasi"
+      "donation": "Donasi",
+      "post": "Postingan"
     },
     "verbs": {
       "project": "menerbitkan proyek",
       "observation": "berbagi pengamatan alam",
       "organization": "mendaftarkan organisasi",
-      "donation": "memberi donasi"
+      "donation": "memberi donasi",
+      "post": "membagikan kabar"
     },
     "to": "untuk",
     "anonymous": "Seseorang",
@@ -759,11 +761,14 @@
       "you": "Anda",
       "postedJustNow": "baru saja",
       "yourCommentsNote": "Komentar yang Anda kirim muncul di sini. Balasan publik akan muncul seiring feed diperbarui.",
-      "errorGeneric": "Terjadi kesalahan. Silakan coba lagi."
+      "errorGeneric": "Terjadi kesalahan. Silakan coba lagi.",
+      "loadingComments": "Memuat komentar…",
+      "noComments": "Belum ada komentar. Jadilah yang pertama."
     },
     "composer": {
       "placeholder": "Bagikan kabar terbaru dengan komunitas…",
       "signedOut": "Masuk untuk membagikan kabar terbaru",
+      "addObservation": "Tambahkan pengamatan alam",
       "post": "Posting",
       "posting": "Memposting…",
       "postedTitle": "Terposting",

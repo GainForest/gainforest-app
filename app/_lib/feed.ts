@@ -39,7 +39,8 @@ export type ActivityFeedKind =
   | "project"
   | "observation"
   | "organization"
-  | "donation";
+  | "donation"
+  | "post";
 
 /** Normalized, serializable feed row — ready to ship to the client. */
 export interface ActivityFeedItem {
@@ -193,10 +194,12 @@ const FEED_QUERY = `
     $occurrenceFirst: Int!
     $orgFirst: Int!
     $receiptFirst: Int!
+    $postFirst: Int!
     $projectWhere: OrgHypercertsCollectionWhereInput
     $occurrenceWhere: AppGainforestDwcOccurrenceWhereInput
     $orgWhere: AppCertifiedActorOrganizationWhereInput
     $donationWhere: OrgHypercertsFundingReceiptWhereInput
+    $postWhere: AppGainforestFeedPostWhereInput
   ) {
     projects: orgHypercertsCollection(
       first: $projectFirst
@@ -263,6 +266,18 @@ const FEED_QUERY = `
         for { uri }
       } }
     }
+
+    posts: appGainforestFeedPost(
+      first: $postFirst
+      where: $postWhere
+      sortBy: createdAt
+      sortDirection: DESC
+    ) {
+      edges { node {
+        did uri createdAt text
+        ${CERTIFIED_PROFILE_DATA_FIELDS}
+      } }
+    }
   }
 `;
 
@@ -315,6 +330,14 @@ type RawOrg = {
   certifiedProfileData?: CertifiedProfileData;
 };
 
+type RawPost = {
+  did: string;
+  uri?: string | null;
+  createdAt: string;
+  text?: string | null;
+  certifiedProfileData?: CertifiedProfileData;
+};
+
 type RawDonor =
   | { __typename: "OrgHypercertsFundingReceiptText"; value?: string | null }
   | { __typename: "AppCertifiedDefsDid"; did?: string | null }
@@ -335,6 +358,7 @@ type RawFeed = {
   occurrences?: { edges?: Array<{ node?: RawOccurrence | null } | null> | null } | null;
   organizations?: { edges?: Array<{ node?: RawOrg | null } | null> | null } | null;
   donations?: { edges?: Array<{ node?: RawReceipt | null } | null> | null } | null;
+  posts?: { edges?: Array<{ node?: RawPost | null } | null> | null } | null;
 };
 
 function imageMeta(image: RawImage): { url: string | null; ref: string | null } {
@@ -433,6 +457,28 @@ function mapOrganizations(nodes: RawOrg[]): ActivityFeedItem[] {
       currency: null,
     };
   });
+}
+
+/** Top-level feed posts (app.gainforest.feed.post with no reply). Replies are
+ *  comments and surface under their subject row, not as their own feed entries. */
+function mapPosts(nodes: RawPost[]): ActivityFeedItem[] {
+  return nodes.map((n) => ({
+    id: n.uri ?? `at://${n.did}/app.gainforest.feed.post/unknown`,
+    kind: "post" as const,
+    createdAt: n.createdAt,
+    actorDid: n.did,
+    actorName: profileName(n.certifiedProfileData),
+    actorAvatarRef: profileAvatarRef(n.certifiedProfileData),
+    title: null,
+    text: clampText(n.text, 400),
+    href: accountHref(n.did),
+    imageUrl: null,
+    imageRef: null,
+    targetTitle: null,
+    targetHref: null,
+    amount: null,
+    currency: null,
+  }));
 }
 
 function safeAmount(raw: string | null | undefined): number {
@@ -665,16 +711,19 @@ async function buildFeedPageUncached(
     occurrenceFirst: wants("observation") ? STREAM_BATCH : 1,
     orgFirst: wants("organization") ? STREAM_BATCH : 1,
     receiptFirst: wants("donation") ? STREAM_BATCH : 1,
+    postFirst: wants("post") ? STREAM_BATCH : 1,
     projectWhere: { type: { in: ["project", "Project"] }, ...ltBound },
     occurrenceWhere: before ? { createdAt: { lte: before } } : null,
     orgWhere: before ? { createdAt: { lte: before } } : null,
     donationWhere: { did: { eq: FACILITATOR_DID }, ...ltBound },
+    postWhere: { reply: { isNull: true }, ...ltBound },
   });
 
   const projectNodes = (data?.projects?.edges ?? []).map((e) => e?.node).filter((n): n is RawProject => Boolean(n?.did));
   const occurrenceNodes = (data?.occurrences?.edges ?? []).map((e) => e?.node).filter((n): n is RawOccurrence => Boolean(n?.did));
   const orgNodes = (data?.organizations?.edges ?? []).map((e) => e?.node).filter((n): n is RawOrg => Boolean(n?.did));
   const receiptNodes = (data?.donations?.edges ?? []).map((e) => e?.node).filter((n): n is RawReceipt => Boolean(n?.uri));
+  const postNodes = (data?.posts?.edges ?? []).map((e) => e?.node).filter((n): n is RawPost => Boolean(n?.did));
 
   const { items: donationItems, certUriById } = mapDonations(receiptNodes);
 
@@ -685,6 +734,7 @@ async function buildFeedPageUncached(
     ...mapProjects(projectNodes),
     ...mapOccurrences(occurrenceNodes),
     ...mapOrganizations(orgNodes),
+    ...mapPosts(postNodes),
     ...donationItems,
   ].filter((item) => item.createdAt && (filter === "all" || item.kind === filter));
   pool.sort(compareNewestFirst);
@@ -721,7 +771,8 @@ async function buildFeedPageUncached(
     projectNodes.length >= STREAM_BATCH ||
     occurrenceNodes.length >= STREAM_BATCH ||
     orgNodes.length >= STREAM_BATCH ||
-    receiptNodes.length >= STREAM_BATCH;
+    receiptNodes.length >= STREAM_BATCH ||
+    postNodes.length >= STREAM_BATCH;
   const hasMore = pageItems.length > 0 && (ordered.length > PAGE_SIZE || fetchedFull);
 
   return {

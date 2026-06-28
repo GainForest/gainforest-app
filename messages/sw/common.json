@@ -725,13 +725,15 @@
       "project": "Miradi",
       "observation": "Maonevu",
       "organization": "Mashirika",
-      "donation": "Michango"
+      "donation": "Michango",
+      "post": "Machapisho"
     },
     "verbs": {
       "project": "amechapisha mradi",
       "observation": "ameshiriki onevu la asili",
       "organization": "amesajili shirika",
-      "donation": "ametoa mchango"
+      "donation": "ametoa mchango",
+      "post": "alishiriki taarifa"
     },
     "to": "kwa",
     "anonymous": "Mtu fulani",
@@ -759,11 +761,14 @@
       "you": "Wewe",
       "postedJustNow": "sasa hivi",
       "yourCommentsNote": "Maoni unayochapisha yanaonekana hapa. Majibu ya umma yataonekana kadri mlisho unavyosasishwa.",
-      "errorGeneric": "Hitilafu imetokea. Tafadhali jaribu tena."
+      "errorGeneric": "Hitilafu imetokea. Tafadhali jaribu tena.",
+      "loadingComments": "Inapakia maoni…",
+      "noComments": "Hakuna maoni bado. Kuwa wa kwanza."
     },
     "composer": {
       "placeholder": "Shiriki taarifa mpya na jamii…",
       "signedOut": "Ingia ili kushiriki taarifa mpya",
+      "addObservation": "Ongeza uchunguzi wa asili",
       "post": "Chapisha",
       "posting": "Inachapisha…",
       "postedTitle": "Imechapishwa",

@@ -11,6 +11,7 @@ import {
   FolderKanbanIcon,
   HeartHandshakeIcon,
   Loader2Icon,
+  MegaphoneIcon,
   NewspaperIcon,
   RefreshCwIcon,
 } from "lucide-react";
@@ -25,6 +26,7 @@ import {
   type FeedInteractions,
 } from "./FeedActions";
 import { formatCompact, formatCompactUsd, formatRelative } from "../_lib/format";
+import { ResolvedAvatar } from "./ResolvedAvatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
@@ -67,6 +69,7 @@ function groupFeedEntries(items: ActivityFeedItem[]): FeedEntry[] {
 
 const FILTERS: { key: Filter; Icon: typeof NewspaperIcon }[] = [
   { key: "all", Icon: NewspaperIcon },
+  { key: "post", Icon: MegaphoneIcon },
   { key: "project", Icon: FolderKanbanIcon },
   { key: "observation", Icon: BinocularsIcon },
   { key: "organization", Icon: Building2Icon },
@@ -199,6 +202,20 @@ export function FeedClient({
 
   const entries = useMemo(() => groupFeedEntries(items), [items]);
 
+  // Pull like + comment engagement for the loaded rows from the indexer.
+  const { loadEngagement } = interactions;
+  useEffect(() => {
+    if (items.length > 0) loadEngagement(items.map((it) => it.id));
+  }, [items, loadEngagement]);
+
+  // A just-posted update shows optimistically until the indexer surfaces it as a
+  // real feed row (same AT-URI), at which point we drop the optimistic card.
+  const itemIds = useMemo(() => new Set(items.map((it) => it.id)), [items]);
+  const pendingPosts = useMemo(
+    () => interactions.localPosts.filter((p) => !itemIds.has(p.id)),
+    [interactions.localPosts, itemIds],
+  );
+
   return (
     <section className="-mt-14 pb-24 md:pb-32">
       {/* Hero */}
@@ -223,44 +240,49 @@ export function FeedClient({
       </div>
 
       <div className="mx-auto max-w-3xl px-4 sm:px-6">
-        <FeedComposer signedIn={signedIn} onPost={interactions.addPost} />
-        {/* Filter pills + refresh */}
-        <div className="sticky top-14 z-20 -mx-4 mb-2 flex items-center gap-2 border-b border-border/60 bg-background/85 px-4 py-2 backdrop-blur sm:mx-0 sm:rounded-full sm:border sm:px-3">
-          <div className="flex flex-1 items-center gap-1 overflow-x-auto">
-            {FILTERS.map(({ key, Icon }) => {
-              const active = filter === key;
-              const label = key === "all" ? t("filters.all") : t(`filters.${key}`);
-              return (
-                <button
-                  key={key}
-                  type="button"
-                  onClick={() => selectFilter(key)}
-                  aria-pressed={active}
-                  className={cn(
-                    "inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-colors",
-                    active
-                      ? "bg-primary text-primary-foreground"
-                      : "text-muted-foreground hover:bg-muted hover:text-foreground",
-                  )}
-                >
-                  <Icon className="size-3.5" />
-                  {label}
-                </button>
-              );
-            })}
+        {/* Sticky filter bar — full-bleed within the column with a solid,
+            blurred backdrop + bottom border so rows scroll cleanly beneath it
+            instead of peeking around a floating pill. */}
+        <div className="sticky top-14 z-20 -mx-4 mb-3 border-b border-border/60 bg-background/90 backdrop-blur supports-[backdrop-filter]:bg-background/70 sm:-mx-6">
+          <div className="flex items-center gap-2 px-4 py-2 sm:px-6">
+            <div className="no-scrollbar flex flex-1 items-center gap-1 overflow-x-auto">
+              {FILTERS.map(({ key, Icon }) => {
+                const active = filter === key;
+                const label = key === "all" ? t("filters.all") : t(`filters.${key}`);
+                return (
+                  <button
+                    key={key}
+                    type="button"
+                    onClick={() => selectFilter(key)}
+                    aria-pressed={active}
+                    className={cn(
+                      "inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-colors",
+                      active
+                        ? "bg-primary text-primary-foreground"
+                        : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                    )}
+                  >
+                    <Icon className="size-3.5" />
+                    {label}
+                  </button>
+                );
+              })}
+            </div>
+            <button
+              type="button"
+              onClick={() => void loadFirst(filter, "refresh")}
+              disabled={refreshing || loading}
+              aria-label={t("refresh")}
+              className="grid size-8 shrink-0 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-50"
+            >
+              <RefreshCwIcon className={cn("size-4", refreshing && "animate-spin")} />
+            </button>
           </div>
-          <button
-            type="button"
-            onClick={() => void loadFirst(filter, "refresh")}
-            disabled={refreshing || loading}
-            aria-label={t("refresh")}
-            className="grid size-8 shrink-0 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-50"
-          >
-            <RefreshCwIcon className={cn("size-4", refreshing && "animate-spin")} />
-          </button>
         </div>
 
-        <LocalPostsList posts={interactions.localPosts} />
+        <FeedComposer signedIn={signedIn} viewerDid={viewerDid} onPost={interactions.addPost} />
+
+        <LocalPostsList posts={pendingPosts} viewerDid={viewerDid} />
 
         {/* Timeline */}
         {loading ? (
@@ -284,7 +306,7 @@ export function FeedClient({
           </div>
         ) : (
           <>
-            <ol className="relative">
+            <ol className="relative divide-y divide-border/50">
               {entries.map((entry) =>
                 entry.type === "batch" ? (
                   <ObservationBatchCard key={`batch:${entry.items[0].id}`} items={entry.items} />
@@ -569,36 +591,19 @@ function ObservationThumb({ item, overlay }: { item: ActivityFeedItem; overlay: 
 }
 
 function FeedAvatar({ item }: { item: ActivityFeedItem }) {
-  const [resolved, setResolved] = useState<string | null>(null);
-
-  useEffect(() => {
-    setResolved(null);
-    if (item.imageUrl || !item.actorDid || !item.actorAvatarRef) return;
-    const controller = new AbortController();
-    resolveBlobUrl(item.actorDid, item.actorAvatarRef, controller.signal)
-      .then((url) => setResolved(url))
-      .catch((error) => {
-        if ((error as Error).name !== "AbortError") setResolved(null);
-      });
-    return () => controller.abort();
-  }, [item.actorDid, item.actorAvatarRef, item.imageUrl]);
-
-  const src = item.imageUrl ?? resolved;
-
+  // Show the actor's profile avatar (or their initials), falling back to a
+  // kind glyph only for anonymous rows. The cover image is rendered separately
+  // below the text, so it never doubles as the avatar.
+  const hasName = Boolean(item.actorName?.trim());
   return (
-    <span
-      className={cn(
-        "relative mt-0.5 grid size-10 shrink-0 place-items-center overflow-hidden rounded-full",
-        !src && "bg-primary/10 text-primary",
-      )}
-      aria-hidden
-    >
-      {src ? (
-        <Image src={src} alt="" fill unoptimized sizes="40px" className="object-cover" />
-      ) : (
-        <KindIcon kind={item.kind} className="size-4" />
-      )}
-    </span>
+    <ResolvedAvatar
+      did={item.actorDid}
+      avatarRef={item.actorAvatarRef}
+      name={item.actorName}
+      fallbackIcon={hasName ? undefined : <KindIcon kind={item.kind} className="size-4" />}
+      className="mt-0.5 size-10"
+      sizes="40px"
+    />
   );
 }
 
@@ -641,6 +646,8 @@ function KindIcon({ kind, className }: { kind: ActivityFeedKind; className?: str
       return <Building2Icon className={className} />;
     case "donation":
       return <HeartHandshakeIcon className={className} />;
+    case "post":
+      return <MegaphoneIcon className={className} />;
   }
 }
 

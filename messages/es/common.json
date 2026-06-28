@@ -725,13 +725,15 @@
       "project": "Proyectos",
       "observation": "Avistamientos",
       "organization": "Organizaciones",
-      "donation": "Donaciones"
+      "donation": "Donaciones",
+      "post": "Publicaciones"
     },
     "verbs": {
       "project": "publicó un proyecto",
       "observation": "compartió un avistamiento",
       "organization": "registró una organización",
-      "donation": "hizo una donación"
+      "donation": "hizo una donación",
+      "post": "compartió una novedad"
     },
     "to": "a",
     "anonymous": "Alguien",
@@ -759,11 +761,14 @@
       "you": "Tú",
       "postedJustNow": "ahora mismo",
       "yourCommentsNote": "Los comentarios que publiques aparecen aquí. Las respuestas públicas se mostrarán a medida que el feed se actualice.",
-      "errorGeneric": "Algo salió mal. Inténtalo de nuevo."
+      "errorGeneric": "Algo salió mal. Inténtalo de nuevo.",
+      "loadingComments": "Cargando comentarios…",
+      "noComments": "Aún no hay comentarios. Sé el primero."
     },
     "composer": {
       "placeholder": "Comparte una novedad con la comunidad…",
       "signedOut": "Inicia sesión para compartir una novedad",
+      "addObservation": "Añadir un avistamiento de naturaleza",
       "post": "Publicar",
       "posting": "Publicando…",
       "postedTitle": "Publicado",

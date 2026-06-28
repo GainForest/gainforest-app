@@ -725,13 +725,15 @@
       "project": "Projects",
       "observation": "Sightings",
       "organization": "Organizations",
-      "donation": "Donations"
+      "donation": "Donations",
+      "post": "Posts"
     },
     "verbs": {
       "project": "published a project",
       "observation": "shared a nature sighting",
       "organization": "registered an organization",
-      "donation": "made a donation"
+      "donation": "made a donation",
+      "post": "shared an update"
     },
     "to": "to",
     "anonymous": "Someone",
@@ -759,11 +761,14 @@
       "you": "You",
       "postedJustNow": "just now",
       "yourCommentsNote": "Comments you post show up here. Public replies will appear as the feed catches up.",
-      "errorGeneric": "Something went wrong. Please try again."
+      "errorGeneric": "Something went wrong. Please try again.",
+      "loadingComments": "Loading comments…",
+      "noComments": "No comments yet. Be the first."
     },
     "composer": {
       "placeholder": "Share an update with the community…",
       "signedOut": "Sign in to share an update",
+      "addObservation": "Add a nature sighting",
       "post": "Post",
       "posting": "Posting…",
       "postedTitle": "Posted",

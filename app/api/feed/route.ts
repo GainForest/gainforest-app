@@ -5,7 +5,7 @@ import { buildActivityFeed, type ActivityFeedFilter } from "@/app/_lib/feed";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const FILTERS: ActivityFeedFilter[] = ["all", "project", "observation", "organization", "donation"];
+const FILTERS: ActivityFeedFilter[] = ["all", "project", "observation", "organization", "donation", "post"];
 
 function parseFilter(value: string | null): ActivityFeedFilter {
   return value && (FILTERS as string[]).includes(value) ? (value as ActivityFeedFilter) : "all";
