@@ -811,7 +811,8 @@
       "post": "Publicar",
       "posting": "Publicando…",
       "postedTitle": "Publicado",
-      "postedNote": "Tu novedad está activa y aparecerá en el feed en breve."
+      "postedNote": "Tu novedad está activa y aparecerá en el feed en breve.",
+      "postingAs": "Publicando como {name}"
     }
   },
   "testAccount": {

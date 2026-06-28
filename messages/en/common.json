@@ -811,7 +811,8 @@
       "post": "Post",
       "posting": "Posting…",
       "postedTitle": "Posted",
-      "postedNote": "Your update is live and will show up in the feed shortly."
+      "postedNote": "Your update is live and will show up in the feed shortly.",
+      "postingAs": "Posting as {name}"
     }
   },
   "testAccount": {

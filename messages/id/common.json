@@ -811,7 +811,8 @@
       "post": "Posting",
       "posting": "Memposting…",
       "postedTitle": "Terposting",
-      "postedNote": "Kabar Anda sudah tayang dan akan muncul di feed sebentar lagi."
+      "postedNote": "Kabar Anda sudah tayang dan akan muncul di feed sebentar lagi.",
+      "postingAs": "Memposting sebagai {name}"
     }
   },
   "testAccount": {

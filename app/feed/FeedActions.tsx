@@ -10,7 +10,7 @@
  * overlay immediately and the indexer reconciles it on the next load.
  */
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { HeartIcon, ImageIcon, Loader2Icon, MessageCircleIcon, SendHorizonalIcon, UserIcon } from "lucide-react";
 import {
@@ -30,17 +30,59 @@ import {
 } from "@/app/_lib/feed-engagement";
 import { redirectToLogin } from "@/app/_lib/auth-client";
 import { formatRelative } from "@/app/_lib/format";
-import { useAccountList } from "@/app/_lib/account-switcher";
+import { useAccountList, useActiveAccountContext } from "@/app/_lib/account-switcher";
 import { useAddObservations } from "@/app/_components/useAddObservations";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { ResolvedAvatar } from "./ResolvedAvatar";
 
-/** The signed-in viewer's personal display name + avatar, for composer and
- *  comment identity (posts/comments always write to the personal repo). */
-function useViewerCard(viewerDid: string | null): { name: string | null; avatarUrl: string | null } {
-  const { personal } = useAccountList(viewerDid);
-  return { name: personal?.displayName?.trim() || null, avatarUrl: personal?.avatarUrl ?? null };
+/** Which account the viewer is currently acting as in the feed. When the
+ *  account switcher is set to a personal context this is the signed-in user; when
+ *  it's set to an organization the viewer manages, writes (posts, comments,
+ *  likes) are made on behalf of that organization's repo. `repo` is the group
+ *  DID for a group context (passed to the mutation helpers so they route through
+ *  CGS, which enforces membership) and undefined for the personal repo. */
+type ActingAccount = {
+  sessionDid: string | null;
+  /** DID whose repo writes land in and whose like state the feed reflects. */
+  actingDid: string | null;
+  /** Group DID when acting as an organization; undefined for the personal repo. */
+  repo: string | undefined;
+  isGroup: boolean;
+  card: { name: string | null; avatarUrl: string | null };
+};
+
+function useActingAccount(sessionDid: string | null): ActingAccount {
+  const { personal, groups } = useAccountList(sessionDid);
+  const [activeContext] = useActiveAccountContext(sessionDid ?? "");
+
+  if (!sessionDid) {
+    return { sessionDid: null, actingDid: null, repo: undefined, isGroup: false, card: { name: null, avatarUrl: null } };
+  }
+  if (activeContext.type === "group" && activeContext.did) {
+    const group = groups.find((g) => g.groupDid === activeContext.did) ?? null;
+    return {
+      sessionDid,
+      actingDid: activeContext.did,
+      repo: activeContext.did,
+      isGroup: true,
+      card: { name: group?.displayName?.trim() || null, avatarUrl: group?.avatarUrl ?? null },
+    };
+  }
+  return {
+    sessionDid,
+    actingDid: sessionDid,
+    repo: undefined,
+    isGroup: false,
+    card: { name: personal?.displayName?.trim() || null, avatarUrl: personal?.avatarUrl ?? null },
+  };
+}
+
+/** The display name + avatar (and DID) of the account the viewer is acting as,
+ *  for the composer and comment identity. */
+function useViewerCard(sessionDid: string | null): { name: string | null; avatarUrl: string | null; did: string | null } {
+  const acting = useActingAccount(sessionDid);
+  return { name: acting.card.name, avatarUrl: acting.card.avatarUrl, did: acting.actingDid };
 }
 
 export type LocalPost = { id: string; text: string; createdAt: string };
@@ -48,6 +90,9 @@ export type LocalPost = { id: string; text: string; createdAt: string };
 export type LikersState = { status: "idle" | "loading" | "ready"; likers: Liker[] };
 
 export type FeedInteractions = {
+  /** The signed-in user's DID (used to resolve the account switcher). */
+  sessionDid: string | null;
+  /** The DID writes are made on behalf of — personal or the active org. */
   viewerDid: string | null;
   getEngagement: (uri: string) => Engagement;
   loadEngagement: (uris: string[]) => void;
@@ -71,8 +116,17 @@ function rkeyOf(uri: string): string {
 }
 
 /** Indexer-backed engagement state with optimistic overlays for the viewer's
- *  own writes. */
-export function useFeedInteractions(viewerDid: string | null): FeedInteractions {
+ *  own writes. Writes are routed to the account the viewer is acting as (their
+ *  personal repo, or an organization they manage when the account switcher is
+ *  set to it), and the like state reflects that same account. */
+export function useFeedInteractions(sessionDid: string | null): FeedInteractions {
+  const acting = useActingAccount(sessionDid);
+  const actingDid = acting.actingDid;
+  const repo = acting.repo;
+  // Stable per-repo option object so the write callbacks below don't change
+  // identity every render (and so exhaustive-deps stays satisfied).
+  const repoOption = useMemo(() => (repo ? { repo } : undefined), [repo]);
+
   const [engagement, setEngagement] = useState<Map<string, Engagement>>(() => new Map());
   const [comments, setComments] = useState<Map<string, FeedComment[]>>(() => new Map());
   const [likers, setLikers] = useState<Map<string, LikersState>>(() => new Map());
@@ -82,7 +136,10 @@ export function useFeedInteractions(viewerDid: string | null): FeedInteractions 
   // URIs whose likers have been requested already (avoids refetch storms).
   const likersRequestedRef = useRef<Set<string>>(new Set());
 
-  // Reset everything when the viewer changes (sign in / out).
+  // Reset everything when the acting account changes (sign in / out, or an
+  // account switch). Engagement + like state are identity-specific, and any
+  // optimistic overlays belong to the previous account, so they're cleared and
+  // re-fetched for the new identity.
   useEffect(() => {
     requestedRef.current = new Set();
     likersRequestedRef.current = new Set();
@@ -90,7 +147,7 @@ export function useFeedInteractions(viewerDid: string | null): FeedInteractions 
     setComments(new Map());
     setLikers(new Map());
     setLocalPosts([]);
-  }, [viewerDid]);
+  }, [actingDid]);
 
   const getEngagement = useCallback(
     (uri: string): Engagement => engagement.get(uri) ?? emptyEngagement(),
@@ -102,7 +159,7 @@ export function useFeedInteractions(viewerDid: string | null): FeedInteractions 
       const todo = uris.filter((u) => u && u.startsWith("at://") && !requestedRef.current.has(u));
       if (todo.length === 0) return;
       todo.forEach((u) => requestedRef.current.add(u));
-      void fetchEngagement(todo, viewerDid)
+      void fetchEngagement(todo, actingDid)
         .then((map) => {
           setEngagement((prev) => {
             const next = new Map(prev);
@@ -122,7 +179,7 @@ export function useFeedInteractions(viewerDid: string | null): FeedInteractions 
           todo.forEach((u) => requestedRef.current.delete(u));
         });
     },
-    [viewerDid],
+    [actingDid],
   );
 
   const setOne = useCallback((uri: string, patch: Partial<Engagement>) => {
@@ -138,21 +195,21 @@ export function useFeedInteractions(viewerDid: string | null): FeedInteractions 
   // reconciles names/order once the indexer catches up.
   const patchViewerLiker = useCallback(
     (uri: string, liked: boolean) => {
-      if (!viewerDid) return;
+      if (!actingDid) return;
       likersRequestedRef.current.delete(uri); // allow a fresh reconcile on next hover
       setLikers((prev) => {
         const existing = prev.get(uri);
         if (!existing) return prev;
-        const without = existing.likers.filter((l) => l.did !== viewerDid);
+        const without = existing.likers.filter((l) => l.did !== actingDid);
         const nextLikers = liked
-          ? [{ did: viewerDid, name: null, avatarRef: null }, ...without]
+          ? [{ did: actingDid, name: null, avatarRef: null }, ...without]
           : without;
         const next = new Map(prev);
         next.set(uri, { ...existing, likers: nextLikers });
         return next;
       });
     },
-    [viewerDid],
+    [actingDid],
   );
 
   const toggleLike = useCallback(
@@ -163,7 +220,7 @@ export function useFeedInteractions(viewerDid: string | null): FeedInteractions 
         setOne(uri, { likeCount: Math.max(0, current.likeCount - 1), viewerLikeUri: null });
         patchViewerLiker(uri, false);
         try {
-          if (likeUri !== "optimistic") await deleteFeedLike(rkeyOf(likeUri));
+          if (likeUri !== "optimistic") await deleteFeedLike(rkeyOf(likeUri), repoOption);
         } catch (error) {
           setOne(uri, { likeCount: current.likeCount, viewerLikeUri: likeUri });
           patchViewerLiker(uri, true);
@@ -174,7 +231,7 @@ export function useFeedInteractions(viewerDid: string | null): FeedInteractions 
       setOne(uri, { likeCount: current.likeCount + 1, viewerLikeUri: "optimistic" });
       patchViewerLiker(uri, true);
       try {
-        const result = await createFeedLike(uri);
+        const result = await createFeedLike(uri, repoOption);
         setOne(uri, { viewerLikeUri: result.uri });
       } catch (error) {
         setOne(uri, { likeCount: current.likeCount, viewerLikeUri: null });
@@ -182,7 +239,7 @@ export function useFeedInteractions(viewerDid: string | null): FeedInteractions 
         throw error;
       }
     },
-    [engagement, setOne, patchViewerLiker],
+    [engagement, setOne, patchViewerLiker, repoOption],
   );
 
   const getLikers = useCallback((uri: string): LikersState => likers.get(uri) ?? EMPTY_LIKERS, [likers]);
@@ -231,10 +288,10 @@ export function useFeedInteractions(viewerDid: string | null): FeedInteractions 
 
   const addComment = useCallback(
     async (uri: string, text: string) => {
-      const result = await createFeedComment({ text, subjectUri: uri });
+      const result = await createFeedComment({ text, subjectUri: uri }, repoOption);
       const optimistic: FeedComment = {
         uri: result.uri,
-        did: viewerDid ?? "",
+        did: actingDid ?? "",
         text: text.trim(),
         createdAt: new Date().toISOString(),
         authorName: null,
@@ -248,16 +305,20 @@ export function useFeedInteractions(viewerDid: string | null): FeedInteractions 
       const current = engagement.get(uri) ?? emptyEngagement();
       setOne(uri, { commentCount: current.commentCount + 1 });
     },
-    [engagement, setOne, viewerDid],
+    [engagement, setOne, actingDid, repoOption],
   );
 
-  const addPost = useCallback(async (text: string) => {
-    const result = await createFeedPost({ text });
-    setLocalPosts((prev) => [{ id: result.uri, text: text.trim(), createdAt: new Date().toISOString() }, ...prev]);
-  }, []);
+  const addPost = useCallback(
+    async (text: string) => {
+      const result = await createFeedPost({ text }, repoOption);
+      setLocalPosts((prev) => [{ id: result.uri, text: text.trim(), createdAt: new Date().toISOString() }, ...prev]);
+    },
+    [repoOption],
+  );
 
   return {
-    viewerDid,
+    sessionDid,
+    viewerDid: actingDid,
     getEngagement,
     loadEngagement,
     toggleLike,
@@ -283,7 +344,7 @@ export function LocalPostsList({ posts, viewerDid }: { posts: LocalPost[]; viewe
         <li key={post.id} className="relative border-b border-border/50">
           <div className="flex gap-3 rounded-2xl px-3 py-3.5">
             <ResolvedAvatar
-              did={viewerDid}
+              did={viewer.did}
               imageUrl={viewer.avatarUrl}
               name={viewer.name}
               fallbackIcon={<UserIcon className="size-4" />}
@@ -320,7 +381,7 @@ export function FeedComposer({
   onPost: (text: string) => Promise<void>;
 }) {
   const t = useTranslations("common.feed");
-  const viewer = useViewerCard(viewerDid);
+  const acting = useActingAccount(viewerDid);
   const [text, setText] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -354,9 +415,9 @@ export function FeedComposer({
     <div className="mb-3 rounded-2xl border border-border/60 bg-card/40 p-3 transition-colors focus-within:border-primary/40">
       <div className="flex gap-3">
         <ResolvedAvatar
-          did={viewerDid}
-          imageUrl={viewer.avatarUrl}
-          name={viewer.name}
+          did={acting.actingDid}
+          imageUrl={acting.card.avatarUrl}
+          name={acting.card.name}
           fallbackIcon={<UserIcon className="size-4" />}
           className="mt-0.5 size-9"
           sizes="36px"
@@ -381,7 +442,13 @@ export function FeedComposer({
         <div className="flex min-w-0 items-center gap-1">
           {signedIn && viewerDid ? <ComposerObservationButton sessionDid={viewerDid} /> : null}
           <span className="truncate text-xs text-muted-foreground/70">
-            {posted ? t("composer.postedNote") : signedIn ? "" : t("actions.signInToInteract")}
+            {posted
+              ? t("composer.postedNote")
+              : !signedIn
+                ? t("actions.signInToInteract")
+                : acting.isGroup && acting.card.name
+                  ? t("composer.postingAs", { name: acting.card.name })
+                  : ""}
           </span>
         </div>
         <div className="flex items-center gap-2.5">
@@ -602,9 +669,9 @@ function CommentPanel({
   interactions: FeedInteractions;
 }) {
   const t = useTranslations("common.feed");
-  const { viewerDid, getComments, loadComments, addComment, loadEngagement } = interactions;
+  const { sessionDid, viewerDid, getComments, loadComments, addComment, loadEngagement } = interactions;
   const comments = getComments(subjectUri);
-  const viewer = useViewerCard(viewerDid);
+  const viewer = useViewerCard(sessionDid);
   const [text, setText] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);

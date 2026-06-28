@@ -811,7 +811,8 @@
       "post": "Chapisha",
       "posting": "Inachapisha…",
       "postedTitle": "Imechapishwa",
-      "postedNote": "Taarifa yako ipo hewani na itaonekana kwenye mlisho hivi karibuni."
+      "postedNote": "Taarifa yako ipo hewani na itaonekana kwenye mlisho hivi karibuni.",
+      "postingAs": "Unachapisha kama {name}"
     }
   },
   "testAccount": {
