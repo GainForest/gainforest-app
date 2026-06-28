@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState, type ChangeEvent, type ComponentProps, type DragEvent, type ReactNode } from "react";
@@ -823,29 +824,67 @@ function AddObservationTile({ target, forProject, disabledReason }: { target: Ma
 
 function ObservationEmptyState({ target, forProject, disabledReason }: { target: ManageTarget; forProject?: string | null; disabledReason?: string | null }) {
   const t = useTranslations("upload.observations");
+  const addHref = manageHref(target, "observations", { mode: "add", ...(forProject ? { forProject } : {}) });
   return (
-    <div className="flex min-h-[300px] flex-col items-center justify-center rounded-3xl border border-dashed border-primary/20 bg-gradient-to-b from-primary/[0.04] to-transparent p-8 text-center">
-      <span className="mb-5 grid size-16 place-items-center rounded-2xl bg-primary/10 text-primary ring-1 ring-primary/15">
-        <ImagePlusIcon className="size-7" />
-      </span>
-      <h2 className="font-instrument text-2xl font-medium italic tracking-[-0.02em] text-foreground">
-        {t("emptyObservationsTitle")}
-      </h2>
-      <p className="mt-2 max-w-md text-sm leading-6 text-muted-foreground">
-        {disabledReason ?? t("emptyObservationsBody")}
-      </p>
-      {disabledReason ? (
-        <Button type="button" disabled title={disabledReason} className="mt-5">
-          <ImagePlusIcon className="size-4" /> {t("addObservation")}
-        </Button>
-      ) : (
-        <Button asChild className="mt-5">
-          <Link href={manageHref(target, "observations", { mode: "add", ...(forProject ? { forProject } : {}) })}>
-            <ImagePlusIcon className="size-4" /> {t("addObservation")}
-          </Link>
-        </Button>
-      )}
-    </div>
+    <motion.section
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.35, ease: [0.25, 0.1, 0.25, 1] }}
+      className="relative overflow-visible rounded-[1.6rem] border border-border/80 bg-card shadow-sm"
+    >
+      <div className="relative min-h-[6rem] overflow-hidden rounded-[1.55rem]">
+        <Image
+          src="/assets/media/images/create-bumicert/hero-light@2x.webp"
+          alt=""
+          fill
+          quality={95}
+          sizes="100vw"
+          className="object-cover object-center dark:hidden"
+        />
+        <Image
+          src="/assets/media/images/create-bumicert/hero-dark@2x.webp"
+          alt=""
+          fill
+          quality={95}
+          sizes="100vw"
+          className="hidden object-cover object-center dark:block"
+        />
+        <div className="absolute inset-0 bg-linear-to-r from-background/95 via-background/72 to-background/5 dark:from-background/90 dark:via-background/58 dark:to-background/10" />
+        <div className="absolute -top-8 right-[7%] h-28 w-52 rounded-full bg-background/50 blur-2xl dark:bg-primary/10" />
+        <div className="absolute inset-x-0 bottom-0 h-16 bg-linear-to-t from-foreground/20 via-foreground/5 to-transparent dark:from-black/55" />
+
+        <div className="relative z-30 flex min-h-[6rem] flex-col gap-4 px-6 py-4 sm:flex-row sm:items-center sm:justify-between sm:gap-6 sm:px-8 lg:px-9">
+          <p className="w-full text-sm leading-5 text-muted-foreground sm:max-w-[30rem]">
+            {disabledReason ?? t("emptyHeroDescription")}
+          </p>
+          {disabledReason ? (
+            <Button type="button" size="sm" disabled title={disabledReason} className="shrink-0 self-start sm:self-auto">
+              <ImagePlusIcon /> {t("addTileTitle")}
+            </Button>
+          ) : (
+            <Button asChild size="sm" className="shrink-0 self-start sm:self-auto">
+              <Link href={addHref}>
+                <ImagePlusIcon /> {t("addTileTitle")}
+              </Link>
+            </Button>
+          )}
+        </div>
+      </div>
+      <Image
+        src="/assets/media/images/create-bumicert/plant-light.png"
+        alt=""
+        width={1002}
+        height={1146}
+        className="pointer-events-none absolute bottom-0 right-[4%] z-20 hidden h-[9rem] w-auto max-w-[50%] object-contain dark:hidden md:block"
+      />
+      <Image
+        src="/assets/media/images/create-bumicert/plant-dark.png"
+        alt=""
+        width={964}
+        height={1129}
+        className="pointer-events-none absolute bottom-0 right-[4%] z-20 hidden h-[9rem] w-auto max-w-[50%] object-contain dark:md:block"
+      />
+    </motion.section>
   );
 }
 

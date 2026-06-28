@@ -740,6 +740,7 @@
     "addTileBody": "Sube más imágenes de campo.",
     "emptyObservationsTitle": "Aún no hay observaciones",
     "emptyObservationsBody": "Agrega tu primera observación desde imágenes de campo.",
+    "emptyHeroDescription": "Las observaciones capturan lo que encuentras en el campo — especies, fotos, lugares y fechas — y construyen la evidencia detrás de tu impacto.",
     "selectAll": "Seleccionar todo",
     "deselectAll": "Deseleccionar todo",
     "removeSelected": "Eliminar seleccionadas",

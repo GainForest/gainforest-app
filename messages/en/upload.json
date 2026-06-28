@@ -740,6 +740,7 @@
     "addTileBody": "Upload more field images.",
     "emptyObservationsTitle": "No observations yet",
     "emptyObservationsBody": "Add your first observation from field images.",
+    "emptyHeroDescription": "Observations capture what you find in the field — species, photos, places, and dates — building the evidence behind your impact.",
     "selectAll": "Select all",
     "deselectAll": "Deselect all",
     "removeSelected": "Remove selected",
