@@ -1211,7 +1211,7 @@
     },
     "actions": {
       "editProject": "Edit proyek",
-      "editProjectFor": "Edit {title}",
+      "editProjectFor": "Ubah {title}",
       "viewProjectFor": "Buka {title}",
       "manageGallery": "Kelola galeri",
       "manageGalleryFor": "Kelola galeri untuk {title}",

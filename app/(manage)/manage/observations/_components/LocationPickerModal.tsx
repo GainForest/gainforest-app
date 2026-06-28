@@ -2,10 +2,12 @@
 
 import "leaflet/dist/leaflet.css";
 import { useCallback, useEffect, useRef, useState } from "react";
+import type { FormEvent } from "react";
 import type { LeafletMouseEvent, Map as LeafletMap, Marker, TileLayer } from "leaflet";
-import { ChevronLeftIcon, LayersIcon, Loader2Icon, LocateFixedIcon, MapPinIcon, XIcon } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { ChevronLeftIcon, LayersIcon, Loader2Icon, LocateFixedIcon, MapPinIcon, SearchIcon, XIcon } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -41,7 +43,25 @@ export type LocationPickerModalProps = {
   onSelect: (location: PickedLocation) => void;
 };
 
+type LocationSearchResult = PickedLocation & {
+  id: string;
+  name: string;
+  detail: string;
+};
+
+type RawLocationSearchResult = {
+  place_id?: number | string;
+  osm_id?: number | string;
+  display_name?: string;
+  name?: string;
+  lat?: string;
+  lon?: string;
+};
+
 const FALLBACK_CENTER: PickedLocation = { lat: 12, lng: 5 };
+const LOCATION_SEARCH_LIMIT = 5;
+const LOCATION_SEARCH_MIN_CHARS = 2;
+const LOCATION_SEARCH_ZOOM = 14;
 const GEOLOCATION_ATTEMPTS: PositionOptions[] = [
   { enableHighAccuracy: false, timeout: 20_000, maximumAge: 10 * 60_000 },
   { enableHighAccuracy: true, timeout: 45_000, maximumAge: 60_000 },
@@ -49,8 +69,28 @@ const GEOLOCATION_ATTEMPTS: PositionOptions[] = [
 const GEOLOCATION_WATCH_OPTIONS: PositionOptions = { enableHighAccuracy: false, maximumAge: 10 * 60_000 };
 const GEOLOCATION_TOTAL_TIMEOUT_MS = 60_000;
 
+function mapLocationSearchResult(raw: RawLocationSearchResult): LocationSearchResult | null {
+  const lat = Number.parseFloat(raw.lat ?? "");
+  const lng = Number.parseFloat(raw.lon ?? "");
+  const displayName = raw.display_name?.trim();
+  if (!Number.isFinite(lat) || !Number.isFinite(lng) || !displayName) return null;
+
+  const parts = displayName.split(",").map((part) => part.trim()).filter(Boolean);
+  const name = raw.name?.trim() || parts[0] || displayName;
+  const detail = parts.slice(name === parts[0] ? 1 : 0).join(", ");
+
+  return {
+    id: String(raw.place_id ?? raw.osm_id ?? `${lat},${lng},${displayName}`),
+    name,
+    detail,
+    lat: roundCoord(lat),
+    lng: roundCoord(lng),
+  };
+}
+
 export function LocationPickerModal({ initial, defaultCenter, onSelect }: LocationPickerModalProps) {
   const t = useTranslations("upload.observations.location");
+  const locale = useLocale();
   const { popModal, stack, hide } = useModal();
   const elRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<LeafletMap | null>(null);
@@ -61,8 +101,12 @@ export function LocationPickerModal({ initial, defaultCenter, onSelect }: Locati
   const geoWatchRef = useRef<number | null>(null);
   const geoTimeoutRef = useRef<number | null>(null);
   const autoRequestedRef = useRef(false);
+  const searchAbortRef = useRef<AbortController | null>(null);
   const [picked, setPicked] = useState<PickedLocation | null>(isValidLocation(initial) ? initial : null);
   const [activeLayer, setActiveLayer] = useState<LayerId>("streets");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<LocationSearchResult[]>([]);
+  const [searchStatus, setSearchStatus] = useState<"idle" | "loading" | "success" | "empty" | "error" | "tooShort">("idle");
   const [ready, setReady] = useState(false);
   const [locating, setLocating] = useState(false);
   const [geoError, setGeoError] = useState<string | null>(null);
@@ -113,6 +157,63 @@ export function LocationPickerModal({ initial, defaultCenter, onSelect }: Locati
     }
     setPicked(next);
   }, []);
+
+  const clearSearch = useCallback(() => {
+    searchAbortRef.current?.abort();
+    searchAbortRef.current = null;
+    setSearchQuery("");
+    setSearchResults([]);
+    setSearchStatus("idle");
+  }, []);
+
+  const searchLocations = useCallback(async (event?: FormEvent<HTMLFormElement>) => {
+    event?.preventDefault();
+    const query = searchQuery.trim();
+    searchAbortRef.current?.abort();
+    setSearchResults([]);
+
+    if (query.length < LOCATION_SEARCH_MIN_CHARS) {
+      setSearchStatus("tooShort");
+      return;
+    }
+
+    const controller = new AbortController();
+    searchAbortRef.current = controller;
+    setSearchStatus("loading");
+
+    try {
+      const params = new URLSearchParams({
+        format: "jsonv2",
+        limit: String(LOCATION_SEARCH_LIMIT),
+        q: query,
+        "accept-language": locale,
+      });
+      const response = await fetch(`https://nominatim.openstreetmap.org/search?${params.toString()}`, {
+        headers: { Accept: "application/json" },
+        signal: controller.signal,
+      });
+      if (!response.ok) throw new Error("Location search failed");
+      const data: unknown = await response.json();
+      const results = Array.isArray(data)
+        ? data.map((item) => mapLocationSearchResult(item as RawLocationSearchResult)).filter((item): item is LocationSearchResult => Boolean(item))
+        : [];
+      setSearchResults(results);
+      setSearchStatus(results.length > 0 ? "success" : "empty");
+    } catch (error) {
+      if (error instanceof DOMException && error.name === "AbortError") return;
+      setSearchStatus("error");
+    } finally {
+      if (searchAbortRef.current === controller) searchAbortRef.current = null;
+    }
+  }, [locale, searchQuery]);
+
+  const chooseSearchResult = useCallback((result: LocationSearchResult) => {
+    mapRef.current?.setView([result.lat, result.lng], LOCATION_SEARCH_ZOOM, { animate: true });
+    placeMarker(result.lat, result.lng);
+    setSearchQuery(result.name);
+    setSearchResults([]);
+    setSearchStatus("idle");
+  }, [placeMarker]);
 
   // Init the map once. Dynamically imported so Leaflet never touches `window`
   // during SSR — mirrors RecordMap.
@@ -167,6 +268,8 @@ export function LocationPickerModal({ initial, defaultCenter, onSelect }: Locati
     return () => {
       cancelled = true;
       clearGeoRequest();
+      searchAbortRef.current?.abort();
+      searchAbortRef.current = null;
       mapRef.current?.remove();
       mapRef.current = null;
       markerRef.current = null;
@@ -316,6 +419,60 @@ export function LocationPickerModal({ initial, defaultCenter, onSelect }: Locati
         </div>
         <ModalDescription>{t("description")}</ModalDescription>
       </ModalHeader>
+      <form className="space-y-2" onSubmit={searchLocations}>
+        <div className="flex gap-2">
+          <div className="relative flex-1">
+            <SearchIcon className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
+            <Input
+              value={searchQuery}
+              onChange={(event) => {
+                setSearchQuery(event.target.value);
+                if (searchStatus !== "idle") setSearchStatus("idle");
+                if (searchResults.length > 0) setSearchResults([]);
+              }}
+              aria-label={t("searchLabel")}
+              placeholder={t("searchPlaceholder")}
+              className="pl-9 pr-9"
+            />
+            {searchQuery ? (
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon-sm"
+                onClick={clearSearch}
+                aria-label={t("searchClear")}
+                className="absolute right-1 top-1/2 size-7 -translate-y-1/2 rounded-full"
+              >
+                <XIcon className="size-3.5" />
+              </Button>
+            ) : null}
+          </div>
+          <Button type="submit" variant="outline" disabled={searchStatus === "loading"}>
+            {searchStatus === "loading" ? <Loader2Icon className="size-4 animate-spin" /> : <SearchIcon className="size-4" />}
+            {t("searchButton")}
+          </Button>
+        </div>
+        {searchResults.length > 0 ? (
+          <div className="overflow-hidden rounded-xl border bg-background shadow-sm" aria-label={t("searchResults")}>
+            {searchResults.map((result) => (
+              <button
+                key={result.id}
+                type="button"
+                onClick={() => chooseSearchResult(result)}
+                className="flex w-full flex-col gap-1 border-b px-3 py-2 text-left transition-colors last:border-b-0 hover:bg-muted focus-visible:bg-muted focus-visible:outline-none"
+                aria-label={t("searchResultAria", { name: result.name })}
+              >
+                <span className="text-sm font-medium text-foreground">{result.name}</span>
+                <span className="line-clamp-1 text-xs text-muted-foreground">{result.detail || t("searchResultFallback")}</span>
+              </button>
+            ))}
+          </div>
+        ) : searchStatus === "empty" || searchStatus === "error" || searchStatus === "tooShort" ? (
+          <p className="px-1 text-xs text-muted-foreground">
+            {searchStatus === "empty" ? t("searchNoResults") : searchStatus === "tooShort" ? t("searchShortQuery") : t("searchError")}
+          </p>
+        ) : null}
+      </form>
       <div className="relative w-full">
         {!ready && (
           <div className="absolute inset-0 z-[1] flex items-center justify-center rounded-xl bg-muted">
