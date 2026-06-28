@@ -279,7 +279,12 @@
     },
     "rsvp": {
       "button": "Register to take part",
-      "note": "Register so we can track your entries and send your prize if you win."
+      "note": "Register so we can track your entries and send your prize if you win.",
+      "registering": "Registering…",
+      "registered": "You're registered",
+      "registeredNote": "We'll track your entries and send your prize if you win.",
+      "error": "Could not register just now. Please try again.",
+      "postText": "I'm joining the Weekly BioBlitz Challenge — {label}! Heading outside to photograph nature for biodiversity. 🌿🔭 #BioBlitz"
     },
     "help": {
       "prompt": "Questions?",

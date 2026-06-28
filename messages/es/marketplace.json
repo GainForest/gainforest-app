@@ -279,7 +279,12 @@
     },
     "rsvp": {
       "button": "Regístrate para participar",
-      "note": "Regístrate para que podamos contar tus aportes y enviarte el premio si ganas."
+      "note": "Regístrate para que podamos contar tus aportes y enviarte el premio si ganas.",
+      "registering": "Registrando…",
+      "registered": "Ya estás registrado",
+      "registeredNote": "Contaremos tus aportes y te enviaremos el premio si ganas.",
+      "error": "No se pudo registrar ahora. Inténtalo de nuevo.",
+      "postText": "¡Me uno al Desafío BioBlitz Semanal — {label}! Voy a salir a fotografiar la naturaleza por la biodiversidad. 🌿🔭 #BioBlitz"
     },
     "help": {
       "prompt": "¿Dudas?",

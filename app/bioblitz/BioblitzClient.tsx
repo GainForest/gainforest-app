@@ -9,7 +9,6 @@ import {
   BadgeCheckIcon,
   BinocularsIcon,
   Building2Icon,
-  CalendarCheckIcon,
   CalendarClockIcon,
   CameraIcon,
   ChevronRightIcon,
@@ -25,6 +24,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { BioblitzGallery } from "./BioblitzGallery";
 import { BioblitzObservationsMap } from "./BioblitzObservationsMap";
+import { RegisterButton } from "./BioblitzRegister";
 import { AuthorInline } from "../_components/AuthorChip";
 import { PreferredAccountLink } from "../_components/PreferredLinks";
 import { formatNumber } from "../_lib/format";
@@ -292,17 +292,7 @@ function HeroBand({
           <span className="font-instrument text-lg italic leading-none text-foreground">{round.label}</span>
         </div>
         <span className="text-[11px] tabular-nums text-muted-foreground">{dates}</span>
-        {round.rsvpUrl && status !== "ended" ? (
-          <a
-            href={round.rsvpUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-1 inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-dark"
-          >
-            <CalendarCheckIcon className="size-4" aria-hidden />
-            {t("rsvp.button")}
-          </a>
-        ) : null}
+        <RegisterButton round={round} status={status} />
       </div>
     </FadeIn>
   );

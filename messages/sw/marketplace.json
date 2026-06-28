@@ -279,7 +279,12 @@
     },
     "rsvp": {
       "button": "Jisajili ili kushiriki",
-      "note": "Jisajili ili tuweze kufuatilia michango yako na kukutumia zawadi ukishinda."
+      "note": "Jisajili ili tuweze kufuatilia michango yako na kukutumia zawadi ukishinda.",
+      "registering": "Inasajili…",
+      "registered": "Umesajiliwa",
+      "registeredNote": "Tutafuatilia michango yako na kukutumia zawadi ukishinda.",
+      "error": "Imeshindikana kusajili sasa. Tafadhali jaribu tena.",
+      "postText": "Najiunga na Changamoto ya BioBlitz ya Wiki — {label}! Naenda nje kupiga picha za maumbile kwa ajili ya bayoanuwai. 🌿🔭 #BioBlitz"
     },
     "help": {
       "prompt": "Una maswali?",

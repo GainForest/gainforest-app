@@ -279,7 +279,12 @@
     },
     "rsvp": {
       "button": "Daftar untuk ikut serta",
-      "note": "Daftar agar kami bisa mencatat kontribusimu dan mengirim hadiah jika kamu menang."
+      "note": "Daftar agar kami bisa mencatat kontribusimu dan mengirim hadiah jika kamu menang.",
+      "registering": "Mendaftar…",
+      "registered": "Kamu sudah terdaftar",
+      "registeredNote": "Kami akan mencatat kontribusimu dan mengirim hadiah jika kamu menang.",
+      "error": "Gagal mendaftar sekarang. Silakan coba lagi.",
+      "postText": "Aku ikut Tantangan BioBlitz Mingguan — {label}! Aku akan keluar memotret alam demi keanekaragaman hayati. 🌿🔭 #BioBlitz"
     },
     "help": {
       "prompt": "Ada pertanyaan?",

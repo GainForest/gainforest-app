@@ -17,7 +17,7 @@
 
 import { INDEXER_URL } from "./urls";
 import { normaliseRef } from "./pds";
-import { fetchHiddenAccountDids, walkOccurrences, type OccurrenceRecord } from "./indexer";
+import { fetchHiddenAccountDids, indexerQuery, walkOccurrences, type OccurrenceRecord } from "./indexer";
 
 /** Cash prizes awarded each round, in USD. */
 export const BIOBLITZ_PRIZES = {
@@ -43,8 +43,9 @@ export type BioblitzRound = {
   start: string;
   /** Inclusive UTC end instant (ISO) — the final moment of the last day. */
   end: string;
-  /** External registration page for the round (Luma). Registering is how a
-   *  participant is tracked for prize eligibility. */
+  /** Legacy external registration page (Luma). No longer used by the UI —
+   *  registration now happens in-app by publishing a join post (see
+   *  fetchBioblitzRegistration / the Register button). Kept only for reference. */
   rsvpUrl?: string;
   /** Set once the round closes and the observations winner is confirmed. */
   mostObservations?: RoundWinner | null;
@@ -74,6 +75,54 @@ export const BIOBLITZ_LINKS = {
   officeHours: "https://calendar.app.google/Ki7h3s5ufAXv4mr48",
   community: "https://t.me/+i15G35wxQT5jNTA1",
 } as const;
+
+// ── Registration ─────────────────────────────────────────────────────────────
+//
+// Taking part is opt-in: instead of an external sign-up form, a participant
+// publishes a short feed post (app.gainforest.feed.post) announcing they're
+// joining. The post carries two tags — a program-wide `bioblitz` tag plus a
+// round-specific one — so the page can detect a participant's own join post and
+// mark them registered automatically the next time the board loads.
+
+/** Program-wide tag every join post carries. */
+export const BIOBLITZ_TAG = "bioblitz";
+
+/** Round-specific join tag, e.g. "bioblitz-round-1". Detection keys on this so
+ *  registering is per-round (a new round needs a fresh join post). */
+export function bioblitzRoundTag(round: BioblitzRound): string {
+  return `${BIOBLITZ_TAG}-round-${round.id}`;
+}
+
+/** Both tags a join post is published with, newest round-specific tag first. */
+export function bioblitzJoinTags(round: BioblitzRound): string[] {
+  return [BIOBLITZ_TAG, bioblitzRoundTag(round)];
+}
+
+const REGISTRATION_QUERY = `
+  query BioblitzRegistration($did: String!, $tag: String!) {
+    appGainforestFeedPost(first: 1, where: { did: { eq: $did }, tags: { any: { eq: $tag } } }) {
+      edges { node { uri } }
+    }
+  }
+`;
+
+/**
+ * Detect whether `did` has already published a join post for this round.
+ * Returns the post's AT-URI when found, otherwise null. Indexer ingestion lags
+ * a write by a few seconds, so a freshly published join may not be detected for
+ * a moment — callers treat a just-completed publish as registered optimistically.
+ */
+export async function fetchBioblitzRegistration(
+  round: BioblitzRound,
+  did: string,
+  signal?: AbortSignal,
+): Promise<string | null> {
+  const data = await indexerQuery<{
+    appGainforestFeedPost?: { edges?: Array<{ node?: { uri?: string | null } | null } | null> | null } | null;
+  }>(REGISTRATION_QUERY, { did, tag: bioblitzRoundTag(round) }, signal).catch(() => null);
+  const uri = data?.appGainforestFeedPost?.edges?.[0]?.node?.uri;
+  return typeof uri === "string" && uri.length > 0 ? uri : null;
+}
 
 export type RoundStatus = "upcoming" | "live" | "ended";
 
