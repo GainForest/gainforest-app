@@ -9,10 +9,11 @@ export const revalidate = 3600;
 type SitemapEntry = MetadataRoute.Sitemap[number];
 type ChangeFrequency = NonNullable<SitemapEntry["changeFrequency"]>;
 
-// Section pages plus every Cert detail page: each project page is a
+// Section pages plus every project detail page: each project page is a
 // crawlable marketplace landing page (server-rendered title, description,
-// OpenGraph, and JSON-LD). DID-based URLs redirect (308) to the handle-based
-// canonical, which also carries the canonical <link>.
+// OpenGraph, and JSON-LD) carrying the full impact-certificate experience.
+// DID-based URLs redirect (308) to the handle-based canonical, which also
+// carries the canonical <link>.
 const ROUTES: Array<{ path: string; priority: number; changeFrequency: ChangeFrequency }> = [
   { path: "", priority: 1, changeFrequency: "daily" },
   { path: "/observations", priority: 0.8, changeFrequency: "daily" },
@@ -25,16 +26,22 @@ const ROUTES: Array<{ path: string; priority: number; changeFrequency: ChangeFre
   { path: "/status", priority: 0.5, changeFrequency: "hourly" },
 ];
 
-const BUMICERT_URIS_QUERY = `
-  query SitemapBumicerts($first: Int!, $after: String) {
-    orgHypercertsClaimActivity(first: $first, after: $after, sortBy: createdAt, sortDirection: DESC) {
+const PROJECT_URIS_QUERY = `
+  query SitemapProjects($first: Int!, $after: String) {
+    orgHypercertsCollection(
+      first: $first
+      after: $after
+      where: { type: { in: ["project", "Project"] } }
+      sortBy: createdAt
+      sortDirection: DESC
+    ) {
       pageInfo { hasNextPage endCursor }
       edges { node { did rkey createdAt } }
     }
   }
 `;
 
-type SitemapBumicertNode = { did?: string | null; rkey?: string | null; createdAt?: string | null };
+type SitemapProjectNode = { did?: string | null; rkey?: string | null; createdAt?: string | null };
 
 function buildAbsoluteUrl(pathname: string, origin: string): string {
   return new URL(pathname, origin).toString();
@@ -70,7 +77,7 @@ function buildLocalizedEntries(options: {
   }));
 }
 
-async function fetchBumicertEntries(origin: string): Promise<MetadataRoute.Sitemap> {
+async function fetchProjectEntries(origin: string): Promise<MetadataRoute.Sitemap> {
   const entries: MetadataRoute.Sitemap = [];
   let after: string | null = null;
 
@@ -79,18 +86,18 @@ async function fetchBumicertEntries(origin: string): Promise<MetadataRoute.Sitem
       const response: Response = await fetch(INDEXER_URL, {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ query: BUMICERT_URIS_QUERY, variables: { first: 1000, after } }),
+        body: JSON.stringify({ query: PROJECT_URIS_QUERY, variables: { first: 1000, after } }),
         signal: AbortSignal.timeout(15_000),
       });
       const json = (await response.json()) as {
         data?: {
-          orgHypercertsClaimActivity?: {
+          orgHypercertsCollection?: {
             pageInfo?: { hasNextPage?: boolean; endCursor?: string | null };
-            edges?: Array<{ node?: SitemapBumicertNode | null }>;
+            edges?: Array<{ node?: SitemapProjectNode | null }>;
           } | null;
         };
       };
-      const connection = json.data?.orgHypercertsClaimActivity;
+      const connection = json.data?.orgHypercertsCollection;
       if (!connection) break;
 
       for (const edge of connection.edges ?? []) {
@@ -99,7 +106,7 @@ async function fetchBumicertEntries(origin: string): Promise<MetadataRoute.Sitem
         entries.push(
           ...buildLocalizedEntries({
             origin,
-            pathname: `/cert/${encodeURIComponent(node.did)}/${encodeURIComponent(node.rkey)}`,
+            pathname: `/projects/${encodeURIComponent(node.did)}/${encodeURIComponent(node.rkey)}`,
             lastModified: node.createdAt ? new Date(node.createdAt) : undefined,
             changeFrequency: "weekly",
             priority: 0.6,
@@ -129,6 +136,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority,
     }),
   );
-  const bumicerts = await fetchBumicertEntries(origin);
-  return [...sections, ...bumicerts];
+  const projects = await fetchProjectEntries(origin);
+  return [...sections, ...projects];
 }

@@ -1239,9 +1239,11 @@
           "hint": "opcional — anexe lugares da sua conta",
           "loading": "Carregando seus lugares…",
           "error": "Não foi possível carregar seus lugares.",
-          "empty": "Ainda não há lugares. Você pode adicioná-los em <link>Lugares</link> e voltar.",
+          "empty": "Ainda não há lugares. Desenhe um no mapa para adicioná-lo ao seu projeto.",
           "unnamed": "Lugar sem nome",
-          "fallback": "Lugar do projeto"
+          "fallback": "Lugar do projeto",
+          "add": "Adicionar um lugar",
+          "manage": "Gerenciar todos os lugares"
         },
         "photo": {
           "label": "Foto do projeto",

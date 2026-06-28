@@ -1239,9 +1239,11 @@
           "hint": "hiari — ambatanisha maeneo kutoka akaunti yako",
           "loading": "Inapakia maeneo yako…",
           "error": "Imeshindwa kupakia maeneo yako.",
-          "empty": "Bado hakuna maeneo. Unaweza kuyaongeza katika <link>Maeneo</link> kisha urudi.",
+          "empty": "Bado hakuna maeneo. Chora moja kwenye ramani ili kuliongeza kwenye mradi wako.",
           "unnamed": "Eneo lisilo na jina",
-          "fallback": "Eneo la mradi"
+          "fallback": "Eneo la mradi",
+          "add": "Ongeza eneo",
+          "manage": "Simamia maeneo yote"
         },
         "photo": {
           "label": "Picha ya mradi",

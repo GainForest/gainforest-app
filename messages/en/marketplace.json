@@ -1239,9 +1239,11 @@
           "hint": "optional — attach places from your account",
           "loading": "Loading your places…",
           "error": "Could not load your places.",
-          "empty": "No places yet. You can add them under <link>Sites</link> and come back.",
+          "empty": "No places yet. Draw one on the map to add it to your project.",
           "unnamed": "Unnamed place",
-          "fallback": "Project place"
+          "fallback": "Project place",
+          "add": "Add a place",
+          "manage": "Manage all places"
         },
         "photo": {
           "label": "Project photo",

@@ -1239,9 +1239,11 @@
           "hint": "opsional — lampirkan tempat dari akun Anda",
           "loading": "Memuat tempat Anda…",
           "error": "Tidak dapat memuat tempat Anda.",
-          "empty": "Belum ada tempat. Anda dapat menambahkannya di <link>Tempat</link> lalu kembali.",
+          "empty": "Belum ada tempat. Gambar satu di peta untuk menambahkannya ke proyek Anda.",
           "unnamed": "Tempat tanpa nama",
-          "fallback": "Tempat proyek"
+          "fallback": "Tempat proyek",
+          "add": "Tambah tempat",
+          "manage": "Kelola semua tempat"
         },
         "photo": {
           "label": "Foto proyek",

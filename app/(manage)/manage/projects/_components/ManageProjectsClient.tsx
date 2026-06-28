@@ -16,6 +16,7 @@ import {
   ImageIcon,
   Loader2Icon,
   MapPinIcon,
+  MapPinPlusIcon,
   PlusIcon,
   RotateCcwIcon,
   SearchIcon,
@@ -36,6 +37,7 @@ import { localProjectHref } from "@/app/_lib/urls";
 import { WORK_SCOPE_MESSAGE_KEYS, type KnownWorkScopeKey } from "@/app/_lib/work-scope-labels";
 import { canCreateRecord, canDeleteRecord, canUpdateRecord } from "../../_lib/cgs-permissions";
 import { createRecord, deleteRecord, getRecord, putRecord, uploadBlob } from "../../_lib/mutations";
+import { SiteEditorModal, SiteEditorModalId } from "../../_modals/SiteEditorModal";
 import {
   CERT_COLLECTION,
   PROJECT_COLLECTION,
@@ -598,6 +600,44 @@ function ProjectEditor({
     setCoverFile(file);
   };
 
+  // Create a place inline (draw a boundary), then attach it to this project —
+  // mirrors Ma Earth's in-wizard location creation, using the free draw map.
+  const openAddPlace = () => {
+    modal.pushModal(
+      {
+        id: SiteEditorModalId,
+        dialogWidth: "max-w-2xl",
+        content: (
+          <SiteEditorModal
+            did={target.did}
+            target={target}
+            requireBoundary
+            onSaved={(site) => {
+              setSites((current) =>
+                current.some((entry) => entry.metadata.uri === site.uri)
+                  ? current
+                  : [
+                      {
+                        metadata: { did: target.did, uri: site.uri, rkey: site.rkey, cid: site.cid, createdAt: new Date().toISOString() },
+                        record: { name: site.name, description: null, locationType: null, location: null },
+                      },
+                      ...current,
+                    ],
+              );
+              setDraft((current) =>
+                current.selectedLocationUris.includes(site.uri)
+                  ? current
+                  : { ...current, selectedLocationUris: [...current.selectedLocationUris, site.uri] },
+              );
+            }}
+          />
+        ),
+      },
+      true,
+    );
+    void modal.show();
+  };
+
   const handleDeleteProject = async () => {
     if (!isEdit) return;
     if (!deletePermission.allowed) {
@@ -780,7 +820,7 @@ function ProjectEditor({
                 <div className="mx-auto max-w-2xl space-y-8">
                   <WizardStepHeader title={t("steps.network.title")} subtitle={t("steps.network.subtitle")} />
                   <ContributorsSection draft={draft} setDraft={setDraft} t={t} />
-                  <SitesSection draft={draft} setDraft={setDraft} sites={sites} sitesStatus={sitesStatus} sitesHref={sitesHref} t={t} />
+                  <SitesSection draft={draft} setDraft={setDraft} sites={sites} sitesStatus={sitesStatus} sitesHref={sitesHref} onAddPlace={openAddPlace} t={t} />
                 </div>
               ) : stepId === "photo" ? (
                 <div className="mx-auto max-w-md">
@@ -866,6 +906,7 @@ function ProjectEditor({
             sites={sites}
             sitesStatus={sitesStatus}
             sitesHref={sitesHref}
+            onAddPlace={openAddPlace}
             t={t}
           />
         </div>
@@ -1068,6 +1109,7 @@ function SitesSection({
   sites,
   sitesStatus,
   sitesHref,
+  onAddPlace,
   t,
 }: {
   draft: ProjectCertDraft;
@@ -1075,6 +1117,7 @@ function SitesSection({
   sites: ManagedLocation[];
   sitesStatus: SitesStatus;
   sitesHref: string;
+  onAddPlace: () => void;
   t: ReturnType<typeof useTranslations>;
 }) {
   const toggleLocation = (uri: string) => {
@@ -1098,13 +1141,7 @@ function SitesSection({
             <div className="p-4 text-sm text-muted-foreground">{t("fields.sites.error")}</div>
           ) : sites.length === 0 ? (
             <div className="rounded-xl border border-dashed border-border p-5 text-sm leading-6 text-muted-foreground">
-              {t.rich("fields.sites.empty", {
-                link: (chunks) => (
-                  <Link href={sitesHref} className="text-primary hover:underline">
-                    {chunks}
-                  </Link>
-                ),
-              })}
+              {t("fields.sites.empty")}
             </div>
           ) : (
             <div className="grid gap-2 md:grid-cols-2">
@@ -1134,6 +1171,14 @@ function SitesSection({
               })}
             </div>
           )}
+        </div>
+        <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2">
+          <Button type="button" variant="outline" size="sm" onClick={onAddPlace}>
+            <MapPinPlusIcon className="size-4" /> {t("fields.sites.add")}
+          </Button>
+          <Link href={sitesHref} className="text-xs text-muted-foreground transition-colors hover:text-foreground hover:underline">
+            {t("fields.sites.manage")}
+          </Link>
         </div>
       </Field>
     </section>

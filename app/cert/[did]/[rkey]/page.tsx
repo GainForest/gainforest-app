@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import {
+  ArrowLeftIcon,
   BanIcon,
   BotIcon,
   ChevronRightIcon,
@@ -51,7 +52,7 @@ import {
   type TimelineAttachmentItem,
 } from "../../../_lib/indexer";
 import { isPdsBlobUrl } from "../../../_lib/pds";
-import { blockExplorerUrl, INDEXER_URL, localBumicertHref } from "../../../_lib/urls";
+import { blockExplorerUrl, INDEXER_URL, localBumicertHref, localProjectHref } from "../../../_lib/urls";
 import { getRequestOrigin } from "../../../_lib/request-origin";
 import { fetchAuthSession } from "../../../_lib/auth-server";
 import type { AuthSession } from "../../../_lib/auth";
@@ -221,12 +222,65 @@ export default async function BumicertDetailPage({
   params: BumicertPageParams;
   searchParams: BumicertSearchParams;
 }) {
-  const [{ record, detail, owner, fundingConfig, authSession, routeIdentifier, urlIdentifier }, search, origin] = await Promise.all([
+  const [routeData, search, origin] = await Promise.all([
     readRouteData(params),
     searchParams,
     getRequestOrigin(),
   ]);
   const activeTab = parseDetailTab(search.tab);
+
+  // A project owns exactly one Cert, and the project page is now the canonical,
+  // fully-featured page. Redirect there when a parent project exists; legacy
+  // standalone Certs (no parent collection) keep rendering here so old deep
+  // links still resolve.
+  const parentProject = await findProjectForCert(routeData.record.did, routeData.record.atUri);
+  if (parentProject) {
+    const projectHref = localProjectHref(routeData.urlIdentifier, parentProject.rkey);
+    redirect(activeTab === "overview" ? projectHref : `${projectHref}?tab=${activeTab}`);
+  }
+
+  const detailHref = localBumicertHref(routeData.urlIdentifier, routeData.record.rkey);
+  if (routeData.routeIdentifier !== routeData.urlIdentifier) {
+    redirect(activeTab === "overview" ? detailHref : `${detailHref}?tab=${activeTab}`);
+  }
+  return <BumicertDetailBody routeData={routeData} activeTab={activeTab} basePath={detailHref} origin={origin} />;
+}
+
+/** Find the project (collection) in this repo whose items[] include the Cert. */
+async function findProjectForCert(did: string, certUri: string) {
+  const projects = await fetchProjectsByDid(did, 1000)
+    .then((page) => page.records)
+    .catch(() => []);
+  return projects.find((project) => project.bumicertUris.includes(certUri)) ?? null;
+}
+
+/**
+ * Shared rich detail body for a Cert. Rendered both at /cert/<did>/<rkey> and,
+ * because a project owns exactly one Cert, inline on the project page — so the
+ * project page carries every feature (story, evidence, site boundaries,
+ * reviews, donations, timeline) instead of linking out to a separate page.
+ *
+ * `basePath` is the page URL the tabs and in-page links resolve against, so the
+ * same body works under the Cert URL and the Project URL.
+ */
+export async function BumicertDetailBody({
+  routeData,
+  activeTab,
+  basePath,
+  origin,
+  backHref,
+  backLabel,
+  showMore = true,
+}: {
+  routeData: RouteData;
+  activeTab: BumicertDetailTab;
+  basePath: string;
+  origin: string;
+  backHref?: string;
+  backLabel?: string;
+  showMore?: boolean;
+}) {
+  const { record, detail, owner, fundingConfig, authSession } = routeData;
   const workScopeT = await getTranslations("common.workScopes");
   const workScopeLabels: WorkScopeLabels = {
     reforestation: workScopeT("reforestation"),
@@ -236,10 +290,7 @@ export default async function BumicertDetailPage({
     carbon_removal: workScopeT("carbonRemoval"),
     restoration_maintenance: workScopeT("restorationMaintenance"),
   };
-  const detailHref = localBumicertHref(urlIdentifier, record.rkey);
-  if (routeIdentifier !== urlIdentifier) {
-    redirect(activeTab === "overview" ? detailHref : `${detailHref}?tab=${activeTab}`);
-  }
+  const detailHref = basePath;
   const donationsHref = `${detailHref}?tab=donations`;
   const period = record.startDate || record.endDate
     ? `${record.startDate ? formatDate(record.startDate) : "—"} → ${record.endDate ? formatDate(record.endDate) : "—"}`
@@ -359,6 +410,17 @@ export default async function BumicertDetailPage({
         }}
       />
       <main className="min-h-screen bg-background pb-20">
+        {backHref ? (
+          <div className="mx-auto max-w-6xl px-6 pt-6 lg:px-8">
+            <Link
+              href={backHref}
+              className="inline-flex items-center gap-1.5 text-[13px] font-medium text-muted-foreground transition-colors hover:text-foreground"
+            >
+              <ArrowLeftIcon className="h-3.5 w-3.5" aria-hidden />
+              {backLabel ?? "Back"}
+            </Link>
+          </div>
+        ) : null}
         <section className={`mx-auto max-w-6xl gap-8 px-6 py-8 lg:px-8 ${showsDetailSidebar ? "grid grid-cols-1 lg:grid-cols-[320px_minmax(0,1fr)]" : ""}`}>
           {showsDetailSidebar && (
             <aside className={`min-w-0 ${isOverviewTab ? "" : "hidden lg:block"}`}>
@@ -428,7 +490,7 @@ export default async function BumicertDetailPage({
             )}
           </div>
 
-          {isOverviewTab && moreBumicerts.length > 0 ? (
+          {showMore && isOverviewTab && moreBumicerts.length > 0 ? (
             <MoreBumicertsSection
               bumicerts={moreBumicerts}
               owner={owner}
@@ -497,17 +559,32 @@ async function readRouteData(params: BumicertPageParams): Promise<RouteData> {
     readAccountRouteParams(params),
   ]);
   const rkey = safeDecode(encodedRkey);
+  const data = await loadBumicertRouteData(did, rkey, urlIdentifier);
+  if (!data) notFound();
+  return data;
+}
+
+/**
+ * Load everything the rich Cert body needs for a given DID + rkey. Returns null
+ * (instead of calling notFound) when the record is missing or isn't a Cert, so
+ * the project page can fall back gracefully when its linked Cert is gone.
+ */
+export async function loadBumicertRouteData(
+  did: string,
+  rkey: string,
+  requestedIdentifier: string,
+): Promise<RouteData | null> {
   const atUri = `at://${did}/org.hypercerts.claim.activity/${rkey}`;
   const [record, detail, owner, fundingConfig, authSession] = await Promise.all([
     fetchRecordByUri(atUri),
     fetchRecordDetail(atUri).catch(() => null),
-    getAccountRouteData(did, urlIdentifier),
+    getAccountRouteData(did, requestedIdentifier),
     fetchBumicertFundingConfig(did, rkey).catch(() => null),
     fetchAuthSession(),
   ]);
 
-  if (!record || record.kind !== "bumicert") notFound();
-  return { record, detail, owner, fundingConfig, authSession, routeIdentifier: urlIdentifier, urlIdentifier: owner.urlIdentifier };
+  if (!record || record.kind !== "bumicert") return null;
+  return { record, detail, owner, fundingConfig, authSession, routeIdentifier: requestedIdentifier, urlIdentifier: owner.urlIdentifier };
 }
 
 async function fetchBumicertFundingConfig(did: string, rkey: string): Promise<BumicertFundingConfig> {
@@ -581,7 +658,7 @@ function safeDecode(value: string): string {
   }
 }
 
-function parseDetailTab(value: string | string[] | undefined): BumicertDetailTab {
+export function parseDetailTab(value: string | string[] | undefined): BumicertDetailTab {
   const raw = Array.isArray(value) ? value[0] : value;
   return BUMICERT_DETAIL_TABS.includes(raw as BumicertDetailTab) ? (raw as BumicertDetailTab) : "overview";
 }
