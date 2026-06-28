@@ -14,6 +14,7 @@
  */
 
 import {
+  fetchHiddenAccountDids,
   fetchProjects,
   searchAccountsByName,
   walkOccurrences,
@@ -102,6 +103,11 @@ export async function searchEverything(
   const q = query.trim();
   if (q.length < MIN_QUERY_LENGTH) return EMPTY_RESULTS;
 
+  // Accounts a steward flagged as "test" never surface in search — neither the
+  // accounts themselves nor any of their projects / observations. Resolved once
+  // (cached) and applied as a final guard over every stream's results.
+  const hidden = await fetchHiddenAccountDids(signal).catch(() => new Set<string>());
+
   const [projectResult, orgResult, observationResult] = await Promise.allSettled([
     fetchProjects(PER_KIND_CAP, null, signal, undefined, {
       query: q,
@@ -129,7 +135,7 @@ export async function searchEverything(
 
   if (projectResult.status === "fulfilled") {
     for (const record of projectResult.value.records) {
-      if (isLikelyTestRecordName(record.title)) continue;
+      if (hidden.has(record.did) || isLikelyTestRecordName(record.title)) continue;
       byKind.project.push({
         kind: "project",
         id: record.id,
@@ -144,6 +150,7 @@ export async function searchEverything(
 
   if (orgResult.status === "fulfilled") {
     for (const account of orgResult.value) {
+      if (hidden.has(account.did)) continue;
       byKind.organization.push({
         kind: "organization",
         id: account.did,
@@ -158,7 +165,11 @@ export async function searchEverything(
 
   if (observationResult.status === "fulfilled") {
     for (const record of observationResult.value.records) {
-      if (isLikelyTestRecordName(record.scientificName) || isLikelyTestRecordName(record.vernacularName)) {
+      if (
+        hidden.has(record.did) ||
+        isLikelyTestRecordName(record.scientificName) ||
+        isLikelyTestRecordName(record.vernacularName)
+      ) {
         continue;
       }
       byKind.observation.push({
