@@ -30,6 +30,12 @@ export type ModalVariant = {
   content: React.ReactNode;
   /** Tailwind max-width class for dialog mode (e.g. "max-w-2xl"). Defaults to "max-w-sm". */
   dialogWidth?: string;
+  /**
+   * Keep this modal as a centered dialog on small screens instead of letting it
+   * collapse into the bottom drawer. Opt-in per modal; when any modal in the
+   * stack sets it, the whole stack renders as a dialog.
+   */
+  forceDialog?: boolean;
 };
 
 type ModalMode = "dialog" | "drawer";
@@ -115,8 +121,13 @@ export const ModalProvider = ({ children }: { children: React.ReactNode }) => {
   const smQueryMatches = useMediaQuery(
     `(min-width: ${SMALL_SCREEN_BREAKPOINT})`
   );
+  const forceDialog = modalStack.some((variant) => variant.forceDialog);
   const mode =
-    smQueryMatches === null ? null : smQueryMatches ? "dialog" : "drawer";
+    smQueryMatches === null
+      ? null
+      : smQueryMatches || forceDialog
+        ? "dialog"
+        : "drawer";
 
   const modalInfo = useCurrentModalInfo(modalIdStack);
   const activeDialogWidth = modalStack.at(-1)?.dialogWidth ?? "max-w-sm";

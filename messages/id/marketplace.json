@@ -1316,6 +1316,10 @@
         "added": "Ditambahkan",
         "notAdded": "Belum ditambahkan"
       }
+    },
+    "emptyHero": {
+      "description": "Proyek menyatukan kerja dampak Anda — orang, tempat, periode waktu, serta foto atau catatan pendukung — dalam satu halaman yang dapat diikuti dan didanai oleh pendukung.",
+      "cta": "Buat proyek"
     }
   },
   "manageBumicerts": {

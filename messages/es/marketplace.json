@@ -1316,6 +1316,10 @@
         "added": "Añadida",
         "notAdded": "Sin añadir"
       }
+    },
+    "emptyHero": {
+      "description": "Los proyectos reúnen tu trabajo de impacto —personas, lugares, periodos de tiempo y fotos o notas de apoyo— en una sola página que los financiadores pueden seguir y apoyar.",
+      "cta": "Crear un proyecto"
     }
   },
   "manageBumicerts": {

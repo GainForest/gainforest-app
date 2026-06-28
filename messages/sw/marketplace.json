@@ -1316,6 +1316,10 @@
         "added": "Imeongezwa",
         "notAdded": "Haijaongezwa"
       }
+    },
+    "emptyHero": {
+      "description": "Miradi huleta pamoja kazi yako ya athari — watu, maeneo, vipindi vya muda, na picha au maelezo ya kuunga mkono — katika ukurasa mmoja ambao wafadhili wanaweza kufuatilia na kuufadhili.",
+      "cta": "Unda mradi"
     }
   },
   "manageBumicerts": {

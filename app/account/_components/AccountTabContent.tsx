@@ -25,7 +25,7 @@ import { BumicertsSection, ObservationsSection, ProjectsSection } from "../../(m
 import { monogram } from "../../_lib/did-profile";
 import { attachProjectTitlesToGalleries, fetchBumicertsByDid, fetchIndexedCertifiedProfileCards, fetchObservationSummaryByDid, fetchProjectImageGalleriesByDid, fetchProjectsByDid } from "../../_lib/indexer";
 import type { AccountRouteData } from "../_lib/account-route";
-import { accountBumicertsPath, accountDonationsPath, accountGalleryPath, accountObservationsPath, accountPath, accountProjectsPath } from "../_lib/account-route";
+import { accountDonationsPath, accountGalleryPath, accountObservationsPath, accountPath, accountProjectsPath } from "../_lib/account-route";
 
 type ManageAction = {
   href: string;

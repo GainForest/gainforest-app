@@ -1316,6 +1316,10 @@
         "added": "Added",
         "notAdded": "Not added"
       }
+    },
+    "emptyHero": {
+      "description": "Projects bring your impact work together — people, places, time periods, and supporting photos or notes — into one page supporters can follow and fund.",
+      "cta": "Create a project"
     }
   },
   "manageBumicerts": {
