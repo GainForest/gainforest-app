@@ -81,7 +81,9 @@ function isNamed(name: string): boolean {
 }
 
 function canSubmitItem(item: QuickItem): boolean {
-  return isNamed(item.scientificName) && item.eventDate.trim().length > 0 && item.status !== "uploaded";
+  // A species name is optional — nameless photos are submitted as unidentified
+  // observations. Only a date is required (it auto-fills from EXIF/file).
+  return item.eventDate.trim().length > 0 && item.status !== "uploaded";
 }
 
 export function AddObservationsModal({
@@ -364,7 +366,7 @@ export function AddObservationsModal({
     }
     const queue = itemsRef.current.filter(canSubmitItem);
     if (queue.length === 0) {
-      setError(t("needSpecies"));
+      setError(t("nothingToSubmit"));
       return;
     }
     setIsSubmitting(true);
@@ -537,7 +539,9 @@ function ObservationCard({
 }) {
   const identifying = item.status === "identifying";
   const uploading = item.status === "uploading";
-  const missingSpecies = !isNamed(item.scientificName);
+  // A blank species is allowed (submitted as unidentified); show a gentle hint
+  // rather than a validation warning.
+  const unnamed = !isNamed(item.scientificName) && !identifying;
 
   return (
     <div className="relative flex gap-3 rounded-2xl border border-border bg-card p-3">
@@ -558,7 +562,7 @@ function ObservationCard({
             placeholder={identifying ? t("identifying") : t("speciesPlaceholder")}
             disabled={disabled || uploading}
             aria-label={t("speciesLabel")}
-            className={cn("pr-8", missingSpecies && !identifying ? "border-amber-400/60" : "")}
+            className="pr-8"
           />
           <span className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground">
             {identifying ? (
@@ -570,6 +574,8 @@ function ObservationCard({
         </div>
         {item.vernacularName ? (
           <p className="-mt-1 truncate text-xs text-muted-foreground">{item.vernacularName}</p>
+        ) : unnamed ? (
+          <p className="-mt-1 text-xs text-muted-foreground">{t("speciesOptionalHint")}</p>
         ) : null}
 
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
