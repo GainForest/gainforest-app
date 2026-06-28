@@ -3,13 +3,19 @@
 import Image from "next/image";
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { FolderKanbanIcon, MapPinIcon } from "lucide-react";
+import { FolderKanbanIcon, LayoutGridIcon, ListIcon, MapPinIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { parseAsStringEnum, useQueryState } from "nuqs";
 import { RecordDrawer } from "../../_components/RecordDrawer";
 import { ProjectScopeTags } from "../../_components/ProjectScopeTags";
 import { ProjectEvidence } from "../../_components/ProjectEvidence";
+import { ProjectListItem } from "../../_components/ProjectListItem";
+import { useStableQueryView } from "../../_lib/use-stable-query-view";
 import { isPdsBlobUrl } from "../../_lib/pds";
 import type { ProjectRecord } from "../../_lib/indexer";
+
+type ProjectsView = "cards" | "list";
+const PROJECTS_VIEWS: ProjectsView[] = ["cards", "list"];
 
 const containerVariants = {
   hidden: {},
@@ -23,7 +29,18 @@ const cardVariants = {
 
 export function AccountProjectsGrid({ projects }: { projects: ProjectRecord[] }) {
   const t = useTranslations("common.accountProjects");
+  const viewT = useTranslations("marketplace.projects.view");
   const [drawer, setDrawer] = useState<ProjectRecord | null>(null);
+  const [queryView, setQueryView] = useQueryState(
+    "view",
+    parseAsStringEnum<ProjectsView>(PROJECTS_VIEWS).withDefault("cards").withOptions({ history: "replace", scroll: false, shallow: true }),
+  );
+  const [view, setView] = useStableQueryView({
+    queryValue: queryView,
+    setQueryValue: setQueryView,
+    values: PROJECTS_VIEWS,
+    defaultValue: "cards",
+  });
 
   if (projects.length === 0) {
     return (
@@ -48,20 +65,58 @@ export function AccountProjectsGrid({ projects }: { projects: ProjectRecord[] })
     );
   }
 
+  const viewOptions: Array<{ id: ProjectsView; label: string; Icon: typeof LayoutGridIcon }> = [
+    { id: "cards", label: viewT("cards"), Icon: LayoutGridIcon },
+    { id: "list", label: viewT("list"), Icon: ListIcon },
+  ];
+
   return (
     <section className="py-6">
-      <motion.div
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-        className="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] items-stretch gap-5"
-      >
-        {projects.map((project) => (
-          <motion.div key={project.id} variants={cardVariants} className="h-full">
-            <ProjectCard project={project} onOpen={() => setDrawer(project)} />
-          </motion.div>
-        ))}
-      </motion.div>
+      <div className="mb-5 flex justify-end">
+        <div className="inline-flex h-10 shrink-0 items-center rounded-full border border-border bg-background/50 p-0.5">
+          {viewOptions.map((option) => (
+            <button
+              key={option.id}
+              type="button"
+              onClick={() => void setView(option.id)}
+              aria-pressed={view === option.id}
+              className={`inline-flex h-9 items-center gap-1.5 rounded-full px-3 text-sm font-medium transition-colors ${
+                view === option.id ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <option.Icon className="h-3.5 w-3.5" />
+              {option.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {view === "list" ? (
+        <ul role="list">
+          {projects.map((project, index) => (
+            <li
+              key={project.id}
+              className="relative animate-in after:absolute after:inset-x-4 after:bottom-0 after:h-px after:bg-border last:after:hidden"
+              style={{ animationDelay: `${Math.min(index, 10) * 35}ms` }}
+            >
+              <ProjectListItem record={project} onOpen={setDrawer} priority={index < 8} />
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+          className="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] items-stretch gap-5"
+        >
+          {projects.map((project) => (
+            <motion.div key={project.id} variants={cardVariants} className="h-full">
+              <ProjectCard project={project} onOpen={() => setDrawer(project)} />
+            </motion.div>
+          ))}
+        </motion.div>
+      )}
       <RecordDrawer record={drawer} onClose={() => setDrawer(null)} />
     </section>
   );
