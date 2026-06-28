@@ -45,7 +45,7 @@ import {
   type ObservationBlobRef,
 } from "./observation-mutations";
 import { LocationPickerModal, LocationPickerModalId } from "./LocationPickerModal";
-import { fetchDefaultObservationCenter, isValidLocation, type PickedLocation } from "./default-location";
+import { fetchDefaultObservationCenter, roundCoord, type PickedLocation } from "./default-location";
 import {
   buildObservationLocationFields,
   DEFAULT_FUZZY_AREA,
@@ -120,6 +120,9 @@ export function AddObservationsModal({
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const dragDepth = useRef(0);
   const itemsRef = useRef<QuickItem[]>([]);
+  // Caches the one device-location request per modal session so adding several
+  // photos never re-prompts. Resolves to null when sharing is denied/unavailable.
+  const deviceLocationRef = useRef<Promise<PickedLocation | null> | null>(null);
 
   const [items, setItems] = useState<QuickItem[]>([]);
   const [isDragging, setIsDragging] = useState(false);
@@ -167,6 +170,32 @@ export function AddObservationsModal({
 
   const patchItem = useCallback((id: string, patch: Partial<QuickItem>) => {
     setItems((current) => current.map((item) => (item.id === id ? { ...item, ...patch } : item)));
+  }, []);
+
+  // Ask the device for its current location so photos without their own GPS can
+  // be auto-located. We prompt at most once per modal session and, crucially,
+  // never guess: if the observer denies access or the browser can't resolve a
+  // fix, this resolves to null and the location is simply left blank.
+  const requestDeviceLocation = useCallback((): Promise<PickedLocation | null> => {
+    if (deviceLocationRef.current) return deviceLocationRef.current;
+    const promise = new Promise<PickedLocation | null>((resolve) => {
+      if (typeof navigator === "undefined" || !navigator.geolocation) {
+        resolve(null);
+        return;
+      }
+      if (typeof window !== "undefined" && !window.isSecureContext) {
+        resolve(null);
+        return;
+      }
+      navigator.geolocation.getCurrentPosition(
+        (position) =>
+          resolve({ lat: roundCoord(position.coords.latitude), lng: roundCoord(position.coords.longitude) }),
+        () => resolve(null),
+        { enableHighAccuracy: false, timeout: 20_000, maximumAge: 10 * 60_000 },
+      );
+    });
+    deviceLocationRef.current = promise;
+    return promise;
   }, []);
 
   const analyzeItem = useCallback(
@@ -262,12 +291,10 @@ export function AddObservationsModal({
               vernacularName: "",
               kingdom: "Plantae",
               eventDate: meta.eventDate || dateFromFile(source),
-              location:
-                Number.isFinite(lat) && Number.isFinite(lng)
-                  ? { lat, lng }
-                  : isValidLocation(defaultCenter)
-                    ? defaultCenter
-                    : null,
+              // Only seed from the photo's own GPS here. Photos without EXIF
+              // coordinates are auto-located from the device below (with the
+              // observer's permission) rather than dropped on a default pin.
+              location: Number.isFinite(lat) && Number.isFinite(lng) ? { lat, lng } : null,
               notes: "",
               caption: cleanFileName(source.name),
               status: "identifying",
@@ -278,11 +305,26 @@ export function AddObservationsModal({
         );
         setItems((current) => [...current, ...prepared]);
         for (const item of prepared) void analyzeItem(item.id, item.file);
+
+        // Auto-fill the location for freshly added photos that have no GPS of
+        // their own. This asks for location access once; if the observer allows
+        // it we drop the current-location pin, and if they deny it we leave the
+        // field blank for them to set manually instead of guessing.
+        const needLocation = prepared.filter((item) => !item.location);
+        if (needLocation.length > 0) {
+          void requestDeviceLocation().then((coords) => {
+            if (!coords) return;
+            const ids = new Set(needLocation.map((item) => item.id));
+            setItems((current) =>
+              current.map((item) => (ids.has(item.id) && !item.location ? { ...item, location: coords } : item)),
+            );
+          });
+        }
       } finally {
         setIsPreparing(false);
       }
     },
-    [analyzeItem, defaultCenter, disabledReason, t],
+    [analyzeItem, disabledReason, requestDeviceLocation, t],
   );
 
   function onInputChange(event: ChangeEvent<HTMLInputElement>) {

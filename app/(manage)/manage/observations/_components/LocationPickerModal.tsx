@@ -60,6 +60,7 @@ export function LocationPickerModal({ initial, defaultCenter, onSelect }: Locati
   const LRef = useRef<typeof import("leaflet") | null>(null);
   const geoWatchRef = useRef<number | null>(null);
   const geoTimeoutRef = useRef<number | null>(null);
+  const autoRequestedRef = useRef(false);
   const [picked, setPicked] = useState<PickedLocation | null>(isValidLocation(initial) ? initial : null);
   const [activeLayer, setActiveLayer] = useState<LayerId>("streets");
   const [ready, setReady] = useState(false);
@@ -249,6 +250,38 @@ export function LocationPickerModal({ initial, defaultCenter, onSelect }: Locati
 
     locate(0);
   }, [clearGeoRequest, geolocationErrorText, placeMarker, t]);
+
+  // Proactively ask for location access the moment the picker opens for a fresh
+  // observation. With no pin chosen yet and the site not already blocked, fire
+  // the geolocation request so the browser surfaces its native permission prompt
+  // straight away — the observer no longer has to discover and tap "Use my
+  // location" before being asked.
+  useEffect(() => {
+    if (!ready || autoRequestedRef.current) return;
+    if (isValidLocation(initial)) return;
+    if (typeof navigator === "undefined" || !navigator.geolocation) return;
+    if (typeof window !== "undefined" && !window.isSecureContext) return;
+    autoRequestedRef.current = true;
+    let cancelled = false;
+    void (async () => {
+      // Skip the auto-request when the site is already blocked — re-firing it
+      // would only flash the "blocked" banner the instant the picker appears.
+      // When the Permissions API is unavailable (older Safari), fall through and
+      // ask anyway so a never-prompted user still gets the native dialog.
+      try {
+        const status = await navigator.permissions?.query({ name: "geolocation" as PermissionName });
+        if (cancelled) return;
+        if (status?.state === "denied") return;
+      } catch {
+        // Permissions API not supported — let the geolocation call drive the prompt.
+      }
+      if (cancelled) return;
+      useMyLocation();
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [ready, initial, useMyLocation]);
 
   const closeModal = useCallback(() => {
     clearGeoRequest();
