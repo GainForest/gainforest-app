@@ -661,8 +661,8 @@ export async function ProjectDetailView({
         }}
       />
       <main className="min-h-screen bg-background pb-20">
-        {backHref ? (
-          <div className="mx-auto max-w-6xl px-6 pt-6 lg:px-8">
+        <header className="mx-auto max-w-6xl px-6 pt-6 lg:px-8">
+          {backHref ? (
             <Link
               href={backHref}
               className="inline-flex items-center gap-1.5 text-[13px] font-medium text-muted-foreground transition-colors hover:text-foreground"
@@ -670,28 +670,54 @@ export async function ProjectDetailView({
               <ArrowLeftIcon className="h-3.5 w-3.5" aria-hidden />
               {backLabel ?? "Back"}
             </Link>
+          ) : null}
+          <div className="mt-4 flex flex-wrap items-center gap-2.5">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-[12px] font-medium text-primary-dark">
+              <SproutIcon className="h-3.5 w-3.5" aria-hidden />
+              Project
+            </span>
+            {detail?.badges?.map((badge, index) => (
+              <Badge key={`${badge.label}-${index}`} badge={badge} workScopeLabels={workScopeLabels} />
+            ))}
           </div>
-        ) : null}
-        <section className="mx-auto grid max-w-6xl grid-cols-1 gap-x-10 gap-y-8 px-6 py-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:px-8">
+          <h1
+            className="mt-3 max-w-3xl text-4xl font-light italic leading-tight tracking-[-0.035em] text-foreground md:text-5xl"
+            style={{ fontFamily: "var(--font-instrument-serif-var)" }}
+          >
+            {record.title}
+          </h1>
+          <div className="mt-4 flex flex-wrap items-center gap-3">
+            <Link href={ownerProfileHref} className="group inline-flex min-w-0 items-center gap-2.5">
+              <span className="relative h-9 w-9 shrink-0 overflow-hidden rounded-full border border-border bg-muted">
+                {owner.avatarUrl ? (
+                  <Image src={owner.avatarUrl} alt="" fill sizes="36px" unoptimized={!isPdsBlobUrl(owner.avatarUrl)} className="object-cover" />
+                ) : (
+                  <span className="grid h-full w-full place-items-center text-xs font-semibold text-muted-foreground">{owner.displayName.charAt(0).toUpperCase()}</span>
+                )}
+              </span>
+              <span className="min-w-0">
+                <span className="block truncate text-sm font-medium text-foreground transition-colors group-hover:text-primary">{owner.displayName}</span>
+                <span className="block text-xs text-muted-foreground">{formatRelative(record.createdAt)}</span>
+              </span>
+            </Link>
+            <span className="ml-auto"><BumicertShareButton /></span>
+          </div>
+          {record.imageUrl ? (
+            <div className="relative mt-6 aspect-[16/10] w-full overflow-hidden rounded-2xl border border-border bg-muted sm:aspect-[16/7]">
+              <Image
+                src={record.imageUrl}
+                alt={record.title}
+                fill
+                priority
+                sizes="(min-width: 1024px) 1100px, 100vw"
+                unoptimized={!isPdsBlobUrl(record.imageUrl)}
+                className="object-cover"
+              />
+            </div>
+          ) : null}
+        </header>
+        <section className="mx-auto grid max-w-6xl grid-cols-1 gap-x-10 gap-y-8 px-6 pb-8 pt-8 lg:grid-cols-[minmax(0,1fr)_320px] lg:px-8">
           <div className="min-w-0">
-            <header>
-              <div className="flex flex-wrap items-center gap-2.5">
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-[12px] font-medium text-primary-dark">
-                  <SproutIcon className="h-3.5 w-3.5" aria-hidden />
-                  Project
-                </span>
-                {detail?.badges?.map((badge, index) => (
-                  <Badge key={`${badge.label}-${index}`} badge={badge} workScopeLabels={workScopeLabels} />
-                ))}
-              </div>
-              <h1
-                className="mt-3 max-w-3xl text-4xl font-light italic leading-tight tracking-[-0.035em] text-foreground md:text-5xl"
-                style={{ fontFamily: "var(--font-instrument-serif-var)" }}
-              >
-                {record.title}
-              </h1>
-            </header>
-
             {detail?.richBody && detail.richBody.length > 0 ? (
               <div className="mt-7"><RichText blocks={detail.richBody} className="text-base leading-7 md:text-lg md:leading-8" /></div>
             ) : description ? (
@@ -792,6 +818,8 @@ export async function ProjectDetailView({
                 canDelete={certManageAccess.canDelete}
                 mutationRepo={certManageAccess.mutationRepo}
                 deleteRedirectHref={ownerProfileHref}
+                hideOwner
+                hideImage
                 extra={
                   <ProjectSidebarExtras
                     record={record}
@@ -834,12 +862,20 @@ function ProjectSidebarExtras({
   if (record.locationUris.length > 0) facts.push({ label: "Places", value: formatNumber(record.locationUris.length) });
   if (record.contributorCount > 0) facts.push({ label: "Contributors", value: formatNumber(record.contributorCount) });
   const badges = detail?.badges ?? [];
+  // Tracks whether a divider is needed before the next block. The first block
+  // omits its leading separator since this is the top of the sidebar.
+  let rendered = false;
+  const lead = () => {
+    const sep = rendered ? <Separator /> : null;
+    rendered = true;
+    return sep;
+  };
 
   return (
     <>
       {facts.length > 0 || badges.length > 0 ? (
         <>
-          <Separator />
+          {lead()}
           <div className="space-y-3">
             <h3 className="text-xs font-semibold uppercase tracking-[0.14em] text-foreground">At a glance</h3>
             {facts.length > 0 ? (
@@ -870,7 +906,7 @@ function ProjectSidebarExtras({
 
       {mapLocationUri ? (
         <>
-          <Separator />
+          {lead()}
           <div className="space-y-2.5">
             <div className="flex items-center justify-between gap-2">
               <h3 className="text-xs font-semibold uppercase tracking-[0.14em] text-foreground">Map</h3>
@@ -891,7 +927,7 @@ function ProjectSidebarExtras({
 
       {recentUpdates.length > 0 ? (
         <>
-          <Separator />
+          {lead()}
           <div className="space-y-2.5">
             <div className="flex items-center justify-between gap-2">
               <h3 className="text-xs font-semibold uppercase tracking-[0.14em] text-foreground">Latest updates</h3>
@@ -1126,6 +1162,8 @@ function OverviewSidebar({
   mutationRepo,
   deleteRedirectHref,
   extra,
+  hideOwner,
+  hideImage,
 }: {
   record: BumicertRecord;
   detail: RouteData["detail"];
@@ -1139,54 +1177,62 @@ function OverviewSidebar({
   deleteRedirectHref: string;
   /** Extra rich content rendered under the cover image (project sidebar). */
   extra?: ReactNode;
+  /** Hide the owner row — the project page shows it in the page header. */
+  hideOwner?: boolean;
+  /** Hide the cover image — the project page shows it as a hero. */
+  hideImage?: boolean;
 }) {
   const orgLinks = buildOrganizationLinks(owner, detail);
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-3">
-        <Link href={`/account/${encodeURIComponent(owner.urlIdentifier)}`} className="relative h-9 w-9 shrink-0 overflow-hidden rounded-full border border-border bg-muted">
-          {owner.avatarUrl ? (
+      {!hideOwner ? (
+        <div className="flex items-center gap-3">
+          <Link href={`/account/${encodeURIComponent(owner.urlIdentifier)}`} className="relative h-9 w-9 shrink-0 overflow-hidden rounded-full border border-border bg-muted">
+            {owner.avatarUrl ? (
+              <Image
+                src={owner.avatarUrl}
+                alt={owner.displayName}
+                fill
+                sizes="36px"
+                unoptimized={!isPdsBlobUrl(owner.avatarUrl)}
+                className="object-cover"
+              />
+            ) : (
+              <div className="grid h-full w-full place-items-center text-xs font-semibold text-muted-foreground">
+                {owner.displayName.charAt(0).toUpperCase()}
+              </div>
+            )}
+          </Link>
+          <Link href={`/account/${encodeURIComponent(owner.urlIdentifier)}`} className="group flex min-w-0 flex-1 flex-col">
+            <span className="truncate text-sm font-medium leading-tight text-foreground transition-colors group-hover:text-primary">
+              {owner.displayName}
+            </span>
+            <span className="text-xs leading-tight text-muted-foreground">{formatRelative(record.createdAt)}</span>
+          </Link>
+          <BumicertShareButton />
+        </div>
+      ) : null}
+
+      {!hideImage ? (
+        <div className="relative aspect-[4/3] w-full max-w-full overflow-hidden rounded-3xl border border-border bg-muted">
+          {record.imageUrl ? (
             <Image
-              src={owner.avatarUrl}
-              alt={owner.displayName}
+              src={record.imageUrl}
+              alt={record.title}
               fill
-              sizes="36px"
-              unoptimized={!isPdsBlobUrl(owner.avatarUrl)}
+              priority
+              sizes="(min-width: 1024px) 320px, 100vw"
+              unoptimized={!isPdsBlobUrl(record.imageUrl)}
               className="object-cover"
             />
           ) : (
-            <div className="grid h-full w-full place-items-center text-xs font-semibold text-muted-foreground">
-              {owner.displayName.charAt(0).toUpperCase()}
+            <div className="absolute inset-0 grid place-items-center text-muted-foreground">
+              <SproutIcon className="h-10 w-10 opacity-40" />
             </div>
           )}
-        </Link>
-        <Link href={`/account/${encodeURIComponent(owner.urlIdentifier)}`} className="group flex min-w-0 flex-1 flex-col">
-          <span className="truncate text-sm font-medium leading-tight text-foreground transition-colors group-hover:text-primary">
-            {owner.displayName}
-          </span>
-          <span className="text-xs leading-tight text-muted-foreground">{formatRelative(record.createdAt)}</span>
-        </Link>
-        <BumicertShareButton />
-      </div>
-
-      <div className="relative aspect-[4/3] w-full max-w-full overflow-hidden rounded-3xl border border-border bg-muted">
-        {record.imageUrl ? (
-          <Image
-            src={record.imageUrl}
-            alt={record.title}
-            fill
-            priority
-            sizes="(min-width: 1024px) 320px, 100vw"
-            unoptimized={!isPdsBlobUrl(record.imageUrl)}
-            className="object-cover"
-          />
-        ) : (
-          <div className="absolute inset-0 grid place-items-center text-muted-foreground">
-            <SproutIcon className="h-10 w-10 opacity-40" />
-          </div>
-        )}
-      </div>
+        </div>
+      ) : null}
 
       {extra}
 
