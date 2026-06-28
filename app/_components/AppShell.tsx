@@ -58,6 +58,7 @@ import { GlobalSearch } from "./GlobalSearch";
 import { LanguageSelector } from "@/components/i18n/LanguageSelector";
 import { ModalContent, ModalDescription, ModalFooter, ModalTitle } from "@/components/ui/modal/modal";
 import { useModal } from "@/components/ui/modal/context";
+import { useAddObservations } from "./useAddObservations";
 
 type NavLeaf = {
   kind: "leaf";
@@ -739,25 +740,6 @@ const CreateProjectModalLazy = dynamic(
   },
 );
 
-// The quick "Add observations" modal (iNaturalist-style drop zone + editable
-// cards). Code-split so its image/EXIF/leaflet deps load only when opened.
-const AddObservationsModalLazy = dynamic(
-  () =>
-    import("@/app/(manage)/manage/observations/_components/AddObservationsModal").then((mod) => ({
-      default: mod.AddObservationsModal,
-    })),
-  {
-    ssr: false,
-    loading: () => (
-      <ModalContent dismissible={false} className="w-full">
-        <div className="flex h-48 items-center justify-center">
-          <Loader2Icon className="size-5 animate-spin text-muted-foreground" />
-        </div>
-      </ModalContent>
-    ),
-  },
-);
-
 // The sidebar "Create a project" button opens the wizard as a popup over the
 // current page instead of routing to /projects first. Signed-out users still
 // follow the link (which routes them through sign-in).
@@ -856,56 +838,7 @@ function AddObservationsButton({
   className?: string;
   children: React.ReactNode;
 }) {
-  const router = useRouter();
-  const modal = useModal();
-  const { groups } = useAccountList(sessionDid);
-  const [activeContext, setActiveContext] = useActiveAccountContext(sessionDid);
-
-  const open = () => {
-    let target: ManageTarget;
-    if (activeContext.type === "group") {
-      const activeGroup = groups.find((group) => group.groupDid === activeContext.did) ?? null;
-      const identifier = activeGroup
-        ? switcherGroupIdentifier(activeGroup)
-        : activeContext.identifier?.trim() || activeContext.did;
-      if (activeGroup) {
-        setActiveContext({ type: "group", did: activeGroup.groupDid, identifier, role: activeGroup.role });
-      }
-      target = groupManageTarget({
-        did: activeContext.did,
-        accountKind: "organization",
-        identifier,
-        role: activeGroup?.role ?? null,
-        currentUserDid: sessionDid,
-      });
-    } else {
-      target = personalManageTarget({ did: sessionDid, accountKind: "user", identifier: sessionDid });
-    }
-
-    const observationsHref = manageHref({ basePath: groupManageBasePath(target.identifier) }, "observations");
-    const closeModal = () => {
-      void modal.hide().then(() => modal.clear());
-    };
-    modal.pushModal(
-      {
-        id: "add-observations",
-        dialogWidth: "max-w-2xl w-[calc(100%-2rem)]",
-        forceDialog: true,
-        content: (
-          <AddObservationsModalLazy
-            target={target}
-            onClose={closeModal}
-            onViewObservations={() => {
-              closeModal();
-              router.push(observationsHref);
-            }}
-          />
-        ),
-      },
-      true,
-    );
-    void modal.show();
-  };
+  const open = useAddObservations(sessionDid);
 
   return (
     <button type="button" onClick={open} className={className}>
