@@ -18,11 +18,10 @@ export default async function AccountAdminPage({ params }: { params: Promise<{ d
     redirect(accountAdminPath(account.urlIdentifier));
   }
 
-  // The admin list lives on a steward's own profile and is only visible to
-  // members of the admin group.
+  // The admin list lives on the admin group's own profile and is only visible
+  // to members of that group.
   const moderator = await getGainForestModeratorAccess().catch(() => null);
-  const isOwnProfile = moderator?.session.isLoggedIn && moderator.session.did === account.did;
-  if (!moderator?.isModerator || !isOwnProfile) {
+  if (!moderator?.isModerator || moderator.repoDid !== account.did) {
     notFound();
   }
 

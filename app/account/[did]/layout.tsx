@@ -69,9 +69,9 @@ export default async function AccountLayout({
   const testAccountFlagged = moderator?.isModerator
     ? await fetchHiddenAccountDids().then((dids) => dids.has(account.did)).catch(() => false)
     : null;
-  // The Admin tab (list of flagged test accounts) shows on a steward's own
-  // profile only.
-  const showAdminTab = Boolean(moderator?.isModerator && session.isLoggedIn && session.did === account.did);
+  // The Admin tab (list of flagged test accounts) lives on the admin group's
+  // own profile, shown to any of its members.
+  const showAdminTab = Boolean(moderator?.isModerator && moderator.repoDid === account.did);
 
   return (
     <main className="w-full">
