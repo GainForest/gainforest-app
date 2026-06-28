@@ -15,11 +15,15 @@
  * Inspired by simocracy-v2's `lib/landing-feed.ts`, which merges proposals,
  * comments, decisions, actions, and sims into a single chronological feed.
  *
- * Per-kind caps keep the merged feed visually diverse instead of letting the
- * most frequent record type (observations) drown everything else.
+ * The feed is a TRUE newest-first merge across all kinds (no per-kind quota) —
+ * each row is placed purely by its createdAt — and pages with a compound
+ * `(createdAt, id)` cursor so "load more" walks strictly older items. Each
+ * stream is queried with `createdAt <= cursor` and re-merged in memory, which
+ * keeps global chronological order even when one stream is far denser than the
+ * others (independent per-stream cursors would interleave out of order).
  */
 
-import { publicExploreCache } from "./public-explore-cache";
+import { cachedAsync } from "./async-cache";
 import { indexerQuery } from "./indexer";
 import { normaliseRef } from "./pds";
 import { FACILITATOR_DID, accountHref, localObservationHref, localProjectHref } from "./urls";
@@ -70,13 +74,69 @@ export interface ActivityFeedItem {
   currency: string | null;
 }
 
-export interface ActivityFeedResponse {
+/** Which kinds the feed should include: a single kind, or the unified merge. */
+export type ActivityFeedFilter = ActivityFeedKind | "all";
+
+export interface ActivityFeedPage {
   items: ActivityFeedItem[];
+  /** Opaque cursor for the next page; null when the feed is exhausted. */
+  nextCursor: string | null;
+  /** Whether a "load more" request could yield further rows. */
+  hasMore: boolean;
 }
 
-const MAX_FEED_ITEMS = 40;
-const MAX_PER_KIND = 10;
+/** Rows returned to the client per page. */
+const PAGE_SIZE = 20;
+/** Items fetched per stream per page. Must be >= PAGE_SIZE so the merged
+ *  top-PAGE_SIZE is globally correct, with a little margin for boundary
+ *  duplicate-timestamp rows that get filtered out by the compound cursor. */
+const STREAM_BATCH = PAGE_SIZE + 6;
 const MAX_TEXT = 220;
+const FEED_CACHE_MS = 60_000; // 60s in-process memo — fresh enough for "live".
+
+// ── Compound (createdAt, id) cursor ──────────────────────────────────────────
+// ISO timestamps alone aren't a stable key (records can share a millisecond),
+// so the cursor pairs the row's timestamp with its id and pagination filters
+// strictly-older rows in that total order.
+
+type FeedCursor = { ts: string; id: string };
+
+function encodeCursor(cursor: FeedCursor | null): string | null {
+  if (!cursor) return null;
+  return Buffer.from(JSON.stringify(cursor), "utf8").toString("base64url");
+}
+
+function decodeCursor(raw: string | null | undefined): FeedCursor | null {
+  if (!raw) return null;
+  try {
+    const parsed = JSON.parse(Buffer.from(raw, "base64url").toString("utf8")) as Partial<FeedCursor>;
+    if (typeof parsed.ts === "string" && typeof parsed.id === "string") return { ts: parsed.ts, id: parsed.id };
+  } catch {
+    // fall through
+  }
+  return null;
+}
+
+function timeValue(iso: string): number {
+  const t = Date.parse(iso);
+  return Number.isNaN(t) ? 0 : t;
+}
+
+/** Newest-first total order: by time desc, then id desc as a stable tiebreak. */
+function compareNewestFirst(a: ActivityFeedItem, b: ActivityFeedItem): number {
+  const ta = timeValue(a.createdAt);
+  const tb = timeValue(b.createdAt);
+  if (ta !== tb) return tb - ta;
+  return a.id < b.id ? 1 : a.id > b.id ? -1 : 0;
+}
+
+/** True when `item` sits strictly older than the cursor in the total order. */
+function isStrictlyOlder(item: ActivityFeedItem, cursor: FeedCursor): boolean {
+  const ti = timeValue(item.createdAt);
+  const tc = timeValue(cursor.ts);
+  if (ti !== tc) return ti < tc;
+  return item.id < cursor.id;
+}
 
 // ── Certified profile helpers (mirrors the private helpers in indexer.ts) ────
 
@@ -114,7 +174,11 @@ function parseAtUri(uri: string): { did: string; rkey: string } | null {
   return { did: match[1], rkey: match[2] };
 }
 
-// ── One combined query: newest N of each kind in a single round-trip ─────────
+// ── One combined query: newest STREAM_BATCH of each kind, before the cursor ──
+//
+// Each stream takes a typed `where` built in JS so we can fold the createdAt
+// upper bound (the cursor) and a per-kind `first: 0` (to skip streams that a
+// kind filter excludes) into the same static query.
 
 const FEED_QUERY = `
   query ActivityFeed(
@@ -122,11 +186,14 @@ const FEED_QUERY = `
     $occurrenceFirst: Int!
     $orgFirst: Int!
     $receiptFirst: Int!
-    $facilitatorDid: String!
+    $projectWhere: OrgHypercertsCollectionWhereInput
+    $occurrenceWhere: AppGainforestDwcOccurrenceWhereInput
+    $orgWhere: AppCertifiedActorOrganizationWhereInput
+    $donationWhere: OrgHypercertsFundingReceiptWhereInput
   ) {
     projects: orgHypercertsCollection(
       first: $projectFirst
-      where: { type: { in: ["project", "Project"] } }
+      where: $projectWhere
       sortBy: createdAt
       sortDirection: DESC
     ) {
@@ -148,6 +215,7 @@ const FEED_QUERY = `
 
     occurrences: appGainforestDwcOccurrence(
       first: $occurrenceFirst
+      where: $occurrenceWhere
       sortBy: createdAt
       sortDirection: DESC
     ) {
@@ -162,6 +230,7 @@ const FEED_QUERY = `
 
     organizations: appCertifiedActorOrganization(
       first: $orgFirst
+      where: $orgWhere
       sortBy: createdAt
       sortDirection: DESC
     ) {
@@ -173,7 +242,7 @@ const FEED_QUERY = `
 
     donations: orgHypercertsFundingReceipt(
       first: $receiptFirst
-      where: { did: { eq: $facilitatorDid } }
+      where: $donationWhere
       sortBy: createdAt
       sortDirection: DESC
     ) {
@@ -269,14 +338,10 @@ function imageMeta(image: RawImage): { url: string | null; ref: string | null } 
   return { url: null, ref: null };
 }
 
-function cap<T>(list: T[], max: number): T[] {
-  return list.length > max ? list.slice(0, max) : list;
-}
-
 // ── Per-kind mappers ────────────────────────────────────────────────────────
 
 function mapProjects(nodes: RawProject[]): ActivityFeedItem[] {
-  return cap(nodes, MAX_PER_KIND).map((n) => {
+  return nodes.map((n) => {
     const banner = imageMeta(n.banner ?? null);
     const avatar = imageMeta(n.avatar ?? null);
     const didOrHandle = n.did;
@@ -315,7 +380,7 @@ function observationText(n: RawOccurrence): string | null {
 }
 
 function mapOccurrences(nodes: RawOccurrence[]): ActivityFeedItem[] {
-  return cap(nodes, MAX_PER_KIND).map((n) => {
+  return nodes.map((n) => {
     const external = n.thumbnailUrl?.trim() || n.speciesImageUrl?.trim() || null;
     const imageRef = normaliseRef(n.imageEvidence?.file?.ref);
     return {
@@ -339,7 +404,7 @@ function mapOccurrences(nodes: RawOccurrence[]): ActivityFeedItem[] {
 }
 
 function mapOrganizations(nodes: RawOrg[]): ActivityFeedItem[] {
-  return cap(nodes, MAX_PER_KIND).map((n) => {
+  return nodes.map((n) => {
     const types = (n.organizationType ?? [])
       .map((t) => (typeof t === "string" ? t.trim() : null))
       .filter((t): t is string => Boolean(t));
@@ -431,77 +496,139 @@ async function resolveProjectsForCertUris(certUris: string[]): Promise<Map<strin
   return out;
 }
 
-async function mapDonations(nodes: RawReceipt[]): Promise<ActivityFeedItem[]> {
-  const capped = cap(nodes, MAX_PER_KIND);
-  const certUris = capped
-    .map((n) => n.for?.uri ?? null)
-    .filter((u): u is string => Boolean(u));
-  const projectByCert = await resolveProjectsForCertUris(certUris);
-
-  return capped.map((n) => {
+/** Map donation receipts to rows WITHOUT resolving their funded project yet —
+ *  the cert→project lookup is deferred until after the page is sliced, so we
+ *  only resolve the donations that actually surface. Returns a side map from
+ *  row id to the funded Cert URI for that later enrichment. */
+function mapDonations(nodes: RawReceipt[]): { items: ActivityFeedItem[]; certUriById: Map<string, string> } {
+  const certUriById = new Map<string, string>();
+  const items = nodes.map((n): ActivityFeedItem => {
     const certUri = n.for?.uri ?? null;
-    const project = certUri ? projectByCert.get(certUri) ?? null : null;
-    const projectHref = project ? localProjectHref(project.did, project.rkey) : null;
-    const donorDid = n.from?.__typename === "AppCertifiedDefsDid" ? n.from.did ?? null : null;
+    if (certUri) certUriById.set(n.uri, certUri);
     const donorWallet = n.from?.__typename === "OrgHypercertsFundingReceiptText" ? n.from.value ?? null : null;
+    const donorDid = n.from?.__typename === "AppCertifiedDefsDid" ? n.from.did ?? null : null;
     const currency = (n.currency ?? "USD").toUpperCase();
     const amount = safeAmount(n.amount);
     return {
       id: n.uri,
       kind: "donation",
-      createdAt: n.occurredAt ?? n.createdAt ?? "",
+      // Order donations by record creation (matches the GraphQL sort + cursor).
+      createdAt: n.createdAt ?? n.occurredAt ?? "",
       actorDid: donorDid ?? "",
       actorName: null,
       actorAvatarRef: null,
       title: null,
       text: clampText(donorWallet ? `via ${donorWallet.slice(0, 10)}…` : null),
-      // Link to the funded project; fall back to the donations hub when the
-      // funded Cert has no parent project (legacy standalone gifts).
-      href: projectHref ?? "/donations",
+      href: "/donations",
       imageUrl: null,
       imageRef: null,
-      targetTitle: project?.title ?? null,
-      targetHref: projectHref,
+      targetTitle: null,
+      targetHref: null,
       amount,
       currency,
     };
   });
+  return { items, certUriById };
+}
+
+/** Resolve funded projects for the donation rows that made it into the page and
+ *  patch their link + target label in place. */
+async function enrichDonations(pageItems: ActivityFeedItem[], certUriById: Map<string, string>): Promise<void> {
+  const certUris = pageItems
+    .filter((it) => it.kind === "donation")
+    .map((it) => certUriById.get(it.id))
+    .filter((u): u is string => Boolean(u));
+  if (certUris.length === 0) return;
+  const projectByCert = await resolveProjectsForCertUris(certUris);
+  for (const it of pageItems) {
+    if (it.kind !== "donation") continue;
+    const certUri = certUriById.get(it.id);
+    const project = certUri ? projectByCert.get(certUri) ?? null : null;
+    if (!project) continue; // legacy standalone Cert — keep the donations-hub link
+    const projectHref = localProjectHref(project.did, project.rkey);
+    it.href = projectHref;
+    it.targetHref = projectHref;
+    it.targetTitle = project.title;
+  }
 }
 
 // ── Public builder ───────────────────────────────────────────────────────────
 
-async function buildActivityFeedUncached(): Promise<ActivityFeedItem[]> {
-  const data = await indexerQuery<RawFeed>(
-    FEED_QUERY,
-    {
-      projectFirst: MAX_PER_KIND,
-      occurrenceFirst: MAX_PER_KIND,
-      orgFirst: MAX_PER_KIND,
-      receiptFirst: MAX_PER_KIND,
-      facilitatorDid: FACILITATOR_DID,
-    },
-  );
+async function buildFeedPageUncached(
+  cursor: FeedCursor | null,
+  filter: ActivityFeedFilter,
+): Promise<ActivityFeedPage> {
+  const before = cursor?.ts ?? null;
+  const ltBound = before ? { createdAt: { lte: before } } : {};
+  const wants = (k: ActivityFeedKind) => filter === "all" || filter === k;
+
+  // `first: 0` is treated as "default page size" by the indexer (not zero), so a
+  // kind filter can't be expressed by zeroing a stream's `first`. Unwanted
+  // streams are fetched at the floor of 1 and then dropped from the pool below.
+  const data = await indexerQuery<RawFeed>(FEED_QUERY, {
+    projectFirst: wants("project") ? STREAM_BATCH : 1,
+    occurrenceFirst: wants("observation") ? STREAM_BATCH : 1,
+    orgFirst: wants("organization") ? STREAM_BATCH : 1,
+    receiptFirst: wants("donation") ? STREAM_BATCH : 1,
+    projectWhere: { type: { in: ["project", "Project"] }, ...ltBound },
+    occurrenceWhere: before ? { createdAt: { lte: before } } : null,
+    orgWhere: before ? { createdAt: { lte: before } } : null,
+    donationWhere: { did: { eq: FACILITATOR_DID }, ...ltBound },
+  });
 
   const projectNodes = (data?.projects?.edges ?? []).map((e) => e?.node).filter((n): n is RawProject => Boolean(n?.did));
   const occurrenceNodes = (data?.occurrences?.edges ?? []).map((e) => e?.node).filter((n): n is RawOccurrence => Boolean(n?.did));
   const orgNodes = (data?.organizations?.edges ?? []).map((e) => e?.node).filter((n): n is RawOrg => Boolean(n?.did));
   const receiptNodes = (data?.donations?.edges ?? []).map((e) => e?.node).filter((n): n is RawReceipt => Boolean(n?.uri));
 
-  const donationItems = await mapDonations(receiptNodes);
+  const { items: donationItems, certUriById } = mapDonations(receiptNodes);
 
-  const merged = [
+  // Merge every wanted kind into one pool ordered purely by recency — no
+  // per-kind quota — then keep only rows strictly older than the cursor. A
+  // single-kind filter drops the floor-fetched rows of the other streams here.
+  const pool = [
     ...mapProjects(projectNodes),
     ...mapOccurrences(occurrenceNodes),
     ...mapOrganizations(orgNodes),
     ...donationItems,
-  ]
-    .filter((item) => item.createdAt)
-    .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
-    .slice(0, MAX_FEED_ITEMS);
+  ].filter((item) => item.createdAt && (filter === "all" || item.kind === filter));
+  pool.sort(compareNewestFirst);
 
-  return merged;
+  const eligible = cursor ? pool.filter((it) => isStrictlyOlder(it, cursor)) : pool;
+  const seen = new Set<string>();
+  const ordered = eligible.filter((it) => (seen.has(it.id) ? false : (seen.add(it.id), true)));
+
+  const pageItems = ordered.slice(0, PAGE_SIZE);
+  await enrichDonations(pageItems, certUriById);
+
+  const last = pageItems[pageItems.length - 1];
+  // A stream that returned a full batch may still have older rows we haven't
+  // reached; combined with leftover eligible overflow, that's "more to load".
+  const fetchedFull =
+    projectNodes.length >= STREAM_BATCH ||
+    occurrenceNodes.length >= STREAM_BATCH ||
+    orgNodes.length >= STREAM_BATCH ||
+    receiptNodes.length >= STREAM_BATCH;
+  const hasMore = pageItems.length > 0 && (ordered.length > PAGE_SIZE || fetchedFull);
+
+  return {
+    items: pageItems,
+    nextCursor: hasMore && last ? encodeCursor({ ts: last.createdAt, id: last.id }) : null,
+    hasMore,
+  };
 }
 
-export async function buildActivityFeed(): Promise<ActivityFeedItem[]> {
-  return publicExploreCache("activity-feed", { v: 1 }, buildActivityFeedUncached);
+/**
+ * Build one page of the activity feed.
+ *
+ * @param rawCursor opaque cursor from a previous page (null/undefined = first).
+ * @param filter    restrict to one kind, or "all" for the unified merge.
+ */
+export async function buildActivityFeed(
+  rawCursor?: string | null,
+  filter: ActivityFeedFilter = "all",
+): Promise<ActivityFeedPage> {
+  const cursor = decodeCursor(rawCursor);
+  const key = `activity-feed:v2:${filter}:${rawCursor ?? "start"}`;
+  return cachedAsync(key, FEED_CACHE_MS, () => buildFeedPageUncached(cursor, filter));
 }

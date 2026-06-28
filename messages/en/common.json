@@ -703,6 +703,9 @@
     "retry": "Try again",
     "error": "Couldn't load the feed right now.",
     "empty": "Nothing has happened yet. Be the first to share!",
-    "emptyFiltered": "No activity of this kind yet."
+    "emptyFiltered": "No activity of this kind yet.",
+    "loadMore": "Load more",
+    "loadingMore": "Loading…",
+    "endOfFeed": "You're all caught up"
   }
 }

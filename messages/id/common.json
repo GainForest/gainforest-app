@@ -703,6 +703,9 @@
     "retry": "Coba lagi",
     "error": "Tidak dapat memuat aktivitas saat ini.",
     "empty": "Belum ada aktivitas. Jadilah yang pertama berbagi!",
-    "emptyFiltered": "Belum ada aktivitas jenis ini."
+    "emptyFiltered": "Belum ada aktivitas jenis ini.",
+    "loadMore": "Muat lainnya",
+    "loadingMore": "Memuat…",
+    "endOfFeed": "Kamu sudah melihat semua"
   }
 }

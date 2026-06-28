@@ -703,6 +703,9 @@
     "retry": "Reintentar",
     "error": "No se pudo cargar la actividad en este momento.",
     "empty": "Todavía no hay actividad. ¡Sé el primero en compartir!",
-    "emptyFiltered": "Aún no hay actividad de este tipo."
+    "emptyFiltered": "Aún no hay actividad de este tipo.",
+    "loadMore": "Cargar más",
+    "loadingMore": "Cargando…",
+    "endOfFeed": "Estás al día"
   }
 }

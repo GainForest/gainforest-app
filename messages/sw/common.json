@@ -703,6 +703,9 @@
     "retry": "Jaribu tena",
     "error": "Haikuweza kupakia shughuli sasa hivi.",
     "empty": "Bado hakuna shughuli. Kuwa wa kwanza kushiriki!",
-    "emptyFiltered": "Bado hakuna shughuli ya aina hii."
+    "emptyFiltered": "Bado hakuna shughuli ya aina hii.",
+    "loadMore": "Pakua zaidi",
+    "loadingMore": "Inapakia…",
+    "endOfFeed": "Umefika mwisho"
   }
 }

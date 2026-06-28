@@ -26,7 +26,7 @@ export default function FeedPage() {
 
 async function FeedContent() {
   // Prefetch the first page server-side so the feed shell renders instantly;
-  // the client hydrates with it and can refetch to pick up live activity.
-  const items = await buildActivityFeed().catch(() => []);
-  return <FeedClient initialItems={items} />;
+  // the client hydrates with it, can load more, and can refetch live activity.
+  const page = await buildActivityFeed().catch(() => ({ items: [], nextCursor: null, hasMore: false }));
+  return <FeedClient initialItems={page.items} initialCursor={page.nextCursor} initialHasMore={page.hasMore} />;
 }

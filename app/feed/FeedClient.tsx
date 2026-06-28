@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import {
   BinocularsIcon,
@@ -13,7 +13,7 @@ import {
   NewspaperIcon,
   RefreshCwIcon,
 } from "lucide-react";
-import type { ActivityFeedItem, ActivityFeedKind } from "../_lib/feed";
+import type { ActivityFeedItem, ActivityFeedKind, ActivityFeedPage } from "../_lib/feed";
 import { resolveBlobUrl } from "../_lib/pds";
 import { formatCompactUsd, formatRelative } from "../_lib/format";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -29,41 +29,113 @@ const FILTERS: { key: Filter; Icon: typeof NewspaperIcon }[] = [
   { key: "donation", Icon: HeartHandshakeIcon },
 ];
 
-export function FeedClient({ initialItems }: { initialItems: ActivityFeedItem[] }) {
+export function FeedClient({
+  initialItems,
+  initialCursor,
+  initialHasMore,
+}: {
+  initialItems: ActivityFeedItem[];
+  initialCursor: string | null;
+  initialHasMore: boolean;
+}) {
   const t = useTranslations("common.feed");
   const [items, setItems] = useState<ActivityFeedItem[]>(initialItems);
   const [filter, setFilter] = useState<Filter>("all");
+  const [cursor, setCursor] = useState<string | null>(initialCursor);
+  const [hasMore, setHasMore] = useState(initialHasMore);
   const [loading, setLoading] = useState(initialItems.length === 0);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(false);
 
-  const load = useCallback(
-    async (mode: "initial" | "refresh") => {
-      if (mode === "refresh") setRefreshing(true);
-      else setLoading(true);
-      setError(false);
-      try {
-        const res = await fetch("/api/feed", { cache: "no-store" });
-        if (!res.ok) throw new Error("feed fetch failed");
-        const data = (await res.json()) as { items?: ActivityFeedItem[] };
-        setItems(data.items ?? []);
-      } catch {
-        setError(true);
-      } finally {
-        if (mode === "refresh") setRefreshing(false);
-        else setLoading(false);
+  // Bumped on every first-page request (filter switch / refresh) so an in-flight
+  // load-more from a previous filter can't append stale rows.
+  const reqRef = useRef(0);
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
+
+  function feedUrl(forFilter: Filter, forCursor?: string | null): string {
+    const params = new URLSearchParams();
+    if (forFilter !== "all") params.set("kind", forFilter);
+    if (forCursor) params.set("cursor", forCursor);
+    const qs = params.toString();
+    return qs ? `/api/feed?${qs}` : "/api/feed";
+  }
+
+  // Load the first page for a filter (initial load, filter switch, refresh).
+  const loadFirst = useCallback(async (forFilter: Filter, mode: "load" | "refresh") => {
+    const seq = ++reqRef.current;
+    if (mode === "refresh") setRefreshing(true);
+    else setLoading(true);
+    setError(false);
+    try {
+      const res = await fetch(feedUrl(forFilter), { cache: "no-store" });
+      if (!res.ok) throw new Error("feed fetch failed");
+      const data = (await res.json()) as ActivityFeedPage;
+      if (seq !== reqRef.current) return; // a newer request superseded this one
+      setItems(data.items ?? []);
+      setCursor(data.nextCursor ?? null);
+      setHasMore(Boolean(data.hasMore));
+    } catch {
+      if (seq === reqRef.current) setError(true);
+    } finally {
+      if (seq === reqRef.current) {
+        setLoading(false);
+        setRefreshing(false);
       }
-    },
-    [],
-  );
+    }
+  }, []);
+
+  // Append the next page for the current filter, de-duping by id.
+  const loadMore = useCallback(async () => {
+    if (loadingMore || !hasMore || !cursor) return;
+    const seq = reqRef.current;
+    setLoadingMore(true);
+    try {
+      const res = await fetch(feedUrl(filter, cursor), { cache: "no-store" });
+      if (!res.ok) throw new Error("feed fetch failed");
+      const data = (await res.json()) as ActivityFeedPage;
+      if (seq !== reqRef.current) return; // filter changed mid-flight — drop it
+      setItems((prev) => {
+        const seen = new Set(prev.map((row) => row.id));
+        return [...prev, ...(data.items ?? []).filter((row) => !seen.has(row.id))];
+      });
+      setCursor(data.nextCursor ?? null);
+      setHasMore(Boolean(data.hasMore));
+    } catch {
+      // Keep what we have; the user can retry by scrolling / clicking again.
+    } finally {
+      setLoadingMore(false);
+    }
+  }, [cursor, filter, hasMore, loadingMore]);
+
+  function selectFilter(next: Filter) {
+    if (next === filter) return;
+    setFilter(next);
+    setItems([]);
+    setCursor(null);
+    setHasMore(false);
+    void loadFirst(next, "load");
+  }
 
   // If the server prefetched nothing (e.g. first deploy), fetch client-side.
   useEffect(() => {
-    if (initialItems.length === 0) void load("initial");
+    if (initialItems.length === 0) void loadFirst("all", "load");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const visible = filter === "all" ? items : items.filter((item) => item.kind === filter);
+  // Infinite scroll: load the next page when the sentinel nears the viewport.
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) void loadMore();
+      },
+      { rootMargin: "600px" },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [loadMore]);
 
   return (
     <section className="-mt-14 pb-24 md:pb-32">
@@ -99,7 +171,7 @@ export function FeedClient({ initialItems }: { initialItems: ActivityFeedItem[] 
                 <button
                   key={key}
                   type="button"
-                  onClick={() => setFilter(key)}
+                  onClick={() => selectFilter(key)}
                   aria-pressed={active}
                   className={cn(
                     "inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-colors",
@@ -116,8 +188,8 @@ export function FeedClient({ initialItems }: { initialItems: ActivityFeedItem[] 
           </div>
           <button
             type="button"
-            onClick={() => void load("refresh")}
-            disabled={refreshing}
+            onClick={() => void loadFirst(filter, "refresh")}
+            disabled={refreshing || loading}
             aria-label={t("refresh")}
             className="grid size-8 shrink-0 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-50"
           >
@@ -133,24 +205,49 @@ export function FeedClient({ initialItems }: { initialItems: ActivityFeedItem[] 
             <p className="text-sm text-muted-foreground">{t("error")}</p>
             <button
               type="button"
-              onClick={() => void load("initial")}
+              onClick={() => void loadFirst(filter, "load")}
               className="mt-3 text-sm font-medium text-primary hover:underline"
             >
               {t("retry")}
             </button>
           </div>
-        ) : visible.length === 0 ? (
+        ) : items.length === 0 ? (
           <div className="px-4 py-16 text-center">
             <p className="text-sm text-muted-foreground">
               {filter === "all" ? t("empty") : t("emptyFiltered")}
             </p>
           </div>
         ) : (
-          <ol className="relative">
-            {visible.map((item) => (
-              <FeedRow key={item.id} item={item} />
-            ))}
-          </ol>
+          <>
+            <ol className="relative">
+              {items.map((item) => (
+                <FeedRow key={item.id} item={item} />
+              ))}
+            </ol>
+
+            {/* Load more — auto-triggers via the sentinel, with a manual
+                fallback button for keyboard users / when the observer misses. */}
+            <div className="py-6">
+              {hasMore ? (
+                <>
+                  <div ref={sentinelRef} aria-hidden className="h-px" />
+                  <div className="flex justify-center">
+                    <button
+                      type="button"
+                      onClick={() => void loadMore()}
+                      disabled={loadingMore}
+                      className="inline-flex items-center gap-2 rounded-full border border-border bg-background px-5 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted disabled:opacity-60"
+                    >
+                      {loadingMore ? <Loader2Icon className="size-4 animate-spin" /> : null}
+                      {loadingMore ? t("loadingMore") : t("loadMore")}
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <p className="text-center text-xs text-muted-foreground">{t("endOfFeed")}</p>
+              )}
+            </div>
+          </>
         )}
       </div>
     </section>
@@ -332,13 +429,3 @@ function fullDate(iso: string): string {
   if (Number.isNaN(d.getTime())) return "";
   return d.toLocaleString();
 }
-
-function LoadingFallback() {
-  return (
-    <div className="flex h-64 items-center justify-center">
-      <Loader2Icon className="size-6 animate-spin text-muted-foreground" />
-    </div>
-  );
-}
-
-export { LoadingFallback };
