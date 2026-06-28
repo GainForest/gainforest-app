@@ -799,7 +799,10 @@
       "likedBy": "Imependwa na",
       "loadingLikes": "Inapakia…",
       "noLikesYet": "Hakuna mapenzi bado",
-      "moreLikers": "{count, plural, one {+# mwingine} other {+# wengine}}"
+      "moreLikers": "{count, plural, one {+# mwingine} other {+# wengine}}",
+      "openImage": "Fungua picha",
+      "viewDetails": "Ona maelezo kamili",
+      "closeImage": "Funga"
     },
     "composer": {
       "placeholder": "Shiriki taarifa mpya na jamii…",

@@ -799,7 +799,10 @@
       "likedBy": "Curtido por",
       "loadingLikes": "Carregando…",
       "noLikesYet": "Ainda sem curtidas",
-      "moreLikers": "{count, plural, one {+# outro} other {+# outros}}"
+      "moreLikers": "{count, plural, one {+# outro} other {+# outros}}",
+      "openImage": "Abrir foto",
+      "viewDetails": "Ver todos os detalhes",
+      "closeImage": "Fechar"
     },
     "composer": {
       "placeholder": "Compartilhe uma novidade com a comunidade…",

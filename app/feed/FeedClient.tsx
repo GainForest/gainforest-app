@@ -27,6 +27,7 @@ import {
   type FeedInteractions,
 } from "./FeedActions";
 import { formatCompact, formatCompactUsd, formatRelative } from "../_lib/format";
+import { FeedImageLightbox } from "./FeedImageLightbox";
 import { ResolvedAvatar } from "./ResolvedAvatar";
 import { AccountHoverCard } from "./AccountHoverCard";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -101,6 +102,8 @@ export function FeedClient({
   const [loadingMore, setLoadingMore] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(false);
+  // The image a viewer tapped open in the in-feed lightbox (null = closed).
+  const [lightboxItem, setLightboxItem] = useState<ActivityFeedItem | null>(null);
 
   // Bumped on every first-page request (filter switch / refresh) so an in-flight
   // load-more from a previous filter can't append stale rows.
@@ -290,6 +293,7 @@ export function FeedClient({
                     key={`batch:${entry.items[0].id}`}
                     items={entry.items}
                     interactions={interactions}
+                    onOpenImage={setLightboxItem}
                   />
                 ) : (
                   <FeedRow
@@ -297,6 +301,7 @@ export function FeedClient({
                     item={entry.item}
                     signedIn={signedIn}
                     interactions={interactions}
+                    onOpenImage={setLightboxItem}
                   />
                 ),
               )}
@@ -327,6 +332,14 @@ export function FeedClient({
           </>
         )}
         </div>
+
+        {/* Tap a photo anywhere in the feed to like / comment it in place. */}
+        <FeedImageLightbox
+          item={lightboxItem}
+          signedIn={signedIn}
+          interactions={interactions}
+          onClose={() => setLightboxItem(null)}
+        />
 
         {/* Right rail — minimal vertical filter list (lg and up). */}
         <aside className="hidden w-44 shrink-0 lg:block">
@@ -463,10 +476,12 @@ function FeedRow({
   item,
   signedIn,
   interactions,
+  onOpenImage,
 }: {
   item: ActivityFeedItem;
   signedIn: boolean;
   interactions: FeedInteractions;
+  onOpenImage: (item: ActivityFeedItem) => void;
 }) {
   const t = useTranslations("common.feed");
   const verb = t(`verbs.${item.kind}`);
@@ -525,11 +540,29 @@ function FeedRow({
             </p>
           ) : null}
 
-          {/* Cover image */}
+          {/* Cover image — a tap opens the in-feed lightbox (like / comment in
+              place) instead of following the row link to the detail page. */}
           {hasImage(item) ? (
-            <div className="relative mt-2 overflow-hidden rounded-xl border border-border/60">
+            <span
+              role="button"
+              tabIndex={0}
+              aria-label={t("actions.openImage")}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onOpenImage(item);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  onOpenImage(item);
+                }
+              }}
+              className="relative mt-2 block cursor-zoom-in overflow-hidden rounded-xl border border-border/60"
+            >
               <FeedImage item={item} />
-            </div>
+            </span>
           ) : null}
         </div>
 
@@ -595,9 +628,11 @@ function useOrgSightingTotal(did: string | null, fallback: number): number {
 function ObservationBatchCard({
   items,
   interactions,
+  onOpenImage,
 }: {
   items: ActivityFeedItem[];
   interactions: FeedInteractions;
+  onOpenImage: (item: ActivityFeedItem) => void;
 }) {
   const t = useTranslations("common.feed");
   const head = items[0]; // newest in the run
@@ -679,23 +714,34 @@ function ObservationBatchCard({
             ) : null}
           </Link>
 
-          {/* Image montage — each thumbnail deep-links to its own sighting so it
-              can be liked/commented; the final "+N" tile opens the full set. */}
+          {/* Image montage — a tap on a thumbnail opens the in-feed lightbox to
+              like / comment that sighting; the final "+N" tile opens the full
+              set instead. */}
           {thumbs.length > 0 ? (
             <div className="mt-2 grid grid-cols-4 gap-1.5 sm:gap-2">
               {thumbs.map((it, idx) => {
                 const isOverlay = idx === thumbs.length - 1 && remaining > 0;
+                if (isOverlay) {
+                  return (
+                    <Link
+                      key={it.id}
+                      href={href}
+                      className="block rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
+                    >
+                      <ObservationThumb item={it} overlay={`+${formatCompact(remaining)}`} />
+                    </Link>
+                  );
+                }
                 return (
-                  <Link
+                  <button
                     key={it.id}
-                    href={isOverlay ? href : it.href}
-                    className="block rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
+                    type="button"
+                    onClick={() => onOpenImage(it)}
+                    aria-label={t("actions.openImage")}
+                    className="block cursor-zoom-in rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
                   >
-                    <ObservationThumb
-                      item={it}
-                      overlay={isOverlay ? `+${formatCompact(remaining)}` : null}
-                    />
-                  </Link>
+                    <ObservationThumb item={it} overlay={null} />
+                  </button>
                 );
               })}
             </div>

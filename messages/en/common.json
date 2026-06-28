@@ -799,7 +799,10 @@
       "likedBy": "Liked by",
       "loadingLikes": "Loading…",
       "noLikesYet": "No likes yet",
-      "moreLikers": "{count, plural, one {+# other} other {+# others}}"
+      "moreLikers": "{count, plural, one {+# other} other {+# others}}",
+      "openImage": "Open photo",
+      "viewDetails": "View full details",
+      "closeImage": "Close"
     },
     "composer": {
       "placeholder": "Share an update with the community…",

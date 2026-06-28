@@ -799,7 +799,10 @@
       "likedBy": "Le gusta a",
       "loadingLikes": "Cargando…",
       "noLikesYet": "Aún no hay me gusta",
-      "moreLikers": "{count, plural, one {+# más} other {+# más}}"
+      "moreLikers": "{count, plural, one {+# más} other {+# más}}",
+      "openImage": "Abrir foto",
+      "viewDetails": "Ver todos los detalles",
+      "closeImage": "Cerrar"
     },
     "composer": {
       "placeholder": "Comparte una novedad con la comunidad…",

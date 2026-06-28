@@ -799,7 +799,10 @@
       "likedBy": "Disukai oleh",
       "loadingLikes": "Memuat…",
       "noLikesYet": "Belum ada suka",
-      "moreLikers": "{count, plural, other {+# lainnya}}"
+      "moreLikers": "{count, plural, other {+# lainnya}}",
+      "openImage": "Buka foto",
+      "viewDetails": "Lihat detail lengkap",
+      "closeImage": "Tutup"
     },
     "composer": {
       "placeholder": "Bagikan kabar terbaru dengan komunitas…",
