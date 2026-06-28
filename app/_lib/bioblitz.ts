@@ -17,7 +17,7 @@
 
 import { INDEXER_URL } from "./urls";
 import { normaliseRef } from "./pds";
-import { walkOccurrences, type OccurrenceRecord } from "./indexer";
+import { fetchHiddenAccountDids, walkOccurrences, type OccurrenceRecord } from "./indexer";
 
 /** Cash prizes awarded each round, in USD. */
 export const BIOBLITZ_PRIZES = {
@@ -202,6 +202,10 @@ export async function fetchRoundCollectors(
       ? { imageEvidence: { isNull: false } }
       : { imageEvidence: { isNull: false }, createdAt: { gte: round.start } };
 
+  // Accounts a steward flagged as "test" are excluded from the challenge — they
+  // don't count toward the leaderboard, totals or prize eligibility.
+  const hidden = await fetchHiddenAccountDids(signal).catch(() => new Set<string>());
+
   const tally = new Map<string, RoundCollector>();
   let total = 0;
   let after: string | null = null;
@@ -236,6 +240,7 @@ export async function fetchRoundCollectors(
 
     for (const n of nodes) {
       const did = n.did!;
+      if (hidden.has(did)) continue;
       const t = Date.parse(n.createdAt ?? "");
       if (!Number.isFinite(t) || t < startMs || t > endMs) continue;
       total += 1;
