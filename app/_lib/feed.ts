@@ -93,6 +93,12 @@ const PAGE_SIZE = 50;
  *  larger page means fewer round-trips when walking long same-owner runs. */
 const STREAM_BATCH = PAGE_SIZE + 10;
 const MAX_TEXT = 220;
+// Burst skip: when one account saturates the sightings stream, scan ahead to
+// find where its run ends and jump the cursor past it instead of crawling
+// through every record page by page.
+const BURST_SCAN_HOP = 1000; // indexer max page size
+const MAX_SCAN_HOPS = 6; // skip up to ~6k sightings per "load more"
+const BURST_SAMPLE = 8; // sightings kept for the card's montage / grouping
 const FEED_CACHE_MS = 60_000; // 60s in-process memo — fresh enough for "live".
 
 // ── Compound (createdAt, id) cursor ──────────────────────────────────────────
@@ -555,6 +561,94 @@ async function enrichDonations(pageItems: ActivityFeedItem[], certUriById: Map<s
 
 // ── Public builder ───────────────────────────────────────────────────────────
 
+// Lean scan over one account's sightings to locate where its burst ends.
+const BURST_SCAN_QUERY = `
+  query BurstScan($first: Int!, $where: AppGainforestDwcOccurrenceWhereInput) {
+    appGainforestDwcOccurrence(first: $first, where: $where, sortBy: createdAt, sortDirection: DESC) {
+      edges { node { did createdAt uri rkey } }
+    }
+  }
+`;
+
+type ScanNode = { did: string; createdAt: string; uri?: string | null; rkey?: string | null };
+
+function scanNodeId(n: ScanNode): string {
+  return n.uri ?? `at://${n.did}/app.gainforest.dwc.occurrence/${n.rkey ?? ""}`;
+}
+
+/**
+ * Walk an account's sightings newest-first (in indexer-max hops) until the run
+ * ends: either another account's sighting, or a record at/below `floorTime`
+ * (the newest non-sighting item already in the pool). Returns the last sighting
+ * of the run, whose (createdAt, id) becomes the jump cursor so the next page
+ * begins right after the whole burst.
+ */
+async function scanBurstEnd(
+  burstActor: string,
+  before: string | null,
+  floorTime: number,
+): Promise<{ createdAt: string; id: string } | null> {
+  let upper = before;
+  let lastBurst: { createdAt: string; id: string } | null = null;
+  const seen = new Set<string>();
+
+  for (let hop = 0; hop < MAX_SCAN_HOPS; hop += 1) {
+    const where = upper ? { createdAt: { lte: upper } } : null;
+    const data = await indexerQuery<{
+      appGainforestDwcOccurrence?: { edges?: Array<{ node?: ScanNode | null } | null> | null } | null;
+    }>(BURST_SCAN_QUERY, { first: BURST_SCAN_HOP, where }).catch(() => null);
+    const nodes = (data?.appGainforestDwcOccurrence?.edges ?? [])
+      .map((e) => e?.node)
+      .filter((n): n is ScanNode => Boolean(n?.did && n.createdAt));
+    if (nodes.length === 0) break;
+
+    let oldestTs: string | null = null;
+    let progressed = false;
+    for (const n of nodes) {
+      const id = scanNodeId(n);
+      if (seen.has(id)) continue;
+      seen.add(id);
+      progressed = true;
+      oldestTs = n.createdAt;
+      if (timeValue(n.createdAt) <= floorTime) return lastBurst; // run ended at the pool's boundary
+      if (n.did === burstActor) lastBurst = { createdAt: n.createdAt, id };
+      else return lastBurst; // run ended at another account's sighting
+    }
+    if (!progressed || nodes.length < BURST_SCAN_HOP) break; // exhausted / no progress
+    upper = oldestTs ?? upper;
+  }
+  // No boundary within the hop budget: jump to the oldest sighting we saw so a
+  // later "load more" continues past the rest of the run.
+  return lastBurst;
+}
+
+/**
+ * Build a page that collapses a saturating single-account sightings burst: emit
+ * a small sample (the client groups it into one summary card) and set the
+ * cursor past the entire run so the next page reaches the next account.
+ */
+async function buildBurstSkipPage(
+  ordered: ActivityFeedItem[],
+  firstObsIdx: number,
+  burstActor: string,
+  before: string | null,
+): Promise<ActivityFeedPage | null> {
+  // The newest non-sighting item already in the pool can also end the run.
+  const newestNonObs = ordered.find((it) => it.kind !== "observation");
+  const floorTime = newestNonObs ? timeValue(newestNonObs.createdAt) : -Infinity;
+
+  const jump = await scanBurstEnd(burstActor, before, floorTime);
+  if (!jump) return null;
+
+  const sample = ordered.slice(0, firstObsIdx + BURST_SAMPLE);
+  if (sample.length === 0) return null;
+  return {
+    items: sample,
+    nextCursor: encodeCursor({ ts: jump.createdAt, id: jump.id }),
+    hasMore: true,
+  };
+}
+
 async function buildFeedPageUncached(
   cursor: FeedCursor | null,
   filter: ActivityFeedFilter,
@@ -598,6 +692,24 @@ async function buildFeedPageUncached(
   const eligible = cursor ? pool.filter((it) => isStrictlyOlder(it, cursor)) : pool;
   const seen = new Set<string>();
   const ordered = eligible.filter((it) => (seen.has(it.id) ? false : (seen.add(it.id), true)));
+
+  // Burst skip: when a single account fills the entire sightings batch, its run
+  // would otherwise crawl past page by page. Collapse it to a sample and jump
+  // the cursor past the whole run to the next account's activity.
+  if (
+    (filter === "all" || filter === "observation") &&
+    occurrenceNodes.length >= STREAM_BATCH
+  ) {
+    const firstObsIdx = ordered.findIndex((it) => it.kind === "observation");
+    const burstActor = firstObsIdx >= 0 && firstObsIdx < PAGE_SIZE ? ordered[firstObsIdx].actorDid : null;
+    if (burstActor && occurrenceNodes.every((n) => n.did === burstActor)) {
+      const skipPage = await buildBurstSkipPage(ordered, firstObsIdx, burstActor, before);
+      if (skipPage) {
+        await enrichDonations(skipPage.items, certUriById);
+        return skipPage;
+      }
+    }
+  }
 
   const pageItems = ordered.slice(0, PAGE_SIZE);
   await enrichDonations(pageItems, certUriById);
