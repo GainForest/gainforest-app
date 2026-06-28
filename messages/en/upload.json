@@ -693,7 +693,8 @@
       "photoCount": "{count, plural, one {# photo} other {# photos}}",
       "dragMergeHint": "Drop another photo here, or tap × to separate one.",
       "separatePhoto": "Separate into its own observation",
-      "removeObservation": "Remove observation"
+      "removeObservation": "Remove observation",
+      "separateDropZone": "Drop here to make a separate observation"
     },
     "tainaTitle": "Say hi to Tainá",
     "tainaBody": "Prefer chat? Send your photos and recordings to Tainá on Telegram and she will add them here for you.",
@@ -878,7 +879,8 @@
     "filterEmptyTitle": "No observations for this project yet",
     "filterEmptyBody": "Collect observations and attach them to this project to see them here.",
     "dragRowHint": "Drag onto another observation to combine them",
-    "dragPhotoHint": "Drag onto another observation to move this photo"
+    "dragPhotoHint": "Drag onto another observation to move this photo",
+    "separateDropZone": "Drop here to make a separate observation"
   },
   "settings": {
     "organizationTitle": "Organization settings",

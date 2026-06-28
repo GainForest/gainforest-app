@@ -693,7 +693,8 @@
       "photoCount": "{count, plural, one {# foto} other {# fotos}}",
       "dragMergeHint": "Solte outra foto aqui, ou toque em × para separar uma.",
       "separatePhoto": "Separar em sua própria observação",
-      "removeObservation": "Remover observação"
+      "removeObservation": "Remover observação",
+      "separateDropZone": "Solte aqui para criar uma observação separada"
     },
     "tainaTitle": "Diga oi para Tainá",
     "tainaBody": "Tainá fica no Telegram. Envie para ela suas fotos de campo, avistamentos e gravações de som, e ela coloca tudo nesta organização para você. Arquivos grandes do AudioMoth também são bem vindos.",
@@ -878,7 +879,8 @@
     "filterEmptyTitle": "Ainda não há observações para este projeto",
     "filterEmptyBody": "Colete observações e vincule-as a este projeto para vê-las aqui.",
     "dragRowHint": "Arraste sobre outra observação para combiná-las",
-    "dragPhotoHint": "Arraste sobre outra observação para mover esta foto"
+    "dragPhotoHint": "Arraste sobre outra observação para mover esta foto",
+    "separateDropZone": "Solte aqui para criar uma observação separada"
   },
   "settings": {
     "organizationTitle": "Configurações da organização",

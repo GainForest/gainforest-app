@@ -693,7 +693,8 @@
       "photoCount": "{count, plural, one {# foto} other {# foto}}",
       "dragMergeHint": "Letakkan foto lain di sini, atau ketuk × untuk memisahkan satu.",
       "separatePhoto": "Pisahkan menjadi observasi tersendiri",
-      "removeObservation": "Hapus observasi"
+      "removeObservation": "Hapus observasi",
+      "separateDropZone": "Letakkan di sini untuk membuat observasi terpisah"
     },
     "tainaTitle": "Sapa Tainá",
     "tainaBody": "Tainá ada di Telegram. Kirimkan foto lapangan, temuan satwa atau tumbuhan, dan rekaman suara kepadanya, lalu ia akan memasukkannya ke organisasi ini untukmu. File AudioMoth besar juga boleh.",
@@ -878,7 +879,8 @@
     "filterEmptyTitle": "Belum ada observasi untuk proyek ini",
     "filterEmptyBody": "Kumpulkan observasi dan tautkan ke proyek ini untuk melihatnya di sini.",
     "dragRowHint": "Seret ke observasi lain untuk menggabungkannya",
-    "dragPhotoHint": "Seret ke observasi lain untuk memindahkan foto ini"
+    "dragPhotoHint": "Seret ke observasi lain untuk memindahkan foto ini",
+    "separateDropZone": "Letakkan di sini untuk membuat observasi terpisah"
   },
   "settings": {
     "organizationTitle": "Pengaturan organisasi",

@@ -693,7 +693,8 @@
       "photoCount": "{count, plural, one {picha #} other {picha #}}",
       "dragMergeHint": "Dondosha picha nyingine hapa, au gusa × kutenganisha moja.",
       "separatePhoto": "Tenganisha kuwa uchunguzi wake mwenyewe",
-      "removeObservation": "Ondoa uchunguzi"
+      "removeObservation": "Ondoa uchunguzi",
+      "separateDropZone": "Dondosha hapa ili kuunda uchunguzi tofauti"
     },
     "tainaTitle": "Msalimie Tainá",
     "tainaBody": "Tainá yuko Telegram. Mtumie picha zako za uwandani, viumbe ulioona na rekodi za sauti, naye ataziweka kwenye shirika hili kwa ajili yako. Faili kubwa za AudioMoth zinakaribishwa pia.",
@@ -878,7 +879,8 @@
     "filterEmptyTitle": "Bado hakuna uchunguzi kwa mradi huu",
     "filterEmptyBody": "Kusanya uchunguzi na uunganishe na mradi huu ili kuuona hapa.",
     "dragRowHint": "Buruta juu ya uchunguzi mwingine ili kuziunganisha",
-    "dragPhotoHint": "Buruta juu ya uchunguzi mwingine ili kuhamisha picha hii"
+    "dragPhotoHint": "Buruta juu ya uchunguzi mwingine ili kuhamisha picha hii",
+    "separateDropZone": "Dondosha hapa ili kuunda uchunguzi tofauti"
   },
   "settings": {
     "organizationTitle": "Mipangilio ya shirika",

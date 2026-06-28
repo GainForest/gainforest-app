@@ -768,6 +768,9 @@ function ObservationBulkAddPanel({
   const [uploadSession, setUploadSession] = useState<{ total: number; uploadableTotal: number } | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  // The photo being dragged out of its observation row, if any — drives the
+  // "drop here to separate" zone beneath the list.
+  const [draggingPhotoId, setDraggingPhotoId] = useState<string | null>(null);
   const [projects, setProjects] = useState<ObservationProject[]>([]);
   const [projectsLoaded, setProjectsLoaded] = useState(false);
   const [projectUri, setProjectUri] = useState<string>("");
@@ -1094,6 +1097,12 @@ function ObservationBulkAddPanel({
   const overallProgress = displayTotal > 0 ? Math.round((displayUploaded / displayTotal) * 100) : 0;
   const failedProgress = runSize > 0 ? Math.round((uploadFailedCount / runSize) * 100) : 0;
   const groups = observationGroups(items);
+  // Only offer the separate zone while dragging a photo that is currently part
+  // of a multi-photo observation.
+  const draggingPhoto = draggingPhotoId ? items.find((item) => item.id === draggingPhotoId) ?? null : null;
+  const canSeparateDraggingPhoto = Boolean(
+    draggingPhoto && items.filter((item) => item.groupId === draggingPhoto.groupId).length > 1,
+  );
   const allEditableSelected = editableItems.length > 0 && selectedEditableItems.length === editableItems.length;
   const someEditableSelected = selectedEditableItems.length > 0 && !allEditableSelected;
 
@@ -1353,6 +1362,13 @@ function ObservationBulkAddPanel({
     setItems((current) => current.map((item) => item.id === itemId ? { ...item, groupId: nextGroupId } : item));
     setExpandedId(nextGroupId);
     setBulkError(null);
+  }
+
+  // Drag a photo onto the separate zone: pull it back into its own observation.
+  function separateDraggedItem(itemId: string) {
+    const item = itemsRef.current.find((candidate) => candidate.id === itemId);
+    if (!item) return;
+    separateItemFromGroup(itemId, item.groupId);
   }
 
   function addItemToGroup(groupId: string, itemId: string) {
@@ -1699,12 +1715,22 @@ function ObservationBulkAddPanel({
                       onAddItem={addItemToGroup}
                       onMergeGroups={mergeGroups}
                       dragDisabled={isBulkUploading}
+                      onPhotoDragStart={setDraggingPhotoId}
+                      onPhotoDragEnd={() => setDraggingPhotoId(null)}
                       onChangeLocation={changeItemLocation}
                     />
                   ))}
                   </AnimatePresence>
                 </div>
               </div>
+              {canSeparateDraggingPhoto ? (
+                <PhotoSeparateDropZone
+                  onSeparate={(itemId) => {
+                    separateDraggedItem(itemId);
+                    setDraggingPhotoId(null);
+                  }}
+                />
+              ) : null}
             </div>
           </>
         )}
@@ -1898,6 +1924,8 @@ function ObservationListItem({
   onAddItem,
   onMergeGroups,
   dragDisabled,
+  onPhotoDragStart,
+  onPhotoDragEnd,
   onChangeLocation,
 }: {
   group: ObservationGroup;
@@ -1912,6 +1940,8 @@ function ObservationListItem({
   onAddItem: (groupId: string, itemId: string) => void;
   onMergeGroups: (sourceGroupId: string, targetGroupId: string) => void;
   dragDisabled: boolean;
+  onPhotoDragStart: (itemId: string) => void;
+  onPhotoDragEnd: () => void;
   onChangeLocation: (id: string) => void;
 }) {
   const t = useTranslations("upload.observations");
@@ -2113,7 +2143,7 @@ function ObservationListItem({
                   </span>
                 ) : null}
               </div>
-              <GroupMediaEditor group={group} groups={groups} onSeparateItem={onSeparateItem} onAddItem={onAddItem} />
+              <GroupMediaEditor group={group} groups={groups} onSeparateItem={onSeparateItem} onAddItem={onAddItem} onPhotoDragStart={onPhotoDragStart} onPhotoDragEnd={onPhotoDragEnd} />
               {item ? (
                 <ObservationLocationRow
                   analysis={analysis}
@@ -2165,16 +2195,58 @@ function StackedThumbnails({ group, size = "sm" }: { group: ObservationGroup; si
   );
 }
 
+// Shown beneath the list while a photo is being dragged; dropping it here pulls
+// that photo back out into its own observation row.
+function PhotoSeparateDropZone({ onSeparate }: { onSeparate: (itemId: string) => void }) {
+  const t = useTranslations("upload.observations");
+  const [isOver, setIsOver] = useState(false);
+  const isItemDrag = (event: DragEvent<HTMLDivElement>) =>
+    Array.from(event.dataTransfer?.types ?? []).includes(DND_ITEM);
+  return (
+    <div
+      onDragOver={(event) => {
+        if (!isItemDrag(event)) return;
+        event.preventDefault();
+        event.dataTransfer.dropEffect = "move";
+        if (!isOver) setIsOver(true);
+      }}
+      onDragLeave={(event) => {
+        if (!isItemDrag(event)) return;
+        setIsOver(false);
+      }}
+      onDrop={(event) => {
+        if (!isItemDrag(event)) return;
+        event.preventDefault();
+        event.stopPropagation();
+        setIsOver(false);
+        const itemId = event.dataTransfer.getData(DND_ITEM);
+        if (itemId) onSeparate(itemId);
+      }}
+      className={cn(
+        "mt-3 flex items-center justify-center gap-2 rounded-2xl border border-dashed px-4 py-5 text-sm transition-colors",
+        isOver ? "border-primary bg-primary/10 text-primary" : "border-primary/40 bg-primary/[0.04] text-muted-foreground",
+      )}
+    >
+      <Layers2Icon className="size-4 shrink-0" />
+      {t("separateDropZone")}
+    </div>
+  );
+}
+
 function GroupMediaEditor({
   group,
   groups,
   onSeparateItem,
   onAddItem,
+  onPhotoDragStart,
+  onPhotoDragEnd,
 }: {
   group: ObservationGroup;
   groups: ObservationGroup[];
   onSeparateItem: (id: string) => void;
   onAddItem: (groupId: string, itemId: string) => void;
+  onPhotoDragStart: (itemId: string) => void;
+  onPhotoDragEnd: () => void;
 }) {
   const t = useTranslations("upload.observations");
   const [showChooser, setShowChooser] = useState(false);
@@ -2205,7 +2277,9 @@ function GroupMediaEditor({
                 }
                 event.dataTransfer.setData(DND_ITEM, item.id);
                 event.dataTransfer.effectAllowed = "move";
+                onPhotoDragStart(item.id);
               }}
+              onDragEnd={onPhotoDragEnd}
               title={editable ? t("dragPhotoHint") : undefined}
               className={cn(
                 "group/media relative size-20 overflow-hidden rounded-2xl bg-muted ring-1 ring-border",
