@@ -2,8 +2,9 @@
 
 /**
  * Pure, browser-only helpers for preparing observation photos: a tidy display
- * name, a fallback capture date, EXIF date/GPS extraction, and downscaling
- * oversized images so they fit within the PDS blob limit.
+ * name, a fallback capture date, EXIF date/GPS extraction (JPEG plus HEIC /
+ * HEIF / AVIF), and downscaling oversized images so they fit within the PDS
+ * blob limit.
  *
  * Shared by the full bulk-add panel (ObservationsClient) and the quick
  * "Add observations" modal so the two stay byte-for-byte consistent.
@@ -59,10 +60,84 @@ function gpsCoordinate(parts: Array<number | null>, ref: string | null): string 
 
 type TiffEntry = { tag: number; type: number; count: number; valueOffset: number; inlineOffset: number; size: number };
 
-function parseExifMetadata(buffer: ArrayBuffer): ImageMetadata {
-  const view = new DataView(buffer);
-  if (view.byteLength < 14 || view.getUint16(0) !== 0xffd8) return {};
+/**
+ * Pull the date + GPS we care about out of a TIFF/EXIF block. `tiffStart` is the
+ * byte offset of the TIFF header ("II"/"MM" + 42) within `buffer`. Shared by the
+ * JPEG (APP1) and HEIF (Exif item) readers, since both wrap the very same TIFF.
+ */
+function parseTiffExif(buffer: ArrayBuffer, view: DataView, tiffStart: number): ImageMetadata {
+  if (tiffStart < 0 || tiffStart + 8 > view.byteLength) return {};
+  const littleEndian = view.getUint16(tiffStart, false) === 0x4949;
+  if (view.getUint16(tiffStart + 2, littleEndian) !== 42) return {};
 
+  const typeSize = (type: number) => {
+    if (type === 1 || type === 2 || type === 7) return 1;
+    if (type === 3) return 2;
+    if (type === 4 || type === 9) return 4;
+    if (type === 5 || type === 10) return 8;
+    return 0;
+  };
+  const readEntries = (ifdOffset: number): TiffEntry[] => {
+    const start = tiffStart + ifdOffset;
+    if (start < 0 || start + 2 > view.byteLength) return [];
+    const count = view.getUint16(start, littleEndian);
+    const entries: TiffEntry[] = [];
+    for (let index = 0; index < count; index += 1) {
+      const entryOffset = start + 2 + index * 12;
+      if (entryOffset + 12 > view.byteLength) break;
+      const type = view.getUint16(entryOffset + 2, littleEndian);
+      const itemCount = view.getUint32(entryOffset + 4, littleEndian);
+      const size = typeSize(type) * itemCount;
+      entries.push({
+        tag: view.getUint16(entryOffset, littleEndian),
+        type,
+        count: itemCount,
+        valueOffset: view.getUint32(entryOffset + 8, littleEndian),
+        inlineOffset: entryOffset + 8,
+        size,
+      });
+    }
+    return entries;
+  };
+  const valueOffset = (entry: TiffEntry) => entry.size <= 4 ? entry.inlineOffset : tiffStart + entry.valueOffset;
+  const readAscii = (entry: TiffEntry | undefined): string | null => {
+    if (!entry) return null;
+    const start = valueOffset(entry);
+    if (start < 0 || start + entry.count > view.byteLength) return null;
+    return String.fromCharCode(...new Uint8Array(buffer, start, entry.count)).replace(/\0+$/, "").trim() || null;
+  };
+  const readRationals = (entry: TiffEntry | undefined): Array<number | null> => {
+    if (!entry) return [];
+    const start = valueOffset(entry);
+    return Array.from({ length: entry.count }, (_, index) => rationalAt(view, start + index * 8, littleEndian));
+  };
+  const readLong = (entry: TiffEntry | undefined): number | null => {
+    if (!entry) return null;
+    const start = valueOffset(entry);
+    if (start < 0 || start + 4 > view.byteLength) return null;
+    return view.getUint32(start, littleEndian);
+  };
+
+  const ifd0 = readEntries(view.getUint32(tiffStart + 4, littleEndian));
+  const byTag = (entries: TiffEntry[], tag: number) => entries.find((entry) => entry.tag === tag);
+  const exifIfd = readLong(byTag(ifd0, 0x8769));
+  const gpsIfd = readLong(byTag(ifd0, 0x8825));
+  const exifEntries = exifIfd !== null ? readEntries(exifIfd) : [];
+  const gpsEntries = gpsIfd !== null ? readEntries(gpsIfd) : [];
+
+  const date = parseExifDate(readAscii(byTag(exifEntries, 0x9003)) ?? readAscii(byTag(ifd0, 0x0132)));
+  const latitude = gpsCoordinate(readRationals(byTag(gpsEntries, 0x0002)), readAscii(byTag(gpsEntries, 0x0001)));
+  const longitude = gpsCoordinate(readRationals(byTag(gpsEntries, 0x0004)), readAscii(byTag(gpsEntries, 0x0003)));
+
+  return {
+    ...(date ? { eventDate: date } : {}),
+    ...(latitude ? { decimalLatitude: latitude } : {}),
+    ...(longitude ? { decimalLongitude: longitude } : {}),
+  };
+}
+
+/** Read EXIF date/GPS from a JPEG's APP1 segment. */
+function parseJpegExif(buffer: ArrayBuffer, view: DataView): ImageMetadata {
   let offset = 2;
   while (offset + 4 <= view.byteLength) {
     if (view.getUint8(offset) !== 0xff) break;
@@ -72,87 +147,183 @@ function parseExifMetadata(buffer: ArrayBuffer): ImageMetadata {
     if (marker === 0xe1 && length >= 8) {
       const exifStart = offset + 4;
       const header = String.fromCharCode(...new Uint8Array(buffer, exifStart, Math.min(6, view.byteLength - exifStart)));
-      if (header === "Exif\0\0") {
-        const tiffStart = exifStart + 6;
-        if (tiffStart + 8 > view.byteLength) return {};
-        const littleEndian = view.getUint16(tiffStart, false) === 0x4949;
-        if (view.getUint16(tiffStart + 2, littleEndian) !== 42) return {};
-
-        const typeSize = (type: number) => {
-          if (type === 1 || type === 2 || type === 7) return 1;
-          if (type === 3) return 2;
-          if (type === 4 || type === 9) return 4;
-          if (type === 5 || type === 10) return 8;
-          return 0;
-        };
-        const readEntries = (ifdOffset: number): TiffEntry[] => {
-          const start = tiffStart + ifdOffset;
-          if (start < 0 || start + 2 > view.byteLength) return [];
-          const count = view.getUint16(start, littleEndian);
-          const entries: TiffEntry[] = [];
-          for (let index = 0; index < count; index += 1) {
-            const entryOffset = start + 2 + index * 12;
-            if (entryOffset + 12 > view.byteLength) break;
-            const type = view.getUint16(entryOffset + 2, littleEndian);
-            const itemCount = view.getUint32(entryOffset + 4, littleEndian);
-            const size = typeSize(type) * itemCount;
-            entries.push({
-              tag: view.getUint16(entryOffset, littleEndian),
-              type,
-              count: itemCount,
-              valueOffset: view.getUint32(entryOffset + 8, littleEndian),
-              inlineOffset: entryOffset + 8,
-              size,
-            });
-          }
-          return entries;
-        };
-        const valueOffset = (entry: TiffEntry) => entry.size <= 4 ? entry.inlineOffset : tiffStart + entry.valueOffset;
-        const readAscii = (entry: TiffEntry | undefined): string | null => {
-          if (!entry) return null;
-          const start = valueOffset(entry);
-          if (start < 0 || start + entry.count > view.byteLength) return null;
-          return String.fromCharCode(...new Uint8Array(buffer, start, entry.count)).replace(/\0+$/, "").trim() || null;
-        };
-        const readRationals = (entry: TiffEntry | undefined): Array<number | null> => {
-          if (!entry) return [];
-          const start = valueOffset(entry);
-          return Array.from({ length: entry.count }, (_, index) => rationalAt(view, start + index * 8, littleEndian));
-        };
-        const readLong = (entry: TiffEntry | undefined): number | null => {
-          if (!entry) return null;
-          const start = valueOffset(entry);
-          if (start < 0 || start + 4 > view.byteLength) return null;
-          return view.getUint32(start, littleEndian);
-        };
-
-        const ifd0 = readEntries(view.getUint32(tiffStart + 4, littleEndian));
-        const byTag = (entries: TiffEntry[], tag: number) => entries.find((entry) => entry.tag === tag);
-        const exifIfd = readLong(byTag(ifd0, 0x8769));
-        const gpsIfd = readLong(byTag(ifd0, 0x8825));
-        const exifEntries = exifIfd !== null ? readEntries(exifIfd) : [];
-        const gpsEntries = gpsIfd !== null ? readEntries(gpsIfd) : [];
-
-        const date = parseExifDate(readAscii(byTag(exifEntries, 0x9003)) ?? readAscii(byTag(ifd0, 0x0132)));
-        const latitude = gpsCoordinate(readRationals(byTag(gpsEntries, 0x0002)), readAscii(byTag(gpsEntries, 0x0001)));
-        const longitude = gpsCoordinate(readRationals(byTag(gpsEntries, 0x0004)), readAscii(byTag(gpsEntries, 0x0003)));
-
-        return {
-          ...(date ? { eventDate: date } : {}),
-          ...(latitude ? { decimalLatitude: latitude } : {}),
-          ...(longitude ? { decimalLongitude: longitude } : {}),
-        };
-      }
+      if (header === "Exif\0\0") return parseTiffExif(buffer, view, exifStart + 6);
     }
     offset += 2 + length;
   }
+  return {};
+}
 
+/** Read a 4-character box type / brand identifier (e.g. "ftyp", "meta", "Exif"). */
+function fourCC(view: DataView, offset: number): string {
+  if (offset < 0 || offset + 4 > view.byteLength) return "";
+  return String.fromCharCode(view.getUint8(offset), view.getUint8(offset + 1), view.getUint8(offset + 2), view.getUint8(offset + 3));
+}
+
+type IsoBox = { type: string; contentStart: number; end: number };
+
+/** Walk the ISO base-media (MP4 / HEIF) boxes within [start, end). */
+function readIsoBoxes(view: DataView, start: number, end: number): IsoBox[] {
+  const boxes: IsoBox[] = [];
+  let offset = start;
+  while (offset + 8 <= end) {
+    let size = view.getUint32(offset, false);
+    const type = fourCC(view, offset + 4);
+    let headerSize = 8;
+    if (size === 1) {
+      if (offset + 16 > end) break;
+      // 64-bit largesize; stays well below 2^53 for any real photo.
+      size = view.getUint32(offset + 8, false) * 0x100000000 + view.getUint32(offset + 12, false);
+      headerSize = 16;
+    } else if (size === 0) {
+      size = end - offset; // box runs to the end of its container
+    }
+    if (size < headerSize || offset + size > end) break;
+    boxes.push({ type, contentStart: offset + headerSize, end: offset + size });
+    offset += size;
+  }
+  return boxes;
+}
+
+/** Read an unsigned big-endian integer of `size` bytes (0 → 0). */
+function readUint(view: DataView, offset: number, size: number): number {
+  let value = 0;
+  for (let index = 0; index < size; index += 1) value = value * 256 + view.getUint8(offset + index);
+  return value;
+}
+
+/** Find the item_ID of the "Exif" item declared in an `iinf` box, if any. */
+function exifItemId(view: DataView, iinf: IsoBox): number | null {
+  let p = iinf.contentStart;
+  const version = view.getUint8(p);
+  p += 4; // version (1) + flags (3)
+  p += version === 0 ? 2 : 4; // entry_count — skipped; we iterate the child boxes
+  for (const entry of readIsoBoxes(view, p, iinf.end)) {
+    if (entry.type !== "infe") continue;
+    let q = entry.contentStart;
+    const infeVersion = view.getUint8(q);
+    q += 4; // version + flags
+    let id: number;
+    if (infeVersion >= 3) {
+      id = view.getUint32(q, false);
+      q += 4;
+    } else if (infeVersion === 2) {
+      id = view.getUint16(q, false);
+      q += 2;
+    } else {
+      continue; // versions 0/1 use a different layout and never carry Exif in practice
+    }
+    q += 2; // item_protection_index
+    if (fourCC(view, q) === "Exif") return id;
+  }
+  return null;
+}
+
+type ItemExtent = { offset: number; method: number };
+
+/** Resolve an item's first extent (offset + construction method) from an `iloc` box. */
+function itemExtent(view: DataView, iloc: IsoBox, itemId: number): ItemExtent | null {
+  let p = iloc.contentStart;
+  const version = view.getUint8(p);
+  p += 4; // version + flags
+  const sizeByte = view.getUint8(p);
+  const offsetSize = sizeByte >> 4;
+  const lengthSize = sizeByte & 0x0f;
+  p += 1;
+  const baseByte = view.getUint8(p);
+  const baseOffsetSize = baseByte >> 4;
+  const indexSize = version === 1 || version === 2 ? baseByte & 0x0f : 0;
+  p += 1;
+  let itemCount: number;
+  if (version < 2) {
+    itemCount = view.getUint16(p, false);
+    p += 2;
+  } else {
+    itemCount = view.getUint32(p, false);
+    p += 4;
+  }
+  for (let i = 0; i < itemCount; i += 1) {
+    let id: number;
+    if (version < 2) {
+      id = view.getUint16(p, false);
+      p += 2;
+    } else {
+      id = view.getUint32(p, false);
+      p += 4;
+    }
+    let method = 0;
+    if (version === 1 || version === 2) {
+      method = view.getUint16(p, false) & 0x0f;
+      p += 2;
+    }
+    p += 2; // data_reference_index
+    const baseOffset = readUint(view, p, baseOffsetSize);
+    p += baseOffsetSize;
+    const extentCount = view.getUint16(p, false);
+    p += 2;
+    let firstOffset: number | null = null;
+    for (let j = 0; j < extentCount; j += 1) {
+      if (indexSize > 0) p += indexSize; // extent_index
+      const extentOffset = readUint(view, p, offsetSize);
+      p += offsetSize + lengthSize; // skip extent_length
+      if (firstOffset === null) firstOffset = extentOffset;
+    }
+    if (id === itemId && firstOffset !== null) return { offset: baseOffset + firstOffset, method };
+  }
+  return null;
+}
+
+/**
+ * Read EXIF date/GPS from an ISO base-media image (HEIC / HEIF / AVIF). These
+ * store EXIF as a named item inside the top-level `meta` box: `iinf` declares an
+ * "Exif" item, `iloc` says where its bytes live, and that payload is a 4-byte
+ * offset followed by the same TIFF block a JPEG would carry in its APP1 segment.
+ */
+function parseHeifExif(buffer: ArrayBuffer, view: DataView): ImageMetadata {
+  const meta = readIsoBoxes(view, 0, view.byteLength).find((box) => box.type === "meta");
+  if (!meta) return {};
+  // `meta` is a FullBox: step over its 4-byte version/flags before its children.
+  const metaBoxes = readIsoBoxes(view, meta.contentStart + 4, meta.end);
+  const iinf = metaBoxes.find((box) => box.type === "iinf");
+  const iloc = metaBoxes.find((box) => box.type === "iloc");
+  if (!iinf || !iloc) return {};
+
+  const itemId = exifItemId(view, iinf);
+  if (itemId === null) return {};
+  const extent = itemExtent(view, iloc, itemId);
+  if (!extent) return {};
+
+  // method 0 = absolute file offset; method 1 = offset into the `idat` box.
+  let itemOffset = extent.offset;
+  if (extent.method === 1) {
+    const idat = metaBoxes.find((box) => box.type === "idat");
+    if (!idat) return {};
+    itemOffset = idat.contentStart + extent.offset;
+  } else if (extent.method !== 0) {
+    return {};
+  }
+
+  if (itemOffset < 0 || itemOffset + 4 > view.byteLength) return {};
+  // ExifDataBlock: a 4-byte offset to the TIFF header, then the EXIF payload.
+  let tiffStart = itemOffset + 4 + view.getUint32(itemOffset, false);
+  // Some encoders prepend an "Exif\0\0" marker; step over it when present.
+  if (fourCC(view, tiffStart) === "Exif") tiffStart += 6;
+  return parseTiffExif(buffer, view, tiffStart);
+}
+
+function parseImageExif(buffer: ArrayBuffer): ImageMetadata {
+  const view = new DataView(buffer);
+  if (view.byteLength < 16) return {};
+  // JPEG opens with the SOI marker; HEIC / HEIF / AVIF are ISO base-media files
+  // whose first box is `ftyp`.
+  if (view.getUint16(0) === 0xffd8) return parseJpegExif(buffer, view);
+  if (fourCC(view, 4) === "ftyp") return parseHeifExif(buffer, view);
   return {};
 }
 
 export async function imageMetadata(file: File): Promise<ImageMetadata> {
   try {
-    return parseExifMetadata(await file.arrayBuffer());
+    return parseImageExif(await file.arrayBuffer());
   } catch {
     return {};
   }
