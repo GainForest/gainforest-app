@@ -561,6 +561,7 @@ function ProjectEditor({
   const [saveAttempted, setSaveAttempted] = useState(false);
   const [coverFile, setCoverFile] = useState<File | null>(null);
   const [coverPreview, setCoverPreview] = useState<string | null>(null);
+  const [coverRemoved, setCoverRemoved] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
@@ -582,7 +583,7 @@ function ProjectEditor({
   const issues = getProjectIssues(draft);
   const visibleIssues = saveAttempted ? issues : issues.filter((issue) => changedFields.has(issue.field));
   const issuesByName = issuesByProjectField(visibleIssues);
-  const coverUrl = coverPreview ?? state.project?.imageUrl ?? null;
+  const coverUrl = coverRemoved ? null : (coverPreview ?? state.project?.imageUrl ?? null);
   const sitesHref = `${profileBasePath(target)}/sites`;
 
   useEffect(() => {
@@ -658,6 +659,7 @@ function ProjectEditor({
     setChangedFields(new Set());
     setSaveAttempted(false);
     setCoverFile(null);
+    setCoverRemoved(false);
     setError(null);
   };
 
@@ -669,6 +671,13 @@ function ProjectEditor({
   const handleCoverChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0] ?? null;
     setCoverFile(file);
+    setCoverRemoved(false);
+    event.currentTarget.value = "";
+  };
+
+  const handleCoverRemove = () => {
+    setCoverFile(null);
+    setCoverRemoved(true);
   };
 
   // Create a place inline (draw a boundary), then attach it to this project —
@@ -763,7 +772,11 @@ function ProjectEditor({
     );
 
     try {
-      const cover = coverFile ? toLexImageBlob(await uploadBlob(coverFile, repoOptions), coverFile) : undefined;
+      const cover = coverFile
+        ? toLexImageBlob(await uploadBlob(coverFile, repoOptions), coverFile)
+        : coverRemoved
+          ? null
+          : undefined;
 
       if (isEdit) {
         const project = state.project;
@@ -897,7 +910,7 @@ function ProjectEditor({
               ) : stepId === "photo" ? (
                 <div className="mx-auto max-w-md">
                   <WizardStepHeader title={t("steps.photo.title")} subtitle={t("steps.photo.subtitle")} />
-                  <PhotoPanel coverUrl={coverUrl} onChange={handleCoverChange} t={t} />
+                  <PhotoPanel coverUrl={coverUrl} onChange={handleCoverChange} onRemove={handleCoverRemove} t={t} />
                 </div>
               ) : (
                 <div className="mx-auto max-w-2xl">
@@ -984,7 +997,7 @@ function ProjectEditor({
         </div>
 
         <aside className="xl:sticky xl:top-20 xl:self-start">
-          <PhotoPanel coverUrl={coverUrl} onChange={handleCoverChange} t={t} />
+          <PhotoPanel coverUrl={coverUrl} onChange={handleCoverChange} onRemove={handleCoverRemove} t={t} />
         </aside>
       </div>
 
@@ -1473,7 +1486,17 @@ function Field({ label, hint, htmlFor, error, children }: { label: string; hint?
   );
 }
 
-function PhotoPanel({ coverUrl, onChange, t }: { coverUrl: string | null; onChange: (event: ChangeEvent<HTMLInputElement>) => void; t: ReturnType<typeof useTranslations> }) {
+function PhotoPanel({
+  coverUrl,
+  onChange,
+  onRemove,
+  t,
+}: {
+  coverUrl: string | null;
+  onChange: (event: ChangeEvent<HTMLInputElement>) => void;
+  onRemove: () => void;
+  t: ReturnType<typeof useTranslations>;
+}) {
   return (
     <div className="rounded-3xl bg-background p-4">
       <label htmlFor="project-image" className="block text-sm font-medium text-foreground">
@@ -1485,7 +1508,12 @@ function PhotoPanel({ coverUrl, onChange, t }: { coverUrl: string | null; onChan
       >
         <div className="relative aspect-[4/3]">
           {coverUrl ? (
-            <Image src={coverUrl} alt="" fill unoptimized sizes="320px" className="object-cover" />
+            <>
+              <Image src={coverUrl} alt="" fill unoptimized sizes="320px" className="object-cover" />
+              <span className="absolute inset-x-4 bottom-4 rounded-full bg-background/90 px-3 py-2 text-center text-sm font-medium text-foreground shadow-sm backdrop-blur">
+                {t("fields.photo.change")}
+              </span>
+            </>
           ) : (
             <div className="flex h-full flex-col items-center justify-center px-6 text-center text-muted-foreground">
               <ImageIcon className="mb-3 size-8 text-primary/70" />
@@ -1495,6 +1523,17 @@ function PhotoPanel({ coverUrl, onChange, t }: { coverUrl: string | null; onChan
           )}
         </div>
       </label>
+      {coverUrl ? (
+        <div className="mt-3 flex flex-wrap gap-2">
+          <Button type="button" variant="outline" size="sm" asChild>
+            <label htmlFor="project-image" className="cursor-pointer">{t("fields.photo.change")}</label>
+          </Button>
+          <Button type="button" variant="ghost" size="sm" onClick={onRemove}>
+            <XIcon className="size-3.5" />
+            {t("fields.photo.remove")}
+          </Button>
+        </div>
+      ) : null}
       <input
         id="project-image"
         type="file"

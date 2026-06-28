@@ -141,7 +141,7 @@ export function buildCertRecord(
   draft: ProjectCertDraft,
   options: {
     existing?: Record<string, unknown> | null;
-    image?: Record<string, unknown>;
+    image?: Record<string, unknown> | null;
     siteRefs?: StrongRef[];
     createdAt?: string;
   } = {},
@@ -196,7 +196,9 @@ export function buildCertRecord(
     delete record.locations;
   }
 
-  if (options.image) {
+  if (options.image === null) {
+    delete record.image;
+  } else if (options.image) {
     record.image = { $type: "org.hypercerts.defs#smallImage", image: options.image };
   }
 
@@ -212,7 +214,7 @@ export function buildProjectRecord(
   draft: Pick<ProjectCertDraft, "title" | "shortDescription" | "description">,
   options: {
     existing?: Record<string, unknown> | null;
-    banner?: Record<string, unknown>;
+    banner?: Record<string, unknown> | null;
     certRef?: StrongRef;
     existingItemUris?: string[];
   } = {},
@@ -234,7 +236,9 @@ export function buildProjectRecord(
   if (story) record.description = { $type: "org.hypercerts.defs#descriptionString", value: story };
   else delete record.description;
 
-  if (options.banner) {
+  if (options.banner === null) {
+    delete record.banner;
+  } else if (options.banner) {
     record.banner = { $type: "org.hypercerts.defs#largeImage", image: options.banner };
   }
 

@@ -1133,6 +1133,7 @@
   },
   "projectPage": {
     "back": "Semua proyek",
+    "edit": "Edit proyek",
     "kind": "Proyek",
     "ledBy": "Proyek oleh",
     "viewProfile": "Lihat profil",
@@ -1269,7 +1270,9 @@
           "label": "Foto proyek",
           "optional": "opsional",
           "cta": "Pilih foto",
-          "formats": "JPG, PNG, WebP, HEIC, atau HEIF."
+          "formats": "JPG, PNG, WebP, HEIC, atau HEIF.",
+          "change": "Ganti foto",
+          "remove": "Hapus foto"
         }
       },
       "success": {

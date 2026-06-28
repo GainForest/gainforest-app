@@ -1133,6 +1133,7 @@
   },
   "projectPage": {
     "back": "Miradi yote",
+    "edit": "Hariri mradi",
     "kind": "Mradi",
     "ledBy": "Mradi wa",
     "viewProfile": "Tazama wasifu",
@@ -1269,7 +1270,9 @@
           "label": "Picha ya mradi",
           "optional": "hiari",
           "cta": "Chagua picha",
-          "formats": "JPG, PNG, WebP, HEIC, au HEIF."
+          "formats": "JPG, PNG, WebP, HEIC, au HEIF.",
+          "change": "Badilisha picha",
+          "remove": "Ondoa picha"
         }
       },
       "success": {

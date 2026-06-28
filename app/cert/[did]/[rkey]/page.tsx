@@ -18,6 +18,7 @@ import {
   LeafIcon,
   MapPinnedIcon,
   PaperclipIcon,
+  PencilIcon,
   SparklesIcon,
   SproutIcon,
   UsersRoundIcon,
@@ -530,6 +531,8 @@ export async function ProjectDetailView({
   origin,
   backHref,
   backLabel,
+  editHref,
+  editLabel,
   timelineMatchUris,
 }: {
   routeData: RouteData;
@@ -537,6 +540,8 @@ export async function ProjectDetailView({
   origin: string;
   backHref?: string;
   backLabel?: string;
+  editHref?: string;
+  editLabel?: string;
   timelineMatchUris?: string[];
 }) {
   const { record, detail, owner, fundingConfig, authSession } = routeData;
@@ -706,7 +711,18 @@ export async function ProjectDetailView({
                 <span className="block text-xs text-muted-foreground">{formatRelative(record.createdAt)}</span>
               </span>
             </Link>
-            <span className="ml-auto"><BumicertShareButton /></span>
+            <span className="ml-auto flex items-center gap-2">
+              {editHref && editLabel && canManageDonations ? (
+                <Link
+                  href={editHref}
+                  className="inline-flex h-9 items-center gap-1.5 rounded-full border border-border-soft bg-background px-3 text-sm font-medium text-foreground transition-colors hover:border-primary/40 hover:bg-muted/60 hover:text-primary"
+                >
+                  <PencilIcon className="h-3.5 w-3.5" aria-hidden />
+                  {editLabel}
+                </Link>
+              ) : null}
+              <BumicertShareButton />
+            </span>
           </div>
           {record.imageUrl ? (
             <div className="relative mt-6 aspect-[16/10] w-full overflow-hidden rounded-2xl border border-border bg-muted sm:aspect-[16/7]">

@@ -82,6 +82,8 @@ export default async function ProjectDetailPage({
           origin={origin}
           backHref="/projects"
           backLabel={t("back")}
+          editHref={`/account/${encodeURIComponent(canonicalIdentifier)}/projects?mode=edit&project=${encodeURIComponent(rkey)}`}
+          editLabel={t("edit")}
           // Match timeline evidence pinned to the Cert URI *or* the project
           // (collection) URI — older projects attached their updates to the
           // collection, which is where this project's timeline lives.

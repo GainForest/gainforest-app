@@ -1133,6 +1133,7 @@
   },
   "projectPage": {
     "back": "Todos os projetos",
+    "edit": "Editar projeto",
     "kind": "Projeto",
     "ledBy": "Projeto de",
     "viewProfile": "Ver perfil",
@@ -1269,7 +1270,9 @@
           "label": "Foto do projeto",
           "optional": "opcional",
           "cta": "Escolher uma foto",
-          "formats": "JPG, PNG, WebP, HEIC ou HEIF."
+          "formats": "JPG, PNG, WebP, HEIC ou HEIF.",
+          "change": "Alterar foto",
+          "remove": "Remover foto"
         }
       },
       "success": {
