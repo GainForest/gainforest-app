@@ -2,8 +2,8 @@
  * Global search — the data layer behind the top-right ⌘K command palette.
  *
  * Unlike the explore pages (which page a single record stream), the palette
- * searches *everything* at once: Certs, Projects, Organizations, and
- * Observations. Each stream is a thin wrapper over the existing indexer
+ * searches Projects, Organizations, and Observations at once. Each stream is a
+ * thin wrapper over the existing indexer
  * fetchers, which already push the user's query down to Hyperindex as a
  * server-side `contains` filter — so this stays a handful of cheap queries
  * per keystroke (debounced upstream) instead of downloading a whole corpus.
@@ -14,20 +14,18 @@
  */
 
 import {
-  fetchBumicerts,
   fetchProjects,
   searchAccountsByName,
   walkOccurrences,
   isLikelyTestRecordName,
 } from "./indexer";
 import {
-  localBumicertHref,
   localProjectHref,
   localObservationHref,
   accountHref,
 } from "./urls";
 
-export type GlobalSearchKind = "cert" | "project" | "organization" | "observation";
+export type GlobalSearchKind = "project" | "organization" | "observation";
 
 /** A single result row in the palette. */
 export type GlobalSearchHit = {
@@ -66,7 +64,7 @@ export const MIN_QUERY_LENGTH = 2;
 const PER_KIND_CAP = 5;
 
 /** Section order in the palette. */
-const KIND_ORDER: GlobalSearchKind[] = ["cert", "project", "organization", "observation"];
+const KIND_ORDER: GlobalSearchKind[] = ["project", "organization", "observation"];
 
 const EMPTY_RESULTS: GlobalSearchResults = { sections: [], flat: [], totalCount: 0 };
 
@@ -92,8 +90,8 @@ function observationSubtitle(record: {
 }
 
 /**
- * Search Certs, Projects, Organizations, and Observations for `query` and
- * return them grouped + flattened. Returns empty for queries shorter than
+ * Search Projects, Organizations, and Observations for `query` and return them
+ * grouped + flattened. Returns empty for queries shorter than
  * {@link MIN_QUERY_LENGTH}. Each stream is independent — a failure in one
  * leaves the others intact.
  */
@@ -104,11 +102,7 @@ export async function searchEverything(
   const q = query.trim();
   if (q.length < MIN_QUERY_LENGTH) return EMPTY_RESULTS;
 
-  const [certResult, projectResult, orgResult, observationResult] = await Promise.allSettled([
-    fetchBumicerts(PER_KIND_CAP, null, signal, undefined, {
-      query: q,
-      featuredBadgesOnly: false,
-    }),
+  const [projectResult, orgResult, observationResult] = await Promise.allSettled([
     fetchProjects(PER_KIND_CAP, null, signal, undefined, {
       query: q,
       featuredBadgesOnly: false,
@@ -128,26 +122,10 @@ export async function searchEverything(
   ]);
 
   const byKind: Record<GlobalSearchKind, GlobalSearchHit[]> = {
-    cert: [],
     project: [],
     organization: [],
     observation: [],
   };
-
-  if (certResult.status === "fulfilled") {
-    for (const record of certResult.value.records) {
-      if (isLikelyTestRecordName(record.title)) continue;
-      byKind.cert.push({
-        kind: "cert",
-        id: record.id,
-        title: record.title,
-        subtitle: record.shortDescription,
-        href: localBumicertHref(record.did, record.rkey),
-        did: record.did,
-        imageUrl: record.imageUrl,
-      });
-    }
-  }
 
   if (projectResult.status === "fulfilled") {
     for (const record of projectResult.value.records) {

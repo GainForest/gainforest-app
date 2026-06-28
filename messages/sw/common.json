@@ -21,7 +21,7 @@
     "trigger": "Tafuta",
     "open": "Fungua utafutaji",
     "title": "Tafuta GainForest",
-    "placeholder": "Tafuta Certs, miradi, mashirika, uchunguzi…",
+    "placeholder": "Tafuta miradi, mashirika, uchunguzi…",
     "clear": "Futa utafutaji",
     "escKey": "esc",
     "kinds": {
@@ -32,7 +32,7 @@
     },
     "idle": {
       "headline": "Andika ili kutafuta",
-      "body": "Pata Certs, miradi, mashirika na uchunguzi."
+      "body": "Pata miradi, mashirika na uchunguzi."
     },
     "noResults": {
       "headline": "Hakuna matokeo ya “{query}”",

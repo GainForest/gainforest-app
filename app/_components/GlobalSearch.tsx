@@ -7,7 +7,6 @@ import * as Dialog from "@radix-ui/react-dialog";
 import {
   SearchIcon,
   XIcon,
-  AwardIcon,
   LayersIcon,
   Building2Icon,
   LeafIcon,
@@ -28,7 +27,6 @@ import {
 const SEARCH_DEBOUNCE_MS = 250;
 
 const KIND_ICON: Record<GlobalSearchKind, LucideIcon> = {
-  cert: AwardIcon,
   project: LayersIcon,
   organization: Building2Icon,
   observation: LeafIcon,

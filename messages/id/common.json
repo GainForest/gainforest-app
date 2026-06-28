@@ -21,7 +21,7 @@
     "trigger": "Cari",
     "open": "Buka pencarian",
     "title": "Cari GainForest",
-    "placeholder": "Cari Cert, proyek, organisasi, observasi…",
+    "placeholder": "Cari proyek, organisasi, observasi…",
     "clear": "Hapus pencarian",
     "escKey": "esc",
     "kinds": {
@@ -32,7 +32,7 @@
     },
     "idle": {
       "headline": "Ketik untuk mencari",
-      "body": "Temukan Cert, proyek, organisasi, dan observasi."
+      "body": "Temukan proyek, organisasi, dan observasi."
     },
     "noResults": {
       "headline": "Tidak ada hasil untuk “{query}”",

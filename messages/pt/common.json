@@ -21,7 +21,7 @@
     "trigger": "Buscar",
     "open": "Abrir busca",
     "title": "Buscar no GainForest",
-    "placeholder": "Busque Certs, projetos, organizações, observações…",
+    "placeholder": "Busque projetos, organizações, observações…",
     "clear": "Limpar busca",
     "escKey": "esc",
     "kinds": {
@@ -32,7 +32,7 @@
     },
     "idle": {
       "headline": "Digite para buscar",
-      "body": "Encontre Certs, projetos, organizações e observações."
+      "body": "Encontre projetos, organizações e observações."
     },
     "noResults": {
       "headline": "Nenhum resultado para “{query}”",
