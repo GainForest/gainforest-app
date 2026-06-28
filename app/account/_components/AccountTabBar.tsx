@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { usePathname, useSearchParams } from "next/navigation";
-import { BinocularsIcon, FolderKanbanIcon, HeartHandshakeIcon, HomeIcon, ImageIcon, SettingsIcon, ShieldCheckIcon, UsersIcon } from "lucide-react";
+import { BinocularsIcon, FolderKanbanIcon, HeartHandshakeIcon, HomeIcon, ImageIcon, MessageSquareTextIcon, SettingsIcon, ShieldCheckIcon, UsersIcon } from "lucide-react";
 import { stripLocaleFromPathname } from "@/lib/i18n/routing";
 import { cn } from "@/lib/utils";
 import type { AccountKind } from "../_lib/account-route";
@@ -14,15 +14,18 @@ import {
   accountDonationsPath,
   accountDronePath,
   accountGalleryPath,
+  accountLikesPath,
   accountMembersPath,
   accountObservationsPath,
   accountPath,
+  accountPostsPath,
   accountProjectsPath,
+  accountRepliesPath,
   accountSettingsPath,
   accountTreesPath,
 } from "../_lib/account-route";
 
-type TabLabelKey = "home" | "overview" | "bumicerts" | "projects" | "donationHistory" | "observations" | "timeline" | "gallery" | "settings" | "sites" | "audio" | "drone" | "trees" | "members" | "admin";
+type TabLabelKey = "home" | "overview" | "bumicerts" | "projects" | "donationHistory" | "observations" | "posts" | "timeline" | "gallery" | "settings" | "sites" | "audio" | "drone" | "trees" | "members" | "admin";
 
 interface Tab {
   labelKey: TabLabelKey;
@@ -96,6 +99,16 @@ function buildTabs(
     icon: ShieldCheckIcon,
     exact: false,
   };
+  // Posts / Replies / Likes share one profile tab (the page carries the
+  // sub-toggle), so the tab stays active across all three routes. Public
+  // activity, so it only appears on the profile (not the manage dashboard).
+  const postsTab: Tab = {
+    labelKey: "posts",
+    href: accountPostsPath(did),
+    icon: MessageSquareTextIcon,
+    exact: false,
+    matchPaths: [accountRepliesPath(did), accountLikesPath(did)],
+  };
   // The Admin tab (test-account moderation) only exists on the public profile,
   // for stewards viewing their own profile.
   const appendExtras = (tabs: Tab[]): Tab[] => {
@@ -127,6 +140,7 @@ function buildTabs(
           { labelKey: "overview", href: paths.home, icon: HomeIcon, exact: true },
           projectsTab,
           observationsTab,
+          postsTab,
           { labelKey: "gallery", href: paths.gallery, icon: ImageIcon, exact: false },
           donationsTab,
         ]
@@ -159,6 +173,9 @@ function buildTabs(
   // Members stay an organization-only governance surface, shown to managers on
   // the profile. Trees, Audio and Drone are reached through the Observations
   // sub-nav. Sites and Timeline now live on each project, not the profile.
+  if (scope === "account") {
+    tabs.push(postsTab);
+  }
   if (scope === "account" && showOrgData) {
     tabs.push(
       { labelKey: "members", href: accountMembersPath(did), icon: UsersIcon, exact: false },

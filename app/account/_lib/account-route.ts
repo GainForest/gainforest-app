@@ -107,6 +107,18 @@ export function accountFollowingPath(didOrHandle: string): string {
   return `${accountPath(didOrHandle)}/following`;
 }
 
+export function accountPostsPath(didOrHandle: string): string {
+  return `${accountPath(didOrHandle)}/posts`;
+}
+
+export function accountRepliesPath(didOrHandle: string): string {
+  return `${accountPath(didOrHandle)}/replies`;
+}
+
+export function accountLikesPath(didOrHandle: string): string {
+  return `${accountPath(didOrHandle)}/likes`;
+}
+
 export function accountOrganizationsPath(didOrHandle: string): string {
   return `${accountPath(didOrHandle)}/organizations`;
 }

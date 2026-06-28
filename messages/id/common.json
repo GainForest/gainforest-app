@@ -390,7 +390,8 @@
     "trees": "Pohon",
     "measurements": "Pengukuran",
     "members": "Anggota",
-    "admin": "Admin"
+    "admin": "Admin",
+    "posts": "Postingan"
   },
   "accountOrganizations": {
     "memberOf": "Anggota dari",
@@ -856,5 +857,23 @@
     "followingTab": "Mengikuti",
     "emptyFollowers": "Belum ada pengikut.",
     "emptyFollowing": "Belum mengikuti siapa pun."
+  },
+  "activity": {
+    "postsTab": "Postingan",
+    "repliesTab": "Balasan",
+    "likesTab": "Suka",
+    "emptyPosts": "Belum ada postingan.",
+    "emptyReplies": "Belum ada balasan.",
+    "emptyLikes": "Belum ada suka.",
+    "liked": "Menyukai",
+    "replyingTo": "Membalas {kind}",
+    "kind": {
+      "project": "proyek",
+      "observation": "pengamatan",
+      "cert": "sertifikat",
+      "post": "postingan",
+      "account": "akun",
+      "record": "catatan"
+    }
   }
 }

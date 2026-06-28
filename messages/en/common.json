@@ -390,7 +390,8 @@
     "trees": "Trees",
     "measurements": "Measurements",
     "members": "Members",
-    "admin": "Admin"
+    "admin": "Admin",
+    "posts": "Posts"
   },
   "accountOrganizations": {
     "memberOf": "Member of",
@@ -856,5 +857,23 @@
     "followingTab": "Following",
     "emptyFollowers": "No followers yet.",
     "emptyFollowing": "Not following anyone yet."
+  },
+  "activity": {
+    "postsTab": "Posts",
+    "repliesTab": "Replies",
+    "likesTab": "Likes",
+    "emptyPosts": "No posts yet.",
+    "emptyReplies": "No replies yet.",
+    "emptyLikes": "No likes yet.",
+    "liked": "Liked",
+    "replyingTo": "Replying to {kind}",
+    "kind": {
+      "project": "project",
+      "observation": "observation",
+      "cert": "cert",
+      "post": "post",
+      "account": "account",
+      "record": "record"
+    }
   }
 }

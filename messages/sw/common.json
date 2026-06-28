@@ -390,7 +390,8 @@
     "trees": "Miti",
     "measurements": "Vipimo",
     "members": "Wanachama",
-    "admin": "Admin"
+    "admin": "Admin",
+    "posts": "Machapisho"
   },
   "accountOrganizations": {
     "memberOf": "Mwanachama wa",
@@ -856,5 +857,23 @@
     "followingTab": "Anaofuata",
     "emptyFollowers": "Hakuna wafuasi bado.",
     "emptyFollowing": "Bado hamfuati mtu yeyote."
+  },
+  "activity": {
+    "postsTab": "Machapisho",
+    "repliesTab": "Majibu",
+    "likesTab": "Vipendwa",
+    "emptyPosts": "Hakuna machapisho bado.",
+    "emptyReplies": "Hakuna majibu bado.",
+    "emptyLikes": "Hakuna vipendwa bado.",
+    "liked": "Alipenda",
+    "replyingTo": "Anajibu {kind}",
+    "kind": {
+      "project": "mradi",
+      "observation": "uchunguzi",
+      "cert": "cheti",
+      "post": "chapisho",
+      "account": "akaunti",
+      "record": "rekodi"
+    }
   }
 }

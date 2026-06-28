@@ -390,7 +390,8 @@
     "trees": "Árboles",
     "measurements": "Mediciones",
     "members": "Miembros",
-    "admin": "Admin"
+    "admin": "Admin",
+    "posts": "Publicaciones"
   },
   "accountOrganizations": {
     "memberOf": "Miembro de",
@@ -856,5 +857,23 @@
     "followingTab": "Siguiendo",
     "emptyFollowers": "Aún no tiene seguidores.",
     "emptyFollowing": "Todavía no sigue a nadie."
+  },
+  "activity": {
+    "postsTab": "Publicaciones",
+    "repliesTab": "Respuestas",
+    "likesTab": "Me gusta",
+    "emptyPosts": "Aún no hay publicaciones.",
+    "emptyReplies": "Aún no hay respuestas.",
+    "emptyLikes": "Aún no hay me gusta.",
+    "liked": "Le gustó",
+    "replyingTo": "En respuesta a {kind}",
+    "kind": {
+      "project": "proyecto",
+      "observation": "observación",
+      "cert": "certificado",
+      "post": "publicación",
+      "account": "cuenta",
+      "record": "registro"
+    }
   }
 }
