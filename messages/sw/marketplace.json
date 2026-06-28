@@ -1249,11 +1249,16 @@
         },
         "people": {
           "label": "Watu na vikundi",
-          "hint": "ongeza watu, timu, au jamii nyuma ya kazi hii",
-          "placeholderFirst": "Walinzi wa Mikoko wa Rufiji",
-          "placeholder": "Jina la mtu au kikundi",
+          "hint": "tafuta jina au @handle",
+          "placeholderFirst": "Tafuta mf. “Walinzi wa Rufiji” au @handle",
+          "placeholder": "Jina au @handle",
           "remove": "Ondoa mtu au kikundi",
-          "add": "Ongeza mtu au kikundi"
+          "add": "Ongeza mtu au kikundi",
+          "change": "Badilisha mtu au kikundi",
+          "selectedProfile": "Wasifu uliochaguliwa",
+          "suggestionsStart": "Anza kuandika ili kuona mapendekezo.",
+          "suggestionsLoading": "Inapakia mapendekezo…",
+          "suggestionsEmpty": "Hakuna zinazolingana bado. Unaweza kuendelea kuandika jina."
         },
         "sites": {
           "label": "Maeneo",

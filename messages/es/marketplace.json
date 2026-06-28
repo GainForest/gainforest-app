@@ -1249,11 +1249,16 @@
         },
         "people": {
           "label": "Personas y grupos",
-          "hint": "añade las personas, equipos o comunidades detrás de este trabajo",
-          "placeholderFirst": "Guardianes del manglar de Rufiji",
-          "placeholder": "Nombre de persona o grupo",
+          "hint": "busca un nombre o @usuario",
+          "placeholderFirst": "Busca p. ej. “Guardianes de Rufiji” o @usuario",
+          "placeholder": "Nombre o @usuario",
           "remove": "Quitar persona o grupo",
-          "add": "Añadir persona o grupo"
+          "add": "Añadir persona o grupo",
+          "change": "Cambiar persona o grupo",
+          "selectedProfile": "Perfil seleccionado",
+          "suggestionsStart": "Empieza a escribir para ver sugerencias.",
+          "suggestionsLoading": "Cargando sugerencias…",
+          "suggestionsEmpty": "Aún no hay coincidencias. Puedes seguir escribiendo un nombre."
         },
         "sites": {
           "label": "Lugares",

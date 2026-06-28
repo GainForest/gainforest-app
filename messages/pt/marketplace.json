@@ -1249,11 +1249,16 @@
         },
         "people": {
           "label": "Pessoas e grupos",
-          "hint": "adicione as pessoas, equipes ou comunidades por trás deste trabalho",
-          "placeholderFirst": "Guardiões do Manguezal de Rufiji",
-          "placeholder": "Nome de pessoa ou grupo",
+          "hint": "busque um nome ou @usuário",
+          "placeholderFirst": "Busque ex. “Guardiões de Rufiji” ou @usuário",
+          "placeholder": "Nome ou @usuário",
           "remove": "Remover pessoa ou grupo",
-          "add": "Adicionar pessoa ou grupo"
+          "add": "Adicionar pessoa ou grupo",
+          "change": "Alterar pessoa ou grupo",
+          "selectedProfile": "Perfil selecionado",
+          "suggestionsStart": "Comece a digitar para ver sugestões.",
+          "suggestionsLoading": "Carregando sugestões…",
+          "suggestionsEmpty": "Ainda não há resultados. Você pode continuar digitando um nome."
         },
         "sites": {
           "label": "Lugares",

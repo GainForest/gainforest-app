@@ -25,7 +25,7 @@ import {
   TriangleAlertIcon,
   XIcon,
 } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { ChangeEvent, FormEvent, ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { ModalContent, ModalDescription, ModalFooter, ModalHeader, ModalTitle } from "@/components/ui/modal/modal";
@@ -100,6 +100,8 @@ type ManagedLocation = {
   metadata: { did: string; uri: string; rkey: string; cid: string; createdAt: string | null };
   record: { name: string | null; description: string | null; locationType: string | null; location: unknown };
 };
+
+type ActorResult = { did: string; handle: string | null; displayName: string | null; avatar: string | null };
 
 type SitesStatus = "idle" | "loading" | "ready" | "error";
 
@@ -557,6 +559,7 @@ function ProjectEditor({
   const workScopes = WORK_SCOPE_KEYS.map((key) => workScopeT(WORK_SCOPE_MESSAGE_KEYS[key]));
 
   const [draft, setDraft] = useState<ProjectCertDraft>(() => draftFromProject(state.project));
+  const [contributorProfiles, setContributorProfiles] = useState<Record<string, ActorResult>>({});
   const [changedFields, setChangedFields] = useState<Set<ProjectField>>(() => new Set());
   const [saveAttempted, setSaveAttempted] = useState(false);
   const [coverFile, setCoverFile] = useState<File | null>(null);
@@ -653,6 +656,18 @@ function ProjectEditor({
     markChanged(field);
     setDraft((current) => ({ ...current, [field]: value }));
   };
+
+  const setContributorProfile = useCallback((identity: string, actor: ActorResult | null) => {
+    setContributorProfiles((current) => {
+      const next = { ...current };
+      if (identity) delete next[identity];
+      if (actor) {
+        next[actor.did] = actor;
+        if (actor.handle) next[actor.handle] = actor;
+      }
+      return next;
+    });
+  }, []);
 
   const resetDraft = () => {
     setDraft(draftFromProject(state.project));
@@ -904,7 +919,7 @@ function ProjectEditor({
               ) : stepId === "network" ? (
                 <div className="mx-auto max-w-2xl space-y-8">
                   <WizardStepHeader title={t("steps.network.title")} subtitle={t("steps.network.subtitle")} />
-                  <ContributorsSection draft={draft} setDraft={setDraft} t={t} />
+                  <ContributorsSection draft={draft} setDraft={setDraft} contributorProfiles={contributorProfiles} setContributorProfile={setContributorProfile} t={t} />
                   <SitesSection draft={draft} setDraft={setDraft} sites={sites} sitesStatus={sitesStatus} sitesHref={sitesHref} onAddPlace={openAddPlace} t={t} />
                 </div>
               ) : stepId === "photo" ? (
@@ -915,7 +930,7 @@ function ProjectEditor({
               ) : (
                 <div className="mx-auto max-w-2xl">
                   <WizardStepHeader title={t("steps.review.title")} subtitle={t("steps.review.subtitle")} />
-                  <ReviewList draft={draft} hasCover={Boolean(coverUrl)} t={t} />
+                  <ReviewList draft={draft} contributorProfiles={contributorProfiles} hasCover={Boolean(coverUrl)} t={t} />
                 </div>
               )}
             </motion.div>
@@ -983,7 +998,7 @@ function ProjectEditor({
             <DatesSection draft={draft} setDraft={setDraft} t={t} />
           </section>
 
-          <ContributorsSection draft={draft} setDraft={setDraft} t={t} />
+          <ContributorsSection draft={draft} setDraft={setDraft} contributorProfiles={contributorProfiles} setContributorProfile={setContributorProfile} t={t} />
 
           <SitesSection
             draft={draft}
@@ -1127,13 +1142,226 @@ function DatesSection({
   );
 }
 
+function actorLabel(actor: ActorResult, fallback: string) {
+  return actor.displayName ?? actor.handle ?? fallback;
+}
+
+function displayContributor(identity: string, profiles: Record<string, ActorResult>, fallback: string) {
+  const actor = profiles[identity];
+  if (actor) return actorLabel(actor, fallback);
+  return identity.startsWith("did:") ? fallback : identity;
+}
+
+function ActorAvatar({ actor, fallback, size = "size-8" }: { actor: ActorResult; fallback: string; size?: string }) {
+  return actor.avatar ? (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img src={actor.avatar} alt="" className={cn(size, "shrink-0 rounded-full object-cover")} />
+  ) : (
+    <span className={cn(size, "flex shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-medium text-primary")}>
+      {actorLabel(actor, fallback).charAt(0).toUpperCase()}
+    </span>
+  );
+}
+
+function ContributorInput({
+  value,
+  actor,
+  onChange,
+  onActorChange,
+  onRemove,
+  canRemove,
+  placeholder,
+  t,
+}: {
+  value: string;
+  actor: ActorResult | null;
+  onChange: (value: string) => void;
+  onActorChange: (actor: ActorResult | null) => void;
+  onRemove: () => void;
+  canRemove: boolean;
+  placeholder: string;
+  t: ReturnType<typeof useTranslations>;
+}) {
+  const [results, setResults] = useState<ActorResult[]>([]);
+  const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [focused, setFocused] = useState(false);
+  const [highlight, setHighlight] = useState(0);
+  const boxRef = useRef<HTMLDivElement>(null);
+  const selectedProfileFallback = t("fields.people.selectedProfile");
+
+  useEffect(() => {
+    const query = value.trim();
+    if (!focused || actor) return;
+    setOpen(true);
+    if (query.length < 2) {
+      setResults([]);
+      setLoading(false);
+      return;
+    }
+    const controller = new AbortController();
+    const timer = window.setTimeout(() => {
+      setLoading(true);
+      fetch(`/api/actors/search?q=${encodeURIComponent(query)}`, { signal: controller.signal })
+        .then((response) => response.json())
+        .then((data: { results?: ActorResult[] }) => {
+          setResults(data.results ?? []);
+          setHighlight(0);
+          setOpen(true);
+        })
+        .catch(() => {})
+        .finally(() => setLoading(false));
+    }, 250);
+    return () => {
+      window.clearTimeout(timer);
+      controller.abort();
+    };
+  }, [actor, focused, value]);
+
+  useEffect(() => {
+    if (actor || !value.trim()) return;
+    const query = value.trim();
+    if (query.length < 3) return;
+    const controller = new AbortController();
+    fetch(`/api/actors/resolve?q=${encodeURIComponent(query)}`, { signal: controller.signal })
+      .then((response) => response.json())
+      .then((data: { actor?: ActorResult | null }) => {
+        if (data.actor) onActorChange(data.actor);
+      })
+      .catch(() => {});
+    return () => controller.abort();
+  }, [actor, onActorChange, value]);
+
+  useEffect(() => {
+    function onDocClick(event: MouseEvent) {
+      if (boxRef.current && !boxRef.current.contains(event.target as Node)) setOpen(false);
+    }
+    document.addEventListener("mousedown", onDocClick);
+    return () => document.removeEventListener("mousedown", onDocClick);
+  }, []);
+
+  const choose = (nextActor: ActorResult) => {
+    onActorChange(nextActor);
+    onChange(nextActor.did);
+    setOpen(false);
+    setResults([]);
+  };
+
+  return (
+    <div ref={boxRef} className="relative flex items-center gap-2">
+      <div className="relative flex-1">
+        {actor ? (
+          <div className="flex min-h-11 items-center gap-3 rounded-xl border border-border bg-background px-3 py-2">
+            <ActorAvatar actor={actor} fallback={selectedProfileFallback} />
+            <span className="min-w-0 flex-1">
+              <span className="block truncate text-sm font-medium text-foreground">{actorLabel(actor, selectedProfileFallback)}</span>
+              {actor.handle ? <span className="block truncate text-xs text-muted-foreground">@{actor.handle}</span> : null}
+            </span>
+            <button
+              type="button"
+              onClick={() => {
+                onActorChange(null);
+                onChange("");
+              }}
+              className="rounded-full p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+              aria-label={t("fields.people.change")}
+            >
+              <XIcon className="size-4" />
+            </button>
+          </div>
+        ) : (
+          <input
+            value={value}
+            onChange={(event) => {
+              onActorChange(null);
+              onChange(event.target.value);
+            }}
+            onFocus={() => {
+              setFocused(true);
+              setOpen(true);
+            }}
+            onBlur={() => setFocused(false)}
+            onKeyDown={(event) => {
+              if (!open || results.length === 0) return;
+              if (event.key === "ArrowDown") {
+                event.preventDefault();
+                setHighlight((current) => Math.min(current + 1, results.length - 1));
+              } else if (event.key === "ArrowUp") {
+                event.preventDefault();
+                setHighlight((current) => Math.max(current - 1, 0));
+              } else if (event.key === "Enter") {
+                event.preventDefault();
+                choose(results[highlight]);
+              } else if (event.key === "Escape") {
+                setOpen(false);
+              }
+            }}
+            placeholder={placeholder}
+            className={cn(FIELD, "px-4 py-2.5 text-sm")}
+          />
+        )}
+
+        {loading && !actor ? <Loader2Icon className="absolute right-3 top-1/2 size-4 -translate-y-1/2 animate-spin text-muted-foreground/60" /> : null}
+
+        <AnimatePresence>
+          {open && !actor ? (
+            <motion.div
+              initial={{ opacity: 0, y: 4 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 4 }}
+              transition={{ duration: 0.14 }}
+              className="absolute z-[1000] mt-1.5 max-h-72 w-full overflow-y-auto rounded-xl border border-border bg-card p-1.5 shadow-xl"
+            >
+              {value.trim().length < 2 ? (
+                <p className="px-3 py-2 text-sm text-muted-foreground">{t("fields.people.suggestionsStart")}</p>
+              ) : loading ? (
+                <p className="flex items-center gap-2 px-3 py-2 text-sm text-muted-foreground"><Loader2Icon className="size-4 animate-spin" /> {t("fields.people.suggestionsLoading")}</p>
+              ) : results.length === 0 ? (
+                <p className="px-3 py-2 text-sm text-muted-foreground">{t("fields.people.suggestionsEmpty")}</p>
+              ) : (
+                <ul>
+                  {results.map((nextActor, index) => (
+                    <li key={nextActor.did}>
+                      <button
+                        type="button"
+                        onMouseDown={(event) => event.preventDefault()}
+                        onClick={() => choose(nextActor)}
+                        onMouseEnter={() => setHighlight(index)}
+                        className={cn("flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left transition-colors", index === highlight ? "bg-muted" : "hover:bg-muted/60")}
+                      >
+                        <ActorAvatar actor={nextActor} fallback={selectedProfileFallback} size="size-7" />
+                        <span className="min-w-0">
+                          <span className="block truncate text-sm font-medium text-foreground">{actorLabel(nextActor, selectedProfileFallback)}</span>
+                          {nextActor.handle ? <span className="block truncate text-xs text-muted-foreground">@{nextActor.handle}</span> : null}
+                        </span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </motion.div>
+          ) : null}
+        </AnimatePresence>
+      </div>
+
+      <Button type="button" variant="ghost" size="icon-sm" disabled={!canRemove} onClick={onRemove} aria-label={t("fields.people.remove")} className="shrink-0 text-muted-foreground hover:text-destructive">
+        <Trash2Icon className="size-4" />
+      </Button>
+    </div>
+  );
+}
+
 function ContributorsSection({
   draft,
   setDraft,
+  contributorProfiles,
+  setContributorProfile,
   t,
 }: {
   draft: ProjectCertDraft;
   setDraft: React.Dispatch<React.SetStateAction<ProjectCertDraft>>;
+  contributorProfiles: Record<string, ActorResult>;
+  setContributorProfile: (identity: string, actor: ActorResult | null) => void;
   t: ReturnType<typeof useTranslations>;
 }) {
   const updateContributor = (index: number, value: string) => {
@@ -1152,36 +1380,29 @@ function ContributorsSection({
   return (
     <section>
       <Field label={t("fields.people.label")} hint={t("fields.people.hint")}>
-        <div className="space-y-3">
+        <div className="space-y-2.5">
           {draft.contributors.map((contributor, index) => (
-            <div key={index} className="flex gap-2">
-              <input
-                value={contributor}
-                onChange={(event) => updateContributor(index, event.target.value)}
-                placeholder={index === 0 ? t("fields.people.placeholderFirst") : t("fields.people.placeholder")}
-                className={cn(FIELD, "h-11 px-4")}
-              />
-              <Button
-                type="button"
-                variant="outline"
-                size="icon"
-                disabled={draft.contributors.length === 1}
-                onClick={() => removeContributor(index)}
-                aria-label={t("fields.people.remove")}
-              >
-                <Trash2Icon className="size-4" />
-              </Button>
-            </div>
+            <ContributorInput
+              key={index}
+              value={contributor}
+              actor={contributorProfiles[contributor] ?? null}
+              onChange={(value) => updateContributor(index, value)}
+              onActorChange={(actor) => setContributorProfile(contributor, actor)}
+              onRemove={() => removeContributor(index)}
+              canRemove={draft.contributors.length > 1}
+              placeholder={index === 0 ? t("fields.people.placeholderFirst") : t("fields.people.placeholder")}
+              t={t}
+            />
           ))}
         </div>
         <Button
           type="button"
-          variant="outline"
+          variant="ghost"
           size="sm"
           onClick={() => setDraft((current) => ({ ...current, contributors: [...current.contributors, ""] }))}
-          className="mt-3"
+          className="mt-2 -ml-2 text-primary hover:text-primary"
         >
-          <PlusIcon /> {t("fields.people.add")}
+          <PlusIcon className="size-4" /> {t("fields.people.add")}
         </Button>
       </Field>
     </section>
@@ -1425,15 +1646,17 @@ function WizardStepHeader({ title, subtitle }: { title: string; subtitle?: strin
 
 function ReviewList({
   draft,
+  contributorProfiles,
   hasCover,
   t,
 }: {
   draft: ProjectCertDraft;
+  contributorProfiles: Record<string, ActorResult>;
   hasCover: boolean;
   t: ReturnType<typeof useTranslations>;
 }) {
   const focus = scopeList(draft);
-  const people = contributorList(draft);
+  const people = contributorList(draft).map((identity) => displayContributor(identity, contributorProfiles, t("fields.people.selectedProfile")));
   const placeCount = draft.selectedLocationUris.length;
   const timeline = draft.startDate
     ? `${draft.startDate} → ${draft.ongoing ? t("review.ongoing") : draft.endDate || "—"}`

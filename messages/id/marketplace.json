@@ -1249,11 +1249,16 @@
         },
         "people": {
           "label": "Orang & kelompok",
-          "hint": "tambahkan orang, tim, atau komunitas di balik pekerjaan ini",
-          "placeholderFirst": "Penjaga Mangrove Rufiji",
-          "placeholder": "Nama orang atau kelompok",
+          "hint": "cari nama atau @handle",
+          "placeholderFirst": "Cari mis. “Penjaga Rufiji” atau @handle",
+          "placeholder": "Nama atau @handle",
           "remove": "Hapus orang atau kelompok",
-          "add": "Tambah orang atau kelompok"
+          "add": "Tambah orang atau kelompok",
+          "change": "Ganti orang atau kelompok",
+          "selectedProfile": "Profil terpilih",
+          "suggestionsStart": "Mulai mengetik untuk melihat saran.",
+          "suggestionsLoading": "Memuat saran…",
+          "suggestionsEmpty": "Belum ada kecocokan. Anda dapat terus mengetik nama."
         },
         "sites": {
           "label": "Tempat",

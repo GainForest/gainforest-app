@@ -1249,11 +1249,16 @@
         },
         "people": {
           "label": "People & groups",
-          "hint": "add the people, teams, or communities behind this work",
-          "placeholderFirst": "Rufiji Mangrove Stewards",
-          "placeholder": "Person or group name",
+          "hint": "search a name or @handle",
+          "placeholderFirst": "Search e.g. “Rufiji Stewards” or @handle",
+          "placeholder": "Name or @handle",
           "remove": "Remove person or group",
-          "add": "Add person or group"
+          "add": "Add person or group",
+          "change": "Change person or group",
+          "selectedProfile": "Selected profile",
+          "suggestionsStart": "Start typing to get suggestions.",
+          "suggestionsLoading": "Loading suggestions…",
+          "suggestionsEmpty": "No matches yet. You can keep typing a name."
         },
         "sites": {
           "label": "Places",
