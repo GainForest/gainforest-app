@@ -1006,6 +1006,16 @@
     "projectEvidence": {
       "title": "Evidence"
     },
+    "projectMap": {
+      "title": "Map",
+      "view": "View places",
+      "alt": "Site boundary map"
+    },
+    "projectUpdates": {
+      "title": "Latest updates",
+      "seeAll": "See all",
+      "fallback": "Update"
+    },
     "projectBumicerts": {
       "title": "Certs in this project",
       "view": "View Cert",

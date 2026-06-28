@@ -11,6 +11,7 @@ import {
   fetchObservationMedia,
   fetchRecordByUri,
   fetchRecordDetail,
+  fetchTimelineAttachmentsByDid,
   summarizeObservationMeasurements,
   type BumicertRecord,
   type ExplorerRecord,
@@ -20,8 +21,9 @@ import {
   type RecordDetail,
   type DetailSection,
   type DetailBadge,
+  type TimelineAttachmentItem,
 } from "../_lib/indexer";
-import { formatCompact, formatDate, formatNumber, countryFlag, formatCountry } from "../_lib/format";
+import { formatCompact, formatDate, formatNumber, formatRelative, countryFlag, formatCountry } from "../_lib/format";
 import { AuthorChip } from "./AuthorChip";
 import { TrustedByBadges } from "./TrustedByBadges";
 import { usePreferredDidIdentifier } from "./PreferredLinks";
@@ -82,6 +84,7 @@ export function RecordDrawer({
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [deletingOccurrence, setDeletingOccurrence] = useState(false);
   const [projectBumicerts, setProjectBumicerts] = useState<BumicertRecord[] | null>(null);
+  const [projectUpdates, setProjectUpdates] = useState<TimelineAttachmentItem[] | null>(null);
   const t = useTranslations("marketplace.recordDrawer");
   const workScopeT = useTranslations("common.workScopes");
   const workScopeLabels: WorkScopeLabels = useMemo(() => ({
@@ -210,6 +213,42 @@ export function RecordDrawer({
     return () => ctrl.abort();
   }, [record]);
 
+  // Latest evidence/updates pinned to the project (collection) or its single
+  // Cert — surfaced in the drawer the same way the project page's at-a-glance
+  // sidebar shows them. Skip the (heavy) fetch when card metadata already tells
+  // us the project has no timeline evidence.
+  useEffect(() => {
+    setProjectUpdates(null);
+    if (!record || record.kind !== "project") return;
+    if (record.evidence && record.evidence.timeline <= 0) {
+      setProjectUpdates([]);
+      return;
+    }
+
+    const ctrl = new AbortController();
+    const matchUris = new Set([record.atUri, ...record.bumicertUris]);
+    fetchTimelineAttachmentsByDid(record.did, ctrl.signal)
+      .then((items) => {
+        if (ctrl.signal.aborted) return;
+        const entries = items
+          .filter((item) => {
+            const uri = item.record.subjects?.[0]?.uri;
+            return Boolean(uri && matchUris.has(uri));
+          })
+          .sort((a, b) =>
+            (b.record.createdAt ?? b.metadata.createdAt ?? "").localeCompare(
+              a.record.createdAt ?? a.metadata.createdAt ?? "",
+            ),
+          )
+          .slice(0, 3);
+        setProjectUpdates(entries);
+      })
+      .catch(() => {
+        if (!ctrl.signal.aborted) setProjectUpdates([]);
+      });
+    return () => ctrl.abort();
+  }, [record]);
+
   useEffect(() => {
     setIsEditingOccurrence(false);
     setOccurrenceFeedback(null);
@@ -290,6 +329,10 @@ export function RecordDrawer({
       ? localObservationHref(preferredOwnerIdentifier, record.rkey)
       : null;
   const projectHref = record.kind === "project" ? localProjectHref(preferredOwnerIdentifier, record.rkey) : null;
+  // Boundary map for the project drawer: the project's own location, falling
+  // back to its single Cert's first mapped location once that record loads.
+  const projectMapUri =
+    record.kind === "project" ? record.locationUri ?? projectBumicerts?.[0]?.locationUris[0] ?? null : null;
   const ownerHref = accountHref(preferredOwnerIdentifier);
   const managingGroupRole = isEditableObservationRecord(record)
     ? groupMemberships.find((group) => group.groupDid === record.did)?.role ?? null
@@ -506,6 +549,14 @@ export function RecordDrawer({
               loading={projectBumicerts === null && record.bumicertUris.length > 0}
               evidence={record.evidence}
             />
+          )}
+
+          {record.kind === "project" && projectHref && projectMapUri && (
+            <ProjectDrawerMap locationUri={projectMapUri} projectHref={projectHref} />
+          )}
+
+          {record.kind === "project" && projectHref && projectUpdates && projectUpdates.length > 0 && (
+            <ProjectDrawerUpdates updates={projectUpdates} projectHref={projectHref} />
           )}
 
           {record.kind === "occurrence" && (
@@ -1470,6 +1521,80 @@ function ProjectCertSummary({
         </section>
       ) : null}
     </>
+  );
+}
+
+// Embeds the same interactive boundary preview the project page's at-a-glance
+// sidebar uses. Tapping anywhere opens the full Places section on the project
+// page.
+function polygonsViewHref(locationUri: string): string {
+  return `https://polygons-gainforest.vercel.app/view?${new URLSearchParams({
+    certifiedLocationRecordUri: locationUri,
+  }).toString()}`;
+}
+
+function ProjectDrawerMap({ locationUri, projectHref }: { locationUri: string; projectHref: string }) {
+  const t = useTranslations("marketplace.recordDrawer");
+  return (
+    <section className="mt-5 space-y-2.5">
+      <div className="flex items-center justify-between gap-2">
+        <h3 className="text-[13px] font-medium text-foreground">{t("projectMap.title")}</h3>
+        <Link
+          href={`${projectHref}#places`}
+          className="text-[12.5px] font-medium text-primary transition-colors hover:underline"
+        >
+          {t("projectMap.view")}
+        </Link>
+      </div>
+      <Link
+        href={`${projectHref}#places`}
+        aria-label={t("projectMap.view")}
+        className="group relative block overflow-hidden rounded-2xl border border-border-soft"
+      >
+        <iframe
+          src={polygonsViewHref(locationUri)}
+          className="pointer-events-none h-44 w-full border-0"
+          loading="lazy"
+          title={t("projectMap.alt")}
+        />
+        <span aria-hidden className="absolute inset-0 transition-colors group-hover:bg-primary/[0.06]" />
+      </Link>
+    </section>
+  );
+}
+
+function ProjectDrawerUpdates({ updates, projectHref }: { updates: TimelineAttachmentItem[]; projectHref: string }) {
+  const t = useTranslations("marketplace.recordDrawer");
+  return (
+    <section className="mt-5 space-y-2.5">
+      <div className="flex items-center justify-between gap-2">
+        <h3 className="text-[13px] font-medium text-foreground">{t("projectUpdates.title")}</h3>
+        <Link
+          href={`${projectHref}#updates`}
+          className="text-[12.5px] font-medium text-primary transition-colors hover:underline"
+        >
+          {t("projectUpdates.seeAll")}
+        </Link>
+      </div>
+      <ul className="space-y-2">
+        {updates.map((entry) => {
+          const date = entry.record.createdAt ?? entry.metadata.createdAt;
+          return (
+            <li key={entry.metadata.uri ?? entry.metadata.rkey}>
+              <Link
+                href={`${projectHref}#updates`}
+                className="group block rounded-xl border border-border-soft bg-surface p-3 transition-colors hover:border-primary/40 hover:bg-surface-sunken"
+              >
+                <p className="line-clamp-2 text-[13px] font-medium leading-snug text-foreground transition-colors group-hover:text-primary">
+                  {entry.record.title?.trim() || entry.record.shortDescription?.trim() || t("projectUpdates.fallback")}
+                </p>
+                {date ? <p className="mt-1 text-[11px] text-muted-foreground">{formatRelative(date)}</p> : null}
+              </Link>
+            </li>
+          );
+        })}
+      </ul>
+    </section>
   );
 }
 

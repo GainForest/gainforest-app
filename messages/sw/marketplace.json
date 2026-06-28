@@ -1006,6 +1006,16 @@
     "projectEvidence": {
       "title": "Ushahidi"
     },
+    "projectMap": {
+      "title": "Ramani",
+      "view": "Tazama maeneo",
+      "alt": "Ramani ya mipaka ya eneo"
+    },
+    "projectUpdates": {
+      "title": "Masasisho ya hivi karibuni",
+      "seeAll": "Ona zote",
+      "fallback": "Sasisho"
+    },
     "projectBumicerts": {
       "title": "vyeti katika mradi huu",
       "view": "Tazama cheti",

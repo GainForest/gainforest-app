@@ -1006,6 +1006,16 @@
     "projectEvidence": {
       "title": "Bukti"
     },
+    "projectMap": {
+      "title": "Peta",
+      "view": "Lihat lokasi",
+      "alt": "Peta batas lokasi"
+    },
+    "projectUpdates": {
+      "title": "Pembaruan terbaru",
+      "seeAll": "Lihat semua",
+      "fallback": "Pembaruan"
+    },
     "projectBumicerts": {
       "title": "sertifikat dalam proyek ini",
       "view": "Lihat sertifikat",

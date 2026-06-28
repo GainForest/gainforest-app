@@ -1006,6 +1006,16 @@
     "projectEvidence": {
       "title": "Evidência"
     },
+    "projectMap": {
+      "title": "Mapa",
+      "view": "Ver locais",
+      "alt": "Mapa de limites do local"
+    },
+    "projectUpdates": {
+      "title": "Atualizações recentes",
+      "seeAll": "Ver tudo",
+      "fallback": "Atualização"
+    },
     "projectBumicerts": {
       "title": "certificados neste projeto",
       "view": "Ver certificado",
