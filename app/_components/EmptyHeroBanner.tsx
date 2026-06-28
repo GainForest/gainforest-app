@@ -14,6 +14,7 @@ export function EmptyHeroBanner({
   description,
   ctaLabel,
   ctaHref,
+  onCtaClick,
   ctaIcon,
   ctaDisabled = false,
   ctaDisabledReason,
@@ -22,12 +23,14 @@ export function EmptyHeroBanner({
   description: string;
   ctaLabel?: string;
   ctaHref?: string;
+  /** Render the CTA as a button with this handler instead of a link. */
+  onCtaClick?: () => void;
   ctaIcon?: ReactNode;
   ctaDisabled?: boolean;
   ctaDisabledReason?: string | null;
   className?: string;
 }) {
-  const showCta = Boolean(ctaLabel) && (ctaDisabled || Boolean(ctaHref));
+  const showCta = Boolean(ctaLabel) && (ctaDisabled || Boolean(ctaHref) || Boolean(onCtaClick));
 
   return (
     <motion.section
@@ -62,6 +65,11 @@ export function EmptyHeroBanner({
           {showCta ? (
             ctaDisabled ? (
               <Button type="button" size="sm" disabled title={ctaDisabledReason ?? undefined} className="shrink-0 self-start sm:self-auto">
+                {ctaIcon}
+                {ctaLabel}
+              </Button>
+            ) : onCtaClick ? (
+              <Button type="button" size="sm" onClick={onCtaClick} className="shrink-0 self-start sm:self-auto">
                 {ctaIcon}
                 {ctaLabel}
               </Button>

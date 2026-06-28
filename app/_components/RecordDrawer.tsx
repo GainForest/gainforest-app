@@ -308,6 +308,10 @@ export function RecordDrawer({
   }, [record]);
 
   const preferredOwnerIdentifier = usePreferredDidIdentifier(record?.did ?? "");
+  const projectGalleryImages = useMemo(
+    () => (projectGalleries ?? []).flatMap((gallery) => gallery.images),
+    [projectGalleries],
+  );
 
   if (!record) return null;
   const activeRecord = record;
@@ -351,10 +355,6 @@ export function RecordDrawer({
       ? localObservationHref(preferredOwnerIdentifier, record.rkey)
       : null;
   const projectHref = record.kind === "project" ? localProjectHref(preferredOwnerIdentifier, record.rkey) : null;
-  const projectGalleryImages = useMemo(
-    () => (projectGalleries ?? []).flatMap((gallery) => gallery.images),
-    [projectGalleries],
-  );
   const ownerHref = accountHref(preferredOwnerIdentifier);
   const managingGroupRole = isEditableObservationRecord(record)
     ? groupMemberships.find((group) => group.groupDid === record.did)?.role ?? null

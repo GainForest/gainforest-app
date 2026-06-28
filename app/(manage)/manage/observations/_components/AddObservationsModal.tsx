@@ -88,10 +88,13 @@ function canSubmitItem(item: QuickItem): boolean {
 
 export function AddObservationsModal({
   target,
+  projectRef,
   onViewObservations,
   onClose,
 }: {
   target: ManageTarget;
+  /** When set, each new observation is attached to this project (at-uri). */
+  projectRef?: string | null;
   /** Navigate to the observations list (called after a successful add). */
   onViewObservations: () => void;
   onClose: () => void;
@@ -339,6 +342,7 @@ export function AddObservationsModal({
       decimalLongitude: item.location ? String(item.location.lng) : "",
       occurrenceRemarks: item.notes.trim(),
       associatedMedia: item.file.name,
+      ...(projectRef ? { projectRef } : {}),
     });
     let primaryBlobRef: ObservationBlobRef | null = null;
     const photo = await createObservationPhoto({

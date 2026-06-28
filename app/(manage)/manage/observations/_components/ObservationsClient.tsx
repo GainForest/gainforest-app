@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState, type ChangeEvent, type ComponentProps, type DragEvent, type ReactNode } from "react";
 import { parseAsString, parseAsStringEnum, useQueryState } from "nuqs";
@@ -35,7 +34,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { useModal } from "@/components/ui/modal/context";
 import QuickTooltip from "@/components/ui/quick-tooltip";
-import { manageApiHref, manageHref, type ManageTarget } from "@/lib/links";
+import { manageApiHref, type ManageTarget } from "@/lib/links";
 import { cn } from "@/lib/utils";
 import { ManageConfirmModal } from "../../_components/ManageConfirmModal";
 import { canCreateRecord, canDeleteRecord } from "../../_lib/cgs-permissions";
@@ -49,6 +48,7 @@ import {
   type ObservationBlobRef,
 } from "./observation-mutations";
 import { LocationPickerModal, LocationPickerModalId } from "./LocationPickerModal";
+import { AddObservationsModal } from "./AddObservationsModal";
 import { takeAddDataHandoff } from "../../_lib/upload/add-data-handoff";
 import {
   fetchDefaultObservationCenter,
@@ -61,11 +61,6 @@ import { cleanFileName, compressImageIfNeeded, dateFromFile, imageMetadata } fro
 type InitialPage = NonNullable<ComponentProps<typeof RecordExplorer>["initialPage"]>;
 type ObservationProjectGroup = { projectUri: string; title: string; count: number; uris: string[] };
 
-/** at://did/org.hypercerts.collection/rkey -> "did/rkey" for the forProject param. */
-function projectIdentityFromUri(uri: string): string | null {
-  const match = uri.match(/^at:\/\/([^/]+)\/org\.hypercerts\.collection\/([^/]+)$/);
-  return match?.[1] && match[2] ? `${match[1]}/${match[2]}` : null;
-}
 type Mode = "list" | "add";
 type ItemStatus = "analyzing" | "ready" | "error" | "uploading" | "uploaded" | "uploadError";
 
@@ -447,9 +442,6 @@ export function ObservationsClient({ target, initialPage, forProject = null }: {
 
   const activeGroup = projectGroups.find((group) => group.projectUri === projectFilter) ?? null;
   const filterUris = useMemo(() => (activeGroup ? new Set(activeGroup.uris) : null), [activeGroup]);
-  // When viewing a single project's observations, keep "Add observation"
-  // anchored to that project so newly collected records stay attached.
-  const addForProject = activeGroup ? projectIdentityFromUri(activeGroup.projectUri) : null;
 
   const handleVisibleRecordsChange = useCallback((records: OccurrenceRecord[]) => {
     setVisibleRecords(records);
@@ -514,6 +506,37 @@ export function ObservationsClient({ target, initialPage, forProject = null }: {
     );
     void modal.show();
   }
+
+  // The primary "Add observation" affordances (the grid tile and the empty
+  // state) open the quick iNaturalist-style modal — the same one the sidebar
+  // uses. The richer in-page bulk panel (mode=add) stays reachable from the
+  // unified Add data drop zone.
+  const openAddObservations = useCallback(() => {
+    if (createPermission.reason) return;
+    const close = () => {
+      void modal.hide().then(() => modal.clear());
+    };
+    modal.pushModal(
+      {
+        id: "add-observations",
+        dialogWidth: "max-w-2xl w-[calc(100%-2rem)]",
+        forceDialog: true,
+        content: (
+          <AddObservationsModal
+            target={target}
+            projectRef={activeGroup?.projectUri ?? null}
+            onClose={close}
+            onViewObservations={() => {
+              close();
+              router.refresh();
+            }}
+          />
+        ),
+      },
+      true,
+    );
+    void modal.show();
+  }, [activeGroup?.projectUri, createPermission.reason, modal, router, target]);
 
   if (mode === "add") {
     return (
@@ -598,8 +621,8 @@ export function ObservationsClient({ target, initialPage, forProject = null }: {
           filterUris={filterUris}
           emptyFilteredTitle={t("filterEmptyTitle")}
           emptyFilteredBody={t("filterEmptyBody")}
-          leadingCard={<AddObservationTile target={target} forProject={addForProject} disabledReason={createPermission.reason} />}
-          emptyState={<ObservationEmptyState target={target} forProject={addForProject} disabledReason={createPermission.reason} />}
+          leadingCard={<AddObservationTile onAdd={openAddObservations} disabledReason={createPermission.reason} />}
+          emptyState={<ObservationEmptyState onAdd={openAddObservations} disabledReason={createPermission.reason} />}
           hideToolbarWhenEmpty
           onEmptyStateChange={setIsEmpty}
           showStatsOverview={false}
@@ -616,7 +639,7 @@ export function ObservationsClient({ target, initialPage, forProject = null }: {
   );
 }
 
-function AddObservationTile({ target, forProject, disabledReason }: { target: ManageTarget; forProject?: string | null; disabledReason?: string | null }) {
+function AddObservationTile({ onAdd, disabledReason }: { onAdd: () => void; disabledReason?: string | null }) {
   const t = useTranslations("upload.observations");
   const content = (
     <>
@@ -633,29 +656,26 @@ function AddObservationTile({ target, forProject, disabledReason }: { target: Ma
   );
 
   const className = "group/tile flex aspect-square w-full flex-col items-center justify-center rounded-3xl border border-dashed border-primary/25 bg-gradient-to-b from-primary/[0.06] to-background p-4 text-center transition-colors hover:border-primary/45 hover:from-primary/[0.1]";
-  if (disabledReason) {
-    return (
-      <button type="button" disabled title={disabledReason} className={`${className} cursor-not-allowed opacity-65`}>
-        {content}
-      </button>
-    );
-  }
-
   return (
-    <Link href={manageHref(target, "observations", { mode: "add", ...(forProject ? { forProject } : {}) })} className={className}>
+    <button
+      type="button"
+      onClick={disabledReason ? undefined : onAdd}
+      disabled={Boolean(disabledReason)}
+      title={disabledReason ?? undefined}
+      className={cn(className, disabledReason && "cursor-not-allowed opacity-65")}
+    >
       {content}
-    </Link>
+    </button>
   );
 }
 
-function ObservationEmptyState({ target, forProject, disabledReason }: { target: ManageTarget; forProject?: string | null; disabledReason?: string | null }) {
+function ObservationEmptyState({ onAdd, disabledReason }: { onAdd: () => void; disabledReason?: string | null }) {
   const t = useTranslations("upload.observations");
-  const addHref = manageHref(target, "observations", { mode: "add", ...(forProject ? { forProject } : {}) });
   return (
     <EmptyHeroBanner
       description={t("emptyHeroDescription")}
       ctaLabel={t("addTileTitle")}
-      ctaHref={addHref}
+      onCtaClick={onAdd}
       ctaIcon={<ImagePlusIcon />}
       ctaDisabled={Boolean(disabledReason)}
       ctaDisabledReason={disabledReason}
