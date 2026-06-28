@@ -10,15 +10,13 @@ import { getAccountRouteData, readAccountRouteParams } from "../../../account/_l
 import { accountHref, localProjectHref } from "../../../_lib/urls";
 import { getRequestOrigin } from "../../../_lib/request-origin";
 import {
-  BumicertDetailBody,
+  ProjectDetailView,
   loadBumicertRouteData,
-  parseDetailTab,
 } from "../../../cert/[did]/[rkey]/page";
 
 export const revalidate = 60;
 
 type ProjectPageParams = Promise<{ did: string; rkey: string }>;
-type ProjectSearchParams = Promise<{ tab?: string | string[] }>;
 
 const COLLECTION = "org.hypercerts.collection";
 
@@ -53,10 +51,8 @@ export async function generateMetadata({ params }: { params: ProjectPageParams }
 
 export default async function ProjectDetailPage({
   params,
-  searchParams,
 }: {
   params: ProjectPageParams;
-  searchParams: ProjectSearchParams;
 }) {
   const { record, did, rkey, urlIdentifier } = await loadProject(params);
 
@@ -67,29 +63,25 @@ export default async function ProjectDetailPage({
   const certUri = record.bumicertUris[0] ?? null;
   if (certUri) {
     const certRkey = rkeyFromUri(certUri);
-    const [routeData, search, origin] = await Promise.all([
+    const [routeData, origin] = await Promise.all([
       certRkey ? loadBumicertRouteData(did, certRkey, urlIdentifier) : Promise.resolve(null),
-      searchParams,
       getRequestOrigin(),
     ]);
 
     if (routeData) {
       const canonicalIdentifier = routeData.owner.urlIdentifier;
       const projectHref = localProjectHref(canonicalIdentifier, rkey);
-      const activeTab = parseDetailTab(search.tab);
       if (canonicalIdentifier !== urlIdentifier) {
-        redirect(activeTab === "overview" ? projectHref : `${projectHref}?tab=${activeTab}`);
+        redirect(projectHref);
       }
       const t = await getTranslations("marketplace.projectPage");
       return (
-        <BumicertDetailBody
+        <ProjectDetailView
           routeData={routeData}
-          activeTab={activeTab}
           basePath={projectHref}
           origin={origin}
           backHref="/projects"
           backLabel={t("back")}
-          showMore={false}
           // Match timeline evidence pinned to the Cert URI *or* the project
           // (collection) URI — older projects attached their updates to the
           // collection, which is where this project's timeline lives.

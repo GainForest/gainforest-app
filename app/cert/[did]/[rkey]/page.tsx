@@ -511,6 +511,313 @@ export async function BumicertDetailBody({
   );
 }
 
+/**
+ * Integrated, single-page detail layout for a project. Instead of hiding
+ * places, updates, reviews, and support behind tabs, every section is rendered
+ * inline with anchored section headers; the at-a-glance evidence chips double
+ * as in-page navigation. Used by the project detail page; the tabbed
+ * `BumicertDetailBody` is kept for legacy standalone Certs.
+ */
+export async function ProjectDetailView({
+  routeData,
+  basePath,
+  origin,
+  backHref,
+  backLabel,
+  timelineMatchUris,
+}: {
+  routeData: RouteData;
+  basePath: string;
+  origin: string;
+  backHref?: string;
+  backLabel?: string;
+  timelineMatchUris?: string[];
+}) {
+  const { record, detail, owner, fundingConfig, authSession } = routeData;
+  const matchUris = timelineMatchUris && timelineMatchUris.length > 0 ? timelineMatchUris : [record.atUri];
+
+  const [workScopeT, permissionT, timelineT, timelineEntryT, referenceT] = await Promise.all([
+    getTranslations("common.workScopes"),
+    getTranslations("bumicert.detail.evidenceAdder.permissions"),
+    getTranslations("bumicert.detail.timeline"),
+    getTranslations("bumicert.detail.timelineEntry"),
+    getTranslations("bumicert.detail.reference"),
+  ]);
+  const workScopeLabels: WorkScopeLabels = {
+    reforestation: workScopeT("reforestation"),
+    forest_protection: workScopeT("forestProtection"),
+    biodiversity_monitoring: workScopeT("natureMonitoring"),
+    community_stewardship: workScopeT("communityStewardship"),
+    carbon_removal: workScopeT("carbonRemoval"),
+    restoration_maintenance: workScopeT("restorationMaintenance"),
+  };
+
+  const detailHref = basePath;
+  const description = detail?.blurb ?? record.shortDescription;
+  const ownerProfileHref = `/account/${encodeURIComponent(owner.urlIdentifier)}`;
+
+  const [certManageAccess, receiptsResult, observations, observationSummary, reviewCounts, projectGalleries, reviews, attachmentsResult, timelineAccess] = await Promise.all([
+    resolveCertManageAccess(record.did, owner.kind, authSession),
+    fetchReceipts().then(
+      (all) => ({ ok: true as const, receipts: all.filter((receipt) => receipt.bumicertUri === record.atUri) }),
+      () => ({ ok: false as const, receipts: [] as FundingReceipt[] }),
+    ),
+    fetchImageOccurrencesByDid(record.did, 24).catch(() => [] as OccurrenceRecord[]),
+    fetchObservationSummaryByDid(record.did).catch(() => null),
+    fetchReviewCounts(record.atUri).catch(() => null),
+    fetchGalleriesForBumicertProject(record.did, record.atUri).catch(() => [] as ProjectImageGallery[]),
+    fetchReviewsForSubject(record.atUri).catch(() => ({ evaluations: [], comments: [] })),
+    fetchTimelineAttachmentsByDid(record.did).then(
+      (items) => ({ ok: true as const, items }),
+      () => ({ ok: false as const, items: [] as TimelineAttachmentItem[] }),
+    ),
+    resolveTimelineAccess(record.did, owner.kind, authSession, {
+      signIn: permissionT("signIn"),
+      notMember: permissionT("notMember"),
+      createDenied: permissionT("createDenied"),
+      deleteDenied: permissionT("deleteDenied"),
+    }),
+  ]);
+
+  const donationReceipts = receiptsResult.receipts;
+  const donationsUnavailable = !receiptsResult.ok;
+  const timelineAttachments = attachmentsResult.items;
+  const timelineAttachmentsUnavailable = !attachmentsResult.ok;
+  const timelineEntries = getEntriesForActivities(timelineAttachments, matchUris);
+  const timelineReferences = timelineEntries.length
+    ? await resolveTimelineReferences({
+        entries: timelineEntries,
+        copy: {
+          linkedRecord: referenceT("linkedRecord"),
+          linkedAudioRecord: referenceT("linkedAudioRecord"),
+          audioEvidence: referenceT("audioEvidence"),
+          linkedDataset: referenceT("linkedDataset"),
+          linkedTreeRecord: referenceT("linkedTreeRecord"),
+          linkedSiteRecord: referenceT("linkedSiteRecord"),
+          siteEvidence: referenceT("siteEvidence"),
+          linkedNatureData: timelineT("fallbacks.linkedNatureData"),
+          treeCount: (count: number) => timelineEntryT("treeCount", { count }),
+          speciesCount: (count: number) => timelineEntryT("speciesCount", { count }),
+          observationCount: (count: number) => timelineEntryT("observationCount", { count }),
+          individualCount: (count: number) => referenceT("individualCount", { count }),
+        },
+      }).catch(() => [])
+    : [];
+  const emptyTimelineSources = { audio: [], occurrences: [], occurrencesIncomplete: false, treeGroups: [], places: [] };
+
+  const isOwner = authSession.isLoggedIn && authSession.did === record.did;
+  const hasObservations = observations.length > 0;
+  const hasPlaces = record.locationUris.length > 0;
+  // Stewards always see Updates so they can add evidence; visitors only when
+  // there is something to show.
+  const showUpdates = timelineEntries.length > 0 || timelineAccess.canManageEvidence;
+  const showSupport = Boolean(fundingConfig?.receivingWallet?.uri) || donationReceipts.length > 0 || isOwner;
+  const donationsHref = showSupport ? `${detailHref}#support` : detailHref;
+  const reviewCount = (reviewCounts?.evaluations ?? 0) + (reviewCounts?.comments ?? 0);
+
+  // Evidence chips double as in-page nav; point each at its section when that
+  // section is rendered, otherwise fall back so zero-state chips aren't dead.
+  const anchors = {
+    boundaries: hasPlaces ? "#places" : detailHref,
+    sightings: hasObservations ? "#observations" : ownerProfileHref,
+    timeline: showUpdates ? "#updates" : detailHref,
+    reviews: "#reviews",
+  };
+
+  const jsonLd = buildBumicertJsonLd(record, owner, fundingConfig, detailHref, description ?? null, origin);
+
+  return (
+    <>
+      <script
+        id="bumicert-json-ld"
+        type="application/ld+json"
+        // eslint-disable-next-line react/no-danger
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <BumicertHeaderTitleBridge
+        summary={{
+          title: record.title,
+          donateHref: donationsHref,
+          card: {
+            did: record.did,
+            title: record.title,
+            shortDescription: record.shortDescription,
+            imageUrl: record.imageUrl,
+            locationCount: record.locationCount,
+            contributorCount: record.contributorCount,
+            creatorName: record.creatorName,
+            creatorAvatarRef: record.creatorAvatarRef,
+            startDate: record.startDate,
+            endDate: record.endDate,
+          },
+        }}
+      />
+      <main className="min-h-screen bg-background pb-20">
+        {backHref ? (
+          <div className="mx-auto max-w-6xl px-6 pt-6 lg:px-8">
+            <Link
+              href={backHref}
+              className="inline-flex items-center gap-1.5 text-[13px] font-medium text-muted-foreground transition-colors hover:text-foreground"
+            >
+              <ArrowLeftIcon className="h-3.5 w-3.5" aria-hidden />
+              {backLabel ?? "Back"}
+            </Link>
+          </div>
+        ) : null}
+        <section className="mx-auto grid max-w-6xl grid-cols-1 gap-x-10 gap-y-8 px-6 py-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:px-8">
+          <div className="min-w-0">
+            <header>
+              <div className="flex flex-wrap items-center gap-2.5">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-[12px] font-medium text-primary-dark">
+                  <SproutIcon className="h-3.5 w-3.5" aria-hidden />
+                  Project
+                </span>
+                {detail?.badges?.map((badge, index) => (
+                  <Badge key={`${badge.label}-${index}`} badge={badge} workScopeLabels={workScopeLabels} />
+                ))}
+              </div>
+              <h1
+                className="mt-3 max-w-3xl text-4xl font-light italic leading-tight tracking-[-0.035em] text-foreground md:text-5xl"
+                style={{ fontFamily: "var(--font-instrument-serif-var)" }}
+              >
+                {record.title}
+              </h1>
+            </header>
+
+            {detail?.richBody && detail.richBody.length > 0 ? (
+              <div className="mt-7"><RichText blocks={detail.richBody} className="text-base leading-7 md:text-lg md:leading-8" /></div>
+            ) : description ? (
+              <p className="mt-7 whitespace-pre-line text-base leading-7 text-foreground/76 md:text-lg md:leading-8">{description}</p>
+            ) : null}
+
+            {detail?.sections?.map((section, index) =>
+              section.fields.length === 0 ? null : (
+                <div key={section.title ?? index} className="mt-8 border-t border-border-soft pt-6">
+                  {section.title && (
+                    <h2 className="mb-4 text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">{section.title}</h2>
+                  )}
+                  <dl className="grid gap-4 sm:grid-cols-2">
+                    {section.fields.map((field) => (
+                      <div key={field.label} className={field.wide ? "sm:col-span-2" : undefined}>
+                        <dt className="text-[11px] font-medium uppercase tracking-[0.1em] text-foreground/45">{field.label}</dt>
+                        <dd className="mt-1 text-sm leading-6 text-foreground">{field.value}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                </div>
+              ),
+            )}
+
+            <EvidenceSection
+              evidence={{
+                boundaries: record.locationUris.length,
+                observationSummary,
+                timelineCount: timelineEntries.length,
+                reviews: reviewCounts,
+                detailHref,
+                ownerHref: ownerProfileHref,
+                anchors,
+              }}
+            />
+
+            <ProjectGalleryViewer galleries={projectGalleries} variant="bumicert" showProjectFilter={false} hideWhenEmpty compact />
+            {hasObservations ? (
+              <div id="observations" className="scroll-mt-24">
+                <BumicertObservationsGallery observations={observations} />
+              </div>
+            ) : null}
+
+            {hasPlaces ? (
+              <ProjectDetailSection id="places" icon={<MapPinnedIcon className="h-4 w-4" aria-hidden />} title="Places" count={formatNumber(record.locationUris.length)}>
+                <SiteBoundariesPanel record={record} />
+              </ProjectDetailSection>
+            ) : null}
+
+            {showUpdates ? (
+              <ProjectDetailSection id="updates" icon={<PaperclipIcon className="h-4 w-4" aria-hidden />} title="Updates & evidence" count={timelineEntries.length > 0 ? formatNumber(timelineEntries.length) : undefined}>
+                <BumicertTimeline
+                organizationDid={record.did}
+                activityUri={record.atUri}
+                activityCid={record.cid ?? ""}
+                matchActivityUris={matchUris}
+                bumicertTitle={record.title}
+                canManageEvidence={timelineAccess.canManageEvidence}
+                createPermission={timelineAccess.createPermission}
+                deletePermission={timelineAccess.deletePermission}
+                mutationRepo={timelineAccess.mutationRepo}
+                initialEntries={timelineAttachments}
+                sources={emptyTimelineSources}
+                references={timelineReferences}
+                  attachmentsUnavailable={timelineAttachmentsUnavailable}
+                />
+              </ProjectDetailSection>
+            ) : null}
+
+            <ProjectDetailSection id="reviews" icon={<ClipboardCheckIcon className="h-4 w-4" aria-hidden />} title="Reviews" count={reviewCount > 0 ? formatNumber(reviewCount) : undefined}>
+              <ReviewsPanel record={record} reviews={reviews} />
+            </ProjectDetailSection>
+
+            {showSupport ? (
+              <ProjectDetailSection id="support" icon={<HeartIcon className="h-4 w-4" aria-hidden />} title="Support">
+                <DonationsPanel
+                  record={record}
+                  owner={owner}
+                  fundingConfig={fundingConfig}
+                  authSession={authSession}
+                  receipts={donationReceipts}
+                  unavailable={donationsUnavailable}
+                />
+              </ProjectDetailSection>
+            ) : null}
+          </div>
+
+          <aside className="min-w-0">
+            <div className="lg:sticky lg:top-24">
+              <OverviewSidebar
+                record={record}
+                detail={detail}
+                owner={owner}
+                receipts={donationReceipts}
+                donationsUnavailable={donationsUnavailable}
+                fundingConfig={fundingConfig}
+                authSession={authSession}
+                canDelete={certManageAccess.canDelete}
+                mutationRepo={certManageAccess.mutationRepo}
+                deleteRedirectHref={ownerProfileHref}
+              />
+            </div>
+          </aside>
+        </section>
+      </main>
+    </>
+  );
+}
+
+function ProjectDetailSection({
+  id,
+  icon,
+  title,
+  count,
+  children,
+}: {
+  id: string;
+  icon: ReactNode;
+  title: string;
+  count?: ReactNode;
+  children: ReactNode;
+}) {
+  return (
+    <section id={id} className="mt-10 scroll-mt-24 border-t border-border-soft pt-7">
+      <div className="mb-5 flex items-center gap-2.5">
+        <span className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">{icon}</span>
+        <h2 className="font-instrument text-2xl italic leading-none tracking-[-0.02em] text-foreground sm:text-[1.75rem]">{title}</h2>
+        {count != null ? <span className="text-sm text-muted-foreground">{count}</span> : null}
+      </div>
+      {children}
+    </section>
+  );
+}
+
 async function fetchGalleriesForBumicertProject(
   did: string,
   bumicertUri: string,
@@ -1060,6 +1367,11 @@ type EvidenceInfo = {
   reviews: ReviewCounts | null;
   detailHref: string;
   ownerHref: string;
+  /**
+   * In-page anchor hrefs for the integrated layout. When set, the evidence
+   * chips scroll to inline sections instead of switching tabs.
+   */
+  anchors?: { boundaries: string; sightings: string; timeline: string; reviews: string };
 };
 
 function OverviewPanel({
@@ -1159,10 +1471,11 @@ function EvidenceSection({ evidence }: { evidence: EvidenceInfo }) {
         reviews.comments > 0 ? `${formatNumber(reviews.comments)} comment${reviews.comments === 1 ? "" : "s"}` : null,
       ].filter(Boolean).join(" · ");
 
+  const anchors = evidence.anchors;
   const chips: Array<{ key: string; href: string; icon: ReactNode; label: string; present: boolean }> = [
     {
       key: "boundaries",
-      href: `${detailHref}?tab=site-boundaries`,
+      href: anchors?.boundaries ?? `${detailHref}?tab=site-boundaries`,
       icon: <MapPinnedIcon className="h-3.5 w-3.5" aria-hidden />,
       label: boundaries > 0
         ? `${formatNumber(boundaries)} site ${boundaries === 1 ? "boundary" : "boundaries"} mapped`
@@ -1172,7 +1485,7 @@ function EvidenceSection({ evidence }: { evidence: EvidenceInfo }) {
     ...(observationSummary
       ? [{
           key: "sightings",
-          href: ownerHref,
+          href: anchors?.sightings ?? ownerHref,
           icon: <LeafIcon className="h-3.5 w-3.5" aria-hidden />,
           label: observationSummary.count > 0
             ? `${formatCompact(observationSummary.count)} nature sighting${observationSummary.count === 1 ? "" : "s"}${
@@ -1185,7 +1498,7 @@ function EvidenceSection({ evidence }: { evidence: EvidenceInfo }) {
     ...(timelineCount !== null
       ? [{
           key: "timeline",
-          href: `${detailHref}?tab=timeline`,
+          href: anchors?.timeline ?? `${detailHref}?tab=timeline`,
           icon: <PaperclipIcon className="h-3.5 w-3.5" aria-hidden />,
           label: timelineCount > 0
             ? `${formatNumber(timelineCount)} timeline item${timelineCount === 1 ? "" : "s"}`
@@ -1196,7 +1509,7 @@ function EvidenceSection({ evidence }: { evidence: EvidenceInfo }) {
     ...(reviews
       ? [{
           key: "reviews",
-          href: `${detailHref}?tab=reviews`,
+          href: anchors?.reviews ?? `${detailHref}?tab=reviews`,
           icon: <ClipboardCheckIcon className="h-3.5 w-3.5" aria-hidden />,
           label: reviewLabel,
           present: reviewVoices > 0,
