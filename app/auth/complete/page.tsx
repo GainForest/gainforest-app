@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { fetchAuthSession } from "@/app/_lib/auth-server";
-import { accountPath, getAccountRouteData } from "@/app/account/_lib/account-route";
+import { getAccountRouteData } from "@/app/account/_lib/account-route";
 import { AuthCompleteClient } from "./_components/AuthCompleteClient";
 
 export const metadata: Metadata = {
@@ -37,9 +37,9 @@ export default async function AuthCompletePage({ searchParams }: PageProps) {
   }
 
   const account = await getAccountRouteData(session.did, session.did).catch(() => null);
-  // Default post-login destination is the signed-in user's own profile, not the
-  // legacy /manage shim.
-  const finalDestination = destination === "/manage" && account ? accountPath(account.urlIdentifier) : destination;
+  // Default post-login destination is the activity feed (the app's logged-in
+  // home base), not the legacy /manage shim.
+  const finalDestination = destination === "/manage" ? "/feed" : destination;
 
   return (
     <AuthCompleteClient

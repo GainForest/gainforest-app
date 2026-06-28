@@ -676,25 +676,23 @@
   "feed": {
     "meta": {
       "title": "Aktivitas terkini",
-      "description": "Proyek, Sertifikat, pengamatan alam, organisasi, dan donasi terbaru di GainForest, dalam satu aliran langsung."
+      "description": "Proyek, pengamatan alam, organisasi, dan donasi terbaru di GainForest, dalam satu aliran langsung."
     },
     "eyebrow": "Aktivitas langsung",
     "hero": {
       "title": "Apa yang terjadi di",
       "accent": "GainForest",
-      "description": "Aliran langsung dari proyek, Sertifikat dampak, pengamatan alam, organisasi, dan donasi terbaru — semua dalam satu tempat."
+      "description": "Aliran langsung dari proyek, pengamatan alam, organisasi, dan donasi terbaru — semua dalam satu tempat."
     },
     "filters": {
       "all": "Semua",
       "project": "Proyek",
-      "bumicert": "Sertifikat",
       "observation": "Pengamatan",
       "organization": "Organisasi",
       "donation": "Donasi"
     },
     "verbs": {
       "project": "menerbitkan proyek",
-      "bumicert": "menerbitkan Sertifikat",
       "observation": "berbagi pengamatan alam",
       "organization": "mendaftarkan organisasi",
       "donation": "memberi donasi"

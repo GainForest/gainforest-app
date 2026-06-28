@@ -618,7 +618,7 @@ function SidebarHeader() {
   const collapsed = useSidebarCollapsed();
   return (
     <div className={cn("mb-4 flex w-full flex-col gap-2", collapsed && "items-center")}>
-      <Link className={cn("flex items-center rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50", collapsed ? "justify-center" : "gap-2.5")} href="/" aria-label="GainForest home">
+      <Link className={cn("flex items-center rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50", collapsed ? "justify-center" : "gap-2.5")} href="/feed" aria-label="GainForest home">
         <motion.div
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}

@@ -2,12 +2,15 @@
  * Activity feed — server-side assembly of a global, Bluesky-style "everything
  * happening on GainForest" timeline for the new /feed sidebar tab.
  *
- * Merges five public record streams into one newest-first stream:
+ * Merges four public record streams into one newest-first stream:
  *   - projects      (org.hypercerts.collection, type "project")
- *   - bumicerts     (org.hypercerts.claim.activity)
  *   - observations  (app.gainforest.dwc.occurrence)
  *   - organizations (app.certified.actor.organization)
  *   - donations     (org.hypercerts.fundingReceipt — completed USD/USDC gifts)
+ *
+ * Certs (org.hypercerts.claim.activity) are deliberately folded into projects
+ * rather than shown as their own rows — a project owns exactly one Cert and is
+ * its canonical surface, matching the /certs → /projects merge elsewhere.
  *
  * Inspired by simocracy-v2's `lib/landing-feed.ts`, which merges proposals,
  * comments, decisions, actions, and sims into a single chronological feed.
@@ -19,12 +22,17 @@
 import { publicExploreCache } from "./public-explore-cache";
 import { indexerQuery } from "./indexer";
 import { normaliseRef } from "./pds";
-import { FACILITATOR_DID, accountHref, localBumicertHref, localObservationHref, localProjectHref } from "./urls";
+import { FACILITATOR_DID, accountHref, localObservationHref, localProjectHref } from "./urls";
 
-/** The kinds of activity a feed row represents. */
+/** The kinds of activity a feed row represents.
+ *
+ *  Note: Certs (org.hypercerts.claim.activity) are intentionally NOT a feed
+ *  kind. A project owns exactly one Cert and the project surface carries the
+ *  full Cert experience, so — exactly like /certs → /projects and the cert
+ *  detail page redirecting to its project — the feed shows Certs as Projects
+ *  instead of as their own rows. */
 export type ActivityFeedKind =
   | "project"
-  | "bumicert"
   | "observation"
   | "organization"
   | "donation";
@@ -52,9 +60,9 @@ export interface ActivityFeedItem {
   imageUrl: string | null;
   /** PDS image blob ref; resolved client-side when present. */
   imageRef: string | null;
-  /** For donations: the funded bumicert's title, when resolved. */
+  /** For donations: the funded project's title, when resolved. */
   targetTitle: string | null;
-  /** For donations: the funded bumicert's in-app detail href. */
+  /** For donations: the funded project's in-app detail href. */
   targetHref: string | null;
   /** For donations: the raw amount. */
   amount: number | null;
@@ -67,7 +75,7 @@ export interface ActivityFeedResponse {
 }
 
 const MAX_FEED_ITEMS = 40;
-const MAX_PER_KIND = 8;
+const MAX_PER_KIND = 10;
 const MAX_TEXT = 220;
 
 // ── Certified profile helpers (mirrors the private helpers in indexer.ts) ────
@@ -111,7 +119,6 @@ function parseAtUri(uri: string): { did: string; rkey: string } | null {
 const FEED_QUERY = `
   query ActivityFeed(
     $projectFirst: Int!
-    $bumicertFirst: Int!
     $occurrenceFirst: Int!
     $orgFirst: Int!
     $receiptFirst: Int!
@@ -132,22 +139,6 @@ const FEED_QUERY = `
           ... on OrgHypercertsDefsLargeImage { image { ref } }
         }
         avatar {
-          __typename
-          ... on OrgHypercertsDefsUri { uri }
-          ... on OrgHypercertsDefsSmallImage { image { ref } }
-        }
-      } }
-    }
-
-    bumicerts: orgHypercertsClaimActivity(
-      first: $bumicertFirst
-      sortBy: createdAt
-      sortDirection: DESC
-    ) {
-      edges { node {
-        did rkey uri createdAt title shortDescription
-        ${CERTIFIED_PROFILE_DATA_FIELDS}
-        image {
           __typename
           ... on OrgHypercertsDefsUri { uri }
           ... on OrgHypercertsDefsSmallImage { image { ref } }
@@ -204,6 +195,7 @@ const FEED_QUERY = `
 type RawImage =
   | { __typename: "OrgHypercertsDefsUri"; uri?: string | null }
   | { __typename: "OrgHypercertsDefsSmallImage"; image?: { ref?: string | null } | null }
+  | { __typename: "OrgHypercertsDefsLargeImage"; image?: { ref?: string | null } | null }
   | null;
 
 type RawProject = {
@@ -216,17 +208,6 @@ type RawProject = {
   certifiedProfileData?: CertifiedProfileData;
   banner?: RawImage;
   avatar?: RawImage;
-};
-
-type RawBumicert = {
-  did: string;
-  rkey: string;
-  uri?: string | null;
-  createdAt: string;
-  title?: string | null;
-  shortDescription?: string | null;
-  certifiedProfileData?: CertifiedProfileData;
-  image?: RawImage;
 };
 
 type RawOccurrence = {
@@ -275,7 +256,6 @@ type RawReceipt = {
 
 type RawFeed = {
   projects?: { edges?: Array<{ node?: RawProject | null } | null> | null } | null;
-  bumicerts?: { edges?: Array<{ node?: RawBumicert | null } | null> | null } | null;
   occurrences?: { edges?: Array<{ node?: RawOccurrence | null } | null> | null } | null;
   organizations?: { edges?: Array<{ node?: RawOrg | null } | null> | null } | null;
   donations?: { edges?: Array<{ node?: RawReceipt | null } | null> | null } | null;
@@ -283,7 +263,9 @@ type RawFeed = {
 
 function imageMeta(image: RawImage): { url: string | null; ref: string | null } {
   if (image?.__typename === "OrgHypercertsDefsUri") return { url: image.uri?.trim() || null, ref: null };
-  if (image?.__typename === "OrgHypercertsDefsSmallImage") return { url: null, ref: normaliseRef(image.image?.ref) };
+  if (image?.__typename === "OrgHypercertsDefsSmallImage" || image?.__typename === "OrgHypercertsDefsLargeImage") {
+    return { url: null, ref: normaliseRef(image.image?.ref) };
+  }
   return { url: null, ref: null };
 }
 
@@ -310,29 +292,6 @@ function mapProjects(nodes: RawProject[]): ActivityFeedItem[] {
       href: localProjectHref(didOrHandle, n.rkey),
       imageUrl: banner.url ?? avatar.url,
       imageRef: banner.ref ?? avatar.ref,
-      targetTitle: null,
-      targetHref: null,
-      amount: null,
-      currency: null,
-    };
-  });
-}
-
-function mapBumicerts(nodes: RawBumicert[]): ActivityFeedItem[] {
-  return cap(nodes, MAX_PER_KIND).map((n) => {
-    const image = imageMeta(n.image ?? null);
-    return {
-      id: n.uri ?? `at://${n.did}/org.hypercerts.claim.activity/${n.rkey}`,
-      kind: "bumicert",
-      createdAt: n.createdAt,
-      actorDid: n.did,
-      actorName: profileName(n.certifiedProfileData),
-      actorAvatarRef: profileAvatarRef(n.certifiedProfileData),
-      title: (n.title ?? "Untitled cert").trim() || "Untitled cert",
-      text: clampText(n.shortDescription),
-      href: localBumicertHref(n.did, n.rkey),
-      imageUrl: image.url,
-      imageRef: image.ref,
       targetTitle: null,
       targetHref: null,
       amount: null,
@@ -409,37 +368,80 @@ function safeAmount(raw: string | null | undefined): number {
   return Number.isFinite(parsed) ? parsed : 0;
 }
 
-/** Resolve the titles of the bumicerts referenced by donation receipts in a
- *  single batched round-trip, so donation rows can name what was funded. */
-async function resolveBumicertTitles(uris: string[]): Promise<Map<string, string>> {
-  const out = new Map<string, string>();
-  const unique = [...new Set(uris)].filter((u) => u.startsWith("at://"));
+/** A donation funds a Cert; since Certs are folded into Projects, resolve each
+ *  funded Cert to its parent Project so donation rows name and link the project
+ *  instead of the (hidden) Cert. The Cert and its Project live in the same repo,
+ *  so we group the funded Cert URIs by owning DID and read that repo's project
+ *  collections, matching on the collection's `items[]` Cert references. */
+type DonationProject = { did: string; rkey: string; title: string | null };
+
+const FEED_PROJECTS_BY_DID_QUERY = `
+  query FeedProjectsByDid($did: String!) {
+    orgHypercertsCollection(
+      where: { did: { eq: $did }, type: { in: ["project", "Project"] } }
+      first: 200
+      sortBy: createdAt
+      sortDirection: DESC
+    ) {
+      edges { node { rkey title items { itemIdentifier { uri } } } }
+    }
+  }
+`;
+
+async function resolveProjectsForCertUris(certUris: string[]): Promise<Map<string, DonationProject>> {
+  const out = new Map<string, DonationProject>();
+  const unique = [...new Set(certUris)].filter((u) => u.startsWith("at://"));
   if (unique.length === 0) return out;
 
-  const selections = unique.map(
-    (uri, i) =>
-      `t${i}: orgHypercertsClaimActivityByUri(uri: ${JSON.stringify(uri)}) { title }`,
+  // Group funded Cert URIs by the DID of the repo that holds both Cert + project.
+  const byDid = new Map<string, Set<string>>();
+  for (const uri of unique) {
+    const parsed = parseAtUri(uri);
+    if (!parsed) continue;
+    const set = byDid.get(parsed.did) ?? new Set<string>();
+    set.add(uri);
+    byDid.set(parsed.did, set);
+  }
+
+  await Promise.all(
+    [...byDid.entries()].map(async ([did, certSet]) => {
+      const data = await indexerQuery<{
+        orgHypercertsCollection?: {
+          edges?: Array<{
+            node?: {
+              rkey?: string | null;
+              title?: string | null;
+              items?: Array<{ itemIdentifier?: { uri?: string | null } | null } | null> | null;
+            } | null;
+          } | null> | null;
+        } | null;
+      }>(FEED_PROJECTS_BY_DID_QUERY, { did }).catch(() => null);
+      for (const edge of data?.orgHypercertsCollection?.edges ?? []) {
+        const node = edge?.node;
+        if (!node?.rkey) continue;
+        for (const item of node.items ?? []) {
+          const certUri = item?.itemIdentifier?.uri;
+          if (typeof certUri === "string" && certSet.has(certUri) && !out.has(certUri)) {
+            out.set(certUri, { did, rkey: node.rkey, title: node.title?.trim() || null });
+          }
+        }
+      }
+    }),
   );
-  const query = `query DonationTargets {\n${selections.join("\n")}\n}`;
-  const data = await indexerQuery<Record<string, { title?: string | null } | null>>(query, {}).catch(() => null);
-  if (!data) return out;
-  unique.forEach((uri, i) => {
-    const title = data[`t${i}`]?.title?.trim();
-    if (title) out.set(uri, title);
-  });
   return out;
 }
 
 async function mapDonations(nodes: RawReceipt[]): Promise<ActivityFeedItem[]> {
   const capped = cap(nodes, MAX_PER_KIND);
-  const targetUris = capped
+  const certUris = capped
     .map((n) => n.for?.uri ?? null)
     .filter((u): u is string => Boolean(u));
-  const titles = await resolveBumicertTitles(targetUris);
+  const projectByCert = await resolveProjectsForCertUris(certUris);
 
   return capped.map((n) => {
-    const bumicertUri = n.for?.uri ?? null;
-    const parsed = bumicertUri ? parseAtUri(bumicertUri) : null;
+    const certUri = n.for?.uri ?? null;
+    const project = certUri ? projectByCert.get(certUri) ?? null : null;
+    const projectHref = project ? localProjectHref(project.did, project.rkey) : null;
     const donorDid = n.from?.__typename === "AppCertifiedDefsDid" ? n.from.did ?? null : null;
     const donorWallet = n.from?.__typename === "OrgHypercertsFundingReceiptText" ? n.from.value ?? null : null;
     const currency = (n.currency ?? "USD").toUpperCase();
@@ -453,11 +455,13 @@ async function mapDonations(nodes: RawReceipt[]): Promise<ActivityFeedItem[]> {
       actorAvatarRef: null,
       title: null,
       text: clampText(donorWallet ? `via ${donorWallet.slice(0, 10)}…` : null),
-      href: parsed ? localBumicertHref(parsed.did, parsed.rkey) : "/donations",
+      // Link to the funded project; fall back to the donations hub when the
+      // funded Cert has no parent project (legacy standalone gifts).
+      href: projectHref ?? "/donations",
       imageUrl: null,
       imageRef: null,
-      targetTitle: bumicertUri ? titles.get(bumicertUri) ?? null : null,
-      targetHref: parsed ? localBumicertHref(parsed.did, parsed.rkey) : null,
+      targetTitle: project?.title ?? null,
+      targetHref: projectHref,
       amount,
       currency,
     };
@@ -471,7 +475,6 @@ async function buildActivityFeedUncached(): Promise<ActivityFeedItem[]> {
     FEED_QUERY,
     {
       projectFirst: MAX_PER_KIND,
-      bumicertFirst: MAX_PER_KIND,
       occurrenceFirst: MAX_PER_KIND,
       orgFirst: MAX_PER_KIND,
       receiptFirst: MAX_PER_KIND,
@@ -480,7 +483,6 @@ async function buildActivityFeedUncached(): Promise<ActivityFeedItem[]> {
   );
 
   const projectNodes = (data?.projects?.edges ?? []).map((e) => e?.node).filter((n): n is RawProject => Boolean(n?.did));
-  const bumicertNodes = (data?.bumicerts?.edges ?? []).map((e) => e?.node).filter((n): n is RawBumicert => Boolean(n?.did));
   const occurrenceNodes = (data?.occurrences?.edges ?? []).map((e) => e?.node).filter((n): n is RawOccurrence => Boolean(n?.did));
   const orgNodes = (data?.organizations?.edges ?? []).map((e) => e?.node).filter((n): n is RawOrg => Boolean(n?.did));
   const receiptNodes = (data?.donations?.edges ?? []).map((e) => e?.node).filter((n): n is RawReceipt => Boolean(n?.uri));
@@ -489,7 +491,6 @@ async function buildActivityFeedUncached(): Promise<ActivityFeedItem[]> {
 
   const merged = [
     ...mapProjects(projectNodes),
-    ...mapBumicerts(bumicertNodes),
     ...mapOccurrences(occurrenceNodes),
     ...mapOrganizations(orgNodes),
     ...donationItems,

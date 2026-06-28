@@ -9,7 +9,6 @@ import {
   Building2Icon,
   FolderKanbanIcon,
   HeartHandshakeIcon,
-  LeafIcon,
   Loader2Icon,
   NewspaperIcon,
   RefreshCwIcon,
@@ -25,7 +24,6 @@ type Filter = "all" | ActivityFeedKind;
 const FILTERS: { key: Filter; Icon: typeof NewspaperIcon }[] = [
   { key: "all", Icon: NewspaperIcon },
   { key: "project", Icon: FolderKanbanIcon },
-  { key: "bumicert", Icon: LeafIcon },
   { key: "observation", Icon: BinocularsIcon },
   { key: "organization", Icon: Building2Icon },
   { key: "donation", Icon: HeartHandshakeIcon },
@@ -296,8 +294,6 @@ function KindIcon({ kind, className }: { kind: ActivityFeedKind; className?: str
   switch (kind) {
     case "project":
       return <FolderKanbanIcon className={className} />;
-    case "bumicert":
-      return <LeafIcon className={className} />;
     case "observation":
       return <BinocularsIcon className={className} />;
     case "organization":

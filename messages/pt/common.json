@@ -676,25 +676,23 @@
   "feed": {
     "meta": {
       "title": "Atividade recente",
-      "description": "Os projetos, Certificados, avistamentos da natureza, organizações e doações mais recentes no GainForest, em uma única transmissão ao vivo."
+      "description": "Os projetos, avistamentos da natureza, organizações e doações mais recentes no GainForest, em uma única transmissão ao vivo."
     },
     "eyebrow": "Atividade ao vivo",
     "hero": {
       "title": "O que está acontecendo no",
       "accent": "GainForest",
-      "description": "Uma transmissão ao vivo dos projetos, Certificados de impacto, avistamentos da natureza, organizações e doações mais recentes — tudo em um só lugar."
+      "description": "Uma transmissão ao vivo dos projetos, avistamentos da natureza, organizações e doações mais recentes — tudo em um só lugar."
     },
     "filters": {
       "all": "Tudo",
       "project": "Projetos",
-      "bumicert": "Certificados",
       "observation": "Avistamentos",
       "organization": "Organizações",
       "donation": "Doações"
     },
     "verbs": {
       "project": "publicou um projeto",
-      "bumicert": "publicou um Certificado",
       "observation": "compartilhou um avistamento",
       "organization": "registrou uma organização",
       "donation": "fez uma doação"

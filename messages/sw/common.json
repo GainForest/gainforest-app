@@ -676,25 +676,23 @@
   "feed": {
     "meta": {
       "title": "Shughuli za hivi punde",
-      "description": "Miradi, Vitambulisho, maonevu ya asili, mashirika na michango ya hivi karibuni kwenye GainForest, katika mtiririko mmoja wa moja kwa moja."
+      "description": "Miradi, maonevu ya asili, mashirika na michango ya hivi karibuni kwenye GainForest, katika mtiririko mmoja wa moja kwa moja."
     },
     "eyebrow": "Shughuli zinazoendelea",
     "hero": {
       "title": "Kinachotokea kwenye",
       "accent": "GainForest",
-      "description": "Mtiririko wa moja kwa moja wa miradi, Vitambulisho vya athari, maonevu ya asili, mashirika na michango ya hivi karibuni — yote mahali pamoja."
+      "description": "Mtiririko wa moja kwa moja wa miradi, maonevu ya asili, mashirika na michango ya hivi karibuni — yote mahali pamoja."
     },
     "filters": {
       "all": "Yote",
       "project": "Miradi",
-      "bumicert": "Vitambulisho",
       "observation": "Maonevu",
       "organization": "Mashirika",
       "donation": "Michango"
     },
     "verbs": {
       "project": "amechapisha mradi",
-      "bumicert": "amechapisha Kitambulisho",
       "observation": "ameshiriki onevu la asili",
       "organization": "amesajili shirika",
       "donation": "ametoa mchango"
