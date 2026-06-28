@@ -13,7 +13,6 @@ import {
   FolderKanbanIcon,
   HeartHandshakeIcon,
   HeartIcon,
-  ImagePlusIcon,
   LeafIcon,
   Loader2Icon,
   MenuIcon,
@@ -1163,7 +1162,7 @@ function AddObservationsCard({ sessionDid }: { sessionDid: string }) {
         {/*Hover Transitioning Observation Card*/}
         <div className="absolute z-1 -bottom-4 left-1/2 -translate-x-1/2 scale-100 group-hover:scale-120 -rotate-12 group-hover:-rotate-30 transition-transform bg-background/50 backdrop-blur-lg border border-border shadow-xl rounded-xl h-20 w-16 p-1 flex flex-col gap-1">
           <div className="w-full h-10 bg-primary/20 rounded-lg flex items-center justify-center">
-            <ImagePlusIcon className="text-primary size-6 opacity-80" />
+            <BinocularsIcon className="text-primary size-6 opacity-80" />
           </div>
           <div className="bg-muted h-2 rounded-lg w-8"></div>
           <div className="bg-muted h-2 rounded-lg w-full"></div>
