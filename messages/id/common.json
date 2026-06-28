@@ -737,6 +737,7 @@
     },
     "to": "untuk",
     "anonymous": "Seseorang",
+    "filterHeading": "Filter",
     "refresh": "Segarkan",
     "retry": "Coba lagi",
     "error": "Tidak dapat memuat aktivitas saat ini.",

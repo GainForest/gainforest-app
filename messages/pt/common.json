@@ -737,6 +737,7 @@
     },
     "to": "para",
     "anonymous": "Alguém",
+    "filterHeading": "Filtros",
     "refresh": "Atualizar",
     "retry": "Tentar novamente",
     "error": "Não foi possível carregar a atividade agora.",

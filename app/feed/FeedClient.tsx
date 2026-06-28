@@ -27,7 +27,6 @@ import {
 } from "./FeedActions";
 import { formatCompact, formatCompactUsd, formatRelative } from "../_lib/format";
 import { ResolvedAvatar } from "./ResolvedAvatar";
-import { HeaderContent } from "../_components/HeaderSlots";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
@@ -219,25 +218,10 @@ export function FeedClient({
 
   return (
     <section className="-mt-14 pb-24 md:pb-32">
-      {/* Filter tabs live in the top navbar (left slot) so they sit at the same
-          level as search/profile and fill the otherwise-empty header — no
-          second stacked bar, no floating pill. */}
-      <HeaderContent
-        left={
-          <FeedFilterTabs
-            filter={filter}
-            onSelect={selectFilter}
-            onRefresh={() => void loadFirst(filter, "refresh")}
-            refreshing={refreshing}
-            loading={loading}
-          />
-        }
-      />
-
       {/* Hero */}
       <div className="relative isolate overflow-hidden">
         <div className="absolute inset-0 -z-10 bg-linear-to-b from-primary/8 via-primary/2 to-transparent" />
-        <div className="mx-auto flex max-w-3xl flex-col px-6 pb-6 pt-[72px] sm:px-8 animate-in">
+        <div className="mx-auto flex max-w-3xl flex-col px-6 pb-6 pt-[72px] sm:px-8 animate-in lg:max-w-5xl">
           <div className="flex items-center gap-2 text-primary/70">
             <NewspaperIcon className="size-5" />
             <span className="text-xs font-medium uppercase tracking-[0.16em]">{t("eyebrow")}</span>
@@ -255,12 +239,27 @@ export function FeedClient({
         </div>
       </div>
 
-      <div className="mx-auto max-w-3xl px-4 sm:px-6">
-        <FeedComposer signedIn={signedIn} viewerDid={viewerDid} onPost={interactions.addPost} />
+      <div className="mx-auto flex w-full max-w-3xl gap-8 px-4 sm:px-6 lg:max-w-5xl">
+        <div className="min-w-0 flex-1">
+          {/* Below lg the right rail is hidden, so keep a horizontal selector
+              pinned at the top of the feed there. */}
+          <div className="sticky top-14 z-20 -mx-4 mb-3 border-b border-border/60 bg-background/90 backdrop-blur supports-[backdrop-filter]:bg-background/70 sm:-mx-6 lg:hidden">
+            <div className="px-4 py-2 sm:px-6">
+              <FeedFilterTabs
+                filter={filter}
+                onSelect={selectFilter}
+                onRefresh={() => void loadFirst(filter, "refresh")}
+                refreshing={refreshing}
+                loading={loading}
+              />
+            </div>
+          </div>
 
-        <LocalPostsList posts={pendingPosts} viewerDid={viewerDid} />
+          <FeedComposer signedIn={signedIn} viewerDid={viewerDid} onPost={interactions.addPost} />
 
-        {/* Timeline */}
+          <LocalPostsList posts={pendingPosts} viewerDid={viewerDid} />
+
+          {/* Timeline */}
         {loading ? (
           <FeedSkeleton />
         ) : error ? (
@@ -321,14 +320,28 @@ export function FeedClient({
             </div>
           </>
         )}
+        </div>
+
+        {/* Right rail — Bluesky-style vertical filter list (lg and up). */}
+        <aside className="hidden w-60 shrink-0 lg:block">
+          <div className="sticky top-20">
+            <FeedFilterRail
+              filter={filter}
+              onSelect={selectFilter}
+              onRefresh={() => void loadFirst(filter, "refresh")}
+              refreshing={refreshing}
+              loading={loading}
+            />
+          </div>
+        </aside>
       </div>
     </section>
   );
 }
 
-/** The filter pills + refresh, rendered inside the top navbar's left slot. The
- *  strip scrolls horizontally on narrow screens so it never crowds the search
- *  and profile controls on the right. */
+/** Horizontal filter pills + refresh, used at the top of the feed below lg
+ *  where the right rail is hidden. The strip scrolls horizontally so it never
+ *  overflows on narrow screens. */
 function FeedFilterTabs({
   filter,
   onSelect,
@@ -377,6 +390,72 @@ function FeedFilterTabs({
       >
         <RefreshCwIcon className={cn("size-4", refreshing && "animate-spin")} />
       </button>
+    </div>
+  );
+}
+
+/** Bluesky-style vertical filter rail for the right column (lg and up): a
+ *  labelled list of feed filters with icon chips, plus a refresh control. */
+function FeedFilterRail({
+  filter,
+  onSelect,
+  onRefresh,
+  refreshing,
+  loading,
+}: {
+  filter: Filter;
+  onSelect: (next: Filter) => void;
+  onRefresh: () => void;
+  refreshing: boolean;
+  loading: boolean;
+}) {
+  const t = useTranslations("common.feed");
+  return (
+    <div className="rounded-2xl border border-border/60 bg-card/30 p-2">
+      <div className="flex items-center justify-between gap-2 px-2 py-1">
+        <p className="text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
+          {t("filterHeading")}
+        </p>
+        <button
+          type="button"
+          onClick={onRefresh}
+          disabled={refreshing || loading}
+          aria-label={t("refresh")}
+          className="grid size-7 shrink-0 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-50"
+        >
+          <RefreshCwIcon className={cn("size-3.5", refreshing && "animate-spin")} />
+        </button>
+      </div>
+      <nav className="mt-0.5 flex flex-col gap-0.5">
+        {FILTERS.map(({ key, Icon }) => {
+          const active = filter === key;
+          const label = key === "all" ? t("filters.all") : t(`filters.${key}`);
+          return (
+            <button
+              key={key}
+              type="button"
+              onClick={() => onSelect(key)}
+              aria-pressed={active}
+              className={cn(
+                "flex w-full items-center gap-2.5 rounded-xl px-2 py-1.5 text-sm transition-colors",
+                active
+                  ? "bg-primary/10 font-medium text-foreground"
+                  : "text-muted-foreground hover:bg-muted hover:text-foreground",
+              )}
+            >
+              <span
+                className={cn(
+                  "grid size-7 shrink-0 place-items-center rounded-lg transition-colors",
+                  active ? "bg-primary text-primary-foreground" : "bg-muted/60 text-muted-foreground",
+                )}
+              >
+                <Icon className="size-4" />
+              </span>
+              <span className="truncate">{label}</span>
+            </button>
+          );
+        })}
+      </nav>
     </div>
   );
 }
