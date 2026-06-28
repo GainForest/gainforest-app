@@ -25,7 +25,7 @@ import {
   TriangleAlertIcon,
   XIcon,
 } from "lucide-react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import type { ChangeEvent, FormEvent, ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { ModalContent, ModalDescription, ModalFooter, ModalHeader, ModalTitle } from "@/components/ui/modal/modal";
@@ -180,12 +180,12 @@ export function ManageProjectsClient({ target }: { target: ManageTarget }) {
     void modal.show();
   }, [modal, target, loadProjects]);
 
-  // Honor a ?mode=new deep link (e.g. the /cert/create redirect) by opening the
-  // create popup once, then clearing the param so the list shows behind it.
-  const autoOpenedRef = useRef(false);
+  // Open the create popup whenever the URL asks for it. The sidebar "Create a
+  // project" link and the /cert/create redirect both navigate to ?mode=new; we
+  // open the modal and immediately clear the param so the list shows behind it
+  // and a later click can re-trigger it.
   useEffect(() => {
-    if (mode !== "new" || autoOpenedRef.current) return;
-    autoOpenedRef.current = true;
+    if (mode !== "new") return;
     if (createPermission.allowed) openCreateModal();
     void setProjectState({ mode: "list", project: null });
   }, [mode, createPermission.allowed, openCreateModal, setProjectState]);
@@ -827,14 +827,14 @@ function ProjectEditor({
     return (
       <div className="relative w-full">
         <div className="mb-5 flex items-center justify-between gap-3">
-          <Button type="button" variant="ghost" size="sm" onClick={onClose} className="-ml-2 text-muted-foreground" disabled={saving}>
-            <ChevronLeftIcon className="size-4" /> {t("backToProjects")}
-          </Button>
           {stepIndex > 0 ? (
-            <Button type="button" variant="ghost" size="sm" onClick={resetWizard} className="text-muted-foreground" disabled={saving}>
+            <Button type="button" variant="ghost" size="sm" onClick={resetWizard} className="-ml-2 text-muted-foreground" disabled={saving}>
               <RotateCcwIcon className="size-4" /> {t("startOver")}
             </Button>
-          ) : null}
+          ) : <span />}
+          <Button type="button" variant="ghost" size="icon-sm" onClick={onClose} aria-label={t("close")} className="text-muted-foreground" disabled={saving}>
+            <XIcon className="size-5" />
+          </Button>
         </div>
 
         <div className="mb-9 h-1.5 w-full overflow-hidden rounded-full bg-muted" role="progressbar" aria-valuenow={Math.round(progress)} aria-valuemin={0} aria-valuemax={100}>

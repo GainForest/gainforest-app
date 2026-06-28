@@ -5,7 +5,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { useTranslations } from "next-intl";
 import type { TimelineAttachmentItem } from "@/app/_lib/indexer";
-import { isAttachmentForActivity } from "./attachmentSubjects";
+import { isAttachmentForAnyActivity } from "./attachmentSubjects";
 import {
   EvidenceAdder,
   type TimelineMutationPermission,
@@ -18,6 +18,12 @@ type BumicertTimelineProps = {
   organizationDid: string;
   activityUri: string;
   activityCid: string;
+  /**
+   * Activity URIs whose attachments should appear in this timeline. Defaults to
+   * `[activityUri]`. The project page passes both the Cert URI and the project
+   * (collection) URI so legacy project-pinned evidence stays visible.
+   */
+  matchActivityUris?: string[];
   bumicertTitle: string;
   canManageEvidence: boolean;
   createPermission: TimelineMutationPermission;
@@ -33,6 +39,7 @@ export function BumicertTimeline({
   organizationDid,
   activityUri,
   activityCid,
+  matchActivityUris,
   bumicertTitle,
   canManageEvidence,
   createPermission,
@@ -45,8 +52,9 @@ export function BumicertTimeline({
 }: BumicertTimelineProps) {
   const router = useRouter();
   const timelineT = useTranslations("bumicert.detail.timeline");
+  const matchUris = matchActivityUris && matchActivityUris.length > 0 ? matchActivityUris : [activityUri];
   const [entries, setEntries] = useState(() =>
-    initialEntries.filter((entry) => isAttachmentForActivity(entry, activityUri)),
+    initialEntries.filter((entry) => isAttachmentForAnyActivity(entry, matchUris)),
   );
   const [status, setStatus] = useState<string | null>(null);
 

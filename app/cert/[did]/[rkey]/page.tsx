@@ -66,7 +66,7 @@ import { BumicertDeleteAction } from "./_components/BumicertDeleteAction";
 import { DonateButton } from "./_components/donate/DonateButton";
 import { FundingStatus } from "./_components/donate/FundingStatus";
 import { BumicertTimeline } from "./_components/timeline/BumicertTimeline";
-import { getEntriesForActivity } from "./_components/timeline/attachmentSubjects";
+import { getEntriesForActivities } from "./_components/timeline/attachmentSubjects";
 import { resolveTimelineReferences } from "./_components/timeline/timelineReferenceResolver";
 import type { TimelineReference } from "./_components/timeline/timelineReferences";
 import { canCreateRecord, canDeleteRecord } from "@/app/(manage)/manage/_lib/cgs-permissions";
@@ -271,6 +271,7 @@ export async function BumicertDetailBody({
   backHref,
   backLabel,
   showMore = true,
+  timelineMatchUris,
 }: {
   routeData: RouteData;
   activeTab: BumicertDetailTab;
@@ -279,8 +280,15 @@ export async function BumicertDetailBody({
   backHref?: string;
   backLabel?: string;
   showMore?: boolean;
+  /**
+   * Activity URIs whose timeline evidence should appear. Defaults to the Cert
+   * URI; the project page also passes the project (collection) URI so legacy
+   * project-pinned evidence keeps showing after the Cert↔project merge.
+   */
+  timelineMatchUris?: string[];
 }) {
   const { record, detail, owner, fundingConfig, authSession } = routeData;
+  const matchUris = timelineMatchUris && timelineMatchUris.length > 0 ? timelineMatchUris : [record.atUri];
   const workScopeT = await getTranslations("common.workScopes");
   const workScopeLabels: WorkScopeLabels = {
     reforestation: workScopeT("reforestation"),
@@ -320,7 +328,7 @@ export async function BumicertDetailBody({
         fetchImageOccurrencesByDid(record.did, 24).catch(() => []),
         fetchObservationSummaryByDid(record.did).catch(() => null),
         fetchTimelineAttachmentsByDid(record.did)
-          .then((items) => getEntriesForActivity(items, record.atUri).length)
+          .then((items) => getEntriesForActivities(items, matchUris).length)
           .catch(() => null),
         fetchReviewCounts(record.atUri).catch(() => null),
         fetchGalleriesForBumicertProject(record.did, record.atUri).catch(() => []),
@@ -352,7 +360,7 @@ export async function BumicertDetailBody({
     timelineAttachments = attachmentsResult.items;
     timelineAttachmentsUnavailable = !attachmentsResult.ok;
 
-    const timelineEntries = getEntriesForActivity(timelineAttachments, record.atUri);
+    const timelineEntries = getEntriesForActivities(timelineAttachments, matchUris);
     const referencePromise = resolveTimelineReferences({
       entries: timelineEntries,
       copy: {
@@ -477,6 +485,7 @@ export async function BumicertDetailBody({
                 organizationDid={record.did}
                 activityUri={record.atUri}
                 activityCid={record.cid ?? ""}
+                matchActivityUris={matchUris}
                 bumicertTitle={record.title}
                 canManageEvidence={timelineAccess.canManageEvidence}
                 createPermission={timelineAccess.createPermission}

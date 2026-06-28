@@ -72,3 +72,26 @@ export function getEntriesForActivity(
 ): TimelineAttachmentItem[] {
   return (data ?? []).filter((item) => isAttachmentForActivity(item, activityUri));
 }
+
+/**
+ * Match an attachment against any of several activity URIs. Used on the project
+ * page, where a project's timeline evidence may be pinned to the project
+ * (collection) URI — the historical subject — *or* to the project's single Cert
+ * (claim.activity) URI, which is where the evidence adder writes today. Without
+ * the union, legacy evidence attached to the collection disappears once the
+ * Cert detail (keyed on the claim.activity URI) is rendered on the project page.
+ */
+export function isAttachmentForAnyActivity(
+  item: TimelineAttachmentItem,
+  activityUris: readonly string[],
+): boolean {
+  const subjectUri = item.record.subjects?.[0]?.uri;
+  return Boolean(subjectUri && activityUris.includes(subjectUri));
+}
+
+export function getEntriesForActivities(
+  data: readonly TimelineAttachmentItem[] | undefined,
+  activityUris: readonly string[],
+): TimelineAttachmentItem[] {
+  return (data ?? []).filter((item) => isAttachmentForAnyActivity(item, activityUris));
+}
