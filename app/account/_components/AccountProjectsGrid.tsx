@@ -9,7 +9,7 @@ import { parseAsStringEnum, useQueryState } from "nuqs";
 import { RecordDrawer } from "../../_components/RecordDrawer";
 import { ProjectScopeTags } from "../../_components/ProjectScopeTags";
 import { ProjectEvidence } from "../../_components/ProjectEvidence";
-import { ProjectListItem } from "../../_components/ProjectListItem";
+import { ProjectListItem, ProjectListHeader } from "../../_components/ProjectListItem";
 import { useStableQueryView } from "../../_lib/use-stable-query-view";
 import { isPdsBlobUrl } from "../../_lib/pds";
 import type { ProjectRecord } from "../../_lib/indexer";
@@ -92,17 +92,20 @@ export function AccountProjectsGrid({ projects }: { projects: ProjectRecord[] })
       </div>
 
       {view === "list" ? (
-        <ul role="list">
-          {projects.map((project, index) => (
-            <li
-              key={project.id}
-              className="relative animate-in after:absolute after:inset-x-4 after:bottom-0 after:h-px after:bg-border last:after:hidden"
-              style={{ animationDelay: `${Math.min(index, 10) * 35}ms` }}
-            >
-              <ProjectListItem record={project} onOpen={setDrawer} priority={index < 8} />
-            </li>
-          ))}
-        </ul>
+        <div>
+          <ProjectListHeader />
+          <ul role="list" className="border-t border-border">
+            {projects.map((project, index) => (
+              <li
+                key={project.id}
+                className="relative animate-in after:absolute after:inset-x-2 after:bottom-0 after:h-px after:bg-border last:after:hidden sm:after:inset-x-3"
+                style={{ animationDelay: `${Math.min(index, 10) * 35}ms` }}
+              >
+                <ProjectListItem record={project} onOpen={setDrawer} priority={index < 8} />
+              </li>
+            ))}
+          </ul>
+        </div>
       ) : (
         <motion.div
           variants={containerVariants}

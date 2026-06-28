@@ -22,7 +22,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { AutoLoadMoreButton } from "../_components/AutoLoadMoreButton";
 import { ProjectScopeTags } from "../_components/ProjectScopeTags";
 import { ProjectEvidence } from "../_components/ProjectEvidence";
-import { ProjectListItem } from "../_components/ProjectListItem";
+import { ProjectListItem, ProjectListHeader } from "../_components/ProjectListItem";
 import { OwnerFilterBanner, OwnerFilterButton, useOwnerFilter } from "../_components/OwnerFilter";
 import { RecordDrawer } from "../_components/RecordDrawer";
 import { RecordMap } from "../_components/RecordMap";
@@ -631,13 +631,16 @@ const ProjectList = memo(function ProjectList({
   if (records.length === 0) return <ProjectGrid records={records} loading={loading} onOpen={onOpen} />;
 
   return (
-    <ul role="list" className="mt-4">
-      {records.map((record, index) => (
-        <li key={record.id} className="relative animate-in after:absolute after:inset-x-4 after:bottom-0 after:h-px after:bg-border last:after:hidden" style={{ animationDelay: `${Math.min(index, 10) * 35}ms` }}>
-          <ProjectListItem record={record} onOpen={onOpen} priority={index < 8} />
-        </li>
-      ))}
-    </ul>
+    <div className="mt-4">
+      <ProjectListHeader />
+      <ul role="list" className="border-t border-border">
+        {records.map((record, index) => (
+          <li key={record.id} className="relative animate-in after:absolute after:inset-x-2 after:bottom-0 after:h-px after:bg-border last:after:hidden sm:after:inset-x-3" style={{ animationDelay: `${Math.min(index, 10) * 35}ms` }}>
+            <ProjectListItem record={record} onOpen={onOpen} priority={index < 8} />
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 });
 

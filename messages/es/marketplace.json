@@ -788,6 +788,12 @@
       "list": "Lista",
       "map": "Mapa"
     },
+    "list": {
+      "colProject": "Proyecto",
+      "colSteward": "Guardián",
+      "colPlace": "Lugar",
+      "colFocus": "Enfoque"
+    },
     "sort": {
       "newest": "Más recientes",
       "oldest": "Más antiguos",

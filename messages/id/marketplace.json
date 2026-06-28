@@ -788,6 +788,12 @@
       "list": "Daftar",
       "map": "Peta"
     },
+    "list": {
+      "colProject": "Proyek",
+      "colSteward": "Pengelola",
+      "colPlace": "Tempat",
+      "colFocus": "Fokus"
+    },
     "sort": {
       "newest": "Terbaru",
       "oldest": "Terlama",

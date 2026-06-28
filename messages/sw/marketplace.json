@@ -788,6 +788,12 @@
       "list": "Orodha",
       "map": "Ramani"
     },
+    "list": {
+      "colProject": "Mradi",
+      "colSteward": "Msimamizi",
+      "colPlace": "Eneo",
+      "colFocus": "Lengo"
+    },
     "sort": {
       "newest": "Mpya zaidi",
       "oldest": "Za zamani zaidi",
