@@ -252,22 +252,29 @@ export function ManageProjectsClient({ target }: { target: ManageTarget }) {
           )
         ) : (
           <>
-            <div className="flex flex-row items-center justify-between gap-3">
-              <div className="group/input-group border-input relative flex h-10 min-w-0 flex-1 items-center rounded-full border bg-background/70 shadow-xs backdrop-blur transition-[color,box-shadow] focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50 sm:max-w-md">
-                <SearchIcon className="ml-3 h-4 w-4 text-muted-foreground" />
-                <input
-                  value={query}
-                  onChange={(event) => setQuery(event.target.value)}
-                  aria-label="Search projects"
-                  placeholder="Search projects"
-                  className="min-w-0 flex-1 truncate border-0 bg-transparent px-3 py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground"
-                />
+            {/* The search + Add row is only useful once projects exist. With
+                none, it just crowds the empty-state hero card (which has its
+                own "Create a project" CTA), so hide it until there's a project
+                to search. The "no matching search" case still has projects, so
+                the row stays visible there. */}
+            {projects.length > 0 ? (
+              <div className="flex flex-row items-center justify-between gap-3">
+                <div className="group/input-group border-input relative flex h-10 min-w-0 flex-1 items-center rounded-full border bg-background/70 shadow-xs backdrop-blur transition-[color,box-shadow] focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50 sm:max-w-md">
+                  <SearchIcon className="ml-3 h-4 w-4 text-muted-foreground" />
+                  <input
+                    value={query}
+                    onChange={(event) => setQuery(event.target.value)}
+                    aria-label="Search projects"
+                    placeholder="Search projects"
+                    className="min-w-0 flex-1 truncate border-0 bg-transparent px-3 py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground"
+                  />
+                </div>
+                <Button type="button" onClick={openNew} disabled={!createPermission.allowed} title={createPermission.reason ?? undefined} className="shrink-0">
+                  <CirclePlusIcon />
+                  Add project
+                </Button>
               </div>
-              <Button type="button" onClick={openNew} disabled={!createPermission.allowed} title={createPermission.reason ?? undefined} className="shrink-0">
-                <CirclePlusIcon />
-                Add project
-              </Button>
-            </div>
+            ) : null}
 
             {loading ? (
               <ProjectsSkeleton />
