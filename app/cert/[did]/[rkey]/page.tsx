@@ -534,6 +534,7 @@ export async function ProjectDetailView({
   editHref,
   editLabel,
   timelineMatchUris,
+  projectRkey,
 }: {
   routeData: RouteData;
   basePath: string;
@@ -543,6 +544,8 @@ export async function ProjectDetailView({
   editHref?: string;
   editLabel?: string;
   timelineMatchUris?: string[];
+  /** Project (collection) rkey, so deleting removes the project, not the Cert. */
+  projectRkey?: string;
 }) {
   const { record, detail, owner, fundingConfig, authSession } = routeData;
   const matchUris = timelineMatchUris && timelineMatchUris.length > 0 ? timelineMatchUris : [record.atUri];
@@ -843,6 +846,7 @@ export async function ProjectDetailView({
                 canManageDonations={certManageAccess.canManageDonations}
                 mutationRepo={certManageAccess.mutationRepo}
                 deleteRedirectHref={ownerProfileHref}
+                projectRkey={projectRkey}
                 hideOwner
                 hideImage
                 extra={
@@ -1187,6 +1191,7 @@ function OverviewSidebar({
   canManageDonations,
   mutationRepo,
   deleteRedirectHref,
+  projectRkey,
   extra,
   hideOwner,
   hideImage,
@@ -1202,6 +1207,8 @@ function OverviewSidebar({
   canManageDonations: boolean;
   mutationRepo?: string;
   deleteRedirectHref: string;
+  /** When set, the delete action removes the project (not just the Cert). */
+  projectRkey?: string;
   /** Extra rich content rendered under the cover image (project sidebar). */
   extra?: ReactNode;
   /** Hide the owner row — the project page shows it in the page header. */
@@ -1288,6 +1295,7 @@ function OverviewSidebar({
             title={record.title}
             mutationRepo={mutationRepo}
             redirectHref={deleteRedirectHref}
+            projectRkey={projectRkey}
           />
         </>
       ) : null}

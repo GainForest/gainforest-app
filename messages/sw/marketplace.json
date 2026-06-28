@@ -56,6 +56,7 @@
       "active": "Huonyesha tarehe za kazi",
       "donations": "Hupokea michango",
       "badges": {
+        "all": "Zote",
         "gainforest": "GainForest",
         "maearth": "Ma Earth",
         "maearthRound1": "Ma Earth Raundi 1",
@@ -1314,6 +1315,12 @@
       "deleteModal": {
         "title": "Futa mradi?",
         "description": "Hii itaondoa “{title}” kutoka akaunti yako. Kitendo hiki hakiwezi kutenduliwa.",
+        "manageHeading": "Dhibiti",
+        "button": "Futa mradi",
+        "hint": "Kufuta huondoa mradi huu kwa kila mtu.",
+        "prompt": "Ili kuthibitisha, andika jina la mradi kama linavyoonyeshwa:",
+        "inputAria": "Andika jina la mradi ili kuthibitisha kufuta",
+        "mismatch": "Jina bado halilingani.",
         "cancel": "Ghairi",
         "confirm": "Futa mradi",
         "error": "Mradi haukuweza kufutwa."

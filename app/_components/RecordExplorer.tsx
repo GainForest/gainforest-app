@@ -404,7 +404,9 @@ export function RecordExplorer({
           after,
           query: deferredQuery,
           ownerDid,
-          featuredBadgesOnly: !ownerDid,
+          // No badge pill selected → show every sighting; selecting GainForest
+          // and/or Ma Earth narrows to those featured badges.
+          featuredBadgesOnly: !ownerDid && badgeFilters.length > 0,
           badgeFilters,
           signal: ctrl.signal,
           resolveMedia: false,
@@ -577,7 +579,7 @@ export function RecordExplorer({
       media: occMedia,
       query: deferredQuery,
       ownerDid,
-      featuredBadgesOnly: !ownerDid,
+      featuredBadgesOnly: !ownerDid && badgeFilters.length > 0,
       badgeFilters,
       signal: controller.signal,
     })
@@ -724,6 +726,12 @@ export function RecordExplorer({
               style={{ animationDelay: "120ms" }}
             >
               <div className="flex items-center gap-1.5 pb-1 pr-8">
+                <FilterPill
+                  selected={badgeFilters.length === 0}
+                  onClick={() => updateBadgeFilters([])}
+                >
+                  {exploreT("filters.badges.all")}
+                </FilterPill>
                 {badgeFilterOptions.map((badge) => (
                   <FilterPill
                     key={badge.key}

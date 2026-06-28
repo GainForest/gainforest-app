@@ -56,6 +56,7 @@
       "active": "Muestra fechas de trabajo",
       "donations": "Acepta donaciones",
       "badges": {
+        "all": "Todas",
         "gainforest": "GainForest",
         "maearth": "Ma Earth",
         "maearthRound1": "Ma Earth Ronda 1",
@@ -1314,6 +1315,12 @@
       "deleteModal": {
         "title": "¿Eliminar proyecto?",
         "description": "Esto eliminará «{title}» de tu cuenta. Esta acción no se puede deshacer.",
+        "manageHeading": "Gestionar",
+        "button": "Eliminar proyecto",
+        "hint": "Al eliminarlo, el proyecto desaparece para todos.",
+        "prompt": "Para confirmar, escribe el nombre del proyecto exactamente como se muestra:",
+        "inputAria": "Escribe el nombre del proyecto para confirmar la eliminación",
+        "mismatch": "El nombre aún no coincide.",
         "cancel": "Cancelar",
         "confirm": "Eliminar proyecto",
         "error": "No se pudo eliminar el proyecto."

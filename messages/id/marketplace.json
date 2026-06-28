@@ -56,6 +56,7 @@
       "active": "Menampilkan tanggal kerja",
       "donations": "Menerima donasi",
       "badges": {
+        "all": "Semua",
         "gainforest": "GainForest",
         "maearth": "Ma Earth",
         "maearthRound1": "Ma Earth Putaran 1",
@@ -1314,6 +1315,12 @@
       "deleteModal": {
         "title": "Hapus proyek?",
         "description": "Ini akan menghapus “{title}” dari akun Anda. Tindakan ini tidak dapat dibatalkan.",
+        "manageHeading": "Kelola",
+        "button": "Hapus proyek",
+        "hint": "Menghapus akan menghilangkan proyek ini untuk semua orang.",
+        "prompt": "Untuk mengonfirmasi, ketik nama proyek persis seperti yang ditampilkan:",
+        "inputAria": "Ketik nama proyek untuk mengonfirmasi penghapusan",
+        "mismatch": "Nama belum cocok.",
         "cancel": "Batal",
         "confirm": "Hapus proyek",
         "error": "Proyek tidak dapat dihapus."

@@ -56,6 +56,7 @@
       "active": "Shows work dates",
       "donations": "Accepts donations",
       "badges": {
+        "all": "All",
         "gainforest": "GainForest",
         "maearth": "Ma Earth",
         "maearthRound1": "Ma Earth Round 1",
@@ -1314,6 +1315,12 @@
       "deleteModal": {
         "title": "Delete project?",
         "description": "This will remove “{title}” from your account. This action cannot be undone.",
+        "manageHeading": "Manage",
+        "button": "Delete project",
+        "hint": "Deleting removes this project for everyone.",
+        "prompt": "To confirm, type the project name exactly as shown:",
+        "inputAria": "Type the project name to confirm deletion",
+        "mismatch": "The name doesn’t match yet.",
         "cancel": "Cancel",
         "confirm": "Delete project",
         "error": "Project could not be deleted."

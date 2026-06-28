@@ -21,7 +21,6 @@ import {
   PlusIcon,
   RotateCcwIcon,
   SearchIcon,
-  SparklesIcon,
   SquarePenIcon,
   Trash2Icon,
   TriangleAlertIcon,
@@ -74,7 +73,7 @@ const WORK_SCOPE_KEYS: KnownWorkScopeKey[] = [...PROJECT_WORK_SCOPE_KEYS];
 // Ma Earth-style progressive-disclosure flow: one focused question per screen,
 // a single progress bar, ending in review → success. Rendered in bumicerts'
 // own editorial styling.
-const WIZARD_STEPS = ["intro", "basics", "focus", "timeline", "story", "network", "photo", "review"] as const;
+const WIZARD_STEPS = ["basics", "focus", "timeline", "story", "network", "photo", "review"] as const;
 type WizardStepId = (typeof WIZARD_STEPS)[number];
 
 type ManagedProject = {
@@ -463,65 +462,6 @@ function ProjectCard({
   );
 }
 
-function ProjectCreateHero() {
-  const t = useTranslations("marketplace.manageProjects.editor");
-  return (
-    <section className="relative mb-8 overflow-hidden rounded-[1.8rem] border border-border bg-card shadow-sm">
-      <div className="relative min-h-[15rem] overflow-hidden rounded-[1.72rem] sm:min-h-[17rem]">
-        <Image
-          src="/assets/media/images/create-bumicert/hero-light@2x.webp"
-          alt=""
-          fill
-          priority
-          quality={95}
-          sizes="(min-width: 1024px) 1100px, 100vw"
-          className="object-cover object-center dark:hidden"
-        />
-        <Image
-          src="/assets/media/images/create-bumicert/hero-dark@2x.webp"
-          alt=""
-          fill
-          priority
-          quality={95}
-          sizes="(min-width: 1024px) 1100px, 100vw"
-          className="hidden object-cover object-center dark:block"
-        />
-        <div className="absolute inset-0 bg-linear-to-r from-background/96 via-background/75 to-background/5 dark:from-background/93 dark:via-background/62 dark:to-background/10" />
-        <div className="absolute inset-x-0 bottom-0 h-28 bg-linear-to-t from-foreground/15 via-foreground/5 to-transparent dark:from-black/65" />
-
-        <div className="relative z-10 flex min-h-[15rem] max-w-[30rem] flex-col justify-center px-6 py-9 sm:min-h-[17rem] sm:px-9">
-          <div className="mb-5 inline-flex w-fit items-center gap-2 rounded-full border border-primary/20 bg-primary/[0.08] px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.16em] text-primary">
-            <SparklesIcon className="size-3.5" />
-            {t("hero.eyebrow")}
-          </div>
-          <h2 className="font-instrument text-4xl font-medium italic leading-[0.95] tracking-[-0.03em] text-foreground sm:text-5xl">
-            {t("hero.title")}
-          </h2>
-          <p className="mt-4 max-w-[24rem] text-base leading-7 text-muted-foreground">
-            {t("hero.subtitle")}
-          </p>
-        </div>
-      </div>
-      <Image
-        src="/assets/media/images/create-bumicert/plant-light.png"
-        alt=""
-        width={1002}
-        height={1146}
-        priority
-        className="pointer-events-none absolute bottom-0 right-[3%] z-20 hidden h-[24rem] w-auto max-w-[48%] object-contain dark:hidden md:block"
-      />
-      <Image
-        src="/assets/media/images/create-bumicert/plant-dark.png"
-        alt=""
-        width={964}
-        height={1129}
-        priority
-        className="pointer-events-none absolute bottom-0 right-[3%] z-20 hidden h-[24rem] w-auto max-w-[48%] object-contain dark:md:block"
-      />
-    </section>
-  );
-}
-
 export function CreateProjectModal({
   target,
   onClose,
@@ -902,9 +842,7 @@ function ProjectEditor({
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.22, ease: [0.25, 0.1, 0.25, 1] }}
             >
-              {stepId === "intro" ? (
-                <ProjectCreateHero />
-              ) : stepId === "basics" ? (
+              {stepId === "basics" ? (
                 <div className="mx-auto max-w-2xl">
                   <WizardStepHeader title={t("steps.basics.title")} subtitle={t("steps.basics.subtitle")} />
                   <BasicsFields draft={draft} onChange={updateDraft} issuesByName={issuesByName} t={t} />
@@ -964,7 +902,7 @@ function ProjectEditor({
             </Button>
           ) : (
             <Button type="button" size="lg" onClick={goNext} disabled={stepId === "basics" && !basicsValid}>
-              {stepIndex === 0 ? t("wizard.start") : t("wizard.next")}
+              {t("wizard.next")}
               <ChevronRightIcon className="size-4" />
             </Button>
           )}
@@ -1781,6 +1719,9 @@ function DeleteProjectModal({ projectTitle, onConfirm }: { projectTitle: string;
   const modal = useModal();
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [confirmValue, setConfirmValue] = useState("");
+  const expectedName = projectTitle.trim() || "DELETE";
+  const nameMatches = confirmValue.trim() === expectedName;
 
   const close = async () => {
     await modal.hide();
@@ -1788,6 +1729,7 @@ function DeleteProjectModal({ projectTitle, onConfirm }: { projectTitle: string;
   };
 
   const confirm = async () => {
+    if (!nameMatches || pending) return;
     setPending(true);
     setError(null);
     try {
@@ -1802,9 +1744,43 @@ function DeleteProjectModal({ projectTitle, onConfirm }: { projectTitle: string;
   return (
     <ModalContent dismissible={!pending} className="space-y-4">
       <ModalHeader>
-        <ModalTitle>{t("title")}</ModalTitle>
+        <ModalTitle className="flex items-center gap-2 text-destructive">
+          <TriangleAlertIcon className="size-5 shrink-0" />
+          {t("title")}
+        </ModalTitle>
         <ModalDescription>{t("description", { title: projectTitle })}</ModalDescription>
       </ModalHeader>
+      <div className="space-y-2">
+        <label htmlFor="delete-project-confirm" className="block text-sm font-medium text-foreground">
+          {t("prompt")}
+        </label>
+        <div className="select-all rounded-lg border border-border bg-muted/60 px-3 py-2 text-sm font-medium text-foreground">
+          {expectedName}
+        </div>
+        <input
+          id="delete-project-confirm"
+          type="text"
+          value={confirmValue}
+          onChange={(event) => setConfirmValue(event.target.value)}
+          onKeyDown={(event) => {
+            if (event.key === "Enter") {
+              event.preventDefault();
+              void confirm();
+            }
+          }}
+          disabled={pending}
+          autoFocus
+          autoComplete="off"
+          autoCapitalize="off"
+          spellCheck={false}
+          aria-label={t("inputAria")}
+          placeholder={expectedName}
+          className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground/65 focus:border-destructive/60 focus:ring-2 focus:ring-destructive/25"
+        />
+        {confirmValue.trim().length > 0 && !nameMatches ? (
+          <p className="text-xs text-muted-foreground">{t("mismatch")}</p>
+        ) : null}
+      </div>
       {error ? (
         <p className={ERROR_MESSAGE}>
           <TriangleAlertIcon className="size-3.5 text-warn" /> {error}
@@ -1812,7 +1788,7 @@ function DeleteProjectModal({ projectTitle, onConfirm }: { projectTitle: string;
       ) : null}
       <ModalFooter>
         <Button type="button" variant="outline" disabled={pending} onClick={() => void close()}>{t("cancel")}</Button>
-        <Button type="button" variant="destructive" disabled={pending} onClick={() => void confirm()}>
+        <Button type="button" variant="destructive" disabled={pending || !nameMatches} onClick={() => void confirm()}>
           {pending ? <Loader2Icon className="size-4 animate-spin" /> : <Trash2Icon className="size-4" />}
           {t("confirm")}
         </Button>
