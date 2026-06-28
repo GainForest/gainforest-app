@@ -682,6 +682,23 @@
       "uploadFailed": "Hatukuweza kuongeza uchunguzi huu. Tafadhali jaribu tena.",
       "doneTitle": "{count, plural, one {Uchunguzi # umeongezwa} other {Uchunguzi # umeongezwa}}",
       "doneBody": "Utaonekana katika uchunguzi wako hivi punde.",
+      "addObservation": "Ongeza uchunguzi mwingine",
+      "addPhoto": "Ongeza picha",
+      "photosTitle": "{count, plural, one {picha #} other {picha #}}",
+      "coverBadge": "Jalada",
+      "photoPartLabel": "Picha hii inaonyesha nini",
+      "removeObservation": "Ondoa uchunguzi",
+      "tooManyPerObservation": "Unaweza kuongeza hadi picha {max} kwa kila uchunguzi.",
+      "subjectParts": {
+        "wholeOrganism": "Kiumbe kizima",
+        "leaf": "Jani",
+        "leafUnderside": "Upande wa chini wa jani",
+        "bark": "Gome",
+        "flower": "Ua",
+        "fruit": "Tunda au mbegu",
+        "habitat": "Makazi",
+        "other": "Maelezo mengine"
+      },
       "viewObservations": "Tazama uchunguzi"
     },
     "tainaTitle": "Msalimie Tainá",

@@ -682,6 +682,23 @@
       "uploadFailed": "No pudimos agregar estas observaciones. Inténtalo de nuevo.",
       "doneTitle": "{count, plural, one {# observación agregada} other {# observaciones agregadas}}",
       "doneBody": "Aparecerán en tus observaciones en un momento.",
+      "addObservation": "Agregar otra observación",
+      "addPhoto": "Agregar foto",
+      "photosTitle": "{count, plural, one {# foto} other {# fotos}}",
+      "coverBadge": "Portada",
+      "photoPartLabel": "Qué muestra esta foto",
+      "removeObservation": "Quitar observación",
+      "tooManyPerObservation": "Puedes agregar hasta {max} fotos por observación.",
+      "subjectParts": {
+        "wholeOrganism": "Organismo completo",
+        "leaf": "Hoja",
+        "leafUnderside": "Envés de la hoja",
+        "bark": "Corteza",
+        "flower": "Flor",
+        "fruit": "Fruto o semilla",
+        "habitat": "Hábitat",
+        "other": "Otro detalle"
+      },
       "viewObservations": "Ver observaciones"
     },
     "tainaTitle": "Saluda a Tainá",

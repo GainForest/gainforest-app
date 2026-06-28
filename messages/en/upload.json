@@ -682,6 +682,23 @@
       "uploadFailed": "We couldn't add these observations. Please try again.",
       "doneTitle": "{count, plural, one {# observation added} other {# observations added}}",
       "doneBody": "They'll appear in your observations in a moment.",
+      "addObservation": "Add another observation",
+      "addPhoto": "Add photo",
+      "photosTitle": "{count, plural, one {# photo} other {# photos}}",
+      "coverBadge": "Cover",
+      "photoPartLabel": "What this photo shows",
+      "removeObservation": "Remove observation",
+      "tooManyPerObservation": "You can add up to {max} photos per observation.",
+      "subjectParts": {
+        "wholeOrganism": "Whole organism",
+        "leaf": "Leaf",
+        "leafUnderside": "Leaf underside",
+        "bark": "Bark",
+        "flower": "Flower",
+        "fruit": "Fruit or seed",
+        "habitat": "Habitat",
+        "other": "Other detail"
+      },
       "viewObservations": "View observations"
     },
     "tainaTitle": "Say hi to Tainá",
