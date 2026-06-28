@@ -62,7 +62,7 @@ type FilterChip = {
 };
 
 const FILTER_KEYS: FilterKey[] = ["images", "locations", "contributors", "active", "donations"];
-const BADGE_FILTER_KEYS: BumicertBadgeFilter[] = ["gainforest", "maearth", "maearth-round-1", "maearth-round-2"];
+const BADGE_FILTER_KEYS: BumicertBadgeFilter[] = ["gainforest", "maearth"];
 const SORT_MODES: SortMode[] = ["newest", "oldest", "az", "za"];
 const VIEW_MODES: ViewMode[] = ["cards", "list", "map"];
 const QUERY_STATE_OPTIONS = { history: "replace", scroll: false, shallow: true } as const;
@@ -84,8 +84,6 @@ export function BumicertsExploreClient({ records: initialRecords = [] }: { recor
   const badgeFilterOptions = useMemo<BadgeFilterOption[]>(() => [
     { key: "gainforest", label: t("filters.badges.gainforest"), logoSrc: "/assets/media/images/gainforest-logo.svg" },
     { key: "maearth", label: t("filters.badges.maearth"), logoSrc: "/assets/media/images/badges/ma-earth-logo.webp" },
-    { key: "maearth-round-1", label: t("filters.badges.maearthRound1"), logoSrc: "/assets/media/images/badges/ma-earth-logo.webp" },
-    { key: "maearth-round-2", label: t("filters.badges.maearthRound2"), logoSrc: "/assets/media/images/badges/ma-earth-logo.webp" },
   ], [t]);
   const sortOptions = useMemo<Array<{ value: SortMode; label: string }>>(() => [
     { value: "newest", label: t("sort.newest") },

@@ -806,7 +806,8 @@
       "description": "Tampilkan proyek berdasarkan lencana sumber, gambar, atau tempat proyek.",
       "updateHint": "Filter diperbarui saat Anda memilih.",
       "images": "Menampilkan gambar",
-      "locations": "Memiliki tempat"
+      "locations": "Memiliki tempat",
+      "timeline": "Punya linimasa"
     },
     "empty": {
       "eyebrow": "Tidak ada hasil",

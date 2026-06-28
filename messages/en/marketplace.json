@@ -806,7 +806,8 @@
       "description": "Show projects by source badge, images, or a project place.",
       "updateHint": "Filters update as you choose.",
       "images": "Shows images",
-      "locations": "Has a place"
+      "locations": "Has a place",
+      "timeline": "Has a timeline"
     },
     "empty": {
       "eyebrow": "No Results",

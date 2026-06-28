@@ -806,7 +806,8 @@
       "description": "Muestra proyectos por insignia de origen, imágenes o un lugar de proyecto.",
       "updateHint": "Los filtros se actualizan a medida que eliges.",
       "images": "Muestra imágenes",
-      "locations": "Tiene un lugar"
+      "locations": "Tiene un lugar",
+      "timeline": "Tiene una cronología"
     },
     "empty": {
       "eyebrow": "Sin resultados",

@@ -806,7 +806,8 @@
       "description": "Onyesha miradi kwa beji ya chanzo, picha, au eneo la mradi.",
       "updateHint": "Vichujio husasishwa unapochagua.",
       "images": "Huonyesha picha",
-      "locations": "Ina eneo"
+      "locations": "Ina eneo",
+      "timeline": "Ina ratiba"
     },
     "empty": {
       "eyebrow": "Hakuna matokeo",

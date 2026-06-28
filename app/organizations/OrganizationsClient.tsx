@@ -41,7 +41,7 @@ type QuickFilter = "observations" | "bumicerts";
 const SORT_MODES: SortMode[] = ["newest", "oldest", "az", "za"];
 const VIEW_MODES: ViewMode[] = ["cards", "list", "map"];
 const QUICK_FILTERS: QuickFilter[] = ["observations", "bumicerts"];
-const BADGE_FILTER_KEYS: BumicertBadgeFilter[] = ["gainforest", "maearth", "maearth-round-1", "maearth-round-2"];
+const BADGE_FILTER_KEYS: BumicertBadgeFilter[] = ["gainforest", "maearth"];
 const QUERY_STATE_OPTIONS = { history: "replace", scroll: false, shallow: true } as const;
 const SEARCH_QUERY_STATE_OPTIONS = { ...QUERY_STATE_OPTIONS, throttleMs: 200 } as const;
 
@@ -115,8 +115,6 @@ export function OrganizationsClient({ records: initialRecords = [] }: { records?
   const badgeFilterOptions = useMemo<BadgeFilterOption[]>(() => [
     { key: "gainforest", label: exploreT("filters.badges.gainforest"), logoSrc: "/assets/media/images/gainforest-logo.svg" },
     { key: "maearth", label: exploreT("filters.badges.maearth"), logoSrc: "/assets/media/images/badges/ma-earth-logo.webp" },
-    { key: "maearth-round-1", label: exploreT("filters.badges.maearthRound1"), logoSrc: "/assets/media/images/badges/ma-earth-logo.webp" },
-    { key: "maearth-round-2", label: exploreT("filters.badges.maearthRound2"), logoSrc: "/assets/media/images/badges/ma-earth-logo.webp" },
   ], [exploreT]);
 
   useEffect(() => {

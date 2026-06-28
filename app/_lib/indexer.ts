@@ -1663,8 +1663,23 @@ function normalizeBadgeFilters(filters: BumicertBadgeFilter[] | undefined): Bumi
   return Array.from(new Set(filters)).filter((filter) => FEATURED_BADGE_KEYS.has(filter));
 }
 
+// "Ma Earth" is an umbrella: selecting it matches the general Ma Earth badge
+// plus every per-round badge, so stewards see all Ma Earth work under one chip
+// instead of confusing "Round 1 / Round 2" variants.
+const BADGE_FILTER_EXPANSIONS: Partial<Record<BumicertBadgeFilter, BumicertBadgeFilter[]>> = {
+  maearth: ["maearth", "maearth-round-1", "maearth-round-2", "maearth-round-3"],
+};
+
+function expandBadgeFilters(filters: BumicertBadgeFilter[]): BumicertBadgeFilter[] {
+  const expanded = new Set<BumicertBadgeFilter>();
+  for (const filter of filters) {
+    for (const member of BADGE_FILTER_EXPANSIONS[filter] ?? [filter]) expanded.add(member);
+  }
+  return Array.from(expanded);
+}
+
 function featuredBadgeValues(index: FeaturedBadgeIndex, filters: BumicertBadgeFilter[] | undefined): FeaturedBadgeValues {
-  const selected = normalizeBadgeFilters(filters);
+  const selected = expandBadgeFilters(normalizeBadgeFilters(filters));
   if (selected.length === 0) return { dids: index.dids, recordUris: index.recordUris };
   return {
     dids: uniqueSorted(selected.flatMap((filter) => index.byBadge[filter].dids)),
@@ -2310,7 +2325,7 @@ const PROJECT_COLLECTION_BY_DID_QUERY = `
   }
 `;
 
-export type ProjectIndexFilter = "images" | "locations";
+export type ProjectIndexFilter = "images" | "locations" | "timeline";
 
 type ProjectQueryOptions = {
   query?: string;

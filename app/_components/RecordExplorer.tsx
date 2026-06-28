@@ -160,7 +160,7 @@ const SORT_MODES: SortMode[] = ["newest", "oldest", "az", "za"];
 const VIEW_MODES: ViewMode[] = ["cards", "list", "map"];
 const OCCURRENCE_MEDIA_FILTERS: OccurrenceFilter[] = ["image", "audio", "all"];
 const OCCURRENCE_CATEGORIES: OccurrenceCategory[] = ["all", "plants", "trees", "birds", "flowers"];
-const BADGE_FILTER_KEYS: BumicertBadgeFilter[] = ["gainforest", "maearth", "maearth-round-1", "maearth-round-2"];
+const BADGE_FILTER_KEYS: BumicertBadgeFilter[] = ["gainforest", "maearth"];
 const SITE_SOURCE_FILTERS: SiteSourceFilter[] = ["both", "certified"];
 
 type InitialExplorerPage = {
@@ -341,8 +341,6 @@ export function RecordExplorer({
   const badgeFilterOptions = useMemo<BadgeFilterOption[]>(() => [
     { key: "gainforest", label: exploreT("filters.badges.gainforest"), logoSrc: "/assets/media/images/gainforest-logo.svg" },
     { key: "maearth", label: exploreT("filters.badges.maearth"), logoSrc: "/assets/media/images/badges/ma-earth-logo.webp" },
-    { key: "maearth-round-1", label: exploreT("filters.badges.maearthRound1"), logoSrc: "/assets/media/images/badges/ma-earth-logo.webp" },
-    { key: "maearth-round-2", label: exploreT("filters.badges.maearthRound2"), logoSrc: "/assets/media/images/badges/ma-earth-logo.webp" },
   ], [exploreT]);
 
   useEffect(() => {

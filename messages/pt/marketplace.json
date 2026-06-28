@@ -806,7 +806,8 @@
       "description": "Mostre projetos por selo de origem, imagens ou um local de projeto.",
       "updateHint": "Os filtros são atualizados conforme você escolhe.",
       "images": "Mostra imagens",
-      "locations": "Tem um local"
+      "locations": "Tem um local",
+      "timeline": "Tem linha do tempo"
     },
     "empty": {
       "eyebrow": "Sem resultados",

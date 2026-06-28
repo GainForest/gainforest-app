@@ -41,8 +41,8 @@ import { useStableQueryView } from "../_lib/use-stable-query-view";
 const PROJECTS_PAGE_SIZE = 48;
 const INITIAL_CARD_LIMIT = 96;
 const CARD_BATCH_SIZE = 96;
-const FILTER_KEYS: ProjectIndexFilter[] = ["images", "locations"];
-const BADGE_FILTER_KEYS: BumicertBadgeFilter[] = ["gainforest", "maearth", "maearth-round-1", "maearth-round-2"];
+const FILTER_KEYS: ProjectIndexFilter[] = ["images", "locations", "timeline"];
+const BADGE_FILTER_KEYS: BumicertBadgeFilter[] = ["gainforest", "maearth"];
 const SORT_MODES: ExplorerSortMode[] = ["newest", "oldest", "az", "za"];
 type ViewMode = "cards" | "list" | "map";
 const VIEW_MODES: ViewMode[] = ["cards", "list", "map"];
@@ -63,12 +63,11 @@ export function ProjectsExploreClient({ records: initialRecords = [] }: { record
   const filterChips = useMemo<Array<{ key: ProjectIndexFilter; label: string; predicate: (record: ProjectRecord) => boolean }>>(() => [
     { key: "images", label: t("filters.images"), predicate: (record) => Boolean(record.imageUrl) },
     { key: "locations", label: t("filters.locations"), predicate: (record) => Boolean(record.locationUri) },
+    { key: "timeline", label: t("filters.timeline"), predicate: (record) => (record.evidence?.timeline ?? 0) > 0 },
   ], [t]);
   const badgeFilterOptions = useMemo<BadgeFilterOption[]>(() => [
     { key: "gainforest", label: exploreT("filters.badges.gainforest"), logoSrc: "/assets/media/images/gainforest-logo.svg" },
     { key: "maearth", label: exploreT("filters.badges.maearth"), logoSrc: "/assets/media/images/badges/ma-earth-logo.webp" },
-    { key: "maearth-round-1", label: exploreT("filters.badges.maearthRound1"), logoSrc: "/assets/media/images/badges/ma-earth-logo.webp" },
-    { key: "maearth-round-2", label: exploreT("filters.badges.maearthRound2"), logoSrc: "/assets/media/images/badges/ma-earth-logo.webp" },
   ], [exploreT]);
   const sortOptions = useMemo<Array<{ value: ExplorerSortMode; label: string }>>(() => [
     { value: "newest", label: t("sort.newest") },
