@@ -665,7 +665,7 @@ function AccountSetupForm({
       if (avatarBlob) {
         certifiedProfileRecord.avatar = {
           $type: "org.hypercerts.defs#smallImage",
-          image: avatarBlob.ref,
+          image: avatarBlob,
         };
       }
 

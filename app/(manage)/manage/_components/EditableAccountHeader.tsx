@@ -725,7 +725,7 @@ export function EditableAccountHeader({
           delete certifiedProfileRecord.website;
         }
         if (avatarBlob) {
-          certifiedProfileRecord.avatar = { $type: "org.hypercerts.defs#smallImage", image: avatarBlob.ref };
+          certifiedProfileRecord.avatar = { $type: "org.hypercerts.defs#smallImage", image: avatarBlob };
         }
 
         await putRecord("app.certified.actor.profile", "self", certifiedProfileRecord, writeOptions);
