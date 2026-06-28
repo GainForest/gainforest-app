@@ -12,12 +12,13 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
-import { HeartIcon, ImageIcon, Loader2Icon, MessageCircleIcon, SendHorizonalIcon, UserIcon } from "lucide-react";
+import { HeartIcon, ImageIcon, Loader2Icon, MessageCircleIcon, PencilIcon, SendHorizonalIcon, UserIcon } from "lucide-react";
 import {
   createFeedComment,
   createFeedLike,
   createFeedPost,
   deleteFeedLike,
+  updateFeedPost,
 } from "@/app/(manage)/manage/_lib/mutations";
 import {
   emptyEngagement,
@@ -102,8 +103,12 @@ export type FeedInteractions = {
   getComments: (uri: string) => FeedComment[] | undefined;
   loadComments: (uri: string) => Promise<void>;
   addComment: (uri: string, text: string) => Promise<void>;
+  /** Edit one of the viewer's own comments under `subjectUri`. */
+  editComment: (subjectUri: string, commentUri: string, text: string) => Promise<void>;
   localPosts: LocalPost[];
   addPost: (text: string) => Promise<void>;
+  /** Edit one of the viewer's own feed posts (optimistic local + persisted). */
+  editPost: (postUri: string, text: string) => Promise<void>;
 };
 
 const EMPTY_LIKERS: LikersState = { status: "idle", likers: [] };
@@ -308,10 +313,41 @@ export function useFeedInteractions(sessionDid: string | null): FeedInteractions
     [engagement, setOne, actingDid, repoOption],
   );
 
+  // Edit one of the viewer's own comments. Gating is the caller's job (only the
+  // author sees the affordance), so the acting repo already matches the owner.
+  const editComment = useCallback(
+    async (subjectUri: string, commentUri: string, text: string) => {
+      const trimmed = text.trim();
+      await updateFeedPost(rkeyOf(commentUri), trimmed, repoOption);
+      setComments((prev) => {
+        const list = prev.get(subjectUri);
+        if (!list) return prev;
+        const next = new Map(prev);
+        next.set(
+          subjectUri,
+          list.map((c) => (c.uri === commentUri ? { ...c, text: trimmed } : c)),
+        );
+        return next;
+      });
+    },
+    [repoOption],
+  );
+
   const addPost = useCallback(
     async (text: string) => {
       const result = await createFeedPost({ text }, repoOption);
       setLocalPosts((prev) => [{ id: result.uri, text: text.trim(), createdAt: new Date().toISOString() }, ...prev]);
+    },
+    [repoOption],
+  );
+
+  // Edit one of the viewer's own posts. Updates the optimistic local copy if it
+  // is still showing; the persisted edit reconciles on the next feed load.
+  const editPost = useCallback(
+    async (postUri: string, text: string) => {
+      const trimmed = text.trim();
+      await updateFeedPost(rkeyOf(postUri), trimmed, repoOption);
+      setLocalPosts((prev) => prev.map((p) => (p.id === postUri ? { ...p, text: trimmed } : p)));
     },
     [repoOption],
   );
@@ -327,16 +363,27 @@ export function useFeedInteractions(sessionDid: string | null): FeedInteractions
     getComments,
     loadComments,
     addComment,
+    editComment,
     localPosts,
     addPost,
+    editPost,
   };
 }
 
 // ── The viewer's own just-published posts (optimistic, above the timeline) ───
 
-export function LocalPostsList({ posts, viewerDid }: { posts: LocalPost[]; viewerDid: string | null }) {
+export function LocalPostsList({
+  posts,
+  viewerDid,
+  onEditPost,
+}: {
+  posts: LocalPost[];
+  viewerDid: string | null;
+  onEditPost?: (postUri: string, text: string) => Promise<void>;
+}) {
   const t = useTranslations("common.feed");
   const viewer = useViewerCard(viewerDid);
+  const [editingId, setEditingId] = useState<string | null>(null);
   if (posts.length === 0) return null;
   return (
     <ol className="relative">
@@ -360,12 +407,104 @@ export function LocalPostsList({ posts, viewerDid }: { posts: LocalPost[]; viewe
                   {t("composer.postedTitle")}
                 </span>
               </div>
-              <p className="mt-1 whitespace-pre-wrap text-[15px] leading-relaxed text-foreground">{post.text}</p>
+              {editingId === post.id && onEditPost ? (
+                <InlineEditor
+                  initial={post.text}
+                  max={POST_MAX}
+                  onSave={(text) => onEditPost(post.id, text)}
+                  onCancel={() => setEditingId(null)}
+                />
+              ) : (
+                <>
+                  <p className="mt-1 whitespace-pre-wrap text-[15px] leading-relaxed text-foreground">{post.text}</p>
+                  {onEditPost ? (
+                    <button
+                      type="button"
+                      onClick={() => setEditingId(post.id)}
+                      className="mt-1 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                    >
+                      <PencilIcon className="size-3" />
+                      {t("actions.edit")}
+                    </button>
+                  ) : null}
+                </>
+              )}
             </div>
           </div>
         </li>
       ))}
     </ol>
+  );
+}
+
+/** Inline text editor used to edit a post or comment in place. Saves the
+ *  trimmed text when changed; Escape or Cancel discards. */
+export function InlineEditor({
+  initial,
+  max,
+  onSave,
+  onCancel,
+}: {
+  initial: string;
+  max: number;
+  onSave: (text: string) => Promise<void>;
+  onCancel: () => void;
+}) {
+  const t = useTranslations("common.feed");
+  const [text, setText] = useState(initial);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const trimmed = text.trim();
+  const canSave = trimmed.length > 0 && text.length <= max && !busy && trimmed !== initial.trim();
+
+  async function save() {
+    if (!canSave) return;
+    setBusy(true);
+    setError(null);
+    try {
+      await onSave(trimmed);
+      onCancel();
+    } catch {
+      setError(t("actions.errorGeneric"));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div className="mt-1">
+      <textarea
+        value={text}
+        autoFocus
+        onChange={(e) => setText(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === "Escape") onCancel();
+        }}
+        rows={2}
+        maxLength={max + 40}
+        aria-label={t("actions.edit")}
+        className="w-full resize-none rounded-lg border border-border/60 bg-background px-2.5 py-1.5 text-sm text-foreground outline-none focus:border-primary/50"
+      />
+      <div className="mt-1 flex items-center gap-2">
+        <button
+          type="button"
+          onClick={() => void save()}
+          disabled={!canSave}
+          className="inline-flex items-center gap-1 rounded-full bg-primary px-3 py-1 text-xs font-medium text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-50"
+        >
+          {busy ? <Loader2Icon className="size-3.5 animate-spin" /> : null}
+          {t("actions.saveEdit")}
+        </button>
+        <button
+          type="button"
+          onClick={onCancel}
+          className="rounded-full px-3 py-1 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
+        >
+          {t("actions.cancelEdit")}
+        </button>
+        {error ? <span className="text-xs text-destructive">{error}</span> : null}
+      </div>
+    </div>
   );
 }
 
@@ -676,6 +815,8 @@ function CommentPanel({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(comments === undefined);
+  // Which of the viewer's own comments is currently being edited in place.
+  const [editingUri, setEditingUri] = useState<string | null>(null);
 
   // Fetch the thread the first time the panel opens for this subject.
   useEffect(() => {
@@ -745,11 +886,32 @@ function CommentPanel({
                     <span className="text-xs text-muted-foreground/70">
                       {c.createdAt ? formatRelative(c.createdAt) : t("actions.postedJustNow")}
                     </span>
-                    <p className="whitespace-pre-wrap break-words text-foreground/90">{c.text}</p>
+                    {editingUri === c.uri ? (
+                      <InlineEditor
+                        initial={c.text}
+                        max={COMMENT_MAX}
+                        onSave={(value) => interactions.editComment(subjectUri, c.uri, value)}
+                        onCancel={() => setEditingUri(null)}
+                      />
+                    ) : (
+                      <p className="whitespace-pre-wrap break-words text-foreground/90">{c.text}</p>
+                    )}
                   </div>
-                  <div className="-ml-2 mt-0.5">
-                    <LikeButton subjectUri={c.uri} signedIn={signedIn} interactions={interactions} size="sm" />
-                  </div>
+                  {editingUri !== c.uri ? (
+                    <div className="-ml-2 mt-0.5 flex items-center gap-1">
+                      <LikeButton subjectUri={c.uri} signedIn={signedIn} interactions={interactions} size="sm" />
+                      {isYou ? (
+                        <button
+                          type="button"
+                          onClick={() => setEditingUri(c.uri)}
+                          className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                        >
+                          <PencilIcon className="size-3" />
+                          {t("actions.edit")}
+                        </button>
+                      ) : null}
+                    </div>
+                  ) : null}
                 </div>
               </li>
             );

@@ -768,7 +768,9 @@
       "sightings": "{count, plural, other {berbagi # pengamatan alam}}",
       "moreSpecies": "+{count} lagi",
       "viewAll": "Lihat semua pengamatan",
-      "likesAcross": "{count, plural, other {# suka pada pengamatan ini}}"
+      "likesAcross": "{count, plural, other {# suka pada pengamatan ini}}",
+      "commentsHeading": "Komentar pada pengamatan ini",
+      "commentOn": "pada {species}"
     },
     "profileCard": {
       "unnamed": "Akun tanpa nama",
@@ -802,7 +804,10 @@
       "moreLikers": "{count, plural, other {+# lainnya}}",
       "openImage": "Buka foto",
       "viewDetails": "Lihat detail lengkap",
-      "closeImage": "Tutup"
+      "closeImage": "Tutup",
+      "edit": "Ubah",
+      "saveEdit": "Simpan",
+      "cancelEdit": "Batal"
     },
     "composer": {
       "placeholder": "Bagikan kabar terbaru dengan komunitas…",

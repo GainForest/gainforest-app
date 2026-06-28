@@ -768,7 +768,9 @@
       "sightings": "{count, plural, one {shared # nature sighting} other {shared # nature sightings}}",
       "moreSpecies": "+{count} more",
       "viewAll": "View all sightings",
-      "likesAcross": "{count, plural, one {# like across these sightings} other {# likes across these sightings}}"
+      "likesAcross": "{count, plural, one {# like across these sightings} other {# likes across these sightings}}",
+      "commentsHeading": "Comments on these sightings",
+      "commentOn": "on {species}"
     },
     "profileCard": {
       "unnamed": "Unnamed account",
@@ -802,7 +804,10 @@
       "moreLikers": "{count, plural, one {+# other} other {+# others}}",
       "openImage": "Open photo",
       "viewDetails": "View full details",
-      "closeImage": "Close"
+      "closeImage": "Close",
+      "edit": "Edit",
+      "saveEdit": "Save",
+      "cancelEdit": "Cancel"
     },
     "composer": {
       "placeholder": "Share an update with the community…",

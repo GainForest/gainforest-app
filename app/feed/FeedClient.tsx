@@ -13,8 +13,11 @@ import {
   HeartIcon,
   Loader2Icon,
   MegaphoneIcon,
+  MessageCircleIcon,
   NewspaperIcon,
+  PencilIcon,
   RefreshCwIcon,
+  UserIcon,
 } from "lucide-react";
 import type { ActivityFeedItem, ActivityFeedKind, ActivityFeedPage } from "../_lib/feed";
 import { indexerQuery } from "../_lib/indexer";
@@ -22,10 +25,13 @@ import { resolveBlobUrl } from "../_lib/pds";
 import {
   FeedActionBar,
   FeedComposer,
+  InlineEditor,
+  LikeButton,
   LocalPostsList,
   useFeedInteractions,
   type FeedInteractions,
 } from "./FeedActions";
+import type { FeedComment } from "../_lib/feed-engagement";
 import { formatCompact, formatCompactUsd, formatRelative } from "../_lib/format";
 import { FeedImageLightbox } from "./FeedImageLightbox";
 import { ResolvedAvatar } from "./ResolvedAvatar";
@@ -262,7 +268,7 @@ export function FeedClient({
 
           <FeedComposer signedIn={signedIn} viewerDid={viewerDid} onPost={interactions.addPost} />
 
-          <LocalPostsList posts={pendingPosts} viewerDid={viewerDid} />
+          <LocalPostsList posts={pendingPosts} viewerDid={viewerDid} onEditPost={interactions.editPost} />
 
           {/* Timeline */}
         {loading ? (
@@ -292,6 +298,7 @@ export function FeedClient({
                   <ObservationBatchCard
                     key={`batch:${entry.items[0].id}`}
                     items={entry.items}
+                    signedIn={signedIn}
                     interactions={interactions}
                     onOpenImage={setLightboxItem}
                   />
@@ -485,6 +492,13 @@ function FeedRow({
 }) {
   const t = useTranslations("common.feed");
   const verb = t(`verbs.${item.kind}`);
+  const [editing, setEditing] = useState(false);
+  const [overrideText, setOverrideText] = useState<string | null>(null);
+  // Only the author of a feed post may edit it (and only posts — other kinds
+  // mirror non-post records whose text isn't a feed post to rewrite).
+  const canEditPost =
+    item.kind === "post" && Boolean(interactions.viewerDid && item.actorDid === interactions.viewerDid);
+  const bodyText = overrideText ?? item.text;
 
   return (
     <li className="relative">
@@ -529,8 +543,8 @@ function FeedRow({
           ) : null}
 
           {/* Body text */}
-          {item.text ? (
-            <p className="mt-0.5 line-clamp-2 text-sm leading-relaxed text-muted-foreground">{item.text}</p>
+          {bodyText ? (
+            <p className="mt-0.5 line-clamp-2 text-sm leading-relaxed text-muted-foreground">{bodyText}</p>
           ) : null}
 
           {/* Donation target line */}
@@ -577,6 +591,28 @@ function FeedRow({
       {/* Like + comment, aligned under the row content (outside the link). */}
       <div className="pb-2 pl-16 pr-3">
         <FeedActionBar subjectUri={item.id} signedIn={signedIn} interactions={interactions} />
+        {canEditPost ? (
+          editing ? (
+            <InlineEditor
+              initial={bodyText ?? ""}
+              max={300}
+              onSave={async (text) => {
+                await interactions.editPost(item.id, text);
+                setOverrideText(text);
+              }}
+              onCancel={() => setEditing(false)}
+            />
+          ) : (
+            <button
+              type="button"
+              onClick={() => setEditing(true)}
+              className="mt-1 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            >
+              <PencilIcon className="size-3" />
+              {t("actions.edit")}
+            </button>
+          )
+        ) : null}
       </div>
     </li>
   );
@@ -627,10 +663,12 @@ function useOrgSightingTotal(did: string | null, fallback: number): number {
 
 function ObservationBatchCard({
   items,
+  signedIn,
   interactions,
   onOpenImage,
 }: {
   items: ActivityFeedItem[];
+  signedIn: boolean;
   interactions: FeedInteractions;
   onOpenImage: (item: ActivityFeedItem) => void;
 }) {
@@ -747,23 +785,170 @@ function ObservationBatchCard({
             </div>
           ) : null}
 
-          {/* Read-only engagement total across the sightings shown here. */}
-          {likeTotal > 0 ? (
-            <p className="mt-2 inline-flex items-center gap-1.5 text-xs text-muted-foreground">
-              <HeartIcon className="size-3.5 text-rose-500" />
-              <span className="tabular-nums">{t("batch.likesAcross", { count: likeTotal })}</span>
-            </p>
-          ) : null}
+          {/* Read-only like total + view-all, laid out as separate flex items so
+              they never collide. */}
+          <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
+            {likeTotal > 0 ? (
+              <span className="inline-flex items-center gap-1.5 text-muted-foreground">
+                <HeartIcon className="size-3.5 text-rose-500" />
+                <span className="tabular-nums">{t("batch.likesAcross", { count: likeTotal })}</span>
+              </span>
+            ) : null}
+            <Link
+              href={href}
+              className="group/all inline-flex items-center gap-1 font-medium text-primary hover:underline"
+            >
+              {t("batch.viewAll")}
+              <ArrowUpRightIcon className="size-3 transition-transform group-hover/all:translate-x-0.5 group-hover/all:-translate-y-0.5" />
+            </Link>
+          </div>
 
-          {/* View-all affordance */}
-          <Link
-            href={href}
-            className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
-          >
-            {t("batch.viewAll")}
-            <ArrowUpRightIcon className="size-3 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-          </Link>
+          {/* Comments people left on these sightings — surfaced here so they stay
+              visible even though the run is collapsed into one card. */}
+          <BatchComments
+            items={items}
+            signedIn={signedIn}
+            interactions={interactions}
+            onOpenImage={onOpenImage}
+          />
         </div>
+      </div>
+    </li>
+  );
+}
+
+/** How many comments to surface beneath a collapsed sightings batch. */
+const MAX_BATCH_COMMENTS = 6;
+const COMMENT_MAX = 1000;
+
+/** Comments left on the individual sightings in a collapsed run, merged and
+ *  shown beneath the summary card so they stay visible. Each comment links back
+ *  to its sighting's photo (opening the lightbox) and the author can edit their
+ *  own. Only the loaded run's sightings are scanned — the same scope as the
+ *  read-only like total. */
+function BatchComments({
+  items,
+  signedIn,
+  interactions,
+  onOpenImage,
+}: {
+  items: ActivityFeedItem[];
+  signedIn: boolean;
+  interactions: FeedInteractions;
+  onOpenImage: (item: ActivityFeedItem) => void;
+}) {
+  const t = useTranslations("common.feed");
+  const { getEngagement, getComments, loadComments } = interactions;
+
+  // Only sightings the indexer says already have comments are worth fetching.
+  const commented = items.filter((it) => getEngagement(it.id).commentCount > 0);
+  const commentedKey = commented.map((it) => it.id).join("\u0000");
+
+  useEffect(() => {
+    if (!commentedKey) return;
+    for (const id of commentedKey.split("\u0000")) void loadComments(id);
+  }, [commentedKey, loadComments]);
+
+  // Merge the loaded threads, tagging each comment with its source sighting.
+  const merged = commented
+    .flatMap((it) => (getComments(it.id) ?? []).map((comment) => ({ comment, item: it })))
+    .sort((a, b) => (b.comment.createdAt ?? "").localeCompare(a.comment.createdAt ?? ""));
+  if (merged.length === 0) return null;
+  const shown = merged.slice(0, MAX_BATCH_COMMENTS);
+
+  return (
+    <div className="mt-3 border-t border-border/40 pt-2.5">
+      <p className="mb-2 flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+        <MessageCircleIcon className="size-3.5" />
+        {t("batch.commentsHeading")}
+      </p>
+      <ul className="space-y-2.5">
+        {shown.map(({ comment, item }) => (
+          <BatchCommentRow
+            key={comment.uri}
+            comment={comment}
+            item={item}
+            signedIn={signedIn}
+            interactions={interactions}
+            onOpenImage={onOpenImage}
+          />
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+/** One merged batch comment: author, which sighting it's on, the text, a like,
+ *  and an inline editor for the viewer's own comment. */
+function BatchCommentRow({
+  comment,
+  item,
+  signedIn,
+  interactions,
+  onOpenImage,
+}: {
+  comment: FeedComment;
+  item: ActivityFeedItem;
+  signedIn: boolean;
+  interactions: FeedInteractions;
+  onOpenImage: (item: ActivityFeedItem) => void;
+}) {
+  const t = useTranslations("common.feed");
+  const [editing, setEditing] = useState(false);
+  const isYou = Boolean(interactions.viewerDid && comment.did === interactions.viewerDid);
+  const name = isYou ? t("actions.you") : comment.authorName || t("anonymous");
+
+  return (
+    <li className="flex gap-2">
+      <ResolvedAvatar
+        did={comment.did}
+        avatarRef={comment.authorAvatarRef}
+        name={name}
+        fallbackIcon={<UserIcon className="size-3.5" />}
+        className="mt-0.5 size-7"
+        sizes="28px"
+      />
+      <div className="min-w-0 flex-1">
+        <div className="text-sm">
+          <span className="font-medium text-foreground">{name}</span>{" "}
+          {item.title ? (
+            <button
+              type="button"
+              onClick={() => onOpenImage(item)}
+              className="text-xs text-primary hover:underline"
+            >
+              {t("batch.commentOn", { species: item.title })}
+            </button>
+          ) : null}{" "}
+          <span className="text-xs text-muted-foreground/70">
+            {comment.createdAt ? formatRelative(comment.createdAt) : t("actions.postedJustNow")}
+          </span>
+          {editing ? (
+            <InlineEditor
+              initial={comment.text}
+              max={COMMENT_MAX}
+              onSave={(text) => interactions.editComment(item.id, comment.uri, text)}
+              onCancel={() => setEditing(false)}
+            />
+          ) : (
+            <p className="whitespace-pre-wrap break-words text-foreground/90">{comment.text}</p>
+          )}
+        </div>
+        {!editing ? (
+          <div className="-ml-2 mt-0.5 flex items-center gap-1">
+            <LikeButton subjectUri={comment.uri} signedIn={signedIn} interactions={interactions} size="sm" />
+            {isYou ? (
+              <button
+                type="button"
+                onClick={() => setEditing(true)}
+                className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+              >
+                <PencilIcon className="size-3" />
+                {t("actions.edit")}
+              </button>
+            ) : null}
+          </div>
+        ) : null}
       </div>
     </li>
   );

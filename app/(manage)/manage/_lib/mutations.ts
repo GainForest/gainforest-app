@@ -413,6 +413,27 @@ export async function createFeedPost(
 }
 
 /**
+ * Edit an existing feed post or comment (both are app.gainforest.feed.post): read
+ * the current record, swap only its `text`, and put it back. Every other field —
+ * `reply` (so a comment stays a comment), `createdAt`, `langs`, `tags`, `embed` —
+ * is preserved untouched. `swapRecord` guards against editing a stale version.
+ * Caller must own the record (or manage the repo it lives in).
+ */
+export async function updateFeedPost(
+  rkey: string,
+  text: string,
+  options?: { repo?: string },
+): Promise<FeedWriteResult> {
+  const existing = await getRecord(FEED_POST_COLLECTION, rkey, options);
+  const record: Record<string, unknown> = { ...existing.record, text: text.trim() };
+  const result = await putRecord(FEED_POST_COLLECTION, rkey, record, {
+    swapRecord: existing.cid,
+    ...(options?.repo ? { repo: options.repo } : {}),
+  });
+  return { ...result, rkey };
+}
+
+/**
  * Comment on a record, or reply to another comment. Mirrors Bluesky's model: a
  * comment is a reply-post whose `reply.parent` is the thing replied to and
  * `reply.root` is the top of the thread. Pass only `subjectUri` for a top-level

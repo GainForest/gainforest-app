@@ -768,7 +768,9 @@
       "sightings": "{count, plural, one {compartió # avistamiento} other {compartió # avistamientos}}",
       "moreSpecies": "+{count} más",
       "viewAll": "Ver todos los avistamientos",
-      "likesAcross": "{count, plural, one {# me gusta en estos avistamientos} other {# me gusta en estos avistamientos}}"
+      "likesAcross": "{count, plural, one {# me gusta en estos avistamientos} other {# me gusta en estos avistamientos}}",
+      "commentsHeading": "Comentarios sobre estos avistamientos",
+      "commentOn": "en {species}"
     },
     "profileCard": {
       "unnamed": "Cuenta sin nombre",
@@ -802,7 +804,10 @@
       "moreLikers": "{count, plural, one {+# más} other {+# más}}",
       "openImage": "Abrir foto",
       "viewDetails": "Ver todos los detalles",
-      "closeImage": "Cerrar"
+      "closeImage": "Cerrar",
+      "edit": "Editar",
+      "saveEdit": "Guardar",
+      "cancelEdit": "Cancelar"
     },
     "composer": {
       "placeholder": "Comparte una novedad con la comunidad…",
