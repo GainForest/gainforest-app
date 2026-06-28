@@ -36,6 +36,7 @@ import { RichText } from "./RichText";
 import { SocialGlyph, socialLabel } from "./SocialIcon";
 import { RecordDrawerStatsTile } from "./StatsTile";
 import { ProjectEvidence } from "./ProjectEvidence";
+import { RecordEngagement } from "./RecordEngagement";
 import { isPdsBlobUrl, resolveBlobUrl } from "../_lib/pds";
 import { pauseOtherAudio } from "../_lib/audio-coordinator";
 import { formatWorkScopeTag, type WorkScopeLabels } from "../_lib/work-scope-labels";
@@ -564,6 +565,14 @@ export function RecordDrawer({
               </div>
             )}
           </div>
+
+          {/* Like + comment a sighting straight from the drawer — the same
+              interaction as the feed + the full sighting page. */}
+          {record.kind === "occurrence" && (
+            <div className="mt-4 border-t border-border-soft pt-3">
+              <RecordEngagement subjectUri={record.atUri} />
+            </div>
+          )}
 
           {record.kind === "project" && (
             <ProjectCertSummary

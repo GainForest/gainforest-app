@@ -19,6 +19,7 @@ import { countryFlag, formatDate, formatNumber } from "../../../_lib/format";
 import { getAccountRouteData, readAccountRouteParams } from "../../../account/_lib/account-route";
 import { accountHref, localObservationHref } from "../../../_lib/urls";
 import { RecordLocationMap } from "../../../_components/RecordLocationMap";
+import { RecordEngagement } from "../../../_components/RecordEngagement";
 import { ObservationMediaViewer, type ObservationViewerImage } from "./_components/ObservationMediaViewer";
 
 export const revalidate = 60;
@@ -124,6 +125,11 @@ export default async function ObservationDetailPage({ params }: { params: Observ
         <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
           <div className="min-w-0">
             <ObservationMediaViewer images={images} audioUrl={audioUrl} title={name} />
+            {/* Like + comment this sighting (the real record) — the same
+                interaction surfaced in the activity feed. */}
+            <div className="mt-4 border-t border-border-soft pt-3">
+              <RecordEngagement subjectUri={record.atUri} />
+            </div>
           </div>
 
           <aside className="min-w-0 space-y-5">
