@@ -460,6 +460,16 @@ export async function createFeedComment(
   return { ...result, rkey: rkeyOf(result.uri) };
 }
 
+/**
+ * Delete one of the viewer's own feed posts or comments (both are
+ * app.gainforest.feed.post). Caller must own the record (or manage the repo it
+ * lives in); deleting a comment removes that reply-post, which the appview then
+ * stops counting under its subject. Pass `{ repo }` to target a group repo.
+ */
+export async function deleteFeedPost(rkey: string, options?: { repo?: string }): Promise<void> {
+  await deleteRecord(FEED_POST_COLLECTION, rkey, options);
+}
+
 /** Like any record/post/comment (app.gainforest.feed.like). Returns the like
  *  record's rkey so the caller can later unlike it via deleteFeedLike. */
 export async function createFeedLike(

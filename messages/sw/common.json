@@ -807,7 +807,10 @@
       "closeImage": "Funga",
       "edit": "Hariri",
       "saveEdit": "Hifadhi",
-      "cancelEdit": "Ghairi"
+      "cancelEdit": "Ghairi",
+      "delete": "Futa",
+      "confirmDelete": "Thibitisha kufuta",
+      "cancelDelete": "Ghairi"
     },
     "composer": {
       "placeholder": "Shiriki taarifa mpya na jamii…",

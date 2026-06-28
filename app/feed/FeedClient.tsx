@@ -23,6 +23,7 @@ import type { ActivityFeedItem, ActivityFeedKind, ActivityFeedPage } from "../_l
 import { indexerQuery } from "../_lib/indexer";
 import { resolveBlobUrl } from "../_lib/pds";
 import {
+  DeleteButton,
   FeedActionBar,
   FeedComposer,
   InlineEditor,
@@ -211,7 +212,13 @@ export function FeedClient({
     return () => observer.disconnect();
   }, [hasMore]);
 
-  const entries = useMemo(() => groupFeedEntries(items), [items]);
+  // Hide rows the viewer just deleted until the indexer stops returning them.
+  const removedUris = interactions.removedUris;
+  const visibleItems = useMemo(
+    () => (removedUris.size === 0 ? items : items.filter((it) => !removedUris.has(it.id))),
+    [items, removedUris],
+  );
+  const entries = useMemo(() => groupFeedEntries(visibleItems), [visibleItems]);
 
   // Pull like + comment engagement for the loaded rows from the indexer.
   const { loadEngagement } = interactions;
@@ -268,7 +275,12 @@ export function FeedClient({
 
           <FeedComposer signedIn={signedIn} viewerDid={viewerDid} onPost={interactions.addPost} />
 
-          <LocalPostsList posts={pendingPosts} viewerDid={viewerDid} onEditPost={interactions.editPost} />
+          <LocalPostsList
+            posts={pendingPosts}
+            viewerDid={viewerDid}
+            onEditPost={interactions.editPost}
+            onDeletePost={interactions.deletePost}
+          />
 
           {/* Timeline */}
         {loading ? (
@@ -603,14 +615,17 @@ function FeedRow({
               onCancel={() => setEditing(false)}
             />
           ) : (
-            <button
-              type="button"
-              onClick={() => setEditing(true)}
-              className="mt-1 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-            >
-              <PencilIcon className="size-3" />
-              {t("actions.edit")}
-            </button>
+            <div className="mt-1 flex items-center gap-1">
+              <button
+                type="button"
+                onClick={() => setEditing(true)}
+                className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+              >
+                <PencilIcon className="size-3" />
+                {t("actions.edit")}
+              </button>
+              <DeleteButton onDelete={() => interactions.deletePost(item.id)} />
+            </div>
           )
         ) : null}
       </div>
@@ -938,14 +953,17 @@ function BatchCommentRow({
           <div className="-ml-2 mt-0.5 flex items-center gap-1">
             <LikeButton subjectUri={comment.uri} signedIn={signedIn} interactions={interactions} size="sm" />
             {isYou ? (
-              <button
-                type="button"
-                onClick={() => setEditing(true)}
-                className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-              >
-                <PencilIcon className="size-3" />
-                {t("actions.edit")}
-              </button>
+              <>
+                <button
+                  type="button"
+                  onClick={() => setEditing(true)}
+                  className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                >
+                  <PencilIcon className="size-3" />
+                  {t("actions.edit")}
+                </button>
+                <DeleteButton onDelete={() => interactions.deleteComment(item.id, comment.uri)} />
+              </>
             ) : null}
           </div>
         ) : null}

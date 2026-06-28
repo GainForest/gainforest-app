@@ -807,7 +807,10 @@
       "closeImage": "Tutup",
       "edit": "Ubah",
       "saveEdit": "Simpan",
-      "cancelEdit": "Batal"
+      "cancelEdit": "Batal",
+      "delete": "Hapus",
+      "confirmDelete": "Konfirmasi hapus",
+      "cancelDelete": "Batal"
     },
     "composer": {
       "placeholder": "Bagikan kabar terbaru dengan komunitas…",

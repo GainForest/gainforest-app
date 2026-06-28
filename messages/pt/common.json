@@ -807,7 +807,10 @@
       "closeImage": "Fechar",
       "edit": "Editar",
       "saveEdit": "Salvar",
-      "cancelEdit": "Cancelar"
+      "cancelEdit": "Cancelar",
+      "delete": "Excluir",
+      "confirmDelete": "Confirmar exclusão",
+      "cancelDelete": "Cancelar"
     },
     "composer": {
       "placeholder": "Compartilhe uma novidade com a comunidade…",

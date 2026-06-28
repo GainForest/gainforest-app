@@ -12,12 +12,13 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
-import { HeartIcon, ImageIcon, Loader2Icon, MessageCircleIcon, PencilIcon, SendHorizonalIcon, UserIcon } from "lucide-react";
+import { HeartIcon, ImageIcon, Loader2Icon, MessageCircleIcon, PencilIcon, SendHorizonalIcon, Trash2Icon, UserIcon } from "lucide-react";
 import {
   createFeedComment,
   createFeedLike,
   createFeedPost,
   deleteFeedLike,
+  deleteFeedPost,
   updateFeedPost,
 } from "@/app/(manage)/manage/_lib/mutations";
 import {
@@ -105,10 +106,17 @@ export type FeedInteractions = {
   addComment: (uri: string, text: string) => Promise<void>;
   /** Edit one of the viewer's own comments under `subjectUri`. */
   editComment: (subjectUri: string, commentUri: string, text: string) => Promise<void>;
+  /** Delete one of the viewer's own comments under `subjectUri`. */
+  deleteComment: (subjectUri: string, commentUri: string) => Promise<void>;
   localPosts: LocalPost[];
   addPost: (text: string) => Promise<void>;
   /** Edit one of the viewer's own feed posts (optimistic local + persisted). */
   editPost: (postUri: string, text: string) => Promise<void>;
+  /** Delete one of the viewer's own feed posts (optimistic local + persisted). */
+  deletePost: (postUri: string) => Promise<void>;
+  /** AT-URIs the viewer has just deleted, so the timeline can hide them until
+   *  the indexer stops returning them. */
+  removedUris: Set<string>;
 };
 
 const EMPTY_LIKERS: LikersState = { status: "idle", likers: [] };
@@ -136,6 +144,9 @@ export function useFeedInteractions(sessionDid: string | null): FeedInteractions
   const [comments, setComments] = useState<Map<string, FeedComment[]>>(() => new Map());
   const [likers, setLikers] = useState<Map<string, LikersState>>(() => new Map());
   const [localPosts, setLocalPosts] = useState<LocalPost[]>([]);
+  // AT-URIs the viewer just deleted, hidden from the timeline until the indexer
+  // catches up and stops returning them.
+  const [removedUris, setRemovedUris] = useState<Set<string>>(() => new Set());
   // URIs whose engagement has been requested already (avoids refetch storms).
   const requestedRef = useRef<Set<string>>(new Set());
   // URIs whose likers have been requested already (avoids refetch storms).
@@ -152,6 +163,7 @@ export function useFeedInteractions(sessionDid: string | null): FeedInteractions
     setComments(new Map());
     setLikers(new Map());
     setLocalPosts([]);
+    setRemovedUris(new Set());
   }, [actingDid]);
 
   const getEngagement = useCallback(
@@ -352,6 +364,38 @@ export function useFeedInteractions(sessionDid: string | null): FeedInteractions
     [repoOption],
   );
 
+  // Delete one of the viewer's own posts. Gating is the caller's job (only the
+  // author sees the affordance), so the acting repo already owns the record.
+  // Drops the optimistic local copy and marks the URI removed so a real feed
+  // row for it is hidden until the indexer stops returning it.
+  const deletePost = useCallback(
+    async (postUri: string) => {
+      await deleteFeedPost(rkeyOf(postUri), repoOption);
+      setLocalPosts((prev) => prev.filter((p) => p.id !== postUri));
+      setRemovedUris((prev) => new Set(prev).add(postUri));
+    },
+    [repoOption],
+  );
+
+  // Delete one of the viewer's own comments (a reply-post). Removes it from the
+  // loaded thread and decrements the subject's comment count optimistically.
+  const deleteComment = useCallback(
+    async (subjectUri: string, commentUri: string) => {
+      await deleteFeedPost(rkeyOf(commentUri), repoOption);
+      setComments((prev) => {
+        const list = prev.get(subjectUri);
+        if (!list) return prev;
+        const next = new Map(prev);
+        next.set(subjectUri, list.filter((c) => c.uri !== commentUri));
+        return next;
+      });
+      setRemovedUris((prev) => new Set(prev).add(commentUri));
+      const current = engagement.get(subjectUri) ?? emptyEngagement();
+      setOne(subjectUri, { commentCount: Math.max(0, current.commentCount - 1) });
+    },
+    [repoOption, engagement, setOne],
+  );
+
   return {
     sessionDid,
     viewerDid: actingDid,
@@ -364,9 +408,12 @@ export function useFeedInteractions(sessionDid: string | null): FeedInteractions
     loadComments,
     addComment,
     editComment,
+    deleteComment,
     localPosts,
     addPost,
     editPost,
+    deletePost,
+    removedUris,
   };
 }
 
@@ -376,10 +423,12 @@ export function LocalPostsList({
   posts,
   viewerDid,
   onEditPost,
+  onDeletePost,
 }: {
   posts: LocalPost[];
   viewerDid: string | null;
   onEditPost?: (postUri: string, text: string) => Promise<void>;
+  onDeletePost?: (postUri: string) => Promise<void>;
 }) {
   const t = useTranslations("common.feed");
   const viewer = useViewerCard(viewerDid);
@@ -417,15 +466,20 @@ export function LocalPostsList({
               ) : (
                 <>
                   <p className="mt-1 whitespace-pre-wrap text-[15px] leading-relaxed text-foreground">{post.text}</p>
-                  {onEditPost ? (
-                    <button
-                      type="button"
-                      onClick={() => setEditingId(post.id)}
-                      className="mt-1 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-                    >
-                      <PencilIcon className="size-3" />
-                      {t("actions.edit")}
-                    </button>
+                  {onEditPost || onDeletePost ? (
+                    <div className="mt-1 flex items-center gap-1">
+                      {onEditPost ? (
+                        <button
+                          type="button"
+                          onClick={() => setEditingId(post.id)}
+                          className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                        >
+                          <PencilIcon className="size-3" />
+                          {t("actions.edit")}
+                        </button>
+                      ) : null}
+                      {onDeletePost ? <DeleteButton onDelete={() => onDeletePost(post.id)} /> : null}
+                    </div>
                   ) : null}
                 </>
               )}
@@ -505,6 +559,68 @@ export function InlineEditor({
         {error ? <span className="text-xs text-destructive">{error}</span> : null}
       </div>
     </div>
+  );
+}
+
+/** A small two-step delete control, shared by posts and comments. The first
+ *  click reveals an explicit "confirm / cancel" pair so a delete can't fire by
+ *  accident; `onDelete` removes the record and the surrounding row disappears. */
+export function DeleteButton({ onDelete }: { onDelete: () => Promise<void> }) {
+  const t = useTranslations("common.feed");
+  const [confirming, setConfirming] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState(false);
+
+  async function run() {
+    if (busy) return;
+    setBusy(true);
+    setError(false);
+    try {
+      await onDelete();
+      // The row unmounts on success; nothing more to do here.
+    } catch {
+      setError(true);
+      setBusy(false);
+      setConfirming(false);
+    }
+  }
+
+  if (confirming) {
+    return (
+      <span className="inline-flex items-center gap-1">
+        <button
+          type="button"
+          onClick={() => void run()}
+          disabled={busy}
+          className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium text-destructive transition-colors hover:bg-destructive/10 disabled:opacity-50"
+        >
+          {busy ? <Loader2Icon className="size-3 animate-spin" /> : <Trash2Icon className="size-3" />}
+          {t("actions.confirmDelete")}
+        </button>
+        <button
+          type="button"
+          onClick={() => setConfirming(false)}
+          disabled={busy}
+          className="rounded-full px-2 py-0.5 text-[11px] font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-50"
+        >
+          {t("actions.cancelDelete")}
+        </button>
+      </span>
+    );
+  }
+
+  return (
+    <span className="inline-flex items-center gap-1">
+      <button
+        type="button"
+        onClick={() => setConfirming(true)}
+        className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
+      >
+        <Trash2Icon className="size-3" />
+        {t("actions.delete")}
+      </button>
+      {error ? <span className="text-[11px] text-destructive">{t("actions.errorGeneric")}</span> : null}
+    </span>
   );
 }
 
@@ -901,14 +1017,17 @@ function CommentPanel({
                     <div className="-ml-2 mt-0.5 flex items-center gap-1">
                       <LikeButton subjectUri={c.uri} signedIn={signedIn} interactions={interactions} size="sm" />
                       {isYou ? (
-                        <button
-                          type="button"
-                          onClick={() => setEditingUri(c.uri)}
-                          className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-                        >
-                          <PencilIcon className="size-3" />
-                          {t("actions.edit")}
-                        </button>
+                        <>
+                          <button
+                            type="button"
+                            onClick={() => setEditingUri(c.uri)}
+                            className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                          >
+                            <PencilIcon className="size-3" />
+                            {t("actions.edit")}
+                          </button>
+                          <DeleteButton onDelete={() => interactions.deleteComment(subjectUri, c.uri)} />
+                        </>
                       ) : null}
                     </div>
                   ) : null}
