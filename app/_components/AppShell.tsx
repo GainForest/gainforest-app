@@ -22,6 +22,7 @@ import {
   Share2Icon,
   SparkleIcon,
   SunIcon,
+  UploadIcon,
   UserIcon,
 } from "lucide-react";
 import { createContext, Suspense, useContext, useEffect, useState, type MouseEvent } from "react";
@@ -1291,11 +1292,25 @@ function myRecordsRouteForPath(pathname: string): MyRecordsRoute | null {
 }
 
 function getRouteHeaderActions(pathname: string, authSession: AuthSession) {
-  // "My X" only has meaning for a signed-in viewer; hidden otherwise.
+  // Route header actions only have meaning for a signed-in viewer; hidden
+  // otherwise (uploading observations and "My X" both require an account).
   if (!authSession.isLoggedIn) return null;
+  // On the activity feed, surface a quick "Upload" entry point that opens the
+  // add-observations modal over the current page.
+  if (pathname === "/feed") return <FeedUploadHeaderButton sessionDid={authSession.did} />;
   const route = myRecordsRouteForPath(pathname);
   if (!route) return null;
   return <MyRecordsHeaderButton route={route} sessionDid={authSession.did} />;
+}
+
+function FeedUploadHeaderButton({ sessionDid }: { sessionDid: string }) {
+  const t = useTranslations("common.sidebar.headerActions");
+  return (
+    <AddObservationsButton sessionDid={sessionDid} className={cn(buttonVariants({ variant: "default", size: "sm" }))}>
+      <UploadIcon />
+      <span className="hidden sm:inline">{t("upload")}</span>
+    </AddObservationsButton>
+  );
 }
 
 function MyRecordsHeaderButton({ route, sessionDid }: { route: MyRecordsRoute; sessionDid: string }) {
