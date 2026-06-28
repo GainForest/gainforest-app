@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { usePathname, useSearchParams } from "next/navigation";
-import { BinocularsIcon, Building2Icon, FolderKanbanIcon, HeartHandshakeIcon, HomeIcon, ImageIcon, SettingsIcon, UsersIcon } from "lucide-react";
+import { BinocularsIcon, FolderKanbanIcon, HeartHandshakeIcon, HomeIcon, ImageIcon, SettingsIcon, UsersIcon } from "lucide-react";
 import { stripLocaleFromPathname } from "@/lib/i18n/routing";
 import { cn } from "@/lib/utils";
 import type { AccountKind } from "../_lib/account-route";
@@ -15,14 +15,13 @@ import {
   accountGalleryPath,
   accountMembersPath,
   accountObservationsPath,
-  accountOrganizationsPath,
   accountPath,
   accountProjectsPath,
   accountSettingsPath,
   accountTreesPath,
 } from "../_lib/account-route";
 
-type TabLabelKey = "home" | "overview" | "bumicerts" | "projects" | "organizations" | "donationHistory" | "observations" | "timeline" | "gallery" | "settings" | "sites" | "audio" | "drone" | "trees" | "members";
+type TabLabelKey = "home" | "overview" | "bumicerts" | "projects" | "donationHistory" | "observations" | "timeline" | "gallery" | "settings" | "sites" | "audio" | "drone" | "trees" | "members";
 
 interface Tab {
   labelKey: TabLabelKey;
@@ -44,7 +43,6 @@ type TabPaths = {
   home: string;
   bumicerts: string;
   projects: string;
-  organizations: string;
   donations: string;
   activity: string;
   gallery: string;
@@ -57,7 +55,6 @@ function buildTabPaths(did: string, scope: AccountTabBarScope, manageBasePath = 
       home: `${manageBasePath}?tab=home`,
       bumicerts: `${manageBasePath}?tab=bumicerts`,
       projects: `${manageBasePath}/projects`,
-      organizations: `${manageBasePath}?tab=organizations`,
       donations: `${manageBasePath}?tab=donations`,
       activity: `${manageBasePath}?tab=observations`,
       gallery: `${manageBasePath}?tab=gallery`,
@@ -69,7 +66,6 @@ function buildTabPaths(did: string, scope: AccountTabBarScope, manageBasePath = 
     home: accountPath(did),
     bumicerts: accountBumicertsPath(did),
     projects: accountProjectsPath(did),
-    organizations: accountOrganizationsPath(did),
     donations: accountDonationsPath(did),
     activity: accountObservationsPath(did),
     gallery: accountGalleryPath(did),
@@ -82,7 +78,6 @@ function buildTabs(
   accountKind: AccountTabBarKind,
   scope: AccountTabBarScope,
   includeSettings: boolean,
-  showOrganizations: boolean,
   showOrgData: boolean,
   manageBasePath?: string,
 ): Tab[] {
@@ -96,7 +91,6 @@ function buildTabs(
 
   if (accountKind === "user") {
     const projectsTab: Tab = { labelKey: "projects", href: paths.projects, icon: FolderKanbanIcon, exact: false };
-    const organizationsTab: Tab = { labelKey: "organizations", href: paths.organizations, icon: Building2Icon, exact: false };
     const observationsTab: Tab = {
       labelKey: "observations",
       href: paths.activity,
@@ -117,7 +111,6 @@ function buildTabs(
       ? [
           { labelKey: "overview", href: paths.home, icon: HomeIcon, exact: true },
           projectsTab,
-          ...(showOrganizations ? [organizationsTab] : []),
           observationsTab,
           { labelKey: "gallery", href: paths.gallery, icon: ImageIcon, exact: false },
           donationsTab,
@@ -176,7 +169,6 @@ interface OrgTabBarProps {
   accountKind?: AccountKind;
   scope?: AccountTabBarScope;
   includeSettings?: boolean;
-  showOrganizations?: boolean;
   showOrgData?: boolean;
   manageBasePath?: string;
 }
@@ -186,14 +178,13 @@ export function AccountTabBar({
   accountKind = "organization",
   scope = "account",
   includeSettings = false,
-  showOrganizations = false,
   showOrgData = false,
   manageBasePath,
 }: OrgTabBarProps) {
   const t = useTranslations("common.accountTabs");
   const pathname = stripLocaleFromPathname(usePathname() ?? "/");
   const searchParams = useSearchParams();
-  const tabs = buildTabs(did, accountKind, scope, includeSettings, showOrganizations, showOrgData, manageBasePath);
+  const tabs = buildTabs(did, accountKind, scope, includeSettings, showOrgData, manageBasePath);
 
   function isActive(tab: Tab): boolean {
     if (scope === "manage") {

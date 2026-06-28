@@ -15,6 +15,8 @@ import {
   Share2Icon,
 } from "lucide-react";
 import type { AccountRouteData } from "../_lib/account-route";
+import type { AccountOrganization } from "./AccountOrganizationsGrid";
+import { AccountMemberships } from "./AccountMemberships";
 import { formatCountry } from "../../_lib/format";
 import { SocialGlyph } from "@/app/_components/SocialIcon";
 import { TrustedByBadges } from "@/app/_components/TrustedByBadges";
@@ -53,7 +55,15 @@ function classifySocial(url: string): string {
   }
 }
 
-export function AccountHero({ account, editHref = null }: { account: AccountRouteData; editHref?: string | null }) {
+export function AccountHero({
+  account,
+  editHref = null,
+  memberships = [],
+}: {
+  account: AccountRouteData;
+  editHref?: string | null;
+  memberships?: AccountOrganization[];
+}) {
   const [copied, setCopied] = useState(false);
   const heroT = useTranslations("upload.dashboardClient.hero");
   const actionsT = useTranslations("upload.actions");
@@ -164,6 +174,7 @@ export function AccountHero({ account, editHref = null }: { account: AccountRout
             <p className="mt-1.5 line-clamp-2 text-sm leading-relaxed text-muted-foreground">
               {account.description ?? ""}
             </p>
+            <AccountMemberships organizations={memberships} className="mt-3" />
           </div>
         </div>
 

@@ -10,7 +10,7 @@ import { RichText } from "../../_components/RichText";
 import { RecordExplorer } from "../../_components/RecordExplorer";
 import { AccountBumicertsGrid } from "./AccountBumicertsGrid";
 import { AccountProjectsGrid } from "./AccountProjectsGrid";
-import { AccountOrganizationsGrid, type AccountOrganization } from "./AccountOrganizationsGrid";
+import type { AccountOrganization } from "./AccountOrganizationsGrid";
 import { OverviewFolders, type OverviewFolderTile } from "./OverviewFolders";
 import { AccountContentColumns, AccountSidebar } from "./AccountSidebar";
 import { AccountSettingsSections } from "./AccountSettingsSections";
@@ -18,7 +18,7 @@ import { ShareProfileButton } from "./ShareProfileButton";
 import { DonationHistory } from "./DonationHistory";
 import { fetchReceipts } from "../../_lib/dashboard";
 import { fetchPublicDataCouncilMembers, type PublicDataCouncilMember } from "../../_lib/data-council";
-import { fetchAuthSession } from "../../_lib/auth-server";
+import type { AuthSession } from "../../_lib/auth";
 import { fetchUserCgsGroups, resolveAccountManageAccess } from "../../_lib/manage-server";
 import { BumicertsSection, ObservationsSection, ProjectsSection } from "../../(manage)/manage/_sections";
 import { monogram } from "../../_lib/did-profile";
@@ -285,12 +285,15 @@ export async function AccountProjectsTabContent({ account, did }: { account: Acc
 }
 
 // The organizations a person belongs to live in the group service, which only
-// lets us read the signed-in viewer's own memberships. So this tab is private:
-// it renders only when you're viewing your own profile, otherwise it 404s.
-export async function AccountOrganizationsTabContent({ account }: { account: AccountRouteData; did: string }) {
-  const session = await fetchAuthSession();
+// lets us read the signed-in viewer's own memberships. So memberships are
+// private: they resolve only when you're viewing your own profile. The result
+// is surfaced as a "Member of…" row in the profile hero (no separate tab).
+export async function loadAccountMemberships(
+  account: AccountRouteData,
+  session: AuthSession,
+): Promise<AccountOrganization[]> {
   if (account.kind !== "user" || !session.isLoggedIn || session.did !== account.did) {
-    notFound();
+    return [];
   }
 
   const t = await getTranslations("common.accountOrganizations");
@@ -300,7 +303,7 @@ export async function AccountOrganizationsTabContent({ account }: { account: Acc
     ? await fetchIndexedCertifiedProfileCards(dids).catch(() => new Map())
     : new Map();
 
-  const organizations: AccountOrganization[] = groups
+  return groups
     .filter((group) => Boolean(group.groupDid))
     .map((group) => {
       const card = cards.get(group.groupDid);
@@ -313,12 +316,6 @@ export async function AccountOrganizationsTabContent({ account }: { account: Acc
         role,
       } satisfies AccountOrganization;
     });
-
-  return (
-    <div className="py-2">
-      <AccountOrganizationsGrid organizations={organizations} />
-    </div>
-  );
 }
 
 export async function AccountGalleryTabContent({ account, did }: { account: AccountRouteData; did: string }) {

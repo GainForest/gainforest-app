@@ -2472,6 +2472,40 @@ async function fetchProjectCardMetaUncached(
   return out;
 }
 
+const EMPTY_EVIDENCE_COUNTS: ProjectEvidenceCounts = { boundaries: 0, timeline: 0, reviews: 0 };
+
+/**
+ * Lazily resolve the card metadata (focus/scope tags + at-a-glance evidence)
+ * for an already-loaded page of projects. The explorer renders projects first
+ * with this metadata omitted, then calls this to fill in the badges without
+ * blocking the initial paint.
+ *
+ * Every returned record has `evidence` defined (zero-filled on miss/error) so
+ * callers can use that as a terminal "already enriched" signal and avoid
+ * re-fetching in a loop.
+ */
+export async function enrichProjectsWithCardMeta(
+  records: ProjectRecord[],
+  signal?: AbortSignal,
+): Promise<ProjectRecord[]> {
+  if (records.length === 0) return records;
+  const pairs = records.map((record) => ({
+    projectUri: record.atUri,
+    certUri: record.bumicertUris[0],
+  }));
+  const metaByProject = await fetchProjectCardMeta(pairs, signal).catch(
+    () => new Map<string, ProjectCardMeta>(),
+  );
+  return records.map((record) => {
+    const meta = metaByProject.get(record.atUri);
+    return {
+      ...record,
+      scopeTags: meta && meta.scopeTags.length > 0 ? meta.scopeTags : record.scopeTags,
+      evidence: meta?.evidence ?? record.evidence ?? EMPTY_EVIDENCE_COUNTS,
+    };
+  });
+}
+
 type RawProjectCount = Pick<RawProjectCollection, "did" | "rkey" | "uri" | "title">;
 
 const PROJECT_COLLECTION_COUNT_QUERY = `

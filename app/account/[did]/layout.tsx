@@ -7,6 +7,7 @@ import { EditableAccountHeader } from "@/app/(manage)/manage/_components/Editabl
 import { AccountChrome } from "../_components/AccountChrome";
 import { AccountHero } from "../_components/AccountHero";
 import { AccountTabBar } from "../_components/AccountTabBar";
+import { loadAccountMemberships } from "../_components/AccountTabContent";
 import { accountSettingsPath, getAccountRouteData, readAccountRouteParams, readOptionalAccountRouteParams } from "../_lib/account-route";
 
 export async function generateMetadata({ params }: { params: Promise<{ did: string }> }): Promise<Metadata> {
@@ -53,9 +54,10 @@ export default async function AccountLayout({
     : false;
   const canManage = Boolean(target);
 
-  // Your organizations are private to you: the group service only lets us read
-  // your own memberships, so this tab appears only on your own profile.
-  const showOrganizations = account.kind === "user" && session.isLoggedIn && session.did === account.did;
+  // The organizations you belong to are private to you: the group service only
+  // lets us read your own memberships, so they surface as a "Member of…" row in
+  // the hero of your own profile (empty everywhere else).
+  const memberships = await loadAccountMemberships(account, session);
 
   return (
     <main className="w-full">
@@ -70,14 +72,14 @@ export default async function AccountLayout({
                 settingsHref={accountSettingsPath(account.urlIdentifier)}
                 viewPublicHref={null}
                 showAbout={false}
+                memberships={memberships}
               />
             ) : (
-              <AccountHero account={account} />
+              <AccountHero account={account} memberships={memberships} />
             )}
             <AccountTabBar
               did={account.urlIdentifier}
               accountKind={account.kind}
-              showOrganizations={showOrganizations}
               includeSettings={canManage}
               showOrgData={canManage}
             />

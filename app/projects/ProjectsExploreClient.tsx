@@ -26,6 +26,7 @@ import { OwnerFilterBanner, OwnerFilterButton, useOwnerFilter } from "../_compon
 import { RecordDrawer } from "../_components/RecordDrawer";
 import { RecordMap } from "../_components/RecordMap";
 import {
+  enrichProjectsWithCardMeta,
   fetchProjectTotalCount,
   fetchProjects,
   type BumicertBadgeFilter,
@@ -133,7 +134,7 @@ export function ProjectsExploreClient({ records: initialRecords = [] }: { record
     if (initialRecords.length > 0) return;
     const controller = new AbortController();
     const requestSeq = ++requestSeqRef.current;
-    const options = { query: deferredQuery, filters, sort, featuredBadgesOnly: !ownerDid, badgeFilters, creatorDid: ownerDid, withScopeTags: true };
+    const options = { query: deferredQuery, filters, sort, featuredBadgesOnly: !ownerDid, badgeFilters, creatorDid: ownerDid };
     const isCurrent = () => requestSeqRef.current === requestSeq && !controller.signal.aborted;
     setLoading(true);
     setLoadingMore(false);
@@ -174,6 +175,24 @@ export function ProjectsExploreClient({ records: initialRecords = [] }: { record
   useEffect(() => {
     setCardLimit(INITIAL_CARD_LIMIT);
   }, [deferredQuery, filters, badgeFilters, sort, view, ownerDid]);
+
+  // Projects paint immediately without their scope tags / evidence badges; this
+  // backfills that slower metadata for any records still missing it (a record's
+  // `evidence` becoming defined is the terminal "enriched" signal, so this never
+  // loops). New "load more" pages are picked up the same way.
+  useEffect(() => {
+    const pending = records.filter((record) => record.evidence === undefined);
+    if (pending.length === 0) return;
+    const controller = new AbortController();
+    enrichProjectsWithCardMeta(pending, controller.signal)
+      .then((enriched) => {
+        if (controller.signal.aborted) return;
+        const enrichedById = new Map(enriched.map((record) => [record.id, record]));
+        setRecords((current) => current.map((record) => enrichedById.get(record.id) ?? record));
+      })
+      .catch(() => {});
+    return () => controller.abort();
+  }, [records]);
 
   useEffect(() => {
     if (!openSort) return;
@@ -253,7 +272,7 @@ export function ProjectsExploreClient({ records: initialRecords = [] }: { record
     const base = records;
     const isCurrent = () => requestSeqRef.current === requestSeq && !controller.signal.aborted;
     setLoadingMore(true);
-    fetchProjects(PROJECTS_PAGE_SIZE, cursor, controller.signal, undefined, { query: deferredQuery, filters, sort, featuredBadgesOnly: !ownerDid, badgeFilters, creatorDid: ownerDid, withScopeTags: true })
+    fetchProjects(PROJECTS_PAGE_SIZE, cursor, controller.signal, undefined, { query: deferredQuery, filters, sort, featuredBadgesOnly: !ownerDid, badgeFilters, creatorDid: ownerDid })
       .then((page) => {
         if (!isCurrent()) return;
         setRecords(mergeProjectRecords(base, page.records));

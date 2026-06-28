@@ -24,6 +24,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { AccountRouteData } from "@/app/account/_lib/account-route";
+import type { AccountOrganization } from "@/app/account/_components/AccountOrganizationsGrid";
+import { AccountMemberships } from "@/app/account/_components/AccountMemberships";
 import { countryFlag } from "@/app/_lib/format";
 import { resolvePdsHost } from "@/app/_lib/pds";
 import { putRecord, uploadBlob } from "../_lib/mutations";
@@ -312,10 +314,12 @@ function EditableHero({
   onEditOrgType,
   onEditSocials,
   editDisabledReason = null,
+  memberships,
 }: {
   account: AccountRouteData;
   settingsHref: string;
   viewPublicHref: string | null;
+  memberships: AccountOrganization[];
   editState: HeroEditState;
   inlineField: InlineField;
   isSaving: boolean;
@@ -470,6 +474,7 @@ function EditableHero({
               <p className={cn("mt-1.5 line-clamp-2 text-sm leading-relaxed", editState.description ? "text-muted-foreground" : "text-muted-foreground/60")}>
                 {editState.description || t("hero.noBio")}
               </p>
+              <AccountMemberships organizations={memberships} className="mt-3" />
               {editDisabledReason ? <p className="mt-2 text-xs text-muted-foreground">{editDisabledReason}</p> : null}
             </>
           )}
@@ -551,6 +556,7 @@ export function EditableAccountHeader({
   settingsHref,
   viewPublicHref,
   showAbout = true,
+  memberships = [],
 }: {
   account: AccountRouteData;
   /** When editing an org repo, the group DID writes are routed to. */
@@ -560,6 +566,8 @@ export function EditableAccountHeader({
   settingsHref: string;
   /** Link to the public profile; pass null to hide (e.g. already on the profile). */
   viewPublicHref: string | null;
+  /** Organizations this person belongs to, shown as a "Member of…" hero row. */
+  memberships?: AccountOrganization[];
   /**
    * Whether to render the organization About section beneath the hero. The
    * dashboard shows it inline; the profile renders About in its Overview tab
@@ -857,6 +865,7 @@ export function EditableAccountHeader({
         account={account}
         settingsHref={settingsHref}
         viewPublicHref={viewPublicHref}
+        memberships={memberships}
         editState={editState}
         inlineField={inlineField}
         isSaving={isSaving}
