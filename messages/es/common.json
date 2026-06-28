@@ -120,7 +120,8 @@
       "myProjects": "Mis proyectos",
       "myCerts": "Mis certificados",
       "myObservations": "Mis observaciones",
-      "myOrganizations": "Mis organizaciones"
+      "myOrganizations": "Mis organizaciones",
+      "upload": "Subir"
     },
     "creationCard": {
       "createBumicert": "Crear un certificado",
@@ -163,6 +164,35 @@
         "full": "Introduce un nombre de usuario completo como alice.example.com.",
         "generic": "No se pudo actualizar tu nombre de usuario. Inténtalo de nuevo.",
         "unavailable": "Cambiar tu nombre de usuario aún no está disponible. Inténtalo más tarde."
+      }
+    },
+    "agentKeys": {
+      "title": "Claves para agentes de IA",
+      "description": "Dale a un agente de IA su propia clave para que añada registros en tu nombre, sin compartir nunca tu contraseña.",
+      "learnMore": "Ver la guía para agentes",
+      "newKeyLabel": "Nombre de la nueva clave",
+      "namePlaceholder": "p. ej. mi asistente de campo",
+      "generate": "Generar",
+      "empty": "Aún no hay claves.",
+      "hint": "Las claves pueden añadir y editar tus registros, pero nunca pueden cambiar la configuración de tu cuenta ni gestionar otras claves. Revocar una clave corta el acceso del agente al instante.",
+      "freshTitle": "{name}: cópiala ahora, solo se muestra una vez",
+      "copyKey": "Copiar clave",
+      "copyPrompt": "Copiar clave + pasos de configuración",
+      "copied": "Copiado",
+      "done": "Listo",
+      "freshHint": "«Copiar clave + pasos de configuración» copia un texto listo para pegar que carga la guía para agentes y configura esta clave en tu agente.",
+      "createdLabel": "creada el {date}",
+      "lastUsedLabel": "último uso {date}",
+      "neverUsed": "nunca usada",
+      "revoke": "Revocar",
+      "revokeAria": "Revocar {name}",
+      "revokeConfirm": "¿Revocar «{name}»? Cualquier agente que use esta clave perderá el acceso de inmediato.",
+      "errors": {
+        "load": "No se pudieron cargar tus claves.",
+        "create": "No se pudo crear la clave.",
+        "revoke": "No se pudo revocar la clave.",
+        "copy": "No se pudo copiar: selecciona el texto manualmente.",
+        "nameRequired": "Ponle a la clave el nombre del agente al que pertenece."
       }
     }
   },

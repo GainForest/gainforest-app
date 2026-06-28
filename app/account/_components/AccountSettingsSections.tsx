@@ -8,9 +8,11 @@ import {
   AlertTriangleIcon,
   ArrowRightIcon,
   AtSignIcon,
+  BotIcon,
   CheckCircle2Icon,
   CheckIcon,
   ChevronRight,
+  CopyIcon,
   ExternalLinkIcon,
   EyeIcon,
   EyeOffIcon,
@@ -781,6 +783,258 @@ function WalletsSection({ did }: { did: string }) {
   );
 }
 
+// ── AI agent keys ────────────────────────────────────────────────────────────
+
+type AgentKey = {
+  id: string;
+  name: string;
+  tokenPrefix: string;
+  scopes: string[];
+  createdAt: string;
+  lastUsedAt?: string;
+};
+
+function authBaseUrlClient(): string {
+  return (process.env.NEXT_PUBLIC_AUTH_BASE_URL ?? "https://auth.gainforest.app").replace(/\/$/, "");
+}
+
+/**
+ * A ready-to-paste setup prompt for any agent runtime: load /skill.md, store
+ * the key under a canonical env var, then verify it. The origin is the live
+ * site so the recipe works on any deployment.
+ */
+function buildAgentSetupPrompt(origin: string, token: string): string {
+  const auth = authBaseUrlClient();
+  return `You are connecting to GainForest, a nature-stewardship data platform on ATProto.
+
+1. Load the GainForest agent skill (read/write recipes):
+   curl -s ${origin}/skill.md
+
+2. Store this key as the env var GAINFOREST_API_KEY. Never hard-code it into
+   prompts, code, or records.
+
+   GAINFOREST_API_KEY=${token}
+
+3. Verify the key and learn your account id:
+   curl -s ${auth}/api/auth/session -H "Authorization: Bearer ${token}"
+   # → { "isLoggedIn": true, "did": "did:plc:…" } means you're connected.
+
+Then follow ${origin}/skill.md for every read/write recipe.`;
+}
+
+function formatKeyDate(iso: string): string {
+  try {
+    return new Date(iso).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
+  } catch {
+    return iso;
+  }
+}
+
+function AgentKeysSection() {
+  const t = useTranslations("common.settings.agentKeys");
+  const [keys, setKeys] = useState<AgentKey[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [draftName, setDraftName] = useState("");
+  const [creating, setCreating] = useState(false);
+  const [createError, setCreateError] = useState<string | null>(null);
+  const [revokingId, setRevokingId] = useState<string | null>(null);
+  const [freshToken, setFreshToken] = useState<{ name: string; token: string } | null>(null);
+  const [copied, setCopied] = useState<"key" | "prompt" | null>(null);
+
+  async function loadKeys() {
+    setIsLoading(true);
+    setLoadError(null);
+    try {
+      const res = await fetch("/api/account/tokens", { cache: "no-store" });
+      const data = (await res.json().catch(() => ({}))) as { tokens?: AgentKey[]; error?: string };
+      if (!res.ok) throw new Error(data.error ?? t("errors.load"));
+      setKeys(data.tokens ?? []);
+    } catch (err) {
+      setLoadError(err instanceof Error ? err.message : t("errors.load"));
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    void loadKeys();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  async function handleCreate() {
+    const name = draftName.trim();
+    if (!name) {
+      setCreateError(t("errors.nameRequired"));
+      return;
+    }
+    setCreating(true);
+    setCreateError(null);
+    try {
+      const res = await fetch("/api/account/tokens", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ name }),
+      });
+      const data = (await res.json().catch(() => ({}))) as { token?: string; error?: string };
+      if (!res.ok || !data.token) throw new Error(data.error ?? t("errors.create"));
+      setFreshToken({ name, token: data.token });
+      setDraftName("");
+      await loadKeys();
+    } catch (err) {
+      setCreateError(err instanceof Error ? err.message : t("errors.create"));
+    } finally {
+      setCreating(false);
+    }
+  }
+
+  async function handleRevoke(entry: AgentKey) {
+    if (!window.confirm(t("revokeConfirm", { name: entry.name }))) return;
+    setRevokingId(entry.id);
+    try {
+      const res = await fetch("/api/account/tokens", {
+        method: "DELETE",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ id: entry.id }),
+      });
+      if (!res.ok) {
+        const data = (await res.json().catch(() => ({}))) as { error?: string };
+        throw new Error(data.error ?? t("errors.revoke"));
+      }
+      if (freshToken && entry.name === freshToken.name) setFreshToken(null);
+      await loadKeys();
+    } catch (err) {
+      setLoadError(err instanceof Error ? err.message : t("errors.revoke"));
+    } finally {
+      setRevokingId(null);
+    }
+  }
+
+  async function copy(kind: "key" | "prompt") {
+    if (!freshToken) return;
+    const text =
+      kind === "key"
+        ? freshToken.token
+        : buildAgentSetupPrompt(window.location.origin, freshToken.token);
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(kind);
+      setTimeout(() => setCopied(null), 2000);
+    } catch {
+      setCreateError(t("errors.copy"));
+    }
+  }
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center gap-2">
+        <BotIcon className="h-4 w-4 text-foreground/70" />
+        <h2 className="text-sm font-medium">{t("title")}</h2>
+      </div>
+
+      <div className="bg-muted rounded-xl p-1 w-full">
+        <div className="flex flex-col gap-3 px-3 py-3">
+          <p className="text-xs text-muted-foreground">
+            {t("description")}{" "}
+            <a href="/skill.md" target="_blank" rel="noreferrer" className="underline underline-offset-2">
+              {t("learnMore")}
+            </a>
+          </p>
+
+          {freshToken ? (
+            <div className="rounded-lg border border-primary/30 bg-primary/5 p-3">
+              <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+                {t("freshTitle", { name: freshToken.name })}
+              </p>
+              <p className="mt-2 break-all font-mono text-xs text-foreground">{freshToken.token}</p>
+              <div className="mt-3 flex flex-wrap items-center gap-2">
+                <Button size="sm" onClick={() => void copy("key")}>
+                  <CopyIcon className="h-3.5 w-3.5" />
+                  {copied === "key" ? t("copied") : t("copyKey")}
+                </Button>
+                <Button size="sm" variant="outline" onClick={() => void copy("prompt")}>
+                  <CopyIcon className="h-3.5 w-3.5" />
+                  {copied === "prompt" ? t("copied") : t("copyPrompt")}
+                </Button>
+                <Button size="sm" variant="ghost" onClick={() => setFreshToken(null)}>
+                  {t("done")}
+                </Button>
+              </div>
+              <p className="mt-2 text-[11px] text-muted-foreground">{t("freshHint")}</p>
+            </div>
+          ) : null}
+
+          <div className="flex flex-col gap-0.5">
+            {isLoading ? (
+              <>
+                <Skeleton className="h-[52px] rounded-lg" />
+                <Skeleton className="h-[52px] rounded-lg" />
+              </>
+            ) : loadError ? (
+              <p className="py-3 text-center text-sm text-destructive">{loadError}</p>
+            ) : keys.length === 0 ? (
+              <p className="py-3 text-center text-sm text-muted-foreground">{t("empty")}</p>
+            ) : (
+              keys.map((entry) => (
+                <div key={entry.id} className="flex items-center gap-3 rounded-lg bg-background/60 px-3 py-2.5">
+                  <div className="flex min-w-0 flex-1 flex-col">
+                    <span className="truncate text-sm font-medium leading-snug">{entry.name}</span>
+                    <span className="truncate font-mono text-[11px] leading-snug text-muted-foreground">
+                      {entry.tokenPrefix}… · {t("createdLabel", { date: formatKeyDate(entry.createdAt) })}
+                      {" · "}
+                      {entry.lastUsedAt ? t("lastUsedLabel", { date: formatKeyDate(entry.lastUsedAt) }) : t("neverUsed")}
+                    </span>
+                  </div>
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className="h-7 w-7 shrink-0 text-muted-foreground hover:text-destructive"
+                    onClick={() => void handleRevoke(entry)}
+                    disabled={revokingId === entry.id}
+                    aria-label={t("revokeAria", { name: entry.name })}
+                  >
+                    {revokingId === entry.id ? (
+                      <Loader2Icon className="h-3.5 w-3.5 animate-spin" />
+                    ) : (
+                      <Trash2Icon className="h-3.5 w-3.5" />
+                    )}
+                  </Button>
+                </div>
+              ))
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="agent-key-name">{t("newKeyLabel")}</Label>
+            <div className="flex items-center gap-2">
+              <Input
+                id="agent-key-name"
+                value={draftName}
+                disabled={creating}
+                maxLength={60}
+                autoComplete="off"
+                spellCheck={false}
+                placeholder={t("namePlaceholder")}
+                onChange={(e) => setDraftName(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") void handleCreate();
+                }}
+                className="bg-background"
+              />
+              <Button size="sm" onClick={() => void handleCreate()} disabled={creating}>
+                {creating ? <Loader2Icon className="h-3.5 w-3.5 animate-spin" /> : <PlusIcon className="h-3.5 w-3.5" />}
+                {t("generate")}
+              </Button>
+            </div>
+            {createError ? <p className="text-xs text-destructive">{createError}</p> : null}
+            <p className="text-xs text-muted-foreground">{t("hint")}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── Account (Advanced) ──────────────────────────────────────────────────────
 
 const VIEWERS = [
@@ -827,6 +1081,7 @@ export function AccountSettingsSections({ did, handle }: { did: string; handle?:
       {handle ? <HandleSection did={did} handle={handle} /> : null}
       <PasswordSection did={did} />
       <WalletsSection did={did} />
+      <AgentKeysSection />
       <Accordion type="single" collapsible>
         <AccordionItem value="advanced" className="border-none">
           <AccordionTrigger className="text-sm font-medium text-muted-foreground hover:text-foreground hover:no-underline py-0 pb-3">

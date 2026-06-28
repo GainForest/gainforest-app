@@ -120,7 +120,8 @@
       "myProjects": "Proyek Saya",
       "myCerts": "Sertifikat Saya",
       "myObservations": "Observasi Saya",
-      "myOrganizations": "Organisasi Saya"
+      "myOrganizations": "Organisasi Saya",
+      "upload": "Unggah"
     },
     "creationCard": {
       "createBumicert": "Buat sertifikat",
@@ -163,6 +164,35 @@
         "full": "Masukkan nama pengguna lengkap seperti alice.example.com.",
         "generic": "Tidak dapat memperbarui nama pengguna Anda. Silakan coba lagi.",
         "unavailable": "Mengubah nama pengguna Anda belum tersedia. Silakan coba lagi nanti."
+      }
+    },
+    "agentKeys": {
+      "title": "Kunci agen AI",
+      "description": "Beri agen AI kuncinya sendiri agar bisa menambahkan catatan atas nama Anda — tanpa pernah membagikan kata sandi Anda.",
+      "learnMore": "Lihat panduan agen",
+      "newKeyLabel": "Nama kunci baru",
+      "namePlaceholder": "mis. asisten lapangan saya",
+      "generate": "Buat",
+      "empty": "Belum ada kunci.",
+      "hint": "Kunci dapat menambah dan mengedit catatan Anda, tetapi tidak akan pernah bisa mengubah pengaturan akun atau mengelola kunci lain. Mencabut kunci langsung memutus akses agen.",
+      "freshTitle": "{name} — salin sekarang, hanya ditampilkan sekali",
+      "copyKey": "Salin kunci",
+      "copyPrompt": "Salin kunci + langkah penyiapan",
+      "copied": "Tersalin",
+      "done": "Selesai",
+      "freshHint": "“Salin kunci + langkah penyiapan” menyalin teks siap tempel yang memuat panduan agen dan memasang kunci ini ke agen Anda.",
+      "createdLabel": "dibuat {date}",
+      "lastUsedLabel": "terakhir dipakai {date}",
+      "neverUsed": "belum pernah dipakai",
+      "revoke": "Cabut",
+      "revokeAria": "Cabut {name}",
+      "revokeConfirm": "Cabut “{name}”? Agen mana pun yang memakai kunci ini langsung kehilangan akses.",
+      "errors": {
+        "load": "Tidak dapat memuat kunci Anda.",
+        "create": "Tidak dapat membuat kunci.",
+        "revoke": "Tidak dapat mencabut kunci.",
+        "copy": "Gagal menyalin — pilih teks secara manual.",
+        "nameRequired": "Beri nama kunci sesuai agen yang dituju."
       }
     }
   },

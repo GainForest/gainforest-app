@@ -120,7 +120,8 @@
       "myProjects": "My Projects",
       "myCerts": "My Certs",
       "myObservations": "My Observations",
-      "myOrganizations": "My Organizations"
+      "myOrganizations": "My Organizations",
+      "upload": "Upload"
     },
     "creationCard": {
       "createBumicert": "Create a Cert",
@@ -163,6 +164,35 @@
         "full": "Enter a full username like alice.example.com.",
         "generic": "Could not update your username. Please try again.",
         "unavailable": "Changing your username isn’t available yet. Please try again later."
+      }
+    },
+    "agentKeys": {
+      "title": "AI agent keys",
+      "description": "Give an AI agent its own key so it can add records on your behalf — without ever sharing your password.",
+      "learnMore": "See the agent guide",
+      "newKeyLabel": "New key name",
+      "namePlaceholder": "e.g. my field assistant",
+      "generate": "Generate",
+      "empty": "No keys yet.",
+      "hint": "Keys can add and edit your stewardship records, but can never change your account settings or manage other keys. Revoking a key cuts the agent off instantly.",
+      "freshTitle": "{name} — copy now, shown only once",
+      "copyKey": "Copy key",
+      "copyPrompt": "Copy key + setup steps",
+      "copied": "Copied",
+      "done": "Done",
+      "freshHint": "“Copy key + setup steps” copies a ready-to-paste prompt that loads the agent guide and wires this key into your agent.",
+      "createdLabel": "created {date}",
+      "lastUsedLabel": "last used {date}",
+      "neverUsed": "never used",
+      "revoke": "Revoke",
+      "revokeAria": "Revoke {name}",
+      "revokeConfirm": "Revoke “{name}”? Any agent using this key loses access immediately.",
+      "errors": {
+        "load": "Could not load your keys.",
+        "create": "Could not create the key.",
+        "revoke": "Could not revoke the key.",
+        "copy": "Copy failed — select the text manually.",
+        "nameRequired": "Name the key after the agent it's for."
       }
     }
   },

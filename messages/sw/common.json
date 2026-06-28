@@ -120,7 +120,8 @@
       "myProjects": "Miradi yangu",
       "myCerts": "Vyeti vyangu",
       "myObservations": "Uchunguzi wangu",
-      "myOrganizations": "Mashirika yangu"
+      "myOrganizations": "Mashirika yangu",
+      "upload": "Pakia"
     },
     "creationCard": {
       "createBumicert": "Unda cheti",
@@ -163,6 +164,35 @@
         "full": "Weka jina kamili la mtumiaji kama alice.example.com.",
         "generic": "Haikuwezekana kusasisha jina lako la mtumiaji. Tafadhali jaribu tena.",
         "unavailable": "Kubadilisha jina lako la mtumiaji bado hakupatikani. Tafadhali jaribu tena baadaye."
+      }
+    },
+    "agentKeys": {
+      "title": "Funguo za wakala wa AI",
+      "description": "Mpe wakala wa AI ufunguo wake mwenyewe ili aweze kuongeza kumbukumbu kwa niaba yako — bila kamwe kushiriki nenosiri lako.",
+      "learnMore": "Ona mwongozo wa wakala",
+      "newKeyLabel": "Jina la ufunguo mpya",
+      "namePlaceholder": "mf. msaidizi wangu wa shambani",
+      "generate": "Tengeneza",
+      "empty": "Bado hakuna funguo.",
+      "hint": "Funguo zinaweza kuongeza na kuhariri kumbukumbu zako, lakini haziwezi kamwe kubadilisha mipangilio ya akaunti yako au kudhibiti funguo nyingine. Kufuta ufunguo kunamzuia wakala mara moja.",
+      "freshTitle": "{name} — nakili sasa, inaonyeshwa mara moja tu",
+      "copyKey": "Nakili ufunguo",
+      "copyPrompt": "Nakili ufunguo + hatua za usanidi",
+      "copied": "Imenakiliwa",
+      "done": "Imekamilika",
+      "freshHint": "“Nakili ufunguo + hatua za usanidi” hunakili maandishi tayari kubandika yanayopakia mwongozo wa wakala na kusanidi ufunguo huu kwenye wakala wako.",
+      "createdLabel": "iliundwa {date}",
+      "lastUsedLabel": "ilitumika mwisho {date}",
+      "neverUsed": "haijawahi kutumika",
+      "revoke": "Batilisha",
+      "revokeAria": "Batilisha {name}",
+      "revokeConfirm": "Batilisha “{name}”? Wakala yeyote anayetumia ufunguo huu atapoteza ufikiaji mara moja.",
+      "errors": {
+        "load": "Imeshindwa kupakia funguo zako.",
+        "create": "Imeshindwa kuunda ufunguo.",
+        "revoke": "Imeshindwa kubatilisha ufunguo.",
+        "copy": "Kunakili kumeshindikana — chagua maandishi mwenyewe.",
+        "nameRequired": "Ipe ufunguo jina la wakala unayemkusudia."
       }
     }
   },
