@@ -2,7 +2,7 @@ import { lookup } from "node:dns/promises";
 import { isIP } from "node:net";
 import { headers } from "next/headers";
 import { fetchAuthSession } from "@/app/_lib/auth-server";
-import { getAuthBaseUrl } from "@/app/_lib/auth";
+import { getAuthBaseUrl, getAuthForwardCookie } from "@/app/_lib/auth";
 import { resolveGroupManageTarget } from "@/app/_lib/manage-server";
 import { TREE_FUTURE_DATE_ERROR, isTreeDateInFuture } from "@/app/_lib/tree-date-validation";
 import { resolvePdsHost } from "@/app/_lib/pds";
@@ -2259,7 +2259,7 @@ export async function POST(request: Request) {
   }
 
   const headerList = await headers();
-  const cookie = headerList.get("cookie");
+  const cookie = getAuthForwardCookie(headerList.get("cookie"));
 
   let rawBody: unknown;
   try {
