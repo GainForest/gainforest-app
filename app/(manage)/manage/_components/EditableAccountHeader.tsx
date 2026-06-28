@@ -478,7 +478,7 @@ function EditableHero({
               <p className={cn("mt-1.5 line-clamp-2 text-sm leading-relaxed", editState.description ? "text-muted-foreground" : "text-muted-foreground/60")}>
                 {editState.description || t("hero.noBio")}
               </p>
-              <FollowStats targetDid={account.did} className="mt-2.5" />
+              <FollowStats targetDid={account.did} identifier={account.urlIdentifier} className="mt-2.5" />
               <AccountMemberships organizations={memberships} className="mt-3" />
               {editDisabledReason ? <p className="mt-2 text-xs text-muted-foreground">{editDisabledReason}</p> : null}
             </>

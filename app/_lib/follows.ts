@@ -191,9 +191,13 @@ export function useFollow(targetDid: string | null): UseFollow {
           }
           return next;
         });
-        setLoaded(true);
       })
-      .catch(() => {});
+      .catch(() => {})
+      // Resolve the loading state either way so the button stops showing its
+      // placeholder even if the stats fetch failed.
+      .finally(() => {
+        if (active) setLoaded(true);
+      });
     return () => {
       active = false;
       controller.abort();

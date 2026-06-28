@@ -176,7 +176,7 @@ export function AccountHero({
             <p className="mt-1.5 line-clamp-2 text-sm leading-relaxed text-muted-foreground">
               {account.description ?? ""}
             </p>
-            <FollowStats targetDid={account.did} className="mt-2.5" />
+            <FollowStats targetDid={account.did} identifier={account.urlIdentifier} className="mt-2.5" />
             <AccountMemberships organizations={memberships} className="mt-3" />
           </div>
         </div>

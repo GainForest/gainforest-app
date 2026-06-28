@@ -56,6 +56,21 @@ export function FollowButton({
   // the viewer is (avoids a flash of "Follow" on your own profile).
   if (!targetDid || follow.isSelf) return null;
 
+  // Until the follow state resolves, hold a fixed-size placeholder so the button
+  // never flashes "Follow" before correcting to "Following".
+  if (follow.status !== "ready") {
+    return (
+      <span
+        aria-hidden
+        className={cn(
+          "skeleton inline-block shrink-0 rounded-full align-middle",
+          size === "sm" ? "h-8 w-[92px]" : "h-9 w-[104px]",
+          className,
+        )}
+      />
+    );
+  }
+
   const accountName = name?.trim() || t("genericName");
   const label = follow.isFollowing ? t("following") : t("follow");
   const aria = follow.isFollowing
@@ -91,24 +106,28 @@ export function FollowButton({
 
 export function FollowStats({
   targetDid,
+  identifier,
   className,
 }: {
   targetDid: string | null;
+  /** Canonical account identifier for the list links. Pass the profile's
+   *  urlIdentifier (handle) where known so navigation skips the DID→handle
+   *  redirect hop; falls back to the DID otherwise. */
+  identifier?: string | null;
   className?: string;
 }) {
   const t = useTranslations("common.follow");
   const follow = useFollowState(targetDid);
   if (!targetDid) return null;
 
-  // Counts link to the followers / following list pages. We pass the DID; the
-  // route redirects to the account's canonical handle path when it has one.
+  const linkId = identifier?.trim() || targetDid;
   return (
     <span className={cn("inline-flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground", className)}>
-      <Link href={accountFollowersPath(targetDid)} className="rounded transition-colors hover:text-foreground hover:underline">
+      <Link href={accountFollowersPath(linkId)} className="rounded transition-colors hover:text-foreground hover:underline">
         <b className="font-semibold tabular-nums text-foreground">{formatCompact(follow.followers)}</b>{" "}
         {t("followersLabel")}
       </Link>
-      <Link href={accountFollowingPath(targetDid)} className="rounded transition-colors hover:text-foreground hover:underline">
+      <Link href={accountFollowingPath(linkId)} className="rounded transition-colors hover:text-foreground hover:underline">
         <b className="font-semibold tabular-nums text-foreground">{formatCompact(follow.following)}</b>{" "}
         {t("followingLabel")}
       </Link>
