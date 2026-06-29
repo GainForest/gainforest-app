@@ -530,11 +530,7 @@
       "support": "Con el apoyo de la subvención Klarna AI for Climate Resilience.",
       "server": {
         "aria": "Ilustración interactiva de un servidor de datos personal",
-        "caption": "Servidor de datos personal",
-        "dataLayer": "TUS DATOS",
-        "serverLayer": "TU SERVIDOR",
-        "contentsTop": "PROYECTOS · OBSERVACIONES · MAPAS",
-        "contentsBottom": "ALMACENAMIENTO · COPIAS · CONTROL"
+        "caption": "Servidor de datos personal"
       },
       "kits": {
         "servers": {

@@ -226,10 +226,6 @@ function RewildingSection({ viewerDid, signedIn }: { viewerDid: string | null; s
             labels={{
               aria: t("server.aria"),
               caption: t("server.caption"),
-              dataLayer: t("server.dataLayer"),
-              serverLayer: t("server.serverLayer"),
-              contentsTop: t("server.contentsTop"),
-              contentsBottom: t("server.contentsBottom"),
             }}
           />
         </div>

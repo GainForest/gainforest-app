@@ -530,11 +530,7 @@
       "support": "Didukung oleh hibah Klarna AI for Climate Resilience.",
       "server": {
         "aria": "Ilustrasi interaktif server data pribadi",
-        "caption": "Server data pribadi",
-        "dataLayer": "DATA ANDA",
-        "serverLayer": "SERVER ANDA",
-        "contentsTop": "PROYEK · OBSERVASI · PETA",
-        "contentsBottom": "PENYIMPANAN · CADANGAN · KENDALI"
+        "caption": "Server data pribadi"
       },
       "kits": {
         "servers": {

@@ -18,14 +18,6 @@ export type PdsVisualLabels = {
   aria: string;
   /** Plain-language caption shown under the slab. */
   caption: string;
-  /** Engraved name of the top layer (left face, upper band). */
-  dataLayer: string;
-  /** Engraved name of the bottom layer (left face, lower band). */
-  serverLayer: string;
-  /** Engraved contents of the top layer (right face, upper band). */
-  contentsTop: string;
-  /** Engraved contents of the bottom layer (right face, lower band). */
-  contentsBottom: string;
 };
 
 const VIEW_W = 520;
@@ -52,8 +44,6 @@ const RIGHT_FACE = `${B.x},${B.y} ${R.x},${R.y} ${R.x},${R.y + DEPTH} ${B.x},${B
 // Mid-depth divider between the two stacked layers.
 const LEFT_DIVIDER = `${L.x},${L.y + LAYER_DEPTH} ${B.x},${B.y + LAYER_DEPTH}`;
 const RIGHT_DIVIDER = `${B.x},${B.y + LAYER_DEPTH} ${R.x},${R.y + LAYER_DEPTH}`;
-
-const ISO_ANGLE = (Math.atan2(B.y - L.y, B.x - L.x) * 180) / Math.PI; // ≈ 26.57°
 
 type Tile = { points: string; cx: number; cy: number; phase: number; lit: boolean };
 
@@ -193,26 +183,6 @@ export function PdsVisual({ labels, className }: { labels: PdsVisualLabels; clas
         <polygon points={RIGHT_FACE} fill="var(--foreground)" opacity={0.04} />
         <polyline points={LEFT_DIVIDER} fill="none" stroke="var(--border)" strokeWidth={1} />
         <polyline points={RIGHT_DIVIDER} fill="none" stroke="var(--border)" strokeWidth={1} />
-
-        {/* Engraved labels */}
-        <g
-          fill="var(--muted-foreground)"
-          fontFamily="var(--font-geist-mono, ui-monospace, monospace)"
-          style={{ pointerEvents: "none" }}
-        >
-          <text x={170} y={207} fontSize={12} fontWeight={600} letterSpacing="1.5" textAnchor="middle" transform={`rotate(${ISO_ANGLE} 170 207)`}>
-            {labels.dataLayer}
-          </text>
-          <text x={170} y={241} fontSize={12} fontWeight={600} letterSpacing="1.5" textAnchor="middle" transform={`rotate(${ISO_ANGLE} 170 241)`}>
-            {labels.serverLayer}
-          </text>
-          <text x={350} y={207} fontSize={8} letterSpacing="0.6" textAnchor="middle" transform={`rotate(${-ISO_ANGLE} 350 207)`}>
-            {labels.contentsTop}
-          </text>
-          <text x={350} y={241} fontSize={8} letterSpacing="0.6" textAnchor="middle" transform={`rotate(${-ISO_ANGLE} 350 241)`}>
-            {labels.contentsBottom}
-          </text>
-        </g>
 
         {/* Top face surface under the tiles */}
         <polygon points={TOP_FACE} fill="var(--card)" stroke="var(--border)" strokeWidth={1} />
