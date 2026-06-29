@@ -908,6 +908,7 @@
       "ac": "Registros de mídia e de monitoramento acústico passivo alinhados ao Audiovisual Core da TDWG. Áudio e mídia ligam-se a uma ocorrência de Darwin Core como evidência.",
       "certified": "Primitivas de identidade do ecossistema Hypercerts: perfis de ator, organizações, seguidores, selos e localizações.",
       "hypercerts": "Declarações de impacto (atividade, contribuição, contribuinte, direitos), coleções, recibos de financiamento, anexos, escopo de trabalho e tipos compartilhados."
-    }
+    },
+    "sectionsAria": "Seções de esquemas"
   }
 }

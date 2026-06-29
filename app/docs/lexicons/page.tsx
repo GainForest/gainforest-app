@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
-import { HelixMark } from "./_components/HelixMark";
+import { LogoMark } from "@/app/_components/Logo";
 import { SchemaGraph } from "./_components/SchemaGraph";
 import { GROUPS } from "./_lib/registry";
 import { lexiconDescription, lexiconHref } from "./_lib/types";
@@ -24,7 +24,7 @@ export default async function LexiconsOverviewPage() {
     <>
       <header className="mb-10">
         <div className="mb-5 text-primary">
-          <HelixMark size={26} />
+          <LogoMark className="h-7 w-7" title="GainForest" />
         </div>
         <h1 className="m-0 font-serif text-4xl font-semibold tracking-tight text-foreground">
           {t("title")}
@@ -32,7 +32,7 @@ export default async function LexiconsOverviewPage() {
         <p className="mt-3 max-w-prose text-[15px] leading-relaxed text-muted-foreground">{t("lead")}</p>
       </header>
 
-      <nav className="mb-12 flex flex-wrap gap-x-5 gap-y-2 border-y border-border/60 py-3 text-[13px]">
+      <nav className="mb-12 flex flex-wrap gap-x-5 gap-y-2 border-y border-border/60 py-3 text-[13px] lg:hidden">
         {GROUPS.map((g) => (
           <a
             key={g.id}

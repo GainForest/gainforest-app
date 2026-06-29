@@ -908,6 +908,7 @@
       "ac": "Rekaman media dan pemantauan akustik pasif yang selaras dengan Audiovisual Core dari TDWG. Audio dan multimedia tertaut ke kemunculan Darwin Core sebagai bukti.",
       "certified": "Primitif identitas dari ekosistem Hypercerts — profil aktor, organisasi, pengikut, lencana, dan lokasi.",
       "hypercerts": "Klaim dampak (aktivitas, kontribusi, kontributor, hak), koleksi, tanda terima pendanaan, lampiran, cakupan kerja, dan tipe bersama."
-    }
+    },
+    "sectionsAria": "Bagian skema"
   }
 }
