@@ -694,7 +694,6 @@
       "dragMergeHint": "Drop another photo here, or tap the split icon on a photo to separate it.",
       "separatePhoto": "Separate into its own observation",
       "removeObservation": "Remove observation",
-      "separateDropZone": "Drop here to make a separate observation",
       "statusReady": "Ready",
       "statusNeedsId": "Needs ID",
       "statusError": "Couldn't add",

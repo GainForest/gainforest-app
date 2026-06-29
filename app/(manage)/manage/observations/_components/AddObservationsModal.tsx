@@ -203,8 +203,6 @@ export function AddObservationsModal({
 
   const [items, setItems] = useState<QuickItem[]>([]);
   const [isDragging, setIsDragging] = useState(false);
-  // The photo currently being dragged — drives the "drop here to separate" zone.
-  const [draggingItemId, setDraggingItemId] = useState<string | null>(null);
   const [isPreparing, setIsPreparing] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -561,12 +559,6 @@ export function AddObservationsModal({
   const submittableCount = groups.filter(canSubmitGroup).length;
   // Drives the AI-detection progress bar so the identify phase never feels frozen.
   const identifyingCount = items.filter((item) => item.status === "identifying").length;
-  // Only show the separate zone while dragging a photo out of a multi-photo
-  // observation (pulling a solo photo out would be a no-op).
-  const draggingItem = draggingItemId ? items.find((item) => item.id === draggingItemId) ?? null : null;
-  const canSeparateDragging = Boolean(
-    draggingItem && items.filter((item) => item.groupId === draggingItem.groupId).length > 1,
-  );
 
   // Upload one observation: a single occurrence carrying every photo in the
   // group, with the first photo set as the primary image the explorer reads.
@@ -758,22 +750,11 @@ export function AddObservationsModal({
                 onRemoveGroup={() => removeGroup(group.id)}
                 onSeparateItem={separateItem}
                 onDropItem={(itemId) => mergeItemIntoGroup(itemId, group.id)}
-                onItemDragStart={setDraggingItemId}
-                onItemDragEnd={() => setDraggingItemId(null)}
                 onPickLocation={() => openLocationPicker(group)}
                 onReanalyze={() => reanalyzeGroup(group.id)}
                 t={t}
               />
             ))}
-            {canSeparateDragging ? (
-              <SeparateDropZone
-                onSeparate={(itemId) => {
-                  separateItem(itemId);
-                  setDraggingItemId(null);
-                }}
-                t={t}
-              />
-            ) : null}
             <Button
               type="button"
               variant="outline"
@@ -859,49 +840,6 @@ export function AddObservationsModal({
   );
 }
 
-// Appears while a photo is being dragged out of a multi-photo observation;
-// dropping it here turns that photo back into its own separate observation.
-function SeparateDropZone({
-  onSeparate,
-  t,
-}: {
-  onSeparate: (itemId: string) => void;
-  t: ReturnType<typeof useTranslations>;
-}) {
-  const [isOver, setIsOver] = useState(false);
-  const isItemDrag = (event: DragEvent<HTMLDivElement>) =>
-    Array.from(event.dataTransfer?.types ?? []).includes(OBS_ITEM_DND);
-  return (
-    <div
-      onDragOver={(event) => {
-        if (!isItemDrag(event)) return;
-        event.preventDefault();
-        event.dataTransfer.dropEffect = "move";
-        if (!isOver) setIsOver(true);
-      }}
-      onDragLeave={(event) => {
-        if (!isItemDrag(event)) return;
-        setIsOver(false);
-      }}
-      onDrop={(event) => {
-        if (!isItemDrag(event)) return;
-        event.preventDefault();
-        event.stopPropagation();
-        setIsOver(false);
-        const itemId = event.dataTransfer.getData(OBS_ITEM_DND) || event.dataTransfer.getData("text/plain");
-        if (itemId) onSeparate(itemId);
-      }}
-      className={cn(
-        "flex items-center justify-center gap-2 rounded-2xl border border-dashed px-4 py-5 text-sm transition-colors",
-        isOver ? "border-primary bg-primary/10 text-primary" : "border-primary/40 bg-primary/[0.04] text-muted-foreground",
-      )}
-    >
-      <Layers2Icon className="size-4 shrink-0" />
-      {t("separateDropZone")}
-    </div>
-  );
-}
-
 // Per-observation status pill: a clear at-a-glance signal for whether a card is
 // still identifying, ready with a name, or uploaded-but-unidentified and waiting
 // for the observer to add an ID.
@@ -978,16 +916,12 @@ function GroupThumb({
   canSeparate,
   disabled,
   onSeparate,
-  onDragStartItem,
-  onDragEndItem,
   t,
 }: {
   item: QuickItem;
   canSeparate: boolean;
   disabled: boolean;
   onSeparate: () => void;
-  onDragStartItem: () => void;
-  onDragEndItem: () => void;
   t: ReturnType<typeof useTranslations>;
 }) {
   const uploading = item.status === "uploading";
@@ -999,9 +933,7 @@ function GroupThumb({
           event.dataTransfer.setData(OBS_ITEM_DND, item.id);
           event.dataTransfer.setData("text/plain", item.id);
           event.dataTransfer.effectAllowed = "move";
-          onDragStartItem();
         }}
-        onDragEnd={onDragEndItem}
         className={cn(
           "relative size-20 overflow-hidden rounded-xl bg-muted ring-1 ring-border",
           !disabled && !uploading && "cursor-grab active:cursor-grabbing",
@@ -1036,8 +968,6 @@ function ObservationGroupCard({
   onRemoveGroup,
   onSeparateItem,
   onDropItem,
-  onItemDragStart,
-  onItemDragEnd,
   onPickLocation,
   onReanalyze,
   t,
@@ -1048,8 +978,6 @@ function ObservationGroupCard({
   onRemoveGroup: () => void;
   onSeparateItem: (itemId: string) => void;
   onDropItem: (itemId: string) => void;
-  onItemDragStart: (itemId: string) => void;
-  onItemDragEnd: () => void;
   onPickLocation: () => void;
   onReanalyze: () => void;
   t: ReturnType<typeof useTranslations>;
@@ -1133,8 +1061,6 @@ function ObservationGroupCard({
             canSeparate={multi}
             disabled={disabled}
             onSeparate={() => onSeparateItem(item.id)}
-            onDragStartItem={() => onItemDragStart(item.id)}
-            onDragEndItem={onItemDragEnd}
             t={t}
           />
         ))}

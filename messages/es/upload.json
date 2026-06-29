@@ -694,7 +694,6 @@
       "dragMergeHint": "Suelta otra foto aquí, o toca el icono de separar en una foto para separarla.",
       "separatePhoto": "Separar en su propia observación",
       "removeObservation": "Quitar observación",
-      "separateDropZone": "Suelta aquí para crear una observación aparte",
       "statusReady": "Listo",
       "statusNeedsId": "Falta identificar",
       "statusError": "No se pudo añadir",
