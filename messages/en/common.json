@@ -873,6 +873,13 @@
       }
     }
   },
+  "steward": {
+    "title": "Steward tools",
+    "show": "Show steward tools",
+    "hide": "Hide steward tools",
+    "public": "Public",
+    "badges": "Recognition badges"
+  },
   "adminModeration": {
     "ariaLabel": "Moderation views",
     "tabs": {

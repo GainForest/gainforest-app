@@ -873,6 +873,13 @@
       }
     }
   },
+  "steward": {
+    "title": "Zana za usimamizi",
+    "show": "Onyesha zana za usimamizi",
+    "hide": "Ficha zana za usimamizi",
+    "public": "Hadharani",
+    "badges": "Beji za kutambua"
+  },
   "adminModeration": {
     "ariaLabel": "Mwonekano wa usimamizi",
     "tabs": {

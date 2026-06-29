@@ -10,8 +10,7 @@ import { getGainForestModeratorAccess } from "@/app/internal/badges/_lib/access"
 import { AccountChrome } from "../_components/AccountChrome";
 import { AccountHero } from "../_components/AccountHero";
 import { AccountTabBar } from "../_components/AccountTabBar";
-import { TestAccountModerationControl } from "../_components/TestAccountModerationControl";
-import { RecognitionBadgeControl } from "../_components/RecognitionBadgeControl";
+import { StewardTools } from "../_components/StewardTools";
 import { RecognitionBadgeChips } from "../_components/RecognitionBadgeChips";
 import { loadAccountMemberships } from "../_components/AccountTabContent";
 import { accountSettingsPath, getAccountRouteData, readAccountRouteParams, readOptionalAccountRouteParams } from "../_lib/account-route";
@@ -87,18 +86,12 @@ export default async function AccountLayout({
         hero={
           <>
             {moderator?.isModerator && testAccountFlagged !== null ? (
-              <>
-                <TestAccountModerationControl
-                  did={account.did}
-                  accountName={account.displayName}
-                  initialFlagged={testAccountFlagged}
-                />
-                <RecognitionBadgeControl
-                  did={account.did}
-                  accountName={account.displayName}
-                  initialAwarded={awardedRecognition}
-                />
-              </>
+              <StewardTools
+                did={account.did}
+                accountName={account.displayName}
+                initialTestFlagged={testAccountFlagged}
+                initialAwarded={awardedRecognition}
+              />
             ) : null}
             {canEditProfile && target ? (
               <EditableAccountHeader

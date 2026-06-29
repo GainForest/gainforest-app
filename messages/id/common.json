@@ -873,6 +873,13 @@
       }
     }
   },
+  "steward": {
+    "title": "Alat pengelola",
+    "show": "Tampilkan alat pengelola",
+    "hide": "Sembunyikan alat pengelola",
+    "public": "Publik",
+    "badges": "Lencana penghargaan"
+  },
   "adminModeration": {
     "ariaLabel": "Tampilan moderasi",
     "tabs": {

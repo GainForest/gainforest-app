@@ -873,6 +873,13 @@
       }
     }
   },
+  "steward": {
+    "title": "Herramientas de administración",
+    "show": "Mostrar herramientas de administración",
+    "hide": "Ocultar herramientas de administración",
+    "public": "Público",
+    "badges": "Insignias de reconocimiento"
+  },
   "adminModeration": {
     "ariaLabel": "Vistas de moderación",
     "tabs": {
