@@ -399,6 +399,17 @@
       "error": "Não foi possível carregar o mural de fotos.",
       "openPhoto": "Abrir este registro: {name}",
       "unnamed": "Registro não identificado"
+    },
+    "bestPicture": {
+      "heading": "Favoritas a melhor foto",
+      "subtitle": "As fotos com mais curtidas nesta rodada — as que disputam o prêmio de melhor foto. Toque em qualquer foto para ver os detalhes.",
+      "prize": "{amount} melhor foto",
+      "leader": "Na frente",
+      "likes": "{count, plural, one {# curtida} other {# curtidas}}",
+      "empty": "Ainda não há curtidas nesta rodada. Curta uma foto para colocá-la na disputa.",
+      "error": "Não foi possível carregar as favoritas.",
+      "openPhoto": "Abrir este registro: {name}",
+      "unnamed": "Registro não identificado"
     }
   },
   "dashboard": {

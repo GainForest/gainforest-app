@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { BioblitzGallery } from "./BioblitzGallery";
+import { BioblitzBestPicture } from "./BioblitzBestPicture";
 import { BioblitzObservationsMap } from "./BioblitzObservationsMap";
 import { RegisterButton } from "./BioblitzRegister";
 import { AuthorInline } from "../_components/AuthorChip";
@@ -179,6 +180,8 @@ export function BioblitzClient() {
     </section>
 
       <BioblitzGallery round={round} />
+
+      <BioblitzBestPicture round={round} />
 
       <BioblitzObservationsMap round={round} />
     </>

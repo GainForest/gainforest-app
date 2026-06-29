@@ -399,6 +399,17 @@
       "error": "No se pudo cargar el muro de fotos.",
       "openPhoto": "Abrir este avistamiento: {name}",
       "unnamed": "Avistamiento sin identificar"
+    },
+    "bestPicture": {
+      "heading": "Favoritas a mejor foto",
+      "subtitle": "Las fotos con más me gusta de esta ronda: las que compiten por el premio a la mejor foto. Toca cualquier foto para ver los detalles.",
+      "prize": "{amount} mejor foto",
+      "leader": "En cabeza",
+      "likes": "{count, plural, one {# me gusta} other {# me gusta}}",
+      "empty": "Aún no hay me gusta en esta ronda. Da me gusta a una foto para que entre en competencia.",
+      "error": "No se pudieron cargar las favoritas.",
+      "openPhoto": "Abrir este avistamiento: {name}",
+      "unnamed": "Avistamiento sin identificar"
     }
   },
   "dashboard": {

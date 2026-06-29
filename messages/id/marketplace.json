@@ -399,6 +399,17 @@
       "error": "Tidak dapat memuat dinding foto.",
       "openPhoto": "Buka pengamatan ini: {name}",
       "unnamed": "Pengamatan tak teridentifikasi"
+    },
+    "bestPicture": {
+      "heading": "Unggulan foto terbaik",
+      "subtitle": "Foto dengan suka terbanyak ronde ini — yang bersaing untuk hadiah foto terbaik. Ketuk foto mana pun untuk melihat detailnya.",
+      "prize": "{amount} foto terbaik",
+      "leader": "Memimpin",
+      "likes": "{count, plural, one {# suka} other {# suka}}",
+      "empty": "Belum ada suka pada ronde ini. Sukai sebuah foto agar ikut bersaing.",
+      "error": "Tidak dapat memuat unggulan.",
+      "openPhoto": "Buka pengamatan ini: {name}",
+      "unnamed": "Pengamatan tak teridentifikasi"
     }
   },
   "dashboard": {

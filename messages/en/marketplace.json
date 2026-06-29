@@ -399,6 +399,17 @@
       "error": "Could not load the photo wall.",
       "openPhoto": "Open this sighting: {name}",
       "unnamed": "Unidentified sighting"
+    },
+    "bestPicture": {
+      "heading": "Best picture front-runners",
+      "subtitle": "The photos drawing the most likes this round — the ones in the running for the best picture prize. Tap any photo to see the details.",
+      "prize": "{amount} best picture",
+      "leader": "In front",
+      "likes": "{count, plural, one {# like} other {# likes}}",
+      "empty": "No likes yet this round. Like a photo to put it in the running.",
+      "error": "Could not load the front-runners.",
+      "openPhoto": "Open this sighting: {name}",
+      "unnamed": "Unidentified sighting"
     }
   },
   "dashboard": {

@@ -399,6 +399,17 @@
       "error": "Imeshindwa kupakia ukuta wa picha.",
       "openPhoto": "Fungua uchunguzi huu: {name}",
       "unnamed": "Uchunguzi usiotambuliwa"
+    },
+    "bestPicture": {
+      "heading": "Vinara wa picha bora",
+      "subtitle": "Picha zilizopata mapenzi mengi zaidi raundi hii — zinazowania zawadi ya picha bora. Gusa picha yoyote kuona maelezo.",
+      "prize": "Picha bora {amount}",
+      "leader": "Mbele",
+      "likes": "{count, plural, one {pendwa #} other {mapenzi #}}",
+      "empty": "Bado hakuna mapenzi raundi hii. Penda picha ili iingie kwenye ushindani.",
+      "error": "Imeshindwa kupakia vinara.",
+      "openPhoto": "Fungua uchunguzi huu: {name}",
+      "unnamed": "Uchunguzi usiotambuliwa"
     }
   },
   "dashboard": {

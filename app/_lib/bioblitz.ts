@@ -18,6 +18,7 @@
 import { INDEXER_URL } from "./urls";
 import { normaliseRef } from "./pds";
 import { fetchHiddenAccountDids, indexerQuery, walkOccurrences, type OccurrenceRecord } from "./indexer";
+import { fetchEngagement } from "./feed-engagement";
 
 /** Cash prizes awarded each round, in USD. */
 export const BIOBLITZ_PRIZES = {
@@ -354,6 +355,50 @@ export async function fetchRoundObservations(
     const t = Date.parse(r.createdAt);
     return Number.isFinite(t) && t >= startMs && t <= endMs;
   });
+}
+
+// ── Best-picture front-runners (most-liked observations) ─────────────────────
+//
+// The "best picture" prize is judged once a round closes, but the page surfaces
+// the photos drawing the most community likes so far — the front-runners for
+// that prize. Likes are app.gainforest.feed.like records keyed by an
+// observation's AT-URI (see feed-engagement.ts), so we tally the round's photo
+// sightings and keep the most-liked ones.
+
+/** A round photo sighting plus its current like tally. */
+export type LikedObservation = {
+  record: OccurrenceRecord;
+  likeCount: number;
+};
+
+/**
+ * The most-liked photo sightings uploaded inside a round's window — the
+ * front-runners for the round's "best picture" prize. Reuses
+ * `fetchRoundObservations` (the same call the gallery and map make, so the
+ * shared cache serves all three) and batch-counts likes for the window, keeping
+ * the top `limit` records that have at least one like. Returns an empty list
+ * until photos start collecting likes.
+ */
+export async function fetchRoundTopLiked(
+  round: BioblitzRound,
+  limit = 3,
+  signal?: AbortSignal,
+): Promise<LikedObservation[]> {
+  const observations = await fetchRoundObservations(round, signal);
+  if (observations.length === 0) return [];
+  const engagement = await fetchEngagement(
+    observations.map((o) => o.atUri),
+    null,
+    signal,
+  );
+  return observations
+    .map((record) => ({ record, likeCount: engagement.get(record.atUri)?.likeCount ?? 0 }))
+    .filter((entry) => entry.likeCount > 0)
+    .sort(
+      (a, b) =>
+        b.likeCount - a.likeCount || Date.parse(b.record.createdAt) - Date.parse(a.record.createdAt),
+    )
+    .slice(0, limit);
 }
 
 function profileName(n: RawNode): string | null {
