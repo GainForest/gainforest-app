@@ -21,7 +21,7 @@ import { accountHref, localObservationHref } from "../../../_lib/urls";
 import { RecordLocationMap } from "../../../_components/RecordLocationMap";
 import { RecordEngagement } from "../../../_components/RecordEngagement";
 import { ObservationMediaViewer, type ObservationViewerImage } from "./_components/ObservationMediaViewer";
-import { ObservationOwnerActions } from "./_components/ObservationOwnerActions";
+import { ObservationInlineEditor } from "./_components/ObservationInlineEditor";
 
 export const revalidate = 60;
 
@@ -99,16 +99,13 @@ export default async function ObservationDetailPage({ params }: { params: Observ
   return (
     <main className="min-h-screen bg-background pb-20">
       <div className="mx-auto max-w-6xl px-6 py-8 lg:px-8">
-        <div className="flex items-center justify-between gap-3">
-          <Link
-            href="/observations"
-            className="inline-flex items-center gap-1.5 text-[13px] font-medium text-muted-foreground transition-colors hover:text-foreground"
-          >
-            <ArrowLeftIcon className="h-3.5 w-3.5" aria-hidden />
-            {t("back")}
-          </Link>
-          <ObservationOwnerActions record={record} fallbackHref={accountHref(urlIdentifier)} />
-        </div>
+        <Link
+          href="/observations"
+          className="inline-flex items-center gap-1.5 text-[13px] font-medium text-muted-foreground transition-colors hover:text-foreground"
+        >
+          <ArrowLeftIcon className="h-3.5 w-3.5" aria-hidden />
+          {t("back")}
+        </Link>
 
         <div className="mt-4 flex flex-wrap items-center gap-3">
           <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-[12px] font-medium text-primary-dark">
@@ -191,6 +188,12 @@ export default async function ObservationDetailPage({ params }: { params: Observ
             <RecordLocationMap record={record} />
           </aside>
         </div>
+
+        <ObservationInlineEditor
+          record={record}
+          primaryImageUrl={images[0]?.url ?? record.imageUrl ?? null}
+          fallbackHref={accountHref(urlIdentifier)}
+        />
 
         {measurementFacts.length > 0 ? (
           <section className="mt-10 border-t border-border-soft pt-8">

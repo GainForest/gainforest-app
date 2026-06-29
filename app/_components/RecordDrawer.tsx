@@ -1025,7 +1025,7 @@ function ObservationMediaThumb({ item, active, onSelect }: { item: ObservationMe
   );
 }
 
-type ObservationDraft = {
+export type ObservationDraft = {
   scientificName: string;
   vernacularName: string;
   kingdom: string;
@@ -1039,7 +1039,7 @@ type ObservationDraft = {
   occurrenceRemarks: string;
 };
 
-const EMPTY_OBSERVATION_DRAFT: ObservationDraft = {
+export const EMPTY_OBSERVATION_DRAFT: ObservationDraft = {
   scientificName: "",
   vernacularName: "",
   kingdom: "",
@@ -1067,7 +1067,7 @@ const TEXTAREA_CLASS = "mt-1.5 min-h-20 w-full rounded-xl border border-border-s
 const LABEL_CLASS = "text-[11px] font-medium uppercase tracking-[0.08em] text-foreground/45";
 const OBSERVATION_KIND_OPTIONS = ["Plantae", "Animalia"] as const;
 
-function ObservationOwnerControls({
+export function ObservationOwnerControls({
   draft,
   feedback,
   hasChanges,
@@ -1337,7 +1337,7 @@ function TextAreaField({ label, value, onChange }: { label: string; value: strin
   );
 }
 
-function ObservationLocationPickerModal({
+export function ObservationLocationPickerModal({
   latitude,
   longitude,
   onClose,
@@ -1500,7 +1500,7 @@ export function canManageOccurrenceRecord(
   return role === "owner" || role === "admin";
 }
 
-function observationKindFromKingdom(value: string | null | undefined): string {
+export function observationKindFromKingdom(value: string | null | undefined): string {
   const normalized = value?.trim().toLowerCase();
   if (normalized === "plantae" || normalized === "plant" || normalized === "flora") return "Plantae";
   if (normalized === "animalia" || normalized === "animal" || normalized === "fauna") return "Animalia";
@@ -1514,16 +1514,16 @@ function observationKindLabel(value: string | null | undefined, t: RecordDrawerT
   return null;
 }
 
-function coordinateFromDraft(value: string): number | null {
+export function coordinateFromDraft(value: string): number | null {
   const number = Number(normalizeDraftValue(value));
   return Number.isFinite(number) ? number : null;
 }
 
-function formatCoordinateInput(value: number): string {
+export function formatCoordinateInput(value: number): string {
   return Number.isInteger(value) ? String(value) : Number(value.toFixed(6)).toString();
 }
 
-function observationDraftFromRecord(record: Extract<ExplorerRecord, { kind: "occurrence" }>): ObservationDraft {
+export function observationDraftFromRecord(record: Extract<ExplorerRecord, { kind: "occurrence" }>): ObservationDraft {
   return {
     scientificName: record.scientificName ?? "",
     vernacularName: record.vernacularName ?? "",
@@ -1543,11 +1543,11 @@ function normalizeDraftValue(value: string): string {
   return value.trim();
 }
 
-function observationDraftsEqual(a: ObservationDraft, b: ObservationDraft): boolean {
+export function observationDraftsEqual(a: ObservationDraft, b: ObservationDraft): boolean {
   return (Object.keys(a) as Array<keyof ObservationDraft>).every((field) => normalizeDraftValue(a[field]) === normalizeDraftValue(b[field]));
 }
 
-function validateObservationDraft(draft: ObservationDraft, t: RecordDrawerT): string | null {
+export function validateObservationDraft(draft: ObservationDraft, t: RecordDrawerT): string | null {
   if (!normalizeDraftValue(draft.scientificName)) return t("observation.validation.name");
   if (!observationKindFromKingdom(draft.kingdom)) return t("observation.validation.kind");
   if (!normalizeDraftValue(draft.eventDate)) return t("observation.validation.date");
@@ -1566,7 +1566,7 @@ function optionalDraftValue(value: string): string | undefined {
   return normalized ? normalized : undefined;
 }
 
-function observationPatchFromDraft(draft: ObservationDraft): {
+export function observationPatchFromDraft(draft: ObservationDraft): {
   data: {
     scientificName: string;
     vernacularName?: string;
