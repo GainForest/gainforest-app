@@ -147,35 +147,6 @@ export const CORE_TEAM: ReadonlyArray<Translated<TeamMember>> = [
     },
   },
   {
-    name: "Niña Cerilla",
-    role: "Operations Lead",
-    location: "Philippines",
-    bio: "Runs operations across the global team and leads delivery on the Klarna AI for Climate Resilience grant. Keeps the organisation moving day to day.",
-    photo: "/team/nina-cerilla.webp",
-    i18n: {
-      es: {
-        role: "Responsable de Operaciones",
-        location: "Filipinas",
-        bio: "Lidera las operaciones del equipo global y la ejecución de la beca Klarna AI for Climate Resilience. Mantiene a la organización en marcha día a día.",
-      },
-      pt: {
-        role: "Líder de Operações",
-        location: "Filipinas",
-        bio: "Lidera as operações da equipe global e a entrega da bolsa Klarna AI for Climate Resilience. Mantém a organização em movimento todos os dias.",
-      },
-      sw: {
-        role: "Kiongozi wa Uendeshaji",
-        location: "Ufilipino",
-        bio: "Anaongoza uendeshaji wa timu ya kimataifa na utekelezaji wa ruzuku ya Klarna AI for Climate Resilience. Hudumisha shirika kusonga mbele kila siku.",
-      },
-      id: {
-        role: "Pemimpin Operasi",
-        location: "Filipina",
-        bio: "Memimpin operasi tim global dan pelaksanaan hibah Klarna AI for Climate Resilience. Membuat organisasi tetap bergerak hari demi hari.",
-      },
-    },
-  },
-  {
     name: "Diego Rivera Buendia",
     role: "Engineering & AI",
     location: "Mexico",
@@ -259,35 +230,6 @@ export const CORE_TEAM: ReadonlyArray<Translated<TeamMember>> = [
         role: "Teknik & Infra",
         location: "Bhutan",
         bio: "Insinyur lapisan ATProto dan Hypercerts yang menjadi jangkar setiap Bumicert. Berkontribusi di GainForest dan ekosistem Hypersphere yang lebih luas.",
-      },
-    },
-  },
-  {
-    name: "Donald Nwokoro",
-    role: "Engineering & Infra",
-    location: "Nigeria",
-    bio: "Engineer on Green Globe; the live planet view that surfaces community-led nature projects, and the ATProto packages and lexicons that power it.",
-    photo: "/team/donald-nwokoro.webp",
-    i18n: {
-      es: {
-        role: "Ingeniería e Infraestructura",
-        location: "Nigeria",
-        bio: "Ingeniero de Green Globe; la vista en vivo del planeta que muestra proyectos de naturaleza liderados por comunidades, junto con los paquetes y lexicones de ATProto que la impulsan.",
-      },
-      pt: {
-        role: "Engenharia e Infraestrutura",
-        location: "Nigéria",
-        bio: "Engenheiro do Green Globe; a vista ao vivo do planeta que mostra projetos liderados por comunidades, e os pacotes e léxicons ATProto que o sustentam.",
-      },
-      sw: {
-        role: "Uhandisi na Miundombinu",
-        location: "Nigeria",
-        bio: "Mhandisi wa Green Globe; mtazamo wa moja kwa moja wa sayari unaoonyesha miradi ya asili inayoongozwa na jamii, pamoja na paketi za ATProto na lexicons zinazoiwezesha.",
-      },
-      id: {
-        role: "Teknik & Infra",
-        location: "Nigeria",
-        bio: "Insinyur Green Globe; tampilan langsung planet yang menampilkan proyek alam yang dipimpin komunitas, beserta paket dan leksikon ATProto yang menjalankannya.",
       },
     },
   },
