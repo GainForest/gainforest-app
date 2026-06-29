@@ -35,6 +35,7 @@ import { groupManageBasePath, manageApiHref, manageHref } from "@/lib/links";
 import { cn } from "@/lib/utils";
 
 const MA_EARTH_FUNDRAISE_URL = "https://maearth.com/fundraise";
+const MA_EARTH_LOGO_SRC = "/assets/media/images/badges/ma-earth-logo.webp";
 // Keep the application post comfortably under the feed post limit even when a
 // project title is long.
 const POST_PROJECT_TITLE_MAX = 160;
@@ -428,18 +429,25 @@ function InteroperableSection() {
   return (
     <article className="overflow-hidden rounded-3xl border border-border bg-card">
       <div className="px-6 py-6 sm:px-8">
-        <p className="text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
-          {t("category")}
-        </p>
-        <div className="mt-1.5 flex flex-wrap items-center gap-3">
-          <h2 className="font-instrument text-2xl font-light italic tracking-[-0.02em] text-foreground sm:text-3xl">
-            {t("grantName")}
-          </h2>
-          <span className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">
-            {t("fundingType")}
+        <div className="flex items-start gap-4">
+          <span className="relative size-14 shrink-0 overflow-hidden rounded-2xl border border-border">
+            <Image src={MA_EARTH_LOGO_SRC} alt={t("logoAlt")} fill sizes="56px" className="object-cover" />
           </span>
+          <div className="min-w-0">
+            <p className="text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
+              {t("category")}
+            </p>
+            <div className="mt-1.5 flex flex-wrap items-center gap-3">
+              <h2 className="font-instrument text-2xl font-light italic tracking-[-0.02em] text-foreground sm:text-3xl">
+                {t("grantName")}
+              </h2>
+              <span className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">
+                {t("fundingType")}
+              </span>
+            </div>
+          </div>
         </div>
-        <p className="mt-3 max-w-2xl text-sm leading-7 text-muted-foreground">{t("description")}</p>
+        <p className="mt-4 max-w-2xl text-sm leading-7 text-muted-foreground">{t("description")}</p>
 
         <div className="mt-6">
           <a

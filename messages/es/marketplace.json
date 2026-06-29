@@ -568,7 +568,8 @@
       "grantName": "Ma Earth Ronda 3",
       "fundingType": "Financiación cuadrática",
       "description": "Ma Earth está realizando una ronda de financiación respaldada por la comunidad que usa financiación cuadrática: muchas donaciones pequeñas se igualan y amplifican más que unas pocas grandes. Postula con tu proyecto para participar.",
-      "apply": "Postula con tu proyecto"
+      "apply": "Postula con tu proyecto",
+      "logoAlt": "Ma Earth"
     }
   },
   "account": {

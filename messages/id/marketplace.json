@@ -568,7 +568,8 @@
       "grantName": "Ma Earth Putaran 3",
       "fundingType": "Pendanaan kuadratik",
       "description": "Ma Earth sedang menjalankan putaran pendanaan yang didukung komunitas dan menggunakan pendanaan kuadratik: banyak donasi kecil disepadankan dan diperkuat lebih dari sedikit donasi besar. Ajukan dengan proyek Anda untuk ikut serta.",
-      "apply": "Ajukan dengan proyek Anda"
+      "apply": "Ajukan dengan proyek Anda",
+      "logoAlt": "Ma Earth"
     }
   },
   "account": {

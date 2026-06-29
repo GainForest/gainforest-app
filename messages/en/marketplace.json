@@ -568,7 +568,8 @@
       "grantName": "Ma Earth Round 3",
       "fundingType": "Quadratic funding",
       "description": "Ma Earth is running a community-backed funding round that uses quadratic funding: many smaller donations are matched and amplified more than a few large ones. Apply with your project to take part.",
-      "apply": "Apply with your project"
+      "apply": "Apply with your project",
+      "logoAlt": "Ma Earth"
     }
   },
   "account": {

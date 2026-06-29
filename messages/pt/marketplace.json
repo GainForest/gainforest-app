@@ -568,7 +568,8 @@
       "grantName": "Ma Earth Rodada 3",
       "fundingType": "Financiamento quadrático",
       "description": "A Ma Earth está realizando uma rodada de financiamento apoiada pela comunidade que usa financiamento quadrático: muitas doações menores são equiparadas e amplificadas mais do que algumas grandes. Candidate-se com o seu projeto para participar.",
-      "apply": "Candidate-se com o seu projeto"
+      "apply": "Candidate-se com o seu projeto",
+      "logoAlt": "Ma Earth"
     }
   },
   "account": {
