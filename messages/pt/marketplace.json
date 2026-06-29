@@ -526,19 +526,19 @@
       "title": "Resselvagem da web",
       "slots": "10 subsídios disponíveis",
       "amount": "Até $1000 cada",
-      "description": "Um programa de subsídios que financia 10 servidores de dados pessoais e kits locais de coleta de dados, para que as comunidades guardem seus próprios dados e mantenham as decisões em suas mãos: pela soberania de dados e de decisões.",
+      "description": "Um programa de subsídios que financia gravadores AudioMoth e outras ferramentas de coleta de dados de campo, para que as comunidades reúnam seus próprios dados de biodiversidade no terreno.",
       "support": "Com o apoio do subsídio Klarna AI for Climate Resilience.",
       "server": {
-        "aria": "Ilustração interativa de um servidor de dados pessoal",
-        "caption": "Servidor de dados pessoal"
+        "aria": "Ilustração interativa de ferramentas de coleta de dados de campo",
+        "caption": "Coleta de dados no campo"
       },
       "kits": {
-        "servers": {
-          "title": "Servidores de dados pessoais",
-          "description": "Seu próprio servidor para guardar e ser dono dos dados da sua comunidade."
+        "audiomoths": {
+          "title": "Gravadores AudioMoth",
+          "description": "Gravadores acústicos que captam o som da biodiversidade no campo."
         },
-        "collection": {
-          "title": "Kits locais de coleta de dados",
+        "tools": {
+          "title": "Ferramentas de coleta de dados",
           "description": "Kits de campo para reunir observações e evidências no terreno."
         }
       },

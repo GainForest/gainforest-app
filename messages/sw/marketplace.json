@@ -526,19 +526,19 @@
       "title": "Kurudisha Uasilia kwenye Wavuti",
       "slots": "Ruzuku 10 zinapatikana",
       "amount": "Hadi $1,000 kila moja",
-      "description": "Programu ya ruzuku inayofadhili seva 10 za data binafsi na vifaa vya kukusanya data vya ndani, ili jamii ziweze kuhifadhi data zao wenyewe na kushikilia maamuzi mikononi mwao kwa ajili ya uhuru wa data na maamuzi.",
+      "description": "Programu ya ruzuku inayofadhili virekodi vya AudioMoth na vifaa vingine vya kukusanya data uwandani, ili jamii ziweze kukusanya data zao za bayoanuwai papo hapo.",
       "support": "Inafadhiliwa na ruzuku ya Klarna AI for Climate Resilience.",
       "server": {
-        "aria": "Mchoro shirikishi wa seva ya data binafsi",
-        "caption": "Seva ya data binafsi"
+        "aria": "Mchoro shirikishi wa vifaa vya kukusanya data uwandani",
+        "caption": "Ukusanyaji data uwandani"
       },
       "kits": {
-        "servers": {
-          "title": "Seva za data binafsi",
-          "description": "Seva yako mwenyewe ya kuhifadhi na kumiliki data ya jamii yako."
+        "audiomoths": {
+          "title": "Virekodi vya AudioMoth",
+          "description": "Virekodi vya sauti vinavyonasa sauti za bayoanuwai uwandani."
         },
-        "collection": {
-          "title": "Vifaa vya kukusanya data vya ndani",
+        "tools": {
+          "title": "Vifaa vya kukusanya data",
           "description": "Vifaa vya uwandani vya kukusanya uchunguzi na ushahidi papo hapo."
         }
       },

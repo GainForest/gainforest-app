@@ -526,19 +526,19 @@
       "title": "Rewilding the Web",
       "slots": "10 grants available",
       "amount": "Up to $1,000 each",
-      "description": "A grant program financing 10 personal data servers and local data collection kits, so communities can store their own data and keep decisions in their own hands — for data and decision sovereignty.",
+      "description": "A grant program financing AudioMoth recorders and other field data collection tools, so communities can gather their own biodiversity data on the ground.",
       "support": "Supported by the Klarna AI for Climate Resilience Grant.",
       "server": {
-        "aria": "Interactive illustration of a personal data server",
-        "caption": "Personal data server"
+        "aria": "Interactive illustration of field data collection tools",
+        "caption": "Field data collection"
       },
       "kits": {
-        "servers": {
-          "title": "Personal data servers",
-          "description": "Your own server to store and own your community's data."
+        "audiomoths": {
+          "title": "AudioMoth recorders",
+          "description": "Acoustic recorders that capture biodiversity sound in the field."
         },
-        "collection": {
-          "title": "Local data collection kits",
+        "tools": {
+          "title": "Data collection tools",
           "description": "Field kits to gather observations and evidence on the ground."
         }
       },

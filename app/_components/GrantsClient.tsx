@@ -6,15 +6,15 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import {
   ArrowUpRightIcon,
+  BinocularsIcon,
   CheckCircle2Icon,
   ChevronRightIcon,
   CirclePlusIcon,
   DatabaseIcon,
   FolderKanbanIcon,
   Loader2Icon,
-  SatelliteDishIcon,
+  MicIcon,
   SearchIcon,
-  ServerIcon,
   SproutIcon,
   TriangleAlertIcon,
 } from "lucide-react";
@@ -165,9 +165,9 @@ function RewildingSection({ viewerDid, signedIn }: { viewerDid: string | null; s
     void modal.show();
   }, [acting, closeModal, modal, signedIn]);
 
-  const kits: { id: "servers" | "collection"; Icon: typeof ServerIcon }[] = [
-    { id: "servers", Icon: ServerIcon },
-    { id: "collection", Icon: SatelliteDishIcon },
+  const kits: { id: "audiomoths" | "tools"; Icon: typeof MicIcon }[] = [
+    { id: "audiomoths", Icon: MicIcon },
+    { id: "tools", Icon: BinocularsIcon },
   ];
 
   return (

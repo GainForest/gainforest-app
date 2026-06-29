@@ -526,19 +526,19 @@
       "title": "Meliarkan Kembali Web",
       "slots": "10 hibah tersedia",
       "amount": "Hingga $1.000 per hibah",
-      "description": "Program hibah yang mendanai 10 server data pribadi dan perangkat pengumpulan data lokal, agar komunitas dapat menyimpan data mereka sendiri dan menjaga keputusan tetap di tangan mereka demi kedaulatan data dan keputusan.",
+      "description": "Program hibah yang mendanai perekam AudioMoth dan perangkat pengumpulan data lapangan lainnya, agar komunitas dapat mengumpulkan data keanekaragaman hayati mereka sendiri di lapangan.",
       "support": "Didukung oleh hibah Klarna AI for Climate Resilience.",
       "server": {
-        "aria": "Ilustrasi interaktif server data pribadi",
-        "caption": "Server data pribadi"
+        "aria": "Ilustrasi interaktif perangkat pengumpulan data lapangan",
+        "caption": "Pengumpulan data lapangan"
       },
       "kits": {
-        "servers": {
-          "title": "Server data pribadi",
-          "description": "Server Anda sendiri untuk menyimpan dan memiliki data komunitas Anda."
+        "audiomoths": {
+          "title": "Perekam AudioMoth",
+          "description": "Perekam akustik yang menangkap suara keanekaragaman hayati di lapangan."
         },
-        "collection": {
-          "title": "Perangkat pengumpulan data lokal",
+        "tools": {
+          "title": "Perangkat pengumpulan data",
           "description": "Perangkat lapangan untuk mengumpulkan observasi dan bukti di lapangan."
         }
       },

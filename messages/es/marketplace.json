@@ -526,19 +526,19 @@
       "title": "Resilvestrar la web",
       "slots": "10 subvenciones disponibles",
       "amount": "Hasta $1000 cada una",
-      "description": "Un programa de subvenciones que financia 10 servidores de datos personales y kits locales de recolección de datos, para que las comunidades guarden sus propios datos y mantengan las decisiones en sus manos: por la soberanía de datos y de decisiones.",
+      "description": "Un programa de subvenciones que financia grabadoras AudioMoth y otras herramientas de recolección de datos de campo, para que las comunidades reúnan sus propios datos de biodiversidad sobre el terreno.",
       "support": "Con el apoyo de la subvención Klarna AI for Climate Resilience.",
       "server": {
-        "aria": "Ilustración interactiva de un servidor de datos personal",
-        "caption": "Servidor de datos personal"
+        "aria": "Ilustración interactiva de herramientas de recolección de datos de campo",
+        "caption": "Recolección de datos en el campo"
       },
       "kits": {
-        "servers": {
-          "title": "Servidores de datos personales",
-          "description": "Tu propio servidor para guardar y poseer los datos de tu comunidad."
+        "audiomoths": {
+          "title": "Grabadoras AudioMoth",
+          "description": "Grabadoras acústicas que captan el sonido de la biodiversidad en el campo."
         },
-        "collection": {
-          "title": "Kits locales de recolección de datos",
+        "tools": {
+          "title": "Herramientas de recolección de datos",
           "description": "Kits de campo para reunir observaciones y evidencia sobre el terreno."
         }
       },
