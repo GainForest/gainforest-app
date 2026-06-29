@@ -21,7 +21,7 @@ import {
   classifyRecordUri,
   fetchProfileLikes,
   fetchProfilePosts,
-  fetchRecordPreview,
+  fetchRecordPreviews,
   type ProfileLike,
   type ProfilePost,
   type RecordPreview,
@@ -136,24 +136,42 @@ function PostsList({ did, replies }: { did: string; replies: boolean }) {
   const t = useTranslations("common.activity");
   const [engagement, setEngagement] = useState<Map<string, Engagement>>(() => new Map());
 
-  const loadEngagement = useCallback((posts: ProfilePost[]) => {
+  const [previews, setPreviews] = useState<Map<string, RecordPreview | null>>(() => new Map());
+
+  // For each freshly loaded page, fan out two batched reads instead of one query
+  // per card: engagement counts for the posts, and previews for the records the
+  // replies target.
+  const onPage = useCallback((posts: ProfilePost[]) => {
     const uris = posts.map((p) => p.uri);
-    if (uris.length === 0) return;
-    void fetchEngagement(uris, null)
-      .then((map) => {
-        setEngagement((prev) => {
-          const next = new Map(prev);
-          for (const [uri, value] of map) next.set(uri, value);
-          return next;
-        });
-      })
-      .catch(() => {});
+    if (uris.length > 0) {
+      void fetchEngagement(uris, null)
+        .then((map) => {
+          setEngagement((prev) => {
+            const next = new Map(prev);
+            for (const [uri, value] of map) next.set(uri, value);
+            return next;
+          });
+        })
+        .catch(() => {});
+    }
+    const parentUris = posts.map((p) => p.parentUri).filter((uri): uri is string => Boolean(uri));
+    if (parentUris.length > 0) {
+      void fetchRecordPreviews(parentUris)
+        .then((map) => {
+          setPreviews((prev) => {
+            const next = new Map(prev);
+            for (const [uri, value] of map) next.set(uri, value);
+            return next;
+          });
+        })
+        .catch(() => {});
+    }
   }, []);
 
   const { items, hasMore, loading, loaded, loadMore } = usePaged<ProfilePost>(
     (cursor) => fetchProfilePosts(did, replies, { cursor, limit: PAGE }),
     (p) => p.uri,
-    loadEngagement,
+    onPage,
   );
 
   if (loaded && items.length === 0) {
@@ -177,7 +195,7 @@ function PostsList({ did, replies }: { did: string; replies: boolean }) {
                     <ReplyIcon className="size-3" />
                     {t("inReplyTo")}
                   </div>
-                  <RecordPreviewCard uri={post.parentUri} />
+                  <RecordPreviewCard uri={post.parentUri} preview={previews.get(post.parentUri)} />
                 </div>
               ) : null}
               <p className="whitespace-pre-wrap break-words text-[15px] leading-relaxed text-foreground">{post.text}</p>
@@ -206,9 +224,27 @@ function PostsList({ did, replies }: { did: string; replies: boolean }) {
 
 function LikesList({ did }: { did: string }) {
   const t = useTranslations("common.activity");
+  const [previews, setPreviews] = useState<Map<string, RecordPreview | null>>(() => new Map());
+
+  // Batch the previews for a whole page of liked records in one go.
+  const onPage = useCallback((likes: ProfileLike[]) => {
+    const uris = likes.map((like) => like.subjectUri).filter(Boolean);
+    if (uris.length === 0) return;
+    void fetchRecordPreviews(uris)
+      .then((map) => {
+        setPreviews((prev) => {
+          const next = new Map(prev);
+          for (const [uri, value] of map) next.set(uri, value);
+          return next;
+        });
+      })
+      .catch(() => {});
+  }, []);
+
   const { items, hasMore, loading, loaded, loadMore } = usePaged<ProfileLike>(
     (cursor) => fetchProfileLikes(did, { cursor, limit: PAGE }),
     (like) => like.uri,
+    onPage,
   );
 
   if (loaded && items.length === 0) {
@@ -230,7 +266,7 @@ function LikesList({ did }: { did: string }) {
                 </>
               ) : null}
             </div>
-            <RecordPreviewCard uri={like.subjectUri} />
+            <RecordPreviewCard uri={like.subjectUri} preview={previews.get(like.subjectUri)} />
           </li>
         ))}
         {!loaded ? <ActivitySkeleton /> : null}
@@ -245,27 +281,9 @@ function LikesList({ did }: { did: string }) {
 /** Compact preview of the record a reply targets or a like points at: thumbnail
  *  + owner + title/text, linking to it. Falls back to an owner chip + kind link
  *  for kinds we don't resolve (e.g. certs) or records that no longer exist. */
-function RecordPreviewCard({ uri }: { uri: string }) {
+function RecordPreviewCard({ uri, preview: data }: { uri: string; preview: RecordPreview | null | undefined }) {
   const t = useTranslations("common.activity");
   const base = classifyRecordUri(uri);
-  const [data, setData] = useState<RecordPreview | null | undefined>(undefined);
-
-  useEffect(() => {
-    let active = true;
-    const controller = new AbortController();
-    setData(undefined);
-    fetchRecordPreview(uri, controller.signal)
-      .then((preview) => {
-        if (active) setData(preview);
-      })
-      .catch(() => {
-        if (active) setData(null);
-      });
-    return () => {
-      active = false;
-      controller.abort();
-    };
-  }, [uri]);
 
   if (!base) return null;
   const kindLabel = t(`kind.${base.kind}`);

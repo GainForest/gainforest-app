@@ -200,15 +200,26 @@ const PROFILE_FRAGMENT = `
   }
 `;
 
+const PROJECT_PREVIEW_FIELDS = `
+  uri did title shortDescription
+  ${PROFILE_FRAGMENT}
+  banner { __typename ... on OrgHypercertsDefsUri { uri } ... on OrgHypercertsDefsLargeImage { image { ref } } }
+  avatar { __typename ... on OrgHypercertsDefsUri { uri } ... on OrgHypercertsDefsSmallImage { image { ref } } }
+`;
+
+const OBSERVATION_PREVIEW_FIELDS = `
+  uri did scientificName vernacularName locality country
+  thumbnailUrl speciesImageUrl
+  ${PROFILE_FRAGMENT}
+  imageEvidence { file { ref } }
+`;
+
+const POST_PREVIEW_FIELDS = `uri did text ${PROFILE_FRAGMENT}`;
+
 const PROJECT_PREVIEW_QUERY = `
   query ProjectPreview($uri: String!) {
     orgHypercertsCollection(first: 1, where: { uri: { eq: $uri } }) {
-      edges { node {
-        did title shortDescription
-        ${PROFILE_FRAGMENT}
-        banner { __typename ... on OrgHypercertsDefsUri { uri } ... on OrgHypercertsDefsLargeImage { image { ref } } }
-        avatar { __typename ... on OrgHypercertsDefsUri { uri } ... on OrgHypercertsDefsSmallImage { image { ref } } }
-      } }
+      edges { node { ${PROJECT_PREVIEW_FIELDS} } }
     }
   }
 `;
@@ -216,12 +227,7 @@ const PROJECT_PREVIEW_QUERY = `
 const OBSERVATION_PREVIEW_QUERY = `
   query ObservationPreview($uri: String!) {
     appGainforestDwcOccurrence(first: 1, where: { uri: { eq: $uri } }) {
-      edges { node {
-        did scientificName vernacularName locality country
-        thumbnailUrl speciesImageUrl
-        ${PROFILE_FRAGMENT}
-        imageEvidence { file { ref } }
-      } }
+      edges { node { ${OBSERVATION_PREVIEW_FIELDS} } }
     }
   }
 `;
@@ -229,7 +235,7 @@ const OBSERVATION_PREVIEW_QUERY = `
 const POST_PREVIEW_QUERY = `
   query PostPreview($uri: String!) {
     appGainforestFeedPost(first: 1, where: { uri: { eq: $uri } }) {
-      edges { node { did text ${PROFILE_FRAGMENT} } }
+      edges { node { ${POST_PREVIEW_FIELDS} } }
     }
   }
 `;
@@ -259,6 +265,40 @@ function clamp(text: string | null | undefined, max = 200): string | null {
   return trimmed.length > max ? `${trimmed.slice(0, max)}\u2026` : trimmed;
 }
 
+type ProjectPreviewNode = { uri?: string | null; did?: string; title?: string | null; shortDescription?: string | null; certifiedProfileData?: ProfileJoin; banner?: ImageUnion; avatar?: ImageUnion };
+type ObservationPreviewNode = { uri?: string | null; did?: string; scientificName?: string | null; vernacularName?: string | null; locality?: string | null; country?: string | null; thumbnailUrl?: string | null; speciesImageUrl?: string | null; certifiedProfileData?: ProfileJoin; imageEvidence?: { file?: { ref?: string | null } | null } | null };
+type PostPreviewNode = { uri?: string | null; did?: string; text?: string | null; certifiedProfileData?: ProfileJoin };
+
+function projectPreviewFromNode(node: ProjectPreviewNode, href: string, fallbackDid: string): RecordPreview {
+  const banner = imageOf(node.banner ?? null);
+  const avatar = imageOf(node.avatar ?? null);
+  return {
+    kind: "project", did: node.did ?? fallbackDid, href,
+    title: node.title?.trim() || null, text: clamp(node.shortDescription),
+    ownerName: ownerNameOf(node.certifiedProfileData ?? null),
+    imageUrl: banner.url ?? avatar.url, imageRef: banner.ref ?? avatar.ref,
+  };
+}
+
+function observationPreviewFromNode(node: ObservationPreviewNode, href: string, fallbackDid: string): RecordPreview {
+  const where = [node.locality?.trim(), node.country?.trim()].filter(Boolean).join(" \u00b7 ") || null;
+  return {
+    kind: "observation", did: node.did ?? fallbackDid, href,
+    title: node.vernacularName?.trim() || node.scientificName?.trim() || null,
+    text: clamp(where), ownerName: ownerNameOf(node.certifiedProfileData ?? null),
+    imageUrl: node.thumbnailUrl?.trim() || node.speciesImageUrl?.trim() || null,
+    imageRef: normaliseRef(node.imageEvidence?.file?.ref),
+  };
+}
+
+function postPreviewFromNode(node: PostPreviewNode, href: string, fallbackDid: string): RecordPreview {
+  return {
+    kind: "post", did: node.did ?? fallbackDid, href,
+    title: null, text: clamp(node.text, 240),
+    ownerName: ownerNameOf(node.certifiedProfileData ?? null), imageUrl: null, imageRef: null,
+  };
+}
+
 const previewCache = new Map<string, RecordPreview | null>();
 
 /**
@@ -275,53 +315,23 @@ export async function fetchRecordPreview(uri: string, signal?: AbortSignal): Pro
   let preview: RecordPreview | null = null;
   try {
     if (base.kind === "project") {
-      const data = await indexerQuery<{ orgHypercertsCollection?: { edges?: Array<{ node?: Record<string, unknown> | null } | null> | null } | null }>(
+      const data = await indexerQuery<{ orgHypercertsCollection?: { edges?: Array<{ node?: ProjectPreviewNode | null } | null> | null } | null }>(
         PROJECT_PREVIEW_QUERY, { uri }, signal,
       );
-      const node = data?.orgHypercertsCollection?.edges?.[0]?.node as
-        | { did?: string; title?: string | null; shortDescription?: string | null; certifiedProfileData?: ProfileJoin; banner?: ImageUnion; avatar?: ImageUnion }
-        | undefined;
-      if (node) {
-        const banner = imageOf(node.banner ?? null);
-        const avatar = imageOf(node.avatar ?? null);
-        preview = {
-          kind: "project", did: node.did ?? base.did, href: base.href,
-          title: node.title?.trim() || null, text: clamp(node.shortDescription),
-          ownerName: ownerNameOf(node.certifiedProfileData ?? null),
-          imageUrl: banner.url ?? avatar.url, imageRef: banner.ref ?? avatar.ref,
-        };
-      }
+      const node = data?.orgHypercertsCollection?.edges?.[0]?.node ?? undefined;
+      if (node) preview = projectPreviewFromNode(node, base.href, base.did);
     } else if (base.kind === "observation") {
-      const data = await indexerQuery<{ appGainforestDwcOccurrence?: { edges?: Array<{ node?: Record<string, unknown> | null } | null> | null } | null }>(
+      const data = await indexerQuery<{ appGainforestDwcOccurrence?: { edges?: Array<{ node?: ObservationPreviewNode | null } | null> | null } | null }>(
         OBSERVATION_PREVIEW_QUERY, { uri }, signal,
       );
-      const node = data?.appGainforestDwcOccurrence?.edges?.[0]?.node as
-        | { did?: string; scientificName?: string | null; vernacularName?: string | null; locality?: string | null; country?: string | null; thumbnailUrl?: string | null; speciesImageUrl?: string | null; certifiedProfileData?: ProfileJoin; imageEvidence?: { file?: { ref?: string | null } | null } | null }
-        | undefined;
-      if (node) {
-        const where = [node.locality?.trim(), node.country?.trim()].filter(Boolean).join(" \u00b7 ") || null;
-        preview = {
-          kind: "observation", did: node.did ?? base.did, href: base.href,
-          title: node.vernacularName?.trim() || node.scientificName?.trim() || null,
-          text: clamp(where), ownerName: ownerNameOf(node.certifiedProfileData ?? null),
-          imageUrl: node.thumbnailUrl?.trim() || node.speciesImageUrl?.trim() || null,
-          imageRef: normaliseRef(node.imageEvidence?.file?.ref),
-        };
-      }
+      const node = data?.appGainforestDwcOccurrence?.edges?.[0]?.node ?? undefined;
+      if (node) preview = observationPreviewFromNode(node, base.href, base.did);
     } else if (base.kind === "post") {
-      const data = await indexerQuery<{ appGainforestFeedPost?: { edges?: Array<{ node?: Record<string, unknown> | null } | null> | null } | null }>(
+      const data = await indexerQuery<{ appGainforestFeedPost?: { edges?: Array<{ node?: PostPreviewNode | null } | null> | null } | null }>(
         POST_PREVIEW_QUERY, { uri }, signal,
       );
-      const node = data?.appGainforestFeedPost?.edges?.[0]?.node as
-        | { did?: string; text?: string | null; certifiedProfileData?: ProfileJoin }
-        | undefined;
-      if (node) {
-        preview = {
-          kind: "post", did: node.did ?? base.did, href: base.href,
-          title: null, text: clamp(node.text, 240),
-          ownerName: ownerNameOf(node.certifiedProfileData ?? null), imageUrl: null, imageRef: null,
-        };
-      }
+      const node = data?.appGainforestFeedPost?.edges?.[0]?.node ?? undefined;
+      if (node) preview = postPreviewFromNode(node, base.href, base.did);
     }
   } catch {
     preview = null;
@@ -329,4 +339,100 @@ export async function fetchRecordPreview(uri: string, signal?: AbortSignal): Pro
 
   previewCache.set(uri, preview);
   return preview;
+}
+
+/**
+ * Batch variant of {@link fetchRecordPreview}: resolves many record AT-URIs in a
+ * handful of indexer round-trips (one per kind, using a `uri IN (…)` filter)
+ * instead of one query per record. This is what the Replies / Likes lists use so
+ * a page of 24 cards costs ~3 queries rather than 24. Cached results are reused,
+ * and unresolved/missing records map to `null` so the caller renders the plain
+ * owner + link fallback.
+ */
+export async function fetchRecordPreviews(
+  uris: string[],
+  signal?: AbortSignal,
+): Promise<Map<string, RecordPreview | null>> {
+  const result = new Map<string, RecordPreview | null>();
+  const projectUris: string[] = [];
+  const observationUris: string[] = [];
+  const postUris: string[] = [];
+  const baseByUri = new Map<string, { kind: RecordKind; did: string; href: string }>();
+
+  for (const uri of new Set(uris)) {
+    if (previewCache.has(uri)) {
+      result.set(uri, previewCache.get(uri) ?? null);
+      continue;
+    }
+    const base = classifyRecordUri(uri);
+    if (!base) {
+      result.set(uri, null);
+      continue;
+    }
+    baseByUri.set(uri, base);
+    if (base.kind === "project") projectUris.push(uri);
+    else if (base.kind === "observation") observationUris.push(uri);
+    else if (base.kind === "post") postUris.push(uri);
+    else {
+      // Kinds we don't resolve (certs, accounts) get the owner+link fallback.
+      result.set(uri, null);
+      previewCache.set(uri, null);
+    }
+  }
+
+  async function resolveBatch(
+    batchUris: string[],
+    run: (batchUris: string[]) => Promise<Map<string, RecordPreview>>,
+  ) {
+    if (batchUris.length === 0) return;
+    try {
+      const previews = await run(batchUris);
+      for (const uri of batchUris) {
+        const preview = previews.get(uri) ?? null;
+        result.set(uri, preview);
+        previewCache.set(uri, preview);
+      }
+    } catch {
+      // Leave these uncached so a later page can retry; render fallback for now.
+      for (const uri of batchUris) result.set(uri, null);
+    }
+  }
+
+  await Promise.all([
+    resolveBatch(projectUris, async (batchUris) => {
+      const query = `query ProjectPreviews { orgHypercertsCollection(first: ${batchUris.length}, where: { uri: { in: ${JSON.stringify(batchUris)} } }) { edges { node { ${PROJECT_PREVIEW_FIELDS} } } } }`;
+      const data = await indexerQuery<{ orgHypercertsCollection?: { edges?: Array<{ node?: ProjectPreviewNode | null } | null> | null } | null }>(query, {}, signal);
+      const previews = new Map<string, RecordPreview>();
+      for (const edge of data?.orgHypercertsCollection?.edges ?? []) {
+        const node = edge?.node;
+        const base = node?.uri ? baseByUri.get(node.uri) : undefined;
+        if (node?.uri && base) previews.set(node.uri, projectPreviewFromNode(node, base.href, base.did));
+      }
+      return previews;
+    }),
+    resolveBatch(observationUris, async (batchUris) => {
+      const query = `query ObservationPreviews { appGainforestDwcOccurrence(first: ${batchUris.length}, where: { uri: { in: ${JSON.stringify(batchUris)} } }) { edges { node { ${OBSERVATION_PREVIEW_FIELDS} } } } }`;
+      const data = await indexerQuery<{ appGainforestDwcOccurrence?: { edges?: Array<{ node?: ObservationPreviewNode | null } | null> | null } | null }>(query, {}, signal);
+      const previews = new Map<string, RecordPreview>();
+      for (const edge of data?.appGainforestDwcOccurrence?.edges ?? []) {
+        const node = edge?.node;
+        const base = node?.uri ? baseByUri.get(node.uri) : undefined;
+        if (node?.uri && base) previews.set(node.uri, observationPreviewFromNode(node, base.href, base.did));
+      }
+      return previews;
+    }),
+    resolveBatch(postUris, async (batchUris) => {
+      const query = `query PostPreviews { appGainforestFeedPost(first: ${batchUris.length}, where: { uri: { in: ${JSON.stringify(batchUris)} } }) { edges { node { ${POST_PREVIEW_FIELDS} } } } }`;
+      const data = await indexerQuery<{ appGainforestFeedPost?: { edges?: Array<{ node?: PostPreviewNode | null } | null> | null } | null }>(query, {}, signal);
+      const previews = new Map<string, RecordPreview>();
+      for (const edge of data?.appGainforestFeedPost?.edges ?? []) {
+        const node = edge?.node;
+        const base = node?.uri ? baseByUri.get(node.uri) : undefined;
+        if (node?.uri && base) previews.set(node.uri, postPreviewFromNode(node, base.href, base.did));
+      }
+      return previews;
+    }),
+  ]);
+
+  return result;
 }
