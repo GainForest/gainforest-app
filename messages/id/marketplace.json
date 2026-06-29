@@ -538,7 +538,7 @@
           "description": "Perangkat lapangan untuk mengumpulkan observasi dan bukti di lapangan."
         }
       },
-      "apply": "Ajukan",
+      "apply": "Ajukan dengan Satu Klik",
       "appliedTitle": "Pengajuan terkirim",
       "appliedNote": "Pengajuan Anda untuk {project} kini telah diposting ke feed.",
       "postText": "Mengajukan hibah Meliarkan Kembali Web dengan proyek saya \"{project}\" demi kedaulatan data dan keputusan. 🌱"

@@ -538,7 +538,7 @@
           "description": "Kits de campo para reunir observaciones y evidencia sobre el terreno."
         }
       },
-      "apply": "Postular",
+      "apply": "Postular con un clic",
       "appliedTitle": "Solicitud enviada",
       "appliedNote": "Tu solicitud para {project} ya se publicó en el feed.",
       "postText": "Postulando a la subvención Resilvestrar la web con mi proyecto \"{project}\": por la soberanía de datos y de decisiones. 🌱"

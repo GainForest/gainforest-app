@@ -538,7 +538,7 @@
           "description": "Kits de campo para reunir observações e evidências no terreno."
         }
       },
-      "apply": "Candidatar-se",
+      "apply": "Candidatar-se com um clique",
       "appliedTitle": "Candidatura enviada",
       "appliedNote": "Sua candidatura para {project} já foi publicada no feed.",
       "postText": "Candidatando-me ao subsídio Resselvagem da web com o meu projeto \"{project}\": pela soberania de dados e de decisões. 🌱"

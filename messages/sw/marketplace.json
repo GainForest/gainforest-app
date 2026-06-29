@@ -538,7 +538,7 @@
           "description": "Vifaa vya uwandani vya kukusanya uchunguzi na ushahidi papo hapo."
         }
       },
-      "apply": "Omba",
+      "apply": "Omba kwa Mbofyo Mmoja",
       "appliedTitle": "Maombi yametumwa",
       "appliedNote": "Maombi yako kwa {project} sasa yamechapishwa kwenye mlisho.",
       "postText": "Ninaomba ruzuku ya Kurudisha Uasilia kwenye Wavuti kwa mradi wangu \"{project}\" kwa ajili ya uhuru wa data na maamuzi. 🌱"

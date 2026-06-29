@@ -538,7 +538,7 @@
           "description": "Field kits to gather observations and evidence on the ground."
         }
       },
-      "apply": "Apply",
+      "apply": "One-Click Apply",
       "appliedTitle": "Application sent",
       "appliedNote": "Your application for {project} is now posted to the feed.",
       "postText": "Applying to the Rewilding the Web grant with my project \"{project}\" — for data and decision sovereignty. 🌱"
