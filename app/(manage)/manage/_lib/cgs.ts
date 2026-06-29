@@ -218,6 +218,13 @@ export async function inviteCgsMember(repo: string, email: string, role: "member
   return parseJsonResponse<{ invitation: CgsPendingInvitation }>(res, "Could not send invitation.");
 }
 
+export async function cancelCgsInvitation(invitationId: string) {
+  const res = await fetch(`/api/cgs/invitations/${encodeURIComponent(invitationId)}`, {
+    method: "DELETE",
+  });
+  return parseJsonResponse<{ invitation: CgsPendingInvitation }>(res, "Could not remove invitation.");
+}
+
 export async function removeCgsMember(repo: string, memberDid: string) {
   return callCgs({ operation: "removeMember", repo, memberDid });
 }

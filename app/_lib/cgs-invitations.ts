@@ -217,6 +217,12 @@ function canInvite(role: CgsServerRole | null, inviteRole: GroupInvitationRole):
   return false;
 }
 
+export function canCancelInvitation(role: CgsServerRole | null, invitationRole: GroupInvitationRole): boolean {
+  if (role === "owner") return true;
+  if (role === "admin") return invitationRole === "member";
+  return false;
+}
+
 async function sendInvitationEmail({
   invitation,
   origin,
@@ -370,6 +376,25 @@ export async function createGroupInvitation({
     }).catch(() => undefined);
     throw new GroupInvitationError("We couldn’t send the invitation email. Please try again in a few minutes.", 502);
   }
+}
+
+export async function cancelGroupInvitation({
+  invitationId,
+  actorRole,
+}: {
+  invitationId: string;
+  actorRole: CgsServerRole | null;
+}): Promise<GroupInvitation> {
+  const invitation = await getGroupInvitation(invitationId);
+  if (!invitation) throw new GroupInvitationError("Invitation not found.", 404);
+  if (!canCancelInvitation(actorRole, invitation.role)) throw new GroupInvitationError("Only organization owners and admins can remove invitations.", 403);
+  if (invitation.status !== "pending") throw new GroupInvitationError("This invitation is no longer pending.", 409);
+
+  const updated = await supabasePatch<RawInvitation>(`/${TABLE}?id=eq.${supabaseFilterValue(invitation.id)}`, {
+    status: "canceled",
+    updated_at: new Date().toISOString(),
+  });
+  return normalizeInvitations(updated)[0] ?? { ...invitation, status: "canceled" };
 }
 
 export async function acceptGroupInvitation({

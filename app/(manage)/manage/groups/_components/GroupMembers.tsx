@@ -11,6 +11,7 @@ import { cn } from "@/lib/utils";
 import { formatCgsErrorMessage } from "@/app/_lib/cgs-errors";
 import { monogram, resolveDidProfile, type DidProfile } from "@/app/_lib/did-profile";
 import {
+  cancelCgsInvitation,
   inviteCgsMember,
   removeCgsMember,
   setCgsMemberRole,
@@ -113,7 +114,23 @@ function InvitationAvatar({ email }: { email: string }) {
   );
 }
 
-function PendingInvitationRow({ invitation, roleLabel, statusLabel }: { invitation: CgsPendingInvitation; roleLabel: string; statusLabel: string }) {
+function PendingInvitationRow({
+  invitation,
+  roleLabel,
+  statusLabel,
+  canCancel,
+  isPending,
+  cancelLabel,
+  onCancel,
+}: {
+  invitation: CgsPendingInvitation;
+  roleLabel: string;
+  statusLabel: string;
+  canCancel: boolean;
+  isPending: boolean;
+  cancelLabel: string;
+  onCancel: (invitation: CgsPendingInvitation) => void;
+}) {
   return (
     <div className="flex items-center gap-3 rounded-xl px-3 py-3 transition-colors hover:bg-muted/40">
       <InvitationAvatar email={invitation.email} />
@@ -124,7 +141,22 @@ function PendingInvitationRow({ invitation, roleLabel, statusLabel }: { invitati
       <span className={cn("rounded-full px-2.5 py-1 text-xs font-medium capitalize", roleBadge(invitation.role))}>
         {roleLabel}
       </span>
-      <span className="w-7 shrink-0" aria-hidden />
+      {canCancel ? (
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon-sm"
+          disabled={isPending}
+          onClick={() => onCancel(invitation)}
+          title={cancelLabel}
+          aria-label={cancelLabel}
+          className="text-muted-foreground hover:text-destructive"
+        >
+          <Trash2Icon />
+        </Button>
+      ) : (
+        <span className="w-7 shrink-0" aria-hidden />
+      )}
     </div>
   );
 }
@@ -401,6 +433,28 @@ export function GroupMembers({
     });
   };
 
+  const canCancelPendingInvitation = (invitation: CgsPendingInvitation) => {
+    if (currentRole === "owner") return true;
+    return currentRole === "admin" && invitation.role === "member";
+  };
+
+  const cancelInvitation = (invitation: CgsPendingInvitation) => {
+    if (!canCancelPendingInvitation(invitation)) return;
+    runPending(async () => {
+      setError(null);
+      setSuccess(null);
+      const previousInvitations = pendingInvitations;
+      setPendingInvitations((current) => current.filter((item) => item.id !== invitation.id));
+      try {
+        await cancelCgsInvitation(invitation.id);
+        setSuccess(invitationsT("canceled", { email: invitation.email }));
+      } catch (err) {
+        setPendingInvitations(previousInvitations);
+        setError(memberErrorMessage(err, invitationsT("cancelError")));
+      }
+    });
+  };
+
   const toggleDataCouncil = (did: string, selected: boolean) => {
     if (!canUseDataCouncil || !dataCouncilCanWrite || dataCouncilSavingDid) return;
     setDataCouncilSavingDid(did);
@@ -541,6 +595,10 @@ export function GroupMembers({
               invitation={invitation}
               roleLabel={invitationsT(invitation.role === "admin" ? "roleAdmin" : "roleMember")}
               statusLabel={invitationsT("pendingStatus", { role: invitationsT(invitation.role === "admin" ? "roleAdmin" : "roleMember") })}
+              canCancel={canCancelPendingInvitation(invitation)}
+              isPending={isPending}
+              cancelLabel={invitationsT("cancel")}
+              onCancel={cancelInvitation}
             />
           ))}
         </>
