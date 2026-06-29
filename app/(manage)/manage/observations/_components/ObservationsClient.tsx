@@ -299,7 +299,7 @@ async function buildOptimisticOccurrence(input: {
     kingdom: analysis.kingdom.trim() || null,
     family: null,
     genus: null,
-    basisOfRecord: "MachineObservation",
+    basisOfRecord: "HumanObservation",
     recordedBy: analysis.recordedBy.trim() || null,
     individualCount: null,
     country: analysis.country.trim() || null,
@@ -1427,7 +1427,7 @@ function ObservationBulkAddPanel({
       let occurrenceContext: { rkey: string; cid: string; record: Record<string, unknown> } | null = null;
       if (!occurrenceUri) {
         const occurrence = await createObservationOccurrence({
-          basisOfRecord: "MachineObservation",
+          basisOfRecord: "HumanObservation",
           scientificName: data.scientificName.trim(),
           vernacularName: data.vernacularName.trim(),
           kingdom: data.kingdom.trim(),

@@ -573,7 +573,7 @@ export function AddObservationsModal({
         })
       : { decimalLatitude: "", decimalLongitude: "" };
     const occurrence = await createObservationOccurrence({
-      basisOfRecord: "MachineObservation",
+      basisOfRecord: "HumanObservation",
       scientificName: fields.scientificName.trim(),
       vernacularName: fields.vernacularName.trim(),
       kingdom: fields.kingdom.trim() || "Plantae",

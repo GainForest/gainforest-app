@@ -41,7 +41,7 @@ function occurrenceRecord(data: Record<string, unknown>) {
   return omitEmpty({
     ...data,
     $type: OCCURRENCE_COLLECTION,
-    basisOfRecord: data.basisOfRecord ?? "MachineObservation",
+    basisOfRecord: data.basisOfRecord ?? "HumanObservation",
     occurrenceID: data.occurrenceID ?? crypto.randomUUID(),
     occurrenceStatus: data.occurrenceStatus ?? "present",
     geodeticDatum: data.geodeticDatum ?? "EPSG:4326",
