@@ -19,6 +19,7 @@ import {
   TriangleAlertIcon,
 } from "lucide-react";
 import { PictureHero } from "./PictureHero";
+import { PdsVisual } from "./PdsVisual";
 import { redirectToLogin } from "../_lib/auth-client";
 import {
   switcherGroupIdentifier,
@@ -191,9 +192,49 @@ function RewildingSection({ viewerDid, signedIn }: { viewerDid: string | null; s
       </div>
 
       <div className="px-6 py-6 sm:px-8">
-        <p className="max-w-2xl text-sm leading-7 text-muted-foreground">{t("description")}</p>
+        <div className="grid gap-8 lg:grid-cols-[1.05fr_1fr] lg:items-center">
+          <div className="min-w-0">
+            <p className="max-w-2xl text-sm leading-7 text-muted-foreground">{t("description")}</p>
 
-        <div className="mt-5 grid gap-3 sm:grid-cols-2">
+            <div className="mt-5 flex items-start gap-2.5 rounded-2xl bg-muted/40 px-4 py-3">
+              <DatabaseIcon className="mt-0.5 size-4 shrink-0 text-primary" />
+              <p className="text-sm leading-6 text-muted-foreground">{t("support")}</p>
+            </div>
+
+            {appliedProjectTitle ? (
+              <div className="mt-6 flex items-start gap-3 rounded-2xl border border-primary/30 bg-primary/5 px-4 py-4">
+                <CheckCircle2Icon className="mt-0.5 size-5 shrink-0 text-primary" />
+                <div className="min-w-0">
+                  <p className="text-sm font-medium text-foreground">{t("appliedTitle")}</p>
+                  <p className="mt-0.5 text-sm leading-6 text-muted-foreground">
+                    {t("appliedNote", { project: appliedProjectTitle })}
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <div className="mt-6">
+                <Button type="button" size="lg" onClick={openApply}>
+                  <SproutIcon />
+                  {t("apply")}
+                </Button>
+              </div>
+            )}
+          </div>
+
+          <PdsVisual
+            className="mx-auto w-full max-w-md lg:max-w-none"
+            labels={{
+              aria: t("server.aria"),
+              caption: t("server.caption"),
+              dataLayer: t("server.dataLayer"),
+              serverLayer: t("server.serverLayer"),
+              contentsTop: t("server.contentsTop"),
+              contentsBottom: t("server.contentsBottom"),
+            }}
+          />
+        </div>
+
+        <div className="mt-8 grid gap-3 sm:grid-cols-2">
           {kits.map((kit) => (
             <div key={kit.id} className="flex gap-3 rounded-2xl border border-border/70 bg-background/60 p-4">
               <span className="inline-flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
@@ -206,30 +247,6 @@ function RewildingSection({ viewerDid, signedIn }: { viewerDid: string | null; s
             </div>
           ))}
         </div>
-
-        <div className="mt-5 flex items-start gap-2.5 rounded-2xl bg-muted/40 px-4 py-3">
-          <DatabaseIcon className="mt-0.5 size-4 shrink-0 text-primary" />
-          <p className="text-sm leading-6 text-muted-foreground">{t("support")}</p>
-        </div>
-
-        {appliedProjectTitle ? (
-          <div className="mt-6 flex items-start gap-3 rounded-2xl border border-primary/30 bg-primary/5 px-4 py-4">
-            <CheckCircle2Icon className="mt-0.5 size-5 shrink-0 text-primary" />
-            <div className="min-w-0">
-              <p className="text-sm font-medium text-foreground">{t("appliedTitle")}</p>
-              <p className="mt-0.5 text-sm leading-6 text-muted-foreground">
-                {t("appliedNote", { project: appliedProjectTitle })}
-              </p>
-            </div>
-          </div>
-        ) : (
-          <div className="mt-6">
-            <Button type="button" size="lg" onClick={openApply}>
-              <SproutIcon />
-              {t("apply")}
-            </Button>
-          </div>
-        )}
       </div>
     </article>
   );

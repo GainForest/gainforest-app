@@ -528,6 +528,14 @@
       "amount": "Até $1000 cada",
       "description": "Um programa de subsídios que financia 10 servidores de dados pessoais e kits locais de coleta de dados, para que as comunidades guardem seus próprios dados e mantenham as decisões em suas mãos: pela soberania de dados e de decisões.",
       "support": "Com o apoio do subsídio Klarna AI for Climate Resilience.",
+      "server": {
+        "aria": "Ilustração interativa de um servidor de dados pessoal",
+        "caption": "Servidor de dados pessoal",
+        "dataLayer": "SEUS DADOS",
+        "serverLayer": "SEU SERVIDOR",
+        "contentsTop": "PROJETOS · OBSERVAÇÕES · MAPAS",
+        "contentsBottom": "ARMAZENAMENTO · CÓPIAS · CONTROLE"
+      },
       "kits": {
         "servers": {
           "title": "Servidores de dados pessoais",

@@ -528,6 +528,14 @@
       "amount": "Up to $1,000 each",
       "description": "A grant program financing 10 personal data servers and local data collection kits, so communities can store their own data and keep decisions in their own hands — for data and decision sovereignty.",
       "support": "Supported by the Klarna AI for Climate Resilience Grant.",
+      "server": {
+        "aria": "Interactive illustration of a personal data server",
+        "caption": "Personal data server",
+        "dataLayer": "YOUR DATA",
+        "serverLayer": "YOUR SERVER",
+        "contentsTop": "PROJECTS · OBSERVATIONS · MAPS",
+        "contentsBottom": "STORAGE · BACKUPS · CONTROL"
+      },
       "kits": {
         "servers": {
           "title": "Personal data servers",

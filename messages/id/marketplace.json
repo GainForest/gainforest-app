@@ -528,6 +528,14 @@
       "amount": "Hingga $1.000 per hibah",
       "description": "Program hibah yang mendanai 10 server data pribadi dan perangkat pengumpulan data lokal, agar komunitas dapat menyimpan data mereka sendiri dan menjaga keputusan tetap di tangan mereka demi kedaulatan data dan keputusan.",
       "support": "Didukung oleh hibah Klarna AI for Climate Resilience.",
+      "server": {
+        "aria": "Ilustrasi interaktif server data pribadi",
+        "caption": "Server data pribadi",
+        "dataLayer": "DATA ANDA",
+        "serverLayer": "SERVER ANDA",
+        "contentsTop": "PROYEK · OBSERVASI · PETA",
+        "contentsBottom": "PENYIMPANAN · CADANGAN · KENDALI"
+      },
       "kits": {
         "servers": {
           "title": "Server data pribadi",

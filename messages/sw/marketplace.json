@@ -528,6 +528,14 @@
       "amount": "Hadi $1,000 kila moja",
       "description": "Programu ya ruzuku inayofadhili seva 10 za data binafsi na vifaa vya kukusanya data vya ndani, ili jamii ziweze kuhifadhi data zao wenyewe na kushikilia maamuzi mikononi mwao kwa ajili ya uhuru wa data na maamuzi.",
       "support": "Inafadhiliwa na ruzuku ya Klarna AI for Climate Resilience.",
+      "server": {
+        "aria": "Mchoro shirikishi wa seva ya data binafsi",
+        "caption": "Seva ya data binafsi",
+        "dataLayer": "DATA YAKO",
+        "serverLayer": "SEVA YAKO",
+        "contentsTop": "MIRADI · UCHUNGUZI · RAMANI",
+        "contentsBottom": "HIFADHI · NAKALA · UDHIBITI"
+      },
       "kits": {
         "servers": {
           "title": "Seva za data binafsi",
