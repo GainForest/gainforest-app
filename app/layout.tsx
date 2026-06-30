@@ -69,7 +69,7 @@ export async function generateMetadata(): Promise<Metadata> {
     publisher: "GainForest",
     keywords: [
       "GainForest",
-      "Certs",
+      "projects",
       "biodiversity",
       "explorer",
       "impact certification",
