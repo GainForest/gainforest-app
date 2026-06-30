@@ -394,7 +394,9 @@
     "members": "Anggota",
     "admin": "Admin",
     "posts": "Postingan",
-    "attachments": "Lampiran"
+    "filesAndPhotos": "Berkas & foto",
+    "photos": "Foto",
+    "files": "Berkas"
   },
   "accountAttachments": {
     "title": "Lampiran",

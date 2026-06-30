@@ -133,15 +133,9 @@ export async function AccountAttachmentsTabContent({ account, did }: { account: 
   const typeLabel = (type: FriendlyType): string => t(`types.${type}`);
 
   return (
-    <section className="py-6">
-      <div className="flex items-baseline gap-2">
-        <h2 className="font-instrument text-2xl italic leading-none text-foreground">{t("title")}</h2>
-        {cards.length > 0 ? <span className="text-sm text-muted-foreground">{cards.length}</span> : null}
-      </div>
-      <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">{t("subtitle")}</p>
-
+    <section className="py-4">
       {cards.length === 0 ? (
-        <div className="mt-6 flex flex-col items-center gap-2 rounded-3xl border border-dashed border-border/70 bg-muted/20 px-6 py-12 text-center">
+        <div className="flex flex-col items-center gap-2 rounded-3xl border border-dashed border-border/70 bg-muted/20 px-6 py-12 text-center">
           <span className="grid size-12 place-items-center rounded-2xl bg-primary/10 text-primary ring-1 ring-primary/15">
             <PaperclipIcon className="size-6" />
           </span>
@@ -149,7 +143,7 @@ export async function AccountAttachmentsTabContent({ account, did }: { account: 
           <p className="max-w-sm text-xs leading-5 text-muted-foreground">{t("emptyHint")}</p>
         </div>
       ) : (
-        <ul className="mt-5 grid gap-3 sm:grid-cols-2">
+        <ul className="grid gap-3 sm:grid-cols-2">
           {cards.map((card) => {
             const primary = card.links[0];
             const Icon = TYPE_ICONS[primary?.friendlyType ?? "file"];

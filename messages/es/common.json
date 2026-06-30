@@ -394,7 +394,9 @@
     "members": "Miembros",
     "admin": "Admin",
     "posts": "Publicaciones",
-    "attachments": "Adjuntos"
+    "filesAndPhotos": "Archivos y fotos",
+    "photos": "Fotos",
+    "files": "Archivos"
   },
   "accountAttachments": {
     "title": "Adjuntos",

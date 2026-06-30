@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { CanonicalRedirect } from "@/app/account/_components/CanonicalRedirect";
 import { AccountAttachmentsTabContent } from "../../_components/AccountAttachments";
+import { GallerySubNav } from "../../_components/GallerySubNav";
 import { accountAttachmentsPath, getAccountRouteData, readAccountRouteParams } from "../../_lib/account-route";
 
 export async function generateMetadata({ params }: { params: Promise<{ did: string }> }): Promise<Metadata> {
@@ -25,5 +26,10 @@ export default async function AccountAttachmentsPage({ params }: { params: Promi
     return <CanonicalRedirect to={accountAttachmentsPath(account.urlIdentifier)} />;
   }
 
-  return <AccountAttachmentsTabContent account={account} did={did} />;
+  return (
+    <>
+      <GallerySubNav identifier={account.urlIdentifier} />
+      <AccountAttachmentsTabContent account={account} did={did} />
+    </>
+  );
 }

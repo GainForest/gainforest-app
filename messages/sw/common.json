@@ -394,7 +394,9 @@
     "members": "Wanachama",
     "admin": "Admin",
     "posts": "Machapisho",
-    "attachments": "Viambatisho"
+    "filesAndPhotos": "Faili na picha",
+    "photos": "Picha",
+    "files": "Faili"
   },
   "accountAttachments": {
     "title": "Viambatisho",
