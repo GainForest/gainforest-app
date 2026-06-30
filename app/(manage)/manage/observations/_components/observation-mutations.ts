@@ -1,6 +1,7 @@
 "use client";
 
-import { createMultimediaFromFile, createRecord, putRecord } from "../../_lib/mutations";
+import { createMultimediaFromFile, createRecord, putRecord, uploadBlob } from "../../_lib/mutations";
+import { resolveStrongRef } from "@/app/_lib/pds";
 
 type MutationResult = { uri: string; cid: string; rkey: string; record?: Record<string, unknown> };
 
@@ -10,6 +11,10 @@ export type ObservationBlobRef = { $type: "blob"; ref: unknown; mimeType: string
 type ObservationPhotoResult = MutationResult & { blobRef: ObservationBlobRef | null };
 
 const OCCURRENCE_COLLECTION = "app.gainforest.dwc.occurrence";
+const ATTACHMENT_COLLECTION = "org.hypercerts.context.attachment";
+// Tags the attachment so the dataset is recognisable as a bulk observations
+// upload rather than a generic document.
+const OBSERVATION_DATASET_CONTENT_TYPE = "observation-dataset";
 // Occurrence photos surface in the explorer/indexer through the occurrence's own
 // `imageEvidence` field (an app.gainforest.common.defs#image wrapper), not the
 // separate ac.multimedia records — so the primary photo must be copied there.
@@ -58,6 +63,54 @@ export function formatObservationMutationError(error: unknown): string {
 export async function createObservationOccurrence(data: Record<string, unknown>): Promise<MutationResult> {
   const record = occurrenceRecord(data);
   const result = await createRecord(OCCURRENCE_COLLECTION, record, undefined, mutationOptions());
+  return { ...result, rkey: rkeyFromUri(result.uri), record };
+}
+
+/**
+ * Store a raw observations CSV as a single hypercert attachment record instead
+ * of expanding it into thousands of occurrence records. The file is kept as an
+ * uploaded blob on the attachment's `content`, so a large dataset costs one
+ * record + one blob rather than flooding the repo and indexer. When a project
+ * is in context we link the attachment to it via `subjects`; otherwise the
+ * dataset is stored standalone.
+ */
+export async function createObservationCsvAttachment(input: {
+  file: File;
+  title: string;
+  note?: string;
+  subjectUri?: string | null;
+}): Promise<MutationResult> {
+  const options = mutationOptions();
+  const uploaded = await uploadBlob(input.file, options);
+  const blob = {
+    $type: "blob",
+    ref: uploaded.ref,
+    mimeType: uploaded.mimeType || "text/csv",
+    size: uploaded.size,
+  };
+
+  const subjects: { $type: "com.atproto.repo.strongRef"; uri: string; cid: string }[] = [];
+  if (input.subjectUri) {
+    try {
+      const ref = await resolveStrongRef(input.subjectUri);
+      subjects.push({ $type: "com.atproto.repo.strongRef", uri: ref.uri, cid: ref.cid });
+    } catch {
+      // Best-effort link only; store the dataset standalone if the project
+      // can't be referenced right now.
+    }
+  }
+
+  const record = omitEmpty({
+    $type: ATTACHMENT_COLLECTION,
+    title: input.title.slice(0, 256),
+    contentType: OBSERVATION_DATASET_CONTENT_TYPE,
+    content: [{ $type: "org.hypercerts.defs#smallBlob", blob }],
+    ...(subjects.length > 0 ? { subjects } : {}),
+    ...(input.note ? { description: { $type: "org.hypercerts.defs#descriptionString", value: input.note } } : {}),
+    createdAt: new Date().toISOString(),
+  });
+
+  const result = await createRecord(ATTACHMENT_COLLECTION, record, undefined, options);
   return { ...result, rkey: rkeyFromUri(result.uri), record };
 }
 

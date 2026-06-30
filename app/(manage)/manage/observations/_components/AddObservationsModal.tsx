@@ -6,7 +6,9 @@ import { useTranslations } from "next-intl";
 import {
   CalendarIcon,
   CheckCircle2Icon,
+  ChevronDownIcon,
   CircleHelpIcon,
+  FileSpreadsheetIcon,
   ImagePlusIcon,
   Layers2Icon,
   Loader2Icon,
@@ -30,6 +32,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { ModalContent, ModalHeader, ModalTitle, ModalDescription } from "@/components/ui/modal/modal";
 import { useModal } from "@/components/ui/modal/context";
 import { cn } from "@/lib/utils";
@@ -50,6 +58,7 @@ import {
   type ObservationBlobRef,
 } from "./observation-mutations";
 import { LocationPickerModal, LocationPickerModalId } from "./LocationPickerModal";
+import { ObservationCsvUpload } from "./ObservationCsvUpload";
 import { fetchDefaultObservationCenter, roundCoord, type PickedLocation } from "./default-location";
 import {
   buildObservationLocationFields,
@@ -194,6 +203,9 @@ export function AddObservationsModal({
 }) {
   const t = useTranslations("upload.observations.quickAdd");
   const modal = useModal();
+  // Switches the modal between the photo quick-add flow and the CSV importer
+  // reachable from the "More ways" menu.
+  const [mode, setMode] = useState<"photos" | "csv">("photos");
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const dragDepth = useRef(0);
   const itemsRef = useRef<QuickItem[]>([]);
@@ -646,6 +658,20 @@ export function AddObservationsModal({
     }
   }
 
+  // CSV importer — reached from the "More ways" menu. The mutation repo is
+  // already pointed at the right account by the effect above, so the importer
+  // can write occurrences and measurements straight away.
+  if (mode === "csv") {
+    return (
+      <ObservationCsvUpload
+        target={target}
+        projectRef={projectRef}
+        onBack={() => setMode("photos")}
+        onClose={onClose}
+      />
+    );
+  }
+
   // Success screen — shown once at least one observation has been added.
   if (addedCount !== null && items.length === 0) {
     return (
@@ -680,16 +706,38 @@ export function AddObservationsModal({
             <ModalTitle>{t("title")}</ModalTitle>
             <ModalDescription className="mt-1">{t("description")}</ModalDescription>
           </div>
-          <Button
-            type="button"
-            variant="secondary"
-            size="icon-sm"
-            onClick={onClose}
-            aria-label={t("close")}
-            className="-mr-1 -mt-1 shrink-0 rounded-full"
-          >
-            <XIcon className="size-4" />
-          </Button>
+          <div className="flex shrink-0 items-center gap-1.5">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="-mt-1 rounded-full"
+                  disabled={isSubmitting}
+                >
+                  {t("moreWays")}
+                  <ChevronDownIcon className="size-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => setMode("csv")}>
+                  <FileSpreadsheetIcon className="size-4" />
+                  {t("uploadCsv")}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <Button
+              type="button"
+              variant="secondary"
+              size="icon-sm"
+              onClick={onClose}
+              aria-label={t("close")}
+              className="-mr-1 -mt-1 rounded-full"
+            >
+              <XIcon className="size-4" />
+            </Button>
+          </div>
         </div>
       </ModalHeader>
 
