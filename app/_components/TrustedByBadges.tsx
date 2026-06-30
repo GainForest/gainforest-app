@@ -13,6 +13,7 @@ import {
 const BADGE_META: Record<TrustedOrganizationBadge, { label: string; src: string }> = {
   gainforest: { label: "GainForest", src: "/assets/media/images/gainforest-logo.svg" },
   maearth: { label: "Ma Earth", src: "/assets/media/images/badges/ma-earth-logo.webp" },
+  biometrust: { label: "Biome Trust", src: "/assets/media/images/badges/biome-trust-logo.webp" },
 };
 
 const ICON_SIZE_CLASS = {
@@ -35,7 +36,7 @@ type TrustedByBadgesProps = {
   labelClassName?: string;
   iconClassName?: string;
   size?: keyof typeof ICON_SIZE_CLASS;
-  variant?: "default" | "compact";
+  variant?: "default" | "compact" | "plain";
 };
 
 export function TrustedByBadges({
@@ -72,18 +73,23 @@ export function TrustedByBadges({
   if (badges.length === 0) return null;
 
   const names = badges.map((badge) => BADGE_META[badge].label).join(", ");
+  const isPlain = variant === "plain";
   const resolvedSize = size ?? (variant === "compact" ? "xs" : "md");
+  // "plain" drops the pill chrome (no rounded background, blur, or check icon)
+  // so the endorsement reads as a quiet "Trusted by ●" line under the title.
   const variantClass = variant === "compact"
     ? "gap-1.5 rounded-full bg-accent/50 p-0.5 pl-2 text-sm"
-    : "gap-2 rounded-full bg-accent/50 p-1 pl-3 text-lg";
+    : isPlain
+      ? "gap-2 text-sm"
+      : "gap-2 rounded-full bg-accent/50 p-1 pl-3 text-lg";
   const checkIconClass = variant === "compact" ? "size-4" : "size-5";
 
   return (
     <span
-      className={`inline-flex min-w-0 items-center overflow-hidden font-medium text-muted-foreground backdrop-blur-lg ${variantClass} ${className}`}
+      className={`${isPlain ? "flex" : "inline-flex"} min-w-0 items-center overflow-hidden font-medium text-muted-foreground ${isPlain ? "" : "backdrop-blur-lg"} ${variantClass} ${className}`}
       aria-label={t("aria", { names })}
     >
-      <BadgeCheckIcon className={`${checkIconClass} shrink-0 text-primary`} aria-hidden />
+      {isPlain ? null : <BadgeCheckIcon className={`${checkIconClass} shrink-0 text-primary`} aria-hidden />}
       <span className={`shrink-0 whitespace-nowrap leading-none ${labelClassName}`}>{t("trustedBy")}</span>
       <span className="inline-flex shrink-0 items-center -space-x-1">
         {badges.map((badge) => {

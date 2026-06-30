@@ -1193,10 +1193,9 @@ const FUNDING_CONFIG_QUERY = `
   }
 `;
 
-export type BumicertBadgeFilter = "gainforest" | "maearth" | "maearth-round-1" | "maearth-round-2" | "maearth-round-3";
-export type TrustedOrganizationBadge = "gainforest" | "maearth";
+export type BumicertBadgeFilter = "gainforest" | "maearth" | "maearth-round-1" | "maearth-round-2" | "maearth-round-3" | "biometrust";
+export type TrustedOrganizationBadge = "gainforest" | "maearth" | "biometrust";
 
-const FEATURED_BADGE_REPO_DID = "did:plc:yjck2sybksyigp3zvbq7bfki";
 const FEATURED_BADGES: Array<{ key: BumicertBadgeFilter; title: string }> = [
   { key: "gainforest", title: "GainForest" },
   { key: "maearth", title: "Ma Earth" },
@@ -1210,6 +1209,43 @@ const FEATURED_BADGES: Array<{ key: BumicertBadgeFilter; title: string }> = [
 const FEATURED_BADGE_KEYS = new Set(FEATURED_BADGES.map((badge) => badge.key));
 const FEATURED_BADGE_KEY_BY_TITLE = new Map(
   FEATURED_BADGES.map((badge) => [normalizeFeaturedBadgeTitle(badge.title), badge.key]),
+);
+
+/**
+ * Organizations whose `app.certified.badge.award` records we honor as
+ * "Trusted by" signals. We read awards from each issuer's repo and attribute
+ * the badge to whoever *signed the award* — not to the repo that happens to
+ * host the badge *definition*. (Biome Trust, for example, endorses orgs using
+ * a definition that lives in Ma Earth's repo; the endorsement is Biome Trust's,
+ * so it must read as "Trusted by Biome Trust".)
+ *
+ * `mode: "title"` issuers host a family of branded badges in one repo and are
+ * split by the badge-definition title (GainForest vs. Ma Earth). `mode:
+ * "fixed"` issuers attribute *every* award they sign to a single brand,
+ * regardless of which definition it points at.
+ *
+ * Hardcoded for now; a future admin panel will manage this allow-list.
+ */
+type TrustedBadgeIssuer =
+  | { did: string; mode: "title" }
+  | { did: string; mode: "fixed"; badge: BumicertBadgeFilter };
+
+const TRUSTED_BADGE_ISSUERS: TrustedBadgeIssuer[] = [
+  // GainForest's certified repo hosts the GainForest + Ma Earth badge family.
+  { did: "did:plc:yjck2sybksyigp3zvbq7bfki", mode: "title" },
+  // Biome Trust signs Organization Endorsements from its own repo.
+  { did: "did:plc:2pfslyh6q2lk46xqwshjd6sc", mode: "fixed", badge: "biometrust" },
+];
+
+// Every brand key the featured-badge index can hold: the title-mapped
+// GainForest/Ma Earth family plus the fixed-issuer brands. Used to seed the
+// per-badge buckets so a brand like `biometrust` (never title-mapped) still
+// gets an entry.
+const FEATURED_BADGE_KEY_LIST: BumicertBadgeFilter[] = Array.from(
+  new Set<BumicertBadgeFilter>([
+    ...FEATURED_BADGES.map((badge) => badge.key),
+    ...TRUSTED_BADGE_ISSUERS.flatMap((issuer) => (issuer.mode === "fixed" ? [issuer.badge] : [])),
+  ]),
 );
 const FEATURED_BADGE_INDEX_CACHE_MS = PUBLIC_EXPLORE_CACHE_TTL_MS;
 const FEATURED_BADGE_FILTER_IN_LIMIT = 100;
@@ -1384,7 +1420,15 @@ function activityUriForDidRkey(did: string, rkey: string): string {
   return `at://${did}/org.hypercerts.claim.activity/${rkey}`;
 }
 
-async function fetchFeaturedBadgeIndexUncached(signal?: AbortSignal): Promise<FeaturedBadgeIndex> {
+/** Page through one issuer repo's badge definitions + awards. Fixed-brand
+ *  issuers attribute every award to one brand, so their definitions are
+ *  skipped (`collectDefinitions: false`) — the badge may even be defined in a
+ *  different repo. */
+async function fetchIssuerBadgeRecords(
+  repo: string,
+  collectDefinitions: boolean,
+  signal?: AbortSignal,
+): Promise<{ definitions: RawFeaturedBadgeDefinition[]; awards: RawFeaturedBadgeAward[] }> {
   const definitions: RawFeaturedBadgeDefinition[] = [];
   const awards: RawFeaturedBadgeAward[] = [];
   let afterDefinitions: string | null = null;
@@ -1392,11 +1436,11 @@ async function fetchFeaturedBadgeIndexUncached(signal?: AbortSignal): Promise<Fe
 
   for (let page = 0; page < 20; page += 1) {
     if (signal?.aborted) throw new DOMException("aborted", "AbortError");
-    const shouldCollectDefinitions: boolean = page === 0 || Boolean(afterDefinitions);
+    const shouldCollectDefinitions: boolean = collectDefinitions && (page === 0 || Boolean(afterDefinitions));
     const payload: FeaturedBadgeIndexPayload | null = await indexerQuery<FeaturedBadgeIndexPayload>(
       FEATURED_BADGE_INDEX_QUERY,
       {
-        repo: FEATURED_BADGE_REPO_DID,
+        repo,
         first: INDEXER_MAX_PAGE,
         afterDefinitions,
         afterAwards,
@@ -1416,34 +1460,51 @@ async function fetchFeaturedBadgeIndexUncached(signal?: AbortSignal): Promise<Fe
     if (!afterDefinitions && !afterAwards) break;
   }
 
-  const targetBadgeUris = new Map(
-    definitions.flatMap((definition) => {
-      const key = FEATURED_BADGE_KEY_BY_TITLE.get(normalizeFeaturedBadgeTitle(definition.title));
-      return key && definition.uri ? [[definition.uri, key] as const] : [];
-    }),
-  );
-  const emptyByBadge = Object.fromEntries(
-    FEATURED_BADGES.map((badge) => [badge.key, { dids: [], recordUris: [] }]),
-  ) as unknown as Record<BumicertBadgeFilter, FeaturedBadgeValues>;
-  if (targetBadgeUris.size === 0) return { dids: [], recordUris: [], byBadge: emptyByBadge };
+  return { definitions, awards };
+}
 
+async function fetchFeaturedBadgeIndexUncached(signal?: AbortSignal): Promise<FeaturedBadgeIndex> {
   const dids: string[] = [];
   const recordUris: string[] = [];
   const byBadge = Object.fromEntries(
-    FEATURED_BADGES.map((badge) => [badge.key, { dids: [] as string[], recordUris: [] as string[] }]),
+    FEATURED_BADGE_KEY_LIST.map((key) => [key, { dids: [] as string[], recordUris: [] as string[] }]),
   ) as Record<BumicertBadgeFilter, { dids: string[]; recordUris: string[] }>;
-  for (const award of awards) {
-    const badgeUri = award.badge?.uri;
-    const badgeKey = badgeUri ? targetBadgeUris.get(badgeUri) : undefined;
-    if (!badgeKey) continue;
-    const subject = award.subject;
-    if (subject?.__typename === "AppCertifiedDefsDid" && subject.did) {
-      dids.push(subject.did);
-      byBadge[badgeKey].dids.push(subject.did);
-    } else if (subject?.__typename === "ComAtprotoRepoStrongRef" && subject.uri?.trim()) {
-      const uri = subject.uri.trim();
-      recordUris.push(uri);
-      byBadge[badgeKey].recordUris.push(uri);
+
+  for (const issuer of TRUSTED_BADGE_ISSUERS) {
+    const { definitions, awards } = await fetchIssuerBadgeRecords(
+      issuer.did,
+      issuer.mode === "title",
+      signal,
+    );
+
+    // Title issuers map each award to a brand via its definition's title;
+    // fixed issuers attribute every award to a single brand.
+    const keyByDefinitionUri = new Map<string, BumicertBadgeFilter>(
+      issuer.mode === "title"
+        ? definitions.flatMap((definition) => {
+            const key = FEATURED_BADGE_KEY_BY_TITLE.get(normalizeFeaturedBadgeTitle(definition.title));
+            return key && definition.uri ? [[definition.uri, key] as const] : [];
+          })
+        : [],
+    );
+
+    for (const award of awards) {
+      const badgeKey: BumicertBadgeFilter | undefined =
+        issuer.mode === "fixed"
+          ? issuer.badge
+          : award.badge?.uri
+            ? keyByDefinitionUri.get(award.badge.uri)
+            : undefined;
+      if (!badgeKey) continue;
+      const subject = award.subject;
+      if (subject?.__typename === "AppCertifiedDefsDid" && subject.did) {
+        dids.push(subject.did);
+        byBadge[badgeKey].dids.push(subject.did);
+      } else if (subject?.__typename === "ComAtprotoRepoStrongRef" && subject.uri?.trim()) {
+        const uri = subject.uri.trim();
+        recordUris.push(uri);
+        byBadge[badgeKey].recordUris.push(uri);
+      }
     }
   }
 
@@ -1451,11 +1512,11 @@ async function fetchFeaturedBadgeIndexUncached(signal?: AbortSignal): Promise<Fe
     dids: uniqueSorted(dids),
     recordUris: uniqueSorted(recordUris),
     byBadge: Object.fromEntries(
-      FEATURED_BADGES.map((badge) => [
-        badge.key,
+      FEATURED_BADGE_KEY_LIST.map((key) => [
+        key,
         {
-          dids: uniqueSorted(byBadge[badge.key].dids),
-          recordUris: uniqueSorted(byBadge[badge.key].recordUris),
+          dids: uniqueSorted(byBadge[key].dids),
+          recordUris: uniqueSorted(byBadge[key].recordUris),
         },
       ]),
     ) as Record<BumicertBadgeFilter, FeaturedBadgeValues>,
@@ -1465,7 +1526,7 @@ async function fetchFeaturedBadgeIndexUncached(signal?: AbortSignal): Promise<Fe
 function fetchFeaturedBadgeIndex(signal?: AbortSignal): Promise<FeaturedBadgeIndex> {
   return publicExploreCache(
     "featured-badge-index",
-    { version: "gainforest-maearth:v3", ttl: FEATURED_BADGE_INDEX_CACHE_MS },
+    { version: "gainforest-maearth-biometrust:v4", ttl: FEATURED_BADGE_INDEX_CACHE_MS },
     // The featured-badge index is shared by count and list requests across the
     // public Explore pages. Keep the cached loader independent from any one
     // component effect's abort signal; otherwise an aborted count refresh can
@@ -1490,6 +1551,7 @@ export async function fetchTrustedOrganizationBadges(
   ) {
     badges.push("maearth");
   }
+  if (index.byBadge.biometrust.dids.includes(did)) badges.push("biometrust");
   return badges;
 }
 
