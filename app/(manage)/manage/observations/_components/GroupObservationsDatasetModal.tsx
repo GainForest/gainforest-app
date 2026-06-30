@@ -27,6 +27,10 @@ export type ObservationDatasetGroup = {
   createdAt: string | null;
   uris: string[];
   parentRkeys: string[];
+  /** AT-URI of the project this dataset is nested under, if any. */
+  projectUri?: string | null;
+  /** Title of that project, for display. */
+  projectName?: string | null;
 };
 
 export type GroupObservationsDoneSummary = {

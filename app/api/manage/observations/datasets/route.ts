@@ -21,7 +21,14 @@ export type ObservationDatasetGroup = {
   /** rkeys of collections (e.g. projects) that nest this dataset in items[], so
    *  deleting the dataset can also remove the dangling reference. */
   parentRkeys: string[];
+  /** AT-URI of the project (type "project" collection) this dataset is nested
+   *  under, if any — surfaced so the folder can show + change its project. */
+  projectUri: string | null;
+  /** Title of that project, for display. */
+  projectName: string | null;
 };
+
+const PROJECT_COLLECTION_TYPE = "project";
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
@@ -110,18 +117,28 @@ export async function GET(request: Request) {
         createdAt: stringValue(collection.value?.createdAt),
         uris: [],
         parentRkeys: [],
+        projectUri: null,
+        projectName: null,
       });
     }
 
-    // Record which collections nest each dataset (so a delete can unnest them).
+    // Record which collections nest each dataset (so a delete can unnest them),
+    // and remember the first project (type "project") parent for display.
     for (const collection of collections) {
       const parentUri = stringValue(collection.uri);
       if (!parentUri) continue;
       const parentRkey = rkeyFromUri(parentUri);
+      const parentIsProject = stringValue(collection.value?.type) === PROJECT_COLLECTION_TYPE;
+      const parentTitle = stringValue(collection.value?.title) ?? "Untitled project";
       for (const childUri of itemUrisOf(collection.value)) {
         if (childUri === parentUri) continue;
         const group = groups.get(childUri);
-        if (group && !group.parentRkeys.includes(parentRkey)) group.parentRkeys.push(parentRkey);
+        if (!group) continue;
+        if (!group.parentRkeys.includes(parentRkey)) group.parentRkeys.push(parentRkey);
+        if (parentIsProject && !group.projectUri) {
+          group.projectUri = parentUri;
+          group.projectName = parentTitle;
+        }
       }
     }
 
