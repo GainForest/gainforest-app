@@ -2,7 +2,7 @@ import { accountPath, getCertifiedProfileCard } from "@/app/account/_lib/account
 import { getAuthBaseUrl, getAuthInternalServiceToken } from "@/app/_lib/auth";
 import { fetchCgsMembersWithCookie, type CgsServerRole } from "@/app/_lib/cgs-server";
 import { renderGroupInvitationEmailTemplate, resolveGroupInvitationEmailLocale } from "@/lib/email/group-invitation-template";
-import { supabaseFilterValue, supabaseInsert, supabasePatch, supabaseSelect, supabaseUpsert } from "@/lib/supabase/rest";
+import { supabaseFilterValue, supabaseInsert, supabasePatch, supabaseSelect } from "@/lib/supabase/rest";
 import type { AuthSession } from "./auth";
 
 export type GroupInvitationRole = "member" | "admin";
@@ -29,7 +29,6 @@ export type GroupInvitation = {
 };
 
 const TABLE = "cgs_group_invitations";
-const AUTH_OAUTH_SESSION_TABLE = "atproto_oauth_session";
 const INVITE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 
 const INVITATION_SELECT = [
@@ -70,14 +69,6 @@ type RawInvitation = {
   accepted_by_email?: unknown;
   email_sent_at?: unknown;
   last_email_error?: unknown;
-};
-
-type RawAuthOauthSession = {
-  id?: unknown;
-  app_id?: unknown;
-  did?: unknown;
-  value?: unknown;
-  updated_at?: unknown;
 };
 
 export class GroupInvitationError extends Error {
@@ -148,61 +139,6 @@ function normalizeInvitations(rows: RawInvitation[]): GroupInvitation[] {
 
 function invitationQuery(filters: string): string {
   return `/${TABLE}?select=${INVITATION_SELECT}&${filters}`;
-}
-
-function authServiceAppId(): string {
-  const configured = process.env.AUTH_APP_ID?.trim() || process.env.ATPROTO_AUTH_APP_ID?.trim();
-  if (configured) return configured;
-
-  const authBase = process.env.NEXT_PUBLIC_AUTH_BASE_URL?.trim().toLowerCase() ?? "";
-  if (authBase.includes("staging") || authBase.includes("dev.auth.")) return "gainforest-auth-staging";
-  return "gainforest-auth";
-}
-
-function authOauthSessionId(did: string): string {
-  return `${authServiceAppId()}:${did}`;
-}
-
-function normalizeAuthOauthSession(row: RawAuthOauthSession | undefined): { id: string; appId: string | null; did: string; value: unknown } | null {
-  const id = asString(row?.id);
-  const did = asString(row?.did);
-  if (!id || !did || row?.value === null || row?.value === undefined) return null;
-  return {
-    id,
-    appId: asString(row?.app_id),
-    did,
-    value: row.value,
-  };
-}
-
-async function latestAuthOauthSessionForDid(did: string): Promise<{ id: string; appId: string | null; did: string; value: unknown } | null> {
-  const rows = await supabaseSelect<RawAuthOauthSession>(`/${AUTH_OAUTH_SESSION_TABLE}?select=id,app_id,did,value,updated_at&did=eq.${supabaseFilterValue(did)}&order=updated_at.desc&limit=1`);
-  return normalizeAuthOauthSession(rows[0]);
-}
-
-async function ensureInviterAuthSessionIsInAuthNamespace(inviterDid: string, invitationId: string): Promise<void> {
-  try {
-    const latest = await latestAuthOauthSessionForDid(inviterDid);
-    if (!latest) return;
-
-    const expectedId = authOauthSessionId(inviterDid);
-    const expectedAppId = authServiceAppId();
-    if (latest.id === expectedId && latest.appId === expectedAppId) return;
-
-    await supabaseUpsert(`/${AUTH_OAUTH_SESSION_TABLE}`, {
-      id: expectedId,
-      app_id: expectedAppId,
-      did: inviterDid,
-      value: latest.value,
-      updated_at: new Date().toISOString(),
-    });
-  } catch (error) {
-    console.warn("[cgs-invitations] Could not prepare inviter auth session", {
-      invitationId,
-      inviterDid,
-      error: error instanceof Error ? error.message : String(error),
-    });
-  }
 }
 
 export async function getGroupInvitation(invitationId: string): Promise<GroupInvitation | null> {
@@ -337,8 +273,6 @@ async function sendInvitationEmail({
 async function addMemberViaAuthService(invitation: GroupInvitation, memberDid: string): Promise<void> {
   const internalKey = getAuthInternalServiceToken();
   if (!internalKey) throw new GroupInvitationError("We couldn’t add you to the organization right now. Please try again later.", 500);
-
-  await ensureInviterAuthSessionIsInAuthNamespace(invitation.inviterDid, invitation.id);
 
   const response = await fetch(new URL("/api/internal/cgs/member-add", getAuthBaseUrl()), {
     method: "POST",
