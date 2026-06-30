@@ -1,10 +1,9 @@
 "use client";
 
-import Link from "next/link";
-import { motion } from "framer-motion";
 import { BinocularsIcon, FolderKanbanIcon, HeartHandshakeIcon, ImageIcon, MapPinIcon, TreePineIcon } from "lucide-react";
 import BumicertIcon from "@/icons/BumicertIcon";
 import type { ReactNode } from "react";
+import { FolderTile } from "@/app/_components/FolderTile";
 
 export type OverviewFolderTile = {
   id: string;
@@ -12,13 +11,6 @@ export type OverviewFolderTile = {
   href: string;
   count: number | null | undefined;
 };
-
-const EASE = [0.25, 0.1, 0.25, 1] as const;
-
-function formatCount(value: number | null | undefined): string {
-  if (typeof value !== "number") return "—";
-  return new Intl.NumberFormat("en").format(value);
-}
 
 // ── Peeking "art": small DOM illustrations, one per section, echoing the
 //    sidebar's project-creation card (image header + skeleton lines). ─────────
@@ -109,31 +101,13 @@ export const OVERVIEW_FOLDER_ART: Record<string, ReactNode> = {
 
 function Folder({ tile, index }: { tile: OverviewFolderTile; index: number }) {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 14 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, delay: index * 0.05, ease: EASE }}
-    >
-      <Link href={tile.href} className="group relative block">
-        {/* Art peeking from behind the folder, tucked to the right */}
-        <div className="pointer-events-none absolute inset-x-0 top-0 z-0 flex justify-end pr-3.5">
-          <div className="rotate-6 transition-transform duration-300 ease-out group-hover:-translate-y-1 group-hover:rotate-0">
-            {OVERVIEW_FOLDER_ART[tile.id]}
-          </div>
-        </div>
-
-        {/* Folder shape */}
-        <div className="relative pt-7">
-          {/* tab */}
-          <div className="absolute left-0 top-[12px] z-20 h-[19px] w-[42%] rounded-t-lg border border-b-0 border-border/60 bg-card transition-colors duration-300 group-hover:border-primary/40" />
-          {/* body */}
-          <div className="relative z-10 flex min-h-[86px] flex-col justify-end rounded-[18px] rounded-tl-none border border-border/60 bg-card p-3.5 transition-all duration-300 group-hover:-translate-y-0.5 group-hover:border-primary/40 group-hover:shadow-[0_14px_32px_-16px_oklch(0_0_0/0.26)]">
-            <div className="font-instrument text-[28px] italic leading-[0.85] text-foreground">{formatCount(tile.count)}</div>
-            <p className="mt-1 text-[13px] font-medium text-foreground/75 transition-colors duration-300 group-hover:text-primary">{tile.title}</p>
-          </div>
-        </div>
-      </Link>
-    </motion.div>
+    <FolderTile
+      title={tile.title}
+      count={tile.count}
+      art={OVERVIEW_FOLDER_ART[tile.id]}
+      href={tile.href}
+      index={index}
+    />
   );
 }
 

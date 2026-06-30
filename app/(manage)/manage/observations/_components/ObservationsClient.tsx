@@ -10,6 +10,7 @@ import {
   CheckCircle2Icon,
   ChevronLeftIcon,
   FolderKanbanIcon,
+  FolderPlusIcon,
   ImagePlusIcon,
   Layers2Icon,
   Loader2Icon,
@@ -50,6 +51,8 @@ import {
 } from "./observation-mutations";
 import { LocationPickerModal, LocationPickerModalId } from "./LocationPickerModal";
 import { AddObservationsModal } from "./AddObservationsModal";
+import { FolderTile } from "@/app/_components/FolderTile";
+import { GroupObservationsDatasetModal, type ObservationDatasetGroup } from "./GroupObservationsDatasetModal";
 import { takeAddDataHandoff } from "../../_lib/upload/add-data-handoff";
 import {
   fetchDefaultObservationCenter,
@@ -418,6 +421,8 @@ export function ObservationsClient({ target, initialPage, forProject = null }: {
   const createPermission = canCreateRecord(target);
   const [projectFilter, setProjectFilter] = useQueryState("project", parseAsString.withOptions(QUERY_STATE_OPTIONS));
   const [projectGroups, setProjectGroups] = useState<ObservationProjectGroup[]>([]);
+  const [datasetGroups, setDatasetGroups] = useState<ObservationDatasetGroup[]>([]);
+  const [datasetFilter, setDatasetFilter] = useQueryState("dataset", parseAsString.withOptions(QUERY_STATE_OPTIONS));
   const deletePermission = canDeleteRecord(target, { ownRecord: target.kind === "personal" });
   const deleteDisabledReason = deletePermission.allowed ? null : deletePermission.reason;
   const selectedIds = useMemo(() => new Set(selectedRecords.keys()), [selectedRecords]);
@@ -446,8 +451,33 @@ export function ObservationsClient({ target, initialPage, forProject = null }: {
     };
   }, [target]);
 
+  // Group observations by the dataset they were filed into so the steward can
+  // see datasets as folders and filter the list down to one. Re-fetched after a
+  // grouping action so folder counts stay fresh.
+  const loadDatasetGroups = useCallback(async () => {
+    try {
+      const response = await fetch(manageApiHref("/api/manage/observations/datasets", target), { cache: "no-store" });
+      const data = (await response.json()) as { datasets?: ObservationDatasetGroup[] };
+      if (!response.ok || !Array.isArray(data?.datasets)) return;
+      setDatasetGroups(data.datasets);
+    } catch {
+      // Datasets are an enhancement; ignore load failures.
+    }
+  }, [target]);
+
+  useEffect(() => {
+    void loadDatasetGroups();
+  }, [loadDatasetGroups]);
+
   const activeGroup = projectGroups.find((group) => group.projectUri === projectFilter) ?? null;
-  const filterUris = useMemo(() => (activeGroup ? new Set(activeGroup.uris) : null), [activeGroup]);
+  const activeDataset = datasetGroups.find((group) => group.datasetUri === datasetFilter) ?? null;
+  // A dataset filter takes precedence over a project filter; the folder row and
+  // the project pills clear each other on click so only one is ever active.
+  const filterUris = useMemo(() => {
+    if (activeDataset) return new Set(activeDataset.uris);
+    if (activeGroup) return new Set(activeGroup.uris);
+    return null;
+  }, [activeDataset, activeGroup]);
 
   const handleVisibleRecordsChange = useCallback((records: OccurrenceRecord[]) => {
     setVisibleRecords(records);
@@ -544,6 +574,42 @@ export function ObservationsClient({ target, initialPage, forProject = null }: {
     void modal.show();
   }, [activeGroup?.projectUri, createPermission.reason, modal, router, target]);
 
+  // Group the currently-selected observations into a dataset (new or existing),
+  // then refresh folder counts and the listing.
+  const openGroupIntoDataset = useCallback(() => {
+    const records = Array.from(selectedRecords.values());
+    if (records.length === 0 || createPermission.reason) return;
+    modal.pushModal(
+      {
+        id: "group-observations-dataset",
+        dialogWidth: "max-w-lg w-[calc(100%-2rem)]",
+        forceDialog: true,
+        content: (
+          <GroupObservationsDatasetModal
+            target={target}
+            observations={records}
+            datasets={datasetGroups}
+            onDone={({ datasetUri, datasetName, result }) => {
+              const movedIds = new Set(result.attached.map((rkey) => `${target.did}-${rkey}`));
+              setSelectedRecords(new Map());
+              setFreshRecords((current) =>
+                current.map((record) =>
+                  record.kind === "occurrence" && movedIds.has(record.id)
+                    ? { ...record, datasetRef: datasetUri, datasetName }
+                    : record,
+                ),
+              );
+              void loadDatasetGroups();
+              router.refresh();
+            }}
+          />
+        ),
+      },
+      true,
+    );
+    void modal.show();
+  }, [createPermission.reason, datasetGroups, loadDatasetGroups, modal, router, selectedRecords, target]);
+
   if (mode === "add") {
     return (
       <ObservationBulkAddPanel
@@ -591,6 +657,16 @@ export function ObservationsClient({ target, initialPage, forProject = null }: {
             <Button
               variant="outline"
               size="sm"
+              onClick={openGroupIntoDataset}
+              disabled={selectedRecords.size === 0 || Boolean(createPermission.reason) || isDeletingSelected}
+              title={createPermission.reason ?? undefined}
+            >
+              <FolderPlusIcon className="size-4" />
+              {t("groupIntoDataset")}
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
               onClick={openDeleteSelectedModal}
               disabled={selectedRecords.size === 0 || Boolean(deleteDisabledReason) || isDeletingSelected}
               title={deleteDisabledReason ?? undefined}
@@ -604,12 +680,49 @@ export function ObservationsClient({ target, initialPage, forProject = null }: {
         )}
       </div>
 
+      {!isEmpty && datasetGroups.length > 0 ? (
+        <div className="mx-auto mt-6 max-w-6xl px-6">
+          <div className="mb-3 flex items-center justify-between gap-3">
+            <h2 className="text-sm font-medium text-foreground">{t("datasetsHeading")}</h2>
+            {datasetFilter ? (
+              <Button variant="ghost" size="sm" onClick={() => void setDatasetFilter(null)}>
+                {t("datasetClearFilter")}
+              </Button>
+            ) : null}
+          </div>
+          <div className="grid grid-cols-2 gap-x-3 gap-y-3 sm:grid-cols-3 lg:grid-cols-4">
+            {datasetGroups.map((dataset, index) => {
+              const active = datasetFilter === dataset.datasetUri;
+              return (
+                <FolderTile
+                  key={dataset.datasetUri}
+                  title={dataset.name}
+                  count={dataset.count}
+                  index={index}
+                  active={active}
+                  ariaPressed={active}
+                  ariaLabel={t("datasetFolderAria", { name: dataset.name, count: dataset.count })}
+                  art={<DatasetFolderArt />}
+                  onClick={() => {
+                    void setDatasetFilter(active ? null : dataset.datasetUri);
+                    if (!active) void setProjectFilter(null);
+                  }}
+                />
+              );
+            })}
+          </div>
+        </div>
+      ) : null}
+
       {!isEmpty && projectGroups.length > 0 ? (
         <div className="mx-auto mt-5 max-w-6xl px-6">
           <ObservationProjectFilter
             groups={projectGroups}
             value={projectFilter ?? null}
-            onChange={(next) => void setProjectFilter(next)}
+            onChange={(next) => {
+              void setProjectFilter(next);
+              if (next) void setDatasetFilter(null);
+            }}
             allLabel={t("filterAllProjects")}
             ariaLabel={t("filterByProject")}
           />
@@ -621,12 +734,12 @@ export function ObservationsClient({ target, initialPage, forProject = null }: {
           kind="occurrence"
           ownerDid={target.did}
           showHero={false}
-          initialPage={activeGroup ? undefined : initialPage}
+          initialPage={activeGroup || activeDataset ? undefined : initialPage}
           extraInitialRecords={freshRecords}
           defaultOccurrenceMedia="all"
           filterUris={filterUris}
-          emptyFilteredTitle={t("filterEmptyTitle")}
-          emptyFilteredBody={t("filterEmptyBody")}
+          emptyFilteredTitle={activeDataset ? t("datasetEmptyTitle") : t("filterEmptyTitle")}
+          emptyFilteredBody={activeDataset ? t("datasetEmptyBody") : t("filterEmptyBody")}
           leadingCard={<AddObservationTile onAdd={openAddObservations} disabledReason={createPermission.reason} />}
           emptyState={<ObservationEmptyState onAdd={openAddObservations} disabledReason={createPermission.reason} />}
           hideToolbarWhenEmpty
@@ -642,6 +755,17 @@ export function ObservationsClient({ target, initialPage, forProject = null }: {
           onObservationVisibleRecordsChange={handleVisibleRecordsChange}
         />
       </Suspense>
+    </div>
+  );
+}
+
+function DatasetFolderArt() {
+  return (
+    <div className="flex h-[52px] w-11 flex-col items-center justify-center gap-1.5 rounded-lg border border-border/70 bg-background/85 shadow-md backdrop-blur-sm">
+      <div className="flex size-7 items-center justify-center rounded-full bg-primary/15 ring-2 ring-primary/20">
+        <Layers2Icon className="size-4 text-primary/80" />
+      </div>
+      <div className="h-1 w-7 rounded-full bg-muted" />
     </div>
   );
 }
