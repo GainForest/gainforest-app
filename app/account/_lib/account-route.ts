@@ -131,6 +131,10 @@ export function accountGalleryPath(didOrHandle: string): string {
   return `${accountPath(didOrHandle)}/gallery`;
 }
 
+export function accountAttachmentsPath(didOrHandle: string): string {
+  return `${accountPath(didOrHandle)}/attachments`;
+}
+
 export function accountSettingsPath(didOrHandle: string): string {
   return `${accountPath(didOrHandle)}/settings`;
 }

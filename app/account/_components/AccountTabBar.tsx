@@ -3,12 +3,13 @@
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { usePathname, useSearchParams } from "next/navigation";
-import { BinocularsIcon, FolderKanbanIcon, HeartHandshakeIcon, HomeIcon, ImageIcon, MessageSquareTextIcon, SettingsIcon, ShieldCheckIcon, UsersIcon } from "lucide-react";
+import { BinocularsIcon, FolderKanbanIcon, HeartHandshakeIcon, HomeIcon, ImageIcon, MessageSquareTextIcon, PaperclipIcon, SettingsIcon, ShieldCheckIcon, UsersIcon } from "lucide-react";
 import { stripLocaleFromPathname } from "@/lib/i18n/routing";
 import { cn } from "@/lib/utils";
 import type { AccountKind } from "../_lib/account-route";
 import {
   accountAdminPath,
+  accountAttachmentsPath,
   accountAudioPath,
   accountBumicertsPath,
   accountDonationsPath,
@@ -25,7 +26,7 @@ import {
   accountTreesPath,
 } from "../_lib/account-route";
 
-type TabLabelKey = "home" | "overview" | "bumicerts" | "projects" | "donationHistory" | "observations" | "posts" | "timeline" | "gallery" | "settings" | "sites" | "audio" | "drone" | "trees" | "members" | "admin";
+type TabLabelKey = "home" | "overview" | "bumicerts" | "projects" | "donationHistory" | "observations" | "posts" | "timeline" | "gallery" | "attachments" | "settings" | "sites" | "audio" | "drone" | "trees" | "members" | "admin";
 
 interface Tab {
   labelKey: TabLabelKey;
@@ -142,6 +143,7 @@ function buildTabs(
           observationsTab,
           postsTab,
           { labelKey: "gallery", href: paths.gallery, icon: ImageIcon, exact: false },
+          { labelKey: "attachments", href: accountAttachmentsPath(did), icon: PaperclipIcon, exact: false },
           donationsTab,
         ]
       : [projectsTab, observationsTab, donationsTab];

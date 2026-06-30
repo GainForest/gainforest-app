@@ -393,7 +393,30 @@
     "measurements": "Vipimo",
     "members": "Wanachama",
     "admin": "Admin",
-    "posts": "Machapisho"
+    "posts": "Machapisho",
+    "attachments": "Viambatisho"
+  },
+  "accountAttachments": {
+    "title": "Viambatisho",
+    "subtitle": "Faili na hati zilizoshirikiwa kama ushahidi.",
+    "empty": "Bado hakuna viambatisho.",
+    "emptyHint": "Lahajedwali, hati na faili nyingine unazoambatisha zitaonekana hapa.",
+    "untitled": "Kiambatisho kisicho na jina",
+    "openFile": "Fungua faili",
+    "openLink": "Fungua kiungo",
+    "metaTitle": "{name} · Viambatisho",
+    "metaDescription": "Faili na hati zilizoshirikiwa na {name}.",
+    "types": {
+      "spreadsheet": "Lahajedwali",
+      "pdf": "PDF",
+      "document": "Hati",
+      "presentation": "Wasilisho",
+      "image": "Picha",
+      "video": "Video",
+      "audio": "Sauti",
+      "link": "Kiungo",
+      "file": "Faili"
+    }
   },
   "accountOrganizations": {
     "memberOf": "Mwanachama wa",

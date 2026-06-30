@@ -393,7 +393,30 @@
     "measurements": "Mediciones",
     "members": "Miembros",
     "admin": "Admin",
-    "posts": "Publicaciones"
+    "posts": "Publicaciones",
+    "attachments": "Adjuntos"
+  },
+  "accountAttachments": {
+    "title": "Adjuntos",
+    "subtitle": "Archivos y documentos compartidos como evidencia.",
+    "empty": "Aún no hay adjuntos.",
+    "emptyHint": "Las hojas de cálculo, documentos y otros archivos que adjuntes aparecerán aquí.",
+    "untitled": "Adjunto sin título",
+    "openFile": "Abrir archivo",
+    "openLink": "Abrir enlace",
+    "metaTitle": "{name} · Adjuntos",
+    "metaDescription": "Archivos y documentos compartidos por {name}.",
+    "types": {
+      "spreadsheet": "Hoja de cálculo",
+      "pdf": "PDF",
+      "document": "Documento",
+      "presentation": "Presentación",
+      "image": "Imagen",
+      "video": "Video",
+      "audio": "Audio",
+      "link": "Enlace",
+      "file": "Archivo"
+    }
   },
   "accountOrganizations": {
     "memberOf": "Miembro de",

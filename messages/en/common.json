@@ -393,7 +393,30 @@
     "measurements": "Measurements",
     "members": "Members",
     "admin": "Admin",
-    "posts": "Posts"
+    "posts": "Posts",
+    "attachments": "Attachments"
+  },
+  "accountAttachments": {
+    "title": "Attachments",
+    "subtitle": "Files and documents shared as evidence.",
+    "empty": "No attachments yet.",
+    "emptyHint": "Spreadsheets, documents and other files you attach show up here.",
+    "untitled": "Untitled attachment",
+    "openFile": "Open file",
+    "openLink": "Open link",
+    "metaTitle": "{name} · Attachments",
+    "metaDescription": "Files and documents shared by {name}.",
+    "types": {
+      "spreadsheet": "Spreadsheet",
+      "pdf": "PDF",
+      "document": "Document",
+      "presentation": "Presentation",
+      "image": "Image",
+      "video": "Video",
+      "audio": "Audio",
+      "link": "Link",
+      "file": "File"
+    }
   },
   "accountOrganizations": {
     "memberOf": "Member of",

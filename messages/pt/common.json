@@ -393,7 +393,30 @@
     "measurements": "Medições",
     "members": "Membros",
     "admin": "Admin",
-    "posts": "Publicações"
+    "posts": "Publicações",
+    "attachments": "Anexos"
+  },
+  "accountAttachments": {
+    "title": "Anexos",
+    "subtitle": "Arquivos e documentos compartilhados como evidência.",
+    "empty": "Ainda não há anexos.",
+    "emptyHint": "Planilhas, documentos e outros arquivos que você anexar aparecem aqui.",
+    "untitled": "Anexo sem título",
+    "openFile": "Abrir arquivo",
+    "openLink": "Abrir link",
+    "metaTitle": "{name} · Anexos",
+    "metaDescription": "Arquivos e documentos compartilhados por {name}.",
+    "types": {
+      "spreadsheet": "Planilha",
+      "pdf": "PDF",
+      "document": "Documento",
+      "presentation": "Apresentação",
+      "image": "Imagem",
+      "video": "Vídeo",
+      "audio": "Áudio",
+      "link": "Link",
+      "file": "Arquivo"
+    }
   },
   "accountOrganizations": {
     "memberOf": "Membro de",

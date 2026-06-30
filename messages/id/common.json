@@ -393,7 +393,30 @@
     "measurements": "Pengukuran",
     "members": "Anggota",
     "admin": "Admin",
-    "posts": "Postingan"
+    "posts": "Postingan",
+    "attachments": "Lampiran"
+  },
+  "accountAttachments": {
+    "title": "Lampiran",
+    "subtitle": "Berkas dan dokumen yang dibagikan sebagai bukti.",
+    "empty": "Belum ada lampiran.",
+    "emptyHint": "Lembar data, dokumen, dan berkas lain yang Anda lampirkan akan muncul di sini.",
+    "untitled": "Lampiran tanpa judul",
+    "openFile": "Buka berkas",
+    "openLink": "Buka tautan",
+    "metaTitle": "{name} · Lampiran",
+    "metaDescription": "Berkas dan dokumen yang dibagikan oleh {name}.",
+    "types": {
+      "spreadsheet": "Lembar data",
+      "pdf": "PDF",
+      "document": "Dokumen",
+      "presentation": "Presentasi",
+      "image": "Gambar",
+      "video": "Video",
+      "audio": "Audio",
+      "link": "Tautan",
+      "file": "Berkas"
+    }
   },
   "accountOrganizations": {
     "memberOf": "Anggota dari",
