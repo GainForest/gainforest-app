@@ -951,7 +951,11 @@
       "confirmNew": "Crear y agrupar",
       "confirmExisting": "Añadir al conjunto",
       "addsToProject": "Este conjunto se añadirá a {project}."
-    }
+    },
+    "datasetDeleteAria": "Eliminar el conjunto {name}",
+    "datasetDeleteTitle": "¿Eliminar el conjunto “{name}”?",
+    "datasetDeleteDescription": "Esto solo elimina la agrupación. {count, plural, one {Tu # observación se conserva.} other {Tus # observaciones se conservan.}}",
+    "datasetDeleteConfirm": "Eliminar conjunto"
   },
   "settings": {
     "organizationTitle": "Configuración de la organización",

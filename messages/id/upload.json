@@ -951,7 +951,11 @@
       "confirmNew": "Buat & kelompokkan",
       "confirmExisting": "Tambahkan ke set data",
       "addsToProject": "Set data ini akan ditambahkan ke {project}."
-    }
+    },
+    "datasetDeleteAria": "Hapus set data {name}",
+    "datasetDeleteTitle": "Hapus set data “{name}”?",
+    "datasetDeleteDescription": "Ini hanya menghapus pengelompokan. {count, plural, other {# observasi Anda tetap ada.}}",
+    "datasetDeleteConfirm": "Hapus set data"
   },
   "settings": {
     "organizationTitle": "Pengaturan organisasi",

@@ -53,6 +53,7 @@ import { LocationPickerModal, LocationPickerModalId } from "./LocationPickerModa
 import { AddObservationsModal } from "./AddObservationsModal";
 import { FolderTile, FolderTileSkeleton } from "@/app/_components/FolderTile";
 import { GroupObservationsDatasetModal, type ObservationDatasetGroup } from "./GroupObservationsDatasetModal";
+import { deleteObservationDataset } from "./observation-dataset-mutations";
 import { takeAddDataHandoff } from "../../_lib/upload/add-data-handoff";
 import {
   fetchDefaultObservationCenter,
@@ -617,6 +618,57 @@ export function ObservationsClient({ target, initialPage, forProject = null }: {
     void modal.show();
   }, [activeGroup, createPermission.reason, datasetGroups, loadDatasetGroups, modal, router, selectedRecords, target]);
 
+  // Delete a dataset (the certified collection) WITHOUT deleting its
+  // observations — the records are ungrouped (datasetRef cleared) and survive.
+  const openDeleteDataset = useCallback(
+    (dataset: ObservationDatasetGroup) => {
+      if (deleteDisabledReason) return;
+      const repoOptions = target.kind === "group" ? { repo: target.did } : undefined;
+      const occurrenceRkeys = dataset.uris.map((uri) => uri.split("/").pop() ?? "").filter((rkey) => rkey.length > 0);
+      const inDataset = new Set(dataset.uris);
+      modal.pushModal(
+        {
+          id: "delete-observation-dataset",
+          content: (
+            <ManageConfirmModal
+              title={t("datasetDeleteTitle", { name: dataset.name })}
+              description={t("datasetDeleteDescription", { count: dataset.count })}
+              confirmLabel={t("datasetDeleteConfirm")}
+              cancelLabel={t("cancel")}
+              destructive
+              onConfirm={async () => {
+                await modal.hide();
+                modal.popModal();
+                await deleteObservationDataset(
+                  {
+                    datasetUri: dataset.datasetUri,
+                    datasetRkey: dataset.datasetRkey,
+                    occurrenceRkeys,
+                    parentRkeys: dataset.parentRkeys,
+                  },
+                  repoOptions,
+                );
+                setFreshRecords((current) =>
+                  current.map((record) =>
+                    record.kind === "occurrence" && inDataset.has(record.atUri)
+                      ? { ...record, datasetRef: null, datasetName: null }
+                      : record,
+                  ),
+                );
+                if (datasetFilter === dataset.datasetUri) void setDatasetFilter(null);
+                void loadDatasetGroups();
+                router.refresh();
+              }}
+            />
+          ),
+        },
+        true,
+      );
+      void modal.show();
+    },
+    [datasetFilter, deleteDisabledReason, loadDatasetGroups, modal, router, setDatasetFilter, t, target],
+  );
+
   if (mode === "add") {
     return (
       <ObservationBulkAddPanel
@@ -715,6 +767,20 @@ export function ObservationsClient({ target, initialPage, forProject = null }: {
                       void setDatasetFilter(active ? null : dataset.datasetUri);
                       if (!active) void setProjectFilter(null);
                     }}
+                    action={
+                      deletePermission.allowed ? (
+                        <button
+                          type="button"
+                          onClick={() => openDeleteDataset(dataset)}
+                          disabled={isDeletingSelected}
+                          aria-label={t("datasetDeleteAria", { name: dataset.name })}
+                          title={t("datasetDeleteConfirm")}
+                          className="grid size-7 place-items-center rounded-full bg-background/90 text-muted-foreground shadow-sm ring-1 ring-border transition-colors hover:text-destructive hover:ring-destructive/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive/40"
+                        >
+                          <Trash2Icon className="size-3.5" />
+                        </button>
+                      ) : undefined
+                    }
                   />
                 );
               })}

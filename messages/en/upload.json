@@ -951,7 +951,11 @@
       "confirmNew": "Create & group",
       "confirmExisting": "Add to dataset",
       "addsToProject": "This dataset will be added to {project}."
-    }
+    },
+    "datasetDeleteAria": "Delete the {name} dataset",
+    "datasetDeleteTitle": "Delete the “{name}” dataset?",
+    "datasetDeleteDescription": "This only removes the grouping. {count, plural, one {Your # observation stays in place.} other {Your # observations stay in place.}}",
+    "datasetDeleteConfirm": "Delete dataset"
   },
   "settings": {
     "organizationTitle": "Organization settings",

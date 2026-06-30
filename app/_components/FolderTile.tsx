@@ -32,6 +32,10 @@ export type FolderTileProps = {
   ariaLabel?: string;
   ariaPressed?: boolean;
   disabled?: boolean;
+  /** Optional control (e.g. a delete button) overlaid on the folder, rendered
+   *  OUTSIDE the clickable surface so it never nests interactive elements.
+   *  Revealed on hover/focus; always visible on touch devices. */
+  action?: ReactNode;
 };
 
 /**
@@ -52,6 +56,7 @@ export function FolderTile({
   ariaLabel,
   ariaPressed,
   disabled = false,
+  action,
 }: FolderTileProps) {
   const inner = (
     <>
@@ -101,6 +106,7 @@ export function FolderTile({
 
   return (
     <motion.div
+      className="group/folder relative"
       initial={{ opacity: 0, y: 14 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: index * 0.05, ease: EASE }}
@@ -121,6 +127,12 @@ export function FolderTile({
           {inner}
         </button>
       )}
+
+      {action ? (
+        <div className="absolute bottom-2 right-2 z-30 opacity-0 transition-opacity duration-150 focus-within:opacity-100 group-hover/folder:opacity-100 [@media(hover:none)]:opacity-100">
+          {action}
+        </div>
+      ) : null}
     </motion.div>
   );
 }

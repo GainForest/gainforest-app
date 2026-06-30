@@ -18,6 +18,9 @@ export type ObservationDatasetGroup = {
   count: number;
   createdAt: string | null;
   uris: string[];
+  /** rkeys of collections (e.g. projects) that nest this dataset in items[], so
+   *  deleting the dataset can also remove the dangling reference. */
+  parentRkeys: string[];
 };
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -40,6 +43,20 @@ function datasetRefOf(value: Record<string, unknown> | undefined): string | null
 
 function rkeyFromUri(uri: string): string {
   return uri.split("/").pop() ?? "";
+}
+
+// AT-URIs referenced by a collection's items[] (tolerates both the
+// { itemIdentifier: { uri } } and bare { uri } shapes).
+function itemUrisOf(value: Record<string, unknown> | undefined): string[] {
+  if (!value || !Array.isArray(value.items)) return [];
+  const uris: string[] = [];
+  for (const item of value.items) {
+    if (!isRecord(item)) continue;
+    const identifier = isRecord(item.itemIdentifier) ? item.itemIdentifier : item;
+    const uri = stringValue(identifier.uri);
+    if (uri) uris.push(uri);
+  }
+  return uris;
 }
 
 async function listAllRecords(host: string, repo: string, collection: string): Promise<ListedRecord[]> {
@@ -92,7 +109,20 @@ export async function GET(request: Request) {
         count: 0,
         createdAt: stringValue(collection.value?.createdAt),
         uris: [],
+        parentRkeys: [],
       });
+    }
+
+    // Record which collections nest each dataset (so a delete can unnest them).
+    for (const collection of collections) {
+      const parentUri = stringValue(collection.uri);
+      if (!parentUri) continue;
+      const parentRkey = rkeyFromUri(parentUri);
+      for (const childUri of itemUrisOf(collection.value)) {
+        if (childUri === parentUri) continue;
+        const group = groups.get(childUri);
+        if (group && !group.parentRkeys.includes(parentRkey)) group.parentRkeys.push(parentRkey);
+      }
     }
 
     // Count only observations that point at one of those dataset collections.

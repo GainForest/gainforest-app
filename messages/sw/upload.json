@@ -951,7 +951,11 @@
       "confirmNew": "Tengeneza na uweke",
       "confirmExisting": "Ongeza kwenye seti",
       "addsToProject": "Seti hii itaongezwa kwenye {project}."
-    }
+    },
+    "datasetDeleteAria": "Futa seti ya {name}",
+    "datasetDeleteTitle": "Futa seti ya “{name}”?",
+    "datasetDeleteDescription": "Hii inaondoa upangaji pekee. {count, plural, one {Uchunguzi wako # unabaki.} other {Uchunguzi wako # unabaki.}}",
+    "datasetDeleteConfirm": "Futa seti"
   },
   "settings": {
     "organizationTitle": "Mipangilio ya shirika",
