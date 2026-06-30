@@ -947,7 +947,8 @@
       "attachFailed": "Observasi ini tidak dapat dikelompokkan. Silakan coba lagi.",
       "cancel": "Batal",
       "confirmNew": "Buat & kelompokkan",
-      "confirmExisting": "Tambahkan ke set data"
+      "confirmExisting": "Tambahkan ke set data",
+      "addsToProject": "Set data ini akan ditambahkan ke {project}."
     }
   },
   "settings": {

@@ -4,7 +4,8 @@ import { resolvePdsHost } from "@/app/_lib/pds";
 export const runtime = "nodejs";
 
 const OCCURRENCE_COLLECTION = "app.gainforest.dwc.occurrence";
-const DATASET_COLLECTION = "app.gainforest.dwc.dataset";
+const COLLECTION_COLLECTION = "org.hypercerts.collection";
+const DATASET_COLLECTION_TYPE = "dataset";
 
 type ListedRecord = { uri?: string; value?: Record<string, unknown> };
 type ListedRecordsResponse = { records?: ListedRecord[]; cursor?: string };
@@ -68,49 +69,41 @@ export async function GET(request: Request) {
     const host = await resolvePdsHost(target.did);
     if (!host) return Response.json({ datasets: [] });
 
-    const [occurrences, datasets] = await Promise.all([
+    const [occurrences, collections] = await Promise.all([
       listAllRecords(host, target.did, OCCURRENCE_COLLECTION),
-      listAllRecords(host, target.did, DATASET_COLLECTION),
+      listAllRecords(host, target.did, COLLECTION_COLLECTION),
     ]);
 
-    // Seed a group for every dataset the steward owns, so freshly created (and
-    // not-yet-populated) datasets still surface as folders.
+    // Seed a group for every dataset-typed collection the steward owns, so a
+    // freshly created (and not-yet-populated) dataset still surfaces as a folder.
+    // Project / portfolio / other collection types are ignored here, and tree
+    // groups (app.gainforest.dwc.dataset) are a different collection entirely —
+    // so neither leaks into the observation dataset list.
     const groups = new Map<string, ObservationDatasetGroup>();
-    for (const dataset of datasets) {
-      const uri = stringValue(dataset.uri);
-      if (!uri) continue;
+    for (const collection of collections) {
+      const uri = stringValue(collection.uri);
+      const type = stringValue(collection.value?.type);
+      if (!uri || type !== DATASET_COLLECTION_TYPE) continue;
       groups.set(uri, {
         datasetUri: uri,
         datasetRkey: rkeyFromUri(uri),
-        name: stringValue(dataset.value?.name) ?? "Untitled dataset",
-        description: stringValue(dataset.value?.description),
+        name: stringValue(collection.value?.title) ?? "Untitled dataset",
+        description: stringValue(collection.value?.shortDescription),
         count: 0,
-        createdAt: stringValue(dataset.value?.createdAt),
+        createdAt: stringValue(collection.value?.createdAt),
         uris: [],
       });
     }
 
+    // Count only observations that point at one of those dataset collections.
     for (const occurrence of occurrences) {
       const uri = stringValue(occurrence.uri);
       const datasetUri = datasetRefOf(occurrence.value);
       if (!uri || !datasetUri) continue;
       const existing = groups.get(datasetUri);
-      if (existing) {
-        existing.count += 1;
-        existing.uris.push(uri);
-      } else {
-        // An occurrence references a dataset record we couldn't read (e.g. it
-        // lives in another repo). Still expose it using the stored datasetName.
-        groups.set(datasetUri, {
-          datasetUri,
-          datasetRkey: rkeyFromUri(datasetUri),
-          name: stringValue(occurrence.value?.datasetName) ?? "Untitled dataset",
-          description: null,
-          count: 1,
-          createdAt: null,
-          uris: [uri],
-        });
-      }
+      if (!existing) continue;
+      existing.count += 1;
+      existing.uris.push(uri);
     }
 
     const sorted = Array.from(groups.values()).sort((a, b) => {

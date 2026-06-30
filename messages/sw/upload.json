@@ -947,7 +947,8 @@
       "attachFailed": "Uchunguzi huu haukuweza kuwekwa pamoja. Tafadhali jaribu tena.",
       "cancel": "Ghairi",
       "confirmNew": "Tengeneza na uweke",
-      "confirmExisting": "Ongeza kwenye seti"
+      "confirmExisting": "Ongeza kwenye seti",
+      "addsToProject": "Seti hii itaongezwa kwenye {project}."
     }
   },
   "settings": {

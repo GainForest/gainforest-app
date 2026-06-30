@@ -947,7 +947,8 @@
       "attachFailed": "These observations could not be grouped. Please try again.",
       "cancel": "Cancel",
       "confirmNew": "Create & group",
-      "confirmExisting": "Add to dataset"
+      "confirmExisting": "Add to dataset",
+      "addsToProject": "This dataset will be added to {project}."
     }
   },
   "settings": {

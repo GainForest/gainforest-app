@@ -947,7 +947,8 @@
       "attachFailed": "No se pudieron agrupar estas observaciones. Inténtalo de nuevo.",
       "cancel": "Cancelar",
       "confirmNew": "Crear y agrupar",
-      "confirmExisting": "Añadir al conjunto"
+      "confirmExisting": "Añadir al conjunto",
+      "addsToProject": "Este conjunto se añadirá a {project}."
     }
   },
   "settings": {

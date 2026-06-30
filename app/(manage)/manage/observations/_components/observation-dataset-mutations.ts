@@ -1,35 +1,55 @@
 "use client";
 
-import { createRecord, getRecord, incrementDatasetRecordCount, putRecord } from "../../_lib/mutations";
+import { createRecord, getRecord, putRecord } from "../../_lib/mutations";
 
-const DATASET_COLLECTION = "app.gainforest.dwc.dataset";
+// A dataset is a certified collection — the same primitive projects use —
+// distinguished by `type: "dataset"`. Observations point UP to it via the
+// occurrence's `datasetRef` (a back-pointer that scales past the collection's
+// 1000-item cap), while a project nests a dataset by listing it in `items[]`.
+const COLLECTION_COLLECTION = "org.hypercerts.collection";
 const OCCURRENCE_COLLECTION = "app.gainforest.dwc.occurrence";
+export const DATASET_COLLECTION_TYPE = "dataset";
+
+// Collection lexicon limits (org.hypercerts.collection): title ≤80 graphemes,
+// shortDescription ≤300 graphemes.
+const TITLE_MAX = 80;
+const SHORT_DESCRIPTION_MAX = 300;
 
 type RepoOptions = { repo?: string } | undefined;
 
-export type CreatedObservationDataset = { uri: string; rkey: string; name: string };
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
+function itemUri(item: unknown): string | null {
+  if (!isRecord(item)) return null;
+  const identifier = isRecord(item.itemIdentifier) ? item.itemIdentifier : item;
+  return typeof identifier.uri === "string" ? identifier.uri : null;
+}
+
+export type CreatedObservationDataset = { uri: string; rkey: string; cid: string; name: string };
 
 /**
- * Create an `app.gainforest.dwc.dataset` record to group observations under.
- * Starts at recordCount 0; the attach step increments it by however many
- * observations actually land in the dataset.
+ * Create an `org.hypercerts.collection` record (type "dataset") to group
+ * observations under. No recordCount is stored — the dataset's size is derived
+ * from the observations that point at it.
  */
 export async function createObservationDataset(
   input: { name: string; description?: string | null },
   options?: RepoOptions,
 ): Promise<CreatedObservationDataset> {
-  const name = input.name.trim();
-  if (!name) throw new Error("Name your dataset first.");
-  const description = input.description?.trim();
+  const title = input.name.trim().slice(0, TITLE_MAX);
+  if (!title) throw new Error("Name your dataset first.");
+  const shortDescription = input.description?.trim().slice(0, SHORT_DESCRIPTION_MAX);
   const record: Record<string, unknown> = {
-    $type: DATASET_COLLECTION,
-    name,
-    ...(description ? { description } : {}),
-    recordCount: 0,
+    $type: COLLECTION_COLLECTION,
+    type: DATASET_COLLECTION_TYPE,
+    title,
+    ...(shortDescription ? { shortDescription } : {}),
     createdAt: new Date().toISOString(),
   };
-  const result = await createRecord(DATASET_COLLECTION, record, undefined, options);
-  return { uri: result.uri, rkey: result.uri.split("/").pop() ?? "", name };
+  const result = await createRecord(COLLECTION_COLLECTION, record, undefined, options);
+  return { uri: result.uri, rkey: result.uri.split("/").pop() ?? "", cid: result.cid, name: title };
 }
 
 export type AttachInputOccurrence = { rkey: string; datasetRef: string | null };
@@ -41,17 +61,16 @@ export type AttachObservationsResult = {
 };
 
 /**
- * Move the given observations into a dataset by stamping `datasetRef` +
- * `datasetName` onto each occurrence record (a read-modify-write that preserves
- * everything else, including photo evidence). Observations that already live in
- * a dataset are left alone so counts never drift; detach them first to re-group.
- * Unlike the tree attach path this never touches `dynamicProperties`, so an
- * observation never gets mislabelled as a measured tree.
+ * Move observations into a dataset by stamping `datasetRef` (the dataset
+ * collection's AT-URI) + `datasetName` onto each occurrence (a read-modify-write
+ * that preserves everything else, including photo evidence). Observations that
+ * already live in a dataset are left alone so membership never silently moves;
+ * detach them first to re-group. Never touches `dynamicProperties`, so an
+ * observation is never mislabelled as a measured tree.
  */
 export async function attachObservationsToDataset(
   input: {
     datasetUri: string;
-    datasetRkey: string;
     datasetName: string;
     occurrences: AttachInputOccurrence[];
   },
@@ -87,15 +106,40 @@ export async function attachObservationsToDataset(
     }
   }
 
-  // The dataset's record count is a convenience for the folder badge; a failure
-  // here doesn't undo the attach, so it's best-effort.
-  if (attached.length > 0) {
-    try {
-      await incrementDatasetRecordCount(input.datasetRkey, attached.length, options);
-    } catch {
-      // Ignore; the datasets route recomputes counts from occurrences anyway.
-    }
-  }
-
   return { attached, skipped, errors };
+}
+
+/**
+ * Nest a dataset collection inside a project collection by adding it to the
+ * project's `items[]` (recursive collection nesting). Idempotent: a no-op if the
+ * dataset is already listed. Best-effort — callers should not fail the whole
+ * grouping if this throws.
+ */
+export async function nestDatasetUnderProject(
+  input: { projectUri: string; datasetUri: string; datasetCid?: string | null },
+  options?: RepoOptions,
+): Promise<void> {
+  const projectRkey = input.projectUri.split("/").pop();
+  if (!projectRkey) throw new Error("Could not resolve the project to nest under.");
+
+  const current = await getRecord(COLLECTION_COLLECTION, projectRkey, options);
+  const items = Array.isArray(current.record.items) ? [...current.record.items] : [];
+  if (items.some((item) => itemUri(item) === input.datasetUri)) return;
+
+  items.push({
+    itemIdentifier: {
+      uri: input.datasetUri,
+      ...(input.datasetCid ? { cid: input.datasetCid } : {}),
+    },
+  });
+
+  const nextRecord: Record<string, unknown> = {
+    ...current.record,
+    $type: typeof current.record.$type === "string" ? current.record.$type : COLLECTION_COLLECTION,
+    items,
+  };
+  await putRecord(COLLECTION_COLLECTION, projectRkey, nextRecord, {
+    swapRecord: current.cid,
+    ...(options?.repo ? { repo: options.repo } : {}),
+  });
 }

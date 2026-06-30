@@ -14,6 +14,7 @@ import type { OccurrenceRecord } from "@/app/_lib/indexer";
 import {
   attachObservationsToDataset,
   createObservationDataset,
+  nestDatasetUnderProject,
   type AttachObservationsResult,
 } from "./observation-dataset-mutations";
 
@@ -46,11 +47,16 @@ export function GroupObservationsDatasetModal({
   target,
   observations,
   datasets,
+  projectUri = null,
+  projectName = null,
   onDone,
 }: {
   target: ManageTarget;
   observations: OccurrenceRecord[];
   datasets: ObservationDatasetGroup[];
+  /** When set, the dataset is nested under this project (added to its items[]). */
+  projectUri?: string | null;
+  projectName?: string | null;
   onDone: (summary: GroupObservationsDoneSummary) => void;
 }) {
   const t = useTranslations("upload.observations.dataset");
@@ -110,12 +116,11 @@ export function GroupObservationsDatasetModal({
       const dataset =
         mode === "new"
           ? await createObservationDataset({ name, description }, repoOptions)
-          : { uri: selectedDataset!.datasetUri, rkey: selectedDataset!.datasetRkey, name: selectedDataset!.name };
+          : { uri: selectedDataset!.datasetUri, name: selectedDataset!.name, cid: null as string | null };
 
       const result = await attachObservationsToDataset(
         {
           datasetUri: dataset.uri,
-          datasetRkey: dataset.rkey,
           datasetName: dataset.name,
           occurrences: observations.map((record) => ({ rkey: record.rkey, datasetRef: record.datasetRef })),
         },
@@ -126,6 +131,16 @@ export function GroupObservationsDatasetModal({
         setError(result.errors[0]?.error ?? t("attachFailed"));
         setIsPending(false);
         return;
+      }
+
+      // Nest the dataset under the active project (project becomes a collection
+      // of Certs + datasets). Best-effort: the grouping already succeeded.
+      if (projectUri) {
+        try {
+          await nestDatasetUnderProject({ projectUri, datasetUri: dataset.uri, datasetCid: dataset.cid }, repoOptions);
+        } catch {
+          // Non-fatal — observations are grouped even if nesting fails.
+        }
       }
 
       const activeElement = document.activeElement;
@@ -203,7 +218,7 @@ export function GroupObservationsDatasetModal({
                 placeholder={t("namePlaceholder")}
                 disabled={isPending}
                 autoFocus
-                maxLength={120}
+                maxLength={80}
               />
             </div>
             <div className="space-y-1.5">
@@ -217,7 +232,7 @@ export function GroupObservationsDatasetModal({
                 placeholder={t("descriptionPlaceholder")}
                 disabled={isPending}
                 rows={3}
-                maxLength={500}
+                maxLength={300}
               />
             </div>
           </div>
@@ -288,6 +303,10 @@ export function GroupObservationsDatasetModal({
             </div>
           </div>
         )}
+
+        {projectUri && projectName ? (
+          <p className="text-xs text-muted-foreground">{t("addsToProject", { project: projectName })}</p>
+        ) : null}
 
         {alreadyGrouped.length > 0 ? (
           <p className="text-xs text-muted-foreground">{t("someAlreadyGrouped", { count: alreadyGrouped.length })}</p>

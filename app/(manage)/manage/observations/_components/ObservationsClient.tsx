@@ -589,6 +589,8 @@ export function ObservationsClient({ target, initialPage, forProject = null }: {
             target={target}
             observations={records}
             datasets={datasetGroups}
+            projectUri={activeGroup?.projectUri ?? null}
+            projectName={activeGroup?.title ?? null}
             onDone={({ datasetUri, datasetName, result }) => {
               const movedIds = new Set(result.attached.map((rkey) => `${target.did}-${rkey}`));
               setSelectedRecords(new Map());
@@ -608,7 +610,7 @@ export function ObservationsClient({ target, initialPage, forProject = null }: {
       true,
     );
     void modal.show();
-  }, [createPermission.reason, datasetGroups, loadDatasetGroups, modal, router, selectedRecords, target]);
+  }, [activeGroup, createPermission.reason, datasetGroups, loadDatasetGroups, modal, router, selectedRecords, target]);
 
   if (mode === "add") {
     return (
