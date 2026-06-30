@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { BadgeCheckIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -9,11 +10,14 @@ import {
   fetchTrustedOrganizationBadges,
   type TrustedOrganizationBadge,
 } from "../_lib/indexer";
+import { accountHref } from "../_lib/urls";
 
-const BADGE_META: Record<TrustedOrganizationBadge, { label: string; src: string }> = {
-  gainforest: { label: "GainForest", src: "/assets/media/images/gainforest-logo.svg" },
-  maearth: { label: "Ma Earth", src: "/assets/media/images/badges/ma-earth-logo.webp" },
-  biometrust: { label: "Biome Trust", src: "/assets/media/images/badges/biome-trust-logo.webp" },
+// `endorser` is the certified handle of the org behind each badge, so the
+// emblem can link to that endorser's own account page.
+const BADGE_META: Record<TrustedOrganizationBadge, { label: string; src: string; endorser: string }> = {
+  gainforest: { label: "GainForest", src: "/assets/media/images/gainforest-logo.svg", endorser: "gainforest.certified.one" },
+  maearth: { label: "Ma Earth", src: "/assets/media/images/badges/ma-earth-logo.webp", endorser: "ma-earth-tqzc.certified.one" },
+  biometrust: { label: "Biome Trust", src: "/assets/media/images/badges/biome-trust-logo.webp", endorser: "biome-trust.certified.one" },
 };
 
 const ICON_SIZE_CLASS = {
@@ -95,19 +99,33 @@ export function TrustedByBadges({
         {badges.map((badge) => {
           const meta = BADGE_META[badge];
           const pixels = ICON_PIXEL_SIZE[resolvedSize];
+          const emblemClass = `grid ${ICON_SIZE_CLASS[resolvedSize]} place-items-center overflow-hidden rounded-full bg-background shadow-sm ring-1 ring-border/70 ${iconClassName}`;
+          const emblemImage = (
+            <Image
+              src={meta.src}
+              width={pixels}
+              height={pixels}
+              alt=""
+              className="h-full w-full object-contain"
+            />
+          );
           return (
             <QuickTooltip key={badge} content={t("aria", { names: meta.label })} asChild>
-              <span
-                className={`grid ${ICON_SIZE_CLASS[resolvedSize]} place-items-center overflow-hidden rounded-full bg-background shadow-sm ring-1 ring-border/70 ${iconClassName}`}
-              >
-                <Image
-                  src={meta.src}
-                  width={pixels}
-                  height={pixels}
-                  alt=""
-                  className="h-full w-full object-contain"
-                />
-              </span>
+              {isPlain ? (
+                // Only the plain (account-hero) variant lives outside a clickable
+                // card, so it's the one place we can safely nest a link without
+                // putting an <a> inside the card's <button>.
+                <Link
+                  href={accountHref(meta.endorser)}
+                  aria-label={t("aria", { names: meta.label })}
+                  onClick={(event) => event.stopPropagation()}
+                  className={`${emblemClass} relative cursor-pointer transition hover:z-10 hover:ring-2 hover:ring-primary focus-visible:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary`}
+                >
+                  {emblemImage}
+                </Link>
+              ) : (
+                <span className={emblemClass}>{emblemImage}</span>
+              )}
             </QuickTooltip>
           );
         })}
