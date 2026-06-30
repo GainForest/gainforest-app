@@ -925,6 +925,7 @@
     "datasetFolderAria": "{name} dataset, {count, plural, one {# observation} other {# observations}}",
     "datasetEmptyTitle": "No observations in this dataset yet",
     "datasetEmptyBody": "Select observations and group them into this dataset to see them here.",
+    "datasetsEmptyHint": "Group observations into a dataset to organise and reuse them. Your datasets will appear here.",
     "dataset": {
       "title": "{count, plural, one {Group # observation} other {Group # observations}}",
       "description": "Collect these observations into a dataset folder you can reuse and share.",

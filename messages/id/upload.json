@@ -925,6 +925,7 @@
     "datasetFolderAria": "Set data {name}, {count, plural, other {# observasi}}",
     "datasetEmptyTitle": "Belum ada observasi di set data ini",
     "datasetEmptyBody": "Pilih observasi dan kelompokkan ke set data ini agar muncul di sini.",
+    "datasetsEmptyHint": "Kelompokkan observasi ke dalam set data untuk menata dan menggunakannya kembali. Set data Anda akan muncul di sini.",
     "dataset": {
       "title": "{count, plural, other {Kelompokkan # observasi}}",
       "description": "Kumpulkan observasi ini ke dalam folder set data yang bisa Anda gunakan ulang dan bagikan.",

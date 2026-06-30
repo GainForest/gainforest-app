@@ -51,7 +51,7 @@ import {
 } from "./observation-mutations";
 import { LocationPickerModal, LocationPickerModalId } from "./LocationPickerModal";
 import { AddObservationsModal } from "./AddObservationsModal";
-import { FolderTile } from "@/app/_components/FolderTile";
+import { FolderTile, FolderTileSkeleton } from "@/app/_components/FolderTile";
 import { GroupObservationsDatasetModal, type ObservationDatasetGroup } from "./GroupObservationsDatasetModal";
 import { takeAddDataHandoff } from "../../_lib/upload/add-data-handoff";
 import {
@@ -422,6 +422,9 @@ export function ObservationsClient({ target, initialPage, forProject = null }: {
   const [projectFilter, setProjectFilter] = useQueryState("project", parseAsString.withOptions(QUERY_STATE_OPTIONS));
   const [projectGroups, setProjectGroups] = useState<ObservationProjectGroup[]>([]);
   const [datasetGroups, setDatasetGroups] = useState<ObservationDatasetGroup[]>([]);
+  // False until the first dataset fetch settles, so the folder strip can show a
+  // loading skeleton instead of briefly flashing the "no datasets yet" hint.
+  const [datasetsLoaded, setDatasetsLoaded] = useState(false);
   const [datasetFilter, setDatasetFilter] = useQueryState("dataset", parseAsString.withOptions(QUERY_STATE_OPTIONS));
   const deletePermission = canDeleteRecord(target, { ownRecord: target.kind === "personal" });
   const deleteDisabledReason = deletePermission.allowed ? null : deletePermission.reason;
@@ -462,6 +465,8 @@ export function ObservationsClient({ target, initialPage, forProject = null }: {
       setDatasetGroups(data.datasets);
     } catch {
       // Datasets are an enhancement; ignore load failures.
+    } finally {
+      setDatasetsLoaded(true);
     }
   }, [target]);
 
@@ -682,7 +687,7 @@ export function ObservationsClient({ target, initialPage, forProject = null }: {
         )}
       </div>
 
-      {!isEmpty && datasetGroups.length > 0 ? (
+      {!isEmpty ? (
         <div className="mx-auto mt-6 max-w-6xl px-6">
           <div className="mb-3 flex items-center justify-between gap-3">
             <h2 className="text-sm font-medium text-foreground">{t("datasetsHeading")}</h2>
@@ -692,27 +697,39 @@ export function ObservationsClient({ target, initialPage, forProject = null }: {
               </Button>
             ) : null}
           </div>
-          <div className="grid grid-cols-2 gap-x-3 gap-y-3 sm:grid-cols-3 lg:grid-cols-4">
-            {datasetGroups.map((dataset, index) => {
-              const active = datasetFilter === dataset.datasetUri;
-              return (
-                <FolderTile
-                  key={dataset.datasetUri}
-                  title={dataset.name}
-                  count={dataset.count}
-                  index={index}
-                  active={active}
-                  ariaPressed={active}
-                  ariaLabel={t("datasetFolderAria", { name: dataset.name, count: dataset.count })}
-                  art={<DatasetFolderArt />}
-                  onClick={() => {
-                    void setDatasetFilter(active ? null : dataset.datasetUri);
-                    if (!active) void setProjectFilter(null);
-                  }}
-                />
-              );
-            })}
-          </div>
+          {datasetGroups.length > 0 ? (
+            <div className="grid grid-cols-2 gap-x-3 gap-y-3 sm:grid-cols-3 lg:grid-cols-4">
+              {datasetGroups.map((dataset, index) => {
+                const active = datasetFilter === dataset.datasetUri;
+                return (
+                  <FolderTile
+                    key={dataset.datasetUri}
+                    title={dataset.name}
+                    count={dataset.count}
+                    index={index}
+                    active={active}
+                    ariaPressed={active}
+                    ariaLabel={t("datasetFolderAria", { name: dataset.name, count: dataset.count })}
+                    art={<DatasetFolderArt />}
+                    onClick={() => {
+                      void setDatasetFilter(active ? null : dataset.datasetUri);
+                      if (!active) void setProjectFilter(null);
+                    }}
+                  />
+                );
+              })}
+            </div>
+          ) : !datasetsLoaded ? (
+            <div className="grid grid-cols-2 gap-x-3 gap-y-3 sm:grid-cols-3 lg:grid-cols-4" aria-busy="true">
+              {Array.from({ length: 4 }).map((_, index) => (
+                <FolderTileSkeleton key={index} index={index} art={<DatasetFolderArtSkeleton />} />
+              ))}
+            </div>
+          ) : (
+            <p className="rounded-2xl border border-dashed border-border/70 bg-muted/40 px-4 py-3 text-sm text-muted-foreground">
+              {t("datasetsEmptyHint")}
+            </p>
+          )}
         </div>
       ) : null}
 
@@ -767,6 +784,17 @@ function DatasetFolderArt() {
       <div className="flex size-7 items-center justify-center rounded-full bg-primary/15 ring-2 ring-primary/20">
         <Layers2Icon className="size-4 text-primary/80" />
       </div>
+      <div className="h-1 w-7 rounded-full bg-muted" />
+    </div>
+  );
+}
+
+// The dataset folder's peeking art, muted for the loading skeleton: same card
+// silhouette, but the layered badge and meta line are flat neutral fills.
+function DatasetFolderArtSkeleton() {
+  return (
+    <div className="flex h-[52px] w-11 flex-col items-center justify-center gap-1.5 rounded-lg border border-border/70 bg-background/85 shadow-md backdrop-blur-sm">
+      <div className="size-7 rounded-full bg-muted" />
       <div className="h-1 w-7 rounded-full bg-muted" />
     </div>
   );

@@ -925,6 +925,7 @@
     "datasetFolderAria": "Conjunto {name}, {count, plural, one {# observación} other {# observaciones}}",
     "datasetEmptyTitle": "Aún no hay observaciones en este conjunto",
     "datasetEmptyBody": "Selecciona observaciones y agrúpalas en este conjunto para verlas aquí.",
+    "datasetsEmptyHint": "Agrupa observaciones en un conjunto de datos para organizarlas y reutilizarlas. Tus conjuntos aparecerán aquí.",
     "dataset": {
       "title": "{count, plural, one {Agrupar # observación} other {Agrupar # observaciones}}",
       "description": "Reúne estas observaciones en una carpeta de conjunto que puedas reutilizar y compartir.",
