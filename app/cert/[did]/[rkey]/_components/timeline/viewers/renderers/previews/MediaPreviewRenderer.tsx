@@ -9,14 +9,19 @@ export function MediaPreviewRenderer({ preview }: { preview: TimelinePreviewPayl
         href={preview.href}
         target="_blank"
         rel="noreferrer"
-        className="block overflow-hidden rounded-xl border border-border/60 bg-muted/30"
+        // Fixed-height letterbox frame: the box keeps a stable height regardless of
+        // which image is selected or whether it has finished loading. Without this
+        // the <img> collapses to 0px height while a newly selected tile loads,
+        // which made the panel (and everything below it) jump — a visible flicker
+        // when stepping through the evidence timeline.
+        className="flex h-[300px] items-center justify-center overflow-hidden rounded-xl border border-border/60 bg-muted/30 sm:h-[420px]"
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={preview.href}
           alt={preview.title}
-          className="max-h-[420px] w-full object-contain"
-          loading="lazy"
+          className="h-full w-full object-contain"
+          decoding="async"
         />
       </a>
     );

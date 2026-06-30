@@ -771,6 +771,7 @@
     },
     "filters": {
       "all": "Semua",
+      "following": "Mengikuti",
       "project": "Proyek",
       "observation": "Pengamatan",
       "organization": "Organisasi",
@@ -792,6 +793,7 @@
     "error": "Tidak dapat memuat aktivitas saat ini.",
     "empty": "Belum ada aktivitas. Jadilah yang pertama berbagi!",
     "emptyFiltered": "Belum ada aktivitas jenis ini.",
+    "emptyFollowing": "Belum ada aktivitas terbaru dari akun yang kamu ikuti.",
     "loadMore": "Muat lainnya",
     "loadingMore": "Memuat…",
     "endOfFeed": "Kamu sudah melihat semua",

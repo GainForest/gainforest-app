@@ -2032,7 +2032,7 @@ function DonationsPanel({
           <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
             <div className="min-w-0">
               <h2 className="font-instrument text-3xl font-light italic leading-tight tracking-[-0.025em] text-foreground sm:text-4xl">
-                Support this Cert
+                Support this project
               </h2>
               <p className="mt-3 max-w-xl text-sm leading-6 text-muted-foreground">
                 Your donation supports {owner.displayName} and appears with this project story once completed.
@@ -2074,7 +2074,7 @@ function DonationsPanel({
         <EmptyState
           icon={<HeartIcon className="h-8 w-8" />}
           title="Donation information is unavailable"
-          body="We could not load donations for this Cert. Try again later on this page."
+          body="We could not load donations for this project. Try again later on this page."
           variant="leaderboard"
         />
       ) : receipts.length === 0 ? (

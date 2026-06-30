@@ -165,7 +165,7 @@ The current manage area is framed as “Organization”, but the desired product
 - Add two grouped sections below the profile:
   - **Impact certificates**
     - Bumicerts only.
-    - Explain that Bumicerts connect uploaded information into an evidence timeline.
+    - Explain that Bumicerts connect uploaded information into project updates.
   - **Data uploads**
     - Biodiversity Observations
     - Sites

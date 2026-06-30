@@ -608,7 +608,7 @@
       "home": "Beranda",
       "bumicerts": "sertifikat",
       "donationHistory": "Riwayat donasi",
-      "evidenceTimeline": "Linimasa bukti",
+      "evidenceTimeline": "Pembaruan proyek",
       "settings": "Pengaturan",
       "leaderboard": "Papan peringkat"
     },
@@ -868,13 +868,13 @@
   "projects": {
     "metadata": {
       "title": "Jelajahi proyek — Karya dampak regeneratif terverifikasi",
-      "description": "Jelajahi koleksi proyek dari komunitas dan organisasi, masing-masing mengelompokkan sertifikat yang mendokumentasikan dampak regeneratif mereka."
+      "description": "Jelajahi proyek — masing-masing pekerjaan yang terfokus dengan tujuan yang jelas, jangka waktu, dan hasil yang diharapkan."
     },
     "hero": {
       "eyebrow": "Jelajahi proyek",
       "title": "Jelajahi",
       "accent": "Proyek",
-      "description": "Proyek mengelompokkan sertifikat terkait dari komunitas dan organisasi, sehingga Anda dapat menelusuri pekerjaan pada tingkat proyek sebelum masuk ke sertifikat individual."
+      "description": "Setiap proyek adalah pekerjaan yang terfokus — dengan tujuan yang jelas, jangka waktu, dan hasil yang diharapkan."
     },
     "search": {
       "ariaLabel": "Cari proyek",
@@ -937,7 +937,7 @@
     "evidence": {
       "boundaries": "{count, plural, =0 {Belum ada batas lokasi} other {# batas lokasi dipetakan}}",
       "sightings": "{count, plural, =0 {Belum ada pengamatan alam} other {# pengamatan alam}}",
-      "timeline": "{count, plural, =0 {Belum ada bukti linimasa} other {# item linimasa}}",
+      "timeline": "{count, plural, =0 {Belum ada pembaruan proyek} other {# pembaruan proyek}}",
       "reviews": "{count, plural, =0 {Belum ada ulasan} other {# ulasan}}"
     }
   },

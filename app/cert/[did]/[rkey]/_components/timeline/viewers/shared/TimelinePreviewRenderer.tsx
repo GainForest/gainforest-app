@@ -23,5 +23,13 @@ const PREVIEW_RENDERER_REGISTRY = {
 
 export function TimelinePreviewRenderer({ preview }: PreviewRendererProps) {
   const Renderer = PREVIEW_RENDERER_REGISTRY[preview.kind];
-  return <Renderer key={`${preview.kind}:${preview.href}:${preview.fileName ?? ""}`} preview={preview} />;
+  // Keep a single <img> element across image-to-image switches so the browser
+  // holds the previous picture until the next one decodes (no blank flash). Other
+  // kinds (audio/video/document/pdf) keep a href-based key so their element and
+  // any internal state are reset when the source changes.
+  const key =
+    preview.kind === "image"
+      ? "image"
+      : `${preview.kind}:${preview.href}:${preview.fileName ?? ""}`;
+  return <Renderer key={key} preview={preview} />;
 }

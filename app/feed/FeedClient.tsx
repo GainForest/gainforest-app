@@ -18,6 +18,7 @@ import {
   PencilIcon,
   RefreshCwIcon,
   UserIcon,
+  UsersRoundIcon,
 } from "lucide-react";
 import type { ActivityFeedItem, ActivityFeedKind, ActivityFeedPage } from "../_lib/feed";
 import { indexerQuery } from "../_lib/indexer";
@@ -42,7 +43,7 @@ import { AccountHoverCard } from "./AccountHoverCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
-type Filter = "all" | ActivityFeedKind;
+type Filter = "all" | "following" | ActivityFeedKind;
 
 // A run of this many consecutive sightings from the same account collapses into
 // one summary card instead of N separate rows.
@@ -79,14 +80,21 @@ function groupFeedEntries(items: ActivityFeedItem[]): FeedEntry[] {
   return entries;
 }
 
-const FILTERS: { key: Filter; Icon: typeof NewspaperIcon }[] = [
+// `authOnly` tabs are shown only to signed-in viewers (a following feed has no
+// meaning when signed out).
+const FILTERS: { key: Filter; Icon: typeof NewspaperIcon; authOnly?: boolean }[] = [
   { key: "all", Icon: NewspaperIcon },
+  { key: "following", Icon: UsersRoundIcon, authOnly: true },
   { key: "post", Icon: MegaphoneIcon },
   { key: "project", Icon: FolderKanbanIcon },
   { key: "observation", Icon: BinocularsIcon },
   { key: "organization", Icon: Building2Icon },
   { key: "donation", Icon: HeartHandshakeIcon },
 ];
+
+function filterLabel(t: (key: string) => string, key: Filter): string {
+  return key === "all" ? t("filters.all") : t(`filters.${key}`);
+}
 
 export function FeedClient({
   initialItems,
@@ -121,7 +129,9 @@ export function FeedClient({
 
   function feedUrl(forFilter: Filter, forCursor?: string | null): string {
     const params = new URLSearchParams();
-    if (forFilter !== "all") params.set("kind", forFilter);
+    // The following tab is a viewer-scoped feed, not a kind filter.
+    if (forFilter === "following") params.set("scope", "following");
+    else if (forFilter !== "all") params.set("kind", forFilter);
     if (forCursor) params.set("cursor", forCursor);
     const qs = params.toString();
     return qs ? `/api/feed?${qs}` : "/api/feed";
@@ -267,6 +277,7 @@ export function FeedClient({
             <div className="px-4 py-2 sm:px-6">
               <FeedFilterTabs
                 filter={filter}
+                signedIn={signedIn}
                 onSelect={selectFilter}
                 onRefresh={() => void loadFirst(filter, "refresh")}
                 refreshing={refreshing}
@@ -301,7 +312,11 @@ export function FeedClient({
         ) : items.length === 0 ? (
           <div className="px-4 py-16 text-center">
             <p className="text-sm text-muted-foreground">
-              {filter === "all" ? t("empty") : t("emptyFiltered")}
+              {filter === "following"
+                ? t("emptyFollowing")
+                : filter === "all"
+                  ? t("empty")
+                  : t("emptyFiltered")}
             </p>
           </div>
         ) : (
@@ -367,6 +382,7 @@ export function FeedClient({
           <div className="sticky top-20">
             <FeedFilterRail
               filter={filter}
+              signedIn={signedIn}
               onSelect={selectFilter}
               onRefresh={() => void loadFirst(filter, "refresh")}
               refreshing={refreshing}
@@ -384,24 +400,27 @@ export function FeedClient({
  *  overflows on narrow screens. */
 function FeedFilterTabs({
   filter,
+  signedIn,
   onSelect,
   onRefresh,
   refreshing,
   loading,
 }: {
   filter: Filter;
+  signedIn: boolean;
   onSelect: (next: Filter) => void;
   onRefresh: () => void;
   refreshing: boolean;
   loading: boolean;
 }) {
   const t = useTranslations("common.feed");
+  const tabs = FILTERS.filter((f) => !f.authOnly || signedIn);
   return (
     <div className="flex min-w-0 items-center gap-1">
       <div className="no-scrollbar flex items-center gap-1 overflow-x-auto">
-        {FILTERS.map(({ key, Icon }) => {
+        {tabs.map(({ key, Icon }) => {
           const active = filter === key;
-          const label = key === "all" ? t("filters.all") : t(`filters.${key}`);
+          const label = filterLabel(t, key);
           return (
             <button
               key={key}
@@ -438,24 +457,27 @@ function FeedFilterTabs({
  *  borderless nav list with a soft active pill, plus a subtle refresh. */
 function FeedFilterRail({
   filter,
+  signedIn,
   onSelect,
   onRefresh,
   refreshing,
   loading,
 }: {
   filter: Filter;
+  signedIn: boolean;
   onSelect: (next: Filter) => void;
   onRefresh: () => void;
   refreshing: boolean;
   loading: boolean;
 }) {
   const t = useTranslations("common.feed");
+  const tabs = FILTERS.filter((f) => !f.authOnly || signedIn);
   return (
     <div className="flex flex-col gap-1">
       <nav aria-label={t("filterHeading")} className="flex flex-col gap-0.5">
-        {FILTERS.map(({ key, Icon }) => {
+        {tabs.map(({ key, Icon }) => {
           const active = filter === key;
-          const label = key === "all" ? t("filters.all") : t(`filters.${key}`);
+          const label = filterLabel(t, key);
           return (
             <button
               key={key}

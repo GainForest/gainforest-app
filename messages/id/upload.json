@@ -921,10 +921,12 @@
     "separateDropZone": "Letakkan di sini untuk membuat observasi terpisah",
     "groupIntoDataset": "Kelompokkan ke set data",
     "datasetsHeading": "Set data",
+    "allObservationsHeading": "Semua observasi",
     "datasetClearFilter": "Tampilkan semua",
     "datasetFolderAria": "Set data {name}, {count, plural, other {# observasi}}",
     "datasetEmptyTitle": "Belum ada observasi di set data ini",
     "datasetEmptyBody": "Pilih observasi dan kelompokkan ke set data ini agar muncul di sini.",
+    "datasetsEmptyHint": "Kelompokkan observasi ke dalam set data untuk menata dan menggunakannya kembali. Set data Anda akan muncul di sini.",
     "dataset": {
       "title": "{count, plural, other {Kelompokkan # observasi}}",
       "description": "Kumpulkan observasi ini ke dalam folder set data yang bisa Anda gunakan ulang dan bagikan.",
@@ -949,7 +951,11 @@
       "confirmNew": "Buat & kelompokkan",
       "confirmExisting": "Tambahkan ke set data",
       "addsToProject": "Set data ini akan ditambahkan ke {project}."
-    }
+    },
+    "datasetDeleteAria": "Hapus set data {name}",
+    "datasetDeleteTitle": "Hapus set data “{name}”?",
+    "datasetDeleteDescription": "Ini hanya menghapus pengelompokan. {count, plural, other {# observasi Anda tetap ada.}}",
+    "datasetDeleteConfirm": "Hapus set data"
   },
   "settings": {
     "organizationTitle": "Pengaturan organisasi",

@@ -18,7 +18,7 @@
       "loadDescription": "Tuvimos problemas para obtener los datos de este certificado. Inténtelo de nuevo o regrese a la página de inicio."
     },
     "timeline": {
-      "title": "Cronología de la evidencia",
+      "title": "Actualizaciones del proyecto",
       "itemCount": "{count, plural, =0 {0 elementos} =1 {1 elemento} other {# elementos}}",
       "linked": "vinculado {window}",
       "linkedWindow": "Ventana vinculada: {window}",
@@ -35,11 +35,11 @@
       },
       "ownerTools": "Herramientas del propietario",
       "linkEvidenceTitle": "Vincular evidencia",
-      "linkEvidenceDescription": "Agrega evidencia guardada o archivos a {title}. Los elementos que agregues aparecerán en la línea de tiempo pública de evidencia abajo.",
+      "linkEvidenceDescription": "Agrega evidencia guardada o archivos a {title}. Los elementos que agregues aparecerán en las actualizaciones públicas del proyecto abajo.",
       "notTimelineYet": "Aún no forma parte de la cronología",
-      "linkedTitle": "Cronología de evidencia vinculada",
+      "linkedTitle": "Actualizaciones del proyecto vinculadas",
       "linkedItemCount": "{count, plural, =0 {0 elementos vinculados a esta actividad de certificado} =1 {1 elemento vinculado a esta actividad de certificado} other {# elementos vinculados a esta actividad de certificado}}",
-      "linkedDescription": "Revisa los registros, archivos y capas del mapa que ya forman parte de la cronología pública de evidencias.",
+      "linkedDescription": "Revisa los registros, archivos y capas del mapa que ya forman parte de las actualizaciones públicas del proyecto.",
       "pageOf": "Página {current} de {total}",
       "previousPage": "Página anterior",
       "nextPage": "Página siguiente",

@@ -115,8 +115,6 @@ export function AccountHero({
           <div className="pointer-events-none absolute inset-x-0 bottom-0 h-14 bg-linear-to-t from-card to-transparent" />
         </motion.div>
 
-        <TrustedByBadges did={account.did} className="absolute left-3 top-3 z-10 w-fit" />
-
         <div className="absolute right-3 top-3 z-10 flex items-center gap-2">
           <Button type="button" variant="outline" size="sm" onClick={handleShare} aria-label="Copy link">
             <AnimatePresence mode="wait" initial={false}>
@@ -177,6 +175,7 @@ export function AccountHero({
               {account.description ?? ""}
             </p>
             <FollowStats targetDid={account.did} identifier={account.urlIdentifier} className="mt-2.5" />
+            <TrustedByBadges did={account.did} variant="plain" className="mt-3 w-fit" />
             <AccountMemberships organizations={memberships} className="mt-3" />
           </div>
         </div>

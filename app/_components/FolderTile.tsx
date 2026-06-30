@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import type { ReactNode } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
 const EASE = [0.25, 0.1, 0.25, 1] as const;
@@ -31,6 +32,10 @@ export type FolderTileProps = {
   ariaLabel?: string;
   ariaPressed?: boolean;
   disabled?: boolean;
+  /** Optional control (e.g. a delete button) overlaid on the folder, rendered
+   *  OUTSIDE the clickable surface so it never nests interactive elements.
+   *  Revealed on hover/focus; always visible on touch devices. */
+  action?: ReactNode;
 };
 
 /**
@@ -51,6 +56,7 @@ export function FolderTile({
   ariaLabel,
   ariaPressed,
   disabled = false,
+  action,
 }: FolderTileProps) {
   const inner = (
     <>
@@ -100,6 +106,7 @@ export function FolderTile({
 
   return (
     <motion.div
+      className="group/folder relative"
       initial={{ opacity: 0, y: 14 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: index * 0.05, ease: EASE }}
@@ -120,6 +127,48 @@ export function FolderTile({
           {inner}
         </button>
       )}
+
+      {action ? (
+        <div className="absolute bottom-2 right-2 z-30 opacity-0 transition-opacity duration-150 focus-within:opacity-100 group-hover/folder:opacity-100 [@media(hover:none)]:opacity-100">
+          {action}
+        </div>
+      ) : null}
+    </motion.div>
+  );
+}
+
+/**
+ * A loading placeholder shaped exactly like {@link FolderTile} — same rounded
+ * tab, body card, big-figure block and label line — so a grid of these reads as
+ * "folders are loading" without any layout shift when the real tiles arrive.
+ * Pass the same `art` the real tile uses (in a muted form) to echo the folder's
+ * peeking illustration.
+ */
+export function FolderTileSkeleton({ art, index = 0 }: { art?: ReactNode; index?: number }) {
+  return (
+    <motion.div
+      aria-hidden
+      initial={{ opacity: 0, y: 14 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, delay: index * 0.05, ease: EASE }}
+    >
+      <div className="relative block w-full">
+        {art ? (
+          <div className="pointer-events-none absolute inset-x-0 top-0 z-0 flex justify-end pr-3.5">
+            <div className="rotate-6">{art}</div>
+          </div>
+        ) : null}
+
+        <div className="relative pt-7">
+          {/* tab */}
+          <div className="absolute left-0 top-[12px] z-20 h-[19px] w-[42%] rounded-t-lg border border-b-0 border-border/60 bg-card" />
+          {/* body */}
+          <div className="relative z-10 flex min-h-[86px] flex-col justify-end rounded-[18px] rounded-tl-none border border-border/60 bg-card p-3.5">
+            <Skeleton className="h-7 w-10" />
+            <Skeleton className="mt-1.5 h-3 w-20 rounded-full" />
+          </div>
+        </div>
+      </div>
     </motion.div>
   );
 }

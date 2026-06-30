@@ -78,6 +78,15 @@ export interface ActivityFeedItem {
 /** Which kinds the feed should include: a single kind, or the unified merge. */
 export type ActivityFeedFilter = ActivityFeedKind | "all";
 
+/** Restrict the feed to records authored by accounts the viewer follows
+ *  (atproto-style query-on-read). `dids` is the followed-account set; `viewerDid`
+ *  scopes the in-process cache so one viewer's following page can't be served to
+ *  another. */
+export interface FollowingScope {
+  dids: string[];
+  viewerDid: string;
+}
+
 export interface ActivityFeedPage {
   items: ActivityFeedItem[];
   /** Opaque cursor for the next page; null when the feed is exhausted. */
@@ -101,6 +110,13 @@ const BURST_SCAN_HOP = 1000; // indexer max page size
 const MAX_SCAN_HOPS = 6; // skip up to ~6k sightings per "load more"
 const BURST_SAMPLE = 8; // sightings kept for the card's montage / grouping
 const FEED_CACHE_MS = 60_000; // 60s in-process memo — fresh enough for "live".
+// The indexer caps an `in` filter's list, so a viewer following more accounts
+// than this is split into chunks that are queried in parallel and re-merged
+// (mirrors the badge-filter chunking in indexer.ts).
+const FOLLOW_IN_LIMIT = 100;
+// Upper bound on the follow set we scope a following feed to — the indexer's
+// single-page max. Following more accounts than this keeps the newest follows.
+const MAX_FOLLOWING = 1000;
 
 // ── Compound (createdAt, id) cursor ──────────────────────────────────────────
 // ISO timestamps alone aren't a stable key (records can share a millisecond),
@@ -605,7 +621,52 @@ async function enrichDonations(pageItems: ActivityFeedItem[], certUriById: Map<s
   }
 }
 
-// ── Public builder ───────────────────────────────────────────────────────────
+// ── Following scope (viewer's follow graph) ───────────────────────────
+
+const VIEWER_FOLLOWING_QUERY = `
+  query ViewerFollowing($did: String!, $first: Int!) {
+    appCertifiedGraphFollow(
+      first: $first
+      where: { did: { eq: $did } }
+      sortBy: createdAt
+      sortDirection: DESC
+    ) {
+      edges { node { subject } }
+    }
+  }
+`;
+
+/**
+ * Resolve the DIDs a viewer follows (newest follows first, capped at the
+ * indexer's single-page max). Server-safe — reads the `app.certified.graph.follow`
+ * collection where `did = viewer` and returns each follow's `subject`. Powers the
+ * feed's "Following" tab: an atproto query-on-read following feed scopes the
+ * record streams to these authors instead of fanning out on write.
+ */
+export async function fetchViewerFollowingDids(
+  viewerDid: string,
+  signal?: AbortSignal,
+): Promise<string[]> {
+  const data = await indexerQuery<{
+    appCertifiedGraphFollow?: {
+      edges?: Array<{ node?: { subject?: string | null } | null } | null> | null;
+    } | null;
+  }>(VIEWER_FOLLOWING_QUERY, { did: viewerDid, first: MAX_FOLLOWING }, signal).catch(() => null);
+  const out = new Set<string>();
+  for (const edge of data?.appCertifiedGraphFollow?.edges ?? []) {
+    const subject = edge?.node?.subject;
+    if (subject) out.add(subject);
+  }
+  return [...out];
+}
+
+function chunkDids(dids: string[], size: number): string[][] {
+  const chunks: string[][] = [];
+  for (let i = 0; i < dids.length; i += size) chunks.push(dids.slice(i, i + size));
+  return chunks;
+}
+
+// ── Public builder ────────────────────────────────────────────────────────────
 
 // Lean scan over one account's sightings to locate where its burst ends.
 const BURST_SCAN_QUERY = `
@@ -698,32 +759,82 @@ async function buildBurstSkipPage(
 async function buildFeedPageUncached(
   cursor: FeedCursor | null,
   filter: ActivityFeedFilter,
+  following: FollowingScope | null,
 ): Promise<ActivityFeedPage> {
   const before = cursor?.ts ?? null;
   const ltBound = before ? { createdAt: { lte: before } } : {};
   const wants = (k: ActivityFeedKind) => filter === "all" || filter === k;
 
+  // Following scope (atproto query-on-read): restrict the author-keyed streams
+  // to the accounts the viewer follows, chunked at the indexer's `in` cap and
+  // re-merged. A viewer who follows nobody gets an empty page straight away.
+  // Donations are donor-keyed (often anonymous wallets, not followable DIDs), so
+  // they're omitted from a following feed.
+  const isFollowing = following != null;
+  if (isFollowing && following.dids.length === 0) {
+    return { items: [], nextCursor: null, hasMore: false };
+  }
+  const didChunks: (readonly string[] | null)[] = isFollowing
+    ? chunkDids(following.dids, FOLLOW_IN_LIMIT)
+    : [null];
+  const wantDonation = wants("donation") && !isFollowing;
+  const nonEmpty = (where: Record<string, unknown>): Record<string, unknown> | null =>
+    Object.keys(where).length > 0 ? where : null;
+
   // `first: 0` is treated as "default page size" by the indexer (not zero), so a
   // kind filter can't be expressed by zeroing a stream's `first`. Unwanted
   // streams are fetched at the floor of 1 and then dropped from the pool below.
-  const data = await indexerQuery<RawFeed>(FEED_QUERY, {
-    projectFirst: wants("project") ? STREAM_BATCH : 1,
-    occurrenceFirst: wants("observation") ? STREAM_BATCH : 1,
-    orgFirst: wants("organization") ? STREAM_BATCH : 1,
-    receiptFirst: wants("donation") ? STREAM_BATCH : 1,
-    postFirst: wants("post") ? STREAM_BATCH : 1,
-    projectWhere: { type: { in: ["project", "Project"] }, ...ltBound },
-    occurrenceWhere: before ? { createdAt: { lte: before } } : null,
-    orgWhere: before ? { createdAt: { lte: before } } : null,
-    donationWhere: { did: { eq: FACILITATOR_DID }, ...ltBound },
-    postWhere: { reply: { isNull: true }, ...ltBound },
-  });
+  // One combined query runs per follow chunk (just one when global); the raw
+  // nodes are unioned before mapping.
+  const results = await Promise.all(
+    didChunks.map((chunk) => {
+      const didIn = chunk ? { did: { in: [...chunk] } } : {};
+      return indexerQuery<RawFeed>(FEED_QUERY, {
+        projectFirst: wants("project") ? STREAM_BATCH : 1,
+        occurrenceFirst: wants("observation") ? STREAM_BATCH : 1,
+        orgFirst: wants("organization") ? STREAM_BATCH : 1,
+        receiptFirst: wantDonation ? STREAM_BATCH : 1,
+        postFirst: wants("post") ? STREAM_BATCH : 1,
+        projectWhere: { type: { in: ["project", "Project"] }, ...didIn, ...ltBound },
+        occurrenceWhere: nonEmpty({ ...didIn, ...ltBound }),
+        orgWhere: nonEmpty({ ...didIn, ...ltBound }),
+        donationWhere: { did: { eq: FACILITATOR_DID }, ...ltBound },
+        postWhere: { reply: { isNull: true }, ...didIn, ...ltBound },
+      });
+    }),
+  );
 
-  const projectNodes = (data?.projects?.edges ?? []).map((e) => e?.node).filter((n): n is RawProject => Boolean(n?.did));
-  const occurrenceNodes = (data?.occurrences?.edges ?? []).map((e) => e?.node).filter((n): n is RawOccurrence => Boolean(n?.did));
-  const orgNodes = (data?.organizations?.edges ?? []).map((e) => e?.node).filter((n): n is RawOrg => Boolean(n?.did));
-  const receiptNodes = (data?.donations?.edges ?? []).map((e) => e?.node).filter((n): n is RawReceipt => Boolean(n?.uri));
-  const postNodes = (data?.posts?.edges ?? []).map((e) => e?.node).filter((n): n is RawPost => Boolean(n?.did));
+  // Union raw nodes across follow chunks. Chunks partition the DID set, so a
+  // node can't appear twice; the item-level `seen` set below still guards stray
+  // duplicates. `fetchedFull` is true when any single (chunk, stream) returned a
+  // full batch — the "there may be older rows" signal for hasMore.
+  const projectNodes: RawProject[] = [];
+  const occurrenceNodes: RawOccurrence[] = [];
+  const orgNodes: RawOrg[] = [];
+  const receiptNodes: RawReceipt[] = [];
+  const postNodes: RawPost[] = [];
+  let fetchedFull = false;
+  for (const data of results) {
+    const p = (data?.projects?.edges ?? []).map((e) => e?.node).filter((n): n is RawProject => Boolean(n?.did));
+    const o = (data?.occurrences?.edges ?? []).map((e) => e?.node).filter((n): n is RawOccurrence => Boolean(n?.did));
+    const g = (data?.organizations?.edges ?? []).map((e) => e?.node).filter((n): n is RawOrg => Boolean(n?.did));
+    const r = (data?.donations?.edges ?? []).map((e) => e?.node).filter((n): n is RawReceipt => Boolean(n?.uri));
+    const s = (data?.posts?.edges ?? []).map((e) => e?.node).filter((n): n is RawPost => Boolean(n?.did));
+    if (
+      p.length >= STREAM_BATCH ||
+      o.length >= STREAM_BATCH ||
+      g.length >= STREAM_BATCH ||
+      r.length >= STREAM_BATCH ||
+      s.length >= STREAM_BATCH
+    ) {
+      fetchedFull = true;
+    }
+    projectNodes.push(...p);
+    occurrenceNodes.push(...o);
+    orgNodes.push(...g);
+    receiptNodes.push(...r);
+    postNodes.push(...s);
+  }
 
   const { items: donationItems, certUriById } = mapDonations(receiptNodes);
 
@@ -749,8 +860,11 @@ async function buildFeedPageUncached(
 
   // Burst skip: when a single account fills the entire sightings batch, its run
   // would otherwise crawl past page by page. Collapse it to a sample and jump
-  // the cursor past the whole run to the next account's activity.
+  // the cursor past the whole run to the next account's activity. Skipped for a
+  // following feed: the burst scan isn't author-scoped, so it would over-skip;
+  // following feeds are sparse enough to page normally.
   if (
+    !isFollowing &&
     (filter === "all" || filter === "observation") &&
     occurrenceNodes.length >= STREAM_BATCH
   ) {
@@ -770,13 +884,8 @@ async function buildFeedPageUncached(
 
   const last = pageItems[pageItems.length - 1];
   // A stream that returned a full batch may still have older rows we haven't
-  // reached; combined with leftover eligible overflow, that's "more to load".
-  const fetchedFull =
-    projectNodes.length >= STREAM_BATCH ||
-    occurrenceNodes.length >= STREAM_BATCH ||
-    orgNodes.length >= STREAM_BATCH ||
-    receiptNodes.length >= STREAM_BATCH ||
-    postNodes.length >= STREAM_BATCH;
+  // reached (tracked as `fetchedFull` during the per-chunk union above);
+  // combined with leftover eligible overflow, that's "more to load".
   const hasMore = pageItems.length > 0 && (ordered.length > PAGE_SIZE || fetchedFull);
 
   return {
@@ -791,12 +900,16 @@ async function buildFeedPageUncached(
  *
  * @param rawCursor opaque cursor from a previous page (null/undefined = first).
  * @param filter    restrict to one kind, or "all" for the unified merge.
+ * @param following when set, scope the feed to records authored by accounts the
+ *                  viewer follows (the "Following" tab). Donations are omitted.
  */
 export async function buildActivityFeed(
   rawCursor?: string | null,
   filter: ActivityFeedFilter = "all",
+  following?: FollowingScope | null,
 ): Promise<ActivityFeedPage> {
   const cursor = decodeCursor(rawCursor);
-  const key = `activity-feed:v2:${filter}:${rawCursor ?? "start"}`;
-  return cachedAsync(key, FEED_CACHE_MS, () => buildFeedPageUncached(cursor, filter));
+  const scopeKey = following ? `follow:${following.viewerDid}` : "global";
+  const key = `activity-feed:v2:${filter}:${scopeKey}:${rawCursor ?? "start"}`;
+  return cachedAsync(key, FEED_CACHE_MS, () => buildFeedPageUncached(cursor, filter, following ?? null));
 }

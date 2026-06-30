@@ -100,7 +100,7 @@ export function StatsDashboardClient() {
   return (
     <div className="mx-auto max-w-6xl space-y-10 px-6 pb-20 md:pb-28">
       <DashboardStatsSection
-        title="Certs"
+        title="Project stories"
         description="Published project stories and the evidence attached to them."
         state={stats.bumicerts}
         items={bumicertItems}
@@ -119,7 +119,7 @@ export function StatsDashboardClient() {
       />
       <DashboardStatsSection
         title="Projects"
-        description="Project collections and the Certs grouped inside them."
+        description="Project collections and the stories grouped inside them."
         state={stats.projects}
         items={projectItems}
       />

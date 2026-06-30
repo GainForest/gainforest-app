@@ -771,6 +771,7 @@
     },
     "filters": {
       "all": "Todo",
+      "following": "Siguiendo",
       "project": "Proyectos",
       "observation": "Avistamientos",
       "organization": "Organizaciones",
@@ -792,6 +793,7 @@
     "error": "No se pudo cargar la actividad en este momento.",
     "empty": "Todavía no hay actividad. ¡Sé el primero en compartir!",
     "emptyFiltered": "Aún no hay actividad de este tipo.",
+    "emptyFollowing": "Aún no hay actividad reciente de las cuentas que sigues.",
     "loadMore": "Cargar más",
     "loadingMore": "Cargando…",
     "endOfFeed": "Estás al día",

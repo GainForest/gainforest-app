@@ -771,6 +771,7 @@
     },
     "filters": {
       "all": "Yote",
+      "following": "Unaofuata",
       "project": "Miradi",
       "observation": "Maonevu",
       "organization": "Mashirika",
@@ -792,6 +793,7 @@
     "error": "Haikuweza kupakia shughuli sasa hivi.",
     "empty": "Bado hakuna shughuli. Kuwa wa kwanza kushiriki!",
     "emptyFiltered": "Bado hakuna shughuli ya aina hii.",
+    "emptyFollowing": "Bado hakuna shughuli za hivi karibuni kutoka kwa akaunti unazofuata.",
     "loadMore": "Pakua zaidi",
     "loadingMore": "Inapakia…",
     "endOfFeed": "Umefika mwisho",

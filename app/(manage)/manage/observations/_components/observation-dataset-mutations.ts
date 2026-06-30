@@ -1,6 +1,6 @@
 "use client";
 
-import { createRecord, getRecord, putRecord } from "../../_lib/mutations";
+import { createRecord, deleteRecord, getRecord, putRecord } from "../../_lib/mutations";
 
 // A dataset is a certified collection — the same primitive projects use —
 // distinguished by `type: "dataset"`. Observations point UP to it via the
@@ -107,6 +107,92 @@ export async function attachObservationsToDataset(
   }
 
   return { attached, skipped, errors };
+}
+
+export type DeleteObservationDatasetResult = {
+  detached: string[];
+  detachErrors: Array<{ rkey: string; error: string }>;
+  unnestedFrom: string[];
+  unnestErrors: Array<{ rkey: string; error: string }>;
+  collectionDeleted: boolean;
+  collectionError: string | null;
+};
+
+/**
+ * Delete a dataset collection WITHOUT deleting its observations. First ungroups
+ * every observation (clears `datasetRef` + `datasetName`, preserving the rest of
+ * the occurrence), then deletes the `org.hypercerts.collection` record itself.
+ * The observations survive as standalone occurrences. Detach is per-occurrence
+ * (getRecord→putRecord with swapRecord); failures are reported, not thrown, and
+ * the collection is still removed so the grouping disappears from the UI.
+ */
+export async function deleteObservationDataset(
+  input: { datasetUri: string; datasetRkey: string; occurrenceRkeys: string[]; parentRkeys: string[] },
+  options?: RepoOptions,
+): Promise<DeleteObservationDatasetResult> {
+  const detached: string[] = [];
+  const detachErrors: Array<{ rkey: string; error: string }> = [];
+
+  for (const rkey of input.occurrenceRkeys) {
+    try {
+      const current = await getRecord(OCCURRENCE_COLLECTION, rkey, options);
+      const nextRecord: Record<string, unknown> = {
+        ...current.record,
+        $type: typeof current.record.$type === "string" ? current.record.$type : OCCURRENCE_COLLECTION,
+      };
+      delete nextRecord.datasetRef;
+      delete nextRecord.datasetName;
+      await putRecord(OCCURRENCE_COLLECTION, rkey, nextRecord, {
+        swapRecord: current.cid,
+        ...(options?.repo ? { repo: options.repo } : {}),
+      });
+      detached.push(rkey);
+    } catch (error) {
+      detachErrors.push({
+        rkey,
+        error: error instanceof Error ? error.message : "This observation could not be ungrouped.",
+      });
+    }
+  }
+
+  // Unnest the dataset from any collection (project, etc.) that lists it in
+  // items[], so no dangling reference is left behind.
+  const unnestedFrom: string[] = [];
+  const unnestErrors: Array<{ rkey: string; error: string }> = [];
+  for (const rkey of input.parentRkeys) {
+    try {
+      const current = await getRecord(COLLECTION_COLLECTION, rkey, options);
+      const items = Array.isArray(current.record.items) ? current.record.items : [];
+      const nextItems = items.filter((item) => itemUri(item) !== input.datasetUri);
+      if (nextItems.length === items.length) continue; // nothing to remove
+      const nextRecord: Record<string, unknown> = {
+        ...current.record,
+        $type: typeof current.record.$type === "string" ? current.record.$type : COLLECTION_COLLECTION,
+        items: nextItems,
+      };
+      await putRecord(COLLECTION_COLLECTION, rkey, nextRecord, {
+        swapRecord: current.cid,
+        ...(options?.repo ? { repo: options.repo } : {}),
+      });
+      unnestedFrom.push(rkey);
+    } catch (error) {
+      unnestErrors.push({
+        rkey,
+        error: error instanceof Error ? error.message : "A parent collection could not be updated.",
+      });
+    }
+  }
+
+  let collectionDeleted = false;
+  let collectionError: string | null = null;
+  try {
+    await deleteRecord(COLLECTION_COLLECTION, input.datasetRkey, options);
+    collectionDeleted = true;
+  } catch (error) {
+    collectionError = error instanceof Error ? error.message : "The dataset could not be deleted.";
+  }
+
+  return { detached, detachErrors, unnestedFrom, unnestErrors, collectionDeleted, collectionError };
 }
 
 /**

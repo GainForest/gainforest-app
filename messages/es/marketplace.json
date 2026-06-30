@@ -609,7 +609,7 @@
       "bumicerts": "certificados",
       "donationHistory": "Historial de donaciones",
       "leaderboard": "Clasificación",
-      "evidenceTimeline": "Cronología de evidencia",
+      "evidenceTimeline": "Actualizaciones del proyecto",
       "settings": "Configuración"
     },
     "setupPrompt": {
@@ -868,13 +868,13 @@
   "projects": {
     "metadata": {
       "title": "Explorar proyectos — trabajo de impacto regenerativo verificado",
-      "description": "Explora colecciones de proyectos de comunidades y organizaciones, cada una agrupando los certificados que documentan su impacto regenerativo."
+      "description": "Explora proyectos: cada uno es un trabajo enfocado con un objetivo claro, un plazo y los resultados esperados."
     },
     "hero": {
       "eyebrow": "Explorar proyectos",
       "title": "Explora",
       "accent": "Proyectos",
-      "description": "Los proyectos agrupan certificados relacionados de comunidades y organizaciones, para que puedas explorar el trabajo a nivel de proyecto antes de entrar en certificados individuales."
+      "description": "Cada proyecto es un trabajo enfocado — con un objetivo claro, un plazo y los resultados esperados."
     },
     "search": {
       "ariaLabel": "Buscar proyectos",
@@ -937,7 +937,7 @@
     "evidence": {
       "boundaries": "{count, plural, =0 {Sin límites de sitio aún} one {# límite de sitio mapeado} other {# límites de sitio mapeados}}",
       "sightings": "{count, plural, =0 {Sin avistamientos de naturaleza aún} one {# avistamiento de naturaleza} other {# avistamientos de naturaleza}}",
-      "timeline": "{count, plural, =0 {Sin evidencia en la cronología aún} one {# elemento de cronología} other {# elementos de cronología}}",
+      "timeline": "{count, plural, =0 {Sin actualizaciones del proyecto aún} one {# actualización del proyecto} other {# actualizaciones del proyecto}}",
       "reviews": "{count, plural, =0 {Sin evaluaciones aún} one {# evaluación} other {# evaluaciones}}"
     }
   },

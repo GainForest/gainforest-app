@@ -26,6 +26,7 @@ export type ObservationDatasetGroup = {
   count: number;
   createdAt: string | null;
   uris: string[];
+  parentRkeys: string[];
 };
 
 export type GroupObservationsDoneSummary = {

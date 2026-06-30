@@ -771,6 +771,7 @@
     },
     "filters": {
       "all": "All",
+      "following": "Following",
       "project": "Projects",
       "observation": "Sightings",
       "organization": "Organizations",
@@ -792,6 +793,7 @@
     "error": "Couldn't load the feed right now.",
     "empty": "Nothing has happened yet. Be the first to share!",
     "emptyFiltered": "No activity of this kind yet.",
+    "emptyFollowing": "No recent activity from accounts you follow yet.",
     "loadMore": "Load more",
     "loadingMore": "Loading…",
     "endOfFeed": "You're all caught up",

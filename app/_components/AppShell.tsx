@@ -222,10 +222,12 @@ export function AppShell({
   children,
   authSession,
   manageAccountKind,
+  footer,
 }: {
   children: React.ReactNode;
   authSession: AuthSession | null;
   manageAccountKind: ManageAccountKind;
+  footer?: React.ReactNode;
 }) {
   const pathname = useCanonicalPathname();
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
@@ -312,7 +314,12 @@ export function AppShell({
   }, []);
 
   if (pathname === "/") {
-    return <>{children}</>;
+    return (
+      <>
+        {children}
+        {footer}
+      </>
+    );
   }
 
   const isProfileLoading = resolvedAuthSession?.isLoggedIn === true && isShellProfileLoading;
@@ -344,7 +351,11 @@ export function AppShell({
           <MobileNavDrawer open={mobileNavOpen} onOpenChange={setMobileNavOpen}>
             <UnifiedSidebar authSession={resolvedAuthSession} />
           </MobileNavDrawer>
-          <main className="relative flex-1 overflow-y-auto">
+          {/* Scroll container is a flex column so the footer is always pinned
+              to the bottom of the viewport. While the page content suspends or
+              loads, the growable content area still fills the height, so the
+              footer never flashes up under the header before the page paints. */}
+          <main className="relative flex flex-1 flex-col overflow-y-auto">
             <Header
               authSession={resolvedAuthSession}
               profileName={resolvedProfileName}
@@ -356,7 +367,8 @@ export function AppShell({
               isProfileLoading={isProfileLoading}
               hasCertifiedProfile={hasCertifiedProfile}
             />
-            {children}
+            <div className="flex-1">{children}</div>
+            {footer}
           </main>
         </div>
       </div>

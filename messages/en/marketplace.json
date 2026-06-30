@@ -609,7 +609,7 @@
       "bumicerts": "Certs",
       "donationHistory": "Donation History",
       "leaderboard": "Leaderboard",
-      "evidenceTimeline": "Evidence Timeline",
+      "evidenceTimeline": "Project Updates",
       "settings": "Settings"
     },
     "setupPrompt": {
@@ -868,13 +868,13 @@
   "projects": {
     "metadata": {
       "title": "Explore Projects — Verified Regenerative Impact Work",
-      "description": "Browse project collections from communities and organizations, each grouping the Certs that document their regenerative impact."
+      "description": "Browse projects — each a focused piece of work with a clear goal, a timeline, and expected outcomes."
     },
     "hero": {
       "eyebrow": "Explore Projects",
       "title": "Browse",
       "accent": "Projects",
-      "description": "Projects group related Certs from communities and organizations, so you can browse work at the parent-project level before diving into individual certificates."
+      "description": "Each project is a focused piece of work — with a clear goal, a timeline, and expected outcomes."
     },
     "search": {
       "ariaLabel": "Search projects",
@@ -937,7 +937,7 @@
     "evidence": {
       "boundaries": "{count, plural, =0 {No site boundaries yet} one {# site boundary mapped} other {# site boundaries mapped}}",
       "sightings": "{count, plural, =0 {No nature sightings yet} one {# nature sighting} other {# nature sightings}}",
-      "timeline": "{count, plural, =0 {No timeline evidence yet} one {# timeline item} other {# timeline items}}",
+      "timeline": "{count, plural, =0 {No project updates yet} one {# project update} other {# project updates}}",
       "reviews": "{count, plural, =0 {No reviews yet} one {# review} other {# reviews}}"
     }
   },

@@ -18,7 +18,7 @@
       "loadDescription": "Kami kesulitan mengambil data sertifikat ini. Silakan coba lagi atau kembali ke beranda."
     },
     "timeline": {
-      "title": "Garis Waktu Bukti",
+      "title": "Pembaruan proyek",
       "itemCount": "{count, plural, =0 {0 item} =1 {1 item} other {# item}}",
       "linked": "tertaut {window}",
       "linkedWindow": "Jendela tertaut: {window}",
@@ -35,11 +35,11 @@
       },
       "ownerTools": "Alat pemilik",
       "linkEvidenceTitle": "Tautkan bukti",
-      "linkEvidenceDescription": "Tambahkan bukti tersimpan atau berkas ke {title}. Item yang Anda tambahkan akan muncul di linimasa bukti publik di bawah.",
+      "linkEvidenceDescription": "Tambahkan bukti tersimpan atau berkas ke {title}. Item yang Anda tambahkan akan muncul di pembaruan proyek publik di bawah.",
       "notTimelineYet": "Belum menjadi bagian dari linimasa",
-      "linkedTitle": "Linimasa bukti tertaut",
+      "linkedTitle": "Pembaruan proyek tertaut",
       "linkedItemCount": "{count, plural, =0 {0 item tertaut ke aktivitas sertifikat ini} =1 {1 item tertaut ke aktivitas sertifikat ini} other {# item tertaut ke aktivitas sertifikat ini}}",
-      "linkedDescription": "Tinjau catatan, file, dan lapisan peta yang sudah menjadi bagian dari linimasa bukti publik.",
+      "linkedDescription": "Tinjau catatan, file, dan lapisan peta yang sudah menjadi bagian dari pembaruan proyek publik.",
       "pageOf": "Halaman {current} dari {total}",
       "previousPage": "Halaman sebelumnya",
       "nextPage": "Halaman berikutnya",

@@ -240,7 +240,7 @@ export function AmountModal({
   return (
     <ModalContent dismissible={false} className="min-w-0">
       <ModalHeader>
-        <ModalTitle>Support this Cert</ModalTitle>
+        <ModalTitle>Support this project</ModalTitle>
         <ModalDescription>
           {bumicert.title} · {bumicert.organizationName}
         </ModalDescription>
@@ -620,7 +620,7 @@ function SuccessModal({
   const organizationIdentifier = usePreferredDidIdentifier(bumicert.organizationDid);
   const sharePath = localBumicertHref(organizationIdentifier, bumicert.rkey);
   const shareUrl = absoluteLocalUrl(sharePath);
-  const shareText = `I donated $${amount.toFixed(2)} to support a Cert: ${shareUrl}`;
+  const shareText = `I donated $${amount.toFixed(2)} to support a project: ${shareUrl}`;
   const shareLinks = [
     { platform: "x", label: "Share on X", href: socialShareUrl("x", shareText), className: "text-black dark:text-white" },
     { platform: "bluesky", label: "Share on Bluesky", href: socialShareUrl("bluesky", shareText), className: "text-blue-600" },
@@ -709,7 +709,7 @@ function SuccessModal({
               <Button variant="secondary" className="h-16 flex-col items-start rounded-2xl" onClick={handleDone} asChild>
                 <Link href="/projects">
                   <CompassIcon className="opacity-40" />
-                  <span>Explore more Certs</span>
+                  <span>Explore more projects</span>
                 </Link>
               </Button>
             </div>

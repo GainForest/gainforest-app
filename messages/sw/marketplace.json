@@ -608,7 +608,7 @@
       "home": "Nyumbani",
       "bumicerts": "vyeti",
       "donationHistory": "Historia ya michango",
-      "evidenceTimeline": "Ratiba ya ushahidi",
+      "evidenceTimeline": "Masasisho ya mradi",
       "settings": "Mipangilio",
       "leaderboard": "Ubao wa wanaoongoza"
     },
@@ -868,13 +868,13 @@
   "projects": {
     "metadata": {
       "title": "Gundua Miradi — Kazi Iliyothibitishwa ya Athari ya Urejeshaji",
-      "description": "Vinjari mikusanyiko ya miradi kutoka kwa jamii na mashirika, kila mkusanyiko ukiweka pamoja vyeti zinazoandika athari zao za urejeshaji."
+      "description": "Vinjari miradi — kila moja ni kazi inayolenga yenye lengo wazi, ratiba ya muda, na matokeo yanayotarajiwa."
     },
     "hero": {
       "eyebrow": "Gundua miradi",
       "title": "Gundua",
       "accent": "Miradi",
-      "description": "Miradi huweka pamoja vyeti zinazohusiana kutoka jamii na mashirika, ili uweze kuvinjari kazi katika kiwango cha mradi kabla ya kuangalia vyeti binafsi."
+      "description": "Kila mradi ni kazi inayolenga — yenye lengo wazi, ratiba ya muda, na matokeo yanayotarajiwa."
     },
     "search": {
       "ariaLabel": "Tafuta miradi",
@@ -937,7 +937,7 @@
     "evidence": {
       "boundaries": "{count, plural, =0 {Bado hakuna mipaka ya eneo} one {Mpaka # wa eneo umechorwa} other {Mipaka # ya eneo imechorwa}}",
       "sightings": "{count, plural, =0 {Bado hakuna uoni wa asili} one {Uoni # wa asili} other {Uoni # wa asili}}",
-      "timeline": "{count, plural, =0 {Bado hakuna ushahidi wa ratiba} one {Kipengele # cha ratiba} other {Vipengele # vya ratiba}}",
+      "timeline": "{count, plural, =0 {Bado hakuna masasisho ya mradi} one {Sasisho # la mradi} other {Masasisho # ya mradi}}",
       "reviews": "{count, plural, =0 {Bado hakuna mapitio} one {Pitio #} other {Mapitio #}}"
     }
   },

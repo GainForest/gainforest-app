@@ -18,7 +18,7 @@
       "loadDescription": "Tulikuwa na tatizo la kuleta data ya cheti hii. Tafadhali jaribu tena au rudi kwenye ukurasa wa nyumbani."
     },
     "timeline": {
-      "title": "Muda wa Ushahidi",
+      "title": "Masasisho ya mradi",
       "itemCount": "{count, plural, =0 {vipengee 0} =1 {kipengee 1} other {vipengee #}}",
       "linked": "iliyounganishwa {window}",
       "linkedWindow": "Dirisha lililounganishwa: {window}",
@@ -35,11 +35,11 @@
       },
       "ownerTools": "Zana za mmiliki",
       "linkEvidenceTitle": "Unganisha ushahidi",
-      "linkEvidenceDescription": "Ongeza ushahidi uliohifadhiwa au faili kwenye {title}. Vipengee utakavyoongeza vitaonekana kwenye ratiba ya ushahidi ya umma hapa chini.",
+      "linkEvidenceDescription": "Ongeza ushahidi uliohifadhiwa au faili kwenye {title}. Vipengee utakavyoongeza vitaonekana kwenye masasisho ya mradi ya umma hapa chini.",
       "notTimelineYet": "Bado si sehemu ya ratiba",
-      "linkedTitle": "Ratiba ya ushahidi uliounganishwa",
+      "linkedTitle": "Masasisho ya mradi yaliyounganishwa",
       "linkedItemCount": "{count, plural, =0 {vipengee 0 vilivyounganishwa na shughuli hii ya cheti} =1 {kipengee 1 kimeunganishwa na shughuli hii ya cheti} other {vipengee # vimeunganishwa na shughuli hii ya cheti}}",
-      "linkedDescription": "Kagua rekodi, faili na tabaka za ramani ambazo tayari ni sehemu ya ratiba ya ushahidi ya umma.",
+      "linkedDescription": "Kagua rekodi, faili na tabaka za ramani ambazo tayari ni sehemu ya masasisho ya mradi ya umma.",
       "pageOf": "Ukurasa {current} kati ya {total}",
       "previousPage": "Ukurasa uliopita",
       "nextPage": "Ukurasa unaofuata",

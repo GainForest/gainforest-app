@@ -18,7 +18,7 @@
       "loadDescription": "Tivemos problemas ao buscar os dados deste certificado. Por favor, tente novamente ou volte para a página inicial."
     },
     "timeline": {
-      "title": "Cronograma da Evidência",
+      "title": "Atualizações do projeto",
       "itemCount": "{count, plural, =0 {0 itens} =1 {1 item} other {# itens}}",
       "linked": "vinculado {window}",
       "linkedWindow": "Janela vinculada: {window}",
@@ -35,11 +35,11 @@
       },
       "ownerTools": "Ferramentas do proprietário",
       "linkEvidenceTitle": "Vincular evidências",
-      "linkEvidenceDescription": "Adicione evidências salvas ou arquivos a {title}. Os itens que você adicionar aparecerão na linha do tempo pública de evidências abaixo.",
+      "linkEvidenceDescription": "Adicione evidências salvas ou arquivos a {title}. Os itens que você adicionar aparecerão nas atualizações públicas do projeto abaixo.",
       "notTimelineYet": "Ainda não faz parte da linha do tempo",
-      "linkedTitle": "Linha do tempo de evidências vinculadas",
+      "linkedTitle": "Atualizações do projeto vinculadas",
       "linkedItemCount": "{count, plural, =0 {0 itens vinculados a esta atividade do certificado} =1 {1 item vinculado a esta atividade do certificado} other {# itens vinculados a esta atividade do certificado}}",
-      "linkedDescription": "Revise os registros, arquivos e camadas do mapa que já fazem parte da linha do tempo pública de evidências.",
+      "linkedDescription": "Revise os registros, arquivos e camadas do mapa que já fazem parte das atualizações públicas do projeto.",
       "pageOf": "Página {current} de {total}",
       "previousPage": "Página anterior",
       "nextPage": "Próxima página",

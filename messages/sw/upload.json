@@ -921,10 +921,12 @@
     "separateDropZone": "Dondosha hapa ili kuunda uchunguzi tofauti",
     "groupIntoDataset": "Weka katika seti ya data",
     "datasetsHeading": "Seti za data",
+    "allObservationsHeading": "Uchunguzi wote",
     "datasetClearFilter": "Onyesha zote",
     "datasetFolderAria": "Seti ya {name}, {count, plural, one {uchunguzi #} other {uchunguzi #}}",
     "datasetEmptyTitle": "Bado hakuna uchunguzi katika seti hii",
     "datasetEmptyBody": "Chagua uchunguzi na uziweke katika seti hii ili zionekane hapa.",
+    "datasetsEmptyHint": "Weka uchunguzi katika seti ya data ili kuzipanga na kuzitumia tena. Seti zako za data zitaonekana hapa.",
     "dataset": {
       "title": "{count, plural, one {Weka uchunguzi #} other {Weka uchunguzi #}}",
       "description": "Kusanya uchunguzi huu katika folda ya seti ya data unayoweza kutumia tena na kushiriki.",
@@ -949,7 +951,11 @@
       "confirmNew": "Tengeneza na uweke",
       "confirmExisting": "Ongeza kwenye seti",
       "addsToProject": "Seti hii itaongezwa kwenye {project}."
-    }
+    },
+    "datasetDeleteAria": "Futa seti ya {name}",
+    "datasetDeleteTitle": "Futa seti ya “{name}”?",
+    "datasetDeleteDescription": "Hii inaondoa upangaji pekee. {count, plural, one {Uchunguzi wako # unabaki.} other {Uchunguzi wako # unabaki.}}",
+    "datasetDeleteConfirm": "Futa seti"
   },
   "settings": {
     "organizationTitle": "Mipangilio ya shirika",

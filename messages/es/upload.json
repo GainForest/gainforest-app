@@ -921,10 +921,12 @@
     "separateDropZone": "Suelta aquí para crear una observación aparte",
     "groupIntoDataset": "Agrupar en un conjunto",
     "datasetsHeading": "Conjuntos de datos",
+    "allObservationsHeading": "Todas las observaciones",
     "datasetClearFilter": "Ver todo",
     "datasetFolderAria": "Conjunto {name}, {count, plural, one {# observación} other {# observaciones}}",
     "datasetEmptyTitle": "Aún no hay observaciones en este conjunto",
     "datasetEmptyBody": "Selecciona observaciones y agrúpalas en este conjunto para verlas aquí.",
+    "datasetsEmptyHint": "Agrupa observaciones en un conjunto de datos para organizarlas y reutilizarlas. Tus conjuntos aparecerán aquí.",
     "dataset": {
       "title": "{count, plural, one {Agrupar # observación} other {Agrupar # observaciones}}",
       "description": "Reúne estas observaciones en una carpeta de conjunto que puedas reutilizar y compartir.",
@@ -949,7 +951,11 @@
       "confirmNew": "Crear y agrupar",
       "confirmExisting": "Añadir al conjunto",
       "addsToProject": "Este conjunto se añadirá a {project}."
-    }
+    },
+    "datasetDeleteAria": "Eliminar el conjunto {name}",
+    "datasetDeleteTitle": "¿Eliminar el conjunto “{name}”?",
+    "datasetDeleteDescription": "Esto solo elimina la agrupación. {count, plural, one {Tu # observación se conserva.} other {Tus # observaciones se conservan.}}",
+    "datasetDeleteConfirm": "Eliminar conjunto"
   },
   "settings": {
     "organizationTitle": "Configuración de la organización",
