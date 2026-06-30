@@ -889,7 +889,7 @@
     "draftRestored": "Rascunho recuperado",
     "discardDraft": "Descartar rascunho",
     "unidentifiedOrganism": "Organismo não identificado",
-    "selectToDeleteHint": "Selecione observações na grade para excluí-las.",
+    "selectToDeleteHint": "Selecione observações para excluí-las ou agrupá-las em um conjunto.",
     "selectedForDelete": "{count, plural, one {# observação selecionada} other {# observações selecionadas}}",
     "deleteSelected": "Excluir selecionadas",
     "deleteSelectedTitle": "Excluir observações selecionadas?",

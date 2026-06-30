@@ -657,22 +657,22 @@ export function ObservationsClient({ target, initialPage, forProject = null }: {
               {selectedRecords.size === visibleRecords.length && visibleRecords.length > 0 ? t("deselectAll") : t("selectAll")}
             </Button>
             <Button
-              variant="outline"
+              variant="ghost"
               size="sm"
               onClick={openGroupIntoDataset}
               disabled={selectedRecords.size === 0 || Boolean(createPermission.reason) || isDeletingSelected}
               title={createPermission.reason ?? undefined}
+              className="text-muted-foreground hover:text-foreground"
             >
               <FolderPlusIcon className="size-4" />
               {t("groupIntoDataset")}
             </Button>
             <Button
-              variant="outline"
+              variant="destructive"
               size="sm"
               onClick={openDeleteSelectedModal}
               disabled={selectedRecords.size === 0 || Boolean(deleteDisabledReason) || isDeletingSelected}
               title={deleteDisabledReason ?? undefined}
-              className="text-destructive hover:bg-destructive/10 hover:text-destructive"
             >
               {isDeletingSelected ? <Loader2Icon className="size-4 animate-spin" /> : <Trash2Icon className="size-4" />}
               {isDeletingSelected ? t("deletingSelected") : t("deleteSelected")}

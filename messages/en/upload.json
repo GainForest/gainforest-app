@@ -889,7 +889,7 @@
     "draftRestored": "Draft restored",
     "discardDraft": "Discard draft",
     "unidentifiedOrganism": "Unidentified Organism",
-    "selectToDeleteHint": "Select observations in the grid to delete them.",
+    "selectToDeleteHint": "Select observations to delete them, or group them into a dataset.",
     "selectedForDelete": "{count, plural, one {# observation selected} other {# observations selected}}",
     "deleteSelected": "Delete selected",
     "deleteSelectedTitle": "Delete selected observations?",

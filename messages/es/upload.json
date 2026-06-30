@@ -889,7 +889,7 @@
     "draftRestored": "Borrador recuperado",
     "discardDraft": "Descartar borrador",
     "unidentifiedOrganism": "Organismo no identificado",
-    "selectToDeleteHint": "Selecciona observaciones en la cuadrícula para eliminarlas.",
+    "selectToDeleteHint": "Selecciona observaciones para eliminarlas o agruparlas en un conjunto.",
     "selectedForDelete": "{count, plural, one {# observación seleccionada} other {# observaciones seleccionadas}}",
     "deleteSelected": "Eliminar seleccionadas",
     "deleteSelectedTitle": "¿Eliminar las observaciones seleccionadas?",
