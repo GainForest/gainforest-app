@@ -748,6 +748,12 @@ export function ObservationsClient({ target, initialPage, forProject = null }: {
         </div>
       ) : null}
 
+      {!isEmpty ? (
+        <div className="mx-auto mt-8 max-w-6xl px-6">
+          <h2 className="text-sm font-medium text-foreground">{t("allObservationsHeading")}</h2>
+        </div>
+      ) : null}
+
       <Suspense fallback={null}>
         <RecordExplorer
           kind="occurrence"

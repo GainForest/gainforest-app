@@ -921,6 +921,7 @@
     "separateDropZone": "Drop here to make a separate observation",
     "groupIntoDataset": "Group into dataset",
     "datasetsHeading": "Datasets",
+    "allObservationsHeading": "All observations",
     "datasetClearFilter": "Show all",
     "datasetFolderAria": "{name} dataset, {count, plural, one {# observation} other {# observations}}",
     "datasetEmptyTitle": "No observations in this dataset yet",

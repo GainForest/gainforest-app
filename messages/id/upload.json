@@ -921,6 +921,7 @@
     "separateDropZone": "Letakkan di sini untuk membuat observasi terpisah",
     "groupIntoDataset": "Kelompokkan ke set data",
     "datasetsHeading": "Set data",
+    "allObservationsHeading": "Semua observasi",
     "datasetClearFilter": "Tampilkan semua",
     "datasetFolderAria": "Set data {name}, {count, plural, other {# observasi}}",
     "datasetEmptyTitle": "Belum ada observasi di set data ini",

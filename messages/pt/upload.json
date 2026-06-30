@@ -921,6 +921,7 @@
     "separateDropZone": "Solte aqui para criar uma observação separada",
     "groupIntoDataset": "Agrupar em conjunto",
     "datasetsHeading": "Conjuntos de dados",
+    "allObservationsHeading": "Todas as observações",
     "datasetClearFilter": "Ver tudo",
     "datasetFolderAria": "Conjunto {name}, {count, plural, one {# observação} other {# observações}}",
     "datasetEmptyTitle": "Ainda não há observações neste conjunto",

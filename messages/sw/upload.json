@@ -921,6 +921,7 @@
     "separateDropZone": "Dondosha hapa ili kuunda uchunguzi tofauti",
     "groupIntoDataset": "Weka katika seti ya data",
     "datasetsHeading": "Seti za data",
+    "allObservationsHeading": "Uchunguzi wote",
     "datasetClearFilter": "Onyesha zote",
     "datasetFolderAria": "Seti ya {name}, {count, plural, one {uchunguzi #} other {uchunguzi #}}",
     "datasetEmptyTitle": "Bado hakuna uchunguzi katika seti hii",
