@@ -229,3 +229,95 @@ export async function nestDatasetUnderProject(
     ...(options?.repo ? { repo: options.repo } : {}),
   });
 }
+
+/** Remove a dataset from a single parent collection's items[]. Returns whether
+ *  the parent actually changed (false when the dataset wasn't listed). */
+async function unnestDatasetFromParent(
+  parentRkey: string,
+  datasetUri: string,
+  options?: RepoOptions,
+): Promise<boolean> {
+  const current = await getRecord(COLLECTION_COLLECTION, parentRkey, options);
+  const items = Array.isArray(current.record.items) ? current.record.items : [];
+  const nextItems = items.filter((item) => itemUri(item) !== datasetUri);
+  if (nextItems.length === items.length) return false; // not listed — nothing to do
+  const nextRecord: Record<string, unknown> = {
+    ...current.record,
+    $type: typeof current.record.$type === "string" ? current.record.$type : COLLECTION_COLLECTION,
+    items: nextItems,
+  };
+  await putRecord(COLLECTION_COLLECTION, parentRkey, nextRecord, {
+    swapRecord: current.cid,
+    ...(options?.repo ? { repo: options.repo } : {}),
+  });
+  return true;
+}
+
+export type SetDatasetProjectResult = {
+  /** Whether the dataset was nested under the target project. */
+  nested: boolean;
+  /** Parent-collection rkeys the dataset was removed from (when moving/detaching). */
+  unnestedFrom: string[];
+  unnestErrors: Array<{ rkey: string; error: string }>;
+  /** Set when nesting under the target project failed (the move was aborted). */
+  nestError: string | null;
+};
+
+/**
+ * Attach an existing dataset to a project by nesting the dataset collection in
+ * that project's `items[]` (the same recursive-collection link `nestDatasetUnderProject`
+ * creates at group-time) and unnesting it from any project it previously lived
+ * under, so a dataset belongs to a single project (a move, not a fan-out).
+ *
+ * Pass an empty `projectUri` to detach (remove the dataset from every parent
+ * collection that lists it). Nesting under the target happens FIRST: if it fails
+ * the move is aborted and the old link is left intact, so the dataset never ends
+ * up orphaned. Unnesting old parents is then best-effort and reported per-parent.
+ */
+export async function setDatasetProject(
+  input: {
+    datasetUri: string;
+    datasetCid?: string | null;
+    projectUri: string;
+    currentParentRkeys: string[];
+  },
+  options?: RepoOptions,
+): Promise<SetDatasetProjectResult> {
+  const targetUri = input.projectUri.trim();
+  const targetRkey = targetUri ? targetUri.split("/").pop() ?? "" : "";
+
+  // Nest under the new project first, so a failure here leaves the previous
+  // attachment untouched rather than detaching with nowhere to land.
+  let nested = false;
+  let nestError: string | null = null;
+  if (targetUri) {
+    try {
+      await nestDatasetUnderProject(
+        { projectUri: targetUri, datasetUri: input.datasetUri, datasetCid: input.datasetCid ?? null },
+        options,
+      );
+      nested = true;
+    } catch (error) {
+      nestError = error instanceof Error ? error.message : "The dataset could not be added to the project.";
+      return { nested, unnestedFrom: [], unnestErrors: [], nestError };
+    }
+  }
+
+  // Remove the dataset from any other project it was nested under (the target is
+  // skipped — nestDatasetUnderProject already made it a member, idempotently).
+  const unnestedFrom: string[] = [];
+  const unnestErrors: Array<{ rkey: string; error: string }> = [];
+  for (const rkey of input.currentParentRkeys) {
+    if (rkey === targetRkey) continue;
+    try {
+      if (await unnestDatasetFromParent(rkey, input.datasetUri, options)) unnestedFrom.push(rkey);
+    } catch (error) {
+      unnestErrors.push({
+        rkey,
+        error: error instanceof Error ? error.message : "A previous project could not be updated.",
+      });
+    }
+  }
+
+  return { nested, unnestedFrom, unnestErrors, nestError };
+}

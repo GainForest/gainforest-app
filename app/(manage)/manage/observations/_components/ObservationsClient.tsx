@@ -39,7 +39,7 @@ import QuickTooltip from "@/components/ui/quick-tooltip";
 import { manageApiHref, type ManageTarget } from "@/lib/links";
 import { cn } from "@/lib/utils";
 import { ManageConfirmModal } from "../../_components/ManageConfirmModal";
-import { canCreateRecord, canDeleteRecord } from "../../_lib/cgs-permissions";
+import { canCreateRecord, canDeleteRecord, canUpdateRecord } from "../../_lib/cgs-permissions";
 import { deleteOccurrenceCascade } from "../../_lib/mutations";
 import {
   configureObservationMutationRepo,
@@ -53,6 +53,7 @@ import { LocationPickerModal, LocationPickerModalId } from "./LocationPickerModa
 import { AddObservationsModal } from "./AddObservationsModal";
 import { FolderTile, FolderTileSkeleton } from "@/app/_components/FolderTile";
 import { GroupObservationsDatasetModal, type ObservationDatasetGroup } from "./GroupObservationsDatasetModal";
+import { AttachDatasetToProjectModal } from "./AttachDatasetToProjectModal";
 import { deleteObservationDataset } from "./observation-dataset-mutations";
 import { takeAddDataHandoff } from "../../_lib/upload/add-data-handoff";
 import {
@@ -429,6 +430,7 @@ export function ObservationsClient({ target, initialPage, forProject = null }: {
   const [datasetFilter, setDatasetFilter] = useQueryState("dataset", parseAsString.withOptions(QUERY_STATE_OPTIONS));
   const deletePermission = canDeleteRecord(target, { ownRecord: target.kind === "personal" });
   const deleteDisabledReason = deletePermission.allowed ? null : deletePermission.reason;
+  const updatePermission = canUpdateRecord(target);
   const selectedIds = useMemo(() => new Set(selectedRecords.keys()), [selectedRecords]);
 
   useEffect(() => {
@@ -438,22 +440,21 @@ export function ObservationsClient({ target, initialPage, forProject = null }: {
 
   // Group the steward's observations by the project they were collected for so
   // the list can be filtered per project (read straight from projectRef).
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const response = await fetch(manageApiHref("/api/manage/observations/projects", target), { cache: "no-store" });
-        const data = (await response.json()) as { groups?: ObservationProjectGroup[] };
-        if (cancelled || !response.ok || !Array.isArray(data?.groups)) return;
-        setProjectGroups(data.groups);
-      } catch {
-        // Filtering is an enhancement; ignore load failures.
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
+  // Re-fetched after attaching a dataset to a project so the pills stay fresh.
+  const loadProjectGroups = useCallback(async () => {
+    try {
+      const response = await fetch(manageApiHref("/api/manage/observations/projects", target), { cache: "no-store" });
+      const data = (await response.json()) as { groups?: ObservationProjectGroup[] };
+      if (!response.ok || !Array.isArray(data?.groups)) return;
+      setProjectGroups(data.groups);
+    } catch {
+      // Filtering is an enhancement; ignore load failures.
+    }
   }, [target]);
+
+  useEffect(() => {
+    void loadProjectGroups();
+  }, [loadProjectGroups]);
 
   // Group observations by the dataset they were filed into so the steward can
   // see datasets as folders and filter the list down to one. Re-fetched after a
@@ -669,6 +670,36 @@ export function ObservationsClient({ target, initialPage, forProject = null }: {
     [datasetFilter, deleteDisabledReason, loadDatasetGroups, modal, router, setDatasetFilter, t, target],
   );
 
+  // Attach an existing dataset (folder) to a project: nests the dataset
+  // collection under the chosen project's items[] (and unnests it from any
+  // previous project), then refreshes the folders + project pills.
+  const openAttachDatasetToProject = useCallback(
+    (dataset: ObservationDatasetGroup) => {
+      if (!updatePermission.allowed) return;
+      modal.pushModal(
+        {
+          id: "attach-dataset-project",
+          dialogWidth: "max-w-lg w-[calc(100%-2rem)]",
+          forceDialog: true,
+          content: (
+            <AttachDatasetToProjectModal
+              target={target}
+              dataset={dataset}
+              onDone={() => {
+                void loadDatasetGroups();
+                void loadProjectGroups();
+                router.refresh();
+              }}
+            />
+          ),
+        },
+        true,
+      );
+      void modal.show();
+    },
+    [loadDatasetGroups, loadProjectGroups, modal, router, target, updatePermission.allowed],
+  );
+
   if (mode === "add") {
     return (
       <ObservationBulkAddPanel
@@ -768,17 +799,32 @@ export function ObservationsClient({ target, initialPage, forProject = null }: {
                       if (!active) void setProjectFilter(null);
                     }}
                     action={
-                      deletePermission.allowed ? (
-                        <button
-                          type="button"
-                          onClick={() => openDeleteDataset(dataset)}
-                          disabled={isDeletingSelected}
-                          aria-label={t("datasetDeleteAria", { name: dataset.name })}
-                          title={t("datasetDeleteConfirm")}
-                          className="grid size-7 place-items-center rounded-full bg-background/90 text-muted-foreground shadow-sm ring-1 ring-border transition-colors hover:text-destructive hover:ring-destructive/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive/40"
-                        >
-                          <Trash2Icon className="size-3.5" />
-                        </button>
+                      updatePermission.allowed || deletePermission.allowed ? (
+                        <div className="flex items-center gap-1.5">
+                          {updatePermission.allowed ? (
+                            <button
+                              type="button"
+                              onClick={() => openAttachDatasetToProject(dataset)}
+                              aria-label={t("datasetAttachAria", { name: dataset.name })}
+                              title={dataset.projectName ? t("datasetChangeProject") : t("datasetAttachToProject")}
+                              className="grid size-7 place-items-center rounded-full bg-background/90 text-muted-foreground shadow-sm ring-1 ring-border transition-colors hover:text-primary hover:ring-primary/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+                            >
+                              <FolderKanbanIcon className="size-3.5" />
+                            </button>
+                          ) : null}
+                          {deletePermission.allowed ? (
+                            <button
+                              type="button"
+                              onClick={() => openDeleteDataset(dataset)}
+                              disabled={isDeletingSelected}
+                              aria-label={t("datasetDeleteAria", { name: dataset.name })}
+                              title={t("datasetDeleteConfirm")}
+                              className="grid size-7 place-items-center rounded-full bg-background/90 text-muted-foreground shadow-sm ring-1 ring-border transition-colors hover:text-destructive hover:ring-destructive/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive/40"
+                            >
+                              <Trash2Icon className="size-3.5" />
+                            </button>
+                          ) : null}
+                        </div>
                       ) : undefined
                     }
                   />
