@@ -203,7 +203,9 @@
       },
       "connectCaption": "Bandika hii kwenye wakala wako wa AI (ChatGPT, Claude, boti ya Telegram…) ili kuiunganisha na GainForest.",
       "generateAndCopy": "Tengeneza ufunguo na unakili ujumbe",
-      "defaultKeyName": "Wakala wa AI"
+      "defaultKeyName": "Wakala wa AI",
+      "tainaBadge": "Tainá",
+      "tainaBadgeTitle": "Ufunguo huu umeunganishwa na boti yako ya Telegram ya Tainá"
     }
   },
   "bumicertCard": {
@@ -1071,7 +1073,7 @@
       "connectedOn": "Imeunganishwa {date}",
       "openInTelegram": "Fungua kwenye Telegram",
       "apiKeyTitle": "Ufunguo wa API",
-      "apiKeyDescription": "Umetengenezwa kiotomatiki kutoka kwenye kuingia kwako. Tainá huutumia kurekodi uchunguzi kwenye akaunti yako. Uweke siri.",
+      "apiKeyDescription": "Ufunguo wa wakala wa AI wa GainForest uliotengenezwa kwa ajili ya Tainá. Pia unaonekana kwenye Mipangilio → Funguo za wakala wa AI, ukiwa na alama ya Tainá. Uweke siri.",
       "active": "Inatumika",
       "revoked": "Umebatilishwa",
       "reveal": "Onyesha",
@@ -1089,7 +1091,11 @@
       "chatTitle": "Mazungumzo ya uchunguzi",
       "chatActive": "Inatumika",
       "chatWaiting": "Inasubiri",
-      "chatEmpty": "Hakuna ujumbe bado. Fungua boti yako kwenye Telegram na ueleze au upige picha kitu ulichokiona — mazungumzo yako na Tainá yanaonekana hapa moja kwa moja."
+      "chatEmpty": "Hakuna ujumbe bado. Fungua boti yako kwenye Telegram na ueleze au upige picha kitu ulichokiona — mazungumzo yako na Tainá yanaonekana hapa moja kwa moja.",
+      "restart": "Anzisha upya kikao",
+      "restarting": "Inaanzisha upya…",
+      "restartConfirm": "Uanze mazungumzo mapya na Tainá? Atasahau historia ya gumzo hili — uchunguzi wako uliorekodiwa hautaathirika.",
+      "restartFailed": "Kuanzisha upya hakukufanikiwa — tafadhali jaribu tena."
     }
   }
 }

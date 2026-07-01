@@ -203,7 +203,9 @@
       },
       "connectCaption": "Tempel ini ke agen AI Anda (ChatGPT, Claude, bot Telegram…) untuk menghubungkannya ke GainForest.",
       "generateAndCopy": "Buat kunci & salin pesan",
-      "defaultKeyName": "Agen AI"
+      "defaultKeyName": "Agen AI",
+      "tainaBadge": "Tainá",
+      "tainaBadgeTitle": "Kunci ini tertaut ke bot Telegram Tainá Anda"
     }
   },
   "bumicertCard": {
@@ -1071,7 +1073,7 @@
       "connectedOn": "Terhubung {date}",
       "openInTelegram": "Buka di Telegram",
       "apiKeyTitle": "Kunci API",
-      "apiKeyDescription": "Dibuat otomatis dari proses masuk Anda. Tainá menggunakannya untuk mencatat observasi di akun Anda. Jaga kerahasiaannya.",
+      "apiKeyDescription": "Kunci agen AI GainForest yang dibuat untuk Tainá. Kunci ini juga tampil di Pengaturan → Kunci agen AI, ditandai sebagai milik Tainá. Jaga kerahasiaannya.",
       "active": "Aktif",
       "revoked": "Dicabut",
       "reveal": "Tampilkan",
@@ -1089,7 +1091,11 @@
       "chatTitle": "Obrolan observasi",
       "chatActive": "Aktif",
       "chatWaiting": "Menunggu",
-      "chatEmpty": "Belum ada pesan. Buka bot Anda di Telegram lalu jelaskan atau foto sesuatu yang Anda lihat — percakapan Anda dengan Tainá tampil di sini secara langsung."
+      "chatEmpty": "Belum ada pesan. Buka bot Anda di Telegram lalu jelaskan atau foto sesuatu yang Anda lihat — percakapan Anda dengan Tainá tampil di sini secara langsung.",
+      "restart": "Mulai ulang sesi",
+      "restarting": "Memulai ulang…",
+      "restartConfirm": "Mulai percakapan baru dengan Tainá? Ia akan melupakan riwayat obrolan ini — observasi yang sudah tercatat tidak terpengaruh.",
+      "restartFailed": "Mulai ulang gagal — silakan coba lagi."
     }
   }
 }

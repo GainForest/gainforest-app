@@ -1,39 +1,33 @@
 import { NextResponse } from "next/server";
 import { fetchAuthSession } from "@/app/_lib/auth-server";
 import {
-  deleteTainaPat,
-  fetchTainaDashboard,
-  mintTainaPat,
-  resolveTainaPat,
+  listTainaAgentKeyIds,
+  mintTainaAgentKey,
+  revokeAgentKeys,
   setTainaKey,
 } from "@/app/_lib/taina-agent";
 
 export const dynamic = "force-dynamic";
 
-/** Read the user's current Tainá key from the agent runtime. */
-async function currentKey(did: string): Promise<string | null> {
-  try {
-    const { ok, data } = await fetchTainaDashboard(did);
-    return ok ? data.apiKey ?? null : null;
-  } catch {
-    return null;
-  }
-}
+/**
+ * The Tainá bot publishes with a regular GainForest AI-agent key (gf_pat_…)
+ * named for Tainá, managed through the central auth service — the same keys
+ * listed in Settings → AI agent keys. Regenerate/revoke here keeps the agent
+ * runtime and the key list in sync.
+ */
 
-/** POST /api/taina/key — regenerate: mint a fresh key, revoke the old one. */
+/** POST /api/taina/key — regenerate: mint a fresh key, retire the old ones. */
 export async function POST() {
   const session = await fetchAuthSession();
   if (!session.isLoggedIn) {
     return NextResponse.json({ error: "not_signed_in" }, { status: 401 });
   }
-  const did = session.did;
 
   try {
-    const old = await currentKey(did);
-    const pat = await mintTainaPat(did);
-    await setTainaKey(did, pat);
-    // Only revoke the old token when it really belonged to this account.
-    if (old && (await resolveTainaPat(old)) === did) await deleteTainaPat(old);
+    const staleKeyIds = await listTainaAgentKeyIds().catch(() => []);
+    const pat = await mintTainaAgentKey();
+    await setTainaKey(session.did, pat);
+    await revokeAgentKeys(staleKeyIds);
 
     return NextResponse.json({ apiKey: pat });
   } catch (error) {
@@ -48,12 +42,10 @@ export async function DELETE() {
   if (!session.isLoggedIn) {
     return NextResponse.json({ error: "not_signed_in" }, { status: 401 });
   }
-  const did = session.did;
 
   try {
-    const old = await currentKey(did);
-    if (old && (await resolveTainaPat(old)) === did) await deleteTainaPat(old);
-    await setTainaKey(did, null);
+    await revokeAgentKeys(await listTainaAgentKeyIds().catch(() => []));
+    await setTainaKey(session.did, null);
 
     return NextResponse.json({ ok: true });
   } catch (error) {

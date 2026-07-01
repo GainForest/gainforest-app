@@ -13,6 +13,7 @@ import {
   KeyRoundIcon,
   MessageCircleIcon,
   RefreshCwIcon,
+  RotateCcwIcon,
   Trash2Icon,
 } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -69,6 +70,8 @@ export function TainaDashboardClient() {
   const [data, setData] = useState<DashData | null>(null);
   const [error, setError] = useState<boolean>(false);
   const [loading, setLoading] = useState(true);
+  const [restarting, setRestarting] = useState(false);
+  const [restartFailed, setRestartFailed] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const load = useCallback(async () => {
@@ -93,6 +96,24 @@ export function TainaDashboardClient() {
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight });
   }, [data?.messages.length]);
+
+  // Start a brand-new conversation with Tainá: the runtime forgets the shared
+  // history, clears the transcript here, and greets the observer afresh in
+  // Telegram.
+  async function restartSession() {
+    if (!window.confirm(t("restartConfirm"))) return;
+    setRestarting(true);
+    setRestartFailed(false);
+    try {
+      const response = await fetch("/api/taina/session", { method: "POST" });
+      if (!response.ok) throw new Error();
+      await load();
+    } catch {
+      setRestartFailed(true);
+    } finally {
+      setRestarting(false);
+    }
+  }
 
   if (loading && !data) {
     return (
@@ -187,11 +208,27 @@ export function TainaDashboardClient() {
             ? t("connectedOn", { date: new Date(data.provisionedAt).toLocaleDateString() })
             : null}
         </p>
-        {data.botUrl ? (
-          <a className={cn(buttonVariants(), "mt-4")} href={data.botUrl} target="_blank" rel="noreferrer">
-            {t("openInTelegram")}
-            <ExternalLinkIcon />
-          </a>
+        <div className="mt-4 flex flex-wrap items-center gap-2.5">
+          {data.botUrl ? (
+            <a className={cn(buttonVariants())} href={data.botUrl} target="_blank" rel="noreferrer">
+              {t("openInTelegram")}
+              <ExternalLinkIcon />
+            </a>
+          ) : null}
+          <Button
+            type="button"
+            variant="outline"
+            disabled={restarting}
+            onClick={() => void restartSession()}
+          >
+            <RotateCcwIcon className={cn(restarting && "animate-spin")} />
+            {restarting ? t("restarting") : t("restart")}
+          </Button>
+        </div>
+        {restartFailed ? (
+          <p className="mt-3 rounded-2xl border border-destructive/25 bg-destructive/5 px-3.5 py-2.5 text-sm text-destructive">
+            {t("restartFailed")}
+          </p>
         ) : null}
       </DashCard>
 

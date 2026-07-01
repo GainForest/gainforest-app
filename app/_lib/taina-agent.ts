@@ -1,18 +1,27 @@
 import "server-only";
-import { randomBytes } from "node:crypto";
+import { headers } from "next/headers";
+import { getAuthBaseUrl, getAuthForwardCookie } from "./auth";
+import { TAINA_AGENT_KEY_NAME, isTainaAgentKeyName } from "./taina-shared";
 
 /**
  * Tainá agent runtime client.
  *
  * Tainá (../agent-village) is GainForest's Telegram-first field assistant: a
  * person connects their own Telegram bot (made with @BotFather), chats with
- * Tainá about what they see in nature, and Tainá records Darwin Core
- * observations under their account. The bots run inside an always-on Flue
- * runtime; this module is the only place bumicerts talks to it.
+ * Tainá about what they see in nature, and Tainá records observations under
+ * their account. The bots run inside an always-on Flue runtime; this module is
+ * the only place bumicerts talks to it.
  *
- * All calls are server-side and authenticated with a shared secret, so the
- * browser can never reach the runtime directly. Who is provisioning always
- * comes from the bumicerts auth session — never from a request body.
+ * Publishing uses a regular GainForest AI-agent key (`gf_pat_…`) minted from
+ * the user's sign-in via the central auth service — the same keys managed in
+ * Settings → AI agent keys, where the Tainá one is recognisable by name. The
+ * agent follows the canonical /skill.md guide with that key; there is no
+ * bespoke upload path.
+ *
+ * All calls are server-side. Flue calls are authenticated with a shared
+ * secret; auth-service calls forward the signed-in browser's cookie. Who is
+ * provisioning always comes from the bumicerts auth session — never from a
+ * request body.
  */
 
 const DEV_FLUE_BASE_URL = "http://127.0.0.1:3583";
@@ -50,40 +59,60 @@ async function flueRequest<T>(path: string, body: Record<string, unknown>): Prom
   return { ok: response.ok, status: response.status, data };
 }
 
-/* ------------------------------- KV / PATs ------------------------------- */
+/* ─────────────────────── GainForest agent keys (gf_pat_…) ─────────────────────── */
 
-// The Flue runtime exposes a small KV store (`/kv`) that the Tainá web app
-// also uses. Personal access tokens live there under `pat:<token> → did`, so a
-// key minted here resolves in the agent's publish path too.
-async function kvCall(op: "get" | "set" | "del", key: string, value?: string): Promise<string | null> {
-  const { ok, data } = await flueRequest<{ value?: string | null }>("/kv", { op, key, value });
-  if (!ok) throw new Error(`taina kv ${op} failed`);
-  return data.value ?? null;
+type AgentTokenMeta = { id: string; name: string; tokenPrefix?: string };
+
+async function authTokensRequest(
+  method: "GET" | "POST" | "DELETE",
+  body?: Record<string, unknown>,
+): Promise<Response> {
+  const headerList = await headers();
+  const cookie = getAuthForwardCookie(headerList.get("cookie"));
+  return fetch(new URL("/api/account/tokens", getAuthBaseUrl()), {
+    method,
+    headers: {
+      ...(cookie ? { cookie } : {}),
+      ...(body ? { "content-type": "application/json" } : {}),
+    },
+    ...(body ? { body: JSON.stringify(body) } : {}),
+    cache: "no-store",
+    signal: AbortSignal.timeout(15_000),
+  });
 }
 
-export const TAINA_PAT_PREFIX = "taina_pat_";
+/** List the ids of the user's existing Tainá-linked agent keys. */
+export async function listTainaAgentKeyIds(): Promise<string[]> {
+  const response = await authTokensRequest("GET");
+  if (!response.ok) return [];
+  const data = (await response.json().catch(() => ({}))) as { tokens?: AgentTokenMeta[] };
+  return (data.tokens ?? [])
+    .filter((token) => isTainaAgentKeyName(token.name))
+    .map((token) => token.id);
+}
 
 /**
- * Mint a personal access token for a DID. The Telegram bot presents it as a
- * Bearer key to record observations under that account — the user's own
- * credentials never leave their sign-in.
+ * Mint a fresh GainForest agent key for the Tainá bot. The key carries the
+ * canonical Tainá name so Settings → AI agent keys shows which key is the
+ * bot's. Returns the plaintext token (`gf_pat_…`) — shown/stored once.
  */
-export async function mintTainaPat(did: string): Promise<string> {
-  const token = TAINA_PAT_PREFIX + randomBytes(24).toString("base64url");
-  await kvCall("set", `pat:${token}`, did);
-  return token;
+export async function mintTainaAgentKey(): Promise<string> {
+  const response = await authTokensRequest("POST", { name: TAINA_AGENT_KEY_NAME });
+  const data = (await response.json().catch(() => ({}))) as { token?: string; error?: string };
+  if (!response.ok || !data.token) {
+    throw new Error(data.error ?? `agent key mint failed (${response.status})`);
+  }
+  return data.token;
 }
 
-export async function resolveTainaPat(token: string): Promise<string | null> {
-  if (!token.startsWith(TAINA_PAT_PREFIX)) return null;
-  return kvCall("get", `pat:${token}`);
+/** Revoke agent keys by id (best-effort; used to retire old Tainá keys). */
+export async function revokeAgentKeys(ids: string[]): Promise<void> {
+  for (const id of ids) {
+    await authTokensRequest("DELETE", { id }).catch(() => {});
+  }
 }
 
-export async function deleteTainaPat(token: string): Promise<void> {
-  await kvCall("del", `pat:${token}`);
-}
-
-/* ------------------------------ Runtime calls ---------------------------- */
+/* ─────────────────────────────── Runtime calls ─────────────────────────────── */
 
 export type TainaProvisionResult = {
   agentId?: string;
@@ -128,4 +157,14 @@ export async function fetchTainaDashboard(did: string): Promise<{ ok: boolean; s
 /** Tell the runtime which key the bot should publish with (or clear it). */
 export async function setTainaKey(did: string, pat: string | null): Promise<void> {
   await flueRequest("/key", { did, pat });
+}
+
+/**
+ * Restart the user's conversation with Tainá: the runtime bumps the session
+ * epoch (fresh agent conversation), wipes the visible transcript, and greets
+ * the observer in the new session.
+ */
+export async function resetTainaSession(did: string): Promise<{ ok: boolean; status: number; error?: string }> {
+  const { ok, status, data } = await flueRequest<{ ok?: boolean; error?: string }>("/reset", { did });
+  return { ok, status, error: data.error };
 }

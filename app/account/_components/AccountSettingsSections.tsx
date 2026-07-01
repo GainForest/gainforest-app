@@ -40,6 +40,7 @@ import { ModalContent, ModalDescription, ModalFooter, ModalHeader, ModalTitle } 
 import { useModal } from "@/components/ui/modal/context";
 import { deleteRecord } from "@/app/(manage)/manage/_lib/mutations";
 import { INDEXER_URL } from "@/app/_lib/urls";
+import { isTainaAgentKeyName } from "@/app/_lib/taina-shared";
 import { CHAIN_ID } from "@/lib/facilitator/usdc";
 import { cn } from "@/lib/utils";
 
@@ -1002,7 +1003,21 @@ function AgentKeysSection() {
               keys.map((entry) => (
                 <div key={entry.id} className="flex items-center gap-3 rounded-lg bg-background/60 px-3 py-2.5">
                   <div className="flex min-w-0 flex-1 flex-col">
-                    <span className="truncate text-sm font-medium leading-snug">{entry.name}</span>
+                    <span className="flex min-w-0 items-center gap-1.5 text-sm font-medium leading-snug">
+                      <span className="truncate">{entry.name}</span>
+                      {/* The Tainá Telegram bot's own key — minted from the Tainá
+                          setup page, recognisable by its canonical name. */}
+                      {isTainaAgentKeyName(entry.name) ? (
+                        <a
+                          href="/taina"
+                          className="inline-flex shrink-0 items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary transition-colors hover:bg-primary/15"
+                          title={t("tainaBadgeTitle")}
+                        >
+                          <BotIcon className="h-3 w-3" />
+                          {t("tainaBadge")}
+                        </a>
+                      ) : null}
+                    </span>
                     <span className="truncate font-mono text-[11px] leading-snug text-muted-foreground">
                       {entry.tokenPrefix}… · {t("createdLabel", { date: formatKeyDate(entry.createdAt) })}
                       {" · "}

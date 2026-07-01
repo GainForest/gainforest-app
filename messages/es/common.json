@@ -203,7 +203,9 @@
       },
       "connectCaption": "Pega esto en tu agente de IA (ChatGPT, Claude, un bot de Telegram…) para conectarlo a GainForest.",
       "generateAndCopy": "Generar clave y copiar mensaje",
-      "defaultKeyName": "Agente de IA"
+      "defaultKeyName": "Agente de IA",
+      "tainaBadge": "Tainá",
+      "tainaBadgeTitle": "Esta clave está vinculada a tu bot de Telegram de Tainá"
     }
   },
   "bumicertCard": {
@@ -1071,7 +1073,7 @@
       "connectedOn": "Conectado el {date}",
       "openInTelegram": "Abrir en Telegram",
       "apiKeyTitle": "Clave API",
-      "apiKeyDescription": "Creada automáticamente al iniciar sesión. Tainá la usa para registrar observaciones en tu cuenta. Mantenla en secreto.",
+      "apiKeyDescription": "Una clave de agente de IA de GainForest creada para Tainá. También aparece en Ajustes → Claves de agentes de IA, marcada como la de Tainá. Mantenla en secreto.",
       "active": "Activa",
       "revoked": "Revocada",
       "reveal": "Mostrar",
@@ -1089,7 +1091,11 @@
       "chatTitle": "Chat de observaciones",
       "chatActive": "Activo",
       "chatWaiting": "En espera",
-      "chatEmpty": "Aún no hay mensajes. Abre tu bot en Telegram y describe o fotografía algo que hayas visto: tu conversación con Tainá aparece aquí en directo."
+      "chatEmpty": "Aún no hay mensajes. Abre tu bot en Telegram y describe o fotografía algo que hayas visto: tu conversación con Tainá aparece aquí en directo.",
+      "restart": "Reiniciar sesión",
+      "restarting": "Reiniciando…",
+      "restartConfirm": "¿Empezar una conversación nueva con Tainá? Olvidará el historial de este chat; tus observaciones registradas no se ven afectadas.",
+      "restartFailed": "El reinicio no funcionó. Inténtalo de nuevo."
     }
   }
 }
