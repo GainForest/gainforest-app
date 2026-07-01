@@ -8,7 +8,7 @@ import { useTranslations } from "next-intl";
 import { FlaskConicalIcon, Loader2Icon, UndoIcon, UserRoundIcon } from "lucide-react";
 import { formatCgsErrorMessage } from "@/app/_lib/cgs-errors";
 import { Button } from "@/components/ui/button";
-import { accountPath } from "../_lib/account-route";
+import { accountPath } from "@/app/account/_lib/account-route";
 import type { FlaggedTestAccount } from "@/app/internal/badges/_lib/test-accounts";
 
 export function AdminTestAccountsList({ accounts: initial }: { accounts: FlaggedTestAccount[] }) {

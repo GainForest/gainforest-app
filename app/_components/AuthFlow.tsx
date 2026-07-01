@@ -35,7 +35,6 @@ import type { CgsGroupMembership } from "@/app/(manage)/manage/_lib/cgs";
 import { accountIdentifierFromManagePath, type ManageAccountKind } from "@/lib/links";
 import { stripLocaleFromPathname } from "@/lib/i18n/routing";
 import {
-  accountAdminPath,
   accountObservationsPath,
   accountOrganizationsPath,
   accountPath,
@@ -717,10 +716,10 @@ function AuthenticatedMenu({
   // Quick links point at each account's own profile identifier (handle or DID).
   const personalIdentifier = personalCard?.handle?.trim() ?? session.did;
   // GainForest moderators (members of the admin group, any role) reach the
-  // moderation panel from here rather than a profile tab. Detect membership
-  // from the account list and link to the admin group's own admin surface.
-  const moderationGroup = groups.find((group) => group.groupDid === GAINFOREST_MODERATION_REPO_DID) ?? null;
-  const adminHref = moderationGroup ? accountAdminPath(switcherGroupIdentifier(moderationGroup)) : null;
+  // standalone moderation panel from here. Detect membership from the account
+  // list; the /admin route itself re-checks access server-side.
+  const isModerator = groups.some((group) => group.groupDid === GAINFOREST_MODERATION_REPO_DID);
+  const adminHref = isModerator ? "/admin" : null;
   const [invitations, setInvitations] = useState<MenuInvitation[]>([]);
   const [invitationsStatus, setInvitationsStatus] = useState<"idle" | "loading" | "ready" | "error">("idle");
   const invitationsStatusRef = useRef(invitationsStatus);

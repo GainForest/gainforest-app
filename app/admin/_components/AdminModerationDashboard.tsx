@@ -10,7 +10,7 @@ import type { BioblitzRegistrant } from "@/app/_lib/bioblitz";
 import type { FlaggedTestAccount } from "@/app/internal/badges/_lib/test-accounts";
 import { formatRelative } from "@/app/_lib/format";
 import { cn } from "@/lib/utils";
-import { accountPath } from "../_lib/account-route";
+import { accountPath } from "@/app/account/_lib/account-route";
 import { AdminTestAccountsList } from "./AdminTestAccountsList";
 
 type Tab = "testAccounts" | "grants" | "bioblitz";

@@ -931,6 +931,10 @@
       "title": "Waliojisajili BioBlitz",
       "description": "Akaunti zilizojisajili BioBlitz. Fungua wasifu ili kutoa beji ya mshindi.",
       "empty": "Bado hakuna aliyejisajili BioBlitz."
+    },
+    "page": {
+      "title": "Msimamizi",
+      "subtitle": "Kagua waombaji wa ruzuku na matukio, na udhibiti akaunti zilizotiwa alama."
     }
   },
   "follow": {

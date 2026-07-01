@@ -931,6 +931,10 @@
       "title": "Inscritos no BioBlitz",
       "description": "Contas que se inscreveram no BioBlitz. Abra um perfil para conceder um selo de vencedor.",
       "empty": "Ninguém se inscreveu no BioBlitz ainda."
+    },
+    "page": {
+      "title": "Administração",
+      "subtitle": "Reveja os candidatos a subsídios e eventos e faça a gestão das contas sinalizadas."
     }
   },
   "follow": {

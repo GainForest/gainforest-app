@@ -931,6 +931,10 @@
       "title": "BioBlitz registrants",
       "description": "Accounts that registered for the BioBlitz. Open a profile to award a winner badge.",
       "empty": "No one has registered for the BioBlitz yet."
+    },
+    "page": {
+      "title": "Admin",
+      "subtitle": "Review grant and event applicants, and manage flagged accounts."
     }
   },
   "follow": {

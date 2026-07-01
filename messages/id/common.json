@@ -931,6 +931,10 @@
       "title": "Pendaftar BioBlitz",
       "description": "Akun yang mendaftar BioBlitz. Buka profil untuk memberikan lencana pemenang.",
       "empty": "Belum ada yang mendaftar BioBlitz."
+    },
+    "page": {
+      "title": "Admin",
+      "subtitle": "Tinjau pendaftar hibah dan acara, serta kelola akun yang ditandai."
     }
   },
   "follow": {

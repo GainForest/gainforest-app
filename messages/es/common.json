@@ -931,6 +931,10 @@
       "title": "Inscritos en BioBlitz",
       "description": "Cuentas que se inscribieron en el BioBlitz. Abre un perfil para otorgar una insignia de ganador.",
       "empty": "Nadie se ha inscrito en el BioBlitz todavía."
+    },
+    "page": {
+      "title": "Administración",
+      "subtitle": "Revisa a los solicitantes de subvenciones y eventos, y gestiona las cuentas marcadas."
     }
   },
   "follow": {
