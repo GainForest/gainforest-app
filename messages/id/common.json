@@ -240,7 +240,8 @@
       "bioblitz": "BioBlitz",
       "greenGlobe": "Green Globe",
       "status": "Status",
-      "lexicons": "Skema data"
+      "lexicons": "Skema data",
+      "privacyPolicy": "Kebijakan Privasi"
     }
   },
   "browseGrid": {

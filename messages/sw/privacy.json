@@ -1,0 +1,129 @@
+{
+  "metadata": {
+    "title": "Sera ya faragha",
+    "description": "Jinsi GainForest inavyoshughulikia taarifa katika gainforest.app, Taina Field, na huduma zinazohusiana."
+  },
+  "title": "Sera ya faragha",
+  "effectiveDate": "Tarehe ya kuanza kutumika: 2 Julai 2026",
+  "lastUpdated": "Ilisasishwa mwisho: 2 Julai 2026",
+  "intro": {
+    "p1": "Sera hii ya faragha inaeleza jinsi GainForest (\"GainForest\", \"sisi\", \"sisi wenyewe\", au \"yetu\") inavyokusanya, kutumia, kushiriki, na kulinda taarifa unapotumia gainforest.app, programu ya simu ya Taina Field, na huduma zinazohusiana (kwa pamoja, \"Huduma\").",
+    "p2": "GainForest ni shirika lisilo la faida linalojenga teknolojia wazi kwa ajili ya mazingira — zana za kupima, kuthibitisha, na kuthamini usimamizi wa mifumo ikolojia, mara nyingi kwa kushirikiana na jamii za eneo husika na jamii za Wenyeji. Kulinda watu na maeneo yaliyo nyuma ya data tunayoshughulikia ni sehemu ya dhamira yetu, si jambo la baadaye."
+  },
+  "sections": {
+    "whoWeAre": {
+      "title": "1. Sisi ni nani",
+      "paragraphs": {
+        "p1": "GainForest ni GainForest e.V., chama kisicho cha faida na kilichosamehewa kodi kilichosajiliwa Uswisi (UID: CHE-181.901.605), chenye ofisi iliyosajiliwa katika Schwandenacker 35, 8052 Zurich, Uswisi.",
+        "p2": "Kwa swali lolote kuhusu faragha, au kutumia haki zako, wasiliana nasi kupitia team@gainforest.net."
+      }
+    },
+    "scope": {
+      "title": "2. Wigo",
+      "paragraphs": {
+        "p1": "Sera hii inahusu:",
+        "p2": "gainforest.app — programu yetu ya wavuti, dashibodi, na huduma zinazohusiana, ambazo pia hufanya kazi kwenye AT Protocol (ATProto).",
+        "p3": "Taina Field — programu yetu ya simu kwa ukusanyaji wa data ya shambani, inayofanya kazi kwa kutumia AT Protocol (ATProto) na hifadhi ya ndani (kwenye kifaa).",
+        "p4": "Haihusishi tovuti, itifaki, au huduma za wahusika wengine tunazounganisha nazo au kushirikiana nazo, ambazo zina sera zao wenyewe (tazama Sehemu ya 11)."
+      }
+    },
+    "informationWeCollect": {
+      "title": "3. Taarifa tunazokusanya",
+      "paragraphs": {
+        "p1": "Taarifa unazotupatia moja kwa moja. Maelezo ya akaunti kama jina lako, anwani ya barua pepe, shirika, na taarifa yoyote ya wasifu; maudhui unayowasilisha; na ujumbe unaotutumia.",
+        "p2": "Data ya mazingira na shambani (Taina Field). Lengo kuu la Taina Field ni kukusanya data ya ikolojia na uhifadhi. Hii inaweza kujumuisha mahali ulipo na viwianishi vya GPS, mihuri ya muda, picha, rekodi za sauti, uchunguzi wa spishi na bioanuwai, maelezo ya makazi, na vipimo vingine vya shambani vinavyofanana. Baadhi ya data hii hukusanywa kwa makusudi ili kushirikiwa kama data wazi ya mazingira (tazama Sehemu ya 6).",
+        "p3": "Data inayohifadhiwa ndani ya kifaa chako. Taina Field imeundwa kufanya kazi bila mtandao na kwa kipaumbele cha hifadhi ya ndani. Sehemu kubwa ya data unayokusanya huhifadhiwa kwenye kifaa chako na hubaki chini ya udhibiti wako mpaka uchague kuisawazisha au kuichapisha. Data inayobaki ndani ya kifaa haipatikani kwetu.",
+        "p4": "Data iliyochapishwa kupitia AT Protocol. Unapochagua kusawazisha au kuchapisha, rekodi zinaweza kuandikwa kwenye hazina yako ya AT Protocol na kusambazwa kwenye mtandao wa ATProto. Tafadhali soma Sehemu ya 5 kwa makini — asili ya mtandao huu inaathiri jinsi data yako ilivyo wazi kwa umma na jinsi inavyoweza kudumu.",
+        "p5": "Data ya kiufundi na matumizi. Aina ya kifaa, mfumo wa uendeshaji, toleo la programu, anwani ya IP, mipangilio ya lugha, na taarifa za msingi za matumizi au uchunguzi, ambazo hutusaidia kuweka Huduma zikiendelea kufanya kazi na kuwa salama.",
+        "p6": "Tunalenga kupunguza data binafsi na kukusanya tu kile Huduma zinachohitaji kwa kweli."
+      }
+    },
+    "howWeUse": {
+      "title": "4. Jinsi tunavyotumia taarifa",
+      "paragraphs": {
+        "p1": "Tunatumia taarifa kuendesha, kudumisha, na kuboresha Huduma; kuwezesha ukusanyaji, uthibitishaji, na uchapishaji wazi wa data ya mazingira; kuwasiliana nawe; kuhakikisha usalama na kuzuia matumizi mabaya; kufanya na kusaidia utafiti wa uhifadhi; na kutimiza wajibu wa kisheria. Hatuuzi taarifa zako binafsi."
+      }
+    },
+    "atProtocolDeletion": {
+      "title": "5. AT Protocol, shirikisho, na maana ya \"kufuta\" inayowezekana na isiyowezekana",
+      "paragraphs": {
+        "p1": "gainforest.app na Taina Field zote zimejengwa juu ya AT Protocol — itifaki wazi na ya shirikisho ambayo ndani yake unamiliki data yako mwenyewe. Rekodi zako hukaa kwenye hazina yako binafsi, inayohudumiwa kwenye Personal Data Server (PDS), na wewe unaidhibiti. Kuelewa jinsi hili linavyofanya kazi ni muhimu:",
+        "p2": "Unashikilia data yako. Rekodi unazounda huhifadhiwa kwenye hazina yako mwenyewe ya AT Protocol, inayotambuliwa na akaunti yako (DID). GainForest hufanya kazi kama programu juu ya mtandao huu; tunasoma na kuorodhesha rekodi unazochapisha, lakini nakala yenye mamlaka iko kwenye hazina yako, chini ya udhibiti wako.",
+        "p3": "Data inaweza kuwa ya umma. Rekodi zinazochapishwa kwenye mtandao, kwa muundo wake, mara nyingi zinaweza kusomwa na umma. Mtu yeyote — si GainForest pekee — anaweza kuzifikia, kuziainisha, au kuzihifadhi.",
+        "p4": "Data hunakiliwa. Itifaki husambaza rekodi kupitia relays, seva, jenereta za feed, na programu huru. Rekodi ikiingia kwenye mtandao, nakala zinaweza kuwepo kwenye miundombinu ambayo GainForest haiendeshi wala haidhibiti.",
+        "p5": "Ufutaji huanzishwa na wewe. Kwa sababu unamiliki hazina yako, kufuta rekodi — au kufuta akaunti yako — ni hatua unayochukua kwenye chanzo (kupitia PDS/akaunti yako). Ufutaji huo hutuma ishara kwenye mtandao, na relays na huduma zinazotii zinatarajiwa kuondoa data husika. GainForest itafuta au kuondoa kwenye faharasa data kutoka kwenye mifumo tunayodhibiti tunapopokea au kuona ufutaji kama huo.",
+        "p6": "Ufutaji hauwezi kuhakikishwa kikamilifu. Kwa sababu huu ni mtandao wazi na wa shirikisho, GainForest haiwezi kuhakikisha kuwa kila nakala ya baadaye iliyoshikiliwa na wahusika huru wa tatu imefutwa. Hii ni sifa ya itifaki, si kikomo tulichochagua.",
+        "p7": "Kwa maelezo rasmi kuhusu jinsi itifaki inavyoshughulikia data na ufutaji, tazama nyaraka za AT Protocol katika https://atproto.com/.",
+        "p8": "Tunakueleza hili waziwazi ili uweze kufanya maamuzi yenye taarifa kuhusu unachochapisha. Taarifa nyeti — ikiwa ni pamoja na maeneo sahihi ya tovuti zinazolindwa, spishi zilizo hatarini, au wanajamii wanaotambulika — zinapaswa kuchapishwa tu kwa uangalifu na ridhaa inayofaa."
+      }
+    },
+    "openDataSharing": {
+      "title": "6. Data wazi na kushiriki",
+      "paragraphs": {
+        "p1": "Dhamira ya GainForest inahusisha kufanya baadhi ya data ya mazingira ipatikane wazi kwa ajili ya uhifadhi, uwazi, na utafiti. Pale data inapobainishwa kuwa wazi, inaweza kuchapishwa, kushirikiwa na washirika wa utafiti na uhifadhi, na kupatikana kwa umma.",
+        "p2": "Tunashiriki taarifa binafsi tu: kwa ridhaa yako; na watoa huduma wanaofanya kazi kwa niaba yetu chini ya wajibu wa usiri; na washirika wa utafiti au uhifadhi inapofaa na kisheria; inapohitajika na sheria; au kulinda haki, usalama, na uadilifu wa Huduma.",
+        "p3": "Data iliyojumlishwa au kuondolewa utambulisho inaweza kushirikiwa kwa ajili ya utafiti na taarifa."
+      }
+    },
+    "communitySensitiveData": {
+      "title": "7. Data ya jamii, Wenyeji, na maeneo nyeti",
+      "paragraphs": {
+        "p1": "Sehemu kubwa ya kazi yetu ya shambani hufanyika pamoja na au karibu na jamii za eneo husika na jamii za Wenyeji, na katika maeneo nyeti kiikolojia. Tumejitoa kuheshimu mamlaka ya data na kupata ridhaa inayofaa. Pale data inapohusu watu wanaotambulika, maarifa yanayomilikiwa na jamii, au eneo la mifumo ikolojia au spishi zilizo hatarini, tunatumia uangalifu wa juu na kusaidia vidhibiti vya ufikiaji, kuficha viwianishi nyeti, au uchapishaji uliowekewa mipaka inapofaa. Ikiwa unakusanya data kama hiyo kupitia Taina Field, una jukumu la kupata ridhaa zozote zinazohitajika katika muktadha wako."
+      }
+    },
+    "legalBases": {
+      "title": "8. Misingi ya kisheria ya uchakataji (FADP ya Uswisi / GDPR)",
+      "paragraphs": {
+        "p1": "Tunategemea: ridhaa yako; utekelezaji wa mkataba na wewe; maslahi yetu halali katika kuendesha na kuboresha Huduma na kuendeleza dhamira yetu ya uhifadhi (yakilinganishwa na haki zako); na kutii wajibu wa kisheria. Pale uchakataji unapotegemea ridhaa, unaweza kuiondoa wakati wowote."
+      }
+    },
+    "retention": {
+      "title": "9. Uhifadhi wa data",
+      "paragraphs": {
+        "p1": "Tunahifadhi taarifa binafsi tu kwa muda unaohitajika kwa madhumuni yaliyoelezwa hapa, kisha tunaifuta au kuondoa utambulisho wake — kwa kuzingatia mipaka ya shirikisho iliyoelezwa katika Sehemu ya 5 na mahitaji yoyote ya kisheria ya uhifadhi. Data iliyohifadhiwa ndani hubaki kwenye kifaa chako hadi uifute au uiondoe programu."
+      }
+    },
+    "rights": {
+      "title": "10. Haki zako",
+      "paragraphs": {
+        "p1": "Kulingana na mahali unapoishi, unaweza kuwa na haki ya kufikia, kurekebisha, kufuta, kuzuia, au kupinga uchakataji wa taarifa zako binafsi; kupata uhamishaji wa data; na kuondoa ridhaa. Unaweza pia kuwasilisha malalamiko kwa mamlaka yako ya ulinzi wa data (nchini Uswisi, FDPIC). Ili kutumia mojawapo ya haki hizi, wasiliana na team@gainforest.net. Kumbuka kuwa kwa data iliyochapishwa kupitia AT Protocol, ufutaji hufanywa kutoka kwenye hazina na akaunti yako mwenyewe — tazama Sehemu ya 5 kuhusu jinsi hili linavyofanya kazi na mipaka yake. Tutajibu ndani ya muda unaohitajika na sheria inayotumika."
+      }
+    },
+    "thirdParties": {
+      "title": "11. Huduma na viungo vya wahusika wengine",
+      "paragraphs": {
+        "p1": "Huduma zinaingiliana na mtandao wa AT Protocol na zinaweza kutegemea watoa huduma wa wahusika wengine (kwa mfano, uhifadhi, uchanganuzi, au miundombinu) na kuunganisha kwenye tovuti za nje. Haya yanaongozwa na sera zao za faragha, ambazo tunakuhimiza uzipitie."
+      }
+    },
+    "children": {
+      "title": "12. Faragha ya watoto",
+      "paragraphs": {
+        "p1": "Huduma hazielekezwi kwa watoto walio chini ya miaka 16, na hatukusanyi kwa makusudi taarifa zao binafsi. Ikiwa unaamini mtoto ametupatia data, wasiliana nasi na tutachukua hatua zinazofaa kuiondoa."
+      }
+    },
+    "security": {
+      "title": "13. Usalama",
+      "paragraphs": {
+        "p1": "Tunatumia hatua za kiufundi na shirika zinazofaa kulinda taarifa, ikiwemo usimbaji wakati wa usafirishaji pale inapowezekana. Hakuna mfumo ulio salama kikamilifu; hifadhi inayotanguliza kifaa chako ina maana kwamba usalama wa sehemu kubwa ya data yako pia unategemea usalama wa kifaa chako mwenyewe."
+      }
+    },
+    "internationalTransfers": {
+      "title": "14. Uhamishaji wa data kimataifa",
+      "paragraphs": {
+        "p1": "GainForest hufanya kazi kimataifa, na — hasa kutokana na asili ya shirikisho ya ATProto — data inaweza kuchakatwa katika nchi nyingine tofauti na yako. Inapohitajika, tunategemea ulinzi unaofaa kwa uhamishaji kama huo."
+      }
+    },
+    "changes": {
+      "title": "15. Mabadiliko ya sera hii",
+      "paragraphs": {
+        "p1": "Tunaweza kusasisha sera hii mara kwa mara. Tutachapisha toleo lililorekebishwa hapa na kusasisha tarehe ya \"Ilisasishwa mwisho\", na tutatoa taarifa iliyo wazi zaidi kwa mabadiliko muhimu."
+      }
+    },
+    "contact": {
+      "title": "16. Wasiliana nasi",
+      "paragraphs": {
+        "p1": "Maswali au maombi: team@gainforest.net GainForest e.V. Schwandenacker 35, 8052 Zurich, Uswisi UID: CHE-181.901.605"
+      }
+    }
+  }
+}

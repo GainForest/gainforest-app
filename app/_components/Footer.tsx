@@ -109,6 +109,10 @@ export function Footer() {
                 {t("swissRegistration")}
               </Link>
               <span className="text-muted-foreground/35"> · </span>
+              <Link href="/privacy" className="underline-offset-4 transition-colors hover:text-primary hover:underline">
+                {t("links.privacyPolicy")}
+              </Link>
+              <span className="text-muted-foreground/35"> · </span>
               <Link href="mailto:team@gainforest.net" className="underline-offset-4 transition-colors hover:text-primary hover:underline">
                 team@gainforest.net
               </Link>

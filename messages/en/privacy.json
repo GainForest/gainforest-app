@@ -1,0 +1,129 @@
+{
+  "metadata": {
+    "title": "Privacy Policy",
+    "description": "How GainForest handles information across gainforest.app, Taina Field, and related services."
+  },
+  "title": "Privacy Policy",
+  "effectiveDate": "Effective date: July 2, 2026",
+  "lastUpdated": "Last updated: July 2, 2026",
+  "intro": {
+    "p1": "This Privacy Policy explains how GainForest (\"GainForest,\" \"we,\" \"us,\" or \"our\") collects, uses, shares, and protects information when you use gainforest.app, the Taina Field mobile application, and related services (together, the \"Services\").",
+    "p2": "GainForest is a non-profit organization that builds open technology for the environment — tools for measuring, verifying, and rewarding ecosystem stewardship, often in collaboration with local and Indigenous communities. Protecting the people and places behind the data we handle is part of our mission, not an afterthought."
+  },
+  "sections": {
+    "whoWeAre": {
+      "title": "1. Who we are",
+      "paragraphs": {
+        "p1": "GainForest is GainForest e.V., a tax-exempt non-profit association registered in Switzerland (UID: CHE-181.901.605), with its registered office at Schwandenacker 35, 8052 Zurich, Switzerland.",
+        "p2": "For any privacy question, or to exercise your rights, contact us at team@gainforest.net."
+      }
+    },
+    "scope": {
+      "title": "2. Scope",
+      "paragraphs": {
+        "p1": "This policy covers:",
+        "p2": "gainforest.app — our web application, dashboards, and associated services, which also operate on the AT Protocol (ATProto).",
+        "p3": "Taina Field — our mobile application for field data collection, which operates using the AT Protocol (ATProto) and local (on-device) storage.",
+        "p4": "It does not cover third-party websites, protocols, or services we link to or interoperate with, which have their own policies (see Section 11)."
+      }
+    },
+    "informationWeCollect": {
+      "title": "3. Information we collect",
+      "paragraphs": {
+        "p1": "Information you provide directly. Account details such as your name, email address, organization, and any profile information; content you submit; and messages you send us.",
+        "p2": "Environmental and field data (Taina Field). The core purpose of Taina Field is collecting ecological and conservation data. This may include geolocation and GPS coordinates, timestamps, photographs, audio recordings, species and biodiversity observations, habitat notes, and similar field measurements. Some of this data is intentionally collected to be shared as open environmental data (see Section 6).",
+        "p3": "Data stored locally on your device. Taina Field is designed to work offline and local-first. A significant portion of the data you collect is stored on your device and remains under your control until you choose to sync or publish it. Data that stays local is not accessible to us.",
+        "p4": "Data published through the AT Protocol. When you choose to sync or publish, records may be written to your AT Protocol repository and propagated across the ATProto network. Please read Section 5 carefully — the nature of this network affects how public and how permanent your data is.",
+        "p5": "Technical and usage data. Device type, operating system, app version, IP address, language settings, and basic usage/diagnostic information, which help us keep the Services working and secure.",
+        "p6": "We aim to minimize personal data and collect only what the Services genuinely need."
+      }
+    },
+    "howWeUse": {
+      "title": "4. How we use information",
+      "paragraphs": {
+        "p1": "We use information to operate, maintain, and improve the Services; to enable environmental data collection, verification, and open publication; to communicate with you; to ensure security and prevent abuse; to conduct and support conservation research; and to comply with legal obligations. We do not sell your personal information."
+      }
+    },
+    "atProtocolDeletion": {
+      "title": "5. AT Protocol, federation, and what \"delete\" can and cannot mean",
+      "paragraphs": {
+        "p1": "Both gainforest.app and Taina Field are built on the AT Protocol — an open, federated protocol in which you own your own data. Your records live in your personal repository, hosted on a Personal Data Server (PDS), and you control them. Understanding how this works matters:",
+        "p2": "You hold your data. Records you create are stored in your own AT Protocol repository, identified by your account (DID). GainForest operates as an application on top of this network; we read and index the records you publish, but the authoritative copy sits in your repository, under your control.",
+        "p3": "Data can be public. Records published to the network are, by design, often publicly readable. Anyone — not just GainForest — may access, index, or store them.",
+        "p4": "Data is replicated. The protocol distributes records across relays, servers, feed generators, and independent applications. Once a record enters the network, copies may exist on infrastructure GainForest does not operate or control.",
+        "p5": "Deletion is initiated by you. Because you own your repository, deleting a record — or deleting your account — is an action you take at the source (through your PDS/account). That deletion emits a signal across the network, and compliant relays and services are expected to remove the corresponding data. GainForest will delete or de-index the data from the systems we control when we receive or observe such a deletion.",
+        "p6": "Deletion cannot be fully guaranteed. Because it is an open, federated network, GainForest cannot guarantee that every downstream copy held by independent third parties is erased. This is a property of the protocol, not a limitation we have chosen.",
+        "p7": "For authoritative detail on how the protocol handles data and deletion, see the AT Protocol documentation at https://atproto.com/.",
+        "p8": "We tell you this plainly so you can make informed decisions about what you publish. Sensitive information — including precise locations of protected sites, vulnerable species, or identifiable community members — should be published only with appropriate care and consent."
+      }
+    },
+    "openDataSharing": {
+      "title": "6. Open data and sharing",
+      "paragraphs": {
+        "p1": "GainForest's mission involves making certain environmental data openly available for conservation, transparency, and research. Where data is designated as open, it may be published, shared with research and conservation partners, and made publicly accessible.",
+        "p2": "We share personal information only: with your consent; with service providers acting on our behalf under confidentiality obligations; with research or conservation partners where appropriate and lawful; when required by law; or to protect rights, safety, and the integrity of the Services.",
+        "p3": "Aggregated or de-identified data may be shared for research and reporting."
+      }
+    },
+    "communitySensitiveData": {
+      "title": "7. Community, Indigenous, and sensitive location data",
+      "paragraphs": {
+        "p1": "Much of our fieldwork takes place with or near local and Indigenous communities and in ecologically sensitive areas. We are committed to respecting data sovereignty and obtaining appropriate consent. Where data concerns identifiable individuals, community-held knowledge, or the location of vulnerable ecosystems or species, we apply heightened care and support access controls, obfuscation of sensitive coordinates, or restricted publication where appropriate. If you are collecting such data through Taina Field, you are responsible for obtaining any consents required in your context."
+      }
+    },
+    "legalBases": {
+      "title": "8. Legal bases for processing (Swiss FADP / GDPR)",
+      "paragraphs": {
+        "p1": "We rely on: your consent; the performance of a contract with you; our legitimate interests in operating and improving the Services and advancing our conservation mission (balanced against your rights); and compliance with legal obligations. Where processing relies on consent, you may withdraw it at any time."
+      }
+    },
+    "retention": {
+      "title": "9. Data retention",
+      "paragraphs": {
+        "p1": "We keep personal information only as long as needed for the purposes described here, then delete or de-identify it — subject to the federation limits described in Section 5 and any legal retention requirements. Locally stored data persists on your device until you delete it or uninstall the app."
+      }
+    },
+    "rights": {
+      "title": "10. Your rights",
+      "paragraphs": {
+        "p1": "Depending on where you live, you may have the right to access, correct, delete, restrict, or object to the processing of your personal information; to data portability; and to withdraw consent. You may also lodge a complaint with your data protection authority (in Switzerland, the FDPIC). To exercise any of these, contact team@gainforest.net. Note that for data published through the AT Protocol, deletion is carried out from your own repository and account — see Section 5 for how this works and its limits. We will respond within the timeframe required by applicable law."
+      }
+    },
+    "thirdParties": {
+      "title": "11. Third-party services and links",
+      "paragraphs": {
+        "p1": "The Services interoperate with the AT Protocol network and may rely on third-party providers (for example, hosting, analytics, or infrastructure) and link to external sites. These are governed by their own privacy policies, which we encourage you to review."
+      }
+    },
+    "children": {
+      "title": "12. Children's privacy",
+      "paragraphs": {
+        "p1": "The Services are not directed to children under 16, and we do not knowingly collect their personal information. If you believe a child has provided us data, contact us and we will take appropriate steps to remove it."
+      }
+    },
+    "security": {
+      "title": "13. Security",
+      "paragraphs": {
+        "p1": "We use reasonable technical and organizational measures to protect information, including encryption in transit where feasible. No system is perfectly secure; local-first storage means much of your data's security also depends on the security of your own device."
+      }
+    },
+    "internationalTransfers": {
+      "title": "14. International data transfers",
+      "paragraphs": {
+        "p1": "GainForest operates internationally, and — especially given the federated nature of ATProto — data may be processed in countries other than your own. Where required, we rely on appropriate safeguards for such transfers."
+      }
+    },
+    "changes": {
+      "title": "15. Changes to this policy",
+      "paragraphs": {
+        "p1": "We may update this policy from time to time. We will post the revised version here and update the \"Last updated\" date, and will provide more prominent notice for material changes."
+      }
+    },
+    "contact": {
+      "title": "16. Contact us",
+      "paragraphs": {
+        "p1": "Questions or requests: team@gainforest.net GainForest e.V. Schwandenacker 35, 8052 Zurich, Switzerland UID: CHE-181.901.605"
+      }
+    }
+  }
+}

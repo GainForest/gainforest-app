@@ -5,7 +5,7 @@ import ts from "typescript";
 const projectRoot = process.cwd();
 const locales = ["es", "id", "pt", "sw"];
 const allLocales = ["en", ...locales];
-const namespaces = ["root", "bumicert", "common", "legacy", "marketplace", "modals", "upload"];
+const namespaces = ["root", "bumicert", "common", "legacy", "marketplace", "modals", "privacy", "upload"];
 
 const allowedExactValues = new Set([
   "",
@@ -238,7 +238,10 @@ function assertBrandNameCasing(locale, namespace, entries) {
   for (const [key, value] of entries) {
     // Brand names should not be localized or recased. Lowercase domains/emails
     // like team@gainforest.net are technical identifiers and are allowed.
-    const visibleText = value.replace(/https?:\/\/\S+/g, "").replace(/[\w.+-]+@gainforest\.\w+/gi, "");
+    const visibleText = value
+      .replace(/https?:\/\/\S+/g, "")
+      .replace(/\bgainforest\.app\b/gi, "")
+      .replace(/[\w.+-]+@gainforest\.\w+/gi, "");
     const badMatch = visibleText.match(/gain\s*forest|gainforest/iu);
     if (badMatch && badMatch[0] !== "GainForest") {
       problems.push(`${namespacePath(locale, namespace)}:${key} must keep the brand name as \"GainForest\": ${JSON.stringify(value)}`);
