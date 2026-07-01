@@ -922,6 +922,7 @@
   "adminModeration": {
     "ariaLabel": "Tampilan moderasi",
     "tabs": {
+      "taina": "Agen Tainá",
       "grants": "Pemohon hibah",
       "bioblitz": "BioBlitz",
       "testAccounts": "Akun uji coba"
@@ -940,8 +941,30 @@
     },
     "page": {
       "title": "Admin",
-      "subtitle": "Tinjau pendaftar hibah dan acara, serta kelola akun yang ditandai."
+      "subtitle": "Tinjau pelamar hibah dan acara, kelola akun yang ditandai, dan awasi agen Tainá."
     }
+  },
+  "adminTaina": {
+    "title": "Agen Tainá",
+    "description": "Semua orang yang menjalankan asisten lapangan Tainá — bot mereka, kapan terakhir dipakai, dan berapa yang sudah dihabiskan. Pesan yang Anda kirim disampaikan oleh Tainá mereka, dengan suaranya sendiri.",
+    "empty": "Belum ada yang menghubungkan Tainá.",
+    "unavailable": "Runtime Tainá tidak dapat dijangkau saat ini, jadi daftarnya tidak bisa dimuat. Coba lagi sebentar lagi.",
+    "unnamed": "Akun tanpa nama",
+    "statusActive": "Aktif",
+    "statusPending": "Menunggu aktivasi",
+    "lastUsed": "Terakhir dipakai {when}",
+    "neverUsed": "Belum pernah dipakai",
+    "credits": "{used} terpakai",
+    "creditsAllowance": "Jatah kredit: {allowance}",
+    "message": "Pesan",
+    "messagePlaceholder": "Apa yang harus Tainá sampaikan kepada mereka?",
+    "messageHint": "Disampaikan lewat bot mereka dengan suara Tainá — penerima melihatnya sebagai pesan dari asistennya sendiri.",
+    "send": "Kirim",
+    "sending": "Mengirim…",
+    "sent": "Terkirim ke obrolan mereka.",
+    "sendFailed": "Pesan tidak dapat dikirim. Silakan coba lagi.",
+    "notActivated": "Pemiliknya belum mengaktifkan bot ini, jadi belum bisa menerima pesan.",
+    "cancel": "Batal"
   },
   "follow": {
     "follow": "Ikuti",

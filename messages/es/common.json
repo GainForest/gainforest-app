@@ -922,6 +922,7 @@
   "adminModeration": {
     "ariaLabel": "Vistas de moderación",
     "tabs": {
+      "taina": "Agentes Tainá",
       "grants": "Solicitantes de subvención",
       "bioblitz": "BioBlitz",
       "testAccounts": "Cuentas de prueba"
@@ -940,8 +941,30 @@
     },
     "page": {
       "title": "Administración",
-      "subtitle": "Revisa a los solicitantes de subvenciones y eventos, y gestiona las cuentas marcadas."
+      "subtitle": "Revisa solicitantes de subvenciones y eventos, gestiona cuentas marcadas y supervisa los agentes Tainá."
     }
+  },
+  "adminTaina": {
+    "title": "Agentes Tainá",
+    "description": "Todas las personas con un asistente de campo Tainá: su bot, cuándo lo usaron por última vez y cuánto ha gastado. Los mensajes que envíes los entrega su Tainá, con su propia voz.",
+    "empty": "Nadie ha conectado una Tainá todavía.",
+    "unavailable": "El runtime de Tainá no está disponible ahora mismo, así que no se puede cargar la lista. Inténtalo de nuevo en un momento.",
+    "unnamed": "Cuenta sin nombre",
+    "statusActive": "Activo",
+    "statusPending": "Pendiente de activación",
+    "lastUsed": "Último uso {when}",
+    "neverUsed": "Nunca usado",
+    "credits": "{used} usados",
+    "creditsAllowance": "Crédito asignado: {allowance}",
+    "message": "Mensaje",
+    "messagePlaceholder": "¿Qué debería decirle Tainá?",
+    "messageHint": "Se entrega a través de su bot con la voz de Tainá: la persona lo ve como un mensaje de su asistente.",
+    "send": "Enviar",
+    "sending": "Enviando…",
+    "sent": "Entregado en su chat.",
+    "sendFailed": "No se pudo enviar el mensaje. Inténtalo de nuevo.",
+    "notActivated": "El propietario aún no ha activado este bot, así que no puede recibir mensajes.",
+    "cancel": "Cancelar"
   },
   "follow": {
     "follow": "Seguir",

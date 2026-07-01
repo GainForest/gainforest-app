@@ -178,6 +178,53 @@ export async function saveTainaProfile(
   return { ok, status, error: data.error };
 }
 
+/* ─────────────────────── Admin (GainForest team) ───────────────────── */
+
+export type TainaAdminResident = {
+  did: string;
+  handle: string;
+  bot: string;
+  botUrl: string;
+  focus: string | null;
+  activated: boolean;
+  provisionedAt: string;
+  lastUsedAt: string | null;
+  creditsUsedUsd: number;
+  hasProfile: boolean;
+};
+
+/**
+ * Every provisioned Tainá, with the operational fields the admin panel shows.
+ * Only ever called behind the GainForest admin-group gate.
+ */
+export async function fetchTainaAdminResidents(): Promise<{
+  residents: TainaAdminResident[];
+  allowanceUsd: number;
+}> {
+  const { ok, data } = await flueRequest<{
+    residents?: TainaAdminResident[];
+    allowanceUsd?: number;
+    error?: string;
+  }>("/admin/residents", {});
+  if (!ok) throw new Error(data.error ?? "admin residents failed");
+  return { residents: data.residents ?? [], allowanceUsd: data.allowanceUsd ?? 25 };
+}
+
+/**
+ * Send a message to an observer through their Tainá: the runtime steers the
+ * agent, which delivers the content to Telegram in its own voice. Admin-only.
+ */
+export async function sendTainaAdminMessage(
+  did: string,
+  text: string,
+): Promise<{ ok: boolean; status: number; error?: string }> {
+  const { ok, status, data } = await flueRequest<{ ok?: boolean; error?: string }>(
+    "/admin/message",
+    { did, text },
+  );
+  return { ok, status, error: data.error };
+}
+
 /**
  * Reset (disconnect) the user's Tainá agent: the runtime stops their bot and
  * forgets its record — bot token, key, profile and credit tally. Recorded

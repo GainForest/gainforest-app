@@ -922,6 +922,7 @@
   "adminModeration": {
     "ariaLabel": "Moderation views",
     "tabs": {
+      "taina": "Tainá agents",
       "grants": "Grant applicants",
       "bioblitz": "BioBlitz",
       "testAccounts": "Test accounts"
@@ -940,8 +941,30 @@
     },
     "page": {
       "title": "Admin",
-      "subtitle": "Review grant and event applicants, and manage flagged accounts."
+      "subtitle": "Review grant and event applicants, manage flagged accounts, and oversee Tainá agents."
     }
+  },
+  "adminTaina": {
+    "title": "Tainá agents",
+    "description": "Everyone running a Tainá field assistant — their bot, when they last used it, and what it has spent. Messages you send are delivered by their Tainá, in its own voice.",
+    "empty": "No one has connected a Tainá yet.",
+    "unavailable": "The Tainá runtime is unreachable right now, so the roster can't be loaded. Try again in a moment.",
+    "unnamed": "Unnamed account",
+    "statusActive": "Active",
+    "statusPending": "Awaiting activation",
+    "lastUsed": "Last used {when}",
+    "neverUsed": "Never used",
+    "credits": "{used} used",
+    "creditsAllowance": "Credit allowance: {allowance}",
+    "message": "Message",
+    "messagePlaceholder": "What should Tainá tell them?",
+    "messageHint": "Delivered through their bot in Tainá's voice — the recipient sees it as a message from their assistant.",
+    "send": "Send",
+    "sending": "Sending…",
+    "sent": "Delivered to their chat.",
+    "sendFailed": "The message couldn't be sent. Please try again.",
+    "notActivated": "This bot hasn't been activated by its owner yet, so it can't receive messages.",
+    "cancel": "Cancel"
   },
   "follow": {
     "follow": "Follow",

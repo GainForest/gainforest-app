@@ -922,6 +922,7 @@
   "adminModeration": {
     "ariaLabel": "Mwonekano wa usimamizi",
     "tabs": {
+      "taina": "Mawakala wa Tainá",
       "grants": "Waombaji wa ruzuku",
       "bioblitz": "BioBlitz",
       "testAccounts": "Akaunti za majaribio"
@@ -940,8 +941,30 @@
     },
     "page": {
       "title": "Msimamizi",
-      "subtitle": "Kagua waombaji wa ruzuku na matukio, na udhibiti akaunti zilizotiwa alama."
+      "subtitle": "Kagua waombaji wa ruzuku na matukio, dhibiti akaunti zilizowekwa alama, na simamia mawakala wa Tainá."
     }
+  },
+  "adminTaina": {
+    "title": "Mawakala wa Tainá",
+    "description": "Kila mtu anayetumia msaidizi wa uwandani wa Tainá — boti yake, mara ya mwisho alipoitumia, na kiasi ilichotumia. Ujumbe unaotuma unafikishwa na Tainá wake, kwa sauti yake mwenyewe.",
+    "empty": "Hakuna aliyeunganisha Tainá bado.",
+    "unavailable": "Mfumo wa Tainá haupatikani kwa sasa, hivyo orodha haiwezi kupakiwa. Jaribu tena baada ya muda mfupi.",
+    "unnamed": "Akaunti isiyo na jina",
+    "statusActive": "Inatumika",
+    "statusPending": "Inasubiri kuwashwa",
+    "lastUsed": "Ilitumika mwisho {when}",
+    "neverUsed": "Haijawahi kutumika",
+    "credits": "{used} zimetumika",
+    "creditsAllowance": "Salio lililotengwa: {allowance}",
+    "message": "Ujumbe",
+    "messagePlaceholder": "Tainá amwambie nini mtu huyu?",
+    "messageHint": "Unafikishwa kupitia boti yake kwa sauti ya Tainá — mpokeaji anauona kama ujumbe kutoka kwa msaidizi wake.",
+    "send": "Tuma",
+    "sending": "Inatuma…",
+    "sent": "Umefikishwa kwenye mazungumzo yake.",
+    "sendFailed": "Ujumbe haukuweza kutumwa. Tafadhali jaribu tena.",
+    "notActivated": "Mmiliki bado hajawasha boti hii, hivyo haiwezi kupokea ujumbe.",
+    "cancel": "Ghairi"
   },
   "follow": {
     "follow": "Fuata",
