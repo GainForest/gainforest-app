@@ -926,7 +926,8 @@
       "taina": "Mawakala wa Tainá",
       "grants": "Waombaji wa ruzuku",
       "bioblitz": "BioBlitz",
-      "testAccounts": "Akaunti za majaribio"
+      "testAccounts": "Akaunti za majaribio",
+      "endorsers": "Wadhamini"
     },
     "unnamed": "Akaunti isiyo na jina",
     "awardHint": "Fungua wasifu ili kutoa beji.",
@@ -1140,5 +1141,17 @@
       "profileSaved": "Imehifadhiwa — Tainá ataitumia kuanzia jibu lake lijalo.",
       "profileSaveFailed": "Hatukuweza kuhifadhi wasifu wako. Tafadhali jaribu tena."
     }
+  },
+  "adminEndorsers": {
+    "title": "Wadhamini",
+    "description": "Mashirika ambayo tunasikiliza beji zao. Uidhinishaji wao huonekana kotekote kwenye programu kama “Imeaminiwa na” na huonyesha miradi wanayounga mkono.",
+    "inputLabel": "Kitambulisho cha shirika au kitambulisho cha akaunti",
+    "inputPlaceholder": "handle.certified.one au did:plc:…",
+    "addButton": "Ongeza mdhamini",
+    "addError": "Imeshindwa kuongeza mdhamini.",
+    "removeError": "Imeshindwa kuondoa mdhamini.",
+    "removeLabel": "Ondoa {name}",
+    "builtinChip": "Iliyojengwa",
+    "propagationHint": "Wadhamini wapya huchukua dakika chache kuonekana kwenye programu."
   }
 }

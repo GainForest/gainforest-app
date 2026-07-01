@@ -926,7 +926,8 @@
       "taina": "Tainá agents",
       "grants": "Grant applicants",
       "bioblitz": "BioBlitz",
-      "testAccounts": "Test accounts"
+      "testAccounts": "Test accounts",
+      "endorsers": "Endorsers"
     },
     "unnamed": "Unnamed account",
     "awardHint": "Open a profile to award a badge.",
@@ -1140,5 +1141,17 @@
       "profileSaved": "Saved — Tainá will use it from her next reply.",
       "profileSaveFailed": "We couldn’t save your profile. Please try again."
     }
+  },
+  "adminEndorsers": {
+    "title": "Endorsers",
+    "description": "Organizations whose badges we listen to. Their endorsements show up across the app as “Trusted by” and surface the projects they back.",
+    "inputLabel": "Organization handle or account id",
+    "inputPlaceholder": "handle.certified.one or did:plc:…",
+    "addButton": "Add endorser",
+    "addError": "Could not add the endorser.",
+    "removeError": "Could not remove the endorser.",
+    "removeLabel": "Remove {name}",
+    "builtinChip": "Built-in",
+    "propagationHint": "New endorsers take a few minutes to appear across the app."
   }
 }

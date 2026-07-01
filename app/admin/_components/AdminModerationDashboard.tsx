@@ -5,17 +5,19 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { BotIcon, FlaskConicalIcon, LeafIcon, SproutIcon, UserRoundIcon } from "lucide-react";
+import { BotIcon, Building2Icon, FlaskConicalIcon, LeafIcon, SproutIcon, UserRoundIcon } from "lucide-react";
 import type { GrantApplicant } from "@/app/_lib/grants";
 import type { BioblitzRegistrant } from "@/app/_lib/bioblitz";
 import type { FlaggedTestAccount } from "@/app/internal/badges/_lib/test-accounts";
+import type { BuiltinEndorser, EndorserRecord } from "@/app/_lib/endorsers";
 import { formatRelative } from "@/app/_lib/format";
 import { cn } from "@/lib/utils";
 import { accountPath } from "@/app/account/_lib/account-route";
 import { AdminTestAccountsList } from "./AdminTestAccountsList";
 import { AdminTainaPanel, type AdminTainaRow } from "./AdminTainaPanel";
+import { EndorsersManager } from "./EndorsersManager";
 
-export type AdminTab = "taina" | "grants" | "bioblitz" | "testAccounts";
+export type AdminTab = "taina" | "grants" | "bioblitz" | "testAccounts" | "endorsers";
 
 /**
  * The /admin control room: one tab bar, one card-shaped panel per concern
@@ -30,6 +32,8 @@ export function AdminModerationDashboard({
   bioblitzRegistrants,
   tainaRows,
   tainaAllowanceUsd,
+  builtinEndorsers,
+  endorsers,
 }: {
   initialTab: AdminTab;
   testAccounts: FlaggedTestAccount[];
@@ -38,10 +42,13 @@ export function AdminModerationDashboard({
   /** null = the Tainá runtime was unreachable (distinct from an empty roster). */
   tainaRows: AdminTainaRow[] | null;
   tainaAllowanceUsd: number;
+  builtinEndorsers: BuiltinEndorser[];
+  endorsers: EndorserRecord[];
 }) {
   const t = useTranslations("common.adminModeration");
   const tTaina = useTranslations("common.adminTaina");
   const tTest = useTranslations("common.adminTestAccounts");
+  const tEndorsers = useTranslations("common.adminEndorsers");
   const router = useRouter();
   const pathname = usePathname();
   const [tab, setTab] = useState<AdminTab>(initialTab);
@@ -56,6 +63,7 @@ export function AdminModerationDashboard({
     { id: "grants", label: t("tabs.grants"), Icon: SproutIcon, count: grantApplicants.length },
     { id: "bioblitz", label: t("tabs.bioblitz"), Icon: LeafIcon, count: bioblitzRegistrants.length },
     { id: "testAccounts", label: t("tabs.testAccounts"), Icon: FlaskConicalIcon, count: testAccounts.length },
+    { id: "endorsers", label: t("tabs.endorsers"), Icon: Building2Icon, count: builtinEndorsers.length + endorsers.length },
   ];
 
   return (
@@ -125,7 +133,7 @@ export function AdminModerationDashboard({
         >
           <BioblitzRegistrantsList registrants={bioblitzRegistrants} />
         </AdminPanel>
-      ) : (
+      ) : tab === "testAccounts" ? (
         <AdminPanel
           Icon={FlaskConicalIcon}
           title={tTest("title")}
@@ -133,6 +141,16 @@ export function AdminModerationDashboard({
           count={testAccounts.length}
         >
           <AdminTestAccountsList accounts={testAccounts} />
+        </AdminPanel>
+      ) : (
+        <AdminPanel
+          Icon={Building2Icon}
+          title={tEndorsers("title")}
+          description={tEndorsers("description")}
+          count={builtinEndorsers.length + endorsers.length}
+          footer={tEndorsers("propagationHint")}
+        >
+          <EndorsersManager builtins={builtinEndorsers} initial={endorsers} />
         </AdminPanel>
       )}
     </section>

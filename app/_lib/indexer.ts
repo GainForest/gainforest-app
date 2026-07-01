@@ -18,6 +18,7 @@ import { PUBLIC_EXPLORE_CACHE_TTL_MS, publicExploreCache } from "./public-explor
 import { INDEXER_URL } from "./urls";
 import { countryCodeFromCertifiedLocation, fetchCertifiedLocationCountryCode, type CertifiedLocationLike } from "./country-location";
 import { blobUrl, resolveBlobUrl, resolvePdsHost, normaliseRef } from "./pds";
+import { fetchEndorserRecords } from "./endorsers";
 import { asNumber, formatNumber, formatDate, formatDateTime, formatCountry } from "./format";
 
 // ── Generic GraphQL helper ────────────────────────────────────────────────
@@ -1224,27 +1225,74 @@ const FEATURED_BADGE_KEY_BY_TITLE = new Map(
  * "fixed"` issuers attribute *every* award they sign to a single brand,
  * regardless of which definition it points at.
  *
- * Hardcoded for now; a future admin panel will manage this allow-list.
+ * The two built-ins below ship with bundled logos; additional endorsers are
+ * managed from the admin panel and stored in the moderation repo (see
+ * `getTrustedIssuers` / `app/_lib/endorsers.ts`).
  */
-type TrustedBadgeIssuer =
+type BuiltinTrustedIssuer =
   | { did: string; mode: "title" }
   | { did: string; mode: "fixed"; badge: BumicertBadgeFilter };
 
-const TRUSTED_BADGE_ISSUERS: TrustedBadgeIssuer[] = [
+const BUILTIN_TRUSTED_ISSUERS: BuiltinTrustedIssuer[] = [
   // GainForest's certified repo hosts the GainForest + Ma Earth badge family.
   { did: "did:plc:yjck2sybksyigp3zvbq7bfki", mode: "title" },
   // Biome Trust signs Organization Endorsements from its own repo.
   { did: "did:plc:2pfslyh6q2lk46xqwshjd6sc", mode: "fixed", badge: "biometrust" },
 ];
 
-// Every brand key the featured-badge index can hold: the title-mapped
-// GainForest/Ma Earth family plus the fixed-issuer brands. Used to seed the
-// per-badge buckets so a brand like `biometrust` (never title-mapped) still
-// gets an entry.
+/** Metadata for a dynamic (admin-added) endorser. Its "Trusted by" emblem is
+ *  rendered from the endorser's own profile instead of a bundled logo, so we
+ *  carry enough here to label and link it. The brand `key` is the endorser DID. */
+export type EndorserMeta = { key: string; label: string; endorserDid: string; endorserHandle: string | null };
+
+/** A trusted issuer resolved for an index build: a built-in brand family, or a
+ *  dynamic endorser whose brand key is its own DID. */
+type ResolvedTrustedIssuer =
+  | { did: string; mode: "title" }
+  | { did: string; mode: "fixed"; badge: string; endorser: EndorserMeta | null };
+
+const BUILTIN_ISSUER_DIDS = new Set(BUILTIN_TRUSTED_ISSUERS.map((issuer) => issuer.did));
+
+/**
+ * Built-in issuers plus the admin-managed endorser allow-list. Reading the
+ * endorser records is a couple of listRecords calls against the moderation
+ * repo; it runs once per featured-badge-index cache miss, so added endorsers
+ * take effect within the index's cache TTL.
+ */
+async function getTrustedIssuers(signal?: AbortSignal): Promise<ResolvedTrustedIssuer[]> {
+  const builtins: ResolvedTrustedIssuer[] = BUILTIN_TRUSTED_ISSUERS.map((issuer) =>
+    issuer.mode === "title"
+      ? { did: issuer.did, mode: "title" }
+      : { did: issuer.did, mode: "fixed", badge: issuer.badge, endorser: null },
+  );
+  const records = await fetchEndorserRecords(GAINFOREST_MODERATION_REPO_DID, signal).catch(() => []);
+  const seen = new Set<string>(BUILTIN_ISSUER_DIDS);
+  const dynamic: ResolvedTrustedIssuer[] = [];
+  for (const record of records) {
+    if (seen.has(record.subjectDid)) continue;
+    seen.add(record.subjectDid);
+    dynamic.push({
+      did: record.subjectDid,
+      mode: "fixed",
+      badge: record.subjectDid,
+      endorser: {
+        key: record.subjectDid,
+        label: record.label,
+        endorserDid: record.subjectDid,
+        endorserHandle: record.handle,
+      },
+    });
+  }
+  return [...builtins, ...dynamic];
+}
+
+// Every brand key the featured-badge index seeds up front: the title-mapped
+// GainForest/Ma Earth family plus the built-in fixed-issuer brands. Dynamic
+// endorser brands (keyed by DID) are added to the index at build time.
 const FEATURED_BADGE_KEY_LIST: BumicertBadgeFilter[] = Array.from(
   new Set<BumicertBadgeFilter>([
     ...FEATURED_BADGES.map((badge) => badge.key),
-    ...TRUSTED_BADGE_ISSUERS.flatMap((issuer) => (issuer.mode === "fixed" ? [issuer.badge] : [])),
+    ...BUILTIN_TRUSTED_ISSUERS.flatMap((issuer) => (issuer.mode === "fixed" ? [issuer.badge] : [])),
   ]),
 );
 const FEATURED_BADGE_INDEX_CACHE_MS = PUBLIC_EXPLORE_CACHE_TTL_MS;
@@ -1335,7 +1383,11 @@ type FeaturedBadgeValues = {
 };
 
 type FeaturedBadgeIndex = FeaturedBadgeValues & {
-  byBadge: Record<BumicertBadgeFilter, FeaturedBadgeValues>;
+  // Keyed by brand: built-in keys (gainforest / maearth / … / biometrust) plus
+  // dynamic endorser brands keyed by the endorser's DID.
+  byBadge: Record<string, FeaturedBadgeValues>;
+  // Dynamic (admin-added) endorsers present in this index, for emblem rendering.
+  endorsers: EndorserMeta[];
 };
 
 type FeaturedBadgeIndexPayload = {
@@ -1464,13 +1516,23 @@ async function fetchIssuerBadgeRecords(
 }
 
 async function fetchFeaturedBadgeIndexUncached(signal?: AbortSignal): Promise<FeaturedBadgeIndex> {
+  const issuers = await getTrustedIssuers(signal);
   const dids: string[] = [];
   const recordUris: string[] = [];
-  const byBadge = Object.fromEntries(
+  const byBadge: Record<string, { dids: string[]; recordUris: string[] }> = Object.fromEntries(
     FEATURED_BADGE_KEY_LIST.map((key) => [key, { dids: [] as string[], recordUris: [] as string[] }]),
-  ) as Record<BumicertBadgeFilter, { dids: string[]; recordUris: string[] }>;
+  );
+  const ensureBucket = (key: string) => (byBadge[key] ??= { dids: [], recordUris: [] });
+  const endorsers: EndorserMeta[] = [];
 
-  for (const issuer of TRUSTED_BADGE_ISSUERS) {
+  for (const issuer of issuers) {
+    // Dynamic endorsers surface in the index even before their first award, so
+    // the admin panel and emblem code can see them; seed the bucket + metadata.
+    if (issuer.mode === "fixed" && issuer.endorser) {
+      endorsers.push(issuer.endorser);
+      ensureBucket(issuer.badge);
+    }
+
     const { definitions, awards } = await fetchIssuerBadgeRecords(
       issuer.did,
       issuer.mode === "title",
@@ -1489,21 +1551,22 @@ async function fetchFeaturedBadgeIndexUncached(signal?: AbortSignal): Promise<Fe
     );
 
     for (const award of awards) {
-      const badgeKey: BumicertBadgeFilter | undefined =
+      const badgeKey: string | undefined =
         issuer.mode === "fixed"
           ? issuer.badge
           : award.badge?.uri
             ? keyByDefinitionUri.get(award.badge.uri)
             : undefined;
       if (!badgeKey) continue;
+      const bucket = ensureBucket(badgeKey);
       const subject = award.subject;
       if (subject?.__typename === "AppCertifiedDefsDid" && subject.did) {
         dids.push(subject.did);
-        byBadge[badgeKey].dids.push(subject.did);
+        bucket.dids.push(subject.did);
       } else if (subject?.__typename === "ComAtprotoRepoStrongRef" && subject.uri?.trim()) {
         const uri = subject.uri.trim();
         recordUris.push(uri);
-        byBadge[badgeKey].recordUris.push(uri);
+        bucket.recordUris.push(uri);
       }
     }
   }
@@ -1512,21 +1575,19 @@ async function fetchFeaturedBadgeIndexUncached(signal?: AbortSignal): Promise<Fe
     dids: uniqueSorted(dids),
     recordUris: uniqueSorted(recordUris),
     byBadge: Object.fromEntries(
-      FEATURED_BADGE_KEY_LIST.map((key) => [
+      Object.entries(byBadge).map(([key, values]) => [
         key,
-        {
-          dids: uniqueSorted(byBadge[key].dids),
-          recordUris: uniqueSorted(byBadge[key].recordUris),
-        },
+        { dids: uniqueSorted(values.dids), recordUris: uniqueSorted(values.recordUris) },
       ]),
-    ) as Record<BumicertBadgeFilter, FeaturedBadgeValues>,
+    ),
+    endorsers,
   };
 }
 
 function fetchFeaturedBadgeIndex(signal?: AbortSignal): Promise<FeaturedBadgeIndex> {
   return publicExploreCache(
     "featured-badge-index",
-    { version: "gainforest-maearth-biometrust:v4", ttl: FEATURED_BADGE_INDEX_CACHE_MS },
+    { version: "gainforest-maearth-biometrust-endorsers:v5", ttl: FEATURED_BADGE_INDEX_CACHE_MS },
     // The featured-badge index is shared by count and list requests across the
     // public Explore pages. Keep the cached loader independent from any one
     // component effect's abort signal; otherwise an aborted count refresh can
@@ -1536,23 +1597,48 @@ function fetchFeaturedBadgeIndex(signal?: AbortSignal): Promise<FeaturedBadgeInd
   );
 }
 
-export async function fetchTrustedOrganizationBadges(
+/** A resolved "Trusted by" endorsement for a profile: either one of the three
+ *  built-in brands (rendered from a bundled logo) or a dynamic admin-added
+ *  endorser (rendered from its own certified profile). */
+export type TrustedByEndorsement = {
+  key: string;
+  /** Set for the three built-in brands; null for dynamic endorsers. */
+  builtin: TrustedOrganizationBadge | null;
+  label: string;
+  endorserDid: string | null;
+  endorserHandle: string | null;
+};
+
+export async function fetchTrustedByEndorsements(
   did: string,
   signal?: AbortSignal,
-): Promise<TrustedOrganizationBadge[]> {
+): Promise<TrustedByEndorsement[]> {
   if (!did.startsWith("did:")) return [];
   const index = await fetchFeaturedBadgeIndex(signal);
-  const badges: TrustedOrganizationBadge[] = [];
-  if (index.byBadge.gainforest.dids.includes(did)) badges.push("gainforest");
-  if (
-    index.byBadge.maearth.dids.includes(did) ||
-    index.byBadge["maearth-round-1"].dids.includes(did) ||
-    index.byBadge["maearth-round-2"].dids.includes(did)
-  ) {
-    badges.push("maearth");
+  const includes = (key: string) => index.byBadge[key]?.dids.includes(did) ?? false;
+  const endorsements: TrustedByEndorsement[] = [];
+  if (includes("gainforest")) {
+    endorsements.push({ key: "gainforest", builtin: "gainforest", label: "GainForest", endorserDid: null, endorserHandle: null });
   }
-  if (index.byBadge.biometrust.dids.includes(did)) badges.push("biometrust");
-  return badges;
+  if (includes("maearth") || includes("maearth-round-1") || includes("maearth-round-2")) {
+    endorsements.push({ key: "maearth", builtin: "maearth", label: "Ma Earth", endorserDid: null, endorserHandle: null });
+  }
+  if (includes("biometrust")) {
+    endorsements.push({ key: "biometrust", builtin: "biometrust", label: "Biome Trust", endorserDid: null, endorserHandle: null });
+  }
+  // Dynamic endorsers, in the order the moderation repo lists them.
+  for (const endorser of index.endorsers) {
+    if (index.byBadge[endorser.key]?.dids.includes(did)) {
+      endorsements.push({
+        key: endorser.key,
+        builtin: null,
+        label: endorser.label,
+        endorserDid: endorser.endorserDid,
+        endorserHandle: endorser.endorserHandle,
+      });
+    }
+  }
+  return endorsements;
 }
 
 /** DIDs of every organization carrying a Ma Earth badge (the umbrella badge
@@ -1957,8 +2043,8 @@ function featuredBadgeValues(index: FeaturedBadgeIndex, filters: BumicertBadgeFi
   const selected = expandBadgeFilters(normalizeBadgeFilters(filters));
   if (selected.length === 0) return { dids: index.dids, recordUris: index.recordUris };
   return {
-    dids: uniqueSorted(selected.flatMap((filter) => index.byBadge[filter].dids)),
-    recordUris: uniqueSorted(selected.flatMap((filter) => index.byBadge[filter].recordUris)),
+    dids: uniqueSorted(selected.flatMap((filter) => index.byBadge[filter]?.dids ?? [])),
+    recordUris: uniqueSorted(selected.flatMap((filter) => index.byBadge[filter]?.recordUris ?? [])),
   };
 }
 

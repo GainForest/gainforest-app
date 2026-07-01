@@ -926,7 +926,8 @@
       "taina": "Agen Tainá",
       "grants": "Pemohon hibah",
       "bioblitz": "BioBlitz",
-      "testAccounts": "Akun uji coba"
+      "testAccounts": "Akun uji coba",
+      "endorsers": "Pendukung"
     },
     "unnamed": "Akun tanpa nama",
     "awardHint": "Buka profil untuk memberikan lencana.",
@@ -1140,5 +1141,17 @@
       "profileSaved": "Tersimpan — Tainá akan memakainya mulai balasan berikutnya.",
       "profileSaveFailed": "Kami tidak dapat menyimpan profil Anda. Silakan coba lagi."
     }
+  },
+  "adminEndorsers": {
+    "title": "Pendukung",
+    "description": "Organisasi yang lencananya kami dengarkan. Dukungan mereka muncul di seluruh aplikasi sebagai “Dipercaya oleh” dan menampilkan proyek yang mereka dukung.",
+    "inputLabel": "Handle organisasi atau id akun",
+    "inputPlaceholder": "handle.certified.one atau did:plc:…",
+    "addButton": "Tambah pendukung",
+    "addError": "Tidak dapat menambahkan pendukung.",
+    "removeError": "Tidak dapat menghapus pendukung.",
+    "removeLabel": "Hapus {name}",
+    "builtinChip": "Bawaan",
+    "propagationHint": "Pendukung baru perlu beberapa menit untuk muncul di seluruh aplikasi."
   }
 }

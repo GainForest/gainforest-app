@@ -926,7 +926,8 @@
       "taina": "Agentes Tainá",
       "grants": "Solicitantes de subvención",
       "bioblitz": "BioBlitz",
-      "testAccounts": "Cuentas de prueba"
+      "testAccounts": "Cuentas de prueba",
+      "endorsers": "Avaladores"
     },
     "unnamed": "Cuenta sin nombre",
     "awardHint": "Abre un perfil para otorgar una insignia.",
@@ -1140,5 +1141,17 @@
       "profileSaved": "Guardado: Tainá lo usará desde su próxima respuesta.",
       "profileSaveFailed": "No pudimos guardar tu perfil. Inténtalo de nuevo."
     }
+  },
+  "adminEndorsers": {
+    "title": "Avaladores",
+    "description": "Organizaciones cuyas insignias escuchamos. Sus respaldos aparecen en toda la app como “Respaldado por” y muestran los proyectos que apoyan.",
+    "inputLabel": "Handle de la organización o id de cuenta",
+    "inputPlaceholder": "handle.certified.one o did:plc:…",
+    "addButton": "Agregar avalador",
+    "addError": "No se pudo agregar el avalador.",
+    "removeError": "No se pudo eliminar el avalador.",
+    "removeLabel": "Eliminar {name}",
+    "builtinChip": "Integrado",
+    "propagationHint": "Los nuevos avaladores tardan unos minutos en aparecer en la app."
   }
 }

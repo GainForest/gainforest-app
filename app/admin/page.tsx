@@ -9,6 +9,7 @@ import { fetchGrantApplicants } from "@/app/_lib/grants";
 import { fetchBioblitzRegistrants } from "@/app/_lib/bioblitz";
 import { fetchTainaAdminResidents } from "@/app/_lib/taina-agent";
 import { fetchIndexedCertifiedProfileCards } from "@/app/_lib/indexer";
+import { BUILTIN_ENDORSERS, fetchEndorserRecords } from "@/app/_lib/endorsers";
 import { AdminModerationDashboard, type AdminTab } from "./_components/AdminModerationDashboard";
 import type { AdminTainaRow } from "./_components/AdminTainaPanel";
 
@@ -17,7 +18,7 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-const TABS: AdminTab[] = ["taina", "grants", "bioblitz", "testAccounts"];
+const TABS: AdminTab[] = ["taina", "grants", "bioblitz", "testAccounts", "endorsers"];
 
 /**
  * The Tainá roster for the admin panel: runtime data (bot, last used, credit
@@ -58,12 +59,13 @@ export default async function AdminPage({
   }
 
   const t = await getTranslations("common.adminModeration");
-  const [{ tab }, testAccounts, grantApplicants, bioblitzRegistrants, taina] = await Promise.all([
+  const [{ tab }, testAccounts, grantApplicants, bioblitzRegistrants, taina, endorsers] = await Promise.all([
     searchParams,
     fetchFlaggedTestAccounts().catch(() => []),
     fetchGrantApplicants().catch(() => []),
     fetchBioblitzRegistrants().catch(() => []),
     loadTainaRows(),
+    moderator.repoDid ? fetchEndorserRecords(moderator.repoDid).catch(() => []) : Promise.resolve([]),
   ]);
 
   const initialTab: AdminTab = TABS.includes(tab as AdminTab) ? (tab as AdminTab) : "taina";
@@ -84,6 +86,8 @@ export default async function AdminPage({
         bioblitzRegistrants={bioblitzRegistrants}
         tainaRows={taina?.rows ?? null}
         tainaAllowanceUsd={taina?.allowanceUsd ?? 25}
+        builtinEndorsers={BUILTIN_ENDORSERS}
+        endorsers={endorsers}
       />
     </Container>
   );
