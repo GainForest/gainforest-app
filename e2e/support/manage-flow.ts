@@ -319,7 +319,9 @@ export async function acceptOrganizationInvitationFromAccountMenu(
   await expect(accountMenu).toBeVisible({ timeout: 60_000 });
   await accountMenu.click();
 
-  await expect(page.getByText(/^invitations$/i)).toBeVisible({ timeout: 15_000 });
+  // The account menu no longer shows an "Invitations" eyebrow; confirm it opened
+  // via the always-present Sign out action instead.
+  await expect(page.getByRole("button", { name: /^sign out$/i })).toBeVisible({ timeout: 15_000 });
   await expect(page.getByText(new RegExp(escapeRegExp(org.displayName), "i")).first()).toBeVisible({ timeout: 60_000 });
   await expect(page.getByText(new RegExp(`${role === "admin" ? "Admin" : "Member"} invite`, "i")).first()).toBeVisible({ timeout: 30_000 });
   await screenshotStep(page, testInfo, `organization-invite-${role}-menu-ready`);

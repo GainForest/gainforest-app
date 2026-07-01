@@ -193,6 +193,23 @@ export function accountIdentifierFromManagePath(pathname: string): string | null
   }
 }
 
+/**
+ * Extracts the account identifier from any account route
+ * (/account/<identifier>[/...]), regardless of the sub-section. Returns null for
+ * paths that are not account routes. Callers that need to know whether the
+ * identifier is the current user's own account (vs. someone else's) should
+ * cross-reference the signed-in DID/handle and group memberships.
+ */
+export function accountIdentifierFromPath(pathname: string): string | null {
+  const match = canonicalAppPathname(pathname).match(/^\/account\/([^/?#]+)/);
+  if (!match?.[1]) return null;
+  try {
+    return decodeURIComponent(match[1]);
+  } catch {
+    return match[1];
+  }
+}
+
 /** @deprecated Use accountIdentifierFromManagePath. Retained for callers. */
 export function groupIdentifierFromManagePath(pathname: string): string | null {
   return accountIdentifierFromManagePath(pathname);

@@ -2,12 +2,13 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   ArrowRightIcon,
   BinocularsIcon,
   CheckIcon,
+  ChevronDownIcon,
   ChevronRightIcon,
   FolderKanbanIcon,
   Loader2,
@@ -23,6 +24,7 @@ import {
 } from "lucide-react";
 import {
   useEffect,
+  useMemo,
   useRef,
   useState,
   type FormEvent,
@@ -30,8 +32,10 @@ import {
 import { useTranslations } from "next-intl";
 import type { CgsGroupMembership } from "@/app/(manage)/manage/_lib/cgs";
 import { accountIdentifierFromManagePath, type ManageAccountKind } from "@/lib/links";
+import { stripLocaleFromPathname } from "@/lib/i18n/routing";
 import {
   accountObservationsPath,
+  accountOrganizationsPath,
   accountPath,
   accountProjectsPath,
   accountSettingsPath,
@@ -41,9 +45,8 @@ import {
   switcherGroupIdentifier,
   useAccountList,
   useActiveAccountContext,
-  useManagePathContextSync,
+  useAccountPathContextSync,
   type AccountCard,
-  type ActiveAccountContext,
   type SwitcherGroup,
 } from "../_lib/account-switcher";
 import type { AuthSession } from "../_lib/auth";
@@ -517,8 +520,22 @@ type MenuInvitation = {
   expiresAt: string;
 };
 
-function isActiveContext(active: ActiveAccountContext, type: "personal" | "group", did: string): boolean {
-  return active.type === type && active.did === did;
+/**
+ * Splits an `/account/<identifier>/<...rest>` path into the account identifier
+ * and the trailing sub-route (e.g. "/observations"). Returns null for any path
+ * that is not an account route. Used to preserve the current sub-route when the
+ * user switches accounts from the menu.
+ */
+function accountRoutePartsFromPathname(pathname: string): { identifier: string; rest: string } | null {
+  const match = stripLocaleFromPathname(pathname).match(/^\/account\/([^/?#]+)((?:\/[^?#]*)?)/);
+  if (!match?.[1]) return null;
+  let identifier = match[1];
+  try {
+    identifier = decodeURIComponent(match[1]);
+  } catch {
+    // Keep the raw segment if it isn't valid percent-encoding.
+  }
+  return { identifier, rest: match[2] ?? "" };
 }
 
 function groupName(group: MenuGroup): string {
@@ -551,40 +568,102 @@ function AccountDot({
   );
 }
 
-function AccountMenuRow({
-  label,
-  subtitle,
-  avatarUrl,
-  active,
-  icon,
-  onSelect,
-}: {
+type MenuSubItem = {
+  key: string;
+  label: string;
+  href: string;
+  icon: React.ReactNode;
+};
+
+type MenuAccount = {
+  key: string;
+  kind: "personal" | "group";
   label: string;
   subtitle: string;
+  identifier: string;
   avatarUrl?: string | null;
-  active: boolean;
   icon: React.ReactNode;
+  group?: MenuGroup;
+  subItems: MenuSubItem[];
+};
+
+function AccountBlock({
+  account,
+  active,
+  expanded,
+  onSelect,
+  onToggle,
+  onNavigate,
+}: {
+  account: MenuAccount;
+  active: boolean;
+  expanded: boolean;
   onSelect: () => void;
+  onToggle: () => void;
+  onNavigate: () => void;
 }) {
   return (
-    <button
-      type="button"
-      onClick={onSelect}
-      className="group flex w-full items-center gap-3 rounded-xl px-2.5 py-2 text-left transition-colors hover:bg-muted/60"
-    >
-      <AccountDot avatarUrl={avatarUrl} label={label} icon={icon} />
-      <span className="min-w-0 flex-1">
-        <span className="block truncate text-sm font-medium text-foreground">{label}</span>
-        <span className="block truncate text-xs text-muted-foreground">{subtitle}</span>
-      </span>
-      {active ? (
-        <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground">
-          <CheckIcon className="h-3 w-3" />
-        </span>
-      ) : (
-        <ChevronRightIcon className="h-4 w-4 shrink-0 text-muted-foreground/45 opacity-0 transition-all group-hover:translate-x-0.5 group-hover:opacity-100" />
-      )}
-    </button>
+    <div>
+      <div
+        className={cn(
+          "group flex items-center gap-1 rounded-xl pr-1 transition-colors",
+          active ? "bg-primary/10" : "hover:bg-muted/50",
+        )}
+      >
+        <button
+          type="button"
+          onClick={onSelect}
+          className="flex min-w-0 flex-1 items-center gap-3 rounded-xl px-2.5 py-2 text-left"
+        >
+          <AccountDot avatarUrl={account.avatarUrl} label={account.label} icon={account.icon} />
+          <span className="min-w-0 flex-1">
+            <span className="block truncate text-sm font-medium text-foreground">{account.label}</span>
+            <span className="block truncate text-xs text-muted-foreground">{account.subtitle}</span>
+          </span>
+          {active ? (
+            <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground">
+              <CheckIcon className="h-3 w-3" />
+            </span>
+          ) : null}
+        </button>
+        <button
+          type="button"
+          onClick={onToggle}
+          aria-label={expanded ? `Collapse ${account.label}` : `Expand ${account.label}`}
+          aria-expanded={expanded}
+          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted/70 hover:text-foreground"
+        >
+          <ChevronDownIcon className={cn("h-4 w-4 transition-transform duration-200", expanded && "rotate-180")} />
+        </button>
+      </div>
+
+      <AnimatePresence initial={false}>
+        {expanded ? (
+          <motion.div
+            key="sub"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.18, ease: [0.25, 0.1, 0.25, 1] }}
+            className="overflow-hidden"
+          >
+            <div className="ml-5 mt-0.5 flex flex-col gap-0.5 border-l border-border/60 py-1 pl-3">
+              {account.subItems.map((item) => (
+                <Link
+                  key={item.key}
+                  href={item.href}
+                  onClick={onNavigate}
+                  className="flex items-center gap-2.5 rounded-lg px-2.5 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground"
+                >
+                  <span className="shrink-0 text-muted-foreground/80">{item.icon}</span>
+                  {item.label}
+                </Link>
+              ))}
+            </div>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
+    </div>
   );
 }
 
@@ -598,7 +677,9 @@ function AuthenticatedMenu({
   isProfileNameLoading?: boolean;
 }) {
   const pathname = usePathname() ?? "/";
+  const router = useRouter();
   const [open, setOpen] = useState(false);
+  const [expandedKey, setExpandedKey] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const { personal: personalCard, groups, status: groupsStatus, reload } = useAccountList(session.did);
   const [activeContext, setActiveContext] = useActiveAccountContext(session.did);
@@ -630,38 +711,130 @@ function AuthenticatedMenu({
     : personalSecondaryLabel;
   const triggerAvatarUrl = showingGroup ? currentGroup?.avatarUrl : personalCard?.avatarUrl;
   const triggerIcon = showingGroup ? <UsersIcon className="h-4 w-4" /> : <UserIcon className="h-3.5 w-3.5" />;
-  const activeGroupIdentifier = routeGroupIdentifier
-    ?? (currentGroup ? switcherGroupIdentifier(currentGroup) : null)
-    ?? (activeContext.type === "group" ? activeContext.identifier || activeContext.did : null);
-  // The active account's home is now its profile, where owners edit in place.
-  const activeIdentifier = activeGroupIdentifier ?? personalCard?.handle?.trim() ?? session.did;
-  // Quick links always point at the *personal* account, regardless of which
-  // organization context is currently active.
+  // Quick links point at each account's own profile identifier (handle or DID).
   const personalIdentifier = personalCard?.handle?.trim() ?? session.did;
-  const profileHref = accountPath(activeIdentifier);
-  const settingsHref = accountSettingsPath(activeIdentifier);
   const [invitations, setInvitations] = useState<MenuInvitation[]>([]);
   const [invitationsStatus, setInvitationsStatus] = useState<"idle" | "loading" | "ready" | "error">("idle");
   const invitationsStatusRef = useRef(invitationsStatus);
   const [invitationRequestKey, setInvitationRequestKey] = useState(0);
   const [acceptingInvitationId, setAcceptingInvitationId] = useState<string | null>(null);
 
-  useManagePathContextSync({ pathname, sessionDid: session.did, groups, activeContext, setActiveContext });
+  useAccountPathContextSync({
+    pathname,
+    sessionDid: session.did,
+    personalHandle: personalCard?.handle ?? null,
+    groups,
+    activeContext,
+    setActiveContext,
+  });
 
-  const selectPersonal = () => {
-    setActiveContext({ type: "personal", did: session.did });
+  const sidebarItemsT = useTranslations("common.sidebar.items");
+
+  // The currently-selected account — route context wins over stored context.
+  const selectedKey = routeGroup
+    ? routeGroup.groupDid
+    : activeContext.type === "group"
+      ? activeContext.did
+      : session.did;
+
+  const buildSubItems = (identifier: string): MenuSubItem[] => [
+    { key: "profile", label: sidebarT("profileRow.viewProfile"), href: accountPath(identifier), icon: <UserIcon className="h-3.5 w-3.5" /> },
+    { key: "observations", label: sidebarItemsT("observations"), href: accountObservationsPath(identifier), icon: <BinocularsIcon className="h-3.5 w-3.5" /> },
+    { key: "projects", label: sidebarItemsT("projects"), href: accountProjectsPath(identifier), icon: <FolderKanbanIcon className="h-3.5 w-3.5" /> },
+    { key: "settings", label: authT("settings"), href: accountSettingsPath(identifier), icon: <SettingsIcon className="h-3.5 w-3.5" /> },
+  ];
+
+  const accounts: MenuAccount[] = [
+    {
+      key: session.did,
+      kind: "personal",
+      label: personalDisplayLabel,
+      subtitle: "Personal account",
+      identifier: personalIdentifier,
+      avatarUrl: personalCard?.avatarUrl,
+      icon: <UserIcon className="h-4 w-4" />,
+      subItems: buildSubItems(personalIdentifier),
+    },
+    ...groups.map((group): MenuAccount => {
+      const identifier = switcherGroupIdentifier(group);
+      return {
+        key: group.groupDid,
+        kind: "group",
+        label: groupName(group),
+        subtitle: roleLabel(group.role),
+        identifier,
+        avatarUrl: group.avatarUrl,
+        icon: <UsersIcon className="h-4 w-4" />,
+        group,
+        subItems: buildSubItems(identifier),
+      };
+    }),
+  ];
+
+  // Identifiers (handles + DIDs) of accounts this user owns, used to decide
+  // whether the current route is a "same sub-route across accounts" candidate.
+  const ownedIdentifiers = useMemo(() => {
+    const set = new Set<string>();
+    const add = (value?: string | null) => {
+      const normalized = value?.trim().toLowerCase();
+      if (normalized) set.add(normalized);
+    };
+    add(session.did);
+    add(personalCard?.handle);
+    for (const group of groups) {
+      add(group.groupDid);
+      add(group.handle);
+    }
+    return set;
+  }, [session.did, personalCard?.handle, groups]);
+
+  const routeParts = accountRoutePartsFromPathname(pathname);
+  // When the user is on one of their own account routes, switching accounts
+  // should carry them to the same sub-route on the newly selected account.
+  const ownedRouteRest =
+    routeParts && ownedIdentifiers.has(routeParts.identifier.toLowerCase()) ? routeParts.rest : null;
+
+  const applyContext = (account: MenuAccount) => {
+    if (account.kind === "group" && account.group) {
+      setActiveContext({
+        type: "group",
+        did: account.group.groupDid,
+        identifier: switcherGroupIdentifier(account.group),
+        role: account.group.role,
+      });
+    } else {
+      setActiveContext({ type: "personal", did: session.did });
+    }
+  };
+
+  // Clicking an account body switches context (and expands it). If we're on one
+  // of the user's own account routes, it also mirrors the current sub-route onto
+  // the selected account.
+  const handleSelectAccount = (account: MenuAccount) => {
+    applyContext(account);
+    setExpandedKey(account.key);
+    if (ownedRouteRest !== null) {
+      router.push(`/account/${encodeURIComponent(account.identifier)}${ownedRouteRest}`);
+      setOpen(false);
+    }
+  };
+
+  const handleToggleAccount = (account: MenuAccount) => {
+    setExpandedKey((current) => (current === account.key ? null : account.key));
+  };
+
+  // Sub-item links navigate on their own; we just align the context + close.
+  const handleSubItemNavigate = (account: MenuAccount) => {
+    applyContext(account);
     setOpen(false);
   };
 
-  const selectGroup = (group: MenuGroup) => {
-    setActiveContext({
-      type: "group",
-      did: group.groupDid,
-      identifier: switcherGroupIdentifier(group),
-      role: group.role,
-    });
-    setOpen(false);
-  };
+  // On open, expand the currently-selected account by default.
+  useEffect(() => {
+    if (open) setExpandedKey(selectedKey);
+    // Only re-run when the menu opens/closes; selection changes are handled inline.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
 
   const handleBlur = (event: React.FocusEvent) => {
     if (!containerRef.current?.contains(event.relatedTarget as Node)) {
@@ -756,9 +929,9 @@ function AuthenticatedMenu({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 6 }}
             transition={{ duration: 0.15, ease: [0.25, 0.1, 0.25, 1] }}
-            className="absolute top-full right-0 z-[1000] mt-2 w-[min(22rem,calc(100vw-1.5rem))] overflow-hidden rounded-2xl border border-border bg-background shadow-xl shadow-black/10"
+            className="absolute top-full right-0 z-[1000] mt-2 w-[min(22rem,calc(100vw-1.5rem))] overflow-hidden rounded-2xl border border-border/60 bg-background/75 shadow-xl shadow-black/10 backdrop-blur-xl supports-[backdrop-filter]:bg-background/65"
           >
-            <div className="border-b border-border px-3 py-3">
+            <div className="border-b border-border/60 px-3 py-3">
               <p className="text-sm font-medium text-foreground truncate">{displayLabel}</p>
               {secondaryLabel && (
                 <p className="text-xs text-muted-foreground truncate">{secondaryLabel}</p>
@@ -766,18 +939,20 @@ function AuthenticatedMenu({
             </div>
 
             <div className="max-h-[min(70vh,34rem)] overflow-y-auto p-2">
-              <div className="px-2 pb-1 pt-1 text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
-                Accounts
+              {/* Accounts */}
+              <div className="flex flex-col gap-0.5">
+                {accounts.map((account) => (
+                  <AccountBlock
+                    key={account.key}
+                    account={account}
+                    active={selectedKey === account.key}
+                    expanded={expandedKey === account.key}
+                    onSelect={() => handleSelectAccount(account)}
+                    onToggle={() => handleToggleAccount(account)}
+                    onNavigate={() => handleSubItemNavigate(account)}
+                  />
+                ))}
               </div>
-
-              <AccountMenuRow
-                label={personalDisplayLabel}
-                subtitle="Personal account"
-                avatarUrl={personalCard?.avatarUrl}
-                active={!routeGroupIdentifier && isActiveContext(activeContext, "personal", session.did)}
-                icon={<UserIcon className="h-4 w-4" />}
-                onSelect={selectPersonal}
-              />
 
               {groupsStatus === "loading" ? (
                 <div className="flex items-center gap-2 px-2.5 py-3 text-sm text-muted-foreground">
@@ -786,7 +961,7 @@ function AuthenticatedMenu({
               ) : null}
 
               {groupsStatus === "error" ? (
-                <div className="rounded-xl bg-destructive/10 px-3 py-2 text-xs text-destructive">
+                <div className="mt-1 rounded-xl bg-destructive/10 px-3 py-2 text-xs text-destructive">
                   <p>Couldn’t load your organizations.</p>
                   <button type="button" onClick={() => void reload()} className="mt-1 font-medium underline underline-offset-2">
                     Try again
@@ -794,27 +969,9 @@ function AuthenticatedMenu({
                 </div>
               ) : null}
 
-              {groupsStatus === "ready" && groups.length === 0 ? (
-                <p className="px-2.5 py-2 text-xs text-muted-foreground">No organizations yet.</p>
-              ) : null}
-
-              {groups.map((group) => (
-                <AccountMenuRow
-                  key={group.groupDid}
-                  label={groupName(group)}
-                  subtitle={roleLabel(group.role)}
-                  avatarUrl={group.avatarUrl}
-                  active={isActiveContext(activeContext, "group", group.groupDid) || routeGroup?.groupDid === group.groupDid}
-                  icon={<UsersIcon className="h-4 w-4" />}
-                  onSelect={() => selectGroup(group)}
-                />
-              ))}
-
               <div className="my-2 h-px bg-border/60" />
 
-              <div className="px-2 pb-1 pt-1 text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
-                {invitationT("title")}
-              </div>
+              {/* Invitations */}
               {invitationsStatus === "loading" ? (
                 <div className="flex items-center gap-2 px-2.5 py-3 text-sm text-muted-foreground">
                   <Loader2 className="h-4 w-4 animate-spin text-primary" /> {invitationT("loading")}
@@ -863,46 +1020,9 @@ function AuthenticatedMenu({
 
               <div className="my-2 h-px bg-border/60" />
 
+              {/* General options — apply to the signed-in user */}
               <Link
-                href={profileHref}
-                onClick={() => setOpen(false)}
-                className="flex items-center justify-center gap-2 rounded-xl bg-primary px-3 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-              >
-                <UserIcon className="h-4 w-4" />
-                {sidebarT("profileRow.viewProfile")}
-              </Link>
-
-              <Link
-                href={settingsHref}
-                onClick={() => setOpen(false)}
-                className="mt-1 flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm text-foreground transition-colors hover:bg-muted/60"
-              >
-                <SettingsIcon className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-                {authT("settings")}
-              </Link>
-
-              <div className="my-2 h-px bg-border/60" />
-
-              <Link
-                href={accountObservationsPath(personalIdentifier)}
-                onClick={() => setOpen(false)}
-                className="flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm text-foreground transition-colors hover:bg-muted/60"
-              >
-                <BinocularsIcon className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-                {sidebarT("profileRow.myObservations")}
-              </Link>
-
-              <Link
-                href={accountProjectsPath(personalIdentifier)}
-                onClick={() => setOpen(false)}
-                className="flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm text-foreground transition-colors hover:bg-muted/60"
-              >
-                <FolderKanbanIcon className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-                {sidebarT("profileRow.myProjects")}
-              </Link>
-
-              <Link
-                href={accountPath(personalIdentifier)}
+                href={accountOrganizationsPath(personalIdentifier)}
                 onClick={() => setOpen(false)}
                 className="flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm text-foreground transition-colors hover:bg-muted/60"
               >
@@ -921,6 +1041,7 @@ function AuthenticatedMenu({
 
               <div className="my-2 h-px bg-border/60" />
 
+              {/* Sign out */}
               <button
                 onClick={redirectToLogout}
                 className="flex w-full cursor-pointer items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-sm text-red-500 transition-colors hover:bg-red-50 dark:hover:bg-red-950/30"

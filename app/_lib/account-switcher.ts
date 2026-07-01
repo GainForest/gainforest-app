@@ -11,7 +11,7 @@
 // the two consumers never double-fetch.
 
 import { useEffect, useRef, useSyncExternalStore } from "react";
-import { ACTIVE_MANAGE_CONTEXT_KEY, accountIdentifierFromManagePath } from "@/lib/links";
+import { ACTIVE_MANAGE_CONTEXT_KEY, accountIdentifierFromPath } from "@/lib/links";
 import type { CgsGroupMembership } from "@/app/(manage)/manage/_lib/cgs";
 
 export type AccountCard = { displayName: string | null; avatarUrl: string | null; handle: string | null };
@@ -329,14 +329,15 @@ export function useActiveAccountContext(
   return [active, rememberActiveContext];
 }
 
-export function useManagePathContextSync(options: {
+export function useAccountPathContextSync(options: {
   pathname: string;
   sessionDid: string;
+  personalHandle?: string | null;
   groups: SwitcherGroup[];
   activeContext: ActiveAccountContext;
   setActiveContext: (context: ActiveAccountContext) => void;
 }): void {
-  const { pathname, sessionDid, groups, activeContext, setActiveContext } = options;
+  const { pathname, sessionDid, personalHandle, groups, activeContext, setActiveContext } = options;
   const activeContextRef = useRef(activeContext);
 
   useEffect(() => {
@@ -344,8 +345,8 @@ export function useManagePathContextSync(options: {
   }, [activeContext]);
 
   useEffect(() => {
-    const accountIdentifier = accountIdentifierFromManagePath(pathname);
-    // Not on a manage route (/account/<id>/manage): leave the context untouched.
+    const accountIdentifier = accountIdentifierFromPath(pathname);
+    // Not on an account route (/account/<id>/...): leave the context untouched.
     if (!accountIdentifier) return;
 
     const match = findSwitcherGroupByIdentifier(groups, accountIdentifier);
@@ -362,10 +363,17 @@ export function useManagePathContextSync(options: {
       return;
     }
 
-    // A manage route whose account is not one of the user's organizations is the
-    // user's own personal manage surface.
+    // Not one of the user's organizations. Only sync to personal when this is
+    // the user's OWN account route — visiting someone else's profile must not
+    // change the active context.
+    const normalized = accountIdentifier.trim().toLowerCase();
+    const ownsPersonalRoute =
+      normalized === sessionDid.trim().toLowerCase() ||
+      (personalHandle ? normalized === personalHandle.trim().toLowerCase() : false);
+    if (!ownsPersonalRoute) return;
+
     const current = activeContextRef.current;
     if (current.type === "personal" && current.did === sessionDid) return;
     setActiveContext({ type: "personal", did: sessionDid });
-  }, [groups, pathname, sessionDid, setActiveContext]);
+  }, [groups, pathname, sessionDid, personalHandle, setActiveContext]);
 }
