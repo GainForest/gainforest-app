@@ -76,9 +76,6 @@ export default async function AccountLayout({
   const awardedRecognition: RecognitionBadgeKey[] = await fetchRecognitionBadgesForDid(account.did)
     .then((keys) => RECOGNITION_BADGE_KEYS.filter((key) => keys.has(key)))
     .catch(() => []);
-  // The Admin tab (list of flagged test accounts) lives on the admin group's
-  // own profile, shown to any of its members.
-  const showAdminTab = Boolean(moderator?.isModerator && moderator.repoDid === account.did);
 
   return (
     <main className="w-full">
@@ -112,7 +109,6 @@ export default async function AccountLayout({
               accountKind={account.kind}
               includeSettings={canManage}
               showOrgData={canManage}
-              showAdmin={showAdminTab}
             />
           </>
         }

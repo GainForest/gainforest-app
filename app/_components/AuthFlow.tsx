@@ -20,6 +20,7 @@ import {
   ShieldCheckIcon,
   UserIcon,
   UsersIcon,
+  WrenchIcon,
 } from "lucide-react";
 import {
   useEffect,
@@ -31,11 +32,13 @@ import { useTranslations } from "next-intl";
 import type { CgsGroupMembership } from "@/app/(manage)/manage/_lib/cgs";
 import { accountIdentifierFromManagePath, type ManageAccountKind } from "@/lib/links";
 import {
+  accountAdminPath,
   accountObservationsPath,
   accountPath,
   accountProjectsPath,
   accountSettingsPath,
 } from "@/app/account/_lib/account-route";
+import { GAINFOREST_MODERATION_REPO_DID } from "@/app/_lib/indexer";
 import {
   findSwitcherGroupByIdentifier,
   switcherGroupIdentifier,
@@ -640,6 +643,11 @@ function AuthenticatedMenu({
   const personalIdentifier = personalCard?.handle?.trim() ?? session.did;
   const profileHref = accountPath(activeIdentifier);
   const settingsHref = accountSettingsPath(activeIdentifier);
+  // GainForest moderators (members of the admin group, any role) reach the
+  // moderation panel from here rather than a profile tab. Detect membership
+  // from the account list and link to the admin group's own admin surface.
+  const moderationGroup = groups.find((group) => group.groupDid === GAINFOREST_MODERATION_REPO_DID) ?? null;
+  const adminHref = moderationGroup ? accountAdminPath(switcherGroupIdentifier(moderationGroup)) : null;
   const [invitations, setInvitations] = useState<MenuInvitation[]>([]);
   const [invitationsStatus, setInvitationsStatus] = useState<"idle" | "loading" | "ready" | "error">("idle");
   const invitationsStatusRef = useRef(invitationsStatus);
@@ -909,6 +917,17 @@ function AuthenticatedMenu({
                 <ShieldCheckIcon className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
                 {sidebarT("profileRow.myOrganizations")}
               </Link>
+
+              {adminHref ? (
+                <Link
+                  href={adminHref}
+                  onClick={() => setOpen(false)}
+                  className="flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm text-foreground transition-colors hover:bg-muted/60"
+                >
+                  <WrenchIcon className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                  {sidebarT("profileRow.admin")}
+                </Link>
+              ) : null}
 
               <Link
                 href="/manage?mode=onboard-org"

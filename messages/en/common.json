@@ -142,7 +142,8 @@
       "fallbackName": "Your profile",
       "myObservations": "My observations",
       "myProjects": "My projects",
-      "myOrganizations": "My organizations"
+      "myOrganizations": "My organizations",
+      "admin": "Admin"
     }
   },
   "settings": {

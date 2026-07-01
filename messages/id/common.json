@@ -142,7 +142,8 @@
       "fallbackName": "Profil Anda",
       "myObservations": "Observasi saya",
       "myProjects": "Proyek saya",
-      "myOrganizations": "Organisasi saya"
+      "myOrganizations": "Organisasi saya",
+      "admin": "Admin"
     }
   },
   "settings": {

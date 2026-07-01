@@ -3,12 +3,11 @@
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { usePathname, useSearchParams } from "next/navigation";
-import { BinocularsIcon, FolderKanbanIcon, HeartHandshakeIcon, HomeIcon, ImageIcon, MessageSquareTextIcon, SettingsIcon, ShieldCheckIcon, UsersIcon } from "lucide-react";
+import { BinocularsIcon, FolderKanbanIcon, HeartHandshakeIcon, HomeIcon, ImageIcon, MessageSquareTextIcon, SettingsIcon, UsersIcon } from "lucide-react";
 import { stripLocaleFromPathname } from "@/lib/i18n/routing";
 import { cn } from "@/lib/utils";
 import type { AccountKind } from "../_lib/account-route";
 import {
-  accountAdminPath,
   accountAttachmentsPath,
   accountAudioPath,
   accountBumicertsPath,
@@ -26,7 +25,7 @@ import {
   accountTreesPath,
 } from "../_lib/account-route";
 
-type TabLabelKey = "home" | "overview" | "bumicerts" | "projects" | "donationHistory" | "observations" | "posts" | "timeline" | "gallery" | "filesAndPhotos" | "settings" | "sites" | "audio" | "drone" | "trees" | "members" | "admin";
+type TabLabelKey = "home" | "overview" | "bumicerts" | "projects" | "donationHistory" | "observations" | "posts" | "timeline" | "gallery" | "filesAndPhotos" | "settings" | "sites" | "audio" | "drone" | "trees" | "members";
 
 interface Tab {
   labelKey: TabLabelKey;
@@ -84,7 +83,6 @@ function buildTabs(
   scope: AccountTabBarScope,
   includeSettings: boolean,
   showOrgData: boolean,
-  showAdmin: boolean,
   manageBasePath?: string,
 ): Tab[] {
   const paths = buildTabPaths(did, scope, manageBasePath);
@@ -92,12 +90,6 @@ function buildTabs(
     labelKey: "settings",
     href: paths.settings,
     icon: SettingsIcon,
-    exact: false,
-  };
-  const adminTab: Tab = {
-    labelKey: "admin",
-    href: accountAdminPath(did),
-    icon: ShieldCheckIcon,
     exact: false,
   };
   // Posts / Replies / Likes share one profile tab (the page carries the
@@ -110,11 +102,8 @@ function buildTabs(
     exact: false,
     matchPaths: [accountRepliesPath(did), accountLikesPath(did)],
   };
-  // The Admin tab (test-account moderation) only exists on the public profile,
-  // for stewards viewing their own profile.
   const appendExtras = (tabs: Tab[]): Tab[] => {
     if (includeSettings) tabs.push(settingsTab);
-    if (showAdmin && scope === "account") tabs.push(adminTab);
     return tabs;
   };
 
@@ -210,7 +199,6 @@ interface OrgTabBarProps {
   scope?: AccountTabBarScope;
   includeSettings?: boolean;
   showOrgData?: boolean;
-  showAdmin?: boolean;
   manageBasePath?: string;
 }
 
@@ -220,13 +208,12 @@ export function AccountTabBar({
   scope = "account",
   includeSettings = false,
   showOrgData = false,
-  showAdmin = false,
   manageBasePath,
 }: OrgTabBarProps) {
   const t = useTranslations("common.accountTabs");
   const pathname = stripLocaleFromPathname(usePathname() ?? "/");
   const searchParams = useSearchParams();
-  const tabs = buildTabs(did, accountKind, scope, includeSettings, showOrgData, showAdmin, manageBasePath);
+  const tabs = buildTabs(did, accountKind, scope, includeSettings, showOrgData, manageBasePath);
 
   function isActive(tab: Tab): boolean {
     if (scope === "manage") {
