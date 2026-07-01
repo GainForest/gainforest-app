@@ -104,18 +104,26 @@ async function organizationName(event: z.infer<typeof welcomeEventSchema>): Prom
   return card?.displayName?.trim() || undefined;
 }
 
-function friendlyName(event: z.infer<typeof welcomeEventSchema>): string | null {
-  const explicit = event.user.name?.trim();
-  if (explicit) return explicit;
+function plainDisplayName(value: string | null | undefined, event: z.infer<typeof welcomeEventSchema>): string | null {
+  const name = value?.trim();
+  if (!name) return null;
 
   const handle = event.user.handle?.trim();
-  if (handle && !handle.startsWith("did:")) {
-    const [firstLabel] = handle.split(".");
-    const label = firstLabel?.replace(/[-_]+/g, " ").trim();
-    if (label) return label.replace(/\b\w/g, (char) => char.toUpperCase());
-  }
+  if (handle && name.toLowerCase() === handle.toLowerCase()) return null;
+  if (name === event.user.email || name.startsWith("did:")) return null;
 
-  return null;
+  return name;
+}
+
+async function friendlyName(event: z.infer<typeof welcomeEventSchema>): Promise<string | null> {
+  const explicit = plainDisplayName(event.user.name, event);
+  if (explicit) return explicit;
+
+  const did = event.user.did.trim();
+  if (!did.startsWith("did:")) return null;
+
+  const card = await getCertifiedProfileCard(did).catch(() => null);
+  return plainDisplayName(card?.displayName, event);
 }
 
 export async function POST(request: NextRequest) {
@@ -157,7 +165,7 @@ export async function POST(request: NextRequest) {
   const rendered = renderWelcomeEmailTemplate({
     variant: event.type === "organization.membership.joined" ? "organization-invite" : "direct-signup",
     locale,
-    name: friendlyName(event),
+    name: await friendlyName(event),
     organizationName: await organizationName(event),
     invitedByName: undefined,
     invitedByEmail: undefined,

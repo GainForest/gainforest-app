@@ -3,7 +3,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { NextRequest } from "next/server";
 
 const sendResendEmail = vi.fn(async () => ({ id: "resend-test-id" }));
-const getCertifiedProfileCard = vi.fn(async () => ({ displayName: "Resolved Org", avatarUrl: null }));
+const getCertifiedProfileCard = vi.fn(async (did: string) => ({
+  displayName: did === "did:plc:org" ? "Resolved Org" : "Forest Member",
+  avatarUrl: null,
+}));
 
 vi.mock("@/lib/email/resend", () => ({
   EmailSendError: class EmailSendError extends Error {
@@ -75,11 +78,58 @@ describe("welcome email event webhook", () => {
 
     await expect(response.json()).resolves.toEqual({ ok: true, id: "resend-test-id" });
     expect(response.status).toBe(200);
+    expect(getCertifiedProfileCard).toHaveBeenCalledWith("did:plc:user");
     expect(getCertifiedProfileCard).toHaveBeenCalledWith("did:plc:org");
     expect(sendResendEmail).toHaveBeenCalledWith(expect.objectContaining({
       to: "member@example.com",
       idempotencyKey: "organization.membershipJoined.v1:test",
       subject: "You’ve joined Resolved Org on GainForest",
+      html: expect.stringContaining("Hi Forest Member,"),
+    }));
+  });
+
+  it("omits the greeting instead of deriving a name from the handle", async () => {
+    getCertifiedProfileCard.mockResolvedValueOnce({ displayName: null, avatarUrl: null });
+    const { POST } = await import("./route");
+    const response = await POST(signedRequest({
+      type: "user.signup.completed",
+      eventId: "user.signup.completed.v1:test",
+      createdAt: new Date().toISOString(),
+      locale: "en",
+      user: {
+        did: "did:plc:user",
+        handle: "forest-steward.example.com",
+        email: "member@example.com",
+      },
+    }, secret));
+
+    expect(response.status).toBe(200);
+    expect(sendResendEmail).toHaveBeenCalledWith(expect.objectContaining({
+      html: expect.not.stringContaining("Hi Forest Steward,"),
+      text: expect.not.stringContaining("Hi Forest Steward,"),
+    }));
+  });
+
+  it("does not use an explicit user name that is actually the handle", async () => {
+    getCertifiedProfileCard.mockResolvedValueOnce({ displayName: null, avatarUrl: null });
+    const { POST } = await import("./route");
+    const response = await POST(signedRequest({
+      type: "user.signup.completed",
+      eventId: "user.signup.completed.v1:handle-name-test",
+      createdAt: new Date().toISOString(),
+      locale: "en",
+      user: {
+        did: "did:plc:user",
+        handle: "forest-steward.example.com",
+        name: "forest-steward.example.com",
+        email: "member@example.com",
+      },
+    }, secret));
+
+    expect(response.status).toBe(200);
+    expect(sendResendEmail).toHaveBeenCalledWith(expect.objectContaining({
+      html: expect.not.stringContaining("Hi forest-steward.example.com,"),
+      text: expect.not.stringContaining("Hi forest-steward.example.com,"),
     }));
   });
 

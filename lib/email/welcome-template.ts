@@ -23,7 +23,6 @@ type WelcomeCopy = {
   directHeading: string;
   inviteHeading: string;
   heroKicker: string;
-  fallbackName: string;
   fallbackOrganizationName: string;
   greeting: string;
   directIntro: string;
@@ -73,7 +72,6 @@ const copyByLocale = {
     directHeading: "Welcome to GainForest",
     inviteHeading: "You’ve joined {organizationName} on GainForest",
     heroKicker: "Welcome to",
-    fallbackName: "there",
     fallbackOrganizationName: "your organization",
     greeting: "Hi {name},",
     directIntro:
@@ -183,7 +181,6 @@ const copyByLocale = {
     directHeading: "Bienvenido a GainForest",
     inviteHeading: "Te uniste a {organizationName} en GainForest",
     heroKicker: "Bienvenido a",
-    fallbackName: "amigo/a",
     fallbackOrganizationName: "tu organización",
     greeting: "Hola {name},",
     directIntro:
@@ -228,7 +225,6 @@ const copyByLocale = {
     directHeading: "Boas-vindas ao GainForest",
     inviteHeading: "Você entrou em {organizationName} no GainForest",
     heroKicker: "Boas-vindas ao",
-    fallbackName: "amigo/a",
     fallbackOrganizationName: "sua organização",
     greeting: "Olá {name},",
     directIntro: "Boas-vindas ao GainForest. Se você documenta trabalho de cuidado ambiental ou quer apoiá-lo, veja o que pode fazer na plataforma.",
@@ -270,7 +266,6 @@ const copyByLocale = {
     directHeading: "Karibu GainForest",
     inviteHeading: "Umejiunga na {organizationName} kwenye GainForest",
     heroKicker: "Karibu",
-    fallbackName: "rafiki",
     fallbackOrganizationName: "shirika lako",
     greeting: "Habari {name},",
     directIntro: "Karibu GainForest. Iwe unaandika kazi ya utunzaji wa mazingira au unataka kuiunga mkono, haya ndiyo unayoweza kufanya kwenye jukwaa.",
@@ -312,7 +307,6 @@ const copyByLocale = {
     directHeading: "Selamat datang di GainForest",
     inviteHeading: "Anda bergabung dengan {organizationName} di GainForest",
     heroKicker: "Selamat datang di",
-    fallbackName: "teman",
     fallbackOrganizationName: "organisasi Anda",
     greeting: "Hai {name},",
     directIntro: "Selamat datang di GainForest. Baik Anda mendokumentasikan kerja penjagaan lingkungan maupun ingin mendukungnya, inilah yang dapat Anda lakukan di platform.",
@@ -457,7 +451,7 @@ function renderText({
   const primaryActions = variant === "organization-invite" ? copy.inviteActions : copy.stewardActions;
   const sections = [
     heading,
-    interpolate(copy.greeting, values),
+    ...(values.name ? [interpolate(copy.greeting, values)] : []),
     intro,
     "",
     ...(variant === "direct-signup" ? [copy.stewardHeading] : []),
@@ -520,7 +514,7 @@ export function renderWelcomeEmailTemplate({
   invitedByEmail?: string | null;
 }): WelcomeEmailRenderResult {
   const copy = copyByLocale[locale];
-  const safeName = name?.trim() || copy.fallbackName;
+  const safeName = name?.trim() || "";
   const safeOrganizationName = organizationName?.trim() || copy.fallbackOrganizationName;
   const safeInviterName = invitedByName?.trim() || "";
   const values = { name: safeName, organizationName: safeOrganizationName, inviterName: safeInviterName };
@@ -572,7 +566,7 @@ export function renderWelcomeEmailTemplate({
                 <span style="display: block; margin: 0 0 4px; font-size: 20px; line-height: 1.2; font-weight: 400;">${escapeHtml(copy.heroKicker)}</span>
                 <span style="display: block; font-size: 32px; line-height: 1.1; font-weight: 400;">${escapeHtml(appName)}</span>
               </h1>
-              <p style="margin: 0 0 6px; color: #0f1f16; font-size: 15px; line-height: 1.5; font-family: 'Instrument Serif', Georgia, 'Times New Roman', serif; font-style: italic;">${escapeHtml(interpolate(copy.greeting, values))}</p>
+              ${safeName ? `<p style="margin: 0 0 6px; color: #0f1f16; font-size: 15px; line-height: 1.5; font-family: 'Instrument Serif', Georgia, 'Times New Roman', serif; font-style: italic;">${escapeHtml(interpolate(copy.greeting, values))}</p>` : ""}
               ${variant === "organization-invite" ? `<span style="display: inline-block; margin: 10px 0 14px; border-radius: 999px; background: #eef7f1; color: #3e7053; padding: 5px 12px; font-size: 12px; line-height: 1.3; font-weight: 700; letter-spacing: -0.01em;">${escapeHtml(safeOrganizationName)}</span>` : ""}
               <p style="margin: ${variant === "organization-invite" ? "0" : "8px"} 0 32px; color: #5f6964; font-size: 15px; line-height: 1.7; font-family: 'Instrument Serif', Georgia, 'Times New Roman', serif; font-style: italic;">${escapeHtml(intro)}</p>
 

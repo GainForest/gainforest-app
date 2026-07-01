@@ -39,17 +39,29 @@ describe("renderWelcomeEmailTemplate", () => {
     expect(rendered.html).not.toContain("satyam@example.com");
   });
 
-  it("uses localized fallback names and organization names", () => {
+  it("omits the greeting when no display name is provided", () => {
     const rendered = renderWelcomeEmailTemplate({
       variant: "organization-invite",
       locale: "es",
       communityFormUrl: "",
     });
 
-    expect(rendered.html).toContain("Hola amigo/a,");
     expect(rendered.html).toContain("Te uniste a tu organización en GainForest");
+    expect(rendered.html).not.toContain("Hola amigo/a,");
     expect(rendered.html).not.toContain("Hi there");
     expect(rendered.html).not.toContain("your organization");
+  });
+
+  it("uses the provided display name in the localized greeting", () => {
+    const rendered = renderWelcomeEmailTemplate({
+      variant: "organization-invite",
+      locale: "es",
+      name: "María",
+      communityFormUrl: "",
+    });
+
+    expect(rendered.html).toContain("Hola María,");
+    expect(rendered.text).toContain("Hola María,");
   });
 
   it("renders centered hero copy and left-aligned action/list content", () => {
