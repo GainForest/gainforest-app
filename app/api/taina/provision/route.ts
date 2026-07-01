@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { fetchAuthSession } from "@/app/_lib/auth-server";
 import {
+  deprovisionTaina,
   listTainaAgentKeyIds,
   mintTainaAgentKey,
   provisionTainaBot,
@@ -68,6 +69,36 @@ export async function POST(request: Request) {
     return NextResponse.json(data);
   } catch (error) {
     console.error("[taina] provision failed", error);
+    return NextResponse.json({ error: "runtime_unreachable" }, { status: 502 });
+  }
+}
+
+/**
+ * DELETE /api/taina/provision — "Reset my agent": fully disconnect the
+ * signed-in user's Tainá. Revokes the Tainá-named agent keys (so nothing can
+ * publish as them anymore) and tells the runtime to stop the bot and forget
+ * its record. Recorded observations are never touched. The user can set Tainá
+ * up again from scratch at any time.
+ */
+export async function DELETE() {
+  const session = await fetchAuthSession();
+  if (!session.isLoggedIn) {
+    return NextResponse.json({ error: "not_signed_in" }, { status: 401 });
+  }
+
+  try {
+    // Key revocation is best-effort but must be attempted before the runtime
+    // forgets the bot, so a half-failed reset can't leave a live key behind
+    // with no dashboard card pointing at it.
+    await revokeAgentKeys(await listTainaAgentKeyIds().catch(() => []));
+
+    const { ok, status, error } = await deprovisionTaina(session.did);
+    if (!ok) {
+      return NextResponse.json({ error: error ?? "reset_failed" }, { status });
+    }
+    return NextResponse.json({ ok: true });
+  } catch (error) {
+    console.error("[taina] reset failed", error);
     return NextResponse.json({ error: "runtime_unreachable" }, { status: 502 });
   }
 }

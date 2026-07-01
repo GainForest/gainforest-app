@@ -1096,7 +1096,25 @@
       "restart": "Restart session",
       "restarting": "Restarting…",
       "restartConfirm": "Start a fresh conversation with Tainá? She'll forget this chat's history — your recorded observations are not affected.",
-      "restartFailed": "The restart didn't work — please try again."
+      "restartFailed": "The restart didn't work — please try again.",
+      "creditsTitle": "Credit usage",
+      "creditsSummary": "{used} used · {left} left",
+      "resetAgent": "Reset my agent",
+      "resetting": "Resetting…",
+      "resetConfirm": "Reset your Tainá agent? This disconnects your bot, deletes its chat history and your profile here, and revokes its key. Your recorded observations are not affected. You can set Tainá up again anytime.",
+      "resetFailed": "The reset didn’t work — please try again.",
+      "profileTitle": "Your profile",
+      "profileDescription": "A short Markdown profile stored with your agent so Tainá knows who you are. It shapes how she talks with you and the connections she can suggest.",
+      "profilePromptTitle": "Prepare your profile",
+      "profilePromptIntro": "Copy this prompt into ChatGPT or Claude to draft a USER.md profile, then send the Markdown it returns to your agent on Telegram — or paste it below.",
+      "profilePromptBody": "Create a two-page, non-sensitive connection profile that helps people or agents find good reasons to talk with me, collaborate, trade notes, invite me into something, or introduce me to someone unexpected.\n\nDon’t make it a resume, biography, personality type, or definitive account. Make it warm, specific, lightly imaginative, and useful for serendipity.\n\nDraw out my recurring curiosities, live questions, tastes, projects, values-in-practice, conversation surfaces, possible offers/asks, and the kinds of people, scenes, collaborations, or opportunities I might resonate with. Include work, but don’t make work the whole frame.\n\nStay grounded: distinguish evidence from hunches, and phrase uncertain things as possibilities or questions. Don’t infer sensitive or private facts. Include what not to assume, and where more context would help.",
+      "profileLabel": "Your profile for USER.md",
+      "profilePlaceholder": "Paste the Markdown profile here. Leave out secrets and anything you do not want stored with your agent.",
+      "profileCounter": "This becomes USER.md in your agent’s workspace. {count}/{max} characters.",
+      "profileSave": "Save profile",
+      "profileSaving": "Saving…",
+      "profileSaved": "Saved — Tainá will use it from her next reply.",
+      "profileSaveFailed": "We couldn’t save your profile. Please try again."
     }
   }
 }

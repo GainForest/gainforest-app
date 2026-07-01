@@ -1096,7 +1096,25 @@
       "restart": "Reiniciar sessão",
       "restarting": "Reiniciando…",
       "restartConfirm": "Começar uma conversa nova com a Tainá? Ela esquecerá o histórico deste chat; as suas observações registradas não são afetadas.",
-      "restartFailed": "O reinício não funcionou — tente novamente."
+      "restartFailed": "O reinício não funcionou — tente novamente.",
+      "creditsTitle": "Uso de créditos",
+      "creditsSummary": "{used} usados · {left} restantes",
+      "resetAgent": "Redefinir meu agente",
+      "resetting": "Redefinindo…",
+      "resetConfirm": "Redefinir seu agente Tainá? Isso desconecta seu bot, apaga aqui o histórico de conversa e o seu perfil, e revoga a chave dele. Suas observações registradas não são afetadas. Você pode configurar a Tainá novamente quando quiser.",
+      "resetFailed": "A redefinição não funcionou — tente novamente.",
+      "profileTitle": "Seu perfil",
+      "profileDescription": "Um perfil curto em Markdown guardado com seu agente para que a Tainá saiba quem você é. Ele molda como ela conversa com você e as conexões que pode sugerir.",
+      "profilePromptTitle": "Prepare seu perfil",
+      "profilePromptIntro": "Copie este prompt no ChatGPT ou Claude para rascunhar um perfil USER.md e depois envie o Markdown gerado ao seu agente no Telegram — ou cole-o abaixo.",
+      "profilePromptBody": "Crie um perfil de conexão de duas páginas, sem dados sensíveis, que ajude pessoas ou agentes a encontrar bons motivos para conversar comigo, colaborar, trocar ideias, me convidar para algo ou me apresentar a alguém inesperado.\n\nNão faça um currículo, biografia, tipo de personalidade nem um relato definitivo. Faça algo caloroso, específico, levemente imaginativo e útil para a serendipidade.\n\nTraga à tona minhas curiosidades recorrentes, perguntas vivas, gostos, projetos, valores na prática, assuntos de conversa, possíveis ofertas e pedidos, e os tipos de pessoas, cenas, colaborações ou oportunidades com que eu poderia ressoar. Inclua o trabalho, mas sem fazer dele o quadro inteiro.\n\nMantenha os pés no chão: distinga evidências de palpites e formule o incerto como possibilidades ou perguntas. Não infira fatos sensíveis ou privados. Inclua o que não se deve presumir e onde mais contexto ajudaria.",
+      "profileLabel": "Seu perfil para USER.md",
+      "profilePlaceholder": "Cole aqui o perfil em Markdown. Deixe de fora segredos e qualquer coisa que você não queira guardar com seu agente.",
+      "profileCounter": "Isso vira o USER.md no espaço de trabalho do seu agente. {count}/{max} caracteres.",
+      "profileSave": "Salvar perfil",
+      "profileSaving": "Salvando…",
+      "profileSaved": "Salvo — a Tainá vai usá-lo a partir da próxima resposta.",
+      "profileSaveFailed": "Não foi possível salvar seu perfil. Tente novamente."
     }
   }
 }

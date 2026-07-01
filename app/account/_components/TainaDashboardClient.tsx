@@ -15,9 +15,14 @@ import {
   RefreshCwIcon,
   RotateCcwIcon,
   Trash2Icon,
+  UnplugIcon,
+  UserRoundIcon,
+  WalletIcon,
 } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Textarea } from "@/components/ui/textarea";
+import { TAINA_PROFILE_MAX_CHARS } from "@/app/_lib/taina-shared";
 import { cn } from "@/lib/utils";
 
 type ChatMsg = { role: "user" | "assistant"; text: string; ts: string };
@@ -34,7 +39,11 @@ type DashData = {
   activateUrl?: string | null;
   hasChat: boolean;
   messages: ChatMsg[];
+  userProfile?: string | null;
+  credits?: { usedUsd: number; allowanceUsd: number } | null;
 };
+
+const usd = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" });
 
 function DashCard({ children, className }: { children: ReactNode; className?: string }) {
   return (
@@ -72,6 +81,8 @@ export function TainaDashboardClient() {
   const [loading, setLoading] = useState(true);
   const [restarting, setRestarting] = useState(false);
   const [restartFailed, setRestartFailed] = useState(false);
+  const [resetting, setResetting] = useState(false);
+  const [resetFailed, setResetFailed] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const load = useCallback(async () => {
@@ -96,6 +107,24 @@ export function TainaDashboardClient() {
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight });
   }, [data?.messages.length]);
+
+  // Fully disconnect Tainá ("Reset my agent"): revoke the agent key and have
+  // the runtime stop the bot and forget it. Observations are never touched;
+  // the user can set Tainá up again from scratch afterwards.
+  async function resetAgent() {
+    if (!window.confirm(t("resetConfirm"))) return;
+    setResetting(true);
+    setResetFailed(false);
+    try {
+      const response = await fetch("/api/taina/provision", { method: "DELETE" });
+      if (!response.ok) throw new Error();
+      await load();
+    } catch {
+      setResetFailed(true);
+    } finally {
+      setResetting(false);
+    }
+  }
 
   // Start a brand-new conversation with Tainá: the runtime forgets the shared
   // history, clears the transcript here, and greets the observer afresh in
@@ -230,7 +259,41 @@ export function TainaDashboardClient() {
             {t("restartFailed")}
           </p>
         ) : null}
+
+        {data.credits ? (
+          <div className="mt-4 rounded-2xl border border-border bg-muted/40 px-4 py-3">
+            <div className="flex items-center gap-2 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+              <WalletIcon className="size-3.5" />
+              {t("creditsTitle")}
+            </div>
+            <p className="mt-1 text-sm text-foreground">
+              {t("creditsSummary", {
+                used: usd.format(data.credits.usedUsd),
+                left: usd.format(Math.max(0, data.credits.allowanceUsd - data.credits.usedUsd)),
+              })}
+            </p>
+          </div>
+        ) : null}
+
+        <div className="mt-4 border-t border-border pt-3">
+          <button
+            type="button"
+            disabled={resetting}
+            onClick={() => void resetAgent()}
+            className="inline-flex items-center gap-1.5 text-sm text-muted-foreground underline underline-offset-4 transition-colors hover:text-destructive disabled:opacity-50"
+          >
+            <UnplugIcon className="size-3.5" />
+            {resetting ? t("resetting") : t("resetAgent")}
+          </button>
+          {resetFailed ? (
+            <p className="mt-3 rounded-2xl border border-destructive/25 bg-destructive/5 px-3.5 py-2.5 text-sm text-destructive">
+              {t("resetFailed")}
+            </p>
+          ) : null}
+        </div>
       </DashCard>
+
+      <ProfileCard savedProfile={data.userProfile ?? ""} onSaved={load} />
 
       <ApiKeyCard apiKey={data.apiKey} onChanged={load} />
 
@@ -281,6 +344,123 @@ export function TainaDashboardClient() {
         )}
       </DashCard>
     </div>
+  );
+}
+
+/**
+ * "Your profile" — the USER.md stored with the user's Tainá agent so it knows
+ * who they are. Ships a copyable prompt to draft the profile with ChatGPT or
+ * Claude, and a Markdown textarea that saves to the agent runtime.
+ */
+function ProfileCard({ savedProfile, onSaved }: { savedProfile: string; onSaved: () => void }) {
+  const t = useTranslations("common.taina.dashboard");
+  const [draft, setDraft] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [saveState, setSaveState] = useState<null | "saved" | "failed">(null);
+  const [promptCopied, setPromptCopied] = useState(false);
+
+  // Seed the editor from the stored profile exactly once — the dashboard
+  // polls every few seconds and must never clobber what the user is typing.
+  useEffect(() => {
+    if (draft === null) setDraft(savedProfile);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [savedProfile]);
+
+  const value = draft ?? savedProfile;
+  const dirty = value.trim() !== savedProfile.trim();
+
+  async function save() {
+    setSaving(true);
+    setSaveState(null);
+    try {
+      const response = await fetch("/api/taina/profile", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ profile: value.trim() }),
+      });
+      if (!response.ok) throw new Error();
+      setSaveState("saved");
+      onSaved();
+    } catch {
+      setSaveState("failed");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function copyPrompt() {
+    try {
+      await navigator.clipboard.writeText(t("profilePromptBody"));
+      setPromptCopied(true);
+      setTimeout(() => setPromptCopied(false), 1500);
+    } catch {
+      // Clipboard access can be blocked; nothing to recover.
+    }
+  }
+
+  return (
+    <DashCard>
+      <CardTitle Icon={UserRoundIcon}>{t("profileTitle")}</CardTitle>
+      <p className="mt-3 text-sm leading-6 text-muted-foreground">{t("profileDescription")}</p>
+
+      <div className="mt-4 rounded-2xl border border-border bg-muted/40 p-4">
+        <div className="flex items-center justify-between gap-3">
+          <h3 className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+            {t("profilePromptTitle")}
+          </h3>
+          <Button type="button" variant="outline" size="sm" onClick={() => void copyPrompt()}>
+            {promptCopied ? <CheckIcon /> : <CopyIcon />}
+            {promptCopied ? t("copied") : t("copy")}
+          </Button>
+        </div>
+        <p className="mt-2 text-sm leading-6 text-muted-foreground">{t("profilePromptIntro")}</p>
+        <div className="mt-3 max-h-40 overflow-y-auto rounded-xl border border-border bg-background px-3.5 py-3">
+          <p className="whitespace-pre-wrap font-mono text-xs leading-5 text-muted-foreground">
+            {t("profilePromptBody")}
+          </p>
+        </div>
+      </div>
+
+      <label
+        htmlFor="taina-user-profile"
+        className="mt-5 block text-[11px] font-medium uppercase tracking-wide text-muted-foreground"
+      >
+        {t("profileLabel")}
+      </label>
+      <Textarea
+        id="taina-user-profile"
+        className="mt-2 min-h-40 rounded-2xl"
+        value={value}
+        maxLength={TAINA_PROFILE_MAX_CHARS}
+        placeholder={t("profilePlaceholder")}
+        onChange={(event) => {
+          setDraft(event.target.value);
+          setSaveState(null);
+        }}
+      />
+      <p className="mt-2 text-xs text-muted-foreground">
+        {t("profileCounter", {
+          count: value.length.toLocaleString(),
+          max: TAINA_PROFILE_MAX_CHARS.toLocaleString(),
+        })}
+      </p>
+      <div className="mt-3 flex flex-wrap items-center gap-3">
+        <Button type="button" disabled={saving || !dirty} onClick={() => void save()}>
+          {saving ? t("profileSaving") : t("profileSave")}
+        </Button>
+        {saveState === "saved" ? (
+          <span className="inline-flex items-center gap-1.5 text-sm text-primary">
+            <CheckIcon className="size-4" />
+            {t("profileSaved")}
+          </span>
+        ) : null}
+      </div>
+      {saveState === "failed" ? (
+        <p className="mt-3 rounded-2xl border border-destructive/25 bg-destructive/5 px-3.5 py-2.5 text-sm text-destructive">
+          {t("profileSaveFailed")}
+        </p>
+      ) : null}
+    </DashCard>
   );
 }
 

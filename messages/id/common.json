@@ -1096,7 +1096,25 @@
       "restart": "Mulai ulang sesi",
       "restarting": "Memulai ulang…",
       "restartConfirm": "Mulai percakapan baru dengan Tainá? Ia akan melupakan riwayat obrolan ini — observasi yang sudah tercatat tidak terpengaruh.",
-      "restartFailed": "Mulai ulang gagal — silakan coba lagi."
+      "restartFailed": "Mulai ulang gagal — silakan coba lagi.",
+      "creditsTitle": "Pemakaian kredit",
+      "creditsSummary": "{used} terpakai · {left} tersisa",
+      "resetAgent": "Atur ulang agen saya",
+      "resetting": "Mengatur ulang…",
+      "resetConfirm": "Atur ulang agen Tainá Anda? Ini memutuskan bot Anda, menghapus riwayat obrolan dan profil Anda di sini, serta mencabut kuncinya. Observasi yang sudah tercatat tidak terpengaruh. Anda bisa menyiapkan Tainá lagi kapan saja.",
+      "resetFailed": "Pengaturan ulang gagal — silakan coba lagi.",
+      "profileTitle": "Profil Anda",
+      "profileDescription": "Profil Markdown singkat yang disimpan bersama agen Anda agar Tainá tahu siapa Anda. Profil ini memengaruhi cara ia berbicara dengan Anda dan koneksi yang bisa ia sarankan.",
+      "profilePromptTitle": "Siapkan profil Anda",
+      "profilePromptIntro": "Salin prompt ini ke ChatGPT atau Claude untuk menyusun profil USER.md, lalu kirim Markdown hasilnya ke agen Anda di Telegram — atau tempel di bawah.",
+      "profilePromptBody": "Buat profil koneksi dua halaman yang tidak memuat hal sensitif, yang membantu orang atau agen menemukan alasan baik untuk berbicara dengan saya, berkolaborasi, bertukar catatan, mengajak saya ke suatu kegiatan, atau memperkenalkan saya kepada seseorang yang tak terduga.\n\nJangan jadikan ini resume, biografi, tipe kepribadian, atau catatan definitif. Buat hangat, spesifik, sedikit imajinatif, dan berguna untuk serendipitas.\n\nGali rasa ingin tahu saya yang berulang, pertanyaan yang sedang hidup, selera, proyek, nilai-nilai dalam praktik, topik percakapan, kemungkinan tawaran/permintaan, serta jenis orang, komunitas, kolaborasi, atau peluang yang mungkin cocok dengan saya. Sertakan pekerjaan, tetapi jangan jadikan pekerjaan satu-satunya bingkai.\n\nTetap membumi: bedakan bukti dari dugaan, dan ungkapkan hal yang belum pasti sebagai kemungkinan atau pertanyaan. Jangan menyimpulkan fakta sensitif atau pribadi. Sertakan apa yang tidak boleh diasumsikan, dan di mana konteks tambahan akan membantu.",
+      "profileLabel": "Profil Anda untuk USER.md",
+      "profilePlaceholder": "Tempel profil Markdown di sini. Jangan sertakan rahasia atau apa pun yang tidak ingin Anda simpan bersama agen Anda.",
+      "profileCounter": "Ini menjadi USER.md di ruang kerja agen Anda. {count}/{max} karakter.",
+      "profileSave": "Simpan profil",
+      "profileSaving": "Menyimpan…",
+      "profileSaved": "Tersimpan — Tainá akan memakainya mulai balasan berikutnya.",
+      "profileSaveFailed": "Kami tidak dapat menyimpan profil Anda. Silakan coba lagi."
     }
   }
 }

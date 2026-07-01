@@ -11,3 +11,9 @@ export const TAINA_AGENT_KEY_NAME = "Tainá — Telegram bot";
 export function isTainaAgentKeyName(name: string | null | undefined): boolean {
   return (name ?? "").trim() === TAINA_AGENT_KEY_NAME;
 }
+
+/**
+ * Longest USER.md profile we accept — the personal "who I am" Markdown stored
+ * with the user's Tainá agent. Must match the runtime's cap.
+ */
+export const TAINA_PROFILE_MAX_CHARS = 12_000;

@@ -1096,7 +1096,25 @@
       "restart": "Reiniciar sesión",
       "restarting": "Reiniciando…",
       "restartConfirm": "¿Empezar una conversación nueva con Tainá? Olvidará el historial de este chat; tus observaciones registradas no se ven afectadas.",
-      "restartFailed": "El reinicio no funcionó. Inténtalo de nuevo."
+      "restartFailed": "El reinicio no funcionó. Inténtalo de nuevo.",
+      "creditsTitle": "Uso de crédito",
+      "creditsSummary": "{used} usados · {left} restantes",
+      "resetAgent": "Restablecer mi agente",
+      "resetting": "Restableciendo…",
+      "resetConfirm": "¿Restablecer tu agente Tainá? Esto desconecta tu bot, borra aquí su historial de chat y tu perfil, y revoca su clave. Tus observaciones registradas no se ven afectadas. Puedes configurar Tainá de nuevo cuando quieras.",
+      "resetFailed": "El restablecimiento no funcionó; inténtalo de nuevo.",
+      "profileTitle": "Tu perfil",
+      "profileDescription": "Un breve perfil en Markdown guardado con tu agente para que Tainá sepa quién eres. Da forma a cómo conversa contigo y a las conexiones que puede sugerirte.",
+      "profilePromptTitle": "Prepara tu perfil",
+      "profilePromptIntro": "Copia este prompt en ChatGPT o Claude para redactar un perfil USER.md y luego envía el Markdown resultante a tu agente por Telegram, o pégalo abajo.",
+      "profilePromptBody": "Crea un perfil de conexión de dos páginas, sin datos sensibles, que ayude a personas o agentes a encontrar buenas razones para hablar conmigo, colaborar, intercambiar notas, invitarme a algo o presentarme a alguien inesperado.\n\nNo lo conviertas en un currículum, una biografía, un tipo de personalidad ni un relato definitivo. Hazlo cálido, específico, ligeramente imaginativo y útil para la serendipia.\n\nExtrae mis curiosidades recurrentes, preguntas vivas, gustos, proyectos, valores en la práctica, temas de conversación, posibles ofertas y peticiones, y el tipo de personas, escenas, colaboraciones u oportunidades con las que podría resonar. Incluye el trabajo, pero que no sea todo el marco.\n\nMantente con los pies en la tierra: distingue la evidencia de las intuiciones y formula lo incierto como posibilidades o preguntas. No infieras datos sensibles ni privados. Incluye qué no se debe asumir y dónde ayudaría más contexto.",
+      "profileLabel": "Tu perfil para USER.md",
+      "profilePlaceholder": "Pega aquí el perfil en Markdown. No incluyas secretos ni nada que no quieras guardar con tu agente.",
+      "profileCounter": "Esto se convierte en USER.md en el espacio de trabajo de tu agente. {count}/{max} caracteres.",
+      "profileSave": "Guardar perfil",
+      "profileSaving": "Guardando…",
+      "profileSaved": "Guardado: Tainá lo usará desde su próxima respuesta.",
+      "profileSaveFailed": "No pudimos guardar tu perfil. Inténtalo de nuevo."
     }
   }
 }

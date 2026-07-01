@@ -147,6 +147,10 @@ export type TainaDashboardData = {
   activateUrl?: string | null;
   hasChat: boolean;
   messages: TainaChatMessage[];
+  /** The observer's USER.md profile stored with the agent (null when unset). */
+  userProfile?: string | null;
+  /** Model spend vs. allowance, in USD. Absent on older runtimes. */
+  credits?: { usedUsd: number; allowanceUsd: number } | null;
   error?: string;
 };
 
@@ -157,6 +161,35 @@ export async function fetchTainaDashboard(did: string): Promise<{ ok: boolean; s
 /** Tell the runtime which key the bot should publish with (or clear it). */
 export async function setTainaKey(did: string, pat: string | null): Promise<void> {
   await flueRequest("/key", { did, pat });
+}
+
+/**
+ * Save (or clear, with an empty string) the user's USER.md profile on the
+ * agent runtime — the personal Markdown that tells Tainá who this observer is.
+ */
+export async function saveTainaProfile(
+  did: string,
+  profile: string,
+): Promise<{ ok: boolean; status: number; error?: string }> {
+  const { ok, status, data } = await flueRequest<{ ok?: boolean; error?: string }>("/profile", {
+    did,
+    profile,
+  });
+  return { ok, status, error: data.error };
+}
+
+/**
+ * Reset (disconnect) the user's Tainá agent: the runtime stops their bot and
+ * forgets its record — bot token, key, profile and credit tally. Recorded
+ * observations live on the user's own account and are never touched.
+ */
+export async function deprovisionTaina(
+  did: string,
+): Promise<{ ok: boolean; status: number; error?: string }> {
+  const { ok, status, data } = await flueRequest<{ ok?: boolean; error?: string }>("/deprovision", {
+    did,
+  });
+  return { ok, status, error: data.error };
 }
 
 /**

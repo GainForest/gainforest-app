@@ -1096,7 +1096,25 @@
       "restart": "Anzisha upya kikao",
       "restarting": "Inaanzisha upya…",
       "restartConfirm": "Uanze mazungumzo mapya na Tainá? Atasahau historia ya gumzo hili — uchunguzi wako uliorekodiwa hautaathirika.",
-      "restartFailed": "Kuanzisha upya hakukufanikiwa — tafadhali jaribu tena."
+      "restartFailed": "Kuanzisha upya hakukufanikiwa — tafadhali jaribu tena.",
+      "creditsTitle": "Matumizi ya salio",
+      "creditsSummary": "{used} zimetumika · {left} zimebaki",
+      "resetAgent": "Weka upya wakala wangu",
+      "resetting": "Inaweka upya…",
+      "resetConfirm": "Uweke upya wakala wako wa Tainá? Hii itatenganisha boti yako, kufuta historia ya mazungumzo na wasifu wako hapa, na kubatilisha ufunguo wake. Uchunguzi wako uliorekodiwa hautaathirika. Unaweza kusanidi Tainá tena wakati wowote.",
+      "resetFailed": "Kuweka upya hakukufanikiwa — tafadhali jaribu tena.",
+      "profileTitle": "Wasifu wako",
+      "profileDescription": "Wasifu mfupi wa Markdown unaohifadhiwa na wakala wako ili Tainá ajue wewe ni nani. Unaathiri jinsi anavyozungumza nawe na miunganisho anayoweza kupendekeza.",
+      "profilePromptTitle": "Andaa wasifu wako",
+      "profilePromptIntro": "Nakili maelekezo haya kwenye ChatGPT au Claude ili kuandaa wasifu wa USER.md, kisha tuma Markdown itakayotolewa kwa wakala wako kwenye Telegram — au ibandike hapa chini.",
+      "profilePromptBody": "Tengeneza wasifu wa kurasa mbili, usio na taarifa nyeti, wa kuunganisha watu — unaosaidia watu au mawakala kupata sababu nzuri za kuzungumza nami, kushirikiana, kubadilishana mawazo, kunialika kwenye jambo fulani, au kunitambulisha kwa mtu nisiyemtarajia.\n\nUsiufanye kuwa CV, historia ya maisha, aina ya haiba, wala maelezo ya mwisho. Ufanye uwe wa kirafiki, mahususi, wenye ubunifu kidogo, na wenye manufaa kwa mikutano ya bahati.\n\nIbua udadisi wangu unaojirudia, maswali yaliyo hai, ladha zangu, miradi, maadili katika vitendo, mada za mazungumzo, ninachoweza kutoa na kuomba, na aina za watu, mazingira, ushirikiano au fursa ninazoweza kuendana nazo. Jumuisha kazi, lakini kazi isiwe fremu nzima.\n\nBaki na uhalisia: tofautisha ushahidi na dhana, na eleza mambo yasiyo na uhakika kama uwezekano au maswali. Usikisie taarifa nyeti au za faragha. Jumuisha kile kisichopaswa kudhaniwa, na mahali ambapo muktadha zaidi ungesaidia.",
+      "profileLabel": "Wasifu wako kwa USER.md",
+      "profilePlaceholder": "Bandika wasifu wa Markdown hapa. Usiweke siri wala chochote usichotaka kihifadhiwe na wakala wako.",
+      "profileCounter": "Hii inakuwa USER.md katika eneo la kazi la wakala wako. Herufi {count}/{max}.",
+      "profileSave": "Hifadhi wasifu",
+      "profileSaving": "Inahifadhi…",
+      "profileSaved": "Imehifadhiwa — Tainá ataitumia kuanzia jibu lake lijalo.",
+      "profileSaveFailed": "Hatukuweza kuhifadhi wasifu wako. Tafadhali jaribu tena."
     }
   }
 }
