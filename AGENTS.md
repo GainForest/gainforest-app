@@ -11,3 +11,18 @@ When adding any feature that creates, updates, deletes, or changes membership/ro
 
 ## E2E test runs
 When a user asks to run the full E2E suite, run it. The suite intentionally creates disposable accounts and organizations, and teardown is responsible for deleting them. Do not avoid a requested full E2E run because it uses disposable accounts; instead, watch cleanup output and report any teardown failure clearly.
+
+## Tainá (Telegram field assistant)
+Tainá lets a signed-in user connect their own Telegram bot and turn nature sightings (a photo or a note) into GainForest observations under their account. **This app is the primary front-end** for it; the agent itself runs in a separate always-on service.
+
+**Two services:**
+- **This app** (`www.gainforest.app`) — the UI + a thin, session-gated proxy. The `/taina` setup page (`app/taina/`), the private **Tainá** profile tab (`app/account/[did]/taina/` + `AccountTabContent`/`AccountTabBar`, owner-only), the sidebar **AI → Tainá** entry (`app/_components/AppShell.tsx`), the `/api/taina/{provision,dashboard,key,session}` routes, and the server client `app/_lib/taina-agent.ts` (+ shared constant `app/_lib/taina-shared.ts`).
+- **Flue runtime** (`../agent-village`, GitHub `GainForest/agent-village`, deployed on Railway at `agent-village-flue-production.up.railway.app`) — one Node process running each user's Telegram bot, the Tainá agent (chat on GLM 5.2, photo species-ID on Claude Sonnet 5), reminders, and a KV store. Its `AGENTS.md` is the source of truth for the agent internals.
+
+**Invariants to preserve when touching Tainá:**
+- **Auth reuses this app's session.** No separate Tainá login. The DID always comes from `fetchAuthSession()`, never the request body. The proxy authenticates to Flue with `TAINA_PROVISION_SHARED_SECRET`; the runtime URL is `TAINA_FLUE_BASE_URL` (both fall back to `PROVISION_SHARED_SECRET` / `FLUE_BASE_URL`, then dev defaults). These must be set on Vercel for production to reach the runtime.
+- **Publishing uses a real GainForest agent key**, not a bespoke tool. Provision/regenerate mint a `gf_pat_…` key through the central auth service named exactly `TAINA_AGENT_KEY_NAME` ("Tainá — Telegram bot"), so Settings → AI agent keys can badge it. The bot follows the canonical `/skill.md` guide (`app/skill.md/route.ts`) with that key — the same flow any connected AI agent uses. Never reintroduce a custom upload endpoint.
+- **Restart session** = `POST /api/taina/session` → runtime `/reset`: a fresh agent conversation, cleared transcript, re-greet. It must never touch the user's recorded observations.
+- Telegram photos land in the agent's `/inbox` sandbox folder; the agent uploads them as blobs per the skill.
+
+**Key links:** agent repo `https://github.com/GainForest/agent-village` · runtime `https://agent-village-flue-production.up.railway.app` · agent guide `https://www.gainforest.app/skill.md` · Flue framework `https://flueframework.com`.
