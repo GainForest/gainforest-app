@@ -12,14 +12,14 @@ import { resolvePdsHost } from "./pds";
  */
 export const ENDORSER_COLLECTION = "app.gainforest.endorser";
 
-/** The two endorsers that ship built in (with bundled logos). They can't be
- *  removed from the admin panel — they're shown there read-only for context so
- *  the whole allow-list is visible in one place. Keep these DIDs in sync with
- *  `BUILTIN_TRUSTED_ISSUERS` in `indexer.ts`. */
+/** The endorser that ships built in (with bundled logos). It can't be removed
+ *  from the admin panel — it's shown there read-only for context so the whole
+ *  allow-list is visible in one place. Keep this DID in sync with
+ *  `BUILTIN_TRUSTED_ISSUERS` in `indexer.ts`. Every other endorser (Biome Trust
+ *  included) is admin-managed. */
 export type BuiltinEndorser = { did: string; handle: string; label: string };
 export const BUILTIN_ENDORSERS: BuiltinEndorser[] = [
   { did: "did:plc:yjck2sybksyigp3zvbq7bfki", handle: "gainforest.certified.one", label: "GainForest" },
-  { did: "did:plc:2pfslyh6q2lk46xqwshjd6sc", handle: "biome-trust.certified.one", label: "Biome Trust" },
 ];
 
 export type EndorserRecord = {

@@ -20,7 +20,6 @@ import { accountHref } from "../_lib/urls";
 const BADGE_META: Record<TrustedOrganizationBadge, { label: string; src: string; endorser: string }> = {
   gainforest: { label: "GainForest", src: "/assets/media/images/gainforest-logo.svg", endorser: "gainforest.certified.one" },
   maearth: { label: "Ma Earth", src: "/assets/media/images/badges/ma-earth-logo.webp", endorser: "ma-earth-tqzc.certified.one" },
-  biometrust: { label: "Biome Trust", src: "/assets/media/images/badges/biome-trust-logo.webp", endorser: "biome-trust.certified.one" },
 };
 
 type EndorserCard = { avatarUrl: string | null; handle: string | null; displayName: string | null };

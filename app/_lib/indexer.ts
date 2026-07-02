@@ -1194,8 +1194,8 @@ const FUNDING_CONFIG_QUERY = `
   }
 `;
 
-export type BumicertBadgeFilter = "gainforest" | "maearth" | "maearth-round-1" | "maearth-round-2" | "maearth-round-3" | "biometrust";
-export type TrustedOrganizationBadge = "gainforest" | "maearth" | "biometrust";
+export type BumicertBadgeFilter = "gainforest" | "maearth" | "maearth-round-1" | "maearth-round-2" | "maearth-round-3";
+export type TrustedOrganizationBadge = "gainforest" | "maearth";
 
 const FEATURED_BADGES: Array<{ key: BumicertBadgeFilter; title: string }> = [
   { key: "gainforest", title: "GainForest" },
@@ -1216,18 +1216,19 @@ const FEATURED_BADGE_KEY_BY_TITLE = new Map(
  * Organizations whose `app.certified.badge.award` records we honor as
  * "Trusted by" signals. We read awards from each issuer's repo and attribute
  * the badge to whoever *signed the award* — not to the repo that happens to
- * host the badge *definition*. (Biome Trust, for example, endorses orgs using
- * a definition that lives in Ma Earth's repo; the endorsement is Biome Trust's,
- * so it must read as "Trusted by Biome Trust".)
+ * host the badge *definition*. (An endorser like Biome Trust signs awards
+ * against a definition that may live in another org's repo; the endorsement is
+ * theirs, so it must read as "Trusted by ⟨that org⟩".)
  *
  * `mode: "title"` issuers host a family of branded badges in one repo and are
  * split by the badge-definition title (GainForest vs. Ma Earth). `mode:
  * "fixed"` issuers attribute *every* award they sign to a single brand,
  * regardless of which definition it points at.
  *
- * The two built-ins below ship with bundled logos; additional endorsers are
- * managed from the admin panel and stored in the moderation repo (see
- * `getTrustedIssuers` / `app/_lib/endorsers.ts`).
+ * Only GainForest is built in (it ships with bundled logos for its two
+ * brands). Every other endorser — Biome Trust included — is managed from the
+ * admin panel and stored in the moderation repo (see `getTrustedIssuers` /
+ * `app/_lib/endorsers.ts`) and renders from its own certified profile.
  */
 type BuiltinTrustedIssuer =
   | { did: string; mode: "title" }
@@ -1235,9 +1236,8 @@ type BuiltinTrustedIssuer =
 
 const BUILTIN_TRUSTED_ISSUERS: BuiltinTrustedIssuer[] = [
   // GainForest's certified repo hosts the GainForest + Ma Earth badge family.
+  // It's the only built-in issuer; all other endorsers are admin-managed.
   { did: "did:plc:yjck2sybksyigp3zvbq7bfki", mode: "title" },
-  // Biome Trust signs Organization Endorsements from its own repo.
-  { did: "did:plc:2pfslyh6q2lk46xqwshjd6sc", mode: "fixed", badge: "biometrust" },
 ];
 
 /** Metadata for a dynamic (admin-added) endorser. Its "Trusted by" emblem is
@@ -1383,7 +1383,7 @@ type FeaturedBadgeValues = {
 };
 
 type FeaturedBadgeIndex = FeaturedBadgeValues & {
-  // Keyed by brand: built-in keys (gainforest / maearth / … / biometrust) plus
+  // Keyed by brand: built-in keys (gainforest / maearth / …) plus
   // dynamic endorser brands keyed by the endorser's DID.
   byBadge: Record<string, FeaturedBadgeValues>;
   // Dynamic (admin-added) endorsers present in this index, for emblem rendering.
@@ -1587,7 +1587,7 @@ async function fetchFeaturedBadgeIndexUncached(signal?: AbortSignal): Promise<Fe
 function fetchFeaturedBadgeIndex(signal?: AbortSignal): Promise<FeaturedBadgeIndex> {
   return publicExploreCache(
     "featured-badge-index",
-    { version: "gainforest-maearth-biometrust-endorsers:v5", ttl: FEATURED_BADGE_INDEX_CACHE_MS },
+    { version: "gainforest-maearth-endorsers:v6", ttl: FEATURED_BADGE_INDEX_CACHE_MS },
     // The featured-badge index is shared by count and list requests across the
     // public Explore pages. Keep the cached loader independent from any one
     // component effect's abort signal; otherwise an aborted count refresh can
@@ -1623,10 +1623,7 @@ export async function fetchTrustedByEndorsements(
   if (includes("maearth") || includes("maearth-round-1") || includes("maearth-round-2")) {
     endorsements.push({ key: "maearth", builtin: "maearth", label: "Ma Earth", endorserDid: null, endorserHandle: null });
   }
-  if (includes("biometrust")) {
-    endorsements.push({ key: "biometrust", builtin: "biometrust", label: "Biome Trust", endorserDid: null, endorserHandle: null });
-  }
-  // Dynamic endorsers, in the order the moderation repo lists them.
+  // Dynamic endorsers (incl. Biome Trust), in the order the moderation repo lists them.
   for (const endorser of index.endorsers) {
     if (index.byBadge[endorser.key]?.dids.includes(did)) {
       endorsements.push({
