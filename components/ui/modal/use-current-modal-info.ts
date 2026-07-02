@@ -38,7 +38,7 @@ const areModalInfosEqual = (left: ModalInfo, right: ModalInfo) => {
   );
 };
 
-const useCurrentModalInfo = (modalIdStack: string[]) => {
+const useCurrentModalInfo = (modalStackDependency: readonly unknown[]) => {
   const [modalInfo, setModalInfo] = useState<ModalInfo>(DEFAULT_MODAL_INFO);
 
   useEffect(() => {
@@ -62,7 +62,8 @@ const useCurrentModalInfo = (modalIdStack: string[]) => {
         clearTimeout(timeoutId);
       }
     };
-  }, [modalIdStack]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [modalStackDependency]);
 
   return modalInfo;
 };

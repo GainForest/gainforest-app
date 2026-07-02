@@ -11,7 +11,7 @@ import { ClientErrorListener } from "./_components/ClientErrorListener";
 import { AccountDrawerProvider } from "./_components/AccountDrawer";
 import { LinkPrefetcher } from "./_components/LinkPrefetcher";
 import { RouteChangeIndicator } from "./_components/RouteChangeIndicator";
-import { ModalProvider } from "@/components/ui/modal/context";
+import { ModalHost, ModalProvider } from "@/components/ui/modal/context";
 import { WagmiProvider } from "@/components/providers/WagmiProvider";
 import { resolveSupportedLanguage } from "@/lib/i18n/languages";
 import { fetchAuthSession } from "./_lib/auth-server";
@@ -152,6 +152,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               <ModalProvider>
                 <AccountDrawerProvider>
                   <ChromeGate authSession={authSession}>{children}</ChromeGate>
+                  {/* The modal chrome mounts at the bottom of the provider
+                      tree so inline modal content pushed via pushModal keeps
+                      access to the app-level contexts above this line. */}
+                  <ModalHost />
                 </AccountDrawerProvider>
               </ModalProvider>
             </WagmiProvider>

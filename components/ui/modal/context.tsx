@@ -1,5 +1,6 @@
 "use client";
 import { createContext, useCallback, useContext, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import { debug } from "@/lib/logger";
 import {
   Dialog,
@@ -27,7 +28,14 @@ const SMALL_SCREEN_BREAKPOINT = "32rem";
 
 export type ModalVariant = {
   id: string;
-  content: React.ReactNode;
+  /**
+   * Inline modal content. NOTE: inline content renders inside <ModalHost>
+   * (mounted in the root layout under the app-level providers), NOT at the
+   * component that pushed it — so it must not rely on page-level React
+   * contexts. Omit `content` and render a <ModalPortal id=…> at the call
+   * site instead when the content needs the caller's context.
+   */
+  content?: React.ReactNode;
   /** Tailwind max-width class for dialog mode (e.g. "max-w-2xl"). Defaults to "max-w-sm". */
   dialogWidth?: string;
   /**
@@ -54,6 +62,29 @@ type ModalContextType = {
 
 const ModalContext = createContext<ModalContextType | null>(null);
 export const ModalModeContext = createContext<ModalMode | null>(null);
+
+// Internal plumbing between ModalProvider (state, mounted at the root),
+// ModalHost (the dialog/drawer chrome, mounted under the app providers) and
+// ModalPortal (call-site content). Not exported.
+type ModalInternals = {
+  isOpen: boolean;
+  mode: ModalMode | null;
+  modalStack: ModalVariant[];
+  activeDialogWidth: string;
+  handleOpenChange: (open: boolean) => void;
+  portalContainers: Record<string, HTMLElement | null>;
+  registerPortalContainer: (id: string, element: HTMLElement | null) => void;
+};
+
+const ModalInternalsContext = createContext<ModalInternals | null>(null);
+
+function useModalInternals(component: string): ModalInternals {
+  const internals = useContext(ModalInternalsContext);
+  if (!internals) {
+    throw new Error(`${component} must be used within a ModalProvider`);
+  }
+  return internals;
+}
 
 const ModalStack = ({
   mode,
@@ -128,8 +159,16 @@ export const ModalProvider = ({ children }: { children: React.ReactNode }) => {
         ? "dialog"
         : "drawer";
 
-  const modalInfo = useCurrentModalInfo(modalIdStack);
   const activeDialogWidth = modalStack.at(-1)?.dialogWidth ?? "max-w-sm";
+
+  // Registry of DOM containers for call-site rendered modals (<ModalPortal>).
+  // ModalWrapper mounts an empty target div for stack entries without inline
+  // content; the pushing component portals its children into that div, which
+  // keeps the children's React context exactly where they were declared.
+  const [portalContainers, setPortalContainers] = useState<Record<string, HTMLElement | null>>({});
+  const registerPortalContainer = useCallback((id: string, element: HTMLElement | null) => {
+    setPortalContainers((prev) => (prev[id] === element ? prev : { ...prev, [id]: element }));
+  }, []);
 
   // All actions are stable callbacks and the context value is memoized: the
   // provider wraps the entire app, so an unstable value would re-render every
@@ -172,9 +211,9 @@ export const ModalProvider = ({ children }: { children: React.ReactNode }) => {
     setModalStack([]);
   }, []);
 
-  const handleOpenChange = (open: boolean) => {
+  const handleOpenChange = useCallback((open: boolean) => {
     setIsOpen(open);
-  };
+  }, []);
 
   const contextValue = useMemo(
     () => ({
@@ -191,70 +230,137 @@ export const ModalProvider = ({ children }: { children: React.ReactNode }) => {
     [show, hide, onVisibilityChange, isOpen, mode, modalIdStack, pushModal, popModal, clear],
   );
 
+  const internals = useMemo<ModalInternals>(
+    () => ({
+      isOpen,
+      mode,
+      modalStack,
+      activeDialogWidth,
+      handleOpenChange,
+      portalContainers,
+      registerPortalContainer,
+    }),
+    [isOpen, mode, modalStack, activeDialogWidth, handleOpenChange, portalContainers, registerPortalContainer],
+  );
+
+  // ModalModeContext wraps the app children too (not just the host) so
+  // ModalContent/ModalFooter/useIsDrawer keep working inside call-site
+  // rendered (<ModalPortal>) content, whose React tree lives at the caller.
   return (
     <ModalContext.Provider value={contextValue}>
-      {children}
-      <ModalModeContext.Provider value={mode}>
-        <ModalStack
-          mode={mode}
-          isOpen={isOpen}
-          onOpenChange={handleOpenChange}
-          dismissible={modalInfo.dismissible}
-          dialogWidth={activeDialogWidth}
-        >
-          <VisuallyHidden.Root>
-            {mode === "dialog" ? (
-              <DialogHeader>
-                <DialogTitle>
-                  {typeof modalInfo.title === "string" ? (
-                    modalInfo.title
-                  ) : (
-                    <>{modalInfo.title}</>
-                  )}
-                </DialogTitle>
-                <DialogDescription>
-                  {typeof modalInfo.description === "string" ? (
-                    modalInfo.description
-                  ) : (
-                    <>{modalInfo.description}</>
-                  )}
-                </DialogDescription>
-              </DialogHeader>
-            ) : mode === "drawer" ? (
-              <DrawerHeader>
-                <DrawerTitle>
-                  {typeof modalInfo.title === "string" ? (
-                    modalInfo.title
-                  ) : (
-                    <>{modalInfo.title}</>
-                  )}
-                </DrawerTitle>
-                <DrawerDescription>
-                  {typeof modalInfo.description === "string" ? (
-                    modalInfo.description
-                  ) : (
-                    <>{modalInfo.description}</>
-                  )}
-                </DrawerDescription>
-              </DrawerHeader>
-            ) : null}
-          </VisuallyHidden.Root>
-          {modalStack.map((modal, index) => {
-            return (
-              <ModalWrapper
-                index={index}
-                transitionDurationInMs={STACK_UPDATE_TRANSITION_DURATION}
-                modal={modal}
-                isActive={modalStack.length - 1 === index}
-                preventFocusTrap={mode === "drawer"}
-                key={modal.id + index}
-              />
-            );
-          })}
-        </ModalStack>
-      </ModalModeContext.Provider>
+      <ModalInternalsContext.Provider value={internals}>
+        <ModalModeContext.Provider value={mode}>{children}</ModalModeContext.Provider>
+      </ModalInternalsContext.Provider>
     </ModalContext.Provider>
   );
+};
+
+/**
+ * Renders the actual dialog/drawer chrome for the modal stack. Mounted ONCE
+ * from the root layout, purposely at the bottom of the app-level provider
+ * tree (inside AccountDrawerProvider etc.) so that inline `content` pushed
+ * via pushModal has access to those contexts. Previously the stack rendered
+ * directly inside ModalProvider — above every other provider — which made
+ * any pushed content that relied on a lower context crash the whole app.
+ */
+export const ModalHost = () => {
+  const internals = useModalInternals("ModalHost");
+  const { isOpen, mode, modalStack, activeDialogWidth, handleOpenChange } = internals;
+  const modalInfo = useCurrentModalInfo(modalStack);
+
+  return (
+    <ModalModeContext.Provider value={mode}>
+      <ModalStack
+        mode={mode}
+        isOpen={isOpen}
+        onOpenChange={handleOpenChange}
+        dismissible={modalInfo.dismissible}
+        dialogWidth={activeDialogWidth}
+      >
+        <VisuallyHidden.Root>
+          {mode === "dialog" ? (
+            <DialogHeader>
+              <DialogTitle>
+                {typeof modalInfo.title === "string" ? (
+                  modalInfo.title
+                ) : (
+                  <>{modalInfo.title}</>
+                )}
+              </DialogTitle>
+              <DialogDescription>
+                {typeof modalInfo.description === "string" ? (
+                  modalInfo.description
+                ) : (
+                  <>{modalInfo.description}</>
+                )}
+              </DialogDescription>
+            </DialogHeader>
+          ) : mode === "drawer" ? (
+            <DrawerHeader>
+              <DrawerTitle>
+                {typeof modalInfo.title === "string" ? (
+                  modalInfo.title
+                ) : (
+                  <>{modalInfo.title}</>
+                )}
+              </DrawerTitle>
+              <DrawerDescription>
+                {typeof modalInfo.description === "string" ? (
+                  modalInfo.description
+                ) : (
+                  <>{modalInfo.description}</>
+                )}
+              </DrawerDescription>
+            </DrawerHeader>
+          ) : null}
+        </VisuallyHidden.Root>
+        {modalStack.map((modal, index) => {
+          // Entries pushed without inline content get an empty target div that
+          // the call site's <ModalPortal> renders into.
+          const resolved =
+            modal.content !== undefined ? modal : { ...modal, content: <ModalPortalTarget id={modal.id} /> };
+          return (
+            <ModalWrapper
+              index={index}
+              transitionDurationInMs={STACK_UPDATE_TRANSITION_DURATION}
+              modal={resolved}
+              isActive={modalStack.length - 1 === index}
+              preventFocusTrap={mode === "drawer"}
+              key={modal.id + index}
+            />
+          );
+        })}
+      </ModalStack>
+    </ModalModeContext.Provider>
+  );
+};
+
+/**
+ * Mount target inside ModalWrapper for stack entries pushed without inline
+ * `content`. Registers its DOM node so the matching <ModalPortal> at the
+ * call site can portal children into it.
+ */
+export const ModalPortalTarget = ({ id }: { id: string }) => {
+  const { registerPortalContainer } = useModalInternals("ModalPortalTarget");
+  return <div ref={(element) => registerPortalContainer(id, element)} />;
+};
+
+/**
+ * Call-site modal content. Push the stack entry WITHOUT `content`
+ * (`modal.pushModal({ id: "my-modal", … })`) and render
+ * `<ModalPortal id="my-modal">…</ModalPortal>` in the same component.
+ * The children render into the modal chrome via a React portal, so they keep
+ * the caller's React context (page providers included) — unlike inline
+ * `content`, which renders under the root-level ModalHost.
+ *
+ * Children are only mounted while the id is present in the modal stack, so
+ * heavy lazy content is not loaded up front.
+ */
+export const ModalPortal = ({ id, children }: { id: string; children: React.ReactNode }) => {
+  const { portalContainers } = useModalInternals("ModalPortal");
+  const container = portalContainers[id] ?? null;
+  if (!container) return null;
+  return createPortal(children, container);
 };
 
 export const useModal = () => {

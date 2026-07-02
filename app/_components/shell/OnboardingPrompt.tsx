@@ -8,7 +8,7 @@ import { useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { ModalContent, ModalDescription, ModalFooter, ModalTitle } from "@/components/ui/modal/modal";
-import { useModal } from "@/components/ui/modal/context";
+import { ModalPortal, useModal } from "@/components/ui/modal/context";
 import type { AuthSession } from "../../_lib/auth";
 
 const ONBOARDING_PROMPT_MODAL_ID = "fresh-account-onboarding";
@@ -70,48 +70,49 @@ export function FreshAccountOnboardingPrompt({
 
     markOnboardingPromptShown(promptSessionKey);
 
-    modal.pushModal(
-      {
-        id: ONBOARDING_PROMPT_MODAL_ID,
-        content: (
-          <ModalContent dismissible={false} className="py-2">
-            <div className="flex flex-col items-center pt-4 text-center">
-              <motion.div
-                className="relative h-20 w-20"
-                transition={{ duration: 0.75, type: "spring" }}
-                layoutId="gainforest-icon"
-                initial={{ scale: 0.2, filter: "blur(20px)", opacity: 0 }}
-                animate={{ scale: 1, filter: "blur(0px)", opacity: 1 }}
-              >
-                <Image className="drop-shadow-2xl" src="/assets/media/images/app-icon.png" fill alt="GainForest" />
-              </motion.div>
-              <ModalTitle className="mt-4">{t("title")}</ModalTitle>
-              <ModalDescription className="mt-1 max-w-sm">
-                {t("description")}
-              </ModalDescription>
-              <ModalFooter className="mt-6 w-full">
-                <Button
-                  type="button"
-                  size="lg"
-                  className="w-full"
-                  onClick={() => {
-                    markOnboardingPromptShown(promptSessionKey);
-                    void modal.hide().then(() => modal.clear());
-                    router.push("/manage?mode=onboard-user");
-                  }}
-                >
-                  {t("continue")}
-                  <ArrowRightIcon />
-                </Button>
-              </ModalFooter>
-            </div>
-          </ModalContent>
-        ),
-      },
-      true,
-    );
+    // Only the stack entry is pushed here; the content itself renders below
+    // via ModalPortal, at this component's place in the tree.
+    modal.pushModal({ id: ONBOARDING_PROMPT_MODAL_ID }, true);
     void modal.show();
   }, [authSession, hasCertifiedProfile, isProfileLoading, modal, pathname, router, t]);
 
-  return null;
+  if (!authSession?.isLoggedIn) return null;
+  const promptSessionKey = onboardingPromptSessionKey(authSession.did);
+
+  return (
+    <ModalPortal id={ONBOARDING_PROMPT_MODAL_ID}>
+      <ModalContent dismissible={false} className="py-2">
+        <div className="flex flex-col items-center pt-4 text-center">
+          <motion.div
+            className="relative h-20 w-20"
+            transition={{ duration: 0.75, type: "spring" }}
+            layoutId="gainforest-icon"
+            initial={{ scale: 0.2, filter: "blur(20px)", opacity: 0 }}
+            animate={{ scale: 1, filter: "blur(0px)", opacity: 1 }}
+          >
+            <Image className="drop-shadow-2xl" src="/assets/media/images/app-icon.png" fill alt="GainForest" />
+          </motion.div>
+          <ModalTitle className="mt-4">{t("title")}</ModalTitle>
+          <ModalDescription className="mt-1 max-w-sm">
+            {t("description")}
+          </ModalDescription>
+          <ModalFooter className="mt-6 w-full">
+            <Button
+              type="button"
+              size="lg"
+              className="w-full"
+              onClick={() => {
+                markOnboardingPromptShown(promptSessionKey);
+                void modal.hide().then(() => modal.clear());
+                router.push("/manage?mode=onboard-user");
+              }}
+            >
+              {t("continue")}
+              <ArrowRightIcon />
+            </Button>
+          </ModalFooter>
+        </div>
+      </ModalContent>
+    </ModalPortal>
+  );
 }

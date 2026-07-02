@@ -4,9 +4,9 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import { Loader2Icon } from "lucide-react";
-import { useEffect, useState, type MouseEvent } from "react";
+import { useEffect, useId, useState, type MouseEvent } from "react";
 import { ModalContent } from "@/components/ui/modal/modal";
-import { useModal } from "@/components/ui/modal/context";
+import { ModalPortal, useModal } from "@/components/ui/modal/context";
 import {
   groupManageBasePath,
   groupManageTarget,
@@ -84,6 +84,10 @@ function AuthenticatedCreateProjectButton({
   const modal = useModal();
   const { groups } = useAccountList(sessionDid);
   const [activeContext, setActiveContext] = useActiveAccountContext(sessionDid);
+  // Unique per instance so several create-project buttons (sidebar card,
+  // headers) never portal into each other's modal container.
+  const modalId = `create-project-${useId()}`;
+  const [wizard, setWizard] = useState<{ target: ManageTarget; projectsHref: string } | null>(null);
 
   const open = () => {
     let target: ManageTarget;
@@ -106,36 +110,39 @@ function AuthenticatedCreateProjectButton({
       target = personalManageTarget({ did: sessionDid, accountKind: "user", identifier: sessionDid });
     }
 
-    const projectsHref = manageHref({ basePath: groupManageBasePath(target.identifier) }, "projects");
-    const closeModal = () => {
-      void modal.hide().then(() => modal.clear());
-    };
-    modal.pushModal(
-      {
-        id: "create-project",
-        dialogWidth: "max-w-3xl w-[calc(100%-2rem)]",
-        forceDialog: true,
-        content: (
+    setWizard({
+      target,
+      projectsHref: manageHref({ basePath: groupManageBasePath(target.identifier) }, "projects"),
+    });
+    modal.pushModal({ id: modalId, dialogWidth: "max-w-3xl w-[calc(100%-2rem)]", forceDialog: true }, true);
+    void modal.show();
+  };
+
+  const closeModal = () => {
+    void modal.hide().then(() => modal.clear());
+  };
+
+  // The wizard renders at this call site (via ModalPortal), so it keeps this
+  // component's React context instead of being teleported to the root host.
+  return (
+    <>
+      <button type="button" onClick={open} className={className}>
+        {children}
+      </button>
+      <ModalPortal id={modalId}>
+        {wizard ? (
           <CreateProjectModalLazy
-            target={target}
+            target={wizard.target}
             onClose={closeModal}
             onSaved={() => {
               closeModal();
               notifyProjectsChanged();
-              router.push(projectsHref);
+              router.push(wizard.projectsHref);
             }}
           />
-        ),
-      },
-      true,
-    );
-    void modal.show();
-  };
-
-  return (
-    <button type="button" onClick={open} className={className}>
-      {children}
-    </button>
+        ) : null}
+      </ModalPortal>
+    </>
   );
 }
 
@@ -151,12 +158,15 @@ export function AddObservationsButton({
   className?: string;
   children: React.ReactNode;
 }) {
-  const open = useAddObservations(sessionDid);
+  const { open, modal } = useAddObservations(sessionDid);
 
   return (
-    <button type="button" onClick={open} className={className}>
-      {children}
-    </button>
+    <>
+      <button type="button" onClick={open} className={className}>
+        {children}
+      </button>
+      {modal}
+    </>
   );
 }
 

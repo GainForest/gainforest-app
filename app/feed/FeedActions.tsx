@@ -846,17 +846,20 @@ export function FeedComposer({
 /** Image button in the composer that opens the quick add-a-sighting flow. */
 function ComposerObservationButton({ sessionDid }: { sessionDid: string }) {
   const t = useTranslations("common.feed");
-  const openAddObservations = useAddObservations(sessionDid);
+  const { open, modal } = useAddObservations(sessionDid);
   return (
-    <button
-      type="button"
-      onClick={openAddObservations}
-      aria-label={t("composer.addObservation")}
-      title={t("composer.addObservation")}
-      className="-ml-1.5 inline-flex size-9 shrink-0 items-center justify-center rounded-full text-primary transition-colors hover:bg-primary/10"
-    >
-      <ImageIcon className="size-5" />
-    </button>
+    <>
+      <button
+        type="button"
+        onClick={open}
+        aria-label={t("composer.addObservation")}
+        title={t("composer.addObservation")}
+        className="-ml-1.5 inline-flex size-9 shrink-0 items-center justify-center rounded-full text-primary transition-colors hover:bg-primary/10"
+      >
+        <ImageIcon className="size-5" />
+      </button>
+      {modal}
+    </>
   );
 }
 
