@@ -696,6 +696,11 @@
     "trustedBy": "Trusted by",
     "aria": "Trusted by {names}"
   },
+  "maEarthRounds": {
+    "title": "Ma Earth",
+    "description": "Selected to take part in these Ma Earth community funding rounds.",
+    "round": "Round {round}"
+  },
   "groupInvitations": {
     "members": {
       "inputPlaceholder": "Email or Bluesky handle",

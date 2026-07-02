@@ -1638,6 +1638,35 @@ export async function fetchTrustedByEndorsements(
   return endorsements;
 }
 
+/** The Ma Earth funding rounds, mapped to their per-round badge keys. Round 3
+ *  is open for applications but has no awards yet, so it only resolves once Ma
+ *  Earth verifies it. Ordered so callers can render rounds ascending. */
+export const MA_EARTH_ROUND_BADGE_KEYS: Array<{ round: number; key: BumicertBadgeFilter }> = [
+  { round: 1, key: "maearth-round-1" },
+  { round: 2, key: "maearth-round-2" },
+  { round: 3, key: "maearth-round-3" },
+];
+
+/** The specific Ma Earth funding rounds an account took part in, resolved from
+ *  the per-round badge awards and returned as ascending round numbers (e.g.
+ *  `[1, 2]`). Empty when the account carries no round-specific Ma Earth badge.
+ *  An award subjects either a bare DID or a StrongRef to a record in the
+ *  awardee's repo, so we honor both — mirroring `fetchMaEarthOrganizationDids`. */
+export async function fetchAccountMaEarthRounds(
+  did: string,
+  signal?: AbortSignal,
+): Promise<number[]> {
+  if (!did.startsWith("did:")) return [];
+  const index = await fetchFeaturedBadgeIndex(signal);
+  const ownsBadge = (key: BumicertBadgeFilter): boolean => {
+    const bucket = index.byBadge[key];
+    if (!bucket) return false;
+    if (bucket.dids.includes(did)) return true;
+    return bucket.recordUris.some((uri) => uri.startsWith(`at://${did}/`));
+  };
+  return MA_EARTH_ROUND_BADGE_KEYS.filter(({ key }) => ownsBadge(key)).map(({ round }) => round);
+}
+
 /** DIDs of every organization carrying a Ma Earth badge (the umbrella badge
  *  plus all funding-round badges). Awards subject either a bare DID or a
  *  StrongRef to a record in the awardee's repo — both resolve to the org DID.

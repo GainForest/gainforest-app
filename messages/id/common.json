@@ -696,6 +696,11 @@
     "trustedBy": "Dipercaya oleh",
     "aria": "Dipercaya oleh {names}"
   },
+  "maEarthRounds": {
+    "title": "Ma Earth",
+    "description": "Terpilih untuk mengikuti putaran pendanaan komunitas Ma Earth ini.",
+    "round": "Putaran {round}"
+  },
   "groupInvitations": {
     "members": {
       "inputPlaceholder": "Email atau handle Bluesky",

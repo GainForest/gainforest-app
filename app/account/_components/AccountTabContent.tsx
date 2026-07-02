@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
-import { ChevronRightIcon } from "lucide-react";
+import { BadgeCheckIcon, ChevronRightIcon } from "lucide-react";
 import { getLocale, getTranslations } from "next-intl/server";
 import { AccountGalleryClient } from "./AccountGalleryClient";
 import type { GalleryProjectOption } from "./AccountGalleryUploader";
@@ -23,7 +23,7 @@ import type { AuthSession } from "../../_lib/auth";
 import { fetchUserCgsGroups, resolveAccountManageAccess } from "../../_lib/manage-server";
 import { BumicertsSection, ObservationsSection, ProjectsSection } from "../../(manage)/manage/_sections";
 import { monogram } from "../../_lib/did-profile";
-import { attachProjectTitlesToGalleries, fetchBumicertsByDid, fetchIndexedCertifiedProfileCards, fetchObservationSummaryByDid, fetchProjectImageGalleriesByDid, fetchProjectsByDid, fetchTimelineAttachmentsByDid, type TimelineAttachmentItem } from "../../_lib/indexer";
+import { attachProjectTitlesToGalleries, fetchAccountMaEarthRounds, fetchBumicertsByDid, fetchIndexedCertifiedProfileCards, fetchObservationSummaryByDid, fetchProjectImageGalleriesByDid, fetchProjectsByDid, fetchTimelineAttachmentsByDid, type TimelineAttachmentItem } from "../../_lib/indexer";
 import { getEntriesForActivities } from "@/app/cert/[did]/[rkey]/_components/timeline/attachmentSubjects";
 import { resolveTimelineReferences } from "@/app/cert/[did]/[rkey]/_components/timeline/timelineReferenceResolver";
 import { ProjectTimelineReadonly } from "@/app/projects/[did]/[rkey]/_components/ProjectTimelineReadonly";
@@ -65,6 +65,47 @@ function DataCouncilAvatar({ member }: { member: PublicDataCouncilMember }) {
         </span>
       )}
     </div>
+  );
+}
+
+// Ma Earth verifies organizations round by round (per-round badge awards). We
+// surface the *specific* rounds an account was part of — an explicit, per-round
+// statement of record, rather than the generic "Trusted by Ma Earth" emblem.
+async function AccountMaEarthRoundsSection({ did, className = "" }: { did: string; className?: string }) {
+  const [t, rounds] = await Promise.all([
+    getTranslations("common.maEarthRounds"),
+    fetchAccountMaEarthRounds(did).catch(() => [] as number[]),
+  ]);
+
+  if (rounds.length === 0) return null;
+
+  return (
+    <section className={`rounded-3xl border border-border/60 bg-card p-5 org-animate org-fade-in-up org-delay-2 sm:p-6 ${className}`.trim()}>
+      <div className="flex items-center gap-3">
+        <span className="grid size-11 shrink-0 place-items-center overflow-hidden rounded-full bg-background shadow-sm ring-1 ring-border/70">
+          <Image
+            src="/assets/media/images/badges/ma-earth-logo.webp"
+            width={44}
+            height={44}
+            alt=""
+            className="h-full w-full object-contain"
+          />
+        </span>
+        <h2 className="font-instrument text-2xl italic leading-none text-foreground">{t("title")}</h2>
+      </div>
+      <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">{t("description")}</p>
+      <ul className="mt-4 flex flex-wrap gap-2">
+        {rounds.map((round) => (
+          <li
+            key={round}
+            className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-background/60 px-3.5 py-2 text-sm font-medium text-foreground"
+          >
+            <BadgeCheckIcon className="size-4 shrink-0 text-primary" aria-hidden />
+            {t("round", { round })}
+          </li>
+        ))}
+      </ul>
+    </section>
   );
 }
 
@@ -202,6 +243,7 @@ export async function AccountHomeTabContent({ account }: { account: AccountRoute
           )}
         </section>
       ) : null}
+      {account.kind === "organization" ? <AccountMaEarthRoundsSection did={account.did} className="mt-8" /> : null}
       {account.kind === "organization" ? <AccountProjectUpdatesSection did={account.did} /> : null}
       {account.kind === "organization" ? <AccountDataCouncilSection did={account.did} /> : null}
     </>
@@ -244,6 +286,8 @@ export async function AccountOverviewTabContent({ account, did }: { account: Acc
       <section className="org-animate org-fade-in-up org-delay-1">
         <OverviewFolders tiles={folderTiles} />
       </section>
+
+      <AccountMaEarthRoundsSection did={did} />
 
       <section className="rounded-2xl border border-border bg-card/80 p-4 sm:flex sm:items-center sm:justify-between sm:gap-4">
         <div className="min-w-0">
