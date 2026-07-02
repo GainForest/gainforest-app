@@ -147,6 +147,16 @@ const MULTIMEDIA_COLLECTION = "app.gainforest.ac.multimedia";
 const MUTATION_TIMEOUT_MS = 45_000;
 const DIRECT_CGS_OPERATIONS = new Set<MutationPayload["operation"]>(["createRecord", "putRecord", "deleteRecord", "uploadBlob"]);
 
+async function readProxyResponse(res: Response): Promise<unknown> {
+  const text = await res.text();
+  if (!text.trim()) return {};
+  try {
+    return JSON.parse(text) as unknown;
+  } catch {
+    return { error: text.trim() };
+  }
+}
+
 async function callProxy<T>(payload: MutationPayload): Promise<T> {
   const controller = new AbortController();
   const timeout = window.setTimeout(() => controller.abort(), MUTATION_TIMEOUT_MS);
@@ -160,12 +170,15 @@ async function callProxy<T>(payload: MutationPayload): Promise<T> {
       body: JSON.stringify(payload),
       signal: controller.signal,
     });
-    const data = (await res.json()) as T & { error?: string; message?: string };
-    if (!res.ok || data.error) {
+    const data = await readProxyResponse(res);
+    const error = isRecord(data) && typeof data.error === "string" ? data.error : null;
+    const message = isRecord(data) && typeof data.message === "string" ? data.message : null;
+    if (!res.ok || error) {
       const fallback = isGroupScoped ? "Organization request failed." : `Saving failed (${res.status})`;
-      throw new Error(isGroupScoped ? formatCgsErrorMessage(data.message ?? data.error, fallback) : data.error ?? fallback);
+      const detail = message ?? error ?? fallback;
+      throw new Error(isGroupScoped ? formatCgsErrorMessage(detail, fallback) : detail);
     }
-    return data;
+    return data as T;
   } catch (error) {
     if (error instanceof DOMException && error.name === "AbortError") {
       throw new Error("Saving timed out. Please try again.");

@@ -37,6 +37,7 @@ import { manageApiHref, manageHref, profileBasePath, type ManageTarget } from "@
 import { localProjectHref } from "@/app/_lib/urls";
 import { notifyProjectsChanged } from "@/app/_lib/projects-events";
 import { WORK_SCOPE_MESSAGE_KEYS, type KnownWorkScopeKey } from "@/app/_lib/work-scope-labels";
+import { compressImageIfNeeded } from "../../observations/_components/observation-image";
 import { canCreateRecord, canDeleteRecord, canUpdateRecord } from "../../_lib/cgs-permissions";
 import { createRecord, deleteRecord, getRecord, putRecord, uploadBlob } from "../../_lib/mutations";
 import { SiteEditorModal, SiteEditorModalId } from "../../_modals/SiteEditorModal";
@@ -735,8 +736,9 @@ function ProjectEditor({
     );
 
     try {
-      const cover = coverFile
-        ? toLexImageBlob(await uploadBlob(coverFile, repoOptions), coverFile)
+      const preparedCoverFile = coverFile ? (await compressImageIfNeeded(coverFile)).file : null;
+      const cover = preparedCoverFile
+        ? toLexImageBlob(await uploadBlob(preparedCoverFile, repoOptions), preparedCoverFile)
         : coverRemoved
           ? null
           : undefined;
