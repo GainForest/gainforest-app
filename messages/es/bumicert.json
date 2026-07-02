@@ -43,6 +43,7 @@
       "orgTitle": "Novedades de los proyectos de esta organización",
       "orgItemCount": "{count, plural, =0 {0 novedades} =1 {1 novedad} other {# novedades}}",
       "orgDescription": "Informes, archivos y notas de campo publicados en todos los proyectos de esta organización.",
+      "seeMore": "Ver {count} más",
       "pageOf": "Página {current} de {total}",
       "previousPage": "Página anterior",
       "nextPage": "Página siguiente",

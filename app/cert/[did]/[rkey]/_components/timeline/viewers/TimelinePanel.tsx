@@ -47,6 +47,7 @@ export function TimelinePanel({
   onDeleted,
   pageSize = DEFAULT_PAGE_SIZE,
   summaryScope = "activity",
+  previewMode = false,
 }: {
   organizationDid: string;
   entries: TimelineAttachmentItem[];
@@ -58,6 +59,10 @@ export function TimelinePanel({
   onDeleted: (rkey: string) => void;
   pageSize?: number;
   summaryScope?: "activity" | "organization";
+  // Compact digest used on the org profile: render only the first (expanded)
+  // update and, when more exist, a "See X more" button that reveals the rest.
+  // Filters, the map preview, and pagination are hidden in this mode.
+  previewMode?: boolean;
 }) {
   const timelineT = useTranslations("bumicert.detail.timeline");
   const entryT = useTranslations("bumicert.detail.timelineEntry");
@@ -65,6 +70,7 @@ export function TimelinePanel({
   const locale = useLocale();
   const [activeFilter, setActiveFilter] = useState<TimelineEvidenceFilter>("all");
   const [currentPage, setCurrentPage] = useState(1);
+  const [showAll, setShowAll] = useState(false);
   const linkedWindow = useMemo(() => formatLinkedWindow(entries, locale), [entries, locale]);
   const referenceCopy = useMemo<TimelineReferenceCopy>(
     () => ({
@@ -147,6 +153,9 @@ export function TimelinePanel({
     () => paginateTimelineEntries(filteredEntries, currentPage, pageSize),
     [currentPage, filteredEntries, pageSize],
   );
+  const previewActive = previewMode && !showAll;
+  const previewEntries = previewActive ? entryListItems.slice(0, 1) : entryListItems;
+  const hiddenCount = entries.length - previewEntries.length;
 
   function handleFilterChange(filter: TimelineEvidenceFilter) {
     setActiveFilter(filter);
@@ -185,39 +194,65 @@ export function TimelinePanel({
           ) : null}
         </div>
 
-        <div className="mt-4 flex flex-wrap gap-2">
-          {TIMELINE_EVIDENCE_FILTERS.map((filter) => {
-            const isActive = activeFilter === filter.id;
-            const count = counts.get(filter.id) ?? 0;
-            return (
-              <button
-                key={filter.id}
-                type="button"
-                aria-pressed={isActive}
-                onClick={() => handleFilterChange(filter.id)}
-                className={cn(
-                  "rounded-md border px-3 py-1.5 text-xs font-medium transition-colors",
-                  isActive
-                    ? "border-primary bg-primary text-primary-foreground"
-                    : "border-border bg-background text-muted-foreground hover:bg-muted/60 hover:text-foreground",
-                )}
-              >
-                {filterLabels[filter.id]}
-                {filter.id !== "all" && count > 0 ? ` ${count}` : ""}
-              </button>
-            );
-          })}
-        </div>
+        {previewMode ? null : (
+          <div className="mt-4 flex flex-wrap gap-2">
+            {TIMELINE_EVIDENCE_FILTERS.map((filter) => {
+              const isActive = activeFilter === filter.id;
+              const count = counts.get(filter.id) ?? 0;
+              return (
+                <button
+                  key={filter.id}
+                  type="button"
+                  aria-pressed={isActive}
+                  onClick={() => handleFilterChange(filter.id)}
+                  className={cn(
+                    "rounded-md border px-3 py-1.5 text-xs font-medium transition-colors",
+                    isActive
+                      ? "border-primary bg-primary text-primary-foreground"
+                      : "border-border bg-background text-muted-foreground hover:bg-muted/60 hover:text-foreground",
+                  )}
+                >
+                  {filterLabels[filter.id]}
+                  {filter.id !== "all" && count > 0 ? ` ${count}` : ""}
+                </button>
+              );
+            })}
+          </div>
+        )}
       </div>
 
-      <TimelineGreenGlobePreview
-        organizationDid={organizationDid}
-        layers={mapLayers}
-        isLoading={false}
-      />
+      {previewMode ? null : (
+        <TimelineGreenGlobePreview
+          organizationDid={organizationDid}
+          layers={mapLayers}
+          isLoading={false}
+        />
+      )}
 
       {entries.length === 0 ? (
         <TimelineEmpty />
+      ) : previewMode ? (
+        <>
+          <TimelineEntryList
+            entries={previewEntries}
+            canManageEvidence={canManageEvidence}
+            canDeleteEvidence={deletePermission.allowed}
+            deleteDisabledReason={deletePermission.reason}
+            mutationRepo={mutationRepo}
+            onDeleted={onDeleted}
+          />
+          {previewActive && hiddenCount > 0 ? (
+            <div className="flex justify-center pt-1">
+              <button
+                type="button"
+                onClick={() => setShowAll(true)}
+                className="inline-flex items-center justify-center rounded-full border border-border bg-background px-6 py-3 text-sm font-medium text-foreground transition-colors hover:bg-muted"
+              >
+                {timelineT("seeMore", { count: hiddenCount })}
+              </button>
+            </div>
+          ) : null}
+        </>
       ) : filteredEntries.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-border/70 py-10 text-center text-sm text-muted-foreground">
           {timelineT("emptyFiltered")}

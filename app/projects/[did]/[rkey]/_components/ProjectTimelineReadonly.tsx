@@ -21,11 +21,13 @@ export function ProjectTimelineReadonly({
   entries,
   references,
   summaryScope = "activity",
+  previewMode = false,
 }: {
   organizationDid: string;
   entries: TimelineAttachmentItem[];
   references: TimelineReference[];
   summaryScope?: "activity" | "organization";
+  previewMode?: boolean;
 }) {
   return (
     <TimelinePanel
@@ -37,6 +39,7 @@ export function ProjectTimelineReadonly({
       deletePermission={{ allowed: false, reason: null }}
       onDeleted={() => {}}
       summaryScope={summaryScope}
+      previewMode={previewMode}
     />
   );
 }

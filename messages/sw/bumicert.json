@@ -43,6 +43,7 @@
       "orgTitle": "Masasisho kutoka miradi ya shirika hili",
       "orgItemCount": "{count, plural, =0 {masasisho 0} =1 {sasisho 1} other {masasisho #}}",
       "orgDescription": "Ripoti, faili na maelezo ya uga yaliyochapishwa katika kila mradi unaoendeshwa na shirika hili.",
+      "seeMore": "Ona {count} zaidi",
       "pageOf": "Ukurasa {current} kati ya {total}",
       "previousPage": "Ukurasa uliopita",
       "nextPage": "Ukurasa unaofuata",

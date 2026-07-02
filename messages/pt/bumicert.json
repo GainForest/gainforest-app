@@ -43,6 +43,7 @@
       "orgTitle": "Atualizações dos projetos desta organização",
       "orgItemCount": "{count, plural, =0 {0 atualizações} =1 {1 atualização} other {# atualizações}}",
       "orgDescription": "Relatórios, arquivos e notas de campo publicados em todos os projetos que esta organização mantém.",
+      "seeMore": "Ver mais {count}",
       "pageOf": "Página {current} de {total}",
       "previousPage": "Página anterior",
       "nextPage": "Próxima página",

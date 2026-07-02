@@ -43,6 +43,7 @@
       "orgTitle": "Pembaruan dari proyek organisasi ini",
       "orgItemCount": "{count, plural, =0 {0 pembaruan} =1 {1 pembaruan} other {# pembaruan}}",
       "orgDescription": "Laporan, file, dan catatan lapangan yang diterbitkan di seluruh proyek yang dijalankan organisasi ini.",
+      "seeMore": "Lihat {count} lainnya",
       "pageOf": "Halaman {current} dari {total}",
       "previousPage": "Halaman sebelumnya",
       "nextPage": "Halaman berikutnya",
