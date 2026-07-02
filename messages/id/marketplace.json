@@ -1612,5 +1612,62 @@
       "totalLength": "Panjang total",
       "groupSize": "Ukuran kelompok"
     }
+  },
+  "globe": {
+    "metadata": {
+      "title": "Globe — Jelajahi Proyek Konservasi di Bumi 3D",
+      "description": "Jelajahi globe 3D yang hidup berisi organisasi dan lokasi proyek mereka, dengan lapisan tutupan lahan dan data konservasi.",
+      "orgTitle": "{name} di Globe",
+      "orgDescription": "Jelajahi lokasi proyek {name} di globe 3D.",
+      "projectTitle": "{name} di Globe",
+      "projectDescription": "Jelajahi batas lokasi {name} di globe 3D."
+    },
+    "title": "Bola Dunia",
+    "subtitle": "Organisasi dan lokasi proyek mereka di Bumi 3D yang hidup.",
+    "viewOnGlobe": "Lihat di Globe",
+    "panel": {
+      "searchPlaceholder": "Cari organisasi…",
+      "toggleList": "Tampilkan daftar organisasi",
+      "loading": "Memuat organisasi…",
+      "count": "{count, plural, other {# organisasi}}",
+      "empty": "Tidak ada organisasi yang cocok dengan pencarian Anda.",
+      "maEarth": "Ma Earth"
+    },
+    "focus": {
+      "organizationLabel": "Organisasi",
+      "projectLabel": "Proyek",
+      "clear": "Kembali ke semua organisasi",
+      "viewProfile": "Lihat profil",
+      "openGlobe": "Halaman globe",
+      "orgGlobe": "Globe organisasi",
+      "viewProject": "Lihat proyek",
+      "backToGlobe": "Kembali ke tampilan global",
+      "recenter": "Pusatkan ulang peta",
+      "sites": "{count, plural, other {# lokasi proyek}}",
+      "boundaries": "{count, plural, other {# batas lokasi}}",
+      "allSites": "Semua lokasi",
+      "noSites": "Belum ada lokasi proyek yang dipetakan.",
+      "noBoundaries": "Proyek ini belum memiliki batas lokasi yang dipetakan.",
+      "projectHint": "Batas yang disorot menunjukkan tempat proyek ini bekerja."
+    },
+    "layers": {
+      "button": "Lapisan",
+      "title": "Jelajahi lapisan",
+      "landcover": "Tutupan lahan",
+      "landcoverSource": "ESA WorldCover 2021",
+      "projectCategory": "Lapisan proyek",
+      "noProjectLayers": "Organisasi ini belum memiliki lapisan peta tambahan.",
+      "landcoverClasses": {
+        "treeCover": "Tutupan pohon",
+        "shrubland": "Semak belukar",
+        "grassland": "Padang rumput",
+        "cropland": "Lahan pertanian",
+        "builtUp": "Kawasan terbangun",
+        "bareVegetation": "Lahan terbuka",
+        "water": "Air",
+        "wetland": "Lahan basah",
+        "mangroves": "Bakau"
+      }
+    }
   }
 }

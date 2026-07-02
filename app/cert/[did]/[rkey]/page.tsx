@@ -12,6 +12,7 @@ import {
   CircleDotIcon,
   ClipboardCheckIcon,
   CrownIcon,
+  EarthIcon,
   ExternalLinkIcon,
   GiftIcon,
   HeartIcon,
@@ -294,6 +295,7 @@ export async function BumicertDetailBody({
 }) {
   const { record, detail, owner, fundingConfig, authSession } = routeData;
   const matchUris = timelineMatchUris && timelineMatchUris.length > 0 ? timelineMatchUris : [record.atUri];
+  const globeT = await getTranslations("marketplace.globe");
   const workScopeT = await getTranslations("common.workScopes");
   const workScopeLabels: WorkScopeLabels = {
     reforestation: workScopeT("reforestation"),
@@ -474,7 +476,13 @@ export async function BumicertDetailBody({
                 workScopeLabels={workScopeLabels}
               />
             )}
-            {activeTab === "site-boundaries" && <SiteBoundariesPanel record={record} />}
+            {activeTab === "site-boundaries" && (
+              <SiteBoundariesPanel
+                record={record}
+                globeHref={`/globe/${encodeURIComponent(owner.urlIdentifier)}`}
+                globeLabel={globeT("viewOnGlobe")}
+              />
+            )}
             {activeTab === "reviews" && reviews && <ReviewsPanel record={record} reviews={reviews} />}
             {activeTab === "donations" && (
               <DonationsPanel
@@ -556,12 +564,13 @@ export async function ProjectDetailView({
   const { record, detail, owner, fundingConfig, authSession } = routeData;
   const matchUris = timelineMatchUris && timelineMatchUris.length > 0 ? timelineMatchUris : [record.atUri];
 
-  const [workScopeT, permissionT, timelineT, timelineEntryT, referenceT] = await Promise.all([
+  const [workScopeT, permissionT, timelineT, timelineEntryT, referenceT, globeT] = await Promise.all([
     getTranslations("common.workScopes"),
     getTranslations("bumicert.detail.evidenceAdder.permissions"),
     getTranslations("bumicert.detail.timeline"),
     getTranslations("bumicert.detail.timelineEntry"),
     getTranslations("bumicert.detail.reference"),
+    getTranslations("marketplace.globe"),
   ]);
   const workScopeLabels: WorkScopeLabels = {
     reforestation: workScopeT("reforestation"),
@@ -573,6 +582,10 @@ export async function ProjectDetailView({
   };
 
   const detailHref = basePath;
+  // Each project gets its own native globe view zoomed to its site boundaries.
+  const projectGlobeHref = projectRkey
+    ? `/globe/${encodeURIComponent(owner.urlIdentifier)}/${encodeURIComponent(projectRkey)}`
+    : `/globe/${encodeURIComponent(owner.urlIdentifier)}`;
   const description = detail?.blurb ?? record.shortDescription;
   const ownerProfileHref = `/account/${encodeURIComponent(owner.urlIdentifier)}`;
 
@@ -800,7 +813,11 @@ export async function ProjectDetailView({
 
             {hasPlaces ? (
               <ProjectDetailSection id="places" icon={<MapPinnedIcon className="h-4 w-4" aria-hidden />} title="Places" count={formatNumber(record.locationUris.length)}>
-                <SiteBoundariesPanel record={record} />
+                <SiteBoundariesPanel
+                  record={record}
+                  globeHref={projectGlobeHref}
+                  globeLabel={globeT("viewOnGlobe")}
+                />
               </ProjectDetailSection>
             ) : null}
 
@@ -1937,13 +1954,33 @@ function formatReportLabel(uri: string): string {
   }
 }
 
-function SiteBoundariesPanel({ record }: { record: BumicertRecord }) {
+function SiteBoundariesPanel({
+  record,
+  globeHref,
+  globeLabel,
+}: {
+  record: BumicertRecord;
+  /** Native globe view of these boundaries (org or project globe page). */
+  globeHref?: string;
+  globeLabel?: string;
+}) {
   const firstLocationUri = record.locationUris[0] ?? null;
 
   return (
     <article className="py-1">
       {firstLocationUri ? (
         <>
+          {globeHref && globeLabel ? (
+            <div className="mb-3 flex justify-end">
+              <Link
+                href={globeHref}
+                className="inline-flex h-8 items-center gap-1.5 rounded-full border border-border-soft bg-background px-3 text-xs font-medium text-foreground transition-colors hover:border-primary/40 hover:text-primary"
+              >
+                <EarthIcon className="h-3.5 w-3.5" aria-hidden />
+                {globeLabel}
+              </Link>
+            </div>
+          ) : null}
           <div className="overflow-hidden rounded-2xl bg-muted/30">
             <iframe
               src={polygonsViewHref(firstLocationUri)}

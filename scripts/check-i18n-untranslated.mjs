@@ -24,6 +24,7 @@ const allowedExactValues = new Set([
   "GainForest",
   "Green Globe",
   "Ma Earth",
+  "ESA WorldCover 2021",
   "BioBlitz",
   "GitHub",
   "X (Twitter)",

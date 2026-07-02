@@ -1612,5 +1612,62 @@
       "totalLength": "Urefu jumla",
       "groupSize": "Ukubwa wa kundi"
     }
+  },
+  "globe": {
+    "metadata": {
+      "title": "Dunia — Chunguza Miradi ya Uhifadhi kwenye Dunia ya 3D",
+      "description": "Zunguka dunia hai ya 3D yenye mashirika na maeneo ya miradi yao, pamoja na tabaka za uoto wa ardhi na data za uhifadhi.",
+      "orgTitle": "{name} kwenye Dunia",
+      "orgDescription": "Chunguza maeneo ya miradi ya {name} kwenye dunia ya 3D.",
+      "projectTitle": "{name} kwenye Dunia",
+      "projectDescription": "Chunguza mipaka ya eneo la {name} kwenye dunia ya 3D."
+    },
+    "title": "Dunia",
+    "subtitle": "Mashirika na maeneo ya miradi yao kwenye Dunia hai ya 3D.",
+    "viewOnGlobe": "Tazama kwenye Dunia",
+    "panel": {
+      "searchPlaceholder": "Tafuta mashirika…",
+      "toggleList": "Onyesha orodha ya mashirika",
+      "loading": "Inapakia mashirika…",
+      "count": "{count, plural, one {shirika #} other {mashirika #}}",
+      "empty": "Hakuna shirika linalolingana na utafutaji wako.",
+      "maEarth": "Ma Earth"
+    },
+    "focus": {
+      "organizationLabel": "Shirika",
+      "projectLabel": "Mradi",
+      "clear": "Rudi kwa mashirika yote",
+      "viewProfile": "Tazama wasifu",
+      "openGlobe": "Ukurasa wa dunia",
+      "orgGlobe": "Dunia ya shirika",
+      "viewProject": "Tazama mradi",
+      "backToGlobe": "Rudi kwenye mwonekano wa dunia nzima",
+      "recenter": "Weka ramani katikati tena",
+      "sites": "{count, plural, one {eneo la mradi #} other {maeneo ya mradi #}}",
+      "boundaries": "{count, plural, one {mpaka wa eneo #} other {mipaka ya eneo #}}",
+      "allSites": "Maeneo yote",
+      "noSites": "Bado hakuna maeneo ya mradi yaliyowekwa kwenye ramani.",
+      "noBoundaries": "Mradi huu bado hauna mipaka ya eneo iliyowekwa kwenye ramani.",
+      "projectHint": "Mipaka iliyoangaziwa inaonyesha mahali mradi huu unafanya kazi."
+    },
+    "layers": {
+      "button": "Tabaka",
+      "title": "Chunguza tabaka",
+      "landcover": "Uoto wa ardhi",
+      "landcoverSource": "ESA WorldCover 2021",
+      "projectCategory": "Tabaka za mradi",
+      "noProjectLayers": "Shirika hili bado halina tabaka za ziada za ramani.",
+      "landcoverClasses": {
+        "treeCover": "Miti",
+        "shrubland": "Vichaka",
+        "grassland": "Nyasi",
+        "cropland": "Mashamba",
+        "builtUp": "Majengo",
+        "bareVegetation": "Ardhi wazi",
+        "water": "Maji",
+        "wetland": "Ardhi oevu",
+        "mangroves": "Mikoko"
+      }
+    }
   }
 }

@@ -1612,5 +1612,62 @@
       "totalLength": "Longitud total",
       "groupSize": "Tamaño del grupo"
     }
+  },
+  "globe": {
+    "metadata": {
+      "title": "Globo — Explora proyectos de conservación en una Tierra 3D",
+      "description": "Recorre un globo 3D vivo con organizaciones y sus sitios de proyecto, con capas de cobertura del suelo y datos de conservación.",
+      "orgTitle": "{name} en el Globo",
+      "orgDescription": "Explora los sitios de proyecto de {name} en el globo 3D.",
+      "projectTitle": "{name} en el Globo",
+      "projectDescription": "Explora los límites del sitio de {name} en el globo 3D."
+    },
+    "title": "Globo",
+    "subtitle": "Organizaciones y sus sitios de proyecto en una Tierra 3D viva.",
+    "viewOnGlobe": "Ver en el Globo",
+    "panel": {
+      "searchPlaceholder": "Buscar organizaciones…",
+      "toggleList": "Mostrar la lista de organizaciones",
+      "loading": "Cargando organizaciones…",
+      "count": "{count, plural, one {# organización} other {# organizaciones}}",
+      "empty": "Ninguna organización coincide con tu búsqueda.",
+      "maEarth": "Ma Earth"
+    },
+    "focus": {
+      "organizationLabel": "Organización",
+      "projectLabel": "Proyecto",
+      "clear": "Volver a todas las organizaciones",
+      "viewProfile": "Ver perfil",
+      "openGlobe": "Página del globo",
+      "orgGlobe": "Globo de la organización",
+      "viewProject": "Ver proyecto",
+      "backToGlobe": "Volver a la vista global",
+      "recenter": "Centrar el mapa",
+      "sites": "{count, plural, one {# sitio de proyecto} other {# sitios de proyecto}}",
+      "boundaries": "{count, plural, one {# límite de sitio} other {# límites de sitio}}",
+      "allSites": "Todos los sitios",
+      "noSites": "Aún no hay sitios de proyecto mapeados.",
+      "noBoundaries": "Este proyecto aún no tiene límites de sitio mapeados.",
+      "projectHint": "Los límites resaltados muestran dónde trabaja este proyecto."
+    },
+    "layers": {
+      "button": "Capas",
+      "title": "Explorar capas",
+      "landcover": "Cobertura del suelo",
+      "landcoverSource": "ESA WorldCover 2021",
+      "projectCategory": "Capas del proyecto",
+      "noProjectLayers": "Esta organización aún no tiene capas de mapa adicionales.",
+      "landcoverClasses": {
+        "treeCover": "Cobertura arbórea",
+        "shrubland": "Matorral",
+        "grassland": "Pastizal",
+        "cropland": "Cultivos",
+        "builtUp": "Urbanizado",
+        "bareVegetation": "Suelo desnudo",
+        "water": "Agua",
+        "wetland": "Humedal",
+        "mangroves": "Manglares"
+      }
+    }
   }
 }

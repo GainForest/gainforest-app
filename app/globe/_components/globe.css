@@ -1,0 +1,57 @@
+/* Globe map chrome, themed with the app's design tokens so the ported map
+   reads as part of the product rather than an embedded widget. */
+
+.globe-popup .maplibregl-popup-content {
+  background: var(--popover);
+  color: var(--popover-foreground);
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) - 2px);
+  padding: 0.375rem 0.625rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  line-height: 1.25rem;
+  box-shadow: 0 8px 24px rgb(0 0 0 / 0.18);
+}
+
+.globe-popup .maplibregl-popup-tip {
+  border-top-color: var(--border);
+}
+
+/* Zoom control pills, matched to the app's outline buttons. */
+.maplibregl-ctrl-group {
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: 9999px;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgb(0 0 0 / 0.16);
+}
+
+.maplibregl-ctrl-group button {
+  background: transparent;
+  width: 32px;
+  height: 32px;
+}
+
+.maplibregl-ctrl-group button + button {
+  border-top: 1px solid var(--border);
+}
+
+.maplibregl-ctrl button .maplibregl-ctrl-icon {
+  filter: none;
+}
+
+.dark .maplibregl-ctrl button .maplibregl-ctrl-icon {
+  filter: invert(1) brightness(1.4);
+}
+
+/* Attribution: keep it readable over the dark space background. */
+.maplibregl-ctrl-attrib {
+  background: color-mix(in oklab, var(--background) 78%, transparent);
+  border-radius: 9999px;
+  font-size: 10px;
+  color: var(--muted-foreground);
+}
+
+.maplibregl-ctrl-attrib a {
+  color: var(--muted-foreground);
+}

@@ -109,7 +109,8 @@
       "myTrees": "Trees",
       "myProfile": "Profile",
       "feed": "Feed",
-      "taina": "Tainá"
+      "taina": "Tainá",
+      "globe": "Globe"
     },
     "prompts": {
       "signInDescription": "Sign in to manage your account and content.",

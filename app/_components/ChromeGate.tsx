@@ -13,8 +13,9 @@ export function ChromeGate({ children }: { children: React.ReactNode }) {
   }
 
   // BioBlitz is a single-screen dashboard meant to fit without scrolling, so it
-  // omits the page footer (same treatment as the promo banner there).
-  const showFooter = pathname !== "/bioblitz";
+  // omits the page footer (same treatment as the promo banner there). The
+  // Globe is a full-bleed map view, so it drops the footer too.
+  const showFooter = pathname !== "/bioblitz" && !pathname.startsWith("/globe");
 
   return (
     <AppShell authSession={null} manageAccountKind="user">

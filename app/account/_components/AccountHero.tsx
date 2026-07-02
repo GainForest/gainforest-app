@@ -9,6 +9,7 @@ import {
   Building2Icon,
   CalendarIcon,
   CheckIcon,
+  EarthIcon,
   GlobeIcon,
   MapPinIcon,
   PencilIcon,
@@ -68,6 +69,7 @@ export function AccountHero({
   const [copied, setCopied] = useState(false);
   const heroT = useTranslations("upload.dashboardClient.hero");
   const actionsT = useTranslations("upload.actions");
+  const globeT = useTranslations("marketplace.globe");
 
   const initial = account.displayName.charAt(0).toUpperCase();
   const sinceDate = formatSinceDate(account.kind === "organization" ? account.foundedDate ?? account.createdAt : account.createdAt);
@@ -207,6 +209,14 @@ export function AccountHero({
               </Button>
             ) : null}
             <FollowButton targetDid={account.did} name={account.displayName} />
+            {account.kind === "organization" ? (
+              <Button asChild variant="outline">
+                <Link href={`/globe/${encodeURIComponent(account.urlIdentifier)}`}>
+                  <EarthIcon />
+                  {globeT("viewOnGlobe")}
+                </Link>
+              </Button>
+            ) : null}
             {account.website ? (
               <Button asChild variant="outline" size="icon" title={formatWebsite(account.website)} aria-label={heroT("openSocialLink", { link: formatWebsite(account.website) })}>
                 <Link href={externalHref(account.website)} target="_blank" rel="noopener noreferrer">
@@ -226,8 +236,16 @@ export function AccountHero({
             })}
           </div>
         ) : (
-          <div className="mt-5">
+          <div className="mt-5 flex flex-wrap items-center gap-2">
             <FollowButton targetDid={account.did} name={account.displayName} />
+            {account.kind === "organization" ? (
+              <Button asChild variant="outline">
+                <Link href={`/globe/${encodeURIComponent(account.urlIdentifier)}`}>
+                  <EarthIcon />
+                  {globeT("viewOnGlobe")}
+                </Link>
+              </Button>
+            ) : null}
           </div>
         )}
       </div>

@@ -1612,5 +1612,62 @@
       "totalLength": "Total length",
       "groupSize": "Group size"
     }
+  },
+  "globe": {
+    "metadata": {
+      "title": "Globe — Explore Conservation Projects on a 3D Earth",
+      "description": "Fly around a living 3D globe of organizations and their project sites, with land cover and conservation data layers.",
+      "orgTitle": "{name} on the Globe",
+      "orgDescription": "Explore {name}'s project sites on the 3D globe.",
+      "projectTitle": "{name} on the Globe",
+      "projectDescription": "Explore the site boundaries of {name} on the 3D globe."
+    },
+    "title": "Globe",
+    "subtitle": "Organizations and their project sites on a living 3D Earth.",
+    "viewOnGlobe": "View on Globe",
+    "panel": {
+      "searchPlaceholder": "Search organizations…",
+      "toggleList": "Show organization list",
+      "loading": "Loading organizations…",
+      "count": "{count, plural, one {# organization} other {# organizations}}",
+      "empty": "No organizations match your search.",
+      "maEarth": "Ma Earth"
+    },
+    "focus": {
+      "organizationLabel": "Organization",
+      "projectLabel": "Project",
+      "clear": "Back to all organizations",
+      "viewProfile": "View profile",
+      "openGlobe": "Globe page",
+      "orgGlobe": "Organization globe",
+      "viewProject": "View project",
+      "backToGlobe": "Back to the global view",
+      "recenter": "Re-center the map",
+      "sites": "{count, plural, one {# project site} other {# project sites}}",
+      "boundaries": "{count, plural, one {# site boundary} other {# site boundaries}}",
+      "allSites": "All sites",
+      "noSites": "No project sites mapped yet.",
+      "noBoundaries": "This project has no mapped site boundaries yet.",
+      "projectHint": "The highlighted boundaries show where this project works."
+    },
+    "layers": {
+      "button": "Layers",
+      "title": "Explore layers",
+      "landcover": "Land cover",
+      "landcoverSource": "ESA WorldCover 2021",
+      "projectCategory": "Project layers",
+      "noProjectLayers": "This organization has no extra map layers yet.",
+      "landcoverClasses": {
+        "treeCover": "Tree cover",
+        "shrubland": "Shrubland",
+        "grassland": "Grassland",
+        "cropland": "Cropland",
+        "builtUp": "Built-up",
+        "bareVegetation": "Bare / sparse",
+        "water": "Water",
+        "wetland": "Wetland",
+        "mangroves": "Mangroves"
+      }
+    }
   }
 }

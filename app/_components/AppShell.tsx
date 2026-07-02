@@ -11,6 +11,7 @@ import {
   Building2Icon,
   CheckIcon,
   ChevronLeftIcon,
+  EarthIcon,
   FolderKanbanIcon,
   HeartHandshakeIcon,
   HeartIcon,
@@ -119,6 +120,14 @@ const NAV_ITEMS: NavSection[] = [
         Icon: BinocularsIcon,
         href: "/observations",
         pathCheck: { startsWith: "/observations" },
+      },
+      {
+        kind: "leaf",
+        id: "globe",
+        text: "Globe",
+        Icon: EarthIcon,
+        href: "/globe",
+        pathCheck: { startsWith: "/globe" },
       },
     ],
   },
@@ -629,8 +638,9 @@ function ExploreNav() {
                   isActive={isLeafActive(item.pathCheck, pathname)}
                   index={leafIndex}
                   // Certs are minted from a Project, so visually hang Certs
-                  // under Projects (which sits directly above it).
-                  paired={item.id === "bumicerts"}
+                  // under Projects (which sits directly above it). The Globe is
+                  // the map view of Observations, so it hangs under that item.
+                  paired={item.id === "bumicerts" || item.id === "globe"}
                 />
               );
             })}

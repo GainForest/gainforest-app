@@ -109,7 +109,8 @@
       "myTrees": "Pohon",
       "myProfile": "Profil",
       "feed": "Aktivitas",
-      "taina": "Tainá"
+      "taina": "Tainá",
+      "globe": "Bola Dunia"
     },
     "prompts": {
       "signInDescription": "Masuk untuk mengelola akun dan konten Anda.",
