@@ -7,6 +7,7 @@ import { getLocale, getMessages, getTranslations } from "next-intl/server";
 import { DomTranslationFallback } from "@/components/i18n/DomTranslationFallback";
 import "./globals.css";
 import { ChromeGate } from "./_components/ChromeGate";
+import { ClientErrorListener } from "./_components/ClientErrorListener";
 import { AccountDrawerProvider } from "./_components/AccountDrawer";
 import { LinkPrefetcher } from "./_components/LinkPrefetcher";
 import { RouteChangeIndicator } from "./_components/RouteChangeIndicator";
@@ -133,6 +134,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       >
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT }} />
         <NextIntlClientProvider locale={locale} messages={messages}>
+          <ClientErrorListener />
           <DomTranslationFallback />
           <Suspense fallback={null}>
             <RouteChangeIndicator />

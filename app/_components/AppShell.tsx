@@ -32,6 +32,7 @@ import { createContext, Suspense, useContext, useEffect, useState, type MouseEve
 import { useTranslations } from "next-intl";
 import type { AuthSession } from "../_lib/auth";
 import { BioblitzPromoBanner } from "./BioblitzPromoBanner";
+import { ChromeErrorBoundary } from "./ChromeErrorBoundary";
 import packageJson from "@/package.json";
 import { BumicertsBumicertCard, type BumicertsBumicertCardRecord } from "@/components/bumicert/BumicertsBumicertCard";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -357,17 +358,25 @@ export function AppShell({
   return (
     <HeaderSlotsProvider>
       <div className="flex h-screen flex-col overflow-hidden">
-        {pathname !== "/bioblitz" ? <BioblitzPromoBanner /> : null}
+        {pathname !== "/bioblitz" ? (
+          <ChromeErrorBoundary name="bioblitz-banner">
+            <BioblitzPromoBanner />
+          </ChromeErrorBoundary>
+        ) : null}
         <div className="flex min-h-0 flex-1 overflow-hidden">
           <div className="relative hidden md:block">
-            <UnifiedSidebar
-              authSession={resolvedAuthSession}
-              collapsed={sidebarCollapsed}
-            />
-            <SidebarCollapseToggle collapsed={sidebarCollapsed} onToggle={toggleSidebarCollapsed} />
+            <ChromeErrorBoundary name="sidebar">
+              <UnifiedSidebar
+                authSession={resolvedAuthSession}
+                collapsed={sidebarCollapsed}
+              />
+              <SidebarCollapseToggle collapsed={sidebarCollapsed} onToggle={toggleSidebarCollapsed} />
+            </ChromeErrorBoundary>
           </div>
           <MobileNavDrawer open={mobileNavOpen} onOpenChange={setMobileNavOpen}>
-            <UnifiedSidebar authSession={resolvedAuthSession} />
+            <ChromeErrorBoundary name="mobile-sidebar">
+              <UnifiedSidebar authSession={resolvedAuthSession} />
+            </ChromeErrorBoundary>
           </MobileNavDrawer>
           <main className="relative flex-1 overflow-y-auto">
             <Header
@@ -376,11 +385,13 @@ export function AppShell({
               manageAccountKind={resolvedManageAccountKind}
               onOpenMobileNav={() => setMobileNavOpen(true)}
             />
-            <FreshAccountOnboardingPrompt
-              authSession={resolvedAuthSession}
-              isProfileLoading={isProfileLoading}
-              hasCertifiedProfile={hasCertifiedProfile}
-            />
+            <ChromeErrorBoundary name="onboarding-prompt">
+              <FreshAccountOnboardingPrompt
+                authSession={resolvedAuthSession}
+                isProfileLoading={isProfileLoading}
+                hasCertifiedProfile={hasCertifiedProfile}
+              />
+            </ChromeErrorBoundary>
             {children}
           </main>
         </div>
@@ -1372,7 +1383,7 @@ function Header({
                   transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
                   className="flex-1 min-w-0"
                 >
-                  {leftContent}
+                  <ChromeErrorBoundary name="header-left-slot">{leftContent}</ChromeErrorBoundary>
                 </motion.div>
               ) : null}
             </AnimatePresence>
@@ -1389,18 +1400,24 @@ function Header({
                   exit={{ opacity: 0, x: 4 }}
                   transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
                 >
-                  {rightContent ?? routeActions}
+                  <ChromeErrorBoundary name="header-right-slot">{rightContent ?? routeActions}</ChromeErrorBoundary>
                 </motion.div>
               ) : null}
             </AnimatePresence>
-            <GlobalSearch />
-            <NotificationBell session={authSession} />
-            <AuthButton
-              session={authSession}
-              profileName={profileName}
-              isProfileNameLoading={profileName === undefined}
-              manageAccountKind={manageAccountKind}
-            />
+            <ChromeErrorBoundary name="global-search">
+              <GlobalSearch />
+            </ChromeErrorBoundary>
+            <ChromeErrorBoundary name="notification-bell">
+              <NotificationBell session={authSession} />
+            </ChromeErrorBoundary>
+            <ChromeErrorBoundary name="auth-button">
+              <AuthButton
+                session={authSession}
+                profileName={profileName}
+                isProfileNameLoading={profileName === undefined}
+                manageAccountKind={manageAccountKind}
+              />
+            </ChromeErrorBoundary>
           </div>
         </div>
 
@@ -1413,7 +1430,7 @@ function Header({
             transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
             className="overflow-hidden px-4 pb-1"
           >
-            {subHeaderContent}
+            <ChromeErrorBoundary name="header-sub-slot">{subHeaderContent}</ChromeErrorBoundary>
           </motion.div>
         ) : showBumicertTabs ? (
           <div className="overflow-hidden px-4 pb-1">

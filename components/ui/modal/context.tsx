@@ -1,5 +1,5 @@
 "use client";
-import { createContext, useContext, useState } from "react";
+import { createContext, useCallback, useContext, useMemo, useState } from "react";
 import { debug } from "@/lib/logger";
 import {
   Dialog,
@@ -121,7 +121,7 @@ export const ModalProvider = ({ children }: { children: React.ReactNode }) => {
     `(min-width: ${SMALL_SCREEN_BREAKPOINT})`
   );
   const forceDialog = modalStack.some((variant) => variant.forceDialog);
-  const mode =
+  const mode: ModalMode | null =
     smQueryMatches === null
       ? null
       : smQueryMatches || forceDialog
@@ -131,60 +131,68 @@ export const ModalProvider = ({ children }: { children: React.ReactNode }) => {
   const modalInfo = useCurrentModalInfo(modalIdStack);
   const activeDialogWidth = modalStack.at(-1)?.dialogWidth ?? "max-w-sm";
 
-  const show = () => {
+  // All actions are stable callbacks and the context value is memoized: the
+  // provider wraps the entire app, so an unstable value would re-render every
+  // useModal consumer (and re-fire their `modal`-dependent effects) on any
+  // modal state change.
+  const show = useCallback(() => {
     setIsOpen(true);
     return new Promise<void>((res) => {
       setTimeout(() => {
         res();
       }, VISIBILITY_TRANSITION_DURATION);
     });
-  };
+  }, []);
 
-  const hide = () => {
+  const hide = useCallback(() => {
     setIsOpen(false);
     return new Promise<void>((res) => {
       setTimeout(() => {
         res();
       }, VISIBILITY_TRANSITION_DURATION);
     });
-  };
+  }, []);
 
-  const onVisibilityChange = (open: boolean) => {
+  const onVisibilityChange = useCallback((open: boolean) => {
     setIsOpen(open);
-  };
+  }, []);
 
-  const pushModal = (variant: ModalVariant, replaceAll?: boolean) => {
+  const pushModal = useCallback((variant: ModalVariant, replaceAll?: boolean) => {
     setModalIdStack((prev) => [...(replaceAll ? [] : prev), variant.id]);
     setModalStack((prev) => [...(replaceAll ? [] : prev), variant]);
-  };
+  }, []);
 
-  const popModal = () => {
+  const popModal = useCallback(() => {
     setModalIdStack((prev) => prev.slice(0, -1));
     setModalStack((prev) => prev.slice(0, -1));
-  };
+  }, []);
 
-  const clear = () => {
+  const clear = useCallback(() => {
     setModalIdStack([]);
     setModalStack([]);
-  };
+  }, []);
 
   const handleOpenChange = (open: boolean) => {
     setIsOpen(open);
   };
+
+  const contextValue = useMemo(
+    () => ({
+      show,
+      hide,
+      onVisibilityChange,
+      isOpen,
+      mode,
+      stack: modalIdStack,
+      pushModal,
+      popModal,
+      clear,
+    }),
+    [show, hide, onVisibilityChange, isOpen, mode, modalIdStack, pushModal, popModal, clear],
+  );
+
   return (
-    <ModalContext.Provider
-      value={{
-        show,
-        hide,
-        onVisibilityChange,
-        isOpen,
-        mode,
-        stack: modalIdStack,
-        pushModal,
-        popModal,
-        clear,
-      }}
-    >
+    <ModalContext.Provider value={contextValue}>
       {children}
       <ModalModeContext.Provider value={mode}>
         <ModalStack
