@@ -12,16 +12,20 @@ const EMPTY_SOURCES = {
   places: [],
 };
 
-// Read-only timeline for the public project page: the same panel the Cert page
-// uses, with every editing affordance turned off.
+// Read-only timeline for the public project page (and the org profile's
+// cross-project "updates" section): the same panel the Cert page uses, with
+// every editing affordance turned off. `summaryScope` switches the header
+// between the per-activity copy and the organization-wide copy.
 export function ProjectTimelineReadonly({
   organizationDid,
   entries,
   references,
+  summaryScope = "activity",
 }: {
   organizationDid: string;
   entries: TimelineAttachmentItem[];
   references: TimelineReference[];
+  summaryScope?: "activity" | "organization";
 }) {
   return (
     <TimelinePanel
@@ -32,7 +36,7 @@ export function ProjectTimelineReadonly({
       canManageEvidence={false}
       deletePermission={{ allowed: false, reason: null }}
       onDeleted={() => {}}
-      summaryScope="activity"
+      summaryScope={summaryScope}
     />
   );
 }

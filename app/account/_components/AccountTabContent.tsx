@@ -22,7 +22,10 @@ import type { AuthSession } from "../../_lib/auth";
 import { fetchUserCgsGroups, resolveAccountManageAccess } from "../../_lib/manage-server";
 import { BumicertsSection, ObservationsSection, ProjectsSection } from "../../(manage)/manage/_sections";
 import { monogram } from "../../_lib/did-profile";
-import { attachProjectTitlesToGalleries, fetchBumicertsByDid, fetchIndexedCertifiedProfileCards, fetchObservationSummaryByDid, fetchProjectImageGalleriesByDid, fetchProjectsByDid } from "../../_lib/indexer";
+import { attachProjectTitlesToGalleries, fetchBumicertsByDid, fetchIndexedCertifiedProfileCards, fetchObservationSummaryByDid, fetchProjectImageGalleriesByDid, fetchProjectsByDid, fetchTimelineAttachmentsByDid, type TimelineAttachmentItem } from "../../_lib/indexer";
+import { getEntriesForActivities } from "@/app/cert/[did]/[rkey]/_components/timeline/attachmentSubjects";
+import { resolveTimelineReferences } from "@/app/cert/[did]/[rkey]/_components/timeline/timelineReferenceResolver";
+import { ProjectTimelineReadonly } from "@/app/projects/[did]/[rkey]/_components/ProjectTimelineReadonly";
 import type { AccountRouteData } from "../_lib/account-route";
 import { accountDonationsPath, accountGalleryPath, accountObservationsPath, accountPath, accountProjectsPath } from "../_lib/account-route";
 
@@ -95,6 +98,60 @@ async function AccountDataCouncilSection({ did }: { did: string }) {
   );
 }
 
+// Every project this organization runs publishes "updates" — the evidence
+// reports, files, and field notes pinned to that project's timeline. Here we
+// surface them all together on the org home tab: fetch the org's projects, gather
+// the activity URIs their updates hang off (each project's collection URI plus
+// the Cert it owns — updates attach to either), then filter the org's full
+// attachment stream down to those and render the read-only timeline.
+async function AccountProjectUpdatesSection({ did }: { did: string }) {
+  const [referenceT, timelineT, timelineEntryT, projects, allEntries] = await Promise.all([
+    getTranslations("bumicert.detail.reference"),
+    getTranslations("bumicert.detail.timeline"),
+    getTranslations("bumicert.detail.timelineEntry"),
+    fetchProjectsByDid(did, 1000).then((page) => page.records).catch(() => []),
+    fetchTimelineAttachmentsByDid(did).catch(() => [] as TimelineAttachmentItem[]),
+  ]);
+
+  const matchUris = new Set<string>();
+  for (const project of projects) {
+    matchUris.add(project.atUri);
+    for (const certUri of project.bumicertUris) matchUris.add(certUri);
+  }
+
+  const entries = getEntriesForActivities(allEntries, Array.from(matchUris));
+  if (entries.length === 0) return null;
+
+  const references = await resolveTimelineReferences({
+    entries,
+    copy: {
+      linkedRecord: referenceT("linkedRecord"),
+      linkedAudioRecord: referenceT("linkedAudioRecord"),
+      audioEvidence: referenceT("audioEvidence"),
+      linkedDataset: referenceT("linkedDataset"),
+      linkedTreeRecord: referenceT("linkedTreeRecord"),
+      linkedSiteRecord: referenceT("linkedSiteRecord"),
+      siteEvidence: referenceT("siteEvidence"),
+      linkedNatureData: timelineT("fallbacks.linkedNatureData"),
+      treeCount: (count: number) => timelineEntryT("treeCount", { count }),
+      speciesCount: (count: number) => timelineEntryT("speciesCount", { count }),
+      observationCount: (count: number) => timelineEntryT("observationCount", { count }),
+      individualCount: (count: number) => referenceT("individualCount", { count }),
+    },
+  }).catch(() => []);
+
+  return (
+    <section className="mt-8 org-animate org-fade-in-up org-delay-2">
+      <ProjectTimelineReadonly
+        organizationDid={did}
+        entries={entries}
+        references={references}
+        summaryScope="organization"
+      />
+    </section>
+  );
+}
+
 async function AccountOverviewFolders({ account }: { account: AccountRouteData }) {
   const [tabsT, projects, galleries] = await Promise.all([
     getTranslations("common.accountTabs"),
@@ -139,6 +196,7 @@ export async function AccountHomeTabContent({ account }: { account: AccountRoute
           )}
         </section>
       ) : null}
+      {account.kind === "organization" ? <AccountProjectUpdatesSection did={account.did} /> : null}
       {account.kind === "organization" ? <AccountDataCouncilSection did={account.did} /> : null}
     </>
   );
