@@ -20,11 +20,9 @@ export const GLOBE_TITILER_ENDPOINT = "https://t7mvfdyitg.execute-api.eu-west-3.
 export const LANDCOVER_TILES_URL =
   "https://mapproxy.terrascope.be/mapproxy/wmts/esa-worldcover-map-10m-2021-v2_map/webmercator/{z}/{x}/{y}.png";
 
-export const PROJECT_MARKER_IMAGE_URL = "/assets/globe/project-marker.webp";
-
-/** Round Ma Earth badge marker (circular-cropped logo with a white ring),
- *  generated from the Ma Earth badge asset. */
-export const MA_EARTH_MARKER_IMAGE_URL = "/assets/globe/ma-earth-marker.png";
+/** Ma Earth logomark, cropped into the shared small circular badge for
+ *  Ma Earth–funded organizations that don't have their own avatar yet. */
+export const MA_EARTH_LOGO_URL = "/assets/media/images/badges/ma-earth-logo.webp";
 
 /** Initial camera — mirrors Green Globe's MAP_CONFIG. */
 export const GLOBE_INITIAL_CENTER: [number, number] = [102, 9];
