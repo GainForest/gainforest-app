@@ -342,7 +342,18 @@ export const ModalHost = () => {
  */
 export const ModalPortalTarget = ({ id }: { id: string }) => {
   const { registerPortalContainer } = useModalInternals("ModalPortalTarget");
-  return <div ref={(element) => registerPortalContainer(id, element)} />;
+  // The ref callback MUST have a stable identity across re-renders. An inline
+  // arrow here gets a new function every render, so React detaches (fires
+  // the old ref with `null`) and reattaches (fires the new ref with the
+  // element) on EVERY re-render — and since both calls update state via
+  // registerPortalContainer, that's an infinite detach/attach/render loop
+  // (React error #185, "Maximum update depth exceeded"), reproduced live in
+  // production the moment a call-site modal (e.g. add-observations) opened.
+  const setRef = useCallback(
+    (element: HTMLElement | null) => registerPortalContainer(id, element),
+    [id, registerPortalContainer],
+  );
+  return <div ref={setRef} />;
 };
 
 /**
