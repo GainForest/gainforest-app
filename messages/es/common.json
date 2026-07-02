@@ -693,6 +693,11 @@
     "trustedBy": "Con la confianza de",
     "aria": "Con la confianza de {names}"
   },
+  "maEarthRounds": {
+    "title": "Ma Earth",
+    "description": "Seleccionada para participar en estas rondas de financiación comunitaria de Ma Earth.",
+    "round": "Ronda {round}"
+  },
   "groupInvitations": {
     "members": {
       "inputPlaceholder": "Correo o usuario de Bluesky",

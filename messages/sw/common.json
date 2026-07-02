@@ -693,6 +693,11 @@
     "trustedBy": "Inaaminiwa na",
     "aria": "Inaaminiwa na {names}"
   },
+  "maEarthRounds": {
+    "title": "Ma Earth",
+    "description": "Imechaguliwa kushiriki katika raundi hizi za ufadhili wa jamii wa Ma Earth.",
+    "round": "Raundi {round}"
+  },
   "groupInvitations": {
     "members": {
       "inputPlaceholder": "Barua pepe au kitambulisho cha Bluesky",
