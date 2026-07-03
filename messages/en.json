@@ -19,26 +19,6 @@
       "description": "Upload observations from the field and certify the work you've done. Your photos, species, and locations become permanent, verifiable records of real environmental impact.",
       "cta": "Explore Projects"
     },
-    "features": {
-      "eyebrow": "About Us",
-      "items": {
-        "verified": {
-          "number": "01",
-          "title": "Verified environmental impact",
-          "description": "Every record is backed by photos, geolocation data, and community verification."
-        },
-        "direct": {
-          "number": "02",
-          "title": "Direct community funding",
-          "description": "Your support goes straight to the stewards doing on-ground restoration work."
-        },
-        "transparent": {
-          "number": "03",
-          "title": "Decentralized & transparent",
-          "description": "Your work, verified. Unchangeable proof of restoration that builds your reputation with donors and communities."
-        }
-      }
-    },
     "paths": {
       "title": "Choose Your Path",
       "description": "Whether you're here to fund impact or showcase your work, there's a place for you.",
@@ -62,14 +42,14 @@
       }
     },
     "certificate": {
-      "eyebrow": "The Record",
+      "eyebrow": "The Certificate",
       "titleLine1": "What exactly is",
-      "titleLine2": "a record?",
+      "titleLine2": "a Cert?",
       "faqItems": {
         "digitalCertificate": {
           "id": "1",
-          "question": "A digital record of impact",
-          "answer": "A record captures a specific environmental action — giving it a permanent, verifiable identity on an open, decentralized network (the same technology that powers Bluesky)."
+          "question": "A digital certificate of impact",
+          "answer": "A Cert records a specific environmental action — giving it a permanent, verifiable identity on an open, decentralized network (the same technology that powers Bluesky)."
         },
         "evidence": {
           "id": "2",
@@ -79,12 +59,12 @@
         "communities": {
           "id": "3",
           "question": "A direct line to communities",
-          "answer": "Each record names the people doing the restoration. The communities on the ground stay credited for their work — no intermediaries, no vague overhead."
+          "answer": "When you fund a Cert, your money reaches the exact people doing the restoration. No intermediaries skimming fees. No vague overhead."
         },
         "story": {
           "id": "4",
           "question": "Your claim to the story",
-          "answer": "A record is your claim to that moment: a tree planted, a reef restored, an ecosystem revived. Yours to share, cite, and build a reputation on."
+          "answer": "Owning a Cert means you're part of that moment. A tree planted. A reef restored. An ecosystem revived. It's yours to share, hold, or gift."
         }
       },
       "previewTitle": "Reforestation of Mount Halimun",

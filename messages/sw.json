@@ -19,26 +19,6 @@
       "description": "Pakia uchunguzi kutoka uwandani na uthibitishe kazi uliyoifanya. Picha, spishi, na maeneo yako huwa rekodi za kudumu na zinazoweza kuthibitishwa za athari halisi ya mazingira.",
       "cta": "Gundua miradi"
     },
-    "features": {
-      "eyebrow": "Kuhusu sisi",
-      "items": {
-        "verified": {
-          "number": "01",
-          "title": "Athari ya mazingira iliyothibitishwa",
-          "description": "Kila rekodi inaungwa mkono na picha, data ya eneo na uthibitisho wa jamii."
-        },
-        "direct": {
-          "number": "02",
-          "title": "Ufadhili wa moja kwa moja kwa jamii",
-          "description": "Msaada wako huenda moja kwa moja kwa wale wanaofanya kazi ya urejeshaji ardhini."
-        },
-        "transparent": {
-          "number": "03",
-          "title": "Iliyogatuliwa na wazi",
-          "description": "Kazi yako, imethibitishwa. Ushahidi usiobadilika wa urejeshaji unaojenga sifa yako kwa wafadhili na jamii."
-        }
-      }
-    },
     "paths": {
       "title": "Chagua njia yako",
       "description": "Iwe uko hapa kufadhili athari au kuonyesha kazi yako, kuna nafasi kwa ajili yako.",
@@ -62,14 +42,14 @@
       }
     },
     "certificate": {
-      "eyebrow": "Rekodi",
-      "titleLine1": "rekodi ni nini",
+      "eyebrow": "Cheti",
+      "titleLine1": "cheti ni nini",
       "titleLine2": "hasa?",
       "faqItems": {
         "digitalCertificate": {
           "id": "1",
-          "question": "Rekodi ya kidijitali ya athari",
-          "answer": "Rekodi hunasa tendo mahususi la mazingira na kulipa utambulisho wa kudumu unaoweza kuthibitishwa kwenye mtandao wazi na uliogatuliwa (teknolojia ile ile inayoendesha Bluesky)."
+          "question": "Cheti cha kidijitali cha athari",
+          "answer": "cheti hurekodi tendo mahususi la mazingira na kulipa utambulisho wa kudumu unaoweza kuthibitishwa kwenye mtandao wazi na uliogatuliwa."
         },
         "evidence": {
           "id": "2",
@@ -79,12 +59,12 @@
         "communities": {
           "id": "3",
           "question": "Njia ya moja kwa moja kwa jamii",
-          "answer": "Kila rekodi hutaja watu wanaofanya urejeshaji. Jamii zilizo uwandani hubaki zikitambuliwa kwa kazi yao — bila wapatanishi, bila gharama zisizo wazi."
+          "answer": "Unapofadhili cheti, pesa zako huwafikia watu wanaofanya urejeshaji. Hakuna wapatanishi wanaochukua ada au gharama zisizo wazi."
         },
         "story": {
           "id": "4",
           "question": "Sehemu yako katika hadithi",
-          "answer": "Rekodi ni uthibitisho wa kuwepo kwako katika wakati huo: mti uliopandwa, mwamba wa matumbawe uliorejeshwa, mfumo wa ikolojia uliohuishwa. Ni yako kuishiriki, kuinukuu, na kujenga sifa yako."
+          "answer": "Kumiliki cheti kunamaanisha kuwa sehemu ya wakati huo: mti uliopandwa, mwamba wa matumbawe uliorejeshwa, mfumo wa ikolojia ulihuishwa. Unaweza kushiriki, kuhifadhi au kutoa kama zawadi."
         }
       },
       "previewTitle": "Upandaji upya wa misitu wa Mlima Halimun",

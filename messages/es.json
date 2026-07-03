@@ -19,26 +19,6 @@
       "description": "Sube observaciones desde el terreno y certifica el trabajo que has hecho. Tus fotos, especies y ubicaciones se convierten en registros permanentes y verificables de impacto ambiental real.",
       "cta": "Explorar proyectos"
     },
-    "features": {
-      "eyebrow": "Sobre nosotros",
-      "items": {
-        "verified": {
-          "number": "01",
-          "title": "Impacto ambiental verificado",
-          "description": "Cada registro está respaldado por fotos, datos de geolocalización y verificación comunitaria."
-        },
-        "direct": {
-          "number": "02",
-          "title": "Financiamiento directo a comunidades",
-          "description": "Tu apoyo llega directamente a quienes realizan la restauración en el territorio."
-        },
-        "transparent": {
-          "number": "03",
-          "title": "Descentralizado y transparente",
-          "description": "Tu trabajo, verificado. Prueba inmutable de restauración que fortalece tu reputación ante donantes y comunidades."
-        }
-      }
-    },
     "paths": {
       "title": "Elige tu camino",
       "description": "Ya sea que vengas a financiar impacto o a mostrar tu trabajo, hay un lugar para ti.",
@@ -62,14 +42,14 @@
       }
     },
     "certificate": {
-      "eyebrow": "El registro",
+      "eyebrow": "El certificado",
       "titleLine1": "¿Qué es exactamente",
-      "titleLine2": "un registro?",
+      "titleLine2": "un certificado?",
       "faqItems": {
         "digitalCertificate": {
           "id": "1",
-          "question": "Un registro digital de impacto",
-          "answer": "Un registro captura una acción ambiental específica y le da una identidad permanente y verificable en una red abierta y descentralizada (la misma tecnología que impulsa Bluesky)."
+          "question": "Un certificado digital de impacto",
+          "answer": "Un certificado registra una acción ambiental específica y le da una identidad permanente y verificable en una red abierta y descentralizada."
         },
         "evidence": {
           "id": "2",
@@ -79,12 +59,12 @@
         "communities": {
           "id": "3",
           "question": "Una línea directa con las comunidades",
-          "answer": "Cada registro nombra a las personas que hacen la restauración. Las comunidades en el terreno reciben el crédito por su trabajo, sin intermediarios ni gastos difusos."
+          "answer": "Cuando financias un certificado, tu dinero llega a las personas que hacen la restauración. Sin intermediarios que absorban comisiones ni costos difusos."
         },
         "story": {
           "id": "4",
           "question": "Tu vínculo con la historia",
-          "answer": "Un registro es tu vínculo con ese momento: un árbol plantado, un arrecife restaurado, un ecosistema revivido. Tuyo para compartir, citar y construir tu reputación."
+          "answer": "Tener un certificado significa formar parte de ese momento: un árbol plantado, un arrecife restaurado, un ecosistema revivido. Puedes compartirlo, conservarlo o regalarlo."
         }
       },
       "previewTitle": "Reforestación del monte Halimun",

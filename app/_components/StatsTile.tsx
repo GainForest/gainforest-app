@@ -19,7 +19,8 @@ export type RecordDrawerStatsTileItem = {
   valueClassName?: string;
 };
 
-const GRID_COLUMNS: Record<3 | 4 | 5 | 6, string> = {
+const GRID_COLUMNS: Record<2 | 3 | 4 | 5 | 6, string> = {
+  2: "lg:grid-cols-2",
   3: "lg:grid-cols-3",
   4: "lg:grid-cols-4",
   5: "lg:grid-cols-5",
@@ -32,7 +33,7 @@ export function StatsTileGrid({
   className,
 }: {
   items: StatsTileItem[];
-  columns?: 3 | 4 | 5 | 6;
+  columns?: 2 | 3 | 4 | 5 | 6;
   className?: string;
 }) {
   return (

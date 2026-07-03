@@ -8,8 +8,6 @@ import {
   ArrowUpRightIcon,
   BinocularsIcon,
   Building2Icon,
-  CompassIcon,
-  HandHeartIcon,
   KeyRoundIcon,
   LeafIcon,
   NetworkIcon,
@@ -21,7 +19,7 @@ import type { ExplorerKpis } from "../_lib/kpis";
 import { fetchBumicerts, type BumicertRecord } from "../_lib/indexer";
 import { localBumicertHref } from "../_lib/urls";
 import { isPdsBlobUrl } from "../_lib/pds";
-import { formatCompact, formatCompactUsd } from "../_lib/format";
+import { formatCompact } from "../_lib/format";
 import { StatsTileGrid, type StatsTileItem } from "./StatsTile";
 import { ThemeToggle } from "./ThemeToggle";
 import { AuthModal } from "./AuthFlow";
@@ -32,8 +30,6 @@ import { useModal } from "@/components/ui/modal/context";
 type HomeLandingProps = {
   kpis?: ExplorerKpis | null;
 };
-
-const FEATURE_ITEMS = ["verified", "direct", "transparent"] as const;
 
 const OPTION_CARDS = [
   {
@@ -90,7 +86,6 @@ export function HomeLanding({ kpis = null }: HomeLandingProps) {
       <main className="w-full">
         <LandingHero />
         <HomeStats kpis={kpis} />
-        <FeaturesSection />
         <UserOptionCards />
         <WhatIsBumicert />
         <OpenNetworkSection />
@@ -287,15 +282,6 @@ function HomeStats({ kpis }: { kpis: ExplorerKpis | null }) {
 
   const stats: StatsTileItem[] = [];
 
-  if (kpis.bumicerts != null) {
-    stats.push({
-      value: formatCompact(kpis.bumicerts),
-      label: t("bumicertsShared"),
-      href: "/projects",
-      icon: <CompassIcon />,
-      accent: true,
-    });
-  }
   if (kpis.sites != null) {
     stats.push({
       value: formatCompact(kpis.sites),
@@ -310,15 +296,6 @@ function HomeStats({ kpis }: { kpis: ExplorerKpis | null }) {
       label: t("natureSightingsShared"),
       href: "/observations",
       icon: <BinocularsIcon />,
-    });
-  }
-  if (kpis.totalRaised != null) {
-    stats.push({
-      value: formatCompactUsd(kpis.totalRaised),
-      label: t("raisedForProjects"),
-      href: "/leaderboard",
-      icon: <HandHeartIcon />,
-      accent: true,
     });
   }
 
@@ -338,51 +315,7 @@ function HomeStats({ kpis }: { kpis: ExplorerKpis | null }) {
             {t("liveLabel")}
           </span>
         </div>
-        <StatsTileGrid items={stats} columns={4} />
-      </div>
-    </section>
-  );
-}
-
-function FeaturesSection() {
-  const t = useTranslations("landing.features");
-  return (
-    <section className="px-6 pt-8 pb-10 sm:px-12 sm:pt-10 sm:pb-12 md:px-6 md:pt-8 md:pb-10">
-      <div className="mx-auto max-w-6xl">
-        <motion.div
-          initial={{ opacity: 0, y: 18 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.55, ease: [0.25, 0.1, 0.25, 1] }}
-          className="mb-5 flex items-center gap-2"
-        >
-          <LeafIcon className="size-4 text-primary" />
-          <span className="text-xs font-semibold tracking-[0.16em] text-primary uppercase">{t("eyebrow")}</span>
-        </motion.div>
-
-        <div className="grid grid-cols-1 gap-12 sm:grid-cols-3 sm:gap-8">
-          {FEATURE_ITEMS.map((feature, index) => (
-            <motion.div
-              key={feature}
-              initial={{ opacity: 0, y: 22 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: index * 0.08 + 0.08, ease: [0.25, 0.1, 0.25, 1] }}
-              className={cn(
-                "sm:px-5",
-                index === 0 && "sm:pl-0",
-                index > 0 && "sm:border-l sm:border-border/80",
-                index === FEATURE_ITEMS.length - 1 && "sm:pr-0",
-              )}
-            >
-              <span className="font-garamond block text-5xl leading-none font-light tracking-tight text-primary/65 dark:text-primary/90">
-                {t(`items.${feature}.number`)}.
-              </span>
-              <h3 className="font-instrument mt-4 text-lg leading-tight text-foreground">{t(`items.${feature}.title`)}</h3>
-              <p className="mt-3 text-[15px] leading-relaxed text-muted-foreground dark:text-foreground/75">{t(`items.${feature}.description`)}</p>
-            </motion.div>
-          ))}
-        </div>
+        <StatsTileGrid items={stats} columns={2} />
       </div>
     </section>
   );
