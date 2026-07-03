@@ -42,6 +42,7 @@
     "filters": {
       "allTitle": "Semua filter",
       "description": "Tampilkan Cert berdasarkan lencana sumber, foto, lokasi proyek, orang yang disebutkan, tanggal kerja, atau donasi.",
+      "sourcesDescription": "Tampilkan hasil berdasarkan lencana sumber.",
       "organization": "Organisasi",
       "bioregion": "Wilayah hayati",
       "country": "Negara",

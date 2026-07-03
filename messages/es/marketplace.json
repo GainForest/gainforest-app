@@ -42,6 +42,7 @@
     "filters": {
       "allTitle": "Todos los filtros",
       "description": "Muestra Certs por insignia de origen, fotos, lugares del proyecto, personas nombradas, fechas de trabajo o donaciones.",
+      "sourcesDescription": "Muestra resultados por insignia de origen.",
       "organization": "Organización",
       "bioregion": "Biorregión",
       "country": "País",

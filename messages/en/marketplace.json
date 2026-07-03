@@ -42,6 +42,7 @@
     "filters": {
       "allTitle": "All Filters",
       "description": "Show Certs by source badge, photos, project places, named people, work dates, or donations.",
+      "sourcesDescription": "Show results by source badge.",
       "organization": "Organization",
       "bioregion": "Bioregion",
       "country": "Country",

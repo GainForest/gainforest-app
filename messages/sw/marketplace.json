@@ -42,6 +42,7 @@
     "filters": {
       "allTitle": "Vichujio vyote",
       "description": "Onyesha Certs kwa beji ya chanzo, picha, maeneo ya mradi, watu waliotajwa, tarehe za kazi, au michango.",
+      "sourcesDescription": "Onyesha matokeo kwa beji ya chanzo.",
       "organization": "Shirika",
       "bioregion": "Eneo la kibaolojia",
       "country": "Nchi",

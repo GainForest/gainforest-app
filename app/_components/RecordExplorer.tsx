@@ -47,6 +47,7 @@ import { resolveDidProfile, getCachedProfile } from "../_lib/did-profile";
 import { formatCompact, countryFlag, formatCountry, formatDate } from "../_lib/format";
 import { AutoLoadMoreButton } from "./AutoLoadMoreButton";
 import { OwnerFilterBanner, OwnerFilterButton, useOwnerFilter } from "./OwnerFilter";
+import { SourceFiltersPopover } from "./SourceFiltersPopover";
 import { PictureHero } from "./PictureHero";
 import { TrustedByBadges } from "./TrustedByBadges";
 import { useStableQueryView } from "../_lib/use-stable-query-view";
@@ -722,31 +723,11 @@ export function RecordExplorer({
 
           {kind === "occurrence" && !hideOccurrenceFilters && (
             <div
-              className="scroll-mask-right scrollbar-hidden relative z-20 overflow-x-auto animate-in"
+              className="relative z-20 flex items-center gap-2 animate-in"
               style={{ animationDelay: "120ms" }}
             >
-              <div className="flex items-center gap-1.5 pb-1 pr-8">
-                <FilterPill
-                  selected={badgeFilters.length === 0}
-                  onClick={() => updateBadgeFilters([])}
-                >
-                  {exploreT("filters.badges.all")}
-                </FilterPill>
-                {badgeFilterOptions.map((badge) => (
-                  <FilterPill
-                    key={badge.key}
-                    selected={badgeFilters.includes(badge.key)}
-                    onClick={() => toggleBadgeFilter(badge.key)}
-                  >
-                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-background/80">
-                      <Image src={badge.logoSrc} width={20} height={20} alt="" className="h-5 w-5 object-contain" />
-                    </span>
-                    {badge.label}
-                  </FilterPill>
-                ))}
-
-                <span className="mx-1 h-5 w-px shrink-0 bg-border-soft" aria-hidden />
-
+              <div className="scroll-mask-right scrollbar-hidden min-w-0 flex-1 overflow-x-auto">
+                <div className="flex items-center gap-1.5 pb-1 pr-8">
                 {(
                   [
                     { id: "image", label: "Photos" },
@@ -774,7 +755,15 @@ export function RecordExplorer({
                     {o.label}
                   </FilterPill>
                 ))}
+                </div>
               </div>
+
+              <SourceFiltersPopover
+                options={badgeFilterOptions}
+                selected={badgeFilters}
+                onToggle={toggleBadgeFilter}
+                onClear={() => updateBadgeFilters([])}
+              />
             </div>
           )}
         </div>
