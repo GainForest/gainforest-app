@@ -401,7 +401,17 @@ function occurrenceAnalysisForUpload(items: ObservationUploadItem[]): Observatio
   return analysis;
 }
 
-export function ObservationsClient({ target, initialPage, forProject = null }: { target: ManageTarget; initialPage: InitialPage; forProject?: string | null }) {
+export function ObservationsClient({
+  target,
+  initialPage,
+  forProject = null,
+  storageNote = null,
+}: {
+  target: ManageTarget;
+  initialPage: InitialPage;
+  forProject?: string | null;
+  storageNote?: string | null;
+}) {
   const t = useTranslations("upload.observations");
   const router = useRouter();
   const modal = useModal();
@@ -696,6 +706,11 @@ export function ObservationsClient({ target, initialPage, forProject = null }: {
             {t("title")}
           </h1>
           <p className="mt-2 text-sm leading-6 text-muted-foreground">{t("description")}</p>
+          {storageNote ? (
+            <div className="mt-4 rounded-2xl bg-muted px-4 py-3 text-sm leading-6 text-muted-foreground">
+              {storageNote}
+            </div>
+          ) : null}
         </header>
 
         {isEmpty ? null : (
