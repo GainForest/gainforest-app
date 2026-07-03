@@ -579,8 +579,8 @@
       "category": "Interoperable Grants Program",
       "grantName": "Ma Earth Round 3",
       "fundingType": "Quadratic funding",
-      "description": "Ma Earth is running a community-backed funding round that uses quadratic funding: many smaller donations are matched and amplified more than a few large ones. Apply with your project to take part.",
-      "apply": "Apply with your project",
+      "description": "Ma Earth's community-backed funding round uses quadratic funding: many smaller donations are matched and amplified more than a few large ones. Applications have closed and the round is now live — browse the projects taking part and support them.",
+      "browseProjects": "Browse projects in this round",
       "logoAlt": "Ma Earth"
     }
   },

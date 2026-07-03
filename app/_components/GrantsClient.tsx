@@ -34,7 +34,9 @@ import { useModal } from "@/components/ui/modal/context";
 import { groupManageBasePath, manageApiHref, manageHref } from "@/lib/links";
 import { cn } from "@/lib/utils";
 
-const MA_EARTH_FUNDRAISE_URL = "https://maearth.com/fundraise";
+// Round 3 applications closed May 31, 2026; the round itself is live, so we
+// point visitors at the participating projects instead of the apply page.
+const MA_EARTH_ROUND_PROJECTS_URL = "https://maearth.com/projects";
 const MA_EARTH_LOGO_SRC = "/assets/media/images/badges/ma-earth-logo.webp";
 // Keep the application post comfortably under the feed post limit even when a
 // project title is long.
@@ -451,12 +453,12 @@ function InteroperableSection() {
 
         <div className="mt-6">
           <a
-            href={MA_EARTH_FUNDRAISE_URL}
+            href={MA_EARTH_ROUND_PROJECTS_URL}
             target="_blank"
             rel="noreferrer"
             className={cn(buttonVariants({ size: "lg" }))}
           >
-            {t("apply")}
+            {t("browseProjects")}
             <ArrowUpRightIcon />
           </a>
         </div>
