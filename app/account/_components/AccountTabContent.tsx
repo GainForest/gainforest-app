@@ -6,6 +6,7 @@ import { BadgeCheckIcon, ChevronRightIcon } from "lucide-react";
 import { getLocale, getTranslations } from "next-intl/server";
 import { AccountGalleryClient } from "./AccountGalleryClient";
 import type { GalleryProjectOption } from "./AccountGalleryUploader";
+import { canCreateRecord } from "../../(manage)/manage/_lib/cgs-permissions";
 import { RichText } from "../../_components/RichText";
 import { InlineCardGridSkeleton } from "../../_components/PageLoadingSkeletons";
 import { RecordExplorer } from "../../_components/RecordExplorer";
@@ -30,7 +31,7 @@ import { getEntriesForActivities } from "@/app/cert/[did]/[rkey]/_components/tim
 import { resolveTimelineReferences } from "@/app/cert/[did]/[rkey]/_components/timeline/timelineReferenceResolver";
 import { ProjectTimelineReadonly } from "@/app/projects/[did]/[rkey]/_components/ProjectTimelineReadonly";
 import type { AccountRouteData } from "../_lib/account-route";
-import { accountDonationsPath, accountGalleryPath, accountObservationsPath, accountPath, accountProjectsPath } from "../_lib/account-route";
+import { accountDonationsPath, accountObservationsPath, accountPath, accountProjectsPath } from "../_lib/account-route";
 
 type ManageAction = {
   href: string;
@@ -197,22 +198,65 @@ async function AccountProjectUpdatesSection({ did }: { did: string }) {
   );
 }
 
-async function AccountOverviewFolders({ account }: { account: AccountRouteData }) {
-  const [tabsT, projects, galleries] = await Promise.all([
+// Shared loader for an account's photo galleries — used both by the standalone
+// Files & photos tab (personal profiles) and the org Overview's inline gallery.
+async function loadAccountGalleryData(account: AccountRouteData, did: string) {
+  const [rawGalleries, projectsResult, access] = await Promise.all([
+    fetchProjectImageGalleriesByDid(did).catch(() => []),
+    fetchProjectsByDid(did, 1000)
+      .then((page) => ({ loaded: true, records: page.records }))
+      .catch(() => ({ loaded: false, records: [] as Awaited<ReturnType<typeof fetchProjectsByDid>>["records"] })),
+    resolveAccountManageAccess(account.urlIdentifier).catch(() => null),
+  ]);
+  const projects = projectsResult.records;
+  const galleries = attachProjectTitlesToGalleries(rawGalleries, projects);
+
+  // A manager target lets the client offer uploads (create) and orphan cleanup
+  // (delete); it checks each permission before showing the matching controls.
+  const target = access?.status === "allowed" ? access.target : null;
+
+  // Galleries still pinned to a project that no longer exists are orphaned: the
+  // project was deleted but its photos stayed behind. We only flag them once the
+  // project list has actually loaded, so a failed fetch never hides live ones.
+  const projectUris = new Set(projects.map((project) => project.atUri));
+  const orphanedGalleries = projectsResult.loaded
+    ? galleries.filter((gallery) => gallery.projectUri !== null && !projectUris.has(gallery.projectUri))
+    : [];
+  const orphanedIds = new Set(orphanedGalleries.map((gallery) => gallery.id));
+  const liveGalleries = galleries.filter((gallery) => !orphanedIds.has(gallery.id));
+
+  const projectOptions: GalleryProjectOption[] = projects
+    .filter((project) => Boolean(project.cid))
+    .map((project) => ({ uri: project.atUri, cid: project.cid, title: project.title }));
+
+  return { liveGalleries, orphanedGalleries, projectOptions, target };
+}
+
+// Organizations no longer get a standalone Files & photos tab; instead the photo
+// gallery lives inline on the Overview, right under the About blurb. We only
+// render it when there are photos to show or the viewer can add some, so an
+// empty org landing page stays clean.
+async function AccountOverviewGallerySection({ account, did }: { account: AccountRouteData; did: string }) {
+  const [tabsT, gallery] = await Promise.all([
     getTranslations("common.accountTabs"),
-    fetchProjectsByDid(account.did, 1000).then((page) => page.records).catch(() => []),
-    fetchProjectImageGalleriesByDid(account.did).catch(() => []),
+    loadAccountGalleryData(account, did),
   ]);
 
-  const tiles: OverviewFolderTile[] = [
-    { id: "projects", title: tabsT("projects"), href: accountProjectsPath(account.urlIdentifier), count: projects.length },
-    { id: "observations", title: tabsT("observations"), href: accountObservationsPath(account.urlIdentifier), count: account.summary.observationCount },
-    { id: "gallery", title: tabsT("gallery"), href: accountGalleryPath(account.urlIdentifier), count: galleries.length },
-  ];
+  const canUpload = gallery.target ? canCreateRecord(gallery.target).allowed : false;
+  if (gallery.liveGalleries.length === 0 && !canUpload) return null;
 
   return (
-    <section className="org-animate org-fade-in-up org-delay-1">
-      <OverviewFolders tiles={tiles} />
+    <section className="mt-8 org-animate org-fade-in-up org-delay-2">
+      <h2 className="font-instrument text-2xl italic leading-none text-foreground">{tabsT("gallery")}</h2>
+      <div className="mt-4">
+        <AccountGalleryClient
+          initialGalleries={gallery.liveGalleries}
+          orphanedGalleries={gallery.orphanedGalleries}
+          projects={gallery.projectOptions}
+          target={gallery.target}
+          accountName={account.displayName}
+        />
+      </div>
     </section>
   );
 }
@@ -226,7 +270,6 @@ export async function AccountHomeTabContent({ account }: { account: AccountRoute
 
   return (
     <>
-      {account.kind === "organization" ? <AccountOverviewFolders account={account} /> : null}
       {hasAbout ? (
         <section className="mt-8 org-animate org-fade-in-up org-delay-1">
           <h2 className="font-instrument text-2xl italic leading-none text-foreground">{aboutT("title")}</h2>
@@ -245,6 +288,7 @@ export async function AccountHomeTabContent({ account }: { account: AccountRoute
           )}
         </section>
       ) : null}
+      {account.kind === "organization" ? <AccountOverviewGallerySection account={account} did={account.did} /> : null}
       {account.kind === "organization" ? <AccountMaEarthRoundsSection did={account.did} className="mt-8" /> : null}
       {account.kind === "organization" ? <AccountProjectUpdatesSection did={account.did} /> : null}
       {account.kind === "organization" ? <AccountDataCouncilSection did={account.did} /> : null}
@@ -459,33 +503,7 @@ export async function loadAccountMemberships(
 }
 
 export async function AccountGalleryTabContent({ account, did }: { account: AccountRouteData; did: string }) {
-  const [rawGalleries, projectsResult, access] = await Promise.all([
-    fetchProjectImageGalleriesByDid(did).catch(() => []),
-    fetchProjectsByDid(did, 1000)
-      .then((page) => ({ loaded: true, records: page.records }))
-      .catch(() => ({ loaded: false, records: [] as Awaited<ReturnType<typeof fetchProjectsByDid>>["records"] })),
-    resolveAccountManageAccess(account.urlIdentifier).catch(() => null),
-  ]);
-  const projects = projectsResult.records;
-  const galleries = attachProjectTitlesToGalleries(rawGalleries, projects);
-
-  // A manager target lets the client offer uploads (create) and orphan cleanup
-  // (delete); it checks each permission before showing the matching controls.
-  const target = access?.status === "allowed" ? access.target : null;
-
-  // Galleries still pinned to a project that no longer exists are orphaned: the
-  // project was deleted but its photos stayed behind. We only flag them once the
-  // project list has actually loaded, so a failed fetch never hides live ones.
-  const projectUris = new Set(projects.map((project) => project.atUri));
-  const orphanedGalleries = projectsResult.loaded
-    ? galleries.filter((gallery) => gallery.projectUri !== null && !projectUris.has(gallery.projectUri))
-    : [];
-  const orphanedIds = new Set(orphanedGalleries.map((gallery) => gallery.id));
-  const liveGalleries = galleries.filter((gallery) => !orphanedIds.has(gallery.id));
-
-  const projectOptions: GalleryProjectOption[] = projects
-    .filter((project) => Boolean(project.cid))
-    .map((project) => ({ uri: project.atUri, cid: project.cid, title: project.title }));
+  const { liveGalleries, orphanedGalleries, projectOptions, target } = await loadAccountGalleryData(account, did);
 
   return (
     <AccountGalleryClient
