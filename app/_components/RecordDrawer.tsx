@@ -95,6 +95,7 @@ export function RecordDrawer({
   const [projectGalleries, setProjectGalleries] = useState<ProjectImageGallery[] | null>(null);
   const t = useTranslations("marketplace.recordDrawer");
   const workScopeT = useTranslations("common.workScopes");
+  const aboutT = useTranslations("common.accountAbout");
   const workScopeLabels: WorkScopeLabels = useMemo(() => ({
     reforestation: workScopeT("reforestation"),
     forest_protection: workScopeT("forestProtection"),
@@ -782,17 +783,31 @@ export function RecordDrawer({
           {record.kind === "bumicert" && <BumicertStatStrip record={record} />}
 
           {/* Full description — rich Leaflet document, else plain text. For a
-              Bumicert the short description above already covers this. */}
+              Bumicert the short description above already covers this. An
+              organization's long body is its "About", so label it here to match
+              the profile page's About section. */}
           {showLongBody &&
             (detail?.richBody && detail.richBody.length > 0 ? (
               <div className="mt-5">
+                {record.kind === "site" && (
+                  <h3 className="mb-2.5 font-instrument text-2xl italic leading-none text-foreground">
+                    {aboutT("title")}
+                  </h3>
+                )}
                 <RichText blocks={detail.richBody} />
               </div>
             ) : (
               blurb.trim().length > 0 && (
-                <p className="mt-5 whitespace-pre-line text-[14px] leading-[1.6] text-foreground/75">
-                  {blurb}
-                </p>
+                <div className="mt-5">
+                  {record.kind === "site" && (
+                    <h3 className="mb-2.5 font-instrument text-2xl italic leading-none text-foreground">
+                      {aboutT("title")}
+                    </h3>
+                  )}
+                  <p className="whitespace-pre-line text-[14px] leading-[1.6] text-foreground/75">
+                    {blurb}
+                  </p>
+                </div>
               )
             ))}
 
