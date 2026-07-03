@@ -702,7 +702,8 @@
       "uploadingProgress": "Adding {done} of {total}",
       "identifyingProgress": "Identifying {done} of {total}…",
       "moreWays": "More ways",
-      "uploadCsv": "Upload CSV data"
+      "uploadCsv": "Upload CSV data",
+      "photoTooLarge": "This photo is too large to upload. Try a smaller photo."
     },
     "csvUpload": {
       "title": "Upload CSV data",
@@ -798,7 +799,8 @@
     },
     "preparingImages": "Preparing images…",
     "compressedFrom": "compressed from {size}",
-    "compressionFailed": "This image could not be compressed below 4 MB. Try a smaller photo.",
+    "compressionFailed": "This image could not be compressed below 3 MB. Try a smaller photo.",
+    "photoTooLarge": "This photo is too large to upload. Try a smaller photo.",
     "groupSelected": "Group as one",
     "ungroupSelected": "Make separate",
     "selectTwoToGroup": "Pick at least two photos to group them.",

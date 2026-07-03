@@ -355,6 +355,14 @@
       "copied": "¡Copiado!",
       "donate": "Donar",
       "goToOverview": "Ir a la pestaña de resumen"
+    },
+    "projectNav": {
+      "overview": "Resumen",
+      "sightings": "Avistamientos",
+      "places": "Lugares",
+      "updates": "Novedades",
+      "reviews": "Reseñas",
+      "support": "Apoyo"
     }
   },
   "create": {

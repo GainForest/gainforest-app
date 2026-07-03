@@ -10,9 +10,12 @@
  * "Add observations" modal so the two stay byte-for-byte consistent.
  */
 
-// Photos larger than this are downscaled before upload; the PDS rejects blobs
-// past its own ceiling, and base64-in-JSON proxy writes get unwieldy too.
-export const MAX_IMAGE_BYTES = 4 * 1024 * 1024;
+// Photos larger than this are downscaled before upload. The binding limit is
+// Vercel's ~4.5 MB request-body cap on the mutation proxy: blobs travel as
+// base64 inside JSON (×4/3 inflation), so a 3 MB image is ~4 MB on the wire.
+// Anything between ~3.4 MB and 4 MB used to slip past the old 4 MB threshold
+// uncompressed and then die server-side with FUNCTION_PAYLOAD_TOO_LARGE.
+export const MAX_IMAGE_BYTES = 3 * 1024 * 1024;
 
 /** The slice of metadata we can recover from a photo's EXIF block. */
 export type ImageMetadata = {

@@ -11,6 +11,8 @@ import {
   fetchProjectsByDid,
   fetchTimelineAttachmentsByDid,
   fetchTreeDatasetsByDid,
+  occurrenceFromPdsRecord,
+  type OccurrenceRecord,
   type TimelineAttachmentItem,
 } from "@/app/_lib/indexer";
 import { BumicertTimeline } from "@/app/cert/[did]/[rkey]/_components/timeline/BumicertTimeline";
@@ -20,7 +22,7 @@ import { canCreateRecord, canDeleteRecord } from "./_lib/cgs-permissions";
 import { profileBasePath } from "@/lib/links";
 import { ProjectSitesManagerClient } from "./projects/[rkey]/sites/_components/ProjectSitesManagerClient";
 import { droneAppHref } from "@/app/_lib/urls";
-import { resolveBlobUrl, resolvePdsHost } from "@/app/_lib/pds";
+import { listLatestPdsRecords, resolveBlobUrl, resolvePdsHost } from "@/app/_lib/pds";
 import { RecordExplorer } from "@/app/_components/RecordExplorer";
 import { InlineCardGridSkeleton } from "@/app/_components/PageLoadingSkeletons";
 import { Button } from "@/components/ui/button";
@@ -342,17 +344,34 @@ export async function ObservationsSection({
 }) {
   // Observations are available to personal accounts and organizations alike,
   // so the steward can collect field data without first creating an org.
-  const initialObservations = await walkOccurrences({
-    media: "all",
-    target: 24,
-    after: null,
-    ownerDid: target.did,
-    resolveMedia: false,
-  }).catch(() => ({ records: [], cursor: null, hasMore: false }));
+  // The indexer lags fresh writes, so read the newest records straight from
+  // the owner's PDS as well — a sighting added moments ago still shows up.
+  const [initialObservations, pdsLatest] = await Promise.all([
+    walkOccurrences({
+      media: "all",
+      target: 24,
+      after: null,
+      ownerDid: target.did,
+      resolveMedia: false,
+    }).catch(() => ({ records: [], cursor: null, hasMore: false })),
+    listLatestPdsRecords(target.did, "app.gainforest.dwc.occurrence", 24).catch(() => []),
+  ]);
+  const indexed = new Set(initialObservations.records.map((record) => record.id));
+  const fresh = pdsLatest
+    .map((item) => occurrenceFromPdsRecord(item))
+    .filter((record): record is OccurrenceRecord => record !== null && !indexed.has(record.id));
+  const initialPage = fresh.length
+    ? {
+        ...initialObservations,
+        records: [...fresh, ...initialObservations.records].sort((a, b) =>
+          (b.createdAt ?? "").localeCompare(a.createdAt ?? ""),
+        ),
+      }
+    : initialObservations;
   return (
     <ObservationsClient
       target={target}
-      initialPage={initialObservations}
+      initialPage={initialPage}
       forProject={forProject ?? null}
     />
   );

@@ -357,6 +357,79 @@ function mapOccurrence(n: RawOccurrence): OccurrenceRecord {
   };
 }
 
+/** A `com.atproto.repo.listRecords` / `getRecord` item for an occurrence. */
+type PdsOccurrenceItem = { uri: string; cid?: string | null; value: Record<string, unknown> };
+
+function pdsString(value: unknown): string | null {
+  return typeof value === "string" && value.trim() ? value : null;
+}
+
+function pdsBlobRef(value: unknown): { file?: { ref?: string | null } | null } | null {
+  if (typeof value !== "object" || value === null) return null;
+  const file = (value as Record<string, unknown>).file;
+  if (typeof file !== "object" || file === null) return null;
+  const ref = (file as Record<string, unknown>).ref;
+  if (typeof ref === "string") return { file: { ref } };
+  if (typeof ref === "object" && ref !== null && typeof (ref as Record<string, unknown>).$link === "string") {
+    return { file: { ref: (ref as Record<string, unknown>).$link as string } };
+  }
+  return null;
+}
+
+/**
+ * Map a raw PDS occurrence record straight into an `OccurrenceRecord`, so a
+ * freshly written sighting can appear in listings before the indexer has
+ * caught up. The PDS record is the source the indexer derives from, so the
+ * shapes line up field-for-field (blob refs arrive as `{ $link }` objects
+ * instead of bare CIDs, which is normalised here).
+ */
+export function occurrenceFromPdsRecord(item: PdsOccurrenceItem): OccurrenceRecord | null {
+  const m = item.uri.match(/^at:\/\/([^/]+)\/([^/]+)\/(.+)$/);
+  if (!m || m[2] !== "app.gainforest.dwc.occurrence") return null;
+  const value = item.value;
+  const raw: RawOccurrence = {
+    did: m[1],
+    rkey: m[3],
+    uri: item.uri,
+    cid: item.cid ?? null,
+    createdAt: pdsString(value.createdAt) ?? new Date().toISOString(),
+    eventDate: pdsString(value.eventDate),
+    scientificName: pdsString(value.scientificName),
+    vernacularName: pdsString(value.vernacularName),
+    kingdom: pdsString(value.kingdom),
+    family: pdsString(value.family),
+    genus: pdsString(value.genus),
+    basisOfRecord: pdsString(value.basisOfRecord),
+    recordedBy: pdsString(value.recordedBy),
+    individualCount: typeof value.individualCount === "number" ? value.individualCount : null,
+    datasetName: pdsString(value.datasetName),
+    country: pdsString(value.country),
+    countryCode: pdsString(value.countryCode),
+    stateProvince: pdsString(value.stateProvince),
+    locality: pdsString(value.locality),
+    decimalLatitude: pdsString(value.decimalLatitude) ?? (typeof value.decimalLatitude === "number" ? value.decimalLatitude : null),
+    decimalLongitude: pdsString(value.decimalLongitude) ?? (typeof value.decimalLongitude === "number" ? value.decimalLongitude : null),
+    coordinateUncertaintyInMeters:
+      pdsString(value.coordinateUncertaintyInMeters) ??
+      (typeof value.coordinateUncertaintyInMeters === "number" ? value.coordinateUncertaintyInMeters : null),
+    habitat: pdsString(value.habitat),
+    siteRef: pdsString(value.siteRef),
+    datasetRef: pdsString(value.datasetRef),
+    dynamicProperties: pdsString(value.dynamicProperties),
+    establishmentMeans: pdsString(value.establishmentMeans),
+    occurrenceRemarks: pdsString(value.occurrenceRemarks),
+    fieldNotes: pdsString(value.fieldNotes),
+    thumbnailUrl: pdsString(value.thumbnailUrl),
+    speciesImageUrl: pdsString(value.speciesImageUrl),
+    associatedMedia: pdsString(value.associatedMedia),
+    imageEvidence: pdsBlobRef(value.imageEvidence),
+    audioEvidence: pdsBlobRef(value.audioEvidence),
+    videoEvidence: pdsBlobRef(value.videoEvidence),
+    spectrogramEvidence: pdsBlobRef(value.spectrogramEvidence),
+  };
+  return mapOccurrence(raw);
+}
+
 export type OccurrenceFilter = "all" | "image" | "audio";
 
 /** Pages to walk when no server-side `where` applies (the "all" view paging
@@ -1469,11 +1542,34 @@ const PLACEHOLDER_DESCRIPTION_PATTERNS: RegExp[] = [
   /^why we care$/i,
 ];
 
+/**
+ * Records imported from other platforms sometimes carry raw HTML in their
+ * short description (`<p><strong>Help Zeb…`). Every consumer renders these as
+ * plain text, so strip the markup down to readable text. Only kicks in when
+ * the value actually looks like HTML, so legit angle brackets survive.
+ */
+function stripHtml(value: string): string {
+  if (!/<[a-z!/]/i.test(value)) return value;
+  return value
+    .replace(/<\s*(?:br|\/p|\/div|\/li|\/h[1-6])[^>]*>/gi, "\n")
+    .replace(/<[^>]+>/g, "")
+    .replace(/&nbsp;/gi, " ")
+    .replace(/&amp;/gi, "&")
+    .replace(/&lt;/gi, "<")
+    .replace(/&gt;/gi, ">")
+    .replace(/&quot;/gi, '"')
+    .replace(/&#0?39;/g, "'")
+    .replace(/[ \t]+/g, " ")
+    .replace(/ ?\n ?/g, "\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
 function sanitizeShortDescription(value: string | null | undefined): string | null {
   const trimmed = value?.trim();
   if (!trimmed) return null;
   if (PLACEHOLDER_DESCRIPTION_PATTERNS.some((pattern) => pattern.test(trimmed))) return null;
-  return trimmed;
+  return stripHtml(trimmed) || null;
 }
 
 function normalizeFeaturedBadgeTitle(title: string | null | undefined): string {
@@ -2800,7 +2896,7 @@ function mapProjectCollection(n: RawProjectCollection): ProjectRecord {
     atUri: n.uri || `at://${n.did}/org.hypercerts.collection/${n.rkey}`,
     cid: n.cid ?? null,
     title: (n.title ?? "Untitled project").trim() || "Untitled project",
-    shortDescription: n.shortDescription?.trim() || null,
+    shortDescription: sanitizeShortDescription(n.shortDescription),
     createdAt: n.createdAt,
     type: n.type?.trim() || null,
     imageUrl: banner.url ?? avatar.url,

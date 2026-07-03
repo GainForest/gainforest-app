@@ -355,6 +355,14 @@
       "copied": "Copied!",
       "donate": "Donate",
       "goToOverview": "Go to overview tab"
+    },
+    "projectNav": {
+      "overview": "Overview",
+      "sightings": "Sightings",
+      "places": "Places",
+      "updates": "Updates",
+      "reviews": "Reviews",
+      "support": "Support"
     }
   },
   "create": {

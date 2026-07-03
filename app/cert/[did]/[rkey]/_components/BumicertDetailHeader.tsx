@@ -50,8 +50,44 @@ function bumicertTabHref(pathname: string, tab: BumicertDetailTab): string {
   return `${pathname}?${new URLSearchParams({ tab }).toString()}`;
 }
 
-export function BumicertDetailHeader({ summary }: { summary: BumicertHeaderSummary }) {
-  return <HeaderContent sub={<BumicertHeaderTabs summary={summary} />} />;
+/** One entry in the project page's in-page section nav. `href` is either the
+ *  page path itself (overview) or a `#section` anchor; labels arrive already
+ *  translated from the server component. */
+export type BumicertAnchorNavItem = { id: string; href: string; label: string };
+
+export function BumicertDetailHeader({
+  summary,
+  anchorNav,
+}: {
+  summary: BumicertHeaderSummary;
+  anchorNav?: BumicertAnchorNavItem[];
+}) {
+  // The single-page project layout has no tab panels — its sections render
+  // inline — so it swaps the `?tab=` strip for anchor links. The tabbed strip
+  // stays for legacy standalone Cert pages, whose route reads `?tab=`.
+  return (
+    <HeaderContent
+      sub={anchorNav ? <BumicertHeaderAnchorNav items={anchorNav} /> : <BumicertHeaderTabs summary={summary} />}
+    />
+  );
+}
+
+function BumicertHeaderAnchorNav({ items }: { items: BumicertAnchorNavItem[] }) {
+  return (
+    <div className="-mx-4 overflow-x-auto px-4">
+      <div className="flex min-w-max items-end border-b border-border">
+        {items.map((item) => (
+          <Link
+            key={item.id}
+            href={item.href}
+            className="relative flex items-center whitespace-nowrap px-4 py-2.5 text-sm font-medium text-muted-foreground transition-colors duration-150 hover:text-foreground"
+          >
+            {item.label}
+          </Link>
+        ))}
+      </div>
+    </div>
+  );
 }
 
 function BumicertHeaderTabs({ summary }: { summary: BumicertHeaderSummary }) {

@@ -702,7 +702,8 @@
       "uploadingProgress": "Adicionando {done} de {total}",
       "identifyingProgress": "Identificando {done} de {total}…",
       "moreWays": "Mais formas",
-      "uploadCsv": "Enviar dados CSV"
+      "uploadCsv": "Enviar dados CSV",
+      "photoTooLarge": "Esta foto é grande demais para enviar. Tente uma foto menor."
     },
     "csvUpload": {
       "title": "Enviar dados CSV",
@@ -798,7 +799,8 @@
     },
     "preparingImages": "Preparando imagens…",
     "compressedFrom": "comprimida de {size}",
-    "compressionFailed": "Esta imagem não pôde ser comprimida para menos de 4 MB. Tente uma foto menor.",
+    "compressionFailed": "Esta imagem não pôde ser comprimida para menos de 3 MB. Tente uma foto menor.",
+    "photoTooLarge": "Esta foto é grande demais para enviar. Tente uma foto menor.",
     "groupSelected": "Agrupar em uma",
     "ungroupSelected": "Separar",
     "selectTwoToGroup": "Selecione pelo menos duas imagens para agrupá-las como uma única observação.",

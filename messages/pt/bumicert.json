@@ -355,6 +355,14 @@
       "copied": "Copiado!",
       "donate": "Doar",
       "goToOverview": "Ir para a aba de visão geral"
+    },
+    "projectNav": {
+      "overview": "Visão geral",
+      "sightings": "Avistamentos",
+      "places": "Locais",
+      "updates": "Atualizações",
+      "reviews": "Avaliações",
+      "support": "Apoio"
     }
   },
   "create": {
