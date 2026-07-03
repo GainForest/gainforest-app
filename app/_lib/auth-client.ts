@@ -9,29 +9,45 @@ const AUTH_ERROR_PARAMS = new Set([
   "unknown_epds_provider",
 ]);
 
+function sanitizeLocalReturnTo(value: string | null | undefined): string | null {
+  if (!value) return null;
+
+  try {
+    const decoded = decodeURIComponent(value);
+    if (decoded.startsWith("/") && !decoded.startsWith("//")) return decoded;
+
+    const url = new URL(decoded);
+    if (url.origin === window.location.origin) {
+      return `${url.pathname}${url.search}${url.hash}` || "/";
+    }
+  } catch {
+    if (value.startsWith("/") && !value.startsWith("//")) return value;
+  }
+
+  return null;
+}
+
 export function getCurrentReturnToUrl(): string {
   const url = new URL(window.location.href);
+
+  if (url.pathname.endsWith("/auth/complete")) {
+    return sanitizeLocalReturnTo(url.searchParams.get("redirect")) ?? "/";
+  }
+
   const error = url.searchParams.get("error");
   if (error && AUTH_ERROR_PARAMS.has(error)) {
     url.searchParams.delete("error");
   }
-  return `${url.pathname}${url.search}${url.hash}` || "/manage";
+  return `${url.pathname}${url.search}${url.hash}` || "/";
 }
 
 function getCurrentAbsoluteReturnToUrl(): string {
   return new URL(getCurrentReturnToUrl(), window.location.origin).toString();
 }
 
-function getAuthCompleteReturnToUrl(): string {
-  const destination = getCurrentReturnToUrl();
-  const url = new URL("/auth/complete", window.location.origin);
-  url.searchParams.set("redirect", destination);
-  return url.toString();
-}
-
 export function buildLoginUrl(options: { email?: string; handle?: string } = {}): string {
   const url = new URL("/login", getAuthBaseUrl());
-  url.searchParams.set("returnTo", getAuthCompleteReturnToUrl());
+  url.searchParams.set("returnTo", getCurrentAbsoluteReturnToUrl());
 
   const provider = getAuthProvider();
   if (provider) {
