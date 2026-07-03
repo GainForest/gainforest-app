@@ -19,6 +19,7 @@
     "@radix-ui/react-dialog": "^1.1.15",
     "@rainbow-me/rainbowkit": "^2.2.11",
     "@tanstack/react-query": "^5.101.0",
+    "@vercel/analytics": "^2.0.1",
     "@walletconnect/ethereum-provider": "^2.23.10",
     "@zip.js/zip.js": "^2.8.26",
     "blo": "^2.0.0",

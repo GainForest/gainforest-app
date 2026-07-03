@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Cormorant_Garamond, Geist, Geist_Mono, Instrument_Serif } from "next/font/google";
 import { Suspense } from "react";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
+import { Analytics } from "@vercel/analytics/next";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages, getTranslations } from "next-intl/server";
 import { DomTranslationFallback } from "@/components/i18n/DomTranslationFallback";
@@ -161,6 +162,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             </WagmiProvider>
           </NuqsAdapter>
         </NextIntlClientProvider>
+        <Analytics />
       </body>
     </html>
   );
