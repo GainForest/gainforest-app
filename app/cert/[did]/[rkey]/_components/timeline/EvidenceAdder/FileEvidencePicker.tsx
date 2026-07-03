@@ -167,7 +167,7 @@ export function FileEvidencePicker({
           />
         </label>
 
-        <div className="flex flex-col gap-1.5 rounded-xl border border-border/60 bg-background p-3">
+        <div className="flex flex-col gap-1.5">
           <label htmlFor={externalLinkInputId} className="text-sm font-medium">
             {evidenceT("externalLink")}
           </label>
@@ -237,7 +237,7 @@ export function FileEvidencePicker({
             ))}
           </div>
         ) : (
-          <div className="rounded-xl bg-muted/60 px-3 py-2 text-center text-xs text-muted-foreground">
+          <div className="rounded-xl bg-muted/40 px-3 py-2 text-center text-xs text-muted-foreground">
             {evidenceT("noFilesSelected")}
           </div>
         )}
@@ -274,7 +274,7 @@ function SelectedItem({
   removeLabel: string;
 }) {
   return (
-    <div className="flex w-full items-center gap-2.5 rounded-xl border bg-background px-3 py-2">
+    <div className="flex w-full items-center gap-2.5 rounded-xl bg-muted/40 px-3 py-2">
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm font-medium text-foreground">{title}</p>
         <p className="truncate text-xs text-muted-foreground">{detail}</p>

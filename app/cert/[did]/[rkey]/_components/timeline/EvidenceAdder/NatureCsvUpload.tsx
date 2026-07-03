@@ -63,14 +63,14 @@ export function NatureCsvUpload({
   }
 
   return (
-    <section className="grid gap-3 rounded-xl border border-border/60 bg-background p-3">
+    <section className="grid gap-3">
       <div>
         <p className="text-sm font-medium text-foreground">{t("title")}</p>
         <p className="mt-1 text-xs text-muted-foreground">{t("description")}</p>
       </div>
 
       {file ? (
-        <div className="flex items-center gap-2 rounded-lg border border-border/60 bg-muted/20 px-3 py-2 text-sm">
+        <div className="flex items-center gap-2 rounded-lg bg-muted/40 px-3 py-2 text-sm">
           <FileSpreadsheetIcon className="size-4 shrink-0 text-primary" />
           <span className="min-w-0 flex-1 truncate font-medium text-foreground">{file.name}</span>
           <span className="shrink-0 text-xs text-muted-foreground">{formatFileSize(file.size)}</span>

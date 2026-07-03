@@ -682,6 +682,7 @@ export async function ProjectDetailView({
     { id: "reviews", href: reviewsHref, label: projectNavT("reviews") },
   ];
   const showOverviewSidebar = activeTab === "overview";
+  const showProjectHero = activeTab !== "updates";
 
   return (
     <>
@@ -712,6 +713,7 @@ export async function ProjectDetailView({
         }}
       />
       <main className="min-h-screen bg-background pb-20">
+        {showProjectHero ? (
         <header className="mx-auto max-w-6xl px-6 pt-6 lg:px-8">
           {backHref ? (
             <Link
@@ -784,7 +786,8 @@ export async function ProjectDetailView({
             </div>
           ) : null}
         </header>
-        <section className={`mx-auto grid max-w-6xl grid-cols-1 gap-x-10 gap-y-8 px-6 pb-8 pt-8 lg:px-8 ${showOverviewSidebar ? "lg:grid-cols-[minmax(0,1fr)_320px]" : ""}`}>
+        ) : null}
+        <section className={`mx-auto grid max-w-6xl grid-cols-1 gap-x-10 gap-y-8 px-6 pb-8 lg:px-8 ${activeTab === "updates" ? "pt-3" : "pt-8"} ${showOverviewSidebar ? "lg:grid-cols-[minmax(0,1fr)_320px]" : ""}`}>
           <div className="min-w-0">
             {activeTab === "overview" ? (
               <>
@@ -882,23 +885,21 @@ export async function ProjectDetailView({
             ) : null}
 
             {activeTab === "updates" ? (
-              <ProjectDetailSection id="updates" icon={<PaperclipIcon className="h-4 w-4" aria-hidden />} title={projectNavT("updates")} count={timelineEntries.length > 0 ? formatNumber(timelineEntries.length) : undefined}>
-                <BumicertTimeline
-                  organizationDid={record.did}
-                  activityUri={record.atUri}
-                  activityCid={record.cid ?? ""}
-                  matchActivityUris={matchUris}
-                  bumicertTitle={record.title}
-                  canManageEvidence={timelineAccess.canManageEvidence}
-                  createPermission={timelineAccess.createPermission}
-                  deletePermission={timelineAccess.deletePermission}
-                  mutationRepo={timelineAccess.mutationRepo}
-                  initialEntries={timelineAttachments}
-                  sources={emptyTimelineSources}
-                  references={timelineReferences}
-                  attachmentsUnavailable={timelineAttachmentsUnavailable}
-                />
-              </ProjectDetailSection>
+              <BumicertTimeline
+                organizationDid={record.did}
+                activityUri={record.atUri}
+                activityCid={record.cid ?? ""}
+                matchActivityUris={matchUris}
+                bumicertTitle={record.title}
+                canManageEvidence={timelineAccess.canManageEvidence}
+                createPermission={timelineAccess.createPermission}
+                deletePermission={timelineAccess.deletePermission}
+                mutationRepo={timelineAccess.mutationRepo}
+                initialEntries={timelineAttachments}
+                sources={emptyTimelineSources}
+                references={timelineReferences}
+                attachmentsUnavailable={timelineAttachmentsUnavailable}
+              />
             ) : null}
 
             {activeTab === "reviews" ? (
