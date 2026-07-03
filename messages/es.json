@@ -42,14 +42,14 @@
       }
     },
     "certificate": {
-      "eyebrow": "El registro",
+      "eyebrow": "El certificado",
       "titleLine1": "¿Qué es exactamente",
-      "titleLine2": "un registro?",
+      "titleLine2": "un certificado?",
       "faqItems": {
         "digitalCertificate": {
           "id": "1",
-          "question": "Un registro digital de impacto",
-          "answer": "Un registro captura una acción ambiental específica y le da una identidad permanente y verificable en una red abierta y descentralizada (la misma tecnología que impulsa Bluesky)."
+          "question": "Un certificado digital de impacto",
+          "answer": "Un certificado registra una acción ambiental específica y le da una identidad permanente y verificable en una red abierta y descentralizada."
         },
         "evidence": {
           "id": "2",
@@ -59,12 +59,12 @@
         "communities": {
           "id": "3",
           "question": "Una línea directa con las comunidades",
-          "answer": "Cada registro nombra a las personas que hacen la restauración. Las comunidades en el terreno reciben el crédito por su trabajo, sin intermediarios ni gastos difusos."
+          "answer": "Cuando financias un certificado, tu dinero llega a las personas que hacen la restauración. Sin intermediarios que absorban comisiones ni costos difusos."
         },
         "story": {
           "id": "4",
           "question": "Tu vínculo con la historia",
-          "answer": "Un registro es tu vínculo con ese momento: un árbol plantado, un arrecife restaurado, un ecosistema revivido. Tuyo para compartir, citar y construir tu reputación."
+          "answer": "Tener un certificado significa formar parte de ese momento: un árbol plantado, un arrecife restaurado, un ecosistema revivido. Puedes compartirlo, conservarlo o regalarlo."
         }
       },
       "previewTitle": "Reforestación del monte Halimun",
