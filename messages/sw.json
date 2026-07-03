@@ -16,13 +16,8 @@
       "imageAlt": "Bonde la msitu wa mvua lenye ukungu",
       "headingUnderlined": "Iliyoidhinishwa",
       "headingRest": "athari kwa walezi wa asili",
-      "description": "Fadhili miradi ya urejeshaji moja kwa moja. Kila cheti ni rekodi iliyothibitishwa ya kazi halisi ya mazingira, ikiungwa mkono na picha, maeneo na walezi wa jamii.",
-      "cta": "Gundua miradi",
-      "proofPoints": {
-        "communityLed": "Inaongozwa na jamii",
-        "photoVerified": "Imethibitishwa kwa picha",
-        "geolocated": "Ina eneo kamili"
-      }
+      "description": "Pakia uchunguzi kutoka uwandani na uthibitishe kazi uliyoifanya. Picha, spishi, na maeneo yako huwa rekodi za kudumu na zinazoweza kuthibitishwa za athari halisi ya mazingira.",
+      "cta": "Gundua miradi"
     },
     "features": {
       "eyebrow": "Kuhusu sisi",
@@ -30,7 +25,7 @@
         "verified": {
           "number": "01",
           "title": "Athari ya mazingira iliyothibitishwa",
-          "description": "Kila cheti kinaungwa mkono na picha, data ya eneo na uthibitisho wa jamii."
+          "description": "Kila rekodi inaungwa mkono na picha, data ya eneo na uthibitisho wa jamii."
         },
         "direct": {
           "number": "02",
@@ -52,8 +47,8 @@
           "label": "Kwa wafadhili",
           "title": "Nataka kusaidia",
           "emphasis": "mradi",
-          "description": "Vinjari vyeti vilivyothibitishwa na ufadhili wakati mahususi wa urejeshaji.",
-          "cta": "Gundua vyeti",
+          "description": "Vinjari rekodi zilizothibitishwa za kazi halisi ya mazingira — nyakati kamili za urejeshaji, kama zilivyotokea uwandani.",
+          "cta": "Gundua rekodi",
           "alt": "Mto ukipinda ndani ya msitu wa mvua"
         },
         "organizations": {
@@ -67,14 +62,14 @@
       }
     },
     "certificate": {
-      "eyebrow": "Cheti",
-      "titleLine1": "cheti ni nini",
+      "eyebrow": "Rekodi",
+      "titleLine1": "rekodi ni nini",
       "titleLine2": "hasa?",
       "faqItems": {
         "digitalCertificate": {
           "id": "1",
-          "question": "Cheti cha kidijitali cha athari",
-          "answer": "cheti hurekodi tendo mahususi la mazingira na kulipa utambulisho wa kudumu unaoweza kuthibitishwa kwenye mtandao wazi na uliogatuliwa."
+          "question": "Rekodi ya kidijitali ya athari",
+          "answer": "Rekodi hunasa tendo mahususi la mazingira na kulipa utambulisho wa kudumu unaoweza kuthibitishwa kwenye mtandao wazi na uliogatuliwa (teknolojia ile ile inayoendesha Bluesky)."
         },
         "evidence": {
           "id": "2",
@@ -84,12 +79,12 @@
         "communities": {
           "id": "3",
           "question": "Njia ya moja kwa moja kwa jamii",
-          "answer": "Unapofadhili cheti, pesa zako huwafikia watu wanaofanya urejeshaji. Hakuna wapatanishi wanaochukua ada au gharama zisizo wazi."
+          "answer": "Kila rekodi hutaja watu wanaofanya urejeshaji. Jamii zilizo uwandani hubaki zikitambuliwa kwa kazi yao — bila wapatanishi, bila gharama zisizo wazi."
         },
         "story": {
           "id": "4",
           "question": "Sehemu yako katika hadithi",
-          "answer": "Kumiliki cheti kunamaanisha kuwa sehemu ya wakati huo: mti uliopandwa, mwamba wa matumbawe uliorejeshwa, mfumo wa ikolojia ulihuishwa. Unaweza kushiriki, kuhifadhi au kutoa kama zawadi."
+          "answer": "Rekodi ni uthibitisho wa kuwepo kwako katika wakati huo: mti uliopandwa, mwamba wa matumbawe uliorejeshwa, mfumo wa ikolojia uliohuishwa. Ni yako kuishiriki, kuinukuu, na kujenga sifa yako."
         }
       },
       "previewTitle": "Upandaji upya wa misitu wa Mlima Halimun",
@@ -109,11 +104,11 @@
       "label": "Awamu wa 3 wa Ufadhili wa Ma Earth",
       "deadline": "Wazi hadi Mei 31",
       "title": "Omba Awamu wa 3 wa Ufadhili wa Ma Earth",
-      "description": "Jamii za GainForest zinaweza kutumia hadithi za miradi zilizothibitishwa, ushahidi, na rekodi za athari kutoka vyeti wanapoomba kwenye awamu ya ufadhili wa kijamii ya Ma Earth.",
+      "description": "Jamii za GainForest zinaweza kutumia hadithi za miradi zilizothibitishwa, ushahidi, na rekodi za athari zao wanapoomba katika awamu ya ufadhili inayoungwa mkono na jamii ya Ma Earth.",
       "highlights": {
         "matchingPool": "Dimbwi la kulinganisha la $500k",
         "projects": "Miradi inayotegemea mazingira",
-        "record": "Andaa rekodi yako ya cheti"
+        "record": "Andaa rekodi yako ya athari"
       },
       "actions": {
         "apply": "Omba kwenye Ma Earth",
@@ -125,7 +120,7 @@
     },
     "stats": {
       "liveLabel": "Athari za moja kwa moja",
-      "bumicertsShared": "vyeti zilizoshirikiwa",
+      "bumicertsShared": "rekodi zilizoshirikiwa",
       "organizationProfiles": "wasifu wa mashirika",
       "natureSightingsShared": "matukio ya asili yaliyoshirikiwa",
       "raisedForProjects": "zimekusanywa kwa miradi"
@@ -133,7 +128,7 @@
     "openNetwork": {
       "titlePrefix": "Imejengwa juu ya",
       "titleEmphasis": "mtandao wazi",
-      "description": "vyeti ni rekodi za athari zinazobebeka kati ya programu, jamii na zana za ufadhili — si hifadhidata iliyofungwa. Usaidizi wa Silvi na majukwaa mengine utakuja hivi karibuni.",
+      "description": "Rekodi zako zinabebeka — data ya athari inayoweza kuhama kati ya programu, jamii na zana za ufadhili, si hifadhidata iliyofungwa. Usaidizi wa Silvi na mifumo mingine unakuja hivi karibuni.",
       "protocol": {
         "name": "Certified",
         "description": "data ya kijamii inayobebeka",
@@ -142,7 +137,7 @@
       "youBadge": "Wewe",
       "apps": {
         "maEarth": {
-          "blurb": "Jamii zinaweza kutumia ushahidi wa cheti wanapoomba awamu za ufadhili zinazoungwa mkono na jamii."
+          "blurb": "Jamii zinaweza kutumia ushahidi wao uliothibitishwa wanapoomba awamu za ufadhili zinazoungwa mkono na jamii."
         },
         "gainforest": {
           "blurb": "GainForest huwasaidia walezi wa mazingira kuchapisha kazi iliyothibitishwa, maeneo, miti, uchunguzi na hadithi za miradi."

@@ -8,12 +8,10 @@ import {
   ArrowUpRightIcon,
   BinocularsIcon,
   Building2Icon,
-  CameraIcon,
   CompassIcon,
   HandHeartIcon,
   KeyRoundIcon,
   LeafIcon,
-  MapPinIcon,
   NetworkIcon,
   Share2Icon,
 } from "lucide-react";
@@ -274,28 +272,6 @@ function LandingHero() {
                   <ArrowUpRightIcon aria-hidden="true" className="size-4" />
                 </motion.span>
               </Link>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.55, delay: 0.68, ease: [0.25, 0.1, 0.25, 1] }}
-              className="mt-14 flex flex-wrap items-center justify-center gap-x-7 gap-y-4 text-sm text-foreground/75 md:justify-start"
-            >
-              <span className="inline-flex items-center gap-3">
-                <LeafIcon className="size-6 stroke-[1.5]" />
-                {t("proofPoints.communityLed")}
-              </span>
-              <span className="hidden h-8 w-px bg-foreground/20 sm:block" />
-              <span className="inline-flex items-center gap-3">
-                <CameraIcon className="size-6 stroke-[1.5]" />
-                {t("proofPoints.photoVerified")}
-              </span>
-              <span className="hidden h-8 w-px bg-foreground/20 sm:block" />
-              <span className="inline-flex items-center gap-3">
-                <MapPinIcon className="size-6 stroke-[1.5]" />
-                {t("proofPoints.geolocated")}
-              </span>
             </motion.div>
           </motion.div>
           <div aria-hidden="true" className="hidden md:block" />

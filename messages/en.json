@@ -16,13 +16,8 @@
       "imageAlt": "Misty rainforest valley",
       "headingUnderlined": "Certified",
       "headingRest": "impact for nature stewards",
-      "description": "Fund regenerative projects directly. Every Cert is a verified record of real environmental work — backed by photos, locations, and community stewards.",
-      "cta": "Explore Projects",
-      "proofPoints": {
-        "communityLed": "Community-led",
-        "photoVerified": "Photo-verified",
-        "geolocated": "Geolocated"
-      }
+      "description": "Upload observations from the field and certify the work you've done. Your photos, species, and locations become permanent, verifiable records of real environmental impact.",
+      "cta": "Explore Projects"
     },
     "features": {
       "eyebrow": "About Us",
@@ -30,7 +25,7 @@
         "verified": {
           "number": "01",
           "title": "Verified environmental impact",
-          "description": "Every certificate is backed by photos, geolocation data, and community verification."
+          "description": "Every record is backed by photos, geolocation data, and community verification."
         },
         "direct": {
           "number": "02",
@@ -52,8 +47,8 @@
           "label": "For Funders",
           "title": "I want to support",
           "emphasis": "a project",
-          "description": "Browse verified certificates and fund the exact moment of restoration.",
-          "cta": "Explore Certs",
+          "description": "Browse verified records of real environmental work — the exact moments of restoration, as they happened on the ground.",
+          "cta": "Explore records",
           "alt": "River winding through rainforest"
         },
         "organizations": {
@@ -67,14 +62,14 @@
       }
     },
     "certificate": {
-      "eyebrow": "The Certificate",
+      "eyebrow": "The Record",
       "titleLine1": "What exactly is",
-      "titleLine2": "a Cert?",
+      "titleLine2": "a record?",
       "faqItems": {
         "digitalCertificate": {
           "id": "1",
-          "question": "A digital certificate of impact",
-          "answer": "A Cert records a specific environmental action — giving it a permanent, verifiable identity on an open, decentralized network (the same technology that powers Bluesky)."
+          "question": "A digital record of impact",
+          "answer": "A record captures a specific environmental action — giving it a permanent, verifiable identity on an open, decentralized network (the same technology that powers Bluesky)."
         },
         "evidence": {
           "id": "2",
@@ -84,12 +79,12 @@
         "communities": {
           "id": "3",
           "question": "A direct line to communities",
-          "answer": "When you fund a Cert, your money reaches the exact people doing the restoration. No intermediaries skimming fees. No vague overhead."
+          "answer": "Each record names the people doing the restoration. The communities on the ground stay credited for their work — no intermediaries, no vague overhead."
         },
         "story": {
           "id": "4",
           "question": "Your claim to the story",
-          "answer": "Owning a Cert means you're part of that moment. A tree planted. A reef restored. An ecosystem revived. It's yours to share, hold, or gift."
+          "answer": "A record is your claim to that moment: a tree planted, a reef restored, an ecosystem revived. Yours to share, cite, and build a reputation on."
         }
       },
       "previewTitle": "Reforestation of Mount Halimun",
@@ -109,11 +104,11 @@
       "label": "Ma Earth Funding Round 3",
       "deadline": "Open till May 31st",
       "title": "Apply for the Ma Earth Funding Round 3",
-      "description": "GainForest communities can use verified project stories, evidence, and impact records from Certs while applying on Ma Earth’s community-backed funding round.",
+      "description": "GainForest communities can use their verified project stories, evidence, and impact records while applying on Ma Earth’s community-backed funding round.",
       "highlights": {
         "matchingPool": "$500k matching pool",
         "projects": "Nature-based projects",
-        "record": "Prepare your Cert record"
+        "record": "Prepare your impact record"
       },
       "actions": {
         "apply": "Apply on Ma Earth",
@@ -125,7 +120,7 @@
     },
     "stats": {
       "liveLabel": "Live impact",
-      "bumicertsShared": "Certs shared",
+      "bumicertsShared": "Records shared",
       "organizationProfiles": "organization profiles",
       "natureSightingsShared": "nature sightings shared",
       "raisedForProjects": "raised for projects"
@@ -133,7 +128,7 @@
     "openNetwork": {
       "titlePrefix": "Built on an",
       "titleEmphasis": "open network",
-      "description": "Certs are portable impact records that can travel across apps, communities, and funding tools — not a closed database. Support for Silvi and other platforms is coming soon.",
+      "description": "Your records are portable — impact data that can travel across apps, communities, and funding tools, not a closed database. Support for Silvi and other platforms is coming soon.",
       "protocol": {
         "name": "Certified",
         "description": "portable social data",
@@ -142,7 +137,7 @@
       "youBadge": "You",
       "apps": {
         "maEarth": {
-          "blurb": "Communities can use Cert evidence when applying for community-backed funding rounds."
+          "blurb": "Communities can use their verified evidence when applying for community-backed funding rounds."
         },
         "gainforest": {
           "blurb": "GainForest helps nature stewards publish verified work, sites, trees, observations, and project stories."

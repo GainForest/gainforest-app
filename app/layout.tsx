@@ -50,7 +50,7 @@ const SITE_NAME = "GainForest";
 // by URL, so bump this suffix whenever the art changes to force a re-fetch.
 const OG_IMAGE = "/og/gainforest-og-2.png";
 const OG_ALT =
-  "GainForest — certified impact for nature stewards. Fund regenerative projects directly, beside an aerial photo of humpback whales in turquoise water.";
+  "GainForest — certified impact for nature stewards. Upload field observations and certify your environmental work, beside an aerial photo of humpback whales in turquoise water.";
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = resolveSupportedLanguage(await getLocale());

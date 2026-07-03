@@ -16,13 +16,8 @@
       "imageAlt": "Lembah hutan hujan berkabut",
       "headingUnderlined": "Bersertifikat",
       "headingRest": "dampak untuk pelindung alam",
-      "description": "Danai proyek regeneratif secara langsung. Setiap sertifikat adalah catatan terverifikasi atas kerja lingkungan nyata, didukung foto, lokasi, dan pengelola komunitas.",
-      "cta": "Jelajahi proyek",
-      "proofPoints": {
-        "communityLed": "Dipimpin komunitas",
-        "photoVerified": "Diverifikasi foto",
-        "geolocated": "Bergeolokasi"
-      }
+      "description": "Unggah observasi dari lapangan dan sertifikasi kerja yang telah kamu lakukan. Foto, spesies, dan lokasimu menjadi catatan permanen dan terverifikasi atas dampak lingkungan nyata.",
+      "cta": "Jelajahi proyek"
     },
     "features": {
       "eyebrow": "Tentang kami",
@@ -30,7 +25,7 @@
         "verified": {
           "number": "01",
           "title": "Dampak lingkungan terverifikasi",
-          "description": "Setiap sertifikat didukung foto, data geolokasi, dan verifikasi komunitas."
+          "description": "Setiap catatan didukung foto, data geolokasi, dan verifikasi komunitas."
         },
         "direct": {
           "number": "02",
@@ -52,8 +47,8 @@
           "label": "Untuk pendana",
           "title": "Saya ingin mendukung",
           "emphasis": "sebuah proyek",
-          "description": "Jelajahi sertifikat terverifikasi dan danai momen restorasi yang tepat.",
-          "cta": "Jelajahi sertifikat",
+          "description": "Jelajahi catatan terverifikasi atas kerja lingkungan nyata — momen restorasi yang sebenarnya, seperti yang terjadi di lapangan.",
+          "cta": "Jelajahi catatan",
           "alt": "Sungai berkelok melalui hutan hujan"
         },
         "organizations": {
@@ -67,14 +62,14 @@
       }
     },
     "certificate": {
-      "eyebrow": "Sertifikat",
+      "eyebrow": "Catatan",
       "titleLine1": "Apa sebenarnya",
-      "titleLine2": "sertifikat itu?",
+      "titleLine2": "catatan itu?",
       "faqItems": {
         "digitalCertificate": {
           "id": "1",
-          "question": "Sertifikat digital untuk dampak",
-          "answer": "sertifikat mencatat tindakan lingkungan tertentu dan memberinya identitas permanen yang dapat diverifikasi di jaringan terbuka dan terdesentralisasi."
+          "question": "Catatan digital untuk dampak",
+          "answer": "Sebuah catatan merekam tindakan lingkungan tertentu dan memberinya identitas permanen yang dapat diverifikasi di jaringan terbuka dan terdesentralisasi (teknologi yang sama yang menggerakkan Bluesky)."
         },
         "evidence": {
           "id": "2",
@@ -84,12 +79,12 @@
         "communities": {
           "id": "3",
           "question": "Jalur langsung ke komunitas",
-          "answer": "Saat Anda mendanai sertifikat, dana Anda sampai ke orang-orang yang melakukan restorasi. Tanpa perantara yang mengambil biaya atau overhead yang kabur."
+          "answer": "Setiap catatan menyebut orang-orang yang melakukan restorasi. Komunitas di lapangan tetap diakui atas kerjanya — tanpa perantara, tanpa biaya yang tidak jelas."
         },
         "story": {
           "id": "4",
           "question": "Klaim Anda atas cerita ini",
-          "answer": "Memiliki sertifikat berarti Anda menjadi bagian dari momen itu: pohon yang ditanam, terumbu yang dipulihkan, ekosistem yang dihidupkan kembali. Anda dapat membagikan, menyimpan, atau menghadiahkannya."
+          "answer": "Sebuah catatan adalah bukti keterlibatanmu dalam momen itu: pohon yang ditanam, terumbu yang dipulihkan, ekosistem yang dihidupkan kembali. Milikmu untuk dibagikan, dirujuk, dan membangun reputasi."
         }
       },
       "previewTitle": "Reforestasi Gunung Halimun",
@@ -109,11 +104,11 @@
       "label": "Putaran Pendanaan Ma Earth 3",
       "deadline": "Dibuka hingga 31 Mei",
       "title": "Daftar ke Putaran Pendanaan Ma Earth 3",
-      "description": "Komunitas GainForest dapat menggunakan cerita proyek terverifikasi, bukti, dan catatan dampak dari sertifikat saat mendaftar ke putaran pendanaan berbasis komunitas Ma Earth.",
+      "description": "Komunitas GainForest dapat menggunakan cerita proyek terverifikasi, bukti, dan catatan dampak mereka saat mendaftar ke putaran pendanaan yang didukung komunitas dari Ma Earth.",
       "highlights": {
         "matchingPool": "Dana pencocokan $500k",
         "projects": "Proyek berbasis alam",
-        "record": "Siapkan catatan sertifikat Anda"
+        "record": "Siapkan catatan dampak Anda"
       },
       "actions": {
         "apply": "Daftar di Ma Earth",
@@ -125,7 +120,7 @@
     },
     "stats": {
       "liveLabel": "Dampak langsung",
-      "bumicertsShared": "sertifikat dibagikan",
+      "bumicertsShared": "catatan dibagikan",
       "organizationProfiles": "profil organisasi",
       "natureSightingsShared": "temuan alam dibagikan",
       "raisedForProjects": "terkumpul untuk proyek"
@@ -133,7 +128,7 @@
     "openNetwork": {
       "titlePrefix": "Dibangun di atas",
       "titleEmphasis": "jaringan terbuka",
-      "description": "sertifikat adalah catatan dampak portabel yang dapat berpindah antar aplikasi, komunitas, dan alat pendanaan — bukan basis data tertutup. Dukungan untuk Silvi dan platform lain akan segera hadir.",
+      "description": "Catatanmu bersifat portabel — data dampak yang dapat berpindah antar aplikasi, komunitas, dan alat pendanaan, bukan basis data tertutup. Dukungan untuk Silvi dan platform lain segera hadir.",
       "protocol": {
         "name": "Certified",
         "description": "data sosial portabel",
@@ -142,7 +137,7 @@
       "youBadge": "Anda",
       "apps": {
         "maEarth": {
-          "blurb": "Komunitas dapat memakai bukti sertifikat saat mendaftar ke putaran pendanaan yang didukung komunitas."
+          "blurb": "Komunitas dapat memakai bukti terverifikasi mereka saat mendaftar ke putaran pendanaan yang didukung komunitas."
         },
         "gainforest": {
           "blurb": "GainForest membantu penjaga alam menerbitkan kerja terverifikasi, lokasi, pohon, observasi, dan cerita proyek."

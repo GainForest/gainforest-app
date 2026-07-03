@@ -16,13 +16,8 @@
       "imageAlt": "Valle de selva tropical con neblina",
       "headingUnderlined": "Certificado",
       "headingRest": "impacto para guardianes de la naturaleza",
-      "description": "Financia proyectos regenerativos directamente. Cada certificado es un registro verificado de trabajo ambiental real, respaldado por fotos, ubicaciones y comunidades guardianas.",
-      "cta": "Explorar proyectos",
-      "proofPoints": {
-        "communityLed": "Liderado por comunidades",
-        "photoVerified": "Verificado con fotos",
-        "geolocated": "Geolocalizado"
-      }
+      "description": "Sube observaciones desde el terreno y certifica el trabajo que has hecho. Tus fotos, especies y ubicaciones se convierten en registros permanentes y verificables de impacto ambiental real.",
+      "cta": "Explorar proyectos"
     },
     "features": {
       "eyebrow": "Sobre nosotros",
@@ -30,7 +25,7 @@
         "verified": {
           "number": "01",
           "title": "Impacto ambiental verificado",
-          "description": "Cada certificado está respaldado por fotos, datos de geolocalización y verificación comunitaria."
+          "description": "Cada registro está respaldado por fotos, datos de geolocalización y verificación comunitaria."
         },
         "direct": {
           "number": "02",
@@ -52,8 +47,8 @@
           "label": "Para financiadores",
           "title": "Quiero apoyar",
           "emphasis": "un proyecto",
-          "description": "Explora certificados verificados y financia el momento exacto de la restauración.",
-          "cta": "Explorar certificados",
+          "description": "Explora registros verificados de trabajo ambiental real: los momentos exactos de la restauración, tal como ocurrieron en el terreno.",
+          "cta": "Explorar registros",
           "alt": "Río serpenteando por la selva tropical"
         },
         "organizations": {
@@ -67,14 +62,14 @@
       }
     },
     "certificate": {
-      "eyebrow": "El certificado",
+      "eyebrow": "El registro",
       "titleLine1": "¿Qué es exactamente",
-      "titleLine2": "un certificado?",
+      "titleLine2": "un registro?",
       "faqItems": {
         "digitalCertificate": {
           "id": "1",
-          "question": "Un certificado digital de impacto",
-          "answer": "Un certificado registra una acción ambiental específica y le da una identidad permanente y verificable en una red abierta y descentralizada."
+          "question": "Un registro digital de impacto",
+          "answer": "Un registro captura una acción ambiental específica y le da una identidad permanente y verificable en una red abierta y descentralizada (la misma tecnología que impulsa Bluesky)."
         },
         "evidence": {
           "id": "2",
@@ -84,12 +79,12 @@
         "communities": {
           "id": "3",
           "question": "Una línea directa con las comunidades",
-          "answer": "Cuando financias un certificado, tu dinero llega a las personas que hacen la restauración. Sin intermediarios que absorban comisiones ni costos difusos."
+          "answer": "Cada registro nombra a las personas que hacen la restauración. Las comunidades en el terreno reciben el crédito por su trabajo, sin intermediarios ni gastos difusos."
         },
         "story": {
           "id": "4",
           "question": "Tu vínculo con la historia",
-          "answer": "Tener un certificado significa formar parte de ese momento: un árbol plantado, un arrecife restaurado, un ecosistema revivido. Puedes compartirlo, conservarlo o regalarlo."
+          "answer": "Un registro es tu vínculo con ese momento: un árbol plantado, un arrecife restaurado, un ecosistema revivido. Tuyo para compartir, citar y construir tu reputación."
         }
       },
       "previewTitle": "Reforestación del monte Halimun",
@@ -109,11 +104,11 @@
       "label": "Ronda de financiación 3 de Ma Earth",
       "deadline": "Abierta hasta el 31 de mayo",
       "title": "Postula a la Ronda de financiación 3 de Ma Earth",
-      "description": "Las comunidades de GainForest pueden usar historias de proyecto verificadas, evidencia y registros de impacto de certificados al postular en la ronda de financiación comunitaria de Ma Earth.",
+      "description": "Las comunidades de GainForest pueden usar sus historias de proyecto verificadas, evidencia y registros de impacto al postular en la ronda de financiación respaldada por la comunidad de Ma Earth.",
       "highlights": {
         "matchingPool": "Fondo de contrapartida de $500k",
         "projects": "Proyectos basados en la naturaleza",
-        "record": "Prepara tu registro de certificado"
+        "record": "Prepara tu registro de impacto"
       },
       "actions": {
         "apply": "Postular en Ma Earth",
@@ -125,7 +120,7 @@
     },
     "stats": {
       "liveLabel": "Impacto en vivo",
-      "bumicertsShared": "certificados compartidos",
+      "bumicertsShared": "registros compartidos",
       "organizationProfiles": "perfiles de organizaciones",
       "natureSightingsShared": "avistamientos de naturaleza compartidos",
       "raisedForProjects": "recaudados para proyectos"
@@ -133,7 +128,7 @@
     "openNetwork": {
       "titlePrefix": "Construido sobre una",
       "titleEmphasis": "red abierta",
-      "description": "Los certificados son registros de impacto portátiles que pueden viajar entre aplicaciones, comunidades y herramientas de financiación, no una base de datos cerrada. Pronto habrá soporte para Silvi y otras plataformas.",
+      "description": "Tus registros son portátiles: datos de impacto que pueden viajar entre aplicaciones, comunidades y herramientas de financiación, no una base de datos cerrada. Pronto habrá compatibilidad con Silvi y otras plataformas.",
       "protocol": {
         "name": "Certified",
         "description": "datos sociales portátiles",
@@ -142,7 +137,7 @@
       "youBadge": "Tú",
       "apps": {
         "maEarth": {
-          "blurb": "Las comunidades pueden usar evidencia de certificado al postular a rondas de financiación respaldadas por la comunidad."
+          "blurb": "Las comunidades pueden usar su evidencia verificada al postular a rondas de financiación respaldadas por la comunidad."
         },
         "gainforest": {
           "blurb": "GainForest ayuda a guardianes de la naturaleza a publicar trabajo verificado, sitios, árboles, observaciones e historias de proyectos."
