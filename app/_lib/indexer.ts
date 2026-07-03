@@ -20,6 +20,7 @@ import { countryCodeFromCertifiedLocation, fetchCertifiedLocationCountryCode, ty
 import { blobUrl, resolveBlobUrl, resolvePdsHost, normaliseRef } from "./pds";
 import { fetchEndorserRecords } from "./endorsers";
 import { asNumber, formatNumber, formatDate, formatDateTime, formatCountry } from "./format";
+import { normalizeKnownWorkScopeKey } from "./work-scope-labels";
 
 // ── Generic GraphQL helper ────────────────────────────────────────────────
 
@@ -1402,16 +1403,21 @@ function splitWorkScopeString(value?: string | null): string[] {
     .filter(Boolean);
 }
 
-function extractWorkScopeTags(workScope?: { __typename?: string; scope?: string | null; expression?: string | null } | null): string[] {
+export function extractWorkScopeTags(workScope?: { __typename?: string; scope?: string | null; expression?: string | null } | null): string[] {
   const stringTags = splitWorkScopeString(workScope?.scope);
-  if (stringTags.length > 0) return stringTags.map(normalizeScopeTag).filter((tag): tag is string => Boolean(tag));
+  const candidates = stringTags.length > 0
+    ? stringTags
+    : [...(workScope?.expression ?? "").matchAll(/(["'])(.*?)\1/g)].map((match) => match[2]?.trim() ?? "");
 
-  const expression = workScope?.expression ?? "";
-  if (!expression) return [];
-
-  return [...expression.matchAll(/(["'])(.*?)\1/g)]
-    .map((match) => normalizeScopeTag(match[2]?.trim() ?? ""))
-    .filter((tag): tag is string => Boolean(tag));
+  const seen = new Set<string>();
+  const tags: string[] = [];
+  for (const candidate of candidates) {
+    const tag = normalizeScopeTag(candidate);
+    if (!tag || seen.has(tag)) continue;
+    seen.add(tag);
+    tags.push(tag);
+  }
+  return tags;
 }
 
 /** "⭔ 24164249 ha" → "⭔ 24.2M ha"; obviously bad areas are dropped. */
@@ -1419,18 +1425,36 @@ const AREA_SCOPE_TAG_RE = /^([\u2b12-\u2b59]\s*)?([\d,.]+)\s*(ha|hectares?)\.?$/
 /** Larger than any country's land area — clearly bad data, not a claim. */
 const MAX_PLAUSIBLE_AREA_HA = 1.5e9;
 
+const MAX_SCOPE_TAG_LENGTH = 40;
+const MAX_SCOPE_TAG_WORDS = 4;
+const SENTENCE_SCOPE_TAG_RE = /[.!?:]/;
+
+function isTagLikeScopeValue(tag: string): boolean {
+  const trimmed = tag.trim();
+  if (!trimmed) return false;
+  if (normalizeKnownWorkScopeKey(trimmed)) return true;
+  if (AREA_SCOPE_TAG_RE.test(trimmed)) return true;
+  if (trimmed.length > MAX_SCOPE_TAG_LENGTH) return false;
+  if (SENTENCE_SCOPE_TAG_RE.test(trimmed)) return false;
+  const words = trimmed.match(/[\p{L}\p{N}]+/gu) ?? [];
+  return words.length > 0 && words.length <= MAX_SCOPE_TAG_WORDS;
+}
+
 function normalizeScopeTag(tag: string): string | null {
   const trimmed = tag.trim();
   if (!trimmed) return null;
   const area = trimmed.match(AREA_SCOPE_TAG_RE);
-  if (!area) return trimmed;
-  const value = Number.parseFloat((area[2] ?? "").replace(/,/g, ""));
-  if (!Number.isFinite(value) || value <= 0 || value > MAX_PLAUSIBLE_AREA_HA) return null;
-  const formatted = new Intl.NumberFormat("en", {
-    notation: value >= 10_000 ? "compact" : "standard",
-    maximumFractionDigits: 1,
-  }).format(value);
-  return `${(area[1] ?? "").trim() || "⬡"} ${formatted} ha`;
+  if (area) {
+    const value = Number.parseFloat((area[2] ?? "").replace(/,/g, ""));
+    if (!Number.isFinite(value) || value <= 0 || value > MAX_PLAUSIBLE_AREA_HA) return null;
+    const formatted = new Intl.NumberFormat("en", {
+      notation: value >= 10_000 ? "compact" : "standard",
+      maximumFractionDigits: 1,
+    }).format(value);
+    return `${(area[1] ?? "").trim() || "⬡"} ${formatted} ha`;
+  }
+  if (!isTagLikeScopeValue(trimmed)) return null;
+  return normalizeKnownWorkScopeKey(trimmed) ?? trimmed;
 }
 
 /**
