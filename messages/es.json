@@ -155,7 +155,8 @@
         "portable": "Portátil entre apps",
         "owned": "Propiedad de las comunidades",
         "shared": "Prueba compartida de impacto"
-      }
+      },
+      "storageNote": "Cuando los guardianes suben observaciones, los registros se guardan en su cuenta de GainForest — o en la cuenta de la organización que gestionan — para que quede claro dónde viven los datos."
     }
   }
 }

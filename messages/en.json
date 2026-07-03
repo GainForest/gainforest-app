@@ -155,7 +155,8 @@
         "portable": "Portable across apps",
         "owned": "Owned by communities",
         "shared": "Shared proof of impact"
-      }
+      },
+      "storageNote": "When stewards upload observations, the records are saved under their GainForest account — or the organization account they manage — so it is clear where the data lives."
     }
   }
 }

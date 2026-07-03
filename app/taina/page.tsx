@@ -70,6 +70,10 @@ async function TainaContent() {
             {t("hero.description")}
           </p>
 
+          <div className="mt-5 max-w-lg rounded-2xl bg-muted px-4 py-3 text-sm leading-6 text-muted-foreground">
+            {t("hero.storageNote")}
+          </div>
+
           <ol className="mt-8 space-y-5">
             {steps.map((step, index) => (
               <li key={step.title} className="flex items-start gap-4">

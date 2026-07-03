@@ -1047,7 +1047,8 @@
       "step2Title": "Kirim foto atau catatan",
       "step2Description": "Kirimkan ke bot Anda apa pun yang Anda lihat di lapangan. Tainá mengenali spesiesnya dan menanyakan detail yang penting.",
       "step3Title": "Observasi tercatat",
-      "step3Description": "Setiap penampakan yang dikonfirmasi menjadi observasi keanekaragaman hayati yang tersimpan di akun Anda dan tampil di profil Anda."
+      "step3Description": "Setiap penampakan yang dikonfirmasi menjadi observasi keanekaragaman hayati yang tersimpan di akun Anda dan tampil di profil Anda.",
+      "storageNote": "Observasi yang dikonfirmasi melalui Tainá disimpan di akun GainForest Anda. Foto dan catatan disimpan bersama file akun Anda."
     },
     "signIn": {
       "title": "Masuk untuk memulai",
@@ -1156,5 +1157,11 @@
     "removeLabel": "Hapus {name}",
     "builtinChip": "Bawaan",
     "propagationHint": "Pendukung baru perlu beberapa menit untuk muncul di seluruh aplikasi."
+  },
+  "accountObservations": {
+    "storageNote": {
+      "user": "Observasi yang Anda unggah di sini disimpan di akun GainForest Anda. Foto dan file disimpan bersama file akun Anda.",
+      "organization": "Observasi yang Anda unggah di sini disimpan di {accountName}. Foto dan file disimpan bersama file akun organisasi tersebut, bukan akun pribadi Anda."
+    }
   }
 }

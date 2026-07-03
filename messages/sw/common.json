@@ -1047,7 +1047,8 @@
       "step2Title": "Tuma picha au maelezo",
       "step2Description": "Tumia boti yako chochote unachokiona uwandani. Tainá hutambua spishi na kuuliza maelezo muhimu.",
       "step3Title": "Uchunguzi umerekodiwa",
-      "step3Description": "Kila mwonekano uliothibitishwa huwa uchunguzi wa bioanuwai uliohifadhiwa kwenye akaunti yako na kuonekana kwenye wasifu wako."
+      "step3Description": "Kila mwonekano uliothibitishwa huwa uchunguzi wa bioanuwai uliohifadhiwa kwenye akaunti yako na kuonekana kwenye wasifu wako.",
+      "storageNote": "Uchunguzi uliothibitishwa kupitia Tainá huhifadhiwa chini ya akaunti yako ya GainForest. Picha na madokezo huhifadhiwa pamoja na faili za akaunti yako."
     },
     "signIn": {
       "title": "Ingia ili kuanza",
@@ -1156,5 +1157,11 @@
     "removeLabel": "Ondoa {name}",
     "builtinChip": "Iliyojengwa",
     "propagationHint": "Wadhamini wapya huchukua dakika chache kuonekana kwenye programu."
+  },
+  "accountObservations": {
+    "storageNote": {
+      "user": "Uchunguzi unaopakia hapa huhifadhiwa chini ya akaunti yako ya GainForest. Picha na faili huhifadhiwa pamoja na faili za akaunti yako.",
+      "organization": "Uchunguzi unaopakia hapa huhifadhiwa chini ya {accountName}. Picha na faili huhifadhiwa pamoja na faili za akaunti ya shirika hilo, si akaunti yako binafsi."
+    }
   }
 }

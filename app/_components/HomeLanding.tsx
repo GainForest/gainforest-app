@@ -788,6 +788,10 @@ function OpenNetworkSection() {
               </span>
             ))}
           </div>
+
+          <div className="mt-6 max-w-2xl rounded-2xl bg-muted px-4 py-3 text-center text-sm leading-6 text-muted-foreground">
+            {t("storageNote")}
+          </div>
         </motion.div>
       </div>
     </section>

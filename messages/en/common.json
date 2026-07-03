@@ -1047,7 +1047,8 @@
       "step2Title": "Send photos or notes",
       "step2Description": "Message your bot whatever you see in the field. Tainá identifies the species and asks for the details that matter.",
       "step3Title": "Observations, recorded",
-      "step3Description": "Each confirmed sighting becomes a biodiversity observation saved under your account and visible on your profile."
+      "step3Description": "Each confirmed sighting becomes a biodiversity observation saved under your account and visible on your profile.",
+      "storageNote": "Observations confirmed through Tainá are saved under your GainForest account. Photos and notes are stored with your account files."
     },
     "signIn": {
       "title": "Sign in to get started",
@@ -1156,5 +1157,11 @@
     "removeLabel": "Remove {name}",
     "builtinChip": "Built-in",
     "propagationHint": "New endorsers take a few minutes to appear across the app."
+  },
+  "accountObservations": {
+    "storageNote": {
+      "user": "Observations you upload here are saved under your GainForest account. Photos and files are stored with your account files.",
+      "organization": "Observations you upload here are saved under {accountName}. Photos and files are stored with that organization’s account files, not your personal account."
+    }
   }
 }

@@ -1047,7 +1047,8 @@
       "step2Title": "Envie fotos ou notas",
       "step2Description": "Mande para o seu bot o que você vir em campo. A Tainá identifica a espécie e pergunta pelos detalhes importantes.",
       "step3Title": "Observações registradas",
-      "step3Description": "Cada avistamento confirmado vira uma observação de biodiversidade salva na sua conta e visível no seu perfil."
+      "step3Description": "Cada avistamento confirmado vira uma observação de biodiversidade salva na sua conta e visível no seu perfil.",
+      "storageNote": "As observações confirmadas pela Tainá são salvas na sua conta GainForest. Fotos e notas ficam armazenadas com os arquivos da sua conta."
     },
     "signIn": {
       "title": "Entre para começar",
@@ -1156,5 +1157,11 @@
     "removeLabel": "Remover {name}",
     "builtinChip": "Integrado",
     "propagationHint": "Novos apoiadores levam alguns minutos para aparecer na app."
+  },
+  "accountObservations": {
+    "storageNote": {
+      "user": "As observações que você envia aqui são salvas na sua conta GainForest. Fotos e arquivos ficam armazenados com os arquivos da sua conta.",
+      "organization": "As observações que você envia aqui são salvas em {accountName}. Fotos e arquivos ficam armazenados com os arquivos dessa organização, não com sua conta pessoal."
+    }
   }
 }
