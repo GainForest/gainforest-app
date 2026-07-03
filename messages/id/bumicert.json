@@ -61,6 +61,7 @@
       "selectEvidence": "Pilih bukti yang akan ditambahkan.",
       "addType": "Tambahkan {type}",
       "tabs": {
+        "update": "Pembaruan teks",
         "audio": "Suara",
         "trees": "Pohon",
         "biodiversity": "Observasi",
@@ -101,6 +102,7 @@
         "certificate": "Sertifikat",
         "audio": "Suara",
         "other": "Lainnya",
+        "update": "Pembaruan",
         "treeDataset": "Dataset pohon",
         "biodiversity": "Alam",
         "occurrence": "Pohon"
@@ -140,10 +142,21 @@
       "checkingExistingLinks": "Memeriksa tautan linimasa yang sudah ada…",
       "unableToVerifyExistingLinks": "Tautan yang ada tidak dapat diperiksa. Muat ulang sebelum menautkan grup pohon.",
       "tabDescriptions": {
+        "update": "Tulis pembaruan singkat tentang kemajuan proyek ini.",
         "audio": "Tambahkan suara yang sudah disimpan oleh organisasi ini.",
         "trees": "Tambahkan informasi pohon yang dikelompokkan berdasarkan lokasi proyek.",
         "biodiversity": "Filter observasi dan tambahkan catatan yang ditampilkan atau grup tersimpan.",
         "files": "Tambahkan laporan, foto, video, atau halaman web."
+      },
+      "update": {
+        "heading": "Tulis pembaruan",
+        "subheading": "Bagikan kemajuan dengan kata-kata Anda sendiri. Pembaruan akan tampil di pembaruan proyek publik.",
+        "titleLabel": "Judul",
+        "titlePlaceholder": "Apa yang baru?",
+        "bodyLabel": "Pembaruan",
+        "bodyPlaceholder": "Bagikan kemajuan, capaian, atau kabar dari lapangan…",
+        "post": "Terbitkan pembaruan",
+        "posting": "Menerbitkan…"
       },
       "permissions": {
         "signIn": "Masuk dengan akun yang dapat mengelola lini waktu ini.",
@@ -210,6 +223,7 @@
         "biodiversity": "Alam",
         "document": "Berkas",
         "site": "Lokasi proyek",
+        "update": "Pembaruan",
         "other": "Bukti"
       },
       "notSpecified": "Tidak ditentukan",

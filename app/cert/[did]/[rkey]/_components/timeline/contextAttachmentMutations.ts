@@ -26,6 +26,12 @@ export type AttachmentDraft = {
   contentType: string;
   contents: AttachmentContentInput[];
   note?: string;
+  /**
+   * Long-form plaintext body stored as a `pub.leaflet.pages.linearDocument`
+   * description (one text block per paragraph). Used for text updates, which
+   * may have no `contents` at all.
+   */
+  textBody?: string;
   contextualSubjects?: AttachmentSubjectInfo[];
 };
 
@@ -81,15 +87,49 @@ type AttachmentSmallBlobContent = {
 };
 type AttachmentRecordContent = AttachmentUriContent | AttachmentSmallBlobContent;
 
+type AttachmentLinearDocumentDescription = {
+  $type: "pub.leaflet.pages.linearDocument";
+  blocks: Array<{
+    $type: "pub.leaflet.pages.linearDocument#block";
+    block: { $type: "pub.leaflet.blocks.text"; plaintext: string };
+  }>;
+};
+
+type AttachmentDescription =
+  | { $type: "org.hypercerts.defs#descriptionString"; value: string }
+  | AttachmentLinearDocumentDescription;
+
 type ContextAttachmentRecord = {
   $type: typeof ATTACHMENT_COLLECTION;
   title: string;
   contentType?: string;
   subjects?: ReturnType<typeof toAttachmentStrongRefs>;
   content?: AttachmentRecordContent[];
-  description?: { $type: "org.hypercerts.defs#descriptionString"; value: string };
+  description?: AttachmentDescription;
   createdAt: string;
 };
+
+function buildLinearDocumentDescription(text: string): AttachmentLinearDocumentDescription {
+  const paragraphs = text
+    .split(/\n+/)
+    .map((paragraph) => paragraph.trim())
+    .filter(Boolean);
+  return {
+    $type: "pub.leaflet.pages.linearDocument",
+    blocks: (paragraphs.length > 0 ? paragraphs : [text]).map((plaintext) => ({
+      $type: "pub.leaflet.pages.linearDocument#block",
+      block: { $type: "pub.leaflet.blocks.text", plaintext },
+    })),
+  };
+}
+
+function buildDraftDescription(draft: Pick<AttachmentDraft, "note" | "textBody">): AttachmentDescription | null {
+  const textBody = draft.textBody?.trim();
+  if (textBody) return buildLinearDocumentDescription(textBody);
+  const note = draft.note?.trim();
+  if (note) return { $type: "org.hypercerts.defs#descriptionString", value: note };
+  return null;
+}
 
 export type CreatedContextAttachment = {
   uri: string;
@@ -213,12 +253,15 @@ export function validateAttachmentDraft(args: {
   const title = args.draft.title.trim();
   const contentType = args.draft.contentType.trim();
   const note = args.draft.note?.trim() ?? "";
+  const textBody = args.draft.textBody?.trim() ?? "";
 
   if (!isValidAttachmentSubjectInfo(args.activitySubject)) {
     throw new AttachmentMutationInputError("invalid-activity");
   }
 
-  if (args.draft.contents.length === 0) {
+  // Text updates carry their body in `description` and may have no content
+  // items at all; everything else must link or upload at least one item.
+  if (args.draft.contents.length === 0 && !textBody) {
     throw new AttachmentMutationInputError("empty-content");
   }
 
@@ -239,6 +282,10 @@ export function validateAttachmentDraft(args: {
   }
 
   if (note.length > MAX_ATTACHMENT_NOTE_LENGTH) {
+    throw new AttachmentMutationInputError("note-too-long");
+  }
+
+  if (textBody.length > MAX_ATTACHMENT_NOTE_LENGTH) {
     throw new AttachmentMutationInputError("note-too-long");
   }
 
@@ -266,7 +313,7 @@ export function buildContextAttachmentRecord(args: {
 }): ContextAttachmentRecord {
   const title = args.draft.title.trim();
   const contentType = args.draft.contentType.trim();
-  const note = args.draft.note?.trim();
+  const description = buildDraftDescription(args.draft);
   const record: ContextAttachmentRecord = {
     $type: ATTACHMENT_COLLECTION,
     title,
@@ -276,7 +323,7 @@ export function buildContextAttachmentRecord(args: {
   if (contentType) record.contentType = contentType;
   if (args.subjects.length > 0) record.subjects = toAttachmentStrongRefs(args.subjects);
   if (args.content.length > 0) record.content = args.content;
-  if (note) record.description = { $type: "org.hypercerts.defs#descriptionString", value: note };
+  if (description) record.description = description;
 
   return record;
 }
@@ -286,7 +333,17 @@ export function validateContextAttachmentRecord(record: ContextAttachmentRecord)
   if (!record.title || record.title.length > MAX_ATTACHMENT_TITLE_LENGTH) throw new AttachmentMutationInputError("invalid-record");
   if (!record.createdAt || Number.isNaN(Date.parse(record.createdAt))) throw new AttachmentMutationInputError("invalid-record");
   if (record.contentType && record.contentType.length > MAX_ATTACHMENT_CONTENT_TYPE_LENGTH) throw new AttachmentMutationInputError("invalid-record");
-  if (record.description?.value && record.description.value.length > MAX_ATTACHMENT_NOTE_LENGTH) throw new AttachmentMutationInputError("invalid-record");
+
+  if (record.description) {
+    if (record.description.$type === "org.hypercerts.defs#descriptionString") {
+      if (record.description.value.length > MAX_ATTACHMENT_NOTE_LENGTH) throw new AttachmentMutationInputError("invalid-record");
+    } else {
+      const blocks = record.description.blocks;
+      if (blocks.length === 0) throw new AttachmentMutationInputError("invalid-record");
+      const totalLength = blocks.reduce((sum, entry) => sum + entry.block.plaintext.length, 0);
+      if (totalLength === 0 || totalLength > MAX_ATTACHMENT_NOTE_LENGTH) throw new AttachmentMutationInputError("invalid-record");
+    }
+  }
 
   if (record.subjects) {
     if (record.subjects.length > MAX_ATTACHMENT_SUBJECTS) throw new AttachmentMutationInputError("invalid-record");
@@ -365,9 +422,7 @@ export function buildOptimisticAttachmentItem(args: {
     record: {
       title: args.draft.title.trim(),
       shortDescription: null,
-      description: args.draft.note?.trim()
-        ? { $type: "org.hypercerts.defs#descriptionString", value: args.draft.note.trim() }
-        : null,
+      description: buildDraftDescription(args.draft),
       contentType: args.draft.contentType.trim() || null,
       subjects,
       content: args.content,

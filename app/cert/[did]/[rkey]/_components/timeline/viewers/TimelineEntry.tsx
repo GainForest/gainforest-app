@@ -164,6 +164,7 @@ export function TimelineEntry({
     nature: entryT("kind.biodiversity"),
     file: entryT("kind.document"),
     site: entryT("kind.site"),
+    update: entryT("kind.update"),
     other: entryT("kind.other"),
   };
   const metricCopy: MetricCopy = {
