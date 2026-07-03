@@ -4,7 +4,6 @@ import Image from "next/image";
 import { Fragment, useCallback, useEffect, useId, useRef, useState, type ChangeEvent, type DragEvent } from "react";
 import { useTranslations } from "next-intl";
 import {
-  CalendarIcon,
   CameraIcon,
   CheckCircle2Icon,
   ChevronDownIcon,
@@ -31,6 +30,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
+import { DatePicker } from "@/components/ui/date-picker";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
@@ -138,6 +138,15 @@ type AnalyzeResponse = {
 };
 
 const sleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
+
+// Local "yyyy-MM-dd" for today — caps the date picker so observers can't select a
+// future sighting date (which the occurrence proxy rejects anyway).
+function todayIso(): string {
+  const now = new Date();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
+  return `${now.getFullYear()}-${month}-${day}`;
+}
 
 function isNamed(name: string): boolean {
   const normalized = name.trim().toLowerCase();
@@ -1389,17 +1398,19 @@ function ObservationGroupCard({
         ) : null}
 
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-          <div className="relative">
-            <CalendarIcon className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              type="date"
-              value={fields.eventDate}
-              onChange={(event) => onChange({ eventDate: event.target.value })}
-              disabled={disabled || uploading}
-              aria-label={t("dateLabel")}
-              className="pl-8"
-            />
-          </div>
+          {/* A Popover-anchored calendar (not a native <input type="date">): the
+              browser's native date dropdown escaped and clipped against the
+              modal's overflow. This stays inside the viewport and visually
+              matches the location button beside it. Future dates are blocked
+              since observations are past sightings (and the server rejects them). */}
+          <DatePicker
+            value={fields.eventDate}
+            onChange={(value) => onChange({ eventDate: value })}
+            disabled={disabled || uploading}
+            max={todayIso()}
+            placeholder={t("dateLabel")}
+            className="h-9 gap-2 rounded-full border border-border bg-background px-4 py-0 text-sm font-normal hover:bg-muted"
+          />
           <Button
             type="button"
             variant="outline"
