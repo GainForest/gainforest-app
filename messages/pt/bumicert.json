@@ -61,6 +61,7 @@
       "selectEvidence": "Selecione a evidência a ser adicionada.",
       "addType": "Adicionar {type}",
       "tabs": {
+        "update": "Atualização de texto",
         "audio": "Sons",
         "trees": "Árvores",
         "biodiversity": "Observações",
@@ -101,6 +102,7 @@
         "certificate": "Certificado",
         "audio": "Som",
         "other": "Outras Permissões",
+        "update": "Atualização",
         "treeDataset": "Conjunto de dados de árvore",
         "biodiversity": "Natureza",
         "occurrence": "Árvore"
@@ -140,10 +142,21 @@
       "checkingExistingLinks": "Verificando vínculos existentes da linha do tempo…",
       "unableToVerifyExistingLinks": "Não foi possível verificar os links existentes. Atualize antes de vincular grupos de árvores.",
       "tabDescriptions": {
+        "update": "Escreva uma breve atualização sobre o progresso deste projeto.",
         "audio": "Adicione sons já salvos por esta organização.",
         "trees": "Adicione informações de árvores agrupadas por local do projeto.",
         "biodiversity": "Filtre observações e adicione registros exibidos ou grupos salvos.",
         "files": "Adicione relatórios, fotos, vídeos ou páginas web."
+      },
+      "update": {
+        "heading": "Escrever uma atualização",
+        "subheading": "Compartilhe o progresso com suas próprias palavras. Ela aparecerá nas atualizações públicas do projeto.",
+        "titleLabel": "Título",
+        "titlePlaceholder": "O que há de novo?",
+        "bodyLabel": "Atualização",
+        "bodyPlaceholder": "Compartilhe avanços, marcos ou novidades do campo…",
+        "post": "Publicar atualização",
+        "posting": "Publicando…"
       },
       "permissions": {
         "signIn": "Entre com uma conta que possa gerenciar esta linha do tempo.",
@@ -210,6 +223,7 @@
         "biodiversity": "Natureza",
         "document": "Arquivos",
         "site": "Local do projeto",
+        "update": "Atualização",
         "other": "Evidência"
       },
       "notSpecified": "Não especificado",
