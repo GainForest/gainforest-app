@@ -467,7 +467,7 @@ export function BumicertsExploreClient({ records: initialRecords = [] }: { recor
                 </div>
               </div>
 
-              <div className="relative z-20 flex items-center justify-between gap-3 sm:justify-start">
+              <div className="relative z-20 flex items-center justify-between gap-3 sm:justify-end">
                 <div className="inline-flex h-10 shrink-0 items-center rounded-full border border-border bg-background/50 p-0.5 backdrop-blur sm:hidden">
                   {(
                     viewOptions
@@ -488,35 +488,6 @@ export function BumicertsExploreClient({ records: initialRecords = [] }: { recor
                       <option.Icon className="h-3.5 w-3.5" aria-hidden />
                     </button>
                   ))}
-                </div>
-
-                <div className="scroll-mask-right scrollbar-hidden hidden min-w-0 flex-1 overflow-x-auto pb-px sm:block">
-                  <div className="flex items-center gap-2 pr-8">
-                    <Button
-                      type="button"
-                      onClick={clearFilters}
-                      variant={activeFilterCount === 0 ? "default" : "outline"}
-                      size="sm"
-                      className="h-10 text-sm"
-                    >
-                      {t("filters.allBumicerts")}
-                    </Button>
-                    {filterChips.map((chip) => {
-                      const selected = filters.includes(chip.key);
-                      return (
-                        <Button
-                          key={chip.key}
-                          type="button"
-                          onClick={() => toggleFilter(chip.key)}
-                          variant={selected ? "default" : "outline"}
-                          size="sm"
-                          className="h-10 text-sm"
-                        >
-                          {chip.label}
-                        </Button>
-                      );
-                    })}
-                  </div>
                 </div>
 
                 <div ref={filtersMenuRef} className="relative shrink-0">

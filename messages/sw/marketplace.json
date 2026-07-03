@@ -42,7 +42,7 @@
     "filters": {
       "allTitle": "Vichujio vyote",
       "description": "Onyesha Certs kwa beji ya chanzo, picha, maeneo ya mradi, watu waliotajwa, tarehe za kazi, au michango.",
-      "sourcesDescription": "Onyesha matokeo kwa beji ya chanzo.",
+      "sightingsDescription": "Onyesha uoni kwa chanzo, aina ya media, au kundi la asili.",
       "organization": "Shirika",
       "bioregion": "Eneo la kibaolojia",
       "country": "Nchi",
@@ -158,6 +158,9 @@
       "colType": "Aina",
       "colPlace": "Eneo",
       "colJoined": "Alijiunga"
+    },
+    "filters": {
+      "description": "Onyesha mashirika kwa chanzo, uchunguzi, kategoria, au nchi."
     },
     "quickFilters": {
       "observations": "Ina uchunguzi"

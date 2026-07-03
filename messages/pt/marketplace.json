@@ -42,7 +42,7 @@
     "filters": {
       "allTitle": "Todos os filtros",
       "description": "Mostre Certs por selo de origem, fotos, locais do projeto, pessoas nomeadas, datas de trabalho ou doações.",
-      "sourcesDescription": "Mostre resultados por selo de origem.",
+      "sightingsDescription": "Mostre avistamentos por origem, tipo de mídia ou grupo da natureza.",
       "organization": "Organização",
       "bioregion": "Biorregião",
       "country": "País",
@@ -158,6 +158,9 @@
       "colType": "Tipo",
       "colPlace": "Local",
       "colJoined": "Entrou"
+    },
+    "filters": {
+      "description": "Mostre organizações por origem, observações, categoria ou país."
     },
     "quickFilters": {
       "observations": "Tem observações"
