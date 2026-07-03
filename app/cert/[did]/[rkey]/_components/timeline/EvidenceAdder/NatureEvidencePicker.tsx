@@ -22,7 +22,6 @@ import {
 } from "../treeEvidenceClassification";
 import { CheckRow } from "./CheckRow";
 import { ManageLink, PickerEmpty } from "./ListHelpers";
-import { OptionalNote } from "./OptionalNote";
 import { SubmitButton } from "./SubmitButton";
 import {
   buildNatureDatasetGroups,
@@ -45,12 +44,16 @@ export function NatureEvidencePicker({
   occurrences,
   datasets,
   linkedUris,
+  caption,
+  captionTitle,
   isSubmitting,
   submitDrafts,
 }: {
   occurrences: OccurrenceRecord[];
   datasets: UploadTreeDatasetRecord[];
   linkedUris: ReadonlySet<string>;
+  caption: string;
+  captionTitle: string | null;
   isSubmitting: boolean;
   submitDrafts: EvidenceSubmitter;
 }) {
@@ -60,7 +63,6 @@ export function NatureEvidencePicker({
   const [selectedDatasets, setSelectedDatasets] = useState<Set<string>>(new Set());
   const [recordedByFilter, setRecordedByFilter] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
-  const [note, setNote] = useState("");
   const searchInputId = useId();
   const recorderLabelId = useId();
   const fallbackObservationName = evidenceT("unknownObservation");
@@ -241,10 +243,10 @@ export function NatureEvidencePicker({
       const group = datasetByUri.get(uri);
       return [
         {
-          title: group?.name ?? natureT("attachmentGroupTitle"),
+          title: captionTitle ?? group?.name ?? natureT("attachmentGroupTitle"),
           contentType: CONTENT_TYPE_NATURE_DATASET,
           contents: [uri],
-          note,
+          note: caption,
         } satisfies AttachmentDraft,
       ];
     });
@@ -253,10 +255,10 @@ export function NatureEvidencePicker({
       ...(occurrenceUris.length > 0
         ? [
             {
-              title: natureT("attachmentObservationsTitle"),
+              title: captionTitle ?? natureT("attachmentObservationsTitle"),
               contentType: CONTENT_TYPE_NATURE,
               contents: occurrenceUris,
-              note,
+              note: caption,
             } satisfies AttachmentDraft,
           ]
         : []),
@@ -264,7 +266,6 @@ export function NatureEvidencePicker({
     submitDrafts(drafts, () => {
       setSelectedOccurrences(new Set());
       setSelectedDatasets(new Set());
-      setNote("");
     });
   }
 
@@ -457,7 +458,6 @@ export function NatureEvidencePicker({
         </section>
       </div>
       <ManageLink href="/manage/observations" label={natureT("manageData")} />
-      <OptionalNote value={note} onChange={setNote} disabled={isSubmitting} />
       <SubmitButton count={selectedCount} isSubmitting={isSubmitting} onClick={submitSelection} />
     </>
   );

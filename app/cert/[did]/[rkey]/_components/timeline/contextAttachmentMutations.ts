@@ -218,7 +218,7 @@ export function validateAttachmentDraft(args: {
     throw new AttachmentMutationInputError("invalid-activity");
   }
 
-  if (args.draft.contents.length === 0) {
+  if (args.draft.contents.length === 0 && !note) {
     throw new AttachmentMutationInputError("empty-content");
   }
 

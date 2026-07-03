@@ -56,17 +56,25 @@
       }
     },
     "evidenceAdder": {
-      "title": "Adicionar evidência",
+      "title": "Adicionar atualização",
+      "composerDescription": "Escreva uma breve atualização. Anexe sons, observações, árvores ou arquivos se ajudarem.",
+      "captionPlaceholder": "Compartilhe uma atualização rápida do projeto. Você pode publicar só texto ou anexar evidências abaixo.",
+      "attachLabel": "Anexar evidência opcional:",
+      "attachingType": "Anexando {type}",
+      "postUpdate": "Publicar atualização",
+      "chooseAttachment": "Escolha algo para anexar",
+      "updateTitleFallback": "Atualização do projeto",
       "selectType": "Selecione o tipo de evidência a ser adicionada.",
       "selectEvidence": "Selecione a evidência a ser adicionada.",
       "addType": "Adicionar {type}",
       "tabs": {
+        "images": "Imagens",
         "audio": "Sons",
         "trees": "Árvores",
         "biodiversity": "Observações",
         "files": "Arquivos"
       },
-      "linking": "Vinculando…",
+      "linking": "Publicando…",
       "loadingSources": "Carregando evidências…",
       "sourcesLoadError": "Não foi possível carregar as evidências disponíveis. Atualize e tente novamente.",
       "selectToLink": "Selecione a evidência para vincular",
@@ -78,6 +86,8 @@
       "selectContentType": "Selecione o tipo de conteúdo",
       "addFilePlaceholder": "Adicionar um arquivo como evidência",
       "fileHelp": "Arquivos de até {maxSize}.",
+      "addImagePlaceholder": "Solte imagens aqui ou clique para enviar",
+      "imageHelp": "Imagens de até {maxSize}.",
       "externalLink": "Link externo",
       "externalLinkPlaceholder": "https://example.org/report",
       "addLink": "Adicionar",
@@ -127,6 +137,7 @@
         "biodiversity": "observações"
       },
       "attachmentTitles": {
+        "images": "Imagens",
         "audio": "Gravações de som",
         "trees": "Grupo de árvores",
         "biodiversity": "Observações"
@@ -140,6 +151,7 @@
       "checkingExistingLinks": "Verificando vínculos existentes da linha do tempo…",
       "unableToVerifyExistingLinks": "Não foi possível verificar os links existentes. Atualize antes de vincular grupos de árvores.",
       "tabDescriptions": {
+        "images": "Envie fotos do projeto.",
         "audio": "Adicione sons já salvos por esta organização.",
         "trees": "Adicione informações de árvores agrupadas por local do projeto.",
         "biodiversity": "Filtre observações e adicione registros exibidos ou grupos salvos.",
@@ -210,7 +222,7 @@
         "biodiversity": "Natureza",
         "document": "Arquivos",
         "site": "Local do projeto",
-        "other": "Evidência"
+        "other": "Atualização"
       },
       "notSpecified": "Não especificado",
       "resolvingDate": "Resolvendo data da evidência…",

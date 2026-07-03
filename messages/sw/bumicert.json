@@ -56,17 +56,25 @@
       }
     },
     "evidenceAdder": {
-      "title": "Ongeza Ushahidi",
+      "title": "Ongeza sasisho",
+      "composerDescription": "Andika sasisho fupi. Ambatisha sauti, uchunguzi, miti au faili ikiwa zitasaidia.",
+      "captionPlaceholder": "Shiriki sasisho fupi la mradi. Unaweza kuchapisha maandishi pekee au kuambatisha ushahidi hapa chini.",
+      "attachLabel": "Ambatisha ushahidi wa hiari:",
+      "attachingType": "Inaambatisha {type}",
+      "postUpdate": "Chapisha sasisho",
+      "chooseAttachment": "Chagua kitu cha kuambatisha",
+      "updateTitleFallback": "Sasisho la mradi",
       "selectType": "Chagua aina ya ushahidi wa kuongeza.",
       "selectEvidence": "Chagua ushahidi wa kuongeza.",
       "addType": "Ongeza {type}",
       "tabs": {
+        "images": "Picha",
         "audio": "Sauti",
         "trees": "Miti",
         "biodiversity": "Uchunguzi",
         "files": "Faili"
       },
-      "linking": "Inaunganisha...",
+      "linking": "Inachapisha...",
       "loadingSources": "Inapakia ushahidi...",
       "sourcesLoadError": "Haikuweza kupakia ushahidi uliopo. Onyesha upya na ujaribu tena.",
       "selectToLink": "Chagua ushahidi wa kuunganisha",
@@ -78,6 +86,8 @@
       "selectContentType": "Chagua aina ya maudhui",
       "addFilePlaceholder": "Ongeza faili kama ushahidi",
       "fileHelp": "Faili hadi {maxSize}.",
+      "addImagePlaceholder": "Dondosha picha hapa au bofya ili kupakia",
+      "imageHelp": "Picha hadi {maxSize}.",
       "externalLink": "Kiungo cha nje",
       "externalLinkPlaceholder": "https://example.org/report",
       "addLink": "Ongeza",
@@ -127,6 +137,7 @@
         "biodiversity": "uchunguzi"
       },
       "attachmentTitles": {
+        "images": "Picha",
         "audio": "Rekodi za sauti",
         "trees": "Kikundi cha miti",
         "biodiversity": "Uchunguzi"
@@ -140,6 +151,7 @@
       "checkingExistingLinks": "Inakagua viungo vilivyopo vya ratiba…",
       "unableToVerifyExistingLinks": "Viungo vilivyopo havikuweza kukaguliwa. Onyesha upya kabla ya kuunganisha vikundi vya miti.",
       "tabDescriptions": {
+        "images": "Pakia picha za mradi.",
         "audio": "Ongeza sauti ambazo tayari zimehifadhiwa na shirika hili.",
         "trees": "Ongeza taarifa za miti zilizopangwa kwa eneo la mradi.",
         "biodiversity": "Chuja uchunguzi na uongeze rekodi zinazoonyeshwa au vikundi vilivyohifadhiwa.",
@@ -210,7 +222,7 @@
         "biodiversity": "Asili",
         "document": "Faili",
         "site": "Eneo la mradi",
-        "other": "Ushahidi"
+        "other": "Sasisho"
       },
       "notSpecified": "Haijabainishwa",
       "resolvingDate": "Inatatua tarehe ya ushahidi...",

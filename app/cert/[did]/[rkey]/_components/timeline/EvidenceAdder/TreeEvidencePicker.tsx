@@ -28,7 +28,6 @@ import {
 import { getTreeGroupStats } from "../timelineReferences";
 import { CheckRow } from "./CheckRow";
 import { ListLayout, ManageLink, PickerEmpty } from "./ListHelpers";
-import { OptionalNote } from "./OptionalNote";
 import { SubmitButton } from "./SubmitButton";
 import {
   CONTENT_TYPE_TREE_DATASET,
@@ -42,6 +41,8 @@ export function TreeEvidencePicker({
   linkedTreeGroups,
   timelineAttachmentsUnavailable,
   occurrenceCoverageIncomplete,
+  caption,
+  captionTitle,
   isSubmitting,
   submitDrafts,
 }: {
@@ -51,12 +52,13 @@ export function TreeEvidencePicker({
   linkedTreeGroups: ReadonlySet<string>;
   timelineAttachmentsUnavailable: boolean;
   occurrenceCoverageIncomplete: boolean;
+  caption: string;
+  captionTitle: string | null;
   isSubmitting: boolean;
   submitDrafts: EvidenceSubmitter;
 }) {
   const evidenceT = useTranslations("bumicert.detail.evidenceAdder");
   const [selected, setSelected] = useState<Set<string>>(new Set());
-  const [note, setNote] = useState("");
   const treeDatasetMetadataUris = useMemo(
     () => new Set(data.filter(hasTreeDatasetMetadata).map((item) => item.uri)),
     [data],
@@ -128,10 +130,10 @@ export function TreeEvidencePicker({
   const drafts = groupedSelections.map(
     (group) =>
       ({
-        title: evidenceT("attachmentTitles.trees"),
+        title: captionTitle ?? evidenceT("attachmentTitles.trees"),
         contentType: CONTENT_TYPE_TREE_DATASET,
         contents: group.datasetUris,
-        note,
+        note: caption,
         contextualSubjects: [group.siteSubject],
       }) satisfies AttachmentDraft,
   );
@@ -224,14 +226,12 @@ export function TreeEvidencePicker({
         href="/manage/trees"
         label={evidenceT("manageType", { type: evidenceT("emptyLabels.trees") })}
       />
-      <OptionalNote value={note} onChange={setNote} disabled={isSubmitting} />
       <SubmitButton
         count={selectedDatasetUris.length}
         isSubmitting={isSubmitting}
         onClick={() =>
           submitDrafts(drafts, () => {
             setSelected(new Set());
-            setNote("");
           })
         }
       />

@@ -56,17 +56,25 @@
       }
     },
     "evidenceAdder": {
-      "title": "Agregar evidencia",
+      "title": "Agregar actualización",
+      "composerDescription": "Escriba una breve actualización. Adjunte sonidos, observaciones, árboles o archivos si ayudan.",
+      "captionPlaceholder": "Comparta una actualización rápida del proyecto. Puede publicar solo texto o adjuntar evidencia abajo.",
+      "attachLabel": "Adjuntar evidencia opcional:",
+      "attachingType": "Adjuntando {type}",
+      "postUpdate": "Publicar actualización",
+      "chooseAttachment": "Elija algo para adjuntar",
+      "updateTitleFallback": "Actualización del proyecto",
       "selectType": "Seleccione el tipo de evidencia a agregar.",
       "selectEvidence": "Seleccione la evidencia a agregar.",
       "addType": "Agregar {type}",
       "tabs": {
+        "images": "Imágenes",
         "audio": "Sonidos",
         "trees": "Árboles",
         "biodiversity": "Observaciones",
         "files": "Archivos"
       },
-      "linking": "Vinculando…",
+      "linking": "Publicando…",
       "loadingSources": "Cargando evidencia…",
       "sourcesLoadError": "No se pudo cargar la evidencia disponible. Actualice e inténtelo de nuevo.",
       "selectToLink": "Seleccione la evidencia para vincular",
@@ -78,6 +86,8 @@
       "selectContentType": "Seleccione el tipo de contenido",
       "addFilePlaceholder": "Agregar un archivo como evidencia",
       "fileHelp": "Archivos de hasta {maxSize}.",
+      "addImagePlaceholder": "Suelte imágenes aquí o haga clic para subir",
+      "imageHelp": "Imágenes de hasta {maxSize}.",
       "externalLink": "Enlace externo",
       "externalLinkPlaceholder": "https://example.org/report",
       "addLink": "Agregar",
@@ -127,6 +137,7 @@
         "biodiversity": "observaciones"
       },
       "attachmentTitles": {
+        "images": "Imágenes",
         "audio": "Grabaciones de sonido",
         "trees": "Grupo de árboles",
         "biodiversity": "Observaciones"
@@ -140,6 +151,7 @@
       "checkingExistingLinks": "Comprobando los vínculos existentes de la cronología…",
       "unableToVerifyExistingLinks": "No se pudieron comprobar los enlaces existentes. Actualiza antes de vincular grupos de árboles.",
       "tabDescriptions": {
+        "images": "Sube fotos del proyecto.",
         "audio": "Añade sonidos ya guardados por esta organización.",
         "trees": "Añade información de árboles agrupada por lugar del proyecto.",
         "biodiversity": "Filtra observaciones y agrega registros mostrados o grupos guardados.",
@@ -210,7 +222,7 @@
         "biodiversity": "Naturaleza",
         "document": "Archivos",
         "site": "Lugar del proyecto",
-        "other": "Evidencia"
+        "other": "Actualización"
       },
       "notSpecified": "No especificado",
       "resolvingDate": "Fecha de resolución de evidencia...",

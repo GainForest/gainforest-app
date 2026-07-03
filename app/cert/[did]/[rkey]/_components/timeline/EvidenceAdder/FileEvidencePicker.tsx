@@ -22,16 +22,19 @@ import {
   type FilePickerEvidenceContentType,
 } from "../shared/evidenceContentTypeRegistry";
 import { formatFileSize, toFileKey } from "./fileUtils";
-import { OptionalNote } from "./OptionalNote";
 import { SubmitButton } from "./SubmitButton";
 import type { EvidenceSubmitter } from "./types";
 
 const FILE_CONTENT_TYPE_OPTIONS = getFilePickerEvidenceContentTypeOptions();
 
 export function FileEvidencePicker({
+  caption,
+  captionTitle,
   isSubmitting,
   submitDrafts,
 }: {
+  caption: string;
+  captionTitle: string | null;
   isSubmitting: boolean;
   submitDrafts: EvidenceSubmitter;
 }) {
@@ -42,7 +45,6 @@ export function FileEvidencePicker({
   const [links, setLinks] = useState<string[]>([]);
   const [linkInput, setLinkInput] = useState("");
   const [linkError, setLinkError] = useState<string | null>(null);
-  const [note, setNote] = useState("");
   const inputId = useId();
   const contentTypeLabelId = useId();
   const externalLinkInputId = useId();
@@ -102,10 +104,10 @@ export function FileEvidencePicker({
   const title =
     contentTypeLabels[selectedContentType] ?? evidenceT("contentTypes.evidence");
   const draft: AttachmentDraft = {
-    title,
+    title: captionTitle ?? title,
     contentType: selectedContentType,
     contents: [...files, ...links],
-    note,
+    note: caption,
   };
 
   return (
@@ -243,7 +245,6 @@ export function FileEvidencePicker({
         )}
       </div>
 
-      <OptionalNote value={note} onChange={setNote} disabled={isSubmitting} />
       <SubmitButton
         count={files.length + links.length}
         isSubmitting={isSubmitting}
@@ -252,7 +253,6 @@ export function FileEvidencePicker({
             setFiles([]);
             setLinks([]);
             setLinkInput("");
-            setNote("");
           })
         }
       />

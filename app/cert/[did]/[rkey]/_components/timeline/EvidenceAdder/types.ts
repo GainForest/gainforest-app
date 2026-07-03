@@ -28,7 +28,7 @@ export type TimelineMutationPermission = {
   reason: string | null;
 };
 
-export type EvidenceTab = "audio" | "trees" | "nature" | "files";
+export type EvidenceTab = "image" | "audio" | "trees" | "nature" | "files";
 
 export type EvidenceSubmitter = (
   drafts: AttachmentDraft | AttachmentDraft[],

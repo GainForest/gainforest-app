@@ -8,22 +8,24 @@ import { formatDate } from "@/app/_lib/format";
 import type { AttachmentDraft } from "../contextAttachmentMutations";
 import { CheckRow } from "./CheckRow";
 import { ListLayout, ManageLink, PickerEmpty } from "./ListHelpers";
-import { OptionalNote } from "./OptionalNote";
 import { SubmitButton } from "./SubmitButton";
 import type { EvidenceSubmitter } from "./types";
 
 export function AudioEvidencePicker({
   data,
+  caption,
+  captionTitle,
   isSubmitting,
   submitDrafts,
 }: {
   data: ManagedAudio[];
+  caption: string;
+  captionTitle: string | null;
   isSubmitting: boolean;
   submitDrafts: EvidenceSubmitter;
 }) {
   const evidenceT = useTranslations("bumicert.detail.evidenceAdder");
   const [selected, setSelected] = useState<Set<string>>(new Set());
-  const [note, setNote] = useState("");
   const selectable = data.filter((item) => item.metadata.uri);
 
   function toggle(uri: string) {
@@ -40,10 +42,10 @@ export function AudioEvidencePicker({
   }
 
   const draft: AttachmentDraft = {
-    title: evidenceT("attachmentTitles.audio"),
+    title: captionTitle ?? evidenceT("attachmentTitles.audio"),
     contentType: "audio",
     contents: Array.from(selected),
-    note,
+    note: caption,
   };
 
   return (
@@ -67,14 +69,12 @@ export function AudioEvidencePicker({
         href="/manage/audio"
         label={evidenceT("manageType", { type: evidenceT("emptyLabels.audio") })}
       />
-      <OptionalNote value={note} onChange={setNote} disabled={isSubmitting} />
       <SubmitButton
         count={selected.size}
         isSubmitting={isSubmitting}
         onClick={() =>
           submitDrafts(draft, () => {
             setSelected(new Set());
-            setNote("");
           })
         }
       />

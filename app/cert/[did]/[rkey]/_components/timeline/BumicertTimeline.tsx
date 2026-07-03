@@ -86,7 +86,7 @@ export function BumicertTimeline({
     >
       <div className="flex flex-col gap-6">
         {canManageEvidence ? (
-          <section className="space-y-3 rounded-2xl bg-muted p-4" aria-labelledby="link-evidence-heading">
+          <section className="space-y-3" aria-labelledby="link-evidence-heading">
             {attachmentsUnavailable ? (
               <p className="rounded-2xl border border-warn/20 bg-warn/10 px-3 py-2 text-sm text-warn">
                 {timelineT("linksUnavailable")}
