@@ -158,12 +158,32 @@ function LandingTopNavbar() {
   );
 }
 
+// React (and Next.js SSR) does not serialize the JSX `muted` prop into the
+// server-rendered HTML, so mobile browsers parse the <video> as autoplay +
+// unmuted and block autoplay at parse time — leaving only the poster. Desktop
+// autoplay policies are lenient, which is why it "works on desktop but not on
+// mobile". After hydration we re-assert muted on the DOM element and kick off
+// playback ourselves; calling play() on a muted video needs no user gesture.
+function useAmbientVideo() {
+  const ref = useRef<HTMLVideoElement>(null);
+  const [videoReady, setVideoReady] = useState(false);
+  useEffect(() => {
+    const video = ref.current;
+    if (!video) return;
+    video.muted = true;
+    video.defaultMuted = true;
+    const attempt = video.play();
+    if (attempt) attempt.catch(() => {});
+  }, []);
+  return { videoRef: ref, videoReady, setVideoReady };
+}
+
 function LandingHero() {
   const t = useTranslations("landing.hero");
   // The ambient biodiversity clip fades in over the poster image once it can
   // actually play. If the clip is missing (not yet provided) or the browser
   // blocks autoplay, the poster image simply remains — identical to before.
-  const [videoReady, setVideoReady] = useState(false);
+  const { videoRef, videoReady, setVideoReady } = useAmbientVideo();
   return (
     <section className="relative flex min-h-[100dvh] flex-col overflow-hidden bg-background">
       <div className="absolute inset-y-0 right-0 w-full overflow-hidden">
@@ -189,6 +209,7 @@ function LandingHero() {
               public/assets/media/video/hero-biodiversity.{webm,mp4}; it fades in
               over the poster on first playback and stays hidden until then. */}
           <video
+            ref={videoRef}
             className={cn(
               "absolute inset-0 h-full w-full object-cover object-center transition-opacity duration-1000 ease-out",
               videoReady ? "opacity-100" : "opacity-0",
@@ -367,7 +388,7 @@ function OptionCard({
   // Ambient animal b-roll fades in over the photo once it can play; if the
   // clip is absent or autoplay is blocked, the photo simply stays — identical
   // to before. Decorative, so muted + aria-hidden.
-  const [videoReady, setVideoReady] = useState(false);
+  const { videoRef, videoReady, setVideoReady } = useAmbientVideo();
   return (
     <motion.div
       initial={{ opacity: 0, y: 22 }}
@@ -386,6 +407,7 @@ function OptionCard({
           />
           {card.video ? (
             <video
+              ref={videoRef}
               className={cn(
                 "absolute inset-0 h-full w-full object-cover transition-all duration-700 ease-out group-hover:scale-105",
                 videoReady ? "opacity-100" : "opacity-0",
