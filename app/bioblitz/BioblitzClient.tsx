@@ -153,6 +153,8 @@ export function BioblitzClient() {
       <div className="relative z-10 mx-auto flex w-full max-w-6xl flex-1 flex-col gap-5 px-4 pb-4 pt-[calc(3.5rem+0.75rem)] sm:px-6 lg:min-h-0">
         <HeroBand round={round} status={status} />
 
+        <ProofNote />
+
         <div className="grid flex-1 gap-4 lg:min-h-0 lg:grid-cols-[minmax(0,5fr)_1px_minmax(0,7fr)]">
           <div className="flex flex-col gap-4 lg:min-h-0">
             <Prizes />
@@ -408,34 +410,41 @@ function HowItWorks() {
             </li>
           ))}
         </ol>
-        <ProofNote />
       </Card>
     </FadeIn>
   );
 }
 
+// ── Data-as-proof wide card ───────────────────────────────────────────────────
+
 function ProofNote() {
   const t = useTranslations("marketplace.bioblitz.how.proof");
   const uses = ["grants", "stakeholders"] as const;
   return (
-    <div className="mt-3 rounded-xl border border-primary/15 bg-primary/5 p-3">
-      <div className="flex items-center gap-2">
-        <span className="flex size-5 items-center justify-center text-primary [&_svg]:size-4">
-          <ShieldCheckIcon />
-        </span>
-        <h3 className="text-sm font-semibold text-foreground">{t("title")}</h3>
+    <FadeIn delay={0.05}>
+      <div className="rounded-2xl border border-primary/15 bg-primary/5 p-4 sm:p-5">
+        <div className="flex flex-col gap-x-8 gap-y-3 md:flex-row md:items-start md:justify-between">
+          <div className="min-w-0 md:max-w-xl">
+            <div className="flex items-center gap-2">
+              <span className="flex size-6 items-center justify-center text-primary [&_svg]:size-5">
+                <ShieldCheckIcon />
+              </span>
+              <h2 className="text-base font-semibold text-foreground sm:text-lg">{t("title")}</h2>
+            </div>
+            <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{t("intro")}</p>
+            <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{t("outro")}</p>
+          </div>
+          <ul className="space-y-2 md:shrink-0 md:pt-1">
+            {uses.map((use) => (
+              <li key={use} className="flex items-start gap-2 text-sm leading-relaxed text-foreground">
+                <span aria-hidden className="mt-2 size-1.5 shrink-0 rounded-full bg-primary" />
+                {t(`uses.${use}`)}
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
-      <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">{t("intro")}</p>
-      <ul className="mt-1.5 space-y-1">
-        {uses.map((use) => (
-          <li key={use} className="flex items-start gap-2 text-xs leading-relaxed text-foreground">
-            <span aria-hidden className="mt-1.5 size-1 shrink-0 rounded-full bg-primary" />
-            {t(`uses.${use}`)}
-          </li>
-        ))}
-      </ul>
-      <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">{t("outro")}</p>
-    </div>
+    </FadeIn>
   );
 }
 
