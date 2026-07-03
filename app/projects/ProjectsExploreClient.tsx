@@ -416,14 +416,6 @@ export function ProjectsExploreClient({ records: initialRecords = [] }: { record
                 <Button type="button" onClick={clearFilters} variant={activeFilterCount === 0 ? "default" : "outline"} size="sm" className="h-10 text-sm">
                   {t("filters.allProjects")}
                 </Button>
-                {badgeFilterOptions.map((badge) => (
-                  <BadgeFilterButton
-                    key={badge.key}
-                    badge={badge}
-                    selected={badgeFilters.includes(badge.key)}
-                    onClick={() => toggleBadgeFilter(badge.key)}
-                  />
-                ))}
                 {filterChips.map((chip) => {
                   const selected = filters.includes(chip.key);
                   return (

@@ -501,14 +501,6 @@ export function BumicertsExploreClient({ records: initialRecords = [] }: { recor
                     >
                       {t("filters.allBumicerts")}
                     </Button>
-                    {badgeFilterOptions.map((badge) => (
-                      <BadgeFilterButton
-                        key={badge.key}
-                        badge={badge}
-                        selected={badgeFilters.includes(badge.key)}
-                        onClick={() => toggleBadgeFilter(badge.key)}
-                      />
-                    ))}
                     {filterChips.map((chip) => {
                       const selected = filters.includes(chip.key);
                       return (
