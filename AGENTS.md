@@ -1,11 +1,46 @@
 # AGENTS.md
 
 Instructions for AI agents (Claude Code, etc.) working in this repository.
-This is the landing page that fronts the two GainForest production apps —
-[green_globe](https://github.com/GainForest/green_globe) and
-[bumicerts-monorepo](https://github.com/GainForest/bumicerts-monorepo) —
-and renders live data from both. It also hosts an ATProto OAuth sign-in
+This is the landing page that fronts the GainForest production app and
+renders live data from it. It also hosts an ATProto OAuth sign-in
 flow ported from simocracy-v2.
+
+## The July 2026 merge (read this first)
+
+The two former production apps —
+[green_globe](https://github.com/GainForest/green_globe) at
+data.gainforest.app and
+[bumicerts-monorepo](https://github.com/GainForest/bumicerts-monorepo) at
+certs.gainforest.app — were **merged into ONE app at
+[gainforest.app](https://gainforest.app)** ("the GainForest app", repo:
+[gainforest-explorer](https://github.com/GainForest/gainforest-explorer)).
+This landing itself moved to the **gainforest.earth** domain
+(`CANONICAL_SITE_URL` in `layout.tsx`; set `NEXT_PUBLIC_BASE_URL`
+accordingly in deploys, including for OAuth client metadata).
+
+Consequences baked into this repo:
+
+- **All visitor-facing links** go through `app/_lib/urls.ts`:
+  `GAINFOREST_APP_URL` (env `NEXT_PUBLIC_GAINFOREST_APP_URL`) plus the
+  derived `PROJECTS_URL` (`/projects`, the old `/bumicerts`),
+  `GLOBE_URL` (`/globe`), `ORGANIZATIONS_URL`, `OBSERVATIONS_URL`,
+  `MANAGE_URL` (`/manage/organizations`, the steward dashboard that
+  replaced the retired `/bumicert/create` flow — that path 404s
+  upstream, as does `/leaderboard`), and `certUrl(did, rkey)`
+  (`/cert/<did>/<rkey>`, the merged app's canonical detail route; the
+  legacy `/bumicert/<did>-<rkey>` still resolves upstream).
+- **The pin-data API did NOT move.** green_globe's
+  `/api/list-organizations` does not exist on gainforest.app; the
+  fetcher in `app/_lib/projects.ts` keeps reading from the
+  still-deployed data.gainforest.app via `GREEN_GLOBE_API_URL`. Never
+  point visitor links at that host, and never point the fetcher at
+  gainforest.app until the merged app grows the route.
+- **Naming**: user-facing copy says "Certs" (the merged app's own word;
+  singular "Cert") instead of "Bumicerts", "Projects" for the
+  directory, and "the Globe" instead of "Green Globe" — in all five
+  locales. Internal identifiers (`fetchLiveBumicerts`, i18n key names
+  like `hero.cta.bumicerts`, file names) were deliberately NOT renamed
+  to keep the diff reviewable; don't "fix" them without a team ask.
 
 The **visual language follows `../bumicerts-clean-rewrite`** as of the
 June 2026 restyle — minimal editorial, big serif headlines with a

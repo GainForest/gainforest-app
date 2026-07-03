@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { BUMICERTS_URL, GLOBE_URL } from "../_lib/urls";
+import { GLOBE_URL, MANAGE_URL, PROJECTS_URL } from "../_lib/urls";
 import { LivePill } from "./LivePill";
 import { useT } from "./LocaleProvider";
 
@@ -40,7 +40,7 @@ export function ChoosePathClient({
   const t = useT();
   return (
     <div className="mt-12 grid grid-cols-1 gap-6 lg:mt-14 lg:auto-rows-fr lg:grid-cols-2 lg:gap-8">
-      {/* LEFT — Green Globe path. */}
+      {/* LEFT — Globe path (the merged app's /globe view). */}
       <div className="group flex h-full flex-col gap-6 rounded-[18px] border border-border-soft bg-background p-6 transition-all hover:-translate-y-0.5 hover:border-foreground/30 hover:shadow-[0_18px_40px_-24px_rgba(40,50,30,0.22)] sm:gap-8 sm:p-8 lg:p-10">
         <div className="min-w-0">
           {/* Eyebrow row mirrors the Bumicerts card: eyebrow label on
@@ -85,7 +85,7 @@ export function ChoosePathClient({
         </div>
       </div>
 
-      {/* RIGHT — Bumicerts fan. */}
+      {/* RIGHT — Certs fan. */}
       <div className="group flex h-full flex-col gap-6 rounded-[18px] border border-border-soft bg-background p-6 transition-all hover:-translate-y-0.5 hover:border-foreground/30 hover:shadow-[0_18px_40px_-24px_rgba(40,50,30,0.22)] sm:gap-8 sm:p-8 lg:p-10">
         <div className="min-w-0">
           {/* Eyebrow row: label on the left, unified <LivePill /> on
@@ -105,7 +105,7 @@ export function ChoosePathClient({
           </div>
           <h3 className="mt-3 font-garamond text-[24px] lg:text-[28px] font-normal leading-[1.15] text-foreground">
             <Link
-              href={`${BUMICERTS_URL}/bumicerts`}
+              href={PROJECTS_URL}
               target="_blank"
               rel="noreferrer"
               className="transition-colors hover:text-primary"
@@ -132,11 +132,13 @@ export function ChoosePathClient({
             underline (would have looked busy with two links). */}
         <div className="flex flex-wrap items-center gap-x-6 gap-y-2 self-start">
           <CardCta
-            href={`${BUMICERTS_URL}/bumicerts`}
+            href={PROJECTS_URL}
             label={t("choosePath.bumicerts.cta")}
           />
+          {/* "Showcase your work" — the merged app's steward dashboard
+              replaced the old /bumicert/create flow (404 upstream). */}
           <CardCta
-            href={`${BUMICERTS_URL}/bumicert/create`}
+            href={MANAGE_URL}
             label={t("choosePath.bumicerts.createCta")}
           />
         </div>

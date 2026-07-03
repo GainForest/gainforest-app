@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useId, useRef, useState, type KeyboardEvent } from "react";
 import type { MessageKey } from "../_lib/i18n";
-import { BUMICERTS_URL, GAINFOREST_URL, GLOBE_URL } from "../_lib/urls";
+import { DOCS_URL, GLOBE_URL, MANAGE_URL, PROJECTS_URL } from "../_lib/urls";
 import { useT } from "./LocaleProvider";
 
 // "I want to…" — two-audience role switcher.
@@ -39,12 +39,16 @@ const ROLE_CARDS: Record<Role, ReadonlyArray<Card>> = {
     {
       titleKey: "iwantto.card1.title",
       bodyKey: "iwantto.card1.body",
-      href: GAINFOREST_URL,
+      // This landing now lives at gainforest.earth itself, so community
+      // onboarding points at the docs portal instead of a self-link.
+      href: DOCS_URL,
     },
     {
       titleKey: "iwantto.card2.title",
       bodyKey: "iwantto.card2.body",
-      href: `${BUMICERTS_URL}/bumicert/create`,
+      // Steward dashboard — the merged app's replacement for the
+      // retired /bumicert/create flow.
+      href: MANAGE_URL,
     },
   ],
   supporter: [
@@ -56,7 +60,7 @@ const ROLE_CARDS: Record<Role, ReadonlyArray<Card>> = {
     {
       titleKey: "iwantto.card4.title",
       bodyKey: "iwantto.card4.body",
-      href: `${BUMICERTS_URL}/bumicerts`,
+      href: PROJECTS_URL,
     },
   ],
 };

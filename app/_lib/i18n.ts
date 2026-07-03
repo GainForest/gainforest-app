@@ -80,17 +80,17 @@ type Messages = {
   // so the key set is paired.
   "choosePath.globe.eyebrow": string;     // "01 · Explore the map"
   "choosePath.bumicerts.eyebrow": string; // "02 · Meet the certificate"
-  "choosePath.globe.heading": string;     // "What's Green Globe?"
-  "choosePath.bumicerts.heading": string; // "What's a Bumicert?"
+  "choosePath.globe.heading": string;     // "What's the Globe?"
+  "choosePath.bumicerts.heading": string; // "What's a Cert?"
   "choosePath.globe.dragHint": string;    // "drag to spin"
-  "choosePath.globe.previewTitle": string; // "Green Globe"
+  "choosePath.globe.previewTitle": string; // "The Globe"
   "choosePath.globe.previewLive": string; // "live"
   "choosePath.globe.previewBody": string;
   "choosePath.globe.pins": string;        // template: "{n}+ live pins"
   "choosePath.globe.caption.projects": string; // template: "{n}+ projects"
-  "choosePath.globe.cta": string;         // "Open Green Globe"
-  "choosePath.bumicerts.cta": string;     // "Explore Bumicerts"
-  "choosePath.bumicerts.createCta": string; // "Create a Bumicert"
+  "choosePath.globe.cta": string;         // "Open the Globe"
+  "choosePath.bumicerts.cta": string;     // "Explore Projects"
+  "choosePath.bumicerts.createCta": string; // "Showcase your work"
   "choosePath.bumicerts.verified": string;
   "choosePath.bumicerts.signed": string;
   // Unified live indicator for the two ChoosePath cards. Both cards
@@ -156,7 +156,7 @@ type Messages = {
   // ── Card chrome (Bumicerts + Globe windows in the hero) ────────
   "card.projects": string;
   "card.organizations": string;
-  "card.leaderboard": string;
+  "card.observations": string;
   "card.searchProjects": string;
   "card.viewAll": string;
   "card.projectsFound": string; // template: "{n} projects found"
@@ -374,26 +374,26 @@ export const MESSAGES: Record<Locale, Messages> = {
     "hero.title.italic": "regenerative intelligence",
     "hero.title.after": "",
     "hero.subtitle":
-      "Explore nature projects around the world, support community-led restoration, and create Bumicerts that make ecological stewardship visible and verifiable.",
-    "hero.cta.bumicerts": "Explore Bumicerts",
+      "Explore nature projects around the world, support community-led restoration, and create Certs that make ecological stewardship visible and verifiable.",
+    "hero.cta.bumicerts": "Explore Projects",
     "hero.cta.globe": "Open the Globe",
     "hero.footnote":
-      "Bumicerts are signed on AT Protocol; every record lives on a community-owned PDS and the live count to the right is pulled straight from the GainForest indexer.",
+      "Certs are signed on AT Protocol; every record lives on a community-owned PDS and the live count to the right is pulled straight from the GainForest indexer.",
     "choosePath.heading": "Choose how you want to use GainForest",
     "choosePath.globe.eyebrow": "01 · Explore the map",
     "choosePath.bumicerts.eyebrow": "02 · Meet the certificate",
-    "choosePath.globe.heading": "What's Green Globe?",
-    "choosePath.bumicerts.heading": "What's a Bumicert?",
+    "choosePath.globe.heading": "What's the Globe?",
+    "choosePath.bumicerts.heading": "What's a Cert?",
     "choosePath.globe.dragHint": "drag to spin",
-    "choosePath.globe.previewTitle": "Green Globe",
+    "choosePath.globe.previewTitle": "The Globe",
     "choosePath.globe.previewLive": "live",
     "choosePath.globe.previewBody":
       "Spin and pin community-led nature projects across the planet; every pin is an organization on ATProto.",
     "choosePath.globe.pins": "{n}+ live pins",
     "choosePath.globe.caption.projects": "{n}+ projects",
-    "choosePath.globe.cta": "Open Green Globe",
-    "choosePath.bumicerts.cta": "Explore Bumicerts",
-    "choosePath.bumicerts.createCta": "Create a Bumicert",
+    "choosePath.globe.cta": "Open the Globe",
+    "choosePath.bumicerts.cta": "Explore Projects",
+    "choosePath.bumicerts.createCta": "Showcase your work",
     "choosePath.bumicerts.verified": "Verified",
     "choosePath.bumicerts.signed": "ATProto signed",
     "choosePath.liveBadge": "Live",
@@ -401,15 +401,15 @@ export const MESSAGES: Record<Locale, Messages> = {
     "choosePath.globe.liveTooltip":
       "Project pins streamed in real time from ATProto via the GainForest indexer.",
     "choosePath.bumicerts.liveTooltip":
-      "The three most recent Bumicerts, fetched live from the GainForest indexer.",
+      "The three most recent Certs, fetched live from the GainForest indexer.",
     "choosePath.bumicerts.fallbackTooltip":
       "Live indexer is unreachable; showing a cached fallback.",
     "choosePath.globe.title": "Open the Globe",
     "choosePath.globe.body":
       "Discover projects and ecosystems across the world. Explore, learn, and get inspired.",
-    "choosePath.bumicerts.title": "Explore Bumicerts",
+    "choosePath.bumicerts.title": "Explore Projects",
     "choosePath.bumicerts.body":
-      "An environmental impact certificate issued by the community doing the work. Each Bumicert binds photos, audio, and field notes into a verifiable, portable record on ATProto.",
+      "An environmental impact certificate issued by the community doing the work. Each Cert binds photos, audio, and field notes into a verifiable, portable record on ATProto.",
     "choosePath.or": "or",
     "choosePath.allProjects": "All projects",
     "iwantto.heading": "I want to…",
@@ -419,15 +419,15 @@ export const MESSAGES: Record<Locale, Messages> = {
     "iwantto.card1.title": "Tell my impact story",
     "iwantto.card1.body":
       "Self-host your fieldwork on ATProto. We bring the models, workshops, and tooling.",
-    "iwantto.card2.title": "Issue a Bumicert",
+    "iwantto.card2.title": "Issue a Cert",
     "iwantto.card2.body":
       "Bundle your photos, audio, and field notes into one portable, signed record.",
     "iwantto.card3.title": "Discover projects",
     "iwantto.card3.body":
-      "Spin Green Globe to meet community-led nature work around the planet.",
+      "Spin the Globe to meet community-led nature work around the planet.",
     "iwantto.card4.title": "Back what's verified",
     "iwantto.card4.body":
-      "Browse recent Bumicerts and support the stewards behind each one.",
+      "Browse recent Certs and support the stewards behind each one.",
     "howitworks.heading": "How it works",
     "howitworks.subheading":
       "Most climate finance never reaches the grassroots. We close that loop with local-first technology, community-owned data, and open protocols.",
@@ -435,12 +435,12 @@ export const MESSAGES: Record<Locale, Messages> = {
     "howitworks.step1.title": "Community-owned data",
     "howitworks.step1.body":
       "Communities self-host their fieldwork on their own ATProto PDS, with models, workshops, and tooling from GainForest.",
-    "howitworks.step2.title": "Issue a Bumicert",
+    "howitworks.step2.title": "Issue a Cert",
     "howitworks.step2.body":
-      "Each community mints a Bumicert that binds their photos, audio, and field notes into one signed record.",
+      "Each community mints a Cert that binds their photos, audio, and field notes into one signed record.",
     "howitworks.step3.title": "Supporters discover",
     "howitworks.step3.body":
-      "Donors, foundations, and allies find verified, community-led work through Green Globe and the Bumicerts directory.",
+      "Donors, foundations, and allies find verified, community-led work through the GainForest app's Globe and project directory.",
     "howitworks.step4.title": "Open by protocol",
     "howitworks.step4.body":
       "Every record lives on ATProto, so the same impact story flows to partners like Ma Earth and Hypercerts. No lock-in.",
@@ -451,13 +451,13 @@ export const MESSAGES: Record<Locale, Messages> = {
       "Join a global community creating a fair future for nature and people.",
     "natureCta.donate": "Donate",
     "natureCta.exploreProjects": "Explore projects",
-    "natureCta.createBumicert": "Create a Bumicert",
+    "natureCta.createBumicert": "Showcase your work",
     "natureCta.newsletter": "Subscribe to our newsletter",
     "footer.rights": "All rights reserved.",
     "footer.contact": "Contact",
     "card.projects": "Projects",
     "card.organizations": "Organizations",
-    "card.leaderboard": "Leaderboard",
+    "card.observations": "Observations",
     "card.searchProjects": "Search projects…",
     "card.viewAll": "View all",
     "card.projectsFound": "{n} projects found",
@@ -469,7 +469,7 @@ export const MESSAGES: Record<Locale, Messages> = {
     "taina.greetingHello":
       "Hi; I'm Taina. Sit a moment and explore GainForest with me.",
     "taina.greetingHint":
-      "Ask me about the Globe, Bumicerts, community-led nature work, or Indigenous data sovereignty; or just say hi.",
+      "Ask me about the Globe, Certs, community-led nature work, or Indigenous data sovereignty; or just say hi.",
     "taina.placeholder": "Say hi…",
     "taina.thinking": "Taina is thinking…",
     "awards.label": "Winners of",
@@ -533,9 +533,9 @@ export const MESSAGES: Record<Locale, Messages> = {
       "Our non-profit collaborates with grassroots cooperatives, Indigenous councils, ecological labs, and protected-area managers across four continents.",
     "partners.stat": "50+",
     "partners.statLabel": "nature partners worldwide",
-    "partners.bannerLabel": "Live from Green Globe",
+    "partners.bannerLabel": "Live from the Globe",
     "partners.bannerCountLabel": "names",
-    "partners.recordLabel": "Green Globe live record",
+    "partners.recordLabel": "Globe live record",
     "partners.callsEyebrow": "Monthly community calls",
     "partners.callsTitle": "Hear the stewards behind the pins.",
     "partners.callsBody":
@@ -692,26 +692,26 @@ export const MESSAGES: Record<Locale, Messages> = {
     "hero.title.italic": "inteligencia regenerativa",
     "hero.title.after": "",
     "hero.subtitle":
-      "Explora proyectos de naturaleza en todo el mundo, apoya la restauración liderada por comunidades y crea Bumicerts que hagan visible y verificable la custodia ecológica.",
-    "hero.cta.bumicerts": "Explorar Bumicerts",
+      "Explora proyectos de naturaleza en todo el mundo, apoya la restauración liderada por comunidades y crea Certs que hagan visible y verificable la custodia ecológica.",
+    "hero.cta.bumicerts": "Explorar proyectos",
     "hero.cta.globe": "Abrir el Globo",
     "hero.footnote":
-      "Los Bumicerts se firman en el AT Protocol; cada registro vive en un PDS comunitario y el contador en vivo a la derecha proviene directamente del indexador de GainForest.",
+      "Los Certs se firman en el AT Protocol; cada registro vive en un PDS comunitario y el contador en vivo a la derecha proviene directamente del indexador de GainForest.",
     "choosePath.heading": "Elige cómo quieres usar GainForest",
     "choosePath.globe.eyebrow": "01 · Explora el mapa",
     "choosePath.bumicerts.eyebrow": "02 · Conoce el certificado",
-    "choosePath.globe.heading": "¿Qué es Green Globe?",
-    "choosePath.bumicerts.heading": "¿Qué es un Bumicert?",
+    "choosePath.globe.heading": "¿Qué es el Globo?",
+    "choosePath.bumicerts.heading": "¿Qué es un Cert?",
     "choosePath.globe.dragHint": "arrastra para girar",
-    "choosePath.globe.previewTitle": "Green Globe",
+    "choosePath.globe.previewTitle": "El Globo",
     "choosePath.globe.previewLive": "en vivo",
     "choosePath.globe.previewBody":
       "Gira el mundo y descubre proyectos liderados por comunidades; cada pin es una organización en ATProto.",
     "choosePath.globe.pins": "{n}+ pines en vivo",
     "choosePath.globe.caption.projects": "{n}+ proyectos",
-    "choosePath.globe.cta": "Abrir Green Globe",
-    "choosePath.bumicerts.cta": "Explorar Bumicerts",
-    "choosePath.bumicerts.createCta": "Crear un Bumicert",
+    "choosePath.globe.cta": "Abrir el Globo",
+    "choosePath.bumicerts.cta": "Explorar proyectos",
+    "choosePath.bumicerts.createCta": "Muestra tu trabajo",
     "choosePath.bumicerts.verified": "Verificado",
     "choosePath.bumicerts.signed": "Firmado en ATProto",
     "choosePath.liveBadge": "En vivo",
@@ -719,15 +719,15 @@ export const MESSAGES: Record<Locale, Messages> = {
     "choosePath.globe.liveTooltip":
       "Pines de proyectos transmitidos en tiempo real desde ATProto a través del indexador de GainForest.",
     "choosePath.bumicerts.liveTooltip":
-      "Los tres Bumicerts más recientes, obtenidos en vivo del indexador de GainForest.",
+      "Los tres Certs más recientes, obtenidos en vivo del indexador de GainForest.",
     "choosePath.bumicerts.fallbackTooltip":
       "El indexador en vivo no está disponible; mostrando una copia en caché.",
     "choosePath.globe.title": "Abrir el Globo",
     "choosePath.globe.body":
       "Descubre proyectos y ecosistemas en todo el mundo. Explora, aprende e inspírate.",
-    "choosePath.bumicerts.title": "Explorar Bumicerts",
+    "choosePath.bumicerts.title": "Explorar proyectos",
     "choosePath.bumicerts.body":
-      "Un certificado de impacto ambiental emitido por la comunidad que hace el trabajo. Cada Bumicert reúne fotos, audio y notas de campo en un registro verificable y portátil en ATProto.",
+      "Un certificado de impacto ambiental emitido por la comunidad que hace el trabajo. Cada Cert reúne fotos, audio y notas de campo en un registro verificable y portátil en ATProto.",
     "choosePath.or": "o",
     "choosePath.allProjects": "Todos los proyectos",
     "iwantto.heading": "Quiero…",
@@ -737,15 +737,15 @@ export const MESSAGES: Record<Locale, Messages> = {
     "iwantto.card1.title": "Contar mi historia de impacto",
     "iwantto.card1.body":
       "Autoaloja tu trabajo de campo en ATProto. Aportamos modelos, talleres y herramientas.",
-    "iwantto.card2.title": "Emitir un Bumicert",
+    "iwantto.card2.title": "Emitir un Cert",
     "iwantto.card2.body":
       "Reúne tus fotos, audio y notas de campo en un registro portátil y firmado.",
     "iwantto.card3.title": "Descubrir proyectos",
     "iwantto.card3.body":
-      "Gira Green Globe para conocer el trabajo de naturaleza liderado por comunidades en todo el planeta.",
+      "Gira el Globo para conocer el trabajo de naturaleza liderado por comunidades en todo el planeta.",
     "iwantto.card4.title": "Apoyar lo verificado",
     "iwantto.card4.body":
-      "Explora los Bumicerts recientes y respalda a las personas que están detrás.",
+      "Explora los Certs recientes y respalda a las personas que están detrás.",
     "howitworks.heading": "Cómo funciona",
     "howitworks.subheading":
       "La mayor parte del financiamiento climático no llega a las bases. Cerramos ese ciclo con tecnología local-first, datos de propiedad comunitaria y protocolos abiertos.",
@@ -753,12 +753,12 @@ export const MESSAGES: Record<Locale, Messages> = {
     "howitworks.step1.title": "Datos de la comunidad",
     "howitworks.step1.body":
       "Las comunidades autoalojan su trabajo de campo en su propio PDS de ATProto, con modelos, talleres y herramientas de GainForest.",
-    "howitworks.step2.title": "Emitir un Bumicert",
+    "howitworks.step2.title": "Emitir un Cert",
     "howitworks.step2.body":
-      "Cada comunidad acuña un Bumicert que une sus fotos, audio y notas de campo en un registro firmado.",
+      "Cada comunidad acuña un Cert que une sus fotos, audio y notas de campo en un registro firmado.",
     "howitworks.step3.title": "Los aliados descubren",
     "howitworks.step3.body":
-      "Donantes, fundaciones y aliados encuentran trabajo comunitario verificado a través de Green Globe y el directorio de Bumicerts.",
+      "Donantes, fundaciones y aliados encuentran trabajo comunitario verificado a través del Globo y el directorio de proyectos de GainForest.",
     "howitworks.step4.title": "Abierto por protocolo",
     "howitworks.step4.body":
       "Cada registro vive en ATProto, así que la misma historia de impacto fluye hacia aliados como Ma Earth y Hypercerts. Sin lock-in.",
@@ -769,13 +769,13 @@ export const MESSAGES: Record<Locale, Messages> = {
       "Únete a una comunidad global que construye un futuro justo para la naturaleza y las personas.",
     "natureCta.donate": "Donar",
     "natureCta.exploreProjects": "Explorar proyectos",
-    "natureCta.createBumicert": "Crear un Bumicert",
+    "natureCta.createBumicert": "Muestra tu trabajo",
     "natureCta.newsletter": "Suscríbete a nuestro newsletter",
     "footer.rights": "Todos los derechos reservados.",
     "footer.contact": "Contacto",
     "card.projects": "Proyectos",
     "card.organizations": "Organizaciones",
-    "card.leaderboard": "Clasificación",
+    "card.observations": "Observaciones",
     "card.searchProjects": "Buscar proyectos…",
     "card.viewAll": "Ver todo",
     "card.projectsFound": "{n} proyectos encontrados",
@@ -787,7 +787,7 @@ export const MESSAGES: Record<Locale, Messages> = {
     "taina.greetingHello":
       "Hola; soy Taina. Siéntate un momento y exploremos GainForest juntos.",
     "taina.greetingHint":
-      "Pregúntame por el Globo, los Bumicerts, el trabajo de las comunidades en la naturaleza o la soberanía de datos indígenas; o solo saluda.",
+      "Pregúntame por el Globo, los Certs, el trabajo de las comunidades en la naturaleza o la soberanía de datos indígenas; o solo saluda.",
     "taina.placeholder": "Saluda…",
     "taina.thinking": "Taina está pensando…",
     "awards.label": "Ganadores de",
@@ -851,9 +851,9 @@ export const MESSAGES: Record<Locale, Messages> = {
       "Colaboramos con cooperativas de base, consejos indígenas, laboratorios ecológicos y administraciones de áreas protegidas en cuatro continentes.",
     "partners.stat": "50+",
     "partners.statLabel": "aliados de naturaleza en el mundo",
-    "partners.bannerLabel": "En vivo desde Green Globe",
+    "partners.bannerLabel": "En vivo desde el Globo",
     "partners.bannerCountLabel": "nombres",
-    "partners.recordLabel": "Registro en vivo de Green Globe",
+    "partners.recordLabel": "Registro en vivo del Globo",
     "partners.callsEyebrow": "Llamadas comunitarias mensuales",
     "partners.callsTitle": "Escucha a los guardianes detrás de los puntos.",
     "partners.callsBody":
@@ -1011,26 +1011,26 @@ export const MESSAGES: Record<Locale, Messages> = {
     "hero.title.italic": "inteligência regenerativa",
     "hero.title.after": "",
     "hero.subtitle":
-      "Explore projetos de natureza ao redor do mundo, apoie a restauração liderada por comunidades e crie Bumicerts que tornem o cuidado ecológico visível e verificável.",
-    "hero.cta.bumicerts": "Explorar Bumicerts",
+      "Explore projetos de natureza ao redor do mundo, apoie a restauração liderada por comunidades e crie Certs que tornem o cuidado ecológico visível e verificável.",
+    "hero.cta.bumicerts": "Explorar projetos",
     "hero.cta.globe": "Abrir o Globo",
     "hero.footnote":
-      "Os Bumicerts são assinados no AT Protocol; cada registro vive em um PDS de propriedade comunitária e o contador ao vivo à direita vem direto do indexador da GainForest.",
+      "Os Certs são assinados no AT Protocol; cada registro vive em um PDS de propriedade comunitária e o contador ao vivo à direita vem direto do indexador da GainForest.",
     "choosePath.heading": "Escolha como você quer usar a GainForest",
     "choosePath.globe.eyebrow": "01 · Explorar o mapa",
     "choosePath.bumicerts.eyebrow": "02 · Conhecer o certificado",
-    "choosePath.globe.heading": "O que é o Green Globe?",
-    "choosePath.bumicerts.heading": "O que é um Bumicert?",
+    "choosePath.globe.heading": "O que é o Globo?",
+    "choosePath.bumicerts.heading": "O que é um Cert?",
     "choosePath.globe.dragHint": "arraste para girar",
-    "choosePath.globe.previewTitle": "Green Globe",
+    "choosePath.globe.previewTitle": "O Globo",
     "choosePath.globe.previewLive": "ao vivo",
     "choosePath.globe.previewBody":
       "Gire e descubra projetos de natureza liderados por comunidades; cada pin é uma organização no ATProto.",
     "choosePath.globe.pins": "{n}+ pins ao vivo",
     "choosePath.globe.caption.projects": "{n}+ projetos",
-    "choosePath.globe.cta": "Abrir o Green Globe",
-    "choosePath.bumicerts.cta": "Explorar Bumicerts",
-    "choosePath.bumicerts.createCta": "Criar um Bumicert",
+    "choosePath.globe.cta": "Abrir o Globo",
+    "choosePath.bumicerts.cta": "Explorar projetos",
+    "choosePath.bumicerts.createCta": "Mostre seu trabalho",
 
     "choosePath.bumicerts.verified": "Verificado",
     "choosePath.bumicerts.signed": "Assinado em ATProto",
@@ -1039,15 +1039,15 @@ export const MESSAGES: Record<Locale, Messages> = {
     "choosePath.globe.liveTooltip":
       "Pinos de projetos transmitidos em tempo real do ATProto via indexador da GainForest.",
     "choosePath.bumicerts.liveTooltip":
-      "Os três Bumicerts mais recentes, obtidos ao vivo do indexador da GainForest.",
+      "Os três Certs mais recentes, obtidos ao vivo do indexador da GainForest.",
     "choosePath.bumicerts.fallbackTooltip":
       "O indexador ao vivo está indisponível; mostrando uma cópia em cache.",
     "choosePath.globe.title": "Abrir o Globo",
     "choosePath.globe.body":
       "Descubra projetos e ecossistemas pelo mundo. Explore, aprenda e inspire-se.",
-    "choosePath.bumicerts.title": "Explorar Bumicerts",
+    "choosePath.bumicerts.title": "Explorar projetos",
     "choosePath.bumicerts.body":
-      "Um certificado de impacto ambiental emitido pela comunidade que faz o trabalho. Cada Bumicert reúne fotos, áudios e notas de campo em um registro verificável e portátil no ATProto.",
+      "Um certificado de impacto ambiental emitido pela comunidade que faz o trabalho. Cada Cert reúne fotos, áudios e notas de campo em um registro verificável e portátil no ATProto.",
     "choosePath.or": "ou",
     "choosePath.allProjects": "Todos os projetos",
     "iwantto.heading": "Quero…",
@@ -1057,15 +1057,15 @@ export const MESSAGES: Record<Locale, Messages> = {
     "iwantto.card1.title": "Contar minha história de impacto",
     "iwantto.card1.body":
       "Hospede você mesmo seu trabalho de campo no ATProto. Trazemos modelos, oficinas e ferramentas.",
-    "iwantto.card2.title": "Emitir um Bumicert",
+    "iwantto.card2.title": "Emitir um Cert",
     "iwantto.card2.body":
       "Reúna fotos, áudios e notas de campo em um registro portátil e assinado.",
     "iwantto.card3.title": "Descobrir projetos",
     "iwantto.card3.body":
-      "Gire o Green Globe para conhecer o trabalho liderado por comunidades em todo o planeta.",
+      "Gire o Globo para conhecer o trabalho liderado por comunidades em todo o planeta.",
     "iwantto.card4.title": "Apoiar o verificado",
     "iwantto.card4.body":
-      "Veja os Bumicerts recentes e apoie quem está por trás de cada um.",
+      "Veja os Certs recentes e apoie quem está por trás de cada um.",
     "howitworks.heading": "Como funciona",
     "howitworks.subheading":
       "A maior parte do financiamento climático não chega às bases. Fechamos esse ciclo com tecnologia local-first, dados de propriedade comunitária e protocolos abertos.",
@@ -1073,12 +1073,12 @@ export const MESSAGES: Record<Locale, Messages> = {
     "howitworks.step1.title": "Dados da comunidade",
     "howitworks.step1.body":
       "As comunidades hospedam seu próprio trabalho de campo em um PDS de ATProto, com modelos, oficinas e ferramentas da GainForest.",
-    "howitworks.step2.title": "Emitir um Bumicert",
+    "howitworks.step2.title": "Emitir um Cert",
     "howitworks.step2.body":
-      "Cada comunidade emite um Bumicert que reúne suas fotos, áudios e notas de campo em um registro assinado.",
+      "Cada comunidade emite um Cert que reúne suas fotos, áudios e notas de campo em um registro assinado.",
     "howitworks.step3.title": "Apoiadores descobrem",
     "howitworks.step3.body":
-      "Doadores, fundações e aliados encontram trabalho comunitário verificado pelo Green Globe e pelo diretório de Bumicerts.",
+      "Doadores, fundações e aliados encontram trabalho comunitário verificado pelo Globo e pelo diretório de projetos da GainForest.",
     "howitworks.step4.title": "Aberto por protocolo",
     "howitworks.step4.body":
       "Cada registro vive no ATProto, então a mesma história de impacto flui para parceiros como Ma Earth e Hypercerts. Sem lock-in.",
@@ -1089,13 +1089,13 @@ export const MESSAGES: Record<Locale, Messages> = {
       "Junte-se a uma comunidade global construindo um futuro justo para a natureza e as pessoas.",
     "natureCta.donate": "Doar",
     "natureCta.exploreProjects": "Explorar projetos",
-    "natureCta.createBumicert": "Criar um Bumicert",
+    "natureCta.createBumicert": "Mostre seu trabalho",
     "natureCta.newsletter": "Assine nossa newsletter",
     "footer.rights": "Todos os direitos reservados.",
     "footer.contact": "Contato",
     "card.projects": "Projetos",
     "card.organizations": "Organizações",
-    "card.leaderboard": "Classificação",
+    "card.observations": "Observações",
     "card.searchProjects": "Buscar projetos…",
     "card.viewAll": "Ver tudo",
     "card.projectsFound": "{n} projetos encontrados",
@@ -1107,7 +1107,7 @@ export const MESSAGES: Record<Locale, Messages> = {
     "taina.greetingHello":
       "Oi; sou a Taina. Sente um pouco e vamos explorar a GainForest juntas.",
     "taina.greetingHint":
-      "Pergunte sobre o Globo, os Bumicerts, o trabalho das comunidades na natureza ou a soberania de dados indígenas; ou só venha dizer oi.",
+      "Pergunte sobre o Globo, os Certs, o trabalho das comunidades na natureza ou a soberania de dados indígenas; ou só venha dizer oi.",
     "taina.placeholder": "Diga oi…",
     "taina.thinking": "Taina está pensando…",
     "awards.label": "Vencedores de",
@@ -1171,9 +1171,9 @@ export const MESSAGES: Record<Locale, Messages> = {
       "Colaboramos com cooperativas de base, conselhos indígenas, laboratórios ecológicos e gestores de áreas protegidas em quatro continentes.",
     "partners.stat": "50+",
     "partners.statLabel": "parceiros pela natureza no mundo",
-    "partners.bannerLabel": "Ao vivo do Green Globe",
+    "partners.bannerLabel": "Ao vivo do Globo",
     "partners.bannerCountLabel": "nomes",
-    "partners.recordLabel": "Registro ao vivo do Green Globe",
+    "partners.recordLabel": "Registro ao vivo do Globo",
     "partners.callsEyebrow": "Chamadas comunitárias mensais",
     "partners.callsTitle": "Ouça os guardiões por trás dos pontos.",
     "partners.callsBody":
@@ -1329,26 +1329,26 @@ export const MESSAGES: Record<Locale, Messages> = {
     "hero.title.italic": "akili ya kuzaa upya",
     "hero.title.after": "",
     "hero.subtitle":
-      "Vinjari miradi ya asili kote duniani, saidia urejeshaji unaoongozwa na jamii, na tengeneza Bumicerts zinazofanya utunzaji wa ikolojia uonekane na kuthibitishwa.",
-    "hero.cta.bumicerts": "Vinjari Bumicerts",
+      "Vinjari miradi ya asili kote duniani, saidia urejeshaji unaoongozwa na jamii, na tengeneza Certs zinazofanya utunzaji wa ikolojia uonekane na kuthibitishwa.",
+    "hero.cta.bumicerts": "Vinjari miradi",
     "hero.cta.globe": "Fungua Dunia",
     "hero.footnote":
-      "Bumicerts husainiwa kwenye AT Protocol; kila rekodi inaishi kwenye PDS inayomilikiwa na jamii na hesabu ya moja kwa moja upande wa kulia inatoka moja kwa moja kwa kiashiria cha GainForest.",
+      "Certs husainiwa kwenye AT Protocol; kila rekodi inaishi kwenye PDS inayomilikiwa na jamii na hesabu ya moja kwa moja upande wa kulia inatoka moja kwa moja kwa kiashiria cha GainForest.",
     "choosePath.heading": "Chagua jinsi unavyotaka kutumia GainForest",
     "choosePath.globe.eyebrow": "01 · Chunguza ramani",
     "choosePath.bumicerts.eyebrow": "02 · Tambua cheti",
-    "choosePath.globe.heading": "Green Globe ni nini?",
-    "choosePath.bumicerts.heading": "Bumicert ni nini?",
+    "choosePath.globe.heading": "Globu ni nini?",
+    "choosePath.bumicerts.heading": "Cert ni nini?",
     "choosePath.globe.dragHint": "vuta kuzungusha",
-    "choosePath.globe.previewTitle": "Green Globe",
+    "choosePath.globe.previewTitle": "Globu",
     "choosePath.globe.previewLive": "moja kwa moja",
     "choosePath.globe.previewBody":
       "Zungusha tufe na uone miradi ya jamii ya hifadhi ya asili; kila kilele ni shirika kwenye ATProto.",
     "choosePath.globe.pins": "{n}+ vilele vya moja kwa moja",
     "choosePath.globe.caption.projects": "{n}+ miradi",
-    "choosePath.globe.cta": "Fungua Green Globe",
-    "choosePath.bumicerts.cta": "Chunguza Bumicerts",
-    "choosePath.bumicerts.createCta": "Tengeneza Bumicert",
+    "choosePath.globe.cta": "Fungua Globu",
+    "choosePath.bumicerts.cta": "Vinjari miradi",
+    "choosePath.bumicerts.createCta": "Onyesha kazi yako",
 
     "choosePath.bumicerts.verified": "Imethibitishwa",
     "choosePath.bumicerts.signed": "Imesainiwa kwa ATProto",
@@ -1357,15 +1357,15 @@ export const MESSAGES: Record<Locale, Messages> = {
     "choosePath.globe.liveTooltip":
       "Vibao vya miradi vinavyotiririshwa moja kwa moja kutoka ATProto kupitia indexer ya GainForest.",
     "choosePath.bumicerts.liveTooltip":
-      "Bumicerts tatu za hivi karibuni, zilizopatikana moja kwa moja kutoka indexer ya GainForest.",
+      "Certs tatu za hivi karibuni, zilizopatikana moja kwa moja kutoka indexer ya GainForest.",
     "choosePath.bumicerts.fallbackTooltip":
       "Indexer ya moja kwa moja haipatikani; tunaonyesha nakala iliyohifadhiwa.",
     "choosePath.globe.title": "Fungua Dunia",
     "choosePath.globe.body":
       "Gundua miradi na mifumo ya ikolojia duniani kote. Vinjari, jifunze, na pata msukumo.",
-    "choosePath.bumicerts.title": "Vinjari Bumicerts",
+    "choosePath.bumicerts.title": "Vinjari miradi",
     "choosePath.bumicerts.body":
-      "Cheti cha athari ya mazingira kinachotolewa na jamii inayofanya kazi. Kila Bumicert inaunganisha picha, sauti, na maelezo ya nyanjani katika rekodi inayoweza kuthibitishwa na kubebeka kwenye ATProto.",
+      "Cheti cha athari ya mazingira kinachotolewa na jamii inayofanya kazi. Kila Cert inaunganisha picha, sauti, na maelezo ya nyanjani katika rekodi inayoweza kuthibitishwa na kubebeka kwenye ATProto.",
     "choosePath.or": "au",
     "choosePath.allProjects": "Miradi yote",
     "iwantto.heading": "Nataka…",
@@ -1375,15 +1375,15 @@ export const MESSAGES: Record<Locale, Messages> = {
     "iwantto.card1.title": "Kusimulia hadithi yangu ya athari",
     "iwantto.card1.body":
       "Jihudumie kazi yako ya nyanjani kwenye ATProto. Tunaleta mifano, warsha, na zana.",
-    "iwantto.card2.title": "Kutoa Bumicert",
+    "iwantto.card2.title": "Kutoa Cert",
     "iwantto.card2.body":
       "Unganisha picha, sauti, na maelezo yako ya nyanjani katika rekodi moja iliyosainiwa na inayobebeka.",
     "iwantto.card3.title": "Kugundua miradi",
     "iwantto.card3.body":
-      "Zungusha Green Globe ukutane na kazi ya jamii ya asili kote duniani.",
+      "Zungusha Globu ukutane na kazi ya jamii ya asili kote duniani.",
     "iwantto.card4.title": "Kuunga mkono kazi iliyothibitishwa",
     "iwantto.card4.body":
-      "Tazama Bumicerts za hivi karibuni na uunge mkono walinzi nyuma yake.",
+      "Tazama Certs za hivi karibuni na uunge mkono walinzi nyuma yake.",
     "howitworks.heading": "Inavyofanya kazi",
     "howitworks.subheading":
       "Sehemu kubwa ya fedha za hali ya hewa hazifiki kwa jamii za asili. Tunafunga mzunguko huo kwa teknolojia ya mahali, data inayomilikiwa na jamii, na itifaki huria.",
@@ -1391,12 +1391,12 @@ export const MESSAGES: Record<Locale, Messages> = {
     "howitworks.step1.title": "Data ya jamii",
     "howitworks.step1.body":
       "Jamii zinajihudumia kazi yao ya nyanjani kwenye PDS yao ya ATProto, pamoja na mifano, warsha, na zana kutoka GainForest.",
-    "howitworks.step2.title": "Toa Bumicert",
+    "howitworks.step2.title": "Toa Cert",
     "howitworks.step2.body":
-      "Kila jamii inatoa Bumicert inayounganisha picha, sauti, na maelezo yao katika rekodi moja iliyosainiwa.",
+      "Kila jamii inatoa Cert inayounganisha picha, sauti, na maelezo yao katika rekodi moja iliyosainiwa.",
     "howitworks.step3.title": "Wafadhili wagundua",
     "howitworks.step3.body":
-      "Wafadhili, taasisi, na washirika wanapata kazi iliyothibitishwa ya jamii kupitia Green Globe na orodha ya Bumicerts.",
+      "Wafadhili, taasisi, na washirika wanapata kazi iliyothibitishwa ya jamii kupitia Globu na orodha ya miradi ya GainForest.",
     "howitworks.step4.title": "Wazi kwa itifaki",
     "howitworks.step4.body":
       "Kila rekodi ipo kwenye ATProto, hivyo hadithi ile ile ya athari inafika kwa washirika kama Ma Earth na Hypercerts. Bila kufungwa.",
@@ -1407,13 +1407,13 @@ export const MESSAGES: Record<Locale, Messages> = {
       "Jiunge na jumuiya ya kimataifa inayojenga mustakabali wa haki kwa maumbile na watu.",
     "natureCta.donate": "Toa",
     "natureCta.exploreProjects": "Vinjari miradi",
-    "natureCta.createBumicert": "Tengeneza Bumicert",
+    "natureCta.createBumicert": "Onyesha kazi yako",
     "natureCta.newsletter": "Jisajili kwa jarida letu",
     "footer.rights": "Haki zote zimehifadhiwa.",
     "footer.contact": "Wasiliana",
     "card.projects": "Miradi",
     "card.organizations": "Mashirika",
-    "card.leaderboard": "Orodha ya wakuu",
+    "card.observations": "Uchunguzi",
     "card.searchProjects": "Tafuta miradi…",
     "card.viewAll": "Ona vyote",
     "card.projectsFound": "Miradi {n} imepatikana",
@@ -1425,7 +1425,7 @@ export const MESSAGES: Record<Locale, Messages> = {
     "taina.greetingHello":
       "Habari; mimi ni Taina. Kaa kidogo, tuvinjari GainForest pamoja.",
     "taina.greetingHint":
-      "Niulize kuhusu Dunia, Bumicerts, kazi za kijamii za asili au mamlaka ya data ya Kiasili; au tu sema habari.",
+      "Niulize kuhusu Globu, Certs, kazi za kijamii za asili au mamlaka ya data ya Kiasili; au tu sema habari.",
     "taina.placeholder": "Sema habari…",
     "taina.thinking": "Taina anafikiria…",
     "awards.label": "Washindi wa",
@@ -1489,9 +1489,9 @@ export const MESSAGES: Record<Locale, Messages> = {
       "Tunashirikiana na vyama vya msingi, mabaraza ya Kiasili, maabara za kiikolojia, na wasimamizi wa hifadhi katika mabara manne.",
     "partners.stat": "50+",
     "partners.statLabel": "washirika wa asili duniani",
-    "partners.bannerLabel": "Moja kwa moja kutoka Green Globe",
+    "partners.bannerLabel": "Moja kwa moja kutoka Globu",
     "partners.bannerCountLabel": "majina",
-    "partners.recordLabel": "Rekodi hai ya Green Globe",
+    "partners.recordLabel": "Rekodi hai ya Globu",
     "partners.callsEyebrow": "Mikutano ya kila mwezi ya jamii",
     "partners.callsTitle": "Sikiliza walinzi walio nyuma ya alama hizi.",
     "partners.callsBody":
@@ -1649,26 +1649,26 @@ export const MESSAGES: Record<Locale, Messages> = {
     "hero.title.italic": "kecerdasan regeneratif",
     "hero.title.after": "",
     "hero.subtitle":
-      "Jelajahi proyek alam di seluruh dunia, dukung pemulihan yang dipimpin komunitas, dan buat Bumicerts yang membuat kepedulian ekologis terlihat dan dapat diverifikasi.",
-    "hero.cta.bumicerts": "Jelajahi Bumicerts",
+      "Jelajahi proyek alam di seluruh dunia, dukung pemulihan yang dipimpin komunitas, dan buat Certs yang membuat kepedulian ekologis terlihat dan dapat diverifikasi.",
+    "hero.cta.bumicerts": "Jelajahi proyek",
     "hero.cta.globe": "Buka Globe",
     "hero.footnote":
-      "Bumicerts ditandatangani di AT Protocol; setiap catatan disimpan di PDS milik komunitas dan jumlah langsung di sebelah kanan diambil langsung dari pengindeks GainForest.",
+      "Certs ditandatangani di AT Protocol; setiap catatan disimpan di PDS milik komunitas dan jumlah langsung di sebelah kanan diambil langsung dari pengindeks GainForest.",
     "choosePath.heading": "Pilih cara Anda menggunakan GainForest",
     "choosePath.globe.eyebrow": "01 · Jelajahi peta",
     "choosePath.bumicerts.eyebrow": "02 · Kenali sertifikat",
-    "choosePath.globe.heading": "Apa itu Green Globe?",
-    "choosePath.bumicerts.heading": "Apa itu Bumicert?",
+    "choosePath.globe.heading": "Apa itu Globe?",
+    "choosePath.bumicerts.heading": "Apa itu Cert?",
     "choosePath.globe.dragHint": "tarik untuk memutar",
-    "choosePath.globe.previewTitle": "Green Globe",
+    "choosePath.globe.previewTitle": "Globe",
     "choosePath.globe.previewLive": "langsung",
     "choosePath.globe.previewBody":
       "Putar bola dunia dan temukan proyek alam yang dipimpin komunitas; setiap pin adalah organisasi di ATProto.",
     "choosePath.globe.pins": "{n}+ pin langsung",
     "choosePath.globe.caption.projects": "{n}+ proyek",
-    "choosePath.globe.cta": "Buka Green Globe",
-    "choosePath.bumicerts.cta": "Jelajahi Bumicerts",
-    "choosePath.bumicerts.createCta": "Buat Bumicert",
+    "choosePath.globe.cta": "Buka Globe",
+    "choosePath.bumicerts.cta": "Jelajahi proyek",
+    "choosePath.bumicerts.createCta": "Tampilkan karyamu",
 
     "choosePath.bumicerts.verified": "Terverifikasi",
     "choosePath.bumicerts.signed": "Ditandatangani di ATProto",
@@ -1677,15 +1677,15 @@ export const MESSAGES: Record<Locale, Messages> = {
     "choosePath.globe.liveTooltip":
       "Pin proyek mengalir langsung dari ATProto melalui indexer GainForest.",
     "choosePath.bumicerts.liveTooltip":
-      "Tiga Bumicert terbaru, diambil langsung dari indexer GainForest.",
+      "Tiga Cert terbaru, diambil langsung dari indexer GainForest.",
     "choosePath.bumicerts.fallbackTooltip":
       "Indexer langsung tidak tersedia; menampilkan salinan tersimpan.",
     "choosePath.globe.title": "Buka Globe",
     "choosePath.globe.body":
       "Temukan proyek dan ekosistem di seluruh dunia. Jelajahi, pelajari, dan dapatkan inspirasi.",
-    "choosePath.bumicerts.title": "Jelajahi Bumicerts",
+    "choosePath.bumicerts.title": "Jelajahi proyek",
     "choosePath.bumicerts.body":
-      "Sertifikat dampak lingkungan yang diterbitkan oleh komunitas yang melakukan pekerjaan itu. Setiap Bumicert menyatukan foto, audio, dan catatan lapangan ke dalam rekam yang dapat diverifikasi dan portabel di ATProto.",
+      "Sertifikat dampak lingkungan yang diterbitkan oleh komunitas yang melakukan pekerjaan itu. Setiap Cert menyatukan foto, audio, dan catatan lapangan ke dalam rekam yang dapat diverifikasi dan portabel di ATProto.",
     "choosePath.or": "atau",
     "choosePath.allProjects": "Semua proyek",
     "iwantto.heading": "Saya ingin…",
@@ -1695,15 +1695,15 @@ export const MESSAGES: Record<Locale, Messages> = {
     "iwantto.card1.title": "Menceritakan dampak saya",
     "iwantto.card1.body":
       "Simpan sendiri kerja lapangan Anda di ATProto. Kami membawakan model, lokakarya, dan perangkatnya.",
-    "iwantto.card2.title": "Menerbitkan Bumicert",
+    "iwantto.card2.title": "Menerbitkan Cert",
     "iwantto.card2.body":
       "Satukan foto, audio, dan catatan lapangan Anda dalam satu rekam portabel yang ditandatangani.",
     "iwantto.card3.title": "Menemukan proyek",
     "iwantto.card3.body":
-      "Putar Green Globe untuk bertemu kerja komunitas alam di seluruh planet.",
+      "Putar Globe untuk bertemu kerja komunitas alam di seluruh planet.",
     "iwantto.card4.title": "Mendukung yang terverifikasi",
     "iwantto.card4.body":
-      "Telusuri Bumicerts terbaru dan dukung para penjaga di balik setiap proyek.",
+      "Telusuri Certs terbaru dan dukung para penjaga di balik setiap proyek.",
     "howitworks.heading": "Cara kerjanya",
     "howitworks.subheading":
       "Sebagian besar pendanaan iklim tidak sampai ke akar rumput. Kami menutup celah itu dengan teknologi lokal-pertama, data milik komunitas, dan protokol terbuka.",
@@ -1711,12 +1711,12 @@ export const MESSAGES: Record<Locale, Messages> = {
     "howitworks.step1.title": "Data milik komunitas",
     "howitworks.step1.body":
       "Komunitas menyimpan sendiri kerja lapangan mereka di PDS ATProto, dengan model, lokakarya, dan perangkat dari GainForest.",
-    "howitworks.step2.title": "Terbitkan Bumicert",
+    "howitworks.step2.title": "Terbitkan Cert",
     "howitworks.step2.body":
-      "Setiap komunitas menerbitkan Bumicert yang mengikat foto, audio, dan catatan lapangan ke dalam satu rekam yang ditandatangani.",
+      "Setiap komunitas menerbitkan Cert yang mengikat foto, audio, dan catatan lapangan ke dalam satu rekam yang ditandatangani.",
     "howitworks.step3.title": "Pendukung menemukan",
     "howitworks.step3.body":
-      "Donor, yayasan, dan mitra menemukan kerja komunitas yang terverifikasi lewat Green Globe dan direktori Bumicerts.",
+      "Donor, yayasan, dan mitra menemukan kerja komunitas yang terverifikasi lewat Globe dan direktori proyek GainForest.",
     "howitworks.step4.title": "Terbuka lewat protokol",
     "howitworks.step4.body":
       "Setiap catatan tinggal di ATProto, jadi cerita dampak yang sama mengalir ke mitra seperti Ma Earth dan Hypercerts. Tanpa lock-in.",
@@ -1727,13 +1727,13 @@ export const MESSAGES: Record<Locale, Messages> = {
       "Bergabunglah dengan komunitas global yang membangun masa depan yang adil untuk alam dan manusia.",
     "natureCta.donate": "Donasi",
     "natureCta.exploreProjects": "Jelajahi proyek",
-    "natureCta.createBumicert": "Buat Bumicert",
+    "natureCta.createBumicert": "Tampilkan karyamu",
     "natureCta.newsletter": "Berlangganan newsletter kami",
     "footer.rights": "Hak cipta dilindungi.",
     "footer.contact": "Kontak",
     "card.projects": "Proyek",
     "card.organizations": "Organisasi",
-    "card.leaderboard": "Papan peringkat",
+    "card.observations": "Pengamatan",
     "card.searchProjects": "Cari proyek…",
     "card.viewAll": "Lihat semua",
     "card.projectsFound": "{n} proyek ditemukan",
@@ -1745,7 +1745,7 @@ export const MESSAGES: Record<Locale, Messages> = {
     "taina.greetingHello":
       "Halo; aku Taina. Duduklah sebentar, mari kita jelajahi GainForest bersama.",
     "taina.greetingHint":
-      "Tanya aku tentang Globe, Bumicerts, kerja komunitas untuk alam, atau kedaulatan data adat; atau sapa saja.",
+      "Tanya aku tentang Globe, Certs, kerja komunitas untuk alam, atau kedaulatan data adat; atau sapa saja.",
     "taina.placeholder": "Sapa…",
     "taina.thinking": "Taina sedang berpikir…",
     "awards.label": "Pemenang",
@@ -1809,9 +1809,9 @@ export const MESSAGES: Record<Locale, Messages> = {
       "Kami bermitra dengan koperasi akar rumput, dewan adat, laboratorium ekologi, dan pengelola kawasan lindung di empat benua.",
     "partners.stat": "50+",
     "partners.statLabel": "mitra alam di seluruh dunia",
-    "partners.bannerLabel": "Langsung dari Green Globe",
+    "partners.bannerLabel": "Langsung dari Globe",
     "partners.bannerCountLabel": "nama",
-    "partners.recordLabel": "Rekaman langsung Green Globe",
+    "partners.recordLabel": "Rekaman langsung Globe",
     "partners.callsEyebrow": "Panggilan komunitas bulanan",
     "partners.callsTitle": "Dengarkan para penjaga di balik titik-titik ini.",
     "partners.callsBody":

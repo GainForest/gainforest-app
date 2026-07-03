@@ -19,7 +19,9 @@
  * route, and would skip real ATProto orgs.)
  */
 
-import { GLOBE_URL as GLOBE_ORIGIN } from "./urls";
+// The merged gainforest.app does NOT serve this API route — the pin
+// fetch stays pointed at the still-deployed data.gainforest.app.
+import { GREEN_GLOBE_API_URL as GLOBE_ORIGIN } from "./urls";
 
 const INDEXER_URL =
   process.env.NEXT_PUBLIC_INDEXER_URL?.trim() ||

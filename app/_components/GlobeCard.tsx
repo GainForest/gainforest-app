@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { fetchProjectPins } from "../_lib/projects";
-import { GLOBE_HOST, GLOBE_URL } from "../_lib/urls";
+import { GAINFOREST_APP_HOST, GLOBE_URL } from "../_lib/urls";
 import { LiveGlobe } from "./LiveGlobe";
 
 const DEFAULT_DIAMETER = 380;
@@ -40,7 +40,7 @@ export async function GlobeCard({
           rel="noreferrer"
           className="absolute bottom-2 left-1/2 z-10 -translate-x-1/2 whitespace-nowrap text-[10px] font-medium uppercase tracking-[0.18em] text-foreground/45 transition-colors hover:text-foreground"
         >
-          {GLOBE_HOST} · live globe →
+          {GAINFOREST_APP_HOST}/globe · live globe →
         </Link>
       )}
     </div>

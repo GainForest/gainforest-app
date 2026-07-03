@@ -587,24 +587,24 @@ export const ECOSYSTEM_PILLARS: ReadonlyArray<Translated<EcosystemPillar>> = [
     id: "hyperlabel",
     name: "Hyperlabel",
     role: "the trust layer",
-    body: "Labeller service emitting com.atproto.label.* records over Hypercert claims; tier signals (high-quality, verified, contested) feed Bumicerts and any compatible consumer the same way Bluesky labels feed downstream feeds.",
+    body: "Labeller service emitting com.atproto.label.* records over Hypercert claims; tier signals (high-quality, verified, contested) feed the GainForest app and any compatible consumer the same way Bluesky labels feed downstream feeds.",
     href: "https://github.com/GainForest",
     i18n: {
       es: {
         role: "la capa de confianza",
-        body: "Servicio etiquetador que emite registros com.atproto.label.* sobre reclamaciones Hypercert; señales por niveles (alta calidad, verificado, en disputa) alimentan los Bumicerts y cualquier consumidor compatible, igual que las etiquetas de Bluesky alimentan los feeds.",
+        body: "Servicio etiquetador que emite registros com.atproto.label.* sobre reclamaciones Hypercert; señales por niveles (alta calidad, verificado, en disputa) alimentan la app de GainForest y cualquier consumidor compatible, igual que las etiquetas de Bluesky alimentan los feeds.",
       },
       pt: {
         role: "a camada de confiança",
-        body: "Serviço etiquetador que emite registos com.atproto.label.* sobre reivindicações Hypercert; sinais por níveis (alta qualidade, verificado, contestado) alimentam Bumicerts e qualquer consumidor compatível, tal como labels do Bluesky alimentam feeds.",
+        body: "Serviço etiquetador que emite registos com.atproto.label.* sobre reivindicações Hypercert; sinais por níveis (alta qualidade, verificado, contestado) alimentam a app da GainForest e qualquer consumidor compatível, tal como labels do Bluesky alimentam feeds.",
       },
       sw: {
         role: "safu ya imani",
-        body: "Huduma ya kuweka lebo inayotoa rekodi za com.atproto.label.* juu ya madai ya Hypercert; ishara za viwango (ubora wa juu, iliyothibitishwa, iliyo na pingamizi) zinalisha Bumicerts na mtumiaji yeyote anayekubaliana, kama lebo za Bluesky zinavyolisha feeds.",
+        body: "Huduma ya kuweka lebo inayotoa rekodi za com.atproto.label.* juu ya madai ya Hypercert; ishara za viwango (ubora wa juu, iliyothibitishwa, iliyo na pingamizi) zinalisha programu ya GainForest na mtumiaji yeyote anayekubaliana, kama lebo za Bluesky zinavyolisha feeds.",
       },
       id: {
         role: "lapisan kepercayaan",
-        body: "Layanan pelabel yang memancarkan rekam com.atproto.label.* di atas klaim Hypercert; sinyal berjenjang (kualitas tinggi, terverifikasi, dipersengketakan) memberi makan Bumicerts dan konsumen kompatibel mana pun, seperti label Bluesky memberi makan feed.",
+        body: "Layanan pelabel yang memancarkan rekam com.atproto.label.* di atas klaim Hypercert; sinyal berjenjang (kualitas tinggi, terverifikasi, dipersengketakan) memberi makan aplikasi GainForest dan konsumen kompatibel mana pun, seperti label Bluesky memberi makan feed.",
       },
     },
   },
@@ -612,24 +612,24 @@ export const ECOSYSTEM_PILLARS: ReadonlyArray<Translated<EcosystemPillar>> = [
     id: "hyperscan",
     name: "Hyperscan",
     role: "the explorer",
-    body: "Web explorer for org.hypercerts.* records; resolves DID → PDS → blob CID and renders the full evidence trail behind any Bumicert, like a block explorer for community claims.",
+    body: "Web explorer for org.hypercerts.* records; resolves DID → PDS → blob CID and renders the full evidence trail behind any Cert, like a block explorer for community claims.",
     href: "https://github.com/GainForest",
     i18n: {
       es: {
         role: "el explorador",
-        body: "Explorador web para registros org.hypercerts.*; resuelve DID → PDS → blob CID y muestra el rastro completo de evidencia detrás de cualquier Bumicert, como un block explorer para reclamaciones comunitarias.",
+        body: "Explorador web para registros org.hypercerts.*; resuelve DID → PDS → blob CID y muestra el rastro completo de evidencia detrás de cualquier Cert, como un block explorer para reclamaciones comunitarias.",
       },
       pt: {
         role: "o explorador",
-        body: "Explorador web para registos org.hypercerts.*; resolve DID → PDS → blob CID e renderiza a trilha completa de evidência por trás de qualquer Bumicert, como um block explorer para reivindicações comunitárias.",
+        body: "Explorador web para registos org.hypercerts.*; resolve DID → PDS → blob CID e renderiza a trilha completa de evidência por trás de qualquer Cert, como um block explorer para reivindicações comunitárias.",
       },
       sw: {
         role: "kichunguzi",
-        body: "Kichunguzi cha wavuti kwa rekodi za org.hypercerts.*; hutatua DID → PDS → blob CID na huonyesha njia kamili ya ushahidi nyuma ya Bumicert yoyote, kama block explorer wa madai ya jamii.",
+        body: "Kichunguzi cha wavuti kwa rekodi za org.hypercerts.*; hutatua DID → PDS → blob CID na huonyesha njia kamili ya ushahidi nyuma ya Cert yoyote, kama block explorer wa madai ya jamii.",
       },
       id: {
         role: "penjelajah",
-        body: "Penjelajah web untuk rekam org.hypercerts.*; menyelesaikan DID → PDS → blob CID dan menampilkan jejak bukti lengkap di balik setiap Bumicert, seperti block explorer untuk klaim komunitas.",
+        body: "Penjelajah web untuk rekam org.hypercerts.*; menyelesaikan DID → PDS → blob CID dan menampilkan jejak bukti lengkap di balik setiap Cert, seperti block explorer untuk klaim komunitas.",
       },
     },
   },

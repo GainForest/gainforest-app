@@ -36,7 +36,10 @@ const instrument = Instrument_Serif({
 // disagrees with the shared link, and chat apps occasionally refuse the
 // preview). When we detect a vercel.app value we ignore it and fall back
 // to the canonical production hostname instead.
-const CANONICAL_SITE_URL = "https://gainforest.app";
+// July 2026: gainforest.app now belongs to the merged product app
+// (green_globe + Bumicerts → "the GainForest app"); this landing moved
+// to the gainforest.earth domain.
+const CANONICAL_SITE_URL = "https://gainforest.earth";
 const RAW_BASE_URL = process.env.NEXT_PUBLIC_BASE_URL?.trim();
 const SITE_URL = (
   RAW_BASE_URL && !/\.vercel\.app(?::\d+)?\/?$/.test(RAW_BASE_URL)
@@ -65,7 +68,7 @@ const OG_IMAGE_PATH = "/og/landing-2026-05-20.png";
 const SITE_TAGLINE = "Open tools for regenerative intelligence";
 const SITE_TITLE = `${SITE_NAME}: ${SITE_TAGLINE}`;
 const SITE_DESCRIPTION =
-  "Explore nature projects around the world, back community-led restoration, and mint Bumicerts; verifiable proof-of-impact records signed on ATProto.";
+  "Explore nature projects around the world, back community-led restoration, and mint Certs; verifiable proof-of-impact records signed on ATProto.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -80,7 +83,8 @@ export const metadata: Metadata = {
   publisher: "GainForest",
   keywords: [
     "GainForest",
-    "Bumicerts",
+    "GainForest app",
+    "Certs",
     "regenerative",
     "rainforest",
     "biodiversity",
@@ -183,9 +187,9 @@ const JSON_LD = {
       url: SITE_URL,
       logo: `${SITE_URL}/icons/icon-512.png`,
       sameAs: [
-        "https://data.gainforest.app",
-        "https://certs.gainforest.app",
-        "https://www.gainforest.earth",
+        // The merged GainForest app (formerly data.gainforest.app +
+        // certs.gainforest.app; both legacy hosts redirect into it).
+        "https://gainforest.app",
         "https://github.com/GainForest",
         "https://twitter.com/gainforest",
       ],

@@ -3,21 +3,21 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { LiveBumicertsSnapshot, LiveBumicert } from "../_lib/bumicerts";
-import { BUMICERTS_URL } from "../_lib/urls";
+import { ORGANIZATIONS_URL, OBSERVATIONS_URL, PROJECTS_URL } from "../_lib/urls";
 import { LivePill } from "./LivePill";
 import { LogoMark } from "./Logo";
 import { useT } from "./LocaleProvider";
 
 /**
- * Faux Bumicerts UI card used in the hero composition.
+ * Faux GainForest-app UI card used in the hero composition.
  *
  * Wired to the live indexer — the three rows shown are the most recent
- * curated Bumicerts coming through the same `orgHypercertsClaimActivity`
- * GraphQL feed that powers certs.gainforest.app/bumicerts.
+ * curated certs coming through the same `orgHypercertsClaimActivity`
+ * GraphQL feed that powers gainforest.app/projects.
  *
- * Rail items (Projects / Organizations / Leaderboard) are real links to
- * the matching Bumicerts pages so the card behaves like a miniature
- * navigation widget rather than a static mockup.
+ * Rail items (Projects / Organizations / Observations) are real links
+ * to the matching gainforest.app pages so the card behaves like a
+ * miniature navigation widget rather than a static mockup.
  *
  * Two render modes:
  *
@@ -84,7 +84,7 @@ export function BumicertsCard({
       <div className="flex items-center gap-2 px-5 pt-5 pb-3 select-none">
         <LogoMark className="h-[22px] w-[22px] text-brand" title="GainForest" />
         <span className="font-garamond text-[20px] font-medium text-foreground">
-          Bumicerts
+          GainForest
         </span>
         {/* Unified <LivePill /> — same component the ChoosePath cards
             use, with a hover tooltip explaining what's being streamed.
@@ -109,23 +109,25 @@ export function BumicertsCard({
           titles + the search bar overflow the rounded card border at
           phone widths in every locale. */}
       <div className="grid grid-cols-[120px_minmax(0,1fr)] gap-3 px-3 pb-3">
-        {/* left rail — real links to the matching Bumicerts pages */}
+        {/* left rail — real links to the matching gainforest.app pages.
+            The old Leaderboard entry is gone: the merged app has no
+            /leaderboard route; /observations is its third nav pillar. */}
         <div className="flex flex-col gap-1 pt-9 text-[12px]">
           <RailLink
             icon={<HomeIcon />}
             label={t("card.projects")}
-            href={`${BUMICERTS_URL}/bumicerts`}
+            href={PROJECTS_URL}
             active
           />
           <RailLink
             icon={<BuildingIcon />}
             label={t("card.organizations")}
-            href={`${BUMICERTS_URL}/organizations`}
+            href={ORGANIZATIONS_URL}
           />
           <RailLink
-            icon={<TrophyIcon />}
-            label={t("card.leaderboard")}
-            href={`${BUMICERTS_URL}/leaderboard`}
+            icon={<LeafIcon />}
+            label={t("card.observations")}
+            href={OBSERVATIONS_URL}
           />
         </div>
 
@@ -212,7 +214,7 @@ export function BumicertsCard({
           )}
         </span>
         <Link
-          href={`${BUMICERTS_URL}/bumicerts`}
+          href={PROJECTS_URL}
           target="_blank"
           rel="noreferrer"
           className="inline-flex items-center gap-1 text-foreground/70 transition-colors hover:text-foreground"
@@ -330,7 +332,7 @@ function RailLink({
 // ── helpers ─────────────────────────────────────────────────────────────────
 
 /**
- * Best-effort country derivation from the bumicert's text. The full record
+ * Best-effort country derivation from the cert's text. The full record
  * exposes a country via creatorInfo on the org but we don't fetch that here
  * to keep the landing query cheap. As a heuristic we look for "in <Country>"
  * or known country names in the short description / title.
@@ -440,15 +442,20 @@ function BuildingIcon() {
     </svg>
   );
 }
-function TrophyIcon() {
+function LeafIcon() {
   return (
     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden>
       <path
-        d="M7 4h10v5a5 5 0 01-10 0V4zM5 6H3a2 2 0 002 2M19 6h2a2 2 0 01-2 2M10 20h4M12 14v6"
+        d="M5 19c0-7 6-13 14-13 0 8-6 14-14 14z"
+        stroke="currentColor"
+        strokeWidth="1.7"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M5 19c4-3 7-6 9-10"
         stroke="currentColor"
         strokeWidth="1.7"
         strokeLinecap="round"
-        strokeLinejoin="round"
       />
     </svg>
   );

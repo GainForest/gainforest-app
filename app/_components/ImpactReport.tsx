@@ -213,7 +213,7 @@ export function ImpactReport() {
                 <div className="relative aspect-[3/2] w-full overflow-hidden rounded-[8px] ring-1 ring-border-soft shadow-[0_14px_30px_-22px_rgba(40,50,30,0.28)]">
                   <Image
                     src="/community/impact-ceremony.webp"
-                    alt="Bumicerts certificate ceremony with community members in the Philippines"
+                    alt="Certificate ceremony with community members in the Philippines"
                     fill
                     sizes="(min-width: 1024px) 360px, (min-width: 640px) 45vw, 90vw"
                     className="object-cover"

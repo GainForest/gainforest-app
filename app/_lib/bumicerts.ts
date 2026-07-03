@@ -23,7 +23,7 @@
  * - Safe: any network/schema hiccup falls back to a curated static set.
  */
 
-import { BUMICERTS_URL as BUMICERTS_BASE } from "./urls";
+import { PROJECTS_URL, certUrl } from "./urls";
 
 // Indexer. We default to the api host (api.hi.gainforest.app) and
 // let an env override (NEXT_PUBLIC_INDEXER_URL) point at another
@@ -367,10 +367,11 @@ export async function fetchLiveBumicerts(
         rkey: node.rkey,
         // Prefer the indexer's title (canonical), fall back to the hyperlabel
         // record's title which is always populated.
-        title: (node.title ?? hyperlabel.title ?? "Untitled bumicert").trim(),
+        title: (node.title ?? hyperlabel.title ?? "Untitled cert").trim(),
         shortDescription: node.shortDescription ?? "",
         imageUrl: await resolveImageUrl(node.did, node.image),
-        href: `${BUMICERTS_BASE}/bumicert/${encodeURIComponent(node.did)}-${encodeURIComponent(node.rkey)}`,
+        // Merged-app canonical detail route: /cert/<did>/<rkey>.
+        href: certUrl(node.did, node.rkey),
         createdAt: node.createdAt,
       })),
     );
@@ -427,7 +428,7 @@ const FALLBACK_SNAPSHOT: LiveBumicertsSnapshot = {
       shortDescription: "Lobongia Rangelands Restoration",
       imageUrl:
         "https://certified.one/xrpc/com.atproto.sync.getBlob?did=did%3Aplc%3A23xqsqgi7itr7mh5ep3sokrz&cid=bafkreibq2b6nqpsrs6xydzdx6ruejkgvghjzjrtkwgni2jvokuhb4iwo3y",
-      href: `${BUMICERTS_BASE}/bumicert/did%3Aplc%3A23xqsqgi7itr7mh5ep3sokrz-3mm2ndaqq2c2x`,
+      href: certUrl("did:plc:23xqsqgi7itr7mh5ep3sokrz", "3mm2ndaqq2c2x"),
       createdAt: "2026-05-17T13:30:10.076Z",
     },
     {
@@ -437,7 +438,7 @@ const FALLBACK_SNAPSHOT: LiveBumicertsSnapshot = {
       title: "Marina Gardens community restoration in Singapore",
       shortDescription: "Community-led mangrove restoration",
       imageUrl: null,
-      href: `${BUMICERTS_BASE}/bumicerts`,
+      href: PROJECTS_URL,
       createdAt: "2026-05-17T18:29:16.070Z",
     },
     {
@@ -447,7 +448,7 @@ const FALLBACK_SNAPSHOT: LiveBumicertsSnapshot = {
       title: "Community-led forest conservation in Uganda's Madi region",
       shortDescription: "Madi region forest stewardship",
       imageUrl: null,
-      href: `${BUMICERTS_BASE}/bumicerts`,
+      href: PROJECTS_URL,
       createdAt: "2026-05-16T00:00:00.000Z",
     },
   ],

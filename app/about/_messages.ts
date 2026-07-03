@@ -89,8 +89,8 @@ const EN: AboutMessages = {
   "about.live.label": "Live",
   "about.hero.spotlightLabel": "live partner",
 
-  "about.stats.communities": "frontline communities, live on Green Globe",
-  "about.stats.bumicerts": "Bumicerts signed on ATProto",
+  "about.stats.communities": "frontline communities, live on the Globe",
+  "about.stats.bumicerts": "Certs signed on ATProto",
   "about.stats.years": "years as a registered non-profit in Zurich",
   "about.stats.continents": "continents: Latin America, Africa, Asia",
 
@@ -101,7 +101,7 @@ const EN: AboutMessages = {
   "about.mission.body1":
     "Most climate finance never reaches the grassroots. We close that loop with regenerative intelligence; a research practice for designing sociotechnical systems that preserve human agency, build digital trust, and scale Ostrom's principles of commons governance beyond their local limits.",
   "about.mission.body2":
-    "In practice that means open protocols, community-owned data, AI assistants co-designed with Indigenous communities, and Bumicerts that bind a community's photos, audio, and field notes into one signed proof-of-impact record they own.",
+    "In practice that means open protocols, community-owned data, AI assistants co-designed with Indigenous communities, and Certs that bind a community's photos, audio, and field notes into one signed proof-of-impact record they own.",
   "about.mission.readEssay": "Read the essay",
 
   "about.story.eyebrow": "Our story",
@@ -149,8 +149,8 @@ const ES: AboutMessages = {
   "about.live.label": "En vivo",
   "about.hero.spotlightLabel": "socio en vivo",
 
-  "about.stats.communities": "comunidades en primera línea, en vivo en Green Globe",
-  "about.stats.bumicerts": "Bumicerts firmados en ATProto",
+  "about.stats.communities": "comunidades en primera línea, en vivo en el Globo",
+  "about.stats.bumicerts": "Certs firmados en ATProto",
   "about.stats.years": "años como ONG registrada en Zúrich",
   "about.stats.continents": "continentes: América Latina, África, Asia",
 
@@ -161,7 +161,7 @@ const ES: AboutMessages = {
   "about.mission.body1":
     "La mayor parte del financiamiento climático nunca llega a las bases. Cerramos ese ciclo con inteligencia regenerativa; una práctica de investigación para diseñar sistemas sociotécnicos que preservan la agencia humana, construyen confianza digital y escalan los principios de gobernanza de los bienes comunes de Ostrom más allá de sus límites locales.",
   "about.mission.body2":
-    "En la práctica eso significa protocolos abiertos, datos de propiedad comunitaria, asistentes de IA co-diseñados con comunidades indígenas, y Bumicerts que reúnen las fotos, el audio y las notas de campo de una comunidad en un único registro firmado de prueba de impacto que les pertenece.",
+    "En la práctica eso significa protocolos abiertos, datos de propiedad comunitaria, asistentes de IA co-diseñados con comunidades indígenas, y Certs que reúnen las fotos, el audio y las notas de campo de una comunidad en un único registro firmado de prueba de impacto que les pertenece.",
   "about.mission.readEssay": "Leer el ensayo",
 
   "about.story.eyebrow": "Nuestra historia",
@@ -209,8 +209,8 @@ const PT: AboutMessages = {
   "about.live.label": "Ao vivo",
   "about.hero.spotlightLabel": "parceiro ao vivo",
 
-  "about.stats.communities": "comunidades de base, ao vivo no Green Globe",
-  "about.stats.bumicerts": "Bumicerts assinados no ATProto",
+  "about.stats.communities": "comunidades de base, ao vivo no Globo",
+  "about.stats.bumicerts": "Certs assinados no ATProto",
   "about.stats.years": "anos como ONG registrada em Zurique",
   "about.stats.continents": "continentes: América Latina, África, Ásia",
 
@@ -221,7 +221,7 @@ const PT: AboutMessages = {
   "about.mission.body1":
     "A maior parte do financiamento climático nunca chega à base. Fechamos esse ciclo com inteligência regenerativa; uma prática de pesquisa para projetar sistemas sociotécnicos que preservam a agência humana, constroem confiança digital e escalam os princípios de governança dos bens comuns de Ostrom para além dos seus limites locais.",
   "about.mission.body2":
-    "Na prática isso significa protocolos abertos, dados de propriedade comunitária, assistentes de IA co-desenhados com comunidades indígenas e Bumicerts que reúnem as fotos, o áudio e as notas de campo de uma comunidade num único registo assinado de prova de impacto que pertence a eles.",
+    "Na prática isso significa protocolos abertos, dados de propriedade comunitária, assistentes de IA co-desenhados com comunidades indígenas e Certs que reúnem as fotos, o áudio e as notas de campo de uma comunidade num único registo assinado de prova de impacto que pertence a eles.",
   "about.mission.readEssay": "Ler o ensaio",
 
   "about.story.eyebrow": "Nossa história",
@@ -269,8 +269,8 @@ const SW: AboutMessages = {
   "about.live.label": "Moja kwa moja",
   "about.hero.spotlightLabel": "mshirika wa moja kwa moja",
 
-  "about.stats.communities": "jamii za mstari wa mbele, moja kwa moja kwenye Green Globe",
-  "about.stats.bumicerts": "Bumicerts zilizotiwa saini kwenye ATProto",
+  "about.stats.communities": "jamii za mstari wa mbele, moja kwa moja kwenye Globu",
+  "about.stats.bumicerts": "Certs zilizotiwa saini kwenye ATProto",
   "about.stats.years": "miaka kama shirika lisilo la faida lililosajiliwa Zürich",
   "about.stats.continents": "mabara: Amerika Kusini, Afrika, Asia",
 
@@ -281,7 +281,7 @@ const SW: AboutMessages = {
   "about.mission.body1":
     "Sehemu kubwa ya fedha za hali ya hewa hazifiki kwa jamii za mstari wa mbele. Tunafunga mzunguko huo kwa akili ya kuzaa upya; mazoezi ya utafiti ya kubuni mifumo ya kijamii na kiteknolojia inayolinda uwezo wa binadamu, inajenga imani ya kidijitali, na inapanua kanuni za Ostrom za utawala wa rasilimali za pamoja zaidi ya mipaka yake ya kawaida.",
   "about.mission.body2":
-    "Kivitendo hii ina maana ya itifaki wazi, data inayomilikiwa na jamii, wasaidizi wa AI walioundwa pamoja na jamii za Asili, na Bumicerts zinazounganisha picha, sauti na maelezo ya nyanjani ya jamii katika rekodi moja iliyotiwa saini ya uthibitisho wa athari ambayo wanaimiliki.",
+    "Kivitendo hii ina maana ya itifaki wazi, data inayomilikiwa na jamii, wasaidizi wa AI walioundwa pamoja na jamii za Asili, na Certs zinazounganisha picha, sauti na maelezo ya nyanjani ya jamii katika rekodi moja iliyotiwa saini ya uthibitisho wa athari ambayo wanaimiliki.",
   "about.mission.readEssay": "Soma insha",
 
   "about.story.eyebrow": "Hadithi yetu",
@@ -329,8 +329,8 @@ const ID: AboutMessages = {
   "about.live.label": "Langsung",
   "about.hero.spotlightLabel": "mitra langsung",
 
-  "about.stats.communities": "komunitas garis depan, langsung di Green Globe",
-  "about.stats.bumicerts": "Bumicerts ditandatangani di ATProto",
+  "about.stats.communities": "komunitas garis depan, langsung di Globe",
+  "about.stats.bumicerts": "Certs ditandatangani di ATProto",
   "about.stats.years": "tahun sebagai nirlaba terdaftar di Zurich",
   "about.stats.continents": "benua: Amerika Latin, Afrika, Asia",
 
@@ -341,7 +341,7 @@ const ID: AboutMessages = {
   "about.mission.body1":
     "Sebagian besar pendanaan iklim tidak pernah mencapai akar rumput. Kami menutup loop itu dengan kecerdasan regeneratif; sebuah praktik riset untuk merancang sistem sosioteknis yang menjaga agensi manusia, membangun kepercayaan digital, dan memperluas prinsip-prinsip tata kelola sumber daya bersama dari Ostrom melampaui batas lokal.",
   "about.mission.body2":
-    "Dalam praktiknya itu berarti protokol terbuka, data milik komunitas, asisten AI yang dirancang bersama komunitas Adat, dan Bumicerts yang menggabungkan foto, audio, dan catatan lapangan komunitas menjadi satu rekam bukti dampak yang ditandatangani dan dimiliki sendiri.",
+    "Dalam praktiknya itu berarti protokol terbuka, data milik komunitas, asisten AI yang dirancang bersama komunitas Adat, dan Certs yang menggabungkan foto, audio, dan catatan lapangan komunitas menjadi satu rekam bukti dampak yang ditandatangani dan dimiliki sendiri.",
   "about.mission.readEssay": "Baca esai",
 
   "about.story.eyebrow": "Kisah kami",

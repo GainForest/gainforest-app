@@ -92,7 +92,7 @@ export async function POST(request: NextRequest) {
     // into for the current page render.)
     if (locale !== "en") {
       const languageName = LOCALE_LABELS[locale].english;
-      systemPrompt += `\n\n## Language\nThe visitor has switched the page to ${languageName} (${LOCALE_LABELS[locale].native}). Reply in ${languageName}, in your own voice. Keep brand names (GainForest, Bumicerts, Taina) as-is. If the visitor writes in a different language, mirror theirs.`;
+      systemPrompt += `\n\n## Language\nThe visitor has switched the page to ${languageName} (${LOCALE_LABELS[locale].native}). Reply in ${languageName}, in your own voice. Keep brand names (GainForest, Certs, Taina) as-is. If the visitor writes in a different language, mirror theirs.`;
     }
 
     if (!process.env.OPENROUTER_API_KEY) {

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { BUMICERTS_URL, GLOBE_URL } from "../_lib/urls";
+import { GLOBE_URL, MANAGE_URL, PROJECTS_URL } from "../_lib/urls";
 import { LogoMark } from "./Logo";
 import { useT } from "./LocaleProvider";
 
@@ -92,7 +92,7 @@ export function Footer() {
             </Link>
             <div className="flex flex-col gap-3 text-[14px] text-ink-foreground/78 lg:items-end">
               <Link
-                href={`${BUMICERTS_URL}/bumicerts`}
+                href={PROJECTS_URL}
                 target="_blank"
                 rel="noreferrer"
                 className="group inline-flex items-center gap-2 transition-colors hover:text-brand"
@@ -105,8 +105,10 @@ export function Footer() {
                   →
                 </span>
               </Link>
+              {/* Steward dashboard — replaces the retired
+                  /bumicert/create flow on the merged app. */}
               <Link
-                href={`${BUMICERTS_URL}/bumicert/create`}
+                href={MANAGE_URL}
                 target="_blank"
                 rel="noreferrer"
                 className="group inline-flex items-center gap-2 transition-colors hover:text-brand"
@@ -220,25 +222,26 @@ export function Footer() {
               {t("nav.globe")}
             </Link>
             <Link
-              href={`${BUMICERTS_URL}/bumicerts`}
+              href={PROJECTS_URL}
               target="_blank"
               rel="noreferrer"
               className="transition-colors hover:text-brand"
             >
-              Bumicerts
+              {t("card.projects")}
             </Link>
             <Link
-              href="https://github.com/GainForest/bumicerts-monorepo"
+              href="https://github.com/GainForest/gainforest-explorer"
               target="_blank"
               rel="noreferrer"
               className="transition-colors hover:text-brand"
             >
               GitHub
             </Link>
+            {/* This landing now lives at gainforest.earth, so the old
+                marketing-site #contact anchor is gone; the About page
+                carries the team + collaboration story. */}
             <Link
-              href="https://www.gainforest.earth/#contact"
-              target="_blank"
-              rel="noreferrer"
+              href="/about"
               className="transition-colors hover:text-brand"
             >
               {t("footer.legal.work")}
