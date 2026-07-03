@@ -370,15 +370,7 @@ export async function AccountDonationsTabContent({ account, did }: { account: Ac
 export async function AccountObservationsTabContent({ account, did }: { account: AccountRouteData; did: string }) {
   const access = await resolveAccountManageAccess(account.urlIdentifier).catch(() => null);
   if (access?.status === "allowed") {
-    const storageNoteT = await getTranslations("common.accountObservations.storageNote");
-    return (
-      <ObservationsSection
-        target={access.target}
-        storageNote={storageNoteT(account.kind === "organization" ? "organization" : "user", {
-          accountName: account.displayName,
-        })}
-      />
-    );
+    return <ObservationsSection target={access.target} />;
   }
 
   return (

@@ -1162,11 +1162,5 @@
     "removeLabel": "Ondoa {name}",
     "builtinChip": "Iliyojengwa",
     "propagationHint": "Wadhamini wapya huchukua dakika chache kuonekana kwenye programu."
-  },
-  "accountObservations": {
-    "storageNote": {
-      "user": "Uchunguzi unaopakia hapa huhifadhiwa chini ya akaunti yako ya GainForest. Picha na faili huhifadhiwa pamoja na faili za akaunti yako.",
-      "organization": "Uchunguzi unaopakia hapa huhifadhiwa chini ya {accountName}. Picha na faili huhifadhiwa pamoja na faili za akaunti ya shirika hilo, si akaunti yako binafsi."
-    }
   }
 }

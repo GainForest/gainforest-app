@@ -1162,11 +1162,5 @@
     "removeLabel": "Remove {name}",
     "builtinChip": "Built-in",
     "propagationHint": "New endorsers take a few minutes to appear across the app."
-  },
-  "accountObservations": {
-    "storageNote": {
-      "user": "Observations you upload here are saved under your GainForest account. Photos and files are stored with your account files.",
-      "organization": "Observations you upload here are saved under {accountName}. Photos and files are stored with that organization’s account files, not your personal account."
-    }
   }
 }

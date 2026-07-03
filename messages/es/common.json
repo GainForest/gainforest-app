@@ -1162,11 +1162,5 @@
     "removeLabel": "Eliminar {name}",
     "builtinChip": "Integrado",
     "propagationHint": "Los nuevos avaladores tardan unos minutos en aparecer en la app."
-  },
-  "accountObservations": {
-    "storageNote": {
-      "user": "Las observaciones que subas aquí se guardan en tu cuenta de GainForest. Las fotos y los archivos se almacenan con los archivos de tu cuenta.",
-      "organization": "Las observaciones que subas aquí se guardan en {accountName}. Las fotos y los archivos se almacenan con los archivos de esa organización, no con tu cuenta personal."
-    }
   }
 }

@@ -1162,11 +1162,5 @@
     "removeLabel": "Hapus {name}",
     "builtinChip": "Bawaan",
     "propagationHint": "Pendukung baru perlu beberapa menit untuk muncul di seluruh aplikasi."
-  },
-  "accountObservations": {
-    "storageNote": {
-      "user": "Observasi yang Anda unggah di sini disimpan di akun GainForest Anda. Foto dan file disimpan bersama file akun Anda.",
-      "organization": "Observasi yang Anda unggah di sini disimpan di {accountName}. Foto dan file disimpan bersama file akun organisasi tersebut, bukan akun pribadi Anda."
-    }
   }
 }

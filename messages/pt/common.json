@@ -1162,11 +1162,5 @@
     "removeLabel": "Remover {name}",
     "builtinChip": "Integrado",
     "propagationHint": "Novos apoiadores levam alguns minutos para aparecer na app."
-  },
-  "accountObservations": {
-    "storageNote": {
-      "user": "As observações que você envia aqui são salvas na sua conta GainForest. Fotos e arquivos ficam armazenados com os arquivos da sua conta.",
-      "organization": "As observações que você envia aqui são salvas em {accountName}. Fotos e arquivos ficam armazenados com os arquivos dessa organização, não com sua conta pessoal."
-    }
   }
 }

@@ -336,11 +336,9 @@ export async function SettingsSection({ target }: { target: ManageTarget }) {
 export async function ObservationsSection({
   target,
   forProject,
-  storageNote,
 }: {
   target: ManageTarget;
   forProject?: string | null;
-  storageNote?: string | null;
 }) {
   // Observations are available to personal accounts and organizations alike,
   // so the steward can collect field data without first creating an org.
@@ -356,7 +354,6 @@ export async function ObservationsSection({
       target={target}
       initialPage={initialObservations}
       forProject={forProject ?? null}
-      storageNote={storageNote ?? null}
     />
   );
 }
