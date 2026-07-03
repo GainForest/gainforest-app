@@ -270,27 +270,35 @@ the top nav.
 
 ## Globe component
 
-`app/_components/LiveGlobe.tsx` is the single source of globe behaviour.
+July 2026: `app/_components/partners-globe/PartnersGlobe.tsx` is the
+single source of globe behaviour for **every** globe on the site — the
+hero card, the ChoosePath preview, the Partners section, and the
+/about hero. The old react-globe.gl `LiveGlobe.tsx` (transparent dotted
+sphere) was deleted along with the `react-globe.gl` + `three`
+dependencies; it lives in git history if the light aesthetic ever
+comes back.
 
-- Library: [react-globe.gl](https://github.com/vasturiano/react-globe.gl).
-  Picked over Mapbox so the canvas is transparent and no API token is
-  required.
-- Loaded via `next/dynamic` with `ssr: false` — three.js touches `window`
-  during init and the bundle is large.
-- Controls config (auto-rotate, zoom-disabled, etc.) is applied in the
-  `onGlobeReady` callback, **not** in a `setTimeout`-based effect.
-
-| What | Where |
-|---|---|
-| Sphere image / bump | `globeImageUrl` / `bumpImageUrl` (unpkg paths) |
-| Atmosphere | `showAtmosphere`, `atmosphereColor`, `atmosphereAltitude` |
-| Dot size / colour | `pointRadius`, `pointColor` (in degrees of arc) |
-| Ping animation | `ringMaxRadius`, `ringPropagationSpeed`, `ringColor` |
-| Rotation speed | `AUTO_ROTATE_SPEED` constant |
-| Zoom behaviour | `controls.enableZoom = false` + wheel `stopPropagation` |
-
-Pings are rendered as a sparse subset of the dot set (`MAX_PINGING_PINS`)
-with staggered random `repeatPeriod` so they never pulse in unison.
+- Library: [maplibre-gl](https://maplibre.org) with globe projection —
+  a trimmed port of the merged app's GlobeMap (see the "Partners
+  section" notes for what was dropped/added). No API token; Esri
+  satellite + reference-label raster tiles.
+- Loaded via `next/dynamic` with `ssr: false` in every consumer
+  (`GlobeCardClient.tsx`, `PartnersClient.tsx`, `AboutHero.tsx`).
+- Data everywhere is `fetchPartnerOrgs()` — the full Ma Earth +
+  GainForest roster — so all globes plot the same ~680 pinned orgs
+  with the same circular logo badges.
+- Two modes: `interactive` (drag + nav-control pills; ChoosePath,
+  Partners, About) and decorative (`interactive={false}`: every camera
+  gesture disabled, idle spin only; the hero card). `scrollZoom` is
+  disabled in BOTH modes — the page must keep scrolling normally over
+  the canvas.
+- `initialZoom` sizes the sphere per embed. Empirical fit: the sphere
+  is ~140 × 2^zoom CSS px across; `GlobeCardClient.zoomForDiameter()`
+  solves for an ~85% fill of a square container.
+- MapLibre's compact attribution mounts expanded and only collapses on
+  user interaction; `PartnersGlobe` force-collapses it on load + first
+  idle (the ⓘ toggle keeps Esri credits reachable — don't remove the
+  control entirely, the imagery licence requires it).
 
 ## FloatingTaina (the Taina sim)
 

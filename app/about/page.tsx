@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { TopNav } from "../_components/TopNav";
 import { Footer } from "../_components/Footer";
-import { fetchProjectPins, fetchCommunitiesTotal } from "../_lib/projects";
+import { fetchCommunitiesTotal } from "../_lib/projects";
+import { fetchPartnerOrgs } from "../_lib/partner-orgs";
 import { fetchLiveBumicerts } from "../_lib/bumicerts";
 import { AboutHero } from "./_components/AboutHero";
 import { AboutStats } from "./_components/AboutStats";
@@ -38,8 +39,8 @@ const OG_IMAGE_ALT =
 // pipelines the landing uses (matches AGENTS.md hard rule #1 — no
 // inline mock data, all live counts come from Hyperindex):
 //
-//   • fetchProjectPins()      → Green Globe live community count
-//                               (the "43 frontline communities" stat)
+//   • fetchPartnerOrgs()      → full Ma Earth + GainForest roster
+//                               (globe markers + partner-network stat)
 //   • fetchLiveBumicerts(12)  → high-quality Bumicerts total from
 //                               hyperlabel + Hyperindex
 //
@@ -94,27 +95,25 @@ export default async function AboutPage() {
   // Match the landing's parallel-fetch pattern so the two upstreams
   // race rather than serialise; both already revalidate at the HTTP
   // cache layer, so this is cheap.
-  const [pins, snapshot, communitiesTotal] = await Promise.all([
-    fetchProjectPins(),
+  const [orgs, snapshot, communitiesTotal] = await Promise.all([
+    fetchPartnerOrgs(),
     fetchLiveBumicerts(12),
     fetchCommunitiesTotal(),
   ]);
 
-  // The "frontline communities" stat is the count of indexed GainForest
-  // orgs (fetchCommunitiesTotal), NOT pins.length — only a subset of orgs
-  // resolve to map coordinates, so pins.length undercounts. We floor at
-  // pins.length so the stat is never smaller than what the globe plots.
-  const communitiesCount = Math.max(communitiesTotal, pins.length);
+  // The "frontline communities" stat is the full partner-network roster
+  // (Ma Earth + GainForest orgs), floored against the indexed-communities
+  // total so it never reads smaller than either upstream.
+  const communitiesCount = Math.max(communitiesTotal, orgs.length);
 
   return (
     <div id="top" className="min-h-screen bg-background">
       <TopNav />
       <main>
-        {/* Hero now renders the live globe (with rotating real-
-            partner spotlight) in its right column, fed by the same
-            `pins` array used by AboutStats and the landing's Partners
-            section. One fetch, three downstream consumers. */}
-        <AboutHero pins={pins} communitiesTotal={communitiesCount} />
+        {/* Hero renders the ported merged-app globe (with rotating
+            random partner spotlight) in its right column, fed by the
+            same roster the landing's Partners section plots. */}
+        <AboutHero orgs={orgs} communitiesTotal={communitiesCount} />
         <AboutStats
           communitiesCount={communitiesCount}
           bumicertsCount={snapshot.bumicertsTotal}

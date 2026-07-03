@@ -327,43 +327,7 @@ body {
   to   { transform: translateX(0);    opacity: 1; }
 }
 
-/* LiveGlobe loading skeleton — slow staggered breath on the pin dots */
-@keyframes globeSkelPulse {
-  0%, 100% {
-    opacity: 0.3;
-    transform: translate(-50%, -50%) scale(1);
-  }
-  50% {
-    opacity: 0.85;
-    transform: translate(-50%, -50%) scale(1.35);
-  }
-}
-
-/* ---------------------------------------------------------------------------
-   react-globe.gl / three-globe tooltip
-   The library ships its own .scene-tooltip wrapper with a dark plate which
-   clashes with the light surface. Restyle to match design tokens. The
-   inline `style="color:var(--brand)"` for the country label is set in
-   <LiveGlobe>, so the tooltip body itself stays neutral here.
---------------------------------------------------------------------------- */
-.scene-tooltip {
-  background: color-mix(
-    in srgb,
-    var(--popover) 96%,
-    transparent
-  ) !important;
-  color: var(--popover-foreground) !important;
-  border: 1px solid var(--border-soft);
-  border-radius: 8px;
-  padding: 6px 10px 7px !important;
-  font-family: var(--font-garamond), Georgia, serif !important;
-  font-size: 12px !important;
-  font-weight: 500;
-  line-height: 1.25 !important;
-  letter-spacing: 0 !important;
-  box-shadow:
-    0 1px 1px rgba(40, 50, 30, 0.04),
-    0 6px 18px -10px rgba(40, 50, 30, 0.22);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-}
+/* (The react-globe.gl skeleton + .scene-tooltip overrides that lived
+   here were removed in July 2026 with <LiveGlobe> itself — every globe
+   now runs the MapLibre port in `_components/partners-globe/`, whose
+   popup styling lives in that folder's globe.css.) */

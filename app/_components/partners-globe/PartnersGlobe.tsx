@@ -55,6 +55,14 @@ type PartnersGlobeProps = {
   onSelectOrganization?: (did: string) => void;
   /** Idle rotation (port of Green Globe's spinGlobe). */
   spin?: boolean;
+  /** Initial camera zoom. The default suits the wide Partners panel;
+   *  smaller embeds (hero card, ChoosePath preview) pass a lower value
+   *  so the whole sphere stays in frame. */
+  initialZoom?: number;
+  /** When false the globe is a decorative widget: no drag / zoom /
+   *  nav control, idle spin only. Marker hover + click still work.
+   *  (Same split the old react-globe.gl LiveGlobe had.) */
+  interactive?: boolean;
   className?: string;
 };
 
@@ -95,6 +103,8 @@ export function PartnersGlobe({
   organizations,
   onSelectOrganization,
   spin = true,
+  initialZoom = GLOBE_INITIAL_ZOOM,
+  interactive = true,
   className,
 }: PartnersGlobeProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -102,6 +112,8 @@ export function PartnersGlobe({
   const [mapLoaded, setMapLoaded] = useState(false);
 
   const spinRef = useRef(spin);
+  const initialZoomRef = useRef(initialZoom);
+  const interactiveRef = useRef(interactive);
   const selectRef = useRef(onSelectOrganization);
   const organizationsRef = useRef(organizations);
   // did → whether that org's own logo badge has been added to the map yet
@@ -179,11 +191,12 @@ export function PartnersGlobe({
     const container = containerRef.current;
     if (!container || mapRef.current) return;
 
+    const isInteractive = interactiveRef.current;
     const map = new maplibregl.Map({
       container,
       style: globeMapStyle(),
       center: GLOBE_INITIAL_CENTER,
-      zoom: GLOBE_INITIAL_ZOOM,
+      zoom: initialZoomRef.current,
       // Both controls live bottom-LEFT here (the source app keeps them
       // bottom-right): the Partners spotlight card occupies the panel's
       // bottom-right corner and would cover them.
@@ -191,28 +204,57 @@ export function PartnersGlobe({
     });
     mapRef.current = map;
 
-    // Landing rule (same as the hero globe): the page must keep scrolling
-    // normally over the canvas. Zoom stays available via the control pills.
+    // Landing rule (same as the old hero globe): the page must keep
+    // scrolling normally over the canvas. Zoom stays available via the
+    // control pills on interactive embeds.
     map.scrollZoom.disable();
-    map.addControl(
-      new maplibregl.NavigationControl({ showCompass: false }),
-      "bottom-left",
-    );
+    if (isInteractive) {
+      map.addControl(
+        new maplibregl.NavigationControl({ showCompass: false }),
+        "bottom-left",
+      );
+    } else {
+      // Decorative widget: freeze every camera gesture; idle spin only.
+      map.dragPan.disable();
+      map.dragRotate.disable();
+      map.touchZoomRotate.disable();
+      map.doubleClickZoom.disable();
+      map.keyboard.disable();
+    }
+    // Esri imagery requires attribution on every embed, however small.
     map.addControl(
       new maplibregl.AttributionControl({ compact: true }),
       "bottom-left",
     );
+    // MapLibre's compact attribution mounts EXPANDED and re-expands as
+    // sources load; it only collapses after the user interacts with the
+    // map — on a decorative embed that never happens, so the full credit
+    // line would sit across the globe forever. Collapse it once the map
+    // settles (load + first idle, when the attribution text is final);
+    // the ⓘ toggle keeps the credits reachable.
+    const collapseAttribution = () => {
+      for (const el of container.querySelectorAll<HTMLDetailsElement>(
+        "details.maplibregl-ctrl-attrib",
+      )) {
+        el.removeAttribute("open");
+        el.classList.remove("maplibregl-compact-show");
+      }
+    };
+    map.once("idle", collapseAttribution);
 
     // Idle rotation: keep spinning between eased moves until the user grabs
-    // the globe (mirrors Green Globe's behaviour).
+    // the globe (mirrors Green Globe's behaviour). Decorative embeds never
+    // register the stop handlers, so they keep spinning forever.
     let interacted = false;
     const continueSpin = () => spinGlobe(map, spinRef.current && !interacted);
     const stopSpin = () => {
       interacted = true;
     };
     map.on("moveend", continueSpin);
-    map.on("mousedown", stopSpin);
-    map.on("touchstart", stopSpin);
+    if (isInteractive) {
+      map.on("mousedown", stopSpin);
+      map.on("touchstart", stopSpin);
+    }
 
     const popup = new maplibregl.Popup({
       closeButton: false,
@@ -291,6 +333,7 @@ export function PartnersGlobe({
       map.on("click", MARKER_LAYER, handleMarkerClick);
 
       setMapLoaded(true);
+      collapseAttribution();
       continueSpin();
     });
 

@@ -18,7 +18,7 @@ import { BumicertsCard } from "./_components/BumicertsCard";
 import { DraggableGlobeCard } from "./_components/DraggableGlobeCard";
 import { GlobeCard } from "./_components/GlobeCard";
 import { fetchLiveBumicerts } from "./_lib/bumicerts";
-import { fetchProjectPins } from "./_lib/projects";
+import { fetchPartnerOrgs } from "./_lib/partner-orgs";
 import { fetchSubstackPosts } from "./_lib/blog";
 
 // Re-fetch live Bumicerts at most every 15 minutes via the
@@ -72,9 +72,9 @@ export const revalidate = 900;
 // a long editorial scroll, with two intentional dark "punches" —
 // DataCommons (mid-page WHY) and the integrated closing Footer.
 export default async function Page() {
-  const [snapshot, pins, blogPosts] = await Promise.all([
+  const [snapshot, partnerOrgs, blogPosts] = await Promise.all([
     fetchLiveBumicerts(12),
-    fetchProjectPins(),
+    fetchPartnerOrgs(),
     fetchSubstackPosts(3),
   ]);
   return (
@@ -87,7 +87,7 @@ export default async function Page() {
           // copy. Hidden on lg+ where the desktopCards take over.
           inlineCards={
             <>
-              <DraggableGlobeCard pinCount={pins.length} inline>
+              <DraggableGlobeCard pinCount={partnerOrgs.length} inline>
                 <GlobeCard diameter={250} caption={false} />
               </DraggableGlobeCard>
               <BumicertsCard snapshot={snapshot} inline />
@@ -112,7 +112,7 @@ export default async function Page() {
                       ~258 + footer 31 ≈ 343 px) lands inside
                       Bumicerts' ≈ 345 px height. */}
               <DraggableGlobeCard
-                pinCount={pins.length}
+                pinCount={partnerOrgs.length}
                 position={{ top: 20, right: -35, width: 280 }}
               >
                 <GlobeCard diameter={250} caption={false} />

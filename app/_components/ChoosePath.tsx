@@ -2,7 +2,7 @@ import { GlobeCard } from "./GlobeCard";
 import { ChoosePathLabels } from "./ChoosePathLabels";
 import { ChoosePathClient } from "./ChoosePathClient";
 import type { LiveBumicertsSnapshot } from "../_lib/bumicerts";
-import { fetchProjectPins } from "../_lib/projects";
+import { fetchPartnerOrgs } from "../_lib/partner-orgs";
 
 // "Choose how you want to use GainForest" — two editorial cards
 // side-by-side. Each card explains AND demonstrates one of the two
@@ -27,7 +27,9 @@ export async function ChoosePath({
 }: {
   snapshot: LiveBumicertsSnapshot;
 }) {
-  const pins = await fetchProjectPins();
+  // Full Ma Earth + GainForest roster — same dataset every globe on
+  // the site plots (see _lib/partner-orgs.ts).
+  const orgs = await fetchPartnerOrgs();
 
   // Featured trio for the right card. fetchLiveBumicerts() returns
   // high-quality Bumicerts sorted by createdAt DESC, so preserving
@@ -59,7 +61,7 @@ export async function ChoosePath({
 
         <ChoosePathClient
           featured={featured}
-          pinCount={pins.length}
+          pinCount={orgs.length}
           isLive={!snapshot.fromFallback}
           globe={<GlobeCard diameter={240} caption={false} interactive />}
         />
