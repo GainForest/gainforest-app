@@ -278,8 +278,7 @@ export type BoardScope = "round" | "all";
 /**
  * Tally the collectors who uploaded photo observations.
  *
- * Scope "round" counts image-bearing occurrences inside the round window
- * (created on/after the round start, filtered to the round end client-side).
+ * Scope "round" counts image-bearing occurrences inside the exact round window.
  * Scope "all" counts every image observation in the program, newest-first, so
  * the board can show the most active collectors overall. A round is one week,
  * so a single page usually covers it; we walk a few pages defensively.
@@ -296,7 +295,7 @@ export async function fetchRoundCollectors(
   const where =
     scope === "all"
       ? { imageEvidence: { isNull: false } }
-      : { imageEvidence: { isNull: false }, createdAt: { gte: round.start } };
+      : { imageEvidence: { isNull: false }, createdAt: { gte: round.start, lte: round.end } };
 
   // Accounts a steward flagged as "test" are excluded from the challenge — they
   // don't count toward the leaderboard, totals or prize eligibility.
