@@ -404,7 +404,8 @@
     "filesAndPhotos": "Berkas & foto",
     "photos": "Foto",
     "files": "Berkas",
-    "taina": "Tainá"
+    "taina": "Tainá",
+    "endorsementsGiven": "Dukungan diberikan"
   },
   "accountAttachments": {
     "title": "Lampiran",
@@ -691,6 +692,12 @@
     "description": "Orang dengan badge ini membantu mengelola data dan bukti bersama milik organisasi.",
     "empty": "Belum ada anggota Dewan Data yang tercantum.",
     "memberFallback": "Anggota tim"
+  },
+  "accountEndorsementsGiven": {
+    "title": "Dukungan diberikan",
+    "description": "Organisasi yang telah didukung {name} secara publik.",
+    "empty": "Organisasi ini belum mendukung siapa pun.",
+    "fallbackName": "Organisasi"
   },
   "trust": {
     "trustedBy": "Dipercaya oleh",

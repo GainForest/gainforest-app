@@ -3,12 +3,13 @@
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { usePathname, useSearchParams } from "next/navigation";
-import { BinocularsIcon, BotIcon, FolderKanbanIcon, HeartHandshakeIcon, HomeIcon, ImageIcon, MessageSquareTextIcon, SettingsIcon, UsersIcon } from "lucide-react";
+import { BadgeCheckIcon, BinocularsIcon, BotIcon, FolderKanbanIcon, HeartHandshakeIcon, HomeIcon, ImageIcon, MessageSquareTextIcon, SettingsIcon, UsersIcon } from "lucide-react";
 import { stripLocaleFromPathname } from "@/lib/i18n/routing";
 import { cn } from "@/lib/utils";
 import type { AccountKind } from "../_lib/account-route";
 import {
   accountAttachmentsPath,
+  accountEndorsementsGivenPath,
   accountAudioPath,
   accountBumicertsPath,
   accountDonationsPath,
@@ -26,7 +27,7 @@ import {
   accountTreesPath,
 } from "../_lib/account-route";
 
-type TabLabelKey = "home" | "overview" | "bumicerts" | "projects" | "donationHistory" | "observations" | "posts" | "timeline" | "gallery" | "filesAndPhotos" | "settings" | "sites" | "audio" | "drone" | "trees" | "members" | "taina";
+type TabLabelKey = "home" | "overview" | "bumicerts" | "projects" | "donationHistory" | "observations" | "posts" | "timeline" | "gallery" | "filesAndPhotos" | "settings" | "sites" | "audio" | "drone" | "trees" | "members" | "taina" | "endorsementsGiven";
 
 interface Tab {
   labelKey: TabLabelKey;
@@ -85,6 +86,7 @@ function buildTabs(
   includeSettings: boolean,
   showOrgData: boolean,
   includeTaina: boolean,
+  showEndorsementsGiven: boolean,
   manageBasePath?: string,
 ): Tab[] {
   const paths = buildTabPaths(did, scope, manageBasePath);
@@ -111,6 +113,14 @@ function buildTabs(
     icon: MessageSquareTextIcon,
     exact: false,
     matchPaths: [accountRepliesPath(did), accountLikesPath(did)],
+  };
+  // Organizations this org has publicly endorsed. Only shown when it has given
+  // at least one endorsement (resolved server-side into `showEndorsementsGiven`).
+  const endorsementsGivenTab: Tab = {
+    labelKey: "endorsementsGiven",
+    href: accountEndorsementsGivenPath(did),
+    icon: BadgeCheckIcon,
+    exact: false,
   };
   const appendExtras = (tabs: Tab[]): Tab[] => {
     if (includeTaina && scope === "account") tabs.push(tainaTab);
@@ -185,6 +195,9 @@ function buildTabs(
   if (scope === "account") {
     tabs.push(postsTab);
   }
+  if (scope === "account" && showEndorsementsGiven) {
+    tabs.push(endorsementsGivenTab);
+  }
   if (scope === "account" && showOrgData) {
     tabs.push(
       { labelKey: "members", href: accountMembersPath(did), icon: UsersIcon, exact: false },
@@ -211,6 +224,7 @@ interface OrgTabBarProps {
   includeSettings?: boolean;
   showOrgData?: boolean;
   includeTaina?: boolean;
+  showEndorsementsGiven?: boolean;
   manageBasePath?: string;
 }
 
@@ -221,12 +235,13 @@ export function AccountTabBar({
   includeSettings = false,
   showOrgData = false,
   includeTaina = false,
+  showEndorsementsGiven = false,
   manageBasePath,
 }: OrgTabBarProps) {
   const t = useTranslations("common.accountTabs");
   const pathname = stripLocaleFromPathname(usePathname() ?? "/");
   const searchParams = useSearchParams();
-  const tabs = buildTabs(did, accountKind, scope, includeSettings, showOrgData, includeTaina, manageBasePath);
+  const tabs = buildTabs(did, accountKind, scope, includeSettings, showOrgData, includeTaina, showEndorsementsGiven, manageBasePath);
 
   function isActive(tab: Tab): boolean {
     if (scope === "manage") {

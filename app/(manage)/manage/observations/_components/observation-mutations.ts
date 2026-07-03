@@ -12,6 +12,10 @@ type ObservationPhotoResult = MutationResult & { blobRef: ObservationBlobRef | n
 
 const OCCURRENCE_COLLECTION = "app.gainforest.dwc.occurrence";
 const ATTACHMENT_COLLECTION = "org.hypercerts.context.attachment";
+const MEASUREMENT_COLLECTION = "app.gainforest.dwc.measurement";
+// Flexible key/value measurement payload — used for observer-entered fields
+// (height, count, temperature, …) that don't fit the flora/fauna split.
+const GENERIC_MEASUREMENT_TYPE = "app.gainforest.dwc.measurement#genericMeasurement";
 // Registered biodiversity-evidence content type (see the cert/project timeline's
 // evidenceContentTypeRegistry). Tagging the dataset with this groups it under
 // Biodiversity on the project/cert timeline and still renders the CSV as a
@@ -58,13 +62,51 @@ function occurrenceRecord(data: Record<string, unknown>) {
   });
 }
 
-export function formatObservationMutationError(error: unknown): string {
-  return error instanceof Error ? error.message : "Could not upload this observation.";
+/** Matches the raw error the platform returns when a request body blows the
+ *  serverless payload cap (e.g. "Request Entity Too Large
+ *  FUNCTION_PAYLOAD_TOO_LARGE fra1::…") — gibberish to end users. */
+const PAYLOAD_TOO_LARGE_PATTERN = /FUNCTION_PAYLOAD_TOO_LARGE|Request Entity Too Large|\b413\b/i;
+
+export function formatObservationMutationError(
+  error: unknown,
+  copy?: { photoTooLarge?: string },
+): string {
+  const message = error instanceof Error ? error.message : "";
+  if (copy?.photoTooLarge && PAYLOAD_TOO_LARGE_PATTERN.test(message)) return copy.photoTooLarge;
+  return message || "Could not upload this observation.";
 }
 
 export async function createObservationOccurrence(data: Record<string, unknown>): Promise<MutationResult> {
   const record = occurrenceRecord(data);
   const result = await createRecord(OCCURRENCE_COLLECTION, record, undefined, mutationOptions());
+  return { ...result, rkey: rkeyFromUri(result.uri), record };
+}
+
+/** A single observer-entered measurement (Darwin Core MeasurementOrFact row). */
+export type ObservationMeasurementEntry = {
+  measurementType: string;
+  measurementValue: string;
+  measurementUnit?: string;
+};
+
+/**
+ * Store the observer's optional measurements for one observation as a single
+ * generic measurement record linked to the occurrence via `occurrenceRef`.
+ */
+export async function createObservationMeasurements(input: {
+  occurrenceRef: string;
+  entries: ObservationMeasurementEntry[];
+}): Promise<MutationResult> {
+  const record = omitEmpty({
+    $type: MEASUREMENT_COLLECTION,
+    occurrenceRef: input.occurrenceRef,
+    result: {
+      $type: GENERIC_MEASUREMENT_TYPE,
+      measurements: input.entries.map((entry) => omitEmpty({ ...entry })),
+    },
+    createdAt: new Date().toISOString(),
+  });
+  const result = await createRecord(MEASUREMENT_COLLECTION, record, undefined, mutationOptions());
   return { ...result, rkey: rkeyFromUri(result.uri), record };
 }
 

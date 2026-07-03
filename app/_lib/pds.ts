@@ -141,3 +141,69 @@ export async function resolveStrongRef(
   }
   return { uri: payload.uri, cid: payload.cid };
 }
+
+/** A full record read straight from its owner's PDS. */
+export type PdsRecord = { uri: string; cid: string | null; value: Record<string, unknown> };
+
+/**
+ * Read one record directly from its owner's PDS via the public
+ * `com.atproto.repo.getRecord`. Returns null when the record (or the PDS)
+ * can't be reached. Used to distinguish "doesn't exist" from "exists but the
+ * indexer hasn't caught up yet" for freshly created records.
+ */
+export async function getPdsRecord(
+  did: string,
+  collection: string,
+  rkey: string,
+  signal?: AbortSignal,
+): Promise<PdsRecord | null> {
+  const host = await resolvePdsHost(did, signal);
+  if (!host) return null;
+  const params = new URLSearchParams({ repo: did, collection, rkey });
+  const res = await fetch(
+    `https://${host}/xrpc/com.atproto.repo.getRecord?${params.toString()}`,
+    { signal, cache: "no-store" },
+  ).catch(() => null);
+  if (!res?.ok) return null;
+  const payload = (await res.json().catch(() => null)) as
+    | { uri?: unknown; cid?: unknown; value?: unknown }
+    | null;
+  if (typeof payload?.uri !== "string" || typeof payload.value !== "object" || payload.value === null) return null;
+  return {
+    uri: payload.uri,
+    cid: typeof payload.cid === "string" ? payload.cid : null,
+    value: payload.value as Record<string, unknown>,
+  };
+}
+
+/**
+ * List the newest records of a collection straight from the owner's PDS
+ * (public `com.atproto.repo.listRecords`, newest-first). One page only — this
+ * exists to surface freshly written records the indexer hasn't seen yet, not
+ * to replace indexer listings.
+ */
+export async function listLatestPdsRecords(
+  did: string,
+  collection: string,
+  limit = 24,
+  signal?: AbortSignal,
+): Promise<PdsRecord[]> {
+  const host = await resolvePdsHost(did, signal);
+  if (!host) return [];
+  const params = new URLSearchParams({ repo: did, collection, limit: String(limit) });
+  const res = await fetch(
+    `https://${host}/xrpc/com.atproto.repo.listRecords?${params.toString()}`,
+    { signal, cache: "no-store" },
+  ).catch(() => null);
+  if (!res?.ok) return [];
+  const payload = (await res.json().catch(() => null)) as { records?: unknown } | null;
+  if (!Array.isArray(payload?.records)) return [];
+  const records: PdsRecord[] = [];
+  for (const item of payload.records) {
+    if (typeof item !== "object" || item === null) continue;
+    const { uri, cid, value } = item as { uri?: unknown; cid?: unknown; value?: unknown };
+    if (typeof uri !== "string" || typeof value !== "object" || value === null) continue;
+    records.push({ uri, cid: typeof cid === "string" ? cid : null, value: value as Record<string, unknown> });
+  }
+  return records;
+}

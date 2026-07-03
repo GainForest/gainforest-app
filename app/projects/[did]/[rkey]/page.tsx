@@ -5,7 +5,8 @@ import { notFound, redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { ArrowLeftIcon, ArrowUpRightIcon, FolderKanbanIcon } from "lucide-react";
 import { fetchRecordByUri } from "../../../_lib/indexer";
-import { isPdsBlobUrl } from "../../../_lib/pds";
+import { getPdsRecord, isPdsBlobUrl } from "../../../_lib/pds";
+import { AutoRefresh } from "./_components/AutoRefresh";
 import { getAccountRouteData, readAccountRouteParams } from "../../../account/_lib/account-route";
 import { accountHref, localProjectHref } from "../../../_lib/urls";
 import { RecordEngagement } from "../../../_components/RecordEngagement";
@@ -21,7 +22,21 @@ type ProjectPageParams = Promise<{ did: string; rkey: string }>;
 
 const COLLECTION = "org.hypercerts.collection";
 
-async function loadProject(params: ProjectPageParams) {
+type ProjectExplorerRecord = Extract<
+  NonNullable<Awaited<ReturnType<typeof fetchRecordByUri>>>,
+  { kind: "project" }
+>;
+
+type LoadedProject = {
+  record: ProjectExplorerRecord | null;
+  /** Title read from the owner's PDS when the indexer hasn't caught up yet. */
+  pendingTitle: string | null;
+  did: string;
+  rkey: string;
+  urlIdentifier: string;
+};
+
+async function loadProject(params: ProjectPageParams): Promise<LoadedProject> {
   const [{ rkey: encodedRkey }, { did, urlIdentifier }] = await Promise.all([
     params,
     readAccountRouteParams(params),
@@ -29,13 +44,30 @@ async function loadProject(params: ProjectPageParams) {
   const rkey = safeDecode(encodedRkey);
   const atUri = `at://${did}/${COLLECTION}/${rkey}`;
   const record = await fetchRecordByUri(atUri).catch(() => null);
-  if (!record || record.kind !== "project") notFound();
-  return { record, did, rkey, urlIdentifier };
+  if (!record || record.kind !== "project") {
+    // The indexer lags fresh writes. When the record exists on the owner's
+    // PDS, this is a just-created project that's still being published — show
+    // a friendly holding page instead of a 404.
+    const pdsRecord = await getPdsRecord(did, COLLECTION, rkey).catch(() => null);
+    if (pdsRecord) {
+      const title = typeof pdsRecord.value.title === "string" ? pdsRecord.value.title : null;
+      return { record: null, pendingTitle: title ?? "", did, rkey, urlIdentifier };
+    }
+    notFound();
+  }
+  return { record, pendingTitle: null, did, rkey, urlIdentifier };
 }
 
 export async function generateMetadata({ params }: { params: ProjectPageParams }): Promise<Metadata> {
-  const { record, urlIdentifier, rkey } = await loadProject(params);
+  const { record, pendingTitle, urlIdentifier, rkey } = await loadProject(params);
   const t = await getTranslations("marketplace.projectPage");
+  if (!record) {
+    return {
+      title: pendingTitle ? t("metaTitle", { name: pendingTitle }) : t("publishingTitle"),
+      description: t("metaFallback"),
+      robots: { index: false },
+    };
+  }
   const description = record.shortDescription?.trim() || t("metaFallback");
   return {
     title: t("metaTitle", { name: record.title }),
@@ -50,12 +82,34 @@ export async function generateMetadata({ params }: { params: ProjectPageParams }
   };
 }
 
+// The project page is a single scrolling layout; old shared links may still
+// carry the legacy Cert `?tab=` param, so map each tab to its inline section.
+const LEGACY_TAB_ANCHORS: Record<string, string> = {
+  "site-boundaries": "#places",
+  timeline: "#updates",
+  reviews: "#reviews",
+  donations: "#support",
+};
+
 export default async function ProjectDetailPage({
   params,
+  searchParams,
 }: {
   params: ProjectPageParams;
+  searchParams: Promise<{ tab?: string | string[] }>;
 }) {
-  const { record, did, rkey, urlIdentifier } = await loadProject(params);
+  const [{ record, pendingTitle, did, rkey, urlIdentifier }, search] = await Promise.all([loadProject(params), searchParams]);
+
+  if (!record) {
+    return <ProjectPublishing title={pendingTitle} />;
+  }
+
+  // Strip the legacy `?tab=` param (this page has no tab panels); land on the
+  // matching inline section instead so old links keep working.
+  const tab = typeof search.tab === "string" ? search.tab : Array.isArray(search.tab) ? search.tab[0] : undefined;
+  if (tab !== undefined) {
+    redirect(`${localProjectHref(urlIdentifier, rkey)}${LEGACY_TAB_ANCHORS[tab] ?? ""}`);
+  }
 
   // A project owns exactly one Cert. Render the full Cert experience inline so
   // the project page carries every feature (story, evidence, site boundaries,
@@ -108,7 +162,7 @@ async function ProjectFallback({
   rkey,
   urlIdentifier,
 }: {
-  record: Awaited<ReturnType<typeof loadProject>>["record"];
+  record: ProjectExplorerRecord;
   did: string;
   rkey: string;
   urlIdentifier: string;
@@ -216,6 +270,30 @@ async function ProjectFallback({
             </aside>
           ) : null}
         </div>
+      </div>
+    </main>
+  );
+}
+
+/** Holding page for a just-created project the indexer hasn't published yet.
+ *  Auto-refreshes until the full page can render. */
+async function ProjectPublishing({ title }: { title: string | null }) {
+  const t = await getTranslations("marketplace.projectPage");
+  return (
+    <main className="min-h-screen bg-background">
+      <AutoRefresh intervalMs={8000} />
+      <div className="mx-auto flex min-h-[70vh] max-w-2xl flex-col items-center justify-center px-6 text-center">
+        <span className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-[12px] font-medium text-primary-dark">
+          <span className="relative flex h-2 w-2">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-60" />
+            <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
+          </span>
+          {t("publishingBadge")}
+        </span>
+        <h1 className="mt-4 font-instrument text-4xl italic leading-tight tracking-[-0.01em] text-foreground md:text-5xl">
+          {title?.trim() || t("publishingTitle")}
+        </h1>
+        <p className="mt-4 max-w-md text-[15px] leading-[1.6] text-muted-foreground">{t("publishingBody")}</p>
       </div>
     </main>
   );

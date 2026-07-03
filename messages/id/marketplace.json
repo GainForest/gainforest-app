@@ -1284,7 +1284,10 @@
     "noCerts": "Belum ada sertifikat yang ditambahkan ke proyek ini.",
     "metaTitle": "{name} — Proyek",
     "metaFallback": "Sebuah proyek yang dibagikan di GainForest.",
-    "timelineTitle": "Lini Masa"
+    "timelineTitle": "Lini Masa",
+    "publishingBadge": "Memublikasikan",
+    "publishingTitle": "Proyek Anda sedang diproses",
+    "publishingBody": "Kami sedang memublikasikan proyek Anda. Ini biasanya memakan waktu sekitar satu menit — halaman akan diperbarui secara otomatis."
   },
   "observationPage": {
     "back": "Semua pengamatan",

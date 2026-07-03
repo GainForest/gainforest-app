@@ -11,6 +11,7 @@ import { InlineCardGridSkeleton } from "../../_components/PageLoadingSkeletons";
 import { RecordExplorer } from "../../_components/RecordExplorer";
 import { AccountBumicertsGrid } from "./AccountBumicertsGrid";
 import { AccountProjectsGrid } from "./AccountProjectsGrid";
+import { EndorsementsGivenGrid } from "./EndorsementsGivenGrid";
 import type { AccountOrganization } from "./AccountOrganizationsGrid";
 import { OverviewFolders, type OverviewFolderTile } from "./OverviewFolders";
 import { AccountContentColumns, AccountSidebar } from "./AccountSidebar";
@@ -19,6 +20,7 @@ import { ShareProfileButton } from "./ShareProfileButton";
 import { DonationHistory } from "./DonationHistory";
 import { fetchReceipts } from "../../_lib/dashboard";
 import { fetchPublicDataCouncilMembers, type PublicDataCouncilMember } from "../../_lib/data-council";
+import { fetchEndorsementsGiven } from "../../_lib/endorsements-given";
 import type { AuthSession } from "../../_lib/auth";
 import { fetchUserCgsGroups, resolveAccountManageAccess } from "../../_lib/manage-server";
 import { BumicertsSection, ObservationsSection, ProjectsSection } from "../../(manage)/manage/_sections";
@@ -390,6 +392,36 @@ export async function AccountProjectsTabContent({ account, did }: { account: Acc
     .then((page) => page.records)
     .catch(() => []);
   return <AccountProjectsGrid projects={projects} />;
+}
+
+// Organizations this org has publicly endorsed (its signed "Organization
+// Endorsement" badge awards). Only surfaced as a tab when there's at least one,
+// so the grid is normally non-empty; the empty copy is a direct-navigation
+// fallback.
+export async function AccountEndorsementsGivenTabContent({ account, did }: { account: AccountRouteData; did: string }) {
+  if (account.kind !== "organization") {
+    notFound();
+  }
+
+  const [t, organizations] = await Promise.all([
+    getTranslations("common.accountEndorsementsGiven"),
+    fetchEndorsementsGiven(did).catch(() => []),
+  ]);
+
+  return (
+    <section className="py-6 org-animate org-fade-in-up org-delay-1">
+      <div className="mb-5">
+        <div className="flex items-baseline gap-2">
+          <h2 className="font-instrument text-2xl italic leading-none text-foreground">{t("title")}</h2>
+          {organizations.length > 0 ? <span className="text-sm text-muted-foreground">{organizations.length}</span> : null}
+        </div>
+        <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
+          {t("description", { name: account.displayName })}
+        </p>
+      </div>
+      <EndorsementsGivenGrid organizations={organizations} />
+    </section>
+  );
 }
 
 // The organizations a person belongs to live in the group service, which only

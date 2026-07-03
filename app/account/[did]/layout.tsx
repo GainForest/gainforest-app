@@ -5,6 +5,7 @@ import { canEditGroupProfile } from "@/app/(manage)/manage/_lib/cgs-permissions"
 import type { CgsRole } from "@/app/(manage)/manage/_lib/cgs";
 import { EditableAccountHeader } from "@/app/(manage)/manage/_components/EditableAccountHeader";
 import { fetchHiddenAccountDids, fetchRecognitionBadgesForDid } from "@/app/_lib/indexer";
+import { fetchEndorsementsGivenCount } from "@/app/_lib/endorsements-given";
 import { RECOGNITION_BADGE_KEYS, type RecognitionBadgeKey } from "@/app/_lib/recognition-badges";
 import { getGainForestModeratorAccess } from "@/app/internal/badges/_lib/access";
 import { AccountChrome } from "../_components/AccountChrome";
@@ -76,6 +77,11 @@ export default async function AccountLayout({
   const awardedRecognition: RecognitionBadgeKey[] = await fetchRecognitionBadgesForDid(account.did)
     .then((keys) => RECOGNITION_BADGE_KEYS.filter((key) => keys.has(key)))
     .catch(() => []);
+  // The "Endorsements given" tab appears only for organizations that have
+  // signed at least one Organization Endorsement badge award. Cached per org.
+  const showEndorsementsGiven = account.kind === "organization"
+    ? (await fetchEndorsementsGivenCount(account.did).catch(() => 0)) > 0
+    : false;
 
   return (
     <main className="w-full">
@@ -112,6 +118,7 @@ export default async function AccountLayout({
               // Tainá is a personal Telegram assistant, so its dashboard tab
               // only appears to the signed-in owner of a personal profile.
               includeTaina={account.kind === "user" && session.isLoggedIn && session.did === account.did}
+              showEndorsementsGiven={showEndorsementsGiven}
             />
           </>
         }

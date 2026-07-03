@@ -123,6 +123,10 @@ export function accountOrganizationsPath(didOrHandle: string): string {
   return `${accountPath(didOrHandle)}/organizations`;
 }
 
+export function accountEndorsementsGivenPath(didOrHandle: string): string {
+  return `${accountPath(didOrHandle)}/endorsements-given`;
+}
+
 export function accountProjectsPath(didOrHandle: string): string {
   return `${accountPath(didOrHandle)}/projects`;
 }

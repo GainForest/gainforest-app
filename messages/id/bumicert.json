@@ -355,6 +355,14 @@
       "copied": "Tersalin!",
       "donate": "Donasi",
       "goToOverview": "Buka tab ringkasan"
+    },
+    "projectNav": {
+      "overview": "Ringkasan",
+      "sightings": "Pengamatan",
+      "places": "Tempat",
+      "updates": "Pembaruan",
+      "reviews": "Ulasan",
+      "support": "Dukungan"
     }
   },
   "create": {

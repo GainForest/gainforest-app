@@ -404,7 +404,8 @@
     "filesAndPhotos": "Files & photos",
     "photos": "Photos",
     "files": "Files",
-    "taina": "Tainá"
+    "taina": "Tainá",
+    "endorsementsGiven": "Endorsements given"
   },
   "accountAttachments": {
     "title": "Attachments",
@@ -691,6 +692,12 @@
     "description": "People with this badge help steward the organization’s shared data and evidence.",
     "empty": "No Data Council members are listed yet.",
     "memberFallback": "Team member"
+  },
+  "accountEndorsementsGiven": {
+    "title": "Endorsements given",
+    "description": "Organizations {name} has publicly endorsed.",
+    "empty": "This organization hasn’t endorsed anyone yet.",
+    "fallbackName": "Organization"
   },
   "trust": {
     "trustedBy": "Trusted by",

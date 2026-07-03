@@ -404,7 +404,8 @@
     "filesAndPhotos": "Arquivos e fotos",
     "photos": "Fotos",
     "files": "Arquivos",
-    "taina": "Tainá"
+    "taina": "Tainá",
+    "endorsementsGiven": "Endossos concedidos"
   },
   "accountAttachments": {
     "title": "Anexos",
@@ -691,6 +692,12 @@
     "description": "Pessoas com este distintivo ajudam a cuidar dos dados e evidências compartilhados da organização.",
     "empty": "Ainda não há membros do Conselho de Dados listados.",
     "memberFallback": "Membro da equipe"
+  },
+  "accountEndorsementsGiven": {
+    "title": "Endossos concedidos",
+    "description": "Organizações que {name} endossou publicamente.",
+    "empty": "Esta organização ainda não endossou ninguém.",
+    "fallbackName": "Organização"
   },
   "trust": {
     "trustedBy": "Com a confiança de",

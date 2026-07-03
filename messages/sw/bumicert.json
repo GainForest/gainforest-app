@@ -355,6 +355,14 @@
       "copied": "Imenakiliwa!",
       "donate": "Changia",
       "goToOverview": "Nenda kwenye kichupo cha muhtasari"
+    },
+    "projectNav": {
+      "overview": "Muhtasari",
+      "sightings": "Uchunguzi",
+      "places": "Maeneo",
+      "updates": "Masasisho",
+      "reviews": "Maoni",
+      "support": "Msaada"
     }
   },
   "create": {

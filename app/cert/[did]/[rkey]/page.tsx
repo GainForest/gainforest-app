@@ -564,13 +564,14 @@ export async function ProjectDetailView({
   const { record, detail, owner, fundingConfig, authSession } = routeData;
   const matchUris = timelineMatchUris && timelineMatchUris.length > 0 ? timelineMatchUris : [record.atUri];
 
-  const [workScopeT, permissionT, timelineT, timelineEntryT, referenceT, globeT] = await Promise.all([
+  const [workScopeT, permissionT, timelineT, timelineEntryT, referenceT, globeT, projectNavT] = await Promise.all([
     getTranslations("common.workScopes"),
     getTranslations("bumicert.detail.evidenceAdder.permissions"),
     getTranslations("bumicert.detail.timeline"),
     getTranslations("bumicert.detail.timelineEntry"),
     getTranslations("bumicert.detail.reference"),
     getTranslations("marketplace.globe"),
+    getTranslations("bumicert.detail.projectNav"),
   ]);
   const workScopeLabels: WorkScopeLabels = {
     reforestation: workScopeT("reforestation"),
@@ -667,6 +668,18 @@ export async function ProjectDetailView({
 
   const jsonLd = buildBumicertJsonLd(record, owner, fundingConfig, detailHref, description ?? null, origin);
 
+  // The project layout renders every section inline, so the sub-header shows
+  // in-page anchor links instead of the legacy `?tab=` strip (which this page
+  // never reads — clicking those tabs changed the URL but not the content).
+  const anchorNav = [
+    { id: "overview", href: detailHref, label: projectNavT("overview") },
+    ...(hasObservations ? [{ id: "observations", href: "#observations", label: projectNavT("sightings") }] : []),
+    ...(hasPlaces ? [{ id: "places", href: "#places", label: projectNavT("places") }] : []),
+    ...(showUpdates ? [{ id: "updates", href: "#updates", label: projectNavT("updates") }] : []),
+    { id: "reviews", href: "#reviews", label: projectNavT("reviews") },
+    ...(showSupport ? [{ id: "support", href: "#support", label: projectNavT("support") }] : []),
+  ];
+
   return (
     <>
       <script
@@ -676,6 +689,7 @@ export async function ProjectDetailView({
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <BumicertDetailHeader
+        anchorNav={anchorNav}
         summary={{
           title: record.title,
           donateHref: donationsHref,

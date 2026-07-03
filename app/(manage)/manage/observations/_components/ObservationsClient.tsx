@@ -1769,7 +1769,7 @@ function ObservationBulkAddPanel({
       }
       return null;
     } catch (error) {
-      const message = formatObservationMutationError(error);
+      const message = formatObservationMutationError(error, { photoTooLarge: t("photoTooLarge") });
       setItems((current) => current.map((candidate) =>
         uploadIds.has(candidate.id) && candidate.status === "uploading"
           ? { ...candidate, status: "uploadError", progress: 0, error: message }

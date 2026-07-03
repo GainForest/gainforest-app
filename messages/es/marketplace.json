@@ -1284,7 +1284,10 @@
     "noCerts": "Todavía no se han añadido certificados a este proyecto.",
     "metaTitle": "{name} — Proyecto",
     "metaFallback": "Un proyecto compartido en GainForest.",
-    "timelineTitle": "Cronología"
+    "timelineTitle": "Cronología",
+    "publishingBadge": "Publicando",
+    "publishingTitle": "Tu proyecto está en camino",
+    "publishingBody": "Estamos publicando tu proyecto. Esto suele tardar un minuto; la página se actualizará sola."
   },
   "observationPage": {
     "back": "Todos los avistamientos",

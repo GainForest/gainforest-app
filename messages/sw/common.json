@@ -404,7 +404,8 @@
     "filesAndPhotos": "Faili na picha",
     "photos": "Picha",
     "files": "Faili",
-    "taina": "Tainá"
+    "taina": "Tainá",
+    "endorsementsGiven": "Idhini zilizotolewa"
   },
   "accountAttachments": {
     "title": "Viambatisho",
@@ -691,6 +692,12 @@
     "description": "Watu walio na beji hii husaidia kusimamia data na ushahidi wa pamoja wa shirika.",
     "empty": "Bado hakuna wanachama wa Baraza la Data walioorodheshwa.",
     "memberFallback": "Mwanachama wa timu"
+  },
+  "accountEndorsementsGiven": {
+    "title": "Idhini zilizotolewa",
+    "description": "Mashirika ambayo {name} imeyaidhinisha hadharani.",
+    "empty": "Shirika hili bado halijaidhinisha yeyote.",
+    "fallbackName": "Shirika"
   },
   "trust": {
     "trustedBy": "Inaaminiwa na",

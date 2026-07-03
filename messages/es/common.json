@@ -404,7 +404,8 @@
     "filesAndPhotos": "Archivos y fotos",
     "photos": "Fotos",
     "files": "Archivos",
-    "taina": "Tainá"
+    "taina": "Tainá",
+    "endorsementsGiven": "Respaldos otorgados"
   },
   "accountAttachments": {
     "title": "Adjuntos",
@@ -691,6 +692,12 @@
     "description": "Las personas con esta insignia ayudan a cuidar los datos y la evidencia compartidos de la organización.",
     "empty": "Aún no hay miembros del Consejo de Datos.",
     "memberFallback": "Miembro del equipo"
+  },
+  "accountEndorsementsGiven": {
+    "title": "Respaldos otorgados",
+    "description": "Organizaciones que {name} ha respaldado públicamente.",
+    "empty": "Esta organización todavía no ha respaldado a nadie.",
+    "fallbackName": "Organización"
   },
   "trust": {
     "trustedBy": "Con la confianza de",

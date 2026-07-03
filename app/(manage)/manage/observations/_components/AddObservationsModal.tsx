@@ -1,22 +1,27 @@
 "use client";
 
 import Image from "next/image";
-import { useCallback, useEffect, useRef, useState, type ChangeEvent, type DragEvent } from "react";
+import { useCallback, useEffect, useId, useRef, useState, type ChangeEvent, type DragEvent } from "react";
 import { useTranslations } from "next-intl";
 import {
   CalendarIcon,
   CheckCircle2Icon,
   ChevronDownIcon,
   CircleHelpIcon,
+  CopyIcon,
   FileSpreadsheetIcon,
+  FolderOpenIcon,
   ImagePlusIcon,
   Layers2Icon,
   Loader2Icon,
   MapPinIcon,
+  PlusIcon,
   RotateCcwIcon,
+  RulerIcon,
   ShieldCheckIcon,
   SparklesIcon,
   SplitIcon,
+  TagIcon,
   Trash2Icon,
   UploadCloudIcon,
   XIcon,
@@ -41,7 +46,7 @@ import {
 import { ModalContent, ModalHeader, ModalTitle, ModalDescription } from "@/components/ui/modal/modal";
 import { useModal } from "@/components/ui/modal/context";
 import { cn } from "@/lib/utils";
-import type { ManageTarget } from "@/lib/links";
+import { manageApiHref, type ManageTarget } from "@/lib/links";
 import { canCreateRecord } from "../../_lib/cgs-permissions";
 import {
   cleanFileName,
@@ -51,6 +56,7 @@ import {
 } from "./observation-image";
 import {
   configureObservationMutationRepo,
+  createObservationMeasurements,
   createObservationOccurrence,
   createObservationPhoto,
   formatObservationMutationError,
@@ -82,6 +88,19 @@ type ItemStatus = "identifying" | "ready" | "uploading" | "uploaded" | "error";
 // Drag payload type used to merge one photo card into another observation.
 const OBS_ITEM_DND = "application/x-obs-item";
 
+// One observer-entered measurement row ("Height / 4.2 / m"). Kept as free text
+// so people can record anything; complete rows (type + value) are stored as a
+// generic measurement record linked to the observation.
+type QuickMeasurement = { id: string; type: string; value: string; unit: string };
+
+function emptyMeasurement(): QuickMeasurement {
+  return { id: crypto.randomUUID(), type: "", value: "", unit: "" };
+}
+
+// A project the observations can optionally be attached to (from the account's
+// own projects). `locationUri` doubles as the siteRef for photos/occurrences.
+type QuickProject = { atUri: string; title: string; locationUri: string | null };
+
 type QuickItem = {
   id: string;
   // Photos sharing a groupId upload as one observation (one occurrence + many
@@ -96,6 +115,8 @@ type QuickItem = {
   eventDate: string;
   location: PickedLocation | null;
   notes: string;
+  tags: string[];
+  measurements: QuickMeasurement[];
   caption: string;
   status: ItemStatus;
   error: string | null;
@@ -138,6 +159,8 @@ type QuickGroupFields = {
   eventDate: string;
   notes: string;
   location: PickedLocation | null;
+  tags: string[];
+  measurements: QuickMeasurement[];
 };
 
 function mergedGroupFields(items: QuickItem[]): QuickGroupFields {
@@ -148,6 +171,18 @@ function mergedGroupFields(items: QuickItem[]): QuickGroupFields {
     }
     return "";
   };
+  // Tags merge as a case-insensitive union so combining photos never drops one
+  // side's keywords; measurements come from whichever photo has them.
+  const tags: string[] = [];
+  const seenTags = new Set<string>();
+  for (const item of items) {
+    for (const tag of item.tags) {
+      const key = tag.toLowerCase();
+      if (seenTags.has(key)) continue;
+      seenTags.add(key);
+      tags.push(tag);
+    }
+  }
   return {
     scientificName: firstText("scientificName"),
     vernacularName: firstText("vernacularName"),
@@ -155,6 +190,8 @@ function mergedGroupFields(items: QuickItem[]): QuickGroupFields {
     eventDate: firstText("eventDate"),
     notes: firstText("notes"),
     location: items.find((item) => item.location)?.location ?? null,
+    tags,
+    measurements: items.find((item) => item.measurements.length > 0)?.measurements ?? [],
   };
 }
 
@@ -227,6 +264,11 @@ export function AddObservationsModal({
   // centred on a randomised point rather than the exact pin.
   const [obscureLocation, setObscureLocation] = useState(false);
   const [fuzzyArea, setFuzzyArea] = useState<FuzzyAreaId>(DEFAULT_FUZZY_AREA);
+  // Optional project attachment for the whole batch. Only offered when the
+  // modal wasn't already opened inside a project context and the account
+  // actually has projects — zero extra chrome otherwise.
+  const [projects, setProjects] = useState<QuickProject[]>([]);
+  const [selectedProjectUri, setSelectedProjectUri] = useState<string>("");
 
   const createPermission = canCreateRecord(target);
   const disabledReason = createPermission.allowed ? null : createPermission.reason;
@@ -252,6 +294,37 @@ export function AddObservationsModal({
       .catch(() => {});
     return () => controller.abort();
   }, [target.did]);
+
+  // Load the account's projects for the optional "Add to a project" picker.
+  // Skipped entirely when the caller already pinned a project via projectRef.
+  useEffect(() => {
+    if (projectRef) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const response = await fetch(manageApiHref("/api/manage/projects", target), { cache: "no-store" });
+        const data = (await response.json()) as Array<Record<string, unknown>> | { error?: string };
+        if (cancelled || !response.ok || !Array.isArray(data)) return;
+        const mapped = data
+          .map((raw) => {
+            const atUri = typeof raw.atUri === "string" ? raw.atUri : null;
+            if (!atUri) return null;
+            return {
+              atUri,
+              title: typeof raw.title === "string" && raw.title.trim() ? raw.title : atUri,
+              locationUri: typeof raw.locationUri === "string" ? raw.locationUri : null,
+            } satisfies QuickProject;
+          })
+          .filter((project): project is QuickProject => Boolean(project));
+        setProjects(mapped);
+      } catch {
+        // Project attachment is optional; ignore load failures.
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [projectRef, target]);
 
   // Revoke object URLs on unmount so previews don't leak.
   useEffect(() => {
@@ -435,6 +508,8 @@ export function AddObservationsModal({
               // observer's permission) rather than dropped on a default pin.
               location: Number.isFinite(lat) && Number.isFinite(lng) ? { lat, lng } : null,
               notes: "",
+              tags: [],
+              measurements: [],
               caption: cleanFileName(source.name),
               status: "identifying",
               error: null,
@@ -519,6 +594,20 @@ export function AddObservationsModal({
     setItems((current) => current.map((item) => (item.groupId === groupId ? { ...item, ...patch } : item)));
   }
 
+  // Copy one observation's date + location onto every other observation in the
+  // batch — a one-tap way out of repeating the same entry across many cards.
+  function applyDateLocationToAll(sourceGroupId: string) {
+    setItems((current) => {
+      const source = current.find((item) => item.groupId === sourceGroupId);
+      if (!source) return current;
+      return current.map((item) =>
+        item.groupId === sourceGroupId || item.status === "uploading" || item.status === "uploaded"
+          ? item
+          : { ...item, eventDate: source.eventDate, location: source.location },
+      );
+    });
+  }
+
   // Drag a photo onto another observation: move it into that group and unify the
   // group's shared fields (keeping any non-empty value from either side).
   function mergeItemIntoGroup(itemId: string, targetGroupId: string) {
@@ -584,6 +673,12 @@ export function AddObservationsModal({
           radiusMeters: radiusForArea(fuzzyArea),
         })
       : { decimalLatitude: "", decimalLongitude: "" };
+    // Project attachment: the caller-pinned project wins; otherwise the one the
+    // observer picked in the modal (with its site carried along when it has one).
+    const selectedProject = projects.find((project) => project.atUri === selectedProjectUri) ?? null;
+    const effectiveProjectUri = projectRef ?? selectedProject?.atUri ?? null;
+    const effectiveSiteUri = projectRef ? null : (selectedProject?.locationUri ?? null);
+    const tags = fields.tags.map((tag) => tag.trim()).filter(Boolean);
     const occurrence = await createObservationOccurrence({
       basisOfRecord: "HumanObservation",
       scientificName: fields.scientificName.trim(),
@@ -593,8 +688,22 @@ export function AddObservationsModal({
       occurrenceRemarks: fields.notes.trim(),
       associatedMedia: group.items.map((item) => item.file.name).join(", "),
       ...locationFields,
-      ...(projectRef ? { projectRef } : {}),
+      ...(tags.length > 0 ? { tags } : {}),
+      ...(effectiveProjectUri ? { projectRef: effectiveProjectUri } : {}),
+      ...(effectiveSiteUri ? { siteRef: effectiveSiteUri } : {}),
     });
+    // Store the observer's optional measurements as one linked record. Only
+    // complete rows (both what was measured and a value) are kept.
+    const measurementEntries = fields.measurements
+      .map((entry) => ({
+        measurementType: entry.type.trim(),
+        measurementValue: entry.value.trim(),
+        ...(entry.unit.trim() ? { measurementUnit: entry.unit.trim() } : {}),
+      }))
+      .filter((entry) => entry.measurementType && entry.measurementValue);
+    if (measurementEntries.length > 0) {
+      await createObservationMeasurements({ occurrenceRef: occurrence.uri, entries: measurementEntries });
+    }
     let primaryBlobRef: ObservationBlobRef | null = null;
     for (const item of group.items) {
       const photo = await createObservationPhoto({
@@ -602,6 +711,7 @@ export function AddObservationsModal({
         occurrenceRef: occurrence.uri,
         subjectPart: "wholeOrganism",
         caption: item.caption.trim() || undefined,
+        siteRef: effectiveSiteUri ?? undefined,
       });
       if (!primaryBlobRef && photo.blobRef) primaryBlobRef = photo.blobRef;
     }
@@ -644,7 +754,7 @@ export function AddObservationsModal({
           return current.filter((item) => !ids.has(item.id));
         });
       } catch (uploadError) {
-        const message = formatObservationMutationError(uploadError);
+        const message = formatObservationMutationError(uploadError, { photoTooLarge: t("photoTooLarge") });
         setItems((current) => current.map((item) => (ids.has(item.id) ? { ...item, status: "error", error: message } : item)));
       }
     }
@@ -793,6 +903,7 @@ export function AddObservationsModal({
               <ObservationGroupCard
                 key={group.id}
                 group={group}
+                groupCount={groups.length}
                 disabled={isSubmitting}
                 onChange={(patch) => patchGroup(group.id, patch)}
                 onRemoveGroup={() => removeGroup(group.id)}
@@ -800,6 +911,7 @@ export function AddObservationsModal({
                 onDropItem={(itemId) => mergeItemIntoGroup(itemId, group.id)}
                 onPickLocation={() => openLocationPicker(group)}
                 onReanalyze={() => reanalyzeGroup(group.id)}
+                onApplyToAll={() => applyDateLocationToAll(group.id)}
                 t={t}
               />
             ))}
@@ -819,6 +931,35 @@ export function AddObservationsModal({
       </div>
 
       <input ref={fileInputRef} type="file" accept="image/*" multiple className="hidden" onChange={onInputChange} />
+
+      {!showEmptyState && !projectRef && projects.length > 0 ? (
+        <div className="flex flex-col gap-2 rounded-2xl border border-border bg-muted/30 p-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex min-w-0 items-start gap-3">
+            <FolderOpenIcon className="mt-0.5 size-4 shrink-0 text-primary" />
+            <div className="min-w-0">
+              <p className="text-sm font-medium text-foreground">{t("projectLabel")}</p>
+              <p className="mt-0.5 text-xs leading-5 text-muted-foreground">{t("projectHint")}</p>
+            </div>
+          </div>
+          <Select
+            value={selectedProjectUri || "none"}
+            onValueChange={(value) => setSelectedProjectUri(value === "none" ? "" : value)}
+            disabled={isSubmitting}
+          >
+            <SelectTrigger className="h-8 w-full sm:w-56" aria-label={t("projectLabel")}>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="none">{t("projectNone")}</SelectItem>
+              {projects.map((project) => (
+                <SelectItem key={project.atUri} value={project.atUri}>
+                  {project.title}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      ) : null}
 
       {!showEmptyState ? (
         <div className="rounded-2xl border border-border bg-muted/30 p-3">
@@ -1011,6 +1152,7 @@ function GroupThumb({
 
 function ObservationGroupCard({
   group,
+  groupCount,
   disabled,
   onChange,
   onRemoveGroup,
@@ -1018,9 +1160,11 @@ function ObservationGroupCard({
   onDropItem,
   onPickLocation,
   onReanalyze,
+  onApplyToAll,
   t,
 }: {
   group: QuickGroup;
+  groupCount: number;
   disabled: boolean;
   onChange: (patch: Partial<QuickGroupFields>) => void;
   onRemoveGroup: () => void;
@@ -1028,10 +1172,17 @@ function ObservationGroupCard({
   onDropItem: (itemId: string) => void;
   onPickLocation: () => void;
   onReanalyze: () => void;
+  onApplyToAll: () => void;
   t: ReturnType<typeof useTranslations>;
 }) {
   const [isOver, setIsOver] = useState(false);
+  // Optional detail sections stay hidden until asked for, so the default card
+  // remains as light as possible; once they carry content they stay visible.
+  const [tagsOpen, setTagsOpen] = useState(group.fields.tags.length > 0);
+  const [measurementsOpen, setMeasurementsOpen] = useState(group.fields.measurements.length > 0);
   const { fields, items } = group;
+  const showTags = tagsOpen || fields.tags.length > 0;
+  const showMeasurements = measurementsOpen || fields.measurements.length > 0;
   const status = quickGroupStatus(items);
   const identifying = status === "identifying";
   const uploading = status === "uploading";
@@ -1173,6 +1324,22 @@ function ObservationGroupCard({
           </Button>
         </div>
 
+        {groupCount > 1 && (fields.eventDate.trim() || fields.location) ? (
+          <div className="-mt-1 flex justify-end">
+            <Button
+              type="button"
+              variant="ghost"
+              size="xs"
+              onClick={onApplyToAll}
+              disabled={disabled || uploading}
+              className="h-6 rounded-full px-2 text-[11px] font-normal text-muted-foreground hover:text-foreground"
+            >
+              <CopyIcon className="size-3" />
+              {t("applyToAll")}
+            </Button>
+          </div>
+        ) : null}
+
         <Textarea
           value={fields.notes}
           onChange={(event) => onChange({ notes: event.target.value })}
@@ -1183,7 +1350,260 @@ function ObservationGroupCard({
           className="resize-none"
         />
 
+        {showTags ? (
+          <QuickTagsEditor
+            tags={fields.tags}
+            disabled={disabled || uploading}
+            onChange={(tags) => onChange({ tags })}
+            onClear={() => {
+              onChange({ tags: [] });
+              setTagsOpen(false);
+            }}
+            t={t}
+          />
+        ) : null}
+
+        {showMeasurements ? (
+          <QuickMeasurementsEditor
+            measurements={fields.measurements}
+            disabled={disabled || uploading}
+            onChange={(measurements) => onChange({ measurements })}
+            onClear={() => {
+              onChange({ measurements: [] });
+              setMeasurementsOpen(false);
+            }}
+            t={t}
+          />
+        ) : null}
+
+        {!showTags || !showMeasurements ? (
+          <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
+            {!showTags ? (
+              <Button
+                type="button"
+                variant="outline"
+                size="xs"
+                onClick={() => setTagsOpen(true)}
+                disabled={disabled || uploading}
+                className="h-7 rounded-full border-dashed px-2.5 text-xs font-normal text-muted-foreground hover:text-foreground"
+              >
+                <TagIcon className="size-3.5" />
+                {t("addTags")}
+              </Button>
+            ) : null}
+            {!showMeasurements ? (
+              <Button
+                type="button"
+                variant="outline"
+                size="xs"
+                onClick={() => {
+                  setMeasurementsOpen(true);
+                  if (fields.measurements.length === 0) onChange({ measurements: [emptyMeasurement()] });
+                }}
+                disabled={disabled || uploading}
+                className="h-7 rounded-full border-dashed px-2.5 text-xs font-normal text-muted-foreground hover:text-foreground"
+              >
+                <RulerIcon className="size-3.5" />
+                {t("addMeasurements")}
+              </Button>
+            ) : null}
+          </div>
+        ) : null}
+
         {error ? <p className="text-xs text-destructive">{error}</p> : null}
+      </div>
+    </div>
+  );
+}
+
+// Chip-style tag editor: type a keyword, press Enter (or comma) to add it.
+// Tags are stored on the observation record itself.
+function QuickTagsEditor({
+  tags,
+  disabled,
+  onChange,
+  onClear,
+  t,
+}: {
+  tags: string[];
+  disabled: boolean;
+  onChange: (tags: string[]) => void;
+  onClear: () => void;
+  t: ReturnType<typeof useTranslations>;
+}) {
+  const [draft, setDraft] = useState("");
+
+  function commit(raw: string) {
+    const value = raw.replace(/,/g, " ").trim().slice(0, 64);
+    setDraft("");
+    if (!value) return;
+    if (tags.some((tag) => tag.toLowerCase() === value.toLowerCase())) return;
+    onChange([...tags, value]);
+  }
+
+  return (
+    <div className="rounded-xl border border-border/70 bg-muted/20 p-2.5">
+      <div className="flex items-center justify-between gap-2">
+        <span className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+          <TagIcon className="size-3.5 text-primary" />
+          {t("tagsLabel")}
+        </span>
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon-sm"
+          onClick={onClear}
+          disabled={disabled}
+          aria-label={t("clearTags")}
+          title={t("clearTags")}
+          className="size-6 rounded-full text-muted-foreground hover:text-foreground"
+        >
+          <XIcon className="size-3.5" />
+        </Button>
+      </div>
+      <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+        {tags.map((tag) => (
+          <span
+            key={tag}
+            className="inline-flex items-center gap-1 rounded-full bg-primary/10 py-0.5 pl-2.5 pr-1 text-xs font-medium text-primary"
+          >
+            {tag}
+            <button
+              type="button"
+              onClick={() => onChange(tags.filter((candidate) => candidate !== tag))}
+              disabled={disabled}
+              aria-label={t("tagRemove", { tag })}
+              className="grid size-4 place-items-center rounded-full transition-colors hover:bg-primary/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+            >
+              <XIcon className="size-3" />
+            </button>
+          </span>
+        ))}
+        <input
+          value={draft}
+          onChange={(event) => setDraft(event.target.value)}
+          onKeyDown={(event) => {
+            if (event.key === "Enter" || event.key === ",") {
+              event.preventDefault();
+              commit(draft);
+            } else if (event.key === "Backspace" && draft === "" && tags.length > 0) {
+              onChange(tags.slice(0, -1));
+            }
+          }}
+          onBlur={() => commit(draft)}
+          placeholder={t("tagsPlaceholder")}
+          disabled={disabled}
+          aria-label={t("tagsLabel")}
+          className="h-6 min-w-32 flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground/70"
+        />
+      </div>
+    </div>
+  );
+}
+
+// The measurement types offered as quick suggestions while typing.
+const MEASUREMENT_SUGGESTION_KEYS = ["height", "dbh", "canopy", "count", "weight"] as const;
+
+// Free-form measurement rows (what was measured / value / unit). Complete rows
+// are saved as one measurement record linked to the observation.
+function QuickMeasurementsEditor({
+  measurements,
+  disabled,
+  onChange,
+  onClear,
+  t,
+}: {
+  measurements: QuickMeasurement[];
+  disabled: boolean;
+  onChange: (measurements: QuickMeasurement[]) => void;
+  onClear: () => void;
+  t: ReturnType<typeof useTranslations>;
+}) {
+  const listId = useId();
+
+  function patchRow(id: string, patch: Partial<QuickMeasurement>) {
+    onChange(measurements.map((entry) => (entry.id === id ? { ...entry, ...patch } : entry)));
+  }
+
+  return (
+    <div className="rounded-xl border border-border/70 bg-muted/20 p-2.5">
+      <div className="flex items-center justify-between gap-2">
+        <span className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+          <RulerIcon className="size-3.5 text-primary" />
+          {t("measurementsLabel")}
+        </span>
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon-sm"
+          onClick={onClear}
+          disabled={disabled}
+          aria-label={t("clearMeasurements")}
+          title={t("clearMeasurements")}
+          className="size-6 rounded-full text-muted-foreground hover:text-foreground"
+        >
+          <XIcon className="size-3.5" />
+        </Button>
+      </div>
+      <datalist id={listId}>
+        {MEASUREMENT_SUGGESTION_KEYS.map((key) => (
+          <option key={key} value={t(`measurementSuggestion_${key}`)} />
+        ))}
+      </datalist>
+      <div className="mt-1.5 space-y-1.5">
+        {measurements.map((entry) => (
+          <div key={entry.id} className="grid grid-cols-[minmax(0,1fr)_4.5rem_3.5rem_auto] items-center gap-1.5">
+            <Input
+              value={entry.type}
+              onChange={(event) => patchRow(entry.id, { type: event.target.value })}
+              placeholder={t("measurementTypePlaceholder")}
+              disabled={disabled}
+              aria-label={t("measurementTypeLabel")}
+              list={listId}
+              className="h-8 text-sm"
+            />
+            <Input
+              value={entry.value}
+              onChange={(event) => patchRow(entry.id, { value: event.target.value })}
+              placeholder={t("measurementValuePlaceholder")}
+              disabled={disabled}
+              aria-label={t("measurementValueLabel")}
+              inputMode="decimal"
+              className="h-8 text-sm"
+            />
+            <Input
+              value={entry.unit}
+              onChange={(event) => patchRow(entry.id, { unit: event.target.value })}
+              placeholder={t("measurementUnitPlaceholder")}
+              disabled={disabled}
+              aria-label={t("measurementUnitLabel")}
+              className="h-8 text-sm"
+            />
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon-sm"
+              onClick={() => onChange(measurements.filter((candidate) => candidate.id !== entry.id))}
+              disabled={disabled}
+              aria-label={t("removeMeasurementRow")}
+              title={t("removeMeasurementRow")}
+              className="size-7 rounded-full text-muted-foreground hover:text-destructive"
+            >
+              <XIcon className="size-3.5" />
+            </Button>
+          </div>
+        ))}
+        <Button
+          type="button"
+          variant="ghost"
+          size="xs"
+          onClick={() => onChange([...measurements, emptyMeasurement()])}
+          disabled={disabled}
+          className="h-7 rounded-full px-2 text-xs font-normal text-muted-foreground hover:text-foreground"
+        >
+          <PlusIcon className="size-3.5" />
+          {t("addMeasurementRow")}
+        </Button>
       </div>
     </div>
   );

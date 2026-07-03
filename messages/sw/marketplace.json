@@ -1284,7 +1284,10 @@
     "noCerts": "Hakuna vyeti vilivyoongezwa kwenye mradi huu bado.",
     "metaTitle": "{name} — Mradi",
     "metaFallback": "Mradi ulioshirikiwa kwenye GainForest.",
-    "timelineTitle": "Ratiba"
+    "timelineTitle": "Ratiba",
+    "publishingBadge": "Inachapishwa",
+    "publishingTitle": "Mradi wako unakuja",
+    "publishingBody": "Tunachapisha mradi wako. Kwa kawaida huchukua dakika moja — ukurasa utajisasisha wenyewe."
   },
   "observationPage": {
     "back": "Uchunguzi wote",

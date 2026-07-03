@@ -1284,7 +1284,10 @@
     "noCerts": "No Certs have been added to this project yet.",
     "metaTitle": "{name} — Project",
     "metaFallback": "A project shared on GainForest.",
-    "timelineTitle": "Timeline"
+    "timelineTitle": "Timeline",
+    "publishingBadge": "Publishing",
+    "publishingTitle": "Your project is on its way",
+    "publishingBody": "We're publishing your project. This usually takes a minute — the page will refresh by itself."
   },
   "observationPage": {
     "back": "All sightings",
