@@ -111,6 +111,7 @@
         "certificate": "Certificado",
         "audio": "Som",
         "other": "Outras Permissões",
+        "update": "Atualização",
         "treeDataset": "Conjunto de dados de árvore",
         "biodiversity": "Natureza",
         "occurrence": "Árvore"
@@ -156,6 +157,16 @@
         "trees": "Adicione informações de árvores agrupadas por local do projeto.",
         "biodiversity": "Filtre observações e adicione registros exibidos ou grupos salvos.",
         "files": "Adicione relatórios, fotos, vídeos ou páginas web."
+      },
+      "update": {
+        "heading": "Escrever uma atualização",
+        "subheading": "Compartilhe o progresso com suas próprias palavras. Ela aparecerá nas atualizações públicas do projeto.",
+        "titleLabel": "Título",
+        "titlePlaceholder": "O que há de novo?",
+        "bodyLabel": "Atualização",
+        "bodyPlaceholder": "Compartilhe avanços, marcos ou novidades do campo…",
+        "post": "Publicar atualização",
+        "posting": "Publicando…"
       },
       "permissions": {
         "signIn": "Entre com uma conta que possa gerenciar esta linha do tempo.",

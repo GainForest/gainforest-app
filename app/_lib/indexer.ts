@@ -1295,9 +1295,13 @@ const FEATURED_BADGE_KEY_BY_TITLE = new Map(
  * theirs, so it must read as "Trusted by ⟨that org⟩".)
  *
  * `mode: "title"` issuers host a family of branded badges in one repo and are
- * split by the badge-definition title (GainForest vs. Ma Earth). `mode:
- * "fixed"` issuers attribute *every* award they sign to a single brand,
- * regardless of which definition it points at.
+ * split by the badge-definition title (GainForest vs. Ma Earth). Their awards
+ * against an *endorsement-typed* definition (which may live in another org's
+ * repo — the platform's shared "Organization Endorsement" badge does) are
+ * attributed to the issuer's own `endorsementBrand`, so a GainForest-signed
+ * endorsement reads "Trusted by GainForest". `mode: "fixed"` issuers attribute
+ * *every* award they sign to a single brand, regardless of which definition it
+ * points at.
  *
  * Only GainForest is built in (it ships with bundled logos for its two
  * brands). Every other endorser — Biome Trust included — is managed from the
@@ -1305,13 +1309,13 @@ const FEATURED_BADGE_KEY_BY_TITLE = new Map(
  * `app/_lib/endorsers.ts`) and renders from its own certified profile.
  */
 type BuiltinTrustedIssuer =
-  | { did: string; mode: "title" }
+  | { did: string; mode: "title"; endorsementBrand: BumicertBadgeFilter }
   | { did: string; mode: "fixed"; badge: BumicertBadgeFilter };
 
 const BUILTIN_TRUSTED_ISSUERS: BuiltinTrustedIssuer[] = [
   // GainForest's certified repo hosts the GainForest + Ma Earth badge family.
   // It's the only built-in issuer; all other endorsers are admin-managed.
-  { did: "did:plc:yjck2sybksyigp3zvbq7bfki", mode: "title" },
+  { did: "did:plc:yjck2sybksyigp3zvbq7bfki", mode: "title", endorsementBrand: "gainforest" },
 ];
 
 /** Metadata for a dynamic (admin-added) endorser. Its "Trusted by" emblem is
@@ -1322,7 +1326,7 @@ export type EndorserMeta = { key: string; label: string; endorserDid: string; en
 /** A trusted issuer resolved for an index build: a built-in brand family, or a
  *  dynamic endorser whose brand key is its own DID. */
 type ResolvedTrustedIssuer =
-  | { did: string; mode: "title" }
+  | { did: string; mode: "title"; endorsementBrand: BumicertBadgeFilter }
   | { did: string; mode: "fixed"; badge: string; endorser: EndorserMeta | null };
 
 const BUILTIN_ISSUER_DIDS = new Set(BUILTIN_TRUSTED_ISSUERS.map((issuer) => issuer.did));
@@ -1336,7 +1340,7 @@ const BUILTIN_ISSUER_DIDS = new Set(BUILTIN_TRUSTED_ISSUERS.map((issuer) => issu
 async function getTrustedIssuers(signal?: AbortSignal): Promise<ResolvedTrustedIssuer[]> {
   const builtins: ResolvedTrustedIssuer[] = BUILTIN_TRUSTED_ISSUERS.map((issuer) =>
     issuer.mode === "title"
-      ? { did: issuer.did, mode: "title" }
+      ? { did: issuer.did, mode: "title", endorsementBrand: issuer.endorsementBrand }
       : { did: issuer.did, mode: "fixed", badge: issuer.badge, endorser: null },
   );
   const records = await fetchEndorserRecords(GAINFOREST_MODERATION_REPO_DID, signal).catch(() => []);
@@ -1592,6 +1596,65 @@ function activityUriForDidRkey(did: string, rkey: string): string {
   return `at://${did}/org.hypercerts.claim.activity/${rkey}`;
 }
 
+const ENDORSEMENT_TYPED_DEFINITIONS_QUERY = `
+  query TrustedIssuerEndorsementDefinitions($repos: [String!]!, $first: Int!, $after: String) {
+    appCertifiedBadgeDefinition(
+      first: $first
+      after: $after
+      where: { did: { in: $repos } }
+      sortBy: createdAt
+      sortDirection: DESC
+    ) {
+      pageInfo { hasNextPage endCursor }
+      edges { node { uri badgeType } }
+    }
+  }
+`;
+
+type RawEndorsementTypedDefinition = { uri?: string | null; badgeType?: string | null };
+type EndorsementTypedDefinitionsPayload = {
+  appCertifiedBadgeDefinition?: Connection<RawEndorsementTypedDefinition> | null;
+};
+
+/** Of the given badge-definition URIs, the subset typed `endorsement` —
+ *  resolved cross-repo through the index, mirroring how the public
+ *  "Endorsements" profile tab classifies awards (endorsements-given.ts). */
+async function fetchEndorsementTypedBadgeUris(
+  candidateUris: Set<string>,
+  signal?: AbortSignal,
+): Promise<Set<string>> {
+  const result = new Set<string>();
+  const repos = new Set<string>();
+  for (const uri of candidateUris) {
+    const match = uri.match(/^at:\/\/(did:[^/]+)\//);
+    if (match) repos.add(match[1]);
+  }
+  if (repos.size === 0) return result;
+
+  for (const repoChunk of chunkStrings([...repos], FEATURED_BADGE_FILTER_IN_LIMIT)) {
+    let after: string | null = null;
+    for (let page = 0; page < 20; page += 1) {
+      if (signal?.aborted) throw new DOMException("aborted", "AbortError");
+      const payload: EndorsementTypedDefinitionsPayload | null = await indexerQuery<EndorsementTypedDefinitionsPayload>(
+        ENDORSEMENT_TYPED_DEFINITIONS_QUERY,
+        { repos: repoChunk, first: INDEXER_MAX_PAGE, after },
+        signal,
+      );
+      const connection: Connection<RawEndorsementTypedDefinition> | null | undefined = payload?.appCertifiedBadgeDefinition;
+      for (const edge of connection?.edges ?? []) {
+        const node = edge?.node;
+        const uri = node?.uri ?? null;
+        if (uri && candidateUris.has(uri) && node?.badgeType?.trim().toLowerCase() === "endorsement") {
+          result.add(uri);
+        }
+      }
+      after = connection?.pageInfo?.hasNextPage ? connection.pageInfo.endCursor ?? null : null;
+      if (!after) break;
+    }
+  }
+  return result;
+}
+
 /** Page through one issuer repo's badge definitions + awards. Fixed-brand
  *  issuers attribute every award to one brand, so their definitions are
  *  skipped (`collectDefinitions: false`) — the badge may even be defined in a
@@ -1670,12 +1733,28 @@ async function fetchFeaturedBadgeIndexUncached(signal?: AbortSignal): Promise<Fe
         : [],
     );
 
+    // A title issuer's endorsement awards may reference a definition hosted
+    // in another org's repo (the shared "Organization Endorsement" badge).
+    // Attribute those to the issuer's own brand so the endorsed org reads
+    // "Trusted by GainForest" — consistent with fixed issuers, which get
+    // credit for every award they sign.
+    let endorsementTypedUris = new Set<string>();
+    if (issuer.mode === "title") {
+      const unmapped = new Set<string>();
+      for (const award of awards) {
+        const uri = award.badge?.uri;
+        if (uri && !keyByDefinitionUri.has(uri)) unmapped.add(uri);
+      }
+      endorsementTypedUris = await fetchEndorsementTypedBadgeUris(unmapped, signal).catch(() => new Set<string>());
+    }
+
     for (const award of awards) {
       const badgeKey: string | undefined =
         issuer.mode === "fixed"
           ? issuer.badge
           : award.badge?.uri
-            ? keyByDefinitionUri.get(award.badge.uri)
+            ? keyByDefinitionUri.get(award.badge.uri) ??
+              (endorsementTypedUris.has(award.badge.uri) ? issuer.endorsementBrand : undefined)
             : undefined;
       if (!badgeKey) continue;
       const bucket = ensureBucket(badgeKey);
@@ -1707,7 +1786,7 @@ async function fetchFeaturedBadgeIndexUncached(signal?: AbortSignal): Promise<Fe
 function fetchFeaturedBadgeIndex(signal?: AbortSignal): Promise<FeaturedBadgeIndex> {
   return publicExploreCache(
     "featured-badge-index",
-    { version: "gainforest-maearth-endorsers:v6", ttl: FEATURED_BADGE_INDEX_CACHE_MS },
+    { version: "gainforest-maearth-endorsers:v7", ttl: FEATURED_BADGE_INDEX_CACHE_MS },
     // The featured-badge index is shared by count and list requests across the
     // public Explore pages. Keep the cached loader independent from any one
     // component effect's abort signal; otherwise an aborted count refresh can

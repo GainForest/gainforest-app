@@ -7,11 +7,9 @@ const IMPORTANT_ROUTES = [
   "/projects",
   "/organizations",
   "/observations",
-  "/leaderboard",
   "/bioblitz",
   "/devices",
   "/status",
-  "/donations",
 ] as const;
 
 const MAX_ANCHOR_PREFETCHES = 80;

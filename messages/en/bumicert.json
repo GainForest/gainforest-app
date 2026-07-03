@@ -111,6 +111,7 @@
         "certificate": "Certificate",
         "audio": "Sound",
         "other": "Other",
+        "update": "Update",
         "treeDataset": "Tree dataset",
         "biodiversity": "Nature",
         "occurrence": "Tree"
@@ -156,6 +157,16 @@
         "trees": "Add tree information grouped by project place.",
         "biodiversity": "Filter observations and add displayed records or saved groups.",
         "files": "Add reports, photos, videos, or web pages."
+      },
+      "update": {
+        "heading": "Write an update",
+        "subheading": "Share progress in your own words. It will appear in the public project updates.",
+        "titleLabel": "Title",
+        "titlePlaceholder": "What's new?",
+        "bodyLabel": "Update",
+        "bodyPlaceholder": "Share progress, milestones, or news from the field…",
+        "post": "Post update",
+        "posting": "Posting…"
       },
       "permissions": {
         "signIn": "Sign in with an account that can manage this timeline.",

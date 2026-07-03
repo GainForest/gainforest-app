@@ -1173,7 +1173,7 @@
   },
   "adminAwardEndorsements": {
     "title": "Berikan dukungan",
-    "description": "Dukung organisasi lain atas nama GainForest. Organisasi yang didukung menampilkan “Dipercaya oleh GainForest” di seluruh aplikasi.",
+    "description": "Dukung organisasi lain atas nama GainForest — dukungan yang sama seperti yang diterbitkan Ma Earth, sehingga platform mitra juga melihatnya. Organisasi yang didukung menampilkan “Dipercaya oleh GainForest” di seluruh aplikasi.",
     "notAllowed": "Memberikan dukungan memerlukan admin organisasi GainForest. Minta pemilik GainForest untuk menambahkan Anda sebagai admin.",
     "noBadges": "Belum ada lencana dukungan. Buat dulu lencana dengan tipe “Dukungan”.",
     "manageBadges": "Kelola lencana",

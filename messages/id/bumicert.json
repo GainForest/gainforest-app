@@ -111,6 +111,7 @@
         "certificate": "Sertifikat",
         "audio": "Suara",
         "other": "Lainnya",
+        "update": "Pembaruan",
         "treeDataset": "Dataset pohon",
         "biodiversity": "Alam",
         "occurrence": "Pohon"
@@ -156,6 +157,16 @@
         "trees": "Tambahkan informasi pohon yang dikelompokkan berdasarkan lokasi proyek.",
         "biodiversity": "Filter observasi dan tambahkan catatan yang ditampilkan atau grup tersimpan.",
         "files": "Tambahkan laporan, foto, video, atau halaman web."
+      },
+      "update": {
+        "heading": "Tulis pembaruan",
+        "subheading": "Bagikan kemajuan dengan kata-kata Anda sendiri. Pembaruan akan tampil di pembaruan proyek publik.",
+        "titleLabel": "Judul",
+        "titlePlaceholder": "Apa yang baru?",
+        "bodyLabel": "Pembaruan",
+        "bodyPlaceholder": "Bagikan kemajuan, capaian, atau kabar dari lapangan…",
+        "post": "Terbitkan pembaruan",
+        "posting": "Menerbitkan…"
       },
       "permissions": {
         "signIn": "Masuk dengan akun yang dapat mengelola lini waktu ini.",

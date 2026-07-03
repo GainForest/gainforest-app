@@ -29,6 +29,8 @@ export type DatePickerProps = {
   placeholder?: string;
   /** Dates before this ("yyyy-MM-dd") are not selectable. */
   min?: string;
+  /** Dates after this ("yyyy-MM-dd") are not selectable. */
+  max?: string;
   className?: string;
   id?: string;
 };
@@ -39,12 +41,22 @@ export function DatePicker({
   disabled,
   placeholder = "Pick a date",
   min,
+  max,
   className,
   id,
 }: DatePickerProps) {
   const [open, setOpen] = React.useState(false);
   const selected = fromValue(value);
   const minDate = min ? fromValue(min) : undefined;
+  const maxDate = max ? fromValue(max) : undefined;
+  const disabledMatchers =
+    minDate && maxDate
+      ? { before: minDate, after: maxDate }
+      : minDate
+        ? { before: minDate }
+        : maxDate
+          ? { after: maxDate }
+          : undefined;
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -68,8 +80,8 @@ export function DatePicker({
         <Calendar
           mode="single"
           selected={selected}
-          defaultMonth={selected ?? minDate}
-          disabled={minDate ? { before: minDate } : undefined}
+          defaultMonth={selected ?? maxDate ?? minDate}
+          disabled={disabledMatchers}
           onSelect={(date) => {
             if (date) onChange(toValue(date));
             setOpen(false);

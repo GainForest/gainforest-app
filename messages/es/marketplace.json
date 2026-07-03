@@ -40,15 +40,17 @@
       "clearCategory": "Borrar {category}"
     },
     "filters": {
-      "allTitle": "Todos los filtros",
+      "allTitle": "Ordenar y filtrar",
+      "sortLabel": "Ordenar",
       "description": "Muestra Certs por insignia de origen, fotos, lugares del proyecto, personas nombradas, fechas de trabajo o donaciones.",
+      "sightingsDescription": "Muestra avistamientos por origen, tipo de medio o grupo de naturaleza.",
       "organization": "Organización",
       "bioregion": "Biorregión",
       "country": "País",
       "impactArea": "Área de impacto",
       "allBumicerts": "Todos los certificados",
-      "allFilters": "Todos los filtros",
-      "allFiltersAria": "Todos los filtros",
+      "allFilters": "Ordenar y filtrar",
+      "allFiltersAria": "Ordenar y filtrar",
       "updateHint": "Los filtros se actualizan a medida que eliges.",
       "images": "Muestra fotos",
       "locations": "Muestra lugares de proyecto",
@@ -58,7 +60,7 @@
       "badges": {
         "all": "Todas",
         "gainforest": "GainForest",
-        "maearth": "Ma Earth",
+        "maearth": "En la plataforma Ma Earth",
         "maearthRound1": "Ma Earth Ronda 1",
         "maearthRound2": "Ma Earth Ronda 2"
       }
@@ -157,6 +159,9 @@
       "colType": "Tipo",
       "colPlace": "Lugar",
       "colJoined": "Se unió"
+    },
+    "filters": {
+      "description": "Muestra organizaciones por origen, observaciones, categoría o país."
     },
     "quickFilters": {
       "observations": "Tiene observaciones"
@@ -573,14 +578,17 @@
       "noMatch": "Ningún proyecto coincide con tu búsqueda.",
       "untitledProject": "Proyecto sin título",
       "applyWith": "Postular con {project}",
-      "submitError": "No se pudo enviar tu solicitud. Inténtalo de nuevo."
+      "submitError": "No se pudo enviar tu solicitud. Inténtalo de nuevo.",
+      "successTitle": "Solicitud enviada",
+      "successBody": "Gracias por postular con {project}. Nos pondremos en contacto pronto sobre los próximos pasos.",
+      "successClose": "Listo"
     },
     "interoperable": {
       "category": "Programa de subvenciones interoperables",
       "grantName": "Ma Earth Ronda 3",
       "fundingType": "Financiación cuadrática",
-      "description": "Ma Earth está realizando una ronda de financiación respaldada por la comunidad que usa financiación cuadrática: muchas donaciones pequeñas se igualan y amplifican más que unas pocas grandes. Postula con tu proyecto para participar.",
-      "apply": "Postula con tu proyecto",
+      "description": "La ronda de financiación respaldada por la comunidad de Ma Earth usa financiación cuadrática: muchas donaciones pequeñas se igualan y amplifican más que unas pocas grandes. Las postulaciones han cerrado y la ronda ya está en marcha: explora los proyectos que participan y apóyalos.",
+      "browseProjects": "Explora los proyectos de esta ronda",
       "logoAlt": "Ma Earth"
     }
   },
@@ -912,7 +920,7 @@
     },
     "filters": {
       "allProjects": "Todos los proyectos",
-      "allFilters": "Todos los filtros",
+      "allFilters": "Ordenar y filtrar",
       "description": "Muestra proyectos por insignia de origen, imágenes o un lugar de proyecto.",
       "updateHint": "Los filtros se actualizan a medida que eliges.",
       "images": "Muestra imágenes",

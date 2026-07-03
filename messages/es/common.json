@@ -1173,7 +1173,7 @@
   },
   "adminAwardEndorsements": {
     "title": "Otorgar respaldos",
-    "description": "Respalda a otras organizaciones en nombre de GainForest. Las organizaciones respaldadas muestran “Con la confianza de GainForest” en toda la app.",
+    "description": "Respalda a otras organizaciones en nombre de GainForest, los mismos respaldos que emite Ma Earth, para que las plataformas asociadas también los vean. Las organizaciones respaldadas muestran “Con la confianza de GainForest” en toda la app.",
     "notAllowed": "Para otorgar respaldos necesitas ser administrador de la organización GainForest. Pide a un propietario de GainForest que te agregue como administrador.",
     "noBadges": "Todavía no hay una insignia de respaldo. Primero crea una insignia del tipo “Respaldo”.",
     "manageBadges": "Gestionar insignias",

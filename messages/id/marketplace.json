@@ -40,15 +40,17 @@
       "clearCategory": "Hapus {category}"
     },
     "filters": {
-      "allTitle": "Semua filter",
+      "allTitle": "Urutkan dan filter",
+      "sortLabel": "Urutkan",
       "description": "Tampilkan Cert berdasarkan lencana sumber, foto, lokasi proyek, orang yang disebutkan, tanggal kerja, atau donasi.",
+      "sightingsDescription": "Tampilkan pengamatan berdasarkan sumber, jenis media, atau kelompok alam.",
       "organization": "Organisasi",
       "bioregion": "Wilayah hayati",
       "country": "Negara",
       "impactArea": "Area dampak",
       "allBumicerts": "Semua sertifikat",
-      "allFilters": "Semua filter",
-      "allFiltersAria": "Semua filter",
+      "allFilters": "Urutkan dan filter",
+      "allFiltersAria": "Urutkan dan filter",
       "updateHint": "Filter diperbarui saat Anda memilih.",
       "images": "Menampilkan foto",
       "locations": "Menampilkan tempat proyek",
@@ -58,7 +60,7 @@
       "badges": {
         "all": "Semua",
         "gainforest": "GainForest",
-        "maearth": "Ma Earth",
+        "maearth": "Di platform Ma Earth",
         "maearthRound1": "Ma Earth Putaran 1",
         "maearthRound2": "Ma Earth Putaran 2"
       }
@@ -157,6 +159,9 @@
       "colType": "Tipe",
       "colPlace": "Tempat",
       "colJoined": "Bergabung"
+    },
+    "filters": {
+      "description": "Tampilkan organisasi berdasarkan sumber, observasi, kategori, atau negara."
     },
     "quickFilters": {
       "observations": "Memiliki observasi"
@@ -573,14 +578,17 @@
       "noMatch": "Tidak ada proyek yang cocok dengan pencarian Anda.",
       "untitledProject": "Proyek tanpa judul",
       "applyWith": "Ajukan dengan {project}",
-      "submitError": "Tidak dapat mengirim pengajuan Anda. Silakan coba lagi."
+      "submitError": "Tidak dapat mengirim pengajuan Anda. Silakan coba lagi.",
+      "successTitle": "Pengajuan terkirim",
+      "successBody": "Terima kasih telah mengajukan dengan {project}. Kami akan segera menghubungi Anda tentang langkah selanjutnya.",
+      "successClose": "Selesai"
     },
     "interoperable": {
       "category": "Program Hibah Interoperabel",
       "grantName": "Ma Earth Putaran 3",
       "fundingType": "Pendanaan kuadratik",
-      "description": "Ma Earth sedang menjalankan putaran pendanaan yang didukung komunitas dan menggunakan pendanaan kuadratik: banyak donasi kecil disepadankan dan diperkuat lebih dari sedikit donasi besar. Ajukan dengan proyek Anda untuk ikut serta.",
-      "apply": "Ajukan dengan proyek Anda",
+      "description": "Putaran pendanaan Ma Earth yang didukung komunitas menggunakan pendanaan kuadratik: banyak donasi kecil disepadankan dan diperkuat lebih dari sedikit donasi besar. Pendaftaran telah ditutup dan putaran kini sedang berlangsung — jelajahi proyek yang ikut serta dan dukung mereka.",
+      "browseProjects": "Jelajahi proyek di putaran ini",
       "logoAlt": "Ma Earth"
     }
   },
@@ -912,7 +920,7 @@
     },
     "filters": {
       "allProjects": "Semua proyek",
-      "allFilters": "Semua filter",
+      "allFilters": "Urutkan dan filter",
       "description": "Tampilkan proyek berdasarkan lencana sumber, gambar, atau tempat proyek.",
       "updateHint": "Filter diperbarui saat Anda memilih.",
       "images": "Menampilkan gambar",

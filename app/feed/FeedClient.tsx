@@ -21,7 +21,6 @@ import {
   UsersRoundIcon,
 } from "lucide-react";
 import type { ActivityFeedItem, ActivityFeedKind, ActivityFeedPage } from "../_lib/feed";
-import { indexerQuery } from "../_lib/indexer";
 import { resolveBlobUrl } from "../_lib/pds";
 import {
   DeleteButton,
@@ -48,8 +47,18 @@ type Filter = "all" | "following" | ActivityFeedKind;
 // A run of this many consecutive sightings from the same account collapses into
 // one summary card instead of N separate rows.
 const MIN_BATCH = 3;
+// ...but only when they were uploaded close together. A gap longer than this
+// between two consecutive sightings splits the run, so a slow drip of posts
+// over many days isn't summarized as one upload (mirrors BURST_MAX_GAP_MS in
+// app/_lib/feed.ts).
+const MAX_BATCH_GAP_MS = 12 * 60 * 60 * 1000; // 12h
 // How many sample thumbnails the summary card shows.
 const MAX_THUMBS = 4;
+
+function batchTime(iso: string): number {
+  const t = Date.parse(iso);
+  return Number.isNaN(t) ? 0 : t;
+}
 
 /** One rendered slot: a normal row, or a collapsed run of same-owner sightings. */
 type FeedEntry =
@@ -57,8 +66,9 @@ type FeedEntry =
   | { type: "batch"; items: ActivityFeedItem[] };
 
 /** Collapse maximal runs of >= MIN_BATCH consecutive observations by the same
- *  account (adjacent in the newest-first timeline) into one batch entry. Every
- *  other row passes through unchanged. */
+ *  account (adjacent in the newest-first timeline AND uploaded within
+ *  MAX_BATCH_GAP_MS of each other) into one batch entry. Every other row
+ *  passes through unchanged. */
 function groupFeedEntries(items: ActivityFeedItem[]): FeedEntry[] {
   const entries: FeedEntry[] = [];
   let i = 0;
@@ -66,7 +76,13 @@ function groupFeedEntries(items: ActivityFeedItem[]): FeedEntry[] {
     const item = items[i];
     if (item.kind === "observation" && item.actorDid) {
       let j = i + 1;
-      while (j < items.length && items[j].kind === "observation" && items[j].actorDid === item.actorDid) j += 1;
+      while (
+        j < items.length &&
+        items[j].kind === "observation" &&
+        items[j].actorDid === item.actorDid &&
+        Math.abs(batchTime(items[j - 1].createdAt) - batchTime(items[j].createdAt)) <= MAX_BATCH_GAP_MS
+      )
+        j += 1;
       const run = items.slice(i, j);
       if (run.length >= MIN_BATCH) {
         entries.push({ type: "batch", items: run });
@@ -81,16 +97,24 @@ function groupFeedEntries(items: ActivityFeedItem[]): FeedEntry[] {
 }
 
 // `authOnly` tabs are shown only to signed-in viewers (a following feed has no
-// meaning when signed out).
-const FILTERS: { key: Filter; Icon: typeof NewspaperIcon; authOnly?: boolean }[] = [
+// meaning when signed out). `adminOnly` tabs are shown only to admin-group
+// members — donations are being wound down for the general public.
+const FILTERS: { key: Filter; Icon: typeof NewspaperIcon; authOnly?: boolean; adminOnly?: boolean }[] = [
   { key: "all", Icon: NewspaperIcon },
   { key: "following", Icon: UsersRoundIcon, authOnly: true },
   { key: "post", Icon: MegaphoneIcon },
   { key: "project", Icon: FolderKanbanIcon },
   { key: "observation", Icon: BinocularsIcon },
   { key: "organization", Icon: Building2Icon },
-  { key: "donation", Icon: HeartHandshakeIcon },
+  { key: "donation", Icon: HeartHandshakeIcon, adminOnly: true },
 ];
+
+// Whether a filter tab is visible to the current viewer.
+function visibleTab(f: { authOnly?: boolean; adminOnly?: boolean }, signedIn: boolean, isAdmin: boolean): boolean {
+  if (f.authOnly && !signedIn) return false;
+  if (f.adminOnly && !isAdmin) return false;
+  return true;
+}
 
 function filterLabel(t: (key: string) => string, key: Filter): string {
   return key === "all" ? t("filters.all") : t(`filters.${key}`);
@@ -102,12 +126,14 @@ export function FeedClient({
   initialHasMore,
   signedIn,
   viewerDid,
+  isAdmin = false,
 }: {
   initialItems: ActivityFeedItem[];
   initialCursor: string | null;
   initialHasMore: boolean;
   signedIn: boolean;
   viewerDid: string | null;
+  isAdmin?: boolean;
 }) {
   const t = useTranslations("common.feed");
   const interactions = useFeedInteractions(viewerDid);
@@ -278,6 +304,7 @@ export function FeedClient({
               <FeedFilterTabs
                 filter={filter}
                 signedIn={signedIn}
+                isAdmin={isAdmin}
                 onSelect={selectFilter}
                 onRefresh={() => void loadFirst(filter, "refresh")}
                 refreshing={refreshing}
@@ -383,6 +410,7 @@ export function FeedClient({
             <FeedFilterRail
               filter={filter}
               signedIn={signedIn}
+              isAdmin={isAdmin}
               onSelect={selectFilter}
               onRefresh={() => void loadFirst(filter, "refresh")}
               refreshing={refreshing}
@@ -401,6 +429,7 @@ export function FeedClient({
 function FeedFilterTabs({
   filter,
   signedIn,
+  isAdmin,
   onSelect,
   onRefresh,
   refreshing,
@@ -408,13 +437,14 @@ function FeedFilterTabs({
 }: {
   filter: Filter;
   signedIn: boolean;
+  isAdmin: boolean;
   onSelect: (next: Filter) => void;
   onRefresh: () => void;
   refreshing: boolean;
   loading: boolean;
 }) {
   const t = useTranslations("common.feed");
-  const tabs = FILTERS.filter((f) => !f.authOnly || signedIn);
+  const tabs = FILTERS.filter((f) => visibleTab(f, signedIn, isAdmin));
   return (
     <div className="flex min-w-0 items-center gap-1">
       <div className="no-scrollbar flex items-center gap-1 overflow-x-auto">
@@ -458,6 +488,7 @@ function FeedFilterTabs({
 function FeedFilterRail({
   filter,
   signedIn,
+  isAdmin,
   onSelect,
   onRefresh,
   refreshing,
@@ -465,13 +496,14 @@ function FeedFilterRail({
 }: {
   filter: Filter;
   signedIn: boolean;
+  isAdmin: boolean;
   onSelect: (next: Filter) => void;
   onRefresh: () => void;
   refreshing: boolean;
   loading: boolean;
 }) {
   const t = useTranslations("common.feed");
-  const tabs = FILTERS.filter((f) => !f.authOnly || signedIn);
+  const tabs = FILTERS.filter((f) => visibleTab(f, signedIn, isAdmin));
   return (
     <div className="flex flex-col gap-1">
       <nav aria-label={t("filterHeading")} className="flex flex-col gap-0.5">
@@ -659,47 +691,6 @@ function FeedRow({
 
 /** Collapsed summary for a run of consecutive sightings from one account:
  *  identity + count, a sample image montage, and a link to all of them. */
-// The account's all-time sighting total — the right headline number for a
-// burst card — fetched once per org with a cheap `totalCount` query (not by
-// paging through thousands of records). Cached for the session.
-const orgSightingTotalCache = new Map<string, number>();
-const ORG_SIGHTING_TOTAL_QUERY = `
-  query OrgSightingTotal($did: String!) {
-    appGainforestDwcOccurrence(first: 0, where: { did: { eq: $did } }) { totalCount }
-  }
-`;
-
-function useOrgSightingTotal(did: string | null, fallback: number): number {
-  const [total, setTotal] = useState<number | null>(() => (did ? orgSightingTotalCache.get(did) ?? null : null));
-
-  useEffect(() => {
-    if (!did) return;
-    const cached = orgSightingTotalCache.get(did);
-    if (cached != null) {
-      setTotal(cached);
-      return;
-    }
-    const controller = new AbortController();
-    indexerQuery<{ appGainforestDwcOccurrence?: { totalCount?: number | null } }>(
-      ORG_SIGHTING_TOTAL_QUERY,
-      { did },
-      controller.signal,
-    )
-      .then((data) => {
-        const n = data?.appGainforestDwcOccurrence?.totalCount;
-        if (typeof n === "number") {
-          orgSightingTotalCache.set(did, n);
-          setTotal(n);
-        }
-      })
-      .catch(() => {});
-    return () => controller.abort();
-  }, [did]);
-
-  // Use the true total once known; until then show the loaded run length.
-  return total != null ? Math.max(total, fallback) : fallback;
-}
-
 function ObservationBatchCard({
   items,
   signedIn,
@@ -721,10 +712,14 @@ function ObservationBatchCard({
   // ids is already prefetched by the FeedClient page effect.
   const likeTotal = items.reduce((sum, it) => sum + interactions.getEngagement(it.id).likeCount, 0);
 
-  // The real count comes from the org's sighting total, so a burst that is only
-  // partially loaded still reads "shared 2,143 nature sightings", not the
-  // loaded slice.
-  const count = useOrgSightingTotal(head.actorDid || null, items.length);
+  // Headline count = the size of THIS burst, not the account's all-time total.
+  // Server-collapsed runs stamp `burstCount` on their sampled rows: the run
+  // size from the collapse point down. Rows of the same run that were emitted
+  // raw on earlier pages (a run can start mid-page) sit above the sample in
+  // this batch without a stamp, so add them. Fully loaded runs have no stamp
+  // and are exactly the rows on screen. Either way it's free — no extra query.
+  const stamped = items.reduce((max, it) => Math.max(max, it.burstCount ?? 0), 0);
+  const count = stamped > 0 ? items.filter((it) => it.burstCount == null).length + stamped : items.length;
 
   const withImages = items.filter((it) => hasImage(it));
   const thumbs = withImages.slice(0, MAX_THUMBS);

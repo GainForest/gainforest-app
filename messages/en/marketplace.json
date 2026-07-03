@@ -40,15 +40,17 @@
       "clearCategory": "Clear {category}"
     },
     "filters": {
-      "allTitle": "All Filters",
+      "allTitle": "Sort and Filter",
+      "sortLabel": "Sort",
       "description": "Show Certs by source badge, photos, project places, named people, work dates, or donations.",
+      "sightingsDescription": "Show sightings by source, media type, or nature group.",
       "organization": "Organization",
       "bioregion": "Bioregion",
       "country": "Country",
       "impactArea": "Impact Area",
       "allBumicerts": "All Certs",
-      "allFilters": "All filters",
-      "allFiltersAria": "All filters",
+      "allFilters": "Sort and Filter",
+      "allFiltersAria": "Sort and Filter",
       "updateHint": "Filters update as you choose.",
       "images": "Shows photos",
       "locations": "Shows project places",
@@ -58,7 +60,7 @@
       "badges": {
         "all": "All",
         "gainforest": "GainForest",
-        "maearth": "Ma Earth",
+        "maearth": "On the Ma Earth platform",
         "maearthRound1": "Ma Earth Round 1",
         "maearthRound2": "Ma Earth Round 2"
       }
@@ -157,6 +159,9 @@
       "colType": "Type",
       "colPlace": "Place",
       "colJoined": "Joined"
+    },
+    "filters": {
+      "description": "Show organizations by source, observations, category, or country."
     },
     "quickFilters": {
       "observations": "Has observations"
@@ -573,14 +578,17 @@
       "noMatch": "No projects match your search.",
       "untitledProject": "Untitled project",
       "applyWith": "Apply with {project}",
-      "submitError": "Couldn't send your application. Please try again."
+      "submitError": "Couldn't send your application. Please try again.",
+      "successTitle": "Application submitted",
+      "successBody": "Thanks for applying with {project}. We'll be in touch soon about the next steps.",
+      "successClose": "Done"
     },
     "interoperable": {
       "category": "Interoperable Grants Program",
       "grantName": "Ma Earth Round 3",
       "fundingType": "Quadratic funding",
-      "description": "Ma Earth is running a community-backed funding round that uses quadratic funding: many smaller donations are matched and amplified more than a few large ones. Apply with your project to take part.",
-      "apply": "Apply with your project",
+      "description": "Ma Earth's community-backed funding round uses quadratic funding: many smaller donations are matched and amplified more than a few large ones. Applications have closed and the round is now live — browse the projects taking part and support them.",
+      "browseProjects": "Browse projects in this round",
       "logoAlt": "Ma Earth"
     }
   },
@@ -912,7 +920,7 @@
     },
     "filters": {
       "allProjects": "All Projects",
-      "allFilters": "All filters",
+      "allFilters": "Sort and Filter",
       "description": "Show projects by source badge, images, or a project place.",
       "updateHint": "Filters update as you choose.",
       "images": "Shows images",

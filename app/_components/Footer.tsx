@@ -15,7 +15,6 @@ const DATA_LINKS = [
   { href: "/projects", key: "projects" },
   { href: "/organizations", key: "organizations" },
   { href: "/observations", key: "observations" },
-  { href: "/leaderboard", key: "leaderboard" },
   { href: "/bioblitz", key: "bioblitz" },
   { href: "/docs/lexicons", key: "lexicons" },
   { href: GLOBE_URL, key: "greenGlobe" },

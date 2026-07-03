@@ -1,10 +1,10 @@
 "use client";
 
 import Image from "next/image";
-import { useCallback, useEffect, useId, useRef, useState, type ChangeEvent, type DragEvent } from "react";
+import { Fragment, useCallback, useEffect, useId, useRef, useState, type ChangeEvent, type DragEvent } from "react";
 import { useTranslations } from "next-intl";
 import {
-  CalendarIcon,
+  CameraIcon,
   CheckCircle2Icon,
   ChevronDownIcon,
   CircleHelpIcon,
@@ -15,6 +15,7 @@ import {
   Layers2Icon,
   Loader2Icon,
   MapPinIcon,
+  MergeIcon,
   PlusIcon,
   RotateCcwIcon,
   RulerIcon,
@@ -29,6 +30,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
+import { DatePicker } from "@/components/ui/date-picker";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
@@ -137,6 +139,15 @@ type AnalyzeResponse = {
 
 const sleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
 
+// Local "yyyy-MM-dd" for today — caps the date picker so observers can't select a
+// future sighting date (which the occurrence proxy rejects anyway).
+function todayIso(): string {
+  const now = new Date();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
+  return `${now.getFullYear()}-${month}-${day}`;
+}
+
 function isNamed(name: string): boolean {
   const normalized = name.trim().toLowerCase();
   return normalized.length > 0 && normalized !== UNIDENTIFIED;
@@ -244,6 +255,9 @@ export function AddObservationsModal({
   // reachable from the "More ways" menu.
   const [mode, setMode] = useState<"photos" | "csv">("photos");
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  // Separate input with `capture` so phones can jump straight into the camera
+  // (surfaced by a touch-only "Take a photo" button).
+  const cameraInputRef = useRef<HTMLInputElement | null>(null);
   const dragDepth = useRef(0);
   const itemsRef = useRef<QuickItem[]>([]);
   // Caches the one device-location request per modal session so adding several
@@ -608,6 +622,25 @@ export function AddObservationsModal({
     });
   }
 
+  // Fold every photo of one observation into another and unify the shared
+  // fields. This powers the tap-friendly "combine with above" button — the
+  // touch counterpart of dragging one photo onto another card.
+  function mergeGroupIntoGroup(sourceGroupId: string, targetGroupId: string) {
+    if (sourceGroupId === targetGroupId) return;
+    setItems((current) => {
+      const source = current.filter((item) => item.groupId === sourceGroupId);
+      const target = current.filter((item) => item.groupId === targetGroupId);
+      if (source.length === 0 || target.length === 0) return current;
+      const fields = mergedGroupFields([...target, ...source]);
+      return current.map((item) =>
+        item.groupId === targetGroupId || item.groupId === sourceGroupId
+          ? { ...item, groupId: targetGroupId, ...fields }
+          : item,
+      );
+    });
+    setError(null);
+  }
+
   // Drag a photo onto another observation: move it into that group and unify the
   // group's shared fields (keeping any non-empty value from either side).
   function mergeItemIntoGroup(itemId: string, targetGroupId: string) {
@@ -812,10 +845,7 @@ export function AddObservationsModal({
     <ModalContent className="space-y-4" dismissible={false}>
       <ModalHeader>
         <div className="flex items-start justify-between gap-3">
-          <div>
-            <ModalTitle>{t("title")}</ModalTitle>
-            <ModalDescription className="mt-1">{t("description")}</ModalDescription>
-          </div>
+          <ModalTitle>{t("title")}</ModalTitle>
           <div className="flex shrink-0 items-center gap-1.5">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -849,6 +879,7 @@ export function AddObservationsModal({
             </Button>
           </div>
         </div>
+        <ModalDescription className="mt-1">{t("description")}</ModalDescription>
       </ModalHeader>
 
       <div
@@ -869,23 +900,41 @@ export function AddObservationsModal({
             </span>
             <div>
               <p className="font-instrument text-xl font-medium italic tracking-[-0.02em] text-foreground">
-                {t("dropTitle")}
+                {/* Touch devices can't drag & drop files, so swap the invitation. */}
+                <span className="[@media(pointer:coarse)]:hidden">{t("dropTitle")}</span>
+                <span className="hidden [@media(pointer:coarse)]:inline">{t("dropTitleTouch")}</span>
               </p>
               <p className="mt-1 text-xs leading-5 text-muted-foreground">{t("dropHint", { max: MAX_PHOTOS })}</p>
             </div>
-            <Button
-              type="button"
-              variant="outline"
-              className="rounded-full"
-              onClick={() => fileInputRef.current?.click()}
-              disabled={Boolean(disabledReason) || isPreparing}
-              title={disabledReason ?? undefined}
-            >
-              {t("choose")}
-            </Button>
+            <div className="flex w-full flex-col items-stretch justify-center gap-2 sm:w-auto sm:flex-row sm:items-center">
+              {/* Field-friendly shortcut straight into the camera; touch-only. */}
+              <Button
+                type="button"
+                className="hidden rounded-full [@media(pointer:coarse)]:inline-flex"
+                onClick={() => cameraInputRef.current?.click()}
+                disabled={Boolean(disabledReason) || isPreparing}
+                title={disabledReason ?? undefined}
+              >
+                <CameraIcon className="size-4" />
+                {t("takePhoto")}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                className="rounded-full"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={Boolean(disabledReason) || isPreparing}
+                title={disabledReason ?? undefined}
+              >
+                {t("choose")}
+              </Button>
+            </div>
           </div>
         ) : (
-          <div className="max-h-[52vh] space-y-3 overflow-y-auto pr-1">
+          // Phones scroll the dialog as one surface (nested scrollers trap the
+          // touch gesture); larger screens keep the list in its own scroll area
+          // so the footer stays put.
+          <div className="space-y-3 sm:max-h-[52vh] sm:overflow-y-auto sm:pr-1">
             {identifyingCount > 0 ? (
               <QuickProgress
                 label={t("identifyingProgress", { done: items.length - identifyingCount, total: items.length })}
@@ -894,43 +943,83 @@ export function AddObservationsModal({
               />
             ) : null}
             {items.length > 1 ? (
-              <p className="flex items-center gap-1.5 px-0.5 text-xs text-muted-foreground">
+              // Drag & drop needs a mouse — only pitch it on fine-pointer devices.
+              // Touch users get the "combine with above" buttons between cards.
+              <p className="hidden items-center gap-1.5 px-0.5 text-xs text-muted-foreground [@media(pointer:fine)]:flex">
                 <Layers2Icon className="size-3.5 shrink-0 text-primary" />
                 {t("combineTip")}
               </p>
             ) : null}
-            {groups.map((group) => (
-              <ObservationGroupCard
-                key={group.id}
-                group={group}
-                groupCount={groups.length}
-                disabled={isSubmitting}
-                onChange={(patch) => patchGroup(group.id, patch)}
-                onRemoveGroup={() => removeGroup(group.id)}
-                onSeparateItem={separateItem}
-                onDropItem={(itemId) => mergeItemIntoGroup(itemId, group.id)}
-                onPickLocation={() => openLocationPicker(group)}
-                onReanalyze={() => reanalyzeGroup(group.id)}
-                onApplyToAll={() => applyDateLocationToAll(group.id)}
-                t={t}
-              />
+            {groups.map((group, index) => (
+              <Fragment key={group.id}>
+                {index > 0 ? (
+                  <div className="flex justify-center">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="xs"
+                      onClick={() => mergeGroupIntoGroup(group.id, groups[index - 1].id)}
+                      disabled={isSubmitting}
+                      className="h-6 rounded-full border-dashed px-2.5 text-[11px] font-normal text-muted-foreground hover:text-foreground"
+                    >
+                      <MergeIcon className="size-3" />
+                      {t("combineWithAbove")}
+                    </Button>
+                  </div>
+                ) : null}
+                <ObservationGroupCard
+                  group={group}
+                  groupCount={groups.length}
+                  disabled={isSubmitting}
+                  onChange={(patch) => patchGroup(group.id, patch)}
+                  onRemoveGroup={() => removeGroup(group.id)}
+                  onSeparateItem={separateItem}
+                  onDropItem={(itemId) => mergeItemIntoGroup(itemId, group.id)}
+                  onPickLocation={() => openLocationPicker(group)}
+                  onReanalyze={() => reanalyzeGroup(group.id)}
+                  onApplyToAll={() => applyDateLocationToAll(group.id)}
+                  t={t}
+                />
+              </Fragment>
             ))}
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              className="w-full rounded-xl border-dashed"
-              onClick={() => fileInputRef.current?.click()}
-              disabled={Boolean(disabledReason) || isPreparing || isSubmitting || items.length >= MAX_PHOTOS}
-            >
-              {isPreparing ? <Loader2Icon className="size-4 animate-spin" /> : <ImagePlusIcon className="size-4" />}
-              {t("addMore")}
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="min-w-0 flex-1 rounded-xl border-dashed"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={Boolean(disabledReason) || isPreparing || isSubmitting || items.length >= MAX_PHOTOS}
+              >
+                {isPreparing ? <Loader2Icon className="size-4 animate-spin" /> : <ImagePlusIcon className="size-4" />}
+                {t("addMore")}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="hidden rounded-xl border-dashed [@media(pointer:coarse)]:inline-flex"
+                onClick={() => cameraInputRef.current?.click()}
+                disabled={Boolean(disabledReason) || isPreparing || isSubmitting || items.length >= MAX_PHOTOS}
+                aria-label={t("takePhoto")}
+                title={t("takePhoto")}
+              >
+                <CameraIcon className="size-4" />
+              </Button>
+            </div>
           </div>
         )}
       </div>
 
       <input ref={fileInputRef} type="file" accept="image/*" multiple className="hidden" onChange={onInputChange} />
+      <input
+        ref={cameraInputRef}
+        type="file"
+        accept="image/*"
+        capture="environment"
+        className="hidden"
+        onChange={onInputChange}
+      />
 
       {!showEmptyState && !projectRef && projects.length > 0 ? (
         <div className="flex flex-col gap-2 rounded-2xl border border-border bg-muted/30 p-3 sm:flex-row sm:items-center sm:justify-between">
@@ -1008,7 +1097,11 @@ export function AddObservationsModal({
       ) : null}
 
       {!showEmptyState ? (
-        <div className="space-y-3 border-t border-border pt-3">
+        // On phones the whole dialog scrolls, so pin the submit bar to the
+        // bottom edge (full-bleed over the dialog's p-6) — the primary action
+        // stays reachable however long the card list grows. From sm up the list
+        // scrolls internally instead and the footer sits statically below it.
+        <div className="sticky bottom-0 z-10 -mx-6 -mb-6 space-y-3 border-t border-border bg-background px-6 pb-5 pt-3 sm:static sm:mx-0 sm:mb-0 sm:bg-transparent sm:px-0 sm:pb-0">
           {isSubmitting && uploadProgress ? (
             <QuickProgress
               label={t("uploadingProgress", { done: uploadProgress.done, total: uploadProgress.total })}
@@ -1016,9 +1109,13 @@ export function AddObservationsModal({
               total={uploadProgress.total}
             />
           ) : null}
-          <div className="flex items-center justify-between gap-3">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
             <p className="text-sm text-muted-foreground">{t("readyCount", { count: submittableCount })}</p>
-            <Button onClick={submit} disabled={submittableCount === 0 || isSubmitting || Boolean(disabledReason)}>
+            <Button
+              onClick={submit}
+              disabled={submittableCount === 0 || isSubmitting || Boolean(disabledReason)}
+              className="w-full sm:w-auto"
+            >
               {isSubmitting ? <Loader2Icon className="size-4 animate-spin" /> : null}
               {isSubmitting ? t("submitting") : t("submit", { count: submittableCount })}
             </Button>
@@ -1141,7 +1238,7 @@ function GroupThumb({
           onClick={onSeparate}
           aria-label={t("separatePhoto")}
           title={t("separatePhoto")}
-          className="absolute -right-1.5 -top-1.5 grid size-6 place-items-center rounded-full bg-background text-primary shadow-sm ring-1 ring-border transition-colors hover:bg-primary hover:text-primary-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+          className="absolute -right-1.5 -top-1.5 grid size-7 place-items-center rounded-full bg-background text-primary shadow-sm ring-1 ring-border transition-colors hover:bg-primary hover:text-primary-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 sm:size-6"
         >
           <SplitIcon className="size-3.5" />
         </button>
@@ -1270,7 +1367,9 @@ function ObservationGroupCard({
           <Layers2Icon className="size-3.5 shrink-0 text-primary" />
           <span>{t("photoCount", { count: items.length })}</span>
           <span className="text-muted-foreground/50">·</span>
-          <span>{t("dragMergeHint")}</span>
+          {/* Dragging photos out needs a mouse; on touch only the split button works. */}
+          <span className="hidden [@media(pointer:fine)]:inline">{t("dragMergeHint")}</span>
+          <span className="[@media(pointer:fine)]:hidden">{t("dragMergeHintTouch")}</span>
         </p>
       ) : null}
 
@@ -1299,17 +1398,19 @@ function ObservationGroupCard({
         ) : null}
 
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-          <div className="relative">
-            <CalendarIcon className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              type="date"
-              value={fields.eventDate}
-              onChange={(event) => onChange({ eventDate: event.target.value })}
-              disabled={disabled || uploading}
-              aria-label={t("dateLabel")}
-              className="pl-8"
-            />
-          </div>
+          {/* A Popover-anchored calendar (not a native <input type="date">): the
+              browser's native date dropdown escaped and clipped against the
+              modal's overflow. This stays inside the viewport and visually
+              matches the location button beside it. Future dates are blocked
+              since observations are past sightings (and the server rejects them). */}
+          <DatePicker
+            value={fields.eventDate}
+            onChange={(value) => onChange({ eventDate: value })}
+            disabled={disabled || uploading}
+            max={todayIso()}
+            placeholder={t("dateLabel")}
+            className="h-9 gap-2 rounded-full border border-border bg-background px-4 py-0 text-sm font-normal hover:bg-muted"
+          />
           <Button
             type="button"
             variant="outline"
@@ -1494,7 +1595,7 @@ function QuickTagsEditor({
           placeholder={t("tagsPlaceholder")}
           disabled={disabled}
           aria-label={t("tagsLabel")}
-          className="h-6 min-w-32 flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground/70"
+          className="h-7 min-w-32 flex-1 bg-transparent text-base text-foreground outline-none placeholder:text-muted-foreground/70 md:h-6 md:text-sm"
         />
       </div>
     </div>
@@ -1560,7 +1661,7 @@ function QuickMeasurementsEditor({
               disabled={disabled}
               aria-label={t("measurementTypeLabel")}
               list={listId}
-              className="h-8 text-sm"
+              className="h-9 md:h-8"
             />
             <Input
               value={entry.value}
@@ -1569,7 +1670,7 @@ function QuickMeasurementsEditor({
               disabled={disabled}
               aria-label={t("measurementValueLabel")}
               inputMode="decimal"
-              className="h-8 text-sm"
+              className="h-9 md:h-8"
             />
             <Input
               value={entry.unit}
@@ -1577,7 +1678,7 @@ function QuickMeasurementsEditor({
               placeholder={t("measurementUnitPlaceholder")}
               disabled={disabled}
               aria-label={t("measurementUnitLabel")}
-              className="h-8 text-sm"
+              className="h-9 md:h-8"
             />
             <Button
               type="button"

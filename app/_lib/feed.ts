@@ -26,7 +26,7 @@
 import { cachedAsync } from "./async-cache";
 import { fetchHiddenAccountDids, indexerQuery } from "./indexer";
 import { normaliseRef } from "./pds";
-import { FACILITATOR_DID, accountHref, localObservationHref, localProjectHref } from "./urls";
+import { FACILITATOR_DID, accountHref, localBumicertHref, localObservationHref, localProjectHref } from "./urls";
 
 /** The kinds of activity a feed row represents.
  *
@@ -73,6 +73,13 @@ export interface ActivityFeedItem {
   amount: number | null;
   /** For donations: the currency code (USD/USDC). */
   currency: string | null;
+  /** Observations only, set on the sampled rows of a server-collapsed burst:
+   *  how many sightings the burst holds from the collapse point down (counted
+   *  for free by the burst scan; includes the sampled rows themselves). Rows
+   *  of the same run emitted raw on earlier pages are NOT included — the
+   *  client adds those, so the summary card's headline is the full burst.
+   *  Absent on fully loaded runs, where the row count itself is exact. */
+  burstCount?: number;
 }
 
 /** Which kinds the feed should include: a single kind, or the unified merge. */
@@ -109,6 +116,11 @@ const MAX_TEXT = 220;
 const BURST_SCAN_HOP = 1000; // indexer max page size
 const MAX_SCAN_HOPS = 6; // skip up to ~6k sightings per "load more"
 const BURST_SAMPLE = 8; // sightings kept for the card's montage / grouping
+// A run only counts as one burst while consecutive sightings are close in
+// time. A quiet gap longer than this splits the run — an account posting
+// steadily over many days isn't one upload and pages/renders normally.
+// Mirrored by MAX_BATCH_GAP_MS in app/feed/FeedClient.tsx.
+const BURST_MAX_GAP_MS = 12 * 60 * 60 * 1000; // 12h
 const FEED_CACHE_MS = 60_000; // 60s in-process memo — fresh enough for "live".
 // The indexer caps an `in` filter's list, so a viewer following more accounts
 // than this is split into chunks that are queried in parallel and re-merged
@@ -574,6 +586,10 @@ function mapDonations(nodes: RawReceipt[]): { items: ActivityFeedItem[]; certUri
   const items = nodes.map((n): ActivityFeedItem => {
     const certUri = n.for?.uri ?? null;
     if (certUri) certUriById.set(n.uri, certUri);
+    // Fallback link while the funded project is unresolved: the Cert page
+    // itself (the donations hub is admin-gated now), else the feed.
+    const certRef = certUri ? parseAtUri(certUri) : null;
+    const fallbackHref = certRef ? localBumicertHref(certRef.did, certRef.rkey) : "/feed";
     const donorWallet = n.from?.__typename === "OrgHypercertsFundingReceiptText" ? n.from.value ?? null : null;
     const donorDid = n.from?.__typename === "AppCertifiedDefsDid" ? n.from.did ?? null : null;
     const currency = (n.currency ?? "USD").toUpperCase();
@@ -588,7 +604,7 @@ function mapDonations(nodes: RawReceipt[]): { items: ActivityFeedItem[]; certUri
       actorAvatarRef: null,
       title: null,
       text: clampText(donorWallet ? `via ${donorWallet.slice(0, 10)}…` : null),
-      href: "/donations",
+      href: fallbackHref,
       imageUrl: null,
       imageRef: null,
       targetTitle: null,
@@ -613,7 +629,7 @@ async function enrichDonations(pageItems: ActivityFeedItem[], certUriById: Map<s
     if (it.kind !== "donation") continue;
     const certUri = certUriById.get(it.id);
     const project = certUri ? projectByCert.get(certUri) ?? null : null;
-    if (!project) continue; // legacy standalone Cert — keep the donations-hub link
+    if (!project) continue; // legacy standalone Cert — keep the Cert-page link
     const projectHref = localProjectHref(project.did, project.rkey);
     it.href = projectHref;
     it.targetHref = projectHref;
@@ -688,15 +704,22 @@ function scanNodeId(n: ScanNode): string {
  * ends: either another account's sighting, or a record at/below `floorTime`
  * (the newest non-sighting item already in the pool). Returns the last sighting
  * of the run, whose (createdAt, id) becomes the jump cursor so the next page
- * begins right after the whole burst.
+ * begins right after the whole burst, plus `count` — how many not-yet-emitted
+ * sightings the run contains (a lower bound when the hop budget runs out) —
+ * gathered while walking anyway, so the summary card's headline number costs
+ * nothing extra. Only nodes strictly older than the page cursor are counted:
+ * run rows already emitted raw on previous pages are the client's to add.
  */
 async function scanBurstEnd(
   burstActor: string,
-  before: string | null,
+  before: FeedCursor | null,
   floorTime: number,
-): Promise<{ createdAt: string; id: string } | null> {
-  let upper = before;
-  let lastBurst: { createdAt: string; id: string } | null = null;
+): Promise<{ createdAt: string; id: string; count: number } | null> {
+  let upper = before?.ts ?? null;
+  const beforeTime = before ? timeValue(before.ts) : null;
+  let lastBurst: { createdAt: string; id: string; count: number } | null = null;
+  let lastBurstTime: number | null = null;
+  let runCount = 0;
   const seen = new Set<string>();
 
   for (let hop = 0; hop < MAX_SCAN_HOPS; hop += 1) {
@@ -717,9 +740,20 @@ async function scanBurstEnd(
       seen.add(id);
       progressed = true;
       oldestTs = n.createdAt;
-      if (timeValue(n.createdAt) <= floorTime) return lastBurst; // run ended at the pool's boundary
-      if (n.did === burstActor) lastBurst = { createdAt: n.createdAt, id };
-      else return lastBurst; // run ended at another account's sighting
+      const t = timeValue(n.createdAt);
+      if (t <= floorTime) return lastBurst; // run ended at the pool's boundary
+      if (n.did !== burstActor) return lastBurst; // run ended at another account's sighting
+      // A long quiet gap between two of the actor's sightings ends the burst:
+      // only things uploaded close together collapse into one summary.
+      if (lastBurstTime !== null && lastBurstTime - t > BURST_MAX_GAP_MS) return lastBurst;
+      // Count only rows strictly older than the cursor (same compound order as
+      // isStrictlyOlder); boundary rows re-fetched by the lte bound were
+      // already emitted on the previous page.
+      const strictlyOlder =
+        beforeTime === null || t < beforeTime || (t === beforeTime && before !== null && id < before.id);
+      if (strictlyOlder) runCount += 1;
+      lastBurst = { createdAt: n.createdAt, id, count: runCount };
+      lastBurstTime = t;
     }
     if (!progressed || nodes.length < BURST_SCAN_HOP) break; // exhausted / no progress
     upper = oldestTs ?? upper;
@@ -738,7 +772,7 @@ async function buildBurstSkipPage(
   ordered: ActivityFeedItem[],
   firstObsIdx: number,
   burstActor: string,
-  before: string | null,
+  before: FeedCursor | null,
 ): Promise<ActivityFeedPage | null> {
   // The newest non-sighting item already in the pool can also end the run.
   const newestNonObs = ordered.find((it) => it.kind !== "observation");
@@ -747,8 +781,20 @@ async function buildBurstSkipPage(
   const jump = await scanBurstEnd(burstActor, before, floorTime);
   if (!jump) return null;
 
-  const sample = ordered.slice(0, firstObsIdx + BURST_SAMPLE);
+  // Emit only items at/after the jump in the total order: anything strictly
+  // older than the jump cursor re-appears on the next page (the gap check can
+  // end a run inside the sampled slice, which would otherwise duplicate rows).
+  const jumpCursor: FeedCursor = { ts: jump.createdAt, id: jump.id };
+  const sample = ordered
+    .slice(0, firstObsIdx + BURST_SAMPLE)
+    .filter((it) => !isStrictlyOlder(it, jumpCursor));
   if (sample.length === 0) return null;
+  // Stamp the scanned run total on the sampled sightings so the client's
+  // summary card can headline the real burst size without another query.
+  const burstCount = Math.max(jump.count, sample.filter((it) => it.kind === "observation").length);
+  for (const it of sample) {
+    if (it.kind === "observation") it.burstCount = burstCount;
+  }
   return {
     items: sample,
     nextCursor: encodeCursor({ ts: jump.createdAt, id: jump.id }),
@@ -871,7 +917,7 @@ async function buildFeedPageUncached(
     const firstObsIdx = ordered.findIndex((it) => it.kind === "observation");
     const burstActor = firstObsIdx >= 0 && firstObsIdx < PAGE_SIZE ? ordered[firstObsIdx].actorDid : null;
     if (burstActor && occurrenceNodes.every((n) => n.did === burstActor)) {
-      const skipPage = await buildBurstSkipPage(ordered, firstObsIdx, burstActor, before);
+      const skipPage = await buildBurstSkipPage(ordered, firstObsIdx, burstActor, cursor);
       if (skipPage) {
         await enrichDonations(skipPage.items, certUriById);
         return skipPage;

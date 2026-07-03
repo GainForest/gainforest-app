@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { Suspense } from "react";
 import { buildActivityFeed } from "../_lib/feed";
 import { fetchAuthSession } from "../_lib/auth-server";
+import { getGainForestModeratorAccess } from "../internal/badges/_lib/access";
 import { FeedPageSkeleton } from "../_components/PageLoadingSkeletons";
 import { FeedClient } from "./FeedClient";
 
@@ -30,9 +31,12 @@ async function FeedContent() {
   // Prefetch the first page server-side so the feed shell renders instantly;
   // the client hydrates with it, can load more, and can refetch live activity.
   // The session decides whether the like / comment / post affordances are live.
-  const [page, session] = await Promise.all([
+  const [page, session, moderator] = await Promise.all([
     buildActivityFeed().catch(() => ({ items: [], nextCursor: null, hasMore: false })),
     fetchAuthSession().catch(() => ({ isLoggedIn: false as const })),
+    // Donations is being wound down for the general public — the filter is only
+    // surfaced to admin-group members for now.
+    getGainForestModeratorAccess().catch(() => null),
   ]);
   const viewerDid = session.isLoggedIn ? session.did : null;
   return (
@@ -42,6 +46,7 @@ async function FeedContent() {
       initialHasMore={page.hasMore}
       signedIn={Boolean(viewerDid)}
       viewerDid={viewerDid}
+      isAdmin={Boolean(moderator?.isModerator)}
     />
   );
 }

@@ -5,7 +5,7 @@ import {
   type TimelineDocumentFormat,
 } from "./timelineDocumentFormats";
 
-export type RegisteredEvidenceKind = "tree" | "audio" | "nature" | "file" | "site" | "other";
+export type RegisteredEvidenceKind = "tree" | "audio" | "nature" | "file" | "site" | "update" | "other";
 
 export const EVIDENCE_CONTENT_TYPE_REGISTRY = [
   { value: "document", translationKey: "document", filePickerEligible: true, evidenceKind: "file" },
@@ -28,6 +28,9 @@ export const EVIDENCE_CONTENT_TYPE_REGISTRY = [
   { value: "nature-dataset", translationKey: "biodiversity", filePickerEligible: false, evidenceKind: "nature" },
   { value: "occurrence", translationKey: "occurrence", filePickerEligible: false, evidenceKind: "tree" },
   { value: "location", translationKey: "location", filePickerEligible: false, evidenceKind: "site" },
+  // A text-only progress update: the body lives in `description` as a
+  // `pub.leaflet.pages.linearDocument`, with no content items required.
+  { value: "update", translationKey: "update", filePickerEligible: false, evidenceKind: "update" },
 ] as const satisfies ReadonlyArray<{
   value: string;
   translationKey: string;

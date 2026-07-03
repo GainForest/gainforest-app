@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { PictureHero } from "./PictureHero";
 import { PdsVisual } from "./PdsVisual";
+import { Confetti } from "./Confetti";
 import { redirectToLogin } from "../_lib/auth-client";
 import {
   switcherGroupIdentifier,
@@ -34,7 +35,9 @@ import { useModal } from "@/components/ui/modal/context";
 import { groupManageBasePath, manageApiHref, manageHref } from "@/lib/links";
 import { cn } from "@/lib/utils";
 
-const MA_EARTH_FUNDRAISE_URL = "https://maearth.com/fundraise";
+// Round 3 applications closed May 31, 2026; the round itself is live, so we
+// point visitors at the participating projects instead of the apply page.
+const MA_EARTH_ROUND_PROJECTS_URL = "https://maearth.com/projects";
 const MA_EARTH_LOGO_SRC = "/assets/media/images/badges/ma-earth-logo.webp";
 // Keep the application post comfortably under the feed post limit even when a
 // project title is long.
@@ -155,7 +158,14 @@ function RewildingSection({ viewerDid, signedIn }: { viewerDid: string | null; s
             onClose={closeModal}
             onApplied={(title) => {
               setAppliedProjectTitle(title);
-              closeModal();
+              modal.pushModal(
+                {
+                  id: "rewilding-applied",
+                  dialogWidth: "max-w-md w-[calc(100%-2rem)]",
+                  content: <RewildingSuccessModal projectTitle={title} onClose={closeModal} />,
+                },
+                true,
+              );
             }}
           />
         ),
@@ -421,6 +431,34 @@ function RewildingApplyModal({
   );
 }
 
+function RewildingSuccessModal({
+  projectTitle,
+  onClose,
+}: {
+  projectTitle: string;
+  onClose: () => void;
+}) {
+  const t = useTranslations("marketplace.grants.applyModal");
+
+  return (
+    <ModalContent className="w-full">
+      <Confetti />
+      <div className="flex flex-col items-center py-2 text-center">
+        <span className="grid size-14 place-items-center rounded-2xl bg-primary/15 text-primary">
+          <CheckCircle2Icon className="size-7" />
+        </span>
+        <ModalTitle className="mt-4">{t("successTitle")}</ModalTitle>
+        <ModalDescription className="mt-1.5 max-w-sm">
+          {t("successBody", { project: projectTitle })}
+        </ModalDescription>
+        <Button type="button" className="mt-6" onClick={onClose}>
+          {t("successClose")}
+        </Button>
+      </div>
+    </ModalContent>
+  );
+}
+
 // ── Interoperable Grants Program (category): Ma Earth Round 3 ─────────────────
 
 function InteroperableSection() {
@@ -451,12 +489,12 @@ function InteroperableSection() {
 
         <div className="mt-6">
           <a
-            href={MA_EARTH_FUNDRAISE_URL}
+            href={MA_EARTH_ROUND_PROJECTS_URL}
             target="_blank"
             rel="noreferrer"
             className={cn(buttonVariants({ size: "lg" }))}
           >
-            {t("apply")}
+            {t("browseProjects")}
             <ArrowUpRightIcon />
           </a>
         </div>

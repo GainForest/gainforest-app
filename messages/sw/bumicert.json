@@ -111,6 +111,7 @@
         "certificate": "Cheti",
         "audio": "Sauti",
         "other": "Nyingine",
+        "update": "Taarifa",
         "treeDataset": "Seti ya data ya mti",
         "biodiversity": "Asili",
         "occurrence": "Mti"
@@ -156,6 +157,16 @@
         "trees": "Ongeza taarifa za miti zilizopangwa kwa eneo la mradi.",
         "biodiversity": "Chuja uchunguzi na uongeze rekodi zinazoonyeshwa au vikundi vilivyohifadhiwa.",
         "files": "Ongeza ripoti, picha, video, au kurasa za wavuti."
+      },
+      "update": {
+        "heading": "Andika taarifa",
+        "subheading": "Shiriki maendeleo kwa maneno yako mwenyewe. Itaonekana kwenye taarifa za mradi za umma.",
+        "titleLabel": "Kichwa",
+        "titlePlaceholder": "Kuna jipya gani?",
+        "bodyLabel": "Taarifa",
+        "bodyPlaceholder": "Shiriki maendeleo, hatua muhimu au habari kutoka uwandani…",
+        "post": "Chapisha taarifa",
+        "posting": "Inachapisha…"
       },
       "permissions": {
         "signIn": "Ingia kwa akaunti inayoweza kusimamia mstari huu wa wakati.",

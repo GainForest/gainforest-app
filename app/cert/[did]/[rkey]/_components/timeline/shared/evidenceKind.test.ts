@@ -21,6 +21,7 @@ describe("timeline evidence kind", () => {
     expect(getTimelineEvidenceKind("audio", [])).toBe("audio");
     expect(getTimelineEvidenceKind("biodiversity", [])).toBe("nature");
     expect(getTimelineEvidenceKind("document", [])).toBe("file");
+    expect(getTimelineEvidenceKind("update", [])).toBe("update");
   });
 
   it("classifies linked records and files when content type is missing", () => {
@@ -35,5 +36,11 @@ describe("timeline evidence kind", () => {
     expect(matchesTimelineFilter("other", "file")).toBe(true);
     expect(matchesTimelineFilter("tree", "file")).toBe(false);
     expect(matchesTimelineFilter("audio", "audio")).toBe(true);
+  });
+
+  it("shows text updates under the all filter only", () => {
+    expect(matchesTimelineFilter("update", "all")).toBe(true);
+    expect(matchesTimelineFilter("update", "file")).toBe(false);
+    expect(matchesTimelineFilter("update", "tree")).toBe(false);
   });
 });
