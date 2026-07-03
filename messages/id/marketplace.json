@@ -42,7 +42,7 @@
     "filters": {
       "allTitle": "Semua filter",
       "description": "Tampilkan Cert berdasarkan lencana sumber, foto, lokasi proyek, orang yang disebutkan, tanggal kerja, atau donasi.",
-      "sourcesDescription": "Tampilkan hasil berdasarkan lencana sumber.",
+      "sightingsDescription": "Tampilkan pengamatan berdasarkan sumber, jenis media, atau kelompok alam.",
       "organization": "Organisasi",
       "bioregion": "Wilayah hayati",
       "country": "Negara",
@@ -158,6 +158,9 @@
       "colType": "Tipe",
       "colPlace": "Tempat",
       "colJoined": "Bergabung"
+    },
+    "filters": {
+      "description": "Tampilkan organisasi berdasarkan sumber, observasi, kategori, atau negara."
     },
     "quickFilters": {
       "observations": "Memiliki observasi"

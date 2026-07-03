@@ -42,7 +42,7 @@
     "filters": {
       "allTitle": "All Filters",
       "description": "Show Certs by source badge, photos, project places, named people, work dates, or donations.",
-      "sourcesDescription": "Show results by source badge.",
+      "sightingsDescription": "Show sightings by source, media type, or nature group.",
       "organization": "Organization",
       "bioregion": "Bioregion",
       "country": "Country",
@@ -158,6 +158,9 @@
       "colType": "Type",
       "colPlace": "Place",
       "colJoined": "Joined"
+    },
+    "filters": {
+      "description": "Show organizations by source, observations, category, or country."
     },
     "quickFilters": {
       "observations": "Has observations"

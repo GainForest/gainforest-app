@@ -47,7 +47,7 @@ import { resolveDidProfile, getCachedProfile } from "../_lib/did-profile";
 import { formatCompact, countryFlag, formatCountry, formatDate } from "../_lib/format";
 import { AutoLoadMoreButton } from "./AutoLoadMoreButton";
 import { OwnerFilterBanner, OwnerFilterButton, useOwnerFilter } from "./OwnerFilter";
-import { SourceFiltersPopover } from "./SourceFiltersPopover";
+import { AllFiltersPopover, SourceFilterChips } from "./AllFiltersPopover";
 import { PictureHero } from "./PictureHero";
 import { TrustedByBadges } from "./TrustedByBadges";
 import { useStableQueryView } from "../_lib/use-stable-query-view";
@@ -723,47 +723,60 @@ export function RecordExplorer({
 
           {kind === "occurrence" && !hideOccurrenceFilters && (
             <div
-              className="relative z-20 flex items-center gap-2 animate-in"
+              className="relative z-20 flex justify-end animate-in"
               style={{ animationDelay: "120ms" }}
             >
-              <div className="scroll-mask-right scrollbar-hidden min-w-0 flex-1 overflow-x-auto">
-                <div className="flex items-center gap-1.5 pb-1 pr-8">
-                {(
-                  [
-                    { id: "image", label: "Photos" },
-                    { id: "audio", label: "Field sounds" },
-                    { id: "all", label: "All media" },
-                  ] as Array<{ id: OccurrenceFilter; label: string }>
-                ).map((o) => (
-                  <FilterPill
-                    key={o.id}
-                    selected={occMedia === o.id}
-                    onClick={() => changeMedia(o.id)}
-                  >
-                    {o.label}
-                  </FilterPill>
-                ))}
-
-                <span className="mx-1 h-5 w-px shrink-0 bg-border-soft" aria-hidden />
-
-                {OCCURRENCE_CATEGORY_OPTIONS.map((o) => (
-                  <FilterPill
-                    key={o.id}
-                    selected={occCategory === o.id}
-                    onClick={() => changeCategory(o.id)}
-                  >
-                    {o.label}
-                  </FilterPill>
-                ))}
+              <AllFiltersPopover
+                activeCount={
+                  badgeFilters.length +
+                  (occMedia !== defaultOccurrenceMedia ? 1 : 0) +
+                  (occCategory !== "all" ? 1 : 0)
+                }
+                description={exploreT("filters.sightingsDescription")}
+                onClear={() => {
+                  updateBadgeFilters([]);
+                  changeMedia(defaultOccurrenceMedia);
+                  changeCategory("all");
+                }}
+              >
+                <div className="flex flex-wrap gap-2">
+                  <SourceFilterChips
+                    options={badgeFilterOptions}
+                    selected={badgeFilters}
+                    onToggle={toggleBadgeFilter}
+                  />
                 </div>
-              </div>
 
-              <SourceFiltersPopover
-                options={badgeFilterOptions}
-                selected={badgeFilters}
-                onToggle={toggleBadgeFilter}
-                onClear={() => updateBadgeFilters([])}
-              />
+                <div className="mt-3 flex flex-wrap gap-2 border-t border-border/60 pt-3">
+                  {(
+                    [
+                      { id: "image", label: "Photos" },
+                      { id: "audio", label: "Field sounds" },
+                      { id: "all", label: "All media" },
+                    ] as Array<{ id: OccurrenceFilter; label: string }>
+                  ).map((o) => (
+                    <FilterPill
+                      key={o.id}
+                      selected={occMedia === o.id}
+                      onClick={() => changeMedia(o.id)}
+                    >
+                      {o.label}
+                    </FilterPill>
+                  ))}
+                </div>
+
+                <div className="mt-3 flex flex-wrap gap-2 border-t border-border/60 pt-3">
+                  {OCCURRENCE_CATEGORY_OPTIONS.map((o) => (
+                    <FilterPill
+                      key={o.id}
+                      selected={occCategory === o.id}
+                      onClick={() => changeCategory(o.id)}
+                    >
+                      {o.label}
+                    </FilterPill>
+                  ))}
+                </div>
+              </AllFiltersPopover>
             </div>
           )}
         </div>

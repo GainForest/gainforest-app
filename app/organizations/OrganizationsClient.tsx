@@ -6,7 +6,6 @@ import { AnimatePresence, motion } from "framer-motion";
 import {
   ArrowUpDownIcon,
   ArrowUpRightIcon,
-  CheckIcon,
   ChevronDownIcon,
   ChevronRightIcon,
   LayoutGridIcon,
@@ -14,14 +13,12 @@ import {
   ListIcon,
   MapIcon,
   SearchIcon,
-  XIcon,
 } from "lucide-react";
 import { memo, useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import { parseAsString, parseAsStringEnum, useQueryState } from "nuqs";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AutoLoadMoreButton } from "../_components/AutoLoadMoreButton";
-import { SourceFiltersPopover } from "../_components/SourceFiltersPopover";
+import { AllFiltersPopover, SourceFilterChips } from "../_components/AllFiltersPopover";
 import { RecordDrawer } from "../_components/RecordDrawer";
 import { RecordMap } from "../_components/RecordMap";
 import { TrustedByBadges } from "../_components/TrustedByBadges";
@@ -270,12 +267,16 @@ export function OrganizationsClient({ records: initialRecords = [] }: { records?
     updateBadgeFilters(badgeFilters.includes(filter) ? badgeFilters.filter((value) => value !== filter) : [...badgeFilters, filter]);
   };
 
-  const clearAll = () => {
-    void setQuery("");
+  const clearFilterControls = () => {
     void setCountryFilter(null);
     void setTypeFilter(null);
     updateQuickFilters([]);
     updateBadgeFilters([]);
+  };
+
+  const clearAll = () => {
+    void setQuery("");
+    clearFilterControls();
   };
 
   const loadMore = useCallback(() => {
@@ -332,58 +333,67 @@ export function OrganizationsClient({ records: initialRecords = [] }: { records?
             </div>
 
             <div
-              className="relative z-20 flex items-center gap-2 animate-in"
+              className="relative z-20 flex justify-end animate-in"
               style={{ animationDelay: "120ms" }}
             >
-              <div className="scroll-mask-right scrollbar-hidden min-w-0 flex-1 overflow-x-auto">
-                <div className="flex items-center gap-1.5 pb-1 pr-8">
-                {QUICK_CHIP_VALUES.map((value) => (
-                  <FilterChip
-                    key={value}
-                    selected={quickFilters.includes(value)}
-                    onClick={() => toggleQuickFilter(value)}
-                  >
-                    {t(`quickFilters.${value}`)}
-                  </FilterChip>
-                ))}
+              <AllFiltersPopover
+                activeCount={activeFilterCount}
+                description={t("filters.description")}
+                onClear={clearFilterControls}
+              >
+                <div className="flex flex-wrap gap-2">
+                  <SourceFilterChips
+                    options={badgeFilterOptions}
+                    selected={badgeFilters}
+                    onToggle={toggleBadgeFilter}
+                  />
+                  {QUICK_CHIP_VALUES.map((value) => (
+                    <FilterChip
+                      key={value}
+                      selected={quickFilters.includes(value)}
+                      onClick={() => toggleQuickFilter(value)}
+                    >
+                      {t(`quickFilters.${value}`)}
+                    </FilterChip>
+                  ))}
+                </div>
 
                 {typeChips.length > 0 && (
-                  <FacetDropdown
-                    label={t("facets.category")}
-                    value={typeFilter}
-                    options={typeChips.map((type) => ({ value: type.value, label: type.label, count: type.count }))}
-                    onChange={(nextType) => void setTypeFilter(nextType)}
-                  />
+                  <div className="mt-3 border-t border-border/60 pt-3">
+                    <p className="mb-2 text-xs font-medium uppercase tracking-[0.08em] text-muted-foreground">{t("facets.category")}</p>
+                    <div className="flex max-h-40 flex-wrap gap-1.5 overflow-y-auto">
+                      {typeChips.map((type) => (
+                        <FilterChip
+                          key={type.value}
+                          selected={typeFilter === type.value}
+                          onClick={() => void setTypeFilter(typeFilter === type.value ? null : type.value)}
+                        >
+                          {type.label}
+                          <span className="text-[11px] tabular-nums opacity-60">{type.count}</span>
+                        </FilterChip>
+                      ))}
+                    </div>
+                  </div>
                 )}
 
                 {countryChips.length > 0 && (
-                  <FacetDropdown
-                    label={t("facets.country")}
-                    value={countryFilter}
-                    options={countryChips.map((country) => ({ value: country.code, label: country.name, emoji: country.emoji }))}
-                    onChange={(nextCountry) => void setCountryFilter(nextCountry)}
-                  />
+                  <div className="mt-3 border-t border-border/60 pt-3">
+                    <p className="mb-2 text-xs font-medium uppercase tracking-[0.08em] text-muted-foreground">{t("facets.country")}</p>
+                    <div className="flex max-h-40 flex-wrap gap-1.5 overflow-y-auto">
+                      {countryChips.map((country) => (
+                        <FilterChip
+                          key={country.code}
+                          selected={countryFilter === country.code}
+                          onClick={() => void setCountryFilter(countryFilter === country.code ? null : country.code)}
+                        >
+                          <span aria-hidden>{country.emoji}</span>
+                          {country.name}
+                        </FilterChip>
+                      ))}
+                    </div>
+                  </div>
                 )}
-
-                {hasActiveFilters && (
-                  <button
-                    type="button"
-                    onClick={clearAll}
-                    className="inline-flex h-9 shrink-0 items-center gap-1 rounded-full px-2.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-                  >
-                    <XIcon className="h-3.5 w-3.5" />
-                    {t("actions.clear")}
-                  </button>
-                )}
-                </div>
-              </div>
-
-              <SourceFiltersPopover
-                options={badgeFilterOptions}
-                selected={badgeFilters}
-                onToggle={toggleBadgeFilter}
-                onClear={() => updateBadgeFilters([])}
-              />
+              </AllFiltersPopover>
             </div>
           </div>
 
@@ -627,75 +637,6 @@ function FilterChip({
     >
       {children}
     </button>
-  );
-}
-
-type FacetOption = { value: string; label: string; count?: number; emoji?: string };
-
-function FacetDropdown({
-  label,
-  value,
-  options,
-  onChange,
-}: {
-  label: string;
-  value: string | null;
-  options: FacetOption[];
-  onChange: (value: string | null) => void;
-}) {
-  const [open, setOpen] = useState(false);
-  const selected = options.find((option) => option.value === value) ?? null;
-
-  return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <button
-          type="button"
-          className={`inline-flex h-9 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border px-3.5 text-sm font-medium transition-colors ${
-            selected
-              ? "border-primary bg-primary text-primary-foreground"
-              : "border-border bg-background text-muted-foreground hover:border-primary/30 hover:text-foreground"
-          }`}
-        >
-          {selected ? (
-            <span className="max-w-[140px] truncate">
-              {selected.emoji ? `${selected.emoji} ` : ""}
-              {selected.label}
-            </span>
-          ) : (
-            label
-          )}
-          <ChevronDownIcon className={`h-3.5 w-3.5 transition-transform ${open ? "rotate-180" : ""}`} />
-        </button>
-      </PopoverTrigger>
-      <PopoverContent align="start" sideOffset={8} className="w-60 p-1.5">
-        <div className="max-h-72 space-y-0.5 overflow-y-auto">
-          {options.map((option) => {
-            const active = option.value === value;
-            return (
-              <button
-                key={option.value}
-                type="button"
-                onClick={() => {
-                  onChange(active ? null : option.value);
-                  setOpen(false);
-                }}
-                className={`flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-sm transition-colors ${
-                  active ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
-                }`}
-              >
-                {option.emoji && <span>{option.emoji}</span>}
-                <span className="min-w-0 flex-1 truncate">{option.label}</span>
-                {option.count != null && (
-                  <span className="text-[11px] tabular-nums opacity-60">{option.count}</span>
-                )}
-                {active && <CheckIcon className="h-3.5 w-3.5 shrink-0" />}
-              </button>
-            );
-          })}
-        </div>
-      </PopoverContent>
-    </Popover>
   );
 }
 
