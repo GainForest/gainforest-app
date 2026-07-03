@@ -1,0 +1,78 @@
+/* Partners globe chrome — port of bumicerts-clean-rewrite's globe.css,
+   themed with this landing's design tokens (same slot names) so the
+   ported map reads as part of the page rather than an embedded widget.
+   The mobile bottom-sheet offset rule was dropped (no sheet here). */
+
+.globe-popup .maplibregl-popup-content {
+  background: var(--popover);
+  color: var(--popover-foreground);
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) - 2px);
+  padding: 0.375rem 0.625rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  line-height: 1.25rem;
+  box-shadow: 0 8px 24px rgb(0 0 0 / 0.18);
+}
+
+.globe-popup .maplibregl-popup-tip {
+  border-top-color: var(--border);
+}
+
+.globe-popup-name {
+  font-weight: 600;
+}
+
+.globe-popup-country {
+  margin-top: 1px;
+  font-size: 0.6875rem;
+  font-weight: 400;
+  color: var(--muted-foreground);
+}
+
+/* Zoom control pills, matched to the app's outline buttons. */
+.maplibregl-ctrl-group {
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: 9999px;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgb(0 0 0 / 0.16);
+}
+
+.maplibregl-ctrl-group button {
+  background: transparent;
+  width: 32px;
+  height: 32px;
+}
+
+.maplibregl-ctrl-group button + button {
+  border-top: 1px solid var(--border);
+}
+
+.maplibregl-ctrl button .maplibregl-ctrl-icon {
+  filter: none;
+}
+
+.dark .maplibregl-ctrl button .maplibregl-ctrl-icon {
+  filter: invert(1) brightness(1.4);
+}
+
+/* Attribution: keep it readable over the dark space background. */
+.maplibregl-ctrl-attrib {
+  background: color-mix(in oklab, var(--background) 78%, transparent);
+  border-radius: 9999px;
+  font-size: 10px;
+  color: var(--muted-foreground);
+}
+
+.maplibregl-ctrl-attrib a {
+  color: var(--muted-foreground);
+}
+
+/* Mobile: the spotlight card spans the panel's full width at the
+   bottom, so lift the (bottom-left) controls clear of it. */
+@media (max-width: 639px) {
+  .maplibregl-ctrl-bottom-left {
+    margin-bottom: 7.5rem;
+  }
+}

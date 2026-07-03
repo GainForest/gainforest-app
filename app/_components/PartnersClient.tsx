@@ -1,46 +1,27 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import dynamic from "next/dynamic";
 import Link from "next/link";
-import { LiveGlobe } from "./LiveGlobe";
 import { useT } from "./LocaleProvider";
-import type { ProjectPin } from "../_lib/projects";
+import { resolveDidAvatar } from "./partners-globe/did-avatars";
+import type { PartnerOrg } from "../_lib/partner-orgs";
 
 // Client child of <Partners />. This section intentionally stays quiet:
-// it uses the same live Green Globe pins as the rest of the page, then
-// overlays a rotating spotlight for one real community/org at a time.
-// Images come from Hyperindex organization cover/logo blobs resolved in
-// `_lib/projects.ts`; no generated or invented partner imagery here.
+// it renders the full Ma Earth + GainForest organization roster on the
+// ported merged-app globe (see `partners-globe/PartnersGlobe.tsx`), then
+// overlays a spotlight for one real org at a time, picked at random.
+// Avatars come from the merged app's Certified profile cards resolved
+// through `/api/partner-cards`; no generated or invented partner
+// imagery here.
 const SPOTLIGHT_ROTATION_MS = 11000;
 
-type Community = {
-  did: string;
-  name: string;
-  country: string;
-  atUri: string | null;
-  imageUrl: string | null;
-};
-
-function uniqueCommunities(pins: ProjectPin[]): Community[] {
-  const seen = new Set<string>();
-  const communities: Community[] = [];
-  for (const pin of pins) {
-    const name = pin.name.trim();
-    if (!name) continue;
-    const country = pin.country.trim();
-    const key = `${name.toLocaleLowerCase()}|${country.toLocaleLowerCase()}`;
-    if (seen.has(key)) continue;
-    seen.add(key);
-    communities.push({
-      did: pin.did,
-      name,
-      country,
-      atUri: pin.atUri,
-      imageUrl: pin.imageUrl,
-    });
-  }
-  return communities.sort((a, b) => a.name.localeCompare(b.name));
-}
+// maplibre-gl touches window during map construction and ships a large
+// bundle; load the globe client-side only, same as the hero globe.
+const PartnersGlobe = dynamic(
+  () => import("./partners-globe/PartnersGlobe").then((m) => m.PartnersGlobe),
+  { ssr: false },
+);
 
 function initials(name: string): string {
   return name
@@ -51,25 +32,38 @@ function initials(name: string): string {
     .join("");
 }
 
+/** Random org that differs from `excludeDid` when the pool allows it. */
+function pickRandom(
+  pool: ReadonlyArray<PartnerOrg>,
+  excludeDid: string | null,
+): PartnerOrg | null {
+  if (pool.length === 0) return null;
+  const candidates =
+    pool.length > 1 && excludeDid
+      ? pool.filter((org) => org.did !== excludeDid)
+      : pool;
+  return candidates[Math.floor(Math.random() * candidates.length)] ?? null;
+}
+
 function SpotlightCard({
-  community,
+  org,
+  avatarUrl,
   label,
-  showRecord,
 }: {
-  community: Community | undefined;
+  org: PartnerOrg | null;
+  avatarUrl: string | null;
   label: string;
-  showRecord: boolean;
 }) {
-  if (!community) return null;
+  if (!org) return null;
   return (
     <div className="absolute inset-x-4 bottom-4 z-10 rounded-[22px] border border-border-soft bg-background/92 p-3 shadow-[0_18px_45px_-28px_rgba(28,28,26,0.45)] backdrop-blur-md sm:left-auto sm:right-5 sm:w-[340px]">
       <div className="flex items-center gap-3">
         <div className="relative h-[74px] w-[92px] shrink-0 overflow-hidden rounded-[16px] bg-surface-sunken">
-          {community.imageUrl ? (
+          {avatarUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
-              key={community.imageUrl}
-              src={community.imageUrl}
+              key={avatarUrl}
+              src={avatarUrl}
               alt=""
               loading="lazy"
               decoding="async"
@@ -77,7 +71,7 @@ function SpotlightCard({
             />
           ) : (
             <span className="flex h-full w-full items-center justify-center font-garamond text-[28px] text-foreground/35">
-              {initials(community.name)}
+              {initials(org.name)}
             </span>
           )}
         </div>
@@ -86,28 +80,20 @@ function SpotlightCard({
             {label}
           </p>
           <p className="mt-1 truncate font-garamond text-[22px] leading-[1.03] text-foreground">
-            {community.name}
+            {org.name}
           </p>
           <div className="mt-2 flex flex-wrap items-center gap-2">
-            {community.country ? (
+            {org.country ? (
               <p className="inline-flex rounded-full border border-border-soft px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-foreground/52">
-                {community.country}
+                {org.country}
               </p>
             ) : null}
-            {showRecord && community.atUri ? (
-              <Link
-                href={hyperscanRecordHref(community.atUri)}
-                target="_blank"
-                rel="noreferrer"
-                title={community.atUri}
-                aria-label={`Open ${community.name} live ATProto record on Hyperscan`}
-                className="inline-flex max-w-full items-center gap-1 rounded-full border border-primary/20 bg-primary/5 px-2 py-0.5 font-mono text-[9.5px] leading-none text-primary transition-colors hover:border-primary/45 hover:bg-primary/10"
-              >
+            {org.maEarth ? (
+              // Brand name, deliberately untranslated across locales.
+              <p className="inline-flex items-center gap-1 rounded-full border border-primary/20 bg-primary/5 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-primary">
                 <span className="h-1 w-1 rounded-full bg-brand" aria-hidden />
-                <span className="truncate">
-                  {minimalAtUri(community.atUri)}
-                </span>
-              </Link>
+                Ma Earth
+              </p>
             ) : null}
           </div>
         </div>
@@ -159,123 +145,63 @@ function CommunityChannelCard({
   );
 }
 
-function minimalAtUri(atUri: string): string {
-  const match = atUri.match(/^at:\/\/(did:plc:)([^/]+)\/(.+)$/);
-  if (!match) return atUri;
-  const [, prefix, didBody, rest] = match;
-  return `at://${prefix}${didBody.slice(0, 6)}…${didBody.slice(-4)}/${rest}`;
-}
-
-function hyperscanRecordHref(atUri: string): string {
-  const match = atUri.match(/^at:\/\/([^/]+)\/([^/]+)\/(.+)$/);
-  if (!match) return "https://www.hyperscan.dev/data";
-  const [, did, collection, rkey] = match;
-  // Hyperscan's Data Explorer accepts AT-URIs via the search box, but its
-  // durable record route uses the same params its agent docs/source expose:
-  // /data?did=...&collection=...&rkey=...
-  return `https://www.hyperscan.dev/data?did=${encodeURIComponent(
-    did,
-  )}&collection=${encodeURIComponent(collection)}&rkey=${encodeURIComponent(
-    rkey,
-  )}`;
-}
-
-export function ClientPartners({ pins }: { pins: ProjectPin[] }) {
+export function ClientPartners({ orgs }: { orgs: PartnerOrg[] }) {
   const t = useT();
   const before = t("partners.heading.before").trim();
   const italic = t("partners.heading.italic").trim();
   const after = t("partners.heading.after").trim();
 
-  const communities = useMemo(() => uniqueCommunities(pins), [pins]);
-  const spotlightPool = useMemo(() => {
-    const withImages = communities.filter((community) => community.imageUrl);
-    return withImages.length > 0 ? withImages : communities;
-  }, [communities]);
-  const total = communities.length || pins.length;
-
-  const [spotlightDid, setSpotlightDid] = useState<string | null>(null);
-  const [diameter, setDiameter] = useState<number>(380);
-  const [visiblePinDids, setVisiblePinDids] = useState<string[]>([]);
-  const spotlightPoolRef = useRef<Community[]>([]);
-  const visibleSpotlightPoolRef = useRef<Community[]>([]);
-
-  useEffect(() => {
-    const update = () => {
-      const w = window.innerWidth;
-      if (w >= 1280) setDiameter(410);
-      else if (w >= 1024) setDiameter(370);
-      else if (w >= 640) setDiameter(340);
-      else setDiameter(Math.min(310, w - 72));
-    };
-    update();
-    window.addEventListener("resize", update);
-    return () => window.removeEventListener("resize", update);
-  }, []);
-
-  const visiblePinDidSet = useMemo(
-    () => new Set(visiblePinDids),
-    [visiblePinDids],
-  );
-  const visibleSpotlightPool = useMemo(
+  // Spotlight pool: only orgs that actually have a marker on the globe,
+  // so the card always describes something the visitor can see.
+  const pinnedOrgs = useMemo(
     () =>
-      spotlightPool.filter(
-        (community) => community.atUri && visiblePinDidSet.has(community.did),
+      orgs.filter(
+        (org) => typeof org.lat === "number" && typeof org.lon === "number",
       ),
-    [spotlightPool, visiblePinDidSet],
+    [orgs],
   );
+  const total = orgs.length;
 
+  const [spotlight, setSpotlight] = useState<PartnerOrg | null>(null);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const pinnedOrgsRef = useRef(pinnedOrgs);
+  pinnedOrgsRef.current = pinnedOrgs;
+
+  // Initial pick happens in an effect (not a lazy state initializer) so
+  // the server-rendered HTML stays deterministic; the card fades in
+  // client-side with the first random org.
   useEffect(() => {
-    spotlightPoolRef.current = spotlightPool;
-  }, [spotlightPool]);
+    setSpotlight((current) => current ?? pickRandom(pinnedOrgsRef.current, null));
+  }, [pinnedOrgs]);
 
-  useEffect(() => {
-    visibleSpotlightPoolRef.current = visibleSpotlightPool;
-  }, [visibleSpotlightPool]);
-
-  useEffect(() => {
-    const preferred = visibleSpotlightPool[0] ?? spotlightPool[0];
-    if (!preferred) {
-      setSpotlightDid(null);
-      return;
-    }
-    const currentIsKnown = spotlightPool.some(
-      (community) => community.did === spotlightDid,
-    );
-    const currentIsVisible = spotlightDid
-      ? visiblePinDidSet.has(spotlightDid)
-      : false;
-    if (
-      !currentIsKnown ||
-      (visibleSpotlightPool.length > 0 && !currentIsVisible)
-    ) {
-      setSpotlightDid(preferred.did);
-    }
-  }, [spotlightDid, spotlightPool, visiblePinDidSet, visibleSpotlightPool]);
-
+  // Random rotation. Clicking a marker (below) also retargets the
+  // spotlight, and the interval simply continues from there.
   useEffect(() => {
     const id = window.setInterval(() => {
-      setSpotlightDid((current) => {
-        const pool =
-          visibleSpotlightPoolRef.current.length > 0
-            ? visibleSpotlightPoolRef.current
-            : spotlightPoolRef.current.filter((community) => community.atUri);
-        if (pool.length === 0) return current;
-        const currentIndex = pool.findIndex(
-          (community) => community.did === current,
-        );
-        return pool[(currentIndex + 1) % pool.length]?.did ?? current;
-      });
+      setSpotlight((current) =>
+        pickRandom(pinnedOrgsRef.current, current?.did ?? null) ?? current,
+      );
     }, SPOTLIGHT_ROTATION_MS);
     return () => window.clearInterval(id);
   }, []);
 
-  const spotlight =
-    spotlightPool.find((community) => community.did === spotlightDid) ??
-    visibleSpotlightPool[0] ??
-    spotlightPool[0];
-  const handleVisiblePinsChange = useCallback((visibleDids: string[]) => {
-    setVisiblePinDids(visibleDids);
-  }, []);
+  // Resolve the spotlighted org's avatar (session-cached by the shared
+  // resolver, so revisits are instant).
+  useEffect(() => {
+    const did = spotlight?.did;
+    if (!did || did.startsWith("fallback-")) {
+      setAvatarUrl(null);
+      return;
+    }
+    let cancelled = false;
+    setAvatarUrl(null);
+    void resolveDidAvatar(did).then((avatar) => {
+      if (!cancelled) setAvatarUrl(avatar);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [spotlight?.did]);
 
   return (
     <section id="partners" className="scroll-mt-20 border-t border-border-soft lg:scroll-mt-24">
@@ -325,7 +251,7 @@ export function ClientPartners({ pins }: { pins: ProjectPin[] }) {
         </div>
 
         <div className="lg:col-span-7">
-          <div className="relative mx-auto min-h-[430px] max-w-[720px] overflow-hidden rounded-[34px] border border-border-soft bg-surface-sunken/55 p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.45)] sm:min-h-[470px] lg:ml-auto">
+          <div className="relative mx-auto max-w-[720px] overflow-hidden rounded-[34px] border border-border-soft bg-[#0b0b19] shadow-[0_30px_70px_-40px_rgba(11,11,25,0.7)] lg:ml-auto">
             <div className="absolute left-5 top-5 z-10 flex items-center gap-3 rounded-full border border-border-soft bg-background/75 px-3 py-1 text-[10px] uppercase tracking-[0.16em] text-foreground/50 backdrop-blur-sm">
               <span className="h-1.5 w-1.5 rounded-full bg-brand" />
               {t("partners.bannerLabel")}
@@ -334,21 +260,25 @@ export function ClientPartners({ pins }: { pins: ProjectPin[] }) {
               {total} {t("partners.bannerCountLabel")}
             </div>
 
-            <div className="flex min-h-[390px] items-center justify-center pt-4 sm:min-h-[430px]">
-              <LiveGlobe
-                pins={pins}
-                diameter={diameter}
-                highlightedDid={spotlight?.did ?? null}
-                onVisiblePinsChange={handleVisiblePinsChange}
+            {/* The ported merged-app globe (MapLibre): satellite sphere,
+                idle spin, one circular logo badge per organization.
+                Clicking a badge retargets the spotlight card. */}
+            <div className="h-[430px] w-full sm:h-[470px]">
+              <PartnersGlobe
+                organizations={pinnedOrgs}
+                onSelectOrganization={(did) => {
+                  const next = pinnedOrgsRef.current.find(
+                    (org) => org.did === did,
+                  );
+                  if (next) setSpotlight(next);
+                }}
               />
             </div>
 
             <SpotlightCard
-              community={spotlight}
+              org={spotlight}
+              avatarUrl={avatarUrl}
               label={t("partners.recordLabel")}
-              showRecord={Boolean(
-                spotlight?.atUri && visiblePinDidSet.has(spotlight.did),
-              )}
             />
           </div>
         </div>

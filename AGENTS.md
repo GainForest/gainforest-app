@@ -473,21 +473,43 @@ segment with similarly useful caption text.
 
 ### Partners section
 
-`app/_components/Partners.tsx` must stay wired to `fetchProjectPins()`;
-that fetcher calls Green Globe's `list-organizations?info=true&mapPoint=true`
-route, then enriches the filtered pins from Hyperindex
-`appGainforestOrganizationInfo` cover/logo blob refs resolved through each
-org's PDS. Do **not** replace the live partner globe/spotlight with made-up
-categories like "Indigenous Councils" or "Climate Funds". The spotlight in
-`PartnersClient.tsx` should render real organization / community names from
-`ProjectPin.name`, country codes from `ProjectPin.country`, and real images
-from `ProjectPin.imageUrl` when available. The spotlight and globe must use
-the same `pins` array so the names, countries, images, and map agree. If the
-upstream is down, the only acceptable fallback is the fallback already owned
-by `app/_lib/projects.ts`. The small "monthly community calls" card links to
-`https://www.youtube.com/@gainforest/videos`, where the team publishes
-recurring community-call recordings and steward sessions; keep that as a
-subtle CTA rather than a separate fake data feed.
+July 2026: the Partners section switched from the 19-pin
+`fetchProjectPins()` subset to **the full Ma Earth + GainForest
+organization roster** (~800+ orgs), rendered on a **port of the merged
+app's globe** (per explicit team ask: "support all the Ma Earth +
+GainForest orgs — copy the globe from bumicerts-clean-rewrite with the
+logos and randomly pick").
+
+- **Data**: `app/_lib/partner-orgs.ts` → `fetchPartnerOrgs()` reads the
+  merged app's `/api/globe/organizations` route (Green Globe roster ∪
+  every Ma Earth–badged org, pins derived from certified locations).
+  Fallback lives in that lib (`FALLBACK_PARTNER_ORGS`, real orgs).
+- **Globe**: `app/_components/partners-globe/PartnersGlobe.tsx` is a
+  trimmed port of `bumicerts-clean-rewrite/app/globe/_components/
+  GlobeMap.tsx` (MapLibre GL globe projection, Esri satellite tiles,
+  space/atmosphere sky, idle spin). Dropped from the source: site
+  boundaries, landcover, TiTiler data layers, fitBounds. Added:
+  `scrollZoom` disabled (landing rule — the page must scroll normally
+  over the canvas) and controls moved bottom-LEFT (the spotlight card
+  owns the bottom-right corner). `config.ts` / `markers.ts` /
+  `globe.css` are near-verbatim ports — diff against the source app
+  before changing them.
+- **Logos**: every marker is the org's own avatar cropped into a small
+  circular badge (`markers.ts`), resolved through the micro-batched
+  `did-avatars.ts` → `/api/partner-cards` (a same-origin proxy for the
+  merged app's `/api/account/cards`, which serves no CORS headers).
+  Orgs without an avatar fall back to the drawn GainForest mark, or the
+  Ma Earth mark (`public/decor/ma-earth-logo.webp`) for badge holders.
+- **Spotlight**: `PartnersClient.tsx` picks a RANDOM pinned org on
+  mount and every 11 s (not the old sequential rotation); clicking a
+  marker retargets it. The card shows the real name, country code, the
+  avatar from the same resolver, and a "Ma Earth" chip for badged orgs.
+- The MapLibre dependency is scoped to this section; the hero globe
+  stays on react-globe.gl. Do **not** replace the live roster/spotlight
+  with made-up categories like "Indigenous Councils" or "Climate
+  Funds". The small "monthly community calls" card links to
+  `https://www.youtube.com/@gainforest/videos`; keep that as a subtle
+  CTA rather than a separate fake data feed.
 
 ### Adding Awards & press / news carousel items
 
@@ -759,8 +781,11 @@ the original viewBox).
   upstream's job to suppress it — propose a fix in green_globe, not here.
 - Don't add a state manager (Zustand, Redux, …). The page is read-only.
 - Don't add a CSS-in-JS library; Tailwind v4 + `globals.css` is enough.
-- Don't switch the globe back to a heavy renderer (Mapbox, Cesium) without
-  a serious reason — and update this doc if you do.
+- Don't switch the HERO globe back to a heavy renderer (Mapbox, Cesium)
+  without a serious reason — and update this doc if you do. (The
+  Partners section is the documented exception: it runs the MapLibre
+  globe ported from the merged app, per team ask — see "Partners
+  section".)
 - Don't embed a Mapbox token into the repo. The token in `.env.local`
   during the initial exploration was the public token from data.gainforest.app's
   JS bundle and is not committed.
