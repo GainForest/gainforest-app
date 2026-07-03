@@ -2,7 +2,7 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { ArrowUpRightIcon, LeafIcon } from "lucide-react";
 import type { ExplorerKpis } from "../_lib/kpis";
-import { formatCompact, formatCompactUsd } from "../_lib/format";
+import { formatCompact } from "../_lib/format";
 
 // Landing-page collections grid. Kept intentionally aligned to the GainForest
 // home sections: max-w-6xl, centered editorial heading, rounded cards, and the
@@ -41,14 +41,8 @@ export function BrowseGrid({ kpis }: { kpis: ExplorerKpis }) {
       stat: formatCompact(kpis.occurrences),
       statLabel: t("cards.observations.statLabel"),
     },
-    {
-      href: "/leaderboard",
-      label: t("cards.leaderboard.label"),
-      title: t("cards.leaderboard.title"),
-      blurb: t("cards.leaderboard.blurb"),
-      stat: formatCompactUsd(kpis.totalRaised),
-      statLabel: t("cards.leaderboard.statLabel"),
-    },
+    // The leaderboard card is gone for now: it lives inside the Donations
+    // hub, which is gated to GainForest admins.
   ];
 
   return (

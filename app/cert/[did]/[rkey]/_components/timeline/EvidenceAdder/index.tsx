@@ -235,42 +235,38 @@ export function EvidenceAdder({
 
   if (activeTab === null) {
     return (
-      <div className="flex flex-col">
-        <span className="text-2xl font-medium text-foreground">
-          {evidenceT("chooseEvidenceType")}
-        </span>
-        <span className="text-sm text-muted-foreground">
-          {evidenceT("selectSourceToLink")}
-        </span>
+      <div className="flex flex-col gap-3">
+        <div>
+          <h2 id="link-evidence-heading" className="text-2xl tracking-tight text-foreground">
+            {evidenceT("title")}
+          </h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {evidenceT("selectSourceToLink")}
+          </p>
+        </div>
         {!createPermission.allowed ? (
-          <p className="mt-3 rounded-xl border border-warn/20 bg-warn/10 px-3 py-2 text-sm text-warn">
+          <p className="rounded-xl border border-warn/20 bg-warn/10 px-3 py-2 text-sm text-warn">
             {createPermission.reason ?? evidenceT("permissions.createDenied")}
           </p>
         ) : null}
-        <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
+        <div className="flex flex-wrap gap-2">
           {EVIDENCE_TABS.map(({ id, icon: Icon }) => (
-            <button
+            <Button
               key={id}
               type="button"
+              variant="outline"
+              size="sm"
               onClick={() => setActiveTab(id)}
               disabled={!createPermission.allowed}
               title={
                 !createPermission.allowed
                   ? createPermission.reason ?? evidenceT("permissions.createDenied")
-                  : undefined
+                  : tabDescriptions[id]
               }
-              className="flex min-h-32 flex-col items-start justify-between rounded-2xl border border-border/60 bg-background p-3 text-left transition-colors hover:border-primary/40 hover:bg-primary/5 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              <Icon className="h-5 w-5 text-primary/70" />
-              <span>
-                <span className="block text-base font-medium text-foreground">
-                  {tabLabels[id]}
-                </span>
-                <span className="mt-1 block text-xs leading-5 text-muted-foreground">
-                  {tabDescriptions[id]}
-                </span>
-              </span>
-            </button>
+              <Icon className="h-4 w-4" aria-hidden />
+              {tabLabels[id]}
+            </Button>
           ))}
         </div>
       </div>
@@ -295,12 +291,12 @@ export function EvidenceAdder({
           <ChevronLeftIcon />
         </Button>
         <div className="flex flex-col">
-          <span className="text-2xl font-medium text-foreground">
+          <h2 id="link-evidence-heading" className="text-2xl tracking-tight text-foreground">
             {evidenceT("linkType", { type: tabLabels[activeConfig.id] })}
-          </span>
-          <span className="text-sm text-muted-foreground">
+          </h2>
+          <p className="text-sm text-muted-foreground">
             {evidenceT("selectRecordsToLink")}
-          </span>
+          </p>
         </div>
       </div>
 

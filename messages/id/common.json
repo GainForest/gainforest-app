@@ -405,7 +405,7 @@
     "photos": "Foto",
     "files": "Berkas",
     "taina": "Tainá",
-    "endorsementsGiven": "Dukungan diberikan"
+    "endorsementsGiven": "Dukungan"
   },
   "accountAttachments": {
     "title": "Lampiran",
@@ -942,7 +942,8 @@
       "grants": "Pemohon hibah",
       "bioblitz": "BioBlitz",
       "testAccounts": "Akun uji coba",
-      "endorsers": "Pendukung"
+      "endorsers": "Pendukung",
+      "awardEndorsements": "Berikan dukungan"
     },
     "unnamed": "Akun tanpa nama",
     "awardHint": "Buka profil untuk memberikan lencana.",
@@ -1169,5 +1170,26 @@
     "removeLabel": "Hapus {name}",
     "builtinChip": "Bawaan",
     "propagationHint": "Pendukung baru perlu beberapa menit untuk muncul di seluruh aplikasi."
+  },
+  "adminAwardEndorsements": {
+    "title": "Berikan dukungan",
+    "description": "Dukung organisasi lain atas nama GainForest. Organisasi yang didukung menampilkan “Dipercaya oleh GainForest” di seluruh aplikasi.",
+    "notAllowed": "Memberikan dukungan memerlukan admin organisasi GainForest. Minta pemilik GainForest untuk menambahkan Anda sebagai admin.",
+    "noBadges": "Belum ada lencana dukungan. Buat dulu lencana dengan tipe “Dukungan”.",
+    "manageBadges": "Kelola lencana",
+    "badgeLabel": "Lencana dukungan",
+    "inputLabel": "Handle organisasi atau id akun",
+    "inputPlaceholder": "handle.certified.one atau did:plc:…",
+    "noteLabel": "Catatan (opsional)",
+    "notePlaceholder": "Tambahkan catatan tentang dukungan ini (opsional)",
+    "awardButton": "Berikan dukungan",
+    "awardError": "Tidak dapat memberikan dukungan.",
+    "removeError": "Tidak dapat menghapus dukungan.",
+    "removeLabel": "Hapus dukungan untuk {name}",
+    "emailNotSupported": "Masukkan handle organisasi atau id akun — dukungan tidak dapat dikirim ke alamat email.",
+    "alreadyEndorsed": "Organisasi ini sudah memiliki dukungan ini.",
+    "empty": "Belum ada dukungan yang diberikan.",
+    "unnamed": "Organisasi tanpa nama",
+    "propagationHint": "Dukungan baru perlu beberapa menit untuk muncul di seluruh aplikasi."
   }
 }

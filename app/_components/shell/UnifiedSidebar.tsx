@@ -19,6 +19,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { cn } from "@/lib/utils";
 import { LanguageSelector } from "@/components/i18n/LanguageSelector";
 import type { AuthSession } from "../../_lib/auth";
+import { GAINFOREST_MODERATION_REPO_DID } from "../../_lib/indexer";
 import {
   switcherGroupIdentifier,
   useAccountList,
@@ -66,7 +67,7 @@ export function UnifiedSidebar({
       <div className={cn("flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto pt-3", collapsed ? "overflow-x-hidden" : "pr-1")}>
         {authSession?.isLoggedIn ? <SidebarProfileRow did={authSession.did} /> : null}
         <LayoutGroup id="unified-sidebar-nav">
-          <ExploreNav />
+          <ExploreNav sessionDid={authSession?.isLoggedIn ? authSession.did : null} />
         </LayoutGroup>
 
         <div className="mt-auto flex flex-col gap-3 pt-4">
@@ -166,16 +167,25 @@ function SidebarProfileRow({ did }: { did: string }) {
   );
 }
 
-function ExploreNav() {
+function ExploreNav({ sessionDid }: { sessionDid: string | null }) {
   const pathname = useCanonicalPathname();
   const t = useTranslations("common.sidebar.items");
   const sectionsT = useTranslations("common.sidebar.sections");
   const collapsed = useSidebarCollapsed();
+  // GainForest moderators (members of the admin group, any role) see the
+  // admin-only entries. Same detection as the account menu's /admin link;
+  // the routes themselves re-check access server-side.
+  const { groups } = useAccountList(sessionDid);
+  const isModerator = groups.some((group) => group.groupDid === GAINFOREST_MODERATION_REPO_DID);
+  const sections = NAV_ITEMS.map((section) => ({
+    ...section,
+    items: section.items.filter((item) => !item.adminOnly || isModerator),
+  })).filter((section) => section.items.length > 0);
   let leafIndex = 0;
 
   return (
     <div className="flex flex-col gap-3">
-      {NAV_ITEMS.map((section, sectionIndex) => (
+      {sections.map((section, sectionIndex) => (
         <div key={section.id} className="flex flex-col gap-0.5">
           {collapsed ? (
             sectionIndex > 0 ? <div aria-hidden className="mx-auto my-1 h-px w-6 rounded-full bg-border" /> : null

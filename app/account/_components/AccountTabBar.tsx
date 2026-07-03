@@ -195,13 +195,13 @@ function buildTabs(
   if (scope === "account") {
     tabs.push(postsTab);
   }
-  if (scope === "account" && showEndorsementsGiven) {
-    tabs.push(endorsementsGivenTab);
-  }
   if (scope === "account" && showOrgData) {
     tabs.push(
       { labelKey: "members", href: accountMembersPath(did), icon: UsersIcon, exact: false },
     );
+  }
+  if (scope === "account" && showEndorsementsGiven) {
+    tabs.push(endorsementsGivenTab);
   }
   // Organizations no longer get a standalone Files & photos tab — their photo
   // gallery is surfaced inline on the Overview, under the About blurb. The

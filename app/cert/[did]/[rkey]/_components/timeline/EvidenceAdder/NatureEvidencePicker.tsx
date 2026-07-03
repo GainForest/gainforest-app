@@ -281,7 +281,7 @@ export function NatureEvidencePicker({
   return (
     <>
       <div className="grid gap-3">
-        <div className="grid gap-2 rounded-xl border border-border/60 bg-muted/20 p-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,14rem)]">
+        <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_minmax(0,14rem)]">
           <div className="flex flex-col gap-1.5">
             <label htmlFor={searchInputId} className="text-sm font-medium">
               {natureT("searchLabel")}
@@ -323,7 +323,7 @@ export function NatureEvidencePicker({
           </div>
         </div>
 
-        <section className="rounded-xl border border-border/60 bg-background p-3">
+        <section className="grid gap-3">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="text-sm font-medium text-foreground">
@@ -349,11 +349,11 @@ export function NatureEvidencePicker({
             </Button>
           </div>
           {displayedRows.length === 0 ? (
-            <p className="mt-3 rounded-lg border border-dashed border-border/70 px-3 py-4 text-center text-sm text-muted-foreground">
+            <p className="rounded-lg bg-muted/40 px-3 py-4 text-center text-sm text-muted-foreground">
               {natureT("noDataMatches")}
             </p>
           ) : (
-            <div className="mt-3 grid max-h-[360px] gap-2 overflow-auto pr-1">
+            <div className="grid max-h-[360px] gap-2 overflow-auto pr-1">
               {displayedRows.map((item) => {
                 const title = occurrenceTitle(item, fallbackObservationName);
                 const datasetName = item.datasetRef
@@ -404,17 +404,17 @@ export function NatureEvidencePicker({
           )}
         </section>
 
-        <section className="rounded-xl border border-border/60 bg-background p-3">
+        <section className="grid gap-3">
           <p className="text-sm font-medium text-foreground">{natureT("groupsTitle")}</p>
-          <p className="mt-1 text-xs text-muted-foreground">
+          <p className="text-xs text-muted-foreground">
             {natureT("groupsDescription")}
           </p>
           {displayedDatasets.length === 0 ? (
-            <p className="mt-3 rounded-lg border border-dashed border-border/70 px-3 py-4 text-center text-sm text-muted-foreground">
+            <p className="rounded-lg bg-muted/40 px-3 py-4 text-center text-sm text-muted-foreground">
               {natureT("noGroupsMatch")}
             </p>
           ) : (
-            <div className="mt-3 grid gap-2">
+            <div className="grid gap-2">
               {displayedDatasets.map((group) => {
                 const alreadyLinked = linkedUris.has(group.uri);
                 const recorder = formatRecorderSummary(group.recordedByValues, {

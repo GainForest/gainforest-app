@@ -405,7 +405,7 @@
     "photos": "Photos",
     "files": "Files",
     "taina": "Tainá",
-    "endorsementsGiven": "Endorsements given"
+    "endorsementsGiven": "Endorsements"
   },
   "accountAttachments": {
     "title": "Attachments",
@@ -942,7 +942,8 @@
       "grants": "Grant applicants",
       "bioblitz": "BioBlitz",
       "testAccounts": "Test accounts",
-      "endorsers": "Endorsers"
+      "endorsers": "Endorsers",
+      "awardEndorsements": "Award endorsements"
     },
     "unnamed": "Unnamed account",
     "awardHint": "Open a profile to award a badge.",
@@ -1169,5 +1170,26 @@
     "removeLabel": "Remove {name}",
     "builtinChip": "Built-in",
     "propagationHint": "New endorsers take a few minutes to appear across the app."
+  },
+  "adminAwardEndorsements": {
+    "title": "Award endorsements",
+    "description": "Endorse other organizations on GainForest’s behalf. Endorsed organizations show “Trusted by GainForest” across the app.",
+    "notAllowed": "Awarding endorsements requires an admin of the GainForest organization. Ask a GainForest owner to add you as an admin.",
+    "noBadges": "There is no endorsement badge yet. Create a badge with the “Endorsement” type first.",
+    "manageBadges": "Manage badges",
+    "badgeLabel": "Endorsement badge",
+    "inputLabel": "Organization handle or account id",
+    "inputPlaceholder": "handle.certified.one or did:plc:…",
+    "noteLabel": "Note (optional)",
+    "notePlaceholder": "Add a note about this endorsement (optional)",
+    "awardButton": "Award endorsement",
+    "awardError": "Could not award the endorsement.",
+    "removeError": "Could not remove the endorsement.",
+    "removeLabel": "Remove endorsement for {name}",
+    "emailNotSupported": "Enter an organization handle or account id — endorsements can’t be sent to an email address.",
+    "alreadyEndorsed": "This organization already has this endorsement.",
+    "empty": "No endorsements have been awarded yet.",
+    "unnamed": "Unnamed organization",
+    "propagationHint": "New endorsements take a few minutes to appear across the app."
   }
 }
