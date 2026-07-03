@@ -573,7 +573,10 @@
       "noMatch": "No projects match your search.",
       "untitledProject": "Untitled project",
       "applyWith": "Apply with {project}",
-      "submitError": "Couldn't send your application. Please try again."
+      "submitError": "Couldn't send your application. Please try again.",
+      "successTitle": "Application submitted",
+      "successBody": "Thanks for applying with {project}. We'll be in touch soon about the next steps.",
+      "successClose": "Done"
     },
     "interoperable": {
       "category": "Interoperable Grants Program",

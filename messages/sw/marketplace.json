@@ -573,7 +573,10 @@
       "noMatch": "Hakuna mradi unaolingana na utafutaji wako.",
       "untitledProject": "Mradi usio na kichwa",
       "applyWith": "Omba kwa {project}",
-      "submitError": "Imeshindikana kutuma maombi yako. Tafadhali jaribu tena."
+      "submitError": "Imeshindikana kutuma maombi yako. Tafadhali jaribu tena.",
+      "successTitle": "Maombi yamewasilishwa",
+      "successBody": "Asante kwa kuomba kwa {project}. Tutawasiliana nawe hivi karibuni kuhusu hatua zinazofuata.",
+      "successClose": "Imekamilika"
     },
     "interoperable": {
       "category": "Programu ya Ruzuku Zinazoshirikiana",

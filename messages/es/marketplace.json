@@ -573,7 +573,10 @@
       "noMatch": "Ningún proyecto coincide con tu búsqueda.",
       "untitledProject": "Proyecto sin título",
       "applyWith": "Postular con {project}",
-      "submitError": "No se pudo enviar tu solicitud. Inténtalo de nuevo."
+      "submitError": "No se pudo enviar tu solicitud. Inténtalo de nuevo.",
+      "successTitle": "Solicitud enviada",
+      "successBody": "Gracias por postular con {project}. Nos pondremos en contacto pronto sobre los próximos pasos.",
+      "successClose": "Listo"
     },
     "interoperable": {
       "category": "Programa de subvenciones interoperables",

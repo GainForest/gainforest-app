@@ -573,7 +573,10 @@
       "noMatch": "Nenhum projeto corresponde à sua pesquisa.",
       "untitledProject": "Projeto sem título",
       "applyWith": "Candidatar-se com {project}",
-      "submitError": "Não foi possível enviar sua candidatura. Tente novamente."
+      "submitError": "Não foi possível enviar sua candidatura. Tente novamente.",
+      "successTitle": "Candidatura enviada",
+      "successBody": "Obrigado por se candidatar com {project}. Entraremos em contato em breve sobre os próximos passos.",
+      "successClose": "Concluído"
     },
     "interoperable": {
       "category": "Programa de subsídios interoperáveis",

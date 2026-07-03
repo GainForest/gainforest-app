@@ -573,7 +573,10 @@
       "noMatch": "Tidak ada proyek yang cocok dengan pencarian Anda.",
       "untitledProject": "Proyek tanpa judul",
       "applyWith": "Ajukan dengan {project}",
-      "submitError": "Tidak dapat mengirim pengajuan Anda. Silakan coba lagi."
+      "submitError": "Tidak dapat mengirim pengajuan Anda. Silakan coba lagi.",
+      "successTitle": "Pengajuan terkirim",
+      "successBody": "Terima kasih telah mengajukan dengan {project}. Kami akan segera menghubungi Anda tentang langkah selanjutnya.",
+      "successClose": "Selesai"
     },
     "interoperable": {
       "category": "Program Hibah Interoperabel",

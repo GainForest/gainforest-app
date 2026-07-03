@@ -204,9 +204,8 @@ function ExploreNav({ sessionDid }: { sessionDid: string | null }) {
                   isActive={isLeafActive(item.pathCheck, pathname)}
                   index={leafIndex}
                   // Certs are minted from a Project, so visually hang Certs
-                  // under Projects (which sits directly above it). The Globe is
-                  // the map view of Observations, so it hangs under that item.
-                  paired={item.id === "bumicerts" || item.id === "globe"}
+                  // under Projects (which sits directly above it).
+                  paired={item.id === "bumicerts"}
                 />
               );
             })}
