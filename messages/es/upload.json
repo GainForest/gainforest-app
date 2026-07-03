@@ -728,7 +728,11 @@
       "projectLabel": "Añadir a un proyecto",
       "projectHint": "Opcional: vincula estas observaciones a uno de tus proyectos.",
       "projectNone": "Sin proyecto",
-      "applyToAll": "Usar esta fecha y ubicación para todas"
+      "applyToAll": "Usar esta fecha y ubicación para todas",
+      "dropTitleTouch": "Añade tus fotos",
+      "takePhoto": "Tomar una foto",
+      "combineWithAbove": "Combinar con la de arriba",
+      "dragMergeHintTouch": "Toca el icono de separar en una foto para sacarla."
     },
     "csvUpload": {
       "title": "Subir datos CSV",

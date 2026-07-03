@@ -728,7 +728,11 @@
       "projectLabel": "Ongeza kwenye mradi",
       "projectHint": "Hiari — unganisha uchunguzi huu na mojawapo ya miradi yako.",
       "projectNone": "Bila mradi",
-      "applyToAll": "Tumia tarehe na eneo hili kwa zote"
+      "applyToAll": "Tumia tarehe na eneo hili kwa zote",
+      "dropTitleTouch": "Ongeza picha zako",
+      "takePhoto": "Piga picha",
+      "combineWithAbove": "Unganisha na iliyo juu",
+      "dragMergeHintTouch": "Gusa alama ya kutenganisha kwenye picha ili kuitenga."
     },
     "csvUpload": {
       "title": "Pakia data ya CSV",

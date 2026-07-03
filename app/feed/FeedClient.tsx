@@ -48,8 +48,18 @@ type Filter = "all" | "following" | ActivityFeedKind;
 // A run of this many consecutive sightings from the same account collapses into
 // one summary card instead of N separate rows.
 const MIN_BATCH = 3;
+// ...but only when they were uploaded close together. A gap longer than this
+// between two consecutive sightings splits the run, so a slow drip of posts
+// over many days isn't summarized as one upload (mirrors BURST_MAX_GAP_MS in
+// app/_lib/feed.ts).
+const MAX_BATCH_GAP_MS = 12 * 60 * 60 * 1000; // 12h
 // How many sample thumbnails the summary card shows.
 const MAX_THUMBS = 4;
+
+function batchTime(iso: string): number {
+  const t = Date.parse(iso);
+  return Number.isNaN(t) ? 0 : t;
+}
 
 /** One rendered slot: a normal row, or a collapsed run of same-owner sightings. */
 type FeedEntry =
@@ -57,8 +67,9 @@ type FeedEntry =
   | { type: "batch"; items: ActivityFeedItem[] };
 
 /** Collapse maximal runs of >= MIN_BATCH consecutive observations by the same
- *  account (adjacent in the newest-first timeline) into one batch entry. Every
- *  other row passes through unchanged. */
+ *  account (adjacent in the newest-first timeline AND uploaded within
+ *  MAX_BATCH_GAP_MS of each other) into one batch entry. Every other row
+ *  passes through unchanged. */
 function groupFeedEntries(items: ActivityFeedItem[]): FeedEntry[] {
   const entries: FeedEntry[] = [];
   let i = 0;
@@ -66,7 +77,13 @@ function groupFeedEntries(items: ActivityFeedItem[]): FeedEntry[] {
     const item = items[i];
     if (item.kind === "observation" && item.actorDid) {
       let j = i + 1;
-      while (j < items.length && items[j].kind === "observation" && items[j].actorDid === item.actorDid) j += 1;
+      while (
+        j < items.length &&
+        items[j].kind === "observation" &&
+        items[j].actorDid === item.actorDid &&
+        Math.abs(batchTime(items[j - 1].createdAt) - batchTime(items[j].createdAt)) <= MAX_BATCH_GAP_MS
+      )
+        j += 1;
       const run = items.slice(i, j);
       if (run.length >= MIN_BATCH) {
         entries.push({ type: "batch", items: run });

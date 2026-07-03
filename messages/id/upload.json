@@ -728,7 +728,11 @@
       "projectLabel": "Tambahkan ke proyek",
       "projectHint": "Opsional — hubungkan observasi ini dengan salah satu proyek Anda.",
       "projectNone": "Tanpa proyek",
-      "applyToAll": "Gunakan tanggal & lokasi ini untuk semua"
+      "applyToAll": "Gunakan tanggal & lokasi ini untuk semua",
+      "dropTitleTouch": "Tambahkan foto Anda",
+      "takePhoto": "Ambil foto",
+      "combineWithAbove": "Gabungkan dengan yang di atas",
+      "dragMergeHintTouch": "Ketuk ikon pisah pada foto untuk memisahkannya."
     },
     "csvUpload": {
       "title": "Unggah data CSV",
