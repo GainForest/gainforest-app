@@ -300,6 +300,10 @@
       "upcoming": "Starting soon",
       "ended": "Finished"
     },
+    "rounds": {
+      "title": "Rounds",
+      "current": "Current"
+    },
     "round": {
       "startsIn": "Starts in",
       "endsIn": "Ends in",
@@ -392,7 +396,10 @@
       "description": "A permanent record of every round's champions.",
       "mostObservations": "Most observations",
       "bestPicture": "Best picture",
-      "pending": "To be announced"
+      "pending": "To be announced",
+      "compact": "Latest",
+      "mostSubmitted": "Most submitted",
+      "mostLiked": "Most liked"
     },
     "map": {
       "title": "Observations of the week",

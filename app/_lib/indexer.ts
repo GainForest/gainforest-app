@@ -493,11 +493,13 @@ function occurrenceWhereVariants(
   ownerDid?: string,
   badgeIndex?: FeaturedBadgeIndex,
   badgeFilters?: BumicertBadgeFilter[],
+  createdAt?: { gte?: string; lte?: string },
 ): Record<string, unknown>[] {
   const ownerWhere = ownerDid ? { did: { eq: ownerDid } } : undefined;
+  const createdWhere = createdAt ? { createdAt } : undefined;
   const badgeWheres = featuredBadgeRecordWhereVariants<Record<string, unknown>>(badgeIndex, "app.gainforest.dwc.occurrence", badgeFilters);
   if (badgeWheres.length === 0) return [];
-  const bases = badgeWheres.flatMap((badgeWhere) => filterWhereVariants(media).map((base) => mergeWhere(ownerWhere, badgeWhere, base) ?? {}));
+  const bases = badgeWheres.flatMap((badgeWhere) => filterWhereVariants(media).map((base) => mergeWhere(ownerWhere, createdWhere, badgeWhere, base) ?? {}));
   const q = query?.trim();
   if (!q) return bases;
   const queryWheres = [
@@ -882,6 +884,7 @@ type OccurrenceWalkOptions = {
   resolveMedia?: boolean;
   featuredBadgesOnly?: boolean;
   badgeFilters?: BumicertBadgeFilter[];
+  createdAt?: { gte?: string; lte?: string };
 };
 
 export async function walkOccurrences(opts: OccurrenceWalkOptions): Promise<OccurrenceWalkResult> {
@@ -911,7 +914,7 @@ export async function walkOccurrences(opts: OccurrenceWalkOptions): Promise<Occu
 async function walkOccurrencesUncached(opts: OccurrenceWalkOptions): Promise<OccurrenceWalkResult> {
   const { media, target, signal } = opts;
   const badgeIndex = opts.featuredBadgesOnly ? await fetchFeaturedBadgeIndex(signal) : undefined;
-  const whereVariants = occurrenceWhereVariants(media, opts.query, opts.ownerDid, badgeIndex, opts.badgeFilters);
+  const whereVariants = occurrenceWhereVariants(media, opts.query, opts.ownerDid, badgeIndex, opts.badgeFilters, opts.createdAt);
   if (whereVariants.length === 0) return { records: [], cursor: null, hasMore: false };
 
   async function walkOne(where: Record<string, unknown> | undefined, after: string | null): Promise<OccurrenceWalkResult> {

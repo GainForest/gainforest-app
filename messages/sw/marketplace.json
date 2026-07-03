@@ -300,6 +300,10 @@
       "upcoming": "Inaanza hivi karibuni",
       "ended": "Imekamilika"
     },
+    "rounds": {
+      "title": "Raundi",
+      "current": "Sasa"
+    },
     "round": {
       "startsIn": "Inaanza baada ya",
       "endsIn": "Inaisha baada ya",
@@ -392,7 +396,10 @@
       "description": "Kumbukumbu ya kudumu ya mabingwa wa kila raundi.",
       "mostObservations": "Uoni mwingi zaidi",
       "bestPicture": "Picha bora",
-      "pending": "Itatangazwa"
+      "pending": "Itatangazwa",
+      "compact": "Karibuni",
+      "mostSubmitted": "Zilizowasilishwa zaidi",
+      "mostLiked": "Zilizopendwa zaidi"
     },
     "map": {
       "title": "Uchunguzi wa wiki",

@@ -300,6 +300,10 @@
       "upcoming": "Segera dimulai",
       "ended": "Selesai"
     },
+    "rounds": {
+      "title": "Ronde",
+      "current": "Saat ini"
+    },
     "round": {
       "startsIn": "Mulai dalam",
       "endsIn": "Berakhir dalam",
@@ -392,7 +396,10 @@
       "description": "Catatan permanen para juara setiap ronde.",
       "mostObservations": "Pengamatan terbanyak",
       "bestPicture": "Foto terbaik",
-      "pending": "Akan diumumkan"
+      "pending": "Akan diumumkan",
+      "compact": "Terbaru",
+      "mostSubmitted": "Kiriman terbanyak",
+      "mostLiked": "Paling disukai"
     },
     "map": {
       "title": "Observasi minggu ini",

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { MapPinnedIcon } from "lucide-react";
 import { RecordMap } from "../_components/RecordMap";
@@ -38,6 +38,7 @@ export function BioblitzObservationsMap({ round }: { round: BioblitzRound }) {
   }, [round]);
 
   const hasMappable = records.some((record) => record.lat != null && record.lon != null);
+  const timeBounds = useMemo(() => ({ start: round.start, end: round.end }), [round.start, round.end]);
 
   return (
     <section>
@@ -69,7 +70,7 @@ export function BioblitzObservationsMap({ round }: { round: BioblitzRound }) {
               </span>
             </div>
           ) : (
-            <RecordMap records={records} kind="occurrence" onOpen={setDrawer} />
+            <RecordMap records={records} kind="occurrence" onOpen={setDrawer} timeBounds={timeBounds} />
           )}
         </div>
       </div>

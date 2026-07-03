@@ -300,6 +300,10 @@
       "upcoming": "Empieza pronto",
       "ended": "Finalizado"
     },
+    "rounds": {
+      "title": "Rondas",
+      "current": "Actual"
+    },
     "round": {
       "startsIn": "Empieza en",
       "endsIn": "Termina en",
@@ -392,7 +396,10 @@
       "description": "Un registro permanente de los campeones de cada ronda.",
       "mostObservations": "Más observaciones",
       "bestPicture": "Mejor foto",
-      "pending": "Por anunciar"
+      "pending": "Por anunciar",
+      "compact": "Recientes",
+      "mostSubmitted": "Más envíos",
+      "mostLiked": "Más me gusta"
     },
     "map": {
       "title": "Observaciones de la semana",
