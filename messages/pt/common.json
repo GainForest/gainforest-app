@@ -1173,7 +1173,7 @@
   },
   "adminAwardEndorsements": {
     "title": "Conceder endossos",
-    "description": "Endosse outras organizações em nome da GainForest — os mesmos endossos que a Ma Earth emite. Aparecem na aba “Endossos” do perfil da GainForest e em plataformas parceiras que os leem.",
+    "description": "Endosse outras organizações em nome da GainForest — os mesmos endossos que a Ma Earth emite, para que plataformas parceiras também os vejam. As organizações endossadas mostram “Com a confiança de GainForest” em toda a app.",
     "notAllowed": "Conceder endossos exige ser administrador da organização GainForest. Peça a um proprietário da GainForest para adicionar você como administrador.",
     "noBadges": "Ainda não existe um selo de endosso. Primeiro crie um selo do tipo “Endosso”.",
     "manageBadges": "Gerir selos",

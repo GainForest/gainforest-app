@@ -1173,7 +1173,7 @@
   },
   "adminAwardEndorsements": {
     "title": "Award endorsements",
-    "description": "Endorse other organizations on GainForest’s behalf — the same endorsements Ma Earth issues. They appear in the “Endorsements” tab on GainForest’s profile and on partner platforms that read them.",
+    "description": "Endorse other organizations on GainForest’s behalf — the same endorsements Ma Earth issues, so partner platforms see them too. Endorsed organizations show “Trusted by GainForest” across the app.",
     "notAllowed": "Awarding endorsements requires an admin of the GainForest organization. Ask a GainForest owner to add you as an admin.",
     "noBadges": "There is no endorsement badge yet. Create a badge with the “Endorsement” type first.",
     "manageBadges": "Manage badges",
