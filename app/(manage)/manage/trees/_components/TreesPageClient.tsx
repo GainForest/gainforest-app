@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import { TreeUploadWizard } from "./TreeUploadWizard";
 import { TreesClient } from "./TreesClient";
 import { TreeUploadContentsquareProvider } from "./TreeUploadContentsquareProvider";
+import { TreesManageSkeleton } from "./TreesManageSkeleton";
 import { useTreesMode } from "../_hooks/useTreesMode";
 import type { ManageTarget } from "@/lib/links";
 
@@ -18,7 +19,7 @@ function TreesPageInner({ did, target }: { did: string; target: ManageTarget }) 
 
 export function TreesPageClient({ did, target }: { did: string; target: ManageTarget }) {
   return (
-    <Suspense fallback={null}>
+    <Suspense fallback={<TreesManageSkeleton />}>
       <TreeUploadContentsquareProvider>
         <TreesPageInner did={did} target={target} />
       </TreeUploadContentsquareProvider>

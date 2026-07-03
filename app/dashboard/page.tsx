@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { LayoutDashboardIcon } from "lucide-react";
 import { PictureHero } from "../_components/PictureHero";
+import { DashboardStatsPageSkeleton } from "../_components/PageLoadingSkeletons";
 import { StatsDashboardClient } from "./StatsDashboardClient";
 
 export const metadata: Metadata = {
@@ -33,7 +34,7 @@ export default function DashboardPage() {
         lede="A single place for the totals from project stories, organizations, observations, and projects."
       />
       <div className="relative z-10 -mt-8">
-        <Suspense fallback={null}>
+        <Suspense fallback={<DashboardStatsPageSkeleton />}>
           <StatsDashboardClient />
         </Suspense>
       </div>

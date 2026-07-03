@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
+import { ExploreGridPageSkeleton } from "../_components/PageLoadingSkeletons";
 import { ProjectsExploreClient } from "./ProjectsExploreClient";
 
 export const revalidate = 86400;
@@ -13,7 +14,7 @@ export const metadata: Metadata = {
 
 export default function ProjectsPage() {
   return (
-    <Suspense fallback={null}>
+    <Suspense fallback={<ExploreGridPageSkeleton />}>
       <ProjectsExploreClient />
     </Suspense>
   );

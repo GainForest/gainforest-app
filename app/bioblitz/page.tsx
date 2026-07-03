@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { Suspense } from "react";
+import { BioblitzPageSkeleton } from "../_components/PageLoadingSkeletons";
 import { BioblitzClient } from "./BioblitzClient";
 
 export const revalidate = 3600;
@@ -17,7 +18,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default function BioblitzPage() {
   return (
-    <Suspense fallback={null}>
+    <Suspense fallback={<BioblitzPageSkeleton />}>
       <BioblitzClient />
     </Suspense>
   );

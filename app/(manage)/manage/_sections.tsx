@@ -22,6 +22,7 @@ import { ProjectSitesManagerClient } from "./projects/[rkey]/sites/_components/P
 import { droneAppHref } from "@/app/_lib/urls";
 import { resolveBlobUrl, resolvePdsHost } from "@/app/_lib/pds";
 import { RecordExplorer } from "@/app/_components/RecordExplorer";
+import { InlineCardGridSkeleton } from "@/app/_components/PageLoadingSkeletons";
 import { Button } from "@/components/ui/button";
 import { getAccountRouteData } from "@/app/account/_lib/account-route";
 import { fetchAuthSession } from "@/app/_lib/auth-server";
@@ -35,9 +36,11 @@ import { ManageProjectsClient } from "./projects/_components/ManageProjectsClien
 import { ProjectGalleryManagerClient } from "./projects/[rkey]/gallery/_components/ProjectGalleryManagerClient";
 import { ProjectCertsManagerClient } from "./projects/[rkey]/certs/_components/ProjectCertsManagerClient";
 import { SitesClient } from "./sites/_components/SitesClient";
+import { SitesSkeleton } from "./sites/_components/SitesSkeleton";
 import { AddDataClient } from "./add/_components/AddDataClient";
 import { TreesPageClient } from "./trees/_components/TreesPageClient";
 import { AudioClient } from "./audio/_components/AudioClient";
+import { AudioSkeleton } from "./audio/_components/AudioSkeleton";
 import { ObservationsClient } from "./observations/_components/ObservationsClient";
 import { ManageBumicertsClient } from "./certs/_components/ManageBumicertsClient";
 import { NewBumicertClient, type LinkedProjectPrefill } from "./certs/new/_components/NewBumicertClient";
@@ -102,7 +105,7 @@ export async function ManageHomeSection({ target, wrapDashboard = true }: { targ
 
 export function ProjectsSection({ target }: { target: ManageTarget }) {
   return (
-    <Suspense fallback={null}>
+    <Suspense fallback={<InlineCardGridSkeleton />}>
       <ManageProjectsClient target={target} />
     </Suspense>
   );
@@ -110,7 +113,7 @@ export function ProjectsSection({ target }: { target: ManageTarget }) {
 
 export function ProjectGallerySection({ target, projectRkey }: { target: ManageTarget; projectRkey: string }) {
   return (
-    <Suspense fallback={null}>
+    <Suspense fallback={<InlineCardGridSkeleton cards={8} />}>
       <ProjectGalleryManagerClient target={target} projectRkey={projectRkey} />
     </Suspense>
   );
@@ -118,7 +121,7 @@ export function ProjectGallerySection({ target, projectRkey }: { target: ManageT
 
 export function ProjectCertsSection({ target, projectRkey }: { target: ManageTarget; projectRkey: string }) {
   return (
-    <Suspense fallback={null}>
+    <Suspense fallback={<InlineCardGridSkeleton cards={4} />}>
       <ProjectCertsManagerClient target={target} projectRkey={projectRkey} />
     </Suspense>
   );
@@ -218,7 +221,7 @@ export async function ProjectTimelineSection({ target, projectRkey }: { target: 
 
 export function ProjectSitesSection({ target, projectRkey }: { target: ManageTarget; projectRkey: string }) {
   return (
-    <Suspense fallback={null}>
+    <Suspense fallback={<SitesSkeleton />}>
       <ProjectSitesManagerClient target={target} projectRkey={projectRkey} />
     </Suspense>
   );
@@ -230,7 +233,7 @@ export function SitesSection({ target }: { target: ManageTarget }) {
 
 export function AddDataSection({ target }: { target: ManageTarget }) {
   return (
-    <Suspense fallback={null}>
+    <Suspense fallback={<InlineCardGridSkeleton cards={4} />}>
       <AddDataClient target={target} />
     </Suspense>
   );
@@ -242,7 +245,7 @@ export function TreesSection({ target }: { target: ManageTarget }) {
 
 export function AudioSection({ target }: { target: ManageTarget }) {
   return (
-    <Suspense fallback={null}>
+    <Suspense fallback={<AudioSkeleton />}>
       <AudioClient target={target} did={target.did} />
     </Suspense>
   );

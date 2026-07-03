@@ -7,6 +7,7 @@ import { getLocale, getTranslations } from "next-intl/server";
 import { AccountGalleryClient } from "./AccountGalleryClient";
 import type { GalleryProjectOption } from "./AccountGalleryUploader";
 import { RichText } from "../../_components/RichText";
+import { InlineCardGridSkeleton } from "../../_components/PageLoadingSkeletons";
 import { RecordExplorer } from "../../_components/RecordExplorer";
 import { AccountBumicertsGrid } from "./AccountBumicertsGrid";
 import { AccountProjectsGrid } from "./AccountProjectsGrid";
@@ -337,7 +338,7 @@ export async function AccountObservationsTabContent({ account, did }: { account:
   }
 
   return (
-    <Suspense fallback={null}>
+    <Suspense fallback={<InlineCardGridSkeleton />}>
       <RecordExplorer kind="occurrence" ownerDid={did} showHero={false} hideOccurrenceFilters defaultOccurrenceMedia="all" />
     </Suspense>
   );

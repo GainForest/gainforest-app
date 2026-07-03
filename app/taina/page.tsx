@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { Suspense } from "react";
 import { BinocularsIcon, BotIcon, SendIcon, SproutIcon } from "lucide-react";
 import { fetchAuthSession } from "../_lib/auth-server";
+import { TainaPageSkeleton } from "../_components/PageLoadingSkeletons";
 import { TainaSetupClient } from "./_components/TainaSetupClient";
 
 export const dynamic = "force-dynamic";
@@ -19,7 +20,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default function TainaPage() {
   return (
-    <Suspense fallback={null}>
+    <Suspense fallback={<TainaPageSkeleton />}>
       <TainaContent />
     </Suspense>
   );

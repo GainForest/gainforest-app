@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { Suspense } from "react";
+import { ExploreGridPageSkeleton } from "../_components/PageLoadingSkeletons";
 import { OrganizationsClient } from "./OrganizationsClient";
 
 export const revalidate = 86400;
@@ -17,7 +18,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default function OrganizationsPage() {
   return (
-    <Suspense fallback={null}>
+    <Suspense fallback={<ExploreGridPageSkeleton />}>
       <OrganizationsClient />
     </Suspense>
   );

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { getTranslations } from "next-intl/server";
+import { GlobePageSkeleton } from "../_components/PageLoadingSkeletons";
 import { GlobeExplorer } from "./_components/GlobeExplorer";
 
 export const revalidate = 3600;
@@ -16,7 +17,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default function GlobePage() {
   return (
-    <Suspense fallback={null}>
+    <Suspense fallback={<GlobePageSkeleton />}>
       <GlobeExplorer />
     </Suspense>
   );

@@ -5,6 +5,7 @@ import { getTranslations } from "next-intl/server";
 import { fetchRecordByUri } from "../../../_lib/indexer";
 import { localProjectHref } from "../../../_lib/urls";
 import { getAccountRouteData, readAccountRouteParams } from "../../../account/_lib/account-route";
+import { GlobePageSkeleton } from "../../../_components/PageLoadingSkeletons";
 import { GlobeExplorer } from "../../_components/GlobeExplorer";
 
 export const revalidate = 300;
@@ -63,7 +64,7 @@ export default async function ProjectGlobePage({ params }: { params: GlobeProjec
   const identifier = account?.urlIdentifier ?? data.urlIdentifier;
 
   return (
-    <Suspense fallback={null}>
+    <Suspense fallback={<GlobePageSkeleton />}>
       <GlobeExplorer
         orgDid={data.did}
         orgName={account?.displayName ?? null}

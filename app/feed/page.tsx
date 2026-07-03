@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { Suspense } from "react";
 import { buildActivityFeed } from "../_lib/feed";
 import { fetchAuthSession } from "../_lib/auth-server";
+import { FeedPageSkeleton } from "../_components/PageLoadingSkeletons";
 import { FeedClient } from "./FeedClient";
 
 export const revalidate = 300;
@@ -19,7 +20,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default function FeedPage() {
   return (
-    <Suspense fallback={null}>
+    <Suspense fallback={<FeedPageSkeleton />}>
       <FeedContent />
     </Suspense>
   );

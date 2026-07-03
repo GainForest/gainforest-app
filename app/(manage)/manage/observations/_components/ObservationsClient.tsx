@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useTranslations } from "next-intl";
+import { InlineCardGridSkeleton } from "@/app/_components/PageLoadingSkeletons";
 import { RecordExplorer } from "@/app/_components/RecordExplorer";
 import { EmptyHeroBanner } from "@/app/_components/EmptyHeroBanner";
 import type { ExplorerRecord, OccurrenceRecord } from "@/app/_lib/indexer";
@@ -835,7 +836,7 @@ export function ObservationsClient({
         </div>
       ) : null}
 
-      <Suspense fallback={null}>
+      <Suspense fallback={<InlineCardGridSkeleton />}>
         <RecordExplorer
           kind="occurrence"
           ownerDid={target.did}

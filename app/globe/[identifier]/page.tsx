@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { getTranslations } from "next-intl/server";
 import { getAccountRouteData, readAccountRouteParams } from "../../account/_lib/account-route";
+import { GlobePageSkeleton } from "../../_components/PageLoadingSkeletons";
 import { GlobeExplorer } from "../_components/GlobeExplorer";
 
 export const revalidate = 300;
@@ -33,7 +34,7 @@ export default async function OrganizationGlobePage({ params }: { params: GlobeO
   const account = await getAccountRouteData(did, urlIdentifier).catch(() => null);
 
   return (
-    <Suspense fallback={null}>
+    <Suspense fallback={<GlobePageSkeleton />}>
       <GlobeExplorer
         orgDid={did}
         orgName={account?.displayName ?? null}
