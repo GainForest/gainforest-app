@@ -73,6 +73,11 @@ export interface ActivityFeedItem {
   amount: number | null;
   /** For donations: the currency code (USD/USDC). */
   currency: string | null;
+  /** Observations only, set on a sampled row of a server-collapsed burst: the
+   *  total number of sightings in that burst (counted for free by the burst
+   *  scan). The client's summary card uses it as the headline count; absent on
+   *  fully loaded runs, where the row count itself is exact. */
+  burstCount?: number;
 }
 
 /** Which kinds the feed should include: a single kind, or the unified merge. */
@@ -697,16 +702,19 @@ function scanNodeId(n: ScanNode): string {
  * ends: either another account's sighting, or a record at/below `floorTime`
  * (the newest non-sighting item already in the pool). Returns the last sighting
  * of the run, whose (createdAt, id) becomes the jump cursor so the next page
- * begins right after the whole burst.
+ * begins right after the whole burst, plus `count` — how many sightings the run
+ * contains (a lower bound when the hop budget runs out) — gathered while
+ * walking anyway, so the summary card's headline number costs nothing extra.
  */
 async function scanBurstEnd(
   burstActor: string,
   before: string | null,
   floorTime: number,
-): Promise<{ createdAt: string; id: string } | null> {
+): Promise<{ createdAt: string; id: string; count: number } | null> {
   let upper = before;
-  let lastBurst: { createdAt: string; id: string } | null = null;
+  let lastBurst: { createdAt: string; id: string; count: number } | null = null;
   let lastBurstTime: number | null = null;
+  let runCount = 0;
   const seen = new Set<string>();
 
   for (let hop = 0; hop < MAX_SCAN_HOPS; hop += 1) {
@@ -733,7 +741,8 @@ async function scanBurstEnd(
       // A long quiet gap between two of the actor's sightings ends the burst:
       // only things uploaded close together collapse into one summary.
       if (lastBurstTime !== null && lastBurstTime - t > BURST_MAX_GAP_MS) return lastBurst;
-      lastBurst = { createdAt: n.createdAt, id };
+      runCount += 1;
+      lastBurst = { createdAt: n.createdAt, id, count: runCount };
       lastBurstTime = t;
     }
     if (!progressed || nodes.length < BURST_SCAN_HOP) break; // exhausted / no progress
@@ -770,6 +779,12 @@ async function buildBurstSkipPage(
     .slice(0, firstObsIdx + BURST_SAMPLE)
     .filter((it) => !isStrictlyOlder(it, jumpCursor));
   if (sample.length === 0) return null;
+  // Stamp the scanned run total on the sampled sightings so the client's
+  // summary card can headline the real burst size without another query.
+  const burstCount = Math.max(jump.count, sample.filter((it) => it.kind === "observation").length);
+  for (const it of sample) {
+    if (it.kind === "observation") it.burstCount = burstCount;
+  }
   return {
     items: sample,
     nextCursor: encodeCursor({ ts: jump.createdAt, id: jump.id }),

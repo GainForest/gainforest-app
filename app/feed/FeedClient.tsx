@@ -21,7 +21,6 @@ import {
   UsersRoundIcon,
 } from "lucide-react";
 import type { ActivityFeedItem, ActivityFeedKind, ActivityFeedPage } from "../_lib/feed";
-import { indexerQuery } from "../_lib/indexer";
 import { resolveBlobUrl } from "../_lib/pds";
 import {
   DeleteButton,
@@ -676,47 +675,6 @@ function FeedRow({
 
 /** Collapsed summary for a run of consecutive sightings from one account:
  *  identity + count, a sample image montage, and a link to all of them. */
-// The account's all-time sighting total — the right headline number for a
-// burst card — fetched once per org with a cheap `totalCount` query (not by
-// paging through thousands of records). Cached for the session.
-const orgSightingTotalCache = new Map<string, number>();
-const ORG_SIGHTING_TOTAL_QUERY = `
-  query OrgSightingTotal($did: String!) {
-    appGainforestDwcOccurrence(first: 0, where: { did: { eq: $did } }) { totalCount }
-  }
-`;
-
-function useOrgSightingTotal(did: string | null, fallback: number): number {
-  const [total, setTotal] = useState<number | null>(() => (did ? orgSightingTotalCache.get(did) ?? null : null));
-
-  useEffect(() => {
-    if (!did) return;
-    const cached = orgSightingTotalCache.get(did);
-    if (cached != null) {
-      setTotal(cached);
-      return;
-    }
-    const controller = new AbortController();
-    indexerQuery<{ appGainforestDwcOccurrence?: { totalCount?: number | null } }>(
-      ORG_SIGHTING_TOTAL_QUERY,
-      { did },
-      controller.signal,
-    )
-      .then((data) => {
-        const n = data?.appGainforestDwcOccurrence?.totalCount;
-        if (typeof n === "number") {
-          orgSightingTotalCache.set(did, n);
-          setTotal(n);
-        }
-      })
-      .catch(() => {});
-    return () => controller.abort();
-  }, [did]);
-
-  // Use the true total once known; until then show the loaded run length.
-  return total != null ? Math.max(total, fallback) : fallback;
-}
-
 function ObservationBatchCard({
   items,
   signedIn,
@@ -738,10 +696,11 @@ function ObservationBatchCard({
   // ids is already prefetched by the FeedClient page effect.
   const likeTotal = items.reduce((sum, it) => sum + interactions.getEngagement(it.id).likeCount, 0);
 
-  // The real count comes from the org's sighting total, so a burst that is only
-  // partially loaded still reads "shared 2,143 nature sightings", not the
-  // loaded slice.
-  const count = useOrgSightingTotal(head.actorDid || null, items.length);
+  // Headline count = the size of THIS burst, not the account's all-time total.
+  // Server-collapsed runs carry the scanned run size on their sampled rows
+  // (`burstCount`); fully loaded runs are exactly the rows on screen. Either
+  // way it's free — no extra query.
+  const count = items.reduce((max, it) => Math.max(max, it.burstCount ?? 0), items.length);
 
   const withImages = items.filter((it) => hasImage(it));
   const thumbs = withImages.slice(0, MAX_THUMBS);
