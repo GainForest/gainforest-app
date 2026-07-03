@@ -706,46 +706,6 @@ export function ObservationsClient({
           </h1>
           <p className="mt-2 text-sm leading-6 text-muted-foreground">{t("description")}</p>
         </header>
-
-        {isEmpty ? null : (
-        <div className="mt-5 flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-muted px-4 py-3">
-          <p className="text-sm text-muted-foreground">
-            {selectedRecords.size > 0 ? t("selectedForDelete", { count: selectedRecords.size }) : t("selectToDeleteHint")}
-          </p>
-          <div className="flex flex-wrap items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={selectedRecords.size === visibleRecords.length && visibleRecords.length > 0 ? clearSelectedRecords : selectAllVisibleRecords}
-              disabled={visibleRecords.length === 0 || Boolean(deleteDisabledReason) || isDeletingSelected}
-              title={deleteDisabledReason ?? undefined}
-            >
-              {selectedRecords.size === visibleRecords.length && visibleRecords.length > 0 ? t("deselectAll") : t("selectAll")}
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={openGroupIntoDataset}
-              disabled={selectedRecords.size === 0 || Boolean(createPermission.reason) || isDeletingSelected}
-              title={createPermission.reason ?? undefined}
-              className="text-muted-foreground hover:text-foreground"
-            >
-              <FolderPlusIcon className="size-4" />
-              {t("groupIntoDataset")}
-            </Button>
-            <Button
-              variant="destructive"
-              size="sm"
-              onClick={openDeleteSelectedModal}
-              disabled={selectedRecords.size === 0 || Boolean(deleteDisabledReason) || isDeletingSelected}
-              title={deleteDisabledReason ?? undefined}
-            >
-              {isDeletingSelected ? <Loader2Icon className="size-4 animate-spin" /> : <Trash2Icon className="size-4" />}
-              {isDeletingSelected ? t("deletingSelected") : t("deleteSelected")}
-            </Button>
-          </div>
-        </div>
-        )}
       </div>
 
       {!isEmpty ? (
@@ -826,6 +786,43 @@ export function ObservationsClient({
       {!isEmpty ? (
         <div className="mx-auto mt-8 max-w-6xl px-6">
           <h2 className="text-sm font-medium text-foreground">{t("allObservationsHeading")}</h2>
+          <div className="mt-3 flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-muted px-4 py-3">
+            <p className="text-sm text-muted-foreground">
+              {selectedRecords.size > 0 ? t("selectedForDelete", { count: selectedRecords.size }) : t("selectToDeleteHint")}
+            </p>
+            <div className="flex flex-wrap items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={selectedRecords.size === visibleRecords.length && visibleRecords.length > 0 ? clearSelectedRecords : selectAllVisibleRecords}
+                disabled={visibleRecords.length === 0 || Boolean(deleteDisabledReason) || isDeletingSelected}
+                title={deleteDisabledReason ?? undefined}
+              >
+                {selectedRecords.size === visibleRecords.length && visibleRecords.length > 0 ? t("deselectAll") : t("selectAll")}
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={openGroupIntoDataset}
+                disabled={selectedRecords.size === 0 || Boolean(createPermission.reason) || isDeletingSelected}
+                title={createPermission.reason ?? undefined}
+                className="text-muted-foreground hover:text-foreground"
+              >
+                <FolderPlusIcon className="size-4" />
+                {t("groupIntoDataset")}
+              </Button>
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={openDeleteSelectedModal}
+                disabled={selectedRecords.size === 0 || Boolean(deleteDisabledReason) || isDeletingSelected}
+                title={deleteDisabledReason ?? undefined}
+              >
+                {isDeletingSelected ? <Loader2Icon className="size-4 animate-spin" /> : <Trash2Icon className="size-4" />}
+                {isDeletingSelected ? t("deletingSelected") : t("deleteSelected")}
+              </Button>
+            </div>
+          </div>
         </div>
       ) : null}
 
