@@ -1688,6 +1688,17 @@
         "mangroves": "Bakau"
       }
     },
+    "tree": {
+      "title": "Pohon",
+      "close": "Tutup",
+      "species": "Spesies",
+      "height": "Tinggi",
+      "dbh": "DBH",
+      "measured": "Diukur:",
+      "unknown": "Tidak diketahui",
+      "unknownSpecies": "Spesies tidak diketahui",
+      "photo": "Foto {index}"
+    },
     "loadingGlobe": "Menyiapkan globe…",
     "sheet": {
       "expand": "Tampilkan detail",

@@ -1688,6 +1688,17 @@
         "mangroves": "Manglares"
       }
     },
+    "tree": {
+      "title": "Árbol",
+      "close": "Cerrar",
+      "species": "Especie",
+      "height": "Altura",
+      "dbh": "DAP",
+      "measured": "Medido:",
+      "unknown": "Desconocido",
+      "unknownSpecies": "Especie desconocida",
+      "photo": "Foto {index}"
+    },
     "loadingGlobe": "Preparando el globo…",
     "sheet": {
       "expand": "Mostrar detalles",

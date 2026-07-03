@@ -106,6 +106,85 @@ export function treeDbh(properties: TreeProperties | null): string | null {
   return value ? `${value}cm` : null;
 }
 
+/** Date the tree was measured/planted (first populated of the known fields). */
+export function treeDate(properties: TreeProperties | null): string | null {
+  if (!properties) return null;
+  return treeMetric(properties, [
+    "dateOfMeasurement",
+    "FCD-tree_records-tree_time",
+    "dateMeasured",
+    "datePlanted",
+    "tree_time",
+  ]);
+}
+
+/** Free-text field notes, when present. */
+export function treeNotes(properties: TreeProperties | null): string | null {
+  if (!properties) return null;
+  return treeMetric(properties, ["FCD-tree_records-notes", "notes", "remarks"]);
+}
+
+/** Turn a Google Drive share link into an embeddable image URL; pass other
+ *  URLs through unchanged. */
+function toEmbeddableImageUrl(url: string): string {
+  const trimmed = url.trim();
+  if (!/drive\.google\.com/.test(trimmed)) return trimmed;
+  const id =
+    trimmed.match(/[?&]id=([^&]+)/)?.[1] ?? trimmed.match(/\/d\/([^/]+)/)?.[1] ?? null;
+  return id ? `https://drive.google.com/thumbnail?id=${id}&sz=w1000` : trimmed;
+}
+
+/** Photo angles for a tree (main → leaf → bark → root → fruit), de-duplicated
+ *  and normalised to embeddable URLs. Port of Green Globe's getTreePhotos,
+ *  minus the project-specific S3 placeholders. */
+export function treePhotos(properties: TreeProperties | null): string[] {
+  if (!properties) return [];
+  const groups = [
+    ["tree_photo", "FCD-tree_records-tree_photo", "awsUrl", "koboUrl"],
+    ["FCD-tree_records-leaves_photo", "leafAwsUrl", "leafKoboUrl"],
+    ["FCD-tree_records-bark_photo", "barkAwsUrl", "barkKoboUrl"],
+    ["FCD-tree_records-root_photo"],
+    ["FCD-tree_records-fruit_flower_seed_photo"],
+  ];
+  const photos: string[] = [];
+  for (const group of groups) {
+    const raw = group
+      .map((key) => properties[key])
+      .find((value): value is string => typeof value === "string" && value.trim().length > 1);
+    if (!raw) continue;
+    const url = toEmbeddableImageUrl(raw);
+    if (url && !photos.includes(url)) photos.push(url);
+  }
+  return photos;
+}
+
+/** Everything the tree detail sidebar needs, derived from a feature. */
+export type TreeDetail = {
+  id: string | number;
+  species: string | null;
+  height: string | null;
+  dbh: string | null;
+  date: string | null;
+  notes: string | null;
+  photos: string[];
+};
+
+/** Build a `TreeDetail` from a clicked feature's id + properties. */
+export function treeDetail(
+  id: string | number,
+  properties: TreeProperties | null,
+): TreeDetail {
+  return {
+    id,
+    species: treeSpeciesName(properties),
+    height: treeHeight(properties),
+    dbh: treeDbh(properties),
+    date: treeDate(properties),
+    notes: treeNotes(properties),
+    photos: treePhotos(properties),
+  };
+}
+
 function isPointFeature(feature: unknown): feature is GeoJSON.Feature<GeoJSON.Point> {
   if (typeof feature !== "object" || feature === null) return false;
   const geometry = (feature as GeoJSON.Feature).geometry;

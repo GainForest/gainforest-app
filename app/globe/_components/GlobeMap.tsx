@@ -31,7 +31,7 @@ import {
   globeMapStyle,
 } from "../_lib/config";
 import { resolveLayerUrl } from "../_lib/layers";
-import { treeDbh, treeHeight, treeSpeciesName } from "../_lib/trees";
+import { treeDbh, treeDetail, treeHeight, treeSpeciesName, type TreeDetail } from "../_lib/trees";
 import {
   DEFAULT_BADGE_ID,
   MA_EARTH_BADGE_ID,
@@ -68,6 +68,10 @@ type GlobeMapProps = {
   highlightGeojson?: GeoJSON.FeatureCollection | null;
   /** Measured/planted trees of the focused organization (clustered pins). */
   treesGeojson?: GeoJSON.FeatureCollection | null;
+  /** Fired when a single tree is clicked (or the selection is cleared). */
+  onSelectTree?: (tree: TreeDetail | null) => void;
+  /** Feature id of the actively selected tree (drives the highlight). */
+  selectedTreeId?: string | number | null;
   /** When set (and whenever `boundsKey` changes), the camera fits here. */
   bounds?: LngLatBounds | null;
   boundsKey?: string | null;
@@ -273,6 +277,8 @@ export function GlobeMap({
   sitesGeojson,
   highlightGeojson,
   treesGeojson,
+  onSelectTree,
+  selectedTreeId = null,
   bounds,
   boundsKey,
   boundsPadding,
@@ -288,6 +294,8 @@ export function GlobeMap({
 
   const spinRef = useRef(spin);
   const selectRef = useRef(onSelectOrganization);
+  const selectTreeRef = useRef(onSelectTree);
+  selectTreeRef.current = onSelectTree;
   const loadedRef = useRef(onLoaded);
   const addedLayerIdsRef = useRef(new Set<string>());
   const organizationsRef = useRef(organizations);
@@ -484,13 +492,32 @@ export function GlobeMap({
         paint: {
           "circle-color": [
             "case",
+            ["boolean", ["feature-state", "selected"], false],
+            "#ec4899",
             ["boolean", ["feature-state", "hover"], false],
             "#0883fe",
             "#ff77c1",
           ],
-          "circle-radius": ["case", ["boolean", ["feature-state", "hover"], false], 8, 4],
-          "circle-stroke-width": 1,
-          "circle-stroke-color": "#000000",
+          "circle-radius": [
+            "case",
+            ["boolean", ["feature-state", "selected"], false],
+            10,
+            ["boolean", ["feature-state", "hover"], false],
+            8,
+            4,
+          ],
+          "circle-stroke-width": [
+            "case",
+            ["boolean", ["feature-state", "selected"], false],
+            3,
+            1,
+          ],
+          "circle-stroke-color": [
+            "case",
+            ["boolean", ["feature-state", "selected"], false],
+            "#ffffff",
+            "#000000",
+          ],
         },
       });
 
@@ -523,6 +550,19 @@ export function GlobeMap({
         map.getCanvas().style.cursor = "";
         clearTreeHover();
         popup.remove();
+      });
+      // Click a single tree to open its detail sidebar; click the map away
+      // from any tree to clear the selection.
+      map.on("click", TREES_POINT_LAYER, (event: MapLayerMouseEvent) => {
+        const feature = event.features?.[0];
+        if (!feature || feature.id === undefined) return;
+        event.preventDefault();
+        selectTreeRef.current?.(treeDetail(feature.id, feature.properties ?? null));
+      });
+      map.on("click", (event: MapLayerMouseEvent) => {
+        if (event.defaultPrevented) return;
+        const hits = map.queryRenderedFeatures(event.point, { layers: [TREES_POINT_LAYER] });
+        if (hits.length === 0) selectTreeRef.current?.(null);
       });
       map.on("mouseenter", TREES_CLUSTER_LAYER, () => {
         map.getCanvas().style.cursor = "pointer";
@@ -659,6 +699,21 @@ export function GlobeMap({
       treesGeojson ?? EMPTY_FEATURE_COLLECTION,
     );
   }, [treesGeojson, mapLoaded]);
+
+  // Highlight the actively selected tree (white ring), clearing the previous.
+  const selectedTreeRef = useRef<string | number | null>(null);
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !mapLoaded) return;
+    const previous = selectedTreeRef.current;
+    if (previous !== null && previous !== selectedTreeId) {
+      map.setFeatureState({ source: TREES_SOURCE, id: previous }, { selected: false });
+    }
+    if (selectedTreeId !== null) {
+      map.setFeatureState({ source: TREES_SOURCE, id: selectedTreeId }, { selected: true });
+    }
+    selectedTreeRef.current = selectedTreeId;
+  }, [selectedTreeId, treesGeojson, mapLoaded]);
 
   // Camera.
   useEffect(() => {

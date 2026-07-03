@@ -1688,6 +1688,17 @@
         "mangroves": "Mangroves"
       }
     },
+    "tree": {
+      "title": "Tree",
+      "close": "Close",
+      "species": "Species",
+      "height": "Height",
+      "dbh": "DBH",
+      "measured": "Measured:",
+      "unknown": "Unknown",
+      "unknownSpecies": "Unknown species",
+      "photo": "Photo {index}"
+    },
     "loadingGlobe": "Preparing the globe…",
     "sheet": {
       "expand": "Show details",

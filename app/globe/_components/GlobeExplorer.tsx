@@ -27,8 +27,11 @@ import {
   EarthIcon,
   FolderKanbanIcon,
   LayersIcon,
+  LeafIcon,
   LocateFixedIcon,
   MapPinnedIcon,
+  MoveHorizontalIcon,
+  MoveVerticalIcon,
   SearchIcon,
   XIcon,
 } from "lucide-react";
@@ -49,7 +52,7 @@ import {
   toFeatures,
 } from "../_lib/data";
 import { fetchGlobalLayers, fetchOrganizationLayers } from "../_lib/layers";
-import { fetchOrganizationTrees } from "../_lib/trees";
+import { fetchOrganizationTrees, type TreeDetail } from "../_lib/trees";
 import type {
   GlobeLayer,
   GlobeOrganization,
@@ -221,10 +224,12 @@ export function GlobeExplorer({ orgDid = null, orgName = null, orgIdentifier = n
     data: GeoJSON.FeatureCollection | null;
   }>({ status: "idle", data: null });
   const [treesVisible, setTreesVisible] = useState(true);
+  const [selectedTree, setSelectedTree] = useState<TreeDetail | null>(null);
 
   useEffect(() => {
     setTreesState({ status: "idle", data: null });
     setTreesVisible(true);
+    setSelectedTree(null);
     if (!focusDid) return;
     const controller = new AbortController();
     setTreesState({ status: "loading", data: null });
@@ -365,6 +370,11 @@ export function GlobeExplorer({ orgDid = null, orgName = null, orgIdentifier = n
     setSheetExpanded(false);
   }, [focusDid]);
 
+  // Drop any open tree card when trees are hidden or the org changes.
+  useEffect(() => {
+    if (!treesVisible) setSelectedTree(null);
+  }, [treesVisible]);
+
   const selectOrganization = useCallback(
     (did: string | null) => {
       if (mode !== "global") return;
@@ -446,6 +456,8 @@ export function GlobeExplorer({ orgDid = null, orgName = null, orgIdentifier = n
         sitesGeojson={featureCollection(focusedState.features)}
         highlightGeojson={featureCollection(highlightFeatures)}
         treesGeojson={treesVisible ? treesState.data : null}
+        onSelectTree={setSelectedTree}
+        selectedTreeId={selectedTree?.id ?? null}
         bounds={mapBounds}
         boundsKey={`${focusDid ?? "none"}:${selectedSiteUri ?? "all"}:${boundsNonce}`}
         boundsPadding={
@@ -476,6 +488,17 @@ export function GlobeExplorer({ orgDid = null, orgName = null, orgIdentifier = n
               <p className="text-sm font-medium text-white/60">{t("loadingGlobe")}</p>
             </div>
           </motion.div>
+        ) : null}
+      </AnimatePresence>
+
+      {/* ── Selected tree detail (right sidebar) ── */}
+      <AnimatePresence>
+        {selectedTree ? (
+          <TreeDetailPanel
+            key={String(selectedTree.id)}
+            tree={selectedTree}
+            onClose={() => setSelectedTree(null)}
+          />
         ) : null}
       </AnimatePresence>
 
@@ -1156,6 +1179,129 @@ function LayerToggleRow({
         />
       </button>
     </label>
+  );
+}
+
+// ── Selected tree detail sidebar ────────────────────────────────────────
+
+function TreeDetailPanel({ tree, onClose }: { tree: TreeDetail; onClose: () => void }) {
+  const t = useTranslations("marketplace.globe");
+  const [activePhoto, setActivePhoto] = useState(0);
+  const [failed, setFailed] = useState<Set<number>>(new Set());
+
+  const photos = tree.photos.filter((_, index) => !failed.has(index));
+  const heroSrc = tree.photos[activePhoto] && !failed.has(activePhoto) ? tree.photos[activePhoto] : null;
+  const species = tree.species ?? t("tree.unknownSpecies");
+
+  return (
+    <motion.aside
+      initial={{ opacity: 0, x: 12, filter: "blur(6px)" }}
+      animate={{ opacity: 1, x: 0, filter: "blur(0px)" }}
+      exit={{ opacity: 0, x: 12, filter: "blur(6px)" }}
+      transition={{ duration: 0.22, ease: [0.25, 0.1, 0.25, 1] }}
+      aria-label={t("tree.title")}
+      data-testid="globe-tree-detail"
+      className="pointer-events-auto absolute right-3 top-[7.5rem] z-30 flex max-h-[calc(100%-9rem)] w-[300px] max-w-[calc(100vw-1.5rem)] flex-col overflow-hidden rounded-2xl border border-border bg-background/90 shadow-xl backdrop-blur-xl md:right-4"
+    >
+      <div className="flex items-center justify-between gap-2 border-b border-border px-4 py-2.5">
+        <span className="flex items-center gap-1.5 text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
+          <LeafIcon className="size-3.5 text-primary" />
+          {t("tree.title")}
+        </span>
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label={t("tree.close")}
+          className="grid size-7 shrink-0 place-items-center rounded-full border border-border text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary"
+        >
+          <XIcon className="size-3.5" />
+        </button>
+      </div>
+
+      <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+        <div className="relative aspect-square w-full bg-muted">
+          {heroSrc ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={heroSrc}
+              alt={species}
+              loading="lazy"
+              onError={() => setFailed((prev) => new Set(prev).add(activePhoto))}
+              className="h-full w-full object-cover"
+            />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center text-muted-foreground">
+              <LeafIcon className="size-10 opacity-40" />
+            </div>
+          )}
+        </div>
+
+        {photos.length > 1 ? (
+          <div className="flex gap-1.5 px-3 pt-3">
+            {tree.photos.map((photo, index) =>
+              failed.has(index) ? null : (
+                <button
+                  key={photo}
+                  type="button"
+                  onClick={() => setActivePhoto(index)}
+                  aria-label={t("tree.photo", { index: index + 1 })}
+                  className={cn(
+                    "size-11 shrink-0 overflow-hidden rounded-lg border transition-colors",
+                    index === activePhoto ? "border-primary" : "border-border hover:border-primary/40",
+                  )}
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={photo}
+                    alt=""
+                    loading="lazy"
+                    onError={() => setFailed((prev) => new Set(prev).add(index))}
+                    className="h-full w-full object-cover"
+                  />
+                </button>
+              ),
+            )}
+          </div>
+        ) : null}
+
+        <div className="flex flex-col gap-3 p-4">
+          <div>
+            <p className="text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
+              {t("tree.species")}
+            </p>
+            <h2 className={cn("text-lg font-bold leading-tight text-foreground", tree.species && "italic")}>
+              {species}
+            </h2>
+          </div>
+
+          <div className="flex items-stretch gap-2">
+            <div className="flex flex-1 flex-col gap-0.5 rounded-xl bg-muted p-2.5">
+              <span className="flex items-center gap-1 text-[11px] text-muted-foreground">
+                <MoveVerticalIcon className="size-3" />
+                {t("tree.height")}
+              </span>
+              <span className="text-base font-bold text-foreground">{tree.height ?? t("tree.unknown")}</span>
+            </div>
+            <div className="flex flex-1 flex-col gap-0.5 rounded-xl bg-muted p-2.5">
+              <span className="flex items-center gap-1 text-[11px] text-muted-foreground">
+                <MoveHorizontalIcon className="size-3" />
+                {t("tree.dbh")}
+              </span>
+              <span className="text-base font-bold text-foreground">{tree.dbh ?? t("tree.unknown")}</span>
+            </div>
+          </div>
+
+          {tree.date ? (
+            <p className="text-xs text-muted-foreground">
+              {t("tree.measured")} <span className="text-foreground">{tree.date}</span>
+            </p>
+          ) : null}
+          {tree.notes ? (
+            <p className="text-xs leading-5 text-muted-foreground">{tree.notes}</p>
+          ) : null}
+        </div>
+      </div>
+    </motion.aside>
   );
 }
 

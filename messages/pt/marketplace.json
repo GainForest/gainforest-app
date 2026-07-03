@@ -1688,6 +1688,17 @@
         "mangroves": "Manguezais"
       }
     },
+    "tree": {
+      "title": "Árvore",
+      "close": "Fechar",
+      "species": "Espécie",
+      "height": "Altura",
+      "dbh": "DAP",
+      "measured": "Medido:",
+      "unknown": "Desconhecido",
+      "unknownSpecies": "Espécie desconhecida",
+      "photo": "Foto {index}"
+    },
     "loadingGlobe": "Preparando o globo…",
     "sheet": {
       "expand": "Mostrar detalhes",

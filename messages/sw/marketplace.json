@@ -1688,6 +1688,17 @@
         "mangroves": "Mikoko"
       }
     },
+    "tree": {
+      "title": "Mti",
+      "close": "Funga",
+      "species": "Spishi",
+      "height": "Urefu",
+      "dbh": "DBH",
+      "measured": "Kilichopimwa:",
+      "unknown": "Haijulikani",
+      "unknownSpecies": "Spishi haijulikani",
+      "photo": "Picha {index}"
+    },
     "loadingGlobe": "Inaandaa dunia…",
     "sheet": {
       "expand": "Onyesha maelezo",
