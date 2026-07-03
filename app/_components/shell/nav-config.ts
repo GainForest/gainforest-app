@@ -18,6 +18,9 @@ export type NavLeaf = {
   href: string;
   pathCheck: { equals?: string; startsWith?: string };
   tabCheck?: string;
+  /** Only shown to GainForest admin-group members (any role). The route
+   *  itself must re-check access server-side — hiding the item is cosmetic. */
+  adminOnly?: boolean;
 };
 
 export type NavSection = {
@@ -97,6 +100,8 @@ export const NAV_ITEMS: NavSection[] = [
         Icon: HeartHandshakeIcon,
         href: "/donations",
         pathCheck: { startsWith: "/donations" },
+        // The donations hub is admin-only for now; hide it from the public.
+        adminOnly: true,
       },
       {
         kind: "leaf",

@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { ArrowUpRightIcon, BadgeCheckIcon, CheckIcon, CompassIcon, CopyIcon, EyeIcon, Share2Icon, TrophyIcon, WalletIcon } from "lucide-react";
+import { ArrowUpRightIcon, BadgeCheckIcon, CheckIcon, CompassIcon, CopyIcon, EyeIcon, Share2Icon, WalletIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
@@ -700,13 +700,9 @@ function SuccessModal({
           </div>
           <div className="min-w-full w-0 overflow-x-auto">
             <div className="flex items-center gap-1">
+              {/* The leaderboard lives in the admin-gated donations hub now,
+                  so the post-donation shortcut only points at public pages. */}
               <Button variant="secondary" className="h-16 flex-1 flex-col items-start rounded-2xl" onClick={handleDone} asChild>
-                <Link href="/leaderboard">
-                  <TrophyIcon className="opacity-40" />
-                  <span>See Leaderboard</span>
-                </Link>
-              </Button>
-              <Button variant="secondary" className="h-16 flex-col items-start rounded-2xl" onClick={handleDone} asChild>
                 <Link href="/projects">
                   <CompassIcon className="opacity-40" />
                   <span>Explore more projects</span>

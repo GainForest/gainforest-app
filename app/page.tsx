@@ -80,8 +80,8 @@ function BrowseGridFallback() {
           <Skeleton className="h-12 w-64 rounded-full" />
           <Skeleton className="mt-4 h-5 w-full max-w-xl rounded-full" />
         </div>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {Array.from({ length: 4 }).map((_, index) => (
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 3 }).map((_, index) => (
             <div key={index} className="min-h-[230px] rounded-2xl border border-border bg-card p-6 shadow-lg shadow-foreground/5">
               <Skeleton className="h-6 w-28 rounded-full" />
               <Skeleton className="mt-5 h-9 w-40 rounded-full" />

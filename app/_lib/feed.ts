@@ -26,7 +26,7 @@
 import { cachedAsync } from "./async-cache";
 import { fetchHiddenAccountDids, indexerQuery } from "./indexer";
 import { normaliseRef } from "./pds";
-import { FACILITATOR_DID, accountHref, localObservationHref, localProjectHref } from "./urls";
+import { FACILITATOR_DID, accountHref, localBumicertHref, localObservationHref, localProjectHref } from "./urls";
 
 /** The kinds of activity a feed row represents.
  *
@@ -574,6 +574,10 @@ function mapDonations(nodes: RawReceipt[]): { items: ActivityFeedItem[]; certUri
   const items = nodes.map((n): ActivityFeedItem => {
     const certUri = n.for?.uri ?? null;
     if (certUri) certUriById.set(n.uri, certUri);
+    // Fallback link while the funded project is unresolved: the Cert page
+    // itself (the donations hub is admin-gated now), else the feed.
+    const certRef = certUri ? parseAtUri(certUri) : null;
+    const fallbackHref = certRef ? localBumicertHref(certRef.did, certRef.rkey) : "/feed";
     const donorWallet = n.from?.__typename === "OrgHypercertsFundingReceiptText" ? n.from.value ?? null : null;
     const donorDid = n.from?.__typename === "AppCertifiedDefsDid" ? n.from.did ?? null : null;
     const currency = (n.currency ?? "USD").toUpperCase();
@@ -588,7 +592,7 @@ function mapDonations(nodes: RawReceipt[]): { items: ActivityFeedItem[]; certUri
       actorAvatarRef: null,
       title: null,
       text: clampText(donorWallet ? `via ${donorWallet.slice(0, 10)}…` : null),
-      href: "/donations",
+      href: fallbackHref,
       imageUrl: null,
       imageRef: null,
       targetTitle: null,
@@ -613,7 +617,7 @@ async function enrichDonations(pageItems: ActivityFeedItem[], certUriById: Map<s
     if (it.kind !== "donation") continue;
     const certUri = certUriById.get(it.id);
     const project = certUri ? projectByCert.get(certUri) ?? null : null;
-    if (!project) continue; // legacy standalone Cert — keep the donations-hub link
+    if (!project) continue; // legacy standalone Cert — keep the Cert-page link
     const projectHref = localProjectHref(project.did, project.rkey);
     it.href = projectHref;
     it.targetHref = projectHref;
