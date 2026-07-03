@@ -40,7 +40,8 @@
       "clearCategory": "Limpar {category}"
     },
     "filters": {
-      "allTitle": "Todos os filtros",
+      "allTitle": "Ordenar e filtrar",
+      "sortLabel": "Ordenar",
       "description": "Mostre Certs por selo de origem, fotos, locais do projeto, pessoas nomeadas, datas de trabalho ou doações.",
       "sightingsDescription": "Mostre avistamentos por origem, tipo de mídia ou grupo da natureza.",
       "organization": "Organização",
@@ -48,8 +49,8 @@
       "country": "País",
       "impactArea": "Área de impacto",
       "allBumicerts": "Todos os certificados",
-      "allFilters": "Todos os filtros",
-      "allFiltersAria": "Todos os filtros",
+      "allFilters": "Ordenar e filtrar",
+      "allFiltersAria": "Ordenar e filtrar",
       "updateHint": "Os filtros são atualizados conforme você escolhe.",
       "images": "Mostra fotos",
       "locations": "Mostra locais de projeto",
@@ -59,7 +60,7 @@
       "badges": {
         "all": "Todas",
         "gainforest": "GainForest",
-        "maearth": "Ma Earth",
+        "maearth": "Na plataforma Ma Earth",
         "maearthRound1": "Ma Earth Rodada 1",
         "maearthRound2": "Ma Earth Rodada 2"
       }
@@ -916,7 +917,7 @@
     },
     "filters": {
       "allProjects": "Todos os projetos",
-      "allFilters": "Todos os filtros",
+      "allFilters": "Ordenar e filtrar",
       "description": "Mostre projetos por selo de origem, imagens ou um local de projeto.",
       "updateHint": "Os filtros são atualizados conforme você escolhe.",
       "images": "Mostra imagens",

@@ -47,7 +47,7 @@ import { resolveDidProfile, getCachedProfile } from "../_lib/did-profile";
 import { formatCompact, countryFlag, formatCountry, formatDate } from "../_lib/format";
 import { AutoLoadMoreButton } from "./AutoLoadMoreButton";
 import { OwnerFilterBanner, OwnerFilterButton, useOwnerFilter } from "./OwnerFilter";
-import { AllFiltersPopover, SourceFilterChips } from "./AllFiltersPopover";
+import { AllFiltersPopover, SortSection, SourceFilterChips } from "./AllFiltersPopover";
 import { PictureHero } from "./PictureHero";
 import { TrustedByBadges } from "./TrustedByBadges";
 import { useStableQueryView } from "../_lib/use-stable-query-view";
@@ -686,7 +686,11 @@ export function RecordExplorer({
 
             {ownerFilterActive ? <OwnerFilterButton ownerDid={ownerDid ?? null} onChange={setOwnerDid} /> : null}
 
-            <SortControl sort={sort} setSort={(nextSort) => void setSort(nextSort)} open={sortOpen} setOpen={setSortOpen} />
+            {/* Occurrence explore folds sort into its "Sort and Filter" popover
+                below; other kinds keep the standalone sort control. */}
+            {kind === "occurrence" && !hideOccurrenceFilters ? null : (
+              <SortControl sort={sort} setSort={(nextSort) => void setSort(nextSort)} open={sortOpen} setOpen={setSortOpen} />
+            )}
 
             {/* Cards / List / Map view toggle */}
             <div className="inline-flex h-10 shrink-0 items-center rounded-full border border-border bg-background/50 p-0.5 backdrop-blur">
@@ -739,7 +743,15 @@ export function RecordExplorer({
                   changeCategory("all");
                 }}
               >
-                <div className="flex flex-wrap gap-2">
+                <div className="mb-3">
+                  <SortSection
+                    label={exploreT("filters.sortLabel")}
+                    options={SORT_OPTIONS}
+                    value={sort}
+                    onChange={(value) => void setSort(value)}
+                  />
+                </div>
+                <div className="flex flex-wrap gap-2 border-t border-border/60 pt-3">
                   <SourceFilterChips
                     options={badgeFilterOptions}
                     selected={badgeFilters}

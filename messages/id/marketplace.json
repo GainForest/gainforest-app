@@ -40,7 +40,8 @@
       "clearCategory": "Hapus {category}"
     },
     "filters": {
-      "allTitle": "Semua filter",
+      "allTitle": "Urutkan dan filter",
+      "sortLabel": "Urutkan",
       "description": "Tampilkan Cert berdasarkan lencana sumber, foto, lokasi proyek, orang yang disebutkan, tanggal kerja, atau donasi.",
       "sightingsDescription": "Tampilkan pengamatan berdasarkan sumber, jenis media, atau kelompok alam.",
       "organization": "Organisasi",
@@ -48,8 +49,8 @@
       "country": "Negara",
       "impactArea": "Area dampak",
       "allBumicerts": "Semua sertifikat",
-      "allFilters": "Semua filter",
-      "allFiltersAria": "Semua filter",
+      "allFilters": "Urutkan dan filter",
+      "allFiltersAria": "Urutkan dan filter",
       "updateHint": "Filter diperbarui saat Anda memilih.",
       "images": "Menampilkan foto",
       "locations": "Menampilkan tempat proyek",
@@ -59,7 +60,7 @@
       "badges": {
         "all": "Semua",
         "gainforest": "GainForest",
-        "maearth": "Ma Earth",
+        "maearth": "Di platform Ma Earth",
         "maearthRound1": "Ma Earth Putaran 1",
         "maearthRound2": "Ma Earth Putaran 2"
       }
@@ -916,7 +917,7 @@
     },
     "filters": {
       "allProjects": "Semua proyek",
-      "allFilters": "Semua filter",
+      "allFilters": "Urutkan dan filter",
       "description": "Tampilkan proyek berdasarkan lencana sumber, gambar, atau tempat proyek.",
       "updateHint": "Filter diperbarui saat Anda memilih.",
       "images": "Menampilkan gambar",

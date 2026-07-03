@@ -2,11 +2,8 @@
 
 import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
-import { AnimatePresence, motion } from "framer-motion";
 import {
-  ArrowUpDownIcon,
   ArrowUpRightIcon,
-  ChevronDownIcon,
   ChevronRightIcon,
   LayoutGridIcon,
   LeafIcon,
@@ -18,7 +15,7 @@ import { memo, useCallback, useDeferredValue, useEffect, useMemo, useRef, useSta
 import { parseAsString, parseAsStringEnum, useQueryState } from "nuqs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AutoLoadMoreButton } from "../_components/AutoLoadMoreButton";
-import { AllFiltersPopover, SourceFilterChips } from "../_components/AllFiltersPopover";
+import { AllFiltersPopover, SortSection, SourceFilterChips } from "../_components/AllFiltersPopover";
 import { RecordDrawer } from "../_components/RecordDrawer";
 import { RecordMap } from "../_components/RecordMap";
 import { TrustedByBadges } from "../_components/TrustedByBadges";
@@ -103,7 +100,6 @@ export function OrganizationsClient({ records: initialRecords = [] }: { records?
     values: VIEW_MODES,
     defaultValue: "cards",
   });
-  const [openDropdown, setOpenDropdown] = useState(false);
   const [drawer, setDrawer] = useState<SiteRecord | null>(null);
   const [cardLimit, setCardLimit] = useState(INITIAL_CARD_LIMIT);
   const [autoLoadMore, setAutoLoadMore] = useState(false);
@@ -115,6 +111,7 @@ export function OrganizationsClient({ records: initialRecords = [] }: { records?
     { key: "gainforest", label: exploreT("filters.badges.gainforest"), logoSrc: "/assets/media/images/gainforest-logo.svg" },
     { key: "maearth", label: exploreT("filters.badges.maearth"), logoSrc: "/assets/media/images/badges/ma-earth-logo.webp" },
   ], [exploreT]);
+  const sortOptions = useMemo(() => SORT_OPTION_VALUES.map((value) => ({ value, label: t(`sort.${value}`) })), [t]);
 
   useEffect(() => {
     if (initialRecords.length > 0) return;
@@ -327,8 +324,6 @@ export function OrganizationsClient({ records: initialRecords = [] }: { records?
                 />
               </div>
 
-              <SortControl sort={sort} setSort={(nextSort) => void setSort(nextSort)} open={openDropdown} setOpen={setOpenDropdown} />
-
               <ViewToggle view={view} setView={(nextView) => void setView(nextView)} />
             </div>
 
@@ -341,7 +336,15 @@ export function OrganizationsClient({ records: initialRecords = [] }: { records?
                 description={t("filters.description")}
                 onClear={clearFilterControls}
               >
-                <div className="flex flex-wrap gap-2">
+                <div className="mb-3">
+                  <SortSection
+                    label={exploreT("filters.sortLabel")}
+                    options={sortOptions}
+                    value={sort}
+                    onChange={(value) => void setSort(value)}
+                  />
+                </div>
+                <div className="flex flex-wrap gap-2 border-t border-border/60 pt-3">
                   <SourceFilterChips
                     options={badgeFilterOptions}
                     selected={badgeFilters}
@@ -529,88 +532,6 @@ function ViewToggle({ view, setView }: { view: ViewMode; setView: (view: ViewMod
           <span className="hidden sm:inline">{label}</span>
         </button>
       ))}
-    </div>
-  );
-}
-
-function SortControl({
-  sort,
-  setSort,
-  open,
-  setOpen,
-}: {
-  sort: SortMode;
-  setSort: (sort: SortMode) => void;
-  open: boolean;
-  setOpen: (updater: (open: boolean) => boolean) => void;
-}) {
-  const t = useTranslations("marketplace.organizations");
-  const sortOptions = SORT_OPTION_VALUES.map((value) => ({ value, label: t(`sort.${value}`) }));
-  const containerRef = useRef<HTMLDivElement | null>(null);
-
-  useEffect(() => {
-    if (!open) return;
-
-    const handlePointerDown = (event: PointerEvent) => {
-      if (containerRef.current?.contains(event.target as Node)) return;
-      setOpen(() => false);
-    };
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setOpen(() => false);
-    };
-
-    document.addEventListener("pointerdown", handlePointerDown);
-    document.addEventListener("keydown", handleKeyDown);
-    return () => {
-      document.removeEventListener("pointerdown", handlePointerDown);
-      document.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [open, setOpen]);
-
-  return (
-    <div ref={containerRef} className="relative shrink-0">
-      <button
-        type="button"
-        onClick={() => setOpen((value) => !value)}
-        aria-expanded={open}
-        aria-label={t("search.sortAriaLabel")}
-        className="inline-flex h-10 cursor-pointer items-center justify-center gap-1.5 whitespace-nowrap rounded-full border border-border bg-background px-3 text-sm font-medium transition-colors hover:bg-muted hover:text-foreground hover:shadow-sm"
-      >
-        <ArrowUpDownIcon className="h-4 w-4" />
-        <span className="hidden md:inline">{sortOptions.find((option) => option.value === sort)?.label}</span>
-        <ChevronDownIcon className={`hidden h-4 w-4 transition-transform md:inline ${open ? "rotate-180" : ""}`} />
-      </button>
-
-      <AnimatePresence>
-        {open && (
-          <>
-            <motion.div
-              initial={{ opacity: 0, y: -8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              className="absolute top-full right-0 z-[1000] mt-2 w-44 rounded-2xl border border-border bg-popover py-1.5 shadow-xl"
-            >
-              {sortOptions.map((option) => (
-                <button
-                  key={option.value}
-                  onClick={() => {
-                    setSort(option.value);
-                    setOpen(() => false);
-                  }}
-                  className={`w-full px-3 py-2 text-left text-sm transition-colors ${
-                    sort === option.value
-                      ? "bg-primary/5 text-primary"
-                      : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
-                  }`}
-                >
-                  {option.label}
-                </button>
-              ))}
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
     </div>
   );
 }
