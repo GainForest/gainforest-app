@@ -942,7 +942,8 @@
       "grants": "Candidatos ao subsídio",
       "bioblitz": "BioBlitz",
       "testAccounts": "Contas de teste",
-      "endorsers": "Apoiadores"
+      "endorsers": "Apoiadores",
+      "awardEndorsements": "Conceder endossos"
     },
     "unnamed": "Conta sem nome",
     "awardHint": "Abra um perfil para conceder um selo.",
@@ -1169,5 +1170,26 @@
     "removeLabel": "Remover {name}",
     "builtinChip": "Integrado",
     "propagationHint": "Novos apoiadores levam alguns minutos para aparecer na app."
+  },
+  "adminAwardEndorsements": {
+    "title": "Conceder endossos",
+    "description": "Endosse outras organizações em nome da GainForest. As organizações endossadas mostram “Com a confiança de GainForest” em toda a app.",
+    "notAllowed": "Conceder endossos exige ser administrador da organização GainForest. Peça a um proprietário da GainForest para adicionar você como administrador.",
+    "noBadges": "Ainda não existe um selo de endosso. Primeiro crie um selo do tipo “Endosso”.",
+    "manageBadges": "Gerir selos",
+    "badgeLabel": "Selo de endosso",
+    "inputLabel": "Identificador da organização ou id da conta",
+    "inputPlaceholder": "handle.certified.one ou did:plc:…",
+    "noteLabel": "Nota (opcional)",
+    "notePlaceholder": "Adicione uma nota sobre este endosso (opcional)",
+    "awardButton": "Conceder endosso",
+    "awardError": "Não foi possível conceder o endosso.",
+    "removeError": "Não foi possível remover o endosso.",
+    "removeLabel": "Remover o endosso de {name}",
+    "emailNotSupported": "Insira o identificador ou id da conta de uma organização; endossos não podem ser enviados para um e-mail.",
+    "alreadyEndorsed": "Esta organização já tem este endosso.",
+    "empty": "Ainda não foram concedidos endossos.",
+    "unnamed": "Organização sem nome",
+    "propagationHint": "Novos endossos levam alguns minutos para aparecer na app."
   }
 }

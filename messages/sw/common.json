@@ -942,7 +942,8 @@
       "grants": "Waombaji wa ruzuku",
       "bioblitz": "BioBlitz",
       "testAccounts": "Akaunti za majaribio",
-      "endorsers": "Wadhamini"
+      "endorsers": "Wadhamini",
+      "awardEndorsements": "Toa idhini"
     },
     "unnamed": "Akaunti isiyo na jina",
     "awardHint": "Fungua wasifu ili kutoa beji.",
@@ -1169,5 +1170,26 @@
     "removeLabel": "Ondoa {name}",
     "builtinChip": "Iliyojengwa",
     "propagationHint": "Wadhamini wapya huchukua dakika chache kuonekana kwenye programu."
+  },
+  "adminAwardEndorsements": {
+    "title": "Toa idhini",
+    "description": "Idhinisha mashirika mengine kwa niaba ya GainForest. Mashirika yaliyoidhinishwa huonyesha “Inaaminiwa na GainForest” kotekote kwenye programu.",
+    "notAllowed": "Kutoa idhini kunahitaji msimamizi wa shirika la GainForest. Omba mmiliki wa GainForest akuongeze kama msimamizi.",
+    "noBadges": "Bado hakuna beji ya uidhinishaji. Kwanza tengeneza beji ya aina ya “Uidhinishaji”.",
+    "manageBadges": "Simamia beji",
+    "badgeLabel": "Beji ya uidhinishaji",
+    "inputLabel": "Kitambulisho cha shirika au kitambulisho cha akaunti",
+    "inputPlaceholder": "handle.certified.one au did:plc:…",
+    "noteLabel": "Dokezo (hiari)",
+    "notePlaceholder": "Ongeza dokezo kuhusu idhini hii (hiari)",
+    "awardButton": "Toa idhini",
+    "awardError": "Imeshindwa kutoa idhini.",
+    "removeError": "Imeshindwa kuondoa idhini.",
+    "removeLabel": "Ondoa idhini ya {name}",
+    "emailNotSupported": "Weka kitambulisho cha shirika au cha akaunti — idhini haziwezi kutumwa kwa barua pepe.",
+    "alreadyEndorsed": "Shirika hili tayari lina idhini hii.",
+    "empty": "Bado hakuna idhini zilizotolewa.",
+    "unnamed": "Shirika lisilo na jina",
+    "propagationHint": "Idhini mpya huchukua dakika chache kuonekana kwenye programu."
   }
 }

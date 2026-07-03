@@ -942,7 +942,8 @@
       "grants": "Solicitantes de subvención",
       "bioblitz": "BioBlitz",
       "testAccounts": "Cuentas de prueba",
-      "endorsers": "Avaladores"
+      "endorsers": "Avaladores",
+      "awardEndorsements": "Otorgar respaldos"
     },
     "unnamed": "Cuenta sin nombre",
     "awardHint": "Abre un perfil para otorgar una insignia.",
@@ -1169,5 +1170,26 @@
     "removeLabel": "Eliminar {name}",
     "builtinChip": "Integrado",
     "propagationHint": "Los nuevos avaladores tardan unos minutos en aparecer en la app."
+  },
+  "adminAwardEndorsements": {
+    "title": "Otorgar respaldos",
+    "description": "Respalda a otras organizaciones en nombre de GainForest. Las organizaciones respaldadas muestran “Con la confianza de GainForest” en toda la app.",
+    "notAllowed": "Para otorgar respaldos necesitas ser administrador de la organización GainForest. Pide a un propietario de GainForest que te agregue como administrador.",
+    "noBadges": "Todavía no hay una insignia de respaldo. Primero crea una insignia del tipo “Respaldo”.",
+    "manageBadges": "Gestionar insignias",
+    "badgeLabel": "Insignia de respaldo",
+    "inputLabel": "Handle de la organización o id de cuenta",
+    "inputPlaceholder": "handle.certified.one o did:plc:…",
+    "noteLabel": "Nota (opcional)",
+    "notePlaceholder": "Agrega una nota sobre este respaldo (opcional)",
+    "awardButton": "Otorgar respaldo",
+    "awardError": "No se pudo otorgar el respaldo.",
+    "removeError": "No se pudo eliminar el respaldo.",
+    "removeLabel": "Eliminar el respaldo de {name}",
+    "emailNotSupported": "Ingresa el handle o id de cuenta de una organización; los respaldos no se pueden enviar a un correo electrónico.",
+    "alreadyEndorsed": "Esta organización ya tiene este respaldo.",
+    "empty": "Todavía no se han otorgado respaldos.",
+    "unnamed": "Organización sin nombre",
+    "propagationHint": "Los nuevos respaldos tardan unos minutos en aparecer en la app."
   }
 }
