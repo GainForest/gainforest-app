@@ -395,7 +395,7 @@ export function EvidenceAdder({
             {evidenceT("postUpdate")}
           </Button>
         </div>
-        <AnimatePresence initial={false} mode="popLayout">
+        <AnimatePresence initial={false} mode="wait">
           {activeTab ? (
             <motion.div
               key={activeTab}
