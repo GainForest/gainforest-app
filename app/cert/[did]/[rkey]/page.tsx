@@ -681,6 +681,7 @@ export async function ProjectDetailView({
     { id: "updates", href: updatesHref, label: projectNavT("updates") },
     { id: "reviews", href: reviewsHref, label: projectNavT("reviews") },
   ];
+  const showOverviewSidebar = activeTab === "overview";
 
   return (
     <>
@@ -783,7 +784,7 @@ export async function ProjectDetailView({
             </div>
           ) : null}
         </header>
-        <section className="mx-auto grid max-w-6xl grid-cols-1 gap-x-10 gap-y-8 px-6 pb-8 pt-8 lg:grid-cols-[minmax(0,1fr)_320px] lg:px-8">
+        <section className={`mx-auto grid max-w-6xl grid-cols-1 gap-x-10 gap-y-8 px-6 pb-8 pt-8 lg:px-8 ${showOverviewSidebar ? "lg:grid-cols-[minmax(0,1fr)_320px]" : ""}`}>
           <div className="min-w-0">
             {activeTab === "overview" ? (
               <>
@@ -831,7 +832,7 @@ export async function ProjectDetailView({
                 ) : null}
 
                 {showUpdates ? (
-                  <ProjectDetailSection id="updates" icon={<PaperclipIcon className="h-4 w-4" aria-hidden />} title="Updates & evidence" count={timelineEntries.length > 0 ? formatNumber(timelineEntries.length) : undefined}>
+                  <ProjectDetailSection id="updates" icon={<PaperclipIcon className="h-4 w-4" aria-hidden />} title={projectNavT("updates")} count={timelineEntries.length > 0 ? formatNumber(timelineEntries.length) : undefined}>
                     <BumicertTimeline
                       organizationDid={record.did}
                       activityUri={record.atUri}
@@ -881,7 +882,7 @@ export async function ProjectDetailView({
             ) : null}
 
             {activeTab === "updates" ? (
-              <ProjectDetailSection id="updates" icon={<PaperclipIcon className="h-4 w-4" aria-hidden />} title="Updates & evidence" count={timelineEntries.length > 0 ? formatNumber(timelineEntries.length) : undefined}>
+              <ProjectDetailSection id="updates" icon={<PaperclipIcon className="h-4 w-4" aria-hidden />} title={projectNavT("updates")} count={timelineEntries.length > 0 ? formatNumber(timelineEntries.length) : undefined}>
                 <BumicertTimeline
                   organizationDid={record.did}
                   activityUri={record.atUri}
@@ -907,38 +908,40 @@ export async function ProjectDetailView({
             ) : null}
           </div>
 
-          <aside className="min-w-0">
-            <div className="lg:sticky lg:top-24">
-              <OverviewSidebar
-                record={record}
-                detail={detail}
-                owner={owner}
-                receipts={donationReceipts}
-                donationsUnavailable={donationsUnavailable}
-                fundingConfig={fundingConfig}
-                authSession={authSession}
-                canDelete={certManageAccess.canDelete}
-                canManageDonations={certManageAccess.canManageDonations}
-                mutationRepo={certManageAccess.mutationRepo}
-                deleteRedirectHref={ownerProfileHref}
-                projectRkey={projectRkey}
-                hideOwner
-                hideImage
-                extra={
-                  <ProjectSidebarExtras
-                    record={record}
-                    detail={detail}
-                    workScopeLabels={workScopeLabels}
-                    period={period}
-                    mapLocationUri={hasPlaces ? record.locationUris[0] : null}
-                    recentUpdates={recentUpdates}
-                    placesHref={placesHref}
-                    updatesHref={updatesHref}
-                  />
-                }
-              />
-            </div>
-          </aside>
+          {showOverviewSidebar ? (
+            <aside className="min-w-0">
+              <div className="lg:sticky lg:top-24">
+                <OverviewSidebar
+                  record={record}
+                  detail={detail}
+                  owner={owner}
+                  receipts={donationReceipts}
+                  donationsUnavailable={donationsUnavailable}
+                  fundingConfig={fundingConfig}
+                  authSession={authSession}
+                  canDelete={certManageAccess.canDelete}
+                  canManageDonations={certManageAccess.canManageDonations}
+                  mutationRepo={certManageAccess.mutationRepo}
+                  deleteRedirectHref={ownerProfileHref}
+                  projectRkey={projectRkey}
+                  hideOwner
+                  hideImage
+                  extra={
+                    <ProjectSidebarExtras
+                      record={record}
+                      detail={detail}
+                      workScopeLabels={workScopeLabels}
+                      period={period}
+                      mapLocationUri={hasPlaces ? record.locationUris[0] : null}
+                      recentUpdates={recentUpdates}
+                      placesHref={placesHref}
+                      updatesHref={updatesHref}
+                    />
+                  }
+                />
+              </div>
+            </aside>
+          ) : null}
         </section>
       </main>
     </>
