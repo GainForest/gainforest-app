@@ -5,7 +5,7 @@ import {
 } from "./evidenceContentTypeRegistry";
 
 export type TimelineEvidenceFilter = "all" | "tree" | "audio" | "nature" | "file";
-export type TimelineEvidenceKind = Exclude<TimelineEvidenceFilter, "all"> | "site" | "other";
+export type TimelineEvidenceKind = Exclude<TimelineEvidenceFilter, "all"> | "site" | "update" | "other";
 
 export const TIMELINE_EVIDENCE_FILTERS: Array<{ id: TimelineEvidenceFilter }> = [
   { id: "all" },

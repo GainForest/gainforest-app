@@ -61,6 +61,7 @@
       "selectEvidence": "Seleccione la evidencia a agregar.",
       "addType": "Agregar {type}",
       "tabs": {
+        "update": "Actualización de texto",
         "audio": "Sonidos",
         "trees": "Árboles",
         "biodiversity": "Observaciones",
@@ -101,6 +102,7 @@
         "certificate": "Certificado",
         "audio": "Sonido",
         "other": "Otros permisos",
+        "update": "Actualización",
         "treeDataset": "Conjunto de datos de árbol",
         "biodiversity": "Naturaleza",
         "occurrence": "Árbol"
@@ -140,10 +142,21 @@
       "checkingExistingLinks": "Comprobando los vínculos existentes de la cronología…",
       "unableToVerifyExistingLinks": "No se pudieron comprobar los enlaces existentes. Actualiza antes de vincular grupos de árboles.",
       "tabDescriptions": {
+        "update": "Escribe una breve actualización sobre el avance de este proyecto.",
         "audio": "Añade sonidos ya guardados por esta organización.",
         "trees": "Añade información de árboles agrupada por lugar del proyecto.",
         "biodiversity": "Filtra observaciones y agrega registros mostrados o grupos guardados.",
         "files": "Añade informes, fotos, videos o páginas web."
+      },
+      "update": {
+        "heading": "Escribir una actualización",
+        "subheading": "Comparte el avance con tus propias palabras. Aparecerá en las actualizaciones públicas del proyecto.",
+        "titleLabel": "Título",
+        "titlePlaceholder": "¿Qué hay de nuevo?",
+        "bodyLabel": "Actualización",
+        "bodyPlaceholder": "Comparte avances, hitos o noticias desde el campo…",
+        "post": "Publicar actualización",
+        "posting": "Publicando…"
       },
       "permissions": {
         "signIn": "Inicia sesión con una cuenta que pueda gestionar esta línea de tiempo.",
@@ -210,6 +223,7 @@
         "biodiversity": "Naturaleza",
         "document": "Archivos",
         "site": "Lugar del proyecto",
+        "update": "Actualización",
         "other": "Evidencia"
       },
       "notSpecified": "No especificado",

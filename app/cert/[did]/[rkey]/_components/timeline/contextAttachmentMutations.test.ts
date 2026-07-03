@@ -52,6 +52,73 @@ describe("context attachment mutation helpers", () => {
     expect(record.createdAt).toBe("2026-01-02T03:04:05.000Z");
   });
 
+  it("builds text-only update records with a leaflet linear document description", () => {
+    const record = buildStubContextAttachmentRecord({
+      draft: draft({
+        title: "Flourishing Indigenous gatherings continue",
+        contentType: "update",
+        contents: [],
+        contextualSubjects: [],
+        textBody: "We continue to host communities.\n\nOur most recent tree planting was a success.",
+      }),
+      activitySubject,
+      createdAt: "2026-01-02T03:04:05.000Z",
+    });
+
+    expect(record.contentType).toBe("update");
+    expect(record.content).toBeUndefined();
+    expect(record.subjects).toEqual([
+      { $type: "com.atproto.repo.strongRef", ...activitySubject },
+    ]);
+    expect(record.description).toEqual({
+      $type: "pub.leaflet.pages.linearDocument",
+      blocks: [
+        {
+          $type: "pub.leaflet.pages.linearDocument#block",
+          block: { $type: "pub.leaflet.blocks.text", plaintext: "We continue to host communities." },
+        },
+        {
+          $type: "pub.leaflet.pages.linearDocument#block",
+          block: { $type: "pub.leaflet.blocks.text", plaintext: "Our most recent tree planting was a success." },
+        },
+      ],
+    });
+  });
+
+  it("keeps the text body in optimistic items so new updates render immediately", () => {
+    const item = buildOptimisticAttachmentItem({
+      did: "did:example:org",
+      created: {
+        uri: "at://did:example:org/org.hypercerts.context.attachment/update",
+        cid: "bafkreiattachment",
+        rkey: "update",
+      },
+      draft: draft({ contentType: "update", contents: [], contextualSubjects: [], textBody: "Progress update" }),
+      activitySubject,
+      content: [],
+    });
+
+    expect(item.record.contentType).toBe("update");
+    expect(item.record.description).toEqual({
+      $type: "pub.leaflet.pages.linearDocument",
+      blocks: [
+        {
+          $type: "pub.leaflet.pages.linearDocument#block",
+          block: { $type: "pub.leaflet.blocks.text", plaintext: "Progress update" },
+        },
+      ],
+    });
+  });
+
+  it("blocks drafts with neither content items nor a text body", () => {
+    expect(() =>
+      buildStubContextAttachmentRecord({
+        draft: draft({ contentType: "update", contents: [], contextualSubjects: [], textBody: "   " }),
+        activitySubject,
+      }),
+    ).toThrow(new AttachmentMutationInputError("empty-content"));
+  });
+
   it("blocks tree evidence when the certified location context is missing", () => {
     expect(() =>
       buildStubContextAttachmentRecord({

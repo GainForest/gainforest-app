@@ -18,6 +18,7 @@ describe("evidence content type registry", () => {
     expect(getRegisteredEvidenceKind("biodiversity-dataset")).toBe("nature");
     expect(getRegisteredEvidenceKind("document")).toBe("file");
     expect(getRegisteredEvidenceKind("location")).toBe("site");
+    expect(getRegisteredEvidenceKind("update")).toBe("update");
   });
 
   it("returns source-truth file picker options", () => {

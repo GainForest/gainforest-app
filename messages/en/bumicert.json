@@ -61,6 +61,7 @@
       "selectEvidence": "Select the evidence to add.",
       "addType": "Add {type}",
       "tabs": {
+        "update": "Text update",
         "audio": "Sounds",
         "trees": "Trees",
         "biodiversity": "Observations",
@@ -101,6 +102,7 @@
         "certificate": "Certificate",
         "audio": "Sound",
         "other": "Other",
+        "update": "Update",
         "treeDataset": "Tree dataset",
         "biodiversity": "Nature",
         "occurrence": "Tree"
@@ -140,10 +142,21 @@
       "checkingExistingLinks": "Checking existing timeline links…",
       "unableToVerifyExistingLinks": "Existing links could not be checked. Refresh before linking tree groups.",
       "tabDescriptions": {
+        "update": "Write a short progress update for this project.",
         "audio": "Add sounds already saved by this organization.",
         "trees": "Add tree information grouped by project place.",
         "biodiversity": "Filter observations and add displayed records or saved groups.",
         "files": "Add reports, photos, videos, or web pages."
+      },
+      "update": {
+        "heading": "Write an update",
+        "subheading": "Share progress in your own words. It will appear in the public project updates.",
+        "titleLabel": "Title",
+        "titlePlaceholder": "What's new?",
+        "bodyLabel": "Update",
+        "bodyPlaceholder": "Share progress, milestones, or news from the field…",
+        "post": "Post update",
+        "posting": "Posting…"
       },
       "permissions": {
         "signIn": "Sign in with an account that can manage this timeline.",
@@ -210,6 +223,7 @@
         "biodiversity": "Nature",
         "document": "Files",
         "site": "Project place",
+        "update": "Update",
         "other": "Evidence"
       },
       "notSpecified": "Not specified",

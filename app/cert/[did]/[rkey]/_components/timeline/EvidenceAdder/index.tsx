@@ -7,6 +7,7 @@ import {
   LeafIcon,
   Loader2Icon,
   MicIcon,
+  PenLineIcon,
   TreesIcon,
   type LucideIcon,
 } from "lucide-react";
@@ -32,6 +33,7 @@ import { TreeEvidencePicker } from "./TreeEvidencePicker";
 import { NatureEvidencePicker } from "./NatureEvidencePicker";
 import { NatureCsvUpload } from "./NatureCsvUpload";
 import { FileEvidencePicker } from "./FileEvidencePicker";
+import { TextUpdateComposer } from "./TextUpdateComposer";
 import {
   hasTimelineSourceData,
   type EvidenceTab,
@@ -43,11 +45,16 @@ import {
 export type { TimelineMutationPermission, TimelineSourceData } from "./types";
 
 const EVIDENCE_TABS: Array<{ id: EvidenceTab; icon: LucideIcon }> = [
+  { id: "update", icon: PenLineIcon },
   { id: "audio", icon: MicIcon },
   { id: "trees", icon: TreesIcon },
   { id: "nature", icon: LeafIcon },
   { id: "files", icon: FileTextIcon },
 ];
+
+// Tabs that create attachments locally instead of linking saved records, so
+// they never need the organization's evidence sources to be loaded.
+const TABS_WITHOUT_SOURCES: ReadonlySet<EvidenceTab> = new Set(["files", "update"]);
 
 export function EvidenceAdder({
   organizationDid,
@@ -86,12 +93,14 @@ export function EvidenceAdder({
   const linkedTreeGroups = useMemo(() => getLinkedTreeGroupUris(entries), [entries]);
   const linkedNatureUris = useMemo(() => getLinkedNatureUris(entries), [entries]);
   const tabLabels: Record<EvidenceTab, string> = {
+    update: evidenceT("tabs.update"),
     audio: evidenceT("tabs.audio"),
     trees: evidenceT("tabs.trees"),
     nature: evidenceT("tabs.biodiversity"),
     files: evidenceT("tabs.files"),
   };
   const tabDescriptions: Record<EvidenceTab, string> = {
+    update: evidenceT("tabDescriptions.update"),
     audio: evidenceT("tabDescriptions.audio"),
     trees: evidenceT("tabDescriptions.trees"),
     nature: evidenceT("tabDescriptions.biodiversity"),
@@ -99,7 +108,7 @@ export function EvidenceAdder({
   };
 
   useEffect(() => {
-    if (activeTab === null || activeTab === "files" || sourceState.status !== "idle") {
+    if (activeTab === null || TABS_WITHOUT_SOURCES.has(activeTab) || sourceState.status !== "idle") {
       return;
     }
 
@@ -181,7 +190,7 @@ export function EvidenceAdder({
     onSuccess?: () => void,
   ) {
     const items = (Array.isArray(drafts) ? drafts : [drafts]).filter(
-      (draft) => draft.contents.length > 0,
+      (draft) => draft.contents.length > 0 || Boolean(draft.textBody?.trim()),
     );
     if (items.length === 0) return;
 
@@ -274,8 +283,16 @@ export function EvidenceAdder({
   }
 
   const activeConfig = EVIDENCE_TABS.find((tab) => tab.id === activeTab)!;
-  const activeTabNeedsSources = activeTab !== "files";
+  const activeTabNeedsSources = !TABS_WITHOUT_SOURCES.has(activeTab);
   const activeSources = sourceState.data;
+  const activeHeading =
+    activeTab === "update"
+      ? evidenceT("update.heading")
+      : evidenceT("linkType", { type: tabLabels[activeConfig.id] });
+  const activeSubheading =
+    activeTab === "update"
+      ? evidenceT("update.subheading")
+      : evidenceT("selectRecordsToLink");
 
   return (
     <div className="flex flex-col">
@@ -292,10 +309,10 @@ export function EvidenceAdder({
         </Button>
         <div className="flex flex-col">
           <h2 id="link-evidence-heading" className="text-2xl tracking-tight text-foreground">
-            {evidenceT("linkType", { type: tabLabels[activeConfig.id] })}
+            {activeHeading}
           </h2>
           <p className="text-sm text-muted-foreground">
-            {evidenceT("selectRecordsToLink")}
+            {activeSubheading}
           </p>
         </div>
       </div>
@@ -345,6 +362,12 @@ export function EvidenceAdder({
         ) : null}
         {activeTab === "files" ? (
           <FileEvidencePicker
+            isSubmitting={isSubmitting}
+            submitDrafts={submitDrafts}
+          />
+        ) : null}
+        {activeTab === "update" ? (
+          <TextUpdateComposer
             isSubmitting={isSubmitting}
             submitDrafts={submitDrafts}
           />
