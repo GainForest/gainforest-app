@@ -9,7 +9,6 @@ import {
   ImageIcon,
   Loader2Icon,
   MicIcon,
-  PenLineIcon,
   TreesIcon,
   type LucideIcon,
 } from "lucide-react";
@@ -60,10 +59,6 @@ const EVIDENCE_TABS: Array<{ id: EvidenceTab; icon: LucideIcon }> = [
   { id: "nature", icon: BinocularsIcon },
   { id: "files", icon: FileTextIcon },
 ];
-
-// Tabs that create attachments locally instead of linking saved records, so
-// they never need the organization's evidence sources to be loaded.
-const TABS_WITHOUT_SOURCES: ReadonlySet<EvidenceTab> = new Set(["files", "update"]);
 
 export function EvidenceAdder({
   organizationDid,
@@ -267,14 +262,6 @@ export function EvidenceAdder({
   const captionTitle = caption.trim() ? titleFromCaption(caption) : null;
   const activeTabNeedsSources = activeTab !== null && activeTab !== "image" && activeTab !== "files";
   const activeSources = sourceState.data;
-  const activeHeading =
-    activeTab === "update"
-      ? evidenceT("update.heading")
-      : evidenceT("linkType", { type: tabLabels[activeConfig.id] });
-  const activeSubheading =
-    activeTab === "update"
-      ? evidenceT("update.subheading")
-      : evidenceT("selectRecordsToLink");
 
   function renderAttachmentPanel() {
     if (activeTab === null) return null;
