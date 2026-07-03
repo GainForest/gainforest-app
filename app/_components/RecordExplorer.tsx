@@ -47,6 +47,7 @@ import { resolveDidProfile, getCachedProfile } from "../_lib/did-profile";
 import { formatCompact, countryFlag, formatCountry, formatDate } from "../_lib/format";
 import { AutoLoadMoreButton } from "./AutoLoadMoreButton";
 import { OwnerFilterBanner, OwnerFilterButton, useOwnerFilter } from "./OwnerFilter";
+import { AllFiltersPopover, SortSection, SourceFilterChips } from "./AllFiltersPopover";
 import { PictureHero } from "./PictureHero";
 import { TrustedByBadges } from "./TrustedByBadges";
 import { useStableQueryView } from "../_lib/use-stable-query-view";
@@ -685,7 +686,11 @@ export function RecordExplorer({
 
             {ownerFilterActive ? <OwnerFilterButton ownerDid={ownerDid ?? null} onChange={setOwnerDid} /> : null}
 
-            <SortControl sort={sort} setSort={(nextSort) => void setSort(nextSort)} open={sortOpen} setOpen={setSortOpen} />
+            {/* Occurrence explore folds sort into its "Sort and Filter" popover
+                below; other kinds keep the standalone sort control. */}
+            {kind === "occurrence" && !hideOccurrenceFilters ? null : (
+              <SortControl sort={sort} setSort={(nextSort) => void setSort(nextSort)} open={sortOpen} setOpen={setSortOpen} />
+            )}
 
             {/* Cards / List / Map view toggle */}
             <div className="inline-flex h-10 shrink-0 items-center rounded-full border border-border bg-background/50 p-0.5 backdrop-blur">
@@ -722,59 +727,68 @@ export function RecordExplorer({
 
           {kind === "occurrence" && !hideOccurrenceFilters && (
             <div
-              className="scroll-mask-right scrollbar-hidden relative z-20 overflow-x-auto animate-in"
+              className="relative z-20 flex justify-end animate-in"
               style={{ animationDelay: "120ms" }}
             >
-              <div className="flex items-center gap-1.5 pb-1 pr-8">
-                <FilterPill
-                  selected={badgeFilters.length === 0}
-                  onClick={() => updateBadgeFilters([])}
-                >
-                  {exploreT("filters.badges.all")}
-                </FilterPill>
-                {badgeFilterOptions.map((badge) => (
-                  <FilterPill
-                    key={badge.key}
-                    selected={badgeFilters.includes(badge.key)}
-                    onClick={() => toggleBadgeFilter(badge.key)}
-                  >
-                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-background/80">
-                      <Image src={badge.logoSrc} width={20} height={20} alt="" className="h-5 w-5 object-contain" />
-                    </span>
-                    {badge.label}
-                  </FilterPill>
-                ))}
+              <AllFiltersPopover
+                activeCount={
+                  badgeFilters.length +
+                  (occMedia !== defaultOccurrenceMedia ? 1 : 0) +
+                  (occCategory !== "all" ? 1 : 0)
+                }
+                description={exploreT("filters.sightingsDescription")}
+                onClear={() => {
+                  updateBadgeFilters([]);
+                  changeMedia(defaultOccurrenceMedia);
+                  changeCategory("all");
+                }}
+              >
+                <div className="mb-3">
+                  <SortSection
+                    label={exploreT("filters.sortLabel")}
+                    options={SORT_OPTIONS}
+                    value={sort}
+                    onChange={(value) => void setSort(value)}
+                  />
+                </div>
+                <div className="flex flex-wrap gap-2 border-t border-border/60 pt-3">
+                  <SourceFilterChips
+                    options={badgeFilterOptions}
+                    selected={badgeFilters}
+                    onToggle={toggleBadgeFilter}
+                  />
+                </div>
 
-                <span className="mx-1 h-5 w-px shrink-0 bg-border-soft" aria-hidden />
+                <div className="mt-3 flex flex-wrap gap-2 border-t border-border/60 pt-3">
+                  {(
+                    [
+                      { id: "image", label: "Photos" },
+                      { id: "audio", label: "Field sounds" },
+                      { id: "all", label: "All media" },
+                    ] as Array<{ id: OccurrenceFilter; label: string }>
+                  ).map((o) => (
+                    <FilterPill
+                      key={o.id}
+                      selected={occMedia === o.id}
+                      onClick={() => changeMedia(o.id)}
+                    >
+                      {o.label}
+                    </FilterPill>
+                  ))}
+                </div>
 
-                {(
-                  [
-                    { id: "image", label: "Photos" },
-                    { id: "audio", label: "Field sounds" },
-                    { id: "all", label: "All media" },
-                  ] as Array<{ id: OccurrenceFilter; label: string }>
-                ).map((o) => (
-                  <FilterPill
-                    key={o.id}
-                    selected={occMedia === o.id}
-                    onClick={() => changeMedia(o.id)}
-                  >
-                    {o.label}
-                  </FilterPill>
-                ))}
-
-                <span className="mx-1 h-5 w-px shrink-0 bg-border-soft" aria-hidden />
-
-                {OCCURRENCE_CATEGORY_OPTIONS.map((o) => (
-                  <FilterPill
-                    key={o.id}
-                    selected={occCategory === o.id}
-                    onClick={() => changeCategory(o.id)}
-                  >
-                    {o.label}
-                  </FilterPill>
-                ))}
-              </div>
+                <div className="mt-3 flex flex-wrap gap-2 border-t border-border/60 pt-3">
+                  {OCCURRENCE_CATEGORY_OPTIONS.map((o) => (
+                    <FilterPill
+                      key={o.id}
+                      selected={occCategory === o.id}
+                      onClick={() => changeCategory(o.id)}
+                    >
+                      {o.label}
+                    </FilterPill>
+                  ))}
+                </div>
+              </AllFiltersPopover>
             </div>
           )}
         </div>

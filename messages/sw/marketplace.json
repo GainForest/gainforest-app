@@ -40,15 +40,17 @@
       "clearCategory": "Futa {category}"
     },
     "filters": {
-      "allTitle": "Vichujio vyote",
+      "allTitle": "Panga na chuja",
+      "sortLabel": "Panga",
       "description": "Onyesha Certs kwa beji ya chanzo, picha, maeneo ya mradi, watu waliotajwa, tarehe za kazi, au michango.",
+      "sightingsDescription": "Onyesha uoni kwa chanzo, aina ya media, au kundi la asili.",
       "organization": "Shirika",
       "bioregion": "Eneo la kibaolojia",
       "country": "Nchi",
       "impactArea": "Eneo la athari",
       "allBumicerts": "vyeti zote",
-      "allFilters": "Vichujio vyote",
-      "allFiltersAria": "Vichujio vyote",
+      "allFilters": "Panga na chuja",
+      "allFiltersAria": "Panga na chuja",
       "updateHint": "Vichujio husasishwa unapochagua.",
       "images": "Huonyesha picha",
       "locations": "Huonyesha maeneo ya mradi",
@@ -58,7 +60,7 @@
       "badges": {
         "all": "Zote",
         "gainforest": "GainForest",
-        "maearth": "Ma Earth",
+        "maearth": "Kwenye jukwaa la Ma Earth",
         "maearthRound1": "Ma Earth Raundi 1",
         "maearthRound2": "Ma Earth Raundi 2"
       }
@@ -157,6 +159,9 @@
       "colType": "Aina",
       "colPlace": "Eneo",
       "colJoined": "Alijiunga"
+    },
+    "filters": {
+      "description": "Onyesha mashirika kwa chanzo, uchunguzi, kategoria, au nchi."
     },
     "quickFilters": {
       "observations": "Ina uchunguzi"
@@ -915,7 +920,7 @@
     },
     "filters": {
       "allProjects": "Miradi yote",
-      "allFilters": "Vichujio vyote",
+      "allFilters": "Panga na chuja",
       "description": "Onyesha miradi kwa beji ya chanzo, picha, au eneo la mradi.",
       "updateHint": "Vichujio husasishwa unapochagua.",
       "images": "Huonyesha picha",

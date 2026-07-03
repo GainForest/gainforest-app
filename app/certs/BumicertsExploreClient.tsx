@@ -3,9 +3,7 @@
 import Image from "next/image";
 import { motion } from "framer-motion";
 import {
-  ArrowUpDownIcon,
   CalendarDaysIcon,
-  ChevronDownIcon,
   HandHeartIcon,
   LayoutGridIcon,
   LeafIcon,
@@ -25,6 +23,7 @@ import { BumicertPillRows, type BumicertCardPill } from "@/components/bumicert/B
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AutoLoadMoreButton } from "../_components/AutoLoadMoreButton";
+import { SortSection } from "../_components/AllFiltersPopover";
 import { OwnerFilterBanner, OwnerFilterButton, useOwnerFilter } from "../_components/OwnerFilter";
 import { RecordDrawer } from "../_components/RecordDrawer";
 import { RecordMap } from "../_components/RecordMap";
@@ -91,7 +90,6 @@ export function BumicertsExploreClient({ records: initialRecords = [] }: { recor
     { value: "az", label: t("sort.az") },
     { value: "za", label: t("sort.za") },
   ], [t]);
-  const sortLabels = useMemo(() => Object.fromEntries(sortOptions.map((option) => [option.value, option.label])) as Record<SortMode, string>, [sortOptions]);
   const viewOptions = useMemo(() => [
     { id: "cards", label: t("view.cards"), Icon: LayoutGridIcon },
     { id: "list", label: t("view.list"), Icon: ListIcon },
@@ -130,14 +128,12 @@ export function BumicertsExploreClient({ records: initialRecords = [] }: { recor
   );
   const pendingViewRef = useRef<ViewMode | null>(null);
   const [view, setLocalView] = useState<ViewMode>(() => readViewFromLocation() ?? queryView);
-  const [openSort, setOpenSort] = useState(false);
   const [openFilters, setOpenFilters] = useState(false);
   const [drawer, setDrawer] = useState<BumicertRecord | null>(null);
   const [autoLoadMore, setAutoLoadMore] = useState(false);
   const [fundingIndex, setFundingIndex] = useState<FundingSummaryIndex | null>(null);
   const [sightingCounts, setSightingCounts] = useState<Map<string, number>>(new Map());
   const sightingDidsRequestedRef = useRef<Set<string>>(new Set());
-  const sortMenuRef = useRef<HTMLDivElement | null>(null);
   const filtersMenuRef = useRef<HTMLDivElement | null>(null);
   const requestSeqRef = useRef(0);
   const countSeqRef = useRef(0);
@@ -255,26 +251,6 @@ export function BumicertsExploreClient({ records: initialRecords = [] }: { recor
   }, [records, sort, filters, fundingIndex, filterChips]);
 
   const renderedRecords = visibleRecords;
-
-  useEffect(() => {
-    if (!openSort) return;
-
-    const handlePointerDown = (event: PointerEvent) => {
-      if (sortMenuRef.current?.contains(event.target as Node)) return;
-      setOpenSort(false);
-    };
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setOpenSort(false);
-    };
-
-    document.addEventListener("pointerdown", handlePointerDown);
-    document.addEventListener("keydown", handleKeyDown);
-    return () => {
-      document.removeEventListener("pointerdown", handlePointerDown);
-      document.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [openSort]);
 
   useEffect(() => {
     if (!openFilters) return;
@@ -426,48 +402,9 @@ export function BumicertsExploreClient({ records: initialRecords = [] }: { recor
                 </div>
 
                 <OwnerFilterButton ownerDid={ownerDid} onChange={setOwnerDid} />
-
-                <div ref={sortMenuRef} className="relative shrink-0">
-                  <button
-                    onClick={() => {
-                      setOpenFilters(false);
-                      setOpenSort((value) => !value);
-                    }}
-                    type="button"
-                    aria-label={t("search.sortAriaLabel")}
-                    aria-expanded={openSort}
-                    className="inline-flex h-10 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-full border border-border bg-background px-8 text-sm font-medium transition-colors hover:bg-muted hover:text-foreground hover:shadow-sm disabled:pointer-events-none disabled:opacity-50 has-[>svg]:px-4"
-                  >
-                    <ArrowUpDownIcon className="h-4 w-4" />
-                    <span className="hidden sm:inline">{sortLabels[sort]}</span>
-                    <ChevronDownIcon className={`h-4 w-4 transition-transform ${openSort ? "rotate-180" : ""}`} />
-                  </button>
-
-                  {openSort && (
-                    <div className="absolute right-0 top-full z-[1000] mt-2 w-36 rounded-2xl border border-border bg-popover py-1.5 shadow-xl animate-in">
-                      {sortOptions.map((option) => (
-                        <button
-                          key={option.value}
-                          type="button"
-                          onClick={() => {
-                            void setSort(option.value);
-                            setOpenSort(false);
-                          }}
-                          className={`w-full px-3 py-2 text-left text-sm transition-colors ${
-                            sort === option.value
-                              ? "bg-primary/5 text-primary"
-                              : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
-                          }`}
-                        >
-                          {option.label}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </div>
               </div>
 
-              <div className="relative z-20 flex items-center justify-between gap-3 sm:justify-start">
+              <div className="relative z-20 flex items-center justify-between gap-3 sm:justify-end">
                 <div className="inline-flex h-10 shrink-0 items-center rounded-full border border-border bg-background/50 p-0.5 backdrop-blur sm:hidden">
                   {(
                     viewOptions
@@ -490,48 +427,10 @@ export function BumicertsExploreClient({ records: initialRecords = [] }: { recor
                   ))}
                 </div>
 
-                <div className="scroll-mask-right scrollbar-hidden hidden min-w-0 flex-1 overflow-x-auto pb-px sm:block">
-                  <div className="flex items-center gap-2 pr-8">
-                    <Button
-                      type="button"
-                      onClick={clearFilters}
-                      variant={activeFilterCount === 0 ? "default" : "outline"}
-                      size="sm"
-                      className="h-10 text-sm"
-                    >
-                      {t("filters.allBumicerts")}
-                    </Button>
-                    {badgeFilterOptions.map((badge) => (
-                      <BadgeFilterButton
-                        key={badge.key}
-                        badge={badge}
-                        selected={badgeFilters.includes(badge.key)}
-                        onClick={() => toggleBadgeFilter(badge.key)}
-                      />
-                    ))}
-                    {filterChips.map((chip) => {
-                      const selected = filters.includes(chip.key);
-                      return (
-                        <Button
-                          key={chip.key}
-                          type="button"
-                          onClick={() => toggleFilter(chip.key)}
-                          variant={selected ? "default" : "outline"}
-                          size="sm"
-                          className="h-10 text-sm"
-                        >
-                          {chip.label}
-                        </Button>
-                      );
-                    })}
-                  </div>
-                </div>
-
                 <div ref={filtersMenuRef} className="relative shrink-0">
                   <Button
                     type="button"
                     onClick={() => {
-                      setOpenSort(false);
                       setOpenFilters((value) => !value);
                     }}
                     aria-haspopup="true"
@@ -560,7 +459,15 @@ export function BumicertsExploreClient({ records: initialRecords = [] }: { recor
                           {t("filters.description")}
                         </p>
                       </div>
-                      <div className="flex flex-wrap gap-2">
+                      <div className="mb-3">
+                        <SortSection
+                          label={t("filters.sortLabel")}
+                          options={sortOptions}
+                          value={sort}
+                          onChange={(value) => void setSort(value)}
+                        />
+                      </div>
+                      <div className="flex flex-wrap gap-2 border-t border-primary/15 pt-3">
                         {badgeFilterOptions.map((badge) => (
                           <BadgeFilterButton
                             key={badge.key}

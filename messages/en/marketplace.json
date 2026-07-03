@@ -40,15 +40,17 @@
       "clearCategory": "Clear {category}"
     },
     "filters": {
-      "allTitle": "All Filters",
+      "allTitle": "Sort and Filter",
+      "sortLabel": "Sort",
       "description": "Show Certs by source badge, photos, project places, named people, work dates, or donations.",
+      "sightingsDescription": "Show sightings by source, media type, or nature group.",
       "organization": "Organization",
       "bioregion": "Bioregion",
       "country": "Country",
       "impactArea": "Impact Area",
       "allBumicerts": "All Certs",
-      "allFilters": "All filters",
-      "allFiltersAria": "All filters",
+      "allFilters": "Sort and Filter",
+      "allFiltersAria": "Sort and Filter",
       "updateHint": "Filters update as you choose.",
       "images": "Shows photos",
       "locations": "Shows project places",
@@ -58,7 +60,7 @@
       "badges": {
         "all": "All",
         "gainforest": "GainForest",
-        "maearth": "Ma Earth",
+        "maearth": "On the Ma Earth platform",
         "maearthRound1": "Ma Earth Round 1",
         "maearthRound2": "Ma Earth Round 2"
       }
@@ -157,6 +159,9 @@
       "colType": "Type",
       "colPlace": "Place",
       "colJoined": "Joined"
+    },
+    "filters": {
+      "description": "Show organizations by source, observations, category, or country."
     },
     "quickFilters": {
       "observations": "Has observations"
@@ -915,7 +920,7 @@
     },
     "filters": {
       "allProjects": "All Projects",
-      "allFilters": "All filters",
+      "allFilters": "Sort and Filter",
       "description": "Show projects by source badge, images, or a project place.",
       "updateHint": "Filters update as you choose.",
       "images": "Shows images",
