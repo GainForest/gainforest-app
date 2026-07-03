@@ -21,6 +21,7 @@ import { parseAsString, parseAsStringEnum, useQueryState } from "nuqs";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AutoLoadMoreButton } from "../_components/AutoLoadMoreButton";
+import { SourceFiltersPopover } from "../_components/SourceFiltersPopover";
 import { RecordDrawer } from "../_components/RecordDrawer";
 import { RecordMap } from "../_components/RecordMap";
 import { TrustedByBadges } from "../_components/TrustedByBadges";
@@ -331,23 +332,11 @@ export function OrganizationsClient({ records: initialRecords = [] }: { records?
             </div>
 
             <div
-              className="scroll-mask-right scrollbar-hidden relative z-20 overflow-x-auto animate-in"
+              className="relative z-20 flex items-center gap-2 animate-in"
               style={{ animationDelay: "120ms" }}
             >
-              <div className="flex items-center gap-1.5 pb-1 pr-8">
-                {badgeFilterOptions.map((badge) => (
-                  <FilterChip
-                    key={badge.key}
-                    selected={badgeFilters.includes(badge.key)}
-                    onClick={() => toggleBadgeFilter(badge.key)}
-                  >
-                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-background/80">
-                      <Image src={badge.logoSrc} width={20} height={20} alt="" className="h-5 w-5 object-contain" />
-                    </span>
-                    {badge.label}
-                  </FilterChip>
-                ))}
-
+              <div className="scroll-mask-right scrollbar-hidden min-w-0 flex-1 overflow-x-auto">
+                <div className="flex items-center gap-1.5 pb-1 pr-8">
                 {QUICK_CHIP_VALUES.map((value) => (
                   <FilterChip
                     key={value}
@@ -386,7 +375,15 @@ export function OrganizationsClient({ records: initialRecords = [] }: { records?
                     {t("actions.clear")}
                   </button>
                 )}
+                </div>
               </div>
+
+              <SourceFiltersPopover
+                options={badgeFilterOptions}
+                selected={badgeFilters}
+                onToggle={toggleBadgeFilter}
+                onClear={() => updateBadgeFilters([])}
+              />
             </div>
           </div>
 
