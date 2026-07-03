@@ -34,20 +34,28 @@ export function ChromeGate({
   // omits the page footer (same treatment as the promo banner there). The
   // Globe is a full-bleed map view, so it drops the footer too.
   const showFooter = pathname !== "/bioblitz" && !pathname.startsWith("/globe");
-  const content = (
-    <>
+  const footer = showFooter ? (
+    <ChromeErrorBoundary name="footer">
+      <Footer />
+    </ChromeErrorBoundary>
+  ) : null;
+  const content = showFooter ? (
+    <div className="flex min-h-full w-full flex-col [&>*]:shrink-0">
       {children}
-      {showFooter ? (
-        <ChromeErrorBoundary name="footer">
-          <Footer />
-        </ChromeErrorBoundary>
-      ) : null}
-    </>
+      {footer}
+    </div>
+  ) : (
+    <>{children}</>
   );
 
   // The landing page brings its own navigation and full-bleed layout.
   if (pathname === "/") {
-    return content;
+    return showFooter ? (
+      <div className="flex min-h-screen w-full flex-col [&>*]:shrink-0">
+        {children}
+        {footer}
+      </div>
+    ) : content;
   }
 
   return <AppShell authSession={authSession}>{content}</AppShell>;

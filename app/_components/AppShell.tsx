@@ -74,7 +74,7 @@ export function AppShell({
               <UnifiedSidebar authSession={session.authSession} />
             </ChromeErrorBoundary>
           </MobileNavDrawer>
-          <main className="relative flex-1 overflow-y-auto">
+          <main className="relative flex min-h-0 flex-1 flex-col overflow-y-auto">
             <ShellHeader
               authSession={session.authSession}
               profileName={session.profileName}
