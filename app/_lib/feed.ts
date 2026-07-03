@@ -109,6 +109,11 @@ const MAX_TEXT = 220;
 const BURST_SCAN_HOP = 1000; // indexer max page size
 const MAX_SCAN_HOPS = 6; // skip up to ~6k sightings per "load more"
 const BURST_SAMPLE = 8; // sightings kept for the card's montage / grouping
+// A run only counts as one burst while consecutive sightings are close in
+// time. A quiet gap longer than this splits the run — an account posting
+// steadily over many days isn't one upload and pages/renders normally.
+// Mirrored by MAX_BATCH_GAP_MS in app/feed/FeedClient.tsx.
+const BURST_MAX_GAP_MS = 12 * 60 * 60 * 1000; // 12h
 const FEED_CACHE_MS = 60_000; // 60s in-process memo — fresh enough for "live".
 // The indexer caps an `in` filter's list, so a viewer following more accounts
 // than this is split into chunks that are queried in parallel and re-merged
@@ -701,6 +706,7 @@ async function scanBurstEnd(
 ): Promise<{ createdAt: string; id: string } | null> {
   let upper = before;
   let lastBurst: { createdAt: string; id: string } | null = null;
+  let lastBurstTime: number | null = null;
   const seen = new Set<string>();
 
   for (let hop = 0; hop < MAX_SCAN_HOPS; hop += 1) {
@@ -721,9 +727,14 @@ async function scanBurstEnd(
       seen.add(id);
       progressed = true;
       oldestTs = n.createdAt;
-      if (timeValue(n.createdAt) <= floorTime) return lastBurst; // run ended at the pool's boundary
-      if (n.did === burstActor) lastBurst = { createdAt: n.createdAt, id };
-      else return lastBurst; // run ended at another account's sighting
+      const t = timeValue(n.createdAt);
+      if (t <= floorTime) return lastBurst; // run ended at the pool's boundary
+      if (n.did !== burstActor) return lastBurst; // run ended at another account's sighting
+      // A long quiet gap between two of the actor's sightings ends the burst:
+      // only things uploaded close together collapse into one summary.
+      if (lastBurstTime !== null && lastBurstTime - t > BURST_MAX_GAP_MS) return lastBurst;
+      lastBurst = { createdAt: n.createdAt, id };
+      lastBurstTime = t;
     }
     if (!progressed || nodes.length < BURST_SCAN_HOP) break; // exhausted / no progress
     upper = oldestTs ?? upper;
@@ -751,7 +762,13 @@ async function buildBurstSkipPage(
   const jump = await scanBurstEnd(burstActor, before, floorTime);
   if (!jump) return null;
 
-  const sample = ordered.slice(0, firstObsIdx + BURST_SAMPLE);
+  // Emit only items at/after the jump in the total order: anything strictly
+  // older than the jump cursor re-appears on the next page (the gap check can
+  // end a run inside the sampled slice, which would otherwise duplicate rows).
+  const jumpCursor: FeedCursor = { ts: jump.createdAt, id: jump.id };
+  const sample = ordered
+    .slice(0, firstObsIdx + BURST_SAMPLE)
+    .filter((it) => !isStrictlyOlder(it, jumpCursor));
   if (sample.length === 0) return null;
   return {
     items: sample,
