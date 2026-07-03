@@ -330,6 +330,15 @@
           "title": "Revisa el nombre de la especie",
           "blurb": "Confirma o corrige el nombre sugerido: tu conocimiento importa."
         }
+      },
+      "proof": {
+        "title": "Tus datos hacen más que ganar premios",
+        "intro": "Cada observación que envías se guarda en tu cuenta. Puedes usarla más adelante como prueba para tus propios proyectos, por ejemplo:",
+        "uses": {
+          "grants": "Rendir cuentas a quienes otorgan financiamiento",
+          "stakeholders": "Mostrar a socios y partes interesadas que tu trabajo marca la diferencia"
+        },
+        "outro": "Sin trabajo extra. Solo sigue observando. Con el tiempo, esto construye evidencia real que puedes usar cuando la necesites."
       }
     },
     "board": {

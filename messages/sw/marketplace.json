@@ -330,6 +330,15 @@
           "title": "Angalia jina la spishi",
           "blurb": "Thibitisha au sahihisha jina lililopendekezwa — maarifa yako ni muhimu."
         }
+      },
+      "proof": {
+        "title": "Data yako inafanya zaidi ya kushinda zawadi",
+        "intro": "Kila uchunguzi unaotuma huhifadhiwa kwenye akaunti yako. Unaweza kuutumia baadaye kama ushahidi kwa miradi yako mwenyewe, kama:",
+        "uses": {
+          "grants": "Kutoa taarifa kwa watoa ufadhili",
+          "stakeholders": "Kuonyesha washirika na wadau kwamba kazi yako inaleta mabadiliko"
+        },
+        "outro": "Hakuna kazi ya ziada. Endelea tu kuchunguza. Baada ya muda, hii hujenga ushahidi halisi unaoweza kuutumia wakati wowote unapohitaji."
       }
     },
     "board": {
