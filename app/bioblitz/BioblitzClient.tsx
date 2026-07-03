@@ -17,6 +17,7 @@ import {
   MapPinnedIcon,
   MessagesSquareIcon,
   ScanSearchIcon,
+  ShieldCheckIcon,
   TrophyIcon,
   UploadIcon,
   UsersRoundIcon,
@@ -407,8 +408,34 @@ function HowItWorks() {
             </li>
           ))}
         </ol>
+        <ProofNote />
       </Card>
     </FadeIn>
+  );
+}
+
+function ProofNote() {
+  const t = useTranslations("marketplace.bioblitz.how.proof");
+  const uses = ["grants", "stakeholders"] as const;
+  return (
+    <div className="mt-3 rounded-xl border border-primary/15 bg-primary/5 p-3">
+      <div className="flex items-center gap-2">
+        <span className="flex size-5 items-center justify-center text-primary [&_svg]:size-4">
+          <ShieldCheckIcon />
+        </span>
+        <h3 className="text-sm font-semibold text-foreground">{t("title")}</h3>
+      </div>
+      <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">{t("intro")}</p>
+      <ul className="mt-1.5 space-y-1">
+        {uses.map((use) => (
+          <li key={use} className="flex items-start gap-2 text-xs leading-relaxed text-foreground">
+            <span aria-hidden className="mt-1.5 size-1 shrink-0 rounded-full bg-primary" />
+            {t(`uses.${use}`)}
+          </li>
+        ))}
+      </ul>
+      <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">{t("outro")}</p>
+    </div>
   );
 }
 

@@ -330,6 +330,15 @@
           "title": "Check the species name",
           "blurb": "Confirm or correct the suggested name — your knowledge matters."
         }
+      },
+      "proof": {
+        "title": "Your data does more than win prizes",
+        "intro": "Every observation you submit gets saved to your account. You can use it later as proof for your own projects, like:",
+        "uses": {
+          "grants": "Reporting back to grant givers",
+          "stakeholders": "Showing partners and stakeholders your work is making a difference"
+        },
+        "outro": "No extra work needed. Just keep observing. Over time, this builds real evidence you can use whenever you need it."
       }
     },
     "board": {
