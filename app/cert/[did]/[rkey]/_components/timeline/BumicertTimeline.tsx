@@ -33,6 +33,9 @@ type BumicertTimelineProps = {
   sources: TimelineSourceData;
   references?: TimelineReference[];
   attachmentsUnavailable: boolean;
+  previewMode?: boolean;
+  previewLimit?: number;
+  seeMoreHref?: string;
 };
 
 export function BumicertTimeline({
@@ -49,6 +52,9 @@ export function BumicertTimeline({
   sources,
   references = [],
   attachmentsUnavailable,
+  previewMode = false,
+  previewLimit,
+  seeMoreHref,
 }: BumicertTimelineProps) {
   const router = useRouter();
   const timelineT = useTranslations("bumicert.detail.timeline");
@@ -80,7 +86,7 @@ export function BumicertTimeline({
       className="py-1"
     >
       <div className="flex flex-col gap-6">
-        {canManageEvidence ? (
+        {canManageEvidence && !previewMode ? (
           <section
             className="rounded-3xl border border-primary/25 bg-primary/5 p-4 shadow-sm ring-1 ring-primary/10"
             aria-labelledby="link-evidence-heading"
@@ -136,6 +142,9 @@ export function BumicertTimeline({
           deletePermission={deletePermission}
           mutationRepo={mutationRepo}
           onDeleted={handleDeleted}
+          previewMode={previewMode}
+          previewLimit={previewLimit}
+          seeMoreHref={seeMoreHref}
         />
       </div>
     </motion.article>

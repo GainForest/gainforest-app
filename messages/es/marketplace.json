@@ -333,12 +333,9 @@
       },
       "proof": {
         "title": "Tus datos hacen más que ganar premios",
-        "intro": "Cada observación que envías se guarda en tu cuenta. Puedes usarla más adelante como prueba para tus propios proyectos, por ejemplo:",
-        "uses": {
-          "grants": "Rendir cuentas a quienes otorgan financiamiento",
-          "stakeholders": "Mostrar a socios y partes interesadas que tu trabajo marca la diferencia"
-        },
-        "outro": "Sin trabajo extra. Solo sigue observando. Con el tiempo, esto construye evidencia real que puedes usar cuando la necesites."
+        "intro": "Cada observación que envías se guarda en tu cuenta, así que puedes usarla más adelante como prueba para tus propios proyectos.",
+        "uses": "Puedes rendir cuentas a quienes otorgan financiamiento con un registro claro de tu trabajo. También puedes mostrar a socios y partes interesadas que lo que haces marca la diferencia.",
+        "outro": "Sin trabajo extra: solo sigue observando. Con el tiempo, esto construye evidencia real que puedes usar cuando la necesites."
       }
     },
     "board": {

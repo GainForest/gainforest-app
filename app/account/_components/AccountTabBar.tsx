@@ -203,17 +203,9 @@ function buildTabs(
       { labelKey: "members", href: accountMembersPath(did), icon: UsersIcon, exact: false },
     );
   }
-  if (scope === "account") {
-    tabs.push(
-      {
-        labelKey: "filesAndPhotos",
-        href: paths.gallery,
-        icon: ImageIcon,
-        exact: false,
-        matchPaths: [accountAttachmentsPath(did)],
-      },
-    );
-  }
+  // Organizations no longer get a standalone Files & photos tab — their photo
+  // gallery is surfaced inline on the Overview, under the About blurb. The
+  // /gallery + /attachments routes still work; they're just no longer linked here.
   return appendExtras(tabs);
 }
 

@@ -333,12 +333,9 @@
       },
       "proof": {
         "title": "Your data does more than win prizes",
-        "intro": "Every observation you submit gets saved to your account. You can use it later as proof for your own projects, like:",
-        "uses": {
-          "grants": "Reporting back to grant givers",
-          "stakeholders": "Showing partners and stakeholders your work is making a difference"
-        },
-        "outro": "No extra work needed. Just keep observing. Over time, this builds real evidence you can use whenever you need it."
+        "intro": "Every observation you submit gets saved to your account, so you can use it later as proof for your own projects.",
+        "uses": "You can report back to grant givers with a clear record of your work. You can also show partners and stakeholders that what you do is making a difference.",
+        "outro": "No extra work needed — just keep observing. Over time, this builds real evidence you can use whenever you need it."
       }
     },
     "board": {

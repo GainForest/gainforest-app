@@ -82,14 +82,24 @@ export async function generateMetadata({ params }: { params: ProjectPageParams }
   };
 }
 
-// The project page is a single scrolling layout; old shared links may still
-// carry the legacy Cert `?tab=` param, so map each tab to its inline section.
-const LEGACY_TAB_ANCHORS: Record<string, string> = {
-  "site-boundaries": "#places",
-  timeline: "#updates",
-  reviews: "#reviews",
-  donations: "#support",
+const PROJECT_DETAIL_TABS = ["overview", "places", "updates", "reviews"] as const;
+type ProjectDetailTab = (typeof PROJECT_DETAIL_TABS)[number];
+
+const LEGACY_PROJECT_TABS: Record<string, ProjectDetailTab> = {
+  "site-boundaries": "places",
+  timeline: "updates",
+  donations: "overview",
 };
+
+function parseProjectDetailTab(value: string | undefined): ProjectDetailTab {
+  if (!value) return "overview";
+  const mapped = LEGACY_PROJECT_TABS[value] ?? value;
+  return PROJECT_DETAIL_TABS.some((tab) => tab === mapped) ? (mapped as ProjectDetailTab) : "overview";
+}
+
+function projectTabHref(basePath: string, tab: ProjectDetailTab): string {
+  return tab === "overview" ? basePath : `${basePath}?${new URLSearchParams({ tab }).toString()}`;
+}
 
 export default async function ProjectDetailPage({
   params,
@@ -104,11 +114,14 @@ export default async function ProjectDetailPage({
     return <ProjectPublishing title={pendingTitle} />;
   }
 
-  // Strip the legacy `?tab=` param (this page has no tab panels); land on the
-  // matching inline section instead so old links keep working.
-  const tab = typeof search.tab === "string" ? search.tab : Array.isArray(search.tab) ? search.tab[0] : undefined;
-  if (tab !== undefined) {
-    redirect(`${localProjectHref(urlIdentifier, rkey)}${LEGACY_TAB_ANCHORS[tab] ?? ""}`);
+  const projectBaseHref = localProjectHref(urlIdentifier, rkey);
+  const requestedTab = typeof search.tab === "string" ? search.tab : Array.isArray(search.tab) ? search.tab[0] : undefined;
+  if (requestedTab === "donations") {
+    redirect(`${projectBaseHref}#support`);
+  }
+  const activeTab = parseProjectDetailTab(requestedTab);
+  if (requestedTab !== undefined && requestedTab !== activeTab) {
+    redirect(projectTabHref(projectBaseHref, activeTab));
   }
 
   // A project owns exactly one Cert. Render the full Cert experience inline so
@@ -127,13 +140,14 @@ export default async function ProjectDetailPage({
       const canonicalIdentifier = routeData.owner.urlIdentifier;
       const projectHref = localProjectHref(canonicalIdentifier, rkey);
       if (canonicalIdentifier !== urlIdentifier) {
-        redirect(projectHref);
+        redirect(projectTabHref(projectHref, activeTab));
       }
       const t = await getTranslations("marketplace.projectPage");
       return (
         <ProjectDetailView
           routeData={routeData}
           basePath={projectHref}
+          activeTab={activeTab}
           origin={origin}
           backHref="/projects"
           backLabel={t("back")}

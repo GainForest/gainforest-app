@@ -333,12 +333,9 @@
       },
       "proof": {
         "title": "Datamu bukan cuma untuk menang hadiah",
-        "intro": "Setiap observasi yang kamu kirim tersimpan di akunmu. Kamu bisa memakainya nanti sebagai bukti untuk proyekmu sendiri, seperti:",
-        "uses": {
-          "grants": "Melaporkan kembali kepada pemberi dana",
-          "stakeholders": "Menunjukkan kepada mitra dan pemangku kepentingan bahwa kerjamu membawa perubahan"
-        },
-        "outro": "Tanpa kerja tambahan. Cukup terus mengamati. Seiring waktu, ini membangun bukti nyata yang bisa kamu pakai kapan pun kamu perlukan."
+        "intro": "Setiap observasi yang kamu kirim tersimpan di akunmu, jadi kamu bisa memakainya nanti sebagai bukti untuk proyekmu sendiri.",
+        "uses": "Kamu bisa melapor kembali kepada pemberi dana dengan catatan kerja yang jelas. Kamu juga bisa menunjukkan kepada mitra dan pemangku kepentingan bahwa apa yang kamu lakukan membawa perubahan.",
+        "outro": "Tanpa kerja tambahan — cukup terus mengamati. Seiring waktu, ini membangun bukti nyata yang bisa kamu pakai kapan pun kamu perlukan."
       }
     },
     "board": {

@@ -17,7 +17,6 @@ import {
   MapPinnedIcon,
   MessagesSquareIcon,
   ScanSearchIcon,
-  ShieldCheckIcon,
   TrophyIcon,
   UploadIcon,
   UsersRoundIcon,
@@ -419,30 +418,13 @@ function HowItWorks() {
 
 function ProofNote() {
   const t = useTranslations("marketplace.bioblitz.how.proof");
-  const uses = ["grants", "stakeholders"] as const;
   return (
     <FadeIn delay={0.05}>
       <div className="rounded-2xl border border-primary/15 bg-primary/5 p-4 sm:p-5">
-        <div className="flex flex-col gap-x-8 gap-y-3 md:flex-row md:items-start md:justify-between">
-          <div className="min-w-0 md:max-w-xl">
-            <div className="flex items-center gap-2">
-              <span className="flex size-6 items-center justify-center text-primary [&_svg]:size-5">
-                <ShieldCheckIcon />
-              </span>
-              <h2 className="text-base font-semibold text-foreground sm:text-lg">{t("title")}</h2>
-            </div>
-            <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{t("intro")}</p>
-            <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{t("outro")}</p>
-          </div>
-          <ul className="space-y-2 md:shrink-0 md:pt-1">
-            {uses.map((use) => (
-              <li key={use} className="flex items-start gap-2 text-sm leading-relaxed text-foreground">
-                <span aria-hidden className="mt-2 size-1.5 shrink-0 rounded-full bg-primary" />
-                {t(`uses.${use}`)}
-              </li>
-            ))}
-          </ul>
-        </div>
+        <h2 className="text-base font-semibold text-foreground sm:text-lg">{t("title")}</h2>
+        <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{t("intro")}</p>
+        <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{t("uses")}</p>
+        <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{t("outro")}</p>
       </div>
     </FadeIn>
   );
