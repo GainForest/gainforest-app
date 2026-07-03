@@ -204,6 +204,7 @@ const BADGE_TONE: Record<DetailBadge["tone"], string> = {
 
 const BUMICERT_DETAIL_TABS = ["overview", "site-boundaries", "reviews", "donations", "timeline"] as const;
 type BumicertDetailTab = (typeof BUMICERT_DETAIL_TABS)[number];
+type ProjectDetailTab = "overview" | "places" | "updates" | "reviews";
 
 export async function generateMetadata({ params }: { params: BumicertPageParams }): Promise<Metadata> {
   const { record, owner, urlIdentifier } = await readRouteData(params);
@@ -537,6 +538,7 @@ export async function BumicertDetailBody({
 export async function ProjectDetailView({
   routeData,
   basePath,
+  activeTab = "overview",
   origin,
   backHref,
   backLabel,
@@ -548,6 +550,7 @@ export async function ProjectDetailView({
 }: {
   routeData: RouteData;
   basePath: string;
+  activeTab?: ProjectDetailTab;
   origin: string;
   backHref?: string;
   backLabel?: string;
@@ -657,27 +660,26 @@ export async function ProjectDetailView({
     )
     .slice(0, 3);
 
-  // Evidence chips double as in-page nav; point each at its section when that
-  // section is rendered, otherwise fall back so zero-state chips aren't dead.
+  const placesHref = `${detailHref}?tab=places`;
+  const updatesHref = `${detailHref}?tab=updates`;
+  const reviewsHref = `${detailHref}?tab=reviews`;
+
+  // Evidence chips point to the matching project tab when available, otherwise
+  // fall back so zero-state chips are not dead ends.
   const anchors = {
-    boundaries: hasPlaces ? "#places" : detailHref,
-    sightings: hasObservations ? "#observations" : ownerProfileHref,
-    timeline: showUpdates ? "#updates" : detailHref,
-    reviews: "#reviews",
+    boundaries: hasPlaces ? placesHref : detailHref,
+    sightings: hasObservations ? `${detailHref}#observations` : ownerProfileHref,
+    timeline: showUpdates ? updatesHref : detailHref,
+    reviews: reviewsHref,
   };
 
   const jsonLd = buildBumicertJsonLd(record, owner, fundingConfig, detailHref, description ?? null, origin);
 
-  // The project layout renders every section inline, so the sub-header shows
-  // in-page anchor links instead of the legacy `?tab=` strip (which this page
-  // never reads — clicking those tabs changed the URL but not the content).
   const anchorNav = [
     { id: "overview", href: detailHref, label: projectNavT("overview") },
-    ...(hasObservations ? [{ id: "observations", href: "#observations", label: projectNavT("sightings") }] : []),
-    ...(hasPlaces ? [{ id: "places", href: "#places", label: projectNavT("places") }] : []),
-    ...(showUpdates ? [{ id: "updates", href: "#updates", label: projectNavT("updates") }] : []),
-    { id: "reviews", href: "#reviews", label: projectNavT("reviews") },
-    ...(showSupport ? [{ id: "support", href: "#support", label: projectNavT("support") }] : []),
+    { id: "places", href: placesHref, label: projectNavT("places") },
+    { id: "updates", href: updatesHref, label: projectNavT("updates") },
+    { id: "reviews", href: reviewsHref, label: projectNavT("reviews") },
   ];
 
   return (
@@ -690,6 +692,7 @@ export async function ProjectDetailView({
       />
       <BumicertDetailHeader
         anchorNav={anchorNav}
+        activeAnchorId={activeTab}
         summary={{
           title: record.title,
           donateHref: donationsHref,
@@ -782,50 +785,92 @@ export async function ProjectDetailView({
         </header>
         <section className="mx-auto grid max-w-6xl grid-cols-1 gap-x-10 gap-y-8 px-6 pb-8 pt-8 lg:grid-cols-[minmax(0,1fr)_320px] lg:px-8">
           <div className="min-w-0">
-            {detail?.richBody && detail.richBody.length > 0 ? (
-              <div className="mt-7"><RichText blocks={detail.richBody} className="text-base leading-7 md:text-lg md:leading-8" /></div>
-            ) : description ? (
-              <p className="mt-7 whitespace-pre-line text-base leading-7 text-foreground/76 md:text-lg md:leading-8">{description}</p>
+            {activeTab === "overview" ? (
+              <>
+                {detail?.richBody && detail.richBody.length > 0 ? (
+                  <div className="mt-7"><RichText blocks={detail.richBody} className="text-base leading-7 md:text-lg md:leading-8" /></div>
+                ) : description ? (
+                  <p className="mt-7 whitespace-pre-line text-base leading-7 text-foreground/76 md:text-lg md:leading-8">{description}</p>
+                ) : null}
+
+                {detail?.sections?.map((section, index) =>
+                  section.fields.length === 0 ? null : (
+                    <div key={section.title ?? index} className="mt-8 border-t border-border-soft pt-6">
+                      {section.title && (
+                        <h2 className="mb-4 text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">{section.title}</h2>
+                      )}
+                      <dl className="grid gap-4 sm:grid-cols-2">
+                        {section.fields.map((field) => (
+                          <div key={field.label} className={field.wide ? "sm:col-span-2" : undefined}>
+                            <dt className="text-[11px] font-medium uppercase tracking-[0.1em] text-foreground/45">{field.label}</dt>
+                            <dd className="mt-1 text-sm leading-6 text-foreground">{field.value}</dd>
+                          </div>
+                        ))}
+                      </dl>
+                    </div>
+                  ),
+                )}
+
+                <EvidenceSection
+                  evidence={{
+                    boundaries: record.locationUris.length,
+                    observationSummary,
+                    timelineCount: timelineEntries.length,
+                    reviews: reviewCounts,
+                    detailHref,
+                    ownerHref: ownerProfileHref,
+                    anchors,
+                  }}
+                />
+
+                <ProjectGalleryViewer galleries={projectGalleries} variant="bumicert" showProjectFilter={false} hideWhenEmpty compact />
+                {hasObservations ? (
+                  <div id="observations" className="scroll-mt-24">
+                    <BumicertObservationsGallery observations={observations} />
+                  </div>
+                ) : null}
+
+                {showUpdates ? (
+                  <ProjectDetailSection id="updates" icon={<PaperclipIcon className="h-4 w-4" aria-hidden />} title="Updates & evidence" count={timelineEntries.length > 0 ? formatNumber(timelineEntries.length) : undefined}>
+                    <BumicertTimeline
+                      organizationDid={record.did}
+                      activityUri={record.atUri}
+                      activityCid={record.cid ?? ""}
+                      matchActivityUris={matchUris}
+                      bumicertTitle={record.title}
+                      canManageEvidence={false}
+                      createPermission={timelineAccess.createPermission}
+                      deletePermission={timelineAccess.deletePermission}
+                      mutationRepo={timelineAccess.mutationRepo}
+                      initialEntries={timelineAttachments}
+                      sources={emptyTimelineSources}
+                      references={timelineReferences}
+                      attachmentsUnavailable={timelineAttachmentsUnavailable}
+                      previewMode
+                      previewLimit={2}
+                      seeMoreHref={updatesHref}
+                    />
+                  </ProjectDetailSection>
+                ) : null}
+
+                {showSupport ? (
+                  <ProjectDetailSection id="support" icon={<HeartIcon className="h-4 w-4" aria-hidden />} title="Support">
+                    <DonationsPanel
+                      record={record}
+                      owner={owner}
+                      fundingConfig={fundingConfig}
+                      authSession={authSession}
+                      receipts={donationReceipts}
+                      unavailable={donationsUnavailable}
+                      canManageDonations={canManageDonations}
+                      mutationRepo={certManageAccess.mutationRepo}
+                    />
+                  </ProjectDetailSection>
+                ) : null}
+              </>
             ) : null}
 
-            {detail?.sections?.map((section, index) =>
-              section.fields.length === 0 ? null : (
-                <div key={section.title ?? index} className="mt-8 border-t border-border-soft pt-6">
-                  {section.title && (
-                    <h2 className="mb-4 text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">{section.title}</h2>
-                  )}
-                  <dl className="grid gap-4 sm:grid-cols-2">
-                    {section.fields.map((field) => (
-                      <div key={field.label} className={field.wide ? "sm:col-span-2" : undefined}>
-                        <dt className="text-[11px] font-medium uppercase tracking-[0.1em] text-foreground/45">{field.label}</dt>
-                        <dd className="mt-1 text-sm leading-6 text-foreground">{field.value}</dd>
-                      </div>
-                    ))}
-                  </dl>
-                </div>
-              ),
-            )}
-
-            <EvidenceSection
-              evidence={{
-                boundaries: record.locationUris.length,
-                observationSummary,
-                timelineCount: timelineEntries.length,
-                reviews: reviewCounts,
-                detailHref,
-                ownerHref: ownerProfileHref,
-                anchors,
-              }}
-            />
-
-            <ProjectGalleryViewer galleries={projectGalleries} variant="bumicert" showProjectFilter={false} hideWhenEmpty compact />
-            {hasObservations ? (
-              <div id="observations" className="scroll-mt-24">
-                <BumicertObservationsGallery observations={observations} />
-              </div>
-            ) : null}
-
-            {hasPlaces ? (
+            {activeTab === "places" ? (
               <ProjectDetailSection id="places" icon={<MapPinnedIcon className="h-4 w-4" aria-hidden />} title="Places" count={formatNumber(record.locationUris.length)}>
                 <SiteBoundariesPanel
                   record={record}
@@ -835,42 +880,29 @@ export async function ProjectDetailView({
               </ProjectDetailSection>
             ) : null}
 
-            {showUpdates ? (
+            {activeTab === "updates" ? (
               <ProjectDetailSection id="updates" icon={<PaperclipIcon className="h-4 w-4" aria-hidden />} title="Updates & evidence" count={timelineEntries.length > 0 ? formatNumber(timelineEntries.length) : undefined}>
                 <BumicertTimeline
-                organizationDid={record.did}
-                activityUri={record.atUri}
-                activityCid={record.cid ?? ""}
-                matchActivityUris={matchUris}
-                bumicertTitle={record.title}
-                canManageEvidence={timelineAccess.canManageEvidence}
-                createPermission={timelineAccess.createPermission}
-                deletePermission={timelineAccess.deletePermission}
-                mutationRepo={timelineAccess.mutationRepo}
-                initialEntries={timelineAttachments}
-                sources={emptyTimelineSources}
-                references={timelineReferences}
+                  organizationDid={record.did}
+                  activityUri={record.atUri}
+                  activityCid={record.cid ?? ""}
+                  matchActivityUris={matchUris}
+                  bumicertTitle={record.title}
+                  canManageEvidence={timelineAccess.canManageEvidence}
+                  createPermission={timelineAccess.createPermission}
+                  deletePermission={timelineAccess.deletePermission}
+                  mutationRepo={timelineAccess.mutationRepo}
+                  initialEntries={timelineAttachments}
+                  sources={emptyTimelineSources}
+                  references={timelineReferences}
                   attachmentsUnavailable={timelineAttachmentsUnavailable}
                 />
               </ProjectDetailSection>
             ) : null}
 
-            <ProjectDetailSection id="reviews" icon={<ClipboardCheckIcon className="h-4 w-4" aria-hidden />} title="Reviews" count={reviewCount > 0 ? formatNumber(reviewCount) : undefined}>
-              <ReviewsPanel record={record} reviews={reviews} />
-            </ProjectDetailSection>
-
-            {showSupport ? (
-              <ProjectDetailSection id="support" icon={<HeartIcon className="h-4 w-4" aria-hidden />} title="Support">
-                <DonationsPanel
-                  record={record}
-                  owner={owner}
-                  fundingConfig={fundingConfig}
-                  authSession={authSession}
-                  receipts={donationReceipts}
-                  unavailable={donationsUnavailable}
-                  canManageDonations={canManageDonations}
-                  mutationRepo={certManageAccess.mutationRepo}
-                />
+            {activeTab === "reviews" ? (
+              <ProjectDetailSection id="reviews" icon={<ClipboardCheckIcon className="h-4 w-4" aria-hidden />} title="Reviews" count={reviewCount > 0 ? formatNumber(reviewCount) : undefined}>
+                <ReviewsPanel record={record} reviews={reviews} />
               </ProjectDetailSection>
             ) : null}
           </div>
@@ -900,6 +932,8 @@ export async function ProjectDetailView({
                     period={period}
                     mapLocationUri={hasPlaces ? record.locationUris[0] : null}
                     recentUpdates={recentUpdates}
+                    placesHref={placesHref}
+                    updatesHref={updatesHref}
                   />
                 }
               />
@@ -921,6 +955,8 @@ function ProjectSidebarExtras({
   period,
   mapLocationUri,
   recentUpdates,
+  placesHref,
+  updatesHref,
 }: {
   record: BumicertRecord;
   detail: RouteData["detail"];
@@ -928,6 +964,8 @@ function ProjectSidebarExtras({
   period: string | null;
   mapLocationUri: string | null;
   recentUpdates: TimelineAttachmentItem[];
+  placesHref: string;
+  updatesHref: string;
 }) {
   const facts: Array<{ label: string; value: string }> = [];
   if (period) facts.push({ label: "Active", value: period });
@@ -982,9 +1020,9 @@ function ProjectSidebarExtras({
           <div className="space-y-2.5">
             <div className="flex items-center justify-between gap-2">
               <h3 className="text-xs font-semibold uppercase tracking-[0.14em] text-foreground">Map</h3>
-              <a href="#places" className="text-xs font-medium text-primary transition-colors hover:underline">View places</a>
+              <Link href={placesHref} className="text-xs font-medium text-primary transition-colors hover:underline">View places</Link>
             </div>
-            <a href="#places" className="group relative block overflow-hidden rounded-2xl border border-border" aria-label="View places">
+            <Link href={placesHref} className="group relative block overflow-hidden rounded-2xl border border-border" aria-label="View places">
               <iframe
                 src={polygonsViewHref(mapLocationUri)}
                 className="pointer-events-none h-44 w-full border-0"
@@ -992,7 +1030,7 @@ function ProjectSidebarExtras({
                 title="Site boundary map"
               />
               <span aria-hidden className="absolute inset-0 transition-colors group-hover:bg-primary/[0.06]" />
-            </a>
+            </Link>
           </div>
         </>
       ) : null}
@@ -1003,22 +1041,22 @@ function ProjectSidebarExtras({
           <div className="space-y-2.5">
             <div className="flex items-center justify-between gap-2">
               <h3 className="text-xs font-semibold uppercase tracking-[0.14em] text-foreground">Latest updates</h3>
-              <a href="#updates" className="text-xs font-medium text-primary transition-colors hover:underline">See all</a>
+              <Link href={updatesHref} className="text-xs font-medium text-primary transition-colors hover:underline">See all</Link>
             </div>
             <ul className="space-y-2">
               {recentUpdates.map((entry) => {
                 const date = entry.record.createdAt ?? entry.metadata.createdAt;
                 return (
                   <li key={entry.metadata.uri ?? entry.metadata.rkey}>
-                    <a
-                      href="#updates"
+                    <Link
+                      href={updatesHref}
                       className="group block rounded-xl border border-border-soft bg-surface p-3 transition-colors hover:border-primary/40 hover:bg-surface-sunken"
                     >
                       <p className="line-clamp-2 text-[13px] font-medium leading-snug text-foreground transition-colors group-hover:text-primary">
                         {entry.record.title?.trim() || entry.record.shortDescription?.trim() || "Update"}
                       </p>
                       {date ? <p className="mt-1 text-[11px] text-muted-foreground">{formatRelative(date)}</p> : null}
-                    </a>
+                    </Link>
                   </li>
                 );
               })}

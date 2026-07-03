@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo, useState } from "react";
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
@@ -48,6 +49,8 @@ export function TimelinePanel({
   pageSize = DEFAULT_PAGE_SIZE,
   summaryScope = "activity",
   previewMode = false,
+  previewLimit = 1,
+  seeMoreHref,
 }: {
   organizationDid: string;
   entries: TimelineAttachmentItem[];
@@ -59,10 +62,12 @@ export function TimelinePanel({
   onDeleted: (rkey: string) => void;
   pageSize?: number;
   summaryScope?: "activity" | "organization";
-  // Compact digest used on the org profile: render only the first (expanded)
-  // update and, when more exist, a "See X more" button that reveals the rest.
+  // Compact digest used on profile/overview pages: render a limited set of
+  // updates first, then either reveal the rest or link to the full timeline.
   // Filters, the map preview, and pagination are hidden in this mode.
   previewMode?: boolean;
+  previewLimit?: number;
+  seeMoreHref?: string;
 }) {
   const timelineT = useTranslations("bumicert.detail.timeline");
   const entryT = useTranslations("bumicert.detail.timelineEntry");
@@ -154,7 +159,8 @@ export function TimelinePanel({
     [currentPage, filteredEntries, pageSize],
   );
   const previewActive = previewMode && !showAll;
-  const previewEntries = previewActive ? entryListItems.slice(0, 1) : entryListItems;
+  const safePreviewLimit = Math.max(1, previewLimit);
+  const previewEntries = previewActive ? entryListItems.slice(0, safePreviewLimit) : entryListItems;
   const hiddenCount = entries.length - previewEntries.length;
 
   function handleFilterChange(filter: TimelineEvidenceFilter) {
@@ -258,13 +264,22 @@ export function TimelinePanel({
           />
           {previewActive && hiddenCount > 0 ? (
             <div className="flex justify-center pt-1">
-              <button
-                type="button"
-                onClick={() => setShowAll(true)}
-                className="inline-flex items-center justify-center rounded-full border border-border bg-background px-6 py-3 text-sm font-medium text-foreground transition-colors hover:bg-muted"
-              >
-                {timelineT("seeMore", { count: hiddenCount })}
-              </button>
+              {seeMoreHref ? (
+                <Link
+                  href={seeMoreHref}
+                  className="inline-flex items-center justify-center rounded-full border border-border bg-background px-6 py-3 text-sm font-medium text-foreground transition-colors hover:bg-muted"
+                >
+                  {timelineT("seeMore", { count: hiddenCount })}
+                </Link>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setShowAll(true)}
+                  className="inline-flex items-center justify-center rounded-full border border-border bg-background px-6 py-3 text-sm font-medium text-foreground transition-colors hover:bg-muted"
+                >
+                  {timelineT("seeMore", { count: hiddenCount })}
+                </button>
+              )}
             </div>
           ) : null}
         </>

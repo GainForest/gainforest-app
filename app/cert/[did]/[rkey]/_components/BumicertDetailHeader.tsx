@@ -58,33 +58,44 @@ export type BumicertAnchorNavItem = { id: string; href: string; label: string };
 export function BumicertDetailHeader({
   summary,
   anchorNav,
+  activeAnchorId,
 }: {
   summary: BumicertHeaderSummary;
   anchorNav?: BumicertAnchorNavItem[];
+  activeAnchorId?: string;
 }) {
-  // The single-page project layout has no tab panels — its sections render
-  // inline — so it swaps the `?tab=` strip for anchor links. The tabbed strip
-  // stays for legacy standalone Cert pages, whose route reads `?tab=`.
+  // Project pages can provide their own navigation items while legacy
+  // standalone Cert pages keep the route-driven tab strip below.
   return (
     <HeaderContent
-      sub={anchorNav ? <BumicertHeaderAnchorNav items={anchorNav} /> : <BumicertHeaderTabs summary={summary} />}
+      sub={anchorNav ? <BumicertHeaderAnchorNav items={anchorNav} activeId={activeAnchorId} /> : <BumicertHeaderTabs summary={summary} />}
     />
   );
 }
 
-function BumicertHeaderAnchorNav({ items }: { items: BumicertAnchorNavItem[] }) {
+function BumicertHeaderAnchorNav({ items, activeId }: { items: BumicertAnchorNavItem[]; activeId?: string }) {
   return (
     <div className="-mx-4 overflow-x-auto px-4">
       <div className="flex min-w-max items-end border-b border-border">
-        {items.map((item) => (
-          <Link
-            key={item.id}
-            href={item.href}
-            className="relative flex items-center whitespace-nowrap px-4 py-2.5 text-sm font-medium text-muted-foreground transition-colors duration-150 hover:text-foreground"
-          >
-            {item.label}
-          </Link>
-        ))}
+        {items.map((item) => {
+          const isActive = item.id === activeId;
+          return (
+            <Link
+              key={item.id}
+              href={item.href}
+              aria-current={isActive ? "page" : undefined}
+              className={cn(
+                "relative flex items-center whitespace-nowrap px-4 py-2.5 text-sm font-medium transition-colors duration-150",
+                isActive ? "text-foreground" : "text-muted-foreground hover:text-foreground",
+              )}
+            >
+              {item.label}
+              {isActive ? (
+                <span className="absolute inset-x-0 bottom-0 h-0.5 rounded-full bg-foreground" />
+              ) : null}
+            </Link>
+          );
+        })}
       </div>
     </div>
   );
