@@ -842,7 +842,7 @@ export async function ProjectDetailView({
                       activityCid={record.cid ?? ""}
                       matchActivityUris={matchUris}
                       bumicertTitle={record.title}
-                      canManageEvidence={false}
+                      canManageEvidence={timelineAccess.canManageEvidence}
                       createPermission={timelineAccess.createPermission}
                       deletePermission={timelineAccess.deletePermission}
                       mutationRepo={timelineAccess.mutationRepo}
