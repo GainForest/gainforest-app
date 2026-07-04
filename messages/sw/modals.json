@@ -147,6 +147,15 @@
     "cancel": "Ghairi",
     "notVerifiedSuffix": "Haijathibitishwa"
   },
+  "walletCreate": {
+    "createTitle": "Ongeza pochi ili kupokea michango",
+    "createHint": "Huhitaji pochi ya sarafu za kidijitali — ingia kwa akaunti yako ya Bluesky au barua pepe na tutakutengenezea pochi salama ndani ya sekunde chache.",
+    "createButton": "Tengeneza pochi mpya",
+    "creating": "Inafungua kuingia salama…",
+    "connectExisting": "Unganisha pochi uliyonayo",
+    "defaultLabel": "Pochi ya michango",
+    "error": "Imeshindwa kutengeneza pochi. Tafadhali jaribu tena."
+  },
   "wallet": {
     "add": {
       "walletLinkedTitle": "Pochi Imeunganishwa",

@@ -147,6 +147,15 @@
     "cancel": "Cancelar",
     "notVerifiedSuffix": "Não verificada"
   },
+  "walletCreate": {
+    "createTitle": "Adicione uma carteira para receber doações",
+    "createHint": "Não precisa de carteira cripto — entre com sua conta do Bluesky ou e-mail e criaremos uma carteira segura para você em segundos.",
+    "createButton": "Criar uma nova carteira",
+    "creating": "Abrindo login seguro…",
+    "connectExisting": "Conectar uma carteira existente",
+    "defaultLabel": "Carteira de doações",
+    "error": "Não foi possível criar a carteira. Tente novamente."
+  },
   "wallet": {
     "add": {
       "walletLinkedTitle": "Carteira vinculada",

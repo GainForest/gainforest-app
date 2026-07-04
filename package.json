@@ -16,6 +16,7 @@
     "test:e2e:publish-report": "pnpm test:e2e && pnpm publish:e2e-report"
   },
   "dependencies": {
+    "@human.tech/waap-sdk": "^2.0.0",
     "@radix-ui/react-dialog": "^1.1.15",
     "@rainbow-me/rainbowkit": "^2.2.11",
     "@tanstack/react-query": "^5.101.0",

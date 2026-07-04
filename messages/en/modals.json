@@ -147,6 +147,15 @@
     "cancel": "Cancel",
     "notVerifiedSuffix": "Not verified"
   },
+  "walletCreate": {
+    "createTitle": "Add a wallet to receive donations",
+    "createHint": "No crypto wallet needed — sign in with your Bluesky account or email and we'll create a secure wallet for you in seconds.",
+    "createButton": "Create a new wallet",
+    "creating": "Opening secure sign-in…",
+    "connectExisting": "Connect an existing wallet",
+    "defaultLabel": "Donation wallet",
+    "error": "Could not create the wallet. Please try again."
+  },
   "wallet": {
     "add": {
       "walletLinkedTitle": "Wallet Linked",

@@ -147,6 +147,15 @@
     "cancel": "Batal",
     "notVerifiedSuffix": "Belum diverifikasi"
   },
+  "walletCreate": {
+    "createTitle": "Tambahkan dompet untuk menerima donasi",
+    "createHint": "Tidak perlu dompet kripto — masuk dengan akun Bluesky atau email Anda dan kami akan membuatkan dompet aman dalam hitungan detik.",
+    "createButton": "Buat dompet baru",
+    "creating": "Membuka proses masuk yang aman…",
+    "connectExisting": "Hubungkan dompet yang sudah ada",
+    "defaultLabel": "Dompet donasi",
+    "error": "Tidak dapat membuat dompet. Silakan coba lagi."
+  },
   "wallet": {
     "add": {
       "walletLinkedTitle": "Dompet Tertaut",

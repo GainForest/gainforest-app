@@ -147,6 +147,15 @@
     "cancel": "Cancelar",
     "notVerifiedSuffix": "No verificada"
   },
+  "walletCreate": {
+    "createTitle": "Añade una billetera para recibir donaciones",
+    "createHint": "No necesitas una billetera cripto: inicia sesión con tu cuenta de Bluesky o tu correo y crearemos una billetera segura para ti en segundos.",
+    "createButton": "Crear una billetera nueva",
+    "creating": "Abriendo inicio de sesión seguro…",
+    "connectExisting": "Conectar una billetera existente",
+    "defaultLabel": "Billetera de donaciones",
+    "error": "No se pudo crear la billetera. Inténtalo de nuevo."
+  },
   "wallet": {
     "add": {
       "walletLinkedTitle": "Billetera vinculada",
