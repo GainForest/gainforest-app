@@ -150,7 +150,6 @@
   "walletCreate": {
     "createTitle": "Añade una billetera para recibir donaciones",
     "createHint": "No necesitas una billetera cripto: inicia sesión con tu cuenta de Bluesky o tu correo y crearemos una billetera segura para ti en segundos.",
-    "createButton": "Crear una billetera nueva",
     "creating": "Abriendo inicio de sesión seguro…",
     "connectExisting": "Conectar una billetera existente",
     "defaultLabel": "Billetera de donaciones",
@@ -158,7 +157,9 @@
     "handleHint": "En el inicio de sesión de Bluesky, usa <handle></handle>, la misma cuenta que usas aquí.",
     "copyHandle": "Copiar tu nombre de usuario",
     "copy": "Copiar",
-    "copied": "Copiado"
+    "copied": "Copiado",
+    "addWallet": "Añadir una billetera de donaciones",
+    "continueButton": "Continuar con Bluesky o correo"
   },
   "wallet": {
     "add": {

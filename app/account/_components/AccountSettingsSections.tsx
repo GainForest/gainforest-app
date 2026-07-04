@@ -563,14 +563,13 @@ function WalletsSection({ did }: { did: string }) {
     void modal.hide().then(() => modal.popModal());
   }
 
-  function openAdd(existing?: WalletLink, startWithCreate = false) {
+  function openAdd(existing?: WalletLink) {
     modal.pushModal({
       id: "settings-wallet-add",
       content: (
         <AddWalletModal
           did={did}
           existingName={existing?.name ?? undefined}
-          startWithCreate={startWithCreate}
           onBack={closeModal}
           onSuccess={() => { closeModal(); void loadLinks(); }}
         />
@@ -610,9 +609,9 @@ function WalletsSection({ did }: { did: string }) {
         ) : links.length === 0 ? (
           <div className="flex flex-col items-center gap-3 py-4 px-3 w-full">
             <p className="text-sm text-muted-foreground text-center">No wallets linked yet.</p>
-            <Button size="sm" onClick={() => openAdd(undefined, true)} className="gap-1.5">
+            <Button size="sm" onClick={() => openAdd()} className="gap-1.5">
               <SparklesIcon className="h-3.5 w-3.5" />
-              {createT("createButton")}
+              {createT("addWallet")}
             </Button>
             <p className="text-xs text-muted-foreground text-center max-w-xs">{createT("createHint")}</p>
           </div>

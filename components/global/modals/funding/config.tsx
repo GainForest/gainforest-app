@@ -176,14 +176,13 @@ export function FundingConfigModal({
 
   // ── Add wallet flow ────────────────────────────────────────────────────────
 
-  const handleAddWallet = (startWithCreate = false) => {
+  const handleAddWallet = () => {
     pushModal({
       id: MODAL_IDS.WALLET_ADD,
       content: (
         <AddWalletModal
           did={ownerDid}
           repo={mutationRepo}
-          startWithCreate={startWithCreate}
           onBack={() => popModal()}
           onSuccess={(attestationUri) => {
             invalidateLinks();
@@ -317,21 +316,13 @@ export function FundingConfigModal({
             <div className="flex flex-col gap-2">
               <button
                 type="button"
-                onClick={() => handleAddWallet(true)}
+                onClick={() => handleAddWallet()}
                 className="flex items-center justify-center gap-1.5 h-9 w-full rounded-md bg-primary text-sm font-medium text-primary-foreground shadow-xs hover:opacity-90 transition-opacity"
               >
                 <SparklesIcon className="size-3.5" />
-                {createT("createButton")}
+                {createT("addWallet")}
               </button>
               <p className="text-xs text-muted-foreground text-center">{createT("createHint")}</p>
-              <button
-                type="button"
-                onClick={() => handleAddWallet()}
-                className="flex items-center justify-center gap-1.5 h-9 w-full rounded-md border border-dashed border-input text-sm text-muted-foreground hover:text-foreground hover:border-foreground/40 transition-colors"
-              >
-                <PlusIcon className="size-3.5" />
-                {t("linkWallet")}
-              </button>
             </div>
           ) : (
             <div className="flex items-center gap-2">

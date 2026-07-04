@@ -8,13 +8,14 @@
  *   repo          — organization repo for group-owned wallet links
  *   existingName  — pre-fills the wallet label field (e.g. when editing an existing wallet)
  *   existingRkey  — informational only; re-link always creates a fresh record
- *   startWithCreate — immediately open the WaaP "create a wallet" flow on mount
  *   onBack / onSuccess — navigation callbacks (push/pop handled by the caller);
  *                        onSuccess receives the created link record URI when available
  *
  * States:
  *   • No wallet connected  → create a new wallet (WaaP: Bluesky/email, no
- *     extension needed) or connect an existing one (RainbowKit)
+ *     extension needed) or connect an existing one (RainbowKit). The handle
+ *     hint is shown BEFORE the WaaP card opens — WaaP only launches on an
+ *     explicit click, never automatically over this modal.
  *   • Wrong network        → connected address shown, Switch to Base CTA
  *   • Ready to sign        → label field + Sign & Link button; wallets created
  *     through WaaP sign & link automatically (auto-attestation)
@@ -26,7 +27,7 @@ import { useAccount, useConnect, useSwitchChain, useDisconnect } from "wagmi";
 import { base } from "wagmi/chains";
 import { useConnectModal } from "@rainbow-me/rainbowkit";
 import { useTranslations } from "next-intl";
-import { getWaaPConnector } from "@/lib/waap/connector";
+import { getWaaPConnector, onWaaPDismissed } from "@/lib/waap/connector";
 import { useModal } from "@/components/ui/modal/context";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -78,8 +79,6 @@ export interface AddWalletModalProps {
   existingName?: string;
   /** Passed for context only — re-link still creates a fresh record. */
   existingRkey?: string;
-  /** Open the WaaP "create a wallet" flow immediately on mount. */
-  startWithCreate?: boolean;
   onBack: () => void | Promise<void>;
   /** Called after the wallet is linked; receives the link record URI when available. */
   onSuccess: (attestationUri?: string | null) => void | Promise<void>;
@@ -89,7 +88,6 @@ export function AddWalletModal({
   did,
   repo,
   existingName,
-  startWithCreate,
   onBack,
   onSuccess,
 }: AddWalletModalProps) {
@@ -125,30 +123,29 @@ export function AddWalletModal({
   // connection came from the create flow, and that we only auto-trigger once.
   const [viaWaaP, setViaWaaP] = useState(false);
   const autoLinkStartedRef = useRef(false);
-  const createStartedRef = useRef(false);
+  const creationDoneRef = useRef(false);
 
   const handleCreateWallet = async () => {
     if (isCreating) return;
     setIsCreating(true);
     setCreateError(null);
+    creationDoneRef.current = false;
+    // WaaP's login() promise never settles when its card is dismissed — watch
+    // the dismissal ourselves so this modal never gets stuck disabled.
+    const unsubscribe = onWaaPDismissed(() => {
+      if (!creationDoneRef.current) setIsCreating(false);
+    });
     try {
       await connectAsync({ connector: getWaaPConnector(), chainId: base.id });
       setViaWaaP(true);
     } catch {
       setCreateError(t("error"));
     } finally {
+      creationDoneRef.current = true;
+      unsubscribe();
       setIsCreating(false);
     }
   };
-
-  // "One-click" entry points (funding modal / settings) open straight into the
-  // WaaP flow instead of showing the connect choice first.
-  useEffect(() => {
-    if (!startWithCreate || createStartedRef.current) return;
-    createStartedRef.current = true;
-    void handleCreateWallet();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [startWithCreate]);
 
   // Auto-attestation: once a WaaP-created wallet is connected on Base, sign &
   // link it without another button press. Runs once; a rejected signature
@@ -234,7 +231,7 @@ export function AddWalletModal({
             ) : null}
             <Button className="w-full" onClick={() => void handleCreateWallet()} disabled={isCreating}>
               {isCreating ? <Loader2Icon className="size-3.5 animate-spin" /> : <SparklesIcon className="size-3.5" />}
-              {isCreating ? t("creating") : t("createButton")}
+              {isCreating ? t("creating") : t("continueButton")}
             </Button>
             <Button variant="outline" className="w-full" onClick={() => openConnectModal?.()} disabled={isCreating}>
               {t("connectExisting")}

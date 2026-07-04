@@ -55,13 +55,38 @@ function parseAddresses(values: unknown): `0x${string}`[] {
   });
 }
 
-function waapConnector(options: InitWaaPOptions) {
-  let provider: WaaPEthereumProviderInterface | null = null;
+let sharedProvider: WaaPEthereumProviderInterface | null = null;
 
-  const ensureProvider = (): WaaPEthereumProviderInterface => {
-    if (!provider) provider = initWaaP(options);
-    return provider;
+/** The lazily-initialised WaaP provider singleton. Also used by the wallet
+ *  modal to observe WaaP's UI lifecycle (its `login()` promise never settles
+ *  when the user dismisses the WaaP card — only an internal `hide_modal`
+ *  event fires — so callers watch that to reset their pending state). */
+export function getWaaPProvider(options: InitWaaPOptions = WAAP_INIT_OPTIONS): WaaPEthereumProviderInterface {
+  if (!sharedProvider) sharedProvider = initWaaP(options);
+  return sharedProvider;
+}
+
+/** Runs `callback` when the WaaP card is dismissed while no login completed.
+ *  Returns an unsubscribe function. */
+export function onWaaPDismissed(callback: () => void): () => void {
+  const provider = getWaaPProvider();
+  const manager = (provider as { uiMessageManager?: { on: (e: string, f: () => void) => void; off?: (e: string, f: () => void) => void; removeListener?: (e: string, f: () => void) => void } }).uiMessageManager;
+  if (!manager) return () => undefined;
+  const onHide = () => {
+    // On a successful login the card also hides — give the connection a beat
+    // to materialise, then treat a still-disconnected provider as a cancel.
+    setTimeout(() => {
+      if (!provider.connected) callback();
+    }, 600);
   };
+  manager.on("hide_modal", onHide);
+  return () => {
+    (manager.off ?? manager.removeListener)?.call(manager, "hide_modal", onHide);
+  };
+}
+
+function waapConnector(options: InitWaaPOptions) {
+  const ensureProvider = (): WaaPEthereumProviderInterface => getWaaPProvider(options);
 
   const getAccounts = async (): Promise<`0x${string}`[]> => {
     const waap = ensureProvider();

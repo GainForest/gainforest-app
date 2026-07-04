@@ -150,7 +150,6 @@
   "walletCreate": {
     "createTitle": "Tambahkan dompet untuk menerima donasi",
     "createHint": "Tidak perlu dompet kripto — masuk dengan akun Bluesky atau email Anda dan kami akan membuatkan dompet aman dalam hitungan detik.",
-    "createButton": "Buat dompet baru",
     "creating": "Membuka proses masuk yang aman…",
     "connectExisting": "Hubungkan dompet yang sudah ada",
     "defaultLabel": "Dompet donasi",
@@ -158,7 +157,9 @@
     "handleHint": "Saat masuk dengan Bluesky, gunakan <handle></handle> — akun yang sama dengan yang Anda pakai di sini.",
     "copyHandle": "Salin nama pengguna Anda",
     "copy": "Salin",
-    "copied": "Tersalin"
+    "copied": "Tersalin",
+    "addWallet": "Tambahkan dompet donasi",
+    "continueButton": "Lanjutkan dengan Bluesky atau email"
   },
   "wallet": {
     "add": {

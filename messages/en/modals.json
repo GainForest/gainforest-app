@@ -150,7 +150,6 @@
   "walletCreate": {
     "createTitle": "Add a wallet to receive donations",
     "createHint": "No crypto wallet needed — sign in with your Bluesky account or email and we'll create a secure wallet for you in seconds.",
-    "createButton": "Create a new wallet",
     "creating": "Opening secure sign-in…",
     "connectExisting": "Connect an existing wallet",
     "defaultLabel": "Donation wallet",
@@ -158,7 +157,9 @@
     "handleHint": "In the Bluesky sign-in, use <handle></handle> — the same account you use here.",
     "copyHandle": "Copy your username",
     "copy": "Copy",
-    "copied": "Copied"
+    "copied": "Copied",
+    "addWallet": "Add a donation wallet",
+    "continueButton": "Continue with Bluesky or email"
   },
   "wallet": {
     "add": {

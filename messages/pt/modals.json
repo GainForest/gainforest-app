@@ -150,7 +150,6 @@
   "walletCreate": {
     "createTitle": "Adicione uma carteira para receber doações",
     "createHint": "Não precisa de carteira cripto — entre com sua conta do Bluesky ou e-mail e criaremos uma carteira segura para você em segundos.",
-    "createButton": "Criar uma nova carteira",
     "creating": "Abrindo login seguro…",
     "connectExisting": "Conectar uma carteira existente",
     "defaultLabel": "Carteira de doações",
@@ -158,7 +157,9 @@
     "handleHint": "No login do Bluesky, use <handle></handle> — a mesma conta que você usa aqui.",
     "copyHandle": "Copiar seu nome de usuário",
     "copy": "Copiar",
-    "copied": "Copiado"
+    "copied": "Copiado",
+    "addWallet": "Adicionar uma carteira de doações",
+    "continueButton": "Continuar com Bluesky ou e-mail"
   },
   "wallet": {
     "add": {

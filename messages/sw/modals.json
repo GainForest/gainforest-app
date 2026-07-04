@@ -150,7 +150,6 @@
   "walletCreate": {
     "createTitle": "Ongeza pochi ili kupokea michango",
     "createHint": "Huhitaji pochi ya sarafu za kidijitali — ingia kwa akaunti yako ya Bluesky au barua pepe na tutakutengenezea pochi salama ndani ya sekunde chache.",
-    "createButton": "Tengeneza pochi mpya",
     "creating": "Inafungua kuingia salama…",
     "connectExisting": "Unganisha pochi uliyonayo",
     "defaultLabel": "Pochi ya michango",
@@ -158,7 +157,9 @@
     "handleHint": "Unapoingia kwa Bluesky, tumia <handle></handle> — akaunti ile ile unayotumia hapa.",
     "copyHandle": "Nakili jina lako la mtumiaji",
     "copy": "Nakili",
-    "copied": "Imenakiliwa"
+    "copied": "Imenakiliwa",
+    "addWallet": "Ongeza pochi ya michango",
+    "continueButton": "Endelea kwa Bluesky au barua pepe"
   },
   "wallet": {
     "add": {
