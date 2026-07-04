@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
-import { BadgeCheckIcon, ChevronRightIcon, HeartIcon } from "lucide-react";
+import { BadgeCheckIcon, ChevronRightIcon } from "lucide-react";
 import { getLocale, getTranslations } from "next-intl/server";
 import { AccountGalleryClient } from "./AccountGalleryClient";
 import type { GalleryProjectOption } from "./AccountGalleryUploader";
@@ -21,8 +21,6 @@ import { ShareProfileButton } from "./ShareProfileButton";
 import { DonationHistory } from "./DonationHistory";
 import { fetchReceipts } from "../../_lib/dashboard";
 import { fetchPublicDataCouncilMembers, type PublicDataCouncilMember } from "../../_lib/data-council";
-import { fetchMaEarthDonationSummary, maEarthDonationUrl } from "../../_lib/maearth-donations";
-import { formatCompactUsd } from "../../_lib/format";
 import { fetchEndorsementsGiven } from "../../_lib/endorsements-given";
 import type { AuthSession } from "../../_lib/auth";
 import { fetchUserCgsGroups, resolveAccountManageAccess } from "../../_lib/manage-server";
@@ -77,14 +75,12 @@ function DataCouncilAvatar({ member }: { member: PublicDataCouncilMember }) {
 // surface the *specific* rounds an account was part of — an explicit, per-round
 // statement of record, rather than the generic "Trusted by Ma Earth" emblem.
 async function AccountMaEarthRoundsSection({ did, className = "" }: { did: string; className?: string }) {
-  const donateUrl = maEarthDonationUrl(did);
-  const [t, rounds, donationSummary] = await Promise.all([
+  const [t, rounds] = await Promise.all([
     getTranslations("common.maEarthRounds"),
     fetchAccountMaEarthRounds(did).catch(() => [] as number[]),
-    donateUrl ? fetchMaEarthDonationSummary(donateUrl) : Promise.resolve(null),
   ]);
 
-  if (rounds.length === 0 && !donateUrl) return null;
+  if (rounds.length === 0) return null;
 
   return (
     <section className={`rounded-3xl border border-border/60 bg-card p-5 org-animate org-fade-in-up org-delay-2 sm:p-6 ${className}`.trim()}>
@@ -100,43 +96,18 @@ async function AccountMaEarthRoundsSection({ did, className = "" }: { did: strin
         </span>
         <h2 className="font-instrument text-2xl italic leading-none text-foreground">{t("title")}</h2>
       </div>
-      <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">
-        {rounds.length > 0 ? t("description") : t("donateDescription")}
-      </p>
-      {rounds.length > 0 ? (
-        <ul className="mt-4 flex flex-wrap gap-2">
-          {rounds.map((round) => (
-            <li
-              key={round}
-              className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-background/60 px-3.5 py-2 text-sm font-medium text-foreground"
-            >
-              <BadgeCheckIcon className="size-4 shrink-0 text-primary" aria-hidden />
-              {t("round", { round })}
-            </li>
-          ))}
-        </ul>
-      ) : null}
-      {donateUrl ? (
-        <div className="mt-4 flex flex-wrap items-center gap-3">
-          <a
-            href={donateUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-sm transition hover:opacity-90"
+      <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">{t("description")}</p>
+      <ul className="mt-4 flex flex-wrap gap-2">
+        {rounds.map((round) => (
+          <li
+            key={round}
+            className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-background/60 px-3.5 py-2 text-sm font-medium text-foreground"
           >
-            <HeartIcon className="size-4 shrink-0" aria-hidden />
-            {t("donate")}
-          </a>
-          {donationSummary && donationSummary.totalUsd > 0 ? (
-            <p className="text-sm text-muted-foreground">
-              {t("raised", {
-                amount: formatCompactUsd(donationSummary.totalUsd),
-                donors: donationSummary.donorCount,
-              })}
-            </p>
-          ) : null}
-        </div>
-      ) : null}
+            <BadgeCheckIcon className="size-4 shrink-0 text-primary" aria-hidden />
+            {t("round", { round })}
+          </li>
+        ))}
+      </ul>
     </section>
   );
 }
