@@ -8,6 +8,7 @@ import { CHAIN_ID } from "@/lib/facilitator/usdc";
 const EIP712_DOMAIN = {
   name: "ATProto EVM Attestation",
   version: "1",
+  chainId: CHAIN_ID,
 } as const;
 
 const EIP712_TYPES = {
@@ -36,12 +37,19 @@ function isUserRejection(err: unknown): boolean {
 
 /** Best human-readable message from a wallet/provider error. */
 function extractErrorMessage(err: unknown): string | null {
-  if (!err) return null;
-  const candidate = err as { shortMessage?: unknown; message?: unknown; error?: unknown };
-  if (typeof candidate.shortMessage === "string" && candidate.shortMessage) return candidate.shortMessage;
-  if (typeof candidate.message === "string" && candidate.message) return candidate.message.split("\n")[0];
-  if (typeof candidate.error === "string" && candidate.error) return candidate.error;
-  return null;
+  let current: unknown = err;
+  let fallback: string | null = null;
+  for (let depth = 0; current && depth < 6; depth++) {
+    const candidate = current as { shortMessage?: unknown; message?: unknown; error?: unknown; cause?: unknown };
+    const messages = [candidate.shortMessage, candidate.message, candidate.error]
+      .filter((message): message is string => typeof message === "string" && message.length > 0)
+      .map((message) => message.split("\n")[0]);
+    const specific = messages.find((message) => !/unknown rpc error/i.test(message));
+    if (specific) return specific;
+    fallback ??= messages[0] ?? null;
+    current = candidate.cause;
+  }
+  return fallback;
 }
 
 type UseWalletAttestationResult = {

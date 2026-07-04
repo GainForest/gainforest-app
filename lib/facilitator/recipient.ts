@@ -41,10 +41,16 @@ const ACTIVITY_CID_QUERY = `
   }
 `;
 
-const EIP712_DOMAIN = {
+const LEGACY_EIP712_DOMAIN = {
   name: "ATProto EVM Attestation",
   version: "1",
 } as const;
+
+function eip712Domain(chainId: string | null | undefined) {
+  const parsedChainId = Number(chainId);
+  if (!Number.isSafeInteger(parsedChainId) || parsedChainId <= 0) return LEGACY_EIP712_DOMAIN;
+  return { ...LEGACY_EIP712_DOMAIN, chainId: parsedChainId } as const;
+}
 
 const EIP712_TYPES = {
   AttestLink: [
@@ -102,19 +108,35 @@ async function indexerQuery<T>(query: string, variables: Record<string, unknown>
 async function verifyUserProof(address: `0x${string}`, userProof: NonNullable<LinkNode["userProof"]>): Promise<boolean> {
   const message = userProof.message;
   if (!userProof.signature || !message) return false;
-  return verifyTypedData({
+  const typedMessage = {
+    did: message.did ?? "",
+    evmAddress: message.evmAddress ?? "",
+    chainId: message.chainId ?? "",
+    timestamp: message.timestamp ?? "",
+    nonce: message.nonce ?? "",
+  };
+  const signature = userProof.signature as `0x${string}`;
+
+  // New signatures include chainId in the EIP-712 domain because many wallet
+  // providers require it for typed-data signing. Keep the legacy domain as a
+  // fallback so already-linked wallets continue to verify.
+  const validWithChainDomain = await verifyTypedData({
     address,
-    domain: EIP712_DOMAIN,
+    domain: eip712Domain(message.chainId),
     types: EIP712_TYPES,
     primaryType: "AttestLink",
-    message: {
-      did: message.did ?? "",
-      evmAddress: message.evmAddress ?? "",
-      chainId: message.chainId ?? "",
-      timestamp: message.timestamp ?? "",
-      nonce: message.nonce ?? "",
-    },
-    signature: userProof.signature as `0x${string}`,
+    message: typedMessage,
+    signature,
+  }).catch(() => false);
+  if (validWithChainDomain) return true;
+
+  return verifyTypedData({
+    address,
+    domain: LEGACY_EIP712_DOMAIN,
+    types: EIP712_TYPES,
+    primaryType: "AttestLink",
+    message: typedMessage,
+    signature,
   }).catch(() => false);
 }
 
