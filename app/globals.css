@@ -860,3 +860,15 @@ body {
     transition: none;
   }
 }
+
+/* WaaP (human.tech) wallet overlay. Our modal system locks the page with
+   <body style="pointer-events: none"> while a dialog is open and re-enables
+   events only inside its own dialog tree. WaaP appends its full-screen
+   overlay to <body>, so it inherits the lock and every click falls straight
+   through its card — the wallet UI looks alive but is completely inert.
+   Re-enable pointer events for WaaP's subtree explicitly. */
+#waap-wallet-iframe-container,
+#waap-wallet-iframe-wrapper,
+#waap-wallet-iframe {
+  pointer-events: auto !important;
+}
