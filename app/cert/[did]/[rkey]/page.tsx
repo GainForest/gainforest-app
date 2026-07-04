@@ -35,6 +35,7 @@ import { SocialGlyph } from "../../../_components/SocialIcon";
 import { StatsTileGrid, type StatsTileItem } from "../../../_components/StatsTile";
 import { fetchReceipts, type DonorRef, type FundingReceipt } from "../../../_lib/dashboard";
 import { formatCompact, formatCompactUsd, formatCountry, formatDate, formatDateTime, formatNumber, formatRelative } from "../../../_lib/format";
+import { fetchMaEarthDonationSummary, maEarthDonationUrl } from "../../../_lib/maearth-donations";
 import { formatWorkScopeTag, type WorkScopeLabels } from "../../../_lib/work-scope-labels";
 import { fetchReviewCounts, fetchReviewsForSubject, type BumicertReviews, type ReviewComment, type ReviewCounts } from "../../../_lib/reviews";
 import {
@@ -567,7 +568,8 @@ export async function ProjectDetailView({
   const { record, detail, owner, fundingConfig, authSession } = routeData;
   const matchUris = timelineMatchUris && timelineMatchUris.length > 0 ? timelineMatchUris : [record.atUri];
 
-  const [workScopeT, permissionT, timelineT, timelineEntryT, referenceT, globeT, projectNavT] = await Promise.all([
+  const maEarthDonateUrl = maEarthDonationUrl(record.did);
+  const [workScopeT, permissionT, timelineT, timelineEntryT, referenceT, globeT, projectNavT, maEarthT, maEarthDonationSummary] = await Promise.all([
     getTranslations("common.workScopes"),
     getTranslations("bumicert.detail.evidenceAdder.permissions"),
     getTranslations("bumicert.detail.timeline"),
@@ -575,6 +577,8 @@ export async function ProjectDetailView({
     getTranslations("bumicert.detail.reference"),
     getTranslations("marketplace.globe"),
     getTranslations("bumicert.detail.projectNav"),
+    getTranslations("common.maEarthRounds"),
+    maEarthDonateUrl ? fetchMaEarthDonationSummary(maEarthDonateUrl) : Promise.resolve(null),
   ]);
   const workScopeLabels: WorkScopeLabels = {
     reforestation: workScopeT("reforestation"),
@@ -828,6 +832,32 @@ export async function ProjectDetailView({
                 />
 
                 <ProjectGalleryViewer galleries={projectGalleries} variant="bumicert" showProjectFilter={false} hideWhenEmpty compact />
+                {maEarthDonateUrl ? (
+                  <ProjectDetailSection id="ma-earth" icon={<HeartIcon className="h-4 w-4" aria-hidden />} title={maEarthT("title")}>
+                    <div className="rounded-2xl border border-border-soft bg-card p-4 shadow-sm sm:p-5">
+                      <p className="max-w-2xl text-sm leading-6 text-muted-foreground">{maEarthT("donateDescription")}</p>
+                      <div className="mt-4 flex flex-wrap items-center gap-3">
+                        <a
+                          href={maEarthDonateUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-sm transition hover:opacity-90"
+                        >
+                          <HeartIcon className="size-4 shrink-0" aria-hidden />
+                          {maEarthT("donate")}
+                        </a>
+                        {maEarthDonationSummary && maEarthDonationSummary.totalUsd > 0 ? (
+                          <p className="text-sm text-muted-foreground">
+                            {maEarthT("raised", {
+                              amount: formatCompactUsd(maEarthDonationSummary.totalUsd),
+                              donors: maEarthDonationSummary.donorCount,
+                            })}
+                          </p>
+                        ) : null}
+                      </div>
+                    </div>
+                  </ProjectDetailSection>
+                ) : null}
                 {hasObservations ? (
                   <div id="observations" className="scroll-mt-24">
                     <BumicertObservationsGallery observations={observations} />
