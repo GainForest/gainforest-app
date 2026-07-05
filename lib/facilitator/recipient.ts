@@ -41,12 +41,20 @@ const ACTIVITY_CID_QUERY = `
   }
 `;
 
+const ATTESTATION_VERIFYING_CONTRACT = "0x0000000000000000000000000000000000000000" as const;
+
 const LEGACY_EIP712_DOMAIN = {
   name: "ATProto EVM Attestation",
   version: "1",
 } as const;
 
 function eip712Domain(chainId: string | null | undefined) {
+  const parsedChainId = Number(chainId);
+  if (!Number.isSafeInteger(parsedChainId) || parsedChainId <= 0) return LEGACY_EIP712_DOMAIN;
+  return { ...LEGACY_EIP712_DOMAIN, chainId: parsedChainId, verifyingContract: ATTESTATION_VERIFYING_CONTRACT } as const;
+}
+
+function legacyChainDomain(chainId: string | null | undefined) {
   const parsedChainId = Number(chainId);
   if (!Number.isSafeInteger(parsedChainId) || parsedChainId <= 0) return LEGACY_EIP712_DOMAIN;
   return { ...LEGACY_EIP712_DOMAIN, chainId: parsedChainId } as const;
@@ -117,12 +125,23 @@ async function verifyUserProof(address: `0x${string}`, userProof: NonNullable<Li
   };
   const signature = userProof.signature as `0x${string}`;
 
-  // New signatures include chainId in the EIP-712 domain because many wallet
-  // providers require it for typed-data signing. Keep the legacy domain as a
-  // fallback so already-linked wallets continue to verify.
-  const validWithChainDomain = await verifyTypedData({
+  // New signatures include chainId + verifyingContract in the EIP-712 domain
+  // because some wallet providers require those fields for typed-data signing.
+  // Keep earlier domain shapes as fallbacks so already-linked wallets continue
+  // to verify.
+  const validWithRequiredDomain = await verifyTypedData({
     address,
     domain: eip712Domain(message.chainId),
+    types: EIP712_TYPES,
+    primaryType: "AttestLink",
+    message: typedMessage,
+    signature,
+  }).catch(() => false);
+  if (validWithRequiredDomain) return true;
+
+  const validWithChainDomain = await verifyTypedData({
+    address,
+    domain: legacyChainDomain(message.chainId),
     types: EIP712_TYPES,
     primaryType: "AttestLink",
     message: typedMessage,

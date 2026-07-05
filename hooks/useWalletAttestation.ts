@@ -5,10 +5,15 @@ import { useSignTypedData, useAccount } from "wagmi";
 import { CHAIN_ID } from "@/lib/facilitator/usdc";
 
 // EIP-712 domain for ATProto EVM attestation
+const ATTESTATION_VERIFYING_CONTRACT = "0x0000000000000000000000000000000000000000" as const;
+
 const EIP712_DOMAIN = {
   name: "ATProto EVM Attestation",
   version: "1",
   chainId: CHAIN_ID,
+  // This attestation is not verified by a smart contract, but some wallet
+  // providers reject EIP-712 payloads unless the domain includes the field.
+  verifyingContract: ATTESTATION_VERIFYING_CONTRACT,
 } as const;
 
 const EIP712_TYPES = {
