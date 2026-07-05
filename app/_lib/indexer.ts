@@ -3330,7 +3330,10 @@ async function fetchProjectsFromCollections(
       cursor = page.cursor;
       hasMore = page.hasMore && Boolean(page.cursor);
     }
-    return { records: uniqueProjects(records, options?.sort).slice(0, target), cursor, hasMore };
+    // Do NOT slice to `target` here: the cursor has already advanced past every
+    // raw record fetched, so any filtered record we drop now would be skipped
+    // forever. `target` is a minimum fetch goal when post-filtering, not a cap.
+    return { records: uniqueProjects(records, options?.sort), cursor, hasMore };
   }
 
   const previous = parseMultiCursor(after, variants.length);
@@ -3349,7 +3352,10 @@ async function fetchProjectsFromCollections(
   const records = uniqueProjects(filterDonatable(pages.flatMap((page) => page.records)), options?.sort);
   onProgress?.(records);
   return {
-    records: donationIndex ? records.slice(0, target) : records,
+    // When donation-filtering, every surviving record must be returned: the
+    // multi-cursor already points past all raw records fetched this round, so
+    // slicing to `target` would permanently drop the excess.
+    records,
     cursor: encodeMultiCursor({ cursors: pages.map((page) => page.cursor), more: pages.map((page) => page.hasMore) }),
     hasMore: pages.some((page) => page.hasMore),
   };
