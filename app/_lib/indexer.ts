@@ -1224,11 +1224,17 @@ const FUNDING_CONFIG_QUERY = `
   }
 `;
 
-export type BumicertBadgeFilter = "gainforest" | "maearth" | "maearth-round-1" | "maearth-round-2" | "maearth-round-3";
+export type BumicertBadgeFilter = "gainforest" | "maearth" | "maearth-round-1" | "maearth-round-2" | "maearth-round-3" | "published";
 export type TrustedOrganizationBadge = "gainforest";
 
 const FEATURED_BADGES: Array<{ key: BumicertBadgeFilter; title: string }> = [
   { key: "gainforest", title: "GainForest" },
+  // Self-serve publishing (Manage → Projects → Publish) awards this badge so
+  // the account shows on the public explore pages. It is deliberately a
+  // SEPARATE key from "gainforest": published orgs become visible, but they
+  // don't match the GainForest source chip and never read "Trusted by
+  // GainForest" (see `app/_lib/publish-org.ts`).
+  { key: "published", title: "Published on GainForest" },
   { key: "maearth", title: "Ma Earth" },
   { key: "maearth-round-1", title: "Ma Earth Round 1" },
   { key: "maearth-round-2", title: "Ma Earth Round 2" },
@@ -1742,7 +1748,7 @@ async function fetchFeaturedBadgeIndexUncached(signal?: AbortSignal): Promise<Fe
 function fetchFeaturedBadgeIndex(signal?: AbortSignal): Promise<FeaturedBadgeIndex> {
   return publicExploreCache(
     "featured-badge-index",
-    { version: "gainforest-maearth-endorsers:v7", ttl: FEATURED_BADGE_INDEX_CACHE_MS },
+    { version: "gainforest-maearth-endorsers:v8", ttl: FEATURED_BADGE_INDEX_CACHE_MS },
     // The featured-badge index is shared by count and list requests across the
     // public Explore pages. Keep the cached loader independent from any one
     // component effect's abort signal; otherwise an aborted count refresh can
