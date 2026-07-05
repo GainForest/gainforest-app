@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-04",
+  "generatedAt": "2026-07-05",
   "source": "https://maearth.com/sitemap.xml",
   "entries": {
     "did:plc:22nx75vwrnnjxzwdcycz4rco": {
@@ -10,26 +10,6 @@
       "orgSlug": "tera-kuno-5b66bc2f",
       "donateUrl": "https://maearth.com/tera-kuno-5b66bc2f/8e906c36"
     },
-    "did:plc:23sqg2e5ykp637fagt5zafcw": {
-      "orgSlug": "explore-your-coast-9426f59c",
-      "donateUrl": "https://maearth.com/explore-your-coast-9426f59c/7eaffa6b"
-    },
-    "did:plc:23xqsqgi7itr7mh5ep3sokrz": {
-      "orgSlug": "rangelands-community-f6ed1818",
-      "donateUrl": "https://maearth.com/rangelands-community-f6ed1818/a9861b46"
-    },
-    "did:plc:25d4zixk7lqxhzc42cribtlx": {
-      "orgSlug": "ecotopia-social-coope-b0fe9aaf",
-      "donateUrl": "https://maearth.com/ecotopia-social-coope-b0fe9aaf/147379ca"
-    },
-    "did:plc:26jsl6jlrtovqkncq3tc2vsu": {
-      "orgSlug": "coordinadora-nacional-para-la-defensa-del-ecosistema-manglar-del-ecuador-7e2532ea",
-      "donateUrl": "https://maearth.com/coordinadora-nacional-para-la-defensa-del-ecosistema-manglar-del-ecuador-7e2532ea/df9f139a"
-    },
-    "did:plc:2bek2etg5uq7e5j23fklpxtl": {
-      "orgSlug": "pacha-nishi-b35b512c",
-      "donateUrl": "https://maearth.com/pacha-nishi-b35b512c/5f963c30"
-    },
     "did:plc:2bjsuiidfgadurs5xn657fwc": {
       "orgSlug": "wise-ancestors-2f725c6b",
       "donateUrl": "https://maearth.com/wise-ancestors-2f725c6b/bosenge-tree"
@@ -38,205 +18,37 @@
       "orgSlug": "rivershed-society-of-bc-4c68cd1e",
       "donateUrl": "https://maearth.com/rivershed-society-of-bc-4c68cd1e/81d83e10"
     },
-    "did:plc:2jwsln57h7sgl5gcwaurljyp": {
-      "orgSlug": "awakening-lands-976f4327",
-      "donateUrl": "https://maearth.com/awakening-lands-976f4327/70fe85ba"
-    },
-    "did:plc:2l426qmd2j5getqushq4noaw": {
-      "orgSlug": "cova-conservacion-vid-2d6bf924",
-      "donateUrl": "https://maearth.com/cova-conservacion-vid-2d6bf924/18276bed"
-    },
     "did:plc:2oadugt74lusm42btvwhjrbh": {
       "orgSlug": "agro-rangers-dbb31b48",
       "donateUrl": "https://maearth.com/agro-rangers-dbb31b48/75f15ba1"
-    },
-    "did:plc:2ohs4zm6ue7ri3lt3aflfv4l": {
-      "orgSlug": "alahne-initiative",
-      "donateUrl": "https://maearth.com/alahne-initiative/521b03f6"
-    },
-    "did:plc:2pjbvj4lpx357m76xjcehig3": {
-      "orgSlug": "babuyirana-women-grou-82a026cc",
-      "donateUrl": "https://maearth.com/babuyirana-women-grou-82a026cc/2aedbee0"
-    },
-    "did:plc:2qcus3nxcvjelabave6cwb3f": {
-      "orgSlug": "instituto-mar-atlanti-22e4b4b2",
-      "donateUrl": "https://maearth.com/instituto-mar-atlanti-22e4b4b2/d7449dcc"
-    },
-    "did:plc:2qnnesxwfwchqkniqyizghnu": {
-      "orgSlug": "nila",
-      "donateUrl": "https://maearth.com/nila/1745ff68"
-    },
-    "did:plc:2t2o4sym6rjztfj3lk75gd3p": {
-      "orgSlug": "green-tree-plantation-ed851f49",
-      "donateUrl": "https://maearth.com/green-tree-plantation-ed851f49/9a26ad7f"
-    },
-    "did:plc:2u5itsydpi57nemzvooyff7p": {
-      "orgSlug": "association-anwar-for-0b3a66dc",
-      "donateUrl": "https://maearth.com/association-anwar-for-0b3a66dc/85125a3d"
-    },
-    "did:plc:2uo27jj5n3v46nml4ouwwdo6": {
-      "orgSlug": "youth-for-environment-5bfa5db3",
-      "donateUrl": "https://maearth.com/youth-for-environment-5bfa5db3/bd59081d"
     },
     "did:plc:2wqyfvj2qkwhinw3njirrofv": {
       "orgSlug": "gen-ukraine-fae52081",
       "donateUrl": "https://maearth.com/gen-ukraine-fae52081/eaca7b9b"
     },
-    "did:plc:2zvslei4bcz5hrf53mvm5xze": {
-      "orgSlug": "high-hope-ranch-15b04d2d",
-      "donateUrl": "https://maearth.com/high-hope-ranch-15b04d2d/718f542f"
-    },
     "did:plc:33opm5s24ikfsrgjvxyewuix": {
       "orgSlug": "yayasan-puge-figo-158ae3fc",
       "donateUrl": "https://maearth.com/yayasan-puge-figo-158ae3fc/de7f21c1"
-    },
-    "did:plc:34jjfkzu77n5af5a5paeeuur": {
-      "orgSlug": "regenhub-earth-62ff60d2",
-      "donateUrl": "https://maearth.com/regenhub-earth-62ff60d2/fa2f2e91"
-    },
-    "did:plc:353fwktkrq7fghahv76l7xog": {
-      "orgSlug": "shtar-galim-51d0b6b8",
-      "donateUrl": "https://maearth.com/shtar-galim-51d0b6b8/915f9c04"
-    },
-    "did:plc:364xq2cn5x3svltta3x4dfw6": {
-      "orgSlug": "tech-sun-6bb4743d",
-      "donateUrl": "https://maearth.com/tech-sun-6bb4743d/techandsun"
-    },
-    "did:plc:3cnnlwmmx5tshnx44ptczgjz": {
-      "orgSlug": "earth-guardians-sierra-leone-bd837100",
-      "donateUrl": "https://maearth.com/earth-guardians-sierra-leone-bd837100/0edabe21"
-    },
-    "did:plc:3d4ipz3y2krap2ptzpauylp7": {
-      "orgSlug": "naughtweed-llc-0944c8b2",
-      "donateUrl": "https://maearth.com/naughtweed-llc-0944c8b2/508dabfd"
     },
     "did:plc:3dspvfwy7jcajb37lxhbkijx": {
       "orgSlug": "tierra-proyecto-bec9eae8",
       "donateUrl": "https://maearth.com/tierra-proyecto-bec9eae8/7a3c0b3b"
     },
-    "did:plc:3e3mjjw6qty3pbusamdhsw4w": {
-      "orgSlug": "global-leadership-initiative-for-education-health-and-social-development-gliehsd-03d1ef67",
-      "donateUrl": "https://maearth.com/global-leadership-initiative-for-education-health-and-social-development-gliehsd-03d1ef67/f1341ad2"
-    },
-    "did:plc:3f6koff6bao3l2dth5facciu": {
-      "orgSlug": "planet-healers-55728113",
-      "donateUrl": "https://maearth.com/planet-healers-55728113/498da058"
-    },
-    "did:plc:3fwxhpszsvy6cfmaqr65a7jr": {
-      "orgSlug": "apeforest-78236c60",
-      "donateUrl": "https://maearth.com/apeforest-78236c60/3275058a"
-    },
-    "did:plc:3gerfyvmbnq5rvaxt2k2bgcu": {
-      "orgSlug": "hydropan-and-trees-7bec0bc8",
-      "donateUrl": "https://maearth.com/hydropan-and-trees-7bec0bc8/bd1c0a4b"
-    },
-    "did:plc:3hqdknlwpcvt6lyxz3lq6yrt": {
-      "orgSlug": "centro-de-estudios-de-f3600177",
-      "donateUrl": "https://maearth.com/centro-de-estudios-de-f3600177/5b75824e"
-    },
-    "did:plc:3id6eseyhopgjrswjcfm7tf3": {
-      "orgSlug": "ola-africa-1e311e97",
-      "donateUrl": "https://maearth.com/ola-africa-1e311e97/67106f26"
-    },
-    "did:plc:3j2xflxncnpwmoiz5wgbxks3": {
-      "orgSlug": "baha-madzo-gadze-for-e1cebaf6",
-      "donateUrl": "https://maearth.com/baha-madzo-gadze-for-e1cebaf6/0f95acbb"
-    },
-    "did:plc:3jj2dotbrgpif2mrjhlrziac": {
-      "orgSlug": "bangs-circular-9c2e8fd8",
-      "donateUrl": "https://maearth.com/bangs-circular-9c2e8fd8/dfe74fdb"
-    },
-    "did:plc:3kg7uuwmdew6z26elrgla52l": {
-      "orgSlug": "greenpill-civ-857cedce",
-      "donateUrl": "https://maearth.com/greenpill-civ-857cedce/a2f7c05c"
-    },
-    "did:plc:3lwvqgrorug3tmub6jfe3klq": {
-      "orgSlug": "hope-for-women-initia-fd2e4c02",
-      "donateUrl": "https://maearth.com/hope-for-women-initia-fd2e4c02/cdd86707"
-    },
-    "did:plc:3mrsjoyzhg77aitg6ghdgtq4": {
-      "orgSlug": "ojulu-island-saviours-5d508290",
-      "donateUrl": "https://maearth.com/ojulu-island-saviours-5d508290/c95b6aa6"
-    },
     "did:plc:3nb6mlj4anyiu2amxdjrtrfr": {
       "orgSlug": "guayaba-colectivo-c7eaaf21",
       "donateUrl": "https://maearth.com/guayaba-colectivo-c7eaaf21/529e93cb"
-    },
-    "did:plc:3nnehgfecmpbdmznp3volzom": {
-      "orgSlug": "oz-durian-fnq-and-bey-caad6218",
-      "donateUrl": "https://maearth.com/oz-durian-fnq-and-bey-caad6218/b488c0a2"
-    },
-    "did:plc:3qz3hzl2ip2au4pvtp4lsftg": {
-      "orgSlug": "uganda-rural-developm-5f6dcd10",
-      "donateUrl": "https://maearth.com/uganda-rural-developm-5f6dcd10/d0eea7da"
     },
     "did:plc:3sxpnqvqruvkollpr6xz445s": {
       "orgSlug": "v-day-8fae2c0b",
       "donateUrl": "https://maearth.com/v-day-8fae2c0b/v-worldfarm"
     },
-    "did:plc:3tn7bz7yy4zvbr4si2qgy5mw": {
-      "orgSlug": "rochester-ecology-par-9073c500",
-      "donateUrl": "https://maearth.com/rochester-ecology-par-9073c500/745a6563"
-    },
-    "did:plc:3ujkzpww4o2y55dzntlxx3gm": {
-      "orgSlug": "mittinav-546099f6",
-      "donateUrl": "https://maearth.com/mittinav-546099f6/f00afaa9"
-    },
     "did:plc:3umme3cfgehubswp3gyuwi7d": {
       "orgSlug": "school-for-inclement-c841acf8",
       "donateUrl": "https://maearth.com/school-for-inclement-c841acf8/b81627d6"
     },
-    "did:plc:3v7ar73ujlld4hwjvs4o2lau": {
-      "orgSlug": "permaculture-champion-1ba39644",
-      "donateUrl": "https://maearth.com/permaculture-champion-1ba39644/87243dd3"
-    },
-    "did:plc:3wmfzrzuzdg66bz2sd4l3dld": {
-      "orgSlug": "soil-soul-3d400b9d",
-      "donateUrl": "https://maearth.com/soil-soul-3d400b9d/eff4aca9"
-    },
-    "did:plc:3wt3lolstqfyszjtgwuuei6w": {
-      "orgSlug": "kakayando-organic-far-9a587754",
-      "donateUrl": "https://maearth.com/kakayando-organic-far-9a587754/dd8e8d61"
-    },
-    "did:plc:3y55aw6kplu5caauknqy2etx": {
-      "orgSlug": "nature-for-mangroves-9db108b1",
-      "donateUrl": "https://maearth.com/nature-for-mangroves-9db108b1/338efe75"
-    },
     "did:plc:3zhjtuvjclvzfx47jzmcwnke": {
       "orgSlug": "ngati-pukenga-iwi-ki-c6122203",
       "donateUrl": "https://maearth.com/ngati-pukenga-iwi-ki-c6122203/68f1c846"
-    },
-    "did:plc:3zmnsuv2ngfixrjwj4ohrpsa": {
-      "orgSlug": "farming-the-future-1c757e37",
-      "donateUrl": "https://maearth.com/farming-the-future-1c757e37/bddc4032"
-    },
-    "did:plc:3zo3qh5czsnenvj35ntjf2qg": {
-      "orgSlug": "center-for-wild-hope-36451c28",
-      "donateUrl": "https://maearth.com/center-for-wild-hope-36451c28/indigenous-education"
-    },
-    "did:plc:43xdhhodocplmqg3kwo7dspm": {
-      "orgSlug": "tropical-resource-governance-for-development-fe544171",
-      "donateUrl": "https://maearth.com/tropical-resource-governance-for-development-fe544171/ee0d8528"
-    },
-    "did:plc:464xevucoi7s5tt4soc6qu67": {
-      "orgSlug": "richmond-community-ga-40fccdae",
-      "donateUrl": "https://maearth.com/richmond-community-ga-40fccdae/8c26cc18"
-    },
-    "did:plc:46ggwbcmdecinkloho3224mi": {
-      "orgSlug": "program-for-the-herit-9e22314c",
-      "donateUrl": "https://maearth.com/program-for-the-herit-9e22314c/f47b97eb"
-    },
-    "did:plc:47cg44zmhd5jnrwpd2lygo6k": {
-      "orgSlug": "growgood",
-      "donateUrl": "https://maearth.com/growgood/syntropic"
-    },
-    "did:plc:47zm3utre6c3pol45fweimvp": {
-      "orgSlug": "the-health-environmen-f0806c8b",
-      "donateUrl": "https://maearth.com/the-health-environmen-f0806c8b/d6b0f01c"
-    },
-    "did:plc:4b2hhxzxhlstjruemoiyotm7": {
-      "orgSlug": "blueleaf-tanzania-7fbe8901",
-      "donateUrl": "https://maearth.com/blueleaf-tanzania-7fbe8901/9739c199"
     },
     "did:plc:4byza7cvip5utyw2dssz7skd": {
       "orgSlug": "hawthorne-valley-asso-3393df8a",
@@ -250,97 +62,29 @@
       "orgSlug": "mangaroa-farms",
       "donateUrl": "https://maearth.com/mangaroa-farms/fruit-and-forage"
     },
-    "did:plc:4g7gyu6ztbecacef4nfpv5hr": {
-      "orgSlug": "greenpill-cape-town-adc4ca07",
-      "donateUrl": "https://maearth.com/greenpill-cape-town-adc4ca07/4ffe2797"
-    },
-    "did:plc:4hgi4z672lamyxfa2fkxzaic": {
-      "orgSlug": "lokiaka-community-dev-a8a8bd99",
-      "donateUrl": "https://maearth.com/lokiaka-community-dev-a8a8bd99/ec574527"
-    },
-    "did:plc:4hsbckpeyyv37kmqb2ffuudv": {
-      "orgSlug": "kenge-content-hive-13d1b2cd",
-      "donateUrl": "https://maearth.com/kenge-content-hive-13d1b2cd/1fc2b38c"
-    },
-    "did:plc:4ibz42kvgrjny5osgwnilcwi": {
-      "orgSlug": "centro-de-innovacion-c5302581",
-      "donateUrl": "https://maearth.com/centro-de-innovacion-c5302581/8bbd78a0"
-    },
     "did:plc:4kgpevodq7bqumkntai5lopi": {
       "orgSlug": "taranaki-mounga-proje-8a5d5d9d",
       "donateUrl": "https://maearth.com/taranaki-mounga-proje-8a5d5d9d/a90298c4"
-    },
-    "did:plc:4mkow2oe2ii53lzg7qfkf5i6": {
-      "orgSlug": "unlimited-hope-alliance-trust-9f03579f",
-      "donateUrl": "https://maearth.com/unlimited-hope-alliance-trust-9f03579f/d7404232"
-    },
-    "did:plc:4nshqilaktzfrtd7gktblapv": {
-      "orgSlug": "center-for-agriculturals-tewardship-and-development-05eed12c",
-      "donateUrl": "https://maearth.com/center-for-agriculturals-tewardship-and-development-05eed12c/632f1911"
     },
     "did:plc:4nt77fjaqqq3wzmuwef3gtzd": {
       "orgSlug": "weaving-earth",
       "donateUrl": "https://maearth.com/weaving-earth/ccff8b52"
     },
-    "did:plc:4o6ci6xaeqh25tch4o22do7x": {
-      "orgSlug": "integrated-women-s-development-organization-22b5232b",
-      "donateUrl": "https://maearth.com/integrated-women-s-development-organization-22b5232b/721123e5"
-    },
-    "did:plc:4p4hqajpupktkchybxqveej2": {
-      "orgSlug": "natureship-37e74352",
-      "donateUrl": "https://maearth.com/natureship-37e74352/df92fd4c"
-    },
-    "did:plc:4r75bfnbycex7to6pnpqrmmu": {
-      "orgSlug": "corporacion-vision-su-cc9f5695",
-      "donateUrl": "https://maearth.com/corporacion-vision-su-cc9f5695/ef76985e"
-    },
     "did:plc:4sgfphpytzahpzwy3anv6637": {
       "orgSlug": "paran-women-group-a8570abc",
       "donateUrl": "https://maearth.com/paran-women-group-a8570abc/244fd95d"
-    },
-    "did:plc:4udlepxjssvffvey7q6w36kt": {
-      "orgSlug": "ong-350-cote-d-ivoire-6cd14181",
-      "donateUrl": "https://maearth.com/ong-350-cote-d-ivoire-6cd14181/b6c06e93"
-    },
-    "did:plc:4uoqwakfff5fbbz5heffz3xb": {
-      "orgSlug": "blue-forests-foundati-0fe4baa7",
-      "donateUrl": "https://maearth.com/blue-forests-foundati-0fe4baa7/545dbabb"
-    },
-    "did:plc:4uvkwi2uzeucri3f3fm42p3d": {
-      "orgSlug": "women-in-nature-tanzania-5fda4f1d",
-      "donateUrl": "https://maearth.com/women-in-nature-tanzania-5fda4f1d/0cca78ee"
-    },
-    "did:plc:4yw4i7ufuiwsrlbarxsya5fx": {
-      "orgSlug": "futuro-nativo-cbcf65d9",
-      "donateUrl": "https://maearth.com/futuro-nativo-cbcf65d9/b08736a5"
     },
     "did:plc:53obd7zc35fosqwheue3rgfn": {
       "orgSlug": "miti-alliance-efe59747",
       "donateUrl": "https://maearth.com/miti-alliance-efe59747/b9ab47d0"
     },
-    "did:plc:53skxib2apv3u3nqotccions": {
-      "orgSlug": "natural-aceh-459e8bb1",
-      "donateUrl": "https://maearth.com/natural-aceh-459e8bb1/296c1807"
-    },
     "did:plc:55rf44yvm2t4rj6liw7agvkn": {
       "orgSlug": "institute-of-liveliho-32cf7533",
       "donateUrl": "https://maearth.com/institute-of-liveliho-32cf7533/f782d42e"
     },
-    "did:plc:56i7bthzbsjgj3bn4ojb5om5": {
-      "orgSlug": "hope-for-tomorrow-ini-75826ec6",
-      "donateUrl": "https://maearth.com/hope-for-tomorrow-ini-75826ec6/1d9504d8"
-    },
     "did:plc:5bha5djcagxwoegs7jlgt7ej": {
       "orgSlug": "stay-foundation-82563e15",
       "donateUrl": "https://maearth.com/stay-foundation-82563e15/f110d874"
-    },
-    "did:plc:5bwmdrmqhpct26vslbytb2iq": {
-      "orgSlug": "bat-conservation-international-1e7ddf39",
-      "donateUrl": "https://maearth.com/bat-conservation-international-1e7ddf39/635b8d6d"
-    },
-    "did:plc:5ewiajffcjxilex4lukbehry": {
-      "orgSlug": "tambdi-maati-foundati-d6e2b486",
-      "donateUrl": "https://maearth.com/tambdi-maati-foundati-d6e2b486/2c771ef4"
     },
     "did:plc:5fwoptbxz63m5357lpjlb5qi": {
       "orgSlug": "fundacion-senderos-vzla",
@@ -350,93 +94,21 @@
       "orgSlug": "hutan-itu-indonesia-a4126a20",
       "donateUrl": "https://maearth.com/hutan-itu-indonesia-a4126a20/6ed3be16"
     },
-    "did:plc:5ihdtafb7aizdksjtdzzi5ku": {
-      "orgSlug": "hodari-foundation-58aebb68",
-      "donateUrl": "https://maearth.com/hodari-foundation-58aebb68/a93be063"
-    },
-    "did:plc:5luygvituyf3fp24tx47fdq3": {
-      "orgSlug": "cooperative-valazomby-madagascar-35ef6a0c",
-      "donateUrl": "https://maearth.com/cooperative-valazomby-madagascar-35ef6a0c/7f94e2aa"
-    },
-    "did:plc:5mpmrarl7jm62vepdxokmgsv": {
-      "orgSlug": "kithima-biodiversity-d1fd4dfe",
-      "donateUrl": "https://maearth.com/kithima-biodiversity-d1fd4dfe/f3465b74"
-    },
-    "did:plc:5nabnwzvxctnauvod67d3gpj": {
-      "orgSlug": "cooperative-valazomby-madagascar-3ff20f1b",
-      "donateUrl": "https://maearth.com/cooperative-valazomby-madagascar-3ff20f1b/1fb66e5b"
-    },
-    "did:plc:5nlmkzbojkpwmhirqks2473t": {
-      "orgSlug": "agri-pay-ventures-55a20d02",
-      "donateUrl": "https://maearth.com/agri-pay-ventures-55a20d02/34c07447"
-    },
     "did:plc:5oyhbjae4jipvhmaj2w353jw": {
       "orgSlug": "bluemxmangrove",
       "donateUrl": "https://maearth.com/bluemxmangrove/8c30802d"
-    },
-    "did:plc:5s25hiezpid3llyz3hjfdtb3": {
-      "orgSlug": "fundacion-bosquizar-8d6a08d0",
-      "donateUrl": "https://maearth.com/fundacion-bosquizar-8d6a08d0/609b4c45"
-    },
-    "did:plc:5sonzi3khuyw5y7nsmg447so": {
-      "orgSlug": "rachaya-environmental-committee-organization-reco-4a046ca6",
-      "donateUrl": "https://maearth.com/rachaya-environmental-committee-organization-reco-4a046ca6/9e2090a9"
-    },
-    "did:plc:5sv6baz2n5iwwtv5oxhegmti": {
-      "orgSlug": "hub-371f2248",
-      "donateUrl": "https://maearth.com/hub-371f2248/2003b62f"
-    },
-    "did:plc:5sxgxbca6f3wypztpghn7asb": {
-      "orgSlug": "wild-bloom-garden-2b44bd6c",
-      "donateUrl": "https://maearth.com/wild-bloom-garden-2b44bd6c/807ff9ad"
-    },
-    "did:plc:5t4zi4iy5tvkq6jlgwce57a3": {
-      "orgSlug": "ndoto-forest-conserva-8a56258a",
-      "donateUrl": "https://maearth.com/ndoto-forest-conserva-8a56258a/f77724b7"
     },
     "did:plc:5t5ulig2agi37nqgaoizw6ip": {
       "orgSlug": "grassroots-economics",
       "donateUrl": "https://maearth.com/grassroots-economics/7ab7572b"
     },
-    "did:plc:5td2t4uquhcc2c2jiw7aei3r": {
-      "orgSlug": "kawagumba-village-com-835ff318",
-      "donateUrl": "https://maearth.com/kawagumba-village-com-835ff318/ded57b88"
-    },
     "did:plc:5uxtisosa4mjixvcwoupydoz": {
       "orgSlug": "deptofbioregion",
       "donateUrl": "https://maearth.com/deptofbioregion/cofoodvancouver"
     },
-    "did:plc:5xa5hjzfpx26sjuyerzftbo6": {
-      "orgSlug": "ras-farm-0c41e5cd",
-      "donateUrl": "https://maearth.com/ras-farm-0c41e5cd/124897c5"
-    },
-    "did:plc:5ykpebx3qyc6sq42nzfrowp6": {
-      "orgSlug": "yawe-foundation-uganga-ltd-d879690a",
-      "donateUrl": "https://maearth.com/yawe-foundation-uganga-ltd-d879690a/dcbc4dda"
-    },
-    "did:plc:6262y6a3v7226hj7zb3rzk3k": {
-      "orgSlug": "maji-ya-chai-land-san-7e8888d4",
-      "donateUrl": "https://maearth.com/maji-ya-chai-land-san-7e8888d4/999f6cac"
-    },
-    "did:plc:62mgzylrljs4id2b2pzrrz7q": {
-      "orgSlug": "colectivo-luz-de-mangle-7e562c31",
-      "donateUrl": "https://maearth.com/colectivo-luz-de-mangle-7e562c31/23448414"
-    },
-    "did:plc:64c2pfwemqhbuybuddvsxmq6": {
-      "orgSlug": "davis-daughter-farms-824cac9c",
-      "donateUrl": "https://maearth.com/davis-daughter-farms-824cac9c/a9841a7b"
-    },
-    "did:plc:66mia2vmun6hjn7scbbqnkrg": {
-      "orgSlug": "kitgum-permaculture-p-788640d9",
-      "donateUrl": "https://maearth.com/kitgum-permaculture-p-788640d9/363b05c7"
-    },
     "did:plc:6a64w7sovubs3a7nzbrrm4h2": {
       "orgSlug": "black-jaguar-foundation-4fce320d",
       "donateUrl": "https://maearth.com/black-jaguar-foundation-4fce320d/17ff0da2"
-    },
-    "did:plc:6aajecmhrgo3z2a3e6akyzlw": {
-      "orgSlug": "african-intiative-for-2695021a",
-      "donateUrl": "https://maearth.com/african-intiative-for-2695021a/68dcb74b"
     },
     "did:plc:6ap7lbe2ievi6jybl54ahq3h": {
       "orgSlug": "treecolor-alliance-pa-12b93327",
@@ -446,34 +118,6 @@
       "orgSlug": "ecological-balance-f068b440",
       "donateUrl": "https://maearth.com/ecological-balance-f068b440/dfa685f5"
     },
-    "did:plc:6e4365u2bfbj5aozrqgm26zt": {
-      "orgSlug": "kaner-retreat-f6c72326",
-      "donateUrl": "https://maearth.com/kaner-retreat-f6c72326/9c7cfe3b"
-    },
-    "did:plc:6gbc7lub2ehu5px37qkhbigi": {
-      "orgSlug": "green-africa-youth-or-abb717f7",
-      "donateUrl": "https://maearth.com/green-africa-youth-or-abb717f7/471850e6"
-    },
-    "did:plc:6gsx7kd2pwwo2sfghgscz3pu": {
-      "orgSlug": "can-font-83f25b80",
-      "donateUrl": "https://maearth.com/can-font-83f25b80/4504bcf2"
-    },
-    "did:plc:6l7os44q5i7q7w4yvctjg6hn": {
-      "orgSlug": "starling-foundries-ll-d6aff3e6",
-      "donateUrl": "https://maearth.com/starling-foundries-ll-d6aff3e6/59fb26d2"
-    },
-    "did:plc:6lrbiinxg5xkx6m5hh77nrar": {
-      "orgSlug": "desert-memory-project-827a7e69",
-      "donateUrl": "https://maearth.com/desert-memory-project-827a7e69/f623c21d"
-    },
-    "did:plc:6m6pemhd632jiof6ratbad6w": {
-      "orgSlug": "kilombo-tenonde-3d3a4adb",
-      "donateUrl": "https://maearth.com/kilombo-tenonde-3d3a4adb/9950762f"
-    },
-    "did:plc:6mujwohdrzzxcbtpj6cwzsri": {
-      "orgSlug": "regenerative-leadersh-e27bdf65",
-      "donateUrl": "https://maearth.com/regenerative-leadersh-e27bdf65/c636490f"
-    },
     "did:plc:6nntxvwz2y3ib65skufpg6lb": {
       "orgSlug": "water-protector-legal-4c672258",
       "donateUrl": "https://maearth.com/water-protector-legal-4c672258/wplc"
@@ -482,233 +126,41 @@
       "orgSlug": "moy-hill-farm-47261d08",
       "donateUrl": "https://maearth.com/moy-hill-farm-47261d08/026ca807"
     },
-    "did:plc:6pcbgx6wlrfb5necnfsveulz": {
-      "orgSlug": "earth-anderson-llc-db-36e92a88",
-      "donateUrl": "https://maearth.com/earth-anderson-llc-db-36e92a88/041c48e1"
-    },
-    "did:plc:6vs65kbzfuzxofbegcfygwos": {
-      "orgSlug": "clear-meat-pvt-ltd-14a1eb67",
-      "donateUrl": "https://maearth.com/clear-meat-pvt-ltd-14a1eb67/632d41ed"
-    },
-    "did:plc:6xydvfoanfrrho5l4n5nlcii": {
-      "orgSlug": "cooperativa-integral-9569f3ec",
-      "donateUrl": "https://maearth.com/cooperativa-integral-9569f3ec/moving-through-the-landscape"
-    },
     "did:plc:6ypw2qtvxnxdp7uowxysaebw": {
       "orgSlug": "matagal-associacao-natureza",
       "donateUrl": "https://maearth.com/matagal-associacao-natureza/vale-de-agua-tree-nursery"
-    },
-    "did:plc:6zjksuuzkysfwcfno67xm3p4": {
-      "orgSlug": "natural-leaders-05695c34",
-      "donateUrl": "https://maearth.com/natural-leaders-05695c34/3139acab"
-    },
-    "did:plc:73mbomkvbq7cqryygddfbdwt": {
-      "orgSlug": "permaculture-educatio-2289e079",
-      "donateUrl": "https://maearth.com/permaculture-educatio-2289e079/503f7fa7"
-    },
-    "did:plc:75itnooogrj44ngguaf724nz": {
-      "orgSlug": "initiative-citoyenne-pour-le-developpement-du-congo-0ad36a58",
-      "donateUrl": "https://maearth.com/initiative-citoyenne-pour-le-developpement-du-congo-0ad36a58/599f794c"
-    },
-    "did:plc:7652rwzyz7qsrvl44jknx7xg": {
-      "orgSlug": "curriculum-for-life-64c445d5",
-      "donateUrl": "https://maearth.com/curriculum-for-life-64c445d5/ad783311"
-    },
-    "did:plc:76c2okpgkbgrlebssiwy7qdp": {
-      "orgSlug": "secours-et-vie-326145bb",
-      "donateUrl": "https://maearth.com/secours-et-vie-326145bb/7509a1ee"
-    },
-    "did:plc:76cgpren4kb2qs7vvozcfp7q": {
-      "orgSlug": "partnership-for-sustainable-development-nepal-psdn-4cf45b14",
-      "donateUrl": "https://maearth.com/partnership-for-sustainable-development-nepal-psdn-4cf45b14/eb2eb861"
-    },
-    "did:plc:7c46ftuwc5cnv6qjq6d6mce6": {
-      "orgSlug": "wildfarmers-33bb384c",
-      "donateUrl": "https://maearth.com/wildfarmers-33bb384c/blueoaks"
-    },
-    "did:plc:7dxwzscyrzyar7qpvn6phz6p": {
-      "orgSlug": "instituto-zag-d3dcdddf",
-      "donateUrl": "https://maearth.com/instituto-zag-d3dcdddf/70d21277"
     },
     "did:plc:7eedj3xksixpt6k3osbwjf5o": {
       "orgSlug": "the-food-farm-5d192d3a",
       "donateUrl": "https://maearth.com/the-food-farm-5d192d3a/d9491e0a"
     },
-    "did:plc:7fxf3foxa5bn2abbmzkd5ki5": {
-      "orgSlug": "origen-circular-81c67a98",
-      "donateUrl": "https://maearth.com/origen-circular-81c67a98/a1d763ba"
-    },
     "did:plc:7ggqoglarqrq2jst2tp4pv3c": {
       "orgSlug": "fundacion-naveducando-9f1d85a4",
       "donateUrl": "https://maearth.com/fundacion-naveducando-9f1d85a4/galapagosinfinito"
-    },
-    "did:plc:7j5pucxqv6pz7p642atuvjj5": {
-      "orgSlug": "centre-for-environmen-5cbfbb22",
-      "donateUrl": "https://maearth.com/centre-for-environmen-5cbfbb22/c76d5a76"
-    },
-    "did:plc:7kcv2h5xjo2dklrwshryjvqt": {
-      "orgSlug": "islamic-help-f978fb08",
-      "donateUrl": "https://maearth.com/islamic-help-f978fb08/1a937ebe"
-    },
-    "did:plc:7mpj445vihahvzrtmemvxh2p": {
-      "orgSlug": "leuser-ecosystem-conservation-foundation-79a82f59",
-      "donateUrl": "https://maearth.com/leuser-ecosystem-conservation-foundation-79a82f59/2e117cbc"
-    },
-    "did:plc:7otqkxseelpn64pjj2s4dfrj": {
-      "orgSlug": "maasai-girl-initiativ-9560954a",
-      "donateUrl": "https://maearth.com/maasai-girl-initiativ-9560954a/9a21c817"
-    },
-    "did:plc:7rxlmkerr4c7exnff3aebram": {
-      "orgSlug": "rwamwanja-rural-found-d9476c20",
-      "donateUrl": "https://maearth.com/rwamwanja-rural-found-d9476c20/684eb6b7"
-    },
-    "did:plc:7uiza3sasml4n5dom2gw36aw": {
-      "orgSlug": "omdesign-5b385076",
-      "donateUrl": "https://maearth.com/omdesign-5b385076/65bf1ac9"
     },
     "did:plc:7uthmskwchb52odtkrdz5sbs": {
       "orgSlug": "yakum-4b454714",
       "donateUrl": "https://maearth.com/yakum-4b454714/bosquesemilla"
     },
-    "did:plc:7xkd2ocj5kg34hxp75eqcq2h": {
-      "orgSlug": "asociacion-apu-catequ-1fea4edc",
-      "donateUrl": "https://maearth.com/asociacion-apu-catequ-1fea4edc/aca9ecd6"
-    },
-    "did:plc:7zcqz5lpc4ug7idzcbarsjqz": {
-      "orgSlug": "community-empowerment-agency-for-sustainable-development-cemasud-a9027835",
-      "donateUrl": "https://maearth.com/community-empowerment-agency-for-sustainable-development-cemasud-a9027835/945edc63"
-    },
     "did:plc:7zu5w6ofrl6ha5ooykapptwe": {
       "orgSlug": "brave-earth",
       "donateUrl": "https://maearth.com/brave-earth/communityresilience"
-    },
-    "did:plc:a52nxtm73xpasq6mrxen2bd4": {
-      "orgSlug": "nvlandcare",
-      "donateUrl": "https://maearth.com/nvlandcare/21d54788"
-    },
-    "did:plc:actg6pldknyworv52zdedi76": {
-      "orgSlug": "vale-da-gema-cooperat-41b75304",
-      "donateUrl": "https://maearth.com/vale-da-gema-cooperat-41b75304/67954a36"
-    },
-    "did:plc:acu2znugjnu54smj7n3dwwzd": {
-      "orgSlug": "beekeeping-extension-society-06fffab7",
-      "donateUrl": "https://maearth.com/beekeeping-extension-society-06fffab7/1739da82"
     },
     "did:plc:af4rxnqkd3yd6q5oxeevh3d3": {
       "orgSlug": "salumayag-youth-colle-8ddf8064",
       "donateUrl": "https://maearth.com/salumayag-youth-colle-8ddf8064/613faeff"
     },
-    "did:plc:afnysamzyuh5hyyht7jd7pvv": {
-      "orgSlug": "great-plains-action-s-c8edddc8",
-      "donateUrl": "https://maearth.com/great-plains-action-s-c8edddc8/a0e1b8d1"
-    },
-    "did:plc:aglz7tvwxslgsr6cvbyf3m55": {
-      "orgSlug": "bee-haven-tanzania-17d4c013",
-      "donateUrl": "https://maearth.com/bee-haven-tanzania-17d4c013/7ed03de0"
-    },
-    "did:plc:agta7r6bzfzjgbx5tg66rdhs": {
-      "orgSlug": "talented-youth-commun-cb6285cb",
-      "donateUrl": "https://maearth.com/talented-youth-commun-cb6285cb/5d19cde4"
-    },
-    "did:plc:ah4msem2j2ylb4mxp4gip5hu": {
-      "orgSlug": "the-bioregional-explo-d9ae7d53",
-      "donateUrl": "https://maearth.com/the-bioregional-explo-d9ae7d53/b4c76673"
-    },
-    "did:plc:aoc2qfjk5vx5naeyaksdlu2h": {
-      "orgSlug": "agape-of-hope-female-d3abd3f1",
-      "donateUrl": "https://maearth.com/agape-of-hope-female-d3abd3f1/ca08f6e3"
-    },
-    "did:plc:aoz33c6unnkcxce7dskvrg6f": {
-      "orgSlug": "young-organic-growers-6536e3dd",
-      "donateUrl": "https://maearth.com/young-organic-growers-6536e3dd/f915e251"
-    },
-    "did:plc:apawerfeufzmj4u5yp3i3fu3": {
-      "orgSlug": "good-growth-3e71cf33",
-      "donateUrl": "https://maearth.com/good-growth-3e71cf33/39b1593e"
-    },
-    "did:plc:aqvfy4qsrxwixogtr4xessgf": {
-      "orgSlug": "maasai-treasures-cbo-7c73fecb",
-      "donateUrl": "https://maearth.com/maasai-treasures-cbo-7c73fecb/439c9bab"
-    },
-    "did:plc:arlaofku6erb7snv5m3z32d6": {
-      "orgSlug": "carpathian-wildlife-s-36bd54f6",
-      "donateUrl": "https://maearth.com/carpathian-wildlife-s-36bd54f6/28fafec1"
-    },
-    "did:plc:arsfuwmrqvtdm4yg6o66lxmd": {
-      "orgSlug": "himpact-intelligence-a44abb25",
-      "donateUrl": "https://maearth.com/himpact-intelligence-a44abb25/25a9051e"
-    },
-    "did:plc:as7qjus24sk2npzje5yzsdwv": {
-      "orgSlug": "kula-applied-research-587bef6e",
-      "donateUrl": "https://maearth.com/kula-applied-research-587bef6e/73d809e9"
-    },
     "did:plc:aspyuyv2vx73rwhv4fsjnocx": {
       "orgSlug": "amazon-sacred-headwaters-alliance",
-      "donateUrl": "https://maearth.com/amazon-sacred-headwaters-alliance/living-school-of-the--45d3e25a"
+      "donateUrl": "https://maearth.com/amazon-sacred-headwaters-alliance/504a2171"
     },
     "did:plc:at3d43nbwzyizbycfere7hoi": {
       "orgSlug": "dryland-solutions-7886804e",
       "donateUrl": "https://maearth.com/dryland-solutions-7886804e/0bc2f30e"
     },
-    "did:plc:avwil4fvte7af6x23fz5r4dl": {
-      "orgSlug": "tao-transformative-ad-c9b17e03",
-      "donateUrl": "https://maearth.com/tao-transformative-ad-c9b17e03/5d04f23c"
-    },
-    "did:plc:b236baoq7emdjtiaw4dkt5uf": {
-      "orgSlug": "coliderate-b38032ef",
-      "donateUrl": "https://maearth.com/coliderate-b38032ef/0f5b0cfe"
-    },
-    "did:plc:b2cmlsgrg2564hfqls6uhbnv": {
-      "orgSlug": "green-thumbs-growing-32b331cc",
-      "donateUrl": "https://maearth.com/green-thumbs-growing-32b331cc/966b7a1e"
-    },
     "did:plc:b433gd4inrl766gj2mdsadcy": {
       "orgSlug": "walking-water-ed8123df",
       "donateUrl": "https://maearth.com/walking-water-ed8123df/resilience"
-    },
-    "did:plc:b4anj5floqggauhfc5z5sydx": {
-      "orgSlug": "greenglobe-ghana-12670952",
-      "donateUrl": "https://maearth.com/greenglobe-ghana-12670952/804fd333"
-    },
-    "did:plc:b5iexiwahohtzkbku2u4grzt": {
-      "orgSlug": "nomadic-escapes-6fceb5ec",
-      "donateUrl": "https://maearth.com/nomadic-escapes-6fceb5ec/23b0dbee"
-    },
-    "did:plc:b66m4vqddzctj4wr2onp5woj": {
-      "orgSlug": "asociacion-corazon-del-bosque-b2ffaeae",
-      "donateUrl": "https://maearth.com/asociacion-corazon-del-bosque-b2ffaeae/b26e11cb"
-    },
-    "did:plc:b7g4ch7kcum3dc6546t2jr3x": {
-      "orgSlug": "associacao-pedagogica-f18cb55c",
-      "donateUrl": "https://maearth.com/associacao-pedagogica-f18cb55c/45a44b7a"
-    },
-    "did:plc:baa7dvcywfqvk7p6aa6ibqhz": {
-      "orgSlug": "vale-da-gema-newcomer-e18b1ce1",
-      "donateUrl": "https://maearth.com/vale-da-gema-newcomer-e18b1ce1/newcomers-rooting-in-place"
-    },
-    "did:plc:bc7lxjg2wiz3lu523txewlrv": {
-      "orgSlug": "la-mujer-obrera-72136ccd",
-      "donateUrl": "https://maearth.com/la-mujer-obrera-72136ccd/4bcb5b86"
-    },
-    "did:plc:bee5f6gos6yo5mtelsdth2ff": {
-      "orgSlug": "guardians-of-nature-a-812e7e73",
-      "donateUrl": "https://maearth.com/guardians-of-nature-a-812e7e73/gnp"
-    },
-    "did:plc:beutyq2undexogw6dl6mysrg": {
-      "orgSlug": "wandusoa-organic-came-781dea9b",
-      "donateUrl": "https://maearth.com/wandusoa-organic-came-781dea9b/d75a184a"
-    },
-    "did:plc:bf2uh4fohtbh6sftv5ue5qhb": {
-      "orgSlug": "eco2librium-639fcb41",
-      "donateUrl": "https://maearth.com/eco2librium-639fcb41/8adb5d7f"
-    },
-    "did:plc:bgfantxb6bdwtx6y65d7fg2o": {
-      "orgSlug": "jodhpur-city-knowledg-81ead398",
-      "donateUrl": "https://maearth.com/jodhpur-city-knowledg-81ead398/d998b8aa"
-    },
-    "did:plc:bid4cj4oilqave7poq2k4n3i": {
-      "orgSlug": "kaicycle-inc-92641369",
-      "donateUrl": "https://maearth.com/kaicycle-inc-92641369/69819bbb"
     },
     "did:plc:bknsxmdc2m3pemjerg3tauvx": {
       "orgSlug": "guardians-worldwide-f29ac5d6",
@@ -718,53 +170,9 @@
       "orgSlug": "kawatiri-nature-envir-be276435",
       "donateUrl": "https://maearth.com/kawatiri-nature-envir-be276435/5ec12bdb"
     },
-    "did:plc:bo27wbmzm5hzojuk3krzfa2d": {
-      "orgSlug": "copy-organisation-6f9f6449",
-      "donateUrl": "https://maearth.com/copy-organisation-6f9f6449/896c358d"
-    },
-    "did:plc:bonjiru5lta4qa323n7ks2e7": {
-      "orgSlug": "cosqui-socio-environm-39b26ea9",
-      "donateUrl": "https://maearth.com/cosqui-socio-environm-39b26ea9/6dffab5b"
-    },
-    "did:plc:bpmzrfdh7xyg3pdbdu5kayl2": {
-      "orgSlug": "uudistavan-kehittamis-9774e672",
-      "donateUrl": "https://maearth.com/uudistavan-kehittamis-9774e672/gardenoflife"
-    },
-    "did:plc:bufzr2hmhpigpvwgyycdlq47": {
-      "orgSlug": "white-oleandef-farm-c-caf34a6f",
-      "donateUrl": "https://maearth.com/white-oleandef-farm-c-caf34a6f/9c166e72"
-    },
     "did:plc:buhdxnyndc2ptrsotngtxvzu": {
       "orgSlug": "small-mammal-conservation-organization-bc7be8fd",
       "donateUrl": "https://maearth.com/small-mammal-conservation-organization-bc7be8fd/22737eda"
-    },
-    "did:plc:bxalox4irjovzgyzugqxahka": {
-      "orgSlug": "wild-wanders-fa5190e5",
-      "donateUrl": "https://maearth.com/wild-wanders-fa5190e5/b4f24bcc"
-    },
-    "did:plc:bz7xhzpmo3hpqfs5vyiaeoo7": {
-      "orgSlug": "maia-lotus-foundation-07a466b4",
-      "donateUrl": "https://maearth.com/maia-lotus-foundation-07a466b4/09e14439"
-    },
-    "did:plc:c2eesahpgelaigvd76ixwavr": {
-      "orgSlug": "calor-66814326",
-      "donateUrl": "https://maearth.com/calor-66814326/22568f04"
-    },
-    "did:plc:c2syaadyqq5it7fvny7hqhg7": {
-      "orgSlug": "cooperativa-estadual-c27116ba",
-      "donateUrl": "https://maearth.com/cooperativa-estadual-c27116ba/f73fbc5f"
-    },
-    "did:plc:c2w67k3gsxs43lljtytejgbu": {
-      "orgSlug": "refi-barcelona-8ade4209",
-      "donateUrl": "https://maearth.com/refi-barcelona-8ade4209/40b34892"
-    },
-    "did:plc:c47hfygymktdohiuaowojo3n": {
-      "orgSlug": "association-of-women-36474704",
-      "donateUrl": "https://maearth.com/association-of-women-36474704/d689e60e"
-    },
-    "did:plc:c4kyiddgasddxlrt44a3qp2k": {
-      "orgSlug": "reserva-managua-72d640c0",
-      "donateUrl": "https://maearth.com/reserva-managua-72d640c0/64e16fcb"
     },
     "did:plc:c4mvklltky6oybzxb3nbon2z": {
       "orgSlug": "the-community-mobiliz-97c2a756",
@@ -778,49 +186,9 @@
       "orgSlug": "beyond-carbon-28d6fe47",
       "donateUrl": "https://maearth.com/beyond-carbon-28d6fe47/data-for-territorial-advocacy"
     },
-    "did:plc:cbremzuc6x44bttqraf73w5f": {
-      "orgSlug": "the-society-for-indig-63bc7244",
-      "donateUrl": "https://maearth.com/the-society-for-indig-63bc7244/4faea539"
-    },
-    "did:plc:cd7cneulealkwerlpk4e3bs6": {
-      "orgSlug": "federation-of-community-forestry-users-nepal-fecofun-bc7eddb9",
-      "donateUrl": "https://maearth.com/federation-of-community-forestry-users-nepal-fecofun-bc7eddb9/7f28781a"
-    },
-    "did:plc:cdvh6dmaevkwo4khfwqkmssi": {
-      "orgSlug": "greenpill-uganda-1deb5b8c",
-      "donateUrl": "https://maearth.com/greenpill-uganda-1deb5b8c/d5dde35b"
-    },
     "did:plc:cegt6ag36dgz7ssd2i6uvgfe": {
       "orgSlug": "maasai-wilderness-con-6359ec21",
       "donateUrl": "https://maearth.com/maasai-wilderness-con-6359ec21/138eb7a3"
-    },
-    "did:plc:cgx7nsgcttvcpgx4pilpmh7f": {
-      "orgSlug": "traditional-dream-fac-f82322e0",
-      "donateUrl": "https://maearth.com/traditional-dream-fac-f82322e0/99d87876"
-    },
-    "did:plc:cibhs3quyzo775kp3nm4aw57": {
-      "orgSlug": "caoba-de-monte-1b0fafd6",
-      "donateUrl": "https://maearth.com/caoba-de-monte-1b0fafd6/13c95b0e"
-    },
-    "did:plc:ciekliyy4q6hmu6jkgnz2vcw": {
-      "orgSlug": "social-forests-protoc-7d1b0e94",
-      "donateUrl": "https://maearth.com/social-forests-protoc-7d1b0e94/ba7426b6"
-    },
-    "did:plc:cio6qyiwgszxlobfesm3tq7l": {
-      "orgSlug": "fundacao-para-o-desen-1afc1710",
-      "donateUrl": "https://maearth.com/fundacao-para-o-desen-1afc1710/0c29c328"
-    },
-    "did:plc:ciyoal64r4pd6i6vfthgz4ob": {
-      "orgSlug": "sehara-indonesia-89deb89b",
-      "donateUrl": "https://maearth.com/sehara-indonesia-89deb89b/9aa856f0"
-    },
-    "did:plc:cj7ch57zy2czyqoi2avdy2qd": {
-      "orgSlug": "farmit-dao-protocol-01352eb5",
-      "donateUrl": "https://maearth.com/farmit-dao-protocol-01352eb5/71fcc833"
-    },
-    "did:plc:cji2xkwxgzxcppe56wn66chp": {
-      "orgSlug": "gaviota-coast-conserv-5b6b7b62",
-      "donateUrl": "https://maearth.com/gaviota-coast-conserv-5b6b7b62/cc79827f"
     },
     "did:plc:ck7bkwein7jmzl4cp6imw54r": {
       "orgSlug": "era-cacao",
@@ -829,50 +197,6 @@
     "did:plc:clpn32gci7rtuo5smawbgqqe": {
       "orgSlug": "currentshift",
       "donateUrl": "https://maearth.com/currentshift/shiftthecurrent"
-    },
-    "did:plc:cmoxgzhnig24abid4cj34v3f": {
-      "orgSlug": "alliance-for-positive-environmental-impacts-reforestation-apeare-5038b506",
-      "donateUrl": "https://maearth.com/alliance-for-positive-environmental-impacts-reforestation-apeare-5038b506/4e6b81c7"
-    },
-    "did:plc:cn2qitvalhywdxqgp6ybcgmz": {
-      "orgSlug": "mostadam-eco-design",
-      "donateUrl": "https://maearth.com/mostadam-eco-design/4c2dea1b"
-    },
-    "did:plc:cokvtwxfza4fjyiqpu7ri75x": {
-      "orgSlug": "dinkenesh-ethiopia-conservation-charity-organization-dinkenesh-ethiopia-5c5b75a1",
-      "donateUrl": "https://maearth.com/dinkenesh-ethiopia-conservation-charity-organization-dinkenesh-ethiopia-5c5b75a1/4d601640"
-    },
-    "did:plc:cqi6awlsiegyfwmey7pfdmcd": {
-      "orgSlug": "santa-monica-mountain-42116010",
-      "donateUrl": "https://maearth.com/santa-monica-mountain-42116010/65719591"
-    },
-    "did:plc:cqunfwkuva7sceinhulmf344": {
-      "orgSlug": "michael-fields-agricu-dfb77905",
-      "donateUrl": "https://maearth.com/michael-fields-agricu-dfb77905/312c505b"
-    },
-    "did:plc:csr6m5gak7octhj4js3bor3w": {
-      "orgSlug": "kanyanjwa-community-f-63576514",
-      "donateUrl": "https://maearth.com/kanyanjwa-community-f-63576514/d1e194a4"
-    },
-    "did:plc:ctljc2jzlkpalr2hjesllelc": {
-      "orgSlug": "gnaly-coffee-agroecol-aaca8e9b",
-      "donateUrl": "https://maearth.com/gnaly-coffee-agroecol-aaca8e9b/5dc60202"
-    },
-    "did:plc:cvfg27zyczk3drira7gfrtgk": {
-      "orgSlug": "city-sync-ffabf666",
-      "donateUrl": "https://maearth.com/city-sync-ffabf666/city-sync"
-    },
-    "did:plc:cvpdtbowqskzwpwqc7b3johb": {
-      "orgSlug": "centre-for-community-9c308c1a",
-      "donateUrl": "https://maearth.com/centre-for-community-9c308c1a/0896ed64"
-    },
-    "did:plc:cxn6bw376ep6ukoraj5fhmzt": {
-      "orgSlug": "spatial-girls-network-599b8d01",
-      "donateUrl": "https://maearth.com/spatial-girls-network-599b8d01/9562f7dd"
-    },
-    "did:plc:d2eg2jks7zs3ofqaftpdaml3": {
-      "orgSlug": "aprendizaje-en-movimi-f605a78b",
-      "donateUrl": "https://maearth.com/aprendizaje-en-movimi-f605a78b/8ce5ea95"
     },
     "did:plc:d2hzx4i5k6zvpawpo5wyi334": {
       "orgSlug": "te-tauihu-environment-7130becf",
@@ -886,10 +210,6 @@
       "orgSlug": "sustainable-ocean-alliance-tanzania-soa-tanzania-fdc7d6a1",
       "donateUrl": "https://maearth.com/sustainable-ocean-alliance-tanzania-soa-tanzania-fdc7d6a1/636430bf"
     },
-    "did:plc:d4sm7csyfujxs4kyauigjktg": {
-      "orgSlug": "giant-youth-initiative-cc9aea2a",
-      "donateUrl": "https://maearth.com/giant-youth-initiative-cc9aea2a/ed87df94"
-    },
     "did:plc:d63dmirffcd7jmcv4sv3ppsd": {
       "orgSlug": "turtle-island-bioregi-5f27b6e9",
       "donateUrl": "https://maearth.com/turtle-island-bioregi-5f27b6e9/tibc11"
@@ -898,169 +218,25 @@
       "orgSlug": "fromtheroots",
       "donateUrl": "https://maearth.com/fromtheroots/seriansanctuary"
     },
-    "did:plc:dbg7hgv2ln6rz5woki6jcbzg": {
-      "orgSlug": "fair-world-1b58a3b4",
-      "donateUrl": "https://maearth.com/fair-world-1b58a3b4/154910c5"
-    },
-    "did:plc:dd6j3yfsoq4pqcenton3kved": {
-      "orgSlug": "gaia-u-international-e20c57c7",
-      "donateUrl": "https://maearth.com/gaia-u-international-e20c57c7/bf6b3dd8"
-    },
-    "did:plc:ddfz676wdvkl3nybvhtngdhz": {
-      "orgSlug": "terraetica-representi-01684c91",
-      "donateUrl": "https://maearth.com/terraetica-representi-01684c91/ec657a3f"
-    },
-    "did:plc:deem36pqt43tzgxdcitipqgh": {
-      "orgSlug": "rwenzori-trust-for-co-d1d1838d",
-      "donateUrl": "https://maearth.com/rwenzori-trust-for-co-d1d1838d/bebeea83"
-    },
-    "did:plc:dfcix7djbpul2l2ay23zzbzl": {
-      "orgSlug": "uganda-rural-development-and-training-program-32f1fdee",
-      "donateUrl": "https://maearth.com/uganda-rural-development-and-training-program-32f1fdee/be4fd203"
-    },
-    "did:plc:dhah3coma26nffwk3apkx4ii": {
-      "orgSlug": "equilibrio-azul-83023cfb",
-      "donateUrl": "https://maearth.com/equilibrio-azul-83023cfb/8f9e7787"
-    },
-    "did:plc:dhjzlcmgjmsvzagjobeaa5ja": {
-      "orgSlug": "uywana-wasi-447ac115",
-      "donateUrl": "https://maearth.com/uywana-wasi-447ac115/93210c9d"
-    },
-    "did:plc:djc4ddklx6dx2ecsznzswsvo": {
-      "orgSlug": "wildland-ecotech",
-      "donateUrl": "https://maearth.com/wildland-ecotech/whale-rock-burn-scar"
-    },
-    "did:plc:doolyd4wbz3gz63iv3ock4bg": {
-      "orgSlug": "cadif-kenya-567f2d1a",
-      "donateUrl": "https://maearth.com/cadif-kenya-567f2d1a/2c16e3d4"
-    },
-    "did:plc:dovmfkufit2wbu5c32kwjgki": {
-      "orgSlug": "rayo-de-sol-a0118790",
-      "donateUrl": "https://maearth.com/rayo-de-sol-a0118790/e9d58cdd"
-    },
-    "did:plc:dpoduzd3gnkv7ahfvpqjggvo": {
-      "orgSlug": "kuruwitu-conservation-and-welfare-community-base-organization-49c20eb1",
-      "donateUrl": "https://maearth.com/kuruwitu-conservation-and-welfare-community-base-organization-49c20eb1/a42440b3"
-    },
-    "did:plc:ducpcknay5dvpyoophh6ue6r": {
-      "orgSlug": "action-for-life-impro-423f2fe3",
-      "donateUrl": "https://maearth.com/action-for-life-impro-423f2fe3/767cd468"
-    },
-    "did:plc:dwwrtl4bg3q4qgeiwlubzj3y": {
-      "orgSlug": "teacher-maria-teresa-e7359767",
-      "donateUrl": "https://maearth.com/teacher-maria-teresa-e7359767/9693eb0f"
-    },
-    "did:plc:dy6ba3kek6fx5z5473woytdr": {
-      "orgSlug": "rural-poor-institute-f1cbdfce",
-      "donateUrl": "https://maearth.com/rural-poor-institute-f1cbdfce/f1ed41dc"
-    },
-    "did:plc:dzswlovqkmk3alw2mzxmvmyi": {
-      "orgSlug": "greenpill-kenya-regen-bd0bf79b",
-      "donateUrl": "https://maearth.com/greenpill-kenya-regen-bd0bf79b/41312471"
-    },
-    "did:plc:e2fcurkm656z7nj4dgkjfvlp": {
-      "orgSlug": "africa-community-village-c1c68387",
-      "donateUrl": "https://maearth.com/africa-community-village-c1c68387/000caf6d"
-    },
-    "did:plc:e2id3zsmaeiakfnkdu5ogksj": {
-      "orgSlug": "rautapatu-foundation-c737e330",
-      "donateUrl": "https://maearth.com/rautapatu-foundation-c737e330/ee08818e"
-    },
-    "did:plc:e2x3a2ct5i5mk6fcumgncffq": {
-      "orgSlug": "viaintensiva-ca7dff57",
-      "donateUrl": "https://maearth.com/viaintensiva-ca7dff57/f901db1f"
-    },
-    "did:plc:e34iyenkj7ikt64mls4pagvu": {
-      "orgSlug": "instituto-compor-nova-6369ab62",
-      "donateUrl": "https://maearth.com/instituto-compor-nova-6369ab62/compostonautas10anos"
-    },
-    "did:plc:e3mnru57wczstjkwv7fcnpnd": {
-      "orgSlug": "climate-technology-so-75a64f63",
-      "donateUrl": "https://maearth.com/climate-technology-so-75a64f63/05cb27ef"
-    },
     "did:plc:e3y76csuqigxlwtxriaytppx": {
       "orgSlug": "grpo-jaragua-332bd2b5",
       "donateUrl": "https://maearth.com/grpo-jaragua-332bd2b5/3b9b66e6"
-    },
-    "did:plc:e5jf2cun7g7csgnbh5bxqpd3": {
-      "orgSlug": "groupe-d-intervention-1a4d993a",
-      "donateUrl": "https://maearth.com/groupe-d-intervention-1a4d993a/60e5984a"
-    },
-    "did:plc:e7uxm7ztfjskz3udxgimq3hw": {
-      "orgSlug": "the-demography-projec-183a6024",
-      "donateUrl": "https://maearth.com/the-demography-projec-183a6024/04352ab4"
-    },
-    "did:plc:eatlzuhct5vvzty5dhi3wmfk": {
-      "orgSlug": "casa-rio-lab",
-      "donateUrl": "https://maearth.com/casa-rio-lab/7c6cca85"
-    },
-    "did:plc:ebd5hr5tiyfxh25lcfk5ae3i": {
-      "orgSlug": "ikaya-earth-private-l-039bedbf",
-      "donateUrl": "https://maearth.com/ikaya-earth-private-l-039bedbf/breathinghills"
-    },
-    "did:plc:ebeta7brf5wigeootn4wrx7y": {
-      "orgSlug": "theotherdada-9368efee",
-      "donateUrl": "https://maearth.com/theotherdada-9368efee/42e64b8c"
     },
     "did:plc:ed3hm5kftg4fpd5cencj7n33": {
       "orgSlug": "eternal-forest",
       "donateUrl": "https://maearth.com/eternal-forest/2026"
     },
-    "did:plc:edjgytsquz7lbfulszjhzfza": {
-      "orgSlug": "casa-das-aguas-sagrad-e23eaf54",
-      "donateUrl": "https://maearth.com/casa-das-aguas-sagrad-e23eaf54/9ac51445"
-    },
-    "did:plc:edynrg62db3jmzli2oaa6py3": {
-      "orgSlug": "mutasa-foundation-for-5939d32c",
-      "donateUrl": "https://maearth.com/mutasa-foundation-for-5939d32c/7f5b7036"
-    },
-    "did:plc:ee5vjozxf4wrdw6i32wlkb2q": {
-      "orgSlug": "ashoka-trust-for-rese-5793cc28",
-      "donateUrl": "https://maearth.com/ashoka-trust-for-rese-5793cc28/27826f8f"
-    },
-    "did:plc:eho7bnowwadmdu3zmscwy3pf": {
-      "orgSlug": "farmers-alliance-for-23c279ca",
-      "donateUrl": "https://maearth.com/farmers-alliance-for-23c279ca/066c35e0"
-    },
-    "did:plc:eino4logt4acb44lvkalawwr": {
-      "orgSlug": "instituto-vidas-do-xi-e9814e7e",
-      "donateUrl": "https://maearth.com/instituto-vidas-do-xi-e9814e7e/0f5c2a60"
-    },
-    "did:plc:ekzuyakyiyedlhm73ngljwss": {
-      "orgSlug": "nordeso-a137c125",
-      "donateUrl": "https://maearth.com/nordeso-a137c125/13f72977"
-    },
-    "did:plc:elfkzwxopyzjltrhyxksougv": {
-      "orgSlug": "mapou-ile",
-      "donateUrl": "https://maearth.com/mapou-ile/03d61a65"
-    },
-    "did:plc:em6d4ts3sxkmadmp5gwysocn": {
-      "orgSlug": "earth-healing-allianc-f8c13c7d",
-      "donateUrl": "https://maearth.com/earth-healing-allianc-f8c13c7d/376e5c74"
-    },
     "did:plc:eoxp4z5kmfuf2in4r5rw4xsk": {
       "orgSlug": "reef-check-malaysia-d3892d61",
       "donateUrl": "https://maearth.com/reef-check-malaysia-d3892d61/coral"
-    },
-    "did:plc:eozwggszr4fpn2yo3wdw5hut": {
-      "orgSlug": "churuata-colective-f023358c",
-      "donateUrl": "https://maearth.com/churuata-colective-f023358c/f22ae865"
     },
     "did:plc:ep62qupawlxkztepnwlo5bdc": {
       "orgSlug": "ngapeke-permaculture-cfeb0037",
       "donateUrl": "https://maearth.com/ngapeke-permaculture-cfeb0037/382b87b5"
     },
-    "did:plc:eqbg5zjwxdxzen6ouy5jyx2x": {
-      "orgSlug": "colectivo-ambiental-d-3f2f3095",
-      "donateUrl": "https://maearth.com/colectivo-ambiental-d-3f2f3095/31fe576e"
-    },
     "did:plc:eqi76vuw6mwucu5tavquroh4": {
       "orgSlug": "fundacion-saimiri-fc91ee69",
       "donateUrl": "https://maearth.com/fundacion-saimiri-fc91ee69/ef796ec6"
-    },
-    "did:plc:ereluwabsoorkqwrq2dew2if": {
-      "orgSlug": "ayure-37089d85",
-      "donateUrl": "https://maearth.com/ayure-37089d85/ef22d829"
     },
     "did:plc:ertwxdemrkshpg5ypemva5ku": {
       "orgSlug": "ruamahanga-farm-found-0e0ad78e",
@@ -1078,29 +254,9 @@
       "orgSlug": "international-analog-44295cfc",
       "donateUrl": "https://maearth.com/international-analog-44295cfc/c992622d"
     },
-    "did:plc:ezwk6kna6c6km2o54xaantm6": {
-      "orgSlug": "forest-for-trees-3ff1ef97",
-      "donateUrl": "https://maearth.com/forest-for-trees-3ff1ef97/7f824907"
-    },
-    "did:plc:f2h2mynafh6cj6changs6r4o": {
-      "orgSlug": "the-little-environmen-15d7794c",
-      "donateUrl": "https://maearth.com/the-little-environmen-15d7794c/e77638e4"
-    },
     "did:plc:f32yfd5eg52q4wmz6vab44aw": {
       "orgSlug": "fundacion-raiz-ecuado-0277393a",
       "donateUrl": "https://maearth.com/fundacion-raiz-ecuado-0277393a/8c4991eb"
-    },
-    "did:plc:f5jv4vdtc5j22g7ux7omepyj": {
-      "orgSlug": "niebla-736d2e3b",
-      "donateUrl": "https://maearth.com/niebla-736d2e3b/26a7b0ee"
-    },
-    "did:plc:f5wczqxdkkzmxhdpmpe4luvj": {
-      "orgSlug": "alphome-community-far-b3ea0bd6",
-      "donateUrl": "https://maearth.com/alphome-community-far-b3ea0bd6/37e83b8a"
-    },
-    "did:plc:f627kllpo7tvgwnqvhkzn36r": {
-      "orgSlug": "greenpill-brasil-0e61d1fd",
-      "donateUrl": "https://maearth.com/greenpill-brasil-0e61d1fd/ef714b06"
     },
     "did:plc:fcpigq3grw5tgbo5s4ixdzae": {
       "orgSlug": "samauma-acoes-baseada-31ed5854",
@@ -1109,46 +265,6 @@
     "did:plc:fecxqglqlbrlh65bpp6oj3sb": {
       "orgSlug": "wilbur-hot-springs",
       "donateUrl": "https://maearth.com/wilbur-hot-springs/restoration-of-sulphu-3b4496d1"
-    },
-    "did:plc:fgfel7kwdvog27sweg2j3vsw": {
-      "orgSlug": "luthe-land-legacy-2b5177ae",
-      "donateUrl": "https://maearth.com/luthe-land-legacy-2b5177ae/711ccfce"
-    },
-    "did:plc:fgrvuum3iyo6eimljglfzybw": {
-      "orgSlug": "reciclando-dunas-12e0fe1c",
-      "donateUrl": "https://maearth.com/reciclando-dunas-12e0fe1c/9a751f54"
-    },
-    "did:plc:fgswsp7qlfokr4332d5eyjjo": {
-      "orgSlug": "regenera-837f7670",
-      "donateUrl": "https://maearth.com/regenera-837f7670/3b0c3afa"
-    },
-    "did:plc:fjjsdf4d5icohsvttbfmq6ya": {
-      "orgSlug": "united-confederation-044fcf0a",
-      "donateUrl": "https://maearth.com/united-confederation-044fcf0a/ed31f2d9"
-    },
-    "did:plc:fjpwrl273qy4xwp6i2st4qwf": {
-      "orgSlug": "sali-cbo-1ab76fb7",
-      "donateUrl": "https://maearth.com/sali-cbo-1ab76fb7/20c8dd49"
-    },
-    "did:plc:fkeiyebgfq6iik5antnlotic": {
-      "orgSlug": "colmeia62-housing-coo-edd11564",
-      "donateUrl": "https://maearth.com/colmeia62-housing-coo-edd11564/d2b58731"
-    },
-    "did:plc:flkuiw4rhykmnxiskldpgh6o": {
-      "orgSlug": "earthjust-ecosystems-c1d4a9b4",
-      "donateUrl": "https://maearth.com/earthjust-ecosystems-c1d4a9b4/4dfdb472"
-    },
-    "did:plc:fp6ikewjwvnavkoqpnnc34su": {
-      "orgSlug": "sun-nation-02709b92",
-      "donateUrl": "https://maearth.com/sun-nation-02709b92/81e542e6"
-    },
-    "did:plc:fqaamh65364cz6647mmtzn4e": {
-      "orgSlug": "ogallala-commons-6c0e8330",
-      "donateUrl": "https://maearth.com/ogallala-commons-6c0e8330/6f0cb1fb"
-    },
-    "did:plc:fs4ixtuoyjm5qun4r73iwly2": {
-      "orgSlug": "riverfront-north-part-f2d9ebf7",
-      "donateUrl": "https://maearth.com/riverfront-north-part-f2d9ebf7/408492c2"
     },
     "did:plc:ft4lv77y4vw63wrax5o6sphk": {
       "orgSlug": "environmental-action-7d1c8c8d",
@@ -1162,14 +278,6 @@
       "orgSlug": "provita-ec23a10a",
       "donateUrl": "https://maearth.com/provita-ec23a10a/1bc5db6b"
     },
-    "did:plc:fwm52aw2oi4vvsw6nne3rl2l": {
-      "orgSlug": "popular-struggle-coor-1663b809",
-      "donateUrl": "https://maearth.com/popular-struggle-coor-1663b809/faz3a"
-    },
-    "did:plc:fwtctpxegrhzwsgopzygmokj": {
-      "orgSlug": "mudzi-cooking-project-2172b47c",
-      "donateUrl": "https://maearth.com/mudzi-cooking-project-2172b47c/e502e3cb"
-    },
     "did:plc:fwzzvt44pqwtdghj2exiecdj": {
       "orgSlug": "mizu-eco-care",
       "donateUrl": "https://maearth.com/mizu-eco-care/9ac8f824"
@@ -1178,33 +286,9 @@
       "orgSlug": "global-forest-generat-22d748db",
       "donateUrl": "https://maearth.com/global-forest-generat-22d748db/e0312678"
     },
-    "did:plc:fy6dctsiqnrh6bkwdunfr2bk": {
-      "orgSlug": "the-learning-field-7b7f7831",
-      "donateUrl": "https://maearth.com/the-learning-field-7b7f7831/7ff90188"
-    },
     "did:plc:fy7se5rntzrxaypm744nmcou": {
       "orgSlug": "amazon-rainforest-conservancy-51f595c7",
       "donateUrl": "https://maearth.com/amazon-rainforest-conservancy-51f595c7/cccf4408"
-    },
-    "did:plc:fzluynol6je3dgq3xvynpbrw": {
-      "orgSlug": "osisi-impact-initiati-a59434fc",
-      "donateUrl": "https://maearth.com/osisi-impact-initiati-a59434fc/1ecc5330"
-    },
-    "did:plc:g337uu4mgfpid4drxww3e6ap": {
-      "orgSlug": "elohim-foundation-de8cf8c7",
-      "donateUrl": "https://maearth.com/elohim-foundation-de8cf8c7/e1d4447f"
-    },
-    "did:plc:g3biqotizpjna6lbbuuycf7o": {
-      "orgSlug": "letting-grow-e4391019",
-      "donateUrl": "https://maearth.com/letting-grow-e4391019/bf47e179"
-    },
-    "did:plc:g4newcwlrvugtbajcjcson5r": {
-      "orgSlug": "reserva-dejavu-b1107c85",
-      "donateUrl": "https://maearth.com/reserva-dejavu-b1107c85/42fa5976"
-    },
-    "did:plc:g4sdiljbi2aws5qrlzyfeljd": {
-      "orgSlug": "coeur-de-foret-madagascar-e35fa71c",
-      "donateUrl": "https://maearth.com/coeur-de-foret-madagascar-e35fa71c/f811697b"
     },
     "did:plc:g5k3kee5yycpimbjnn36as4o": {
       "orgSlug": "jiwa-garden-pt-cahaya-ca4af26e",
@@ -1218,18 +302,6 @@
       "orgSlug": "foret-naturalite",
       "donateUrl": "https://maearth.com/foret-naturalite/6ba9cfb1"
     },
-    "did:plc:gacwtbntjsdt5qvhuoacdfxd": {
-      "orgSlug": "umma-muda-indonesia-df582f66",
-      "donateUrl": "https://maearth.com/umma-muda-indonesia-df582f66/d825b4bd"
-    },
-    "did:plc:gahqm6xn2wpijfhevxk4g3nz": {
-      "orgSlug": "riia-ac-113bb733",
-      "donateUrl": "https://maearth.com/riia-ac-113bb733/21fd971f"
-    },
-    "did:plc:gbp2xlpyzjitslaw6im3xgar": {
-      "orgSlug": "mkaaji-mpya-asbl-ed9f16b5",
-      "donateUrl": "https://maearth.com/mkaaji-mpya-asbl-ed9f16b5/3ee507db"
-    },
     "did:plc:gbu4fv3ckdte45vpbmly62tb": {
       "orgSlug": "comoris",
       "donateUrl": "https://maearth.com/comoris/forforest"
@@ -1238,89 +310,29 @@
       "orgSlug": "blue-ridge-foodshed-commons",
       "donateUrl": "https://maearth.com/blue-ridge-foodshed-commons/cultivator"
     },
-    "did:plc:gfqqltksknc7dxjikgm3l3d7": {
-      "orgSlug": "friends-of-the-environment-438d075c",
-      "donateUrl": "https://maearth.com/friends-of-the-environment-438d075c/a60ad0d6"
-    },
-    "did:plc:ggdlr2pthx2uyrrdmjdiiuqz": {
-      "orgSlug": "tree-solutions-ghana-a4e9db1c",
-      "donateUrl": "https://maearth.com/tree-solutions-ghana-a4e9db1c/bfaa94e7"
-    },
-    "did:plc:gkghlem5bvppaht7znjx5myy": {
-      "orgSlug": "reimagining-sustainab-74ead36e",
-      "donateUrl": "https://maearth.com/reimagining-sustainab-74ead36e/c6397800"
-    },
-    "did:plc:gljga25fl6b55tayjclytb3o": {
-      "orgSlug": "darukaa-earth-b423ca61",
-      "donateUrl": "https://maearth.com/darukaa-earth-b423ca61/857a8f8a"
-    },
-    "did:plc:gloffgt35irshwoldguz6ic2": {
-      "orgSlug": "calling-our-spirits-forward-1ef263e7",
-      "donateUrl": "https://maearth.com/calling-our-spirits-forward-1ef263e7/d14266fd"
-    },
     "did:plc:gnr7xzsz2auey2kvo73odrwf": {
       "orgSlug": "yayasan-gambut-69f0a5df",
       "donateUrl": "https://maearth.com/yayasan-gambut-69f0a5df/db1444e2"
-    },
-    "did:plc:goy4rjs52py4tdjl673rzh2x": {
-      "orgSlug": "keshet-ngo-community-culture-environment-ea96bbc4",
-      "donateUrl": "https://maearth.com/keshet-ngo-community-culture-environment-ea96bbc4/3000246c"
-    },
-    "did:plc:grg4o6dk32skrcyxhimtdgg2": {
-      "orgSlug": "akaam-peoples-empower-7cc522b0",
-      "donateUrl": "https://maearth.com/akaam-peoples-empower-7cc522b0/92d4aed0"
     },
     "did:plc:grjmasrkfcemdpzpnoujh2u3": {
       "orgSlug": "oceanus-conservation-2f977c85",
       "donateUrl": "https://maearth.com/oceanus-conservation-2f977c85/fc60bf53"
     },
-    "did:plc:grnd7rfd7jnvtbq4zqgtlhlq": {
-      "orgSlug": "ecorestoration-allian-1b2c5c2d",
-      "donateUrl": "https://maearth.com/ecorestoration-allian-1b2c5c2d/5d2aa7e6"
-    },
     "did:plc:gsq3t5i52jyw6jrtudfwvyrb": {
       "orgSlug": "alianza-wichi-8273c298",
       "donateUrl": "https://maearth.com/alianza-wichi-8273c298/alianza-wichi-scaling-d030ef73"
-    },
-    "did:plc:gswjx7qg7n62j2mab3sukedq": {
-      "orgSlug": "associacao-indigena-d-0aa9b0d2",
-      "donateUrl": "https://maearth.com/associacao-indigena-d-0aa9b0d2/06438c88"
     },
     "did:plc:gu24outgrzrm4cxjypqzjof7": {
       "orgSlug": "te-mana-o-tauhara-cha-20272ee7",
       "donateUrl": "https://maearth.com/te-mana-o-tauhara-cha-20272ee7/a77cc851"
     },
-    "did:plc:gw6nhcedehf7bpwvd3gro3fz": {
-      "orgSlug": "nalubaaga-valley-community",
-      "donateUrl": "https://maearth.com/nalubaaga-valley-community/nalubaaga-wetland-res-3bba69d4"
-    },
-    "did:plc:gxeffgonouj6664bue3xbwn4": {
-      "orgSlug": "support-center-for-ma-8deef680",
-      "donateUrl": "https://maearth.com/support-center-for-ma-8deef680/6cc45212"
-    },
     "did:plc:gxmbp5bdecpfdu74tqkzderl": {
       "orgSlug": "papawhakaritorito-trust",
       "donateUrl": "https://maearth.com/papawhakaritorito-trust/61dea755"
     },
-    "did:plc:gy64dk3xepic2yylodoev3zk": {
-      "orgSlug": "changefusion-institut-2e267c2b",
-      "donateUrl": "https://maearth.com/changefusion-institut-2e267c2b/948ad332"
-    },
-    "did:plc:gypiei6sak4ky2mckmjt5hp7": {
-      "orgSlug": "reforestamos-mexico-a-c-87c7b74b",
-      "donateUrl": "https://maearth.com/reforestamos-mexico-a-c-87c7b74b/71b88a8f"
-    },
-    "did:plc:h2yd76ayyearmscgxi2ftmau": {
-      "orgSlug": "tree-federation-967903fb",
-      "donateUrl": "https://maearth.com/tree-federation-967903fb/2becf24e"
-    },
     "did:plc:h42xtuz34vizieekzhe245mh": {
       "orgSlug": "mangarara-family-farm",
       "donateUrl": "https://maearth.com/mangarara-family-farm/5843661f"
-    },
-    "did:plc:h4egpyenjgvj4ewzrno4565a": {
-      "orgSlug": "rights-of-nature-ghan-1ee6d5e6",
-      "donateUrl": "https://maearth.com/rights-of-nature-ghan-1ee6d5e6/9edca398"
     },
     "did:plc:h4on5qcaws7uqhnbdyknaloy": {
       "orgSlug": "zanzibar-spice-forests",
@@ -1334,273 +346,57 @@
       "orgSlug": "ocean-vision-legal-8e557579",
       "donateUrl": "https://maearth.com/ocean-vision-legal-8e557579/701520ac"
     },
-    "did:plc:h766n77nlqnsr4fyt3cljqcz": {
-      "orgSlug": "aalamaram-ngo-4bf2e769",
-      "donateUrl": "https://maearth.com/aalamaram-ngo-4bf2e769/70f4d516"
-    },
-    "did:plc:haglmglepxabynp76llduigj": {
-      "orgSlug": "fundacion-bosquizar-918e0338",
-      "donateUrl": "https://maearth.com/fundacion-bosquizar-918e0338/745a6490"
-    },
-    "did:plc:hardy3ei5trvcw5mjeglathd": {
-      "orgSlug": "parque-das-tribos-1e9ba72f",
-      "donateUrl": "https://maearth.com/parque-das-tribos-1e9ba72f/4ae64b37"
-    },
-    "did:plc:hbu7ersxcvm5jnomk2x55f35": {
-      "orgSlug": "idd-org",
-      "donateUrl": "https://maearth.com/idd-org/idd-org"
-    },
-    "did:plc:hbz7phtzy2ifhlaoqtasr2tl": {
-      "orgSlug": "loop-frome-26c6b3d1",
-      "donateUrl": "https://maearth.com/loop-frome-26c6b3d1/7cb4e5c1"
-    },
     "did:plc:hcveolwpx2vx2s4lw2tkmjsq": {
       "orgSlug": "la-tierra-del-jaguar-9182eb4a",
       "donateUrl": "https://maearth.com/la-tierra-del-jaguar-9182eb4a/9288adce"
-    },
-    "did:plc:hdeawui4sh7hbxgj6vhqm4hr": {
-      "orgSlug": "amira-academy-0e458232",
-      "donateUrl": "https://maearth.com/amira-academy-0e458232/ca7692b8"
     },
     "did:plc:hent6csywblz75js24ky3jsl": {
       "orgSlug": "otepic",
       "donateUrl": "https://maearth.com/otepic/4f08cb41"
     },
-    "did:plc:hghspi2hgyrgyxkj334yvmdg": {
-      "orgSlug": "environmental-conservation-trust-of-uganda-ecotrust-c7ac83e3",
-      "donateUrl": "https://maearth.com/environmental-conservation-trust-of-uganda-ecotrust-c7ac83e3/52dc925f"
-    },
     "did:plc:him7zwt4opivfi7e5dpu4mxg": {
       "orgSlug": "vale-da-gema-headwate-2c8d618b",
       "donateUrl": "https://maearth.com/vale-da-gema-headwate-2c8d618b/resilience-via-community"
-    },
-    "did:plc:hjfgt7f7jmsweq6gdimapmlm": {
-      "orgSlug": "yayasan-rakan-kehidupan-lestari-0d5c71da",
-      "donateUrl": "https://maearth.com/yayasan-rakan-kehidupan-lestari-0d5c71da/ca105601"
-    },
-    "did:plc:hkdkbauvx4xz3dnws7u3v2kj": {
-      "orgSlug": "ciudad-de-luz-13-20-c6842ede",
-      "donateUrl": "https://maearth.com/ciudad-de-luz-13-20-c6842ede/5984fa0e"
-    },
-    "did:plc:hl3cdgfedzwjt4odl37azxcx": {
-      "orgSlug": "kootuia-0c6fad0e",
-      "donateUrl": "https://maearth.com/kootuia-0c6fad0e/f272dab0"
-    },
-    "did:plc:hme2wxqtylruzr4jcst4wv33": {
-      "orgSlug": "djpe-e57bc2e8",
-      "donateUrl": "https://maearth.com/djpe-e57bc2e8/74df3f6f"
-    },
-    "did:plc:hq7sawttbvqmnucqhf7m27le": {
-      "orgSlug": "rozmary-rapport-found-ad7ca78d",
-      "donateUrl": "https://maearth.com/rozmary-rapport-found-ad7ca78d/6831a1a9"
     },
     "did:plc:hskfhwdnelg5mhhjqcr5z7u2": {
       "orgSlug": "monte-alegre-foundati-b4874952",
       "donateUrl": "https://maearth.com/monte-alegre-foundati-b4874952/66791b7c"
     },
-    "did:plc:hsr5osmzgzzbz4opl3labexs": {
-      "orgSlug": "fundacion-nacional-co-e7287f58",
-      "donateUrl": "https://maearth.com/fundacion-nacional-co-e7287f58/41825e6d"
-    },
     "did:plc:hswn3yz3fyg7lnhts4r6xkqw": {
       "orgSlug": "panya-forest-b9d032aa",
       "donateUrl": "https://maearth.com/panya-forest-b9d032aa/b87fa289"
-    },
-    "did:plc:hvc4ljxb3pdg5xsikvfyk2xd": {
-      "orgSlug": "clean-ocean-view-liberia-35724c44",
-      "donateUrl": "https://maearth.com/clean-ocean-view-liberia-35724c44/5672b31d"
     },
     "did:plc:hvmeiw7uni5z5br5n62aexlk": {
       "orgSlug": "agroecology-articulation",
       "donateUrl": "https://maearth.com/agroecology-articulation/aed8f78a"
     },
-    "did:plc:hwoz3kgq2hkqfj2pvto3xs3w": {
-      "orgSlug": "earthfarm-gambia-part-bde75202",
-      "donateUrl": "https://maearth.com/earthfarm-gambia-part-bde75202/3797eacf"
-    },
-    "did:plc:i2tza55qvm3wxalq7wfwq5fs": {
-      "orgSlug": "entelechy-ecovillage-bd00fbab",
-      "donateUrl": "https://maearth.com/entelechy-ecovillage-bd00fbab/dfa17d4e"
-    },
-    "did:plc:i36w4brxywxxxivd7yuqzu2c": {
-      "orgSlug": "mother-earth-initiati-08865617",
-      "donateUrl": "https://maearth.com/mother-earth-initiati-08865617/65bc4c51"
-    },
-    "did:plc:i3ncgawu64v5ibgd5dejo2se": {
-      "orgSlug": "youth-hub-trust-e0d156ab",
-      "donateUrl": "https://maearth.com/youth-hub-trust-e0d156ab/1043b725"
-    },
-    "did:plc:ia7euniz2pzobw5p3qfso4fk": {
-      "orgSlug": "refa-4262e9da",
-      "donateUrl": "https://maearth.com/refa-4262e9da/b8e151f7"
-    },
-    "did:plc:iaoufcz4ilvxibp3yonsuckf": {
-      "orgSlug": "middle-beef-a5ae6304",
-      "donateUrl": "https://maearth.com/middle-beef-a5ae6304/d2f5bc1c"
-    },
     "did:plc:ic4myd6yxmdrnsasnr2ssnbk": {
       "orgSlug": "colectiva-valle-machu-d5e109cf",
       "donateUrl": "https://maearth.com/colectiva-valle-machu-d5e109cf/7bc878cf"
-    },
-    "did:plc:icsnnx2sx566qdtayssizxbf": {
-      "orgSlug": "agape-hand-and-refore",
-      "donateUrl": "https://maearth.com/agape-hand-and-refore/da077076"
-    },
-    "did:plc:idgxgtf2xt2hgap3aiuxq5jt": {
-      "orgSlug": "shagrha-for-sustainable-development-5aa88fdb",
-      "donateUrl": "https://maearth.com/shagrha-for-sustainable-development-5aa88fdb/b8b31d27"
     },
     "did:plc:iejvjz5fcga2skmbycwmigtc": {
       "orgSlug": "love-the-oceans-conse-94cb0fc9",
       "donateUrl": "https://maearth.com/love-the-oceans-conse-94cb0fc9/cb63d369"
     },
-    "did:plc:igfkrtcckg3voo3zop4tvwpi": {
-      "orgSlug": "karambi-group-of-peop-a8d7510c",
-      "donateUrl": "https://maearth.com/karambi-group-of-peop-a8d7510c/b3d9cd53"
-    },
-    "did:plc:ihmcbn64etchjc5zguv4kdlu": {
-      "orgSlug": "crops-in-pots-833cf20a",
-      "donateUrl": "https://maearth.com/crops-in-pots-833cf20a/5b2b1f80"
-    },
-    "did:plc:iiuvtskujrqjhuysidkhwti4": {
-      "orgSlug": "climate-relief-da644488",
-      "donateUrl": "https://maearth.com/climate-relief-da644488/5e87342a"
-    },
-    "did:plc:ij7dyrhphln2pxoz6qxrk4sl": {
-      "orgSlug": "sacred-water-mountain-83f9430d",
-      "donateUrl": "https://maearth.com/sacred-water-mountain-83f9430d/e7f30151"
-    },
-    "did:plc:imnztlrllf6fbmr5hnv4z3uy": {
-      "orgSlug": "centre-for-dryland-de-d0edf41c",
-      "donateUrl": "https://maearth.com/centre-for-dryland-de-d0edf41c/a02bb4f9"
-    },
-    "did:plc:iveirmro5qev3rnle3l5b23m": {
-      "orgSlug": "maa-ru-collective-b787641d",
-      "donateUrl": "https://maearth.com/maa-ru-collective-b787641d/321cfb52"
-    },
     "did:plc:ivmixi2teepsziyvtdxcyi77": {
       "orgSlug": "wakatu-incorporation-fa163c4b",
       "donateUrl": "https://maearth.com/wakatu-incorporation-fa163c4b/ed590980"
-    },
-    "did:plc:ixs35kufns7twyz5aniubics": {
-      "orgSlug": "kimilili-community-land-users-association-cbo-57b7c872",
-      "donateUrl": "https://maearth.com/kimilili-community-land-users-association-cbo-57b7c872/dbd32e4e"
     },
     "did:plc:iyn24fzmixlesmkw3l6n2mwd": {
       "orgSlug": "native-conservancy",
       "donateUrl": "https://maearth.com/native-conservancy/224269b4"
     },
-    "did:plc:izdfssgtvgsg5cl2roqewuwo": {
-      "orgSlug": "kapiti-zero-waste-3ed1cdc1",
-      "donateUrl": "https://maearth.com/kapiti-zero-waste-3ed1cdc1/48e5cd18"
-    },
-    "did:plc:j3tvls3rm7owif435fc3dnbe": {
-      "orgSlug": "mudwood-limited-9c7da9fd",
-      "donateUrl": "https://maearth.com/mudwood-limited-9c7da9fd/a59e8c71"
-    },
-    "did:plc:j4mim5urgq7jpjydcfufrkjy": {
-      "orgSlug": "earth-b09a82bd",
-      "donateUrl": "https://maearth.com/earth-b09a82bd/4bcfd659"
-    },
-    "did:plc:j65ggjob2wf4bku7nvluku57": {
-      "orgSlug": "quantum-cacao-sanctua-b05d97fb",
-      "donateUrl": "https://maearth.com/quantum-cacao-sanctua-b05d97fb/71ddbe2c"
-    },
     "did:plc:j6og56j335u66rropifkdmff": {
       "orgSlug": "go-eco-waikato-enviro-b76be2d6",
       "donateUrl": "https://maearth.com/go-eco-waikato-enviro-b76be2d6/238e9ba1"
-    },
-    "did:plc:jaeimg6b55laxobh5lkev3ds": {
-      "orgSlug": "wheres-the-food-chart-851196b5",
-      "donateUrl": "https://maearth.com/wheres-the-food-chart-851196b5/def92070"
-    },
-    "did:plc:jdoimvpx6rcfvz3yrad3hwne": {
-      "orgSlug": "greenwave-haiti-108a5acc",
-      "donateUrl": "https://maearth.com/greenwave-haiti-108a5acc/8d2a4384"
-    },
-    "did:plc:je7iyxh6tss7nwztxb5j4nra": {
-      "orgSlug": "rivers-for-change-hom-34b6290c",
-      "donateUrl": "https://maearth.com/rivers-for-change-hom-34b6290c/f59aad60"
-    },
-    "did:plc:jfqredru3mw4rmxwtrxf4z6p": {
-      "orgSlug": "r3-0-redesign-for-res-4d441fc1",
-      "donateUrl": "https://maearth.com/r3-0-redesign-for-res-4d441fc1/3a8adc8d"
     },
     "did:plc:jft4qtylyfzlwsmoclgttyfq": {
       "orgSlug": "earth-guardians",
       "donateUrl": "https://maearth.com/earth-guardians/togoreforestation"
     },
-    "did:plc:jga3ipdwr3q7dyzhlttr4zhg": {
-      "orgSlug": "komuhn-d67a549a",
-      "donateUrl": "https://maearth.com/komuhn-d67a549a/ruamais"
-    },
-    "did:plc:jgkwqw6ur63qwu3xamw3pf52": {
-      "orgSlug": "matopa-cbo-2d8bddcf",
-      "donateUrl": "https://maearth.com/matopa-cbo-2d8bddcf/e9ca05e8"
-    },
-    "did:plc:jgycqqtcyvmsspesyt2cagvu": {
-      "orgSlug": "amucss",
-      "donateUrl": "https://maearth.com/amucss/5fc24473"
-    },
-    "did:plc:jh4u6x33vdmjl6csapxol6ry": {
-      "orgSlug": "young-warriors-club-kenya-e554abe2",
-      "donateUrl": "https://maearth.com/young-warriors-club-kenya-e554abe2/a58250f5"
-    },
-    "did:plc:jigzmjzdtwqdj3f7ingva2ge": {
-      "orgSlug": "baryodi-trust-dao-8ad82017",
-      "donateUrl": "https://maearth.com/baryodi-trust-dao-8ad82017/87c50869"
-    },
-    "did:plc:jiq5xwlzepj3qk7ahzdpotvu": {
-      "orgSlug": "munansi-green-initiai-7dab1fc0",
-      "donateUrl": "https://maearth.com/munansi-green-initiai-7dab1fc0/558875e0"
-    },
-    "did:plc:jo7ffizdwkvov3ne62pcs6k7": {
-      "orgSlug": "instituto-waru-dfw-br-b8c362ea",
-      "donateUrl": "https://maearth.com/instituto-waru-dfw-br-b8c362ea/f434842a"
-    },
-    "did:plc:jos4ngj56rmpmddyx4kuzzs7": {
-      "orgSlug": "toliara-eco-restorati-7c3d4f98",
-      "donateUrl": "https://maearth.com/toliara-eco-restorati-7c3d4f98/da9201ff"
-    },
-    "did:plc:jpiylgl572deoxcxkyehj3d3": {
-      "orgSlug": "vetiver-bio-r-e78a86b3",
-      "donateUrl": "https://maearth.com/vetiver-bio-r-e78a86b3/ee7875b9"
-    },
-    "did:plc:jpprcyakpsv4fjdaqrijlvld": {
-      "orgSlug": "africa-partnership-on-6ca0fa84",
-      "donateUrl": "https://maearth.com/africa-partnership-on-6ca0fa84/c1f148fd"
-    },
-    "did:plc:jq3l2pq7iflysyyldbyspi6y": {
-      "orgSlug": "amigxs-del-mar-c97d38a1",
-      "donateUrl": "https://maearth.com/amigxs-del-mar-c97d38a1/16b2239e"
-    },
-    "did:plc:jrt6d5enouofta5n2nuocvqb": {
-      "orgSlug": "every-natalday-tree-day-initiative-f4144c39",
-      "donateUrl": "https://maearth.com/every-natalday-tree-day-initiative-f4144c39/2918e0bf"
-    },
-    "did:plc:jt47yg77myb5ccd3wtqvvq4r": {
-      "orgSlug": "ecosystem-forestry-development-and-related-activities-association-808fc168",
-      "donateUrl": "https://maearth.com/ecosystem-forestry-development-and-related-activities-association-808fc168/b4f41aa2"
-    },
-    "did:plc:jtsst6v26fe7aqmqe6xmaiwv": {
-      "orgSlug": "eat-sleep-ride-c839dfdf",
-      "donateUrl": "https://maearth.com/eat-sleep-ride-c839dfdf/e2cbdc06"
-    },
-    "did:plc:k2zi57nr5i3icfxuklsurwna": {
-      "orgSlug": "odienya-permaculture-1817cd37",
-      "donateUrl": "https://maearth.com/odienya-permaculture-1817cd37/68c48df2"
-    },
-    "did:plc:k4f3etacfpqcisofiosrzb4v": {
-      "orgSlug": "inspira-5c41a8c9",
-      "donateUrl": "https://maearth.com/inspira-5c41a8c9/8644d369"
-    },
     "did:plc:k4uafj3kle5ywv6jdgoyhhux": {
       "orgSlug": "bangladesh-environmen-5c5dc167",
       "donateUrl": "https://maearth.com/bangladesh-environmen-5c5dc167/575c4a43"
-    },
-    "did:plc:k4z3ndrbph2ucqblyrgxk6dg": {
-      "orgSlug": "kolektivo-curacao-8a054d8e",
-      "donateUrl": "https://maearth.com/kolektivo-curacao-8a054d8e/dbfaf763"
     },
     "did:plc:k7p4xmd4h5kyrr2mdyx4awbl": {
       "orgSlug": "koanga-institute-de431bfb",
@@ -1610,69 +406,17 @@
       "orgSlug": "costas-verdes-6e146c84",
       "donateUrl": "https://maearth.com/costas-verdes-6e146c84/restoration"
     },
-    "did:plc:kckbtl2a6dii5mg3tn5pdjk4": {
-      "orgSlug": "nahdiyaw-tribal-youth-746c66ae",
-      "donateUrl": "https://maearth.com/nahdiyaw-tribal-youth-746c66ae/f4439618"
-    },
-    "did:plc:kevq2rysk2zerex2xiprlgno": {
-      "orgSlug": "himalayan-nature-5a20490a",
-      "donateUrl": "https://maearth.com/himalayan-nature-5a20490a/1fc8442f"
-    },
     "did:plc:kfqzktopy4554eqq7qqnxtya": {
       "orgSlug": "freethebees-c63a63a4",
       "donateUrl": "https://maearth.com/freethebees-c63a63a4/ac903ee2"
-    },
-    "did:plc:kfrj6trjbghogvw6frlrgi6t": {
-      "orgSlug": "zairel-designs-7a79d49f",
-      "donateUrl": "https://maearth.com/zairel-designs-7a79d49f/81f24a7b"
     },
     "did:plc:khxa3bjhqjzbjwb7n22ygxhy": {
       "orgSlug": "global-coralition-1b81a8b7",
       "donateUrl": "https://maearth.com/global-coralition-1b81a8b7/f0f55e2d"
     },
-    "did:plc:kjh5bol7cvbhnl3tlvjrpgwz": {
-      "orgSlug": "tana-mallorca-biohub-cbd5cdc7",
-      "donateUrl": "https://maearth.com/tana-mallorca-biohub-cbd5cdc7/9402d48f"
-    },
-    "did:plc:kk2hhslybkhg7hdyngyqtcvs": {
-      "orgSlug": "fundacion-magnolios-ef9d64ef",
-      "donateUrl": "https://maearth.com/fundacion-magnolios-ef9d64ef/b9889a11"
-    },
-    "did:plc:klg45ip6hdwa7nm3dy5rpw6b": {
-      "orgSlug": "suwareh-kunda-community-forest-dalaba-kafo-cffcf011",
-      "donateUrl": "https://maearth.com/suwareh-kunda-community-forest-dalaba-kafo-cffcf011/27103809"
-    },
-    "did:plc:klmnx7rouhnh75zi2ulldzdz": {
-      "orgSlug": "koanga-institute",
-      "donateUrl": "https://maearth.com/koanga-institute/river-block-regenerat-5e9c8045"
-    },
-    "did:plc:kluxahdzqjr4smbnep3jriru": {
-      "orgSlug": "ndogo-farms-8815e522",
-      "donateUrl": "https://maearth.com/ndogo-farms-8815e522/54e5ead2"
-    },
-    "did:plc:krjihdwpand43qbazr7nnjsc": {
-      "orgSlug": "broomhill-sanctuary-04a88b5d",
-      "donateUrl": "https://maearth.com/broomhill-sanctuary-04a88b5d/a2f1c687"
-    },
-    "did:plc:kspknzfeiyz36f6ctudzwyez": {
-      "orgSlug": "conservacion-e-invest-91988d75",
-      "donateUrl": "https://maearth.com/conservacion-e-invest-91988d75/79f1c231"
-    },
-    "did:plc:kuuekgg3luti4jhzal35khfr": {
-      "orgSlug": "reconectando-95d6944a",
-      "donateUrl": "https://maearth.com/reconectando-95d6944a/a5016691"
-    },
     "did:plc:kuyzo2bfj4kaypy4etj6topc": {
       "orgSlug": "sacred-contract-8043c638",
       "donateUrl": "https://maearth.com/sacred-contract-8043c638/39799380"
-    },
-    "did:plc:kviwipsd73s33edjfy463odo": {
-      "orgSlug": "bosque-fractal-48bfe3da",
-      "donateUrl": "https://maearth.com/bosque-fractal-48bfe3da/52b6cf16"
-    },
-    "did:plc:kvolqafsr6yw7bkrocanncrz": {
-      "orgSlug": "the-clean-wave",
-      "donateUrl": "https://maearth.com/the-clean-wave/coral-nursery-and-reg-857fb754"
     },
     "did:plc:kvq5cuxjdbzwt5oowjtpsnbo": {
       "orgSlug": "appalachianrekindlingproject",
@@ -1686,25 +430,9 @@
       "orgSlug": "bsu-mandiri-7203f3b8",
       "donateUrl": "https://maearth.com/bsu-mandiri-7203f3b8/1ec5c5e8"
     },
-    "did:plc:kxhigb32volwsgotbppja2hz": {
-      "orgSlug": "oca-terravila-glocal-b33ec11d",
-      "donateUrl": "https://maearth.com/oca-terravila-glocal-b33ec11d/233308da"
-    },
     "did:plc:ky7vnxckzeioltvsmhfpatzh": {
       "orgSlug": "monviso-institute",
       "donateUrl": "https://maearth.com/monviso-institute/c2a581e7"
-    },
-    "did:plc:kyh7en7vkes3ybye2x655rsm": {
-      "orgSlug": "amieiras-a0bed9d6",
-      "donateUrl": "https://maearth.com/amieiras-a0bed9d6/affordable-resilience"
-    },
-    "did:plc:kylpy6mgsyvnvieeiefjyobl": {
-      "orgSlug": "eriu-farm-company-lim-90f5fc12",
-      "donateUrl": "https://maearth.com/eriu-farm-company-lim-90f5fc12/648206a3"
-    },
-    "did:plc:l6u7hddboouezp6ou4wk7vhw": {
-      "orgSlug": "permaculture-educatio-4d8c4a0c",
-      "donateUrl": "https://maearth.com/permaculture-educatio-4d8c4a0c/de160d2b"
     },
     "did:plc:l6ykg24mojab3tkwbwgajtyh": {
       "orgSlug": "purposeflow-living",
@@ -1714,121 +442,13 @@
       "orgSlug": "planttherain",
       "donateUrl": "https://maearth.com/planttherain/grow"
     },
-    "did:plc:lf7657eoicyicgoaow4om3b7": {
-      "orgSlug": "escola-da-esperanca-b998732f",
-      "donateUrl": "https://maearth.com/escola-da-esperanca-b998732f/next-gen-earth-stewards"
-    },
-    "did:plc:lffyabnplb4pxcpmegv4snhs": {
-      "orgSlug": "mutirao-agroflorestal-c4be37a5",
-      "donateUrl": "https://maearth.com/mutirao-agroflorestal-c4be37a5/0c6e1aa4"
-    },
-    "did:plc:lgrhzuoxfltyhtz3mjniqw6b": {
-      "orgSlug": "atlas-sanctum-4e6b07af",
-      "donateUrl": "https://maearth.com/atlas-sanctum-4e6b07af/b49d1685"
-    },
     "did:plc:lgw56jjkedcszqs3toaidhb4": {
       "orgSlug": "folona-for-the-love-o-fbfb81e4",
       "donateUrl": "https://maearth.com/folona-for-the-love-o-fbfb81e4/c46b239d"
     },
-    "did:plc:ljmwxlqbexxyltutihmass42": {
-      "orgSlug": "playmakers-group-5ccccedc",
-      "donateUrl": "https://maearth.com/playmakers-group-5ccccedc/9a1e4ad8"
-    },
-    "did:plc:llumyzopdlktu3xjqrpawmqa": {
-      "orgSlug": "environmental-conserv-627b7d2a",
-      "donateUrl": "https://maearth.com/environmental-conserv-627b7d2a/748c4612"
-    },
-    "did:plc:lmkp2wswxegn72it5d7vdqop": {
-      "orgSlug": "nigeria-youth-climate-preservation-network-a84c75da",
-      "donateUrl": "https://maearth.com/nigeria-youth-climate-preservation-network-a84c75da/0fbe94a8"
-    },
-    "did:plc:loexq36g4a32g6c636uvhepf": {
-      "orgSlug": "friends-of-fundesur-i-aa371ea2",
-      "donateUrl": "https://maearth.com/friends-of-fundesur-i-aa371ea2/2142e8da"
-    },
-    "did:plc:lombct22tx7kdivx42cpgghd": {
-      "orgSlug": "per-auset-b8044867",
-      "donateUrl": "https://maearth.com/per-auset-b8044867/0c6acc6a"
-    },
-    "did:plc:lpq4rcaurwi7k66jggp3psok": {
-      "orgSlug": "beekon-f5261ed9",
-      "donateUrl": "https://maearth.com/beekon-f5261ed9/ac8279fc"
-    },
-    "did:plc:lq4rraldl2xwagricanlgk74": {
-      "orgSlug": "touch-the-youth-found-644299a6",
-      "donateUrl": "https://maearth.com/touch-the-youth-found-644299a6/8a9a92e6"
-    },
-    "did:plc:lqa5i2dkjxykouvzitvdrhur": {
-      "orgSlug": "save-ghana-frogs-60f25213",
-      "donateUrl": "https://maearth.com/save-ghana-frogs-60f25213/102c6d6d"
-    },
     "did:plc:lqkgnco5bg22ttxcjxczdj6e": {
       "orgSlug": "voedselpark-amsterdam-37dbb1c8",
       "donateUrl": "https://maearth.com/voedselpark-amsterdam-37dbb1c8/ad724362"
-    },
-    "did:plc:lsqvd2kt6dkdlpqb2f4yarms": {
-      "orgSlug": "miracle-project",
-      "donateUrl": "https://maearth.com/miracle-project/miracle-mountain"
-    },
-    "did:plc:ltwl7fuozx7hcmke4uoiaklq": {
-      "orgSlug": "green-cosmos-zambia-2c92751e",
-      "donateUrl": "https://maearth.com/green-cosmos-zambia-2c92751e/dc753918"
-    },
-    "did:plc:lv7nxovg6zgztuw66ibdyswe": {
-      "orgSlug": "putika-village-f1101947",
-      "donateUrl": "https://maearth.com/putika-village-f1101947/e92c72f4"
-    },
-    "did:plc:lwcvonjsdirrhpmtlbplodlw": {
-      "orgSlug": "seacology-0fc9c40d",
-      "donateUrl": "https://maearth.com/seacology-0fc9c40d/5621bd21"
-    },
-    "did:plc:ly7shayqhcpcmuwd6enmvemr": {
-      "orgSlug": "kleine-feldwirt-e-v-4f888cc7",
-      "donateUrl": "https://maearth.com/kleine-feldwirt-e-v-4f888cc7/24877767"
-    },
-    "did:plc:lyatwmvpybwmmsbt24jv2tn5": {
-      "orgSlug": "fundacion-kindicocha-42d3910b",
-      "donateUrl": "https://maearth.com/fundacion-kindicocha-42d3910b/b7a37f2b"
-    },
-    "did:plc:m5fhmiq6tibixmihv263pgp6": {
-      "orgSlug": "rosana-correa-ab1af718",
-      "donateUrl": "https://maearth.com/rosana-correa-ab1af718/85e6214b"
-    },
-    "did:plc:m5yqdsdh3k6rvo6f2pxk3zle": {
-      "orgSlug": "emergent-wisdom-79a063da",
-      "donateUrl": "https://maearth.com/emergent-wisdom-79a063da/a3186e5d"
-    },
-    "did:plc:m6476el2sakdlurfaf4b3a7t": {
-      "orgSlug": "centro-de-negocios-ganaderos-4263450d",
-      "donateUrl": "https://maearth.com/centro-de-negocios-ganaderos-4263450d/4b2641c9"
-    },
-    "did:plc:m72giplg4iebm7d3qqczgvdi": {
-      "orgSlug": "friends-of-refugees-i-f0e235ac",
-      "donateUrl": "https://maearth.com/friends-of-refugees-i-f0e235ac/76ef8d44"
-    },
-    "did:plc:m72t5trxbibutdbv6pwxtqfd": {
-      "orgSlug": "international-society-of-tropical-foresters-ghana-chapter-9fe094f1",
-      "donateUrl": "https://maearth.com/international-society-of-tropical-foresters-ghana-chapter-9fe094f1/5bcce7aa"
-    },
-    "did:plc:ma3hqvizchz4g5pv74wtbglh": {
-      "orgSlug": "yayasan-rakan-kehidupan-lestari-f90ecd27",
-      "donateUrl": "https://maearth.com/yayasan-rakan-kehidupan-lestari-f90ecd27/d1f9b11c"
-    },
-    "did:plc:malauowbt2t4k2pvkwjdnahb": {
-      "orgSlug": "kokkoya-organics-3f3c53a0",
-      "donateUrl": "https://maearth.com/kokkoya-organics-3f3c53a0/2a566ef3"
-    },
-    "did:plc:mdnnmw7vj5wxtqvxonxcfuuc": {
-      "orgSlug": "robberg-coastal-corri-e3222e93",
-      "donateUrl": "https://maearth.com/robberg-coastal-corri-e3222e93/ea006a89"
-    },
-    "did:plc:mf6asxg6elbby5nuhp4ojxua": {
-      "orgSlug": "mboni-ya-vijana-bdef0269",
-      "donateUrl": "https://maearth.com/mboni-ya-vijana-bdef0269/2513becd"
-    },
-    "did:plc:mfxcvoixvfevbww3mpf6trgb": {
-      "orgSlug": "pangea-econetassets-p-0c27069c",
-      "donateUrl": "https://maearth.com/pangea-econetassets-p-0c27069c/05bb8cac"
     },
     "did:plc:mg6oi3wrljykvvykjs7z2gvy": {
       "orgSlug": "collective",
@@ -1838,101 +458,21 @@
       "orgSlug": "grow-wanaka-1e94cb9b",
       "donateUrl": "https://maearth.com/grow-wanaka-1e94cb9b/garden"
     },
-    "did:plc:mnqgaayusutgk7lxpuvm4icc": {
-      "orgSlug": "alma-grande-nbs-565e7879",
-      "donateUrl": "https://maearth.com/alma-grande-nbs-565e7879/9a662a57"
-    },
     "did:plc:mpgr2ewlpqcxiiqgq4dencv5": {
       "orgSlug": "wild-survivors-33a5d565",
       "donateUrl": "https://maearth.com/wild-survivors-33a5d565/d2f6fc65"
-    },
-    "did:plc:mr4dv2rxfk6npof5jebt4ym6": {
-      "orgSlug": "tanzania-agricultural-26946f4b",
-      "donateUrl": "https://maearth.com/tanzania-agricultural-26946f4b/5b9bc35f"
     },
     "did:plc:mu2p4uq5maxcduvupqlupdgx": {
       "orgSlug": "fey-commons",
       "donateUrl": "https://maearth.com/fey-commons/regenhouse"
     },
-    "did:plc:mwxuv2jjrfvvlapju3yktmr5": {
-      "orgSlug": "the-kore-project-46b4b4d8",
-      "donateUrl": "https://maearth.com/the-kore-project-46b4b4d8/12668fb7"
-    },
-    "did:plc:mxuuawewu52bivwakapc27id": {
-      "orgSlug": "wovoka-ed11d42a",
-      "donateUrl": "https://maearth.com/wovoka-ed11d42a/f86a4afb"
-    },
-    "did:plc:n2n3gcjrzudxqasvs4qsw3xu": {
-      "orgSlug": "safers-e-v-49b5337d",
-      "donateUrl": "https://maearth.com/safers-e-v-49b5337d/de176429"
-    },
-    "did:plc:n3pbnkxcfegqpqcj46gzge7x": {
-      "orgSlug": "green-ambassadors-club-4f215013",
-      "donateUrl": "https://maearth.com/green-ambassadors-club-4f215013/a632adb4"
-    },
-    "did:plc:n4eoggvy57wreelmqc4onwgw": {
-      "orgSlug": "nogor-abad-4e71fa43",
-      "donateUrl": "https://maearth.com/nogor-abad-4e71fa43/e57757d4"
-    },
-    "did:plc:nbg5gurkxhgfmui3dfwansep": {
-      "orgSlug": "wildlife-conservation-f7448d8c",
-      "donateUrl": "https://maearth.com/wildlife-conservation-f7448d8c/55059b72"
-    },
-    "did:plc:nbsphg5b6ybimapgxhpxqfsa": {
-      "orgSlug": "coordinacion-nacional-8f22c32d",
-      "donateUrl": "https://maearth.com/coordinacion-nacional-8f22c32d/c5ac2cb6"
-    },
     "did:plc:nd4c3k6j7wvgx5pmtna5wkdt": {
       "orgSlug": "people-of-the-forest-1b38a7ab",
       "donateUrl": "https://maearth.com/people-of-the-forest-1b38a7ab/c2eff1d7"
     },
-    "did:plc:ne3tttqz7mcwwjog4udth5kt": {
-      "orgSlug": "yayasan-tana-sanggamu-3dd5a426",
-      "donateUrl": "https://maearth.com/yayasan-tana-sanggamu-3dd5a426/a3473aeb"
-    },
     "did:plc:nfgufndrhsby5erqqamejl3c": {
       "orgSlug": "prospr",
       "donateUrl": "https://maearth.com/prospr/honeymoonfarm"
-    },
-    "did:plc:nior52stdfhqduon3rpnt2sm": {
-      "orgSlug": "land-guardians-networ-fef945b2",
-      "donateUrl": "https://maearth.com/land-guardians-networ-fef945b2/879b94d9"
-    },
-    "did:plc:nis6ykrg5unqvt6u2y3kidi5": {
-      "orgSlug": "www-desiringmachines-cc6d5eab",
-      "donateUrl": "https://maearth.com/www-desiringmachines-cc6d5eab/fd65dab6"
-    },
-    "did:plc:nivpjgwdxtd2sjpx2ic4peah": {
-      "orgSlug": "hope-ministries-inter-a979476a",
-      "donateUrl": "https://maearth.com/hope-ministries-inter-a979476a/f81a0100"
-    },
-    "did:plc:nkfdvsesbwdkw3amwgwt5t3l": {
-      "orgSlug": "embodied-earth-996ab2e7",
-      "donateUrl": "https://maearth.com/embodied-earth-996ab2e7/88d8b15c"
-    },
-    "did:plc:nkxswnznc64jhi7rcum3ayma": {
-      "orgSlug": "crees-foundation-for-manu",
-      "donateUrl": "https://maearth.com/crees-foundation-for-manu/71ffb76a"
-    },
-    "did:plc:nqizypik2qwv7emappvvhpen": {
-      "orgSlug": "acorujeira",
-      "donateUrl": "https://maearth.com/acorujeira/c9607dca"
-    },
-    "did:plc:nr5gzdq2wjl7nm5vzgx5k5n7": {
-      "orgSlug": "unkara-group-foundati-471e9865",
-      "donateUrl": "https://maearth.com/unkara-group-foundati-471e9865/780aa0ac"
-    },
-    "did:plc:nr7qgxhaafdawp3pmq77vpiw": {
-      "orgSlug": "thera-6cee5cbe",
-      "donateUrl": "https://maearth.com/thera-6cee5cbe/0cf3fcfb"
-    },
-    "did:plc:nswvdlazt3o6corb7w43d75c": {
-      "orgSlug": "the-permagardens-foun-7af25840",
-      "donateUrl": "https://maearth.com/the-permagardens-foun-7af25840/e98c0678"
-    },
-    "did:plc:nuluhz2iueoawqffb6abzqvq": {
-      "orgSlug": "conserve-2-develop-pl-f609e9e1",
-      "donateUrl": "https://maearth.com/conserve-2-develop-pl-f609e9e1/5c1a2c4c"
     },
     "did:plc:nx7uwd67prjsmlrxetw3scgj": {
       "orgSlug": "water-love",
@@ -1941,50 +481,6 @@
     "did:plc:nyc55kqv4mceevfncyqzqfti": {
       "orgSlug": "beavers-human-foodways",
       "donateUrl": "https://maearth.com/beavers-human-foodways/845b6570"
-    },
-    "did:plc:nyyyuln2b6emm5iycoharxlp": {
-      "orgSlug": "anasi-farmers-e99e08f0",
-      "donateUrl": "https://maearth.com/anasi-farmers-e99e08f0/f7a5b615"
-    },
-    "did:plc:o2fx5jzwsywaqnr4zd7kljyy": {
-      "orgSlug": "the-little-art-0c50865c",
-      "donateUrl": "https://maearth.com/the-little-art-0c50865c/1c1dc67e"
-    },
-    "did:plc:o3bjv642v34tfl2nsaaw5lxm": {
-      "orgSlug": "cahed-cd358de9",
-      "donateUrl": "https://maearth.com/cahed-cd358de9/c05c96e9"
-    },
-    "did:plc:o3juwxmevrlan7aw4bjjuedg": {
-      "orgSlug": "planete-urgence-347b8ea4",
-      "donateUrl": "https://maearth.com/planete-urgence-347b8ea4/84f901fe"
-    },
-    "did:plc:o4f2loo2o4kkeptv3fut6jqo": {
-      "orgSlug": "associacao-movimento-eb2c6094",
-      "donateUrl": "https://maearth.com/associacao-movimento-eb2c6094/e2a972fb"
-    },
-    "did:plc:o4gf2qed5b5qtu7rbatlnnvw": {
-      "orgSlug": "himmel-humus-65fec066",
-      "donateUrl": "https://maearth.com/himmel-humus-65fec066/b238c28d"
-    },
-    "did:plc:o5legdwerj3kfvht4h7wx4pt": {
-      "orgSlug": "peoples-resource-cent-abaccea9",
-      "donateUrl": "https://maearth.com/peoples-resource-cent-abaccea9/a2362d75"
-    },
-    "did:plc:o5smenza33jk3rj62z5nvl7g": {
-      "orgSlug": "healer-of-the-world-7ad12c38",
-      "donateUrl": "https://maearth.com/healer-of-the-world-7ad12c38/5dab9db8"
-    },
-    "did:plc:oc6eknerwasupkb2zj26kvf7": {
-      "orgSlug": "vale-da-gema-headwate-e5d1dff6",
-      "donateUrl": "https://maearth.com/vale-da-gema-headwate-e5d1dff6/building-the-funding-engine"
-    },
-    "did:plc:oc7psob523dcm3ovodgvdnu4": {
-      "orgSlug": "west-kootenay-watersh-f8a90fbc",
-      "donateUrl": "https://maearth.com/west-kootenay-watersh-f8a90fbc/9014fab6"
-    },
-    "did:plc:ocxjx7pw34aepecmyzhc63po": {
-      "orgSlug": "salmon-returns-b0d12771",
-      "donateUrl": "https://maearth.com/salmon-returns-b0d12771/d571c7e7"
     },
     "did:plc:ofl77xovdsym6rhqs5emh2oi": {
       "orgSlug": "unidos-social-innovation-cente",
@@ -1998,121 +494,37 @@
       "orgSlug": "the-learning-environment",
       "donateUrl": "https://maearth.com/the-learning-environment/integrated-model"
     },
-    "did:plc:ohkxqaiemhccrbitrlxsfggb": {
-      "orgSlug": "kickstart-foundation-fe743749",
-      "donateUrl": "https://maearth.com/kickstart-foundation-fe743749/25bd6034"
-    },
-    "did:plc:ohmboydbagcaxlclanueolon": {
-      "orgSlug": "cemeteryparklondon",
-      "donateUrl": "https://maearth.com/cemeteryparklondon/40aadb2c"
-    },
-    "did:plc:oiwcciabx3zox6vsyoadngxp": {
-      "orgSlug": "ayowecca-uganda",
-      "donateUrl": "https://maearth.com/ayowecca-uganda/community-training-an-25574a77"
-    },
     "did:plc:oiwkjqt7xp5f3nlaz2zgaw7b": {
       "orgSlug": "selva-investigacion-p-1a9ffe06",
       "donateUrl": "https://maearth.com/selva-investigacion-p-1a9ffe06/209aaf09"
-    },
-    "did:plc:olcm3hrznzeuivxj7qabrvj2": {
-      "orgSlug": "kokonut-network",
-      "donateUrl": "https://maearth.com/kokonut-network/adelphi"
     },
     "did:plc:olejgt2s2vohnp4mjcoymmeq": {
       "orgSlug": "institut-de-la-ferme-75b20372",
       "donateUrl": "https://maearth.com/institut-de-la-ferme-75b20372/bba010fc"
     },
-    "did:plc:oluhbbpfvcm3khigepejngbl": {
-      "orgSlug": "light-forest-world-c7c8d55b",
-      "donateUrl": "https://maearth.com/light-forest-world-c7c8d55b/6d52a857"
-    },
-    "did:plc:orwzo2bkeqse57er5zwwkuxj": {
-      "orgSlug": "impact-weaver-pvt-ltd-2acbcb1b",
-      "donateUrl": "https://maearth.com/impact-weaver-pvt-ltd-2acbcb1b/06c7c1fd"
-    },
-    "did:plc:oszajfrzcn65aegowgvvr7tm": {
-      "orgSlug": "rainforest-protectors-59edce53",
-      "donateUrl": "https://maearth.com/rainforest-protectors-59edce53/8eac2ced"
-    },
     "did:plc:othky2rxhwd6aevcphycijcn": {
       "orgSlug": "waihekemarineproject",
       "donateUrl": "https://maearth.com/waihekemarineproject/0a0790c3"
-    },
-    "did:plc:ouo6n36rkj6xaocev425vgni": {
-      "orgSlug": "wild-roots-c9daccdc",
-      "donateUrl": "https://maearth.com/wild-roots-c9daccdc/e5dccfa6"
-    },
-    "did:plc:ox6ddvlkri7eqv42mkdzkr35": {
-      "orgSlug": "concerned-youth-initiative-for-climate-action-bbb33779",
-      "donateUrl": "https://maearth.com/concerned-youth-initiative-for-climate-action-bbb33779/356fa08a"
-    },
-    "did:plc:ox7i7ch4hdk4u562cbdixgun": {
-      "orgSlug": "ngati-tumutumu-iwi-tr-dac34612",
-      "donateUrl": "https://maearth.com/ngati-tumutumu-iwi-tr-dac34612/b2909e3d"
-    },
-    "did:plc:p2bby4mtyaq45jcmumht4kyn": {
-      "orgSlug": "for-the-future-ph-9ce68aa4",
-      "donateUrl": "https://maearth.com/for-the-future-ph-9ce68aa4/b05414c0"
     },
     "did:plc:p525n5n7pyxcierkenankdjs": {
       "orgSlug": "lead-foundation-c3260e56",
       "donateUrl": "https://maearth.com/lead-foundation-c3260e56/0d1c16a8"
     },
-    "did:plc:p57mlgaoydkkqc7apjz74uzy": {
-      "orgSlug": "extremely-poverty-era-8002e62e",
-      "donateUrl": "https://maearth.com/extremely-poverty-era-8002e62e/8a77f3c3"
-    },
     "did:plc:p6lwpsll7ibiekp4i2kv6w72": {
       "orgSlug": "sesdo",
       "donateUrl": "https://maearth.com/sesdo/mangroves4life"
-    },
-    "did:plc:p7ag3uvyzgyyk6pxqzpouiak": {
-      "orgSlug": "foundation-for-restoration-and-environmental-conservation-freeco-ecc97fd5",
-      "donateUrl": "https://maearth.com/foundation-for-restoration-and-environmental-conservation-freeco-ecc97fd5/e24b9765"
     },
     "did:plc:p7rxuaj5yku7sggybbepslma": {
       "orgSlug": "wildwaikawa",
       "donateUrl": "https://maearth.com/wildwaikawa/wildwaikawa"
     },
-    "did:plc:pal4dr6rzskwd4mzng7kw53z": {
-      "orgSlug": "mjj-83ae41e4",
-      "donateUrl": "https://maearth.com/mjj-83ae41e4/3b7e332c"
-    },
-    "did:plc:pbabqphaenm6snq7frqkbueo": {
-      "orgSlug": "kithima-biodiversity-bd741cc6",
-      "donateUrl": "https://maearth.com/kithima-biodiversity-bd741cc6/492c9f0f"
-    },
-    "did:plc:pbfbaqvqotdonejzllxim6hg": {
-      "orgSlug": "instituto-tecnologico-f98943b0",
-      "donateUrl": "https://maearth.com/instituto-tecnologico-f98943b0/68edb4e9"
-    },
-    "did:plc:pdsbkago5iusrkdju76pb5a6": {
-      "orgSlug": "dynamo-projects-2b7b4527",
-      "donateUrl": "https://maearth.com/dynamo-projects-2b7b4527/d4f99df9"
-    },
-    "did:plc:pe6tfynupiv5ydrvljbyiuie": {
-      "orgSlug": "urban-hub-farms-31022185",
-      "donateUrl": "https://maearth.com/urban-hub-farms-31022185/5c911628"
-    },
-    "did:plc:pgs53jltxhfivk2v5ljir26n": {
-      "orgSlug": "dream-village-4ab7e79e",
-      "donateUrl": "https://maearth.com/dream-village-4ab7e79e/e4d9b032"
-    },
     "did:plc:pipxq2jthn675wduhuo7asfc": {
       "orgSlug": "instituto-felinos-do-aguai-b1dae4e5",
       "donateUrl": "https://maearth.com/instituto-felinos-do-aguai-b1dae4e5/b78c33cd"
     },
-    "did:plc:pivhwyteitho7m2ptvviypop": {
-      "orgSlug": "community-impact-nepal-7a99e977",
-      "donateUrl": "https://maearth.com/community-impact-nepal-7a99e977/041afdbe"
-    },
     "did:plc:pktwukejt6bnubpkhldnaeyc": {
       "orgSlug": "bees-and-trees-uganda",
       "donateUrl": "https://maearth.com/bees-and-trees-uganda/088849e3"
-    },
-    "did:plc:pmqj5upevo7hyywg6cxujekm": {
-      "orgSlug": "plastic-taka-creatives-b57968f1",
-      "donateUrl": "https://maearth.com/plastic-taka-creatives-b57968f1/bb43ffb4"
     },
     "did:plc:poyg2wmae2hixspp5dxtd6i7": {
       "orgSlug": "cultiva-ciudad",
@@ -2122,49 +534,13 @@
       "orgSlug": "buffalo-back-consumer-cf005dc4",
       "donateUrl": "https://maearth.com/buffalo-back-consumer-cf005dc4/d164ad35"
     },
-    "did:plc:przywfixzd5y4vrtu7ptrtqy": {
-      "orgSlug": "permo-africa-training-2ed60d8e",
-      "donateUrl": "https://maearth.com/permo-africa-training-2ed60d8e/56de8c89"
-    },
-    "did:plc:pukzeqcciv7bue4dgkyhgut4": {
-      "orgSlug": "kevin-richardson-foun-95139089",
-      "donateUrl": "https://maearth.com/kevin-richardson-foun-95139089/a350aff6"
-    },
     "did:plc:pvf72p2a5fie4d3jduredlai": {
       "orgSlug": "the-returning-indigenous",
       "donateUrl": "https://maearth.com/the-returning-indigenous/native-nursery"
     },
-    "did:plc:pvlcjgq7ztpjrqfeye3mpwvk": {
-      "orgSlug": "celebration-barn-thea-b6a79eab",
-      "donateUrl": "https://maearth.com/celebration-barn-thea-b6a79eab/fefe00a2"
-    },
-    "did:plc:pwi453rdfmxapdea632dzwtc": {
-      "orgSlug": "asia-regenerative-aca-ca371a45",
-      "donateUrl": "https://maearth.com/asia-regenerative-aca-ca371a45/fb38a9af"
-    },
-    "did:plc:pxbcvrmvg3ei4octzpiuocu4": {
-      "orgSlug": "foundation-urban-stre-f57e3a5b",
-      "donateUrl": "https://maearth.com/foundation-urban-stre-f57e3a5b/04f81b98"
-    },
-    "did:plc:pxxspvcba5m73zkhne5rpqbh": {
-      "orgSlug": "somos-e2a6974a",
-      "donateUrl": "https://maearth.com/somos-e2a6974a/9512ee59"
-    },
-    "did:plc:pyh7huek35cjhtpeusyy7soj": {
-      "orgSlug": "el-impenetrable-7ad372ba",
-      "donateUrl": "https://maearth.com/el-impenetrable-7ad372ba/b2e450d1"
-    },
-    "did:plc:pyjmgdrwaiwlys6vrldabpk5": {
-      "orgSlug": "empyrean-farm-b7aa5338",
-      "donateUrl": "https://maearth.com/empyrean-farm-b7aa5338/4e10df38"
-    },
     "did:plc:q3lijdrtqr23xmzlkj3irzxv": {
       "orgSlug": "fundacion-montecito",
       "donateUrl": "https://maearth.com/fundacion-montecito/muyso-school"
-    },
-    "did:plc:q54lpqj35dugnmu6lut7unmn": {
-      "orgSlug": "association-for-human-7d20f556",
-      "donateUrl": "https://maearth.com/association-for-human-7d20f556/72f05684"
     },
     "did:plc:q56y7cqumm47f2aev6y5nq6u": {
       "orgSlug": "panama-wildlife-conservation",
@@ -2174,89 +550,29 @@
       "orgSlug": "drylands-agroecology-7fddfabb",
       "donateUrl": "https://maearth.com/drylands-agroecology-7fddfabb/ec37a2e3"
     },
-    "did:plc:q6efiwhvajy5ubygslzwunn7": {
-      "orgSlug": "gigantesq-connexion-g-889a6706",
-      "donateUrl": "https://maearth.com/gigantesq-connexion-g-889a6706/72da55d2"
-    },
     "did:plc:q7cwmw5nwxz7hgzifqaejxw2": {
       "orgSlug": "forests-for-monarchs",
       "donateUrl": "https://maearth.com/forests-for-monarchs/76364d09"
     },
-    "did:plc:qa2eyesrzdopxnj2r4uzz4jw": {
-      "orgSlug": "the-farmer-tantoh-fou-0ca54da9",
-      "donateUrl": "https://maearth.com/the-farmer-tantoh-fou-0ca54da9/9e386561"
-    },
-    "did:plc:qbo7meqooeq6qfxumxfwqxvo": {
-      "orgSlug": "cultivating-self-11058da1",
-      "donateUrl": "https://maearth.com/cultivating-self-11058da1/1b5e4f26"
-    },
-    "did:plc:qfk3uajodld6t6ntaphixu56": {
-      "orgSlug": "centre-for-volunteeri-a577c82a",
-      "donateUrl": "https://maearth.com/centre-for-volunteeri-a577c82a/5dcdcd15"
-    },
-    "did:plc:qfyvjtgqzwkvquvacz2hn2bm": {
-      "orgSlug": "meg-wah-my-earth-516dcd79",
-      "donateUrl": "https://maearth.com/meg-wah-my-earth-516dcd79/16d57e34"
-    },
     "did:plc:qhwwuofpdon5c5p6vdtu3hoo": {
       "orgSlug": "tennessee-environment-35fed1bc",
       "donateUrl": "https://maearth.com/tennessee-environment-35fed1bc/a5bf584b"
-    },
-    "did:plc:qj7qdxuiaixup2w2qsm5mwne": {
-      "orgSlug": "nexus-points-doc-b9544487",
-      "donateUrl": "https://maearth.com/nexus-points-doc-b9544487/c84747fa"
-    },
-    "did:plc:qjo7t3nm6qr4amru3rj5dceg": {
-      "orgSlug": "wecoop-0a05c24a",
-      "donateUrl": "https://maearth.com/wecoop-0a05c24a/c25fb3a4"
-    },
-    "did:plc:qon34jn5a2ikt3uuwxxjhzrn": {
-      "orgSlug": "kakamega-days-for-gir-7244acc2",
-      "donateUrl": "https://maearth.com/kakamega-days-for-gir-7244acc2/03dfa2de"
-    },
-    "did:plc:qtxbfuordj5arsd2ht6hf7lu": {
-      "orgSlug": "moonflower-gardens-4dd0917d",
-      "donateUrl": "https://maearth.com/moonflower-gardens-4dd0917d/c897aad4"
     },
     "did:plc:quunsyabhjmrb2oqzbya2b3l": {
       "orgSlug": "sugi-3bcde976",
       "donateUrl": "https://maearth.com/sugi-3bcde976/be74f28d"
     },
     "did:plc:qw7b2r3hnqxb2r63fnpzmyyu": {
-      "orgSlug": "living-story-landscap-46654435",
-      "donateUrl": "https://maearth.com/living-story-landscap-46654435/9b6841b1"
-    },
-    "did:plc:qy57efxkmzmcohqzb2vvls5k": {
-      "orgSlug": "ipe-instituto-de-pesquisas-ecologicas-903ce289",
-      "donateUrl": "https://maearth.com/ipe-instituto-de-pesquisas-ecologicas-903ce289/efa296c8"
+      "orgSlug": "pusosanctuary",
+      "donateUrl": "https://maearth.com/pusosanctuary/bayanihan"
     },
     "did:plc:qzrqe2637edcl4i3ayljw4dr": {
       "orgSlug": "associacao-quinta-das-relvas",
       "donateUrl": "https://maearth.com/associacao-quinta-das-relvas/b8d4d512"
     },
-    "did:plc:r3drpvrtqmsd5eerwtemlh3q": {
-      "orgSlug": "fundacion-great-leaf-4b0fa9df",
-      "donateUrl": "https://maearth.com/fundacion-great-leaf-4b0fa9df/5731cc79"
-    },
-    "did:plc:r5rjbyplgom4z3sdpwixcyna": {
-      "orgSlug": "loliondo-actions-for-53acfa31",
-      "donateUrl": "https://maearth.com/loliondo-actions-for-53acfa31/5d623d2a"
-    },
     "did:plc:rbejcxl2oot5bttjena6peya": {
       "orgSlug": "ushindi-ventures-35a52e37",
       "donateUrl": "https://maearth.com/ushindi-ventures-35a52e37/257a313b"
-    },
-    "did:plc:re2o4eknc4dfbykv4t7lrmnn": {
-      "orgSlug": "mandala-springs-c359664d",
-      "donateUrl": "https://maearth.com/mandala-springs-c359664d/6c7d8c2c"
-    },
-    "did:plc:rf55kyhzt2ww6pnqku6y43yw": {
-      "orgSlug": "aquabloom-fisheries-268c4ab8",
-      "donateUrl": "https://maearth.com/aquabloom-fisheries-268c4ab8/3bdad5be"
-    },
-    "did:plc:rgepbuljrnhbih6rdh4cd6mf": {
-      "orgSlug": "sutsung-enterprise-pr-f88c4176",
-      "donateUrl": "https://maearth.com/sutsung-enterprise-pr-f88c4176/2d4537a1"
     },
     "did:plc:rhouzciswnh23aec4vpgukjo": {
       "orgSlug": "growninhaiti",
@@ -2266,10 +582,6 @@
       "orgSlug": "association-les-amis-de-capte-tunisie-c385f218",
       "donateUrl": "https://maearth.com/association-les-amis-de-capte-tunisie-c385f218/bd88fdab"
     },
-    "did:plc:rlwmrbu7afocko5rnitmjhsk": {
-      "orgSlug": "church-of-sacred-wate-b16628e1",
-      "donateUrl": "https://maearth.com/church-of-sacred-wate-b16628e1/29e2e6b0"
-    },
     "did:plc:rlxqlnuim4lypz262imhekz5": {
       "orgSlug": "youth-pawa",
       "donateUrl": "https://maearth.com/youth-pawa/8d7e202e"
@@ -2278,33 +590,9 @@
       "orgSlug": "home-planet-fund-b865e7bf",
       "donateUrl": "https://maearth.com/home-planet-fund-b865e7bf/31dba93d"
     },
-    "did:plc:rni5wfevenns4siph4qqmeoj": {
-      "orgSlug": "ardha-jabesa-foundation-6cc51d5a",
-      "donateUrl": "https://maearth.com/ardha-jabesa-foundation-6cc51d5a/2f0f0d82"
-    },
-    "did:plc:rornteoba45ypd5cvziwawft": {
-      "orgSlug": "seed-society-for-socio-economic-ecological-development-1b84de35",
-      "donateUrl": "https://maearth.com/seed-society-for-socio-economic-ecological-development-1b84de35/bba05c94"
-    },
     "did:plc:rphqi2uk2xlxgabc4mw4ektd": {
       "orgSlug": "asociacion-de-mujeres-7f7739d8",
       "donateUrl": "https://maearth.com/asociacion-de-mujeres-7f7739d8/64048dd3"
-    },
-    "did:plc:ruhj3ez6i7e6m7g2tnq7s6kb": {
-      "orgSlug": "plant-for-the-planet-italia-odv-d7fc4d78",
-      "donateUrl": "https://maearth.com/plant-for-the-planet-italia-odv-d7fc4d78/9db59d6b"
-    },
-    "did:plc:ruldnboyujoo3wq7t2aqv7g6": {
-      "orgSlug": "fundacion-ecominga-c1a1d545",
-      "donateUrl": "https://maearth.com/fundacion-ecominga-c1a1d545/3e7c25b3"
-    },
-    "did:plc:rwdssa7fxcmyrdgkdnrru5im": {
-      "orgSlug": "stichting-viable-comm-6771de39",
-      "donateUrl": "https://maearth.com/stichting-viable-comm-6771de39/fed28a7b"
-    },
-    "did:plc:rx7d2x6qkdqm63o3ewhps5zw": {
-      "orgSlug": "fundacion-lurgaia-fundazioa-a3c7df0d",
-      "donateUrl": "https://maearth.com/fundacion-lurgaia-fundazioa-a3c7df0d/6ca35ab5"
     },
     "did:plc:rywnqygk4gpnuuhlbj2quldq": {
       "orgSlug": "fundacion-allpa-tarpu-9f3f0b60",
@@ -2314,69 +602,17 @@
       "orgSlug": "los-higuerones-coop-c1fef0cc",
       "donateUrl": "https://maearth.com/los-higuerones-coop-c1fef0cc/manoscambiadas"
     },
-    "did:plc:s4azlkqcqt6femnogmbefus4": {
-      "orgSlug": "aaranyak-66287eab",
-      "donateUrl": "https://maearth.com/aaranyak-66287eab/a963e29c"
-    },
-    "did:plc:s5nuwtwdxzv4pltcmky3lc36": {
-      "orgSlug": "equiearth-foundation-sierra-leone-b208a3aa",
-      "donateUrl": "https://maearth.com/equiearth-foundation-sierra-leone-b208a3aa/6033a4cd"
-    },
-    "did:plc:s7hhz6mactoriiadfbdlxyh5": {
-      "orgSlug": "regeneraoutono",
-      "donateUrl": "https://maearth.com/regeneraoutono/regeneraoutono"
-    },
     "did:plc:sa3ho2cenx6kgqqtonfnzhdj": {
       "orgSlug": "green-belt-movement-8f81197a",
       "donateUrl": "https://maearth.com/green-belt-movement-8f81197a/2fbfe3e2"
-    },
-    "did:plc:sahxkiggdltktnhtgqk7obkb": {
-      "orgSlug": "green-hope-foundation-a5d68fe1",
-      "donateUrl": "https://maearth.com/green-hope-foundation-a5d68fe1/8a32d4a5"
-    },
-    "did:plc:sap55lf3663ajrv7ffgsccf2": {
-      "orgSlug": "mantasa-7350c210",
-      "donateUrl": "https://maearth.com/mantasa-7350c210/54310311"
     },
     "did:plc:saxa7ydojfvsaqyjoorrtfmt": {
       "orgSlug": "batwa-indigenous-deve-4cefc125",
       "donateUrl": "https://maearth.com/batwa-indigenous-deve-4cefc125/540ec06d"
     },
-    "did:plc:sbcdqftw47mfimrbhravttwz": {
-      "orgSlug": "fundacion-boapaz-2b936327",
-      "donateUrl": "https://maearth.com/fundacion-boapaz-2b936327/5e615d16"
-    },
     "did:plc:sbolgug3jzo2h4luewh7ecuv": {
       "orgSlug": "zingela-ulwazi-trust-254a9005",
       "donateUrl": "https://maearth.com/zingela-ulwazi-trust-254a9005/c906a296"
-    },
-    "did:plc:sd6n2nznbyfu2x27p4fu4n7w": {
-      "orgSlug": "solidarite-pour-la-protection-des-droits-de-l-enfant-soprode-en-sigle-01b54138",
-      "donateUrl": "https://maearth.com/solidarite-pour-la-protection-des-droits-de-l-enfant-soprode-en-sigle-01b54138/b6826154"
-    },
-    "did:plc:sfsq6awqkujnthbedsianrpc": {
-      "orgSlug": "vulnerable-ug-communi-cb383533",
-      "donateUrl": "https://maearth.com/vulnerable-ug-communi-cb383533/22e7b90e"
-    },
-    "did:plc:sgjvpuiceao2snabbsil6zba": {
-      "orgSlug": "the-earth-elders-920e0f41",
-      "donateUrl": "https://maearth.com/the-earth-elders-920e0f41/3ae016d3"
-    },
-    "did:plc:sgmjqc2x6rbde2ohd7mll3dq": {
-      "orgSlug": "opulence-plus-burundi-b93beba2",
-      "donateUrl": "https://maearth.com/opulence-plus-burundi-b93beba2/b7907bb5"
-    },
-    "did:plc:sl3kfhtpdldk2k4syahu6r5y": {
-      "orgSlug": "lily-s-leaves-05ffb423",
-      "donateUrl": "https://maearth.com/lily-s-leaves-05ffb423/518659e6"
-    },
-    "did:plc:ss2kmvvtz344zdlfksjsp673": {
-      "orgSlug": "kalpavaatika-society-nepal-f66ff120",
-      "donateUrl": "https://maearth.com/kalpavaatika-society-nepal-f66ff120/af94d6a1"
-    },
-    "did:plc:sucdubbpyzjztx3mwv2dlm7y": {
-      "orgSlug": "pro-eco-azuero",
-      "donateUrl": "https://maearth.com/pro-eco-azuero/seeds-of-change-empow-be390630"
     },
     "did:plc:sxj5xpd73yprxco6swdyuuup": {
       "orgSlug": "let-s-go-compost-b2122f8d",
@@ -2390,29 +626,9 @@
       "orgSlug": "instituto-favela-da-p-2d96096b",
       "donateUrl": "https://maearth.com/instituto-favela-da-p-2d96096b/33712e43"
     },
-    "did:plc:t3s735p3oksygzqgazrktzwc": {
-      "orgSlug": "se-siwa-ecolodge-and-92c450e4",
-      "donateUrl": "https://maearth.com/se-siwa-ecolodge-and-92c450e4/72baf660"
-    },
-    "did:plc:t42aa5pxuljw7q57asvwodow": {
-      "orgSlug": "desert-leaves-foundation-439cb2e8",
-      "donateUrl": "https://maearth.com/desert-leaves-foundation-439cb2e8/3a9ca4a2"
-    },
-    "did:plc:tdcqhcxdp727pv247bvzsyt6": {
-      "orgSlug": "tanzania-sustainable-nature-organization-eef364c5",
-      "donateUrl": "https://maearth.com/tanzania-sustainable-nature-organization-eef364c5/a98635bc"
-    },
-    "did:plc:tgix4t75xfp5v3dtw4gtbsbx": {
-      "orgSlug": "conserve-natural-fore-4960e5c5",
-      "donateUrl": "https://maearth.com/conserve-natural-fore-4960e5c5/3dfd4ed5"
-    },
     "did:plc:tjnj5qgucz5kc5n6qiuzv4gj": {
       "orgSlug": "sand-dams-worldwide",
       "donateUrl": "https://maearth.com/sand-dams-worldwide/restoring-drylands"
-    },
-    "did:plc:tkj5pqpkfy5srko45wptuubp": {
-      "orgSlug": "community-based-envir-c79cb04b",
-      "donateUrl": "https://maearth.com/community-based-envir-c79cb04b/fe2858f4"
     },
     "did:plc:tknipthfsfszcqhq6cqydywh": {
       "orgSlug": "mycelium-learning-net-f77a3938",
@@ -2426,41 +642,9 @@
       "orgSlug": "nature-sacredness-and-cultural-rights-initiative-nasacuri-fad82722",
       "donateUrl": "https://maearth.com/nature-sacredness-and-cultural-rights-initiative-nasacuri-fad82722/29d45913"
     },
-    "did:plc:tq7ni7kjaszagoixsnri2bc4": {
-      "orgSlug": "mud-valley-foundation-0bcd2ed3",
-      "donateUrl": "https://maearth.com/mud-valley-foundation-0bcd2ed3/078df391"
-    },
-    "did:plc:trxrkxgv37gyyrpkc7yazupk": {
-      "orgSlug": "anaadi-ecofutures-23307efd",
-      "donateUrl": "https://maearth.com/anaadi-ecofutures-23307efd/60b96e78"
-    },
-    "did:plc:tsz42q5masi7kzhac5oblytb": {
-      "orgSlug": "saints-regeneration-m-0adb2092",
-      "donateUrl": "https://maearth.com/saints-regeneration-m-0adb2092/0b924542"
-    },
     "did:plc:tt3dvijui3uymbdxdncvya2k": {
       "orgSlug": "naturaleza-publica",
       "donateUrl": "https://maearth.com/naturaleza-publica/patagonia"
-    },
-    "did:plc:tu3nv7ybjpwbe3pyhkwpx3ob": {
-      "orgSlug": "the-shantigar-foundat-0f084344",
-      "donateUrl": "https://maearth.com/the-shantigar-foundat-0f084344/6bc2d9a3"
-    },
-    "did:plc:tv5akgw7kqsgqtqa3vpubhk2": {
-      "orgSlug": "fundacion-barichara-r-6c5b1887",
-      "donateUrl": "https://maearth.com/fundacion-barichara-r-6c5b1887/8aa169a8"
-    },
-    "did:plc:twghptap4nbvuz5a3jvfxmmh": {
-      "orgSlug": "aldema-b0d1604b",
-      "donateUrl": "https://maearth.com/aldema-b0d1604b/2d8a7236"
-    },
-    "did:plc:ty5ymrhue3st6yoap7hsvu6i": {
-      "orgSlug": "actions-pour-le-developpement-et-l-entrepreneuriat-ade-climaterra-rdc-2b3c4bd0",
-      "donateUrl": "https://maearth.com/actions-pour-le-developpement-et-l-entrepreneuriat-ade-climaterra-rdc-2b3c4bd0/e83aeedb"
-    },
-    "did:plc:tzhrfx66755nh6t36mjmri7v": {
-      "orgSlug": "huautlilibre-d90ca25a",
-      "donateUrl": "https://maearth.com/huautlilibre-d90ca25a/d9a43ac3"
     },
     "did:plc:tzimclufhphretdvfsnq4hhc": {
       "orgSlug": "for-the-love-of-wildlife2026",
@@ -2470,85 +654,25 @@
       "orgSlug": "regen-waves",
       "donateUrl": "https://maearth.com/regen-waves/superbioregion"
     },
-    "did:plc:u6leglkt4lx4plvne3lzb54l": {
-      "orgSlug": "climatica-foundation-c337bf9a",
-      "donateUrl": "https://maearth.com/climatica-foundation-c337bf9a/27861269"
-    },
-    "did:plc:ua7aypyrb6v44bbrrs2i6cjo": {
-      "orgSlug": "bioharmonic-solutions-282ef869",
-      "donateUrl": "https://maearth.com/bioharmonic-solutions-282ef869/b908ddad"
-    },
     "did:plc:uaj23cikpsyd5b7og5btxsmv": {
       "orgSlug": "barichara-regeneration-fund",
       "donateUrl": "https://maearth.com/barichara-regeneration-fund/b0ae9804"
-    },
-    "did:plc:ud4j6tjbqvcllusgnijs4elk": {
-      "orgSlug": "biome-conserve-initia-d95c4d6a",
-      "donateUrl": "https://maearth.com/biome-conserve-initia-d95c4d6a/cfc315c6"
-    },
-    "did:plc:ueccm2apm7rhuwpsgfnkqobd": {
-      "orgSlug": "united-for-future-mot-0c19a9ba",
-      "donateUrl": "https://maearth.com/united-for-future-mot-0c19a9ba/8611f67b"
-    },
-    "did:plc:ug37jxrmfzm3rpakreegydrq": {
-      "orgSlug": "horn-nature-conservation-5d4c925e",
-      "donateUrl": "https://maearth.com/horn-nature-conservation-5d4c925e/c3805fb3"
-    },
-    "did:plc:uhmgujvqb77dkypsq3k5nnnf": {
-      "orgSlug": "gotas-project-7919ded3",
-      "donateUrl": "https://maearth.com/gotas-project-7919ded3/c3392b75"
-    },
-    "did:plc:uihhifrc65jxye264q2epn5f": {
-      "orgSlug": "elkenmist-0b7f01fb",
-      "donateUrl": "https://maearth.com/elkenmist-0b7f01fb/9dbea037"
-    },
-    "did:plc:uj57s3wwroixtp3tppuzqyex": {
-      "orgSlug": "lim-nguen-foundation-ce5db513",
-      "donateUrl": "https://maearth.com/lim-nguen-foundation-ce5db513/10261b49"
     },
     "did:plc:ukbtj3ar2izctmt4kbotxgg4": {
       "orgSlug": "youth-initiative-for-11f1c174",
       "donateUrl": "https://maearth.com/youth-initiative-for-11f1c174/7d370485"
     },
-    "did:plc:ulpb4m6t2jnr6oj6hwcihaby": {
-      "orgSlug": "ejido-san-antonio-051d0096",
-      "donateUrl": "https://maearth.com/ejido-san-antonio-051d0096/66044dcb"
-    },
     "did:plc:umgbmvlxf4jgy2ibpfgjnsey": {
       "orgSlug": "the-leatherback-proje-d2ce811c",
       "donateUrl": "https://maearth.com/the-leatherback-proje-d2ce811c/e470ee99"
-    },
-    "did:plc:uo3k5rmdxqzmdbowfmuqvkld": {
-      "orgSlug": "uasis-eco-techno-hub-ad1dd4e1",
-      "donateUrl": "https://maearth.com/uasis-eco-techno-hub-ad1dd4e1/728e513e"
     },
     "did:plc:uocjvayii7bjjaeylt5tumud": {
       "orgSlug": "farming-on-crutches",
       "donateUrl": "https://maearth.com/farming-on-crutches/bokashi"
     },
-    "did:plc:uod2ufja7gbqgrn377oh4ajs": {
-      "orgSlug": "maiden-solution-ltd-1585c29e",
-      "donateUrl": "https://maearth.com/maiden-solution-ltd-1585c29e/750f3c57"
-    },
-    "did:plc:up42xlijaykqojejfmoxwwwn": {
-      "orgSlug": "mada-resilient-forestry-alatsimarefo-2786c960",
-      "donateUrl": "https://maearth.com/mada-resilient-forestry-alatsimarefo-2786c960/da836dad"
-    },
     "did:plc:uru4uw5kmsrrsmxqj7o3xl24": {
       "orgSlug": "kino-bay-center-for-c-176496ad",
       "donateUrl": "https://maearth.com/kino-bay-center-for-c-176496ad/162ae0f8"
-    },
-    "did:plc:uryioe3o63c7bxfto6euevf4": {
-      "orgSlug": "alexandra-primary-sch-1418f147",
-      "donateUrl": "https://maearth.com/alexandra-primary-sch-1418f147/c447118f"
-    },
-    "did:plc:utgms244vtswfc4qdcykbgbh": {
-      "orgSlug": "regen-education-72c6c19e",
-      "donateUrl": "https://maearth.com/regen-education-72c6c19e/eca76549"
-    },
-    "did:plc:utxcunay5sglcq2zcwmefo3p": {
-      "orgSlug": "mad-design-oy-69662559",
-      "donateUrl": "https://maearth.com/mad-design-oy-69662559/215764e5"
     },
     "did:plc:uuvfp7xadcud56pjxbka26lc": {
       "orgSlug": "rifai-sicilia",
@@ -2562,113 +686,21 @@
       "orgSlug": "nature-and-people-as-one-napo-2260bc4e",
       "donateUrl": "https://maearth.com/nature-and-people-as-one-napo-2260bc4e/ea0b4a53"
     },
-    "did:plc:uw2fpf6a2fp3lpgznwry277i": {
-      "orgSlug": "greensci-a58c85ac",
-      "donateUrl": "https://maearth.com/greensci-a58c85ac/748579ea"
-    },
-    "did:plc:uwrbeacl5pwgahm3vm2v7ear": {
-      "orgSlug": "kongogreen-a02cce13",
-      "donateUrl": "https://maearth.com/kongogreen-a02cce13/afd45463"
-    },
-    "did:plc:v2titeiepsr7rjgh3xa5wdoc": {
-      "orgSlug": "baringo-county-conser-beca342a",
-      "donateUrl": "https://maearth.com/baringo-county-conser-beca342a/13fa42f0"
-    },
-    "did:plc:v4cf36vh36stshlomabkhdvo": {
-      "orgSlug": "youth-for-environment-bd425c58",
-      "donateUrl": "https://maearth.com/youth-for-environment-bd425c58/664dfdf5"
-    },
-    "did:plc:v4dlih3xhz53c2bto5hmi6zg": {
-      "orgSlug": "logos-children-for-de-fad92837",
-      "donateUrl": "https://maearth.com/logos-children-for-de-fad92837/36d5a48c"
-    },
-    "did:plc:v4ouomfvyvkurbfhpemv4l6u": {
-      "orgSlug": "misool-foundation-7d6a9143",
-      "donateUrl": "https://maearth.com/misool-foundation-7d6a9143/33b851d0"
-    },
     "did:plc:v4po74j3uzhaqs55eeyqnlhd": {
       "orgSlug": "ecotone-center-for-la-4407a7f5",
       "donateUrl": "https://maearth.com/ecotone-center-for-la-4407a7f5/df7e13b7"
-    },
-    "did:plc:v5xbbaendsbcapcnasuwhku2": {
-      "orgSlug": "diamante-bridge-colle-30f4f9e6",
-      "donateUrl": "https://maearth.com/diamante-bridge-colle-30f4f9e6/50def8a0"
-    },
-    "did:plc:v6g3pbkqieotcxgnord3trpr": {
-      "orgSlug": "the-bioarca-57c8076b",
-      "donateUrl": "https://maearth.com/the-bioarca-57c8076b/6cefe479"
     },
     "did:plc:v773vrlwaw5pcfwu5azaiikt": {
       "orgSlug": "te-tira-whakamataki-83e53570",
       "donateUrl": "https://maearth.com/te-tira-whakamataki-83e53570/b163d575"
     },
-    "did:plc:v7tqrpraefzxo4ipdixzpa5v": {
-      "orgSlug": "nappyese-c89c0b5f",
-      "donateUrl": "https://maearth.com/nappyese-c89c0b5f/2fcbb3de"
-    },
     "did:plc:vbp3x3s5xsjjyn6kykqgqjtg": {
       "orgSlug": "girls-who-grow-b55260df",
       "donateUrl": "https://maearth.com/girls-who-grow-b55260df/girlswhogrow"
     },
-    "did:plc:vbqpw7sp6pd3ygi3bpnebjk2": {
-      "orgSlug": "compost-capital-netwo-c4523e38",
-      "donateUrl": "https://maearth.com/compost-capital-netwo-c4523e38/50060fc7"
-    },
-    "did:plc:vcv5bqksckbm477szhhzhsil": {
-      "orgSlug": "global-cerah-sdn-bhd-f016f130",
-      "donateUrl": "https://maearth.com/global-cerah-sdn-bhd-f016f130/17e6f350"
-    },
-    "did:plc:vd2v46bkz2mlxvm4junr6f4f": {
-      "orgSlug": "associacao-social-e-c-311d8fcf",
-      "donateUrl": "https://maearth.com/associacao-social-e-c-311d8fcf/fc1bf540"
-    },
-    "did:plc:vd6b2mijospap2xsdbeesibo": {
-      "orgSlug": "sera-wildlife-conserv-e96e39ae",
-      "donateUrl": "https://maearth.com/sera-wildlife-conserv-e96e39ae/5cce0b2f"
-    },
-    "did:plc:vdfwckjfxa3l63siku6w77ls": {
-      "orgSlug": "africa-center-for-inc-0b46ac8d",
-      "donateUrl": "https://maearth.com/africa-center-for-inc-0b46ac8d/1646bdc6"
-    },
-    "did:plc:vfuwgzrgp2237fs6litdu4mp": {
-      "orgSlug": "wild-ivy-integral-pra-2a69f073",
-      "donateUrl": "https://maearth.com/wild-ivy-integral-pra-2a69f073/wildivyhouse"
-    },
-    "did:plc:vhuibzwgoshghwykz3puyle2": {
-      "orgSlug": "youth-leading-environ-f4390159",
-      "donateUrl": "https://maearth.com/youth-leading-environ-f4390159/6572c21d"
-    },
-    "did:plc:vijyypjtimbqhf2bmh2d4qcc": {
-      "orgSlug": "orla-design-c91eef0f",
-      "donateUrl": "https://maearth.com/orla-design-c91eef0f/b606ea3d"
-    },
     "did:plc:viubfq2bbu7n36vgtbnchlio": {
       "orgSlug": "fundacion-guanacas-bo-8e89c5a3",
       "donateUrl": "https://maearth.com/fundacion-guanacas-bo-8e89c5a3/355c4d68"
-    },
-    "did:plc:vjyvtxo53t3fezkz3vkwe2p6": {
-      "orgSlug": "finca-vega-de-la-moti-2ba0512a",
-      "donateUrl": "https://maearth.com/finca-vega-de-la-moti-2ba0512a/9da74ee7"
-    },
-    "did:plc:vlpmle72gc4u73zbf3tkp6d3": {
-      "orgSlug": "language-culture-init-ab8f7648",
-      "donateUrl": "https://maearth.com/language-culture-init-ab8f7648/11b6fc1b"
-    },
-    "did:plc:vnmvs5yoq6kvndbg2nsdkclc": {
-      "orgSlug": "youth-for-climate-change-action-ycca-b7589b99",
-      "donateUrl": "https://maearth.com/youth-for-climate-change-action-ycca-b7589b99/8f1623ac"
-    },
-    "did:plc:vqgfc5dvr7jokbzm3vpvyvpr": {
-      "orgSlug": "raumati-technology-ce-bab991a8",
-      "donateUrl": "https://maearth.com/raumati-technology-ce-bab991a8/c2c1c736"
-    },
-    "did:plc:vtgmzys72p5rgs4gouwv2uxd": {
-      "orgSlug": "impacto-colectivo-baru-2030-6cb88b3b",
-      "donateUrl": "https://maearth.com/impacto-colectivo-baru-2030-6cb88b3b/5fb4b4aa"
-    },
-    "did:plc:vwhzdhjifhcc2sb4jgpj76cd": {
-      "orgSlug": "friends-of-arabuko-so-7df4473b",
-      "donateUrl": "https://maearth.com/friends-of-arabuko-so-7df4473b/c08de27f"
     },
     "did:plc:vx5nvvysknhjoypzppdlxcnm": {
       "orgSlug": "mount-kenya-trust-1fee9405",
@@ -2678,10 +710,6 @@
       "orgSlug": "support-for-women-in-agriculture-and-environment-swagen-44ad5fb4",
       "donateUrl": "https://maearth.com/support-for-women-in-agriculture-and-environment-swagen-44ad5fb4/b525dc57"
     },
-    "did:plc:vxppeiibbsk7xaunlac4dca7": {
-      "orgSlug": "himba-raya-indonesia-3c6967e0",
-      "donateUrl": "https://maearth.com/himba-raya-indonesia-3c6967e0/58cd006a"
-    },
     "did:plc:vy2pa6g2yoc6sbv5t22hvkvt": {
       "orgSlug": "slash-for-cash-fcec57d7",
       "donateUrl": "https://maearth.com/slash-for-cash-fcec57d7/6a686385"
@@ -2690,93 +718,25 @@
       "orgSlug": "tuqtuquilal-b6afdb52",
       "donateUrl": "https://maearth.com/tuqtuquilal-b6afdb52/f37777ba"
     },
-    "did:plc:w72g56rjnvl7ehijzvv6o7b7": {
-      "orgSlug": "planete-urgence-bb87e70c",
-      "donateUrl": "https://maearth.com/planete-urgence-bb87e70c/af093207"
-    },
-    "did:plc:w7enham7kt2lphnozr7e5ps2": {
-      "orgSlug": "central-virginia-agra-d8dba462",
-      "donateUrl": "https://maearth.com/central-virginia-agra-d8dba462/b7c0f276"
-    },
-    "did:plc:wcgc3ncx5ifejvek5hb6fylr": {
-      "orgSlug": "reliable-refugee-stor-ff3109a5",
-      "donateUrl": "https://maearth.com/reliable-refugee-stor-ff3109a5/00ceda20"
-    },
-    "did:plc:wdhv7a6zfqppkzavnpj5hlr7": {
-      "orgSlug": "hasat-coop-05ae146e",
-      "donateUrl": "https://maearth.com/hasat-coop-05ae146e/5b0a66d3"
-    },
     "did:plc:wdvwekvaacgqcytow5exiplg": {
       "orgSlug": "spvs",
       "donateUrl": "https://maearth.com/spvs/brazil"
-    },
-    "did:plc:wdwnegczvjzgpk6g2fe7psy2": {
-      "orgSlug": "bosco-integrated-deve-9d04f751",
-      "donateUrl": "https://maearth.com/bosco-integrated-deve-9d04f751/bids"
     },
     "did:plc:we5koeiplvzxq2jnb3os5awx": {
       "orgSlug": "kibale-ass-n-for-rura-729eccf5",
       "donateUrl": "https://maearth.com/kibale-ass-n-for-rura-729eccf5/59052f03"
     },
-    "did:plc:wfv43s4idq7bax25wfm7np7m": {
-      "orgSlug": "commonwealth-associat-6454bd0f",
-      "donateUrl": "https://maearth.com/commonwealth-associat-6454bd0f/349e84bf"
-    },
-    "did:plc:wgizisjwjisu3gkv3ugx623d": {
-      "orgSlug": "south-veluwe-watershe-747d6ea0",
-      "donateUrl": "https://maearth.com/south-veluwe-watershe-747d6ea0/f1b63332"
-    },
-    "did:plc:whnb5psgjgmgxf2kp2vp2mw7": {
-      "orgSlug": "careshade-organisation-ca2b18d3",
-      "donateUrl": "https://maearth.com/careshade-organisation-ca2b18d3/7c1f19e0"
-    },
-    "did:plc:wirrtflv7qvrxy2f5lcvh5nb": {
-      "orgSlug": "cameroon-weltwarts-ne-0e550090",
-      "donateUrl": "https://maearth.com/cameroon-weltwarts-ne-0e550090/c1c077ce"
-    },
     "did:plc:wjqxrokwwkkh3lhzc4bxywkh": {
       "orgSlug": "rdi",
       "donateUrl": "https://maearth.com/rdi/181f8181"
-    },
-    "did:plc:wlpchpccv244w2k2tjz3mcry": {
-      "orgSlug": "canopy-collective-c67cce97",
-      "donateUrl": "https://maearth.com/canopy-collective-c67cce97/7cb3ae42"
-    },
-    "did:plc:wmf3exr2bpzj7fwswkkjfoij": {
-      "orgSlug": "green-planet-ecosyste-023c1d90",
-      "donateUrl": "https://maearth.com/green-planet-ecosyste-023c1d90/6214e7f1"
-    },
-    "did:plc:wnb6wyv2rs5d73wrpw7v2k2z": {
-      "orgSlug": "kayawe-earth-5f085826",
-      "donateUrl": "https://maearth.com/kayawe-earth-5f085826/5a0b863c"
     },
     "did:plc:wnqsxpkt7sssfiqxckdtsobz": {
       "orgSlug": "bay-islands-conservation-association-610ff066",
       "donateUrl": "https://maearth.com/bay-islands-conservation-association-610ff066/4c50bc8e"
     },
-    "did:plc:wscrq6i4qoy56wcfhufzztok": {
-      "orgSlug": "khemeia-valley-c3479987",
-      "donateUrl": "https://maearth.com/khemeia-valley-c3479987/d3cafa0b"
-    },
     "did:plc:wt2bbufogle34rtp2yrdyh4m": {
       "orgSlug": "associacao-eden-refor-23278bcc",
       "donateUrl": "https://maearth.com/associacao-eden-refor-23278bcc/chimanimani"
-    },
-    "did:plc:wtsweef7njf5hwmsjqdj7fmh": {
-      "orgSlug": "biobonds-e234c9ab",
-      "donateUrl": "https://maearth.com/biobonds-e234c9ab/240e20f9"
-    },
-    "did:plc:wugquc34i2ufavvqrsgbtelb": {
-      "orgSlug": "harjeevanfoundation",
-      "donateUrl": "https://maearth.com/harjeevanfoundation/3d34f24b"
-    },
-    "did:plc:x26fhrytuu5obmn4yvwr2nar": {
-      "orgSlug": "asociacion-ambiental-arrecife-natura-6fb7b589",
-      "donateUrl": "https://maearth.com/asociacion-ambiental-arrecife-natura-6fb7b589/3834a33a"
-    },
-    "did:plc:x2z2d6lci4etcdyuil5ovgjm": {
-      "orgSlug": "uru-uru-team-dcbc5a13",
-      "donateUrl": "https://maearth.com/uru-uru-team-dcbc5a13/acd39255"
     },
     "did:plc:x57uajdntnsfunrsesu3qbql": {
       "orgSlug": "fundacion-proaves-col-0e64144c",
@@ -2786,33 +746,13 @@
       "orgSlug": "futurefaith-e2222f13",
       "donateUrl": "https://maearth.com/futurefaith-e2222f13/4f157d83"
     },
-    "did:plc:x5s3l6bkiiuericgtyvop4yq": {
-      "orgSlug": "save-the-planet-cente-cb097a60",
-      "donateUrl": "https://maearth.com/save-the-planet-cente-cb097a60/652d37e7"
-    },
     "did:plc:x5tuh62xq6u7q3jdl6und65n": {
       "orgSlug": "biodynamics-new-zeala-0d21a552",
       "donateUrl": "https://maearth.com/biodynamics-new-zeala-0d21a552/b1474e43"
     },
-    "did:plc:x5uxedurz766lavoh43u4u3l": {
-      "orgSlug": "tfortrees-3711dd3f",
-      "donateUrl": "https://maearth.com/tfortrees-3711dd3f/cf535890"
-    },
-    "did:plc:x5wlsopho4yzouz2fgfczcas": {
-      "orgSlug": "regeneratecommunity",
-      "donateUrl": "https://maearth.com/regeneratecommunity/e30bd345"
-    },
     "did:plc:x6tvxrgi3e2bivu4y7kqhpfo": {
       "orgSlug": "native-forest-restoration-trust-09be47ad",
       "donateUrl": "https://maearth.com/native-forest-restoration-trust-09be47ad/5768db1b"
-    },
-    "did:plc:xalqolt4g5qdrvanfxjrlozd": {
-      "orgSlug": "digital-security-grou-ef1002cf",
-      "donateUrl": "https://maearth.com/digital-security-grou-ef1002cf/4b063f94"
-    },
-    "did:plc:xbfekyjhc66qsff77cphp7m4": {
-      "orgSlug": "hearts-educators-d4f276c1",
-      "donateUrl": "https://maearth.com/hearts-educators-d4f276c1/c0770bab"
     },
     "did:plc:xcmvxqase5paakatu337zqwv": {
       "orgSlug": "trees-for-life-a7b4b1c3",
@@ -2822,10 +762,6 @@
       "orgSlug": "center-for-nature-conservation-and-development-170a2f23",
       "donateUrl": "https://maearth.com/center-for-nature-conservation-and-development-170a2f23/74811e68"
     },
-    "did:plc:xfpixhx767d46b7stahscqdm": {
-      "orgSlug": "oga-opportunities-for-53f10125",
-      "donateUrl": "https://maearth.com/oga-opportunities-for-53f10125/b9cb894a"
-    },
     "did:plc:xgn2bmlmgx5zpr4a5i2pjzuh": {
       "orgSlug": "lagardencouncil",
       "donateUrl": "https://maearth.com/lagardencouncil/2ca01a6d"
@@ -2834,181 +770,25 @@
       "orgSlug": "instituto-chaikuni",
       "donateUrl": "https://maearth.com/instituto-chaikuni/regenerate-the-amazon"
     },
-    "did:plc:xhjn4egmly7lzizlbz2i54ys": {
-      "orgSlug": "la-abuela-beba-8cdec062",
-      "donateUrl": "https://maearth.com/la-abuela-beba-8cdec062/203e8f2e"
-    },
-    "did:plc:xjyotv77ltcoskf6ds4gdmyo": {
-      "orgSlug": "jardim-sensorial-da-a-f80eb665",
-      "donateUrl": "https://maearth.com/jardim-sensorial-da-a-f80eb665/e1fb4bfe"
-    },
-    "did:plc:xkbqpwzvo4ufi4wv2ddeypjf": {
-      "orgSlug": "sitio-d-ossi-farm-ef221802",
-      "donateUrl": "https://maearth.com/sitio-d-ossi-farm-ef221802/44176e06"
-    },
-    "did:plc:xmtbyav6djilhvuwk6yvxndf": {
-      "orgSlug": "techcycle-2e4a825c",
-      "donateUrl": "https://maearth.com/techcycle-2e4a825c/c13b6914"
-    },
-    "did:plc:xoaf4pvxihkstj6eivayexev": {
-      "orgSlug": "three-feathers-farm-5fa293cf",
-      "donateUrl": "https://maearth.com/three-feathers-farm-5fa293cf/4f78a008"
-    },
-    "did:plc:xq2jr6ixz7bdijfjdoibweys": {
-      "orgSlug": "kuu-village-4bb7706b",
-      "donateUrl": "https://maearth.com/kuu-village-4bb7706b/a7ce83de"
-    },
-    "did:plc:xrxupyupmspktye6l35w3pdg": {
-      "orgSlug": "adce-mali-0fea5572",
-      "donateUrl": "https://maearth.com/adce-mali-0fea5572/8ad49cfa"
-    },
-    "did:plc:xwcwe6q4pmqnvrhhzxwwwqw3": {
-      "orgSlug": "the-farmers-land-trus-3b452ac5",
-      "donateUrl": "https://maearth.com/the-farmers-land-trus-3b452ac5/fea5bdcd"
-    },
-    "did:plc:xzk735dp7envvsizp5jitqhb": {
-      "orgSlug": "equilibrium-wayak-a-c-ec08b7a2",
-      "donateUrl": "https://maearth.com/equilibrium-wayak-a-c-ec08b7a2/38761701"
-    },
-    "did:plc:y2ev7esj3al5ymk752w2gtqo": {
-      "orgSlug": "ecohubs-community-397956aa",
-      "donateUrl": "https://maearth.com/ecohubs-community-397956aa/9b9ee992"
-    },
-    "did:plc:y2f5liurhf2r57f3ndhliorq": {
-      "orgSlug": "hu-institute-b3c633e6",
-      "donateUrl": "https://maearth.com/hu-institute-b3c633e6/becbcfad"
-    },
-    "did:plc:y5y4vu7na574bzcjd5c4zyui": {
-      "orgSlug": "kitabu-integrated-dev-204e0180",
-      "donateUrl": "https://maearth.com/kitabu-integrated-dev-204e0180/3ca11fe1"
-    },
-    "did:plc:y62h65kpx3qgphupqqkur23e": {
-      "orgSlug": "south-rift-associatio-c9cf8e95",
-      "donateUrl": "https://maearth.com/south-rift-associatio-c9cf8e95/4fc8b764"
-    },
-    "did:plc:y6pxboftabmgumuvpbpz7iyu": {
-      "orgSlug": "nature-conservation-a-783d8b01",
-      "donateUrl": "https://maearth.com/nature-conservation-a-783d8b01/1c78d307"
-    },
-    "did:plc:yao7c3s4a4zuqevactptkn3w": {
-      "orgSlug": "te-ranga-wairua-trust-9201576f",
-      "donateUrl": "https://maearth.com/te-ranga-wairua-trust-9201576f/ec00439d"
-    },
     "did:plc:ybw7awrsivuor3vpgnc5n4f2": {
       "orgSlug": "el-pantano-bd35f1aa",
       "donateUrl": "https://maearth.com/el-pantano-bd35f1aa/5f44ec7b"
-    },
-    "did:plc:yd35s2m5rhyzdui675yof4ml": {
-      "orgSlug": "lidsam-investments-li-4c4d4635",
-      "donateUrl": "https://maearth.com/lidsam-investments-li-4c4d4635/352803f4"
     },
     "did:plc:ydcjhaae5cyyhg2qerigskxi": {
       "orgSlug": "the-land-is-our-coope-86437c3c",
       "donateUrl": "https://maearth.com/the-land-is-our-coope-86437c3c/d48ddc02"
     },
-    "did:plc:ye72ema3zpdas2paomlefncp": {
-      "orgSlug": "ametxe-bed9d7e4",
-      "donateUrl": "https://maearth.com/ametxe-bed9d7e4/biz"
-    },
-    "did:plc:yhminxy36erwdornvqh2kinc": {
-      "orgSlug": "reciclaxp-2f398684",
-      "donateUrl": "https://maearth.com/reciclaxp-2f398684/b0e588fc"
-    },
-    "did:plc:yhpldtgk4rgwrkxlrvecljby": {
-      "orgSlug": "happy-people-of-ukrai-874a545c",
-      "donateUrl": "https://maearth.com/happy-people-of-ukrai-874a545c/371698e2"
-    },
-    "did:plc:yibcbc4q26k73x556itnep66": {
-      "orgSlug": "equal-right-70699924",
-      "donateUrl": "https://maearth.com/equal-right-70699924/b12a0cb4"
-    },
-    "did:plc:yktuz7siaolqfek7fdyy72il": {
-      "orgSlug": "rise-earth-initiative-aaa5b9f5",
-      "donateUrl": "https://maearth.com/rise-earth-initiative-aaa5b9f5/10c58ba5"
-    },
-    "did:plc:ylf5d7fczolj5lg7f3hopypu": {
-      "orgSlug": "joint-actions-for-sustainable-development-55976325",
-      "donateUrl": "https://maearth.com/joint-actions-for-sustainable-development-55976325/fe013124"
-    },
     "did:plc:yotj7h3xrhjqrn6pxquttjon": {
       "orgSlug": "meli-bees",
       "donateUrl": "https://maearth.com/meli-bees/agroforestry-alto-solimoes"
-    },
-    "did:plc:ypuezwpkdolijwxutjrnf4dw": {
-      "orgSlug": "majka-zemlja-balkan-h-c82dc2b4",
-      "donateUrl": "https://maearth.com/majka-zemlja-balkan-h-c82dc2b4/9490f943"
     },
     "did:plc:yq7guq66sspzqtb3ksrw2vkw": {
       "orgSlug": "protect-the-andes-dfad9d83",
       "donateUrl": "https://maearth.com/protect-the-andes-dfad9d83/daf80ed9"
     },
-    "did:plc:yqbol33wiqpk3xww6hpnreyn": {
-      "orgSlug": "muhisimbi-the-voice-o-6e0b20e5",
-      "donateUrl": "https://maearth.com/muhisimbi-the-voice-o-6e0b20e5/f066f80a"
-    },
-    "did:plc:yr2wsqkoe7bzdzpfmzrpqiyj": {
-      "orgSlug": "mosaic-02dd2c92",
-      "donateUrl": "https://maearth.com/mosaic-02dd2c92/2dc72576"
-    },
-    "did:plc:ysj5vyz37uh5hi5j4w4pr36f": {
-      "orgSlug": "te-awhina-marae-o-mot-4d48d514",
-      "donateUrl": "https://maearth.com/te-awhina-marae-o-mot-4d48d514/35fee395"
-    },
-    "did:plc:ysoglawnvzfuuxjicookkud4": {
-      "orgSlug": "nara-climate-kenya-067dbeb4",
-      "donateUrl": "https://maearth.com/nara-climate-kenya-067dbeb4/b6fa19c6"
-    },
-    "did:plc:ytgrixabmbummml4mlfxadg6": {
-      "orgSlug": "afan",
-      "donateUrl": "https://maearth.com/afan/cd34246c"
-    },
-    "did:plc:ytjb3zywydkvfqrjlmtscwzd": {
-      "orgSlug": "re-generating-panjab-e3c3bd3c",
-      "donateUrl": "https://maearth.com/re-generating-panjab-e3c3bd3c/11880eb2"
-    },
-    "did:plc:yuxdz2n4cupb2phrewomuve6": {
-      "orgSlug": "regenerating-morningt-b5f1d7b7",
-      "donateUrl": "https://maearth.com/regenerating-morningt-b5f1d7b7/0f6ea87f"
-    },
-    "did:plc:yvlsmxqcfmr3kqpinvig4u4o": {
-      "orgSlug": "cikananga-widlife-cen-b6773c04",
-      "donateUrl": "https://maearth.com/cikananga-widlife-cen-b6773c04/f16c1ec3"
-    },
-    "did:plc:yyrhca22crkm5g7yqfjwranj": {
-      "orgSlug": "africa-nature-solutions-trust-85bcd0ed",
-      "donateUrl": "https://maearth.com/africa-nature-solutions-trust-85bcd0ed/b0127d4e"
-    },
     "did:plc:yzccxmtu3acat5mfwlyyt3cp": {
       "orgSlug": "nirvana-carbon-founda-d854ade4",
       "donateUrl": "https://maearth.com/nirvana-carbon-founda-d854ade4/34e1027e"
-    },
-    "did:plc:z2gcvdysqzipcazlt7vslio5": {
-      "orgSlug": "warna-asri-untuk-alam-00ccf99f",
-      "donateUrl": "https://maearth.com/warna-asri-untuk-alam-00ccf99f/b5d9f8ee"
-    },
-    "did:plc:z3irfscty2kc7edf5lgnnmev": {
-      "orgSlug": "green-space-initiativ-0fca0f66",
-      "donateUrl": "https://maearth.com/green-space-initiativ-0fca0f66/16065551"
-    },
-    "did:plc:z4ehwabadaae32leahzcjsvd": {
-      "orgSlug": "raksa-urvi-59261671",
-      "donateUrl": "https://maearth.com/raksa-urvi-59261671/85ad3ffc"
-    },
-    "did:plc:z4hiosrjvowgpkufxvetz6jb": {
-      "orgSlug": "minga-reforestation-p-61bd8770",
-      "donateUrl": "https://maearth.com/minga-reforestation-p-61bd8770/50ed6725"
-    },
-    "did:plc:zbe5s6lnvgbc3w4jenlduwnv": {
-      "orgSlug": "environmental-and-gre-d8b196d2",
-      "donateUrl": "https://maearth.com/environmental-and-gre-d8b196d2/658a1362"
-    },
-    "did:plc:zbgisjucezmapp7etnbndjal": {
-      "orgSlug": "mni-wichoni-5ac77b71",
-      "donateUrl": "https://maearth.com/mni-wichoni-5ac77b71/06ee5926"
-    },
-    "did:plc:ze6ccsi3drfkdklkotht5qd3": {
-      "orgSlug": "fundacion-pachamama-17d7503c",
-      "donateUrl": "https://maearth.com/fundacion-pachamama-17d7503c/8c3c4e40"
     },
     "did:plc:zf74s3yrbh7utrkpm62zfv3t": {
       "orgSlug": "regennow-farms",
@@ -3022,61 +802,9 @@
       "orgSlug": "ampela-03285e7b",
       "donateUrl": "https://maearth.com/ampela-03285e7b/b3bd37f1"
     },
-    "did:plc:zhlint4dyyevzx6tjikoz73r": {
-      "orgSlug": "living-wholeness-inst-6c8fc4b5",
-      "donateUrl": "https://maearth.com/living-wholeness-inst-6c8fc4b5/73d5baa8"
-    },
-    "did:plc:zjqgmmgr4gtmtp2fjbxkhe4q": {
-      "orgSlug": "maya-mountain-research-farm-7bd7834b",
-      "donateUrl": "https://maearth.com/maya-mountain-research-farm-7bd7834b/e79baec6"
-    },
-    "did:plc:zjrlqiw6ktf63rc6aqjflqcn": {
-      "orgSlug": "anewkind-studio-88187601",
-      "donateUrl": "https://maearth.com/anewkind-studio-88187601/19707dfe"
-    },
-    "did:plc:zjt3lmlnewa46jidute4pou4": {
-      "orgSlug": "neighbourhoods-founda-48e0920e",
-      "donateUrl": "https://maearth.com/neighbourhoods-founda-48e0920e/84d5a7a9"
-    },
-    "did:plc:zkwnkmfanwex7ltemebthmyp": {
-      "orgSlug": "the-sojourner-foundat-3914e774",
-      "donateUrl": "https://maearth.com/the-sojourner-foundat-3914e774/e3a6909f"
-    },
     "did:plc:zkytqkqobeplet72qdculnqc": {
       "orgSlug": "ebiil-society-inc-fec5dca3",
       "donateUrl": "https://maearth.com/ebiil-society-inc-fec5dca3/69107bac"
-    },
-    "did:plc:zlvrorcaunl4jxpmkgwzycnr": {
-      "orgSlug": "jenga-future-initiative-655b7a8c",
-      "donateUrl": "https://maearth.com/jenga-future-initiative-655b7a8c/bb6e045a"
-    },
-    "did:plc:zmjvowjfs56u6dcr3uygfudu": {
-      "orgSlug": "carablaze-enterprise-82f89be8",
-      "donateUrl": "https://maearth.com/carablaze-enterprise-82f89be8/90292a21"
-    },
-    "did:plc:zmm2x4v7tu7fmus3jkkbtikx": {
-      "orgSlug": "bethel-business-and-community-dev-centre-301f9c31",
-      "donateUrl": "https://maearth.com/bethel-business-and-community-dev-centre-301f9c31/d3da84f1"
-    },
-    "did:plc:zp4aishuzg7fmhrh2asohp4c": {
-      "orgSlug": "plant-with-purpose-51b22ac6",
-      "donateUrl": "https://maearth.com/plant-with-purpose-51b22ac6/fe68ae44"
-    },
-    "did:plc:zpkmxx5ztk4hqartc4xqt5gn": {
-      "orgSlug": "igumbilama2kmayine",
-      "donateUrl": "https://maearth.com/igumbilama2kmayine/05a4db3b"
-    },
-    "did:plc:zqxf3rg4yfikyynbdt7ste6k": {
-      "orgSlug": "jemez-mountain-bloom-d609e5f0",
-      "donateUrl": "https://maearth.com/jemez-mountain-bloom-d609e5f0/739ff908"
-    },
-    "did:plc:zrpofsmuef5h4oajmmthgw6v": {
-      "orgSlug": "kingfisher-ced5b483",
-      "donateUrl": "https://maearth.com/kingfisher-ced5b483/ac018b75"
-    },
-    "did:plc:zs6fzcksprvugpsw3utqmjd3": {
-      "orgSlug": "ginakev-farms-a5baa115",
-      "donateUrl": "https://maearth.com/ginakev-farms-a5baa115/94dd5930"
     },
     "did:plc:zv7fnfc3qphinopyeyba6ldn": {
       "orgSlug": "arbol-co-n-razon",

@@ -8,8 +8,10 @@
 //        /<org-slug>/<campaign-slug>        — a fundraising campaign page
 //   2. Fetch every org profile page and extract the atproto DID that Ma Earth
 //      embeds in it (the same DID the org uses on this site).
-//   3. For each org that has at least one campaign page, record the most
-//      recently updated campaign URL (by sitemap <lastmod>) as its donate link.
+//   3. For each org, walk its campaign pages (newest first by sitemap
+//      <lastmod>) and record the first one that actually renders a Donate
+//      button. Campaigns outside an active funding round exist as pages but
+//      cannot receive donations, so sitemap presence alone is NOT enough.
 //
 // Run: node scripts/generate-maearth-donation-links.mjs
 // Commit the regenerated JSON. Safe to re-run any time; it only reads
@@ -59,6 +61,27 @@ async function resolveDid(orgSlug) {
   }
 }
 
+// A campaign page only renders a Donate button while it can actually receive
+// donations (e.g. it belongs to an active funding round). Closed/idle
+// campaigns still exist in the sitemap but have no button — linking to them
+// from our UI would be misleading.
+async function isDonatable(campaignUrl) {
+  try {
+    const html = await fetchText(campaignUrl);
+    return html.includes(">Donate</button>");
+  } catch {
+    return false;
+  }
+}
+
+async function findDonatableCampaign(campaigns) {
+  const newestFirst = [...campaigns].sort((a, b) => (b.lastmod || "").localeCompare(a.lastmod || ""));
+  for (const campaign of newestFirst) {
+    if (await isDonatable(campaign.url)) return campaign;
+  }
+  return null;
+}
+
 async function main() {
   const xml = await fetchText(SITEMAP_URL);
   const { orgSlugs, campaignsByOrgSlug } = parseSitemap(xml);
@@ -78,9 +101,10 @@ async function main() {
         if (!did) continue;
         const campaigns = campaignsByOrgSlug.get(slug);
         if (!campaigns?.length) continue;
-        const latest = [...campaigns].sort((a, b) => (b.lastmod || "").localeCompare(a.lastmod || ""))[0];
-        // A DID can own several Ma Earth org pages; keep the first with a campaign.
-        entries[did] ??= { orgSlug: slug, donateUrl: latest.url };
+        if (entries[did]) continue; // a DID can own several Ma Earth org pages
+        const donatable = await findDonatableCampaign(campaigns);
+        if (!donatable) continue;
+        entries[did] ??= { orgSlug: slug, donateUrl: donatable.url };
       }
     }),
   );
