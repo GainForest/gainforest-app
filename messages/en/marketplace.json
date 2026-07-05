@@ -960,7 +960,8 @@
       "donationSummaryShort": "{amount} · {donors, plural, one {# supporter} other {# supporters}}",
       "donationWays": "{count} ways",
       "maEarth": "Ma Earth",
-      "round": "Round {round}"
+      "round": "Round {round}",
+      "byDonors": "by {donors, plural, one {# donor} other {# donors}}"
     },
     "actions": {
       "clearAll": "Clear all"

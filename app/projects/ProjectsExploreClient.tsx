@@ -752,38 +752,29 @@ function ProjectCard({
   );
 }
 
+/**
+ * Ma Earth-style donation line: a quiet single line with the amount in bold
+ * and the donor count muted. No progress bar — projects here have no funding
+ * goal, so a bar length would be arbitrary decoration pretending to be data.
+ */
 function ProjectDonationMini({ summary, acceptsDonations }: { summary?: ProjectDonationSummary; acceptsDonations: boolean }) {
   const t = useTranslations("marketplace.projects.card");
   if (!summary && !acceptsDonations) return null;
   const totalUsd = summary?.totalUsd ?? 0;
   const donorCount = summary?.donorCount ?? 0;
-  const hasAmount = totalUsd > 0;
-  const sourceCount = [summary?.gainforest, summary?.maEarth].filter(Boolean).length;
-  const progress = hasAmount ? Math.min(88, Math.max(14, totalUsd / 4)) : 18;
+  const hasAmount = totalUsd > 0 && donorCount > 0;
 
   return (
-    <div className="mt-4 rounded-2xl border border-primary/15 bg-primary/[0.035] p-3">
-      <div className="flex items-center justify-between gap-3">
-        <div className="min-w-0">
-          <p className="text-[11px] font-medium uppercase tracking-[0.1em] text-primary">{t("acceptsDonations")}</p>
-          <p className="mt-1 truncate text-sm font-semibold text-foreground">
-            {hasAmount ? t("donationSummary", { amount: formatCompactUsd(totalUsd), donors: donorCount }) : t("openForSupport")}
-          </p>
-        </div>
-        {sourceCount > 1 ? (
-          <span className="shrink-0 rounded-full bg-background px-2.5 py-1 text-[11px] font-medium text-muted-foreground ring-1 ring-border">
-            {t("donationWays", { count: sourceCount })}
-          </span>
-        ) : summary?.maEarth ? (
-          <span className="shrink-0 rounded-full bg-background px-2.5 py-1 text-[11px] font-medium text-muted-foreground ring-1 ring-border">
-            {t("maEarth")}
-          </span>
-        ) : null}
-      </div>
-      <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-primary/12" aria-hidden>
-        <div className="h-full rounded-full bg-primary/70" style={{ width: `${progress}%` }} />
-      </div>
-    </div>
+    <p className="mt-4 flex min-w-0 items-baseline gap-1.5 text-sm">
+      {hasAmount ? (
+        <>
+          <span className="shrink-0 font-semibold text-foreground">{formatCompactUsd(totalUsd)}</span>
+          <span className="truncate text-muted-foreground">{t("byDonors", { donors: donorCount })}</span>
+        </>
+      ) : (
+        <span className="truncate text-muted-foreground">{t("openForSupport")}</span>
+      )}
+    </p>
   );
 }
 

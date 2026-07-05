@@ -960,7 +960,8 @@
       "donationSummaryShort": "{amount} · {donors, plural, one {mchangiaji #} other {wachangiaji #}}",
       "donationWays": "Njia {count}",
       "maEarth": "Ma Earth",
-      "round": "Raundi {round}"
+      "round": "Raundi {round}",
+      "byDonors": "kutoka kwa {donors, plural, one {mchangiaji #} other {wachangiaji #}}"
     },
     "actions": {
       "clearAll": "Futa yote"

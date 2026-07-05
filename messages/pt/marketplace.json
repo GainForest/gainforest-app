@@ -960,7 +960,8 @@
       "donationSummaryShort": "{amount} · {donors, plural, one {# apoiador} other {# apoiadores}}",
       "donationWays": "{count} formas",
       "maEarth": "Ma Earth",
-      "round": "Rodada {round}"
+      "round": "Rodada {round}",
+      "byDonors": "de {donors, plural, one {# doador} other {# doadores}}"
     },
     "actions": {
       "clearAll": "Limpar tudo"

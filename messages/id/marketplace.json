@@ -960,7 +960,8 @@
       "donationSummaryShort": "{amount} · {donors, plural, other {# pendukung}}",
       "donationWays": "{count} cara",
       "maEarth": "Ma Earth",
-      "round": "Putaran {round}"
+      "round": "Putaran {round}",
+      "byDonors": "dari {donors, plural, other {# donatur}}"
     },
     "actions": {
       "clearAll": "Hapus semua"
