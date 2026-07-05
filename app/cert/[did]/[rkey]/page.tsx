@@ -6,15 +6,12 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import {
   ArrowLeftIcon,
-  BanIcon,
   BotIcon,
   ChevronRightIcon,
-  CircleDotIcon,
   ClipboardCheckIcon,
   CrownIcon,
   EarthIcon,
   ExternalLinkIcon,
-  GiftIcon,
   HeartIcon,
   LeafIcon,
   MapPinnedIcon,
@@ -576,7 +573,7 @@ export async function ProjectDetailView({
   const matchUris = timelineMatchUris && timelineMatchUris.length > 0 ? timelineMatchUris : [record.atUri];
 
   const maEarthDonateUrl = maEarthDonationUrl(record.did);
-  const [workScopeT, permissionT, timelineT, timelineEntryT, referenceT, globeT, projectNavT, maEarthDonationSummary, maEarthRounds] = await Promise.all([
+  const [workScopeT, permissionT, timelineT, timelineEntryT, referenceT, globeT, projectNavT, supportT, maEarthDonationSummary, maEarthRounds] = await Promise.all([
     getTranslations("common.workScopes"),
     getTranslations("bumicert.detail.evidenceAdder.permissions"),
     getTranslations("bumicert.detail.timeline"),
@@ -584,6 +581,7 @@ export async function ProjectDetailView({
     getTranslations("bumicert.detail.reference"),
     getTranslations("marketplace.globe"),
     getTranslations("bumicert.detail.projectNav"),
+    getTranslations("bumicert.detail.support"),
     maEarthDonateUrl ? fetchMaEarthDonationSummary(maEarthDonateUrl) : Promise.resolve(null),
     maEarthDonateUrl ? fetchAccountMaEarthRounds(record.did).catch(() => [] as number[]) : Promise.resolve([] as number[]),
   ]);
@@ -664,6 +662,9 @@ export async function ProjectDetailView({
   const showUpdates = timelineEntries.length > 0 || timelineAccess.canManageEvidence;
   const showSupport = Boolean(fundingConfig?.receivingWallet?.uri) || donationReceipts.length > 0 || canManageDonations || Boolean(maEarthOption);
   const donationsHref = showSupport ? `${detailHref}#support` : detailHref;
+  const donationEntries = buildDonationLeaderboard(
+    donationReceipts.filter((receipt) => ["USD", "USDC"].includes(receipt.currency.toUpperCase())),
+  );
   const reviewCount = (reviewCounts?.evaluations ?? 0) + (reviewCounts?.comments ?? 0);
   const period = record.startDate || record.endDate
     ? `${record.startDate ? formatDate(record.startDate) : "\u2014"} \u2192 ${record.endDate ? formatDate(record.endDate) : "\u2014"}`
@@ -801,10 +802,26 @@ export async function ProjectDetailView({
           ) : null}
         </header>
         ) : null}
-        <section className={`mx-auto grid max-w-6xl grid-cols-1 gap-x-10 gap-y-8 px-6 pb-8 lg:px-8 ${activeTab === "updates" ? "pt-3" : "pt-8"} ${showOverviewSidebar ? "lg:grid-cols-[minmax(0,1fr)_320px]" : ""}`}>
+        <section id="support" className={`mx-auto grid max-w-6xl scroll-mt-24 grid-cols-1 gap-x-10 gap-y-8 px-6 pb-8 lg:px-8 ${activeTab === "updates" ? "pt-3" : "pt-8"} ${showOverviewSidebar ? "lg:grid-cols-[minmax(0,1fr)_320px]" : ""}`}>
           <div className="min-w-0">
             {activeTab === "overview" ? (
               <>
+                {/* Mobile: the sidebar renders below the content, so surface the
+                    donation card up top where visitors actually see it. */}
+                {showSupport ? (
+                  <div className="mt-2 lg:hidden">
+                    <SupportCard
+                      record={record}
+                      owner={owner}
+                      receipts={donationReceipts}
+                      unavailable={donationsUnavailable}
+                      fundingConfig={fundingConfig}
+                      canManageDonations={canManageDonations}
+                      mutationRepo={certManageAccess.mutationRepo}
+                      maEarthOption={maEarthOption}
+                    />
+                  </div>
+                ) : null}
                 {detail?.richBody && detail.richBody.length > 0 ? (
                   <div className="mt-7"><RichText blocks={detail.richBody} className="text-base leading-7 md:text-lg md:leading-8" /></div>
                 ) : description ? (
@@ -871,19 +888,13 @@ export async function ProjectDetailView({
                   </ProjectDetailSection>
                 ) : null}
 
-                {showSupport ? (
-                  <ProjectDetailSection id="support" icon={<HeartIcon className="h-4 w-4" aria-hidden />} title="Support">
-                    <DonationsPanel
-                      record={record}
-                      owner={owner}
-                      fundingConfig={fundingConfig}
-                      authSession={authSession}
-                      receipts={donationReceipts}
-                      unavailable={donationsUnavailable}
-                      canManageDonations={canManageDonations}
-                      mutationRepo={certManageAccess.mutationRepo}
-                      maEarthOption={maEarthOption}
-                    />
+                {donationEntries.length > 0 ? (
+                  <ProjectDetailSection id="donations" icon={<HeartIcon className="h-4 w-4" aria-hidden />} title={supportT("donations")} count={formatNumber(donationEntries.length)}>
+                    <div className="overflow-hidden rounded-3xl bg-card/70 shadow-sm shadow-primary/5 ring-1 ring-foreground/5 backdrop-blur divide-y divide-border/60">
+                      {donationEntries.map((entry) => (
+                        <DonationLeaderboardRow key={entry.key} entry={entry} />
+                      ))}
+                    </div>
                   </ProjectDetailSection>
                 ) : null}
               </>
@@ -941,6 +952,7 @@ export async function ProjectDetailView({
                   deleteRedirectHref={ownerProfileHref}
                   projectRkey={projectRkey}
                   maEarthOption={maEarthOption}
+                  supportCardClassName="hidden lg:block"
                   hideOwner
                   hideImage
                   extra={
@@ -1294,6 +1306,7 @@ function OverviewSidebar({
   deleteRedirectHref,
   projectRkey,
   maEarthOption,
+  supportCardClassName,
   extra,
   hideOwner,
   hideImage,
@@ -1312,6 +1325,9 @@ function OverviewSidebar({
   /** When set, the delete action removes the project (not just the Cert). */
   projectRkey?: string;
   maEarthOption?: MaEarthDonationOption | null;
+  /** Extra classes for the support card wrapper (e.g. hide it on mobile when
+   *  the page renders its own mobile copy near the top). */
+  supportCardClassName?: string;
   /** Extra rich content rendered under the cover image (project sidebar). */
   extra?: ReactNode;
   /** Hide the owner row — the project page shows it in the page header. */
@@ -1371,25 +1387,25 @@ function OverviewSidebar({
         </div>
       ) : null}
 
-      {extra}
-
-      <Separator />
-
-      <AboutOrganizationSection owner={owner} links={orgLinks} />
-
-      <Separator />
-
-      <SidebarDonations
+      {/* Donations first — supporting the project is the sidebar's primary
+          action, mirroring how funding platforms surface it at the top. */}
+      <SupportCard
         record={record}
         owner={owner}
         receipts={receipts}
         unavailable={donationsUnavailable}
         fundingConfig={fundingConfig}
-        authSession={authSession}
         canManageDonations={canManageDonations}
         mutationRepo={mutationRepo}
         maEarthOption={maEarthOption ?? null}
+        className={supportCardClassName}
       />
+
+      {extra}
+
+      <Separator />
+
+      <AboutOrganizationSection owner={owner} links={orgLinks} />
 
       {canDelete ? (
         <>
@@ -1473,99 +1489,124 @@ function donorKey(donor: DonorRef): string | null {
   return donor ? `${donor.type}:${donor.id}` : null;
 }
 
-function SidebarDonations({
+/**
+ * Prominent, Ma Earth-style donation card: one combined "raised" figure with
+ * a supporter count and clear donate actions. Rendered at the top of the
+ * detail sidebar (and near the top of the page on mobile) so supporting the
+ * project never requires scrolling to the bottom.
+ */
+async function SupportCard({
   record,
   owner,
   receipts,
   unavailable,
   fundingConfig,
-  authSession,
   canManageDonations,
   mutationRepo,
   maEarthOption,
+  className,
 }: {
   record: BumicertRecord;
   owner: RouteData["owner"];
   receipts: FundingReceipt[];
   unavailable: boolean;
   fundingConfig: BumicertFundingConfig;
-  authSession: RouteData["authSession"];
   canManageDonations: boolean;
   mutationRepo?: string;
   maEarthOption?: MaEarthDonationOption | null;
+  className?: string;
 }) {
+  const t = await getTranslations("bumicert.detail.support");
+  const maEarth = maEarthOption ?? null;
   const usdReceipts = receipts.filter((receipt) => ["USD", "USDC"].includes(receipt.currency.toUpperCase()));
   const totalUsd = usdReceipts.reduce((sum, receipt) => sum + receipt.amount, 0);
-  const hasReceipts = receipts.length > 0;
-  const donationStatus = getDonationStatus(fundingConfig, unavailable);
-  const goalUsd = parseGoalUsd(fundingConfig);
-  const maEarthTotalUsd = maEarthOption?.summary?.totalUsd ?? 0;
-  const maEarthDonorCount = maEarthOption?.summary?.donorCount ?? 0;
+  const gainforestDonors = new Set(usdReceipts.map((receipt) => donorKey(receipt.from)).filter(Boolean)).size || (usdReceipts.length > 0 ? 1 : 0);
+  const maEarthTotalUsd = maEarth?.summary?.totalUsd ?? 0;
+  const maEarthDonorCount = maEarth?.summary?.donorCount ?? 0;
   const combinedUsd = totalUsd + maEarthTotalUsd;
-  const gainforestDonors = new Set(usdReceipts.map((receipt) => donorKey(receipt.from)).filter(Boolean)).size;
-  const combinedDonors = gainforestDonors + maEarthDonorCount;
-  const hasMaEarth = Boolean(maEarthOption);
+  const supporterCount = gainforestDonors + maEarthDonorCount;
+  const donationStatus = getDonationStatus(fundingConfig, unavailable);
+  const gainForestOpen = donationStatus.kind === "open";
+  const goalUsd = parseGoalUsd(fundingConfig);
+  const latestRound = maEarth && maEarth.rounds.length > 0 ? maEarth.rounds.at(-1) : null;
 
-  // No funding config, no history, and no permission to configure donations:
-  // skip the dead commerce UI ($0 stats + disabled button) — a short note is more honest.
-  if (!canManageDonations && donationStatus.kind === "not-applicable" && !hasReceipts && !hasMaEarth) {
+  // No donation channel, no history, and no permission to configure one:
+  // skip the dead commerce UI — a short note is more honest.
+  if (!canManageDonations && !gainForestOpen && !maEarth && receipts.length === 0 && donationStatus.kind === "not-applicable") {
     return (
-      <div className="space-y-2">
-        <h3 className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
-          Donations
-        </h3>
-        <p className="text-sm leading-6 text-muted-foreground">
-          This project is not accepting donations yet. Explore the story, places, and evidence — or follow {owner.displayName} for updates.
-        </p>
+      <div className={["space-y-2", className].filter(Boolean).join(" ")}>
+        <h3 className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">{t("title")}</h3>
+        <p className="text-sm leading-6 text-muted-foreground">{t("notAccepting", { name: owner.displayName })}</p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-3">
-      <h3 className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
-        Donations
-      </h3>
-      {!canManageDonations ? (
-        <div className="flex items-center gap-2 text-sm">
-          {donationStatus.kind === "open" ? (
-            <CircleDotIcon className="h-3.5 w-3.5 text-primary" />
+    <div className={["rounded-3xl border border-border bg-card p-5 shadow-sm shadow-primary/5", className].filter(Boolean).join(" ")}>
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          {combinedUsd > 0 ? (
+            <>
+              <p className="text-3xl font-semibold leading-none tracking-tight text-foreground">{formatCompactUsd(combinedUsd)}</p>
+              <p className="mt-1.5 text-sm text-muted-foreground">{t("fromSupporters", { count: supporterCount })}</p>
+            </>
           ) : (
-            <BanIcon className="h-3.5 w-3.5 text-muted-foreground" />
+            <>
+              <p className="text-lg font-semibold leading-tight text-foreground">{t("title")}</p>
+              <p className="mt-1 text-sm leading-5 text-muted-foreground">{t("noDonationsYet")}</p>
+            </>
           )}
-          <span className={donationStatus.kind === "open" ? "text-primary" : "text-muted-foreground"}>
-            {donationStatus.label}
+        </div>
+        {latestRound != null ? (
+          <span className="shrink-0 rounded-full bg-foreground px-2.5 py-1 text-[11px] font-semibold text-background">
+            {t("round", { round: latestRound })}
           </span>
-        </div>
-      ) : null}
-      <div className="grid grid-cols-2 gap-3">
-        <div>
-          <p className="text-xs text-muted-foreground">Raised</p>
-          <p className="mt-0.5 text-lg font-medium text-foreground">{formatCompactUsd(combinedUsd)}</p>
-        </div>
-        <div>
-          <p className="text-xs text-muted-foreground">Supporters</p>
-          <p className="mt-0.5 text-lg font-medium text-foreground">{formatCompact(combinedDonors || receipts.length)}</p>
-        </div>
+        ) : null}
       </div>
-      {goalUsd !== null && donationStatus.kind === "open" ? (
-        <FundingProgress raisedUsd={totalUsd} goalUsd={goalUsd} />
+      {goalUsd !== null && gainForestOpen ? (
+        <div className="mt-4">
+          <FundingProgress raisedUsd={totalUsd} goalUsd={goalUsd} />
+        </div>
       ) : null}
-      <DonationActionOptions
-        record={record}
-        owner={owner}
-        fundingConfig={fundingConfig}
-        donationStatus={donationStatus}
-        canManageDonations={canManageDonations}
-        mutationRepo={mutationRepo}
-        hasReceipts={hasReceipts}
-        maEarthOption={maEarthOption ?? null}
-        compact
-      />
-      {donationStatus.kind === "open" || hasMaEarth ? (
-        <p className="text-xs leading-5 text-muted-foreground">
-          Choose a verified GainForest donation when available, or use the linked Ma Earth campaign.
-        </p>
+      <div className="mt-4 space-y-2">
+        {canManageDonations ? (
+          <FundingStatus ownerDid={record.did} bumicertRkey={record.rkey} fundingConfig={fundingConfig} mutationRepo={mutationRepo} />
+        ) : gainForestOpen ? (
+          <DonateButton
+            bumicert={{
+              organizationDid: record.did,
+              rkey: record.rkey,
+              title: record.title,
+              organizationName: owner.displayName,
+              image: record.imageUrl ?? null,
+            }}
+            fundingConfig={fundingConfig}
+            disabled={false}
+            label={receipts.length > 0 ? t("donateAgain") : t("donate")}
+          />
+        ) : donationStatus.kind === "inactive" || donationStatus.kind === "unavailable" ? (
+          <p className="rounded-2xl bg-muted px-3 py-2 text-center text-xs text-muted-foreground">{donationStatus.label}</p>
+        ) : null}
+        {maEarth ? (
+          <a
+            href={maEarth.donateUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={
+              !gainForestOpen && !canManageDonations
+                ? "inline-flex h-10 w-full items-center justify-center gap-2 rounded-full bg-primary px-4 text-sm font-semibold text-primary-foreground opacity-90 transition-opacity hover:opacity-100"
+                : "inline-flex h-9 w-full items-center justify-center gap-2 rounded-full border border-border-soft bg-background px-3 text-sm font-medium text-foreground transition-colors hover:border-primary/40 hover:bg-muted/60 hover:text-primary"
+            }
+          >
+            <ExternalLinkIcon className="size-3.5" aria-hidden />
+            {t("donateOnMaEarth")}
+          </a>
+        ) : null}
+      </div>
+      {maEarth && maEarthTotalUsd > 0 && totalUsd > 0 ? (
+        <p className="mt-3 text-xs leading-5 text-muted-foreground">{t("includesMaEarth")}</p>
+      ) : maEarth && maEarthTotalUsd > 0 && totalUsd === 0 ? (
+        <p className="mt-3 text-xs leading-5 text-muted-foreground">{t("viaMaEarth")}</p>
       ) : null}
     </div>
   );
@@ -1580,7 +1621,6 @@ function DonationActionOptions({
   mutationRepo,
   hasReceipts,
   maEarthOption,
-  compact = false,
 }: {
   record: BumicertRecord;
   owner: RouteData["owner"];
@@ -1590,18 +1630,10 @@ function DonationActionOptions({
   mutationRepo?: string;
   hasReceipts: boolean;
   maEarthOption: MaEarthDonationOption | null;
-  compact?: boolean;
 }) {
   const gainForestOpen = donationStatus.kind === "open";
-  const showTabs = gainForestOpen && Boolean(maEarthOption);
   return (
-    <div className="space-y-3">
-      {showTabs ? (
-        <div className="grid grid-cols-2 rounded-full bg-muted p-1 text-xs font-medium text-muted-foreground">
-          <span className="rounded-full bg-background px-3 py-1.5 text-center text-foreground shadow-sm">GainForest</span>
-          <span className="px-3 py-1.5 text-center">Ma Earth</span>
-        </div>
-      ) : null}
+    <div className="space-y-2">
       {canManageDonations ? (
         <FundingStatus ownerDid={record.did} bumicertRkey={record.rkey} fundingConfig={fundingConfig} mutationRepo={mutationRepo} />
       ) : gainForestOpen ? (
@@ -1621,32 +1653,19 @@ function DonationActionOptions({
         <p className="rounded-2xl bg-muted px-3 py-2 text-center text-xs text-muted-foreground">{donationStatus.label}</p>
       ) : null}
       {maEarthOption ? (
-        <div className={`rounded-2xl border border-border-soft bg-background p-3 ${compact ? "space-y-2" : "space-y-3"}`}>
-          <div className="flex items-start justify-between gap-3">
-            <div className="min-w-0">
-              <p className="text-sm font-semibold text-foreground">Ma Earth campaign</p>
-              <p className="mt-0.5 text-xs leading-5 text-muted-foreground">
-                {maEarthOption.summary && maEarthOption.summary.totalUsd > 0
-                  ? `${formatCompactUsd(maEarthOption.summary.totalUsd)} from ${maEarthOption.summary.donorCount} ${maEarthOption.summary.donorCount === 1 ? "supporter" : "supporters"}`
-                  : "External donation page"}
-              </p>
-            </div>
-            {maEarthOption.rounds.length > 0 ? (
-              <span className="shrink-0 rounded-full bg-foreground px-2.5 py-1 text-[11px] font-semibold text-background">
-                Round {maEarthOption.rounds.at(-1)}
-              </span>
-            ) : null}
-          </div>
-          <a
-            href={maEarthOption.donateUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex h-9 w-full items-center justify-center gap-2 rounded-full border border-border-soft bg-background px-3 text-sm font-medium text-foreground transition-colors hover:border-primary/40 hover:bg-muted/60 hover:text-primary"
-          >
-            <ExternalLinkIcon className="size-3.5" aria-hidden />
-            Donate on Ma Earth
-          </a>
-        </div>
+        <a
+          href={maEarthOption.donateUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={
+            !gainForestOpen && !canManageDonations
+              ? "inline-flex h-10 w-full items-center justify-center gap-2 rounded-full bg-primary px-4 text-sm font-semibold text-primary-foreground opacity-90 transition-opacity hover:opacity-100"
+              : "inline-flex h-9 w-full items-center justify-center gap-2 rounded-full border border-border-soft bg-background px-3 text-sm font-medium text-foreground transition-colors hover:border-primary/40 hover:bg-muted/60 hover:text-primary"
+          }
+        >
+          <ExternalLinkIcon className="size-3.5" aria-hidden />
+          Donate on Ma Earth
+        </a>
       ) : null}
     </div>
   );
@@ -2220,12 +2239,7 @@ function DonationsPanel({
       accent: true,
     },
     {
-      label: "Completed donations",
-      value: formatCompact(usdReceipts.length),
-      icon: <GiftIcon />,
-    },
-    {
-      label: "donors",
+      label: "supporters",
       value: formatCompact(combinedDonorCount),
       icon: <UsersRoundIcon />,
       accent: true,
@@ -2286,7 +2300,7 @@ function DonationsPanel({
         />
       ) : (
         <div className="space-y-5">
-          <StatsTileGrid items={stats} columns={3} />
+          <StatsTileGrid items={stats} columns={2} />
 
           {donationEntries.length > 0 ? (
             <div className="overflow-hidden rounded-3xl bg-card/70 shadow-sm shadow-primary/5 ring-1 ring-foreground/5 backdrop-blur divide-y divide-border/60">

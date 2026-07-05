@@ -387,6 +387,19 @@
       "updates": "Pembaruan",
       "reviews": "Ulasan",
       "support": "Dukungan"
+    },
+    "support": {
+      "title": "Dukungan",
+      "donations": "Donasi",
+      "fromSupporters": "Dari {count, plural, other {# pendukung}}",
+      "noDonationsYet": "Jadilah yang pertama mendukung proyek ini.",
+      "donate": "Donasi",
+      "donateAgain": "Donasi lagi",
+      "donateOnMaEarth": "Donasi di Ma Earth",
+      "round": "Putaran {round}",
+      "includesMaEarth": "Total mencakup donasi GainForest dan Ma Earth.",
+      "viaMaEarth": "Terkumpul melalui kampanye Ma Earth.",
+      "notAccepting": "Proyek ini belum menerima donasi. Ikuti {name} untuk kabar terbaru."
     }
   },
   "create": {

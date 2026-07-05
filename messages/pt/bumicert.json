@@ -387,6 +387,19 @@
       "updates": "Atualizações",
       "reviews": "Avaliações",
       "support": "Apoio"
+    },
+    "support": {
+      "title": "Apoio",
+      "donations": "Doações",
+      "fromSupporters": "De {count, plural, one {# apoiador} other {# apoiadores}}",
+      "noDonationsYet": "Seja a primeira pessoa a apoiar este projeto.",
+      "donate": "Doar",
+      "donateAgain": "Doar novamente",
+      "donateOnMaEarth": "Doar na Ma Earth",
+      "round": "Rodada {round}",
+      "includesMaEarth": "O total inclui doações do GainForest e da Ma Earth.",
+      "viaMaEarth": "Arrecadado pela campanha na Ma Earth.",
+      "notAccepting": "Este projeto ainda não aceita doações. Siga {name} para receber novidades."
     }
   },
   "create": {

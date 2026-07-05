@@ -387,6 +387,19 @@
       "updates": "Masasisho",
       "reviews": "Maoni",
       "support": "Msaada"
+    },
+    "support": {
+      "title": "Usaidizi",
+      "donations": "Michango",
+      "fromSupporters": "Kutoka kwa {count, plural, one {mfadhili #} other {wafadhili #}}",
+      "noDonationsYet": "Kuwa wa kwanza kuunga mkono mradi huu.",
+      "donate": "Changia",
+      "donateAgain": "Changia tena",
+      "donateOnMaEarth": "Changia kwenye Ma Earth",
+      "round": "Duru ya {round}",
+      "includesMaEarth": "Jumla inajumuisha michango ya GainForest na Ma Earth.",
+      "viaMaEarth": "Imekusanywa kupitia kampeni ya Ma Earth.",
+      "notAccepting": "Mradi huu bado haupokei michango. Fuata {name} kupata habari mpya."
     }
   },
   "create": {

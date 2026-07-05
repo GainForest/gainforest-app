@@ -387,6 +387,19 @@
       "updates": "Updates",
       "reviews": "Reviews",
       "support": "Support"
+    },
+    "support": {
+      "title": "Support",
+      "donations": "Donations",
+      "fromSupporters": "From {count, plural, one {# supporter} other {# supporters}}",
+      "noDonationsYet": "Be the first to support this project.",
+      "donate": "Donate",
+      "donateAgain": "Donate again",
+      "donateOnMaEarth": "Donate on Ma Earth",
+      "round": "Round {round}",
+      "includesMaEarth": "Total includes GainForest and Ma Earth donations.",
+      "viaMaEarth": "Raised through the Ma Earth campaign.",
+      "notAccepting": "This project is not accepting donations yet. Follow {name} for updates."
     }
   },
   "create": {
