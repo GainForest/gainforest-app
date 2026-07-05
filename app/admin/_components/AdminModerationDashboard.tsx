@@ -5,21 +5,23 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { AwardIcon, BotIcon, Building2Icon, FlaskConicalIcon, LeafIcon, SproutIcon, UserRoundIcon } from "lucide-react";
+import { AwardIcon, BotIcon, Building2Icon, FlaskConicalIcon, LeafIcon, SproutIcon, UserRoundIcon, WalletIcon } from "lucide-react";
 import type { GrantApplicant } from "@/app/_lib/grants";
 import type { BioblitzRegistrant } from "@/app/_lib/bioblitz";
 import type { FlaggedTestAccount } from "@/app/internal/badges/_lib/test-accounts";
 import type { BuiltinEndorser, EndorserRecord } from "@/app/_lib/endorsers";
 import type { AwardEndorsementsData } from "../_lib/award-endorsements";
+import type { FacilitatorStats } from "../_lib/facilitator-stats";
 import { formatRelative } from "@/app/_lib/format";
 import { cn } from "@/lib/utils";
 import { accountPath } from "@/app/account/_lib/account-route";
 import { AdminTestAccountsList } from "./AdminTestAccountsList";
 import { AdminTainaPanel, type AdminTainaRow } from "./AdminTainaPanel";
+import { AdminFacilitatorPanel } from "./AdminFacilitatorPanel";
 import { EndorsersManager } from "./EndorsersManager";
 import { AwardEndorsementsPanel } from "./AwardEndorsementsPanel";
 
-export type AdminTab = "taina" | "grants" | "bioblitz" | "testAccounts" | "endorsers" | "awardEndorsements";
+export type AdminTab = "taina" | "grants" | "bioblitz" | "testAccounts" | "endorsers" | "awardEndorsements" | "facilitator";
 
 /**
  * The /admin control room: one tab bar, one card-shaped panel per concern
@@ -37,6 +39,7 @@ export function AdminModerationDashboard({
   builtinEndorsers,
   endorsers,
   awardEndorsements,
+  facilitatorStats,
 }: {
   initialTab: AdminTab;
   testAccounts: FlaggedTestAccount[];
@@ -48,12 +51,14 @@ export function AdminModerationDashboard({
   builtinEndorsers: BuiltinEndorser[];
   endorsers: EndorserRecord[];
   awardEndorsements: AwardEndorsementsData;
+  facilitatorStats: FacilitatorStats;
 }) {
   const t = useTranslations("common.adminModeration");
   const tTaina = useTranslations("common.adminTaina");
   const tTest = useTranslations("common.adminTestAccounts");
   const tEndorsers = useTranslations("common.adminEndorsers");
   const tAward = useTranslations("common.adminAwardEndorsements");
+  const tFacilitator = useTranslations("common.adminFacilitator");
   const router = useRouter();
   const pathname = usePathname();
   const [tab, setTab] = useState<AdminTab>(initialTab);
@@ -70,6 +75,7 @@ export function AdminModerationDashboard({
     { id: "testAccounts", label: t("tabs.testAccounts"), Icon: FlaskConicalIcon, count: testAccounts.length },
     { id: "endorsers", label: t("tabs.endorsers"), Icon: Building2Icon, count: builtinEndorsers.length + endorsers.length },
     { id: "awardEndorsements", label: t("tabs.awardEndorsements"), Icon: AwardIcon, count: awardEndorsements.awards.length },
+    { id: "facilitator", label: t("tabs.facilitator"), Icon: WalletIcon, count: facilitatorStats.receiptCount ?? 0 },
   ];
 
   return (
@@ -158,7 +164,7 @@ export function AdminModerationDashboard({
         >
           <EndorsersManager builtins={builtinEndorsers} initial={endorsers} />
         </AdminPanel>
-      ) : (
+      ) : tab === "awardEndorsements" ? (
         <AdminPanel
           Icon={AwardIcon}
           title={tAward("title")}
@@ -167,6 +173,15 @@ export function AdminModerationDashboard({
           footer={awardEndorsements.allowed ? tAward("propagationHint") : undefined}
         >
           <AwardEndorsementsPanel data={awardEndorsements} />
+        </AdminPanel>
+      ) : (
+        <AdminPanel
+          Icon={WalletIcon}
+          title={tFacilitator("title")}
+          description={tFacilitator("description")}
+          count={facilitatorStats.receiptCount ?? 0}
+        >
+          <AdminFacilitatorPanel stats={facilitatorStats} />
         </AdminPanel>
       )}
     </section>

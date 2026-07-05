@@ -947,7 +947,8 @@
       "bioblitz": "BioBlitz",
       "testAccounts": "Contas de teste",
       "endorsers": "Apoiadores",
-      "awardEndorsements": "Conceder endossos"
+      "awardEndorsements": "Conceder endossos",
+      "facilitator": "Carteira facilitadora"
     },
     "unnamed": "Conta sem nome",
     "awardHint": "Abra um perfil para conceder um selo.",
@@ -987,6 +988,25 @@
     "sendFailed": "Não foi possível enviar a mensagem. Tente novamente.",
     "notActivated": "O dono ainda não ativou este bot, então ele não pode receber mensagens.",
     "cancel": "Cancelar"
+  },
+  "adminFacilitator": {
+    "title": "Carteira facilitadora",
+    "description": "A carteira da plataforma que liquida cada doação na Ethereum. Ela assina as atestações de carteiras, envia cada transferência de USDC e paga o gás.",
+    "notConfigured": "A carteira facilitadora não está configurada nesta instalação, então não há nada para mostrar.",
+    "addressLabel": "Endereço da carteira",
+    "copy": "Copiar",
+    "copied": "Copiado",
+    "viewOnEtherscan": "Ver no Etherscan",
+    "volume": "Dinheiro movimentado",
+    "volumeHint": "Valor total das doações liquidadas por esta carteira.",
+    "receipts": "Doações",
+    "receiptsHint": "Número de recibos de doação registrados pela carteira.",
+    "txCount": "Transações",
+    "txCountHint": "Total de transações que esta carteira enviou na Ethereum.",
+    "ethBalance": "Gás restante",
+    "ethBalanceHint": "ETH disponível na carteira para pagar transações futuras.",
+    "chainUnavailable": "Os dados ao vivo da Ethereum estão indisponíveis no momento, então o número de transações e o saldo de gás não podem ser mostrados.",
+    "receiptsUnavailable": "Os totais de doações estão indisponíveis no momento. Tente novamente em instantes."
   },
   "follow": {
     "follow": "Seguir",

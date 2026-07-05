@@ -947,7 +947,8 @@
       "bioblitz": "BioBlitz",
       "testAccounts": "Akaunti za majaribio",
       "endorsers": "Wadhamini",
-      "awardEndorsements": "Toa idhini"
+      "awardEndorsements": "Toa idhini",
+      "facilitator": "Pochi ya uwezeshaji"
     },
     "unnamed": "Akaunti isiyo na jina",
     "awardHint": "Fungua wasifu ili kutoa beji.",
@@ -987,6 +988,25 @@
     "sendFailed": "Ujumbe haukuweza kutumwa. Tafadhali jaribu tena.",
     "notActivated": "Mmiliki bado hajawasha boti hii, hivyo haiwezi kupokea ujumbe.",
     "cancel": "Ghairi"
+  },
+  "adminFacilitator": {
+    "title": "Pochi ya uwezeshaji",
+    "description": "Pochi ya jukwaa inayokamilisha kila mchango kwenye Ethereum. Inasaini uthibitisho wa pochi, inatuma kila uhamisho wa USDC na kulipa gesi.",
+    "notConfigured": "Pochi ya uwezeshaji haijasanidiwa kwenye usakinishaji huu, kwa hivyo hakuna cha kuonyesha.",
+    "addressLabel": "Anwani ya pochi",
+    "copy": "Nakili",
+    "copied": "Imenakiliwa",
+    "viewOnEtherscan": "Tazama kwenye Etherscan",
+    "volume": "Fedha zilizopita",
+    "volumeHint": "Thamani ya jumla ya michango iliyokamilishwa kupitia pochi hii.",
+    "receipts": "Michango",
+    "receiptsHint": "Idadi ya risiti za michango zilizorekodiwa kupitia pochi.",
+    "txCount": "Miamala",
+    "txCountHint": "Jumla ya miamala ambayo pochi hii imetuma kwenye Ethereum.",
+    "ethBalance": "Gesi iliyobaki",
+    "ethBalanceHint": "ETH iliyosalia kwenye pochi kulipia miamala ijayo.",
+    "chainUnavailable": "Data ya moja kwa moja ya Ethereum haipatikani kwa sasa, kwa hivyo idadi ya miamala na salio la gesi haviwezi kuonyeshwa.",
+    "receiptsUnavailable": "Jumla za michango hazipatikani kwa sasa. Jaribu tena baada ya muda mfupi."
   },
   "follow": {
     "follow": "Fuata",

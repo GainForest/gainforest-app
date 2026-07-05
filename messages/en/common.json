@@ -947,7 +947,8 @@
       "bioblitz": "BioBlitz",
       "testAccounts": "Test accounts",
       "endorsers": "Endorsers",
-      "awardEndorsements": "Award endorsements"
+      "awardEndorsements": "Award endorsements",
+      "facilitator": "Facilitator wallet"
     },
     "unnamed": "Unnamed account",
     "awardHint": "Open a profile to award a badge.",
@@ -987,6 +988,25 @@
     "sendFailed": "The message couldn't be sent. Please try again.",
     "notActivated": "This bot hasn't been activated by its owner yet, so it can't receive messages.",
     "cancel": "Cancel"
+  },
+  "adminFacilitator": {
+    "title": "Facilitator wallet",
+    "description": "The platform wallet that settles every donation on Ethereum. It signs wallet attestations, submits each USDC transfer, and pays the gas.",
+    "notConfigured": "The facilitator wallet isn't configured on this deployment, so there's nothing to show.",
+    "addressLabel": "Wallet address",
+    "copy": "Copy",
+    "copied": "Copied",
+    "viewOnEtherscan": "View on Etherscan",
+    "volume": "Money moved",
+    "volumeHint": "Total value of donations settled through this wallet.",
+    "receipts": "Donations",
+    "receiptsHint": "Number of donation receipts recorded through the wallet.",
+    "txCount": "Transactions",
+    "txCountHint": "Total transactions this wallet has sent on Ethereum.",
+    "ethBalance": "Gas remaining",
+    "ethBalanceHint": "ETH left in the wallet to pay for future transactions.",
+    "chainUnavailable": "Live Ethereum data is unavailable right now, so the transaction count and gas balance can't be shown.",
+    "receiptsUnavailable": "Donation totals are unavailable right now. Try again in a moment."
   },
   "follow": {
     "follow": "Follow",

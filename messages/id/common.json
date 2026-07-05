@@ -947,7 +947,8 @@
       "bioblitz": "BioBlitz",
       "testAccounts": "Akun uji coba",
       "endorsers": "Pendukung",
-      "awardEndorsements": "Berikan dukungan"
+      "awardEndorsements": "Berikan dukungan",
+      "facilitator": "Dompet fasilitator"
     },
     "unnamed": "Akun tanpa nama",
     "awardHint": "Buka profil untuk memberikan lencana.",
@@ -987,6 +988,25 @@
     "sendFailed": "Pesan tidak dapat dikirim. Silakan coba lagi.",
     "notActivated": "Pemiliknya belum mengaktifkan bot ini, jadi belum bisa menerima pesan.",
     "cancel": "Batal"
+  },
+  "adminFacilitator": {
+    "title": "Dompet fasilitator",
+    "description": "Dompet platform yang menyelesaikan setiap donasi di Ethereum. Dompet ini menandatangani atestasi dompet, mengirim setiap transfer USDC, dan membayar gas.",
+    "notConfigured": "Dompet fasilitator belum dikonfigurasi di instalasi ini, jadi tidak ada yang bisa ditampilkan.",
+    "addressLabel": "Alamat dompet",
+    "copy": "Salin",
+    "copied": "Tersalin",
+    "viewOnEtherscan": "Lihat di Etherscan",
+    "volume": "Dana yang mengalir",
+    "volumeHint": "Total nilai donasi yang diselesaikan melalui dompet ini.",
+    "receipts": "Donasi",
+    "receiptsHint": "Jumlah tanda terima donasi yang tercatat melalui dompet.",
+    "txCount": "Transaksi",
+    "txCountHint": "Total transaksi yang telah dikirim dompet ini di Ethereum.",
+    "ethBalance": "Sisa gas",
+    "ethBalanceHint": "ETH yang tersisa di dompet untuk membayar transaksi berikutnya.",
+    "chainUnavailable": "Data langsung Ethereum sedang tidak tersedia, jadi jumlah transaksi dan saldo gas tidak dapat ditampilkan.",
+    "receiptsUnavailable": "Total donasi sedang tidak tersedia. Coba lagi sebentar lagi."
   },
   "follow": {
     "follow": "Ikuti",

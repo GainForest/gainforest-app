@@ -11,6 +11,7 @@ import { fetchTainaAdminResidents } from "@/app/_lib/taina-agent";
 import { fetchIndexedCertifiedProfileCards } from "@/app/_lib/indexer";
 import { BUILTIN_ENDORSERS, fetchEndorserRecords } from "@/app/_lib/endorsers";
 import { fetchEndorsementAwarding, type AwardEndorsementsData } from "./_lib/award-endorsements";
+import { fetchFacilitatorStats, type FacilitatorStats } from "./_lib/facilitator-stats";
 import { AdminModerationDashboard, type AdminTab } from "./_components/AdminModerationDashboard";
 import type { AdminTainaRow } from "./_components/AdminTainaPanel";
 
@@ -19,7 +20,15 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-const TABS: AdminTab[] = ["taina", "grants", "bioblitz", "testAccounts", "endorsers", "awardEndorsements"];
+const TABS: AdminTab[] = ["taina", "grants", "bioblitz", "testAccounts", "endorsers", "awardEndorsements", "facilitator"];
+
+const EMPTY_FACILITATOR_STATS: FacilitatorStats = {
+  address: null,
+  txCount: null,
+  ethBalance: null,
+  receiptCount: null,
+  usdVolume: null,
+};
 
 /**
  * The Tainá roster for the admin panel: runtime data (bot, last used, credit
@@ -75,7 +84,7 @@ export default async function AdminPage({
   }
 
   const t = await getTranslations("common.adminModeration");
-  const [{ tab }, testAccounts, grantApplicants, bioblitzRegistrants, taina, endorsers, awardEndorsements] = await Promise.all([
+  const [{ tab }, testAccounts, grantApplicants, bioblitzRegistrants, taina, endorsers, awardEndorsements, facilitatorStats] = await Promise.all([
     searchParams,
     fetchFlaggedTestAccounts().catch(() => []),
     fetchGrantApplicants().catch(() => []),
@@ -83,6 +92,7 @@ export default async function AdminPage({
     loadTainaRows(),
     moderator.repoDid ? fetchEndorserRecords(moderator.repoDid).catch(() => []) : Promise.resolve([]),
     loadAwardEndorsements(),
+    fetchFacilitatorStats().catch(() => EMPTY_FACILITATOR_STATS),
   ]);
 
   const initialTab: AdminTab = TABS.includes(tab as AdminTab) ? (tab as AdminTab) : "taina";
@@ -106,6 +116,7 @@ export default async function AdminPage({
         builtinEndorsers={BUILTIN_ENDORSERS}
         endorsers={endorsers}
         awardEndorsements={awardEndorsements}
+        facilitatorStats={facilitatorStats}
       />
     </Container>
   );

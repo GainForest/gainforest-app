@@ -947,7 +947,8 @@
       "bioblitz": "BioBlitz",
       "testAccounts": "Cuentas de prueba",
       "endorsers": "Avaladores",
-      "awardEndorsements": "Otorgar respaldos"
+      "awardEndorsements": "Otorgar respaldos",
+      "facilitator": "Billetera facilitadora"
     },
     "unnamed": "Cuenta sin nombre",
     "awardHint": "Abre un perfil para otorgar una insignia.",
@@ -987,6 +988,25 @@
     "sendFailed": "No se pudo enviar el mensaje. Inténtalo de nuevo.",
     "notActivated": "El propietario aún no ha activado este bot, así que no puede recibir mensajes.",
     "cancel": "Cancelar"
+  },
+  "adminFacilitator": {
+    "title": "Billetera facilitadora",
+    "description": "La billetera de la plataforma que liquida cada donación en Ethereum. Firma las certificaciones de billeteras, envía cada transferencia de USDC y paga el gas.",
+    "notConfigured": "La billetera facilitadora no está configurada en esta instalación, así que no hay nada que mostrar.",
+    "addressLabel": "Dirección de la billetera",
+    "copy": "Copiar",
+    "copied": "Copiado",
+    "viewOnEtherscan": "Ver en Etherscan",
+    "volume": "Dinero movido",
+    "volumeHint": "Valor total de las donaciones liquidadas a través de esta billetera.",
+    "receipts": "Donaciones",
+    "receiptsHint": "Número de recibos de donación registrados a través de la billetera.",
+    "txCount": "Transacciones",
+    "txCountHint": "Total de transacciones que esta billetera ha enviado en Ethereum.",
+    "ethBalance": "Gas restante",
+    "ethBalanceHint": "ETH disponible en la billetera para pagar futuras transacciones.",
+    "chainUnavailable": "Los datos en vivo de Ethereum no están disponibles ahora mismo, así que no se pueden mostrar el número de transacciones ni el saldo de gas.",
+    "receiptsUnavailable": "Los totales de donaciones no están disponibles ahora mismo. Inténtalo de nuevo en un momento."
   },
   "follow": {
     "follow": "Seguir",
