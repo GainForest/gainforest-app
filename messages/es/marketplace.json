@@ -1527,7 +1527,8 @@
       "publishedHint": "Esta cuenta y sus proyectos son visibles para cualquiera que explore GainForest.",
       "justPublishedHint": "¡Listo! Puede tardar unos minutos en aparecer en las páginas de exploración.",
       "memberBlocked": "Solo los propietarios y administradores de la organización pueden publicar.",
-      "error": "No se pudo publicar. Inténtalo de nuevo más tarde."
+      "error": "No se pudo publicar. Inténtalo de nuevo más tarde.",
+      "unavailable": "La publicación no está disponible en este momento. Inténtalo de nuevo más tarde."
     }
   },
   "manageBumicerts": {

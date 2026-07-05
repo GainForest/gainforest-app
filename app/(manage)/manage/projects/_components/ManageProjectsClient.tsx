@@ -333,7 +333,7 @@ export function ManageProjectsClient({ target }: { target: ManageTarget }) {
 // this organization and all of its projects appear on the explore pages.
 function PublishCard({ target }: { target: ManageTarget }) {
   const t = useTranslations("marketplace.manageProjects.publish");
-  const [status, setStatus] = useState<"loading" | "idle" | "publishing" | "published" | "justPublished" | "hidden">("loading");
+  const [status, setStatus] = useState<"loading" | "idle" | "publishing" | "published" | "justPublished" | "unavailable" | "hidden">("loading");
   const [error, setError] = useState<string | null>(null);
   // Publishing exposes the whole organization publicly — owner/admin only.
   const allowed = target.kind !== "group" || target.role === "owner" || target.role === "admin";
@@ -344,7 +344,8 @@ function PublishCard({ target }: { target: ManageTarget }) {
       .then((response) => (response.ok ? response.json() : null))
       .then((data: { available?: boolean; published?: boolean } | null) => {
         if (cancelled) return;
-        if (!data?.available) setStatus("hidden");
+        if (!data) setStatus("hidden");
+        else if (!data.available) setStatus("unavailable");
         else setStatus(data.published ? "published" : "idle");
       })
       .catch(() => {
@@ -399,8 +400,8 @@ function PublishCard({ target }: { target: ManageTarget }) {
         <Button
           type="button"
           onClick={() => void publish()}
-          disabled={!allowed || status === "publishing"}
-          title={!allowed ? t("memberBlocked") : undefined}
+          disabled={!allowed || status === "publishing" || status === "unavailable"}
+          title={!allowed ? t("memberBlocked") : status === "unavailable" ? t("unavailable") : undefined}
           className="shrink-0"
         >
           {status === "publishing" ? <Loader2Icon className="animate-spin" /> : <GlobeIcon />}
@@ -408,6 +409,7 @@ function PublishCard({ target }: { target: ManageTarget }) {
         </Button>
       </div>
       {!allowed ? <p className="mt-2 text-xs text-muted-foreground">{t("memberBlocked")}</p> : null}
+      {allowed && status === "unavailable" ? <p className="mt-2 text-xs text-muted-foreground">{t("unavailable")}</p> : null}
       {error ? (
         <p className="mt-2 flex items-center gap-1.5 text-xs font-medium text-destructive">
           <TriangleAlertIcon className="h-3.5 w-3.5" />

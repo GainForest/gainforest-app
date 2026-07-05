@@ -1527,7 +1527,8 @@
       "publishedHint": "Akaunti hii na miradi yake inaonekana kwa kila mtu anayevinjari GainForest.",
       "justPublishedHint": "Imekamilika! Inaweza kuchukua dakika chache kuonekana kwenye kurasa za uchunguzi.",
       "memberBlocked": "Wamiliki na wasimamizi wa shirika pekee ndio wanaweza kuchapisha.",
-      "error": "Uchapishaji haukufanikiwa. Tafadhali jaribu tena baadaye."
+      "error": "Uchapishaji haukufanikiwa. Tafadhali jaribu tena baadaye.",
+      "unavailable": "Uchapishaji haupatikani kwa sasa. Tafadhali jaribu tena baadaye."
     }
   },
   "manageBumicerts": {

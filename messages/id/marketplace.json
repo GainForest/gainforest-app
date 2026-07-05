@@ -1527,7 +1527,8 @@
       "publishedHint": "Akun ini dan proyek-proyeknya terlihat oleh semua orang yang menjelajahi GainForest.",
       "justPublishedHint": "Selesai! Mungkin perlu beberapa menit untuk muncul di halaman jelajah.",
       "memberBlocked": "Hanya pemilik dan admin organisasi yang dapat menerbitkan.",
-      "error": "Penerbitan tidak berhasil. Silakan coba lagi nanti."
+      "error": "Penerbitan tidak berhasil. Silakan coba lagi nanti.",
+      "unavailable": "Penerbitan tidak tersedia saat ini. Silakan coba lagi nanti."
     }
   },
   "manageBumicerts": {

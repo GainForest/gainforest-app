@@ -1527,7 +1527,8 @@
       "publishedHint": "This account and its projects are visible to everyone browsing GainForest.",
       "justPublishedHint": "Done! It can take a few minutes to appear on the explore pages.",
       "memberBlocked": "Only organization owners and admins can publish.",
-      "error": "Publishing didn’t go through. Please try again later."
+      "error": "Publishing didn’t go through. Please try again later.",
+      "unavailable": "Publishing isn’t available right now. Please try again later."
     }
   },
   "manageBumicerts": {
