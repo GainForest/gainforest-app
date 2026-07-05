@@ -6,7 +6,6 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import {
   ArrowLeftIcon,
-  BotIcon,
   ChevronRightIcon,
   ClipboardCheckIcon,
   CrownIcon,
@@ -1980,9 +1979,9 @@ function EvidenceSection({ evidence }: { evidence: EvidenceInfo }) {
 
 /**
  * Reviews tab — third-party judgement about this claim, read straight off the
- * open network: formal `org.hypercerts.context.evaluation` records plus
- * threaded `org.impactindexer.review.comment` discussion (including comments
- * authored by Simocracy AI sims, which are labelled as such).
+ * open network: formal `org.hypercerts.context.evaluation` records plus the
+ * threaded comment discussion (`app.gainforest.feed.post` reply-posts, the
+ * same records the like + comment bar writes).
  */
 function ReviewsPanel({ record, reviews }: { record: BumicertRecord; reviews: BumicertReviews }) {
   const { evaluations, comments } = reviews;
@@ -2058,8 +2057,8 @@ function ReviewsPanel({ record, reviews }: { record: BumicertRecord; reviews: Bu
         </h2>
         {comments.length === 0 ? (
           <p className="rounded-2xl border border-border-soft bg-surface p-4 text-sm leading-6 text-muted-foreground">
-            No public comments yet. Comments posted on this claim from the wider network — including
-            reviews by Simocracy AI sims — will appear here.
+            No public comments yet. Comments posted on this claim from the wider network will
+            appear here.
           </p>
         ) : (
           <div className="grid gap-3">
@@ -2083,7 +2082,7 @@ function ReviewCommentCard({ comment, nested = false }: { comment: ReviewComment
   return (
     <div className={nested ? "border-l-2 border-border-soft pl-4" : "rounded-2xl border border-border-soft bg-surface p-4"}>
       <div className="flex flex-wrap items-center justify-between gap-3">
-        {comment.sim ? <SimIdentity name={comment.sim.name} uri={comment.sim.uri} /> : <AuthorInline did={comment.did} />}
+        <AuthorInline did={comment.did} />
         {comment.createdAt ? (
           <span className="text-xs text-muted-foreground" title={formatDateTime(comment.createdAt)}>
             {formatRelative(comment.createdAt)}
@@ -2099,30 +2098,6 @@ function ReviewCommentCard({ comment, nested = false }: { comment: ReviewComment
         </div>
       ) : null}
     </div>
-  );
-}
-
-/** Sim-authored comments are labelled and linked to the sim's public page. */
-function SimIdentity({ name, uri }: { name: string; uri: string | null }) {
-  const match = uri?.match(/^at:\/\/([^/]+)\/org\.simocracy\.sim\/([^/]+)$/);
-  const href = match ? `https://simocracy.org/sims/${encodeURIComponent(match[1])}/${encodeURIComponent(match[2])}` : null;
-  const body = (
-    <span className="inline-flex items-center gap-1.5">
-      <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary/15 text-primary">
-        <BotIcon className="h-3 w-3" aria-hidden />
-      </span>
-      <span className="text-sm font-medium text-foreground">{name}</span>
-      <span className="rounded-full border border-border-soft bg-background px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
-        AI sim
-      </span>
-    </span>
-  );
-  return href ? (
-    <a href={href} target="_blank" rel="noreferrer" className="transition-opacity hover:opacity-80">
-      {body}
-    </a>
-  ) : (
-    body
   );
 }
 
