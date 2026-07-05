@@ -104,13 +104,13 @@ function addArchiveEntry(entriesByPath: Map<string, FileEntry>, entry: FileEntry
   entriesByPath.set(normalizeZipEntryPath(entry.filename), entry);
 }
 
-export function getImageMimeTypeFromFileName(fileName: string): string {
+function getImageMimeTypeFromFileName(fileName: string): string {
   const extension = fileName.split(".").pop()?.toLowerCase();
   if (!extension) return "application/octet-stream";
   return IMAGE_MIME_BY_EXTENSION.get(extension) ?? "application/octet-stream";
 }
 
-export function isAcceptedKoboMediaImage(fileName: string): boolean {
+function isAcceptedKoboMediaImage(fileName: string): boolean {
   return IMAGE_MIME_BY_EXTENSION.has(fileName.split(".").pop()?.toLowerCase() ?? "");
 }
 
@@ -172,7 +172,7 @@ export async function buildKoboMediaZipIndex(file: File): Promise<KoboMediaZipIn
   return { fileName: file.name, entries, submissionCount: submissionUuids.size };
 }
 
-export function getKoboSubmissionUuid(row: Record<string, string>): string | null {
+function getKoboSubmissionUuid(row: Record<string, string>): string | null {
   const candidates = [row._uuid, row["meta/rootUuid"]];
 
   for (const candidate of candidates) {

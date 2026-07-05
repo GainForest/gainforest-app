@@ -1,6 +1,6 @@
 import type { AccountKind } from "@/app/account/_lib/account-route";
 
-export const MANAGE_MODE_VALUES = ["onboard-user", "onboard-org"] as const;
+const MANAGE_MODE_VALUES = ["onboard-user", "onboard-org"] as const;
 export type ManageMode = (typeof MANAGE_MODE_VALUES)[number];
 
 export function parseManageMode(value: string | string[] | undefined): ManageMode | null {

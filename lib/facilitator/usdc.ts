@@ -12,7 +12,7 @@ export const DECIMALS = 6 as const;
 export const EIP3009_DOMAIN_NAME = "USD Coin" as const;
 export const EIP3009_DOMAIN_VERSION = "2" as const;
 
-export const EIP3009_TYPES = {
+const EIP3009_TYPES = {
   TransferWithAuthorization: [
     { name: "from", type: "address" },
     { name: "to", type: "address" },

@@ -1,13 +1,12 @@
 import { cachedAsync } from "./async-cache";
 
 export const PUBLIC_EXPLORE_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
-export const PUBLIC_EXPLORE_REVALIDATE_SECONDS = 24 * 60 * 60;
 
 /**
  * One switch for the heavy public Explore surfaces. Set this to false to undo
  * the 24h client-side data cache without touching each page/fetcher.
  */
-export const PUBLIC_EXPLORE_CACHE_ENABLED = true;
+const PUBLIC_EXPLORE_CACHE_ENABLED = true;
 
 export function publicExploreCache<T>(
   scope: string,
@@ -19,7 +18,7 @@ export function publicExploreCache<T>(
   return cachedAsync(publicExploreCacheKey(scope, params), PUBLIC_EXPLORE_CACHE_TTL_MS, loader, signal);
 }
 
-export function publicExploreCacheKey(scope: string, params: unknown): string {
+function publicExploreCacheKey(scope: string, params: unknown): string {
   return `public-explore:v1:${scope}:${stableStringify(params)}`;
 }
 

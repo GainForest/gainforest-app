@@ -25,7 +25,7 @@ export type CartItem = {
   maxUsd: number | null;
 };
 
-export const DEFAULT_TIP_PERCENT = 10;
+const DEFAULT_TIP_PERCENT = 10;
 export const MAX_TIP_PERCENT = 25;
 
 const STORAGE_KEY = "gainforest.donation-cart.v1";

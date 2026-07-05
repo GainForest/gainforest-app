@@ -162,7 +162,7 @@ async function collectPaged<R>(
 
 // ── 1. Darwin Core occurrences ────────────────────────────────────────────
 
-export type MediaKind = "image" | "audio" | "video" | "spectrogram";
+type MediaKind = "image" | "audio" | "video" | "spectrogram";
 
 export type OccurrenceRecord = {
   kind: "occurrence";
@@ -1052,53 +1052,6 @@ export async function fetchObservationSummaryByDid(
   };
 }
 
-export type ProjectObservationSummary = {
-  /** Total observations linked to the project via `projectRef`. */
-  count: number;
-  /** Up to `target` image-bearing observations, ready to preview. */
-  records: OccurrenceRecord[];
-};
-
-/** Count + a few image previews for the observations attached to one project
- *  (matched on the occurrence `projectRef`). Powers the project detail page's
- *  observations summary. */
-export async function fetchProjectObservationSummary(
-  projectUri: string,
-  target = 12,
-  signal?: AbortSignal,
-): Promise<ProjectObservationSummary> {
-  if (!projectUri) return { count: 0, records: [] };
-
-  const countData = await indexerQuery<{ appGainforestDwcOccurrence?: { totalCount?: number | null } | null }>(
-    `query ProjectObservationCount($uri: String!) {
-      appGainforestDwcOccurrence(first: 1, where: { projectRef: { eq: $uri } }) { totalCount }
-    }`,
-    { uri: projectUri },
-    signal,
-  ).catch(() => null);
-  const count = countData?.appGainforestDwcOccurrence?.totalCount ?? 0;
-
-  const where = { projectRef: { eq: projectUri }, imageEvidence: { isNull: false } };
-  const page = await fetchOccurrencePage(Math.min(INDEXER_MAX_PAGE, Math.max(target, 24)), null, signal, where).catch(
-    () => ({ nodes: [] as RawOccurrence[], cursor: null, hasNextPage: false }),
-  );
-  const matches = page.nodes.filter((node) => Boolean(node.imageEvidence?.file?.ref));
-  let mapped = matches.map(mapOccurrence);
-  mapped = await resolveImages(
-    mapped,
-    (record) => {
-      if (record.imageUrl) return null;
-      const raw = matches.find((node) => node.rkey === record.rkey && node.did === record.did);
-      const ref = raw?.imageEvidence?.file?.ref ?? null;
-      return ref ? { did: record.did, ref } : null;
-    },
-    (record, url) => ({ ...record, imageUrl: url }),
-    signal,
-  );
-  const records = mapped.filter((record) => Boolean(record.imageUrl)).slice(0, target);
-  return { count, records };
-}
-
 /** Load recent image observations owned by a single DID. Used by Bumicert detail
  * pages to show a compact evidence gallery connected to the publishing
  * organization. */
@@ -1325,7 +1278,7 @@ const BUILTIN_TRUSTED_ISSUERS: BuiltinTrustedIssuer[] = [
 /** Metadata for a dynamic (admin-added) endorser. Its "Trusted by" emblem is
  *  rendered from the endorser's own profile instead of a bundled logo, so we
  *  carry enough here to label and link it. The brand `key` is the endorser DID. */
-export type EndorserMeta = { key: string; label: string; endorserDid: string; endorserHandle: string | null };
+type EndorserMeta = { key: string; label: string; endorserDid: string; endorserHandle: string | null };
 
 /** A trusted issuer resolved for an index build: a built-in brand family, or a
  *  dynamic endorser whose brand key is its own DID. */
@@ -1849,7 +1802,7 @@ export async function fetchTrustedByEndorsements(
 /** The Ma Earth funding rounds, mapped to their per-round badge keys. Round 3
  *  is open for applications but has no awards yet, so it only resolves once Ma
  *  Earth verifies it. Ordered so callers can render rounds ascending. */
-export const MA_EARTH_ROUND_BADGE_KEYS: Array<{ round: number; key: BumicertBadgeFilter }> = [
+const MA_EARTH_ROUND_BADGE_KEYS: Array<{ round: number; key: BumicertBadgeFilter }> = [
   { round: 1, key: "maearth-round-1" },
   { round: 2, key: "maearth-round-2" },
   { round: 3, key: "maearth-round-3" },
@@ -2042,7 +1995,7 @@ async function fetchRecognitionAwardIndexUncached(signal?: AbortSignal): Promise
  * Cached account-DID -> recognition-badge-keys index. Returns an empty map on
  * any error so a transient indexer hiccup never drops badges site-wide.
  */
-export function fetchRecognitionAwardIndex(signal?: AbortSignal): Promise<Map<string, Set<string>>> {
+function fetchRecognitionAwardIndex(signal?: AbortSignal): Promise<Map<string, Set<string>>> {
   return cachedAsync(
     "recognition-award-index:v1",
     HIDDEN_ACCOUNTS_CACHE_MS,
@@ -2193,7 +2146,7 @@ async function mapActivityConnection(
   };
 }
 
-export type BumicertIndexFilter = "images" | "locations" | "contributors" | "active" | "donations";
+type BumicertIndexFilter = "images" | "locations" | "contributors" | "active" | "donations";
 export type ExplorerSortMode = "newest" | "oldest" | "az" | "za";
 
 type ActivityQueryOptions = {
@@ -2650,17 +2603,6 @@ async function fetchBumicertsFromActivityCount(signal?: AbortSignal, options?: A
     }
   }
   return seen.size;
-}
-
-export async function fetchBumicertTotalCount(signal?: AbortSignal, options?: ActivityQueryOptions): Promise<number> {
-  return publicExploreCache(
-    "bumicert-total-count",
-    { options },
-    () => options?.filters?.includes("donations")
-      ? fetchDonationEnabledBumicertCount(undefined, options)
-      : fetchBumicertsFromActivityCount(undefined, options),
-    signal,
-  );
 }
 
 async function fetchBumicertsFromActivity(
@@ -3570,7 +3512,7 @@ export async function fetchProjectStats(signal?: AbortSignal): Promise<ProjectSt
 // ── 4. Project sites (organizations) ───────────────────────────────────────
 
 /** Which lexicon a project-site row came from. */
-export type SiteSource = "certified";
+type SiteSource = "certified";
 /** Toolbar filter selection; legacy organization records are intentionally excluded. */
 export type SiteSourceFilter = SiteSource | "both";
 
@@ -3645,7 +3587,7 @@ function fetchBumicertCountsByDid(dids: string[], signal?: AbortSignal): Promise
   );
 }
 
-export function fetchObservationCountsByDid(dids: string[], signal?: AbortSignal): Promise<Map<string, number>> {
+function fetchObservationCountsByDid(dids: string[], signal?: AbortSignal): Promise<Map<string, number>> {
   const uniqueDids = Array.from(new Set(dids.filter(Boolean))).sort();
   return publicExploreCache(
     "observation-counts-by-did",
@@ -3659,7 +3601,7 @@ export function fetchObservationCountsByDid(dids: string[], signal?: AbortSignal
   );
 }
 
-export type SiteIndexQuickFilter = "locations" | "bumicerts" | "observations" | "donations";
+type SiteIndexQuickFilter = "locations" | "bumicerts" | "observations" | "donations";
 export type SiteQueryOptions = {
   query?: string;
   country?: string | null;
@@ -4339,7 +4281,7 @@ export type ManagedLocation = {
   rawRecord?: Record<string, unknown> | null;
 };
 
-export type ManagedLocationData =
+type ManagedLocationData =
   | { kind: "point"; lat: number; lon: number }
   | { kind: "uri"; uri: string }
   | { kind: "unknown" };
@@ -5644,7 +5586,7 @@ export function summarizeObservationMeasurements(records: TreeMeasurementRecord[
 
 // ── 9. Bumicert project updates attachments ─────────────────────────────
 
-export type TimelineAttachmentSubject = { uri: string | null; cid: string | null };
+type TimelineAttachmentSubject = { uri: string | null; cid: string | null };
 
 export type TimelineAttachmentItem = {
   metadata: {
@@ -6508,12 +6450,12 @@ export async function fetchRecordByUri(
 // description; org records carry a profile. Everything is best-effort: null
 // fields are dropped so a sparse record stays clean.
 
-export type DetailField = { label: string; value: string; wide?: boolean };
+type DetailField = { label: string; value: string; wide?: boolean };
 export type DetailSection = { title: string | null; fields: DetailField[] };
 export type DetailBadge = { label: string; tone: "ok" | "warn" | "down" | "info" };
-export type DetailLink = { label: string; href: string };
+type DetailLink = { label: string; href: string };
 /** A social/website link, rendered as a minimalist icon button in the drawer. */
-export type SocialLink = { href: string; platform: string };
+type SocialLink = { href: string; platform: string };
 
 // ── Rich document model (Leaflet linear documents) ─────────────────────────
 // Bumicert descriptions are authored as `pub.leaflet.pages.linearDocument`s:

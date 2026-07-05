@@ -379,7 +379,7 @@ const ORG_COUNTRY_QUERY = `
   }
 `;
 
-export type CountryRow = {
+type CountryRow = {
   countryCode: string;
   name: string;
   emoji: string;

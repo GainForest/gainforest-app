@@ -1,10 +1,9 @@
 import { occurrenceInputToAppendInput } from "./occurrence-adapter";
 import type { ValidatedRow } from "./types";
 
-export const APPEND_EXISTING_DWC_DATASET_MAX_ROWS = 10;
 export const APPEND_EXISTING_DWC_DATASET_CLIENT_ROWS = 1;
 
-export type AppendExistingDatasetFloraMeasurementInput = {
+type AppendExistingDatasetFloraMeasurementInput = {
   dbh?: string;
   totalHeight?: string;
   diameter?: string;
@@ -16,7 +15,7 @@ export type AppendExistingDatasetRowInput = {
   floraMeasurement: AppendExistingDatasetFloraMeasurementInput | null;
 };
 
-export type AppendExistingDatasetRowResult =
+type AppendExistingDatasetRowResult =
   | { index: number; state: "success"; occurrenceUri: string; photoCount: number }
   | { index: number; state: "partial"; occurrenceUri: string; photoCount: number; error: string }
   | { index: number; state: "error"; error: string };

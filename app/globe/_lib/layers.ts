@@ -48,7 +48,7 @@ export function toKebabCase(value: string): string {
 
 /** Layer records template environment variables into endpoints; strip them the
  *  same way Green Globe does. */
-export function cleanLayerEndpoint(endpoint: string): string {
+function cleanLayerEndpoint(endpoint: string): string {
   return endpoint.replace(/\$\{process\.env\.(AWS_STORAGE|TITILER_ENDPOINT)\}(\/)?/g, "");
 }
 

@@ -37,7 +37,7 @@ function MedallionArt({ icon }: { icon: ReactNode }) {
   );
 }
 
-export const OVERVIEW_FOLDER_ART: Record<string, ReactNode> = {
+const OVERVIEW_FOLDER_ART: Record<string, ReactNode> = {
   certs: <MedallionArt icon={<BumicertIcon className="size-4 text-primary/80" />} />,
   donations: <MedallionArt icon={<HeartHandshakeIcon className="size-4 text-primary/80" />} />,
   projects: <CardArt header={<FolderKanbanIcon className="size-4 text-primary/80" />} lines={[7, 11]} />,

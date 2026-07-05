@@ -20,10 +20,8 @@ export type CodexPetState =
   | "running"
   | "review";
 
-export const CODEX_PET_SHEET_W = 1536;
-export const CODEX_PET_SHEET_H = 1872;
-export const CODEX_PET_CELL_W = 192;
-export const CODEX_PET_CELL_H = 208;
+const CODEX_PET_CELL_W = 192;
+const CODEX_PET_CELL_H = 208;
 
 interface CodexPetRow {
   row: number;

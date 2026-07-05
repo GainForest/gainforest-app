@@ -12,7 +12,7 @@ type TreeDatasetClassificationInput = {
 const TREE_DATA_TYPE = "measuredtree";
 const TREE_SOURCE = "bumicerts";
 
-export function getOccurrenceDynamicProperty(
+function getOccurrenceDynamicProperty(
   value: string | null | undefined,
   key: string,
 ): string | null {
@@ -54,7 +54,7 @@ export function hasTreeDatasetMetadata(
   return hasText(item.establishmentMeans);
 }
 
-export function isMeasuredTreeOccurrence(
+function isMeasuredTreeOccurrence(
   item: TreeOccurrenceClassificationInput,
   options?: { treeDatasetUrisWithMetadata?: ReadonlySet<string> },
 ): boolean {

@@ -1,5 +1,5 @@
 import { existsSync, readFileSync } from "node:fs";
-import { mkdir, rm, writeFile } from "node:fs/promises";
+import { mkdir, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import type { DisposableInbox } from "./disposable-email";
 
@@ -58,10 +58,6 @@ export async function patchCgsOrgMetadata(patch: Partial<CgsOrgMetadata>): Promi
   const next = { ...current, ...patch };
   await writeCgsOrgMetadata(next);
   return next;
-}
-
-export async function clearCgsOrgMetadata(): Promise<void> {
-  await rm(cgsOrgMetadataPath, { force: true });
 }
 
 export function readCgsOrgMetadata(): CgsOrgMetadata | null {

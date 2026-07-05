@@ -16,7 +16,6 @@ import { EndorsementsGivenGrid } from "./EndorsementsGivenGrid";
 import type { AccountOrganization } from "./AccountOrganizationsGrid";
 import { OverviewFolders, type OverviewFolderTile } from "./OverviewFolders";
 import { AccountContentColumns, AccountSidebar } from "./AccountSidebar";
-import { AccountSettingsSections } from "./AccountSettingsSections";
 import { ShareProfileButton } from "./ShareProfileButton";
 import { DonationHistory } from "./DonationHistory";
 import { fetchReceipts } from "../../_lib/dashboard";
@@ -514,8 +513,4 @@ export async function AccountGalleryTabContent({ account, did }: { account: Acco
       accountName={account.displayName}
     />
   );
-}
-
-export function AccountSettingsTabContent({ account }: { account: AccountRouteData }) {
-  return <AccountSettingsSections did={account.did} />;
 }

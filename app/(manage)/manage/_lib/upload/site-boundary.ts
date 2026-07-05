@@ -33,10 +33,6 @@ export type UploadRowsSiteBoundaryCheck = {
   fatalError: string | null;
 };
 
-export function uploadSiteBoundaryQueryKey(siteUri: string | null | undefined) {
-  return ["upload", "trees", "site-boundary", siteUri ?? null] as const;
-}
-
 function assertUsableSiteBoundary(boundary: SiteBoundaryGeoJson): SiteBoundaryGeoJson {
   const classification = classifyPointAgainstGeoJsonBoundary({
     geoJson: boundary,

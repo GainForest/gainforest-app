@@ -72,7 +72,7 @@ export function lexiconDescription(doc: LexiconDoc): string {
   return main?.description ?? "";
 }
 
-export type DefKind =
+type DefKind =
   | "record"
   | "object"
   | "query"

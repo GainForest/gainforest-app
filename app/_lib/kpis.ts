@@ -50,7 +50,7 @@ const RECEIPTS_TOTALS_QUERY = `
   }
 `;
 
-export type CollectionTotals = Pick<
+type CollectionTotals = Pick<
   ExplorerKpis,
   "occurrences" | "bumicerts" | "projects" | "sites" | "locations"
 >;
@@ -87,7 +87,7 @@ async function fetchTotalsUncached(): Promise<CollectionTotals> {
 
 const USD = new Set(["USD", "USDC"]);
 
-export async function fetchTotals(): Promise<CollectionTotals> {
+async function fetchTotals(): Promise<CollectionTotals> {
   return cachedAsync("home-collection-totals", TOTAL_STATS_CACHE_MS, fetchTotalsUncached);
 }
 
@@ -137,7 +137,7 @@ async function fetchRaisedUncached(): Promise<
   }
 }
 
-export async function fetchRaised(): Promise<
+async function fetchRaised(): Promise<
   Pick<ExplorerKpis, "totalRaised" | "totalDonations">
 > {
   return cachedAsync("home-raised-totals", TOTAL_STATS_CACHE_MS, fetchRaisedUncached);

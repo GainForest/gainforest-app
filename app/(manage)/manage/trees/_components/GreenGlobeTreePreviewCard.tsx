@@ -20,7 +20,7 @@ type GreenGlobeTreePreviewCardProps = {
   focusedSiteRef?: string | null;
 };
 
-export function GreenGlobeTreePreviewCard({
+function GreenGlobeTreePreviewCard({
   did,
   datasetRef,
   treeGroupName,

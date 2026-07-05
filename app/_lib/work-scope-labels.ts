@@ -1,4 +1,4 @@
-export const KNOWN_WORK_SCOPE_KEYS = [
+const KNOWN_WORK_SCOPE_KEYS = [
   "reforestation",
   "forest_protection",
   "biodiversity_monitoring",
@@ -31,7 +31,7 @@ export function normalizeKnownWorkScopeKey(value: string): KnownWorkScopeKey | n
   return knownWorkScopeKeys.has(normalized) ? normalized as KnownWorkScopeKey : null;
 }
 
-export function formatUnknownWorkScopeTag(tag: string): string {
+function formatUnknownWorkScopeTag(tag: string): string {
   const clean = tag.replace(/[_-]+/g, " ").replace(/\s+/g, " ").trim();
   return clean ? clean.charAt(0).toUpperCase() + clean.slice(1) : tag;
 }

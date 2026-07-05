@@ -307,7 +307,7 @@ const previewCache = new Map<string, RecordPreview | null>();
  * Handles projects, observations and feed posts; other kinds resolve to null so
  * the caller can fall back to a plain owner + link row. Results are memoized.
  */
-export async function fetchRecordPreview(uri: string, signal?: AbortSignal): Promise<RecordPreview | null> {
+async function fetchRecordPreview(uri: string, signal?: AbortSignal): Promise<RecordPreview | null> {
   if (previewCache.has(uri)) return previewCache.get(uri) ?? null;
   const base = classifyRecordUri(uri);
   if (!base) return null;

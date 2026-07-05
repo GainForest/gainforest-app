@@ -39,11 +39,11 @@ export type TreeUploadEventName =
 
 export type TreeUploadStepName = (typeof TREE_UPLOAD_STEP_NAMES)[number];
 
-export type TreeUploadDatasetMode = "none" | "new" | "existing";
+type TreeUploadDatasetMode = "none" | "new" | "existing";
 
-export type TreeUploadSourceFormat = "kobo" | "generic";
+type TreeUploadSourceFormat = "kobo" | "generic";
 
-export const TREE_UPLOAD_FAILURE_REASONS = [
+const TREE_UPLOAD_FAILURE_REASONS = [
   "unsupported_file_type",
   "file_too_large",
   "parse_error",
@@ -57,7 +57,7 @@ export const TREE_UPLOAD_FAILURE_REASONS = [
   "tree_group_create_failed",
 ] as const;
 
-export type TreeUploadFailureReason =
+type TreeUploadFailureReason =
   (typeof TREE_UPLOAD_FAILURE_REASONS)[number];
 
 export type TreeUploadEventPayload = {

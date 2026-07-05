@@ -7,8 +7,7 @@
  *     evaluation primitive (summary, optional numeric score, evaluator DIDs,
  *     report links). The GraphQL `where` input only exposes a presence filter
  *     on `subject`, so we drain the (small) collection once and index it by
- *     `subject.uri`, exactly like `funding-summary.ts` does for funding
- *     configs.
+ *     `subject.uri`.
  *
  *  2. `app.gainforest.feed.post` reply-posts — the same comment records the
  *     feed's like + comment bar writes (a post carrying a `reply` ref whose
@@ -28,9 +27,9 @@ const PAGE_SIZE = 1000;
 
 // ── Types ─────────────────────────────────────────────────────────────────
 
-export type EvaluationScore = { min: number; max: number; value: number };
+type EvaluationScore = { min: number; max: number; value: number };
 
-export type BumicertEvaluation = {
+type BumicertEvaluation = {
   uri: string;
   /** Repo owner — the account that published the evaluation. */
   did: string;
@@ -149,7 +148,7 @@ async function loadEvaluationIndex(): Promise<Map<string, BumicertEvaluation[]>>
   return index;
 }
 
-export function fetchEvaluationIndex(signal?: AbortSignal): Promise<Map<string, BumicertEvaluation[]>> {
+function fetchEvaluationIndex(signal?: AbortSignal): Promise<Map<string, BumicertEvaluation[]>> {
   return cachedAsync("reviews:evaluation-index", CACHE_TTL_MS, loadEvaluationIndex, signal);
 }
 
@@ -231,7 +230,7 @@ async function loadCommentsForSubject(subjectUri: string): Promise<ReviewComment
   return roots;
 }
 
-export function fetchCommentsForSubject(subjectUri: string, signal?: AbortSignal): Promise<ReviewComment[]> {
+function fetchCommentsForSubject(subjectUri: string, signal?: AbortSignal): Promise<ReviewComment[]> {
   return cachedAsync(`reviews:comments:${subjectUri}`, CACHE_TTL_MS, () => loadCommentsForSubject(subjectUri), signal);
 }
 

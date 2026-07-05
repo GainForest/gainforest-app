@@ -86,10 +86,6 @@ export function resolveEmailTemplateLocale(options: {
   return resolvePreferredLanguageFromHeader(options.acceptLanguage);
 }
 
-export function getEmailTemplateLocales(): readonly SupportedLanguageCode[] {
-  return SUPPORTED_LOCALES;
-}
-
 export function renderOtpEmailTemplate(locale: SupportedLanguageCode = DEFAULT_LANGUAGE): string {
   const copy = copyByLocale[locale];
 

@@ -112,28 +112,10 @@ export function formatDuration(ms: number | null | undefined): string {
   return remHr ? `${day}d ${remHr}h` : `${day}d`;
 }
 
-export function formatCoord(
-  lat: number | string | null | undefined,
-  lon: number | string | null | undefined,
-): string {
-  const la = asNumber(lat);
-  const lo = asNumber(lon);
-  if (la == null || lo == null) return "";
-  return `${la.toFixed(3)}°, ${lo.toFixed(3)}°`;
-}
-
 export function asNumber(v: number | string | null | undefined): number | null {
   if (v == null) return null;
   const n = typeof v === "number" ? v : Number(v);
   return Number.isFinite(n) ? n : null;
-}
-
-/** at://did:plc:abcdef…/coll/rkey → readable short form for chips. */
-export function shortAtUri(uri: string): string {
-  const m = uri.match(/^at:\/\/(did:[a-z0-9]+:)([^/]+)\/([^/]+)\/(.+)$/);
-  if (!m) return uri;
-  const [, prefix, id, , rkey] = m;
-  return `at://${prefix}${id.slice(0, 4)}…${id.slice(-4)}/…/${rkey.slice(-7)}`;
 }
 
 /** did:plc:abcdefghij… → "did:plc:abcd…ghij" */
@@ -143,12 +125,6 @@ export function shortDid(did: string): string {
   if (tail.length <= 12) return did;
   const prefix = did.slice(0, did.length - tail.length);
   return `${prefix}${tail.slice(0, 4)}…${tail.slice(-4)}`;
-}
-
-/** 0x12ab…cd34 wallet shortener (already-short values pass through). */
-export function shortWallet(addr: string): string {
-  if (!addr.startsWith("0x") || addr.length <= 12) return addr;
-  return `${addr.slice(0, 6)}…${addr.slice(-4)}`;
 }
 
 /** ISO country code → flag emoji (best effort). */

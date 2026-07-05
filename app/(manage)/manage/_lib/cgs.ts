@@ -33,25 +33,12 @@ export type CgsMemberIdentity = {
   handle?: string | null;
 };
 
-export type CgsMembersResponse = {
-  members: CgsMember[];
-  cursor?: string;
-};
-
 export type CgsPendingInvitation = {
   id: string;
   email: string;
   role: "member" | "admin";
   status: "pending" | "accepted" | "canceled" | "expired";
   createdAt?: string | null;
-};
-
-type RawCgsMember = {
-  did?: unknown;
-  memberDid?: unknown;
-  role?: unknown;
-  addedBy?: unknown;
-  addedAt?: unknown;
 };
 
 export type RegisterCgsGroupResponse = {
@@ -77,7 +64,7 @@ function sanitizeCgsHandleName(name: string, maxLen: number): string {
   return label;
 }
 
-export function buildCgsGroupHandleCandidate(name: string, attempt = 0): string {
+function buildCgsGroupHandleCandidate(name: string, attempt = 0): string {
   if (attempt === 0) {
     const clean = sanitizeCgsHandleName(name, CGS_HANDLE_NAME_MAX_LEN);
     if (clean.length >= CGS_HANDLE_MIN_LEN) return clean;
@@ -132,7 +119,7 @@ export async function fetchCgsGroups(): Promise<CgsGroupsResponse> {
   return parseJsonResponse<CgsGroupsResponse>(res, "Could not load organizations.");
 }
 
-export async function callCgs<T>(payload: CgsMutationPayload): Promise<T> {
+async function callCgs<T>(payload: CgsMutationPayload): Promise<T> {
   const res = await fetch("/api/cgs/mutation", {
     method: "POST",
     headers: { "content-type": "application/json" },
@@ -174,29 +161,6 @@ export async function registerCgsGroup(input: {
   throw lastError instanceof Error
     ? lastError
     : new Error("Could not register organization handle.");
-}
-
-function normalizeCgsMembers(value: unknown): CgsMember[] {
-  if (!Array.isArray(value)) return [];
-  return value.flatMap((entry) => {
-    if (typeof entry !== "object" || entry === null) return [];
-    const member = entry as RawCgsMember;
-    const did = typeof member.did === "string" ? member.did : typeof member.memberDid === "string" ? member.memberDid : null;
-    if (!did) return [];
-    return [{
-      did,
-      role: member.role === "owner" || member.role === "admin" ? member.role : "member",
-      addedBy: typeof member.addedBy === "string" ? member.addedBy : null,
-      addedAt: typeof member.addedAt === "string" ? member.addedAt : null,
-    }];
-  });
-}
-
-export async function listCgsMembers(repo: string): Promise<CgsMembersResponse> {
-  const params = new URLSearchParams({ repo, limit: "100" });
-  const res = await fetch(`/api/cgs/members?${params.toString()}`, { cache: "no-store" });
-  const data = await parseJsonResponse<CgsMembersResponse>(res, "Could not load members.");
-  return { ...data, members: normalizeCgsMembers(data.members) };
 }
 
 export async function resolveCgsMemberIdentity(identifier: string): Promise<CgsMemberIdentity> {

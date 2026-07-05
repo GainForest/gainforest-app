@@ -23,7 +23,7 @@ const REVALIDATE = 30;
 
 export type DeviceStatus = "up" | "down" | "grace" | "new" | "paused" | "started";
 
-export type DeviceSystem = {
+type DeviceSystem = {
   tempC: number | null;
   memUsedPct: number | null;
   diskUsedPct: number | null;
@@ -33,7 +33,7 @@ export type DeviceSystem = {
   throttled: boolean;
 };
 
-export type DeviceTainá = {
+type DeviceTainá = {
   handle: string | null;
   drafts: number | null;
   draftsWithImages: number | null;
@@ -284,41 +284,4 @@ export function formatUptime(seconds: number | null): string {
 export function devicesSummary(devices: Device[]): { healthy: number; total: number } {
   const healthy = devices.filter((d) => d.status === "up" || d.status === "started").length;
   return { healthy, total: devices.length };
-}
-
-// ── Lightweight liveness summary ───────────────────────────────────────────
-//
-// The home page only needs "how many Tainás are live right now", so it skips
-// the per-device ping-body fetches that fetchDevices() does and just counts
-// statuses off the single /checks/ listing.
-
-export type DevicesLiveSummary = {
-  /** False when no HEALTHCHECKS_API_KEY is configured. */
-  configured: boolean;
-  /** Devices currently reporting up. */
-  healthy: number;
-  /** Total registered field devices. */
-  total: number;
-  fetchedAt: string;
-};
-
-export async function fetchDevicesSummary(): Promise<DevicesLiveSummary> {
-  const apiKey = process.env.HEALTHCHECKS_API_KEY?.trim();
-  const fetchedAt = new Date().toISOString();
-  if (!apiKey) return { configured: false, healthy: 0, total: 0, fetchedAt };
-  try {
-    const res = await fetch(`${API_BASE}/checks/`, {
-      headers: { "X-Api-Key": apiKey },
-      next: { revalidate: REVALIDATE },
-    });
-    if (!res.ok) return { configured: true, healthy: 0, total: 0, fetchedAt };
-    const checks = ((await res.json()) as { checks?: RawCheck[] }).checks ?? [];
-    const healthy = checks.filter((c) => {
-      const s = normaliseStatus(c.status);
-      return s === "up" || s === "started";
-    }).length;
-    return { configured: true, healthy, total: checks.length, fetchedAt };
-  } catch {
-    return { configured: true, healthy: 0, total: 0, fetchedAt };
-  }
 }

@@ -34,7 +34,7 @@ const ENDORSEMENT_BADGE_TYPE = "endorsement";
 const MAX_FOREIGN_DEFINITION_LOOKUPS = 20;
 
 /** An endorsement-typed badge definition the admin can award. */
-export type EndorsementBadgeOption = {
+type EndorsementBadgeOption = {
   uri: string;
   cid: string;
   rkey: string;

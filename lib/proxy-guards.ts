@@ -40,7 +40,7 @@ const PROXY_BYPASS_PREFIXES = ["/api/"] as const;
 const ACCOUNT_ID_ROUTES = ["account", "cert", "bumicert", "projects", "observations"] as const;
 const RECORD_DETAIL_ROUTES = ["cert", "bumicert", "projects", "observations"] as const;
 
-export type ProxyBlockReason =
+type ProxyBlockReason =
   | "blocked-bot-user-agent"
   | "invalid-account-did-or-handle"
   | "invalid-record-rkey";
@@ -101,7 +101,7 @@ export function isBlockedBotUserAgent(userAgent: string): boolean {
   );
 }
 
-export function shouldInspectProxyRequest(
+function shouldInspectProxyRequest(
   method: string,
   pathname: string,
 ): boolean {

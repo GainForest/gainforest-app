@@ -55,7 +55,7 @@ type DirectCertifiedOrganization = {
   longDescription: string | null;
 };
 
-export function encodeAccountSegment(value: string): string {
+function encodeAccountSegment(value: string): string {
   return encodeURIComponent(value);
 }
 

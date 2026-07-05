@@ -62,7 +62,7 @@ import type {
 
 const WORLD_BOUNDS: LngLatBounds = [-150, -50, 150, 65];
 
-export type GlobeProjectFocus = {
+type GlobeProjectFocus = {
   title: string;
   /** Project page to link back to. */
   href: string;

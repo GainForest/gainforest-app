@@ -33,14 +33,14 @@ function loadAll(): LexiconDoc[] {
 // stay on disk (so refs to them still resolve as labels) but aren't surfaced.
 // `id` is a stable key used for translation lookups (common.docs.sections.<id>);
 // `title` is a proper-noun standard name kept verbatim across locales.
-export interface Section {
+interface Section {
   id: string;
   title: string;
   prefix: string;
   ids?: string[];
 }
 
-export const SECTIONS: Section[] = [
+const SECTIONS: Section[] = [
   {
     id: "feed",
     title: "Feed",

@@ -17,7 +17,7 @@ import {
   type UploadSiteSelection,
 } from "../../_lib/upload/site-selection";
 
-export const STORAGE_KEY = "manage-trees-pending";
+const STORAGE_KEY = "manage-trees-pending";
 const SESSION_TTL_MS = 10 * 60 * 1000;
 
 export type PendingUploadData = {

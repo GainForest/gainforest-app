@@ -250,7 +250,7 @@ function matchPattern(header: string): KoboPattern | null {
   return null;
 }
 
-export function isKoboPhotoUrlCompanionColumn(
+function isKoboPhotoUrlCompanionColumn(
   header: string,
   allHeaders: string[],
 ): boolean {

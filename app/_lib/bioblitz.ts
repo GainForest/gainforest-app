@@ -30,7 +30,7 @@ export const BIOBLITZ_PRIZES = {
 
 /** A confirmed winner of one of the round prizes. The DID is resolved to a
  *  display name in the UI, so no technical identifier is ever shown. */
-export type RoundWinner = {
+type RoundWinner = {
   did: string;
   /** Final observation count, when relevant (the "most observations" prize). */
   count?: number;
@@ -111,7 +111,6 @@ export function bioblitzRounds(now: number = Date.now(), futureCount = 1): Biobl
 
 /** Backwards-compatible snapshot for callers that only need the active schedule
  *  around module load. Prefer `bioblitzRounds()` for time-sensitive UI. */
-export const BIOBLITZ_ROUNDS: BioblitzRound[] = bioblitzRounds(Date.now());
 
 /**
  * Program-wide support links (the same across rounds): a live "ask us anything"
@@ -131,11 +130,11 @@ export const BIOBLITZ_LINKS = {
 // mark them registered automatically the next time the board loads.
 
 /** Program-wide tag every join post carries. */
-export const BIOBLITZ_TAG = "bioblitz";
+const BIOBLITZ_TAG = "bioblitz";
 
 /** Round-specific join tag, e.g. "bioblitz-round-1". Detection keys on this so
  *  registering is per-round (a new round needs a fresh join post). */
-export function bioblitzRoundTag(round: BioblitzRound): string {
+function bioblitzRoundTag(round: BioblitzRound): string {
   return `${BIOBLITZ_TAG}-round-${round.id}`;
 }
 
@@ -220,7 +219,7 @@ export function countdownTo(targetIso: string, now: number = Date.now()): Countd
 /** A collector on the round board, with everything the UI needs to render a
  *  row without a second lookup (name + avatar come from the indexer; the DID is
  *  only used internally to resolve a richer profile/avatar). */
-export type RoundCollector = {
+type RoundCollector = {
   did: string;
   count: number;
   displayName: string | null;

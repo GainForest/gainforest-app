@@ -4,7 +4,6 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
-import { Skeleton } from "@/components/ui/skeleton";
 import { BumicertOwnerAvatar } from "./BumicertOwnerAvatar";
 
 function resolveImageSrc(coverImage: File | string): string {
@@ -241,28 +240,3 @@ function TextPill({
   );
 }
 
-export function BumicertCardSkeleton() {
-  return (
-    <div className="relative flex h-full w-full flex-col overflow-hidden rounded-2xl border border-border bg-card">
-      <Skeleton className="relative aspect-4/3 overflow-hidden rounded-none" />
-
-      <div className="relative z-1 -mt-6 flex flex-1 flex-col justify-between px-4 py-3">
-        <div>
-          <Skeleton className="h-7 w-3/4" />
-          <div className="mt-1.5 space-y-1.5">
-            <Skeleton className="h-4 w-full" />
-            <Skeleton className="h-4 w-2/3" />
-          </div>
-        </div>
-        <div className="mt-4 flex items-center gap-2">
-          <Skeleton className="h-7 w-16 rounded-full" />
-          <Skeleton className="h-7 w-24 rounded-full" />
-        </div>
-      </div>
-
-      <div className="absolute left-2 top-2 flex items-center gap-1 rounded-full bg-background/70 p-1 shadow-lg backdrop-blur-lg">
-        <Skeleton className="size-6 rounded-full" />
-      </div>
-    </div>
-  );
-}

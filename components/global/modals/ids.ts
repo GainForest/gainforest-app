@@ -14,5 +14,3 @@ export const MODAL_IDS = {
   MANAGE_TREE_ADD_TO_TREE_GROUP: "manage/tree/add-to-tree-group",
   MANAGE_TREE_DELETE_TREE_GROUP: "manage/tree/delete-tree-group",
 } as const;
-
-export type ModalId = (typeof MODAL_IDS)[keyof typeof MODAL_IDS];

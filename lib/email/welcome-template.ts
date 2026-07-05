@@ -44,7 +44,7 @@ type WelcomeCopy = {
   inviteFooter: string;
 };
 
-export type WelcomeEmailLinks = {
+type WelcomeEmailLinks = {
   manage: string;
   organizationSetup: string;
   createProject: string;
@@ -485,10 +485,6 @@ export function resolveWelcomeEmailLocale(options: {
   }
 
   return resolvePreferredLanguageFromHeader(options.acceptLanguage);
-}
-
-export function getWelcomeEmailLocales(): readonly SupportedLanguageCode[] {
-  return SUPPORTED_LOCALES;
 }
 
 export function renderWelcomeEmailTemplate({

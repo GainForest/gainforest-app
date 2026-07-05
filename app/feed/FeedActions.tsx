@@ -91,7 +91,7 @@ function useViewerCard(sessionDid: string | null): { name: string | null; avatar
 
 export type LocalPost = { id: string; text: string; createdAt: string };
 
-export type LikersState = { status: "idle" | "loading" | "ready"; likers: Liker[] };
+type LikersState = { status: "idle" | "loading" | "ready"; likers: Liker[] };
 
 export type FeedInteractions = {
   /** The signed-in user's DID (used to resolve the account switcher). */

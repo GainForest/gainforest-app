@@ -57,7 +57,7 @@ const TREES_CLUSTER_LAYER = "clusteredTrees";
 const TREES_CLUSTER_COUNT_LAYER = "clusteredTreesCountText";
 const TREES_POINT_LAYER = "unclusteredTrees";
 
-export type GlobeMapPadding = { top: number; bottom: number; left: number; right: number };
+type GlobeMapPadding = { top: number; bottom: number; left: number; right: number };
 
 type GlobeMapProps = {
   organizations: GlobeOrganization[];

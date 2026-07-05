@@ -1,5 +1,5 @@
 import { hexToNumber, slice } from "viem";
-import { CHAIN_ID, EIP3009_DOMAIN_NAME, EIP3009_DOMAIN_VERSION, EIP3009_TYPES, USDC_CONTRACT } from "./usdc";
+import { CHAIN_ID } from "./usdc";
 
 export type Eip3009Authorization = {
   from: `0x${string}`;
@@ -45,31 +45,6 @@ function parseAuthorization(value: unknown): Eip3009Authorization | null {
   if (typeof validAfter !== "string" || !/^\d+$/.test(validAfter)) return null;
   if (typeof validBefore !== "string" || !/^\d+$/.test(validBefore)) return null;
   return { from, to, nonce, value: valueRaw, validAfter, validBefore };
-}
-
-export function buildEip3009Domain() {
-  return {
-    name: EIP3009_DOMAIN_NAME,
-    version: EIP3009_DOMAIN_VERSION,
-    chainId: CHAIN_ID,
-    verifyingContract: USDC_CONTRACT,
-  } as const;
-}
-
-export function buildEip3009TypedData(authorization: Eip3009Authorization) {
-  return {
-    domain: buildEip3009Domain(),
-    types: EIP3009_TYPES,
-    primaryType: "TransferWithAuthorization" as const,
-    message: {
-      from: authorization.from,
-      to: authorization.to,
-      value: BigInt(authorization.value),
-      validAfter: BigInt(authorization.validAfter),
-      validBefore: BigInt(authorization.validBefore),
-      nonce: authorization.nonce,
-    },
-  };
 }
 
 export function parsePaymentSignature(header: string): PaymentSignaturePayload {

@@ -69,7 +69,7 @@ let sharedProvider: WaaPEthereumProviderInterface | null = null;
  *  modal to observe WaaP's UI lifecycle (its `login()` promise never settles
  *  when the user dismisses the WaaP card — only an internal `hide_modal`
  *  event fires — so callers watch that to reset their pending state). */
-export function getWaaPProvider(options: InitWaaPOptions = WAAP_INIT_OPTIONS): WaaPEthereumProviderInterface {
+function getWaaPProvider(options: InitWaaPOptions = WAAP_INIT_OPTIONS): WaaPEthereumProviderInterface {
   if (!sharedProvider) sharedProvider = initWaaP(options);
   return sharedProvider;
 }

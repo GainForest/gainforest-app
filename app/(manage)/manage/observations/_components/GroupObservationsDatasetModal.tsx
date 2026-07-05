@@ -328,5 +328,3 @@ export function GroupObservationsDatasetModal({
     </ModalContent>
   );
 }
-
-export default GroupObservationsDatasetModal;

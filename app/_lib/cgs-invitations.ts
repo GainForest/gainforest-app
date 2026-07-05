@@ -6,7 +6,7 @@ import { supabaseFilterValue, supabaseInsert, supabasePatch, supabaseSelect } fr
 import type { AuthSession } from "./auth";
 
 export type GroupInvitationRole = "member" | "admin";
-export type GroupInvitationStatus = "pending" | "accepted" | "canceled" | "expired";
+type GroupInvitationStatus = "pending" | "accepted" | "canceled" | "expired";
 
 export type GroupInvitation = {
   id: string;
@@ -217,7 +217,7 @@ function canInvite(role: CgsServerRole | null, inviteRole: GroupInvitationRole):
   return false;
 }
 
-export function canCancelInvitation(role: CgsServerRole | null, invitationRole: GroupInvitationRole): boolean {
+function canCancelInvitation(role: CgsServerRole | null, invitationRole: GroupInvitationRole): boolean {
   if (role === "owner") return true;
   if (role === "admin") return invitationRole === "member";
   return false;

@@ -107,7 +107,7 @@ export function treeDbh(properties: TreeProperties | null): string | null {
 }
 
 /** Date the tree was measured/planted (first populated of the known fields). */
-export function treeDate(properties: TreeProperties | null): string | null {
+function treeDate(properties: TreeProperties | null): string | null {
   if (!properties) return null;
   return treeMetric(properties, [
     "dateOfMeasurement",
@@ -119,7 +119,7 @@ export function treeDate(properties: TreeProperties | null): string | null {
 }
 
 /** Free-text field notes, when present. */
-export function treeNotes(properties: TreeProperties | null): string | null {
+function treeNotes(properties: TreeProperties | null): string | null {
   if (!properties) return null;
   return treeMetric(properties, ["FCD-tree_records-notes", "notes", "remarks"]);
 }
@@ -137,7 +137,7 @@ function toEmbeddableImageUrl(url: string): string {
 /** Photo angles for a tree (main → leaf → bark → root → fruit), de-duplicated
  *  and normalised to embeddable URLs. Port of Green Globe's getTreePhotos,
  *  minus the project-specific S3 placeholders. */
-export function treePhotos(properties: TreeProperties | null): string[] {
+function treePhotos(properties: TreeProperties | null): string[] {
   if (!properties) return [];
   const groups = [
     ["tree_photo", "FCD-tree_records-tree_photo", "awsUrl", "koboUrl"],

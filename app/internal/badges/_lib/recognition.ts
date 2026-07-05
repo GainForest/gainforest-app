@@ -63,7 +63,7 @@ function findDefinition(
   return match ? { uri: match.uri, cid: match.cid } : null;
 }
 
-export type RecognitionBadgeState = {
+type RecognitionBadgeState = {
   key: RecognitionBadgeKey;
   awarded: boolean;
   /** Award records for this account+badge, for revocation. */
@@ -71,7 +71,7 @@ export type RecognitionBadgeState = {
 };
 
 /** Read every recognition badge's awarded state for one account. */
-export async function readRecognitionState(
+async function readRecognitionState(
   repoDid: string,
   subjectDid: string,
 ): Promise<Record<RecognitionBadgeKey, RecognitionBadgeState>> {
@@ -85,15 +85,6 @@ export async function readRecognitionState(
     result[key] = { key, awarded: awards.length > 0, awards };
   }
   return result;
-}
-
-/** The recognition badge keys currently awarded to an account. */
-export async function readAwardedRecognitionKeys(
-  repoDid: string,
-  subjectDid: string,
-): Promise<RecognitionBadgeKey[]> {
-  const state = await readRecognitionState(repoDid, subjectDid);
-  return RECOGNITION_BADGE_KEYS.filter((key) => state[key].awarded);
 }
 
 /** Ensure a recognition badge definition exists, creating it on first award. */

@@ -9,7 +9,7 @@ import {
 
 export const ATTACHMENT_COLLECTION = "org.hypercerts.context.attachment";
 export const ATTACHMENT_MAX_FILE_BYTES = 10 * 1024 * 1024;
-export const ATTACHMENT_ACCEPTED_MIME_TYPES = ["*/*"] as const;
+const ATTACHMENT_ACCEPTED_MIME_TYPES = ["*/*"] as const;
 
 const CONTENT_TYPE_TREE_DATASET = "tree-dataset";
 const MAX_ATTACHMENT_CONTENT_ITEMS = 100;
@@ -19,7 +19,7 @@ const MAX_ATTACHMENT_CONTENT_TYPE_LENGTH = 64;
 const MAX_ATTACHMENT_NOTE_LENGTH = 250_000;
 const DEFAULT_MIME_TYPE = "application/octet-stream";
 
-export type AttachmentContentInput = string | File;
+type AttachmentContentInput = string | File;
 
 export type AttachmentDraft = {
   title: string;
@@ -246,7 +246,7 @@ export function validateAttachmentFile(file: File): void {
   }
 }
 
-export function validateAttachmentDraft(args: {
+function validateAttachmentDraft(args: {
   draft: AttachmentDraft;
   activitySubject: AttachmentSubjectInfo;
 }): void {
@@ -303,7 +303,7 @@ export function validateAttachmentDraft(args: {
   }
 }
 
-export function buildContextAttachmentRecord(args: {
+function buildContextAttachmentRecord(args: {
   draft: AttachmentDraft;
   subjects: AttachmentSubjectInfo[];
   content: AttachmentRecordContent[];
@@ -326,7 +326,7 @@ export function buildContextAttachmentRecord(args: {
   return record;
 }
 
-export function validateContextAttachmentRecord(record: ContextAttachmentRecord): void {
+function validateContextAttachmentRecord(record: ContextAttachmentRecord): void {
   if (record.$type !== ATTACHMENT_COLLECTION) throw new AttachmentMutationInputError("invalid-record");
   if (!record.title || record.title.length > MAX_ATTACHMENT_TITLE_LENGTH) throw new AttachmentMutationInputError("invalid-record");
   if (!record.createdAt || Number.isNaN(Date.parse(record.createdAt))) throw new AttachmentMutationInputError("invalid-record");

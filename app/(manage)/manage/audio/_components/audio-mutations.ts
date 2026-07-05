@@ -1,6 +1,6 @@
 "use client";
 
-import { createRecord, deleteRecord, putRecord, uploadBlob } from "../../_lib/mutations";
+import { createRecord, putRecord, uploadBlob } from "../../_lib/mutations";
 import type { AudioDeploymentItem, AudioEventItem, AudioRecordingItem } from "@/app/_lib/indexer";
 import type { AudioMetadataDraft } from "./types";
 
@@ -248,8 +248,4 @@ export async function updateAudioRecording(input: {
 export async function createSpeciesOccurrence(data: Record<string, unknown>): Promise<MutationResult> {
   const result = await createRecord(OCCURRENCE_COLLECTION, occurrenceRecord(data), undefined, mutationOptions());
   return { ...result, rkey: rkeyFromUri(result.uri) };
-}
-
-export async function deleteAudioRecording(rkey: string): Promise<void> {
-  await deleteRecord(AUDIO_COLLECTION, rkey, mutationOptions());
 }

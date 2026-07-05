@@ -5,7 +5,7 @@ const TREE_UPLOAD_FEEDBACK_FORM_URL =
 const CONTENTSQUARE_UXA_BASE_URL = "https://t.contentsquare.net/uxa";
 
 export type ManageAccountKind = "organization" | "user";
-export type ManageTargetKind = "personal" | "group";
+type ManageTargetKind = "personal" | "group";
 
 export type ManageTarget = {
   kind: ManageTargetKind;
@@ -163,7 +163,7 @@ export function manageApiHref(
   return appendQuery(path, params);
 }
 
-export function manageTreeHref(
+function manageTreeHref(
   target: Pick<ManageTarget, "basePath">,
   options?: { dataset?: string | null; mode?: string | null },
 ): string {
@@ -213,42 +213,6 @@ export function accountIdentifierFromPath(pathname: string): string | null {
 /** @deprecated Use accountIdentifierFromManagePath. Retained for callers. */
 export function groupIdentifierFromManagePath(pathname: string): string | null {
   return accountIdentifierFromManagePath(pathname);
-}
-
-export function isManagePath(pathname: string): boolean {
-  return /^\/account\/[^/?#]+\/manage(?:[/?#]|$)/.test(canonicalAppPathname(pathname));
-}
-
-export function isManageGroupsPath(_pathname: string): boolean {
-  // Legacy /manage/groups/<id> URLs no longer exist as a destination; this is
-  // kept only so dependent helpers keep type-checking.
-  return false;
-}
-
-export function isPersonalManageContextPath(pathname: string): boolean {
-  return isManagePath(pathname) && !isManageGroupsPath(pathname);
-}
-
-export function isGroupManagePath(pathname: string): boolean {
-  return groupIdentifierFromManagePath(pathname) !== null;
-}
-
-export function activeContextToManagePath(rawContext: string | null | undefined): string {
-  if (!rawContext) return "/manage";
-  try {
-    const parsed = JSON.parse(rawContext) as { type?: unknown; did?: unknown; identifier?: unknown; handle?: unknown };
-    if (parsed.type === "group" && typeof parsed.did === "string") {
-      const identifier = typeof parsed.identifier === "string" && parsed.identifier.trim()
-        ? parsed.identifier.trim()
-        : typeof parsed.handle === "string" && parsed.handle.trim()
-          ? parsed.handle.trim()
-          : parsed.did;
-      return groupManageBasePath(identifier);
-    }
-  } catch {
-    // Ignore malformed persisted context.
-  }
-  return "/manage";
 }
 
 export const links = {

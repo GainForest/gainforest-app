@@ -23,7 +23,7 @@ export const UNGROUPED_DATASET_FILTER = "__ungrouped__";
 
 type StatusTone = "neutral" | "good" | "warn";
 
-export type DatasetLandingBuildCopy = {
+type DatasetLandingBuildCopy = {
   dateUnavailable: string;
   locationNotSet: string;
   additionalLocations: (count: number) => string;
