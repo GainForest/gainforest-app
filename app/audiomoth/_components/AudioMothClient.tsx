@@ -914,61 +914,77 @@ function ConnectionCard({
     );
   }
 
+  const notReadyReason =
+    setupCheck?.status === "not-ready"
+      ? [
+          setupCheck.firmwareOk === false ? t("setupReasonFirmware") : null,
+          setupCheck.settingsOk === false
+            ? t("setupReasonSettings")
+            : setupCheck.settingsOk === null
+              ? t("setupReasonSettingsUnknown")
+              : null,
+        ]
+          .filter(Boolean)
+          .join(" · ")
+      : null;
+
   return (
-    <Card className="flex flex-col gap-3 border-primary/30 bg-primary/[0.04] sm:flex-row sm:items-center sm:justify-between">
-      <div className="flex items-center gap-3">
-        <span className="flex size-10 items-center justify-center rounded-full bg-primary/10 text-primary">
-          <CheckIcon className="size-5" />
-        </span>
-        <div>
-          <div className="flex flex-wrap items-center gap-2">
-            <p className="text-sm font-medium">{t("connectedTitle")}</p>
-            <SetupBadge setupCheck={setupCheck} />
+    <Card className="flex flex-col gap-3 border-primary/30 bg-primary/[0.04]">
+      {/* Identity row: who is connected + quiet live stats */}
+      <div className="flex items-start justify-between gap-4">
+        <div className="flex min-w-0 items-center gap-3">
+          <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+            <CheckIcon className="size-4.5" />
+          </span>
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
+              <p className="text-sm font-medium">{t("connectedTitle")}</p>
+              <SetupBadge setupCheck={setupCheck} />
+            </div>
+            <p className="truncate font-mono text-xs text-muted-foreground">{info ? info.id : "…"}</p>
           </div>
-          <p className="font-mono text-xs text-muted-foreground">{info ? info.id : "…"}</p>
-          {setupCheck?.status === "not-ready" && (
-            <p className="mt-0.5 text-xs text-muted-foreground">
-              {[
-                setupCheck.firmwareOk === false ? t("setupReasonFirmware") : null,
-                setupCheck.settingsOk === false
-                  ? t("setupReasonSettings")
-                  : setupCheck.settingsOk === null
-                    ? t("setupReasonSettingsUnknown")
-                    : null,
-              ]
-                .filter(Boolean)
-                .join(" · ")}
-            </p>
-          )}
+        </div>
+        <div className="flex shrink-0 items-center gap-3 pt-1 text-xs text-muted-foreground">
+          <span className="inline-flex items-center gap-1">
+            <BatteryMediumIcon className="size-3.5" />
+            {reading ? reading.battery : "—"}
+          </span>
+          <span className="inline-flex items-center gap-1">
+            <CpuIcon className="size-3.5" />
+            {info ? info.firmwareVersion.join(".") : "—"}
+          </span>
         </div>
       </div>
-      <div className="flex flex-wrap items-center gap-4">
-        <span className="inline-flex items-center gap-1.5 text-sm text-muted-foreground">
-          <BatteryMediumIcon className="size-4" />
-          {reading ? reading.battery : "—"}
-        </span>
-        <span className="inline-flex items-center gap-1.5 text-sm text-muted-foreground">
-          <CpuIcon className="size-4" />
-          {info ? info.firmwareVersion.join(".") : "—"}
-        </span>
-        <Button onClick={onAutoSetup} disabled={!info}>
-          <WandSparklesIcon className="size-4" />
-          {t("autoSetupButton")}
-        </Button>
-        {equipmentStatus.status === "registered" && sessionDid && (
-          <Button variant="outline" asChild>
-            <Link href={accountEquipmentPath(sessionDid)}>
-              <ArchiveIcon className="size-4" />
-              {t("viewEquipmentButton")}
-            </Link>
+
+      {/* Action row: hint on the left, compact actions on the right */}
+      <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-t border-primary/10 pt-3">
+        {notReadyReason && <p className="min-w-0 flex-1 basis-48 text-xs text-muted-foreground">{notReadyReason}</p>}
+        <div className="ml-auto flex flex-wrap items-center justify-end gap-1.5">
+          {equipmentStatus.status === "registered" && sessionDid && (
+            <Button variant="ghost" size="sm" className="text-muted-foreground" asChild>
+              <Link href={accountEquipmentPath(sessionDid)}>
+                <ArchiveIcon className="size-3.5" />
+                {t("viewEquipmentButton")}
+              </Link>
+            </Button>
+          )}
+          {equipmentStatus.status === "unregistered" && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-muted-foreground"
+              onClick={onSaveEquipment}
+              disabled={savingEquipment}
+            >
+              {savingEquipment ? <Loader2Icon className="size-3.5 animate-spin" /> : <ArchiveIcon className="size-3.5" />}
+              {t("saveEquipmentButton")}
+            </Button>
+          )}
+          <Button size="sm" onClick={onAutoSetup} disabled={!info}>
+            <WandSparklesIcon className="size-3.5" />
+            {t("autoSetupButton")}
           </Button>
-        )}
-        {equipmentStatus.status === "unregistered" && (
-          <Button variant="outline" onClick={onSaveEquipment} disabled={savingEquipment}>
-            {savingEquipment ? <Loader2Icon className="size-4 animate-spin" /> : <ArchiveIcon className="size-4" />}
-            {t("saveEquipmentButton")}
-          </Button>
-        )}
+        </div>
       </div>
     </Card>
   );
