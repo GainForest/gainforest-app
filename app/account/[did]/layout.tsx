@@ -116,8 +116,11 @@ export default async function AccountLayout({
               includeSettings={canManage}
               showOrgData={canManage}
               // Tainá is a personal Telegram assistant, so its dashboard tab
-              // only appears to the signed-in owner of a personal profile.
-              includeTaina={account.kind === "user" && session.isLoggedIn && session.did === account.did}
+              // only appears to the signed-in owner of this profile. Ownership
+              // (session DID === account DID) is the whole gate: it can only
+              // ever match a personal repo, and some personal accounts carry
+              // an organization record, so don't also require kind === "user".
+              includeTaina={session.isLoggedIn && session.did === account.did}
               showEndorsementsGiven={showEndorsementsGiven}
             />
           </>

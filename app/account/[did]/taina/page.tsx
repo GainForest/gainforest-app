@@ -13,13 +13,16 @@ export default async function AccountTainaPage({ params }: { params: Promise<{ d
   const { did, urlIdentifier } = await readAccountRouteParams(params);
 
   // The Tainá dashboard is private: it carries the owner's bot, API key and
-  // Telegram conversation. Only the signed-in owner of this personal profile
-  // gets here — everyone else sees a 404 instead of the tab content.
-  const [account, session] = await Promise.all([
+  // Telegram conversation. Only the signed-in owner of this profile gets here
+  // — everyone else sees a 404 instead of the tab content. Ownership is the
+  // whole gate: session DIDs can only ever match personal repos (never CGS
+  // group accounts), and some personal accounts legitimately carry an
+  // organization record, so we must not additionally require kind === "user".
+  const [, session] = await Promise.all([
     getAccountRouteData(did, urlIdentifier),
     fetchAuthSession().catch(() => ({ isLoggedIn: false as const })),
   ]);
-  if (account.kind !== "user" || !session.isLoggedIn || session.did !== did) notFound();
+  if (!session.isLoggedIn || session.did !== did) notFound();
 
   return <TainaDashboardClient />;
 }
