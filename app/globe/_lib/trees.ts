@@ -11,6 +11,7 @@
  *      `shapefiles/{org-slug}-all-tree-plantings.geojson`.
  */
 
+import { withAbort } from "../../_lib/async-cache";
 import { blobUrl, resolvePdsHost } from "../../_lib/pds";
 import { GLOBE_DATA_BUCKET } from "./config";
 import { toKebabCase } from "./layers";
@@ -276,6 +277,41 @@ async function fetchOrgSlug(
 
 const treesCache = new Map<string, Promise<GeoJSON.FeatureCollection | null>>();
 
+/** Resolve one organization's measured trees (uncached). */
+async function resolveOrganizationTrees(
+  did: string,
+  signal?: AbortSignal,
+): Promise<GeoJSON.FeatureCollection | null> {
+  const host = await resolvePdsHost(did, signal);
+
+  // Path 1: `trees` blobs on the org's site records.
+  if (host) {
+    const cids = await fetchSiteTreeCids(host, did, signal);
+    const features: GeoJSON.Feature[] = [];
+    for (const cid of cids) {
+      const normalized = normalizeTrees(await fetchJson(blobUrl(host, did, cid), signal));
+      if (normalized) features.push(...normalized.features);
+    }
+    if (features.length > 0) {
+      // Re-stamp ids so merged blobs stay unique for feature-state.
+      return {
+        type: "FeatureCollection",
+        features: features.map((feature, index) => ({ ...feature, id: index })),
+      };
+    }
+  }
+
+  // Path 2: legacy bucket shapefile by org slug.
+  const slug = host ? await fetchOrgSlug(host, did, signal) : null;
+  if (!slug) return null;
+  return normalizeTrees(
+    await fetchJson(
+      `${GLOBE_DATA_BUCKET}/shapefiles/${slug}-all-tree-plantings.geojson`,
+      signal,
+    ),
+  );
+}
+
 /** All measured trees for one organization (null when it has none). */
 export function fetchOrganizationTrees(
   did: string,
@@ -283,41 +319,25 @@ export function fetchOrganizationTrees(
 ): Promise<GeoJSON.FeatureCollection | null> {
   let promise = treesCache.get(did);
   if (!promise) {
-    promise = (async () => {
-      const host = await resolvePdsHost(did, signal);
-
-      // Path 1: `trees` blobs on the org's site records.
-      if (host) {
-        const cids = await fetchSiteTreeCids(host, did, signal);
-        const features: GeoJSON.Feature[] = [];
-        for (const cid of cids) {
-          const normalized = normalizeTrees(await fetchJson(blobUrl(host, did, cid), signal));
-          if (normalized) features.push(...normalized.features);
-        }
-        if (features.length > 0) {
-          // Re-stamp ids so merged blobs stay unique for feature-state.
-          return {
-            type: "FeatureCollection",
-            features: features.map((feature, index) => ({ ...feature, id: index })),
-          };
-        }
-      }
-
-      // Path 2: legacy bucket shapefile by org slug.
-      const slug = host ? await fetchOrgSlug(host, did, signal) : null;
-      if (!slug) return null;
-      return normalizeTrees(
-        await fetchJson(
-          `${GLOBE_DATA_BUCKET}/shapefiles/${slug}-all-tree-plantings.geojson`,
-          signal,
-        ),
-      );
-    })();
+    // The shared resolve runs without the caller's signal so aborting one
+    // caller (e.g. React strict-mode's first mount) can't poison the cache
+    // for everyone else — only the caller's own await is cut short below.
+    promise = resolveOrganizationTrees(did);
     treesCache.set(did, promise);
     promise.catch(() => {
       if (treesCache.get(did) === promise) treesCache.delete(did);
     });
   }
-  // Callers share one in-flight promise; aborting one caller must not kill it.
-  return promise;
+  return withAbort(promise, signal);
+}
+
+/** How many measured trees an organization has published. Deliberately
+ *  uncached — used by the server-side tree-stats route, which counts many
+ *  orgs and must not retain full geometry in memory. */
+export async function fetchOrganizationTreeCount(
+  did: string,
+  signal?: AbortSignal,
+): Promise<number> {
+  const trees = await resolveOrganizationTrees(did, signal);
+  return trees?.features.length ?? 0;
 }

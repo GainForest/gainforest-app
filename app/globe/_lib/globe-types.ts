@@ -66,4 +66,10 @@ export type GlobeSite = {
   point: { lat: number; lon: number } | null;
 };
 
+/** One org's measured-tree count, as served by `/api/globe/trees`. */
+export type GlobeTreeStat = {
+  did: string;
+  trees: number;
+};
+
 export type LngLatBounds = [number, number, number, number];
