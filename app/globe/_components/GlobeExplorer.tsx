@@ -364,6 +364,17 @@ export function GlobeExplorer({ orgDid = null, orgName = null, orgIdentifier = n
     return focusedState.features.filter((feature) => feature.properties?.siteUri === selectedSiteUri);
   }, [focusedState.features, selectedSiteUri]);
 
+  // Stable GeoJSON identities — building these inline in JSX gave the map a
+  // new object every render, forcing redundant setData round-trips.
+  const sitesCollection = useMemo(
+    () => featureCollection(focusedState.features),
+    [focusedState.features],
+  );
+  const highlightCollection = useMemo(
+    () => featureCollection(highlightFeatures),
+    [highlightFeatures],
+  );
+
   useEffect(() => {
     if (!focusDid && mode === "global") return;
     if (selectedSiteUri) {
@@ -489,8 +500,8 @@ export function GlobeExplorer({ orgDid = null, orgName = null, orgIdentifier = n
         className="absolute inset-0"
         organizations={visibleOrganizations}
         onSelectOrganization={(did) => selectOrganization(did)}
-        sitesGeojson={featureCollection(focusedState.features)}
-        highlightGeojson={featureCollection(highlightFeatures)}
+        sitesGeojson={sitesCollection}
+        highlightGeojson={highlightCollection}
         treesGeojson={treesVisible ? treesState.data : null}
         onSelectTree={setSelectedTree}
         selectedTreeId={selectedTree?.id ?? null}

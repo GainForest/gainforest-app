@@ -119,6 +119,29 @@ function popupContent(name: string, country: string | null): HTMLElement {
   return root;
 }
 
+/** How long after the last pointer/wheel input the map is considered calm.
+ *  Background badge work (avatar decode, marker source rebuilds) waits for
+ *  calm so it never competes with an in-flight zoom or drag gesture. */
+const INPUT_CALM_MS = 300;
+/** How many org avatars are fetched + cropped concurrently. The full roster
+ *  is ~850 orgs — doing them all at once used to flood the main thread. */
+const LOGO_CONCURRENCY = 4;
+
+/** Decode an avatar off the main thread when the browser supports it
+ *  (fetch + createImageBitmap); drawing an already-decoded bitmap onto the
+ *  badge canvas is cheap. Falls back to an <img> decode otherwise. */
+async function loadBadgeSource(url: string): Promise<CanvasImageSource> {
+  if (typeof createImageBitmap === "function") {
+    try {
+      const res = await fetch(url, { mode: "cors" });
+      if (res.ok) return await createImageBitmap(await res.blob());
+    } catch {
+      /* fall through to the <img> path */
+    }
+  }
+  return loadHtmlImage(url);
+}
+
 // ── Idle globe rotation (port of Green Globe's spinGlobe) ──────────────────
 
 function spinGlobe(map: maplibregl.Map, enabled: boolean) {
@@ -299,6 +322,14 @@ export function GlobeMap({
   const loadedRef = useRef(onLoaded);
   const addedLayerIdsRef = useRef(new Set<string>());
   const organizationsRef = useRef(organizations);
+  // User-gesture tracking: background badge work yields to interaction.
+  const pointerDownRef = useRef(false);
+  const lastInputRef = useRef(0);
+  // Badge pipeline: queued DIDs, active worker count, batched source refresh.
+  const logoQueueRef = useRef<string[]>([]);
+  const logoWorkersRef = useRef(0);
+  const markerRefreshTimerRef = useRef<number | null>(null);
+  const pumpRef = useRef<() => void>(() => {});
   // did → whether that org's own logo badge has been added to the map yet
   // ( "pending" while the avatar is being fetched/cropped, "none" once it's
   // confirmed the org has no avatar so the fallback badge is used instead).
@@ -335,29 +366,83 @@ export function GlobeMap({
     });
   }, []);
 
-  // Fetch + crop one org's avatar into the shared badge image, then refresh
-  // the marker source so it swaps in from the fallback badge.
+  // Resolve after the user has been hands-off the map for INPUT_CALM_MS.
+  const waitForCalm = useCallback(async () => {
+    for (;;) {
+      if (!mapRef.current) return;
+      const since = Date.now() - lastInputRef.current;
+      if (!pointerDownRef.current && since >= INPUT_CALM_MS) return;
+      await new Promise((resolve) =>
+        setTimeout(resolve, Math.max(INPUT_CALM_MS - since, 0) + 50),
+      );
+    }
+  }, []);
+
+  // Coalesce marker source rebuilds: many logos finish in a burst, but the
+  // 800+-feature source only needs to be re-uploaded once per burst — and
+  // never in the middle of a zoom/drag gesture.
+  const scheduleMarkerRefresh = useCallback(() => {
+    if (markerRefreshTimerRef.current !== null) return;
+    const run = () => {
+      markerRefreshTimerRef.current = null;
+      if (!mapRef.current) return;
+      if (pointerDownRef.current || Date.now() - lastInputRef.current < INPUT_CALM_MS) {
+        markerRefreshTimerRef.current = window.setTimeout(run, INPUT_CALM_MS);
+        return;
+      }
+      setMarkerData();
+    };
+    markerRefreshTimerRef.current = window.setTimeout(run, 250);
+  }, [setMarkerData]);
+
+  // Badge pipeline worker: fetch + crop avatars a few at a time, decoding off
+  // the main thread and pausing whenever the user is interacting. Doing all
+  // ~850 orgs at once (with synchronous decodes and a full marker-source
+  // rebuild per logo) used to freeze the page during fast zoom + drag.
+  const pumpLogoQueue = useCallback(() => {
+    while (logoWorkersRef.current < LOGO_CONCURRENCY && logoQueueRef.current.length > 0) {
+      const did = logoQueueRef.current.shift()!;
+      logoWorkersRef.current += 1;
+      (async () => {
+        try {
+          await waitForCalm();
+          const profile = await resolveDidProfile(did);
+          if (!profile.avatar) {
+            logoStatusRef.current.set(did, "none");
+            return;
+          }
+          const source = await loadBadgeSource(profile.avatar);
+          await waitForCalm();
+          const map = mapRef.current;
+          if (!map) return;
+          const badge = buildCircleBadge(source, "cover");
+          if (typeof ImageBitmap !== "undefined" && source instanceof ImageBitmap) source.close();
+          const id = orgLogoImageId(did);
+          if (!map.hasImage(id)) map.addImage(id, badge.image, { pixelRatio: badge.pixelRatio });
+          logoStatusRef.current.set(did, "loaded");
+          scheduleMarkerRefresh();
+        } catch {
+          logoStatusRef.current.set(did, "none");
+        } finally {
+          logoWorkersRef.current -= 1;
+          pumpRef.current();
+        }
+      })();
+    }
+  }, [waitForCalm, scheduleMarkerRefresh]);
+  useEffect(() => {
+    pumpRef.current = pumpLogoQueue;
+  }, [pumpLogoQueue]);
+
+  /** Queue one org's avatar badge (idempotent per DID). */
   const ensureOrgLogo = useCallback(
-    async (map: maplibregl.Map, did: string) => {
+    (did: string) => {
       if (logoStatusRef.current.has(did)) return;
       logoStatusRef.current.set(did, "pending");
-      try {
-        const profile = await resolveDidProfile(did);
-        if (!profile.avatar) {
-          logoStatusRef.current.set(did, "none");
-          return;
-        }
-        const img = await loadHtmlImage(profile.avatar);
-        const badge = buildCircleBadge(img, "cover");
-        const id = orgLogoImageId(did);
-        if (!map.hasImage(id)) map.addImage(id, badge.image, { pixelRatio: badge.pixelRatio });
-        logoStatusRef.current.set(did, "loaded");
-        setMarkerData();
-      } catch {
-        logoStatusRef.current.set(did, "none");
-      }
+      logoQueueRef.current.push(did);
+      pumpLogoQueue();
     },
-    [setMarkerData],
+    [pumpLogoQueue],
   );
 
   // One-time map initialisation.
@@ -391,6 +476,30 @@ export function GlobeMap({
     map.on("touchstart", stopSpin);
     map.on("wheel", stopSpin);
     map.on("keydown", stopSpin);
+
+    // Track raw user input so background badge work yields to gestures. Uses
+    // DOM events (not map move events) because the idle spin keeps the camera
+    // permanently "moving" — gating on isMoving() would starve the queue.
+    const canvasContainer = map.getCanvasContainer();
+    const markInput = () => {
+      lastInputRef.current = Date.now();
+    };
+    const onPointerDown = () => {
+      pointerDownRef.current = true;
+      markInput();
+    };
+    const onPointerUp = () => {
+      pointerDownRef.current = false;
+      markInput();
+    };
+    const onPointerMove = () => {
+      if (pointerDownRef.current) markInput();
+    };
+    canvasContainer.addEventListener("pointerdown", onPointerDown, { passive: true });
+    window.addEventListener("pointerup", onPointerUp, { passive: true });
+    canvasContainer.addEventListener("pointermove", onPointerMove, { passive: true });
+    canvasContainer.addEventListener("wheel", markInput, { passive: true });
+    canvasContainer.addEventListener("touchmove", markInput, { passive: true });
 
     const popup = new maplibregl.Popup({
       closeButton: false,
@@ -619,10 +728,16 @@ export function GlobeMap({
         })
         .catch((error) => console.warn("[globe] marker badges failed", error));
 
+      // Hover card — only rebuilt when the hovered org changes, not on every
+      // mousemove event over the same marker.
+      let hoveredMarkerDid: string | null = null;
       const handleMarkerMove = (event: MapLayerMouseEvent) => {
         map.getCanvas().style.cursor = "pointer";
         const feature = event.features?.[0];
         if (!feature || feature.geometry.type !== "Point") return;
+        const did = String(feature.properties?.did ?? "");
+        if (did === hoveredMarkerDid) return;
+        hoveredMarkerDid = did;
         const coordinates = feature.geometry.coordinates.slice() as [number, number];
         while (Math.abs(event.lngLat.lng - coordinates[0]) > 180) {
           coordinates[0] += event.lngLat.lng > coordinates[0] ? 360 : -360;
@@ -632,6 +747,7 @@ export function GlobeMap({
         popup.setLngLat(coordinates).setDOMContent(popupContent(name, country)).addTo(map);
       };
       const handleMarkerLeave = () => {
+        hoveredMarkerDid = null;
         map.getCanvas().style.cursor = "";
         popup.remove();
       };
@@ -649,6 +765,12 @@ export function GlobeMap({
     });
 
     return () => {
+      window.removeEventListener("pointerup", onPointerUp);
+      if (markerRefreshTimerRef.current !== null) {
+        clearTimeout(markerRefreshTimerRef.current);
+        markerRefreshTimerRef.current = null;
+      }
+      logoQueueRef.current = [];
       popup.remove();
       map.remove();
       mapRef.current = null;
@@ -674,7 +796,7 @@ export function GlobeMap({
     setMarkerData();
     for (const org of organizations) {
       if (typeof org.lat === "number" && typeof org.lon === "number") {
-        void ensureOrgLogo(map, org.did);
+        ensureOrgLogo(org.did);
       }
     }
   }, [organizations, mapLoaded, setMarkerData, ensureOrgLogo]);
