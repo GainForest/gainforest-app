@@ -1,21 +1,30 @@
-import { privateKeyToAccount } from "viem/accounts";
+import { createPublicClient, http } from "viem";
+import { mainnet } from "viem/chains";
+import { normalize } from "viem/ens";
 import { formatUsdcAmount, normalizeUsdcAmountString, parseUsdcAmount } from "@/lib/facilitator/amount";
 import { parsePaymentSignature } from "@/lib/facilitator/eip3009";
 import { executeTransferWithAuthorization } from "@/lib/facilitator";
+import { cachedAsync } from "@/app/_lib/async-cache";
 import { FACILITATOR_DID } from "@/app/_lib/urls";
-import { PAYMENT_NETWORK, PAYMENT_RAIL } from "@/lib/facilitator/usdc";
+import { PAYMENT_NETWORK, PAYMENT_RAIL, RPC_URL } from "@/lib/facilitator/usdc";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 /**
  * Optional GainForest tip at checkout. The tip is a plain USDC
- * transferWithAuthorization to the facilitator wallet — the same wallet that
- * pays gas for everyone's donations — executed by the facilitator itself.
+ * transferWithAuthorization to GainForest's own wallet (gainforest.eth,
+ * resolved via ENS) — NOT the facilitator wallet. The facilitator still
+ * executes the transfer on-chain (paying the gas), but the money lands in
+ * gainforest.eth.
  *
- * GET  → { enabled, address } so the client knows where tips go.
+ * GET  → { enabled, address, ensName } so the client knows where tips go.
  * POST → executes the signed authorization and writes a public receipt.
  */
+
+/** Tips go to GainForest's own wallet, resolved fresh from ENS. */
+const TIP_ENS_NAME = "gainforest.eth";
+const TIP_WALLET_CACHE_MS = 60 * 60 * 1000; // 1 hour
 
 type DidIdentifier = `did:${string}:${string}`;
 
@@ -23,22 +32,33 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
-function isHexPrefixed(value: string): value is `0x${string}` {
-  return /^0x[0-9a-fA-F]+$/.test(value);
+function isHexAddress(value: string): value is `0x${string}` {
+  return /^0x[a-fA-F0-9]{40}$/.test(value);
 }
 
 function isDidIdentifier(value: string): value is DidIdentifier {
   return /^did:[a-z0-9]+:.+$/i.test(value);
 }
 
-function getTipWalletAddress(): `0x${string}` | null {
-  const platformPrivateKey = process.env.FACILITATOR_PRIVATE_KEY;
-  if (!platformPrivateKey || !isHexPrefixed(platformPrivateKey)) return null;
-  try {
-    return privateKeyToAccount(platformPrivateKey).address;
-  } catch {
-    return null;
-  }
+/**
+ * Resolve the tip wallet: the TIP_WALLET_ADDRESS env override when set,
+ * otherwise gainforest.eth via ENS on mainnet. Throws on RPC failure so the
+ * cache retries instead of pinning a transient outage for the full TTL;
+ * resolves to null only when the name genuinely has no address.
+ */
+async function resolveTipWalletUncached(): Promise<`0x${string}` | null> {
+  const override = process.env.TIP_WALLET_ADDRESS?.trim();
+  if (override) return isHexAddress(override) ? override : null;
+  const client = createPublicClient({
+    chain: mainnet,
+    transport: http(process.env.ETHEREUM_RPC_URL || process.env.MAINNET_RPC_URL || RPC_URL),
+  });
+  const address = await client.getEnsAddress({ name: normalize(TIP_ENS_NAME) });
+  return address && isHexAddress(address) ? address : null;
+}
+
+async function getTipWalletAddress(): Promise<`0x${string}` | null> {
+  return cachedAsync("tip-wallet-address", TIP_WALLET_CACHE_MS, resolveTipWalletUncached).catch(() => null);
 }
 
 function getFacilitatorServiceHost(): string {
@@ -91,7 +111,7 @@ async function writeTipReceipt(params: {
         paymentRail: PAYMENT_RAIL,
         paymentNetwork: PAYMENT_NETWORK,
         transactionId: params.transactionHash,
-        notes: `${fromLabel} tipped ${params.amount}USDC to the GainForest platform`,
+        notes: `${fromLabel} tipped ${params.amount}USDC to GainForest (${TIP_ENS_NAME})`,
         occurredAt,
       },
     }),
@@ -103,16 +123,16 @@ async function writeTipReceipt(params: {
 }
 
 export async function GET() {
-  const address = getTipWalletAddress();
+  const address = await getTipWalletAddress();
   if (!address) return Response.json({ enabled: false });
-  return Response.json({ enabled: true, address });
+  return Response.json({ enabled: true, address, ensName: TIP_ENS_NAME });
 }
 
 export async function POST(request: Request) {
   const paymentSig = request.headers.get("PAYMENT-SIGNATURE");
   if (!paymentSig) return Response.json({ error: "Missing payment approval" }, { status: 400 });
 
-  const tipWallet = getTipWalletAddress();
+  const tipWallet = await getTipWalletAddress();
   if (!tipWallet) return Response.json({ error: "Tips are not available right now" }, { status: 503 });
 
   const rawBody = await request.json().catch(() => null);
