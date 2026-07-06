@@ -77,6 +77,7 @@
     "backHome": "Kembali ke beranda"
   },
   "sidebar": {
+    "changelogLink": "Lihat yang baru",
     "sections": {
       "explore": "JELAJAHI",
       "funding": "PENDANAAN",

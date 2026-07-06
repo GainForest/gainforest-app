@@ -77,6 +77,7 @@
     "backHome": "Voltar ao início"
   },
   "sidebar": {
+    "changelogLink": "Ver novidades",
     "sections": {
       "explore": "EXPLORAR",
       "funding": "FINANCIAMENTO",
