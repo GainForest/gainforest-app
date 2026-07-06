@@ -1418,7 +1418,8 @@
       "noDeviceTitle": "AudioMoth tidak ditemukan",
       "noDeviceBody": "Hubungkan AudioMoth Anda lewat USB, geser sakelar ke USB/OFF, lalu tekan tombol untuk memberi akses.",
       "connectButton": "Hubungkan AudioMoth",
-      "connectedTitle": "AudioMoth terhubung"
+      "connectedTitle": "AudioMoth terhubung",
+      "autoSetupButton": "Penyiapan otomatis"
     },
     "device": {
       "setTimeButton": "Atur waktu dari komputer ini",
@@ -1521,6 +1522,35 @@
       "phaseVerifying": "Memverifikasi…",
       "phaseFlashing": "Menulis firmware…",
       "phaseRestarting": "Menyalakan ulang perangkat…"
+    },
+    "autoSetup": {
+      "subtitle": "Santai saja — kami memperbarui firmware, mengatur jam, menerapkan pengaturan perekaman siap lapangan, dan menyimpan perangkat ke daftar peralatan Anda.",
+      "runningTitle": "Menyiapkan AudioMoth Anda…",
+      "doneTitle": "AudioMoth Anda siap",
+      "errorTitle": "Penyiapan tidak selesai",
+      "closeButton": "Selesai",
+      "closeAfterError": "Kembali",
+      "stepFirmware": "Perbarui firmware",
+      "stepClock": "Atur jam",
+      "stepSettings": "Terapkan pengaturan perekaman",
+      "stepEquipment": "Simpan ke daftar peralatan Anda",
+      "firmwareChecking": "Memeriksa firmware terbaru…",
+      "firmwareUpToDate": "Sudah menggunakan firmware terbaru ({version})",
+      "firmwareDownloading": "Mengunduh firmware {version}…",
+      "firmwareUpdated": "Diperbarui ke firmware {version}",
+      "firmwareManualSkip": "Perangkat ini memerlukan pembaruan manual — dilewati. Anda dapat memperbaruinya dari tab Firmware.",
+      "firmwareFailed": "Pembaruan firmware tidak selesai. Cabut dan pasang kembali AudioMoth Anda, lalu coba lagi.",
+      "clockSetting": "Mengatur jam dari komputer ini…",
+      "clockDone": "Jam disinkronkan dengan komputer ini",
+      "clockFailed": "Tidak dapat mengatur jam. Periksa koneksi dan coba lagi.",
+      "settingsApplying": "Menerapkan pengaturan perekaman…",
+      "settingsDone": "48 kHz, rekaman 60 detik dengan jeda 4 menit, sinyal akustik diwajibkan",
+      "settingsFailed": "AudioMoth tidak mengonfirmasi pengaturan. Silakan coba lagi.",
+      "equipmentChecking": "Memeriksa daftar peralatan Anda…",
+      "equipmentExists": "Sudah ada di daftar peralatan Anda sebagai {name}",
+      "equipmentSaved": "Disimpan ke daftar peralatan Anda sebagai {name}",
+      "equipmentSignInSkip": "Masuk untuk menyimpan perangkat ini ke daftar peralatan Anda — dilewati.",
+      "equipmentFailed": "Tidak dapat menyimpan perangkat ke daftar peralatan Anda."
     }
   }
 }

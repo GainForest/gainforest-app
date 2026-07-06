@@ -1418,7 +1418,8 @@
       "noDeviceTitle": "No AudioMoth found",
       "noDeviceBody": "Connect your AudioMoth via USB, set its switch to USB/OFF, then press the button to grant access.",
       "connectButton": "Connect AudioMoth",
-      "connectedTitle": "AudioMoth connected"
+      "connectedTitle": "AudioMoth connected",
+      "autoSetupButton": "Auto-setup"
     },
     "device": {
       "setTimeButton": "Set time from this computer",
@@ -1521,6 +1522,35 @@
       "phaseVerifying": "Verifying…",
       "phaseFlashing": "Writing firmware…",
       "phaseRestarting": "Restarting device…"
+    },
+    "autoSetup": {
+      "subtitle": "Sit back — updating firmware, setting the clock, applying field-ready recording settings and saving the device to your equipment list.",
+      "runningTitle": "Setting up your AudioMoth…",
+      "doneTitle": "Your AudioMoth is ready",
+      "errorTitle": "Setup didn't finish",
+      "closeButton": "Done",
+      "closeAfterError": "Back",
+      "stepFirmware": "Update firmware",
+      "stepClock": "Set the clock",
+      "stepSettings": "Apply recording settings",
+      "stepEquipment": "Save to your equipment list",
+      "firmwareChecking": "Checking for the newest firmware…",
+      "firmwareUpToDate": "Already on the newest firmware ({version})",
+      "firmwareDownloading": "Downloading firmware {version}…",
+      "firmwareUpdated": "Updated to firmware {version}",
+      "firmwareManualSkip": "This device needs a manual update — skipped. You can update it from the Firmware tab.",
+      "firmwareFailed": "The firmware update didn't finish. Detach and reattach your AudioMoth, then try again.",
+      "clockSetting": "Setting the clock from this computer…",
+      "clockDone": "Clock synchronized with this computer",
+      "clockFailed": "Couldn't set the clock. Check the connection and try again.",
+      "settingsApplying": "Applying recording settings…",
+      "settingsDone": "48 kHz, 60 s recordings with 4 min pauses, acoustic chime required",
+      "settingsFailed": "The AudioMoth didn't confirm the settings. Please try again.",
+      "equipmentChecking": "Checking your equipment list…",
+      "equipmentExists": "Already in your equipment list as {name}",
+      "equipmentSaved": "Saved to your equipment list as {name}",
+      "equipmentSignInSkip": "Sign in to save this device to your equipment list — skipped.",
+      "equipmentFailed": "Couldn't save the device to your equipment list."
     }
   }
 }

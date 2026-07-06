@@ -1418,7 +1418,8 @@
       "noDeviceTitle": "Hakuna AudioMoth iliyopatikana",
       "noDeviceBody": "Unganisha AudioMoth yako kwa USB, weka swichi kwenye USB/OFF, kisha bonyeza kitufe kutoa ruhusa.",
       "connectButton": "Unganisha AudioMoth",
-      "connectedTitle": "AudioMoth imeunganishwa"
+      "connectedTitle": "AudioMoth imeunganishwa",
+      "autoSetupButton": "Usanidi wa kiotomatiki"
     },
     "device": {
       "setTimeButton": "Weka saa kutoka kompyuta hii",
@@ -1521,6 +1522,35 @@
       "phaseVerifying": "Inathibitisha…",
       "phaseFlashing": "Inaandika firmware…",
       "phaseRestarting": "Inaanzisha upya kifaa…"
+    },
+    "autoSetup": {
+      "subtitle": "Pumzika — tunasasisha firmware, tunaweka saa, tunatumia mipangilio ya kurekodi iliyo tayari kwa uwandani na kuhifadhi kifaa kwenye orodha yako ya vifaa.",
+      "runningTitle": "Inasanidi AudioMoth yako…",
+      "doneTitle": "AudioMoth yako iko tayari",
+      "errorTitle": "Usanidi haukukamilika",
+      "closeButton": "Imekamilika",
+      "closeAfterError": "Rudi",
+      "stepFirmware": "Sasisha firmware",
+      "stepClock": "Weka saa",
+      "stepSettings": "Tumia mipangilio ya kurekodi",
+      "stepEquipment": "Hifadhi kwenye orodha yako ya vifaa",
+      "firmwareChecking": "Inakagua firmware mpya zaidi…",
+      "firmwareUpToDate": "Tayari ina firmware mpya zaidi ({version})",
+      "firmwareDownloading": "Inapakua firmware {version}…",
+      "firmwareUpdated": "Imesasishwa hadi firmware {version}",
+      "firmwareManualSkip": "Kifaa hiki kinahitaji usasishaji wa mkono — imerukwa. Unaweza kukisasisha kupitia kichupo cha Firmware.",
+      "firmwareFailed": "Usasishaji wa firmware haukukamilika. Chomoa na uchomeke tena AudioMoth yako, kisha ujaribu tena.",
+      "clockSetting": "Inaweka saa kutoka kompyuta hii…",
+      "clockDone": "Saa imesawazishwa na kompyuta hii",
+      "clockFailed": "Imeshindikana kuweka saa. Kagua muunganisho kisha ujaribu tena.",
+      "settingsApplying": "Inatumia mipangilio ya kurekodi…",
+      "settingsDone": "48 kHz, rekodi za sekunde 60 na mapumziko ya dakika 4, mlio wa kusanidi unahitajika",
+      "settingsFailed": "AudioMoth haikuthibitisha mipangilio. Tafadhali jaribu tena.",
+      "equipmentChecking": "Inakagua orodha yako ya vifaa…",
+      "equipmentExists": "Tayari iko kwenye orodha yako ya vifaa kama {name}",
+      "equipmentSaved": "Imehifadhiwa kwenye orodha yako ya vifaa kama {name}",
+      "equipmentSignInSkip": "Ingia kwenye akaunti ili kuhifadhi kifaa hiki kwenye orodha yako ya vifaa — imerukwa.",
+      "equipmentFailed": "Imeshindikana kuhifadhi kifaa kwenye orodha yako ya vifaa."
     }
   }
 }

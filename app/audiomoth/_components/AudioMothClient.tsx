@@ -9,7 +9,9 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
+import { AnimatePresence, motion } from "framer-motion";
 import {
+  ArchiveIcon,
   AudioLinesIcon,
   BatteryMediumIcon,
   CheckIcon,
@@ -18,9 +20,12 @@ import {
   DownloadIcon,
   FingerprintIcon,
   Loader2Icon,
+  MinusIcon,
   PlugZapIcon,
   SlidersHorizontalIcon,
+  TriangleAlertIcon,
   UsbIcon,
+  WandSparklesIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -60,6 +65,7 @@ import {
   looksLikeAudioMothFirmware,
   type FlashProgress,
 } from "@/app/_lib/audiomoth/flash";
+import { createEquipment, listEquipment } from "@/app/_lib/equipment";
 
 /* ------------------------------------------------------------------ */
 /* Types                                                               */
@@ -97,6 +103,55 @@ type FlashState =
   | { stage: "done"; crc: string }
   | { stage: "error"; message: string };
 
+/* ---------------- auto-setup wizard ---------------- */
+
+const WIZARD_STEP_IDS = ["firmware", "clock", "settings", "equipment"] as const;
+
+type WizardStepId = (typeof WIZARD_STEP_IDS)[number];
+
+type WizardStepStatus = "pending" | "active" | "done" | "skipped" | "error";
+
+interface WizardStepState {
+  status: WizardStepStatus;
+  detail?: string;
+  /** 0-1 progress bar shown while the step is active, when known. */
+  progress?: number | null;
+}
+
+interface WizardState {
+  running: boolean;
+  failed: boolean;
+  steps: Record<WizardStepId, WizardStepState>;
+}
+
+function freshWizardState(): WizardState {
+  return {
+    running: true,
+    failed: false,
+    steps: {
+      firmware: { status: "pending" },
+      clock: { status: "pending" },
+      settings: { status: "pending" },
+      equipment: { status: "pending" },
+    },
+  };
+}
+
+/** Auto-setup recording settings: defaults plus 60 s recordings every 5 minutes
+ *  (4 min sleep) and a required acoustic chime, recording around the clock. */
+function autoSetupConfig(): AudioMothConfig {
+  return {
+    ...DEFAULT_CONFIG,
+    timePeriods: [{ startMins: 0, endMins: MINUTES_IN_DAY }],
+    dutyEnabled: true,
+    recordDuration: 60,
+    sleepDuration: 240,
+    requireAcousticConfig: true,
+  };
+}
+
+
+
 /* ------------------------------------------------------------------ */
 /* Small helpers                                                       */
 /* ------------------------------------------------------------------ */
@@ -122,6 +177,55 @@ function formatUtc(date: Date): string {
   );
 }
 
+/** Read the static device details (ID, firmware, flash capabilities). */
+async function readDeviceInfo(device: AudioMothDevice): Promise<DeviceInfo> {
+  const id = await withRetries(() => device.getId());
+  const firmwareVersion = await withRetries(() => device.getFirmwareVersion());
+  const firmwareDescription = await withRetries(() => device.getFirmwareDescription());
+  let supportsUsbHidFlash = false;
+  let supportsSerialBootloaderSwitch = false;
+  try {
+    supportsUsbHidFlash = await device.queryUsbHidBootloaderSupport();
+  } catch {
+    /* older firmware does not answer */
+  }
+  try {
+    supportsSerialBootloaderSwitch = await device.querylSerialBootloaderSupport();
+  } catch {
+    /* older firmware does not answer */
+  }
+  return { id, firmwareVersion, firmwareDescription, supportsUsbHidFlash, supportsSerialBootloaderSwitch };
+}
+
+/** Wait for an (already-permitted) AudioMoth to enumerate and respond, e.g. after a firmware restart. */
+async function waitForAudioMoth(timeoutMs: number): Promise<AudioMothDevice> {
+  const hid = getWebHid();
+  if (!hid) throw new Error("WebHID unavailable");
+  const deadline = Date.now() + timeoutMs;
+  for (;;) {
+    const devices = await hid.getDevices().catch(() => [] as WebHidDevice[]);
+    const target = devices.find(isAudioMothHidDevice);
+    if (target) {
+      const wrapper = new AudioMothDevice(target);
+      try {
+        await wrapper.open();
+        await wrapper.getId();
+        return wrapper;
+      } catch {
+        await wrapper.close();
+      }
+    }
+    if (Date.now() >= deadline) throw new Error("The AudioMoth did not reappear after restarting.");
+    await new Promise((resolve) => setTimeout(resolve, 500));
+  }
+}
+
+function parseVersionString(value: string): [number, number, number] | null {
+  const match = value.match(/(\d+)\.(\d+)\.(\d+)/);
+  if (!match) return null;
+  return [parseInt(match[1], 10), parseInt(match[2], 10), parseInt(match[3], 10)];
+}
+
 function Card({ children, className }: { children: ReactNode; className?: string }) {
   return (
     <section className={cn("rounded-3xl border border-border bg-card/90 p-5 shadow-sm backdrop-blur-sm sm:p-6", className)}>
@@ -143,22 +247,29 @@ function InfoRow({ label, value, dimmed }: { label: string; value: string; dimme
 /* Main component                                                      */
 /* ------------------------------------------------------------------ */
 
-export function AudioMothClient() {
+export function AudioMothClient({ sessionDid }: { sessionDid: string | null }) {
   const t = useTranslations("common.audiomoth");
 
   const [supported, setSupported] = useState<boolean | null>(null);
   const [device, setDevice] = useState<AudioMothDevice | null>(null);
   const [info, setInfo] = useState<DeviceInfo | null>(null);
   const [reading, setReading] = useState<LiveReading | null>(null);
-  const [tab, setTab] = useState<TabId>("device");
+  const [tab, setTab] = useState<TabId>("firmware");
   const [connecting, setConnecting] = useState(false);
+  const [wizard, setWizard] = useState<WizardState | null>(null);
 
   const deviceRef = useRef<AudioMothDevice | null>(null);
   deviceRef.current = device;
 
+  /* While the auto-setup wizard is driving the device (including across the
+     firmware restart) the passive auto-adoption below must stay out of the
+     way, so the wizard's device wrapper is the only one issuing reports. */
+  const wizardActiveRef = useRef(false);
+
   /* ---------------- detection ---------------- */
 
   const adoptDevice = useCallback(async (hidDevice: WebHidDevice) => {
+    if (wizardActiveRef.current) return;
     const wrapper = new AudioMothDevice(hidDevice);
     try {
       await wrapper.open();
@@ -236,24 +347,8 @@ export function AudioMothClient() {
 
     (async () => {
       try {
-        const id = await withRetries(() => device.getId());
-        const firmwareVersion = await withRetries(() => device.getFirmwareVersion());
-        const firmwareDescription = await withRetries(() => device.getFirmwareDescription());
-        let supportsUsbHidFlash = false;
-        let supportsSerialBootloaderSwitch = false;
-        try {
-          supportsUsbHidFlash = await device.queryUsbHidBootloaderSupport();
-        } catch {
-          /* older firmware does not answer */
-        }
-        try {
-          supportsSerialBootloaderSwitch = await device.querylSerialBootloaderSupport();
-        } catch {
-          /* older firmware does not answer */
-        }
-        if (!cancelled) {
-          setInfo({ id, firmwareVersion, firmwareDescription, supportsUsbHidFlash, supportsSerialBootloaderSwitch });
-        }
+        const nextInfo = await readDeviceInfo(device);
+        if (!cancelled) setInfo(nextInfo);
       } catch {
         if (!cancelled) setInfo(null);
       }
@@ -295,12 +390,204 @@ export function AudioMothClient() {
     };
   }, [device]);
 
+  /* ---------------- auto-setup wizard ---------------- */
+
+  const runAutoSetup = useCallback(async () => {
+    if (!device || !info) return;
+
+    let workingDevice = device;
+    let workingInfo = info;
+
+    pollingPausedRef.current = true;
+    wizardActiveRef.current = true;
+    setWizard(freshWizardState());
+
+    const setStep = (id: WizardStepId, patch: Partial<WizardStepState>) => {
+      setWizard((current) =>
+        current
+          ? { ...current, steps: { ...current.steps, [id]: { ...current.steps[id], ...patch } } }
+          : current,
+      );
+    };
+
+    const finish = (failed: boolean) => {
+      wizardActiveRef.current = false;
+      pollingPausedRef.current = false;
+      setWizard((current) => (current ? { ...current, running: false, failed } : current));
+      /* If the page lost the device during the firmware restart, pick it up again */
+      if (!deviceRef.current) {
+        getWebHid()
+          ?.getDevices()
+          .then((devices) => {
+            const audioMoth = devices.find(isAudioMothHidDevice);
+            if (audioMoth) void adoptDevice(audioMoth);
+          })
+          .catch(() => undefined);
+      }
+    };
+
+    const fail = (id: WizardStepId, detail: string) => {
+      setStep(id, { status: "error", detail, progress: null });
+      finish(true);
+    };
+
+    /* Step 1 — firmware: bring the device to the newest official release */
+
+    setStep("firmware", { status: "active", detail: t("autoSetup.firmwareChecking") });
+
+    try {
+      const response = await fetch("/api/audiomoth/firmware");
+      if (!response.ok) throw new Error("releases unavailable");
+      const { releases } = (await response.json()) as { releases: FirmwareRelease[] };
+      const newest = releases[0];
+      const newestVersion = newest ? parseVersionString(newest.version) : null;
+      if (!newest || !newestVersion) throw new Error("releases unavailable");
+
+      const isOfficial = classifyFirmware(workingInfo.firmwareDescription) === "official";
+      const alreadyNewest = isOfficial && !isOlderVersion(workingInfo.firmwareVersion, ...newestVersion);
+
+      if (alreadyNewest) {
+        setStep("firmware", {
+          status: "done",
+          detail: t("autoSetup.firmwareUpToDate", { version: workingInfo.firmwareVersion.join(".") }),
+        });
+      } else if (!workingInfo.supportsUsbHidFlash) {
+        /* Serial-only devices need a user gesture per port — leave it to the Firmware tab. */
+        setStep("firmware", { status: "skipped", detail: t("autoSetup.firmwareManualSkip") });
+      } else {
+        setStep("firmware", { status: "active", detail: t("autoSetup.firmwareDownloading", { version: newest.version }) });
+
+        const download = await fetch(`/api/audiomoth/firmware?download=${newest.assetId}`);
+        if (!download.ok) throw new Error("download failed");
+        const firmware = new Uint8Array(await download.arrayBuffer());
+        if (!looksLikeAudioMothFirmware(firmware)) throw new Error("invalid firmware");
+
+        await flashViaUsbHid(workingDevice, firmware, false, (progress) => {
+          const detailKeys: Record<FlashProgress["phase"], string> = {
+            preparing: "firmware.phasePreparing",
+            transferring: "firmware.phaseTransferring",
+            verifying: "firmware.phaseVerifying",
+            flashing: "firmware.phaseFlashing",
+            restarting: "firmware.phaseRestarting",
+          };
+          setStep("firmware", {
+            detail: t(detailKeys[progress.phase]),
+            progress: progress.phase === "transferring" ? progress.fraction : null,
+          });
+        });
+
+        /* The device restarts and re-enumerates — pick it up again */
+        setStep("firmware", { detail: t("firmware.phaseRestarting"), progress: null });
+        await workingDevice.close().catch(() => undefined);
+        workingDevice = await waitForAudioMoth(30000);
+        workingInfo = await readDeviceInfo(workingDevice);
+        setDevice(workingDevice);
+        setInfo(workingInfo);
+
+        setStep("firmware", {
+          status: "done",
+          detail: t("autoSetup.firmwareUpdated", { version: workingInfo.firmwareVersion.join(".") }),
+          progress: null,
+        });
+      }
+    } catch {
+      fail("firmware", t("autoSetup.firmwareFailed"));
+      return;
+    }
+
+    /* Step 2 — clock: set the device time from this computer */
+
+    setStep("clock", { status: "active", detail: t("autoSetup.clockSetting") });
+
+    try {
+      const sendTime = new Date();
+      let delayMs = 1000 - sendTime.getMilliseconds();
+      if (delayMs < 100) delayMs += 1000;
+      sendTime.setMilliseconds(sendTime.getMilliseconds() + delayMs);
+      const waitMs = sendTime.getTime() - Date.now() - 20;
+      if (waitMs > 0) await new Promise((resolve) => setTimeout(resolve, waitMs));
+      await withRetries(() => workingDevice.setTime(sendTime));
+      setStep("clock", { status: "done", detail: t("autoSetup.clockDone") });
+    } catch {
+      fail("clock", t("autoSetup.clockFailed"));
+      return;
+    }
+
+    /* Step 3 — recording settings: defaults + 60 s / 4 min duty cycle + required chime */
+
+    setStep("settings", { status: "active", detail: t("autoSetup.settingsApplying") });
+
+    try {
+      const sendTime = new Date();
+      let delayMs = 1000 - sendTime.getMilliseconds();
+      if (delayMs < 100) delayMs += 1000;
+      sendTime.setMilliseconds(sendTime.getMilliseconds() + delayMs);
+
+      const { packet, verifyLength } = buildConfigPacket(
+        autoSetupConfig(),
+        workingInfo.firmwareVersion,
+        workingInfo.firmwareDescription,
+        sendTime,
+      );
+
+      const waitMs = sendTime.getTime() - Date.now() - 20;
+      if (waitMs > 0) await new Promise((resolve) => setTimeout(resolve, waitMs));
+
+      const echo = await withRetries(() => workingDevice.setPacket(packet));
+      const compareLength = verifyLength(echo.length);
+      for (let i = 0; i < compareLength; i += 1) {
+        if (packet[i] !== echo[i]) throw new Error("echo mismatch");
+      }
+
+      setStep("settings", { status: "done", detail: t("autoSetup.settingsDone") });
+    } catch {
+      fail("settings", t("autoSetup.settingsFailed"));
+      return;
+    }
+
+    /* Step 4 — equipment: register the unit in the user's equipment list */
+
+    setStep("equipment", { status: "active", detail: t("autoSetup.equipmentChecking") });
+
+    try {
+      if (!sessionDid) {
+        setStep("equipment", { status: "skipped", detail: t("autoSetup.equipmentSignInSkip") });
+      } else {
+        const items = await listEquipment(sessionDid);
+        const deviceId = workingInfo.id;
+        const existing = items.find((item) => item.assetId.trim().toUpperCase() === deviceId.toUpperCase());
+        if (existing) {
+          setStep("equipment", { status: "done", detail: t("autoSetup.equipmentExists", { name: existing.name }) });
+        } else {
+          const name = `AudioMoth ${deviceId.slice(-4)}`;
+          await createEquipment({
+            assetId: deviceId,
+            name,
+            category: "audiomoth",
+            status: "storage",
+            acquiredAt: new Date().toISOString().slice(0, 10),
+          });
+          setStep("equipment", { status: "done", detail: t("autoSetup.equipmentSaved", { name }) });
+        }
+      }
+    } catch {
+      fail("equipment", t("autoSetup.equipmentFailed"));
+      return;
+    }
+
+    finish(false);
+  }, [adoptDevice, device, info, sessionDid, t]);
+
+  const closeWizard = useCallback(() => {
+    setWizard((current) => (current?.running ? current : null));
+  }, []);
+
   /* ---------------- render ---------------- */
 
   const tabs: Array<{ id: TabId; label: string; Icon: typeof ClockIcon }> = [
+    { id: "firmware", label: t("tabs.firmware"), Icon: CpuIcon },
     { id: "device", label: t("tabs.device"), Icon: ClockIcon },
     { id: "configure", label: t("tabs.configure"), Icon: SlidersHorizontalIcon },
-    { id: "firmware", label: t("tabs.firmware"), Icon: CpuIcon },
   ];
 
   return (
@@ -323,37 +610,57 @@ export function AudioMothClient() {
 
       {supported && (
         <>
-          <ConnectionCard
-            device={device}
-            info={info}
-            reading={reading}
-            connecting={connecting}
-            onRequestDevice={requestDevice}
-          />
-
-          <nav className="flex gap-1 rounded-full border border-border bg-card/70 p-1" aria-label={t("title")}>
-            {tabs.map(({ id, label, Icon }) => (
-              <button
-                key={id}
-                type="button"
-                onClick={() => setTab(id)}
-                className={cn(
-                  "flex flex-1 items-center justify-center gap-2 rounded-full px-3 py-2 text-sm font-medium transition-colors",
-                  tab === id ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground",
-                )}
-                aria-current={tab === id ? "page" : undefined}
-              >
-                <Icon className="size-4" />
-                <span className="hidden sm:inline">{label}</span>
-              </button>
-            ))}
-          </nav>
-
-          {tab === "device" && (
-            <DeviceTab device={device} info={info} reading={reading} pollingPausedRef={pollingPausedRef} />
+          {!wizard && (
+            <ConnectionCard
+              device={device}
+              info={info}
+              reading={reading}
+              connecting={connecting}
+              onRequestDevice={requestDevice}
+              onAutoSetup={runAutoSetup}
+            />
           )}
-          {tab === "configure" && <ConfigureTab device={device} info={info} pollingPausedRef={pollingPausedRef} />}
-          {tab === "firmware" && <FirmwareTab device={device} info={info} pollingPausedRef={pollingPausedRef} setDevice={setDevice} />}
+
+          <AnimatePresence mode="wait">
+            {wizard ? (
+              <AutoSetupWizard key="wizard" wizard={wizard} onClose={closeWizard} />
+            ) : (
+              <motion.div
+                key="tabs"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.2 }}
+                className="flex flex-col gap-6"
+              >
+                <nav className="flex gap-1 rounded-full border border-border bg-card/70 p-1" aria-label={t("title")}>
+                  {tabs.map(({ id, label, Icon }) => (
+                    <button
+                      key={id}
+                      type="button"
+                      onClick={() => setTab(id)}
+                      className={cn(
+                        "flex flex-1 items-center justify-center gap-2 rounded-full px-3 py-2 text-sm font-medium transition-colors",
+                        tab === id ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground",
+                      )}
+                      aria-current={tab === id ? "page" : undefined}
+                    >
+                      <Icon className="size-4" />
+                      <span className="hidden sm:inline">{label}</span>
+                    </button>
+                  ))}
+                </nav>
+
+                {tab === "firmware" && (
+                  <FirmwareTab device={device} info={info} pollingPausedRef={pollingPausedRef} setDevice={setDevice} />
+                )}
+                {tab === "device" && (
+                  <DeviceTab device={device} info={info} reading={reading} pollingPausedRef={pollingPausedRef} />
+                )}
+                {tab === "configure" && <ConfigureTab device={device} info={info} pollingPausedRef={pollingPausedRef} />}
+              </motion.div>
+            )}
+          </AnimatePresence>
         </>
       )}
     </div>
@@ -370,12 +677,14 @@ function ConnectionCard({
   reading,
   connecting,
   onRequestDevice,
+  onAutoSetup,
 }: {
   device: AudioMothDevice | null;
   info: DeviceInfo | null;
   reading: LiveReading | null;
   connecting: boolean;
   onRequestDevice: () => void;
+  onAutoSetup: () => void;
 }) {
   const t = useTranslations("common.audiomoth.connection");
 
@@ -410,17 +719,169 @@ function ConnectionCard({
           <p className="font-mono text-xs text-muted-foreground">{info ? info.id : "…"}</p>
         </div>
       </div>
-      <div className="flex items-center gap-4 text-sm text-muted-foreground">
-        <span className="inline-flex items-center gap-1.5">
+      <div className="flex flex-wrap items-center gap-4">
+        <span className="inline-flex items-center gap-1.5 text-sm text-muted-foreground">
           <BatteryMediumIcon className="size-4" />
           {reading ? reading.battery : "—"}
         </span>
-        <span className="inline-flex items-center gap-1.5">
+        <span className="inline-flex items-center gap-1.5 text-sm text-muted-foreground">
           <CpuIcon className="size-4" />
           {info ? info.firmwareVersion.join(".") : "—"}
         </span>
+        <Button onClick={onAutoSetup} disabled={!info}>
+          <WandSparklesIcon className="size-4" />
+          {t("autoSetupButton")}
+        </Button>
       </div>
     </Card>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Auto-setup wizard                                                   */
+/* ------------------------------------------------------------------ */
+
+function AutoSetupWizard({ wizard, onClose }: { wizard: WizardState; onClose: () => void }) {
+  const t = useTranslations("common.audiomoth.autoSetup");
+
+  const stepMeta: Record<WizardStepId, { Icon: typeof ClockIcon; title: string }> = {
+    firmware: { Icon: CpuIcon, title: t("stepFirmware") },
+    clock: { Icon: ClockIcon, title: t("stepClock") },
+    settings: { Icon: SlidersHorizontalIcon, title: t("stepSettings") },
+    equipment: { Icon: ArchiveIcon, title: t("stepEquipment") },
+  };
+
+  const headline = wizard.running ? t("runningTitle") : wizard.failed ? t("errorTitle") : t("doneTitle");
+
+  return (
+    <motion.section
+      key="auto-setup"
+      initial={{ opacity: 0, y: 12, scale: 0.98 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      exit={{ opacity: 0, y: -8, scale: 0.98 }}
+      transition={{ duration: 0.25 }}
+      className="rounded-3xl border border-primary/25 bg-card/95 p-6 shadow-md backdrop-blur-sm sm:p-8"
+      aria-live="polite"
+    >
+      <div className="mb-6 flex flex-col items-center gap-3 text-center">
+        <motion.span
+          className="flex size-14 items-center justify-center rounded-full border border-primary/20 bg-primary/10 text-primary"
+          animate={wizard.running ? { scale: [1, 1.08, 1] } : { scale: 1 }}
+          transition={wizard.running ? { duration: 1.6, repeat: Infinity, ease: "easeInOut" } : undefined}
+        >
+          {wizard.running ? (
+            <AudioLinesIcon className="size-6" />
+          ) : wizard.failed ? (
+            <TriangleAlertIcon className="size-6 text-destructive" />
+          ) : (
+            <CheckIcon className="size-6" />
+          )}
+        </motion.span>
+        <div>
+          <h2 className="text-lg font-semibold">{headline}</h2>
+          <p className="text-sm text-muted-foreground">{t("subtitle")}</p>
+        </div>
+      </div>
+
+      <ol className="mx-auto flex max-w-md flex-col gap-1">
+        {WIZARD_STEP_IDS.map((id, index) => {
+          const step = wizard.steps[id];
+          const { Icon, title } = stepMeta[id];
+          return (
+            <motion.li
+              key={id}
+              initial={{ opacity: 0, x: -12 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: index * 0.08, duration: 0.25 }}
+              className="flex gap-3"
+            >
+              <div className="flex flex-col items-center">
+                <StepStatusBadge status={step.status} Icon={Icon} />
+                {index < WIZARD_STEP_IDS.length - 1 && (
+                  <span
+                    className={cn(
+                      "w-px flex-1 transition-colors",
+                      step.status === "done" || step.status === "skipped" ? "bg-primary/50" : "bg-border",
+                    )}
+                  />
+                )}
+              </div>
+              <div className="flex min-h-14 flex-1 flex-col pb-4">
+                <p
+                  className={cn(
+                    "text-sm font-medium leading-9",
+                    step.status === "pending" && "text-muted-foreground/60",
+                    step.status === "error" && "text-destructive",
+                  )}
+                >
+                  {title}
+                </p>
+                {step.detail && (
+                  <motion.p
+                    key={step.detail}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className={cn("text-sm", step.status === "error" ? "text-destructive" : "text-muted-foreground")}
+                  >
+                    {step.detail}
+                  </motion.p>
+                )}
+                {step.status === "active" && typeof step.progress === "number" && (
+                  <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-muted">
+                    <motion.div
+                      className="h-full rounded-full bg-primary"
+                      animate={{ width: `${Math.round(step.progress * 100)}%` }}
+                      transition={{ ease: "easeOut", duration: 0.2 }}
+                    />
+                  </div>
+                )}
+              </div>
+            </motion.li>
+          );
+        })}
+      </ol>
+
+      {!wizard.running && (
+        <motion.div
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mt-2 flex justify-center"
+        >
+          <Button onClick={onClose} variant={wizard.failed ? "outline" : "default"}>
+            {wizard.failed ? t("closeAfterError") : t("closeButton")}
+          </Button>
+        </motion.div>
+      )}
+    </motion.section>
+  );
+}
+
+function StepStatusBadge({ status, Icon }: { status: WizardStepStatus; Icon: typeof ClockIcon }) {
+  return (
+    <span
+      className={cn(
+        "flex size-9 shrink-0 items-center justify-center rounded-full border transition-colors",
+        status === "pending" && "border-border bg-muted/40 text-muted-foreground/50",
+        status === "active" && "border-primary/40 bg-primary/10 text-primary",
+        status === "done" && "border-primary bg-primary text-primary-foreground",
+        status === "skipped" && "border-border bg-muted text-muted-foreground",
+        status === "error" && "border-destructive/50 bg-destructive/10 text-destructive",
+      )}
+    >
+      {status === "active" ? (
+        <Loader2Icon className="size-4 animate-spin" />
+      ) : status === "done" ? (
+        <motion.span initial={{ scale: 0.4, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: "spring", stiffness: 400, damping: 18 }}>
+          <CheckIcon className="size-4" />
+        </motion.span>
+      ) : status === "skipped" ? (
+        <MinusIcon className="size-4" />
+      ) : status === "error" ? (
+        <TriangleAlertIcon className="size-4" />
+      ) : (
+        <Icon className="size-4" />
+      )}
+    </span>
   );
 }
 

@@ -1418,7 +1418,8 @@
       "noDeviceTitle": "No se encontró ningún AudioMoth",
       "noDeviceBody": "Conecta tu AudioMoth por USB, pon el interruptor en USB/OFF y pulsa el botón para dar acceso.",
       "connectButton": "Conectar AudioMoth",
-      "connectedTitle": "AudioMoth conectado"
+      "connectedTitle": "AudioMoth conectado",
+      "autoSetupButton": "Configuración automática"
     },
     "device": {
       "setTimeButton": "Ajustar hora desde esta computadora",
@@ -1521,6 +1522,35 @@
       "phaseVerifying": "Verificando…",
       "phaseFlashing": "Escribiendo firmware…",
       "phaseRestarting": "Reiniciando dispositivo…"
+    },
+    "autoSetup": {
+      "subtitle": "Relájate: actualizamos el firmware, ajustamos el reloj, aplicamos ajustes de grabación listos para el campo y guardamos el dispositivo en tu lista de equipos.",
+      "runningTitle": "Configurando tu AudioMoth…",
+      "doneTitle": "Tu AudioMoth está listo",
+      "errorTitle": "La configuración no terminó",
+      "closeButton": "Listo",
+      "closeAfterError": "Volver",
+      "stepFirmware": "Actualizar firmware",
+      "stepClock": "Ajustar el reloj",
+      "stepSettings": "Aplicar ajustes de grabación",
+      "stepEquipment": "Guardar en tu lista de equipos",
+      "firmwareChecking": "Buscando el firmware más reciente…",
+      "firmwareUpToDate": "Ya tiene el firmware más reciente ({version})",
+      "firmwareDownloading": "Descargando firmware {version}…",
+      "firmwareUpdated": "Actualizado al firmware {version}",
+      "firmwareManualSkip": "Este dispositivo necesita una actualización manual; se omitió. Puedes actualizarlo desde la pestaña Firmware.",
+      "firmwareFailed": "La actualización de firmware no terminó. Desconecta y vuelve a conectar tu AudioMoth, e inténtalo de nuevo.",
+      "clockSetting": "Ajustando el reloj desde esta computadora…",
+      "clockDone": "Reloj sincronizado con esta computadora",
+      "clockFailed": "No se pudo ajustar el reloj. Revisa la conexión e inténtalo de nuevo.",
+      "settingsApplying": "Aplicando ajustes de grabación…",
+      "settingsDone": "48 kHz, grabaciones de 60 s con pausas de 4 min, señal acústica requerida",
+      "settingsFailed": "El AudioMoth no confirmó los ajustes. Inténtalo de nuevo.",
+      "equipmentChecking": "Revisando tu lista de equipos…",
+      "equipmentExists": "Ya está en tu lista de equipos como {name}",
+      "equipmentSaved": "Guardado en tu lista de equipos como {name}",
+      "equipmentSignInSkip": "Inicia sesión para guardar este dispositivo en tu lista de equipos; se omitió.",
+      "equipmentFailed": "No se pudo guardar el dispositivo en tu lista de equipos."
     }
   }
 }
