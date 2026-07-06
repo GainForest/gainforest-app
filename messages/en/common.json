@@ -948,7 +948,8 @@
       "testAccounts": "Test accounts",
       "endorsers": "Endorsers",
       "awardEndorsements": "Award endorsements",
-      "facilitator": "Facilitator wallet"
+      "facilitator": "Facilitator wallet",
+      "dataJobs": "Data batches"
     },
     "unnamed": "Unnamed account",
     "awardHint": "Open a profile to award a badge.",
@@ -1215,5 +1216,101 @@
     "empty": "No endorsements have been awarded yet.",
     "unnamed": "Unnamed organization",
     "propagationHint": "New endorsements take a few minutes to appear across the app."
+  },
+  "dataJobs": {
+    "meta": {
+      "title": "Submit field data",
+      "description": "Send large batches of field photos and survey exports to the GainForest team for review and publishing."
+    },
+    "hero": {
+      "kicker": "For field partners",
+      "title": "Submit your field data in one big batch",
+      "description": "Pack your photos and survey exports (for example from KoboToolbox) into a single zip file and send it to us. Our team reviews every batch and publishes the observations to your account for you.",
+      "step1Title": "Pack everything into one zip",
+      "step1Description": "Photos, spreadsheets and survey exports — the format doesn't need to be perfect.",
+      "step2Title": "Upload the batch",
+      "step2Description": "Files up to 10GB upload straight from your browser. Keep the page open until it finishes.",
+      "step3Title": "We review and publish for you",
+      "step3Description": "The GainForest team checks the data and publishes the observations to your account. You can follow the progress here."
+    },
+    "signIn": {
+      "title": "Sign in to submit data",
+      "description": "Batches are linked to your account so the observations end up in the right place.",
+      "button": "Sign in"
+    },
+    "notConfigured": "Batch uploads aren't available on this deployment yet. Please contact the GainForest team.",
+    "form": {
+      "title": "New batch",
+      "dropHint": "Drop your zip file here or click to choose",
+      "dropSubHint": "One .zip file, up to {max}",
+      "replaceFile": "Click to choose a different file",
+      "projectLabel": "Project or site",
+      "projectPlaceholder": "e.g. Mangrove restoration, north site",
+      "notesLabel": "Notes for the review team",
+      "notesPlaceholder": "Anything that helps us read your data — column meanings, dates, species lists…",
+      "consentLabel": "Allow the GainForest team to review this data and publish it to my account on my behalf.",
+      "consentHint": "You can withdraw this permission at any time in Settings.",
+      "consentGranted": "You've allowed the GainForest team to publish reviewed data to your account.",
+      "consentManage": "Manage in Settings",
+      "submit": "Submit batch",
+      "preparing": "Preparing…",
+      "uploading": "Uploading…",
+      "finishing": "Finishing…",
+      "keepOpen": "Keep this page open until the upload finishes.",
+      "cancel": "Cancel"
+    },
+    "errors": {
+      "zipOnly": "Please choose a single .zip file.",
+      "tooLarge": "That file is too large — the limit is {max}.",
+      "uploadFailed": "The upload didn't complete. Check your connection and try again."
+    },
+    "done": {
+      "description": "Batch received! Our team will review it and publish the observations to your account."
+    },
+    "jobs": {
+      "title": "Your batches",
+      "empty": "No batches yet — your submissions will show up here.",
+      "submitted": "Submitted {when}",
+      "publishedCount": "{count} observations published",
+      "cancel": "Remove"
+    },
+    "status": {
+      "uploading": "Uploading",
+      "received": "Received",
+      "inReview": "In review",
+      "published": "Published",
+      "needsAttention": "Needs attention"
+    }
+  },
+  "adminDataJobs": {
+    "title": "Data batches",
+    "description": "Large archives submitted by field partners — review each batch remotely, then publish the observations to the submitter's account with their permission.",
+    "empty": "No batches have been submitted yet.",
+    "unavailable": "Batch storage is not configured or unreachable right now, so the list can't be loaded.",
+    "unnamed": "Unnamed account",
+    "details": "Details",
+    "submitted": "Submitted {when}",
+    "keyActive": "Publishing allowed",
+    "keyMissing": "No publishing permission",
+    "submitterNotes": "Notes:",
+    "status": {
+      "uploading": "Uploading",
+      "received": "Received",
+      "inReview": "In review",
+      "published": "Published",
+      "needsAttention": "Needs attention"
+    },
+    "download": "Download link",
+    "publishedCountLabel": "Observations published",
+    "reviewNoteLabel": "Note to the submitter",
+    "reviewNotePlaceholder": "Shown on their submissions page — plain language.",
+    "saveNote": "Save note",
+    "saved": "Saved",
+    "saveFailed": "Couldn't save. Try again.",
+    "inspect": "Inspect contents",
+    "inspectFailed": "The archive couldn't be inspected. It may still be uploading or not be a valid zip file.",
+    "contentsSummary": "{entries} files · {size} uncompressed",
+    "previewLoading": "Loading preview…",
+    "previewFailed": "This file couldn't be previewed."
   }
 }

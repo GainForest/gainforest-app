@@ -8,19 +8,21 @@ import { fetchFlaggedTestAccounts } from "@/app/internal/badges/_lib/test-accoun
 import { fetchGrantApplicants } from "@/app/_lib/grants";
 import { fetchBioblitzRegistrants } from "@/app/_lib/bioblitz";
 import { fetchTainaAdminResidents } from "@/app/_lib/taina-agent";
+import { hasStoredAgentKey, isDataJobsConfigured, listAllJobs, toPublicJob } from "@/app/_lib/data-jobs";
 import { fetchIndexedCertifiedProfileCards } from "@/app/_lib/indexer";
 import { BUILTIN_ENDORSERS, fetchEndorserRecords } from "@/app/_lib/endorsers";
 import { fetchEndorsementAwarding, type AwardEndorsementsData } from "./_lib/award-endorsements";
 import { fetchFacilitatorStats, type FacilitatorStats } from "./_lib/facilitator-stats";
 import { AdminModerationDashboard, type AdminTab } from "./_components/AdminModerationDashboard";
 import type { AdminTainaRow } from "./_components/AdminTainaPanel";
+import type { AdminDataJobRow } from "./_components/AdminDataJobsPanel";
 
 export const metadata: Metadata = {
   title: "Admin",
   robots: { index: false, follow: false },
 };
 
-const TABS: AdminTab[] = ["taina", "grants", "bioblitz", "testAccounts", "endorsers", "awardEndorsements", "facilitator"];
+const TABS: AdminTab[] = ["taina", "dataJobs", "grants", "bioblitz", "testAccounts", "endorsers", "awardEndorsements", "facilitator"];
 
 const EMPTY_FACILITATOR_STATS: FacilitatorStats = {
   address: null,
@@ -58,6 +60,35 @@ async function loadTainaRows(): Promise<{ rows: AdminTainaRow[]; allowanceUsd: n
 }
 
 /**
+ * Partner data batches for the admin panel: every job in the ingest bucket,
+ * enriched with the submitter's display name + avatar and whether their
+ * publish-on-behalf agent key is still stored. `null` signals storage is
+ * unconfigured or unreachable — distinct from "no batches yet".
+ */
+async function loadDataJobRows(): Promise<AdminDataJobRow[] | null> {
+  if (!isDataJobsConfigured()) return null;
+  try {
+    const jobs = await listAllJobs();
+    const cards = await fetchIndexedCertifiedProfileCards(jobs.map((job) => job.did)).catch(
+      () => new Map<string, { displayName: string | null; avatarUrl: string | null }>(),
+    );
+    const keyByDid = new Map<string, boolean>();
+    await Promise.all(
+      [...new Set(jobs.map((job) => job.did))].map(async (did) => {
+        keyByDid.set(did, await hasStoredAgentKey(did).catch(() => false));
+      }),
+    );
+    return jobs.map((job) => ({
+      ...toPublicJob(job, keyByDid.get(job.did) ?? false),
+      displayName: cards.get(job.did)?.displayName ?? null,
+      avatarUrl: cards.get(job.did)?.avatarUrl ?? null,
+    }));
+  } catch {
+    return null;
+  }
+}
+
+/**
  * The "Award endorsements" tab needs more than moderator access: the awards
  * are signed by the GainForest org itself, so the viewer must be an
  * owner/admin of that org (checked again server-side by the internal badge
@@ -84,12 +115,13 @@ export default async function AdminPage({
   }
 
   const t = await getTranslations("common.adminModeration");
-  const [{ tab }, testAccounts, grantApplicants, bioblitzRegistrants, taina, endorsers, awardEndorsements, facilitatorStats] = await Promise.all([
+  const [{ tab }, testAccounts, grantApplicants, bioblitzRegistrants, taina, dataJobRows, endorsers, awardEndorsements, facilitatorStats] = await Promise.all([
     searchParams,
     fetchFlaggedTestAccounts().catch(() => []),
     fetchGrantApplicants().catch(() => []),
     fetchBioblitzRegistrants().catch(() => []),
     loadTainaRows(),
+    loadDataJobRows(),
     moderator.repoDid ? fetchEndorserRecords(moderator.repoDid).catch(() => []) : Promise.resolve([]),
     loadAwardEndorsements(),
     fetchFacilitatorStats().catch(() => EMPTY_FACILITATOR_STATS),
@@ -113,6 +145,7 @@ export default async function AdminPage({
         bioblitzRegistrants={bioblitzRegistrants}
         tainaRows={taina?.rows ?? null}
         tainaAllowanceUsd={taina?.allowanceUsd ?? 25}
+        dataJobRows={dataJobRows}
         builtinEndorsers={BUILTIN_ENDORSERS}
         endorsers={endorsers}
         awardEndorsements={awardEndorsements}

@@ -159,3 +159,12 @@ export function formatCountry(code: string | null | undefined): string {
   const name = countryName(code);
   return [countryFlag(code), name].filter(Boolean).join(" ");
 }
+
+/** Compact byte size: 1536 → "1.5KB", 7301444403 → "6.8GB". */
+export function formatBytes(bytes: number | null | undefined): string {
+  if (bytes == null || !Number.isFinite(bytes) || bytes <= 0) return "0B";
+  const units = ["B", "KB", "MB", "GB", "TB"];
+  const i = Math.min(units.length - 1, Math.floor(Math.log2(bytes) / 10));
+  const value = bytes / 2 ** (10 * i);
+  return `${value >= 10 || i === 0 ? Math.round(value) : value.toFixed(1)}${units[i]}`;
+}

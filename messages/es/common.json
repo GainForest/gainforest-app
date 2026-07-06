@@ -948,7 +948,8 @@
       "testAccounts": "Cuentas de prueba",
       "endorsers": "Avaladores",
       "awardEndorsements": "Otorgar respaldos",
-      "facilitator": "Billetera facilitadora"
+      "facilitator": "Billetera facilitadora",
+      "dataJobs": "Lotes de datos"
     },
     "unnamed": "Cuenta sin nombre",
     "awardHint": "Abre un perfil para otorgar una insignia.",
@@ -1215,5 +1216,101 @@
     "empty": "Todavía no se han otorgado respaldos.",
     "unnamed": "Organización sin nombre",
     "propagationHint": "Los nuevos respaldos tardan unos minutos en aparecer en la app."
+  },
+  "dataJobs": {
+    "meta": {
+      "title": "Enviar datos de campo",
+      "description": "Envía grandes lotes de fotos de campo y exportaciones de encuestas al equipo de GainForest para su revisión y publicación."
+    },
+    "hero": {
+      "kicker": "Para socios de campo",
+      "title": "Envía tus datos de campo en un solo lote",
+      "description": "Empaqueta tus fotos y exportaciones de encuestas (por ejemplo de KoboToolbox) en un único archivo zip y envíanoslo. Nuestro equipo revisa cada lote y publica las observaciones en tu cuenta por ti.",
+      "step1Title": "Empaqueta todo en un zip",
+      "step1Description": "Fotos, hojas de cálculo y exportaciones de encuestas — el formato no tiene que ser perfecto.",
+      "step2Title": "Sube el lote",
+      "step2Description": "Los archivos de hasta 10GB se suben directamente desde tu navegador. Mantén la página abierta hasta que termine.",
+      "step3Title": "Nosotros revisamos y publicamos por ti",
+      "step3Description": "El equipo de GainForest revisa los datos y publica las observaciones en tu cuenta. Puedes seguir el progreso aquí."
+    },
+    "signIn": {
+      "title": "Inicia sesión para enviar datos",
+      "description": "Los lotes se vinculan a tu cuenta para que las observaciones lleguen al lugar correcto.",
+      "button": "Iniciar sesión"
+    },
+    "notConfigured": "La subida de lotes aún no está disponible en esta instalación. Ponte en contacto con el equipo de GainForest.",
+    "form": {
+      "title": "Nuevo lote",
+      "dropHint": "Arrastra tu archivo zip aquí o haz clic para elegirlo",
+      "dropSubHint": "Un archivo .zip, hasta {max}",
+      "replaceFile": "Haz clic para elegir otro archivo",
+      "projectLabel": "Proyecto o sitio",
+      "projectPlaceholder": "p. ej. Restauración de manglares, sitio norte",
+      "notesLabel": "Notas para el equipo de revisión",
+      "notesPlaceholder": "Cualquier cosa que nos ayude a entender tus datos: significado de columnas, fechas, listas de especies…",
+      "consentLabel": "Permito que el equipo de GainForest revise estos datos y los publique en mi cuenta en mi nombre.",
+      "consentHint": "Puedes retirar este permiso en cualquier momento en Ajustes.",
+      "consentGranted": "Has permitido que el equipo de GainForest publique datos revisados en tu cuenta.",
+      "consentManage": "Gestionar en Ajustes",
+      "submit": "Enviar lote",
+      "preparing": "Preparando…",
+      "uploading": "Subiendo…",
+      "finishing": "Finalizando…",
+      "keepOpen": "Mantén esta página abierta hasta que termine la subida.",
+      "cancel": "Cancelar"
+    },
+    "errors": {
+      "zipOnly": "Elige un único archivo .zip.",
+      "tooLarge": "Ese archivo es demasiado grande — el límite es {max}.",
+      "uploadFailed": "La subida no se completó. Comprueba tu conexión e inténtalo de nuevo."
+    },
+    "done": {
+      "description": "¡Lote recibido! Nuestro equipo lo revisará y publicará las observaciones en tu cuenta."
+    },
+    "jobs": {
+      "title": "Tus lotes",
+      "empty": "Aún no hay lotes — tus envíos aparecerán aquí.",
+      "submitted": "Enviado {when}",
+      "publishedCount": "{count} observaciones publicadas",
+      "cancel": "Eliminar"
+    },
+    "status": {
+      "uploading": "Subiendo",
+      "received": "Recibido",
+      "inReview": "En revisión",
+      "published": "Publicado",
+      "needsAttention": "Requiere atención"
+    }
+  },
+  "adminDataJobs": {
+    "title": "Lotes de datos",
+    "description": "Archivos grandes enviados por socios de campo: revisa cada lote de forma remota y publica las observaciones en la cuenta del remitente con su permiso.",
+    "empty": "Todavía no se ha enviado ningún lote.",
+    "unavailable": "El almacenamiento de lotes no está configurado o no está disponible ahora mismo, así que la lista no se puede cargar.",
+    "unnamed": "Cuenta sin nombre",
+    "details": "Detalles",
+    "submitted": "Enviado {when}",
+    "keyActive": "Publicación permitida",
+    "keyMissing": "Sin permiso de publicación",
+    "submitterNotes": "Notas:",
+    "status": {
+      "uploading": "Subiendo",
+      "received": "Recibido",
+      "inReview": "En revisión",
+      "published": "Publicado",
+      "needsAttention": "Requiere atención"
+    },
+    "download": "Enlace de descarga",
+    "publishedCountLabel": "Observaciones publicadas",
+    "reviewNoteLabel": "Nota para el remitente",
+    "reviewNotePlaceholder": "Se muestra en su página de envíos — lenguaje sencillo.",
+    "saveNote": "Guardar nota",
+    "saved": "Guardado",
+    "saveFailed": "No se pudo guardar. Inténtalo de nuevo.",
+    "inspect": "Inspeccionar contenido",
+    "inspectFailed": "No se pudo inspeccionar el archivo. Puede que aún se esté subiendo o no sea un zip válido.",
+    "contentsSummary": "{entries} archivos · {size} sin comprimir",
+    "previewLoading": "Cargando vista previa…",
+    "previewFailed": "No se pudo previsualizar este archivo."
   }
 }

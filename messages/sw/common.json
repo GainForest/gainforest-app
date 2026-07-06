@@ -948,7 +948,8 @@
       "testAccounts": "Akaunti za majaribio",
       "endorsers": "Wadhamini",
       "awardEndorsements": "Toa idhini",
-      "facilitator": "Pochi ya uwezeshaji"
+      "facilitator": "Pochi ya uwezeshaji",
+      "dataJobs": "Makundi ya data"
     },
     "unnamed": "Akaunti isiyo na jina",
     "awardHint": "Fungua wasifu ili kutoa beji.",
@@ -1215,5 +1216,101 @@
     "empty": "Bado hakuna idhini zilizotolewa.",
     "unnamed": "Shirika lisilo na jina",
     "propagationHint": "Idhini mpya huchukua dakika chache kuonekana kwenye programu."
+  },
+  "dataJobs": {
+    "meta": {
+      "title": "Tuma data ya uwandani",
+      "description": "Tuma makundi makubwa ya picha za uwandani na faili za utafiti kwa timu ya GainForest kwa ukaguzi na uchapishaji."
+    },
+    "hero": {
+      "kicker": "Kwa washirika wa uwandani",
+      "title": "Tuma data yako ya uwandani kwa kundi moja kubwa",
+      "description": "Weka picha zako na faili za utafiti (kwa mfano kutoka KoboToolbox) kwenye faili moja ya zip kisha ututumie. Timu yetu hukagua kila kundi na kuchapisha uchunguzi kwenye akaunti yako.",
+      "step1Title": "Weka kila kitu kwenye zip moja",
+      "step1Description": "Picha, majedwali na faili za utafiti — muundo hauhitaji kuwa kamili.",
+      "step2Title": "Pakia kundi",
+      "step2Description": "Faili hadi 10GB hupakiwa moja kwa moja kutoka kivinjari chako. Acha ukurasa uwe wazi hadi ikamilike.",
+      "step3Title": "Tunakagua na kuchapisha kwa niaba yako",
+      "step3Description": "Timu ya GainForest hukagua data na kuchapisha uchunguzi kwenye akaunti yako. Unaweza kufuatilia maendeleo hapa."
+    },
+    "signIn": {
+      "title": "Ingia ili kutuma data",
+      "description": "Makundi huunganishwa na akaunti yako ili uchunguzi ufike mahali sahihi.",
+      "button": "Ingia"
+    },
+    "notConfigured": "Upakiaji wa makundi bado haupatikani hapa. Tafadhali wasiliana na timu ya GainForest.",
+    "form": {
+      "title": "Kundi jipya",
+      "dropHint": "Dondosha faili yako ya zip hapa au bofya kuchagua",
+      "dropSubHint": "Faili moja ya .zip, hadi {max}",
+      "replaceFile": "Bofya kuchagua faili nyingine",
+      "projectLabel": "Mradi au eneo",
+      "projectPlaceholder": "mf. Urejeshaji wa mikoko, eneo la kaskazini",
+      "notesLabel": "Maelezo kwa timu ya ukaguzi",
+      "notesPlaceholder": "Chochote kitakachotusaidia kuelewa data yako — maana ya safu, tarehe, orodha za spishi…",
+      "consentLabel": "Ninaruhusu timu ya GainForest kukagua data hii na kuichapisha kwenye akaunti yangu kwa niaba yangu.",
+      "consentHint": "Unaweza kuondoa ruhusa hii wakati wowote kwenye Mipangilio.",
+      "consentGranted": "Umeruhusu timu ya GainForest kuchapisha data iliyokaguliwa kwenye akaunti yako.",
+      "consentManage": "Simamia kwenye Mipangilio",
+      "submit": "Tuma kundi",
+      "preparing": "Inaandaa…",
+      "uploading": "Inapakia…",
+      "finishing": "Inakamilisha…",
+      "keepOpen": "Acha ukurasa huu uwe wazi hadi upakiaji ukamilike.",
+      "cancel": "Ghairi"
+    },
+    "errors": {
+      "zipOnly": "Tafadhali chagua faili moja ya .zip.",
+      "tooLarge": "Faili hiyo ni kubwa mno — kikomo ni {max}.",
+      "uploadFailed": "Upakiaji haukukamilika. Angalia muunganisho wako kisha ujaribu tena."
+    },
+    "done": {
+      "description": "Kundi limepokelewa! Timu yetu italikagua na kuchapisha uchunguzi kwenye akaunti yako."
+    },
+    "jobs": {
+      "title": "Makundi yako",
+      "empty": "Hakuna makundi bado — matumaji yako yataonekana hapa.",
+      "submitted": "Limetumwa {when}",
+      "publishedCount": "Uchunguzi {count} umechapishwa",
+      "cancel": "Ondoa"
+    },
+    "status": {
+      "uploading": "Inapakia",
+      "received": "Limepokelewa",
+      "inReview": "Linakaguliwa",
+      "published": "Limechapishwa",
+      "needsAttention": "Linahitaji umakini"
+    }
+  },
+  "adminDataJobs": {
+    "title": "Makundi ya data",
+    "description": "Faili kubwa zilizotumwa na washirika wa uwandani — kagua kila kundi kwa mbali, kisha uchapishe uchunguzi kwenye akaunti ya mtumaji kwa ruhusa yake.",
+    "empty": "Hakuna kundi lililotumwa bado.",
+    "unavailable": "Hifadhi ya makundi haijasanidiwa au haipatikani kwa sasa, kwa hivyo orodha haiwezi kupakiwa.",
+    "unnamed": "Akaunti isiyo na jina",
+    "details": "Maelezo",
+    "submitted": "Limetumwa {when}",
+    "keyActive": "Uchapishaji umeruhusiwa",
+    "keyMissing": "Hakuna ruhusa ya uchapishaji",
+    "submitterNotes": "Maelezo:",
+    "status": {
+      "uploading": "Inapakia",
+      "received": "Limepokelewa",
+      "inReview": "Linakaguliwa",
+      "published": "Limechapishwa",
+      "needsAttention": "Linahitaji umakini"
+    },
+    "download": "Kiungo cha kupakua",
+    "publishedCountLabel": "Uchunguzi uliochapishwa",
+    "reviewNoteLabel": "Ujumbe kwa mtumaji",
+    "reviewNotePlaceholder": "Unaonekana kwenye ukurasa wao wa matumaji — tumia lugha rahisi.",
+    "saveNote": "Hifadhi ujumbe",
+    "saved": "Imehifadhiwa",
+    "saveFailed": "Imeshindwa kuhifadhi. Jaribu tena.",
+    "inspect": "Kagua yaliyomo",
+    "inspectFailed": "Faili haikuweza kukaguliwa. Huenda bado inapakiwa au si faili sahihi ya zip.",
+    "contentsSummary": "Faili {entries} · {size} bila mfinyazo",
+    "previewLoading": "Inapakia hakikisho…",
+    "previewFailed": "Faili hii haikuweza kuonyeshwa."
   }
 }
