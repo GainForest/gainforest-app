@@ -22,6 +22,7 @@
     "tourHint": "I'll point at your screen. Click the highlighted spot to continue.",
     "minimizeLabel": "Minimize Tainá",
     "restoreLabel": "Open Tainá",
+    "signInFirst": "You'll need to sign in for this one — use the Sign in button at the top of the page, then come back and I'll walk you through it.",
     "needProjectFirst": "Donations are set up on a project, and you don't have one yet — create your first project, then come back here.",
     "createProjectFirst": "Show me how to create a project"
   },

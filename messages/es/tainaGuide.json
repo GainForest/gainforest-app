@@ -22,6 +22,7 @@
     "tourHint": "Señalaré tu pantalla. Haz clic en la zona resaltada para continuar.",
     "minimizeLabel": "Minimizar a Tainá",
     "restoreLabel": "Abrir Tainá",
+    "signInFirst": "Para esto necesitas iniciar sesión: usa el botón Iniciar sesión en la parte superior de la página y luego vuelve, que yo te guío paso a paso.",
     "needProjectFirst": "Las donaciones se configuran en un proyecto y todavía no tienes ninguno: crea primero tu proyecto y luego vuelve aquí.",
     "createProjectFirst": "Muéstrame cómo crear un proyecto"
   },

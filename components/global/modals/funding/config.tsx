@@ -338,6 +338,7 @@ export function FundingConfigModal({
                 type="button"
                 onClick={() => handleAddWallet()}
                 title={t("linkNewWallet")}
+                data-taina="add-donation-wallet"
                 className="flex items-center gap-1 h-9 shrink-0 rounded-md border border-input px-2.5 text-sm text-muted-foreground hover:text-foreground hover:border-foreground/40 transition-colors"
               >
                 <PlusIcon className="size-3.5" />

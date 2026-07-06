@@ -79,6 +79,23 @@ function clamp(value: number, min: number, max: number): number {
   return Math.max(min, Math.min(value, max));
 }
 
+// Some tour targets are rendered twice for responsive layouts (e.g. the
+// desktop Support card and a hidden mobile bar both carry
+// data-taina="enable-donations"). `querySelector` would happily return the
+// hidden one and the spotlight would land on a 0×0 rect at the top-left
+// corner — so always pick the first *visible* match.
+function isElementVisible(element: Element): boolean {
+  const rect = element.getBoundingClientRect();
+  if (rect.width < 1 || rect.height < 1) return false;
+  const style = window.getComputedStyle(element);
+  return style.display !== "none" && style.visibility !== "hidden";
+}
+
+function findVisibleTarget(selector: string): Element | null {
+  const matches = Array.from(document.querySelectorAll(selector));
+  return matches.find(isElementVisible) ?? null;
+}
+
 function clampToViewport(pos: Position): Position {
   if (typeof window === "undefined") return pos;
   const maxX = window.innerWidth - SPRITE_W - VIEWPORT_PADDING;
@@ -166,6 +183,12 @@ export function FloatingTainaGuide() {
   // don't second-guess the user. Refreshed every time a project-dependent
   // guide (e.g. donation setup) is opened.
   const [hasProjects, setHasProjects] = useState<boolean | null>(null);
+  // Whether the visitor is signed in. `null` = unknown. Checked whenever a
+  // guide view opens: every live tour points at account surfaces (My
+  // Projects, donation settings, …), so a signed-out visitor would only end
+  // up staring at a sign-in wall while Tainá says "I can't find it". Instead
+  // we tell them to sign in first.
+  const [signedIn, setSignedIn] = useState<boolean | null>(null);
 
   // ── Live tour state ─────────────────────────────────────────────────
   const [tour, setTour] = useState<TourState | null>(() => {
@@ -198,6 +221,13 @@ export function FloatingTainaGuide() {
   // account-specific path, so "pathname ≠ step route" alone must never
   // re-trigger a push — that ping-pongs the URL forever.
   const navigatedStepRef = useRef<string | null>(null);
+  // The step the locate-effect is currently serving. advanceOnClick uses it
+  // instead of the effect's own `cancelled` flag: when the click navigates
+  // (project card → project page), the pathname change re-runs the effect and
+  // cancels its closure *before* the delayed advance fires — which used to
+  // strand the tour on the previous step. The ref survives re-runs, so the
+  // advance still goes through as long as the tour is on the same step.
+  const activeStepKeyRef = useRef<string | null>(null);
 
   const dragRef = useRef<{
     pointerId: number;
@@ -305,24 +335,36 @@ export function FloatingTainaGuide() {
     return () => window.removeEventListener("taina:open", onOpen);
   }, []);
 
-  // Guides that require a project (donation setup) check whether the user
-  // actually has one, so Tainá can say "create a project first" instead of
-  // pointing at a project that doesn't exist. Refreshed on every open so a
-  // freshly created project is picked up.
+  // Opening a guide checks the visitor's session (every tour needs one) and,
+  // for project-dependent guides (donation setup), whether the user actually
+  // has a project — so Tainá can say "sign in first" / "create a project
+  // first" instead of pointing at things that aren't there. Refreshed on
+  // every open so a fresh sign-in or a freshly created project is picked up.
   useEffect(() => {
     if (view.kind !== "guide") return;
-    if (!getTainaGuide(view.guideId)?.requiresProject) return;
     let cancelled = false;
     (async () => {
       try {
-        const res = await fetch("/api/manage/projects");
-        if (!res.ok) return; // signed out or error — leave it unknown
-        const data = (await res.json()) as unknown;
-        if (!cancelled && Array.isArray(data)) setHasProjects(data.length > 0);
+        const res = await fetch("/api/session");
+        if (!res.ok) return; // error — leave it unknown
+        const data = (await res.json()) as { session?: { isLoggedIn?: boolean } };
+        if (!cancelled) setSignedIn(Boolean(data.session?.isLoggedIn));
       } catch {
         // leave it unknown
       }
     })();
+    if (getTainaGuide(view.guideId)?.requiresProject) {
+      (async () => {
+        try {
+          const res = await fetch("/api/manage/projects");
+          if (!res.ok) return; // signed out or error — leave it unknown
+          const data = (await res.json()) as unknown;
+          if (!cancelled && Array.isArray(data)) setHasProjects(data.length > 0);
+        } catch {
+          // leave it unknown
+        }
+      })();
+    }
     return () => {
       cancelled = true;
     };
@@ -478,6 +520,7 @@ export function FloatingTainaGuide() {
   // When the tour finished (tour flipped to null), restore the sprite.
   useEffect(() => {
     if (tour) return;
+    activeStepKeyRef.current = null;
     if (savedPositionRef.current) {
       setPosition(clampToViewport(savedPositionRef.current));
       savedPositionRef.current = null;
@@ -507,13 +550,14 @@ export function FloatingTainaGuide() {
     let clickHandler: (() => void) | null = null;
 
     const stepKey = `${tour.guideId}:${tour.index}`;
+    activeStepKeyRef.current = stepKey;
     if (
       activeTourStep.route &&
       pathname !== activeTourStep.route &&
       navigatedStepRef.current !== stepKey &&
       // If the target is already on screen (shim redirects land on a page
       // that contains it), don't navigate at all.
-      !(activeTourStep.selector && document.querySelector(activeTourStep.selector))
+      !(activeTourStep.selector && findVisibleTarget(activeTourStep.selector))
     ) {
       navigatedStepRef.current = stepKey;
       router.push(`${localePrefix}${activeTourStep.route}`);
@@ -528,7 +572,7 @@ export function FloatingTainaGuide() {
     const startedAt = Date.now();
     const findTimer = setInterval(() => {
       if (cancelled) return;
-      const found = document.querySelector(activeTourStep.selector!);
+      const found = findVisibleTarget(activeTourStep.selector!);
       if (found) {
         clearInterval(findTimer);
         element = found;
@@ -537,6 +581,10 @@ export function FloatingTainaGuide() {
         const measure = () => {
           if (cancelled || !element || !element.isConnected) return;
           const r = element.getBoundingClientRect();
+          // The element can collapse to 0×0 (breakpoint change, closing
+          // dialog) — keep the last good rect instead of jumping the
+          // spotlight to the top-left corner.
+          if (r.width < 1 || r.height < 1) return;
           setSpotRect((prev) => {
             if (
               prev &&
@@ -557,9 +605,11 @@ export function FloatingTainaGuide() {
         if (activeTourStep.advanceOnClick) {
           clickHandler = () => {
             // Small delay so the click's effect (dialog, navigation) starts
-            // before we look for the next target.
+            // before we look for the next target. Guarded by the step-key ref
+            // (not `cancelled`): a click that navigates re-runs this effect
+            // and would otherwise cancel the advance it just triggered.
             setTimeout(() => {
-              if (!cancelled) advanceTour(1);
+              if (activeStepKeyRef.current === stepKey) advanceTour(1);
             }, 650);
           };
           element.addEventListener("click", clickHandler, { capture: true, once: true });
@@ -678,9 +728,13 @@ export function FloatingTainaGuide() {
   const panelPos = open ? computePanelPosition(position) : { x: 0, y: 0 };
   const bubblePos = tour && spotRect ? computeBubblePosition(spotRect) : null;
   const guideView = view.kind === "guide" ? getTainaGuide(view.guideId) : undefined;
+  // Confirmed signed out → every tour would dead-end on a sign-in wall, so
+  // ask the visitor to sign in first instead of offering the tour.
+  const guideNeedsSignIn = signedIn === false;
   // Confirmed "no projects yet" for a guide that needs one → tell the user
   // to create a project first instead of showing an impossible tour.
-  const guideNeedsProject = Boolean(guideView?.requiresProject) && hasProjects === false;
+  const guideNeedsProject =
+    !guideNeedsSignIn && Boolean(guideView?.requiresProject) && hasProjects === false;
 
   // A running tour always takes precedence over the minimized state (it can
   // be rehydrated from sessionStorage after a hard navigation).
@@ -887,6 +941,11 @@ export function FloatingTainaGuide() {
             ) : guideView ? (
               <>
                 <p className="text-foreground/70">{guidesT(`${guideView.id}.intro`)}</p>
+                {guideNeedsSignIn ? (
+                  <div className="rounded-xl border border-amber-500/40 bg-amber-500/10 px-3 py-2">
+                    <p className="text-foreground/80">{t("signInFirst")}</p>
+                  </div>
+                ) : null}
                 {guideNeedsProject ? (
                   <div className="rounded-xl border border-amber-500/40 bg-amber-500/10 px-3 py-2">
                     <p className="text-foreground/80">{t("needProjectFirst")}</p>
@@ -899,7 +958,7 @@ export function FloatingTainaGuide() {
                     </button>
                   </div>
                 ) : null}
-                {guideView.tour.length > 0 && !guideNeedsProject ? (
+                {guideView.tour.length > 0 && !guideNeedsProject && !guideNeedsSignIn ? (
                   <button
                     type="button"
                     onClick={() => startTour(guideView.id)}
