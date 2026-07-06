@@ -46,8 +46,10 @@ import {
   classifyFirmware,
   CONFIGURATIONS,
   DEFAULT_CONFIG,
+  gainforestSetupConfig,
   isOlderVersion,
   LATEST_FIRMWARE_VERSION,
+  matchesGainForestSetup,
   MAX_PERIODS,
   MAX_RECORD_DURATION,
   MAX_SLEEP_DURATION,
@@ -137,17 +139,49 @@ function freshWizardState(): WizardState {
   };
 }
 
-/** Auto-setup recording settings: defaults plus 60 s recordings every 5 minutes
- *  (4 min sleep) and a required acoustic chime, recording around the clock. */
-function autoSetupConfig(): AudioMothConfig {
-  return {
-    ...DEFAULT_CONFIG,
-    timePeriods: [{ startMins: 0, endMins: MINUTES_IN_DAY }],
-    dutyEnabled: true,
-    recordDuration: 60,
-    sleepDuration: 240,
-    requireAcousticConfig: true,
-  };
+/* ---------------- GainForest setup check ---------------- */
+
+interface SetupCheck {
+  status: "checking" | "ready" | "not-ready" | "unknown";
+  firmwareOk: boolean | null;
+  settingsOk: boolean | null;
+}
+
+/**
+ * Compare the connected device against the one-click GainForest setup:
+ * newest official firmware + the GainForest recording configuration.
+ */
+async function evaluateGainForestSetup(device: AudioMothDevice, info: DeviceInfo): Promise<SetupCheck> {
+  let firmwareOk: boolean | null = null;
+  try {
+    const response = await fetch("/api/audiomoth/firmware");
+    if (response.ok) {
+      const { releases } = (await response.json()) as { releases: FirmwareRelease[] };
+      const newest = releases[0] ? parseVersionString(releases[0].version) : null;
+      if (newest) {
+        firmwareOk =
+          classifyFirmware(info.firmwareDescription) === "official" &&
+          !isOlderVersion(info.firmwareVersion, ...newest);
+      }
+    }
+  } catch {
+    /* release roster unreachable — leave firmware verdict open */
+  }
+
+  let settingsOk: boolean | null = null;
+  try {
+    const stored = await withRetries(() => device.getPacket());
+    settingsOk = matchesGainForestSetup(stored, info.firmwareVersion, info.firmwareDescription);
+  } catch {
+    /* device did not answer — leave settings verdict open */
+  }
+
+  /* Any confirmed mismatch → not ready; confirmed matching settings (with no
+     firmware complaint) → ready; otherwise we could not tell. */
+  const status: SetupCheck["status"] =
+    firmwareOk === false || settingsOk === false ? "not-ready" : settingsOk === true ? "ready" : "unknown";
+
+  return { status, firmwareOk, settingsOk };
 }
 
 
@@ -257,6 +291,10 @@ export function AudioMothClient({ sessionDid }: { sessionDid: string | null }) {
   const [tab, setTab] = useState<TabId>("firmware");
   const [connecting, setConnecting] = useState(false);
   const [wizard, setWizard] = useState<WizardState | null>(null);
+  const [setupCheck, setSetupCheck] = useState<SetupCheck | null>(null);
+  const [recheckCounter, setRecheckCounter] = useState(0);
+
+  const requestSetupRecheck = useCallback(() => setRecheckCounter((value) => value + 1), []);
 
   const deviceRef = useRef<AudioMothDevice | null>(null);
   deviceRef.current = device;
@@ -390,6 +428,29 @@ export function AudioMothClient({ sessionDid }: { sessionDid: string | null }) {
     };
   }, [device]);
 
+  /* ---------------- GainForest setup check ---------------- */
+
+  useEffect(() => {
+    if (!device || !info) {
+      setSetupCheck(null);
+      return;
+    }
+    /* While the wizard is driving the device, hold off — finish() re-triggers via recheckCounter. */
+    if (wizardActiveRef.current) return;
+
+    let cancelled = false;
+    setSetupCheck({ status: "checking", firmwareOk: null, settingsOk: null });
+
+    (async () => {
+      const result = await evaluateGainForestSetup(device, info);
+      if (!cancelled) setSetupCheck(result);
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [device, info, recheckCounter]);
+
   /* ---------------- auto-setup wizard ---------------- */
 
   const runAutoSetup = useCallback(async () => {
@@ -424,6 +485,8 @@ export function AudioMothClient({ sessionDid }: { sessionDid: string | null }) {
           })
           .catch(() => undefined);
       }
+      /* Re-evaluate the GainForest setup badge with the fresh state */
+      requestSetupRecheck();
     };
 
     const fail = (id: WizardStepId, detail: string) => {
@@ -524,7 +587,7 @@ export function AudioMothClient({ sessionDid }: { sessionDid: string | null }) {
       sendTime.setMilliseconds(sendTime.getMilliseconds() + delayMs);
 
       const { packet, verifyLength } = buildConfigPacket(
-        autoSetupConfig(),
+        gainforestSetupConfig(),
         workingInfo.firmwareVersion,
         workingInfo.firmwareDescription,
         sendTime,
@@ -576,7 +639,7 @@ export function AudioMothClient({ sessionDid }: { sessionDid: string | null }) {
     }
 
     finish(false);
-  }, [adoptDevice, device, info, sessionDid, t]);
+  }, [adoptDevice, device, info, requestSetupRecheck, sessionDid, t]);
 
   const closeWizard = useCallback(() => {
     setWizard((current) => (current?.running ? current : null));
@@ -616,6 +679,7 @@ export function AudioMothClient({ sessionDid }: { sessionDid: string | null }) {
               info={info}
               reading={reading}
               connecting={connecting}
+              setupCheck={setupCheck}
               onRequestDevice={requestDevice}
               onAutoSetup={runAutoSetup}
             />
@@ -657,7 +721,14 @@ export function AudioMothClient({ sessionDid }: { sessionDid: string | null }) {
                 {tab === "device" && (
                   <DeviceTab device={device} info={info} reading={reading} pollingPausedRef={pollingPausedRef} />
                 )}
-                {tab === "configure" && <ConfigureTab device={device} info={info} pollingPausedRef={pollingPausedRef} />}
+                {tab === "configure" && (
+                  <ConfigureTab
+                    device={device}
+                    info={info}
+                    pollingPausedRef={pollingPausedRef}
+                    onConfigured={requestSetupRecheck}
+                  />
+                )}
               </motion.div>
             )}
           </AnimatePresence>
@@ -676,6 +747,7 @@ function ConnectionCard({
   info,
   reading,
   connecting,
+  setupCheck,
   onRequestDevice,
   onAutoSetup,
 }: {
@@ -683,6 +755,7 @@ function ConnectionCard({
   info: DeviceInfo | null;
   reading: LiveReading | null;
   connecting: boolean;
+  setupCheck: SetupCheck | null;
   onRequestDevice: () => void;
   onAutoSetup: () => void;
 }) {
@@ -715,8 +788,21 @@ function ConnectionCard({
           <CheckIcon className="size-5" />
         </span>
         <div>
-          <p className="text-sm font-medium">{t("connectedTitle")}</p>
+          <div className="flex flex-wrap items-center gap-2">
+            <p className="text-sm font-medium">{t("connectedTitle")}</p>
+            <SetupBadge setupCheck={setupCheck} />
+          </div>
           <p className="font-mono text-xs text-muted-foreground">{info ? info.id : "…"}</p>
+          {setupCheck?.status === "not-ready" && (
+            <p className="mt-0.5 text-xs text-muted-foreground">
+              {[
+                setupCheck.firmwareOk === false ? t("setupReasonFirmware") : null,
+                setupCheck.settingsOk === false ? t("setupReasonSettings") : null,
+              ]
+                .filter(Boolean)
+                .join(" · ")}
+            </p>
+          )}
         </div>
       </div>
       <div className="flex flex-wrap items-center gap-4">
@@ -734,6 +820,46 @@ function ConnectionCard({
         </Button>
       </div>
     </Card>
+  );
+}
+
+/** Subtle chip showing whether the device matches the one-click GainForest setup. */
+function SetupBadge({ setupCheck }: { setupCheck: SetupCheck | null }) {
+  const t = useTranslations("common.audiomoth.connection");
+
+  if (!setupCheck || setupCheck.status === "unknown") return null;
+
+  if (setupCheck.status === "checking") {
+    return (
+      <span className="inline-flex items-center gap-1 rounded-full border border-border bg-muted/50 px-2 py-0.5 text-[11px] text-muted-foreground">
+        <Loader2Icon className="size-3 animate-spin" />
+        {t("setupChecking")}
+      </span>
+    );
+  }
+
+  if (setupCheck.status === "ready") {
+    return (
+      <motion.span
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="inline-flex items-center gap-1 rounded-full border border-primary/30 bg-primary/10 px-2 py-0.5 text-[11px] font-medium text-primary"
+      >
+        <CheckIcon className="size-3" />
+        {t("setupOk")}
+      </motion.span>
+    );
+  }
+
+  return (
+    <motion.span
+      initial={{ opacity: 0, scale: 0.9 }}
+      animate={{ opacity: 1, scale: 1 }}
+      className="inline-flex items-center gap-1 rounded-full border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 text-[11px] font-medium text-amber-600 dark:text-amber-400"
+    >
+      <TriangleAlertIcon className="size-3" />
+      {t("setupMissing")}
+    </motion.span>
   );
 }
 
@@ -986,10 +1112,12 @@ function ConfigureTab({
   device,
   info,
   pollingPausedRef,
+  onConfigured,
 }: {
   device: AudioMothDevice | null;
   info: DeviceInfo | null;
   pollingPausedRef: React.MutableRefObject<boolean>;
+  onConfigured: () => void;
 }) {
   const t = useTranslations("common.audiomoth.configure");
 
@@ -1047,13 +1175,14 @@ function ConfigureTab({
       }
 
       setResult("ok");
+      onConfigured();
     } catch {
       setResult("error");
     } finally {
       pollingPausedRef.current = false;
       setSending(false);
     }
-  }, [config, device, info, pollingPausedRef, timeZoneMode]);
+  }, [config, device, info, onConfigured, pollingPausedRef, timeZoneMode]);
 
   const disabled = !device || !info;
 

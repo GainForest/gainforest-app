@@ -1419,7 +1419,12 @@
       "noDeviceBody": "Hubungkan AudioMoth Anda lewat USB, geser sakelar ke USB/OFF, lalu tekan tombol untuk memberi akses.",
       "connectButton": "Hubungkan AudioMoth",
       "connectedTitle": "AudioMoth terhubung",
-      "autoSetupButton": "Penyiapan otomatis"
+      "autoSetupButton": "Penyiapan otomatis",
+      "setupChecking": "Memeriksa penyiapan…",
+      "setupOk": "Penyiapan GainForest",
+      "setupMissing": "Belum disiapkan",
+      "setupReasonFirmware": "Firmware belum yang terbaru",
+      "setupReasonSettings": "Pengaturan perekaman berbeda dari penyiapan GainForest"
     },
     "device": {
       "setTimeButton": "Atur waktu dari komputer ini",

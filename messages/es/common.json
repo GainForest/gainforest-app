@@ -1419,7 +1419,12 @@
       "noDeviceBody": "Conecta tu AudioMoth por USB, pon el interruptor en USB/OFF y pulsa el botón para dar acceso.",
       "connectButton": "Conectar AudioMoth",
       "connectedTitle": "AudioMoth conectado",
-      "autoSetupButton": "Configuración automática"
+      "autoSetupButton": "Configuración automática",
+      "setupChecking": "Comprobando configuración…",
+      "setupOk": "Configuración GainForest",
+      "setupMissing": "Aún sin configurar",
+      "setupReasonFirmware": "El firmware no está actualizado",
+      "setupReasonSettings": "Los ajustes de grabación difieren de la configuración GainForest"
     },
     "device": {
       "setTimeButton": "Ajustar hora desde esta computadora",

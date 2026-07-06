@@ -1419,7 +1419,12 @@
       "noDeviceBody": "Unganisha AudioMoth yako kwa USB, weka swichi kwenye USB/OFF, kisha bonyeza kitufe kutoa ruhusa.",
       "connectButton": "Unganisha AudioMoth",
       "connectedTitle": "AudioMoth imeunganishwa",
-      "autoSetupButton": "Usanidi wa kiotomatiki"
+      "autoSetupButton": "Usanidi wa kiotomatiki",
+      "setupChecking": "Inakagua usanidi…",
+      "setupOk": "Usanidi wa GainForest",
+      "setupMissing": "Bado haijasanidiwa",
+      "setupReasonFirmware": "Firmware si mpya zaidi",
+      "setupReasonSettings": "Mipangilio ya kurekodi inatofautiana na usanidi wa GainForest"
     },
     "device": {
       "setTimeButton": "Weka saa kutoka kompyuta hii",

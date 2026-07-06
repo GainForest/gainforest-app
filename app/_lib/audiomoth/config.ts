@@ -194,6 +194,45 @@ export const DEFAULT_CONFIG: AudioMothConfig = {
   gpsFixTime: 2,
 };
 
+/**
+ * The recording configuration the one-click GainForest setup applies:
+ * defaults plus 60 s recordings every 5 minutes (4 min sleep), recording
+ * around the clock, with the acoustic chime required on switching to CUSTOM.
+ */
+export function gainforestSetupConfig(): AudioMothConfig {
+  return {
+    ...DEFAULT_CONFIG,
+    timePeriods: [{ startMins: 0, endMins: MINUTES_IN_DAY }],
+    dutyEnabled: true,
+    recordDuration: 60,
+    sleepDuration: 240,
+    requireAcousticConfig: true,
+  };
+}
+
+/**
+ * Compare a configuration packet read back from a device (GET_APP_PACKET)
+ * with the packet the GainForest setup would write. The leading 4 bytes are
+ * the configuration timestamp and are ignored.
+ */
+export function matchesGainForestSetup(
+  storedPacket: Uint8Array,
+  firmwareVersion: [number, number, number],
+  firmwareDescription: string,
+): boolean {
+  const { packet: expected, verifyLength } = buildConfigPacket(
+    gainforestSetupConfig(),
+    firmwareVersion,
+    firmwareDescription,
+    new Date(),
+  );
+  const compareLength = verifyLength(storedPacket.length);
+  for (let i = 4; i < compareLength; i += 1) {
+    if (expected[i] !== (storedPacket[i] ?? 0)) return false;
+  }
+  return true;
+}
+
 function writeLittleEndianBytes(buffer: Uint8Array, start: number, byteCount: number, value: number): void {
   for (let i = 0; i < byteCount; i += 1) {
     buffer[start + i] = (value / 2 ** (i * 8)) & 255;

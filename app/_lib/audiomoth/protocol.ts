@@ -24,7 +24,7 @@ const MSG_GET_TIME = 0x01;
 const MSG_SET_TIME = 0x02;
 const MSG_GET_UID = 0x03;
 const MSG_GET_BATTERY = 0x04;
-// const MSG_GET_APP_PACKET = 0x05; — unused in the web app
+const MSG_GET_APP_PACKET = 0x05;
 const MSG_SET_APP_PACKET = 0x06;
 const MSG_GET_FIRMWARE_VERSION = 0x07;
 const MSG_GET_FIRMWARE_DESCRIPTION = 0x08;
@@ -253,6 +253,12 @@ export class AudioMothDevice {
   /** Send a configuration packet; returns the echoed packet for verification. */
   async setPacket(packet: Uint8Array): Promise<Uint8Array> {
     const response = await this.request(MSG_SET_APP_PACKET, packet.slice(0, 62));
+    return response.slice(1);
+  }
+
+  /** Read the configuration packet currently stored on the device. */
+  async getPacket(): Promise<Uint8Array> {
+    const response = await this.request(MSG_GET_APP_PACKET);
     return response.slice(1);
   }
 

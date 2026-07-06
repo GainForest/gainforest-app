@@ -4,7 +4,9 @@ import {
   classifyFirmware,
   CONFIGURATIONS,
   DEFAULT_CONFIG,
+  gainforestSetupConfig,
   getEffectiveFirmwareVersion,
+  matchesGainForestSetup,
   MINUTES_IN_DAY,
   type AudioMothConfig,
 } from "./config";
@@ -252,6 +254,40 @@ describe("buildConfigPacket", () => {
 
     const legacy = buildConfigPacket(baseConfig, [1, 4, 2], OFFICIAL, sendTime);
     expect(legacy.verifyLength(63)).toBe(58);
+  });
+});
+
+describe("GainForest setup detection", () => {
+  const version: [number, number, number] = [1, 12, 0];
+
+  it("encodes 60 s recordings, 4 min sleep, full-day schedule and required chime", () => {
+    const config = gainforestSetupConfig();
+    expect(config.recordDuration).toBe(60);
+    expect(config.sleepDuration).toBe(240);
+    expect(config.dutyEnabled).toBe(true);
+    expect(config.requireAcousticConfig).toBe(true);
+    expect(config.timePeriods).toEqual([{ startMins: 0, endMins: MINUTES_IN_DAY }]);
+  });
+
+  it("recognises a device configured by the one-click setup, ignoring the timestamp", () => {
+    const { packet } = buildConfigPacket(gainforestSetupConfig(), version, OFFICIAL, new Date("2026-01-01T00:00:00Z"));
+    const stored = new Uint8Array(packet);
+    /* GET_APP_PACKET returns a different timestamp in the first four bytes */
+    stored[0] = 0xaa;
+    stored[1] = 0xbb;
+    stored[2] = 0xcc;
+    stored[3] = 0xdd;
+    expect(matchesGainForestSetup(stored, version, OFFICIAL)).toBe(true);
+  });
+
+  it("flags a device with different settings", () => {
+    const { packet } = buildConfigPacket(
+      { ...gainforestSetupConfig(), requireAcousticConfig: false },
+      version,
+      OFFICIAL,
+      new Date("2026-01-01T00:00:00Z"),
+    );
+    expect(matchesGainForestSetup(packet, version, OFFICIAL)).toBe(false);
   });
 });
 
