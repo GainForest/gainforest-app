@@ -186,6 +186,12 @@ export function FloatingTainaGuide() {
   const panelBodyRef = useRef<HTMLDivElement>(null);
   const savedPositionRef = useRef<Position | null>(null);
   const lastSpritePosRef = useRef<Position>({ x: 0, y: 0 });
+  // Which tour step we've already auto-navigated for. Guards against redirect
+  // loops: shim routes like /manage/projects immediately redirect to the
+  // account-specific path, so "pathname ≠ step route" alone must never
+  // re-trigger a push — that ping-pongs the URL forever.
+  const navigatedStepRef = useRef<string | null>(null);
+
   const dragRef = useRef<{
     pointerId: number;
     startClientX: number;
@@ -394,6 +400,7 @@ export function FloatingTainaGuide() {
       const guide = getTainaGuide(guideId);
       if (!guide || guide.tour.length === 0) return;
       savedPositionRef.current = lastSpritePosRef.current;
+      navigatedStepRef.current = null;
       setOpen(false);
       setSpotRect(null);
       setSpotMissing(false);
@@ -452,7 +459,16 @@ export function FloatingTainaGuide() {
     let trackTimer: ReturnType<typeof setInterval> | null = null;
     let clickHandler: (() => void) | null = null;
 
-    if (activeTourStep.route && pathname !== activeTourStep.route) {
+    const stepKey = `${tour.guideId}:${tour.index}`;
+    if (
+      activeTourStep.route &&
+      pathname !== activeTourStep.route &&
+      navigatedStepRef.current !== stepKey &&
+      // If the target is already on screen (shim redirects land on a page
+      // that contains it), don't navigate at all.
+      !(activeTourStep.selector && document.querySelector(activeTourStep.selector))
+    ) {
+      navigatedStepRef.current = stepKey;
       router.push(`${localePrefix}${activeTourStep.route}`);
     }
 
