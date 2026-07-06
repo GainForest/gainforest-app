@@ -1682,7 +1682,9 @@
       "loading": "Loading organizations…",
       "count": "{count, plural, one {# organization} other {# organizations}}",
       "empty": "No organizations match your search.",
-      "maEarth": "Ma Earth"
+      "maEarth": "Ma Earth",
+      "dataFilter": "Drone & data layers",
+      "dataBadge": "{count, plural, one {# map data layer} other {# map data layers}}"
     },
     "focus": {
       "organizationLabel": "Organization",
@@ -1720,7 +1722,10 @@
         "water": "Water",
         "wetland": "Wetland",
         "mangroves": "Mangroves"
-      }
+      },
+      "visibleNow": "{count, plural, one {# layer on the map} other {# layers on the map}}",
+      "flyTo": "Zoom to {name}",
+      "hide": "Hide {name}"
     },
     "tree": {
       "title": "Tree",

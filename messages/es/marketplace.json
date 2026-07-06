@@ -1682,7 +1682,9 @@
       "loading": "Cargando organizaciones…",
       "count": "{count, plural, one {# organización} other {# organizaciones}}",
       "empty": "Ninguna organización coincide con tu búsqueda.",
-      "maEarth": "Ma Earth"
+      "maEarth": "Ma Earth",
+      "dataFilter": "Capas de dron y datos",
+      "dataBadge": "{count, plural, one {# capa de datos del mapa} other {# capas de datos del mapa}}"
     },
     "focus": {
       "organizationLabel": "Organización",
@@ -1720,7 +1722,10 @@
         "water": "Agua",
         "wetland": "Humedal",
         "mangroves": "Manglares"
-      }
+      },
+      "visibleNow": "{count, plural, one {# capa en el mapa} other {# capas en el mapa}}",
+      "flyTo": "Acercar a {name}",
+      "hide": "Ocultar {name}"
     },
     "tree": {
       "title": "Árbol",

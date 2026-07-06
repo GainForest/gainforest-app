@@ -35,6 +35,10 @@ type GlobeOrgOut = {
   lat: number | null;
   lon: number | null;
   maEarth: boolean;
+  /** Published drone-imagery layers (orthomosaics / aerial tiles). */
+  droneLayers: number;
+  /** All published map data layers. */
+  dataLayers: number;
 };
 
 type RawOrg = {
@@ -64,6 +68,8 @@ async function fetchGreenGlobeRoster(): Promise<Map<string, GlobeOrgOut>> {
           lat: typeof lat === "number" ? lat : null,
           lon: typeof lon === "number" ? lon : null,
           maEarth: false,
+          droneLayers: 0,
+          dataLayers: 0,
         });
       }
     }
@@ -225,6 +231,58 @@ async function enrichMaEarthOrgs(dids: string[]): Promise<{
   return { names, pins };
 }
 
+// ── Data-layer stats ─────────────────────────────────────────────────────────────
+
+/** Layer types that render drone/aerial imagery on the globe. */
+const DRONE_LAYER_TYPES = new Set(["raster_tif", "tms_tile"]);
+
+const LAYER_STATS_QUERY = `
+  query GlobeLayerStats($first: Int!, $after: String) {
+    appGainforestOrganizationLayer(first: $first, after: $after) {
+      pageInfo { hasNextPage endCursor }
+      edges { node { did type } }
+    }
+  }
+`;
+
+type LayerStats = Map<string, { drone: number; total: number }>;
+
+type LayerStatsData = {
+  appGainforestOrganizationLayer?: {
+    pageInfo?: { hasNextPage?: boolean; endCursor?: string | null } | null;
+    edges?: Array<{ node?: { did?: string; type?: string } | null } | null> | null;
+  } | null;
+};
+
+/** Count published map data layers per organization (one indexer scan) so the
+ *  globe can surface + filter orgs with drone imagery and extra data. */
+async function fetchLayerStats(): Promise<LayerStats> {
+  const stats: LayerStats = new Map();
+  let after: string | null = null;
+  for (let page = 0; page < 10; page++) {
+    const data: LayerStatsData | null = await indexerQuery<LayerStatsData>(LAYER_STATS_QUERY, {
+      first: 1000,
+      after,
+    }).catch((error) => {
+      console.warn("[globe/organizations] layer stats failed", error);
+      return null;
+    });
+    const conn: LayerStatsData["appGainforestOrganizationLayer"] = data?.appGainforestOrganizationLayer;
+    if (!conn) break;
+    for (const edge of conn.edges ?? []) {
+      const node = edge?.node;
+      if (!node?.did) continue;
+      const entry = stats.get(node.did) ?? { drone: 0, total: 0 };
+      entry.total += 1;
+      if (node.type && DRONE_LAYER_TYPES.has(node.type)) entry.drone += 1;
+      stats.set(node.did, entry);
+    }
+    if (!conn.pageInfo?.hasNextPage || !conn.pageInfo.endCursor) break;
+    after = conn.pageInfo.endCursor;
+  }
+  return stats;
+}
+
 async function fetchMaEarthDidsWithRetry(): Promise<string[] | null> {
   for (let attempt = 0; attempt < 2; attempt++) {
     try {
@@ -240,9 +298,10 @@ async function fetchMaEarthDidsWithRetry(): Promise<string[] | null> {
 type RosterBuild = { organizations: GlobeOrgOut[]; degraded: boolean };
 
 async function buildRoster(): Promise<RosterBuild> {
-  const [roster, maEarthDidsOrNull] = await Promise.all([
+  const [roster, maEarthDidsOrNull, layerStats] = await Promise.all([
     fetchGreenGlobeRoster(),
     fetchMaEarthDidsWithRetry(),
+    fetchLayerStats(),
   ]);
   const maEarthDids = maEarthDidsOrNull ?? [];
 
@@ -278,10 +337,18 @@ async function buildRoster(): Promise<RosterBuild> {
         lat: pin?.lat ?? null,
         lon: pin?.lon ?? null,
         maEarth: true,
+        droneLayers: 0,
+        dataLayers: 0,
       });
     }
   } catch {
     /* enrichment is best-effort; the curated roster still renders */
+  }
+
+  for (const org of roster.values()) {
+    const layerStat = layerStats.get(org.did);
+    org.dataLayers = layerStat?.total ?? 0;
+    org.droneLayers = layerStat?.drone ?? 0;
   }
 
   return { organizations: [...roster.values()], degraded: maEarthDidsOrNull === null };

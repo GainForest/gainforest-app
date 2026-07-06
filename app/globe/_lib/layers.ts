@@ -10,7 +10,7 @@
 
 import { resolvePdsHost } from "../../_lib/pds";
 import { GLOBE_DATA_BUCKET } from "./config";
-import type { GlobeLayer, GlobeLayerType, GlobeLegendEntry } from "./globe-types";
+import type { GlobeLayer, GlobeLayerType, GlobeLegendEntry, LngLatBounds } from "./globe-types";
 
 const LAYER_COLLECTION = "app.gainforest.organization.layer";
 
@@ -66,7 +66,19 @@ type RawLayer = {
   category?: unknown;
   isDefault?: unknown;
   legend?: unknown;
+  bounds?: unknown;
 };
+
+/** Parse a record's `bounds` string ("minLng,minLat,maxLng,maxLat"). */
+function parseBounds(raw: unknown): LngLatBounds | undefined {
+  if (typeof raw !== "string") return undefined;
+  const parts = raw.split(",").map((part) => Number(part.trim()));
+  if (parts.length !== 4 || parts.some((value) => !Number.isFinite(value))) return undefined;
+  const [minLng, minLat, maxLng, maxLat] = parts as [number, number, number, number];
+  if (minLng < -180 || maxLng > 180 || minLat < -90 || maxLat > 90) return undefined;
+  if (minLng > maxLng || minLat > maxLat) return undefined;
+  return [minLng, minLat, maxLng, maxLat];
+}
 
 function parseLegend(raw: unknown): GlobeLegendEntry[] | undefined {
   if (!Array.isArray(raw)) return undefined;
@@ -107,6 +119,7 @@ function normalizeLayer(raw: RawLayer, fallbackCategory: string): GlobeLayer | n
     category: typeof raw.category === "string" && raw.category.trim() ? raw.category : fallbackCategory,
     legend: parseLegend(raw.legend),
     isDefault: typeof raw.isDefault === "boolean" ? raw.isDefault : undefined,
+    bounds: parseBounds(raw.bounds),
   };
 }
 

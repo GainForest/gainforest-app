@@ -14,6 +14,10 @@ export type GlobeOrganization = {
   lon: number | null;
   /** True when the organization carries a Ma Earth badge (any round). */
   maEarth?: boolean;
+  /** Published drone-imagery layers (orthomosaics / aerial tiles). */
+  droneLayers?: number;
+  /** All published map data layers (drone imagery included). */
+  dataLayers?: number;
 };
 
 export type GlobeLegendEntry = {
@@ -46,6 +50,9 @@ export type GlobeLayer = {
   category: string;
   legend?: GlobeLegendEntry[];
   isDefault?: boolean;
+  /** Geographic footprint declared on the record — lets the camera fly to
+   *  exactly what a toggle just made visible. */
+  bounds?: LngLatBounds | null;
 };
 
 /** A project site (certified location) resolved for map display. */

@@ -1682,7 +1682,9 @@
       "loading": "Memuat organisasi…",
       "count": "{count, plural, other {# organisasi}}",
       "empty": "Tidak ada organisasi yang cocok dengan pencarian Anda.",
-      "maEarth": "Ma Earth"
+      "maEarth": "Ma Earth",
+      "dataFilter": "Lapisan drone & data",
+      "dataBadge": "{count, plural, other {# lapisan data peta}}"
     },
     "focus": {
       "organizationLabel": "Organisasi",
@@ -1720,7 +1722,10 @@
         "water": "Air",
         "wetland": "Lahan basah",
         "mangroves": "Bakau"
-      }
+      },
+      "visibleNow": "{count, plural, other {# lapisan di peta}}",
+      "flyTo": "Perbesar ke {name}",
+      "hide": "Sembunyikan {name}"
     },
     "tree": {
       "title": "Pohon",

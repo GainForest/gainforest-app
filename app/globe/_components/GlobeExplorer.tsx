@@ -24,6 +24,7 @@ import {
   ArrowUpRightIcon,
   Building2Icon,
   ChevronDownIcon,
+  DroneIcon,
   EarthIcon,
   FolderKanbanIcon,
   LayersIcon,
@@ -126,6 +127,9 @@ export function GlobeExplorer({ orgDid = null, orgName = null, orgIdentifier = n
   // Ma Earth roster filter (global mode). The flag arrives on the roster
   // itself — the API merges Ma Earth–badged organizations server-side.
   const [maEarthOnly, setMaEarthOnly] = useState(false);
+  // Drone/data-layer roster filter (global mode). Layer counts arrive on the
+  // roster too — the API counts each org's published map layers server-side.
+  const [layersOnly, setLayersOnly] = useState(false);
 
   // ── Sites of the focused organization ────────────────────────────────────
   const [siteState, setSiteState] = useState<SiteState>(EMPTY_SITE_STATE);
@@ -288,14 +292,42 @@ export function GlobeExplorer({ orgDid = null, orgName = null, orgIdentifier = n
     return () => controller.abort();
   }, [focusDid]);
 
-  const toggleLayer = useCallback((layerId: string) => {
-    setEnabledLayerIds((current) => {
-      const next = new Set(current);
-      if (next.has(layerId)) next.delete(layerId);
-      else next.add(layerId);
-      return next;
-    });
+  const [mapBounds, setMapBounds] = useState<LngLatBounds | null>(null);
+
+  // Layer flights: when a layer with a declared footprint becomes visible the
+  // camera flies straight to it, so it is always clear which toggle just
+  // changed the map. The nonce re-triggers the flight on repeat requests.
+  const [layerFlightNonce, setLayerFlightNonce] = useState(0);
+  const flyToLayer = useCallback((layer: GlobeLayer) => {
+    if (!layer.bounds) return;
+    setMapBounds(layer.bounds);
+    setLayerFlightNonce((nonce) => nonce + 1);
   }, []);
+
+  const toggleLayer = useCallback(
+    (layer: GlobeLayer) => {
+      const enabling = !enabledLayerIds.has(layer.id);
+      setEnabledLayerIds((current) => {
+        const next = new Set(current);
+        if (next.has(layer.id)) next.delete(layer.id);
+        else next.add(layer.id);
+        return next;
+      });
+      if (enabling) flyToLayer(layer);
+    },
+    [enabledLayerIds, flyToLayer],
+  );
+
+  // "Zoom to layer": make sure the layer is visible, then fly to it.
+  const locateLayer = useCallback(
+    (layer: GlobeLayer) => {
+      setEnabledLayerIds((current) =>
+        current.has(layer.id) ? current : new Set([...current, layer.id]),
+      );
+      flyToLayer(layer);
+    },
+    [flyToLayer],
+  );
 
   const categorizedGlobalLayers = useMemo(() => {
     const categories = new Map<string, GlobeLayer[]>();
@@ -320,16 +352,18 @@ export function GlobeExplorer({ orgDid = null, orgName = null, orgIdentifier = n
   const focusedState = mode === "project" ? projectState : siteState;
   const visibleOrganizations = useMemo(() => {
     if (!organizations) return [];
-    if (mode !== "global" || !maEarthOnly) return organizations;
-    return organizations.filter((org) => org.maEarth === true);
-  }, [organizations, mode, maEarthOnly]);
+    if (mode !== "global") return organizations;
+    let list = organizations;
+    if (maEarthOnly) list = list.filter((org) => org.maEarth === true);
+    if (layersOnly) list = list.filter((org) => (org.dataLayers ?? 0) > 0);
+    return list;
+  }, [organizations, mode, maEarthOnly, layersOnly]);
 
   const highlightFeatures = useMemo(() => {
     if (!selectedSiteUri) return [];
     return focusedState.features.filter((feature) => feature.properties?.siteUri === selectedSiteUri);
   }, [focusedState.features, selectedSiteUri]);
 
-  const [mapBounds, setMapBounds] = useState<LngLatBounds | null>(null);
   useEffect(() => {
     if (!focusDid && mode === "global") return;
     if (selectedSiteUri) {
@@ -405,6 +439,8 @@ export function GlobeExplorer({ orgDid = null, orgName = null, orgIdentifier = n
     visibleOrganizations,
     maEarthOnly,
     onToggleMaEarth: () => setMaEarthOnly((value) => !value),
+    layersOnly,
+    onToggleLayersOnly: () => setLayersOnly((value) => !value),
     onSelect: (did: string) => {
       selectOrganization(did);
       collapseSheet();
@@ -459,7 +495,7 @@ export function GlobeExplorer({ orgDid = null, orgName = null, orgIdentifier = n
         onSelectTree={setSelectedTree}
         selectedTreeId={selectedTree?.id ?? null}
         bounds={mapBounds}
-        boundsKey={`${focusDid ?? "none"}:${selectedSiteUri ?? "all"}:${boundsNonce}`}
+        boundsKey={`${focusDid ?? "none"}:${selectedSiteUri ?? "all"}:${boundsNonce}:layer${layerFlightNonce}`}
         boundsPadding={
           isDesktop
             ? { top: 96, bottom: 64, left: 416, right: 64 }
@@ -537,6 +573,7 @@ export function GlobeExplorer({ orgDid = null, orgName = null, orgIdentifier = n
                 showOrgLayers={Boolean(focusDid)}
                 enabledLayerIds={enabledLayerIds}
                 onToggleLayer={toggleLayer}
+                onLocateLayer={locateLayer}
                 treesCount={treesState.data?.features.length ?? 0}
                 treesLoading={treesState.status === "loading"}
                 treesVisible={treesVisible}
@@ -623,9 +660,12 @@ export function GlobeExplorer({ orgDid = null, orgName = null, orgIdentifier = n
         </section>
       </div>
 
-      {/* ── Active layer legends ── */}
-      {activeLegends.length > 0 || landcoverVisible ? (
+      {/* ── Visible layers summary + active layer legends ── */}
+      {activeLayers.length > 0 || landcoverVisible ? (
         <div className="pointer-events-none absolute bottom-24 left-3 z-10 flex max-w-[min(320px,calc(100vw-6rem))] flex-col gap-2 md:bottom-8 md:left-4 md:max-w-[min(360px,calc(100vw-1.5rem))]">
+          {activeLayers.length > 0 ? (
+            <ActiveLayersCard layers={activeLayers} onLocate={flyToLayer} onHide={toggleLayer} />
+          ) : null}
           {landcoverVisible ? <LandcoverLegend /> : null}
           {activeLegends.map((layer) => (
             <div
@@ -657,6 +697,8 @@ function GlobalPanel({
   visibleOrganizations,
   maEarthOnly,
   onToggleMaEarth,
+  layersOnly,
+  onToggleLayersOnly,
   onSelect,
 }: {
   variant: PanelVariant;
@@ -664,6 +706,8 @@ function GlobalPanel({
   visibleOrganizations: GlobeOrganization[];
   maEarthOnly: boolean;
   onToggleMaEarth: () => void;
+  layersOnly: boolean;
+  onToggleLayersOnly: () => void;
   onSelect: (did: string) => void;
 }) {
   const t = useTranslations("marketplace.globe");
@@ -702,8 +746,8 @@ function GlobalPanel({
         </div>
       ) : null}
 
-      <div className={cn("flex items-center gap-2 px-4", variant === "floating" ? "pb-3" : "py-3")}>
-        <div className="relative min-w-0 flex-1">
+      <div className={cn("flex flex-col gap-2 px-4", variant === "floating" ? "pb-3" : "py-3")}>
+        <div className="relative min-w-0">
           <SearchIcon className="pointer-events-none absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
           <input
             type="search"
@@ -716,26 +760,42 @@ function GlobalPanel({
             className="h-9 w-full rounded-full border border-border bg-background pl-9 pr-3 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-primary/50"
           />
         </div>
-        <button
-          type="button"
-          onClick={onToggleMaEarth}
-          aria-pressed={maEarthOnly}
-          className={cn(
-            "inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full border px-2.5 text-xs font-medium transition-colors",
-            maEarthOnly
-              ? "border-primary/50 bg-primary/10 text-primary"
-              : "border-border text-muted-foreground hover:border-primary/40 hover:text-primary",
-          )}
-        >
-          <Image
-            src="/assets/media/images/badges/ma-earth-logo.webp"
-            alt=""
-            width={16}
-            height={16}
-            className="size-4 rounded-full"
-          />
-          {t("panel.maEarth")}
-        </button>
+        <div className="flex flex-wrap items-center gap-1.5">
+          <button
+            type="button"
+            onClick={onToggleMaEarth}
+            aria-pressed={maEarthOnly}
+            className={cn(
+              "inline-flex h-7 shrink-0 items-center gap-1.5 rounded-full border px-2.5 text-xs font-medium transition-colors",
+              maEarthOnly
+                ? "border-primary/50 bg-primary/10 text-primary"
+                : "border-border text-muted-foreground hover:border-primary/40 hover:text-primary",
+            )}
+          >
+            <Image
+              src="/assets/media/images/badges/ma-earth-logo.webp"
+              alt=""
+              width={14}
+              height={14}
+              className="size-3.5 rounded-full"
+            />
+            {t("panel.maEarth")}
+          </button>
+          <button
+            type="button"
+            onClick={onToggleLayersOnly}
+            aria-pressed={layersOnly}
+            className={cn(
+              "inline-flex h-7 shrink-0 items-center gap-1.5 rounded-full border px-2.5 text-xs font-medium transition-colors",
+              layersOnly
+                ? "border-primary/50 bg-primary/10 text-primary"
+                : "border-border text-muted-foreground hover:border-primary/40 hover:text-primary",
+            )}
+          >
+            <DroneIcon className="size-3.5" />
+            {t("panel.dataFilter")}
+          </button>
+        </div>
       </div>
 
       {showList ? (
@@ -790,6 +850,20 @@ function GlobalPanel({
                         </span>
                       ) : null}
                     </span>
+                    {(org.dataLayers ?? 0) > 0 ? (
+                      <span
+                        title={t("panel.dataBadge", { count: org.dataLayers ?? 0 })}
+                        className="inline-flex shrink-0 items-center gap-1 rounded-full bg-primary/10 px-1.5 py-0.5 text-[10px] font-semibold text-primary"
+                      >
+                        {(org.droneLayers ?? 0) > 0 ? (
+                          <DroneIcon className="size-3" />
+                        ) : (
+                          <LayersIcon className="size-3" />
+                        )}
+                        {org.dataLayers}
+                        <span className="sr-only">{t("panel.dataBadge", { count: org.dataLayers ?? 0 })}</span>
+                      </span>
+                    ) : null}
                     {org.lat === null ? null : (
                       <MapPinnedIcon className="size-3.5 shrink-0 text-muted-foreground/60 transition-colors group-hover:text-primary" />
                     )}
@@ -1030,6 +1104,7 @@ function LayersPanel({
   showOrgLayers,
   enabledLayerIds,
   onToggleLayer,
+  onLocateLayer,
   treesCount,
   treesLoading,
   treesVisible,
@@ -1043,7 +1118,8 @@ function LayersPanel({
   orgLayersLoading: boolean;
   showOrgLayers: boolean;
   enabledLayerIds: Set<string>;
-  onToggleLayer: (layerId: string) => void;
+  onToggleLayer: (layer: GlobeLayer) => void;
+  onLocateLayer: (layer: GlobeLayer) => void;
   treesCount: number;
   treesLoading: boolean;
   treesVisible: boolean;
@@ -1105,7 +1181,8 @@ function LayersPanel({
                   label={layer.name}
                   description={layer.description || undefined}
                   checked={enabledLayerIds.has(layer.id)}
-                  onToggle={() => onToggleLayer(layer.id)}
+                  onToggle={() => onToggleLayer(layer)}
+                  onLocate={layer.bounds ? () => onLocateLayer(layer) : undefined}
                 />
               ))}
             </div>
@@ -1130,7 +1207,8 @@ function LayersPanel({
                   label={layer.name}
                   description={layer.description || undefined}
                   checked={enabledLayerIds.has(layer.id)}
-                  onToggle={() => onToggleLayer(layer.id)}
+                  onToggle={() => onToggleLayer(layer)}
+                  onLocate={layer.bounds ? () => onLocateLayer(layer) : undefined}
                 />
               ))}
             </div>
@@ -1146,20 +1224,38 @@ function LayerToggleRow({
   description,
   checked,
   onToggle,
+  onLocate,
 }: {
   label: string;
   description?: string;
   checked: boolean;
   onToggle: () => void;
+  /** "Zoom to layer" — shown when the layer declares a map footprint. */
+  onLocate?: () => void;
 }) {
+  const t = useTranslations("marketplace.globe");
   return (
-    <label className="flex cursor-pointer items-center justify-between gap-3 px-3.5 py-2.5">
-      <span className="min-w-0">
+    <label className="flex cursor-pointer items-center justify-between gap-2 px-3.5 py-2.5">
+      <span className="min-w-0 flex-1">
         <span className="block truncate text-sm text-foreground">{label}</span>
         {description ? (
           <span className="block truncate text-[11px] text-muted-foreground">{description}</span>
         ) : null}
       </span>
+      {onLocate ? (
+        <button
+          type="button"
+          onClick={(event) => {
+            event.preventDefault();
+            onLocate();
+          }}
+          aria-label={t("layers.flyTo", { name: label })}
+          title={t("layers.flyTo", { name: label })}
+          className="grid size-7 shrink-0 place-items-center rounded-full border border-border text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary"
+        >
+          <LocateFixedIcon className="size-3.5" />
+        </button>
+      ) : null}
       <button
         type="button"
         role="switch"
@@ -1302,6 +1398,65 @@ function TreeDetailPanel({ tree, onClose }: { tree: TreeDetail; onClose: () => v
         </div>
       </div>
     </motion.aside>
+  );
+}
+
+// ── Visible layers summary ──────────────────────────────────────────────────
+
+/** Lists exactly which data layers are on the map right now, with "zoom to
+ *  layer" and quick-hide actions — so toggling many drone images never leaves
+ *  the user guessing which one is visible. */
+function ActiveLayersCard({
+  layers,
+  onLocate,
+  onHide,
+}: {
+  layers: GlobeLayer[];
+  onLocate: (layer: GlobeLayer) => void;
+  onHide: (layer: GlobeLayer) => void;
+}) {
+  const t = useTranslations("marketplace.globe");
+  return (
+    <div
+      data-testid="globe-active-layers"
+      className="pointer-events-auto rounded-xl border border-border bg-background/85 p-3 shadow-lg backdrop-blur-xl"
+    >
+      <p className="flex items-center gap-1.5 text-xs font-semibold text-foreground">
+        <LayersIcon className="size-3.5 text-primary" />
+        {t("layers.visibleNow", { count: layers.length })}
+      </p>
+      <ul className="mt-2 flex max-h-36 flex-col gap-0.5 overflow-y-auto overscroll-contain">
+        {layers.map((layer) => (
+          <li key={layer.id} className="flex items-center gap-1">
+            {layer.bounds ? (
+              <button
+                type="button"
+                onClick={() => onLocate(layer)}
+                title={t("layers.flyTo", { name: layer.name })}
+                className="flex h-6 min-w-0 flex-1 items-center gap-1.5 rounded text-left text-[11px] text-muted-foreground transition-colors hover:text-primary"
+              >
+                <LocateFixedIcon className="size-3 shrink-0" />
+                <span className="truncate">{layer.name}</span>
+              </button>
+            ) : (
+              <span className="flex h-6 min-w-0 flex-1 items-center gap-1.5 text-[11px] text-muted-foreground">
+                <span aria-hidden className="size-3 shrink-0" />
+                <span className="truncate">{layer.name}</span>
+              </span>
+            )}
+            <button
+              type="button"
+              onClick={() => onHide(layer)}
+              aria-label={t("layers.hide", { name: layer.name })}
+              title={t("layers.hide", { name: layer.name })}
+              className="grid size-5 shrink-0 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            >
+              <XIcon className="size-3" />
+            </button>
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }
 

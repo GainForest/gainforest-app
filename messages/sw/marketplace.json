@@ -1682,7 +1682,9 @@
       "loading": "Inapakia mashirika…",
       "count": "{count, plural, one {shirika #} other {mashirika #}}",
       "empty": "Hakuna shirika linalolingana na utafutaji wako.",
-      "maEarth": "Ma Earth"
+      "maEarth": "Ma Earth",
+      "dataFilter": "Tabaka za droni na data",
+      "dataBadge": "{count, plural, one {tabaka # la data ya ramani} other {tabaka # za data ya ramani}}"
     },
     "focus": {
       "organizationLabel": "Shirika",
@@ -1720,7 +1722,10 @@
         "water": "Maji",
         "wetland": "Ardhi oevu",
         "mangroves": "Mikoko"
-      }
+      },
+      "visibleNow": "{count, plural, one {tabaka # kwenye ramani} other {tabaka # kwenye ramani}}",
+      "flyTo": "Kuza hadi {name}",
+      "hide": "Ficha {name}"
     },
     "tree": {
       "title": "Mti",
