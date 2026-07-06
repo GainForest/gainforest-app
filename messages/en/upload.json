@@ -732,7 +732,8 @@
       "dropTitleTouch": "Add your photos",
       "takePhoto": "Take a photo",
       "combineWithAbove": "Combine with above",
-      "dragMergeHintTouch": "Tap the split icon on a photo to separate it."
+      "dragMergeHintTouch": "Tap the split icon on a photo to separate it.",
+      "submitDataBatch": "Send a large zip batch"
     },
     "csvUpload": {
       "title": "Upload CSV data",

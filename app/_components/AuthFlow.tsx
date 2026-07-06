@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import {
+  ArchiveIcon,
   ArrowRightIcon,
   BinocularsIcon,
   CheckIcon,
@@ -1035,6 +1036,15 @@ function AuthenticatedMenu({
               >
                 <ShieldCheckIcon className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
                 {sidebarT("profileRow.myOrganizations")}
+              </Link>
+
+              <Link
+                href="/submit-data"
+                onClick={() => setOpen(false)}
+                className="flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm text-foreground transition-colors hover:bg-muted/60"
+              >
+                <ArchiveIcon className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                {sidebarT("profileRow.submitData")}
               </Link>
 
               {adminHref ? (

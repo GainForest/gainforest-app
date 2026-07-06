@@ -146,7 +146,8 @@
       "myObservations": "Observasi saya",
       "myProjects": "Proyek saya",
       "myOrganizations": "Organisasi saya",
-      "admin": "Admin"
+      "admin": "Admin",
+      "submitData": "Kirim data lapangan"
     }
   },
   "settings": {

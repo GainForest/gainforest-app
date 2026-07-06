@@ -732,7 +732,8 @@
       "dropTitleTouch": "Tambahkan foto Anda",
       "takePhoto": "Ambil foto",
       "combineWithAbove": "Gabungkan dengan yang di atas",
-      "dragMergeHintTouch": "Ketuk ikon pisah pada foto untuk memisahkannya."
+      "dragMergeHintTouch": "Ketuk ikon pisah pada foto untuk memisahkannya.",
+      "submitDataBatch": "Kirim batch zip besar"
     },
     "csvUpload": {
       "title": "Unggah data CSV",

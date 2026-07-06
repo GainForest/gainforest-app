@@ -732,7 +732,8 @@
       "dropTitleTouch": "Añade tus fotos",
       "takePhoto": "Tomar una foto",
       "combineWithAbove": "Combinar con la de arriba",
-      "dragMergeHintTouch": "Toca el icono de separar en una foto para sacarla."
+      "dragMergeHintTouch": "Toca el icono de separar en una foto para sacarla.",
+      "submitDataBatch": "Enviar un lote zip grande"
     },
     "csvUpload": {
       "title": "Subir datos CSV",

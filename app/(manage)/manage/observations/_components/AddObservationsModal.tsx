@@ -1,9 +1,11 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { Fragment, useCallback, useEffect, useId, useRef, useState, type ChangeEvent, type DragEvent } from "react";
 import { useTranslations } from "next-intl";
 import {
+  ArchiveIcon,
   CameraIcon,
   CheckCircle2Icon,
   ChevronDownIcon,
@@ -864,6 +866,14 @@ export function AddObservationsModal({
                 <DropdownMenuItem onClick={() => setMode("csv")}>
                   <FileSpreadsheetIcon className="size-4" />
                   {t("uploadCsv")}
+                </DropdownMenuItem>
+                {/* Very large archives (photos + survey exports) go through the
+                    batch-review pipeline instead of this modal. */}
+                <DropdownMenuItem asChild onClick={onClose}>
+                  <Link href="/submit-data">
+                    <ArchiveIcon className="size-4" />
+                    {t("submitDataBatch")}
+                  </Link>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

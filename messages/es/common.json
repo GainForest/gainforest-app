@@ -146,7 +146,8 @@
       "myObservations": "Mis observaciones",
       "myProjects": "Mis proyectos",
       "myOrganizations": "Mis organizaciones",
-      "admin": "Administración"
+      "admin": "Administración",
+      "submitData": "Enviar datos de campo"
     }
   },
   "settings": {

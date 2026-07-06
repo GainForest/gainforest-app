@@ -732,7 +732,8 @@
       "dropTitleTouch": "Ongeza picha zako",
       "takePhoto": "Piga picha",
       "combineWithAbove": "Unganisha na iliyo juu",
-      "dragMergeHintTouch": "Gusa alama ya kutenganisha kwenye picha ili kuitenga."
+      "dragMergeHintTouch": "Gusa alama ya kutenganisha kwenye picha ili kuitenga.",
+      "submitDataBatch": "Tuma kundi kubwa la zip"
     },
     "csvUpload": {
       "title": "Pakia data ya CSV",
