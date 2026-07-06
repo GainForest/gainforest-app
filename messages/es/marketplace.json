@@ -1701,6 +1701,8 @@
       "allSites": "Todos los sitios",
       "noSites": "Aún no hay sitios de proyecto mapeados.",
       "noBoundaries": "Este proyecto aún no tiene límites de sitio mapeados.",
+      "projectPill": "Proyecto: {name}",
+      "moreProjects": "+{count} más",
       "projectHint": "Los límites resaltados muestran dónde trabaja este proyecto."
     },
     "layers": {

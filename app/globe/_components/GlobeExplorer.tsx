@@ -45,6 +45,7 @@ import { GlobeMap } from "./GlobeMap";
 import { LANDCOVER_LEGEND } from "../_lib/config";
 import {
   fetchGlobeOrganizations,
+  fetchOrganizationSiteProjects,
   fetchOrganizationSites,
   fetchSiteGeoJson,
   geojsonBounds,
@@ -180,6 +181,24 @@ export function GlobeExplorer({ orgDid = null, orgName = null, orgIdentifier = n
     });
     return () => controller.abort();
   }, [focusDid, mode, bumpBounds]);
+
+  // ── Which project(s) each site belongs to (tag pills in the site list) ──
+  const [siteProjects, setSiteProjects] = useState<Map<string, string[]>>(new Map());
+  useEffect(() => {
+    setSiteProjects(new Map());
+    if (!focusDid || mode === "project") return;
+    const controller = new AbortController();
+    fetchOrganizationSiteProjects(focusDid, controller.signal)
+      .then((map) => {
+        if (!controller.signal.aborted) setSiteProjects(map);
+      })
+      .catch((error) => {
+        if ((error as Error).name !== "AbortError") {
+          console.warn("[globe] site projects failed", error);
+        }
+      });
+    return () => controller.abort();
+  }, [focusDid, mode]);
 
   // ── Project boundaries (project mode) ────────────────────────────────────
   const [projectState, setProjectState] = useState<SiteState>(EMPTY_SITE_STATE);
@@ -467,6 +486,7 @@ export function GlobeExplorer({ orgDid = null, orgName = null, orgIdentifier = n
         selectedOrg,
         project,
         state: focusedState,
+        siteProjects,
         selectedSiteUri,
         onSelectSite: (uri: string | null) => {
           selectSite(uri);
@@ -900,6 +920,7 @@ function FocusPanel({
   selectedOrg,
   project,
   state,
+  siteProjects,
   selectedSiteUri,
   onSelectSite,
   onClear,
@@ -913,6 +934,8 @@ function FocusPanel({
   selectedOrg: GlobeOrganization | null;
   project: GlobeProjectFocus | null;
   state: SiteState;
+  /** Certified location AT-URI → titles of the projects that reference it. */
+  siteProjects: Map<string, string[]>;
   selectedSiteUri: string | null;
   onSelectSite: (uri: string | null) => void;
   onClear?: () => void;
@@ -1073,6 +1096,7 @@ function FocusPanel({
               <li key={site.uri}>
                 <SiteRow
                   label={site.name}
+                  projects={siteProjects.get(site.uri)}
                   active={selectedSiteUri === site.uri}
                   onClick={() => onSelectSite(site.uri)}
                 />
@@ -1085,7 +1109,24 @@ function FocusPanel({
   );
 }
 
-function SiteRow({ label, active, onClick }: { label: string; active: boolean; onClick: () => void }) {
+/** How many project pills a site row shows before collapsing into "+N". */
+const SITE_ROW_MAX_PILLS = 2;
+
+function SiteRow({
+  label,
+  projects,
+  active,
+  onClick,
+}: {
+  label: string;
+  /** Titles of the projects this site belongs to (tag pills). */
+  projects?: string[];
+  active: boolean;
+  onClick: () => void;
+}) {
+  const t = useTranslations("marketplace.globe");
+  const shown = projects?.slice(0, SITE_ROW_MAX_PILLS) ?? [];
+  const hidden = (projects?.length ?? 0) - shown.length;
   return (
     <button
       type="button"
@@ -1096,8 +1137,33 @@ function SiteRow({ label, active, onClick }: { label: string; active: boolean; o
         active ? "font-medium text-primary" : "text-foreground",
       )}
     >
-      <MapPinnedIcon className={cn("size-3.5 shrink-0", active ? "text-primary" : "text-muted-foreground")} />
-      <span className="min-w-0 flex-1 truncate">{label}</span>
+      <MapPinnedIcon className={cn("size-3.5 shrink-0 self-start mt-0.5", active ? "text-primary" : "text-muted-foreground")} />
+      <span className="min-w-0 flex-1">
+        <span className="block truncate">{label}</span>
+        {shown.length > 0 ? (
+          <span className="mt-1 flex flex-wrap items-center gap-1">
+            {shown.map((title) => (
+              <span
+                key={title}
+                title={t("focus.projectPill", { name: title })}
+                className="inline-flex max-w-[150px] items-center gap-1 rounded-full bg-primary/10 px-1.5 py-px text-[10px] font-medium leading-4 text-primary"
+              >
+                <FolderKanbanIcon aria-hidden className="size-2.5 shrink-0" />
+                <span className="truncate">{title}</span>
+                <span className="sr-only">{t("focus.projectPill", { name: title })}</span>
+              </span>
+            ))}
+            {hidden > 0 ? (
+              <span
+                title={projects!.slice(SITE_ROW_MAX_PILLS).join(", ")}
+                className="rounded-full bg-muted px-1.5 py-px text-[10px] font-medium leading-4 text-muted-foreground"
+              >
+                {t("focus.moreProjects", { count: hidden })}
+              </span>
+            ) : null}
+          </span>
+        ) : null}
+      </span>
       {active ? <span aria-hidden className="size-1.5 shrink-0 rounded-full bg-primary" /> : null}
     </button>
   );

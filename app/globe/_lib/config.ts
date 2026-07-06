@@ -75,7 +75,12 @@ export function globeMapStyle(): StyleSpecification {
           "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
         ],
         tileSize: 256,
-        maxzoom: 19,
+        // Esri serves literal "Map data not yet available" placeholder tiles
+        // past the locally available imagery resolution — in the remote areas
+        // most project sites live in, that kicks in right around z17–18.
+        // Capping the source here makes MapLibre overzoom the deepest real
+        // tiles instead of rendering the gray placeholders.
+        maxzoom: 17,
         attribution:
           '<a href="https://www.esri.com/" target="_blank" rel="noreferrer">Esri</a>, Maxar, Earthstar Geographics | <a href="https://esa-worldcover.org/" target="_blank" rel="noreferrer">ESA WorldCover</a> | © GainForest',
       },

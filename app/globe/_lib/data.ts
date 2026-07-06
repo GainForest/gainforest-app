@@ -4,7 +4,7 @@
  * indexer, with GeoJSON boundaries resolved from each org's PDS).
  */
 
-import { fetchLocationsByDid } from "../../_lib/indexer";
+import { fetchBumicertsByDid, fetchLocationsByDid } from "../../_lib/indexer";
 import type { GlobeOrganization, GlobeSite, LngLatBounds } from "./globe-types";
 
 /** Organization roster for the globe (name, country, marker point). */
@@ -31,6 +31,27 @@ export async function fetchOrganizationSites(
         ? { lat: location.record.location.lat, lon: location.record.location.lon }
         : null,
   }));
+}
+
+/** Which of the organization's projects reference each site: certified
+ *  location AT-URI → project titles. Lets the site list badge every site with
+ *  the project(s) it belongs to, so a long roster of boundaries stays legible. */
+export async function fetchOrganizationSiteProjects(
+  did: string,
+  signal?: AbortSignal,
+): Promise<Map<string, string[]>> {
+  const page = await fetchBumicertsByDid(did, 500, null, signal);
+  const bySite = new Map<string, string[]>();
+  for (const project of page.records) {
+    const title = project.title?.trim();
+    if (!title) continue;
+    for (const uri of project.locationUris) {
+      const titles = bySite.get(uri) ?? [];
+      if (!titles.includes(title)) titles.push(title);
+      bySite.set(uri, titles);
+    }
+  }
+  return bySite;
 }
 
 const geojsonCache = new Map<string, Promise<GeoJSON.GeoJSON | null>>();

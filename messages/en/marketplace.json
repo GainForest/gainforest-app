@@ -1701,6 +1701,8 @@
       "allSites": "All sites",
       "noSites": "No project sites mapped yet.",
       "noBoundaries": "This project has no mapped site boundaries yet.",
+      "projectPill": "Project: {name}",
+      "moreProjects": "+{count} more",
       "projectHint": "The highlighted boundaries show where this project works."
     },
     "layers": {
