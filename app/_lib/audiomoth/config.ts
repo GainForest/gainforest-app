@@ -107,6 +107,10 @@ export interface TimePeriod {
 
 export type FilterType = "none" | "low" | "band" | "high";
 
+export type GpsFixMode = "period" | "individual";
+
+export const VALID_GPS_FIX_TIMES = [1, 2, 5, 10, 15] as const;
+
 export interface AudioMothConfig {
   gain: number; // 0-4
   sampleRateIndex: number; // index into CONFIGURATIONS
@@ -130,6 +134,31 @@ export interface AudioMothConfig {
   disable48DCFilter: boolean;
   dailyFolders: boolean;
   filenameWithDeviceIDEnabled: boolean;
+  /* Advanced settings (fw ≥ 1.12.0 unless noted) */
+  /** Always require an acoustic chime when switching to CUSTOM. */
+  requireAcousticConfig: boolean;
+  /** Also require the location in the acoustic chime (needs requireAcousticConfig). */
+  requireLocationInChime: boolean;
+  /** Use the time zone included in the acoustic chime. */
+  useTimeZoneInChime: boolean;
+  /** Also adjust the schedule to the chimed time zone (needs useTimeZoneInChime). */
+  adjustScheduleUsingTimezoneFromAcousticChime: boolean;
+  /** Extend WAV file preparation time for slow SD cards (prep time 10s vs 2s). */
+  extendPrepTime: boolean;
+  /** Show NiMH/LiPo voltage range instead of battery level on the LEDs. */
+  displayVoltageRange: boolean;
+  /** Switch the gain settings to the low gain range. */
+  lowGainRangeEnabled: boolean;
+  /** Ignore an attached external microphone for the acoustic chime. */
+  ignoreExternalMicrophoneForAcousticChime: boolean;
+  /** Use a magnetic switch to delay the start of the schedule. */
+  magneticSwitchEnabled: boolean;
+  /** Use the GPS add-on to set time and location (fw ≥ 1.11.0 for fix options). */
+  timeSettingFromGPSEnabled: boolean;
+  /** Acquire a GPS fix around whole periods or each individual recording. */
+  acquireGpsFixBeforeAfter: GpsFixMode;
+  /** GPS fix time in minutes (1, 2, 5, 10 or 15). */
+  gpsFixTime: number;
 }
 
 export const DEFAULT_CONFIG: AudioMothConfig = {
@@ -151,6 +180,18 @@ export const DEFAULT_CONFIG: AudioMothConfig = {
   disable48DCFilter: false,
   dailyFolders: false,
   filenameWithDeviceIDEnabled: false,
+  requireAcousticConfig: false,
+  requireLocationInChime: false,
+  useTimeZoneInChime: false,
+  adjustScheduleUsingTimezoneFromAcousticChime: false,
+  extendPrepTime: false,
+  displayVoltageRange: false,
+  lowGainRangeEnabled: false,
+  ignoreExternalMicrophoneForAcousticChime: false,
+  magneticSwitchEnabled: false,
+  timeSettingFromGPSEnabled: false,
+  acquireGpsFixBeforeAfter: "period",
+  gpsFixTime: 2,
 };
 
 function writeLittleEndianBytes(buffer: Uint8Array, start: number, byteCount: number, value: number): void {
@@ -258,15 +299,34 @@ export function buildConfigPacket(
   /* Low voltage cut-off is always enabled */
   packet[index++] = 1;
 
-  /* packedValue1: bit 0 = battery level indication DISABLED; chime/GPS extras stay 0 */
-  packet[index++] = config.batteryLevelCheckEnabled ? 0 : 1;
+  /* packedValue1: bit 0 = battery level indication DISABLED, plus chime/prep-time extras on fw ≥ 1.12.0 */
+  let packedValue1 = config.batteryLevelCheckEnabled ? 0 : 1;
+  if (!isOlderVersion(version, 1, 12, 0)) {
+    if (config.requireAcousticConfig) {
+      packedValue1 |= config.requireLocationInChime ? 1 << 1 : 0;
+    }
+    packedValue1 |= config.useTimeZoneInChime ? 1 << 2 : 0;
+    if (config.useTimeZoneInChime) {
+      packedValue1 |= config.adjustScheduleUsingTimezoneFromAcousticChime ? 1 << 3 : 0;
+    }
+    const prerecordingPrepTime = config.extendPrepTime ? 10 : 2;
+    packedValue1 |= (prerecordingPrepTime & 0b1111) << 4;
+  }
+  packet[index++] = packedValue1;
 
   packet[index++] = offsetMins & 0xff;
 
-  /* packedValue2: bit 0 = duty cycle DISABLED, bit 1 = filename includes device ID */
+  /* packedValue2: bit 0 = duty cycle DISABLED, bit 1 = filename includes device ID, GPS fix options, external mic */
   let packedValue2 = config.dutyEnabled ? 0 : 1;
   if (!isOlderVersion(version, 1, 11, 0)) {
     packedValue2 |= config.filenameWithDeviceIDEnabled ? 1 << 1 : 0;
+    if (config.timeSettingFromGPSEnabled) {
+      packedValue2 |= config.acquireGpsFixBeforeAfter === "individual" ? 1 << 2 : 0;
+      packedValue2 |= (config.gpsFixTime & 0b1111) << 3;
+    }
+  }
+  if (!isOlderVersion(version, 1, 12, 0)) {
+    packedValue2 |= config.ignoreExternalMicrophoneForAcousticChime ? 1 << 7 : 0;
   }
   packet[index++] = packedValue2;
 
@@ -324,8 +384,10 @@ export function buildConfigPacket(
   writeLittleEndianBytes(packet, index, 2, 0);
   index += 2;
 
-  /* packedValue3: acoustic config off, voltage range display off, no minimum trigger duration */
-  packet[index++] = 0;
+  /* packedValue3: acoustic chime requirement, voltage range display; no minimum trigger duration (triggers off) */
+  let packedValue3 = config.requireAcousticConfig ? 1 : 0;
+  packedValue3 |= config.displayVoltageRange ? 1 << 1 : 0;
+  packet[index++] = packedValue3;
 
   /* packedValue4/5 (or 6/7): threshold scales — disabled */
   packet[index++] = 0;
@@ -334,6 +396,9 @@ export function buildConfigPacket(
   /* packedValue8: misc flags */
   let packedValue8 = config.energySaverModeEnabled ? 1 : 0;
   packedValue8 |= config.disable48DCFilter ? 1 << 1 : 0;
+  packedValue8 |= config.timeSettingFromGPSEnabled ? 1 << 2 : 0;
+  packedValue8 |= config.magneticSwitchEnabled ? 1 << 3 : 0;
+  packedValue8 |= config.lowGainRangeEnabled ? 1 << 4 : 0;
   packedValue8 |= config.dailyFolders ? 1 << 6 : 0;
   packet[index++] = packedValue8;
 

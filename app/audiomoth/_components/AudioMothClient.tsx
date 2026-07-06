@@ -47,8 +47,10 @@ import {
   MAX_RECORD_DURATION,
   MAX_SLEEP_DURATION,
   MINUTES_IN_DAY,
+  VALID_GPS_FIX_TIMES,
   type AudioMothConfig,
   type FilterType,
+  type GpsFixMode,
   type TimePeriod,
 } from "@/app/_lib/audiomoth/config";
 import {
@@ -846,6 +848,140 @@ function ConfigureTab({
             />
             {t("filenameWithDeviceIdLabel")}
           </label>
+          <label className="flex items-center gap-2 text-sm">
+            <Checkbox
+              checked={config.extendPrepTime}
+              onCheckedChange={(checked) => update({ extendPrepTime: checked === true })}
+            />
+            {t("extendPrepTimeLabel")}
+          </label>
+          <label className="flex items-center gap-2 text-sm">
+            <Checkbox
+              checked={config.displayVoltageRange}
+              onCheckedChange={(checked) => update({ displayVoltageRange: checked === true })}
+            />
+            {t("displayVoltageRangeLabel")}
+          </label>
+          <label className="flex items-center gap-2 text-sm">
+            <Checkbox
+              checked={config.lowGainRangeEnabled}
+              onCheckedChange={(checked) => update({ lowGainRangeEnabled: checked === true })}
+            />
+            {t("lowGainRangeLabel")}
+          </label>
+          <label className="flex items-center gap-2 text-sm">
+            <Checkbox
+              checked={config.magneticSwitchEnabled}
+              onCheckedChange={(checked) => update({ magneticSwitchEnabled: checked === true })}
+            />
+            {t("magneticSwitchLabel")}
+          </label>
+        </div>
+      </Card>
+
+      <Card>
+        <h2 className="mb-1 text-sm font-semibold">{t("chimeTitle")}</h2>
+        <p className="mb-4 text-sm text-muted-foreground">{t("chimeBody")}</p>
+        <div className="flex flex-col gap-3">
+          <label className="flex items-center gap-2 text-sm">
+            <Checkbox
+              checked={config.requireAcousticConfig}
+              onCheckedChange={(checked) =>
+                update({
+                  requireAcousticConfig: checked === true,
+                  ...(checked === true ? {} : { requireLocationInChime: false }),
+                })
+              }
+            />
+            {t("requireAcousticConfigLabel")}
+          </label>
+          <label
+            className={cn("flex items-center gap-2 pl-6 text-sm", !config.requireAcousticConfig && "text-muted-foreground/60")}
+          >
+            <Checkbox
+              checked={config.requireLocationInChime}
+              disabled={!config.requireAcousticConfig}
+              onCheckedChange={(checked) => update({ requireLocationInChime: checked === true })}
+            />
+            {t("requireLocationInChimeLabel")}
+          </label>
+          <label className="flex items-center gap-2 text-sm">
+            <Checkbox
+              checked={config.useTimeZoneInChime}
+              onCheckedChange={(checked) =>
+                update({
+                  useTimeZoneInChime: checked === true,
+                  ...(checked === true ? {} : { adjustScheduleUsingTimezoneFromAcousticChime: false }),
+                })
+              }
+            />
+            {t("useTimeZoneInChimeLabel")}
+          </label>
+          <label
+            className={cn("flex items-center gap-2 pl-6 text-sm", !config.useTimeZoneInChime && "text-muted-foreground/60")}
+          >
+            <Checkbox
+              checked={config.adjustScheduleUsingTimezoneFromAcousticChime}
+              disabled={!config.useTimeZoneInChime}
+              onCheckedChange={(checked) => update({ adjustScheduleUsingTimezoneFromAcousticChime: checked === true })}
+            />
+            {t("adjustScheduleFromChimeLabel")}
+          </label>
+          <label className="flex items-center gap-2 text-sm">
+            <Checkbox
+              checked={config.ignoreExternalMicrophoneForAcousticChime}
+              onCheckedChange={(checked) => update({ ignoreExternalMicrophoneForAcousticChime: checked === true })}
+            />
+            {t("ignoreExternalMicLabel")}
+          </label>
+        </div>
+      </Card>
+
+      <Card>
+        <h2 className="mb-1 text-sm font-semibold">{t("gpsTitle")}</h2>
+        <p className="mb-4 text-sm text-muted-foreground">{t("gpsBody")}</p>
+        <div className="flex flex-col gap-4">
+          <label className="flex items-center gap-2 text-sm">
+            <Checkbox
+              checked={config.timeSettingFromGPSEnabled}
+              onCheckedChange={(checked) => update({ timeSettingFromGPSEnabled: checked === true })}
+            />
+            {t("gpsEnabledLabel")}
+          </label>
+          {config.timeSettingFromGPSEnabled && (
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="audiomoth-gps-mode">{t("gpsFixModeLabel")}</Label>
+                <Select
+                  value={config.acquireGpsFixBeforeAfter}
+                  onValueChange={(value) => update({ acquireGpsFixBeforeAfter: value as GpsFixMode })}
+                >
+                  <SelectTrigger id="audiomoth-gps-mode">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="period">{t("gpsFixModePeriod")}</SelectItem>
+                    <SelectItem value="individual">{t("gpsFixModeIndividual")}</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="audiomoth-gps-fix-time">{t("gpsFixTimeLabel")}</Label>
+                <Select value={String(config.gpsFixTime)} onValueChange={(value) => update({ gpsFixTime: parseInt(value, 10) })}>
+                  <SelectTrigger id="audiomoth-gps-fix-time">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {VALID_GPS_FIX_TIMES.map((minutes) => (
+                      <SelectItem key={minutes} value={String(minutes)}>
+                        {minutes}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          )}
         </div>
       </Card>
 

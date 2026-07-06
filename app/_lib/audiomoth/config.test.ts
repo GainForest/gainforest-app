@@ -65,7 +65,8 @@ describe("buildConfigPacket", () => {
     /* timezone, low voltage cutoff, battery level */
     expect(packet[39]).toBe(0);
     expect(packet[40]).toBe(1);
-    expect(packet[41]).toBe(0); // battery level indication enabled → bit clear
+    /* battery indication enabled → bit 0 clear; default 2s prep time in bits 4-7 (fw ≥ 1.12.0) */
+    expect(packet[41]).toBe(2 << 4);
     expect(packet[42]).toBe(0);
     expect(packet[43] & 1).toBe(0); // duty cycle enabled → "disabled" bit clear
 
@@ -77,7 +78,90 @@ describe("buildConfigPacket", () => {
     expect(readUint16(packet, 52)).toBe(0);
     expect(readUint16(packet, 54)).toBe(0);
     expect(readUint16(packet, 56)).toBe(0);
+    expect(packet[58]).toBe(0); // no chime requirement, no voltage range display
     expect(packet[61]).toBe(0);
+  });
+
+  it("omits prep time and chime bits for firmware older than 1.12.0", () => {
+    const { packet } = buildConfigPacket(
+      { ...baseConfig, requireAcousticConfig: true, requireLocationInChime: true, useTimeZoneInChime: true },
+      [1, 11, 0],
+      OFFICIAL,
+      sendTime,
+    );
+    expect(packet[41]).toBe(0); // packedValue1 extras gated to 1.12.0+
+    expect(packet[58]).toBe(1); // requireAcousticConfig itself is always written
+  });
+
+  it("packs the acoustic chime options", () => {
+    const { packet } = buildConfigPacket(
+      {
+        ...baseConfig,
+        requireAcousticConfig: true,
+        requireLocationInChime: true,
+        useTimeZoneInChime: true,
+        adjustScheduleUsingTimezoneFromAcousticChime: true,
+        extendPrepTime: true,
+        ignoreExternalMicrophoneForAcousticChime: true,
+        displayVoltageRange: true,
+      },
+      [1, 12, 0],
+      OFFICIAL,
+      sendTime,
+    );
+    /* packedValue1: location bit1, tz bit2, adjust bit3, prep time 10 in bits 4-7 */
+    expect(packet[41]).toBe((1 << 1) | (1 << 2) | (1 << 3) | (10 << 4));
+    /* packedValue2: external mic bit 7 */
+    expect(packet[43] & (1 << 7)).toBe(1 << 7);
+    /* packedValue3: chime required bit 0, voltage range bit 1 */
+    expect(packet[58]).toBe(0b11);
+  });
+
+  it("only packs dependent chime bits when their parents are enabled", () => {
+    const { packet } = buildConfigPacket(
+      {
+        ...baseConfig,
+        requireAcousticConfig: false,
+        requireLocationInChime: true,
+        useTimeZoneInChime: false,
+        adjustScheduleUsingTimezoneFromAcousticChime: true,
+      },
+      [1, 12, 0],
+      OFFICIAL,
+      sendTime,
+    );
+    expect(packet[41]).toBe(2 << 4); // only the default prep time survives
+    expect(packet[58]).toBe(0);
+  });
+
+  it("packs GPS options into packedValue2 and packedValue8", () => {
+    const { packet } = buildConfigPacket(
+      {
+        ...baseConfig,
+        timeSettingFromGPSEnabled: true,
+        acquireGpsFixBeforeAfter: "individual",
+        gpsFixTime: 5,
+        magneticSwitchEnabled: true,
+        lowGainRangeEnabled: true,
+      },
+      [1, 12, 0],
+      OFFICIAL,
+      sendTime,
+    );
+    expect(packet[43] & (1 << 2)).toBe(1 << 2); // individual fix mode
+    expect((packet[43] >> 3) & 0b1111).toBe(5); // fix time
+    expect(packet[61]).toBe((1 << 2) | (1 << 3) | (1 << 4)); // gps + magnetic + low gain
+  });
+
+  it("omits GPS fix options for firmware older than 1.11.0", () => {
+    const { packet } = buildConfigPacket(
+      { ...baseConfig, timeSettingFromGPSEnabled: true, acquireGpsFixBeforeAfter: "individual", gpsFixTime: 5 },
+      [1, 10, 0],
+      OFFICIAL,
+      sendTime,
+    );
+    expect(packet[43]).toBe(0); // duty enabled, no GPS bits on old firmware
+    expect(packet[61] & (1 << 2)).toBe(1 << 2); // GPS enable flag itself is always written
   });
 
   it("encodes duty cycle disabled and battery indication disabled as set bits", () => {
