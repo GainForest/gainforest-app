@@ -1678,6 +1678,10 @@
     "viewOnGlobe": "Ver en el Globo",
     "panel": {
       "searchPlaceholder": "Buscar organizaciones…",
+      "tabOrganizations": "Organizaciones",
+      "tabTrees": "Datos de árboles",
+      "treesEmpty": "Aún no se han subido datos de árboles.",
+      "treesFailed": "Los datos de árboles no están disponibles en este momento.",
       "toggleList": "Mostrar la lista de organizaciones",
       "loading": "Cargando organizaciones…",
       "count": "{count, plural, one {# organización} other {# organizaciones}}",

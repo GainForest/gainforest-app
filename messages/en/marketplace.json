@@ -1678,6 +1678,10 @@
     "viewOnGlobe": "View on Globe",
     "panel": {
       "searchPlaceholder": "Search organizations…",
+      "tabOrganizations": "Organizations",
+      "tabTrees": "Tree data",
+      "treesEmpty": "No tree data uploaded yet.",
+      "treesFailed": "Tree data is unavailable right now.",
       "toggleList": "Show organization list",
       "loading": "Loading organizations…",
       "count": "{count, plural, one {# organization} other {# organizations}}",
