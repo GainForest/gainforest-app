@@ -377,7 +377,10 @@ export function GlobeMap({
     map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "bottom-right");
 
     // Idle rotation: keep spinning between eased moves until the user grabs
-    // the globe (mirrors Green Globe's behaviour).
+    // the globe (mirrors Green Globe's behaviour). Wheel/keyboard zoom must
+    // also count as interaction — otherwise every wheel-zoom `moveend`
+    // restarts the spin's easeTo, which cancels the in-flight scroll-zoom
+    // animation and locks the camera in a fight that feels like a freeze.
     let interacted = false;
     const continueSpin = () => spinGlobe(map, spinRef.current && !interacted);
     const stopSpin = () => {
@@ -386,6 +389,8 @@ export function GlobeMap({
     map.on("moveend", continueSpin);
     map.on("mousedown", stopSpin);
     map.on("touchstart", stopSpin);
+    map.on("wheel", stopSpin);
+    map.on("keydown", stopSpin);
 
     const popup = new maplibregl.Popup({
       closeButton: false,
