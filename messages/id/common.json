@@ -948,7 +948,8 @@
       "testAccounts": "Akun uji coba",
       "endorsers": "Pendukung",
       "awardEndorsements": "Berikan dukungan",
-      "facilitator": "Dompet fasilitator"
+      "facilitator": "Dompet fasilitator",
+      "dataJobs": "Batch data"
     },
     "unnamed": "Akun tanpa nama",
     "awardHint": "Buka profil untuk memberikan lencana.",
@@ -1215,5 +1216,101 @@
     "empty": "Belum ada dukungan yang diberikan.",
     "unnamed": "Organisasi tanpa nama",
     "propagationHint": "Dukungan baru perlu beberapa menit untuk muncul di seluruh aplikasi."
+  },
+  "dataJobs": {
+    "meta": {
+      "title": "Kirim data lapangan",
+      "description": "Kirim batch besar berisi foto lapangan dan ekspor survei ke tim GainForest untuk ditinjau dan dipublikasikan."
+    },
+    "hero": {
+      "kicker": "Untuk mitra lapangan",
+      "title": "Kirim data lapangan Anda dalam satu batch besar",
+      "description": "Kemas foto dan ekspor survei Anda (misalnya dari KoboToolbox) ke dalam satu file zip dan kirimkan kepada kami. Tim kami meninjau setiap batch dan mempublikasikan observasi ke akun Anda.",
+      "step1Title": "Kemas semuanya dalam satu zip",
+      "step1Description": "Foto, spreadsheet, dan ekspor survei — formatnya tidak harus sempurna.",
+      "step2Title": "Unggah batch",
+      "step2Description": "File hingga 10GB diunggah langsung dari browser Anda. Biarkan halaman tetap terbuka sampai selesai.",
+      "step3Title": "Kami meninjau dan mempublikasikan untuk Anda",
+      "step3Description": "Tim GainForest memeriksa data dan mempublikasikan observasi ke akun Anda. Anda bisa memantau prosesnya di sini."
+    },
+    "signIn": {
+      "title": "Masuk untuk mengirim data",
+      "description": "Batch terhubung dengan akun Anda agar observasi sampai ke tempat yang tepat.",
+      "button": "Masuk"
+    },
+    "notConfigured": "Unggah batch belum tersedia di instalasi ini. Silakan hubungi tim GainForest.",
+    "form": {
+      "title": "Batch baru",
+      "dropHint": "Letakkan file zip Anda di sini atau klik untuk memilih",
+      "dropSubHint": "Satu file .zip, hingga {max}",
+      "replaceFile": "Klik untuk memilih file lain",
+      "projectLabel": "Proyek atau lokasi",
+      "projectPlaceholder": "mis. Restorasi mangrove, lokasi utara",
+      "notesLabel": "Catatan untuk tim peninjau",
+      "notesPlaceholder": "Apa pun yang membantu kami memahami data Anda — arti kolom, tanggal, daftar spesies…",
+      "consentLabel": "Izinkan tim GainForest meninjau data ini dan mempublikasikannya ke akun saya atas nama saya.",
+      "consentHint": "Anda dapat mencabut izin ini kapan saja di Pengaturan.",
+      "consentGranted": "Anda telah mengizinkan tim GainForest mempublikasikan data yang sudah ditinjau ke akun Anda.",
+      "consentManage": "Kelola di Pengaturan",
+      "submit": "Kirim batch",
+      "preparing": "Menyiapkan…",
+      "uploading": "Mengunggah…",
+      "finishing": "Menyelesaikan…",
+      "keepOpen": "Biarkan halaman ini tetap terbuka sampai unggahan selesai.",
+      "cancel": "Batal"
+    },
+    "errors": {
+      "zipOnly": "Pilih satu file .zip saja.",
+      "tooLarge": "File itu terlalu besar — batasnya {max}.",
+      "uploadFailed": "Unggahan tidak selesai. Periksa koneksi Anda dan coba lagi."
+    },
+    "done": {
+      "description": "Batch diterima! Tim kami akan meninjaunya dan mempublikasikan observasi ke akun Anda."
+    },
+    "jobs": {
+      "title": "Batch Anda",
+      "empty": "Belum ada batch — kiriman Anda akan muncul di sini.",
+      "submitted": "Dikirim {when}",
+      "publishedCount": "{count} observasi dipublikasikan",
+      "cancel": "Hapus"
+    },
+    "status": {
+      "uploading": "Mengunggah",
+      "received": "Diterima",
+      "inReview": "Sedang ditinjau",
+      "published": "Dipublikasikan",
+      "needsAttention": "Perlu perhatian"
+    }
+  },
+  "adminDataJobs": {
+    "title": "Batch data",
+    "description": "Arsip besar yang dikirim mitra lapangan — tinjau setiap batch dari jarak jauh, lalu publikasikan observasi ke akun pengirim dengan izin mereka.",
+    "empty": "Belum ada batch yang dikirim.",
+    "unavailable": "Penyimpanan batch belum dikonfigurasi atau sedang tidak dapat diakses, jadi daftarnya tidak bisa dimuat.",
+    "unnamed": "Akun tanpa nama",
+    "details": "Detail",
+    "submitted": "Dikirim {when}",
+    "keyActive": "Publikasi diizinkan",
+    "keyMissing": "Tidak ada izin publikasi",
+    "submitterNotes": "Catatan:",
+    "status": {
+      "uploading": "Mengunggah",
+      "received": "Diterima",
+      "inReview": "Sedang ditinjau",
+      "published": "Dipublikasikan",
+      "needsAttention": "Perlu perhatian"
+    },
+    "download": "Tautan unduhan",
+    "publishedCountLabel": "Observasi dipublikasikan",
+    "reviewNoteLabel": "Catatan untuk pengirim",
+    "reviewNotePlaceholder": "Ditampilkan di halaman kiriman mereka — gunakan bahasa sederhana.",
+    "saveNote": "Simpan catatan",
+    "saved": "Tersimpan",
+    "saveFailed": "Tidak bisa menyimpan. Coba lagi.",
+    "inspect": "Periksa isi",
+    "inspectFailed": "Arsip tidak bisa diperiksa. Mungkin masih diunggah atau bukan file zip yang valid.",
+    "contentsSummary": "{entries} file · {size} tanpa kompresi",
+    "previewLoading": "Memuat pratinjau…",
+    "previewFailed": "File ini tidak bisa dipratinjau."
   }
 }
