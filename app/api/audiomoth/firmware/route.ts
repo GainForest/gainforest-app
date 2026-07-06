@@ -10,12 +10,18 @@ export const dynamic = "force-dynamic";
  * GET /api/audiomoth/firmware?download=<asset id> — stream one release
  * asset (.bin) to the browser. Only assets we listed ourselves are allowed,
  * which pins downloads to the official OpenAcousticDevices repository.
+ *
+ * GitHub's unauthenticated API allows only 60 requests/hour per IP, which is
+ * quickly exhausted behind shared serverless egress. To stay resilient we:
+ *   - send an Authorization header when GITHUB_TOKEN is configured (5000/hr),
+ *   - serve the last good roster if a refresh is rate-limited or fails,
+ *   - download assets via their browser_download_url, which does not count
+ *     against the API rate limit at all.
  */
 
 const RELEASES_URL = "https://api.github.com/repos/OpenAcousticDevices/AudioMoth-Firmware-Basic/releases";
-const ASSET_URL_PREFIX = "https://api.github.com/repos/OpenAcousticDevices/AudioMoth-Firmware-Basic/releases/assets/";
 
-const CACHE_TTL_MS = 10 * 60 * 1000;
+const CACHE_TTL_MS = 30 * 60 * 1000;
 
 export interface FirmwareRelease {
   version: string;
@@ -23,12 +29,14 @@ export interface FirmwareRelease {
   assetId: number;
   assetName: string;
   sizeBytes: number;
+  downloadUrl: string;
 }
 
 interface GitHubReleaseAsset {
   id: number;
   name: string;
   size: number;
+  browser_download_url: string;
 }
 
 interface GitHubRelease {
@@ -40,19 +48,32 @@ interface GitHubRelease {
   assets: GitHubReleaseAsset[];
 }
 
+/** Last good roster, kept indefinitely so we can serve it when GitHub fails. */
 let cachedReleases: { fetchedAt: number; releases: FirmwareRelease[] } | null = null;
+
+function githubHeaders(accept: string): HeadersInit {
+  const headers: Record<string, string> = { Accept: accept, "User-Agent": "gainforest-app" };
+  const token = process.env.GITHUB_TOKEN || process.env.GH_TOKEN;
+  if (token) headers.Authorization = `Bearer ${token}`;
+  return headers;
+}
 
 async function fetchReleases(): Promise<FirmwareRelease[]> {
   if (cachedReleases && Date.now() - cachedReleases.fetchedAt < CACHE_TTL_MS) {
     return cachedReleases.releases;
   }
 
-  const response = await fetch(RELEASES_URL, {
-    headers: { Accept: "application/vnd.github+json", "User-Agent": "gainforest-app" },
-    cache: "no-store",
-  });
+  let response: Response;
+  try {
+    response = await fetch(RELEASES_URL, { headers: githubHeaders("application/vnd.github+json"), cache: "no-store" });
+  } catch (error) {
+    if (cachedReleases) return cachedReleases.releases;
+    throw error;
+  }
 
   if (!response.ok) {
+    // Rate limited or transient failure — fall back to the last good roster.
+    if (cachedReleases) return cachedReleases.releases;
     throw new Error(`GitHub responded ${response.status}`);
   }
 
@@ -70,6 +91,7 @@ async function fetchReleases(): Promise<FirmwareRelease[]> {
       assetId: asset.id,
       assetName: asset.name,
       sizeBytes: asset.size,
+      downloadUrl: asset.browser_download_url,
     });
   }
 
@@ -86,7 +108,9 @@ export async function GET(request: Request) {
     const releases = await fetchReleases();
 
     if (!download) {
-      return NextResponse.json({ releases });
+      // Do not leak the asset download URLs to the browser payload.
+      const roster = releases.map(({ downloadUrl: _downloadUrl, ...rest }) => rest);
+      return NextResponse.json({ releases: roster });
     }
 
     const assetId = Number.parseInt(download, 10);
@@ -96,8 +120,11 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: "unknown_asset" }, { status: 404 });
     }
 
-    const assetResponse = await fetch(`${ASSET_URL_PREFIX}${assetId}`, {
+    // browser_download_url redirects to objects.githubusercontent.com and is
+    // not subject to the API rate limit.
+    const assetResponse = await fetch(release.downloadUrl, {
       headers: { Accept: "application/octet-stream", "User-Agent": "gainforest-app" },
+      redirect: "follow",
       cache: "no-store",
     });
 
