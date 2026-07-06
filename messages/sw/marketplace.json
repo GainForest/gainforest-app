@@ -1701,6 +1701,8 @@
       "allSites": "Maeneo yote",
       "noSites": "Bado hakuna maeneo ya mradi yaliyowekwa kwenye ramani.",
       "noBoundaries": "Mradi huu bado hauna mipaka ya eneo iliyowekwa kwenye ramani.",
+      "projectPill": "Mradi: {name}",
+      "moreProjects": "+{count} zaidi",
       "projectHint": "Mipaka iliyoangaziwa inaonyesha mahali mradi huu unafanya kazi."
     },
     "layers": {

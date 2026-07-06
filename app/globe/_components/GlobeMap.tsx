@@ -455,6 +455,9 @@ export function GlobeMap({
       style: globeMapStyle(),
       center: GLOBE_INITIAL_CENTER,
       zoom: GLOBE_INITIAL_ZOOM,
+      // Satellite imagery is overzoomed past its native z17 (see config.ts);
+      // stop the camera before that stretch turns into a blurry mush.
+      maxZoom: 18.5,
       attributionControl: { compact: true },
     });
     mapRef.current = map;

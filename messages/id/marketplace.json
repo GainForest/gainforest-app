@@ -1701,6 +1701,8 @@
       "allSites": "Semua lokasi",
       "noSites": "Belum ada lokasi proyek yang dipetakan.",
       "noBoundaries": "Proyek ini belum memiliki batas lokasi yang dipetakan.",
+      "projectPill": "Proyek: {name}",
+      "moreProjects": "+{count} lainnya",
       "projectHint": "Batas yang disorot menunjukkan tempat proyek ini bekerja."
     },
     "layers": {
