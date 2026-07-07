@@ -8,6 +8,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { AnimatePresence, motion } from "framer-motion";
 import {
@@ -301,7 +302,10 @@ export function AudioMothClient({ sessionDid }: { sessionDid: string | null }) {
   const [device, setDevice] = useState<AudioMothDevice | null>(null);
   const [info, setInfo] = useState<DeviceInfo | null>(null);
   const [reading, setReading] = useState<LiveReading | null>(null);
-  const [mainTab, setMainTab] = useState<MainTabId>("setup");
+  const searchParams = useSearchParams();
+  const [mainTab, setMainTab] = useState<MainTabId>(
+    searchParams.get("tab") === "deployments" ? "deployments" : "setup",
+  );
   const [tab, setTab] = useState<TabId>("firmware");
   const [connecting, setConnecting] = useState(false);
   const [wizard, setWizard] = useState<WizardState | null>(null);

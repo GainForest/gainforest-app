@@ -68,6 +68,41 @@ function rkeyFromUri(uri: string): string {
   return uri.split("/").pop() ?? "";
 }
 
+/** Local path of a deployment event's own page. */
+export function deploymentDetailPath(did: string, rkey: string): string {
+  return `/deployments/${encodeURIComponent(did)}/${encodeURIComponent(rkey)}`;
+}
+
+/** Parse an at:// URI into its repo DID + record key, if well-formed. */
+export function parseAtUri(uri: string): { did: string; collection: string; rkey: string } | null {
+  const match = uri.match(/^at:\/\/([^/]+)\/([^/]+)\/([^/]+)$/);
+  if (!match) return null;
+  return { did: match[1]!, collection: match[2]!, rkey: match[3]! };
+}
+
+/** Read one deployment event straight from its owner's PDS (public). */
+export async function getDeploymentEvent(
+  did: string,
+  rkey: string,
+  signal?: AbortSignal,
+): Promise<DeploymentEventItem | null> {
+  const host = await resolvePdsHost(did, signal);
+  if (!host) return null;
+  const params = new URLSearchParams({ repo: did, collection: DWC_EVENT_COLLECTION, rkey });
+  const res = await fetch(
+    `https://${host}/xrpc/com.atproto.repo.getRecord?${params.toString()}`,
+    { signal, cache: "no-store" },
+  );
+  if (!res.ok) return null;
+  const data = (await res.json().catch(() => null)) as
+    | { uri?: unknown; cid?: unknown; value?: unknown }
+    | null;
+  if (!data || typeof data.uri !== "string" || typeof data.cid !== "string") return null;
+  const parsed = parseDeploymentEventRecord(data.value);
+  if (!parsed) return null;
+  return { ...parsed, uri: data.uri, cid: data.cid, rkey: rkeyFromUri(data.uri), did };
+}
+
 /** List every dwc.event record in a repo, paging the PDS until exhausted. */
 export async function listDeploymentEvents(
   did: string,

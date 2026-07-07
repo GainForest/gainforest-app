@@ -1630,7 +1630,14 @@
       "fixedTitle": "Fixo ao sinal",
       "coordinatesLabel": "Localização",
       "deployedLabel": "Implantado",
-      "equipmentLinked": "Unidade vinculada"
+      "equipmentLinked": "Unidade vinculada",
+      "metadataTitle": "{name} — Implantação",
+      "detailBack": "Voltar às implantações",
+      "mapTitle": "Local da implantação",
+      "equipmentUsedLabel": "AudioMoth utilizado",
+      "protocolLabel": "Protocolo",
+      "recordedByLabel": "Registrado por",
+      "viewEquipment": "Ver os equipamentos"
     }
   }
 }

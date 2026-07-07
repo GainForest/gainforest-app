@@ -275,9 +275,9 @@ export function GlobeExplorer({ orgDid = null, orgName = null, orgIdentifier = n
     setTreesState({ status: "idle", data: null });
     setTreesVisible(true);
     setSelectedTree(null);
-    // Tree data only renders on the dedicated org/project globe pages — the
-    // global view (even with an org selected) stays tree-free.
-    if (!focusDid || mode === "global") return;
+    // Tree data renders for any focused organization — the dedicated org/project
+    // globe pages, and the global view once an org is selected/clicked.
+    if (!focusDid) return;
     const controller = new AbortController();
     setTreesState({ status: "loading", data: null });
     fetchOrganizationTrees(focusDid, controller.signal)

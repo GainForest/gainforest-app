@@ -1630,7 +1630,14 @@
       "fixedTitle": "Terkunci pada nada",
       "coordinatesLabel": "Lokasi",
       "deployedLabel": "Ditempatkan",
-      "equipmentLinked": "Unit tertaut"
+      "equipmentLinked": "Unit tertaut",
+      "metadataTitle": "{name} — Penempatan",
+      "detailBack": "Kembali ke penempatan",
+      "mapTitle": "Lokasi penempatan",
+      "equipmentUsedLabel": "AudioMoth yang digunakan",
+      "protocolLabel": "Protokol",
+      "recordedByLabel": "Dicatat oleh",
+      "viewEquipment": "Lihat peralatan mereka"
     }
   }
 }

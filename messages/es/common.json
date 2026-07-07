@@ -1630,7 +1630,14 @@
       "fixedTitle": "Fijado al tono",
       "coordinatesLabel": "Ubicación",
       "deployedLabel": "Desplegado",
-      "equipmentLinked": "Unidad vinculada"
+      "equipmentLinked": "Unidad vinculada",
+      "metadataTitle": "{name} — Despliegue",
+      "detailBack": "Volver a los despliegues",
+      "mapTitle": "Ubicación del despliegue",
+      "equipmentUsedLabel": "AudioMoth utilizado",
+      "protocolLabel": "Protocolo",
+      "recordedByLabel": "Registrado por",
+      "viewEquipment": "Ver sus equipos"
     }
   }
 }

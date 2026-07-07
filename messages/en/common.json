@@ -1630,7 +1630,14 @@
       "fixedTitle": "Fixed to the chime",
       "coordinatesLabel": "Location",
       "deployedLabel": "Deployed",
-      "equipmentLinked": "Linked unit"
+      "equipmentLinked": "Linked unit",
+      "metadataTitle": "{name} — Deployment",
+      "detailBack": "Back to deployments",
+      "mapTitle": "Deployment location",
+      "equipmentUsedLabel": "AudioMoth used",
+      "protocolLabel": "Protocol",
+      "recordedByLabel": "Recorded by",
+      "viewEquipment": "View their equipment"
     }
   }
 }

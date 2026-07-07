@@ -1630,7 +1630,14 @@
       "fixedTitle": "Vimefungwa kwenye mlio",
       "coordinatesLabel": "Mahali",
       "deployedLabel": "Ilisambazwa",
-      "equipmentLinked": "Kifaa kilichounganishwa"
+      "equipmentLinked": "Kifaa kilichounganishwa",
+      "metadataTitle": "{name} — Usambazaji",
+      "detailBack": "Rudi kwenye usambazaji",
+      "mapTitle": "Mahali pa usambazaji",
+      "equipmentUsedLabel": "AudioMoth iliyotumika",
+      "protocolLabel": "Itifaki",
+      "recordedByLabel": "Kimerekodiwa na",
+      "viewEquipment": "Ona vifaa vyao"
     }
   }
 }
