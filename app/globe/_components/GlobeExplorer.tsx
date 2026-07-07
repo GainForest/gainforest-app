@@ -697,8 +697,9 @@ export function GlobeExplorer({ orgDid = null, orgName = null, orgIdentifier = n
       }
     : null;
 
-  // Bottom-sheet header summary (mobile).
-  const sheetTitle = focusDid ? (mode === "project" ? project?.title ?? "…" : focusName ?? "…") : t("title");
+  // Bottom-sheet header summary (mobile). A null title means the roster is
+  // still loading (hard refresh of /globe?org=…) — render a skeleton, not "…".
+  const sheetTitle = focusDid ? (mode === "project" ? project?.title ?? null : focusName) : t("title");
   const sheetSubtitle = focusDid
     ? focusedState.status === "loading"
       ? t("panel.loading")
@@ -851,7 +852,7 @@ export function GlobeExplorer({ orgDid = null, orgName = null, orgIdentifier = n
       {/* ── Mobile: bottom sheet ── */}
       <div className="md:hidden">
         <section
-          aria-label={sheetTitle}
+          aria-label={sheetTitle ?? t("panel.loading")}
           data-testid="globe-sheet"
           className={cn(
             "pointer-events-auto absolute inset-x-0 bottom-0 z-20 flex h-[min(62dvh,520px)] flex-col rounded-t-2xl border-x border-t border-border bg-background/95 shadow-[0_-8px_32px_rgb(0_0_0/0.25)] backdrop-blur-xl transition-transform duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)]",
@@ -873,7 +874,11 @@ export function GlobeExplorer({ orgDid = null, orgName = null, orgIdentifier = n
                 <SheetIcon className="size-4" />
               </span>
               <span className="min-w-0 flex-1">
-                <span className="block truncate text-sm font-semibold text-foreground">{sheetTitle}</span>
+                {sheetTitle ? (
+                  <span className="block truncate text-sm font-semibold text-foreground">{sheetTitle}</span>
+                ) : (
+                  <Skeleton className="my-0.5 h-4 w-32 rounded-md" />
+                )}
                 <span className="block truncate text-xs text-muted-foreground">{sheetSubtitle}</span>
               </span>
               <ChevronDownIcon
@@ -1227,9 +1232,18 @@ function FocusPanel({
             <p className="text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
               {mode === "project" ? t("focus.projectLabel") : t("focus.organizationLabel")}
             </p>
-            <h2 className="truncate text-sm font-semibold text-foreground">
-              {mode === "project" ? project?.title : focusName ?? "…"}
-            </h2>
+            {(mode === "project" ? project?.title : focusName) ? (
+              <h2 className="truncate text-sm font-semibold text-foreground">
+                {mode === "project" ? project?.title : focusName}
+              </h2>
+            ) : (
+              // Roster still loading (hard refresh of /globe?org=…): skeleton
+              // lines where the name + country will appear.
+              <>
+                <Skeleton className="mt-1 h-4 w-36 rounded-md" />
+                <Skeleton className="mt-1.5 h-3 w-24 rounded-md" />
+              </>
+            )}
             {mode === "project" && focusName ? (
               <Link href={profileHref} className="mt-0.5 block truncate text-xs text-muted-foreground transition-colors hover:text-primary">
                 {focusName}
