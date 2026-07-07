@@ -1678,8 +1678,7 @@
     "viewOnGlobe": "Lihat di Globe",
     "panel": {
       "searchPlaceholder": "Cari organisasi…",
-      "tabOrganizations": "Organisasi",
-      "tabTrees": "Data pohon",
+      "treeFilter": "Data pohon",
       "treesEmpty": "Belum ada data pohon yang diunggah.",
       "treesFailed": "Data pohon tidak tersedia saat ini.",
       "toggleList": "Tampilkan daftar organisasi",

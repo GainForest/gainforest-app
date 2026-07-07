@@ -134,6 +134,25 @@ export function GlobeExplorer({ orgDid = null, orgName = null, orgIdentifier = n
   // Drone/data-layer roster filter (global mode). Layer counts arrive on the
   // roster too — the API counts each org's published map layers server-side.
   const [layersOnly, setLayersOnly] = useState(false);
+  // Tree-data roster filter (global mode). Tree counts are not on the roster —
+  // they come from /api/globe/trees, fetched lazily the first time the filter
+  // is switched on.
+  const [treesOnly, setTreesOnly] = useState(false);
+  const [treeCounts, setTreeCounts] = useState<Map<string, number> | null>(null);
+  const [treeCountsFailed, setTreeCountsFailed] = useState(false);
+  useEffect(() => {
+    if (!treesOnly || treeCounts !== null || treeCountsFailed) return;
+    const controller = new AbortController();
+    fetchGlobeTreeStats(controller.signal)
+      .then((stats) => setTreeCounts(new Map(stats.map((stat) => [stat.did, stat.trees]))))
+      .catch((error) => {
+        if ((error as Error).name !== "AbortError") {
+          console.warn("[globe] tree stats failed", error);
+          setTreeCountsFailed(true);
+        }
+      });
+    return () => controller.abort();
+  }, [treesOnly, treeCounts, treeCountsFailed]);
 
   // ── Sites of the focused organization ────────────────────────────────────
   const [siteState, setSiteState] = useState<SiteState>(EMPTY_SITE_STATE);
@@ -383,8 +402,9 @@ export function GlobeExplorer({ orgDid = null, orgName = null, orgIdentifier = n
     let list = organizations;
     if (maEarthOnly) list = list.filter((org) => org.maEarth === true);
     if (layersOnly) list = list.filter((org) => (org.dataLayers ?? 0) > 0);
+    if (treesOnly) list = list.filter((org) => (treeCounts?.get(org.did) ?? 0) > 0);
     return list;
-  }, [organizations, mode, focusDid, maEarthOnly, layersOnly]);
+  }, [organizations, mode, focusDid, maEarthOnly, layersOnly, treesOnly, treeCounts]);
 
   // The project page only shows the trees that fall inside the project's own
   // boundaries — the org-wide tree file covers every project of the org.
@@ -488,6 +508,11 @@ export function GlobeExplorer({ orgDid = null, orgName = null, orgIdentifier = n
     onToggleMaEarth: () => setMaEarthOnly((value) => !value),
     layersOnly,
     onToggleLayersOnly: () => setLayersOnly((value) => !value),
+    treesOnly,
+    onToggleTrees: () => setTreesOnly((value) => !value),
+    treeCounts,
+    treeCountsLoading: treesOnly && treeCounts === null && !treeCountsFailed,
+    treeCountsFailed,
     onSelect: (did: string) => {
       selectOrganization(did);
       collapseSheet();
@@ -739,11 +764,6 @@ export function GlobeExplorer({ orgDid = null, orgName = null, orgIdentifier = n
 
 // ── Global mode: search + roster ───────────────────────────────────────────
 
-type GlobalTab = "organizations" | "trees";
-
-/** One row of the Tree data tab: an org's roster entry + its tree count. */
-type TreeStatRow = { did: string; name: string; country: string | null; trees: number };
-
 function GlobalPanel({
   variant,
   organizations,
@@ -752,6 +772,11 @@ function GlobalPanel({
   onToggleMaEarth,
   layersOnly,
   onToggleLayersOnly,
+  treesOnly,
+  onToggleTrees,
+  treeCounts,
+  treeCountsLoading,
+  treeCountsFailed,
   onSelect,
 }: {
   variant: PanelVariant;
@@ -761,11 +786,16 @@ function GlobalPanel({
   onToggleMaEarth: () => void;
   layersOnly: boolean;
   onToggleLayersOnly: () => void;
+  treesOnly: boolean;
+  onToggleTrees: () => void;
+  /** did → measured-tree count, once loaded (null before the first toggle). */
+  treeCounts: Map<string, number> | null;
+  treeCountsLoading: boolean;
+  treeCountsFailed: boolean;
   onSelect: (did: string) => void;
 }) {
   const t = useTranslations("marketplace.globe");
   const [query, setQuery] = useState("");
-  const [tab, setTab] = useState<GlobalTab>("organizations");
   // The floating (desktop) panel shows the roster right away for
   // discoverability; the sheet always shows it when expanded.
   const [listOpen, setListOpen] = useState(true);
@@ -776,42 +806,6 @@ function GlobalPanel({
     if (!q) return visibleOrganizations;
     return visibleOrganizations.filter((org) => org.name.toLowerCase().includes(q));
   }, [visibleOrganizations, query]);
-
-  // ── Tree data tab — which orgs uploaded tree data, and how many trees ───
-  // Counts are only fetched once the tab is first opened; names/flags come
-  // from the roster the panel already has, so the fetch also waits for it.
-  const [treeStats, setTreeStats] = useState<TreeStatRow[] | null>(null);
-  const [treeStatsFailed, setTreeStatsFailed] = useState(false);
-  useEffect(() => {
-    if (tab !== "trees" || treeStats !== null || treeStatsFailed || organizations === null) return;
-    const controller = new AbortController();
-    fetchGlobeTreeStats(controller.signal)
-      .then((stats) => {
-        const byDid = new Map(organizations.map((org) => [org.did, org]));
-        setTreeStats(
-          stats.flatMap((stat) => {
-            const org = byDid.get(stat.did);
-            return org
-              ? [{ did: stat.did, name: org.name, country: org.country, trees: stat.trees }]
-              : [];
-          }),
-        );
-      })
-      .catch((error) => {
-        if ((error as Error).name !== "AbortError") {
-          console.warn("[globe] tree stats failed", error);
-          setTreeStatsFailed(true);
-        }
-      });
-    return () => controller.abort();
-  }, [tab, treeStats, treeStatsFailed, organizations]);
-
-  const filteredTreeStats = useMemo(() => {
-    if (!treeStats) return [];
-    const q = query.trim().toLowerCase();
-    if (!q) return treeStats;
-    return treeStats.filter((row) => row.name.toLowerCase().includes(q));
-  }, [treeStats, query]);
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
@@ -837,40 +831,6 @@ function GlobalPanel({
       ) : null}
 
       <div className={cn("flex flex-col gap-2 px-4", variant === "floating" ? "pb-3" : "py-3")}>
-        <div className="flex rounded-full border border-border bg-background p-0.5" role="tablist">
-          <button
-            type="button"
-            role="tab"
-            aria-selected={tab === "organizations"}
-            onClick={() => {
-              setTab("organizations");
-              setListOpen(true);
-            }}
-            className={cn(
-              "flex h-7 flex-1 items-center justify-center gap-1.5 rounded-full text-xs font-medium transition-colors",
-              tab === "organizations" ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-primary",
-            )}
-          >
-            <Building2Icon className="size-3.5" />
-            {t("panel.tabOrganizations")}
-          </button>
-          <button
-            type="button"
-            role="tab"
-            aria-selected={tab === "trees"}
-            onClick={() => {
-              setTab("trees");
-              setListOpen(true);
-            }}
-            className={cn(
-              "flex h-7 flex-1 items-center justify-center gap-1.5 rounded-full text-xs font-medium transition-colors",
-              tab === "trees" ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-primary",
-            )}
-          >
-            <TreePineIcon className="size-3.5" />
-            {t("panel.tabTrees")}
-          </button>
-        </div>
         <div className="relative min-w-0">
           <SearchIcon className="pointer-events-none absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
           <input
@@ -884,7 +844,6 @@ function GlobalPanel({
             className="h-9 w-full rounded-full border border-border bg-background pl-9 pr-3 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-primary/50"
           />
         </div>
-        {tab === "organizations" ? (
         <div className="flex flex-wrap items-center gap-1.5">
           <button
             type="button"
@@ -920,76 +879,48 @@ function GlobalPanel({
             <DroneIcon className="size-3.5" />
             {t("panel.dataFilter")}
           </button>
+          <button
+            type="button"
+            onClick={onToggleTrees}
+            aria-pressed={treesOnly}
+            className={cn(
+              "inline-flex h-7 shrink-0 items-center gap-1.5 rounded-full border px-2.5 text-xs font-medium transition-colors",
+              treesOnly
+                ? "border-primary/50 bg-primary/10 text-primary"
+                : "border-border text-muted-foreground hover:border-primary/40 hover:text-primary",
+            )}
+          >
+            <TreePineIcon className="size-3.5" />
+            {t("panel.treeFilter")}
+          </button>
         </div>
-        ) : null}
       </div>
 
       {showList ? (
         <div className="flex min-h-0 flex-1 flex-col border-t border-border">
           {variant === "floating" ? (
             <p className="px-4 pb-1 pt-2.5 text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
-              {organizations === null || (tab === "trees" && treeStats === null && !treeStatsFailed)
+              {organizations === null || treeCountsLoading
                 ? t("panel.loading")
-                : t("panel.count", {
-                    count: tab === "trees" ? filteredTreeStats.length : filtered.length,
-                  })}
+                : t("panel.count", { count: filtered.length })}
             </p>
           ) : null}
           <ul
             className="min-h-0 flex-1 overflow-y-auto overscroll-contain pb-2"
             style={variant === "floating" ? { maxHeight: "42vh" } : undefined}
           >
-            {tab === "trees" ? (
-              treeStatsFailed ? (
-                <li className="px-4 py-3 text-sm text-muted-foreground">{t("panel.treesFailed")}</li>
-              ) : treeStats === null || organizations === null ? (
-                <li className="flex flex-col gap-2 px-4 py-2">
-                  <Skeleton className="h-9 w-full rounded-lg" />
-                  <Skeleton className="h-9 w-full rounded-lg" />
-                  <Skeleton className="h-9 w-3/4 rounded-lg" />
-                </li>
-              ) : filteredTreeStats.length === 0 ? (
-                <li className="px-4 py-3 text-sm text-muted-foreground">
-                  {treeStats.length === 0 ? t("panel.treesEmpty") : t("panel.empty")}
-                </li>
-              ) : (
-                filteredTreeStats.map((row) => (
-                  <li key={row.did}>
-                    {/* Trees only render on the org's own globe page, so the
-                        row links there instead of selecting on this view. */}
-                    <Link
-                      href={`/globe/${encodeURIComponent(row.did)}`}
-                      className="group flex w-full items-center gap-2.5 px-4 py-2 text-left transition-colors hover:bg-muted/60"
-                    >
-                      <span className="grid size-8 shrink-0 place-items-center rounded-full bg-primary/10 text-base">
-                        {(row.country ? countryFlag(row.country) : "") || "🌳"}
-                      </span>
-                      <span className="min-w-0 flex-1">
-                        <span className="block truncate text-sm font-medium text-foreground group-hover:text-primary">
-                          {row.name}
-                        </span>
-                        {row.country ? (
-                          <span className="block truncate text-[11px] text-muted-foreground">
-                            {formatCountry(row.country)}
-                          </span>
-                        ) : null}
-                      </span>
-                      <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-primary/10 px-1.5 py-0.5 text-[10px] font-semibold text-primary">
-                        <TreePineIcon className="size-3" />
-                        {t("layers.measuredTreesCount", { count: row.trees })}
-                      </span>
-                    </Link>
-                  </li>
-                ))
-              )
-            ) : organizations === null ? (
+            {organizations === null || treeCountsLoading ? (
               <li className="flex flex-col gap-2 px-4 py-2">
                 <Skeleton className="h-9 w-full rounded-lg" />
                 <Skeleton className="h-9 w-full rounded-lg" />
                 <Skeleton className="h-9 w-3/4 rounded-lg" />
               </li>
+            ) : treesOnly && treeCountsFailed ? (
+              <li className="px-4 py-3 text-sm text-muted-foreground">{t("panel.treesFailed")}</li>
             ) : filtered.length === 0 ? (
-              <li className="px-4 py-3 text-sm text-muted-foreground">{t("panel.empty")}</li>
+              <li className="px-4 py-3 text-sm text-muted-foreground">
+                {treesOnly && !query.trim() ? t("panel.treesEmpty") : t("panel.empty")}
+              </li>
             ) : (
               filtered.map((org) => (
                 <li key={org.did}>
@@ -1021,7 +952,12 @@ function GlobalPanel({
                         </span>
                       ) : null}
                     </span>
-                    {(org.dataLayers ?? 0) > 0 ? (
+                    {treesOnly && (treeCounts?.get(org.did) ?? 0) > 0 ? (
+                      <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-primary/10 px-1.5 py-0.5 text-[10px] font-semibold text-primary">
+                        <TreePineIcon className="size-3" />
+                        {t("layers.measuredTreesCount", { count: treeCounts?.get(org.did) ?? 0 })}
+                      </span>
+                    ) : (org.dataLayers ?? 0) > 0 ? (
                       <span
                         title={t("panel.dataBadge", { count: org.dataLayers ?? 0 })}
                         className="inline-flex shrink-0 items-center gap-1 rounded-full bg-primary/10 px-1.5 py-0.5 text-[10px] font-semibold text-primary"

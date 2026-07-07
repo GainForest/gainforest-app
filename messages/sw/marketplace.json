@@ -1678,8 +1678,7 @@
     "viewOnGlobe": "Tazama kwenye Dunia",
     "panel": {
       "searchPlaceholder": "Tafuta mashirika…",
-      "tabOrganizations": "Mashirika",
-      "tabTrees": "Data ya miti",
+      "treeFilter": "Data ya miti",
       "treesEmpty": "Bado hakuna data ya miti iliyopakiwa.",
       "treesFailed": "Data ya miti haipatikani kwa sasa.",
       "toggleList": "Onyesha orodha ya mashirika",

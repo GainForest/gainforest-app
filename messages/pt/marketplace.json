@@ -1678,8 +1678,7 @@
     "viewOnGlobe": "Ver no Globo",
     "panel": {
       "searchPlaceholder": "Pesquisar organizações…",
-      "tabOrganizations": "Organizações",
-      "tabTrees": "Dados de árvores",
+      "treeFilter": "Dados de árvores",
       "treesEmpty": "Ainda não há dados de árvores enviados.",
       "treesFailed": "Os dados de árvores estão indisponíveis no momento.",
       "toggleList": "Mostrar a lista de organizações",
