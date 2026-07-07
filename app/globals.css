@@ -331,6 +331,19 @@ body {
   animation: shimmer 1.6s ease-in-out infinite;
 }
 
+/* Skeletons on the globe's translucent glass panels: the default near-white
+   .skeleton washes out over the map, so tint with the foreground for a visible
+   grey. Foreground-based so it reads correctly in both light and dark. */
+.globe-glass .skeleton {
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--foreground) 10%, transparent) 25%,
+    color-mix(in srgb, var(--foreground) 17%, transparent) 37%,
+    color-mix(in srgb, var(--foreground) 10%, transparent) 63%
+  );
+  background-size: 200% 100%;
+}
+
 .sidebar-skeleton {
   background: linear-gradient(
     90deg,

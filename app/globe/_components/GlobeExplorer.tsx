@@ -713,7 +713,7 @@ export function GlobeExplorer({ orgDid = null, orgName = null, orgIdentifier = n
 
   // ── Render ───────────────────────────────────────────────────────────────
   return (
-    <div className="absolute inset-0 overflow-hidden bg-[#0b0b19]" data-testid="globe-explorer">
+    <div className="globe-glass absolute inset-0 overflow-hidden bg-[#0b0b19]" data-testid="globe-explorer">
       <GlobeMap
         className="absolute inset-0"
         organizations={visibleOrganizations}
