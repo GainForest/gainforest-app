@@ -82,7 +82,7 @@ function AuthenticatedCreateProjectButton({
 }) {
   const router = useRouter();
   const modal = useModal();
-  const { groups } = useAccountList(sessionDid);
+  const { personal, groups } = useAccountList(sessionDid);
   const [activeContext, setActiveContext] = useActiveAccountContext(sessionDid);
   // Unique per instance so several create-project buttons (sidebar card,
   // headers) never portal into each other's modal container.
@@ -104,10 +104,18 @@ function AuthenticatedCreateProjectButton({
         accountKind: "organization",
         identifier,
         role: activeGroup?.role ?? null,
+        displayName: activeGroup?.displayName ?? null,
+        avatarUrl: activeGroup?.avatarUrl ?? null,
         currentUserDid: sessionDid,
       });
     } else {
-      target = personalManageTarget({ did: sessionDid, accountKind: "user", identifier: sessionDid });
+      target = personalManageTarget({
+        did: sessionDid,
+        accountKind: "user",
+        identifier: sessionDid,
+        displayName: personal?.displayName ?? null,
+        avatarUrl: personal?.avatarUrl ?? null,
+      });
     }
 
     setWizard({
@@ -122,6 +130,15 @@ function AuthenticatedCreateProjectButton({
     void modal.hide().then(() => modal.clear());
   };
 
+  // The wizard's in-modal "Publishing as" switcher re-targets the create flow;
+  // keep the post-save redirect pointing at the same account's project list.
+  const handleChangeTarget = (nextTarget: ManageTarget) => {
+    setWizard({
+      target: nextTarget,
+      projectsHref: manageHref({ basePath: groupManageBasePath(nextTarget.identifier) }, "projects"),
+    });
+  };
+
   // The wizard renders at this call site (via ModalPortal), so it keeps this
   // component's React context instead of being teleported to the root host.
   return (
@@ -133,6 +150,8 @@ function AuthenticatedCreateProjectButton({
         {wizard ? (
           <CreateProjectModalLazy
             target={wizard.target}
+            sessionDid={sessionDid}
+            onChangeTarget={handleChangeTarget}
             onClose={closeModal}
             onSaved={() => {
               closeModal();

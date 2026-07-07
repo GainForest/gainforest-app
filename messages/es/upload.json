@@ -682,6 +682,7 @@
       "uploadFailed": "No pudimos agregar estas observaciones. Inténtalo de nuevo.",
       "doneTitle": "{count, plural, one {# observación agregada} other {# observaciones agregadas}}",
       "doneBody": "Aparecerán en tus observaciones en un momento.",
+      "doneBodyOrganization": "Aparecerán en las observaciones de la organización en un momento.",
       "viewObservations": "Ver observaciones",
       "combineTip": "Arrastra una foto sobre otra para combinarlas en una sola observación.",
       "photoCount": "{count, plural, one {# foto} other {# fotos}}",

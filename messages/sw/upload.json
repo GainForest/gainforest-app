@@ -682,6 +682,7 @@
       "uploadFailed": "Hatukuweza kuongeza uchunguzi huu. Tafadhali jaribu tena.",
       "doneTitle": "{count, plural, one {Uchunguzi # umeongezwa} other {Uchunguzi # umeongezwa}}",
       "doneBody": "Utaonekana katika uchunguzi wako hivi punde.",
+      "doneBodyOrganization": "Utaonekana katika uchunguzi wa shirika hivi punde.",
       "viewObservations": "Tazama uchunguzi",
       "combineTip": "Buruta picha moja juu ya nyingine ili kuziunganisha kuwa uchunguzi mmoja.",
       "photoCount": "{count, plural, one {picha #} other {picha #}}",

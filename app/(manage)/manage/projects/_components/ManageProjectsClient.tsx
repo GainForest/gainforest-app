@@ -37,6 +37,7 @@ import { cn } from "@/lib/utils";
 import { manageApiHref, manageHref, profileBasePath, type ManageTarget } from "@/lib/links";
 import { localProjectHref } from "@/app/_lib/urls";
 import { notifyProjectsChanged } from "@/app/_lib/projects-events";
+import { PublishAsPicker } from "@/app/_components/PublishAsPicker";
 import { WORK_SCOPE_MESSAGE_KEYS, type KnownWorkScopeKey } from "@/app/_lib/work-scope-labels";
 import { compressImageIfNeeded } from "../../observations/_components/observation-image";
 import { canCreateRecord, canDeleteRecord, canUpdateRecord } from "../../_lib/cgs-permissions";
@@ -564,10 +565,20 @@ function ProjectCard({
 
 export function CreateProjectModal({
   target,
+  sessionDid,
+  onChangeTarget,
   onClose,
   onSaved,
 }: {
   target: ManageTarget;
+  /**
+   * Signed-in user's DID. Together with `onChangeTarget` it turns the
+   * wizard's "Publishing as" chip into an account switcher (global entry
+   * points); without them the chip is read-only (account-scoped pages).
+   */
+  sessionDid?: string | null;
+  /** Called when the user picks a different account to create the project under. */
+  onChangeTarget?: (target: ManageTarget) => void;
   onClose: () => void;
   onSaved: () => void;
 }) {
@@ -581,6 +592,8 @@ export function CreateProjectModal({
         <ProjectEditor
           state={{ mode: "create", project: null }}
           target={target}
+          sessionDid={sessionDid}
+          onChangeTarget={onChangeTarget}
           onClose={onClose}
           onSaved={onSaved}
         />
@@ -592,12 +605,16 @@ export function CreateProjectModal({
 function ProjectEditor({
   state,
   target,
+  sessionDid,
+  onChangeTarget,
   onClose,
   onSaved,
   onDeleted,
 }: {
   state: EditorState;
   target: ManageTarget;
+  sessionDid?: string | null;
+  onChangeTarget?: (target: ManageTarget) => void;
   onClose: () => void;
   onSaved: () => void;
   onDeleted?: () => void;
@@ -625,6 +642,17 @@ function ProjectEditor({
 
   const [sites, setSites] = useState<ManagedLocation[]>([]);
   const [sitesStatus, setSitesStatus] = useState<SitesStatus>("idle");
+
+  // When the "Publishing as" switcher re-targets the wizard to a different
+  // account, site selections from the previous account's repo no longer apply.
+  const targetDidRef = useRef(target.did);
+  useEffect(() => {
+    if (targetDidRef.current === target.did) return;
+    targetDidRef.current = target.did;
+    setDraft((current) =>
+      current.selectedLocationUris.length ? { ...current, selectedLocationUris: [] } : current,
+    );
+  }, [target.did]);
 
   const modal = useModal();
   const isEdit = state.mode === "edit";
@@ -923,6 +951,14 @@ function ProjectEditor({
           <Button type="button" variant="ghost" size="icon-sm" onClick={onClose} aria-label={t("close")} className="text-muted-foreground" disabled={saving}>
             <XIcon className="size-5" />
           </Button>
+        </div>
+
+        {/* Which account will own this project — the wizard can be reached
+            from anywhere, so make the personal-vs-organization destination
+            explicit (and switchable from the global entry points) before any
+            details are filled in. Locked while saving. */}
+        <div className="mx-auto mb-5 max-w-2xl">
+          <PublishAsPicker target={target} sessionDid={sessionDid} onChangeTarget={onChangeTarget} disabled={saving} />
         </div>
 
         <div className="mb-9 h-1.5 w-full overflow-hidden rounded-full bg-muted" role="progressbar" aria-valuenow={Math.round(progress)} aria-valuemin={0} aria-valuemax={100}>

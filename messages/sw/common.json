@@ -64,7 +64,24 @@
     "userAccount": "Akaunti ya mtumiaji",
     "myAccount": "Akaunti yangu",
     "signOut": "Ondoka",
-    "settings": "Mipangilio"
+    "settings": "Mipangilio",
+    "switchAccount": "Badilisha akaunti",
+    "switchAccountHint": "Vipakizi vipya na miradi huhifadhiwa kwenye akaunti unayochagua hapa.",
+    "organizationRole": "Shirika · {role}"
+  },
+  "publishAs": {
+    "label": "Unachapisha kama",
+    "badgePersonal": "Binafsi",
+    "badgeOrganization": "Shirika",
+    "personalFallback": "Akaunti binafsi",
+    "organizationFallback": "Akaunti ya shirika",
+    "personalDescription": "Huenda kwenye wasifu wako binafsi",
+    "organizationDescription": "Huenda kwenye wasifu wa pamoja wa shirika",
+    "menuTitle": "Chagua mahali pa kuchapisha",
+    "menuPersonalSubtitle": "Akaunti yako binafsi",
+    "menuOrganizationSubtitle": "Akaunti ya pamoja ya shirika",
+    "organizationsLabel": "Mashirika yako",
+    "switchHint": "Badilisha akaunti unayochapisha nayo"
   },
   "errorPage": {
     "title": "Hitilafu imetokea.",
@@ -149,7 +166,9 @@
       "myProjects": "Miradi yangu",
       "myOrganizations": "Mashirika yangu",
       "admin": "Msimamizi",
-      "submitData": "Tuma data ya uwandani"
+      "submitData": "Tuma data ya uwandani",
+      "personalAccount": "Akaunti binafsi",
+      "organizationAccount": "Akaunti ya shirika"
     }
   },
   "settings": {

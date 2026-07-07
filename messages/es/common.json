@@ -64,7 +64,24 @@
     "userAccount": "Cuenta de usuario",
     "myAccount": "Mi cuenta",
     "signOut": "Cerrar sesión",
-    "settings": "Configuración"
+    "settings": "Configuración",
+    "switchAccount": "Cambiar de cuenta",
+    "switchAccountHint": "Las nuevas subidas y proyectos se guardan en la cuenta que elijas aquí.",
+    "organizationRole": "Organización · {role}"
+  },
+  "publishAs": {
+    "label": "Publicando como",
+    "badgePersonal": "Personal",
+    "badgeOrganization": "Organización",
+    "personalFallback": "Cuenta personal",
+    "organizationFallback": "Cuenta de organización",
+    "personalDescription": "Va a tu perfil personal",
+    "organizationDescription": "Va al perfil compartido de la organización",
+    "menuTitle": "Elige dónde publicar",
+    "menuPersonalSubtitle": "Tu cuenta personal",
+    "menuOrganizationSubtitle": "Cuenta compartida de la organización",
+    "organizationsLabel": "Tus organizaciones",
+    "switchHint": "Cambia con qué cuenta publicas"
   },
   "errorPage": {
     "title": "Algo salió mal.",
@@ -149,7 +166,9 @@
       "myProjects": "Mis proyectos",
       "myOrganizations": "Mis organizaciones",
       "admin": "Administración",
-      "submitData": "Enviar datos de campo"
+      "submitData": "Enviar datos de campo",
+      "personalAccount": "Cuenta personal",
+      "organizationAccount": "Cuenta de organización"
     }
   },
   "settings": {

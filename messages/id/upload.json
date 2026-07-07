@@ -682,6 +682,7 @@
       "uploadFailed": "Kami tidak dapat menambahkan observasi ini. Silakan coba lagi.",
       "doneTitle": "{count, plural, other {# observasi ditambahkan}}",
       "doneBody": "Akan muncul di observasi Anda sebentar lagi.",
+      "doneBodyOrganization": "Akan muncul di observasi organisasi sebentar lagi.",
       "viewObservations": "Lihat observasi",
       "combineTip": "Seret satu foto ke foto lain untuk menggabungkannya menjadi satu observasi.",
       "photoCount": "{count, plural, one {# foto} other {# foto}}",

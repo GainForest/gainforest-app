@@ -682,6 +682,7 @@
       "uploadFailed": "We couldn't add these observations. Please try again.",
       "doneTitle": "{count, plural, one {# observation added} other {# observations added}}",
       "doneBody": "They'll appear in your observations in a moment.",
+      "doneBodyOrganization": "They'll appear in the organization's observations in a moment.",
       "viewObservations": "View observations",
       "combineTip": "Drag one photo onto another to combine them into one observation.",
       "photoCount": "{count, plural, one {# photo} other {# photos}}",

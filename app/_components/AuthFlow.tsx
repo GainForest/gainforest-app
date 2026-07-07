@@ -21,7 +21,7 @@ import {
   SettingsIcon,
   ShieldCheckIcon,
   UserIcon,
-  UsersIcon,
+  Building2Icon,
   WrenchIcon,
 } from "lucide-react";
 import {
@@ -710,10 +710,12 @@ function AuthenticatedMenu({
   const groupDisplayLabel = currentGroup ? groupName(currentGroup) : groupFallbackLabel;
   const displayLabel = showingGroup ? groupDisplayLabel : personalDisplayLabel;
   const secondaryLabel = showingGroup
-    ? currentGroup ? roleLabel(currentGroup.role) : "Organization"
+    ? currentGroup
+      ? authT("organizationRole", { role: roleLabel(currentGroup.role) })
+      : "Organization"
     : personalSecondaryLabel;
   const triggerAvatarUrl = showingGroup ? currentGroup?.avatarUrl : personalCard?.avatarUrl;
-  const triggerIcon = showingGroup ? <UsersIcon className="h-4 w-4" /> : <UserIcon className="h-3.5 w-3.5" />;
+  const triggerIcon = showingGroup ? <Building2Icon className="h-4 w-4" /> : <UserIcon className="h-3.5 w-3.5" />;
   // Quick links point at each account's own profile identifier (handle or DID).
   const personalIdentifier = personalCard?.handle?.trim() ?? session.did;
   // GainForest moderators (members of the admin group, any role) reach the
@@ -769,10 +771,12 @@ function AuthenticatedMenu({
         key: group.groupDid,
         kind: "group",
         label: groupName(group),
-        subtitle: roleLabel(group.role),
+        // Spell out that this is an organization (not just the viewer's role)
+        // so it's obvious which entries publish to a shared account.
+        subtitle: authT("organizationRole", { role: roleLabel(group.role) }),
         identifier,
         avatarUrl: group.avatarUrl,
-        icon: <UsersIcon className="h-4 w-4" />,
+        icon: <Building2Icon className="h-4 w-4" />,
         group,
         subItems: buildSubItems(identifier),
       };
@@ -947,7 +951,13 @@ function AuthenticatedMenu({
             </div>
 
             <div className="max-h-[min(70vh,34rem)] overflow-y-auto p-2">
-              {/* Accounts */}
+              {/* Accounts — explain what selecting one actually does: it decides
+                  whether new uploads/projects are published as the person or as
+                  an organization. */}
+              <p className="px-2.5 pb-0.5 pt-1 text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
+                {authT("switchAccount")}
+              </p>
+              <p className="px-2.5 pb-2 text-xs leading-4 text-muted-foreground">{authT("switchAccountHint")}</p>
               <div className="flex flex-col gap-0.5">
                 {accounts.map((account) => (
                   <AccountBlock

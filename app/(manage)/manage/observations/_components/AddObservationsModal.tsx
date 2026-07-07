@@ -51,6 +51,7 @@ import { ModalContent, ModalHeader, ModalTitle, ModalDescription } from "@/compo
 import { useModal } from "@/components/ui/modal/context";
 import { cn } from "@/lib/utils";
 import { manageApiHref, type ManageTarget } from "@/lib/links";
+import { PublishAsPicker } from "@/app/_components/PublishAsPicker";
 import { canCreateRecord } from "../../_lib/cgs-permissions";
 import {
   cleanFileName,
@@ -240,11 +241,22 @@ function quickGroupStatus(items: QuickItem[]): ItemStatus {
 
 export function AddObservationsModal({
   target,
+  sessionDid,
+  onChangeTarget,
   projectRef,
   onViewObservations,
   onClose,
 }: {
   target: ManageTarget;
+  /**
+   * Signed-in user's DID. Together with `onChangeTarget` it turns the
+   * "Publishing as" chip into an account switcher (global entry points);
+   * without them the chip is read-only (account-scoped manage pages, where
+   * the destination is fixed by the route).
+   */
+  sessionDid?: string | null;
+  /** Called when the user picks a different account to publish to. */
+  onChangeTarget?: (target: ManageTarget) => void;
   /** When set, each new observation is attached to this project (at-uri). */
   projectRef?: string | null;
   /** Navigate to the observations list (called after a successful add). */
@@ -316,6 +328,10 @@ export function AddObservationsModal({
   useEffect(() => {
     if (projectRef) return;
     let cancelled = false;
+    // A project picked under the previous account doesn't exist in the newly
+    // selected account's repo — drop the selection alongside the reload.
+    setSelectedProjectUri("");
+    setProjects([]);
     (async () => {
       try {
         const response = await fetch(manageApiHref("/api/manage/projects", target), { cache: "no-store" });
@@ -810,6 +826,8 @@ export function AddObservationsModal({
     return (
       <ObservationCsvUpload
         target={target}
+        sessionDid={sessionDid}
+        onChangeTarget={onChangeTarget}
         projectRef={projectRef}
         onBack={() => setMode("photos")}
         onClose={onClose}
@@ -827,7 +845,9 @@ export function AddObservationsModal({
           </span>
           <div>
             <ModalTitle>{t("doneTitle", { count: addedCount })}</ModalTitle>
-            <ModalDescription className="mt-1">{t("doneBody")}</ModalDescription>
+            <ModalDescription className="mt-1">
+              {target.kind === "group" ? t("doneBodyOrganization") : t("doneBody")}
+            </ModalDescription>
           </div>
         </div>
         <div className="flex flex-col gap-2 sm:flex-row sm:justify-center">
@@ -891,6 +911,18 @@ export function AddObservationsModal({
         </div>
         <ModalDescription className="mt-1">{t("description")}</ModalDescription>
       </ModalHeader>
+
+      {/* Always spell out (and, from global entry points, let the user change)
+          which account these observations will be published to — the number
+          one source of "did this go to me or my organization?" confusion.
+          Locked once an upload has started so one batch never splits across
+          two accounts. */}
+      <PublishAsPicker
+        target={target}
+        sessionDid={sessionDid}
+        onChangeTarget={onChangeTarget}
+        disabled={isSubmitting || items.some((item) => item.status === "uploading" || item.status === "uploaded")}
+      />
 
       <div
         onDragEnter={onDragEnter}

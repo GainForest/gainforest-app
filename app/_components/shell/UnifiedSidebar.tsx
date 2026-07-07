@@ -147,7 +147,14 @@ function SidebarProfileRow({ did }: { did: string }) {
           collapsed ? "h-auto justify-center px-0 py-1.5" : "h-auto justify-start gap-2.5 px-2 py-1.5",
         )}
       >
-        <span className="relative flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-primary/10 text-primary">
+        <span
+          className={cn(
+            "relative flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-full",
+            // Sky = organization, green = personal; matches the "Publishing as"
+            // chip so the two surfaces read as the same concept.
+            isGroup ? "bg-sky-500/10 text-sky-600 dark:text-sky-400" : "bg-primary/10 text-primary",
+          )}
+        >
           {avatarUrl ? (
             <Image src={avatarUrl} alt="" fill unoptimized sizes="32px" className="object-cover" />
           ) : isGroup ? (
@@ -159,7 +166,12 @@ function SidebarProfileRow({ did }: { did: string }) {
         {collapsed ? null : (
           <span className="flex min-w-0 flex-1 flex-col text-left">
             <span className="truncate text-sm font-medium text-foreground">{name}</span>
-            <span className="truncate text-xs text-muted-foreground">{t("viewProfile")}</span>
+            {/* Say what kind of account is active (mirrors the top-right
+                switcher) so it's always clear whether new uploads go to the
+                person or to an organization. */}
+            <span className={cn("truncate text-xs", isGroup ? "text-sky-600 dark:text-sky-400" : "text-muted-foreground")}>
+              {isGroup ? t("organizationAccount") : t("personalAccount")}
+            </span>
           </span>
         )}
       </Link>

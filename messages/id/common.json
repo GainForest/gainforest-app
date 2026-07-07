@@ -64,7 +64,24 @@
     "userAccount": "Akun pengguna",
     "myAccount": "Akun saya",
     "signOut": "Keluar",
-    "settings": "Pengaturan"
+    "settings": "Pengaturan",
+    "switchAccount": "Ganti akun",
+    "switchAccountHint": "Unggahan dan proyek baru disimpan ke akun yang Anda pilih di sini.",
+    "organizationRole": "Organisasi · {role}"
+  },
+  "publishAs": {
+    "label": "Menerbitkan sebagai",
+    "badgePersonal": "Pribadi",
+    "badgeOrganization": "Organisasi",
+    "personalFallback": "Akun pribadi",
+    "organizationFallback": "Akun organisasi",
+    "personalDescription": "Masuk ke profil pribadi Anda",
+    "organizationDescription": "Masuk ke profil bersama organisasi",
+    "menuTitle": "Pilih tempat menerbitkan",
+    "menuPersonalSubtitle": "Akun pribadi Anda",
+    "menuOrganizationSubtitle": "Akun bersama organisasi",
+    "organizationsLabel": "Organisasi Anda",
+    "switchHint": "Ganti akun yang Anda gunakan untuk menerbitkan"
   },
   "errorPage": {
     "title": "Terjadi kesalahan.",
@@ -149,7 +166,9 @@
       "myProjects": "Proyek saya",
       "myOrganizations": "Organisasi saya",
       "admin": "Admin",
-      "submitData": "Kirim data lapangan"
+      "submitData": "Kirim data lapangan",
+      "personalAccount": "Akun pribadi",
+      "organizationAccount": "Akun organisasi"
     }
   },
   "settings": {

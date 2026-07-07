@@ -66,6 +66,8 @@ const allowedExactValues = new Set([
   "Handle",
   "Link",
   "Admin",
+  // "Personal" is the same word in Spanish (publishAs badge).
+  "Personal",
   "Banner",
   "Format",
   "format",
