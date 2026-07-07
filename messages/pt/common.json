@@ -1577,7 +1577,8 @@
     },
     "mainTabs": {
       "setup": "Configuração",
-      "deployments": "Implantação"
+      "deployments": "Implantação",
+      "upload": "Enviar"
     },
     "deployments": {
       "intro": "As implantações registram onde e quando um AudioMoth foi colocado em campo. Cada uma reproduz um sinal acústico que ajusta o relógio, a localização e o ID de implantação do gravador.",
@@ -1638,6 +1639,58 @@
       "protocolLabel": "Protocolo",
       "recordedByLabel": "Registrado por",
       "viewEquipment": "Ver os equipamentos"
+    },
+    "upload": {
+      "intro": "Insira o cartão SD de um AudioMoth e escolha-o abaixo. As gravações são reconhecidas pelo ID de implantação embutido em cada arquivo, mantidas em armazenamento de arquivo seguro e salvas na sua conta.",
+      "signInTitle": "Entre para enviar gravações",
+      "signInBody": "Suas gravações são salvas na sua conta. Entre para enviá-las.",
+      "dropTitle": "Escolha seu cartão SD ou solte-o aqui",
+      "dropBody": "Selecione a unidade do cartão SD (ou qualquer pasta com gravações do AudioMoth). Os arquivos são lidos neste dispositivo primeiro — nada é enviado até você confirmar.",
+      "chooseFolder": "Escolher cartão SD ou pasta",
+      "chooseFiles": "Escolher arquivos",
+      "scanning": "Lendo gravações…",
+      "scanningCount": "{done} de {total} arquivos lidos",
+      "noWavTitle": "Nenhuma gravação encontrada",
+      "noWavBody": "Nenhum arquivo WAV foi encontrado na seleção. Escolha o nível superior do cartão SD do AudioMoth ou uma pasta que contenha gravações.",
+      "back": "Recomeçar",
+      "summaryRecordings": "Gravações",
+      "summarySize": "Tamanho total",
+      "summaryRange": "Período",
+      "summaryDevices": "Gravador",
+      "unknownTime": "Desconhecido",
+      "matchedDeployment": "Implantação reconhecida: {name}",
+      "unmatchedTitle": "Implantação não encontrada na sua conta",
+      "noIdTitle": "Estas gravações não têm ID de implantação",
+      "groupCount": "{count} gravações",
+      "assignLabel": "Vincular a uma implantação (opcional)",
+      "assignNone": "Sem implantação",
+      "unreadable": "{count} arquivos não puderam ser lidos como gravações WAV e serão ignorados.",
+      "moreFiles": "…e mais {count} gravações",
+      "previewToggle": "Salvar prévias reproduzíveis",
+      "previewHint": "Adiciona uma pequena prévia e um espectrograma de cada gravação à sua conta para poder ser reproduzida e vista em qualquer lugar.",
+      "uploadButton": "Enviar {count} gravações",
+      "uploadingButton": "Enviando… {done} de {total} concluídas",
+      "cancel": "Cancelar",
+      "doneTitle": "Envio concluído",
+      "doneWithErrors": "Concluído com {count} erros",
+      "doneBody": "{count} gravações enviadas. {skipped} já existiam e foram ignoradas.",
+      "uploadMore": "Enviar outro cartão",
+      "statusSkipped": "Já enviada",
+      "statusSaving": "Salvando…",
+      "notConfigured": "O armazenamento de gravações ainda não está configurado. Fale com a equipe.",
+      "uploadFailed": "O envio não pôde ser concluído. Tente novamente.",
+      "deploymentFallback": "Criado automaticamente ao enviar gravações do cartão SD."
+    },
+    "recordings": {
+      "title": "Gravações",
+      "uploadCta": "Enviar cartão SD",
+      "loadError": "As gravações não puderam ser carregadas agora.",
+      "empty": "Ainda não há gravações enviadas desta implantação.",
+      "playAria": "Reproduzir {name}",
+      "pauseAria": "Pausar {name}",
+      "previewUnavailable": "Sem prévia disponível para esta gravação",
+      "downloadAria": "Baixar original de {name}",
+      "showMore": "Mostrar mais {count}"
     }
   }
 }

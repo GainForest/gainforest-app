@@ -43,6 +43,8 @@ import {
   listDeploymentEvents,
   type DeploymentEventItem,
 } from "@/app/_lib/deployment-events";
+import { createAcDeployment } from "@/app/_lib/ac-deployment";
+import { loadAppliedConfig } from "@/app/_lib/audiomoth/setup-store";
 import { equipmentDetailPath } from "@/app/_lib/equipment";
 import { formatRelative } from "@/app/_lib/format";
 import { EditDeploymentDialog, audioMothOptionLabel, useMyAudioMoths } from "./deployment-shared";
@@ -361,7 +363,7 @@ function CreateDeploymentDialog({
       const now = new Date();
       const id = deploymentId.trim().toLowerCase();
       // Save first — even if the speaker fails, the generated ID is preserved.
-      await createDeploymentEvent({
+      const eventResult = await createDeploymentEvent({
         deploymentIdHex: id,
         siteName,
         lat: coords.lat,
@@ -371,6 +373,27 @@ function CreateDeploymentDialog({
           ? { name: selectedEquipment.name, assetId: selectedEquipment.assetId, uri: selectedEquipment.uri }
           : null,
       });
+      // Companion recorder-deployment record (ac.deployment) carrying the
+      // device configuration this browser last wrote to the unit. Best
+      // effort — the chime event above is the source of truth for the ID.
+      try {
+        const applied = selectedEquipment ? loadAppliedConfig(selectedEquipment.assetId) : null;
+        await createAcDeployment({
+          name: siteName.trim() || `AudioMoth ${id}`,
+          deployedAt: now,
+          lat: coords.lat,
+          lon: coords.lon,
+          eventUri: eventResult.uri,
+          equipment: selectedEquipment
+            ? { name: selectedEquipment.name, assetId: selectedEquipment.assetId, uri: selectedEquipment.uri }
+            : null,
+          config: applied?.config ?? null,
+          firmwareVersion: applied?.firmwareVersion ?? null,
+          remarks: `Chime deployment ID ${id}.`,
+        });
+      } catch (acError) {
+        console.warn("ac.deployment companion record could not be saved", acError);
+      }
       onCreated();
       const samples = generateChime(Math.floor(now.getTime() / 1000), coords.lat, coords.lon, id);
       await playChime(samples);

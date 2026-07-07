@@ -1577,7 +1577,8 @@
     },
     "mainTabs": {
       "setup": "Setup",
-      "deployments": "Deployment"
+      "deployments": "Deployment",
+      "upload": "Upload"
     },
     "deployments": {
       "intro": "Deployments record where and when an AudioMoth was placed in the field. Each one plays an acoustic chime that sets the recorder's clock, location and deployment ID.",
@@ -1638,6 +1639,58 @@
       "protocolLabel": "Protocol",
       "recordedByLabel": "Recorded by",
       "viewEquipment": "View their equipment"
+    },
+    "upload": {
+      "intro": "Insert an AudioMoth SD card and choose it below. Recordings are recognised by the deployment ID embedded in each file, kept safe in archival storage and saved to your account.",
+      "signInTitle": "Sign in to upload recordings",
+      "signInBody": "Your recordings are saved to your account. Sign in to upload them.",
+      "dropTitle": "Choose your SD card or drop it here",
+      "dropBody": "Pick the SD card drive (or any folder of AudioMoth recordings). Files are read on this device first — nothing is uploaded until you confirm.",
+      "chooseFolder": "Choose SD card or folder",
+      "chooseFiles": "Choose files",
+      "scanning": "Reading recordings…",
+      "scanningCount": "{done} of {total} files read",
+      "noWavTitle": "No recordings found",
+      "noWavBody": "No WAV files were found in the selection. Choose the top level of the AudioMoth SD card or a folder that contains recordings.",
+      "back": "Start over",
+      "summaryRecordings": "Recordings",
+      "summarySize": "Total size",
+      "summaryRange": "Date range",
+      "summaryDevices": "Recorder",
+      "unknownTime": "Unknown",
+      "matchedDeployment": "Matched deployment: {name}",
+      "unmatchedTitle": "Deployment not found in your account",
+      "noIdTitle": "No deployment ID in these recordings",
+      "groupCount": "{count} recordings",
+      "assignLabel": "Link to a deployment (optional)",
+      "assignNone": "No deployment",
+      "unreadable": "{count} files could not be read as WAV recordings and will be skipped.",
+      "moreFiles": "…and {count} more recordings",
+      "previewToggle": "Save playable previews",
+      "previewHint": "Adds a small preview and a spectrogram of each recording to your account so it can be played and seen anywhere.",
+      "uploadButton": "Upload {count} recordings",
+      "uploadingButton": "Uploading… {done} of {total} done",
+      "cancel": "Cancel",
+      "doneTitle": "Upload complete",
+      "doneWithErrors": "Finished with {count} errors",
+      "doneBody": "{count} recordings uploaded. {skipped} already existed and were skipped.",
+      "uploadMore": "Upload another card",
+      "statusSkipped": "Already uploaded",
+      "statusSaving": "Saving…",
+      "notConfigured": "Recording storage is not set up yet. Please contact the team.",
+      "uploadFailed": "The upload could not be completed. Please try again.",
+      "deploymentFallback": "Created automatically when uploading SD card recordings."
+    },
+    "recordings": {
+      "title": "Recordings",
+      "uploadCta": "Upload SD card",
+      "loadError": "Recordings could not be loaded right now.",
+      "empty": "No recordings uploaded from this deployment yet.",
+      "playAria": "Play {name}",
+      "pauseAria": "Pause {name}",
+      "previewUnavailable": "No preview available for this recording",
+      "downloadAria": "Download original of {name}",
+      "showMore": "Show {count} more"
     }
   }
 }

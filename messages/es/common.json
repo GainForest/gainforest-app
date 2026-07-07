@@ -1577,7 +1577,8 @@
     },
     "mainTabs": {
       "setup": "Configuración",
-      "deployments": "Despliegue"
+      "deployments": "Despliegue",
+      "upload": "Subir"
     },
     "deployments": {
       "intro": "Los despliegues registran dónde y cuándo se colocó un AudioMoth en el campo. Cada uno reproduce un tono acústico que ajusta el reloj, la ubicación y el ID de despliegue del grabador.",
@@ -1638,6 +1639,58 @@
       "protocolLabel": "Protocolo",
       "recordedByLabel": "Registrado por",
       "viewEquipment": "Ver sus equipos"
+    },
+    "upload": {
+      "intro": "Inserta la tarjeta SD de un AudioMoth y elígela abajo. Las grabaciones se reconocen por el ID de despliegue incluido en cada archivo, se guardan en un almacenamiento de archivo seguro y se registran en tu cuenta.",
+      "signInTitle": "Inicia sesión para subir grabaciones",
+      "signInBody": "Tus grabaciones se guardan en tu cuenta. Inicia sesión para subirlas.",
+      "dropTitle": "Elige tu tarjeta SD o suéltala aquí",
+      "dropBody": "Selecciona la unidad de la tarjeta SD (o cualquier carpeta con grabaciones de AudioMoth). Los archivos se leen primero en este dispositivo: no se sube nada hasta que confirmes.",
+      "chooseFolder": "Elegir tarjeta SD o carpeta",
+      "chooseFiles": "Elegir archivos",
+      "scanning": "Leyendo grabaciones…",
+      "scanningCount": "{done} de {total} archivos leídos",
+      "noWavTitle": "No se encontraron grabaciones",
+      "noWavBody": "No se encontraron archivos WAV en la selección. Elige el nivel superior de la tarjeta SD del AudioMoth o una carpeta con grabaciones.",
+      "back": "Empezar de nuevo",
+      "summaryRecordings": "Grabaciones",
+      "summarySize": "Tamaño total",
+      "summaryRange": "Rango de fechas",
+      "summaryDevices": "Grabadora",
+      "unknownTime": "Desconocido",
+      "matchedDeployment": "Despliegue reconocido: {name}",
+      "unmatchedTitle": "Despliegue no encontrado en tu cuenta",
+      "noIdTitle": "Estas grabaciones no tienen ID de despliegue",
+      "groupCount": "{count} grabaciones",
+      "assignLabel": "Vincular a un despliegue (opcional)",
+      "assignNone": "Sin despliegue",
+      "unreadable": "{count} archivos no se pudieron leer como grabaciones WAV y se omitirán.",
+      "moreFiles": "…y {count} grabaciones más",
+      "previewToggle": "Guardar vistas previas reproducibles",
+      "previewHint": "Añade una pequeña vista previa y un espectrograma de cada grabación a tu cuenta para poder reproducirla y verla en cualquier lugar.",
+      "uploadButton": "Subir {count} grabaciones",
+      "uploadingButton": "Subiendo… {done} de {total} completadas",
+      "cancel": "Cancelar",
+      "doneTitle": "Subida completada",
+      "doneWithErrors": "Finalizado con {count} errores",
+      "doneBody": "{count} grabaciones subidas. {skipped} ya existían y se omitieron.",
+      "uploadMore": "Subir otra tarjeta",
+      "statusSkipped": "Ya subida",
+      "statusSaving": "Guardando…",
+      "notConfigured": "El almacenamiento de grabaciones aún no está configurado. Contacta con el equipo.",
+      "uploadFailed": "La subida no se pudo completar. Inténtalo de nuevo.",
+      "deploymentFallback": "Creado automáticamente al subir grabaciones de la tarjeta SD."
+    },
+    "recordings": {
+      "title": "Grabaciones",
+      "uploadCta": "Subir tarjeta SD",
+      "loadError": "Las grabaciones no se pudieron cargar en este momento.",
+      "empty": "Aún no se han subido grabaciones de este despliegue.",
+      "playAria": "Reproducir {name}",
+      "pauseAria": "Pausar {name}",
+      "previewUnavailable": "No hay vista previa disponible para esta grabación",
+      "downloadAria": "Descargar original de {name}",
+      "showMore": "Mostrar {count} más"
     }
   }
 }

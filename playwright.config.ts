@@ -137,8 +137,14 @@ export default defineConfig({
       use: { ...desktopChrome },
     },
     {
-      name: "member-permissions",
+      name: "audiomoth-upload",
       dependencies: ["audio-recordings"],
+      testMatch: /audiomoth-upload\.spec\.ts/,
+      use: { ...desktopChrome },
+    },
+    {
+      name: "member-permissions",
+      dependencies: ["audiomoth-upload"],
       testMatch: /member-permissions\.spec\.ts/,
       use: { ...desktopChrome },
     },

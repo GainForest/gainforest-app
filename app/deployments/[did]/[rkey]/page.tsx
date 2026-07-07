@@ -20,6 +20,7 @@ import { getCertifiedProfileCard } from "@/app/account/_lib/account-route";
 import { accountEquipmentPath } from "@/app/account/_lib/account-route";
 import { DeploymentLocationMap } from "./DeploymentLocationMap";
 import { DeploymentDetailActions } from "./DeploymentDetailActions";
+import { DeploymentRecordings } from "./DeploymentRecordings";
 
 export const dynamic = "force-dynamic";
 
@@ -145,6 +146,8 @@ export default async function DeploymentDetailPage({ params }: { params: Deploym
           ) : null}
         </dl>
       </section>
+
+      <DeploymentRecordings did={item.did} eventUri={item.uri} isOwner={isOwner} />
 
       <section className="mt-4 rounded-2xl border border-border bg-card/90 p-5 sm:p-6">
         <p className="text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground">

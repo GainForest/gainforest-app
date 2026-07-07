@@ -1577,7 +1577,8 @@
     },
     "mainTabs": {
       "setup": "Penyiapan",
-      "deployments": "Penempatan"
+      "deployments": "Penempatan",
+      "upload": "Unggah"
     },
     "deployments": {
       "intro": "Penempatan mencatat di mana dan kapan sebuah AudioMoth dipasang di lapangan. Masing-masing memutar nada akustik yang mengatur jam, lokasi, dan ID penempatan perekam.",
@@ -1638,6 +1639,58 @@
       "protocolLabel": "Protokol",
       "recordedByLabel": "Dicatat oleh",
       "viewEquipment": "Lihat peralatan mereka"
+    },
+    "upload": {
+      "intro": "Masukkan kartu SD AudioMoth dan pilih di bawah. Rekaman dikenali dari ID penempatan yang tertanam di setiap berkas, disimpan aman di penyimpanan arsip, dan dicatat ke akun Anda.",
+      "signInTitle": "Masuk untuk mengunggah rekaman",
+      "signInBody": "Rekaman Anda disimpan ke akun Anda. Masuk untuk mengunggahnya.",
+      "dropTitle": "Pilih kartu SD Anda atau letakkan di sini",
+      "dropBody": "Pilih drive kartu SD (atau folder mana pun berisi rekaman AudioMoth). Berkas dibaca di perangkat ini terlebih dahulu — tidak ada yang diunggah sampai Anda konfirmasi.",
+      "chooseFolder": "Pilih kartu SD atau folder",
+      "chooseFiles": "Pilih berkas",
+      "scanning": "Membaca rekaman…",
+      "scanningCount": "{done} dari {total} berkas terbaca",
+      "noWavTitle": "Tidak ada rekaman ditemukan",
+      "noWavBody": "Tidak ada berkas WAV dalam pilihan. Pilih tingkat teratas kartu SD AudioMoth atau folder yang berisi rekaman.",
+      "back": "Mulai ulang",
+      "summaryRecordings": "Rekaman",
+      "summarySize": "Ukuran total",
+      "summaryRange": "Rentang tanggal",
+      "summaryDevices": "Perekam",
+      "unknownTime": "Tidak diketahui",
+      "matchedDeployment": "Penempatan dikenali: {name}",
+      "unmatchedTitle": "Penempatan tidak ditemukan di akun Anda",
+      "noIdTitle": "Rekaman ini tidak memiliki ID penempatan",
+      "groupCount": "{count} rekaman",
+      "assignLabel": "Tautkan ke penempatan (opsional)",
+      "assignNone": "Tanpa penempatan",
+      "unreadable": "{count} berkas tidak dapat dibaca sebagai rekaman WAV dan akan dilewati.",
+      "moreFiles": "…dan {count} rekaman lainnya",
+      "previewToggle": "Simpan pratinjau yang dapat diputar",
+      "previewHint": "Menambahkan pratinjau kecil dan spektrogram dari setiap rekaman ke akun Anda agar dapat diputar dan dilihat di mana saja.",
+      "uploadButton": "Unggah {count} rekaman",
+      "uploadingButton": "Mengunggah… {done} dari {total} selesai",
+      "cancel": "Batal",
+      "doneTitle": "Unggahan selesai",
+      "doneWithErrors": "Selesai dengan {count} kesalahan",
+      "doneBody": "{count} rekaman terunggah. {skipped} sudah ada dan dilewati.",
+      "uploadMore": "Unggah kartu lain",
+      "statusSkipped": "Sudah diunggah",
+      "statusSaving": "Menyimpan…",
+      "notConfigured": "Penyimpanan rekaman belum disiapkan. Silakan hubungi tim.",
+      "uploadFailed": "Unggahan tidak dapat diselesaikan. Silakan coba lagi.",
+      "deploymentFallback": "Dibuat otomatis saat mengunggah rekaman kartu SD."
+    },
+    "recordings": {
+      "title": "Rekaman",
+      "uploadCta": "Unggah kartu SD",
+      "loadError": "Rekaman tidak dapat dimuat saat ini.",
+      "empty": "Belum ada rekaman yang diunggah dari penempatan ini.",
+      "playAria": "Putar {name}",
+      "pauseAria": "Jeda {name}",
+      "previewUnavailable": "Tidak ada pratinjau untuk rekaman ini",
+      "downloadAria": "Unduh asli {name}",
+      "showMore": "Tampilkan {count} lagi"
     }
   }
 }

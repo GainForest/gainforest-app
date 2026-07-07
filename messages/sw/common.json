@@ -1577,7 +1577,8 @@
     },
     "mainTabs": {
       "setup": "Usanidi",
-      "deployments": "Usambazaji"
+      "deployments": "Usambazaji",
+      "upload": "Pakia"
     },
     "deployments": {
       "intro": "Usambazaji hurekodi mahali na wakati AudioMoth ilipowekwa uwandani. Kila mmoja hucheza mlio wa akustika unaoweka saa, mahali na kitambulisho cha usambazaji cha kinasa sauti.",
@@ -1638,6 +1639,58 @@
       "protocolLabel": "Itifaki",
       "recordedByLabel": "Kimerekodiwa na",
       "viewEquipment": "Ona vifaa vyao"
+    },
+    "upload": {
+      "intro": "Ingiza kadi ya SD ya AudioMoth kisha uichague hapa chini. Rekodi zinatambuliwa kwa kitambulisho cha uwekaji kilichowekwa kwenye kila faili, zinahifadhiwa salama kwenye hifadhi ya kumbukumbu na kuandikwa kwenye akaunti yako.",
+      "signInTitle": "Ingia ili kupakia rekodi",
+      "signInBody": "Rekodi zako zinahifadhiwa kwenye akaunti yako. Ingia ili kuzipakia.",
+      "dropTitle": "Chagua kadi yako ya SD au idondoshe hapa",
+      "dropBody": "Chagua hifadhi ya kadi ya SD (au folda yoyote yenye rekodi za AudioMoth). Faili zinasomwa kwenye kifaa hiki kwanza — hakuna kinachopakiwa hadi uthibitishe.",
+      "chooseFolder": "Chagua kadi ya SD au folda",
+      "chooseFiles": "Chagua faili",
+      "scanning": "Inasoma rekodi…",
+      "scanningCount": "Faili {done} kati ya {total} zimesomwa",
+      "noWavTitle": "Hakuna rekodi zilizopatikana",
+      "noWavBody": "Hakuna faili za WAV zilizopatikana. Chagua ngazi ya juu ya kadi ya SD ya AudioMoth au folda yenye rekodi.",
+      "back": "Anza upya",
+      "summaryRecordings": "Rekodi",
+      "summarySize": "Ukubwa jumla",
+      "summaryRange": "Kipindi cha tarehe",
+      "summaryDevices": "Kirekodi",
+      "unknownTime": "Haijulikani",
+      "matchedDeployment": "Uwekaji umetambuliwa: {name}",
+      "unmatchedTitle": "Uwekaji haukupatikana kwenye akaunti yako",
+      "noIdTitle": "Rekodi hizi hazina kitambulisho cha uwekaji",
+      "groupCount": "Rekodi {count}",
+      "assignLabel": "Unganisha na uwekaji (hiari)",
+      "assignNone": "Bila uwekaji",
+      "unreadable": "Faili {count} hazikuweza kusomwa kama rekodi za WAV na zitarukwa.",
+      "moreFiles": "…na rekodi {count} zaidi",
+      "previewToggle": "Hifadhi vionjo vinavyochezeka",
+      "previewHint": "Inaongeza kionjo kidogo na spektrogramu ya kila rekodi kwenye akaunti yako ili iweze kuchezwa na kuonekana popote.",
+      "uploadButton": "Pakia rekodi {count}",
+      "uploadingButton": "Inapakia… {done} kati ya {total} zimekamilika",
+      "cancel": "Ghairi",
+      "doneTitle": "Upakiaji umekamilika",
+      "doneWithErrors": "Imekamilika na makosa {count}",
+      "doneBody": "Rekodi {count} zimepakiwa. {skipped} zilikuwepo tayari na zilirukwa.",
+      "uploadMore": "Pakia kadi nyingine",
+      "statusSkipped": "Imeshapakiwa",
+      "statusSaving": "Inahifadhi…",
+      "notConfigured": "Hifadhi ya rekodi bado haijasanidiwa. Tafadhali wasiliana na timu.",
+      "uploadFailed": "Upakiaji haukuweza kukamilika. Tafadhali jaribu tena.",
+      "deploymentFallback": "Imeundwa kiotomatiki wakati wa kupakia rekodi za kadi ya SD."
+    },
+    "recordings": {
+      "title": "Rekodi",
+      "uploadCta": "Pakia kadi ya SD",
+      "loadError": "Rekodi hazikuweza kupakiwa kwa sasa.",
+      "empty": "Bado hakuna rekodi zilizopakiwa kutoka uwekaji huu.",
+      "playAria": "Cheza {name}",
+      "pauseAria": "Simamisha {name}",
+      "previewUnavailable": "Hakuna kionjo cha rekodi hii",
+      "downloadAria": "Pakua nakala halisi ya {name}",
+      "showMore": "Onyesha {count} zaidi"
     }
   }
 }

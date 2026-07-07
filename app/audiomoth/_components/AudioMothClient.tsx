@@ -20,6 +20,7 @@ import {
   CpuIcon,
   DownloadIcon,
   FingerprintIcon,
+  HardDriveUploadIcon,
   Loader2Icon,
   MapPinIcon,
   MinusIcon,
@@ -74,12 +75,13 @@ import Link from "next/link";
 import { createEquipment, equipmentDetailPath, listEquipment, updateEquipment, type EquipmentItem } from "@/app/_lib/equipment";
 import { loadAppliedConfig, mergeSetupNotes, saveAppliedConfig, SETUP_NOTES_HEADER } from "@/app/_lib/audiomoth/setup-store";
 import { DeploymentsTab } from "./DeploymentsTab";
+import { UploadTab } from "./UploadTab";
 
 /* ------------------------------------------------------------------ */
 /* Types                                                               */
 /* ------------------------------------------------------------------ */
 
-type MainTabId = "setup" | "deployments";
+type MainTabId = "setup" | "deployments" | "upload";
 
 type TabId = "device" | "configure" | "firmware";
 
@@ -303,9 +305,10 @@ export function AudioMothClient({ sessionDid }: { sessionDid: string | null }) {
   const [info, setInfo] = useState<DeviceInfo | null>(null);
   const [reading, setReading] = useState<LiveReading | null>(null);
   const searchParams = useSearchParams();
-  const [mainTab, setMainTab] = useState<MainTabId>(
-    searchParams.get("tab") === "deployments" ? "deployments" : "setup",
-  );
+  const [mainTab, setMainTab] = useState<MainTabId>(() => {
+    const tab = searchParams.get("tab");
+    return tab === "deployments" || tab === "upload" ? tab : "setup";
+  });
   const [tab, setTab] = useState<TabId>("firmware");
   const [connecting, setConnecting] = useState(false);
   const [wizard, setWizard] = useState<WizardState | null>(null);
@@ -786,6 +789,7 @@ export function AudioMothClient({ sessionDid }: { sessionDid: string | null }) {
   const mainTabs: Array<{ id: MainTabId; label: string; Icon: typeof ClockIcon }> = [
     { id: "setup", label: t("mainTabs.setup"), Icon: WrenchIcon },
     { id: "deployments", label: t("mainTabs.deployments"), Icon: MapPinIcon },
+    { id: "upload", label: t("mainTabs.upload"), Icon: HardDriveUploadIcon },
   ];
 
   return (
@@ -820,6 +824,8 @@ export function AudioMothClient({ sessionDid }: { sessionDid: string | null }) {
       </nav>
 
       {mainTab === "deployments" && <DeploymentsTab sessionDid={sessionDid} />}
+
+      {mainTab === "upload" && <UploadTab sessionDid={sessionDid} />}
 
       {mainTab === "setup" && supported === false && (
         <Card>
