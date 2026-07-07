@@ -1697,7 +1697,14 @@
       "otherGroup": "Rekaman lainnya",
       "viewDeployment": "Lihat penempatan",
       "accountEmptyTitle": "Belum ada rekaman",
-      "accountEmptyBody": "Rekaman yang diunggah dari kartu SD AudioMoth akan muncul di sini, dikelompokkan per penempatan."
+      "accountEmptyBody": "Rekaman yang diunggah dari kartu SD AudioMoth akan muncul di sini, dikelompokkan per penempatan.",
+      "explorerHint": "Perekam menangkap suara sepanjang hari — pilih tanggal di kalender, lalu ketuk batang jam untuk mempersempit.",
+      "daySpan": "{count, plural, other {# hari}}",
+      "prevMonth": "Bulan sebelumnya",
+      "nextMonth": "Bulan berikutnya",
+      "prevDay": "Hari sebelumnya dengan rekaman",
+      "nextDay": "Hari berikutnya dengan rekaman",
+      "allHours": "Semua jam"
     }
   }
 }

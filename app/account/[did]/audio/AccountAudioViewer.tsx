@@ -23,7 +23,7 @@ import { listAcDeployments, type AcDeploymentItem } from "@/app/_lib/ac-deployme
 import { listAllRecordings, type AcAudioListItem } from "@/app/_lib/ac-audio";
 import { deploymentDetailPath, parseAtUri } from "@/app/_lib/deployment-events";
 import { formatDate } from "@/app/_lib/format";
-import { RecordingsPlayerList } from "@/app/_components/RecordingsPlayerList";
+import { RecordingsExplorer } from "@/app/_components/RecordingsExplorer";
 
 type DeploymentGroup = {
   key: string;
@@ -194,7 +194,7 @@ export function AccountAudioViewer({
                 ) : null}
               </div>
               <div className="mt-4">
-                <RecordingsPlayerList did={did} host={host} items={group.items} />
+                <RecordingsExplorer did={did} host={host} items={group.items} />
               </div>
             </section>
           ))}

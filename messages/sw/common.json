@@ -1697,7 +1697,14 @@
       "otherGroup": "Rekodi nyingine",
       "viewDeployment": "Tazama uwekaji",
       "accountEmptyTitle": "Bado hakuna rekodi",
-      "accountEmptyBody": "Rekodi zilizopakiwa kutoka kadi ya SD ya AudioMoth zitaonekana hapa, zikiwa zimepangwa kwa uwekaji."
+      "accountEmptyBody": "Rekodi zilizopakiwa kutoka kadi ya SD ya AudioMoth zitaonekana hapa, zikiwa zimepangwa kwa uwekaji.",
+      "explorerHint": "Vinasa sauti hurekodi mchana na usiku — chagua siku kwenye kalenda, kisha gusa pau ya saa ili kuchuja.",
+      "daySpan": "{count, plural, one {siku #} other {siku #}}",
+      "prevMonth": "Mwezi uliopita",
+      "nextMonth": "Mwezi ujao",
+      "prevDay": "Siku iliyotangulia yenye rekodi",
+      "nextDay": "Siku inayofuata yenye rekodi",
+      "allHours": "Saa zote"
     }
   }
 }

@@ -1697,7 +1697,14 @@
       "otherGroup": "Outras gravações",
       "viewDeployment": "Ver implantação",
       "accountEmptyTitle": "Ainda não há gravações",
-      "accountEmptyBody": "As gravações enviadas de um cartão SD do AudioMoth aparecerão aqui, agrupadas por implantação."
+      "accountEmptyBody": "As gravações enviadas de um cartão SD do AudioMoth aparecerão aqui, agrupadas por implantação.",
+      "explorerHint": "Os gravadores capturam o dia todo — escolha um dia no calendário e toque numa barra de hora para refinar.",
+      "daySpan": "{count, plural, one {# dia} other {# dias}}",
+      "prevMonth": "Mês anterior",
+      "nextMonth": "Próximo mês",
+      "prevDay": "Dia anterior com gravações",
+      "nextDay": "Próximo dia com gravações",
+      "allHours": "Todas as horas"
     }
   }
 }

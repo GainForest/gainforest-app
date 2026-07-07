@@ -1697,7 +1697,14 @@
       "otherGroup": "Other recordings",
       "viewDeployment": "View deployment",
       "accountEmptyTitle": "No recordings yet",
-      "accountEmptyBody": "Recordings uploaded from an AudioMoth SD card will show up here, grouped by deployment."
+      "accountEmptyBody": "Recordings uploaded from an AudioMoth SD card will show up here, grouped by deployment.",
+      "explorerHint": "Recorders capture around the clock — pick a day on the calendar, then tap an hour bar to narrow down.",
+      "daySpan": "{count, plural, one {# day} other {# days}}",
+      "prevMonth": "Previous month",
+      "nextMonth": "Next month",
+      "prevDay": "Previous day with recordings",
+      "nextDay": "Next day with recordings",
+      "allHours": "All hours"
     }
   }
 }

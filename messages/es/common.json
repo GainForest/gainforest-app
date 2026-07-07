@@ -1697,7 +1697,14 @@
       "otherGroup": "Otras grabaciones",
       "viewDeployment": "Ver despliegue",
       "accountEmptyTitle": "Aún no hay grabaciones",
-      "accountEmptyBody": "Las grabaciones subidas desde una tarjeta SD de AudioMoth aparecerán aquí, agrupadas por despliegue."
+      "accountEmptyBody": "Las grabaciones subidas desde una tarjeta SD de AudioMoth aparecerán aquí, agrupadas por despliegue.",
+      "explorerHint": "Las grabadoras capturan a toda hora: elige un día en el calendario y toca una barra de hora para acotar.",
+      "daySpan": "{count, plural, one {# día} other {# días}}",
+      "prevMonth": "Mes anterior",
+      "nextMonth": "Mes siguiente",
+      "prevDay": "Día anterior con grabaciones",
+      "nextDay": "Día siguiente con grabaciones",
+      "allHours": "Todas las horas"
     }
   }
 }

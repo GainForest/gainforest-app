@@ -13,7 +13,7 @@ import { UploadIcon } from "lucide-react";
 import { resolvePdsHost } from "@/app/_lib/pds";
 import { listAcDeployments } from "@/app/_lib/ac-deployment";
 import { listRecordingsForDeployment, type AcAudioListItem } from "@/app/_lib/ac-audio";
-import { RecordingsPlayerList } from "@/app/_components/RecordingsPlayerList";
+import { RecordingsExplorer } from "@/app/_components/RecordingsExplorer";
 
 export function DeploymentRecordings({
   did,
@@ -91,7 +91,7 @@ export function DeploymentRecordings({
         <p className="mt-4 text-sm text-muted-foreground">{t("empty")}</p>
       ) : (
         <div className="mt-4">
-          <RecordingsPlayerList did={did} host={host} items={items} />
+          <RecordingsExplorer did={did} host={host} items={items} />
         </div>
       )}
     </section>
