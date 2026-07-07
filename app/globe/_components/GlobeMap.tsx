@@ -11,6 +11,7 @@
  */
 
 import maplibregl, {
+  type ExpressionSpecification,
   type LayerSpecification,
   type GeoJSONSource,
   type MapLayerMouseEvent,
@@ -28,6 +29,8 @@ import {
   GLOBE_TITILER_ENDPOINT,
   LANDCOVER_TILES_URL,
   MA_EARTH_LOGO_URL,
+  ORG_LOCATION_COLOR,
+  PROJECT_SITE_COLOR,
   globeMapStyle,
 } from "../_lib/config";
 import { resolveLayerUrl } from "../_lib/layers";
@@ -57,12 +60,23 @@ const TREES_CLUSTER_LAYER = "clusteredTrees";
 const TREES_CLUSTER_COUNT_LAYER = "clusteredTreesCountText";
 const TREES_POINT_LAYER = "unclusteredTrees";
 
+/** Data-driven site color: the organization's own location (features tagged
+ *  `siteKind: "organization"`) paints sky blue, project sites stay green. */
+const SITE_COLOR: ExpressionSpecification = [
+  "match",
+  ["coalesce", ["get", "siteKind"], "project"],
+  "organization",
+  ORG_LOCATION_COLOR,
+  PROJECT_SITE_COLOR,
+];
+
 type GlobeMapPadding = { top: number; bottom: number; left: number; right: number };
 
 type GlobeMapProps = {
   organizations: GlobeOrganization[];
   onSelectOrganization?: (did: string) => void;
-  /** Green boundaries for every site of the focused organization. */
+  /** Boundaries for every site of the focused organization — project sites in
+   *  green, the org's own location (`siteKind: "organization"`) in blue. */
   sitesGeojson?: GeoJSON.FeatureCollection | null;
   /** Yellow outline for the actively selected site. */
   highlightGeojson?: GeoJSON.FeatureCollection | null;
@@ -564,28 +578,29 @@ export function GlobeMap({
         );
       }
 
-      // Site boundaries (all sites, green) + highlighted site (yellow).
+      // Site boundaries (project sites green, org location blue) +
+      // highlighted site (yellow).
       map.addSource(SITES_SOURCE, { type: "geojson", data: EMPTY_FEATURE_COLLECTION });
       map.addLayer({
         id: SITES_FILL_LAYER,
         type: "fill",
         source: SITES_SOURCE,
-        paint: { "fill-color": "#00FF00", "fill-opacity": 0.05 },
+        paint: { "fill-color": SITE_COLOR, "fill-opacity": 0.05 },
       });
       map.addLayer({
         id: SITES_OUTLINE_LAYER,
         type: "line",
         source: SITES_SOURCE,
-        paint: { "line-color": "#00FF00", "line-width": 3 },
+        paint: { "line-color": SITE_COLOR, "line-width": 3 },
       });
-      // Point-style sites (bare coordinates) render as small green dots.
+      // Point-style sites (bare coordinates) render as small dots.
       map.addLayer({
         id: SITES_POINT_LAYER,
         type: "circle",
         source: SITES_SOURCE,
         filter: ["==", ["geometry-type"], "Point"],
         paint: {
-          "circle-color": "#00FF00",
+          "circle-color": SITE_COLOR,
           "circle-radius": 5,
           "circle-stroke-color": "#FFFFFF",
           "circle-stroke-width": 1.5,

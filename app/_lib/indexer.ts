@@ -3807,6 +3807,39 @@ async function fetchDirectCertifiedOrgRecord(
   return promise;
 }
 
+const ORG_SELF_LOCATION_QUERY = `
+  query OrgSelfLocation($uri: String!) {
+    appCertifiedActorOrganizationByUri(uri: $uri) { location { uri } }
+  }
+`;
+
+/** AT-URI of the organization's own location record — the certified location
+ *  referenced by `app.certified.actor.organization/self` ("where the org is
+ *  based"), as opposed to the sites its projects work in. Null when the org
+ *  declares no location. Indexer first, direct-PDS record as fallback. */
+export async function fetchOrganizationLocationUri(
+  did: string,
+  signal?: AbortSignal,
+): Promise<string | null> {
+  type OrgSelfLocationData = {
+    appCertifiedActorOrganizationByUri?: { location?: { uri?: string | null } | null } | null;
+  };
+  const [data, direct] = await Promise.all([
+    indexerQuery<OrgSelfLocationData>(
+      ORG_SELF_LOCATION_QUERY,
+      { uri: `at://${did}/app.certified.actor.organization/self` },
+      signal,
+    ).catch((err) => {
+      if ((err as Error).name === "AbortError") throw err;
+      return null;
+    }),
+    fetchDirectCertifiedOrgRecord(did, signal).catch(() => null),
+  ]);
+  // Same precedence as fetchAccountSummary: the live PDS record wins when readable.
+  if (direct) return direct.locationUri;
+  return sv(data?.appCertifiedActorOrganizationByUri?.location?.uri) ?? null;
+}
+
 /** Resolve many certified profiles in one aliased query (DIDs are quote-safe). */
 async function fetchCertProfiles(
   dids: string[],

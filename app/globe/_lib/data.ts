@@ -7,6 +7,11 @@
 import { fetchBumicertsByDid, fetchLocationsByDid } from "../../_lib/indexer";
 import type { GlobeOrganization, GlobeSite, GlobeTreeStat, LngLatBounds } from "./globe-types";
 
+/** The org's own location record (referenced from its certified organization
+ *  profile) — lets the site list keep "where the org is based" apart from the
+ *  project sites. */
+export { fetchOrganizationLocationUri } from "../../_lib/indexer";
+
 /** Organization roster for the globe (name, country, marker point). */
 export async function fetchGlobeOrganizations(signal?: AbortSignal): Promise<GlobeOrganization[]> {
   const res = await fetch("/api/globe/organizations", { signal });

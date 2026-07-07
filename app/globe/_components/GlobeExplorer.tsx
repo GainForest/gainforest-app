@@ -48,10 +48,11 @@ import { countryFlag, countryName, formatCountry } from "../../_lib/format";
 import { resolveCertifiedLocationCoords } from "../../_lib/coords";
 import { TrustedByBadges } from "../../_components/TrustedByBadges";
 import { GlobeMap } from "./GlobeMap";
-import { LANDCOVER_LEGEND } from "../_lib/config";
+import { LANDCOVER_LEGEND, ORG_LOCATION_COLOR, PROJECT_SITE_COLOR } from "../_lib/config";
 import {
   fetchGlobeOrganizations,
   fetchGlobeTreeStats,
+  fetchOrganizationLocationUri,
   fetchOrganizationSiteProjects,
   fetchOrganizationSites,
   fetchSiteGeoJson,
@@ -214,6 +215,24 @@ export function GlobeExplorer({ orgDid = null, orgName = null, orgIdentifier = n
     });
     return () => controller.abort();
   }, [focusDid, mode, bumpBounds]);
+
+  // ── The organization's own location (kept apart from the project sites) ──
+  const [orgLocationUri, setOrgLocationUri] = useState<string | null>(null);
+  useEffect(() => {
+    setOrgLocationUri(null);
+    if (!focusDid || mode === "project") return;
+    const controller = new AbortController();
+    fetchOrganizationLocationUri(focusDid, controller.signal)
+      .then((uri) => {
+        if (!controller.signal.aborted) setOrgLocationUri(uri);
+      })
+      .catch((error) => {
+        if ((error as Error).name !== "AbortError") {
+          console.warn("[globe] org location failed", error);
+        }
+      });
+    return () => controller.abort();
+  }, [focusDid, mode]);
 
   // ── Which project(s) each site belongs to (tag pills in the site list) ──
   const [siteProjects, setSiteProjects] = useState<Map<string, string[]>>(new Map());
@@ -549,11 +568,18 @@ export function GlobeExplorer({ orgDid = null, orgName = null, orgIdentifier = n
   }, [focusedState.features, selectedSiteUri]);
 
   // Stable GeoJSON identities — building these inline in JSX gave the map a
-  // new object every render, forcing redundant setData round-trips.
-  const sitesCollection = useMemo(
-    () => featureCollection(focusedState.features),
-    [focusedState.features],
-  );
+  // new object every render, forcing redundant setData round-trips. Features
+  // of the org's own location are tagged so the map can paint them apart.
+  const sitesCollection = useMemo(() => {
+    if (!orgLocationUri) return featureCollection(focusedState.features);
+    return featureCollection(
+      focusedState.features.map((feature) =>
+        feature.properties?.siteUri === orgLocationUri
+          ? { ...feature, properties: { ...feature.properties, siteKind: "organization" } }
+          : feature,
+      ),
+    );
+  }, [focusedState.features, orgLocationUri]);
   const highlightCollection = useMemo(
     () => featureCollection(highlightFeatures),
     [highlightFeatures],
@@ -657,6 +683,7 @@ export function GlobeExplorer({ orgDid = null, orgName = null, orgIdentifier = n
         project,
         state: focusedState,
         siteProjects,
+        orgLocationUri,
         selectedSiteUri,
         onSelectSite: (uri: string | null) => {
           selectSite(uri);
@@ -1152,6 +1179,7 @@ function FocusPanel({
   project,
   state,
   siteProjects,
+  orgLocationUri,
   selectedSiteUri,
   onSelectSite,
   onClear,
@@ -1167,6 +1195,8 @@ function FocusPanel({
   state: SiteState;
   /** Certified location AT-URI → titles of the projects that reference it. */
   siteProjects: Map<string, string[]>;
+  /** AT-URI of the org's own location record (its "based in" place), if any. */
+  orgLocationUri: string | null;
   selectedSiteUri: string | null;
   onSelectSite: (uri: string | null) => void;
   onClear?: () => void;
@@ -1176,6 +1206,15 @@ function FocusPanel({
   const profileHref = `/account/${encodeURIComponent(orgIdentifier)}`;
   const orgGlobeHref = `/globe/${encodeURIComponent(orgIdentifier)}`;
   const boundaryCount = state.features.length;
+
+  // The org's own location renders under its own heading, apart from the
+  // sites its projects work in. Without a declared org location the list
+  // stays flat (no headings).
+  const orgSites = orgLocationUri
+    ? state.sites.filter((site) => site.uri === orgLocationUri)
+    : [];
+  const projectSites =
+    orgSites.length > 0 ? state.sites.filter((site) => site.uri !== orgLocationUri) : state.sites;
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
@@ -1324,7 +1363,32 @@ function FocusPanel({
                 onClick={() => onSelectSite(null)}
               />
             </li>
-            {state.sites.map((site) => (
+            {orgSites.length > 0 ? (
+              <li>
+                <SiteGroupHeading color={ORG_LOCATION_COLOR}>
+                  {t("focus.orgLocationHeading")}
+                </SiteGroupHeading>
+              </li>
+            ) : null}
+            {orgSites.map((site) => (
+              <li key={site.uri}>
+                <SiteRow
+                  kind="organization"
+                  label={site.name}
+                  projects={siteProjects.get(site.uri)}
+                  active={selectedSiteUri === site.uri}
+                  onClick={() => onSelectSite(site.uri)}
+                />
+              </li>
+            ))}
+            {orgSites.length > 0 && projectSites.length > 0 ? (
+              <li>
+                <SiteGroupHeading color={PROJECT_SITE_COLOR}>
+                  {t("focus.projectSitesHeading")}
+                </SiteGroupHeading>
+              </li>
+            ) : null}
+            {projectSites.map((site) => (
               <li key={site.uri}>
                 <SiteRow
                   label={site.name}
@@ -1341,6 +1405,21 @@ function FocusPanel({
   );
 }
 
+/** Heading splitting the site list into org location vs project sites; the
+ *  colored dot echoes the paint color of those features on the map. */
+function SiteGroupHeading({ color, children }: { color: string; children: React.ReactNode }) {
+  return (
+    <p className="flex items-center gap-1.5 px-4 pb-0.5 pt-2.5 text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
+      <span
+        aria-hidden
+        className="size-1.5 shrink-0 rounded-full ring-1 ring-black/10"
+        style={{ backgroundColor: color }}
+      />
+      {children}
+    </p>
+  );
+}
+
 /** How many project pills a site row shows before collapsing into "+N". */
 const SITE_ROW_MAX_PILLS = 2;
 
@@ -1349,12 +1428,15 @@ function SiteRow({
   projects,
   active,
   onClick,
+  kind = "site",
 }: {
   label: string;
   /** Titles of the projects this site belongs to (tag pills). */
   projects?: string[];
   active: boolean;
   onClick: () => void;
+  /** "organization" rows carry the org's building icon instead of the pin. */
+  kind?: "site" | "organization";
 }) {
   const t = useTranslations("marketplace.globe");
   const shown = projects?.slice(0, SITE_ROW_MAX_PILLS) ?? [];
@@ -1369,7 +1451,11 @@ function SiteRow({
         active ? "font-medium text-primary" : "text-foreground",
       )}
     >
-      <MapPinnedIcon className={cn("size-3.5 shrink-0 self-start mt-0.5", active ? "text-primary" : "text-muted-foreground")} />
+      {kind === "organization" ? (
+        <Building2Icon className={cn("size-3.5 shrink-0 self-start mt-0.5", active ? "text-primary" : "text-muted-foreground")} />
+      ) : (
+        <MapPinnedIcon className={cn("size-3.5 shrink-0 self-start mt-0.5", active ? "text-primary" : "text-muted-foreground")} />
+      )}
       <span className="min-w-0 flex-1">
         <span className="block truncate">{label}</span>
         {shown.length > 0 ? (
