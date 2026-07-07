@@ -47,12 +47,6 @@ function normalizePersistedSubject(
   return { uri: subject.uri, cid: subject.cid };
 }
 
-export function getAttachmentActivitySubject(
-  subjects: TimelineAttachmentItem["record"]["subjects"] | null | undefined,
-): AttachmentSubjectInfo | null {
-  return normalizePersistedSubject(subjects?.[0]);
-}
-
 export function getAttachmentContextSubject(
   subjects: TimelineAttachmentItem["record"]["subjects"] | null | undefined,
 ): AttachmentSubjectInfo | null {

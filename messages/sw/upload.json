@@ -114,14 +114,8 @@
     "deleteConfirmTitle": "Ungependa kufuta rekodi hii?",
     "deleteConfirmDescription": "Kitendo hiki hakiwezi kutenduliwa.",
     "howDoesThisWork": "Hii hufanya kazi vipi?",
-    "useTainá": "Tumia Tainá",
-    "useTaináLong": "Tumia Tainá kupakia AudioMoth",
     "fileSizeNote": "Faili zinazopakiwa hapa lazima ziwe 4MB au ndogo zaidi. Kwa faili kubwa za AudioMoth, tafadhali tumia Tainá.",
     "intro": "Hifadhi rekodi zako za uwandani mahali pamoja. Kila moja huunganishwa na wapi, lini, na jinsi ilivyorekodiwa.",
-    "whatIsTainá": "Tainá ni nini?",
-    "tainaTitle": "Kutana na Tainá",
-    "tainaBody": "Tainá ni msaidizi wetu kwenye Telegram. Piga gumzo kutuma rekodi moja kwa moja kutoka uwandani. Yeye hushughulikia faili kubwa za AudioMoth zisizoweza kupakiwa hapa.",
-    "tainaCta": "Fungua Tainá kwenye Telegram",
     "loading": "Inapakia nafasi ya kazi ya sauti…",
     "backTo": "Rudi kwenye {section}",
     "sections": {
@@ -732,7 +726,8 @@
       "dropTitleTouch": "Ongeza picha zako",
       "takePhoto": "Piga picha",
       "combineWithAbove": "Unganisha na iliyo juu",
-      "dragMergeHintTouch": "Gusa alama ya kutenganisha kwenye picha ili kuitenga."
+      "dragMergeHintTouch": "Gusa alama ya kutenganisha kwenye picha ili kuitenga.",
+      "submitDataBatch": "Tuma kundi kubwa la zip"
     },
     "csvUpload": {
       "title": "Pakia data ya CSV",
@@ -1012,7 +1007,7 @@
   },
   "settings": {
     "organizationTitle": "Mipangilio ya shirika",
-    "organizationDescription": "Dhibiti wanachama na udhibiti nani anaweza kufanya mabadiliko katika shirika hili.",
+    "organizationDescription": "Unganisha mawakala wa AI na simamia zana za shirika hili.",
     "personalTitle": "Mipangilio",
     "personalDescription": "Dhibiti viungo vya akaunti, usalama na zana za kuhamisha data.",
     "dataCouncil": {
@@ -1040,7 +1035,10 @@
         "save": "Haikuweza kuhifadhi mabadiliko ya Baraza la Data."
       },
       "addLabel": "Ongeza kwenye Baraza la Data"
-    }
+    },
+    "membersMoved": "Wanachama, majukumu na Baraza la Data vipo kwenye kichupo cha Wanachama.",
+    "openMembers": "Fungua Wanachama",
+    "orgAgentKeysHint": "Funguo ni za binafsi: funguo unayotengeneza hapa ni ya akaunti yako na inamruhusu wakala wako wa AI kufanya kazi katika shirika hili kupitia uanachama wako. Ukiondoka kwenye shirika, funguo zako zinapoteza ufikiaji huo."
   },
   "dashboardClient": {
     "actions": {

@@ -28,11 +28,12 @@ import { InlineCardGridSkeleton } from "@/app/_components/PageLoadingSkeletons";
 import { Button } from "@/components/ui/button";
 import { getAccountRouteData } from "@/app/account/_lib/account-route";
 import { fetchAuthSession } from "@/app/_lib/auth-server";
-import { AccountSettingsSections } from "@/app/account/_components/AccountSettingsSections";
+import { AccountSettingsSections, AgentKeysSection } from "@/app/account/_components/AccountSettingsSections";
+import { accountMembersPath } from "@/app/account/_lib/account-route";
+import { UsersIcon } from "lucide-react";
 import Container from "@/components/ui/container";
 import { ManageOverview } from "./_components/ManageOverview";
 import { ManageDashboard } from "./_components/ManageDashboard";
-import { GroupMembers } from "./groups/_components/GroupMembers";
 import type { CgsRole } from "./_lib/cgs";
 import { ManageProjectsClient } from "./projects/_components/ManageProjectsClient";
 import { ProjectGalleryManagerClient } from "./projects/[rkey]/gallery/_components/ProjectGalleryManagerClient";
@@ -295,25 +296,29 @@ export async function NewBumicertSection({ target, searchParams }: { target: Man
 export async function SettingsSection({ target }: { target: ManageTarget }) {
   const t = await getTranslations("upload.settings");
   if (target.kind === "group") {
-    const role: CgsRole = target.role === "owner" ? "owner" : target.role === "admin" ? "admin" : "member";
-    let currentUserDid = target.currentUserDid ?? null;
-    if (!currentUserDid) {
-      const session = await fetchAuthSession();
-      currentUserDid = session.isLoggedIn ? session.did : null;
-    }
+    // Members + Data Council live on the profile's Members tab; repeating them
+    // here made Settings a duplicate of that tab. Organization settings now
+    // carry the org-level tools instead — starting with AI agent keys — and
+    // link to Members for governance.
     return (
       <Container className="pt-4 pb-8">
         <div className="mb-6">
           <h1 className="font-instrument text-3xl font-light italic leading-tight tracking-[-0.02em] text-foreground">{t("organizationTitle")}</h1>
           <p className="mt-1 text-sm text-muted-foreground">{t("organizationDescription")}</p>
         </div>
-        <GroupMembers
-          groupDid={target.did}
-          currentRole={role}
-          currentUserDid={currentUserDid}
-          variant="section"
-          showDataCouncil
-        />
+        <div className="mb-8 flex flex-col gap-3 rounded-2xl border border-border bg-background/70 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex min-w-0 items-start gap-3">
+            <UsersIcon className="mt-0.5 h-5 w-5 shrink-0 text-muted-foreground" />
+            <p className="text-sm text-muted-foreground">{t("membersMoved")}</p>
+          </div>
+          <Button asChild variant="outline" size="sm" className="shrink-0">
+            <Link href={accountMembersPath(target.identifier || target.did)}>{t("openMembers")}</Link>
+          </Button>
+        </div>
+        <div className="space-y-3">
+          <p className="text-sm text-muted-foreground">{t("orgAgentKeysHint")}</p>
+          <AgentKeysSection />
+        </div>
       </Container>
     );
   }

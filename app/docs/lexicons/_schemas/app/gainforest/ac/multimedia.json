@@ -9,7 +9,7 @@
       "key": "tid",
       "record": {
         "type": "object",
-        "required": ["subjectPart", "file", "createdAt"],
+        "required": ["file", "createdAt"],
         "properties": {
           "occurrenceRef": {
             "type": "string",
@@ -23,7 +23,7 @@
           },
           "subjectPart": {
             "type": "string",
-            "description": "The part of the organism depicted, using TDWG Audubon Core subjectPart controlled values (http://rs.tdwg.org/acpart/values/). Examples: entireOrganism, leaf, bark, flower, fruit, seed, stem, twig, bud, root.",
+            "description": "The part of the organism depicted, using TDWG Audubon Core subjectPart controlled values (http://rs.tdwg.org/acpart/values/). Examples: entireOrganism, leaf, bark, flower, fruit, seed, stem, twig, bud, root. Only meaningful for media depicting an organism; omit for soundscapes and other media without a single depicted subject.",
             "maxGraphemes": 128,
             "knownValues": ["entireOrganism", "leaf", "bark", "flower", "fruit", "seed", "stem", "twig", "bud", "root", "head", "wing", "shell", "unspecifiedPart"]
           },

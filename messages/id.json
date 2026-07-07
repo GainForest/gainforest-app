@@ -41,6 +41,14 @@
         }
       }
     },
+    "explainer": {
+      "eyebrow": "Tonton penjelasannya",
+      "titlePrefix": "Cara baru untuk",
+      "titleEmphasis": "mendanai alam",
+      "description": "Dalam dua menit, lihat bagaimana Bumicerts mengubah kerja lapangan nyata menjadi catatan yang dapat diverifikasi — dan menyalurkan pendanaan langsung ke para penjaga alam setempat yang melakukannya.",
+      "play": "Putar video",
+      "videoTitle": "Bumicerts: mekanisme pendanaan alam yang baru dan adil untuk penjaga alam setempat"
+    },
     "certificate": {
       "eyebrow": "Sertifikat",
       "titleLine1": "Apa sebenarnya",

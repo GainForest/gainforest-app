@@ -1,4 +1,4 @@
-export const ANALYTICS_CONSENT_STORAGE_KEY = "bumicerts_contentsquare_consent";
+const ANALYTICS_CONSENT_STORAGE_KEY = "bumicerts_contentsquare_consent";
 export const ANALYTICS_CONSENT_CHANGED_EVENT = "bumicerts:analytics-consent-changed";
 
 export type AnalyticsConsent = "granted" | "denied";

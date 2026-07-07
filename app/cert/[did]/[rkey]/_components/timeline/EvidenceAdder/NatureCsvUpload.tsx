@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { ATTACHMENT_MAX_FILE_BYTES, type AttachmentDraft } from "../contextAttachmentMutations";
 import { formatFileSize } from "./fileUtils";
-import { OptionalNote } from "./OptionalNote";
 import { SubmitButton } from "./SubmitButton";
 import { CONTENT_TYPE_NATURE_OBSERVATIONS, type EvidenceSubmitter } from "./types";
 
@@ -18,16 +17,19 @@ import { CONTENT_TYPE_NATURE_OBSERVATIONS, type EvidenceSubmitter } from "./type
  * tagged as biodiversity evidence, and linked to the activity automatically.
  */
 export function NatureCsvUpload({
+  caption,
+  captionTitle,
   isSubmitting,
   submitDrafts,
 }: {
+  caption: string;
+  captionTitle: string | null;
   isSubmitting: boolean;
   submitDrafts: EvidenceSubmitter;
 }) {
   const t = useTranslations("bumicert.detail.evidenceAdder.biodiversity.csvUpload");
   const inputId = useId();
   const [file, setFile] = useState<File | null>(null);
-  const [note, setNote] = useState("");
   const [error, setError] = useState<string | null>(null);
 
   function onPick(event: ChangeEvent<HTMLInputElement>) {
@@ -50,14 +52,13 @@ export function NatureCsvUpload({
   function submit() {
     if (!file) return;
     const draft: AttachmentDraft = {
-      title: file.name,
+      title: captionTitle ?? file.name,
       contentType: CONTENT_TYPE_NATURE_OBSERVATIONS,
       contents: [file],
-      note,
+      note: caption,
     };
     submitDrafts([draft], () => {
       setFile(null);
-      setNote("");
       setError(null);
     });
   }
@@ -112,7 +113,6 @@ export function NatureCsvUpload({
 
       {error ? <p className="text-xs text-destructive">{error}</p> : null}
 
-      <OptionalNote value={note} onChange={setNote} disabled={isSubmitting} />
       <SubmitButton count={file ? 1 : 0} isSubmitting={isSubmitting} onClick={submit} />
     </section>
   );

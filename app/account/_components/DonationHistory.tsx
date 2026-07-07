@@ -8,6 +8,7 @@ import type { FundingReceipt } from "../../_lib/dashboard";
 import { formatCompactUsd } from "../../_lib/format";
 import { EmptyHeroBanner } from "../../_components/EmptyHeroBanner";
 import { PreferredBumicertLink } from "../../_components/PreferredLinks";
+import { blockExplorerUrl } from "../../_lib/urls";
 
 interface DonationHistoryProps {
   receipts: FundingReceipt[];
@@ -51,7 +52,7 @@ function DonationCard({
 
   const relativeTime = useMemo(() => formatDistanceToNowLabel(occurredAt), [occurredAt]);
 
-  const baseScanUrl = txId ? `https://basescan.org/tx/${txId}` : null;
+  const explorerUrl = blockExplorerUrl(txId, item.paymentNetwork ?? "ethereum");
 
   return (
     <motion.div
@@ -94,9 +95,9 @@ function DonationCard({
         )}
       </div>
 
-      {baseScanUrl && (
+      {explorerUrl && (
         <a
-          href={baseScanUrl}
+          href={explorerUrl}
           target="_blank"
           rel="noopener noreferrer"
           className="shrink-0 text-muted-foreground hover:text-primary transition-colors"

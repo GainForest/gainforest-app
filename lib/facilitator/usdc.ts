@@ -1,15 +1,18 @@
-/** USDC on Base — constants and minimal ABI for EIP-3009 TransferWithAuthorization. */
+/** USDC on Ethereum mainnet — constants and minimal ABI for EIP-3009 TransferWithAuthorization. */
 
-export const CHAIN_ID = 8453 as const;
-export const BASE_CHAIN_NAME = "Base" as const;
-export const BASE_RPC_URL = "https://mainnet.base.org" as const;
-export const USDC_CONTRACT = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913" as const;
+export const CHAIN_ID = 1 as const;
+export const CHAIN_NAME = "Ethereum" as const;
+export const RPC_URL = "https://ethereum-rpc.publicnode.com" as const;
+export const BLOCK_EXPLORER_URL = "https://etherscan.io" as const;
+export const PAYMENT_NETWORK = "ethereum" as const;
+export const PAYMENT_RAIL = "x402-usdc-ethereum" as const;
+export const USDC_CONTRACT = "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48" as const;
 export const DECIMALS = 6 as const;
 
 export const EIP3009_DOMAIN_NAME = "USD Coin" as const;
 export const EIP3009_DOMAIN_VERSION = "2" as const;
 
-export const EIP3009_TYPES = {
+const EIP3009_TYPES = {
   TransferWithAuthorization: [
     { name: "from", type: "address" },
     { name: "to", type: "address" },

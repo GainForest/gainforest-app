@@ -114,14 +114,8 @@
     "deleteConfirmTitle": "Hapus rekaman ini?",
     "deleteConfirmDescription": "Tindakan ini tidak dapat dibatalkan.",
     "howDoesThisWork": "Bagaimana cara kerjanya?",
-    "useTainá": "Gunakan Tainá",
-    "useTaináLong": "Gunakan Tainá untuk mengunggah AudioMoth",
     "fileSizeNote": "File yang diunggah di sini harus berukuran 4MB atau lebih kecil. Untuk file AudioMoth yang lebih besar, gunakan Tainá.",
     "intro": "Simpan rekaman lapangan Anda di satu tempat. Setiap rekaman terhubung dengan di mana, kapan, dan bagaimana rekaman itu diambil.",
-    "whatIsTainá": "Apa itu Tainá?",
-    "tainaTitle": "Kenalan dengan Tainá",
-    "tainaBody": "Tainá adalah asisten kami di Telegram. Mengobrollah untuk mengirim rekaman langsung dari lapangan. Dia menangani file AudioMoth besar yang tidak bisa diunggah di sini.",
-    "tainaCta": "Buka Tainá di Telegram",
     "loading": "Memuat ruang kerja audio…",
     "backTo": "Kembali ke {section}",
     "sections": {
@@ -732,7 +726,8 @@
       "dropTitleTouch": "Tambahkan foto Anda",
       "takePhoto": "Ambil foto",
       "combineWithAbove": "Gabungkan dengan yang di atas",
-      "dragMergeHintTouch": "Ketuk ikon pisah pada foto untuk memisahkannya."
+      "dragMergeHintTouch": "Ketuk ikon pisah pada foto untuk memisahkannya.",
+      "submitDataBatch": "Kirim batch zip besar"
     },
     "csvUpload": {
       "title": "Unggah data CSV",
@@ -1012,7 +1007,7 @@
   },
   "settings": {
     "organizationTitle": "Pengaturan organisasi",
-    "organizationDescription": "Kelola anggota dan tentukan siapa yang dapat membuat perubahan untuk organisasi ini.",
+    "organizationDescription": "Hubungkan agen AI dan kelola perangkat untuk organisasi ini.",
     "personalTitle": "Pengaturan",
     "personalDescription": "Kelola tautan akun, keamanan, dan alat ekspor.",
     "dataCouncil": {
@@ -1040,7 +1035,10 @@
         "save": "Tidak dapat menyimpan perubahan Dewan Data."
       },
       "addLabel": "Tambahkan ke Dewan Data"
-    }
+    },
+    "membersMoved": "Anggota, peran, dan Dewan Data ada di tab Anggota.",
+    "openMembers": "Buka Anggota",
+    "orgAgentKeysHint": "Kunci bersifat pribadi: kunci yang Anda buat di sini milik akun Anda dan memungkinkan agen AI Anda bekerja di organisasi ini melalui keanggotaan Anda. Jika Anda keluar dari organisasi, kunci Anda kehilangan akses tersebut."
   },
   "dashboardClient": {
     "actions": {

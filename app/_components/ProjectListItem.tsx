@@ -2,11 +2,11 @@
 
 import Image from "next/image";
 import { useState } from "react";
-import { ChevronRightIcon, FolderKanbanIcon, MapPinIcon } from "lucide-react";
+import { ChevronRightIcon, FolderKanbanIcon, HeartIcon, MapPinIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { ProjectScopeTags } from "./ProjectScopeTags";
 import { isPdsBlobUrl } from "../_lib/pds";
-import { countryName } from "../_lib/format";
+import { countryName, formatCompactUsd } from "../_lib/format";
 import type { ProjectRecord } from "../_lib/indexer";
 
 /**
@@ -56,16 +56,30 @@ export function ProjectListItem({
   record,
   onOpen,
   priority = false,
+  donationSummary,
 }: {
   record: ProjectRecord;
   onOpen: (record: ProjectRecord) => void;
   priority?: boolean;
+  donationSummary?: {
+    acceptsDonations: boolean;
+    totalUsd: number;
+    donorCount: number;
+    maEarth: { rounds: number[] } | null;
+  };
 }) {
   const t = useTranslations("marketplace.projects.card");
   const [imgError, setImgError] = useState(false);
   const hasImage = Boolean(record.imageUrl) && !imgError;
   const place = countryName(record.country);
   const steward = record.creatorName ?? t("projectSteward");
+  const acceptsDonations = donationSummary?.acceptsDonations || record.acceptsDonations === true;
+  const donationLabel = donationSummary && donationSummary.totalUsd > 0
+    ? t("donationSummaryShort", { amount: formatCompactUsd(donationSummary.totalUsd), donors: donationSummary.donorCount })
+    : acceptsDonations
+      ? t("acceptsDonations")
+      : null;
+  const round = donationSummary?.maEarth?.rounds.at(-1);
 
   return (
     <button
@@ -102,11 +116,18 @@ export function ProjectListItem({
         </span>
         {/* Mobile: steward · place. Desktop: short description. */}
         <span className="mt-0.5 truncate text-xs leading-snug text-muted-foreground sm:hidden">
-          {[steward, place].filter(Boolean).join(" · ")}
+          {[steward, place, donationLabel].filter(Boolean).join(" · ")}
         </span>
         {record.shortDescription ? (
           <span className="mt-0.5 hidden truncate text-xs leading-snug text-muted-foreground sm:block">
             {record.shortDescription}
+          </span>
+        ) : null}
+        {donationLabel ? (
+          <span className="mt-1 hidden items-center gap-1.5 truncate text-xs font-medium text-primary sm:flex">
+            <HeartIcon className="h-3 w-3 shrink-0" aria-hidden />
+            <span className="truncate">{donationLabel}</span>
+            {round ? <span className="rounded-full bg-foreground px-1.5 py-0.5 text-[10px] text-background">{t("round", { round })}</span> : null}
           </span>
         ) : null}
       </span>

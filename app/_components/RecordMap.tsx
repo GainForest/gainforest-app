@@ -108,10 +108,15 @@ export function RecordMap({
   records,
   kind,
   onOpen,
+  timeBounds,
 }: {
   records: ExplorerRecord[];
   kind: RecordKind;
   onOpen: (r: ExplorerRecord) => void;
+  /** Optional axis bounds for the floating timeline. BioBlitz uses this so the
+   *  scrubber always represents the whole selected round, not only the days
+   *  that already have uploads. */
+  timeBounds?: { start: string; end: string };
 }) {
   const t = useTranslations("marketplace.map");
   const elRef = useRef<HTMLDivElement>(null);
@@ -540,8 +545,11 @@ export function RecordMap({
     }));
     timed.sort((a, b) => a.t - b.t);
 
-    const min = timed.length ? timed[0]!.t : 0;
-    const max = timed.length ? timed[timed.length - 1]!.t : 0;
+    const forcedMin = timeBounds ? Date.parse(timeBounds.start) : Number.NaN;
+    const forcedMax = timeBounds ? Date.parse(timeBounds.end) : Number.NaN;
+    const hasForcedBounds = Number.isFinite(forcedMin) && Number.isFinite(forcedMax) && forcedMax > forcedMin;
+    const min = hasForcedBounds ? forcedMin : timed.length ? timed[0]!.t : 0;
+    const max = hasForcedBounds ? forcedMax : timed.length ? timed[timed.length - 1]!.t : 0;
     const timelineEnabled = timed.length >= MIN_TIMELINE_POINTS && max > min;
 
     if (timelineEnabled) {
@@ -587,7 +595,7 @@ export function RecordMap({
     if (points.length > 0 && !userMovedRef.current) fitTo(points, false);
     if (timelineEnabled) syncHeadUi(1);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [points, recordById, ready]);
+  }, [points, recordById, ready, timeBounds]);
 
   // ── Play / pause ───────────────────────────────────────────────────────────
   function play() {

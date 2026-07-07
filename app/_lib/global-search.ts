@@ -45,7 +45,7 @@ export type GlobalSearchHit = {
 };
 
 /** One group of results, in display order. */
-export type GlobalSearchSection = {
+type GlobalSearchSection = {
   kind: GlobalSearchKind;
   hits: GlobalSearchHit[];
 };

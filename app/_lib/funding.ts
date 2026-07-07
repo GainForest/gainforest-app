@@ -99,7 +99,7 @@ type LinkEvmNode = {
 };
 
 /** Fetch the linked EVM wallets for a DID, shaped as EvmLink[]. */
-export async function fetchEvmLinks(did: string): Promise<EvmLink[]> {
+async function fetchEvmLinks(did: string): Promise<EvmLink[]> {
   if (!did) return [];
   const response = await fetch(INDEXER_URL, {
     method: "POST",

@@ -5,7 +5,7 @@ import ts from "typescript";
 const projectRoot = process.cwd();
 const locales = ["es", "id", "pt", "sw"];
 const allLocales = ["en", ...locales];
-const namespaces = ["root", "bumicert", "common", "legacy", "marketplace", "modals", "privacy", "upload"];
+const namespaces = ["root", "bumicert", "cart", "common", "legacy", "marketplace", "modals", "privacy", "tainaGuide", "upload"];
 
 const allowedExactValues = new Set([
   "",
@@ -31,6 +31,7 @@ const allowedExactValues = new Set([
   "Telegram",
   "USDC",
   "Base",
+  "Ethereum",
   "DBH",
   "DBH (cm)",
   "PDF",
@@ -43,6 +44,10 @@ const allowedExactValues = new Set([
   "GeoJSON",
   "KoboToolbox",
   "AudioMoth",
+  "AudioMoth — GainForest",
+  "Firmware",
+  "Firmware: {firmware}",
+  "UTC",
   "Hz",
   "kHz",
   "Latitude",

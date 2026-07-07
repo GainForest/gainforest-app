@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * WagmiProvider — configures wallet connection for Base mainnet.
+ * WagmiProvider — configures wallet connection for Ethereum mainnet.
  *
  * Uses RainbowKit's getDefaultConfig which bundles WalletConnect,
  * MetaMask, Coinbase Wallet, Rainbow, and other popular wallets.
@@ -15,7 +15,7 @@
  */
 
 import { createStorage, WagmiProvider as WagmiProviderBase } from "wagmi";
-import { base } from "wagmi/chains";
+import { mainnet } from "wagmi/chains";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   getDefaultConfig,
@@ -55,7 +55,7 @@ function WagmiClientProvider({ children }: { children: React.ReactNode }) {
       getDefaultConfig({
         appName: "GainForest",
         projectId: WALLETCONNECT_PROJECT_ID,
-        chains: [base],
+        chains: [mainnet],
         ssr: true,
         storage: createStorage({ storage: getWalletStorage() }),
       }),

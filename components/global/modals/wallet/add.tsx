@@ -8,19 +8,26 @@
  *   repo          — organization repo for group-owned wallet links
  *   existingName  — pre-fills the wallet label field (e.g. when editing an existing wallet)
  *   existingRkey  — informational only; re-link always creates a fresh record
- *   onBack / onSuccess — navigation callbacks (push/pop handled by the caller)
+ *   onBack / onSuccess — navigation callbacks (push/pop handled by the caller);
+ *                        onSuccess receives the created link record URI when available
  *
  * States:
- *   • No wallet connected  → prompt to connect (WalletIcon + description + Connect button)
- *   • Wrong network        → connected address shown, Switch to Base CTA
- *   • Ready to sign        → label field + Sign & Link button
+ *   • No wallet connected  → create a new wallet (WaaP: Bluesky/email, no
+ *     extension needed) or connect an existing one (RainbowKit). The handle
+ *     hint is shown BEFORE the WaaP card opens — WaaP only launches on an
+ *     explicit click, never automatically over this modal.
+ *   • Wrong network        → connected address shown, Switch to Ethereum CTA
+ *   • Ready to sign        → label field + Sign & Link button; wallets created
+ *     through WaaP sign & link automatically (auto-attestation)
  *   • Success              → confirmation message
  */
 
-import { useState } from "react";
-import { useAccount, useSwitchChain, useDisconnect } from "wagmi";
-import { base } from "wagmi/chains";
+import { useEffect, useRef, useState } from "react";
+import { useAccount, useConnect, useSwitchChain, useDisconnect } from "wagmi";
+import { mainnet } from "wagmi/chains";
 import { useConnectModal } from "@rainbow-me/rainbowkit";
+import { useTranslations } from "next-intl";
+import { forceHideWaaPUi, getWaaPConnector, onWaaPDismissed, prewarmWaaP } from "@/lib/waap/connector";
 import { useModal } from "@/components/ui/modal/context";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -34,9 +41,34 @@ import {
 import { useWalletAttestation } from "@/hooks/useWalletAttestation";
 import {
   CheckCircle2Icon,
+  CheckIcon,
+  CopyIcon,
   WalletIcon,
   ArrowRightIcon,
+  Loader2Icon,
+  SparklesIcon,
 } from "lucide-react";
+import type { AuthSession } from "@/app/_lib/auth";
+
+/** The signed-in viewer's handle, fetched once — shown as a hint so the user
+ *  knows exactly which Bluesky account to type into WaaP's sign-in. */
+function useViewerHandle(): string | null {
+  const [handle, setHandle] = useState<string | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/session")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((json: { session?: AuthSession } | null) => {
+        const session = json?.session;
+        if (!cancelled && session?.isLoggedIn && session.handle) setHandle(session.handle);
+      })
+      .catch(() => undefined);
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+  return handle;
+}
 
 export interface AddWalletModalProps {
   /** The account DID the wallet links to. */
@@ -48,7 +80,8 @@ export interface AddWalletModalProps {
   /** Passed for context only — re-link still creates a fresh record. */
   existingRkey?: string;
   onBack: () => void | Promise<void>;
-  onSuccess: () => void | Promise<void>;
+  /** Called after the wallet is linked; receives the link record URI when available. */
+  onSuccess: (attestationUri?: string | null) => void | Promise<void>;
 }
 
 export function AddWalletModal({
@@ -58,21 +91,96 @@ export function AddWalletModal({
   onBack,
   onSuccess,
 }: AddWalletModalProps) {
+  const t = useTranslations("modals.walletCreate");
   const { stack, hide, popModal } = useModal();
   const { address, chainId, isConnected } = useAccount();
+  const { connectAsync } = useConnect();
   const { switchChain, isPending: isSwitching } = useSwitchChain();
   const { disconnect } = useDisconnect();
   const { openConnectModal } = useConnectModal();
-  const { status, error, linkWallet, reset } = useWalletAttestation(did, repo ? { repo } : undefined);
+  const { status, error, attestationUri, linkWallet, reset } = useWalletAttestation(did, repo ? { repo } : undefined);
 
-  const isCorrectNetwork = chainId === base.id;
+  const isCorrectNetwork = chainId === mainnet.id;
   const isSuccess = status === "success";
 
   const [name, setName] = useState(existingName ?? "");
+  const [isCreating, setIsCreating] = useState(false);
+  const [createError, setCreateError] = useState<string | null>(null);
+  const viewerHandle = useViewerHandle();
+  const [handleCopied, setHandleCopied] = useState(false);
+
+  const copyHandle = async () => {
+    if (!viewerHandle) return;
+    try {
+      await navigator.clipboard.writeText(viewerHandle);
+      setHandleCopied(true);
+      setTimeout(() => setHandleCopied(false), 2000);
+    } catch {
+      // Clipboard unavailable — the handle is still visible to copy manually.
+    }
+  };
+  // Wallets created through WaaP sign & link automatically — track that the
+  // connection came from the create flow, and that we only auto-trigger once.
+  const [viaWaaP, setViaWaaP] = useState(false);
+  const autoLinkStartedRef = useRef(false);
+  const creationDoneRef = useRef(false);
+
+  // Load the WaaP iframe as soon as the modal opens — its handshake message
+  // is fired once without retry, so it must already be loaded when the user
+  // clicks "continue" (see prewarmWaaP for the gory details).
+  useEffect(() => {
+    prewarmWaaP();
+  }, []);
+
+  const handleCreateWallet = async () => {
+    if (isCreating) return;
+    setIsCreating(true);
+    setCreateError(null);
+    creationDoneRef.current = false;
+    // WaaP's login() promise never settles when its card is dismissed — watch
+    // the dismissal ourselves so this modal never gets stuck disabled.
+    const unsubscribe = onWaaPDismissed(() => {
+      if (!creationDoneRef.current) {
+        setIsCreating(false);
+        forceHideWaaPUi();
+      }
+    });
+    try {
+      await connectAsync({ connector: getWaaPConnector(), chainId: mainnet.id });
+      setViaWaaP(true);
+    } catch {
+      setCreateError(t("error"));
+      // Never leave WaaP's full-screen overlay wedged over the page.
+      forceHideWaaPUi();
+    } finally {
+      creationDoneRef.current = true;
+      unsubscribe();
+      setIsCreating(false);
+    }
+  };
+
+  // Auto-attestation: once a WaaP-created wallet is connected on Ethereum, sign &
+  // link it without another button press. Runs once; a rejected signature
+  // falls back to the regular "Try Again" button. The short delay lets WaaP's
+  // login card finish closing first — firing the sign request immediately can
+  // race the card's pending hide event, which would hide the signing prompt
+  // the moment it appears.
+  useEffect(() => {
+    if (!viaWaaP || autoLinkStartedRef.current) return;
+    if (!isConnected || !isCorrectNetwork || !address || status !== "idle") return;
+    autoLinkStartedRef.current = true;
+    const label = name.trim() || t("defaultLabel");
+    setName(label);
+    const timer = setTimeout(() => {
+      void linkWallet(label);
+    }, 800);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [viaWaaP, isConnected, isCorrectNetwork, address, status]);
 
   const handleDone = () => {
     reset();
-    onSuccess();
+    onSuccess(attestationUri);
   };
 
   const handleBack = () => {
@@ -117,13 +225,34 @@ export function AddWalletModal({
               <WalletIcon className="size-6 text-muted-foreground" />
             </div>
             <div className="text-center space-y-1">
-              <p className="text-sm font-medium text-foreground">Connect a wallet</p>
-              <p className="text-xs text-muted-foreground">
-                We&rsquo;ll ask you to sign a message to prove ownership. No transaction will be sent.
-              </p>
+              <p className="text-sm font-medium text-foreground">{t("createTitle")}</p>
+              <p className="text-xs text-muted-foreground">{t("createHint")}</p>
             </div>
-            <Button className="w-full" onClick={() => openConnectModal?.()}>
-              Connect Wallet
+            {createError ? <p className="text-sm text-destructive text-center">{createError}</p> : null}
+            {viewerHandle ? (
+              <div className="flex w-full items-center gap-2 rounded-md bg-muted px-3 py-2">
+                <p className="min-w-0 flex-1 text-xs text-muted-foreground">
+                  {t.rich("handleHint", {
+                    handle: () => <span className="font-mono font-medium text-foreground break-all">{viewerHandle}</span>,
+                  })}
+                </p>
+                <button
+                  type="button"
+                  onClick={() => void copyHandle()}
+                  className="flex shrink-0 items-center gap-1 rounded-md border border-input px-2 py-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                  aria-label={t("copyHandle")}
+                >
+                  {handleCopied ? <CheckIcon className="size-3 text-primary" aria-hidden /> : <CopyIcon className="size-3" aria-hidden />}
+                  {handleCopied ? t("copied") : t("copy")}
+                </button>
+              </div>
+            ) : null}
+            <Button className="w-full" onClick={() => void handleCreateWallet()} disabled={isCreating}>
+              {isCreating ? <Loader2Icon className="size-3.5 animate-spin" /> : <SparklesIcon className="size-3.5" />}
+              {isCreating ? t("creating") : t("continueButton")}
+            </Button>
+            <Button variant="outline" className="w-full" onClick={() => openConnectModal?.()} disabled={isCreating}>
+              {t("connectExisting")}
               <ArrowRightIcon className="size-3.5" />
             </Button>
           </div>
@@ -148,14 +277,14 @@ export function AddWalletModal({
               </button>
             </div>
             <p className="text-xs text-muted-foreground">
-              GainForest requires Base network. Switch to continue.
+              GainForest requires Ethereum network. Switch to continue.
             </p>
             <Button
-              onClick={() => switchChain({ chainId: base.id })}
+              onClick={() => switchChain({ chainId: mainnet.id })}
               disabled={isSwitching}
               className="w-full"
             >
-              {isSwitching ? "Switching…" : "Switch to Base"}
+              {isSwitching ? "Switching…" : "Switch to Ethereum"}
             </Button>
           </div>
         )}
@@ -169,7 +298,7 @@ export function AddWalletModal({
                 <span className="text-sm font-mono text-foreground">
                   {address?.slice(0, 6)}…{address?.slice(-4)}
                 </span>
-                <span className="text-xs text-muted-foreground">Base</span>
+                <span className="text-xs text-muted-foreground">Ethereum</span>
               </div>
               <div className="flex items-center gap-2">
                 {openConnectModal && (
@@ -206,7 +335,7 @@ export function AddWalletModal({
               />
             </div>
 
-            {error && <p className="text-sm text-destructive">Could not link this wallet. Please try again.</p>}
+            {error && <p className="text-sm text-destructive">{error}</p>}
 
             <Button
               onClick={() => linkWallet(name.trim() || undefined)}

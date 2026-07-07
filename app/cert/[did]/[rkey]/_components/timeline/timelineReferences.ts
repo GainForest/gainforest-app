@@ -7,7 +7,7 @@ import type {
   UploadTreeDatasetRecord,
 } from "@/app/_lib/indexer";
 import { greenGlobeTreePreviewHref } from "@/app/_lib/urls";
-import { formatDate, formatNumber } from "../../../../../_lib/format";
+import { formatDate } from "../../../../../_lib/format";
 import { parseAtUri } from "./atUri";
 import { parseAttachmentContent } from "./attachmentContentParser";
 import { getOccurrenceDatasetRef } from "./treeEvidenceClassification";
@@ -168,7 +168,7 @@ export function collectTimelineReferenceLookupInput(
   };
 }
 
-export function getDatasetEvidencePurposes(entries: TimelineAttachmentItem[]): Map<string, "tree" | "biodiversity"> {
+function getDatasetEvidencePurposes(entries: TimelineAttachmentItem[]): Map<string, "tree" | "biodiversity"> {
   const purposes = new Map<string, "tree" | "biodiversity">();
   for (const entry of entries) {
     const normalized = entry.record.contentType?.trim().toLowerCase();

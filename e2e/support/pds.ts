@@ -4,7 +4,7 @@ import { getE2EEnv } from "./env";
 import { readDisposableAccountMetadata } from "./disposable-email";
 import { readCgsOrgMetadata } from "./cgs-org";
 
-export const E2E_PDS_COLLECTIONS = {
+const E2E_PDS_COLLECTIONS = {
   claimActivity: "org.hypercerts.claim.activity",
   projectCollection: "org.hypercerts.collection",
   certifiedLocation: "app.certified.location",
@@ -12,7 +12,7 @@ export const E2E_PDS_COLLECTIONS = {
   audioRecording: "app.gainforest.ac.audio",
 } as const;
 
-export const createdRecordsPath = "e2e/.auth/created-records.jsonl";
+const createdRecordsPath = "e2e/.auth/created-records.jsonl";
 
 export type PdsRepoRecord = {
   uri: string;

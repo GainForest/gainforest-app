@@ -12,10 +12,6 @@ export const CONTENT_TYPE_NATURE_DATASET = "biodiversity-dataset";
 // A raw observations spreadsheet stored as a single file attachment, grouped
 // under Biodiversity on the timeline.
 export const CONTENT_TYPE_NATURE_OBSERVATIONS = "biodiversity-observations";
-// A text-only progress update. The body is stored in the attachment's
-// `description` as a `pub.leaflet.pages.linearDocument`; no content items.
-export const CONTENT_TYPE_UPDATE = "update";
-
 export type TimelineSourceData = {
   audio: ManagedAudio[];
   occurrences: OccurrenceRecord[];
@@ -31,7 +27,7 @@ export type TimelineMutationPermission = {
   reason: string | null;
 };
 
-export type EvidenceTab = "update" | "audio" | "trees" | "nature" | "files";
+export type EvidenceTab = "image" | "audio" | "trees" | "nature" | "files";
 
 export type EvidenceSubmitter = (
   drafts: AttachmentDraft | AttachmentDraft[],

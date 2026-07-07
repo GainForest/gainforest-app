@@ -1,4 +1,5 @@
 import {
+  AudioLinesIcon,
   BinocularsIcon,
   BotIcon,
   Building2Icon,
@@ -125,6 +126,14 @@ export const NAV_ITEMS: NavSection[] = [
         Icon: BotIcon,
         href: "/taina",
         pathCheck: { startsWith: "/taina" },
+      },
+      {
+        kind: "leaf",
+        id: "audiomoth",
+        text: "AudioMoth",
+        Icon: AudioLinesIcon,
+        href: "/audiomoth",
+        pathCheck: { startsWith: "/audiomoth" },
       },
     ],
   },

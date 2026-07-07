@@ -17,7 +17,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ModalContent, ModalDescription, ModalFooter, ModalHeader, ModalTitle } from "@/components/ui/modal/modal";
 import { useModal } from "@/components/ui/modal/context";
-import { BumicertCardSkeleton, BumicertCardVisual } from "@/components/bumicert/BumicertCard";
+import { BumicertCardVisual } from "@/components/bumicert/BumicertCard";
 import type { BumicertRecord } from "@/app/_lib/indexer";
 import { localBumicertHref } from "@/app/_lib/urls";
 import { cn } from "@/lib/utils";
@@ -377,16 +377,6 @@ export function ManageBumicertsClient({ target, did, ownerIdentifier, bumicerts,
           <RecentBumicerts target={target} bumicerts={bumicerts} did={did} ownerIdentifier={ownerIdentifier} />
         )}
       </div>
-    </div>
-  );
-}
-
-export function ManageBumicertsSkeleton() {
-  return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-      {Array.from({ length: 8 }).map((_, index) => (
-        <BumicertCardSkeleton key={index} />
-      ))}
     </div>
   );
 }

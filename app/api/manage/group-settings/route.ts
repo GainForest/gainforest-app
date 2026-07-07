@@ -5,7 +5,12 @@ import { fetchCgsMembersWithCookie, type CgsServerMember, type CgsServerRole } f
 import { fetchIndexedCertifiedProfileCards, type IndexedCertifiedProfileCard } from "@/app/_lib/indexer";
 import { fetchBlueskyProfileCard } from "@/app/_lib/bluesky-profile";
 import { loadFastDataCouncilState, type DataCouncilState } from "@/app/_lib/data-council";
-import { listPendingGroupInvitationsForRepo, type GroupInvitation } from "@/app/_lib/cgs-invitations";
+import {
+  listAcceptedGroupInvitationEmailsForRepo,
+  listPendingGroupInvitationsForRepo,
+  type GroupInvitation,
+} from "@/app/_lib/cgs-invitations";
+import { isEpdsIdentity, resolveDidIdentity, type DidIdentity } from "@/app/_lib/did-identity";
 
 export const runtime = "nodejs";
 
@@ -19,6 +24,11 @@ type AccountCardProfile = {
 type GroupSettingsResponse = {
   members: CgsServerMember[];
   profiles: AccountCardProfile[];
+  /**
+   * Member DID → email for ePDS accounts. Only present when the requesting
+   * user is a member of the organization — emails are never public info.
+   */
+  memberEmails: Record<string, string>;
   invitations: GroupInvitation[];
   dataCouncil: DataCouncilState | null;
   dataCouncilError: string | null;
@@ -30,9 +40,19 @@ function jsonError(message: string, status: number) {
   return Response.json({ error: message }, { status, headers: { "cache-control": "no-store" } });
 }
 
+async function resolveMemberIdentities(members: CgsServerMember[]): Promise<Map<string, DidIdentity>> {
+  const entries = await Promise.all(
+    members.map(async (member) =>
+      [member.did, await resolveDidIdentity(member.did).catch((): DidIdentity => ({ handle: null, pdsHost: null }))] as const,
+    ),
+  );
+  return new Map(entries);
+}
+
 async function buildMemberProfiles(
   members: CgsServerMember[],
   cards: Map<string, IndexedCertifiedProfileCard>,
+  identities: Map<string, DidIdentity>,
 ): Promise<AccountCardProfile[]> {
   // Members without an indexed Certified profile may be external Bluesky
   // accounts; look those up on the Bluesky appview so they render with a name
@@ -51,10 +71,38 @@ async function buildMemberProfiles(
     const bluesky = blueskyByDid.get(member.did) ?? null;
     const displayName = indexed?.displayName?.trim() || bluesky?.displayName?.trim() || null;
     const avatar = indexed?.avatarUrl?.trim() || bluesky?.avatarUrl?.trim() || null;
-    const handle = bluesky?.handle?.trim() || null;
+    const handle = identities.get(member.did)?.handle?.trim() || bluesky?.handle?.trim() || null;
     if (!displayName && !avatar && !handle) return [];
     return [{ did: member.did, handle, displayName, avatar }];
   });
+}
+
+/**
+ * Email per ePDS member, sourced from accepted email invitations (plus the
+ * viewer's own session email). Only built for verified members — the caller
+ * must pass `isMember` computed from the CGS member list.
+ */
+function buildMemberEmails({
+  members,
+  identities,
+  acceptedEmails,
+  userDid,
+  userEmail,
+}: {
+  members: CgsServerMember[];
+  identities: Map<string, DidIdentity>;
+  acceptedEmails: Map<string, string>;
+  userDid: string | null;
+  userEmail: string | null;
+}): Record<string, string> {
+  const memberEmails: Record<string, string> = {};
+  for (const member of members) {
+    const identity = identities.get(member.did);
+    if (!identity || !isEpdsIdentity(identity)) continue;
+    const email = (member.did === userDid ? userEmail : null) ?? acceptedEmails.get(member.did) ?? null;
+    if (email) memberEmails[member.did] = email;
+  }
+  return memberEmails;
 }
 
 function canWriteDataCouncil(members: CgsServerMember[], userDid: string | null): boolean {
@@ -81,7 +129,15 @@ export async function GET(request: Request) {
     const userDid = session.isLoggedIn ? session.did : null;
     const memberDids = members.map((member) => member.did);
 
+    const isMember = Boolean(userDid && members.some((member) => member.did === userDid));
+
     const profilesPromise = fetchIndexedCertifiedProfileCards(memberDids).catch(() => new Map<string, IndexedCertifiedProfileCard>());
+    const identitiesPromise = resolveMemberIdentities(members);
+    // Emails are private: only look them up when the requester is a verified
+    // member of this organization.
+    const acceptedEmailsPromise = isMember
+      ? listAcceptedGroupInvitationEmailsForRepo(repo).catch(() => new Map<string, string>())
+      : Promise.resolve(new Map<string, string>());
     const canWrite = canWriteDataCouncil(members, userDid);
     const invitationsPromise = canWrite
       ? listPendingGroupInvitationsForRepo(repo).catch(() => [])
@@ -99,10 +155,25 @@ export async function GET(request: Request) {
         )
       : Promise.resolve({ state: null, error: null });
 
-    const [profilesByDid, invitations, dataCouncilResult] = await Promise.all([profilesPromise, invitationsPromise, dataCouncilPromise]);
+    const [profilesByDid, identities, acceptedEmails, invitations, dataCouncilResult] = await Promise.all([
+      profilesPromise,
+      identitiesPromise,
+      acceptedEmailsPromise,
+      invitationsPromise,
+      dataCouncilPromise,
+    ]);
     const body: GroupSettingsResponse = {
       members,
-      profiles: await buildMemberProfiles(members, profilesByDid),
+      profiles: await buildMemberProfiles(members, profilesByDid, identities),
+      memberEmails: isMember
+        ? buildMemberEmails({
+            members,
+            identities,
+            acceptedEmails,
+            userDid,
+            userEmail: session.isLoggedIn ? session.email?.trim() || null : null,
+          })
+        : {},
       invitations,
       dataCouncil: dataCouncilResult.state,
       dataCouncilError: dataCouncilResult.error,

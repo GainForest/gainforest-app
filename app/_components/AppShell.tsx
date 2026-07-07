@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import type { AuthSession } from "../_lib/auth";
 import { BioblitzPromoBanner } from "./BioblitzPromoBanner";
+import { FloatingTainaGuide } from "./FloatingTainaGuide";
 import { ChromeErrorBoundary } from "./ChromeErrorBoundary";
 import { HeaderSlotsProvider } from "./HeaderSlots";
 import { MobileNavDrawer } from "./shell/MobileNavDrawer";
@@ -91,6 +92,9 @@ export function AppShell({
             {children}
           </main>
         </div>
+        <ChromeErrorBoundary name="floating-taina">
+          <FloatingTainaGuide />
+        </ChromeErrorBoundary>
       </div>
     </HeaderSlotsProvider>
   );

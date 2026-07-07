@@ -39,7 +39,7 @@ function newCertUrl(options: FillCertFormOptions): string {
     : `${basePath}/certs/new?noProject=1`;
 }
 
-export async function expectCertPublishValidationEdgeCases(page: Page, testInfo: TestInfo): Promise<void> {
+async function expectCertPublishValidationEdgeCases(page: Page, testInfo: TestInfo): Promise<void> {
   await page.getByRole("button", { name: publishButtonName }).click();
   await expect(page.getByText(/add a title with at least 4 characters/i).first()).toBeVisible({ timeout: 10_000 });
   await expect(page.getByText(/pick at least one type of work/i).first()).toBeVisible();

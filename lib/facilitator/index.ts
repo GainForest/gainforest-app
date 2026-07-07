@@ -1,7 +1,7 @@
 import { createPublicClient, createWalletClient, http } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
-import { base } from "viem/chains";
-import { USDC_ABI, USDC_CONTRACT } from "./usdc";
+import { mainnet } from "viem/chains";
+import { RPC_URL, USDC_ABI, USDC_CONTRACT } from "./usdc";
 import { splitSignature, type Eip3009Authorization } from "./eip3009";
 
 function getRequiredEnv(name: string): string {
@@ -16,15 +16,15 @@ function getFacilitatorAccount() {
 
 function getPublicClient() {
   return createPublicClient({
-    chain: base,
-    transport: http(process.env.BASE_RPC_URL || "https://mainnet.base.org"),
+    chain: mainnet,
+    transport: http(process.env.ETHEREUM_RPC_URL || process.env.MAINNET_RPC_URL || RPC_URL),
   });
 }
 
 function getWalletClient() {
   return createWalletClient({
-    chain: base,
-    transport: http(process.env.BASE_RPC_URL || "https://mainnet.base.org"),
+    chain: mainnet,
+    transport: http(process.env.ETHEREUM_RPC_URL || process.env.MAINNET_RPC_URL || RPC_URL),
     account: getFacilitatorAccount(),
   });
 }

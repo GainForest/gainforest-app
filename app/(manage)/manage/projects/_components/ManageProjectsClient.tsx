@@ -9,6 +9,7 @@ import { parseAsString, parseAsStringEnum, useQueryStates } from "nuqs";
 import {
   BadgeCheckIcon,
   BinocularsIcon,
+  GlobeIcon,
   CalendarDaysIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
@@ -276,12 +277,14 @@ export function ManageProjectsClient({ target }: { target: ManageTarget }) {
                     className="min-w-0 flex-1 truncate border-0 bg-transparent px-3 py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground"
                   />
                 </div>
-                <Button type="button" onClick={openNew} disabled={!createPermission.allowed} title={createPermission.reason ?? undefined} className="shrink-0">
+                <Button type="button" onClick={openNew} disabled={!createPermission.allowed} title={createPermission.reason ?? undefined} className="shrink-0" data-taina="add-project">
                   <CirclePlusIcon />
                   Add project
                 </Button>
               </div>
             ) : null}
+
+            {projects.length > 0 && !loading ? <PublishCard target={target} /> : null}
 
             {loading ? (
               <ProjectsSkeleton />
@@ -319,6 +322,100 @@ export function ManageProjectsClient({ target }: { target: ManageTarget }) {
           </>
         )}
       </div>
+    </div>
+  );
+}
+
+// Self-serve publishing: the public explore pages only list accounts holding
+// a featured badge, so freshly created organizations are invisible there
+// until an owner/admin publishes. The button awards the GainForest badge to
+// the whole account through the server (see /api/manage/publish), which makes
+// this organization and all of its projects appear on the explore pages.
+function PublishCard({ target }: { target: ManageTarget }) {
+  const t = useTranslations("marketplace.manageProjects.publish");
+  const [status, setStatus] = useState<"loading" | "idle" | "publishing" | "published" | "justPublished" | "unavailable" | "hidden">("loading");
+  const [error, setError] = useState<string | null>(null);
+  // Publishing exposes the whole organization publicly — owner/admin only.
+  const allowed = target.kind !== "group" || target.role === "owner" || target.role === "admin";
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch(manageApiHref("/api/manage/publish", target), { cache: "no-store" })
+      .then((response) => (response.ok ? response.json() : null))
+      .then((data: { available?: boolean; published?: boolean } | null) => {
+        if (cancelled) return;
+        if (!data) setStatus("hidden");
+        else if (!data.available) setStatus("unavailable");
+        else setStatus(data.published ? "published" : "idle");
+      })
+      .catch(() => {
+        if (!cancelled) setStatus("hidden");
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [target]);
+
+  const publish = async () => {
+    if (!allowed || status === "publishing") return;
+    setStatus("publishing");
+    setError(null);
+    try {
+      const response = await fetch(manageApiHref("/api/manage/publish", target), { method: "POST", cache: "no-store" });
+      const data = (await response.json().catch(() => null)) as { published?: boolean; error?: string } | null;
+      if (!response.ok || !data?.published) throw new Error(data?.error || t("error"));
+      setStatus("justPublished");
+    } catch (caught) {
+      setError((caught as Error).message || t("error"));
+      setStatus("idle");
+    }
+  };
+
+  if (status === "loading" || status === "hidden") return null;
+
+  if (status === "published" || status === "justPublished") {
+    return (
+      <div className="flex items-center gap-3 rounded-2xl border border-primary/25 bg-primary/5 px-4 py-3">
+        <BadgeCheckIcon className="h-5 w-5 shrink-0 text-primary" />
+        <div className="min-w-0">
+          <p className="text-sm font-medium text-foreground">{t("publishedTitle")}</p>
+          <p className="text-xs text-muted-foreground">
+            {status === "justPublished" ? t("justPublishedHint") : t("publishedHint")}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="rounded-2xl border border-border bg-background/70 px-4 py-3">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex min-w-0 items-start gap-3">
+          <GlobeIcon className="mt-0.5 h-5 w-5 shrink-0 text-muted-foreground" />
+          <div className="min-w-0">
+            <p className="text-sm font-medium text-foreground">{t("title")}</p>
+            <p className="text-xs text-muted-foreground">{t("description")}</p>
+          </div>
+        </div>
+        <Button
+          type="button"
+          onClick={() => void publish()}
+          disabled={!allowed || status === "publishing" || status === "unavailable"}
+          title={!allowed ? t("memberBlocked") : status === "unavailable" ? t("unavailable") : undefined}
+          className="shrink-0"
+        >
+          {status === "publishing" ? <Loader2Icon className="animate-spin" /> : <GlobeIcon />}
+          {status === "publishing" ? t("publishing") : t("action")}
+        </Button>
+      </div>
+      {!allowed ? <p className="mt-2 text-xs text-muted-foreground">{t("memberBlocked")}</p> : null}
+      {allowed && status === "unavailable" ? <p className="mt-2 text-xs text-muted-foreground">{t("unavailable")}</p> : null}
+      {error ? (
+        <p className="mt-2 flex items-center gap-1.5 text-xs font-medium text-destructive">
+          <TriangleAlertIcon className="h-3.5 w-3.5" />
+          {error}
+        </p>
+      ) : null}
     </div>
   );
 }
@@ -384,6 +481,7 @@ function ProjectCard({
       exit={{ opacity: 0, scale: 0.98 }}
       transition={{ duration: 0.35, delay: Math.min(index, 10) * 0.025, ease: [0.25, 0.1, 0.25, 1] }}
       aria-label={t("viewProjectFor", { title: project.title })}
+      data-taina="open-project"
       className={cn(
         "group flex cursor-pointer gap-3 rounded-2xl bg-card/45 px-1 py-3 transition-colors duration-300 hover:bg-surface-sunken focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/45 sm:gap-4 sm:px-2 sm:py-4",
       )}
@@ -433,6 +531,7 @@ function ProjectCard({
             disabled={disabled}
             title={disabledReason ?? undefined}
             aria-label={t("editProjectFor", { title: project.title })}
+            data-taina="edit-project"
           >
             <SquarePenIcon className="size-3.5" />
             {t("editProject")}
@@ -971,7 +1070,7 @@ function ProjectEditor({
       ) : null}
 
       <div className="mt-10 flex flex-wrap items-center justify-between gap-3">
-        <Button type="button" variant="destructive" size="lg" onClick={() => void handleDeleteProject()} disabled={saving || !deletePermission.allowed} title={deletePermission.reason ?? undefined}>
+        <Button type="button" variant="destructive" size="lg" onClick={() => void handleDeleteProject()} disabled={saving || !deletePermission.allowed} title={deletePermission.reason ?? undefined} data-taina="delete-project">
           <Trash2Icon className="size-4" />
           {t("delete")}
         </Button>
@@ -1915,7 +2014,7 @@ function EmptyState({ hasQuery, onCreate }: { hasQuery: boolean; onCreate: () =>
         {hasQuery ? "Try another search term or clear the search field." : "Create your first project page with a name, summary, story, and optional photo."}
       </p>
       {!hasQuery ? (
-        <Button type="button" variant="outline" size="sm" onClick={onCreate} className="mt-5">
+        <Button type="button" variant="outline" size="sm" onClick={onCreate} className="mt-5" data-taina="add-project">
           <CirclePlusIcon />
           Add project
         </Button>

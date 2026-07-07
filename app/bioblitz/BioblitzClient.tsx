@@ -32,10 +32,13 @@ import { formatNumber } from "../_lib/format";
 import {
   BIOBLITZ_LINKS,
   BIOBLITZ_PRIZES,
+  bioblitzRounds,
   countdownTo,
+  endedRounds,
   featuredRound,
   fetchCollectorOrgs,
   fetchRoundCollectors,
+  fetchRoundTopLiked,
   roundStatus,
   type BioblitzRound,
   type BoardScope,
@@ -64,6 +67,19 @@ const KNOWN_ORG_TYPES = new Set([
   "academic",
 ]);
 
+type WinnerAccount = {
+  did: string;
+  name: string | null;
+  avatarRef: string | null;
+  count: number;
+};
+
+type PastRoundSummary = {
+  round: BioblitzRound;
+  mostSubmitted: WinnerAccount | null;
+  mostLiked: WinnerAccount | null;
+};
+
 export function BioblitzClient() {
   // Resolve "now"-dependent state after mount so the server-rendered shell
   // can't disagree with the first client paint (countdown / round selection).
@@ -74,16 +90,22 @@ export function BioblitzClient() {
     return () => clearInterval(id);
   }, []);
 
-  // Resolve the featured round, but keep its object identity stable while the
-  // same round stays active — so the once-a-minute `now` tick (which drives the
-  // countdown) doesn't reset the live board to a skeleton every minute.
-  const [round, setRound] = useState<BioblitzRound>(() => featuredRound());
-  useEffect(() => {
-    const next = featuredRound(now ?? Date.now());
-    setRound((prev) => (prev.id === next.id ? prev : next));
-  }, [now]);
+  const snapshotNow = now ?? Date.now();
+  const rounds = useMemo(() => bioblitzRounds(snapshotNow, 0), [snapshotNow]);
+  const currentRound = useMemo(() => featuredRound(snapshotNow), [snapshotNow]);
+  const [selectedRoundId, setSelectedRoundId] = useState<number | null>(null);
+  const round = useMemo(
+    () => rounds.find((item) => item.id === (selectedRoundId ?? currentRound.id)) ?? currentRound,
+    [rounds, selectedRoundId, currentRound],
+  );
 
-  const status = now != null ? roundStatus(round, now) : "live";
+  useEffect(() => {
+    if (selectedRoundId != null && !rounds.some((item) => item.id === selectedRoundId)) {
+      setSelectedRoundId(null);
+    }
+  }, [rounds, selectedRoundId]);
+
+  const status = now != null ? roundStatus(round, now) : roundStatus(round);
 
   const [board, setBoard] = useState<RoundBoard | null>(null);
   const [error, setError] = useState(false);
@@ -92,6 +114,9 @@ export function BioblitzClient() {
   // Organisation membership per collector account, resolved after the board
   // loads and merged in progressively so the standings never wait on it.
   const [orgs, setOrgs] = useState<Map<string, CollectorOrg>>(new Map());
+  const pastRounds = useMemo(() => endedRounds(snapshotNow).slice(0, 4), [snapshotNow]);
+  const pastRoundsKey = pastRounds.map((item) => item.id).join(",");
+  const [pastWinners, setPastWinners] = useState<PastRoundSummary[] | null>(null);
 
   // Reset to the loading state whenever the active round or scope changes.
   useEffect(() => {
@@ -142,7 +167,57 @@ export function BioblitzClient() {
       controller.abort();
       clearInterval(id);
     };
-  }, [round, scope]);
+  }, [round.id, round.start, round.end, scope]);
+
+  useEffect(() => {
+    if (pastRounds.length === 0) {
+      setPastWinners([]);
+      return;
+    }
+    const controller = new AbortController();
+    let cancelled = false;
+    setPastWinners(null);
+    Promise.all(
+      pastRounds.map(async (pastRound): Promise<PastRoundSummary> => {
+        const [pastBoard, liked] = await Promise.all([
+          fetchRoundCollectors(pastRound, "round", controller.signal).catch(() => null),
+          fetchRoundTopLiked(pastRound, 1, controller.signal).catch(() => []),
+        ]);
+        const topCollector = pastBoard?.collectors[0] ?? null;
+        const topLiked = liked[0] ?? null;
+        return {
+          round: pastRound,
+          mostSubmitted: topCollector
+            ? {
+                did: topCollector.did,
+                name: topCollector.displayName,
+                avatarRef: topCollector.avatarRef,
+                count: topCollector.count,
+              }
+            : null,
+          mostLiked: topLiked
+            ? {
+                did: topLiked.record.did,
+                name: topLiked.record.creatorName,
+                avatarRef: topLiked.record.creatorAvatarRef,
+                count: topLiked.likeCount,
+              }
+            : null,
+        };
+      }),
+    )
+      .then((result) => {
+        if (!cancelled) setPastWinners(result);
+      })
+      .catch((err) => {
+        if ((err as Error).name !== "AbortError" && !cancelled) setPastWinners([]);
+      });
+    return () => {
+      cancelled = true;
+      controller.abort();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pastRoundsKey]);
 
   return (
     <>
@@ -152,11 +227,20 @@ export function BioblitzClient() {
       <div className="relative z-10 mx-auto flex w-full max-w-6xl flex-1 flex-col gap-5 px-4 pb-4 pt-[calc(3.5rem+0.75rem)] sm:px-6">
         <HeroBand round={round} status={status} />
 
+        <RoundNavigator
+          rounds={rounds}
+          selectedId={round.id}
+          currentId={currentRound.id}
+          now={snapshotNow}
+          onSelect={(id) => setSelectedRoundId(id === currentRound.id ? null : id)}
+        />
+
         <ProofNote />
 
-        <div className="grid flex-1 gap-4 lg:h-[calc(100dvh-17rem)] lg:flex-none lg:min-h-0 lg:grid-cols-[minmax(0,5fr)_1px_minmax(0,7fr)]">
+        <div className="grid flex-1 gap-4 lg:min-h-[34rem] lg:grid-cols-[minmax(0,5fr)_1px_minmax(0,7fr)]">
           <div className="flex flex-col gap-4 lg:min-h-0">
             <Prizes />
+            <PastWinners rounds={pastRounds} summaries={pastWinners} />
             <Separator />
             <HowItWorks />
             <Separator />
@@ -323,6 +407,70 @@ function StatusChip({ status }: { status: RoundStatus }) {
   );
 }
 
+function RoundNavigator({
+  rounds,
+  selectedId,
+  currentId,
+  now,
+  onSelect,
+}: {
+  rounds: BioblitzRound[];
+  selectedId: number;
+  currentId: number;
+  now: number;
+  onSelect: (id: number) => void;
+}) {
+  const t = useTranslations("marketplace.bioblitz.rounds");
+  const statusT = useTranslations("marketplace.bioblitz.status");
+  const locale = useLocale();
+  const newestFirst = useMemo(() => [...rounds].sort((a, b) => b.id - a.id), [rounds]);
+
+  return (
+    <FadeIn delay={0.03} className="-mt-2">
+      <div className="flex items-center gap-3 overflow-hidden rounded-2xl border border-border/60 bg-background/70 p-2 backdrop-blur">
+        <div className="hidden shrink-0 pl-2 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground sm:block">
+          {t("title")}
+        </div>
+        <div className="flex min-w-0 flex-1 gap-2 overflow-x-auto pb-0.5">
+          {newestFirst.map((item) => {
+            const selected = item.id === selectedId;
+            const isCurrent = item.id === currentId;
+            const itemStatus = roundStatus(item, now);
+            return (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => onSelect(item.id)}
+                aria-pressed={selected}
+                className={`flex min-w-[9rem] shrink-0 flex-col rounded-xl border px-3 py-2 text-left transition-colors ${
+                  selected
+                    ? "border-primary/50 bg-primary/10 text-foreground"
+                    : "border-transparent bg-foreground/5 text-muted-foreground hover:bg-foreground/10 hover:text-foreground"
+                }`}
+              >
+                <span className="flex items-center justify-between gap-2 text-xs font-semibold">
+                  <span className="truncate">{item.label}</span>
+                  {isCurrent ? (
+                    <span className="rounded-full bg-primary/15 px-1.5 py-0.5 text-[10px] text-primary">
+                      {t("current")}
+                    </span>
+                  ) : null}
+                </span>
+                <span className="mt-1 truncate text-[11px] tabular-nums opacity-80">
+                  {formatDateRange(item.start, item.end, locale)}
+                </span>
+                <span className="mt-1 text-[10px] font-medium uppercase tracking-[0.12em] opacity-70">
+                  {statusT(itemStatus)}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    </FadeIn>
+  );
+}
+
 // ── Prizes ───────────────────────────────────────────────────────────────────
 
 function Prizes() {
@@ -380,6 +528,95 @@ function PrizeTile({
       </span>
       <span className="font-instrument text-3xl italic leading-none text-primary">{amount}</span>
       <span className="text-xs font-semibold text-foreground">{title}</span>
+    </div>
+  );
+}
+
+function PastWinners({
+  rounds,
+  summaries,
+}: {
+  rounds: BioblitzRound[];
+  summaries: PastRoundSummary[] | null;
+}) {
+  const t = useTranslations("marketplace.bioblitz.winners");
+  const boardT = useTranslations("marketplace.bioblitz.board");
+  const bestT = useTranslations("marketplace.bioblitz.bestPicture");
+  const locale = useLocale();
+  if (rounds.length === 0) return null;
+  const rows = summaries ?? rounds.map((round) => ({ round, mostSubmitted: null, mostLiked: null }));
+
+  return (
+    <FadeIn delay={0.08}>
+      <Card>
+        <div className="mb-2 flex items-center justify-between gap-2">
+          <SectionTitle icon={<CrownIcon />} title={t("title")} />
+          <span className="rounded-full bg-foreground/5 px-2 py-1 text-[10px] font-medium text-muted-foreground">
+            {t("compact")}
+          </span>
+        </div>
+        <ul className="space-y-1.5">
+          {rows.map((summary) => (
+            <li key={summary.round.id} className="rounded-2xl bg-foreground/5 px-3 py-2">
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-xs font-semibold text-foreground">{summary.round.label}</span>
+                <span className="text-[10px] tabular-nums text-muted-foreground">
+                  {formatDateRange(summary.round.start, summary.round.end, locale)}
+                </span>
+              </div>
+              <div className="mt-1.5 grid gap-1 text-[11px] sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
+                <WinnerPill
+                  icon={<TrophyIcon />}
+                  label={t("mostSubmitted")}
+                  winner={summary.mostSubmitted}
+                  countLabel={summary.mostSubmitted ? boardT("observations", { count: summary.mostSubmitted.count }) : null}
+                  pending={summaries == null ? "…" : t("pending")}
+                />
+                <WinnerPill
+                  icon={<CameraIcon />}
+                  label={t("mostLiked")}
+                  winner={summary.mostLiked}
+                  countLabel={summary.mostLiked ? bestT("likes", { count: summary.mostLiked.count }) : null}
+                  pending={summaries == null ? "…" : t("pending")}
+                />
+              </div>
+            </li>
+          ))}
+        </ul>
+      </Card>
+    </FadeIn>
+  );
+}
+
+function WinnerPill({
+  icon,
+  label,
+  winner,
+  countLabel,
+  pending,
+}: {
+  icon: ReactNode;
+  label: string;
+  winner: WinnerAccount | null;
+  countLabel: string | null;
+  pending: string;
+}) {
+  return (
+    <div className="min-w-0 rounded-xl bg-background/70 px-2.5 py-2">
+      <div className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground [&_svg]:size-3">
+        {icon}
+        <span className="truncate">{label}</span>
+      </div>
+      {winner ? (
+        <div className="mt-1 flex min-w-0 items-center justify-between gap-2">
+          <span className="min-w-0 flex-1 truncate font-medium text-foreground">
+            <AuthorInline did={winner.did} nameOverride={winner.name} avatarRefOverride={winner.avatarRef} />
+          </span>
+          {countLabel ? <span className="shrink-0 text-[10px] text-muted-foreground">{countLabel}</span> : null}
+        </div>
+      ) : (
+        <div className="mt-1 text-xs font-medium text-muted-foreground">{pending}</div>
+      )}
     </div>
   );
 }

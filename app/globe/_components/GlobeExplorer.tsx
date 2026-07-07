@@ -16,7 +16,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { parseAsString, useQueryState } from "nuqs";
 import { AnimatePresence, motion } from "framer-motion";
 import {
@@ -24,33 +24,54 @@ import {
   ArrowUpRightIcon,
   Building2Icon,
   ChevronDownIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  DroneIcon,
   EarthIcon,
   FolderKanbanIcon,
+  HistoryIcon,
   LayersIcon,
+  LeafIcon,
   LocateFixedIcon,
   MapPinnedIcon,
+  MoveHorizontalIcon,
+  MoveVerticalIcon,
+  PauseIcon,
+  PlayIcon,
   SearchIcon,
+  TreePineIcon,
   XIcon,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
-import { countryFlag, formatCountry } from "../../_lib/format";
+import { countryFlag, countryName, formatCountry } from "../../_lib/format";
 import { resolveCertifiedLocationCoords } from "../../_lib/coords";
 import { TrustedByBadges } from "../../_components/TrustedByBadges";
 import { GlobeMap } from "./GlobeMap";
-import { LANDCOVER_LEGEND } from "../_lib/config";
+import { LANDCOVER_LEGEND, ORG_LOCATION_COLOR, PROJECT_SITE_COLOR } from "../_lib/config";
 import {
   fetchGlobeOrganizations,
+  fetchGlobeTreeStats,
+  fetchOrganizationLocationUri,
+  fetchOrganizationSiteProjects,
   fetchOrganizationSites,
   fetchSiteGeoJson,
+  filterPointsWithinBoundaries,
   geojsonBounds,
   mergeBounds,
   pointBounds,
   toFeatures,
 } from "../_lib/data";
-import { fetchGlobalLayers, fetchOrganizationLayers } from "../_lib/layers";
+import {
+  fetchGlobalLayers,
+  fetchOrganizationLayerGroups,
+  fetchOrganizationLayers,
+} from "../_lib/layers";
+import { buildDroneTimeSeries, type DroneTimeSeries } from "../_lib/time-series";
+import { fetchOrganizationTrees, type TreeDetail } from "../_lib/trees";
 import type {
   GlobeLayer,
+  GlobeLayerGroup,
   GlobeOrganization,
   GlobeSite,
   LngLatBounds,
@@ -58,7 +79,7 @@ import type {
 
 const WORLD_BOUNDS: LngLatBounds = [-150, -50, 150, 65];
 
-export type GlobeProjectFocus = {
+type GlobeProjectFocus = {
   title: string;
   /** Project page to link back to. */
   href: string;
@@ -122,6 +143,28 @@ export function GlobeExplorer({ orgDid = null, orgName = null, orgIdentifier = n
   // Ma Earth roster filter (global mode). The flag arrives on the roster
   // itself — the API merges Ma Earth–badged organizations server-side.
   const [maEarthOnly, setMaEarthOnly] = useState(false);
+  // Drone/data-layer roster filter (global mode). Layer counts arrive on the
+  // roster too — the API counts each org's published map layers server-side.
+  const [layersOnly, setLayersOnly] = useState(false);
+  // Tree-data roster filter (global mode). Tree counts are not on the roster —
+  // they come from /api/globe/trees, fetched lazily the first time the filter
+  // is switched on.
+  const [treesOnly, setTreesOnly] = useState(false);
+  const [treeCounts, setTreeCounts] = useState<Map<string, number> | null>(null);
+  const [treeCountsFailed, setTreeCountsFailed] = useState(false);
+  useEffect(() => {
+    if (!treesOnly || treeCounts !== null || treeCountsFailed) return;
+    const controller = new AbortController();
+    fetchGlobeTreeStats(controller.signal)
+      .then((stats) => setTreeCounts(new Map(stats.map((stat) => [stat.did, stat.trees]))))
+      .catch((error) => {
+        if ((error as Error).name !== "AbortError") {
+          console.warn("[globe] tree stats failed", error);
+          setTreeCountsFailed(true);
+        }
+      });
+    return () => controller.abort();
+  }, [treesOnly, treeCounts, treeCountsFailed]);
 
   // ── Sites of the focused organization ────────────────────────────────────
   const [siteState, setSiteState] = useState<SiteState>(EMPTY_SITE_STATE);
@@ -173,6 +216,42 @@ export function GlobeExplorer({ orgDid = null, orgName = null, orgIdentifier = n
     return () => controller.abort();
   }, [focusDid, mode, bumpBounds]);
 
+  // ── The organization's own location (kept apart from the project sites) ──
+  const [orgLocationUri, setOrgLocationUri] = useState<string | null>(null);
+  useEffect(() => {
+    setOrgLocationUri(null);
+    if (!focusDid || mode === "project") return;
+    const controller = new AbortController();
+    fetchOrganizationLocationUri(focusDid, controller.signal)
+      .then((uri) => {
+        if (!controller.signal.aborted) setOrgLocationUri(uri);
+      })
+      .catch((error) => {
+        if ((error as Error).name !== "AbortError") {
+          console.warn("[globe] org location failed", error);
+        }
+      });
+    return () => controller.abort();
+  }, [focusDid, mode]);
+
+  // ── Which project(s) each site belongs to (tag pills in the site list) ──
+  const [siteProjects, setSiteProjects] = useState<Map<string, string[]>>(new Map());
+  useEffect(() => {
+    setSiteProjects(new Map());
+    if (!focusDid || mode === "project") return;
+    const controller = new AbortController();
+    fetchOrganizationSiteProjects(focusDid, controller.signal)
+      .then((map) => {
+        if (!controller.signal.aborted) setSiteProjects(map);
+      })
+      .catch((error) => {
+        if ((error as Error).name !== "AbortError") {
+          console.warn("[globe] site projects failed", error);
+        }
+      });
+    return () => controller.abort();
+  }, [focusDid, mode]);
+
   // ── Project boundaries (project mode) ────────────────────────────────────
   const [projectState, setProjectState] = useState<SiteState>(EMPTY_SITE_STATE);
   useEffect(() => {
@@ -214,13 +293,48 @@ export function GlobeExplorer({ orgDid = null, orgName = null, orgIdentifier = n
     return () => controller.abort();
   }, [project, bumpBounds]);
 
+  // ── Measured trees of the focused organization ─────────────────────────
+  const [treesState, setTreesState] = useState<{
+    status: "idle" | "loading" | "ready";
+    data: GeoJSON.FeatureCollection | null;
+  }>({ status: "idle", data: null });
+  const [treesVisible, setTreesVisible] = useState(true);
+  const [selectedTree, setSelectedTree] = useState<TreeDetail | null>(null);
+
+  useEffect(() => {
+    setTreesState({ status: "idle", data: null });
+    setTreesVisible(true);
+    setSelectedTree(null);
+    // Tree data renders for any focused organization — the dedicated org/project
+    // globe pages, and the global view once an org is selected/clicked.
+    if (!focusDid) return;
+    const controller = new AbortController();
+    setTreesState({ status: "loading", data: null });
+    fetchOrganizationTrees(focusDid, controller.signal)
+      .then((data) => {
+        if (!controller.signal.aborted) setTreesState({ status: "ready", data });
+      })
+      .catch((error) => {
+        if ((error as Error).name !== "AbortError") {
+          console.warn("[globe] trees failed", error);
+          setTreesState({ status: "ready", data: null });
+        }
+      });
+    return () => controller.abort();
+  }, [focusDid, mode]);
+
   // ── Data layers ──────────────────────────────────────────────────────────
   const [globalLayers, setGlobalLayers] = useState<GlobeLayer[] | null>(null);
   const [orgLayers, setOrgLayers] = useState<GlobeLayer[]>([]);
+  const [orgLayerGroups, setOrgLayerGroups] = useState<GlobeLayerGroup[]>([]);
   const [orgLayersLoading, setOrgLayersLoading] = useState(false);
   const [enabledLayerIds, setEnabledLayerIds] = useState<Set<string>>(new Set());
   const [landcoverVisible, setLandcoverVisible] = useState(false);
   const [layersOpen, setLayersOpen] = useState(false);
+  // Drone time-series slider: which series is active, current stop, autoplay.
+  const [activeSeriesId, setActiveSeriesId] = useState<string | null>(null);
+  const [seriesStep, setSeriesStep] = useState(0);
+  const [seriesPlaying, setSeriesPlaying] = useState(false);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -237,12 +351,21 @@ export function GlobeExplorer({ orgDid = null, orgName = null, orgIdentifier = n
 
   useEffect(() => {
     setOrgLayers([]);
+    setOrgLayerGroups([]);
+    setActiveSeriesId(null);
+    setSeriesPlaying(false);
     if (!focusDid) return;
     const controller = new AbortController();
     setOrgLayersLoading(true);
-    fetchOrganizationLayers(focusDid, controller.signal)
-      .then((layers) => {
+    Promise.all([
+      fetchOrganizationLayers(focusDid, controller.signal),
+      // Declared monitored areas — tolerated as empty on failure so a broken
+      // group listing never hides the layers themselves.
+      fetchOrganizationLayerGroups(focusDid, controller.signal).catch(() => []),
+    ])
+      .then(([layers, groups]) => {
         setOrgLayers(layers);
+        setOrgLayerGroups(groups);
         // Layers flagged as default for this org start visible.
         const defaults = layers.filter((layer) => layer.isDefault).map((layer) => layer.id);
         if (defaults.length > 0) {
@@ -256,14 +379,121 @@ export function GlobeExplorer({ orgDid = null, orgName = null, orgIdentifier = n
     return () => controller.abort();
   }, [focusDid]);
 
-  const toggleLayer = useCallback((layerId: string) => {
+  // ── Drone time series (repeat flights over the same area) ──────────────
+  // Overlapping drone imagery is grouped into per-area series; enabling one
+  // swaps the individual layer toggles for a time slider on the map.
+  const droneSeries = useMemo(
+    () => buildDroneTimeSeries(orgLayers, orgLayerGroups),
+    [orgLayers, orgLayerGroups],
+  );
+  const seriesLayerIds = useMemo(
+    () => new Set(droneSeries.flatMap((series) => series.layers.map((layer) => layer.id))),
+    [droneSeries],
+  );
+  const activeSeries = useMemo(
+    () => droneSeries.find((series) => series.id === activeSeriesId) ?? null,
+    [droneSeries, activeSeriesId],
+  );
+
+  // Series members never participate in the plain per-layer toggles — the
+  // slider owns them. Strip any that slipped in (e.g. record defaults).
+  useEffect(() => {
+    if (seriesLayerIds.size === 0) return;
     setEnabledLayerIds((current) => {
-      const next = new Set(current);
-      if (next.has(layerId)) next.delete(layerId);
-      else next.add(layerId);
-      return next;
+      const next = new Set([...current].filter((id) => !seriesLayerIds.has(id)));
+      return next.size === current.size ? current : next;
     });
+  }, [seriesLayerIds]);
+
+  // Auto-advance while playing (loops).
+  useEffect(() => {
+    if (!seriesPlaying || !activeSeries) return;
+    const timer = setInterval(() => {
+      setSeriesStep((step) => (step + 1) % activeSeries.steps.length);
+    }, 1800);
+    return () => clearInterval(timer);
+  }, [seriesPlaying, activeSeries]);
+
+  const [mapBounds, setMapBounds] = useState<LngLatBounds | null>(null);
+
+  // Layer flights: when a layer with a declared footprint becomes visible the
+  // camera flies straight to it, so it is always clear which toggle just
+  // changed the map. The nonce re-triggers the flight on repeat requests.
+  const [layerFlightNonce, setLayerFlightNonce] = useState(0);
+  const flyToLayer = useCallback((layer: GlobeLayer) => {
+    if (!layer.bounds) return;
+    setMapBounds(layer.bounds);
+    setLayerFlightNonce((nonce) => nonce + 1);
   }, []);
+
+  const toggleLayer = useCallback(
+    (layer: GlobeLayer) => {
+      const enabling = !enabledLayerIds.has(layer.id);
+      setEnabledLayerIds((current) => {
+        const next = new Set(current);
+        if (next.has(layer.id)) next.delete(layer.id);
+        else next.add(layer.id);
+        return next;
+      });
+      if (enabling) flyToLayer(layer);
+    },
+    [enabledLayerIds, flyToLayer],
+  );
+
+  // "Zoom to layer": make sure the layer is visible, then fly to it.
+  const locateLayer = useCallback(
+    (layer: GlobeLayer) => {
+      setEnabledLayerIds((current) =>
+        current.has(layer.id) ? current : new Set([...current, layer.id]),
+      );
+      flyToLayer(layer);
+    },
+    [flyToLayer],
+  );
+
+  const flyToSeries = useCallback((series: DroneTimeSeries) => {
+    setMapBounds(series.bounds);
+    setLayerFlightNonce((nonce) => nonce + 1);
+  }, []);
+
+  /** Turn a drone time series on (starting at its latest capture) or off. */
+  const toggleSeries = useCallback(
+    (series: DroneTimeSeries) => {
+      setSeriesPlaying(false);
+      if (activeSeriesId === series.id) {
+        setActiveSeriesId(null);
+        return;
+      }
+      setActiveSeriesId(series.id);
+      setSeriesStep(series.steps.length - 1);
+      flyToSeries(series);
+    },
+    [activeSeriesId, flyToSeries],
+  );
+
+  /** Jump straight to one capture date (activates the series if needed). */
+  const selectSeriesStep = useCallback(
+    (series: DroneTimeSeries, step: number) => {
+      setSeriesPlaying(false);
+      setSeriesStep(step);
+      if (activeSeriesId !== series.id) {
+        setActiveSeriesId(series.id);
+        flyToSeries(series);
+      }
+    },
+    [activeSeriesId, flyToSeries],
+  );
+
+  const toggleSeriesPlayback = useCallback(() => {
+    if (!activeSeries) return;
+    if (seriesPlaying) {
+      setSeriesPlaying(false);
+      return;
+    }
+    // Restart from the oldest capture when play is pressed at the end.
+    setSeriesStep((step) => (step >= activeSeries.steps.length - 1 ? 0 : step));
+    setSeriesPlaying(true);
+  }, [activeSeries, seriesPlaying]);
 
   const categorizedGlobalLayers = useMemo(() => {
     const categories = new Map<string, GlobeLayer[]>();
@@ -275,9 +505,33 @@ export function GlobeExplorer({ orgDid = null, orgName = null, orgIdentifier = n
     return [...categories.entries()];
   }, [globalLayers]);
 
+  // Individually toggled layers (series members excluded — the slider owns
+  // them), plus every member of the active series so steps swap instantly.
+  const looseLayers = useMemo(
+    () =>
+      [...(globalLayers ?? []), ...orgLayers].filter(
+        (layer) => enabledLayerIds.has(layer.id) && !seriesLayerIds.has(layer.id),
+      ),
+    [globalLayers, orgLayers, enabledLayerIds, seriesLayerIds],
+  );
   const activeLayers = useMemo(
-    () => [...(globalLayers ?? []), ...orgLayers].filter((layer) => enabledLayerIds.has(layer.id)),
-    [globalLayers, orgLayers, enabledLayerIds],
+    () => (activeSeries ? [...looseLayers, ...activeSeries.layers] : looseLayers),
+    [looseLayers, activeSeries],
+  );
+  // Only the current capture date is opaque; the rest stay mounted at 0 so
+  // dragging the slider crossfades instead of refetching tiles.
+  const layerOpacities = useMemo(() => {
+    if (!activeSeries) return undefined;
+    const visible = new Set(activeSeries.steps[seriesStep]?.layerIds ?? []);
+    return Object.fromEntries(
+      activeSeries.layers.map((layer) => [layer.id, visible.has(layer.id) ? 1 : 0]),
+    );
+  }, [activeSeries, seriesStep]);
+  // Series members are pulled out of the flat per-layer toggle list — they
+  // render as one grouped time-series card instead.
+  const nonSeriesOrgLayers = useMemo(
+    () => orgLayers.filter((layer) => !seriesLayerIds.has(layer.id)),
+    [orgLayers, seriesLayerIds],
   );
   const activeLegends = useMemo(
     () => activeLayers.filter((layer) => (layer.legend?.length ?? 0) > 0),
@@ -288,16 +542,49 @@ export function GlobeExplorer({ orgDid = null, orgName = null, orgIdentifier = n
   const focusedState = mode === "project" ? projectState : siteState;
   const visibleOrganizations = useMemo(() => {
     if (!organizations) return [];
-    if (mode !== "global" || !maEarthOnly) return organizations;
-    return organizations.filter((org) => org.maEarth === true);
-  }, [organizations, mode, maEarthOnly]);
+    // Focused pages show only their own subject: the org page keeps just that
+    // org's marker, the project page shows nothing but its own boundaries.
+    if (mode === "organization") return organizations.filter((org) => org.did === focusDid);
+    if (mode === "project") return [];
+    let list = organizations;
+    if (maEarthOnly) list = list.filter((org) => org.maEarth === true);
+    if (layersOnly) list = list.filter((org) => (org.dataLayers ?? 0) > 0);
+    if (treesOnly) list = list.filter((org) => (treeCounts?.get(org.did) ?? 0) > 0);
+    return list;
+  }, [organizations, mode, focusDid, maEarthOnly, layersOnly, treesOnly, treeCounts]);
+
+  // The project page only shows the trees that fall inside the project's own
+  // boundaries — the org-wide tree file covers every project of the org.
+  const visibleTrees = useMemo(() => {
+    if (!treesState.data) return null;
+    if (mode !== "project") return treesState.data;
+    if (projectState.status !== "ready") return null;
+    return filterPointsWithinBoundaries(treesState.data, projectState.features);
+  }, [treesState.data, mode, projectState]);
 
   const highlightFeatures = useMemo(() => {
     if (!selectedSiteUri) return [];
     return focusedState.features.filter((feature) => feature.properties?.siteUri === selectedSiteUri);
   }, [focusedState.features, selectedSiteUri]);
 
-  const [mapBounds, setMapBounds] = useState<LngLatBounds | null>(null);
+  // Stable GeoJSON identities — building these inline in JSX gave the map a
+  // new object every render, forcing redundant setData round-trips. Features
+  // of the org's own location are tagged so the map can paint them apart.
+  const sitesCollection = useMemo(() => {
+    if (!orgLocationUri) return featureCollection(focusedState.features);
+    return featureCollection(
+      focusedState.features.map((feature) =>
+        feature.properties?.siteUri === orgLocationUri
+          ? { ...feature, properties: { ...feature.properties, siteKind: "organization" } }
+          : feature,
+      ),
+    );
+  }, [focusedState.features, orgLocationUri]);
+  const highlightCollection = useMemo(
+    () => featureCollection(highlightFeatures),
+    [highlightFeatures],
+  );
+
   useEffect(() => {
     if (!focusDid && mode === "global") return;
     if (selectedSiteUri) {
@@ -338,6 +625,11 @@ export function GlobeExplorer({ orgDid = null, orgName = null, orgIdentifier = n
     setSheetExpanded(false);
   }, [focusDid]);
 
+  // Drop any open tree card when trees are hidden or the org changes.
+  useEffect(() => {
+    if (!treesVisible) setSelectedTree(null);
+  }, [treesVisible]);
+
   const selectOrganization = useCallback(
     (did: string | null) => {
       if (mode !== "global") return;
@@ -368,6 +660,13 @@ export function GlobeExplorer({ orgDid = null, orgName = null, orgIdentifier = n
     visibleOrganizations,
     maEarthOnly,
     onToggleMaEarth: () => setMaEarthOnly((value) => !value),
+    layersOnly,
+    onToggleLayersOnly: () => setLayersOnly((value) => !value),
+    treesOnly,
+    onToggleTrees: () => setTreesOnly((value) => !value),
+    treeCounts,
+    treeCountsLoading: treesOnly && treeCounts === null && !treeCountsFailed,
+    treeCountsFailed,
     onSelect: (did: string) => {
       selectOrganization(did);
       collapseSheet();
@@ -383,6 +682,8 @@ export function GlobeExplorer({ orgDid = null, orgName = null, orgIdentifier = n
         selectedOrg,
         project,
         state: focusedState,
+        siteProjects,
+        orgLocationUri,
         selectedSiteUri,
         onSelectSite: (uri: string | null) => {
           selectSite(uri);
@@ -396,8 +697,9 @@ export function GlobeExplorer({ orgDid = null, orgName = null, orgIdentifier = n
       }
     : null;
 
-  // Bottom-sheet header summary (mobile).
-  const sheetTitle = focusDid ? (mode === "project" ? project?.title ?? "…" : focusName ?? "…") : t("title");
+  // Bottom-sheet header summary (mobile). A null title means the roster is
+  // still loading (hard refresh of /globe?org=…) — render a skeleton, not "…".
+  const sheetTitle = focusDid ? (mode === "project" ? project?.title ?? null : focusName) : t("title");
   const sheetSubtitle = focusDid
     ? focusedState.status === "loading"
       ? t("panel.loading")
@@ -411,15 +713,18 @@ export function GlobeExplorer({ orgDid = null, orgName = null, orgIdentifier = n
 
   // ── Render ───────────────────────────────────────────────────────────────
   return (
-    <div className="absolute inset-0 overflow-hidden bg-[#0b0b19]" data-testid="globe-explorer">
+    <div className="globe-glass absolute inset-0 overflow-hidden bg-[#0b0b19]" data-testid="globe-explorer">
       <GlobeMap
         className="absolute inset-0"
         organizations={visibleOrganizations}
         onSelectOrganization={(did) => selectOrganization(did)}
-        sitesGeojson={featureCollection(focusedState.features)}
-        highlightGeojson={featureCollection(highlightFeatures)}
+        sitesGeojson={sitesCollection}
+        highlightGeojson={highlightCollection}
+        treesGeojson={treesVisible ? visibleTrees : null}
+        onSelectTree={setSelectedTree}
+        selectedTreeId={selectedTree?.id ?? null}
         bounds={mapBounds}
-        boundsKey={`${focusDid ?? "none"}:${selectedSiteUri ?? "all"}:${boundsNonce}`}
+        boundsKey={`${focusDid ?? "none"}:${selectedSiteUri ?? "all"}:${boundsNonce}:layer${layerFlightNonce}`}
         boundsPadding={
           isDesktop
             ? { top: 96, bottom: 64, left: 416, right: 64 }
@@ -428,6 +733,7 @@ export function GlobeExplorer({ orgDid = null, orgName = null, orgIdentifier = n
         spin={mode === "global" && !focusDid}
         landcoverVisible={landcoverVisible}
         activeLayers={activeLayers}
+        layerOpacities={layerOpacities}
         onLoaded={() => setMapReady(true)}
       />
 
@@ -448,6 +754,17 @@ export function GlobeExplorer({ orgDid = null, orgName = null, orgIdentifier = n
               <p className="text-sm font-medium text-white/60">{t("loadingGlobe")}</p>
             </div>
           </motion.div>
+        ) : null}
+      </AnimatePresence>
+
+      {/* ── Selected tree detail (right sidebar) ── */}
+      <AnimatePresence>
+        {selectedTree ? (
+          <TreeDetailPanel
+            key={String(selectedTree.id)}
+            tree={selectedTree}
+            onClose={() => setSelectedTree(null)}
+          />
         ) : null}
       </AnimatePresence>
 
@@ -481,11 +798,22 @@ export function GlobeExplorer({ orgDid = null, orgName = null, orgIdentifier = n
                 onToggleLandcover={() => setLandcoverVisible((value) => !value)}
                 categorizedGlobalLayers={categorizedGlobalLayers}
                 globalLayersLoading={globalLayers === null}
-                orgLayers={orgLayers}
+                orgLayers={nonSeriesOrgLayers}
                 orgLayersLoading={orgLayersLoading}
                 showOrgLayers={Boolean(focusDid)}
                 enabledLayerIds={enabledLayerIds}
                 onToggleLayer={toggleLayer}
+                onLocateLayer={locateLayer}
+                droneSeries={droneSeries}
+                activeSeriesId={activeSeriesId}
+                activeSeriesStep={seriesStep}
+                onToggleSeries={toggleSeries}
+                onSelectSeriesStep={selectSeriesStep}
+                onLocateSeries={flyToSeries}
+                treesCount={visibleTrees?.features.length ?? 0}
+                treesLoading={treesState.status === "loading"}
+                treesVisible={treesVisible}
+                onToggleTrees={() => setTreesVisible((value) => !value)}
               />
             </motion.div>
           ) : null}
@@ -524,7 +852,7 @@ export function GlobeExplorer({ orgDid = null, orgName = null, orgIdentifier = n
       {/* ── Mobile: bottom sheet ── */}
       <div className="md:hidden">
         <section
-          aria-label={sheetTitle}
+          aria-label={sheetTitle ?? t("panel.loading")}
           data-testid="globe-sheet"
           className={cn(
             "pointer-events-auto absolute inset-x-0 bottom-0 z-20 flex h-[min(62dvh,520px)] flex-col rounded-t-2xl border-x border-t border-border bg-background/95 shadow-[0_-8px_32px_rgb(0_0_0/0.25)] backdrop-blur-xl transition-transform duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)]",
@@ -546,7 +874,11 @@ export function GlobeExplorer({ orgDid = null, orgName = null, orgIdentifier = n
                 <SheetIcon className="size-4" />
               </span>
               <span className="min-w-0 flex-1">
-                <span className="block truncate text-sm font-semibold text-foreground">{sheetTitle}</span>
+                {sheetTitle ? (
+                  <span className="block truncate text-sm font-semibold text-foreground">{sheetTitle}</span>
+                ) : (
+                  <Skeleton className="my-0.5 h-4 w-32 rounded-md" />
+                )}
                 <span className="block truncate text-xs text-muted-foreground">{sheetSubtitle}</span>
               </span>
               <ChevronDownIcon
@@ -568,9 +900,31 @@ export function GlobeExplorer({ orgDid = null, orgName = null, orgIdentifier = n
         </section>
       </div>
 
-      {/* ── Active layer legends ── */}
-      {activeLegends.length > 0 || landcoverVisible ? (
+      {/* ── Drone time slider (active series) ── */}
+      <AnimatePresence>
+        {activeSeries ? (
+          <TimeSliderCard
+            key={activeSeries.id}
+            series={activeSeries}
+            step={seriesStep}
+            playing={seriesPlaying}
+            onStepChange={(step) => {
+              setSeriesPlaying(false);
+              setSeriesStep(step);
+            }}
+            onTogglePlay={toggleSeriesPlayback}
+            onLocate={() => flyToSeries(activeSeries)}
+            onClose={() => toggleSeries(activeSeries)}
+          />
+        ) : null}
+      </AnimatePresence>
+
+      {/* ── Visible layers summary + active layer legends ── */}
+      {looseLayers.length > 0 || landcoverVisible || activeLegends.length > 0 ? (
         <div className="pointer-events-none absolute bottom-24 left-3 z-10 flex max-w-[min(320px,calc(100vw-6rem))] flex-col gap-2 md:bottom-8 md:left-4 md:max-w-[min(360px,calc(100vw-1.5rem))]">
+          {looseLayers.length > 0 ? (
+            <ActiveLayersCard layers={looseLayers} onLocate={flyToLayer} onHide={toggleLayer} />
+          ) : null}
           {landcoverVisible ? <LandcoverLegend /> : null}
           {activeLegends.map((layer) => (
             <div
@@ -602,6 +956,13 @@ function GlobalPanel({
   visibleOrganizations,
   maEarthOnly,
   onToggleMaEarth,
+  layersOnly,
+  onToggleLayersOnly,
+  treesOnly,
+  onToggleTrees,
+  treeCounts,
+  treeCountsLoading,
+  treeCountsFailed,
   onSelect,
 }: {
   variant: PanelVariant;
@@ -609,6 +970,14 @@ function GlobalPanel({
   visibleOrganizations: GlobeOrganization[];
   maEarthOnly: boolean;
   onToggleMaEarth: () => void;
+  layersOnly: boolean;
+  onToggleLayersOnly: () => void;
+  treesOnly: boolean;
+  onToggleTrees: () => void;
+  /** did → measured-tree count, once loaded (null before the first toggle). */
+  treeCounts: Map<string, number> | null;
+  treeCountsLoading: boolean;
+  treeCountsFailed: boolean;
   onSelect: (did: string) => void;
 }) {
   const t = useTranslations("marketplace.globe");
@@ -647,8 +1016,8 @@ function GlobalPanel({
         </div>
       ) : null}
 
-      <div className={cn("flex items-center gap-2 px-4", variant === "floating" ? "pb-3" : "py-3")}>
-        <div className="relative min-w-0 flex-1">
+      <div className={cn("flex flex-col gap-2 px-4", variant === "floating" ? "pb-3" : "py-3")}>
+        <div className="relative min-w-0">
           <SearchIcon className="pointer-events-none absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
           <input
             type="search"
@@ -661,33 +1030,63 @@ function GlobalPanel({
             className="h-9 w-full rounded-full border border-border bg-background pl-9 pr-3 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-primary/50"
           />
         </div>
-        <button
-          type="button"
-          onClick={onToggleMaEarth}
-          aria-pressed={maEarthOnly}
-          className={cn(
-            "inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full border px-2.5 text-xs font-medium transition-colors",
-            maEarthOnly
-              ? "border-primary/50 bg-primary/10 text-primary"
-              : "border-border text-muted-foreground hover:border-primary/40 hover:text-primary",
-          )}
-        >
-          <Image
-            src="/assets/media/images/badges/ma-earth-logo.webp"
-            alt=""
-            width={16}
-            height={16}
-            className="size-4 rounded-full"
-          />
-          {t("panel.maEarth")}
-        </button>
+        <div className="flex flex-wrap items-center gap-1.5">
+          <button
+            type="button"
+            onClick={onToggleMaEarth}
+            aria-pressed={maEarthOnly}
+            className={cn(
+              "inline-flex h-7 shrink-0 items-center gap-1.5 rounded-full border px-2.5 text-xs font-medium transition-colors",
+              maEarthOnly
+                ? "border-primary/50 bg-primary/10 text-primary"
+                : "border-border text-muted-foreground hover:border-primary/40 hover:text-primary",
+            )}
+          >
+            <Image
+              src="/assets/media/images/badges/ma-earth-logo.webp"
+              alt=""
+              width={14}
+              height={14}
+              className="size-3.5 rounded-full"
+            />
+            {t("panel.maEarth")}
+          </button>
+          <button
+            type="button"
+            onClick={onToggleLayersOnly}
+            aria-pressed={layersOnly}
+            className={cn(
+              "inline-flex h-7 shrink-0 items-center gap-1.5 rounded-full border px-2.5 text-xs font-medium transition-colors",
+              layersOnly
+                ? "border-primary/50 bg-primary/10 text-primary"
+                : "border-border text-muted-foreground hover:border-primary/40 hover:text-primary",
+            )}
+          >
+            <DroneIcon className="size-3.5" />
+            {t("panel.dataFilter")}
+          </button>
+          <button
+            type="button"
+            onClick={onToggleTrees}
+            aria-pressed={treesOnly}
+            className={cn(
+              "inline-flex h-7 shrink-0 items-center gap-1.5 rounded-full border px-2.5 text-xs font-medium transition-colors",
+              treesOnly
+                ? "border-primary/50 bg-primary/10 text-primary"
+                : "border-border text-muted-foreground hover:border-primary/40 hover:text-primary",
+            )}
+          >
+            <TreePineIcon className="size-3.5" />
+            {t("panel.treeFilter")}
+          </button>
+        </div>
       </div>
 
       {showList ? (
         <div className="flex min-h-0 flex-1 flex-col border-t border-border">
           {variant === "floating" ? (
             <p className="px-4 pb-1 pt-2.5 text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
-              {organizations === null
+              {organizations === null || treeCountsLoading
                 ? t("panel.loading")
                 : t("panel.count", { count: filtered.length })}
             </p>
@@ -696,14 +1095,18 @@ function GlobalPanel({
             className="min-h-0 flex-1 overflow-y-auto overscroll-contain pb-2"
             style={variant === "floating" ? { maxHeight: "42vh" } : undefined}
           >
-            {organizations === null ? (
+            {organizations === null || treeCountsLoading ? (
               <li className="flex flex-col gap-2 px-4 py-2">
                 <Skeleton className="h-9 w-full rounded-lg" />
                 <Skeleton className="h-9 w-full rounded-lg" />
                 <Skeleton className="h-9 w-3/4 rounded-lg" />
               </li>
+            ) : treesOnly && treeCountsFailed ? (
+              <li className="px-4 py-3 text-sm text-muted-foreground">{t("panel.treesFailed")}</li>
             ) : filtered.length === 0 ? (
-              <li className="px-4 py-3 text-sm text-muted-foreground">{t("panel.empty")}</li>
+              <li className="px-4 py-3 text-sm text-muted-foreground">
+                {treesOnly && !query.trim() ? t("panel.treesEmpty") : t("panel.empty")}
+              </li>
             ) : (
               filtered.map((org) => (
                 <li key={org.did}>
@@ -731,10 +1134,30 @@ function GlobalPanel({
                       </span>
                       {org.country ? (
                         <span className="block truncate text-[11px] text-muted-foreground">
-                          {formatCountry(org.country)}
+                          {/* Name only — the row's avatar circle is already the flag. */}
+                          {countryName(org.country)}
                         </span>
                       ) : null}
                     </span>
+                    {treesOnly && (treeCounts?.get(org.did) ?? 0) > 0 ? (
+                      <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-primary/10 px-1.5 py-0.5 text-[10px] font-semibold text-primary">
+                        <TreePineIcon className="size-3" />
+                        {t("layers.measuredTreesCount", { count: treeCounts?.get(org.did) ?? 0 })}
+                      </span>
+                    ) : (org.dataLayers ?? 0) > 0 ? (
+                      <span
+                        title={t("panel.dataBadge", { count: org.dataLayers ?? 0 })}
+                        className="inline-flex shrink-0 items-center gap-1 rounded-full bg-primary/10 px-1.5 py-0.5 text-[10px] font-semibold text-primary"
+                      >
+                        {(org.droneLayers ?? 0) > 0 ? (
+                          <DroneIcon className="size-3" />
+                        ) : (
+                          <LayersIcon className="size-3" />
+                        )}
+                        {org.dataLayers}
+                        <span className="sr-only">{t("panel.dataBadge", { count: org.dataLayers ?? 0 })}</span>
+                      </span>
+                    ) : null}
                     {org.lat === null ? null : (
                       <MapPinnedIcon className="size-3.5 shrink-0 text-muted-foreground/60 transition-colors group-hover:text-primary" />
                     )}
@@ -760,6 +1183,8 @@ function FocusPanel({
   selectedOrg,
   project,
   state,
+  siteProjects,
+  orgLocationUri,
   selectedSiteUri,
   onSelectSite,
   onClear,
@@ -773,6 +1198,10 @@ function FocusPanel({
   selectedOrg: GlobeOrganization | null;
   project: GlobeProjectFocus | null;
   state: SiteState;
+  /** Certified location AT-URI → titles of the projects that reference it. */
+  siteProjects: Map<string, string[]>;
+  /** AT-URI of the org's own location record (its "based in" place), if any. */
+  orgLocationUri: string | null;
   selectedSiteUri: string | null;
   onSelectSite: (uri: string | null) => void;
   onClear?: () => void;
@@ -782,6 +1211,15 @@ function FocusPanel({
   const profileHref = `/account/${encodeURIComponent(orgIdentifier)}`;
   const orgGlobeHref = `/globe/${encodeURIComponent(orgIdentifier)}`;
   const boundaryCount = state.features.length;
+
+  // The org's own location renders under its own heading, apart from the
+  // sites its projects work in. Without a declared org location the list
+  // stays flat (no headings).
+  const orgSites = orgLocationUri
+    ? state.sites.filter((site) => site.uri === orgLocationUri)
+    : [];
+  const projectSites =
+    orgSites.length > 0 ? state.sites.filter((site) => site.uri !== orgLocationUri) : state.sites;
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
@@ -794,16 +1232,26 @@ function FocusPanel({
             <p className="text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
               {mode === "project" ? t("focus.projectLabel") : t("focus.organizationLabel")}
             </p>
-            <h2 className="truncate text-sm font-semibold text-foreground">
-              {mode === "project" ? project?.title : focusName ?? "…"}
-            </h2>
+            {(mode === "project" ? project?.title : focusName) ? (
+              <h2 className="truncate text-sm font-semibold text-foreground">
+                {mode === "project" ? project?.title : focusName}
+              </h2>
+            ) : (
+              // Roster still loading (hard refresh of /globe?org=…): skeleton
+              // lines where the name + country will appear.
+              <>
+                <Skeleton className="mt-1 h-4 w-36 rounded-md" />
+                <Skeleton className="mt-1.5 h-3 w-24 rounded-md" />
+              </>
+            )}
             {mode === "project" && focusName ? (
               <Link href={profileHref} className="mt-0.5 block truncate text-xs text-muted-foreground transition-colors hover:text-primary">
                 {focusName}
               </Link>
             ) : selectedOrg?.country ? (
               <p className="mt-0.5 text-xs text-muted-foreground">
-                {countryFlag(selectedOrg.country)} {formatCountry(selectedOrg.country)}
+                {/* formatCountry already includes the flag. */}
+                {formatCountry(selectedOrg.country)}
               </p>
             ) : null}
           </div>
@@ -929,10 +1377,36 @@ function FocusPanel({
                 onClick={() => onSelectSite(null)}
               />
             </li>
-            {state.sites.map((site) => (
+            {orgSites.length > 0 ? (
+              <li>
+                <SiteGroupHeading color={ORG_LOCATION_COLOR}>
+                  {t("focus.orgLocationHeading")}
+                </SiteGroupHeading>
+              </li>
+            ) : null}
+            {orgSites.map((site) => (
+              <li key={site.uri}>
+                <SiteRow
+                  kind="organization"
+                  label={site.name}
+                  projects={siteProjects.get(site.uri)}
+                  active={selectedSiteUri === site.uri}
+                  onClick={() => onSelectSite(site.uri)}
+                />
+              </li>
+            ))}
+            {orgSites.length > 0 && projectSites.length > 0 ? (
+              <li>
+                <SiteGroupHeading color={PROJECT_SITE_COLOR}>
+                  {t("focus.projectSitesHeading")}
+                </SiteGroupHeading>
+              </li>
+            ) : null}
+            {projectSites.map((site) => (
               <li key={site.uri}>
                 <SiteRow
                   label={site.name}
+                  projects={siteProjects.get(site.uri)}
                   active={selectedSiteUri === site.uri}
                   onClick={() => onSelectSite(site.uri)}
                 />
@@ -945,7 +1419,42 @@ function FocusPanel({
   );
 }
 
-function SiteRow({ label, active, onClick }: { label: string; active: boolean; onClick: () => void }) {
+/** Heading splitting the site list into org location vs project sites; the
+ *  colored dot echoes the paint color of those features on the map. */
+function SiteGroupHeading({ color, children }: { color: string; children: React.ReactNode }) {
+  return (
+    <p className="flex items-center gap-1.5 px-4 pb-0.5 pt-2.5 text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
+      <span
+        aria-hidden
+        className="size-1.5 shrink-0 rounded-full ring-1 ring-black/10"
+        style={{ backgroundColor: color }}
+      />
+      {children}
+    </p>
+  );
+}
+
+/** How many project pills a site row shows before collapsing into "+N". */
+const SITE_ROW_MAX_PILLS = 2;
+
+function SiteRow({
+  label,
+  projects,
+  active,
+  onClick,
+  kind = "site",
+}: {
+  label: string;
+  /** Titles of the projects this site belongs to (tag pills). */
+  projects?: string[];
+  active: boolean;
+  onClick: () => void;
+  /** "organization" rows carry the org's building icon instead of the pin. */
+  kind?: "site" | "organization";
+}) {
+  const t = useTranslations("marketplace.globe");
+  const shown = projects?.slice(0, SITE_ROW_MAX_PILLS) ?? [];
+  const hidden = (projects?.length ?? 0) - shown.length;
   return (
     <button
       type="button"
@@ -956,14 +1465,60 @@ function SiteRow({ label, active, onClick }: { label: string; active: boolean; o
         active ? "font-medium text-primary" : "text-foreground",
       )}
     >
-      <MapPinnedIcon className={cn("size-3.5 shrink-0", active ? "text-primary" : "text-muted-foreground")} />
-      <span className="min-w-0 flex-1 truncate">{label}</span>
+      {kind === "organization" ? (
+        <Building2Icon className={cn("size-3.5 shrink-0 self-start mt-0.5", active ? "text-primary" : "text-muted-foreground")} />
+      ) : (
+        <MapPinnedIcon className={cn("size-3.5 shrink-0 self-start mt-0.5", active ? "text-primary" : "text-muted-foreground")} />
+      )}
+      <span className="min-w-0 flex-1">
+        <span className="block truncate">{label}</span>
+        {shown.length > 0 ? (
+          <span className="mt-1 flex flex-wrap items-center gap-1">
+            {shown.map((title) => (
+              <span
+                key={title}
+                title={t("focus.projectPill", { name: title })}
+                className="inline-flex max-w-[150px] items-center gap-1 rounded-full bg-primary/10 px-1.5 py-px text-[10px] font-medium leading-4 text-primary"
+              >
+                <FolderKanbanIcon aria-hidden className="size-2.5 shrink-0" />
+                <span className="truncate">{title}</span>
+                <span className="sr-only">{t("focus.projectPill", { name: title })}</span>
+              </span>
+            ))}
+            {hidden > 0 ? (
+              <span
+                title={projects!.slice(SITE_ROW_MAX_PILLS).join(", ")}
+                className="rounded-full bg-muted px-1.5 py-px text-[10px] font-medium leading-4 text-muted-foreground"
+              >
+                {t("focus.moreProjects", { count: hidden })}
+              </span>
+            ) : null}
+          </span>
+        ) : null}
+      </span>
       {active ? <span aria-hidden className="size-1.5 shrink-0 rounded-full bg-primary" /> : null}
     </button>
   );
 }
 
 // ── Layers panel ───────────────────────────────────────────────────────────
+
+/** "2025-04-09" → local Date (avoids the UTC-midnight off-by-one). */
+function parseDay(date: string): Date {
+  const [year, month, day] = date.split("-").map(Number);
+  return new Date(year ?? 1970, (month ?? 1) - 1, day ?? 1);
+}
+
+function useDayFormatter(): (date: string) => string {
+  const locale = useLocale();
+  return useCallback(
+    (date: string) =>
+      new Intl.DateTimeFormat(locale, { year: "numeric", month: "short", day: "numeric" }).format(
+        parseDay(date),
+      ),
+    [locale],
+  );
+}
 
 function LayersPanel({
   landcoverVisible,
@@ -975,6 +1530,17 @@ function LayersPanel({
   showOrgLayers,
   enabledLayerIds,
   onToggleLayer,
+  onLocateLayer,
+  droneSeries,
+  activeSeriesId,
+  activeSeriesStep,
+  onToggleSeries,
+  onSelectSeriesStep,
+  onLocateSeries,
+  treesCount,
+  treesLoading,
+  treesVisible,
+  onToggleTrees,
 }: {
   landcoverVisible: boolean;
   onToggleLandcover: () => void;
@@ -984,9 +1550,21 @@ function LayersPanel({
   orgLayersLoading: boolean;
   showOrgLayers: boolean;
   enabledLayerIds: Set<string>;
-  onToggleLayer: (layerId: string) => void;
+  onToggleLayer: (layer: GlobeLayer) => void;
+  onLocateLayer: (layer: GlobeLayer) => void;
+  droneSeries: DroneTimeSeries[];
+  activeSeriesId: string | null;
+  activeSeriesStep: number;
+  onToggleSeries: (series: DroneTimeSeries) => void;
+  onSelectSeriesStep: (series: DroneTimeSeries, step: number) => void;
+  onLocateSeries: (series: DroneTimeSeries) => void;
+  treesCount: number;
+  treesLoading: boolean;
+  treesVisible: boolean;
+  onToggleTrees: () => void;
 }) {
   const t = useTranslations("marketplace.globe");
+  const hasTreesRow = showOrgLayers && (treesLoading || treesCount > 0);
 
   return (
     <div className="flex max-h-[min(56vh,520px)] flex-col overflow-y-auto overscroll-contain p-4">
@@ -1010,25 +1588,57 @@ function LayersPanel({
           <h3 className="mb-1 text-xs font-semibold capitalize text-muted-foreground">
             {t("layers.projectCategory")}
           </h3>
+          {hasTreesRow ? (
+            <div className="mb-2 rounded-xl border border-border bg-background/60">
+              {treesLoading ? (
+                <div className="p-2">
+                  <Skeleton className="h-8 w-full rounded-lg" />
+                </div>
+              ) : (
+                <LayerToggleRow
+                  label={t("layers.measuredTrees")}
+                  description={t("layers.measuredTreesCount", { count: treesCount })}
+                  checked={treesVisible}
+                  onToggle={onToggleTrees}
+                />
+              )}
+            </div>
+          ) : null}
           {orgLayersLoading ? (
             <div className="flex flex-col gap-2">
               <Skeleton className="h-10 w-full rounded-xl" />
               <Skeleton className="h-10 w-full rounded-xl" />
             </div>
-          ) : orgLayers.length === 0 ? (
+          ) : orgLayers.length === 0 && droneSeries.length === 0 && !hasTreesRow ? (
             <p className="text-xs text-muted-foreground">{t("layers.noProjectLayers")}</p>
           ) : (
-            <div className="flex flex-col divide-y divide-border rounded-xl border border-border bg-background/60">
-              {orgLayers.map((layer) => (
-                <LayerToggleRow
-                  key={layer.id}
-                  label={layer.name}
-                  description={layer.description || undefined}
-                  checked={enabledLayerIds.has(layer.id)}
-                  onToggle={() => onToggleLayer(layer.id)}
+            <>
+              {droneSeries.map((series) => (
+                <TimeSeriesCard
+                  key={series.id}
+                  series={series}
+                  active={series.id === activeSeriesId}
+                  activeStep={activeSeriesStep}
+                  onToggle={() => onToggleSeries(series)}
+                  onLocate={() => onLocateSeries(series)}
+                  onSelectStep={(step) => onSelectSeriesStep(series, step)}
                 />
               ))}
-            </div>
+              {orgLayers.length > 0 ? (
+                <div className="flex flex-col divide-y divide-border rounded-xl border border-border bg-background/60">
+                  {orgLayers.map((layer) => (
+                    <LayerToggleRow
+                      key={layer.id}
+                      label={layer.name}
+                      description={layer.description || undefined}
+                      checked={enabledLayerIds.has(layer.id)}
+                      onToggle={() => onToggleLayer(layer)}
+                      onLocate={layer.bounds ? () => onLocateLayer(layer) : undefined}
+                    />
+                  ))}
+                </div>
+              ) : null}
+            </>
           )}
         </div>
       ) : null}
@@ -1050,7 +1660,8 @@ function LayersPanel({
                   label={layer.name}
                   description={layer.description || undefined}
                   checked={enabledLayerIds.has(layer.id)}
-                  onToggle={() => onToggleLayer(layer.id)}
+                  onToggle={() => onToggleLayer(layer)}
+                  onLocate={layer.bounds ? () => onLocateLayer(layer) : undefined}
                 />
               ))}
             </div>
@@ -1066,20 +1677,38 @@ function LayerToggleRow({
   description,
   checked,
   onToggle,
+  onLocate,
 }: {
   label: string;
   description?: string;
   checked: boolean;
   onToggle: () => void;
+  /** "Zoom to layer" — shown when the layer declares a map footprint. */
+  onLocate?: () => void;
 }) {
+  const t = useTranslations("marketplace.globe");
   return (
-    <label className="flex cursor-pointer items-center justify-between gap-3 px-3.5 py-2.5">
-      <span className="min-w-0">
+    <label className="flex cursor-pointer items-center justify-between gap-2 px-3.5 py-2.5">
+      <span className="min-w-0 flex-1">
         <span className="block truncate text-sm text-foreground">{label}</span>
         {description ? (
           <span className="block truncate text-[11px] text-muted-foreground">{description}</span>
         ) : null}
       </span>
+      {onLocate ? (
+        <button
+          type="button"
+          onClick={(event) => {
+            event.preventDefault();
+            onLocate();
+          }}
+          aria-label={t("layers.flyTo", { name: label })}
+          title={t("layers.flyTo", { name: label })}
+          className="grid size-7 shrink-0 place-items-center rounded-full border border-border text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary"
+        >
+          <LocateFixedIcon className="size-3.5" />
+        </button>
+      ) : null}
       <button
         type="button"
         role="switch"
@@ -1099,6 +1728,399 @@ function LayerToggleRow({
         />
       </button>
     </label>
+  );
+}
+
+// ── Drone time series (repeat flights over the same area) ─────────────────
+
+/** Layers-panel card for one detected series: one switch for the whole
+ *  timeline plus a chip per capture date, replacing the pile of
+ *  indistinguishable per-flight toggles. */
+function TimeSeriesCard({
+  series,
+  active,
+  activeStep,
+  onToggle,
+  onLocate,
+  onSelectStep,
+}: {
+  series: DroneTimeSeries;
+  active: boolean;
+  /** Current slider stop — only meaningful while `active`. */
+  activeStep: number;
+  onToggle: () => void;
+  onLocate: () => void;
+  onSelectStep: (step: number) => void;
+}) {
+  const t = useTranslations("marketplace.globe");
+  const formatDay = useDayFormatter();
+
+  return (
+    <div
+      data-testid="globe-time-series-card"
+      className={cn(
+        "mb-2 rounded-xl border bg-background/60 transition-colors",
+        active ? "border-primary/50" : "border-border",
+      )}
+    >
+      <div className="flex items-center justify-between gap-2 px-3.5 pt-2.5">
+        <span className="min-w-0 flex-1">
+          <span className="flex items-center gap-1.5 text-sm text-foreground">
+            <HistoryIcon className="size-3.5 shrink-0 text-primary" />
+            <span className="truncate font-medium">{series.name}</span>
+          </span>
+          <span className="mt-0.5 block text-[11px] text-muted-foreground">
+            {t("timeline.seriesFlights", { count: series.layers.length })}
+          </span>
+        </span>
+        <button
+          type="button"
+          onClick={onLocate}
+          aria-label={t("layers.flyTo", { name: series.name })}
+          title={t("layers.flyTo", { name: series.name })}
+          className="grid size-7 shrink-0 place-items-center rounded-full border border-border text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary"
+        >
+          <LocateFixedIcon className="size-3.5" />
+        </button>
+        <button
+          type="button"
+          role="switch"
+          aria-checked={active}
+          aria-label={t("timeline.toggle", { name: series.name })}
+          onClick={onToggle}
+          className={cn(
+            "relative h-5 w-9 shrink-0 rounded-full border transition-colors",
+            active ? "border-primary bg-primary" : "border-border bg-muted",
+          )}
+        >
+          <span
+            className={cn(
+              "absolute top-1/2 size-3.5 -translate-y-1/2 rounded-full bg-background shadow transition-[left]",
+              active ? "left-[calc(100%-1.05rem)]" : "left-0.5",
+            )}
+          />
+        </button>
+      </div>
+      <p className="px-3.5 pt-1 text-[11px] leading-4 text-muted-foreground">
+        {t("timeline.seriesHint")}
+      </p>
+      <div className="flex flex-wrap gap-1 px-3.5 py-2.5">
+        {series.steps.map((step, index) => (
+          <button
+            key={step.date}
+            type="button"
+            onClick={() => onSelectStep(index)}
+            aria-pressed={active && index === activeStep}
+            className={cn(
+              "rounded-full border px-2 py-0.5 text-[11px] font-medium transition-colors",
+              active && index === activeStep
+                ? "border-primary/50 bg-primary/10 text-primary"
+                : "border-border text-muted-foreground hover:border-primary/40 hover:text-primary",
+            )}
+          >
+            {formatDay(step.date)}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/** Floating time slider (bottom center) while a drone series is active —
+ *  scrub, step, or auto-play through the captures of the same area. */
+function TimeSliderCard({
+  series,
+  step,
+  playing,
+  onStepChange,
+  onTogglePlay,
+  onLocate,
+  onClose,
+}: {
+  series: DroneTimeSeries;
+  step: number;
+  playing: boolean;
+  onStepChange: (step: number) => void;
+  onTogglePlay: () => void;
+  onLocate: () => void;
+  onClose: () => void;
+}) {
+  const t = useTranslations("marketplace.globe");
+  const formatDay = useDayFormatter();
+  const lastStep = series.steps.length - 1;
+  const current = series.steps[Math.min(step, lastStep)]!;
+
+  return (
+    <div className="pointer-events-none absolute inset-x-3 bottom-[6.75rem] z-20 flex justify-center md:bottom-8">
+      <motion.section
+        initial={{ opacity: 0, y: 14 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: 14 }}
+        transition={{ duration: 0.22, ease: [0.25, 0.1, 0.25, 1] }}
+        aria-label={t("timeline.title")}
+        data-testid="globe-time-slider"
+        className="pointer-events-auto w-full max-w-[460px] rounded-2xl border border-border bg-background/90 p-3.5 shadow-xl backdrop-blur-xl"
+      >
+        <div className="flex items-center gap-2">
+          <span className="flex min-w-0 flex-1 items-center gap-1.5">
+            <HistoryIcon className="size-4 shrink-0 text-primary" />
+            <span className="truncate text-sm font-semibold text-foreground">{series.name}</span>
+          </span>
+          <span className="shrink-0 rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary">
+            {formatDay(current.date)}
+          </span>
+          <button
+            type="button"
+            onClick={onLocate}
+            aria-label={t("layers.flyTo", { name: series.name })}
+            title={t("layers.flyTo", { name: series.name })}
+            className="grid size-7 shrink-0 place-items-center rounded-full border border-border text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary"
+          >
+            <LocateFixedIcon className="size-3.5" />
+          </button>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label={t("timeline.close")}
+            title={t("timeline.close")}
+            className="grid size-7 shrink-0 place-items-center rounded-full border border-border text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary"
+          >
+            <XIcon className="size-3.5" />
+          </button>
+        </div>
+
+        <div className="mt-3 flex items-center gap-2">
+          <button
+            type="button"
+            onClick={onTogglePlay}
+            aria-label={playing ? t("timeline.pause") : t("timeline.play")}
+            title={playing ? t("timeline.pause") : t("timeline.play")}
+            className="grid size-8 shrink-0 place-items-center rounded-full bg-primary text-primary-foreground transition-colors hover:bg-primary-dark"
+          >
+            {playing ? <PauseIcon className="size-3.5" /> : <PlayIcon className="size-3.5" />}
+          </button>
+          <button
+            type="button"
+            onClick={() => onStepChange(Math.max(0, step - 1))}
+            disabled={step <= 0}
+            aria-label={t("timeline.previous")}
+            title={t("timeline.previous")}
+            className="grid size-7 shrink-0 place-items-center rounded-full border border-border text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary disabled:pointer-events-none disabled:opacity-40"
+          >
+            <ChevronLeftIcon className="size-4" />
+          </button>
+          <input
+            type="range"
+            min={0}
+            max={lastStep}
+            step={1}
+            value={Math.min(step, lastStep)}
+            onChange={(event) => onStepChange(Number(event.target.value))}
+            aria-label={t("timeline.slider")}
+            aria-valuetext={formatDay(current.date)}
+            className="h-1.5 min-w-0 flex-1 cursor-pointer accent-primary"
+          />
+          <button
+            type="button"
+            onClick={() => onStepChange(Math.min(lastStep, step + 1))}
+            disabled={step >= lastStep}
+            aria-label={t("timeline.next")}
+            title={t("timeline.next")}
+            className="grid size-7 shrink-0 place-items-center rounded-full border border-border text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary disabled:pointer-events-none disabled:opacity-40"
+          >
+            <ChevronRightIcon className="size-4" />
+          </button>
+        </div>
+
+        <div className="mt-1.5 flex items-center justify-between pl-[4.75rem] pr-9 text-[10px] text-muted-foreground">
+          <span>{formatDay(series.steps[0]!.date)}</span>
+          <span>{t("timeline.step", { current: Math.min(step, lastStep) + 1, total: series.steps.length })}</span>
+          <span>{formatDay(series.steps[lastStep]!.date)}</span>
+        </div>
+      </motion.section>
+    </div>
+  );
+}
+
+// ── Selected tree detail sidebar ────────────────────────────────────────
+
+function TreeDetailPanel({ tree, onClose }: { tree: TreeDetail; onClose: () => void }) {
+  const t = useTranslations("marketplace.globe");
+  const [activePhoto, setActivePhoto] = useState(0);
+  const [failed, setFailed] = useState<Set<number>>(new Set());
+
+  const photos = tree.photos.filter((_, index) => !failed.has(index));
+  const heroSrc = tree.photos[activePhoto] && !failed.has(activePhoto) ? tree.photos[activePhoto] : null;
+  const species = tree.species ?? t("tree.unknownSpecies");
+
+  return (
+    <motion.aside
+      initial={{ opacity: 0, x: 12, filter: "blur(6px)" }}
+      animate={{ opacity: 1, x: 0, filter: "blur(0px)" }}
+      exit={{ opacity: 0, x: 12, filter: "blur(6px)" }}
+      transition={{ duration: 0.22, ease: [0.25, 0.1, 0.25, 1] }}
+      aria-label={t("tree.title")}
+      data-testid="globe-tree-detail"
+      className="pointer-events-auto absolute right-3 top-[7.5rem] z-30 flex max-h-[calc(100%-9rem)] w-[300px] max-w-[calc(100vw-1.5rem)] flex-col overflow-hidden rounded-2xl border border-border bg-background/90 shadow-xl backdrop-blur-xl md:right-4"
+    >
+      <div className="flex items-center justify-between gap-2 border-b border-border px-4 py-2.5">
+        <span className="flex items-center gap-1.5 text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
+          <LeafIcon className="size-3.5 text-primary" />
+          {t("tree.title")}
+        </span>
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label={t("tree.close")}
+          className="grid size-7 shrink-0 place-items-center rounded-full border border-border text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary"
+        >
+          <XIcon className="size-3.5" />
+        </button>
+      </div>
+
+      <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+        <div className="relative aspect-square w-full bg-muted">
+          {heroSrc ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={heroSrc}
+              alt={species}
+              loading="lazy"
+              onError={() => setFailed((prev) => new Set(prev).add(activePhoto))}
+              className="h-full w-full object-cover"
+            />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center text-muted-foreground">
+              <LeafIcon className="size-10 opacity-40" />
+            </div>
+          )}
+        </div>
+
+        {photos.length > 1 ? (
+          <div className="flex gap-1.5 px-3 pt-3">
+            {tree.photos.map((photo, index) =>
+              failed.has(index) ? null : (
+                <button
+                  key={photo}
+                  type="button"
+                  onClick={() => setActivePhoto(index)}
+                  aria-label={t("tree.photo", { index: index + 1 })}
+                  className={cn(
+                    "size-11 shrink-0 overflow-hidden rounded-lg border transition-colors",
+                    index === activePhoto ? "border-primary" : "border-border hover:border-primary/40",
+                  )}
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={photo}
+                    alt=""
+                    loading="lazy"
+                    onError={() => setFailed((prev) => new Set(prev).add(index))}
+                    className="h-full w-full object-cover"
+                  />
+                </button>
+              ),
+            )}
+          </div>
+        ) : null}
+
+        <div className="flex flex-col gap-3 p-4">
+          <div>
+            <p className="text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
+              {t("tree.species")}
+            </p>
+            <h2 className={cn("text-lg font-bold leading-tight text-foreground", tree.species && "italic")}>
+              {species}
+            </h2>
+          </div>
+
+          <div className="flex items-stretch gap-2">
+            <div className="flex flex-1 flex-col gap-0.5 rounded-xl bg-muted p-2.5">
+              <span className="flex items-center gap-1 text-[11px] text-muted-foreground">
+                <MoveVerticalIcon className="size-3" />
+                {t("tree.height")}
+              </span>
+              <span className="text-base font-bold text-foreground">{tree.height ?? t("tree.unknown")}</span>
+            </div>
+            <div className="flex flex-1 flex-col gap-0.5 rounded-xl bg-muted p-2.5">
+              <span className="flex items-center gap-1 text-[11px] text-muted-foreground">
+                <MoveHorizontalIcon className="size-3" />
+                {t("tree.dbh")}
+              </span>
+              <span className="text-base font-bold text-foreground">{tree.dbh ?? t("tree.unknown")}</span>
+            </div>
+          </div>
+
+          {tree.date ? (
+            <p className="text-xs text-muted-foreground">
+              {t("tree.measured")} <span className="text-foreground">{tree.date}</span>
+            </p>
+          ) : null}
+          {tree.notes ? (
+            <p className="text-xs leading-5 text-muted-foreground">{tree.notes}</p>
+          ) : null}
+        </div>
+      </div>
+    </motion.aside>
+  );
+}
+
+// ── Visible layers summary ──────────────────────────────────────────────────
+
+/** Lists exactly which data layers are on the map right now, with "zoom to
+ *  layer" and quick-hide actions — so toggling many drone images never leaves
+ *  the user guessing which one is visible. */
+function ActiveLayersCard({
+  layers,
+  onLocate,
+  onHide,
+}: {
+  layers: GlobeLayer[];
+  onLocate: (layer: GlobeLayer) => void;
+  onHide: (layer: GlobeLayer) => void;
+}) {
+  const t = useTranslations("marketplace.globe");
+  return (
+    <div
+      data-testid="globe-active-layers"
+      className="pointer-events-auto rounded-xl border border-border bg-background/85 p-3 shadow-lg backdrop-blur-xl"
+    >
+      <p className="flex items-center gap-1.5 text-xs font-semibold text-foreground">
+        <LayersIcon className="size-3.5 text-primary" />
+        {t("layers.visibleNow", { count: layers.length })}
+      </p>
+      <ul className="mt-2 flex max-h-36 flex-col gap-0.5 overflow-y-auto overscroll-contain">
+        {layers.map((layer) => (
+          <li key={layer.id} className="flex items-center gap-1">
+            {layer.bounds ? (
+              <button
+                type="button"
+                onClick={() => onLocate(layer)}
+                title={t("layers.flyTo", { name: layer.name })}
+                className="flex h-6 min-w-0 flex-1 items-center gap-1.5 rounded text-left text-[11px] text-muted-foreground transition-colors hover:text-primary"
+              >
+                <LocateFixedIcon className="size-3 shrink-0" />
+                <span className="truncate">{layer.name}</span>
+              </button>
+            ) : (
+              <span className="flex h-6 min-w-0 flex-1 items-center gap-1.5 text-[11px] text-muted-foreground">
+                <span aria-hidden className="size-3 shrink-0" />
+                <span className="truncate">{layer.name}</span>
+              </span>
+            )}
+            <button
+              type="button"
+              onClick={() => onHide(layer)}
+              aria-label={t("layers.hide", { name: layer.name })}
+              title={t("layers.hide", { name: layer.name })}
+              className="grid size-5 shrink-0 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            >
+              <XIcon className="size-3" />
+            </button>
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }
 

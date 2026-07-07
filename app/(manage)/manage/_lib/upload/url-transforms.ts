@@ -54,16 +54,3 @@ export function transformPhotoUrl(url: string): string {
 
   return trimmed;
 }
-
-export function extractFileName(url: string): string {
-  try {
-    const parsed = new URL(url);
-    const pathSegments = parsed.pathname.split("/").filter(Boolean);
-    const lastSegment = pathSegments[pathSegments.length - 1];
-    if (lastSegment && /\.\w{2,5}$/.test(lastSegment)) return decodeURIComponent(lastSegment);
-  } catch {
-    // Keep the plain fallback below.
-  }
-
-  return "photo.jpg";
-}

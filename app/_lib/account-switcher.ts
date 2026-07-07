@@ -20,7 +20,7 @@ import type { CgsGroupMembership } from "@/app/(manage)/manage/_lib/cgs";
 
 export type AccountCard = { displayName: string | null; avatarUrl: string | null; handle: string | null };
 export type SwitcherGroup = CgsGroupMembership & AccountCard;
-export type AccountListStatus = "idle" | "loading" | "ready" | "error";
+type AccountListStatus = "idle" | "loading" | "ready" | "error";
 
 export type ActiveAccountContext =
   | { type: "personal"; did: string; selectedAt?: string }
@@ -242,7 +242,7 @@ export function useAccountList(sessionDid: string | null): UseAccountListResult 
 
 // ── active account context (personal vs organization) ──────────────────────
 
-export function readActiveContext(sessionDid: string): ActiveAccountContext {
+function readActiveContext(sessionDid: string): ActiveAccountContext {
   if (typeof window === "undefined") return { type: "personal", did: sessionDid };
   try {
     const raw = window.localStorage.getItem(ACTIVE_MANAGE_CONTEXT_KEY);
@@ -262,7 +262,7 @@ export function readActiveContext(sessionDid: string): ActiveAccountContext {
   return { type: "personal", did: sessionDid };
 }
 
-export function rememberActiveContext(context: ActiveAccountContext): void {
+function rememberActiveContext(context: ActiveAccountContext): void {
   try {
     window.localStorage.setItem(
       ACTIVE_MANAGE_CONTEXT_KEY,

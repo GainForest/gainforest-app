@@ -1055,7 +1055,7 @@ export type ObservationDraft = {
   occurrenceRemarks: string;
 };
 
-export const EMPTY_OBSERVATION_DRAFT: ObservationDraft = {
+const EMPTY_OBSERVATION_DRAFT: ObservationDraft = {
   scientificName: "",
   vernacularName: "",
   kingdom: "",
@@ -1148,7 +1148,7 @@ export function ObservationFields({
   );
 }
 
-export function ObservationOwnerControls({
+function ObservationOwnerControls({
   draft,
   feedback,
   hasChanges,
@@ -1536,7 +1536,7 @@ export function ObservationLocationPickerModal({
   );
 }
 
-export function isEditableObservationRecord(record: ExplorerRecord): record is Extract<ExplorerRecord, { kind: "occurrence" }> {
+function isEditableObservationRecord(record: ExplorerRecord): record is Extract<ExplorerRecord, { kind: "occurrence" }> {
   return record.kind === "occurrence" && record.atUri.includes("/app.gainforest.dwc.occurrence/");
 }
 

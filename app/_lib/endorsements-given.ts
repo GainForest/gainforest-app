@@ -189,7 +189,7 @@ async function fetchEndorsedDidsUncached(orgDid: string, signal?: AbortSignal): 
 }
 
 /** DIDs this org has endorsed, newest-first. Cached per org. */
-export function fetchEndorsedDidsByDid(orgDid: string, signal?: AbortSignal): Promise<string[]> {
+function fetchEndorsedDidsByDid(orgDid: string, signal?: AbortSignal): Promise<string[]> {
   if (!orgDid.startsWith("did:")) return Promise.resolve([]);
   return publicExploreCache(
     "endorsements-given",

@@ -161,10 +161,13 @@
       "colJoined": "Alijiunga"
     },
     "filters": {
-      "description": "Onyesha mashirika kwa chanzo, uchunguzi, kategoria, au nchi."
+      "description": "Onyesha mashirika kwa chanzo, michango, uchunguzi, kategoria, au nchi."
     },
     "quickFilters": {
-      "observations": "Ina uchunguzi"
+      "observations": "Ina uchunguzi",
+      "donations": "Hupokea michango",
+      "donationsGainforest": "Michango ya GainForest",
+      "donationsMaearth": "Michango ya Ma Earth"
     },
     "facets": {
       "category": "Kategoria",
@@ -246,7 +249,7 @@
       "natureChampion": "Bingwa wa mazingira",
       "consistentGiver": "Mtoaji wa kudumu",
       "risingSupporter": "Msaidizi anayechipukia",
-      "openWallet": "Fungua {wallet} kwenye BaseScan",
+      "openWallet": "Fungua {wallet} kwenye Etherscan",
       "openAccount": "Fungua akaunti ya mchangiaji kwenye kichupo kipya",
       "anonymousSupporter": "Muungaji mkono asiyejulikana",
       "donationSummaryWithTime": "{count, plural, one {mchango #} other {michango #}} · Mchango wa mwisho {relativeTime}",
@@ -299,6 +302,10 @@
       "live": "Inaendelea",
       "upcoming": "Inaanza hivi karibuni",
       "ended": "Imekamilika"
+    },
+    "rounds": {
+      "title": "Raundi",
+      "current": "Sasa"
     },
     "round": {
       "startsIn": "Inaanza baada ya",
@@ -392,7 +399,10 @@
       "description": "Kumbukumbu ya kudumu ya mabingwa wa kila raundi.",
       "mostObservations": "Uoni mwingi zaidi",
       "bestPicture": "Picha bora",
-      "pending": "Itatangazwa"
+      "pending": "Itatangazwa",
+      "compact": "Karibuni",
+      "mostSubmitted": "Zilizowasilishwa zaidi",
+      "mostLiked": "Zilizopendwa zaidi"
     },
     "map": {
       "title": "Uchunguzi wa wiki",
@@ -578,7 +588,10 @@
       "noMatch": "Hakuna mradi unaolingana na utafutaji wako.",
       "untitledProject": "Mradi usio na kichwa",
       "applyWith": "Omba kwa {project}",
-      "submitError": "Imeshindikana kutuma maombi yako. Tafadhali jaribu tena."
+      "submitError": "Imeshindikana kutuma maombi yako. Tafadhali jaribu tena.",
+      "successTitle": "Maombi yamewasilishwa",
+      "successBody": "Asante kwa kuomba kwa {project}. Tutawasiliana nawe hivi karibuni kuhusu hatua zinazofuata.",
+      "successClose": "Imekamilika"
     },
     "interoperable": {
       "category": "Programu ya Ruzuku Zinazoshirikiana",
@@ -637,9 +650,9 @@
       "setupDescription": "Unganisha pochi ili kupokea michango ya USDC kutoka kwa waungaji mkono.",
       "stepConnect": "Hatua ya 1: Unganisha pochi yako",
       "connectWallet": "Unganisha pochi",
-      "stepSwitch": "Hatua ya 2: Hamia kwenye mtandao wa Base",
+      "stepSwitch": "Hatua ya 2: Hamia kwenye mtandao wa Ethereum",
       "switching": "Inabadilisha...",
-      "switchToBase": "Hamia Base",
+      "switchToEthereum": "Hamia Ethereum",
       "linkedSuccess": "✓ Pochi imeunganishwa kwa mafanikio!",
       "linkedSuccessDescription": "Kichakataji faharasa kinaweza kuchukua muda kuchakata uthibitisho wako.",
       "refresh": "Onyesha upya",
@@ -918,11 +931,14 @@
     "filters": {
       "allProjects": "Miradi yote",
       "allFilters": "Panga na chuja",
-      "description": "Onyesha miradi kwa beji ya chanzo, picha, au eneo la mradi.",
+      "description": "Onyesha miradi kwa beji ya chanzo, michango, picha, au eneo la mradi.",
       "updateHint": "Vichujio husasishwa unapochagua.",
       "images": "Huonyesha picha",
       "locations": "Ina eneo",
-      "timeline": "Ina ratiba"
+      "timeline": "Ina ratiba",
+      "donations": "Hupokea michango",
+      "donationsGainforest": "Michango ya GainForest",
+      "donationsMaearth": "Michango ya Ma Earth"
     },
     "empty": {
       "eyebrow": "Hakuna matokeo",
@@ -940,7 +956,16 @@
       "bumicertCount": "{count, plural, one {# cheti} other {# vyeti}}",
       "projectPlace": "Eneo la mradi",
       "showDetails": "Onyesha maelezo",
-      "loading": "Inapakia miradi"
+      "loading": "Inapakia miradi",
+      "donate": "Changia",
+      "acceptsDonations": "Hupokea michango",
+      "openForSupport": "Iko wazi kwa msaada",
+      "donationSummary": "{amount} kutoka kwa {donors, plural, one {mchangiaji #} other {wachangiaji #}}",
+      "donationSummaryShort": "{amount} · {donors, plural, one {mchangiaji #} other {wachangiaji #}}",
+      "donationWays": "Njia {count}",
+      "maEarth": "Ma Earth",
+      "round": "Raundi {round}",
+      "byDonors": "kutoka kwa {donors, plural, one {mchangiaji #} other {wachangiaji #}}"
     },
     "actions": {
       "clearAll": "Futa yote"
@@ -1492,6 +1517,18 @@
     "emptyHero": {
       "description": "Miradi huleta pamoja kazi yako ya athari — watu, maeneo, vipindi vya muda, na picha au maelezo ya kuunga mkono — katika ukurasa mmoja ambao wafadhili wanaweza kufuatilia na kuufadhili.",
       "cta": "Unda mradi"
+    },
+    "publish": {
+      "title": "Onyesha kazi yako kwenye kurasa za uchunguzi",
+      "description": "Kuchapisha hufanya akaunti hii na miradi yake yote ionekane kwa kila mtu anayevinjari GainForest.",
+      "action": "Chapisha",
+      "publishing": "Inachapisha…",
+      "publishedTitle": "Imechapishwa kwenye kurasa za uchunguzi",
+      "publishedHint": "Akaunti hii na miradi yake inaonekana kwa kila mtu anayevinjari GainForest.",
+      "justPublishedHint": "Imekamilika! Inaweza kuchukua dakika chache kuonekana kwenye kurasa za uchunguzi.",
+      "memberBlocked": "Wamiliki na wasimamizi wa shirika pekee ndio wanaweza kuchapisha.",
+      "error": "Uchapishaji haukufanikiwa. Tafadhali jaribu tena baadaye.",
+      "unavailable": "Uchapishaji haupatikani kwa sasa. Tafadhali jaribu tena baadaye."
     }
   },
   "manageBumicerts": {
@@ -1641,11 +1678,16 @@
     "viewOnGlobe": "Tazama kwenye Dunia",
     "panel": {
       "searchPlaceholder": "Tafuta mashirika…",
+      "treeFilter": "Data ya miti",
+      "treesEmpty": "Bado hakuna data ya miti iliyopakiwa.",
+      "treesFailed": "Data ya miti haipatikani kwa sasa.",
       "toggleList": "Onyesha orodha ya mashirika",
       "loading": "Inapakia mashirika…",
       "count": "{count, plural, one {shirika #} other {mashirika #}}",
       "empty": "Hakuna shirika linalolingana na utafutaji wako.",
-      "maEarth": "Ma Earth"
+      "maEarth": "Ma Earth",
+      "dataFilter": "Tabaka za droni na data",
+      "dataBadge": "{count, plural, one {tabaka # la data ya ramani} other {tabaka # za data ya ramani}}"
     },
     "focus": {
       "organizationLabel": "Shirika",
@@ -1657,11 +1699,15 @@
       "viewProject": "Tazama mradi",
       "backToGlobe": "Rudi kwenye mwonekano wa dunia nzima",
       "recenter": "Weka ramani katikati tena",
-      "sites": "{count, plural, one {eneo la mradi #} other {maeneo ya mradi #}}",
+      "sites": "{count, plural, one {eneo # kwenye ramani} other {maeneo # kwenye ramani}}",
       "boundaries": "{count, plural, one {mpaka wa eneo #} other {mipaka ya eneo #}}",
       "allSites": "Maeneo yote",
+      "orgLocationHeading": "Mahali pa shirika",
+      "projectSitesHeading": "Maeneo ya mradi",
       "noSites": "Bado hakuna maeneo ya mradi yaliyowekwa kwenye ramani.",
       "noBoundaries": "Mradi huu bado hauna mipaka ya eneo iliyowekwa kwenye ramani.",
+      "projectPill": "Mradi: {name}",
+      "moreProjects": "+{count} zaidi",
       "projectHint": "Mipaka iliyoangaziwa inaonyesha mahali mradi huu unafanya kazi."
     },
     "layers": {
@@ -1669,6 +1715,8 @@
       "title": "Chunguza tabaka",
       "landcover": "Uoto wa ardhi",
       "landcoverSource": "ESA WorldCover 2021",
+      "measuredTrees": "Miti iliyopimwa",
+      "measuredTreesCount": "{count, plural, one {mti #} other {miti #}}",
       "projectCategory": "Tabaka za mradi",
       "noProjectLayers": "Shirika hili bado halina tabaka za ziada za ramani.",
       "landcoverClasses": {
@@ -1681,7 +1729,34 @@
         "water": "Maji",
         "wetland": "Ardhi oevu",
         "mangroves": "Mikoko"
-      }
+      },
+      "visibleNow": "{count, plural, one {tabaka # kwenye ramani} other {tabaka # kwenye ramani}}",
+      "flyTo": "Kuza hadi {name}",
+      "hide": "Ficha {name}"
+    },
+    "timeline": {
+      "seriesFlights": "{count, plural, one {Safari # ya droni} other {Safari # za droni}} juu ya eneo lilelile",
+      "seriesHint": "Eneo lilelile lilipigwa picha kwa tarehe tofauti — washa kitelezi cha muda kuona linavyobadilika.",
+      "toggle": "Ona {name} kwa muda",
+      "title": "Mabadiliko kwa muda",
+      "close": "Ficha kitelezi cha muda",
+      "play": "Cheza ratiba ya muda",
+      "pause": "Simamisha ratiba ya muda",
+      "previous": "Picha ya awali",
+      "next": "Picha inayofuata",
+      "slider": "Tarehe ya kupiga picha",
+      "step": "{current} kati ya {total}"
+    },
+    "tree": {
+      "title": "Mti",
+      "close": "Funga",
+      "species": "Spishi",
+      "height": "Urefu",
+      "dbh": "DBH",
+      "measured": "Kilichopimwa:",
+      "unknown": "Haijulikani",
+      "unknownSpecies": "Spishi haijulikani",
+      "photo": "Picha {index}"
     },
     "loadingGlobe": "Inaandaa dunia…",
     "sheet": {

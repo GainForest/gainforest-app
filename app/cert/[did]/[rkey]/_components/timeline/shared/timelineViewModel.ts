@@ -34,7 +34,7 @@ export type TimelinePaginationResult<T> = {
   visibleItems: T[];
 };
 
-export function getTimelineEntryId(item: TimelineAttachmentItem, index: number): string {
+function getTimelineEntryId(item: TimelineAttachmentItem, index: number): string {
   return item.metadata.uri ?? `${item.metadata.rkey ?? "entry"}-${index}`;
 }
 

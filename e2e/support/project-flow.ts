@@ -3,9 +3,9 @@ import { screenshotStep } from "./artifacts";
 import { getPdsRecord, parseAtUri, trackCreatedPdsRecord, waitForProjectByTitle, type PdsRepoRecord } from "./pds";
 import { groupManageBasePath, readCgsOrgMetadata } from "./cgs-org";
 
-export const E2E_PROJECT_SHORT_DESCRIPTION =
+const E2E_PROJECT_SHORT_DESCRIPTION =
   "E2E project summary for restoration work, field evidence, and public impact review.";
-export const E2E_PROJECT_DESCRIPTION = "";
+const E2E_PROJECT_DESCRIPTION = "";
 
 export type CreatedProject = {
   title: string;
@@ -21,11 +21,6 @@ export type CreatedProject = {
 
 function isObject(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
-}
-
-export function projectIdentityFromRecord(record: PdsRepoRecord): string {
-  const parsed = parseAtUri(record.uri);
-  return `${parsed.did}/${parsed.rkey}`;
 }
 
 export function projectItemUris(record: PdsRepoRecord): string[] {

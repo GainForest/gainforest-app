@@ -133,7 +133,7 @@ export async function provisionTainaBot(input: {
   return flueRequest<TainaProvisionResult>("/provision", input);
 }
 
-export type TainaChatMessage = { role: "user" | "assistant"; text: string; ts: string };
+type TainaChatMessage = { role: "user" | "assistant"; text: string; ts: string };
 
 export type TainaDashboardData = {
   provisioned: boolean;

@@ -204,9 +204,8 @@ function ExploreNav({ sessionDid }: { sessionDid: string | null }) {
                   isActive={isLeafActive(item.pathCheck, pathname)}
                   index={leafIndex}
                   // Certs are minted from a Project, so visually hang Certs
-                  // under Projects (which sits directly above it). The Globe is
-                  // the map view of Observations, so it hangs under that item.
-                  paired={item.id === "bumicerts" || item.id === "globe"}
+                  // under Projects (which sits directly above it).
+                  paired={item.id === "bumicerts"}
                 />
               );
             })}
@@ -400,6 +399,7 @@ function AddObservationsCard({ sessionDid }: { sessionDid: string }) {
         <span className="mx-auto flex w-fit">
           <AddObservationsButton
             sessionDid={sessionDid}
+            dataTaina="add-observations"
             className={cn(
               buttonVariants({ variant: "outline", size: "icon" }),
               "bg-background hover:bg-primary hover:text-primary-foreground",
@@ -453,6 +453,7 @@ function AddObservationsCard({ sessionDid }: { sessionDid: string }) {
       {/*CTA*/}
       <AddObservationsButton
         sessionDid={sessionDid}
+        dataTaina="add-observations"
         className={cn(
           buttonVariants({ variant: "outline", size: "sm" }),
           "relative z-2 w-full bg-background hover:bg-primary hover:text-primary-foreground",
@@ -466,9 +467,18 @@ function AddObservationsCard({ sessionDid }: { sessionDid: string }) {
 
 function SocialFooter() {
   const collapsed = useSidebarCollapsed();
+  const footerT = useTranslations("common.sidebar");
   return (
     <div className={cn("flex px-1", collapsed ? "flex-col items-center gap-1" : "items-center justify-between")}>
-      {collapsed ? null : <span className="text-xs font-medium text-muted-foreground">GainForest v{APP_VERSION}</span>}
+      {collapsed ? null : (
+        <Link
+          href="/changelog"
+          className="rounded-full text-xs font-medium text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+          title={footerT("changelogLink")}
+        >
+          GainForest v{APP_VERSION}
+        </Link>
+      )}
       {/* Language + theme controls live together in the sidebar footer; the
           language picker sits directly to the left of the dark/light toggle. */}
       <div className={cn("flex items-center", collapsed ? "flex-col gap-1" : "gap-0.5")}>

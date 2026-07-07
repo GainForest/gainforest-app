@@ -12,7 +12,7 @@
 
 import { useEffect, useSyncExternalStore } from "react";
 
-export type ViewerStatus = "idle" | "loading" | "ready";
+type ViewerStatus = "idle" | "loading" | "ready";
 export type ViewerState = { status: ViewerStatus; sessionDid: string | null };
 
 const SERVER_STATE: ViewerState = { status: "idle", sessionDid: null };
@@ -56,7 +56,7 @@ async function load(): Promise<void> {
 }
 
 /** Resolve the viewer session once (deduped). Safe no-op on the server. */
-export function ensureViewer(): Promise<void> {
+function ensureViewer(): Promise<void> {
   if (typeof window === "undefined") return Promise.resolve();
   if (state.status === "ready") return Promise.resolve();
   if (inflight) return inflight;
@@ -75,9 +75,4 @@ export function useViewer(): ViewerState {
     void ensureViewer();
   }, []);
   return snapshot;
-}
-
-/** Convenience: just the signed-in viewer's DID (null when signed out/unknown). */
-export function useViewerDid(): string | null {
-  return useViewer().sessionDid;
 }

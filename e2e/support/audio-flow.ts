@@ -27,15 +27,22 @@ function makeTinyWavBuffer(): Buffer {
   return buffer;
 }
 
-function manageBasePath(): string {
+/**
+ * The audio record editor lives on the account Audio tab behind explicit
+ * `?section=…&mode=…` deep links (the tab's default view is the read-only
+ * player gallery). Link straight to the profile path — the /manage redirect
+ * would drop the query params.
+ */
+function audioWorkspacePath(): string {
   const org = readCgsOrgMetadata();
-  return org ? groupManageBasePath(org) : "/manage";
+  const base = org ? groupManageBasePath(org).replace(/\/manage$/, "") : "/manage";
+  return `${base}/audio?section=recordings&mode=new`;
 }
 
 export async function createAudioRecording(page: Page, testInfo: TestInfo): Promise<PdsRepoRecord> {
   const name = `E2E Audio Recording ${Date.now()}-${testInfo.workerIndex}-${testInfo.retry}`;
 
-  await page.goto(`${manageBasePath()}/audio?section=recordings&mode=new`, { waitUntil: "domcontentloaded" });
+  await page.goto(audioWorkspacePath(), { waitUntil: "domcontentloaded" });
   await expect(page.getByRole("heading", { name: /upload audio recording/i })).toBeVisible({ timeout: 60_000 });
   await screenshotStep(page, testInfo, "audio-create-open");
 

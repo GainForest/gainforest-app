@@ -24,6 +24,14 @@ export const LANDCOVER_TILES_URL =
  *  Ma Earth–funded organizations that don't have their own avatar yet. */
 export const MA_EARTH_LOGO_URL = "/assets/media/images/badges/ma-earth-logo.webp";
 
+/** Map paint colors for the focused org's certified locations: project sites
+ *  keep Green Globe's neon green, while the organization's own location (the
+ *  one referenced by its certified organization profile) paints sky blue so
+ *  the two kinds are distinguishable at a glance. The side-panel site list
+ *  reuses these as legend dots. */
+export const PROJECT_SITE_COLOR = "#00FF00";
+export const ORG_LOCATION_COLOR = "#38BDF8";
+
 /** Initial camera — mirrors Green Globe's MAP_CONFIG. */
 export const GLOBE_INITIAL_CENTER: [number, number] = [102, 9];
 export const GLOBE_INITIAL_ZOOM = 2;
@@ -75,7 +83,12 @@ export function globeMapStyle(): StyleSpecification {
           "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
         ],
         tileSize: 256,
-        maxzoom: 19,
+        // Esri serves literal "Map data not yet available" placeholder tiles
+        // past the locally available imagery resolution — in the remote areas
+        // most project sites live in, that kicks in right around z17–18.
+        // Capping the source here makes MapLibre overzoom the deepest real
+        // tiles instead of rendering the gray placeholders.
+        maxzoom: 17,
         attribution:
           '<a href="https://www.esri.com/" target="_blank" rel="noreferrer">Esri</a>, Maxar, Earthstar Geographics | <a href="https://esa-worldcover.org/" target="_blank" rel="noreferrer">ESA WorldCover</a> | © GainForest',
       },

@@ -36,13 +36,15 @@ import {
   type ProjectRecord,
 } from "../_lib/indexer";
 import { isPdsBlobUrl } from "../_lib/pds";
-import { countryName } from "../_lib/format";
+import { countryName, formatCompactUsd } from "../_lib/format";
 import { useStableQueryView } from "../_lib/use-stable-query-view";
 
 const PROJECTS_PAGE_SIZE = 48;
 const INITIAL_CARD_LIMIT = 96;
 const CARD_BATCH_SIZE = 96;
-const FILTER_KEYS: ProjectIndexFilter[] = ["images", "locations", "timeline"];
+// "donations" stays parseable so old shared links keep working (it means
+// "either donation source"), but the UI only offers the two source chips.
+const FILTER_KEYS: ProjectIndexFilter[] = ["images", "locations", "timeline", "donations", "donations-gainforest", "donations-maearth"];
 const BADGE_FILTER_KEYS: BumicertBadgeFilter[] = ["gainforest", "maearth"];
 const SORT_MODES: ExplorerSortMode[] = ["newest", "oldest", "az", "za"];
 type ViewMode = "cards" | "list" | "map";
@@ -58,13 +60,25 @@ type BadgeFilterOption = {
   logoSrc: string;
 };
 
+type ProjectDonationSummary = {
+  acceptsDonations: boolean;
+  totalUsd: number;
+  donorCount: number;
+  gainforest: { totalUsd: number; donorCount: number } | null;
+  maEarth: { totalUsd: number; donorCount: number; donateUrl: string; rounds: number[] } | null;
+};
+
 export function ProjectsExploreClient({ records: initialRecords = [] }: { records?: ProjectRecord[] }) {
   const t = useTranslations("marketplace.projects");
   const exploreT = useTranslations("marketplace.explore");
-  const filterChips = useMemo<Array<{ key: ProjectIndexFilter; label: string; predicate: (record: ProjectRecord) => boolean }>>(() => [
+  const filterChips = useMemo<Array<{ key: ProjectIndexFilter; label: string; predicate: (record: ProjectRecord) => boolean; hidden?: boolean }>>(() => [
     { key: "images", label: t("filters.images"), predicate: (record) => Boolean(record.imageUrl) },
     { key: "locations", label: t("filters.locations"), predicate: (record) => Boolean(record.locationUri) },
     { key: "timeline", label: t("filters.timeline"), predicate: (record) => (record.evidence?.timeline ?? 0) > 0 },
+    { key: "donations-gainforest", label: t("filters.donationsGainforest"), predicate: (record) => record.donationSources?.gainforest === true },
+    { key: "donations-maearth", label: t("filters.donationsMaearth"), predicate: (record) => record.donationSources?.maearth === true },
+    // Legacy key from old shared links; not offered as a chip anymore.
+    { key: "donations", label: t("filters.donations"), predicate: (record) => record.acceptsDonations === true, hidden: true },
   ], [t]);
   const badgeFilterOptions = useMemo<BadgeFilterOption[]>(() => [
     { key: "gainforest", label: exploreT("filters.badges.gainforest"), logoSrc: "/assets/media/images/gainforest-logo.svg" },
@@ -91,9 +105,11 @@ export function ProjectsExploreClient({ records: initialRecords = [] }: { record
   const [autoLoadMore, setAutoLoadMore] = useState(false);
   const [openFilters, setOpenFilters] = useState(false);
   const [drawer, setDrawer] = useState<ProjectRecord | null>(null);
+  const [donationSummaries, setDonationSummaries] = useState<Record<string, ProjectDonationSummary>>({});
   const filtersMenuRef = useRef<HTMLDivElement | null>(null);
   const requestSeqRef = useRef(0);
   const countSeqRef = useRef(0);
+  const donationRequestKeyRef = useRef("");
 
   const [query, setQuery] = useQueryState(
     "q",
@@ -218,6 +234,38 @@ export function ProjectsExploreClient({ records: initialRecords = [] }: { record
     [cardLimit, view, visibleRecords],
   );
   const hasMoreCardsToShow = view !== "map" && renderedRecords.length < visibleRecords.length;
+
+  useEffect(() => {
+    const candidates = renderedRecords.slice(0, 60).filter((record) => record.bumicertUris.length > 0);
+    if (candidates.length === 0) return;
+    const key = candidates.map((record) => `${record.atUri}:${record.bumicertUris.join("|")}`).join(";");
+    if (donationRequestKeyRef.current === key) return;
+    donationRequestKeyRef.current = key;
+
+    const controller = new AbortController();
+    fetch("/api/projects/donation-summaries", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        items: candidates.map((record) => ({
+          key: record.atUri,
+          did: record.did,
+          atUri: record.atUri,
+          bumicertUris: record.bumicertUris,
+        })),
+      }),
+      signal: controller.signal,
+    })
+      .then((response) => response.ok ? response.json() : null)
+      .then((data: { summaries?: Record<string, ProjectDonationSummary> } | null) => {
+        if (!data?.summaries || controller.signal.aborted) return;
+        setDonationSummaries((current) => ({ ...current, ...data.summaries }));
+      })
+      .catch((error) => {
+        if ((error as Error).name !== "AbortError") console.warn("[projects] donation summaries failed", error);
+      });
+    return () => controller.abort();
+  }, [renderedRecords]);
 
   const updateFilters = useCallback((nextFilters: ProjectIndexFilter[]) => {
     void setFiltersParam(serializeFilterParam(nextFilters));
@@ -397,7 +445,7 @@ export function ProjectsExploreClient({ records: initialRecords = [] }: { record
                         onClick={() => toggleBadgeFilter(badge.key)}
                       />
                     ))}
-                    {filterChips.map((chip) => (
+                    {filterChips.filter((chip) => !chip.hidden).map((chip) => (
                       <Button key={chip.key} type="button" aria-pressed={filters.includes(chip.key)} onClick={() => toggleFilter(chip.key)} variant={filters.includes(chip.key) ? "default" : "outline"} size="sm" className="h-10 text-sm">
                         {chip.label}
                       </Button>
@@ -425,9 +473,9 @@ export function ProjectsExploreClient({ records: initialRecords = [] }: { record
           {view === "map" ? (
             <RecordMap records={visibleRecords} kind="project" onOpen={openMapRecord} />
           ) : view === "list" ? (
-            <ProjectList records={renderedRecords} loading={loading} onOpen={openRecord} />
+            <ProjectList records={renderedRecords} loading={loading} onOpen={openRecord} donationSummaries={donationSummaries} />
           ) : (
-            <ProjectGrid records={renderedRecords} loading={loading} onOpen={openRecord} onFilterOwner={setOwnerDid} />
+            <ProjectGrid records={renderedRecords} loading={loading} onOpen={openRecord} onFilterOwner={setOwnerDid} donationSummaries={donationSummaries} />
           )}
         </div>
 
@@ -503,11 +551,13 @@ const ProjectGrid = memo(function ProjectGrid({
   loading,
   onOpen,
   onFilterOwner,
+  donationSummaries = {},
 }: {
   records: ProjectRecord[];
   loading: boolean;
   onOpen: (record: ProjectRecord) => void;
   onFilterOwner?: (did: string) => void;
+  donationSummaries?: Record<string, ProjectDonationSummary>;
 }) {
   const t = useTranslations("marketplace.projects");
   if (loading && records.length === 0) return <ProjectGridSkeleton />;
@@ -535,7 +585,7 @@ const ProjectGrid = memo(function ProjectGrid({
   return (
     <div className="mt-5 grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] items-stretch gap-6 lg:gap-8">
       {records.map((record, index) => (
-        <ProjectCard key={record.id} record={record} priority={index < 6} index={index} onOpen={onOpen} onFilterOwner={onFilterOwner} />
+        <ProjectCard key={record.id} record={record} priority={index < 6} index={index} onOpen={onOpen} onFilterOwner={onFilterOwner} donationSummary={donationSummaries[record.atUri]} />
       ))}
     </div>
   );
@@ -545,13 +595,15 @@ const ProjectList = memo(function ProjectList({
   records,
   loading,
   onOpen,
+  donationSummaries = {},
 }: {
   records: ProjectRecord[];
   loading: boolean;
   onOpen: (record: ProjectRecord) => void;
+  donationSummaries?: Record<string, ProjectDonationSummary>;
 }) {
   if (loading && records.length === 0) return <ProjectGridSkeleton />;
-  if (records.length === 0) return <ProjectGrid records={records} loading={loading} onOpen={onOpen} />;
+  if (records.length === 0) return <ProjectGrid records={records} loading={loading} onOpen={onOpen} donationSummaries={donationSummaries} />;
 
   return (
     <div className="mt-4">
@@ -559,7 +611,7 @@ const ProjectList = memo(function ProjectList({
       <ul role="list" className="border-t border-border">
         {records.map((record, index) => (
           <li key={record.id} className="relative animate-in after:absolute after:inset-x-2 after:bottom-0 after:h-px after:bg-border last:after:hidden sm:after:inset-x-3" style={{ animationDelay: `${Math.min(index, 10) * 35}ms` }}>
-            <ProjectListItem record={record} onOpen={onOpen} priority={index < 8} />
+            <ProjectListItem record={record} onOpen={onOpen} priority={index < 8} donationSummary={donationSummaries[record.atUri]} />
           </li>
         ))}
       </ul>
@@ -595,12 +647,14 @@ function ProjectCard({
   index,
   onOpen,
   onFilterOwner,
+  donationSummary,
 }: {
   record: ProjectRecord;
   priority: boolean;
   index: number;
   onOpen: (record: ProjectRecord) => void;
   onFilterOwner?: (did: string) => void;
+  donationSummary?: ProjectDonationSummary;
 }) {
   const t = useTranslations("marketplace.projects.card");
   const ownerFilterT = useTranslations("marketplace.ownerFilter");
@@ -609,6 +663,7 @@ function ProjectCard({
   const ownerName = record.creatorName ?? t("projectSteward");
   const canFilterOwner = Boolean(onFilterOwner) && Boolean(record.did);
   const place = countryName(record.country);
+  const maEarthRounds = donationSummary?.maEarth?.rounds ?? [];
 
   return (
     <button type="button" onClick={() => onOpen(record)} className="group flex h-full flex-col overflow-hidden rounded-3xl border border-border bg-card text-left shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 animate-in" style={{ animationDelay: `${Math.min(index, 10) * 35}ms` }}>
@@ -630,6 +685,15 @@ function ProjectCard({
             <FolderKanbanIcon className="h-12 w-12" />
           </div>
         )}
+        {maEarthRounds.length > 0 ? (
+          <span className="absolute right-3 top-3 z-10 rounded-full bg-foreground px-3 py-1 text-xs font-semibold text-background shadow-lg">
+            {t("round", { round: maEarthRounds[maEarthRounds.length - 1]! })}
+          </span>
+        ) : donationSummary?.acceptsDonations || record.acceptsDonations ? (
+          <span className="absolute right-3 top-3 z-10 rounded-full bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground shadow-lg">
+            {t("donate")}
+          </span>
+        ) : null}
         <span
           {...(canFilterOwner
             ? {
@@ -687,8 +751,35 @@ function ProjectCard({
           </div>
         ) : null}
 
+        <ProjectDonationMini summary={donationSummary} acceptsDonations={record.acceptsDonations === true} />
       </div>
     </button>
+  );
+}
+
+/**
+ * Ma Earth-style donation line: a quiet single line with the amount in bold
+ * and the donor count muted. No progress bar — projects here have no funding
+ * goal, so a bar length would be arbitrary decoration pretending to be data.
+ */
+function ProjectDonationMini({ summary, acceptsDonations }: { summary?: ProjectDonationSummary; acceptsDonations: boolean }) {
+  const t = useTranslations("marketplace.projects.card");
+  if (!summary && !acceptsDonations) return null;
+  const totalUsd = summary?.totalUsd ?? 0;
+  const donorCount = summary?.donorCount ?? 0;
+  const hasAmount = totalUsd > 0 && donorCount > 0;
+
+  return (
+    <p className="mt-4 flex min-w-0 items-baseline gap-1.5 text-sm">
+      {hasAmount ? (
+        <>
+          <span className="shrink-0 font-semibold text-foreground">{formatCompactUsd(totalUsd)}</span>
+          <span className="truncate text-muted-foreground">{t("byDonors", { donors: donorCount })}</span>
+        </>
+      ) : (
+        <span className="truncate text-muted-foreground">{t("openForSupport")}</span>
+      )}
+    </p>
   );
 }
 

@@ -56,18 +56,25 @@
       }
     },
     "evidenceAdder": {
-      "title": "Add Evidence",
+      "title": "Add update",
+      "composerDescription": "Write a short update. Attach sounds, observations, trees, or files if they help.",
+      "captionPlaceholder": "Share a quick project update. You can post text only or attach evidence below.",
+      "attachLabel": "Attach optional evidence:",
+      "attachingType": "Attaching {type}",
+      "postUpdate": "Post update",
+      "chooseAttachment": "Choose something to attach",
+      "updateTitleFallback": "Project update",
       "selectType": "Select the type of evidence to add.",
       "selectEvidence": "Select the evidence to add.",
       "addType": "Add {type}",
       "tabs": {
-        "update": "Text update",
+        "images": "Images",
         "audio": "Sounds",
         "trees": "Trees",
         "biodiversity": "Observations",
         "files": "Files"
       },
-      "linking": "Linking…",
+      "linking": "Posting…",
       "loadingSources": "Loading evidence…",
       "sourcesLoadError": "Could not load available evidence. Refresh and try again.",
       "selectToLink": "Select evidence to link",
@@ -79,6 +86,8 @@
       "selectContentType": "Select content type",
       "addFilePlaceholder": "Add a file as evidence",
       "fileHelp": "Files up to {maxSize}.",
+      "addImagePlaceholder": "Drop images here or click to upload",
+      "imageHelp": "Images up to {maxSize}.",
       "externalLink": "External link",
       "externalLinkPlaceholder": "https://example.org/report",
       "addLink": "Add",
@@ -129,6 +138,7 @@
         "biodiversity": "observations"
       },
       "attachmentTitles": {
+        "images": "Images",
         "audio": "Sound recordings",
         "trees": "Tree group",
         "biodiversity": "Observations"
@@ -142,7 +152,7 @@
       "checkingExistingLinks": "Checking existing timeline links…",
       "unableToVerifyExistingLinks": "Existing links could not be checked. Refresh before linking tree groups.",
       "tabDescriptions": {
-        "update": "Write a short progress update for this project.",
+        "images": "Upload project photos.",
         "audio": "Add sounds already saved by this organization.",
         "trees": "Add tree information grouped by project place.",
         "biodiversity": "Filter observations and add displayed records or saved groups.",
@@ -224,7 +234,7 @@
         "document": "Files",
         "site": "Project place",
         "update": "Update",
-        "other": "Evidence"
+        "other": "Update"
       },
       "notSpecified": "Not specified",
       "resolvingDate": "Resolving evidence date…",
@@ -377,6 +387,19 @@
       "updates": "Updates",
       "reviews": "Reviews",
       "support": "Support"
+    },
+    "support": {
+      "title": "Support",
+      "donations": "Donations",
+      "fromSupporters": "From {count, plural, one {# supporter} other {# supporters}}",
+      "noDonationsYet": "Be the first to support this project.",
+      "donate": "Donate",
+      "donateAgain": "Donate again",
+      "donateOnMaEarth": "Donate on Ma Earth",
+      "round": "Round {round}",
+      "includesMaEarth": "Total includes GainForest and Ma Earth donations.",
+      "viaMaEarth": "Raised through the Ma Earth campaign.",
+      "notAccepting": "This project is not accepting donations yet. Follow {name} for updates."
     }
   },
   "create": {

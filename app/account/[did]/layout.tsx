@@ -82,6 +82,13 @@ export default async function AccountLayout({
   const showEndorsementsGiven = account.kind === "organization"
     ? (await fetchEndorsementsGivenCount(account.did).catch(() => 0)) > 0
     : false;
+  // The Equipment tab is a private inventory surface, not a public showcase:
+  // organizations aggregate the whole team's gear, so — like Members — it
+  // only shows to people who belong to the organization, and personal
+  // profiles only show it to the signed-in owner. (Individual equipment
+  // detail pages stay public, since deployments reference them.)
+  const isOwner = session.isLoggedIn && session.did === account.did;
+  const showEquipment = account.kind === "organization" ? canManage : isOwner;
 
   return (
     <main className="w-full">
@@ -116,9 +123,13 @@ export default async function AccountLayout({
               includeSettings={canManage}
               showOrgData={canManage}
               // Tainá is a personal Telegram assistant, so its dashboard tab
-              // only appears to the signed-in owner of a personal profile.
-              includeTaina={account.kind === "user" && session.isLoggedIn && session.did === account.did}
+              // only appears to the signed-in owner of this profile. Ownership
+              // (session DID === account DID) is the whole gate: it can only
+              // ever match a personal repo, and some personal accounts carry
+              // an organization record, so don't also require kind === "user".
+              includeTaina={isOwner}
               showEndorsementsGiven={showEndorsementsGiven}
+              showEquipment={showEquipment}
             />
           </>
         }

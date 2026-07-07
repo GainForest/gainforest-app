@@ -1,4 +1,3 @@
-import type { TimelineAttachmentItem } from "@/app/_lib/indexer";
 
 function parseDate(value: string | null | undefined): Date | null {
   if (!value) return null;
@@ -12,33 +11,6 @@ function formatMonthYear(date: Date, locale: string): string {
     timeZone: "UTC",
     year: "numeric",
   });
-}
-
-export function formatLinkedWindow(
-  entries: TimelineAttachmentItem[],
-  locale: string,
-): string | null {
-  const dates = entries
-    .map((entry) => parseDate(entry.record.createdAt ?? entry.metadata.createdAt))
-    .filter((date): date is Date => date !== null);
-
-  if (dates.length === 0) return null;
-
-  const first = dates.reduce((current, next) =>
-    next.getTime() < current.getTime() ? next : current,
-  );
-  const last = dates.reduce((current, next) =>
-    next.getTime() > current.getTime() ? next : current,
-  );
-
-  if (
-    first.getUTCFullYear() === last.getUTCFullYear() &&
-    first.getUTCMonth() === last.getUTCMonth()
-  ) {
-    return formatMonthYear(first, locale);
-  }
-
-  return `${formatMonthYear(first, locale)} – ${formatMonthYear(last, locale)}`;
 }
 
 export function formatDateRangeFromValues(

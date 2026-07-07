@@ -4,7 +4,7 @@ import { resolveBlobUrl, resolvePdsHost } from "@/app/_lib/pds";
 
 export const BADGE_DEFINITION_COLLECTION = "app.certified.badge.definition";
 export const BADGE_AWARD_COLLECTION = "app.certified.badge.award";
-export const BADGE_PENDING_AWARD_COLLECTION = "app.certified.badge.pendingAward";
+const BADGE_PENDING_AWARD_COLLECTION = "app.certified.badge.pendingAward";
 
 export const INTERNAL_BADGE_COLLECTIONS = new Set([
   BADGE_DEFINITION_COLLECTION,

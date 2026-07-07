@@ -56,18 +56,25 @@
       }
     },
     "evidenceAdder": {
-      "title": "Agregar evidencia",
+      "title": "Agregar actualización",
+      "composerDescription": "Escriba una breve actualización. Adjunte sonidos, observaciones, árboles o archivos si ayudan.",
+      "captionPlaceholder": "Comparta una actualización rápida del proyecto. Puede publicar solo texto o adjuntar evidencia abajo.",
+      "attachLabel": "Adjuntar evidencia opcional:",
+      "attachingType": "Adjuntando {type}",
+      "postUpdate": "Publicar actualización",
+      "chooseAttachment": "Elija algo para adjuntar",
+      "updateTitleFallback": "Actualización del proyecto",
       "selectType": "Seleccione el tipo de evidencia a agregar.",
       "selectEvidence": "Seleccione la evidencia a agregar.",
       "addType": "Agregar {type}",
       "tabs": {
-        "update": "Actualización de texto",
+        "images": "Imágenes",
         "audio": "Sonidos",
         "trees": "Árboles",
         "biodiversity": "Observaciones",
         "files": "Archivos"
       },
-      "linking": "Vinculando…",
+      "linking": "Publicando…",
       "loadingSources": "Cargando evidencia…",
       "sourcesLoadError": "No se pudo cargar la evidencia disponible. Actualice e inténtelo de nuevo.",
       "selectToLink": "Seleccione la evidencia para vincular",
@@ -79,6 +86,8 @@
       "selectContentType": "Seleccione el tipo de contenido",
       "addFilePlaceholder": "Agregar un archivo como evidencia",
       "fileHelp": "Archivos de hasta {maxSize}.",
+      "addImagePlaceholder": "Suelte imágenes aquí o haga clic para subir",
+      "imageHelp": "Imágenes de hasta {maxSize}.",
       "externalLink": "Enlace externo",
       "externalLinkPlaceholder": "https://example.org/report",
       "addLink": "Agregar",
@@ -129,6 +138,7 @@
         "biodiversity": "observaciones"
       },
       "attachmentTitles": {
+        "images": "Imágenes",
         "audio": "Grabaciones de sonido",
         "trees": "Grupo de árboles",
         "biodiversity": "Observaciones"
@@ -142,7 +152,7 @@
       "checkingExistingLinks": "Comprobando los vínculos existentes de la cronología…",
       "unableToVerifyExistingLinks": "No se pudieron comprobar los enlaces existentes. Actualiza antes de vincular grupos de árboles.",
       "tabDescriptions": {
-        "update": "Escribe una breve actualización sobre el avance de este proyecto.",
+        "images": "Sube fotos del proyecto.",
         "audio": "Añade sonidos ya guardados por esta organización.",
         "trees": "Añade información de árboles agrupada por lugar del proyecto.",
         "biodiversity": "Filtra observaciones y agrega registros mostrados o grupos guardados.",
@@ -224,7 +234,7 @@
         "document": "Archivos",
         "site": "Lugar del proyecto",
         "update": "Actualización",
-        "other": "Evidencia"
+        "other": "Actualización"
       },
       "notSpecified": "No especificado",
       "resolvingDate": "Fecha de resolución de evidencia...",
@@ -377,6 +387,19 @@
       "updates": "Novedades",
       "reviews": "Reseñas",
       "support": "Apoyo"
+    },
+    "support": {
+      "title": "Apoyo",
+      "donations": "Donaciones",
+      "fromSupporters": "De {count, plural, one {# colaborador} other {# colaboradores}}",
+      "noDonationsYet": "Sé la primera persona en apoyar este proyecto.",
+      "donate": "Donar",
+      "donateAgain": "Donar de nuevo",
+      "donateOnMaEarth": "Donar en Ma Earth",
+      "round": "Ronda {round}",
+      "includesMaEarth": "El total incluye donaciones de GainForest y Ma Earth.",
+      "viaMaEarth": "Recaudado a través de la campaña de Ma Earth.",
+      "notAccepting": "Este proyecto aún no acepta donaciones. Sigue a {name} para recibir novedades."
     }
   },
   "create": {

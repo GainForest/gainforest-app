@@ -14,6 +14,10 @@ export type GlobeOrganization = {
   lon: number | null;
   /** True when the organization carries a Ma Earth badge (any round). */
   maEarth?: boolean;
+  /** Published drone-imagery layers (orthomosaics / aerial tiles). */
+  droneLayers?: number;
+  /** All published map data layers (drone imagery included). */
+  dataLayers?: number;
 };
 
 export type GlobeLegendEntry = {
@@ -46,6 +50,27 @@ export type GlobeLayer = {
   category: string;
   legend?: GlobeLegendEntry[];
   isDefault?: boolean;
+  /** Geographic footprint declared on the record — lets the camera fly to
+   *  exactly what a toggle just made visible. */
+  bounds?: LngLatBounds | null;
+  /** Capture day ("YYYY-MM-DD") of the underlying data, when the record
+   *  declares one (drone flights do). Lets repeat flights over the same area
+   *  be grouped into a time series. */
+  capturedAt?: string | null;
+  /** AT-URI of the layerGroup this layer belongs to (author-declared
+   *  grouping — preferred over geometric inference when present). */
+  groupRef?: string | null;
+};
+
+/** A named monitored area (`app.gainforest.organization.layerGroup`).
+ *  Membership lives on the layers via `groupRef`; the group itself is just
+ *  the identity + display metadata. */
+export type GlobeLayerGroup = {
+  /** AT-URI of the group record — what member layers point at. */
+  uri: string;
+  name: string;
+  description: string;
+  bounds: LngLatBounds | null;
 };
 
 /** A project site (certified location) resolved for map display. */
@@ -57,6 +82,12 @@ export type GlobeSite = {
   geojsonUrl: string | null;
   /** Bare coordinate for point-style locations. */
   point: { lat: number; lon: number } | null;
+};
+
+/** One org's measured-tree count, as served by `/api/globe/trees`. */
+export type GlobeTreeStat = {
+  did: string;
+  trees: number;
 };
 
 export type LngLatBounds = [number, number, number, number];

@@ -153,16 +153,19 @@ export function AddObservationsButton({
   sessionDid,
   className,
   children,
+  dataTaina,
 }: {
   sessionDid: string;
   className?: string;
   children: React.ReactNode;
+  /** Optional `data-taina` marker so Tainá's guided tours can spotlight it. */
+  dataTaina?: string;
 }) {
   const { open, modal } = useAddObservations(sessionDid);
 
   return (
     <>
-      <button type="button" onClick={open} className={className}>
+      <button type="button" onClick={open} className={className} data-taina={dataTaina}>
         {children}
       </button>
       {modal}

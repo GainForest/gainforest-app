@@ -5,7 +5,7 @@ export const GREEN_GLOBE_PREVIEW_SET_DATASET_LAYERS_MESSAGE_TYPE =
 export const GREEN_GLOBE_PREVIEW_READY_MESSAGE_TYPE =
   "gainforest.greenGlobePreview.v1.ready";
 
-export type GreenGlobePreviewDatasetLayer = {
+type GreenGlobePreviewDatasetLayer = {
   datasetRef: string;
   title: string;
   siteRef: TimelineMapLayer["siteRef"];

@@ -3,13 +3,14 @@
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { usePathname, useSearchParams } from "next/navigation";
-import { BadgeCheckIcon, BinocularsIcon, BotIcon, FolderKanbanIcon, HeartHandshakeIcon, HomeIcon, ImageIcon, MessageSquareTextIcon, SettingsIcon, UsersIcon } from "lucide-react";
+import { BadgeCheckIcon, BinocularsIcon, BotIcon, FolderKanbanIcon, HeartHandshakeIcon, HomeIcon, ImageIcon, MessageSquareTextIcon, SettingsIcon, UsersIcon, WrenchIcon } from "lucide-react";
 import { stripLocaleFromPathname } from "@/lib/i18n/routing";
 import { cn } from "@/lib/utils";
 import type { AccountKind } from "../_lib/account-route";
 import {
   accountAttachmentsPath,
   accountEndorsementsGivenPath,
+  accountEquipmentPath,
   accountAudioPath,
   accountBumicertsPath,
   accountDonationsPath,
@@ -27,7 +28,7 @@ import {
   accountTreesPath,
 } from "../_lib/account-route";
 
-type TabLabelKey = "home" | "overview" | "bumicerts" | "projects" | "donationHistory" | "observations" | "posts" | "timeline" | "gallery" | "filesAndPhotos" | "settings" | "sites" | "audio" | "drone" | "trees" | "members" | "taina" | "endorsementsGiven";
+type TabLabelKey = "home" | "overview" | "bumicerts" | "projects" | "donationHistory" | "observations" | "posts" | "timeline" | "gallery" | "filesAndPhotos" | "settings" | "sites" | "audio" | "drone" | "trees" | "members" | "taina" | "endorsementsGiven" | "equipment";
 
 interface Tab {
   labelKey: TabLabelKey;
@@ -87,6 +88,7 @@ function buildTabs(
   showOrgData: boolean,
   includeTaina: boolean,
   showEndorsementsGiven: boolean,
+  showEquipment: boolean,
   manageBasePath?: string,
 ): Tab[] {
   const paths = buildTabPaths(did, scope, manageBasePath);
@@ -120,6 +122,16 @@ function buildTabs(
     labelKey: "endorsementsGiven",
     href: accountEndorsementsGivenPath(did),
     icon: BadgeCheckIcon,
+    exact: false,
+  };
+  // Field equipment registry — a private inventory surface. On personal
+  // profiles it only appears for the signed-in owner; on organizations it
+  // aggregates the whole team's gear, so — like Members — it only shows to
+  // people who belong to the organization.
+  const equipmentTab: Tab = {
+    labelKey: "equipment",
+    href: accountEquipmentPath(did),
+    icon: WrenchIcon,
     exact: false,
   };
   const appendExtras = (tabs: Tab[]): Tab[] => {
@@ -164,6 +176,7 @@ function buildTabs(
           donationsTab,
         ]
       : [projectsTab, observationsTab, donationsTab];
+    if (scope === "account" && showEquipment) tabs.push(equipmentTab);
     return appendExtras(tabs);
   }
 
@@ -200,6 +213,9 @@ function buildTabs(
       { labelKey: "members", href: accountMembersPath(did), icon: UsersIcon, exact: false },
     );
   }
+  if (scope === "account" && showEquipment) {
+    tabs.push(equipmentTab);
+  }
   if (scope === "account" && showEndorsementsGiven) {
     tabs.push(endorsementsGivenTab);
   }
@@ -217,6 +233,7 @@ interface OrgTabBarProps {
   showOrgData?: boolean;
   includeTaina?: boolean;
   showEndorsementsGiven?: boolean;
+  showEquipment?: boolean;
   manageBasePath?: string;
 }
 
@@ -228,12 +245,13 @@ export function AccountTabBar({
   showOrgData = false,
   includeTaina = false,
   showEndorsementsGiven = false,
+  showEquipment = false,
   manageBasePath,
 }: OrgTabBarProps) {
   const t = useTranslations("common.accountTabs");
   const pathname = stripLocaleFromPathname(usePathname() ?? "/");
   const searchParams = useSearchParams();
-  const tabs = buildTabs(did, accountKind, scope, includeSettings, showOrgData, includeTaina, showEndorsementsGiven, manageBasePath);
+  const tabs = buildTabs(did, accountKind, scope, includeSettings, showOrgData, includeTaina, showEndorsementsGiven, showEquipment, manageBasePath);
 
   function isActive(tab: Tab): boolean {
     if (scope === "manage") {

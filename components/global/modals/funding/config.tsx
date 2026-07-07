@@ -39,6 +39,7 @@ import {
   AlertTriangleIcon,
   ChevronDownIcon,
   PlusIcon,
+  SparklesIcon,
   WalletIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -130,6 +131,7 @@ export function FundingConfigModal({
   onSaved,
 }: FundingConfigModalProps) {
   const t = useTranslations("modals.fundingConfig");
+  const createT = useTranslations("modals.walletCreate");
   const { pushModal, popModal, stack, hide } = useModal();
   const facilitatorAddress = FACILITATOR_WALLET_ADDRESS;
 
@@ -182,9 +184,15 @@ export function FundingConfigModal({
           did={ownerDid}
           repo={mutationRepo}
           onBack={() => popModal()}
-          onSuccess={() => {
+          onSuccess={(attestationUri) => {
             invalidateLinks();
             popModal();
+            if (!attestationUri) return;
+            setSelectedWalletUri(attestationUri);
+            // "One-click" setup: a wallet created/linked while no donation
+            // settings exist yet opens donations immediately with the new
+            // wallet, instead of asking for another Save press.
+            if (!existingConfig) void saveConfig(attestationUri);
           }}
         />
       ),
@@ -210,16 +218,14 @@ export function FundingConfigModal({
 
   // ── Save ───────────────────────────────────────────────────────────────────
 
-  const handleSave = async () => {
-    if (!effectiveSelectedWalletUri) return;
-
+  const saveConfig = async (receivingWalletUri: string) => {
     setSaveError(null);
     setIsSaving(true);
 
     try {
       const savedConfig = await upsertFundingConfig({
         rkey: bumicertRkey,
-        receivingWalletUri: effectiveSelectedWalletUri,
+        receivingWalletUri,
         status,
         allowOversell,
         repo: mutationRepo,
@@ -237,6 +243,11 @@ export function FundingConfigModal({
     } finally {
       setIsSaving(false);
     }
+  };
+
+  const handleSave = async () => {
+    if (!effectiveSelectedWalletUri) return;
+    await saveConfig(effectiveSelectedWalletUri);
   };
 
   // ── Render ─────────────────────────────────────────────────────────────────
@@ -302,14 +313,18 @@ export function FundingConfigModal({
           </div>
 
           {evmLinks.length === 0 ? (
-            <button
-              type="button"
-              onClick={handleAddWallet}
-              className="flex items-center justify-center gap-1.5 h-9 w-full rounded-md border border-dashed border-input text-sm text-muted-foreground hover:text-foreground hover:border-foreground/40 transition-colors"
-            >
-              <PlusIcon className="size-3.5" />
-              {t("linkWallet")}
-            </button>
+            <div className="flex flex-col gap-2">
+              <button
+                type="button"
+                onClick={() => handleAddWallet()}
+                data-taina="add-donation-wallet"
+                className="flex items-center justify-center gap-1.5 h-9 w-full rounded-md bg-primary text-sm font-medium text-primary-foreground shadow-xs hover:opacity-90 transition-opacity"
+              >
+                <SparklesIcon className="size-3.5" />
+                {createT("addWallet")}
+              </button>
+              <p className="text-xs text-muted-foreground text-center">{createT("createHint")}</p>
+            </div>
           ) : (
             <div className="flex items-center gap-2">
               <StyledSelect
@@ -321,8 +336,9 @@ export function FundingConfigModal({
               />
               <button
                 type="button"
-                onClick={handleAddWallet}
+                onClick={() => handleAddWallet()}
                 title={t("linkNewWallet")}
+                data-taina="add-donation-wallet"
                 className="flex items-center gap-1 h-9 shrink-0 rounded-md border border-input px-2.5 text-sm text-muted-foreground hover:text-foreground hover:border-foreground/40 transition-colors"
               >
                 <PlusIcon className="size-3.5" />

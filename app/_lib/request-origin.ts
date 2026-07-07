@@ -26,7 +26,3 @@ function originFromHeaders(headerList: Headers, fallbackUrl?: string): string {
 export async function getRequestOrigin(): Promise<string> {
   return originFromHeaders(await headers());
 }
-
-export function getRequestOriginFromRequest(request: Request): string {
-  return originFromHeaders(request.headers, request.url);
-}

@@ -21,7 +21,7 @@ type CgsGroupsResponse = {
   groups?: CgsGroupMembership[];
 };
 
-export type GroupManageAccessResult =
+type GroupManageAccessResult =
   | { status: "allowed"; target: ManageTarget }
   | {
       status: "not-member";
@@ -85,7 +85,7 @@ export async function resolvePersonalManageTarget(): Promise<ManageTarget | null
   });
 }
 
-export async function resolveGroupManageAccess(identifier: string): Promise<GroupManageAccessResult> {
+async function resolveGroupManageAccess(identifier: string): Promise<GroupManageAccessResult> {
   const session = await fetchAuthSession();
   if (!session.isLoggedIn) return { status: "signed-out" };
 
@@ -138,11 +138,6 @@ export async function resolveGroupManageAccess(identifier: string): Promise<Grou
 export async function resolveGroupManageTarget(identifier: string): Promise<ManageTarget | null> {
   const access = await resolveGroupManageAccess(identifier);
   return access.status === "allowed" ? access.target : null;
-}
-
-export async function resolveManageTargetFromRepo(repo: string | null): Promise<ManageTarget | null> {
-  if (!repo) return resolvePersonalManageTarget();
-  return resolveGroupManageTarget(repo);
 }
 
 export type AccountManageAccessResult =

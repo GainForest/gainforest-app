@@ -340,7 +340,7 @@ export const ModalHost = () => {
  * `content`. Registers its DOM node so the matching <ModalPortal> at the
  * call site can portal children into it.
  */
-export const ModalPortalTarget = ({ id }: { id: string }) => {
+const ModalPortalTarget = ({ id }: { id: string }) => {
   const { registerPortalContainer } = useModalInternals("ModalPortalTarget");
   // The ref callback MUST have a stable identity across re-renders. An inline
   // arrow here gets a new function every render, so React detaches (fires

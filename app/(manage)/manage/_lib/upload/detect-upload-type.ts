@@ -28,7 +28,7 @@ function fileExtension(name: string): string {
 }
 
 /** Map a single file to the flow that can ingest it, or "unknown". */
-export function detectUploadKind(file: { name: string; type: string }): DetectedKind {
+function detectUploadKind(file: { name: string; type: string }): DetectedKind {
   const mime = (file.type || "").toLowerCase();
   const ext = fileExtension(file.name);
 

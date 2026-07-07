@@ -1,7 +1,7 @@
 // Generated from heisenberg.climateai.org certified country locations and ../bumicerts-monorepo/apps/bumicerts/lib/countries.ts.
 // Keep this independent of temporary record links so organization country locations can be recreated.
 
-export type CountryCoordinates = {
+type CountryCoordinates = {
   latitude: number;
   longitude: number;
 };
@@ -1846,8 +1846,6 @@ export const countries = {
 
 export type CountryCode = keyof typeof countries;
 
-export const countryCodes = Object.keys(countries) as CountryCode[];
-
 export const countryEntries = Object.entries(countries) as Array<[CountryCode, Country]>;
 
 export function getCountry(code: string | null | undefined): Country | null {
@@ -1855,10 +1853,3 @@ export function getCountry(code: string | null | undefined): Country | null {
   return countries[code.trim().toUpperCase() as CountryCode] ?? null;
 }
 
-export function getCountryName(code: string | null | undefined): string | null {
-  return getCountry(code)?.name ?? null;
-}
-
-export function getCountryCoordinates(code: string | null | undefined): CountryCoordinates | null {
-  return getCountry(code)?.coordinates ?? null;
-}

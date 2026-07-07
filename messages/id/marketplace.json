@@ -161,10 +161,13 @@
       "colJoined": "Bergabung"
     },
     "filters": {
-      "description": "Tampilkan organisasi berdasarkan sumber, observasi, kategori, atau negara."
+      "description": "Tampilkan organisasi berdasarkan sumber, donasi, observasi, kategori, atau negara."
     },
     "quickFilters": {
-      "observations": "Memiliki observasi"
+      "observations": "Memiliki observasi",
+      "donations": "Menerima donasi",
+      "donationsGainforest": "Donasi GainForest",
+      "donationsMaearth": "Donasi Ma Earth"
     },
     "facets": {
       "category": "Kategori",
@@ -246,7 +249,7 @@
       "natureChampion": "Juara alam",
       "consistentGiver": "Pemberi konsisten",
       "risingSupporter": "Pendukung baru",
-      "openWallet": "Buka {wallet} di BaseScan",
+      "openWallet": "Buka {wallet} di Etherscan",
       "openAccount": "Buka akun donatur di tab baru",
       "anonymousSupporter": "Pendukung anonim",
       "donationSummaryWithTime": "{count, plural, one {# donasi} other {# donasi}} · Donasi terakhir {relativeTime}",
@@ -299,6 +302,10 @@
       "live": "Berlangsung",
       "upcoming": "Segera dimulai",
       "ended": "Selesai"
+    },
+    "rounds": {
+      "title": "Ronde",
+      "current": "Saat ini"
     },
     "round": {
       "startsIn": "Mulai dalam",
@@ -392,7 +399,10 @@
       "description": "Catatan permanen para juara setiap ronde.",
       "mostObservations": "Pengamatan terbanyak",
       "bestPicture": "Foto terbaik",
-      "pending": "Akan diumumkan"
+      "pending": "Akan diumumkan",
+      "compact": "Terbaru",
+      "mostSubmitted": "Kiriman terbanyak",
+      "mostLiked": "Paling disukai"
     },
     "map": {
       "title": "Observasi minggu ini",
@@ -578,7 +588,10 @@
       "noMatch": "Tidak ada proyek yang cocok dengan pencarian Anda.",
       "untitledProject": "Proyek tanpa judul",
       "applyWith": "Ajukan dengan {project}",
-      "submitError": "Tidak dapat mengirim pengajuan Anda. Silakan coba lagi."
+      "submitError": "Tidak dapat mengirim pengajuan Anda. Silakan coba lagi.",
+      "successTitle": "Pengajuan terkirim",
+      "successBody": "Terima kasih telah mengajukan dengan {project}. Kami akan segera menghubungi Anda tentang langkah selanjutnya.",
+      "successClose": "Selesai"
     },
     "interoperable": {
       "category": "Program Hibah Interoperabel",
@@ -637,9 +650,9 @@
       "setupDescription": "Tautkan dompet untuk menerima donasi USDC dari pendukung.",
       "stepConnect": "Langkah 1: Hubungkan dompet Anda",
       "connectWallet": "Hubungkan dompet",
-      "stepSwitch": "Langkah 2: Beralih ke jaringan Base",
+      "stepSwitch": "Langkah 2: Beralih ke jaringan Ethereum",
       "switching": "Beralih...",
-      "switchToBase": "Beralih ke Base",
+      "switchToEthereum": "Beralih ke Ethereum",
       "linkedSuccess": "✓ Dompet berhasil ditautkan!",
       "linkedSuccessDescription": "Pengindeks mungkin memerlukan waktu untuk memproses attestasi Anda.",
       "refresh": "Segarkan",
@@ -918,11 +931,14 @@
     "filters": {
       "allProjects": "Semua proyek",
       "allFilters": "Urutkan dan filter",
-      "description": "Tampilkan proyek berdasarkan lencana sumber, gambar, atau tempat proyek.",
+      "description": "Tampilkan proyek berdasarkan lencana sumber, donasi, gambar, atau tempat proyek.",
       "updateHint": "Filter diperbarui saat Anda memilih.",
       "images": "Menampilkan gambar",
       "locations": "Memiliki tempat",
-      "timeline": "Punya linimasa"
+      "timeline": "Punya linimasa",
+      "donations": "Menerima donasi",
+      "donationsGainforest": "Donasi GainForest",
+      "donationsMaearth": "Donasi Ma Earth"
     },
     "empty": {
       "eyebrow": "Tidak ada hasil",
@@ -940,7 +956,16 @@
       "bumicertCount": "{count, plural, one {# sertifikat} other {# sertifikat}}",
       "projectPlace": "Tempat proyek",
       "showDetails": "Tampilkan detail",
-      "loading": "Memuat proyek"
+      "loading": "Memuat proyek",
+      "donate": "Donasi",
+      "acceptsDonations": "Menerima donasi",
+      "openForSupport": "Terbuka untuk dukungan",
+      "donationSummary": "{amount} dari {donors, plural, other {# pendukung}}",
+      "donationSummaryShort": "{amount} · {donors, plural, other {# pendukung}}",
+      "donationWays": "{count} cara",
+      "maEarth": "Ma Earth",
+      "round": "Putaran {round}",
+      "byDonors": "dari {donors, plural, other {# donatur}}"
     },
     "actions": {
       "clearAll": "Hapus semua"
@@ -1492,6 +1517,18 @@
     "emptyHero": {
       "description": "Proyek menyatukan kerja dampak Anda — orang, tempat, periode waktu, serta foto atau catatan pendukung — dalam satu halaman yang dapat diikuti dan didanai oleh pendukung.",
       "cta": "Buat proyek"
+    },
+    "publish": {
+      "title": "Tampilkan karya Anda di halaman jelajah",
+      "description": "Menerbitkan membuat akun ini dan semua proyeknya terlihat oleh semua orang yang menjelajahi GainForest.",
+      "action": "Terbitkan",
+      "publishing": "Menerbitkan…",
+      "publishedTitle": "Diterbitkan di halaman jelajah",
+      "publishedHint": "Akun ini dan proyek-proyeknya terlihat oleh semua orang yang menjelajahi GainForest.",
+      "justPublishedHint": "Selesai! Mungkin perlu beberapa menit untuk muncul di halaman jelajah.",
+      "memberBlocked": "Hanya pemilik dan admin organisasi yang dapat menerbitkan.",
+      "error": "Penerbitan tidak berhasil. Silakan coba lagi nanti.",
+      "unavailable": "Penerbitan tidak tersedia saat ini. Silakan coba lagi nanti."
     }
   },
   "manageBumicerts": {
@@ -1641,11 +1678,16 @@
     "viewOnGlobe": "Lihat di Globe",
     "panel": {
       "searchPlaceholder": "Cari organisasi…",
+      "treeFilter": "Data pohon",
+      "treesEmpty": "Belum ada data pohon yang diunggah.",
+      "treesFailed": "Data pohon tidak tersedia saat ini.",
       "toggleList": "Tampilkan daftar organisasi",
       "loading": "Memuat organisasi…",
       "count": "{count, plural, other {# organisasi}}",
       "empty": "Tidak ada organisasi yang cocok dengan pencarian Anda.",
-      "maEarth": "Ma Earth"
+      "maEarth": "Ma Earth",
+      "dataFilter": "Lapisan drone & data",
+      "dataBadge": "{count, plural, other {# lapisan data peta}}"
     },
     "focus": {
       "organizationLabel": "Organisasi",
@@ -1657,11 +1699,15 @@
       "viewProject": "Lihat proyek",
       "backToGlobe": "Kembali ke tampilan global",
       "recenter": "Pusatkan ulang peta",
-      "sites": "{count, plural, other {# lokasi proyek}}",
+      "sites": "{count, plural, other {# lokasi terpetakan}}",
       "boundaries": "{count, plural, other {# batas lokasi}}",
       "allSites": "Semua lokasi",
+      "orgLocationHeading": "Lokasi organisasi",
+      "projectSitesHeading": "Lokasi proyek",
       "noSites": "Belum ada lokasi proyek yang dipetakan.",
       "noBoundaries": "Proyek ini belum memiliki batas lokasi yang dipetakan.",
+      "projectPill": "Proyek: {name}",
+      "moreProjects": "+{count} lainnya",
       "projectHint": "Batas yang disorot menunjukkan tempat proyek ini bekerja."
     },
     "layers": {
@@ -1669,6 +1715,8 @@
       "title": "Jelajahi lapisan",
       "landcover": "Tutupan lahan",
       "landcoverSource": "ESA WorldCover 2021",
+      "measuredTrees": "Pohon terukur",
+      "measuredTreesCount": "{count, plural, other {# pohon}}",
       "projectCategory": "Lapisan proyek",
       "noProjectLayers": "Organisasi ini belum memiliki lapisan peta tambahan.",
       "landcoverClasses": {
@@ -1681,7 +1729,34 @@
         "water": "Air",
         "wetland": "Lahan basah",
         "mangroves": "Bakau"
-      }
+      },
+      "visibleNow": "{count, plural, other {# lapisan di peta}}",
+      "flyTo": "Perbesar ke {name}",
+      "hide": "Sembunyikan {name}"
+    },
+    "timeline": {
+      "seriesFlights": "{count, plural, other {# penerbangan drone}} di area yang sama",
+      "seriesHint": "Area yang sama dipotret pada tanggal berbeda — aktifkan garis waktu untuk melihat perubahannya.",
+      "toggle": "Lihat {name} dari waktu ke waktu",
+      "title": "Perubahan dari waktu ke waktu",
+      "close": "Sembunyikan penggeser waktu",
+      "play": "Putar garis waktu",
+      "pause": "Jeda garis waktu",
+      "previous": "Citra sebelumnya",
+      "next": "Citra berikutnya",
+      "slider": "Tanggal pengambilan",
+      "step": "{current} dari {total}"
+    },
+    "tree": {
+      "title": "Pohon",
+      "close": "Tutup",
+      "species": "Spesies",
+      "height": "Tinggi",
+      "dbh": "DBH",
+      "measured": "Diukur:",
+      "unknown": "Tidak diketahui",
+      "unknownSpecies": "Spesies tidak diketahui",
+      "photo": "Foto {index}"
     },
     "loadingGlobe": "Menyiapkan globe…",
     "sheet": {

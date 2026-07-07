@@ -1,3 +1,3 @@
 "use client";
 
-export { useFormatter, useTranslations } from "next-intl";
+export { useTranslations } from "next-intl";

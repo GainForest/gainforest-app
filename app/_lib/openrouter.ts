@@ -3,10 +3,10 @@
 
 import { getRequestOrigin } from "./request-origin";
 
-export const DEFAULT_CHAT_MODEL =
+const DEFAULT_CHAT_MODEL =
   process.env.DEFAULT_CHAT_MODEL ?? "google/gemini-2.5-flash";
 
-export class OpenRouterConfigError extends Error {
+class OpenRouterConfigError extends Error {
   constructor(message = "OPENROUTER_API_KEY missing") {
     super(message);
     this.name = "OpenRouterConfigError";

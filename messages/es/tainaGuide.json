@@ -1,0 +1,127 @@
+{
+  "widget": {
+    "shield": "¿Necesitas ayuda?",
+    "role": "Tu guía de GainForest",
+    "spriteLabel": "Tainá — haz clic para chatear, arrastra para mover",
+    "greeting": "¡Hola, soy Tainá! Puedo guiarte por todo GainForest.",
+    "greetingHint": "Elige una pregunta abajo o pregúntame lo que quieras.",
+    "guidesTitle": "Preguntas frecuentes",
+    "placeholder": "Pregúntame lo que quieras…",
+    "thinking": "Tainá está pensando…",
+    "send": "Enviar",
+    "close": "Cerrar chat",
+    "back": "Atrás",
+    "showMe": "Muéstramelo paso a paso",
+    "stepOf": "Paso {current} de {total}",
+    "next": "Siguiente",
+    "previous": "Atrás",
+    "done": "Listo",
+    "endTour": "Terminar recorrido",
+    "openImage": "Ver captura a tamaño completo",
+    "cantFind": "Ahora mismo no encuentro eso en esta página, pero esto es lo que hay que hacer:",
+    "tourHint": "Señalaré tu pantalla. Haz clic en la zona resaltada para continuar.",
+    "minimizeLabel": "Minimizar a Tainá",
+    "restoreLabel": "Abrir Tainá",
+    "signInFirst": "Para esto necesitas iniciar sesión: usa el botón Iniciar sesión en la parte superior de la página y luego vuelve, que yo te guío paso a paso.",
+    "needProjectFirst": "Las donaciones se configuran en un proyecto y todavía no tienes ninguno: crea primero tu proyecto y luego vuelve aquí.",
+    "createProjectFirst": "Muéstrame cómo crear un proyecto"
+  },
+  "guides": {
+    "wallet": {
+      "question": "¿Cómo recibo donaciones?",
+      "title": "Configura una billetera para recibir donaciones",
+      "intro": "Las donaciones llegan a una billetera vinculada a tu cuenta. No necesitas experiencia en cripto: puedes crear una solo con tu correo.",
+      "steps": {
+        "open": { "title": "Abre tu proyecto", "body": "Ve a Mis proyectos y abre el proyecto para el que quieres recibir apoyo." },
+        "enable": { "title": "Haz clic en «Enable Donations»", "body": "En la página de tu proyecto verás la tarjeta de apoyo a la derecha. Haz clic en Enable Donations." },
+        "addWallet": { "title": "Añade una billetera de donaciones", "body": "En la ventana de configuración de donaciones, haz clic en Add a donation wallet." },
+        "signIn": { "title": "Inicia sesión: la billetera se crea sola", "body": "Continúa con tu cuenta de Bluesky o tu correo y se creará una billetera segura en segundos. ¿Ya tienes una billetera cripto? También puedes conectarla." },
+        "settings": { "title": "Gestiona tus billeteras cuando quieras", "body": "Encontrarás todas tus billeteras vinculadas en Ajustes → Linked Wallets." }
+      },
+      "tour": {
+        "open": "Abre el proyecto para el que quieres recibir donaciones.",
+        "enable": "Haz clic en Enable Donations en la tarjeta de apoyo.",
+        "addWallet": "Haz clic en Add a donation wallet y luego inicia sesión con Bluesky o tu correo. ¡Eso es todo!"
+      }
+    },
+    "createProject": {
+      "question": "¿Cómo creo un proyecto?",
+      "title": "Crea tu primer proyecto",
+      "intro": "Un proyecto cuenta la historia de tu trabajo y puede recibir apoyo. El asistente toma unos dos minutos.",
+      "steps": {
+        "start": { "title": "Empieza un proyecto nuevo", "body": "Haz clic en Crear un proyecto en la barra lateral, o en Añadir proyecto en tu página Mis proyectos." },
+        "name": { "title": "Ponle nombre", "body": "Usa un nombre claro que la gente entienda, más un resumen de una línea." },
+        "focus": { "title": "Elige las áreas de trabajo", "body": "Selecciona los tipos de trabajo que mejor describen el proyecto: reforestación, monitoreo, custodia…" },
+        "story": { "title": "Añade fechas e historia", "body": "Define una fecha de inicio (puede seguir en curso) y cuenta qué pasó, cómo se mide el impacto y quién se beneficia." },
+        "people": { "title": "Da crédito a personas y lugares", "body": "Añade a las personas y grupos detrás del trabajo, y adjunta los lugares donde ocurrió." },
+        "photo": { "title": "Añade una foto", "body": "Una buena foto ayuda a que la gente reconozca tu proyecto y confíe en él." },
+        "review": { "title": "Revisa y crea", "body": "Comprueba que todo esté bien y haz clic en Crear proyecto. Ya está listo para compartir y recibir apoyo." }
+      },
+      "tour": {
+        "start": "Haz clic en Añadir proyecto para abrir el asistente.",
+        "wizard": "Ahora sigue los pasos: nombre, áreas de trabajo, fechas, historia, personas y lugares, foto… y Crear proyecto."
+      }
+    },
+    "editProject": {
+      "question": "¿Cómo edito un proyecto?",
+      "title": "Editar un proyecto",
+      "intro": "Puedes cambiar todo lo de un proyecto después de publicarlo: nombre, historia, foto, lugares.",
+      "steps": {
+        "myProjects": { "title": "Ve a Mis proyectos", "body": "Abre la pestaña Proyectos de tu perfil, o entra en Gestionar desde tu menú de perfil." },
+        "edit": { "title": "Haz clic en «Editar proyecto»", "body": "Cada tarjeta de proyecto tiene un botón de edición." },
+        "save": { "title": "Cambia y guarda", "body": "Actualiza cualquier campo, cambia o quita la foto, y haz clic en Guardar cambios al final." }
+      },
+      "tour": {
+        "edit": "Haz clic en Editar proyecto en el proyecto que quieres cambiar.",
+        "save": "Haz tus cambios y pulsa Guardar cambios al final."
+      }
+    },
+    "deleteProject": {
+      "question": "¿Cómo elimino un proyecto?",
+      "title": "Eliminar un proyecto",
+      "intro": "Eliminar quita el proyecto de tu cuenta. No se puede deshacer, pero tus observaciones nunca se borran con él.",
+      "steps": {
+        "editor": { "title": "Abre el editor del proyecto", "body": "Ve a Mis proyectos y haz clic en Editar proyecto, o abre la página del proyecto y busca la sección Gestionar." },
+        "delete": { "title": "Haz clic en «Eliminar proyecto»", "body": "El botón de eliminar está al final del editor." },
+        "confirm": { "title": "Confirma escribiendo el nombre", "body": "Escribe el nombre exacto del proyecto para confirmar. Esto no se puede deshacer." }
+      },
+      "tour": {
+        "editor": "Primero abre el editor del proyecto que quieres eliminar.",
+        "delete": "Baja y haz clic en Eliminar proyecto.",
+        "confirm": "Escribe el nombre exacto del proyecto y confirma. Esto no se puede deshacer."
+      }
+    },
+    "observations": {
+      "question": "¿Cómo subo y gestiono observaciones?",
+      "title": "Subir y gestionar observaciones",
+      "intro": "Las observaciones son fotos de la naturaleza con especie, fecha y lugar: la evidencia detrás de tu trabajo.",
+      "steps": {
+        "add": { "title": "Haz clic en «Añadir observaciones»", "body": "Lo encontrarás en la barra lateral y en tu perfil." },
+        "photos": { "title": "Suelta tus fotos", "body": "Sube hasta 50 fotos a la vez: la IA analiza cada una y sugiere qué contiene." },
+        "check": { "title": "Revisa y vincula", "body": "Confirma la especie, la fecha y el lugar, y vincúlalas si quieres a uno de tus proyectos. También puedes ocultar tu ubicación exacta." },
+        "publish": { "title": "Añádelas", "body": "Haz clic en Añadir y tus avistamientos se publican en tu cuenta." },
+        "manage": { "title": "Gestiónalas después", "body": "La pestaña Observaciones de tu perfil te permite buscar, agrupar en conjuntos de datos, o seleccionar y eliminar." }
+      },
+      "tour": {
+        "add": "Haz clic en Añadir observaciones.",
+        "photos": "Suelta tus fotos: las sugerencias de especie llegan solas. Revisa los nombres, vincula un proyecto si quieres y pulsa Añadir.",
+        "manage": "Y aquí viven todas tus observaciones: búscalas, agrúpalas en conjuntos de datos, o selecciona y elimina."
+      }
+    },
+    "bioblitz": {
+      "question": "¿Cómo participo en el BioBlitz y gano?",
+      "title": "Únete al reto BioBlitz",
+      "intro": "El BioBlitz es una carrera semanal y amistosa por registrar la naturaleza. Fotografía cualquier ser vivo, súbelo y sube en la tabla.",
+      "steps": {
+        "open": { "title": "Abre BioBlitz", "body": "Lo encontrarás en la barra lateral, bajo Financiación." },
+        "register": { "title": "Regístrate para participar", "body": "Un solo clic: registrarte permite al equipo contar tus entradas y enviarte el premio si ganas." },
+        "upload": { "title": "Fotografía y sube", "body": "Sal afuera, fotografía cualquier ser vivo y añádelo como observaciones durante la ronda." },
+        "win": { "title": "Gana premios", "body": "Más observaciones y mejor foto ganan premios en efectivo y una insignia permanente en tu perfil. Y cada observación sigue siendo tuya, reutilizable como evidencia para tus proyectos." }
+      },
+      "tour": {
+        "register": "Haz clic en Registrarte para participar: un clic y ya estás dentro.",
+        "upload": "Luego sube aquí fotos de naturaleza durante la ronda: cada observación cuenta."
+      }
+    }
+  }
+}

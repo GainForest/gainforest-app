@@ -34,10 +34,10 @@ export const NOTIFICATION_SEEN_COLLECTION = "app.gainforest.notification.seen";
 /** Recent likes/comments scanned per source before client-side filtering. */
 const SCAN_LIMIT = 500;
 
-export type NotificationKind = "like" | "comment";
+type NotificationKind = "like" | "comment";
 
 /** Plain-language category of the liked/commented record, for display + links. */
-export type NotificationSubjectKind = "observation" | "project" | "post" | "recording" | "record";
+type NotificationSubjectKind = "observation" | "project" | "post" | "recording" | "record";
 
 export type NotificationItem = {
   /** Stable id (the engagement record's AT-URI). */

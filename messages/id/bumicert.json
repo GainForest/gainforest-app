@@ -56,18 +56,25 @@
       }
     },
     "evidenceAdder": {
-      "title": "Tambahkan Bukti",
+      "title": "Tambahkan pembaruan",
+      "composerDescription": "Tulis pembaruan singkat. Lampirkan suara, observasi, pohon, atau berkas jika membantu.",
+      "captionPlaceholder": "Bagikan pembaruan proyek singkat. Anda dapat memposting teks saja atau melampirkan bukti di bawah.",
+      "attachLabel": "Lampirkan bukti opsional:",
+      "attachingType": "Melampirkan {type}",
+      "postUpdate": "Posting pembaruan",
+      "chooseAttachment": "Pilih sesuatu untuk dilampirkan",
+      "updateTitleFallback": "Pembaruan proyek",
       "selectType": "Pilih jenis bukti yang akan ditambahkan.",
       "selectEvidence": "Pilih bukti yang akan ditambahkan.",
       "addType": "Tambahkan {type}",
       "tabs": {
-        "update": "Pembaruan teks",
+        "images": "Gambar",
         "audio": "Suara",
         "trees": "Pohon",
         "biodiversity": "Observasi",
         "files": "Berkas"
       },
-      "linking": "Menghubungkan…",
+      "linking": "Memposting…",
       "loadingSources": "Memuat bukti…",
       "sourcesLoadError": "Tidak dapat memuat bukti yang tersedia. Segarkan halaman dan coba lagi.",
       "selectToLink": "Pilih bukti untuk ditautkan",
@@ -79,6 +86,8 @@
       "selectContentType": "Pilih jenis konten",
       "addFilePlaceholder": "Tambahkan file sebagai bukti",
       "fileHelp": "Berkas hingga {maxSize}.",
+      "addImagePlaceholder": "Jatuhkan gambar di sini atau klik untuk mengunggah",
+      "imageHelp": "Gambar hingga {maxSize}.",
       "externalLink": "Tautan eksternal",
       "externalLinkPlaceholder": "https://example.org/report",
       "addLink": "Tambahkan",
@@ -129,6 +138,7 @@
         "biodiversity": "observasi"
       },
       "attachmentTitles": {
+        "images": "Gambar",
         "audio": "Rekaman suara",
         "trees": "Grup pohon",
         "biodiversity": "Observasi"
@@ -142,7 +152,7 @@
       "checkingExistingLinks": "Memeriksa tautan linimasa yang sudah ada…",
       "unableToVerifyExistingLinks": "Tautan yang ada tidak dapat diperiksa. Muat ulang sebelum menautkan grup pohon.",
       "tabDescriptions": {
-        "update": "Tulis pembaruan singkat tentang kemajuan proyek ini.",
+        "images": "Unggah foto proyek.",
         "audio": "Tambahkan suara yang sudah disimpan oleh organisasi ini.",
         "trees": "Tambahkan informasi pohon yang dikelompokkan berdasarkan lokasi proyek.",
         "biodiversity": "Filter observasi dan tambahkan catatan yang ditampilkan atau grup tersimpan.",
@@ -224,7 +234,7 @@
         "document": "Berkas",
         "site": "Lokasi proyek",
         "update": "Pembaruan",
-        "other": "Bukti"
+        "other": "Pembaruan"
       },
       "notSpecified": "Tidak ditentukan",
       "resolvingDate": "Menyelesaikan tanggal bukti…",
@@ -377,6 +387,19 @@
       "updates": "Pembaruan",
       "reviews": "Ulasan",
       "support": "Dukungan"
+    },
+    "support": {
+      "title": "Dukungan",
+      "donations": "Donasi",
+      "fromSupporters": "Dari {count, plural, other {# pendukung}}",
+      "noDonationsYet": "Jadilah yang pertama mendukung proyek ini.",
+      "donate": "Donasi",
+      "donateAgain": "Donasi lagi",
+      "donateOnMaEarth": "Donasi di Ma Earth",
+      "round": "Putaran {round}",
+      "includesMaEarth": "Total mencakup donasi GainForest dan Ma Earth.",
+      "viaMaEarth": "Terkumpul melalui kampanye Ma Earth.",
+      "notAccepting": "Proyek ini belum menerima donasi. Ikuti {name} untuk kabar terbaru."
     }
   },
   "create": {

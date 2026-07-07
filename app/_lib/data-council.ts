@@ -1,15 +1,12 @@
 import { fetchIndexedCertifiedProfileCards, indexerQuery } from "./indexer";
 import { resolveInternalBadgeRepoDid } from "@/app/internal/badges/_lib/access";
-import {
-  BADGE_AWARD_COLLECTION,
-  BADGE_DEFINITION_COLLECTION,
-} from "@/app/internal/badges/_lib/badge-records";
+import { BADGE_AWARD_COLLECTION } from "@/app/internal/badges/_lib/badge-records";
 import type { CgsServerMember } from "./cgs-server";
 
 const DATA_COUNCIL_BADGE_RKEY = process.env.DATA_COUNCIL_BADGE_RKEY?.trim() || "3monk2b3xak2i";
 const DATA_COUNCIL_INDEXER_LIMIT = 1000;
 
-export type DataCouncilBadge = {
+type DataCouncilBadge = {
   rkey: string;
   uri: string;
   cid: string;
@@ -18,7 +15,7 @@ export type DataCouncilBadge = {
   iconUrl: string | null;
 };
 
-export type DataCouncilAward = {
+type DataCouncilAward = {
   rkey: string;
   uri: string;
   cid: string;
@@ -204,4 +201,4 @@ export function applyOptimisticDataCouncilSelection(
   };
 }
 
-export { BADGE_AWARD_COLLECTION, BADGE_DEFINITION_COLLECTION };
+export { BADGE_AWARD_COLLECTION };

@@ -32,17 +32,25 @@ import { useStableQueryView } from "../_lib/use-stable-query-view";
 
 type SortMode = "newest" | "oldest" | "az" | "za";
 type ViewMode = "cards" | "list" | "map";
-type QuickFilter = "observations";
+type QuickFilter = "observations" | "donations" | "donations-gainforest" | "donations-maearth";
 
 const SORT_MODES: SortMode[] = ["newest", "oldest", "az", "za"];
 const VIEW_MODES: ViewMode[] = ["cards", "list", "map"];
-const QUICK_FILTERS: QuickFilter[] = ["observations"];
+// "donations" stays parseable so old shared links keep working (it means
+// "either donation source"), but the UI only offers the two source chips.
+const QUICK_FILTERS: QuickFilter[] = ["observations", "donations", "donations-gainforest", "donations-maearth"];
 const BADGE_FILTER_KEYS: BumicertBadgeFilter[] = ["gainforest", "maearth"];
 const QUERY_STATE_OPTIONS = { history: "replace", scroll: false, shallow: true } as const;
 const SEARCH_QUERY_STATE_OPTIONS = { ...QUERY_STATE_OPTIONS, throttleMs: 200 } as const;
 
 const SORT_OPTION_VALUES: SortMode[] = ["newest", "oldest", "az", "za"];
-const QUICK_CHIP_VALUES: QuickFilter[] = ["observations"];
+const QUICK_CHIP_VALUES: QuickFilter[] = ["observations", "donations-gainforest", "donations-maearth"];
+const QUICK_CHIP_LABEL_KEYS: Record<QuickFilter, string> = {
+  observations: "observations",
+  donations: "donations",
+  "donations-gainforest": "donationsGainforest",
+  "donations-maearth": "donationsMaearth",
+};
 
 const ORGANIZATIONS_PAGE_SIZE = 24;
 const INITIAL_CARD_LIMIT = 96;
@@ -206,6 +214,9 @@ export function OrganizationsClient({ records: initialRecords = [] }: { records?
       if (countryFilter && normalizeCountry(record.country) !== countryFilter) return false;
       if (typeFilter && !orgTypes(record).includes(typeFilter)) return false;
       if (quickFilters.includes("observations") && (record.observationCount ?? 0) <= 0) return false;
+      if (quickFilters.includes("donations") && record.acceptsDonations !== true) return false;
+      if (quickFilters.includes("donations-gainforest") && record.donationSources?.gainforest !== true) return false;
+      if (quickFilters.includes("donations-maearth") && record.donationSources?.maearth !== true) return false;
       if (!normalizedQuery) return true;
       const haystack = [record.name, record.country, countryNameOrEmpty(record.country, locale), record.orgType, record.source]
         .filter(Boolean)
@@ -356,7 +367,7 @@ export function OrganizationsClient({ records: initialRecords = [] }: { records?
                       selected={quickFilters.includes(value)}
                       onClick={() => toggleQuickFilter(value)}
                     >
-                      {t(`quickFilters.${value}`)}
+                      {t(`quickFilters.${QUICK_CHIP_LABEL_KEYS[value]}`)}
                     </FilterChip>
                   ))}
                 </div>

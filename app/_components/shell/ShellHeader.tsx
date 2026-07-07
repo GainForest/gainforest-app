@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 import { groupManageBasePath, manageHref } from "@/lib/links";
 import type { AuthSession } from "../../_lib/auth";
 import { AuthButton } from "../AuthFlow";
+import { CartHeaderButton } from "../cart/CartHeaderButton";
 import { ChromeErrorBoundary } from "../ChromeErrorBoundary";
 import { GlobalSearch } from "../GlobalSearch";
 import { useHeaderSlots } from "../HeaderSlots";
@@ -186,6 +187,9 @@ export function ShellHeader({
             </AnimatePresence>
             <ChromeErrorBoundary name="global-search">
               <GlobalSearch />
+            </ChromeErrorBoundary>
+            <ChromeErrorBoundary name="cart-button">
+              <CartHeaderButton />
             </ChromeErrorBoundary>
             <ChromeErrorBoundary name="notification-bell">
               <NotificationBell session={authSession} />

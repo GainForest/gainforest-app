@@ -68,7 +68,7 @@ function recordSubtitle(record: ExplorerRecord): string | null {
 }
 
 /** The moment the record represents, for the card's date stamp. */
-export function recordWhen(record: ExplorerRecord): string | null {
+function recordWhen(record: ExplorerRecord): string | null {
   switch (record.kind) {
     case "occurrence":
       return record.eventDate || record.createdAt;

@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 
 const EASE = [0.25, 0.1, 0.25, 1] as const;
 
-export function formatFolderCount(value: number | null | undefined): string {
+function formatFolderCount(value: number | null | undefined): string {
   if (typeof value !== "number") return "—";
   return new Intl.NumberFormat("en").format(value);
 }
@@ -172,5 +172,3 @@ export function FolderTileSkeleton({ art, index = 0 }: { art?: ReactNode; index?
     </motion.div>
   );
 }
-
-export default FolderTile;

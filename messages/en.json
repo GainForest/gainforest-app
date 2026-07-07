@@ -41,6 +41,14 @@
         }
       }
     },
+    "explainer": {
+      "eyebrow": "Watch the explainer",
+      "titlePrefix": "A new way to",
+      "titleEmphasis": "fund nature",
+      "description": "In two minutes, see how Bumicerts turn real fieldwork into verifiable records — and send funding straight to the local stewards doing the work.",
+      "play": "Play video",
+      "videoTitle": "Bumicerts: a new and equitable nature finance mechanism for local nature stewards"
+    },
     "certificate": {
       "eyebrow": "The Certificate",
       "titleLine1": "What exactly is",

@@ -9,7 +9,7 @@
  */
 
 /** Display diameter in CSS pixels — small and unobtrusive vs. the old ~36-42px pins. */
-export const ORG_BADGE_SIZE_CSS = 20;
+const ORG_BADGE_SIZE_CSS = 20;
 const ORG_BADGE_RING_CSS = 1.25;
 
 export const DEFAULT_BADGE_ID = "orgBadgeDefault";

@@ -1,6 +1,5 @@
-import { parseAtUri } from "./atUri";
 
-export type AttachmentUriKind = "at-uri" | "http-url" | "other-uri";
+type AttachmentUriKind = "at-uri" | "http-url" | "other-uri";
 
 export type ParsedAttachmentContent =
   | {
@@ -70,7 +69,7 @@ function getBlobRef(value: unknown): string | null {
   return null;
 }
 
-export function getUriKind(uri: string): AttachmentUriKind {
+function getUriKind(uri: string): AttachmentUriKind {
   if (uri.startsWith("at://")) return "at-uri";
   if (
     uri.startsWith("https://") ||
@@ -201,7 +200,7 @@ export function getAtUrisFromContent(content: unknown): string[] {
   return uris;
 }
 
-export function getRenderableAttachmentLinks(
+function getRenderableAttachmentLinks(
   parsedItems: ParsedAttachmentContent[],
 ): RenderableAttachmentLink[] {
   const links: RenderableAttachmentLink[] = [];
@@ -241,25 +240,4 @@ export function getRenderableAttachmentLinks(
 
 export function getRenderableAttachmentLinksFromContent(content: unknown): RenderableAttachmentLink[] {
   return getRenderableAttachmentLinks(parseAttachmentContent(content));
-}
-
-export function getLinkedTreeDatasetUrisFromContent(content: unknown): string[] {
-  const linkedDatasetUris: string[] = [];
-  const seenUris = new Set<string>();
-
-  for (const item of parseAttachmentContent(content)) {
-    if (
-      item.kind !== "uri" ||
-      item.uriKind !== "at-uri" ||
-      parseAtUri(item.uri)?.collection !== TREE_DATASET_COLLECTION ||
-      seenUris.has(item.uri)
-    ) {
-      continue;
-    }
-
-    seenUris.add(item.uri);
-    linkedDatasetUris.push(item.uri);
-  }
-
-  return linkedDatasetUris;
 }

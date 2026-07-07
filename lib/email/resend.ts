@@ -13,7 +13,7 @@ export class EmailSendError extends Error {
   }
 }
 
-export function getEmailFrom(): string {
+function getEmailFrom(): string {
   return process.env.EMAIL_FROM?.trim() || DEFAULT_EMAIL_FROM;
 }
 

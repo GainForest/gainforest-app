@@ -22,7 +22,7 @@ export type ComponentStatus =
 
 export type PageStatus = "UP" | "HASISSUES" | "UNDERMAINTENANCE" | "DOWN";
 
-export type StatusComponent = {
+type StatusComponent = {
   id: string;
   name: string;
   description: string;
@@ -213,45 +213,6 @@ function degradedSnapshot(): StatusSnapshot {
 }
 
 /**
- * Lightweight snapshot from the two CORS-open JSON documents only (page status
- * + component statuses). Used by the nav/hero pill on every page, so it stays
- * cheap — no uptime % or incident history. Use {@link fetchStatusDetailed} for
- * the full status board.
- */
-export async function fetchStatus(opts?: {
-  revalidate?: number;
-  signal?: AbortSignal;
-}): Promise<StatusSnapshot> {
-  const next =
-    opts?.revalidate != null ? { next: { revalidate: opts.revalidate } } : {};
-  try {
-    const [summaryRes, componentsRes] = await Promise.all([
-      fetch(`${STATUS_URL}/summary.json`, { signal: opts?.signal, ...next }),
-      fetch(`${STATUS_URL}/v2/components.json`, { signal: opts?.signal, ...next }),
-    ]);
-    const summary = (await summaryRes.json()) as SummaryDoc;
-    const componentsDoc = (await componentsRes.json()) as ComponentsDoc;
-    const components: StatusComponent[] = (componentsDoc.components ?? []).map((c) => ({
-      id: c.id ?? crypto.randomUUID(),
-      name: c.name ?? "Unnamed service",
-      description: c.description ?? "",
-      status: normaliseComponentStatus(c.status),
-      uptime: null,
-    }));
-    return {
-      page: normalisePageStatus(summary.page?.status),
-      components,
-      incidents: [],
-      overallUptime: null,
-      fetchedAt: new Date().toISOString(),
-      degraded: false,
-    };
-  } catch {
-    return degradedSnapshot();
-  }
-}
-
-/**
  * Full status board: the JSON statuses plus rolling uptime % and incident
  * history scraped from the rendered status page. Heavier (fetches the page
  * HTML), so it's used only by the /status page + /api/status route, never the
@@ -327,23 +288,6 @@ export function componentTone(status: ComponentStatus): StatusTone {
   }
 }
 
-export function componentLabel(status: ComponentStatus): string {
-  switch (status) {
-    case "OPERATIONAL":
-      return "Working";
-    case "DEGRADEDPERFORMANCE":
-      return "Slow";
-    case "UNDERMAINTENANCE":
-      return "Planned work";
-    case "PARTIALOUTAGE":
-      return "Partly down";
-    case "MAJOROUTAGE":
-      return "Not working";
-    default:
-      return "Verifying";
-  }
-}
-
 export function pageTone(page: PageStatus, degraded: boolean): StatusTone {
   if (degraded) return "neutral";
   switch (page) {
@@ -356,22 +300,6 @@ export function pageTone(page: PageStatus, degraded: boolean): StatusTone {
       return "down";
     default:
       return "neutral";
-  }
-}
-
-export function pageLabel(page: PageStatus, degraded: boolean): string {
-  if (degraded) return "Health unavailable";
-  switch (page) {
-    case "UP":
-      return "Everything is working";
-    case "HASISSUES":
-      return "Some services are slow";
-    case "UNDERMAINTENANCE":
-      return "Planned work happening";
-    case "DOWN":
-      return "A service is not working";
-    default:
-      return "Verifying health";
   }
 }
 

@@ -3,6 +3,7 @@ import { parsePaymentSignature } from "@/lib/facilitator/eip3009";
 import { executeTransferWithAuthorization } from "@/lib/facilitator";
 import { fetchActivityCid, fetchVerifiedRecipientAddress } from "@/lib/facilitator/recipient";
 import { FACILITATOR_DID } from "@/app/_lib/urls";
+import { PAYMENT_NETWORK, PAYMENT_RAIL } from "@/lib/facilitator/usdc";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -122,8 +123,8 @@ async function writeFundingReceipt(params: {
         to: params.to,
         amount: params.amount,
         currency: params.currency,
-        paymentRail: "x402-usdc-base",
-        paymentNetwork: "base",
+        paymentRail: PAYMENT_RAIL,
+        paymentNetwork: PAYMENT_NETWORK,
         transactionId: params.transactionHash,
         for: params.receiptSubject,
         notes: `${params.from.$type === "app.certified.defs#did" ? params.from.did : params.from.value} paid ${params.amount}${params.currency} using wallet`,
@@ -151,7 +152,7 @@ export async function POST(request: Request) {
         options: {
           crypto: {
             protocol: "x402",
-            network: "Base",
+            network: "Ethereum",
             payTo: recipientWallet ?? "0x0000000000000000000000000000000000000000",
             token: "USDC",
             decimals: 6,

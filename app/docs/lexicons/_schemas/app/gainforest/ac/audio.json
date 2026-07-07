@@ -9,7 +9,7 @@
       "key": "tid",
       "record": {
         "type": "object",
-        "required": ["blob", "metadata", "createdAt"],
+        "required": ["metadata", "createdAt"],
         "properties": {
           "name": {
             "type": "string",
@@ -24,7 +24,19 @@
           "blob": {
             "type": "ref",
             "ref": "app.gainforest.common.defs#audio",
-            "description": "The audio file blob stored on the PDS."
+            "description": "The audio file blob stored on the PDS. May be a compressed preview variant when the archival original is referenced via accessUri. At least one of blob or accessUri should be present."
+          },
+          "accessUri": {
+            "type": "string",
+            "format": "uri",
+            "maxGraphemes": 2048,
+            "description": "URI to the original full-resolution audio resource (e.g. object storage URL). When present, the PDS blob is a compressed variant and this points to the archival original. Aligns with AC ac:accessURI."
+          },
+          "variantLiteral": {
+            "type": "string",
+            "maxGraphemes": 64,
+            "knownValues": ["Thumbnail", "Lower Quality", "Medium Quality", "Good Quality", "Best Quality", "Offline"],
+            "description": "AC variant describing the quality/size of the PDS blob relative to the archival original. Aligns with AC ac:variant."
           },
           "metadata": {
             "type": "ref",

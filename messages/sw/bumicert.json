@@ -56,18 +56,25 @@
       }
     },
     "evidenceAdder": {
-      "title": "Ongeza Ushahidi",
+      "title": "Ongeza sasisho",
+      "composerDescription": "Andika sasisho fupi. Ambatisha sauti, uchunguzi, miti au faili ikiwa zitasaidia.",
+      "captionPlaceholder": "Shiriki sasisho fupi la mradi. Unaweza kuchapisha maandishi pekee au kuambatisha ushahidi hapa chini.",
+      "attachLabel": "Ambatisha ushahidi wa hiari:",
+      "attachingType": "Inaambatisha {type}",
+      "postUpdate": "Chapisha sasisho",
+      "chooseAttachment": "Chagua kitu cha kuambatisha",
+      "updateTitleFallback": "Sasisho la mradi",
       "selectType": "Chagua aina ya ushahidi wa kuongeza.",
       "selectEvidence": "Chagua ushahidi wa kuongeza.",
       "addType": "Ongeza {type}",
       "tabs": {
-        "update": "Taarifa ya maandishi",
+        "images": "Picha",
         "audio": "Sauti",
         "trees": "Miti",
         "biodiversity": "Uchunguzi",
         "files": "Faili"
       },
-      "linking": "Inaunganisha...",
+      "linking": "Inachapisha...",
       "loadingSources": "Inapakia ushahidi...",
       "sourcesLoadError": "Haikuweza kupakia ushahidi uliopo. Onyesha upya na ujaribu tena.",
       "selectToLink": "Chagua ushahidi wa kuunganisha",
@@ -79,6 +86,8 @@
       "selectContentType": "Chagua aina ya maudhui",
       "addFilePlaceholder": "Ongeza faili kama ushahidi",
       "fileHelp": "Faili hadi {maxSize}.",
+      "addImagePlaceholder": "Dondosha picha hapa au bofya ili kupakia",
+      "imageHelp": "Picha hadi {maxSize}.",
       "externalLink": "Kiungo cha nje",
       "externalLinkPlaceholder": "https://example.org/report",
       "addLink": "Ongeza",
@@ -129,6 +138,7 @@
         "biodiversity": "uchunguzi"
       },
       "attachmentTitles": {
+        "images": "Picha",
         "audio": "Rekodi za sauti",
         "trees": "Kikundi cha miti",
         "biodiversity": "Uchunguzi"
@@ -142,7 +152,7 @@
       "checkingExistingLinks": "Inakagua viungo vilivyopo vya ratiba…",
       "unableToVerifyExistingLinks": "Viungo vilivyopo havikuweza kukaguliwa. Onyesha upya kabla ya kuunganisha vikundi vya miti.",
       "tabDescriptions": {
-        "update": "Andika taarifa fupi kuhusu maendeleo ya mradi huu.",
+        "images": "Pakia picha za mradi.",
         "audio": "Ongeza sauti ambazo tayari zimehifadhiwa na shirika hili.",
         "trees": "Ongeza taarifa za miti zilizopangwa kwa eneo la mradi.",
         "biodiversity": "Chuja uchunguzi na uongeze rekodi zinazoonyeshwa au vikundi vilivyohifadhiwa.",
@@ -223,8 +233,8 @@
         "biodiversity": "Asili",
         "document": "Faili",
         "site": "Eneo la mradi",
-        "update": "Taarifa",
-        "other": "Ushahidi"
+        "update": "Sasisho",
+        "other": "Sasisho"
       },
       "notSpecified": "Haijabainishwa",
       "resolvingDate": "Inatatua tarehe ya ushahidi...",
@@ -377,6 +387,19 @@
       "updates": "Masasisho",
       "reviews": "Maoni",
       "support": "Msaada"
+    },
+    "support": {
+      "title": "Usaidizi",
+      "donations": "Michango",
+      "fromSupporters": "Kutoka kwa {count, plural, one {mfadhili #} other {wafadhili #}}",
+      "noDonationsYet": "Kuwa wa kwanza kuunga mkono mradi huu.",
+      "donate": "Changia",
+      "donateAgain": "Changia tena",
+      "donateOnMaEarth": "Changia kwenye Ma Earth",
+      "round": "Duru ya {round}",
+      "includesMaEarth": "Jumla inajumuisha michango ya GainForest na Ma Earth.",
+      "viaMaEarth": "Imekusanywa kupitia kampeni ya Ma Earth.",
+      "notAccepting": "Mradi huu bado haupokei michango. Fuata {name} kupata habari mpya."
     }
   },
   "create": {

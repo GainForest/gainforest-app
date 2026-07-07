@@ -1,0 +1,30 @@
+{
+  "metadata": {
+    "title": "Yang Baru",
+    "description": "Setiap perubahan yang dirilis ke GainForest, divisualisasikan dari waktu ke waktu."
+  },
+  "eyebrow": "Yang baru",
+  "heading": "GainForest v{version}",
+  "intro": "Lini masa hidup dari semua yang telah kami rilis — fitur baru, penyempurnaan, dan perbaikan, dikelompokkan per bulan dan diberi kode warna berdasarkan area.",
+  "stats": {
+    "commits": "Perubahan",
+    "months": "Bulan",
+    "range": "Rentang"
+  },
+  "filterLabel": "Saring berdasarkan area",
+  "all": "Semua",
+  "shipped": "{count, plural, other {# perubahan}}",
+  "categories": {
+    "taina": "Tainá",
+    "dataJobs": "Batch data",
+    "donations": "Donasi",
+    "observations": "Observasi",
+    "projects": "Proyek & organisasi",
+    "auth": "Akun & masuk",
+    "admin": "Admin & tinjauan",
+    "i18n": "Bahasa",
+    "ui": "Desain & antarmuka",
+    "fix": "Perbaikan",
+    "core": "Platform inti"
+  }
+}

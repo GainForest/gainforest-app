@@ -10,6 +10,7 @@ import { AutoRefresh } from "./_components/AutoRefresh";
 import { getAccountRouteData, readAccountRouteParams } from "../../../account/_lib/account-route";
 import { accountHref, localProjectHref } from "../../../_lib/urls";
 import { RecordEngagement } from "../../../_components/RecordEngagement";
+import { FollowButton } from "../../../_components/FollowButton";
 import { getRequestOrigin } from "../../../_lib/request-origin";
 import {
   ProjectDetailView,
@@ -252,7 +253,10 @@ async function ProjectFallback({
           {owner ? (
             <aside className="min-w-0">
               <div className="rounded-2xl border border-border-soft bg-surface/60 p-4">
-                <p className="text-[11px] font-medium uppercase tracking-[0.12em] text-foreground/45">{t("ledBy")}</p>
+                <div className="flex items-center justify-between gap-2">
+                  <p className="text-[11px] font-medium uppercase tracking-[0.12em] text-foreground/45">{t("ledBy")}</p>
+                  <FollowButton targetDid={did} name={ownerName} />
+                </div>
                 <Link href={accountHref(ownerIdentifier)} className="group mt-3 flex items-center gap-3">
                   <span className="relative h-11 w-11 shrink-0 overflow-hidden rounded-full border border-border bg-muted">
                     {owner.avatarUrl ? (

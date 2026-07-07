@@ -1,24 +1,18 @@
 /**
  * Reviews layer: third-party judgement attached to Bumicerts.
  *
- * Two record families, two indexers:
+ * Two record families, one indexer (the GainForest hyperindex, `INDEXER_URL`):
  *
  *  1. `org.hypercerts.context.evaluation` — the Hypercerts protocol's formal
  *     evaluation primitive (summary, optional numeric score, evaluator DIDs,
- *     report links). Indexed by the GainForest hyperindex we already use for
- *     everything else (`INDEXER_URL`). The GraphQL `where` input only exposes
- *     a presence filter on `subject`, so we drain the (small) collection once
- *     and index it by `subject.uri`, exactly like `funding-summary.ts` does
- *     for funding configs.
+ *     report links). The GraphQL `where` input only exposes a presence filter
+ *     on `subject`, so we drain the (small) collection once and index it by
+ *     `subject.uri`.
  *
- *  2. `org.impactindexer.review.comment` — lightweight threaded comments on
- *     any AT-URI. These are written by simocracy.org users and by AI sims via
- *     pi-simocracy (`simocracy_post_comment`). They are NOT ingested by the
- *     GainForest hyperindex, so we read them from the Simocracy indexer's
- *     generic `records(collection:)` endpoint. Sim authorship is carried in
- *     `org.simocracy.history` sidecars (`type === "comment"`, `subjectUri`
- *     pointing at the comment) — we join those so sim-authored comments can
- *     be labelled as such in the UI.
+ *  2. `app.gainforest.feed.post` reply-posts — the same comment records the
+ *     feed's like + comment bar writes (a post carrying a `reply` ref whose
+ *     root is the subject). One query per subject pulls the whole thread,
+ *     since every comment and nested reply shares the same `reply.root`.
  *
  * Everything is cached for five minutes in-process; a Bumicert detail render
  * costs zero extra round-trips when the caches are warm.
@@ -27,16 +21,15 @@
 import { cachedAsync } from "./async-cache";
 import { indexerQuery } from "./indexer";
 
-const SIMOCRACY_INDEXER_URL = "https://simocracy-indexer.gainforest.id/graphql";
 const CACHE_TTL_MS = 5 * 60 * 1000;
 const MAX_DRAIN = 4000;
 const PAGE_SIZE = 1000;
 
 // ── Types ─────────────────────────────────────────────────────────────────
 
-export type EvaluationScore = { min: number; max: number; value: number };
+type EvaluationScore = { min: number; max: number; value: number };
 
-export type BumicertEvaluation = {
+type BumicertEvaluation = {
   uri: string;
   /** Repo owner — the account that published the evaluation. */
   did: string;
@@ -50,13 +43,11 @@ export type BumicertEvaluation = {
 
 export type ReviewComment = {
   uri: string;
-  /** Repo owner — for sim-authored comments this is the sim operator. */
+  /** Repo owner — the account that posted the comment. */
   did: string;
   subjectUri: string;
   text: string;
   createdAt: string | null;
-  /** Set when an `org.simocracy.history` sidecar attributes this comment to an AI sim. */
-  sim: { name: string; uri: string | null } | null;
   replies: ReviewComment[];
 };
 
@@ -157,152 +148,90 @@ async function loadEvaluationIndex(): Promise<Map<string, BumicertEvaluation[]>>
   return index;
 }
 
-export function fetchEvaluationIndex(signal?: AbortSignal): Promise<Map<string, BumicertEvaluation[]>> {
+function fetchEvaluationIndex(signal?: AbortSignal): Promise<Map<string, BumicertEvaluation[]>> {
   return cachedAsync("reviews:evaluation-index", CACHE_TTL_MS, loadEvaluationIndex, signal);
 }
 
-// ── Comments (Simocracy indexer) ──────────────────────────────────────────
+// ── Comments (GainForest hyperindex feed reply-posts) ─────────────────────
 
-type SimocracyRecordNode = {
+type FeedCommentNode = {
   uri?: string | null;
   did?: string | null;
-  value?: Record<string, unknown> | null;
+  text?: string | null;
+  createdAt?: string | null;
+  reply?: { parent?: { uri?: string | null } | null } | null;
 };
 
-/** Drain a collection from the Simocracy indexer's generic records endpoint. */
-async function drainSimocracyCollection(collection: string): Promise<SimocracyRecordNode[]> {
-  const nodes: SimocracyRecordNode[] = [];
-  let cursor: string | null = null;
-
-  while (nodes.length < MAX_DRAIN) {
-    const res = await fetch(SIMOCRACY_INDEXER_URL, {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({
-        query: `query DrainCollection($collection: String!, $first: Int, $after: String) {
-          records(collection: $collection, first: $first, after: $after) {
-            pageInfo { hasNextPage endCursor }
-            edges { node { uri did value } }
-          }
-        }`,
-        variables: { collection, first: PAGE_SIZE, after: cursor },
-      }),
-    });
-    if (!res.ok) throw new Error(`simocracy indexer ${res.status}`);
-    const json = (await res.json()) as {
-      data?: {
-        records?: {
-          pageInfo?: { hasNextPage?: boolean | null; endCursor?: string | null } | null;
-          edges?: Array<{ node?: SimocracyRecordNode | null } | null> | null;
-        } | null;
-      } | null;
-      errors?: Array<{ message: string }>;
-    };
-    if (json.errors?.length && !json.data?.records) {
-      throw new Error(json.errors[0]?.message ?? "simocracy indexer error");
+// Match by thread root so one query yields the subject's top-level comments
+// AND every nested reply (all of which carry `reply.root == subject`).
+const COMMENTS_FOR_SUBJECT_QUERY = `
+  query ReviewCommentsForSubject($uri: String!) {
+    appGainforestFeedPost(first: 200, where: { reply: { root: { uri: { eq: $uri } } } }) {
+      edges {
+        node {
+          uri did text createdAt
+          reply { parent { uri } }
+        }
+      }
     }
-
-    const conn = json.data?.records;
-    const edges = conn?.edges ?? [];
-    for (const edge of edges) {
-      if (edge?.node) nodes.push(edge.node);
-    }
-    if (!conn?.pageInfo?.hasNextPage || !conn.pageInfo.endCursor || edges.length === 0) break;
-    cursor = conn.pageInfo.endCursor;
   }
-
-  return nodes;
-}
-
-function readString(value: Record<string, unknown> | null | undefined, key: string): string | null {
-  const raw = value?.[key];
-  return typeof raw === "string" && raw.length > 0 ? raw : null;
-}
-
-/** `subject` on a comment is `{ uri }` per the lexicon, but legacy records may hold a bare string. */
-function readSubjectUri(value: Record<string, unknown> | null | undefined): string | null {
-  const subject = value?.subject;
-  if (typeof subject === "string") return subject;
-  if (typeof subject === "object" && subject !== null) {
-    const uri = (subject as Record<string, unknown>).uri;
-    if (typeof uri === "string") return uri;
-  }
-  return null;
-}
+`;
 
 /**
- * Comment index: top-level comments grouped by the AT-URI they were posted
- * on, with one level of threading (replies whose subject is another comment)
- * and sim attribution joined from `org.simocracy.history` sidecars.
+ * The comment thread for one subject: top-level comments (replies directly to
+ * the subject) with one level of threading — deeper reply chains are flattened
+ * onto their top-level ancestor so long discussions stay readable.
  */
-async function loadCommentIndex(): Promise<Map<string, ReviewComment[]>> {
-  const [commentNodes, historyNodes] = await Promise.all([
-    drainSimocracyCollection("org.impactindexer.review.comment"),
-    drainSimocracyCollection("org.simocracy.history"),
-  ]);
-
-  // commentUri -> sim attribution
-  const simByCommentUri = new Map<string, { name: string; uri: string | null }>();
-  for (const node of historyNodes) {
-    const value = node.value;
-    if (readString(value, "type") !== "comment") continue;
-    const subjectUri = readString(value, "subjectUri");
-    if (!subjectUri) continue;
-    const simNames = Array.isArray(value?.simNames) ? (value?.simNames as unknown[]) : [];
-    const simUris = Array.isArray(value?.simUris) ? (value?.simUris as unknown[]) : [];
-    const name = typeof simNames[0] === "string" ? simNames[0] : null;
-    if (!name) continue;
-    simByCommentUri.set(subjectUri, {
-      name,
-      uri: typeof simUris[0] === "string" ? simUris[0] : null,
-    });
-  }
+async function loadCommentsForSubject(subjectUri: string): Promise<ReviewComment[]> {
+  const data = await indexerQuery<{
+    appGainforestFeedPost?: { edges?: Array<{ node?: FeedCommentNode | null } | null> | null } | null;
+  }>(COMMENTS_FOR_SUBJECT_QUERY, { uri: subjectUri });
 
   const byUri = new Map<string, ReviewComment>();
-  for (const node of commentNodes) {
-    const text = readString(node.value, "text");
-    const subjectUri = readSubjectUri(node.value);
-    if (!node.uri || !node.did || !text || !subjectUri) continue;
+  const parentByUri = new Map<string, string>();
+  for (const edge of data?.appGainforestFeedPost?.edges ?? []) {
+    const node = edge?.node;
+    if (!node?.uri || !node.did || !node.text) continue;
     byUri.set(node.uri, {
       uri: node.uri,
       did: node.did,
       subjectUri,
-      text,
-      createdAt: readString(node.value, "createdAt"),
-      sim: simByCommentUri.get(node.uri) ?? null,
+      text: node.text,
+      createdAt: node.createdAt ?? null,
       replies: [],
     });
+    if (node.reply?.parent?.uri) parentByUri.set(node.uri, node.reply.parent.uri);
   }
 
-  // Thread: a comment whose subject is another comment becomes a reply
-  // (flattened to one level so deep chains stay readable).
-  const index = new Map<string, ReviewComment[]>();
-  const byTime = (a: ReviewComment, b: ReviewComment) => (a.createdAt ?? "").localeCompare(b.createdAt ?? "");
+  const roots: ReviewComment[] = [];
   for (const comment of byUri.values()) {
-    let parent = byUri.get(comment.subjectUri);
+    // Walk up the parent chain to this comment's top-level ancestor.
+    let parentUri = parentByUri.get(comment.uri) ?? subjectUri;
     let hops = 0;
-    while (parent && byUri.has(parent.subjectUri) && hops < 10) {
-      parent = byUri.get(parent.subjectUri);
+    while (parentUri !== subjectUri && hops < 10) {
+      const next = parentByUri.get(parentUri);
+      if (!next || !byUri.has(parentUri)) break;
+      if (next === subjectUri) break;
+      parentUri = next;
       hops += 1;
     }
-    if (parent && parent !== comment) {
-      parent.replies.push(comment);
-      continue;
+    if (parentUri === subjectUri || !byUri.has(parentUri)) {
+      roots.push(comment);
+    } else {
+      const ancestor = byUri.get(parentUri);
+      if (ancestor && ancestor !== comment) ancestor.replies.push(comment);
+      else roots.push(comment);
     }
-    if (byUri.has(comment.subjectUri)) continue; // self/cyclic reference — drop
-    const list = index.get(comment.subjectUri);
-    if (list) list.push(comment);
-    else index.set(comment.subjectUri, [comment]);
   }
-  for (const list of index.values()) {
-    list.sort(byTime);
-    for (const comment of list) comment.replies.sort(byTime);
-  }
-  return index;
+
+  const byTime = (a: ReviewComment, b: ReviewComment) => (a.createdAt ?? "").localeCompare(b.createdAt ?? "");
+  roots.sort(byTime);
+  for (const comment of roots) comment.replies.sort(byTime);
+  return roots;
 }
 
-export function fetchCommentIndex(signal?: AbortSignal): Promise<Map<string, ReviewComment[]>> {
-  return cachedAsync("reviews:comment-index", CACHE_TTL_MS, loadCommentIndex, signal);
+function fetchCommentsForSubject(subjectUri: string, signal?: AbortSignal): Promise<ReviewComment[]> {
+  return cachedAsync(`reviews:comments:${subjectUri}`, CACHE_TTL_MS, () => loadCommentsForSubject(subjectUri), signal);
 }
 
 // ── Combined accessors ────────────────────────────────────────────────────
@@ -311,16 +240,49 @@ export function fetchCommentIndex(signal?: AbortSignal): Promise<Map<string, Rev
 export async function fetchReviewsForSubject(subjectUri: string, signal?: AbortSignal): Promise<BumicertReviews> {
   const [evaluations, comments] = await Promise.all([
     fetchEvaluationIndex(signal).then((index) => index.get(subjectUri) ?? [], () => []),
-    fetchCommentIndex(signal).then((index) => index.get(subjectUri) ?? [], () => []),
+    fetchCommentsForSubject(subjectUri, signal).catch(() => []),
   ]);
   return { evaluations, comments };
+}
+
+/**
+ * Reviews aggregated across several subject URIs that represent the same
+ * thing to the reader — e.g. a project page, where the like + comment bar
+ * writes against the project (collection) URI while evaluations target the
+ * Cert URI. Deduped by record URI, merged into one chronology.
+ */
+export async function fetchReviewsForSubjects(subjectUris: string[], signal?: AbortSignal): Promise<BumicertReviews> {
+  const unique = [...new Set(subjectUris.filter(Boolean))];
+  if (unique.length === 0) return { evaluations: [], comments: [] };
+  if (unique.length === 1) return fetchReviewsForSubject(unique[0], signal);
+
+  const results = await Promise.all(unique.map((uri) => fetchReviewsForSubject(uri, signal)));
+  const evaluations = new Map<string, BumicertEvaluation>();
+  const comments = new Map<string, ReviewComment>();
+  for (const result of results) {
+    for (const evaluation of result.evaluations) evaluations.set(evaluation.uri, evaluation);
+    for (const comment of result.comments) comments.set(comment.uri, comment);
+  }
+
+  const mergedEvaluations = [...evaluations.values()].sort((a, b) =>
+    (b.createdAt ?? "").localeCompare(a.createdAt ?? ""),
+  );
+  const mergedComments = [...comments.values()].sort((a, b) =>
+    (a.createdAt ?? "").localeCompare(b.createdAt ?? ""),
+  );
+  return { evaluations: mergedEvaluations, comments: mergedComments };
 }
 
 export type ReviewCounts = { evaluations: number; comments: number };
 
 /** Cheap counts for badges/chips. Counts replies too — they are voices, not metadata. */
 export async function fetchReviewCounts(subjectUri: string, signal?: AbortSignal): Promise<ReviewCounts> {
-  const { evaluations, comments } = await fetchReviewsForSubject(subjectUri, signal);
+  return fetchReviewCountsForSubjects([subjectUri], signal);
+}
+
+/** Counts across several subject URIs (see `fetchReviewsForSubjects`). */
+export async function fetchReviewCountsForSubjects(subjectUris: string[], signal?: AbortSignal): Promise<ReviewCounts> {
+  const { evaluations, comments } = await fetchReviewsForSubjects(subjectUris, signal);
   let commentCount = 0;
   for (const comment of comments) commentCount += 1 + comment.replies.length;
   return { evaluations: evaluations.length, comments: commentCount };

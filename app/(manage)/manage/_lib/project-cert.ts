@@ -54,11 +54,11 @@ export const emptyProjectCertDraft: ProjectCertDraft = {
 
 export type StrongRef = { uri: string; cid?: string | null };
 
-export function isRecord(value: unknown): value is Record<string, unknown> {
+function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
 }
 
-export function stringValue(value: unknown): string | null {
+function stringValue(value: unknown): string | null {
   return typeof value === "string" && value.trim().length > 0 ? value.trim() : null;
 }
 
@@ -70,7 +70,7 @@ export function scopeList(draft: Pick<ProjectCertDraft, "scopes" | "customScope"
   return [...draft.scopes, draft.customScope.trim()].map((item) => item.trim()).filter(Boolean);
 }
 
-export function scopeString(draft: Pick<ProjectCertDraft, "scopes" | "customScope">): string {
+function scopeString(draft: Pick<ProjectCertDraft, "scopes" | "customScope">): string {
   return scopeList(draft).join(", ");
 }
 
@@ -78,13 +78,13 @@ export function contributorList(draft: Pick<ProjectCertDraft, "contributors">): 
   return draft.contributors.map((item) => item.trim()).filter(Boolean);
 }
 
-export function dateInputToIso(date: string): string | null {
+function dateInputToIso(date: string): string | null {
   if (!date) return null;
   const iso = new Date(`${date}T12:00:00.000Z`);
   return Number.isNaN(iso.getTime()) ? null : iso.toISOString();
 }
 
-export function isoToDateInput(value: unknown): string {
+function isoToDateInput(value: unknown): string {
   if (typeof value !== "string" || !value.trim()) return "";
   const parsed = new Date(value);
   if (Number.isNaN(parsed.getTime())) return "";
@@ -264,15 +264,10 @@ export function buildProjectRecord(
   return record;
 }
 
-export function projectItemUri(value: unknown): string | null {
+function projectItemUri(value: unknown): string | null {
   if (!isRecord(value)) return null;
   const itemIdentifier = isRecord(value.itemIdentifier) ? value.itemIdentifier : value;
   return stringValue(itemIdentifier.uri);
-}
-
-export function projectItemUris(record: Record<string, unknown> | null | undefined): string[] {
-  if (!record || !Array.isArray(record.items)) return [];
-  return record.items.map(projectItemUri).filter((uri): uri is string => Boolean(uri));
 }
 
 /** Pull rich cert fields back out of a stored record so edits can hydrate. */

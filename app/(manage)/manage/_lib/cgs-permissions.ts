@@ -6,11 +6,11 @@ export type ManageMutationPermission = {
   reason: string | null;
 };
 
-export function normalizeCgsRole(role: ManageTarget["role"]): CgsRole {
+function normalizeCgsRole(role: ManageTarget["role"]): CgsRole {
   return role === "owner" || role === "admin" ? role : "member";
 }
 
-export function groupRole(target: Pick<ManageTarget, "kind" | "role">): CgsRole | null {
+function groupRole(target: Pick<ManageTarget, "kind" | "role">): CgsRole | null {
   return target.kind === "group" ? normalizeCgsRole(target.role) : null;
 }
 
@@ -45,14 +45,4 @@ export function canDeleteRecord(target: Pick<ManageTarget, "kind" | "role">, opt
     allowed: false,
     reason: "Members can only delete records they created. Ask an organization admin to remove existing records.",
   };
-}
-
-export function canManageMembers(role: CgsRole): ManageMutationPermission {
-  if (role === "owner" || role === "admin") return { allowed: true, reason: null };
-  return { allowed: false, reason: "Only organization owners and admins can add or remove members." };
-}
-
-export function canSetMemberRoles(role: CgsRole): ManageMutationPermission {
-  if (role === "owner") return { allowed: true, reason: null };
-  return { allowed: false, reason: "Only organization owners can change member roles." };
 }

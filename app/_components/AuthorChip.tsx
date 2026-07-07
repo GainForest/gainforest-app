@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type SyntheticEvent } from "react";
+import { useEffect, useState } from "react";
 import {
   resolveDidProfile,
   getCachedProfile,
@@ -118,64 +118,6 @@ export function AuthorInline({
       <span className="inline-flex min-w-0 cursor-default items-center gap-1.5 align-middle" title={label}>
         {showAvatar ? <Avatar did={did} handle={handle} avatar={avatar} avatarRef={avatarRefOverride ?? null} className="h-4 w-4 text-[8px]" /> : null}
         <span className="truncate text-foreground/80">{label}</span>
-      </span>
-    </AccountHoverCard>
-  );
-}
-
-/** Floating owner badge for the top-left of a card cover (Bumicerts-card
- *  style): the avatar is always shown; the @handle appears once resolved. The
- *  did:plc + created date live in the card footer, so the badge stays compact. */
-export function OwnerBadge({
-  did,
-  avatarOverride,
-  avatarRefOverride,
-  nameOverride,
-}: {
-  did: string;
-  avatarOverride?: string | null;
-  avatarRefOverride?: string | null;
-  nameOverride?: string | null;
-}) {
-  const [profile, setProfile] = useState<DidProfile | null>(() => getCachedProfile(did) ?? null);
-  useEffect(() => {
-    let active = true;
-    setProfile(getCachedProfile(did) ?? null);
-    resolveDidProfile(did).then((p) => {
-      if (active) setProfile(p);
-    });
-    return () => {
-      active = false;
-    };
-  }, [did]);
-
-  const { openAccount } = useAccountDrawer();
-  const handle = profile?.handle ?? null;
-  const avatar = avatarOverride ?? profile?.avatar ?? null;
-
-  // Lives inside the card's <button>, so this is a role=button span that stops
-  // propagation — clicking the owner opens the account drawer, not the record.
-  const open = (e: SyntheticEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    openAccount(did);
-  };
-  return (
-    <AccountHoverCard did={did}>
-      <span
-        role="button"
-        tabIndex={0}
-        onClick={open}
-        onKeyDown={(e) => {
-          if (e.key === "Enter" || e.key === " ") open(e);
-        }}
-        className="inline-flex min-w-0 cursor-pointer items-center gap-1.5"
-        title="View profile"
-      >
-        <Avatar did={did} handle={handle} avatar={avatar} avatarRef={avatarRefOverride ?? null} className="h-5 w-5 text-[9px]" />
-        {nameOverride || profile?.displayName || handle ? (
-          <span className="truncate text-[11px] font-medium text-foreground">{nameOverride || profile?.displayName || handle}</span>
-        ) : null}
       </span>
     </AccountHoverCard>
   );

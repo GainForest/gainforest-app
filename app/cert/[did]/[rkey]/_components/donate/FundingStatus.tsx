@@ -226,6 +226,7 @@ export function FundingStatus({
         onClick={handleOpenModal}
         variant={ui.buttonVariant}
         className="w-full"
+        data-taina="enable-donations"
       >
         <SettingsIcon className="size-3.5" />
         {ui.buttonLabel}

@@ -35,6 +35,20 @@ export function withAbort<T>(promise: Promise<T>, signal?: AbortSignal): Promise
  * a cached promise is shared, so wiring one caller's signal into the loader can
  * cancel work that other current callers are still awaiting.
  */
+/** Drop every cached entry whose key starts with `prefix`. Returns how many
+ *  entries were removed. Used to bust derived caches after a rare mutation
+ *  (e.g. publishing an organization must refresh the explore indexes). */
+export function invalidateCachedAsyncByPrefix(prefix: string): number {
+  let removed = 0;
+  for (const key of cache.keys()) {
+    if (key.startsWith(prefix)) {
+      cache.delete(key);
+      removed += 1;
+    }
+  }
+  return removed;
+}
+
 export function cachedAsync<T>(
   key: string,
   ttlMs: number,

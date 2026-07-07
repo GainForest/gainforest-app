@@ -42,7 +42,3 @@ export function takeAddDataHandoff(kind: UploadKind): File[] {
   if (Date.now() - current.createdAt > HANDOFF_TTL_MS) return [];
   return current.files;
 }
-
-export function clearAddDataHandoff(): void {
-  pending = null;
-}

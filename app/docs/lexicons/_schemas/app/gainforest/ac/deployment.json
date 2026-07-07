@@ -106,6 +106,11 @@
             "format": "at-uri",
             "description": "AT-URI of the organization site record this deployment belongs to."
           },
+          "equipmentRef": {
+            "type": "string",
+            "format": "at-uri",
+            "description": "AT-URI of the app.gainforest.equipment inventory record for the physical unit used in this deployment. Prefer this link over the freeform deviceModel/deviceSerialNumber strings when the unit is registered."
+          },
           "eventRef": {
             "type": "string",
             "format": "at-uri",

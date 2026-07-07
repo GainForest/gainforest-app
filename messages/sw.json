@@ -41,6 +41,14 @@
         }
       }
     },
+    "explainer": {
+      "eyebrow": "Tazama maelezo",
+      "titlePrefix": "Njia mpya ya",
+      "titleEmphasis": "kufadhili asili",
+      "description": "Kwa dakika mbili, ona jinsi Bumicerts zinavyobadilisha kazi halisi ya shambani kuwa kumbukumbu zinazothibitishwa — na kupeleka ufadhili moja kwa moja kwa walinzi wa asili wa kienyeji wanaofanya kazi hiyo.",
+      "play": "Cheza video",
+      "videoTitle": "Bumicerts: mfumo mpya na wa haki wa kufadhili asili kwa walinzi wa asili wa kienyeji"
+    },
     "certificate": {
       "eyebrow": "Cheti",
       "titleLine1": "cheti ni nini",

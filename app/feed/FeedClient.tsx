@@ -97,16 +97,24 @@ function groupFeedEntries(items: ActivityFeedItem[]): FeedEntry[] {
 }
 
 // `authOnly` tabs are shown only to signed-in viewers (a following feed has no
-// meaning when signed out).
-const FILTERS: { key: Filter; Icon: typeof NewspaperIcon; authOnly?: boolean }[] = [
+// meaning when signed out). `adminOnly` tabs are shown only to admin-group
+// members — donations are being wound down for the general public.
+const FILTERS: { key: Filter; Icon: typeof NewspaperIcon; authOnly?: boolean; adminOnly?: boolean }[] = [
   { key: "all", Icon: NewspaperIcon },
   { key: "following", Icon: UsersRoundIcon, authOnly: true },
   { key: "post", Icon: MegaphoneIcon },
   { key: "project", Icon: FolderKanbanIcon },
   { key: "observation", Icon: BinocularsIcon },
   { key: "organization", Icon: Building2Icon },
-  { key: "donation", Icon: HeartHandshakeIcon },
+  { key: "donation", Icon: HeartHandshakeIcon, adminOnly: true },
 ];
+
+// Whether a filter tab is visible to the current viewer.
+function visibleTab(f: { authOnly?: boolean; adminOnly?: boolean }, signedIn: boolean, isAdmin: boolean): boolean {
+  if (f.authOnly && !signedIn) return false;
+  if (f.adminOnly && !isAdmin) return false;
+  return true;
+}
 
 function filterLabel(t: (key: string) => string, key: Filter): string {
   return key === "all" ? t("filters.all") : t(`filters.${key}`);
@@ -118,12 +126,14 @@ export function FeedClient({
   initialHasMore,
   signedIn,
   viewerDid,
+  isAdmin = false,
 }: {
   initialItems: ActivityFeedItem[];
   initialCursor: string | null;
   initialHasMore: boolean;
   signedIn: boolean;
   viewerDid: string | null;
+  isAdmin?: boolean;
 }) {
   const t = useTranslations("common.feed");
   const interactions = useFeedInteractions(viewerDid);
@@ -294,6 +304,7 @@ export function FeedClient({
               <FeedFilterTabs
                 filter={filter}
                 signedIn={signedIn}
+                isAdmin={isAdmin}
                 onSelect={selectFilter}
                 onRefresh={() => void loadFirst(filter, "refresh")}
                 refreshing={refreshing}
@@ -399,6 +410,7 @@ export function FeedClient({
             <FeedFilterRail
               filter={filter}
               signedIn={signedIn}
+              isAdmin={isAdmin}
               onSelect={selectFilter}
               onRefresh={() => void loadFirst(filter, "refresh")}
               refreshing={refreshing}
@@ -417,6 +429,7 @@ export function FeedClient({
 function FeedFilterTabs({
   filter,
   signedIn,
+  isAdmin,
   onSelect,
   onRefresh,
   refreshing,
@@ -424,13 +437,14 @@ function FeedFilterTabs({
 }: {
   filter: Filter;
   signedIn: boolean;
+  isAdmin: boolean;
   onSelect: (next: Filter) => void;
   onRefresh: () => void;
   refreshing: boolean;
   loading: boolean;
 }) {
   const t = useTranslations("common.feed");
-  const tabs = FILTERS.filter((f) => !f.authOnly || signedIn);
+  const tabs = FILTERS.filter((f) => visibleTab(f, signedIn, isAdmin));
   return (
     <div className="flex min-w-0 items-center gap-1">
       <div className="no-scrollbar flex items-center gap-1 overflow-x-auto">
@@ -474,6 +488,7 @@ function FeedFilterTabs({
 function FeedFilterRail({
   filter,
   signedIn,
+  isAdmin,
   onSelect,
   onRefresh,
   refreshing,
@@ -481,13 +496,14 @@ function FeedFilterRail({
 }: {
   filter: Filter;
   signedIn: boolean;
+  isAdmin: boolean;
   onSelect: (next: Filter) => void;
   onRefresh: () => void;
   refreshing: boolean;
   loading: boolean;
 }) {
   const t = useTranslations("common.feed");
-  const tabs = FILTERS.filter((f) => !f.authOnly || signedIn);
+  const tabs = FILTERS.filter((f) => visibleTab(f, signedIn, isAdmin));
   return (
     <div className="flex flex-col gap-1">
       <nav aria-label={t("filterHeading")} className="flex flex-col gap-0.5">

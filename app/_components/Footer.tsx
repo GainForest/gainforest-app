@@ -2,12 +2,13 @@ import Image from "next/image";
 import Link from "next/link";
 import { ExternalLinkIcon, FileTextIcon, GlobeIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { GAINFOREST_URL, GLOBE_URL, STATUS_URL } from "../_lib/urls";
+import { GAINFOREST_URL, STATUS_URL } from "../_lib/urls";
 
 const PRIMARY_LINKS = [
   { href: GAINFOREST_URL, key: "gainforest", Icon: GlobeIcon, external: true },
   { href: "https://docs.gainforest.earth", key: "documentation", Icon: FileTextIcon, external: true },
-  { href: "https://www.x.com/GainForestNow", key: "twitter", Icon: TwitterIcon, external: true },
+  { href: "https://bsky.app/profile/gainforest.earth", key: "bluesky", Icon: BlueskyIcon, external: true },
+  { href: "https://www.instagram.com/gainforest", key: "instagram", Icon: InstagramIcon, external: true },
   { href: "https://github.com/GainForest/gainforest-explorer", key: "github", Icon: GithubIcon, external: true },
 ] as const;
 
@@ -17,7 +18,7 @@ const DATA_LINKS = [
   { href: "/observations", key: "observations" },
   { href: "/bioblitz", key: "bioblitz" },
   { href: "/docs/lexicons", key: "lexicons" },
-  { href: GLOBE_URL, key: "greenGlobe" },
+  { href: "/globe", key: "greenGlobe" },
   { href: STATUS_URL, key: "status" },
 ] as const;
 
@@ -134,10 +135,18 @@ function GithubIcon({ className }: { className?: string }) {
   );
 }
 
-function TwitterIcon({ className }: { className?: string }) {
+function BlueskyIcon({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" className={className} fill="currentColor" aria-hidden>
-      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24h-6.657l-5.214-6.817-5.967 6.817H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231 5.45-6.231Zm-1.161 17.52h1.833L7.084 4.126H5.117L17.083 19.77Z" />
+      <path d="M12 10.8c-1.087-2.114-4.046-6.053-6.798-7.995C2.566.944 1.561 1.266.902 1.565.139 1.908 0 3.08 0 3.768c0 .69.378 5.65.624 6.479.815 2.736 3.713 3.66 6.383 3.364.136-.02.275-.039.415-.056-.138.022-.276.04-.415.056-3.912.58-7.387 2.005-2.83 7.078 5.013 5.19 6.87-1.113 7.823-4.308.953 3.195 2.05 9.271 7.733 4.308 4.267-4.308 1.172-6.498-2.74-7.078a8.741 8.741 0 0 1-.415-.056c.14.017.279.036.415.056 2.67.297 5.568-.628 6.383-3.364.246-.828.624-5.79.624-6.478 0-.69-.139-1.861-.902-2.206-.659-.298-1.664-.62-4.3 1.24C16.046 4.748 13.087 8.687 12 10.8Z" />
+    </svg>
+  );
+}
+
+function InstagramIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} fill="currentColor" aria-hidden>
+      <path d="M12 2.163c3.204 0 3.584.012 4.85.07 1.366.062 2.633.336 3.608 1.31.975.975 1.248 2.242 1.31 3.608.058 1.266.07 1.646.07 4.85s-.012 3.584-.07 4.85c-.062 1.366-.335 2.633-1.31 3.608-.975.975-2.242 1.248-3.608 1.31-1.266.058-1.646.07-4.85.07s-3.584-.012-4.85-.07c-1.366-.062-2.633-.335-3.608-1.31-.975-.975-1.248-2.242-1.31-3.608C2.174 15.584 2.163 15.204 2.163 12s.011-3.584.07-4.85c.061-1.366.334-2.633 1.309-3.608.975-.974 2.242-1.248 3.608-1.31 1.266-.058 1.646-.07 4.85-.07Zm0 1.802c-3.15 0-3.517.011-4.76.068-1.045.048-1.613.222-1.99.369-.5.194-.858.427-1.233.802-.375.375-.608.732-.802 1.233-.147.377-.321.945-.369 1.99-.057 1.243-.068 1.61-.068 4.76s.011 3.517.068 4.76c.048 1.045.222 1.613.369 1.99.194.5.427.858.802 1.233.375.375.732.608 1.233.802.377.147.945.321 1.99.369 1.243.057 1.61.068 4.76.068s3.517-.011 4.76-.068c1.045-.048 1.613-.222 1.99-.369.5-.194.858-.427 1.233-.802.375-.375.608-.732.802-1.233.147-.377.321-.945.369-1.99.057-1.243.068-1.61.068-4.76s-.011-3.517-.068-4.76c-.048-1.045-.222-1.613-.369-1.99a3.32 3.32 0 0 0-.802-1.233 3.32 3.32 0 0 0-1.233-.802c-.377-.147-.945-.321-1.99-.369-1.243-.057-1.61-.068-4.76-.068Zm0 3.063a4.972 4.972 0 1 1 0 9.944 4.972 4.972 0 0 1 0-9.944Zm0 1.802a3.17 3.17 0 1 0 0 6.34 3.17 3.17 0 0 0 0-6.34Zm5.18-3.132a1.162 1.162 0 1 1 0 2.324 1.162 1.162 0 0 1 0-2.324Z" />
     </svg>
   );
 }

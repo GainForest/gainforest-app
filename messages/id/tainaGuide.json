@@ -1,0 +1,127 @@
+{
+  "widget": {
+    "shield": "Butuh bantuan?",
+    "role": "Pemandu GainForest Anda",
+    "spriteLabel": "Tainá — klik untuk mengobrol, seret untuk memindahkan",
+    "greeting": "Hai, saya Tainá! Saya bisa memandu Anda menjelajahi GainForest.",
+    "greetingHint": "Pilih pertanyaan di bawah, atau tanyakan apa saja.",
+    "guidesTitle": "Pertanyaan umum",
+    "placeholder": "Tanyakan apa saja…",
+    "thinking": "Tainá sedang berpikir…",
+    "send": "Kirim",
+    "close": "Tutup obrolan",
+    "back": "Kembali",
+    "showMe": "Tunjukkan langkah demi langkah",
+    "stepOf": "Langkah {current} dari {total}",
+    "next": "Berikutnya",
+    "previous": "Kembali",
+    "done": "Selesai",
+    "endTour": "Akhiri tur",
+    "openImage": "Lihat tangkapan layar ukuran penuh",
+    "cantFind": "Saya tidak menemukannya di halaman ini sekarang — tapi begini caranya:",
+    "tourHint": "Saya akan menunjuk di layar Anda. Klik bagian yang disorot untuk melanjutkan.",
+    "minimizeLabel": "Perkecil Tainá",
+    "restoreLabel": "Buka Tainá",
+    "signInFirst": "Untuk yang ini kamu perlu masuk dulu — gunakan tombol Masuk di bagian atas halaman, lalu kembali ke sini dan aku akan memandumu.",
+    "needProjectFirst": "Donasi diatur pada sebuah proyek, dan kamu belum punya proyek — buat proyek pertamamu dulu, lalu kembali ke sini.",
+    "createProjectFirst": "Tunjukkan cara membuat proyek"
+  },
+  "guides": {
+    "wallet": {
+      "question": "Bagaimana cara menerima donasi?",
+      "title": "Siapkan dompet untuk menerima donasi",
+      "intro": "Donasi masuk ke dompet yang tertaut ke akun Anda. Tidak perlu paham kripto — Anda bisa membuatnya hanya dengan email.",
+      "steps": {
+        "open": { "title": "Buka proyek Anda", "body": "Buka Proyek Saya lalu pilih proyek yang ingin menerima dukungan." },
+        "enable": { "title": "Klik “Enable Donations”", "body": "Di halaman proyek Anda akan menemukan kartu dukungan di sisi kanan. Klik Enable Donations." },
+        "addWallet": { "title": "Tambahkan dompet donasi", "body": "Di jendela pengaturan donasi, klik Add a donation wallet." },
+        "signIn": { "title": "Masuk — dompet dibuat otomatis", "body": "Lanjutkan dengan akun Bluesky atau email Anda dan dompet aman dibuat dalam hitungan detik. Sudah punya dompet kripto? Anda juga bisa menghubungkannya." },
+        "settings": { "title": "Kelola dompet kapan saja", "body": "Semua dompet tertaut Anda ada di Pengaturan → Linked Wallets." }
+      },
+      "tour": {
+        "open": "Buka proyek yang ingin menerima donasi.",
+        "enable": "Klik Enable Donations di kartu dukungan.",
+        "addWallet": "Klik Add a donation wallet, lalu masuk dengan Bluesky atau email — selesai!"
+      }
+    },
+    "createProject": {
+      "question": "Bagaimana cara membuat proyek?",
+      "title": "Buat proyek pertama Anda",
+      "intro": "Proyek menceritakan kisah kerja Anda dan bisa menerima dukungan. Panduannya hanya butuh sekitar dua menit.",
+      "steps": {
+        "start": { "title": "Mulai proyek baru", "body": "Klik Buat Proyek di bilah samping, atau Tambah proyek di halaman Proyek Saya." },
+        "name": { "title": "Beri nama", "body": "Gunakan nama jelas yang mudah dipahami orang, plus ringkasan satu baris." },
+        "focus": { "title": "Pilih area fokus", "body": "Pilih jenis kerja yang paling menggambarkan proyek — reboisasi, pemantauan, penjagaan…" },
+        "story": { "title": "Tambahkan waktu dan cerita", "body": "Tetapkan tanggal mulai (boleh masih berjalan) dan ceritakan apa yang terjadi, bagaimana dampak diukur, dan siapa yang diuntungkan." },
+        "people": { "title": "Hargai orang dan tempat", "body": "Tambahkan orang dan kelompok di balik kerja ini, dan lampirkan tempat kejadiannya." },
+        "photo": { "title": "Tambahkan foto", "body": "Foto yang kuat membantu orang mengenali dan memercayai proyek Anda." },
+        "review": { "title": "Tinjau dan buat", "body": "Pastikan semuanya benar, lalu klik Buat proyek. Proyek siap dibagikan dan menerima dukungan." }
+      },
+      "tour": {
+        "start": "Klik Tambah proyek untuk membuka panduan.",
+        "wizard": "Sekarang ikuti langkahnya: nama, area fokus, tanggal, cerita, orang & tempat, foto — lalu Buat proyek."
+      }
+    },
+    "editProject": {
+      "question": "Bagaimana cara mengedit proyek?",
+      "title": "Edit proyek",
+      "intro": "Anda bisa mengubah semua hal pada proyek setelah terbit — nama, cerita, foto, tempat.",
+      "steps": {
+        "myProjects": { "title": "Buka Proyek Saya", "body": "Buka tab Proyek di profil Anda, atau masuk ke Kelola dari menu profil." },
+        "edit": { "title": "Klik “Edit proyek”", "body": "Setiap kartu proyek punya tombol edit." },
+        "save": { "title": "Ubah dan simpan", "body": "Perbarui kolom apa pun, ganti atau hapus foto, lalu klik Simpan perubahan di bagian bawah." }
+      },
+      "tour": {
+        "edit": "Klik Edit proyek pada proyek yang ingin diubah.",
+        "save": "Lakukan perubahan, lalu tekan Simpan perubahan di bagian bawah."
+      }
+    },
+    "deleteProject": {
+      "question": "Bagaimana cara menghapus proyek?",
+      "title": "Hapus proyek",
+      "intro": "Menghapus akan mengeluarkan proyek dari akun Anda. Tidak bisa dibatalkan — tetapi observasi Anda tidak pernah ikut terhapus.",
+      "steps": {
+        "editor": { "title": "Buka editor proyek", "body": "Buka Proyek Saya dan klik Edit proyek — atau buka halaman proyek dan cari bagian Kelola." },
+        "delete": { "title": "Klik “Hapus proyek”", "body": "Tombol hapus ada di bagian bawah editor." },
+        "confirm": { "title": "Konfirmasi dengan mengetik nama", "body": "Ketik nama proyek persis untuk konfirmasi. Ini tidak bisa dibatalkan." }
+      },
+      "tour": {
+        "editor": "Pertama, buka editor proyek yang ingin dihapus.",
+        "delete": "Gulir ke bawah dan klik Hapus proyek.",
+        "confirm": "Ketik nama proyek persis, lalu konfirmasi. Ini tidak bisa dibatalkan."
+      }
+    },
+    "observations": {
+      "question": "Bagaimana cara mengunggah dan mengelola observasi?",
+      "title": "Unggah dan kelola observasi",
+      "intro": "Observasi adalah foto alam dengan spesies, tanggal, dan tempat — bukti di balik kerja Anda.",
+      "steps": {
+        "add": { "title": "Klik “Tambah observasi”", "body": "Anda akan menemukannya di bilah samping dan di profil Anda." },
+        "photos": { "title": "Taruh foto Anda", "body": "Unggah hingga 50 foto sekaligus — AI membaca setiap foto dan menyarankan isinya." },
+        "check": { "title": "Periksa dan tautkan", "body": "Pastikan nama spesies, tanggal, dan lokasi — dan tautkan ke salah satu proyek Anda jika mau. Anda juga bisa menyembunyikan lokasi persis Anda." },
+        "publish": { "title": "Tambahkan", "body": "Klik Tambah dan temuan Anda diterbitkan ke akun Anda." },
+        "manage": { "title": "Kelola nanti", "body": "Tab Observasi di profil memungkinkan Anda mencari, mengelompokkan ke dataset, atau memilih dan menghapus." }
+      },
+      "tour": {
+        "add": "Klik Tambah observasi.",
+        "photos": "Taruh foto Anda — saran spesies berjalan otomatis. Periksa namanya, tautkan proyek jika mau, lalu klik Tambah.",
+        "manage": "Dan di sinilah semua observasi Anda: cari, kelompokkan ke dataset, atau pilih dan hapus."
+      }
+    },
+    "bioblitz": {
+      "question": "Bagaimana cara ikut BioBlitz dan menang?",
+      "title": "Ikut tantangan BioBlitz",
+      "intro": "BioBlitz adalah lomba mingguan yang seru untuk merekam alam. Foto makhluk hidup apa pun, unggah, dan naiki papan peringkat.",
+      "steps": {
+        "open": { "title": "Buka BioBlitz", "body": "Anda akan menemukannya di bilah samping, di bawah Pendanaan." },
+        "register": { "title": "Daftar untuk ikut", "body": "Satu klik — mendaftar membuat tim bisa melacak entri Anda dan mengirim hadiah jika Anda menang." },
+        "upload": { "title": "Foto dan unggah", "body": "Keluarlah, foto makhluk hidup apa pun, dan tambahkan sebagai observasi selama ronde berlangsung." },
+        "win": { "title": "Menangkan hadiah", "body": "Observasi terbanyak dan foto terbaik memenangkan hadiah uang dan lencana permanen di profil — dan setiap observasi tetap milik Anda, bisa dipakai ulang sebagai bukti untuk proyek Anda." }
+      },
+      "tour": {
+        "register": "Klik Daftar untuk ikut — satu klik dan Anda terdaftar.",
+        "upload": "Lalu unggah foto alam di sini selama ronde — setiap observasi dihitung."
+      }
+    }
+  }
+}

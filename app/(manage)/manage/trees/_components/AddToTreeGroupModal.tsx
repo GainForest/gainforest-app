@@ -49,7 +49,7 @@ function getTreeGroupSearchText(treeGroup: UploadTreeDatasetRecord): string {
     .toLowerCase();
 }
 
-export function AddToTreeGroupModal({
+function AddToTreeGroupModal({
   treeGroups,
   treeCount,
   onConfirm,

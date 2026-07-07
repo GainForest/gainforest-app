@@ -11,6 +11,7 @@ import {
   KeyRoundIcon,
   LeafIcon,
   NetworkIcon,
+  PlayIcon,
   Share2Icon,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
@@ -87,6 +88,7 @@ export function HomeLanding({ kpis = null }: HomeLandingProps) {
         <LandingHero />
         <HomeStats kpis={kpis} />
         <UserOptionCards />
+        <ExplainerVideo />
         <WhatIsBumicert />
         <OpenNetworkSection />
       </main>
@@ -158,12 +160,32 @@ function LandingTopNavbar() {
   );
 }
 
+// React (and Next.js SSR) does not serialize the JSX `muted` prop into the
+// server-rendered HTML, so mobile browsers parse the <video> as autoplay +
+// unmuted and block autoplay at parse time — leaving only the poster. Desktop
+// autoplay policies are lenient, which is why it "works on desktop but not on
+// mobile". After hydration we re-assert muted on the DOM element and kick off
+// playback ourselves; calling play() on a muted video needs no user gesture.
+function useAmbientVideo() {
+  const ref = useRef<HTMLVideoElement>(null);
+  const [videoReady, setVideoReady] = useState(false);
+  useEffect(() => {
+    const video = ref.current;
+    if (!video) return;
+    video.muted = true;
+    video.defaultMuted = true;
+    const attempt = video.play();
+    if (attempt) attempt.catch(() => {});
+  }, []);
+  return { videoRef: ref, videoReady, setVideoReady };
+}
+
 function LandingHero() {
   const t = useTranslations("landing.hero");
   // The ambient biodiversity clip fades in over the poster image once it can
   // actually play. If the clip is missing (not yet provided) or the browser
   // blocks autoplay, the poster image simply remains — identical to before.
-  const [videoReady, setVideoReady] = useState(false);
+  const { videoRef, videoReady, setVideoReady } = useAmbientVideo();
   return (
     <section className="relative flex min-h-[100dvh] flex-col overflow-hidden bg-background">
       <div className="absolute inset-y-0 right-0 w-full overflow-hidden">
@@ -189,6 +211,7 @@ function LandingHero() {
               public/assets/media/video/hero-biodiversity.{webm,mp4}; it fades in
               over the poster on first playback and stays hidden until then. */}
           <video
+            ref={videoRef}
             className={cn(
               "absolute inset-0 h-full w-full object-cover object-center transition-opacity duration-1000 ease-out",
               videoReady ? "opacity-100" : "opacity-0",
@@ -367,7 +390,7 @@ function OptionCard({
   // Ambient animal b-roll fades in over the photo once it can play; if the
   // clip is absent or autoplay is blocked, the photo simply stays — identical
   // to before. Decorative, so muted + aria-hidden.
-  const [videoReady, setVideoReady] = useState(false);
+  const { videoRef, videoReady, setVideoReady } = useAmbientVideo();
   return (
     <motion.div
       initial={{ opacity: 0, y: 22 }}
@@ -386,6 +409,7 @@ function OptionCard({
           />
           {card.video ? (
             <video
+              ref={videoRef}
               className={cn(
                 "absolute inset-0 h-full w-full object-cover transition-all duration-700 ease-out group-hover:scale-105",
                 videoReady ? "opacity-100" : "opacity-0",
@@ -431,6 +455,91 @@ function OptionCard({
         </div>
       </Link>
     </motion.div>
+  );
+}
+
+// GainForest's Bumicerts explainer on YouTube. We use a click-to-load facade:
+// the poster + play button render instantly (no third-party JS, no cookies, no
+// hit to LCP), and the privacy-hardened youtube-nocookie iframe is only mounted
+// once the visitor actually chooses to watch.
+const EXPLAINER_VIDEO_ID = "S1it4YS9tTc";
+
+function ExplainerVideo() {
+  const t = useTranslations("landing.explainer");
+  const [playing, setPlaying] = useState(false);
+  const videoTitle = t("videoTitle");
+  return (
+    <section className="px-6 pt-8 pb-12 sm:px-12 sm:pt-10 sm:pb-14 md:px-6 md:pt-8 md:pb-16">
+      <div className="mx-auto max-w-4xl">
+        <motion.div
+          initial={{ opacity: 0, y: 18 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.55, ease: [0.25, 0.1, 0.25, 1] }}
+          className="mb-6 text-center md:mb-8"
+        >
+          <div className="mb-4 flex items-center justify-center gap-3 text-primary/60">
+            <span className="h-px w-8 bg-border" />
+            <PlayIcon className="size-4" />
+            <span className="h-px w-8 bg-border" />
+          </div>
+          <h2 className="font-garamond text-4xl font-light tracking-[-0.01em] text-foreground md:text-5xl">
+            {t("titlePrefix")} <span className="font-instrument text-primary italic">{t("titleEmphasis")}</span>
+          </h2>
+          <p className="mx-auto mt-3 max-w-2xl text-base leading-relaxed text-muted-foreground">
+            {t("description")}
+          </p>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, scale: 0.97 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6, delay: 0.08, ease: [0.25, 0.1, 0.25, 1] }}
+          className="relative"
+        >
+          {/* soft glow behind the player, matching the certificate card */}
+          <div aria-hidden className="absolute -inset-6 rounded-[2.5rem] bg-primary/10 blur-3xl" />
+          <div className="relative aspect-video overflow-hidden rounded-2xl border border-border bg-card shadow-xl shadow-foreground/10">
+            {playing ? (
+              <iframe
+                className="absolute inset-0 h-full w-full"
+                src={`https://www.youtube-nocookie.com/embed/${EXPLAINER_VIDEO_ID}?autoplay=1&rel=0&modestbranding=1`}
+                title={videoTitle}
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                referrerPolicy="strict-origin-when-cross-origin"
+                allowFullScreen
+              />
+            ) : (
+              <button
+                type="button"
+                onClick={() => setPlaying(true)}
+                aria-label={t("play")}
+                className="group absolute inset-0 h-full w-full"
+              >
+                <Image
+                  src={`https://i.ytimg.com/vi/${EXPLAINER_VIDEO_ID}/maxresdefault.jpg`}
+                  alt={videoTitle}
+                  fill
+                  sizes="(min-width: 896px) 896px, 100vw"
+                  className="object-cover transition-transform duration-700 group-hover:scale-105"
+                />
+                <span
+                  aria-hidden
+                  className="absolute inset-0 bg-foreground/20 transition-colors duration-300 group-hover:bg-foreground/10"
+                />
+                <span
+                  aria-hidden
+                  className="absolute top-1/2 left-1/2 flex size-16 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-background/90 text-primary shadow-lg ring-1 ring-border backdrop-blur transition-transform duration-300 group-hover:scale-110 md:size-20"
+                >
+                  <PlayIcon className="size-7 translate-x-0.5 fill-current md:size-9" />
+                </span>
+              </button>
+            )}
+          </div>
+        </motion.div>
+      </div>
+    </section>
   );
 }
 

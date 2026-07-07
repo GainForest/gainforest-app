@@ -1,4 +1,5 @@
-import { buildSystemPrompt, getTaináPersona, TAINA_SIM } from "@/app/_lib/taina-sim";
+import { buildGuideSystemPrompt, buildSystemPrompt, getTaináPersona, TAINA_SIM } from "@/app/_lib/taina-sim";
+import { buildGuideKnowledge } from "@/app/_lib/taina-guides";
 import { openRouterChat } from "@/app/_lib/openrouter";
 
 export const runtime = "nodejs";
@@ -63,8 +64,18 @@ export async function POST(request: Request) {
         content: String(m.content).slice(0, MAX_CONTENT_CHARS),
       }));
 
+    // Two callers share this route: the Cert-creation writing companion
+    // (default) and the floating tutorial guide (`mode: "guide"`), which
+    // adds the platform how-to reference and replies in the UI language.
+    const mode = (body as { mode?: unknown }).mode === "guide" ? "guide" : "cert";
+    const rawLocale = (body as { locale?: unknown }).locale;
+    const locale = typeof rawLocale === "string" && /^[a-z]{2}$/.test(rawLocale) ? rawLocale : undefined;
+
     const persona = await getTaináPersona();
-    const systemPrompt = buildSystemPrompt(persona);
+    const systemPrompt =
+      mode === "guide"
+        ? buildGuideSystemPrompt(persona, buildGuideKnowledge(), locale)
+        : buildSystemPrompt(persona);
 
     if (!process.env.OPENROUTER_API_KEY) {
       return Response.json(

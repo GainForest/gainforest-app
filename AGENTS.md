@@ -12,6 +12,15 @@ When adding any feature that creates, updates, deletes, or changes membership/ro
 ## E2E test runs
 When a user asks to run the full E2E suite, run it. The suite intentionally creates disposable accounts and organizations, and teardown is responsible for deleting them. Do not avoid a requested full E2E run because it uses disposable accounts; instead, watch cleanup output and report any teardown failure clearly.
 
+## Data batch jobs (field-partner bulk ingest)
+Field partners submit 5–10GB zip archives (photos + KoboToolbox CSVs in varying formats) as review "jobs" via `/submit-data`; the team oversees them on the `/admin` **Data batches** tab. Full architecture + setup: `docs/data-jobs.md`.
+
+**Invariants to preserve when touching data jobs:**
+- **Uploads never flow through the Next.js server.** The browser PUTs presigned multipart parts straight to S3-compatible storage (`app/_lib/s3-storage.ts`); Vercel's body limit makes any proxied upload path a regression.
+- **Publishing on behalf uses a real GainForest agent key**, minted from the submitter's session on explicit consent, named exactly `DATA_JOBS_AGENT_KEY_NAME` so Settings → AI agent keys can badge it, stored only encrypted (`DATA_JOBS_KEY_SECRET`), and revocable by the user at any time. Never add a bespoke upload/publish endpoint.
+- **Ownership comes from the session, never the request body**; admin routes are gated by `getGainForestModeratorAccess()`.
+- The review team's actions never touch already-published observations; owner-side cancel only works while a job is still `uploading`.
+
 ## Tainá (Telegram field assistant)
 Tainá lets a signed-in user connect their own Telegram bot and turn nature sightings (a photo or a note) into GainForest observations under their account. **This app is the primary front-end** for it; the agent itself runs in a separate always-on service.
 

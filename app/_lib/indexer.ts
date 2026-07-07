@@ -21,6 +21,7 @@ import { blobUrl, resolveBlobUrl, resolvePdsHost, normaliseRef } from "./pds";
 import { fetchEndorserRecords } from "./endorsers";
 import { asNumber, formatNumber, formatDate, formatDateTime, formatCountry } from "./format";
 import { normalizeKnownWorkScopeKey } from "./work-scope-labels";
+import { hasMaEarthDonationUrl } from "./maearth-donation-data";
 
 // ── Generic GraphQL helper ────────────────────────────────────────────────
 
@@ -161,7 +162,7 @@ async function collectPaged<R>(
 
 // ── 1. Darwin Core occurrences ────────────────────────────────────────────
 
-export type MediaKind = "image" | "audio" | "video" | "spectrogram";
+type MediaKind = "image" | "audio" | "video" | "spectrogram";
 
 export type OccurrenceRecord = {
   kind: "occurrence";
@@ -493,11 +494,13 @@ function occurrenceWhereVariants(
   ownerDid?: string,
   badgeIndex?: FeaturedBadgeIndex,
   badgeFilters?: BumicertBadgeFilter[],
+  createdAt?: { gte?: string; lte?: string },
 ): Record<string, unknown>[] {
   const ownerWhere = ownerDid ? { did: { eq: ownerDid } } : undefined;
+  const createdWhere = createdAt ? { createdAt } : undefined;
   const badgeWheres = featuredBadgeRecordWhereVariants<Record<string, unknown>>(badgeIndex, "app.gainforest.dwc.occurrence", badgeFilters);
   if (badgeWheres.length === 0) return [];
-  const bases = badgeWheres.flatMap((badgeWhere) => filterWhereVariants(media).map((base) => mergeWhere(ownerWhere, badgeWhere, base) ?? {}));
+  const bases = badgeWheres.flatMap((badgeWhere) => filterWhereVariants(media).map((base) => mergeWhere(ownerWhere, createdWhere, badgeWhere, base) ?? {}));
   const q = query?.trim();
   if (!q) return bases;
   const queryWheres = [
@@ -730,12 +733,14 @@ async function walkAudioRecords(opts: {
       const page = await fetchAudioPage(Math.min(INDEXER_MAX_PAGE, Math.max(opts.target, 24)), cursor, opts.signal, where);
       cursor = page.cursor;
       hasNextPage = page.hasNextPage;
-      const mapped = await mapAudioRecords(page.nodes.slice(0, opts.target - collected.length), opts.signal);
+      // Map the whole fetched page — the cursor already points past all of it,
+      // so slicing to the target would permanently skip the remainder.
+      const mapped = await mapAudioRecords(page.nodes, opts.signal);
       collected.push(...mapped);
-      opts.onProgress?.(collected.slice(0, opts.target));
+      opts.onProgress?.([...collected]);
       if (!hasNextPage || !cursor) break;
     }
-    return { records: collected.slice(0, opts.target), cursor, hasMore: hasNextPage && Boolean(cursor) };
+    return { records: collected, cursor, hasMore: hasNextPage && Boolean(cursor) };
   };
 
   if (variants.length === 1) return walkOne(variants[0]!, opts.after);
@@ -882,6 +887,7 @@ type OccurrenceWalkOptions = {
   resolveMedia?: boolean;
   featuredBadgesOnly?: boolean;
   badgeFilters?: BumicertBadgeFilter[];
+  createdAt?: { gte?: string; lte?: string };
 };
 
 export async function walkOccurrences(opts: OccurrenceWalkOptions): Promise<OccurrenceWalkResult> {
@@ -911,7 +917,7 @@ export async function walkOccurrences(opts: OccurrenceWalkOptions): Promise<Occu
 async function walkOccurrencesUncached(opts: OccurrenceWalkOptions): Promise<OccurrenceWalkResult> {
   const { media, target, signal } = opts;
   const badgeIndex = opts.featuredBadgesOnly ? await fetchFeaturedBadgeIndex(signal) : undefined;
-  const whereVariants = occurrenceWhereVariants(media, opts.query, opts.ownerDid, badgeIndex, opts.badgeFilters);
+  const whereVariants = occurrenceWhereVariants(media, opts.query, opts.ownerDid, badgeIndex, opts.badgeFilters, opts.createdAt);
   if (whereVariants.length === 0) return { records: [], cursor: null, hasMore: false };
 
   async function walkOne(where: Record<string, unknown> | undefined, after: string | null): Promise<OccurrenceWalkResult> {
@@ -933,16 +939,13 @@ async function walkOccurrencesUncached(opts: OccurrenceWalkOptions): Promise<Occ
 
       const matches = res.nodes.filter((n) => matchesFilter(n, media));
       if (matches.length > 0) {
-        const needed = target - collected.length;
-        const pageMatches = matches.slice(0, needed);
+        // Keep EVERY match from this page: the cursor has already advanced past
+        // the whole raw page, so any match we drop now would be skipped forever
+        // on the next paginated call. `target` is a minimum, not a cap.
         const startIndex = collected.length;
-        const mapped = pageMatches.map(mapOccurrence);
-
-        for (const record of mapped) {
-          if (collected.length >= target) break;
-          collected.push(record);
-        }
-        opts.onProgress?.(collected.slice(0, target));
+        const mapped = matches.map(mapOccurrence);
+        collected.push(...mapped);
+        opts.onProgress?.([...collected]);
 
         if (opts.resolveMedia !== false) {
           const resolved = await resolveImages(
@@ -959,7 +962,7 @@ async function walkOccurrencesUncached(opts: OccurrenceWalkOptions): Promise<Occ
           for (let index = 0; index < resolved.length && startIndex + index < collected.length; index += 1) {
             collected[startIndex + index] = resolved[index]!;
           }
-          opts.onProgress?.(collected.slice(0, target));
+          opts.onProgress?.([...collected]);
         }
       }
 
@@ -967,7 +970,7 @@ async function walkOccurrencesUncached(opts: OccurrenceWalkOptions): Promise<Occ
     }
 
     return {
-      records: collected.slice(0, target),
+      records: collected,
       cursor,
       hasMore: hasNextPage && Boolean(cursor),
     };
@@ -1046,53 +1049,6 @@ export async function fetchObservationSummaryByDid(
     count: conn?.totalCount ?? 0,
     latestAt: conn?.edges?.[0]?.node?.createdAt ?? null,
   };
-}
-
-export type ProjectObservationSummary = {
-  /** Total observations linked to the project via `projectRef`. */
-  count: number;
-  /** Up to `target` image-bearing observations, ready to preview. */
-  records: OccurrenceRecord[];
-};
-
-/** Count + a few image previews for the observations attached to one project
- *  (matched on the occurrence `projectRef`). Powers the project detail page's
- *  observations summary. */
-export async function fetchProjectObservationSummary(
-  projectUri: string,
-  target = 12,
-  signal?: AbortSignal,
-): Promise<ProjectObservationSummary> {
-  if (!projectUri) return { count: 0, records: [] };
-
-  const countData = await indexerQuery<{ appGainforestDwcOccurrence?: { totalCount?: number | null } | null }>(
-    `query ProjectObservationCount($uri: String!) {
-      appGainforestDwcOccurrence(first: 1, where: { projectRef: { eq: $uri } }) { totalCount }
-    }`,
-    { uri: projectUri },
-    signal,
-  ).catch(() => null);
-  const count = countData?.appGainforestDwcOccurrence?.totalCount ?? 0;
-
-  const where = { projectRef: { eq: projectUri }, imageEvidence: { isNull: false } };
-  const page = await fetchOccurrencePage(Math.min(INDEXER_MAX_PAGE, Math.max(target, 24)), null, signal, where).catch(
-    () => ({ nodes: [] as RawOccurrence[], cursor: null, hasNextPage: false }),
-  );
-  const matches = page.nodes.filter((node) => Boolean(node.imageEvidence?.file?.ref));
-  let mapped = matches.map(mapOccurrence);
-  mapped = await resolveImages(
-    mapped,
-    (record) => {
-      if (record.imageUrl) return null;
-      const raw = matches.find((node) => node.rkey === record.rkey && node.did === record.did);
-      const ref = raw?.imageEvidence?.file?.ref ?? null;
-      return ref ? { did: record.did, ref } : null;
-    },
-    (record, url) => ({ ...record, imageUrl: url }),
-    signal,
-  );
-  const records = mapped.filter((record) => Boolean(record.imageUrl)).slice(0, target);
-  return { count, records };
 }
 
 /** Load recent image observations owned by a single DID. Used by Bumicert detail
@@ -1268,11 +1224,17 @@ const FUNDING_CONFIG_QUERY = `
   }
 `;
 
-export type BumicertBadgeFilter = "gainforest" | "maearth" | "maearth-round-1" | "maearth-round-2" | "maearth-round-3";
+export type BumicertBadgeFilter = "gainforest" | "maearth" | "maearth-round-1" | "maearth-round-2" | "maearth-round-3" | "published";
 export type TrustedOrganizationBadge = "gainforest";
 
 const FEATURED_BADGES: Array<{ key: BumicertBadgeFilter; title: string }> = [
   { key: "gainforest", title: "GainForest" },
+  // Self-serve publishing (Manage → Projects → Publish) awards this badge so
+  // the account shows on the public explore pages. It is deliberately a
+  // SEPARATE key from "gainforest": published orgs become visible, but they
+  // don't match the GainForest source chip and never read "Trusted by
+  // GainForest" (see `app/_lib/publish-org.ts`).
+  { key: "published", title: "Published on GainForest" },
   { key: "maearth", title: "Ma Earth" },
   { key: "maearth-round-1", title: "Ma Earth Round 1" },
   { key: "maearth-round-2", title: "Ma Earth Round 2" },
@@ -1321,7 +1283,7 @@ const BUILTIN_TRUSTED_ISSUERS: BuiltinTrustedIssuer[] = [
 /** Metadata for a dynamic (admin-added) endorser. Its "Trusted by" emblem is
  *  rendered from the endorser's own profile instead of a bundled logo, so we
  *  carry enough here to label and link it. The brand `key` is the endorser DID. */
-export type EndorserMeta = { key: string; label: string; endorserDid: string; endorserHandle: string | null };
+type EndorserMeta = { key: string; label: string; endorserDid: string; endorserHandle: string | null };
 
 /** A trusted issuer resolved for an index build: a built-in brand family, or a
  *  dynamic endorser whose brand key is its own DID. */
@@ -1786,7 +1748,7 @@ async function fetchFeaturedBadgeIndexUncached(signal?: AbortSignal): Promise<Fe
 function fetchFeaturedBadgeIndex(signal?: AbortSignal): Promise<FeaturedBadgeIndex> {
   return publicExploreCache(
     "featured-badge-index",
-    { version: "gainforest-maearth-endorsers:v7", ttl: FEATURED_BADGE_INDEX_CACHE_MS },
+    { version: "gainforest-maearth-endorsers:v8", ttl: FEATURED_BADGE_INDEX_CACHE_MS },
     // The featured-badge index is shared by count and list requests across the
     // public Explore pages. Keep the cached loader independent from any one
     // component effect's abort signal; otherwise an aborted count refresh can
@@ -1845,7 +1807,7 @@ export async function fetchTrustedByEndorsements(
 /** The Ma Earth funding rounds, mapped to their per-round badge keys. Round 3
  *  is open for applications but has no awards yet, so it only resolves once Ma
  *  Earth verifies it. Ordered so callers can render rounds ascending. */
-export const MA_EARTH_ROUND_BADGE_KEYS: Array<{ round: number; key: BumicertBadgeFilter }> = [
+const MA_EARTH_ROUND_BADGE_KEYS: Array<{ round: number; key: BumicertBadgeFilter }> = [
   { round: 1, key: "maearth-round-1" },
   { round: 2, key: "maearth-round-2" },
   { round: 3, key: "maearth-round-3" },
@@ -2038,7 +2000,7 @@ async function fetchRecognitionAwardIndexUncached(signal?: AbortSignal): Promise
  * Cached account-DID -> recognition-badge-keys index. Returns an empty map on
  * any error so a transient indexer hiccup never drops badges site-wide.
  */
-export function fetchRecognitionAwardIndex(signal?: AbortSignal): Promise<Map<string, Set<string>>> {
+function fetchRecognitionAwardIndex(signal?: AbortSignal): Promise<Map<string, Set<string>>> {
   return cachedAsync(
     "recognition-award-index:v1",
     HIDDEN_ACCOUNTS_CACHE_MS,
@@ -2189,7 +2151,7 @@ async function mapActivityConnection(
   };
 }
 
-export type BumicertIndexFilter = "images" | "locations" | "contributors" | "active" | "donations";
+type BumicertIndexFilter = "images" | "locations" | "contributors" | "active" | "donations";
 export type ExplorerSortMode = "newest" | "oldest" | "az" | "za";
 
 type ActivityQueryOptions = {
@@ -2478,6 +2440,62 @@ async function fetchFundingConfigPage(
   };
 }
 
+type DonationEligibilityIndex = {
+  dids: Set<string>;
+  activityUris: Set<string>;
+};
+
+async function fetchDonationEligibilityIndex(signal?: AbortSignal): Promise<DonationEligibilityIndex> {
+  return publicExploreCache(
+    "donation-eligibility-index",
+    {},
+    async () => {
+      const dids = new Set<string>();
+      const activityUris = new Set<string>();
+      let cursor: string | null = null;
+      let hasMore = true;
+      while (hasMore) {
+        const page = await fetchFundingConfigPage(INDEXER_MAX_PAGE, cursor);
+        for (const config of page.records) {
+          dids.add(config.did);
+          activityUris.add(activityUriForDidRkey(config.did, config.rkey));
+        }
+        cursor = page.cursor;
+        hasMore = page.hasMore && Boolean(page.cursor);
+      }
+      return { dids, activityUris };
+    },
+    signal,
+  );
+}
+
+/** Where a record can receive donations: `gainforest` = a native funding
+ *  config (linked wallet), `maearth` = a live Ma Earth campaign page. */
+export type DonationSources = { gainforest: boolean; maearth: boolean };
+
+function recordDonationSources(record: { did: string; atUri?: string; bumicertUris?: string[] }, index: DonationEligibilityIndex): DonationSources {
+  const maearth = hasMaEarthDonationUrl(record.did);
+  const gainforest = (!record.bumicertUris && index.dids.has(record.did)) ||
+    (record.bumicertUris ?? [record.atUri].filter((uri): uri is string => Boolean(uri))).some((uri) => index.activityUris.has(uri));
+  return { gainforest, maearth };
+}
+
+function recordAcceptsDonations(record: { did: string; atUri?: string; bumicertUris?: string[] }, index: DonationEligibilityIndex): boolean {
+  const sources = recordDonationSources(record, index);
+  return sources.gainforest || sources.maearth;
+}
+
+const DONATION_FILTER_KEYS = ["donations", "donations-gainforest", "donations-maearth"] as const;
+
+/** AND semantics for the source-specific chips; the legacy `donations` key
+ *  (old shared links) means "either source". */
+function donationSourcesMatchFilters(sources: DonationSources, filters: readonly string[] | undefined): boolean {
+  if (filters?.includes("donations-gainforest") && !sources.gainforest) return false;
+  if (filters?.includes("donations-maearth") && !sources.maearth) return false;
+  if (filters?.includes("donations") && !sources.gainforest && !sources.maearth) return false;
+  return true;
+}
+
 async function fetchActivityByUriRecord(uri: string, signal?: AbortSignal): Promise<BumicertRecord | null> {
   const data = await indexerQuery<{ orgHypercertsClaimActivityByUri?: RawActivity | null }>(
     ACTIVITY_BY_URI_QUERY,
@@ -2523,7 +2541,10 @@ async function fetchDonationEnabledBumicerts(
         })
       : page.records).filter((config) => !hidden.has(config.did));
 
-    for (let index = 0; index < eligibleConfigs.length && records.length < target; index += batchSize) {
+    // Resolve the ENTIRE fetched config page, even past `target`: the cursor
+    // has already advanced beyond all of it, so any eligible activity we skip
+    // now would never be seen by a later paginated call.
+    for (let index = 0; index < eligibleConfigs.length; index += batchSize) {
       if (signal?.aborted) throw new DOMException("aborted", "AbortError");
       const batch = eligibleConfigs.slice(index, index + batchSize);
       const activities = await Promise.all(
@@ -2534,7 +2555,6 @@ async function fetchDonationEnabledBumicerts(
       for (const activity of activities) {
         if (!activity || !activityMatchesOptions(activity, options)) continue;
         records.push(activity);
-        if (records.length >= target) break;
       }
     }
     if (!page.cursor) break;
@@ -2611,17 +2631,6 @@ async function fetchBumicertsFromActivityCount(signal?: AbortSignal, options?: A
     }
   }
   return seen.size;
-}
-
-export async function fetchBumicertTotalCount(signal?: AbortSignal, options?: ActivityQueryOptions): Promise<number> {
-  return publicExploreCache(
-    "bumicert-total-count",
-    { options },
-    () => options?.filters?.includes("donations")
-      ? fetchDonationEnabledBumicertCount(undefined, options)
-      : fetchBumicertsFromActivityCount(undefined, options),
-    signal,
-  );
 }
 
 async function fetchBumicertsFromActivity(
@@ -2839,6 +2848,10 @@ export type ProjectRecord = {
   /** Work-scope / focus tags inherited from the project's single Cert. Only
    *  populated when the project was fetched with `withScopeTags`. */
   scopeTags?: string[];
+  /** True when the project can receive donations through a linked button or external donation page. */
+  acceptsDonations?: boolean;
+  /** Per-source donation eligibility (native GainForest wallet vs Ma Earth campaign). */
+  donationSources?: DonationSources;
   /** At-a-glance evidence counts for card display. Only populated when fetched
    *  with `withScopeTags`. */
   evidence?: ProjectEvidenceCounts;
@@ -2930,7 +2943,7 @@ const PROJECT_COLLECTION_BY_DID_QUERY = `
   }
 `;
 
-export type ProjectIndexFilter = "images" | "locations" | "timeline";
+export type ProjectIndexFilter = "images" | "locations" | "timeline" | "donations" | "donations-gainforest" | "donations-maearth";
 
 type ProjectQueryOptions = {
   query?: string;
@@ -3213,6 +3226,10 @@ function projectFilterWhere(filters: ProjectIndexFilter[] | undefined): ProjectW
   return Object.keys(where).length > 0 ? where : undefined;
 }
 
+function projectRequiresDonationFilter(options?: ProjectQueryOptions): boolean {
+  return options?.filters?.some((filter) => (DONATION_FILTER_KEYS as readonly string[]).includes(filter)) ?? false;
+}
+
 function projectSearchWhere(query: string | undefined): ProjectWhere[] {
   const q = query?.trim();
   if (!q) return [{}];
@@ -3316,31 +3333,62 @@ async function fetchProjectsFromCollections(
   const badgeIndex = options?.featuredBadgesOnly ? await fetchFeaturedBadgeIndex(signal) : undefined;
   const variants = projectWhereVariants(options, badgeIndex);
   if (variants.length === 0) return { records: [], cursor: null, hasMore: false };
+  const donationIndex = projectRequiresDonationFilter(options) ? await fetchDonationEligibilityIndex(signal) : null;
+  const filterDonatable = (records: ProjectRecord[]) => donationIndex
+    ? records.flatMap((record) => {
+        const sources = recordDonationSources(record, donationIndex);
+        if (!donationSourcesMatchFilters(sources, options?.filters)) return [];
+        return [{ ...record, acceptsDonations: sources.gainforest || sources.maearth, donationSources: sources }];
+      })
+    : records;
+
   if (variants.length === 1) {
-    return collectPaged(
-      (first, cursor, nextSignal) => fetchProjectPage(first, cursor, nextSignal, variants[0], options?.sort, options?.withScopeTags),
-      target,
-      after,
-      signal,
-      onProgress,
-    );
+    if (!donationIndex) {
+      return collectPaged(
+        (first, cursor, nextSignal) => fetchProjectPage(first, cursor, nextSignal, variants[0], options?.sort, options?.withScopeTags),
+        target,
+        after,
+        signal,
+        onProgress,
+      );
+    }
+
+    const records: ProjectRecord[] = [];
+    let cursor = after;
+    let hasMore = true;
+    while (records.length < target && hasMore) {
+      if (signal?.aborted) throw new DOMException("aborted", "AbortError");
+      const page = await fetchProjectPage(INDEXER_MAX_PAGE, cursor, signal, variants[0], options?.sort, options?.withScopeTags);
+      records.push(...filterDonatable(page.records));
+      onProgress?.(uniqueProjects(records, options?.sort));
+      cursor = page.cursor;
+      hasMore = page.hasMore && Boolean(page.cursor);
+    }
+    // Do NOT slice to `target` here: the cursor has already advanced past every
+    // raw record fetched, so any filtered record we drop now would be skipped
+    // forever. `target` is a minimum fetch goal when post-filtering, not a cap.
+    return { records: uniqueProjects(records, options?.sort), cursor, hasMore };
   }
 
   const previous = parseMultiCursor(after, variants.length);
+  const pageTarget = donationIndex ? INDEXER_MAX_PAGE : target;
   const pages = await Promise.all(
     variants.map((where, index) => {
       if (!previous.more[index]) return Promise.resolve({ records: [], cursor: null, hasMore: false } satisfies Page<ProjectRecord>);
       return collectPaged(
         (first, cursor, nextSignal) => fetchProjectPage(first, cursor, nextSignal, where, options?.sort, options?.withScopeTags),
-        target,
+        pageTarget,
         previous.cursors[index] ?? null,
         signal,
       );
     }),
   );
-  const records = uniqueProjects(pages.flatMap((page) => page.records), options?.sort);
+  const records = uniqueProjects(filterDonatable(pages.flatMap((page) => page.records)), options?.sort);
   onProgress?.(records);
   return {
+    // When donation-filtering, every surviving record must be returned: the
+    // multi-cursor already points past all raw records fetched this round, so
+    // slicing to `target` would permanently drop the excess.
     records,
     cursor: encodeMultiCursor({ cursors: pages.map((page) => page.cursor), more: pages.map((page) => page.hasMore) }),
     hasMore: pages.some((page) => page.hasMore),
@@ -3356,6 +3404,7 @@ async function fetchProjectTotalCountUncached(signal?: AbortSignal, options?: Pr
   const variants = projectWhereVariants(options, badgeIndex);
   if (variants.length === 0) return 0;
   const hidden = await hiddenDidsForScope(Boolean(options?.creatorDid?.trim()), signal);
+  const donationIndex = projectRequiresDonationFilter(options) ? await fetchDonationEligibilityIndex(signal) : null;
 
   const seen = new Set<string>();
   for (const where of variants) {
@@ -3363,6 +3412,17 @@ async function fetchProjectTotalCountUncached(signal?: AbortSignal, options?: Pr
     let hasMore = true;
     while (hasMore) {
       if (signal?.aborted) throw new DOMException("aborted", "AbortError");
+      if (donationIndex) {
+        const page = await fetchProjectPage(INDEXER_MAX_PAGE, cursor, signal, where, options?.sort, false);
+        for (const record of page.records) {
+          if (hidden.has(record.did)) continue;
+          if (!donationSourcesMatchFilters(recordDonationSources(record, donationIndex), options?.filters)) continue;
+          seen.add(record.atUri);
+        }
+        cursor = page.cursor;
+        hasMore = page.hasMore && Boolean(page.cursor);
+        continue;
+      }
       const page = await fetchProjectCountPage(INDEXER_MAX_PAGE, cursor, signal, where, options?.sort);
       for (const record of page.records) {
         if (hidden.has(record.did)) continue;
@@ -3493,7 +3553,7 @@ export async function fetchProjectStats(signal?: AbortSignal): Promise<ProjectSt
 // ── 4. Project sites (organizations) ───────────────────────────────────────
 
 /** Which lexicon a project-site row came from. */
-export type SiteSource = "certified";
+type SiteSource = "certified";
 /** Toolbar filter selection; legacy organization records are intentionally excluded. */
 export type SiteSourceFilter = SiteSource | "both";
 
@@ -3522,6 +3582,10 @@ export type SiteRecord = {
   bumicertCount: number | null;
   /** Number of nature sightings shared by this organization, when loaded. */
   observationCount: number | null;
+  /** True when the organization can receive donations through a linked button or external donation page. */
+  acceptsDonations: boolean | null;
+  /** Per-source donation eligibility (native GainForest wallet vs Ma Earth campaign), when loaded. */
+  donationSources: DonationSources | null;
 };
 
 const ORG_COUNT_BATCH_SIZE = 50;
@@ -3566,7 +3630,7 @@ function fetchBumicertCountsByDid(dids: string[], signal?: AbortSignal): Promise
   );
 }
 
-export function fetchObservationCountsByDid(dids: string[], signal?: AbortSignal): Promise<Map<string, number>> {
+function fetchObservationCountsByDid(dids: string[], signal?: AbortSignal): Promise<Map<string, number>> {
   const uniqueDids = Array.from(new Set(dids.filter(Boolean))).sort();
   return publicExploreCache(
     "observation-counts-by-did",
@@ -3580,7 +3644,7 @@ export function fetchObservationCountsByDid(dids: string[], signal?: AbortSignal
   );
 }
 
-export type SiteIndexQuickFilter = "locations" | "bumicerts" | "observations";
+type SiteIndexQuickFilter = "locations" | "bumicerts" | "observations" | "donations" | "donations-gainforest" | "donations-maearth";
 export type SiteQueryOptions = {
   query?: string;
   country?: string | null;
@@ -3618,6 +3682,9 @@ function siteMatchesOptions(record: SiteRecord, options?: SiteQueryOptions): boo
   if (quick.includes("locations") && !record.locationUri) return false;
   if (quick.includes("bumicerts") && (record.bumicertCount ?? 0) <= 0) return false;
   if (quick.includes("observations") && (record.observationCount ?? 0) <= 0) return false;
+  if (quick.includes("donations") && record.acceptsDonations !== true) return false;
+  if (quick.includes("donations-gainforest") && record.donationSources?.gainforest !== true) return false;
+  if (quick.includes("donations-maearth") && record.donationSources?.maearth !== true) return false;
   return true;
 }
 
@@ -3740,6 +3807,39 @@ async function fetchDirectCertifiedOrgRecord(
   return promise;
 }
 
+const ORG_SELF_LOCATION_QUERY = `
+  query OrgSelfLocation($uri: String!) {
+    appCertifiedActorOrganizationByUri(uri: $uri) { location { uri } }
+  }
+`;
+
+/** AT-URI of the organization's own location record — the certified location
+ *  referenced by `app.certified.actor.organization/self` ("where the org is
+ *  based"), as opposed to the sites its projects work in. Null when the org
+ *  declares no location. Indexer first, direct-PDS record as fallback. */
+export async function fetchOrganizationLocationUri(
+  did: string,
+  signal?: AbortSignal,
+): Promise<string | null> {
+  type OrgSelfLocationData = {
+    appCertifiedActorOrganizationByUri?: { location?: { uri?: string | null } | null } | null;
+  };
+  const [data, direct] = await Promise.all([
+    indexerQuery<OrgSelfLocationData>(
+      ORG_SELF_LOCATION_QUERY,
+      { uri: `at://${did}/app.certified.actor.organization/self` },
+      signal,
+    ).catch((err) => {
+      if ((err as Error).name === "AbortError") throw err;
+      return null;
+    }),
+    fetchDirectCertifiedOrgRecord(did, signal).catch(() => null),
+  ]);
+  // Same precedence as fetchAccountSummary: the live PDS record wins when readable.
+  if (direct) return direct.locationUri;
+  return sv(data?.appCertifiedActorOrganizationByUri?.location?.uri) ?? null;
+}
+
 /** Resolve many certified profiles in one aliased query (DIDs are quote-safe). */
 async function fetchCertProfiles(
   dids: string[],
@@ -3810,6 +3910,8 @@ function mapCertOrg(n: RawCertOrg, profile: CertProfileInfo | undefined): SiteRe
     logoRef: profile?.avatarRef ?? null,
     bumicertCount: null,
     observationCount: null,
+    acceptsDonations: null,
+    donationSources: null,
   };
 }
 
@@ -3819,6 +3921,7 @@ async function hydrateCertOrgs(
   includeBumicertCounts = false,
   includeObservationCounts = false,
   includeImages = true,
+  includeDonationStatus = false,
 ): Promise<SiteRecord[]> {
   const missingProfileDids = nodes
     .filter((n) => !profileName(n.certifiedProfileData) && !profileAvatarRef(n.certifiedProfileData))
@@ -3840,6 +3943,9 @@ async function hydrateCertOrgs(
     : null;
   const observationCountsPromise = includeObservationCounts
     ? fetchObservationCountsByDid(dids, signal).catch(() => new Map<string, number>())
+    : null;
+  const donationIndexPromise = includeDonationStatus
+    ? fetchDonationEligibilityIndex(signal).catch(() => null)
     : null;
 
   const profiles = await profilesPromise;
@@ -3868,6 +3974,15 @@ async function hydrateCertOrgs(
   if (observationCountsPromise) {
     const counts = await observationCountsPromise;
     records = records.map((record) => ({ ...record, observationCount: counts.get(record.did) ?? 0 }));
+  }
+  if (donationIndexPromise) {
+    const donationIndex = await donationIndexPromise;
+    records = records.map((record) => {
+      const sources: DonationSources = donationIndex
+        ? recordDonationSources(record, donationIndex)
+        : { gainforest: false, maearth: hasMaEarthDonationUrl(record.did) };
+      return { ...record, acceptsDonations: sources.gainforest || sources.maearth, donationSources: sources };
+    });
   }
   return records;
 }
@@ -3900,6 +4015,7 @@ async function fetchCertOrgPage(
   includeBumicertCounts = false,
   includeObservationCounts = false,
   includeImages = true,
+  includeDonationStatus = false,
 ): Promise<Page<SiteRecord>> {
   const { sortBy, sortDirection } = certifiedOrgSort(sort);
   const data = await indexerQuery<{
@@ -3909,7 +4025,7 @@ async function fetchCertOrgPage(
   const nodes = (conn?.edges ?? [])
     .map((e) => e?.node)
     .filter((n): n is RawCertOrg => Boolean(n?.did));
-  const records = (await hydrateCertOrgs(nodes, signal, includeBumicertCounts, includeObservationCounts, includeImages))
+  const records = (await hydrateCertOrgs(nodes, signal, includeBumicertCounts, includeObservationCounts, includeImages, includeDonationStatus))
     .filter((record) => !isLikelyTestRecordName(record.name));
   return {
     records,
@@ -4087,6 +4203,7 @@ export async function fetchSiteTotalCount(signal?: AbortSignal, options?: SiteQu
 async function fetchSiteTotalCountUncached(signal?: AbortSignal, options?: SiteQueryOptions): Promise<number> {
   const includeBumicertCounts = options?.quickFilters?.includes("bumicerts") ?? false;
   const includeObservationCounts = options?.quickFilters?.includes("observations") ?? false;
+  const includeDonationStatus = options?.quickFilters?.some((filter) => (DONATION_FILTER_KEYS as readonly string[]).includes(filter)) ?? false;
   const badgeIndex = options?.featuredBadgesOnly ? await fetchFeaturedBadgeIndex(signal) : undefined;
   const variants = siteWhereVariants(options, badgeIndex);
   if (variants.length === 0) return 0;
@@ -4097,7 +4214,7 @@ async function fetchSiteTotalCountUncached(signal?: AbortSignal, options?: SiteQ
     let hasMore = true;
     while (hasMore) {
       if (signal?.aborted) throw new DOMException("aborted", "AbortError");
-      const page = await fetchCertOrgPage(INDEXER_MAX_PAGE, cursor, signal, where, options?.sort, includeBumicertCounts, includeObservationCounts, false);
+      const page = await fetchCertOrgPage(INDEXER_MAX_PAGE, cursor, signal, where, options?.sort, includeBumicertCounts, includeObservationCounts, false, includeDonationStatus);
       for (const record of page.records) {
         if (siteMatchesOptions(record, options)) seen.set(record.id, record);
       }
@@ -4155,12 +4272,14 @@ async function fetchSitesUncached(
 
   const includeBumicertCounts = options?.quickFilters?.includes("bumicerts") ?? false;
   const includeObservationCounts = options?.quickFilters?.includes("observations") ?? false;
+  const includeDonationStatus = options?.quickFilters?.some((filter) => (DONATION_FILTER_KEYS as readonly string[]).includes(filter)) ?? false;
   const hasClientSideFilters = Boolean(
     options?.query?.trim() ||
     options?.country ||
     options?.orgType ||
     includeBumicertCounts ||
-    includeObservationCounts,
+    includeObservationCounts ||
+    includeDonationStatus,
   );
   const collectAllForNameSort = options?.sort === "az" || options?.sort === "za";
   const badgeIndex = options?.featuredBadgesOnly ? await fetchFeaturedBadgeIndex(signal) : undefined;
@@ -4185,7 +4304,7 @@ async function fetchSitesUncached(
       const first = collectAllForNameSort || hasClientSideFilters
         ? INDEXER_MAX_PAGE
         : Math.min(INDEXER_MAX_PAGE, Math.max(1, target - matchedCount));
-      const page = await fetchCertOrgPage(first, cursor, signal, where, options?.sort, includeBumicertCounts, includeObservationCounts);
+      const page = await fetchCertOrgPage(first, cursor, signal, where, options?.sort, includeBumicertCounts, includeObservationCounts, true, includeDonationStatus);
       records.push(...page.records);
       cursor = page.cursor;
       const advanced = Boolean(cursor) && cursor !== previousCursor;
@@ -4243,7 +4362,7 @@ export type ManagedLocation = {
   rawRecord?: Record<string, unknown> | null;
 };
 
-export type ManagedLocationData =
+type ManagedLocationData =
   | { kind: "point"; lat: number; lon: number }
   | { kind: "uri"; uri: string }
   | { kind: "unknown" };
@@ -4805,13 +4924,14 @@ export async function fetchOccurrencesByDid(
   onProgress?: (records: OccurrenceRecord[]) => void,
 ): Promise<Page<OccurrenceRecord>> {
   const where = { did: { eq: did } };
-  const pageSize = INDEXER_MAX_PAGE;
   const collected: OccurrenceRecord[] = [];
   let cursor: string | null = after;
   let hasNextPage = true;
   for (let page = 0; page < 20; page++) {
     if (signal?.aborted) throw new DOMException("aborted", "AbortError");
-    const res = await fetchOccurrencePage(pageSize, cursor, signal, where);
+    // Only request what is still needed so the returned cursor never points
+    // past records we would then drop (which would skip them on the next call).
+    const res = await fetchOccurrencePage(Math.min(INDEXER_MAX_PAGE, target - collected.length), cursor, signal, where);
     cursor = res.cursor;
     hasNextPage = res.hasNextPage;
     let mapped = res.nodes.map(mapOccurrence);
@@ -4894,7 +5014,9 @@ export async function fetchOccurrencesBySiteRef(
 
   for (let page = 0; page < 50; page++) {
     if (signal?.aborted) throw new DOMException("aborted", "AbortError");
-    const res = await fetchOccurrencePage(INDEXER_MAX_PAGE, cursor, signal, where);
+    // Only request what is still needed so the returned cursor never points
+    // past records we would then drop.
+    const res = await fetchOccurrencePage(Math.min(INDEXER_MAX_PAGE, target - collected.length), cursor, signal, where);
     cursor = res.cursor;
     hasNextPage = res.hasNextPage;
 
@@ -5548,7 +5670,7 @@ export function summarizeObservationMeasurements(records: TreeMeasurementRecord[
 
 // ── 9. Bumicert project updates attachments ─────────────────────────────
 
-export type TimelineAttachmentSubject = { uri: string | null; cid: string | null };
+type TimelineAttachmentSubject = { uri: string | null; cid: string | null };
 
 export type TimelineAttachmentItem = {
   metadata: {
@@ -6412,12 +6534,12 @@ export async function fetchRecordByUri(
 // description; org records carry a profile. Everything is best-effort: null
 // fields are dropped so a sparse record stays clean.
 
-export type DetailField = { label: string; value: string; wide?: boolean };
+type DetailField = { label: string; value: string; wide?: boolean };
 export type DetailSection = { title: string | null; fields: DetailField[] };
 export type DetailBadge = { label: string; tone: "ok" | "warn" | "down" | "info" };
-export type DetailLink = { label: string; href: string };
+type DetailLink = { label: string; href: string };
 /** A social/website link, rendered as a minimalist icon button in the drawer. */
-export type SocialLink = { href: string; platform: string };
+type SocialLink = { href: string; platform: string };
 
 // ── Rich document model (Leaflet linear documents) ─────────────────────────
 // Bumicert descriptions are authored as `pub.leaflet.pages.linearDocument`s:

@@ -7,7 +7,7 @@ import {
 
 export type RegisteredEvidenceKind = "tree" | "audio" | "nature" | "file" | "site" | "update" | "other";
 
-export const EVIDENCE_CONTENT_TYPE_REGISTRY = [
+const EVIDENCE_CONTENT_TYPE_REGISTRY = [
   { value: "document", translationKey: "document", filePickerEligible: true, evidenceKind: "file" },
   { value: "report", translationKey: "report", filePickerEligible: true, evidenceKind: "file" },
   { value: "audit", translationKey: "audit", filePickerEligible: true, evidenceKind: "file" },
@@ -37,9 +37,6 @@ export const EVIDENCE_CONTENT_TYPE_REGISTRY = [
   filePickerEligible: boolean;
   evidenceKind: RegisteredEvidenceKind;
 }>;
-
-export type KnownEvidenceContentType =
-  (typeof EVIDENCE_CONTENT_TYPE_REGISTRY)[number]["value"];
 
 export type FilePickerEvidenceContentType = Extract<
   (typeof EVIDENCE_CONTENT_TYPE_REGISTRY)[number],
@@ -76,7 +73,7 @@ function isSpecificMimeType(mimeType: string): boolean {
   );
 }
 
-export function getEvidenceContentTypeEntry(contentType: string | null | undefined) {
+function getEvidenceContentTypeEntry(contentType: string | null | undefined) {
   const normalized = normalizeContentType(contentType);
   return normalized ? CONTENT_TYPE_BY_VALUE.get(normalized) ?? null : null;
 }

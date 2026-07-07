@@ -1,4 +1,4 @@
-import { countryEntries, countries, type CountryCode } from "./countries";
+import { countryEntries, type CountryCode } from "./countries";
 import { resolvePdsHost } from "./pds";
 
 export type CertifiedLocationLike = {
@@ -13,7 +13,7 @@ function parseAtUri(uri: string): { did: string; collection: string; rkey: strin
   return { did: match[1]!, collection: match[2]!, rkey: match[3]! };
 }
 
-export function parseCoordinateDecimal(value: string | null | undefined): { latitude: number; longitude: number } | null {
+function parseCoordinateDecimal(value: string | null | undefined): { latitude: number; longitude: number } | null {
   if (!value) return null;
   const [latitudeRaw, longitudeRaw] = value.split(",").map((part) => part.trim());
   const latitude = Number(latitudeRaw);
@@ -28,7 +28,7 @@ function coordinateStringFromLocation(location: unknown): string | null {
   return typeof value.string === "string" ? value.string : null;
 }
 
-export function countryCodeFromCoordinates(latitude: number, longitude: number): CountryCode | null {
+function countryCodeFromCoordinates(latitude: number, longitude: number): CountryCode | null {
   for (const [code, country] of countryEntries) {
     if (
       Math.abs(country.coordinates.latitude - latitude) <= COORDINATE_EPSILON &&
@@ -66,7 +66,3 @@ export async function fetchCertifiedLocationCountryCode(uri: string | null | und
   return countryCodeFromCertifiedLocation(data?.value);
 }
 
-export function isKnownCountryCode(value: string | null | undefined): value is CountryCode {
-  if (!value) return false;
-  return Boolean(countries[value.trim().toUpperCase() as CountryCode]);
-}

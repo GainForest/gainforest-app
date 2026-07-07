@@ -164,10 +164,6 @@ export function resolveGroupInvitationEmailLocale(options: {
   return resolvePreferredLanguageFromHeader(options.acceptLanguage);
 }
 
-export function getGroupInvitationEmailLocales(): readonly SupportedLanguageCode[] {
-  return SUPPORTED_LOCALES;
-}
-
 function renderActions(actions: InviteCopy["actions"]): string {
   return actions.map((action) => `
       <tr>

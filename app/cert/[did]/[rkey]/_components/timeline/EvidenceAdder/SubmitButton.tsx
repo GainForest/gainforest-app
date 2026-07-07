@@ -26,8 +26,8 @@ export function SubmitButton({
       {isSubmitting
         ? evidenceT("linking")
         : count === 0
-          ? evidenceT("selectToLink")
-          : evidenceT("linkItems", { count })}
+          ? evidenceT("chooseAttachment")
+          : evidenceT("postUpdate")}
       {!isSubmitting ? <ArrowRightIcon /> : null}
     </Button>
   );

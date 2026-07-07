@@ -1,4 +1,4 @@
-export type ParsedDateState = "empty" | "valid" | "invalid";
+type ParsedDateState = "empty" | "valid" | "invalid";
 
 type ParsedDateResult = {
   state: ParsedDateState;
@@ -58,24 +58,4 @@ export function parseOrganizationDate(value: string | null): ParsedDateResult {
   }
 
   return { state: "valid", date: parsedDate };
-}
-
-export function formatOrganizationSinceDate(value: string | null): {
-  label: string | null;
-  state: ParsedDateState;
-} {
-  const parsed = parseOrganizationDate(value);
-
-  if (parsed.state !== "valid" || !parsed.date) {
-    return { label: null, state: parsed.state };
-  }
-
-  return {
-    label: parsed.date.toLocaleDateString("en-US", {
-      month: "short",
-      year: "numeric",
-      timeZone: "UTC",
-    }),
-    state: "valid",
-  };
 }

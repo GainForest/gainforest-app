@@ -41,10 +41,24 @@ const ACTIVITY_CID_QUERY = `
   }
 `;
 
-const EIP712_DOMAIN = {
+const ATTESTATION_VERIFYING_CONTRACT = "0x0000000000000000000000000000000000000000" as const;
+
+const LEGACY_EIP712_DOMAIN = {
   name: "ATProto EVM Attestation",
   version: "1",
 } as const;
+
+function eip712Domain(chainId: string | null | undefined) {
+  const parsedChainId = Number(chainId);
+  if (!Number.isSafeInteger(parsedChainId) || parsedChainId <= 0) return LEGACY_EIP712_DOMAIN;
+  return { ...LEGACY_EIP712_DOMAIN, chainId: parsedChainId, verifyingContract: ATTESTATION_VERIFYING_CONTRACT } as const;
+}
+
+function legacyChainDomain(chainId: string | null | undefined) {
+  const parsedChainId = Number(chainId);
+  if (!Number.isSafeInteger(parsedChainId) || parsedChainId <= 0) return LEGACY_EIP712_DOMAIN;
+  return { ...LEGACY_EIP712_DOMAIN, chainId: parsedChainId } as const;
+}
 
 const EIP712_TYPES = {
   AttestLink: [
@@ -102,19 +116,46 @@ async function indexerQuery<T>(query: string, variables: Record<string, unknown>
 async function verifyUserProof(address: `0x${string}`, userProof: NonNullable<LinkNode["userProof"]>): Promise<boolean> {
   const message = userProof.message;
   if (!userProof.signature || !message) return false;
-  return verifyTypedData({
+  const typedMessage = {
+    did: message.did ?? "",
+    evmAddress: message.evmAddress ?? "",
+    chainId: message.chainId ?? "",
+    timestamp: message.timestamp ?? "",
+    nonce: message.nonce ?? "",
+  };
+  const signature = userProof.signature as `0x${string}`;
+
+  // New signatures include chainId + verifyingContract in the EIP-712 domain
+  // because some wallet providers require those fields for typed-data signing.
+  // Keep earlier domain shapes as fallbacks so already-linked wallets continue
+  // to verify.
+  const validWithRequiredDomain = await verifyTypedData({
     address,
-    domain: EIP712_DOMAIN,
+    domain: eip712Domain(message.chainId),
     types: EIP712_TYPES,
     primaryType: "AttestLink",
-    message: {
-      did: message.did ?? "",
-      evmAddress: message.evmAddress ?? "",
-      chainId: message.chainId ?? "",
-      timestamp: message.timestamp ?? "",
-      nonce: message.nonce ?? "",
-    },
-    signature: userProof.signature as `0x${string}`,
+    message: typedMessage,
+    signature,
+  }).catch(() => false);
+  if (validWithRequiredDomain) return true;
+
+  const validWithChainDomain = await verifyTypedData({
+    address,
+    domain: legacyChainDomain(message.chainId),
+    types: EIP712_TYPES,
+    primaryType: "AttestLink",
+    message: typedMessage,
+    signature,
+  }).catch(() => false);
+  if (validWithChainDomain) return true;
+
+  return verifyTypedData({
+    address,
+    domain: LEGACY_EIP712_DOMAIN,
+    types: EIP712_TYPES,
+    primaryType: "AttestLink",
+    message: typedMessage,
+    signature,
   }).catch(() => false);
 }
 

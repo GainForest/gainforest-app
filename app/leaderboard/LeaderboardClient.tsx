@@ -398,7 +398,7 @@ function DonorCard({ entry }: { entry: LeaderboardEntry }) {
   if (isWallet) {
     return (
       <a
-        href={basescanAddress(entry.donorId)}
+        href={etherscanAddress(entry.donorId)}
         target="_blank"
         rel="noopener noreferrer"
         aria-label={t("openPayment")}
@@ -531,8 +531,8 @@ function formatRelativeTimeFromNow(date: Date, locale: string): string | null {
   return formatter.format(Math.round(diffInSeconds / 31536000), "year");
 }
 
-function basescanAddress(address: string): string {
-  return `https://basescan.org/address/${encodeURIComponent(address)}`;
+function etherscanAddress(address: string): string {
+  return `https://etherscan.io/address/${encodeURIComponent(address)}`;
 }
 
 function isSortMode(value: string): value is SortMode {

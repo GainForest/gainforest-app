@@ -5,9 +5,15 @@ import { useSignTypedData, useAccount } from "wagmi";
 import { CHAIN_ID } from "@/lib/facilitator/usdc";
 
 // EIP-712 domain for ATProto EVM attestation
+const ATTESTATION_VERIFYING_CONTRACT = "0x0000000000000000000000000000000000000000" as const;
+
 const EIP712_DOMAIN = {
   name: "ATProto EVM Attestation",
   version: "1",
+  chainId: CHAIN_ID,
+  // This attestation is not verified by a smart contract, but some wallet
+  // providers reject EIP-712 payloads unless the domain includes the field.
+  verifyingContract: ATTESTATION_VERIFYING_CONTRACT,
 } as const;
 
 const EIP712_TYPES = {
@@ -21,6 +27,35 @@ const EIP712_TYPES = {
 } as const;
 
 type LinkStatus = "idle" | "signing" | "writing" | "success" | "error";
+
+/** True when the error (or anything in its cause chain) is a genuine
+ *  user rejection (EIP-1193 code 4001 / viem UserRejectedRequestError). */
+function isUserRejection(err: unknown): boolean {
+  let current: unknown = err;
+  for (let depth = 0; current && depth < 6; depth++) {
+    const candidate = current as { code?: unknown; name?: unknown; cause?: unknown };
+    if (candidate.code === 4001 || candidate.name === "UserRejectedRequestError") return true;
+    current = candidate.cause;
+  }
+  return false;
+}
+
+/** Best human-readable message from a wallet/provider error. */
+function extractErrorMessage(err: unknown): string | null {
+  let current: unknown = err;
+  let fallback: string | null = null;
+  for (let depth = 0; current && depth < 6; depth++) {
+    const candidate = current as { shortMessage?: unknown; message?: unknown; error?: unknown; cause?: unknown };
+    const messages = [candidate.shortMessage, candidate.message, candidate.error]
+      .filter((message): message is string => typeof message === "string" && message.length > 0)
+      .map((message) => message.split("\n")[0]);
+    const specific = messages.find((message) => !/unknown rpc error/i.test(message));
+    if (specific) return specific;
+    fallback ??= messages[0] ?? null;
+    current = candidate.cause;
+  }
+  return fallback;
+}
 
 type UseWalletAttestationResult = {
   /** Current status of the linking flow */
@@ -88,9 +123,16 @@ export function useWalletAttestation(donorDid: string, options?: { repo?: string
         primaryType: "AttestLink",
         message,
       });
-    } catch {
+    } catch (err) {
+      // Don't mislabel infrastructure failures as user rejections — surface
+      // the wallet's actual error so the problem is diagnosable.
+      console.error("[useWalletAttestation] signTypedData failed", err);
       setStatus("error");
-      setError("Signing was rejected in your wallet.");
+      setError(
+        isUserRejection(err)
+          ? "Signing was rejected in your wallet."
+          : extractErrorMessage(err) ?? "Failed to link wallet",
+      );
       return;
     }
 

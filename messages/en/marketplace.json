@@ -161,10 +161,13 @@
       "colJoined": "Joined"
     },
     "filters": {
-      "description": "Show organizations by source, observations, category, or country."
+      "description": "Show organizations by source, donations, observations, category, or country."
     },
     "quickFilters": {
-      "observations": "Has observations"
+      "observations": "Has observations",
+      "donations": "Accepts donations",
+      "donationsGainforest": "GainForest donations",
+      "donationsMaearth": "Ma Earth donations"
     },
     "facets": {
       "category": "Category",
@@ -246,7 +249,7 @@
       "natureChampion": "Nature Champion",
       "consistentGiver": "Consistent Giver",
       "risingSupporter": "Rising Supporter",
-      "openWallet": "Open {wallet} on BaseScan",
+      "openWallet": "Open {wallet} on Etherscan",
       "openAccount": "Open donor account in a new tab",
       "anonymousSupporter": "Anonymous supporter",
       "donationSummaryWithTime": "{count, plural, one {# donation} other {# donations}} · Last donation {relativeTime}",
@@ -299,6 +302,10 @@
       "live": "Live now",
       "upcoming": "Starting soon",
       "ended": "Finished"
+    },
+    "rounds": {
+      "title": "Rounds",
+      "current": "Current"
     },
     "round": {
       "startsIn": "Starts in",
@@ -392,7 +399,10 @@
       "description": "A permanent record of every round's champions.",
       "mostObservations": "Most observations",
       "bestPicture": "Best picture",
-      "pending": "To be announced"
+      "pending": "To be announced",
+      "compact": "Latest",
+      "mostSubmitted": "Most submitted",
+      "mostLiked": "Most liked"
     },
     "map": {
       "title": "Observations of the week",
@@ -578,7 +588,10 @@
       "noMatch": "No projects match your search.",
       "untitledProject": "Untitled project",
       "applyWith": "Apply with {project}",
-      "submitError": "Couldn't send your application. Please try again."
+      "submitError": "Couldn't send your application. Please try again.",
+      "successTitle": "Application submitted",
+      "successBody": "Thanks for applying with {project}. We'll be in touch soon about the next steps.",
+      "successClose": "Done"
     },
     "interoperable": {
       "category": "Interoperable Grants Program",
@@ -637,9 +650,9 @@
       "setupDescription": "Link a wallet to receive USDC donations from supporters.",
       "stepConnect": "Step 1: Connect your wallet",
       "connectWallet": "Connect Wallet",
-      "stepSwitch": "Step 2: Switch to Base network",
+      "stepSwitch": "Step 2: Switch to Ethereum network",
       "switching": "Switching...",
-      "switchToBase": "Switch to Base",
+      "switchToEthereum": "Switch to Ethereum",
       "linkedSuccess": "✓ Wallet linked successfully!",
       "linkedSuccessDescription": "It may take a moment for the indexer to process your attestation.",
       "refresh": "Refresh",
@@ -918,11 +931,14 @@
     "filters": {
       "allProjects": "All Projects",
       "allFilters": "Sort and Filter",
-      "description": "Show projects by source badge, images, or a project place.",
+      "description": "Show projects by source badge, donations, images, or a project place.",
       "updateHint": "Filters update as you choose.",
       "images": "Shows images",
       "locations": "Has a place",
-      "timeline": "Has a timeline"
+      "timeline": "Has a timeline",
+      "donations": "Accepts donations",
+      "donationsGainforest": "GainForest donations",
+      "donationsMaearth": "Ma Earth donations"
     },
     "empty": {
       "eyebrow": "No Results",
@@ -940,7 +956,16 @@
       "bumicertCount": "{count, plural, one {# Cert} other {# Certs}}",
       "projectPlace": "Project place",
       "showDetails": "Show details",
-      "loading": "Loading projects"
+      "loading": "Loading projects",
+      "donate": "Donate",
+      "acceptsDonations": "Accepts donations",
+      "openForSupport": "Open for support",
+      "donationSummary": "{amount} from {donors, plural, one {# supporter} other {# supporters}}",
+      "donationSummaryShort": "{amount} · {donors, plural, one {# supporter} other {# supporters}}",
+      "donationWays": "{count} ways",
+      "maEarth": "Ma Earth",
+      "round": "Round {round}",
+      "byDonors": "by {donors, plural, one {# donor} other {# donors}}"
     },
     "actions": {
       "clearAll": "Clear all"
@@ -1492,6 +1517,18 @@
     "emptyHero": {
       "description": "Projects bring your impact work together — people, places, time periods, and supporting photos or notes — into one page supporters can follow and fund.",
       "cta": "Create a project"
+    },
+    "publish": {
+      "title": "Show your work on the explore pages",
+      "description": "Publishing makes this account and all of its projects visible to everyone browsing GainForest.",
+      "action": "Publish",
+      "publishing": "Publishing…",
+      "publishedTitle": "Published on the explore pages",
+      "publishedHint": "This account and its projects are visible to everyone browsing GainForest.",
+      "justPublishedHint": "Done! It can take a few minutes to appear on the explore pages.",
+      "memberBlocked": "Only organization owners and admins can publish.",
+      "error": "Publishing didn’t go through. Please try again later.",
+      "unavailable": "Publishing isn’t available right now. Please try again later."
     }
   },
   "manageBumicerts": {
@@ -1641,11 +1678,16 @@
     "viewOnGlobe": "View on Globe",
     "panel": {
       "searchPlaceholder": "Search organizations…",
+      "treeFilter": "Tree data",
+      "treesEmpty": "No tree data uploaded yet.",
+      "treesFailed": "Tree data is unavailable right now.",
       "toggleList": "Show organization list",
       "loading": "Loading organizations…",
       "count": "{count, plural, one {# organization} other {# organizations}}",
       "empty": "No organizations match your search.",
-      "maEarth": "Ma Earth"
+      "maEarth": "Ma Earth",
+      "dataFilter": "Drone & data layers",
+      "dataBadge": "{count, plural, one {# map data layer} other {# map data layers}}"
     },
     "focus": {
       "organizationLabel": "Organization",
@@ -1657,11 +1699,15 @@
       "viewProject": "View project",
       "backToGlobe": "Back to the global view",
       "recenter": "Re-center the map",
-      "sites": "{count, plural, one {# project site} other {# project sites}}",
+      "sites": "{count, plural, one {# mapped site} other {# mapped sites}}",
       "boundaries": "{count, plural, one {# site boundary} other {# site boundaries}}",
       "allSites": "All sites",
+      "orgLocationHeading": "Organization location",
+      "projectSitesHeading": "Project sites",
       "noSites": "No project sites mapped yet.",
       "noBoundaries": "This project has no mapped site boundaries yet.",
+      "projectPill": "Project: {name}",
+      "moreProjects": "+{count} more",
       "projectHint": "The highlighted boundaries show where this project works."
     },
     "layers": {
@@ -1669,6 +1715,8 @@
       "title": "Explore layers",
       "landcover": "Land cover",
       "landcoverSource": "ESA WorldCover 2021",
+      "measuredTrees": "Measured trees",
+      "measuredTreesCount": "{count, plural, one {# tree} other {# trees}}",
       "projectCategory": "Project layers",
       "noProjectLayers": "This organization has no extra map layers yet.",
       "landcoverClasses": {
@@ -1681,7 +1729,34 @@
         "water": "Water",
         "wetland": "Wetland",
         "mangroves": "Mangroves"
-      }
+      },
+      "visibleNow": "{count, plural, one {# layer on the map} other {# layers on the map}}",
+      "flyTo": "Zoom to {name}",
+      "hide": "Hide {name}"
+    },
+    "timeline": {
+      "seriesFlights": "{count, plural, one {# drone flight} other {# drone flights}} over the same area",
+      "seriesHint": "The same area was flown on different dates — turn on the timeline to watch it change.",
+      "toggle": "Show {name} over time",
+      "title": "Change over time",
+      "close": "Hide the time slider",
+      "play": "Play the timeline",
+      "pause": "Pause the timeline",
+      "previous": "Earlier capture",
+      "next": "Later capture",
+      "slider": "Capture date",
+      "step": "{current} of {total}"
+    },
+    "tree": {
+      "title": "Tree",
+      "close": "Close",
+      "species": "Species",
+      "height": "Height",
+      "dbh": "DBH",
+      "measured": "Measured:",
+      "unknown": "Unknown",
+      "unknownSpecies": "Unknown species",
+      "photo": "Photo {index}"
     },
     "loadingGlobe": "Preparing the globe…",
     "sheet": {

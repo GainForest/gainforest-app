@@ -30,7 +30,7 @@ export const BIOBLITZ_PRIZES = {
 
 /** A confirmed winner of one of the round prizes. The DID is resolved to a
  *  display name in the UI, so no technical identifier is ever shown. */
-export type RoundWinner = {
+type RoundWinner = {
   did: string;
   /** Final observation count, when relevant (the "most observations" prize). */
   count?: number;
@@ -54,19 +54,63 @@ export type BioblitzRound = {
   bestPicture?: RoundWinner | null;
 };
 
+const DAY_MS = 86_400_000;
+const STANDARD_ROUND_MS = 7 * DAY_MS;
+const FIRST_ROUND_START = "2026-06-26T00:00:00.000Z";
+const FIRST_ROUND_END = "2026-07-03T23:59:59.999Z";
+const FIRST_ROUND_END_MS = Date.parse(FIRST_ROUND_END);
+const SECOND_ROUND_START_MS = FIRST_ROUND_END_MS + 1;
+
 /**
- * Round schedule. Add the next round here when it opens; fill in the winners
- * once a round closes so the Winners section keeps a permanent record.
+ * Hand-maintained round metadata. The schedule itself continues weekly so the
+ * page always has a current round; add overrides here only for special labels
+ * or confirmed prize records.
  */
-export const BIOBLITZ_ROUNDS: BioblitzRound[] = [
-  {
-    id: 1,
+const BIOBLITZ_ROUND_OVERRIDES: Record<number, Partial<BioblitzRound>> = {
+  1: {
     label: "Pilot Round",
-    start: "2026-06-26T00:00:00.000Z",
-    end: "2026-07-03T23:59:59.999Z",
+    start: FIRST_ROUND_START,
+    end: FIRST_ROUND_END,
     rsvpUrl: "https://luma.com/0yujr98x",
   },
-];
+};
+
+function generatedRound(id: number): BioblitzRound {
+  if (id <= 1) {
+    return {
+      id: 1,
+      label: "Pilot Round",
+      start: FIRST_ROUND_START,
+      end: FIRST_ROUND_END,
+      rsvpUrl: "https://luma.com/0yujr98x",
+      ...BIOBLITZ_ROUND_OVERRIDES[1],
+    };
+  }
+  const startMs = SECOND_ROUND_START_MS + (id - 2) * STANDARD_ROUND_MS;
+  const endMs = startMs + STANDARD_ROUND_MS - 1;
+  return {
+    id,
+    label: `Round ${id}`,
+    start: new Date(startMs).toISOString(),
+    end: new Date(endMs).toISOString(),
+    ...BIOBLITZ_ROUND_OVERRIDES[id],
+  };
+}
+
+function roundIdFor(now: number): number {
+  if (now <= FIRST_ROUND_END_MS) return 1;
+  return 2 + Math.floor(Math.max(0, now - SECOND_ROUND_START_MS) / STANDARD_ROUND_MS);
+}
+
+/** Rounds available to the UI, oldest first. Includes the current round and a
+ *  small look-ahead so the page can show the next start near a boundary. */
+export function bioblitzRounds(now: number = Date.now(), futureCount = 1): BioblitzRound[] {
+  const lastId = Math.max(1, roundIdFor(now) + futureCount);
+  return Array.from({ length: lastId }, (_, index) => generatedRound(index + 1));
+}
+
+/** Backwards-compatible snapshot for callers that only need the active schedule
+ *  around module load. Prefer `bioblitzRounds()` for time-sensitive UI. */
 
 /**
  * Program-wide support links (the same across rounds): a live "ask us anything"
@@ -86,11 +130,11 @@ export const BIOBLITZ_LINKS = {
 // mark them registered automatically the next time the board loads.
 
 /** Program-wide tag every join post carries. */
-export const BIOBLITZ_TAG = "bioblitz";
+const BIOBLITZ_TAG = "bioblitz";
 
 /** Round-specific join tag, e.g. "bioblitz-round-1". Detection keys on this so
  *  registering is per-round (a new round needs a fresh join post). */
-export function bioblitzRoundTag(round: BioblitzRound): string {
+function bioblitzRoundTag(round: BioblitzRound): string {
   return `${BIOBLITZ_TAG}-round-${round.id}`;
 }
 
@@ -137,25 +181,26 @@ export function roundStatus(round: BioblitzRound, now: number = Date.now()): Rou
 
 /** Rounds that have already finished, newest first — used by the Winners list. */
 export function endedRounds(now: number = Date.now()): BioblitzRound[] {
-  return BIOBLITZ_ROUNDS.filter((r) => roundStatus(r, now) === "ended").sort(
-    (a, b) => Date.parse(b.start) - Date.parse(a.start),
-  );
+  return bioblitzRounds(now, 0)
+    .filter((r) => roundStatus(r, now) === "ended")
+    .sort((a, b) => Date.parse(b.start) - Date.parse(a.start));
 }
 
 /**
  * The round to feature at the top of the page: the live round if one is
  * running, otherwise the next upcoming round, otherwise the most recent ended
- * round. Falls back to the last configured round if the schedule is empty-ish.
+ * round. Falls back to the latest generated round if the schedule is empty-ish.
  */
 export function featuredRound(now: number = Date.now()): BioblitzRound {
-  const live = BIOBLITZ_ROUNDS.find((r) => roundStatus(r, now) === "live");
+  const rounds = bioblitzRounds(now);
+  const live = rounds.find((r) => roundStatus(r, now) === "live");
   if (live) return live;
-  const upcoming = BIOBLITZ_ROUNDS.filter((r) => roundStatus(r, now) === "upcoming").sort(
-    (a, b) => Date.parse(a.start) - Date.parse(b.start),
-  );
+  const upcoming = rounds
+    .filter((r) => roundStatus(r, now) === "upcoming")
+    .sort((a, b) => Date.parse(a.start) - Date.parse(b.start));
   if (upcoming[0]) return upcoming[0];
   const ended = endedRounds(now);
-  return ended[0] ?? BIOBLITZ_ROUNDS[BIOBLITZ_ROUNDS.length - 1]!;
+  return ended[0] ?? rounds[rounds.length - 1]!;
 }
 
 /** Whole-day, ms-precise countdown breakdown to a target instant. */
@@ -174,7 +219,7 @@ export function countdownTo(targetIso: string, now: number = Date.now()): Countd
 /** A collector on the round board, with everything the UI needs to render a
  *  row without a second lookup (name + avatar come from the indexer; the DID is
  *  only used internally to resolve a richer profile/avatar). */
-export type RoundCollector = {
+type RoundCollector = {
   did: string;
   count: number;
   displayName: string | null;
@@ -232,8 +277,7 @@ export type BoardScope = "round" | "all";
 /**
  * Tally the collectors who uploaded photo observations.
  *
- * Scope "round" counts image-bearing occurrences inside the round window
- * (created on/after the round start, filtered to the round end client-side).
+ * Scope "round" counts image-bearing occurrences inside the exact round window.
  * Scope "all" counts every image observation in the program, newest-first, so
  * the board can show the most active collectors overall. A round is one week,
  * so a single page usually covers it; we walk a few pages defensively.
@@ -250,7 +294,7 @@ export async function fetchRoundCollectors(
   const where =
     scope === "all"
       ? { imageEvidence: { isNull: false } }
-      : { imageEvidence: { isNull: false }, createdAt: { gte: round.start } };
+      : { imageEvidence: { isNull: false }, createdAt: { gte: round.start, lte: round.end } };
 
   // Accounts a steward flagged as "test" are excluded from the challenge — they
   // don't count toward the leaderboard, totals or prize eligibility.
@@ -349,6 +393,7 @@ export async function fetchRoundObservations(
     after: null,
     resolveMedia: false,
     featuredBadgesOnly: false,
+    createdAt: { gte: round.start, lte: round.end },
     signal,
   });
   return records.filter((r) => {

@@ -27,7 +27,7 @@ function sanitizeLocalReturnTo(value: string | null | undefined): string | null 
   return null;
 }
 
-export function getCurrentReturnToUrl(): string {
+function getCurrentReturnToUrl(): string {
   const url = new URL(window.location.href);
 
   if (url.pathname.endsWith("/auth/complete")) {
@@ -67,7 +67,7 @@ export function buildLoginUrl(options: { email?: string; handle?: string } = {})
   return url.toString();
 }
 
-export function buildLogoutUrl(): string {
+function buildLogoutUrl(): string {
   const url = new URL("/logout", getAuthBaseUrl());
   url.searchParams.set("returnTo", getCurrentAbsoluteReturnToUrl());
   return url.toString();

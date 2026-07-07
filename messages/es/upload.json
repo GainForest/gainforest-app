@@ -114,14 +114,8 @@
     "deleteConfirmTitle": "¿Eliminar esta grabación?",
     "deleteConfirmDescription": "Esta acción no se puede deshacer.",
     "howDoesThisWork": "¿Cómo funciona esto?",
-    "useTainá": "Usar Tainá",
-    "useTaináLong": "Usa Tainá para subir AudioMoth",
     "fileSizeNote": "Los archivos subidos aquí deben ser de 4MB o menos. Para archivos de AudioMoth más grandes, usa Tainá.",
     "intro": "Reúne tus grabaciones de campo en un solo lugar. Cada una queda vinculada a dónde, cuándo y cómo se capturó.",
-    "whatIsTainá": "¿Qué es Tainá?",
-    "tainaTitle": "Conoce a Tainá",
-    "tainaBody": "Tainá es nuestra asistente en Telegram. Chatea para enviar grabaciones directamente desde el campo. Ella se encarga de los archivos grandes de AudioMoth que no se pueden subir aquí.",
-    "tainaCta": "Abrir Tainá en Telegram",
     "loading": "Cargando espacio de trabajo de audio…",
     "backTo": "Volver a {section}",
     "sections": {
@@ -732,7 +726,8 @@
       "dropTitleTouch": "Añade tus fotos",
       "takePhoto": "Tomar una foto",
       "combineWithAbove": "Combinar con la de arriba",
-      "dragMergeHintTouch": "Toca el icono de separar en una foto para sacarla."
+      "dragMergeHintTouch": "Toca el icono de separar en una foto para sacarla.",
+      "submitDataBatch": "Enviar un lote zip grande"
     },
     "csvUpload": {
       "title": "Subir datos CSV",
@@ -1012,7 +1007,7 @@
   },
   "settings": {
     "organizationTitle": "Configuración de la organización",
-    "organizationDescription": "Gestiona miembros y controla quién puede hacer cambios en esta organización.",
+    "organizationDescription": "Conecta agentes de IA y gestiona las herramientas de esta organización.",
     "personalTitle": "Configuración",
     "personalDescription": "Gestiona enlaces de cuenta, seguridad y herramientas de exportación.",
     "dataCouncil": {
@@ -1040,7 +1035,10 @@
         "save": "No se pudieron guardar los cambios del Consejo de Datos."
       },
       "addLabel": "Añadir al Consejo de Datos"
-    }
+    },
+    "membersMoved": "Los miembros, los roles y el Consejo de Datos están en la pestaña Miembros.",
+    "openMembers": "Abrir Miembros",
+    "orgAgentKeysHint": "Las claves son personales: una clave creada aquí pertenece a tu cuenta y permite que tu agente de IA trabaje en esta organización a través de tu membresía. Si dejas la organización, tus claves pierden ese acceso."
   },
   "dashboardClient": {
     "actions": {

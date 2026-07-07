@@ -1,0 +1,127 @@
+{
+  "widget": {
+    "shield": "Need help?",
+    "role": "Your GainForest guide",
+    "spriteLabel": "Tainá — click to chat, drag to move",
+    "greeting": "Hi, I'm Tainá! I can walk you through anything on GainForest.",
+    "greetingHint": "Pick a question below, or ask me anything.",
+    "guidesTitle": "Common questions",
+    "placeholder": "Ask me anything…",
+    "thinking": "Tainá is thinking…",
+    "send": "Send",
+    "close": "Close chat",
+    "back": "Back",
+    "showMe": "Show me, step by step",
+    "stepOf": "Step {current} of {total}",
+    "next": "Next",
+    "previous": "Back",
+    "done": "Done",
+    "endTour": "End tour",
+    "openImage": "View screenshot full size",
+    "cantFind": "I can't spot that on this page right now — but here's what to do:",
+    "tourHint": "I'll point at your screen. Click the highlighted spot to continue.",
+    "minimizeLabel": "Minimize Tainá",
+    "restoreLabel": "Open Tainá",
+    "signInFirst": "You'll need to sign in for this one — use the Sign in button at the top of the page, then come back and I'll walk you through it.",
+    "needProjectFirst": "Donations are set up on a project, and you don't have one yet — create your first project, then come back here.",
+    "createProjectFirst": "Show me how to create a project"
+  },
+  "guides": {
+    "wallet": {
+      "question": "How do I receive donations?",
+      "title": "Set up a wallet to receive donations",
+      "intro": "Donations go to a wallet linked to your account. No crypto experience needed — you can create one with just your email.",
+      "steps": {
+        "open": { "title": "Open your project", "body": "Go to My Projects and open the project you want to receive support for." },
+        "enable": { "title": "Click “Enable Donations”", "body": "On your project page you'll find the Support card on the right. Click Enable Donations." },
+        "addWallet": { "title": "Add a donation wallet", "body": "In the Donation Settings window, click Add a donation wallet." },
+        "signIn": { "title": "Sign in — the wallet is created for you", "body": "Continue with your Bluesky account or email and a secure wallet is created for you in seconds. Already have a crypto wallet? You can connect it instead." },
+        "settings": { "title": "Manage wallets any time", "body": "You'll find all your linked wallets under Settings → Linked Wallets." }
+      },
+      "tour": {
+        "open": "Open the project you want to receive donations for.",
+        "enable": "Click Enable Donations in the Support card.",
+        "addWallet": "Click Add a donation wallet, then sign in with Bluesky or email — that's it!"
+      }
+    },
+    "createProject": {
+      "question": "How do I set up a project?",
+      "title": "Create your first project",
+      "intro": "A project tells the story of your work and can receive support. The wizard takes about two minutes.",
+      "steps": {
+        "start": { "title": "Start a new project", "body": "Click Create a Project in the sidebar, or Add project on your My Projects page." },
+        "name": { "title": "Name it", "body": "Use a clear name people will understand, plus a one-line summary." },
+        "focus": { "title": "Pick focus areas", "body": "Choose the kinds of work that best describe the project — reforestation, monitoring, stewardship…" },
+        "story": { "title": "Add the timeline and story", "body": "Set a start date (ongoing is fine) and share what happened, how impact is measured, and who benefits." },
+        "people": { "title": "Credit people and places", "body": "Add the people and groups behind the work, and attach the places where it happened." },
+        "photo": { "title": "Add a photo", "body": "A strong photo helps people recognise and trust your project." },
+        "review": { "title": "Review and create", "body": "Check everything looks right, then click Create project. It's ready to share and receive support." }
+      },
+      "tour": {
+        "start": "Click Add project to open the wizard.",
+        "wizard": "Now follow the steps: name, focus areas, dates, story, people & places, photo — then Create project."
+      }
+    },
+    "editProject": {
+      "question": "How do I edit a project?",
+      "title": "Edit a project",
+      "intro": "You can change everything about a project after publishing — name, story, photo, places.",
+      "steps": {
+        "myProjects": { "title": "Go to My Projects", "body": "Open your profile's Projects tab, or head to Manage from your profile menu." },
+        "edit": { "title": "Click “Edit project”", "body": "Every project card has an Edit project button." },
+        "save": { "title": "Change and save", "body": "Update any field, change or remove the photo, then click Save changes at the bottom." }
+      },
+      "tour": {
+        "edit": "Click Edit project on the project you want to change.",
+        "save": "Make your changes, then hit Save changes at the bottom."
+      }
+    },
+    "deleteProject": {
+      "question": "How do I delete a project?",
+      "title": "Delete a project",
+      "intro": "Deleting removes the project from your account. It cannot be undone — but your observations are never deleted with it.",
+      "steps": {
+        "editor": { "title": "Open the project editor", "body": "Go to My Projects and click Edit project — or open the project page and look for the Manage section." },
+        "delete": { "title": "Click “Delete project”", "body": "The delete button sits at the bottom of the editor." },
+        "confirm": { "title": "Confirm by typing the name", "body": "Type the exact project name to confirm. This can't be undone." }
+      },
+      "tour": {
+        "editor": "First, open the editor of the project you want to remove.",
+        "delete": "Scroll down and click Delete project.",
+        "confirm": "Type the exact project name, then confirm. This can't be undone."
+      }
+    },
+    "observations": {
+      "question": "How do I upload and manage observations?",
+      "title": "Upload and manage observations",
+      "intro": "Observations are photos of nature with a species, date, and place — the evidence behind your work.",
+      "steps": {
+        "add": { "title": "Click “Add observations”", "body": "You'll find it in the sidebar and on your profile." },
+        "photos": { "title": "Drop in your photos", "body": "Upload up to 50 photos at once — AI reads each one and suggests what's in it." },
+        "check": { "title": "Check and link", "body": "Confirm the species name, date, and location — and optionally link them to one of your projects. You can also hide your exact location." },
+        "publish": { "title": "Add them", "body": "Click Add and your sightings are published to your account." },
+        "manage": { "title": "Manage them later", "body": "Your profile's Observations tab lets you search, group observations into datasets, or select and delete them." }
+      },
+      "tour": {
+        "add": "Click Add observations.",
+        "photos": "Drop your photos in — species suggestions run automatically. Check the names, link a project if you like, then click Add.",
+        "manage": "And this is where all your observations live: search them, group them into datasets, or select and delete."
+      }
+    },
+    "bioblitz": {
+      "question": "How do I join the BioBlitz and win?",
+      "title": "Join the BioBlitz challenge",
+      "intro": "The BioBlitz is a friendly weekly race to record nature. Photograph any living thing, upload it, and climb the board.",
+      "steps": {
+        "open": { "title": "Open BioBlitz", "body": "You'll find it in the sidebar under Funding." },
+        "register": { "title": "Register to take part", "body": "One click — registering lets the team track your entries and send your prize if you win." },
+        "upload": { "title": "Photograph and upload", "body": "Head outside, photograph any living thing, and add it as observations during the round." },
+        "win": { "title": "Win prizes", "body": "Most observations and best picture win cash prizes and a permanent profile badge — and every observation stays yours, reusable as evidence for your projects." }
+      },
+      "tour": {
+        "register": "Click Register to take part — one click and you're in.",
+        "upload": "Then upload nature photos here during the round — every observation counts."
+      }
+    }
+  }
+}

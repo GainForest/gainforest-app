@@ -1,6 +1,6 @@
 const SUPABASE_REST_PATH = "/rest/v1";
 
-export class SupabaseRestError extends Error {
+class SupabaseRestError extends Error {
   status: number;
   details?: unknown;
 
@@ -83,28 +83,4 @@ export async function supabasePatch<T>(pathAndQuery: string, value: Record<strin
   if (!response.ok) throw await parseSupabaseError(response);
   const data = await response.json().catch(() => []);
   return Array.isArray(data) ? data as T[] : [];
-}
-
-export async function supabaseUpsert(path: string, value: Record<string, unknown>, onConflict = "id"): Promise<void> {
-  const headers = serviceRoleHeaders({
-    "content-type": "application/json",
-    prefer: "resolution=merge-duplicates,return=minimal",
-  });
-  const separator = path.includes("?") ? "&" : "?";
-  const response = await fetch(supabaseUrl(`${path}${separator}on_conflict=${encodeURIComponent(onConflict)}`), {
-    method: "POST",
-    headers,
-    body: JSON.stringify(value),
-    cache: "no-store",
-  });
-  if (!response.ok) throw await parseSupabaseError(response);
-}
-
-export async function supabaseDelete(pathAndQuery: string): Promise<void> {
-  const response = await fetch(supabaseUrl(pathAndQuery), {
-    method: "DELETE",
-    headers: serviceRoleHeaders(),
-    cache: "no-store",
-  });
-  if (!response.ok) throw await parseSupabaseError(response);
 }

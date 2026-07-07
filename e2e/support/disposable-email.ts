@@ -1,5 +1,5 @@
 import { existsSync, readFileSync } from "node:fs";
-import { mkdir, rm, writeFile } from "node:fs/promises";
+import { mkdir, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 
 export const disposableAccountMetadataPath = "e2e/.auth/disposable-account.json";
@@ -238,18 +238,6 @@ export async function waitForInboxDeletionToken(
 export async function writeDisposableAccountMetadataAt(path: string, metadata: DisposableAccountMetadata): Promise<void> {
   await mkdir(dirname(path), { recursive: true });
   await writeFile(path, `${JSON.stringify(metadata, null, 2)}\n`, "utf8");
-}
-
-export async function writeDisposableAccountMetadata(metadata: DisposableAccountMetadata): Promise<void> {
-  await writeDisposableAccountMetadataAt(disposableAccountMetadataPath, metadata);
-}
-
-export async function clearDisposableAccountMetadataAt(path: string): Promise<void> {
-  await rm(path, { force: true });
-}
-
-export async function clearDisposableAccountMetadata(): Promise<void> {
-  await clearDisposableAccountMetadataAt(disposableAccountMetadataPath);
 }
 
 function parseInbox(value: unknown): DisposableInbox | null {

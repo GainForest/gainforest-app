@@ -89,6 +89,7 @@ export function BumicertDeleteAction(props: BumicertDeleteActionProps) {
         type="button"
         variant="outline"
         onClick={openConfirm}
+        data-taina="delete-project"
         className="w-full border-destructive/30 text-destructive hover:bg-destructive hover:text-destructive-foreground"
       >
         <Trash2Icon className="size-4" />

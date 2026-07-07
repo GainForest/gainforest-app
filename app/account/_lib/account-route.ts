@@ -55,7 +55,7 @@ type DirectCertifiedOrganization = {
   longDescription: string | null;
 };
 
-export function encodeAccountSegment(value: string): string {
+function encodeAccountSegment(value: string): string {
   return encodeURIComponent(value);
 }
 
@@ -161,6 +161,10 @@ export function accountTreesPath(didOrHandle: string): string {
 
 export function accountMembersPath(didOrHandle: string): string {
   return `${accountPath(didOrHandle)}/members`;
+}
+
+export function accountEquipmentPath(didOrHandle: string): string {
+  return `${accountPath(didOrHandle)}/equipment`;
 }
 
 export function accountTainaPath(didOrHandle: string): string {

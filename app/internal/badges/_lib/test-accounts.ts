@@ -61,7 +61,7 @@ async function cgsMutate(
   return data;
 }
 
-export type TestAccountState = {
+type TestAccountState = {
   flagged: boolean;
   definition: StrongRef | null;
   awards: BadgeAwardRecord[];
@@ -74,7 +74,7 @@ function findTestDefinition(definitions: { uri: string; cid: string; title: stri
 
 /** Read whether an account is currently flagged as a test account, along with
  *  the matching award records (for revocation). */
-export async function readTestAccountState(repoDid: string, subjectDid: string): Promise<TestAccountState> {
+async function readTestAccountState(repoDid: string, subjectDid: string): Promise<TestAccountState> {
   const data = await fetchInternalBadgeData(repoDid, { includeAwards: true });
   const definition = findTestDefinition(data.definitions);
   if (!definition) return { flagged: false, definition: null, awards: [] };

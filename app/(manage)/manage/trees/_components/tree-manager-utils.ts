@@ -66,12 +66,12 @@ function nonEmptyString(value: string | null | undefined): string | null {
   return typeof value === "string" && value.length > 0 ? value : null;
 }
 
-export function parseFloraMeasurement(value: unknown): FloraMeasurement | null {
+function parseFloraMeasurement(value: unknown): FloraMeasurement | null {
   if (!isRecord(value)) return null;
   return value.$type === FLORA_MEASUREMENT_TYPE ? (value as FloraMeasurement) : null;
 }
 
-export function groupMeasurementsByOccurrenceUri(
+function groupMeasurementsByOccurrenceUri(
   measurements: TreeMeasurementRecord[],
 ): Map<string, TreeMeasurementRecord[]> {
   const grouped = new Map<string, TreeMeasurementRecord[]>();
@@ -85,7 +85,7 @@ export function groupMeasurementsByOccurrenceUri(
   return grouped;
 }
 
-export function groupPhotosByOccurrenceUri(
+function groupPhotosByOccurrenceUri(
   photos: TreeMultimediaRecord[],
 ): Map<string, TreeMultimediaRecord[]> {
   const grouped = new Map<string, TreeMultimediaRecord[]>();

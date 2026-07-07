@@ -41,6 +41,14 @@
         }
       }
     },
+    "explainer": {
+      "eyebrow": "Assista à explicação",
+      "titlePrefix": "Uma nova forma de",
+      "titleEmphasis": "financiar a natureza",
+      "description": "Em dois minutos, veja como os Bumicerts transformam o trabalho de campo real em registros verificáveis e enviam financiamento diretamente aos guardiões locais que realizam o trabalho.",
+      "play": "Reproduzir vídeo",
+      "videoTitle": "Bumicerts: um mecanismo de financiamento da natureza novo e equitativo para guardiões locais"
+    },
     "certificate": {
       "eyebrow": "O certificado",
       "titleLine1": "O que exatamente é",

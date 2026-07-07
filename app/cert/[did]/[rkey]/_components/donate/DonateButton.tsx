@@ -3,19 +3,16 @@
 import { HeartIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useModal } from "@/components/ui/modal/context";
-import type { AuthSession } from "@/app/_lib/auth";
 import { AmountModal, type DonationBumicert, type DonationFundingConfig } from "./DonationModals";
 
 export function DonateButton({
   bumicert,
   fundingConfig,
-  authSession,
   disabled,
   label,
 }: {
   bumicert: DonationBumicert;
   fundingConfig: DonationFundingConfig;
-  authSession: AuthSession;
   disabled: boolean;
   label: string;
 }) {
@@ -30,7 +27,7 @@ export function DonateButton({
         pushModal(
           {
             id: "bumicert-donate-amount",
-            content: <AmountModal bumicert={bumicert} fundingConfig={fundingConfig} authSession={authSession} />,
+            content: <AmountModal bumicert={bumicert} fundingConfig={fundingConfig} />,
           },
           true,
         );

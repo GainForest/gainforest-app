@@ -161,10 +161,13 @@
       "colJoined": "Entrou"
     },
     "filters": {
-      "description": "Mostre organizações por origem, observações, categoria ou país."
+      "description": "Mostre organizações por origem, doações, observações, categoria ou país."
     },
     "quickFilters": {
-      "observations": "Tem observações"
+      "observations": "Tem observações",
+      "donations": "Aceita doações",
+      "donationsGainforest": "Doações GainForest",
+      "donationsMaearth": "Doações Ma Earth"
     },
     "facets": {
       "category": "Categoria",
@@ -246,7 +249,7 @@
       "natureChampion": "Campeão da natureza",
       "consistentGiver": "Doador constante",
       "risingSupporter": "Apoiador em ascensão",
-      "openWallet": "Abrir {wallet} no BaseScan",
+      "openWallet": "Abrir {wallet} no Etherscan",
       "openAccount": "Abrir a conta do doador em uma nova aba",
       "anonymousSupporter": "Apoiador anônimo",
       "donationSummaryWithTime": "{count, plural, one {# doação} other {# doações}} · Última doação {relativeTime}",
@@ -299,6 +302,10 @@
       "live": "Ao vivo",
       "upcoming": "Começa em breve",
       "ended": "Encerrado"
+    },
+    "rounds": {
+      "title": "Rodadas",
+      "current": "Atual"
     },
     "round": {
       "startsIn": "Começa em",
@@ -392,7 +399,10 @@
       "description": "Um registro permanente dos campeões de cada rodada.",
       "mostObservations": "Mais observações",
       "bestPicture": "Melhor foto",
-      "pending": "A anunciar"
+      "pending": "A anunciar",
+      "compact": "Recentes",
+      "mostSubmitted": "Mais envios",
+      "mostLiked": "Mais curtidas"
     },
     "map": {
       "title": "Observações da semana",
@@ -578,7 +588,10 @@
       "noMatch": "Nenhum projeto corresponde à sua pesquisa.",
       "untitledProject": "Projeto sem título",
       "applyWith": "Candidatar-se com {project}",
-      "submitError": "Não foi possível enviar sua candidatura. Tente novamente."
+      "submitError": "Não foi possível enviar sua candidatura. Tente novamente.",
+      "successTitle": "Candidatura enviada",
+      "successBody": "Obrigado por se candidatar com {project}. Entraremos em contato em breve sobre os próximos passos.",
+      "successClose": "Concluído"
     },
     "interoperable": {
       "category": "Programa de subsídios interoperáveis",
@@ -637,9 +650,9 @@
       "setupDescription": "Vincule uma carteira para receber doações em USDC de apoiadores.",
       "stepConnect": "Passo 1: Conecte sua carteira",
       "connectWallet": "Conectar carteira",
-      "stepSwitch": "Passo 2: Mude para a rede Base",
+      "stepSwitch": "Passo 2: Mude para a rede Ethereum",
       "switching": "Alterando...",
-      "switchToBase": "Mudar para Base",
+      "switchToEthereum": "Mudar para Ethereum",
       "linkedSuccess": "✓ Carteira vinculada com sucesso!",
       "linkedSuccessDescription": "O indexador pode levar alguns instantes para processar sua atestação.",
       "refresh": "Atualizar",
@@ -918,11 +931,14 @@
     "filters": {
       "allProjects": "Todos os projetos",
       "allFilters": "Ordenar e filtrar",
-      "description": "Mostre projetos por selo de origem, imagens ou um local de projeto.",
+      "description": "Mostre projetos por selo de origem, doações, imagens ou um local de projeto.",
       "updateHint": "Os filtros são atualizados conforme você escolhe.",
       "images": "Mostra imagens",
       "locations": "Tem um local",
-      "timeline": "Tem linha do tempo"
+      "timeline": "Tem linha do tempo",
+      "donations": "Aceita doações",
+      "donationsGainforest": "Doações GainForest",
+      "donationsMaearth": "Doações Ma Earth"
     },
     "empty": {
       "eyebrow": "Sem resultados",
@@ -940,7 +956,16 @@
       "bumicertCount": "{count, plural, one {# certificado} other {# certificados}}",
       "projectPlace": "Local do projeto",
       "showDetails": "Mostrar detalhes",
-      "loading": "Carregando projetos"
+      "loading": "Carregando projetos",
+      "donate": "Doar",
+      "acceptsDonations": "Aceita doações",
+      "openForSupport": "Aberto a apoio",
+      "donationSummary": "{amount} de {donors, plural, one {# apoiador} other {# apoiadores}}",
+      "donationSummaryShort": "{amount} · {donors, plural, one {# apoiador} other {# apoiadores}}",
+      "donationWays": "{count} formas",
+      "maEarth": "Ma Earth",
+      "round": "Rodada {round}",
+      "byDonors": "de {donors, plural, one {# doador} other {# doadores}}"
     },
     "actions": {
       "clearAll": "Limpar tudo"
@@ -1492,6 +1517,18 @@
     "emptyHero": {
       "description": "Os projetos reúnem o seu trabalho de impacto — pessoas, lugares, períodos de tempo e fotos ou notas de apoio — em uma página que apoiadores podem acompanhar e financiar.",
       "cta": "Criar um projeto"
+    },
+    "publish": {
+      "title": "Mostre seu trabalho nas páginas de exploração",
+      "description": "Publicar torna esta conta e todos os seus projetos visíveis para qualquer pessoa navegando no GainForest.",
+      "action": "Publicar",
+      "publishing": "Publicando…",
+      "publishedTitle": "Publicado nas páginas de exploração",
+      "publishedHint": "Esta conta e seus projetos estão visíveis para qualquer pessoa navegando no GainForest.",
+      "justPublishedHint": "Pronto! Pode levar alguns minutos para aparecer nas páginas de exploração.",
+      "memberBlocked": "Apenas proprietários e administradores da organização podem publicar.",
+      "error": "A publicação não foi concluída. Tente novamente mais tarde.",
+      "unavailable": "A publicação não está disponível no momento. Tente novamente mais tarde."
     }
   },
   "manageBumicerts": {
@@ -1641,11 +1678,16 @@
     "viewOnGlobe": "Ver no Globo",
     "panel": {
       "searchPlaceholder": "Pesquisar organizações…",
+      "treeFilter": "Dados de árvores",
+      "treesEmpty": "Ainda não há dados de árvores enviados.",
+      "treesFailed": "Os dados de árvores estão indisponíveis no momento.",
       "toggleList": "Mostrar a lista de organizações",
       "loading": "Carregando organizações…",
       "count": "{count, plural, one {# organização} other {# organizações}}",
       "empty": "Nenhuma organização corresponde à sua pesquisa.",
-      "maEarth": "Ma Earth"
+      "maEarth": "Ma Earth",
+      "dataFilter": "Camadas de drone e dados",
+      "dataBadge": "{count, plural, one {# camada de dados do mapa} other {# camadas de dados do mapa}}"
     },
     "focus": {
       "organizationLabel": "Organização",
@@ -1657,11 +1699,15 @@
       "viewProject": "Ver projeto",
       "backToGlobe": "Voltar à visão global",
       "recenter": "Centralizar o mapa",
-      "sites": "{count, plural, one {# site de projeto} other {# sites de projeto}}",
+      "sites": "{count, plural, one {# site mapeado} other {# sites mapeados}}",
       "boundaries": "{count, plural, one {# limite de site} other {# limites de site}}",
       "allSites": "Todos os sites",
+      "orgLocationHeading": "Localização da organização",
+      "projectSitesHeading": "Sites de projeto",
       "noSites": "Ainda não há sites de projeto mapeados.",
       "noBoundaries": "Este projeto ainda não tem limites de site mapeados.",
+      "projectPill": "Projeto: {name}",
+      "moreProjects": "+{count} mais",
       "projectHint": "Os limites destacados mostram onde este projeto atua."
     },
     "layers": {
@@ -1669,6 +1715,8 @@
       "title": "Explorar camadas",
       "landcover": "Cobertura do solo",
       "landcoverSource": "ESA WorldCover 2021",
+      "measuredTrees": "Árvores medidas",
+      "measuredTreesCount": "{count, plural, one {# árvore} other {# árvores}}",
       "projectCategory": "Camadas do projeto",
       "noProjectLayers": "Esta organização ainda não tem camadas de mapa adicionais.",
       "landcoverClasses": {
@@ -1681,7 +1729,34 @@
         "water": "Água",
         "wetland": "Zona úmida",
         "mangroves": "Manguezais"
-      }
+      },
+      "visibleNow": "{count, plural, one {# camada no mapa} other {# camadas no mapa}}",
+      "flyTo": "Aproximar de {name}",
+      "hide": "Ocultar {name}"
+    },
+    "timeline": {
+      "seriesFlights": "{count, plural, one {# voo de drone} other {# voos de drone}} sobre a mesma área",
+      "seriesHint": "A mesma área foi sobrevoada em datas diferentes — ative a linha do tempo para ver como muda.",
+      "toggle": "Ver {name} ao longo do tempo",
+      "title": "Mudança ao longo do tempo",
+      "close": "Ocultar o controle de tempo",
+      "play": "Reproduzir a linha do tempo",
+      "pause": "Pausar a linha do tempo",
+      "previous": "Captura anterior",
+      "next": "Próxima captura",
+      "slider": "Data da captura",
+      "step": "{current} de {total}"
+    },
+    "tree": {
+      "title": "Árvore",
+      "close": "Fechar",
+      "species": "Espécie",
+      "height": "Altura",
+      "dbh": "DAP",
+      "measured": "Medido:",
+      "unknown": "Desconhecido",
+      "unknownSpecies": "Espécie desconhecida",
+      "photo": "Foto {index}"
     },
     "loadingGlobe": "Preparando o globo…",
     "sheet": {

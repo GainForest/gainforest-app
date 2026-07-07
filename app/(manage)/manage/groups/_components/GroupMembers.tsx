@@ -34,6 +34,8 @@ type DataCouncilResponse = {
 type GroupSettingsResponse = {
   members: CgsMember[];
   profiles?: DidProfile[];
+  /** Member DID → email (ePDS accounts only; only sent to organization members). */
+  memberEmails?: Record<string, string>;
   invitations?: CgsPendingInvitation[];
   dataCouncil?: DataCouncilResponse | null;
   dataCouncilError?: string | null;
@@ -174,6 +176,7 @@ function PendingInvitationRow({
 function MemberRow({
   member,
   profile,
+  email,
   canRemove,
   canSetRoles,
   isPending,
@@ -183,6 +186,7 @@ function MemberRow({
 }: {
   member: CgsMember;
   profile?: DidProfile;
+  email?: string | null;
   canRemove: boolean;
   canSetRoles: boolean;
   isPending: boolean;
@@ -196,7 +200,14 @@ function MemberRow({
   const name = profile?.displayName?.trim();
   const primary = name || "Team member";
   const joined = formatDate(member.addedAt);
-  const secondary = !profile ? "Loading name…" : joined ? `Joined ${joined}` : "Organization member";
+  // ePDS members are labelled by email (member-gated, provided by the server);
+  // Bluesky / other atproto members by their public handle.
+  const handle = profile?.handle?.trim();
+  const identifier = email?.trim() || (handle ? `@${handle.replace(/^@+/, "")}` : null);
+  const joinedText = joined ? `Joined ${joined}` : null;
+  const secondary = !profile && !identifier
+    ? "Loading name…"
+    : [identifier, joinedText].filter(Boolean).join(" · ") || "Organization member";
 
   return (
     <div className="flex items-center gap-3 rounded-xl px-3 py-3 transition-colors hover:bg-muted/40">
@@ -287,6 +298,7 @@ export function GroupMembers({
   const [members, setMembers] = useState<CgsMember[]>(() => initialMembers ?? []);
   const [pendingInvitations, setPendingInvitations] = useState<CgsPendingInvitation[]>([]);
   const [profiles, setProfiles] = useState<Record<string, DidProfile>>({});
+  const [memberEmails, setMemberEmails] = useState<Record<string, string>>({});
   const [memberIdentifier, setMemberIdentifier] = useState("");
   const [role, setRole] = useState<RoleInput>("member");
   const [error, setError] = useState<string | null>(initialError);
@@ -319,6 +331,7 @@ export function GroupMembers({
     setMembers(data.members ?? []);
     setPendingInvitations(data.invitations ?? []);
     setProfiles((current) => ({ ...current, ...profilesByDid(data.profiles) }));
+    setMemberEmails(data.memberEmails ?? {});
     if (canUseDataCouncil) {
       if (data.dataCouncil) applyDataCouncilState(data.dataCouncil);
       else {
@@ -347,6 +360,7 @@ export function GroupMembers({
   useEffect(() => {
     setMembers(initialMembers ?? []);
     setPendingInvitations([]);
+    setMemberEmails({});
     setError(initialError);
     setLoaded(hasInitialMembers || Boolean(initialError));
     setDataCouncilLoaded(!canUseDataCouncil);
@@ -626,6 +640,7 @@ export function GroupMembers({
                 key={member.did}
                 member={member}
                 profile={profile}
+                email={memberEmails[member.did] ?? null}
                 canRemove={canAddRemove || Boolean(currentUserDid && member.did === currentUserDid)}
                 canSetRoles={canSetRoles}
                 isPending={isPending}
