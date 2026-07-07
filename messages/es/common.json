@@ -1620,7 +1620,17 @@
       "doneBody": "El tono se reprodujo y el despliegue se guardó en tu cuenta. Reprodúcelo de nuevo si el AudioMoth no lo captó.",
       "playAgain": "Reproducir tono de nuevo",
       "done": "Listo",
-      "close": "Cerrar"
+      "close": "Cerrar",
+      "edit": "Editar despliegue",
+      "editTitle": "Editar despliegue",
+      "editIntro": "Cambia el nombre del sitio o el AudioMoth vinculado. El ID de despliegue, la ubicación y la fecha están fijados al tono que ya se reprodujo.",
+      "save": "Guardar cambios",
+      "saving": "Guardando…",
+      "updateFailed": "No se pudo actualizar el despliegue. Inténtalo de nuevo.",
+      "fixedTitle": "Fijado al tono",
+      "coordinatesLabel": "Ubicación",
+      "deployedLabel": "Desplegado",
+      "equipmentLinked": "Unidad vinculada"
     }
   }
 }

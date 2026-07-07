@@ -1620,7 +1620,17 @@
       "doneBody": "O sinal foi reproduzido e a implantação foi salva na sua conta. Reproduza de novo se o AudioMoth não o captou.",
       "playAgain": "Reproduzir sinal de novo",
       "done": "Concluído",
-      "close": "Fechar"
+      "close": "Fechar",
+      "edit": "Editar implantação",
+      "editTitle": "Editar implantação",
+      "editIntro": "Altere o nome do local ou o AudioMoth vinculado. O ID de implantação, a localização e a data estão fixos ao sinal que já foi reproduzido.",
+      "save": "Salvar alterações",
+      "saving": "Salvando…",
+      "updateFailed": "Não foi possível atualizar a implantação. Tente novamente.",
+      "fixedTitle": "Fixo ao sinal",
+      "coordinatesLabel": "Localização",
+      "deployedLabel": "Implantado",
+      "equipmentLinked": "Unidade vinculada"
     }
   }
 }

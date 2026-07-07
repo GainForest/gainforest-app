@@ -173,6 +173,91 @@ export function buildDeploymentEventRecord(draft: DeploymentEventDraft): Deploym
   return record;
 }
 
+/** The AT-URI of the equipment linked to a deployment, if any (stored in the
+ *  event's remarks as `Equipment record: at://…`). */
+export function linkedEquipmentUri(remarks: string | undefined): string | null {
+  const match = (remarks ?? "").match(/Equipment record:\s*(at:\/\/\S+)/);
+  return match ? match[1]! : null;
+}
+
+/** Strip any existing `Equipment record: at://…` reference from remarks. */
+function stripEquipmentRemark(remarks: string | undefined): string {
+  return (remarks ?? "").replace(/\s*Equipment record:\s*at:\/\/\S+/g, "").trim();
+}
+
+/** The only two fields a deployment lets you change after the chime: the site
+ *  name and the linked AudioMoth. Everything else is fixed to the chime. */
+export type DeploymentEventEdit = {
+  siteName?: string;
+  equipment?: { name: string; assetId: string; uri: string } | null;
+};
+
+function equipmentUsedLabel(equipment: DeploymentEventEdit["equipment"]): string {
+  return equipment
+    ? [equipment.name, equipment.assetId && `(${equipment.assetId})`].filter(Boolean).join(" ")
+    : "AudioMoth";
+}
+
+/**
+ * Rebuild an event record changing only the name (`locality`) and the linked
+ * equipment (`equipmentUsed` + the `Equipment record:` remark). The chime
+ * identity — eventID, eventDate, coordinates, protocol — is carried over
+ * untouched from the stored record.
+ */
+export function buildUpdatedDeploymentEventRecord(
+  item: DeploymentEventItem,
+  edit: DeploymentEventEdit,
+): DeploymentEventRecord {
+  const record: DeploymentEventRecord = {
+    $type: DWC_EVENT_COLLECTION,
+    eventID: item.eventID,
+    eventDate: item.eventDate,
+    geodeticDatum: item.geodeticDatum ?? "EPSG:4326",
+    samplingProtocol: item.samplingProtocol ?? "AudioMoth passive acoustic monitoring",
+    equipmentUsed: equipmentUsedLabel(edit.equipment),
+    createdAt: item.createdAt,
+  };
+  if (item.decimalLatitude) record.decimalLatitude = item.decimalLatitude;
+  if (item.decimalLongitude) record.decimalLongitude = item.decimalLongitude;
+  const site = edit.siteName?.trim();
+  if (site) record.locality = site;
+  const remarks = [
+    stripEquipmentRemark(item.eventRemarks) ||
+      `Chime deployment ID ${item.eventID}. Clock, location and ID set acoustically with the GainForest web app.`,
+    edit.equipment ? `Equipment record: ${edit.equipment.uri}` : null,
+  ]
+    .filter(Boolean)
+    .join(" ");
+  if (remarks) record.eventRemarks = remarks;
+  return record;
+}
+
+/** Merge an edit back into a list item locally (after a successful put). */
+export function applyDeploymentEdit(
+  item: DeploymentEventItem,
+  edit: DeploymentEventEdit,
+  cid: string,
+): DeploymentEventItem {
+  const record = buildUpdatedDeploymentEventRecord(item, edit);
+  return { ...item, ...record, uri: item.uri, rkey: item.rkey, did: item.did, cid };
+}
+
+export async function updateDeploymentEvent(
+  item: DeploymentEventItem,
+  edit: DeploymentEventEdit,
+): Promise<MutationResult> {
+  return postMutation<MutationResult>(
+    {
+      operation: "putRecord",
+      collection: DWC_EVENT_COLLECTION,
+      rkey: item.rkey,
+      swapRecord: item.cid,
+      record: buildUpdatedDeploymentEventRecord(item, edit),
+    },
+    "Could not update the deployment.",
+  );
+}
+
 export async function createDeploymentEvent(draft: DeploymentEventDraft): Promise<MutationResult> {
   return postMutation<MutationResult>(
     {

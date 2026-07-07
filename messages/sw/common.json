@@ -1620,7 +1620,17 @@
       "doneBody": "Mlio ulichezwa na usambazaji umehifadhiwa kwenye akaunti yako. Ucheze tena ikiwa AudioMoth haikuupokea.",
       "playAgain": "Cheza mlio tena",
       "done": "Imekamilika",
-      "close": "Funga"
+      "close": "Funga",
+      "edit": "Hariri usambazaji",
+      "editTitle": "Hariri usambazaji",
+      "editIntro": "Badilisha jina la eneo au AudioMoth iliyounganishwa. Kitambulisho cha usambazaji, mahali na tarehe vimefungwa kwenye mlio uliochezwa tayari.",
+      "save": "Hifadhi mabadiliko",
+      "saving": "Inahifadhi…",
+      "updateFailed": "Usambazaji haukuweza kusasishwa. Tafadhali jaribu tena.",
+      "fixedTitle": "Vimefungwa kwenye mlio",
+      "coordinatesLabel": "Mahali",
+      "deployedLabel": "Ilisambazwa",
+      "equipmentLinked": "Kifaa kilichounganishwa"
     }
   }
 }

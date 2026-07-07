@@ -1620,7 +1620,17 @@
       "doneBody": "The chime was played and the deployment was saved to your account. Play it again if the AudioMoth didn't catch it.",
       "playAgain": "Play chime again",
       "done": "Done",
-      "close": "Close"
+      "close": "Close",
+      "edit": "Edit deployment",
+      "editTitle": "Edit deployment",
+      "editIntro": "Change the site name or the linked AudioMoth. The deployment ID, location and date are fixed to the chime that was already played.",
+      "save": "Save changes",
+      "saving": "Saving…",
+      "updateFailed": "The deployment could not be updated. Please try again.",
+      "fixedTitle": "Fixed to the chime",
+      "coordinatesLabel": "Location",
+      "deployedLabel": "Deployed",
+      "equipmentLinked": "Linked unit"
     }
   }
 }

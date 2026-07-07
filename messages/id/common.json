@@ -1620,7 +1620,17 @@
       "doneBody": "Nada telah diputar dan penempatan disimpan ke akun Anda. Putar lagi jika AudioMoth belum menangkapnya.",
       "playAgain": "Putar nada lagi",
       "done": "Selesai",
-      "close": "Tutup"
+      "close": "Tutup",
+      "edit": "Edit penempatan",
+      "editTitle": "Edit penempatan",
+      "editIntro": "Ubah nama lokasi atau AudioMoth yang tertaut. ID penempatan, lokasi, dan tanggal terkunci pada nada yang sudah diputar.",
+      "save": "Simpan perubahan",
+      "saving": "Menyimpan…",
+      "updateFailed": "Penempatan tidak dapat diperbarui. Silakan coba lagi.",
+      "fixedTitle": "Terkunci pada nada",
+      "coordinatesLabel": "Lokasi",
+      "deployedLabel": "Ditempatkan",
+      "equipmentLinked": "Unit tertaut"
     }
   }
 }
