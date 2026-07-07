@@ -18,7 +18,7 @@ import { formatDate, shortDid } from "@/app/_lib/format";
 import { STATUS_TONES, categoryIcon, getEquipment, type EquipmentStatusTone } from "@/app/_lib/equipment";
 import { getCertifiedProfileCard } from "@/app/account/_lib/account-route";
 import { RecordEngagement } from "@/app/_components/RecordEngagement";
-import { accountEquipmentPath } from "@/app/account/_lib/account-route";
+import { accountEquipmentPath, accountPath } from "@/app/account/_lib/account-route";
 import { EquipmentDetailActions } from "./EquipmentDetailActions";
 
 export const dynamic = "force-dynamic";
@@ -62,6 +62,7 @@ export async function generateMetadata({ params }: { params: EquipmentPageParams
 export default async function EquipmentDetailPage({ params }: { params: EquipmentPageParams }) {
   const item = await loadEquipment(params);
   const t = await getTranslations("common.equipment");
+  const tProfile = await getTranslations("common.feed.profileCard");
 
   const [session, ownerProfile] = await Promise.all([
     fetchAuthSession().catch(() => ({ isLoggedIn: false as const })),
@@ -77,13 +78,16 @@ export default async function EquipmentDetailPage({ params }: { params: Equipmen
 
   return (
     <main className="mx-auto w-full max-w-3xl px-6 pb-20 pt-8 md:pt-12">
-      <Link
-        href={accountEquipmentPath(item.did)}
-        className="inline-flex items-center gap-1.5 text-[13px] font-medium text-muted-foreground transition-colors hover:text-foreground"
-      >
-        <ArrowLeftIcon className="h-3.5 w-3.5" aria-hidden />
-        {t("detail.back")}
-      </Link>
+      {/* The registry list is owner-only, so only the owner gets a back link to it. */}
+      {isOwner ? (
+        <Link
+          href={accountEquipmentPath(item.did)}
+          className="inline-flex items-center gap-1.5 text-[13px] font-medium text-muted-foreground transition-colors hover:text-foreground"
+        >
+          <ArrowLeftIcon className="h-3.5 w-3.5" aria-hidden />
+          {t("detail.back")}
+        </Link>
+      ) : null}
 
       <header className="mt-5 flex flex-wrap items-start justify-between gap-4">
         <div className="flex min-w-0 items-center gap-4">
@@ -157,7 +161,12 @@ export default async function EquipmentDetailPage({ params }: { params: Equipmen
         <p className="text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
           {t("detail.registeredBy")}
         </p>
-        <Link href={accountEquipmentPath(item.did)} className="group mt-3 flex items-center gap-3">
+        {/* Visitors go to the owner's public profile; the owner-only registry
+            list is linked only when the viewer is the owner. */}
+        <Link
+          href={isOwner ? accountEquipmentPath(item.did) : accountPath(item.did)}
+          className="group mt-3 flex items-center gap-3"
+        >
           <span className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full border border-border bg-muted">
             {ownerProfile?.avatarUrl ? (
               // eslint-disable-next-line @next/next/no-img-element -- arbitrary PDS/CDN hosts
@@ -173,7 +182,7 @@ export default async function EquipmentDetailPage({ params }: { params: Equipmen
               {ownerName}
             </span>
             <span className="mt-0.5 inline-flex items-center gap-1 text-xs text-muted-foreground">
-              {t("detail.viewAllEquipment")}
+              {isOwner ? t("detail.viewAllEquipment") : tProfile("viewProfile")}
               <ArrowUpRightIcon className="h-3 w-3" aria-hidden />
             </span>
           </span>

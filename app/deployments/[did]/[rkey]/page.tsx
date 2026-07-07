@@ -17,7 +17,7 @@ import { formatDate, shortDid } from "@/app/_lib/format";
 import { getDeploymentEvent, linkedEquipmentUri, parseAtUri } from "@/app/_lib/deployment-events";
 import { equipmentDetailPath } from "@/app/_lib/equipment";
 import { getCertifiedProfileCard } from "@/app/account/_lib/account-route";
-import { accountEquipmentPath } from "@/app/account/_lib/account-route";
+import { accountEquipmentPath, accountPath } from "@/app/account/_lib/account-route";
 import { DeploymentLocationMap } from "./DeploymentLocationMap";
 import { DeploymentDetailActions } from "./DeploymentDetailActions";
 import { DeploymentRecordings } from "./DeploymentRecordings";
@@ -57,6 +57,7 @@ export async function generateMetadata({ params }: { params: DeploymentPageParam
 export default async function DeploymentDetailPage({ params }: { params: DeploymentPageParams }) {
   const item = await loadDeployment(params);
   const t = await getTranslations("common.audiomoth.deployments");
+  const tProfile = await getTranslations("common.feed.profileCard");
 
   const [session, ownerProfile] = await Promise.all([
     fetchAuthSession().catch(() => ({ isLoggedIn: false as const })),
@@ -153,7 +154,12 @@ export default async function DeploymentDetailPage({ params }: { params: Deploym
         <p className="text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
           {t("recordedByLabel")}
         </p>
-        <Link href={accountEquipmentPath(item.did)} className="group mt-3 flex items-center gap-3">
+        {/* Visitors go to the recorder owner's public profile; the owner-only
+            equipment registry is linked only when the viewer is the owner. */}
+        <Link
+          href={isOwner ? accountEquipmentPath(item.did) : accountPath(item.did)}
+          className="group mt-3 flex items-center gap-3"
+        >
           <span className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full border border-border bg-muted">
             {ownerProfile?.avatarUrl ? (
               // eslint-disable-next-line @next/next/no-img-element -- arbitrary PDS/CDN hosts
@@ -169,7 +175,7 @@ export default async function DeploymentDetailPage({ params }: { params: Deploym
               {ownerName}
             </span>
             <span className="mt-0.5 inline-flex items-center gap-1 text-xs text-muted-foreground">
-              {t("viewEquipment")}
+              {isOwner ? t("viewEquipment") : tProfile("viewProfile")}
               <ArrowUpRightIcon className="h-3 w-3" aria-hidden />
             </span>
           </span>

@@ -124,10 +124,10 @@ function buildTabs(
     icon: BadgeCheckIcon,
     exact: false,
   };
-  // Field equipment registry. On personal profiles it appears publicly once
-  // the account has registered gear (and always for the owner); on
-  // organizations it aggregates the whole team's gear, so — like Members —
-  // it only shows to people who belong to the organization.
+  // Field equipment registry — a private inventory surface. On personal
+  // profiles it only appears for the signed-in owner; on organizations it
+  // aggregates the whole team's gear, so — like Members — it only shows to
+  // people who belong to the organization.
   const equipmentTab: Tab = {
     labelKey: "equipment",
     href: accountEquipmentPath(did),

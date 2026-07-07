@@ -65,8 +65,11 @@ export default async function AccountEquipmentPage({ params }: { params: Promise
     }
   }
 
-  // Personal profiles: the list is public (records live in the person's own
-  // public repo); only the owner can add or edit.
+  // Personal profiles: the equipment registry is a private inventory surface,
+  // so only the signed-in owner can see it (individual equipment detail pages
+  // stay public, since deployments reference them).
+  if (viewerDid !== account.did) notFound();
+
   return (
     <EquipmentSection
       variant="personal"
