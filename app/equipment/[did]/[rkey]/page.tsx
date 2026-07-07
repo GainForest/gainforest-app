@@ -17,6 +17,7 @@ import { fetchAuthSession } from "@/app/_lib/auth-server";
 import { formatDate, shortDid } from "@/app/_lib/format";
 import { STATUS_TONES, categoryIcon, getEquipment, type EquipmentStatusTone } from "@/app/_lib/equipment";
 import { getCertifiedProfileCard } from "@/app/account/_lib/account-route";
+import { RecordEngagement } from "@/app/_components/RecordEngagement";
 import { accountEquipmentPath } from "@/app/account/_lib/account-route";
 import { EquipmentDetailActions } from "./EquipmentDetailActions";
 
@@ -178,6 +179,11 @@ export default async function EquipmentDetailPage({ params }: { params: Equipmen
           </span>
         </Link>
       </section>
+
+      {/* Like + comment this equipment — same records + counts as the feed. */}
+      <div className="mt-6 border-t border-border-soft pt-4">
+        <RecordEngagement subjectUri={item.uri} />
+      </div>
     </main>
   );
 }

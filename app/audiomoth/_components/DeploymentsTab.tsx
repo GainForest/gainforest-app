@@ -41,8 +41,17 @@ import {
   listDeploymentEvents,
   type DeploymentEventItem,
 } from "@/app/_lib/deployment-events";
-import { equipmentDetailPath, listEquipment, type EquipmentItem } from "@/app/_lib/equipment";
-import { formatRelative } from "@/app/_lib/format";
+import { equipmentDetailPath, type EquipmentItem } from "@/app/_lib/equipment";
+import { resolveDidProfile, type DidProfile } from "@/app/_lib/did-profile";
+import { formatRelative, shortDid } from "@/app/_lib/format";
+
+/** Your AudioMoths, aggregated across every organization you belong to. */
+async function fetchMyAudioMoths(signal?: AbortSignal): Promise<EquipmentItem[]> {
+  const res = await fetch("/api/audiomoth/equipment", { signal, cache: "no-store" });
+  if (!res.ok) throw new Error(`Could not load equipment (${res.status}).`);
+  const data = (await res.json()) as { equipment?: EquipmentItem[] };
+  return Array.isArray(data.equipment) ? data.equipment : [];
+}
 
 export function DeploymentsTab({ sessionDid }: { sessionDid: string | null }) {
   const t = useTranslations("common.audiomoth.deployments");
@@ -240,6 +249,7 @@ function CreateDeploymentDialog({
   const [lon, setLon] = useState("");
   const [locating, setLocating] = useState(false);
   const [equipment, setEquipment] = useState<EquipmentItem[] | null>(null);
+  const [ownerProfiles, setOwnerProfiles] = useState<Record<string, DidProfile>>({});
   const [equipmentUri, setEquipmentUri] = useState<string>("none");
   const [stage, setStage] = useState<CreateStage>("form");
   const [replaying, setReplaying] = useState(false);
@@ -247,13 +257,24 @@ function CreateDeploymentDialog({
 
   const busy = stage === "playing" || replaying;
 
-  /* Your registered AudioMoths, for the optional link to this deployment. */
+  /* Your registered AudioMoths (across your organizations too), for the
+     optional link to this deployment. */
   useEffect(() => {
     const ctrl = new AbortController();
-    listEquipment(sessionDid, ctrl.signal)
+    fetchMyAudioMoths(ctrl.signal)
       .then((items) => {
-        if (!ctrl.signal.aborted) {
-          setEquipment(items.filter((item) => item.category === "audiomoth"));
+        if (ctrl.signal.aborted) return;
+        setEquipment(items);
+        // Resolve owner names for units held by teammates, to disambiguate.
+        const others = [...new Set(items.map((item) => item.did))].filter((did) => did !== sessionDid);
+        for (const did of others) {
+          resolveDidProfile(did)
+            .then((profile) => {
+              if (!ctrl.signal.aborted) {
+                setOwnerProfiles((prev) => (prev[did] ? prev : { ...prev, [did]: profile }));
+              }
+            })
+            .catch(() => {});
         }
       })
       .catch(() => {
@@ -486,11 +507,20 @@ function CreateDeploymentDialog({
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="none">{t("equipmentNone")}</SelectItem>
-                    {(equipment ?? []).map((item) => (
-                      <SelectItem key={item.uri} value={item.uri}>
-                        {item.assetId ? `${item.name} (${item.assetId})` : item.name}
-                      </SelectItem>
-                    ))}
+                    {(equipment ?? []).map((item) => {
+                      const base = item.assetId ? `${item.name} (${item.assetId})` : item.name;
+                      const owner =
+                        item.did === sessionDid
+                          ? null
+                          : ownerProfiles[item.did]?.displayName ||
+                            ownerProfiles[item.did]?.handle ||
+                            shortDid(item.did);
+                      return (
+                        <SelectItem key={item.uri} value={item.uri}>
+                          {owner ? `${base} — ${owner}` : base}
+                        </SelectItem>
+                      );
+                    })}
                   </SelectContent>
                 </Select>
                 <p className="text-xs text-muted-foreground">
