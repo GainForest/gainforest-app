@@ -28,6 +28,87 @@
   color: var(--muted-foreground);
 }
 
+/* Feathered glass panels: the background/backdrop blur fades out before the
+   edge, replacing hard borders with a softer map-first overlay. */
+.globe-feathered-panel {
+  position: relative;
+  isolation: isolate;
+  background: transparent;
+  border-color: transparent;
+}
+
+.globe-feathered-panel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  background: rgb(0 0 0 / 0.7);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  --globe-panel-feather: 18px;
+  -webkit-mask-image:
+    linear-gradient(
+      to right,
+      transparent 0,
+      #000 var(--globe-panel-feather),
+      #000 calc(100% - var(--globe-panel-feather)),
+      transparent 100%
+    ),
+    linear-gradient(
+      to bottom,
+      transparent 0,
+      #000 var(--globe-panel-feather),
+      #000 calc(100% - var(--globe-panel-feather)),
+      transparent 100%
+    );
+  mask-image:
+    linear-gradient(
+      to right,
+      transparent 0,
+      #000 var(--globe-panel-feather),
+      #000 calc(100% - var(--globe-panel-feather)),
+      transparent 100%
+    ),
+    linear-gradient(
+      to bottom,
+      transparent 0,
+      #000 var(--globe-panel-feather),
+      #000 calc(100% - var(--globe-panel-feather)),
+      transparent 100%
+    );
+  -webkit-mask-composite: source-in;
+  mask-composite: intersect;
+}
+
+.globe-feathered-panel > * {
+  position: relative;
+  z-index: 1;
+}
+
+.globe-feathered-panel--left-rail::before {
+  --globe-panel-feather: 80px;
+  -webkit-mask-image: linear-gradient(
+    to right,
+    #000 0,
+    #000 calc(100% - var(--globe-panel-feather)),
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to right,
+    #000 0,
+    #000 calc(100% - var(--globe-panel-feather)),
+    transparent 100%
+  );
+  -webkit-mask-composite: source-over;
+  mask-composite: add;
+}
+
+.globe-feathered-panel--left-rail > * {
+  width: min(380px, calc(100vw - 5rem));
+}
+
 /* Zoom control pills, matched to the app's outline buttons. */
 .maplibregl-ctrl-group {
   background: var(--background);

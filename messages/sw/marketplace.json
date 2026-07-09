@@ -1677,8 +1677,10 @@
     "subtitle": "Mashirika na maeneo ya miradi yao kwenye Dunia hai ya 3D.",
     "viewOnGlobe": "Tazama kwenye Dunia",
     "tabs": {
-      "details": "Maelezo",
-      "layers": "Tabaka"
+      "details": "Mashirika",
+      "layers": "Tabaka",
+      "popup": "Fungua kama kidirisha kinachoelea",
+      "dock": "Bandika pembeni"
     },
     "panel": {
       "searchPlaceholder": "Tafuta mashirika…",
@@ -1734,6 +1736,7 @@
         "wetland": "Ardhi oevu",
         "mangroves": "Mikoko"
       },
+      "visibleDetails": "Kwenye ramani",
       "visibleNow": "{count, plural, one {tabaka # kwenye ramani} other {tabaka # kwenye ramani}}",
       "flyTo": "Kuza hadi {name}",
       "hide": "Ficha {name}"

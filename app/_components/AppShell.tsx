@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { AuthSession } from "../_lib/auth";
 import { BioblitzPromoBanner } from "./BioblitzPromoBanner";
 import { FloatingTainaGuide } from "./FloatingTainaGuide";
 import { ChromeErrorBoundary } from "./ChromeErrorBoundary";
 import { HeaderSlotsProvider } from "./HeaderSlots";
 import { MobileNavDrawer } from "./shell/MobileNavDrawer";
+import { MobileNavProvider } from "./shell/mobile-nav-context";
 import { FreshAccountOnboardingPrompt } from "./shell/OnboardingPrompt";
 import { ShellHeader } from "./shell/ShellHeader";
 import { SidebarCollapseToggle, UnifiedSidebar } from "./shell/UnifiedSidebar";
@@ -35,6 +36,9 @@ export function AppShell({
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const session = useShellSession(authSession);
   const isGlobe = pathname.startsWith("/globe");
+  // Published to full-bleed routes (the Globe) that hide the ShellHeader but
+  // still need to open the nav drawer from their own header.
+  const mobileNav = useMemo(() => ({ open: () => setMobileNavOpen(true) }), []);
 
   useEffect(() => {
     try {
@@ -58,6 +62,7 @@ export function AppShell({
 
   return (
     <HeaderSlotsProvider>
+      <MobileNavProvider value={mobileNav}>
       <div className="flex h-screen flex-col overflow-hidden">
         {pathname !== "/bioblitz" && !isGlobe ? (
           <ChromeErrorBoundary name="bioblitz-banner">
@@ -99,6 +104,7 @@ export function AppShell({
           <FloatingTainaGuide />
         </ChromeErrorBoundary>
       </div>
+      </MobileNavProvider>
     </HeaderSlotsProvider>
   );
 }

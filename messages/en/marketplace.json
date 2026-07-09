@@ -1677,8 +1677,10 @@
     "subtitle": "Organizations and their project sites on a living 3D Earth.",
     "viewOnGlobe": "View on Globe",
     "tabs": {
-      "details": "Details",
-      "layers": "Layers"
+      "details": "Organizations",
+      "layers": "Layers",
+      "popup": "Open as a floating popup",
+      "dock": "Dock to the side"
     },
     "panel": {
       "searchPlaceholder": "Search organizations…",
@@ -1734,6 +1736,7 @@
         "wetland": "Wetland",
         "mangroves": "Mangroves"
       },
+      "visibleDetails": "On the map",
       "visibleNow": "{count, plural, one {# layer on the map} other {# layers on the map}}",
       "flyTo": "Zoom to {name}",
       "hide": "Hide {name}"

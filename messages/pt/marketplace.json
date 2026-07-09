@@ -1677,8 +1677,10 @@
     "subtitle": "Organizações e seus sites de projeto em uma Terra 3D viva.",
     "viewOnGlobe": "Ver no Globo",
     "tabs": {
-      "details": "Detalhes",
-      "layers": "Camadas"
+      "details": "Organizações",
+      "layers": "Camadas",
+      "popup": "Abrir como janela flutuante",
+      "dock": "Fixar na lateral"
     },
     "panel": {
       "searchPlaceholder": "Pesquisar organizações…",
@@ -1734,6 +1736,7 @@
         "wetland": "Zona úmida",
         "mangroves": "Manguezais"
       },
+      "visibleDetails": "No mapa",
       "visibleNow": "{count, plural, one {# camada no mapa} other {# camadas no mapa}}",
       "flyTo": "Aproximar de {name}",
       "hide": "Ocultar {name}"

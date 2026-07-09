@@ -1677,8 +1677,10 @@
     "subtitle": "Organisasi dan lokasi proyek mereka di Bumi 3D yang hidup.",
     "viewOnGlobe": "Lihat di Globe",
     "tabs": {
-      "details": "Detail",
-      "layers": "Lapisan"
+      "details": "Organisasi",
+      "layers": "Lapisan",
+      "popup": "Buka sebagai popup melayang",
+      "dock": "Sematkan ke sisi"
     },
     "panel": {
       "searchPlaceholder": "Cari organisasi…",
@@ -1734,6 +1736,7 @@
         "wetland": "Lahan basah",
         "mangroves": "Bakau"
       },
+      "visibleDetails": "Di peta",
       "visibleNow": "{count, plural, other {# lapisan di peta}}",
       "flyTo": "Perbesar ke {name}",
       "hide": "Sembunyikan {name}"
