@@ -971,6 +971,21 @@ function GlobeHeader({
   const t = useTranslations("marketplace.globe");
   const nav = useTranslations("common.navigation");
   const mobileNav = useMobileNav();
+  const [hoveredTab, setHoveredTab] = useState<OverlayTab | null>(null);
+  const [, startPreview] = useTransition();
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const cancelPreviewClose = useCallback(() => {
+    if (closeTimer.current) clearTimeout(closeTimer.current);
+    closeTimer.current = null;
+  }, []);
+  const schedulePreviewClose = useCallback(() => {
+    cancelPreviewClose();
+    closeTimer.current = setTimeout(() => setHoveredTab(null), 120);
+  }, [cancelPreviewClose]);
+  useEffect(() => cancelPreviewClose, [cancelPreviewClose]);
+
+  const previewTab = hoveredTab && !(railOpen && activeTab === hoveredTab) ? hoveredTab : null;
 
   return (
     <div className="pointer-events-none absolute inset-x-0 top-0 z-30 flex items-start justify-between gap-2 p-2.5">
@@ -1003,18 +1018,25 @@ function GlobeHeader({
         )}
       </div>
 
-      {/* Desktop panel switcher. No backdrop-blur on this ancestor: a blurred
-          ancestor would become the backdrop root and kill the hover-preview
-          card's own blur. Solid glass is fine for a slim desktop bar. */}
-      <div className="pointer-events-auto hidden items-center gap-1 rounded-full border border-white/10 bg-black/80 p-1 shadow-lg md:flex">
+      {/* Desktop panel switcher. Keep this glassy too; preview cards render as
+          their own outlined surfaces below it. */}
+      <div className="pointer-events-auto hidden items-center gap-1 rounded-full border border-white/10 bg-black/80 p-1 shadow-lg backdrop-blur-lg md:flex">
         {NAV_ITEMS.map((item) => (
           <HeaderNavItem
             key={item.id}
             label={t(item.labelKey)}
             icon={item.icon}
             active={railOpen && activeTab === item.id}
-            onSelect={() => onSelectNav(item.id)}
-            renderPanel={() => renderPanel(item.id, "floating")}
+            onSelect={() => {
+              cancelPreviewClose();
+              setHoveredTab(null);
+              onSelectNav(item.id);
+            }}
+            onPreviewStart={() => {
+              cancelPreviewClose();
+              startPreview(() => setHoveredTab(item.id));
+            }}
+            onPreviewEnd={schedulePreviewClose}
           />
         ))}
         {/* Close the pinned tab (desktop). */}
@@ -1030,64 +1052,54 @@ function GlobeHeader({
           </button>
         ) : null}
       </div>
+
+      <AnimatePresence>
+        {previewTab ? (
+          // Render outside the blurred tab group. Nested backdrop-filter is
+          // unreliable in Chrome, so the popup gets its own blur root here.
+          <motion.div
+            key={previewTab}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.14, ease: [0.25, 0.1, 0.25, 1] }}
+            onMouseEnter={cancelPreviewClose}
+            onMouseLeave={schedulePreviewClose}
+            className="pointer-events-auto absolute left-2.5 top-[3.75rem] z-40 hidden pt-2 md:block"
+          >
+            <div className={cn("flex h-[min(66vh,600px)] w-[360px] max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-2xl border border-white/10 bg-black/70 shadow-xl backdrop-blur-2xl")}>
+              {renderPanel(previewTab, "floating")}
+            </div>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
     </div>
   );
 }
 
-/** One header nav item: a pill that previews its panel in a floating card
- *  while hovered (only when it is not the pinned/active item) and pins it on
- *  click. The card and the pill share one hover region so moving between them
- *  keeps the preview open. */
+/** One desktop header nav item. Hover preview is rendered by GlobeHeader as
+ *  a sibling of the blurred tab group so the popup can have its own backdrop
+ *  blur instead of being trapped inside a blurred ancestor. */
 function HeaderNavItem({
   label,
   icon: Icon,
   active,
   onSelect,
-  renderPanel,
+  onPreviewStart,
+  onPreviewEnd,
 }: {
   label: string;
   icon: LucideIcon;
   active: boolean;
   onSelect: () => void;
-  renderPanel: () => React.ReactNode;
+  onPreviewStart: () => void;
+  onPreviewEnd: () => void;
 }) {
-  const [hovered, setHovered] = useState(false);
-  // Mounting the preview renders the (heavy) panel — e.g. the 800+ org roster.
-  // Doing it as a transition lets the pill's own hover state paint immediately
-  // instead of the whole frame stalling behind the panel render.
-  const [, startPreview] = useTransition();
-  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  const cancelClose = useCallback(() => {
-    if (closeTimer.current) clearTimeout(closeTimer.current);
-    closeTimer.current = null;
-  }, []);
-  const scheduleClose = useCallback(() => {
-    cancelClose();
-    closeTimer.current = setTimeout(() => setHovered(false), 120);
-  }, [cancelClose]);
-  useEffect(() => cancelClose, [cancelClose]);
-
-  // The preview never competes with the pinned overlay: only shows when this
-  // item is not the active one.
-  const showPreview = hovered && !active;
-
   return (
-    <div
-      className="relative"
-      onMouseEnter={() => {
-        cancelClose();
-        startPreview(() => setHovered(true));
-      }}
-      onMouseLeave={scheduleClose}
-    >
+    <div className="relative" onMouseEnter={onPreviewStart} onMouseLeave={onPreviewEnd}>
       <button
         type="button"
-        onClick={() => {
-          cancelClose();
-          setHovered(false);
-          onSelect();
-        }}
+        onClick={onSelect}
         aria-pressed={active}
         className={cn(
           "inline-flex h-9 items-center gap-1.5 rounded-full px-3 text-xs font-semibold transition-colors",
@@ -1097,24 +1109,6 @@ function HeaderNavItem({
         <Icon className={cn("size-3.5", active && "text-primary")} />
         {label}
       </button>
-      <AnimatePresence>
-        {showPreview ? (
-          // Fade only — a `transform` on this ancestor (e.g. a slide) would
-          // disable the card's backdrop-filter in Chrome, killing the blur.
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.14, ease: [0.25, 0.1, 0.25, 1] }}
-            // top-full + padding keeps a continuous hover bridge to the pill.
-            className="absolute left-0 top-full z-40 pt-2"
-          >
-            <div className={cn("flex h-[min(66vh,600px)] w-[360px] max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-2xl shadow-xl", OUTLINE_SURFACE)}>
-              {renderPanel()}
-            </div>
-          </motion.div>
-        ) : null}
-      </AnimatePresence>
     </div>
   );
 }
