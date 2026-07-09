@@ -981,7 +981,35 @@
     "datasetDeleteAria": "Delete the {name} dataset",
     "datasetDeleteTitle": "Delete the “{name}” dataset?",
     "datasetDeleteDescription": "This only removes the grouping. {count, plural, one {Your # observation stays in place.} other {Your # observations stay in place.}}",
-    "datasetDeleteConfirm": "Delete dataset"
+    "datasetDeleteConfirm": "Delete dataset",
+    "inaturalist": {
+      "title": "Sync from iNaturalist",
+      "description": "Paste an iNaturalist project link to add its observations to {project}.",
+      "placeholder": "https://www.inaturalist.org/projects/...",
+      "urlLabel": "iNaturalist project URL",
+      "urlRequired": "Enter an iNaturalist project page link.",
+      "preview": "Preview",
+      "refresh": "Refresh",
+      "loading": "Loading…",
+      "loadFailed": "Could not load that iNaturalist project.",
+      "syncPending": "Sync {count, plural, one {# missing} other {# missing}}",
+      "syncing": "Syncing…",
+      "syncFailed": "Could not sync this observation.",
+      "photoFailed": "A photo could not be copied.",
+      "syncedPhotoWarning": "Observation added. One or more photos could not be copied.",
+      "summary": "{synced} synced · {pending} missing · {errors} failed",
+      "found": "{count, plural, one {# observation} other {# observations}} found in {project}",
+      "truncated": "This project is very large, so only the first observations were loaded.",
+      "unnamedObservation": "Observation",
+      "status": {
+        "pending": "Missing",
+        "syncing": "Syncing",
+        "synced": "Synced",
+        "syncedElsewhere": "In another project",
+        "error": "Failed"
+      },
+      "photoCount": "{count, plural, one {# photo} other {# photos}}"
+    }
   },
   "settings": {
     "organizationTitle": "Organization settings",

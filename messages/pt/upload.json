@@ -981,7 +981,35 @@
     "datasetDeleteAria": "Excluir o conjunto {name}",
     "datasetDeleteTitle": "Excluir o conjunto “{name}”?",
     "datasetDeleteDescription": "Isto remove apenas o agrupamento. {count, plural, one {Sua # observação é mantida.} other {Suas # observações são mantidas.}}",
-    "datasetDeleteConfirm": "Excluir conjunto"
+    "datasetDeleteConfirm": "Excluir conjunto",
+    "inaturalist": {
+      "title": "Sincronizar do iNaturalist",
+      "description": "Cole um link de projeto do iNaturalist para adicionar as observações a {project}.",
+      "placeholder": "https://www.inaturalist.org/projects/...",
+      "urlLabel": "URL do projeto do iNaturalist",
+      "urlRequired": "Insira um link de página de projeto do iNaturalist.",
+      "preview": "Pré-visualizar",
+      "refresh": "Atualizar",
+      "loading": "Carregando…",
+      "loadFailed": "Não foi possível carregar esse projeto do iNaturalist.",
+      "syncPending": "Sincronizar {count, plural, one {# ausente} other {# ausentes}}",
+      "syncing": "Sincronizando…",
+      "syncFailed": "Não foi possível sincronizar esta observação.",
+      "photoFailed": "Não foi possível copiar uma foto.",
+      "syncedPhotoWarning": "Observação adicionada. Uma ou mais fotos não puderam ser copiadas.",
+      "summary": "{synced} sincronizadas · {pending} ausentes · {errors} falharam",
+      "found": "{count, plural, one {# observação} other {# observações}} encontradas em {project}",
+      "truncated": "Este projeto é muito grande, então apenas as primeiras observações foram carregadas.",
+      "unnamedObservation": "Observação",
+      "status": {
+        "pending": "Ausente",
+        "syncing": "Sincronizando",
+        "synced": "Sincronizada",
+        "syncedElsewhere": "Em outro projeto",
+        "error": "Falhou"
+      },
+      "photoCount": "{count, plural, one {# foto} other {# fotos}}"
+    }
   },
   "settings": {
     "organizationTitle": "Configurações da organização",

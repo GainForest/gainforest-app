@@ -981,7 +981,35 @@
     "datasetDeleteAria": "Futa seti ya {name}",
     "datasetDeleteTitle": "Futa seti ya “{name}”?",
     "datasetDeleteDescription": "Hii inaondoa upangaji pekee. {count, plural, one {Uchunguzi wako # unabaki.} other {Uchunguzi wako # unabaki.}}",
-    "datasetDeleteConfirm": "Futa seti"
+    "datasetDeleteConfirm": "Futa seti",
+    "inaturalist": {
+      "title": "Sawazisha kutoka iNaturalist",
+      "description": "Bandika kiungo cha mradi wa iNaturalist ili kuongeza uchunguzi wake kwenye {project}.",
+      "placeholder": "https://www.inaturalist.org/projects/...",
+      "urlLabel": "URL ya mradi wa iNaturalist",
+      "urlRequired": "Weka kiungo cha ukurasa wa mradi wa iNaturalist.",
+      "preview": "Hakiki",
+      "refresh": "Onyesha upya",
+      "loading": "Inapakia…",
+      "loadFailed": "Haikuweza kupakia mradi huo wa iNaturalist.",
+      "syncPending": "Sawazisha {count, plural, one {# ambao haupo} other {# ambazo hazipo}}",
+      "syncing": "Inasawazisha…",
+      "syncFailed": "Haikuweza kusawazisha uchunguzi huu.",
+      "photoFailed": "Picha haikuweza kunakiliwa.",
+      "syncedPhotoWarning": "Uchunguzi umeongezwa. Picha moja au zaidi hazikuweza kunakiliwa.",
+      "summary": "{synced} zimesawazishwa · {pending} hazipo · {errors} zimeshindwa",
+      "found": "{count, plural, one {Uchunguzi #} other {Uchunguzi #}} umepatikana kwenye {project}",
+      "truncated": "Mradi huu ni mkubwa sana, hivyo uchunguzi wa mwanzo pekee ulipakiwa.",
+      "unnamedObservation": "Uchunguzi",
+      "status": {
+        "pending": "Haupo",
+        "syncing": "Inasawazisha",
+        "synced": "Umesawazishwa",
+        "syncedElsewhere": "Kwenye mradi mwingine",
+        "error": "Imeshindwa"
+      },
+      "photoCount": "{count, plural, one {Picha #} other {Picha #}}"
+    }
   },
   "settings": {
     "organizationTitle": "Mipangilio ya shirika",

@@ -41,7 +41,7 @@ import { manageApiHref, type ManageTarget } from "@/lib/links";
 import { cn } from "@/lib/utils";
 import { ManageConfirmModal } from "../../_components/ManageConfirmModal";
 import { canCreateRecord, canDeleteRecord } from "../../_lib/cgs-permissions";
-import { deleteOccurrenceCascade } from "../../_lib/mutations";
+import { createMultimediaFromUrl, createRecord, deleteOccurrenceCascade, getRecord, putRecord } from "../../_lib/mutations";
 import {
   configureObservationMutationRepo,
   createObservationOccurrence,
@@ -63,9 +63,17 @@ import {
 } from "./default-location";
 import { clearDraft, loadDraft, saveDraft } from "./observation-draft-store";
 import { cleanFileName, compressImageIfNeeded, dateFromFile, imageMetadata } from "./observation-image";
+import {
+  INATURALIST_OBSERVATION_SOURCE,
+  inaturalistOccurrenceIdKey,
+  type INaturalistObservationSummary,
+  type INaturalistProjectSummary,
+  type INaturalistSyncStatus,
+} from "@/app/_lib/inaturalist-shared";
 
 type InitialPage = NonNullable<ComponentProps<typeof RecordExplorer>["initialPage"]>;
 type ObservationProjectGroup = { projectUri: string; title: string; count: number; uris: string[] };
+type ObservationProjectContext = { projectUri: string; title: string };
 
 type Mode = "list" | "add";
 type ItemStatus = "analyzing" | "ready" | "error" | "uploading" | "uploaded" | "uploadError";
@@ -143,6 +151,9 @@ const UNIDENTIFIED_NAME = "Unidentified organism";
 // layer so a flaky client network connection also recovers on its own.
 const ANALYZE_CLIENT_ATTEMPTS = 3;
 const sleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
+const OCCURRENCE_COLLECTION = "app.gainforest.dwc.occurrence";
+const IMAGE_DEF_TYPE = "app.gainforest.common.defs#image";
+
 const EMPTY_ANALYSIS: ObservationAnalysis = {
   scientificName: "",
   vernacularName: "",
@@ -269,6 +280,69 @@ function refToCid(ref: unknown): string | null {
     return typeof link === "string" ? link : null;
   }
   return null;
+}
+
+function omitEmptyRecord<T extends Record<string, unknown>>(record: T): T {
+  for (const key of Object.keys(record)) {
+    const value = record[key];
+    if (value === undefined || value === null || value === "") delete record[key];
+  }
+  return record;
+}
+
+type INaturalistBlobRef = { $type: "blob"; ref: unknown; mimeType: string; size: number };
+
+function blobRefFromMultimediaRecord(record: Record<string, unknown> | undefined): INaturalistBlobRef | null {
+  const file = record?.file;
+  if (!file || typeof file !== "object") return null;
+  const candidate = file as Record<string, unknown>;
+  if (candidate.ref === undefined || candidate.ref === null) return null;
+  return {
+    $type: "blob",
+    ref: candidate.ref,
+    mimeType: typeof candidate.mimeType === "string" ? candidate.mimeType : "application/octet-stream",
+    size: typeof candidate.size === "number" ? candidate.size : 0,
+  };
+}
+
+function buildINaturalistOccurrenceRecord(input: {
+  observation: INaturalistObservationSummary;
+  project: INaturalistProjectSummary;
+  projectRef: string;
+}): Record<string, unknown> {
+  const { observation, project } = input;
+  const sourceUrl = observation.url || `https://www.inaturalist.org/observations/${observation.id}`;
+  const remarks = [observation.description, `Synced from iNaturalist: ${sourceUrl}`]
+    .filter((value): value is string => typeof value === "string" && value.trim().length > 0)
+    .join("\n\n");
+
+  return omitEmptyRecord({
+    $type: OCCURRENCE_COLLECTION,
+    scientificName: observation.scientificName ?? observation.commonName ?? "Unidentified organism",
+    vernacularName: observation.commonName ?? undefined,
+    kingdom: observation.kingdom ?? undefined,
+    basisOfRecord: "HumanObservation",
+    occurrenceID: inaturalistOccurrenceIdKey(observation.id),
+    occurrenceStatus: "present",
+    geodeticDatum: "EPSG:4326",
+    eventDate: observation.observedOn ?? new Date().toISOString(),
+    recordedBy: observation.recordedBy ?? undefined,
+    decimalLatitude: observation.latitude === null ? undefined : String(observation.latitude),
+    decimalLongitude: observation.longitude === null ? undefined : String(observation.longitude),
+    locality: observation.placeGuess ?? undefined,
+    occurrenceRemarks: remarks || undefined,
+    projectRef: input.projectRef,
+    dynamicProperties: JSON.stringify({
+      source: INATURALIST_OBSERVATION_SOURCE,
+      inaturalistProjectId: project.id,
+      inaturalistProjectSlug: project.slug,
+      inaturalistObservationId: observation.id,
+      inaturalistUrl: sourceUrl,
+      qualityGrade: observation.qualityGrade,
+      syncedAt: new Date().toISOString(),
+    }),
+    createdAt: new Date().toISOString(),
+  });
 }
 
 /**
@@ -431,6 +505,7 @@ export function ObservationsClient({
   const createPermission = canCreateRecord(target);
   const [projectFilter, setProjectFilter] = useQueryState("project", parseAsString.withOptions(QUERY_STATE_OPTIONS));
   const [projectGroups, setProjectGroups] = useState<ObservationProjectGroup[]>([]);
+  const [projectContexts, setProjectContexts] = useState<ObservationProjectContext[]>([]);
   const [datasetGroups, setDatasetGroups] = useState<ObservationDatasetGroup[]>([]);
   // False until the first dataset fetch settles, so the folder strip can show a
   // loading skeleton instead of briefly flashing the "no datasets yet" hint.
@@ -464,6 +539,34 @@ export function ObservationsClient({
     };
   }, [target]);
 
+  // The project filter can point at a project that has zero observations yet
+  // (for example when arriving from a project card). Load project titles too so
+  // project-scoped tools still know which project is active.
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const response = await fetch(manageApiHref("/api/manage/projects", target), { cache: "no-store" });
+        const data = (await response.json()) as Array<Record<string, unknown>> | { error?: string };
+        if (cancelled || !response.ok || !Array.isArray(data)) return;
+        setProjectContexts(
+          data
+            .map((raw) => {
+              const projectUri = typeof raw.atUri === "string" ? raw.atUri : null;
+              const title = typeof raw.title === "string" && raw.title.trim() ? raw.title : null;
+              return projectUri && title ? { projectUri, title } : null;
+            })
+            .filter((project): project is ObservationProjectContext => Boolean(project)),
+        );
+      } catch {
+        // Project context is an enhancement; ignore load failures.
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [target]);
+
   // Group observations by the dataset they were filed into so the steward can
   // see datasets as folders and filter the list down to one. Re-fetched after a
   // grouping action so folder counts stay fresh.
@@ -485,14 +588,18 @@ export function ObservationsClient({
   }, [loadDatasetGroups]);
 
   const activeGroup = projectGroups.find((group) => group.projectUri === projectFilter) ?? null;
+  const activeProject = activeGroup
+    ? { projectUri: activeGroup.projectUri, title: activeGroup.title }
+    : projectContexts.find((project) => project.projectUri === projectFilter) ?? null;
   const activeDataset = datasetGroups.find((group) => group.datasetUri === datasetFilter) ?? null;
   // A dataset filter takes precedence over a project filter; the folder row and
   // the project pills clear each other on click so only one is ever active.
   const filterUris = useMemo(() => {
     if (activeDataset) return new Set(activeDataset.uris);
     if (activeGroup) return new Set(activeGroup.uris);
+    if (projectFilter && activeProject) return new Set<string>();
     return null;
-  }, [activeDataset, activeGroup]);
+  }, [activeDataset, activeGroup, activeProject, projectFilter]);
 
   const handleVisibleRecordsChange = useCallback((records: OccurrenceRecord[]) => {
     setVisibleRecords(records);
@@ -575,7 +682,7 @@ export function ObservationsClient({
         content: (
           <AddObservationsModal
             target={target}
-            projectRef={activeGroup?.projectUri ?? null}
+            projectRef={activeProject?.projectUri ?? null}
             onClose={close}
             onViewObservations={() => {
               close();
@@ -587,7 +694,7 @@ export function ObservationsClient({
       true,
     );
     void modal.show();
-  }, [activeGroup?.projectUri, createPermission.reason, modal, router, target]);
+  }, [activeProject?.projectUri, createPermission.reason, modal, router, target]);
 
   // Group the currently-selected observations into a dataset (new or existing),
   // then refresh folder counts and the listing.
@@ -604,8 +711,8 @@ export function ObservationsClient({
             target={target}
             observations={records}
             datasets={datasetGroups}
-            projectUri={activeGroup?.projectUri ?? null}
-            projectName={activeGroup?.title ?? null}
+            projectUri={activeProject?.projectUri ?? null}
+            projectName={activeProject?.title ?? null}
             onDone={({ datasetUri, datasetName, result }) => {
               const movedIds = new Set(result.attached.map((rkey) => `${target.did}-${rkey}`));
               setSelectedRecords(new Map());
@@ -625,7 +732,7 @@ export function ObservationsClient({
       true,
     );
     void modal.show();
-  }, [activeGroup, createPermission.reason, datasetGroups, loadDatasetGroups, modal, router, selectedRecords, target]);
+  }, [activeProject, createPermission.reason, datasetGroups, loadDatasetGroups, modal, router, selectedRecords, target]);
 
   // Delete a dataset WITHOUT deleting its observations — the records are
   // ungrouped (datasetRef cleared) and survive.
@@ -783,6 +890,17 @@ export function ObservationsClient({
         </div>
       ) : null}
 
+      {activeProject ? (
+        <div className="mx-auto mt-5 max-w-6xl px-6">
+          <INaturalistProjectSyncPanel
+            target={target}
+            project={activeProject}
+            disabledReason={createPermission.reason}
+            onSynced={() => router.refresh()}
+          />
+        </div>
+      ) : null}
+
       {!isEmpty ? (
         <div className="mx-auto mt-8 max-w-6xl px-6">
           <h2 className="text-sm font-medium text-foreground">{t("allObservationsHeading")}</h2>
@@ -853,6 +971,270 @@ export function ObservationsClient({
         />
       </Suspense>
     </div>
+  );
+}
+
+type INaturalistPreviewResponse = {
+  project?: INaturalistProjectSummary;
+  observations?: INaturalistObservationSummary[];
+  truncated?: boolean;
+  error?: string;
+};
+
+type LocalSyncState = {
+  status: INaturalistSyncStatus;
+  message?: string | null;
+};
+
+function INaturalistProjectSyncPanel({
+  target,
+  project,
+  disabledReason,
+  onSynced,
+}: {
+  target: ManageTarget;
+  project: ObservationProjectContext;
+  disabledReason?: string | null;
+  onSynced: () => void;
+}) {
+  const t = useTranslations("upload.observations.inaturalist");
+  const [inputUrl, setInputUrl] = useState("");
+  const [sourceProject, setSourceProject] = useState<INaturalistProjectSummary | null>(null);
+  const [observations, setObservations] = useState<INaturalistObservationSummary[]>([]);
+  const [localStatuses, setLocalStatuses] = useState<Map<number, LocalSyncState>>(() => new Map());
+  const [loading, setLoading] = useState(false);
+  const [syncing, setSyncing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [truncated, setTruncated] = useState(false);
+  const repoOptions = target.kind === "group" ? { repo: target.did } : undefined;
+
+  const mergedObservations = useMemo(
+    () => observations.map((observation) => ({ ...observation, ...(localStatuses.get(observation.id) ?? {}) })),
+    [observations, localStatuses],
+  );
+  const pendingCount = mergedObservations.filter((observation) => (observation.status ?? observation.syncStatus) === "pending").length;
+  const syncableCount = mergedObservations.filter((observation) => {
+    const status = observation.status ?? observation.syncStatus;
+    return status === "pending" || status === "syncedElsewhere";
+  }).length;
+  const syncedCount = mergedObservations.filter((observation) => (observation.status ?? observation.syncStatus) === "synced").length;
+  const errorCount = mergedObservations.filter((observation) => (observation.status ?? observation.syncStatus) === "error").length;
+
+  const setObservationStatus = useCallback((id: number, status: INaturalistSyncStatus, message?: string | null) => {
+    setLocalStatuses((current) => {
+      const next = new Map(current);
+      next.set(id, { status, message });
+      return next;
+    });
+  }, []);
+
+  const preview = useCallback(async () => {
+    const trimmed = inputUrl.trim();
+    if (!trimmed) {
+      setError(t("urlRequired"));
+      return;
+    }
+    setLoading(true);
+    setError(null);
+    setLocalStatuses(new Map());
+    try {
+      const response = await fetch(manageApiHref("/api/manage/observations/inaturalist", target, {
+        url: trimmed,
+        projectRef: project.projectUri,
+      }), { cache: "no-store" });
+      const data = (await response.json().catch(() => null)) as INaturalistPreviewResponse | null;
+      if (!response.ok || !data?.project || !Array.isArray(data.observations)) {
+        throw new Error(data?.error || t("loadFailed"));
+      }
+      setSourceProject(data.project);
+      setObservations(data.observations);
+      setTruncated(Boolean(data.truncated));
+    } catch (caught) {
+      setSourceProject(null);
+      setObservations([]);
+      setTruncated(false);
+      setError(caught instanceof Error ? caught.message : t("loadFailed"));
+    } finally {
+      setLoading(false);
+    }
+  }, [inputUrl, project.projectUri, t, target]);
+
+  async function syncObservation(observation: INaturalistObservationSummary, inatProject: INaturalistProjectSummary) {
+    setObservationStatus(observation.id, "syncing");
+
+    if (observation.syncStatus === "syncedElsewhere" && observation.existingUri) {
+      const rkey = observation.existingUri.split("/").pop() ?? "";
+      if (!rkey) throw new Error(t("syncFailed"));
+      const existing = await getRecord(OCCURRENCE_COLLECTION, rkey, repoOptions);
+      await putRecord(OCCURRENCE_COLLECTION, rkey, {
+        ...existing.record,
+        projectRef: project.projectUri,
+      }, {
+        ...repoOptions,
+        swapRecord: existing.cid,
+      });
+      setObservationStatus(observation.id, "synced");
+      return;
+    }
+
+    const occurrenceRecord = buildINaturalistOccurrenceRecord({ observation, project: inatProject, projectRef: project.projectUri });
+    const occurrence = await createRecord(OCCURRENCE_COLLECTION, occurrenceRecord, undefined, repoOptions);
+    const rkey = occurrence.uri.split("/").pop() ?? "";
+    let primaryBlobRef: INaturalistBlobRef | null = null;
+    let photoError: string | null = null;
+
+    for (const photo of observation.photos) {
+      try {
+        const photoResult = await createMultimediaFromUrl(
+          {
+            url: photo.url,
+            occurrenceRef: occurrence.uri,
+            subjectPart: "wholeOrganism",
+            caption: photo.attribution ?? observation.commonName ?? observation.scientificName ?? undefined,
+          },
+          repoOptions,
+        );
+        primaryBlobRef ??= blobRefFromMultimediaRecord(photoResult.record);
+      } catch (caught) {
+        photoError = caught instanceof Error ? caught.message : t("photoFailed");
+      }
+    }
+
+    if (primaryBlobRef && rkey) {
+      await putRecord(OCCURRENCE_COLLECTION, rkey, {
+        ...occurrenceRecord,
+        imageEvidence: { $type: IMAGE_DEF_TYPE, file: primaryBlobRef },
+      }, {
+        ...repoOptions,
+        swapRecord: occurrence.cid,
+      });
+    }
+
+    setObservationStatus(observation.id, "synced", photoError ? t("syncedPhotoWarning") : null);
+  }
+
+  const syncPending = async () => {
+    if (!sourceProject || syncing || disabledReason) return;
+    setSyncing(true);
+    setError(null);
+    try {
+      for (const observation of mergedObservations) {
+        const status = observation.status ?? observation.syncStatus;
+        if (status !== "pending" && status !== "syncedElsewhere") continue;
+        try {
+          await syncObservation(observation, sourceProject);
+        } catch (caught) {
+          setObservationStatus(observation.id, "error", caught instanceof Error ? caught.message : t("syncFailed"));
+        }
+      }
+      onSynced();
+    } finally {
+      setSyncing(false);
+    }
+  };
+
+  return (
+    <section className="rounded-3xl border border-border bg-card/70 p-4 shadow-sm sm:p-5">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0">
+          <h2 className="font-instrument text-xl italic leading-tight text-foreground">{t("title")}</h2>
+          <p className="mt-1 text-sm leading-6 text-muted-foreground">{t("description", { project: project.title })}</p>
+        </div>
+        {sourceProject ? (
+          <div className="shrink-0 rounded-2xl bg-muted px-3 py-2 text-xs text-muted-foreground">
+            {t("summary", { synced: syncedCount, pending: pendingCount, errors: errorCount })}
+          </div>
+        ) : null}
+      </div>
+
+      <div className="mt-4 flex flex-col gap-2 sm:flex-row">
+        <Input
+          value={inputUrl}
+          onChange={(event) => setInputUrl(event.target.value)}
+          placeholder={t("placeholder")}
+          aria-label={t("urlLabel")}
+          disabled={loading || syncing}
+          className="min-w-0 flex-1"
+        />
+        <Button type="button" variant="outline" onClick={() => void preview()} disabled={loading || syncing}>
+          {loading ? <Loader2Icon className="size-4 animate-spin" /> : <RotateCcwIcon className="size-4" />}
+          {loading ? t("loading") : sourceProject ? t("refresh") : t("preview")}
+        </Button>
+        <Button type="button" onClick={() => void syncPending()} disabled={!sourceProject || syncableCount === 0 || syncing || Boolean(disabledReason)} title={disabledReason ?? undefined}>
+          {syncing ? <Loader2Icon className="size-4 animate-spin" /> : <UploadCloudIcon className="size-4" />}
+          {syncing ? t("syncing") : t("syncPending", { count: syncableCount })}
+        </Button>
+      </div>
+
+      {error ? (
+        <p className="mt-3 flex items-center gap-1.5 rounded-xl bg-destructive/10 px-3 py-2 text-sm text-destructive">
+          <AlertTriangleIcon className="size-4" />
+          {error}
+        </p>
+      ) : null}
+      {disabledReason ? <p className="mt-3 text-xs text-muted-foreground">{disabledReason}</p> : null}
+      {truncated ? <p className="mt-3 text-xs text-muted-foreground">{t("truncated")}</p> : null}
+
+      {sourceProject ? (
+        <div className="mt-4 rounded-2xl border border-border/70 bg-background/60 p-3">
+          <div className="mb-3 text-sm font-medium text-foreground">
+            {t("found", { count: observations.length, project: sourceProject.title })}
+          </div>
+          <div className="grid max-h-[28rem] grid-cols-2 gap-3 overflow-y-auto pr-1 sm:grid-cols-3 lg:grid-cols-4">
+            {mergedObservations.map((observation) => {
+              const status = observation.status ?? observation.syncStatus;
+              const message = observation.message;
+              const imageUrl = observation.photos[0]?.url ?? null;
+              return (
+                <article key={observation.id} className="group overflow-hidden rounded-2xl border border-border/70 bg-card shadow-sm">
+                  <div className="relative aspect-square bg-muted">
+                    {imageUrl ? (
+                      // iNaturalist image hosts are external and varied; use a plain image
+                      // so the preview works without adding every host to next.config.
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={imageUrl} alt="" className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" loading="lazy" />
+                    ) : (
+                      <div className="grid h-full place-items-center text-muted-foreground">
+                        <BinocularsIcon className="size-8" />
+                      </div>
+                    )}
+                    <span className={cn(
+                      "absolute left-2 top-2 rounded-full px-2 py-1 text-[11px] font-semibold shadow-sm backdrop-blur",
+                      status === "synced" ? "bg-primary/90 text-primary-foreground" :
+                        status === "syncing" ? "bg-background/85 text-muted-foreground" :
+                        status === "error" ? "bg-destructive/90 text-destructive-foreground" :
+                        status === "syncedElsewhere" ? "bg-warn/90 text-foreground" :
+                        "bg-background/85 text-muted-foreground ring-1 ring-border/70",
+                    )}>
+                      {status === "syncing" ? t("status.syncing") :
+                        status === "synced" ? t("status.synced") :
+                        status === "syncedElsewhere" ? t("status.syncedElsewhere") :
+                        status === "error" ? t("status.error") :
+                        t("status.pending")}
+                    </span>
+                    {observation.photos.length > 1 ? (
+                      <span className="absolute bottom-2 right-2 rounded-full bg-background/85 px-2 py-1 text-[11px] font-medium text-foreground shadow-sm backdrop-blur">
+                        {t("photoCount", { count: observation.photos.length })}
+                      </span>
+                    ) : null}
+                  </div>
+                  <div className="space-y-1 p-3">
+                    <p className="line-clamp-2 min-h-10 text-sm font-medium leading-5 text-foreground">
+                      {observation.commonName ?? observation.scientificName ?? t("unnamedObservation")}
+                    </p>
+                    <p className="truncate text-xs italic text-muted-foreground">{observation.scientificName ?? t("unnamedObservation")}</p>
+                    <p className="truncate text-xs text-muted-foreground">
+                      {[observation.observedOn, observation.recordedBy].filter(Boolean).join(" · ")}
+                    </p>
+                    {message ? <p className="line-clamp-2 text-xs text-muted-foreground">{message}</p> : null}
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        </div>
+      ) : null}
+    </section>
   );
 }
 

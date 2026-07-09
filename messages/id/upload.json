@@ -981,7 +981,35 @@
     "datasetDeleteAria": "Hapus set data {name}",
     "datasetDeleteTitle": "Hapus set data “{name}”?",
     "datasetDeleteDescription": "Ini hanya menghapus pengelompokan. {count, plural, other {# observasi Anda tetap ada.}}",
-    "datasetDeleteConfirm": "Hapus set data"
+    "datasetDeleteConfirm": "Hapus set data",
+    "inaturalist": {
+      "title": "Sinkronkan dari iNaturalist",
+      "description": "Tempel tautan proyek iNaturalist untuk menambahkan observasinya ke {project}.",
+      "placeholder": "https://www.inaturalist.org/projects/...",
+      "urlLabel": "URL proyek iNaturalist",
+      "urlRequired": "Masukkan tautan halaman proyek iNaturalist.",
+      "preview": "Pratinjau",
+      "refresh": "Segarkan",
+      "loading": "Memuat…",
+      "loadFailed": "Tidak dapat memuat proyek iNaturalist itu.",
+      "syncPending": "Sinkronkan {count, plural, one {# yang belum ada} other {# yang belum ada}}",
+      "syncing": "Menyinkronkan…",
+      "syncFailed": "Tidak dapat menyinkronkan observasi ini.",
+      "photoFailed": "Foto tidak dapat disalin.",
+      "syncedPhotoWarning": "Observasi ditambahkan. Satu atau beberapa foto tidak dapat disalin.",
+      "summary": "{synced} tersinkron · {pending} belum ada · {errors} gagal",
+      "found": "{count, plural, one {# observasi} other {# observasi}} ditemukan di {project}",
+      "truncated": "Proyek ini sangat besar, jadi hanya observasi pertama yang dimuat.",
+      "unnamedObservation": "Observasi",
+      "status": {
+        "pending": "Belum ada",
+        "syncing": "Menyinkronkan",
+        "synced": "Tersinkron",
+        "syncedElsewhere": "Di proyek lain",
+        "error": "Gagal"
+      },
+      "photoCount": "{count, plural, one {# foto} other {# foto}}"
+    }
   },
   "settings": {
     "organizationTitle": "Pengaturan organisasi",
