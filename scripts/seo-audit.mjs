@@ -14,6 +14,7 @@ const indexablePageHreflangGaps = [];
 const publicLandingSitemapGaps = [];
 const feedSitemapGaps = [];
 const listStructuredDataGaps = [];
+const listSocialMetadataGaps = [];
 const warnings = [];
 
 function read(path) {
@@ -70,6 +71,10 @@ function addFeedSitemapGap(id, detail) {
 
 function addListStructuredDataGap(id, detail) {
   listStructuredDataGaps.push({ id, detail });
+}
+
+function addListSocialMetadataGap(id, detail) {
+  listSocialMetadataGaps.push({ id, detail });
 }
 
 const locales = ["en", "es", "pt", "sw", "id"];
@@ -246,6 +251,12 @@ for (const { id, file, source, path } of [
       `${file} should emit CollectionPage JSON-LD using its localized metadata and canonical ${path} URL so crawlers understand the public listing page type.`,
     );
   }
+  if (!source.includes("openGraph:") || !source.includes("twitter:") || !source.includes(`url: \"${path}\"`)) {
+    addListSocialMetadataGap(
+      `list-social-metadata-${id}`,
+      `${file} should set page-specific Open Graph and Twitter metadata with canonical ${path} URL so check-site-meta/social previews do not fall back to generic home metadata.`,
+    );
+  }
 }
 
 if (!sitemap.includes("fetchOrganizationEntries") || !sitemap.includes("/account/${encodeURIComponent(node.did)}")) {
@@ -387,6 +398,10 @@ console.log("List structured data gaps:");
 for (const gap of listStructuredDataGaps) {
   console.log(`- ${gap.id}: ${gap.detail}`);
 }
+console.log("List social metadata gaps:");
+for (const gap of listSocialMetadataGaps) {
+  console.log(`- ${gap.id}: ${gap.detail}`);
+}
 for (const warning of warnings) {
   console.log(`WARN ${warning.id}: ${warning.detail}`);
 }
@@ -401,4 +416,5 @@ console.log(`METRIC indexable_page_hreflang_gaps=${indexablePageHreflangGaps.len
 console.log(`METRIC public_landing_sitemap_gaps=${publicLandingSitemapGaps.length}`);
 console.log(`METRIC feed_sitemap_gaps=${feedSitemapGaps.length}`);
 console.log(`METRIC list_structured_data_gaps=${listStructuredDataGaps.length}`);
+console.log(`METRIC list_social_metadata_gaps=${listSocialMetadataGaps.length}`);
 console.log(`METRIC seo_warnings=${warnings.length}`);
