@@ -8,13 +8,72 @@ import { fetchHiddenAccountDids, fetchRecognitionBadgesForDid } from "@/app/_lib
 import { fetchEndorsementsGivenCount } from "@/app/_lib/endorsements-given";
 import { RECOGNITION_BADGE_KEYS, type RecognitionBadgeKey } from "@/app/_lib/recognition-badges";
 import { getGainForestModeratorAccess } from "@/app/internal/badges/_lib/access";
+import { localizedAlternates } from "@/app/_lib/seo-metadata";
+import { getRequestOrigin } from "@/app/_lib/request-origin";
 import { AccountChrome } from "../_components/AccountChrome";
 import { AccountHero } from "../_components/AccountHero";
 import { AccountTabBar } from "../_components/AccountTabBar";
 import { StewardTools } from "../_components/StewardTools";
 import { RecognitionBadgeChips } from "../_components/RecognitionBadgeChips";
 import { loadAccountMemberships } from "../_components/AccountTabContent";
-import { accountSettingsPath, getAccountRouteData, readAccountRouteParams, readOptionalAccountRouteParams } from "../_lib/account-route";
+import { accountSettingsPath, getAccountRouteData, readAccountRouteParams, readOptionalAccountRouteParams, type AccountRouteData } from "../_lib/account-route";
+
+function absoluteUrlOrNull(value: string | null | undefined): string | null {
+  if (!value) return null;
+  try {
+    const url = new URL(value);
+    return url.protocol === "http:" || url.protocol === "https:" ? url.toString() : null;
+  } catch {
+    return null;
+  }
+}
+
+function uniqueUrls(values: Array<string | null | undefined>): string[] {
+  return Array.from(new Set(values.map(absoluteUrlOrNull).filter((value): value is string => Boolean(value))));
+}
+
+function withoutEmptyValues<T extends Record<string, unknown>>(value: T): T {
+  return Object.fromEntries(Object.entries(value).filter(([, entry]) => entry !== null && entry !== undefined)) as T;
+}
+
+function buildAccountProfileJsonLd(origin: string, account: AccountRouteData): Record<string, unknown> {
+  const profileUrl = new URL(`/account/${encodeURIComponent(account.urlIdentifier)}`, origin).toString();
+  const sameAs = uniqueUrls([account.website, ...account.socialLinks]);
+  const image = absoluteUrlOrNull(account.avatarUrl);
+  const description = account.description || account.longDescription || undefined;
+  const mainEntity = withoutEmptyValues({
+    "@type": account.kind === "organization" ? "Organization" : "Person",
+    name: account.displayName,
+    description,
+    url: profileUrl,
+    image,
+    sameAs: sameAs.length ? sameAs : undefined,
+    foundingDate: account.kind === "organization" ? account.foundedDate : undefined,
+    address: account.kind === "organization" && account.country
+      ? { "@type": "PostalAddress", addressCountry: account.country }
+      : undefined,
+  });
+
+  return withoutEmptyValues({
+    "@context": "https://schema.org",
+    "@type": "ProfilePage",
+    name: account.displayName,
+    description,
+    url: profileUrl,
+    primaryImageOfPage: image,
+    mainEntity,
+  });
+}
+
+function AccountProfileJsonLd({ jsonLd }: { jsonLd: Record<string, unknown> }) {
+  return (
+    <script
+      id="account-profile-json-ld"
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+    />
+  );
+}
 
 export async function generateMetadata({ params }: { params: Promise<{ did: string }> }): Promise<Metadata> {
   const routeParams = await readOptionalAccountRouteParams(params);
@@ -27,10 +86,27 @@ export async function generateMetadata({ params }: { params: Promise<{ did: stri
   }
 
   const account = await getAccountRouteData(routeParams.did, routeParams.urlIdentifier);
+  const accountHref = `/account/${encodeURIComponent(account.urlIdentifier)}`;
+  const title = `${account.displayName} — Account`;
+  const description = account.description ?? `Public GainForest profile for ${account.displayName}.`;
+  const previewImage = account.avatarUrl ? [{ url: account.avatarUrl, alt: account.displayName }] : undefined;
+
   return {
-    title: `${account.displayName} — Account`,
-    description: account.description ?? `Public GainForest profile for ${account.displayName}.`,
-    alternates: { canonical: `/account/${encodeURIComponent(account.urlIdentifier)}` },
+    title,
+    description,
+    alternates: localizedAlternates(`/account/${encodeURIComponent(account.urlIdentifier)}`),
+    openGraph: {
+      title,
+      description,
+      url: accountHref,
+      images: previewImage,
+    },
+    twitter: {
+      card: previewImage ? "summary_large_image" : "summary",
+      title,
+      description,
+      images: previewImage,
+    },
   };
 }
 
@@ -42,8 +118,11 @@ export default async function AccountLayout({
   params: Promise<{ did: string }>;
 }) {
   const { did, urlIdentifier } = await readAccountRouteParams(params);
-  const account = await getAccountRouteData(did, urlIdentifier);
-  const session = await fetchAuthSession();
+  const [account, session, origin] = await Promise.all([
+    getAccountRouteData(did, urlIdentifier),
+    fetchAuthSession(),
+    getRequestOrigin(),
+  ]);
 
   // Owners (and org admins) edit their profile in place; everyone else — including
   // plain org members, who can still manage records through the tabs — sees the
@@ -90,8 +169,11 @@ export default async function AccountLayout({
   const isOwner = session.isLoggedIn && session.did === account.did;
   const showEquipment = account.kind === "organization" ? canManage : isOwner;
 
+  const profileJsonLd = buildAccountProfileJsonLd(origin, account);
+
   return (
     <main className="w-full">
+      <AccountProfileJsonLd jsonLd={profileJsonLd} />
       <AccountChrome
         hero={
           <>

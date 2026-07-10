@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { LogoMark } from "@/app/_components/Logo";
+import { localizedAlternates } from "@/app/_lib/seo-metadata";
 import { SchemaGraph } from "./_components/SchemaGraph";
 import { GROUPS } from "./_lib/registry";
 import { lexiconDescription, lexiconHref } from "./_lib/types";
@@ -13,7 +14,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: t("metaTitle"),
     description: t("metaDescription"),
-    alternates: { canonical: "/docs/lexicons" },
+    alternates: localizedAlternates("/docs/lexicons"),
   };
 }
 

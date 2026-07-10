@@ -62,14 +62,27 @@ type BadgeFilterOption = {
   logoSrc: string;
 };
 
-export function OrganizationsClient({ records: initialRecords = [] }: { records?: SiteRecord[] }) {
+type InitialOrganizationsPage = {
+  records: SiteRecord[];
+  cursor: string | null;
+  hasMore: boolean;
+};
+
+export function OrganizationsClient({
+  initialPage,
+  records: initialRecordsProp,
+}: {
+  initialPage?: InitialOrganizationsPage;
+  records?: SiteRecord[];
+}) {
   const t = useTranslations("marketplace.organizations");
   const exploreT = useTranslations("marketplace.explore");
   const locale = useLocale();
+  const initialRecords = useMemo(() => initialPage?.records ?? initialRecordsProp ?? [], [initialPage, initialRecordsProp]);
   const [records, setRecords] = useState<SiteRecord[]>(initialRecords);
-  const [cursor, setCursor] = useState<string | null>(null);
-  const [hasMore, setHasMore] = useState(initialRecords.length === 0);
-  const [loading, setLoading] = useState(initialRecords.length === 0);
+  const [cursor, setCursor] = useState<string | null>(initialPage?.cursor ?? null);
+  const [hasMore, setHasMore] = useState(initialPage?.hasMore ?? initialRecords.length === 0);
+  const [loading, setLoading] = useState(!initialPage && initialRecords.length === 0);
   const [loadingMore, setLoadingMore] = useState(false);
   const [totalCount, setTotalCount] = useState<number | null>(null);
   const [query, setQuery] = useQueryState(
@@ -120,9 +133,23 @@ export function OrganizationsClient({ records: initialRecords = [] }: { records?
     { key: "maearth", label: exploreT("filters.badges.maearth"), logoSrc: "/assets/media/images/badges/ma-earth-logo.webp" },
   ], [exploreT]);
   const sortOptions = useMemo(() => SORT_OPTION_VALUES.map((value) => ({ value, label: t(`sort.${value}`) })), [t]);
+  const shouldUseInitialRecords = initialRecords.length > 0
+    && !deferredQuery.trim()
+    && !countryFilter
+    && !typeFilter
+    && quickFilters.length === 0
+    && badgeFilters.length === 0
+    && sort === "newest";
 
   useEffect(() => {
-    if (initialRecords.length > 0) return;
+    if (shouldUseInitialRecords) {
+      setRecords(initialRecords);
+      setCursor(initialPage?.cursor ?? null);
+      setHasMore(initialPage?.hasMore ?? initialRecords.length === 0);
+      setLoading(false);
+      setLoadingMore(false);
+      return;
+    }
     const controller = new AbortController();
     const requestSeq = ++requestSeqRef.current;
     const isCurrent = () => requestSeqRef.current === requestSeq && !controller.signal.aborted;
@@ -146,7 +173,7 @@ export function OrganizationsClient({ records: initialRecords = [] }: { records?
         if (isCurrent()) setLoading(false);
       });
     return () => controller.abort();
-  }, [countryFilter, deferredQuery, initialRecords.length, quickFilters, sort, typeFilter, badgeFilters]);
+  }, [shouldUseInitialRecords, initialRecords, initialPage?.cursor, initialPage?.hasMore, countryFilter, deferredQuery, quickFilters, sort, typeFilter, badgeFilters]);
 
   useEffect(() => {
     const controller = new AbortController();

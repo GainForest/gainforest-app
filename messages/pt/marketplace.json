@@ -891,8 +891,8 @@
   },
   "projects": {
     "metadata": {
-      "title": "Explorar projetos — Trabalho de impacto regenerativo verificado",
-      "description": "Explore projetos: cada um é um trabalho focado com um objetivo claro, um prazo e os resultados esperados."
+      "title": "Projetos GainForest — impacto regenerativo verificado",
+      "description": "Explore projetos GainForest de comunidades e organizações, cada um com trabalho regenerativo verificado e evidências de impacto ambiental."
     },
     "hero": {
       "eyebrow": "Explorar projetos",
@@ -1552,6 +1552,10 @@
       "colSighting": "Observação",
       "colObserver": "Observador",
       "colDate": "Data"
+    },
+    "metadata": {
+      "title": "Avistamentos da natureza no GainForest",
+      "description": "Explore avistamentos da natureza no GainForest com fotos de campo, gravações de som, nomes de espécies e locais no mapa."
     }
   },
   "manageProjectCerts": {

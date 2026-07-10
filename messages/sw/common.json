@@ -1,7 +1,7 @@
 {
   "seo": {
     "title": "GainForest — Fadhili athari ya urejeshaji",
-    "description": "vyeti huwaunganisha wafadhili na walinzi wa mazingira wanaofanya kazi ya urejeshaji ardhini. Fadhili athari ya mazingira iliyothibitishwa moja kwa moja."
+    "description": "GainForest huwaunganisha wafadhili na walinzi wa mazingira wanaofanya kazi ya urejeshaji ardhini. Fadhili athari ya mazingira iliyothibitishwa moja kwa moja."
   },
   "language": {
     "label": "Lugha",
@@ -383,6 +383,10 @@
       "justNow": "sasa hivi",
       "minutesAgo": "dakika {count, plural, one {#} other {#}} zilizopita",
       "hoursAgo": "saa {count, plural, one {#} other {#}} zilizopita"
+    },
+    "metadata": {
+      "title": "Hali ya tovuti ya GainForest",
+      "description": "Hali ya moja kwa moja ya huduma zinazoendesha GainForest."
     }
   },
   "accountTabs": {
@@ -1706,6 +1710,12 @@
       "prevDay": "Siku iliyotangulia yenye rekodi",
       "nextDay": "Siku inayofuata yenye rekodi",
       "allHours": "Saa zote"
+    }
+  },
+  "devices": {
+    "metadata": {
+      "title": "Vifaa vya Tainá — GainForest",
+      "description": "Taarifa za uwandani kutoka kwa vifaa vya GainForest vinavyoendesha Tainá, ikiwemo kama kila kifaa kinafanya kazi na kiko tayari."
     }
   }
 }

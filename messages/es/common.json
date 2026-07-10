@@ -1,7 +1,7 @@
 {
   "seo": {
     "title": "GainForest — Financia impacto regenerativo",
-    "description": "certificados conecta financiadores con guardianes de la naturaleza que realizan trabajo regenerativo en el terreno. Financia impacto ambiental verificado directamente."
+    "description": "GainForest conecta a financiadores con guardianes de la naturaleza que realizan trabajo regenerativo en el terreno. Financia impacto ambiental verificado directamente."
   },
   "language": {
     "label": "Idioma",
@@ -383,6 +383,10 @@
       "justNow": "ahora mismo",
       "minutesAgo": "hace {count, plural, one {# minuto} other {# minutos}}",
       "hoursAgo": "hace {count, plural, one {# hora} other {# horas}}"
+    },
+    "metadata": {
+      "title": "Estado del sitio de GainForest",
+      "description": "Estado en vivo de los servicios detrás de GainForest."
     }
   },
   "accountTabs": {
@@ -1706,6 +1710,12 @@
       "prevDay": "Día anterior con grabaciones",
       "nextDay": "Día siguiente con grabaciones",
       "allHours": "Todas las horas"
+    }
+  },
+  "devices": {
+    "metadata": {
+      "title": "Dispositivos Tainá — GainForest",
+      "description": "Actualizaciones de campo de dispositivos GainForest que ejecutan Tainá, incluido si cada dispositivo está activo y listo."
     }
   }
 }

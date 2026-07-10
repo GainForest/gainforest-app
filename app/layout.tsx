@@ -16,6 +16,7 @@ import { RouteChangeIndicator } from "./_components/RouteChangeIndicator";
 import { ModalHost, ModalProvider } from "@/components/ui/modal/context";
 import { WagmiProvider } from "@/components/providers/WagmiProvider";
 import { resolveSupportedLanguage } from "@/lib/i18n/languages";
+import { getLocalizedPathnames } from "@/lib/i18n/routing";
 import { fetchAuthSession } from "./_lib/auth-server";
 import { getRequestOrigin } from "./_lib/request-origin";
 
@@ -53,12 +54,45 @@ const OG_IMAGE = "/og/gainforest-og-2.png";
 const OG_ALT =
   "GainForest — certified impact for nature stewards. Upload field observations and certify your environmental work, beside an aerial photo of humpback whales in turquoise water.";
 
+function buildHomeStructuredData(origin: string, description: string, language: string) {
+  const siteUrl = new URL("/", origin).toString();
+
+  return {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": `${siteUrl}#organization`,
+        name: SITE_NAME,
+        url: siteUrl,
+        logo: new URL("/icons/icon-512.png", origin).toString(),
+        sameAs: [
+          "https://gainforest.earth",
+          "https://bsky.app/profile/gainforest.earth",
+          "https://github.com/GainForest/gainforest-explorer",
+        ],
+      },
+      {
+        "@type": "WebSite",
+        "@id": `${siteUrl}#website`,
+        name: SITE_NAME,
+        url: siteUrl,
+        description,
+        publisher: { "@id": `${siteUrl}#organization` },
+        inLanguage: language,
+      },
+    ],
+  };
+}
+
 export async function generateMetadata(): Promise<Metadata> {
   const locale = resolveSupportedLanguage(await getLocale());
   const t = await getTranslations("common.seo");
   const title = t("title");
   const description = t("description");
   const origin = await getRequestOrigin();
+
+  const languages = { ...getLocalizedPathnames("/"), "x-default": "/" };
 
   return {
     metadataBase: new URL(origin),
@@ -80,7 +114,7 @@ export async function generateMetadata(): Promise<Metadata> {
       "donations",
     ],
     category: "sustainability",
-    alternates: { canonical: "/" },
+    alternates: { canonical: "/", languages },
     openGraph: {
       type: "website",
       locale,
@@ -130,11 +164,14 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   // The session is resolved server-side (in parallel with i18n setup) so the
   // shell renders with the real signed-in state on first paint — no
   // signed-out flash, no client-side session fetch waterfall.
-  const [locale, messages, authSession] = await Promise.all([
+  const [locale, messages, authSession, origin, seoT] = await Promise.all([
     getLocale(),
     getMessages(),
     fetchAuthSession(),
+    getRequestOrigin(),
+    getTranslations("common.seo"),
   ]);
+  const structuredData = buildHomeStructuredData(origin, seoT("description"), locale);
 
   return (
     <html lang={locale} suppressHydrationWarning>
@@ -142,6 +179,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         className={`${geistSans.variable} ${geistMono.variable} ${cormorant.variable} ${instrument.variable} antialiased`}
       >
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT }} />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+        />
         <NextIntlClientProvider locale={locale} messages={messages}>
           <ClientErrorListener />
           <DomTranslationFallback />

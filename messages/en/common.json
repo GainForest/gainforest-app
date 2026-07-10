@@ -1,7 +1,7 @@
 {
   "seo": {
     "title": "GainForest — Fund Regenerative Impact",
-    "description": "Certs connects funders with nature stewards doing on-ground regenerative work. Fund verified environmental impact directly."
+    "description": "GainForest connects funders with nature stewards doing on-ground regenerative work. Fund verified environmental impact directly."
   },
   "language": {
     "label": "Language",
@@ -383,6 +383,10 @@
       "justNow": "just now",
       "minutesAgo": "{count, plural, one {# minute ago} other {# minutes ago}}",
       "hoursAgo": "{count, plural, one {# hour ago} other {# hours ago}}"
+    },
+    "metadata": {
+      "title": "GainForest site health",
+      "description": "Live health of the services behind GainForest."
     }
   },
   "accountTabs": {
@@ -1706,6 +1710,12 @@
       "prevDay": "Previous day with recordings",
       "nextDay": "Next day with recordings",
       "allHours": "All hours"
+    }
+  },
+  "devices": {
+    "metadata": {
+      "title": "Tainá devices — GainForest",
+      "description": "Field updates from GainForest devices running Tainá, including whether each device is active and ready."
     }
   }
 }
