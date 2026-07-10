@@ -21,6 +21,7 @@ const accountProfileStructuredDataGaps = [];
 const observationsServerContentGaps = [];
 const projectsServerContentGaps = [];
 const organizationsServerContentGaps = [];
+const listItemStructuredDataGaps = [];
 const warnings = [];
 
 function read(path) {
@@ -105,6 +106,10 @@ function addProjectsServerContentGap(id, detail) {
 
 function addOrganizationsServerContentGap(id, detail) {
   organizationsServerContentGaps.push({ id, detail });
+}
+
+function addListItemStructuredDataGap(id, detail) {
+  listItemStructuredDataGaps.push({ id, detail });
 }
 
 const locales = ["en", "es", "pt", "sw", "id"];
@@ -320,6 +325,18 @@ if (!organizationsPage.includes("fetchSites") || !organizationsPage.includes("in
     "/organizations should fetch and pass an initial server-rendered page of public organization cards so crawlers and no-JS previews see real organization profile links, not only an empty client shell.",
   );
 }
+for (const { id, file, source } of [
+  { id: "projects", file: "app/projects/page.tsx", source: projectsPage },
+  { id: "observations", file: "app/observations/page.tsx", source: observationsPage },
+  { id: "organizations", file: "app/organizations/page.tsx", source: organizationsPage },
+]) {
+  if (!source.includes("ItemList") || !source.includes("itemListElement") || !source.includes(`${id}-item-list-json-ld`)) {
+    addListItemStructuredDataGap(
+      `list-item-structured-data-${id}`,
+      `${file} should emit ItemList JSON-LD for its server-rendered initial records so crawlers can connect the public listing page to the visible project/observation/organization cards.`,
+    );
+  }
+}
 
 for (const { path, file } of indexablePagesNeedingSocialMetadata) {
   const source = read(file);
@@ -505,6 +522,10 @@ console.log("Organizations server-rendered content gaps:");
 for (const gap of organizationsServerContentGaps) {
   console.log(`- ${gap.id}: ${gap.detail}`);
 }
+console.log("List ItemList structured data gaps:");
+for (const gap of listItemStructuredDataGaps) {
+  console.log(`- ${gap.id}: ${gap.detail}`);
+}
 for (const warning of warnings) {
   console.log(`WARN ${warning.id}: ${warning.detail}`);
 }
@@ -526,4 +547,5 @@ console.log(`METRIC account_profile_structured_data_gaps=${accountProfileStructu
 console.log(`METRIC observations_server_content_gaps=${observationsServerContentGaps.length}`);
 console.log(`METRIC projects_server_content_gaps=${projectsServerContentGaps.length}`);
 console.log(`METRIC organizations_server_content_gaps=${organizationsServerContentGaps.length}`);
+console.log(`METRIC list_item_structured_data_gaps=${listItemStructuredDataGaps.length}`);
 console.log(`METRIC seo_warnings=${warnings.length}`);
