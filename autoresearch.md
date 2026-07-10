@@ -5,7 +5,8 @@ Improve gainforest.app technical SEO and brand/entity signals so Google can bett
 
 ## Metrics
 Current phase:
-- **Primary**: `projects_server_content_gaps` (count, lower is better) — the public projects index missing an initial server-rendered page of project cards for crawler-visible content.
+- **Primary**: `organizations_server_content_gaps` (count, lower is better) — the public organizations index missing an initial server-rendered page of organization cards for crawler-visible content.
+- **Secondary**: `projects_server_content_gaps` — the public projects index missing an initial server-rendered page of project cards for crawler-visible content.
 - **Secondary**: `observations_server_content_gaps` — the public observations index missing an initial server-rendered page of sightings for crawler-visible content.
 - **Secondary**: `account_profile_structured_data_gaps` — public account/profile pages missing ProfilePage JSON-LD with Person/Organization mainEntity data.
 - **Secondary**: `project_breadcrumb_gaps` — dynamic project detail pages missing BreadcrumbList JSON-LD for search-result hierarchy.
@@ -27,6 +28,7 @@ Current phase:
 - **Secondary**: `check_site_meta_ready` — whether `npx check-site-meta` successfully boots against the configured target URL.
 
 Previous phases:
+- **Primary**: `projects_server_content_gaps` (count, lower is better) — the public projects index missing an initial server-rendered page of project cards for crawler-visible content.
 - **Primary**: `observations_server_content_gaps` (count, lower is better) — the public observations index missing an initial server-rendered page of sightings for crawler-visible content.
 - **Primary**: `account_profile_structured_data_gaps` (count, lower is better) — public account/profile pages missing ProfilePage JSON-LD with Person/Organization mainEntity data.
 - **Primary**: `project_breadcrumb_gaps` (count, lower is better) — dynamic project detail pages missing BreadcrumbList JSON-LD for search-result hierarchy.
@@ -108,3 +110,5 @@ The script outputs `METRIC name=value` lines. It also starts `npx check-site-met
 - Started a sixteenth phase for crawlable observations content: `/observations` has strong metadata and sitemap coverage, but should render an initial page of public sightings on the server instead of relying entirely on client-side fetching.
 - Reduced `observations_server_content_gaps` from 1 to 0 by fetching a default image-sighting page on the server and passing it to `RecordExplorer`.
 - Started a seventeenth phase for crawlable projects content: `/projects` is a high-value sitemap-backed index with metadata/social/structured data, and should also server-render the first page of project cards while preserving client filtering and load-more behavior.
+- Reduced `projects_server_content_gaps` from 1 to 0 by adding cursor-aware initial page support to `ProjectsExploreClient` and fetching a default first project page on the server.
+- Started an eighteenth phase for crawlable organizations content: `/organizations` is a public sitemap-backed index with metadata/social/structured data, and should server-render the first page of organization cards while preserving filter and load-more behavior.
