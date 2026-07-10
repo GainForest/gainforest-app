@@ -24,6 +24,7 @@ const organizationsServerContentGaps = [];
 const listItemStructuredDataGaps = [];
 const observationDetailMetadataGaps = [];
 const observationBreadcrumbGaps = [];
+const observationSitemapDiscoveryGaps = [];
 const warnings = [];
 
 function read(path) {
@@ -120,6 +121,10 @@ function addObservationDetailMetadataGap(id, detail) {
 
 function addObservationBreadcrumbGap(id, detail) {
   observationBreadcrumbGaps.push({ id, detail });
+}
+
+function addObservationSitemapDiscoveryGap(id, detail) {
+  observationSitemapDiscoveryGaps.push({ id, detail });
 }
 
 const locales = ["en", "es", "pt", "sw", "id"];
@@ -402,6 +407,18 @@ if (!sitemap.includes("appCertifiedActorOrganization")) {
     "Sitemap should query certified organization records to discover public organization profile URLs.",
   );
 }
+if (!sitemap.includes("fetchObservationEntries") || !sitemap.includes("/observations/${encodeURIComponent(node.did)}")) {
+  addObservationSitemapDiscoveryGap(
+    "observation-detail-sitemap",
+    "Sitemap should include high-quality public observation detail URLs now that observation pages have complete metadata, Observation JSON-LD, and breadcrumbs.",
+  );
+}
+if (!sitemap.includes("appGainforestDwcOccurrence")) {
+  addObservationSitemapDiscoveryGap(
+    "observation-detail-query",
+    "Sitemap should query recent public observation records to discover indexable nature-sighting detail pages.",
+  );
+}
 
 if (!accountLayout.includes("localizedAlternates(`/account/${encodeURIComponent(account.urlIdentifier)}`)")) {
   addAccountProfileMetadataGap(
@@ -575,6 +592,10 @@ console.log("Observation breadcrumb gaps:");
 for (const gap of observationBreadcrumbGaps) {
   console.log(`- ${gap.id}: ${gap.detail}`);
 }
+console.log("Observation sitemap discovery gaps:");
+for (const gap of observationSitemapDiscoveryGaps) {
+  console.log(`- ${gap.id}: ${gap.detail}`);
+}
 for (const warning of warnings) {
   console.log(`WARN ${warning.id}: ${warning.detail}`);
 }
@@ -599,4 +620,5 @@ console.log(`METRIC organizations_server_content_gaps=${organizationsServerConte
 console.log(`METRIC list_item_structured_data_gaps=${listItemStructuredDataGaps.length}`);
 console.log(`METRIC observation_detail_metadata_gaps=${observationDetailMetadataGaps.length}`);
 console.log(`METRIC observation_breadcrumb_gaps=${observationBreadcrumbGaps.length}`);
+console.log(`METRIC observation_sitemap_discovery_gaps=${observationSitemapDiscoveryGaps.length}`);
 console.log(`METRIC seo_warnings=${warnings.length}`);

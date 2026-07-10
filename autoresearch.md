@@ -5,7 +5,8 @@ Improve gainforest.app technical SEO and brand/entity signals so Google can bett
 
 ## Metrics
 Current phase:
-- **Primary**: `observation_breadcrumb_gaps` (count, lower is better) — dynamic observation detail pages missing BreadcrumbList JSON-LD for search-result hierarchy.
+- **Primary**: `observation_sitemap_discovery_gaps` (count, lower is better) — high-quality public observation detail pages missing sitemap discovery now that their metadata and structured data are complete.
+- **Secondary**: `observation_breadcrumb_gaps` — dynamic observation detail pages missing BreadcrumbList JSON-LD for search-result hierarchy.
 - **Secondary**: `observation_detail_metadata_gaps` — dynamic observation detail pages missing hreflang, social preview, or Observation JSON-LD metadata.
 - **Secondary**: `list_item_structured_data_gaps` — public list pages with server-rendered initial records missing ItemList JSON-LD for those visible records.
 - **Secondary**: `organizations_server_content_gaps` — the public organizations index missing an initial server-rendered page of organization cards for crawler-visible content.
@@ -31,6 +32,7 @@ Current phase:
 - **Secondary**: `check_site_meta_ready` — whether `npx check-site-meta` successfully boots against the configured target URL.
 
 Previous phases:
+- **Primary**: `observation_breadcrumb_gaps` (count, lower is better) — dynamic observation detail pages missing BreadcrumbList JSON-LD for search-result hierarchy.
 - **Primary**: `observation_detail_metadata_gaps` (count, lower is better) — dynamic observation detail pages missing hreflang, social preview, or Observation JSON-LD metadata.
 - **Primary**: `list_item_structured_data_gaps` (count, lower is better) — public list pages with server-rendered initial records missing ItemList JSON-LD for those visible records.
 - **Primary**: `organizations_server_content_gaps` (count, lower is better) — the public organizations index missing an initial server-rendered page of organization cards for crawler-visible content.
@@ -124,3 +126,5 @@ The script outputs `METRIC name=value` lines. It also starts `npx check-site-met
 - Started a twentieth phase for observation detail metadata: observation detail pages are now linked from server-rendered ItemLists and should carry localized alternates, canonical social previews, and structured data for the sighting.
 - Reduced `observation_detail_metadata_gaps` from 4 to 0 by adding localized alternates, canonical social metadata, Twitter card metadata, and Observation JSON-LD to dynamic observation detail pages.
 - Started a twenty-first phase for observation breadcrumbs: dynamic observation detail pages are now richer public landing pages and should emit `BreadcrumbList` JSON-LD for home → observations → sighting hierarchy.
+- Reduced `observation_breadcrumb_gaps` from 1 to 0 by adding BreadcrumbList JSON-LD to dynamic observation detail pages.
+- Started a twenty-second phase for observation sitemap discovery: high-quality public observation detail pages are now complete landing pages, so recent image-backed sightings should be discoverable in sitemap.xml without trying to list every private or low-value app surface.
