@@ -5,13 +5,15 @@ Improve gainforest.app technical SEO and brand/entity signals so Google can bett
 
 ## Metrics
 Current phase:
-- **Primary**: `public_hreflang_gaps` (count, lower is better) — public pages whose page-level metadata overrides root metadata without preserving localized `hreflang` alternates.
+- **Primary**: `dynamic_detail_metadata_gaps` (count, lower is better) — missing hreflang/social metadata on dynamic project detail pages that are included in the sitemap.
+- **Secondary**: `public_hreflang_gaps` — public pages whose page-level metadata overrides root metadata without preserving localized `hreflang` alternates.
 - **Secondary**: `public_metadata_gaps` — missing/hardcoded localized metadata on important public index pages.
 - **Secondary**: `seo_findings` — core technical SEO findings from `scripts/seo-audit.mjs`.
 - **Secondary**: `seo_warnings` — non-blocking follow-up prompts from the audit.
 - **Secondary**: `check_site_meta_ready` — whether `npx check-site-meta` successfully boots against the configured target URL.
 
 Previous phases:
+- **Primary**: `public_hreflang_gaps` (count, lower is better) — public pages whose page-level metadata overrides root metadata without preserving localized `hreflang` alternates.
 - **Primary**: `public_metadata_gaps` (count, lower is better) — missing/hardcoded localized metadata on important public index pages.
 - **Primary**: `seo_findings` (count, lower is better) — deterministic findings from `scripts/seo-audit.mjs`.
 
@@ -48,3 +50,5 @@ The script outputs `METRIC name=value` lines. It also starts `npx check-site-met
 - Started a second phase for localized public-page metadata: Projects and Observations should use translated Metadata API values and brand-forward descriptions across all configured languages.
 - Reduced `public_metadata_gaps` from 12 to 0 by localizing Projects and Observations Metadata API values.
 - Started a third phase for public-page `hreflang`: pages with their own `alternates` metadata should preserve localized alternates instead of only setting canonical URLs.
+- Reduced `public_hreflang_gaps` from 10 to 0 by adding a shared `localizedAlternates` helper and applying it to sitemap-backed public pages.
+- Started a fourth phase for dynamic project detail metadata: sitemap-backed project detail pages should preserve localized alternates and include canonical Open Graph/Twitter preview metadata.

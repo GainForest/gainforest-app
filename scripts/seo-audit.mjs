@@ -6,6 +6,7 @@ const root = process.cwd();
 const findings = [];
 const pageMetadataGaps = [];
 const publicHreflangGaps = [];
+const dynamicDetailMetadataGaps = [];
 const warnings = [];
 
 function read(path) {
@@ -32,6 +33,10 @@ function addPublicHreflangGap(id, detail) {
   publicHreflangGaps.push({ id, detail });
 }
 
+function addDynamicDetailMetadataGap(id, detail) {
+  dynamicDetailMetadataGaps.push({ id, detail });
+}
+
 const locales = ["en", "es", "pt", "sw", "id"];
 const layout = read("app/layout.tsx");
 const page = read("app/page.tsx");
@@ -40,6 +45,7 @@ const robots = read("app/robots.ts");
 const homeLanding = read("app/_components/HomeLanding.tsx");
 const projectsPage = read("app/projects/page.tsx");
 const observationsPage = read("app/observations/page.tsx");
+const projectDetailPage = read("app/projects/[did]/[rkey]/page.tsx");
 const publicPagesNeedingHreflang = [
   { path: "/", file: "app/page.tsx" },
   { path: "/observations", file: "app/observations/page.tsx" },
@@ -109,6 +115,25 @@ for (const { path, file } of publicPagesNeedingHreflang) {
       `${file} should use localizedAlternates(\"${path}\") so localized public URLs keep hreflang alternates when page metadata overrides root metadata.`,
     );
   }
+}
+
+if (!projectDetailPage.includes("localizedAlternates(localProjectHref(urlIdentifier, rkey))")) {
+  addDynamicDetailMetadataGap(
+    "project-detail-hreflang",
+    "Dynamic project detail metadata should use localizedAlternates(localProjectHref(urlIdentifier, rkey)) so indexed project pages expose language alternates.",
+  );
+}
+if (!projectDetailPage.includes("openGraph:") || !projectDetailPage.includes("url: detailHref")) {
+  addDynamicDetailMetadataGap(
+    "project-detail-og-url",
+    "Dynamic project detail Open Graph metadata should include the canonical detail URL for consistent social/link previews.",
+  );
+}
+if (!projectDetailPage.includes("twitter:") || !projectDetailPage.includes("summary_large_image")) {
+  addDynamicDetailMetadataGap(
+    "project-detail-twitter-card",
+    "Dynamic project detail metadata should define a Twitter/X card using the project title, description, and image.",
+  );
 }
 
 if (!projectsPage.includes("generateMetadata") || !projectsPage.includes("getTranslations")) {
@@ -186,10 +211,15 @@ console.log("Public hreflang gaps:");
 for (const gap of publicHreflangGaps) {
   console.log(`- ${gap.id}: ${gap.detail}`);
 }
+console.log("Dynamic detail metadata gaps:");
+for (const gap of dynamicDetailMetadataGaps) {
+  console.log(`- ${gap.id}: ${gap.detail}`);
+}
 for (const warning of warnings) {
   console.log(`WARN ${warning.id}: ${warning.detail}`);
 }
 console.log(`METRIC seo_findings=${findings.length}`);
 console.log(`METRIC public_metadata_gaps=${pageMetadataGaps.length}`);
 console.log(`METRIC public_hreflang_gaps=${publicHreflangGaps.length}`);
+console.log(`METRIC dynamic_detail_metadata_gaps=${dynamicDetailMetadataGaps.length}`);
 console.log(`METRIC seo_warnings=${warnings.length}`);
