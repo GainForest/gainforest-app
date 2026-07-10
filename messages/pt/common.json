@@ -383,6 +383,10 @@
       "justNow": "agora mesmo",
       "minutesAgo": "há {count, plural, one {# minuto} other {# minutos}}",
       "hoursAgo": "há {count, plural, one {# hora} other {# horas}}"
+    },
+    "metadata": {
+      "title": "Saúde do site GainForest",
+      "description": "Saúde ao vivo dos serviços por trás do GainForest."
     }
   },
   "accountTabs": {
@@ -1706,6 +1710,12 @@
       "prevDay": "Dia anterior com gravações",
       "nextDay": "Próximo dia com gravações",
       "allHours": "Todas as horas"
+    }
+  },
+  "devices": {
+    "metadata": {
+      "title": "Dispositivos Tainá — GainForest",
+      "description": "Atualizações de campo de dispositivos GainForest que executam Tainá, incluindo se cada dispositivo está ativo e pronto."
     }
   }
 }

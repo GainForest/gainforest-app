@@ -383,6 +383,10 @@
       "justNow": "baru saja",
       "minutesAgo": "{count, plural, one {# menit lalu} other {# menit lalu}}",
       "hoursAgo": "{count, plural, one {# jam lalu} other {# jam lalu}}"
+    },
+    "metadata": {
+      "title": "Kesehatan situs GainForest",
+      "description": "Kesehatan langsung layanan di balik GainForest."
     }
   },
   "accountTabs": {
@@ -1706,6 +1710,12 @@
       "prevDay": "Hari sebelumnya dengan rekaman",
       "nextDay": "Hari berikutnya dengan rekaman",
       "allHours": "Semua jam"
+    }
+  },
+  "devices": {
+    "metadata": {
+      "title": "Perangkat Tainá — GainForest",
+      "description": "Pembaruan lapangan dari perangkat GainForest yang menjalankan Tainá, termasuk apakah tiap perangkat aktif dan siap."
     }
   }
 }
