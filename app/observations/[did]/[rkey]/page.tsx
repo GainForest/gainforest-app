@@ -106,6 +106,7 @@ export default async function ObservationDetailPage({ params }: { params: Observ
   const place = [record.locality, record.stateProvince, record.country].filter(Boolean).join(", ");
   const detailHref = localObservationHref(owner?.urlIdentifier ?? urlIdentifier, rkey);
   const observationJsonLd = buildObservationJsonLd(origin, detailHref, record, owner, name, place, images[0]?.url ?? record.imageUrl ?? null);
+  const breadcrumbJsonLd = buildObservationBreadcrumbJsonLd(origin, detailHref, t("back"), name);
 
   return (
     <>
@@ -113,6 +114,11 @@ export default async function ObservationDetailPage({ params }: { params: Observ
         id="observation-json-ld"
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(observationJsonLd) }}
+      />
+      <script
+        id="observation-breadcrumb-json-ld"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
       />
       <main className="min-h-screen bg-background pb-20">
       <div className="mx-auto max-w-6xl px-6 py-8 lg:px-8">
@@ -294,6 +300,38 @@ function buildObservationJsonLd(
         })
       : undefined,
   });
+}
+
+function buildObservationBreadcrumbJsonLd(
+  origin: string,
+  detailHref: string,
+  observationsLabel: string,
+  observationTitle: string,
+): Record<string, unknown> {
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "GainForest",
+        item: new URL("/", origin).toString(),
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: observationsLabel,
+        item: new URL("/observations", origin).toString(),
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: observationTitle,
+        item: new URL(detailHref, origin).toString(),
+      },
+    ],
+  };
 }
 
 function MetaRow({ icon, label, children }: { icon: ReactNode; label: string; children: ReactNode }) {
