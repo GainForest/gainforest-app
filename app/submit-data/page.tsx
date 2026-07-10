@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { ArchiveIcon, CloudUploadIcon, SearchCheckIcon, SproutIcon } from "lucide-react";
-import { localizedAlternates } from "@/app/_lib/seo-metadata";
+import { localizedAlternates, socialPreviewMetadata } from "@/app/_lib/seo-metadata";
 import { fetchAuthSession } from "../_lib/auth-server";
 import { isDataJobsConfigured } from "../_lib/data-jobs";
 import { SubmitDataClient } from "./_components/SubmitDataClient";
@@ -10,10 +10,14 @@ export const dynamic = "force-dynamic";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("common.dataJobs.meta");
+  const title = t("title");
+  const description = t("description");
+
   return {
-    title: t("title"),
-    description: t("description"),
+    title,
+    description,
     alternates: localizedAlternates("/submit-data"),
+    ...socialPreviewMetadata("/submit-data", title, description),
   };
 }
 

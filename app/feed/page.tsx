@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { Suspense } from "react";
-import { localizedAlternates } from "@/app/_lib/seo-metadata";
+import { localizedAlternates, socialPreviewMetadata } from "@/app/_lib/seo-metadata";
 import { buildActivityFeed } from "../_lib/feed";
 import { fetchAuthSession } from "../_lib/auth-server";
 import { getGainForestModeratorAccess } from "../internal/badges/_lib/access";
@@ -12,11 +12,14 @@ export const revalidate = 300;
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("common.feed");
+  const title = t("meta.title");
+  const description = t("meta.description");
 
   return {
-    title: t("meta.title"),
-    description: t("meta.description"),
+    title,
+    description,
     alternates: localizedAlternates("/feed"),
+    ...socialPreviewMetadata("/feed", title, description),
   };
 }
 

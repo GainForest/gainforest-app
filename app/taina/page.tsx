@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { Suspense } from "react";
 import { BinocularsIcon, BotIcon, SendIcon, SproutIcon } from "lucide-react";
-import { localizedAlternates } from "@/app/_lib/seo-metadata";
+import { localizedAlternates, socialPreviewMetadata } from "@/app/_lib/seo-metadata";
 import { fetchAuthSession } from "../_lib/auth-server";
 import { TainaPageSkeleton } from "../_components/PageLoadingSkeletons";
 import { TainaSetupClient } from "./_components/TainaSetupClient";
@@ -11,11 +11,14 @@ export const dynamic = "force-dynamic";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("common.taina.meta");
+  const title = t("title");
+  const description = t("description");
 
   return {
-    title: t("title"),
-    description: t("description"),
+    title,
+    description,
     alternates: localizedAlternates("/taina"),
+    ...socialPreviewMetadata("/taina", title, description),
   };
 }
 
