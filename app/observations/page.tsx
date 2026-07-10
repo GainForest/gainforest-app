@@ -4,9 +4,12 @@ import { Suspense } from "react";
 import { localizedAlternates } from "@/app/_lib/seo-metadata";
 import { ExploreGridPageSkeleton } from "../_components/PageLoadingSkeletons";
 import { getRequestOrigin } from "../_lib/request-origin";
+import { walkOccurrences } from "../_lib/indexer";
 import { RecordExplorer } from "../_components/RecordExplorer";
 
 export const revalidate = 86400;
+
+const INITIAL_OBSERVATIONS_TARGET = 24;
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("marketplace.observations.metadata");
@@ -34,9 +37,15 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function ObservationsPage() {
-  const [t, origin] = await Promise.all([
+  const [t, origin, initialPage] = await Promise.all([
     getTranslations("marketplace.observations.metadata"),
     getRequestOrigin(),
+    walkOccurrences({
+      media: "image",
+      target: INITIAL_OBSERVATIONS_TARGET,
+      after: null,
+      resolveMedia: false,
+    }).catch(() => undefined),
   ]);
   const jsonLd = {
     "@context": "https://schema.org",
@@ -58,7 +67,7 @@ export default async function ObservationsPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <Suspense fallback={<ExploreGridPageSkeleton />}>
-        <RecordExplorer kind="occurrence" enableOwnerFilter />
+        <RecordExplorer kind="occurrence" enableOwnerFilter initialPage={initialPage} />
       </Suspense>
     </>
   );
