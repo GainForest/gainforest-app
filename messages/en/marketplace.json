@@ -891,8 +891,8 @@
   },
   "projects": {
     "metadata": {
-      "title": "Explore Projects — Verified Regenerative Impact Work",
-      "description": "Browse projects — each a focused piece of work with a clear goal, a timeline, and expected outcomes."
+      "title": "GainForest projects — Verified regenerative impact",
+      "description": "Browse GainForest projects from communities and organizations, each showing verified regenerative work and environmental impact evidence."
     },
     "hero": {
       "eyebrow": "Explore Projects",
@@ -1552,6 +1552,10 @@
       "colSighting": "Sighting",
       "colObserver": "Observer",
       "colDate": "Date"
+    },
+    "metadata": {
+      "title": "GainForest nature sightings",
+      "description": "Explore GainForest nature sightings with field photos, sound recordings, species names, and map locations from real restoration work."
     }
   },
   "manageProjectCerts": {

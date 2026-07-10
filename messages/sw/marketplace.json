@@ -891,8 +891,8 @@
   },
   "projects": {
     "metadata": {
-      "title": "Gundua Miradi — Kazi Iliyothibitishwa ya Athari ya Urejeshaji",
-      "description": "Vinjari miradi — kila moja ni kazi inayolenga yenye lengo wazi, ratiba ya muda, na matokeo yanayotarajiwa."
+      "title": "Miradi ya GainForest — athari ya urejeshaji iliyothibitishwa",
+      "description": "Vinjari miradi ya GainForest kutoka kwa jamii na mashirika, kila moja ikionyesha kazi ya urejeshaji iliyothibitishwa na ushahidi wa athari ya mazingira."
     },
     "hero": {
       "eyebrow": "Gundua miradi",
@@ -1552,6 +1552,10 @@
       "colSighting": "Uchunguzi",
       "colObserver": "Mwangalizi",
       "colDate": "Tarehe"
+    },
+    "metadata": {
+      "title": "Uchunguzi wa asili wa GainForest",
+      "description": "Gundua uchunguzi wa asili wa GainForest wenye picha za uwandani, rekodi za sauti, majina ya spishi, na maeneo kwenye ramani."
     }
   },
   "manageProjectCerts": {

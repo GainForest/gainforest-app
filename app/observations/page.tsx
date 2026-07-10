@@ -1,16 +1,20 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { Suspense } from "react";
 import { ExploreGridPageSkeleton } from "../_components/PageLoadingSkeletons";
 import { RecordExplorer } from "../_components/RecordExplorer";
 
 export const revalidate = 86400;
 
-export const metadata: Metadata = {
-  title: "Nature sightings",
-  description:
-    "Browse GainForest nature sightings with photos, field sound recordings, common names, and map locations.",
-  alternates: { canonical: "/observations" },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("marketplace.observations.metadata");
+
+  return {
+    title: t("title"),
+    description: t("description"),
+    alternates: { canonical: "/observations" },
+  };
+}
 
 export default function ObservationsPage() {
   return (

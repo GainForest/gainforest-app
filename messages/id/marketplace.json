@@ -891,8 +891,8 @@
   },
   "projects": {
     "metadata": {
-      "title": "Jelajahi proyek — Karya dampak regeneratif terverifikasi",
-      "description": "Jelajahi proyek — masing-masing pekerjaan yang terfokus dengan tujuan yang jelas, jangka waktu, dan hasil yang diharapkan."
+      "title": "Proyek GainForest — dampak regeneratif terverifikasi",
+      "description": "Jelajahi proyek GainForest dari komunitas dan organisasi, masing-masing menampilkan kerja regeneratif terverifikasi dan bukti dampak lingkungan."
     },
     "hero": {
       "eyebrow": "Jelajahi proyek",
@@ -1552,6 +1552,10 @@
       "colSighting": "Observasi",
       "colObserver": "Pengamat",
       "colDate": "Tanggal"
+    },
+    "metadata": {
+      "title": "Pengamatan alam GainForest",
+      "description": "Jelajahi pengamatan alam GainForest dengan foto lapangan, rekaman suara, nama spesies, dan lokasi peta dari kerja pemulihan nyata."
     }
   },
   "manageProjectCerts": {
