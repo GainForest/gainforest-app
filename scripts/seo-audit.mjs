@@ -5,6 +5,7 @@ import { join } from "node:path";
 const root = process.cwd();
 const findings = [];
 const pageMetadataGaps = [];
+const publicHreflangGaps = [];
 const warnings = [];
 
 function read(path) {
@@ -27,6 +28,10 @@ function addPageMetadataGap(id, detail) {
   pageMetadataGaps.push({ id, detail });
 }
 
+function addPublicHreflangGap(id, detail) {
+  publicHreflangGaps.push({ id, detail });
+}
+
 const locales = ["en", "es", "pt", "sw", "id"];
 const layout = read("app/layout.tsx");
 const page = read("app/page.tsx");
@@ -35,6 +40,18 @@ const robots = read("app/robots.ts");
 const homeLanding = read("app/_components/HomeLanding.tsx");
 const projectsPage = read("app/projects/page.tsx");
 const observationsPage = read("app/observations/page.tsx");
+const publicPagesNeedingHreflang = [
+  { path: "/", file: "app/page.tsx" },
+  { path: "/observations", file: "app/observations/page.tsx" },
+  { path: "/projects", file: "app/projects/page.tsx" },
+  { path: "/organizations", file: "app/organizations/page.tsx" },
+  { path: "/bioblitz", file: "app/bioblitz/page.tsx" },
+  { path: "/grants", file: "app/grants/page.tsx" },
+  { path: "/devices", file: "app/devices/page.tsx" },
+  { path: "/status", file: "app/status/page.tsx" },
+  { path: "/privacy", file: "app/privacy/page.tsx" },
+  { path: "/docs/lexicons", file: "app/docs/lexicons/page.tsx" },
+];
 
 for (const locale of locales) {
   const common = readJson(`messages/${locale}/common.json`);
@@ -82,6 +99,16 @@ if (!layout.includes("@type") || !layout.includes("Organization") || !layout.inc
 }
 if (!layout.includes("sameAs")) {
   addFinding("jsonld-brand-sameas", "Organization JSON-LD should include sameAs links to connect GainForest's web entities.");
+}
+
+for (const { path, file } of publicPagesNeedingHreflang) {
+  const source = read(file);
+  if (!source.includes("localizedAlternates") || !source.includes(`localizedAlternates(\"${path}\")`)) {
+    addPublicHreflangGap(
+      `hreflang-${path === "/" ? "home" : path.slice(1).replaceAll("/", "-")}`,
+      `${file} should use localizedAlternates(\"${path}\") so localized public URLs keep hreflang alternates when page metadata overrides root metadata.`,
+    );
+  }
 }
 
 if (!projectsPage.includes("generateMetadata") || !projectsPage.includes("getTranslations")) {
@@ -155,9 +182,14 @@ console.log("Public page metadata gaps:");
 for (const gap of pageMetadataGaps) {
   console.log(`- ${gap.id}: ${gap.detail}`);
 }
+console.log("Public hreflang gaps:");
+for (const gap of publicHreflangGaps) {
+  console.log(`- ${gap.id}: ${gap.detail}`);
+}
 for (const warning of warnings) {
   console.log(`WARN ${warning.id}: ${warning.detail}`);
 }
 console.log(`METRIC seo_findings=${findings.length}`);
 console.log(`METRIC public_metadata_gaps=${pageMetadataGaps.length}`);
+console.log(`METRIC public_hreflang_gaps=${publicHreflangGaps.length}`);
 console.log(`METRIC seo_warnings=${warnings.length}`);
