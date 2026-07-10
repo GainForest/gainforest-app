@@ -11,6 +11,7 @@ const accountProfileMetadataGaps = [];
 const sitemapDiscoveryGaps = [];
 const localizedStaticMetadataGaps = [];
 const indexablePageHreflangGaps = [];
+const publicLandingSitemapGaps = [];
 const warnings = [];
 
 function read(path) {
@@ -57,6 +58,10 @@ function addIndexablePageHreflangGap(id, detail) {
   indexablePageHreflangGaps.push({ id, detail });
 }
 
+function addPublicLandingSitemapGap(id, detail) {
+  publicLandingSitemapGaps.push({ id, detail });
+}
+
 const locales = ["en", "es", "pt", "sw", "id"];
 const layout = read("app/layout.tsx");
 const page = read("app/page.tsx");
@@ -66,6 +71,10 @@ const indexablePagesNeedingLocalizedAlternates = [
   { path: "/feed", file: "app/feed/page.tsx" },
   { path: "/submit-data", file: "app/submit-data/page.tsx" },
   { path: "/taina", file: "app/taina/page.tsx" },
+];
+const publicLandingPagesNeedingSitemap = [
+  { path: "/submit-data", reason: "field-partner data submission landing page" },
+  { path: "/taina", reason: "Tainá field assistant setup landing page" },
 ];
 const sitemap = read("app/sitemap.ts");
 const robots = read("app/robots.ts");
@@ -197,6 +206,15 @@ for (const { path, file } of indexablePagesNeedingLocalizedAlternates) {
   }
 }
 
+for (const { path, reason } of publicLandingPagesNeedingSitemap) {
+  if (!sitemap.includes(`path: "${path}"`)) {
+    addPublicLandingSitemapGap(
+      `sitemap-public-landing-${path.slice(1).replaceAll("-", "_")}`,
+      `${path} is a public ${reason} with localized metadata and should appear in sitemap.xml for crawler discovery.`,
+    );
+  }
+}
+
 if (!sitemap.includes("fetchOrganizationEntries") || !sitemap.includes("/account/${encodeURIComponent(node.did)}")) {
   addSitemapDiscoveryGap(
     "organization-profile-sitemap",
@@ -324,6 +342,10 @@ console.log("Indexable page hreflang gaps:");
 for (const gap of indexablePageHreflangGaps) {
   console.log(`- ${gap.id}: ${gap.detail}`);
 }
+console.log("Public landing sitemap gaps:");
+for (const gap of publicLandingSitemapGaps) {
+  console.log(`- ${gap.id}: ${gap.detail}`);
+}
 for (const warning of warnings) {
   console.log(`WARN ${warning.id}: ${warning.detail}`);
 }
@@ -335,4 +357,5 @@ console.log(`METRIC account_profile_metadata_gaps=${accountProfileMetadataGaps.l
 console.log(`METRIC sitemap_discovery_gaps=${sitemapDiscoveryGaps.length}`);
 console.log(`METRIC localized_static_metadata_gaps=${localizedStaticMetadataGaps.length}`);
 console.log(`METRIC indexable_page_hreflang_gaps=${indexablePageHreflangGaps.length}`);
+console.log(`METRIC public_landing_sitemap_gaps=${publicLandingSitemapGaps.length}`);
 console.log(`METRIC seo_warnings=${warnings.length}`);
