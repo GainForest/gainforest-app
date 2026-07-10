@@ -16,6 +16,7 @@ const feedSitemapGaps = [];
 const listStructuredDataGaps = [];
 const listSocialMetadataGaps = [];
 const remainingSocialMetadataGaps = [];
+const projectBreadcrumbGaps = [];
 const warnings = [];
 
 function read(path) {
@@ -80,6 +81,10 @@ function addListSocialMetadataGap(id, detail) {
 
 function addRemainingSocialMetadataGap(id, detail) {
   remainingSocialMetadataGaps.push({ id, detail });
+}
+
+function addProjectBreadcrumbGap(id, detail) {
+  projectBreadcrumbGaps.push({ id, detail });
 }
 
 const locales = ["en", "es", "pt", "sw", "id"];
@@ -198,6 +203,12 @@ if (!projectDetailPage.includes("twitter:") || !projectDetailPage.includes("summ
   addDynamicDetailMetadataGap(
     "project-detail-twitter-card",
     "Dynamic project detail metadata should define a Twitter/X card using the project title, description, and image.",
+  );
+}
+if (!projectDetailPage.includes("BreadcrumbList") || !projectDetailPage.includes("buildProjectBreadcrumbJsonLd") || !projectDetailPage.includes("project-breadcrumb-json-ld")) {
+  addProjectBreadcrumbGap(
+    "project-detail-breadcrumb-jsonld",
+    "Dynamic project detail pages should emit BreadcrumbList JSON-LD (home → projects → project) so search results can understand hierarchy and breadcrumbs.",
   );
 }
 
@@ -429,6 +440,10 @@ console.log("Remaining social metadata gaps:");
 for (const gap of remainingSocialMetadataGaps) {
   console.log(`- ${gap.id}: ${gap.detail}`);
 }
+console.log("Project breadcrumb gaps:");
+for (const gap of projectBreadcrumbGaps) {
+  console.log(`- ${gap.id}: ${gap.detail}`);
+}
 for (const warning of warnings) {
   console.log(`WARN ${warning.id}: ${warning.detail}`);
 }
@@ -445,4 +460,5 @@ console.log(`METRIC feed_sitemap_gaps=${feedSitemapGaps.length}`);
 console.log(`METRIC list_structured_data_gaps=${listStructuredDataGaps.length}`);
 console.log(`METRIC list_social_metadata_gaps=${listSocialMetadataGaps.length}`);
 console.log(`METRIC remaining_social_metadata_gaps=${remainingSocialMetadataGaps.length}`);
+console.log(`METRIC project_breadcrumb_gaps=${projectBreadcrumbGaps.length}`);
 console.log(`METRIC seo_warnings=${warnings.length}`);

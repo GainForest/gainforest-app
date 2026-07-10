@@ -5,7 +5,8 @@ Improve gainforest.app technical SEO and brand/entity signals so Google can bett
 
 ## Metrics
 Current phase:
-- **Primary**: `remaining_social_metadata_gaps` (count, lower is better) — remaining indexable public pages whose social preview metadata still falls back to generic site/home Open Graph/Twitter data.
+- **Primary**: `project_breadcrumb_gaps` (count, lower is better) — dynamic project detail pages missing BreadcrumbList JSON-LD for search-result hierarchy.
+- **Secondary**: `remaining_social_metadata_gaps` — remaining indexable public pages whose social preview metadata still falls back to generic site/home Open Graph/Twitter data.
 - **Secondary**: `list_social_metadata_gaps` — public listing pages whose social preview metadata still falls back to generic site/home Open Graph/Twitter data.
 - **Secondary**: `list_structured_data_gaps` — public listing pages missing CollectionPage JSON-LD that describes their localized index/list content.
 - **Secondary**: `feed_sitemap_gaps` — the public activity feed is indexable with server-rendered content but missing a clear sitemap/noindex strategy.
@@ -23,6 +24,7 @@ Current phase:
 - **Secondary**: `check_site_meta_ready` — whether `npx check-site-meta` successfully boots against the configured target URL.
 
 Previous phases:
+- **Primary**: `remaining_social_metadata_gaps` (count, lower is better) — remaining indexable public pages whose social preview metadata still falls back to generic site/home Open Graph/Twitter data.
 - **Primary**: `list_social_metadata_gaps` (count, lower is better) — public listing pages whose social preview metadata still falls back to generic site/home Open Graph/Twitter data.
 - **Primary**: `list_structured_data_gaps` (count, lower is better) — public listing pages missing CollectionPage JSON-LD that describes their localized index/list content.
 - **Primary**: `feed_sitemap_gaps` (count, lower is better) — the public activity feed is indexable with server-rendered content but missing a clear sitemap/noindex strategy.
@@ -92,3 +94,5 @@ The script outputs `METRIC name=value` lines. It also starts `npx check-site-met
 - Started a twelfth phase for list-page social metadata: the same high-value list pages should define page-specific Open Graph/Twitter metadata so check-site-meta/social previews show the list page title/description rather than generic home metadata.
 - Reduced `list_social_metadata_gaps` from 3 to 0 by adding page-specific Open Graph/Twitter metadata to `/projects`, `/observations`, and `/organizations`.
 - Started a thirteenth phase for remaining social metadata: other indexable public pages (`/feed`, `/submit-data`, `/taina`, `/devices`, `/status`) should also use page-specific social preview metadata because they now have localized metadata and sitemap/hreflang coverage.
+- Reduced `remaining_social_metadata_gaps` from 5 to 0 by adding a reusable `socialPreviewMetadata` helper and applying it to `/feed`, `/submit-data`, `/taina`, `/devices`, and `/status`.
+- Started a fourteenth phase for project breadcrumbs: dynamic project detail pages are high-value sitemap-backed landing pages and should emit `BreadcrumbList` JSON-LD for home → projects → project hierarchy.
