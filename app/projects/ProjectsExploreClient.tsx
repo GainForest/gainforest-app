@@ -68,7 +68,19 @@ type ProjectDonationSummary = {
   maEarth: { totalUsd: number; donorCount: number; donateUrl: string; rounds: number[] } | null;
 };
 
-export function ProjectsExploreClient({ records: initialRecords = [] }: { records?: ProjectRecord[] }) {
+type InitialProjectsPage = {
+  records: ProjectRecord[];
+  cursor: string | null;
+  hasMore: boolean;
+};
+
+export function ProjectsExploreClient({
+  initialPage,
+  records: initialRecordsProp,
+}: {
+  initialPage?: InitialProjectsPage;
+  records?: ProjectRecord[];
+}) {
   const t = useTranslations("marketplace.projects");
   const exploreT = useTranslations("marketplace.explore");
   const filterChips = useMemo<Array<{ key: ProjectIndexFilter; label: string; predicate: (record: ProjectRecord) => boolean; hidden?: boolean }>>(() => [
@@ -95,10 +107,11 @@ export function ProjectsExploreClient({ records: initialRecords = [] }: { record
     { id: "list", label: t("view.list"), Icon: ListIcon },
     { id: "map", label: t("view.map"), Icon: MapIcon },
   ] as const, [t]);
+  const initialRecords = useMemo(() => initialPage?.records ?? initialRecordsProp ?? [], [initialPage, initialRecordsProp]);
   const [records, setRecords] = useState<ProjectRecord[]>(initialRecords);
-  const [cursor, setCursor] = useState<string | null>(null);
-  const [hasMore, setHasMore] = useState(initialRecords.length === 0);
-  const [loading, setLoading] = useState(initialRecords.length === 0);
+  const [cursor, setCursor] = useState<string | null>(initialPage?.cursor ?? null);
+  const [hasMore, setHasMore] = useState(initialPage?.hasMore ?? initialRecords.length === 0);
+  const [loading, setLoading] = useState(!initialPage && initialRecords.length === 0);
   const [loadingMore, setLoadingMore] = useState(false);
   const [totalCount, setTotalCount] = useState<number | null>(null);
   const [cardLimit, setCardLimit] = useState(INITIAL_CARD_LIMIT);
@@ -142,9 +155,22 @@ export function ProjectsExploreClient({ records: initialRecords = [] }: { record
   const badgeFilters = useMemo(() => parseBadgeFilterParam(badgesParam), [badgesParam]);
   const { ownerDid, setOwnerDid } = useOwnerFilter();
   const activeFilterCount = filters.length + badgeFilters.length;
+  const shouldUseInitialRecords = initialRecords.length > 0
+    && !deferredQuery.trim()
+    && filters.length === 0
+    && badgeFilters.length === 0
+    && sort === "newest"
+    && !ownerDid;
 
   useEffect(() => {
-    if (initialRecords.length > 0) return;
+    if (shouldUseInitialRecords) {
+      setRecords(initialRecords);
+      setCursor(initialPage?.cursor ?? null);
+      setHasMore(initialPage?.hasMore ?? initialRecords.length === 0);
+      setLoading(false);
+      setLoadingMore(false);
+      return;
+    }
     const controller = new AbortController();
     const requestSeq = ++requestSeqRef.current;
     const options = { query: deferredQuery, filters, sort, featuredBadgesOnly: !ownerDid, badgeFilters, creatorDid: ownerDid };
@@ -168,7 +194,7 @@ export function ProjectsExploreClient({ records: initialRecords = [] }: { record
         if (isCurrent()) setLoading(false);
       });
     return () => controller.abort();
-  }, [initialRecords.length, deferredQuery, filters, sort, badgeFilters, ownerDid]);
+  }, [shouldUseInitialRecords, initialRecords, initialPage?.cursor, initialPage?.hasMore, deferredQuery, filters, sort, badgeFilters, ownerDid]);
 
   useEffect(() => {
     const controller = new AbortController();
