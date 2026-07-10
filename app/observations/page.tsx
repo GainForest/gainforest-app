@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { Suspense } from "react";
 import { localizedAlternates } from "@/app/_lib/seo-metadata";
 import { ExploreGridPageSkeleton } from "../_components/PageLoadingSkeletons";
+import { getRequestOrigin } from "../_lib/request-origin";
 import { RecordExplorer } from "../_components/RecordExplorer";
 
 export const revalidate = 86400;
@@ -17,10 +18,33 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default function ObservationsPage() {
+export default async function ObservationsPage() {
+  const [t, origin] = await Promise.all([
+    getTranslations("marketplace.observations.metadata"),
+    getRequestOrigin(),
+  ]);
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name: t("title"),
+    description: t("description"),
+    url: new URL("/observations", origin).toString(),
+    isPartOf: {
+      "@type": "WebSite",
+      name: "GainForest",
+      url: new URL("/", origin).toString(),
+    },
+  };
+
   return (
-    <Suspense fallback={<ExploreGridPageSkeleton />}>
-      <RecordExplorer kind="occurrence" enableOwnerFilter />
-    </Suspense>
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <Suspense fallback={<ExploreGridPageSkeleton />}>
+        <RecordExplorer kind="occurrence" enableOwnerFilter />
+      </Suspense>
+    </>
   );
 }
