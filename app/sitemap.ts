@@ -99,7 +99,7 @@ function buildLocalizedEntries(options: {
   }));
 }
 
-function shouldIncludeOrganizationProfile(node: SitemapOrganizationNode): boolean {
+function shouldIncludeOrganizationProfile(node: SitemapOrganizationNode): node is SitemapOrganizationNode & { did: string } {
   if (!node.did) return false;
   const visibility = node.visibility?.trim().toLowerCase();
   if (visibility === "private" || visibility === "hidden") return false;
