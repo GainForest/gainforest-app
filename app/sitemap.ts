@@ -27,6 +27,20 @@ const ROUTES: Array<{ path: string; priority: number; changeFrequency: ChangeFre
   { path: "/docs/lexicons", priority: 0.4, changeFrequency: "monthly" },
 ];
 
+const ORGANIZATION_PROFILES_QUERY = `
+  query SitemapOrganizations($first: Int!, $after: String) {
+    appCertifiedActorOrganization(
+      first: $first
+      after: $after
+      sortBy: createdAt
+      sortDirection: DESC
+    ) {
+      pageInfo { hasNextPage endCursor }
+      edges { node { did createdAt visibility certifiedProfileData { displayName } } }
+    }
+  }
+`;
+
 const PROJECT_URIS_QUERY = `
   query SitemapProjects($first: Int!, $after: String) {
     orgHypercertsCollection(
@@ -41,6 +55,13 @@ const PROJECT_URIS_QUERY = `
     }
   }
 `;
+
+type SitemapOrganizationNode = {
+  did?: string | null;
+  createdAt?: string | null;
+  visibility?: string | null;
+  certifiedProfileData?: { displayName?: string | null } | null;
+};
 
 type SitemapProjectNode = { did?: string | null; rkey?: string | null; createdAt?: string | null };
 
@@ -76,6 +97,61 @@ function buildLocalizedEntries(options: {
       languages: alternates,
     },
   }));
+}
+
+function shouldIncludeOrganizationProfile(node: SitemapOrganizationNode): boolean {
+  if (!node.did) return false;
+  const visibility = node.visibility?.trim().toLowerCase();
+  if (visibility === "private" || visibility === "hidden") return false;
+  const displayName = node.certifiedProfileData?.displayName?.trim().toLowerCase() ?? "";
+  return !/(^|\b)(test|demo|sample)(\b|$)/.test(displayName);
+}
+
+async function fetchOrganizationEntries(origin: string): Promise<MetadataRoute.Sitemap> {
+  const entries: MetadataRoute.Sitemap = [];
+  let after: string | null = null;
+
+  try {
+    for (let page = 0; page < 5; page += 1) {
+      const response: Response = await fetch(INDEXER_URL, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ query: ORGANIZATION_PROFILES_QUERY, variables: { first: 1000, after } }),
+        signal: AbortSignal.timeout(15_000),
+      });
+      const json = (await response.json()) as {
+        data?: {
+          appCertifiedActorOrganization?: {
+            pageInfo?: { hasNextPage?: boolean; endCursor?: string | null };
+            edges?: Array<{ node?: SitemapOrganizationNode | null }>;
+          } | null;
+        };
+      };
+      const connection = json.data?.appCertifiedActorOrganization;
+      if (!connection) break;
+
+      for (const edge of connection.edges ?? []) {
+        const node = edge.node;
+        if (!node || !shouldIncludeOrganizationProfile(node)) continue;
+        entries.push(
+          ...buildLocalizedEntries({
+            origin,
+            pathname: `/account/${encodeURIComponent(node.did)}`,
+            lastModified: node.createdAt ? new Date(node.createdAt) : undefined,
+            changeFrequency: "weekly",
+            priority: 0.55,
+          }),
+        );
+      }
+
+      if (!connection.pageInfo?.hasNextPage || !connection.pageInfo.endCursor) break;
+      after = connection.pageInfo.endCursor;
+    }
+  } catch {
+    // Best effort — fall back to the static section and project routes.
+  }
+
+  return entries;
 }
 
 async function fetchProjectEntries(origin: string): Promise<MetadataRoute.Sitemap> {
@@ -137,6 +213,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority,
     }),
   );
-  const projects = await fetchProjectEntries(origin);
-  return [...sections, ...projects];
+  const [organizations, projects] = await Promise.all([
+    fetchOrganizationEntries(origin),
+    fetchProjectEntries(origin),
+  ]);
+  return [...sections, ...organizations, ...projects];
 }
