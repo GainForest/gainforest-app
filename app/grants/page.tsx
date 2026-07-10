@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { Suspense } from "react";
+import { localizedAlternates } from "@/app/_lib/seo-metadata";
 import { fetchAuthSession } from "../_lib/auth-server";
 import { ExploreGridPageSkeleton } from "../_components/PageLoadingSkeletons";
 import { GrantsClient } from "../_components/GrantsClient";
@@ -13,7 +14,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: t("title"),
     description: t("description"),
-    alternates: { canonical: "/grants" },
+    alternates: localizedAlternates("/grants"),
   };
 }
 

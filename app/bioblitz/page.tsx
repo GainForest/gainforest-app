@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { Suspense } from "react";
+import { localizedAlternates } from "@/app/_lib/seo-metadata";
 import { BioblitzPageSkeleton } from "../_components/PageLoadingSkeletons";
 import { BioblitzClient } from "./BioblitzClient";
 
@@ -12,7 +13,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: t("title"),
     description: t("description"),
-    alternates: { canonical: "/bioblitz" },
+    alternates: localizedAlternates("/bioblitz"),
   };
 }
 

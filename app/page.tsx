@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { unstable_cache } from "next/cache";
+import { localizedAlternates } from "@/app/_lib/seo-metadata";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -14,7 +15,7 @@ export const metadata: Metadata = {
   title: "GainForest — Fund Regenerative Impact",
   description:
     "GainForest connects funders with nature stewards doing on-ground regenerative work. Support verified environmental impact directly.",
-  alternates: { canonical: "/" },
+  alternates: localizedAlternates("/"),
 };
 
 const fetchHomeKpis = unstable_cache(fetchKpis, ["home-page-kpis"], {
