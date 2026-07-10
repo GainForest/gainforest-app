@@ -215,11 +215,11 @@ if (!observationsPage.includes("generateMetadata") || !observationsPage.includes
   addPageMetadataGap("observations-page-localized-metadata", "Observations page should use localized metadata from messages, not hardcoded English.");
 }
 
-if (!page.includes("GainForest connects")) {
-  addFinding("home-metadata-description-brand", "Home page metadata description should start from the GainForest brand/entity.");
+if (!page.includes("getTranslations(\"common.seo\")")) {
+  addFinding("home-metadata-description-brand", "Home page metadata should use the localized common.seo brand description.");
 }
-if (!/title:\s*["']GainForest/.test(page)) {
-  addFinding("home-metadata-title-brand", "Home page metadata title should begin with GainForest.");
+if (!page.includes("getTranslations(\"common.seo\")")) {
+  addFinding("home-metadata-title-brand", "Home page metadata should use the localized common.seo brand title.");
 }
 if (!/<h1\b/.test(homeLanding)) {
   addFinding("home-h1", "Home landing page should render exactly one crawlable h1.");
