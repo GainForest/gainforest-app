@@ -81,6 +81,8 @@ import {
 
 // Keep one quick-add session light; the rich bulk panel handles big imports.
 const MAX_PHOTOS = 50;
+// Stored as dwc.occurrence.fieldNotes on every observation in this upload.
+const BATCH_STORY_MAX = 10_000;
 const ANALYZE_ATTEMPTS = 2;
 // Safety net so a stalled connection can't leave a card spinning on
 // "Identifying…" forever. Sits above the analyze route's own worst-case runtime
@@ -258,6 +260,7 @@ export function AddObservationsModal({
   // reachable from the "More ways" menu.
   const [mode, setMode] = useState<"photos" | "csv">("photos");
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const batchStoryId = useId();
   // Separate input with `capture` so phones can jump straight into the camera
   // (surfaced by a touch-only "Take a photo" button).
   const cameraInputRef = useRef<HTMLInputElement | null>(null);
@@ -272,6 +275,7 @@ export function AddObservationsModal({
   const [isPreparing, setIsPreparing] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [batchStory, setBatchStory] = useState("");
   const [addedCount, setAddedCount] = useState<number | null>(null);
   // Tracks how many observations have finished uploading during a submit run, so
   // the footer can show a progress bar instead of just a spinning button.
@@ -699,7 +703,10 @@ export function AddObservationsModal({
 
   // Upload one observation: a single occurrence carrying every photo in the
   // group, with the first photo set as the primary image the explorer reads.
-  async function uploadGroup(group: QuickGroup): Promise<boolean> {
+  async function uploadGroup(
+    group: QuickGroup,
+    batchContext?: { eventID: string; fieldNotes: string },
+  ): Promise<boolean> {
     const { fields } = group;
     // Resolve the location into Darwin Core fields, swapping the precise pin for
     // a randomised circle when the observer opted to keep their location private.
@@ -724,6 +731,8 @@ export function AddObservationsModal({
       occurrenceRemarks: fields.notes.trim(),
       associatedMedia: group.items.map((item) => item.file.name).join(", "),
       ...locationFields,
+      ...(batchContext?.eventID ? { eventID: batchContext.eventID } : {}),
+      ...(batchContext?.fieldNotes ? { fieldNotes: batchContext.fieldNotes } : {}),
       ...(tags.length > 0 ? { tags } : {}),
       ...(effectiveProjectUri ? { projectRef: effectiveProjectUri } : {}),
       ...(effectiveSiteUri ? { siteRef: effectiveSiteUri } : {}),
@@ -772,6 +781,10 @@ export function AddObservationsModal({
       setError(t("nothingToSubmit"));
       return;
     }
+    const trimmedBatchStory = batchStory.trim().slice(0, BATCH_STORY_MAX);
+    const batchContext = trimmedBatchStory
+      ? { eventID: `gainforest-upload-${crypto.randomUUID()}`, fieldNotes: trimmedBatchStory }
+      : undefined;
     setIsSubmitting(true);
     setError(null);
     setUploadProgress({ done: 0, total: queue.length });
@@ -780,7 +793,7 @@ export function AddObservationsModal({
       const ids = new Set(group.items.map((item) => item.id));
       setItems((current) => current.map((item) => (ids.has(item.id) ? { ...item, status: "uploading", error: null } : item)));
       try {
-        await uploadGroup(group);
+        await uploadGroup(group, batchContext);
         success += 1;
         setUploadProgress((progress) => (progress ? { ...progress, done: progress.done + 1 } : progress));
         setItems((current) => {
@@ -797,6 +810,7 @@ export function AddObservationsModal({
     setIsSubmitting(false);
     setUploadProgress(null);
     if (success > 0) {
+      if (success === queue.length) setBatchStory("");
       setAddedCount(success);
       setError(null);
     } else {
@@ -896,6 +910,25 @@ export function AddObservationsModal({
         </div>
         <ModalDescription className="mt-1">{t("description")}</ModalDescription>
       </ModalHeader>
+
+      {!showEmptyState ? (
+        <div className="rounded-2xl border border-border bg-muted/30 p-3">
+          <label htmlFor={batchStoryId} className="text-sm font-medium text-foreground">
+            {t("batchStoryLabel")}
+          </label>
+          <p className="mt-0.5 text-xs leading-5 text-muted-foreground">{t("batchStoryHint")}</p>
+          <Textarea
+            id={batchStoryId}
+            value={batchStory}
+            maxLength={BATCH_STORY_MAX}
+            rows={3}
+            placeholder={t("batchStoryPlaceholder")}
+            onChange={(event) => setBatchStory(event.currentTarget.value.slice(0, BATCH_STORY_MAX))}
+            disabled={isSubmitting}
+            className="mt-2 resize-y"
+          />
+        </div>
+      ) : null}
 
       <div
         onDragEnter={onDragEnter}

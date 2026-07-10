@@ -116,6 +116,17 @@ function visibleTab(f: { authOnly?: boolean; adminOnly?: boolean }, signedIn: bo
   return true;
 }
 
+function sharedObservationBatchNote(items: ActivityFeedItem[]): string | null {
+  const eventIds = items.map((item) => item.observationEventId?.trim()).filter((value): value is string => Boolean(value));
+  if (eventIds.length !== items.length) return null;
+  const uniqueEventIds = new Set(eventIds);
+  if (uniqueEventIds.size !== 1) return null;
+  const notes = items.map((item) => item.observationBatchNote?.trim()).filter((value): value is string => Boolean(value));
+  if (notes.length === 0) return null;
+  const uniqueNotes = new Set(notes);
+  return uniqueNotes.size === 1 ? notes[0] : null;
+}
+
 function filterLabel(t: (key: string) => string, key: Filter): string {
   return key === "all" ? t("filters.all") : t(`filters.${key}`);
 }
@@ -736,6 +747,7 @@ function ObservationBatchCard({
   );
   const shownSpecies = species.slice(0, 3);
   const moreSpecies = species.length - shownSpecies.length;
+  const batchNote = sharedObservationBatchNote(items);
 
   const href = head.actorDid ? `/observations?by=${encodeURIComponent(head.actorDid)}` : "/observations";
 
@@ -785,6 +797,12 @@ function ObservationBatchCard({
               </p>
             ) : null}
           </Link>
+
+          {batchNote ? (
+            <p className="mt-2 line-clamp-3 rounded-xl bg-muted/50 px-3 py-2 text-sm leading-6 text-muted-foreground">
+              {batchNote}
+            </p>
+          ) : null}
 
           {/* Image montage — a tap on a thumbnail opens the in-feed lightbox to
               like / comment that sighting; the final "+N" tile opens the full

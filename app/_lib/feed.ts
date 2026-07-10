@@ -73,6 +73,10 @@ export interface ActivityFeedItem {
   amount: number | null;
   /** For donations: the currency code (USD/USDC). */
   currency: string | null;
+  /** Observations only: shared event identifier for sightings uploaded together. */
+  observationEventId?: string | null;
+  /** Observations only: shared field note/story for a multi-sighting upload. */
+  observationBatchNote?: string | null;
   /** Observations only, set on the sampled rows of a server-collapsed burst:
    *  how many sightings the burst holds from the collapse point down (counted
    *  for free by the burst scan; includes the sampled rows themselves). Rows
@@ -258,7 +262,7 @@ const FEED_QUERY = `
       sortDirection: DESC
     ) {
       edges { node {
-        did rkey uri createdAt eventDate
+        did rkey uri createdAt eventDate eventID fieldNotes
         scientificName vernacularName kingdom family country countryCode locality habitat
         thumbnailUrl speciesImageUrl
         ${CERTIFIED_PROFILE_DATA_FIELDS}
@@ -335,6 +339,8 @@ type RawOccurrence = {
   uri?: string | null;
   createdAt: string;
   eventDate?: string | null;
+  eventID?: string | null;
+  fieldNotes?: string | null;
   scientificName?: string | null;
   vernacularName?: string | null;
   kingdom?: string | null;
@@ -454,6 +460,8 @@ function mapOccurrences(nodes: RawOccurrence[]): ActivityFeedItem[] {
       href: localObservationHref(n.did, n.rkey),
       imageUrl: external,
       imageRef,
+      observationEventId: n.eventID?.trim() || null,
+      observationBatchNote: clampText(n.fieldNotes, 600),
       targetTitle: null,
       targetHref: null,
       amount: null,
