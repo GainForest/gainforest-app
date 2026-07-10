@@ -3,13 +3,48 @@ import { getTranslations } from "next-intl/server";
 import { Suspense } from "react";
 import { localizedAlternates } from "@/app/_lib/seo-metadata";
 import { ExploreGridPageSkeleton } from "../_components/PageLoadingSkeletons";
-import { fetchProjects } from "../_lib/indexer";
+import { fetchProjects, type ProjectRecord } from "../_lib/indexer";
 import { getRequestOrigin } from "../_lib/request-origin";
+import { localProjectHref } from "../_lib/urls";
 import { ProjectsExploreClient } from "./ProjectsExploreClient";
 
 export const revalidate = 86400;
 
 const INITIAL_PROJECTS_TARGET = 48;
+
+function absoluteUrlOrUndefined(origin: string, value: string | null | undefined): string | undefined {
+  if (!value) return undefined;
+  try {
+    return new URL(value, origin).toString();
+  } catch {
+    return undefined;
+  }
+}
+
+function buildProjectsItemListJsonLd(origin: string, records: ProjectRecord[], name: string): Record<string, unknown> {
+  return {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name,
+    numberOfItems: records.length,
+    itemListElement: records.map((record, index) => {
+      const url = new URL(localProjectHref(record.did, record.rkey), origin).toString();
+      return {
+        "@type": "ListItem",
+        position: index + 1,
+        url,
+        item: {
+          "@type": "Project",
+          name: record.title,
+          description: record.shortDescription || undefined,
+          url,
+          image: absoluteUrlOrUndefined(origin, record.imageUrl),
+          datePublished: record.createdAt,
+        },
+      };
+    }),
+  };
+}
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("marketplace.projects.metadata");
@@ -45,10 +80,11 @@ export default async function ProjectsPage() {
       featuredBadgesOnly: true,
     }).catch(() => undefined),
   ]);
+  const title = t("title");
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
-    name: t("title"),
+    name: title,
     description: t("description"),
     url: new URL("/projects", origin).toString(),
     isPartOf: {
@@ -57,12 +93,18 @@ export default async function ProjectsPage() {
       url: new URL("/", origin).toString(),
     },
   };
+  const itemListJsonLd = buildProjectsItemListJsonLd(origin, initialPage?.records ?? [], title);
 
   return (
     <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <script
+        id="projects-item-list-json-ld"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }}
       />
       <Suspense fallback={<ExploreGridPageSkeleton />}>
         <ProjectsExploreClient initialPage={initialPage} />

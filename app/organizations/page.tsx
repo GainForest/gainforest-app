@@ -3,13 +3,49 @@ import { getTranslations } from "next-intl/server";
 import { Suspense } from "react";
 import { localizedAlternates } from "@/app/_lib/seo-metadata";
 import { ExploreGridPageSkeleton } from "../_components/PageLoadingSkeletons";
-import { fetchSites } from "../_lib/indexer";
+import { fetchSites, type SiteRecord } from "../_lib/indexer";
 import { getRequestOrigin } from "../_lib/request-origin";
+import { accountHref } from "../_lib/urls";
 import { OrganizationsClient } from "./OrganizationsClient";
 
 export const revalidate = 86400;
 
 const INITIAL_ORGANIZATIONS_TARGET = 24;
+
+function absoluteUrlOrUndefined(origin: string, value: string | null | undefined): string | undefined {
+  if (!value) return undefined;
+  try {
+    return new URL(value, origin).toString();
+  } catch {
+    return undefined;
+  }
+}
+
+function buildOrganizationsItemListJsonLd(origin: string, records: SiteRecord[], name: string): Record<string, unknown> {
+  return {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name,
+    numberOfItems: records.length,
+    itemListElement: records.map((record, index) => {
+      const url = new URL(accountHref(record.did), origin).toString();
+      return {
+        "@type": "ListItem",
+        position: index + 1,
+        url,
+        item: {
+          "@type": "Organization",
+          name: record.name,
+          url,
+          image: absoluteUrlOrUndefined(origin, record.avatarUrl ?? record.imageUrl),
+          address: record.country
+            ? { "@type": "PostalAddress", addressCountry: record.country }
+            : undefined,
+        },
+      };
+    }),
+  };
+}
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("marketplace.organizations.metadata");
@@ -45,10 +81,11 @@ export default async function OrganizationsPage() {
       featuredBadgesOnly: true,
     }).catch(() => undefined),
   ]);
+  const title = t("title");
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
-    name: t("title"),
+    name: title,
     description: t("description"),
     url: new URL("/organizations", origin).toString(),
     isPartOf: {
@@ -57,12 +94,18 @@ export default async function OrganizationsPage() {
       url: new URL("/", origin).toString(),
     },
   };
+  const itemListJsonLd = buildOrganizationsItemListJsonLd(origin, initialPage?.records ?? [], title);
 
   return (
     <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <script
+        id="organizations-item-list-json-ld"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }}
       />
       <Suspense fallback={<ExploreGridPageSkeleton />}>
         <OrganizationsClient initialPage={initialPage} />
