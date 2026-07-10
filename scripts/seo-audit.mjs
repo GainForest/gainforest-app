@@ -1,0 +1,129 @@
+#!/usr/bin/env node
+import { readFileSync, existsSync } from "node:fs";
+import { join } from "node:path";
+
+const root = process.cwd();
+const findings = [];
+const warnings = [];
+
+function read(path) {
+  return readFileSync(join(root, path), "utf8");
+}
+
+function readJson(path) {
+  return JSON.parse(read(path));
+}
+
+function addFinding(id, detail) {
+  findings.push({ id, detail });
+}
+
+function addWarning(id, detail) {
+  warnings.push({ id, detail });
+}
+
+const locales = ["en", "es", "pt", "sw", "id"];
+const layout = read("app/layout.tsx");
+const page = read("app/page.tsx");
+const sitemap = read("app/sitemap.ts");
+const robots = read("app/robots.ts");
+const homeLanding = read("app/_components/HomeLanding.tsx");
+
+for (const locale of locales) {
+  const common = readJson(`messages/${locale}/common.json`);
+  const seo = common.seo ?? {};
+  const title = String(seo.title ?? "");
+  const description = String(seo.description ?? "");
+
+  if (!title.includes("GainForest")) {
+    addFinding(`seo-title-brand-${locale}`, `${locale} root SEO title should include GainForest.`);
+  }
+  if (title.length < 20 || title.length > 65) {
+    addFinding(`seo-title-length-${locale}`, `${locale} root SEO title length is ${title.length}; target 20–65 characters.`);
+  }
+  if (!description.includes("GainForest")) {
+    addFinding(`seo-description-brand-${locale}`, `${locale} root SEO description should name GainForest, not only a generic product.`);
+  }
+  if (description.length < 80 || description.length > 170) {
+    addFinding(`seo-description-length-${locale}`, `${locale} root SEO description length is ${description.length}; target 80–170 characters.`);
+  }
+}
+
+if (!layout.includes("applicationName: SITE_NAME")) {
+  addFinding("metadata-application-name", "Root metadata should set applicationName for app/search result context.");
+}
+if (!/alternates:\s*\{[\s\S]*languages/.test(layout)) {
+  addFinding("metadata-hreflang", "Root metadata should expose language alternates so Google can cluster localized home pages.");
+}
+if (!layout.includes("@type") || !layout.includes("Organization") || !layout.includes("WebSite")) {
+  addFinding("jsonld-home-organization-website", "Home page should include Organization and WebSite JSON-LD for brand/entity understanding.");
+}
+if (!layout.includes("sameAs")) {
+  addFinding("jsonld-brand-sameas", "Organization JSON-LD should include sameAs links to connect GainForest's web entities.");
+}
+
+if (!page.includes("GainForest connects")) {
+  addFinding("home-metadata-description-brand", "Home page metadata description should start from the GainForest brand/entity.");
+}
+if (!/title:\s*["']GainForest/.test(page)) {
+  addFinding("home-metadata-title-brand", "Home page metadata title should begin with GainForest.");
+}
+if (!/<h1\b/.test(homeLanding)) {
+  addFinding("home-h1", "Home landing page should render exactly one crawlable h1.");
+}
+if (!homeLanding.includes("headingUnderlined") || !homeLanding.includes("headingRest")) {
+  addFinding("home-heading-translated", "Home h1 should use translated text rather than hardcoded English.");
+}
+
+for (const image of [
+  "public/og/gainforest-og-2.png",
+  "public/icons/favicon.ico",
+  "public/icons/apple-touch-icon.png",
+]) {
+  if (!existsSync(join(root, image))) {
+    addFinding(`asset-${image}`, `${image} should exist for search/social previews.`);
+  }
+}
+
+for (const route of ["", "/observations", "/projects", "/organizations", "/bioblitz", "/grants", "/privacy"]) {
+  const quoted = route === "" ? 'path: ""' : `path: "${route}"`;
+  if (!sitemap.includes(quoted)) {
+    addFinding(`sitemap-route-${route || "home"}`, `Sitemap should include ${route || "/"}.`);
+  }
+}
+if (!sitemap.includes("alternates") || !sitemap.includes("languages")) {
+  addFinding("sitemap-hreflang", "Sitemap entries should include language alternates.");
+}
+if (!robots.includes("sitemap")) {
+  addFinding("robots-sitemap", "robots.txt should point crawlers to sitemap.xml.");
+}
+if (!robots.includes('allow: "/"')) {
+  addFinding("robots-allow-root", "robots.txt should explicitly allow the public site.");
+}
+if (robots.includes("/projects") || robots.includes("/observations")) {
+  addFinding("robots-public-disallow", "robots.txt must not disallow public project or observation pages.");
+}
+
+if (!layout.includes("twitter:") || !layout.includes("summary_large_image")) {
+  addFinding("twitter-card", "Root metadata should define a large-image Twitter/X card.");
+}
+if (!layout.includes("openGraph:") || !layout.includes("images:")) {
+  addFinding("open-graph-image", "Root metadata should define Open Graph preview image metadata.");
+}
+if (!layout.includes("metadataBase")) {
+  addFinding("metadata-base", "Root metadata should set metadataBase so relative canonicals and preview images become absolute URLs.");
+}
+
+if (findings.length === 0) {
+  addWarning("next-step", "Technical SEO audit is clean; next experiments should target content depth, internal links, and live Search Console data.");
+}
+
+console.log("SEO audit findings:");
+for (const finding of findings) {
+  console.log(`- ${finding.id}: ${finding.detail}`);
+}
+for (const warning of warnings) {
+  console.log(`WARN ${warning.id}: ${warning.detail}`);
+}
+console.log(`METRIC seo_findings=${findings.length}`);
+console.log(`METRIC seo_warnings=${warnings.length}`);
