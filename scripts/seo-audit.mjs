@@ -13,6 +13,7 @@ const localizedStaticMetadataGaps = [];
 const indexablePageHreflangGaps = [];
 const publicLandingSitemapGaps = [];
 const feedSitemapGaps = [];
+const listStructuredDataGaps = [];
 const warnings = [];
 
 function read(path) {
@@ -67,6 +68,10 @@ function addFeedSitemapGap(id, detail) {
   feedSitemapGaps.push({ id, detail });
 }
 
+function addListStructuredDataGap(id, detail) {
+  listStructuredDataGaps.push({ id, detail });
+}
+
 const locales = ["en", "es", "pt", "sw", "id"];
 const layout = read("app/layout.tsx");
 const page = read("app/page.tsx");
@@ -86,6 +91,7 @@ const robots = read("app/robots.ts");
 const homeLanding = read("app/_components/HomeLanding.tsx");
 const projectsPage = read("app/projects/page.tsx");
 const observationsPage = read("app/observations/page.tsx");
+const organizationsPage = read("app/organizations/page.tsx");
 const projectDetailPage = read("app/projects/[did]/[rkey]/page.tsx");
 const accountLayout = read("app/account/[did]/layout.tsx");
 const publicPagesNeedingHreflang = [
@@ -229,6 +235,19 @@ if (feedIsIndexable && !sitemap.includes('path: "/feed"')) {
   );
 }
 
+for (const { id, file, source, path } of [
+  { id: "projects", file: "app/projects/page.tsx", source: projectsPage, path: "/projects" },
+  { id: "observations", file: "app/observations/page.tsx", source: observationsPage, path: "/observations" },
+  { id: "organizations", file: "app/organizations/page.tsx", source: organizationsPage, path: "/organizations" },
+]) {
+  if (!source.includes("application/ld+json") || !source.includes("CollectionPage") || !source.includes(path)) {
+    addListStructuredDataGap(
+      `list-structured-data-${id}`,
+      `${file} should emit CollectionPage JSON-LD using its localized metadata and canonical ${path} URL so crawlers understand the public listing page type.`,
+    );
+  }
+}
+
 if (!sitemap.includes("fetchOrganizationEntries") || !sitemap.includes("/account/${encodeURIComponent(node.did)}")) {
   addSitemapDiscoveryGap(
     "organization-profile-sitemap",
@@ -364,6 +383,10 @@ console.log("Feed sitemap gaps:");
 for (const gap of feedSitemapGaps) {
   console.log(`- ${gap.id}: ${gap.detail}`);
 }
+console.log("List structured data gaps:");
+for (const gap of listStructuredDataGaps) {
+  console.log(`- ${gap.id}: ${gap.detail}`);
+}
 for (const warning of warnings) {
   console.log(`WARN ${warning.id}: ${warning.detail}`);
 }
@@ -377,4 +400,5 @@ console.log(`METRIC localized_static_metadata_gaps=${localizedStaticMetadataGaps
 console.log(`METRIC indexable_page_hreflang_gaps=${indexablePageHreflangGaps.length}`);
 console.log(`METRIC public_landing_sitemap_gaps=${publicLandingSitemapGaps.length}`);
 console.log(`METRIC feed_sitemap_gaps=${feedSitemapGaps.length}`);
+console.log(`METRIC list_structured_data_gaps=${listStructuredDataGaps.length}`);
 console.log(`METRIC seo_warnings=${warnings.length}`);
