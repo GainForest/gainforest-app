@@ -5,7 +5,8 @@ Improve gainforest.app technical SEO and brand/entity signals so Google can bett
 
 ## Metrics
 Current phase:
-- **Primary**: `public_landing_sitemap_gaps` (count, lower is better) — public landing/setup pages with localized metadata that are missing from sitemap discovery.
+- **Primary**: `feed_sitemap_gaps` (count, lower is better) — the public activity feed is indexable with server-rendered content but missing a clear sitemap/noindex strategy.
+- **Secondary**: `public_landing_sitemap_gaps` — public landing/setup pages with localized metadata that are missing from sitemap discovery.
 - **Secondary**: `indexable_page_hreflang_gaps` — remaining indexable public pages with page-level canonicals but no localized `hreflang` alternates.
 - **Secondary**: `seo_findings` — core technical SEO findings from `scripts/seo-audit.mjs`.
 - **Secondary**: `localized_static_metadata_gaps` — sitemap-backed public pages with hardcoded English metadata or missing metadata translations.
@@ -19,6 +20,7 @@ Current phase:
 - **Secondary**: `check_site_meta_ready` — whether `npx check-site-meta` successfully boots against the configured target URL.
 
 Previous phases:
+- **Primary**: `public_landing_sitemap_gaps` (count, lower is better) — public landing/setup pages with localized metadata that are missing from sitemap discovery.
 - **Primary**: `indexable_page_hreflang_gaps` (count, lower is better) — remaining indexable public pages with page-level canonicals but no localized `hreflang` alternates.
 - **Primary**: `seo_findings` (count, lower is better) — core technical SEO findings from `scripts/seo-audit.mjs`.
 - **Primary**: `localized_static_metadata_gaps` (count, lower is better) — sitemap-backed public pages with hardcoded English metadata or missing metadata translations.
@@ -76,3 +78,5 @@ The script outputs `METRIC name=value` lines. It also starts `npx check-site-met
 - Started an eighth phase for remaining indexable page `hreflang`: public pages such as feed, submit-data, and Tainá use page-level canonicals and should preserve localized alternates unless explicitly noindexed.
 - Reduced `indexable_page_hreflang_gaps` from 3 to 0 by switching feed, submit-data, and Tainá to `localizedAlternates`.
 - Started a ninth phase for public landing-page sitemap discovery: `/submit-data` and `/taina` have localized metadata and should be discoverable through `sitemap.xml` if they remain indexable public landing/setup pages.
+- Reduced `public_landing_sitemap_gaps` from 2 to 0 by adding `/submit-data` and `/taina` to sitemap routes.
+- Started a tenth phase for `/feed`: it is an indexable, server-rendered public activity page with localized metadata and should either be listed in sitemap.xml or explicitly noindexed. The current hypothesis is that listing it is better because it exposes fresh public activity and internal links.

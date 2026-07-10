@@ -12,6 +12,7 @@ const sitemapDiscoveryGaps = [];
 const localizedStaticMetadataGaps = [];
 const indexablePageHreflangGaps = [];
 const publicLandingSitemapGaps = [];
+const feedSitemapGaps = [];
 const warnings = [];
 
 function read(path) {
@@ -60,6 +61,10 @@ function addIndexablePageHreflangGap(id, detail) {
 
 function addPublicLandingSitemapGap(id, detail) {
   publicLandingSitemapGaps.push({ id, detail });
+}
+
+function addFeedSitemapGap(id, detail) {
+  feedSitemapGaps.push({ id, detail });
 }
 
 const locales = ["en", "es", "pt", "sw", "id"];
@@ -215,6 +220,15 @@ for (const { path, reason } of publicLandingPagesNeedingSitemap) {
   }
 }
 
+const feedPage = read("app/feed/page.tsx");
+const feedIsIndexable = !/robots:\s*\{[^}]*index:\s*false/s.test(feedPage);
+if (feedIsIndexable && !sitemap.includes('path: "/feed"')) {
+  addFeedSitemapGap(
+    "sitemap-feed",
+    "/feed is an indexable, server-rendered public activity page with localized metadata and should be either listed in sitemap.xml or explicitly noindexed.",
+  );
+}
+
 if (!sitemap.includes("fetchOrganizationEntries") || !sitemap.includes("/account/${encodeURIComponent(node.did)}")) {
   addSitemapDiscoveryGap(
     "organization-profile-sitemap",
@@ -346,6 +360,10 @@ console.log("Public landing sitemap gaps:");
 for (const gap of publicLandingSitemapGaps) {
   console.log(`- ${gap.id}: ${gap.detail}`);
 }
+console.log("Feed sitemap gaps:");
+for (const gap of feedSitemapGaps) {
+  console.log(`- ${gap.id}: ${gap.detail}`);
+}
 for (const warning of warnings) {
   console.log(`WARN ${warning.id}: ${warning.detail}`);
 }
@@ -358,4 +376,5 @@ console.log(`METRIC sitemap_discovery_gaps=${sitemapDiscoveryGaps.length}`);
 console.log(`METRIC localized_static_metadata_gaps=${localizedStaticMetadataGaps.length}`);
 console.log(`METRIC indexable_page_hreflang_gaps=${indexablePageHreflangGaps.length}`);
 console.log(`METRIC public_landing_sitemap_gaps=${publicLandingSitemapGaps.length}`);
+console.log(`METRIC feed_sitemap_gaps=${feedSitemapGaps.length}`);
 console.log(`METRIC seo_warnings=${warnings.length}`);
