@@ -18,6 +18,7 @@ const listSocialMetadataGaps = [];
 const remainingSocialMetadataGaps = [];
 const projectBreadcrumbGaps = [];
 const accountProfileStructuredDataGaps = [];
+const observationsServerContentGaps = [];
 const warnings = [];
 
 function read(path) {
@@ -90,6 +91,10 @@ function addProjectBreadcrumbGap(id, detail) {
 
 function addAccountProfileStructuredDataGap(id, detail) {
   accountProfileStructuredDataGaps.push({ id, detail });
+}
+
+function addObservationsServerContentGap(id, detail) {
+  observationsServerContentGaps.push({ id, detail });
 }
 
 const locales = ["en", "es", "pt", "sw", "id"];
@@ -287,6 +292,13 @@ for (const { id, file, source, path } of [
   }
 }
 
+if (!observationsPage.includes("walkOccurrences") || !observationsPage.includes("initialPage={initialPage}")) {
+  addObservationsServerContentGap(
+    "observations-initial-server-page",
+    "/observations should fetch and pass an initial server-rendered page of public sightings so crawlers and no-JS previews see real observation cards and links, not only an empty client shell.",
+  );
+}
+
 for (const { path, file } of indexablePagesNeedingSocialMetadata) {
   const source = read(file);
   const isNoindex = /robots:\s*\{[^}]*index:\s*false/s.test(source);
@@ -459,6 +471,10 @@ console.log("Account profile structured data gaps:");
 for (const gap of accountProfileStructuredDataGaps) {
   console.log(`- ${gap.id}: ${gap.detail}`);
 }
+console.log("Observations server-rendered content gaps:");
+for (const gap of observationsServerContentGaps) {
+  console.log(`- ${gap.id}: ${gap.detail}`);
+}
 for (const warning of warnings) {
   console.log(`WARN ${warning.id}: ${warning.detail}`);
 }
@@ -477,4 +493,5 @@ console.log(`METRIC list_social_metadata_gaps=${listSocialMetadataGaps.length}`)
 console.log(`METRIC remaining_social_metadata_gaps=${remainingSocialMetadataGaps.length}`);
 console.log(`METRIC project_breadcrumb_gaps=${projectBreadcrumbGaps.length}`);
 console.log(`METRIC account_profile_structured_data_gaps=${accountProfileStructuredDataGaps.length}`);
+console.log(`METRIC observations_server_content_gaps=${observationsServerContentGaps.length}`);
 console.log(`METRIC seo_warnings=${warnings.length}`);
