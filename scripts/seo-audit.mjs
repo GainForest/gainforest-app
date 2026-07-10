@@ -9,6 +9,7 @@ const publicHreflangGaps = [];
 const dynamicDetailMetadataGaps = [];
 const accountProfileMetadataGaps = [];
 const sitemapDiscoveryGaps = [];
+const localizedStaticMetadataGaps = [];
 const warnings = [];
 
 function read(path) {
@@ -47,9 +48,15 @@ function addSitemapDiscoveryGap(id, detail) {
   sitemapDiscoveryGaps.push({ id, detail });
 }
 
+function addLocalizedStaticMetadataGap(id, detail) {
+  localizedStaticMetadataGaps.push({ id, detail });
+}
+
 const locales = ["en", "es", "pt", "sw", "id"];
 const layout = read("app/layout.tsx");
 const page = read("app/page.tsx");
+const devicesPage = read("app/devices/page.tsx");
+const statusPage = read("app/status/page.tsx");
 const sitemap = read("app/sitemap.ts");
 const robots = read("app/robots.ts");
 const homeLanding = read("app/_components/HomeLanding.tsx");
@@ -145,6 +152,28 @@ if (!projectDetailPage.includes("twitter:") || !projectDetailPage.includes("summ
     "project-detail-twitter-card",
     "Dynamic project detail metadata should define a Twitter/X card using the project title, description, and image.",
   );
+}
+
+for (const { id, file, source, translationKey } of [
+  { id: "home", file: "app/page.tsx", source: page, translationKey: "common.seo" },
+  { id: "devices", file: "app/devices/page.tsx", source: devicesPage, translationKey: "common.devices.metadata" },
+  { id: "status", file: "app/status/page.tsx", source: statusPage, translationKey: "common.status.metadata" },
+]) {
+  if (!source.includes("generateMetadata") || !source.includes("getTranslations") || !source.includes(translationKey)) {
+    addLocalizedStaticMetadataGap(
+      `localized-static-metadata-${id}`,
+      `${file} should use generateMetadata with ${translationKey} translations so localized URLs do not serve hardcoded English metadata.`,
+    );
+  }
+}
+for (const locale of locales) {
+  const common = readJson(`messages/${locale}/common.json`);
+  if (!common.devices?.metadata?.title || !common.devices?.metadata?.description) {
+    addLocalizedStaticMetadataGap(`devices-metadata-${locale}`, `${locale} devices metadata translation is missing.`);
+  }
+  if (!common.status?.metadata?.title || !common.status?.metadata?.description) {
+    addLocalizedStaticMetadataGap(`status-metadata-${locale}`, `${locale} status metadata translation is missing.`);
+  }
 }
 
 if (!sitemap.includes("fetchOrganizationEntries") || !sitemap.includes("/account/${encodeURIComponent(node.did)}")) {
@@ -266,6 +295,10 @@ console.log("Sitemap discovery gaps:");
 for (const gap of sitemapDiscoveryGaps) {
   console.log(`- ${gap.id}: ${gap.detail}`);
 }
+console.log("Localized static metadata gaps:");
+for (const gap of localizedStaticMetadataGaps) {
+  console.log(`- ${gap.id}: ${gap.detail}`);
+}
 for (const warning of warnings) {
   console.log(`WARN ${warning.id}: ${warning.detail}`);
 }
@@ -275,4 +308,5 @@ console.log(`METRIC public_hreflang_gaps=${publicHreflangGaps.length}`);
 console.log(`METRIC dynamic_detail_metadata_gaps=${dynamicDetailMetadataGaps.length}`);
 console.log(`METRIC account_profile_metadata_gaps=${accountProfileMetadataGaps.length}`);
 console.log(`METRIC sitemap_discovery_gaps=${sitemapDiscoveryGaps.length}`);
+console.log(`METRIC localized_static_metadata_gaps=${localizedStaticMetadataGaps.length}`);
 console.log(`METRIC seo_warnings=${warnings.length}`);
