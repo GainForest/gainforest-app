@@ -22,6 +22,7 @@ const observationsServerContentGaps = [];
 const projectsServerContentGaps = [];
 const organizationsServerContentGaps = [];
 const listItemStructuredDataGaps = [];
+const observationDetailMetadataGaps = [];
 const warnings = [];
 
 function read(path) {
@@ -112,6 +113,10 @@ function addListItemStructuredDataGap(id, detail) {
   listItemStructuredDataGaps.push({ id, detail });
 }
 
+function addObservationDetailMetadataGap(id, detail) {
+  observationDetailMetadataGaps.push({ id, detail });
+}
+
 const locales = ["en", "es", "pt", "sw", "id"];
 const layout = read("app/layout.tsx");
 const page = read("app/page.tsx");
@@ -140,6 +145,7 @@ const projectsPage = read("app/projects/page.tsx");
 const observationsPage = read("app/observations/page.tsx");
 const organizationsPage = read("app/organizations/page.tsx");
 const projectDetailPage = read("app/projects/[did]/[rkey]/page.tsx");
+const observationDetailPage = read("app/observations/[did]/[rkey]/page.tsx");
 const accountLayout = read("app/account/[did]/layout.tsx");
 const publicPagesNeedingHreflang = [
   { path: "/", file: "app/page.tsx" },
@@ -234,6 +240,30 @@ if (!projectDetailPage.includes("BreadcrumbList") || !projectDetailPage.includes
   addProjectBreadcrumbGap(
     "project-detail-breadcrumb-jsonld",
     "Dynamic project detail pages should emit BreadcrumbList JSON-LD (home → projects → project) so search results can understand hierarchy and breadcrumbs.",
+  );
+}
+if (!observationDetailPage.includes("localizedAlternates(localObservationHref(urlIdentifier, rkey))")) {
+  addObservationDetailMetadataGap(
+    "observation-detail-hreflang",
+    "Dynamic observation detail metadata should use localizedAlternates(localObservationHref(urlIdentifier, rkey)) so indexed sighting pages expose language alternates.",
+  );
+}
+if (!observationDetailPage.includes("openGraph:") || !observationDetailPage.includes("url: detailHref")) {
+  addObservationDetailMetadataGap(
+    "observation-detail-og-url",
+    "Dynamic observation detail Open Graph metadata should include the canonical detail URL for consistent social/link previews.",
+  );
+}
+if (!observationDetailPage.includes("twitter:") || !observationDetailPage.includes("summary_large_image")) {
+  addObservationDetailMetadataGap(
+    "observation-detail-twitter-card",
+    "Dynamic observation detail metadata should define a Twitter/X card using the sighting name, description, and image.",
+  );
+}
+if (!observationDetailPage.includes("buildObservationJsonLd") || !observationDetailPage.includes("observation-json-ld")) {
+  addObservationDetailMetadataGap(
+    "observation-detail-jsonld",
+    "Dynamic observation detail pages should emit Observation JSON-LD describing the public nature sighting, date, location, image, and observer profile when available.",
   );
 }
 
@@ -526,6 +556,10 @@ console.log("List ItemList structured data gaps:");
 for (const gap of listItemStructuredDataGaps) {
   console.log(`- ${gap.id}: ${gap.detail}`);
 }
+console.log("Observation detail metadata gaps:");
+for (const gap of observationDetailMetadataGaps) {
+  console.log(`- ${gap.id}: ${gap.detail}`);
+}
 for (const warning of warnings) {
   console.log(`WARN ${warning.id}: ${warning.detail}`);
 }
@@ -548,4 +582,5 @@ console.log(`METRIC observations_server_content_gaps=${observationsServerContent
 console.log(`METRIC projects_server_content_gaps=${projectsServerContentGaps.length}`);
 console.log(`METRIC organizations_server_content_gaps=${organizationsServerContentGaps.length}`);
 console.log(`METRIC list_item_structured_data_gaps=${listItemStructuredDataGaps.length}`);
+console.log(`METRIC observation_detail_metadata_gaps=${observationDetailMetadataGaps.length}`);
 console.log(`METRIC seo_warnings=${warnings.length}`);

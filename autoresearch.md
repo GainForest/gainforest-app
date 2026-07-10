@@ -5,7 +5,8 @@ Improve gainforest.app technical SEO and brand/entity signals so Google can bett
 
 ## Metrics
 Current phase:
-- **Primary**: `list_item_structured_data_gaps` (count, lower is better) — public list pages with server-rendered initial records missing ItemList JSON-LD for those visible records.
+- **Primary**: `observation_detail_metadata_gaps` (count, lower is better) — dynamic observation detail pages missing hreflang, social preview, or Observation JSON-LD metadata.
+- **Secondary**: `list_item_structured_data_gaps` — public list pages with server-rendered initial records missing ItemList JSON-LD for those visible records.
 - **Secondary**: `organizations_server_content_gaps` — the public organizations index missing an initial server-rendered page of organization cards for crawler-visible content.
 - **Secondary**: `projects_server_content_gaps` — the public projects index missing an initial server-rendered page of project cards for crawler-visible content.
 - **Secondary**: `observations_server_content_gaps` — the public observations index missing an initial server-rendered page of sightings for crawler-visible content.
@@ -29,6 +30,7 @@ Current phase:
 - **Secondary**: `check_site_meta_ready` — whether `npx check-site-meta` successfully boots against the configured target URL.
 
 Previous phases:
+- **Primary**: `list_item_structured_data_gaps` (count, lower is better) — public list pages with server-rendered initial records missing ItemList JSON-LD for those visible records.
 - **Primary**: `organizations_server_content_gaps` (count, lower is better) — the public organizations index missing an initial server-rendered page of organization cards for crawler-visible content.
 - **Primary**: `projects_server_content_gaps` (count, lower is better) — the public projects index missing an initial server-rendered page of project cards for crawler-visible content.
 - **Primary**: `observations_server_content_gaps` (count, lower is better) — the public observations index missing an initial server-rendered page of sightings for crawler-visible content.
@@ -116,3 +118,5 @@ The script outputs `METRIC name=value` lines. It also starts `npx check-site-met
 - Started an eighteenth phase for crawlable organizations content: `/organizations` is a public sitemap-backed index with metadata/social/structured data, and should server-render the first page of organization cards while preserving filter and load-more behavior.
 - Reduced `organizations_server_content_gaps` from 1 to 0 by adding cursor-aware initial page support to `OrganizationsClient` and fetching a default first organization page on the server.
 - Started a nineteenth phase for ItemList structured data: now `/projects`, `/observations`, and `/organizations` all have server-rendered initial records, their `CollectionPage` JSON-LD should expose an `ItemList` of the visible records and canonical detail/profile URLs.
+- Reduced `list_item_structured_data_gaps` from 3 to 0 by adding ItemList JSON-LD for server-rendered records on `/projects`, `/observations`, and `/organizations`.
+- Started a twentieth phase for observation detail metadata: observation detail pages are now linked from server-rendered ItemLists and should carry localized alternates, canonical social previews, and structured data for the sighting.
