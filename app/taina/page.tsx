@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { Suspense } from "react";
 import { BinocularsIcon, BotIcon, SendIcon, SproutIcon } from "lucide-react";
+import { localizedAlternates } from "@/app/_lib/seo-metadata";
 import { fetchAuthSession } from "../_lib/auth-server";
 import { TainaPageSkeleton } from "../_components/PageLoadingSkeletons";
 import { TainaSetupClient } from "./_components/TainaSetupClient";
@@ -14,7 +15,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: t("title"),
     description: t("description"),
-    alternates: { canonical: "/taina" },
+    alternates: localizedAlternates("/taina"),
   };
 }
 

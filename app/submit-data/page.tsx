@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { ArchiveIcon, CloudUploadIcon, SearchCheckIcon, SproutIcon } from "lucide-react";
+import { localizedAlternates } from "@/app/_lib/seo-metadata";
 import { fetchAuthSession } from "../_lib/auth-server";
 import { isDataJobsConfigured } from "../_lib/data-jobs";
 import { SubmitDataClient } from "./_components/SubmitDataClient";
@@ -12,7 +13,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: t("title"),
     description: t("description"),
-    alternates: { canonical: "/submit-data" },
+    alternates: localizedAlternates("/submit-data"),
   };
 }
 
