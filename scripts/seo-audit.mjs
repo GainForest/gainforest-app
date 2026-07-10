@@ -15,6 +15,7 @@ const publicLandingSitemapGaps = [];
 const feedSitemapGaps = [];
 const listStructuredDataGaps = [];
 const listSocialMetadataGaps = [];
+const remainingSocialMetadataGaps = [];
 const warnings = [];
 
 function read(path) {
@@ -77,6 +78,10 @@ function addListSocialMetadataGap(id, detail) {
   listSocialMetadataGaps.push({ id, detail });
 }
 
+function addRemainingSocialMetadataGap(id, detail) {
+  remainingSocialMetadataGaps.push({ id, detail });
+}
+
 const locales = ["en", "es", "pt", "sw", "id"];
 const layout = read("app/layout.tsx");
 const page = read("app/page.tsx");
@@ -90,6 +95,13 @@ const indexablePagesNeedingLocalizedAlternates = [
 const publicLandingPagesNeedingSitemap = [
   { path: "/submit-data", reason: "field-partner data submission landing page" },
   { path: "/taina", reason: "Tainá field assistant setup landing page" },
+];
+const indexablePagesNeedingSocialMetadata = [
+  { path: "/feed", file: "app/feed/page.tsx" },
+  { path: "/submit-data", file: "app/submit-data/page.tsx" },
+  { path: "/taina", file: "app/taina/page.tsx" },
+  { path: "/devices", file: "app/devices/page.tsx" },
+  { path: "/status", file: "app/status/page.tsx" },
 ];
 const sitemap = read("app/sitemap.ts");
 const robots = read("app/robots.ts");
@@ -259,6 +271,17 @@ for (const { id, file, source, path } of [
   }
 }
 
+for (const { path, file } of indexablePagesNeedingSocialMetadata) {
+  const source = read(file);
+  const isNoindex = /robots:\s*\{[^}]*index:\s*false/s.test(source);
+  if (!isNoindex && !source.includes(`socialPreviewMetadata(\"${path}\"`)) {
+    addRemainingSocialMetadataGap(
+      `remaining-social-metadata-${path.slice(1).replaceAll("-", "_")}`,
+      `${file} is an indexable public page with localized metadata; it should use socialPreviewMetadata(\"${path}\", ...) so check-site-meta/social previews are page-specific.`,
+    );
+  }
+}
+
 if (!sitemap.includes("fetchOrganizationEntries") || !sitemap.includes("/account/${encodeURIComponent(node.did)}")) {
   addSitemapDiscoveryGap(
     "organization-profile-sitemap",
@@ -402,6 +425,10 @@ console.log("List social metadata gaps:");
 for (const gap of listSocialMetadataGaps) {
   console.log(`- ${gap.id}: ${gap.detail}`);
 }
+console.log("Remaining social metadata gaps:");
+for (const gap of remainingSocialMetadataGaps) {
+  console.log(`- ${gap.id}: ${gap.detail}`);
+}
 for (const warning of warnings) {
   console.log(`WARN ${warning.id}: ${warning.detail}`);
 }
@@ -417,4 +444,5 @@ console.log(`METRIC public_landing_sitemap_gaps=${publicLandingSitemapGaps.lengt
 console.log(`METRIC feed_sitemap_gaps=${feedSitemapGaps.length}`);
 console.log(`METRIC list_structured_data_gaps=${listStructuredDataGaps.length}`);
 console.log(`METRIC list_social_metadata_gaps=${listSocialMetadataGaps.length}`);
+console.log(`METRIC remaining_social_metadata_gaps=${remainingSocialMetadataGaps.length}`);
 console.log(`METRIC seo_warnings=${warnings.length}`);

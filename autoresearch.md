@@ -5,7 +5,8 @@ Improve gainforest.app technical SEO and brand/entity signals so Google can bett
 
 ## Metrics
 Current phase:
-- **Primary**: `list_social_metadata_gaps` (count, lower is better) — public listing pages whose social preview metadata still falls back to generic site/home Open Graph/Twitter data.
+- **Primary**: `remaining_social_metadata_gaps` (count, lower is better) — remaining indexable public pages whose social preview metadata still falls back to generic site/home Open Graph/Twitter data.
+- **Secondary**: `list_social_metadata_gaps` — public listing pages whose social preview metadata still falls back to generic site/home Open Graph/Twitter data.
 - **Secondary**: `list_structured_data_gaps` — public listing pages missing CollectionPage JSON-LD that describes their localized index/list content.
 - **Secondary**: `feed_sitemap_gaps` — the public activity feed is indexable with server-rendered content but missing a clear sitemap/noindex strategy.
 - **Secondary**: `public_landing_sitemap_gaps` — public landing/setup pages with localized metadata that are missing from sitemap discovery.
@@ -22,6 +23,7 @@ Current phase:
 - **Secondary**: `check_site_meta_ready` — whether `npx check-site-meta` successfully boots against the configured target URL.
 
 Previous phases:
+- **Primary**: `list_social_metadata_gaps` (count, lower is better) — public listing pages whose social preview metadata still falls back to generic site/home Open Graph/Twitter data.
 - **Primary**: `list_structured_data_gaps` (count, lower is better) — public listing pages missing CollectionPage JSON-LD that describes their localized index/list content.
 - **Primary**: `feed_sitemap_gaps` (count, lower is better) — the public activity feed is indexable with server-rendered content but missing a clear sitemap/noindex strategy.
 - **Primary**: `public_landing_sitemap_gaps` (count, lower is better) — public landing/setup pages with localized metadata that are missing from sitemap discovery.
@@ -88,3 +90,5 @@ The script outputs `METRIC name=value` lines. It also starts `npx check-site-met
 - Started an eleventh phase for list-page structured data: public listing pages (`/projects`, `/observations`, `/organizations`) should emit localized `CollectionPage` JSON-LD in addition to regular metadata, so crawlers can understand these as index/list pages rather than generic web pages.
 - Reduced `list_structured_data_gaps` from 3 to 0 by adding localized `CollectionPage` JSON-LD to `/projects`, `/observations`, and `/organizations`.
 - Started a twelfth phase for list-page social metadata: the same high-value list pages should define page-specific Open Graph/Twitter metadata so check-site-meta/social previews show the list page title/description rather than generic home metadata.
+- Reduced `list_social_metadata_gaps` from 3 to 0 by adding page-specific Open Graph/Twitter metadata to `/projects`, `/observations`, and `/organizations`.
+- Started a thirteenth phase for remaining social metadata: other indexable public pages (`/feed`, `/submit-data`, `/taina`, `/devices`, `/status`) should also use page-specific social preview metadata because they now have localized metadata and sitemap/hreflang coverage.
