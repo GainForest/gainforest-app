@@ -43,11 +43,17 @@ function DialogPlaceholder({
   className,
   children,
   dialogWidth,
+  fullscreen = false,
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Content> & {
   showCloseButton?: boolean;
   /** Tailwind max-width class for the dialog container (e.g. "max-w-2xl"). Defaults to "max-w-sm". */
   dialogWidth?: string;
+  /**
+   * Take over the whole viewport (phone "full page" mode). Overrides the
+   * centered floating card: edge-to-edge, full dynamic height, no radius.
+   */
+  fullscreen?: boolean;
 }) {
   return (
     <DialogPortal data-slot="dialog-portal">
@@ -62,6 +68,11 @@ function DialogPlaceholder({
           // below the screen and the title/footer become unreachable.
           "max-h-[calc(100dvh-2rem)] overflow-x-hidden overflow-y-auto overscroll-contain",
           dialogWidth ?? "max-w-sm",
+          // Fullscreen mode (opt-in per modal, small screens only): the dialog
+          // becomes the page. Listed after dialogWidth so tailwind-merge lets
+          // these win over the centered-card geometry above.
+          fullscreen &&
+            "top-0 left-0 h-dvh max-h-dvh w-full max-w-none translate-x-0 translate-y-0 rounded-none border-0 p-4 pt-[max(1rem,env(safe-area-inset-top))] pb-[max(1rem,env(safe-area-inset-bottom))]",
           className,
         )}
         {...props}

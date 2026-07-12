@@ -44,6 +44,14 @@ export type ModalVariant = {
    * stack sets it, the whole stack renders as a dialog.
    */
   forceDialog?: boolean;
+  /**
+   * On small screens, expand the dialog to cover the whole viewport ("full
+   * page" feel) instead of a cramped floating card. Implies forceDialog
+   * behaviour is desirable for the flow; when any modal in the stack sets it,
+   * the whole stack renders fullscreen while on a small screen. No effect on
+   * larger screens (the dialog keeps its dialogWidth there).
+   */
+  fullscreenOnMobile?: boolean;
 };
 
 type ModalMode = "dialog" | "drawer";
@@ -71,6 +79,7 @@ type ModalInternals = {
   mode: ModalMode | null;
   modalStack: ModalVariant[];
   activeDialogWidth: string;
+  dialogFullscreen: boolean;
   handleOpenChange: (open: boolean) => void;
   portalContainers: Record<string, HTMLElement | null>;
   registerPortalContainer: (id: string, element: HTMLElement | null) => void;
@@ -93,6 +102,7 @@ const ModalStack = ({
   onOpenChange,
   dismissible,
   dialogWidth,
+  dialogFullscreen,
 }: {
   mode: ModalMode | null;
   children: React.ReactNode;
@@ -100,6 +110,7 @@ const ModalStack = ({
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
   dialogWidth: string;
+  dialogFullscreen: boolean;
 }) => {
   if (mode === "dialog") {
     debug.log("dismissible", dismissible);
@@ -107,6 +118,7 @@ const ModalStack = ({
       <Dialog open={isOpen} onOpenChange={onOpenChange}>
         <DialogPlaceholder
           dialogWidth={dialogWidth}
+          fullscreen={dialogFullscreen}
           onEscapeKeyDown={(e) => {
             e.preventDefault();
             if (dismissible) {
@@ -151,13 +163,20 @@ export const ModalProvider = ({ children }: { children: React.ReactNode }) => {
   const smQueryMatches = useMediaQuery(
     `(min-width: ${SMALL_SCREEN_BREAKPOINT})`
   );
-  const forceDialog = modalStack.some((variant) => variant.forceDialog);
+  const forceDialog = modalStack.some(
+    (variant) => variant.forceDialog || variant.fullscreenOnMobile,
+  );
   const mode: ModalMode | null =
     smQueryMatches === null
       ? null
       : smQueryMatches || forceDialog
         ? "dialog"
         : "drawer";
+  // Fullscreen only kicks in below the drawer breakpoint — on larger screens
+  // the modal stays a normal centered dialog with its dialogWidth.
+  const dialogFullscreen =
+    smQueryMatches === false &&
+    modalStack.some((variant) => variant.fullscreenOnMobile);
 
   const activeDialogWidth = modalStack.at(-1)?.dialogWidth ?? "max-w-sm";
 
@@ -236,11 +255,12 @@ export const ModalProvider = ({ children }: { children: React.ReactNode }) => {
       mode,
       modalStack,
       activeDialogWidth,
+      dialogFullscreen,
       handleOpenChange,
       portalContainers,
       registerPortalContainer,
     }),
-    [isOpen, mode, modalStack, activeDialogWidth, handleOpenChange, portalContainers, registerPortalContainer],
+    [isOpen, mode, modalStack, activeDialogWidth, dialogFullscreen, handleOpenChange, portalContainers, registerPortalContainer],
   );
 
   // ModalModeContext wraps the app children too (not just the host) so
@@ -265,7 +285,7 @@ export const ModalProvider = ({ children }: { children: React.ReactNode }) => {
  */
 export const ModalHost = () => {
   const internals = useModalInternals("ModalHost");
-  const { isOpen, mode, modalStack, activeDialogWidth, handleOpenChange } = internals;
+  const { isOpen, mode, modalStack, activeDialogWidth, dialogFullscreen, handleOpenChange } = internals;
   const modalInfo = useCurrentModalInfo(modalStack);
 
   return (
@@ -276,6 +296,7 @@ export const ModalHost = () => {
         onOpenChange={handleOpenChange}
         dismissible={modalInfo.dismissible}
         dialogWidth={activeDialogWidth}
+        dialogFullscreen={dialogFullscreen}
       >
         <VisuallyHidden.Root>
           {mode === "dialog" ? (

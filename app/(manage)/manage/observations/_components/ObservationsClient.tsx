@@ -685,7 +685,8 @@ export function ObservationsClient({
       {
         id: "add-observations",
         dialogWidth: "max-w-2xl w-[calc(100%-2rem)]",
-        forceDialog: true,
+        // Full page on phones; centered max-w-2xl dialog on >=32rem.
+        fullscreenOnMobile: true,
         content: (
           <AddObservationsModal
             target={target}

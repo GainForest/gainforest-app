@@ -936,7 +936,12 @@ export function AddObservationsModal({
         className={cn(
           "rounded-2xl border border-dashed transition-colors",
           isDragging ? "border-primary bg-primary/10" : "border-primary/30",
-          showEmptyState ? "px-6 py-10" : "p-3",
+          // Below the modal system's 32rem drawer breakpoint the dialog runs
+          // fullscreen (fullscreenOnMobile), so let the empty drop zone grow
+          // into the freed-up height instead of leaving a dead lower half.
+          showEmptyState
+            ? "px-6 py-10 max-[32rem]:grid max-[32rem]:min-h-[55dvh] max-[32rem]:place-items-center"
+            : "p-3",
         )}
       >
         {showEmptyState ? (
