@@ -929,9 +929,6 @@
       "title": "Observasi — GainForest",
       "description": "Kumpulkan dan unggah observasi lapangan serta tautkan ke proyek Anda."
     },
-    "newMetadata": {
-      "title": "Tambah observasi — GainForest"
-    },
     "projectLabel": "Kumpulkan untuk proyek",
     "projectHelp": "Opsional. Tautkan observasi ini ke salah satu proyek Anda agar siap digunakan sebagai bukti.",
     "projectStepTitle": "Pilih proyek terlebih dahulu",
@@ -998,19 +995,17 @@
       "refresh": "Segarkan",
       "loading": "Memuat…",
       "loadFailed": "Tidak dapat memuat proyek iNaturalist itu.",
-      "syncPending": "Sinkronkan {count, plural, one {# tersisa} other {# tersisa}}",
+      "syncPending": "Sinkronkan {count, plural, one {# yang belum ada} other {# yang belum ada}}",
       "syncing": "Menyinkronkan…",
-      "syncProgress": "Tersinkron {done} dari {total}",
-      "keepOpen": "Biarkan halaman ini tetap terbuka sampai sinkronisasi selesai — mungkin perlu beberapa saat.",
       "syncFailed": "Tidak dapat menyinkronkan observasi ini.",
       "photoFailed": "Foto tidak dapat disalin.",
       "syncedPhotoWarning": "Observasi ditambahkan. Satu atau beberapa foto tidak dapat disalin.",
-      "summary": "{synced} tersinkron · {pending} tersisa · {errors} gagal",
+      "summary": "{synced} tersinkron · {pending} belum ada · {errors} gagal",
       "found": "{count, plural, one {# observasi} other {# observasi}} ditemukan di {project}",
       "truncated": "Proyek ini sangat besar, jadi hanya observasi pertama yang dimuat.",
       "unnamedObservation": "Observasi",
       "status": {
-        "pending": "Belum tersinkron",
+        "pending": "Belum ada",
         "syncing": "Menyinkronkan",
         "synced": "Tersinkron",
         "syncedElsewhere": "Di proyek lain",

@@ -929,9 +929,6 @@
       "title": "Observations — GainForest",
       "description": "Collect and upload field observations and attach them to your projects."
     },
-    "newMetadata": {
-      "title": "Add observations — GainForest"
-    },
     "projectLabel": "Collect for a project",
     "projectHelp": "Optional. Attach these observations to one of your projects so they're ready to use as evidence.",
     "projectStepTitle": "Choose a project first",
@@ -998,19 +995,17 @@
       "refresh": "Refresh",
       "loading": "Loading…",
       "loadFailed": "Could not load that iNaturalist project.",
-      "syncPending": "Sync {count, plural, one {# remaining} other {# remaining}}",
+      "syncPending": "Sync {count, plural, one {# missing} other {# missing}}",
       "syncing": "Syncing…",
-      "syncProgress": "Synced {done} of {total}",
-      "keepOpen": "Keep this page open until syncing finishes — it can take a little while.",
       "syncFailed": "Could not sync this observation.",
       "photoFailed": "A photo could not be copied.",
       "syncedPhotoWarning": "Observation added. One or more photos could not be copied.",
-      "summary": "{synced} synced · {pending} remaining · {errors} failed",
+      "summary": "{synced} synced · {pending} missing · {errors} failed",
       "found": "{count, plural, one {# observation} other {# observations}} found in {project}",
       "truncated": "This project is very large, so only the first observations were loaded.",
       "unnamedObservation": "Observation",
       "status": {
-        "pending": "Not synced",
+        "pending": "Missing",
         "syncing": "Syncing",
         "synced": "Synced",
         "syncedElsewhere": "In another project",

@@ -12,7 +12,6 @@ import {
   FolderKanbanIcon,
   FolderPlusIcon,
   ImagePlusIcon,
-  InfoIcon,
   Layers2Icon,
   Loader2Icon,
   MapPinIcon,
@@ -52,7 +51,7 @@ import {
   type ObservationBlobRef,
 } from "./observation-mutations";
 import { LocationPickerModal, LocationPickerModalId } from "./LocationPickerModal";
-import { accountNewObservationPath } from "@/app/account/_lib/account-route";
+import { AddObservationsModal } from "./AddObservationsModal";
 import { FolderTile, FolderTileSkeleton } from "@/app/_components/FolderTile";
 import { GroupObservationsDatasetModal, type ObservationDatasetGroup } from "./GroupObservationsDatasetModal";
 import { deleteObservationDataset } from "./observation-dataset-mutations";
@@ -610,15 +609,7 @@ export function ObservationsClient({
   }, [activeDataset, activeGroup, activeProject, projectFilter]);
 
   const handleVisibleRecordsChange = useCallback((records: OccurrenceRecord[]) => {
-    // RecordExplorer hands us a fresh array on every render, so only adopt it
-    // when the visible set actually changed. Blindly calling setVisibleRecords
-    // would re-render → RecordExplorer re-renders → its effect fires again →
-    // infinite "Maximum update depth exceeded" loop (which froze clicks).
-    setVisibleRecords((current) =>
-      current.length === records.length && current.every((record, index) => record.id === records[index]?.id)
-        ? current
-        : records,
-    );
+    setVisibleRecords(records);
     const visibleIds = new Set(records.map((record) => record.id));
     setSelectedRecords((current) => {
       const next = new Map(Array.from(current).filter(([id]) => visibleIds.has(id)));
@@ -682,15 +673,35 @@ export function ObservationsClient({
   }
 
   // The primary "Add observation" affordances (the grid tile and the empty
-  // state) open the quick iNaturalist-style flow — the same one the sidebar
-  // uses. It now lives on its own page (roomier than a dialog, especially on
-  // phones); the project context, when set, rides along so new sightings attach
-  // to it. The richer in-page bulk panel (mode=add) stays reachable from the
+  // state) open the quick iNaturalist-style modal — the same one the sidebar
+  // uses. The richer in-page bulk panel (mode=add) stays reachable from the
   // unified Add data drop zone.
   const openAddObservations = useCallback(() => {
     if (createPermission.reason) return;
-    router.push(accountNewObservationPath(target.identifier, activeProject?.projectUri ?? null));
-  }, [activeProject?.projectUri, createPermission.reason, router, target.identifier]);
+    const close = () => {
+      void modal.hide().then(() => modal.clear());
+    };
+    modal.pushModal(
+      {
+        id: "add-observations",
+        dialogWidth: "max-w-2xl w-[calc(100%-2rem)]",
+        forceDialog: true,
+        content: (
+          <AddObservationsModal
+            target={target}
+            projectRef={activeProject?.projectUri ?? null}
+            onClose={close}
+            onViewObservations={() => {
+              close();
+              router.refresh();
+            }}
+          />
+        ),
+      },
+      true,
+    );
+    void modal.show();
+  }, [activeProject?.projectUri, createPermission.reason, modal, router, target]);
 
   // Group the currently-selected observations into a dataset (new or existing),
   // then refresh folder counts and the listing.
@@ -1000,9 +1011,6 @@ function INaturalistProjectSyncPanel({
   const [localStatuses, setLocalStatuses] = useState<Map<number, LocalSyncState>>(() => new Map());
   const [loading, setLoading] = useState(false);
   const [syncing, setSyncing] = useState(false);
-  // Determinate progress across the sync run so the observer sees steady
-  // movement instead of a lone spinner, and knows roughly how far it has to go.
-  const [syncProgress, setSyncProgress] = useState<{ done: number; total: number } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [truncated, setTruncated] = useState(false);
   const repoOptions = target.kind === "group" ? { repo: target.did } : undefined;
@@ -1114,44 +1122,35 @@ function INaturalistProjectSyncPanel({
 
   const syncPending = async () => {
     if (!sourceProject || syncing || disabledReason) return;
-    const queue = mergedObservations.filter((observation) => {
-      const status = observation.status ?? observation.syncStatus;
-      return status === "pending" || status === "syncedElsewhere";
-    });
-    if (queue.length === 0) return;
     setSyncing(true);
     setError(null);
-    setSyncProgress({ done: 0, total: queue.length });
     try {
-      for (const observation of queue) {
+      for (const observation of mergedObservations) {
+        const status = observation.status ?? observation.syncStatus;
+        if (status !== "pending" && status !== "syncedElsewhere") continue;
         try {
           await syncObservation(observation, sourceProject);
         } catch (caught) {
           setObservationStatus(observation.id, "error", caught instanceof Error ? caught.message : t("syncFailed"));
-        } finally {
-          setSyncProgress((current) => (current ? { ...current, done: current.done + 1 } : current));
         }
       }
       onSynced();
     } finally {
       setSyncing(false);
-      setSyncProgress(null);
     }
   };
 
-  const syncPct = syncProgress && syncProgress.total > 0 ? Math.round((syncProgress.done / syncProgress.total) * 100) : 0;
-
   return (
-    <section className="rounded-3xl bg-muted/40 p-5 sm:p-6">
-      <div className="flex flex-col gap-1.5 sm:flex-row sm:items-baseline sm:justify-between sm:gap-4">
+    <section className="rounded-3xl border border-border bg-card/70 p-4 shadow-sm sm:p-5">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
           <h2 className="font-instrument text-xl italic leading-tight text-foreground">{t("title")}</h2>
-          <p className="mt-1 max-w-xl text-sm leading-6 text-muted-foreground">{t("description", { project: project.title })}</p>
+          <p className="mt-1 text-sm leading-6 text-muted-foreground">{t("description", { project: project.title })}</p>
         </div>
         {sourceProject ? (
-          <p className="shrink-0 text-xs text-muted-foreground sm:text-right">
+          <div className="shrink-0 rounded-2xl bg-muted px-3 py-2 text-xs text-muted-foreground">
             {t("summary", { synced: syncedCount, pending: pendingCount, errors: errorCount })}
-          </p>
+          </div>
         ) : null}
       </div>
 
@@ -1162,7 +1161,7 @@ function INaturalistProjectSyncPanel({
           placeholder={t("placeholder")}
           aria-label={t("urlLabel")}
           disabled={loading || syncing}
-          className="min-w-0 flex-1 bg-background"
+          className="min-w-0 flex-1"
         />
         <Button type="button" variant="outline" onClick={() => void preview()} disabled={loading || syncing}>
           {loading ? <Loader2Icon className="size-4 animate-spin" /> : <RotateCcwIcon className="size-4" />}
@@ -1181,42 +1180,20 @@ function INaturalistProjectSyncPanel({
         </p>
       ) : null}
       {disabledReason ? <p className="mt-3 text-xs text-muted-foreground">{disabledReason}</p> : null}
-
-      {syncProgress ? (
-        <div className="mt-4 space-y-2">
-          <div className="flex items-center justify-between text-xs text-muted-foreground">
-            <span>{t("syncProgress", { done: syncProgress.done, total: syncProgress.total })}</span>
-            <span className="tabular-nums">{syncPct}%</span>
-          </div>
-          <div
-            className="h-1.5 overflow-hidden rounded-full bg-border"
-            role="progressbar"
-            aria-valuenow={syncPct}
-            aria-valuemin={0}
-            aria-valuemax={100}
-          >
-            <div className="h-full rounded-full bg-primary transition-[width] duration-300" style={{ width: `${syncPct}%` }} />
-          </div>
-          <p className="flex items-start gap-1.5 text-xs text-muted-foreground">
-            <InfoIcon className="mt-0.5 size-3.5 shrink-0" />
-            {t("keepOpen")}
-          </p>
-        </div>
-      ) : null}
       {truncated ? <p className="mt-3 text-xs text-muted-foreground">{t("truncated")}</p> : null}
 
       {sourceProject ? (
-        <div className="mt-5">
-          <p className="mb-3 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+        <div className="mt-4 rounded-2xl border border-border/70 bg-background/60 p-3">
+          <div className="mb-3 text-sm font-medium text-foreground">
             {t("found", { count: observations.length, project: sourceProject.title })}
-          </p>
-          <div className="grid max-h-[30rem] grid-cols-2 gap-3 overflow-y-auto pr-1 sm:grid-cols-3 lg:grid-cols-4">
+          </div>
+          <div className="grid max-h-[28rem] grid-cols-2 gap-3 overflow-y-auto pr-1 sm:grid-cols-3 lg:grid-cols-4">
             {mergedObservations.map((observation) => {
               const status = observation.status ?? observation.syncStatus;
               const message = observation.message;
               const imageUrl = observation.photos[0]?.url ?? null;
               return (
-                <article key={observation.id} className="group overflow-hidden rounded-2xl bg-background">
+                <article key={observation.id} className="group overflow-hidden rounded-2xl border border-border/70 bg-card shadow-sm">
                   <div className="relative aspect-square bg-muted">
                     {imageUrl ? (
                       // iNaturalist image hosts are external and varied; use a plain image
@@ -1248,15 +1225,15 @@ function INaturalistProjectSyncPanel({
                       </span>
                     ) : null}
                   </div>
-                  <div className="space-y-0.5 px-1 pb-1 pt-2">
-                    <p className="line-clamp-1 text-sm font-medium leading-5 text-foreground">
+                  <div className="space-y-1 p-3">
+                    <p className="line-clamp-2 min-h-10 text-sm font-medium leading-5 text-foreground">
                       {observation.commonName ?? observation.scientificName ?? t("unnamedObservation")}
                     </p>
                     <p className="truncate text-xs italic text-muted-foreground">{observation.scientificName ?? t("unnamedObservation")}</p>
                     <p className="truncate text-xs text-muted-foreground">
                       {[observation.observedOn, observation.recordedBy].filter(Boolean).join(" · ")}
                     </p>
-                    {message ? <p className="line-clamp-2 pt-0.5 text-xs text-muted-foreground">{message}</p> : null}
+                    {message ? <p className="line-clamp-2 text-xs text-muted-foreground">{message}</p> : null}
                   </div>
                 </article>
               );

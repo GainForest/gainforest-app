@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { CanonicalRedirect } from "@/app/account/_components/CanonicalRedirect";
 import { resolveAccountManageAccess } from "@/app/_lib/manage-server";
+import { ObservationsSubNav } from "../../_components/ObservationsSubNav";
 import { accountAudioPath, getAccountRouteData, readAccountRouteParams } from "../../_lib/account-route";
 import { AudioSection } from "@/app/(manage)/manage/_sections";
 import { AccountAudioViewer } from "./AccountAudioViewer";
@@ -38,9 +39,14 @@ export default async function AccountAudioPage({ params, searchParams }: PagePro
   const sp = await searchParams;
   const wantsEditor = typeof sp.section === "string" || typeof sp.mode === "string";
 
-  return wantsEditor ? (
-    <AudioSection target={target} />
-  ) : (
-    <AccountAudioViewer did={target.did} showUploadCta={target.kind === "personal"} />
+  return (
+    <>
+      <ObservationsSubNav identifier={account.urlIdentifier} showPrivate />
+      {wantsEditor ? (
+        <AudioSection target={target} />
+      ) : (
+        <AccountAudioViewer did={target.did} showUploadCta={target.kind === "personal"} />
+      )}
+    </>
   );
 }

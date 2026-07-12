@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { usePathname, useSearchParams } from "next/navigation";
-import { BadgeCheckIcon, BinocularsIcon, BotIcon, FolderKanbanIcon, HeartHandshakeIcon, HomeIcon, ImageIcon, MessageSquareTextIcon, MicIcon, SettingsIcon, UsersIcon, WrenchIcon } from "lucide-react";
+import { BadgeCheckIcon, BinocularsIcon, BotIcon, FolderKanbanIcon, HeartHandshakeIcon, HomeIcon, ImageIcon, MessageSquareTextIcon, SettingsIcon, UsersIcon, WrenchIcon } from "lucide-react";
 import { stripLocaleFromPathname } from "@/lib/i18n/routing";
 import { cn } from "@/lib/utils";
 import type { AccountKind } from "../_lib/account-route";
@@ -89,7 +89,6 @@ function buildTabs(
   includeTaina: boolean,
   showEndorsementsGiven: boolean,
   showEquipment: boolean,
-  canManage: boolean,
   manageBasePath?: string,
 ): Tab[] {
   const paths = buildTabPaths(did, scope, manageBasePath);
@@ -135,15 +134,6 @@ function buildTabs(
     icon: WrenchIcon,
     exact: false,
   };
-  // Audio (field recordings) is a private layer, so it only appears to the
-  // account owner / organization manager. It now stands as its own top-level
-  // tab beside Observations rather than a sub-toggle underneath it.
-  const audioTab: Tab = {
-    labelKey: "audio",
-    href: accountAudioPath(did),
-    icon: MicIcon,
-    exact: false,
-  };
   const appendExtras = (tabs: Tab[]): Tab[] => {
     if (includeTaina && scope === "account") tabs.push(tainaTab);
     if (includeSettings) tabs.push(settingsTab);
@@ -157,8 +147,8 @@ function buildTabs(
       href: paths.activity,
       icon: BinocularsIcon,
       exact: false,
-      // Trees / Drone are sub-views of Observations. Audio is its own tab.
-      matchPaths: scope === "account" ? [accountTreesPath(did), accountDronePath(did)] : undefined,
+      // Trees / Audio / Drone are sub-views of Observations now.
+      matchPaths: scope === "account" ? [accountTreesPath(did), accountAudioPath(did), accountDronePath(did)] : undefined,
     };
     const donationsTab: Tab = { labelKey: "donationHistory", href: paths.donations, icon: HeartHandshakeIcon, exact: false };
 
@@ -173,7 +163,6 @@ function buildTabs(
           { labelKey: "overview", href: paths.home, icon: HomeIcon, exact: true },
           projectsTab,
           observationsTab,
-          ...(canManage ? [audioTab] : []),
           postsTab,
           // Photos (galleries) and other file attachments share one tab; the
           // page carries a Photos | Files sub-toggle.
@@ -209,16 +198,13 @@ function buildTabs(
       href: paths.activity,
       icon: BinocularsIcon,
       exact: false,
-      // Trees / Drone are sub-views of Observations. Audio is its own tab.
-      matchPaths: scope === "account" ? [accountTreesPath(did), accountDronePath(did)] : undefined,
+      // Trees / Audio / Drone are sub-views of Observations now.
+      matchPaths: scope === "account" ? [accountTreesPath(did), accountAudioPath(did), accountDronePath(did)] : undefined,
     },
   ];
   // Members stay an organization-only governance surface, shown to managers on
-  // the profile. Trees and Drone are reached through Observations; Audio is now
-  // its own top-level tab (managers only). Sites and Timeline live on projects.
-  if (scope === "account" && canManage) {
-    tabs.push(audioTab);
-  }
+  // the profile. Trees, Audio and Drone are reached through the Observations
+  // sub-nav. Sites and Timeline now live on each project, not the profile.
   if (scope === "account") {
     tabs.push(postsTab);
   }
@@ -248,8 +234,6 @@ interface OrgTabBarProps {
   includeTaina?: boolean;
   showEndorsementsGiven?: boolean;
   showEquipment?: boolean;
-  /** Owner / manager of this profile — gates private tabs like Audio. */
-  canManage?: boolean;
   manageBasePath?: string;
 }
 
@@ -262,13 +246,12 @@ export function AccountTabBar({
   includeTaina = false,
   showEndorsementsGiven = false,
   showEquipment = false,
-  canManage = false,
   manageBasePath,
 }: OrgTabBarProps) {
   const t = useTranslations("common.accountTabs");
   const pathname = stripLocaleFromPathname(usePathname() ?? "/");
   const searchParams = useSearchParams();
-  const tabs = buildTabs(did, accountKind, scope, includeSettings, showOrgData, includeTaina, showEndorsementsGiven, showEquipment, canManage, manageBasePath);
+  const tabs = buildTabs(did, accountKind, scope, includeSettings, showOrgData, includeTaina, showEndorsementsGiven, showEquipment, manageBasePath);
 
   function isActive(tab: Tab): boolean {
     if (scope === "manage") {

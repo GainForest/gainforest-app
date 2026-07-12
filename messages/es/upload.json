@@ -929,9 +929,6 @@
       "title": "Observaciones — GainForest",
       "description": "Recopila y sube observaciones de campo y vincúlalas a tus proyectos."
     },
-    "newMetadata": {
-      "title": "Añadir observaciones — GainForest"
-    },
     "projectLabel": "Recopilar para un proyecto",
     "projectHelp": "Opcional. Vincula estas observaciones a uno de tus proyectos para tenerlas listas como evidencia.",
     "projectStepTitle": "Elige primero un proyecto",
@@ -998,19 +995,17 @@
       "refresh": "Actualizar",
       "loading": "Cargando…",
       "loadFailed": "No se pudo cargar ese proyecto de iNaturalist.",
-      "syncPending": "Sincronizar {count, plural, one {# restante} other {# restantes}}",
+      "syncPending": "Sincronizar {count, plural, one {# faltante} other {# faltantes}}",
       "syncing": "Sincronizando…",
-      "syncProgress": "Sincronizadas {done} de {total}",
-      "keepOpen": "Mantén esta página abierta hasta que termine la sincronización; puede tardar un poco.",
       "syncFailed": "No se pudo sincronizar esta observación.",
       "photoFailed": "No se pudo copiar una foto.",
       "syncedPhotoWarning": "Observación añadida. No se pudieron copiar una o más fotos.",
-      "summary": "{synced} sincronizadas · {pending} restantes · {errors} fallidas",
+      "summary": "{synced} sincronizadas · {pending} faltantes · {errors} fallidas",
       "found": "{count, plural, one {# observación} other {# observaciones}} encontradas en {project}",
       "truncated": "Este proyecto es muy grande, así que solo se cargaron las primeras observaciones.",
       "unnamedObservation": "Observación",
       "status": {
-        "pending": "Sin sincronizar",
+        "pending": "Faltante",
         "syncing": "Sincronizando",
         "synced": "Sincronizada",
         "syncedElsewhere": "En otro proyecto",

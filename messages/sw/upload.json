@@ -929,9 +929,6 @@
       "title": "Uchunguzi — GainForest",
       "description": "Kusanya na pakia uchunguzi wa shambani na uunganishe na miradi yako."
     },
-    "newMetadata": {
-      "title": "Ongeza uchunguzi — GainForest"
-    },
     "projectLabel": "Kusanya kwa ajili ya mradi",
     "projectHelp": "Si lazima. Unganisha uchunguzi huu na mojawapo ya miradi yako ili uwe tayari kutumika kama ushahidi.",
     "projectStepTitle": "Chagua mradi kwanza",
@@ -998,19 +995,17 @@
       "refresh": "Onyesha upya",
       "loading": "Inapakia…",
       "loadFailed": "Haikuweza kupakia mradi huo wa iNaturalist.",
-      "syncPending": "Sawazisha {count, plural, one {# zilizosalia} other {# zilizosalia}}",
+      "syncPending": "Sawazisha {count, plural, one {# ambao haupo} other {# ambazo hazipo}}",
       "syncing": "Inasawazisha…",
-      "syncProgress": "Zimesawazishwa {done} kati ya {total}",
-      "keepOpen": "Acha ukurasa huu wazi hadi usawazishaji ukamilike — huenda ikachukua muda kidogo.",
       "syncFailed": "Haikuweza kusawazisha uchunguzi huu.",
       "photoFailed": "Picha haikuweza kunakiliwa.",
       "syncedPhotoWarning": "Uchunguzi umeongezwa. Picha moja au zaidi hazikuweza kunakiliwa.",
-      "summary": "{synced} zimesawazishwa · {pending} zilizosalia · {errors} zimeshindwa",
+      "summary": "{synced} zimesawazishwa · {pending} hazipo · {errors} zimeshindwa",
       "found": "{count, plural, one {Uchunguzi #} other {Uchunguzi #}} umepatikana kwenye {project}",
       "truncated": "Mradi huu ni mkubwa sana, hivyo uchunguzi wa mwanzo pekee ulipakiwa.",
       "unnamedObservation": "Uchunguzi",
       "status": {
-        "pending": "Hazijasawazishwa",
+        "pending": "Haupo",
         "syncing": "Inasawazisha",
         "synced": "Umesawazishwa",
         "syncedElsewhere": "Kwenye mradi mwingine",

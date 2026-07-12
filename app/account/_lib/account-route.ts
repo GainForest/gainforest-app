@@ -99,15 +99,6 @@ export function accountObservationsPath(didOrHandle: string): string {
   return `${accountPath(didOrHandle)}/observations`;
 }
 
-/**
- * The full-page "Add observations" flow. Optionally scoped to a project so new
- * sightings attach to it (matches the modal's `projectRef`).
- */
-export function accountNewObservationPath(didOrHandle: string, projectRef?: string | null): string {
-  const base = `${accountPath(didOrHandle)}/observations/new`;
-  return projectRef ? `${base}?forProject=${encodeURIComponent(projectRef)}` : base;
-}
-
 export function accountFollowersPath(didOrHandle: string): string {
   return `${accountPath(didOrHandle)}/followers`;
 }

@@ -5,7 +5,7 @@ import ts from "typescript";
 const projectRoot = process.cwd();
 const locales = ["es", "id", "pt", "sw"];
 const allLocales = ["en", ...locales];
-const namespaces = ["root", "bumicert", "cart", "changelog", "common", "legacy", "marketplace", "modals", "privacy", "tainaGuide", "upload"];
+const namespaces = ["root", "bumicert", "cart", "common", "legacy", "marketplace", "modals", "privacy", "tainaGuide", "upload"];
 
 const allowedExactValues = new Set([
   "",
@@ -14,12 +14,6 @@ const allowedExactValues = new Set([
   "Audio",
   "Video",
   "Drone",
-  "Bluesky",
-  "Instagram",
-  "Raspberry Pi",
-  "Sensor",
-  "Starlink",
-  "Laptop",
   "Bumicert",
   "Bumicerts",
   "Bumicerts — Bumicerts",
@@ -50,7 +44,6 @@ const allowedExactValues = new Set([
   "GeoJSON",
   "KoboToolbox",
   "AudioMoth",
-  "AudioMoth #14",
   "AudioMoth — GainForest",
   "Firmware",
   "Firmware: {firmware}",
@@ -85,7 +78,6 @@ const allowedExactValues = new Set([
   "night-recording, tropical-forest",
   "Green Globe —",
   "GainForest v",
-  "GainForest v{version}",
   "GainForest e.V.",
   "Schwandenacker 35, 8052 Zurich, Switzerland",
   "team@gainforest.net",
