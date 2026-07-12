@@ -46,6 +46,16 @@ import {
   type AccountDataSummary,
 } from "@/app/(manage)/manage/_lib/mutations";
 import { redirectToLogout } from "@/app/_lib/auth-client";
+import {
+  blueskyProfileUrl,
+  ensureBlueskyProfile,
+  hasBlueskyProfile,
+  readBlueskyCrosspostPref,
+  saveBlueskyCrosspostPref,
+  type BlueskyCrosspostPref,
+} from "@/app/_lib/bluesky-crosspost";
+import { BlueskyConsentModal } from "@/app/_components/BlueskyConsentModal";
+import { BlueskyIcon } from "@/app/_components/BlueskyIcon";
 import { INDEXER_URL } from "@/app/_lib/urls";
 import { isTainaAgentKeyName } from "@/app/_lib/taina-shared";
 import { cn } from "@/lib/utils";
@@ -921,6 +931,125 @@ export function AgentKeysSection() {
   );
 }
 
+// ── Bluesky cross-posting ────────────────────────────────────────────────────
+
+/**
+ * Opt-in toggle for mirroring feed posts to Bluesky (app.bsky.feed.post twins
+ * in the user's own repo — see app/_lib/bluesky-crosspost.ts). The first
+ * activation goes through the consent modal, which also creates the user's
+ * Bluesky profile from their GainForest profile when they don't have one.
+ * Personal accounts only; organizations never see this section.
+ */
+function BlueskySection({ did }: { did: string }) {
+  const t = useTranslations("common.bluesky.settings");
+  const [pref, setPref] = useState<BlueskyCrosspostPref | null>(null);
+  const [hasProfile, setHasProfile] = useState<boolean | null>(null);
+  const [consentOpen, setConsentOpen] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    void readBlueskyCrosspostPref(did).then((value) => {
+      if (!cancelled) setPref(value);
+    });
+    void hasBlueskyProfile(did).then((value) => {
+      if (!cancelled) setHasProfile(value);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [did]);
+
+  async function toggle() {
+    if (!pref || busy) return;
+    setError(null);
+    if (!pref.enabled && !pref.consented) {
+      // First activation ever: nothing is written to Bluesky before the user
+      // has confirmed the consent modal once.
+      setConsentOpen(true);
+      return;
+    }
+    const previous = pref;
+    const next = { enabled: !pref.enabled, consented: true };
+    setPref(next);
+    setBusy(true);
+    try {
+      await saveBlueskyCrosspostPref(did, next.enabled);
+    } catch {
+      setPref(previous);
+      setError(t("error"));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function confirmConsent() {
+    await ensureBlueskyProfile(did);
+    await saveBlueskyCrosspostPref(did, true);
+    setPref({ enabled: true, consented: true });
+    setHasProfile(true);
+  }
+
+  const enabled = pref?.enabled === true;
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center gap-2">
+        <BlueskyIcon className="h-4 w-4 text-[#1185fe]" />
+        <h2 className="text-sm font-medium">{t("title")}</h2>
+      </div>
+
+      <div className="bg-muted rounded-xl p-4 space-y-3">
+        <div className="flex items-start justify-between gap-4">
+          <div className="min-w-0">
+            <p className="text-sm font-medium text-foreground">{t("toggleLabel")}</p>
+            <p className="mt-0.5 text-xs text-muted-foreground">{t("toggleDescription")}</p>
+          </div>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={enabled}
+            aria-label={t("toggleLabel")}
+            disabled={!pref || busy}
+            onClick={() => void toggle()}
+            className={cn(
+              "relative h-6 w-11 shrink-0 rounded-full transition-colors disabled:opacity-50",
+              enabled ? "bg-[#1185fe]" : "bg-border",
+            )}
+          >
+            <span
+              className={cn(
+                "absolute left-0.5 top-0.5 size-5 rounded-full bg-background shadow transition-transform",
+                enabled && "translate-x-5",
+              )}
+            />
+          </button>
+        </div>
+        {enabled ? (
+          <a
+            href={blueskyProfileUrl(did)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1 text-xs font-medium text-[#1185fe] hover:underline"
+          >
+            {t("viewProfile")}
+            <ExternalLinkIcon className="h-3 w-3" />
+          </a>
+        ) : null}
+        {error ? <p className="text-xs text-destructive">{error}</p> : null}
+      </div>
+
+      <BlueskyConsentModal
+        open={consentOpen}
+        needsProfile={hasProfile === null ? null : !hasProfile}
+        onOpenChange={setConsentOpen}
+        onConfirm={confirmConsent}
+      />
+    </div>
+  );
+}
+
 // ── Account (Advanced) ──────────────────────────────────────────────────────
 
 const VIEWERS = [
@@ -1302,6 +1431,7 @@ export function AccountSettingsSections({ did, handle }: { did: string; handle?:
     <div className="mx-auto mt-8 mb-20 space-y-8">
       {handle ? <HandleSection did={did} handle={handle} /> : null}
       <PasswordSection did={did} />
+      <BlueskySection did={did} />
       <WalletsSection did={did} />
       <AgentKeysSection />
       <Accordion type="single" collapsible>

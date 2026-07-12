@@ -1717,5 +1717,29 @@
       "title": "Dispositivos Tainá — GainForest",
       "description": "Atualizações de campo de dispositivos GainForest que executam Tainá, incluindo se cada dispositivo está ativo e pronto."
     }
+  },
+  "bluesky": {
+    "toggle": "Publicar também no Bluesky",
+    "onHint": "Esta publicação também será compartilhada no Bluesky",
+    "offHint": "Compartilhar também esta publicação no Bluesky",
+    "composerHint": "Também será compartilhado no Bluesky",
+    "viewPost": "Ver no Bluesky",
+    "consent": {
+      "title": "Compartilhe suas publicações no Bluesky",
+      "body": "Quando você publicar uma atualização aqui, também podemos publicá-la no Bluesky, uma rede social aberta com milhões de pessoas.",
+      "discovery": "É uma ótima forma de ser descoberto: suas atualizações alcançam amantes da natureza, financiadores e pesquisadores muito além do GainForest.",
+      "profileNote": "Você ainda não tem um perfil no Bluesky, então criaremos um a partir do seu perfil GainForest (seu nome, foto e biografia).",
+      "optOutNote": "Somente publicações novas feitas depois de ativar são compartilhadas. Você pode desativar quando quiser em Configurações.",
+      "confirm": "Ativar compartilhamento",
+      "cancel": "Agora não",
+      "error": "Não foi possível ativar o compartilhamento no Bluesky. Tente novamente."
+    },
+    "settings": {
+      "title": "Bluesky",
+      "toggleLabel": "Compartilhar novas publicações no Bluesky",
+      "toggleDescription": "As atualizações que você publica também são publicadas na sua conta do Bluesky, para que mais pessoas descubram seu trabalho.",
+      "viewProfile": "Ver seu perfil no Bluesky",
+      "error": "Não foi possível salvar a alteração. Tente novamente."
+    }
   }
 }

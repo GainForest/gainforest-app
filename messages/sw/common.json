@@ -1717,5 +1717,29 @@
       "title": "Vifaa vya Tainá — GainForest",
       "description": "Taarifa za uwandani kutoka kwa vifaa vya GainForest vinavyoendesha Tainá, ikiwemo kama kila kifaa kinafanya kazi na kiko tayari."
     }
+  },
+  "bluesky": {
+    "toggle": "Shiriki pia kwenye Bluesky",
+    "onHint": "Chapisho hili litashirikiwa pia kwenye Bluesky",
+    "offHint": "Shiriki chapisho hili pia kwenye Bluesky",
+    "composerHint": "Linashirikiwa pia kwenye Bluesky",
+    "viewPost": "Tazama kwenye Bluesky",
+    "consent": {
+      "title": "Shiriki machapisho yako kwenye Bluesky",
+      "body": "Unapochapisha habari mpya hapa, tunaweza pia kuichapisha kwenye Bluesky, mtandao wa kijamii wa wazi wenye mamilioni ya watu.",
+      "discovery": "Ni njia nzuri ya kugunduliwa: habari zako zinawafikia wapenzi wa asili, wafadhili na watafiti mbali zaidi ya GainForest.",
+      "profileNote": "Bado huna wasifu wa Bluesky, kwa hivyo tutakutengenezea mmoja kutoka kwa wasifu wako wa GainForest (jina, picha na maelezo yako).",
+      "optOutNote": "Machapisho mapya tu baada ya kuwasha ndiyo yanayoshirikiwa. Unaweza kuzima wakati wowote kwenye Mipangilio.",
+      "confirm": "Washa kushiriki",
+      "cancel": "Si sasa",
+      "error": "Hatukuweza kuwasha kushiriki kwenye Bluesky. Tafadhali jaribu tena."
+    },
+    "settings": {
+      "title": "Bluesky",
+      "toggleLabel": "Shiriki machapisho mapya kwenye Bluesky",
+      "toggleDescription": "Habari unazochapisha pia zinachapishwa kwenye akaunti yako ya Bluesky, ili watu wengi zaidi wagundue kazi yako.",
+      "viewProfile": "Tazama wasifu wako wa Bluesky",
+      "error": "Hatukuweza kuhifadhi mabadiliko hayo. Tafadhali jaribu tena."
+    }
   }
 }

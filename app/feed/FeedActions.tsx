@@ -33,6 +33,18 @@ import {
   type Liker,
 } from "@/app/_lib/feed-engagement";
 import { redirectToLogin } from "@/app/_lib/auth-client";
+import {
+  crosspostToBluesky,
+  deleteBlueskyTwin,
+  ensureBlueskyProfile,
+  hasBlueskyProfile,
+  readBlueskyCrosspostPref,
+  saveBlueskyCrosspostPref,
+  updateBlueskyTwin,
+  type BlueskyCrosspostPref,
+} from "@/app/_lib/bluesky-crosspost";
+import { BlueskyConsentModal } from "@/app/_components/BlueskyConsentModal";
+import { BlueskyIcon } from "@/app/_components/BlueskyIcon";
 import { formatRelative } from "@/app/_lib/format";
 import { useAccountList, useActiveAccountContext } from "@/app/_lib/account-switcher";
 import { useAddObservations } from "@/app/_components/useAddObservations";
@@ -89,7 +101,13 @@ function useViewerCard(sessionDid: string | null): { name: string | null; avatar
   return { name: acting.card.name, avatarUrl: acting.card.avatarUrl, did: acting.actingDid };
 }
 
-export type LocalPost = { id: string; text: string; createdAt: string };
+export type LocalPost = {
+  id: string;
+  text: string;
+  createdAt: string;
+  /** bsky.app URL of the Bluesky twin when this post was cross-posted. */
+  bskyUrl?: string | null;
+};
 
 type LikersState = { status: "idle" | "loading" | "ready"; likers: Liker[] };
 
@@ -115,7 +133,9 @@ export type FeedInteractions = {
   /** Delete one of the viewer's own comments under `subjectUri`. */
   deleteComment: (subjectUri: string, commentUri: string) => Promise<void>;
   localPosts: LocalPost[];
-  addPost: (text: string) => Promise<void>;
+  /** Publish a top-level post. `crosspost` additionally writes the
+   *  app.bsky.feed.post twin (personal repo only; ignored for group repos). */
+  addPost: (text: string, opts?: { crosspost?: boolean }) => Promise<void>;
   /** Edit one of the viewer's own feed posts (optimistic local + persisted). */
   editPost: (postUri: string, text: string) => Promise<void>;
   /** Delete one of the viewer's own feed posts (optimistic local + persisted). */
@@ -357,11 +377,21 @@ export function useFeedInteractions(sessionDid: string | null): FeedInteractions
   );
 
   const addPost = useCallback(
-    async (text: string) => {
+    async (text: string, opts?: { crosspost?: boolean }) => {
       const result = await createFeedPost({ text }, repoOption);
-      setLocalPosts((prev) => [{ id: result.uri, text: text.trim(), createdAt: new Date().toISOString() }, ...prev]);
+      // Bluesky twin: opt-in, personal repo only, top-level posts only. The
+      // GainForest post is already live at this point, so a failed twin write
+      // just means no Bluesky link — never a failed post.
+      let bskyUrl: string | null = null;
+      if (opts?.crosspost && !repoOption && actingDid) {
+        bskyUrl = await crosspostToBluesky({ did: actingDid, rkey: result.rkey, text: text.trim() });
+      }
+      setLocalPosts((prev) => [
+        { id: result.uri, text: text.trim(), createdAt: new Date().toISOString(), bskyUrl },
+        ...prev,
+      ]);
     },
-    [repoOption],
+    [repoOption, actingDid],
   );
 
   // Edit one of the viewer's own posts. Updates the optimistic local copy if it
@@ -370,6 +400,9 @@ export function useFeedInteractions(sessionDid: string | null): FeedInteractions
     async (postUri: string, text: string) => {
       const trimmed = text.trim();
       await updateFeedPost(rkeyOf(postUri), trimmed, repoOption);
+      // Keep an existing Bluesky twin's record in sync (best-effort, personal
+      // repo only; a no-op when the post was never cross-posted).
+      if (!repoOption) void updateBlueskyTwin(rkeyOf(postUri), trimmed);
       setLocalPosts((prev) => prev.map((p) => (p.id === postUri ? { ...p, text: trimmed } : p)));
     },
     [repoOption],
@@ -382,6 +415,9 @@ export function useFeedInteractions(sessionDid: string | null): FeedInteractions
   const deletePost = useCallback(
     async (postUri: string) => {
       await deleteFeedPost(rkeyOf(postUri), repoOption);
+      // Deleting a post also deletes its Bluesky twin when one exists
+      // (best-effort, personal repo only) so nothing orphaned stays public.
+      if (!repoOption) void deleteBlueskyTwin(rkeyOf(postUri));
       setLocalPosts((prev) => prev.filter((p) => p.id !== postUri));
       setRemovedUris((prev) => new Set(prev).add(postUri));
     },
@@ -430,6 +466,24 @@ export function useFeedInteractions(sessionDid: string | null): FeedInteractions
 
 // ── The viewer's own just-published posts (optimistic, above the timeline) ───
 
+/** Small "view this post on Bluesky" link rendered under cross-posted feed
+ *  posts — both the optimistic just-posted rows and indexed timeline rows. */
+export function BlueskyPostLink({ href }: { href: string }) {
+  const tb = useTranslations("common.bluesky");
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      onClick={(e) => e.stopPropagation()}
+      className="mt-1 inline-flex items-center gap-1 rounded-full text-xs font-medium text-[#1185fe] hover:underline"
+    >
+      <BlueskyIcon className="size-3" />
+      {tb("viewPost")}
+    </a>
+  );
+}
+
 export function LocalPostsList({
   posts,
   viewerDid,
@@ -477,6 +531,7 @@ export function LocalPostsList({
               ) : (
                 <>
                   <p className="mt-1 whitespace-pre-wrap text-[15px] leading-relaxed text-foreground">{post.text}</p>
+                  {post.bskyUrl ? <BlueskyPostLink href={post.bskyUrl} /> : null}
                   {onEditPost || onDeletePost ? (
                     <div className="mt-1 flex items-center gap-1">
                       {onEditPost ? (
@@ -743,14 +798,70 @@ export function FeedComposer({
 }: {
   signedIn: boolean;
   viewerDid: string | null;
-  onPost: (text: string) => Promise<void>;
+  onPost: (text: string, opts?: { crosspost?: boolean }) => Promise<void>;
 }) {
   const t = useTranslations("common.feed");
+  const tb = useTranslations("common.bluesky");
   const acting = useActingAccount(viewerDid);
   const [text, setText] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [posted, setPosted] = useState(false);
+
+  // ── Bluesky cross-posting (opt-in, personal repo only) ──────────────────
+  // The preference is a singleton on the user's PDS; the first activation is
+  // gated by an explicit consent modal (see BlueskyConsentModal). Groups never
+  // cross-post — the chip is hidden while acting as an organization.
+  const personalDid = signedIn && !acting.isGroup ? acting.actingDid : null;
+  const [bskyPref, setBskyPref] = useState<BlueskyCrosspostPref | null>(null);
+  const [consentOpen, setConsentOpen] = useState(false);
+  const [needsProfile, setNeedsProfile] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    setBskyPref(null);
+    if (!personalDid) return;
+    let cancelled = false;
+    void readBlueskyCrosspostPref(personalDid).then((pref) => {
+      if (!cancelled) setBskyPref(pref);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [personalDid]);
+
+  const crosspostOn = Boolean(personalDid && bskyPref?.enabled);
+
+  async function toggleBluesky() {
+    if (!signedIn) {
+      redirectToLogin();
+      return;
+    }
+    if (!personalDid || !bskyPref) return;
+    if (!bskyPref.enabled && !bskyPref.consented) {
+      // First activation: ask for consent before anything touches Bluesky.
+      setNeedsProfile(null);
+      void hasBlueskyProfile(personalDid).then(setNeedsProfile);
+      setConsentOpen(true);
+      return;
+    }
+    const previous = bskyPref;
+    const next = { enabled: !bskyPref.enabled, consented: true };
+    setBskyPref(next);
+    try {
+      await saveBlueskyCrosspostPref(personalDid, next.enabled);
+    } catch {
+      setBskyPref(previous);
+    }
+  }
+
+  async function confirmBlueskyConsent() {
+    if (!personalDid) return;
+    // Consent given: bootstrap the Bluesky profile from the certified profile
+    // when missing, then persist the opt-in.
+    await ensureBlueskyProfile(personalDid);
+    await saveBlueskyCrosspostPref(personalDid, true);
+    setBskyPref({ enabled: true, consented: true });
+  }
 
   const remaining = POST_MAX - text.length;
   const nearLimit = remaining <= 40;
@@ -765,7 +876,7 @@ export function FeedComposer({
     setBusy(true);
     setError(null);
     try {
-      await onPost(text.trim());
+      await onPost(text.trim(), { crosspost: crosspostOn });
       setText("");
       setPosted(true);
       window.setTimeout(() => setPosted(false), 6000);
@@ -806,6 +917,23 @@ export function FeedComposer({
       <div className="mt-1 flex items-center justify-between gap-2 pl-12">
         <div className="flex min-w-0 items-center gap-1">
           {signedIn && viewerDid ? <ComposerObservationButton sessionDid={viewerDid} /> : null}
+          {personalDid && bskyPref ? (
+            <button
+              type="button"
+              onClick={() => void toggleBluesky()}
+              aria-pressed={crosspostOn}
+              aria-label={tb("toggle")}
+              title={crosspostOn ? tb("onHint") : tb("offHint")}
+              className={cn(
+                "-ml-1 inline-flex size-9 shrink-0 items-center justify-center rounded-full transition-colors",
+                crosspostOn
+                  ? "text-[#1185fe] hover:bg-[#1185fe]/10"
+                  : "text-muted-foreground/50 hover:bg-muted hover:text-muted-foreground",
+              )}
+            >
+              <BlueskyIcon className="size-[18px]" />
+            </button>
+          ) : null}
           <span className="truncate text-xs text-muted-foreground/70">
             {posted
               ? t("composer.postedNote")
@@ -813,7 +941,9 @@ export function FeedComposer({
                 ? t("actions.signInToInteract")
                 : acting.isGroup && acting.card.name
                   ? t("composer.postingAs", { name: acting.card.name })
-                  : ""}
+                  : crosspostOn
+                    ? tb("composerHint")
+                    : ""}
           </span>
         </div>
         <div className="flex items-center gap-2.5">
@@ -839,6 +969,12 @@ export function FeedComposer({
         </div>
       </div>
       {error ? <p className="mt-1 pl-12 text-xs text-destructive">{error}</p> : null}
+      <BlueskyConsentModal
+        open={consentOpen}
+        needsProfile={needsProfile}
+        onOpenChange={setConsentOpen}
+        onConfirm={confirmBlueskyConsent}
+      />
     </div>
   );
 }

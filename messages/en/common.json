@@ -1717,5 +1717,29 @@
       "title": "Tainá devices — GainForest",
       "description": "Field updates from GainForest devices running Tainá, including whether each device is active and ready."
     }
+  },
+  "bluesky": {
+    "toggle": "Cross-post to Bluesky",
+    "onHint": "This post will also be shared on Bluesky",
+    "offHint": "Also share this post on Bluesky",
+    "composerHint": "Also sharing on Bluesky",
+    "viewPost": "View on Bluesky",
+    "consent": {
+      "title": "Share your posts on Bluesky",
+      "body": "When you post an update here, we can also publish it to Bluesky, an open social network with millions of people.",
+      "discovery": "It's a great way to get discovered: your updates reach nature lovers, funders, and researchers far beyond GainForest.",
+      "profileNote": "You don't have a Bluesky profile yet, so we'll create one for you from your GainForest profile (your name, photo, and bio).",
+      "optOutNote": "Only new posts you publish after turning this on are shared. You can turn it off anytime in Settings.",
+      "confirm": "Turn on sharing",
+      "cancel": "Not now",
+      "error": "We couldn't turn on Bluesky sharing. Please try again."
+    },
+    "settings": {
+      "title": "Bluesky",
+      "toggleLabel": "Share new posts on Bluesky",
+      "toggleDescription": "Community updates you post are also published to your Bluesky account, so more people can discover your work.",
+      "viewProfile": "View your Bluesky profile",
+      "error": "We couldn't save that change. Please try again."
+    }
   }
 }

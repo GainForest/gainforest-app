@@ -1717,5 +1717,29 @@
       "title": "Perangkat Tainá — GainForest",
       "description": "Pembaruan lapangan dari perangkat GainForest yang menjalankan Tainá, termasuk apakah tiap perangkat aktif dan siap."
     }
+  },
+  "bluesky": {
+    "toggle": "Bagikan juga ke Bluesky",
+    "onHint": "Postingan ini juga akan dibagikan ke Bluesky",
+    "offHint": "Bagikan juga postingan ini ke Bluesky",
+    "composerHint": "Juga dibagikan ke Bluesky",
+    "viewPost": "Lihat di Bluesky",
+    "consent": {
+      "title": "Bagikan postingan Anda di Bluesky",
+      "body": "Saat Anda memposting pembaruan di sini, kami juga dapat menerbitkannya di Bluesky, jejaring sosial terbuka dengan jutaan pengguna.",
+      "discovery": "Ini cara yang bagus untuk ditemukan: pembaruan Anda menjangkau pecinta alam, pendana, dan peneliti jauh di luar GainForest.",
+      "profileNote": "Anda belum punya profil Bluesky, jadi kami akan membuatkannya dari profil GainForest Anda (nama, foto, dan bio).",
+      "optOutNote": "Hanya postingan baru setelah fitur ini aktif yang dibagikan. Anda bisa menonaktifkannya kapan saja di Pengaturan.",
+      "confirm": "Aktifkan berbagi",
+      "cancel": "Nanti saja",
+      "error": "Kami tidak dapat mengaktifkan berbagi ke Bluesky. Silakan coba lagi."
+    },
+    "settings": {
+      "title": "Bluesky",
+      "toggleLabel": "Bagikan postingan baru ke Bluesky",
+      "toggleDescription": "Pembaruan komunitas yang Anda posting juga diterbitkan ke akun Bluesky Anda, sehingga lebih banyak orang dapat menemukan karya Anda.",
+      "viewProfile": "Lihat profil Bluesky Anda",
+      "error": "Kami tidak dapat menyimpan perubahan itu. Silakan coba lagi."
+    }
   }
 }

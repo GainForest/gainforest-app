@@ -23,6 +23,7 @@ import {
 import type { ActivityFeedItem, ActivityFeedKind, ActivityFeedPage } from "../_lib/feed";
 import { resolveBlobUrl } from "../_lib/pds";
 import {
+  BlueskyPostLink,
   DeleteButton,
   FeedActionBar,
   FeedComposer,
@@ -34,6 +35,7 @@ import {
   useFeedInteractions,
   type FeedInteractions,
 } from "./FeedActions";
+import { fetchBlueskyPostLinks } from "../_lib/bluesky-crosspost";
 import { buildCommentTree, type CommentTreeNode } from "../_lib/feed-engagement";
 import { formatCompact, formatCompactUsd, formatRelative } from "../_lib/format";
 import { FeedImageLightbox } from "./FeedImageLightbox";
@@ -283,6 +285,28 @@ export function FeedClient({
     [interactions.localPosts, itemIds],
   );
 
+  // Which cross-posted twins actually exist on Bluesky, keyed by the
+  // GainForest post's AT-URI. Post rows are checked once in batches against
+  // the public Bluesky appview as they load; only confirmed twins render a
+  // link, so the feed never points at a post bsky.app can't show.
+  const [blueskyLinks, setBlueskyLinks] = useState<Map<string, string>>(() => new Map());
+  const blueskyCheckedRef = useRef<Set<string>>(new Set());
+  useEffect(() => {
+    const pending = visibleItems
+      .filter((it) => it.kind === "post" && !blueskyCheckedRef.current.has(it.id))
+      .map((it) => it.id);
+    if (pending.length === 0) return;
+    for (const id of pending) blueskyCheckedRef.current.add(id);
+    void fetchBlueskyPostLinks(pending).then((found) => {
+      if (found.size === 0) return;
+      setBlueskyLinks((prev) => {
+        const next = new Map(prev);
+        for (const [uri, url] of found) next.set(uri, url);
+        return next;
+      });
+    });
+  }, [visibleItems]);
+
   return (
     <section className="-mt-14 pb-24 md:pb-32">
       {/* Hero */}
@@ -376,6 +400,7 @@ export function FeedClient({
                     signedIn={signedIn}
                     interactions={interactions}
                     onOpenImage={setLightboxItem}
+                    bskyUrl={blueskyLinks.get(entry.item.id) ?? null}
                   />
                 ),
               )}
@@ -563,11 +588,14 @@ function FeedRow({
   signedIn,
   interactions,
   onOpenImage,
+  bskyUrl = null,
 }: {
   item: ActivityFeedItem;
   signedIn: boolean;
   interactions: FeedInteractions;
   onOpenImage: (item: ActivityFeedItem) => void;
+  /** bsky.app URL of this post's confirmed Bluesky twin, when cross-posted. */
+  bskyUrl?: string | null;
 }) {
   const t = useTranslations("common.feed");
   const verb = t(`verbs.${item.kind}`);
@@ -670,6 +698,7 @@ function FeedRow({
       {/* Like + comment, aligned under the row content (outside the link). */}
       <div className="pb-2 pl-16 pr-3">
         <FeedActionBar subjectUri={item.id} signedIn={signedIn} interactions={interactions} />
+        {bskyUrl ? <BlueskyPostLink href={bskyUrl} /> : null}
         {canEditPost ? (
           editing ? (
             <InlineEditor
