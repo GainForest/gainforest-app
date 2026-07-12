@@ -39,7 +39,13 @@ import {
 import { ModalContent, ModalDescription, ModalFooter, ModalHeader, ModalTitle } from "@/components/ui/modal/modal";
 import { useModal } from "@/components/ui/modal/context";
 import { AddWalletModal } from "@/components/global/modals/wallet/add";
-import { deleteRecord } from "@/app/(manage)/manage/_lib/mutations";
+import {
+  deleteAccountDataChunk,
+  deleteRecord,
+  fetchAccountDataSummary,
+  type AccountDataSummary,
+} from "@/app/(manage)/manage/_lib/mutations";
+import { redirectToLogout } from "@/app/_lib/auth-client";
 import { INDEXER_URL } from "@/app/_lib/urls";
 import { isTainaAgentKeyName } from "@/app/_lib/taina-shared";
 import { cn } from "@/lib/utils";
@@ -955,6 +961,342 @@ function AccountSection({ did }: { did: string }) {
   );
 }
 
+// ── Danger zone (Advanced) ────────────────────────────────────────────
+//
+// "Delete account" here means deleting every record the GainForest stack
+// has written into the user's repo (projects, certs, observations, sites,
+// profile, wallet links … — all app.gainforest.* / app.certified.* /
+// org.hypercerts.* collections). Their ATProto identity (DID, handle,
+// PDS login) survives, as do records from unrelated apps. Deliberately
+// buried inside the collapsed "Advanced" accordion and gated behind a
+// typed confirmation — this is a destructive, irreversible bulk delete.
+
+const DELETE_CONFIRM_PHRASE = "delete my account";
+
+function lexiconGroupLabel(collection: string): string {
+  if (collection.startsWith("app.gainforest.dwc.")) return "Biodiversity observations";
+  if (collection.startsWith("app.gainforest.ac.")) return "Audio & multimedia";
+  if (collection.startsWith("app.gainforest.organization.")) return "Organization data";
+  if (collection.startsWith("app.gainforest.feed")) return "Feed posts & likes";
+  if (collection.startsWith("org.hypercerts.")) return "Certs & collections";
+  if (collection.startsWith("app.certified.")) return "Profile, badges & signatures";
+  return "Other GainForest records";
+}
+
+function summarizeByGroup(summary: AccountDataSummary): Array<{ label: string; count: number }> {
+  const groups = new Map<string, number>();
+  for (const { collection, count } of summary.collections) {
+    const label = lexiconGroupLabel(collection);
+    groups.set(label, (groups.get(label) ?? 0) + count);
+  }
+  return [...groups.entries()]
+    .map(([label, count]) => ({ label, count }))
+    .sort((a, b) => b.count - a.count);
+}
+
+type DeleteAccountPhase = "loading" | "confirm" | "deleting" | "done" | "error";
+
+type OwnedGroup = {
+  did: string;
+  displayName: string | null;
+  handle: string | null;
+};
+
+// Organizations where the signed-in user holds the `owner` role. Deleting
+// the account leaves those orgs without an owner, so the modal makes the
+// visitor acknowledge that explicitly before the confirm button unlocks.
+async function fetchOwnedGroups(): Promise<OwnedGroup[]> {
+  try {
+    const res = await fetch("/api/cgs/groups", { cache: "no-store" });
+    if (!res.ok) return [];
+    const payload = (await res.json().catch(() => null)) as {
+      groups?: Array<{ groupDid?: unknown; role?: unknown; displayName?: unknown; handle?: unknown }>;
+    } | null;
+    if (!Array.isArray(payload?.groups)) return [];
+    return payload.groups
+      .filter((group) => typeof group?.role === "string" && group.role.toLowerCase() === "owner")
+      .map((group) => ({
+        did: typeof group.groupDid === "string" ? group.groupDid : "",
+        displayName: typeof group.displayName === "string" && group.displayName.trim() ? group.displayName.trim() : null,
+        handle: typeof group.handle === "string" && group.handle.trim() ? group.handle.trim() : null,
+      }))
+      .filter((group) => group.did.startsWith("did:"));
+  } catch {
+    // If the membership lookup fails we still warn generically below rather
+    // than blocking deletion on an unrelated outage.
+    return [];
+  }
+}
+
+function DeleteAccountModal({ handle, onBack }: { handle: string | null; onBack: () => void }) {
+  const [phase, setPhase] = useState<DeleteAccountPhase>("loading");
+  const [summary, setSummary] = useState<AccountDataSummary | null>(null);
+  const [ownedGroups, setOwnedGroups] = useState<OwnedGroup[]>([]);
+  const [orphanAcknowledged, setOrphanAcknowledged] = useState(false);
+  const [confirmText, setConfirmText] = useState("");
+  const [deletedCount, setDeletedCount] = useState(0);
+  const [failedCount, setFailedCount] = useState(0);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    Promise.all([fetchAccountDataSummary(), fetchOwnedGroups()])
+      .then(([result, owned]) => {
+        if (cancelled) return;
+        setSummary(result);
+        setOwnedGroups(owned);
+        setPhase("confirm");
+      })
+      .catch((err) => {
+        if (cancelled) return;
+        setError(err instanceof Error ? err.message : "Could not read your account data.");
+        setPhase("error");
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const confirmMatches = confirmText.trim().toLowerCase() === DELETE_CONFIRM_PHRASE;
+  const orphanGateOpen = ownedGroups.length === 0 || orphanAcknowledged;
+  const busy = phase === "deleting";
+  const groups = summary ? summarizeByGroup(summary) : [];
+
+  async function runDeletion() {
+    setPhase("deleting");
+    setError(null);
+    let deleted = 0;
+    let failed = 0;
+    try {
+      // Chunked loop — each call deletes a bounded batch server-side, so a
+      // repo with thousands of records never hits one request timeout.
+      for (;;) {
+        const chunk = await deleteAccountDataChunk();
+        deleted += chunk.deleted;
+        failed += chunk.failed;
+        setDeletedCount(deleted);
+        setFailedCount(failed);
+        if (chunk.done) break;
+      }
+      setPhase("done");
+      // The account's GainForest data is gone — end the session too so the
+      // app doesn't keep rendering a ghost profile from stale caches.
+      window.setTimeout(() => redirectToLogout(), 2500);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Deletion failed. Please try again.");
+      setPhase("error");
+    }
+  }
+
+  return (
+    <ModalContent dismissible={!busy}>
+      <ModalHeader backAction={busy ? undefined : onBack}>
+        <ModalTitle>Delete account</ModalTitle>
+        <ModalDescription>This cannot be undone</ModalDescription>
+      </ModalHeader>
+
+      {phase === "loading" ? (
+        <div className="mt-6 flex items-center justify-center gap-2 text-sm text-muted-foreground">
+          <Loader2Icon className="size-4 animate-spin" />
+          Checking what would be deleted…
+        </div>
+      ) : null}
+
+      {phase === "confirm" && summary ? (
+        <>
+          <div className="mt-6 rounded-2xl border border-destructive/30 bg-destructive/5 p-4">
+            <div className="flex items-start gap-3">
+              <AlertTriangleIcon className="mt-0.5 size-5 shrink-0 text-destructive" />
+              <div className="space-y-1 text-sm">
+                <p className="font-medium text-destructive">
+                  This permanently deletes {summary.approximate ? "about " : ""}
+                  {summary.total} record{summary.total === 1 ? "" : "s"} from your account.
+                </p>
+                <p className="text-muted-foreground">
+                  Everything you published on GainForest is removed from your personal data
+                  server. Your ATProto identity (DID and handle) and data from other apps are
+                  not touched.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {groups.length > 0 ? (
+            <ul className="mt-4 space-y-1.5 rounded-2xl bg-muted/50 p-4 text-sm">
+              {groups.map(({ label, count }) => (
+                <li key={label} className="flex items-center justify-between gap-4">
+                  <span className="text-muted-foreground">{label}</span>
+                  <span className="font-medium tabular-nums">{count}</span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="mt-4 text-center text-sm text-muted-foreground">
+              No GainForest records found — there is nothing to delete.
+            </p>
+          )}
+
+          {ownedGroups.length > 0 ? (
+            <div className="mt-4 rounded-2xl border border-destructive/30 bg-destructive/5 p-4">
+              <div className="flex items-start gap-3">
+                <AlertTriangleIcon className="mt-0.5 size-5 shrink-0 text-destructive" />
+                <div className="min-w-0 space-y-2 text-sm">
+                  <p className="font-medium text-destructive">
+                    You are the owner of {ownedGroups.length} organization{ownedGroups.length === 1 ? "" : "s"}.
+                    Deleting your account leaves {ownedGroups.length === 1 ? "it" : "them"} without an owner:
+                  </p>
+                  <ul className="space-y-1">
+                    {ownedGroups.map((group) => (
+                      <li key={group.did} className="truncate text-muted-foreground">
+                        • {group.displayName ?? group.handle ?? group.did}
+                        {group.displayName && group.handle ? (
+                          <span className="text-muted-foreground/70"> (@{group.handle})</span>
+                        ) : null}
+                      </li>
+                    ))}
+                  </ul>
+                  <p className="text-muted-foreground">
+                    Consider transferring ownership from each organization&apos;s Members page first.
+                  </p>
+                  <label className="flex cursor-pointer items-start gap-2 pt-1 text-foreground">
+                    <input
+                      type="checkbox"
+                      className="mt-0.5 accent-[var(--destructive,#dc2626)]"
+                      checked={orphanAcknowledged}
+                      onChange={(event) => setOrphanAcknowledged(event.target.checked)}
+                    />
+                    <span>I understand these organizations will be left ownerless.</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+          ) : null}
+
+          {summary.total > 0 ? (
+            <div className="mt-4 space-y-2">
+              <Label htmlFor="delete-account-confirm" className="text-sm text-muted-foreground">
+                Type <span className="font-mono font-medium text-foreground">{DELETE_CONFIRM_PHRASE}</span> to confirm
+                {handle ? (
+                  <>
+                    {" "}for <span className="font-medium text-foreground">@{handle}</span>
+                  </>
+                ) : null}
+                :
+              </Label>
+              <Input
+                id="delete-account-confirm"
+                value={confirmText}
+                onChange={(event) => setConfirmText(event.target.value)}
+                placeholder={DELETE_CONFIRM_PHRASE}
+                autoComplete="off"
+                spellCheck={false}
+              />
+            </div>
+          ) : null}
+        </>
+      ) : null}
+
+      {phase === "deleting" ? (
+        <div className="mt-6 flex flex-col items-center gap-3 text-sm">
+          <Loader2Icon className="size-6 animate-spin text-destructive" />
+          <p className="text-muted-foreground" aria-live="polite">
+            Deleting your records… {deletedCount}
+            {summary && summary.total > 0 ? ` of ${summary.approximate ? "~" : ""}${summary.total}` : ""}
+          </p>
+          <p className="text-xs text-muted-foreground">Keep this window open until it finishes.</p>
+        </div>
+      ) : null}
+
+      {phase === "done" ? (
+        <div className="mt-6 flex flex-col items-center gap-3 text-sm">
+          <CheckCircle2Icon className="size-6 text-primary" />
+          <p className="text-center text-muted-foreground">
+            Deleted {deletedCount} record{deletedCount === 1 ? "" : "s"}
+            {failedCount > 0 ? ` (${failedCount} could not be removed)` : ""}. Signing you out…
+          </p>
+        </div>
+      ) : null}
+
+      {phase === "error" && error ? (
+        <p className="mt-6 text-center text-sm text-destructive" role="alert">
+          {error}
+        </p>
+      ) : null}
+
+      <ModalFooter>
+        {phase === "confirm" && summary && summary.total > 0 ? (
+          <Button
+            variant="destructive"
+            className="w-full"
+            disabled={!confirmMatches || !orphanGateOpen}
+            onClick={() => void runDeletion()}
+          >
+            <Trash2Icon className="size-3.5" />
+            Permanently delete everything
+          </Button>
+        ) : null}
+        {phase === "error" ? (
+          <Button variant="destructive" className="w-full" onClick={() => void runDeletion()}>
+            Try again
+          </Button>
+        ) : null}
+        {!busy && phase !== "done" ? (
+          <Button variant="outline" className="w-full" onClick={onBack}>
+            Cancel
+          </Button>
+        ) : null}
+      </ModalFooter>
+    </ModalContent>
+  );
+}
+
+function DangerZoneSection({ handle }: { handle: string | null }) {
+  const modal = useModal();
+
+  function closeModal() {
+    void modal.hide().then(() => modal.popModal());
+  }
+
+  function openDeleteAccount() {
+    modal.pushModal({
+      id: "settings-delete-account",
+      content: <DeleteAccountModal handle={handle} onBack={closeModal} />,
+    });
+    void modal.show();
+  }
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center gap-2">
+        <AlertTriangleIcon className="h-4 w-4 text-destructive/80" />
+        <h2 className="text-sm font-medium text-destructive">Danger zone</h2>
+      </div>
+
+      <div className="rounded-xl border border-destructive/30 bg-destructive/5 p-4">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="min-w-0 space-y-1">
+            <p className="text-sm font-medium">Delete account</p>
+            <p className="text-xs text-muted-foreground">
+              Permanently removes every record you published on GainForest (projects, certs,
+              observations, profile, …) from your personal data server. Your ATProto identity
+              and other apps&apos; data stay intact. This cannot be undone.
+            </p>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            className="shrink-0 border-destructive/40 text-destructive hover:bg-destructive hover:text-destructive-foreground"
+            onClick={openDeleteAccount}
+          >
+            <Trash2Icon className="size-3.5" />
+            Delete account…
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function AccountSettingsSections({ did, handle }: { did: string; handle?: string | null }) {
   return (
     <div className="mx-auto mt-8 mb-20 space-y-8">
@@ -967,8 +1309,12 @@ export function AccountSettingsSections({ did, handle }: { did: string; handle?:
           <AccordionTrigger className="text-sm font-medium text-muted-foreground hover:text-foreground hover:no-underline py-0 pb-3">
             Advanced
           </AccordionTrigger>
-          <AccordionContent className="pb-0">
+          <AccordionContent className="pb-0 space-y-8">
             <AccountSection did={did} />
+            {/* Danger zone lives INSIDE the collapsed Advanced accordion on
+                purpose — destructive account deletion should never sit in
+                the visitor's direct line of sight. */}
+            <DangerZoneSection handle={handle ?? null} />
           </AccordionContent>
         </AccordionItem>
       </Accordion>

@@ -93,6 +93,8 @@ type MutationPayload = GroupScoped & (
   | { operation: "updateMultimedia"; rkey: string; data: UpdateMultimediaData; unset?: string[] }
   | { operation: "deleteOccurrenceCascade"; rkey: string }
   | { operation: "deleteTreeGroupCascade"; datasetRkey: string }
+  | { operation: "accountDataSummary" }
+  | { operation: "deleteAccountDataChunk" }
   | { operation: "detachOccurrenceFromDataset"; rkey: string }
   | { operation: "attachExistingOccurrences"; datasetRkey: string; occurrenceRkeys: string[] }
   | {
@@ -225,6 +227,35 @@ export async function putRecord(
 
 export async function deleteRecord(collection: string, rkey: string, options?: { repo?: string }): Promise<void> {
   await callProxy({ operation: "deleteRecord", collection, rkey, ...(options?.repo ? { repo: options.repo } : {}) });
+}
+
+// ── Account data deletion (settings → danger zone) ───────────────────────
+
+export type AccountDataSummary = {
+  collections: Array<{ collection: string; count: number }>;
+  total: number;
+  /** True when a very large repo made exact counting impractical. */
+  approximate: boolean;
+};
+
+export type AccountDataDeleteChunkResult = {
+  deleted: number;
+  failed: number;
+  done: boolean;
+};
+
+/** Count every GainForest-namespace record in the signed-in user's repo. */
+export async function fetchAccountDataSummary(): Promise<AccountDataSummary> {
+  return callProxy({ operation: "accountDataSummary" });
+}
+
+/**
+ * Delete one chunk of the signed-in user's GainForest records. Call in a
+ * loop until `done` — the server bounds each request so arbitrarily large
+ * repos never hit a single-request timeout.
+ */
+export async function deleteAccountDataChunk(): Promise<AccountDataDeleteChunkResult> {
+  return callProxy({ operation: "deleteAccountDataChunk" });
 }
 
 export async function getRecord(collection: string, rkey: string, options?: { repo?: string }): Promise<RecordReadResult> {

@@ -93,6 +93,8 @@ type MutationBody = GroupScoped & (
   | { operation: "updateMultimedia"; rkey: string; data: UpdateMultimediaData; unset?: string[] }
   | { operation: "deleteOccurrenceCascade"; rkey: string }
   | { operation: "deleteTreeGroupCascade"; datasetRkey: string }
+  | { operation: "accountDataSummary" }
+  | { operation: "deleteAccountDataChunk" }
   | { operation: "detachOccurrenceFromDataset"; rkey: string }
   | { operation: "attachExistingOccurrences"; datasetRkey: string; occurrenceRkeys: string[] }
   | {
@@ -128,6 +130,8 @@ type ForwardableMutationBody = Exclude<
   | { operation: "detachOccurrenceFromDataset" }
   | { operation: "attachExistingOccurrences" }
   | { operation: "appendExistingDataset" }
+  | { operation: "accountDataSummary" }
+  | { operation: "deleteAccountDataChunk" }
 >;
 type PdsSession = { did: string; accessJwt: string };
 type DatasetRecordResult = { uri: string; cid: string; rkey: string; record: Record<string, unknown> };
@@ -544,6 +548,9 @@ function isMutationBody(value: unknown): value is MutationBody {
   }
   if (body.operation === "deleteTreeGroupCascade") {
     return typeof body.datasetRkey === "string" && body.datasetRkey.length > 0;
+  }
+  if (body.operation === "accountDataSummary" || body.operation === "deleteAccountDataChunk") {
+    return true;
   }
   if (body.operation === "detachOccurrenceFromDataset") {
     return typeof body.rkey === "string" && body.rkey.length > 0;
@@ -1616,6 +1623,136 @@ async function deleteTreeGroupCascadeByRkey(
   };
 }
 
+// ── Account data deletion (settings → danger zone) ───────────────────────
+//
+// "Deleting your account" on GainForest means deleting every record this
+// app family has written into the user's repo — their ATProto identity
+// (DID / handle / PDS login) is NOT touched, and records under other
+// namespaces (e.g. app.bsky.*) are left alone. The namespaces below cover
+// everything the GainForest stack writes (see /docs/lexicons).
+//
+// Deletion is chunked: the client calls `deleteAccountDataChunk` in a loop
+// until `done` so a large repo (thousands of observations) never has to
+// fit into a single request timeout.
+
+const ACCOUNT_DATA_COLLECTION_PREFIXES = [
+  "app.gainforest.",
+  "app.certified.",
+  "org.hypercerts.",
+] as const;
+
+const ACCOUNT_DELETE_CHUNK_SIZE = 20;
+// Summary counting is bounded so a pathological repo can't pin the route;
+// past these page budgets the count is reported as approximate.
+const ACCOUNT_SUMMARY_MAX_PAGES_PER_COLLECTION = 30;
+const ACCOUNT_SUMMARY_MAX_PAGES_TOTAL = 60;
+
+function isAccountDataCollection(collection: string): boolean {
+  return ACCOUNT_DATA_COLLECTION_PREFIXES.some((prefix) => collection.startsWith(prefix));
+}
+
+async function listAccountDataCollections(did: string): Promise<string[]> {
+  const pdsBaseUrl = await getPdsBaseUrl(did);
+  const response = await fetch(
+    `${pdsBaseUrl}/xrpc/com.atproto.repo.describeRepo?repo=${encodeURIComponent(did)}`,
+    { cache: "no-store" },
+  );
+  const payload = (await response.json().catch(() => null)) as { collections?: unknown } | null;
+  if (!response.ok || !payload || !Array.isArray(payload.collections)) {
+    throw new Error("Could not read your account data.");
+  }
+  return payload.collections.filter(
+    (collection): collection is string => typeof collection === "string" && isAccountDataCollection(collection),
+  );
+}
+
+async function buildAccountDataSummary(did: string): Promise<{
+  collections: Array<{ collection: string; count: number }>;
+  total: number;
+  approximate: boolean;
+}> {
+  const collections = await listAccountDataCollections(did);
+  const summary: Array<{ collection: string; count: number }> = [];
+  let total = 0;
+  let approximate = false;
+  let totalPages = 0;
+
+  for (const collection of collections) {
+    let count = 0;
+    let cursor: string | undefined;
+    let pages = 0;
+    do {
+      if (totalPages >= ACCOUNT_SUMMARY_MAX_PAGES_TOTAL) {
+        approximate = true;
+        break;
+      }
+      let page: Awaited<ReturnType<typeof listRepoRecords>>;
+      try {
+        page = await listRepoRecords({ did, collection, cursor });
+      } catch {
+        throw new Error("Could not read your account data.");
+      }
+      count += page.records.length;
+      cursor = page.cursor;
+      pages += 1;
+      totalPages += 1;
+      if (pages >= ACCOUNT_SUMMARY_MAX_PAGES_PER_COLLECTION && cursor) {
+        approximate = true;
+        cursor = undefined;
+      }
+    } while (cursor);
+    if (count > 0) summary.push({ collection, count });
+    total += count;
+  }
+
+  summary.sort((a, b) => b.count - a.count);
+  return { collections: summary, total, approximate };
+}
+
+async function deleteAccountDataChunk(
+  did: string,
+  cookie: string | null,
+): Promise<{ deleted: number; failed: number; done: boolean }> {
+  const collections = await listAccountDataCollections(did);
+
+  const targets: Array<{ collection: string; rkey: string }> = [];
+  for (const collection of collections) {
+    if (targets.length >= ACCOUNT_DELETE_CHUNK_SIZE) break;
+    let page: Awaited<ReturnType<typeof listRepoRecords>>;
+    try {
+      page = await listRepoRecords({ did, collection });
+    } catch {
+      throw new Error("Could not read your account data.");
+    }
+    for (const record of page.records) {
+      if (targets.length >= ACCOUNT_DELETE_CHUNK_SIZE) break;
+      const rkey = record.uri.split("/").pop();
+      if (rkey) targets.push({ collection, rkey });
+    }
+  }
+
+  if (targets.length === 0) return { deleted: 0, failed: 0, done: true };
+
+  let deleted = 0;
+  let failed = 0;
+  for (const target of targets) {
+    try {
+      await deleteStoredRecord({ did, cookie, collection: target.collection, rkey: target.rkey });
+      deleted += 1;
+    } catch {
+      failed += 1;
+    }
+  }
+
+  // Every delete in the chunk failed — surface an error instead of letting
+  // the client loop forever against a broken upstream.
+  if (deleted === 0) {
+    throw new Error("Your records could not be deleted. Please try again.");
+  }
+
+  return { deleted, failed, done: false };
+}
+
 async function deleteOccurrenceCascadeByRkey(
   body: Extract<MutationBody, { operation: "deleteOccurrenceCascade" }>,
   did: string,
@@ -2287,6 +2424,26 @@ export async function POST(request: Request) {
   const futureDateError = getMutationFutureDateError(body);
   if (futureDateError) {
     return Response.json({ error: futureDateError }, { status: 400 });
+  }
+
+  if (body.operation === "accountDataSummary" || body.operation === "deleteAccountDataChunk") {
+    // Account deletion is strictly personal: it always operates on the
+    // signed-in user's own repo and cannot be pointed at an organization.
+    if (body.repo && body.repo !== session.did) {
+      return Response.json({ error: "Account data can only be deleted for your own account." }, { status: 400 });
+    }
+    try {
+      const result =
+        body.operation === "accountDataSummary"
+          ? await buildAccountDataSummary(session.did)
+          : await deleteAccountDataChunk(session.did, cookie);
+      return Response.json(result);
+    } catch (error) {
+      return Response.json(
+        { error: error instanceof Error ? error.message : "Could not process your account data." },
+        { status: 502 },
+      );
+    }
   }
 
   if (body.operation === "getRecord") {
