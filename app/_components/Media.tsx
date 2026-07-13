@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useT, useLocale } from "./LocaleProvider";
+import { QuickLikeButton } from "./QuickLikeButton";
 import type { BlogPost } from "../_lib/blog";
 import type { MessageKey } from "../_lib/i18n";
 
@@ -369,6 +370,16 @@ export function Media({ blogPosts }: { blogPosts: ReadonlyArray<BlogPost> }) {
                     <span className="absolute right-3 top-3 rounded-full bg-background/95 px-2 py-0.5 text-[10px] font-medium uppercase tracking-[0.12em] text-foreground/65 backdrop-blur-sm">
                       {dateFmt.format(new Date(row.sortDate))}
                     </span>
+                    {/* Quick like — bottom-right of every thumbnail.
+                        The date pill owns top-right and the gradient
+                        scrim guarantees contrast at the bottom, so
+                        this is the free corner. The button swallows
+                        the click (see QuickLikeButton) so the card
+                        link doesn't open. */}
+                    <QuickLikeButton
+                      id={row.key}
+                      className="absolute bottom-3 right-3"
+                    />
                   </div>
 
                   <div className="flex flex-1 flex-col p-5 sm:p-6">

@@ -265,6 +265,9 @@ type Messages = {
   "media.eyebrow": string;
   "media.heading": string;
   "media.scroll": string;
+  // QuickLikeButton — the heart overlay on gallery thumbnails.
+  "quickLike.like": string;
+  "quickLike.unlike": string;
   // Per-item kind labels rendered in the eyebrow of every card.
   "media.kind.award": string;
   "media.kind.press": string;
@@ -552,6 +555,8 @@ export const MESSAGES: Record<Locale, Messages> = {
     "media.eyebrow": "Selected media",
     "media.heading": "Awards & press.",
     "media.scroll": "Scroll →",
+    "quickLike.like": "Like this",
+    "quickLike.unlike": "Remove like",
     "media.kind.award": "Award",
     "media.kind.press": "Press",
     "media.kind.documentary": "Documentary",
@@ -870,6 +875,8 @@ export const MESSAGES: Record<Locale, Messages> = {
     "media.eyebrow": "Medios seleccionados",
     "media.heading": "Premios y prensa.",
     "media.scroll": "Desplaza →",
+    "quickLike.like": "Me gusta",
+    "quickLike.unlike": "Quitar me gusta",
     "media.kind.award": "Premio",
     "media.kind.press": "Prensa",
     "media.kind.documentary": "Documental",
@@ -1190,6 +1197,8 @@ export const MESSAGES: Record<Locale, Messages> = {
     "media.eyebrow": "Mídia selecionada",
     "media.heading": "Prêmios e imprensa.",
     "media.scroll": "Rolar →",
+    "quickLike.like": "Curtir",
+    "quickLike.unlike": "Remover curtida",
     "media.kind.award": "Prêmio",
     "media.kind.press": "Imprensa",
     "media.kind.documentary": "Documentário",
@@ -1508,6 +1517,8 @@ export const MESSAGES: Record<Locale, Messages> = {
     "media.eyebrow": "Vyombo vya habari",
     "media.heading": "Tuzo na vyombo vya habari.",
     "media.scroll": "Sogeza →",
+    "quickLike.like": "Penda hii",
+    "quickLike.unlike": "Ondoa kupenda",
     "media.kind.award": "Tuzo",
     "media.kind.press": "Habari",
     "media.kind.documentary": "Filamu",
@@ -1828,6 +1839,8 @@ export const MESSAGES: Record<Locale, Messages> = {
     "media.eyebrow": "Media pilihan",
     "media.heading": "Penghargaan & pers.",
     "media.scroll": "Geser →",
+    "quickLike.like": "Sukai ini",
+    "quickLike.unlike": "Hapus suka",
     "media.kind.award": "Penghargaan",
     "media.kind.press": "Pers",
     "media.kind.documentary": "Dokumenter",
