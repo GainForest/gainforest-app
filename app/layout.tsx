@@ -16,7 +16,7 @@ import { RouteChangeIndicator } from "./_components/RouteChangeIndicator";
 import { ModalHost, ModalProvider } from "@/components/ui/modal/context";
 import { WagmiProvider } from "@/components/providers/WagmiProvider";
 import { resolveSupportedLanguage } from "@/lib/i18n/languages";
-import { getLocalizedPathnames } from "@/lib/i18n/routing";
+import { getLocalizedPathnames, withLocalePrefix } from "@/lib/i18n/routing";
 import { fetchAuthSession } from "./_lib/auth-server";
 import { getRequestOrigin } from "./_lib/request-origin";
 
@@ -114,7 +114,7 @@ export async function generateMetadata(): Promise<Metadata> {
       "donations",
     ],
     category: "sustainability",
-    alternates: { canonical: "/", languages },
+    alternates: { canonical: withLocalePrefix("/", locale), languages },
     openGraph: {
       type: "website",
       locale,

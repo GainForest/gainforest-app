@@ -13,7 +13,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title,
     description,
-    alternates: localizedAlternates("/status"),
+    alternates: await localizedAlternates("/status"),
     ...socialPreviewMetadata("/status", title, description),
   };
 }

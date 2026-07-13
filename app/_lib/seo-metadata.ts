@@ -1,11 +1,17 @@
 import type { Metadata } from "next";
-import { getLocalizedPathnames } from "@/lib/i18n/routing";
+import { getLocale } from "next-intl/server";
+import { resolveSupportedLanguage } from "@/lib/i18n/languages";
+import { getLocalizedPathnames, withLocalePrefix } from "@/lib/i18n/routing";
 
 const SOCIAL_IMAGE = "/og/gainforest-og-2.png";
 
-export function localizedAlternates(pathname: string): NonNullable<Metadata["alternates"]> {
+export async function localizedAlternates(
+  pathname: string,
+): Promise<NonNullable<Metadata["alternates"]>> {
+  const locale = resolveSupportedLanguage(await getLocale());
+
   return {
-    canonical: pathname,
+    canonical: withLocalePrefix(pathname, locale),
     languages: {
       ...getLocalizedPathnames(pathname),
       "x-default": pathname,

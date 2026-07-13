@@ -54,7 +54,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title,
     description,
-    alternates: localizedAlternates("/observations"),
+    alternates: await localizedAlternates("/observations"),
     openGraph: {
       title,
       description,

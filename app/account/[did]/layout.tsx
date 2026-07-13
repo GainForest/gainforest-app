@@ -94,7 +94,7 @@ export async function generateMetadata({ params }: { params: Promise<{ did: stri
   return {
     title,
     description,
-    alternates: localizedAlternates(`/account/${encodeURIComponent(account.urlIdentifier)}`),
+    alternates: await localizedAlternates(`/account/${encodeURIComponent(account.urlIdentifier)}`),
     openGraph: {
       title,
       description,

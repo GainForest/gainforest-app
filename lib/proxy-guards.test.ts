@@ -21,6 +21,22 @@ describe("isBlockedBotUserAgent", () => {
     ).toBe(false);
     expect(isBlockedBotUserAgent("facebookexternalhit/1.1")).toBe(false);
   });
+
+  it("allows trusted search crawler user agents", () => {
+    expect(
+      isBlockedBotUserAgent(
+        "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)",
+      ),
+    ).toBe(false);
+    expect(
+      isBlockedBotUserAgent("AdsBot-Google (+http://www.google.com/adsbot.html)"),
+    ).toBe(false);
+    expect(
+      isBlockedBotUserAgent(
+        "Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; bingbot/2.0; +http://www.bing.com/bingbot.htm)",
+      ),
+    ).toBe(false);
+  });
 });
 
 describe("getProxyBlockResult", () => {

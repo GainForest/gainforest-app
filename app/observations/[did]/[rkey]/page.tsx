@@ -56,7 +56,7 @@ export async function generateMetadata({ params }: { params: ObservationPagePara
   return {
     title: t("metaTitle", { name }),
     description,
-    alternates: localizedAlternates(localObservationHref(urlIdentifier, rkey)),
+    alternates: await localizedAlternates(localObservationHref(urlIdentifier, rkey)),
     openGraph: {
       title: name,
       description,

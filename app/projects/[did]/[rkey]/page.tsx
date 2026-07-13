@@ -77,7 +77,7 @@ export async function generateMetadata({ params }: { params: ProjectPageParams }
   return {
     title,
     description,
-    alternates: localizedAlternates(localProjectHref(urlIdentifier, rkey)),
+    alternates: await localizedAlternates(localProjectHref(urlIdentifier, rkey)),
     openGraph: {
       title,
       description,

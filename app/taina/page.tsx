@@ -17,7 +17,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title,
     description,
-    alternates: localizedAlternates("/taina"),
+    alternates: await localizedAlternates("/taina"),
     ...socialPreviewMetadata("/taina", title, description),
   };
 }

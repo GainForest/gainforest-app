@@ -18,7 +18,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title,
     description,
-    alternates: localizedAlternates("/feed"),
+    alternates: await localizedAlternates("/feed"),
     ...socialPreviewMetadata("/feed", title, description),
   };
 }

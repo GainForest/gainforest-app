@@ -14,7 +14,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: t("title"),
     description: t("description"),
-    alternates: localizedAlternates("/grants"),
+    alternates: await localizedAlternates("/grants"),
   };
 }
 
