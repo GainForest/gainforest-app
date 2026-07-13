@@ -570,6 +570,7 @@
         }
       },
       "apply": "Postular con un clic",
+      "details": "Leer detalles de la subvención",
       "appliedTitle": "Solicitud enviada",
       "appliedNote": "Tu solicitud para {project} ya se publicó en el feed.",
       "postText": "Postulando a la subvención Resilvestrar la web con mi proyecto \"{project}\": por la soberanía de datos y de decisiones. 🌱"

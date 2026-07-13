@@ -570,6 +570,7 @@
         }
       },
       "apply": "Candidatar-se com um clique",
+      "details": "Ler detalhes do subsídio",
       "appliedTitle": "Candidatura enviada",
       "appliedNote": "Sua candidatura para {project} já foi publicada no feed.",
       "postText": "Candidatando-me ao subsídio Resselvagem da web com o meu projeto \"{project}\": pela soberania de dados e de decisões. 🌱"

@@ -570,6 +570,7 @@
         }
       },
       "apply": "One-Click Apply",
+      "details": "Read grant details",
       "appliedTitle": "Application sent",
       "appliedNote": "Your application for {project} is now posted to the feed.",
       "postText": "Applying to the Rewilding the Web grant with my project \"{project}\" — for data and decision sovereignty. 🌱"
