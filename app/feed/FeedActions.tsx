@@ -1112,7 +1112,7 @@ export function MobileComposerBar({
           A gradient is essentially free and still separates the bar. */}
       <div
         className={cn(
-          "pointer-events-none fixed inset-x-0 bottom-0 z-30 h-32 transition-transform duration-300",
+          "pointer-events-none fixed inset-x-0 bottom-0 z-10 h-32 transition-transform duration-300",
           footerNear && "translate-y-full",
         )}
         style={{
@@ -1128,7 +1128,10 @@ export function MobileComposerBar({
         type="button"
         onClick={openComposer}
         className={cn(
-          "fixed inset-x-4 bottom-[max(1rem,env(safe-area-inset-bottom))] z-40 flex items-center gap-3 rounded-full border-2 border-primary bg-background/90 py-2 pl-2 pr-4 text-left shadow-lg backdrop-blur transition-[transform,opacity] duration-300 active:bg-muted supports-[backdrop-filter]:bg-background/80",
+          // z-20 keeps the island above the scrolling feed but *below* the
+          // sticky header (z-30) so its user menu / sign-out dropdown, which is
+          // trapped in the header's stacking context, stays clickable on phones.
+          "fixed inset-x-4 bottom-[max(1rem,env(safe-area-inset-bottom))] z-20 flex items-center gap-3 rounded-full border-2 border-primary bg-background/90 py-2 pl-2 pr-4 text-left shadow-lg backdrop-blur transition-[transform,opacity] duration-300 active:bg-muted supports-[backdrop-filter]:bg-background/80",
           footerNear && "pointer-events-none translate-y-[calc(100%+2rem)] opacity-0",
         )}
       >

@@ -7,6 +7,65 @@ import { cn } from "@/lib/utils";
 
 const DRAWER_PADDING_CLASS_PATTERN = /^!?(?:p|px|py|pt|pr|pb|pl|ps|pe)-/;
 
+/**
+ * Lift a bottom-anchored drawer clear of the on-screen keyboard on iOS.
+ *
+ * iOS shrinks only the *visual* viewport when the keyboard opens; the layout
+ * viewport (and therefore our `fixed bottom-0` sheet) stays full height, so the
+ * sheet's lower portion — where a focused input usually is — hides behind the
+ * keyboard (vaul's `repositionInputs` is disabled for us). We read the keyboard
+ * overlap from `visualViewport` and offset the sheet by it, then scroll the
+ * focused field into view. Android resizes the layout viewport instead, so the
+ * measured overlap is ~0 there and this is a no-op — leaving its working
+ * behaviour untouched.
+ */
+function useDrawerKeyboardInset(
+  contentRef: React.RefObject<HTMLDivElement | null>,
+) {
+  React.useEffect(() => {
+    const vv =
+      typeof window !== "undefined" ? window.visualViewport : undefined;
+    if (!vv) return;
+
+    const applyInset = () => {
+      const content = contentRef.current;
+      if (!content) return;
+      // Only the bottom sheet lives against the keyboard.
+      if (content.getAttribute("data-vaul-drawer-direction") !== "bottom") {
+        return;
+      }
+      const overlap = Math.max(
+        0,
+        window.innerHeight - vv.height - vv.offsetTop,
+      );
+      content.style.bottom = overlap > 0 ? `${overlap}px` : "";
+      return overlap;
+    };
+
+    const handleResize = () => {
+      const overlap = applyInset();
+      if (!overlap) return;
+      // Wait for the keyboard/layout to settle, then reveal the focused field.
+      requestAnimationFrame(() => {
+        const content = contentRef.current;
+        const active = document.activeElement as HTMLElement | null;
+        if (active && content?.contains(active)) {
+          active.scrollIntoView({ block: "center", behavior: "smooth" });
+        }
+      });
+    };
+
+    vv.addEventListener("resize", handleResize);
+    vv.addEventListener("scroll", applyInset);
+    return () => {
+      vv.removeEventListener("resize", handleResize);
+      vv.removeEventListener("scroll", applyInset);
+      const content = contentRef.current;
+      if (content) content.style.bottom = "";
+    };
+  }, [contentRef]);
+}
+
 const splitDrawerClassName = (className?: string) => {
   if (!className) {
     return {
@@ -87,11 +146,14 @@ function DrawerPlaceholder({
   dismissible?: boolean;
 }) {
   const { outerClassName, innerClassName } = splitDrawerClassName(className);
+  const contentRef = React.useRef<HTMLDivElement | null>(null);
+  useDrawerKeyboardInset(contentRef);
 
   return (
     <DrawerPortal data-slot="drawer-portal">
       <DrawerOverlay />
       <DrawerPrimitive.Content
+        ref={contentRef}
         data-slot="drawer-content"
         className={cn(
           "group/drawer-content bg-background fixed z-50 flex h-auto min-h-0 min-w-0 flex-col overflow-hidden",
