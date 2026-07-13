@@ -129,7 +129,8 @@
       "feed": "Novedades",
       "taina": "Tainá",
       "globe": "Globo",
-      "audiomoth": "AudioMoth"
+      "audiomoth": "AudioMoth",
+      "soundscape": "Paisaje sonoro"
     },
     "prompts": {
       "signInDescription": "Inicia sesión para gestionar tu cuenta y contenido.",
@@ -1725,6 +1726,45 @@
       "prevDay": "Día anterior con grabaciones",
       "nextDay": "Día siguiente con grabaciones",
       "allHours": "Todas las horas"
+    }
+  },
+  "soundscape": {
+    "meta": {
+      "title": "Paisaje sonoro",
+      "description": "Importa grabaciones de AudioMoth y crea un reloj de paisaje sonoro de 24 horas a partir de sus frecuencias."
+    },
+    "hero": {
+      "eyebrow": "Monitoreo acústico",
+      "title": "Convierte grabaciones de AudioMoth en un reloj de paisaje sonoro",
+      "description": "Suelta abajo un día de archivos WAV de AudioMoth. Cada grabación se analiza en cinco bandas de frecuencia y los momentos más sonoros se dibujan alrededor de un reloj de 24 horas.",
+      "timeNote": "Las horas de grabación se leen de los nombres de archivo de AudioMoth (por ejemplo 20240404_153000.WAV). Los dispositivos AudioMoth suelen usar UTC salvo que se configuren de otra forma. Tus grabaciones nunca salen de este dispositivo: todo se analiza en tu navegador."
+    },
+    "import": {
+      "dropTitle": "Suelta aquí los archivos WAV de AudioMoth",
+      "dropHint": "Puedes seleccionar muchos archivos a la vez; un día completo de grabaciones funciona mejor.",
+      "browse": "Elegir archivos",
+      "fileCount": "{count, plural, one {# grabación} other {# grabaciones}}",
+      "clearAll": "Quitar todo",
+      "removeFile": "Quitar {name}",
+      "analyzing": "Analizando {name}…",
+      "progress": "{done} de {total} grabaciones analizadas",
+      "statusError": "No se pudo leer este archivo",
+      "tooShort": "La grabación es demasiado corta para analizarla",
+      "onlyWav": "Solo se admiten archivos WAV.",
+      "timeFromModified": "El nombre del archivo no incluye fecha y hora; se usa la fecha de modificación"
+    },
+    "chart": {
+      "title": "Potencia menos ruido — {date}",
+      "allDates": "aún sin grabaciones",
+      "radialLabel": "Potencia menos ruido",
+      "timeLabel": "Hora del día",
+      "legendTitle": "Bandas de frecuencia",
+      "empty": "Las grabaciones analizadas aparecerán aquí como un reloj de paisaje sonoro de 24 horas.",
+      "emptyHint": "Importa grabaciones de AudioMoth arriba para empezar.",
+      "downloadPng": "Descargar imagen",
+      "hoverHint": "Mueve el cursor sobre el reloj para ver los valores.",
+      "datesTitle": "Días",
+      "allDatesChip": "Todos los días"
     }
   }
 }

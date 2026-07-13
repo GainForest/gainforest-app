@@ -129,7 +129,8 @@
       "feed": "Novidades",
       "taina": "Tainá",
       "globe": "Globo",
-      "audiomoth": "AudioMoth"
+      "audiomoth": "AudioMoth",
+      "soundscape": "Paisagem sonora"
     },
     "prompts": {
       "signInDescription": "Entre para gerenciar sua conta e conteúdo.",
@@ -1725,6 +1726,45 @@
       "prevDay": "Dia anterior com gravações",
       "nextDay": "Próximo dia com gravações",
       "allHours": "Todas as horas"
+    }
+  },
+  "soundscape": {
+    "meta": {
+      "title": "Paisagem sonora",
+      "description": "Importe gravações do AudioMoth e crie um relógio de paisagem sonora de 24 horas a partir das frequências."
+    },
+    "hero": {
+      "eyebrow": "Monitoramento acústico",
+      "title": "Transforme gravações do AudioMoth em um relógio de paisagem sonora",
+      "description": "Solte abaixo um dia de arquivos WAV do AudioMoth. Cada gravação é analisada em cinco faixas de frequência e os momentos mais sonoros são desenhados ao redor de um relógio de 24 horas.",
+      "timeNote": "Os horários das gravações são lidos dos nomes dos arquivos do AudioMoth (por exemplo 20240404_153000.WAV). Os dispositivos AudioMoth normalmente usam UTC, salvo configuração diferente. Suas gravações nunca saem deste dispositivo — tudo é analisado no seu navegador."
+    },
+    "import": {
+      "dropTitle": "Solte os arquivos WAV do AudioMoth aqui",
+      "dropHint": "Você pode selecionar vários arquivos de uma vez — um dia inteiro de gravações funciona melhor.",
+      "browse": "Escolher arquivos",
+      "fileCount": "{count, plural, one {# gravação} other {# gravações}}",
+      "clearAll": "Limpar tudo",
+      "removeFile": "Remover {name}",
+      "analyzing": "Analisando {name}…",
+      "progress": "{done} de {total} gravações analisadas",
+      "statusError": "Não foi possível ler este arquivo",
+      "tooShort": "A gravação é curta demais para ser analisada",
+      "onlyWav": "Apenas arquivos WAV são aceitos.",
+      "timeFromModified": "O nome do arquivo não tem data e hora — usando a data de modificação"
+    },
+    "chart": {
+      "title": "Potência menos ruído — {date}",
+      "allDates": "ainda sem gravações",
+      "radialLabel": "Potência menos ruído",
+      "timeLabel": "Hora do dia",
+      "legendTitle": "Faixas de frequência",
+      "empty": "As gravações analisadas aparecerão aqui como um relógio de paisagem sonora de 24 horas.",
+      "emptyHint": "Importe gravações do AudioMoth acima para começar.",
+      "downloadPng": "Baixar imagem",
+      "hoverHint": "Passe o cursor sobre o relógio para ver os valores.",
+      "datesTitle": "Dias",
+      "allDatesChip": "Todos os dias"
     }
   }
 }

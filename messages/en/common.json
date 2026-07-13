@@ -129,7 +129,8 @@
       "feed": "Feed",
       "taina": "Tainá",
       "globe": "Globe",
-      "audiomoth": "AudioMoth"
+      "audiomoth": "AudioMoth",
+      "soundscape": "Soundscape"
     },
     "prompts": {
       "signInDescription": "Sign in to manage your account and content.",
@@ -1725,6 +1726,45 @@
       "prevDay": "Previous day with recordings",
       "nextDay": "Next day with recordings",
       "allHours": "All hours"
+    }
+  },
+  "soundscape": {
+    "meta": {
+      "title": "Soundscape",
+      "description": "Import AudioMoth recordings and build a 24-hour soundscape clock from their frequency content."
+    },
+    "hero": {
+      "eyebrow": "Acoustic monitoring",
+      "title": "Turn AudioMoth recordings into a soundscape clock",
+      "description": "Drop a day of AudioMoth WAV files below. Each recording is scanned for sound energy in five frequency bins, and the loudest moments are drawn around a 24-hour clock.",
+      "timeNote": "Recording times are read from the AudioMoth file names (for example 20240404_153000.WAV). AudioMoth devices usually name files in UTC unless configured otherwise. Your recordings never leave this device — everything is analyzed in your browser."
+    },
+    "import": {
+      "dropTitle": "Drop AudioMoth WAV files here",
+      "dropHint": "You can select many files at once — a whole day of recordings works best.",
+      "browse": "Choose files",
+      "fileCount": "{count, plural, one {# recording} other {# recordings}}",
+      "clearAll": "Clear all",
+      "removeFile": "Remove {name}",
+      "analyzing": "Analyzing {name}…",
+      "progress": "{done} of {total} recordings analyzed",
+      "statusError": "Couldn't read this file",
+      "tooShort": "Recording is too short to analyze",
+      "onlyWav": "Only WAV files are supported.",
+      "timeFromModified": "No timestamp in the file name — using the file's modified time instead"
+    },
+    "chart": {
+      "title": "Power-Minus-Noise — {date}",
+      "allDates": "no recordings yet",
+      "radialLabel": "Power-Minus-Noise",
+      "timeLabel": "Time (Hour)",
+      "legendTitle": "Frequency Bins",
+      "empty": "Analyzed recordings will appear here as a 24-hour soundscape clock.",
+      "emptyHint": "Import AudioMoth recordings above to begin.",
+      "downloadPng": "Download image",
+      "hoverHint": "Move your cursor over the clock to inspect values.",
+      "datesTitle": "Days",
+      "allDatesChip": "All days"
     }
   }
 }

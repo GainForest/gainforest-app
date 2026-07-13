@@ -79,6 +79,14 @@ export const NAV_ITEMS: NavSection[] = [
         href: "/globe",
         pathCheck: { startsWith: "/globe" },
       },
+      {
+        kind: "leaf",
+        id: "soundscape",
+        text: "Soundscape",
+        Icon: AudioLinesIcon,
+        href: "/soundscape",
+        pathCheck: { startsWith: "/soundscape" },
+      },
     ],
   },
   {

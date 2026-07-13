@@ -129,7 +129,8 @@
       "feed": "Aktivitas",
       "taina": "Tainá",
       "globe": "Bola Dunia",
-      "audiomoth": "AudioMoth"
+      "audiomoth": "AudioMoth",
+      "soundscape": "Lanskap suara"
     },
     "prompts": {
       "signInDescription": "Masuk untuk mengelola akun dan konten Anda.",
@@ -1725,6 +1726,45 @@
       "prevDay": "Hari sebelumnya dengan rekaman",
       "nextDay": "Hari berikutnya dengan rekaman",
       "allHours": "Semua jam"
+    }
+  },
+  "soundscape": {
+    "meta": {
+      "title": "Lanskap suara",
+      "description": "Impor rekaman AudioMoth dan buat jam lanskap suara 24 jam dari kandungan frekuensinya."
+    },
+    "hero": {
+      "eyebrow": "Pemantauan akustik",
+      "title": "Ubah rekaman AudioMoth menjadi jam lanskap suara",
+      "description": "Letakkan file WAV AudioMoth selama satu hari di bawah ini. Setiap rekaman dipindai dalam lima pita frekuensi, dan momen paling nyaring digambar mengelilingi jam 24 jam.",
+      "timeNote": "Waktu rekaman dibaca dari nama file AudioMoth (misalnya 20240404_153000.WAV). Perangkat AudioMoth biasanya memakai UTC kecuali diatur berbeda. Rekaman Anda tidak pernah meninggalkan perangkat ini — semuanya dianalisis di browser Anda."
+    },
+    "import": {
+      "dropTitle": "Letakkan file WAV AudioMoth di sini",
+      "dropHint": "Anda dapat memilih banyak file sekaligus — rekaman satu hari penuh paling baik.",
+      "browse": "Pilih file",
+      "fileCount": "{count, plural, other {# rekaman}}",
+      "clearAll": "Hapus semua",
+      "removeFile": "Hapus {name}",
+      "analyzing": "Menganalisis {name}…",
+      "progress": "{done} dari {total} rekaman dianalisis",
+      "statusError": "File ini tidak dapat dibaca",
+      "tooShort": "Rekaman terlalu pendek untuk dianalisis",
+      "onlyWav": "Hanya file WAV yang didukung.",
+      "timeFromModified": "Nama file tidak memuat stempel waktu — memakai waktu modifikasi file"
+    },
+    "chart": {
+      "title": "Daya dikurangi derau — {date}",
+      "allDates": "belum ada rekaman",
+      "radialLabel": "Daya dikurangi derau",
+      "timeLabel": "Waktu (Jam)",
+      "legendTitle": "Pita frekuensi",
+      "empty": "Rekaman yang dianalisis akan muncul di sini sebagai jam lanskap suara 24 jam.",
+      "emptyHint": "Impor rekaman AudioMoth di atas untuk memulai.",
+      "downloadPng": "Unduh gambar",
+      "hoverHint": "Gerakkan kursor di atas jam untuk melihat nilai.",
+      "datesTitle": "Hari",
+      "allDatesChip": "Semua hari"
     }
   }
 }
