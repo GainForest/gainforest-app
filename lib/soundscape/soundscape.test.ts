@@ -8,16 +8,16 @@ import {
   wallClockMinuteOfDay,
   WavDecodeError,
 } from "./audiomoth";
+import { buildSoundscapePoints, fftRadix2, formatBandLabel, FREQUENCY_BANDS } from "./analysis";
 import {
-  ANALYSIS_WINDOW_SIZE,
-  analyzeRecording,
-  buildSoundscapePoints,
-  fftRadix2,
-  formatBandLabel,
-  FREQUENCY_BANDS,
-  percentile,
+  binnedMaxPmn,
+  computeRecordingPmn,
+  dft384Magnitude,
+  PMN_BIN_COUNT,
   RecordingTooShortError,
-} from "./analysis";
+  segmentPmn,
+  WINDOW_LENGTH,
+} from "./pmn";
 
 // ---------------------------------------------------------------------------
 // Filename parsing
@@ -176,52 +176,79 @@ describe("fftRadix2", () => {
   });
 });
 
-describe("percentile", () => {
-  it("returns values at the requested fraction", () => {
-    expect(percentile([5, 1, 3], 0)).toBe(1);
-    expect(percentile([5, 1, 3], 1)).toBe(5);
-    expect(percentile([], 0.5)).toBe(0);
+describe("dft384Magnitude", () => {
+  it("matches a naive DFT of a real length-384 signal", () => {
+    const x = new Float64Array(WINDOW_LENGTH);
+    for (let i = 0; i < WINDOW_LENGTH; i++) {
+      x[i] = Math.sin((2 * Math.PI * 17 * i) / WINDOW_LENGTH) + 0.4 * Math.cos((2 * Math.PI * 53 * i) / WINDOW_LENGTH);
+    }
+    const out = new Float64Array(WINDOW_LENGTH / 2);
+    dft384Magnitude(x, out);
+    for (let k = 0; k < WINDOW_LENGTH / 2; k++) {
+      let re = 0;
+      let im = 0;
+      for (let n = 0; n < WINDOW_LENGTH; n++) {
+        const angle = (-2 * Math.PI * k * n) / WINDOW_LENGTH;
+        re += x[n] * Math.cos(angle);
+        im += x[n] * Math.sin(angle);
+      }
+      expect(out[k]).toBeCloseTo(Math.hypot(re, im), 5);
+    }
   });
 });
 
-describe("analyzeRecording", () => {
-  it("attributes a tone burst to the right band", async () => {
-    const sampleRate = 48000;
-    const totalSamples = sampleRate; // 1 second
-    const samples: number[] = new Array(totalSamples);
-    for (let i = 0; i < totalSamples; i++) {
-      // Quiet noise floor everywhere, loud 440 Hz tone in the middle fifth.
-      const noise = (((i * 2654435761) % 1000) / 1000 - 0.5) * 0.002;
-      const inBurst = i > totalSamples * 0.4 && i < totalSamples * 0.6;
-      samples[i] = noise + (inBurst ? 0.8 * Math.sin((2 * Math.PI * 440 * i) / sampleRate) : 0);
-    }
-    const wav = openWav(makeWavBuffer({ sampleRate, samples }));
-    const { maxPmnDb } = await analyzeRecording(wav);
-
-    expect(maxPmnDb).toHaveLength(FREQUENCY_BANDS.length);
-    expect(FREQUENCY_BANDS).toHaveLength(5);
-    // 440 Hz sits in band 0; its power-minus-noise must dominate the rest.
-    expect(maxPmnDb[0]).toBeGreaterThan(0);
-    for (let band = 1; band < maxPmnDb.length; band++) {
-      expect(maxPmnDb[0]).toBeGreaterThan(maxPmnDb[band] * 4);
-    }
+describe("binnedMaxPmn", () => {
+  it("maps FFT bins to the five pseudo-Hz (index x 750) bins by max", () => {
+    const pmn = new Float64Array(WINDOW_LENGTH / 2);
+    // freq index -> pseudo Hz (index*750): 2->1500 (bin0), 6->4500 (bin1),
+    // 13->9750 (bin2), 26->19500 (bin3), 79->59250 (bin4).
+    pmn[1] = 10; // index 2
+    pmn[5] = 20; // index 6
+    pmn[12] = 30; // index 13
+    pmn[25] = 40; // index 26
+    pmn[78] = 50; // index 79
+    expect(binnedMaxPmn(pmn)).toEqual([10, 20, 30, 40, 50]);
+    expect(PMN_BIN_COUNT).toBe(5);
   });
+});
 
-  it("rejects recordings shorter than one window", async () => {
-    const wav = openWav(makeWavBuffer({ sampleRate: 48000, samples: new Array(ANALYSIS_WINDOW_SIZE - 1).fill(0) }));
-    await expect(analyzeRecording(wav)).rejects.toBeInstanceOf(RecordingTooShortError);
+describe("segmentPmn", () => {
+  it("peaks at the FFT bin of a tone burst", () => {
+    const sampleRate = 48000;
+    const windows = 30;
+    const total = windows * WINDOW_LENGTH;
+    const toneBin = 48; // 6000 Hz at 48 kHz, wl=384 (48000/384 = 125 Hz/bin)
+    const segment = new Float32Array(total);
+    for (let i = 0; i < total; i++) {
+      const w = Math.floor(i / WINDOW_LENGTH);
+      const noise = (((i * 2654435761) % 1000) / 1000 - 0.5) * 0.002;
+      const inBurst = w >= 12 && w < 20;
+      segment[i] = noise + (inBurst ? 0.8 * Math.sin((2 * Math.PI * toneBin * i) / WINDOW_LENGTH) : 0);
+    }
+    const pmn = segmentPmn(segment);
+    let argmax = 0;
+    for (let k = 1; k < pmn.length; k++) if (pmn[k] > pmn[argmax]) argmax = k;
+    expect(Math.abs(argmax - toneBin)).toBeLessThanOrEqual(2);
+    expect(pmn[argmax]).toBeGreaterThan(0);
+  });
+});
+
+describe("computeRecordingPmn", () => {
+  it("rejects recordings shorter than one 60-second segment", async () => {
+    const wav = openWav(makeWavBuffer({ sampleRate: 8000, samples: new Array(1000).fill(0) }));
+    await expect(computeRecordingPmn(wav)).rejects.toBeInstanceOf(RecordingTooShortError);
   });
 });
 
 describe("buildSoundscapePoints", () => {
-  it("merges recordings in the same minute with per-band max and sorts", () => {
+  it("merges recordings in the same minute with per-bin max and sorts", () => {
     const points = buildSoundscapePoints([
-      { minuteOfDay: 930, pmnDb: [1, 2, 3, 4, 5] },
-      { minuteOfDay: 90, pmnDb: [5, 5, 5, 5, 5] },
-      { minuteOfDay: 930, pmnDb: [4, 1, 6, 2, 9] },
+      { minuteOfDay: 930, pmn: [1, 2, 3, 4, 5] },
+      { minuteOfDay: 90, pmn: [5, 5, 5, 5, 5] },
+      { minuteOfDay: 930, pmn: [4, 1, 6, 2, 9] },
     ]);
     expect(points.map((point) => point.minuteOfDay)).toEqual([90, 930]);
-    expect(points[1].pmnDb).toEqual([4, 2, 6, 4, 9]);
+    expect(points[1].pmn).toEqual([4, 2, 6, 4, 9]);
   });
 });
 

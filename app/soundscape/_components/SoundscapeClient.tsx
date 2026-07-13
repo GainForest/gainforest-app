@@ -22,13 +22,8 @@ import {
   wallClockMinuteOfDay,
   type WallClockTime,
 } from "@/lib/soundscape/audiomoth";
-import {
-  analyzeRecording,
-  buildSoundscapePoints,
-  formatBandLabel,
-  FREQUENCY_BANDS,
-  RecordingTooShortError,
-} from "@/lib/soundscape/analysis";
+import { buildSoundscapePoints, formatBandLabel, FREQUENCY_BANDS } from "@/lib/soundscape/analysis";
+import { computeRecordingPmn, RecordingTooShortError } from "@/lib/soundscape/pmn";
 import { cn } from "@/lib/utils";
 import { BAND_COLORS, SoundscapeClock } from "./SoundscapeClock";
 
@@ -43,7 +38,7 @@ type ImportedRecording = {
   errorKind?: "decode" | "tooShort";
   timestamp: WallClockTime | null;
   timeSource: "filename" | "modified";
-  pmnDb?: number[];
+  pmn?: number[];
 };
 
 const ALL_DATES = "all";
@@ -116,8 +111,8 @@ export function SoundscapeClient() {
       try {
         const buffer = await next.file.arrayBuffer();
         const wav = openWav(buffer);
-        const { maxPmnDb } = await analyzeRecording(wav);
-        update = { status: "done", pmnDb: maxPmnDb };
+        const { pmnPerBand } = await computeRecordingPmn(wav);
+        update = { status: "done", pmn: pmnPerBand };
       } catch (error) {
         update = {
           status: "error",
@@ -158,13 +153,13 @@ export function SoundscapeClient() {
 
   const points = useMemo(() => {
     const usable = recordings.filter(
-      (entry): entry is ImportedRecording & { pmnDb: number[]; timestamp: WallClockTime } =>
-        entry.status === "done" && entry.pmnDb !== undefined && entry.timestamp !== null,
+      (entry): entry is ImportedRecording & { pmn: number[]; timestamp: WallClockTime } =>
+        entry.status === "done" && entry.pmn !== undefined && entry.timestamp !== null,
     );
     const filtered =
       selectedDate === ALL_DATES ? usable : usable.filter((entry) => wallClockDateKey(entry.timestamp) === selectedDate);
     return buildSoundscapePoints(
-      filtered.map((entry) => ({ minuteOfDay: wallClockMinuteOfDay(entry.timestamp), pmnDb: entry.pmnDb })),
+      filtered.map((entry) => ({ minuteOfDay: wallClockMinuteOfDay(entry.timestamp), pmn: entry.pmn })),
     );
   }, [recordings, selectedDate]);
 
