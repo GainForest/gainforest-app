@@ -1556,6 +1556,11 @@
     "metadata": {
       "title": "Uchunguzi wa asili wa GainForest",
       "description": "Gundua uchunguzi wa asili wa GainForest wenye picha za uwandani, rekodi za sauti, majina ya spishi, na maeneo kwenye ramani."
+    },
+    "view": {
+      "compact": "Fupi",
+      "comfortable": "Kawaida",
+      "density": "Msongamano wa kadi"
     }
   },
   "manageProjectCerts": {

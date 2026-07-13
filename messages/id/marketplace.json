@@ -1556,6 +1556,11 @@
     "metadata": {
       "title": "Pengamatan alam GainForest",
       "description": "Jelajahi pengamatan alam GainForest dengan foto lapangan, rekaman suara, nama spesies, dan lokasi peta dari kerja pemulihan nyata."
+    },
+    "view": {
+      "compact": "Ringkas",
+      "comfortable": "Nyaman",
+      "density": "Kepadatan kartu"
     }
   },
   "manageProjectCerts": {
