@@ -73,7 +73,7 @@ function buildBandPath(points: SoundscapePoint[], band: number, maxValue: number
       runs.push(run);
       run = [];
     }
-    run.push(polar(points[index].minuteOfDay, radiusForValue(points[index].pmnDb[band] ?? 0, maxValue)));
+    run.push(polar(points[index].minuteOfDay, radiusForValue(points[index].pmn[band] ?? 0, maxValue)));
   }
   if (run.length > 0) runs.push(run);
 
@@ -110,8 +110,8 @@ export function SoundscapeClock(props: SoundscapeClockProps) {
   const maxValue = useMemo(() => {
     let max = 0;
     for (const point of points) {
-      for (let band = 0; band < point.pmnDb.length; band++) {
-        if (visibleBands[band]) max = Math.max(max, point.pmnDb[band]);
+      for (let band = 0; band < point.pmn.length; band++) {
+        if (visibleBands[band]) max = Math.max(max, point.pmn[band]);
       }
     }
     return niceCeil(max);
@@ -299,7 +299,7 @@ export function SoundscapeClock(props: SoundscapeClockProps) {
         >
           <p className="font-semibold text-foreground">{formatMinuteOfDay(hover.point.minuteOfDay)}</p>
           <ul className="mt-1 space-y-0.5">
-            {hover.point.pmnDb.map((value, band) =>
+            {hover.point.pmn.map((value, band) =>
               visibleBands[band] ? (
                 <li key={band} className="flex items-center gap-1.5 text-muted-foreground">
                   <span aria-hidden className="inline-block size-2 rounded-full" style={{ backgroundColor: BAND_COLORS[band] }} />
