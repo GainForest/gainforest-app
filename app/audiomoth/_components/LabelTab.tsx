@@ -1,5 +1,13 @@
 "use client";
 
+/**
+ * Interactive AudioMoth spectrogram labelling workspace.
+ *
+ * Persistence semantics are documented in
+ * docs/audiomoth-spectrogram-occurrences.md. Confirmed boxes are Darwin Core
+ * occurrences; browser storage is only a draft/recovery layer.
+ */
+
 import {
   useCallback,
   useEffect,
