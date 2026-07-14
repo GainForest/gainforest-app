@@ -1186,6 +1186,15 @@
       "certified": "Identity primitives from the Hypercerts ecosystem — actor profiles, organizations, follows, badges, and locations.",
       "hypercerts": "Impact claims (activity, contribution, contributor, rights), collections, funding receipts, attachments, work scope, and shared types."
     },
+    "guides": {
+      "usageGuide": "Usage guide",
+      "audiomothTitle": "AudioMoth spectrogram labels as Darwin Core occurrences",
+      "audiomothDescription": "How each confirmed time and frequency box becomes a new occurrence linked to its source audio recording.",
+      "openGuide": "Read the implementation guide",
+      "breadcrumbAria": "Documentation breadcrumb",
+      "schemas": "Data schemas",
+      "guideIntro": "This guide defines the application-level conventions used with the occurrence schema. The schema remains generic Darwin Core; the guide explains how AudioMoth recordings, spectrogram boxes, and occurrence records connect."
+    },
     "sectionsAria": "Schema sections"
   },
   "taina": {

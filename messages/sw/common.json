@@ -1186,6 +1186,15 @@
       "certified": "Vipengele vya utambulisho kutoka mfumo wa Hypercerts — wasifu wa watendaji, mashirika, wafuasi, beji na maeneo.",
       "hypercerts": "Madai ya athari (shughuli, mchango, mchangiaji, haki), makusanyo, risiti za ufadhili, viambatisho, wigo wa kazi na aina za pamoja."
     },
+    "guides": {
+      "usageGuide": "Mwongozo wa matumizi",
+      "audiomothTitle": "Lebo za spektrogramu za AudioMoth kama matukio ya Darwin Core",
+      "audiomothDescription": "Jinsi kila kisanduku cha muda na masafa kilichothibitishwa kinavyokuwa rekodi mpya ya tukio iliyounganishwa na rekodi yake ya sauti.",
+      "openGuide": "Soma mwongozo wa utekelezaji",
+      "breadcrumbAria": "Njia ya urambazaji ya nyaraka",
+      "schemas": "Miundo ya data",
+      "guideIntro": "Mwongozo huu unaeleza kanuni za programu zinazotumiwa pamoja na muundo wa matukio. Muundo unabaki Darwin Core wa jumla; mwongozo unaeleza jinsi rekodi za AudioMoth, visanduku vya spektrogramu na rekodi za matukio zinavyounganishwa."
+    },
     "sectionsAria": "Sehemu za miundo"
   },
   "taina": {

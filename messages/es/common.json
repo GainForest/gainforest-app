@@ -1186,6 +1186,15 @@
       "certified": "Primitivas de identidad del ecosistema Hypercerts: perfiles de actor, organizaciones, seguimientos, insignias y ubicaciones.",
       "hypercerts": "Declaraciones de impacto (actividad, contribución, contribuyente, derechos), colecciones, recibos de financiación, adjuntos, alcance del trabajo y tipos compartidos."
     },
+    "guides": {
+      "usageGuide": "Guía de uso",
+      "audiomothTitle": "Etiquetas de espectrogramas de AudioMoth como presencias de Darwin Core",
+      "audiomothDescription": "Cómo cada cuadro confirmado de tiempo y frecuencia se convierte en una nueva presencia vinculada a su grabación de audio de origen.",
+      "openGuide": "Leer la guía de implementación",
+      "breadcrumbAria": "Ruta de navegación de la documentación",
+      "schemas": "Esquemas de datos",
+      "guideIntro": "Esta guía define las convenciones de la aplicación utilizadas con el esquema de presencias. El esquema sigue siendo Darwin Core genérico; la guía explica cómo se conectan las grabaciones de AudioMoth, los cuadros del espectrograma y los registros de presencia."
+    },
     "sectionsAria": "Secciones de esquemas"
   },
   "taina": {
