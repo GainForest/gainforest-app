@@ -44,10 +44,11 @@ Consequences baked into this repo:
 
 The **visual language follows `../bumicerts-clean-rewrite`** as of the
 June 2026 restyle — minimal editorial, big serif headlines with a
-single italic word, stark white/ink oklch surfaces with a sage primary,
+single italic word, warm cream/ink surfaces with a sage primary,
 punctuated by the dark `DataCommons` band and the integrated closing
-`Footer`. (The earlier warm-cream gainforest.earth palette is in git
-history; the team asked to adopt the Bumicerts system wholesale.) The previous
+`Footer`. In July 2026 the team restored the earlier gainforest.earth
+cream palette (`#f4efe4` background, `#fbf8f0` cards, `#efe9da` muted
+surfaces) while retaining the Bumicerts structure and sage CTA tokens. The previous
 tropical sprigs and the hand-drawn icon PNGs were dropped per team
 feedback ("thin-stroke art doesn't match the rendered apps; tone is
 too light"). The earlier pixel-art capybara floating companion was
@@ -134,7 +135,7 @@ wins** for the landing — but call out the divergence in the PR.
 app/
 ├── page.tsx                       async server component; the entry point
 ├── layout.tsx                     fonts + metadata + mounts <FloatingTaina>
-├── globals.css                    design tokens (white/ink + sage, oklch)
+├── globals.css                    design tokens (warm cream/ink + sage)
 ├── _components/                   only UI; no business logic
 ├── _lib/                          fetchers + auth + chat helpers
 │   ├── bumicerts.ts               hyperlabel + indexer → LiveBumicert[]
@@ -621,22 +622,22 @@ Never overwrite a dated OG — always render a new one and bump the path.
 
 ## Design tokens
 
-All colour/spacing rules live in `app/globals.css`. The token blocks are
-a **verbatim port of `../bumicerts-clean-rewrite/app/globals.css`**
-(stark white/ink oklch surfaces, sage primary, shadcn-compatible
-card/popover/secondary/muted/accent/destructive/input/ring slots, and
-the `--radius: 0.75rem` scale). When a token question comes up, diff
-against that file first — it is the source of truth.
+All colour/spacing rules live in `app/globals.css`. The token structure,
+sage primary, and radius scale come from
+`../bumicerts-clean-rewrite/app/globals.css`; the surface colours deliberately
+diverge by restoring the pre-June 2026 gainforest.earth warm-cream palette.
+The shadcn-compatible card/popover/secondary/muted/accent/destructive/input/ring
+slots remain intact.
 
 ```
---background / --foreground      white / near-black (oklch), swap in .dark
---card, --popover (+foregrounds) panel surfaces (white light / 0.12 dark)
+--background / --foreground      #f4efe4 cream / warm near-black
+--card, --popover (+foregrounds) #fbf8f0 light / warm dark panels
 --primary            oklch sage  (CTA fill; lifted one step in .dark)
 --primary-dark                   hover / pressed
---secondary, --muted, --accent   cool-grey + pale-sage utility slots
---muted-foreground               secondary text
+--secondary, --muted             #efe9da recessed cream
+--muted-foreground               #5b5b56 secondary text
 --destructive, --input, --ring   shadcn-compatible form slots
---border                         hairlines (white 8% in .dark)
+--border                         #d9d3c3 warm hairlines
 --radius             0.75rem     drives the rounded-sm…rounded-3xl scale
 ```
 
@@ -651,11 +652,11 @@ alias of the sage `--primary`, exactly as in bumicerts-clean-rewrite.
 The logo, LIVE badges, signed-in chip, and active language row all
 render sage. Don't resurrect the mint without team sign-off.
 
-**Section rhythm:** the page is mostly white, with two deliberate
+**Section rhythm:** the page is mostly warm cream, with two deliberate
 near-black beats: `DataCommons` (mid-page WHY / 1% biodiversity-data
 claim) and the integrated closing `Footer` band — both pinned to the
 `--ink*` tokens so they stay near-black in light *and* dark themes.
-Keep the dark surfaces sparse and editorial so the white → ink
+Keep the dark surfaces sparse and editorial so the cream → ink
 contrast lands hard without turning the whole page into a dark
 alternation pattern.
 

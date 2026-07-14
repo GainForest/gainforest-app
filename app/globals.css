@@ -1,16 +1,14 @@
 @import "tailwindcss";
 
 /* ──────────────────────────────────────────────────────────────────────────
-   Design tokens — ported from ../bumicerts-clean-rewrite/app/globals.css
-   (itself mirrored from bumicerts-monorepo): stark white/ink surfaces,
-   oklch sage primary, shadcn-compatible card/muted/accent slots, and the
-   same radius scale. The earlier warm-cream gainforest.earth palette is in
-   git history; the team asked to adopt the Bumicerts system wholesale.
+   Design tokens keep the shadcn-compatible slots and sage primary ported
+   from ../bumicerts-clean-rewrite/app/globals.css, while restoring the warm
+   cream surfaces from the pre-June 2026 gainforest.earth palette.
 
    Compatibility aliases (`--border-soft`, `--surface`, `--surface-sunken`,
    `--brand`, `--ink*`) keep this app's existing components themed without
-   a mechanical class rename. `--brand` now maps onto the sage primary the
-   same way bumicerts-clean-rewrite does — the mint #2fce8a is retired.
+   a mechanical class rename. `--brand` maps onto the sage primary; the mint
+   #2fce8a remains retired.
 
    Headlines: tall serif (Cormorant Garamond), with italic emphasis on
    a single key word — never a whole line.
@@ -20,47 +18,48 @@
 ────────────────────────────────────────────────────────────────────────── */
 
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
+  /* Warm cream palette restored from the pre-June 2026 landing. */
+  --background: #f4efe4;
+  --foreground: #1c1c1a;
 
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
+  --card: #fbf8f0;
+  --card-foreground: #1c1c1a;
 
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
+  --popover: #fbf8f0;
+  --popover-foreground: #1c1c1a;
 
   --primary: oklch(0.5 0.0719 157.12);
   --primary-dark: oklch(0.42 0.0719 157.12);
-  --primary-foreground: oklch(0.985 0 0);
+  --primary-foreground: #fafafa;
 
-  --secondary: oklch(0.97 0.003 264.54);
-  --secondary-foreground: oklch(0.205 0 0);
+  --secondary: #efe9da;
+  --secondary-foreground: #1c1c1a;
 
-  --muted: oklch(0.97 0.003 264.54);
-  --muted-foreground: oklch(0.48 0.012 264.54);
+  --muted: #efe9da;
+  --muted-foreground: #5b5b56;
 
-  --accent: oklch(0.97 0.0209 147.64);
+  --accent: #e7e5d8;
   --accent-foreground: oklch(0.3 0.04 157);
 
   --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.985 0 0);
+  --destructive-foreground: #fafafa;
 
-  --border: oklch(0.922 0.004 286.32);
-  --input: oklch(0.922 0.004 286.32);
+  --border: #d9d3c3;
+  --input: #d9d3c3;
   --ring: oklch(0.5 0.0719 157.12 / 0.3);
 
   --radius: 0.75rem;
 
-  /* Legacy gainforest-app aliases, mapped onto the Bumicerts system. */
+  /* Legacy gainforest-app aliases, mapped onto the current token slots. */
   --border-soft: var(--border);
   --surface: var(--card);
   --surface-sunken: var(--muted);
   --brand: var(--primary);
   --brand-dark: var(--primary-dark);
-  --ink: oklch(0.08 0 0);
-  --ink-foreground: oklch(0.93 0 0);
-  --ink-muted: oklch(0.65 0.01 264.54);
-  --ink-border: oklch(1 0 0 / 0.08);
+  --ink: #141413;
+  --ink-foreground: #f4efe4;
+  --ink-muted: #a8a59a;
+  --ink-border: #2a2a27;
 
   color-scheme: light;
 }
@@ -73,33 +72,33 @@
    `--ink` tokens, which stay near-black in both themes.
 ────────────────────────────────────────────────────────────────────────── */
 .dark {
-  --background: oklch(0.08 0 0);
-  --foreground: oklch(0.93 0 0);
+  --background: #141413;
+  --foreground: #f1ece1;
 
-  --card: oklch(0.12 0 0);
-  --card-foreground: oklch(0.93 0 0);
+  --card: #1c1c1a;
+  --card-foreground: #f1ece1;
 
-  --popover: oklch(0.12 0 0);
-  --popover-foreground: oklch(0.93 0 0);
+  --popover: #1c1c1a;
+  --popover-foreground: #f1ece1;
 
   --primary: oklch(0.58 0.0751 159.05);
   --primary-dark: oklch(0.66 0.0751 159.05);
   --primary-foreground: oklch(0.93 0 0);
 
-  --secondary: oklch(0.18 0.005 264.54);
-  --secondary-foreground: oklch(0.93 0 0);
+  --secondary: #26251f;
+  --secondary-foreground: #f1ece1;
 
-  --muted: oklch(0.16 0.005 264.54);
-  --muted-foreground: oklch(0.65 0.01 264.54);
+  --muted: #26251f;
+  --muted-foreground: #a8a59a;
 
-  --accent: oklch(0.2 0.02 157);
+  --accent: #2a3029;
   --accent-foreground: oklch(0.75 0.08 157);
 
   --destructive: oklch(0.65 0.22 27.325);
-  --destructive-foreground: oklch(0.08 0 0);
+  --destructive-foreground: #141413;
 
-  --border: oklch(1 0 0 / 0.08);
-  --input: oklch(1 0 0 / 0.08);
+  --border: #2c2c28;
+  --input: #2c2c28;
   --ring: oklch(0.58 0.0751 159.05 / 0.3);
 
   --border-soft: var(--border);
@@ -107,10 +106,10 @@
   --surface-sunken: var(--muted);
   --brand: var(--primary);
   --brand-dark: var(--primary-dark);
-  --ink: oklch(0.08 0 0);
-  --ink-foreground: oklch(0.93 0 0);
-  --ink-muted: oklch(0.65 0.01 264.54);
-  --ink-border: oklch(1 0 0 / 0.08);
+  --ink: #141413;
+  --ink-foreground: #f4efe4;
+  --ink-muted: #a8a59a;
+  --ink-border: #2a2a27;
 
   color-scheme: dark;
 }
