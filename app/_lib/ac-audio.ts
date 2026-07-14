@@ -148,6 +148,8 @@ export type AcAudioListItem = {
   accessUri: string | null;
   /** AT-URI of the ac.deployment this recording belongs to, when present. */
   deploymentRef: string | null;
+  /** AT-URI of the field site linked directly to this recording, when present. */
+  siteRef?: string | null;
   createdAt: string;
 };
 
@@ -189,6 +191,7 @@ function parseAcAudioListItem(
     spectrogramCid: spectrogram?.cid ?? null,
     accessUri: typeof v.accessUri === "string" ? v.accessUri : null,
     deploymentRef: typeof v.deploymentRef === "string" ? v.deploymentRef : null,
+    siteRef: typeof v.siteRef === "string" ? v.siteRef : null,
     createdAt: typeof v.createdAt === "string" ? v.createdAt : new Date(0).toISOString(),
   };
 }

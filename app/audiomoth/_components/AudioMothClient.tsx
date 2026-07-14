@@ -832,7 +832,7 @@ export function AudioMothClient({ sessionDid }: { sessionDid: string | null }) {
 
       {mainTab === "upload" && <UploadTab sessionDid={sessionDid} />}
 
-      {mainTab === "label" && <LabelTab />}
+      {mainTab === "label" && <LabelTab sessionDid={sessionDid} />}
 
       {mainTab === "setup" && supported === false && (
         <Card>

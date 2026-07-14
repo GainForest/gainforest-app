@@ -45,6 +45,8 @@ const allowedExactValues = new Set([
   "KoboToolbox",
   "AudioMoth",
   "AudioMoth — GainForest",
+  // Scientific names are universal rather than translated.
+  "Boana faber",
   "Firmware",
   "Firmware: {firmware}",
   "UTC",
