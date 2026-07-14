@@ -22,6 +22,7 @@ import {
   FingerprintIcon,
   HardDriveUploadIcon,
   Loader2Icon,
+  TagsIcon,
   MapPinIcon,
   MinusIcon,
   PlugZapIcon,
@@ -76,12 +77,13 @@ import { createEquipment, equipmentDetailPath, listEquipment, updateEquipment, t
 import { loadAppliedConfig, mergeSetupNotes, saveAppliedConfig, SETUP_NOTES_HEADER } from "@/app/_lib/audiomoth/setup-store";
 import { DeploymentsTab } from "./DeploymentsTab";
 import { UploadTab } from "./UploadTab";
+import { LabelTab } from "./LabelTab";
 
 /* ------------------------------------------------------------------ */
 /* Types                                                               */
 /* ------------------------------------------------------------------ */
 
-type MainTabId = "setup" | "deployments" | "upload";
+type MainTabId = "setup" | "deployments" | "upload" | "label";
 
 type TabId = "device" | "configure" | "firmware";
 
@@ -307,7 +309,7 @@ export function AudioMothClient({ sessionDid }: { sessionDid: string | null }) {
   const searchParams = useSearchParams();
   const [mainTab, setMainTab] = useState<MainTabId>(() => {
     const tab = searchParams.get("tab");
-    return tab === "deployments" || tab === "upload" ? tab : "setup";
+    return tab === "deployments" || tab === "upload" || tab === "label" ? tab : "setup";
   });
   const [tab, setTab] = useState<TabId>("firmware");
   const [connecting, setConnecting] = useState(false);
@@ -790,6 +792,7 @@ export function AudioMothClient({ sessionDid }: { sessionDid: string | null }) {
     { id: "setup", label: t("mainTabs.setup"), Icon: WrenchIcon },
     { id: "deployments", label: t("mainTabs.deployments"), Icon: MapPinIcon },
     { id: "upload", label: t("mainTabs.upload"), Icon: HardDriveUploadIcon },
+    { id: "label", label: t("mainTabs.label"), Icon: TagsIcon },
   ];
 
   return (
@@ -801,18 +804,20 @@ export function AudioMothClient({ sessionDid }: { sessionDid: string | null }) {
           </span>
           <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
         </div>
-        <p className="max-w-2xl text-sm text-muted-foreground">{t("subtitle")}</p>
+        <p className="max-w-2xl text-sm text-muted-foreground">
+          {mainTab === "label" ? t("label.subtitle") : t("subtitle")}
+        </p>
       </header>
 
       {/* Setup (this device over USB) vs Deployment (field events) */}
-      <nav className="flex gap-1 self-start rounded-full border border-border bg-card/70 p-1" aria-label={t("title")}>
+      <nav className="flex w-full gap-1 self-start rounded-full border border-border bg-card/70 p-1 sm:w-auto" aria-label={t("title")}>
         {mainTabs.map(({ id, label, Icon }) => (
           <button
             key={id}
             type="button"
             onClick={() => setMainTab(id)}
             className={cn(
-              "flex items-center justify-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-colors",
+              "flex min-w-0 flex-1 items-center justify-center gap-1 rounded-full px-2 py-2 text-xs font-medium transition-colors sm:flex-none sm:gap-2 sm:px-4 sm:text-sm",
               mainTab === id ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground",
             )}
             aria-current={mainTab === id ? "page" : undefined}
@@ -826,6 +831,8 @@ export function AudioMothClient({ sessionDid }: { sessionDid: string | null }) {
       {mainTab === "deployments" && <DeploymentsTab sessionDid={sessionDid} />}
 
       {mainTab === "upload" && <UploadTab sessionDid={sessionDid} />}
+
+      {mainTab === "label" && <LabelTab />}
 
       {mainTab === "setup" && supported === false && (
         <Card>
