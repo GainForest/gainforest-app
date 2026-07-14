@@ -1235,7 +1235,16 @@
     "atprotoLinkTitle": "Como funciona o AT Protocol",
     "atprotoLinkDesc": "Um passeio interativo pela rede aberta sobre a qual tudo isto é construído.",
     "teeEpdsLinkTitle": "Assinatura protegida do ePDS",
-    "teeEpdsLinkDesc": "Veja como chaves privadas podem ficar dentro de hardware protegido."
+    "teeEpdsLinkDesc": "Veja como chaves privadas podem ficar dentro de hardware protegido.",
+    "guides": {
+      "usageGuide": "Guia de uso",
+      "audiomothTitle": "Rótulos de espectrograma do AudioMoth como ocorrências de Darwin Core",
+      "audiomothDescription": "Como cada caixa confirmada de tempo e frequência se torna uma nova ocorrência ligada à gravação de áudio de origem.",
+      "openGuide": "Ler o guia de implementação",
+      "breadcrumbAria": "Navegação da documentação",
+      "schemas": "Esquemas de dados",
+      "guideIntro": "Este guia define as convenções da aplicação usadas com o esquema de ocorrência. O esquema continua sendo Darwin Core genérico; o guia explica como as gravações do AudioMoth, as caixas do espectrograma e os registros de ocorrência se conectam."
+    }
   },
   "taina": {
     "meta": {

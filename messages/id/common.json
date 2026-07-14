@@ -1235,7 +1235,16 @@
     "atprotoLinkTitle": "Cara kerja AT Protocol",
     "atprotoLinkDesc": "Tur interaktif jaringan terbuka tempat semua ini dibangun.",
     "teeEpdsLinkTitle": "Penandatanganan ePDS terlindungi",
-    "teeEpdsLinkDesc": "Lihat cara kunci privat tetap berada di perangkat keras terlindungi."
+    "teeEpdsLinkDesc": "Lihat cara kunci privat tetap berada di perangkat keras terlindungi.",
+    "guides": {
+      "usageGuide": "Panduan penggunaan",
+      "audiomothTitle": "Label spektrogram AudioMoth sebagai kemunculan Darwin Core",
+      "audiomothDescription": "Cara setiap kotak waktu dan frekuensi yang dikonfirmasi menjadi rekaman kemunculan baru yang terhubung ke rekaman audio sumbernya.",
+      "openGuide": "Baca panduan implementasi",
+      "breadcrumbAria": "Jejak navigasi dokumentasi",
+      "schemas": "Skema data",
+      "guideIntro": "Panduan ini menetapkan konvensi aplikasi yang digunakan bersama skema kemunculan. Skemanya tetap berupa Darwin Core umum; panduan ini menjelaskan hubungan antara rekaman AudioMoth, kotak spektrogram, dan rekaman kemunculan."
+    }
   },
   "taina": {
     "meta": {

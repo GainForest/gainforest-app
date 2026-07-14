@@ -1235,7 +1235,16 @@
     "atprotoLinkTitle": "How the AT Protocol works",
     "atprotoLinkDesc": "An interactive tour of the open network everything here is built on.",
     "teeEpdsLinkTitle": "Protected ePDS signing",
-    "teeEpdsLinkDesc": "See how private keys can stay inside protected hardware."
+    "teeEpdsLinkDesc": "See how private keys can stay inside protected hardware.",
+    "guides": {
+      "usageGuide": "Usage guide",
+      "audiomothTitle": "AudioMoth spectrogram labels as Darwin Core occurrences",
+      "audiomothDescription": "How each confirmed time and frequency box becomes a new occurrence linked to its source audio recording.",
+      "openGuide": "Read the implementation guide",
+      "breadcrumbAria": "Documentation breadcrumb",
+      "schemas": "Data schemas",
+      "guideIntro": "This guide defines the application-level conventions used with the occurrence schema. The schema remains generic Darwin Core; the guide explains how AudioMoth recordings, spectrogram boxes, and occurrence records connect."
+    }
   },
   "taina": {
     "meta": {
