@@ -115,6 +115,16 @@ Vercel** or production can't reach the runtime.
 [Flue](https://flueframework.com). The agent internals, data flows, and deploy
 notes live in that repo's `AGENTS.md`.
 
+## AudioMoth spectrogram occurrences
+
+The AudioMoth labelling workspace treats every confirmed time/frequency box as
+a Darwin Core occurrence linked to its source `app.gainforest.ac.audio` record.
+See [`docs/audiomoth-spectrogram-occurrences.md`](docs/audiomoth-spectrogram-occurrences.md)
+for the record mapping, relationship cardinality, time semantics, permissions,
+draft behavior, and required tests. In particular, these labels are
+`app.gainforest.dwc.occurrence` records—not evaluator evaluations—and one audio
+recording may have many occurrences.
+
 ## Design system
 
 Ported verbatim from gainforest-app: tokens in `app/globals.css`
