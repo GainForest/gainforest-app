@@ -5,7 +5,7 @@ import ts from "typescript";
 const projectRoot = process.cwd();
 const locales = ["es", "id", "pt", "sw"];
 const allLocales = ["en", ...locales];
-const namespaces = ["root", "bumicert", "cart", "common", "legacy", "marketplace", "modals", "privacy", "tainaGuide", "upload"];
+const namespaces = ["root", "bumicert", "cart", "common", "deleteAccount", "legacy", "marketplace", "modals", "privacy", "tainaGuide", "upload"];
 
 const allowedExactValues = new Set([
   "",

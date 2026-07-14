@@ -113,6 +113,10 @@ export function Footer() {
                 {t("links.privacyPolicy")}
               </Link>
               <span className="text-muted-foreground/35"> · </span>
+              <Link href="/delete-account" className="underline-offset-4 transition-colors hover:text-primary hover:underline">
+                {t("links.deleteAccount")}
+              </Link>
+              <span className="text-muted-foreground/35"> · </span>
               <Link href="mailto:team@gainforest.net" className="underline-offset-4 transition-colors hover:text-primary hover:underline">
                 team@gainforest.net
               </Link>

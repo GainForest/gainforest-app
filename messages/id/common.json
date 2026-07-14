@@ -246,7 +246,8 @@
       "greenGlobe": "Green Globe",
       "status": "Status",
       "lexicons": "Skema data",
-      "privacyPolicy": "Kebijakan Privasi"
+      "privacyPolicy": "Kebijakan Privasi",
+      "deleteAccount": "Hapus Akun"
     }
   },
   "browseGrid": {

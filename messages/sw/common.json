@@ -246,7 +246,8 @@
       "greenGlobe": "Green Globe",
       "status": "Hali",
       "lexicons": "Miundo ya data",
-      "privacyPolicy": "Sera ya faragha"
+      "privacyPolicy": "Sera ya faragha",
+      "deleteAccount": "Futa akaunti"
     }
   },
   "browseGrid": {

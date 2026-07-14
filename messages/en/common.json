@@ -246,7 +246,8 @@
       "greenGlobe": "Green Globe",
       "status": "Status",
       "lexicons": "Data schemas",
-      "privacyPolicy": "Privacy Policy"
+      "privacyPolicy": "Privacy Policy",
+      "deleteAccount": "Delete Account"
     }
   },
   "browseGrid": {

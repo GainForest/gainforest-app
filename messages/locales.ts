@@ -6,6 +6,7 @@ import swLanding from "./sw.json";
 import enBumicert from "./en/bumicert.json";
 import enCart from "./en/cart.json";
 import enCommon from "./en/common.json";
+import enDeleteAccount from "./en/deleteAccount.json";
 import enMarketplace from "./en/marketplace.json";
 import enModals from "./en/modals.json";
 import enUpload from "./en/upload.json";
@@ -16,6 +17,7 @@ import enTainaGuide from "./en/tainaGuide.json";
 import esBumicert from "./es/bumicert.json";
 import esCart from "./es/cart.json";
 import esCommon from "./es/common.json";
+import esDeleteAccount from "./es/deleteAccount.json";
 import esMarketplace from "./es/marketplace.json";
 import esModals from "./es/modals.json";
 import esUpload from "./es/upload.json";
@@ -26,6 +28,7 @@ import esTainaGuide from "./es/tainaGuide.json";
 import idBumicert from "./id/bumicert.json";
 import idCart from "./id/cart.json";
 import idCommon from "./id/common.json";
+import idDeleteAccount from "./id/deleteAccount.json";
 import idMarketplace from "./id/marketplace.json";
 import idModals from "./id/modals.json";
 import idUpload from "./id/upload.json";
@@ -36,6 +39,7 @@ import idTainaGuide from "./id/tainaGuide.json";
 import ptBumicert from "./pt/bumicert.json";
 import ptCart from "./pt/cart.json";
 import ptCommon from "./pt/common.json";
+import ptDeleteAccount from "./pt/deleteAccount.json";
 import ptMarketplace from "./pt/marketplace.json";
 import ptModals from "./pt/modals.json";
 import ptUpload from "./pt/upload.json";
@@ -46,6 +50,7 @@ import ptTainaGuide from "./pt/tainaGuide.json";
 import swBumicert from "./sw/bumicert.json";
 import swCart from "./sw/cart.json";
 import swCommon from "./sw/common.json";
+import swDeleteAccount from "./sw/deleteAccount.json";
 import swMarketplace from "./sw/marketplace.json";
 import swModals from "./sw/modals.json";
 import swUpload from "./sw/upload.json";
@@ -66,6 +71,7 @@ export const messagesByLocale = {
     modals: enModals,
     legacy: enLegacy,
     privacy: enPrivacy,
+    deleteAccount: enDeleteAccount,
     changelog: enChangelog,
     tainaGuide: enTainaGuide,
   },
@@ -79,6 +85,7 @@ export const messagesByLocale = {
     modals: esModals,
     legacy: esLegacy,
     privacy: esPrivacy,
+    deleteAccount: esDeleteAccount,
     changelog: esChangelog,
     tainaGuide: esTainaGuide,
   },
@@ -92,6 +99,7 @@ export const messagesByLocale = {
     modals: ptModals,
     legacy: ptLegacy,
     privacy: ptPrivacy,
+    deleteAccount: ptDeleteAccount,
     changelog: ptChangelog,
     tainaGuide: ptTainaGuide,
   },
@@ -105,6 +113,7 @@ export const messagesByLocale = {
     modals: swModals,
     legacy: swLegacy,
     privacy: swPrivacy,
+    deleteAccount: swDeleteAccount,
     changelog: swChangelog,
     tainaGuide: swTainaGuide,
   },
@@ -118,6 +127,7 @@ export const messagesByLocale = {
     modals: idModals,
     legacy: idLegacy,
     privacy: idPrivacy,
+    deleteAccount: idDeleteAccount,
     changelog: idChangelog,
     tainaGuide: idTainaGuide,
   },
