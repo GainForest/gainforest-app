@@ -299,7 +299,13 @@ function InfoRow({ label, value, dimmed }: { label: string; value: string; dimme
 /* Main component                                                      */
 /* ------------------------------------------------------------------ */
 
-export function AudioMothClient({ sessionDid }: { sessionDid: string | null }) {
+export function AudioMothClient({
+  sessionDid,
+  canUseLabelling,
+}: {
+  sessionDid: string | null;
+  canUseLabelling: boolean;
+}) {
   const t = useTranslations("common.audiomoth");
 
   const [supported, setSupported] = useState<boolean | null>(null);
@@ -309,7 +315,8 @@ export function AudioMothClient({ sessionDid }: { sessionDid: string | null }) {
   const searchParams = useSearchParams();
   const [mainTab, setMainTab] = useState<MainTabId>(() => {
     const tab = searchParams.get("tab");
-    return tab === "deployments" || tab === "upload" || tab === "label" ? tab : "setup";
+    if (tab === "label") return canUseLabelling ? "label" : "setup";
+    return tab === "deployments" || tab === "upload" ? tab : "setup";
   });
   const [tab, setTab] = useState<TabId>("firmware");
   const [connecting, setConnecting] = useState(false);
@@ -792,7 +799,9 @@ export function AudioMothClient({ sessionDid }: { sessionDid: string | null }) {
     { id: "setup", label: t("mainTabs.setup"), Icon: WrenchIcon },
     { id: "deployments", label: t("mainTabs.deployments"), Icon: MapPinIcon },
     { id: "upload", label: t("mainTabs.upload"), Icon: HardDriveUploadIcon },
-    { id: "label", label: t("mainTabs.label"), Icon: TagsIcon },
+    ...(canUseLabelling
+      ? [{ id: "label" as const, label: t("mainTabs.label"), Icon: TagsIcon }]
+      : []),
   ];
 
   return (
@@ -832,7 +841,7 @@ export function AudioMothClient({ sessionDid }: { sessionDid: string | null }) {
 
       {mainTab === "upload" && <UploadTab sessionDid={sessionDid} />}
 
-      {mainTab === "label" && <LabelTab sessionDid={sessionDid} />}
+      {canUseLabelling && mainTab === "label" && <LabelTab sessionDid={sessionDid} />}
 
       {mainTab === "setup" && supported === false && (
         <Card>
