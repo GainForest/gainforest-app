@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { getLocale } from "next-intl/server";
 import { resolveSupportedLanguage } from "@/lib/i18n/languages";
-import { getLocalizedPathnames, withLocalePrefix } from "@/lib/i18n/routing";
+import { getCanonicalPathname, getSeoLocalizedPathnames } from "@/lib/i18n/routing";
 
 const SOCIAL_IMAGE = "/og/gainforest-og-2.png";
 const SITE_NAME = "GainForest";
@@ -12,9 +12,9 @@ export async function localizedAlternates(
   const locale = resolveSupportedLanguage(await getLocale());
 
   return {
-    canonical: withLocalePrefix(pathname, locale),
+    canonical: getCanonicalPathname(pathname, locale),
     languages: {
-      ...getLocalizedPathnames(pathname),
+      ...getSeoLocalizedPathnames(pathname),
       "x-default": pathname,
     },
   };

@@ -2,7 +2,7 @@ import type { MetadataRoute } from "next";
 import { INDEXER_URL } from "./_lib/urls";
 import { getRequestOrigin } from "./_lib/request-origin";
 import { SUPPORTED_LOCALES, type SupportedLanguageCode } from "@/lib/i18n/languages";
-import { getLocalizedPathnames, withLocalePrefix } from "@/lib/i18n/routing";
+import { getCanonicalPathname, getSeoLocalizedPathnames } from "@/lib/i18n/routing";
 
 export const revalidate = 3600;
 
@@ -105,7 +105,7 @@ function buildAbsoluteUrl(pathname: string, origin: string): string {
 }
 
 function buildAlternates(pathname: string, origin: string): Record<SupportedLanguageCode, string> {
-  const localizedPathnames = getLocalizedPathnames(pathname);
+  const localizedPathnames = getSeoLocalizedPathnames(pathname);
   return Object.fromEntries(
     Object.entries(localizedPathnames).map(([locale, path]) => [
       locale,
@@ -124,7 +124,7 @@ function buildLocalizedEntries(options: {
   const alternates = buildAlternates(options.pathname, options.origin);
 
   return SUPPORTED_LOCALES.map((locale) => ({
-    url: buildAbsoluteUrl(withLocalePrefix(options.pathname, locale), options.origin),
+    url: buildAbsoluteUrl(getCanonicalPathname(options.pathname, locale), options.origin),
     lastModified: options.lastModified,
     changeFrequency: options.changeFrequency,
     priority: options.priority,

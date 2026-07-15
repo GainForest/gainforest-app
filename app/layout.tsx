@@ -16,7 +16,7 @@ import { RouteChangeIndicator } from "./_components/RouteChangeIndicator";
 import { ModalHost, ModalProvider } from "@/components/ui/modal/context";
 import { WagmiProvider } from "@/components/providers/WagmiProvider";
 import { resolveSupportedLanguage } from "@/lib/i18n/languages";
-import { getLocalizedPathnames, withLocalePrefix } from "@/lib/i18n/routing";
+import { getCanonicalPathname, getSeoLocalizedPathnames, withLocalePrefix } from "@/lib/i18n/routing";
 import { fetchAuthSession } from "./_lib/auth-server";
 import { getRequestOrigin } from "./_lib/request-origin";
 
@@ -117,7 +117,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const description = t("description");
   const origin = await getRequestOrigin();
 
-  const languages = { ...getLocalizedPathnames("/"), "x-default": "/" };
+  const languages = { ...getSeoLocalizedPathnames("/"), "x-default": "/" };
 
   return {
     metadataBase: new URL(origin),
@@ -139,7 +139,7 @@ export async function generateMetadata(): Promise<Metadata> {
       "impact certification",
     ],
     category: "sustainability",
-    alternates: { canonical: withLocalePrefix("/", locale), languages },
+    alternates: { canonical: getCanonicalPathname("/", locale), languages },
     openGraph: {
       type: "website",
       locale,
@@ -168,6 +168,7 @@ export async function generateMetadata(): Promise<Metadata> {
       apple: [{ url: "/icons/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
     },
     manifest: "/icons/site.webmanifest",
+    appleWebApp: { title: SITE_NAME, capable: true },
     robots: { index: true, follow: true },
     formatDetection: { telephone: false, email: false, address: false },
   };

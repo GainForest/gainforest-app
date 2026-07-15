@@ -1,7 +1,7 @@
 {
   "name": "GainForest",
   "short_name": "GainForest",
-  "description": "GainForest helps people explore project stories, nature sightings, donations, and site health.",
+  "description": "Explore field observations, biodiversity records, and nature projects from communities and organizations using GainForest.",
   "icons": [
     { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
     { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
@@ -10,5 +10,7 @@
   "theme_color": "#3e7053",
   "background_color": "#f4efe4",
   "display": "minimal-ui",
-  "start_url": "/"
+  "start_url": "/",
+  "scope": "/",
+  "id": "/"
 }
