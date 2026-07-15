@@ -19,6 +19,11 @@
 
 import { indexerQuery } from "./indexer";
 import { normaliseRef } from "./pds";
+import {
+  mentionCandidatesFromFacets,
+  type MentionCandidate,
+  type RawIndexedFacet,
+} from "./mentions";
 
 export type Engagement = {
   likeCount: number;
@@ -37,6 +42,9 @@ export type FeedComment = {
   /** AT-URI this comment replies to: the subject for a top-level comment, or
    *  another comment's URI for a threaded reply. Null when unknown. */
   parentUri: string | null;
+  /** Accounts @-mentioned in the text (from the record's facets), for
+   *  linkified rendering and for seeding the edit composer. */
+  mentions: MentionCandidate[];
 };
 
 /** A comment plus its nested replies, built from a flat thread by parent link. */
@@ -97,6 +105,14 @@ const CERTIFIED_PROFILE_DATA_FIELDS = `
   certifiedProfileData {
     displayName
     avatar { __typename ... on OrgHypercertsDefsSmallImage { image { ref } } }
+  }
+`;
+
+/** Facet selection for mention rendering (see app/_lib/mentions.ts). */
+export const FACET_FIELDS = `
+  facets {
+    index { byteStart byteEnd }
+    features { __typename ... on AppBskyRichtextFacetMention { did } }
   }
 `;
 
@@ -182,6 +198,7 @@ const COMMENTS_FOR_SUBJECT_QUERY = `
         node {
           uri did text createdAt
           reply { parent { uri } }
+          ${FACET_FIELDS}
           ${CERTIFIED_PROFILE_DATA_FIELDS}
         }
       }
@@ -195,6 +212,7 @@ type CommentNode = {
   text?: string | null;
   createdAt?: string | null;
   reply?: { parent?: { uri?: string | null } | null } | null;
+  facets?: RawIndexedFacet[] | null;
   certifiedProfileData?: {
     displayName?: string | null;
     avatar?: { image?: { ref?: string | null } | null } | null;
@@ -262,6 +280,7 @@ export async function fetchComments(uri: string, signal?: AbortSignal): Promise<
       authorName: node.certifiedProfileData?.displayName?.trim() || null,
       authorAvatarRef: normaliseRef(node.certifiedProfileData?.avatar?.image?.ref),
       parentUri: node.reply?.parent?.uri ?? null,
+      mentions: mentionCandidatesFromFacets(node.text, node.facets),
     });
   }
   comments.sort((a, b) => (a.createdAt ?? "").localeCompare(b.createdAt ?? ""));

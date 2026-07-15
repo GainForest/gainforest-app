@@ -14,6 +14,7 @@ import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { ArrowUpRightIcon, UserIcon, XIcon } from "lucide-react";
 import type { ActivityFeedItem } from "../_lib/feed";
+import { MentionText } from "@/app/_components/MentionText";
 import { resolveBlobUrl } from "../_lib/pds";
 import { formatRelative } from "../_lib/format";
 import { FeedActionBar, type FeedInteractions } from "./FeedActions";
@@ -126,7 +127,11 @@ export function FeedImageLightbox({
           {item.title ? (
             <p className="text-[15px] font-medium leading-snug text-foreground">{item.title}</p>
           ) : null}
-          {item.text ? <p className="mt-0.5 line-clamp-2 text-sm text-muted-foreground">{item.text}</p> : null}
+          {item.text ? (
+            <p className="mt-0.5 line-clamp-2 text-sm text-muted-foreground">
+              <MentionText text={item.text} mentions={item.mentions} />
+            </p>
+          ) : null}
           <FeedActionBar subjectUri={item.id} signedIn={signedIn} interactions={interactions} />
           <Link
             href={item.href}

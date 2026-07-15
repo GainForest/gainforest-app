@@ -25,6 +25,7 @@
 
 import { cachedAsync } from "./async-cache";
 import { fetchHiddenAccountDids, fetchHiddenRecordUris, indexerQuery } from "./indexer";
+import { mentionCandidatesFromFacets, type MentionCandidate, type RawIndexedFacet } from "./mentions";
 import { normaliseRef } from "./pds";
 import { FACILITATOR_DID, accountHref, localBumicertHref, localObservationHref, localProjectHref } from "./urls";
 
@@ -59,6 +60,8 @@ export interface ActivityFeedItem {
   title: string | null;
   /** Body text (short description, habitat, donation summary). */
   text: string | null;
+  /** Posts only: accounts @-mentioned in the text, for linkified rendering. */
+  mentions?: MentionCandidate[];
   /** In-app detail link for the row. */
   href: string;
   /** Already-resolved external image URL (projects / observations). */
@@ -307,6 +310,10 @@ const FEED_QUERY = `
     ) {
       edges { node {
         did uri createdAt text
+        facets {
+          index { byteStart byteEnd }
+          features { __typename ... on AppBskyRichtextFacetMention { did } }
+        }
         ${CERTIFIED_PROFILE_DATA_FIELDS}
       } }
     }
@@ -369,6 +376,7 @@ type RawPost = {
   uri?: string | null;
   createdAt: string;
   text?: string | null;
+  facets?: RawIndexedFacet[] | null;
   certifiedProfileData?: CertifiedProfileData;
 };
 
@@ -507,6 +515,7 @@ function mapPosts(nodes: RawPost[]): ActivityFeedItem[] {
     actorAvatarRef: profileAvatarRef(n.certifiedProfileData),
     title: null,
     text: clampText(n.text, 400),
+    mentions: mentionCandidatesFromFacets(n.text ?? "", n.facets),
     href: accountHref(n.did),
     imageUrl: null,
     imageRef: null,

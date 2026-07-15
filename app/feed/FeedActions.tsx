@@ -33,6 +33,9 @@ import {
   type Liker,
 } from "@/app/_lib/feed-engagement";
 import { redirectToLogin } from "@/app/_lib/auth-client";
+import { buildMentionFacets, type MentionCandidate } from "@/app/_lib/mentions";
+import { MentionText } from "@/app/_components/MentionText";
+import { MentionTextarea } from "@/app/_components/MentionTextarea";
 import {
   crosspostToBluesky,
   deleteBlueskyTwin,
@@ -107,6 +110,8 @@ export type LocalPost = {
   id: string;
   text: string;
   createdAt: string;
+  /** Accounts @-mentioned in the text, for linkified rendering. */
+  mentions?: MentionCandidate[];
   /** bsky.app URL of the Bluesky twin when this post was cross-posted. */
   bskyUrl?: string | null;
 };
@@ -128,18 +133,19 @@ export type FeedInteractions = {
   /** Comment on `uri`, or reply to it within a thread. Pass `rootUri` (the
    *  subject at the top of the thread) to make this a threaded reply; omit it
    *  for a top-level comment. The optimistic comment lands in the thread keyed
-   *  by the root so it nests under what it answers. */
-  addComment: (uri: string, text: string, rootUri?: string) => Promise<void>;
+   *  by the root so it nests under what it answers. `mentions` are the accounts
+   *  the author @-tagged (facets are computed from them at write time). */
+  addComment: (uri: string, text: string, rootUri?: string, mentions?: MentionCandidate[]) => Promise<void>;
   /** Edit one of the viewer's own comments under `subjectUri`. */
-  editComment: (subjectUri: string, commentUri: string, text: string) => Promise<void>;
+  editComment: (subjectUri: string, commentUri: string, text: string, mentions?: MentionCandidate[]) => Promise<void>;
   /** Delete one of the viewer's own comments under `subjectUri`. */
   deleteComment: (subjectUri: string, commentUri: string) => Promise<void>;
   localPosts: LocalPost[];
   /** Publish a top-level post. `crosspost` additionally writes the
    *  app.bsky.feed.post twin (personal repo only; ignored for group repos). */
-  addPost: (text: string, opts?: { crosspost?: boolean }) => Promise<void>;
+  addPost: (text: string, opts?: { crosspost?: boolean; mentions?: MentionCandidate[] }) => Promise<void>;
   /** Edit one of the viewer's own feed posts (optimistic local + persisted). */
-  editPost: (postUri: string, text: string) => Promise<void>;
+  editPost: (postUri: string, text: string, mentions?: MentionCandidate[]) => Promise<void>;
   /** Delete one of the viewer's own feed posts (optimistic local + persisted). */
   deletePost: (postUri: string) => Promise<void>;
   /** AT-URIs the viewer has just deleted, so the timeline can hide them until
@@ -332,12 +338,13 @@ export function useFeedInteractions(sessionDid: string | null): FeedInteractions
   }, []);
 
   const addComment = useCallback(
-    async (uri: string, text: string, rootUri?: string) => {
+    async (uri: string, text: string, rootUri?: string, mentions?: MentionCandidate[]) => {
       // A reply targets the comment (`uri`) as its parent but lives in the
       // thread keyed by the subject at the top (`rootUri`). A top-level comment
       // is its own root, so the thread key is just `uri`.
       const threadKey = rootUri ?? uri;
-      const result = await createFeedComment({ text, subjectUri: uri, rootUri }, repoOption);
+      const facets = buildMentionFacets(text.trim(), mentions ?? []);
+      const result = await createFeedComment({ text, subjectUri: uri, rootUri, facets }, repoOption);
       const optimistic: FeedComment = {
         uri: result.uri,
         did: actingDid ?? "",
@@ -346,6 +353,7 @@ export function useFeedInteractions(sessionDid: string | null): FeedInteractions
         authorName: null,
         authorAvatarRef: null,
         parentUri: uri,
+        mentions: mentions ?? [],
       };
       setComments((prev) => {
         const next = new Map(prev);
@@ -361,16 +369,17 @@ export function useFeedInteractions(sessionDid: string | null): FeedInteractions
   // Edit one of the viewer's own comments. Gating is the caller's job (only the
   // author sees the affordance), so the acting repo already matches the owner.
   const editComment = useCallback(
-    async (subjectUri: string, commentUri: string, text: string) => {
+    async (subjectUri: string, commentUri: string, text: string, mentions?: MentionCandidate[]) => {
       const trimmed = text.trim();
-      await updateFeedPost(rkeyOf(commentUri), trimmed, repoOption);
+      const facets = buildMentionFacets(trimmed, mentions ?? []);
+      await updateFeedPost(rkeyOf(commentUri), trimmed, { ...repoOption, facets });
       setComments((prev) => {
         const list = prev.get(subjectUri);
         if (!list) return prev;
         const next = new Map(prev);
         next.set(
           subjectUri,
-          list.map((c) => (c.uri === commentUri ? { ...c, text: trimmed } : c)),
+          list.map((c) => (c.uri === commentUri ? { ...c, text: trimmed, mentions: mentions ?? [] } : c)),
         );
         return next;
       });
@@ -379,8 +388,9 @@ export function useFeedInteractions(sessionDid: string | null): FeedInteractions
   );
 
   const addPost = useCallback(
-    async (text: string, opts?: { crosspost?: boolean }) => {
-      const result = await createFeedPost({ text }, repoOption);
+    async (text: string, opts?: { crosspost?: boolean; mentions?: MentionCandidate[] }) => {
+      const facets = buildMentionFacets(text.trim(), opts?.mentions ?? []);
+      const result = await createFeedPost({ text, facets }, repoOption);
       // Bluesky twin: opt-in, personal repo only, top-level posts only. The
       // GainForest post is already live at this point, so a failed twin write
       // just means no Bluesky link — never a failed post.
@@ -389,7 +399,7 @@ export function useFeedInteractions(sessionDid: string | null): FeedInteractions
         bskyUrl = await crosspostToBluesky({ did: actingDid, rkey: result.rkey, text: text.trim() });
       }
       setLocalPosts((prev) => [
-        { id: result.uri, text: text.trim(), createdAt: new Date().toISOString(), bskyUrl },
+        { id: result.uri, text: text.trim(), createdAt: new Date().toISOString(), mentions: opts?.mentions ?? [], bskyUrl },
         ...prev,
       ]);
     },
@@ -399,13 +409,14 @@ export function useFeedInteractions(sessionDid: string | null): FeedInteractions
   // Edit one of the viewer's own posts. Updates the optimistic local copy if it
   // is still showing; the persisted edit reconciles on the next feed load.
   const editPost = useCallback(
-    async (postUri: string, text: string) => {
+    async (postUri: string, text: string, mentions?: MentionCandidate[]) => {
       const trimmed = text.trim();
-      await updateFeedPost(rkeyOf(postUri), trimmed, repoOption);
+      const facets = buildMentionFacets(trimmed, mentions ?? []);
+      await updateFeedPost(rkeyOf(postUri), trimmed, { ...repoOption, facets });
       // Keep an existing Bluesky twin's record in sync (best-effort, personal
       // repo only; a no-op when the post was never cross-posted).
       if (!repoOption) void updateBlueskyTwin(rkeyOf(postUri), trimmed);
-      setLocalPosts((prev) => prev.map((p) => (p.id === postUri ? { ...p, text: trimmed } : p)));
+      setLocalPosts((prev) => prev.map((p) => (p.id === postUri ? { ...p, text: trimmed, mentions: mentions ?? [] } : p)));
     },
     [repoOption],
   );
@@ -494,7 +505,7 @@ export function LocalPostsList({
 }: {
   posts: LocalPost[];
   viewerDid: string | null;
-  onEditPost?: (postUri: string, text: string) => Promise<void>;
+  onEditPost?: (postUri: string, text: string, mentions?: MentionCandidate[]) => Promise<void>;
   onDeletePost?: (postUri: string) => Promise<void>;
 }) {
   const t = useTranslations("common.feed");
@@ -526,13 +537,16 @@ export function LocalPostsList({
               {editingId === post.id && onEditPost ? (
                 <InlineEditor
                   initial={post.text}
+                  initialMentions={post.mentions}
                   max={POST_MAX}
-                  onSave={(text) => onEditPost(post.id, text)}
+                  onSave={(text, mentions) => onEditPost(post.id, text, mentions)}
                   onCancel={() => setEditingId(null)}
                 />
               ) : (
                 <>
-                  <p className="mt-1 whitespace-pre-wrap text-[15px] leading-relaxed text-foreground">{post.text}</p>
+                  <p className="mt-1 whitespace-pre-wrap text-[15px] leading-relaxed text-foreground">
+                    <MentionText text={post.text} mentions={post.mentions} />
+                  </p>
                   {post.bskyUrl ? <BlueskyPostLink href={post.bskyUrl} /> : null}
                   {onEditPost || onDeletePost ? (
                     <div className="mt-1 flex items-center gap-1">
@@ -560,20 +574,25 @@ export function LocalPostsList({
 }
 
 /** Inline text editor used to edit a post or comment in place. Saves the
- *  trimmed text when changed; Escape or Cancel discards. */
+ *  trimmed text when changed; Escape or Cancel discards. `initialMentions`
+ *  seeds the accounts already tagged in the text so an edit keeps existing
+ *  @-mentions linked; new ones can be added through the type-ahead. */
 export function InlineEditor({
   initial,
+  initialMentions,
   max,
   onSave,
   onCancel,
 }: {
   initial: string;
+  initialMentions?: MentionCandidate[];
   max: number;
-  onSave: (text: string) => Promise<void>;
+  onSave: (text: string, mentions: MentionCandidate[]) => Promise<void>;
   onCancel: () => void;
 }) {
   const t = useTranslations("common.feed");
   const [text, setText] = useState(initial);
+  const [mentions, setMentions] = useState<MentionCandidate[]>(initialMentions ?? []);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const trimmed = text.trim();
@@ -584,7 +603,7 @@ export function InlineEditor({
     setBusy(true);
     setError(null);
     try {
-      await onSave(trimmed);
+      await onSave(trimmed, mentions);
       onCancel();
     } catch {
       setError(t("actions.errorGeneric"));
@@ -595,17 +614,16 @@ export function InlineEditor({
 
   return (
     <div className="mt-1">
-      <textarea
+      <MentionTextarea
         value={text}
         autoFocus
-        onChange={(e) => setText(e.target.value)}
-        onKeyDown={(e) => {
-          if (e.key === "Escape") onCancel();
-        }}
+        onValueChange={setText}
+        onPickMention={(c) => setMentions((prev) => [...prev, c])}
+        onEscape={onCancel}
         rows={2}
         maxLength={max + 40}
-        aria-label={t("actions.edit")}
-        className="w-full resize-none rounded-lg border border-border/60 bg-background px-2.5 py-1.5 text-sm text-foreground outline-none focus:border-primary/50"
+        ariaLabel={t("actions.edit")}
+        className="resize-none rounded-lg border border-border/60 bg-background px-2.5 py-1.5 text-sm text-foreground outline-none focus:border-primary/50"
       />
       <div className="mt-1 flex items-center gap-2">
         <button
@@ -656,12 +674,13 @@ export function ReplyComposer({
   onCancel,
 }: {
   viewerDid: string | null;
-  onSubmit: (text: string) => Promise<void>;
+  onSubmit: (text: string, mentions: MentionCandidate[]) => Promise<void>;
   onCancel: () => void;
 }) {
   const t = useTranslations("common.feed");
   const viewer = useViewerCard(viewerDid);
   const [text, setText] = useState("");
+  const [mentions, setMentions] = useState<MentionCandidate[]>([]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const canSend = text.trim().length > 0 && text.length <= COMMENT_MAX && !busy;
@@ -671,8 +690,9 @@ export function ReplyComposer({
     setBusy(true);
     setError(null);
     try {
-      await onSubmit(text.trim());
+      await onSubmit(text.trim(), mentions);
       setText("");
+      setMentions([]);
       onCancel();
     } catch {
       setError(t("actions.errorGeneric"));
@@ -692,18 +712,17 @@ export function ReplyComposer({
         sizes="24px"
       />
       <div className="min-w-0 flex-1">
-        <textarea
+        <MentionTextarea
           value={text}
           autoFocus
-          onChange={(e) => setText(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Escape") onCancel();
-          }}
+          onValueChange={setText}
+          onPickMention={(c) => setMentions((prev) => [...prev, c])}
+          onEscape={onCancel}
           rows={1}
           maxLength={COMMENT_MAX + 40}
           placeholder={t("actions.replyPlaceholder")}
-          aria-label={t("actions.replyPlaceholder")}
-          className="min-h-8 w-full resize-none rounded-lg border border-border/60 bg-background px-2.5 py-1.5 text-sm text-foreground outline-none placeholder:text-muted-foreground/70 focus:border-primary/50"
+          ariaLabel={t("actions.replyPlaceholder")}
+          className="min-h-8 resize-none rounded-lg border border-border/60 bg-background px-2.5 py-1.5 text-sm text-foreground outline-none placeholder:text-muted-foreground/70 focus:border-primary/50"
         />
         <div className="mt-1 flex items-center gap-2">
           <button
@@ -871,10 +890,12 @@ export function FeedComposer({
   onAddPhoto,
   draftText,
   onDraftChange,
+  draftMentions,
+  onDraftMentionsChange,
 }: {
   signedIn: boolean;
   viewerDid: string | null;
-  onPost: (text: string, opts?: { crosspost?: boolean }) => Promise<void>;
+  onPost: (text: string, opts?: { crosspost?: boolean; mentions?: MentionCandidate[] }) => Promise<void>;
   /** Drop the standalone card chrome (border/background/margin) so the composer
    *  can sit inside another container, e.g. the phone composer modal. */
   embedded?: boolean;
@@ -890,13 +911,20 @@ export function FeedComposer({
    *  a half-written post intact when the user comes back. Controlled pair. */
   draftText?: string;
   onDraftChange?: (text: string) => void;
+  /** Controlled pair for the draft's picked @-mentions, lifted alongside the
+   *  draft text so tags survive the composer being remounted. */
+  draftMentions?: MentionCandidate[];
+  onDraftMentionsChange?: (mentions: MentionCandidate[]) => void;
 }) {
   const t = useTranslations("common.feed");
   const tb = useTranslations("common.bluesky");
   const acting = useActingAccount(viewerDid);
   const [internalText, setInternalText] = useState("");
+  const [internalMentions, setInternalMentions] = useState<MentionCandidate[]>([]);
   const text = draftText ?? internalText;
   const setText = onDraftChange ?? setInternalText;
+  const mentions = draftMentions ?? internalMentions;
+  const setMentions = onDraftMentionsChange ?? setInternalMentions;
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [posted, setPosted] = useState(false);
@@ -971,8 +999,9 @@ export function FeedComposer({
     setBusy(true);
     setError(null);
     try {
-      await onPost(text.trim(), { crosspost: crosspostOn });
+      await onPost(text.trim(), { crosspost: crosspostOn, mentions });
       setText("");
+      setMentions([]);
       setPosted(true);
       window.setTimeout(() => setPosted(false), 6000);
     } catch {
@@ -999,23 +1028,23 @@ export function FeedComposer({
           className="mt-0.5 size-9"
           sizes="36px"
         />
-        <textarea
-          // eslint-disable-next-line jsx-a11y/no-autofocus
+        <MentionTextarea
           autoFocus={autoFocus}
           value={text}
-          onChange={(e) => {
-            setText(e.target.value);
+          onValueChange={(next) => {
+            setText(next);
             setPosted(false);
           }}
+          onPickMention={(c) => setMentions([...mentions, c])}
           onFocus={() => {
             if (!signedIn) redirectToLogin();
           }}
           rows={2}
           maxLength={POST_MAX + 40}
           placeholder={signedIn ? t("composer.placeholder") : t("composer.signedOut")}
-          aria-label={t("composer.placeholder")}
+          ariaLabel={t("composer.placeholder")}
           className={cn(
-            "flex-1 resize-none bg-transparent pt-1.5 text-[15px] leading-relaxed text-foreground outline-none placeholder:text-muted-foreground/70",
+            "resize-none bg-transparent pt-1.5 text-[15px] leading-relaxed text-foreground outline-none placeholder:text-muted-foreground/70",
             embedded ? "min-h-[8rem]" : "min-h-[3rem]",
           )}
         />
@@ -1112,7 +1141,7 @@ export function MobileComposerBar({
 }: {
   signedIn: boolean;
   viewerDid: string | null;
-  onPost: (text: string, opts?: { crosspost?: boolean }) => Promise<void>;
+  onPost: (text: string, opts?: { crosspost?: boolean; mentions?: MentionCandidate[] }) => Promise<void>;
 }) {
   const t = useTranslations("common.feed");
   const acting = useActingAccount(viewerDid);
@@ -1121,6 +1150,7 @@ export function MobileComposerBar({
   // Held here (not in the composer) so a half-written post survives the round
   // trip out to the sighting uploader and back.
   const [draft, setDraft] = useState("");
+  const [draftMentions, setDraftMentions] = useState<MentionCandidate[]>([]);
 
   // The bar is fixed to the viewport bottom, so it would otherwise sit on top of
   // the page footer at the end of the feed. Watch the footer and slide the bar
@@ -1163,7 +1193,7 @@ export function MobileComposerBar({
 
   // Close the modal once the post lands; the optimistic row shows in the feed
   // behind it immediately.
-  const handlePost = async (text: string, opts?: { crosspost?: boolean }) => {
+  const handlePost = async (text: string, opts?: { crosspost?: boolean; mentions?: MentionCandidate[] }) => {
     await onPost(text, opts);
     closeComposer();
   };
@@ -1243,6 +1273,8 @@ export function MobileComposerBar({
             autoFocus
             draftText={draft}
             onDraftChange={setDraft}
+            draftMentions={draftMentions}
+            onDraftMentionsChange={setDraftMentions}
             onAddPhoto={signedIn && viewerDid ? addObservations.open : undefined}
           />
         </div>
@@ -1456,6 +1488,7 @@ function CommentPanel({
   const comments = getComments(subjectUri);
   const viewer = useViewerCard(sessionDid);
   const [text, setText] = useState("");
+  const [mentions, setMentions] = useState<MentionCandidate[]>([]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(comments === undefined);
@@ -1493,8 +1526,9 @@ function CommentPanel({
     setBusy(true);
     setError(null);
     try {
-      await addComment(subjectUri, text.trim());
+      await addComment(subjectUri, text.trim(), undefined, mentions);
       setText("");
+      setMentions([]);
     } catch {
       setError(t("actions.errorGeneric"));
     } finally {
@@ -1537,14 +1571,15 @@ function CommentPanel({
           className="size-7"
           sizes="28px"
         />
-        <textarea
+        <MentionTextarea
           value={text}
-          onChange={(e) => setText(e.target.value)}
+          onValueChange={setText}
+          onPickMention={(c) => setMentions((prev) => [...prev, c])}
           rows={1}
           maxLength={COMMENT_MAX + 40}
           placeholder={t("actions.commentPlaceholder")}
-          aria-label={t("actions.commentPlaceholder")}
-          className="min-h-9 flex-1 resize-none rounded-lg border border-border/60 bg-background px-2.5 py-1.5 text-sm text-foreground outline-none placeholder:text-muted-foreground/70 focus:border-primary/50"
+          ariaLabel={t("actions.commentPlaceholder")}
+          className="min-h-9 resize-none rounded-lg border border-border/60 bg-background px-2.5 py-1.5 text-sm text-foreground outline-none placeholder:text-muted-foreground/70 focus:border-primary/50"
         />
         <button
           type="button"
@@ -1609,12 +1644,15 @@ function LightboxCommentNode({
           {editing ? (
             <InlineEditor
               initial={c.text}
+              initialMentions={c.mentions}
               max={COMMENT_MAX}
-              onSave={(value) => interactions.editComment(subjectUri, c.uri, value)}
+              onSave={(value, mentions) => interactions.editComment(subjectUri, c.uri, value, mentions)}
               onCancel={() => setEditingUri(null)}
             />
           ) : (
-            <p className="whitespace-pre-wrap break-words text-foreground/90">{c.text}</p>
+            <p className="whitespace-pre-wrap break-words text-foreground/90">
+              <MentionText text={c.text} mentions={c.mentions} />
+            </p>
           )}
         </div>
         {!editing ? (
@@ -1639,7 +1677,7 @@ function LightboxCommentNode({
         {replying ? (
           <ReplyComposer
             viewerDid={interactions.viewerDid}
-            onSubmit={(text) => interactions.addComment(c.uri, text, subjectUri)}
+            onSubmit={(text, mentions) => interactions.addComment(c.uri, text, subjectUri, mentions)}
             onCancel={() => setReplying(false)}
           />
         ) : null}

@@ -906,7 +906,8 @@
       "post": "publicação",
       "recording": "gravação",
       "record": "registro"
-    }
+    },
+    "mentionedYou": "mencionou você"
   },
   "feed": {
     "meta": {
@@ -1012,6 +1013,11 @@
     "quickLike": {
       "like": "Curtir esta foto",
       "unlike": "Remover curtida"
+    },
+    "mentions": {
+      "suggestionsAria": "Sugestões de contas",
+      "searching": "Buscando contas…",
+      "noMatches": "Nenhuma conta correspondente"
     }
   },
   "testAccount": {

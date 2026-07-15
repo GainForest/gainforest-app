@@ -906,7 +906,8 @@
       "post": "postingan",
       "recording": "rekaman",
       "record": "catatan"
-    }
+    },
+    "mentionedYou": "menyebut Anda"
   },
   "feed": {
     "meta": {
@@ -1012,6 +1013,11 @@
     "quickLike": {
       "like": "Sukai foto ini",
       "unlike": "Batalkan suka"
+    },
+    "mentions": {
+      "suggestionsAria": "Saran akun",
+      "searching": "Mencari akun…",
+      "noMatches": "Tidak ada akun yang cocok"
     }
   },
   "testAccount": {

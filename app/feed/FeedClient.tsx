@@ -21,6 +21,8 @@ import {
   UsersRoundIcon,
 } from "lucide-react";
 import type { ActivityFeedItem, ActivityFeedKind, ActivityFeedPage } from "../_lib/feed";
+import type { MentionCandidate } from "../_lib/mentions";
+import { MentionText } from "@/app/_components/MentionText";
 import { resolveBlobUrl } from "../_lib/pds";
 import {
   BlueskyPostLink,
@@ -610,11 +612,13 @@ function FeedRow({
   const verb = t(`verbs.${item.kind}`);
   const [editing, setEditing] = useState(false);
   const [overrideText, setOverrideText] = useState<string | null>(null);
+  const [overrideMentions, setOverrideMentions] = useState<MentionCandidate[] | null>(null);
   // Only the author of a feed post may edit it (and only posts — other kinds
   // mirror non-post records whose text isn't a feed post to rewrite).
   const canEditPost =
     item.kind === "post" && Boolean(interactions.viewerDid && item.actorDid === interactions.viewerDid);
   const bodyText = overrideText ?? item.text;
+  const bodyMentions = overrideMentions ?? item.mentions;
 
   return (
     <li className="relative">
@@ -662,7 +666,9 @@ function FeedRow({
 
           {/* Body text */}
           {bodyText ? (
-            <p className="mt-0.5 line-clamp-2 text-sm leading-relaxed text-muted-foreground">{bodyText}</p>
+            <p className="mt-0.5 line-clamp-2 text-sm leading-relaxed text-muted-foreground">
+              <MentionText text={bodyText} mentions={bodyMentions} />
+            </p>
           ) : null}
 
           {/* Donation target line */}
@@ -728,10 +734,12 @@ function FeedRow({
           editing ? (
             <InlineEditor
               initial={bodyText ?? ""}
+              initialMentions={bodyMentions}
               max={300}
-              onSave={async (text) => {
-                await interactions.editPost(item.id, text);
+              onSave={async (text, mentions) => {
+                await interactions.editPost(item.id, text, mentions);
                 setOverrideText(text);
+                setOverrideMentions(mentions);
               }}
               onCancel={() => setEditing(false)}
             />
@@ -1049,12 +1057,15 @@ function BatchCommentNode({
           {editing ? (
             <InlineEditor
               initial={comment.text}
+              initialMentions={comment.mentions}
               max={COMMENT_MAX}
-              onSave={(text) => interactions.editComment(item.id, comment.uri, text)}
+              onSave={(text, mentions) => interactions.editComment(item.id, comment.uri, text, mentions)}
               onCancel={() => setEditing(false)}
             />
           ) : (
-            <p className="whitespace-pre-wrap break-words text-foreground/90">{comment.text}</p>
+            <p className="whitespace-pre-wrap break-words text-foreground/90">
+              <MentionText text={comment.text} mentions={comment.mentions} />
+            </p>
           )}
         </div>
         {!editing ? (
@@ -1079,7 +1090,7 @@ function BatchCommentNode({
         {replying ? (
           <ReplyComposer
             viewerDid={interactions.viewerDid}
-            onSubmit={(text) => interactions.addComment(comment.uri, text, item.id)}
+            onSubmit={(text, mentions) => interactions.addComment(comment.uri, text, item.id, mentions)}
             onCancel={() => setReplying(false)}
           />
         ) : null}

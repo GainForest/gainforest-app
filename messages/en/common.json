@@ -906,7 +906,8 @@
       "post": "post",
       "recording": "recording",
       "record": "record"
-    }
+    },
+    "mentionedYou": "mentioned you"
   },
   "feed": {
     "meta": {
@@ -1012,6 +1013,11 @@
     "quickLike": {
       "like": "Like this photo",
       "unlike": "Remove like"
+    },
+    "mentions": {
+      "suggestionsAria": "Account suggestions",
+      "searching": "Searching accounts…",
+      "noMatches": "No matching accounts"
     }
   },
   "testAccount": {

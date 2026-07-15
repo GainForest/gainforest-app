@@ -906,7 +906,8 @@
       "post": "chapisho",
       "recording": "rekodi ya sauti",
       "record": "rekodi"
-    }
+    },
+    "mentionedYou": "amekutaja"
   },
   "feed": {
     "meta": {
@@ -1012,6 +1013,11 @@
     "quickLike": {
       "like": "Penda picha hii",
       "unlike": "Ondoa kupenda"
+    },
+    "mentions": {
+      "suggestionsAria": "Mapendekezo ya akaunti",
+      "searching": "Inatafuta akaunti…",
+      "noMatches": "Hakuna akaunti zinazolingana"
     }
   },
   "testAccount": {
