@@ -210,6 +210,25 @@
       "defaultKeyName": "Agen AI",
       "tainaBadge": "Tainá",
       "tainaBadgeTitle": "Kunci ini tertaut ke bot Telegram Tainá Anda"
+    },
+    "inaturalist": {
+      "title": "iNaturalist",
+      "connectTitle": "Verifikasi akun iNaturalist",
+      "description": "Gunakan bukti profil publik agar GainForest hanya mengimpor observasi dari akun iNaturalist Anda sendiri.",
+      "connectedAs": "Terverifikasi sebagai @{account}",
+      "disconnect": "Hapus verifikasi",
+      "proofLabel": "Kode verifikasi Anda",
+      "proofHint": "Tambahkan kode ini ke nama publik iNaturalist Anda, lalu tempel handle atau tautan profil iNaturalist di bawah. Anda dapat menghapus kode setelah verifikasi.",
+      "copy": "Salin",
+      "copied": "Disalin",
+      "profileLabel": "Handle atau tautan iNaturalist",
+      "profilePlaceholder": "@handle atau https://www.inaturalist.org/people/handle",
+      "verify": "Verifikasi akun",
+      "verifying": "Memverifikasi…",
+      "verifyFailed": "Tidak dapat memverifikasi akun iNaturalist itu.",
+      "connectFirst": "Verifikasi akun iNaturalist Anda terlebih dahulu.",
+      "chooseProject": "Pilih proyek GainForest terlebih dahulu.",
+      "projectLabel": "Proyek GainForest"
     }
   },
   "bumicertCard": {

@@ -1557,6 +1557,11 @@
     "metadata": {
       "title": "Vivutio vya asili",
       "description": "Gundua vivutio vya asili kwenye GainForest vyenye picha za uwandani, rekodi za sauti, majina ya spishi, na maeneo kutoka kazi halisi ya uwandani."
+    },
+    "view": {
+      "compact": "Fupi",
+      "comfortable": "Kawaida",
+      "density": "Msongamano wa kadi"
     }
   },
   "manageProjectCerts": {

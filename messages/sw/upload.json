@@ -1012,8 +1012,17 @@
         "syncedElsewhere": "Kwenye mradi mwingine",
         "error": "Imeshindwa"
       },
-      "photoCount": "{count, plural, one {Picha #} other {Picha #}}"
-    }
+      "photoCount": "{count, plural, one {Picha #} other {Picha #}}",
+      "chooseProjectDescription": "Chagua mradi, kisha bandika kiungo cha mradi wa iNaturalist ili kuleta uchunguzi.",
+      "projectLabel": "Mradi wa GainForest",
+      "noProject": "Chagua mradi kwanza",
+      "projectRequired": "Chagua mradi wa GainForest kwanza.",
+      "chooseProjectShort": "Chagua mradi kwanza.",
+      "pasteLinkDescription": "Bandika kiungo cha mradi wa iNaturalist kwa {project}.",
+      "back": "Rudi"
+    },
+    "filterAllObservations": "Uchunguzi wote",
+    "filterChipsAria": "Chuja uchunguzi kwa seti ya data au mradi"
   },
   "settings": {
     "organizationTitle": "Mipangilio ya shirika",

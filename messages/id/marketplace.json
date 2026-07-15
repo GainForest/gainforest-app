@@ -1557,6 +1557,11 @@
     "metadata": {
       "title": "Temuan alam",
       "description": "Jelajahi temuan alam di GainForest dengan foto lapangan, rekaman suara, nama spesies, dan lokasi dari kerja lapangan nyata."
+    },
+    "view": {
+      "compact": "Ringkas",
+      "comfortable": "Nyaman",
+      "density": "Kepadatan kartu"
     }
   },
   "manageProjectCerts": {

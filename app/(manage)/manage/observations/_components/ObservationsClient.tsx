@@ -14,6 +14,7 @@ import {
   ImagePlusIcon,
   Layers2Icon,
   Loader2Icon,
+  LeafIcon,
   MapPinIcon,
   PencilIcon,
   RotateCcwIcon,
@@ -52,7 +53,7 @@ import {
 } from "./observation-mutations";
 import { LocationPickerModal, LocationPickerModalId } from "./LocationPickerModal";
 import { AddObservationsModal } from "./AddObservationsModal";
-import { FolderTile, FolderTileSkeleton } from "@/app/_components/FolderTile";
+
 import { GroupObservationsDatasetModal, type ObservationDatasetGroup } from "./GroupObservationsDatasetModal";
 import { deleteObservationDataset } from "./observation-dataset-mutations";
 import { takeAddDataHandoff } from "../../_lib/upload/add-data-handoff";
@@ -516,7 +517,7 @@ export function ObservationsClient({
   const [datasetGroups, setDatasetGroups] = useState<ObservationDatasetGroup[]>([]);
   // False until the first dataset fetch settles, so the folder strip can show a
   // loading skeleton instead of briefly flashing the "no datasets yet" hint.
-  const [datasetsLoaded, setDatasetsLoaded] = useState(false);
+  const [, setDatasetsLoaded] = useState(false);
   const [datasetFilter, setDatasetFilter] = useQueryState("dataset", parseAsString.withOptions(QUERY_STATE_OPTIONS));
   const deletePermission = canDeleteRecord(target, { ownRecord: target.kind === "personal" });
   const deleteDisabledReason = deletePermission.allowed ? null : deletePermission.reason;
@@ -595,9 +596,15 @@ export function ObservationsClient({
   }, [loadDatasetGroups]);
 
   const activeGroup = projectGroups.find((group) => group.projectUri === projectFilter) ?? null;
+  const projectOptions = useMemo(() => {
+    const byUri = new Map<string, ObservationProjectContext & { count?: number }>();
+    for (const project of projectContexts) byUri.set(project.projectUri, project);
+    for (const group of projectGroups) byUri.set(group.projectUri, { projectUri: group.projectUri, title: group.title, count: group.count });
+    return Array.from(byUri.values()).sort((a, b) => a.title.localeCompare(b.title));
+  }, [projectContexts, projectGroups]);
   const activeProject = activeGroup
     ? { projectUri: activeGroup.projectUri, title: activeGroup.title }
-    : projectContexts.find((project) => project.projectUri === projectFilter) ?? null;
+    : projectOptions.find((project) => project.projectUri === projectFilter) ?? null;
   const activeDataset = datasetGroups.find((group) => group.datasetUri === datasetFilter) ?? null;
   // A dataset filter takes precedence over a project filter; the folder row and
   // the project pills clear each other on click so only one is ever active.
@@ -814,105 +821,9 @@ export function ObservationsClient({
 
   return (
     <div className="bg-background pb-4">
-      <div className="mx-auto max-w-6xl px-6 pt-4">
-        <header>
-          <h1 className="font-instrument text-2xl font-medium italic tracking-[-0.03em] text-foreground sm:text-3xl">
-            {t("title")}
-          </h1>
-          <p className="mt-2 text-sm leading-6 text-muted-foreground">{t("description")}</p>
-        </header>
-      </div>
-
       {!isEmpty ? (
-        <div className="mx-auto mt-6 max-w-6xl px-6">
-          <div className="mb-3 flex items-center justify-between gap-3">
-            <h2 className="text-sm font-medium text-foreground">{t("datasetsHeading")}</h2>
-            {datasetFilter ? (
-              <Button variant="ghost" size="sm" onClick={() => void setDatasetFilter(null)}>
-                {t("datasetClearFilter")}
-              </Button>
-            ) : null}
-          </div>
-          {datasetGroups.length > 0 ? (
-            <div className="grid grid-cols-2 gap-x-3 gap-y-3 sm:grid-cols-3 lg:grid-cols-4">
-              {datasetGroups.map((dataset, index) => {
-                const active = datasetFilter === dataset.datasetUri;
-                return (
-                  <FolderTile
-                    key={dataset.datasetUri}
-                    title={dataset.name}
-                    count={dataset.count}
-                    index={index}
-                    active={active}
-                    ariaPressed={active}
-                    ariaLabel={t("datasetFolderAria", { name: dataset.name, count: dataset.count })}
-                    art={<DatasetFolderArt />}
-                    onClick={() => {
-                      void setDatasetFilter(active ? null : dataset.datasetUri);
-                      if (!active) void setProjectFilter(null);
-                    }}
-                    action={
-                      deletePermission.allowed ? (
-                        <button
-                          type="button"
-                          onClick={() => openDeleteDataset(dataset)}
-                          disabled={isDeletingSelected}
-                          aria-label={t("datasetDeleteAria", { name: dataset.name })}
-                          title={t("datasetDeleteConfirm")}
-                          className="grid size-7 place-items-center rounded-full bg-background/90 text-muted-foreground shadow-sm ring-1 ring-border transition-colors hover:text-destructive hover:ring-destructive/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive/40"
-                        >
-                          <Trash2Icon className="size-3.5" />
-                        </button>
-                      ) : undefined
-                    }
-                  />
-                );
-              })}
-            </div>
-          ) : !datasetsLoaded ? (
-            <div className="grid grid-cols-2 gap-x-3 gap-y-3 sm:grid-cols-3 lg:grid-cols-4" aria-busy="true">
-              {Array.from({ length: 4 }).map((_, index) => (
-                <FolderTileSkeleton key={index} index={index} art={<DatasetFolderArtSkeleton />} />
-              ))}
-            </div>
-          ) : (
-            <p className="rounded-2xl border border-dashed border-border/70 bg-muted/40 px-4 py-3 text-sm text-muted-foreground">
-              {t("datasetsEmptyHint")}
-            </p>
-          )}
-        </div>
-      ) : null}
-
-      {!isEmpty && projectGroups.length > 0 ? (
         <div className="mx-auto mt-5 max-w-6xl px-6">
-          <ObservationProjectFilter
-            groups={projectGroups}
-            value={projectFilter ?? null}
-            onChange={(next) => {
-              void setProjectFilter(next);
-              if (next) void setDatasetFilter(null);
-            }}
-            allLabel={t("filterAllProjects")}
-            ariaLabel={t("filterByProject")}
-          />
-        </div>
-      ) : null}
-
-      {activeProject ? (
-        <div className="mx-auto mt-5 max-w-6xl px-6">
-          <INaturalistProjectSyncPanel
-            target={target}
-            project={activeProject}
-            disabledReason={createPermission.reason}
-            onSynced={() => router.refresh()}
-          />
-        </div>
-      ) : null}
-
-      {!isEmpty ? (
-        <div className="mx-auto mt-8 max-w-6xl px-6">
-          <h2 className="text-sm font-medium text-foreground">{t("allObservationsHeading")}</h2>
-          <div className="mt-3 flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-muted px-4 py-3">
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-muted px-4 py-3">
             <p className="text-sm text-muted-foreground">
               {selectedRecords.size > 0 ? t("selectedForDelete", { count: selectedRecords.size }) : t("selectToDeleteHint")}
             </p>
@@ -963,10 +874,29 @@ export function ObservationsClient({
           filterUris={filterUris}
           emptyFilteredTitle={activeDataset ? t("datasetEmptyTitle") : t("filterEmptyTitle")}
           emptyFilteredBody={activeDataset ? t("datasetEmptyBody") : t("filterEmptyBody")}
-          leadingCard={<AddObservationTile onAdd={openAddObservations} disabledReason={createPermission.reason} />}
+          leadingCard={<AddObservationTile onAdd={openAddObservations} disabledReason={createPermission.reason} wide />}
+          compactLeadingCard={<AddObservationTile onAdd={openAddObservations} disabledReason={createPermission.reason} compact wide />}
           emptyState={<ObservationEmptyState onAdd={openAddObservations} disabledReason={createPermission.reason} />}
           hideToolbarWhenEmpty
           hideOccurrenceFilters
+          toolbarAfterSearchRow={
+            <ObservationFilterChipRow
+              datasets={datasetGroups}
+              projects={projectOptions}
+              datasetValue={datasetFilter ?? null}
+              projectValue={projectFilter ?? null}
+              onDatasetChange={(next) => {
+                void setDatasetFilter(next);
+                if (next) void setProjectFilter(null);
+              }}
+              onProjectChange={(next) => {
+                void setProjectFilter(next);
+                if (next) void setDatasetFilter(null);
+              }}
+            />
+          }
+          enableCompactObservationCards
+          defaultCardDensity="compact"
           onEmptyStateChange={setIsEmpty}
           showStatsOverview={false}
           hiddenRecordIds={deletedRecordIds}
@@ -996,12 +926,14 @@ type LocalSyncState = {
 
 function INaturalistProjectSyncPanel({
   target,
-  project,
+  projects,
+  selectedProject,
   disabledReason,
   onSynced,
 }: {
   target: ManageTarget;
-  project: ObservationProjectContext;
+  projects: ObservationProjectContext[];
+  selectedProject: ObservationProjectContext | null;
   disabledReason?: string | null;
   onSynced: () => void;
 }) {
@@ -1014,7 +946,11 @@ function INaturalistProjectSyncPanel({
   const [syncing, setSyncing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [truncated, setTruncated] = useState(false);
+  const [localProjectUri, setLocalProjectUri] = useState<string | null | undefined>(undefined);
   const repoOptions = target.kind === "group" ? { repo: target.did } : undefined;
+  const selectedProjectUri = localProjectUri === undefined ? selectedProject?.projectUri ?? null : localProjectUri;
+  const project = projects.find((option) => option.projectUri === selectedProjectUri) ?? selectedProject ?? null;
+  const projectRequired = !project;
 
   const mergedObservations = useMemo(
     () => observations.map((observation) => ({ ...observation, ...(localStatuses.get(observation.id) ?? {}) })),
@@ -1037,6 +973,10 @@ function INaturalistProjectSyncPanel({
   }, []);
 
   const preview = useCallback(async () => {
+    if (!project) {
+      setError(t("projectRequired"));
+      return;
+    }
     const trimmed = inputUrl.trim();
     if (!trimmed) {
       setError(t("urlRequired"));
@@ -1065,9 +1005,10 @@ function INaturalistProjectSyncPanel({
     } finally {
       setLoading(false);
     }
-  }, [inputUrl, project.projectUri, t, target]);
+  }, [inputUrl, project, t, target]);
 
   async function syncObservation(observation: INaturalistObservationSummary, inatProject: INaturalistProjectSummary) {
+    if (!project) throw new Error(t("projectRequired"));
     setObservationStatus(observation.id, "syncing");
 
     if (observation.syncStatus === "syncedElsewhere" && observation.existingUri) {
@@ -1122,6 +1063,10 @@ function INaturalistProjectSyncPanel({
   }
 
   const syncPending = async () => {
+    if (!project) {
+      setError(t("projectRequired"));
+      return;
+    }
     if (!sourceProject || syncing || disabledReason) return;
     setSyncing(true);
     setError(null);
@@ -1142,38 +1087,92 @@ function INaturalistProjectSyncPanel({
   };
 
   return (
-    <section className="rounded-3xl border border-border bg-card/70 p-4 shadow-sm sm:p-5">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <div className="min-w-0">
-          <h2 className="font-instrument text-xl italic leading-tight text-foreground">{t("title")}</h2>
-          <p className="mt-1 text-sm leading-6 text-muted-foreground">{t("description", { project: project.title })}</p>
-        </div>
-        {sourceProject ? (
-          <div className="shrink-0 rounded-2xl bg-muted px-3 py-2 text-xs text-muted-foreground">
-            {t("summary", { synced: syncedCount, pending: pendingCount, errors: errorCount })}
+    <section className="rounded-2xl bg-muted px-4 py-3">
+      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+        <div className="flex min-w-0 items-center gap-3">
+          <INaturalistMark />
+          <div className="min-w-0">
+            <h2 className="text-sm font-semibold leading-5 text-foreground">{t("title")}</h2>
+            <p className="truncate text-sm leading-5 text-muted-foreground">
+              {project ? t("pasteLinkDescription", { project: project.title }) : t("chooseProjectShort")}
+            </p>
           </div>
-        ) : null}
+        </div>
+
+        <div className="flex min-w-0 flex-col gap-2 sm:flex-row md:ml-auto md:justify-end">
+          {projectRequired ? (
+            <Select
+              value="none"
+              onValueChange={(value) => {
+                setError(null);
+                setSourceProject(null);
+                setObservations([]);
+                setLocalStatuses(new Map());
+                setLocalProjectUri(value === "none" ? null : value);
+              }}
+              disabled={loading || syncing}
+            >
+              <SelectTrigger className="h-9 bg-background sm:w-72" aria-label={t("projectLabel")}>
+                <SelectValue placeholder={t("projectLabel")} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">{t("noProject")}</SelectItem>
+                {projects.map((option) => (
+                  <SelectItem key={option.projectUri} value={option.projectUri}>
+                    {option.title}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          ) : (
+            <>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setError(null);
+                  setSourceProject(null);
+                  setObservations([]);
+                  setLocalStatuses(new Map());
+                  setLocalProjectUri(null);
+                }}
+                disabled={loading || syncing}
+                className="shrink-0 text-muted-foreground hover:text-foreground"
+              >
+                <ChevronLeftIcon className="size-4" />
+                {t("back")}
+              </Button>
+              <Input
+                value={inputUrl}
+                onChange={(event) => setInputUrl(event.target.value)}
+                placeholder={t("placeholder")}
+                aria-label={t("urlLabel")}
+                disabled={loading || syncing}
+                className="h-9 min-w-0 bg-background sm:w-[28rem]"
+              />
+              <Button type="button" variant="outline" size="sm" onClick={() => void preview()} disabled={loading || syncing}>
+                {loading ? <Loader2Icon className="size-4 animate-spin" /> : <RotateCcwIcon className="size-4" />}
+                {loading ? t("loading") : sourceProject ? t("refresh") : t("preview")}
+              </Button>
+              {sourceProject ? (
+                <Button type="button" size="sm" onClick={() => void syncPending()} disabled={syncableCount === 0 || syncing || Boolean(disabledReason)} title={disabledReason ?? undefined}>
+                  {syncing ? <Loader2Icon className="size-4 animate-spin" /> : <UploadCloudIcon className="size-4" />}
+                  {syncing ? t("syncing") : t("syncPending", { count: syncableCount })}
+                </Button>
+              ) : null}
+            </>
+          )}
+        </div>
       </div>
 
-      <div className="mt-4 flex flex-col gap-2 sm:flex-row">
-        <Input
-          value={inputUrl}
-          onChange={(event) => setInputUrl(event.target.value)}
-          placeholder={t("placeholder")}
-          aria-label={t("urlLabel")}
-          disabled={loading || syncing}
-          className="min-w-0 flex-1"
-        />
-        <Button type="button" variant="outline" onClick={() => void preview()} disabled={loading || syncing}>
-          {loading ? <Loader2Icon className="size-4 animate-spin" /> : <RotateCcwIcon className="size-4" />}
-          {loading ? t("loading") : sourceProject ? t("refresh") : t("preview")}
-        </Button>
-        <Button type="button" onClick={() => void syncPending()} disabled={!sourceProject || syncableCount === 0 || syncing || Boolean(disabledReason)} title={disabledReason ?? undefined}>
-          {syncing ? <Loader2Icon className="size-4 animate-spin" /> : <UploadCloudIcon className="size-4" />}
-          {syncing ? t("syncing") : t("syncPending", { count: syncableCount })}
-        </Button>
-      </div>
-
+      {sourceProject ? (
+        <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+          <span>{t("found", { count: observations.length, project: sourceProject.title })}</span>
+          <span aria-hidden>·</span>
+          <span>{t("summary", { synced: syncedCount, pending: pendingCount, errors: errorCount })}</span>
+        </div>
+      ) : null}
       {error ? (
         <p className="mt-3 flex items-center gap-1.5 rounded-xl bg-destructive/10 px-3 py-2 text-sm text-destructive">
           <AlertTriangleIcon className="size-4" />
@@ -1184,35 +1183,37 @@ function INaturalistProjectSyncPanel({
       {truncated ? <p className="mt-3 text-xs text-muted-foreground">{t("truncated")}</p> : null}
 
       {sourceProject ? (
-        <div className="mt-4 rounded-2xl border border-border/70 bg-background/60 p-3">
-          <div className="mb-3 text-sm font-medium text-foreground">
-            {t("found", { count: observations.length, project: sourceProject.title })}
-          </div>
-          <div className="grid max-h-[28rem] grid-cols-2 gap-3 overflow-y-auto pr-1 sm:grid-cols-3 lg:grid-cols-4">
-            {mergedObservations.map((observation) => {
-              const status = observation.status ?? observation.syncStatus;
-              const message = observation.message;
-              const imageUrl = observation.photos[0]?.url ?? null;
-              return (
-                <article key={observation.id} className="group overflow-hidden rounded-2xl border border-border/70 bg-card shadow-sm">
-                  <div className="relative aspect-square bg-muted">
-                    {imageUrl ? (
-                      // iNaturalist image hosts are external and varied; use a plain image
-                      // so the preview works without adding every host to next.config.
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={imageUrl} alt="" className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" loading="lazy" />
-                    ) : (
-                      <div className="grid h-full place-items-center text-muted-foreground">
-                        <BinocularsIcon className="size-8" />
-                      </div>
-                    )}
+        <div className="mt-3 grid max-h-72 gap-2 overflow-y-auto pr-1 sm:grid-cols-2 lg:grid-cols-3">
+          {mergedObservations.map((observation) => {
+            const status = observation.status ?? observation.syncStatus;
+            const message = observation.message;
+            const imageUrl = observation.photos[0]?.url ?? null;
+            return (
+              <article key={observation.id} className="flex min-w-0 items-center gap-2 rounded-xl bg-background/65 p-2">
+                <div className="relative size-12 shrink-0 overflow-hidden rounded-lg bg-muted">
+                  {imageUrl ? (
+                    // iNaturalist image hosts are external and varied; use a plain image
+                    // so the preview works without adding every host to next.config.
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={imageUrl} alt="" className="h-full w-full object-cover" loading="lazy" />
+                  ) : (
+                    <div className="grid h-full place-items-center text-muted-foreground">
+                      <BinocularsIcon className="size-5" />
+                    </div>
+                  )}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex min-w-0 items-center gap-2">
+                    <p className="truncate text-sm font-medium text-foreground">
+                      {observation.commonName ?? observation.scientificName ?? t("unnamedObservation")}
+                    </p>
                     <span className={cn(
-                      "absolute left-2 top-2 rounded-full px-2 py-1 text-[11px] font-semibold shadow-sm backdrop-blur",
-                      status === "synced" ? "bg-primary/90 text-primary-foreground" :
-                        status === "syncing" ? "bg-background/85 text-muted-foreground" :
-                        status === "error" ? "bg-destructive/90 text-destructive-foreground" :
-                        status === "syncedElsewhere" ? "bg-warn/90 text-foreground" :
-                        "bg-background/85 text-muted-foreground ring-1 ring-border/70",
+                      "shrink-0 rounded-full px-1.5 py-0.5 text-[10px] font-semibold",
+                      status === "synced" ? "bg-primary/15 text-primary" :
+                        status === "syncing" ? "bg-muted text-muted-foreground" :
+                        status === "error" ? "bg-destructive/10 text-destructive" :
+                        status === "syncedElsewhere" ? "bg-warn/30 text-foreground" :
+                        "bg-muted text-muted-foreground",
                     )}>
                       {status === "syncing" ? t("status.syncing") :
                         status === "synced" ? t("status.synced") :
@@ -1220,57 +1221,42 @@ function INaturalistProjectSyncPanel({
                         status === "error" ? t("status.error") :
                         t("status.pending")}
                     </span>
-                    {observation.photos.length > 1 ? (
-                      <span className="absolute bottom-2 right-2 rounded-full bg-background/85 px-2 py-1 text-[11px] font-medium text-foreground shadow-sm backdrop-blur">
-                        {t("photoCount", { count: observation.photos.length })}
-                      </span>
-                    ) : null}
                   </div>
-                  <div className="space-y-1 p-3">
-                    <p className="line-clamp-2 min-h-10 text-sm font-medium leading-5 text-foreground">
-                      {observation.commonName ?? observation.scientificName ?? t("unnamedObservation")}
-                    </p>
-                    <p className="truncate text-xs italic text-muted-foreground">{observation.scientificName ?? t("unnamedObservation")}</p>
-                    <p className="truncate text-xs text-muted-foreground">
-                      {[observation.observedOn, observation.recordedBy].filter(Boolean).join(" · ")}
-                    </p>
-                    {message ? <p className="line-clamp-2 text-xs text-muted-foreground">{message}</p> : null}
-                  </div>
-                </article>
-              );
-            })}
-          </div>
+                  <p className="truncate text-xs text-muted-foreground">
+                    {[observation.observedOn, observation.recordedBy].filter(Boolean).join(" · ") || observation.scientificName || t("unnamedObservation")}
+                  </p>
+                  {message ? <p className="truncate text-xs text-muted-foreground">{message}</p> : null}
+                </div>
+              </article>
+            );
+          })}
         </div>
       ) : null}
     </section>
   );
 }
 
-function DatasetFolderArt() {
+function INaturalistMark() {
   return (
-    <div className="flex h-[52px] w-11 flex-col items-center justify-center gap-1.5 rounded-lg border border-border/70 bg-background/85 shadow-md backdrop-blur-sm">
-      <div className="flex size-7 items-center justify-center rounded-full bg-primary/15 ring-2 ring-primary/20">
-        <Layers2Icon className="size-4 text-primary/80" />
-      </div>
-      <div className="h-1 w-7 rounded-full bg-muted" />
-    </div>
+    <span aria-hidden className="grid size-10 shrink-0 place-items-center overflow-hidden rounded-xl bg-background ring-1 ring-border/60">
+      {/* Official iNaturalist favicon, stored locally so the sync panel does not depend on their asset CDN. */}
+      <img src="/assets/logos/inaturalist.png" alt="" className="size-8" />
+    </span>
   );
 }
 
-// The dataset folder's peeking art, muted for the loading skeleton: same card
-// silhouette, but the layered badge and meta line are flat neutral fills.
-function DatasetFolderArtSkeleton() {
-  return (
-    <div className="flex h-[52px] w-11 flex-col items-center justify-center gap-1.5 rounded-lg border border-border/70 bg-background/85 shadow-md backdrop-blur-sm">
-      <div className="size-7 rounded-full bg-muted" />
-      <div className="h-1 w-7 rounded-full bg-muted" />
-    </div>
-  );
-}
-
-function AddObservationTile({ onAdd, disabledReason }: { onAdd: () => void; disabledReason?: string | null }) {
+function AddObservationTile({ onAdd, disabledReason, compact = false, wide = false }: { onAdd: () => void; disabledReason?: string | null; compact?: boolean; wide?: boolean }) {
   const t = useTranslations("upload.observations");
-  const content = (
+  const content = compact ? (
+    <>
+      <span className="grid size-8 place-items-center rounded-xl bg-primary/10 text-primary ring-1 ring-primary/15 transition-transform duration-300 group-hover/tile:scale-105">
+        <BinocularsIcon className="size-4" />
+      </span>
+      <span className="mt-2 block font-instrument text-[15px] font-medium italic leading-tight tracking-[-0.02em] text-foreground">
+        {t("addTileTitle")}
+      </span>
+    </>
+  ) : (
     <>
       <span className="grid size-12 place-items-center rounded-2xl bg-primary/10 text-primary ring-1 ring-primary/15 transition-transform duration-300 group-hover/tile:scale-105">
         <BinocularsIcon className="size-6" />
@@ -1284,7 +1270,11 @@ function AddObservationTile({ onAdd, disabledReason }: { onAdd: () => void; disa
     </>
   );
 
-  const className = "group/tile flex aspect-square w-full flex-col items-center justify-center rounded-3xl border border-dashed border-primary/25 bg-gradient-to-b from-primary/[0.06] to-background p-4 text-center transition-colors hover:border-primary/45 hover:from-primary/[0.1]";
+  const className = cn(
+    "group/tile flex min-h-0 w-full flex-col items-center justify-center overflow-hidden rounded-3xl border border-dashed border-primary/25 bg-gradient-to-b from-primary/[0.06] to-background text-center transition-colors hover:border-primary/45 hover:from-primary/[0.1]",
+    wide ? "aspect-[2/1]" : "aspect-square",
+    compact ? "p-2" : "p-4",
+  );
   return (
     <button
       type="button"
@@ -1312,32 +1302,59 @@ function ObservationEmptyState({ onAdd, disabledReason }: { onAdd: () => void; d
   );
 }
 
-function ObservationProjectFilter({
-  groups,
-  value,
-  onChange,
-  allLabel,
-  ariaLabel,
+function ObservationFilterChipRow({
+  datasets,
+  projects,
+  datasetValue,
+  projectValue,
+  onDatasetChange,
+  onProjectChange,
 }: {
-  groups: ObservationProjectGroup[];
-  value: string | null;
-  onChange: (next: string | null) => void;
-  allLabel: string;
-  ariaLabel: string;
+  datasets: ObservationDatasetGroup[];
+  projects: Array<ObservationProjectContext & { count?: number }>;
+  datasetValue: string | null;
+  projectValue: string | null;
+  onDatasetChange: (next: string | null) => void;
+  onProjectChange: (next: string | null) => void;
 }) {
+  const t = useTranslations("upload.observations");
+  if (datasets.length === 0 && projects.length === 0) return null;
+
   return (
-    <div role="group" aria-label={ariaLabel} className="scrollbar-hidden flex items-center gap-1.5 overflow-x-auto pb-1">
-      <ObservationFilterPill selected={!value} onClick={() => onChange(null)}>
-        {allLabel}
+    <div className="scrollbar-hidden flex items-center gap-1.5 overflow-x-auto pb-1" aria-label={t("filterChipsAria")}>
+      <ObservationFilterPill selected={!datasetValue && !projectValue} onClick={() => {
+        onDatasetChange(null);
+        onProjectChange(null);
+      }}>
+        {t("filterAllObservations")}
       </ObservationFilterPill>
-      {groups.map((group) => (
-        <ObservationFilterPill key={group.projectUri} selected={value === group.projectUri} onClick={() => onChange(group.projectUri)}>
-          <span className="max-w-[12rem] truncate">{group.title}</span>
-          <span className={cn("ml-1 rounded-full px-1.5 text-[11px] tabular-nums", value === group.projectUri ? "bg-primary-foreground/20" : "bg-foreground/10")}>
-            {group.count}
-          </span>
-        </ObservationFilterPill>
-      ))}
+      {datasets.map((dataset) => {
+        const selected = datasetValue === dataset.datasetUri;
+        return (
+          <ObservationFilterPill key={dataset.datasetUri} selected={selected} onClick={() => onDatasetChange(selected ? null : dataset.datasetUri)}>
+            <Layers2Icon className="size-3.5" aria-hidden />
+            <span className="max-w-[12rem] truncate">{dataset.name}</span>
+            <span className={cn("ml-0.5 rounded-full px-1.5 text-[11px] tabular-nums", selected ? "bg-primary-foreground/20" : "bg-foreground/10")}>
+              {dataset.count}
+            </span>
+
+          </ObservationFilterPill>
+        );
+      })}
+      {projects.map((project) => {
+        const selected = projectValue === project.projectUri;
+        return (
+          <ObservationFilterPill key={project.projectUri} selected={selected} onClick={() => onProjectChange(selected ? null : project.projectUri)}>
+            <LeafIcon className="size-3.5" aria-hidden />
+            <span className="max-w-[12rem] truncate">{project.title}</span>
+            {typeof project.count === "number" ? (
+              <span className={cn("ml-0.5 rounded-full px-1.5 text-[11px] tabular-nums", selected ? "bg-primary-foreground/20" : "bg-foreground/10")}>
+                {project.count}
+              </span>
+            ) : null}
+          </ObservationFilterPill>
+        );
+      })}
     </div>
   );
 }

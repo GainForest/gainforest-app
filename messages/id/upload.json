@@ -1012,8 +1012,17 @@
         "syncedElsewhere": "Di proyek lain",
         "error": "Gagal"
       },
-      "photoCount": "{count, plural, one {# foto} other {# foto}}"
-    }
+      "photoCount": "{count, plural, one {# foto} other {# foto}}",
+      "chooseProjectDescription": "Pilih proyek, lalu tempel tautan proyek iNaturalist untuk mengimpor observasi.",
+      "projectLabel": "Proyek GainForest",
+      "noProject": "Pilih proyek dulu",
+      "projectRequired": "Pilih proyek GainForest terlebih dahulu.",
+      "chooseProjectShort": "Pilih proyek terlebih dahulu.",
+      "pasteLinkDescription": "Tempel tautan proyek iNaturalist untuk {project}.",
+      "back": "Kembali"
+    },
+    "filterAllObservations": "Semua observasi",
+    "filterChipsAria": "Filter observasi menurut dataset atau proyek"
   },
   "settings": {
     "organizationTitle": "Pengaturan organisasi",

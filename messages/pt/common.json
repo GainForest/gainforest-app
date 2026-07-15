@@ -210,6 +210,25 @@
       "defaultKeyName": "Agente de IA",
       "tainaBadge": "Tainá",
       "tainaBadgeTitle": "Esta chave está vinculada ao seu bot de Telegram da Tainá"
+    },
+    "inaturalist": {
+      "title": "iNaturalist",
+      "connectTitle": "Verificar conta do iNaturalist",
+      "description": "Use uma prova de perfil pública para que o GainForest importe observações somente da sua própria conta do iNaturalist.",
+      "connectedAs": "Verificado como @{account}",
+      "disconnect": "Remover verificação",
+      "proofLabel": "Seu código de verificação",
+      "proofHint": "Adicione este código ao seu nome público do iNaturalist e depois cole abaixo seu usuário ou link de perfil. Você pode remover o código depois da verificação.",
+      "copy": "Copiar",
+      "copied": "Copiado",
+      "profileLabel": "Usuário ou link do iNaturalist",
+      "profilePlaceholder": "@usuario ou https://www.inaturalist.org/people/usuario",
+      "verify": "Verificar conta",
+      "verifying": "Verificando…",
+      "verifyFailed": "Não foi possível verificar essa conta do iNaturalist.",
+      "connectFirst": "Verifique primeiro sua conta do iNaturalist.",
+      "chooseProject": "Escolha primeiro um projeto do GainForest.",
+      "projectLabel": "Projeto do GainForest"
     }
   },
   "bumicertCard": {

@@ -1012,8 +1012,17 @@
         "syncedElsewhere": "Em outro projeto",
         "error": "Falhou"
       },
-      "photoCount": "{count, plural, one {# foto} other {# fotos}}"
-    }
+      "photoCount": "{count, plural, one {# foto} other {# fotos}}",
+      "chooseProjectDescription": "Escolha um projeto e depois cole um link de projeto do iNaturalist para importar observações.",
+      "projectLabel": "Projeto GainForest",
+      "noProject": "Escolha primeiro um projeto",
+      "projectRequired": "Escolha primeiro um projeto GainForest.",
+      "chooseProjectShort": "Escolha primeiro um projeto.",
+      "pasteLinkDescription": "Cole um link de projeto do iNaturalist para {project}.",
+      "back": "Voltar"
+    },
+    "filterAllObservations": "Todas as observações",
+    "filterChipsAria": "Filtrar observações por conjunto de dados ou projeto"
   },
   "settings": {
     "organizationTitle": "Configurações da organização",

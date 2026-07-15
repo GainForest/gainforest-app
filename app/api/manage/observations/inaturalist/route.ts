@@ -1,5 +1,8 @@
+import { cookies } from "next/headers";
 import { fetchINaturalistProject, fetchINaturalistProjectObservations } from "@/app/_lib/inaturalist-server";
+import { INATURALIST_CONNECTION_COOKIE, unsealJson, type INaturalistConnection } from "@/app/_lib/inaturalist-proof";
 import { resolvePdsHost } from "@/app/_lib/pds";
+import { fetchAuthSession } from "@/app/_lib/auth-server";
 import { isResponse, resolveManageApiTarget } from "../../_lib/target";
 
 export const runtime = "nodejs";
@@ -102,6 +105,14 @@ export async function GET(request: Request) {
   const target = await resolveManageApiTarget(request);
   if (isResponse(target)) return target;
 
+  const session = await fetchAuthSession();
+  if (!session.isLoggedIn) return Response.json({ error: "Please sign in." }, { status: 401 });
+  const cookieStore = await cookies();
+  const connection = unsealJson<INaturalistConnection>(cookieStore.get(INATURALIST_CONNECTION_COOKIE)?.value);
+  if (!connection || connection.ownerDid !== session.did) {
+    return Response.json({ error: "Verify your iNaturalist account in Settings first." }, { status: 401 });
+  }
+
   const url = new URL(request.url);
   const inputUrl = url.searchParams.get("url")?.trim() ?? "";
   const projectRef = url.searchParams.get("projectRef")?.trim() || null;
@@ -118,6 +129,7 @@ export async function GET(request: Request) {
       project,
       existingByObservationId: existing,
       projectRef,
+      userId: connection.userId,
     });
 
     return Response.json({

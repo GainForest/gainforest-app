@@ -210,6 +210,25 @@
       "defaultKeyName": "Wakala wa AI",
       "tainaBadge": "Tainá",
       "tainaBadgeTitle": "Ufunguo huu umeunganishwa na boti yako ya Telegram ya Tainá"
+    },
+    "inaturalist": {
+      "title": "iNaturalist",
+      "connectTitle": "Thibitisha akaunti ya iNaturalist",
+      "description": "Tumia uthibitisho wa wasifu wa umma ili GainForest ilete uchunguzi kutoka akaunti yako ya iNaturalist pekee.",
+      "connectedAs": "Imethibitishwa kama @{account}",
+      "disconnect": "Ondoa uthibitisho",
+      "proofLabel": "Msimbo wako wa uthibitisho",
+      "proofHint": "Ongeza msimbo huu kwenye jina lako la umma la iNaturalist, kisha bandika jina au kiungo cha wasifu hapa chini. Unaweza kuondoa msimbo baada ya kuthibitisha.",
+      "copy": "Nakili",
+      "copied": "Imenakiliwa",
+      "profileLabel": "Jina au kiungo cha iNaturalist",
+      "profilePlaceholder": "@jina au https://www.inaturalist.org/people/jina",
+      "verify": "Thibitisha akaunti",
+      "verifying": "Inathibitisha…",
+      "verifyFailed": "Haikuweza kuthibitisha akaunti hiyo ya iNaturalist.",
+      "connectFirst": "Thibitisha akaunti yako ya iNaturalist kwanza.",
+      "chooseProject": "Chagua mradi wa GainForest kwanza.",
+      "projectLabel": "Mradi wa GainForest"
     }
   },
   "bumicertCard": {

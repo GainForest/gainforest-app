@@ -1557,6 +1557,11 @@
     "metadata": {
       "title": "Avistamentos de natureza",
       "description": "Explore avistamentos de natureza no GainForest com fotos de campo, gravações de som, nomes de espécies e localizações de trabalho real em campo."
+    },
+    "view": {
+      "compact": "Compacta",
+      "comfortable": "Confortável",
+      "density": "Densidade dos cartões"
     }
   },
   "manageProjectCerts": {

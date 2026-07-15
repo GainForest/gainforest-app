@@ -111,9 +111,13 @@ function observationSummary(value: unknown, existing: ExistingINaturalistRecord 
   };
 }
 
-async function inaturalistGet<T>(path: string, params: URLSearchParams): Promise<T> {
+async function inaturalistGet<T>(path: string, params: URLSearchParams, accessToken?: string | null): Promise<T> {
   const response = await fetch(`${INATURALIST_API_BASE}${path}?${params.toString()}`, {
-    headers: { accept: "application/json", "user-agent": "GainForest iNaturalist project sync" },
+    headers: {
+      accept: "application/json",
+      "user-agent": "GainForest iNaturalist project sync",
+      ...(accessToken ? { authorization: `Bearer ${accessToken}` } : {}),
+    },
     cache: "no-store",
   });
   const payload = (await response.json().catch(() => null)) as (T & { error?: string; message?: string }) | null;
@@ -147,6 +151,8 @@ export async function fetchINaturalistProjectObservations(options: {
   project: INaturalistProjectSummary;
   existingByObservationId?: Map<number, ExistingINaturalistRecord>;
   projectRef?: string | null;
+  userId?: number | null;
+  accessToken?: string | null;
 }): Promise<{ observations: INaturalistObservationSummary[]; totalResults: number; truncated: boolean }> {
   const observations: INaturalistObservationSummary[] = [];
   let totalResults = 0;
@@ -160,7 +166,8 @@ export async function fetchINaturalistProjectObservations(options: {
       order: "desc",
       order_by: "observed_on",
     });
-    const data = await inaturalistGet<INaturalistObservationApiResponse>("/observations", params);
+    if (options.userId) params.set("user_id", String(options.userId));
+    const data = await inaturalistGet<INaturalistObservationApiResponse>("/observations", params, options.accessToken);
     totalResults = typeof data.total_results === "number" ? data.total_results : totalResults;
     const rows = Array.isArray(data.results) ? data.results : [];
     if (rows.length === 0) break;

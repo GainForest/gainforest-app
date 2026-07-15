@@ -1557,6 +1557,11 @@
     "metadata": {
       "title": "Nature sightings",
       "description": "Explore GainForest nature sightings with field photos, sound recordings, species names, and map locations from real fieldwork."
+    },
+    "view": {
+      "compact": "Compact",
+      "comfortable": "Comfortable",
+      "density": "Card density"
     }
   },
   "manageProjectCerts": {
