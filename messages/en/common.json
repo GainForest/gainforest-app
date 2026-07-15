@@ -1227,7 +1227,9 @@
       "certified": "Identity primitives from the Hypercerts ecosystem — actor profiles, organizations, follows, badges, and locations.",
       "hypercerts": "Impact claims (activity, contribution, contributor, rights), collections, funding receipts, attachments, work scope, and shared types."
     },
-    "sectionsAria": "Schema sections"
+    "sectionsAria": "Schema sections",
+    "epdsLinkTitle": "How ePDS works",
+    "epdsLinkDesc": "An interactive tour of the login system and the servers behind these records."
   },
   "taina": {
     "meta": {
@@ -1798,6 +1800,137 @@
       "toggleDescription": "Community updates you post are also published to your Bluesky account, so more people can discover your work.",
       "viewProfile": "View your Bluesky profile",
       "error": "We couldn't save that change. Please try again."
+    }
+  },
+  "epds": {
+    "metaTitle": "How ePDS works",
+    "metaDescription": "An interactive tour of ePDS, the extended Personal Data Server that lets anyone join the AT Protocol network with just their email.",
+    "kicker": "extended Personal Data Server",
+    "title": "How ePDS works",
+    "lead": "GainForest runs on the AT Protocol, the open network behind Bluesky. Joining that network normally takes a password and some technical setup. ePDS removes that wall: you type your email, you get a code, and you are in. This page shows how it works, step by step.",
+    "whatIs": {
+      "heading": "What is a PDS, and what does the e add?",
+      "p1": "On the AT Protocol, everyone keeps their data on a Personal Data Server, or PDS. Think of it as a personal home for your posts, observations, and projects. You own what is inside, and you can move to another server at any time without losing anything.",
+      "p2": "ePDS is a normal PDS with one extension: a friendly front door. Instead of asking for a password, it signs you in with a one-time email code or a social account, and it creates an account for you on your first visit. Behind that door everything stays standard AT Protocol, so every app on the network can talk to it."
+    },
+    "compare": {
+      "heading": "Two front doors",
+      "intro": "Same house, different door. Flip the switch and try both ways of signing in.",
+      "classicTab": "Classic PDS",
+      "epdsTab": "ePDS",
+      "handle": "Handle",
+      "password": "Password",
+      "inviteCode": "Invite code",
+      "email": "Email",
+      "sendCode": "Send me a code",
+      "signIn": "Sign in",
+      "codeLabel": "Type the code from your email",
+      "classicCaption": "A classic PDS asks for a password, and often for an invite code from the server admin. You also have to create the account first.",
+      "epdsCaption": "ePDS asks for your email and sends you a code. First visit? Your account is created for you on the spot.",
+      "done": "You are in!",
+      "reset": "Try again"
+    },
+    "journey": {
+      "heading": "The login journey",
+      "intro": "Press play, or step through it yourself. The moving dot is your login making its round trip.",
+      "play": "Play",
+      "pause": "Pause",
+      "back": "Back",
+      "next": "Next",
+      "stepLabel": "Step {n} of {total}",
+      "ariaLabel": "Login journey diagram",
+      "nodes": {
+        "app": "Your app",
+        "pds": "PDS core",
+        "auth": "Login service",
+        "inbox": "Your inbox"
+      },
+      "steps": {
+        "s1": {
+          "title": "You click Sign in",
+          "text": "It all starts in the app you are using, for example GainForest. You click Sign in and maybe type your email."
+        },
+        "s2": {
+          "title": "The app calls the PDS",
+          "text": "Your app quietly asks the PDS to start a login. This is a standard AT Protocol request, the same one any Bluesky app would make."
+        },
+        "s3": {
+          "title": "The PDS opens its front door",
+          "text": "Here is the ePDS trick. Instead of showing a password form, the PDS sends your browser to its friendly login service."
+        },
+        "s4": {
+          "title": "A code flies to your inbox",
+          "text": "The login service creates a one-time code and emails it to you. The code works once and expires after a few minutes."
+        },
+        "s5": {
+          "title": "You type the code",
+          "text": "You copy the code from the email into the login screen. That proves the inbox is yours. No password is ever involved."
+        },
+        "s6": {
+          "title": "New here? Pick a handle",
+          "text": "On your first visit, ePDS creates an account for you and asks you to pick a handle, your public name on the network."
+        },
+        "s7": {
+          "title": "The signed handshake",
+          "text": "The login service tells the PDS that you are verified. The message carries a cryptographic signature, so nobody can fake it."
+        },
+        "s8": {
+          "title": "Back to your app",
+          "text": "The PDS sends your browser back to your app with a short-lived code. Your app trades that code for an access token."
+        },
+        "s9": {
+          "title": "You are in",
+          "text": "Your app can now read and write your data on your behalf. To the rest of the network you look like any other AT Protocol user."
+        }
+      }
+    },
+    "map": {
+      "heading": "The moving parts",
+      "intro": "ePDS is a small team of services. Tap each one to see its job.",
+      "ariaLabel": "Map of ePDS services",
+      "nodes": {
+        "app": {
+          "name": "Your app",
+          "desc": "Any AT Protocol app, like GainForest or Bluesky. It never sees your email code or any keys. It only receives the final access token."
+        },
+        "pds": {
+          "name": "PDS core",
+          "desc": "A standard Personal Data Server. It stores your records, talks to the rest of the network, and issues tokens. ePDS wraps it without changing how it speaks to other apps."
+        },
+        "auth": {
+          "name": "Login service",
+          "desc": "The friendly front door. It shows the login screen, sends the email codes, handles social logins, and helps new users pick a handle."
+        },
+        "email": {
+          "name": "Email provider",
+          "desc": "Delivers the one-time codes to your inbox. Each code is short-lived and can be used exactly once."
+        },
+        "db": {
+          "name": "Shared database",
+          "desc": "A small database both services share. It keeps track of login sessions and codes, nothing more."
+        },
+        "tee": {
+          "name": "Key safe",
+          "desc": "An optional signer that keeps signing keys inside a secure enclave, a sealed vault that even the server operator cannot open."
+        }
+      }
+    },
+    "vault": {
+      "heading": "The key safe",
+      "intro": "Every account has a signing key that signs your records, like a personal wax seal. ePDS can keep that key inside a secure enclave. The key is born in there and never comes out. Try it:",
+      "signButton": "Ask for a signature",
+      "stealButton": "Try to take the key",
+      "idle": "The key sits inside the safe.",
+      "signing": "The record goes in and gets signed inside the safe...",
+      "signed": "Signature delivered. The key never left the safe.",
+      "denied": "No. Not even the server operator can take the key out."
+    },
+    "more": {
+      "heading": "Keep exploring",
+      "lexiconsTitle": "Data schemas",
+      "lexiconsDesc": "The open record formats that live inside each PDS.",
+      "githubTitle": "ePDS on GitHub",
+      "githubDesc": "The full source code, open for anyone to read, run, and improve."
     }
   }
 }

@@ -38,6 +38,7 @@ const allowedExactValues = new Set([
   "DID",
   "GBIF",
   "PDS",
+  "ePDS",
   "CSV",
   "TSV",
   "ZIP",

@@ -1227,7 +1227,9 @@
       "certified": "Vipengele vya utambulisho kutoka mfumo wa Hypercerts — wasifu wa watendaji, mashirika, wafuasi, beji na maeneo.",
       "hypercerts": "Madai ya athari (shughuli, mchango, mchangiaji, haki), makusanyo, risiti za ufadhili, viambatisho, wigo wa kazi na aina za pamoja."
     },
-    "sectionsAria": "Sehemu za miundo"
+    "sectionsAria": "Sehemu za miundo",
+    "epdsLinkTitle": "Jinsi ePDS inavyofanya kazi",
+    "epdsLinkDesc": "Ziara shirikishi ya mfumo wa kuingia na seva zilizo nyuma ya rekodi hizi."
   },
   "taina": {
     "meta": {
@@ -1798,6 +1800,137 @@
       "toggleDescription": "Habari unazochapisha pia zinachapishwa kwenye akaunti yako ya Bluesky, ili watu wengi zaidi wagundue kazi yako.",
       "viewProfile": "Tazama wasifu wako wa Bluesky",
       "error": "Hatukuweza kuhifadhi mabadiliko hayo. Tafadhali jaribu tena."
+    }
+  },
+  "epds": {
+    "metaTitle": "Jinsi ePDS inavyofanya kazi",
+    "metaDescription": "Ziara shirikishi ya ePDS, Personal Data Server iliyopanuliwa inayomruhusu mtu yeyote kujiunga na mtandao wa AT Protocol kwa barua pepe tu.",
+    "kicker": "Personal Data Server iliyopanuliwa",
+    "title": "Jinsi ePDS inavyofanya kazi",
+    "lead": "GainForest inaendeshwa juu ya AT Protocol, mtandao wazi ulio nyuma ya Bluesky. Kwa kawaida kujiunga na mtandao huo kunahitaji nenosiri na usanidi wa kiufundi. ePDS inaondoa kizuizi hicho: unaandika barua pepe yako, unapokea msimbo, na umeingia. Ukurasa huu unaonyesha jinsi inavyofanya kazi, hatua kwa hatua.",
+    "whatIs": {
+      "heading": "PDS ni nini, na herufi e inaongeza nini?",
+      "p1": "Katika AT Protocol, kila mtu huhifadhi data yake kwenye Personal Data Server, au PDS. Ifikirie kama nyumba yako binafsi ya machapisho, uchunguzi, na miradi yako. Kilichomo ndani ni chako, na unaweza kuhamia seva nyingine wakati wowote bila kupoteza chochote.",
+      "p2": "ePDS ni PDS ya kawaida yenye nyongeza moja: mlango wa mbele wenye ukarimu. Badala ya kuomba nenosiri, inakuingiza kwa msimbo wa barua pepe wa matumizi moja au akaunti ya kijamii, na inakutengenezea akaunti katika ziara yako ya kwanza. Nyuma ya mlango huo kila kitu kinabaki AT Protocol ya kawaida, hivyo kila programu kwenye mtandao inaweza kuzungumza nayo."
+    },
+    "compare": {
+      "heading": "Milango miwili ya mbele",
+      "intro": "Nyumba ile ile, mlango tofauti. Geuza swichi ujaribu njia zote mbili za kuingia.",
+      "classicTab": "PDS ya kawaida",
+      "epdsTab": "ePDS",
+      "handle": "Jina la mtumiaji",
+      "password": "Nenosiri",
+      "inviteCode": "Msimbo wa mwaliko",
+      "email": "Barua pepe",
+      "sendCode": "Nitumie msimbo",
+      "signIn": "Ingia",
+      "codeLabel": "Andika msimbo kutoka kwenye barua pepe yako",
+      "classicCaption": "PDS ya kawaida huomba nenosiri, na mara nyingi msimbo wa mwaliko kutoka kwa msimamizi wa seva. Pia inabidi utengeneze akaunti kwanza.",
+      "epdsCaption": "ePDS inaomba barua pepe yako na kukutumia msimbo. Ziara ya kwanza? Akaunti yako inatengenezwa papo hapo.",
+      "done": "Umeingia!",
+      "reset": "Jaribu tena"
+    },
+    "journey": {
+      "heading": "Safari ya kuingia",
+      "intro": "Bonyeza cheza, au pitia hatua mwenyewe. Kitone kinachosogea ni ombi lako la kuingia likifanya safari ya kwenda na kurudi.",
+      "play": "Cheza",
+      "pause": "Simamisha",
+      "back": "Nyuma",
+      "next": "Mbele",
+      "stepLabel": "Hatua {n} kati ya {total}",
+      "ariaLabel": "Mchoro wa safari ya kuingia",
+      "nodes": {
+        "app": "Programu yako",
+        "pds": "Kiini cha PDS",
+        "auth": "Huduma ya kuingia",
+        "inbox": "Kikasha chako"
+      },
+      "steps": {
+        "s1": {
+          "title": "Unabofya Ingia",
+          "text": "Yote huanzia kwenye programu unayotumia, kwa mfano GainForest. Unabofya Ingia na labda unaandika barua pepe yako."
+        },
+        "s2": {
+          "title": "Programu inaita PDS",
+          "text": "Programu yako inaiomba PDS kimyakimya kuanzisha uingiaji. Hili ni ombi la kawaida la AT Protocol, lile lile ambalo programu yoyote ya Bluesky ingetuma."
+        },
+        "s3": {
+          "title": "PDS inafungua mlango wake",
+          "text": "Hapa ndipo ujanja wa ePDS ulipo. Badala ya kuonyesha fomu ya nenosiri, PDS inaelekeza kivinjari chako kwenye huduma yake ya kuingia yenye ukarimu."
+        },
+        "s4": {
+          "title": "Msimbo unaruka hadi kikasha chako",
+          "text": "Huduma ya kuingia inatengeneza msimbo wa matumizi moja na kukutumia kwa barua pepe. Msimbo unafanya kazi mara moja tu na unaisha baada ya dakika chache."
+        },
+        "s5": {
+          "title": "Unaandika msimbo",
+          "text": "Unanakili msimbo kutoka kwenye barua pepe hadi skrini ya kuingia. Hiyo inathibitisha kikasha ni chako. Hakuna nenosiri kabisa."
+        },
+        "s6": {
+          "title": "Mgeni? Chagua jina",
+          "text": "Katika ziara yako ya kwanza, ePDS inakutengenezea akaunti na kukuomba uchague jina lako la mtumiaji, jina lako la hadharani kwenye mtandao."
+        },
+        "s7": {
+          "title": "Salamu iliyotiwa saini",
+          "text": "Huduma ya kuingia inaiambia PDS kuwa umethibitishwa. Ujumbe huo unabeba saini ya kriptografia, hivyo hakuna anayeweza kuughushi."
+        },
+        "s8": {
+          "title": "Kurudi kwenye programu yako",
+          "text": "PDS inarudisha kivinjari chako kwenye programu yako ukiwa na msimbo wa muda mfupi. Programu yako inabadilisha msimbo huo kuwa tokeni ya ufikiaji."
+        },
+        "s9": {
+          "title": "Umeingia",
+          "text": "Programu yako sasa inaweza kusoma na kuandika data yako kwa niaba yako. Kwa mtandao mzima unaonekana kama mtumiaji mwingine yeyote wa AT Protocol."
+        }
+      }
+    },
+    "map": {
+      "heading": "Sehemu zinazofanya kazi",
+      "intro": "ePDS ni timu ndogo ya huduma. Gusa kila moja uone kazi yake.",
+      "ariaLabel": "Ramani ya huduma za ePDS",
+      "nodes": {
+        "app": {
+          "name": "Programu yako",
+          "desc": "Programu yoyote ya AT Protocol, kama GainForest au Bluesky. Kamwe haioni msimbo wako wa barua pepe wala funguo zozote. Inapokea tu tokeni ya mwisho ya ufikiaji."
+        },
+        "pds": {
+          "name": "Kiini cha PDS",
+          "desc": "Personal Data Server ya kawaida. Inahifadhi rekodi zako, inazungumza na mtandao mzima, na inatoa tokeni. ePDS inaizunguka bila kubadilisha jinsi inavyozungumza na programu nyingine."
+        },
+        "auth": {
+          "name": "Huduma ya kuingia",
+          "desc": "Mlango wa mbele wenye ukarimu. Inaonyesha skrini ya kuingia, inatuma misimbo ya barua pepe, inashughulikia uingiaji wa kijamii, na inawasaidia watumiaji wapya kuchagua jina."
+        },
+        "email": {
+          "name": "Mtoa huduma wa barua pepe",
+          "desc": "Inafikisha misimbo ya matumizi moja kwenye kikasha chako. Kila msimbo ni wa muda mfupi na unaweza kutumika mara moja tu."
+        },
+        "db": {
+          "name": "Hifadhidata ya pamoja",
+          "desc": "Hifadhidata ndogo inayotumiwa na huduma zote mbili. Inafuatilia vipindi vya kuingia na misimbo, hakuna zaidi."
+        },
+        "tee": {
+          "name": "Sefu ya funguo",
+          "desc": "Mtia saini wa hiari anayehifadhi funguo za kutia saini ndani ya enklevu salama, sefu iliyofungwa ambayo hata mwendeshaji wa seva hawezi kuifungua."
+        }
+      }
+    },
+    "vault": {
+      "heading": "Sefu ya funguo",
+      "intro": "Kila akaunti ina ufunguo unaotia saini rekodi zako, kama muhuri wako binafsi wa nta. ePDS inaweza kuhifadhi ufunguo huo ndani ya enklevu salama. Ufunguo huzaliwa humo ndani na hautoki kamwe. Jaribu:",
+      "signButton": "Omba saini",
+      "stealButton": "Jaribu kuchukua ufunguo",
+      "idle": "Ufunguo umekaa ndani ya sefu.",
+      "signing": "Rekodi inaingia na kutiwa saini ndani ya sefu...",
+      "signed": "Saini imetolewa. Ufunguo haukutoka sefuni kamwe.",
+      "denied": "Hapana. Hata mwendeshaji wa seva hawezi kuutoa ufunguo."
+    },
+    "more": {
+      "heading": "Endelea kuchunguza",
+      "lexiconsTitle": "Miundo ya data",
+      "lexiconsDesc": "Miundo wazi ya rekodi inayoishi ndani ya kila PDS.",
+      "githubTitle": "ePDS kwenye GitHub",
+      "githubDesc": "Msimbo wote wa chanzo, wazi kwa yeyote kusoma, kuendesha, na kuboresha."
     }
   }
 }

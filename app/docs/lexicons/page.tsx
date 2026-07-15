@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
+import { ArrowUpRightIcon } from "lucide-react";
 import { LogoMark } from "@/app/_components/Logo";
 import { localizedAlternates } from "@/app/_lib/seo-metadata";
 import { SchemaGraph } from "./_components/SchemaGraph";
@@ -86,6 +87,17 @@ export default async function LexiconsOverviewPage() {
           </section>
         ))}
       </div>
+
+      <Link
+        href="/docs/ePDS"
+        className="group mt-14 block rounded-xl border border-border/60 px-5 py-4 no-underline transition-colors hover:border-primary/50"
+      >
+        <div className="flex items-center gap-1.5 text-[13.5px] font-medium text-foreground group-hover:text-primary">
+          {t("epdsLinkTitle")}
+          <ArrowUpRightIcon className="h-3.5 w-3.5 opacity-50" />
+        </div>
+        <p className="m-0 mt-1 text-[12.5px] leading-relaxed text-muted-foreground">{t("epdsLinkDesc")}</p>
+      </Link>
     </>
   );
 }

@@ -1227,7 +1227,9 @@
       "certified": "Primitivas de identidad del ecosistema Hypercerts: perfiles de actor, organizaciones, seguimientos, insignias y ubicaciones.",
       "hypercerts": "Declaraciones de impacto (actividad, contribución, contribuyente, derechos), colecciones, recibos de financiación, adjuntos, alcance del trabajo y tipos compartidos."
     },
-    "sectionsAria": "Secciones de esquemas"
+    "sectionsAria": "Secciones de esquemas",
+    "epdsLinkTitle": "Cómo funciona ePDS",
+    "epdsLinkDesc": "Un recorrido interactivo por el sistema de acceso y los servidores detrás de estos registros."
   },
   "taina": {
     "meta": {
@@ -1798,6 +1800,137 @@
       "toggleDescription": "Las actualizaciones que publiques también se publican en tu cuenta de Bluesky, para que más personas descubran tu trabajo.",
       "viewProfile": "Ver tu perfil de Bluesky",
       "error": "No pudimos guardar el cambio. Inténtalo de nuevo."
+    }
+  },
+  "epds": {
+    "metaTitle": "Cómo funciona ePDS",
+    "metaDescription": "Un recorrido interactivo por ePDS, el Personal Data Server extendido que permite a cualquiera unirse a la red AT Protocol solo con su correo.",
+    "kicker": "Personal Data Server extendido",
+    "title": "Cómo funciona ePDS",
+    "lead": "GainForest funciona sobre AT Protocol, la red abierta detrás de Bluesky. Unirse a esa red normalmente requiere una contraseña y algo de configuración técnica. ePDS elimina esa barrera: escribes tu correo, recibes un código y ya estás dentro. Esta página muestra cómo funciona, paso a paso.",
+    "whatIs": {
+      "heading": "¿Qué es un PDS y qué añade la e?",
+      "p1": "En AT Protocol, cada persona guarda sus datos en un Personal Data Server, o PDS. Piensa en él como un hogar personal para tus publicaciones, observaciones y proyectos. Lo que hay dentro es tuyo, y puedes mudarte a otro servidor cuando quieras sin perder nada.",
+      "p2": "ePDS es un PDS normal con una extensión: una puerta de entrada amable. En lugar de pedir una contraseña, te conecta con un código de un solo uso enviado por correo o con una cuenta social, y crea una cuenta para ti en tu primera visita. Detrás de esa puerta todo sigue siendo AT Protocol estándar, así que cualquier app de la red puede hablar con él."
+    },
+    "compare": {
+      "heading": "Dos puertas de entrada",
+      "intro": "La misma casa, distinta puerta. Mueve el interruptor y prueba las dos formas de iniciar sesión.",
+      "classicTab": "PDS clásico",
+      "epdsTab": "ePDS",
+      "handle": "Identificador",
+      "password": "Contraseña",
+      "inviteCode": "Código de invitación",
+      "email": "Correo electrónico",
+      "sendCode": "Envíame un código",
+      "signIn": "Iniciar sesión",
+      "codeLabel": "Escribe el código de tu correo",
+      "classicCaption": "Un PDS clásico pide una contraseña y, a menudo, un código de invitación del administrador del servidor. Además tienes que crear la cuenta primero.",
+      "epdsCaption": "ePDS te pide el correo y te envía un código. ¿Primera visita? Tu cuenta se crea al momento.",
+      "done": "¡Ya estás dentro!",
+      "reset": "Probar de nuevo"
+    },
+    "journey": {
+      "heading": "El viaje del inicio de sesión",
+      "intro": "Pulsa reproducir o avanza paso a paso. El punto en movimiento es tu inicio de sesión haciendo su viaje de ida y vuelta.",
+      "play": "Reproducir",
+      "pause": "Pausar",
+      "back": "Atrás",
+      "next": "Siguiente",
+      "stepLabel": "Paso {n} de {total}",
+      "ariaLabel": "Diagrama del viaje de inicio de sesión",
+      "nodes": {
+        "app": "Tu app",
+        "pds": "Núcleo PDS",
+        "auth": "Servicio de acceso",
+        "inbox": "Tu bandeja"
+      },
+      "steps": {
+        "s1": {
+          "title": "Haces clic en Iniciar sesión",
+          "text": "Todo empieza en la app que estás usando, por ejemplo GainForest. Haces clic en Iniciar sesión y quizá escribes tu correo."
+        },
+        "s2": {
+          "title": "La app llama al PDS",
+          "text": "Tu app le pide al PDS, en segundo plano, que inicie un acceso. Es una petición estándar de AT Protocol, la misma que haría cualquier app de Bluesky."
+        },
+        "s3": {
+          "title": "El PDS abre su puerta",
+          "text": "Aquí está el truco de ePDS. En lugar de mostrar un formulario de contraseña, el PDS envía tu navegador a su servicio de acceso."
+        },
+        "s4": {
+          "title": "Un código vuela a tu bandeja",
+          "text": "El servicio de acceso crea un código de un solo uso y te lo envía por correo. El código funciona una vez y caduca a los pocos minutos."
+        },
+        "s5": {
+          "title": "Escribes el código",
+          "text": "Copias el código del correo en la pantalla de acceso. Eso demuestra que la bandeja es tuya. Nunca hay una contraseña de por medio."
+        },
+        "s6": {
+          "title": "¿Primera vez? Elige un identificador",
+          "text": "En tu primera visita, ePDS crea una cuenta para ti y te pide elegir un identificador, tu nombre público en la red."
+        },
+        "s7": {
+          "title": "El saludo firmado",
+          "text": "El servicio de acceso le dice al PDS que estás verificado. El mensaje lleva una firma criptográfica, así que nadie puede falsificarlo."
+        },
+        "s8": {
+          "title": "De vuelta a tu app",
+          "text": "El PDS devuelve tu navegador a tu app con un código de corta duración. Tu app cambia ese código por un token de acceso."
+        },
+        "s9": {
+          "title": "Ya estás dentro",
+          "text": "Tu app ya puede leer y escribir tus datos en tu nombre. Para el resto de la red eres un usuario más de AT Protocol."
+        }
+      }
+    },
+    "map": {
+      "heading": "Las piezas del sistema",
+      "intro": "ePDS es un pequeño equipo de servicios. Toca cada uno para ver su función.",
+      "ariaLabel": "Mapa de los servicios de ePDS",
+      "nodes": {
+        "app": {
+          "name": "Tu app",
+          "desc": "Cualquier app de AT Protocol, como GainForest o Bluesky. Nunca ve tu código de correo ni ninguna clave. Solo recibe el token de acceso final."
+        },
+        "pds": {
+          "name": "Núcleo PDS",
+          "desc": "Un Personal Data Server estándar. Guarda tus registros, habla con el resto de la red y emite tokens. ePDS lo envuelve sin cambiar cómo se comunica con otras apps."
+        },
+        "auth": {
+          "name": "Servicio de acceso",
+          "desc": "La puerta de entrada amable. Muestra la pantalla de acceso, envía los códigos por correo, gestiona los accesos sociales y ayuda a los nuevos usuarios a elegir un identificador."
+        },
+        "email": {
+          "name": "Proveedor de correo",
+          "desc": "Entrega los códigos de un solo uso en tu bandeja. Cada código dura poco y solo puede usarse una vez."
+        },
+        "db": {
+          "name": "Base de datos compartida",
+          "desc": "Una pequeña base de datos que ambos servicios comparten. Registra sesiones y códigos de acceso, nada más."
+        },
+        "tee": {
+          "name": "Caja fuerte de claves",
+          "desc": "Un firmante opcional que guarda las claves de firma dentro de un enclave seguro, una bóveda sellada que ni siquiera el operador del servidor puede abrir."
+        }
+      }
+    },
+    "vault": {
+      "heading": "La caja fuerte de claves",
+      "intro": "Cada cuenta tiene una clave que firma tus registros, como un sello de lacre personal. ePDS puede guardar esa clave dentro de un enclave seguro. La clave nace ahí dentro y nunca sale. Pruébalo:",
+      "signButton": "Pedir una firma",
+      "stealButton": "Intentar sacar la clave",
+      "idle": "La clave descansa dentro de la caja fuerte.",
+      "signing": "El registro entra y se firma dentro de la caja fuerte...",
+      "signed": "Firma entregada. La clave nunca salió de la caja.",
+      "denied": "No. Ni siquiera el operador del servidor puede sacar la clave."
+    },
+    "more": {
+      "heading": "Sigue explorando",
+      "lexiconsTitle": "Esquemas de datos",
+      "lexiconsDesc": "Los formatos abiertos de registro que viven dentro de cada PDS.",
+      "githubTitle": "ePDS en GitHub",
+      "githubDesc": "Todo el código fuente, abierto para que cualquiera lo lea, lo ejecute y lo mejore."
     }
   }
 }

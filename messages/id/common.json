@@ -1227,7 +1227,9 @@
       "certified": "Primitif identitas dari ekosistem Hypercerts — profil aktor, organisasi, pengikut, lencana, dan lokasi.",
       "hypercerts": "Klaim dampak (aktivitas, kontribusi, kontributor, hak), koleksi, tanda terima pendanaan, lampiran, cakupan kerja, dan tipe bersama."
     },
-    "sectionsAria": "Bagian skema"
+    "sectionsAria": "Bagian skema",
+    "epdsLinkTitle": "Cara kerja ePDS",
+    "epdsLinkDesc": "Tur interaktif tentang sistem masuk dan server di balik catatan-catatan ini."
   },
   "taina": {
     "meta": {
@@ -1798,6 +1800,137 @@
       "toggleDescription": "Pembaruan komunitas yang Anda posting juga diterbitkan ke akun Bluesky Anda, sehingga lebih banyak orang dapat menemukan karya Anda.",
       "viewProfile": "Lihat profil Bluesky Anda",
       "error": "Kami tidak dapat menyimpan perubahan itu. Silakan coba lagi."
+    }
+  },
+  "epds": {
+    "metaTitle": "Cara kerja ePDS",
+    "metaDescription": "Tur interaktif tentang ePDS, Personal Data Server yang diperluas sehingga siapa pun bisa bergabung ke jaringan AT Protocol hanya dengan email.",
+    "kicker": "Personal Data Server yang diperluas",
+    "title": "Cara kerja ePDS",
+    "lead": "GainForest berjalan di atas AT Protocol, jaringan terbuka di balik Bluesky. Bergabung ke jaringan itu biasanya butuh kata sandi dan pengaturan teknis. ePDS menghapus penghalang itu: Anda mengetik email, menerima kode, dan langsung masuk. Halaman ini menunjukkan cara kerjanya, langkah demi langkah.",
+    "whatIs": {
+      "heading": "Apa itu PDS, dan apa arti huruf e?",
+      "p1": "Di AT Protocol, setiap orang menyimpan datanya di Personal Data Server, atau PDS. Anggap saja rumah pribadi untuk postingan, observasi, dan proyek Anda. Isinya milik Anda, dan Anda bisa pindah ke server lain kapan saja tanpa kehilangan apa pun.",
+      "p2": "ePDS adalah PDS biasa dengan satu tambahan: pintu depan yang ramah. Alih-alih meminta kata sandi, ia memasukkan Anda dengan kode email sekali pakai atau akun sosial, dan membuatkan akun saat kunjungan pertama. Di balik pintu itu semuanya tetap AT Protocol standar, jadi semua aplikasi di jaringan bisa berkomunikasi dengannya."
+    },
+    "compare": {
+      "heading": "Dua pintu depan",
+      "intro": "Rumah yang sama, pintu yang berbeda. Geser sakelarnya dan coba kedua cara masuk.",
+      "classicTab": "PDS klasik",
+      "epdsTab": "ePDS",
+      "handle": "Handle",
+      "password": "Kata sandi",
+      "inviteCode": "Kode undangan",
+      "email": "Alamat email",
+      "sendCode": "Kirimkan kode",
+      "signIn": "Masuk",
+      "codeLabel": "Ketik kode dari email Anda",
+      "classicCaption": "PDS klasik meminta kata sandi, dan sering juga kode undangan dari admin server. Anda juga harus membuat akun terlebih dahulu.",
+      "epdsCaption": "ePDS meminta email Anda lalu mengirim kode. Kunjungan pertama? Akun Anda langsung dibuat saat itu juga.",
+      "done": "Anda sudah masuk!",
+      "reset": "Coba lagi"
+    },
+    "journey": {
+      "heading": "Perjalanan proses masuk",
+      "intro": "Tekan putar, atau maju selangkah demi selangkah. Titik yang bergerak adalah proses masuk Anda yang menempuh perjalanan pulang pergi.",
+      "play": "Putar",
+      "pause": "Jeda",
+      "back": "Kembali",
+      "next": "Lanjut",
+      "stepLabel": "Langkah {n} dari {total}",
+      "ariaLabel": "Diagram perjalanan proses masuk",
+      "nodes": {
+        "app": "Aplikasi Anda",
+        "pds": "Inti PDS",
+        "auth": "Layanan masuk",
+        "inbox": "Kotak masuk Anda"
+      },
+      "steps": {
+        "s1": {
+          "title": "Anda mengeklik Masuk",
+          "text": "Semuanya dimulai di aplikasi yang Anda pakai, misalnya GainForest. Anda mengeklik Masuk dan mungkin mengetik email Anda."
+        },
+        "s2": {
+          "title": "Aplikasi memanggil PDS",
+          "text": "Aplikasi Anda diam-diam meminta PDS memulai proses masuk. Ini permintaan AT Protocol standar, sama seperti yang dilakukan aplikasi Bluesky mana pun."
+        },
+        "s3": {
+          "title": "PDS membuka pintu depannya",
+          "text": "Inilah trik ePDS. Alih-alih menampilkan formulir kata sandi, PDS mengarahkan peramban Anda ke layanan masuk yang ramah."
+        },
+        "s4": {
+          "title": "Kode terbang ke kotak masuk Anda",
+          "text": "Layanan masuk membuat kode sekali pakai dan mengirimkannya lewat email. Kode hanya berlaku sekali dan kedaluwarsa dalam beberapa menit."
+        },
+        "s5": {
+          "title": "Anda mengetik kode",
+          "text": "Anda menyalin kode dari email ke layar masuk. Itu membuktikan kotak masuk itu milik Anda. Tidak ada kata sandi sama sekali."
+        },
+        "s6": {
+          "title": "Baru di sini? Pilih handle",
+          "text": "Pada kunjungan pertama, ePDS membuatkan akun dan meminta Anda memilih handle, nama publik Anda di jaringan."
+        },
+        "s7": {
+          "title": "Jabat tangan bertanda tangan",
+          "text": "Layanan masuk memberi tahu PDS bahwa Anda sudah terverifikasi. Pesan itu membawa tanda tangan kriptografis, jadi tidak ada yang bisa memalsukannya."
+        },
+        "s8": {
+          "title": "Kembali ke aplikasi Anda",
+          "text": "PDS mengembalikan peramban Anda ke aplikasi dengan kode berumur pendek. Aplikasi Anda menukar kode itu dengan token akses."
+        },
+        "s9": {
+          "title": "Anda sudah masuk",
+          "text": "Aplikasi Anda kini bisa membaca dan menulis data atas nama Anda. Bagi jaringan, Anda terlihat seperti pengguna AT Protocol lainnya."
+        }
+      }
+    },
+    "map": {
+      "heading": "Bagian-bagian yang bergerak",
+      "intro": "ePDS adalah tim kecil berisi beberapa layanan. Ketuk masing-masing untuk melihat tugasnya.",
+      "ariaLabel": "Peta layanan ePDS",
+      "nodes": {
+        "app": {
+          "name": "Aplikasi Anda",
+          "desc": "Aplikasi AT Protocol mana pun, seperti GainForest atau Bluesky. Ia tidak pernah melihat kode email atau kunci apa pun. Ia hanya menerima token akses akhir."
+        },
+        "pds": {
+          "name": "Inti PDS",
+          "desc": "Personal Data Server standar. Ia menyimpan catatan Anda, berbicara dengan jaringan, dan menerbitkan token. ePDS membungkusnya tanpa mengubah caranya berkomunikasi dengan aplikasi lain."
+        },
+        "auth": {
+          "name": "Layanan masuk",
+          "desc": "Pintu depan yang ramah. Ia menampilkan layar masuk, mengirim kode email, menangani login sosial, dan membantu pengguna baru memilih handle."
+        },
+        "email": {
+          "name": "Penyedia email",
+          "desc": "Mengantarkan kode sekali pakai ke kotak masuk Anda. Setiap kode berumur pendek dan hanya bisa dipakai satu kali."
+        },
+        "db": {
+          "name": "Basis data bersama",
+          "desc": "Basis data kecil yang dipakai kedua layanan. Ia mencatat sesi dan kode masuk, tidak lebih."
+        },
+        "tee": {
+          "name": "Brankas kunci",
+          "desc": "Penandatangan opsional yang menyimpan kunci tanda tangan di dalam enklave aman, brankas tersegel yang bahkan operator server tidak bisa buka."
+        }
+      }
+    },
+    "vault": {
+      "heading": "Brankas kunci",
+      "intro": "Setiap akun punya kunci yang menandatangani catatan Anda, seperti stempel lilin pribadi. ePDS bisa menyimpan kunci itu di dalam enklave aman. Kunci lahir di dalam dan tidak pernah keluar. Coba saja:",
+      "signButton": "Minta tanda tangan",
+      "stealButton": "Coba ambil kuncinya",
+      "idle": "Kunci itu diam di dalam brankas.",
+      "signing": "Catatan masuk dan ditandatangani di dalam brankas...",
+      "signed": "Tanda tangan terkirim. Kuncinya tidak pernah meninggalkan brankas.",
+      "denied": "Tidak bisa. Bahkan operator server pun tidak bisa mengeluarkan kuncinya."
+    },
+    "more": {
+      "heading": "Terus jelajahi",
+      "lexiconsTitle": "Skema data",
+      "lexiconsDesc": "Format catatan terbuka yang hidup di dalam setiap PDS.",
+      "githubTitle": "ePDS di GitHub",
+      "githubDesc": "Seluruh kode sumber, terbuka bagi siapa pun untuk dibaca, dijalankan, dan diperbaiki."
     }
   }
 }
