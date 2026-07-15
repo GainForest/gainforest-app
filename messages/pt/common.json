@@ -2259,30 +2259,31 @@
     }
   },
   "teeEpds": {
-    "metaTitle": "Como a assinatura TEE protege as chaves do ePDS",
-    "metaDescription": "Um guia interativo do assinador TEE opcional do ePDS, com diagramas simples sobre chaves protegidas, assinatura de registros, aprovação da carteira e limites.",
+    "metaTitle": "Como funcionam a assinatura protegida e a recuperação da carteira no ePDS",
+    "metaDescription": "Um guia interativo da assinatura protegida do ePDS, recuperação da carteira com duas de três partes, aprovação do dispositivo e limites.",
     "kicker": "assinatura protegida do ePDS",
-    "title": "Chaves que ficam dentro de um computador protegido",
-    "lead": "O ePDS pode manter as chaves da conta e da carteira dentro de um Ambiente de Execução Confiável, ou TEE. A chave é criada, guardada e usada em memória protegida. O servidor pede assinaturas, mas nunca recebe a chave privada.",
+    "title": "Protegida do servidor, recuperável por você",
+    "lead": "O ePDS pode mover a assinatura da conta para um Ambiente de Execução Confiável, ou TEE. A carteira opcional divide o controle em três: seu dispositivo, o hardware protegido e sua cópia de recuperação. O operador não pode gastar nem prender você ao serviço.",
     "facts": {
       "keys": {
-        "title": "As chaves ficam dentro",
-        "text": "As chaves privadas nunca entram no aplicativo normal nem no processo PDS."
+        "title": "O servidor não recebe chaves",
+        "text": "O aplicativo e o PDS recebem assinaturas, não segredos da conta ou carteira."
       },
       "protection": {
         "title": "O código pode ser verificado",
         "text": "Uma prova de hardware pode mostrar qual código assinador está em execução."
       },
       "wallet": {
-        "title": "A pessoa ainda aprova",
-        "text": "Uma assinatura de carteira precisa da aprovação do dispositivo cadastrado."
+        "title": "Você tem a maioria",
+        "text": "Seu dispositivo e cópia de recuperação dão a você duas das três partes da carteira."
       }
     },
     "what": {
       "heading": "O que a extensão TEE adiciona?",
       "intro": "A extensão adiciona um pequeno serviço de assinatura ao lado do ePDS normal. Todo o resto continua usando os caminhos padrão do AT Protocol.",
       "p1": "Um PDS normal precisa de uma chave privada para assinar cada atualização dos seus dados. Com a extensão TEE, o ePDS move esse trabalho para uma máquina virtual confidencial. O PDS envia uma impressão de 32 bytes da atualização. O assinador protegido devolve uma assinatura. A chave privada nunca sai da memória protegida.",
-      "p2": "O mesmo assinador também pode derivar uma carteira Ethereum ou Solana para cada conta. Essas chaves são separadas da chave de assinatura da conta. Conhecer uma chave não revela nada sobre outra."
+      "p2": "A carteira nasce do seu próprio segredo aleatório, separado da chave da conta. Esse segredo é dividido em três partes. O hardware protegido guarda uma parte criptografada; você controla as partes do dispositivo e da recuperação. Duas partes restauram a carteira, mas uma sozinha não revela nada.",
+      "p3": "Os aplicativos podem criar, ver, assinar, exportar e recuperar a carteira por chamadas padrão do AT Protocol ou solicitações comuns da web. Os dois caminhos usam as mesmas verificações e retornam os mesmos resultados."
     },
     "boundary": {
       "heading": "Onde fica a chave privada?",
@@ -2340,21 +2341,57 @@
       },
       "wallet": {
         "title": "Caminho da carteira",
-        "text": "A carteira usa chaves separadas para Ethereum e Solana. Antes de assinar, o serviço confere a aprovação do navegador ou dispositivo cadastrado."
+        "text": "A carteira usa chaves separadas para Ethereum e Solana. Para assinar, o serviço protegido precisa da prova do dispositivo cadastrado e de uma parte verdadeira da carteira."
+      }
+    },
+    "shares": {
+      "heading": "Uma carteira que você pode recuperar ou levar consigo",
+      "intro": "O segredo da carteira é dividido em três partes. Escolha uma situação para ver quais duas partes a restauram. O operador controla apenas uma.",
+      "device": {
+        "title": "Seu dispositivo",
+        "text": "Guardada pelo seu navegador ou aplicativo e nunca pelo serviço."
+      },
+      "protected": {
+        "title": "Serviço protegido",
+        "text": "Guardada criptografada e utilizável apenas em hardware protegido aprovado."
+      },
+      "recovery": {
+        "title": "Sua cópia de recuperação",
+        "text": "Protegida por uma senha ou nuvem pessoal que você controla."
+      },
+      "used": "Parte usada",
+      "notNeeded": "Não necessária",
+      "threshold": "Quaisquer 2 de 3",
+      "scenarios": {
+        "everyday": {
+          "tab": "Uso diário",
+          "title": "Seu dispositivo e o hardware protegido assinam juntos",
+          "text": "A carteira é reconstruída por instantes na memória protegida, comparada ao endereço público, usada para assinar e depois apagada."
+        },
+        "recover": {
+          "tab": "Dispositivo perdido",
+          "title": "Sua cópia de recuperação substitui o dispositivo perdido",
+          "text": "O serviço protegido combina sua parte com a parte de recuperação, cria partes novas e pode cadastrar o dispositivo substituto. A parte do dispositivo antigo deixa de funcionar com o serviço."
+        },
+        "leave": {
+          "tab": "Deixar o serviço",
+          "title": "Suas duas partes evitam aprisionamento",
+          "text": "As partes do dispositivo e da recuperação formam uma maioria. Você pode reconstruir a carteira sem o operador ou exportá-la pelo serviço enquanto ele estiver disponível."
+        }
       }
     },
     "walletGate": {
       "heading": "Por que o servidor não pode gastar da carteira",
-      "intro": "Teste as duas solicitações. Um token pode mostrar o endereço público, mas não é suficiente para criar uma assinatura.",
+      "intro": "Teste as duas solicitações. Um token pode mostrar o endereço público, mas gastar também exige a prova do dispositivo e sua parte da carteira.",
       "serverAttempt": "PDS pede sozinho",
-      "userAttempt": "A pessoa aprova primeiro",
+      "userAttempt": "Prova + parte pessoal",
       "serverNode": "Solicitação do PDS",
-      "userNode": "Solicitação assinada pela pessoa",
-      "teeNode": "Chave da carteira TEE",
+      "userNode": "Prova + parte do dispositivo",
+      "teeNode": "Carteira protegida",
       "approved": "Assinatura aprovada",
       "denied": "Solicitação negada",
-      "approvedDesc": "O navegador assina uma solicitação curta com a chave cadastrada. O TEE confere a prova, a hora e um número de uso único antes de usar a chave.",
-      "deniedDesc": "Um token do PDS não basta. O assinador recusa porque a solicitação não tem uma prova do dispositivo cadastrado."
+      "approvedDesc": "O dispositivo assina uma solicitação curta e envia sua parte criptografada ao hardware protegido. O assinador confere a prova, a hora e um número de uso único antes de reconstruir e usar a carteira.",
+      "deniedDesc": "Um token do PDS não basta. O assinador protegido tem apenas uma parte e recusa solicitações sem a prova do dispositivo e uma segunda parte verdadeira."
     },
     "proof": {
       "heading": "Como um aplicativo pode confiar no assinador?",
@@ -2379,7 +2416,7 @@
       },
       "recovery": {
         "title": "Cópias e repetição",
-        "text": "Aprovações e números de uso único precisam de cópias cuidadosas. Voltar o armazenamento pode reabrir solicitações antigas, mas não criar uma nova aprovação."
+        "text": "Você deve proteger sua cópia de recuperação, e o serviço deve copiar sua parte criptografada. Voltar o armazenamento também pode reabrir uma solicitação antiga já aprovada, mas não criar uma nova aprovação."
       }
     },
     "more": {

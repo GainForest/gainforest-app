@@ -2259,30 +2259,31 @@
     }
   },
   "teeEpds": {
-    "metaTitle": "How TEE signing protects ePDS keys",
-    "metaDescription": "An interactive guide to the optional TEE signer in ePDS, with simple diagrams for protected keys, record signing, wallet approval, and honest limits.",
+    "metaTitle": "How protected ePDS signing and wallet recovery work",
+    "metaDescription": "An interactive guide to ePDS protected signing, two-of-three wallet recovery, device approval, and honest limits.",
     "kicker": "ePDS protected signing",
-    "title": "Keys that stay inside a protected computer",
-    "lead": "ePDS can keep account and wallet keys inside a Trusted Execution Environment, or TEE. The key is created, stored, and used inside protected memory. The server asks for signatures, but it never receives the private key.",
+    "title": "Protected from the server, recoverable by you",
+    "lead": "ePDS can move account signing into a Trusted Execution Environment, or TEE. Its optional wallet splits control three ways: your device, protected hardware, and your recovery backup. The operator cannot spend from the wallet or keep you locked in.",
     "facts": {
       "keys": {
-        "title": "Keys stay inside",
-        "text": "Private keys never enter the normal app or PDS process."
+        "title": "The server gets no key",
+        "text": "The normal app and PDS receive signatures, not account or wallet secrets."
       },
       "protection": {
         "title": "Code can be checked",
         "text": "A hardware proof can show which signer code is running."
       },
       "wallet": {
-        "title": "The user still approves",
-        "text": "A wallet signature needs approval from the user’s enrolled device."
+        "title": "You hold the majority",
+        "text": "Your device and recovery backup give you two of the wallet’s three shares."
       }
     },
     "what": {
       "heading": "What does the TEE extension add?",
       "intro": "The extension adds a small signing service beside the normal ePDS. Everything else keeps using standard AT Protocol paths.",
       "p1": "A normal PDS needs a private key to sign each update to your data. With the TEE extension, ePDS moves that job into a confidential virtual machine. The PDS sends a 32-byte fingerprint of the update. The protected signer returns a signature. The private key never leaves protected memory.",
-      "p2": "The same protected signer can also derive an Ethereum or Solana wallet for each account. These wallet keys are separate from the account signing key. Knowing one key gives no clue about another."
+      "p2": "The wallet is created from its own random secret, separate from the account key. That secret is split into three shares. Protected hardware keeps one encrypted share; you control the device and recovery shares. Any two can restore the wallet, but one alone reveals nothing.",
+      "p3": "Apps get the same create, view, sign, export, and recovery actions through standard AT Protocol calls and ordinary web requests. Both paths use the same security checks and return the same results."
     },
     "boundary": {
       "heading": "Where does the private key live?",
@@ -2340,21 +2341,57 @@
       },
       "wallet": {
         "title": "Wallet path",
-        "text": "The wallet uses separate Ethereum and Solana keys. Before it signs, the protected service also checks approval from the user’s enrolled browser or device."
+        "text": "The wallet uses separate Ethereum and Solana keys. To sign, the protected service needs both proof from the enrolled device and a genuine wallet share."
+      }
+    },
+    "shares": {
+      "heading": "A wallet you can recover or take with you",
+      "intro": "The wallet secret is split into three shares. Choose a situation to see which two shares restore it. The operator controls only one.",
+      "device": {
+        "title": "Your device",
+        "text": "Kept by your browser or app and never stored by the service."
+      },
+      "protected": {
+        "title": "Protected service",
+        "text": "Stored encrypted and usable only inside approved protected hardware."
+      },
+      "recovery": {
+        "title": "Your recovery backup",
+        "text": "Protected by a password or personal cloud backup that you control."
+      },
+      "used": "Share used",
+      "notNeeded": "Not needed",
+      "threshold": "Any 2 of 3",
+      "scenarios": {
+        "everyday": {
+          "tab": "Everyday use",
+          "title": "Your device and protected hardware sign together",
+          "text": "The wallet is briefly rebuilt inside protected memory, checked against its public address, used to sign, and then cleared."
+        },
+        "recover": {
+          "tab": "Lost device",
+          "title": "Your recovery backup replaces a lost device",
+          "text": "The protected service combines its share with your recovery share, creates fresh shares, and can enroll your replacement device. The old device share can no longer work with the service."
+        },
+        "leave": {
+          "tab": "Leave service",
+          "title": "Your two shares prevent lock-in",
+          "text": "Your device and recovery shares form a majority. You can reconstruct the wallet without the operator, or export it through the service while it is available."
+        }
       }
     },
     "walletGate": {
       "heading": "Why the server cannot spend from the wallet",
-      "intro": "Try both requests. A login token can show the public wallet address, but it is not enough to make a wallet signature.",
+      "intro": "Try both requests. A login token can show the public wallet address, but spending also needs proof from your device and its wallet share.",
       "serverAttempt": "PDS asks by itself",
-      "userAttempt": "User approves first",
+      "userAttempt": "User proof + share",
       "serverNode": "PDS request",
-      "userNode": "User-signed request",
-      "teeNode": "TEE wallet key",
+      "userNode": "Device proof + share",
+      "teeNode": "Protected wallet",
       "approved": "Signature approved",
       "denied": "Request denied",
-      "approvedDesc": "The user’s browser signs a short request with its enrolled key. The TEE checks that proof, the time, and a one-time number before it uses the wallet key.",
-      "deniedDesc": "A PDS token alone is not enough. The protected signer refuses the request because it does not carry proof from the user’s enrolled device."
+      "approvedDesc": "The device signs a short request and sends its wallet share encrypted for the protected hardware. The signer checks the proof, time, and one-time number before rebuilding and using the wallet.",
+      "deniedDesc": "A PDS token alone is not enough. The protected signer has only one share and refuses any request without both device proof and a genuine second share."
     },
     "proof": {
       "heading": "How can an app trust the protected signer?",
@@ -2379,7 +2416,7 @@
       },
       "recovery": {
         "title": "Backups and replay",
-        "text": "Wallet approvals and one-time numbers need careful backup. Rolling storage back can reopen old requests, even though it cannot create a new user approval."
+        "text": "You must protect your recovery backup, and the service must back up its encrypted share. Rolling service storage back can also reopen an old approved request, though it cannot create a new approval."
       }
     },
     "more": {

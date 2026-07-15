@@ -2259,30 +2259,31 @@
     }
   },
   "teeEpds": {
-    "metaTitle": "Cara penandatanganan TEE melindungi kunci ePDS",
-    "metaDescription": "Panduan interaktif untuk penandatangan TEE opsional di ePDS, dengan diagram sederhana tentang kunci terlindungi, penandatanganan catatan, persetujuan dompet, dan batasannya.",
+    "metaTitle": "Cara penandatanganan terlindungi dan pemulihan dompet ePDS bekerja",
+    "metaDescription": "Panduan interaktif untuk penandatanganan terlindungi ePDS, pemulihan dompet dua-dari-tiga, persetujuan perangkat, dan batasannya.",
     "kicker": "penandatanganan ePDS terlindungi",
-    "title": "Kunci yang tetap berada di dalam komputer terlindungi",
-    "lead": "ePDS dapat menyimpan kunci akun dan dompet di dalam Trusted Execution Environment, atau TEE. Kunci dibuat, disimpan, dan digunakan di dalam memori terlindungi. Server meminta tanda tangan, tetapi tidak pernah menerima kunci privat.",
+    "title": "Terlindungi dari server, dapat Anda pulihkan",
+    "lead": "ePDS dapat memindahkan penandatanganan akun ke Trusted Execution Environment, atau TEE. Dompet opsionalnya membagi kendali menjadi tiga: perangkat Anda, perangkat keras terlindungi, dan cadangan pemulihan Anda. Operator tidak dapat membelanjakan dana atau mengunci Anda di layanan.",
     "facts": {
       "keys": {
-        "title": "Kunci tetap di dalam",
-        "text": "Kunci privat tidak pernah masuk ke aplikasi biasa atau proses PDS."
+        "title": "Server tidak menerima kunci",
+        "text": "Aplikasi biasa dan PDS menerima tanda tangan, bukan rahasia akun atau dompet."
       },
       "protection": {
         "title": "Kode dapat diperiksa",
         "text": "Bukti perangkat keras dapat menunjukkan kode penandatangan yang sedang berjalan."
       },
       "wallet": {
-        "title": "Pengguna tetap menyetujui",
-        "text": "Tanda tangan dompet memerlukan persetujuan perangkat pengguna yang terdaftar."
+        "title": "Anda memegang mayoritas",
+        "text": "Perangkat dan cadangan pemulihan memberi Anda dua dari tiga bagian dompet."
       }
     },
     "what": {
       "heading": "Apa yang ditambahkan ekstensi TEE?",
       "intro": "Ekstensi ini menambahkan layanan penandatangan kecil di samping ePDS biasa. Bagian lain tetap memakai jalur standar AT Protocol.",
       "p1": "PDS biasa memerlukan kunci privat untuk menandatangani setiap pembaruan data. Dengan ekstensi TEE, ePDS memindahkan tugas itu ke mesin virtual rahasia. PDS mengirim sidik jari 32 byte dari pembaruan. Penandatangan terlindungi mengembalikan tanda tangan. Kunci privat tidak pernah keluar dari memori terlindungi.",
-      "p2": "Penandatangan yang sama juga dapat membuat dompet Ethereum atau Solana untuk setiap akun. Kunci dompet ini terpisah dari kunci akun. Mengetahui satu kunci tidak memberi petunjuk tentang kunci lain."
+      "p2": "Dompet dibuat dari rahasia acaknya sendiri, terpisah dari kunci akun. Rahasia itu dibagi menjadi tiga bagian. Perangkat keras terlindungi menyimpan satu bagian terenkripsi; Anda mengendalikan bagian perangkat dan pemulihan. Dua bagian dapat memulihkan dompet, tetapi satu bagian saja tidak mengungkap apa pun.",
+      "p3": "Aplikasi mendapat tindakan membuat, melihat, menandatangani, mengekspor, dan memulihkan yang sama melalui panggilan AT Protocol standar dan permintaan web biasa. Kedua jalur memakai pemeriksaan keamanan dan memberikan hasil yang sama."
     },
     "boundary": {
       "heading": "Di mana kunci privat berada?",
@@ -2340,21 +2341,57 @@
       },
       "wallet": {
         "title": "Jalur dompet",
-        "text": "Dompet memakai kunci Ethereum dan Solana yang terpisah. Sebelum menandatangani, layanan juga memeriksa persetujuan dari perangkat pengguna yang terdaftar."
+        "text": "Dompet memakai kunci Ethereum dan Solana yang terpisah. Untuk menandatangani, layanan terlindungi memerlukan bukti dari perangkat terdaftar dan bagian dompet yang asli."
+      }
+    },
+    "shares": {
+      "heading": "Dompet yang dapat dipulihkan atau Anda bawa",
+      "intro": "Rahasia dompet dibagi menjadi tiga bagian. Pilih situasi untuk melihat dua bagian mana yang memulihkannya. Operator hanya mengendalikan satu.",
+      "device": {
+        "title": "Perangkat Anda",
+        "text": "Disimpan oleh browser atau aplikasi Anda dan tidak pernah oleh layanan."
+      },
+      "protected": {
+        "title": "Layanan terlindungi",
+        "text": "Disimpan terenkripsi dan hanya dapat digunakan di perangkat keras terlindungi yang disetujui."
+      },
+      "recovery": {
+        "title": "Cadangan pemulihan Anda",
+        "text": "Dilindungi dengan kata sandi atau cadangan cloud pribadi yang Anda kendalikan."
+      },
+      "used": "Bagian digunakan",
+      "notNeeded": "Tidak diperlukan",
+      "threshold": "2 mana pun dari 3",
+      "scenarios": {
+        "everyday": {
+          "tab": "Penggunaan biasa",
+          "title": "Perangkat dan perangkat keras terlindungi menandatangani bersama",
+          "text": "Dompet dibangun kembali sejenak dalam memori terlindungi, dicocokkan dengan alamat publiknya, dipakai untuk menandatangani, lalu dihapus."
+        },
+        "recover": {
+          "tab": "Perangkat hilang",
+          "title": "Cadangan pemulihan menggantikan perangkat yang hilang",
+          "text": "Layanan terlindungi menggabungkan bagiannya dengan bagian pemulihan Anda, membuat bagian baru, dan dapat mendaftarkan perangkat pengganti. Bagian perangkat lama tidak lagi berfungsi dengan layanan."
+        },
+        "leave": {
+          "tab": "Keluar layanan",
+          "title": "Dua bagian Anda mencegah ketergantungan",
+          "text": "Bagian perangkat dan pemulihan Anda membentuk mayoritas. Anda dapat membangun kembali dompet tanpa operator, atau mengekspornya melalui layanan selama masih tersedia."
+        }
       }
     },
     "walletGate": {
       "heading": "Mengapa server tidak dapat membelanjakan dana dompet",
-      "intro": "Coba kedua permintaan. Token masuk dapat menampilkan alamat publik, tetapi tidak cukup untuk membuat tanda tangan dompet.",
+      "intro": "Coba kedua permintaan. Token masuk dapat menampilkan alamat publik, tetapi pembelanjaan juga memerlukan bukti perangkat dan bagian dompetnya.",
       "serverAttempt": "PDS meminta sendiri",
-      "userAttempt": "Pengguna menyetujui dulu",
+      "userAttempt": "Bukti + bagian pengguna",
       "serverNode": "Permintaan PDS",
-      "userNode": "Permintaan bertanda tangan pengguna",
-      "teeNode": "Kunci dompet TEE",
+      "userNode": "Bukti + bagian perangkat",
+      "teeNode": "Dompet terlindungi",
       "approved": "Tanda tangan disetujui",
       "denied": "Permintaan ditolak",
-      "approvedDesc": "Browser menandatangani permintaan singkat dengan kunci terdaftar. TEE memeriksa bukti, waktu, dan nomor sekali pakai sebelum memakai kunci dompet.",
-      "deniedDesc": "Token PDS saja tidak cukup. Penandatangan menolak permintaan karena tidak ada bukti dari perangkat pengguna yang terdaftar."
+      "approvedDesc": "Perangkat menandatangani permintaan singkat dan mengirim bagiannya yang terenkripsi untuk perangkat keras terlindungi. Penandatangan memeriksa bukti, waktu, dan nomor sekali pakai sebelum membangun kembali dan memakai dompet.",
+      "deniedDesc": "Token PDS saja tidak cukup. Penandatangan terlindungi hanya memiliki satu bagian dan menolak permintaan tanpa bukti perangkat serta bagian kedua yang asli."
     },
     "proof": {
       "heading": "Bagaimana aplikasi dapat mempercayai penandatangan?",
@@ -2379,7 +2416,7 @@
       },
       "recovery": {
         "title": "Cadangan dan pengulangan",
-        "text": "Persetujuan dompet dan nomor sekali pakai perlu dicadangkan dengan hati-hati. Mengembalikan penyimpanan dapat membuka permintaan lama, tetapi tidak dapat membuat persetujuan pengguna baru."
+        "text": "Anda harus melindungi cadangan pemulihan, dan layanan harus mencadangkan bagiannya yang terenkripsi. Mengembalikan penyimpanan juga dapat membuka permintaan lama yang sudah disetujui, tetapi tidak dapat membuat persetujuan baru."
       }
     },
     "more": {

@@ -2259,30 +2259,31 @@
     }
   },
   "teeEpds": {
-    "metaTitle": "Cómo la firma TEE protege las claves de ePDS",
-    "metaDescription": "Una guía interactiva del firmante TEE opcional de ePDS, con diagramas simples sobre claves protegidas, firma de registros, aprobación de billetera y límites.",
+    "metaTitle": "Cómo funcionan la firma protegida y la recuperación de billetera en ePDS",
+    "metaDescription": "Una guía interactiva de la firma protegida de ePDS, la recuperación de billetera con dos de tres partes, la aprobación del dispositivo y sus límites.",
     "kicker": "firma protegida de ePDS",
-    "title": "Claves que permanecen dentro de una computadora protegida",
-    "lead": "ePDS puede guardar las claves de cuenta y billetera dentro de un Entorno de Ejecución Confiable, o TEE. La clave se crea, guarda y usa dentro de memoria protegida. El servidor pide firmas, pero nunca recibe la clave privada.",
+    "title": "Protegida del servidor, recuperable por ti",
+    "lead": "ePDS puede mover la firma de la cuenta a un Entorno de Ejecución Confiable, o TEE. Su billetera opcional divide el control en tres: tu dispositivo, el hardware protegido y tu copia de recuperación. El operador no puede gastar ni encerrarte en el servicio.",
     "facts": {
       "keys": {
-        "title": "Las claves quedan dentro",
-        "text": "Las claves privadas nunca entran en la aplicación normal ni en el proceso PDS."
+        "title": "El servidor no recibe claves",
+        "text": "La aplicación y el PDS reciben firmas, no secretos de cuenta o billetera."
       },
       "protection": {
         "title": "El código se puede comprobar",
         "text": "Una prueba de hardware puede mostrar qué código firmante se está ejecutando."
       },
       "wallet": {
-        "title": "La persona todavía aprueba",
-        "text": "Una firma de billetera necesita la aprobación del dispositivo registrado."
+        "title": "Tú tienes la mayoría",
+        "text": "Tu dispositivo y copia de recuperación te dan dos de las tres partes de la billetera."
       }
     },
     "what": {
       "heading": "¿Qué agrega la extensión TEE?",
       "intro": "La extensión agrega un pequeño servicio de firma junto al ePDS normal. Todo lo demás sigue usando rutas estándar de AT Protocol.",
       "p1": "Un PDS normal necesita una clave privada para firmar cada actualización de tus datos. Con la extensión TEE, ePDS mueve ese trabajo a una máquina virtual confidencial. El PDS envía una huella de 32 bytes de la actualización. El firmante protegido devuelve una firma. La clave privada nunca sale de la memoria protegida.",
-      "p2": "El mismo firmante protegido también puede derivar una billetera de Ethereum o Solana para cada cuenta. Estas claves son distintas de la clave de firma de la cuenta. Conocer una clave no da pistas sobre otra."
+      "p2": "La billetera nace de su propio secreto aleatorio, separado de la clave de cuenta. Ese secreto se divide en tres partes. El hardware protegido guarda una parte cifrada; tú controlas las partes del dispositivo y de recuperación. Dos partes restauran la billetera, pero una sola no revela nada.",
+      "p3": "Las aplicaciones pueden crear, ver, firmar, exportar y recuperar la billetera mediante llamadas estándar de AT Protocol o solicitudes web comunes. Ambos caminos usan los mismos controles y devuelven los mismos resultados."
     },
     "boundary": {
       "heading": "¿Dónde vive la clave privada?",
@@ -2340,21 +2341,57 @@
       },
       "wallet": {
         "title": "Ruta de billetera",
-        "text": "La billetera usa claves separadas de Ethereum y Solana. Antes de firmar, el servicio comprueba la aprobación del navegador o dispositivo registrado."
+        "text": "La billetera usa claves separadas de Ethereum y Solana. Para firmar, el servicio protegido necesita una prueba del dispositivo registrado y una parte auténtica de la billetera."
+      }
+    },
+    "shares": {
+      "heading": "Una billetera que puedes recuperar o llevar contigo",
+      "intro": "El secreto de la billetera se divide en tres partes. Elige una situación para ver qué dos partes la restauran. El operador solo controla una.",
+      "device": {
+        "title": "Tu dispositivo",
+        "text": "Se guarda en tu navegador o aplicación y nunca en el servicio."
+      },
+      "protected": {
+        "title": "Servicio protegido",
+        "text": "Se guarda cifrada y solo se usa dentro de hardware protegido aprobado."
+      },
+      "recovery": {
+        "title": "Tu copia de recuperación",
+        "text": "Protegida por una contraseña o nube personal bajo tu control."
+      },
+      "used": "Parte utilizada",
+      "notNeeded": "No necesaria",
+      "threshold": "2 de 3 cualquiera",
+      "scenarios": {
+        "everyday": {
+          "tab": "Uso diario",
+          "title": "Tu dispositivo y el hardware protegido firman juntos",
+          "text": "La billetera se reconstruye brevemente en memoria protegida, se compara con su dirección pública, se usa para firmar y luego se borra."
+        },
+        "recover": {
+          "tab": "Dispositivo perdido",
+          "title": "Tu copia de recuperación reemplaza el dispositivo perdido",
+          "text": "El servicio protegido combina su parte con la tuya, crea partes nuevas y puede registrar tu dispositivo de reemplazo. La parte del dispositivo antiguo ya no funciona con el servicio."
+        },
+        "leave": {
+          "tab": "Dejar el servicio",
+          "title": "Tus dos partes evitan quedar atrapado",
+          "text": "Las partes de tu dispositivo y recuperación forman una mayoría. Puedes reconstruir la billetera sin el operador o exportarla mediante el servicio mientras esté disponible."
+        }
       }
     },
     "walletGate": {
       "heading": "Por qué el servidor no puede gastar de la billetera",
-      "intro": "Prueba ambas solicitudes. Un token puede mostrar la dirección pública, pero no basta para crear una firma.",
+      "intro": "Prueba ambas solicitudes. Un token puede mostrar la dirección pública, pero gastar también requiere una prueba del dispositivo y su parte de la billetera.",
       "serverAttempt": "El PDS pide solo",
-      "userAttempt": "La persona aprueba primero",
+      "userAttempt": "Prueba + parte personal",
       "serverNode": "Solicitud del PDS",
-      "userNode": "Solicitud firmada por la persona",
-      "teeNode": "Clave de billetera TEE",
+      "userNode": "Prueba + parte del dispositivo",
+      "teeNode": "Billetera protegida",
       "approved": "Firma aprobada",
       "denied": "Solicitud rechazada",
-      "approvedDesc": "El navegador firma una solicitud corta con su clave registrada. El TEE comprueba esa prueba, la hora y un número de un solo uso antes de usar la clave.",
-      "deniedDesc": "Un token del PDS no basta. El firmante rechaza la solicitud porque no lleva una prueba del dispositivo registrado."
+      "approvedDesc": "El dispositivo firma una solicitud corta y envía su parte cifrada para el hardware protegido. El firmante comprueba la prueba, la hora y un número de un solo uso antes de reconstruir y usar la billetera.",
+      "deniedDesc": "Un token del PDS no basta. El firmante protegido solo tiene una parte y rechaza cualquier solicitud sin la prueba del dispositivo y una segunda parte auténtica."
     },
     "proof": {
       "heading": "¿Cómo puede una aplicación confiar en el firmante?",
@@ -2379,7 +2416,7 @@
       },
       "recovery": {
         "title": "Copias y repetición",
-        "text": "Las aprobaciones y números de un solo uso necesitan copias cuidadosas. Volver atrás el almacenamiento puede reabrir solicitudes antiguas, pero no crear una aprobación nueva."
+        "text": "Debes proteger tu copia de recuperación y el servicio debe respaldar su parte cifrada. Volver atrás el almacenamiento también puede reabrir una solicitud aprobada antigua, pero no crear una aprobación nueva."
       }
     },
     "more": {

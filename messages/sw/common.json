@@ -2259,30 +2259,31 @@
     }
   },
   "teeEpds": {
-    "metaTitle": "Jinsi utiaji saini wa TEE unavyolinda funguo za ePDS",
-    "metaDescription": "Mwongozo shirikishi wa mtia saini wa TEE wa hiari katika ePDS, wenye michoro rahisi kuhusu funguo salama, utiaji saini, idhini ya pochi na mipaka.",
+    "metaTitle": "Jinsi utiaji saini salama na urejeshaji wa pochi wa ePDS unavyofanya kazi",
+    "metaDescription": "Mwongozo shirikishi wa utiaji saini salama wa ePDS, urejeshaji wa pochi kwa sehemu mbili kati ya tatu, idhini ya kifaa na mipaka.",
     "kicker": "utiaji saini salama wa ePDS",
-    "title": "Funguo zinazobaki ndani ya kompyuta iliyolindwa",
-    "lead": "ePDS inaweza kuweka funguo za akaunti na pochi ndani ya Trusted Execution Environment, au TEE. Ufunguo huundwa, huhifadhiwa na hutumiwa ndani ya kumbukumbu iliyolindwa. Seva huomba saini, lakini haipokei ufunguo binafsi.",
+    "title": "Imelindwa dhidi ya seva, inaweza kurejeshwa na wewe",
+    "lead": "ePDS inaweza kuhamisha utiaji saini wa akaunti kwenye Trusted Execution Environment, au TEE. Pochi yake ya hiari hugawa udhibiti katika sehemu tatu: kifaa chako, maunzi yaliyolindwa na nakala yako ya urejeshaji. Mwendeshaji hawezi kutumia pesa wala kukufungia kwenye huduma.",
     "facts": {
       "keys": {
-        "title": "Funguo hubaki ndani",
-        "text": "Funguo binafsi haziingii kwenye programu ya kawaida wala mchakato wa PDS."
+        "title": "Seva haipokei funguo",
+        "text": "Programu ya kawaida na PDS hupokea saini, si siri za akaunti au pochi."
       },
       "protection": {
         "title": "Msimbo unaweza kukaguliwa",
         "text": "Uthibitisho wa maunzi unaweza kuonyesha msimbo gani wa kusaini unaoendeshwa."
       },
       "wallet": {
-        "title": "Mtumiaji bado huidhinisha",
-        "text": "Saini ya pochi inahitaji idhini kutoka kifaa cha mtumiaji kilichosajiliwa."
+        "title": "Wewe unamiliki sehemu nyingi",
+        "text": "Kifaa na nakala ya urejeshaji hukupa sehemu mbili kati ya tatu za pochi."
       }
     },
     "what": {
       "heading": "Kiendelezi cha TEE kinaongeza nini?",
       "intro": "Kiendelezi kinaongeza huduma ndogo ya kusaini kando ya ePDS ya kawaida. Sehemu nyingine zinaendelea kutumia njia za kawaida za AT Protocol.",
       "p1": "PDS ya kawaida inahitaji ufunguo binafsi kusaini kila sasisho la data. Kwa kiendelezi cha TEE, ePDS huhamisha kazi hiyo kwenye mashine pepe ya siri. PDS hutuma alama ya baiti 32 ya sasisho. Mtia saini aliyelindwa hurudisha saini. Ufunguo binafsi hautoki kwenye kumbukumbu iliyolindwa.",
-      "p2": "Mtia saini huyo anaweza pia kutengeneza pochi ya Ethereum au Solana kwa kila akaunti. Funguo hizi ni tofauti na ufunguo wa akaunti. Kujua ufunguo mmoja hakutoi taarifa kuhusu mwingine."
+      "p2": "Pochi hutengenezwa kwa siri yake ya nasibu, tofauti na ufunguo wa akaunti. Siri hiyo hugawanywa katika sehemu tatu. Maunzi yaliyolindwa huhifadhi sehemu moja iliyosimbwa; wewe unadhibiti sehemu za kifaa na urejeshaji. Sehemu mbili zinaweza kurejesha pochi, lakini moja pekee haifichui chochote.",
+      "p3": "Programu hupata hatua zilezile za kuunda, kuona, kusaini, kuhamisha na kurejesha kupitia miito ya kawaida ya AT Protocol na maombi ya kawaida ya wavuti. Njia zote mbili hutumia ukaguzi sawa na kurudisha matokeo sawa."
     },
     "boundary": {
       "heading": "Ufunguo binafsi unaishi wapi?",
@@ -2340,21 +2341,57 @@
       },
       "wallet": {
         "title": "Njia ya pochi",
-        "text": "Pochi hutumia funguo tofauti za Ethereum na Solana. Kabla ya kusaini, huduma hukagua idhini kutoka kivinjari au kifaa kilichosajiliwa."
+        "text": "Pochi hutumia funguo tofauti za Ethereum na Solana. Ili kusaini, huduma salama inahitaji uthibitisho kutoka kifaa kilichosajiliwa na sehemu halisi ya pochi."
+      }
+    },
+    "shares": {
+      "heading": "Pochi unayoweza kurejesha au kuondoka nayo",
+      "intro": "Siri ya pochi imegawanywa katika sehemu tatu. Chagua hali kuona sehemu zipi mbili zinazoirejesha. Mwendeshaji hudhibiti moja tu.",
+      "device": {
+        "title": "Kifaa chako",
+        "text": "Huhifadhiwa na kivinjari au programu yako, kamwe si huduma."
+      },
+      "protected": {
+        "title": "Huduma salama",
+        "text": "Huhifadhiwa ikiwa imesimbwa na hutumika tu ndani ya maunzi salama yaliyoidhinishwa."
+      },
+      "recovery": {
+        "title": "Nakala yako ya urejeshaji",
+        "text": "Imelindwa kwa nenosiri au nakala ya wingu binafsi unayodhibiti."
+      },
+      "used": "Sehemu inatumika",
+      "notNeeded": "Haihitajiki",
+      "threshold": "Sehemu 2 zozote kati ya 3",
+      "scenarios": {
+        "everyday": {
+          "tab": "Matumizi ya kawaida",
+          "title": "Kifaa chako na maunzi salama husaini pamoja",
+          "text": "Pochi huundwa tena kwa muda ndani ya kumbukumbu salama, hulinganishwa na anwani yake ya umma, hutumika kusaini, kisha hufutwa."
+        },
+        "recover": {
+          "tab": "Kifaa kimepotea",
+          "title": "Nakala ya urejeshaji inachukua nafasi ya kifaa kilichopotea",
+          "text": "Huduma salama huunganisha sehemu yake na sehemu yako ya urejeshaji, hutengeneza sehemu mpya na inaweza kusajili kifaa mbadala. Sehemu ya kifaa cha zamani haiwezi tena kufanya kazi na huduma."
+        },
+        "leave": {
+          "tab": "Ondoka kwenye huduma",
+          "title": "Sehemu zako mbili huzuia kufungiwa",
+          "text": "Sehemu za kifaa na urejeshaji zinaunda wingi. Unaweza kuunda pochi tena bila mwendeshaji, au kuihamisha kupitia huduma wakati bado inapatikana."
+        }
       }
     },
     "walletGate": {
       "heading": "Kwa nini seva haiwezi kutumia pesa za pochi",
-      "intro": "Jaribu maombi yote mawili. Tokeni inaweza kuonyesha anwani ya umma, lakini haitoshi kutengeneza saini ya pochi.",
+      "intro": "Jaribu maombi yote mawili. Tokeni inaweza kuonyesha anwani ya umma, lakini kutumia pesa kunahitaji pia uthibitisho wa kifaa na sehemu yake ya pochi.",
       "serverAttempt": "PDS inaomba peke yake",
-      "userAttempt": "Mtumiaji anaidhinisha kwanza",
+      "userAttempt": "Uthibitisho + sehemu yako",
       "serverNode": "Ombi la PDS",
-      "userNode": "Ombi lililosainiwa na mtumiaji",
-      "teeNode": "Ufunguo wa pochi wa TEE",
+      "userNode": "Uthibitisho + sehemu ya kifaa",
+      "teeNode": "Pochi salama",
       "approved": "Saini imeidhinishwa",
       "denied": "Ombi limekataliwa",
-      "approvedDesc": "Kivinjari husaini ombi fupi kwa ufunguo uliosajiliwa. TEE hukagua uthibitisho, muda na namba ya matumizi moja kabla ya kutumia ufunguo wa pochi.",
-      "deniedDesc": "Tokeni ya PDS pekee haitoshi. Mtia saini anakataa ombi kwa sababu halina uthibitisho kutoka kifaa kilichosajiliwa."
+      "approvedDesc": "Kifaa husaini ombi fupi na kutuma sehemu yake iliyosimbwa kwa maunzi salama. Mtia saini hukagua uthibitisho, muda na namba ya matumizi moja kabla ya kuunda na kutumia pochi.",
+      "deniedDesc": "Tokeni ya PDS pekee haitoshi. Mtia saini salama ana sehemu moja tu na hukataa ombi lisilo na uthibitisho wa kifaa na sehemu halisi ya pili."
     },
     "proof": {
       "heading": "Programu inaweza kumwamini vipi mtia saini?",
@@ -2379,7 +2416,7 @@
       },
       "recovery": {
         "title": "Nakala na kurudia",
-        "text": "Idhini za pochi na namba za matumizi moja zinahitaji nakala makini. Kurudisha hifadhi nyuma kunaweza kufungua maombi ya zamani, lakini hakuwezi kuunda idhini mpya."
+        "text": "Lazima ulinde nakala yako ya urejeshaji, na huduma ihifadhi nakala ya sehemu yake iliyosimbwa. Kurudisha hifadhi nyuma pia kunaweza kufungua ombi la zamani lililoidhinishwa, lakini hakuwezi kuunda idhini mpya."
       }
     },
     "more": {

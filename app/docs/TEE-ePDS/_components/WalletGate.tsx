@@ -7,9 +7,9 @@ import { CheckCircle2Icon, ShieldXIcon, UserRoundCheckIcon, WalletCardsIcon } fr
 
 type Attempt = "server" | "user";
 
-// Shows the wallet's extra user check. A server token can ask for public wallet
-// information, but only a request signed by the user's enrolled browser key can
-// unlock a wallet signature.
+// Shows the wallet's two user-held checks. A server token can ask for public
+// information, but spending needs both a request signed by the enrolled device
+// and a genuine second wallet share.
 export function WalletGate() {
   const t = useTranslations("common.teeEpds.walletGate");
   const [attempt, setAttempt] = useState<Attempt>("server");

@@ -7,6 +7,7 @@ import { localizedAlternates } from "@/app/_lib/seo-metadata";
 import { KeyBoundaryGraph } from "./_components/KeyBoundaryGraph";
 import { SigningJourney } from "./_components/SigningJourney";
 import { WalletGate } from "./_components/WalletGate";
+import { WalletRecovery } from "./_components/WalletRecovery";
 
 const GITHUB_URL = "https://github.com/hypercerts-org/ePDS";
 const DESIGN_URL = `${GITHUB_URL}/blob/feat/tee-signer/docs/design/tee-signer.md`;
@@ -22,7 +23,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 // An interactive plain-language guide to the optional TEE signer in ePDS.
 // Each graph reveals one boundary: where keys live, how a record is signed,
-// and why a wallet action needs approval from the user's browser.
+// how wallet recovery works, and why spending needs the user's device share.
 export default async function TeeEpdsDocsPage() {
   const t = await getTranslations("common.teeEpds");
 
@@ -56,6 +57,7 @@ export default async function TeeEpdsDocsPage() {
       <Section heading={t("what.heading")} intro={t("what.intro")}>
         <p className="max-w-prose text-[14.5px] leading-relaxed text-muted-foreground">{t("what.p1")}</p>
         <p className="mt-4 max-w-prose text-[14.5px] leading-relaxed text-muted-foreground">{t("what.p2")}</p>
+        <p className="mt-4 max-w-prose text-[14.5px] leading-relaxed text-muted-foreground">{t("what.p3")}</p>
       </Section>
 
       <Section heading={t("boundary.heading")} intro={t("boundary.intro")}>
@@ -71,6 +73,10 @@ export default async function TeeEpdsDocsPage() {
           <PathCard number="01" title={t("separate.repo.title")} text={t("separate.repo.text")} />
           <PathCard number="02" title={t("separate.wallet.title")} text={t("separate.wallet.text")} />
         </div>
+      </Section>
+
+      <Section heading={t("shares.heading")} intro={t("shares.intro")}>
+        <WalletRecovery />
       </Section>
 
       <Section heading={t("walletGate.heading")} intro={t("walletGate.intro")}>
