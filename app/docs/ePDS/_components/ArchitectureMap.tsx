@@ -4,21 +4,19 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { AnimatePresence, motion } from "framer-motion";
 
-type NodeId = "app" | "pds" | "auth" | "email" | "db" | "tee";
+type NodeId = "app" | "pds" | "auth" | "email" | "db";
 
-const NODES: { id: NodeId; x: number; y: number; optional?: boolean }[] = [
+const NODES: { id: NodeId; x: number; y: number }[] = [
   { id: "app", x: 130, y: 80 },
   { id: "pds", x: 380, y: 80 },
-  { id: "tee", x: 630, y: 80, optional: true },
   { id: "email", x: 130, y: 220 },
   { id: "auth", x: 380, y: 220 },
-  { id: "db", x: 630, y: 220 },
+  { id: "db", x: 630, y: 150 },
 ];
 
 const EDGES: [NodeId, NodeId][] = [
   ["app", "pds"],
   ["pds", "auth"],
-  ["pds", "tee"],
   ["pds", "db"],
   ["auth", "email"],
   ["auth", "db"],
@@ -80,7 +78,6 @@ export function ArchitectureMap() {
                 fill={active ? "var(--primary)" : "var(--background)"}
                 stroke={active ? "var(--primary)" : "var(--border)"}
                 strokeWidth={active ? 1.6 : 1}
-                strokeDasharray={node.optional && !active ? "5 4" : undefined}
               />
               <text
                 x={node.x}
@@ -96,7 +93,6 @@ export function ArchitectureMap() {
                 {node.id === "auth" && t("nodes.auth.name")}
                 {node.id === "email" && t("nodes.email.name")}
                 {node.id === "db" && t("nodes.db.name")}
-                {node.id === "tee" && t("nodes.tee.name")}
               </text>
             </g>
           );
@@ -119,7 +115,6 @@ export function ArchitectureMap() {
               {selected === "auth" && t("nodes.auth.name")}
               {selected === "email" && t("nodes.email.name")}
               {selected === "db" && t("nodes.db.name")}
-              {selected === "tee" && t("nodes.tee.name")}
             </div>
             <p className="m-0 text-[13.5px] leading-relaxed text-muted-foreground">
               {selected === "app" && t("nodes.app.desc")}
@@ -127,7 +122,6 @@ export function ArchitectureMap() {
               {selected === "auth" && t("nodes.auth.desc")}
               {selected === "email" && t("nodes.email.desc")}
               {selected === "db" && t("nodes.db.desc")}
-              {selected === "tee" && t("nodes.tee.desc")}
             </p>
           </motion.div>
         </AnimatePresence>

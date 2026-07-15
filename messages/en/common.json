@@ -1908,22 +1908,8 @@
         "db": {
           "name": "Shared database",
           "desc": "A small database both services share. It keeps track of login sessions and codes, nothing more."
-        },
-        "tee": {
-          "name": "Key safe",
-          "desc": "An optional signer that keeps signing keys inside a secure enclave, a sealed vault that even the server operator cannot open."
         }
       }
-    },
-    "vault": {
-      "heading": "The key safe",
-      "intro": "Every account has a signing key that signs your records, like a personal wax seal. ePDS can keep that key inside a secure enclave. The key is born in there and never comes out. Try it:",
-      "signButton": "Ask for a signature",
-      "stealButton": "Try to take the key",
-      "idle": "The key sits inside the safe.",
-      "signing": "The record goes in and gets signed inside the safe...",
-      "signed": "Signature delivered. The key never left the safe.",
-      "denied": "No. Not even the server operator can take the key out."
     },
     "more": {
       "heading": "Keep exploring",

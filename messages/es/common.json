@@ -1908,22 +1908,8 @@
         "db": {
           "name": "Base de datos compartida",
           "desc": "Una pequeña base de datos que ambos servicios comparten. Registra sesiones y códigos de acceso, nada más."
-        },
-        "tee": {
-          "name": "Caja fuerte de claves",
-          "desc": "Un firmante opcional que guarda las claves de firma dentro de un enclave seguro, una bóveda sellada que ni siquiera el operador del servidor puede abrir."
         }
       }
-    },
-    "vault": {
-      "heading": "La caja fuerte de claves",
-      "intro": "Cada cuenta tiene una clave que firma tus registros, como un sello de lacre personal. ePDS puede guardar esa clave dentro de un enclave seguro. La clave nace ahí dentro y nunca sale. Pruébalo:",
-      "signButton": "Pedir una firma",
-      "stealButton": "Intentar sacar la clave",
-      "idle": "La clave descansa dentro de la caja fuerte.",
-      "signing": "El registro entra y se firma dentro de la caja fuerte...",
-      "signed": "Firma entregada. La clave nunca salió de la caja.",
-      "denied": "No. Ni siquiera el operador del servidor puede sacar la clave."
     },
     "more": {
       "heading": "Sigue explorando",

@@ -1908,22 +1908,8 @@
         "db": {
           "name": "Basis data bersama",
           "desc": "Basis data kecil yang dipakai kedua layanan. Ia mencatat sesi dan kode masuk, tidak lebih."
-        },
-        "tee": {
-          "name": "Brankas kunci",
-          "desc": "Penandatangan opsional yang menyimpan kunci tanda tangan di dalam enklave aman, brankas tersegel yang bahkan operator server tidak bisa buka."
         }
       }
-    },
-    "vault": {
-      "heading": "Brankas kunci",
-      "intro": "Setiap akun punya kunci yang menandatangani catatan Anda, seperti stempel lilin pribadi. ePDS bisa menyimpan kunci itu di dalam enklave aman. Kunci lahir di dalam dan tidak pernah keluar. Coba saja:",
-      "signButton": "Minta tanda tangan",
-      "stealButton": "Coba ambil kuncinya",
-      "idle": "Kunci itu diam di dalam brankas.",
-      "signing": "Catatan masuk dan ditandatangani di dalam brankas...",
-      "signed": "Tanda tangan terkirim. Kuncinya tidak pernah meninggalkan brankas.",
-      "denied": "Tidak bisa. Bahkan operator server pun tidak bisa mengeluarkan kuncinya."
     },
     "more": {
       "heading": "Terus jelajahi",

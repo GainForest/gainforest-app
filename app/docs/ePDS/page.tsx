@@ -6,7 +6,6 @@ import { LogoMark } from "@/app/_components/Logo";
 import { localizedAlternates } from "@/app/_lib/seo-metadata";
 import { ArchitectureMap } from "./_components/ArchitectureMap";
 import { CompareLogin } from "./_components/CompareLogin";
-import { KeyVault } from "./_components/KeyVault";
 import { LoginJourney } from "./_components/LoginJourney";
 
 const GITHUB_URL = "https://github.com/hypercerts-org/ePDS";
@@ -55,10 +54,6 @@ export default async function EpdsDocsPage() {
 
       <Section heading={t("map.heading")} intro={t("map.intro")}>
         <ArchitectureMap />
-      </Section>
-
-      <Section heading={t("vault.heading")} intro={t("vault.intro")}>
-        <KeyVault />
       </Section>
 
       <section className="mt-16 border-t border-border/60 pt-10">

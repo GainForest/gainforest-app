@@ -1908,22 +1908,8 @@
         "db": {
           "name": "Hifadhidata ya pamoja",
           "desc": "Hifadhidata ndogo inayotumiwa na huduma zote mbili. Inafuatilia vipindi vya kuingia na misimbo, hakuna zaidi."
-        },
-        "tee": {
-          "name": "Sefu ya funguo",
-          "desc": "Mtia saini wa hiari anayehifadhi funguo za kutia saini ndani ya enklevu salama, sefu iliyofungwa ambayo hata mwendeshaji wa seva hawezi kuifungua."
         }
       }
-    },
-    "vault": {
-      "heading": "Sefu ya funguo",
-      "intro": "Kila akaunti ina ufunguo unaotia saini rekodi zako, kama muhuri wako binafsi wa nta. ePDS inaweza kuhifadhi ufunguo huo ndani ya enklevu salama. Ufunguo huzaliwa humo ndani na hautoki kamwe. Jaribu:",
-      "signButton": "Omba saini",
-      "stealButton": "Jaribu kuchukua ufunguo",
-      "idle": "Ufunguo umekaa ndani ya sefu.",
-      "signing": "Rekodi inaingia na kutiwa saini ndani ya sefu...",
-      "signed": "Saini imetolewa. Ufunguo haukutoka sefuni kamwe.",
-      "denied": "Hapana. Hata mwendeshaji wa seva hawezi kuutoa ufunguo."
     },
     "more": {
       "heading": "Endelea kuchunguza",

@@ -1908,22 +1908,8 @@
         "db": {
           "name": "Banco de dados compartilhado",
           "desc": "Um pequeno banco de dados que os dois serviços compartilham. Guarda sessões e códigos de login, nada mais."
-        },
-        "tee": {
-          "name": "Cofre de chaves",
-          "desc": "Um assinador opcional que mantém as chaves de assinatura dentro de um enclave seguro, um cofre lacrado que nem o operador do servidor consegue abrir."
         }
       }
-    },
-    "vault": {
-      "heading": "O cofre de chaves",
-      "intro": "Cada conta tem uma chave que assina seus registros, como um selo de cera pessoal. O ePDS pode guardar essa chave dentro de um enclave seguro. A chave nasce lá dentro e nunca sai. Experimente:",
-      "signButton": "Pedir uma assinatura",
-      "stealButton": "Tentar pegar a chave",
-      "idle": "A chave descansa dentro do cofre.",
-      "signing": "O registro entra e é assinado dentro do cofre...",
-      "signed": "Assinatura entregue. A chave nunca saiu do cofre.",
-      "denied": "Não. Nem o operador do servidor consegue tirar a chave."
     },
     "more": {
       "heading": "Continue explorando",
