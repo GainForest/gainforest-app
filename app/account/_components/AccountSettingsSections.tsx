@@ -1428,7 +1428,7 @@ function DangerZoneSection({ handle }: { handle: string | null }) {
 
 export function AccountSettingsSections({ did, handle }: { did: string; handle?: string | null }) {
   return (
-    <div className="mx-auto mt-8 mb-20 space-y-8">
+    <div className="space-y-8">
       {handle ? <HandleSection did={did} handle={handle} /> : null}
       <PasswordSection did={did} />
       <BlueskySection did={did} />

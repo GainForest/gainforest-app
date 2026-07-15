@@ -821,16 +821,6 @@ export function ObservationsClient({
 
   return (
     <div className="bg-background pb-4">
-      <div className="mx-auto mt-5 max-w-6xl px-6">
-        <INaturalistProjectSyncPanel
-          target={target}
-          projects={projectOptions}
-          selectedProject={activeProject}
-          disabledReason={createPermission.reason}
-          onSynced={() => router.refresh()}
-        />
-      </div>
-
       {!isEmpty ? (
         <div className="mx-auto mt-5 max-w-6xl px-6">
           <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-muted px-4 py-3">

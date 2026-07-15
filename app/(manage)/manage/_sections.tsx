@@ -34,6 +34,7 @@ import { UsersIcon } from "lucide-react";
 import Container from "@/components/ui/container";
 import { ManageOverview } from "./_components/ManageOverview";
 import { ManageDashboard } from "./_components/ManageDashboard";
+import { INaturalistSettingsSection } from "./settings/_components/INaturalistSettingsSection";
 import type { CgsRole } from "./_lib/cgs";
 import { ManageProjectsClient } from "./projects/_components/ManageProjectsClient";
 import { ProjectGalleryManagerClient } from "./projects/[rkey]/gallery/_components/ProjectGalleryManagerClient";
@@ -295,6 +296,9 @@ export async function NewBumicertSection({ target, searchParams }: { target: Man
 
 export async function SettingsSection({ target }: { target: ManageTarget }) {
   const t = await getTranslations("upload.settings");
+  const managedProjects = await fetchProjectsByDid(target.did, 500).then((page) => page.records).catch(() => []);
+  const inaturalistProjects = managedProjects.map((project) => ({ projectUri: project.atUri, title: project.title }));
+  const createPermission = canCreateRecord(target);
   if (target.kind === "group") {
     // Members + Data Council live on the profile's Members tab; repeating them
     // here made Settings a duplicate of that tab. Organization settings now
@@ -315,9 +319,12 @@ export async function SettingsSection({ target }: { target: ManageTarget }) {
             <Link href={accountMembersPath(target.identifier || target.did)}>{t("openMembers")}</Link>
           </Button>
         </div>
-        <div className="space-y-3">
-          <p className="text-sm text-muted-foreground">{t("orgAgentKeysHint")}</p>
-          <AgentKeysSection />
+        <div className="space-y-8">
+          <INaturalistSettingsSection target={target} projects={inaturalistProjects} disabledReason={createPermission.reason} />
+          <div className="space-y-3">
+            <p className="text-sm text-muted-foreground">{t("orgAgentKeysHint")}</p>
+            <AgentKeysSection />
+          </div>
         </div>
       </Container>
     );
@@ -335,7 +342,10 @@ export async function SettingsSection({ target }: { target: ManageTarget }) {
         <h1 className="text-2xl font-medium">{t("personalTitle")}</h1>
         <p className="mt-1 text-sm text-muted-foreground">{t("personalDescription")}</p>
       </div>
-      <AccountSettingsSections did={target.did} handle={currentHandle} />
+      <div className="mx-auto mt-8 mb-20 space-y-8">
+        <INaturalistSettingsSection target={target} projects={inaturalistProjects} disabledReason={createPermission.reason} />
+        <AccountSettingsSections did={target.did} handle={currentHandle} />
+      </div>
     </Container>
   );
 }
