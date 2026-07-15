@@ -1231,7 +1231,9 @@
     "epdsLinkTitle": "Jinsi ePDS inavyofanya kazi",
     "epdsLinkDesc": "Ziara shirikishi ya mfumo wa kuingia na seva zilizo nyuma ya rekodi hizi.",
     "cgsLinkTitle": "Jinsi akaunti za kikundi zinavyofanya kazi",
-    "cgsLinkDesc": "Ziara shirikishi ya huduma ya ulinzi inayowezesha timu nzima kushiriki akaunti moja."
+    "cgsLinkDesc": "Ziara shirikishi ya huduma ya ulinzi inayowezesha timu nzima kushiriki akaunti moja.",
+    "atprotoLinkTitle": "Jinsi AT Protocol inavyofanya kazi",
+    "atprotoLinkDesc": "Ziara shirikishi ya mtandao wazi ambao yote haya yamejengwa juu yake."
   },
   "taina": {
     "meta": {
@@ -1920,7 +1922,9 @@
       "githubTitle": "ePDS kwenye GitHub",
       "githubDesc": "Msimbo wote wa chanzo, wazi kwa yeyote kusoma, kuendesha, na kuboresha.",
       "cgsTitle": "Jinsi akaunti za kikundi zinavyofanya kazi",
-      "cgsDesc": "Huduma ya ulinzi inayowezesha timu nzima kushiriki akaunti moja ya kikundi kwa usalama."
+      "cgsDesc": "Huduma ya ulinzi inayowezesha timu nzima kushiriki akaunti moja ya kikundi kwa usalama.",
+      "atprotoTitle": "Jinsi AT Protocol inavyofanya kazi",
+      "atprotoDesc": "Ziara shirikishi ya mtandao wazi ambao yote haya yamejengwa juu yake."
     }
   },
   "cgs": {
@@ -2108,7 +2112,146 @@
       "epdsTitle": "Jinsi ePDS inavyofanya kazi",
       "epdsDesc": "Mlango wa mbele wa kirafiki unaowaingiza watu kwa barua pepe tu.",
       "githubTitle": "CGS kwenye GitHub",
-      "githubDesc": "Msimbo kamili wa chanzo wa huduma ya vikundi, wazi kwa yeyote kusoma, kuendesha na kuboresha."
+      "githubDesc": "Msimbo kamili wa chanzo wa huduma ya vikundi, wazi kwa yeyote kusoma, kuendesha na kuboresha.",
+      "atprotoTitle": "Jinsi AT Protocol inavyofanya kazi",
+      "atprotoDesc": "Ziara shirikishi ya mtandao wazi ambao yote haya yamejengwa juu yake."
+    }
+  },
+  "atproto": {
+    "metaTitle": "Jinsi AT Protocol inavyofanya kazi",
+    "metaDescription": "Ziara shirikishi na rafiki ya AT Protocol, mtandao wazi ambao GainForest imejengwa juu yake. Ona jinsi utambulisho, rekodi na programu zinavyoshikamana.",
+    "kicker": "AT Protocol",
+    "title": "Jinsi AT Protocol inavyofanya kazi",
+    "lead": "GainForest haihifadhi data yako kwenye hifadhidata ya faragha. Kila kitu kinaishi kwenye AT Protocol, mtandao wazi ambapo watu wanamiliki data zao na programu nyingi zinazishiriki. Ukurasa huu unaeleza mawazo makuu kwa maneno rahisi, pamoja na vichezeo vidogo vya kujaribu.",
+    "whatIs": {
+      "heading": "AT Protocol ni nini?",
+      "p1": "AT Protocol, kwa kifupi atproto, ni mpango wa kujenga programu za kijamii ambapo data ni mali ya watu, si ya majukwaa. Kila mtu na kila shirika lina akaunti, na kila akaunti ina seva ya data inayohifadhi rekodi zake. Chapisho, kupenda, kufuata, uchunguzi wa bioanuwai: kila kimoja ni rekodi ndogo iliyosainiwa.",
+      "p2": "Programu kama GainForest au Bluesky zinasoma rekodi hizo na kuzigeuza kuwa mipasho, ramani na wasifu. Rekodi zinabaki wazi na zinaweza kuhamishwa, hivyo hakuna kampuni moja inayoweza kukufunga ndani. Programu moja ikifungwa, jina lako na data yako vinabaki salama."
+    },
+    "naming": {
+      "heading": "Jina, si mahali",
+      "intro": "Kwenye wavuti ya zamani, kiungo kinaelekeza mahali: seva moja, mahali fulani. Kwenye atproto, kiungo kinaelekeza kwa mtu. Jaribu kuvunja vyote viwili.",
+      "linkChip": "kiungo",
+      "web": {
+        "title": "Kiungo cha mahali",
+        "serverLabel": "seva moja",
+        "action": "Zima seva",
+        "undo": "Irudishe",
+        "okCaption": "Kiungo hiki kinafanya kazi tu wakati seva hiyo moja iko mtandaoni.",
+        "downCaption": "Seva imepotea, na chapisho limekufa pamoja nayo. Kila nakala ya kiungo hiki sasa imevunjika.",
+        "aria": "Mchoro wa kiungo cha wavuti kinachoelekeza kwenye seva moja"
+      },
+      "id": {
+        "title": "Kiungo cha mtu",
+        "hostA": "nyumba ya kale",
+        "hostB": "nyumba mpya",
+        "action": "Mhamishe Maria nyumba mpya",
+        "undo": "Mrudishe",
+        "okCaption": "Kiungo kinataja Maria, si mashine. Mtandao unatafuta mahali data yake inaishi sasa hivi.",
+        "movedCaption": "Maria amehama, na kiungo hakikubadilika. Hakuna cha kusasisha, hakuna kilichovunjika.",
+        "aria": "Mchoro wa kiungo cha atproto kinachoelekeza kwa mtu anayeweza kubadilisha seva"
+      }
+    },
+    "records": {
+      "heading": "Kila kitu ni rekodi",
+      "intro": "Kila akaunti inahifadhi data yake kwenye hazina: folda ya wazi ya rekodi ndogo zilizosainiwa. Rekodi zinaweza kuelekeza rekodi za akaunti nyingine. Gusa moja kuisoma.",
+      "aria": "Mchoro wa hazina mbili zenye rekodi zinazounganishwa",
+      "repoOfMaria": "Hazina ya Maria",
+      "repoOfKai": "Hazina ya Kai",
+      "nodes": {
+        "profile": "wasifu",
+        "post": "chapisho: naona ndege",
+        "observation": "uchunguzi + picha",
+        "like": "penda",
+        "follow": "fuata"
+      },
+      "details": {
+        "mProfile": "Rekodi ya wasifu wa Maria. Jina lake na maelezo yake yanaishi hapa, ndani ya hazina yake mwenyewe.",
+        "mPost": "Chapisho la Maria. Linaelekeza kwenye rekodi yake ya uchunguzi kama ushahidi, likitumia anwani ya rekodi hiyo.",
+        "mObs": "Uchunguzi wa bioanuwai wenye picha. GainForest inasoma rekodi kama hii kujenga ramani na kurasa za miradi.",
+        "kProfile": "Rekodi ya wasifu wa Kai, ndani ya hazina yake mwenyewe.",
+        "kLike": "Kupenda pia ni rekodi. Inaishi kwenye hazina ya Kai na inaelekeza kwenye chapisho la Maria kwa anwani yake. Hakuna aliyehitaji ruhusa kuunda kiungo hicho.",
+        "kFollow": "Kai anamfuata Maria. Kufuata kunamlenga Maria mwenyewe, hivyo kunaendelea kufanya kazi popote data yake inapoishi."
+      },
+      "caption": "Anwani zinaanza na at:// na zinataja akaunti, aina ya rekodi na ufunguo. Programu yoyote kwenye mtandao inaweza kuzifuata."
+    },
+    "flow": {
+      "heading": "Rekodi moja, kila programu",
+      "intro": "Mtu anapochapisha, seva yake binafsi ya data (PDS) inatangaza rekodi mpya. Kituo cha kupokezana kinakusanya matangazo ya mtandao mzima kuwa mkondo mmoja mkubwa, na kila programu inausikiliza. Gusa mtu ili achapishe.",
+      "aria": "Mchoro wa rekodi zikitiririka kutoka seva binafsi kupitia kituo hadi programu",
+      "publishAs": "Chapisha kama {name}",
+      "pdsLabel": "PDS",
+      "relayLabel": "kituo",
+      "appForest": "App ya msitu",
+      "appFeed": "App ya mipasho",
+      "received": "{count} zimepokelewa",
+      "caption": "Programu zote mbili zinapokea rekodi ileile wakati uleule. Programu mpya inaweza kujiunga na mkondo kesho na kujenga kitu ambacho hakuna aliyekifikiria, bila kuomba ruhusa."
+    },
+    "move": {
+      "heading": "Unaweza kuhama wakati wowote",
+      "intro": "Jina lako na data yako havijagandishwa kwenye kampuni yoyote. Seva yako ikiwa polepole, yenye tamaa au ikipotea, unafunga virago na kuondoka. Jaribu.",
+      "hostA": "Seva ya zamani",
+      "hostB": "Seva mpya",
+      "emptyHost": "tupu",
+      "suitcaseRecords": "Rekodi 128",
+      "suitcaseFollowers": "Wafuasi 42",
+      "moveAction": "Hamia seva mpya",
+      "moveBack": "Rudi nyuma",
+      "checkName": "Jina lilelile",
+      "checkRecords": "Rekodi zote zipo",
+      "checkFollowers": "Wafuasi wote wapo",
+      "checkLinks": "Viungo vyote vinafanya kazi",
+      "caption": "Hii inaitwa njia ya kutoka ya kuaminika. Seva lazima ziwatendee watu vizuri, kwa sababu kuondoka ni rahisi. Wengi hawahami kamwe, lakini kila mtu ananufaika na mlango ulio wazi."
+    },
+    "roots": {
+      "heading": "Mawazo matatu ya zamani, mtandao mmoja",
+      "intro": "Atproto haikutokea hewani. Inachanganya sehemu bora za mawimbi matatu ya awali ya intaneti.",
+      "web": {
+        "title": "Kutoka kwenye wavuti",
+        "text": "Yeyote anaweza kujiunga na kuchapisha bila kuomba ruhusa, na kila kitu kinaweza kuunganishwa na kingine."
+      },
+      "p2p": {
+        "title": "Kutoka rika-kwa-rika",
+        "text": "Kila rekodi imesainiwa na mwandishi wake, hivyo inabaki ya kuaminika bila kujali kompyuta gani inayokukabidhi."
+      },
+      "scale": {
+        "title": "Kutoka majukwaa makubwa",
+        "text": "Mipasho ya haraka, utafutaji na hesabu vinatoka kwa huduma imara za kuorodhesha zinazosoma mkondo wa pamoja."
+      }
+    },
+    "trust": {
+      "heading": "Imani nyepesi",
+      "intro": "Kukagua kila sahihi kwenye kila ukurasa kungekuwa polepole. Atproto inachukua njia ya kati iliyotulia.",
+      "signed": {
+        "title": "Imesainiwa chanzoni",
+        "text": "Kila rekodi inabeba sahihi ya mwandishi wake, hivyo yeyote anaweza kuithibitisha inapohitajika."
+      },
+      "views": {
+        "title": "Kurasa za haraka",
+        "text": "Programu zinatoa kurasa zilizoandaliwa bila kukagua kila rekodi upya. Programu ikidanganya, rekodi asilia zilizosainiwa zitathibitisha."
+      },
+      "exit": {
+        "title": "Mlango wazi",
+        "text": "Data na utambulisho vinaweza kuhama wakati wowote, hivyo huduma inayokiuka inapoteza watumiaji wake. Hilo linamfanya kila mtu kuwa mwaminifu."
+      }
+    },
+    "lexicon": {
+      "heading": "Kuzungumza lugha moja",
+      "p1": "Ili programu zishiriki rekodi, lazima zikubaliane rekodi inaonekanaje. Atproto inafanya hivyo kwa miundo inayoitwa lexicons. Kila muundo una mmiliki wazi anayeweza kuuendeleza, na kila programu inaweza kuhakikisha rekodi inafuata sheria kikamilifu. Muundo ndio unaofanya kushiriki kufanikiwe.",
+      "p2": "GainForest inachapisha miundo yake wazi kwa uchunguzi wa bioanuwai, miradi, vyeti na michango. Programu nyingine yoyote inaweza kusoma rekodi zetu au kuandika rekodi zinazolingana. Unaweza kuvinjari yote kwenye mwongozo wa miundo ya data hapa chini."
+    },
+    "more": {
+      "heading": "Endelea kuchunguza",
+      "lexiconsTitle": "Miundo ya data",
+      "lexiconsDesc": "Kila muundo wa rekodi ambao GainForest inachapisha kwenye mtandao.",
+      "cgsTitle": "Jinsi akaunti za kikundi zinavyofanya kazi",
+      "cgsDesc": "Huduma ya ulinzi inayoruhusu timu nzima kushiriki akaunti moja kwa usalama.",
+      "epdsTitle": "Jinsi ePDS inavyofanya kazi",
+      "epdsDesc": "Mfumo wa kuingia na seva zilizo nyuma ya kila akaunti ya GainForest.",
+      "siteTitle": "atproto.com",
+      "siteDesc": "Tovuti rasmi ya itifaki, yenye maelezo kamili na miongozo kwa wajenzi.",
+      "ethosNote": "Mawazo mengi ya ukurasa huu yanatoka kwenye insha ya timu ya itifaki kuhusu falsafa yake ya usanifu:",
+      "ethosLink": "Ethos ya atproto"
     }
   }
 }

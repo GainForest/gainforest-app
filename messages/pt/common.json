@@ -1231,7 +1231,9 @@
     "epdsLinkTitle": "Como o ePDS funciona",
     "epdsLinkDesc": "Um tour interativo pelo sistema de login e pelos servidores por trás destes registros.",
     "cgsLinkTitle": "Como funcionam as contas de grupo",
-    "cgsLinkDesc": "Um passeio interativo pelo serviço guardião que permite que uma equipe inteira compartilhe uma conta."
+    "cgsLinkDesc": "Um passeio interativo pelo serviço guardião que permite que uma equipe inteira compartilhe uma conta.",
+    "atprotoLinkTitle": "Como funciona o AT Protocol",
+    "atprotoLinkDesc": "Um passeio interativo pela rede aberta sobre a qual tudo isto é construído."
   },
   "taina": {
     "meta": {
@@ -1920,7 +1922,9 @@
       "githubTitle": "ePDS no GitHub",
       "githubDesc": "Todo o código-fonte, aberto para qualquer pessoa ler, rodar e melhorar.",
       "cgsTitle": "Como funcionam as contas de grupo",
-      "cgsDesc": "O serviço guardião que permite que uma equipe inteira compartilhe uma conta de grupo com segurança."
+      "cgsDesc": "O serviço guardião que permite que uma equipe inteira compartilhe uma conta de grupo com segurança.",
+      "atprotoTitle": "Como funciona o AT Protocol",
+      "atprotoDesc": "Um passeio interativo pela rede aberta sobre a qual tudo isto é construído."
     }
   },
   "cgs": {
@@ -2108,7 +2112,146 @@
       "epdsTitle": "Como o ePDS funciona",
       "epdsDesc": "A porta de entrada amigável que conecta pessoas só com um e-mail.",
       "githubTitle": "CGS no GitHub",
-      "githubDesc": "O código-fonte completo do serviço de grupos, aberto para qualquer pessoa ler, rodar e melhorar."
+      "githubDesc": "O código-fonte completo do serviço de grupos, aberto para qualquer pessoa ler, rodar e melhorar.",
+      "atprotoTitle": "Como funciona o AT Protocol",
+      "atprotoDesc": "Um passeio interativo pela rede aberta sobre a qual tudo isto é construído."
+    }
+  },
+  "atproto": {
+    "metaTitle": "Como funciona o AT Protocol",
+    "metaDescription": "Um passeio interativo e amigável pelo AT Protocol, a rede aberta sobre a qual o GainForest é construído. Veja como identidades, registros e apps se encaixam.",
+    "kicker": "AT Protocol",
+    "title": "Como funciona o AT Protocol",
+    "lead": "O GainForest não guarda seus dados em um banco de dados privado. Tudo vive no AT Protocol, uma rede aberta onde as pessoas são donas dos seus dados e muitos apps os compartilham. Esta página explica as grandes ideias em palavras simples, com pequenos brinquedos para você experimentar.",
+    "whatIs": {
+      "heading": "O que é o AT Protocol?",
+      "p1": "O AT Protocol, atproto para encurtar, é uma receita para apps sociais em que os dados pertencem às pessoas, não às plataformas. Cada pessoa e cada organização tem uma conta, e cada conta tem um servidor de dados que guarda seus registros. Um post, uma curtida, um seguir, uma observação de biodiversidade: cada um é um pequeno registro assinado.",
+      "p2": "Apps como o GainForest ou o Bluesky leem esses registros e os transformam em feeds, mapas e perfis. Os registros ficam abertos e portáteis, então nenhuma empresa pode te prender. Se um app fechar, seu nome e seus dados sobrevivem."
+    },
+    "naming": {
+      "heading": "Um nome, não um lugar",
+      "intro": "Na web clássica, um link aponta para um lugar: um servidor em algum canto. No atproto, um link aponta para uma pessoa. Tente quebrar os dois.",
+      "linkChip": "link",
+      "web": {
+        "title": "Um link para um lugar",
+        "serverLabel": "um servidor",
+        "action": "Desligue o servidor",
+        "undo": "Ligue de novo",
+        "okCaption": "Este link só funciona enquanto esse único servidor estiver no ar.",
+        "downCaption": "O servidor sumiu, e o post morreu junto. Toda cópia deste link agora está quebrada.",
+        "aria": "Diagrama de um link da web apontando para um único servidor"
+      },
+      "id": {
+        "title": "Um link para uma pessoa",
+        "hostA": "casa velha",
+        "hostB": "casa nova",
+        "action": "Mude a Maria para uma casa nova",
+        "undo": "Traga ela de volta",
+        "okCaption": "O link nomeia a Maria, não uma máquina. A rede descobre onde os dados dela vivem agora.",
+        "movedCaption": "A Maria se mudou e o link não mudou. Nada para atualizar, nada quebrado.",
+        "aria": "Diagrama de um link atproto apontando para uma pessoa que pode trocar de servidor"
+      }
+    },
+    "records": {
+      "heading": "Tudo é um registro",
+      "intro": "Cada conta guarda seus dados em um repositório: uma pasta pública de pequenos registros assinados. Registros podem apontar para registros de outras contas. Toque em um para ler.",
+      "aria": "Diagrama de dois repositórios com registros ligados entre eles",
+      "repoOfMaria": "Repo da Maria",
+      "repoOfKai": "Repo do Kai",
+      "nodes": {
+        "profile": "perfil",
+        "post": "post: vi um tucano",
+        "observation": "observação + foto",
+        "like": "curtida",
+        "follow": "seguir"
+      },
+      "details": {
+        "mProfile": "O registro de perfil da Maria. O nome e a bio dela vivem aqui, dentro do repositório dela.",
+        "mPost": "Um post da Maria. Ele aponta para o registro de observação dela como evidência, usando o endereço desse registro.",
+        "mObs": "Uma observação de biodiversidade com foto. O GainForest lê registros como este para montar mapas e páginas de projeto.",
+        "kProfile": "O registro de perfil do Kai, dentro do repositório dele.",
+        "kLike": "Uma curtida também é um registro. Ela vive no repositório do Kai e aponta para o post da Maria pelo endereço. Ninguém precisou de permissão para criar esse link.",
+        "kFollow": "O Kai segue a Maria. O seguir aponta para a própria Maria, então continua funcionando onde quer que os dados dela vivam."
+      },
+      "caption": "Os endereços começam com at:// e nomeiam uma conta, um tipo de registro e uma chave. Qualquer app da rede pode segui-los."
+    },
+    "flow": {
+      "heading": "Um registro, todos os apps",
+      "intro": "Quando alguém publica, seu servidor pessoal de dados (o PDS) anuncia o novo registro. Um repetidor reúne os anúncios da rede inteira em um grande fluxo, e todos os apps escutam esse fluxo. Toque em uma pessoa para publicar.",
+      "aria": "Diagrama de registros fluindo dos servidores pessoais, por um repetidor, até os apps",
+      "publishAs": "Publicar como {name}",
+      "pdsLabel": "PDS",
+      "relayLabel": "repetidor",
+      "appForest": "App de floresta",
+      "appFeed": "App social",
+      "received": "{count} recebidos",
+      "caption": "Os dois apps recebem o mesmo registro no mesmo instante. Um app novo pode entrar no fluxo amanhã e construir algo que ninguém imaginou, sem pedir licença a ninguém."
+    },
+    "move": {
+      "heading": "Você sempre pode se mudar",
+      "intro": "Seu nome e seus dados não estão colados em nenhuma empresa. Se o seu servidor ficar lento, ganancioso ou sumir, você faz as malas e vai embora. Experimente.",
+      "hostA": "O servidor antigo",
+      "hostB": "O servidor novo",
+      "emptyHost": "vazio",
+      "suitcaseRecords": "128 registros",
+      "suitcaseFollowers": "42 seguidores",
+      "moveAction": "Mudar para o servidor novo",
+      "moveBack": "Voltar",
+      "checkName": "O mesmo nome",
+      "checkRecords": "Todos os registros",
+      "checkFollowers": "Todos os seguidores",
+      "checkLinks": "Todos os links funcionam",
+      "caption": "Isso se chama saída crível. Os servidores precisam tratar bem as pessoas, porque ir embora é fácil. A maioria nunca se muda, mas todo mundo ganha com a porta aberta."
+    },
+    "roots": {
+      "heading": "Três ideias antigas, uma rede",
+      "intro": "O atproto não surgiu do nada. Ele mistura o melhor de três ondas anteriores da internet.",
+      "web": {
+        "title": "Da web",
+        "text": "Qualquer um pode entrar e publicar sem pedir permissão, e tudo pode se ligar a todo o resto."
+      },
+      "p2p": {
+        "title": "Do peer-to-peer",
+        "text": "Cada registro é assinado pelo autor, então continua confiável não importa qual computador o entregue a você."
+      },
+      "scale": {
+        "title": "Das grandes plataformas",
+        "text": "Feeds rápidos, busca e contagens vêm de serviços de indexação fortes que leem o fluxo compartilhado."
+      }
+    },
+    "trust": {
+      "heading": "Confiança preguiçosa",
+      "intro": "Conferir cada assinatura em cada visualização seria lento. O atproto segue um caminho do meio, mais relaxado.",
+      "signed": {
+        "title": "Assinado na origem",
+        "text": "Cada registro carrega a assinatura do autor, então qualquer um pode verificá-lo quando importa."
+      },
+      "views": {
+        "title": "Visualizações rápidas",
+        "text": "Os apps servem visualizações prontas sem conferir de novo cada registro. Se um app mentisse, os originais assinados provariam."
+      },
+      "exit": {
+        "title": "A porta aberta",
+        "text": "Dados e identidade podem se mudar a qualquer momento, então um serviço que se comporta mal perde seus usuários. Isso mantém todo mundo honesto."
+      }
+    },
+    "lexicon": {
+      "heading": "Falar a mesma língua",
+      "p1": "Para que os apps compartilhem registros, eles precisam concordar sobre a forma de cada registro. O atproto faz isso com esquemas chamados lexicons. Cada esquema tem um dono claro que pode evoluí-lo, e todo app pode conferir se um registro segue as regras à risca. A estrutura é o que faz o compartilhamento funcionar.",
+      "p2": "O GainForest publica seus próprios esquemas abertos para observações de biodiversidade, projetos, certificados e doações. Qualquer outro app pode ler nossos registros ou escrever registros compatíveis. Você pode explorar todos no guia de esquemas de dados aqui embaixo."
+    },
+    "more": {
+      "heading": "Continue explorando",
+      "lexiconsTitle": "Esquemas de dados",
+      "lexiconsDesc": "Todos os formatos de registro que o GainForest publica na rede.",
+      "cgsTitle": "Como funcionam as contas de grupo",
+      "cgsDesc": "O serviço guardião que permite a uma equipe inteira compartilhar uma conta com segurança.",
+      "epdsTitle": "Como o ePDS funciona",
+      "epdsDesc": "O sistema de login e os servidores por trás de cada conta do GainForest.",
+      "siteTitle": "atproto.com",
+      "siteDesc": "O site oficial do protocolo, com as especificações completas e guias para quem constrói.",
+      "ethosNote": "Muitas ideias desta página vêm do ensaio da equipe do protocolo sobre sua filosofia de design:",
+      "ethosLink": "O ethos do atproto"
     }
   }
 }

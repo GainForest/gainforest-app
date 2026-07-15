@@ -1231,7 +1231,9 @@
     "epdsLinkTitle": "How ePDS works",
     "epdsLinkDesc": "An interactive tour of the login system and the servers behind these records.",
     "cgsLinkTitle": "How group accounts work",
-    "cgsLinkDesc": "An interactive tour of the guard service that lets a whole team share one account."
+    "cgsLinkDesc": "An interactive tour of the guard service that lets a whole team share one account.",
+    "atprotoLinkTitle": "How the AT Protocol works",
+    "atprotoLinkDesc": "An interactive tour of the open network everything here is built on."
   },
   "taina": {
     "meta": {
@@ -1920,7 +1922,9 @@
       "githubTitle": "ePDS on GitHub",
       "githubDesc": "The full source code, open for anyone to read, run, and improve.",
       "cgsTitle": "How group accounts work",
-      "cgsDesc": "The guard service that lets a whole team share one group account safely."
+      "cgsDesc": "The guard service that lets a whole team share one group account safely.",
+      "atprotoTitle": "How the AT Protocol works",
+      "atprotoDesc": "An interactive tour of the open network everything here is built on."
     }
   },
   "cgs": {
@@ -2108,7 +2112,146 @@
       "epdsTitle": "How ePDS works",
       "epdsDesc": "The friendly front door that signs people in with just an email.",
       "githubTitle": "CGS on GitHub",
-      "githubDesc": "The full source code of the group service, open for anyone to read, run, and improve."
+      "githubDesc": "The full source code of the group service, open for anyone to read, run, and improve.",
+      "atprotoTitle": "How the AT Protocol works",
+      "atprotoDesc": "An interactive tour of the open network everything here is built on."
+    }
+  },
+  "atproto": {
+    "metaTitle": "How the AT Protocol works",
+    "metaDescription": "A friendly interactive tour of the AT Protocol, the open network GainForest is built on. See how identities, records, and apps fit together.",
+    "kicker": "AT Protocol",
+    "title": "How the AT Protocol works",
+    "lead": "GainForest does not keep your data in a private database. Everything lives on the AT Protocol, an open network where people own their data and many apps share it. This page explains the big ideas in plain words, with small toys you can play with.",
+    "whatIs": {
+      "heading": "What is the AT Protocol?",
+      "p1": "The AT Protocol, atproto for short, is a recipe for social apps where data belongs to people instead of platforms. Every person and every organization has an account, and every account has a data server that stores its records. A post, a like, a follow, a biodiversity observation: each one is a small signed record.",
+      "p2": "Apps like GainForest or Bluesky read those records and turn them into feeds, maps, and profiles. The records stay open and portable, so no single company can lock you in. If one app shuts down, your name and your data survive."
+    },
+    "naming": {
+      "heading": "A name, not a place",
+      "intro": "On the classic web, a link points at a place: one server, somewhere. On atproto, a link points at a person. Try to break both.",
+      "linkChip": "link",
+      "web": {
+        "title": "A link to a place",
+        "serverLabel": "one server",
+        "action": "Shut the server down",
+        "undo": "Bring it back",
+        "okCaption": "This link only works while this one server stays online.",
+        "downCaption": "The server is gone, and the post died with it. Every copy of this link is now broken.",
+        "aria": "Diagram of a web link pointing at one server"
+      },
+      "id": {
+        "title": "A link to a person",
+        "hostA": "old home",
+        "hostB": "new home",
+        "action": "Move Maria to a new home",
+        "undo": "Move her back",
+        "okCaption": "The link names Maria, not a machine. The network looks up where her data lives right now.",
+        "movedCaption": "Maria moved, and the link did not change. Nothing to update, nothing broken.",
+        "aria": "Diagram of an atproto link pointing at a person who can change hosts"
+      }
+    },
+    "records": {
+      "heading": "Everything is a record",
+      "intro": "Each account keeps its data in a repository: a public folder of small signed records. Records can point at records in other accounts. Tap one to read it.",
+      "aria": "Diagram of two repositories with records linking across them",
+      "repoOfMaria": "Maria's repo",
+      "repoOfKai": "Kai's repo",
+      "nodes": {
+        "profile": "profile",
+        "post": "post: I saw a toucan",
+        "observation": "observation + photo",
+        "like": "like",
+        "follow": "follow"
+      },
+      "details": {
+        "mProfile": "Maria's profile record. Her name and bio live here, inside her own repository.",
+        "mPost": "A post by Maria. It points at her observation record as evidence, using that record's address.",
+        "mObs": "A biodiversity observation with a photo. GainForest reads records like this one to build maps and project pages.",
+        "kProfile": "Kai's profile record, inside his own repository.",
+        "kLike": "A like is a record too. It lives in Kai's repository and points at Maria's post by its address. No permission was needed to make that link.",
+        "kFollow": "Kai follows Maria. The follow points at Maria herself, so it keeps working wherever her data lives."
+      },
+      "caption": "Addresses start with at:// and name an account, a record type, and a key. Any app on the network can follow them."
+    },
+    "flow": {
+      "heading": "One record, every app",
+      "intro": "When someone publishes, their personal data server (the PDS) announces the new record. A relay collects announcements from the whole network into one big stream, and every app listens to it. Tap a person to publish.",
+      "aria": "Diagram of records flowing from personal data servers through a relay to apps",
+      "publishAs": "Publish as {name}",
+      "pdsLabel": "PDS",
+      "relayLabel": "relay",
+      "appForest": "Forest app",
+      "appFeed": "Feed app",
+      "received": "{count} received",
+      "caption": "Both apps receive the same record at the same moment. A new app can join the stream tomorrow and build something nobody imagined, without asking anyone."
+    },
+    "move": {
+      "heading": "You can always move out",
+      "intro": "Your name and your data are not glued to any company. If your host gets slow, greedy, or disappears, you pack up and go. Try it.",
+      "hostA": "The old host",
+      "hostB": "The new host",
+      "emptyHost": "empty",
+      "suitcaseRecords": "128 records",
+      "suitcaseFollowers": "42 followers",
+      "moveAction": "Move to the new host",
+      "moveBack": "Move back",
+      "checkName": "Same name",
+      "checkRecords": "All records kept",
+      "checkFollowers": "All followers kept",
+      "checkLinks": "All links still work",
+      "caption": "This is called credible exit. Hosts have to treat people well, because leaving is easy. Most people never move, but everyone benefits from the open door."
+    },
+    "roots": {
+      "heading": "Three old ideas, one network",
+      "intro": "Atproto did not appear out of nowhere. It mixes the best parts of three earlier waves of the internet.",
+      "web": {
+        "title": "From the web",
+        "text": "Anyone may join and publish without asking permission, and anything can link to anything else."
+      },
+      "p2p": {
+        "title": "From peer-to-peer",
+        "text": "Every record is signed by its author, so it stays trustworthy no matter which computer hands it to you."
+      },
+      "scale": {
+        "title": "From big platforms",
+        "text": "Fast feeds, search, and counts come from strong indexing services that read the shared stream."
+      }
+    },
+    "trust": {
+      "heading": "Lazy trust",
+      "intro": "Checking every signature on every page view would be slow. Atproto takes a relaxed middle path.",
+      "signed": {
+        "title": "Signed at the source",
+        "text": "Every record carries its author's signature, so anyone can verify it whenever it matters."
+      },
+      "views": {
+        "title": "Fast views",
+        "text": "Apps serve prepared views without rechecking each record. If an app ever lied, the signed originals would prove it."
+      },
+      "exit": {
+        "title": "The open door",
+        "text": "Data and identity can move at any time, so a service that misbehaves loses its users. That keeps everyone honest."
+      }
+    },
+    "lexicon": {
+      "heading": "Speaking the same language",
+      "p1": "For apps to share records, they must agree on what each record looks like. Atproto does this with schemas called lexicons. Every schema has a clear owner who can evolve it, and every app can check that a record follows the rules exactly. Structure is what makes the sharing work.",
+      "p2": "GainForest publishes its own open schemas for biodiversity observations, projects, certificates, and donations. Any other app can read our records or write compatible ones. You can browse them all in the data schemas guide below."
+    },
+    "more": {
+      "heading": "Keep exploring",
+      "lexiconsTitle": "Data schemas",
+      "lexiconsDesc": "Every record format GainForest publishes on the network.",
+      "cgsTitle": "How group accounts work",
+      "cgsDesc": "The guard service that lets a whole team share one account safely.",
+      "epdsTitle": "How ePDS works",
+      "epdsDesc": "The login system and the servers behind every GainForest account.",
+      "siteTitle": "atproto.com",
+      "siteDesc": "The official protocol site, with the full specs and guides for builders.",
+      "ethosNote": "Many ideas on this page come from the protocol team's essay on its design philosophy:",
+      "ethosLink": "The atproto ethos"
     }
   }
 }

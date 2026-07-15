@@ -28,6 +28,7 @@ const ROUTES: Array<{ path: string; priority: number; changeFrequency: ChangeFre
   { path: "/status", priority: 0.5, changeFrequency: "hourly" },
   { path: "/privacy", priority: 0.4, changeFrequency: "yearly" },
   { path: "/docs/lexicons", priority: 0.4, changeFrequency: "monthly" },
+  { path: "/docs/atproto", priority: 0.4, changeFrequency: "monthly" },
   { path: "/docs/cgs", priority: 0.4, changeFrequency: "monthly" },
 ];
 

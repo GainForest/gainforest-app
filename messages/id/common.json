@@ -1231,7 +1231,9 @@
     "epdsLinkTitle": "Cara kerja ePDS",
     "epdsLinkDesc": "Tur interaktif tentang sistem masuk dan server di balik catatan-catatan ini.",
     "cgsLinkTitle": "Cara kerja akun grup",
-    "cgsLinkDesc": "Tur interaktif tentang layanan penjaga yang memungkinkan satu tim berbagi satu akun."
+    "cgsLinkDesc": "Tur interaktif tentang layanan penjaga yang memungkinkan satu tim berbagi satu akun.",
+    "atprotoLinkTitle": "Cara kerja AT Protocol",
+    "atprotoLinkDesc": "Tur interaktif jaringan terbuka tempat semua ini dibangun."
   },
   "taina": {
     "meta": {
@@ -1920,7 +1922,9 @@
       "githubTitle": "ePDS di GitHub",
       "githubDesc": "Seluruh kode sumber, terbuka bagi siapa pun untuk dibaca, dijalankan, dan diperbaiki.",
       "cgsTitle": "Cara kerja akun grup",
-      "cgsDesc": "Layanan penjaga yang memungkinkan satu tim berbagi satu akun grup dengan aman."
+      "cgsDesc": "Layanan penjaga yang memungkinkan satu tim berbagi satu akun grup dengan aman.",
+      "atprotoTitle": "Cara kerja AT Protocol",
+      "atprotoDesc": "Tur interaktif jaringan terbuka tempat semua ini dibangun."
     }
   },
   "cgs": {
@@ -2108,7 +2112,146 @@
       "epdsTitle": "Cara kerja ePDS",
       "epdsDesc": "Pintu depan ramah yang memasukkan orang hanya dengan email.",
       "githubTitle": "CGS di GitHub",
-      "githubDesc": "Kode sumber lengkap layanan grup, terbuka untuk dibaca, dijalankan, dan diperbaiki siapa pun."
+      "githubDesc": "Kode sumber lengkap layanan grup, terbuka untuk dibaca, dijalankan, dan diperbaiki siapa pun.",
+      "atprotoTitle": "Cara kerja AT Protocol",
+      "atprotoDesc": "Tur interaktif jaringan terbuka tempat semua ini dibangun."
+    }
+  },
+  "atproto": {
+    "metaTitle": "Cara kerja AT Protocol",
+    "metaDescription": "Tur interaktif yang ramah tentang AT Protocol, jaringan terbuka tempat GainForest dibangun. Lihat bagaimana identitas, rekaman, dan aplikasi saling terhubung.",
+    "kicker": "AT Protocol",
+    "title": "Cara kerja AT Protocol",
+    "lead": "GainForest tidak menyimpan datamu di basis data tertutup. Semuanya hidup di AT Protocol, jaringan terbuka tempat orang memiliki datanya sendiri dan banyak aplikasi berbagi data itu. Halaman ini menjelaskan ide-ide besarnya dengan bahasa sederhana, lengkap dengan mainan kecil untuk dicoba.",
+    "whatIs": {
+      "heading": "Apa itu AT Protocol?",
+      "p1": "AT Protocol, disingkat atproto, adalah resep untuk membangun aplikasi sosial di mana data milik orang, bukan milik platform. Setiap orang dan setiap organisasi punya akun, dan setiap akun punya server data yang menyimpan rekamannya. Kiriman, suka, ikuti, observasi keanekaragaman hayati: masing-masing adalah rekaman kecil yang ditandatangani.",
+      "p2": "Aplikasi seperti GainForest atau Bluesky membaca rekaman itu dan mengubahnya menjadi linimasa, peta, dan profil. Rekaman tetap terbuka dan bisa dipindahkan, jadi tidak ada satu perusahaan pun yang bisa menguncimu. Kalau satu aplikasi tutup, nama dan datamu tetap selamat."
+    },
+    "naming": {
+      "heading": "Nama, bukan tempat",
+      "intro": "Di web klasik, tautan menunjuk ke tempat: satu server di suatu tempat. Di atproto, tautan menunjuk ke orang. Coba rusak keduanya.",
+      "linkChip": "tautan",
+      "web": {
+        "title": "Tautan ke tempat",
+        "serverLabel": "satu server",
+        "action": "Matikan servernya",
+        "undo": "Nyalakan lagi",
+        "okCaption": "Tautan ini hanya bekerja selama satu server itu tetap online.",
+        "downCaption": "Servernya hilang, dan kirimannya ikut mati. Semua salinan tautan ini sekarang rusak.",
+        "aria": "Diagram tautan web yang menunjuk ke satu server"
+      },
+      "id": {
+        "title": "Tautan ke orang",
+        "hostA": "rumah lama",
+        "hostB": "rumah baru",
+        "action": "Pindahkan Maria ke rumah baru",
+        "undo": "Pindahkan kembali",
+        "okCaption": "Tautan ini menyebut Maria, bukan mesin. Jaringan mencari tempat datanya tinggal saat ini.",
+        "movedCaption": "Maria pindah, dan tautannya tidak berubah. Tidak ada yang perlu diperbarui, tidak ada yang rusak.",
+        "aria": "Diagram tautan atproto yang menunjuk ke orang yang bisa berganti server"
+      }
+    },
+    "records": {
+      "heading": "Semuanya adalah rekaman",
+      "intro": "Setiap akun menyimpan datanya di repositori: folder publik berisi rekaman kecil yang ditandatangani. Rekaman bisa menunjuk ke rekaman di akun lain. Ketuk satu untuk membacanya.",
+      "aria": "Diagram dua repositori dengan rekaman yang saling terhubung",
+      "repoOfMaria": "Repo milik Maria",
+      "repoOfKai": "Repo milik Kai",
+      "nodes": {
+        "profile": "profil",
+        "post": "kiriman: lihat tukan",
+        "observation": "observasi + foto",
+        "like": "suka",
+        "follow": "ikuti"
+      },
+      "details": {
+        "mProfile": "Rekaman profil Maria. Nama dan bionya hidup di sini, di dalam repositorinya sendiri.",
+        "mPost": "Kiriman dari Maria. Kiriman ini menunjuk ke rekaman observasinya sebagai bukti, memakai alamat rekaman itu.",
+        "mObs": "Observasi keanekaragaman hayati dengan foto. GainForest membaca rekaman seperti ini untuk membangun peta dan halaman proyek.",
+        "kProfile": "Rekaman profil Kai, di dalam repositorinya sendiri.",
+        "kLike": "Suka juga sebuah rekaman. Ia hidup di repositori Kai dan menunjuk ke kiriman Maria lewat alamatnya. Tidak ada yang perlu izin untuk membuat tautan itu.",
+        "kFollow": "Kai mengikuti Maria. Rekaman ikuti menunjuk ke Maria sendiri, jadi tetap bekerja di mana pun datanya tinggal."
+      },
+      "caption": "Alamat dimulai dengan at:// dan menyebut akun, jenis rekaman, dan kunci. Aplikasi mana pun di jaringan bisa mengikutinya."
+    },
+    "flow": {
+      "heading": "Satu rekaman, semua aplikasi",
+      "intro": "Saat seseorang menerbitkan sesuatu, server data pribadinya (PDS) mengumumkan rekaman baru itu. Sebuah relai mengumpulkan pengumuman dari seluruh jaringan menjadi satu aliran besar, dan semua aplikasi mendengarkannya. Ketuk seseorang untuk menerbitkan.",
+      "aria": "Diagram rekaman yang mengalir dari server pribadi melalui relai ke aplikasi",
+      "publishAs": "Terbitkan sebagai {name}",
+      "pdsLabel": "PDS",
+      "relayLabel": "relai",
+      "appForest": "Aplikasi hutan",
+      "appFeed": "Aplikasi sosial",
+      "received": "{count} diterima",
+      "caption": "Kedua aplikasi menerima rekaman yang sama pada saat yang sama. Aplikasi baru bisa bergabung ke aliran itu besok dan membangun sesuatu yang tak terbayangkan, tanpa minta izin siapa pun."
+    },
+    "move": {
+      "heading": "Kamu selalu bisa pindah",
+      "intro": "Nama dan datamu tidak menempel di perusahaan mana pun. Kalau servermu jadi lambat, serakah, atau hilang, kamu tinggal berkemas dan pergi. Coba saja.",
+      "hostA": "Server lama",
+      "hostB": "Server baru",
+      "emptyHost": "kosong",
+      "suitcaseRecords": "128 rekaman",
+      "suitcaseFollowers": "42 pengikut",
+      "moveAction": "Pindah ke server baru",
+      "moveBack": "Pindah kembali",
+      "checkName": "Nama tetap sama",
+      "checkRecords": "Semua rekaman aman",
+      "checkFollowers": "Semua pengikut aman",
+      "checkLinks": "Semua tautan tetap bekerja",
+      "caption": "Ini disebut jalan keluar yang kredibel. Server harus memperlakukan orang dengan baik, karena pergi itu mudah. Kebanyakan orang tidak pernah pindah, tapi semua orang diuntungkan oleh pintu yang terbuka."
+    },
+    "roots": {
+      "heading": "Tiga ide lama, satu jaringan",
+      "intro": "Atproto tidak muncul begitu saja. Ia mencampur bagian terbaik dari tiga gelombang internet sebelumnya.",
+      "web": {
+        "title": "Dari web",
+        "text": "Siapa pun boleh bergabung dan menerbitkan tanpa minta izin, dan semuanya bisa saling tertaut."
+      },
+      "p2p": {
+        "title": "Dari peer-to-peer",
+        "text": "Setiap rekaman ditandatangani pembuatnya, jadi tetap tepercaya dari komputer mana pun ia datang."
+      },
+      "scale": {
+        "title": "Dari platform besar",
+        "text": "Linimasa cepat, pencarian, dan hitungan datang dari layanan pengindeksan kuat yang membaca aliran bersama."
+      }
+    },
+    "trust": {
+      "heading": "Kepercayaan santai",
+      "intro": "Memeriksa setiap tanda tangan di setiap tampilan akan lambat. Atproto mengambil jalan tengah yang santai.",
+      "signed": {
+        "title": "Ditandatangani di sumber",
+        "text": "Setiap rekaman membawa tanda tangan pembuatnya, jadi siapa pun bisa memeriksanya saat itu penting."
+      },
+      "views": {
+        "title": "Tampilan cepat",
+        "text": "Aplikasi menyajikan tampilan siap pakai tanpa memeriksa ulang tiap rekaman. Kalau aplikasi berbohong, rekaman asli yang ditandatangani akan membuktikannya."
+      },
+      "exit": {
+        "title": "Pintu terbuka",
+        "text": "Data dan identitas bisa pindah kapan saja, jadi layanan yang nakal kehilangan penggunanya. Itu membuat semua pihak jujur."
+      }
+    },
+    "lexicon": {
+      "heading": "Berbicara bahasa yang sama",
+      "p1": "Agar aplikasi bisa berbagi rekaman, mereka harus sepakat soal bentuk tiap rekaman. Atproto melakukannya dengan skema bernama lexicon. Setiap skema punya pemilik yang jelas yang boleh mengembangkannya, dan setiap aplikasi bisa memastikan rekaman mengikuti aturan dengan tepat. Struktur itulah yang membuat berbagi bisa berjalan.",
+      "p2": "GainForest menerbitkan skema terbukanya sendiri untuk observasi keanekaragaman hayati, proyek, sertifikat, dan donasi. Aplikasi lain mana pun bisa membaca rekaman kami atau menulis rekaman yang cocok. Kamu bisa menjelajahi semuanya di panduan skema data di bawah."
+    },
+    "more": {
+      "heading": "Terus jelajahi",
+      "lexiconsTitle": "Skema data",
+      "lexiconsDesc": "Semua format rekaman yang diterbitkan GainForest di jaringan.",
+      "cgsTitle": "Cara kerja akun grup",
+      "cgsDesc": "Layanan penjaga yang membuat satu tim bisa berbagi satu akun dengan aman.",
+      "epdsTitle": "Cara kerja ePDS",
+      "epdsDesc": "Sistem masuk dan server di balik setiap akun GainForest.",
+      "siteTitle": "atproto.com",
+      "siteDesc": "Situs resmi protokol, dengan spesifikasi lengkap dan panduan untuk pembangun.",
+      "ethosNote": "Banyak ide di halaman ini berasal dari esai tim protokol tentang filosofi desainnya:",
+      "ethosLink": "Ethos atproto"
     }
   }
 }

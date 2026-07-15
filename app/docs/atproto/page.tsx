@@ -1,33 +1,33 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
-import { ArrowUpRightIcon, LockIcon, ScrollTextIcon, TimerIcon } from "lucide-react";
+import { ArrowUpRightIcon, FileCheckIcon, GlobeIcon, DoorOpenIcon, EyeIcon, ServerIcon, Share2Icon } from "lucide-react";
 import { LogoMark } from "@/app/_components/Logo";
 import { localizedAlternates } from "@/app/_lib/seo-metadata";
-import { RequestJourney } from "./_components/RequestJourney";
-import { RolePlayground } from "./_components/RolePlayground";
-import { ServiceMap } from "./_components/ServiceMap";
-import { SharedRepo } from "./_components/SharedRepo";
+import { Firehose } from "./_components/Firehose";
+import { MoveHouse } from "./_components/MoveHouse";
+import { PlaceVsPerson } from "./_components/PlaceVsPerson";
+import { RecordWeb } from "./_components/RecordWeb";
 
-
-const GITHUB_URL = "https://github.com/hypercerts-org/certified-group-service";
+const ATPROTO_URL = "https://atproto.com";
+const ETHOS_URL = "https://atproto.com/articles/atproto-ethos";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const t = await getTranslations("common.cgs");
+  const t = await getTranslations("common.atproto");
   return {
     title: t("metaTitle"),
     description: t("metaDescription"),
-    alternates: await localizedAlternates("/docs/cgs"),
+    alternates: await localizedAlternates("/docs/atproto"),
   };
 }
 
-// An interactive explainer for the Certified Group Service, the layer that
-// lets a whole team share one AT Protocol account. Prose sections alternate
-// with small self-contained client components (shared repo toy, request
-// journey, role playground with live audit log, service map) so the page
-// reads like a guided tour.
-export default async function CgsDocsPage() {
-  const t = await getTranslations("common.cgs");
+// An interactive explainer for the AT Protocol itself, the open network that
+// GainForest builds on. Plain-language prose sections alternate with small
+// self-contained toys (place vs person links, the record web, the firehose
+// playground, the moving-house demo) so the page reads like a guided tour.
+// The ideas follow atproto.com and its "atproto ethos" article.
+export default async function AtprotoDocsPage() {
+  const t = await getTranslations("common.atproto");
 
   return (
     <div className="mx-auto w-full max-w-3xl px-5 py-10 sm:px-8 sm:py-14">
@@ -47,28 +47,41 @@ export default async function CgsDocsPage() {
         <p className="mt-4 max-w-prose text-[14.5px] leading-relaxed text-muted-foreground">{t("whatIs.p2")}</p>
       </Section>
 
-      <Section heading={t("repo.heading")} intro={t("repo.intro")}>
-        <SharedRepo />
+      <Section heading={t("naming.heading")} intro={t("naming.intro")}>
+        <PlaceVsPerson />
       </Section>
 
-      <Section heading={t("journey.heading")} intro={t("journey.intro")}>
-        <RequestJourney />
+      <Section heading={t("records.heading")} intro={t("records.intro")}>
+        <RecordWeb />
       </Section>
 
-      <Section heading={t("roles.heading")} intro={t("roles.intro")}>
-        <RolePlayground />
+      <Section heading={t("flow.heading")} intro={t("flow.intro")}>
+        <Firehose />
       </Section>
 
-      <Section heading={t("map.heading")} intro={t("map.intro")}>
-        <ServiceMap />
+      <Section heading={t("move.heading")} intro={t("move.intro")}>
+        <MoveHouse />
       </Section>
 
-      <Section heading={t("safety.heading")} intro={t("safety.intro")}>
+      <Section heading={t("roots.heading")} intro={t("roots.intro")}>
         <div className="grid gap-3 sm:grid-cols-3">
-          <SafetyCard icon={<TimerIcon className="h-4 w-4" />} title={t("safety.pass.title")} text={t("safety.pass.text")} />
-          <SafetyCard icon={<LockIcon className="h-4 w-4" />} title={t("safety.vault.title")} text={t("safety.vault.text")} />
-          <SafetyCard icon={<ScrollTextIcon className="h-4 w-4" />} title={t("safety.log.title")} text={t("safety.log.text")} />
+          <IdeaCard icon={<GlobeIcon className="h-4 w-4" />} title={t("roots.web.title")} text={t("roots.web.text")} />
+          <IdeaCard icon={<Share2Icon className="h-4 w-4" />} title={t("roots.p2p.title")} text={t("roots.p2p.text")} />
+          <IdeaCard icon={<ServerIcon className="h-4 w-4" />} title={t("roots.scale.title")} text={t("roots.scale.text")} />
         </div>
+      </Section>
+
+      <Section heading={t("trust.heading")} intro={t("trust.intro")}>
+        <div className="grid gap-3 sm:grid-cols-3">
+          <IdeaCard icon={<FileCheckIcon className="h-4 w-4" />} title={t("trust.signed.title")} text={t("trust.signed.text")} />
+          <IdeaCard icon={<EyeIcon className="h-4 w-4" />} title={t("trust.views.title")} text={t("trust.views.text")} />
+          <IdeaCard icon={<DoorOpenIcon className="h-4 w-4" />} title={t("trust.exit.title")} text={t("trust.exit.text")} />
+        </div>
+      </Section>
+
+      <Section heading={t("lexicon.heading")}>
+        <p className="max-w-prose text-[14.5px] leading-relaxed text-muted-foreground">{t("lexicon.p1")}</p>
+        <p className="mt-4 max-w-prose text-[14.5px] leading-relaxed text-muted-foreground">{t("lexicon.p2")}</p>
       </Section>
 
       <section className="mt-16 border-t border-border/60 pt-10">
@@ -76,11 +89,17 @@ export default async function CgsDocsPage() {
           {t("more.heading")}
         </h2>
         <div className="grid gap-3 sm:grid-cols-2">
-          <MoreCard href="/docs/atproto" title={t("more.atprotoTitle")} desc={t("more.atprotoDesc")} />
           <MoreCard href="/docs/lexicons" title={t("more.lexiconsTitle")} desc={t("more.lexiconsDesc")} />
+          <MoreCard href="/docs/cgs" title={t("more.cgsTitle")} desc={t("more.cgsDesc")} />
           <MoreCard href="/docs/ePDS" title={t("more.epdsTitle")} desc={t("more.epdsDesc")} />
-          <MoreCard href={GITHUB_URL} external title={t("more.githubTitle")} desc={t("more.githubDesc")} />
+          <MoreCard href={ATPROTO_URL} external title={t("more.siteTitle")} desc={t("more.siteDesc")} />
         </div>
+        <p className="m-0 mt-5 text-[12.5px] leading-relaxed text-muted-foreground/80">
+          {t("more.ethosNote")}{" "}
+          <a href={ETHOS_URL} target="_blank" rel="noreferrer" className="text-primary underline underline-offset-2">
+            {t("more.ethosLink")}
+          </a>
+        </p>
       </section>
     </div>
   );
@@ -105,7 +124,7 @@ function Section({
   );
 }
 
-function SafetyCard({ icon, title, text }: { icon: React.ReactNode; title: string; text: string }) {
+function IdeaCard({ icon, title, text }: { icon: React.ReactNode; title: string; text: string }) {
   return (
     <div className="rounded-xl border border-border/60 px-5 py-4">
       <div className="flex items-center gap-2 text-primary">{icon}</div>

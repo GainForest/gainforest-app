@@ -86,7 +86,17 @@ export default async function LexiconsOverviewPage() {
         ))}
       </div>
 
-      <div className="mt-14 grid gap-3 sm:grid-cols-2">
+      <div className="mt-14 grid gap-3 sm:grid-cols-3">
+        <Link
+          href="/docs/atproto"
+          className="group rounded-xl border border-border/60 px-5 py-4 no-underline transition-colors hover:border-primary/50"
+        >
+          <div className="flex items-center gap-1.5 text-[13.5px] font-medium text-foreground group-hover:text-primary">
+            {t("atprotoLinkTitle")}
+            <ArrowUpRightIcon className="h-3.5 w-3.5 opacity-50" />
+          </div>
+          <p className="m-0 mt-1 text-[12.5px] leading-relaxed text-muted-foreground">{t("atprotoLinkDesc")}</p>
+        </Link>
         <Link
           href="/docs/cgs"
           className="group rounded-xl border border-border/60 px-5 py-4 no-underline transition-colors hover:border-primary/50"
