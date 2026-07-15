@@ -1229,7 +1229,9 @@
     },
     "sectionsAria": "Bagian skema",
     "epdsLinkTitle": "Cara kerja ePDS",
-    "epdsLinkDesc": "Tur interaktif tentang sistem masuk dan server di balik catatan-catatan ini."
+    "epdsLinkDesc": "Tur interaktif tentang sistem masuk dan server di balik catatan-catatan ini.",
+    "cgsLinkTitle": "Cara kerja akun grup",
+    "cgsLinkDesc": "Tur interaktif tentang layanan penjaga yang memungkinkan satu tim berbagi satu akun."
   },
   "taina": {
     "meta": {
@@ -1916,7 +1918,197 @@
       "lexiconsTitle": "Skema data",
       "lexiconsDesc": "Format catatan terbuka yang hidup di dalam setiap PDS.",
       "githubTitle": "ePDS di GitHub",
-      "githubDesc": "Seluruh kode sumber, terbuka bagi siapa pun untuk dibaca, dijalankan, dan diperbaiki."
+      "githubDesc": "Seluruh kode sumber, terbuka bagi siapa pun untuk dibaca, dijalankan, dan diperbaiki.",
+      "cgsTitle": "Cara kerja akun grup",
+      "cgsDesc": "Layanan penjaga yang memungkinkan satu tim berbagi satu akun grup dengan aman."
+    }
+  },
+  "cgs": {
+    "metaTitle": "Cara kerja akun grup",
+    "metaDescription": "Tur interaktif tentang Certified Group Service, penjaga yang memungkinkan satu tim berbagi satu akun AT Protocol dengan peran, aturan yang jelas, dan jejak audit lengkap.",
+    "kicker": "Certified Group Service",
+    "title": "Cara kerja akun grup",
+    "lead": "Di AT Protocol, sebuah akun biasanya milik satu orang saja. Tapi hutan dipetakan oleh tim. Certified Group Service, disingkat CGS, memungkinkan satu tim berbagi satu akun dengan aman, dengan peran, aturan yang jelas, dan ingatan atas semua yang terjadi. Halaman ini menunjukkan cara kerjanya, langkah demi langkah.",
+    "whatIs": {
+      "heading": "Apa itu akun grup?",
+      "p1": "Setiap organisasi di GainForest tinggal di akun AT Protocol biasa. Akun biasa punya satu kata sandi dan satu pemilik. Itu cukup untuk satu orang, tapi tim butuh lebih: banyak orang menulis ke tempat yang sama, tanpa saling mengoper kata sandi akun.",
+      "p2": "CGS adalah layanan penjaga kecil yang berdiri di depan akun grup. Ia menyimpan kredensial akun dalam kotak tersegel, memegang daftar anggota dengan peran, dan memeriksa setiap permintaan terhadap aturan sebelum meloloskannya. Anggota tim tidak pernah melihat kata sandi. Bagi jaringan lainnya, grup terlihat seperti satu akun biasa, jadi aplikasi mana pun bisa membaca datanya seperti biasa."
+    },
+    "repo": {
+      "heading": "Satu akun, banyak tangan",
+      "intro": "Tiga rekan, satu repo bersama. Ketuk seorang rekan dan ia akan menerbitkan sebuah rekaman. Lihat bagaimana setiap rekaman mengingat penulisnya.",
+      "repoLabel": "Repo milik grup",
+      "empty": "Belum ada apa-apa. Ketuk seorang rekan di atas.",
+      "stamp": "oleh {name}",
+      "roleOwner": "Pemilik",
+      "roleAdmin": "Admin",
+      "roleMember": "Anggota",
+      "clear": "Bersihkan",
+      "caption": "Semua rekaman masuk ke repo yang sama, tapi layanan mencatat siapa yang membuat masing-masing. Ingatan itu membuat anggota bisa menyunting karyanya sendiri, sementara mengubah karya orang lain butuh admin."
+    },
+    "journey": {
+      "heading": "Perjalanan sebuah permintaan",
+      "intro": "Tekan putar, atau melangkah sendiri. Titik yang bergerak adalah permintaanmu dalam perjalanan pulang-pergi.",
+      "play": "Putar",
+      "pause": "Jeda",
+      "back": "Kembali",
+      "next": "Lanjut",
+      "stepLabel": "Langkah {n} dari {total}",
+      "ariaLabel": "Diagram perjalanan permintaan",
+      "nodes": {
+        "app": "Aplikasimu",
+        "pds": "PDS-mu",
+        "cgs": "Layanan grup",
+        "gpds": "PDS grup"
+      },
+      "steps": {
+        "s1": {
+          "title": "Kamu menekan Terbitkan",
+          "text": "Semua dimulai di aplikasi. Kamu masuk sebagai dirimu sendiri dan ingin menambahkan rekaman ke akun grupmu."
+        },
+        "s2": {
+          "title": "Aplikasi memanggil PDS-mu sendiri",
+          "text": "Aplikasi mengirim permintaan ke server data pribadimu dengan catatan penerusan: tolong teruskan ini ke layanan grup."
+        },
+        "s3": {
+          "title": "PDS-mu menandatangani tiket",
+          "text": "PDS-mu membuat tiket berumur pendek yang ditandatangani dengan kuncimu sendiri. Tiket itu menyebut namamu, layanannya, dan aksi persisnya. Ia berlaku sekali dan mati setelah dua menit."
+        },
+        "s4": {
+          "title": "Penjaga memeriksa tiket",
+          "text": "Layanan grup memeriksa tanda tangan terhadap identitas publikmu dan memastikan tiketnya masih segar dan belum dipakai. Tiket salinan tidak berguna."
+        },
+        "s5": {
+          "title": "Pemeriksaan peran",
+          "text": "Layanan mencarimu di daftar anggota grup. Anggota, admin, atau pemilik? Peranmu menentukan aksi mana yang terbuka untukmu."
+        },
+        "s6": {
+          "title": "Pemeriksaan penulis",
+          "text": "Untuk penyuntingan dan penghapusan ada satu pertanyaan lagi: siapa yang menulis rekaman ini? Anggota boleh mengubah rekamannya sendiri. Menyentuh karya orang lain butuh admin."
+        },
+        "s7": {
+          "title": "Semua dicatat",
+          "text": "Apa pun jawabannya, percobaan itu masuk ke log audit grup: siapa, apa, kapan, dan apakah diizinkan atau ditolak."
+        },
+        "s8": {
+          "title": "Layanan melakukan penulisan",
+          "text": "Jika semua pemeriksaan lolos, layanan menjalankan aksi di PDS milik grup, memakai kredensial yang hanya ia pegang, dan mencapmu sebagai penulis."
+        },
+        "s9": {
+          "title": "Selesai",
+          "text": "Jawaban kembali ke aplikasimu. Rekaman itu kini berada di repo grup, terlihat oleh seluruh jaringan seperti rekaman AT Protocol lainnya."
+        }
+      }
+    },
+    "roles": {
+      "heading": "Siapa boleh apa",
+      "intro": "Pilih topi, lalu coba beberapa aksi. Setiap percobaan, diizinkan atau ditolak, masuk ke log audit di bawah.",
+      "youAre": "Kamu adalah",
+      "tryAction": "Coba sebuah aksi",
+      "allowed": "Diizinkan",
+      "denied": "Ditolak",
+      "auditTitle": "Log audit",
+      "auditEmpty": "Belum ada apa-apa. Coba aksi di atas.",
+      "clearLog": "Hapus log",
+      "auditPermitted": "diizinkan",
+      "auditDenied": "ditolak",
+      "role": {
+        "visitor": {
+          "name": "Pengunjung",
+          "desc": "Tidak ada di daftar anggota sama sekali."
+        },
+        "member": {
+          "name": "Anggota",
+          "desc": "Bisa membuat rekaman dan mengelola karyanya sendiri."
+        },
+        "admin": {
+          "name": "Admin",
+          "desc": "Bisa mengelola anggota dan menyunting rekaman apa pun."
+        },
+        "owner": {
+          "name": "Pemilik",
+          "desc": "Satu per grup. Ditetapkan saat grup dibuat."
+        }
+      },
+      "action": {
+        "create": "Buat rekaman",
+        "editOwn": "Sunting rekamanmu sendiri",
+        "editOther": "Sunting rekaman orang lain",
+        "addMember": "Tambah anggota",
+        "setRole": "Ubah peran",
+        "viewAudit": "Baca log audit"
+      },
+      "ok": {
+        "create": "Setiap anggota bisa membuat rekaman. Rekaman ditulis ke repo grup dengan namamu tercap sebagai penulis.",
+        "editOwn": "Ini rekamanmu, jadi peran anggota sudah cukup. Layanan memeriksa cap penulis lebih dulu.",
+        "editOther": "Admin bisa menyunting rekaman apa pun di grup, siapa pun penulisnya.",
+        "addMember": "Admin bisa menambah orang baru sebagai anggota atau admin. Tidak ada yang bisa ditambahkan sebagai pemilik.",
+        "setRole": "Hanya pemilik yang bisa mengubah peran. Bahkan pemilik pun tidak bisa membuat pemilik kedua.",
+        "viewAudit": "Admin dan pemilik bisa membaca riwayat lengkap grup."
+      },
+      "no": {
+        "visitor": "Kamu tidak ada di daftar anggota, jadi permintaan berhenti di pintu. Percobaan itu tetap dicatat di log audit.",
+        "editOther": "Rekaman itu milik orang lain. Anggota hanya bisa menyunting karyanya sendiri. Menyunting rekaman orang lain butuh admin.",
+        "addMember": "Hanya admin dan pemilik yang bisa menambah anggota baru.",
+        "setRole": "Mengubah peran adalah tugas pemilik seorang. Admin tidak bisa menaikkan atau menurunkan siapa pun.",
+        "viewAudit": "Log audit hanya terbuka untuk admin dan pemilik."
+      }
+    },
+    "map": {
+      "heading": "Bagian-bagian yang bergerak",
+      "intro": "CGS adalah tim kecil berisi beberapa bagian. Ketuk masing-masing untuk melihat tugasnya.",
+      "ariaLabel": "Peta bagian layanan grup",
+      "nodes": {
+        "pds": {
+          "name": "PDS-mu",
+          "desc": "Server data milikmu sendiri. Ia menandatangani tiket pendek yang membuktikan siapa kamu dan meneruskan permintaanmu. Kata sandimu tidak pernah bepergian ke mana pun."
+        },
+        "cgs": {
+          "name": "Layanan grup",
+          "desc": "Penjaga di depan pintu. Ia memeriksa tiket, mencari peran, mencatat pembukuan, dan satu-satunya yang bisa bertindak atas akun grup."
+        },
+        "gpds": {
+          "name": "PDS grup",
+          "desc": "Server data yang sepenuhnya biasa yang menyimpan rekaman grup. Ia tidak tahu apa-apa soal peran atau anggota. Ia hanya percaya pada layanan yang memegang kredensialnya."
+        },
+        "members": {
+          "name": "Daftar anggota",
+          "desc": "Basis data kecil dan privat, satu per grup. Ia menyimpan identitas dan peran tiap anggota, serta mengingat siapa penulis setiap rekaman."
+        },
+        "audit": {
+          "name": "Log audit",
+          "desc": "Ingatan grup. Setiap percobaan dicatat: siapa, apa, kapan, dan apakah diizinkan atau ditolak."
+        },
+        "vault": {
+          "name": "Kredensial tersegel",
+          "desc": "Kata sandi akun grup, disimpan terenkripsi. Anggota dan aplikasi tidak pernah melihatnya. Hanya layanan yang bisa membukanya, dan hanya untuk berbicara dengan PDS grup."
+        }
+      }
+    },
+    "safety": {
+      "heading": "Keamanan bawaan",
+      "intro": "Tiga kebiasaan menjaga akun bersama tetap aman.",
+      "pass": {
+        "title": "Tiket cepat mati",
+        "text": "Setiap permintaan membawa tiket segar yang ditandatangani. Ia berlaku tepat satu kali dan kedaluwarsa setelah dua menit, jadi tiket curian nyaris tak berharga."
+      },
+      "vault": {
+        "title": "Kredensial tetap tersegel",
+        "text": "Kata sandi grup disimpan terenkripsi. Anggota tidak pernah melihatnya dan aplikasi tidak pernah menyentuhnya. Hanya layanan penjaga yang bisa memakainya."
+      },
+      "log": {
+        "title": "Tidak ada yang luput",
+        "text": "Diizinkan atau ditolak, setiap aksi masuk ke log audit grup lengkap dengan siapa, apa, dan kapan."
+      }
+    },
+    "more": {
+      "heading": "Terus jelajahi",
+      "lexiconsTitle": "Skema data",
+      "lexiconsDesc": "Format rekaman terbuka yang hidup di dalam repo setiap grup.",
+      "epdsTitle": "Cara kerja ePDS",
+      "epdsDesc": "Pintu depan ramah yang memasukkan orang hanya dengan email.",
+      "githubTitle": "CGS di GitHub",
+      "githubDesc": "Kode sumber lengkap layanan grup, terbuka untuk dibaca, dijalankan, dan diperbaiki siapa pun."
     }
   }
 }

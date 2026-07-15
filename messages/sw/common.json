@@ -1229,7 +1229,9 @@
     },
     "sectionsAria": "Sehemu za miundo",
     "epdsLinkTitle": "Jinsi ePDS inavyofanya kazi",
-    "epdsLinkDesc": "Ziara shirikishi ya mfumo wa kuingia na seva zilizo nyuma ya rekodi hizi."
+    "epdsLinkDesc": "Ziara shirikishi ya mfumo wa kuingia na seva zilizo nyuma ya rekodi hizi.",
+    "cgsLinkTitle": "Jinsi akaunti za kikundi zinavyofanya kazi",
+    "cgsLinkDesc": "Ziara shirikishi ya huduma ya ulinzi inayowezesha timu nzima kushiriki akaunti moja."
   },
   "taina": {
     "meta": {
@@ -1916,7 +1918,197 @@
       "lexiconsTitle": "Miundo ya data",
       "lexiconsDesc": "Miundo wazi ya rekodi inayoishi ndani ya kila PDS.",
       "githubTitle": "ePDS kwenye GitHub",
-      "githubDesc": "Msimbo wote wa chanzo, wazi kwa yeyote kusoma, kuendesha, na kuboresha."
+      "githubDesc": "Msimbo wote wa chanzo, wazi kwa yeyote kusoma, kuendesha, na kuboresha.",
+      "cgsTitle": "Jinsi akaunti za kikundi zinavyofanya kazi",
+      "cgsDesc": "Huduma ya ulinzi inayowezesha timu nzima kushiriki akaunti moja ya kikundi kwa usalama."
+    }
+  },
+  "cgs": {
+    "metaTitle": "Jinsi akaunti za kikundi zinavyofanya kazi",
+    "metaDescription": "Ziara shirikishi ya Certified Group Service, mlinzi anayewezesha timu nzima kushiriki akaunti moja ya AT Protocol kwa majukumu, sheria wazi, na kumbukumbu kamili ya ukaguzi.",
+    "kicker": "Certified Group Service",
+    "title": "Jinsi akaunti za kikundi zinavyofanya kazi",
+    "lead": "Katika AT Protocol, akaunti kwa kawaida inamilikiwa na mtu mmoja tu. Lakini misitu inachorwa ramani na timu. Certified Group Service, kwa kifupi CGS, inawezesha timu nzima kushiriki akaunti moja kwa usalama, ikiwa na majukumu, sheria wazi, na kumbukumbu ya kila kinachotokea. Ukurasa huu unaonyesha jinsi inavyofanya kazi, hatua kwa hatua.",
+    "whatIs": {
+      "heading": "Akaunti ya kikundi ni nini?",
+      "p1": "Kila shirika kwenye GainForest linaishi katika akaunti ya kawaida ya AT Protocol. Akaunti ya kawaida ina nenosiri moja na mmiliki mmoja. Hiyo inatosha kwa mtu mmoja, lakini timu inahitaji zaidi: watu wengi wakiandika mahali pamoja, bila kupitishana nenosiri la akaunti.",
+      "p2": "CGS ni huduma ndogo ya ulinzi inayosimama mbele ya akaunti ya kikundi. Inahifadhi vitambulisho vya akaunti kwenye sanduku lililofungwa, inashikilia orodha ya wanachama na majukumu yao, na hukagua kila ombi dhidi ya sheria kabla ya kuliruhusu. Wanachama wa timu hawaoni nenosiri kamwe. Kwa mtandao wote, kikundi kinaonekana kama akaunti moja ya kawaida, hivyo programu yoyote inaweza kusoma rekodi zake kama kawaida."
+    },
+    "repo": {
+      "heading": "Akaunti moja, mikono mingi",
+      "intro": "Wenzako watatu, hazina moja ya pamoja. Gusa mwenzako naye atachapisha rekodi. Angalia jinsi kila rekodi inavyomkumbuka mwandishi wake.",
+      "repoLabel": "Hazina ya kikundi",
+      "empty": "Hakuna kitu bado. Gusa mwenzako hapo juu.",
+      "stamp": "na {name}",
+      "roleOwner": "Mmiliki",
+      "roleAdmin": "Msimamizi",
+      "roleMember": "Mwanachama",
+      "clear": "Futa",
+      "caption": "Rekodi zote zinaingia kwenye hazina moja, lakini huduma inaandika nani aliyetengeneza kila moja. Kumbukumbu hiyo inawawezesha wanachama kuhariri kazi zao wenyewe, huku kubadilisha kazi ya mtu mwingine kunahitaji msimamizi."
+    },
+    "journey": {
+      "heading": "Safari ya ombi",
+      "intro": "Bonyeza cheza, au piga hatua mwenyewe. Nukta inayosogea ni ombi lako katika safari yake ya kwenda na kurudi.",
+      "play": "Cheza",
+      "pause": "Simamisha",
+      "back": "Nyuma",
+      "next": "Mbele",
+      "stepLabel": "Hatua ya {n} kati ya {total}",
+      "ariaLabel": "Mchoro wa safari ya ombi",
+      "nodes": {
+        "app": "Programu yako",
+        "pds": "PDS yako",
+        "cgs": "Huduma ya kikundi",
+        "gpds": "PDS ya kikundi"
+      },
+      "steps": {
+        "s1": {
+          "title": "Unabonyeza Chapisha",
+          "text": "Yote huanzia kwenye programu. Umeingia kama wewe mwenyewe na unataka kuongeza rekodi kwenye akaunti ya kikundi chako."
+        },
+        "s2": {
+          "title": "Programu inaita PDS yako mwenyewe",
+          "text": "Programu inatuma ombi kwa seva yako binafsi ya data ikiwa na kikaratasi cha kupeleka mbele: tafadhali fikisha hili kwa huduma ya kikundi."
+        },
+        "s3": {
+          "title": "PDS yako inasaini kibali",
+          "text": "PDS yako inatengeneza kibali cha muda mfupi kilichosainiwa kwa ufunguo wako mwenyewe. Kibali kinakutaja wewe, huduma, na kitendo halisi. Kinafanya kazi mara moja na kinakufa baada ya dakika mbili."
+        },
+        "s4": {
+          "title": "Mlinzi anakagua kibali",
+          "text": "Huduma ya kikundi inahakiki saini dhidi ya utambulisho wako wa umma na kuhakikisha kibali ni kipya na hakijatumika. Kibali kilichonakiliwa hakina maana."
+        },
+        "s5": {
+          "title": "Ukaguzi wa jukumu",
+          "text": "Huduma inakutafuta kwenye orodha ya wanachama wa kikundi. Mwanachama, msimamizi, au mmiliki? Jukumu lako linaamua vitendo vipi viko wazi kwako."
+        },
+        "s6": {
+          "title": "Ukaguzi wa mwandishi",
+          "text": "Kwa uhariri na ufutaji kuna swali moja zaidi: nani aliandika rekodi hii? Wanachama wanaweza kubadilisha rekodi zao wenyewe. Kugusa kazi ya mtu mwingine kunahitaji msimamizi."
+        },
+        "s7": {
+          "title": "Kila kitu kinaandikwa",
+          "text": "Jibu liwe lolote, jaribio linaingia kwenye kumbukumbu ya ukaguzi ya kikundi: nani, nini, lini, na kama liliruhusiwa au kukataliwa."
+        },
+        "s8": {
+          "title": "Huduma inafanya uandishi",
+          "text": "Ukaguzi wote ukipita, huduma inatekeleza kitendo kwenye PDS ya kikundi chenyewe, ikitumia vitambulisho inavyoshikilia peke yake, na inakupiga muhuri kama mwandishi."
+        },
+        "s9": {
+          "title": "Imekamilika",
+          "text": "Jibu linarudi kwenye programu yako. Rekodi sasa iko kwenye hazina ya kikundi, ikionekana kwa mtandao wote kama rekodi nyingine yoyote ya AT Protocol."
+        }
+      }
+    },
+    "roles": {
+      "heading": "Nani anaweza kufanya nini",
+      "intro": "Chagua kofia, kisha jaribu vitendo kadhaa. Kila jaribio, liruhusiwe au likataliwe, linaingia kwenye kumbukumbu ya ukaguzi hapa chini.",
+      "youAre": "Wewe ni",
+      "tryAction": "Jaribu kitendo",
+      "allowed": "Imeruhusiwa",
+      "denied": "Imekataliwa",
+      "auditTitle": "Kumbukumbu ya ukaguzi",
+      "auditEmpty": "Hakuna kitu bado. Jaribu kitendo hapo juu.",
+      "clearLog": "Futa kumbukumbu",
+      "auditPermitted": "imeruhusiwa",
+      "auditDenied": "imekataliwa",
+      "role": {
+        "visitor": {
+          "name": "Mgeni",
+          "desc": "Hayupo kwenye orodha ya wanachama kabisa."
+        },
+        "member": {
+          "name": "Mwanachama",
+          "desc": "Anaweza kutengeneza rekodi na kusimamia kazi yake mwenyewe."
+        },
+        "admin": {
+          "name": "Msimamizi",
+          "desc": "Anaweza kusimamia wanachama na kuhariri rekodi yoyote."
+        },
+        "owner": {
+          "name": "Mmiliki",
+          "desc": "Mmoja kwa kila kikundi. Anawekwa kikundi kinapoundwa."
+        }
+      },
+      "action": {
+        "create": "Tengeneza rekodi",
+        "editOwn": "Hariri rekodi yako mwenyewe",
+        "editOther": "Hariri rekodi ya mtu mwingine",
+        "addMember": "Ongeza mwanachama",
+        "setRole": "Badilisha jukumu",
+        "viewAudit": "Soma kumbukumbu ya ukaguzi"
+      },
+      "ok": {
+        "create": "Mwanachama yeyote anaweza kutengeneza rekodi. Rekodi inaandikwa kwenye hazina ya kikundi na jina lako likipigwa muhuri kama mwandishi.",
+        "editOwn": "Ni rekodi yako, hivyo jukumu la mwanachama linatosha. Huduma inakagua muhuri wa mwandishi kwanza.",
+        "editOther": "Wasimamizi wanaweza kuhariri rekodi yoyote ya kikundi, bila kujali nani aliiandika.",
+        "addMember": "Wasimamizi wanaweza kuongeza watu wapya kama mwanachama au msimamizi. Hakuna anayeweza kuongezwa kama mmiliki.",
+        "setRole": "Ni mmiliki pekee anayeweza kubadilisha majukumu. Hata mmiliki hawezi kutengeneza mmiliki wa pili.",
+        "viewAudit": "Wasimamizi na mmiliki wanaweza kusoma historia kamili ya kikundi."
+      },
+      "no": {
+        "visitor": "Haupo kwenye orodha ya wanachama, hivyo ombi linasimama mlangoni. Jaribio hata hivyo linaandikwa kwenye kumbukumbu ya ukaguzi.",
+        "editOther": "Rekodi hiyo ni ya mtu mwingine. Wanachama wanaweza kuhariri kazi zao wenyewe tu. Kuhariri rekodi ya mtu mwingine kunahitaji msimamizi.",
+        "addMember": "Ni wasimamizi na mmiliki pekee wanaoweza kuongeza wanachama wapya.",
+        "setRole": "Kubadilisha majukumu ni kazi ya mmiliki peke yake. Wasimamizi hawawezi kumpandisha wala kumshusha yeyote.",
+        "viewAudit": "Kumbukumbu ya ukaguzi iko wazi kwa wasimamizi na mmiliki pekee."
+      }
+    },
+    "map": {
+      "heading": "Sehemu zinazotembea",
+      "intro": "CGS ni timu ndogo ya sehemu. Gusa kila moja kuona kazi yake.",
+      "ariaLabel": "Ramani ya sehemu za huduma ya kikundi",
+      "nodes": {
+        "pds": {
+          "name": "PDS yako",
+          "desc": "Seva yako mwenyewe ya data. Inasaini kibali kifupi kinachothibitisha wewe ni nani na inapeleka ombi lako mbele. Nenosiri lako halisafiri kokote."
+        },
+        "cgs": {
+          "name": "Huduma ya kikundi",
+          "desc": "Mlinzi wa mlangoni. Anakagua vibali, anatafuta majukumu, anaweka hesabu, na ndiye pekee anayeweza kutenda kwenye akaunti ya kikundi."
+        },
+        "gpds": {
+          "name": "PDS ya kikundi",
+          "desc": "Seva ya data ya kawaida kabisa inayohifadhi rekodi za kikundi. Haijui chochote kuhusu majukumu wala wanachama. Inaamini tu huduma inayoshikilia vitambulisho vyake."
+        },
+        "members": {
+          "name": "Orodha ya wanachama",
+          "desc": "Hifadhidata ndogo ya faragha, moja kwa kila kikundi. Inahifadhi utambulisho na jukumu la kila mwanachama, na inakumbuka nani mwandishi wa kila rekodi."
+        },
+        "audit": {
+          "name": "Kumbukumbu ya ukaguzi",
+          "desc": "Kumbukumbu ya kikundi. Kila jaribio linaandikwa: nani, nini, lini, na kama liliruhusiwa au kukataliwa."
+        },
+        "vault": {
+          "name": "Vitambulisho vilivyofungwa",
+          "desc": "Nenosiri la akaunti ya kikundi, limehifadhiwa kwa usimbaji fiche. Wanachama na programu hawalioni kamwe. Ni huduma pekee inayoweza kulifungua, na kwa ajili ya kuzungumza na PDS ya kikundi tu."
+        }
+      }
+    },
+    "safety": {
+      "heading": "Usalama uliojengwa ndani",
+      "intro": "Mazoea matatu yanaifanya akaunti ya pamoja kuwa salama.",
+      "pass": {
+        "title": "Vibali vinakufa haraka",
+        "text": "Kila ombi linabeba kibali kipya kilichosainiwa. Kinafanya kazi mara moja tu na kinaisha baada ya dakika mbili, hivyo kibali kilichoibwa karibu hakina thamani."
+      },
+      "vault": {
+        "title": "Vitambulisho vinabaki vimefungwa",
+        "text": "Nenosiri la kikundi linahifadhiwa kwa usimbaji fiche. Wanachama hawalioni kamwe na programu haziligusi. Ni huduma ya ulinzi pekee inayoweza kulitumia."
+      },
+      "log": {
+        "title": "Hakuna kinachotokea bila kuonekana",
+        "text": "Kiruhusiwe au kikataliwe, kila kitendo kinaingia kwenye kumbukumbu ya ukaguzi ya kikundi pamoja na nani, nini, na lini."
+      }
+    },
+    "more": {
+      "heading": "Endelea kuchunguza",
+      "lexiconsTitle": "Miundo ya data",
+      "lexiconsDesc": "Miundo huru ya rekodi inayoishi ndani ya hazina ya kila kikundi.",
+      "epdsTitle": "Jinsi ePDS inavyofanya kazi",
+      "epdsDesc": "Mlango wa mbele wa kirafiki unaowaingiza watu kwa barua pepe tu.",
+      "githubTitle": "CGS kwenye GitHub",
+      "githubDesc": "Msimbo kamili wa chanzo wa huduma ya vikundi, wazi kwa yeyote kusoma, kuendesha na kuboresha."
     }
   }
 }

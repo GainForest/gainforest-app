@@ -1229,7 +1229,9 @@
     },
     "sectionsAria": "Seções de esquemas",
     "epdsLinkTitle": "Como o ePDS funciona",
-    "epdsLinkDesc": "Um tour interativo pelo sistema de login e pelos servidores por trás destes registros."
+    "epdsLinkDesc": "Um tour interativo pelo sistema de login e pelos servidores por trás destes registros.",
+    "cgsLinkTitle": "Como funcionam as contas de grupo",
+    "cgsLinkDesc": "Um passeio interativo pelo serviço guardião que permite que uma equipe inteira compartilhe uma conta."
   },
   "taina": {
     "meta": {
@@ -1916,7 +1918,197 @@
       "lexiconsTitle": "Esquemas de dados",
       "lexiconsDesc": "Os formatos abertos de registro que vivem dentro de cada PDS.",
       "githubTitle": "ePDS no GitHub",
-      "githubDesc": "Todo o código-fonte, aberto para qualquer pessoa ler, rodar e melhorar."
+      "githubDesc": "Todo o código-fonte, aberto para qualquer pessoa ler, rodar e melhorar.",
+      "cgsTitle": "Como funcionam as contas de grupo",
+      "cgsDesc": "O serviço guardião que permite que uma equipe inteira compartilhe uma conta de grupo com segurança."
+    }
+  },
+  "cgs": {
+    "metaTitle": "Como funcionam as contas de grupo",
+    "metaDescription": "Um passeio interativo pelo Certified Group Service, o guardião que permite que uma equipe inteira compartilhe uma conta do AT Protocol com papéis, regras claras e uma trilha de auditoria completa.",
+    "kicker": "Certified Group Service",
+    "title": "Como funcionam as contas de grupo",
+    "lead": "No AT Protocol, uma conta normalmente pertence a uma única pessoa. Mas florestas são mapeadas por equipes. O Certified Group Service, CGS para abreviar, permite que uma equipe inteira compartilhe uma conta com segurança, com papéis, regras claras e uma memória de tudo o que acontece. Esta página mostra como funciona, passo a passo.",
+    "whatIs": {
+      "heading": "O que é uma conta de grupo?",
+      "p1": "Cada organização no GainForest vive em uma conta normal do AT Protocol. Uma conta normal tem uma senha e um dono. Isso basta para uma pessoa, mas uma equipe precisa de mais: várias pessoas escrevendo no mesmo lugar, sem passar a senha da conta de mão em mão.",
+      "p2": "O CGS é um pequeno serviço guardião que fica na frente da conta do grupo. Ele guarda as credenciais da conta em uma caixa lacrada, mantém uma lista de membros com papéis e confere cada pedido contra as regras antes de deixá-lo passar. Os membros da equipe nunca veem a senha. Para o resto da rede, o grupo parece uma conta comum, então qualquer app pode ler seus registros normalmente."
+    },
+    "repo": {
+      "heading": "Uma conta, muitas mãos",
+      "intro": "Três colegas, um repositório compartilhado. Toque em um colega e ele publica um registro. Veja como cada registro lembra seu autor.",
+      "repoLabel": "O repositório do grupo",
+      "empty": "Nada aqui ainda. Toque em um colega acima.",
+      "stamp": "de {name}",
+      "roleOwner": "Dono",
+      "roleAdmin": "Admin",
+      "roleMember": "Membro",
+      "clear": "Limpar",
+      "caption": "Todos os registros caem no mesmo repositório, mas o serviço anota quem criou cada um. Essa memória permite que membros editem o próprio trabalho, enquanto mudar o trabalho de outra pessoa exige um admin."
+    },
+    "journey": {
+      "heading": "A jornada de um pedido",
+      "intro": "Aperte play, ou avance você mesmo. O ponto em movimento é o seu pedido na viagem de ida e volta.",
+      "play": "Reproduzir",
+      "pause": "Pausar",
+      "back": "Voltar",
+      "next": "Avançar",
+      "stepLabel": "Etapa {n} de {total}",
+      "ariaLabel": "Diagrama da jornada de um pedido",
+      "nodes": {
+        "app": "Seu app",
+        "pds": "Seu PDS",
+        "cgs": "Serviço do grupo",
+        "gpds": "PDS do grupo"
+      },
+      "steps": {
+        "s1": {
+          "title": "Você aperta Publicar",
+          "text": "Tudo começa no app. Você está conectado como você mesmo e quer adicionar um registro à conta do seu grupo."
+        },
+        "s2": {
+          "title": "O app chama o seu próprio PDS",
+          "text": "O app envia o pedido ao seu servidor de dados pessoal com um bilhete de encaminhamento: por favor, repasse isto ao serviço do grupo."
+        },
+        "s3": {
+          "title": "Seu PDS assina um passe",
+          "text": "Seu PDS cria um passe de curta duração assinado com a sua própria chave. O passe nomeia você, o serviço e a ação exata. Ele funciona uma vez e morre depois de dois minutos."
+        },
+        "s4": {
+          "title": "O guardião confere o passe",
+          "text": "O serviço do grupo verifica a assinatura contra a sua identidade pública e garante que o passe é fresco e nunca foi usado. Um passe copiado não serve para nada."
+        },
+        "s5": {
+          "title": "Verificação de papel",
+          "text": "O serviço procura você na lista de membros do grupo. Membro, admin ou dono? Seu papel decide quais ações estão abertas para você."
+        },
+        "s6": {
+          "title": "Verificação de autoria",
+          "text": "Para edições e exclusões há mais uma pergunta: quem escreveu este registro? Membros podem mudar seus próprios registros. Mexer no trabalho de outra pessoa exige um admin."
+        },
+        "s7": {
+          "title": "Tudo fica anotado",
+          "text": "Seja qual for a resposta, a tentativa entra no registro de auditoria do grupo: quem, o quê, quando e se foi permitida ou negada."
+        },
+        "s8": {
+          "title": "O serviço faz a escrita",
+          "text": "Se tudo passa, o serviço executa a ação no PDS do próprio grupo, usando credenciais que só ele possui, e carimba você como autor."
+        },
+        "s9": {
+          "title": "Pronto",
+          "text": "A resposta volta para o seu app. O registro agora vive no repositório do grupo, visível para toda a rede como qualquer outro registro do AT Protocol."
+        }
+      }
+    },
+    "roles": {
+      "heading": "Quem pode fazer o quê",
+      "intro": "Escolha um chapéu e experimente algumas ações. Cada tentativa, permitida ou negada, entra no registro de auditoria abaixo.",
+      "youAre": "Você é",
+      "tryAction": "Experimente uma ação",
+      "allowed": "Permitido",
+      "denied": "Negado",
+      "auditTitle": "Registro de auditoria",
+      "auditEmpty": "Nada ainda. Experimente uma ação acima.",
+      "clearLog": "Limpar registro",
+      "auditPermitted": "permitido",
+      "auditDenied": "negado",
+      "role": {
+        "visitor": {
+          "name": "Visitante",
+          "desc": "Não está na lista de membros."
+        },
+        "member": {
+          "name": "Membro",
+          "desc": "Pode criar registros e cuidar do próprio trabalho."
+        },
+        "admin": {
+          "name": "Admin",
+          "desc": "Pode gerenciar membros e editar qualquer registro."
+        },
+        "owner": {
+          "name": "Dono",
+          "desc": "Um por grupo. Definido quando o grupo é criado."
+        }
+      },
+      "action": {
+        "create": "Criar um registro",
+        "editOwn": "Editar seu próprio registro",
+        "editOther": "Editar o registro de outra pessoa",
+        "addMember": "Adicionar um membro",
+        "setRole": "Mudar um papel",
+        "viewAudit": "Ler o registro de auditoria"
+      },
+      "ok": {
+        "create": "Qualquer membro pode criar registros. O registro é escrito no repositório do grupo com o seu nome carimbado como autor.",
+        "editOwn": "O registro é seu, então o papel de membro basta. O serviço confere o carimbo de autoria primeiro.",
+        "editOther": "Admins podem editar qualquer registro do grupo, não importa quem o escreveu.",
+        "addMember": "Admins podem adicionar pessoas como membro ou admin. Ninguém pode ser adicionado como dono.",
+        "setRole": "Só o dono pode mudar papéis. Nem mesmo o dono pode criar um segundo dono.",
+        "viewAudit": "Admins e o dono podem ler a história completa do grupo."
+      },
+      "no": {
+        "visitor": "Você não está na lista de membros, então o pedido para na porta. A tentativa ainda assim é anotada no registro de auditoria.",
+        "editOther": "Esse registro pertence a outra pessoa. Membros só podem editar o próprio trabalho. Editar o registro de outra pessoa exige um admin.",
+        "addMember": "Só admins e o dono podem adicionar novos membros.",
+        "setRole": "Mudar papéis é tarefa exclusiva do dono. Admins não podem promover nem rebaixar ninguém.",
+        "viewAudit": "O registro de auditoria só está aberto aos admins e ao dono."
+      }
+    },
+    "map": {
+      "heading": "As peças em movimento",
+      "intro": "O CGS é um pequeno time de peças. Toque em cada uma para ver seu trabalho.",
+      "ariaLabel": "Mapa das peças do serviço de grupo",
+      "nodes": {
+        "pds": {
+          "name": "Seu PDS",
+          "desc": "Seu próprio servidor de dados. Ele assina o passe curto que prova quem você é e encaminha seu pedido. Sua senha nunca viaja para lugar nenhum."
+        },
+        "cgs": {
+          "name": "Serviço do grupo",
+          "desc": "O guardião da porta. Ele confere passes, consulta papéis, mantém os livros e é o único que pode agir na conta do grupo."
+        },
+        "gpds": {
+          "name": "PDS do grupo",
+          "desc": "Um servidor de dados completamente normal que guarda os registros do grupo. Ele não sabe nada sobre papéis ou membros. Ele simplesmente confia no serviço que guarda suas credenciais."
+        },
+        "members": {
+          "name": "Lista de membros",
+          "desc": "Um pequeno banco de dados privado, um por grupo. Guarda a identidade e o papel de cada membro e lembra quem é o autor de cada registro."
+        },
+        "audit": {
+          "name": "Registro de auditoria",
+          "desc": "A memória do grupo. Cada tentativa fica anotada: quem, o quê, quando e se foi permitida ou negada."
+        },
+        "vault": {
+          "name": "Credenciais lacradas",
+          "desc": "A senha da conta do grupo, guardada criptografada. Membros e apps nunca a veem. Só o serviço pode abri-la, e só para falar com o PDS do grupo."
+        }
+      }
+    },
+    "safety": {
+      "heading": "Segurança embutida",
+      "intro": "Três hábitos mantêm uma conta compartilhada segura.",
+      "pass": {
+        "title": "Passes morrem rápido",
+        "text": "Cada pedido carrega um passe fresco e assinado. Ele funciona exatamente uma vez e expira depois de dois minutos, então um passe roubado quase não vale nada."
+      },
+      "vault": {
+        "title": "Credenciais ficam lacradas",
+        "text": "A senha do grupo é guardada criptografada. Membros nunca a veem e apps nunca a tocam. Só o serviço guardião pode usá-la."
+      },
+      "log": {
+        "title": "Nada acontece sem ser visto",
+        "text": "Permitida ou negada, cada ação entra no registro de auditoria do grupo com o quem, o quê e o quando."
+      }
+    },
+    "more": {
+      "heading": "Continue explorando",
+      "lexiconsTitle": "Esquemas de dados",
+      "lexiconsDesc": "Os formatos abertos de registro que vivem dentro do repositório de cada grupo.",
+      "epdsTitle": "Como o ePDS funciona",
+      "epdsDesc": "A porta de entrada amigável que conecta pessoas só com um e-mail.",
+      "githubTitle": "CGS no GitHub",
+      "githubDesc": "O código-fonte completo do serviço de grupos, aberto para qualquer pessoa ler, rodar e melhorar."
     }
   }
 }

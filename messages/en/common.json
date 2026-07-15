@@ -1229,7 +1229,9 @@
     },
     "sectionsAria": "Schema sections",
     "epdsLinkTitle": "How ePDS works",
-    "epdsLinkDesc": "An interactive tour of the login system and the servers behind these records."
+    "epdsLinkDesc": "An interactive tour of the login system and the servers behind these records.",
+    "cgsLinkTitle": "How group accounts work",
+    "cgsLinkDesc": "An interactive tour of the guard service that lets a whole team share one account."
   },
   "taina": {
     "meta": {
@@ -1916,7 +1918,197 @@
       "lexiconsTitle": "Data schemas",
       "lexiconsDesc": "The open record formats that live inside each PDS.",
       "githubTitle": "ePDS on GitHub",
-      "githubDesc": "The full source code, open for anyone to read, run, and improve."
+      "githubDesc": "The full source code, open for anyone to read, run, and improve.",
+      "cgsTitle": "How group accounts work",
+      "cgsDesc": "The guard service that lets a whole team share one group account safely."
+    }
+  },
+  "cgs": {
+    "metaTitle": "How group accounts work",
+    "metaDescription": "An interactive tour of the Certified Group Service, the guard that lets a whole team share one AT Protocol account with roles, clear rules, and a full audit trail.",
+    "kicker": "Certified Group Service",
+    "title": "How group accounts work",
+    "lead": "On the AT Protocol, an account normally belongs to exactly one person. But forests are mapped by teams. The Certified Group Service, CGS for short, lets a whole team share one account safely, with roles, clear rules, and a memory of everything that happens. This page shows how it works, step by step.",
+    "whatIs": {
+      "heading": "What is a group account?",
+      "p1": "Every organization on GainForest lives in a normal AT Protocol account. A normal account has one password and one owner. That is fine for a person, but a team needs more: many people writing to the same place, without passing the account password around.",
+      "p2": "CGS is a small guard service that stands in front of the group's account. It keeps the account credentials in a sealed box, holds a member list with roles, and checks every request against the rules before letting it through. Team members never see the password. To the rest of the network the group looks like one ordinary account, so any app can read its records as usual."
+    },
+    "repo": {
+      "heading": "One account, many hands",
+      "intro": "Three teammates, one shared repo. Tap a teammate and they publish a record. Watch how every record remembers its author.",
+      "repoLabel": "The group's repo",
+      "empty": "Nothing here yet. Tap a teammate above.",
+      "stamp": "by {name}",
+      "roleOwner": "Owner",
+      "roleAdmin": "Admin",
+      "roleMember": "Member",
+      "clear": "Clear",
+      "caption": "All records land in the same repo, but the service writes down who created each one. That memory lets members edit their own work, while changing someone else's work takes an admin."
+    },
+    "journey": {
+      "heading": "The journey of a request",
+      "intro": "Press play, or step through it yourself. The moving dot is your request on its round trip.",
+      "play": "Play",
+      "pause": "Pause",
+      "back": "Back",
+      "next": "Next",
+      "stepLabel": "Step {n} of {total}",
+      "ariaLabel": "Request journey diagram",
+      "nodes": {
+        "app": "Your app",
+        "pds": "Your PDS",
+        "cgs": "Group service",
+        "gpds": "Group's PDS"
+      },
+      "steps": {
+        "s1": {
+          "title": "You press Publish",
+          "text": "It starts in the app. You are signed in as yourself, and you want to add a record to your group's account."
+        },
+        "s2": {
+          "title": "The app calls your own PDS",
+          "text": "The app sends the request to your personal data server with a forwarding note attached: please pass this on to the group's service."
+        },
+        "s3": {
+          "title": "Your PDS signs a pass",
+          "text": "Your PDS creates a short-lived pass signed with your own key. The pass names you, the service, and the exact action. It works once and dies after two minutes."
+        },
+        "s4": {
+          "title": "The guard checks the pass",
+          "text": "The group service checks the signature against your public identity and makes sure the pass is fresh and unused. A copied pass is useless."
+        },
+        "s5": {
+          "title": "Role check",
+          "text": "The service looks you up in the group's member list. Member, admin, or owner? Your role decides which actions are open to you."
+        },
+        "s6": {
+          "title": "Author check",
+          "text": "For edits and deletes there is one more question: who wrote this record? Members may change their own records. Touching someone else's work takes an admin."
+        },
+        "s7": {
+          "title": "Everything is written down",
+          "text": "Whatever the answer, the attempt goes into the group's audit log: who, what, when, and whether it was allowed or denied."
+        },
+        "s8": {
+          "title": "The service does the write",
+          "text": "If all checks pass, the service performs the action on the group's own PDS, using credentials that only it holds, and stamps you as the author."
+        },
+        "s9": {
+          "title": "Done",
+          "text": "The answer travels back to your app. The record now sits in the group's repo, visible to the whole network like any other AT Protocol record."
+        }
+      }
+    },
+    "roles": {
+      "heading": "Who can do what",
+      "intro": "Pick a hat, then try some actions. Every attempt, allowed or denied, lands in the audit log below.",
+      "youAre": "You are",
+      "tryAction": "Try an action",
+      "allowed": "Allowed",
+      "denied": "Denied",
+      "auditTitle": "Audit log",
+      "auditEmpty": "Nothing yet. Try an action above.",
+      "clearLog": "Clear log",
+      "auditPermitted": "permitted",
+      "auditDenied": "denied",
+      "role": {
+        "visitor": {
+          "name": "Visitor",
+          "desc": "Not on the member list at all."
+        },
+        "member": {
+          "name": "Member",
+          "desc": "Can create records and manage their own work."
+        },
+        "admin": {
+          "name": "Admin",
+          "desc": "Can manage members and edit any record."
+        },
+        "owner": {
+          "name": "Owner",
+          "desc": "One per group. Set when the group is created."
+        }
+      },
+      "action": {
+        "create": "Create a record",
+        "editOwn": "Edit your own record",
+        "editOther": "Edit someone else's record",
+        "addMember": "Add a member",
+        "setRole": "Change a role",
+        "viewAudit": "Read the audit log"
+      },
+      "ok": {
+        "create": "Any member can create records. The record is written to the group's repo with your name stamped on it as the author.",
+        "editOwn": "It is your record, so a member role is enough. The service checks the author stamp first.",
+        "editOther": "Admins can edit any record in the group, no matter who wrote it.",
+        "addMember": "Admins can add new people as member or admin. Nobody can be added as owner.",
+        "setRole": "Only the owner can change roles. Even the owner cannot create a second owner.",
+        "viewAudit": "Admins and the owner can read the group's full history."
+      },
+      "no": {
+        "visitor": "You are not on the member list, so the request stops at the door. The attempt is still written into the audit log.",
+        "editOther": "That record belongs to someone else. Members can only edit their own work. Editing another person's record takes an admin.",
+        "addMember": "Only admins and the owner can add new members.",
+        "setRole": "Changing roles is the owner's job alone. Admins cannot promote or demote anyone.",
+        "viewAudit": "The audit log is only open to admins and the owner."
+      }
+    },
+    "map": {
+      "heading": "The moving parts",
+      "intro": "CGS is a small team of parts. Tap each one to see its job.",
+      "ariaLabel": "Map of the group service parts",
+      "nodes": {
+        "pds": {
+          "name": "Your PDS",
+          "desc": "Your own data server. It signs the short pass that proves who you are and forwards your request. Your password never travels anywhere."
+        },
+        "cgs": {
+          "name": "Group service",
+          "desc": "The guard at the door. It checks passes, looks up roles, keeps the books, and is the only one that can act on the group's account."
+        },
+        "gpds": {
+          "name": "Group's PDS",
+          "desc": "A completely normal data server that holds the group's records. It knows nothing about roles or members. It simply trusts the service that holds its credentials."
+        },
+        "members": {
+          "name": "Member list",
+          "desc": "A small private database, one per group. It stores each member's identity and role, and remembers who authored every record."
+        },
+        "audit": {
+          "name": "Audit log",
+          "desc": "The group's memory. Every attempt is written down: who, what, when, and whether it was allowed or denied."
+        },
+        "vault": {
+          "name": "Sealed credentials",
+          "desc": "The group's account password, stored encrypted. Members and apps never see it. Only the service can open it, and only to talk to the group's PDS."
+        }
+      }
+    },
+    "safety": {
+      "heading": "Built-in safety",
+      "intro": "Three habits keep a shared account safe.",
+      "pass": {
+        "title": "Passes die fast",
+        "text": "Every request carries a fresh signed pass. It works exactly once and expires after two minutes, so a stolen pass is close to worthless."
+      },
+      "vault": {
+        "title": "Credentials stay sealed",
+        "text": "The group's password is stored encrypted. Members never see it and apps never touch it. Only the guard service can use it."
+      },
+      "log": {
+        "title": "Nothing happens unseen",
+        "text": "Allowed or denied, every action lands in the group's audit log with the who, the what, and the when."
+      }
+    },
+    "more": {
+      "heading": "Keep exploring",
+      "lexiconsTitle": "Data schemas",
+      "lexiconsDesc": "The open record formats that live inside each group's repo.",
+      "epdsTitle": "How ePDS works",
+      "epdsDesc": "The friendly front door that signs people in with just an email.",
+      "githubTitle": "CGS on GitHub",
+      "githubDesc": "The full source code of the group service, open for anyone to read, run, and improve."
     }
   }
 }
