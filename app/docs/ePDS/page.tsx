@@ -9,8 +9,6 @@ import { CompareLogin } from "./_components/CompareLogin";
 import { KeyVault } from "./_components/KeyVault";
 import { LoginJourney } from "./_components/LoginJourney";
 
-export const dynamic = "force-static";
-
 const GITHUB_URL = "https://github.com/hypercerts-org/ePDS";
 
 export async function generateMetadata(): Promise<Metadata> {

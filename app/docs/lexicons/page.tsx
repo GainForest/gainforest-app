@@ -8,8 +8,6 @@ import { SchemaGraph } from "./_components/SchemaGraph";
 import { GROUPS } from "./_lib/registry";
 import { lexiconDescription, lexiconHref } from "./_lib/types";
 
-export const dynamic = "force-static";
-
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("common.docs");
   return {

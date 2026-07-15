@@ -8,8 +8,6 @@ import { byId, groupOf, KNOWN_IDS, LEXICONS } from "../_lib/registry";
 import { lexiconDescription, lexiconHref, mainDefName, shortName } from "../_lib/types";
 import type { DocsLabels } from "../_lib/labels";
 
-export const dynamic = "force-static";
-
 type Params = { nsid: string };
 
 export function generateStaticParams(): Params[] {
