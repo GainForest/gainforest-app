@@ -699,6 +699,8 @@
       "reanalyzeAria": "Re-run AI for a new suggestion",
       "uploadingProgress": "Adding {done} of {total}",
       "identifyingProgress": "Identifying {done} of {total}…",
+      "preparingProgress": "Preparing {done} of {total}…",
+      "skipIdentify": "Skip AI suggestions",
       "moreWays": "More ways",
       "uploadCsv": "Upload CSV data",
       "photoTooLarge": "This photo is too large to upload. Try a smaller photo.",

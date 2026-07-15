@@ -17,6 +17,14 @@
 // uncompressed and then die server-side with FUNCTION_PAYLOAD_TOO_LARGE.
 const MAX_IMAGE_BYTES = 3 * 1024 * 1024;
 
+// AI identification and on-screen previews don't need the full-resolution
+// photo: a ~1024px JPEG (usually 100–300 KB) is plenty for both. Big batches
+// then stop pushing hundreds of megabytes through the identify endpoint, and
+// the browser stops decoding dozens of full-size photos just to draw 80px
+// thumbnails.
+const THUMBNAIL_MAX_DIM = 1024;
+const THUMBNAIL_QUALITY = 0.78;
+
 /** The slice of metadata we can recover from a photo's EXIF block. */
 export type ImageMetadata = {
   eventDate?: string;
@@ -343,8 +351,18 @@ function canvasToBlob(canvas: HTMLCanvasElement, mimeType: string, quality: numb
 
 export async function compressImageIfNeeded(file: File): Promise<{ file: File; compressed: boolean; originalSize: number }> {
   if (file.size <= MAX_IMAGE_BYTES) return { file, compressed: false, originalSize: file.size };
-
   const bitmap = await createImageBitmap(file);
+  try {
+    return await compressBitmap(bitmap, file);
+  } finally {
+    bitmap.close();
+  }
+}
+
+async function compressBitmap(
+  bitmap: ImageBitmap,
+  file: File,
+): Promise<{ file: File; compressed: boolean; originalSize: number }> {
   const canvas = document.createElement("canvas");
   const ctx = canvas.getContext("2d");
   if (!ctx) throw new Error("Could not prepare image.");
@@ -373,4 +391,51 @@ export async function compressImageIfNeeded(file: File): Promise<{ file: File; c
   }
 
   throw new Error("Could not prepare image.");
+}
+
+async function thumbnailFromBitmap(bitmap: ImageBitmap, file: File): Promise<File> {
+  const scale = Math.min(1, THUMBNAIL_MAX_DIM / Math.max(bitmap.width, bitmap.height));
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.max(1, Math.round(bitmap.width * scale));
+  canvas.height = Math.max(1, Math.round(bitmap.height * scale));
+  const ctx = canvas.getContext("2d");
+  if (!ctx) throw new Error("Could not prepare image.");
+  ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+  const blob = await canvasToBlob(canvas, "image/jpeg", THUMBNAIL_QUALITY);
+  const extensionless = file.name.replace(/\.[^.]+$/, "") || "observation";
+  return new File([blob], `${extensionless}-thumb.jpg`, { type: "image/jpeg", lastModified: file.lastModified });
+}
+
+export type PreparedObservationImage = {
+  /** The photo to publish — downscaled only when the original is oversized. */
+  file: File;
+  /**
+   * Small JPEG stand-in for previews and AI identification. Null when the
+   * browser can't decode the source at all (e.g. HEIC on Chrome), in which
+   * case callers should fall back to the original file.
+   */
+  thumbnail: File | null;
+};
+
+/**
+ * One-decode preparation for an observation photo: compress it when it exceeds
+ * the blob limit AND derive the small preview/analysis thumbnail from the same
+ * bitmap. Decoding a large photo is the expensive part, so sharing the bitmap
+ * roughly halves the work compared to running the two steps separately.
+ */
+export async function prepareObservationImage(source: File): Promise<PreparedObservationImage> {
+  let bitmap: ImageBitmap;
+  try {
+    bitmap = await createImageBitmap(source);
+  } catch {
+    // Undecodable in this browser — publish the original untouched, no thumbnail.
+    return { file: source, thumbnail: null };
+  }
+  try {
+    const thumbnail = await thumbnailFromBitmap(bitmap, source).catch(() => null);
+    const file = source.size <= MAX_IMAGE_BYTES ? source : (await compressBitmap(bitmap, source)).file;
+    return { file, thumbnail };
+  } finally {
+    bitmap.close();
+  }
 }

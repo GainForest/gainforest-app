@@ -699,6 +699,8 @@
       "reanalyzeAria": "Endesha AI tena kwa pendekezo jipya",
       "uploadingProgress": "Inaongeza {done} kati ya {total}",
       "identifyingProgress": "Inatambua {done} kati ya {total}…",
+      "preparingProgress": "Inaandaa {done} kati ya {total}…",
+      "skipIdentify": "Ruka mapendekezo ya AI",
       "moreWays": "Njia zaidi",
       "uploadCsv": "Pakia data ya CSV",
       "photoTooLarge": "Picha hii ni kubwa mno kupakiwa. Jaribu picha ndogo zaidi.",
