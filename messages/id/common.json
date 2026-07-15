@@ -1233,7 +1233,9 @@
     "cgsLinkTitle": "Cara kerja akun grup",
     "cgsLinkDesc": "Tur interaktif tentang layanan penjaga yang memungkinkan satu tim berbagi satu akun.",
     "atprotoLinkTitle": "Cara kerja AT Protocol",
-    "atprotoLinkDesc": "Tur interaktif jaringan terbuka tempat semua ini dibangun."
+    "atprotoLinkDesc": "Tur interaktif jaringan terbuka tempat semua ini dibangun.",
+    "teeEpdsLinkTitle": "Penandatanganan ePDS terlindungi",
+    "teeEpdsLinkDesc": "Lihat cara kunci privat tetap berada di perangkat keras terlindungi."
   },
   "taina": {
     "meta": {
@@ -1924,7 +1926,9 @@
       "cgsTitle": "Cara kerja akun grup",
       "cgsDesc": "Layanan penjaga yang memungkinkan satu tim berbagi satu akun grup dengan aman.",
       "atprotoTitle": "Cara kerja AT Protocol",
-      "atprotoDesc": "Tur interaktif jaringan terbuka tempat semua ini dibangun."
+      "atprotoDesc": "Tur interaktif jaringan terbuka tempat semua ini dibangun.",
+      "teeTitle": "Penandatanganan ePDS terlindungi",
+      "teeDesc": "Lihat cara kunci privat tetap berada di perangkat keras terlindungi."
     }
   },
   "cgs": {
@@ -2252,6 +2256,142 @@
       "siteDesc": "Situs resmi protokol, dengan spesifikasi lengkap dan panduan untuk pembangun.",
       "ethosNote": "Banyak ide di halaman ini berasal dari esai tim protokol tentang filosofi desainnya:",
       "ethosLink": "Ethos atproto"
+    }
+  },
+  "teeEpds": {
+    "metaTitle": "Cara penandatanganan TEE melindungi kunci ePDS",
+    "metaDescription": "Panduan interaktif untuk penandatangan TEE opsional di ePDS, dengan diagram sederhana tentang kunci terlindungi, penandatanganan catatan, persetujuan dompet, dan batasannya.",
+    "kicker": "penandatanganan ePDS terlindungi",
+    "title": "Kunci yang tetap berada di dalam komputer terlindungi",
+    "lead": "ePDS dapat menyimpan kunci akun dan dompet di dalam Trusted Execution Environment, atau TEE. Kunci dibuat, disimpan, dan digunakan di dalam memori terlindungi. Server meminta tanda tangan, tetapi tidak pernah menerima kunci privat.",
+    "facts": {
+      "keys": {
+        "title": "Kunci tetap di dalam",
+        "text": "Kunci privat tidak pernah masuk ke aplikasi biasa atau proses PDS."
+      },
+      "protection": {
+        "title": "Kode dapat diperiksa",
+        "text": "Bukti perangkat keras dapat menunjukkan kode penandatangan yang sedang berjalan."
+      },
+      "wallet": {
+        "title": "Pengguna tetap menyetujui",
+        "text": "Tanda tangan dompet memerlukan persetujuan perangkat pengguna yang terdaftar."
+      }
+    },
+    "what": {
+      "heading": "Apa yang ditambahkan ekstensi TEE?",
+      "intro": "Ekstensi ini menambahkan layanan penandatangan kecil di samping ePDS biasa. Bagian lain tetap memakai jalur standar AT Protocol.",
+      "p1": "PDS biasa memerlukan kunci privat untuk menandatangani setiap pembaruan data. Dengan ekstensi TEE, ePDS memindahkan tugas itu ke mesin virtual rahasia. PDS mengirim sidik jari 32 byte dari pembaruan. Penandatangan terlindungi mengembalikan tanda tangan. Kunci privat tidak pernah keluar dari memori terlindungi.",
+      "p2": "Penandatangan yang sama juga dapat membuat dompet Ethereum atau Solana untuk setiap akun. Kunci dompet ini terpisah dari kunci akun. Mengetahui satu kunci tidak memberi petunjuk tentang kunci lain."
+    },
+    "boundary": {
+      "heading": "Di mana kunci privat berada?",
+      "intro": "Ganti antara dua rancangan. Ikuti permintaan yang bergerak dan lihat sisi mana yang pernah memegang kunci.",
+      "serverTab": "Kunci di server",
+      "teeTab": "Kunci di dalam TEE",
+      "pdsName": "Server PDS",
+      "serverKeyName": "Berkas kunci privat",
+      "teeName": "Penandatangan terlindungi",
+      "serverResult": "Server dapat membaca kunci",
+      "teeResult": "Kunci tetap terlindungi",
+      "serverDesc": "Proses PDS membuka berkas kunci dan menandatangani pembaruan sendiri. Pihak yang menguasai server sepenuhnya mungkin dapat menyalin kunci.",
+      "teeDesc": "PDS hanya mengirim sidik jari ke penandatangan terlindungi. PDS menerima tanda tangan, bukan kunci. Operator mesin pun tidak dapat sekadar membuka memori terlindungi dan menyalinnya."
+    },
+    "journey": {
+      "heading": "Cara satu catatan ditandatangani",
+      "intro": "Tekan putar atau pilih langkah. TEE hanya menandatangani. Catatan tetap bergerak melalui PDS biasa dan jaringan AT Protocol.",
+      "play": "Putar",
+      "pause": "Jeda",
+      "back": "Kembali",
+      "next": "Berikutnya",
+      "stepLabel": "Langkah {n} dari {total}",
+      "jumpTo": "Ke langkah {step}",
+      "nodes": {
+        "app": "Aplikasi Anda",
+        "pds": "PDS",
+        "tee": "Penandatangan TEE",
+        "network": "Jaringan"
+      },
+      "steps": {
+        "s1": {
+          "title": "Aplikasi menyimpan catatan",
+          "text": "Anda menerbitkan pengamatan, memperbarui profil, atau membuat catatan lain. Aplikasi mengirimnya ke PDS seperti biasa."
+        },
+        "s2": {
+          "title": "PDS menyiapkan pembaruan",
+          "text": "PDS memeriksa permintaan dan membuat versi data berikutnya. Pembaruan diubah menjadi sidik jari pendek."
+        },
+        "s3": {
+          "title": "TEE menandatangani sidik jari",
+          "text": "Penandatangan membuat kunci akun di dalam memori terlindungi dan menandatangani sidik jari. Hanya tanda tangan yang kembali."
+        },
+        "s4": {
+          "title": "Jaringan memeriksanya",
+          "text": "Pembaruan bertanda tangan masuk ke riwayat catatan. Layanan lain memeriksanya dengan kunci publik di identitas akun."
+        }
+      }
+    },
+    "separate": {
+      "heading": "Dua jalur yang tidak berbagi kunci",
+      "intro": "Penandatanganan akun dan dompet memakai layanan terlindungi yang sama, tetapi kunci dan aturannya berbeda.",
+      "repo": {
+        "title": "Jalur catatan akun",
+        "text": "PDS dapat meminta tanda tangan untuk pembaruan data biasa. Kunci ini hanya menandatangani catatan AT Protocol. Kunci ini tidak dapat menandatangani transaksi Ethereum."
+      },
+      "wallet": {
+        "title": "Jalur dompet",
+        "text": "Dompet memakai kunci Ethereum dan Solana yang terpisah. Sebelum menandatangani, layanan juga memeriksa persetujuan dari perangkat pengguna yang terdaftar."
+      }
+    },
+    "walletGate": {
+      "heading": "Mengapa server tidak dapat membelanjakan dana dompet",
+      "intro": "Coba kedua permintaan. Token masuk dapat menampilkan alamat publik, tetapi tidak cukup untuk membuat tanda tangan dompet.",
+      "serverAttempt": "PDS meminta sendiri",
+      "userAttempt": "Pengguna menyetujui dulu",
+      "serverNode": "Permintaan PDS",
+      "userNode": "Permintaan bertanda tangan pengguna",
+      "teeNode": "Kunci dompet TEE",
+      "approved": "Tanda tangan disetujui",
+      "denied": "Permintaan ditolak",
+      "approvedDesc": "Browser menandatangani permintaan singkat dengan kunci terdaftar. TEE memeriksa bukti, waktu, dan nomor sekali pakai sebelum memakai kunci dompet.",
+      "deniedDesc": "Token PDS saja tidak cukup. Penandatangan menolak permintaan karena tidak ada bukti dari perangkat pengguna yang terdaftar."
+    },
+    "proof": {
+      "heading": "Bagaimana aplikasi dapat mempercayai penandatangan?",
+      "intro": "TEE dapat membuat laporan perangkat keras yang disebut atestasi. Laporan ini membantu memeriksa mesin dan kode sebelum dipercaya.",
+      "cardLabel": "Bukti dari perangkat keras",
+      "text": "Penandatangan membuat identitas publiknya di dalam memori terlindungi. Laporan perangkat keras mengikat identitas itu ke kode yang berjalan. PDS dapat mewajibkan laporan sebelum mulai. Jika kode berubah, laporan ikut berubah."
+    },
+    "limits": {
+      "heading": "Hal yang tidak diselesaikan perlindungan ini",
+      "intro": "Kunci terlindungi membantu, tetapi tidak membuat seluruh sistem sempurna. Batasan ini penting.",
+      "onboarding": {
+        "title": "Pengaturan dompet pertama",
+        "text": "Pendaftaran perangkat pertama mempercayai layanan satu kali. Versi masa depan dapat memakai passkey untuk mengurangi kepercayaan ini."
+      },
+      "uptime": {
+        "title": "Ketersediaan layanan",
+        "text": "Host masih dapat mematikan mesin atau memblokir permintaan. TEE melindungi rahasia, bukan ketersediaan."
+      },
+      "server": {
+        "title": "Permintaan catatan buruk",
+        "text": "PDS yang diretas dapat meminta kunci akun menandatangani pembaruan buruk. Kunci pemulihan dan riwayat identitas publik membantu pemilik membatalkannya."
+      },
+      "recovery": {
+        "title": "Cadangan dan pengulangan",
+        "text": "Persetujuan dompet dan nomor sekali pakai perlu dicadangkan dengan hati-hati. Mengembalikan penyimpanan dapat membuka permintaan lama, tetapi tidak dapat membuat persetujuan pengguna baru."
+      }
+    },
+    "more": {
+      "heading": "Jelajahi lebih lanjut",
+      "epdsTitle": "Cara login ePDS bekerja",
+      "epdsDesc": "Lihat pintu masuk tanpa kata sandi dan layanan biasa di sekitarnya.",
+      "lexiconsTitle": "Skema data",
+      "lexiconsDesc": "Jelajahi format catatan terbuka yang tersimpan di setiap PDS.",
+      "designTitle": "Rancangan teknis",
+      "designDesc": "Baca model ancaman, aturan penandatanganan, dan catatan implementasi.",
+      "githubTitle": "ePDS di GitHub",
+      "githubDesc": "Baca kode sumber dan jalankan proyeknya."
     }
   }
 }

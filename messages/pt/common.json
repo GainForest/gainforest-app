@@ -1233,7 +1233,9 @@
     "cgsLinkTitle": "Como funcionam as contas de grupo",
     "cgsLinkDesc": "Um passeio interativo pelo serviço guardião que permite que uma equipe inteira compartilhe uma conta.",
     "atprotoLinkTitle": "Como funciona o AT Protocol",
-    "atprotoLinkDesc": "Um passeio interativo pela rede aberta sobre a qual tudo isto é construído."
+    "atprotoLinkDesc": "Um passeio interativo pela rede aberta sobre a qual tudo isto é construído.",
+    "teeEpdsLinkTitle": "Assinatura protegida do ePDS",
+    "teeEpdsLinkDesc": "Veja como chaves privadas podem ficar dentro de hardware protegido."
   },
   "taina": {
     "meta": {
@@ -1924,7 +1926,9 @@
       "cgsTitle": "Como funcionam as contas de grupo",
       "cgsDesc": "O serviço guardião que permite que uma equipe inteira compartilhe uma conta de grupo com segurança.",
       "atprotoTitle": "Como funciona o AT Protocol",
-      "atprotoDesc": "Um passeio interativo pela rede aberta sobre a qual tudo isto é construído."
+      "atprotoDesc": "Um passeio interativo pela rede aberta sobre a qual tudo isto é construído.",
+      "teeTitle": "Assinatura protegida do ePDS",
+      "teeDesc": "Veja como chaves privadas podem ficar dentro de hardware protegido."
     }
   },
   "cgs": {
@@ -2252,6 +2256,142 @@
       "siteDesc": "O site oficial do protocolo, com as especificações completas e guias para quem constrói.",
       "ethosNote": "Muitas ideias desta página vêm do ensaio da equipe do protocolo sobre sua filosofia de design:",
       "ethosLink": "O ethos do atproto"
+    }
+  },
+  "teeEpds": {
+    "metaTitle": "Como a assinatura TEE protege as chaves do ePDS",
+    "metaDescription": "Um guia interativo do assinador TEE opcional do ePDS, com diagramas simples sobre chaves protegidas, assinatura de registros, aprovação da carteira e limites.",
+    "kicker": "assinatura protegida do ePDS",
+    "title": "Chaves que ficam dentro de um computador protegido",
+    "lead": "O ePDS pode manter as chaves da conta e da carteira dentro de um Ambiente de Execução Confiável, ou TEE. A chave é criada, guardada e usada em memória protegida. O servidor pede assinaturas, mas nunca recebe a chave privada.",
+    "facts": {
+      "keys": {
+        "title": "As chaves ficam dentro",
+        "text": "As chaves privadas nunca entram no aplicativo normal nem no processo PDS."
+      },
+      "protection": {
+        "title": "O código pode ser verificado",
+        "text": "Uma prova de hardware pode mostrar qual código assinador está em execução."
+      },
+      "wallet": {
+        "title": "A pessoa ainda aprova",
+        "text": "Uma assinatura de carteira precisa da aprovação do dispositivo cadastrado."
+      }
+    },
+    "what": {
+      "heading": "O que a extensão TEE adiciona?",
+      "intro": "A extensão adiciona um pequeno serviço de assinatura ao lado do ePDS normal. Todo o resto continua usando os caminhos padrão do AT Protocol.",
+      "p1": "Um PDS normal precisa de uma chave privada para assinar cada atualização dos seus dados. Com a extensão TEE, o ePDS move esse trabalho para uma máquina virtual confidencial. O PDS envia uma impressão de 32 bytes da atualização. O assinador protegido devolve uma assinatura. A chave privada nunca sai da memória protegida.",
+      "p2": "O mesmo assinador também pode derivar uma carteira Ethereum ou Solana para cada conta. Essas chaves são separadas da chave de assinatura da conta. Conhecer uma chave não revela nada sobre outra."
+    },
+    "boundary": {
+      "heading": "Onde fica a chave privada?",
+      "intro": "Alterne entre os dois projetos. Siga a solicitação em movimento e veja qual lado chega a ter a chave.",
+      "serverTab": "Chave no servidor",
+      "teeTab": "Chave dentro do TEE",
+      "pdsName": "Servidor PDS",
+      "serverKeyName": "Arquivo de chave privada",
+      "teeName": "Assinador protegido",
+      "serverResult": "O servidor pode ler a chave",
+      "teeResult": "A chave fica protegida",
+      "serverDesc": "O processo PDS abre um arquivo de chave e assina a atualização. Quem controla totalmente o servidor pode conseguir copiar essa chave.",
+      "teeDesc": "O PDS envia apenas uma impressão ao assinador protegido. Ele recebe uma assinatura, não a chave. Nem o operador pode simplesmente abrir a memória protegida e copiá-la."
+    },
+    "journey": {
+      "heading": "Como um registro é assinado",
+      "intro": "Pressione reproduzir ou escolha uma etapa. O TEE só assina. Seus registros continuam passando pelo PDS normal e pela rede AT Protocol.",
+      "play": "Reproduzir",
+      "pause": "Pausar",
+      "back": "Voltar",
+      "next": "Próximo",
+      "stepLabel": "Etapa {n} de {total}",
+      "jumpTo": "Ir para a etapa {step}",
+      "nodes": {
+        "app": "Seu aplicativo",
+        "pds": "PDS",
+        "tee": "Assinador TEE",
+        "network": "Rede"
+      },
+      "steps": {
+        "s1": {
+          "title": "Seu aplicativo salva um registro",
+          "text": "Você publica uma observação, atualiza um perfil ou cria outro registro. O aplicativo envia ao PDS como sempre."
+        },
+        "s2": {
+          "title": "O PDS prepara a atualização",
+          "text": "O PDS verifica a solicitação e cria a próxima versão dos dados. Ele transforma a atualização em uma impressão curta."
+        },
+        "s3": {
+          "title": "O TEE assina a impressão",
+          "text": "O assinador deriva a chave da conta dentro da memória protegida e assina a impressão. Só a assinatura volta."
+        },
+        "s4": {
+          "title": "A rede verifica",
+          "text": "A atualização assinada entra no histórico. Outros serviços conferem com a chave pública da identidade da conta."
+        }
+      }
+    },
+    "separate": {
+      "heading": "Dois caminhos que nunca compartilham chaves",
+      "intro": "A assinatura da conta e da carteira usa o mesmo serviço protegido, mas chaves e regras diferentes.",
+      "repo": {
+        "title": "Caminho dos registros",
+        "text": "O PDS pode pedir uma assinatura para uma atualização normal. Esta chave só assina registros AT Protocol. Ela não pode assinar uma transação Ethereum."
+      },
+      "wallet": {
+        "title": "Caminho da carteira",
+        "text": "A carteira usa chaves separadas para Ethereum e Solana. Antes de assinar, o serviço confere a aprovação do navegador ou dispositivo cadastrado."
+      }
+    },
+    "walletGate": {
+      "heading": "Por que o servidor não pode gastar da carteira",
+      "intro": "Teste as duas solicitações. Um token pode mostrar o endereço público, mas não é suficiente para criar uma assinatura.",
+      "serverAttempt": "PDS pede sozinho",
+      "userAttempt": "A pessoa aprova primeiro",
+      "serverNode": "Solicitação do PDS",
+      "userNode": "Solicitação assinada pela pessoa",
+      "teeNode": "Chave da carteira TEE",
+      "approved": "Assinatura aprovada",
+      "denied": "Solicitação negada",
+      "approvedDesc": "O navegador assina uma solicitação curta com a chave cadastrada. O TEE confere a prova, a hora e um número de uso único antes de usar a chave.",
+      "deniedDesc": "Um token do PDS não basta. O assinador recusa porque a solicitação não tem uma prova do dispositivo cadastrado."
+    },
+    "proof": {
+      "heading": "Como um aplicativo pode confiar no assinador?",
+      "intro": "Um TEE pode criar um relatório de hardware chamado atestação. Ele ajuda a verificar a máquina e o código antes de confiar.",
+      "cardLabel": "Prova apoiada por hardware",
+      "text": "O assinador cria sua identidade pública dentro da memória protegida. Um relatório de hardware liga essa identidade ao código em execução. O PDS pode exigir o relatório antes de iniciar. Se o código mudar, o relatório também muda."
+    },
+    "limits": {
+      "heading": "O que esta proteção não resolve",
+      "intro": "Chaves protegidas ajudam, mas não tornam o sistema perfeito. Estes limites importam.",
+      "onboarding": {
+        "title": "Primeira configuração",
+        "text": "O primeiro cadastro de dispositivo confia uma vez no serviço. Uma versão futura pode usar passkeys para reduzir essa confiança."
+      },
+      "uptime": {
+        "title": "Disponibilidade",
+        "text": "Um operador ainda pode desligar a máquina ou bloquear solicitações. Um TEE protege segredos, não a disponibilidade."
+      },
+      "server": {
+        "title": "Solicitações ruins",
+        "text": "Um PDS invadido pode pedir uma assinatura para uma atualização ruim. Chaves de recuperação e o histórico público ajudam o dono a desfazer isso."
+      },
+      "recovery": {
+        "title": "Cópias e repetição",
+        "text": "Aprovações e números de uso único precisam de cópias cuidadosas. Voltar o armazenamento pode reabrir solicitações antigas, mas não criar uma nova aprovação."
+      }
+    },
+    "more": {
+      "heading": "Continue explorando",
+      "epdsTitle": "Como o login ePDS funciona",
+      "epdsDesc": "Veja a entrada sem senha e os serviços normais ao redor.",
+      "lexiconsTitle": "Esquemas de dados",
+      "lexiconsDesc": "Explore os formatos abertos guardados em cada PDS.",
+      "designTitle": "Projeto técnico",
+      "designDesc": "Leia o modelo de ameaças, as regras de assinatura e as notas de implementação.",
+      "githubTitle": "ePDS no GitHub",
+      "githubDesc": "Leia o código-fonte e execute o projeto."
     }
   }
 }

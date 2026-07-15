@@ -1233,7 +1233,9 @@
     "cgsLinkTitle": "How group accounts work",
     "cgsLinkDesc": "An interactive tour of the guard service that lets a whole team share one account.",
     "atprotoLinkTitle": "How the AT Protocol works",
-    "atprotoLinkDesc": "An interactive tour of the open network everything here is built on."
+    "atprotoLinkDesc": "An interactive tour of the open network everything here is built on.",
+    "teeEpdsLinkTitle": "Protected ePDS signing",
+    "teeEpdsLinkDesc": "See how private keys can stay inside protected hardware."
   },
   "taina": {
     "meta": {
@@ -1924,7 +1926,9 @@
       "cgsTitle": "How group accounts work",
       "cgsDesc": "The guard service that lets a whole team share one group account safely.",
       "atprotoTitle": "How the AT Protocol works",
-      "atprotoDesc": "An interactive tour of the open network everything here is built on."
+      "atprotoDesc": "An interactive tour of the open network everything here is built on.",
+      "teeTitle": "Protected ePDS signing",
+      "teeDesc": "See how private keys can stay inside protected hardware."
     }
   },
   "cgs": {
@@ -2252,6 +2256,142 @@
       "siteDesc": "The official protocol site, with the full specs and guides for builders.",
       "ethosNote": "Many ideas on this page come from the protocol team's essay on its design philosophy:",
       "ethosLink": "The atproto ethos"
+    }
+  },
+  "teeEpds": {
+    "metaTitle": "How TEE signing protects ePDS keys",
+    "metaDescription": "An interactive guide to the optional TEE signer in ePDS, with simple diagrams for protected keys, record signing, wallet approval, and honest limits.",
+    "kicker": "ePDS protected signing",
+    "title": "Keys that stay inside a protected computer",
+    "lead": "ePDS can keep account and wallet keys inside a Trusted Execution Environment, or TEE. The key is created, stored, and used inside protected memory. The server asks for signatures, but it never receives the private key.",
+    "facts": {
+      "keys": {
+        "title": "Keys stay inside",
+        "text": "Private keys never enter the normal app or PDS process."
+      },
+      "protection": {
+        "title": "Code can be checked",
+        "text": "A hardware proof can show which signer code is running."
+      },
+      "wallet": {
+        "title": "The user still approves",
+        "text": "A wallet signature needs approval from the user’s enrolled device."
+      }
+    },
+    "what": {
+      "heading": "What does the TEE extension add?",
+      "intro": "The extension adds a small signing service beside the normal ePDS. Everything else keeps using standard AT Protocol paths.",
+      "p1": "A normal PDS needs a private key to sign each update to your data. With the TEE extension, ePDS moves that job into a confidential virtual machine. The PDS sends a 32-byte fingerprint of the update. The protected signer returns a signature. The private key never leaves protected memory.",
+      "p2": "The same protected signer can also derive an Ethereum or Solana wallet for each account. These wallet keys are separate from the account signing key. Knowing one key gives no clue about another."
+    },
+    "boundary": {
+      "heading": "Where does the private key live?",
+      "intro": "Switch between the two designs. Follow the moving request and notice which side ever holds the key.",
+      "serverTab": "Key on the server",
+      "teeTab": "Key inside the TEE",
+      "pdsName": "PDS server",
+      "serverKeyName": "Private key file",
+      "teeName": "Protected signer",
+      "serverResult": "Server can read the key",
+      "teeResult": "Key stays protected",
+      "serverDesc": "The PDS process opens a key file and signs the update itself. Anyone who fully controls the server may be able to copy that key.",
+      "teeDesc": "The PDS sends only a fingerprint to the protected signer. It receives a signature, not the key. Even the machine operator cannot simply open protected memory and copy it."
+    },
+    "journey": {
+      "heading": "How one record is signed",
+      "intro": "Press play or choose a step. The TEE only signs. Your records still move through the normal PDS and AT Protocol network.",
+      "play": "Play",
+      "pause": "Pause",
+      "back": "Back",
+      "next": "Next",
+      "stepLabel": "Step {n} of {total}",
+      "jumpTo": "Go to step {step}",
+      "nodes": {
+        "app": "Your app",
+        "pds": "PDS",
+        "tee": "TEE signer",
+        "network": "Network"
+      },
+      "steps": {
+        "s1": {
+          "title": "Your app saves a record",
+          "text": "You publish an observation, update a profile, or create another record. The app sends it to your PDS in the usual way."
+        },
+        "s2": {
+          "title": "The PDS prepares the update",
+          "text": "The PDS checks the request and builds the next version of your data. It turns that update into a short fingerprint."
+        },
+        "s3": {
+          "title": "The TEE signs the fingerprint",
+          "text": "The signer derives your account key inside protected memory and signs the fingerprint. Only the signature comes back."
+        },
+        "s4": {
+          "title": "The network checks it",
+          "text": "The signed update joins your record history. Other AT Protocol services check it with the public key in your account identity."
+        }
+      }
+    },
+    "separate": {
+      "heading": "Two paths that never share keys",
+      "intro": "Account signing and wallet signing use the same protected service, but they use different keys and different rules.",
+      "repo": {
+        "title": "Account record path",
+        "text": "The PDS may request a signature for a normal data update. This key signs AT Protocol records only. It cannot sign an Ethereum transaction."
+      },
+      "wallet": {
+        "title": "Wallet path",
+        "text": "The wallet uses separate Ethereum and Solana keys. Before it signs, the protected service also checks approval from the user’s enrolled browser or device."
+      }
+    },
+    "walletGate": {
+      "heading": "Why the server cannot spend from the wallet",
+      "intro": "Try both requests. A login token can show the public wallet address, but it is not enough to make a wallet signature.",
+      "serverAttempt": "PDS asks by itself",
+      "userAttempt": "User approves first",
+      "serverNode": "PDS request",
+      "userNode": "User-signed request",
+      "teeNode": "TEE wallet key",
+      "approved": "Signature approved",
+      "denied": "Request denied",
+      "approvedDesc": "The user’s browser signs a short request with its enrolled key. The TEE checks that proof, the time, and a one-time number before it uses the wallet key.",
+      "deniedDesc": "A PDS token alone is not enough. The protected signer refuses the request because it does not carry proof from the user’s enrolled device."
+    },
+    "proof": {
+      "heading": "How can an app trust the protected signer?",
+      "intro": "A TEE can create a hardware report called an attestation. It helps another service check the machine and the code before trusting it.",
+      "cardLabel": "Hardware-backed proof",
+      "text": "The signer creates its own public identity inside protected memory. A hardware report binds that identity to the running code. The PDS can require this report before it starts. If the signer code changes, the report changes too."
+    },
+    "limits": {
+      "heading": "What this protection does not solve",
+      "intro": "Protected keys are useful, but they do not make the whole system perfect. These limits matter.",
+      "onboarding": {
+        "title": "First wallet setup",
+        "text": "The first device enrollment trusts the service once. A stronger future version can use passkeys to reduce that trust."
+      },
+      "uptime": {
+        "title": "Service availability",
+        "text": "A host can still stop the machine or block requests. A TEE protects secrets, not uptime."
+      },
+      "server": {
+        "title": "Bad record requests",
+        "text": "A hacked PDS could ask the account key to sign a bad data update. Recovery keys and the public identity history help the owner undo this."
+      },
+      "recovery": {
+        "title": "Backups and replay",
+        "text": "Wallet approvals and one-time numbers need careful backup. Rolling storage back can reopen old requests, even though it cannot create a new user approval."
+      }
+    },
+    "more": {
+      "heading": "Keep exploring",
+      "epdsTitle": "How ePDS login works",
+      "epdsDesc": "See the passwordless front door and the normal services around it.",
+      "lexiconsTitle": "Data schemas",
+      "lexiconsDesc": "Explore the open record formats stored inside each PDS.",
+      "designTitle": "Technical design",
+      "designDesc": "Read the full threat model, signing rules, and implementation notes.",
+      "githubTitle": "ePDS on GitHub",
+      "githubDesc": "Read the source code and run the project yourself."
     }
   }
 }

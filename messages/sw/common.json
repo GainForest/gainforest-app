@@ -1233,7 +1233,9 @@
     "cgsLinkTitle": "Jinsi akaunti za kikundi zinavyofanya kazi",
     "cgsLinkDesc": "Ziara shirikishi ya huduma ya ulinzi inayowezesha timu nzima kushiriki akaunti moja.",
     "atprotoLinkTitle": "Jinsi AT Protocol inavyofanya kazi",
-    "atprotoLinkDesc": "Ziara shirikishi ya mtandao wazi ambao yote haya yamejengwa juu yake."
+    "atprotoLinkDesc": "Ziara shirikishi ya mtandao wazi ambao yote haya yamejengwa juu yake.",
+    "teeEpdsLinkTitle": "Utiaji saini salama wa ePDS",
+    "teeEpdsLinkDesc": "Ona jinsi funguo binafsi zinavyoweza kubaki ndani ya maunzi salama."
   },
   "taina": {
     "meta": {
@@ -1924,7 +1926,9 @@
       "cgsTitle": "Jinsi akaunti za kikundi zinavyofanya kazi",
       "cgsDesc": "Huduma ya ulinzi inayowezesha timu nzima kushiriki akaunti moja ya kikundi kwa usalama.",
       "atprotoTitle": "Jinsi AT Protocol inavyofanya kazi",
-      "atprotoDesc": "Ziara shirikishi ya mtandao wazi ambao yote haya yamejengwa juu yake."
+      "atprotoDesc": "Ziara shirikishi ya mtandao wazi ambao yote haya yamejengwa juu yake.",
+      "teeTitle": "Utiaji saini salama wa ePDS",
+      "teeDesc": "Ona jinsi funguo binafsi zinavyoweza kubaki ndani ya maunzi salama."
     }
   },
   "cgs": {
@@ -2252,6 +2256,142 @@
       "siteDesc": "Tovuti rasmi ya itifaki, yenye maelezo kamili na miongozo kwa wajenzi.",
       "ethosNote": "Mawazo mengi ya ukurasa huu yanatoka kwenye insha ya timu ya itifaki kuhusu falsafa yake ya usanifu:",
       "ethosLink": "Ethos ya atproto"
+    }
+  },
+  "teeEpds": {
+    "metaTitle": "Jinsi utiaji saini wa TEE unavyolinda funguo za ePDS",
+    "metaDescription": "Mwongozo shirikishi wa mtia saini wa TEE wa hiari katika ePDS, wenye michoro rahisi kuhusu funguo salama, utiaji saini, idhini ya pochi na mipaka.",
+    "kicker": "utiaji saini salama wa ePDS",
+    "title": "Funguo zinazobaki ndani ya kompyuta iliyolindwa",
+    "lead": "ePDS inaweza kuweka funguo za akaunti na pochi ndani ya Trusted Execution Environment, au TEE. Ufunguo huundwa, huhifadhiwa na hutumiwa ndani ya kumbukumbu iliyolindwa. Seva huomba saini, lakini haipokei ufunguo binafsi.",
+    "facts": {
+      "keys": {
+        "title": "Funguo hubaki ndani",
+        "text": "Funguo binafsi haziingii kwenye programu ya kawaida wala mchakato wa PDS."
+      },
+      "protection": {
+        "title": "Msimbo unaweza kukaguliwa",
+        "text": "Uthibitisho wa maunzi unaweza kuonyesha msimbo gani wa kusaini unaoendeshwa."
+      },
+      "wallet": {
+        "title": "Mtumiaji bado huidhinisha",
+        "text": "Saini ya pochi inahitaji idhini kutoka kifaa cha mtumiaji kilichosajiliwa."
+      }
+    },
+    "what": {
+      "heading": "Kiendelezi cha TEE kinaongeza nini?",
+      "intro": "Kiendelezi kinaongeza huduma ndogo ya kusaini kando ya ePDS ya kawaida. Sehemu nyingine zinaendelea kutumia njia za kawaida za AT Protocol.",
+      "p1": "PDS ya kawaida inahitaji ufunguo binafsi kusaini kila sasisho la data. Kwa kiendelezi cha TEE, ePDS huhamisha kazi hiyo kwenye mashine pepe ya siri. PDS hutuma alama ya baiti 32 ya sasisho. Mtia saini aliyelindwa hurudisha saini. Ufunguo binafsi hautoki kwenye kumbukumbu iliyolindwa.",
+      "p2": "Mtia saini huyo anaweza pia kutengeneza pochi ya Ethereum au Solana kwa kila akaunti. Funguo hizi ni tofauti na ufunguo wa akaunti. Kujua ufunguo mmoja hakutoi taarifa kuhusu mwingine."
+    },
+    "boundary": {
+      "heading": "Ufunguo binafsi unaishi wapi?",
+      "intro": "Badilisha kati ya miundo miwili. Fuata ombi linalosonga na uone upande gani unawahi kushika ufunguo.",
+      "serverTab": "Ufunguo kwenye seva",
+      "teeTab": "Ufunguo ndani ya TEE",
+      "pdsName": "Seva ya PDS",
+      "serverKeyName": "Faili ya ufunguo binafsi",
+      "teeName": "Mtia saini salama",
+      "serverResult": "Seva inaweza kusoma ufunguo",
+      "teeResult": "Ufunguo unabaki salama",
+      "serverDesc": "Mchakato wa PDS hufungua faili ya ufunguo na kusaini sasisho. Anayedhibiti seva yote anaweza kunakili ufunguo huo.",
+      "teeDesc": "PDS hutuma alama tu kwa mtia saini salama. Hupokea saini, si ufunguo. Hata mwendeshaji hawezi kufungua kumbukumbu iliyolindwa na kuunakili kwa urahisi."
+    },
+    "journey": {
+      "heading": "Jinsi rekodi moja inavyosainiwa",
+      "intro": "Bonyeza cheza au chagua hatua. TEE husaini tu. Rekodi zako bado hupitia PDS ya kawaida na mtandao wa AT Protocol.",
+      "play": "Cheza",
+      "pause": "Sitisha",
+      "back": "Nyuma",
+      "next": "Mbele",
+      "stepLabel": "Hatua {n} kati ya {total}",
+      "jumpTo": "Nenda hatua ya {step}",
+      "nodes": {
+        "app": "Programu yako",
+        "pds": "PDS",
+        "tee": "Mtia saini TEE",
+        "network": "Mtandao"
+      },
+      "steps": {
+        "s1": {
+          "title": "Programu yako inahifadhi rekodi",
+          "text": "Unachapisha uchunguzi, unasasisha wasifu au unatengeneza rekodi nyingine. Programu huituma kwa PDS kama kawaida."
+        },
+        "s2": {
+          "title": "PDS inaandaa sasisho",
+          "text": "PDS hukagua ombi na kutengeneza toleo jipya la data. Hubadilisha sasisho kuwa alama fupi."
+        },
+        "s3": {
+          "title": "TEE inasaini alama",
+          "text": "Mtia saini hutengeneza ufunguo wa akaunti ndani ya kumbukumbu iliyolindwa na kusaini alama. Saini pekee ndiyo hurudi."
+        },
+        "s4": {
+          "title": "Mtandao unaikagua",
+          "text": "Sasisho lililosainiwa linaingia kwenye historia. Huduma nyingine hukagua kwa ufunguo wa umma wa utambulisho wa akaunti."
+        }
+      }
+    },
+    "separate": {
+      "heading": "Njia mbili ambazo hazishiriki funguo",
+      "intro": "Utiaji saini wa akaunti na pochi hutumia huduma salama ileile, lakini funguo na sheria tofauti.",
+      "repo": {
+        "title": "Njia ya rekodi za akaunti",
+        "text": "PDS inaweza kuomba saini kwa sasisho la kawaida. Ufunguo huu husaini rekodi za AT Protocol tu. Hauwezi kusaini muamala wa Ethereum."
+      },
+      "wallet": {
+        "title": "Njia ya pochi",
+        "text": "Pochi hutumia funguo tofauti za Ethereum na Solana. Kabla ya kusaini, huduma hukagua idhini kutoka kivinjari au kifaa kilichosajiliwa."
+      }
+    },
+    "walletGate": {
+      "heading": "Kwa nini seva haiwezi kutumia pesa za pochi",
+      "intro": "Jaribu maombi yote mawili. Tokeni inaweza kuonyesha anwani ya umma, lakini haitoshi kutengeneza saini ya pochi.",
+      "serverAttempt": "PDS inaomba peke yake",
+      "userAttempt": "Mtumiaji anaidhinisha kwanza",
+      "serverNode": "Ombi la PDS",
+      "userNode": "Ombi lililosainiwa na mtumiaji",
+      "teeNode": "Ufunguo wa pochi wa TEE",
+      "approved": "Saini imeidhinishwa",
+      "denied": "Ombi limekataliwa",
+      "approvedDesc": "Kivinjari husaini ombi fupi kwa ufunguo uliosajiliwa. TEE hukagua uthibitisho, muda na namba ya matumizi moja kabla ya kutumia ufunguo wa pochi.",
+      "deniedDesc": "Tokeni ya PDS pekee haitoshi. Mtia saini anakataa ombi kwa sababu halina uthibitisho kutoka kifaa kilichosajiliwa."
+    },
+    "proof": {
+      "heading": "Programu inaweza kumwamini vipi mtia saini?",
+      "intro": "TEE inaweza kutengeneza ripoti ya maunzi inayoitwa attestation. Husaidia kukagua mashine na msimbo kabla ya kuviamini.",
+      "cardLabel": "Uthibitisho wa maunzi",
+      "text": "Mtia saini hutengeneza utambulisho wake wa umma ndani ya kumbukumbu iliyolindwa. Ripoti ya maunzi huunganisha utambulisho huo na msimbo unaoendeshwa. PDS inaweza kuhitaji ripoti kabla ya kuanza. Msimbo ukibadilika, ripoti pia hubadilika."
+    },
+    "limits": {
+      "heading": "Mambo ambayo ulinzi huu hautatui",
+      "intro": "Funguo salama zinasaidia, lakini hazifanyi mfumo wote kuwa kamili. Mipaka hii ni muhimu.",
+      "onboarding": {
+        "title": "Usanidi wa kwanza wa pochi",
+        "text": "Usajili wa kifaa cha kwanza unaamini huduma mara moja. Toleo la baadaye linaweza kutumia passkey kupunguza imani hiyo."
+      },
+      "uptime": {
+        "title": "Upatikanaji wa huduma",
+        "text": "Mwendeshaji bado anaweza kuzima mashine au kuzuia maombi. TEE hulinda siri, si upatikanaji."
+      },
+      "server": {
+        "title": "Maombi mabaya ya rekodi",
+        "text": "PDS iliyovamiwa inaweza kuomba ufunguo wa akaunti kusaini sasisho baya. Funguo za kurejesha na historia ya umma humsaidia mmiliki kulitengua."
+      },
+      "recovery": {
+        "title": "Nakala na kurudia",
+        "text": "Idhini za pochi na namba za matumizi moja zinahitaji nakala makini. Kurudisha hifadhi nyuma kunaweza kufungua maombi ya zamani, lakini hakuwezi kuunda idhini mpya."
+      }
+    },
+    "more": {
+      "heading": "Endelea kuchunguza",
+      "epdsTitle": "Jinsi kuingia ePDS kunavyofanya kazi",
+      "epdsDesc": "Tazama mlango usio na nenosiri na huduma za kawaida zinazouzunguka.",
+      "lexiconsTitle": "Miundo ya data",
+      "lexiconsDesc": "Chunguza fomati wazi za rekodi zinazohifadhiwa katika kila PDS.",
+      "designTitle": "Muundo wa kiufundi",
+      "designDesc": "Soma mfano wa vitisho, sheria za kusaini na maelezo ya utekelezaji.",
+      "githubTitle": "ePDS kwenye GitHub",
+      "githubDesc": "Soma msimbo na uendeshe mradi mwenyewe."
     }
   }
 }

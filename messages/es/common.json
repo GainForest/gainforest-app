@@ -1233,7 +1233,9 @@
     "cgsLinkTitle": "Cómo funcionan las cuentas de grupo",
     "cgsLinkDesc": "Un recorrido interactivo por el servicio guardián que permite a todo un equipo compartir una cuenta.",
     "atprotoLinkTitle": "Cómo funciona el AT Protocol",
-    "atprotoLinkDesc": "Un recorrido interactivo por la red abierta sobre la que está construido todo esto."
+    "atprotoLinkDesc": "Un recorrido interactivo por la red abierta sobre la que está construido todo esto.",
+    "teeEpdsLinkTitle": "Firma protegida de ePDS",
+    "teeEpdsLinkDesc": "Mira cómo las claves privadas pueden quedar dentro de hardware protegido."
   },
   "taina": {
     "meta": {
@@ -1924,7 +1926,9 @@
       "cgsTitle": "Cómo funcionan las cuentas de grupo",
       "cgsDesc": "El servicio guardián que permite a todo un equipo compartir una cuenta de grupo de forma segura.",
       "atprotoTitle": "Cómo funciona el AT Protocol",
-      "atprotoDesc": "Un recorrido interactivo por la red abierta sobre la que está construido todo esto."
+      "atprotoDesc": "Un recorrido interactivo por la red abierta sobre la que está construido todo esto.",
+      "teeTitle": "Firma protegida de ePDS",
+      "teeDesc": "Mira cómo las claves privadas pueden quedar dentro de hardware protegido."
     }
   },
   "cgs": {
@@ -2252,6 +2256,142 @@
       "siteDesc": "El sitio oficial del protocolo, con las especificaciones completas y guías para desarrolladores.",
       "ethosNote": "Muchas ideas de esta página vienen del ensayo del equipo del protocolo sobre su filosofía de diseño:",
       "ethosLink": "El ethos de atproto"
+    }
+  },
+  "teeEpds": {
+    "metaTitle": "Cómo la firma TEE protege las claves de ePDS",
+    "metaDescription": "Una guía interactiva del firmante TEE opcional de ePDS, con diagramas simples sobre claves protegidas, firma de registros, aprobación de billetera y límites.",
+    "kicker": "firma protegida de ePDS",
+    "title": "Claves que permanecen dentro de una computadora protegida",
+    "lead": "ePDS puede guardar las claves de cuenta y billetera dentro de un Entorno de Ejecución Confiable, o TEE. La clave se crea, guarda y usa dentro de memoria protegida. El servidor pide firmas, pero nunca recibe la clave privada.",
+    "facts": {
+      "keys": {
+        "title": "Las claves quedan dentro",
+        "text": "Las claves privadas nunca entran en la aplicación normal ni en el proceso PDS."
+      },
+      "protection": {
+        "title": "El código se puede comprobar",
+        "text": "Una prueba de hardware puede mostrar qué código firmante se está ejecutando."
+      },
+      "wallet": {
+        "title": "La persona todavía aprueba",
+        "text": "Una firma de billetera necesita la aprobación del dispositivo registrado."
+      }
+    },
+    "what": {
+      "heading": "¿Qué agrega la extensión TEE?",
+      "intro": "La extensión agrega un pequeño servicio de firma junto al ePDS normal. Todo lo demás sigue usando rutas estándar de AT Protocol.",
+      "p1": "Un PDS normal necesita una clave privada para firmar cada actualización de tus datos. Con la extensión TEE, ePDS mueve ese trabajo a una máquina virtual confidencial. El PDS envía una huella de 32 bytes de la actualización. El firmante protegido devuelve una firma. La clave privada nunca sale de la memoria protegida.",
+      "p2": "El mismo firmante protegido también puede derivar una billetera de Ethereum o Solana para cada cuenta. Estas claves son distintas de la clave de firma de la cuenta. Conocer una clave no da pistas sobre otra."
+    },
+    "boundary": {
+      "heading": "¿Dónde vive la clave privada?",
+      "intro": "Cambia entre los dos diseños. Sigue la solicitud en movimiento y observa qué lado llega a tener la clave.",
+      "serverTab": "Clave en el servidor",
+      "teeTab": "Clave dentro del TEE",
+      "pdsName": "Servidor PDS",
+      "serverKeyName": "Archivo de clave privada",
+      "teeName": "Firmante protegido",
+      "serverResult": "El servidor puede leer la clave",
+      "teeResult": "La clave queda protegida",
+      "serverDesc": "El proceso PDS abre un archivo de clave y firma la actualización. Quien controle por completo el servidor podría copiar esa clave.",
+      "teeDesc": "El PDS solo envía una huella al firmante protegido. Recibe una firma, no la clave. Incluso el operador no puede abrir la memoria protegida y copiarla fácilmente."
+    },
+    "journey": {
+      "heading": "Cómo se firma un registro",
+      "intro": "Pulsa reproducir o elige un paso. El TEE solo firma. Tus registros siguen pasando por el PDS normal y la red AT Protocol.",
+      "play": "Reproducir",
+      "pause": "Pausa",
+      "back": "Atrás",
+      "next": "Siguiente",
+      "stepLabel": "Paso {n} de {total}",
+      "jumpTo": "Ir al paso {step}",
+      "nodes": {
+        "app": "Tu aplicación",
+        "pds": "PDS",
+        "tee": "Firmante TEE",
+        "network": "Red"
+      },
+      "steps": {
+        "s1": {
+          "title": "Tu aplicación guarda un registro",
+          "text": "Publicas una observación, actualizas un perfil o creas otro registro. La aplicación lo envía a tu PDS como siempre."
+        },
+        "s2": {
+          "title": "El PDS prepara la actualización",
+          "text": "El PDS revisa la solicitud y crea la siguiente versión de tus datos. Convierte la actualización en una huella corta."
+        },
+        "s3": {
+          "title": "El TEE firma la huella",
+          "text": "El firmante deriva tu clave de cuenta dentro de memoria protegida y firma la huella. Solo devuelve la firma."
+        },
+        "s4": {
+          "title": "La red la comprueba",
+          "text": "La actualización firmada entra en el historial. Otros servicios verifican la firma con la clave pública de tu identidad."
+        }
+      }
+    },
+    "separate": {
+      "heading": "Dos rutas que nunca comparten claves",
+      "intro": "La firma de cuenta y la firma de billetera usan el mismo servicio protegido, pero claves y reglas distintas.",
+      "repo": {
+        "title": "Ruta de registros",
+        "text": "El PDS puede pedir una firma para una actualización normal. Esta clave solo firma registros AT Protocol. No puede firmar una transacción de Ethereum."
+      },
+      "wallet": {
+        "title": "Ruta de billetera",
+        "text": "La billetera usa claves separadas de Ethereum y Solana. Antes de firmar, el servicio comprueba la aprobación del navegador o dispositivo registrado."
+      }
+    },
+    "walletGate": {
+      "heading": "Por qué el servidor no puede gastar de la billetera",
+      "intro": "Prueba ambas solicitudes. Un token puede mostrar la dirección pública, pero no basta para crear una firma.",
+      "serverAttempt": "El PDS pide solo",
+      "userAttempt": "La persona aprueba primero",
+      "serverNode": "Solicitud del PDS",
+      "userNode": "Solicitud firmada por la persona",
+      "teeNode": "Clave de billetera TEE",
+      "approved": "Firma aprobada",
+      "denied": "Solicitud rechazada",
+      "approvedDesc": "El navegador firma una solicitud corta con su clave registrada. El TEE comprueba esa prueba, la hora y un número de un solo uso antes de usar la clave.",
+      "deniedDesc": "Un token del PDS no basta. El firmante rechaza la solicitud porque no lleva una prueba del dispositivo registrado."
+    },
+    "proof": {
+      "heading": "¿Cómo puede una aplicación confiar en el firmante?",
+      "intro": "Un TEE puede crear un informe de hardware llamado atestación. Ayuda a comprobar la máquina y el código antes de confiar.",
+      "cardLabel": "Prueba respaldada por hardware",
+      "text": "El firmante crea su propia identidad pública dentro de memoria protegida. Un informe de hardware une esa identidad al código activo. El PDS puede exigir el informe antes de iniciar. Si el código cambia, el informe también cambia."
+    },
+    "limits": {
+      "heading": "Lo que esta protección no resuelve",
+      "intro": "Las claves protegidas ayudan, pero no hacen perfecto todo el sistema. Estos límites importan.",
+      "onboarding": {
+        "title": "Primera configuración",
+        "text": "El primer registro de dispositivo confía una vez en el servicio. Una versión futura puede usar passkeys para reducir esa confianza."
+      },
+      "uptime": {
+        "title": "Disponibilidad",
+        "text": "Un operador todavía puede apagar la máquina o bloquear solicitudes. Un TEE protege secretos, no la disponibilidad."
+      },
+      "server": {
+        "title": "Solicitudes malas",
+        "text": "Un PDS atacado podría pedir una firma para una actualización mala. Las claves de recuperación y el historial público ayudan a deshacerla."
+      },
+      "recovery": {
+        "title": "Copias y repetición",
+        "text": "Las aprobaciones y números de un solo uso necesitan copias cuidadosas. Volver atrás el almacenamiento puede reabrir solicitudes antiguas, pero no crear una aprobación nueva."
+      }
+    },
+    "more": {
+      "heading": "Sigue explorando",
+      "epdsTitle": "Cómo funciona el acceso ePDS",
+      "epdsDesc": "Mira la entrada sin contraseña y los servicios normales que la rodean.",
+      "lexiconsTitle": "Esquemas de datos",
+      "lexiconsDesc": "Explora los formatos abiertos guardados en cada PDS.",
+      "designTitle": "Diseño técnico",
+      "designDesc": "Lee el modelo de amenazas, las reglas de firma y las notas de implementación.",
+      "githubTitle": "ePDS en GitHub",
+      "githubDesc": "Lee el código fuente y ejecuta el proyecto."
     }
   }
 }
