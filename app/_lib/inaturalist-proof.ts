@@ -64,7 +64,7 @@ export function unsealJson<T>(value: string | undefined | null): T | null {
 }
 
 export function verificationCodeForDid(did: string): string {
-  return `gainforest-${createHash("sha256").update(`inaturalist-proof:${did}`).digest("hex").slice(0, 14)}`;
+  return `gf=${did}`;
 }
 
 export function parseINaturalistUserInput(input: string): string | null {
