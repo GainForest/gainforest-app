@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { LayoutGroup, motion } from "framer-motion";
 import {
   BinocularsIcon,
@@ -178,6 +178,13 @@ function ExploreNav({ sessionDid }: { sessionDid: string | null }) {
   const sectionsT = useTranslations("common.sidebar.sections");
   const collapsed = useSidebarCollapsed();
   const [moreOpen, setMoreOpen] = useState(false);
+
+  // Minimizing the sidebar is also an intent to dismiss secondary navigation.
+  // Do not restore an expanded More section when the sidebar opens again.
+  useEffect(() => {
+    if (collapsed) setMoreOpen(false);
+  }, [collapsed]);
+
   // GainForest moderators (members of the admin group, any role) see the
   // admin-only entries. Same detection as the account menu's /admin link;
   // the routes themselves re-check access server-side.
