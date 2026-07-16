@@ -1031,6 +1031,8 @@
     "audio": {
       "play": "Putar suara",
       "pause": "Jeda suara",
+      "seek": "Putar dari sini",
+      "playSection": "Putar ulang suara berlabel",
       "unavailable": "Suara tidak tersedia",
       "spectrogramAlt": "Spektrogram rekaman dengan suara berlabel yang disorot"
     },

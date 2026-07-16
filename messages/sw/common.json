@@ -1031,6 +1031,8 @@
     "audio": {
       "play": "Cheza sauti",
       "pause": "Simamisha sauti",
+      "seek": "Cheza kuanzia hapa",
+      "playSection": "Cheza tena sauti iliyowekewa lebo",
       "unavailable": "Sauti haipatikani",
       "spectrogramAlt": "Spektrogramu ya rekodi ikiwa na sauti iliyowekewa lebo imeangaziwa"
     },

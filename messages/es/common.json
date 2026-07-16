@@ -1031,6 +1031,8 @@
     "audio": {
       "play": "Reproducir sonido",
       "pause": "Pausar sonido",
+      "seek": "Reproducir desde aquí",
+      "playSection": "Repetir el sonido etiquetado",
       "unavailable": "Sonido no disponible",
       "spectrogramAlt": "Espectrograma de la grabación con el sonido etiquetado resaltado"
     },

@@ -17,6 +17,12 @@
  * spectrograms were saved). For those the card computes one client-side from
  * the audio itself — the same FFT pipeline the AudioMoth labelling workspace
  * uses — lazily, only once the card scrolls into view.
+ *
+ * Playback always goes through a local object URL: the PDS `getBlob` endpoint
+ * doesn't answer HTTP Range requests, which leaves a streamed <audio> element
+ * unseekable (`seekable` stays [0,0] and every `currentTime` write snaps back
+ * to 0). Downloading the compact preview once — shared with the spectrogram
+ * decode — makes the whole recording instantly seekable.
  */
 
 import Image from "next/image";
@@ -128,12 +134,13 @@ export function FeedAudioClip({ clip }: { clip: FeedBioacousticsClip }) {
   const [playing, setPlaying] = useState(false);
   const [playhead, setPlayhead] = useState<number | null>(null);
   const [audioFailed, setAudioFailed] = useState(false);
-  // Walks the playable-URL list when a source errors (preview → archival).
-  const [audioIndex, setAudioIndex] = useState(0);
+  // Local object URL for the downloaded audio — the only src we hand to the
+  // <audio> element, because the PDS blob endpoint isn't seekable (no Range).
+  const [objectUrl, setObjectUrl] = useState<string | null>(null);
+  const objectUrlRef = useRef<string | null>(null);
 
   useEffect(() => {
     setSource(undefined);
-    setAudioIndex(0);
     setAudioFailed(false);
     setFallback(null);
     setComputedNyquist(null);
@@ -145,6 +152,14 @@ export function FeedAudioClip({ clip }: { clip: FeedBioacousticsClip }) {
       });
     return () => controller.abort();
   }, [clip.audioUri]);
+
+  // Release the downloaded audio when the card unmounts.
+  useEffect(
+    () => () => {
+      if (objectUrlRef.current) URL.revokeObjectURL(objectUrlRef.current);
+    },
+    [],
+  );
 
   // Watch for the card entering the viewport (once), so the computed fallback
   // below never decodes audio for rows far offscreen.
@@ -167,34 +182,51 @@ export function FeedAudioClip({ clip }: { clip: FeedBioacousticsClip }) {
     return () => observer.disconnect();
   }, []);
 
-  // Computed fallback: when the record stored no spectrogram PNG, build one
-  // from the playable audio (decode → Hann/FFT magnitudes → inferno colours),
-  // exactly like the labelling workspace but at a lighter resolution.
+  // Once in view: download the audio (first working URL) into an object URL
+  // for seekable playback, and — when the record stored no spectrogram PNG —
+  // compute one from the same bytes (decode → Hann/FFT magnitudes → inferno
+  // colours), exactly like the labelling workspace but at a lighter resolution.
   useEffect(() => {
-    if (!inView || !source || source.spectrogramUrl || source.audioUrls.length === 0) return;
+    if (!inView || !source || source.audioUrls.length === 0) return;
     let cancelled = false;
-    setFallback("pending");
+    const needsSpectrogram = !source.spectrogramUrl;
+    if (needsSpectrogram) setFallback("pending");
 
-    async function render() {
+    async function download(): Promise<ArrayBuffer> {
+      let bytes: ArrayBuffer | null = null;
+      let mimeType = "audio/mpeg";
+      for (const candidate of source!.audioUrls) {
+        try {
+          const response = await fetch(candidate);
+          if (!response.ok) continue;
+          bytes = await response.arrayBuffer();
+          mimeType = response.headers.get("content-type")?.split(";")[0]?.trim() || mimeType;
+          break;
+        } catch {
+          /* Try the archival original when the PDS preview is unavailable. */
+        }
+      }
+      if (!bytes) throw new Error("audio_load_failed");
+      const url = URL.createObjectURL(new Blob([bytes], { type: mimeType }));
+      if (cancelled) {
+        URL.revokeObjectURL(url);
+        return bytes;
+      }
+      if (objectUrlRef.current) URL.revokeObjectURL(objectUrlRef.current);
+      objectUrlRef.current = url;
+      setObjectUrl(url);
+      return bytes;
+    }
+
+    async function render(bytes: ArrayBuffer) {
       const AudioContextClass = window.AudioContext ?? window.webkitAudioContext;
       if (!AudioContextClass) throw new Error("unsupported");
       const context = new AudioContextClass();
       try {
-        let buffer: AudioBuffer | null = null;
-        for (const candidate of source!.audioUrls) {
-          try {
-            const response = await fetch(candidate);
-            if (!response.ok) continue;
-            buffer = await context.decodeAudioData(await response.arrayBuffer());
-            break;
-          } catch {
-            /* Try the next playable URL. */
-          }
-        }
-        if (!buffer || cancelled) {
-          if (!buffer) throw new Error("audio_load_failed");
-          return;
-        }
+        // decodeAudioData detaches its input — hand it a copy so the object
+        // URL blob above keeps the original bytes.
+        const buffer = await context.decodeAudioData(bytes.slice(0));
+        if (cancelled) return;
         const channel = buffer.getChannelData(0);
         const samples = new Int16Array(channel.length);
         for (let index = 0; index < channel.length; index += 1) {
@@ -234,9 +266,15 @@ export function FeedAudioClip({ clip }: { clip: FeedBioacousticsClip }) {
       }
     }
 
-    void render().catch(() => {
-      if (!cancelled) setFallback("failed");
-    });
+    void download()
+      .then((bytes) => (needsSpectrogram ? render(bytes) : undefined))
+      .catch((error) => {
+        if (cancelled) return;
+        // A failed download means no playback either; a failed decode only
+        // loses the picture (the object URL may already be set and playable).
+        if ((error as Error).message === "audio_load_failed") setAudioFailed(true);
+        if (needsSpectrogram) setFallback("failed");
+      });
     return () => {
       cancelled = true;
     };
@@ -261,11 +299,27 @@ export function FeedAudioClip({ clip }: { clip: FeedBioacousticsClip }) {
     };
   }, [clip, duration, nyquist]);
 
-  const audioUrl = source?.audioUrls[audioIndex] ?? null;
-  const canPlay = Boolean(audioUrl) && !audioFailed;
+  const canPlay = Boolean(objectUrl) && !audioFailed;
+  // Between the card scrolling into view and the download landing, the play
+  // button shows a brief busy state instead of looking broken.
+  const preparingAudio = Boolean(source && source.audioUrls.length > 0 && !objectUrl && !audioFailed);
 
   // Nothing useful to show — keep the row clean instead of an empty shell.
   if (source === null || (source && !source.spectrogramUrl && source.audioUrls.length === 0)) return null;
+
+  /** Jump the recording to `seconds` and start playing from there. */
+  const seekAndPlay = (seconds: number) => {
+    const audio = audioRef.current;
+    if (!audio || !canPlay) return;
+    try {
+      audio.currentTime = seconds;
+    } catch {
+      /* Metadata not ready yet — playback will still start from the top. */
+    }
+    setPlayhead(seconds);
+    pauseOtherAudio(audio);
+    void audio.play().catch(() => setAudioFailed(true));
+  };
 
   const togglePlayback = () => {
     const audio = audioRef.current;
@@ -274,10 +328,14 @@ export function FeedAudioClip({ clip }: { clip: FeedBioacousticsClip }) {
       audio.pause();
       return;
     }
-    // (Re)start from the beginning of the labelled section when the playhead
-    // sits outside it; otherwise resume where the listener paused.
-    if (audio.currentTime < clip.startTimeSeconds || audio.currentTime >= clip.endTimeSeconds - 0.05) {
-      audio.currentTime = clip.startTimeSeconds;
+    // First play (or replay after the end) jumps to the labelled sound — the
+    // reason this card exists — then keeps going through the whole recording.
+    // A paused listener simply resumes where they stopped.
+    const atStart = audio.currentTime < 0.05;
+    const atEnd = duration ? audio.currentTime >= duration - 0.05 : audio.ended;
+    if (atStart || atEnd) {
+      seekAndPlay(clip.startTimeSeconds);
+      return;
     }
     pauseOtherAudio(audio);
     void audio.play().catch(() => setAudioFailed(true));
@@ -285,17 +343,15 @@ export function FeedAudioClip({ clip }: { clip: FeedBioacousticsClip }) {
 
   const onTimeUpdate = () => {
     const audio = audioRef.current;
-    if (!audio) return;
-    setPlayhead(audio.currentTime);
-    // Segment playback: stop at the end of the labelled section.
-    if (audio.currentTime >= clip.endTimeSeconds) {
-      audio.pause();
-      audio.currentTime = clip.startTimeSeconds;
-      setPlayhead(null);
-    }
+    if (audio) setPlayhead(audio.currentTime);
   };
 
-  const showPlayhead = playing && playhead !== null && duration && duration > 0;
+  // Keep the playhead visible while paused too — it marks where playback will
+  // resume, and gives immediate feedback after a seek.
+  const showPlayhead = playhead !== null && duration && duration > 0;
+  // Light the box up while the labelled sound is actually audible.
+  const insideSection =
+    playing && playhead !== null && playhead >= clip.startTimeSeconds && playhead <= clip.endTimeSeconds;
   const computingFallback = Boolean(
     source && !source.spectrogramUrl && source.audioUrls.length > 0 && fallback !== "done" && fallback !== "failed",
   );
@@ -329,17 +385,45 @@ export function FeedAudioClip({ clip }: { clip: FeedBioacousticsClip }) {
             <Loader2Icon className="size-4 animate-spin" aria-hidden />
           </div>
         ) : null}
+        {/* Click anywhere on the spectrogram to play from that moment. */}
+        {canPlay && duration ? (
+          <button
+            type="button"
+            aria-label={t("seek")}
+            className="absolute inset-0 z-10 cursor-pointer"
+            onClick={(event) => {
+              event.preventDefault();
+              event.stopPropagation();
+              const rect = event.currentTarget.getBoundingClientRect();
+              const fraction = clampFraction((event.clientX - rect.left) / rect.width);
+              seekAndPlay(fraction * duration);
+            }}
+          />
+        ) : null}
         {box ? (
-          <span
-            aria-hidden
-            className={cn("absolute z-10 border-2", styles.box)}
+          /* The labelled sound itself — tap the box to replay that section. */
+          <button
+            type="button"
+            aria-label={t("playSection")}
+            disabled={!canPlay}
+            onClick={(event) => {
+              event.preventDefault();
+              event.stopPropagation();
+              seekAndPlay(clip.startTimeSeconds);
+            }}
+            className={cn(
+              "absolute z-20 border-2 transition-shadow",
+              styles.box,
+              insideSection && "shadow-[0_0_0_1px_rgba(255,255,255,.75),0_0_14px_rgba(255,255,255,.35)]",
+              canPlay ? "cursor-pointer" : "cursor-default",
+            )}
             style={{ left: `${box.left}%`, top: `${box.top}%`, width: `${box.width}%`, height: `${box.height}%` }}
           />
         ) : null}
         {showPlayhead ? (
           <span
             aria-hidden
-            className="absolute inset-y-0 z-20 w-px bg-white/80 shadow-[0_0_7px_rgba(255,255,255,.7)]"
+            className="pointer-events-none absolute inset-y-0 z-30 w-px bg-white/80 shadow-[0_0_7px_rgba(255,255,255,.7)]"
             style={{ left: `${clampFraction((playhead ?? 0) / (duration ?? 1)) * 100}%` }}
           />
         ) : null}
@@ -358,25 +442,50 @@ export function FeedAudioClip({ clip }: { clip: FeedBioacousticsClip }) {
           aria-label={playing ? t("pause") : t("play")}
           className="grid size-8 shrink-0 place-items-center rounded-full bg-primary text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-40"
         >
-          {playing ? <PauseIcon className="size-3.5" /> : <PlayIcon className="size-3.5 translate-x-px" />}
+          {preparingAudio ? (
+            <Loader2Icon className="size-3.5 animate-spin" />
+          ) : playing ? (
+            <PauseIcon className="size-3.5" />
+          ) : (
+            <PlayIcon className="size-3.5 translate-x-px" />
+          )}
         </button>
-        <span className={cn("inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold", styles.chip)}>
+        <button
+          type="button"
+          disabled={!canPlay}
+          aria-label={t("playSection")}
+          onClick={(event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            seekAndPlay(clip.startTimeSeconds);
+          }}
+          className={cn(
+            "inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold",
+            styles.chip,
+            canPlay && "transition-opacity hover:opacity-80",
+          )}
+        >
           <WavesIcon className="size-3" aria-hidden />
           {tCategories(clip.category)}
-        </span>
+        </button>
         <span className="min-w-0 truncate font-mono text-[11px] text-muted-foreground">
           {formatTime(clip.startTimeSeconds)}–{formatTime(clip.endTimeSeconds)} · {formatFrequency(clip.minFrequencyHz)}–{formatFrequency(clip.maxFrequencyHz)}
         </span>
         {audioFailed || (source && source.audioUrls.length === 0) ? (
           <span className="ml-auto shrink-0 text-[11px] text-muted-foreground">{t("unavailable")}</span>
+        ) : playhead !== null && duration ? (
+          /* Live position through the whole recording once playback started. */
+          <span className="ml-auto shrink-0 font-mono text-[11px] tabular-nums text-muted-foreground">
+            {formatTime(playhead)} / {formatTime(duration)}
+          </span>
         ) : null}
       </div>
 
-      {audioUrl ? (
+      {objectUrl ? (
         <audio
           ref={audioRef}
-          src={audioUrl}
-          preload="none"
+          src={objectUrl}
+          preload="metadata"
           className="hidden"
           onPlay={() => setPlaying(true)}
           onPause={() => setPlaying(false)}
@@ -386,11 +495,7 @@ export function FeedAudioClip({ clip }: { clip: FeedBioacousticsClip }) {
             const value = event.currentTarget.duration;
             if (Number.isFinite(value) && value > 0) setMeasuredDuration(value);
           }}
-          onError={() => {
-            // Fall back to the next playable URL; give up after the last one.
-            if (source && audioIndex < source.audioUrls.length - 1) setAudioIndex(audioIndex + 1);
-            else setAudioFailed(true);
-          }}
+          onError={() => setAudioFailed(true)}
         />
       ) : null}
     </div>

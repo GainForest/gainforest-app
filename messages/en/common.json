@@ -1031,6 +1031,8 @@
     "audio": {
       "play": "Play sound",
       "pause": "Pause sound",
+      "seek": "Play from here",
+      "playSection": "Replay the labelled sound",
       "unavailable": "Sound unavailable",
       "spectrogramAlt": "Spectrogram of the recording with the labelled sound highlighted"
     },
