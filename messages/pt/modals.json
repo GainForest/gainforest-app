@@ -411,6 +411,8 @@
     "removeSigner": "Remover signatário",
     "addMyPasskey": "Adicionar minha chave de acesso",
     "signersHint": "Os membros da organização podem adicionar sua própria chave de acesso para também aprovar pagamentos.",
-    "deleteButton": "Remover carteira"
+    "deleteButton": "Remover carteira",
+    "viewOnExplorer": "Ver este endereço no Etherscan",
+    "explorer": "Etherscan"
   }
 }

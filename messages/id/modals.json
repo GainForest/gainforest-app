@@ -411,6 +411,8 @@
     "removeSigner": "Hapus penandatangan",
     "addMyPasskey": "Tambahkan kunci sandi saya",
     "signersHint": "Anggota organisasi dapat menambahkan kunci sandi mereka sendiri agar juga dapat menyetujui pembayaran.",
-    "deleteButton": "Hapus dompet"
+    "deleteButton": "Hapus dompet",
+    "viewOnExplorer": "Lihat alamat ini di Etherscan",
+    "explorer": "Etherscan"
   }
 }

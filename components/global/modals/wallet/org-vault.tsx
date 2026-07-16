@@ -37,6 +37,7 @@ import type { AuthSession } from "@/app/_lib/auth";
 import {
   CheckIcon,
   CopyIcon,
+  ExternalLinkIcon,
   FingerprintIcon,
   Loader2Icon,
   LockIcon,
@@ -263,15 +264,27 @@ export function OrgWalletModal({ orgDid, orgName, onBack, onChanged }: OrgWallet
                 <span className="text-sm font-medium leading-snug truncate">{record.name || t("defaultName")}</span>
                 <span className="text-xs text-muted-foreground font-mono leading-snug">{shortAddress(record.address)}</span>
               </div>
-              <button
-                type="button"
-                onClick={() => void copyAddress()}
-                className="flex shrink-0 items-center gap-1 rounded-md border border-input px-2 py-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
-                aria-label={t("copyAddress")}
-              >
-                {copied ? <CheckIcon className="size-3 text-primary" aria-hidden /> : <CopyIcon className="size-3" aria-hidden />}
-                {copied ? t("copied") : t("copy")}
-              </button>
+              <div className="flex shrink-0 items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => void copyAddress()}
+                  className="flex items-center gap-1 rounded-md border border-input px-2 py-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                  aria-label={t("copyAddress")}
+                >
+                  {copied ? <CheckIcon className="size-3 text-primary" aria-hidden /> : <CopyIcon className="size-3" aria-hidden />}
+                  {copied ? t("copied") : t("copy")}
+                </button>
+                <a
+                  href={`https://etherscan.io/address/${record.address}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex items-center gap-1 rounded-md border border-input px-2 py-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                  aria-label={t("viewOnExplorer")}
+                >
+                  <ExternalLinkIcon className="size-3" aria-hidden />
+                  {t("explorer")}
+                </a>
+              </div>
             </div>
 
             <div className="flex items-start gap-2 rounded-md bg-primary/5 border border-primary/20 px-3 py-2">

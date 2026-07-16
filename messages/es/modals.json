@@ -411,6 +411,8 @@
     "removeSigner": "Quitar firmante",
     "addMyPasskey": "Añadir mi llave de acceso",
     "signersHint": "Los miembros de la organización pueden añadir su propia llave de acceso para aprobar pagos también.",
-    "deleteButton": "Eliminar billetera"
+    "deleteButton": "Eliminar billetera",
+    "viewOnExplorer": "Ver esta dirección en Etherscan",
+    "explorer": "Etherscan"
   }
 }

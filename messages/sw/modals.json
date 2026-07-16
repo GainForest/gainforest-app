@@ -411,6 +411,8 @@
     "removeSigner": "Ondoa mtia saini",
     "addMyPasskey": "Ongeza ufunguo wangu wa siri",
     "signersHint": "Wanachama wa shirika wanaweza kuongeza funguo zao za siri ili nao waweze kuidhinisha malipo.",
-    "deleteButton": "Ondoa pochi"
+    "deleteButton": "Ondoa pochi",
+    "viewOnExplorer": "Tazama anwani hii kwenye Etherscan",
+    "explorer": "Etherscan"
   }
 }

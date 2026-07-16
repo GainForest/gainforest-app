@@ -411,6 +411,8 @@
     "removeSigner": "Remove signer",
     "addMyPasskey": "Add my passkey",
     "signersHint": "Members of the organization can add their own passkey so they can approve payments too.",
-    "deleteButton": "Remove wallet"
+    "deleteButton": "Remove wallet",
+    "viewOnExplorer": "View this address on Etherscan",
+    "explorer": "Etherscan"
   }
 }
