@@ -26,7 +26,7 @@
   },
   "prepare": {
     "heading": "Sebelum memulai",
-    "intro": "Gunakan daftar ini agar tidak ada barang penting yang tertinggal. Kemajuan tersimpan selama halaman tetap terbuka.",
+    "intro": "Gunakan daftar ini agar tidak ada barang penting yang tertinggal. Kemajuan disimpan di perangkat ini dan tetap ada setelah halaman dimuat ulang.",
     "equipmentTab": "Peralatan",
     "managerTab": "Pengelola proyek",
     "fieldTab": "Tim lapangan",

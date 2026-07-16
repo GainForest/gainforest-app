@@ -43,6 +43,7 @@ const APP_URL = "https://www.openacousticdevices.info/applications";
 const ARBIMON_URL = "https://arbimon.org/";
 const UPLOADER_URL = "https://arbimon.org/p/perm-stations/import-recordings";
 const VIDEO_URL = "https://www.youtube-nocookie.com/embed/HDTtGw_DFNU?rel=0";
+const CHECKLIST_STORAGE_KEY = "gainforest:audiomoth-deployment-checklist:v1";
 
 export function AudioMothGuide() {
   const t = useTranslations("audiomothGuide");
@@ -251,6 +252,32 @@ function PreparationChecklist() {
   const t = useTranslations("audiomothGuide.prepare");
   const [tab, setTab] = useState<PrepTab>("equipment");
   const [checked, setChecked] = useState<Set<string>>(new Set());
+  const [hasLoadedStoredProgress, setHasLoadedStoredProgress] = useState(false);
+
+  useEffect(() => {
+    try {
+      const stored = window.localStorage.getItem(CHECKLIST_STORAGE_KEY);
+      if (stored) {
+        const values: unknown = JSON.parse(stored);
+        if (Array.isArray(values)) {
+          setChecked(new Set(values.filter((value): value is string => typeof value === "string")));
+        }
+      }
+    } catch {
+      // A malformed or unavailable local store should not block the checklist.
+    } finally {
+      setHasLoadedStoredProgress(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!hasLoadedStoredProgress) return;
+    try {
+      window.localStorage.setItem(CHECKLIST_STORAGE_KEY, JSON.stringify([...checked]));
+    } catch {
+      // Browsers that block local storage still get a working in-memory checklist.
+    }
+  }, [checked, hasLoadedStoredProgress]);
 
   const tabs: { id: PrepTab; label: string }[] = [
     { id: "equipment", label: t("equipmentTab") },

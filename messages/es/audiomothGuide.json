@@ -26,7 +26,7 @@
   },
   "prepare": {
     "heading": "Antes de comenzar",
-    "intro": "Usa las listas para asegurarte de no olvidar nada importante. El progreso se conserva mientras esta página esté abierta.",
+    "intro": "Usa las listas para asegurarte de no olvidar nada importante. El progreso se guarda en este dispositivo y permanece al actualizar la página.",
     "equipmentTab": "Equipo",
     "managerTab": "Gestión del proyecto",
     "fieldTab": "Equipo de campo",
