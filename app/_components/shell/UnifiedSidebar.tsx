@@ -9,8 +9,10 @@ import {
   Building2Icon,
   ChevronDownIcon,
   ChevronLeftIcon,
-  MoreHorizontalIcon,
+  LeafIcon,
+  LayoutGridIcon,
   PlusIcon,
+  SparkleIcon,
   UserIcon,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -188,7 +190,7 @@ function ExploreNav({ sessionDid }: { sessionDid: string | null }) {
 
   // Keep the everyday path short for new visitors. Specialist destinations
   // remain one click away and open automatically whenever one is active.
-  const primaryIds = new Set(["feed", "projects", "organizations", "observations"]);
+  const primaryIds = new Set(["feed", "projects", "observations", "globe", "bioblitz", "donations", "grants"]);
   const primarySections = sections
     .map((section) => ({ ...section, items: section.items.filter((item) => primaryIds.has(item.id)) }))
     .filter((section) => section.items.length > 0);
@@ -229,7 +231,7 @@ function ExploreNav({ sessionDid }: { sessionDid: string | null }) {
 
   return (
     <div className="flex flex-col gap-1">
-      {renderSections(primarySections, false)}
+      {renderSections(primarySections, true)}
       {secondarySections.length > 0 ? (
         <div className="mt-1 border-t border-border/70 pt-1">
           <SidebarTooltip label={sidebarT("more")}>
@@ -244,7 +246,7 @@ function ExploreNav({ sessionDid }: { sessionDid: string | null }) {
               )}
             >
               <span className="flex size-6 shrink-0 items-center justify-center">
-                <MoreHorizontalIcon className="size-4" />
+                <LayoutGridIcon className="size-4" />
               </span>
               {collapsed ? null : (
                 <>
@@ -367,21 +369,66 @@ function BumicertCreationCard({ sessionDid }: { sessionDid: string }) {
   // Hide the create-project CTA once this account already has a project.
   if (hasProjects) return null;
 
+  if (collapsed) {
+    return (
+      <SidebarTooltip label={t("createProject")}>
+        <span className="mx-auto flex w-fit">
+          <CreateProjectButton
+            sessionDid={sessionDid}
+            className={cn(
+              buttonVariants({ variant: "outline", size: "icon" }),
+              "bg-background hover:bg-primary hover:text-primary-foreground",
+            )}
+          >
+            <PlusIcon />
+            <span className="sr-only">{t("createProject")}</span>
+          </CreateProjectButton>
+        </span>
+      </SidebarTooltip>
+    );
+  }
+
   return (
-    <SidebarTooltip label={t("createProject")}>
-      <span className={cn("flex", collapsed ? "mx-auto w-fit" : "w-full")}>
-        <CreateProjectButton
-          sessionDid={sessionDid}
-          className={cn(
-            buttonVariants({ variant: collapsed ? "outline" : "default", size: collapsed ? "icon" : "sm" }),
-            collapsed ? "bg-background" : "w-full justify-start gap-2",
-          )}
-        >
-          <PlusIcon />
-          <span className={collapsed ? "sr-only" : undefined}>{t("createProject")}</span>
-        </CreateProjectButton>
-      </span>
-    </SidebarTooltip>
+    <div className="group flex flex-col w-full h-20 border border-border bg-background rounded-2xl p-1">
+      <div className="flex-1 relative">
+        <SparkleIcon
+          className="absolute bottom-2 left-4 size-6 rotate-30 opacity-50 group-hover:opacity-30 group-hover:scale-130 text-primary transition-all duration-300 animate-spin-slow"
+          fill="currentcolor"
+          strokeWidth={0}
+        />
+        <SparkleIcon
+          className="absolute bottom-1 left-12 size-3 rotate-60 opacity-30 group-hover:opacity-50 group-hover:scale-130 text-primary transition-all duration-300 animate-spin-slow"
+          fill="currentcolor"
+          strokeWidth={0}
+        />
+        <SparkleIcon
+          className="absolute bottom-2 right-2 size-6 rotate-60 opacity-50 group-hover:opacity-30 group-hover:scale-130 text-primary transition-all duration-300 animate-spin-slow"
+          fill="currentcolor"
+          strokeWidth={0}
+        />
+        <SparkleIcon
+          className="absolute bottom-1 right-10 size-3 rotate-30 opacity-30 group-hover:opacity-50 group-hover:scale-130 text-primary transition-all duration-300 animate-spin-slow"
+          fill="currentcolor"
+          strokeWidth={0}
+        />
+        <div className="absolute z-1 -bottom-4 left-1/2 -translate-x-1/2 scale-100 group-hover:scale-120 -rotate-12 group-hover:-rotate-30 transition-transform bg-background/50 backdrop-blur-lg border border-border shadow-xl rounded-xl h-20 w-16 p-1 flex flex-col gap-1">
+          <div className="w-full h-10 bg-primary/20 rounded-lg flex items-center justify-center">
+            <LeafIcon className="text-primary size-6 opacity-80" />
+          </div>
+          <div className="bg-muted h-2 rounded-lg w-8" />
+          <div className="bg-muted h-2 rounded-lg w-full" />
+        </div>
+      </div>
+      <CreateProjectButton
+        sessionDid={sessionDid}
+        className={cn(
+          buttonVariants({ variant: "outline", size: "sm" }),
+          "relative z-2 w-full bg-background hover:bg-primary hover:text-primary-foreground",
+        )}
+      >
+        <PlusIcon /> {t("createProject")}
+      </CreateProjectButton>
+    </div>
   );
 }
 
@@ -389,22 +436,68 @@ function AddObservationsCard({ sessionDid }: { sessionDid: string }) {
   const t = useTranslations("common.sidebar.creationCard");
   const collapsed = useSidebarCollapsed();
 
+  if (collapsed) {
+    return (
+      <SidebarTooltip label={t("addObservations")}>
+        <span className="mx-auto flex w-fit">
+          <AddObservationsButton
+            sessionDid={sessionDid}
+            dataTaina="add-observations"
+            className={cn(
+              buttonVariants({ variant: "outline", size: "icon" }),
+              "bg-background hover:bg-primary hover:text-primary-foreground",
+            )}
+          >
+            <BinocularsIcon />
+            <span className="sr-only">{t("addObservations")}</span>
+          </AddObservationsButton>
+        </span>
+      </SidebarTooltip>
+    );
+  }
+
   return (
-    <SidebarTooltip label={t("addObservations")}>
-      <span className={cn("flex", collapsed ? "mx-auto w-fit" : "w-full")}>
-        <AddObservationsButton
-          sessionDid={sessionDid}
-          dataTaina="add-observations"
-          className={cn(
-            buttonVariants({ variant: "outline", size: collapsed ? "icon" : "sm" }),
-            collapsed ? "bg-background" : "w-full justify-start gap-2 bg-background",
-          )}
-        >
-          <BinocularsIcon />
-          <span className={collapsed ? "sr-only" : undefined}>{t("addObservations")}</span>
-        </AddObservationsButton>
-      </span>
-    </SidebarTooltip>
+    <div className="group flex flex-col w-full h-20 border border-border bg-background rounded-2xl p-1">
+      <div className="flex-1 relative">
+        <SparkleIcon
+          className="absolute bottom-2 left-4 size-6 rotate-30 opacity-50 group-hover:opacity-30 group-hover:scale-130 text-primary transition-all duration-300 animate-spin-slow"
+          fill="currentcolor"
+          strokeWidth={0}
+        />
+        <SparkleIcon
+          className="absolute bottom-1 left-12 size-3 rotate-60 opacity-30 group-hover:opacity-50 group-hover:scale-130 text-primary transition-all duration-300 animate-spin-slow"
+          fill="currentcolor"
+          strokeWidth={0}
+        />
+        <SparkleIcon
+          className="absolute bottom-2 right-2 size-6 rotate-60 opacity-50 group-hover:opacity-30 group-hover:scale-130 text-primary transition-all duration-300 animate-spin-slow"
+          fill="currentcolor"
+          strokeWidth={0}
+        />
+        <SparkleIcon
+          className="absolute bottom-1 right-10 size-3 rotate-30 opacity-30 group-hover:opacity-50 group-hover:scale-130 text-primary transition-all duration-300 animate-spin-slow"
+          fill="currentcolor"
+          strokeWidth={0}
+        />
+        <div className="absolute z-1 -bottom-4 left-1/2 -translate-x-1/2 scale-100 group-hover:scale-120 -rotate-12 group-hover:-rotate-30 transition-transform bg-background/50 backdrop-blur-lg border border-border shadow-xl rounded-xl h-20 w-16 p-1 flex flex-col gap-1">
+          <div className="w-full h-10 bg-primary/20 rounded-lg flex items-center justify-center">
+            <BinocularsIcon className="text-primary size-6 opacity-80" />
+          </div>
+          <div className="bg-muted h-2 rounded-lg w-8" />
+          <div className="bg-muted h-2 rounded-lg w-full" />
+        </div>
+      </div>
+      <AddObservationsButton
+        sessionDid={sessionDid}
+        dataTaina="add-observations"
+        className={cn(
+          buttonVariants({ variant: "outline", size: "sm" }),
+          "relative z-2 w-full bg-background hover:bg-primary hover:text-primary-foreground",
+        )}
+      >
+        <BinocularsIcon /> {t("addObservations")}
+      </AddObservationsButton>
+    </div>
   );
 }
 
