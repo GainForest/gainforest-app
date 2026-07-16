@@ -1256,8 +1256,8 @@
     "cgsLinkDesc": "Tur interaktif tentang layanan penjaga yang memungkinkan satu tim berbagi satu akun.",
     "atprotoLinkTitle": "Cara kerja AT Protocol",
     "atprotoLinkDesc": "Tur interaktif jaringan terbuka tempat semua ini dibangun.",
-    "teeEpdsLinkTitle": "Penandatanganan ePDS terlindungi",
-    "teeEpdsLinkDesc": "Lihat cara kunci privat tetap berada di perangkat keras terlindungi.",
+    "walletServiceLinkTitle": "Dompet GainForest",
+    "walletServiceLinkDesc": "Bagaimana setiap akun mendapat dompet yang hanya bisa dibelanjakan oleh pemiliknya.",
     "guides": {
       "usageGuide": "Panduan penggunaan",
       "audiomothTitle": "Label spektrogram AudioMoth sebagai kemunculan Darwin Core",
@@ -2040,8 +2040,8 @@
       "cgsDesc": "Layanan penjaga yang memungkinkan satu tim berbagi satu akun grup dengan aman.",
       "atprotoTitle": "Cara kerja AT Protocol",
       "atprotoDesc": "Tur interaktif jaringan terbuka tempat semua ini dibangun.",
-      "teeTitle": "Penandatanganan ePDS terlindungi",
-      "teeDesc": "Lihat cara kunci privat tetap berada di perangkat keras terlindungi.",
+      "walletTitle": "Dompet GainForest",
+      "walletDesc": "Bagaimana setiap akun mendapat dompet yang hanya bisa dibelanjakan oleh pemiliknya.",
       "routerTitle": "Router ePDS",
       "routerDesc": "Bagaimana aplikasi menemukan server yang tepat untuk sebuah email saat komunitas menjalankan beberapa."
     }
@@ -2349,7 +2349,7 @@
         },
         "vault": {
           "name": "Kredensial tersegel",
-          "desc": "Kata sandi akun grup, disimpan terenkripsi. Anggota dan aplikasi tidak pernah melihatnya. Hanya layanan yang bisa membukanya, dan hanya untuk berbicara dengan PDS grup."
+          "desc": "Kata sandi aplikasi untuk akun grup, disimpan terenkripsi. Ini kunci cadangan terbatas, bukan kata sandi utama akun: anggota dan aplikasi tidak pernah melihatnya, hanya layanan yang bisa memakainya, dan pemegang kredensial asli akun bisa mencabutnya kapan saja."
         }
       }
     },
@@ -2362,7 +2362,7 @@
       },
       "vault": {
         "title": "Kredensial tetap tersegel",
-        "text": "Kata sandi grup disimpan terenkripsi. Anggota tidak pernah melihatnya dan aplikasi tidak pernah menyentuhnya. Hanya layanan penjaga yang bisa memakainya."
+        "text": "Layanan hanya menyimpan kata sandi aplikasi — kunci cadangan, bukan kata sandi utama akun. Ia disimpan terenkripsi, dan siapa pun yang memegang kredensial asli akun bisa mencabut akses layanan kapan saja. Sebaliknya tidak mungkin."
       },
       "log": {
         "title": "Tidak ada yang luput",
@@ -2518,49 +2518,36 @@
       "ethosLink": "Ethos atproto"
     }
   },
-  "teeEpds": {
-    "metaTitle": "Cara penandatanganan terlindungi dan pemulihan dompet ePDS bekerja",
-    "metaDescription": "Panduan interaktif untuk penandatanganan terlindungi ePDS, pemulihan dompet dua-dari-tiga, persetujuan perangkat, dan batasannya.",
-    "kicker": "penandatanganan ePDS terlindungi",
-    "title": "Terlindungi dari server, dapat Anda pulihkan",
-    "lead": "ePDS dapat memindahkan penandatanganan akun ke Trusted Execution Environment, atau TEE. Dompet opsionalnya membagi kendali menjadi tiga: perangkat Anda, perangkat keras terlindungi, dan cadangan pemulihan Anda. Operator tidak dapat membelanjakan dana atau mengunci Anda di layanan.",
+  "walletService": {
+    "metaTitle": "Cara kerja layanan dompet GainForest",
+    "metaDescription": "Panduan interaktif layanan dompet: daftar dengan akun AT Protocol mana pun, kunci dibagi menjadi tiga bagian, dan setujui pembayaran dari perangkat Anda sendiri.",
+    "kicker": "Layanan dompet GainForest",
+    "title": "Dompet untuk akun AT Protocol Anda",
+    "lead": "Layanan dompet memberi setiap akun AT Protocol sebuah dompet swakustodi untuk Ethereum dan Solana. Layanan ini bekerja dengan semua PDS, termasuk Bluesky. Tidak ada frasa benih yang perlu dicatat. Kunci Anda dibagi menjadi tiga bagian, perangkat Anda menyetujui setiap pembayaran, dan Anda bisa mengekspor kunci lalu pergi kapan saja.",
     "facts": {
-      "keys": {
-        "title": "Server tidak menerima kunci",
-        "text": "Aplikasi biasa dan PDS menerima tanda tangan, bukan rahasia akun atau dompet."
+      "anyPds": {
+        "title": "Bekerja dengan akun apa pun",
+        "text": "Anda mendaftar dengan identitas AT Protocol yang sudah ada. Tanpa kata sandi baru dan tanpa akun baru."
       },
       "protection": {
-        "title": "Kode dapat diperiksa",
-        "text": "Bukti perangkat keras dapat menunjukkan kode penandatangan yang sedang berjalan."
+        "title": "Kunci tetap terlindungi",
+        "text": "Kunci dompet lengkap hanya muncul sesaat di dalam perangkat keras terlindungi, lalu dihapus."
       },
-      "wallet": {
+      "majority": {
         "title": "Anda memegang mayoritas",
-        "text": "Perangkat dan cadangan pemulihan memberi Anda dua dari tiga bagian dompet."
+        "text": "Perangkat Anda dan cadangan pemulihan menyimpan dua dari tiga bagian dompet."
       }
     },
     "what": {
-      "heading": "Apa yang ditambahkan ekstensi TEE?",
-      "intro": "Ekstensi ini menambahkan layanan penandatangan kecil di samping ePDS biasa. Bagian lain tetap memakai jalur standar AT Protocol.",
-      "p1": "PDS biasa memerlukan kunci privat untuk menandatangani setiap pembaruan data. Dengan ekstensi TEE, ePDS memindahkan tugas itu ke mesin virtual rahasia. PDS mengirim sidik jari 32 byte dari pembaruan. Penandatangan terlindungi mengembalikan tanda tangan. Kunci privat tidak pernah keluar dari memori terlindungi.",
-      "p2": "Dompet dibuat dari rahasia acaknya sendiri, terpisah dari kunci akun. Rahasia itu dibagi menjadi tiga bagian. Perangkat keras terlindungi menyimpan satu bagian terenkripsi; Anda mengendalikan bagian perangkat dan pemulihan. Dua bagian dapat memulihkan dompet, tetapi satu bagian saja tidak mengungkap apa pun.",
-      "p3": "Aplikasi mendapat tindakan membuat, melihat, menandatangani, mengekspor, dan memulihkan yang sama melalui panggilan AT Protocol standar dan permintaan web biasa. Kedua jalur memakai pemeriksaan keamanan dan memberikan hasil yang sama."
+      "heading": "Apa itu layanan dompet?",
+      "intro": "Layanan kecil yang berdiri sendiri, berjalan di dalam perangkat keras terlindungi, dan menyimpan dompet untuk setiap pengguna.",
+      "p1": "Setiap dompet terikat pada DID, identitas permanen di balik akun AT Protocol. Layanan membuat dompet dari rahasia acak baru di dalam mesin virtual rahasia, sejenis perangkat keras terlindungi yang disebut TEE.",
+      "p2": "Rahasia itu dibagi menjadi tiga bagian: satu untuk perangkat Anda, satu untuk layanan terlindungi, dan satu untuk cadangan pemulihan Anda. Dua bagian mana pun dapat memulihkan dompet. Satu bagian saja tidak mengungkap apa pun.",
+      "p3": "Layanan ini sengaja dibuat kecil. Ia menyimpan materi dompet, memeriksa bukti, dan menandatangani transaksi. Postingan, profil, dan catatan Anda lainnya tetap berada di PDS Anda sendiri sepanjang waktu."
     },
-    "boundary": {
-      "heading": "Di mana kunci privat berada?",
-      "intro": "Ganti antara dua rancangan. Ikuti permintaan yang bergerak dan lihat sisi mana yang pernah memegang kunci.",
-      "serverTab": "Kunci di server",
-      "teeTab": "Kunci di dalam TEE",
-      "pdsName": "Server PDS",
-      "serverKeyName": "Berkas kunci privat",
-      "teeName": "Penandatangan terlindungi",
-      "serverResult": "Server dapat membaca kunci",
-      "teeResult": "Kunci tetap terlindungi",
-      "serverDesc": "Proses PDS membuka berkas kunci dan menandatangani pembaruan sendiri. Pihak yang menguasai server sepenuhnya mungkin dapat menyalin kunci.",
-      "teeDesc": "PDS hanya mengirim sidik jari ke penandatangan terlindungi. PDS menerima tanda tangan, bukan kunci. Operator mesin pun tidak dapat sekadar membuka memori terlindungi dan menyalinnya."
-    },
-    "journey": {
-      "heading": "Cara satu catatan ditandatangani",
-      "intro": "Tekan putar atau pilih langkah. TEE hanya menandatangani. Catatan tetap bergerak melalui PDS biasa dan jaringan AT Protocol.",
+    "enroll": {
+      "heading": "Cara Anda mendapatkan dompet",
+      "intro": "Tekan putar atau pilih langkah. Pendaftaran memakai tiket standar AT Protocol dari PDS Anda sendiri, jadi tidak ada server yang butuh integrasi khusus.",
       "play": "Putar",
       "pause": "Jeda",
       "back": "Kembali",
@@ -2569,39 +2556,27 @@
       "jumpTo": "Ke langkah {step}",
       "nodes": {
         "app": "Aplikasi Anda",
-        "pds": "PDS",
-        "tee": "Penandatangan TEE",
-        "network": "Jaringan"
+        "pds": "PDS Anda",
+        "service": "Layanan dompet",
+        "wallet": "Dompet Anda"
       },
       "steps": {
         "s1": {
-          "title": "Aplikasi menyimpan catatan",
-          "text": "Anda menerbitkan pengamatan, memperbarui profil, atau membuat catatan lain. Aplikasi mengirimnya ke PDS seperti biasa."
+          "title": "Aplikasi meminta tiket",
+          "text": "Aplikasi Anda meminta tiket berumur pendek dari PDS Anda sendiri yang membuktikan siapa Anda. Semua PDS bisa menerbitkan tiket ini karena ini fitur standar AT Protocol."
         },
         "s2": {
-          "title": "PDS menyiapkan pembaruan",
-          "text": "PDS memeriksa permintaan dan membuat versi data berikutnya. Pembaruan diubah menjadi sidik jari pendek."
+          "title": "Layanan memeriksa tiket",
+          "text": "Layanan dompet membaca catatan identitas publik Anda dan mencocokkan tiket dengannya. Layanan juga menyimpan kunci publik dari perangkat Anda untuk persetujuan di masa depan."
         },
         "s3": {
-          "title": "TEE menandatangani sidik jari",
-          "text": "Penandatangan membuat kunci akun di dalam memori terlindungi dan menandatangani sidik jari. Hanya tanda tangan yang kembali."
+          "title": "Perangkat keras terlindungi membuat dompet",
+          "text": "Rahasia acak baru menjadi dompet Anda di dalam memori terlindungi. Rahasia itu langsung dibagi menjadi tiga bagian dan kunci lengkapnya dihapus."
         },
         "s4": {
-          "title": "Jaringan memeriksanya",
-          "text": "Pembaruan bertanda tangan masuk ke riwayat catatan. Layanan lain memeriksanya dengan kunci publik di identitas akun."
+          "title": "Anda memegang mayoritas",
+          "text": "Perangkat Anda dan cadangan pemulihan masing-masing menerima satu bagian. Layanan menyimpan bagiannya sendiri dalam bentuk terenkripsi. Alamat Ethereum dan Solana Anda siap dipakai."
         }
-      }
-    },
-    "separate": {
-      "heading": "Dua jalur yang tidak berbagi kunci",
-      "intro": "Penandatanganan akun dan dompet memakai layanan terlindungi yang sama, tetapi kunci dan aturannya berbeda.",
-      "repo": {
-        "title": "Jalur catatan akun",
-        "text": "PDS dapat meminta tanda tangan untuk pembaruan data biasa. Kunci ini hanya menandatangani catatan AT Protocol. Kunci ini tidak dapat menandatangani transaksi Ethereum."
-      },
-      "wallet": {
-        "title": "Jalur dompet",
-        "text": "Dompet memakai kunci Ethereum dan Solana yang terpisah. Untuk menandatangani, layanan terlindungi memerlukan bukti dari perangkat terdaftar dan bagian dompet yang asli."
       }
     },
     "shares": {
@@ -2640,43 +2615,57 @@
         }
       }
     },
-    "walletGate": {
-      "heading": "Mengapa server tidak dapat membelanjakan dana dompet",
-      "intro": "Coba kedua permintaan. Token masuk dapat menampilkan alamat publik, tetapi pembelanjaan juga memerlukan bukti perangkat dan bagian dompetnya.",
-      "serverAttempt": "PDS meminta sendiri",
-      "userAttempt": "Bukti + bagian pengguna",
-      "serverNode": "Permintaan PDS",
-      "userNode": "Bukti + bagian perangkat",
+    "gate": {
+      "heading": "Mengapa operator tidak bisa membelanjakan uang Anda",
+      "intro": "Coba kedua permintaan. Tiket masuk bisa menampilkan alamat dompet publik. Untuk membelanjakan, dibutuhkan juga bukti dari perangkat Anda beserta bagian dompetnya.",
+      "tokenAttempt": "Tiket saja",
+      "userAttempt": "Bukti perangkat + bagian",
+      "tokenNode": "Tiket masuk",
+      "userNode": "Bukti + bagian",
       "teeNode": "Dompet terlindungi",
       "approved": "Tanda tangan disetujui",
       "denied": "Permintaan ditolak",
-      "approvedDesc": "Perangkat menandatangani permintaan singkat dan mengirim bagiannya yang terenkripsi untuk perangkat keras terlindungi. Penandatangan memeriksa bukti, waktu, dan nomor sekali pakai sebelum membangun kembali dan memakai dompet.",
-      "deniedDesc": "Token PDS saja tidak cukup. Penandatangan terlindungi hanya memiliki satu bagian dan menolak permintaan tanpa bukti perangkat serta bagian kedua yang asli."
+      "approvedDesc": "Perangkat Anda menandatangani permintaan singkat dan mengirim bagiannya dalam bentuk terenkripsi untuk perangkat keras terlindungi. Layanan memeriksa tanda tangan, waktu, dan nomor sekali pakai sebelum membangun ulang dompet untuk menandatangani.",
+      "deniedDesc": "Tiket saja hanya membuka informasi publik. Layanan terlindungi memegang satu bagian saja dan menolak menandatangani tanpa permintaan yang ditandatangani perangkat Anda dan bagian kedua yang asli."
+    },
+    "binding": {
+      "heading": "Cara siapa pun memeriksa tautannya",
+      "intro": "Akun dan dompet Anda saling menunjuk secara publik. Ganti sisi untuk melihat tiap setengah bukti.",
+      "accountTab": "Sisi akun",
+      "walletTab": "Sisi dompet",
+      "repoName": "Repo data Anda",
+      "recordName": "Catatan pengikat",
+      "walletName": "Kunci dompet",
+      "signatureName": "Tanda tangan di catatan",
+      "accountResult": "Akun Anda mengklaim dompet",
+      "accountDesc": "Anda menerbitkan catatan kecil di repo Anda sendiri yang memuat alamat dompet Anda. Hanya Anda yang bisa menulis ke repo itu, jadi catatan ini menunjukkan akun Anda berdiri di belakang alamat tersebut.",
+      "walletResult": "Dompet Anda setuju",
+      "walletDesc": "Di dalam catatan ada tanda tangan yang dibuat kunci dompet atas identitas dan alamat Anda. Itu menunjukkan dompet menerima tautan ini. Siapa pun bisa memverifikasi kedua setengahnya dengan data publik."
     },
     "proof": {
-      "heading": "Bagaimana aplikasi dapat mempercayai penandatangan?",
-      "intro": "TEE dapat membuat laporan perangkat keras yang disebut atestasi. Laporan ini membantu memeriksa mesin dan kode sebelum dipercaya.",
+      "heading": "Bagaimana aplikasi bisa memercayai layanan?",
+      "intro": "Perangkat keras terlindungi bisa membuat laporan bernama atestasi. Laporan ini memungkinkan siapa pun memeriksa mesin dan kodenya sebelum memberi kepercayaan.",
       "cardLabel": "Bukti dari perangkat keras",
-      "text": "Penandatangan membuat identitas publiknya di dalam memori terlindungi. Laporan perangkat keras mengikat identitas itu ke kode yang berjalan. PDS dapat mewajibkan laporan sebelum mulai. Jika kode berubah, laporan ikut berubah."
+      "text": "Layanan membuat identitasnya di dalam memori terlindungi. Laporan perangkat keras mengikat identitas itu ke kode persis yang sedang berjalan. Siapa pun bisa mengambil laporan ini dari layanan dan memeriksanya. Jika kodenya berubah, laporannya ikut berubah."
     },
     "limits": {
-      "heading": "Hal yang tidak diselesaikan perlindungan ini",
-      "intro": "Kunci terlindungi membantu, tetapi tidak membuat seluruh sistem sempurna. Batasan ini penting.",
+      "heading": "Apa yang tidak diselesaikan perlindungan ini",
+      "intro": "Kunci yang dibagi dan perangkat keras terlindungi menghilangkan banyak risiko. Batasan berikut tetap ada dan kami menyebutkannya secara terbuka.",
       "onboarding": {
         "title": "Pengaturan dompet pertama",
         "text": "Pendaftaran perangkat pertama mempercayai layanan satu kali. Versi masa depan dapat memakai passkey untuk mengurangi kepercayaan ini."
       },
       "uptime": {
         "title": "Ketersediaan layanan",
-        "text": "Host masih dapat mematikan mesin atau memblokir permintaan. TEE melindungi rahasia, bukan ketersediaan."
+        "text": "Penyedia hosting masih bisa mematikan mesin atau memblokir permintaan. Bagian perangkat dan bagian pemulihan Anda memungkinkan dompet dibangun ulang tanpa layanan."
       },
-      "server": {
-        "title": "Permintaan catatan buruk",
-        "text": "PDS yang diretas dapat meminta kunci akun menandatangani pembaruan buruk. Kunci pemulihan dan riwayat identitas publik membantu pemilik membatalkannya."
+      "backup": {
+        "title": "Cadangan Anda",
+        "text": "Anda harus menjaga cadangan pemulihan tetap aman. Jika perangkat dan cadangan hilang bersamaan, layanan sendirian tidak bisa memulihkan dompet."
       },
-      "recovery": {
-        "title": "Cadangan dan pengulangan",
-        "text": "Anda harus melindungi cadangan pemulihan, dan layanan harus mencadangkan bagiannya yang terenkripsi. Mengembalikan penyimpanan juga dapat membuka permintaan lama yang sudah disetujui, tetapi tidak dapat membuat persetujuan baru."
+      "rollback": {
+        "title": "Pemutaran balik penyimpanan",
+        "text": "Memutar balik penyimpanan layanan ke masa lalu bisa mengulang permintaan lama yang sudah disetujui. Itu tidak pernah bisa membuat persetujuan baru."
       }
     },
     "more": {
@@ -2685,10 +2674,10 @@
       "epdsDesc": "Lihat pintu masuk tanpa kata sandi dan layanan biasa di sekitarnya.",
       "lexiconsTitle": "Skema data",
       "lexiconsDesc": "Jelajahi format catatan terbuka yang tersimpan di setiap PDS.",
-      "designTitle": "Rancangan teknis",
-      "designDesc": "Baca model ancaman, aturan penandatanganan, dan catatan implementasi.",
-      "githubTitle": "ePDS di GitHub",
-      "githubDesc": "Baca kode sumber dan jalankan proyeknya."
+      "atprotoTitle": "Cara kerja AT Protocol",
+      "atprotoDesc": "Tur interaktif jaringan terbuka tempat semua ini dibangun.",
+      "githubTitle": "Layanan di GitHub",
+      "githubDesc": "Baca kode sumbernya dan jalankan layanannya sendiri."
     }
   }
 }

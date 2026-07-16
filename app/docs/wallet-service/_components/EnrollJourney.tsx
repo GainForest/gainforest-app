@@ -3,16 +3,17 @@
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { motion } from "framer-motion";
-import { AppWindowIcon, CheckIcon, CpuIcon, PauseIcon, PlayIcon, ServerIcon } from "lucide-react";
+import { AppWindowIcon, PauseIcon, PlayIcon, ServerIcon, ShieldCheckIcon, WalletCardsIcon } from "lucide-react";
 
 type Step = 0 | 1 | 2 | 3;
 
 const STEP_COUNT = 4;
 
-// A step-through graph for one normal AT Protocol write. The TEE is only a
-// signing stop. Records still follow the ordinary PDS path.
-export function SigningJourney() {
-  const t = useTranslations("common.teeEpds.journey");
+// A step-through graph for getting a wallet. Enrollment rides on a standard
+// AT Protocol pass from the user's own PDS, so the service works with any
+// account, including Bluesky-hosted ones.
+export function EnrollJourney() {
+  const t = useTranslations("common.walletService.enroll");
   const [step, setStep] = useState<Step>(0);
   const [playing, setPlaying] = useState(false);
 
@@ -30,12 +31,12 @@ export function SigningJourney() {
     return () => window.clearInterval(timer);
   }, [playing]);
 
-  const labels = [t("nodes.app"), t("nodes.pds"), t("nodes.tee"), t("nodes.network")];
+  const labels = [t("nodes.app"), t("nodes.pds"), t("nodes.service"), t("nodes.wallet")];
   const icons = [
     <AppWindowIcon key="app" className="h-4 w-4" />,
     <ServerIcon key="pds" className="h-4 w-4" />,
-    <CpuIcon key="tee" className="h-4 w-4" />,
-    <CheckIcon key="network" className="h-4 w-4" />,
+    <ShieldCheckIcon key="service" className="h-4 w-4" />,
+    <WalletCardsIcon key="wallet" className="h-4 w-4" />,
   ];
 
   return (

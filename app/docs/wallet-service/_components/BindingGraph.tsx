@@ -3,47 +3,52 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { motion } from "framer-motion";
-import { KeyRoundIcon, ServerIcon, ShieldCheckIcon } from "lucide-react";
+import { DatabaseIcon, FileCheck2Icon, PenLineIcon, WalletCardsIcon } from "lucide-react";
 
-type Mode = "server" | "tee";
+type Side = "account" | "wallet";
 
-// Compares a key stored by an ordinary server with a key that stays inside
-// protected TEE memory. The moving request dot makes the boundary visible.
-export function KeyBoundaryGraph() {
-  const t = useTranslations("common.teeEpds.boundary");
-  const [mode, setMode] = useState<Mode>("tee");
+// The public binding record points in two directions. The account publishes
+// the record in its own repo, and the wallet key signs the link from its
+// side. Anyone can verify both halves with public data.
+export function BindingGraph() {
+  const t = useTranslations("common.walletService.binding");
+  const [side, setSide] = useState<Side>("account");
 
   return (
     <div className="rounded-2xl border border-border/60 bg-muted/20 p-4 sm:p-6">
       <div className="mb-6 flex justify-center gap-1 rounded-xl bg-muted/60 p-1">
         <button
           type="button"
-          onClick={() => setMode("server")}
-          aria-pressed={mode === "server"}
+          onClick={() => setSide("account")}
+          aria-pressed={side === "account"}
           className={`flex-1 rounded-lg px-3 py-2 text-[12.5px] font-medium transition-colors ${
-            mode === "server" ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+            side === "account" ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
           }`}
         >
-          {t("serverTab")}
+          {t("accountTab")}
         </button>
         <button
           type="button"
-          onClick={() => setMode("tee")}
-          aria-pressed={mode === "tee"}
+          onClick={() => setSide("wallet")}
+          aria-pressed={side === "wallet"}
           className={`flex-1 rounded-lg px-3 py-2 text-[12.5px] font-medium transition-colors ${
-            mode === "tee" ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+            side === "wallet" ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
           }`}
         >
-          {t("teeTab")}
+          {t("walletTab")}
         </button>
       </div>
 
       <div className="relative mx-auto grid max-w-2xl grid-cols-[1fr_auto_1fr] items-center gap-3 sm:gap-6">
-        <Node icon={<ServerIcon className="h-5 w-5" />} title={t("pdsName")} active />
+        {side === "account" ? (
+          <Node icon={<DatabaseIcon className="h-5 w-5" />} title={t("repoName")} />
+        ) : (
+          <Node icon={<WalletCardsIcon className="h-5 w-5" />} title={t("walletName")} highlighted />
+        )}
 
         <div className="relative h-px w-12 bg-border sm:w-24" aria-hidden="true">
           <motion.span
-            key={mode}
+            key={side}
             initial={{ left: 0, opacity: 0 }}
             animate={{ left: "calc(100% - 8px)", opacity: [0, 1, 1] }}
             transition={{ duration: 1.1, repeat: Infinity, repeatDelay: 0.65 }}
@@ -51,26 +56,24 @@ export function KeyBoundaryGraph() {
           />
         </div>
 
-        {mode === "server" ? (
-          <Node icon={<KeyRoundIcon className="h-5 w-5" />} title={t("serverKeyName")} active />
+        {side === "account" ? (
+          <Node icon={<FileCheck2Icon className="h-5 w-5" />} title={t("recordName")} highlighted />
         ) : (
-          <Node icon={<ShieldCheckIcon className="h-5 w-5" />} title={t("teeName")} active protectedNode />
+          <Node icon={<PenLineIcon className="h-5 w-5" />} title={t("signatureName")} />
         )}
       </div>
 
       <motion.div
-        key={mode}
+        key={side}
         initial={{ opacity: 0, y: 6 }}
         animate={{ opacity: 1, y: 0 }}
-        className={`mx-auto mt-6 max-w-xl rounded-xl border px-5 py-4 text-center ${
-          mode === "tee" ? "border-primary/30 bg-primary/5" : "border-border/60 bg-background"
-        }`}
+        className="mx-auto mt-6 max-w-xl rounded-xl border border-primary/30 bg-primary/5 px-5 py-4 text-center"
       >
         <div className="mb-1 font-mono text-[11px] uppercase tracking-[0.1em] text-primary">
-          {mode === "tee" ? t("teeResult") : t("serverResult")}
+          {side === "account" ? t("accountResult") : t("walletResult")}
         </div>
         <p className="m-0 text-[13.5px] leading-relaxed text-muted-foreground">
-          {mode === "tee" ? t("teeDesc") : t("serverDesc")}
+          {side === "account" ? t("accountDesc") : t("walletDesc")}
         </p>
       </motion.div>
     </div>
@@ -80,25 +83,19 @@ export function KeyBoundaryGraph() {
 function Node({
   icon,
   title,
-  active,
-  protectedNode = false,
+  highlighted = false,
 }: {
   icon: React.ReactNode;
   title: string;
-  active?: boolean;
-  protectedNode?: boolean;
+  highlighted?: boolean;
 }) {
   return (
     <div
       className={`relative flex min-h-28 flex-col items-center justify-center rounded-2xl border px-3 text-center ${
-        protectedNode
-          ? "border-primary/50 bg-primary/8 text-primary"
-          : active
-            ? "border-border bg-background text-foreground"
-            : "border-border/60 text-muted-foreground"
+        highlighted ? "border-primary/50 bg-primary/8 text-primary" : "border-border bg-background text-foreground"
       }`}
     >
-      {protectedNode && (
+      {highlighted && (
         <motion.span
           aria-hidden="true"
           animate={{ opacity: [0.18, 0.45, 0.18], scale: [0.92, 1.04, 0.92] }}

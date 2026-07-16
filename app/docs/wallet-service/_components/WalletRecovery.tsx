@@ -15,11 +15,11 @@ const ACTIVE_SHARES: Record<Scenario, Set<string>> = {
   leave: new Set(["device", "recovery"]),
 };
 
-// Wallet entropy is split so no single party can reconstruct it. This graph
-// shows the three useful two-share combinations without exposing protocol
-// details that are not needed to understand the custody model.
+// The wallet secret is split so no single party can rebuild it. This graph
+// shows the three useful two-share combinations without protocol details
+// that are unnecessary for understanding the custody model.
 export function WalletRecovery() {
-  const t = useTranslations("common.teeEpds.shares");
+  const t = useTranslations("common.walletService.shares");
   const [scenario, setScenario] = useState<Scenario>("everyday");
   const activeShares = ACTIVE_SHARES[scenario];
 

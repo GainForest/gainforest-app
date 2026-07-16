@@ -1256,8 +1256,8 @@
     "cgsLinkDesc": "Un recorrido interactivo por el servicio guardián que permite a todo un equipo compartir una cuenta.",
     "atprotoLinkTitle": "Cómo funciona el AT Protocol",
     "atprotoLinkDesc": "Un recorrido interactivo por la red abierta sobre la que está construido todo esto.",
-    "teeEpdsLinkTitle": "Firma protegida de ePDS",
-    "teeEpdsLinkDesc": "Mira cómo las claves privadas pueden quedar dentro de hardware protegido.",
+    "walletServiceLinkTitle": "La billetera de GainForest",
+    "walletServiceLinkDesc": "Cómo cada cuenta recibe una billetera de la que solo su dueño puede gastar.",
     "guides": {
       "usageGuide": "Guía de uso",
       "audiomothTitle": "Etiquetas de espectrogramas de AudioMoth como presencias de Darwin Core",
@@ -2040,8 +2040,8 @@
       "cgsDesc": "El servicio guardián que permite a todo un equipo compartir una cuenta de grupo de forma segura.",
       "atprotoTitle": "Cómo funciona el AT Protocol",
       "atprotoDesc": "Un recorrido interactivo por la red abierta sobre la que está construido todo esto.",
-      "teeTitle": "Firma protegida de ePDS",
-      "teeDesc": "Mira cómo las claves privadas pueden quedar dentro de hardware protegido.",
+      "walletTitle": "La billetera de GainForest",
+      "walletDesc": "Cómo cada cuenta recibe una billetera de la que solo su dueño puede gastar.",
       "routerTitle": "El router de ePDS",
       "routerDesc": "Cómo las apps encuentran el servidor correcto para un email cuando una comunidad tiene varios."
     }
@@ -2349,7 +2349,7 @@
         },
         "vault": {
           "name": "Credenciales selladas",
-          "desc": "La contraseña de la cuenta del grupo, guardada cifrada. Los miembros y las apps nunca la ven. Solo el servicio puede abrirla, y solo para hablar con el PDS del grupo."
+          "desc": "Una contraseña de aplicación para la cuenta del grupo, guardada cifrada. Es una llave de repuesto limitada, no la contraseña principal de la cuenta: los miembros y las apps nunca la ven, solo el servicio puede usarla, y quien posee las credenciales reales de la cuenta puede revocarla en cualquier momento."
         }
       }
     },
@@ -2362,7 +2362,7 @@
       },
       "vault": {
         "title": "Las credenciales quedan selladas",
-        "text": "La contraseña del grupo se guarda cifrada. Los miembros nunca la ven y las apps nunca la tocan. Solo el servicio guardián puede usarla."
+        "text": "El servicio solo guarda una contraseña de aplicación — una llave de repuesto, no la contraseña principal de la cuenta. Se guarda cifrada, y quien tiene las credenciales reales de la cuenta puede revocar el acceso del servicio en cualquier momento. Lo contrario es imposible."
       },
       "log": {
         "title": "Nada pasa sin ser visto",
@@ -2518,49 +2518,36 @@
       "ethosLink": "El ethos de atproto"
     }
   },
-  "teeEpds": {
-    "metaTitle": "Cómo funcionan la firma protegida y la recuperación de billetera en ePDS",
-    "metaDescription": "Una guía interactiva de la firma protegida de ePDS, la recuperación de billetera con dos de tres partes, la aprobación del dispositivo y sus límites.",
-    "kicker": "firma protegida de ePDS",
-    "title": "Protegida del servidor, recuperable por ti",
-    "lead": "ePDS puede mover la firma de la cuenta a un Entorno de Ejecución Confiable, o TEE. Su billetera opcional divide el control en tres: tu dispositivo, el hardware protegido y tu copia de recuperación. El operador no puede gastar ni encerrarte en el servicio.",
+  "walletService": {
+    "metaTitle": "Cómo funciona el servicio de billetera de GainForest",
+    "metaDescription": "Una guía interactiva del servicio de billetera: inscríbete con cualquier cuenta de AT Protocol, divide las claves en tres partes y aprueba los pagos desde tu propio dispositivo.",
+    "kicker": "Servicio de billetera de GainForest",
+    "title": "Una billetera para tu cuenta de AT Protocol",
+    "lead": "El servicio de billetera da a cualquier cuenta de AT Protocol una billetera de custodia propia para Ethereum y Solana. Funciona con todos los PDS, incluido Bluesky. No hay frase semilla que anotar. Tus claves se dividen en tres partes, tu dispositivo aprueba cada pago y puedes exportar tus claves e irte cuando quieras.",
     "facts": {
-      "keys": {
-        "title": "El servidor no recibe claves",
-        "text": "La aplicación y el PDS reciben firmas, no secretos de cuenta o billetera."
+      "anyPds": {
+        "title": "Funciona con cualquier cuenta",
+        "text": "Te inscribes con tu identidad actual de AT Protocol. Sin contraseña nueva y sin cuenta nueva."
       },
       "protection": {
-        "title": "El código se puede comprobar",
-        "text": "Una prueba de hardware puede mostrar qué código firmante se está ejecutando."
+        "title": "Las claves quedan protegidas",
+        "text": "La clave completa de la billetera aparece solo un momento dentro del hardware protegido y luego se borra."
       },
-      "wallet": {
+      "majority": {
         "title": "Tú tienes la mayoría",
-        "text": "Tu dispositivo y copia de recuperación te dan dos de las tres partes de la billetera."
+        "text": "Tu dispositivo y tu copia de recuperación guardan dos de las tres partes de la billetera."
       }
     },
     "what": {
-      "heading": "¿Qué agrega la extensión TEE?",
-      "intro": "La extensión agrega un pequeño servicio de firma junto al ePDS normal. Todo lo demás sigue usando rutas estándar de AT Protocol.",
-      "p1": "Un PDS normal necesita una clave privada para firmar cada actualización de tus datos. Con la extensión TEE, ePDS mueve ese trabajo a una máquina virtual confidencial. El PDS envía una huella de 32 bytes de la actualización. El firmante protegido devuelve una firma. La clave privada nunca sale de la memoria protegida.",
-      "p2": "La billetera nace de su propio secreto aleatorio, separado de la clave de cuenta. Ese secreto se divide en tres partes. El hardware protegido guarda una parte cifrada; tú controlas las partes del dispositivo y de recuperación. Dos partes restauran la billetera, pero una sola no revela nada.",
-      "p3": "Las aplicaciones pueden crear, ver, firmar, exportar y recuperar la billetera mediante llamadas estándar de AT Protocol o solicitudes web comunes. Ambos caminos usan los mismos controles y devuelven los mismos resultados."
+      "heading": "¿Qué es el servicio de billetera?",
+      "intro": "Un servicio pequeño e independiente que corre dentro de hardware protegido y guarda una billetera para cada persona.",
+      "p1": "Cada billetera está ligada a un DID, la identidad permanente detrás de una cuenta de AT Protocol. El servicio crea la billetera a partir de un secreto aleatorio nuevo dentro de una máquina virtual confidencial, un tipo de hardware protegido llamado TEE.",
+      "p2": "Ese secreto se divide en tres partes: una para tu dispositivo, una para el servicio protegido y una para tu copia de recuperación. Dos partes cualesquiera pueden restaurar la billetera. Una sola parte no revela nada.",
+      "p3": "El servicio se mantiene pequeño a propósito. Guarda el material de la billetera, verifica pruebas y firma transacciones. Tus publicaciones, perfiles y demás registros permanecen todo el tiempo en tu propio PDS."
     },
-    "boundary": {
-      "heading": "¿Dónde vive la clave privada?",
-      "intro": "Cambia entre los dos diseños. Sigue la solicitud en movimiento y observa qué lado llega a tener la clave.",
-      "serverTab": "Clave en el servidor",
-      "teeTab": "Clave dentro del TEE",
-      "pdsName": "Servidor PDS",
-      "serverKeyName": "Archivo de clave privada",
-      "teeName": "Firmante protegido",
-      "serverResult": "El servidor puede leer la clave",
-      "teeResult": "La clave queda protegida",
-      "serverDesc": "El proceso PDS abre un archivo de clave y firma la actualización. Quien controle por completo el servidor podría copiar esa clave.",
-      "teeDesc": "El PDS solo envía una huella al firmante protegido. Recibe una firma, no la clave. Incluso el operador no puede abrir la memoria protegida y copiarla fácilmente."
-    },
-    "journey": {
-      "heading": "Cómo se firma un registro",
-      "intro": "Pulsa reproducir o elige un paso. El TEE solo firma. Tus registros siguen pasando por el PDS normal y la red AT Protocol.",
+    "enroll": {
+      "heading": "Cómo obtienes una billetera",
+      "intro": "Pulsa reproducir o elige un paso. La inscripción usa un pase estándar de AT Protocol emitido por tu propio PDS, así que ningún servidor necesita integración especial.",
       "play": "Reproducir",
       "pause": "Pausa",
       "back": "Atrás",
@@ -2569,39 +2556,27 @@
       "jumpTo": "Ir al paso {step}",
       "nodes": {
         "app": "Tu aplicación",
-        "pds": "PDS",
-        "tee": "Firmante TEE",
-        "network": "Red"
+        "pds": "Tu PDS",
+        "service": "Servicio de billetera",
+        "wallet": "Tu billetera"
       },
       "steps": {
         "s1": {
-          "title": "Tu aplicación guarda un registro",
-          "text": "Publicas una observación, actualizas un perfil o creas otro registro. La aplicación lo envía a tu PDS como siempre."
+          "title": "Tu aplicación pide un pase",
+          "text": "Tu aplicación pide a tu propio PDS un pase de corta duración que demuestra quién eres. Todos los PDS pueden emitir este pase, porque es una función estándar de AT Protocol."
         },
         "s2": {
-          "title": "El PDS prepara la actualización",
-          "text": "El PDS revisa la solicitud y crea la siguiente versión de tus datos. Convierte la actualización en una huella corta."
+          "title": "El servicio verifica el pase",
+          "text": "El servicio de billetera lee tu registro público de identidad y compara el pase con él. También guarda una clave pública de tu dispositivo para futuras aprobaciones."
         },
         "s3": {
-          "title": "El TEE firma la huella",
-          "text": "El firmante deriva tu clave de cuenta dentro de memoria protegida y firma la huella. Solo devuelve la firma."
+          "title": "El hardware protegido crea la billetera",
+          "text": "Un secreto aleatorio nuevo se convierte en tu billetera dentro de la memoria protegida. El secreto se divide de inmediato en tres partes y la clave completa se borra."
         },
         "s4": {
-          "title": "La red la comprueba",
-          "text": "La actualización firmada entra en el historial. Otros servicios verifican la firma con la clave pública de tu identidad."
+          "title": "Tú te quedas con la mayoría",
+          "text": "Tu dispositivo y tu copia de recuperación reciben una parte cada uno. El servicio guarda su propia parte cifrada. Tus direcciones de Ethereum y Solana quedan listas para usar."
         }
-      }
-    },
-    "separate": {
-      "heading": "Dos rutas que nunca comparten claves",
-      "intro": "La firma de cuenta y la firma de billetera usan el mismo servicio protegido, pero claves y reglas distintas.",
-      "repo": {
-        "title": "Ruta de registros",
-        "text": "El PDS puede pedir una firma para una actualización normal. Esta clave solo firma registros AT Protocol. No puede firmar una transacción de Ethereum."
-      },
-      "wallet": {
-        "title": "Ruta de billetera",
-        "text": "La billetera usa claves separadas de Ethereum y Solana. Para firmar, el servicio protegido necesita una prueba del dispositivo registrado y una parte auténtica de la billetera."
       }
     },
     "shares": {
@@ -2640,43 +2615,57 @@
         }
       }
     },
-    "walletGate": {
-      "heading": "Por qué el servidor no puede gastar de la billetera",
-      "intro": "Prueba ambas solicitudes. Un token puede mostrar la dirección pública, pero gastar también requiere una prueba del dispositivo y su parte de la billetera.",
-      "serverAttempt": "El PDS pide solo",
-      "userAttempt": "Prueba + parte personal",
-      "serverNode": "Solicitud del PDS",
-      "userNode": "Prueba + parte del dispositivo",
+    "gate": {
+      "heading": "Por qué el operador no puede gastar tu dinero",
+      "intro": "Prueba ambas solicitudes. Un pase de acceso puede mostrar la dirección pública de la billetera. Gastar necesita además la prueba de tu dispositivo y su parte de la billetera.",
+      "tokenAttempt": "Solo el pase",
+      "userAttempt": "Prueba del dispositivo + parte",
+      "tokenNode": "Pase de acceso",
+      "userNode": "Prueba + parte",
       "teeNode": "Billetera protegida",
       "approved": "Firma aprobada",
-      "denied": "Solicitud rechazada",
-      "approvedDesc": "El dispositivo firma una solicitud corta y envía su parte cifrada para el hardware protegido. El firmante comprueba la prueba, la hora y un número de un solo uso antes de reconstruir y usar la billetera.",
-      "deniedDesc": "Un token del PDS no basta. El firmante protegido solo tiene una parte y rechaza cualquier solicitud sin la prueba del dispositivo y una segunda parte auténtica."
+      "denied": "Solicitud denegada",
+      "approvedDesc": "Tu dispositivo firma una solicitud corta y envía su parte cifrada para el hardware protegido. El servicio verifica la firma, la hora y un número de un solo uso antes de reconstruir la billetera para firmar.",
+      "deniedDesc": "Un pase por sí solo únicamente da acceso a información pública. El servicio protegido guarda una sola parte y se niega a firmar sin una solicitud firmada por tu dispositivo y una segunda parte genuina."
+    },
+    "binding": {
+      "heading": "Cómo cualquiera puede verificar el vínculo",
+      "intro": "Tu cuenta y tu billetera se señalan mutuamente en público. Cambia de lado para ver cada mitad de la prueba.",
+      "accountTab": "Lado de la cuenta",
+      "walletTab": "Lado de la billetera",
+      "repoName": "Tu repositorio de datos",
+      "recordName": "Registro de vínculo",
+      "walletName": "Clave de la billetera",
+      "signatureName": "Firma en el registro",
+      "accountResult": "Tu cuenta reclama la billetera",
+      "accountDesc": "Publicas un registro pequeño en tu propio repositorio con tus direcciones de billetera. Solo tú puedes escribir en tu repositorio, así que el registro muestra que tu cuenta respalda esas direcciones.",
+      "walletResult": "Tu billetera está de acuerdo",
+      "walletDesc": "Dentro del registro hay una firma hecha por la clave de la billetera sobre tu identidad y tus direcciones. Muestra que la billetera aceptó el vínculo. Cualquiera puede verificar ambas mitades con datos públicos."
     },
     "proof": {
-      "heading": "¿Cómo puede una aplicación confiar en el firmante?",
-      "intro": "Un TEE puede crear un informe de hardware llamado atestación. Ayuda a comprobar la máquina y el código antes de confiar.",
+      "heading": "¿Cómo puede una aplicación confiar en el servicio?",
+      "intro": "El hardware protegido puede crear un informe llamado atestación. Permite a cualquiera revisar la máquina y el código antes de confiar.",
       "cardLabel": "Prueba respaldada por hardware",
-      "text": "El firmante crea su propia identidad pública dentro de memoria protegida. Un informe de hardware une esa identidad al código activo. El PDS puede exigir el informe antes de iniciar. Si el código cambia, el informe también cambia."
+      "text": "El servicio crea su identidad dentro de la memoria protegida. Un informe de hardware une esa identidad al código exacto que se está ejecutando. Cualquiera puede pedir este informe al servicio y revisarlo. Si el código cambia, el informe también cambia."
     },
     "limits": {
       "heading": "Lo que esta protección no resuelve",
-      "intro": "Las claves protegidas ayudan, pero no hacen perfecto todo el sistema. Estos límites importan.",
+      "intro": "Las claves divididas y el hardware protegido eliminan muchos riesgos. Estos límites permanecen y los nombramos abiertamente.",
       "onboarding": {
         "title": "Primera configuración",
         "text": "El primer registro de dispositivo confía una vez en el servicio. Una versión futura puede usar passkeys para reducir esa confianza."
       },
       "uptime": {
-        "title": "Disponibilidad",
-        "text": "Un operador todavía puede apagar la máquina o bloquear solicitudes. Un TEE protege secretos, no la disponibilidad."
+        "title": "Disponibilidad del servicio",
+        "text": "Un anfitrión todavía puede apagar la máquina o bloquear solicitudes. Tus partes de dispositivo y de recuperación te permiten reconstruir la billetera sin el servicio."
       },
-      "server": {
-        "title": "Solicitudes malas",
-        "text": "Un PDS atacado podría pedir una firma para una actualización mala. Las claves de recuperación y el historial público ayudan a deshacerla."
+      "backup": {
+        "title": "Tus copias",
+        "text": "Debes mantener segura tu copia de recuperación. Si pierdes tu dispositivo y tu copia al mismo tiempo, el servicio por sí solo no puede restaurar la billetera."
       },
-      "recovery": {
-        "title": "Copias y repetición",
-        "text": "Debes proteger tu copia de recuperación y el servicio debe respaldar su parte cifrada. Volver atrás el almacenamiento también puede reabrir una solicitud aprobada antigua, pero no crear una aprobación nueva."
+      "rollback": {
+        "title": "Retroceso de almacenamiento",
+        "text": "Retroceder el almacenamiento del servicio en el tiempo podría repetir una solicitud antigua ya aprobada. Nunca puede crear una aprobación nueva."
       }
     },
     "more": {
@@ -2685,10 +2674,10 @@
       "epdsDesc": "Mira la entrada sin contraseña y los servicios normales que la rodean.",
       "lexiconsTitle": "Esquemas de datos",
       "lexiconsDesc": "Explora los formatos abiertos guardados en cada PDS.",
-      "designTitle": "Diseño técnico",
-      "designDesc": "Lee el modelo de amenazas, las reglas de firma y las notas de implementación.",
-      "githubTitle": "ePDS en GitHub",
-      "githubDesc": "Lee el código fuente y ejecuta el proyecto."
+      "atprotoTitle": "Cómo funciona el AT Protocol",
+      "atprotoDesc": "Un recorrido interactivo por la red abierta sobre la que está construido todo esto.",
+      "githubTitle": "El servicio en GitHub",
+      "githubDesc": "Lee el código fuente y ejecuta el servicio tú mismo."
     }
   }
 }

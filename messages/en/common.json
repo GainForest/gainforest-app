@@ -1256,8 +1256,8 @@
     "cgsLinkDesc": "An interactive tour of the guard service that lets a whole team share one account.",
     "atprotoLinkTitle": "How the AT Protocol works",
     "atprotoLinkDesc": "An interactive tour of the open network everything here is built on.",
-    "teeEpdsLinkTitle": "Protected ePDS signing",
-    "teeEpdsLinkDesc": "See how private keys can stay inside protected hardware.",
+    "walletServiceLinkTitle": "The GainForest wallet",
+    "walletServiceLinkDesc": "How every account gets a wallet that only its owner can spend from.",
     "guides": {
       "usageGuide": "Usage guide",
       "audiomothTitle": "AudioMoth spectrogram labels as Darwin Core occurrences",
@@ -2040,8 +2040,8 @@
       "cgsDesc": "The guard service that lets a whole team share one group account safely.",
       "atprotoTitle": "How the AT Protocol works",
       "atprotoDesc": "An interactive tour of the open network everything here is built on.",
-      "teeTitle": "Protected ePDS signing",
-      "teeDesc": "See how private keys can stay inside protected hardware.",
+      "walletTitle": "The GainForest wallet",
+      "walletDesc": "How every account gets a wallet that only its owner can spend from.",
       "routerTitle": "The ePDS router",
       "routerDesc": "How apps find the right server for an email when a community runs several."
     }
@@ -2349,7 +2349,7 @@
         },
         "vault": {
           "name": "Sealed credentials",
-          "desc": "The group's account password, stored encrypted. Members and apps never see it. Only the service can open it, and only to talk to the group's PDS."
+          "desc": "An app password for the group's account, stored encrypted. It is a limited spare key, not the account's main password: members and apps never see it, only the service can use it, and whoever holds the real account credentials can revoke it at any time."
         }
       }
     },
@@ -2362,7 +2362,7 @@
       },
       "vault": {
         "title": "Credentials stay sealed",
-        "text": "The group's password is stored encrypted. Members never see it and apps never touch it. Only the guard service can use it."
+        "text": "The service holds only an app password — a spare key, not the account's main password. It is stored encrypted, and whoever keeps the real account credentials can revoke the service's access at any time. The reverse is impossible."
       },
       "log": {
         "title": "Nothing happens unseen",
@@ -2518,49 +2518,36 @@
       "ethosLink": "The atproto ethos"
     }
   },
-  "teeEpds": {
-    "metaTitle": "How protected ePDS signing and wallet recovery work",
-    "metaDescription": "An interactive guide to ePDS protected signing, two-of-three wallet recovery, device approval, and honest limits.",
-    "kicker": "ePDS protected signing",
-    "title": "Protected from the server, recoverable by you",
-    "lead": "ePDS can move account signing into a Trusted Execution Environment, or TEE. Its optional wallet splits control three ways: your device, protected hardware, and your recovery backup. The operator cannot spend from the wallet or keep you locked in.",
+  "walletService": {
+    "metaTitle": "How the GainForest wallet service works",
+    "metaDescription": "An interactive guide to the wallet service: enroll with any AT Protocol account, split keys into three shares, approve spending from your own device.",
+    "kicker": "GainForest wallet service",
+    "title": "A wallet for your AT Protocol account",
+    "lead": "The wallet service gives any AT Protocol account a self-custodial wallet for Ethereum and Solana. It works with every PDS, including Bluesky. There is no seed phrase to write down. Your keys are split into three shares, your device approves every payment, and you can export your keys and leave whenever you want.",
     "facts": {
-      "keys": {
-        "title": "The server gets no key",
-        "text": "The normal app and PDS receive signatures, not account or wallet secrets."
+      "anyPds": {
+        "title": "Works with any account",
+        "text": "You enroll with your existing AT Protocol identity. No new password and no new account."
       },
       "protection": {
-        "title": "Code can be checked",
-        "text": "A hardware proof can show which signer code is running."
+        "title": "Keys stay protected",
+        "text": "The full wallet key appears only for a moment inside protected hardware, then it is cleared."
       },
-      "wallet": {
+      "majority": {
         "title": "You hold the majority",
-        "text": "Your device and recovery backup give you two of the wallet’s three shares."
+        "text": "Your device and your recovery backup hold two of the wallet's three shares."
       }
     },
     "what": {
-      "heading": "What does the TEE extension add?",
-      "intro": "The extension adds a small signing service beside the normal ePDS. Everything else keeps using standard AT Protocol paths.",
-      "p1": "A normal PDS needs a private key to sign each update to your data. With the TEE extension, ePDS moves that job into a confidential virtual machine. The PDS sends a 32-byte fingerprint of the update. The protected signer returns a signature. The private key never leaves protected memory.",
-      "p2": "The wallet is created from its own random secret, separate from the account key. That secret is split into three shares. Protected hardware keeps one encrypted share; you control the device and recovery shares. Any two can restore the wallet, but one alone reveals nothing.",
-      "p3": "Apps get the same create, view, sign, export, and recovery actions through standard AT Protocol calls and ordinary web requests. Both paths use the same security checks and return the same results."
+      "heading": "What is the wallet service?",
+      "intro": "A small standalone service that runs inside protected hardware and keeps a wallet for each user.",
+      "p1": "Every wallet is tied to a DID, the permanent identity behind an AT Protocol account. The service creates the wallet from a fresh random secret inside a confidential virtual machine, a kind of protected hardware called a TEE.",
+      "p2": "That secret is split into three shares: one for your device, one for the protected service, and one for your recovery backup. Any two shares can restore the wallet. A single share reveals nothing on its own.",
+      "p3": "The service stays deliberately small. It holds wallet material, checks proofs, and signs transactions. Your posts, profiles, and other records stay on your own PDS the whole time."
     },
-    "boundary": {
-      "heading": "Where does the private key live?",
-      "intro": "Switch between the two designs. Follow the moving request and notice which side ever holds the key.",
-      "serverTab": "Key on the server",
-      "teeTab": "Key inside the TEE",
-      "pdsName": "PDS server",
-      "serverKeyName": "Private key file",
-      "teeName": "Protected signer",
-      "serverResult": "Server can read the key",
-      "teeResult": "Key stays protected",
-      "serverDesc": "The PDS process opens a key file and signs the update itself. Anyone who fully controls the server may be able to copy that key.",
-      "teeDesc": "The PDS sends only a fingerprint to the protected signer. It receives a signature, not the key. Even the machine operator cannot simply open protected memory and copy it."
-    },
-    "journey": {
-      "heading": "How one record is signed",
-      "intro": "Press play or choose a step. The TEE only signs. Your records still move through the normal PDS and AT Protocol network.",
+    "enroll": {
+      "heading": "How you get a wallet",
+      "intro": "Press play or choose a step. Enrollment uses a standard AT Protocol pass from your own PDS, so no server needs special integration.",
       "play": "Play",
       "pause": "Pause",
       "back": "Back",
@@ -2569,39 +2556,27 @@
       "jumpTo": "Go to step {step}",
       "nodes": {
         "app": "Your app",
-        "pds": "PDS",
-        "tee": "TEE signer",
-        "network": "Network"
+        "pds": "Your PDS",
+        "service": "Wallet service",
+        "wallet": "Your wallet"
       },
       "steps": {
         "s1": {
-          "title": "Your app saves a record",
-          "text": "You publish an observation, update a profile, or create another record. The app sends it to your PDS in the usual way."
+          "title": "Your app asks for a pass",
+          "text": "Your app asks your own PDS for a short-lived pass that proves who you are. Every PDS can issue this pass, because it is a standard AT Protocol feature."
         },
         "s2": {
-          "title": "The PDS prepares the update",
-          "text": "The PDS checks the request and builds the next version of your data. It turns that update into a short fingerprint."
+          "title": "The service checks the pass",
+          "text": "The wallet service reads your public identity record and checks the pass against it. It also remembers a public key from your device for future approvals."
         },
         "s3": {
-          "title": "The TEE signs the fingerprint",
-          "text": "The signer derives your account key inside protected memory and signs the fingerprint. Only the signature comes back."
+          "title": "Protected hardware creates the wallet",
+          "text": "A fresh random secret becomes your wallet inside protected memory. The secret is split into three shares right away, and the full key is cleared."
         },
         "s4": {
-          "title": "The network checks it",
-          "text": "The signed update joins your record history. Other AT Protocol services check it with the public key in your account identity."
+          "title": "You keep the majority",
+          "text": "Your device and your recovery backup each receive one share. The service stores its own share encrypted. Your Ethereum and Solana addresses are ready to use."
         }
-      }
-    },
-    "separate": {
-      "heading": "Two paths that never share keys",
-      "intro": "Account signing and wallet signing use the same protected service, but they use different keys and different rules.",
-      "repo": {
-        "title": "Account record path",
-        "text": "The PDS may request a signature for a normal data update. This key signs AT Protocol records only. It cannot sign an Ethereum transaction."
-      },
-      "wallet": {
-        "title": "Wallet path",
-        "text": "The wallet uses separate Ethereum and Solana keys. To sign, the protected service needs both proof from the enrolled device and a genuine wallet share."
       }
     },
     "shares": {
@@ -2640,43 +2615,57 @@
         }
       }
     },
-    "walletGate": {
-      "heading": "Why the server cannot spend from the wallet",
-      "intro": "Try both requests. A login token can show the public wallet address, but spending also needs proof from your device and its wallet share.",
-      "serverAttempt": "PDS asks by itself",
-      "userAttempt": "User proof + share",
-      "serverNode": "PDS request",
-      "userNode": "Device proof + share",
+    "gate": {
+      "heading": "Why the operator cannot spend your money",
+      "intro": "Try both requests. A login pass can show the public wallet address. Spending also needs proof from your device and its wallet share.",
+      "tokenAttempt": "Pass alone",
+      "userAttempt": "Device proof + share",
+      "tokenNode": "Login pass",
+      "userNode": "Proof + share",
       "teeNode": "Protected wallet",
       "approved": "Signature approved",
       "denied": "Request denied",
-      "approvedDesc": "The device signs a short request and sends its wallet share encrypted for the protected hardware. The signer checks the proof, time, and one-time number before rebuilding and using the wallet.",
-      "deniedDesc": "A PDS token alone is not enough. The protected signer has only one share and refuses any request without both device proof and a genuine second share."
+      "approvedDesc": "Your device signs a short request and sends its wallet share encrypted for the protected hardware. The service checks the signature, the time, and a one-time number before rebuilding the wallet to sign.",
+      "deniedDesc": "A pass by itself only unlocks public information. The protected service holds a single share and refuses to sign without a request signed by your device and a genuine second share."
+    },
+    "binding": {
+      "heading": "How anyone can check the link",
+      "intro": "Your account and your wallet point at each other in public. Switch sides to see each half of the proof.",
+      "accountTab": "Account side",
+      "walletTab": "Wallet side",
+      "repoName": "Your data repo",
+      "recordName": "Binding record",
+      "walletName": "Wallet key",
+      "signatureName": "Signature in the record",
+      "accountResult": "Your account claims the wallet",
+      "accountDesc": "You publish a small record in your own repo that lists your wallet addresses. Only you can write to your repo, so the record shows your account stands behind these addresses.",
+      "walletResult": "Your wallet agrees",
+      "walletDesc": "Inside the record sits a signature made by the wallet key over your identity and addresses. It shows the wallet accepted the link. Anyone can verify both halves with public data."
     },
     "proof": {
-      "heading": "How can an app trust the protected signer?",
-      "intro": "A TEE can create a hardware report called an attestation. It helps another service check the machine and the code before trusting it.",
+      "heading": "How can an app trust the service?",
+      "intro": "Protected hardware can create a report called an attestation. It lets anyone check the machine and the code before trusting it.",
       "cardLabel": "Hardware-backed proof",
-      "text": "The signer creates its own public identity inside protected memory. A hardware report binds that identity to the running code. The PDS can require this report before it starts. If the signer code changes, the report changes too."
+      "text": "The service creates its identity inside protected memory. A hardware report binds that identity to the exact code that is running. Anyone can fetch this report from the service and check it. If the code changes, the report changes too."
     },
     "limits": {
       "heading": "What this protection does not solve",
-      "intro": "Protected keys are useful, but they do not make the whole system perfect. These limits matter.",
+      "intro": "Split keys and protected hardware remove many risks. These limits remain, and we name them openly.",
       "onboarding": {
         "title": "First wallet setup",
         "text": "The first device enrollment trusts the service once. A stronger future version can use passkeys to reduce that trust."
       },
       "uptime": {
         "title": "Service availability",
-        "text": "A host can still stop the machine or block requests. A TEE protects secrets, not uptime."
+        "text": "A host can still stop the machine or block requests. Your device and recovery shares let you rebuild the wallet without the service."
       },
-      "server": {
-        "title": "Bad record requests",
-        "text": "A hacked PDS could ask the account key to sign a bad data update. Recovery keys and the public identity history help the owner undo this."
+      "backup": {
+        "title": "Your backups",
+        "text": "You must keep your recovery backup safe. If you lose your device and your backup at the same time, the service alone cannot restore the wallet."
       },
-      "recovery": {
-        "title": "Backups and replay",
-        "text": "You must protect your recovery backup, and the service must back up its encrypted share. Rolling service storage back can also reopen an old approved request, though it cannot create a new approval."
+      "rollback": {
+        "title": "Storage rollback",
+        "text": "Rolling the service storage back in time could replay an old approved request. It can never create a new approval."
       }
     },
     "more": {
@@ -2685,10 +2674,10 @@
       "epdsDesc": "See the passwordless front door and the normal services around it.",
       "lexiconsTitle": "Data schemas",
       "lexiconsDesc": "Explore the open record formats stored inside each PDS.",
-      "designTitle": "Technical design",
-      "designDesc": "Read the full threat model, signing rules, and implementation notes.",
-      "githubTitle": "ePDS on GitHub",
-      "githubDesc": "Read the source code and run the project yourself."
+      "atprotoTitle": "How the AT Protocol works",
+      "atprotoDesc": "An interactive tour of the open network everything here is built on.",
+      "githubTitle": "Wallet service on GitHub",
+      "githubDesc": "Read the source code and run the service yourself."
     }
   }
 }

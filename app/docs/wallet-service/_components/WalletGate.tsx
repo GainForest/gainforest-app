@@ -3,31 +3,31 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { motion } from "framer-motion";
-import { CheckCircle2Icon, ShieldXIcon, UserRoundCheckIcon, WalletCardsIcon } from "lucide-react";
+import { CheckCircle2Icon, ShieldXIcon, TicketIcon, UserRoundCheckIcon } from "lucide-react";
 
-type Attempt = "server" | "user";
+type Attempt = "token" | "user";
 
-// Shows the wallet's two user-held checks. A server token can ask for public
-// information, but spending needs both a request signed by the enrolled device
-// and a genuine second wallet share.
+// Shows the wallet's two user-held checks. A login pass can ask for public
+// information, while spending needs both a request signed by the enrolled
+// device and a genuine second wallet share.
 export function WalletGate() {
-  const t = useTranslations("common.teeEpds.walletGate");
-  const [attempt, setAttempt] = useState<Attempt>("server");
+  const t = useTranslations("common.walletService.gate");
+  const [attempt, setAttempt] = useState<Attempt>("token");
 
   return (
     <div className="rounded-2xl border border-border/60 bg-muted/20 p-4 sm:p-6">
       <div className="mb-6 grid grid-cols-2 gap-2">
         <button
           type="button"
-          onClick={() => setAttempt("server")}
-          aria-pressed={attempt === "server"}
+          onClick={() => setAttempt("token")}
+          aria-pressed={attempt === "token"}
           className={`rounded-xl border px-3 py-3 text-[12.5px] font-medium transition-colors ${
-            attempt === "server"
+            attempt === "token"
               ? "border-destructive/40 bg-destructive/5 text-foreground"
               : "border-border bg-background text-muted-foreground"
           }`}
         >
-          {t("serverAttempt")}
+          {t("tokenAttempt")}
         </button>
         <button
           type="button"
@@ -49,20 +49,20 @@ export function WalletGate() {
             attempt === "user" ? (
               <UserRoundCheckIcon className="h-5 w-5" />
             ) : (
-              <WalletCardsIcon className="h-5 w-5" />
+              <TicketIcon className="h-5 w-5" />
             )
           }
-          label={attempt === "user" ? t("userNode") : t("serverNode")}
+          label={attempt === "user" ? t("userNode") : t("tokenNode")}
           active
         />
 
-        <FlowLine active={attempt === "user"} denied={attempt === "server"} />
+        <FlowLine active={attempt === "user"} denied={attempt === "token"} />
 
         <GateNode
           icon={attempt === "user" ? <CheckCircle2Icon className="h-5 w-5" /> : <ShieldXIcon className="h-5 w-5" />}
           label={t("teeNode")}
           active={attempt === "user"}
-          denied={attempt === "server"}
+          denied={attempt === "token"}
         />
       </div>
 

@@ -4,28 +4,28 @@ import { getTranslations } from "next-intl/server";
 import { ArrowUpRightIcon, KeyRoundIcon, ShieldCheckIcon, WalletCardsIcon } from "lucide-react";
 import { LogoMark } from "@/app/_components/Logo";
 import { localizedAlternates } from "@/app/_lib/seo-metadata";
-import { KeyBoundaryGraph } from "./_components/KeyBoundaryGraph";
-import { SigningJourney } from "./_components/SigningJourney";
+import { BindingGraph } from "./_components/BindingGraph";
+import { EnrollJourney } from "./_components/EnrollJourney";
 import { WalletGate } from "./_components/WalletGate";
 import { WalletRecovery } from "./_components/WalletRecovery";
 
-const GITHUB_URL = "https://github.com/hypercerts-org/ePDS";
-const DESIGN_URL = `${GITHUB_URL}/blob/feat/tee-signer/docs/design/tee-signer.md`;
+const GITHUB_URL = "https://github.com/GainForest/atproto-wallet-service";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const t = await getTranslations("common.teeEpds");
+  const t = await getTranslations("common.walletService");
   return {
     title: t("metaTitle"),
     description: t("metaDescription"),
-    alternates: await localizedAlternates("/docs/TEE-ePDS"),
+    alternates: await localizedAlternates("/docs/wallet-service"),
   };
 }
 
-// An interactive plain-language guide to the optional TEE signer in ePDS.
-// Each graph reveals one boundary: where keys live, how a record is signed,
-// how wallet recovery works, and why spending needs the user's device share.
-export default async function TeeEpdsDocsPage() {
-  const t = await getTranslations("common.teeEpds");
+// An interactive plain-language guide to the standalone wallet service.
+// Each graph reveals one idea: how enrollment works, how the three shares
+// combine, why spending needs the user's device, and how the public link
+// between an account and its wallet can be checked.
+export default async function WalletServiceDocsPage() {
+  const t = await getTranslations("common.walletService");
 
   return (
     <div className="mx-auto w-full max-w-3xl px-5 py-10 sm:px-8 sm:py-14">
@@ -41,7 +41,7 @@ export default async function TeeEpdsDocsPage() {
       </header>
 
       <section className="grid gap-3 sm:grid-cols-3">
-        <FactCard icon={<KeyRoundIcon className="h-4 w-4" />} title={t("facts.keys.title")} text={t("facts.keys.text")} />
+        <FactCard icon={<KeyRoundIcon className="h-4 w-4" />} title={t("facts.anyPds.title")} text={t("facts.anyPds.text")} />
         <FactCard
           icon={<ShieldCheckIcon className="h-4 w-4" />}
           title={t("facts.protection.title")}
@@ -49,8 +49,8 @@ export default async function TeeEpdsDocsPage() {
         />
         <FactCard
           icon={<WalletCardsIcon className="h-4 w-4" />}
-          title={t("facts.wallet.title")}
-          text={t("facts.wallet.text")}
+          title={t("facts.majority.title")}
+          text={t("facts.majority.text")}
         />
       </section>
 
@@ -60,27 +60,20 @@ export default async function TeeEpdsDocsPage() {
         <p className="mt-4 max-w-prose text-[14.5px] leading-relaxed text-muted-foreground">{t("what.p3")}</p>
       </Section>
 
-      <Section heading={t("boundary.heading")} intro={t("boundary.intro")}>
-        <KeyBoundaryGraph />
-      </Section>
-
-      <Section heading={t("journey.heading")} intro={t("journey.intro")}>
-        <SigningJourney />
-      </Section>
-
-      <Section heading={t("separate.heading")} intro={t("separate.intro")}>
-        <div className="grid gap-3 sm:grid-cols-2">
-          <PathCard number="01" title={t("separate.repo.title")} text={t("separate.repo.text")} />
-          <PathCard number="02" title={t("separate.wallet.title")} text={t("separate.wallet.text")} />
-        </div>
+      <Section heading={t("enroll.heading")} intro={t("enroll.intro")}>
+        <EnrollJourney />
       </Section>
 
       <Section heading={t("shares.heading")} intro={t("shares.intro")}>
         <WalletRecovery />
       </Section>
 
-      <Section heading={t("walletGate.heading")} intro={t("walletGate.intro")}>
+      <Section heading={t("gate.heading")} intro={t("gate.intro")}>
         <WalletGate />
+      </Section>
+
+      <Section heading={t("binding.heading")} intro={t("binding.intro")}>
+        <BindingGraph />
       </Section>
 
       <Section heading={t("proof.heading")} intro={t("proof.intro")}>
@@ -97,8 +90,8 @@ export default async function TeeEpdsDocsPage() {
         <div className="divide-y divide-border/60 border-y border-border/60">
           <LimitRow title={t("limits.onboarding.title")} text={t("limits.onboarding.text")} />
           <LimitRow title={t("limits.uptime.title")} text={t("limits.uptime.text")} />
-          <LimitRow title={t("limits.server.title")} text={t("limits.server.text")} />
-          <LimitRow title={t("limits.recovery.title")} text={t("limits.recovery.text")} />
+          <LimitRow title={t("limits.backup.title")} text={t("limits.backup.text")} />
+          <LimitRow title={t("limits.rollback.title")} text={t("limits.rollback.text")} />
         </div>
       </Section>
 
@@ -109,7 +102,7 @@ export default async function TeeEpdsDocsPage() {
         <div className="grid gap-3 sm:grid-cols-2">
           <MoreCard href="/docs/ePDS" title={t("more.epdsTitle")} text={t("more.epdsDesc")} />
           <MoreCard href="/docs/lexicons" title={t("more.lexiconsTitle")} text={t("more.lexiconsDesc")} />
-          <MoreCard href={DESIGN_URL} title={t("more.designTitle")} text={t("more.designDesc")} external />
+          <MoreCard href="/docs/atproto" title={t("more.atprotoTitle")} text={t("more.atprotoDesc")} />
           <MoreCard href={GITHUB_URL} title={t("more.githubTitle")} text={t("more.githubDesc")} external />
         </div>
       </section>
@@ -141,16 +134,6 @@ function FactCard({ icon, title, text }: { icon: React.ReactNode; title: string;
       <div className="mb-2 text-primary">{icon}</div>
       <h2 className="m-0 text-[13px] font-medium text-foreground">{title}</h2>
       <p className="m-0 mt-1 text-[12px] leading-relaxed text-muted-foreground">{text}</p>
-    </div>
-  );
-}
-
-function PathCard({ number, title, text }: { number: string; title: string; text: string }) {
-  return (
-    <div className="rounded-2xl border border-border/60 p-5">
-      <div className="mb-4 font-mono text-[10.5px] text-primary">{number}</div>
-      <h3 className="m-0 text-sm font-medium text-foreground">{title}</h3>
-      <p className="m-0 mt-2 text-[13px] leading-relaxed text-muted-foreground">{text}</p>
     </div>
   );
 }

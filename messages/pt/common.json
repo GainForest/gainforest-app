@@ -1256,8 +1256,8 @@
     "cgsLinkDesc": "Um passeio interativo pelo serviço guardião que permite que uma equipe inteira compartilhe uma conta.",
     "atprotoLinkTitle": "Como funciona o AT Protocol",
     "atprotoLinkDesc": "Um passeio interativo pela rede aberta sobre a qual tudo isto é construído.",
-    "teeEpdsLinkTitle": "Assinatura protegida do ePDS",
-    "teeEpdsLinkDesc": "Veja como chaves privadas podem ficar dentro de hardware protegido.",
+    "walletServiceLinkTitle": "A carteira GainForest",
+    "walletServiceLinkDesc": "Como cada conta recebe uma carteira da qual só o dono pode gastar.",
     "guides": {
       "usageGuide": "Guia de uso",
       "audiomothTitle": "Rótulos de espectrograma do AudioMoth como ocorrências de Darwin Core",
@@ -2040,8 +2040,8 @@
       "cgsDesc": "O serviço guardião que permite que uma equipe inteira compartilhe uma conta de grupo com segurança.",
       "atprotoTitle": "Como funciona o AT Protocol",
       "atprotoDesc": "Um passeio interativo pela rede aberta sobre a qual tudo isto é construído.",
-      "teeTitle": "Assinatura protegida do ePDS",
-      "teeDesc": "Veja como chaves privadas podem ficar dentro de hardware protegido.",
+      "walletTitle": "A carteira GainForest",
+      "walletDesc": "Como cada conta recebe uma carteira da qual só o dono pode gastar.",
       "routerTitle": "O roteador do ePDS",
       "routerDesc": "Como os apps encontram o servidor certo para um email quando uma comunidade tem vários."
     }
@@ -2349,7 +2349,7 @@
         },
         "vault": {
           "name": "Credenciais lacradas",
-          "desc": "A senha da conta do grupo, guardada criptografada. Membros e apps nunca a veem. Só o serviço pode abri-la, e só para falar com o PDS do grupo."
+          "desc": "Uma senha de aplicativo para a conta do grupo, guardada criptografada. É uma chave reserva limitada, não a senha principal da conta: membros e apps nunca a veem, só o serviço pode usá-la, e quem tem as credenciais reais da conta pode revogá-la a qualquer momento."
         }
       }
     },
@@ -2362,7 +2362,7 @@
       },
       "vault": {
         "title": "Credenciais ficam lacradas",
-        "text": "A senha do grupo é guardada criptografada. Membros nunca a veem e apps nunca a tocam. Só o serviço guardião pode usá-la."
+        "text": "O serviço guarda apenas uma senha de aplicativo — uma chave reserva, não a senha principal da conta. Ela fica criptografada, e quem tem as credenciais reais da conta pode revogar o acesso do serviço a qualquer momento. O contrário é impossível."
       },
       "log": {
         "title": "Nada acontece sem ser visto",
@@ -2518,49 +2518,36 @@
       "ethosLink": "O ethos do atproto"
     }
   },
-  "teeEpds": {
-    "metaTitle": "Como funcionam a assinatura protegida e a recuperação da carteira no ePDS",
-    "metaDescription": "Um guia interativo da assinatura protegida do ePDS, recuperação da carteira com duas de três partes, aprovação do dispositivo e limites.",
-    "kicker": "assinatura protegida do ePDS",
-    "title": "Protegida do servidor, recuperável por você",
-    "lead": "O ePDS pode mover a assinatura da conta para um Ambiente de Execução Confiável, ou TEE. A carteira opcional divide o controle em três: seu dispositivo, o hardware protegido e sua cópia de recuperação. O operador não pode gastar nem prender você ao serviço.",
+  "walletService": {
+    "metaTitle": "Como funciona o serviço de carteira da GainForest",
+    "metaDescription": "Um guia interativo do serviço de carteira: inscreva-se com qualquer conta AT Protocol, divida as chaves em três partes e aprove pagamentos no seu próprio dispositivo.",
+    "kicker": "Serviço de carteira GainForest",
+    "title": "Uma carteira para a sua conta AT Protocol",
+    "lead": "O serviço de carteira dá a qualquer conta AT Protocol uma carteira de custódia própria para Ethereum e Solana. Funciona com todos os PDS, incluindo o Bluesky. Não há frase-semente para anotar. Suas chaves são divididas em três partes, seu dispositivo aprova cada pagamento e você pode exportar suas chaves e sair quando quiser.",
     "facts": {
-      "keys": {
-        "title": "O servidor não recebe chaves",
-        "text": "O aplicativo e o PDS recebem assinaturas, não segredos da conta ou carteira."
+      "anyPds": {
+        "title": "Funciona com qualquer conta",
+        "text": "Você se inscreve com sua identidade AT Protocol atual. Sem senha nova e sem conta nova."
       },
       "protection": {
-        "title": "O código pode ser verificado",
-        "text": "Uma prova de hardware pode mostrar qual código assinador está em execução."
+        "title": "As chaves ficam protegidas",
+        "text": "A chave completa da carteira aparece só por um instante dentro do hardware protegido e depois é apagada."
       },
-      "wallet": {
+      "majority": {
         "title": "Você tem a maioria",
-        "text": "Seu dispositivo e cópia de recuperação dão a você duas das três partes da carteira."
+        "text": "Seu dispositivo e seu backup de recuperação guardam duas das três partes da carteira."
       }
     },
     "what": {
-      "heading": "O que a extensão TEE adiciona?",
-      "intro": "A extensão adiciona um pequeno serviço de assinatura ao lado do ePDS normal. Todo o resto continua usando os caminhos padrão do AT Protocol.",
-      "p1": "Um PDS normal precisa de uma chave privada para assinar cada atualização dos seus dados. Com a extensão TEE, o ePDS move esse trabalho para uma máquina virtual confidencial. O PDS envia uma impressão de 32 bytes da atualização. O assinador protegido devolve uma assinatura. A chave privada nunca sai da memória protegida.",
-      "p2": "A carteira nasce do seu próprio segredo aleatório, separado da chave da conta. Esse segredo é dividido em três partes. O hardware protegido guarda uma parte criptografada; você controla as partes do dispositivo e da recuperação. Duas partes restauram a carteira, mas uma sozinha não revela nada.",
-      "p3": "Os aplicativos podem criar, ver, assinar, exportar e recuperar a carteira por chamadas padrão do AT Protocol ou solicitações comuns da web. Os dois caminhos usam as mesmas verificações e retornam os mesmos resultados."
+      "heading": "O que é o serviço de carteira?",
+      "intro": "Um serviço pequeno e independente que roda dentro de hardware protegido e guarda uma carteira para cada pessoa.",
+      "p1": "Cada carteira está ligada a um DID, a identidade permanente por trás de uma conta AT Protocol. O serviço cria a carteira a partir de um segredo aleatório novo dentro de uma máquina virtual confidencial, um tipo de hardware protegido chamado TEE.",
+      "p2": "Esse segredo é dividido em três partes: uma para o seu dispositivo, uma para o serviço protegido e uma para o seu backup de recuperação. Duas partes quaisquer podem restaurar a carteira. Uma parte sozinha não revela nada.",
+      "p3": "O serviço se mantém pequeno de propósito. Ele guarda o material da carteira, verifica provas e assina transações. Suas publicações, perfis e demais registros ficam o tempo todo no seu próprio PDS."
     },
-    "boundary": {
-      "heading": "Onde fica a chave privada?",
-      "intro": "Alterne entre os dois projetos. Siga a solicitação em movimento e veja qual lado chega a ter a chave.",
-      "serverTab": "Chave no servidor",
-      "teeTab": "Chave dentro do TEE",
-      "pdsName": "Servidor PDS",
-      "serverKeyName": "Arquivo de chave privada",
-      "teeName": "Assinador protegido",
-      "serverResult": "O servidor pode ler a chave",
-      "teeResult": "A chave fica protegida",
-      "serverDesc": "O processo PDS abre um arquivo de chave e assina a atualização. Quem controla totalmente o servidor pode conseguir copiar essa chave.",
-      "teeDesc": "O PDS envia apenas uma impressão ao assinador protegido. Ele recebe uma assinatura, não a chave. Nem o operador pode simplesmente abrir a memória protegida e copiá-la."
-    },
-    "journey": {
-      "heading": "Como um registro é assinado",
-      "intro": "Pressione reproduzir ou escolha uma etapa. O TEE só assina. Seus registros continuam passando pelo PDS normal e pela rede AT Protocol.",
+    "enroll": {
+      "heading": "Como você recebe uma carteira",
+      "intro": "Aperte reproduzir ou escolha um passo. A inscrição usa um passe padrão do AT Protocol emitido pelo seu próprio PDS, então nenhum servidor precisa de integração especial.",
       "play": "Reproduzir",
       "pause": "Pausar",
       "back": "Voltar",
@@ -2568,40 +2555,28 @@
       "stepLabel": "Etapa {n} de {total}",
       "jumpTo": "Ir para a etapa {step}",
       "nodes": {
-        "app": "Seu aplicativo",
-        "pds": "PDS",
-        "tee": "Assinador TEE",
-        "network": "Rede"
+        "app": "Seu app",
+        "pds": "Seu PDS",
+        "service": "Serviço de carteira",
+        "wallet": "Sua carteira"
       },
       "steps": {
         "s1": {
-          "title": "Seu aplicativo salva um registro",
-          "text": "Você publica uma observação, atualiza um perfil ou cria outro registro. O aplicativo envia ao PDS como sempre."
+          "title": "Seu app pede um passe",
+          "text": "Seu app pede ao seu próprio PDS um passe de curta duração que prova quem você é. Todo PDS pode emitir esse passe, porque é um recurso padrão do AT Protocol."
         },
         "s2": {
-          "title": "O PDS prepara a atualização",
-          "text": "O PDS verifica a solicitação e cria a próxima versão dos dados. Ele transforma a atualização em uma impressão curta."
+          "title": "O serviço confere o passe",
+          "text": "O serviço de carteira lê seu registro público de identidade e confere o passe com ele. Também guarda uma chave pública do seu dispositivo para aprovações futuras."
         },
         "s3": {
-          "title": "O TEE assina a impressão",
-          "text": "O assinador deriva a chave da conta dentro da memória protegida e assina a impressão. Só a assinatura volta."
+          "title": "O hardware protegido cria a carteira",
+          "text": "Um segredo aleatório novo vira sua carteira dentro da memória protegida. O segredo é dividido em três partes na hora e a chave completa é apagada."
         },
         "s4": {
-          "title": "A rede verifica",
-          "text": "A atualização assinada entra no histórico. Outros serviços conferem com a chave pública da identidade da conta."
+          "title": "Você fica com a maioria",
+          "text": "Seu dispositivo e seu backup de recuperação recebem uma parte cada um. O serviço guarda a própria parte criptografada. Seus endereços de Ethereum e Solana ficam prontos para usar."
         }
-      }
-    },
-    "separate": {
-      "heading": "Dois caminhos que nunca compartilham chaves",
-      "intro": "A assinatura da conta e da carteira usa o mesmo serviço protegido, mas chaves e regras diferentes.",
-      "repo": {
-        "title": "Caminho dos registros",
-        "text": "O PDS pode pedir uma assinatura para uma atualização normal. Esta chave só assina registros AT Protocol. Ela não pode assinar uma transação Ethereum."
-      },
-      "wallet": {
-        "title": "Caminho da carteira",
-        "text": "A carteira usa chaves separadas para Ethereum e Solana. Para assinar, o serviço protegido precisa da prova do dispositivo cadastrado e de uma parte verdadeira da carteira."
       }
     },
     "shares": {
@@ -2640,43 +2615,57 @@
         }
       }
     },
-    "walletGate": {
-      "heading": "Por que o servidor não pode gastar da carteira",
-      "intro": "Teste as duas solicitações. Um token pode mostrar o endereço público, mas gastar também exige a prova do dispositivo e sua parte da carteira.",
-      "serverAttempt": "PDS pede sozinho",
-      "userAttempt": "Prova + parte pessoal",
-      "serverNode": "Solicitação do PDS",
-      "userNode": "Prova + parte do dispositivo",
+    "gate": {
+      "heading": "Por que o operador não pode gastar seu dinheiro",
+      "intro": "Teste os dois pedidos. Um passe de acesso pode mostrar o endereço público da carteira. Gastar exige também a prova do seu dispositivo e a parte dele.",
+      "tokenAttempt": "Só o passe",
+      "userAttempt": "Prova do dispositivo + parte",
+      "tokenNode": "Passe de acesso",
+      "userNode": "Prova + parte",
       "teeNode": "Carteira protegida",
       "approved": "Assinatura aprovada",
-      "denied": "Solicitação negada",
-      "approvedDesc": "O dispositivo assina uma solicitação curta e envia sua parte criptografada ao hardware protegido. O assinador confere a prova, a hora e um número de uso único antes de reconstruir e usar a carteira.",
-      "deniedDesc": "Um token do PDS não basta. O assinador protegido tem apenas uma parte e recusa solicitações sem a prova do dispositivo e uma segunda parte verdadeira."
+      "denied": "Pedido negado",
+      "approvedDesc": "Seu dispositivo assina um pedido curto e envia sua parte criptografada para o hardware protegido. O serviço confere a assinatura, o horário e um número de uso único antes de reconstruir a carteira para assinar.",
+      "deniedDesc": "Um passe sozinho só dá acesso a informações públicas. O serviço protegido guarda uma única parte e se recusa a assinar sem um pedido assinado pelo seu dispositivo e uma segunda parte genuína."
+    },
+    "binding": {
+      "heading": "Como qualquer pessoa pode conferir o vínculo",
+      "intro": "Sua conta e sua carteira apontam uma para a outra em público. Troque de lado para ver cada metade da prova.",
+      "accountTab": "Lado da conta",
+      "walletTab": "Lado da carteira",
+      "repoName": "Seu repositório de dados",
+      "recordName": "Registro de vínculo",
+      "walletName": "Chave da carteira",
+      "signatureName": "Assinatura no registro",
+      "accountResult": "Sua conta reivindica a carteira",
+      "accountDesc": "Você publica um registro pequeno no seu próprio repositório com os endereços da carteira. Só você pode escrever no seu repositório, então o registro mostra que sua conta assume esses endereços.",
+      "walletResult": "Sua carteira concorda",
+      "walletDesc": "Dentro do registro há uma assinatura feita pela chave da carteira sobre sua identidade e seus endereços. Ela mostra que a carteira aceitou o vínculo. Qualquer pessoa pode verificar as duas metades com dados públicos."
     },
     "proof": {
-      "heading": "Como um aplicativo pode confiar no assinador?",
-      "intro": "Um TEE pode criar um relatório de hardware chamado atestação. Ele ajuda a verificar a máquina e o código antes de confiar.",
+      "heading": "Como um app pode confiar no serviço?",
+      "intro": "O hardware protegido pode criar um relatório chamado atestado. Ele permite que qualquer pessoa confira a máquina e o código antes de confiar.",
       "cardLabel": "Prova apoiada por hardware",
-      "text": "O assinador cria sua identidade pública dentro da memória protegida. Um relatório de hardware liga essa identidade ao código em execução. O PDS pode exigir o relatório antes de iniciar. Se o código mudar, o relatório também muda."
+      "text": "O serviço cria sua identidade dentro da memória protegida. Um relatório de hardware liga essa identidade ao código exato em execução. Qualquer pessoa pode pedir esse relatório ao serviço e conferi-lo. Se o código mudar, o relatório também muda."
     },
     "limits": {
       "heading": "O que esta proteção não resolve",
-      "intro": "Chaves protegidas ajudam, mas não tornam o sistema perfeito. Estes limites importam.",
+      "intro": "Chaves divididas e hardware protegido eliminam muitos riscos. Estes limites permanecem e nós os nomeamos abertamente.",
       "onboarding": {
         "title": "Primeira configuração",
         "text": "O primeiro cadastro de dispositivo confia uma vez no serviço. Uma versão futura pode usar passkeys para reduzir essa confiança."
       },
       "uptime": {
-        "title": "Disponibilidade",
-        "text": "Um operador ainda pode desligar a máquina ou bloquear solicitações. Um TEE protege segredos, não a disponibilidade."
+        "title": "Disponibilidade do serviço",
+        "text": "Um host ainda pode desligar a máquina ou bloquear pedidos. Suas partes do dispositivo e de recuperação permitem reconstruir a carteira sem o serviço."
       },
-      "server": {
-        "title": "Solicitações ruins",
-        "text": "Um PDS invadido pode pedir uma assinatura para uma atualização ruim. Chaves de recuperação e o histórico público ajudam o dono a desfazer isso."
+      "backup": {
+        "title": "Seus backups",
+        "text": "Você precisa manter seu backup de recuperação em segurança. Se perder o dispositivo e o backup ao mesmo tempo, o serviço sozinho não consegue restaurar a carteira."
       },
-      "recovery": {
-        "title": "Cópias e repetição",
-        "text": "Você deve proteger sua cópia de recuperação, e o serviço deve copiar sua parte criptografada. Voltar o armazenamento também pode reabrir uma solicitação antiga já aprovada, mas não criar uma nova aprovação."
+      "rollback": {
+        "title": "Reversão de armazenamento",
+        "text": "Reverter o armazenamento do serviço no tempo poderia repetir um pedido antigo já aprovado. Isso nunca cria uma aprovação nova."
       }
     },
     "more": {
@@ -2685,10 +2674,10 @@
       "epdsDesc": "Veja a entrada sem senha e os serviços normais ao redor.",
       "lexiconsTitle": "Esquemas de dados",
       "lexiconsDesc": "Explore os formatos abertos guardados em cada PDS.",
-      "designTitle": "Projeto técnico",
-      "designDesc": "Leia o modelo de ameaças, as regras de assinatura e as notas de implementação.",
-      "githubTitle": "ePDS no GitHub",
-      "githubDesc": "Leia o código-fonte e execute o projeto."
+      "atprotoTitle": "Como funciona o AT Protocol",
+      "atprotoDesc": "Um passeio interativo pela rede aberta sobre a qual tudo isto é construído.",
+      "githubTitle": "O serviço no GitHub",
+      "githubDesc": "Leia o código-fonte e rode o serviço você mesmo."
     }
   }
 }

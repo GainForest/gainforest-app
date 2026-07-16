@@ -102,14 +102,14 @@ export default async function EpdsDocsPage() {
             <p className="m-0 mt-1 text-[12.5px] leading-relaxed text-muted-foreground">{t("more.routerDesc")}</p>
           </Link>
           <Link
-            href="/docs/TEE-ePDS"
+            href="/docs/wallet-service"
             className="group rounded-xl border border-border/60 px-5 py-4 no-underline transition-colors hover:border-primary/50"
           >
             <div className="flex items-center gap-1.5 text-[13.5px] font-medium text-foreground group-hover:text-primary">
-              {t("more.teeTitle")}
+              {t("more.walletTitle")}
               <ArrowUpRightIcon className="h-3.5 w-3.5 opacity-50" />
             </div>
-            <p className="m-0 mt-1 text-[12.5px] leading-relaxed text-muted-foreground">{t("more.teeDesc")}</p>
+            <p className="m-0 mt-1 text-[12.5px] leading-relaxed text-muted-foreground">{t("more.walletDesc")}</p>
           </Link>
           <a
             href={GITHUB_URL}
