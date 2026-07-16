@@ -8,6 +8,9 @@
     "changeAria": "Cambiar idioma",
     "currentLanguage": "Idioma actual"
   },
+  "adminOnly": {
+    "label": "Solo administradores"
+  },
   "navigation": {
     "navigation": "Navegación",
     "openNavigation": "Abrir navegación",
@@ -1238,7 +1241,24 @@
       "certified": "Primitivas de identidad del ecosistema Hypercerts: perfiles de actor, organizaciones, seguimientos, insignias y ubicaciones.",
       "hypercerts": "Declaraciones de impacto (actividad, contribución, contribuyente, derechos), colecciones, recibos de financiación, adjuntos, alcance del trabajo y tipos compartidos."
     },
-    "sectionsAria": "Secciones de esquemas"
+    "sectionsAria": "Secciones de esquemas",
+    "epdsLinkTitle": "Cómo funciona ePDS",
+    "epdsLinkDesc": "Un recorrido interactivo por el sistema de acceso y los servidores detrás de estos registros.",
+    "cgsLinkTitle": "Cómo funcionan las cuentas de grupo",
+    "cgsLinkDesc": "Un recorrido interactivo por el servicio guardián que permite a todo un equipo compartir una cuenta.",
+    "atprotoLinkTitle": "Cómo funciona el AT Protocol",
+    "atprotoLinkDesc": "Un recorrido interactivo por la red abierta sobre la que está construido todo esto.",
+    "teeEpdsLinkTitle": "Firma protegida de ePDS",
+    "teeEpdsLinkDesc": "Mira cómo las claves privadas pueden quedar dentro de hardware protegido.",
+    "guides": {
+      "usageGuide": "Guía de uso",
+      "audiomothTitle": "Etiquetas de espectrogramas de AudioMoth como presencias de Darwin Core",
+      "audiomothDescription": "Cómo cada cuadro confirmado de tiempo y frecuencia se convierte en una nueva presencia vinculada a su grabación de audio de origen.",
+      "openGuide": "Leer la guía de implementación",
+      "breadcrumbAria": "Ruta de navegación de la documentación",
+      "schemas": "Esquemas de datos",
+      "guideIntro": "Esta guía define las convenciones de la aplicación utilizadas con el esquema de presencias. El esquema sigue siendo Darwin Core genérico; la guía explica cómo se conectan las grabaciones de AudioMoth, los cuadros del espectrograma y los registros de presencia."
+    }
   },
   "taina": {
     "meta": {
@@ -1651,7 +1671,89 @@
     "mainTabs": {
       "setup": "Configuración",
       "deployments": "Despliegue",
-      "upload": "Subir"
+      "upload": "Subir",
+      "label": "Etiquetar"
+    },
+    "label": {
+      "subtitle": "Revisa grabaciones de AudioMoth, marca llamadas por tiempo y frecuencia, y crea un conjunto de etiquetas claro para tus datos de campo.",
+      "signInTitle": "Inicia sesión para etiquetar grabaciones",
+      "signInBody": "Las ocurrencias se guardan en tu cuenta. Inicia sesión, sube grabaciones de AudioMoth y marca los sonidos de fauna que encuentres.",
+      "loadingRecordings": "Cargando tus grabaciones de AudioMoth…",
+      "loadFailed": "No se pudieron cargar tus grabaciones. Inténtalo de nuevo.",
+      "occurrencesLoadFailed": "No se pudieron cargar las ocurrencias guardadas de esta grabación.",
+      "noRecordingsTitle": "Primero sube una grabación",
+      "noRecordingsBody": "El espacio de etiquetado utiliza grabaciones guardadas en tu cuenta para que cada cuadro se convierta en una ocurrencia de biodiversidad vinculada.",
+      "uploadFirst": "Subir grabaciones de AudioMoth",
+      "refresh": "Actualizar",
+      "savedAtproto": "Cada cuadro guardado es una ocurrencia de biodiversidad en tu cuenta.",
+      "openToLoad": "Abrir para cargar etiquetas",
+      "saved": "Guardado",
+      "deleteConfirm": "¿Eliminar esta ocurrencia? Se borrará de tu cuenta y no se puede deshacer.",
+      "deleteFailed": "No se pudo eliminar la ocurrencia. Inténtalo de nuevo.",
+      "saveFailed": "No se pudo guardar la ocurrencia. El cuadro sigue aquí para que puedas intentarlo de nuevo.",
+      "recordedAtMissing": "Esta grabación no tiene una hora de inicio válida, por lo que no se puede calcular la hora de la ocurrencia.",
+      "audioUnavailable": "Esta grabación no tiene un original ni una vista previa reproducible. Vuelve a subirla con las vistas previas activadas.",
+      "commonName": "Nombre común/local (opcional)",
+      "commonNamePlaceholder": "Rana arborícola",
+      "scientificName": "Nombre científico (opcional)",
+      "scientificNamePlaceholder": "Boana faber",
+      "scientificNameHint": "Déjalo vacío para guardar el grupo amplio correcto, como Anura para las ranas.",
+      "saveOccurrence": "Guardar ocurrencia",
+      "saveAtprotoHint": "Crea una ocurrencia Darwin Core vinculada a esta grabación de audio.",
+      "stepImport": "Elige grabaciones",
+      "stepDraw": "Dibuja un cuadro de tiempo y frecuencia",
+      "stepDescribe": "Describe lo que escuchaste",
+      "emptyTitle": "Etiqueta sonidos de fauna en tus grabaciones de AudioMoth",
+      "emptyBody": "Elige una carpeta de la tarjeta SD o varios archivos WAV. Selecciona una grabación, dibuja un cuadro alrededor de una llamada e identifícala como ave, rana, insecto, otro sonido o una nota.",
+      "chooseFolder": "Elegir tarjeta SD o carpeta",
+      "chooseFiles": "Elegir archivos WAV",
+      "privacyNote": "Tus grabaciones permanecen en este dispositivo mientras las etiquetas.",
+      "workspaceSummary": "{files, plural, one {# grabación} other {# grabaciones}} · {labels, plural, one {# etiqueta} other {# etiquetas}}",
+      "savedLocally": "Los borradores se guardan en este navegador. Expórtalos cuando estén listos.",
+      "addFiles": "Añadir grabaciones",
+      "export": "Exportar CSV",
+      "closeSet": "Cerrar conjunto",
+      "recordings": "Grabaciones",
+      "search": "Buscar archivos…",
+      "labelCount": "{count, plural, one {# etiqueta} other {# etiquetas}}",
+      "notLabelled": "Sin etiquetar",
+      "filePosition": "Grabación {current} de {total}",
+      "previousFile": "Grabación anterior",
+      "nextFile": "Grabación siguiente",
+      "labelsTitle": "Etiquetas ({count})",
+      "selectToEdit": "Selecciona una etiqueta para editarla",
+      "labelsEmpty": "Aún no hay etiquetas. Dibuja un cuadro sobre un sonido del espectrograma para empezar.",
+      "deleteLabel": "Eliminar etiqueta",
+      "editLabel": "Editar etiqueta",
+      "newLabel": "Nueva etiqueta",
+      "describeSelection": "¿Qué hay en este cuadro?",
+      "drawFirst": "Dibuja un cuadro para empezar",
+      "clearSelection": "Borrar selección",
+      "drawHint": "Arrastra sobre el espectrograma para marcar el sonido que quieres etiquetar. El cuadro captura cuándo ocurrió y su rango de frecuencia.",
+      "timeRange": "Tiempo",
+      "frequencyRange": "Frecuencia",
+      "whatIsIt": "¿Qué escuchaste?",
+      "categories": {
+        "bird": "Ave",
+        "frog": "Rana",
+        "insect": "Insecto",
+        "other": "Otro",
+        "note": "Nota"
+      },
+      "species": "Especie (opcional)",
+      "speciesPlaceholder": "Nombre común o científico",
+      "speciesHint": "Déjalo vacío si solo conoces el grupo del animal.",
+      "noteRequired": "Nota",
+      "noteOptional": "Nota (opcional)",
+      "notePlaceholder": "Tipo de llamada, confianza, clima o cualquier detalle útil…",
+      "updateLabel": "Actualizar etiqueta",
+      "saveLabel": "Guardar etiqueta",
+      "saveHint": "Se guarda en este navegador hasta que exportes el conjunto.",
+      "drawInstruction": "Arrastra para dibujar · selecciona un cuadro para editar",
+      "spectrogramAria": "Espectrograma de audio interactivo",
+      "buildingSpectrogram": "Creando espectrograma…",
+      "spectrogramFailed": "No se pudo crear un espectrograma de esta grabación.",
+      "audioUnsupported": "Tu navegador no puede reproducir esta grabación."
     },
     "deployments": {
       "intro": "Los despliegues registran dónde y cuándo se colocó un AudioMoth en el campo. Cada uno reproduce un tono acústico que ajusta el reloj, la ubicación y el ID de despliegue del grabador.",
@@ -1809,6 +1911,768 @@
       "toggleDescription": "Las actualizaciones que publiques también se publican en tu cuenta de Bluesky, para que más personas descubran tu trabajo.",
       "viewProfile": "Ver tu perfil de Bluesky",
       "error": "No pudimos guardar el cambio. Inténtalo de nuevo."
+    }
+  },
+  "epds": {
+    "metaTitle": "Cómo funciona ePDS",
+    "metaDescription": "Un recorrido interactivo por ePDS, el Personal Data Server extendido que permite a cualquiera unirse a la red AT Protocol solo con su correo.",
+    "kicker": "Personal Data Server extendido",
+    "title": "Cómo funciona ePDS",
+    "lead": "GainForest funciona sobre AT Protocol, la red abierta detrás de Bluesky. Unirse a esa red normalmente requiere una contraseña y algo de configuración técnica. ePDS elimina esa barrera: escribes tu correo, recibes un código y ya estás dentro. Esta página muestra cómo funciona, paso a paso.",
+    "whatIs": {
+      "heading": "¿Qué es un PDS y qué añade la e?",
+      "p1": "En AT Protocol, cada persona guarda sus datos en un Personal Data Server, o PDS. Piensa en él como un hogar personal para tus publicaciones, observaciones y proyectos. Lo que hay dentro es tuyo, y puedes mudarte a otro servidor cuando quieras sin perder nada.",
+      "p2": "ePDS es un PDS normal con una extensión: una puerta de entrada amable. En lugar de pedir una contraseña, te conecta con un código de un solo uso enviado por correo o con una cuenta social, y crea una cuenta para ti en tu primera visita. Detrás de esa puerta todo sigue siendo AT Protocol estándar, así que cualquier app de la red puede hablar con él."
+    },
+    "compare": {
+      "heading": "Dos puertas de entrada",
+      "intro": "La misma casa, distinta puerta. Mueve el interruptor y prueba las dos formas de iniciar sesión.",
+      "classicTab": "PDS clásico",
+      "epdsTab": "ePDS",
+      "handle": "Identificador",
+      "password": "Contraseña",
+      "inviteCode": "Código de invitación",
+      "email": "Correo electrónico",
+      "sendCode": "Envíame un código",
+      "signIn": "Iniciar sesión",
+      "codeLabel": "Escribe el código de tu correo",
+      "classicCaption": "Un PDS clásico pide una contraseña y, a menudo, un código de invitación del administrador del servidor. Además tienes que crear la cuenta primero.",
+      "epdsCaption": "ePDS te pide el correo y te envía un código. ¿Primera visita? Tu cuenta se crea al momento.",
+      "done": "¡Ya estás dentro!",
+      "reset": "Probar de nuevo"
+    },
+    "journey": {
+      "heading": "El viaje del inicio de sesión",
+      "intro": "Pulsa reproducir o avanza paso a paso. El punto en movimiento es tu inicio de sesión haciendo su viaje de ida y vuelta.",
+      "play": "Reproducir",
+      "pause": "Pausar",
+      "back": "Atrás",
+      "next": "Siguiente",
+      "stepLabel": "Paso {n} de {total}",
+      "ariaLabel": "Diagrama del viaje de inicio de sesión",
+      "nodes": {
+        "app": "Tu app",
+        "pds": "Núcleo PDS",
+        "auth": "Servicio de acceso",
+        "inbox": "Tu bandeja"
+      },
+      "steps": {
+        "s1": {
+          "title": "Haces clic en Iniciar sesión",
+          "text": "Todo empieza en la app que estás usando, por ejemplo GainForest. Haces clic en Iniciar sesión y quizá escribes tu correo."
+        },
+        "s2": {
+          "title": "La app llama al PDS",
+          "text": "Tu app le pide al PDS, en segundo plano, que inicie un acceso. Es una petición estándar de AT Protocol, la misma que haría cualquier app de Bluesky."
+        },
+        "s3": {
+          "title": "El PDS abre su puerta",
+          "text": "Aquí está el truco de ePDS. En lugar de mostrar un formulario de contraseña, el PDS envía tu navegador a su servicio de acceso."
+        },
+        "s4": {
+          "title": "Un código vuela a tu bandeja",
+          "text": "El servicio de acceso crea un código de un solo uso y te lo envía por correo. El código funciona una vez y caduca a los pocos minutos."
+        },
+        "s5": {
+          "title": "Escribes el código",
+          "text": "Copias el código del correo en la pantalla de acceso. Eso demuestra que la bandeja es tuya. Nunca hay una contraseña de por medio."
+        },
+        "s6": {
+          "title": "¿Primera vez? Elige un identificador",
+          "text": "En tu primera visita, ePDS crea una cuenta para ti y te pide elegir un identificador, tu nombre público en la red."
+        },
+        "s7": {
+          "title": "El saludo firmado",
+          "text": "El servicio de acceso le dice al PDS que estás verificado. El mensaje lleva una firma criptográfica, así que nadie puede falsificarlo."
+        },
+        "s8": {
+          "title": "De vuelta a tu app",
+          "text": "El PDS devuelve tu navegador a tu app con un código de corta duración. Tu app cambia ese código por un token de acceso."
+        },
+        "s9": {
+          "title": "Ya estás dentro",
+          "text": "Tu app ya puede leer y escribir tus datos en tu nombre. Para el resto de la red eres un usuario más de AT Protocol."
+        }
+      }
+    },
+    "map": {
+      "heading": "Las piezas del sistema",
+      "intro": "ePDS es un pequeño equipo de servicios. Toca cada uno para ver su función.",
+      "ariaLabel": "Mapa de los servicios de ePDS",
+      "nodes": {
+        "app": {
+          "name": "Tu app",
+          "desc": "Cualquier app de AT Protocol, como GainForest o Bluesky. Nunca ve tu código de correo ni ninguna clave. Solo recibe el token de acceso final."
+        },
+        "pds": {
+          "name": "Núcleo PDS",
+          "desc": "Un Personal Data Server estándar. Guarda tus registros, habla con el resto de la red y emite tokens. ePDS lo envuelve sin cambiar cómo se comunica con otras apps."
+        },
+        "auth": {
+          "name": "Servicio de acceso",
+          "desc": "La puerta de entrada amable. Muestra la pantalla de acceso, envía los códigos por correo, gestiona los accesos sociales y ayuda a los nuevos usuarios a elegir un identificador."
+        },
+        "email": {
+          "name": "Proveedor de correo",
+          "desc": "Entrega los códigos de un solo uso en tu bandeja. Cada código dura poco y solo puede usarse una vez."
+        },
+        "db": {
+          "name": "Base de datos compartida",
+          "desc": "Una pequeña base de datos que ambos servicios comparten. Registra sesiones y códigos de acceso, nada más."
+        }
+      }
+    },
+    "more": {
+      "heading": "Sigue explorando",
+      "lexiconsTitle": "Esquemas de datos",
+      "lexiconsDesc": "Los formatos abiertos de registro que viven dentro de cada PDS.",
+      "githubTitle": "ePDS en GitHub",
+      "githubDesc": "Todo el código fuente, abierto para que cualquiera lo lea, lo ejecute y lo mejore.",
+      "cgsTitle": "Cómo funcionan las cuentas de grupo",
+      "cgsDesc": "El servicio guardián que permite a todo un equipo compartir una cuenta de grupo de forma segura.",
+      "atprotoTitle": "Cómo funciona el AT Protocol",
+      "atprotoDesc": "Un recorrido interactivo por la red abierta sobre la que está construido todo esto.",
+      "teeTitle": "Firma protegida de ePDS",
+      "teeDesc": "Mira cómo las claves privadas pueden quedar dentro de hardware protegido.",
+      "routerTitle": "El router de ePDS",
+      "routerDesc": "Cómo las apps encuentran el servidor correcto para un email cuando una comunidad tiene varios."
+    }
+  },
+  "epdsRouter": {
+    "metaTitle": "Cómo funciona el router de ePDS",
+    "metaDescription": "Una guía interactiva del router de ePDS: cómo una app encuentra el servidor correcto para iniciar sesión con email entre varios servidores — los anfitriones comparten solo huellas irreversibles, nunca credenciales ni direcciones.",
+    "kicker": "descubrimiento de email a servidor",
+    "title": "Un email, muchos servidores",
+    "lead": "ePDS te permite iniciar sesión solo con tu email. Pero cuando una comunidad tiene varios servidores, la app primero debe responder una pequeña pregunta: ¿qué servidor conoce este email? El router la responde en una sola llamada — los anfitriones mantienen el control total y nadie entrega nunca una dirección ni una contraseña.",
+    "facts": {
+      "routing": {
+        "title": "Una consulta, el servidor correcto",
+        "text": "La app pregunta una vez y sabe qué servidores conocen el email: ninguno, exactamente uno o varios."
+      },
+      "privacy": {
+        "title": "Los emails nunca se guardan",
+        "text": "Las direcciones se cifran en su propio servidor antes de que algo salga de él. El router solo ve huellas — y las vuelve a cifrar antes de guardarlas."
+      },
+      "zerochange": {
+        "title": "Los anfitriones mantienen el control",
+        "text": "Sin credenciales que entregar, nada que instalar dentro del PDS. Los anfitriones ejecutan un pequeño script junto a su servidor, con su propio calendario."
+      }
+    },
+    "problem": {
+      "heading": "Por qué hace falta el descubrimiento",
+      "p1": "Una app con inicio de sesión por email tiene que enviar el login a un servidor concreto: ese servidor envía el código y guarda la cuenta. Con un solo servidor la respuesta es fija. Con varios, la app necesita un directorio, y las direcciones de email son justo el tipo de dato que no quieres copiar en una gran lista.",
+      "p2": "El router lo resuelve con un pequeño truco: solo trabaja con huellas. Cada servidor cifra sus direcciones de forma irreversible en casa y no comparte nada más, y cada consulta cifra el email entrante de la misma manera y compara huellas. La misma respuesta, sin agenda de direcciones — y nadie entrega sus llaves."
+    },
+    "demo": {
+      "heading": "Prueba una consulta",
+      "intro": "Tres servidores de ejemplo, tres emails de ejemplo. Elige uno y mira cómo el router lo enruta.",
+      "reset": "Reiniciar",
+      "ariaLabel": "Diagrama de enrutamiento de consultas de email",
+      "nodes": {
+        "app": "Tu app",
+        "router": "Router",
+        "forest": "PDS Bosque",
+        "ocean": "PDS Océano",
+        "river": "PDS Río"
+      },
+      "steps": {
+        "idle": {
+          "title": "Elige un email arriba",
+          "text": "La app quiere iniciar una sesión por email pero aún no sabe con qué servidor hablar."
+        },
+        "sent": {
+          "title": "La app pregunta al router",
+          "text": "Envía el email por una llamada privada y autenticada. Las consultas nunca se escriben en ningún registro."
+        },
+        "fingerprint": {
+          "title": "El router lo cifra",
+          "text": "El email se convierte en una huella al llegar, y solo la huella se compara con el conjunto de cada servidor."
+        }
+      },
+      "outcomes": {
+        "one": {
+          "title": "Un hogar encontrado",
+          "text": "Exactamente un servidor conoce este email, así que la app inicia la sesión allí. El código llega a la bandeja correcta."
+        },
+        "many": {
+          "title": "Dos hogares encontrados",
+          "text": "Dos servidores conocen este email: son dos cuentas separadas. La app muestra un selector y la persona elige cuál usar."
+        },
+        "none": {
+          "title": "Aún sin hogar",
+          "text": "Ningún servidor conoce este email, así que la app ofrece crear una cuenta nueva en su servidor predeterminado."
+        }
+      }
+    },
+    "sync": {
+      "heading": "Cómo se mantiene al día el router",
+      "intro": "Nada que entregar: cada anfitrión envía su propia instantánea, con el temporizador que elija.",
+      "play": "Reproducir",
+      "pause": "Pausar",
+      "back": "Atrás",
+      "next": "Siguiente",
+      "stepLabel": "Paso {n} de {total}",
+      "ariaLabel": "Diagrama del ciclo de sincronización",
+      "nodes": {
+        "pds": "Tu ePDS",
+        "router": "Router",
+        "index": "índice de huellas"
+      },
+      "steps": {
+        "s1": {
+          "title": "Tu servidor reúne su propia lista",
+          "text": "Un pequeño script se ejecuta junto a tu PDS, con la frecuencia que tú eliges. Lee los emails de las cuentas localmente — tu contraseña de administrador nunca sale de tu máquina."
+        },
+        "s2": {
+          "title": "Las huellas se hacen en casa",
+          "text": "Cada dirección se cifra de forma irreversible en tu propio servidor. Desde este momento, no existe ningún email en claro en todo el proceso."
+        },
+        "s3": {
+          "title": "Se envía la instantánea",
+          "text": "El script envía el conjunto completo de huellas al router por una llamada cifrada y protegida con token. Reemplaza por completo la instantánea anterior."
+        },
+        "s4": {
+          "title": "El router la intercambia",
+          "text": "El router vuelve a cifrar cada huella con su propia clave privada y reemplaza todo el conjunto de tu servidor en un solo paso atómico. Las cuentas borradas desaparecen con tu siguiente envío."
+        }
+      }
+    },
+    "register": {
+      "heading": "Únete como anfitrión de ePDS",
+      "intro": "Nunca compartes tu contraseña de administrador y nunca esperas a que el router te llame. Inscríbete una vez, envía huellas con tu propio calendario y pide al operador que te apruebe.",
+      "p1": "Inscribirse es una sola llamada y sin credenciales — la respuesta trae tu token de envío (guárdalo, se muestra solo una vez). Tu servidor queda pendiente e invisible para las consultas hasta que el operador del router lo apruebe.",
+      "enrollLabel": "1 · inscribe tu servidor",
+      "pushLabel": "2 · envía huellas con un temporizador",
+      "approveNote": "3 · Pide al operador del router que apruebe tu inscripción — las consultas empiezan en cuanto lo haga. Irte es solo decisión tuya: deja de enviar, o pide al operador que elimine tu entrada."
+    },
+    "integrate": {
+      "heading": "Integra consultas en tu app",
+      "intro": "Las apps cliente reciben su propio token del operador del router. Basta una llamada antes de mostrar la pantalla de inicio de sesión.",
+      "lookupLabel": "consultar un email",
+      "jsLabel": "manejar los tres resultados",
+      "cacheTip": "Consejo: tras el primer inicio de sesión exitoso, recuerda la identidad de la cuenta (el DID) en tu app. A partir de ahí la red puede resolver el servidor correcto por sí sola, y solo necesitas el router para visitantes nuevos."
+    },
+    "api": {
+      "heading": "La API de un vistazo",
+      "intro": "Cinco endpoints pequeños. La consulta y el estado usan un token de cliente; gestionar servidores usa el token de administrador.",
+      "lookup": "Pregunta qué servidores conocen un email.",
+      "status": "Estado de sincronización de cada servidor: número de cuentas, última sincronización, último error.",
+      "unregister": "Elimina un servidor inscrito (token de administrador).",
+      "enroll": "Inscribe tu servidor. Llamada abierta, sin credenciales; devuelve un token de envío de un solo uso y una entrada pendiente.",
+      "digests": "Envía una instantánea completa de huellas de email (SHA-256 en hex). Cada envío reemplaza al anterior.",
+      "script": "El script de envío listo para usar — Python 3, solo biblioteca estándar.",
+      "approve": "El operador aprueba una inscripción; las consultas empiezan a servirla (token de administrador)."
+    },
+    "snippets": {
+      "copy": "Copiar",
+      "copied": "¡Copiado!"
+    },
+    "more": {
+      "heading": "Sigue explorando",
+      "epdsTitle": "Cómo funciona ePDS",
+      "epdsDesc": "La puerta de entrada amigable en sí: inicio de sesión con código por email en el AT Protocol.",
+      "githubTitle": "Router de ePDS en GitHub",
+      "githubDesc": "El código fuente completo del router: un pequeño servicio en Go sin dependencias."
+    }
+  },
+  "cgs": {
+    "metaTitle": "Cómo funcionan las cuentas de grupo",
+    "metaDescription": "Un recorrido interactivo por el Certified Group Service, el guardián que permite a todo un equipo compartir una cuenta de AT Protocol con roles, reglas claras y un registro completo de auditoría.",
+    "kicker": "Certified Group Service",
+    "title": "Cómo funcionan las cuentas de grupo",
+    "lead": "En AT Protocol, una cuenta normalmente pertenece a una sola persona. Pero los bosques se cartografían en equipo. El Certified Group Service, CGS para abreviar, permite que todo un equipo comparta una cuenta de forma segura, con roles, reglas claras y una memoria de todo lo que ocurre. Esta página muestra cómo funciona, paso a paso.",
+    "whatIs": {
+      "heading": "¿Qué es una cuenta de grupo?",
+      "p1": "Cada organización en GainForest vive en una cuenta normal de AT Protocol. Una cuenta normal tiene una contraseña y un dueño. Eso basta para una persona, pero un equipo necesita más: muchas personas escribiendo en el mismo lugar, sin pasarse la contraseña de mano en mano.",
+      "p2": "CGS es un pequeño servicio guardián que se coloca delante de la cuenta del grupo. Guarda las credenciales en una caja sellada, mantiene una lista de miembros con roles y revisa cada solicitud contra las reglas antes de dejarla pasar. Los miembros del equipo nunca ven la contraseña. Para el resto de la red, el grupo parece una cuenta común, así que cualquier app puede leer sus registros como siempre."
+    },
+    "repo": {
+      "heading": "Una cuenta, muchas manos",
+      "intro": "Tres compañeros, un repositorio compartido. Toca a un compañero y publicará un registro. Observa cómo cada registro recuerda a su autor.",
+      "repoLabel": "El repositorio del grupo",
+      "empty": "Aún no hay nada. Toca a un compañero arriba.",
+      "stamp": "de {name}",
+      "roleOwner": "Dueño",
+      "roleAdmin": "Admin",
+      "roleMember": "Miembro",
+      "clear": "Limpiar",
+      "caption": "Todos los registros caen en el mismo repositorio, pero el servicio anota quién creó cada uno. Esa memoria permite que los miembros editen su propio trabajo, mientras que cambiar el trabajo de otra persona requiere un admin."
+    },
+    "journey": {
+      "heading": "El viaje de una solicitud",
+      "intro": "Pulsa reproducir o avanza tú mismo. El punto en movimiento es tu solicitud en su viaje de ida y vuelta.",
+      "play": "Reproducir",
+      "pause": "Pausa",
+      "back": "Atrás",
+      "next": "Siguiente",
+      "stepLabel": "Paso {n} de {total}",
+      "ariaLabel": "Diagrama del viaje de una solicitud",
+      "nodes": {
+        "app": "Tu app",
+        "pds": "Tu PDS",
+        "cgs": "Servicio del grupo",
+        "gpds": "PDS del grupo"
+      },
+      "steps": {
+        "s1": {
+          "title": "Pulsas Publicar",
+          "text": "Todo empieza en la app. Has iniciado sesión como tú y quieres añadir un registro a la cuenta de tu grupo."
+        },
+        "s2": {
+          "title": "La app llama a tu propio PDS",
+          "text": "La app envía la solicitud a tu servidor de datos personal con una nota de reenvío: por favor, pásalo al servicio del grupo."
+        },
+        "s3": {
+          "title": "Tu PDS firma un pase",
+          "text": "Tu PDS crea un pase de corta duración firmado con tu propia clave. El pase te nombra a ti, al servicio y la acción exacta. Funciona una vez y muere a los dos minutos."
+        },
+        "s4": {
+          "title": "El guardián revisa el pase",
+          "text": "El servicio del grupo verifica la firma contra tu identidad pública y se asegura de que el pase sea fresco y no se haya usado. Un pase copiado no sirve de nada."
+        },
+        "s5": {
+          "title": "Revisión de rol",
+          "text": "El servicio te busca en la lista de miembros del grupo. ¿Miembro, admin o dueño? Tu rol decide qué acciones están abiertas para ti."
+        },
+        "s6": {
+          "title": "Revisión de autoría",
+          "text": "Para ediciones y borrados hay una pregunta más: ¿quién escribió este registro? Los miembros pueden cambiar sus propios registros. Tocar el trabajo de otra persona requiere un admin."
+        },
+        "s7": {
+          "title": "Todo queda anotado",
+          "text": "Sea cual sea la respuesta, el intento entra en el registro de auditoría del grupo: quién, qué, cuándo y si fue permitido o denegado."
+        },
+        "s8": {
+          "title": "El servicio hace la escritura",
+          "text": "Si todo está en orden, el servicio realiza la acción en el PDS del grupo, usando credenciales que solo él posee, y te marca como autor."
+        },
+        "s9": {
+          "title": "Listo",
+          "text": "La respuesta vuelve a tu app. El registro ahora vive en el repositorio del grupo, visible para toda la red como cualquier otro registro de AT Protocol."
+        }
+      }
+    },
+    "roles": {
+      "heading": "Quién puede hacer qué",
+      "intro": "Elige un sombrero y prueba algunas acciones. Cada intento, permitido o denegado, queda en el registro de auditoría de abajo.",
+      "youAre": "Tú eres",
+      "tryAction": "Prueba una acción",
+      "allowed": "Permitido",
+      "denied": "Denegado",
+      "auditTitle": "Registro de auditoría",
+      "auditEmpty": "Nada todavía. Prueba una acción arriba.",
+      "clearLog": "Borrar registro",
+      "auditPermitted": "permitido",
+      "auditDenied": "denegado",
+      "role": {
+        "visitor": {
+          "name": "Visitante",
+          "desc": "No está en la lista de miembros."
+        },
+        "member": {
+          "name": "Miembro",
+          "desc": "Puede crear registros y gestionar su propio trabajo."
+        },
+        "admin": {
+          "name": "Admin",
+          "desc": "Puede gestionar miembros y editar cualquier registro."
+        },
+        "owner": {
+          "name": "Dueño",
+          "desc": "Uno por grupo. Se define al crear el grupo."
+        }
+      },
+      "action": {
+        "create": "Crear un registro",
+        "editOwn": "Editar tu propio registro",
+        "editOther": "Editar el registro de otra persona",
+        "addMember": "Añadir un miembro",
+        "setRole": "Cambiar un rol",
+        "viewAudit": "Leer el registro de auditoría"
+      },
+      "ok": {
+        "create": "Cualquier miembro puede crear registros. El registro se escribe en el repositorio del grupo con tu nombre estampado como autor.",
+        "editOwn": "Es tu registro, así que basta con ser miembro. El servicio revisa primero el sello de autoría.",
+        "editOther": "Los admins pueden editar cualquier registro del grupo, sin importar quién lo escribió.",
+        "addMember": "Los admins pueden añadir personas como miembro o admin. Nadie puede ser añadido como dueño.",
+        "setRole": "Solo el dueño puede cambiar roles. Ni siquiera el dueño puede crear un segundo dueño.",
+        "viewAudit": "Los admins y el dueño pueden leer la historia completa del grupo."
+      },
+      "no": {
+        "visitor": "No estás en la lista de miembros, así que la solicitud se detiene en la puerta. El intento igualmente queda anotado en el registro de auditoría.",
+        "editOther": "Ese registro pertenece a otra persona. Los miembros solo pueden editar su propio trabajo. Editar el registro de otro requiere un admin.",
+        "addMember": "Solo los admins y el dueño pueden añadir nuevos miembros.",
+        "setRole": "Cambiar roles es tarea exclusiva del dueño. Los admins no pueden ascender ni degradar a nadie.",
+        "viewAudit": "El registro de auditoría solo está abierto a los admins y al dueño."
+      }
+    },
+    "map": {
+      "heading": "Las piezas en movimiento",
+      "intro": "CGS es un pequeño equipo de piezas. Toca cada una para ver su trabajo.",
+      "ariaLabel": "Mapa de las piezas del servicio de grupo",
+      "nodes": {
+        "pds": {
+          "name": "Tu PDS",
+          "desc": "Tu propio servidor de datos. Firma el pase corto que prueba quién eres y reenvía tu solicitud. Tu contraseña nunca viaja a ninguna parte."
+        },
+        "cgs": {
+          "name": "Servicio del grupo",
+          "desc": "El guardián de la puerta. Revisa pases, consulta roles, lleva los libros y es el único que puede actuar sobre la cuenta del grupo."
+        },
+        "gpds": {
+          "name": "PDS del grupo",
+          "desc": "Un servidor de datos completamente normal que guarda los registros del grupo. No sabe nada de roles ni miembros. Simplemente confía en el servicio que tiene sus credenciales."
+        },
+        "members": {
+          "name": "Lista de miembros",
+          "desc": "Una pequeña base de datos privada, una por grupo. Guarda la identidad y el rol de cada miembro, y recuerda quién es el autor de cada registro."
+        },
+        "audit": {
+          "name": "Registro de auditoría",
+          "desc": "La memoria del grupo. Cada intento queda anotado: quién, qué, cuándo y si fue permitido o denegado."
+        },
+        "vault": {
+          "name": "Credenciales selladas",
+          "desc": "La contraseña de la cuenta del grupo, guardada cifrada. Los miembros y las apps nunca la ven. Solo el servicio puede abrirla, y solo para hablar con el PDS del grupo."
+        }
+      }
+    },
+    "safety": {
+      "heading": "Seguridad incorporada",
+      "intro": "Tres hábitos mantienen segura una cuenta compartida.",
+      "pass": {
+        "title": "Los pases mueren rápido",
+        "text": "Cada solicitud lleva un pase firmado y fresco. Funciona exactamente una vez y caduca a los dos minutos, así que un pase robado casi no vale nada."
+      },
+      "vault": {
+        "title": "Las credenciales quedan selladas",
+        "text": "La contraseña del grupo se guarda cifrada. Los miembros nunca la ven y las apps nunca la tocan. Solo el servicio guardián puede usarla."
+      },
+      "log": {
+        "title": "Nada pasa sin ser visto",
+        "text": "Permitida o denegada, cada acción queda en el registro de auditoría del grupo con el quién, el qué y el cuándo."
+      }
+    },
+    "more": {
+      "heading": "Sigue explorando",
+      "lexiconsTitle": "Esquemas de datos",
+      "lexiconsDesc": "Los formatos abiertos de registro que viven dentro del repositorio de cada grupo.",
+      "epdsTitle": "Cómo funciona ePDS",
+      "epdsDesc": "La puerta de entrada amigable que inicia sesión solo con un correo.",
+      "githubTitle": "CGS en GitHub",
+      "githubDesc": "El código fuente completo del servicio de grupos, abierto para leer, ejecutar y mejorar.",
+      "atprotoTitle": "Cómo funciona el AT Protocol",
+      "atprotoDesc": "Un recorrido interactivo por la red abierta sobre la que está construido todo esto."
+    }
+  },
+  "atproto": {
+    "metaTitle": "Cómo funciona el AT Protocol",
+    "metaDescription": "Un recorrido interactivo y amigable por el AT Protocol, la red abierta sobre la que está construido GainForest. Mira cómo encajan identidades, registros y apps.",
+    "kicker": "AT Protocol",
+    "title": "Cómo funciona el AT Protocol",
+    "lead": "GainForest no guarda tus datos en una base de datos privada. Todo vive en el AT Protocol, una red abierta donde las personas son dueñas de sus datos y muchas apps los comparten. Esta página explica las grandes ideas con palabras simples, con pequeños juguetes para experimentar.",
+    "whatIs": {
+      "heading": "¿Qué es el AT Protocol?",
+      "p1": "El AT Protocol, atproto para abreviar, es una receta para apps sociales donde los datos pertenecen a las personas y no a las plataformas. Cada persona y cada organización tiene una cuenta, y cada cuenta tiene un servidor de datos que guarda sus registros. Una publicación, un me gusta, un seguimiento, una observación de biodiversidad: cada uno es un pequeño registro firmado.",
+      "p2": "Apps como GainForest o Bluesky leen esos registros y los convierten en feeds, mapas y perfiles. Los registros quedan abiertos y portátiles, así que ninguna empresa puede encerrarte. Si una app cierra, tu nombre y tus datos sobreviven."
+    },
+    "naming": {
+      "heading": "Un nombre, no un lugar",
+      "intro": "En la web clásica, un enlace apunta a un lugar: un servidor en alguna parte. En atproto, un enlace apunta a una persona. Intenta romper los dos.",
+      "linkChip": "enlace",
+      "web": {
+        "title": "Un enlace a un lugar",
+        "serverLabel": "un servidor",
+        "action": "Apaga el servidor",
+        "undo": "Enciéndelo de nuevo",
+        "okCaption": "Este enlace solo funciona mientras ese único servidor siga en línea.",
+        "downCaption": "El servidor desapareció, y la publicación murió con él. Cada copia de este enlace ya está rota.",
+        "aria": "Diagrama de un enlace web que apunta a un solo servidor"
+      },
+      "id": {
+        "title": "Un enlace a una persona",
+        "hostA": "casa vieja",
+        "hostB": "casa nueva",
+        "action": "Muda a Maria a una casa nueva",
+        "undo": "Múdala de vuelta",
+        "okCaption": "El enlace nombra a Maria, no a una máquina. La red busca dónde viven sus datos en este momento.",
+        "movedCaption": "Maria se mudó y el enlace no cambió. Nada que actualizar, nada roto.",
+        "aria": "Diagrama de un enlace atproto que apunta a una persona que puede cambiar de servidor"
+      }
+    },
+    "records": {
+      "heading": "Todo es un registro",
+      "intro": "Cada cuenta guarda sus datos en un repositorio: una carpeta pública de pequeños registros firmados. Los registros pueden apuntar a registros de otras cuentas. Toca uno para leerlo.",
+      "aria": "Diagrama de dos repositorios con registros enlazados entre ellos",
+      "repoOfMaria": "Repo de Maria",
+      "repoOfKai": "Repo de Kai",
+      "nodes": {
+        "profile": "perfil",
+        "post": "publicación: un tucán",
+        "observation": "observación + foto",
+        "like": "me gusta",
+        "follow": "seguir"
+      },
+      "details": {
+        "mProfile": "El registro de perfil de Maria. Su nombre y su biografía viven aquí, dentro de su propio repositorio.",
+        "mPost": "Una publicación de Maria. Apunta a su registro de observación como evidencia, usando la dirección de ese registro.",
+        "mObs": "Una observación de biodiversidad con foto. GainForest lee registros como este para construir mapas y páginas de proyecto.",
+        "kProfile": "El registro de perfil de Kai, dentro de su propio repositorio.",
+        "kLike": "Un me gusta también es un registro. Vive en el repositorio de Kai y apunta a la publicación de Maria por su dirección. Nadie pidió permiso para crear ese enlace.",
+        "kFollow": "Kai sigue a Maria. El seguimiento apunta a Maria misma, así que sigue funcionando donde sea que vivan sus datos."
+      },
+      "caption": "Las direcciones empiezan con at:// y nombran una cuenta, un tipo de registro y una clave. Cualquier app de la red puede seguirlas."
+    },
+    "flow": {
+      "heading": "Un registro, todas las apps",
+      "intro": "Cuando alguien publica, su servidor personal de datos (el PDS) anuncia el nuevo registro. Un repetidor reúne los anuncios de toda la red en un gran flujo, y todas las apps lo escuchan. Toca a una persona para publicar.",
+      "aria": "Diagrama de registros que fluyen desde servidores personales a través de un repetidor hacia las apps",
+      "publishAs": "Publicar como {name}",
+      "pdsLabel": "PDS",
+      "relayLabel": "repetidor",
+      "appForest": "App de bosques",
+      "appFeed": "App social",
+      "received": "{count} recibidos",
+      "caption": "Las dos apps reciben el mismo registro en el mismo instante. Una app nueva puede unirse al flujo mañana y construir algo que nadie imaginó, sin pedir permiso."
+    },
+    "move": {
+      "heading": "Siempre puedes mudarte",
+      "intro": "Tu nombre y tus datos no están pegados a ninguna empresa. Si tu servidor se vuelve lento, codicioso o desaparece, empacas y te vas. Pruébalo.",
+      "hostA": "El servidor viejo",
+      "hostB": "El servidor nuevo",
+      "emptyHost": "vacío",
+      "suitcaseRecords": "128 registros",
+      "suitcaseFollowers": "42 seguidores",
+      "moveAction": "Mudarse al servidor nuevo",
+      "moveBack": "Volver",
+      "checkName": "El mismo nombre",
+      "checkRecords": "Todos los registros",
+      "checkFollowers": "Todos los seguidores",
+      "checkLinks": "Todos los enlaces funcionan",
+      "caption": "Esto se llama salida creíble. Los servidores deben tratar bien a la gente, porque irse es fácil. La mayoría nunca se muda, pero todos ganan con la puerta abierta."
+    },
+    "roots": {
+      "heading": "Tres ideas viejas, una red",
+      "intro": "Atproto no apareció de la nada. Mezcla lo mejor de tres olas anteriores de internet.",
+      "web": {
+        "title": "De la web",
+        "text": "Cualquiera puede unirse y publicar sin pedir permiso, y todo puede enlazar con todo lo demás."
+      },
+      "p2p": {
+        "title": "Del peer-to-peer",
+        "text": "Cada registro está firmado por su autor, así que sigue siendo confiable sin importar qué computadora te lo entregue."
+      },
+      "scale": {
+        "title": "De las grandes plataformas",
+        "text": "Los feeds rápidos, la búsqueda y los conteos vienen de servicios de indexación potentes que leen el flujo compartido."
+      }
+    },
+    "trust": {
+      "heading": "Confianza perezosa",
+      "intro": "Verificar cada firma en cada vista sería lento. Atproto toma un camino intermedio y relajado.",
+      "signed": {
+        "title": "Firmado en el origen",
+        "text": "Cada registro lleva la firma de su autor, así que cualquiera puede verificarlo cuando importa."
+      },
+      "views": {
+        "title": "Vistas rápidas",
+        "text": "Las apps sirven vistas preparadas sin volver a revisar cada registro. Si una app mintiera, los originales firmados lo probarían."
+      },
+      "exit": {
+        "title": "La puerta abierta",
+        "text": "Los datos y la identidad pueden mudarse en cualquier momento, así que un servicio que se porta mal pierde a sus usuarios. Eso mantiene honestos a todos."
+      }
+    },
+    "lexicon": {
+      "heading": "Hablar el mismo idioma",
+      "p1": "Para que las apps compartan registros, deben acordar cómo se ve cada registro. Atproto lo hace con esquemas llamados lexicons. Cada esquema tiene un dueño claro que puede evolucionarlo, y cada app puede comprobar que un registro sigue las reglas al pie de la letra. La estructura es lo que hace posible compartir.",
+      "p2": "GainForest publica sus propios esquemas abiertos para observaciones de biodiversidad, proyectos, certificados y donaciones. Cualquier otra app puede leer nuestros registros o escribir registros compatibles. Puedes explorarlos todos en la guía de esquemas de datos aquí abajo."
+    },
+    "more": {
+      "heading": "Sigue explorando",
+      "lexiconsTitle": "Esquemas de datos",
+      "lexiconsDesc": "Todos los formatos de registro que GainForest publica en la red.",
+      "cgsTitle": "Cómo funcionan las cuentas de grupo",
+      "cgsDesc": "El servicio guardián que permite a un equipo compartir una cuenta de forma segura.",
+      "epdsTitle": "Cómo funciona ePDS",
+      "epdsDesc": "El sistema de inicio de sesión y los servidores detrás de cada cuenta de GainForest.",
+      "siteTitle": "atproto.com",
+      "siteDesc": "El sitio oficial del protocolo, con las especificaciones completas y guías para desarrolladores.",
+      "ethosNote": "Muchas ideas de esta página vienen del ensayo del equipo del protocolo sobre su filosofía de diseño:",
+      "ethosLink": "El ethos de atproto"
+    }
+  },
+  "teeEpds": {
+    "metaTitle": "Cómo funcionan la firma protegida y la recuperación de billetera en ePDS",
+    "metaDescription": "Una guía interactiva de la firma protegida de ePDS, la recuperación de billetera con dos de tres partes, la aprobación del dispositivo y sus límites.",
+    "kicker": "firma protegida de ePDS",
+    "title": "Protegida del servidor, recuperable por ti",
+    "lead": "ePDS puede mover la firma de la cuenta a un Entorno de Ejecución Confiable, o TEE. Su billetera opcional divide el control en tres: tu dispositivo, el hardware protegido y tu copia de recuperación. El operador no puede gastar ni encerrarte en el servicio.",
+    "facts": {
+      "keys": {
+        "title": "El servidor no recibe claves",
+        "text": "La aplicación y el PDS reciben firmas, no secretos de cuenta o billetera."
+      },
+      "protection": {
+        "title": "El código se puede comprobar",
+        "text": "Una prueba de hardware puede mostrar qué código firmante se está ejecutando."
+      },
+      "wallet": {
+        "title": "Tú tienes la mayoría",
+        "text": "Tu dispositivo y copia de recuperación te dan dos de las tres partes de la billetera."
+      }
+    },
+    "what": {
+      "heading": "¿Qué agrega la extensión TEE?",
+      "intro": "La extensión agrega un pequeño servicio de firma junto al ePDS normal. Todo lo demás sigue usando rutas estándar de AT Protocol.",
+      "p1": "Un PDS normal necesita una clave privada para firmar cada actualización de tus datos. Con la extensión TEE, ePDS mueve ese trabajo a una máquina virtual confidencial. El PDS envía una huella de 32 bytes de la actualización. El firmante protegido devuelve una firma. La clave privada nunca sale de la memoria protegida.",
+      "p2": "La billetera nace de su propio secreto aleatorio, separado de la clave de cuenta. Ese secreto se divide en tres partes. El hardware protegido guarda una parte cifrada; tú controlas las partes del dispositivo y de recuperación. Dos partes restauran la billetera, pero una sola no revela nada.",
+      "p3": "Las aplicaciones pueden crear, ver, firmar, exportar y recuperar la billetera mediante llamadas estándar de AT Protocol o solicitudes web comunes. Ambos caminos usan los mismos controles y devuelven los mismos resultados."
+    },
+    "boundary": {
+      "heading": "¿Dónde vive la clave privada?",
+      "intro": "Cambia entre los dos diseños. Sigue la solicitud en movimiento y observa qué lado llega a tener la clave.",
+      "serverTab": "Clave en el servidor",
+      "teeTab": "Clave dentro del TEE",
+      "pdsName": "Servidor PDS",
+      "serverKeyName": "Archivo de clave privada",
+      "teeName": "Firmante protegido",
+      "serverResult": "El servidor puede leer la clave",
+      "teeResult": "La clave queda protegida",
+      "serverDesc": "El proceso PDS abre un archivo de clave y firma la actualización. Quien controle por completo el servidor podría copiar esa clave.",
+      "teeDesc": "El PDS solo envía una huella al firmante protegido. Recibe una firma, no la clave. Incluso el operador no puede abrir la memoria protegida y copiarla fácilmente."
+    },
+    "journey": {
+      "heading": "Cómo se firma un registro",
+      "intro": "Pulsa reproducir o elige un paso. El TEE solo firma. Tus registros siguen pasando por el PDS normal y la red AT Protocol.",
+      "play": "Reproducir",
+      "pause": "Pausa",
+      "back": "Atrás",
+      "next": "Siguiente",
+      "stepLabel": "Paso {n} de {total}",
+      "jumpTo": "Ir al paso {step}",
+      "nodes": {
+        "app": "Tu aplicación",
+        "pds": "PDS",
+        "tee": "Firmante TEE",
+        "network": "Red"
+      },
+      "steps": {
+        "s1": {
+          "title": "Tu aplicación guarda un registro",
+          "text": "Publicas una observación, actualizas un perfil o creas otro registro. La aplicación lo envía a tu PDS como siempre."
+        },
+        "s2": {
+          "title": "El PDS prepara la actualización",
+          "text": "El PDS revisa la solicitud y crea la siguiente versión de tus datos. Convierte la actualización en una huella corta."
+        },
+        "s3": {
+          "title": "El TEE firma la huella",
+          "text": "El firmante deriva tu clave de cuenta dentro de memoria protegida y firma la huella. Solo devuelve la firma."
+        },
+        "s4": {
+          "title": "La red la comprueba",
+          "text": "La actualización firmada entra en el historial. Otros servicios verifican la firma con la clave pública de tu identidad."
+        }
+      }
+    },
+    "separate": {
+      "heading": "Dos rutas que nunca comparten claves",
+      "intro": "La firma de cuenta y la firma de billetera usan el mismo servicio protegido, pero claves y reglas distintas.",
+      "repo": {
+        "title": "Ruta de registros",
+        "text": "El PDS puede pedir una firma para una actualización normal. Esta clave solo firma registros AT Protocol. No puede firmar una transacción de Ethereum."
+      },
+      "wallet": {
+        "title": "Ruta de billetera",
+        "text": "La billetera usa claves separadas de Ethereum y Solana. Para firmar, el servicio protegido necesita una prueba del dispositivo registrado y una parte auténtica de la billetera."
+      }
+    },
+    "shares": {
+      "heading": "Una billetera que puedes recuperar o llevar contigo",
+      "intro": "El secreto de la billetera se divide en tres partes. Elige una situación para ver qué dos partes la restauran. El operador solo controla una.",
+      "device": {
+        "title": "Tu dispositivo",
+        "text": "Se guarda en tu navegador o aplicación y nunca en el servicio."
+      },
+      "protected": {
+        "title": "Servicio protegido",
+        "text": "Se guarda cifrada y solo se usa dentro de hardware protegido aprobado."
+      },
+      "recovery": {
+        "title": "Tu copia de recuperación",
+        "text": "Protegida por una contraseña o nube personal bajo tu control."
+      },
+      "used": "Parte utilizada",
+      "notNeeded": "No necesaria",
+      "threshold": "2 de 3 cualquiera",
+      "scenarios": {
+        "everyday": {
+          "tab": "Uso diario",
+          "title": "Tu dispositivo y el hardware protegido firman juntos",
+          "text": "La billetera se reconstruye brevemente en memoria protegida, se compara con su dirección pública, se usa para firmar y luego se borra."
+        },
+        "recover": {
+          "tab": "Dispositivo perdido",
+          "title": "Tu copia de recuperación reemplaza el dispositivo perdido",
+          "text": "El servicio protegido combina su parte con la tuya, crea partes nuevas y puede registrar tu dispositivo de reemplazo. La parte del dispositivo antiguo ya no funciona con el servicio."
+        },
+        "leave": {
+          "tab": "Dejar el servicio",
+          "title": "Tus dos partes evitan quedar atrapado",
+          "text": "Las partes de tu dispositivo y recuperación forman una mayoría. Puedes reconstruir la billetera sin el operador o exportarla mediante el servicio mientras esté disponible."
+        }
+      }
+    },
+    "walletGate": {
+      "heading": "Por qué el servidor no puede gastar de la billetera",
+      "intro": "Prueba ambas solicitudes. Un token puede mostrar la dirección pública, pero gastar también requiere una prueba del dispositivo y su parte de la billetera.",
+      "serverAttempt": "El PDS pide solo",
+      "userAttempt": "Prueba + parte personal",
+      "serverNode": "Solicitud del PDS",
+      "userNode": "Prueba + parte del dispositivo",
+      "teeNode": "Billetera protegida",
+      "approved": "Firma aprobada",
+      "denied": "Solicitud rechazada",
+      "approvedDesc": "El dispositivo firma una solicitud corta y envía su parte cifrada para el hardware protegido. El firmante comprueba la prueba, la hora y un número de un solo uso antes de reconstruir y usar la billetera.",
+      "deniedDesc": "Un token del PDS no basta. El firmante protegido solo tiene una parte y rechaza cualquier solicitud sin la prueba del dispositivo y una segunda parte auténtica."
+    },
+    "proof": {
+      "heading": "¿Cómo puede una aplicación confiar en el firmante?",
+      "intro": "Un TEE puede crear un informe de hardware llamado atestación. Ayuda a comprobar la máquina y el código antes de confiar.",
+      "cardLabel": "Prueba respaldada por hardware",
+      "text": "El firmante crea su propia identidad pública dentro de memoria protegida. Un informe de hardware une esa identidad al código activo. El PDS puede exigir el informe antes de iniciar. Si el código cambia, el informe también cambia."
+    },
+    "limits": {
+      "heading": "Lo que esta protección no resuelve",
+      "intro": "Las claves protegidas ayudan, pero no hacen perfecto todo el sistema. Estos límites importan.",
+      "onboarding": {
+        "title": "Primera configuración",
+        "text": "El primer registro de dispositivo confía una vez en el servicio. Una versión futura puede usar passkeys para reducir esa confianza."
+      },
+      "uptime": {
+        "title": "Disponibilidad",
+        "text": "Un operador todavía puede apagar la máquina o bloquear solicitudes. Un TEE protege secretos, no la disponibilidad."
+      },
+      "server": {
+        "title": "Solicitudes malas",
+        "text": "Un PDS atacado podría pedir una firma para una actualización mala. Las claves de recuperación y el historial público ayudan a deshacerla."
+      },
+      "recovery": {
+        "title": "Copias y repetición",
+        "text": "Debes proteger tu copia de recuperación y el servicio debe respaldar su parte cifrada. Volver atrás el almacenamiento también puede reabrir una solicitud aprobada antigua, pero no crear una aprobación nueva."
+      }
+    },
+    "more": {
+      "heading": "Sigue explorando",
+      "epdsTitle": "Cómo funciona el acceso ePDS",
+      "epdsDesc": "Mira la entrada sin contraseña y los servicios normales que la rodean.",
+      "lexiconsTitle": "Esquemas de datos",
+      "lexiconsDesc": "Explora los formatos abiertos guardados en cada PDS.",
+      "designTitle": "Diseño técnico",
+      "designDesc": "Lee el modelo de amenazas, las reglas de firma y las notas de implementación.",
+      "githubTitle": "ePDS en GitHub",
+      "githubDesc": "Lee el código fuente y ejecuta el proyecto."
     }
   }
 }

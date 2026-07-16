@@ -6,6 +6,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { ArchiveIcon, AwardIcon, BotIcon, Building2Icon, FlaskConicalIcon, LeafIcon, SproutIcon, UserRoundIcon, WalletIcon } from "lucide-react";
+import { AdminOnlyIndicator } from "@/app/_components/AdminOnlyIndicator";
 import type { GrantApplicant } from "@/app/_lib/grants";
 import type { BioblitzRegistrant } from "@/app/_lib/bioblitz";
 import type { FlaggedTestAccount } from "@/app/internal/badges/_lib/test-accounts";
@@ -114,6 +115,7 @@ export function AdminModerationDashboard({
             >
               <entry.Icon className="size-4" />
               {entry.label}
+              <AdminOnlyIndicator />
               <span
                 className={cn(
                   "rounded-full px-1.5 text-xs tabular-nums",

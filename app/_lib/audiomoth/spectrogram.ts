@@ -119,7 +119,7 @@ const COLOR_STOPS: Array<[number, number, number]> = [
   [252, 255, 164],
 ];
 
-function colorFor(normalized: number): [number, number, number] {
+export function colorForSpectrogram(normalized: number): [number, number, number] {
   const t = Math.max(0, Math.min(1, normalized)) * (COLOR_STOPS.length - 1);
   const i = Math.min(COLOR_STOPS.length - 2, Math.floor(t));
   const f = t - i;
@@ -152,7 +152,7 @@ export async function renderSpectrogramPng(
     for (let bin = 0; bin < bins; bin += 1) {
       const db = magnitudesDb[col * bins + bin]!;
       const normalized = (db - MIN_DB) / (MAX_DB - MIN_DB);
-      const [r, g, b] = colorFor(normalized);
+      const [r, g, b] = colorForSpectrogram(normalized);
       // Flip vertically: bin 0 (lowest frequency) at the bottom row.
       const y = bins - 1 - bin;
       const offset = (y * columns + col) * 4;

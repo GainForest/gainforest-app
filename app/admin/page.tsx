@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { ShieldCheckIcon } from "lucide-react";
 import Container from "@/components/ui/container";
+import { AdminOnlyIndicator } from "@/app/_components/AdminOnlyIndicator";
 import { getGainForestModeratorAccess, getInternalBadgeAccess } from "@/app/internal/badges/_lib/access";
 import { fetchFlaggedTestAccounts } from "@/app/internal/badges/_lib/test-accounts";
 import { fetchFlaggedTestRecords } from "@/app/internal/badges/_lib/test-records";
@@ -137,6 +138,7 @@ export default async function AdminPage({
         <div className="flex items-center gap-2">
           <ShieldCheckIcon className="size-5 text-muted-foreground" />
           <h1 className="font-instrument text-3xl font-light italic tracking-[-0.04em]">{t("page.title")}</h1>
+          <AdminOnlyIndicator className="text-muted-foreground" />
         </div>
         <p className="mt-2 max-w-prose text-sm leading-6 text-muted-foreground">{t("page.subtitle")}</p>
       </header>

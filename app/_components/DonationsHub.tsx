@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 import { BarChart3Icon, TrophyIcon } from "lucide-react";
 import { parseAsStringEnum, useQueryState } from "nuqs";
+import { AdminOnlyIndicator } from "./AdminOnlyIndicator";
 import { cn } from "@/lib/utils";
 import { DashboardBody } from "./Dashboard";
 import { LeaderboardBody } from "../leaderboard/LeaderboardClient";
@@ -92,6 +93,7 @@ function DonationsViewToggle({ view, onChange }: { view: DonationsView; onChange
           >
             <tab.Icon className="size-4" />
             {tab.label}
+            <AdminOnlyIndicator />
           </button>
         );
       })}

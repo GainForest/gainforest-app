@@ -11,6 +11,7 @@ import {
   Loader2Icon,
   ShieldCheckIcon,
 } from "lucide-react";
+import { AdminOnlyIndicator } from "@/app/_components/AdminOnlyIndicator";
 import { formatCgsErrorMessage } from "@/app/_lib/cgs-errors";
 import { RECOGNITION_BADGE_KEYS, type RecognitionBadgeKey } from "@/app/_lib/recognition-badges";
 import { cn } from "@/lib/utils";
@@ -103,6 +104,7 @@ export function StewardTools({ did, accountName, initialTestFlagged, initialAwar
           <ShieldCheckIcon className="size-4" />
         </span>
         <span className="min-w-0 flex-1 truncate text-sm font-medium text-foreground">{t("title")}</span>
+        <AdminOnlyIndicator className="text-muted-foreground" />
 
         {/* At-a-glance status: hidden flag + awarded badge icons. */}
         <span className="flex items-center gap-1.5">

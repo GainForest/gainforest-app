@@ -28,6 +28,12 @@ const ROUTES: Array<{ path: string; priority: number; changeFrequency: ChangeFre
   { path: "/status", priority: 0.5, changeFrequency: "hourly" },
   { path: "/privacy", priority: 0.4, changeFrequency: "yearly" },
   { path: "/docs/lexicons", priority: 0.4, changeFrequency: "monthly" },
+  { path: "/docs/atproto", priority: 0.4, changeFrequency: "monthly" },
+  { path: "/docs/ePDS", priority: 0.4, changeFrequency: "monthly" },
+  { path: "/docs/ePDS-router", priority: 0.4, changeFrequency: "monthly" },
+  { path: "/docs/TEE-ePDS", priority: 0.4, changeFrequency: "monthly" },
+  { path: "/docs/cgs", priority: 0.4, changeFrequency: "monthly" },
+  { path: "/docs/audiomoth", priority: 0.5, changeFrequency: "monthly" },
 ];
 
 const ORGANIZATION_PROFILES_QUERY = `

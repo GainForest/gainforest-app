@@ -699,6 +699,8 @@
       "reanalyzeAria": "Executar a IA novamente para uma nova sugestão",
       "uploadingProgress": "Adicionando {done} de {total}",
       "identifyingProgress": "Identificando {done} de {total}…",
+      "preparingProgress": "Preparando {done} de {total}…",
+      "skipIdentify": "Pular sugestões de IA",
       "moreWays": "Mais formas",
       "uploadCsv": "Enviar dados CSV",
       "photoTooLarge": "Esta foto é grande demais para enviar. Tente uma foto menor.",

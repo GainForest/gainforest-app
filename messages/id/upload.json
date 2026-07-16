@@ -699,6 +699,8 @@
       "reanalyzeAria": "Jalankan ulang AI untuk saran baru",
       "uploadingProgress": "Menambahkan {done} dari {total}",
       "identifyingProgress": "Mengidentifikasi {done} dari {total}…",
+      "preparingProgress": "Menyiapkan {done} dari {total}…",
+      "skipIdentify": "Lewati saran AI",
       "moreWays": "Cara lain",
       "uploadCsv": "Unggah data CSV",
       "photoTooLarge": "Foto ini terlalu besar untuk diunggah. Coba foto yang lebih kecil.",

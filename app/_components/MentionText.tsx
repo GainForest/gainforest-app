@@ -5,13 +5,15 @@ import { useRouter } from "next/navigation";
 
 import { segmentTextWithMentions, type MentionCandidate } from "@/app/_lib/mentions";
 import { accountHref } from "@/app/_lib/urls";
+import { AccountHoverCard } from "@/app/feed/AccountHoverCard";
 
 /**
  * Post/comment body text with `@Name` mentions linkified to the tagged
- * account's page. Mentions render as span-links (role="link" + router.push)
- * instead of anchors because several call sites live inside a wrapping
- * `<Link>` (e.g. feed rows), where a nested `<a>` is invalid — the span
- * navigates itself and stops the event so the outer link doesn't fire.
+ * account's page. Hovering a mention opens the same rich account preview card
+ * used on feed author chips. Mentions render as span-links (role="link" +
+ * router.push) instead of anchors because several call sites live inside a
+ * wrapping `<Link>` (e.g. feed rows), where a nested `<a>` is invalid — the
+ * span navigates itself and stops the event so the outer link doesn't fire.
  */
 export function MentionText({
   text,
@@ -27,26 +29,31 @@ export function MentionText({
     <>
       {segments.map((segment, i) =>
         segment.did ? (
-          <span
+          <AccountHoverCard
             key={i}
-            role="link"
-            tabIndex={0}
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              router.push(accountHref(segment.did as string));
-            }}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" || e.key === " ") {
+            did={segment.did}
+            name={segment.text.replace(/^@/, "")}
+          >
+            <span
+              role="link"
+              tabIndex={0}
+              onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
                 router.push(accountHref(segment.did as string));
-              }
-            }}
-            className="cursor-pointer font-medium text-primary hover:underline"
-          >
-            {segment.text}
-          </span>
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  router.push(accountHref(segment.did as string));
+                }
+              }}
+              className="cursor-pointer font-medium text-primary hover:underline"
+            >
+              {segment.text}
+            </span>
+          </AccountHoverCard>
         ) : (
           <span key={i}>{segment.text}</span>
         ),

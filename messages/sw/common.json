@@ -8,6 +8,9 @@
     "changeAria": "Badilisha lugha",
     "currentLanguage": "Lugha ya sasa"
   },
+  "adminOnly": {
+    "label": "Wasimamizi pekee"
+  },
   "navigation": {
     "navigation": "Urambazaji",
     "openNavigation": "Fungua urambazaji",
@@ -1238,7 +1241,24 @@
       "certified": "Vipengele vya utambulisho kutoka mfumo wa Hypercerts — wasifu wa watendaji, mashirika, wafuasi, beji na maeneo.",
       "hypercerts": "Madai ya athari (shughuli, mchango, mchangiaji, haki), makusanyo, risiti za ufadhili, viambatisho, wigo wa kazi na aina za pamoja."
     },
-    "sectionsAria": "Sehemu za miundo"
+    "sectionsAria": "Sehemu za miundo",
+    "epdsLinkTitle": "Jinsi ePDS inavyofanya kazi",
+    "epdsLinkDesc": "Ziara shirikishi ya mfumo wa kuingia na seva zilizo nyuma ya rekodi hizi.",
+    "cgsLinkTitle": "Jinsi akaunti za kikundi zinavyofanya kazi",
+    "cgsLinkDesc": "Ziara shirikishi ya huduma ya ulinzi inayowezesha timu nzima kushiriki akaunti moja.",
+    "atprotoLinkTitle": "Jinsi AT Protocol inavyofanya kazi",
+    "atprotoLinkDesc": "Ziara shirikishi ya mtandao wazi ambao yote haya yamejengwa juu yake.",
+    "teeEpdsLinkTitle": "Utiaji saini salama wa ePDS",
+    "teeEpdsLinkDesc": "Ona jinsi funguo binafsi zinavyoweza kubaki ndani ya maunzi salama.",
+    "guides": {
+      "usageGuide": "Mwongozo wa matumizi",
+      "audiomothTitle": "Lebo za spektrogramu za AudioMoth kama matukio ya Darwin Core",
+      "audiomothDescription": "Jinsi kila kisanduku cha muda na masafa kilichothibitishwa kinavyokuwa rekodi mpya ya tukio iliyounganishwa na rekodi yake ya sauti.",
+      "openGuide": "Soma mwongozo wa utekelezaji",
+      "breadcrumbAria": "Njia ya urambazaji ya nyaraka",
+      "schemas": "Miundo ya data",
+      "guideIntro": "Mwongozo huu unaeleza kanuni za programu zinazotumiwa pamoja na muundo wa matukio. Muundo unabaki Darwin Core wa jumla; mwongozo unaeleza jinsi rekodi za AudioMoth, visanduku vya spektrogramu na rekodi za matukio zinavyounganishwa."
+    }
   },
   "taina": {
     "meta": {
@@ -1651,7 +1671,89 @@
     "mainTabs": {
       "setup": "Usanidi",
       "deployments": "Usambazaji",
-      "upload": "Pakia"
+      "upload": "Pakia",
+      "label": "Weka lebo"
+    },
+    "label": {
+      "subtitle": "Kagua rekodi za AudioMoth, weka alama za miito kwa muda na masafa, kisha tengeneza mkusanyiko safi wa lebo za data ya uwanjani.",
+      "signInTitle": "Ingia ili kuweka lebo kwenye rekodi",
+      "signInBody": "Matukio yanahifadhiwa kwenye akaunti yako. Ingia, pakia rekodi za AudioMoth, kisha weka alama kwenye sauti za wanyamapori.",
+      "loadingRecordings": "Inapakia rekodi zako za AudioMoth…",
+      "loadFailed": "Rekodi zako hazikuweza kupakiwa. Jaribu tena.",
+      "occurrencesLoadFailed": "Matukio yaliyohifadhiwa kwa rekodi hii hayakuweza kupakiwa.",
+      "noRecordingsTitle": "Pakia rekodi kwanza",
+      "noRecordingsBody": "Sehemu ya kuweka lebo hutumia rekodi zilizohifadhiwa kwenye akaunti yako ili kila kisanduku kiwe tukio la bioanuwai lililounganishwa.",
+      "uploadFirst": "Pakia rekodi za AudioMoth",
+      "refresh": "Onyesha upya",
+      "savedAtproto": "Kila kisanduku kilichohifadhiwa ni tukio la bioanuwai kwenye akaunti yako.",
+      "openToLoad": "Fungua kupakia lebo",
+      "saved": "Imehifadhiwa",
+      "deleteConfirm": "Ufute tukio hili? Litaondolewa kwenye akaunti yako na haliwezi kurejeshwa.",
+      "deleteFailed": "Tukio halikuweza kufutwa. Jaribu tena.",
+      "saveFailed": "Tukio halikuweza kuhifadhiwa. Kisanduku bado kipo ili ujaribu tena.",
+      "recordedAtMissing": "Rekodi hii haina muda halali wa kuanza, kwa hivyo muda wa tukio hauwezi kukokotolewa.",
+      "audioUnavailable": "Rekodi hii haina faili asili au hakikisho linaloweza kuchezwa. Pakia tena huku mahakikisho yakiwa yamewashwa.",
+      "commonName": "Jina la kawaida/kienyeji (si lazima)",
+      "commonNamePlaceholder": "Chura wa mtini",
+      "scientificName": "Jina la kisayansi (si lazima)",
+      "scientificNamePlaceholder": "Boana faber",
+      "scientificNameHint": "Acha wazi ili kuhifadhi kundi pana sahihi, kama Anura kwa vyura.",
+      "saveOccurrence": "Hifadhi tukio",
+      "saveAtprotoHint": "Huunda tukio la Darwin Core lililounganishwa na rekodi hii ya sauti.",
+      "stepImport": "Chagua rekodi",
+      "stepDraw": "Chora kisanduku cha muda na masafa",
+      "stepDescribe": "Eleza ulichosikia",
+      "emptyTitle": "Weka lebo sauti za wanyamapori katika rekodi za AudioMoth",
+      "emptyBody": "Chagua folda ya kadi ya SD au faili za WAV. Chagua rekodi, chora kisanduku kuzunguka mwito, kisha uitambue kama ndege, chura, mdudu, sauti nyingine au dokezo.",
+      "chooseFolder": "Chagua kadi ya SD au folda",
+      "chooseFiles": "Chagua faili za WAV",
+      "privacyNote": "Rekodi zako zinasalia kwenye kifaa hiki unapoweka lebo.",
+      "workspaceSummary": "Rekodi {files} · lebo {labels}",
+      "savedLocally": "Rasimu zinahifadhiwa kwenye kivinjari hiki. Zihamishe zikiwa tayari.",
+      "addFiles": "Ongeza rekodi",
+      "export": "Hamisha CSV",
+      "closeSet": "Funga mkusanyiko",
+      "recordings": "Rekodi",
+      "search": "Tafuta faili…",
+      "labelCount": "Lebo {count}",
+      "notLabelled": "Haijawekewa lebo",
+      "filePosition": "Rekodi {current} kati ya {total}",
+      "previousFile": "Rekodi iliyotangulia",
+      "nextFile": "Rekodi inayofuata",
+      "labelsTitle": "Lebo ({count})",
+      "selectToEdit": "Chagua lebo ili kuihariri",
+      "labelsEmpty": "Bado hakuna lebo. Chora kisanduku juu ya sauti kwenye spektrogramu ili kuanza.",
+      "deleteLabel": "Futa lebo",
+      "editLabel": "Hariri lebo",
+      "newLabel": "Lebo mpya",
+      "describeSelection": "Kuna nini katika kisanduku hiki?",
+      "drawFirst": "Chora kisanduku ili kuanza",
+      "clearSelection": "Futa uteuzi",
+      "drawHint": "Buruta kwenye spektrogramu kuweka alama kwenye sauti unayotaka. Kisanduku kinanasa muda ilipotokea na masafa yake.",
+      "timeRange": "Muda",
+      "frequencyRange": "Masafa",
+      "whatIsIt": "Ulisikia nini?",
+      "categories": {
+        "bird": "Ndege",
+        "frog": "Chura",
+        "insect": "Mdudu",
+        "other": "Nyingine",
+        "note": "Dokezo"
+      },
+      "species": "Spishi (si lazima)",
+      "speciesPlaceholder": "Jina la kawaida au kisayansi",
+      "speciesHint": "Acha wazi ikiwa unajua tu kundi la mnyama.",
+      "noteRequired": "Dokezo",
+      "noteOptional": "Dokezo (si lazima)",
+      "notePlaceholder": "Aina ya mwito, uhakika, hali ya hewa au maelezo mengine muhimu…",
+      "updateLabel": "Sasisha lebo",
+      "saveLabel": "Hifadhi lebo",
+      "saveHint": "Imehifadhiwa kwenye kivinjari hiki hadi uhamishe mkusanyiko wa lebo.",
+      "drawInstruction": "Buruta kuchora · chagua kisanduku kuhariri",
+      "spectrogramAria": "Spektrogramu shirikishi ya sauti",
+      "buildingSpectrogram": "Inatengeneza spektrogramu…",
+      "spectrogramFailed": "Rekodi hii haikuweza kubadilishwa kuwa spektrogramu.",
+      "audioUnsupported": "Kivinjari chako hakiwezi kucheza rekodi hii."
     },
     "deployments": {
       "intro": "Usambazaji hurekodi mahali na wakati AudioMoth ilipowekwa uwandani. Kila mmoja hucheza mlio wa akustika unaoweka saa, mahali na kitambulisho cha usambazaji cha kinasa sauti.",
@@ -1809,6 +1911,768 @@
       "toggleDescription": "Habari unazochapisha pia zinachapishwa kwenye akaunti yako ya Bluesky, ili watu wengi zaidi wagundue kazi yako.",
       "viewProfile": "Tazama wasifu wako wa Bluesky",
       "error": "Hatukuweza kuhifadhi mabadiliko hayo. Tafadhali jaribu tena."
+    }
+  },
+  "epds": {
+    "metaTitle": "Jinsi ePDS inavyofanya kazi",
+    "metaDescription": "Ziara shirikishi ya ePDS, Personal Data Server iliyopanuliwa inayomruhusu mtu yeyote kujiunga na mtandao wa AT Protocol kwa barua pepe tu.",
+    "kicker": "Personal Data Server iliyopanuliwa",
+    "title": "Jinsi ePDS inavyofanya kazi",
+    "lead": "GainForest inaendeshwa juu ya AT Protocol, mtandao wazi ulio nyuma ya Bluesky. Kwa kawaida kujiunga na mtandao huo kunahitaji nenosiri na usanidi wa kiufundi. ePDS inaondoa kizuizi hicho: unaandika barua pepe yako, unapokea msimbo, na umeingia. Ukurasa huu unaonyesha jinsi inavyofanya kazi, hatua kwa hatua.",
+    "whatIs": {
+      "heading": "PDS ni nini, na herufi e inaongeza nini?",
+      "p1": "Katika AT Protocol, kila mtu huhifadhi data yake kwenye Personal Data Server, au PDS. Ifikirie kama nyumba yako binafsi ya machapisho, uchunguzi, na miradi yako. Kilichomo ndani ni chako, na unaweza kuhamia seva nyingine wakati wowote bila kupoteza chochote.",
+      "p2": "ePDS ni PDS ya kawaida yenye nyongeza moja: mlango wa mbele wenye ukarimu. Badala ya kuomba nenosiri, inakuingiza kwa msimbo wa barua pepe wa matumizi moja au akaunti ya kijamii, na inakutengenezea akaunti katika ziara yako ya kwanza. Nyuma ya mlango huo kila kitu kinabaki AT Protocol ya kawaida, hivyo kila programu kwenye mtandao inaweza kuzungumza nayo."
+    },
+    "compare": {
+      "heading": "Milango miwili ya mbele",
+      "intro": "Nyumba ile ile, mlango tofauti. Geuza swichi ujaribu njia zote mbili za kuingia.",
+      "classicTab": "PDS ya kawaida",
+      "epdsTab": "ePDS",
+      "handle": "Jina la mtumiaji",
+      "password": "Nenosiri",
+      "inviteCode": "Msimbo wa mwaliko",
+      "email": "Barua pepe",
+      "sendCode": "Nitumie msimbo",
+      "signIn": "Ingia",
+      "codeLabel": "Andika msimbo kutoka kwenye barua pepe yako",
+      "classicCaption": "PDS ya kawaida huomba nenosiri, na mara nyingi msimbo wa mwaliko kutoka kwa msimamizi wa seva. Pia inabidi utengeneze akaunti kwanza.",
+      "epdsCaption": "ePDS inaomba barua pepe yako na kukutumia msimbo. Ziara ya kwanza? Akaunti yako inatengenezwa papo hapo.",
+      "done": "Umeingia!",
+      "reset": "Jaribu tena"
+    },
+    "journey": {
+      "heading": "Safari ya kuingia",
+      "intro": "Bonyeza cheza, au pitia hatua mwenyewe. Kitone kinachosogea ni ombi lako la kuingia likifanya safari ya kwenda na kurudi.",
+      "play": "Cheza",
+      "pause": "Simamisha",
+      "back": "Nyuma",
+      "next": "Mbele",
+      "stepLabel": "Hatua {n} kati ya {total}",
+      "ariaLabel": "Mchoro wa safari ya kuingia",
+      "nodes": {
+        "app": "Programu yako",
+        "pds": "Kiini cha PDS",
+        "auth": "Huduma ya kuingia",
+        "inbox": "Kikasha chako"
+      },
+      "steps": {
+        "s1": {
+          "title": "Unabofya Ingia",
+          "text": "Yote huanzia kwenye programu unayotumia, kwa mfano GainForest. Unabofya Ingia na labda unaandika barua pepe yako."
+        },
+        "s2": {
+          "title": "Programu inaita PDS",
+          "text": "Programu yako inaiomba PDS kimyakimya kuanzisha uingiaji. Hili ni ombi la kawaida la AT Protocol, lile lile ambalo programu yoyote ya Bluesky ingetuma."
+        },
+        "s3": {
+          "title": "PDS inafungua mlango wake",
+          "text": "Hapa ndipo ujanja wa ePDS ulipo. Badala ya kuonyesha fomu ya nenosiri, PDS inaelekeza kivinjari chako kwenye huduma yake ya kuingia yenye ukarimu."
+        },
+        "s4": {
+          "title": "Msimbo unaruka hadi kikasha chako",
+          "text": "Huduma ya kuingia inatengeneza msimbo wa matumizi moja na kukutumia kwa barua pepe. Msimbo unafanya kazi mara moja tu na unaisha baada ya dakika chache."
+        },
+        "s5": {
+          "title": "Unaandika msimbo",
+          "text": "Unanakili msimbo kutoka kwenye barua pepe hadi skrini ya kuingia. Hiyo inathibitisha kikasha ni chako. Hakuna nenosiri kabisa."
+        },
+        "s6": {
+          "title": "Mgeni? Chagua jina",
+          "text": "Katika ziara yako ya kwanza, ePDS inakutengenezea akaunti na kukuomba uchague jina lako la mtumiaji, jina lako la hadharani kwenye mtandao."
+        },
+        "s7": {
+          "title": "Salamu iliyotiwa saini",
+          "text": "Huduma ya kuingia inaiambia PDS kuwa umethibitishwa. Ujumbe huo unabeba saini ya kriptografia, hivyo hakuna anayeweza kuughushi."
+        },
+        "s8": {
+          "title": "Kurudi kwenye programu yako",
+          "text": "PDS inarudisha kivinjari chako kwenye programu yako ukiwa na msimbo wa muda mfupi. Programu yako inabadilisha msimbo huo kuwa tokeni ya ufikiaji."
+        },
+        "s9": {
+          "title": "Umeingia",
+          "text": "Programu yako sasa inaweza kusoma na kuandika data yako kwa niaba yako. Kwa mtandao mzima unaonekana kama mtumiaji mwingine yeyote wa AT Protocol."
+        }
+      }
+    },
+    "map": {
+      "heading": "Sehemu zinazofanya kazi",
+      "intro": "ePDS ni timu ndogo ya huduma. Gusa kila moja uone kazi yake.",
+      "ariaLabel": "Ramani ya huduma za ePDS",
+      "nodes": {
+        "app": {
+          "name": "Programu yako",
+          "desc": "Programu yoyote ya AT Protocol, kama GainForest au Bluesky. Kamwe haioni msimbo wako wa barua pepe wala funguo zozote. Inapokea tu tokeni ya mwisho ya ufikiaji."
+        },
+        "pds": {
+          "name": "Kiini cha PDS",
+          "desc": "Personal Data Server ya kawaida. Inahifadhi rekodi zako, inazungumza na mtandao mzima, na inatoa tokeni. ePDS inaizunguka bila kubadilisha jinsi inavyozungumza na programu nyingine."
+        },
+        "auth": {
+          "name": "Huduma ya kuingia",
+          "desc": "Mlango wa mbele wenye ukarimu. Inaonyesha skrini ya kuingia, inatuma misimbo ya barua pepe, inashughulikia uingiaji wa kijamii, na inawasaidia watumiaji wapya kuchagua jina."
+        },
+        "email": {
+          "name": "Mtoa huduma wa barua pepe",
+          "desc": "Inafikisha misimbo ya matumizi moja kwenye kikasha chako. Kila msimbo ni wa muda mfupi na unaweza kutumika mara moja tu."
+        },
+        "db": {
+          "name": "Hifadhidata ya pamoja",
+          "desc": "Hifadhidata ndogo inayotumiwa na huduma zote mbili. Inafuatilia vipindi vya kuingia na misimbo, hakuna zaidi."
+        }
+      }
+    },
+    "more": {
+      "heading": "Endelea kuchunguza",
+      "lexiconsTitle": "Miundo ya data",
+      "lexiconsDesc": "Miundo wazi ya rekodi inayoishi ndani ya kila PDS.",
+      "githubTitle": "ePDS kwenye GitHub",
+      "githubDesc": "Msimbo wote wa chanzo, wazi kwa yeyote kusoma, kuendesha, na kuboresha.",
+      "cgsTitle": "Jinsi akaunti za kikundi zinavyofanya kazi",
+      "cgsDesc": "Huduma ya ulinzi inayowezesha timu nzima kushiriki akaunti moja ya kikundi kwa usalama.",
+      "atprotoTitle": "Jinsi AT Protocol inavyofanya kazi",
+      "atprotoDesc": "Ziara shirikishi ya mtandao wazi ambao yote haya yamejengwa juu yake.",
+      "teeTitle": "Utiaji saini salama wa ePDS",
+      "teeDesc": "Ona jinsi funguo binafsi zinavyoweza kubaki ndani ya maunzi salama.",
+      "routerTitle": "Router ya ePDS",
+      "routerDesc": "Jinsi programu zinavyopata seva sahihi ya barua pepe wakati jumuiya inaendesha seva kadhaa."
+    }
+  },
+  "epdsRouter": {
+    "metaTitle": "Jinsi router ya ePDS inavyofanya kazi",
+    "metaDescription": "Mwongozo shirikishi wa router ya ePDS: jinsi programu inavyopata seva sahihi ya kuingia kwa barua pepe kati ya seva nyingi — wenyeji hushiriki alama za vidole za njia moja tu, kamwe si vitambulisho wala anwani.",
+    "kicker": "ugunduzi wa barua pepe hadi seva",
+    "title": "Barua pepe moja, seva nyingi",
+    "lead": "ePDS inakuwezesha kuingia kwa barua pepe yako tu. Lakini jumuiya inapoendesha seva kadhaa, programu lazima kwanza ijibu swali dogo: seva ipi inaijua barua pepe hii? Router inalijibu kwa wito mmoja — wenyeji wanabaki na udhibiti kamili, na hakuna anayekabidhi anwani wala nenosiri.",
+    "facts": {
+      "routing": {
+        "title": "Utafutaji mmoja, seva sahihi",
+        "text": "Programu inauliza mara moja na kujua seva zipi zinaijua barua pepe: hakuna, moja tu, au kadhaa."
+      },
+      "privacy": {
+        "title": "Barua pepe hazihifadhiwi kamwe",
+        "text": "Anwani huchanganywa kwenye seva yao wenyewe kabla ya chochote kuondoka. Router huona alama za vidole tu — na kuzichanganya tena kabla ya kuhifadhi."
+      },
+      "zerochange": {
+        "title": "Wenyeji wanabaki na udhibiti",
+        "text": "Hakuna vitambulisho vya kukabidhi, hakuna cha kusakinisha ndani ya PDS. Wenyeji huendesha skripti moja ndogo kando ya seva yao, kwa ratiba yao wenyewe."
+      }
+    },
+    "problem": {
+      "heading": "Kwa nini ugunduzi unahitajika",
+      "p1": "Programu yenye kuingia kwa barua pepe lazima ipeleke ombi la kuingia kwa seva moja mahususi: seva hiyo ndiyo hutuma msimbo na kuhifadhi akaunti. Kwa seva moja jibu ni thabiti. Kwa seva kadhaa, programu inahitaji orodha ya mwelekeo — na anwani za barua pepe ni aina ya data usiyotaka kuinakili kwenye orodha moja kubwa.",
+      "p2": "Router hutatua hili kwa mbinu ndogo: hufanya kazi na alama za vidole tu. Kila seva huchanganya anwani zake kwa njia moja nyumbani na haishiriki kitu kingine, na kila utafutaji huchanganya barua pepe inayoingia kwa njia ile ile na kulinganisha alama. Jibu lile lile, bila kitabu cha anwani — na hakuna anayekabidhi funguo zake."
+    },
+    "demo": {
+      "heading": "Jaribu utafutaji",
+      "intro": "Seva tatu za mfano, barua pepe tatu za mfano. Chagua moja uone router ikiielekeza.",
+      "reset": "Anza upya",
+      "ariaLabel": "Mchoro wa uelekezaji wa utafutaji wa barua pepe",
+      "nodes": {
+        "app": "Programu yako",
+        "router": "Router",
+        "forest": "PDS Msitu",
+        "ocean": "PDS Bahari",
+        "river": "PDS Mto"
+      },
+      "steps": {
+        "idle": {
+          "title": "Chagua barua pepe hapo juu",
+          "text": "Programu inataka kuanzisha kuingia kwa barua pepe lakini bado haijui iongee na seva ipi."
+        },
+        "sent": {
+          "title": "Programu inauliza router",
+          "text": "Inatuma barua pepe kupitia wito wa faragha uliothibitishwa. Tafutizi hazirekodiwi kwenye kumbukumbu yoyote."
+        },
+        "fingerprint": {
+          "title": "Router inaichanganya",
+          "text": "Barua pepe inakuwa alama ya kidole mara inapofika, na alama pekee ndiyo inayolinganishwa na seti ya kila seva."
+        }
+      },
+      "outcomes": {
+        "one": {
+          "title": "Nyumba moja imepatikana",
+          "text": "Seva moja tu inaijua barua pepe hii, hivyo programu inaanzisha kuingia hapo. Msimbo unafika kwenye kikasha sahihi."
+        },
+        "many": {
+          "title": "Nyumba mbili zimepatikana",
+          "text": "Seva mbili zinaijua barua pepe hii — hizo ni akaunti mbili tofauti. Programu inaonyesha kichaguzi na mtu anachagua ipi atumie."
+        },
+        "none": {
+          "title": "Bado hakuna nyumba",
+          "text": "Hakuna seva inayoijua barua pepe hii, hivyo programu inatoa kutengeneza akaunti mpya kwenye seva yake ya msingi."
+        }
+      }
+    },
+    "sync": {
+      "heading": "Jinsi router inavyobaki na taarifa mpya",
+      "intro": "Hakuna cha kukabidhi: kila mwenyeji husukuma picha yake mwenyewe, kwa kipima muda anachochagua.",
+      "play": "Cheza",
+      "pause": "Simamisha",
+      "back": "Nyuma",
+      "next": "Mbele",
+      "stepLabel": "Hatua ya {n} kati ya {total}",
+      "ariaLabel": "Mchoro wa mzunguko wa usawazishaji",
+      "nodes": {
+        "pds": "ePDS yako",
+        "router": "Router",
+        "index": "fahirisi ya alama za vidole"
+      },
+      "steps": {
+        "s1": {
+          "title": "Seva yako inakusanya orodha yake yenyewe",
+          "text": "Skripti ndogo huendeshwa kando ya PDS yako, kwa ratiba unayochagua. Inasoma barua pepe za akaunti papo hapo — nenosiri lako la msimamizi haliondoki kamwe kwenye mashine yako."
+        },
+        "s2": {
+          "title": "Alama za vidole zinatengenezwa nyumbani",
+          "text": "Kila anwani huchanganywa kwa njia moja kwenye seva yako mwenyewe. Kuanzia sasa, hakuna barua pepe ya maandishi wazi popote katika mchakato."
+        },
+        "s3": {
+          "title": "Picha inasukumwa",
+          "text": "Skripti hutuma seti kamili ya alama za vidole kwa router kupitia wito uliosimbwa na kulindwa kwa tokeni. Inachukua nafasi ya picha iliyotangulia kabisa."
+        },
+        "s4": {
+          "title": "Router inaibadilisha",
+          "text": "Router huchanganya kila alama ya kidole mara ya pili kwa ufunguo wake binafsi, kisha kubadilisha seti nzima ya seva yako kwa hatua moja kamili. Akaunti zilizofutwa hutoweka kwa msukumo wako unaofuata."
+        }
+      }
+    },
+    "register": {
+      "heading": "Jiunge kama mwenyeji wa ePDS",
+      "intro": "Hushiriki kamwe nenosiri lako la msimamizi, na husubiri kamwe router ikupigie. Jisajili mara moja, sukuma alama za vidole kwa ratiba yako mwenyewe, na muombe mwendeshaji akuidhinishe.",
+      "p1": "Kujisajili ni wito mmoja bila vitambulisho — jibu linabeba tokeni yako ya kusukuma (ihifadhi, inaonyeshwa mara moja tu). Seva yako inabaki inasubiri na haionekani kwenye tafutizi hadi mwendeshaji wa router aidhinishe.",
+      "enrollLabel": "1 · sajili seva yako",
+      "pushLabel": "2 · sukuma alama za vidole kwa kipima muda",
+      "approveNote": "3 · Muombe mwendeshaji wa router aidhinishe usajili wako — tafutizi zinaanza mara tu atakapofanya hivyo. Kuondoka ni uamuzi wako peke yako: acha kusukuma, au muombe mwendeshaji aondoe ingizo lako."
+    },
+    "integrate": {
+      "heading": "Unganisha tafutizi kwenye programu yako",
+      "intro": "Programu za mteja hupata tokeni yao wenyewe kutoka kwa mwendeshaji wa router. Wito mmoja kabla ya kuonyesha skrini ya kuingia unatosha.",
+      "lookupLabel": "tafuta barua pepe",
+      "jsLabel": "shughulikia matokeo matatu",
+      "cacheTip": "Kidokezo: baada ya kuingia kwa mara ya kwanza kufanikiwa, hifadhi utambulisho wa akaunti (DID) kwenye programu yako. Tangu hapo mtandao unaweza kupata seva sahihi wenyewe, na router inahitajika tu kwa wageni wapya kabisa."
+    },
+    "api": {
+      "heading": "API kwa mtazamo mmoja",
+      "intro": "Vituo vitano vidogo. Utafutaji na hali hutumia tokeni ya mteja; kusimamia seva hutumia tokeni ya msimamizi.",
+      "lookup": "Uliza seva zipi zinaijua barua pepe.",
+      "status": "Hali ya usawazishaji ya kila seva: idadi ya akaunti, usawazishaji wa mwisho, hitilafu ya mwisho.",
+      "unregister": "Ondoa seva iliyosajiliwa (tokeni ya msimamizi).",
+      "enroll": "Sajili seva yako. Wito wazi bila vitambulisho; hurudisha tokeni ya kusukuma ya mara moja na ingizo linalosubiri.",
+      "digests": "Sukuma picha kamili ya alama za vidole za barua pepe (SHA-256 heksi). Kila msukumo huchukua nafasi ya uliotangulia.",
+      "script": "Skripti ya kusukuma tayari kwa wenyeji — Python 3, maktaba ya kawaida tu.",
+      "approve": "Mwendeshaji huidhinisha usajili; tafutizi zinaanza kuutumikia (tokeni ya msimamizi)."
+    },
+    "snippets": {
+      "copy": "Nakili",
+      "copied": "Imenakiliwa!"
+    },
+    "more": {
+      "heading": "Endelea kuchunguza",
+      "epdsTitle": "Jinsi ePDS inavyofanya kazi",
+      "epdsDesc": "Mlango wa mbele wenyewe: kuingia kwa msimbo wa barua pepe kwenye AT Protocol.",
+      "githubTitle": "Router ya ePDS kwenye GitHub",
+      "githubDesc": "Msimbo kamili wa chanzo wa router: huduma moja ndogo ya Go bila utegemezi."
+    }
+  },
+  "cgs": {
+    "metaTitle": "Jinsi akaunti za kikundi zinavyofanya kazi",
+    "metaDescription": "Ziara shirikishi ya Certified Group Service, mlinzi anayewezesha timu nzima kushiriki akaunti moja ya AT Protocol kwa majukumu, sheria wazi, na kumbukumbu kamili ya ukaguzi.",
+    "kicker": "Certified Group Service",
+    "title": "Jinsi akaunti za kikundi zinavyofanya kazi",
+    "lead": "Katika AT Protocol, akaunti kwa kawaida inamilikiwa na mtu mmoja tu. Lakini misitu inachorwa ramani na timu. Certified Group Service, kwa kifupi CGS, inawezesha timu nzima kushiriki akaunti moja kwa usalama, ikiwa na majukumu, sheria wazi, na kumbukumbu ya kila kinachotokea. Ukurasa huu unaonyesha jinsi inavyofanya kazi, hatua kwa hatua.",
+    "whatIs": {
+      "heading": "Akaunti ya kikundi ni nini?",
+      "p1": "Kila shirika kwenye GainForest linaishi katika akaunti ya kawaida ya AT Protocol. Akaunti ya kawaida ina nenosiri moja na mmiliki mmoja. Hiyo inatosha kwa mtu mmoja, lakini timu inahitaji zaidi: watu wengi wakiandika mahali pamoja, bila kupitishana nenosiri la akaunti.",
+      "p2": "CGS ni huduma ndogo ya ulinzi inayosimama mbele ya akaunti ya kikundi. Inahifadhi vitambulisho vya akaunti kwenye sanduku lililofungwa, inashikilia orodha ya wanachama na majukumu yao, na hukagua kila ombi dhidi ya sheria kabla ya kuliruhusu. Wanachama wa timu hawaoni nenosiri kamwe. Kwa mtandao wote, kikundi kinaonekana kama akaunti moja ya kawaida, hivyo programu yoyote inaweza kusoma rekodi zake kama kawaida."
+    },
+    "repo": {
+      "heading": "Akaunti moja, mikono mingi",
+      "intro": "Wenzako watatu, hazina moja ya pamoja. Gusa mwenzako naye atachapisha rekodi. Angalia jinsi kila rekodi inavyomkumbuka mwandishi wake.",
+      "repoLabel": "Hazina ya kikundi",
+      "empty": "Hakuna kitu bado. Gusa mwenzako hapo juu.",
+      "stamp": "na {name}",
+      "roleOwner": "Mmiliki",
+      "roleAdmin": "Msimamizi",
+      "roleMember": "Mwanachama",
+      "clear": "Futa",
+      "caption": "Rekodi zote zinaingia kwenye hazina moja, lakini huduma inaandika nani aliyetengeneza kila moja. Kumbukumbu hiyo inawawezesha wanachama kuhariri kazi zao wenyewe, huku kubadilisha kazi ya mtu mwingine kunahitaji msimamizi."
+    },
+    "journey": {
+      "heading": "Safari ya ombi",
+      "intro": "Bonyeza cheza, au piga hatua mwenyewe. Nukta inayosogea ni ombi lako katika safari yake ya kwenda na kurudi.",
+      "play": "Cheza",
+      "pause": "Simamisha",
+      "back": "Nyuma",
+      "next": "Mbele",
+      "stepLabel": "Hatua ya {n} kati ya {total}",
+      "ariaLabel": "Mchoro wa safari ya ombi",
+      "nodes": {
+        "app": "Programu yako",
+        "pds": "PDS yako",
+        "cgs": "Huduma ya kikundi",
+        "gpds": "PDS ya kikundi"
+      },
+      "steps": {
+        "s1": {
+          "title": "Unabonyeza Chapisha",
+          "text": "Yote huanzia kwenye programu. Umeingia kama wewe mwenyewe na unataka kuongeza rekodi kwenye akaunti ya kikundi chako."
+        },
+        "s2": {
+          "title": "Programu inaita PDS yako mwenyewe",
+          "text": "Programu inatuma ombi kwa seva yako binafsi ya data ikiwa na kikaratasi cha kupeleka mbele: tafadhali fikisha hili kwa huduma ya kikundi."
+        },
+        "s3": {
+          "title": "PDS yako inasaini kibali",
+          "text": "PDS yako inatengeneza kibali cha muda mfupi kilichosainiwa kwa ufunguo wako mwenyewe. Kibali kinakutaja wewe, huduma, na kitendo halisi. Kinafanya kazi mara moja na kinakufa baada ya dakika mbili."
+        },
+        "s4": {
+          "title": "Mlinzi anakagua kibali",
+          "text": "Huduma ya kikundi inahakiki saini dhidi ya utambulisho wako wa umma na kuhakikisha kibali ni kipya na hakijatumika. Kibali kilichonakiliwa hakina maana."
+        },
+        "s5": {
+          "title": "Ukaguzi wa jukumu",
+          "text": "Huduma inakutafuta kwenye orodha ya wanachama wa kikundi. Mwanachama, msimamizi, au mmiliki? Jukumu lako linaamua vitendo vipi viko wazi kwako."
+        },
+        "s6": {
+          "title": "Ukaguzi wa mwandishi",
+          "text": "Kwa uhariri na ufutaji kuna swali moja zaidi: nani aliandika rekodi hii? Wanachama wanaweza kubadilisha rekodi zao wenyewe. Kugusa kazi ya mtu mwingine kunahitaji msimamizi."
+        },
+        "s7": {
+          "title": "Kila kitu kinaandikwa",
+          "text": "Jibu liwe lolote, jaribio linaingia kwenye kumbukumbu ya ukaguzi ya kikundi: nani, nini, lini, na kama liliruhusiwa au kukataliwa."
+        },
+        "s8": {
+          "title": "Huduma inafanya uandishi",
+          "text": "Ukaguzi wote ukipita, huduma inatekeleza kitendo kwenye PDS ya kikundi chenyewe, ikitumia vitambulisho inavyoshikilia peke yake, na inakupiga muhuri kama mwandishi."
+        },
+        "s9": {
+          "title": "Imekamilika",
+          "text": "Jibu linarudi kwenye programu yako. Rekodi sasa iko kwenye hazina ya kikundi, ikionekana kwa mtandao wote kama rekodi nyingine yoyote ya AT Protocol."
+        }
+      }
+    },
+    "roles": {
+      "heading": "Nani anaweza kufanya nini",
+      "intro": "Chagua kofia, kisha jaribu vitendo kadhaa. Kila jaribio, liruhusiwe au likataliwe, linaingia kwenye kumbukumbu ya ukaguzi hapa chini.",
+      "youAre": "Wewe ni",
+      "tryAction": "Jaribu kitendo",
+      "allowed": "Imeruhusiwa",
+      "denied": "Imekataliwa",
+      "auditTitle": "Kumbukumbu ya ukaguzi",
+      "auditEmpty": "Hakuna kitu bado. Jaribu kitendo hapo juu.",
+      "clearLog": "Futa kumbukumbu",
+      "auditPermitted": "imeruhusiwa",
+      "auditDenied": "imekataliwa",
+      "role": {
+        "visitor": {
+          "name": "Mgeni",
+          "desc": "Hayupo kwenye orodha ya wanachama kabisa."
+        },
+        "member": {
+          "name": "Mwanachama",
+          "desc": "Anaweza kutengeneza rekodi na kusimamia kazi yake mwenyewe."
+        },
+        "admin": {
+          "name": "Msimamizi",
+          "desc": "Anaweza kusimamia wanachama na kuhariri rekodi yoyote."
+        },
+        "owner": {
+          "name": "Mmiliki",
+          "desc": "Mmoja kwa kila kikundi. Anawekwa kikundi kinapoundwa."
+        }
+      },
+      "action": {
+        "create": "Tengeneza rekodi",
+        "editOwn": "Hariri rekodi yako mwenyewe",
+        "editOther": "Hariri rekodi ya mtu mwingine",
+        "addMember": "Ongeza mwanachama",
+        "setRole": "Badilisha jukumu",
+        "viewAudit": "Soma kumbukumbu ya ukaguzi"
+      },
+      "ok": {
+        "create": "Mwanachama yeyote anaweza kutengeneza rekodi. Rekodi inaandikwa kwenye hazina ya kikundi na jina lako likipigwa muhuri kama mwandishi.",
+        "editOwn": "Ni rekodi yako, hivyo jukumu la mwanachama linatosha. Huduma inakagua muhuri wa mwandishi kwanza.",
+        "editOther": "Wasimamizi wanaweza kuhariri rekodi yoyote ya kikundi, bila kujali nani aliiandika.",
+        "addMember": "Wasimamizi wanaweza kuongeza watu wapya kama mwanachama au msimamizi. Hakuna anayeweza kuongezwa kama mmiliki.",
+        "setRole": "Ni mmiliki pekee anayeweza kubadilisha majukumu. Hata mmiliki hawezi kutengeneza mmiliki wa pili.",
+        "viewAudit": "Wasimamizi na mmiliki wanaweza kusoma historia kamili ya kikundi."
+      },
+      "no": {
+        "visitor": "Haupo kwenye orodha ya wanachama, hivyo ombi linasimama mlangoni. Jaribio hata hivyo linaandikwa kwenye kumbukumbu ya ukaguzi.",
+        "editOther": "Rekodi hiyo ni ya mtu mwingine. Wanachama wanaweza kuhariri kazi zao wenyewe tu. Kuhariri rekodi ya mtu mwingine kunahitaji msimamizi.",
+        "addMember": "Ni wasimamizi na mmiliki pekee wanaoweza kuongeza wanachama wapya.",
+        "setRole": "Kubadilisha majukumu ni kazi ya mmiliki peke yake. Wasimamizi hawawezi kumpandisha wala kumshusha yeyote.",
+        "viewAudit": "Kumbukumbu ya ukaguzi iko wazi kwa wasimamizi na mmiliki pekee."
+      }
+    },
+    "map": {
+      "heading": "Sehemu zinazotembea",
+      "intro": "CGS ni timu ndogo ya sehemu. Gusa kila moja kuona kazi yake.",
+      "ariaLabel": "Ramani ya sehemu za huduma ya kikundi",
+      "nodes": {
+        "pds": {
+          "name": "PDS yako",
+          "desc": "Seva yako mwenyewe ya data. Inasaini kibali kifupi kinachothibitisha wewe ni nani na inapeleka ombi lako mbele. Nenosiri lako halisafiri kokote."
+        },
+        "cgs": {
+          "name": "Huduma ya kikundi",
+          "desc": "Mlinzi wa mlangoni. Anakagua vibali, anatafuta majukumu, anaweka hesabu, na ndiye pekee anayeweza kutenda kwenye akaunti ya kikundi."
+        },
+        "gpds": {
+          "name": "PDS ya kikundi",
+          "desc": "Seva ya data ya kawaida kabisa inayohifadhi rekodi za kikundi. Haijui chochote kuhusu majukumu wala wanachama. Inaamini tu huduma inayoshikilia vitambulisho vyake."
+        },
+        "members": {
+          "name": "Orodha ya wanachama",
+          "desc": "Hifadhidata ndogo ya faragha, moja kwa kila kikundi. Inahifadhi utambulisho na jukumu la kila mwanachama, na inakumbuka nani mwandishi wa kila rekodi."
+        },
+        "audit": {
+          "name": "Kumbukumbu ya ukaguzi",
+          "desc": "Kumbukumbu ya kikundi. Kila jaribio linaandikwa: nani, nini, lini, na kama liliruhusiwa au kukataliwa."
+        },
+        "vault": {
+          "name": "Vitambulisho vilivyofungwa",
+          "desc": "Nenosiri la akaunti ya kikundi, limehifadhiwa kwa usimbaji fiche. Wanachama na programu hawalioni kamwe. Ni huduma pekee inayoweza kulifungua, na kwa ajili ya kuzungumza na PDS ya kikundi tu."
+        }
+      }
+    },
+    "safety": {
+      "heading": "Usalama uliojengwa ndani",
+      "intro": "Mazoea matatu yanaifanya akaunti ya pamoja kuwa salama.",
+      "pass": {
+        "title": "Vibali vinakufa haraka",
+        "text": "Kila ombi linabeba kibali kipya kilichosainiwa. Kinafanya kazi mara moja tu na kinaisha baada ya dakika mbili, hivyo kibali kilichoibwa karibu hakina thamani."
+      },
+      "vault": {
+        "title": "Vitambulisho vinabaki vimefungwa",
+        "text": "Nenosiri la kikundi linahifadhiwa kwa usimbaji fiche. Wanachama hawalioni kamwe na programu haziligusi. Ni huduma ya ulinzi pekee inayoweza kulitumia."
+      },
+      "log": {
+        "title": "Hakuna kinachotokea bila kuonekana",
+        "text": "Kiruhusiwe au kikataliwe, kila kitendo kinaingia kwenye kumbukumbu ya ukaguzi ya kikundi pamoja na nani, nini, na lini."
+      }
+    },
+    "more": {
+      "heading": "Endelea kuchunguza",
+      "lexiconsTitle": "Miundo ya data",
+      "lexiconsDesc": "Miundo huru ya rekodi inayoishi ndani ya hazina ya kila kikundi.",
+      "epdsTitle": "Jinsi ePDS inavyofanya kazi",
+      "epdsDesc": "Mlango wa mbele wa kirafiki unaowaingiza watu kwa barua pepe tu.",
+      "githubTitle": "CGS kwenye GitHub",
+      "githubDesc": "Msimbo kamili wa chanzo wa huduma ya vikundi, wazi kwa yeyote kusoma, kuendesha na kuboresha.",
+      "atprotoTitle": "Jinsi AT Protocol inavyofanya kazi",
+      "atprotoDesc": "Ziara shirikishi ya mtandao wazi ambao yote haya yamejengwa juu yake."
+    }
+  },
+  "atproto": {
+    "metaTitle": "Jinsi AT Protocol inavyofanya kazi",
+    "metaDescription": "Ziara shirikishi na rafiki ya AT Protocol, mtandao wazi ambao GainForest imejengwa juu yake. Ona jinsi utambulisho, rekodi na programu zinavyoshikamana.",
+    "kicker": "AT Protocol",
+    "title": "Jinsi AT Protocol inavyofanya kazi",
+    "lead": "GainForest haihifadhi data yako kwenye hifadhidata ya faragha. Kila kitu kinaishi kwenye AT Protocol, mtandao wazi ambapo watu wanamiliki data zao na programu nyingi zinazishiriki. Ukurasa huu unaeleza mawazo makuu kwa maneno rahisi, pamoja na vichezeo vidogo vya kujaribu.",
+    "whatIs": {
+      "heading": "AT Protocol ni nini?",
+      "p1": "AT Protocol, kwa kifupi atproto, ni mpango wa kujenga programu za kijamii ambapo data ni mali ya watu, si ya majukwaa. Kila mtu na kila shirika lina akaunti, na kila akaunti ina seva ya data inayohifadhi rekodi zake. Chapisho, kupenda, kufuata, uchunguzi wa bioanuwai: kila kimoja ni rekodi ndogo iliyosainiwa.",
+      "p2": "Programu kama GainForest au Bluesky zinasoma rekodi hizo na kuzigeuza kuwa mipasho, ramani na wasifu. Rekodi zinabaki wazi na zinaweza kuhamishwa, hivyo hakuna kampuni moja inayoweza kukufunga ndani. Programu moja ikifungwa, jina lako na data yako vinabaki salama."
+    },
+    "naming": {
+      "heading": "Jina, si mahali",
+      "intro": "Kwenye wavuti ya zamani, kiungo kinaelekeza mahali: seva moja, mahali fulani. Kwenye atproto, kiungo kinaelekeza kwa mtu. Jaribu kuvunja vyote viwili.",
+      "linkChip": "kiungo",
+      "web": {
+        "title": "Kiungo cha mahali",
+        "serverLabel": "seva moja",
+        "action": "Zima seva",
+        "undo": "Irudishe",
+        "okCaption": "Kiungo hiki kinafanya kazi tu wakati seva hiyo moja iko mtandaoni.",
+        "downCaption": "Seva imepotea, na chapisho limekufa pamoja nayo. Kila nakala ya kiungo hiki sasa imevunjika.",
+        "aria": "Mchoro wa kiungo cha wavuti kinachoelekeza kwenye seva moja"
+      },
+      "id": {
+        "title": "Kiungo cha mtu",
+        "hostA": "nyumba ya kale",
+        "hostB": "nyumba mpya",
+        "action": "Mhamishe Maria nyumba mpya",
+        "undo": "Mrudishe",
+        "okCaption": "Kiungo kinataja Maria, si mashine. Mtandao unatafuta mahali data yake inaishi sasa hivi.",
+        "movedCaption": "Maria amehama, na kiungo hakikubadilika. Hakuna cha kusasisha, hakuna kilichovunjika.",
+        "aria": "Mchoro wa kiungo cha atproto kinachoelekeza kwa mtu anayeweza kubadilisha seva"
+      }
+    },
+    "records": {
+      "heading": "Kila kitu ni rekodi",
+      "intro": "Kila akaunti inahifadhi data yake kwenye hazina: folda ya wazi ya rekodi ndogo zilizosainiwa. Rekodi zinaweza kuelekeza rekodi za akaunti nyingine. Gusa moja kuisoma.",
+      "aria": "Mchoro wa hazina mbili zenye rekodi zinazounganishwa",
+      "repoOfMaria": "Hazina ya Maria",
+      "repoOfKai": "Hazina ya Kai",
+      "nodes": {
+        "profile": "wasifu",
+        "post": "chapisho: naona ndege",
+        "observation": "uchunguzi + picha",
+        "like": "penda",
+        "follow": "fuata"
+      },
+      "details": {
+        "mProfile": "Rekodi ya wasifu wa Maria. Jina lake na maelezo yake yanaishi hapa, ndani ya hazina yake mwenyewe.",
+        "mPost": "Chapisho la Maria. Linaelekeza kwenye rekodi yake ya uchunguzi kama ushahidi, likitumia anwani ya rekodi hiyo.",
+        "mObs": "Uchunguzi wa bioanuwai wenye picha. GainForest inasoma rekodi kama hii kujenga ramani na kurasa za miradi.",
+        "kProfile": "Rekodi ya wasifu wa Kai, ndani ya hazina yake mwenyewe.",
+        "kLike": "Kupenda pia ni rekodi. Inaishi kwenye hazina ya Kai na inaelekeza kwenye chapisho la Maria kwa anwani yake. Hakuna aliyehitaji ruhusa kuunda kiungo hicho.",
+        "kFollow": "Kai anamfuata Maria. Kufuata kunamlenga Maria mwenyewe, hivyo kunaendelea kufanya kazi popote data yake inapoishi."
+      },
+      "caption": "Anwani zinaanza na at:// na zinataja akaunti, aina ya rekodi na ufunguo. Programu yoyote kwenye mtandao inaweza kuzifuata."
+    },
+    "flow": {
+      "heading": "Rekodi moja, kila programu",
+      "intro": "Mtu anapochapisha, seva yake binafsi ya data (PDS) inatangaza rekodi mpya. Kituo cha kupokezana kinakusanya matangazo ya mtandao mzima kuwa mkondo mmoja mkubwa, na kila programu inausikiliza. Gusa mtu ili achapishe.",
+      "aria": "Mchoro wa rekodi zikitiririka kutoka seva binafsi kupitia kituo hadi programu",
+      "publishAs": "Chapisha kama {name}",
+      "pdsLabel": "PDS",
+      "relayLabel": "kituo",
+      "appForest": "App ya msitu",
+      "appFeed": "App ya mipasho",
+      "received": "{count} zimepokelewa",
+      "caption": "Programu zote mbili zinapokea rekodi ileile wakati uleule. Programu mpya inaweza kujiunga na mkondo kesho na kujenga kitu ambacho hakuna aliyekifikiria, bila kuomba ruhusa."
+    },
+    "move": {
+      "heading": "Unaweza kuhama wakati wowote",
+      "intro": "Jina lako na data yako havijagandishwa kwenye kampuni yoyote. Seva yako ikiwa polepole, yenye tamaa au ikipotea, unafunga virago na kuondoka. Jaribu.",
+      "hostA": "Seva ya zamani",
+      "hostB": "Seva mpya",
+      "emptyHost": "tupu",
+      "suitcaseRecords": "Rekodi 128",
+      "suitcaseFollowers": "Wafuasi 42",
+      "moveAction": "Hamia seva mpya",
+      "moveBack": "Rudi nyuma",
+      "checkName": "Jina lilelile",
+      "checkRecords": "Rekodi zote zipo",
+      "checkFollowers": "Wafuasi wote wapo",
+      "checkLinks": "Viungo vyote vinafanya kazi",
+      "caption": "Hii inaitwa njia ya kutoka ya kuaminika. Seva lazima ziwatendee watu vizuri, kwa sababu kuondoka ni rahisi. Wengi hawahami kamwe, lakini kila mtu ananufaika na mlango ulio wazi."
+    },
+    "roots": {
+      "heading": "Mawazo matatu ya zamani, mtandao mmoja",
+      "intro": "Atproto haikutokea hewani. Inachanganya sehemu bora za mawimbi matatu ya awali ya intaneti.",
+      "web": {
+        "title": "Kutoka kwenye wavuti",
+        "text": "Yeyote anaweza kujiunga na kuchapisha bila kuomba ruhusa, na kila kitu kinaweza kuunganishwa na kingine."
+      },
+      "p2p": {
+        "title": "Kutoka rika-kwa-rika",
+        "text": "Kila rekodi imesainiwa na mwandishi wake, hivyo inabaki ya kuaminika bila kujali kompyuta gani inayokukabidhi."
+      },
+      "scale": {
+        "title": "Kutoka majukwaa makubwa",
+        "text": "Mipasho ya haraka, utafutaji na hesabu vinatoka kwa huduma imara za kuorodhesha zinazosoma mkondo wa pamoja."
+      }
+    },
+    "trust": {
+      "heading": "Imani nyepesi",
+      "intro": "Kukagua kila sahihi kwenye kila ukurasa kungekuwa polepole. Atproto inachukua njia ya kati iliyotulia.",
+      "signed": {
+        "title": "Imesainiwa chanzoni",
+        "text": "Kila rekodi inabeba sahihi ya mwandishi wake, hivyo yeyote anaweza kuithibitisha inapohitajika."
+      },
+      "views": {
+        "title": "Kurasa za haraka",
+        "text": "Programu zinatoa kurasa zilizoandaliwa bila kukagua kila rekodi upya. Programu ikidanganya, rekodi asilia zilizosainiwa zitathibitisha."
+      },
+      "exit": {
+        "title": "Mlango wazi",
+        "text": "Data na utambulisho vinaweza kuhama wakati wowote, hivyo huduma inayokiuka inapoteza watumiaji wake. Hilo linamfanya kila mtu kuwa mwaminifu."
+      }
+    },
+    "lexicon": {
+      "heading": "Kuzungumza lugha moja",
+      "p1": "Ili programu zishiriki rekodi, lazima zikubaliane rekodi inaonekanaje. Atproto inafanya hivyo kwa miundo inayoitwa lexicons. Kila muundo una mmiliki wazi anayeweza kuuendeleza, na kila programu inaweza kuhakikisha rekodi inafuata sheria kikamilifu. Muundo ndio unaofanya kushiriki kufanikiwe.",
+      "p2": "GainForest inachapisha miundo yake wazi kwa uchunguzi wa bioanuwai, miradi, vyeti na michango. Programu nyingine yoyote inaweza kusoma rekodi zetu au kuandika rekodi zinazolingana. Unaweza kuvinjari yote kwenye mwongozo wa miundo ya data hapa chini."
+    },
+    "more": {
+      "heading": "Endelea kuchunguza",
+      "lexiconsTitle": "Miundo ya data",
+      "lexiconsDesc": "Kila muundo wa rekodi ambao GainForest inachapisha kwenye mtandao.",
+      "cgsTitle": "Jinsi akaunti za kikundi zinavyofanya kazi",
+      "cgsDesc": "Huduma ya ulinzi inayoruhusu timu nzima kushiriki akaunti moja kwa usalama.",
+      "epdsTitle": "Jinsi ePDS inavyofanya kazi",
+      "epdsDesc": "Mfumo wa kuingia na seva zilizo nyuma ya kila akaunti ya GainForest.",
+      "siteTitle": "atproto.com",
+      "siteDesc": "Tovuti rasmi ya itifaki, yenye maelezo kamili na miongozo kwa wajenzi.",
+      "ethosNote": "Mawazo mengi ya ukurasa huu yanatoka kwenye insha ya timu ya itifaki kuhusu falsafa yake ya usanifu:",
+      "ethosLink": "Ethos ya atproto"
+    }
+  },
+  "teeEpds": {
+    "metaTitle": "Jinsi utiaji saini salama na urejeshaji wa pochi wa ePDS unavyofanya kazi",
+    "metaDescription": "Mwongozo shirikishi wa utiaji saini salama wa ePDS, urejeshaji wa pochi kwa sehemu mbili kati ya tatu, idhini ya kifaa na mipaka.",
+    "kicker": "utiaji saini salama wa ePDS",
+    "title": "Imelindwa dhidi ya seva, inaweza kurejeshwa na wewe",
+    "lead": "ePDS inaweza kuhamisha utiaji saini wa akaunti kwenye Trusted Execution Environment, au TEE. Pochi yake ya hiari hugawa udhibiti katika sehemu tatu: kifaa chako, maunzi yaliyolindwa na nakala yako ya urejeshaji. Mwendeshaji hawezi kutumia pesa wala kukufungia kwenye huduma.",
+    "facts": {
+      "keys": {
+        "title": "Seva haipokei funguo",
+        "text": "Programu ya kawaida na PDS hupokea saini, si siri za akaunti au pochi."
+      },
+      "protection": {
+        "title": "Msimbo unaweza kukaguliwa",
+        "text": "Uthibitisho wa maunzi unaweza kuonyesha msimbo gani wa kusaini unaoendeshwa."
+      },
+      "wallet": {
+        "title": "Wewe unamiliki sehemu nyingi",
+        "text": "Kifaa na nakala ya urejeshaji hukupa sehemu mbili kati ya tatu za pochi."
+      }
+    },
+    "what": {
+      "heading": "Kiendelezi cha TEE kinaongeza nini?",
+      "intro": "Kiendelezi kinaongeza huduma ndogo ya kusaini kando ya ePDS ya kawaida. Sehemu nyingine zinaendelea kutumia njia za kawaida za AT Protocol.",
+      "p1": "PDS ya kawaida inahitaji ufunguo binafsi kusaini kila sasisho la data. Kwa kiendelezi cha TEE, ePDS huhamisha kazi hiyo kwenye mashine pepe ya siri. PDS hutuma alama ya baiti 32 ya sasisho. Mtia saini aliyelindwa hurudisha saini. Ufunguo binafsi hautoki kwenye kumbukumbu iliyolindwa.",
+      "p2": "Pochi hutengenezwa kwa siri yake ya nasibu, tofauti na ufunguo wa akaunti. Siri hiyo hugawanywa katika sehemu tatu. Maunzi yaliyolindwa huhifadhi sehemu moja iliyosimbwa; wewe unadhibiti sehemu za kifaa na urejeshaji. Sehemu mbili zinaweza kurejesha pochi, lakini moja pekee haifichui chochote.",
+      "p3": "Programu hupata hatua zilezile za kuunda, kuona, kusaini, kuhamisha na kurejesha kupitia miito ya kawaida ya AT Protocol na maombi ya kawaida ya wavuti. Njia zote mbili hutumia ukaguzi sawa na kurudisha matokeo sawa."
+    },
+    "boundary": {
+      "heading": "Ufunguo binafsi unaishi wapi?",
+      "intro": "Badilisha kati ya miundo miwili. Fuata ombi linalosonga na uone upande gani unawahi kushika ufunguo.",
+      "serverTab": "Ufunguo kwenye seva",
+      "teeTab": "Ufunguo ndani ya TEE",
+      "pdsName": "Seva ya PDS",
+      "serverKeyName": "Faili ya ufunguo binafsi",
+      "teeName": "Mtia saini salama",
+      "serverResult": "Seva inaweza kusoma ufunguo",
+      "teeResult": "Ufunguo unabaki salama",
+      "serverDesc": "Mchakato wa PDS hufungua faili ya ufunguo na kusaini sasisho. Anayedhibiti seva yote anaweza kunakili ufunguo huo.",
+      "teeDesc": "PDS hutuma alama tu kwa mtia saini salama. Hupokea saini, si ufunguo. Hata mwendeshaji hawezi kufungua kumbukumbu iliyolindwa na kuunakili kwa urahisi."
+    },
+    "journey": {
+      "heading": "Jinsi rekodi moja inavyosainiwa",
+      "intro": "Bonyeza cheza au chagua hatua. TEE husaini tu. Rekodi zako bado hupitia PDS ya kawaida na mtandao wa AT Protocol.",
+      "play": "Cheza",
+      "pause": "Sitisha",
+      "back": "Nyuma",
+      "next": "Mbele",
+      "stepLabel": "Hatua {n} kati ya {total}",
+      "jumpTo": "Nenda hatua ya {step}",
+      "nodes": {
+        "app": "Programu yako",
+        "pds": "PDS",
+        "tee": "Mtia saini TEE",
+        "network": "Mtandao"
+      },
+      "steps": {
+        "s1": {
+          "title": "Programu yako inahifadhi rekodi",
+          "text": "Unachapisha uchunguzi, unasasisha wasifu au unatengeneza rekodi nyingine. Programu huituma kwa PDS kama kawaida."
+        },
+        "s2": {
+          "title": "PDS inaandaa sasisho",
+          "text": "PDS hukagua ombi na kutengeneza toleo jipya la data. Hubadilisha sasisho kuwa alama fupi."
+        },
+        "s3": {
+          "title": "TEE inasaini alama",
+          "text": "Mtia saini hutengeneza ufunguo wa akaunti ndani ya kumbukumbu iliyolindwa na kusaini alama. Saini pekee ndiyo hurudi."
+        },
+        "s4": {
+          "title": "Mtandao unaikagua",
+          "text": "Sasisho lililosainiwa linaingia kwenye historia. Huduma nyingine hukagua kwa ufunguo wa umma wa utambulisho wa akaunti."
+        }
+      }
+    },
+    "separate": {
+      "heading": "Njia mbili ambazo hazishiriki funguo",
+      "intro": "Utiaji saini wa akaunti na pochi hutumia huduma salama ileile, lakini funguo na sheria tofauti.",
+      "repo": {
+        "title": "Njia ya rekodi za akaunti",
+        "text": "PDS inaweza kuomba saini kwa sasisho la kawaida. Ufunguo huu husaini rekodi za AT Protocol tu. Hauwezi kusaini muamala wa Ethereum."
+      },
+      "wallet": {
+        "title": "Njia ya pochi",
+        "text": "Pochi hutumia funguo tofauti za Ethereum na Solana. Ili kusaini, huduma salama inahitaji uthibitisho kutoka kifaa kilichosajiliwa na sehemu halisi ya pochi."
+      }
+    },
+    "shares": {
+      "heading": "Pochi unayoweza kurejesha au kuondoka nayo",
+      "intro": "Siri ya pochi imegawanywa katika sehemu tatu. Chagua hali kuona sehemu zipi mbili zinazoirejesha. Mwendeshaji hudhibiti moja tu.",
+      "device": {
+        "title": "Kifaa chako",
+        "text": "Huhifadhiwa na kivinjari au programu yako, kamwe si huduma."
+      },
+      "protected": {
+        "title": "Huduma salama",
+        "text": "Huhifadhiwa ikiwa imesimbwa na hutumika tu ndani ya maunzi salama yaliyoidhinishwa."
+      },
+      "recovery": {
+        "title": "Nakala yako ya urejeshaji",
+        "text": "Imelindwa kwa nenosiri au nakala ya wingu binafsi unayodhibiti."
+      },
+      "used": "Sehemu inatumika",
+      "notNeeded": "Haihitajiki",
+      "threshold": "Sehemu 2 zozote kati ya 3",
+      "scenarios": {
+        "everyday": {
+          "tab": "Matumizi ya kawaida",
+          "title": "Kifaa chako na maunzi salama husaini pamoja",
+          "text": "Pochi huundwa tena kwa muda ndani ya kumbukumbu salama, hulinganishwa na anwani yake ya umma, hutumika kusaini, kisha hufutwa."
+        },
+        "recover": {
+          "tab": "Kifaa kimepotea",
+          "title": "Nakala ya urejeshaji inachukua nafasi ya kifaa kilichopotea",
+          "text": "Huduma salama huunganisha sehemu yake na sehemu yako ya urejeshaji, hutengeneza sehemu mpya na inaweza kusajili kifaa mbadala. Sehemu ya kifaa cha zamani haiwezi tena kufanya kazi na huduma."
+        },
+        "leave": {
+          "tab": "Ondoka kwenye huduma",
+          "title": "Sehemu zako mbili huzuia kufungiwa",
+          "text": "Sehemu za kifaa na urejeshaji zinaunda wingi. Unaweza kuunda pochi tena bila mwendeshaji, au kuihamisha kupitia huduma wakati bado inapatikana."
+        }
+      }
+    },
+    "walletGate": {
+      "heading": "Kwa nini seva haiwezi kutumia pesa za pochi",
+      "intro": "Jaribu maombi yote mawili. Tokeni inaweza kuonyesha anwani ya umma, lakini kutumia pesa kunahitaji pia uthibitisho wa kifaa na sehemu yake ya pochi.",
+      "serverAttempt": "PDS inaomba peke yake",
+      "userAttempt": "Uthibitisho + sehemu yako",
+      "serverNode": "Ombi la PDS",
+      "userNode": "Uthibitisho + sehemu ya kifaa",
+      "teeNode": "Pochi salama",
+      "approved": "Saini imeidhinishwa",
+      "denied": "Ombi limekataliwa",
+      "approvedDesc": "Kifaa husaini ombi fupi na kutuma sehemu yake iliyosimbwa kwa maunzi salama. Mtia saini hukagua uthibitisho, muda na namba ya matumizi moja kabla ya kuunda na kutumia pochi.",
+      "deniedDesc": "Tokeni ya PDS pekee haitoshi. Mtia saini salama ana sehemu moja tu na hukataa ombi lisilo na uthibitisho wa kifaa na sehemu halisi ya pili."
+    },
+    "proof": {
+      "heading": "Programu inaweza kumwamini vipi mtia saini?",
+      "intro": "TEE inaweza kutengeneza ripoti ya maunzi inayoitwa attestation. Husaidia kukagua mashine na msimbo kabla ya kuviamini.",
+      "cardLabel": "Uthibitisho wa maunzi",
+      "text": "Mtia saini hutengeneza utambulisho wake wa umma ndani ya kumbukumbu iliyolindwa. Ripoti ya maunzi huunganisha utambulisho huo na msimbo unaoendeshwa. PDS inaweza kuhitaji ripoti kabla ya kuanza. Msimbo ukibadilika, ripoti pia hubadilika."
+    },
+    "limits": {
+      "heading": "Mambo ambayo ulinzi huu hautatui",
+      "intro": "Funguo salama zinasaidia, lakini hazifanyi mfumo wote kuwa kamili. Mipaka hii ni muhimu.",
+      "onboarding": {
+        "title": "Usanidi wa kwanza wa pochi",
+        "text": "Usajili wa kifaa cha kwanza unaamini huduma mara moja. Toleo la baadaye linaweza kutumia passkey kupunguza imani hiyo."
+      },
+      "uptime": {
+        "title": "Upatikanaji wa huduma",
+        "text": "Mwendeshaji bado anaweza kuzima mashine au kuzuia maombi. TEE hulinda siri, si upatikanaji."
+      },
+      "server": {
+        "title": "Maombi mabaya ya rekodi",
+        "text": "PDS iliyovamiwa inaweza kuomba ufunguo wa akaunti kusaini sasisho baya. Funguo za kurejesha na historia ya umma humsaidia mmiliki kulitengua."
+      },
+      "recovery": {
+        "title": "Nakala na kurudia",
+        "text": "Lazima ulinde nakala yako ya urejeshaji, na huduma ihifadhi nakala ya sehemu yake iliyosimbwa. Kurudisha hifadhi nyuma pia kunaweza kufungua ombi la zamani lililoidhinishwa, lakini hakuwezi kuunda idhini mpya."
+      }
+    },
+    "more": {
+      "heading": "Endelea kuchunguza",
+      "epdsTitle": "Jinsi kuingia ePDS kunavyofanya kazi",
+      "epdsDesc": "Tazama mlango usio na nenosiri na huduma za kawaida zinazouzunguka.",
+      "lexiconsTitle": "Miundo ya data",
+      "lexiconsDesc": "Chunguza fomati wazi za rekodi zinazohifadhiwa katika kila PDS.",
+      "designTitle": "Muundo wa kiufundi",
+      "designDesc": "Soma mfano wa vitisho, sheria za kusaini na maelezo ya utekelezaji.",
+      "githubTitle": "ePDS kwenye GitHub",
+      "githubDesc": "Soma msimbo na uendeshe mradi mwenyewe."
     }
   }
 }

@@ -8,6 +8,9 @@
     "changeAria": "Change language",
     "currentLanguage": "Current language"
   },
+  "adminOnly": {
+    "label": "Admin only"
+  },
   "navigation": {
     "navigation": "Navigation",
     "openNavigation": "Open navigation",
@@ -1238,7 +1241,24 @@
       "certified": "Identity primitives from the Hypercerts ecosystem — actor profiles, organizations, follows, badges, and locations.",
       "hypercerts": "Impact claims (activity, contribution, contributor, rights), collections, funding receipts, attachments, work scope, and shared types."
     },
-    "sectionsAria": "Schema sections"
+    "sectionsAria": "Schema sections",
+    "epdsLinkTitle": "How ePDS works",
+    "epdsLinkDesc": "An interactive tour of the login system and the servers behind these records.",
+    "cgsLinkTitle": "How group accounts work",
+    "cgsLinkDesc": "An interactive tour of the guard service that lets a whole team share one account.",
+    "atprotoLinkTitle": "How the AT Protocol works",
+    "atprotoLinkDesc": "An interactive tour of the open network everything here is built on.",
+    "teeEpdsLinkTitle": "Protected ePDS signing",
+    "teeEpdsLinkDesc": "See how private keys can stay inside protected hardware.",
+    "guides": {
+      "usageGuide": "Usage guide",
+      "audiomothTitle": "AudioMoth spectrogram labels as Darwin Core occurrences",
+      "audiomothDescription": "How each confirmed time and frequency box becomes a new occurrence linked to its source audio recording.",
+      "openGuide": "Read the implementation guide",
+      "breadcrumbAria": "Documentation breadcrumb",
+      "schemas": "Data schemas",
+      "guideIntro": "This guide defines the application-level conventions used with the occurrence schema. The schema remains generic Darwin Core; the guide explains how AudioMoth recordings, spectrogram boxes, and occurrence records connect."
+    }
   },
   "taina": {
     "meta": {
@@ -1651,7 +1671,89 @@
     "mainTabs": {
       "setup": "Setup",
       "deployments": "Deployment",
-      "upload": "Upload"
+      "upload": "Upload",
+      "label": "Label"
+    },
+    "label": {
+      "subtitle": "Review AudioMoth recordings, mark calls by time and frequency, and build a clean label set for your field data.",
+      "signInTitle": "Sign in to label recordings",
+      "signInBody": "Occurrences are saved to your account. Sign in, upload AudioMoth recordings, then mark the wildlife sounds you find.",
+      "loadingRecordings": "Loading your AudioMoth recordings…",
+      "loadFailed": "Your recordings could not be loaded. Please try again.",
+      "occurrencesLoadFailed": "Saved occurrences could not be loaded for this recording.",
+      "noRecordingsTitle": "Upload a recording first",
+      "noRecordingsBody": "The labelling workspace uses recordings already saved to your account so every box can become a linked biodiversity occurrence.",
+      "uploadFirst": "Upload AudioMoth recordings",
+      "refresh": "Refresh",
+      "savedAtproto": "Every saved box is a biodiversity occurrence in your account.",
+      "openToLoad": "Open to load labels",
+      "saved": "Saved",
+      "deleteConfirm": "Delete this occurrence? This removes it from your account and cannot be undone.",
+      "deleteFailed": "The occurrence could not be deleted. Please try again.",
+      "saveFailed": "The occurrence could not be saved. Your box is still here so you can try again.",
+      "recordedAtMissing": "This recording has no valid start time, so an occurrence time cannot be calculated.",
+      "audioUnavailable": "This recording has no playable original or preview. Upload it again with previews enabled.",
+      "commonName": "Common/local name (optional)",
+      "commonNamePlaceholder": "Tree frog",
+      "scientificName": "Scientific name (optional)",
+      "scientificNamePlaceholder": "Boana faber",
+      "scientificNameHint": "Leave blank to save the honest broad group, such as Anura for frogs.",
+      "saveOccurrence": "Save occurrence",
+      "saveAtprotoHint": "Creates a Darwin Core occurrence linked to this audio recording.",
+      "stepImport": "Choose recordings",
+      "stepDraw": "Draw a time and frequency box",
+      "stepDescribe": "Describe what you heard",
+      "emptyTitle": "Label wildlife sounds in your AudioMoth recordings",
+      "emptyBody": "Choose an SD card folder or a set of WAV files. Pick a recording, drag a box around a call, then identify it as a bird, frog, insect, another sound, or a note.",
+      "chooseFolder": "Choose SD card or folder",
+      "chooseFiles": "Choose WAV files",
+      "privacyNote": "Your recordings stay on this device while you label them.",
+      "workspaceSummary": "{files, plural, one {# uploaded recording} other {# uploaded recordings}} · {labels, plural, one {# occurrence here} other {# occurrences here}}",
+      "savedLocally": "Drafts are saved in this browser. Export them when you are ready.",
+      "addFiles": "Add recordings",
+      "export": "Export CSV",
+      "closeSet": "Close set",
+      "recordings": "Recordings",
+      "search": "Search files…",
+      "labelCount": "{count, plural, one {# label} other {# labels}}",
+      "notLabelled": "Not labelled",
+      "filePosition": "Recording {current} of {total}",
+      "previousFile": "Previous recording",
+      "nextFile": "Next recording",
+      "labelsTitle": "Labels ({count})",
+      "selectToEdit": "Select a label to edit it",
+      "labelsEmpty": "No labels yet. Drag a box over a sound in the spectrogram to begin.",
+      "deleteLabel": "Delete label",
+      "editLabel": "Edit label",
+      "newLabel": "New label",
+      "describeSelection": "What is in this box?",
+      "drawFirst": "Draw a box to begin",
+      "clearSelection": "Clear selection",
+      "drawHint": "Drag across the spectrogram to mark the sound you want to label. The box captures both when it happened and its frequency range.",
+      "timeRange": "Time",
+      "frequencyRange": "Frequency",
+      "whatIsIt": "What did you hear?",
+      "categories": {
+        "bird": "Bird",
+        "frog": "Frog",
+        "insect": "Insect",
+        "other": "Other",
+        "note": "Note"
+      },
+      "species": "Species (optional)",
+      "speciesPlaceholder": "Common or scientific name",
+      "speciesHint": "Leave blank if you only know the animal group.",
+      "noteRequired": "Note",
+      "noteOptional": "Note (optional)",
+      "notePlaceholder": "Call type, confidence, weather, or anything useful…",
+      "updateLabel": "Update label",
+      "saveLabel": "Save label",
+      "saveHint": "Saved in this browser until you export the label set.",
+      "drawInstruction": "Drag to draw · select a box to edit",
+      "spectrogramAria": "Interactive audio spectrogram",
+      "buildingSpectrogram": "Building spectrogram…",
+      "spectrogramFailed": "This recording could not be turned into a spectrogram.",
+      "audioUnsupported": "Your browser cannot play this recording."
     },
     "deployments": {
       "intro": "Deployments record where and when an AudioMoth was placed in the field. Each one plays an acoustic chime that sets the recorder's clock, location and deployment ID.",
@@ -1809,6 +1911,768 @@
       "toggleDescription": "Community updates you post are also published to your Bluesky account, so more people can discover your work.",
       "viewProfile": "View your Bluesky profile",
       "error": "We couldn't save that change. Please try again."
+    }
+  },
+  "epds": {
+    "metaTitle": "How ePDS works",
+    "metaDescription": "An interactive tour of ePDS, the extended Personal Data Server that lets anyone join the AT Protocol network with just their email.",
+    "kicker": "extended Personal Data Server",
+    "title": "How ePDS works",
+    "lead": "GainForest runs on the AT Protocol, the open network behind Bluesky. Joining that network normally takes a password and some technical setup. ePDS removes that wall: you type your email, you get a code, and you are in. This page shows how it works, step by step.",
+    "whatIs": {
+      "heading": "What is a PDS, and what does the e add?",
+      "p1": "On the AT Protocol, everyone keeps their data on a Personal Data Server, or PDS. Think of it as a personal home for your posts, observations, and projects. You own what is inside, and you can move to another server at any time without losing anything.",
+      "p2": "ePDS is a normal PDS with one extension: a friendly front door. Instead of asking for a password, it signs you in with a one-time email code or a social account, and it creates an account for you on your first visit. Behind that door everything stays standard AT Protocol, so every app on the network can talk to it."
+    },
+    "compare": {
+      "heading": "Two front doors",
+      "intro": "Same house, different door. Flip the switch and try both ways of signing in.",
+      "classicTab": "Classic PDS",
+      "epdsTab": "ePDS",
+      "handle": "Handle",
+      "password": "Password",
+      "inviteCode": "Invite code",
+      "email": "Email",
+      "sendCode": "Send me a code",
+      "signIn": "Sign in",
+      "codeLabel": "Type the code from your email",
+      "classicCaption": "A classic PDS asks for a password, and often for an invite code from the server admin. You also have to create the account first.",
+      "epdsCaption": "ePDS asks for your email and sends you a code. First visit? Your account is created for you on the spot.",
+      "done": "You are in!",
+      "reset": "Try again"
+    },
+    "journey": {
+      "heading": "The login journey",
+      "intro": "Press play, or step through it yourself. The moving dot is your login making its round trip.",
+      "play": "Play",
+      "pause": "Pause",
+      "back": "Back",
+      "next": "Next",
+      "stepLabel": "Step {n} of {total}",
+      "ariaLabel": "Login journey diagram",
+      "nodes": {
+        "app": "Your app",
+        "pds": "PDS core",
+        "auth": "Login service",
+        "inbox": "Your inbox"
+      },
+      "steps": {
+        "s1": {
+          "title": "You click Sign in",
+          "text": "It all starts in the app you are using, for example GainForest. You click Sign in and maybe type your email."
+        },
+        "s2": {
+          "title": "The app calls the PDS",
+          "text": "Your app quietly asks the PDS to start a login. This is a standard AT Protocol request, the same one any Bluesky app would make."
+        },
+        "s3": {
+          "title": "The PDS opens its front door",
+          "text": "Here is the ePDS trick. Instead of showing a password form, the PDS sends your browser to its friendly login service."
+        },
+        "s4": {
+          "title": "A code flies to your inbox",
+          "text": "The login service creates a one-time code and emails it to you. The code works once and expires after a few minutes."
+        },
+        "s5": {
+          "title": "You type the code",
+          "text": "You copy the code from the email into the login screen. That proves the inbox is yours. No password is ever involved."
+        },
+        "s6": {
+          "title": "New here? Pick a handle",
+          "text": "On your first visit, ePDS creates an account for you and asks you to pick a handle, your public name on the network."
+        },
+        "s7": {
+          "title": "The signed handshake",
+          "text": "The login service tells the PDS that you are verified. The message carries a cryptographic signature, so nobody can fake it."
+        },
+        "s8": {
+          "title": "Back to your app",
+          "text": "The PDS sends your browser back to your app with a short-lived code. Your app trades that code for an access token."
+        },
+        "s9": {
+          "title": "You are in",
+          "text": "Your app can now read and write your data on your behalf. To the rest of the network you look like any other AT Protocol user."
+        }
+      }
+    },
+    "map": {
+      "heading": "The moving parts",
+      "intro": "ePDS is a small team of services. Tap each one to see its job.",
+      "ariaLabel": "Map of ePDS services",
+      "nodes": {
+        "app": {
+          "name": "Your app",
+          "desc": "Any AT Protocol app, like GainForest or Bluesky. It never sees your email code or any keys. It only receives the final access token."
+        },
+        "pds": {
+          "name": "PDS core",
+          "desc": "A standard Personal Data Server. It stores your records, talks to the rest of the network, and issues tokens. ePDS wraps it without changing how it speaks to other apps."
+        },
+        "auth": {
+          "name": "Login service",
+          "desc": "The friendly front door. It shows the login screen, sends the email codes, handles social logins, and helps new users pick a handle."
+        },
+        "email": {
+          "name": "Email provider",
+          "desc": "Delivers the one-time codes to your inbox. Each code is short-lived and can be used exactly once."
+        },
+        "db": {
+          "name": "Shared database",
+          "desc": "A small database both services share. It keeps track of login sessions and codes, nothing more."
+        }
+      }
+    },
+    "more": {
+      "heading": "Keep exploring",
+      "lexiconsTitle": "Data schemas",
+      "lexiconsDesc": "The open record formats that live inside each PDS.",
+      "githubTitle": "ePDS on GitHub",
+      "githubDesc": "The full source code, open for anyone to read, run, and improve.",
+      "cgsTitle": "How group accounts work",
+      "cgsDesc": "The guard service that lets a whole team share one group account safely.",
+      "atprotoTitle": "How the AT Protocol works",
+      "atprotoDesc": "An interactive tour of the open network everything here is built on.",
+      "teeTitle": "Protected ePDS signing",
+      "teeDesc": "See how private keys can stay inside protected hardware.",
+      "routerTitle": "The ePDS router",
+      "routerDesc": "How apps find the right server for an email when a community runs several."
+    }
+  },
+  "epdsRouter": {
+    "metaTitle": "How the ePDS router works",
+    "metaDescription": "An interactive guide to the ePDS router: how an app finds the right server for an email login across many servers — hosts share only one-way fingerprints, never credentials or addresses.",
+    "kicker": "email-to-server discovery",
+    "title": "One email, many servers",
+    "lead": "ePDS lets you sign in with just your email. But when a community runs several servers, an app must first answer a small question: which server knows this email? The router answers it in a single call — hosts stay in full control, and nobody ever hands over an address or a password.",
+    "facts": {
+      "routing": {
+        "title": "One lookup, the right server",
+        "text": "An app asks once and learns which servers know the email: none, exactly one, or several."
+      },
+      "privacy": {
+        "title": "Emails are never stored",
+        "text": "Addresses are scrambled on their own server before anything leaves it. The router only ever sees fingerprints — and scrambles them again before storing."
+      },
+      "zerochange": {
+        "title": "Hosts stay in control",
+        "text": "No credentials to hand over, nothing to install inside the PDS. Hosts run one small script next to their server, on their own schedule."
+      }
+    },
+    "problem": {
+      "heading": "Why discovery is needed",
+      "p1": "An app that offers email sign-in has to send the login to one specific server: that server emails the code and holds the account. With a single server the answer is fixed. With several, the app needs a directory — and email addresses are exactly the kind of data you do not want to copy into one big list.",
+      "p2": "The router solves this with a small trick: it deals only in fingerprints. Each server scrambles its addresses one-way at home and shares nothing else, and each lookup scrambles the incoming email the same way and compares fingerprints. Same answer, no address book — and nobody hands anyone their keys."
+    },
+    "demo": {
+      "heading": "Try a lookup",
+      "intro": "Three example servers, three example emails. Pick one and watch the router route it.",
+      "reset": "Reset",
+      "ariaLabel": "Email lookup routing diagram",
+      "nodes": {
+        "app": "Your app",
+        "router": "Router",
+        "forest": "Forest PDS",
+        "ocean": "Ocean PDS",
+        "river": "River PDS"
+      },
+      "steps": {
+        "idle": {
+          "title": "Pick an email above",
+          "text": "The app wants to start an email sign-in but does not yet know which server to talk to."
+        },
+        "sent": {
+          "title": "The app asks the router",
+          "text": "It sends the email over a private, authenticated call. Lookups are never written to any log."
+        },
+        "fingerprint": {
+          "title": "The router scrambles it",
+          "text": "The email becomes a fingerprint on arrival, and only the fingerprint is compared against each server's set."
+        }
+      },
+      "outcomes": {
+        "one": {
+          "title": "One home found",
+          "text": "Exactly one server knows this email, so the app starts the sign-in there. The code lands in the right inbox."
+        },
+        "many": {
+          "title": "Two homes found",
+          "text": "Two servers know this email — those are two separate accounts. The app shows a chooser and the person picks which one to use."
+        },
+        "none": {
+          "title": "No home yet",
+          "text": "No server knows this email, so the app offers to create a brand-new account on its default server."
+        }
+      }
+    },
+    "sync": {
+      "heading": "How the router stays current",
+      "intro": "Nothing to hand over: each host pushes its own snapshot, on a timer it chooses.",
+      "play": "Play",
+      "pause": "Pause",
+      "back": "Back",
+      "next": "Next",
+      "stepLabel": "Step {n} of {total}",
+      "ariaLabel": "Sync loop diagram",
+      "nodes": {
+        "pds": "Your ePDS",
+        "router": "Router",
+        "index": "fingerprint index"
+      },
+      "steps": {
+        "s1": {
+          "title": "Your server gathers its own list",
+          "text": "A small script runs next to your PDS, on a timer you choose. It reads the account emails locally — your admin password never leaves your machine."
+        },
+        "s2": {
+          "title": "Fingerprints are made at home",
+          "text": "Each address is scrambled one-way on your own server. From this moment on, no plaintext email exists anywhere in the process."
+        },
+        "s3": {
+          "title": "The snapshot is pushed",
+          "text": "The script sends the complete fingerprint set to the router over an encrypted, token-protected call. It replaces the previous snapshot entirely."
+        },
+        "s4": {
+          "title": "The router swaps it in",
+          "text": "The router scrambles every fingerprint a second time with its own private key, then replaces your server's whole set in one atomic step. Deleted accounts vanish with your next push."
+        }
+      }
+    },
+    "register": {
+      "heading": "Join as an ePDS host",
+      "intro": "You never share your admin password, and you never wait on the router to call you. Enroll once, push fingerprints on your own schedule, and ask the operator to approve you.",
+      "p1": "Enrolling takes one call and no credentials — the reply carries your submit token (keep it, it is shown only once). Your server stays pending and invisible to lookups until the router operator approves it.",
+      "enrollLabel": "1 · enroll your server",
+      "pushLabel": "2 · push fingerprints on a timer",
+      "approveNote": "3 · Ask the router operator to approve your enrollment — lookups start the moment they do. Leaving is your choice alone: stop pushing, or ask the operator to remove your entry."
+    },
+    "integrate": {
+      "heading": "Integrate lookups in your app",
+      "intro": "Client apps get their own token from the router operator. One call before showing the sign-in screen is enough.",
+      "lookupLabel": "look up an email",
+      "jsLabel": "handle the three outcomes",
+      "cacheTip": "Tip: after the first successful sign-in, remember the account identity (the DID) in your app. From then on the network can resolve the right server on its own, and you only need the router for brand-new visitors."
+    },
+    "api": {
+      "heading": "The API at a glance",
+      "intro": "Five small endpoints. Lookup and status use a client token; managing servers uses the admin token.",
+      "lookup": "Ask which servers know an email.",
+      "status": "Sync state of every server: account counts, last sync, last error.",
+      "unregister": "Remove an enrolled server (admin token).",
+      "enroll": "Enroll your server. Open call, no credentials; returns a one-time submit token and a pending entry.",
+      "digests": "Push a full snapshot of email fingerprints (hex SHA-256). Each push replaces the previous one.",
+      "script": "The ready-made push script for hosts — Python 3, standard library only.",
+      "approve": "Operator approves an enrollment; lookups start serving it (admin token)."
+    },
+    "snippets": {
+      "copy": "Copy",
+      "copied": "Copied!"
+    },
+    "more": {
+      "heading": "Keep exploring",
+      "epdsTitle": "How ePDS works",
+      "epdsDesc": "The friendly front door itself: email-code login on the AT Protocol.",
+      "githubTitle": "ePDS router on GitHub",
+      "githubDesc": "The full source code of the router: one small Go service with no dependencies."
+    }
+  },
+  "cgs": {
+    "metaTitle": "How group accounts work",
+    "metaDescription": "An interactive tour of the Certified Group Service, the guard that lets a whole team share one AT Protocol account with roles, clear rules, and a full audit trail.",
+    "kicker": "Certified Group Service",
+    "title": "How group accounts work",
+    "lead": "On the AT Protocol, an account normally belongs to exactly one person. But forests are mapped by teams. The Certified Group Service, CGS for short, lets a whole team share one account safely, with roles, clear rules, and a memory of everything that happens. This page shows how it works, step by step.",
+    "whatIs": {
+      "heading": "What is a group account?",
+      "p1": "Every organization on GainForest lives in a normal AT Protocol account. A normal account has one password and one owner. That is fine for a person, but a team needs more: many people writing to the same place, without passing the account password around.",
+      "p2": "CGS is a small guard service that stands in front of the group's account. It keeps the account credentials in a sealed box, holds a member list with roles, and checks every request against the rules before letting it through. Team members never see the password. To the rest of the network the group looks like one ordinary account, so any app can read its records as usual."
+    },
+    "repo": {
+      "heading": "One account, many hands",
+      "intro": "Three teammates, one shared repo. Tap a teammate and they publish a record. Watch how every record remembers its author.",
+      "repoLabel": "The group's repo",
+      "empty": "Nothing here yet. Tap a teammate above.",
+      "stamp": "by {name}",
+      "roleOwner": "Owner",
+      "roleAdmin": "Admin",
+      "roleMember": "Member",
+      "clear": "Clear",
+      "caption": "All records land in the same repo, but the service writes down who created each one. That memory lets members edit their own work, while changing someone else's work takes an admin."
+    },
+    "journey": {
+      "heading": "The journey of a request",
+      "intro": "Press play, or step through it yourself. The moving dot is your request on its round trip.",
+      "play": "Play",
+      "pause": "Pause",
+      "back": "Back",
+      "next": "Next",
+      "stepLabel": "Step {n} of {total}",
+      "ariaLabel": "Request journey diagram",
+      "nodes": {
+        "app": "Your app",
+        "pds": "Your PDS",
+        "cgs": "Group service",
+        "gpds": "Group's PDS"
+      },
+      "steps": {
+        "s1": {
+          "title": "You press Publish",
+          "text": "It starts in the app. You are signed in as yourself, and you want to add a record to your group's account."
+        },
+        "s2": {
+          "title": "The app calls your own PDS",
+          "text": "The app sends the request to your personal data server with a forwarding note attached: please pass this on to the group's service."
+        },
+        "s3": {
+          "title": "Your PDS signs a pass",
+          "text": "Your PDS creates a short-lived pass signed with your own key. The pass names you, the service, and the exact action. It works once and dies after two minutes."
+        },
+        "s4": {
+          "title": "The guard checks the pass",
+          "text": "The group service checks the signature against your public identity and makes sure the pass is fresh and unused. A copied pass is useless."
+        },
+        "s5": {
+          "title": "Role check",
+          "text": "The service looks you up in the group's member list. Member, admin, or owner? Your role decides which actions are open to you."
+        },
+        "s6": {
+          "title": "Author check",
+          "text": "For edits and deletes there is one more question: who wrote this record? Members may change their own records. Touching someone else's work takes an admin."
+        },
+        "s7": {
+          "title": "Everything is written down",
+          "text": "Whatever the answer, the attempt goes into the group's audit log: who, what, when, and whether it was allowed or denied."
+        },
+        "s8": {
+          "title": "The service does the write",
+          "text": "If all checks pass, the service performs the action on the group's own PDS, using credentials that only it holds, and stamps you as the author."
+        },
+        "s9": {
+          "title": "Done",
+          "text": "The answer travels back to your app. The record now sits in the group's repo, visible to the whole network like any other AT Protocol record."
+        }
+      }
+    },
+    "roles": {
+      "heading": "Who can do what",
+      "intro": "Pick a hat, then try some actions. Every attempt, allowed or denied, lands in the audit log below.",
+      "youAre": "You are",
+      "tryAction": "Try an action",
+      "allowed": "Allowed",
+      "denied": "Denied",
+      "auditTitle": "Audit log",
+      "auditEmpty": "Nothing yet. Try an action above.",
+      "clearLog": "Clear log",
+      "auditPermitted": "permitted",
+      "auditDenied": "denied",
+      "role": {
+        "visitor": {
+          "name": "Visitor",
+          "desc": "Not on the member list at all."
+        },
+        "member": {
+          "name": "Member",
+          "desc": "Can create records and manage their own work."
+        },
+        "admin": {
+          "name": "Admin",
+          "desc": "Can manage members and edit any record."
+        },
+        "owner": {
+          "name": "Owner",
+          "desc": "One per group. Set when the group is created."
+        }
+      },
+      "action": {
+        "create": "Create a record",
+        "editOwn": "Edit your own record",
+        "editOther": "Edit someone else's record",
+        "addMember": "Add a member",
+        "setRole": "Change a role",
+        "viewAudit": "Read the audit log"
+      },
+      "ok": {
+        "create": "Any member can create records. The record is written to the group's repo with your name stamped on it as the author.",
+        "editOwn": "It is your record, so a member role is enough. The service checks the author stamp first.",
+        "editOther": "Admins can edit any record in the group, no matter who wrote it.",
+        "addMember": "Admins can add new people as member or admin. Nobody can be added as owner.",
+        "setRole": "Only the owner can change roles. Even the owner cannot create a second owner.",
+        "viewAudit": "Admins and the owner can read the group's full history."
+      },
+      "no": {
+        "visitor": "You are not on the member list, so the request stops at the door. The attempt is still written into the audit log.",
+        "editOther": "That record belongs to someone else. Members can only edit their own work. Editing another person's record takes an admin.",
+        "addMember": "Only admins and the owner can add new members.",
+        "setRole": "Changing roles is the owner's job alone. Admins cannot promote or demote anyone.",
+        "viewAudit": "The audit log is only open to admins and the owner."
+      }
+    },
+    "map": {
+      "heading": "The moving parts",
+      "intro": "CGS is a small team of parts. Tap each one to see its job.",
+      "ariaLabel": "Map of the group service parts",
+      "nodes": {
+        "pds": {
+          "name": "Your PDS",
+          "desc": "Your own data server. It signs the short pass that proves who you are and forwards your request. Your password never travels anywhere."
+        },
+        "cgs": {
+          "name": "Group service",
+          "desc": "The guard at the door. It checks passes, looks up roles, keeps the books, and is the only one that can act on the group's account."
+        },
+        "gpds": {
+          "name": "Group's PDS",
+          "desc": "A completely normal data server that holds the group's records. It knows nothing about roles or members. It simply trusts the service that holds its credentials."
+        },
+        "members": {
+          "name": "Member list",
+          "desc": "A small private database, one per group. It stores each member's identity and role, and remembers who authored every record."
+        },
+        "audit": {
+          "name": "Audit log",
+          "desc": "The group's memory. Every attempt is written down: who, what, when, and whether it was allowed or denied."
+        },
+        "vault": {
+          "name": "Sealed credentials",
+          "desc": "The group's account password, stored encrypted. Members and apps never see it. Only the service can open it, and only to talk to the group's PDS."
+        }
+      }
+    },
+    "safety": {
+      "heading": "Built-in safety",
+      "intro": "Three habits keep a shared account safe.",
+      "pass": {
+        "title": "Passes die fast",
+        "text": "Every request carries a fresh signed pass. It works exactly once and expires after two minutes, so a stolen pass is close to worthless."
+      },
+      "vault": {
+        "title": "Credentials stay sealed",
+        "text": "The group's password is stored encrypted. Members never see it and apps never touch it. Only the guard service can use it."
+      },
+      "log": {
+        "title": "Nothing happens unseen",
+        "text": "Allowed or denied, every action lands in the group's audit log with the who, the what, and the when."
+      }
+    },
+    "more": {
+      "heading": "Keep exploring",
+      "lexiconsTitle": "Data schemas",
+      "lexiconsDesc": "The open record formats that live inside each group's repo.",
+      "epdsTitle": "How ePDS works",
+      "epdsDesc": "The friendly front door that signs people in with just an email.",
+      "githubTitle": "CGS on GitHub",
+      "githubDesc": "The full source code of the group service, open for anyone to read, run, and improve.",
+      "atprotoTitle": "How the AT Protocol works",
+      "atprotoDesc": "An interactive tour of the open network everything here is built on."
+    }
+  },
+  "atproto": {
+    "metaTitle": "How the AT Protocol works",
+    "metaDescription": "A friendly interactive tour of the AT Protocol, the open network GainForest is built on. See how identities, records, and apps fit together.",
+    "kicker": "AT Protocol",
+    "title": "How the AT Protocol works",
+    "lead": "GainForest does not keep your data in a private database. Everything lives on the AT Protocol, an open network where people own their data and many apps share it. This page explains the big ideas in plain words, with small toys you can play with.",
+    "whatIs": {
+      "heading": "What is the AT Protocol?",
+      "p1": "The AT Protocol, atproto for short, is a recipe for social apps where data belongs to people instead of platforms. Every person and every organization has an account, and every account has a data server that stores its records. A post, a like, a follow, a biodiversity observation: each one is a small signed record.",
+      "p2": "Apps like GainForest or Bluesky read those records and turn them into feeds, maps, and profiles. The records stay open and portable, so no single company can lock you in. If one app shuts down, your name and your data survive."
+    },
+    "naming": {
+      "heading": "A name, not a place",
+      "intro": "On the classic web, a link points at a place: one server, somewhere. On atproto, a link points at a person. Try to break both.",
+      "linkChip": "link",
+      "web": {
+        "title": "A link to a place",
+        "serverLabel": "one server",
+        "action": "Shut the server down",
+        "undo": "Bring it back",
+        "okCaption": "This link only works while this one server stays online.",
+        "downCaption": "The server is gone, and the post died with it. Every copy of this link is now broken.",
+        "aria": "Diagram of a web link pointing at one server"
+      },
+      "id": {
+        "title": "A link to a person",
+        "hostA": "old home",
+        "hostB": "new home",
+        "action": "Move Maria to a new home",
+        "undo": "Move her back",
+        "okCaption": "The link names Maria, not a machine. The network looks up where her data lives right now.",
+        "movedCaption": "Maria moved, and the link did not change. Nothing to update, nothing broken.",
+        "aria": "Diagram of an atproto link pointing at a person who can change hosts"
+      }
+    },
+    "records": {
+      "heading": "Everything is a record",
+      "intro": "Each account keeps its data in a repository: a public folder of small signed records. Records can point at records in other accounts. Tap one to read it.",
+      "aria": "Diagram of two repositories with records linking across them",
+      "repoOfMaria": "Maria's repo",
+      "repoOfKai": "Kai's repo",
+      "nodes": {
+        "profile": "profile",
+        "post": "post: I saw a toucan",
+        "observation": "observation + photo",
+        "like": "like",
+        "follow": "follow"
+      },
+      "details": {
+        "mProfile": "Maria's profile record. Her name and bio live here, inside her own repository.",
+        "mPost": "A post by Maria. It points at her observation record as evidence, using that record's address.",
+        "mObs": "A biodiversity observation with a photo. GainForest reads records like this one to build maps and project pages.",
+        "kProfile": "Kai's profile record, inside his own repository.",
+        "kLike": "A like is a record too. It lives in Kai's repository and points at Maria's post by its address. No permission was needed to make that link.",
+        "kFollow": "Kai follows Maria. The follow points at Maria herself, so it keeps working wherever her data lives."
+      },
+      "caption": "Addresses start with at:// and name an account, a record type, and a key. Any app on the network can follow them."
+    },
+    "flow": {
+      "heading": "One record, every app",
+      "intro": "When someone publishes, their personal data server (the PDS) announces the new record. A relay collects announcements from the whole network into one big stream, and every app listens to it. Tap a person to publish.",
+      "aria": "Diagram of records flowing from personal data servers through a relay to apps",
+      "publishAs": "Publish as {name}",
+      "pdsLabel": "PDS",
+      "relayLabel": "relay",
+      "appForest": "Forest app",
+      "appFeed": "Feed app",
+      "received": "{count} received",
+      "caption": "Both apps receive the same record at the same moment. A new app can join the stream tomorrow and build something nobody imagined, without asking anyone."
+    },
+    "move": {
+      "heading": "You can always move out",
+      "intro": "Your name and your data are not glued to any company. If your host gets slow, greedy, or disappears, you pack up and go. Try it.",
+      "hostA": "The old host",
+      "hostB": "The new host",
+      "emptyHost": "empty",
+      "suitcaseRecords": "128 records",
+      "suitcaseFollowers": "42 followers",
+      "moveAction": "Move to the new host",
+      "moveBack": "Move back",
+      "checkName": "Same name",
+      "checkRecords": "All records kept",
+      "checkFollowers": "All followers kept",
+      "checkLinks": "All links still work",
+      "caption": "This is called credible exit. Hosts have to treat people well, because leaving is easy. Most people never move, but everyone benefits from the open door."
+    },
+    "roots": {
+      "heading": "Three old ideas, one network",
+      "intro": "Atproto did not appear out of nowhere. It mixes the best parts of three earlier waves of the internet.",
+      "web": {
+        "title": "From the web",
+        "text": "Anyone may join and publish without asking permission, and anything can link to anything else."
+      },
+      "p2p": {
+        "title": "From peer-to-peer",
+        "text": "Every record is signed by its author, so it stays trustworthy no matter which computer hands it to you."
+      },
+      "scale": {
+        "title": "From big platforms",
+        "text": "Fast feeds, search, and counts come from strong indexing services that read the shared stream."
+      }
+    },
+    "trust": {
+      "heading": "Lazy trust",
+      "intro": "Checking every signature on every page view would be slow. Atproto takes a relaxed middle path.",
+      "signed": {
+        "title": "Signed at the source",
+        "text": "Every record carries its author's signature, so anyone can verify it whenever it matters."
+      },
+      "views": {
+        "title": "Fast views",
+        "text": "Apps serve prepared views without rechecking each record. If an app ever lied, the signed originals would prove it."
+      },
+      "exit": {
+        "title": "The open door",
+        "text": "Data and identity can move at any time, so a service that misbehaves loses its users. That keeps everyone honest."
+      }
+    },
+    "lexicon": {
+      "heading": "Speaking the same language",
+      "p1": "For apps to share records, they must agree on what each record looks like. Atproto does this with schemas called lexicons. Every schema has a clear owner who can evolve it, and every app can check that a record follows the rules exactly. Structure is what makes the sharing work.",
+      "p2": "GainForest publishes its own open schemas for biodiversity observations, projects, certificates, and donations. Any other app can read our records or write compatible ones. You can browse them all in the data schemas guide below."
+    },
+    "more": {
+      "heading": "Keep exploring",
+      "lexiconsTitle": "Data schemas",
+      "lexiconsDesc": "Every record format GainForest publishes on the network.",
+      "cgsTitle": "How group accounts work",
+      "cgsDesc": "The guard service that lets a whole team share one account safely.",
+      "epdsTitle": "How ePDS works",
+      "epdsDesc": "The login system and the servers behind every GainForest account.",
+      "siteTitle": "atproto.com",
+      "siteDesc": "The official protocol site, with the full specs and guides for builders.",
+      "ethosNote": "Many ideas on this page come from the protocol team's essay on its design philosophy:",
+      "ethosLink": "The atproto ethos"
+    }
+  },
+  "teeEpds": {
+    "metaTitle": "How protected ePDS signing and wallet recovery work",
+    "metaDescription": "An interactive guide to ePDS protected signing, two-of-three wallet recovery, device approval, and honest limits.",
+    "kicker": "ePDS protected signing",
+    "title": "Protected from the server, recoverable by you",
+    "lead": "ePDS can move account signing into a Trusted Execution Environment, or TEE. Its optional wallet splits control three ways: your device, protected hardware, and your recovery backup. The operator cannot spend from the wallet or keep you locked in.",
+    "facts": {
+      "keys": {
+        "title": "The server gets no key",
+        "text": "The normal app and PDS receive signatures, not account or wallet secrets."
+      },
+      "protection": {
+        "title": "Code can be checked",
+        "text": "A hardware proof can show which signer code is running."
+      },
+      "wallet": {
+        "title": "You hold the majority",
+        "text": "Your device and recovery backup give you two of the wallet’s three shares."
+      }
+    },
+    "what": {
+      "heading": "What does the TEE extension add?",
+      "intro": "The extension adds a small signing service beside the normal ePDS. Everything else keeps using standard AT Protocol paths.",
+      "p1": "A normal PDS needs a private key to sign each update to your data. With the TEE extension, ePDS moves that job into a confidential virtual machine. The PDS sends a 32-byte fingerprint of the update. The protected signer returns a signature. The private key never leaves protected memory.",
+      "p2": "The wallet is created from its own random secret, separate from the account key. That secret is split into three shares. Protected hardware keeps one encrypted share; you control the device and recovery shares. Any two can restore the wallet, but one alone reveals nothing.",
+      "p3": "Apps get the same create, view, sign, export, and recovery actions through standard AT Protocol calls and ordinary web requests. Both paths use the same security checks and return the same results."
+    },
+    "boundary": {
+      "heading": "Where does the private key live?",
+      "intro": "Switch between the two designs. Follow the moving request and notice which side ever holds the key.",
+      "serverTab": "Key on the server",
+      "teeTab": "Key inside the TEE",
+      "pdsName": "PDS server",
+      "serverKeyName": "Private key file",
+      "teeName": "Protected signer",
+      "serverResult": "Server can read the key",
+      "teeResult": "Key stays protected",
+      "serverDesc": "The PDS process opens a key file and signs the update itself. Anyone who fully controls the server may be able to copy that key.",
+      "teeDesc": "The PDS sends only a fingerprint to the protected signer. It receives a signature, not the key. Even the machine operator cannot simply open protected memory and copy it."
+    },
+    "journey": {
+      "heading": "How one record is signed",
+      "intro": "Press play or choose a step. The TEE only signs. Your records still move through the normal PDS and AT Protocol network.",
+      "play": "Play",
+      "pause": "Pause",
+      "back": "Back",
+      "next": "Next",
+      "stepLabel": "Step {n} of {total}",
+      "jumpTo": "Go to step {step}",
+      "nodes": {
+        "app": "Your app",
+        "pds": "PDS",
+        "tee": "TEE signer",
+        "network": "Network"
+      },
+      "steps": {
+        "s1": {
+          "title": "Your app saves a record",
+          "text": "You publish an observation, update a profile, or create another record. The app sends it to your PDS in the usual way."
+        },
+        "s2": {
+          "title": "The PDS prepares the update",
+          "text": "The PDS checks the request and builds the next version of your data. It turns that update into a short fingerprint."
+        },
+        "s3": {
+          "title": "The TEE signs the fingerprint",
+          "text": "The signer derives your account key inside protected memory and signs the fingerprint. Only the signature comes back."
+        },
+        "s4": {
+          "title": "The network checks it",
+          "text": "The signed update joins your record history. Other AT Protocol services check it with the public key in your account identity."
+        }
+      }
+    },
+    "separate": {
+      "heading": "Two paths that never share keys",
+      "intro": "Account signing and wallet signing use the same protected service, but they use different keys and different rules.",
+      "repo": {
+        "title": "Account record path",
+        "text": "The PDS may request a signature for a normal data update. This key signs AT Protocol records only. It cannot sign an Ethereum transaction."
+      },
+      "wallet": {
+        "title": "Wallet path",
+        "text": "The wallet uses separate Ethereum and Solana keys. To sign, the protected service needs both proof from the enrolled device and a genuine wallet share."
+      }
+    },
+    "shares": {
+      "heading": "A wallet you can recover or take with you",
+      "intro": "The wallet secret is split into three shares. Choose a situation to see which two shares restore it. The operator controls only one.",
+      "device": {
+        "title": "Your device",
+        "text": "Kept by your browser or app and never stored by the service."
+      },
+      "protected": {
+        "title": "Protected service",
+        "text": "Stored encrypted and usable only inside approved protected hardware."
+      },
+      "recovery": {
+        "title": "Your recovery backup",
+        "text": "Protected by a password or personal cloud backup that you control."
+      },
+      "used": "Share used",
+      "notNeeded": "Not needed",
+      "threshold": "Any 2 of 3",
+      "scenarios": {
+        "everyday": {
+          "tab": "Everyday use",
+          "title": "Your device and protected hardware sign together",
+          "text": "The wallet is briefly rebuilt inside protected memory, checked against its public address, used to sign, and then cleared."
+        },
+        "recover": {
+          "tab": "Lost device",
+          "title": "Your recovery backup replaces a lost device",
+          "text": "The protected service combines its share with your recovery share, creates fresh shares, and can enroll your replacement device. The old device share can no longer work with the service."
+        },
+        "leave": {
+          "tab": "Leave service",
+          "title": "Your two shares prevent lock-in",
+          "text": "Your device and recovery shares form a majority. You can reconstruct the wallet without the operator, or export it through the service while it is available."
+        }
+      }
+    },
+    "walletGate": {
+      "heading": "Why the server cannot spend from the wallet",
+      "intro": "Try both requests. A login token can show the public wallet address, but spending also needs proof from your device and its wallet share.",
+      "serverAttempt": "PDS asks by itself",
+      "userAttempt": "User proof + share",
+      "serverNode": "PDS request",
+      "userNode": "Device proof + share",
+      "teeNode": "Protected wallet",
+      "approved": "Signature approved",
+      "denied": "Request denied",
+      "approvedDesc": "The device signs a short request and sends its wallet share encrypted for the protected hardware. The signer checks the proof, time, and one-time number before rebuilding and using the wallet.",
+      "deniedDesc": "A PDS token alone is not enough. The protected signer has only one share and refuses any request without both device proof and a genuine second share."
+    },
+    "proof": {
+      "heading": "How can an app trust the protected signer?",
+      "intro": "A TEE can create a hardware report called an attestation. It helps another service check the machine and the code before trusting it.",
+      "cardLabel": "Hardware-backed proof",
+      "text": "The signer creates its own public identity inside protected memory. A hardware report binds that identity to the running code. The PDS can require this report before it starts. If the signer code changes, the report changes too."
+    },
+    "limits": {
+      "heading": "What this protection does not solve",
+      "intro": "Protected keys are useful, but they do not make the whole system perfect. These limits matter.",
+      "onboarding": {
+        "title": "First wallet setup",
+        "text": "The first device enrollment trusts the service once. A stronger future version can use passkeys to reduce that trust."
+      },
+      "uptime": {
+        "title": "Service availability",
+        "text": "A host can still stop the machine or block requests. A TEE protects secrets, not uptime."
+      },
+      "server": {
+        "title": "Bad record requests",
+        "text": "A hacked PDS could ask the account key to sign a bad data update. Recovery keys and the public identity history help the owner undo this."
+      },
+      "recovery": {
+        "title": "Backups and replay",
+        "text": "You must protect your recovery backup, and the service must back up its encrypted share. Rolling service storage back can also reopen an old approved request, though it cannot create a new approval."
+      }
+    },
+    "more": {
+      "heading": "Keep exploring",
+      "epdsTitle": "How ePDS login works",
+      "epdsDesc": "See the passwordless front door and the normal services around it.",
+      "lexiconsTitle": "Data schemas",
+      "lexiconsDesc": "Explore the open record formats stored inside each PDS.",
+      "designTitle": "Technical design",
+      "designDesc": "Read the full threat model, signing rules, and implementation notes.",
+      "githubTitle": "ePDS on GitHub",
+      "githubDesc": "Read the source code and run the project yourself."
     }
   }
 }

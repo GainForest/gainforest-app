@@ -1,0 +1,186 @@
+{
+  "meta": {
+    "title": "Cara memasang AudioMoth Anda",
+    "description": "Panduan lapangan interaktif untuk menyiapkan, mengatur, memasang, dan mengambil perekam AudioMoth dengan Arbimon."
+  },
+  "hero": {
+    "kicker": "Panduan lapangan · Pemantauan akustik",
+    "title": "Cara memasang AudioMoth Anda",
+    "lead": "Siapkan perekam, atur jadwal yang andal, hubungkan pemasangan ke Arbimon, lalu bawa pulang rekaman dengan aman.",
+    "time": "Sekitar 30 menit untuk persiapan",
+    "deployment": "Dirancang untuk pemasangan dua minggu"
+  },
+  "chapters": {
+    "label": "Bab panduan",
+    "prepare": "Persiapan",
+    "account": "Arbimon",
+    "configure": "Pengaturan",
+    "deploy": "Pemasangan",
+    "retrieve": "Pengambilan",
+    "upload": "Unggah"
+  },
+  "video": {
+    "title": "Tonton panduan lapangan",
+    "caption": "Lihat seluruh proses sebelum membawa peralatan ke lapangan.",
+    "frameTitle": "Video: cara memasang AudioMoth"
+  },
+  "prepare": {
+    "heading": "Sebelum memulai",
+    "intro": "Gunakan daftar ini agar tidak ada barang penting yang tertinggal. Kemajuan tersimpan selama halaman tetap terbuka.",
+    "equipmentTab": "Peralatan",
+    "managerTab": "Pengelola proyek",
+    "fieldTab": "Tim lapangan",
+    "equipment": {
+      "phone": "Ponsel Android",
+      "computer": "Laptop atau komputer",
+      "recorder": "AudioMoth dan 3 baterai AA",
+      "cable": "Kabel data Micro USB yang cocok dengan komputer",
+      "reader": "Pembaca atau adaptor kartu MicroSD",
+      "card": "Kartu MicroSD berukuran 32 GB atau kurang",
+      "case": "Casing ponsel tahan air atau kantong ziplock tebal"
+    },
+    "manager": {
+      "arbimon": "Akun Arbimon",
+      "config": "Aplikasi AudioMoth Configuration",
+      "flash": "Aplikasi AudioMoth Flash",
+      "time": "Aplikasi AudioMoth Time",
+      "companion": "Aplikasi Arbimon Companion di ponsel",
+      "uploader": "Arbimon Uploader di komputer"
+    },
+    "field": {
+      "arbimon": "Akun Arbimon",
+      "companion": "Aplikasi Arbimon Companion di ponsel"
+    },
+    "remaining": "{count, plural, =0 {Semuanya siap} other {# item tersisa}}",
+    "reset": "Atur ulang daftar",
+    "linksNote": "Buka setiap tautan aplikasi selagi koneksi internet masih andal.",
+    "downloadApps": "Unduh aplikasi desktop AudioMoth",
+    "openArbimon": "Buka Arbimon",
+    "openUploader": "Buka Arbimon Uploader"
+  },
+  "account": {
+    "heading": "Buat proyek Arbimon Anda",
+    "intro": "Proyek menyatukan rekaman, lokasi, dan catatan lapangan.",
+    "accountTitle": "1. Buat akun",
+    "accountText": "Buka Arbimon, pilih Sign up atau Start Analyzing, isi formulir, lalu verifikasi surel Anda.",
+    "projectTitle": "2. Buat proyek",
+    "projectText": "Pilih Create a new project, masukkan nama proyek yang unik, lalu kirim formulir. Proyek akan muncul di My Projects.",
+    "tip": "Pilih nama yang mudah dikenali seluruh tim, misalnya bentang alam dan periode survei."
+  },
+  "configure": {
+    "heading": "Atur perekam",
+    "intro": "Hubungkan AudioMoth ke komputer, lalu selesaikan empat tahap berikut. Pilih tahap untuk melihat rinciannya.",
+    "flashTab": "1 · Perangkat lunak",
+    "timeTab": "2 · Waktu & ID",
+    "recordTab": "3 · Perekaman",
+    "cardTab": "4 · Kartu SD",
+    "flashTitle": "Perbarui firmware",
+    "flashText": "Pasang tiga baterai AA, hubungkan perekam dengan kabel Micro USB, lalu buka Flash App. Unduh firmware terbaru dan pilih Flash AudioMoth.",
+    "timeTitle": "Atur jam dan beri label perangkat",
+    "timeText": "Buka Time App dan pilih Set Time. Temukan Device ID, catat dua karakter pertama dan dua karakter terakhir, lalu tempelkan ID singkat itu pada perekam.",
+    "idExample": "Contoh: 242A2605648778E7 menjadi 24E7",
+    "recordTitle": "Terapkan jadwal perekaman GainForest",
+    "recordText": "Masukkan pengaturan berikut di Configuration App. Perangkat akan merekam satu menit setiap lima menit, sesuai untuk pemasangan dua minggu.",
+    "sampleRate": "Laju sampel",
+    "sampleValue": "48 kHz",
+    "recordDuration": "Perekaman",
+    "recordValue": "1 menit",
+    "sleepDuration": "Jeda",
+    "sleepValue": "4 menit",
+    "schedule": "Jadwal harian",
+    "scheduleValue": "00:00–24:00",
+    "chime": "Nada akustik",
+    "chimeValue": "Selalu diwajibkan saat beralih ke CUSTOM",
+    "recordWarning": "Untuk tujuan atau durasi survei lain, tanyakan kepada penanggung jawab bioakustik sebelum mengubah pengaturan.",
+    "save": "Pilih Configure AudioMoth untuk menyimpan pengaturan.",
+    "cardTitle": "Beri label dan pasang kartu MicroSD",
+    "cardText": "Beri label kartu dengan pena putih atau stiker tipis. Masukkan ke AudioMoth hingga terdengar klik.",
+    "formatNote": "Kartu hingga 32 GB sebaiknya memakai FAT32. Kartu lebih besar dapat memakai exFAT, tetapi ukuran 32 GB atau kurang disarankan.",
+    "switchLabel": "Sakelar perekam",
+    "switchOff": "USB/OFF",
+    "switchCustom": "CUSTOM",
+    "switchDefault": "DEFAULT",
+    "offStatus": "Terhubung untuk pengaturan",
+    "customStatus": "Menunggu jadwal",
+    "defaultStatus": "Langsung merekam",
+    "greenLed": "Lampu hijau berkedip saat menunggu",
+    "redLed": "Lampu merah berkedip saat merekam"
+  },
+  "test": {
+    "heading": "Uji sebelum berangkat",
+    "intro": "Pengujian dua menit dapat mencegah perjalanan lapangan yang sia-sia.",
+    "s1": "Geser sakelar ke DEFAULT dan biarkan perekam bekerja beberapa menit.",
+    "s2": "Kembalikan sakelar ke USB/OFF.",
+    "s3": "Keluarkan kartu MicroSD dan masukkan ke komputer.",
+    "s4": "Buka kartu dan dengarkan salah satu berkas audio baru.",
+    "success": "Jika berkas tersedia dan suaranya terdengar, perekam siap dipasang."
+  },
+  "deploy": {
+    "heading": "Pasang dengan Companion App",
+    "intro": "Selesaikan langkah-langkah ini di lokasi pemasangan. Aplikasi menghubungkan lokasi, koordinat, dan foto yang tepat dengan perekam.",
+    "offline": "Akan berada di luar jaringan? Masuk ke Companion App sebelum kehilangan koneksi. Pemasangan akan tersinkron saat Anda kembali terhubung.",
+    "back": "Kembali",
+    "next": "Berikutnya",
+    "play": "Putar panduan",
+    "pause": "Jeda panduan",
+    "stepLabel": "Langkah {n} dari {total}",
+    "steps": {
+      "s1": {
+        "title": "Buka daftar pemasangan",
+        "text": "Pilih proyek, ketuk tombol tambah berwarna hijau, lalu pilih AudioMoth."
+      },
+      "s2": {
+        "title": "Tentukan lokasi pemasangan",
+        "text": "Pilih Set deployment site, tandai lokasi perekam, lalu konfirmasi."
+      },
+      "s3": {
+        "title": "Sinkronkan perekam",
+        "text": "Atur sakelar ke USB/OFF dan pilih Begin Sync. Saat nada berbunyi, beralihlah ke CUSTOM, dekatkan ponsel, dan kurangi kebisingan. Pastikan lampu merah tidak menyala terus."
+      },
+      "s4": {
+        "title": "Ambil foto dan pasang",
+        "text": "Jika perlu, tambahkan hingga sepuluh foto lalu pilih DEPLOY. Penanda akan muncul di peta setelah pemasangan tersimpan."
+      }
+    },
+    "whyHeading": "Yang disimpan aplikasi",
+    "whySite": "Proyek dan lokasi yang tepat",
+    "whyLocation": "Koordinat pemasangan",
+    "whyPhotos": "Foto lapangan dan status sinkronisasi"
+  },
+  "tips": {
+    "heading": "Kiat penempatan di lapangan",
+    "water": "Lindungi perekam dengan casing tahan air untuk kegiatan air atau kantong tebal yang tertutup rapat.",
+    "camouflage": "Gunakan casing kamuflase jika tersedia dan tempatkan jauh dari pandangan orang.",
+    "rope": "Ikat casing ke pohon dengan tali tipis tanpa menutupi lubang mikrofon.",
+    "tide": "Di hutan bakau, tempatkan di atas ketinggian pasang tertinggi yang diperkirakan.",
+    "sound": "Jauhkan mikrofon dari daun yang bergesekan, tali longgar, dan sumber kebisingan lain."
+  },
+  "retrieve": {
+    "heading": "Ambil AudioMoth Anda",
+    "intro": "Di akhir survei, hentikan perekam sebelum membuka casing.",
+    "off": "Geser sakelar dari CUSTOM ke USB/OFF.",
+    "remove": "Keluarkan kartu MicroSD dan simpan bersama ID singkat perekam.",
+    "check": "Masukkan kartu ke komputer dan, jika memungkinkan, dengarkan beberapa rekaman sebelum meninggalkan lokasi."
+  },
+  "upload": {
+    "heading": "Impor rekaman",
+    "intro": "Tim GainForest biasanya menangani tahap ini. Mitra komunitas dapat mengikuti alur ini bila diperlukan.",
+    "s1": "Masukkan kartu MicroSD ke komputer dengan pembaca atau adaptor.",
+    "s2": "Buka Arbimon Uploader dan masuk.",
+    "s3": "Pilih Import Files lalu pilih kartu atau folder rekaman. Folder juga dapat diseret langsung ke aplikasi.",
+    "s4": "Pastikan proyek dan lokasi yang tampil sesuai dengan pemasangan.",
+    "s5": "Pilih Import, lalu mulai unggahan.",
+    "s6": "Biarkan aplikasi terbuka hingga semua berkas selesai diunggah.",
+    "slow": "Survei besar dapat memerlukan waktu lama. Anda tetap dapat mengerjakan hal lain selama unggahan berjalan.",
+    "checkHeading": "Periksa hasilnya",
+    "checkText": "Buka dasbor proyek Arbimon dan muat ulang halaman. Rekaman baru dan visualisasi suara seharusnya muncul.",
+    "admin": "Tambahkan tech@gainforest.net sebagai administrator proyek jika Anda ingin GainForest membantu mengatur data."
+  },
+  "finish": {
+    "heading": "Siap ke lapangan?",
+    "text": "Periksa kembali daftar peralatan, bawa baterai cadangan, dan simpan ID perekam bersama catatan lapangan.",
+    "tool": "Buka alat pengaturan AudioMoth",
+    "soundscape": "Kelola rekaman AudioMoth",
+    "arbimon": "Buka Arbimon"
+  }
+}

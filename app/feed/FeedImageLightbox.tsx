@@ -18,6 +18,7 @@ import { MentionText } from "@/app/_components/MentionText";
 import { resolveBlobUrl } from "../_lib/pds";
 import { formatRelative } from "../_lib/format";
 import { FeedActionBar, type FeedInteractions } from "./FeedActions";
+import { AccountHoverCard } from "./AccountHoverCard";
 import { ResolvedAvatar } from "./ResolvedAvatar";
 
 export function FeedImageLightbox({
@@ -83,16 +84,30 @@ export function FeedImageLightbox({
       <div className="relative z-[1] flex max-h-full w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-border/60 bg-background shadow-2xl">
         {/* Header: who shared it + close */}
         <div className="flex items-center gap-2.5 border-b border-border/50 px-4 py-3">
-          <ResolvedAvatar
+          <AccountHoverCard
             did={item.actorDid}
-            avatarRef={item.actorAvatarRef}
             name={item.actorName}
-            fallbackIcon={<UserIcon className="size-4" />}
-            className="size-9"
-            sizes="36px"
-          />
+            avatarRef={item.actorAvatarRef}
+            triggerClassName="shrink-0"
+          >
+            <ResolvedAvatar
+              did={item.actorDid}
+              avatarRef={item.actorAvatarRef}
+              name={item.actorName}
+              fallbackIcon={<UserIcon className="size-4" />}
+              className="size-9"
+              sizes="36px"
+            />
+          </AccountHoverCard>
           <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-medium text-foreground">{name}</p>
+            <AccountHoverCard
+              did={item.actorDid}
+              name={item.actorName}
+              avatarRef={item.actorAvatarRef}
+              triggerClassName="block min-w-0 max-w-full"
+            >
+              <span className="block truncate text-sm font-medium text-foreground hover:underline">{name}</span>
+            </AccountHoverCard>
             <p className="truncate text-xs text-muted-foreground">{formatRelative(item.createdAt)}</p>
           </div>
           <button

@@ -22,6 +22,7 @@ import {
   FingerprintIcon,
   HardDriveUploadIcon,
   Loader2Icon,
+  TagsIcon,
   MapPinIcon,
   MinusIcon,
   PlugZapIcon,
@@ -32,6 +33,7 @@ import {
   WrenchIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { AdminOnlyIndicator } from "@/app/_components/AdminOnlyIndicator";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -76,12 +78,13 @@ import { createEquipment, equipmentDetailPath, listEquipment, updateEquipment, t
 import { loadAppliedConfig, mergeSetupNotes, saveAppliedConfig, SETUP_NOTES_HEADER } from "@/app/_lib/audiomoth/setup-store";
 import { DeploymentsTab } from "./DeploymentsTab";
 import { UploadTab } from "./UploadTab";
+import { LabelTab } from "./LabelTab";
 
 /* ------------------------------------------------------------------ */
 /* Types                                                               */
 /* ------------------------------------------------------------------ */
 
-type MainTabId = "setup" | "deployments" | "upload";
+type MainTabId = "setup" | "deployments" | "upload" | "label";
 
 type TabId = "device" | "configure" | "firmware";
 
@@ -297,7 +300,13 @@ function InfoRow({ label, value, dimmed }: { label: string; value: string; dimme
 /* Main component                                                      */
 /* ------------------------------------------------------------------ */
 
-export function AudioMothClient({ sessionDid }: { sessionDid: string | null }) {
+export function AudioMothClient({
+  sessionDid,
+  canUseLabelling,
+}: {
+  sessionDid: string | null;
+  canUseLabelling: boolean;
+}) {
   const t = useTranslations("common.audiomoth");
 
   const [supported, setSupported] = useState<boolean | null>(null);
@@ -307,6 +316,7 @@ export function AudioMothClient({ sessionDid }: { sessionDid: string | null }) {
   const searchParams = useSearchParams();
   const [mainTab, setMainTab] = useState<MainTabId>(() => {
     const tab = searchParams.get("tab");
+    if (tab === "label") return canUseLabelling ? "label" : "setup";
     return tab === "deployments" || tab === "upload" ? tab : "setup";
   });
   const [tab, setTab] = useState<TabId>("firmware");
@@ -786,10 +796,18 @@ export function AudioMothClient({ sessionDid }: { sessionDid: string | null }) {
     { id: "configure", label: t("tabs.configure"), Icon: SlidersHorizontalIcon },
   ];
 
-  const mainTabs: Array<{ id: MainTabId; label: string; Icon: typeof ClockIcon }> = [
+  const mainTabs: Array<{
+    id: MainTabId;
+    label: string;
+    Icon: typeof ClockIcon;
+    adminOnly?: boolean;
+  }> = [
     { id: "setup", label: t("mainTabs.setup"), Icon: WrenchIcon },
     { id: "deployments", label: t("mainTabs.deployments"), Icon: MapPinIcon },
     { id: "upload", label: t("mainTabs.upload"), Icon: HardDriveUploadIcon },
+    ...(canUseLabelling
+      ? [{ id: "label" as const, label: t("mainTabs.label"), Icon: TagsIcon, adminOnly: true }]
+      : []),
   ];
 
   return (
@@ -801,24 +819,27 @@ export function AudioMothClient({ sessionDid }: { sessionDid: string | null }) {
           </span>
           <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
         </div>
-        <p className="max-w-2xl text-sm text-muted-foreground">{t("subtitle")}</p>
+        <p className="max-w-2xl text-sm text-muted-foreground">
+          {mainTab === "label" ? t("label.subtitle") : t("subtitle")}
+        </p>
       </header>
 
       {/* Setup (this device over USB) vs Deployment (field events) */}
-      <nav className="flex gap-1 self-start rounded-full border border-border bg-card/70 p-1" aria-label={t("title")}>
-        {mainTabs.map(({ id, label, Icon }) => (
+      <nav className="flex w-full gap-1 self-start rounded-full border border-border bg-card/70 p-1 sm:w-auto" aria-label={t("title")}>
+        {mainTabs.map(({ id, label, Icon, adminOnly }) => (
           <button
             key={id}
             type="button"
             onClick={() => setMainTab(id)}
             className={cn(
-              "flex items-center justify-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-colors",
+              "flex min-w-0 flex-1 items-center justify-center gap-1 rounded-full px-2 py-2 text-xs font-medium transition-colors sm:flex-none sm:gap-2 sm:px-4 sm:text-sm",
               mainTab === id ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground",
             )}
             aria-current={mainTab === id ? "page" : undefined}
           >
             <Icon className="size-4" />
             {label}
+            {adminOnly ? <AdminOnlyIndicator /> : null}
           </button>
         ))}
       </nav>
@@ -826,6 +847,8 @@ export function AudioMothClient({ sessionDid }: { sessionDid: string | null }) {
       {mainTab === "deployments" && <DeploymentsTab sessionDid={sessionDid} />}
 
       {mainTab === "upload" && <UploadTab sessionDid={sessionDid} />}
+
+      {canUseLabelling && mainTab === "label" && <LabelTab sessionDid={sessionDid} />}
 
       {mainTab === "setup" && supported === false && (
         <Card>

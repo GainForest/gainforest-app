@@ -25,6 +25,7 @@ import {
   useAccountList,
   useActiveAccountContext,
 } from "../../_lib/account-switcher";
+import { AdminOnlyIndicator } from "../AdminOnlyIndicator";
 import { SignInPrompt } from "../AuthFlow";
 import { NAV_ITEMS, isLeafActive, type NavLeaf } from "./nav-config";
 import { useCanonicalPathname } from "./paths";
@@ -304,6 +305,9 @@ function NavLeafRow({ item, isActive, index, paired = false }: { item: NavLeaf; 
               <item.Icon className="h-4 w-4 shrink-0" />
             </span>
             {collapsed ? null : <span className="flex-1 text-left">{item.text}</span>}
+            {item.adminOnly ? (
+              <AdminOnlyIndicator className={collapsed ? "absolute right-1 top-1" : undefined} />
+            ) : null}
           </motion.div>
         </Link>
       </SidebarTooltip>

@@ -3,6 +3,7 @@ import esLanding from "./es.json";
 import idLanding from "./id.json";
 import ptLanding from "./pt.json";
 import swLanding from "./sw.json";
+import enAudioMothGuide from "./en/audiomothGuide.json";
 import enBumicert from "./en/bumicert.json";
 import enCart from "./en/cart.json";
 import enCommon from "./en/common.json";
@@ -14,6 +15,7 @@ import enLegacy from "./en/legacy.json";
 import enPrivacy from "./en/privacy.json";
 import enChangelog from "./en/changelog.json";
 import enTainaGuide from "./en/tainaGuide.json";
+import esAudioMothGuide from "./es/audiomothGuide.json";
 import esBumicert from "./es/bumicert.json";
 import esCart from "./es/cart.json";
 import esCommon from "./es/common.json";
@@ -25,6 +27,7 @@ import esLegacy from "./es/legacy.json";
 import esPrivacy from "./es/privacy.json";
 import esChangelog from "./es/changelog.json";
 import esTainaGuide from "./es/tainaGuide.json";
+import idAudioMothGuide from "./id/audiomothGuide.json";
 import idBumicert from "./id/bumicert.json";
 import idCart from "./id/cart.json";
 import idCommon from "./id/common.json";
@@ -36,6 +39,7 @@ import idLegacy from "./id/legacy.json";
 import idPrivacy from "./id/privacy.json";
 import idChangelog from "./id/changelog.json";
 import idTainaGuide from "./id/tainaGuide.json";
+import ptAudioMothGuide from "./pt/audiomothGuide.json";
 import ptBumicert from "./pt/bumicert.json";
 import ptCart from "./pt/cart.json";
 import ptCommon from "./pt/common.json";
@@ -47,6 +51,7 @@ import ptLegacy from "./pt/legacy.json";
 import ptPrivacy from "./pt/privacy.json";
 import ptChangelog from "./pt/changelog.json";
 import ptTainaGuide from "./pt/tainaGuide.json";
+import swAudioMothGuide from "./sw/audiomothGuide.json";
 import swBumicert from "./sw/bumicert.json";
 import swCart from "./sw/cart.json";
 import swCommon from "./sw/common.json";
@@ -63,6 +68,7 @@ import type { SupportedLanguageCode } from "@/lib/i18n/languages";
 export const messagesByLocale = {
   en: {
     ...enLanding,
+    audiomothGuide: enAudioMothGuide,
     common: enCommon,
     marketplace: enMarketplace,
     bumicert: enBumicert,
@@ -77,6 +83,7 @@ export const messagesByLocale = {
   },
   es: {
     ...esLanding,
+    audiomothGuide: esAudioMothGuide,
     common: esCommon,
     marketplace: esMarketplace,
     bumicert: esBumicert,
@@ -91,6 +98,7 @@ export const messagesByLocale = {
   },
   pt: {
     ...ptLanding,
+    audiomothGuide: ptAudioMothGuide,
     common: ptCommon,
     marketplace: ptMarketplace,
     bumicert: ptBumicert,
@@ -105,6 +113,7 @@ export const messagesByLocale = {
   },
   sw: {
     ...swLanding,
+    audiomothGuide: swAudioMothGuide,
     common: swCommon,
     marketplace: swMarketplace,
     bumicert: swBumicert,
@@ -119,6 +128,7 @@ export const messagesByLocale = {
   },
   id: {
     ...idLanding,
+    audiomothGuide: idAudioMothGuide,
     common: idCommon,
     marketplace: idMarketplace,
     bumicert: idBumicert,
