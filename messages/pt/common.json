@@ -2040,18 +2040,18 @@
   },
   "epdsRouter": {
     "metaTitle": "Como funciona o roteador do ePDS",
-    "metaDescription": "Um guia interativo do roteador do ePDS: como um app encontra o servidor certo para login por email entre vários servidores — os anfitriões compartilham apenas impressões digitais irreversíveis, nunca credenciais ou endereços.",
-    "kicker": "descoberta de email para servidor",
+    "metaDescription": "Um guia interativo do roteador do ePDS: como um app encontra a conta certa para login por email entre vários servidores. Os anfitriões compartilham apenas impressões digitais irreversíveis, nunca credenciais ou endereços.",
+    "kicker": "descoberta de email para conta",
     "title": "Um email, muitos servidores",
-    "lead": "O ePDS permite entrar só com o seu email. Mas quando uma comunidade tem vários servidores, o app precisa primeiro responder a uma pequena pergunta: qual servidor conhece este email? O roteador responde em uma única chamada — os anfitriões mantêm controle total e ninguém nunca entrega um endereço ou uma senha.",
+    "lead": "O ePDS permite entrar só com o seu email. Quando uma comunidade tem vários servidores, o app primeiro precisa responder a uma pequena pergunta: quais contas existem para este email? O roteador responde em uma única chamada. Ninguém entrega um endereço ou uma senha.",
     "facts": {
       "routing": {
-        "title": "Uma consulta, o servidor certo",
-        "text": "O app pergunta uma vez e descobre quais servidores conhecem o email: nenhum, exatamente um ou vários."
+        "title": "Uma consulta, a conta certa",
+        "text": "O app pergunta uma vez e descobre quais contas existem para o email. Cada resposta é uma identidade que a rede sempre consegue localizar, mesmo após uma mudança de servidor."
       },
       "privacy": {
         "title": "Emails nunca são guardados",
-        "text": "Os endereços são embaralhados no próprio servidor antes de qualquer coisa sair dele. O roteador só vê impressões digitais — e as embaralha de novo antes de guardar."
+        "text": "Os endereços são embaralhados no próprio servidor antes de qualquer coisa sair dele. O roteador só vê impressões digitais, e as embaralha de novo antes de guardar."
       },
       "zerochange": {
         "title": "Anfitriões mantêm o controle",
@@ -2060,8 +2060,8 @@
     },
     "problem": {
       "heading": "Por que a descoberta é necessária",
-      "p1": "Um app com login por email precisa enviar o login para um servidor específico: esse servidor envia o código e guarda a conta. Com um único servidor a resposta é fixa. Com vários, o app precisa de um diretório — e endereços de email são exatamente o tipo de dado que você não quer copiar para uma grande lista.",
-      "p2": "O roteador resolve isso com um pequeno truque: trabalha apenas com impressões digitais. Cada servidor embaralha seus endereços de forma irreversível em casa e não compartilha mais nada, e cada consulta embaralha o email recebido da mesma forma e compara impressões. A mesma resposta, sem agenda de endereços — e ninguém entrega suas chaves."
+      "p1": "Um app com login por email precisa enviar o login para um servidor específico. Esse servidor envia o código e guarda a conta. Com um único servidor a resposta é fixa. Com vários servidores o app precisa de um diretório. Endereços de email são exatamente o tipo de dado que você não quer copiar para uma grande lista.",
+      "p2": "O roteador resolve isso com um pequeno truque: trabalha apenas com impressões digitais. Cada servidor embaralha seus endereços de forma irreversível em casa e não compartilha mais nada. Cada consulta embaralha o email recebido da mesma forma e compara impressões. A mesma resposta, sem agenda de endereços, e ninguém entrega suas chaves."
     },
     "demo": {
       "heading": "Experimente uma consulta",
@@ -2078,7 +2078,7 @@
       "steps": {
         "idle": {
           "title": "Escolha um email acima",
-          "text": "O app quer iniciar um login por email mas ainda não sabe com qual servidor falar."
+          "text": "O app quer iniciar um login por email. Ainda não sabe onde a conta vive."
         },
         "sent": {
           "title": "O app pergunta ao roteador",
@@ -2086,7 +2086,7 @@
         },
         "fingerprint": {
           "title": "O roteador o embaralha",
-          "text": "O email vira uma impressão digital ao chegar, e só a impressão é comparada com o conjunto de cada servidor."
+          "text": "O email vira uma impressão digital ao chegar. Só a impressão é comparada com o conjunto de cada servidor."
         }
       },
       "outcomes": {
@@ -2096,7 +2096,7 @@
         },
         "many": {
           "title": "Dois lares encontrados",
-          "text": "Dois servidores conhecem este email — são duas contas separadas. O app mostra um seletor e a pessoa escolhe qual usar."
+          "text": "Dois servidores conhecem este email. São duas contas separadas. O app mostra um seletor e a pessoa escolhe qual usar."
         },
         "none": {
           "title": "Ainda sem lar",
@@ -2121,11 +2121,11 @@
       "steps": {
         "s1": {
           "title": "Seu servidor reúne sua própria lista",
-          "text": "Um pequeno script roda ao lado do seu PDS, na frequência que você escolhe. Ele lê os emails das contas localmente — sua senha de administrador nunca sai da sua máquina."
+          "text": "Um pequeno script roda ao lado do seu PDS, na frequência que você escolhe. Ele lê os emails das contas localmente. Sua senha de administrador nunca sai da sua máquina."
         },
         "s2": {
           "title": "As impressões são feitas em casa",
-          "text": "Cada endereço é embaralhado de forma irreversível no seu próprio servidor. A partir deste momento, nenhum email em texto claro existe no processo."
+          "text": "Cada endereço é embaralhado de forma irreversível no seu próprio servidor, com uma chave de rede que você recebe ao se inscrever. A partir deste momento, nenhum email em texto claro existe no processo."
         },
         "s3": {
           "title": "O retrato é enviado",
@@ -2139,29 +2139,29 @@
     },
     "register": {
       "heading": "Participe como anfitrião de ePDS",
-      "intro": "Você nunca compartilha sua senha de administrador e nunca espera o roteador te chamar. Inscreva-se uma vez, envie impressões no seu próprio ritmo e peça ao operador para aprovar.",
-      "p1": "Inscrever-se é uma única chamada, sem credenciais — a resposta traz seu token de envio (guarde-o, é mostrado só uma vez). Seu servidor fica pendente e invisível às consultas até o operador do roteador aprová-lo.",
-      "enrollLabel": "1 · inscreva seu servidor",
-      "pushLabel": "2 · envie impressões com um temporizador",
-      "approveNote": "3 · Peça ao operador do roteador para aprovar sua inscrição — as consultas começam no momento em que ele o fizer. Sair é decisão só sua: pare de enviar, ou peça ao operador para remover sua entrada."
+      "intro": "Você nunca compartilha sua senha de administrador e nunca espera por ninguém. Um único script inscreve você e começa a enviar imediatamente.",
+      "p1": "Na primeira execução, o script inscreve seu servidor no roteador, guarda seu token de envio ao lado dele (guarde esse arquivo), busca a chave compartilhada da rede e envia seu primeiro retrato. Seu servidor fica localizável em segundos.",
+      "enrollLabel": "1 · execute o script de envio",
+      "pushLabel": "2 · coloque-o num temporizador",
+      "approveNote": "É isso. Sem fila de aprovação, sem espera. Sair é decisão só sua: pare de enviar, ou peça ao operador do roteador para remover sua entrada. O operador também pode remover entradas abusivas a qualquer momento."
     },
     "integrate": {
       "heading": "Integre consultas no seu app",
       "intro": "Apps clientes recebem seu próprio token do operador do roteador. Uma chamada antes de mostrar a tela de login é suficiente.",
       "lookupLabel": "consultar um email",
       "jsLabel": "tratar os três resultados",
-      "cacheTip": "Dica: após o primeiro login bem-sucedido, guarde a identidade da conta (o DID) no seu app. A partir daí a rede resolve o servidor certo sozinha, e você só precisa do roteador para visitantes totalmente novos."
+      "cacheTip": "A resposta traz a identidade permanente de cada conta (seu DID). A rede sempre consegue resolver um DID para seu servidor atual, mesmo depois de uma mudança. Seu app nunca depende de endereços de servidor guardados: uma consulta, e a resolução padrão do AT Protocol faz o resto."
     },
     "api": {
       "heading": "A API num relance",
-      "intro": "Cinco endpoints pequenos. Consulta e status usam um token de cliente; gerenciar servidores usa o token de administrador.",
-      "lookup": "Pergunte quais servidores conhecem um email.",
+      "intro": "Consulta e status usam um token de cliente. Anfitriões usam seu token de envio. O token do operador é só para moderação.",
+      "lookup": "Pergunte quais contas (DIDs) existem para um email.",
       "status": "Estado de sincronização de cada servidor: número de contas, última sincronização, último erro.",
-      "unregister": "Remove um servidor inscrito (token de administrador).",
-      "enroll": "Inscreva seu servidor. Chamada aberta, sem credenciais; devolve um token de envio de uso único e uma entrada pendente.",
-      "digests": "Envie um retrato completo de impressões de email (SHA-256 em hex). Cada envio substitui o anterior.",
-      "script": "O script de envio pronto para usar — Python 3, apenas biblioteca padrão.",
-      "approve": "O operador aprova uma inscrição; as consultas passam a servi-la (token de administrador)."
+      "enroll": "Inscreva seu servidor. Chamada aberta, sem credenciais. Ativo imediatamente, devolve um token de envio de uso único.",
+      "pepper": "A chave compartilhada da rede para criar impressões. Entregue aos anfitriões inscritos.",
+      "digests": "Envie um retrato completo de pares de impressão e identidade. Cada envio substitui o anterior.",
+      "script": "O script de envio pronto para usar. Python 3, apenas biblioteca padrão.",
+      "unregister": "Remove um servidor inscrito (apenas o operador do roteador)."
     },
     "snippets": {
       "copy": "Copiar",

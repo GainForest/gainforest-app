@@ -2040,18 +2040,18 @@
   },
   "epdsRouter": {
     "metaTitle": "Cómo funciona el router de ePDS",
-    "metaDescription": "Una guía interactiva del router de ePDS: cómo una app encuentra el servidor correcto para iniciar sesión con email entre varios servidores — los anfitriones comparten solo huellas irreversibles, nunca credenciales ni direcciones.",
-    "kicker": "descubrimiento de email a servidor",
+    "metaDescription": "Una guía interactiva del router de ePDS: cómo una app encuentra la cuenta correcta para iniciar sesión con email entre varios servidores. Los anfitriones comparten solo huellas irreversibles, nunca credenciales ni direcciones.",
+    "kicker": "descubrimiento de email a cuenta",
     "title": "Un email, muchos servidores",
-    "lead": "ePDS te permite iniciar sesión solo con tu email. Pero cuando una comunidad tiene varios servidores, la app primero debe responder una pequeña pregunta: ¿qué servidor conoce este email? El router la responde en una sola llamada — los anfitriones mantienen el control total y nadie entrega nunca una dirección ni una contraseña.",
+    "lead": "ePDS te permite iniciar sesión solo con tu email. Cuando una comunidad tiene varios servidores, la app primero necesita responder una pequeña pregunta: ¿qué cuentas existen para este email? El router la responde en una sola llamada. Nadie entrega una dirección ni una contraseña.",
     "facts": {
       "routing": {
-        "title": "Una consulta, el servidor correcto",
-        "text": "La app pregunta una vez y sabe qué servidores conocen el email: ninguno, exactamente uno o varios."
+        "title": "Una consulta, la cuenta correcta",
+        "text": "La app pregunta una vez y sabe qué cuentas existen para el email. Cada respuesta es una identidad que la red siempre puede localizar, incluso tras un cambio de servidor."
       },
       "privacy": {
         "title": "Los emails nunca se guardan",
-        "text": "Las direcciones se cifran en su propio servidor antes de que algo salga de él. El router solo ve huellas — y las vuelve a cifrar antes de guardarlas."
+        "text": "Las direcciones se cifran en su propio servidor antes de que algo salga de él. El router solo ve huellas, y las vuelve a cifrar antes de guardarlas."
       },
       "zerochange": {
         "title": "Los anfitriones mantienen el control",
@@ -2060,8 +2060,8 @@
     },
     "problem": {
       "heading": "Por qué hace falta el descubrimiento",
-      "p1": "Una app con inicio de sesión por email tiene que enviar el login a un servidor concreto: ese servidor envía el código y guarda la cuenta. Con un solo servidor la respuesta es fija. Con varios, la app necesita un directorio, y las direcciones de email son justo el tipo de dato que no quieres copiar en una gran lista.",
-      "p2": "El router lo resuelve con un pequeño truco: solo trabaja con huellas. Cada servidor cifra sus direcciones de forma irreversible en casa y no comparte nada más, y cada consulta cifra el email entrante de la misma manera y compara huellas. La misma respuesta, sin agenda de direcciones — y nadie entrega sus llaves."
+      "p1": "Una app con inicio de sesión por email tiene que enviar el login a un servidor concreto. Ese servidor envía el código y guarda la cuenta. Con un solo servidor la respuesta es fija. Con varios servidores la app necesita un directorio. Las direcciones de email son justo el tipo de dato que no quieres copiar en una gran lista.",
+      "p2": "El router lo resuelve con un pequeño truco: solo trabaja con huellas. Cada servidor cifra sus direcciones de forma irreversible en casa y no comparte nada más. Cada consulta cifra el email entrante de la misma manera y compara huellas. La misma respuesta, sin agenda de direcciones, y nadie entrega sus llaves."
     },
     "demo": {
       "heading": "Prueba una consulta",
@@ -2078,7 +2078,7 @@
       "steps": {
         "idle": {
           "title": "Elige un email arriba",
-          "text": "La app quiere iniciar una sesión por email pero aún no sabe con qué servidor hablar."
+          "text": "La app quiere iniciar una sesión por email. Todavía no sabe dónde vive la cuenta."
         },
         "sent": {
           "title": "La app pregunta al router",
@@ -2086,7 +2086,7 @@
         },
         "fingerprint": {
           "title": "El router lo cifra",
-          "text": "El email se convierte en una huella al llegar, y solo la huella se compara con el conjunto de cada servidor."
+          "text": "El email se convierte en una huella al llegar. Solo la huella se compara con el conjunto de cada servidor."
         }
       },
       "outcomes": {
@@ -2096,7 +2096,7 @@
         },
         "many": {
           "title": "Dos hogares encontrados",
-          "text": "Dos servidores conocen este email: son dos cuentas separadas. La app muestra un selector y la persona elige cuál usar."
+          "text": "Dos servidores conocen este email. Son dos cuentas separadas. La app muestra un selector y la persona elige cuál usar."
         },
         "none": {
           "title": "Aún sin hogar",
@@ -2121,11 +2121,11 @@
       "steps": {
         "s1": {
           "title": "Tu servidor reúne su propia lista",
-          "text": "Un pequeño script se ejecuta junto a tu PDS, con la frecuencia que tú eliges. Lee los emails de las cuentas localmente — tu contraseña de administrador nunca sale de tu máquina."
+          "text": "Un pequeño script se ejecuta junto a tu PDS, con la frecuencia que tú eliges. Lee los emails de las cuentas localmente. Tu contraseña de administrador nunca sale de tu máquina."
         },
         "s2": {
           "title": "Las huellas se hacen en casa",
-          "text": "Cada dirección se cifra de forma irreversible en tu propio servidor. Desde este momento, no existe ningún email en claro en todo el proceso."
+          "text": "Cada dirección se cifra de forma irreversible en tu propio servidor, con una clave de red que recibes al inscribirte. Desde este momento, no existe ningún email en claro en todo el proceso."
         },
         "s3": {
           "title": "Se envía la instantánea",
@@ -2139,29 +2139,29 @@
     },
     "register": {
       "heading": "Únete como anfitrión de ePDS",
-      "intro": "Nunca compartes tu contraseña de administrador y nunca esperas a que el router te llame. Inscríbete una vez, envía huellas con tu propio calendario y pide al operador que te apruebe.",
-      "p1": "Inscribirse es una sola llamada y sin credenciales — la respuesta trae tu token de envío (guárdalo, se muestra solo una vez). Tu servidor queda pendiente e invisible para las consultas hasta que el operador del router lo apruebe.",
-      "enrollLabel": "1 · inscribe tu servidor",
-      "pushLabel": "2 · envía huellas con un temporizador",
-      "approveNote": "3 · Pide al operador del router que apruebe tu inscripción — las consultas empiezan en cuanto lo haga. Irte es solo decisión tuya: deja de enviar, o pide al operador que elimine tu entrada."
+      "intro": "Nunca compartes tu contraseña de administrador y nunca esperas a nadie. Un solo script te inscribe y empieza a enviar de inmediato.",
+      "p1": "En su primera ejecución, el script inscribe tu servidor en el router, guarda tu token de envío junto a sí mismo (conserva ese archivo), obtiene la clave compartida de la red y envía tu primera instantánea. Tu servidor es localizable en segundos.",
+      "enrollLabel": "1 · ejecuta el script de envío",
+      "pushLabel": "2 · ponlo en un temporizador",
+      "approveNote": "Eso es todo. Sin cola de aprobación, sin esperas. Irte es solo decisión tuya: deja de enviar, o pide al operador del router que elimine tu entrada. El operador también puede eliminar entradas abusivas en cualquier momento."
     },
     "integrate": {
       "heading": "Integra consultas en tu app",
       "intro": "Las apps cliente reciben su propio token del operador del router. Basta una llamada antes de mostrar la pantalla de inicio de sesión.",
       "lookupLabel": "consultar un email",
       "jsLabel": "manejar los tres resultados",
-      "cacheTip": "Consejo: tras el primer inicio de sesión exitoso, recuerda la identidad de la cuenta (el DID) en tu app. A partir de ahí la red puede resolver el servidor correcto por sí sola, y solo necesitas el router para visitantes nuevos."
+      "cacheTip": "La respuesta trae la identidad permanente de cada cuenta (su DID). La red siempre puede resolver un DID a su servidor actual, incluso después de una mudanza. Tu app nunca depende de direcciones de servidor guardadas: una consulta, y la resolución estándar del AT Protocol hace el resto."
     },
     "api": {
       "heading": "La API de un vistazo",
-      "intro": "Cinco endpoints pequeños. La consulta y el estado usan un token de cliente; gestionar servidores usa el token de administrador.",
-      "lookup": "Pregunta qué servidores conocen un email.",
+      "intro": "La consulta y el estado usan un token de cliente. Los anfitriones usan su token de envío. El token del operador es solo para moderación.",
+      "lookup": "Pregunta qué cuentas (DIDs) existen para un email.",
       "status": "Estado de sincronización de cada servidor: número de cuentas, última sincronización, último error.",
-      "unregister": "Elimina un servidor inscrito (token de administrador).",
-      "enroll": "Inscribe tu servidor. Llamada abierta, sin credenciales; devuelve un token de envío de un solo uso y una entrada pendiente.",
-      "digests": "Envía una instantánea completa de huellas de email (SHA-256 en hex). Cada envío reemplaza al anterior.",
-      "script": "El script de envío listo para usar — Python 3, solo biblioteca estándar.",
-      "approve": "El operador aprueba una inscripción; las consultas empiezan a servirla (token de administrador)."
+      "enroll": "Inscribe tu servidor. Llamada abierta, sin credenciales. Activo de inmediato, devuelve un token de envío de un solo uso.",
+      "pepper": "La clave compartida de la red para crear huellas. Se entrega a los anfitriones inscritos.",
+      "digests": "Envía una instantánea completa de pares de huella e identidad. Cada envío reemplaza al anterior.",
+      "script": "El script de envío listo para usar. Python 3, solo biblioteca estándar.",
+      "unregister": "Elimina un servidor inscrito (solo el operador del router)."
     },
     "snippets": {
       "copy": "Copiar",

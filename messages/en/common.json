@@ -2040,18 +2040,18 @@
   },
   "epdsRouter": {
     "metaTitle": "How the ePDS router works",
-    "metaDescription": "An interactive guide to the ePDS router: how an app finds the right server for an email login across many servers — hosts share only one-way fingerprints, never credentials or addresses.",
-    "kicker": "email-to-server discovery",
+    "metaDescription": "An interactive guide to the ePDS router: how an app finds the right account for an email login across many servers. Hosts share only one-way fingerprints, never credentials or addresses.",
+    "kicker": "email-to-account discovery",
     "title": "One email, many servers",
-    "lead": "ePDS lets you sign in with just your email. But when a community runs several servers, an app must first answer a small question: which server knows this email? The router answers it in a single call — hosts stay in full control, and nobody ever hands over an address or a password.",
+    "lead": "ePDS lets you sign in with just your email. When a community runs several servers, an app first needs to answer a small question: which accounts exist for this email? The router answers it in a single call. Nobody hands over an address or a password.",
     "facts": {
       "routing": {
-        "title": "One lookup, the right server",
-        "text": "An app asks once and learns which servers know the email: none, exactly one, or several."
+        "title": "One lookup, the right account",
+        "text": "An app asks once and learns which accounts exist for the email. Each answer is an identity the network can always locate, even after a server move."
       },
       "privacy": {
         "title": "Emails are never stored",
-        "text": "Addresses are scrambled on their own server before anything leaves it. The router only ever sees fingerprints — and scrambles them again before storing."
+        "text": "Addresses are scrambled on their own server before anything leaves it. The router only ever sees fingerprints, and it scrambles them again before storing."
       },
       "zerochange": {
         "title": "Hosts stay in control",
@@ -2060,8 +2060,8 @@
     },
     "problem": {
       "heading": "Why discovery is needed",
-      "p1": "An app that offers email sign-in has to send the login to one specific server: that server emails the code and holds the account. With a single server the answer is fixed. With several, the app needs a directory — and email addresses are exactly the kind of data you do not want to copy into one big list.",
-      "p2": "The router solves this with a small trick: it deals only in fingerprints. Each server scrambles its addresses one-way at home and shares nothing else, and each lookup scrambles the incoming email the same way and compares fingerprints. Same answer, no address book — and nobody hands anyone their keys."
+      "p1": "An app with email sign-in has to send the login to one specific server. That server emails the code and holds the account. With a single server the answer is fixed. With several servers the app needs a directory. Email addresses are exactly the kind of data you do not want to copy into one big list.",
+      "p2": "The router solves this with a small trick: it works only with fingerprints. Each server scrambles its addresses one-way at home and shares nothing else. Each lookup scrambles the incoming email the same way and compares fingerprints. Same answer, no address book, and nobody hands anyone their keys."
     },
     "demo": {
       "heading": "Try a lookup",
@@ -2078,7 +2078,7 @@
       "steps": {
         "idle": {
           "title": "Pick an email above",
-          "text": "The app wants to start an email sign-in but does not yet know which server to talk to."
+          "text": "The app wants to start an email sign-in. It does not yet know where the account lives."
         },
         "sent": {
           "title": "The app asks the router",
@@ -2086,7 +2086,7 @@
         },
         "fingerprint": {
           "title": "The router scrambles it",
-          "text": "The email becomes a fingerprint on arrival, and only the fingerprint is compared against each server's set."
+          "text": "The email becomes a fingerprint on arrival. Only the fingerprint is compared against each server's set."
         }
       },
       "outcomes": {
@@ -2096,7 +2096,7 @@
         },
         "many": {
           "title": "Two homes found",
-          "text": "Two servers know this email — those are two separate accounts. The app shows a chooser and the person picks which one to use."
+          "text": "Two servers know this email. Those are two separate accounts. The app shows a chooser and the person picks which one to use."
         },
         "none": {
           "title": "No home yet",
@@ -2121,11 +2121,11 @@
       "steps": {
         "s1": {
           "title": "Your server gathers its own list",
-          "text": "A small script runs next to your PDS, on a timer you choose. It reads the account emails locally — your admin password never leaves your machine."
+          "text": "A small script runs next to your PDS, on a timer you choose. It reads the account emails locally. Your admin password never leaves your machine."
         },
         "s2": {
           "title": "Fingerprints are made at home",
-          "text": "Each address is scrambled one-way on your own server. From this moment on, no plaintext email exists anywhere in the process."
+          "text": "Each address is scrambled one-way on your own server, keyed with a network key you receive when you enroll. From this moment on, no plaintext email exists anywhere in the process."
         },
         "s3": {
           "title": "The snapshot is pushed",
@@ -2139,29 +2139,29 @@
     },
     "register": {
       "heading": "Join as an ePDS host",
-      "intro": "You never share your admin password, and you never wait on the router to call you. Enroll once, push fingerprints on your own schedule, and ask the operator to approve you.",
-      "p1": "Enrolling takes one call and no credentials — the reply carries your submit token (keep it, it is shown only once). Your server stays pending and invisible to lookups until the router operator approves it.",
-      "enrollLabel": "1 · enroll your server",
-      "pushLabel": "2 · push fingerprints on a timer",
-      "approveNote": "3 · Ask the router operator to approve your enrollment — lookups start the moment they do. Leaving is your choice alone: stop pushing, or ask the operator to remove your entry."
+      "intro": "You never share your admin password and you never wait for anyone. One script enrolls you and starts pushing right away.",
+      "p1": "On its first run the script enrolls your server with the router, saves your submit token next to itself (keep that file), fetches the shared network key, and pushes your first snapshot. Your server is discoverable within seconds.",
+      "enrollLabel": "1 · run the push script",
+      "pushLabel": "2 · put it on a timer",
+      "approveNote": "That is it. No approval queue, no waiting. Leaving is your choice alone: stop pushing, or ask the router operator to remove your entry. The operator can also remove abusive entries at any time."
     },
     "integrate": {
       "heading": "Integrate lookups in your app",
       "intro": "Client apps get their own token from the router operator. One call before showing the sign-in screen is enough.",
       "lookupLabel": "look up an email",
       "jsLabel": "handle the three outcomes",
-      "cacheTip": "Tip: after the first successful sign-in, remember the account identity (the DID) in your app. From then on the network can resolve the right server on its own, and you only need the router for brand-new visitors."
+      "cacheTip": "The reply carries each account's permanent identity (its DID). The network can always resolve a DID to its current server, even after the account moves. Your app never depends on stored server addresses: one lookup, then standard AT Protocol resolution does the rest."
     },
     "api": {
       "heading": "The API at a glance",
-      "intro": "Five small endpoints. Lookup and status use a client token; managing servers uses the admin token.",
-      "lookup": "Ask which servers know an email.",
+      "intro": "Lookup and status use a client token. Hosts use their submit token. The operator token is only for moderation.",
+      "lookup": "Ask which accounts (DIDs) exist for an email.",
       "status": "Sync state of every server: account counts, last sync, last error.",
-      "unregister": "Remove an enrolled server (admin token).",
-      "enroll": "Enroll your server. Open call, no credentials; returns a one-time submit token and a pending entry.",
-      "digests": "Push a full snapshot of email fingerprints (hex SHA-256). Each push replaces the previous one.",
-      "script": "The ready-made push script for hosts — Python 3, standard library only.",
-      "approve": "Operator approves an enrollment; lookups start serving it (admin token)."
+      "enroll": "Enroll your server. Open call, no credentials. Active immediately, returns a one-time submit token.",
+      "pepper": "The shared network key for making fingerprints. Released to enrolled hosts.",
+      "digests": "Push a full snapshot of fingerprint and identity pairs. Each push replaces the previous one.",
+      "script": "The ready-made push script for hosts. Python 3, standard library only.",
+      "unregister": "Remove an enrolled server (router operator only)."
     },
     "snippets": {
       "copy": "Copy",

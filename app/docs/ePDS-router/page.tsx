@@ -11,32 +11,33 @@ import { SyncJourney } from "./_components/SyncJourney";
 const GITHUB_URL = "https://github.com/GainForest/ePDS-router";
 const ROUTER_URL = "https://router.gainforest.id";
 
-const ENROLL_SNIPPET = `curl -X POST ${ROUTER_URL}/v1/enroll \\
-  -H "Content-Type: application/json" \\
-  -d '{"id": "my-pds", "url": "https://pds.example.com"}'
-
-# → {"status": "pending", "submit_token": "…"}   keep it — shown only once`;
-
-const PUSH_SNIPPET = `# The script runs on YOUR machine — your admin password never leaves it.
-# Python 3, standard library only.
+const ENROLL_SNIPPET = `# One script does everything. It runs on YOUR machine and your admin
+# password never leaves it. Python 3, standard library only.
 curl -sO ${ROUTER_URL}/push-digests.py
 
 PDS_URL=http://localhost:3000 \\
 PDS_ADMIN_PASSWORD=... \\
 ROUTER_URL=${ROUTER_URL} \\
 INSTANCE_ID=my-pds \\
-SUBMIT_TOKEN=... \\
+PDS_PUBLIC_URL=https://pds.example.com \\
 python3 push-digests.py
 
-# then put the same command on a timer, e.g. cron every 5 minutes:
-# */5 * * * *  cd /opt/pds && PDS_URL=... SUBMIT_TOKEN=... python3 push-digests.py`;
+# 1st run → enrolls you (token saved to ./.epds-router-my-pds.token)
+#           and pushes your first snapshot. Discoverable within seconds.
+# later   → pushes fresh fingerprints`;
+
+const PUSH_SNIPPET = `# cron, every 5 minutes:
+*/5 * * * *  cd /opt/pds && PDS_URL=http://localhost:3000 \\
+  PDS_ADMIN_PASSWORD=... ROUTER_URL=${ROUTER_URL} \\
+  INSTANCE_ID=my-pds python3 push-digests.py`;
 
 const LOOKUP_SNIPPET = `curl -X POST ${ROUTER_URL}/v1/lookup \\
   -H "Authorization: Bearer $ROUTER_CLIENT_TOKEN" \\
   -H "Content-Type: application/json" \\
   -d '{"email": "maya@example.com"}'
 
-# → {"instances":[{"id":"my-pds","url":"https://pds.example.com"}]}`;
+# → {"accounts":[{"did":"did:plc:abc123…","instance":"my-pds",
+#                  "url":"https://pds.example.com"}]}`;
 
 const INTEGRATE_SNIPPET = `const res = await fetch("${ROUTER_URL}/v1/lookup", {
   method: "POST",
@@ -46,16 +47,17 @@ const INTEGRATE_SNIPPET = `const res = await fetch("${ROUTER_URL}/v1/lookup", {
   },
   body: JSON.stringify({ email }),
 });
-const { instances } = await res.json();
+const { accounts } = await res.json();
 
-if (instances.length === 1) {
-  // One home — start the ePDS email login there.
-  startLogin(instances[0].url, email);
-} else if (instances.length > 1) {
-  // Several homes — let the user pick which account to use.
-  showAccountChooser(instances);
+if (accounts.length === 1) {
+  // One account. The DID resolves to its current server automatically
+  // (@atproto/oauth-client-node looks it up in the PLC directory).
+  redirect(await oauthClient.authorize(accounts[0].did));
+} else if (accounts.length > 1) {
+  // Several accounts. Let the user pick which identity to use.
+  showAccountChooser(accounts);
 } else {
-  // No home yet — offer to create an account on your default server.
+  // No account yet. Offer to create one on your default server.
   startSignup(DEFAULT_PDS_URL, email);
 }`;
 
@@ -141,9 +143,9 @@ export default async function EpdsRouterDocsPage() {
               <ApiRow method="POST" path="/v1/lookup" text={t("api.lookup")} />
               <ApiRow method="GET" path="/v1/status" text={t("api.status")} />
               <ApiRow method="POST" path="/v1/enroll" text={t("api.enroll")} />
+              <ApiRow method="GET" path="/v1/instances/:id/pepper" text={t("api.pepper")} />
               <ApiRow method="PUT" path="/v1/instances/:id/digests" text={t("api.digests")} />
               <ApiRow method="GET" path="/push-digests.py" text={t("api.script")} />
-              <ApiRow method="POST" path="/v1/instances/:id/approve" text={t("api.approve")} />
               <ApiRow method="DELETE" path="/v1/instances/:id" text={t("api.unregister")} />
             </tbody>
           </table>

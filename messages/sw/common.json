@@ -2040,18 +2040,18 @@
   },
   "epdsRouter": {
     "metaTitle": "Jinsi router ya ePDS inavyofanya kazi",
-    "metaDescription": "Mwongozo shirikishi wa router ya ePDS: jinsi programu inavyopata seva sahihi ya kuingia kwa barua pepe kati ya seva nyingi — wenyeji hushiriki alama za vidole za njia moja tu, kamwe si vitambulisho wala anwani.",
-    "kicker": "ugunduzi wa barua pepe hadi seva",
+    "metaDescription": "Mwongozo shirikishi wa router ya ePDS: jinsi programu inavyopata akaunti sahihi ya kuingia kwa barua pepe kati ya seva nyingi. Wenyeji hushiriki alama za vidole za njia moja tu, kamwe si vitambulisho wala anwani.",
+    "kicker": "ugunduzi wa barua pepe hadi akaunti",
     "title": "Barua pepe moja, seva nyingi",
-    "lead": "ePDS inakuwezesha kuingia kwa barua pepe yako tu. Lakini jumuiya inapoendesha seva kadhaa, programu lazima kwanza ijibu swali dogo: seva ipi inaijua barua pepe hii? Router inalijibu kwa wito mmoja — wenyeji wanabaki na udhibiti kamili, na hakuna anayekabidhi anwani wala nenosiri.",
+    "lead": "ePDS inakuwezesha kuingia kwa barua pepe yako tu. Jumuiya inapoendesha seva kadhaa, programu inahitaji kwanza kujibu swali dogo: akaunti zipi zipo kwa barua pepe hii? Router inalijibu kwa wito mmoja. Hakuna anayekabidhi anwani wala nenosiri.",
     "facts": {
       "routing": {
-        "title": "Utafutaji mmoja, seva sahihi",
-        "text": "Programu inauliza mara moja na kujua seva zipi zinaijua barua pepe: hakuna, moja tu, au kadhaa."
+        "title": "Utafutaji mmoja, akaunti sahihi",
+        "text": "Programu inauliza mara moja na kujua akaunti zipi zipo kwa barua pepe hiyo. Kila jibu ni utambulisho ambao mtandao unaweza kuupata daima, hata baada ya kuhamia seva nyingine."
       },
       "privacy": {
         "title": "Barua pepe hazihifadhiwi kamwe",
-        "text": "Anwani huchanganywa kwenye seva yao wenyewe kabla ya chochote kuondoka. Router huona alama za vidole tu — na kuzichanganya tena kabla ya kuhifadhi."
+        "text": "Anwani huchanganywa kwenye seva yao wenyewe kabla ya chochote kuondoka. Router huona alama za vidole tu, na kuzichanganya tena kabla ya kuhifadhi."
       },
       "zerochange": {
         "title": "Wenyeji wanabaki na udhibiti",
@@ -2060,8 +2060,8 @@
     },
     "problem": {
       "heading": "Kwa nini ugunduzi unahitajika",
-      "p1": "Programu yenye kuingia kwa barua pepe lazima ipeleke ombi la kuingia kwa seva moja mahususi: seva hiyo ndiyo hutuma msimbo na kuhifadhi akaunti. Kwa seva moja jibu ni thabiti. Kwa seva kadhaa, programu inahitaji orodha ya mwelekeo — na anwani za barua pepe ni aina ya data usiyotaka kuinakili kwenye orodha moja kubwa.",
-      "p2": "Router hutatua hili kwa mbinu ndogo: hufanya kazi na alama za vidole tu. Kila seva huchanganya anwani zake kwa njia moja nyumbani na haishiriki kitu kingine, na kila utafutaji huchanganya barua pepe inayoingia kwa njia ile ile na kulinganisha alama. Jibu lile lile, bila kitabu cha anwani — na hakuna anayekabidhi funguo zake."
+      "p1": "Programu yenye kuingia kwa barua pepe lazima ipeleke ombi la kuingia kwa seva moja mahususi. Seva hiyo hutuma msimbo na kuhifadhi akaunti. Kwa seva moja jibu ni thabiti. Kwa seva kadhaa programu inahitaji orodha ya mwelekeo. Anwani za barua pepe ni aina ya data usiyotaka kuinakili kwenye orodha moja kubwa.",
+      "p2": "Router hutatua hili kwa mbinu ndogo: hufanya kazi na alama za vidole tu. Kila seva huchanganya anwani zake kwa njia moja nyumbani na haishiriki kitu kingine. Kila utafutaji huchanganya barua pepe inayoingia kwa njia ile ile na kulinganisha alama. Jibu lile lile, bila kitabu cha anwani, na hakuna anayekabidhi funguo zake."
     },
     "demo": {
       "heading": "Jaribu utafutaji",
@@ -2078,7 +2078,7 @@
       "steps": {
         "idle": {
           "title": "Chagua barua pepe hapo juu",
-          "text": "Programu inataka kuanzisha kuingia kwa barua pepe lakini bado haijui iongee na seva ipi."
+          "text": "Programu inataka kuanzisha kuingia kwa barua pepe. Bado haijui akaunti inaishi wapi."
         },
         "sent": {
           "title": "Programu inauliza router",
@@ -2086,7 +2086,7 @@
         },
         "fingerprint": {
           "title": "Router inaichanganya",
-          "text": "Barua pepe inakuwa alama ya kidole mara inapofika, na alama pekee ndiyo inayolinganishwa na seti ya kila seva."
+          "text": "Barua pepe inakuwa alama ya kidole mara inapofika. Alama pekee ndiyo inayolinganishwa na seti ya kila seva."
         }
       },
       "outcomes": {
@@ -2096,7 +2096,7 @@
         },
         "many": {
           "title": "Nyumba mbili zimepatikana",
-          "text": "Seva mbili zinaijua barua pepe hii — hizo ni akaunti mbili tofauti. Programu inaonyesha kichaguzi na mtu anachagua ipi atumie."
+          "text": "Seva mbili zinaijua barua pepe hii. Hizo ni akaunti mbili tofauti. Programu inaonyesha kichaguzi na mtu anachagua ipi atumie."
         },
         "none": {
           "title": "Bado hakuna nyumba",
@@ -2121,11 +2121,11 @@
       "steps": {
         "s1": {
           "title": "Seva yako inakusanya orodha yake yenyewe",
-          "text": "Skripti ndogo huendeshwa kando ya PDS yako, kwa ratiba unayochagua. Inasoma barua pepe za akaunti papo hapo — nenosiri lako la msimamizi haliondoki kamwe kwenye mashine yako."
+          "text": "Skripti ndogo huendeshwa kando ya PDS yako, kwa ratiba unayochagua. Inasoma barua pepe za akaunti papo hapo. Nenosiri lako la msimamizi haliondoki kamwe kwenye mashine yako."
         },
         "s2": {
           "title": "Alama za vidole zinatengenezwa nyumbani",
-          "text": "Kila anwani huchanganywa kwa njia moja kwenye seva yako mwenyewe. Kuanzia sasa, hakuna barua pepe ya maandishi wazi popote katika mchakato."
+          "text": "Kila anwani huchanganywa kwa njia moja kwenye seva yako mwenyewe, kwa ufunguo wa mtandao unaoupokea unapojisajili. Kuanzia sasa, hakuna barua pepe ya maandishi wazi popote katika mchakato."
         },
         "s3": {
           "title": "Picha inasukumwa",
@@ -2139,29 +2139,29 @@
     },
     "register": {
       "heading": "Jiunge kama mwenyeji wa ePDS",
-      "intro": "Hushiriki kamwe nenosiri lako la msimamizi, na husubiri kamwe router ikupigie. Jisajili mara moja, sukuma alama za vidole kwa ratiba yako mwenyewe, na muombe mwendeshaji akuidhinishe.",
-      "p1": "Kujisajili ni wito mmoja bila vitambulisho — jibu linabeba tokeni yako ya kusukuma (ihifadhi, inaonyeshwa mara moja tu). Seva yako inabaki inasubiri na haionekani kwenye tafutizi hadi mwendeshaji wa router aidhinishe.",
-      "enrollLabel": "1 · sajili seva yako",
-      "pushLabel": "2 · sukuma alama za vidole kwa kipima muda",
-      "approveNote": "3 · Muombe mwendeshaji wa router aidhinishe usajili wako — tafutizi zinaanza mara tu atakapofanya hivyo. Kuondoka ni uamuzi wako peke yako: acha kusukuma, au muombe mwendeshaji aondoe ingizo lako."
+      "intro": "Hushiriki kamwe nenosiri lako la msimamizi na husubiri mtu yeyote. Skripti moja inakusajili na kuanza kusukuma mara moja.",
+      "p1": "Katika mzunguko wake wa kwanza, skripti inasajili seva yako kwenye router, inahifadhi tokeni yako ya kusukuma kando yake (hifadhi faili hilo), inachukua ufunguo wa pamoja wa mtandao, na kusukuma picha yako ya kwanza. Seva yako inapatikana ndani ya sekunde.",
+      "enrollLabel": "1 · endesha skripti ya kusukuma",
+      "pushLabel": "2 · iweke kwenye kipima muda",
+      "approveNote": "Ndivyo hivyo. Hakuna foleni ya idhini, hakuna kusubiri. Kuondoka ni uamuzi wako peke yako: acha kusukuma, au muombe mwendeshaji wa router aondoe ingizo lako. Mwendeshaji pia anaweza kuondoa maingizo mabaya wakati wowote."
     },
     "integrate": {
       "heading": "Unganisha tafutizi kwenye programu yako",
       "intro": "Programu za mteja hupata tokeni yao wenyewe kutoka kwa mwendeshaji wa router. Wito mmoja kabla ya kuonyesha skrini ya kuingia unatosha.",
       "lookupLabel": "tafuta barua pepe",
       "jsLabel": "shughulikia matokeo matatu",
-      "cacheTip": "Kidokezo: baada ya kuingia kwa mara ya kwanza kufanikiwa, hifadhi utambulisho wa akaunti (DID) kwenye programu yako. Tangu hapo mtandao unaweza kupata seva sahihi wenyewe, na router inahitajika tu kwa wageni wapya kabisa."
+      "cacheTip": "Jibu linabeba utambulisho wa kudumu wa kila akaunti (DID yake). Mtandao unaweza daima kupata seva ya sasa ya DID, hata baada ya akaunti kuhama. Programu yako haitegemei kamwe anwani za seva zilizohifadhiwa: utafutaji mmoja, kisha utatuzi wa kawaida wa AT Protocol unamaliza kazi."
     },
     "api": {
       "heading": "API kwa mtazamo mmoja",
-      "intro": "Vituo vitano vidogo. Utafutaji na hali hutumia tokeni ya mteja; kusimamia seva hutumia tokeni ya msimamizi.",
-      "lookup": "Uliza seva zipi zinaijua barua pepe.",
+      "intro": "Utafutaji na hali hutumia tokeni ya mteja. Wenyeji hutumia tokeni yao ya kusukuma. Tokeni ya mwendeshaji ni ya usimamizi tu.",
+      "lookup": "Uliza akaunti zipi (DID) zipo kwa barua pepe.",
       "status": "Hali ya usawazishaji ya kila seva: idadi ya akaunti, usawazishaji wa mwisho, hitilafu ya mwisho.",
-      "unregister": "Ondoa seva iliyosajiliwa (tokeni ya msimamizi).",
-      "enroll": "Sajili seva yako. Wito wazi bila vitambulisho; hurudisha tokeni ya kusukuma ya mara moja na ingizo linalosubiri.",
-      "digests": "Sukuma picha kamili ya alama za vidole za barua pepe (SHA-256 heksi). Kila msukumo huchukua nafasi ya uliotangulia.",
-      "script": "Skripti ya kusukuma tayari kwa wenyeji — Python 3, maktaba ya kawaida tu.",
-      "approve": "Mwendeshaji huidhinisha usajili; tafutizi zinaanza kuutumikia (tokeni ya msimamizi)."
+      "enroll": "Sajili seva yako. Wito wazi bila vitambulisho. Inaanza kazi mara moja, hurudisha tokeni ya kusukuma ya mara moja.",
+      "pepper": "Ufunguo wa pamoja wa mtandao wa kutengeneza alama za vidole. Hutolewa kwa wenyeji waliosajiliwa.",
+      "digests": "Sukuma picha kamili ya jozi za alama za vidole na utambulisho. Kila msukumo huchukua nafasi ya uliotangulia.",
+      "script": "Skripti ya kusukuma tayari kwa wenyeji. Python 3, maktaba ya kawaida tu.",
+      "unregister": "Ondoa seva iliyosajiliwa (mwendeshaji wa router pekee)."
     },
     "snippets": {
       "copy": "Nakili",
