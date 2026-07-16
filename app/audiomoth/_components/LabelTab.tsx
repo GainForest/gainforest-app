@@ -102,6 +102,16 @@ function formatFrequency(hz: number): string {
   return hz >= 1_000 ? `${(hz / 1_000).toFixed(hz >= 10_000 ? 0 : 1)} kHz` : `${Math.round(hz)} Hz`;
 }
 
+/**
+ * Prefer the researcher-entered species scientific name over the vernacular
+ * name (which falls back to the broad group, e.g. "Bird", when the common
+ * name was left blank).
+ */
+function occurrenceDisplayName(item: AudioOccurrenceItem): string {
+  if (item.record.taxonRank === "species" && item.scientificName) return item.scientificName;
+  return item.commonName || item.scientificName;
+}
+
 function boundsToBox(
   item: AudioOccurrenceItem,
   durationSeconds: number,
@@ -311,7 +321,7 @@ export function LabelTab({ sessionDid }: { sessionDid: string | null }) {
       fileKey: selectedRecording.uri,
       fileName: selectedRecording.name,
       category: item.category,
-      species: item.commonName || item.scientificName,
+      species: occurrenceDisplayName(item),
       note: item.note,
       ...item.bounds,
       box: ready ? boundsToBox(item, ready.durationSeconds, ready.maxFrequencyHz) : { startX: 0, endX: 0, topY: 0, bottomY: 0 },
@@ -445,7 +455,7 @@ export function LabelTab({ sessionDid }: { sessionDid: string | null }) {
                       <div key={item.uri} className={cn("flex items-center gap-2 rounded-xl border p-2.5", editingUri === item.uri ? "border-primary bg-primary/[0.04]" : "border-border") }>
                         <button type="button" onClick={() => selectExisting(item)} className="min-w-0 flex-1 text-left">
                           <span className={cn("inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold", CATEGORY_STYLES[item.category].chip)}>{t(`categories.${item.category}`)}</span>
-                          <p className="mt-1 truncate text-xs font-medium text-foreground">{item.commonName || item.scientificName}</p>
+                          <p className="mt-1 truncate text-xs font-medium text-foreground">{occurrenceDisplayName(item)}</p>
                           <p className="mt-0.5 text-[10px] text-muted-foreground">{formatTime(item.bounds.startTimeSeconds)}–{formatTime(item.bounds.endTimeSeconds)} · {formatFrequency(item.bounds.minFrequencyHz)}–{formatFrequency(item.bounds.maxFrequencyHz)}</p>
                         </button>
                         <span className="text-[10px] font-medium text-primary">{t("saved")}</span>
@@ -634,7 +644,7 @@ function SpectrogramEditor({
             {duration > 0 ? <div className="pointer-events-none absolute inset-y-0 w-px bg-white/80 shadow-[0_0_7px_rgba(255,255,255,.7)]" style={{ left: `${(currentTime / duration) * 100}%` }} /> : null}
             {labels.map((item) => {
               const box = boundsToBox(item, duration || 1, maxFrequency || 1);
-              const name = item.commonName || item.scientificName || t(`categories.${item.category}`);
+              const name = occurrenceDisplayName(item) || t(`categories.${item.category}`);
               return (
                 <button key={item.uri} type="button" onPointerDown={(event) => event.stopPropagation()} onPointerMove={(event) => event.stopPropagation()} onPointerUp={(event) => event.stopPropagation()} onClick={(event) => { event.stopPropagation(); onSelectLabel(item); seekTo(item.bounds.startTimeSeconds); }} className={cn("group absolute z-10 border-2 transition-colors", CATEGORY_STYLES[item.category].box, editingUri === item.uri && "ring-2 ring-white ring-offset-1 ring-offset-transparent")} style={{ left: `${box.startX * 100}%`, top: `${box.topY * 100}%`, width: `${(box.endX - box.startX) * 100}%`, height: `${(box.bottomY - box.topY) * 100}%` }} aria-label={name}>
                   <span className={cn("pointer-events-none absolute z-30 whitespace-nowrap rounded-md bg-black/85 px-2 py-0.5 text-[10px] font-medium text-white opacity-0 shadow-lg transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100", box.topY > 0.1 ? "bottom-full mb-1" : "top-full mt-1", box.startX < 0.5 ? "left-0" : "right-0")}>{name}</span>
