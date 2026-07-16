@@ -87,6 +87,7 @@
     "shareOnTelegram": "Share on Telegram",
     "copyShareText": "Copy share text",
     "exploreMore": "Explore more projects",
-    "emptyTitle": "Your cart is empty"
+    "emptyTitle": "Your cart is empty",
+    "singleApprovalNote": "Your wallet will ask for a single approval covering the whole total. GainForest then forwards each donation to its organization."
   }
 }

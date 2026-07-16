@@ -61,6 +61,7 @@ import {
   toUsdcUnits,
   USDC_CONTRACT,
 } from "@/lib/facilitator/usdc";
+import { FACILITATOR_WALLET_ADDRESS } from "@/app/_lib/urls";
 
 type RecipientState = { status: "loading" } | { status: "ready"; address: string } | { status: "unavailable" };
 
@@ -139,6 +140,82 @@ async function signAndSettle(params: {
   const raw = (await response.json().catch(() => null)) as { transactionHash?: string } | null;
   if (!response.ok || typeof raw?.transactionHash !== "string") return { errorRaw: raw };
   return { txHash: raw.transactionHash };
+}
+
+type BatchLineResult = {
+  orgDid: string;
+  rkey?: string;
+  amount: string;
+  transactionHash?: string;
+  error?: string;
+};
+
+type BatchResponse = {
+  success?: boolean;
+  pullTransactionHash?: string;
+  lines?: BatchLineResult[];
+  tip?: { amount: string; transactionHash?: string; error?: string };
+  error?: string;
+  code?: string;
+};
+
+/**
+ * ONE wallet approval for the whole cart: the donor authorizes the TOTAL to
+ * the facilitator wallet, which fans it out to every organization plus the
+ * tip server-side (see /api/checkout).
+ */
+async function signAndSettleBatch(params: {
+  ethereum: EthereumProvider;
+  senderWallet: string;
+  facilitatorWallet: string;
+  totalUnits: bigint;
+  body: Record<string, unknown>;
+  onSigned?: () => void;
+}): Promise<{ ok: true; response: BatchResponse } | { ok: false; errorRaw: unknown }> {
+  const nonce = createNonce();
+  const validBefore = String(Math.floor(Date.now() / 1000) + 300);
+  const typedData = {
+    domain: {
+      name: EIP3009_DOMAIN_NAME,
+      version: EIP3009_DOMAIN_VERSION,
+      chainId: CHAIN_ID,
+      verifyingContract: USDC_CONTRACT,
+    },
+    types: EIP3009_TYPES_FOR_WALLET,
+    primaryType: "TransferWithAuthorization",
+    message: {
+      from: params.senderWallet,
+      to: params.facilitatorWallet,
+      value: params.totalUnits.toString(),
+      validAfter: "0",
+      validBefore,
+      nonce,
+    },
+  };
+
+  const signature = await params.ethereum.request<`0x${string}`>({
+    method: "eth_signTypedData_v4",
+    params: [params.senderWallet, JSON.stringify(typedData)],
+  });
+  params.onSigned?.();
+
+  const sigHeader = createPaymentSignatureHeader({
+    signature,
+    senderWallet: params.senderWallet,
+    recipientWallet: params.facilitatorWallet,
+    usdcAmount: params.totalUnits,
+    nonce,
+    validBefore,
+  });
+
+  const response = await fetch("/api/checkout", {
+    method: "POST",
+    headers: { "content-type": "application/json", "PAYMENT-SIGNATURE": sigHeader },
+    body: JSON.stringify(params.body),
+  });
+  const raw = (await response.json().catch(() => null)) as BatchResponse | null;
+  if (!response.ok || !raw?.success) return { ok: false, errorRaw: raw };
+  return { ok: true, response: raw };
 }
 
 export function CheckoutView({ authSession }: { authSession: AuthSession }) {
@@ -260,6 +337,7 @@ export function CheckoutView({ authSession }: { authSession: AuthSession }) {
     setPhase("paying");
 
     const lines = payableItems.map((item) => ({ item, key: cartItemKey(item) }));
+    const includeTip = tipUsd > 0 && tipEnabled && tipConfig.status === "ready" && !!tipConfig.address;
     const initialStates: Record<string, LineState> = {};
     for (const line of lines) initialStates[line.key] = { phase: "pending" };
     if (tipUsd > 0 && tipEnabled) initialStates[TIP_LINE_KEY] = { phase: "pending" };
@@ -270,6 +348,90 @@ export function CheckoutView({ authSession }: { authSession: AuthSession }) {
 
     const results: CompletedLine[] = [];
     let anyFailed = false;
+
+    // Batched settlement: one wallet approval for the whole cart. The donor
+    // authorizes the total to the facilitator, which fans it out server-side.
+    // A single donation without a tip keeps the direct donor→org transfer.
+    const facilitatorWallet = FACILITATOR_WALLET_ADDRESS;
+    if (facilitatorWallet && lines.length + (includeTip ? 1 : 0) > 1) {
+      const readyLines = lines.filter(({ item }) => recipients[item.orgDid]?.status === "ready");
+      const totalUnits =
+        readyLines.reduce((sum, { item }) => sum + toUsdcUnits(item.amountUsd), 0n) +
+        (includeTip ? toUsdcUnits(tipUsd) : 0n);
+      for (const { key } of readyLines) setLine(key, { phase: "signing" });
+      if (includeTip) setLine(TIP_LINE_KEY, { phase: "signing" });
+
+      try {
+        const outcome = await signAndSettleBatch({
+          ethereum,
+          senderWallet: wallet.address,
+          facilitatorWallet,
+          totalUnits,
+          onSigned: () => {
+            for (const { key } of readyLines) setLine(key, { phase: "processing" });
+            if (includeTip) setLine(TIP_LINE_KEY, { phase: "processing" });
+          },
+          body: {
+            lines: readyLines.map(({ item }) => ({
+              orgDid: item.orgDid,
+              rkey: item.rkey,
+              amount: String(item.amountUsd),
+            })),
+            ...(includeTip ? { tipAmount: String(tipUsd) } : {}),
+            anonymous: authSession.isLoggedIn ? anonymous : true,
+            donorDid: authSession.isLoggedIn && !anonymous ? authSession.did : undefined,
+          },
+        });
+
+        if (outcome.ok) {
+          for (const { item, key } of readyLines) {
+            const lineResult = outcome.response.lines?.find(
+              (line) => line.orgDid === item.orgDid && line.rkey === item.rkey,
+            );
+            if (lineResult?.transactionHash) {
+              setLine(key, { phase: "done", txHash: lineResult.transactionHash });
+              results.push({ kind: "donation", title: item.title, orgName: item.orgName, amountUsd: item.amountUsd, txHash: lineResult.transactionHash });
+              removeItem(item.orgDid, item.rkey);
+            } else {
+              anyFailed = true;
+              setLine(key, { phase: "failed", error: lineResult?.error ?? t("errorGeneric") });
+            }
+          }
+          if (includeTip) {
+            const tipResult = outcome.response.tip;
+            if (tipResult?.transactionHash) {
+              setLine(TIP_LINE_KEY, { phase: "done", txHash: tipResult.transactionHash });
+              results.push({ kind: "tip", title: t("tipLineLabel"), orgName: "GainForest", amountUsd: tipUsd, txHash: tipResult.transactionHash });
+            } else {
+              // A failed tip never blocks the donations that already settled.
+              setLine(TIP_LINE_KEY, { phase: "failed", error: tipResult?.error ?? t("tipFailed") });
+            }
+          }
+        } else {
+          anyFailed = true;
+          const message = parseSettleError(outcome.errorRaw);
+          for (const { key } of readyLines) setLine(key, { phase: "failed", error: message });
+          if (includeTip) setLine(TIP_LINE_KEY, { phase: "failed", error: t("tipSkipped") });
+        }
+      } catch (error) {
+        anyFailed = true;
+        const message = error instanceof Error && error.message ? error.message.split("\n")[0] : t("errorGeneric");
+        for (const { key } of readyLines) setLine(key, { phase: "failed", error: message });
+        if (includeTip) setLine(TIP_LINE_KEY, { phase: "failed", error: t("tipSkipped") });
+      }
+
+      const balance = await readUsdcBalance(ethereum, wallet.address).catch(() => null);
+      setWallet((current) => (current ? { ...current, balance } : current));
+
+      setCompleted((current) => [...current, ...results]);
+      payingRef.current = false;
+      if (!anyFailed && results.length > 0) {
+        setPhase("done");
+      } else {
+        setPhase("review");
+      }
+      return;
+    }
 
     for (const { item, key } of lines) {
       const recipient = recipients[item.orgDid];
@@ -673,7 +835,9 @@ export function CheckoutView({ authSession }: { authSession: AuthSession }) {
 
           {payableItems.length > 1 || (tipEnabled && tipUsd > 0) ? (
             <p className="mt-3 text-xs leading-5 text-muted-foreground">
-              {t("multiApprovalNote", { count: payableItems.length + (tipEnabled && tipUsd > 0 ? 1 : 0) })}
+              {FACILITATOR_WALLET_ADDRESS
+                ? t("singleApprovalNote")
+                : t("multiApprovalNote", { count: payableItems.length + (tipEnabled && tipUsd > 0 ? 1 : 0) })}
             </p>
           ) : null}
 

@@ -14,6 +14,31 @@ function getFacilitatorAccount() {
   return privateKeyToAccount(getRequiredEnv("FACILITATOR_PRIVATE_KEY") as `0x${string}`);
 }
 
+/** The facilitator's own address — the `to` of batched checkout authorizations. */
+export function getFacilitatorAddress(): `0x${string}` {
+  return getFacilitatorAccount().address;
+}
+
+/**
+ * Plain USDC transfer from the facilitator wallet. Used by the batched
+ * checkout: the donor signs ONE authorization for the total to the
+ * facilitator, which then fans the money out to each recipient.
+ */
+export async function executeUsdcTransfer(params: { to: `0x${string}`; value: bigint }): Promise<{ transactionHash: `0x${string}` }> {
+  const account = getFacilitatorAccount();
+  const walletClient = getWalletClient();
+  const publicClient = getPublicClient();
+  const txHash = await walletClient.writeContract({
+    address: USDC_CONTRACT,
+    abi: USDC_ABI,
+    functionName: "transfer",
+    account,
+    args: [params.to, params.value],
+  });
+  await publicClient.waitForTransactionReceipt({ hash: txHash });
+  return { transactionHash: txHash };
+}
+
 function getPublicClient() {
   return createPublicClient({
     chain: mainnet,

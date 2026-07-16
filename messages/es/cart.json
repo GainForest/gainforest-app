@@ -87,6 +87,7 @@
     "shareOnTelegram": "Compartir en Telegram",
     "copyShareText": "Copiar texto para compartir",
     "exploreMore": "Explorar más proyectos",
-    "emptyTitle": "Tu carrito está vacío"
+    "emptyTitle": "Tu carrito está vacío",
+    "singleApprovalNote": "Tu billetera pedirá una sola aprobación por el total. Después, GainForest envía cada donación a su organización."
   }
 }
