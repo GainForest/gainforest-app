@@ -2065,12 +2065,13 @@
     },
     "demo": {
       "heading": "Prueba una consulta",
-      "intro": "Tres servidores de ejemplo, tres emails de ejemplo. Elige uno y mira cómo el router lo enruta.",
+      "intro": "Tres servidores de ejemplo, tres emails de ejemplo. Elige uno y mira cómo la app encuentra la cuenta correcta.",
       "reset": "Reiniciar",
-      "ariaLabel": "Diagrama de enrutamiento de consultas de email",
+      "ariaLabel": "Diagrama de consulta de email y resolución de identidad",
       "nodes": {
         "app": "Tu app",
         "router": "Router",
+        "directory": "Directorio de identidades",
         "forest": "PDS Bosque",
         "ocean": "PDS Océano",
         "river": "PDS Río"
@@ -2078,29 +2079,37 @@
       "steps": {
         "idle": {
           "title": "Elige un email arriba",
-          "text": "La app quiere iniciar una sesión por email. Todavía no sabe dónde vive la cuenta."
+          "text": "La app quiere iniciar una sesión por email. Todavía no sabe a qué cuenta pertenece este email."
         },
         "sent": {
           "title": "La app pregunta al router",
           "text": "Envía el email por una llamada privada y autenticada. Las consultas nunca se escriben en ningún registro."
         },
         "fingerprint": {
-          "title": "El router lo cifra",
-          "text": "El email se convierte en una huella al llegar. Solo la huella se compara con el conjunto de cada servidor."
+          "title": "El router compara huellas",
+          "text": "El email se convierte en una huella al llegar. El router la compara con el conjunto de huellas de cada servidor."
+        },
+        "answer": {
+          "title": "El router responde con identidades",
+          "text": "La respuesta no es la dirección de un servidor. Es la identidad permanente de la cuenta, llamada DID. El trabajo del router termina aquí."
+        },
+        "resolve": {
+          "title": "La red encuentra el hogar",
+          "text": "La app pregunta al directorio de identidades dónde vive esta identidad hoy. Es la resolución estándar del AT Protocol y sigue siendo correcta incluso si la cuenta cambia de servidor."
         }
       },
       "outcomes": {
         "one": {
-          "title": "Un hogar encontrado",
-          "text": "Exactamente un servidor conoce este email, así que la app inicia la sesión allí. El código llega a la bandeja correcta."
+          "title": "Una cuenta encontrada",
+          "text": "El directorio señala el servidor actual de la cuenta. La sesión se inicia allí y el código llega a la bandeja correcta."
         },
         "many": {
-          "title": "Dos hogares encontrados",
-          "text": "Dos servidores conocen este email. Son dos cuentas separadas. La app muestra un selector y la persona elige cuál usar."
+          "title": "Dos cuentas encontradas",
+          "text": "Este email tiene dos identidades separadas. La app muestra un selector, y cada identidad se resuelve a su propio servidor."
         },
         "none": {
-          "title": "Aún sin hogar",
-          "text": "Ningún servidor conoce este email, así que la app ofrece crear una cuenta nueva en su servidor predeterminado."
+          "title": "Aún sin cuenta",
+          "text": "No existe ninguna identidad para este email, así que la app ofrece crear una cuenta nueva en su servidor predeterminado."
         }
       }
     },
@@ -2125,7 +2134,7 @@
         },
         "s2": {
           "title": "Las huellas se hacen en casa",
-          "text": "Cada dirección se cifra de forma irreversible en tu propio servidor, con una clave de red que recibes al inscribirte. Desde este momento, no existe ningún email en claro en todo el proceso."
+          "text": "Cada dirección se cifra de forma irreversible en tu propio servidor. Desde este momento, no existe ningún email en claro en todo el proceso."
         },
         "s3": {
           "title": "Se envía la instantánea",
@@ -2140,7 +2149,7 @@
     "register": {
       "heading": "Únete como anfitrión de ePDS",
       "intro": "Nunca compartes tu contraseña de administrador y nunca esperas a nadie. Un solo script te inscribe y empieza a enviar de inmediato.",
-      "p1": "En su primera ejecución, el script inscribe tu servidor en el router, guarda tu token de envío junto a sí mismo (conserva ese archivo), obtiene la clave compartida de la red y envía tu primera instantánea. Tu servidor es localizable en segundos.",
+      "p1": "En su primera ejecución, el script inscribe tu servidor en el router, guarda tu token de envío junto a sí mismo (conserva ese archivo) y envía tu primera instantánea. Tu servidor es localizable en segundos.",
       "enrollLabel": "1 · ejecuta el script de envío",
       "pushLabel": "2 · ponlo en un temporizador",
       "approveNote": "Eso es todo. Sin cola de aprobación, sin esperas. Irte es solo decisión tuya: deja de enviar, o pide al operador del router que elimine tu entrada. El operador también puede eliminar entradas abusivas en cualquier momento."
@@ -2158,7 +2167,6 @@
       "lookup": "Pregunta qué cuentas (DIDs) existen para un email.",
       "status": "Estado de sincronización de cada servidor: número de cuentas, última sincronización, último error.",
       "enroll": "Inscribe tu servidor. Llamada abierta, sin credenciales. Activo de inmediato, devuelve un token de envío de un solo uso.",
-      "pepper": "La clave compartida de la red para crear huellas. Se entrega a los anfitriones inscritos.",
       "digests": "Envía una instantánea completa de pares de huella e identidad. Cada envío reemplaza al anterior.",
       "script": "El script de envío listo para usar. Python 3, solo biblioteca estándar.",
       "unregister": "Elimina un servidor inscrito (solo el operador del router)."

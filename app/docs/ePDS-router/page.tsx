@@ -143,7 +143,6 @@ export default async function EpdsRouterDocsPage() {
               <ApiRow method="POST" path="/v1/lookup" text={t("api.lookup")} />
               <ApiRow method="GET" path="/v1/status" text={t("api.status")} />
               <ApiRow method="POST" path="/v1/enroll" text={t("api.enroll")} />
-              <ApiRow method="GET" path="/v1/instances/:id/pepper" text={t("api.pepper")} />
               <ApiRow method="PUT" path="/v1/instances/:id/digests" text={t("api.digests")} />
               <ApiRow method="GET" path="/push-digests.py" text={t("api.script")} />
               <ApiRow method="DELETE" path="/v1/instances/:id" text={t("api.unregister")} />

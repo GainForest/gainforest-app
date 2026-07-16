@@ -2065,12 +2065,13 @@
     },
     "demo": {
       "heading": "Coba sebuah pencarian",
-      "intro": "Tiga server contoh, tiga email contoh. Pilih satu dan lihat router mengarahkannya.",
+      "intro": "Tiga server contoh, tiga email contoh. Pilih satu dan lihat bagaimana aplikasi menemukan akun yang tepat.",
       "reset": "Ulangi",
-      "ariaLabel": "Diagram perutean pencarian email",
+      "ariaLabel": "Diagram pencarian email dan resolusi identitas",
       "nodes": {
         "app": "Aplikasi Anda",
         "router": "Router",
+        "directory": "Direktori identitas",
         "forest": "PDS Hutan",
         "ocean": "PDS Samudra",
         "river": "PDS Sungai"
@@ -2078,29 +2079,37 @@
       "steps": {
         "idle": {
           "title": "Pilih email di atas",
-          "text": "Aplikasi ingin memulai masuk lewat email. Ia belum tahu di mana akunnya tinggal."
+          "text": "Aplikasi ingin memulai masuk lewat email. Ia belum tahu email ini milik akun yang mana."
         },
         "sent": {
           "title": "Aplikasi bertanya ke router",
           "text": "Email dikirim lewat panggilan privat yang terautentikasi. Pencarian tidak pernah ditulis ke log mana pun."
         },
         "fingerprint": {
-          "title": "Router mengacaknya",
-          "text": "Email menjadi sidik jari begitu tiba. Hanya sidik jarinya yang dibandingkan dengan himpunan tiap server."
+          "title": "Router membandingkan sidik jari",
+          "text": "Email menjadi sidik jari begitu tiba. Router membandingkannya dengan himpunan sidik jari tiap server."
+        },
+        "answer": {
+          "title": "Router menjawab dengan identitas",
+          "text": "Jawabannya bukan alamat server. Jawabannya adalah identitas permanen akun, yang disebut DID. Tugas router selesai di sini."
+        },
+        "resolve": {
+          "title": "Jaringan menemukan rumahnya",
+          "text": "Aplikasi bertanya ke direktori identitas di mana identitas ini tinggal hari ini. Ini resolusi standar AT Protocol dan tetap benar meski akun pindah server."
         }
       },
       "outcomes": {
         "one": {
-          "title": "Satu rumah ditemukan",
-          "text": "Tepat satu server mengenal email ini, jadi aplikasi memulai proses masuk di sana. Kodenya sampai ke kotak masuk yang benar."
+          "title": "Satu akun ditemukan",
+          "text": "Direktori menunjuk ke server rumah akun saat ini. Proses masuk dimulai di sana dan kodenya sampai ke kotak masuk yang benar."
         },
         "many": {
-          "title": "Dua rumah ditemukan",
-          "text": "Dua server mengenal email ini. Itu dua akun terpisah. Aplikasi menampilkan pemilih dan orangnya memilih yang mana yang dipakai."
+          "title": "Dua akun ditemukan",
+          "text": "Email ini punya dua identitas terpisah. Aplikasi menampilkan pemilih, dan tiap identitas menemukan server rumahnya sendiri."
         },
         "none": {
-          "title": "Belum punya rumah",
-          "text": "Tidak ada server yang mengenal email ini, jadi aplikasi menawarkan membuat akun baru di server bawaannya."
+          "title": "Belum ada akun",
+          "text": "Tidak ada identitas untuk email ini, jadi aplikasi menawarkan membuat akun baru di server bawaannya."
         }
       }
     },
@@ -2125,7 +2134,7 @@
         },
         "s2": {
           "title": "Sidik jari dibuat di rumah",
-          "text": "Setiap alamat diacak satu arah di server Anda sendiri, dengan kunci jaringan yang Anda terima saat mendaftar. Sejak saat ini, tidak ada email teks polos di mana pun dalam prosesnya."
+          "text": "Setiap alamat diacak satu arah di server Anda sendiri. Sejak saat ini, tidak ada email teks polos di mana pun dalam prosesnya."
         },
         "s3": {
           "title": "Potret didorong",
@@ -2140,7 +2149,7 @@
     "register": {
       "heading": "Bergabung sebagai tuan rumah ePDS",
       "intro": "Anda tidak pernah membagikan kata sandi admin dan tidak pernah menunggu siapa pun. Satu skrip mendaftarkan Anda dan langsung mulai mendorong.",
-      "p1": "Pada jalanan pertamanya, skrip mendaftarkan server Anda ke router, menyimpan token kirim di sampingnya (simpan berkas itu), mengambil kunci jaringan bersama, dan mendorong potret pertama Anda. Server Anda dapat ditemukan dalam hitungan detik.",
+      "p1": "Pada jalanan pertamanya, skrip mendaftarkan server Anda ke router, menyimpan token kirim di sampingnya (simpan berkas itu), dan mendorong potret pertama Anda. Server Anda dapat ditemukan dalam hitungan detik.",
       "enrollLabel": "1 · jalankan skrip dorong",
       "pushLabel": "2 · pasang di pewaktu",
       "approveNote": "Selesai. Tanpa antrean persetujuan, tanpa menunggu. Keluar sepenuhnya pilihan Anda: berhenti mendorong, atau minta operator router menghapus entri Anda. Operator juga dapat menghapus entri yang menyalahgunakan kapan saja."
@@ -2158,7 +2167,6 @@
       "lookup": "Tanyakan akun (DID) mana yang ada untuk sebuah email.",
       "status": "Keadaan sinkronisasi tiap server: jumlah akun, sinkronisasi terakhir, galat terakhir.",
       "enroll": "Daftarkan server Anda. Panggilan terbuka tanpa kredensial. Langsung aktif, mengembalikan token kirim sekali-tampil.",
-      "pepper": "Kunci jaringan bersama untuk membuat sidik jari. Diberikan ke tuan rumah yang terdaftar.",
       "digests": "Dorong potret lengkap pasangan sidik jari dan identitas. Setiap dorongan menggantikan yang sebelumnya.",
       "script": "Skrip dorong siap pakai untuk tuan rumah. Python 3, hanya pustaka standar.",
       "unregister": "Hapus server terdaftar (hanya operator router)."

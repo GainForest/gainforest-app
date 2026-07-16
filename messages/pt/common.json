@@ -2065,12 +2065,13 @@
     },
     "demo": {
       "heading": "Experimente uma consulta",
-      "intro": "Três servidores de exemplo, três emails de exemplo. Escolha um e veja o roteador encaminhá-lo.",
+      "intro": "Três servidores de exemplo, três emails de exemplo. Escolha um e veja como o app encontra a conta certa.",
       "reset": "Reiniciar",
-      "ariaLabel": "Diagrama de roteamento de consultas de email",
+      "ariaLabel": "Diagrama de consulta de email e resolução de identidade",
       "nodes": {
         "app": "Seu app",
         "router": "Roteador",
+        "directory": "Diretório de identidades",
         "forest": "PDS Floresta",
         "ocean": "PDS Oceano",
         "river": "PDS Rio"
@@ -2078,29 +2079,37 @@
       "steps": {
         "idle": {
           "title": "Escolha um email acima",
-          "text": "O app quer iniciar um login por email. Ainda não sabe onde a conta vive."
+          "text": "O app quer iniciar um login por email. Ainda não sabe a qual conta este email pertence."
         },
         "sent": {
           "title": "O app pergunta ao roteador",
           "text": "Ele envia o email por uma chamada privada e autenticada. As consultas nunca são gravadas em nenhum registro."
         },
         "fingerprint": {
-          "title": "O roteador o embaralha",
-          "text": "O email vira uma impressão digital ao chegar. Só a impressão é comparada com o conjunto de cada servidor."
+          "title": "O roteador compara impressões",
+          "text": "O email vira uma impressão digital ao chegar. O roteador a compara com o conjunto de impressões de cada servidor."
+        },
+        "answer": {
+          "title": "O roteador responde com identidades",
+          "text": "A resposta não é o endereço de um servidor. É a identidade permanente da conta, chamada DID. O trabalho do roteador termina aqui."
+        },
+        "resolve": {
+          "title": "A rede encontra o lar",
+          "text": "O app pergunta ao diretório de identidades onde esta identidade vive hoje. É a resolução padrão do AT Protocol e continua correta mesmo se a conta mudar de servidor."
         }
       },
       "outcomes": {
         "one": {
-          "title": "Um lar encontrado",
-          "text": "Exatamente um servidor conhece este email, então o app inicia o login lá. O código chega à caixa de entrada certa."
+          "title": "Uma conta encontrada",
+          "text": "O diretório aponta para o servidor atual da conta. O login começa lá e o código chega à caixa de entrada certa."
         },
         "many": {
-          "title": "Dois lares encontrados",
-          "text": "Dois servidores conhecem este email. São duas contas separadas. O app mostra um seletor e a pessoa escolhe qual usar."
+          "title": "Duas contas encontradas",
+          "text": "Este email tem duas identidades separadas. O app mostra um seletor, e cada identidade resolve para seu próprio servidor."
         },
         "none": {
-          "title": "Ainda sem lar",
-          "text": "Nenhum servidor conhece este email, então o app oferece criar uma conta nova no seu servidor padrão."
+          "title": "Ainda sem conta",
+          "text": "Nenhuma identidade existe para este email, então o app oferece criar uma conta nova no seu servidor padrão."
         }
       }
     },
@@ -2125,7 +2134,7 @@
         },
         "s2": {
           "title": "As impressões são feitas em casa",
-          "text": "Cada endereço é embaralhado de forma irreversível no seu próprio servidor, com uma chave de rede que você recebe ao se inscrever. A partir deste momento, nenhum email em texto claro existe no processo."
+          "text": "Cada endereço é embaralhado de forma irreversível no seu próprio servidor. A partir deste momento, nenhum email em texto claro existe no processo."
         },
         "s3": {
           "title": "O retrato é enviado",
@@ -2140,7 +2149,7 @@
     "register": {
       "heading": "Participe como anfitrião de ePDS",
       "intro": "Você nunca compartilha sua senha de administrador e nunca espera por ninguém. Um único script inscreve você e começa a enviar imediatamente.",
-      "p1": "Na primeira execução, o script inscreve seu servidor no roteador, guarda seu token de envio ao lado dele (guarde esse arquivo), busca a chave compartilhada da rede e envia seu primeiro retrato. Seu servidor fica localizável em segundos.",
+      "p1": "Na primeira execução, o script inscreve seu servidor no roteador, guarda seu token de envio ao lado dele (guarde esse arquivo) e envia seu primeiro retrato. Seu servidor fica localizável em segundos.",
       "enrollLabel": "1 · execute o script de envio",
       "pushLabel": "2 · coloque-o num temporizador",
       "approveNote": "É isso. Sem fila de aprovação, sem espera. Sair é decisão só sua: pare de enviar, ou peça ao operador do roteador para remover sua entrada. O operador também pode remover entradas abusivas a qualquer momento."
@@ -2158,7 +2167,6 @@
       "lookup": "Pergunte quais contas (DIDs) existem para um email.",
       "status": "Estado de sincronização de cada servidor: número de contas, última sincronização, último erro.",
       "enroll": "Inscreva seu servidor. Chamada aberta, sem credenciais. Ativo imediatamente, devolve um token de envio de uso único.",
-      "pepper": "A chave compartilhada da rede para criar impressões. Entregue aos anfitriões inscritos.",
       "digests": "Envie um retrato completo de pares de impressão e identidade. Cada envio substitui o anterior.",
       "script": "O script de envio pronto para usar. Python 3, apenas biblioteca padrão.",
       "unregister": "Remove um servidor inscrito (apenas o operador do roteador)."
