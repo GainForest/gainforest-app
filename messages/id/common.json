@@ -243,7 +243,9 @@
         "editBio": "2. Temukan kolom bio/tentang Anda.",
         "pasteCode": "3. Tempel tautan DID GainForest di atas ke bio itu lalu simpan.",
         "returnVerify": "4. Kembali ke sini, tempel handle atau tautan profil iNaturalist Anda, lalu verifikasi."
-      }
+      },
+      "connect": "Hubungkan",
+      "hideSetup": "Sembunyikan penyiapan"
     }
   },
   "bumicertCard": {

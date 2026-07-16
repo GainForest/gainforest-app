@@ -320,11 +320,11 @@ export async function SettingsSection({ target }: { target: ManageTarget }) {
           </Button>
         </div>
         <div className="space-y-8">
-          <INaturalistSettingsSection target={target} projects={inaturalistProjects} disabledReason={createPermission.reason} />
           <div className="space-y-3">
             <p className="text-sm text-muted-foreground">{t("orgAgentKeysHint")}</p>
             <AgentKeysSection />
           </div>
+          <INaturalistSettingsSection target={target} projects={inaturalistProjects} disabledReason={createPermission.reason} />
         </div>
       </Container>
     );
@@ -343,8 +343,11 @@ export async function SettingsSection({ target }: { target: ManageTarget }) {
         <p className="mt-1 text-sm text-muted-foreground">{t("personalDescription")}</p>
       </div>
       <div className="mx-auto mt-8 mb-20 space-y-8">
-        <INaturalistSettingsSection target={target} projects={inaturalistProjects} disabledReason={createPermission.reason} />
-        <AccountSettingsSections did={target.did} handle={currentHandle} />
+        <AccountSettingsSections
+          did={target.did}
+          handle={currentHandle}
+          integrations={<INaturalistSettingsSection target={target} projects={inaturalistProjects} disabledReason={createPermission.reason} />}
+        />
       </div>
     </Container>
   );

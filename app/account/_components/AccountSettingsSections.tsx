@@ -1200,12 +1200,23 @@ function DangerZoneSection({ handle }: { handle: string | null }) {
   );
 }
 
-export function AccountSettingsSections({ did, handle }: { did: string; handle?: string | null }) {
+export function AccountSettingsSections({
+  did,
+  handle,
+  integrations,
+}: {
+  did: string;
+  handle?: string | null;
+  /** Extra integration sections (e.g. iNaturalist) slotted next to Bluesky,
+   *  so account basics stay on top and Advanced stays last. */
+  integrations?: React.ReactNode;
+}) {
   return (
     <div className="space-y-8">
       {handle ? <HandleSection did={did} handle={handle} /> : null}
       <PasswordSection did={did} />
       <BlueskySection did={did} />
+      {integrations}
       <AgentKeysSection />
       <Accordion type="single" collapsible>
         <AccordionItem value="advanced" className="border-none">

@@ -243,7 +243,9 @@
         "editBio": "2. Tafuta sehemu ya wasifu/kuhusu.",
         "pasteCode": "3. Bandika kiungo cha DID cha GainForest hapo juu kwenye wasifu huo na uhifadhi.",
         "returnVerify": "4. Rudi hapa, bandika jina au kiungo chako cha wasifu wa iNaturalist, kisha thibitisha."
-      }
+      },
+      "connect": "Unganisha",
+      "hideSetup": "Ficha usanidi"
     }
   },
   "bumicertCard": {

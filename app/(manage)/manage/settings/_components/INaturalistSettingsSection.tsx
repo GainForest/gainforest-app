@@ -131,6 +131,10 @@ export function INaturalistSettingsSection({
   const [loadingProjects, setLoadingProjects] = useState(false);
   const [syncing, setSyncing] = useState(false);
   const [verifying, setVerifying] = useState(false);
+  // The verification wizard is long (proof code + 4 steps + input) — keep it
+  // collapsed behind an explicit "Connect" click so the settings page stays
+  // scannable for people who don't use iNaturalist.
+  const [setupOpen, setSetupOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [truncated, setTruncated] = useState(false);
@@ -371,10 +375,14 @@ export function INaturalistSettingsSection({
               <LogOutIcon className="size-3.5" />
               {t("disconnect")}
             </Button>
-          ) : null}
+          ) : (
+            <Button type="button" variant={setupOpen ? "outline" : "default"} size="sm" onClick={() => setSetupOpen((open) => !open)}>
+              {setupOpen ? t("hideSetup") : t("connect")}
+            </Button>
+          )}
         </div>
 
-        {!connected ? (
+        {!connected && setupOpen ? (
           <div className="mt-4 space-y-3 border-t border-border/60 pt-4">
             <div className="rounded-xl bg-background/70 p-3">
               <p className="text-xs font-medium text-foreground">{t("proofLabel")}</p>

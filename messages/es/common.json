@@ -243,7 +243,9 @@
         "editBio": "2. Busca tu campo de biografía o acerca de.",
         "pasteCode": "3. Pega ahí el enlace DID de GainForest de arriba y guarda.",
         "returnVerify": "4. Vuelve aquí, pega tu usuario o enlace de perfil de iNaturalist y verifica."
-      }
+      },
+      "connect": "Conectar",
+      "hideSetup": "Ocultar configuración"
     }
   },
   "bumicertCard": {
