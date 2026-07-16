@@ -242,7 +242,7 @@ function ExploreNav({ sessionDid }: { sessionDid: string | null }) {
   return (
     <div className="flex flex-col gap-1">
       {renderSections(primarySections, true)}
-      {secondarySections.length > 0 && !collapsed ? (
+      {secondarySections.length > 0 ? (
         <div className="mt-1 border-t border-border/70 pt-1">
           <SidebarTooltip label={sidebarT("more")}>
             <button
