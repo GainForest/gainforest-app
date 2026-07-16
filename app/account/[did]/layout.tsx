@@ -210,6 +210,10 @@ export default async function AccountLayout({
               // ever match a personal repo, and some personal accounts carry
               // an organization record, so don't also require kind === "user".
               includeTaina={isOwner}
+              // The personal donation wallet shares the same ownership gate:
+              // it only ever appears to the signed-in owner of this profile
+              // (organization wallets are managed from funding settings).
+              includeWallet={isOwner}
               showEndorsementsGiven={showEndorsementsGiven}
               showEquipment={showEquipment}
             />

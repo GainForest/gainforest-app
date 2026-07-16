@@ -171,6 +171,10 @@ export function accountTainaPath(didOrHandle: string): string {
   return `${accountPath(didOrHandle)}/taina`;
 }
 
+export function accountWalletPath(didOrHandle: string): string {
+  return `${accountPath(didOrHandle)}/wallet`;
+}
+
 export async function readOptionalAccountRouteParams(
   params: Promise<{ did: string }>,
 ): Promise<{ urlIdentifier: string; did: string } | null> {

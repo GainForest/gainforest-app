@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { usePathname, useSearchParams } from "next/navigation";
-import { BadgeCheckIcon, BinocularsIcon, BotIcon, ChevronDownIcon, FolderKanbanIcon, HeartHandshakeIcon, HomeIcon, ImageIcon, LayoutGridIcon, MessageSquareTextIcon, SettingsIcon, UsersIcon, WrenchIcon } from "lucide-react";
+import { BadgeCheckIcon, BinocularsIcon, BotIcon, ChevronDownIcon, FolderKanbanIcon, HeartHandshakeIcon, HomeIcon, ImageIcon, LayoutGridIcon, MessageSquareTextIcon, SettingsIcon, UsersIcon, WalletIcon, WrenchIcon } from "lucide-react";
 import { stripLocaleFromPathname } from "@/lib/i18n/routing";
 import { cn } from "@/lib/utils";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -27,9 +27,10 @@ import {
   accountSettingsPath,
   accountTainaPath,
   accountTreesPath,
+  accountWalletPath,
 } from "../_lib/account-route";
 
-type TabLabelKey = "home" | "overview" | "bumicerts" | "projects" | "donationHistory" | "observations" | "posts" | "timeline" | "gallery" | "filesAndPhotos" | "settings" | "sites" | "audio" | "drone" | "trees" | "members" | "taina" | "endorsementsGiven" | "equipment";
+type TabLabelKey = "home" | "overview" | "bumicerts" | "projects" | "donationHistory" | "observations" | "posts" | "timeline" | "gallery" | "filesAndPhotos" | "settings" | "sites" | "audio" | "drone" | "trees" | "members" | "taina" | "endorsementsGiven" | "equipment" | "wallet";
 
 interface Tab {
   labelKey: TabLabelKey;
@@ -90,6 +91,7 @@ function buildTabs(
   includeTaina: boolean,
   showEndorsementsGiven: boolean,
   showEquipment: boolean,
+  includeWallet: boolean,
   manageBasePath?: string,
 ): Tab[] {
   const paths = buildTabPaths(did, scope, manageBasePath);
@@ -105,6 +107,14 @@ function buildTabs(
     labelKey: "taina",
     href: accountTainaPath(did),
     icon: BotIcon,
+    exact: false,
+  };
+  // The personal donation wallet is private: the tab only shows on the
+  // owner's own profile, next to Tainá and Settings.
+  const walletTab: Tab = {
+    labelKey: "wallet",
+    href: accountWalletPath(did),
+    icon: WalletIcon,
     exact: false,
   };
   // Posts / Replies / Likes share one profile tab (the page carries the
@@ -136,6 +146,7 @@ function buildTabs(
     exact: false,
   };
   const appendExtras = (tabs: Tab[]): Tab[] => {
+    if (includeWallet && scope === "account") tabs.push(walletTab);
     if (includeTaina && scope === "account") tabs.push(tainaTab);
     if (includeSettings) tabs.push(settingsTab);
     return tabs;
@@ -235,6 +246,7 @@ interface OrgTabBarProps {
   includeTaina?: boolean;
   showEndorsementsGiven?: boolean;
   showEquipment?: boolean;
+  includeWallet?: boolean;
   manageBasePath?: string;
 }
 
@@ -247,12 +259,13 @@ export function AccountTabBar({
   includeTaina = false,
   showEndorsementsGiven = false,
   showEquipment = false,
+  includeWallet = false,
   manageBasePath,
 }: OrgTabBarProps) {
   const t = useTranslations("common.accountTabs");
   const pathname = stripLocaleFromPathname(usePathname() ?? "/");
   const searchParams = useSearchParams();
-  const tabs = buildTabs(did, accountKind, scope, includeSettings, showOrgData, includeTaina, showEndorsementsGiven, showEquipment, manageBasePath);
+  const tabs = buildTabs(did, accountKind, scope, includeSettings, showOrgData, includeTaina, showEndorsementsGiven, showEquipment, includeWallet, manageBasePath);
 
   function isActive(tab: Tab): boolean {
     if (scope === "manage") {

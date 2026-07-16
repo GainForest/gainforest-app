@@ -50,7 +50,12 @@ export function isSplitsVaultUri(uri: string | null | undefined): boolean {
   return typeof uri === "string" && uri.includes(`/${SPLITS_VAULT_COLLECTION}/`);
 }
 
-/** Deterministic per-organization CREATE2 salt (uint256, hex encoded). */
+/**
+ * Deterministic per-account CREATE2 salt (uint256, hex encoded). Keyed by the
+ * account DID — personal wallets (an individual's own repo) reuse the exact
+ * same derivation as organization wallets, so one verification path covers
+ * both (see fetchVerifiedVault in ./server.ts).
+ */
 export function orgVaultSalt(orgDid: string): `0x${string}` {
   return keccak256(stringToBytes(`${VAULT_SALT_SCHEME}:${orgDid}`));
 }
