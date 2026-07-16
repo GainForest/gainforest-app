@@ -115,7 +115,8 @@
       "feed": "Aktivitas",
       "taina": "Tainá",
       "globe": "Bola Dunia",
-      "audiomoth": "AudioMoth"
+      "audiomoth": "AudioMoth",
+      "identifications": "Identifikasi"
     },
     "prompts": {
       "signInDescription": "Masuk untuk mengelola akun dan konten Anda.",
@@ -1680,7 +1681,8 @@
       "setup": "Penyiapan",
       "deployments": "Penempatan",
       "upload": "Unggah",
-      "label": "Beri label"
+      "label": "Beri label",
+      "identifications": "Identifikasi"
     },
     "label": {
       "subtitle": "Tinjau rekaman AudioMoth, tandai suara berdasarkan waktu dan frekuensi, lalu buat kumpulan label yang rapi untuk data lapangan Anda.",
@@ -2678,6 +2680,36 @@
       "atprotoDesc": "Tur interaktif jaringan terbuka tempat semua ini dibangun.",
       "githubTitle": "Layanan di GitHub",
       "githubDesc": "Baca kode sumbernya dan jalankan layanannya sendiri."
+    }
+  },
+  "identifications": {
+    "meta": {
+      "title": "Identifikasi",
+      "description": "Setiap label suara AudioMoth yang kamu simpan, terkumpul di satu tempat."
+    },
+    "title": "Identifikasi",
+    "subtitle": "Semua label AudioMoth tersimpan dari seluruh rekamanmu, dalam satu tempat. Masing-masing adalah kemunculan keanekaragaman hayati di akunmu.",
+    "loading": "Memuat identifikasi…",
+    "loadFailed": "Kami tidak dapat memuat identifikasimu. Silakan coba lagi.",
+    "unknownRecording": "Rekaman tidak dikenal",
+    "summary": "{count} identifikasi",
+    "summaryHint": "Ringkasan hanya-baca dari ruang pelabelanmu.",
+    "openLabeller": "Buka pelabel",
+    "export": "Ekspor CSV",
+    "refresh": "Muat ulang",
+    "searchPlaceholder": "Cari nama, rekaman, atau catatan…",
+    "filterAll": "Semua · {count}",
+    "emptyTitle": "Belum ada identifikasi",
+    "emptyBody": "Gambar dan simpan kotak di pelabel AudioMoth, dan akan muncul di sini.",
+    "noMatches": "Tidak ada identifikasi yang cocok dengan filtermu.",
+    "signInTitle": "Masuk untuk melihat identifikasi",
+    "signInBody": "Label AudioMoth tersimpanmu ada di akunmu. Masuk untuk melihatnya.",
+    "categories": {
+      "bird": "Burung",
+      "frog": "Katak",
+      "insect": "Serangga",
+      "other": "Lainnya",
+      "note": "Catatan"
     }
   }
 }

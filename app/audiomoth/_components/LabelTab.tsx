@@ -49,6 +49,7 @@ import {
   type NormalizedSpectrogramBox,
 } from "@/app/_lib/audiomoth/labels";
 import {
+  audioOccurrenceDisplayName,
   createAudioOccurrence,
   deleteAudioOccurrence,
   listAudioOccurrences,
@@ -102,16 +103,7 @@ function formatFrequency(hz: number): string {
   return hz >= 1_000 ? `${(hz / 1_000).toFixed(hz >= 10_000 ? 0 : 1)} kHz` : `${Math.round(hz)} Hz`;
 }
 
-/**
- * The name to show for a saved box: the researcher-entered species scientific
- * name, else the common name they typed. Returns "" for an unnamed broad-group
- * box so callers can fall back to the friendly category label rather than the
- * raw broad taxon (e.g. "Aves").
- */
-function occurrenceDisplayName(item: AudioOccurrenceItem): string {
-  if (item.record.taxonRank === "species" && item.scientificName) return item.scientificName;
-  return item.commonName;
-}
+const occurrenceDisplayName = audioOccurrenceDisplayName;
 
 function boundsToBox(
   item: AudioOccurrenceItem,

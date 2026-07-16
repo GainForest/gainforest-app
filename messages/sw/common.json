@@ -115,7 +115,8 @@
       "feed": "Matukio",
       "taina": "Tainá",
       "globe": "Dunia",
-      "audiomoth": "AudioMoth"
+      "audiomoth": "AudioMoth",
+      "identifications": "Vitambulisho"
     },
     "prompts": {
       "signInDescription": "Ingia ili kusimamia akaunti na maudhui yako.",
@@ -1680,7 +1681,8 @@
       "setup": "Usanidi",
       "deployments": "Usambazaji",
       "upload": "Pakia",
-      "label": "Weka lebo"
+      "label": "Weka lebo",
+      "identifications": "Vitambulisho"
     },
     "label": {
       "subtitle": "Kagua rekodi za AudioMoth, weka alama za miito kwa muda na masafa, kisha tengeneza mkusanyiko safi wa lebo za data ya uwanjani.",
@@ -2678,6 +2680,36 @@
       "atprotoDesc": "Ziara shirikishi ya mtandao wazi ambao yote haya yamejengwa juu yake.",
       "githubTitle": "Huduma kwenye GitHub",
       "githubDesc": "Soma msimbo wa chanzo na uendeshe huduma mwenyewe."
+    }
+  },
+  "identifications": {
+    "meta": {
+      "title": "Vitambulisho",
+      "description": "Kila lebo ya sauti ya AudioMoth uliyohifadhi, imekusanywa mahali pamoja."
+    },
+    "title": "Vitambulisho",
+    "subtitle": "Lebo zote za AudioMoth zilizohifadhiwa katika rekodi zako, mahali pamoja. Kila moja ni tukio la bayoanuwai katika akaunti yako.",
+    "loading": "Inapakia vitambulisho…",
+    "loadFailed": "Hatukuweza kupakia vitambulisho vyako. Tafadhali jaribu tena.",
+    "unknownRecording": "Rekodi isiyojulikana",
+    "summary": "Vitambulisho {count}",
+    "summaryHint": "Muhtasari wa kusoma tu wa eneo lako la kuweka lebo.",
+    "openLabeller": "Fungua kiwekaji lebo",
+    "export": "Hamisha CSV",
+    "refresh": "Onyesha upya",
+    "searchPlaceholder": "Tafuta jina, rekodi au dokezo…",
+    "filterAll": "Zote · {count}",
+    "emptyTitle": "Bado hakuna vitambulisho",
+    "emptyBody": "Chora na uhifadhi kisanduku katika kiwekaji lebo cha AudioMoth nacho kitaonekana hapa.",
+    "noMatches": "Hakuna kitambulisho kinacholingana na vichujio vyako.",
+    "signInTitle": "Ingia ili kuona vitambulisho",
+    "signInBody": "Lebo zako za AudioMoth zilizohifadhiwa ziko katika akaunti yako. Ingia uzione.",
+    "categories": {
+      "bird": "Ndege",
+      "frog": "Chura",
+      "insect": "Mdudu",
+      "other": "Nyingine",
+      "note": "Dokezo"
     }
   }
 }

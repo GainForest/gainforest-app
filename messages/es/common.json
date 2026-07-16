@@ -115,7 +115,8 @@
       "feed": "Novedades",
       "taina": "Tainá",
       "globe": "Globo",
-      "audiomoth": "AudioMoth"
+      "audiomoth": "AudioMoth",
+      "identifications": "Identificaciones"
     },
     "prompts": {
       "signInDescription": "Inicia sesión para gestionar tu cuenta y contenido.",
@@ -1680,7 +1681,8 @@
       "setup": "Configuración",
       "deployments": "Despliegue",
       "upload": "Subir",
-      "label": "Etiquetar"
+      "label": "Etiquetar",
+      "identifications": "Identificaciones"
     },
     "label": {
       "subtitle": "Revisa grabaciones de AudioMoth, marca llamadas por tiempo y frecuencia, y crea un conjunto de etiquetas claro para tus datos de campo.",
@@ -2678,6 +2680,36 @@
       "atprotoDesc": "Un recorrido interactivo por la red abierta sobre la que está construido todo esto.",
       "githubTitle": "El servicio en GitHub",
       "githubDesc": "Lee el código fuente y ejecuta el servicio tú mismo."
+    }
+  },
+  "identifications": {
+    "meta": {
+      "title": "Identificaciones",
+      "description": "Cada etiqueta de sonido de AudioMoth que has guardado, reunida en un solo lugar."
+    },
+    "title": "Identificaciones",
+    "subtitle": "Todas las etiquetas de AudioMoth guardadas en tus grabaciones, en un solo lugar. Cada una es una ocurrencia de biodiversidad en tu cuenta.",
+    "loading": "Cargando identificaciones…",
+    "loadFailed": "No pudimos cargar tus identificaciones. Inténtalo de nuevo.",
+    "unknownRecording": "Grabación desconocida",
+    "summary": "{count, plural, one {# identificación} other {# identificaciones}}",
+    "summaryHint": "Resumen de solo lectura de tu espacio de etiquetado.",
+    "openLabeller": "Abrir etiquetador",
+    "export": "Exportar CSV",
+    "refresh": "Actualizar",
+    "searchPlaceholder": "Buscar nombre, grabación o nota…",
+    "filterAll": "Todas · {count}",
+    "emptyTitle": "Aún no hay identificaciones",
+    "emptyBody": "Dibuja y guarda una caja en el etiquetador de AudioMoth y aparecerá aquí.",
+    "noMatches": "Ninguna identificación coincide con tus filtros.",
+    "signInTitle": "Inicia sesión para ver las identificaciones",
+    "signInBody": "Tus etiquetas de AudioMoth guardadas están en tu cuenta. Inicia sesión para verlas.",
+    "categories": {
+      "bird": "Ave",
+      "frog": "Rana",
+      "insect": "Insecto",
+      "other": "Otro",
+      "note": "Nota"
     }
   }
 }

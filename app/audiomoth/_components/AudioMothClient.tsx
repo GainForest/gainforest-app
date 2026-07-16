@@ -21,6 +21,7 @@ import {
   DownloadIcon,
   FingerprintIcon,
   HardDriveUploadIcon,
+  ListChecksIcon,
   Loader2Icon,
   TagsIcon,
   MapPinIcon,
@@ -797,16 +798,20 @@ export function AudioMothClient({
   ];
 
   const mainTabs: Array<{
-    id: MainTabId;
+    id: MainTabId | "identifications";
     label: string;
     Icon: typeof ClockIcon;
     adminOnly?: boolean;
+    href?: string;
   }> = [
     { id: "setup", label: t("mainTabs.setup"), Icon: WrenchIcon },
     { id: "deployments", label: t("mainTabs.deployments"), Icon: MapPinIcon },
     { id: "upload", label: t("mainTabs.upload"), Icon: HardDriveUploadIcon },
     ...(canUseLabelling
-      ? [{ id: "label" as const, label: t("mainTabs.label"), Icon: TagsIcon, adminOnly: true }]
+      ? [
+          { id: "label" as const, label: t("mainTabs.label"), Icon: TagsIcon, adminOnly: true },
+          { id: "identifications" as const, label: t("mainTabs.identifications"), Icon: ListChecksIcon, adminOnly: true, href: "/identifications" },
+        ]
       : []),
   ];
 
@@ -826,22 +831,18 @@ export function AudioMothClient({
 
       {/* Setup (this device over USB) vs Deployment (field events) */}
       <nav className="flex w-full gap-1 self-start rounded-full border border-border bg-card/70 p-1 sm:w-auto" aria-label={t("title")}>
-        {mainTabs.map(({ id, label, Icon, adminOnly }) => (
-          <button
-            key={id}
-            type="button"
-            onClick={() => setMainTab(id)}
-            className={cn(
-              "flex min-w-0 flex-1 items-center justify-center gap-1 rounded-full px-2 py-2 text-xs font-medium transition-colors sm:flex-none sm:gap-2 sm:px-4 sm:text-sm",
-              mainTab === id ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground",
-            )}
-            aria-current={mainTab === id ? "page" : undefined}
-          >
-            <Icon className="size-4" />
-            {label}
-            {adminOnly ? <AdminOnlyIndicator /> : null}
-          </button>
-        ))}
+        {mainTabs.map(({ id, label, Icon, adminOnly, href }) => {
+          const className = cn(
+            "flex min-w-0 flex-1 items-center justify-center gap-1 rounded-full px-2 py-2 text-xs font-medium transition-colors sm:flex-none sm:gap-2 sm:px-4 sm:text-sm",
+            mainTab === id ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground",
+          );
+          const content = <><Icon className="size-4" />{label}{adminOnly ? <AdminOnlyIndicator /> : null}</>;
+          return href ? (
+            <Link key={id} href={href} className={className}>{content}</Link>
+          ) : (
+            <button key={id} type="button" onClick={() => setMainTab(id as MainTabId)} className={className} aria-current={mainTab === id ? "page" : undefined}>{content}</button>
+          );
+        })}
       </nav>
 
       {mainTab === "deployments" && <DeploymentsTab sessionDid={sessionDid} />}

@@ -3,6 +3,7 @@ import {
   buildAudioOccurrenceRecord,
   createAudioOccurrence,
   deleteAudioOccurrence,
+  listAllAudioOccurrences,
   parseAudioOccurrenceItem,
   parseAudioSegmentDynamicProperties,
   type AudioOccurrenceDraft,
@@ -142,6 +143,40 @@ describe("AudioMoth Darwin Core occurrences", () => {
     expect(item?.bounds).toEqual(draft.bounds);
     expect(item?.commonName).toBe("Tree frog");
     expect(parseAudioOccurrenceItem({ uri: "at://did:plc:test/app.gainforest.dwc.occurrence/one", cid: "bafy-occ", value: record }, `${source.uri}-other`)).toBeNull();
+  });
+
+  it("lists bioacoustic identifications across recordings and pages", async () => {
+    const older = buildAudioOccurrenceRecord({
+      ...draft,
+      source: { ...source, uri: "at://did:web:test/app.gainforest.ac.audio/older" },
+    });
+    older.createdAt = "2026-01-01T00:00:00.000Z";
+    const newer = buildAudioOccurrenceRecord({
+      ...draft,
+      source: { ...source, uri: "at://did:web:test/app.gainforest.ac.audio/newer" },
+      scientificName: "Boana faber",
+    });
+    newer.createdAt = "2026-02-01T00:00:00.000Z";
+
+    const fetchMock = vi.fn().mockImplementation((input: RequestInfo | URL) => {
+      const url = new URL(String(input));
+      const cursor = url.searchParams.get("cursor");
+      return Promise.resolve(new Response(JSON.stringify(cursor
+        ? { records: [{ uri: "at://did:web:test/app.gainforest.dwc.occurrence/newer", cid: "newer", value: newer }] }
+        : { records: [{ uri: "at://did:web:test/app.gainforest.dwc.occurrence/older", cid: "older", value: older }], cursor: "next" }), {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      }));
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const items = await listAllAudioOccurrences("did:web:test");
+    expect(items.map((item) => item.rkey)).toEqual(["newer", "older"]);
+    expect(items.map((item) => item.sourceAudioUri)).toEqual([
+      "at://did:web:test/app.gainforest.ac.audio/newer",
+      "at://did:web:test/app.gainforest.ac.audio/older",
+    ]);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 
   it("creates one ATProto occurrence record for a confirmed box", async () => {

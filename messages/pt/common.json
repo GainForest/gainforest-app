@@ -115,7 +115,8 @@
       "feed": "Novidades",
       "taina": "Tainá",
       "globe": "Globo",
-      "audiomoth": "AudioMoth"
+      "audiomoth": "AudioMoth",
+      "identifications": "Identificações"
     },
     "prompts": {
       "signInDescription": "Entre para gerenciar sua conta e conteúdo.",
@@ -1680,7 +1681,8 @@
       "setup": "Configuração",
       "deployments": "Implantação",
       "upload": "Enviar",
-      "label": "Rotular"
+      "label": "Rotular",
+      "identifications": "Identificações"
     },
     "label": {
       "subtitle": "Revise gravações do AudioMoth, marque chamados por tempo e frequência e crie um conjunto de rótulos organizado para seus dados de campo.",
@@ -2678,6 +2680,36 @@
       "atprotoDesc": "Um passeio interativo pela rede aberta sobre a qual tudo isto é construído.",
       "githubTitle": "O serviço no GitHub",
       "githubDesc": "Leia o código-fonte e rode o serviço você mesmo."
+    }
+  },
+  "identifications": {
+    "meta": {
+      "title": "Identificações",
+      "description": "Cada etiqueta de som do AudioMoth que você salvou, reunida em um só lugar."
+    },
+    "title": "Identificações",
+    "subtitle": "Todas as etiquetas do AudioMoth salvas em suas gravações, em um só lugar. Cada uma é uma ocorrência de biodiversidade na sua conta.",
+    "loading": "Carregando identificações…",
+    "loadFailed": "Não foi possível carregar suas identificações. Tente novamente.",
+    "unknownRecording": "Gravação desconhecida",
+    "summary": "{count, plural, one {# identificação} other {# identificações}}",
+    "summaryHint": "Resumo somente leitura do seu espaço de etiquetagem.",
+    "openLabeller": "Abrir etiquetador",
+    "export": "Exportar CSV",
+    "refresh": "Atualizar",
+    "searchPlaceholder": "Buscar nome, gravação ou nota…",
+    "filterAll": "Todas · {count}",
+    "emptyTitle": "Ainda não há identificações",
+    "emptyBody": "Desenhe e salve uma caixa no etiquetador do AudioMoth e ela aparecerá aqui.",
+    "noMatches": "Nenhuma identificação corresponde aos seus filtros.",
+    "signInTitle": "Entre para ver as identificações",
+    "signInBody": "Suas etiquetas do AudioMoth salvas ficam na sua conta. Entre para vê-las.",
+    "categories": {
+      "bird": "Ave",
+      "frog": "Sapo",
+      "insect": "Inseto",
+      "other": "Outro",
+      "note": "Nota"
     }
   }
 }

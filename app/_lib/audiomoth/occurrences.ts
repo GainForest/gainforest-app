@@ -47,8 +47,22 @@ export type AudioOccurrenceItem = {
   scientificName: string;
   note: string;
   bounds: AudioSegmentBounds;
+  /** AT-URI of the source `ac.audio` recording this box was drawn on. */
+  sourceAudioUri: string;
   createdAt: string;
 };
+
+/**
+ * The name to show for a saved identification: the researcher-entered species
+ * scientific name, else the common name they typed. Returns "" for an unnamed
+ * broad-group box so callers can fall back to the friendly category label
+ * rather than the raw broad taxon (e.g. "Aves"). Single source of truth shared
+ * by the labelling tool and the identifications page.
+ */
+export function audioOccurrenceDisplayName(item: AudioOccurrenceItem): string {
+  if (item.record.taxonRank === "species" && item.scientificName) return item.scientificName;
+  return item.commonName;
+}
 
 type MutationResult = { uri: string; cid: string };
 
@@ -277,6 +291,7 @@ export function parseAudioOccurrenceItem(
     category: segment.labelCategory,
     commonName: readCommonName(entry.value.vernacularName, segment.labelCategory),
     scientificName: typeof entry.value.scientificName === "string" ? entry.value.scientificName : "",
+    sourceAudioUri: segment.sourceAudioUri,
     note: typeof entry.value.occurrenceRemarks === "string" ? entry.value.occurrenceRemarks : "",
     bounds: {
       startTimeSeconds: segment.startTimeSeconds,
@@ -329,14 +344,14 @@ export async function deleteAudioOccurrence(item: AudioOccurrenceItem): Promise<
   );
 }
 
-export async function listAudioOccurrences(
+/** Page through every `dwc.occurrence` record in a repo. */
+async function listOccurrenceRecords(
   did: string,
-  sourceAudioUri: string,
   signal?: AbortSignal,
-): Promise<AudioOccurrenceItem[]> {
+): Promise<Array<{ uri?: unknown; cid?: unknown; value?: unknown }>> {
   const host = await resolvePdsHost(did, signal);
   if (!host) throw new Error("Could not resolve the data host for this account.");
-  const items: AudioOccurrenceItem[] = [];
+  const records: Array<{ uri?: unknown; cid?: unknown; value?: unknown }> = [];
   let cursor: string | undefined;
   do {
     const params = new URLSearchParams({ repo: did, collection: OCCURRENCE_COLLECTION, limit: "100" });
@@ -346,18 +361,44 @@ export async function listAudioOccurrences(
       cache: "no-store",
     });
     if (!response.ok) {
-      if (response.status === 400 && items.length === 0) return [];
+      if (response.status === 400 && records.length === 0) return [];
       throw new Error(`Could not load occurrences (${response.status}).`);
     }
     const data = (await response.json()) as {
       records?: Array<{ uri?: unknown; cid?: unknown; value?: unknown }>;
       cursor?: unknown;
     };
-    for (const entry of data.records ?? []) {
-      const parsed = parseAudioOccurrenceItem(entry, sourceAudioUri);
-      if (parsed) items.push(parsed);
-    }
+    records.push(...(data.records ?? []));
     cursor = typeof data.cursor === "string" ? data.cursor : undefined;
   } while (cursor);
+  return records;
+}
+
+/** Bioacoustic occurrences drawn on one recording, ordered by start time. */
+export async function listAudioOccurrences(
+  did: string,
+  sourceAudioUri: string,
+  signal?: AbortSignal,
+): Promise<AudioOccurrenceItem[]> {
+  const records = await listOccurrenceRecords(did, signal);
+  const items: AudioOccurrenceItem[] = [];
+  for (const entry of records) {
+    const parsed = parseAudioOccurrenceItem(entry, sourceAudioUri);
+    if (parsed) items.push(parsed);
+  }
   return items.sort((a, b) => a.bounds.startTimeSeconds - b.bounds.startTimeSeconds);
+}
+
+/** Every bioacoustic occurrence in a repo, newest first — across all recordings. */
+export async function listAllAudioOccurrences(
+  did: string,
+  signal?: AbortSignal,
+): Promise<AudioOccurrenceItem[]> {
+  const records = await listOccurrenceRecords(did, signal);
+  const items: AudioOccurrenceItem[] = [];
+  for (const entry of records) {
+    const parsed = parseAudioOccurrenceItem(entry);
+    if (parsed) items.push(parsed);
+  }
+  return items.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 }

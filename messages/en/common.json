@@ -115,7 +115,8 @@
       "feed": "Feed",
       "taina": "Tainá",
       "globe": "Globe",
-      "audiomoth": "AudioMoth"
+      "audiomoth": "AudioMoth",
+      "identifications": "Identifications"
     },
     "prompts": {
       "signInDescription": "Sign in to manage your account and content.",
@@ -1680,7 +1681,8 @@
       "setup": "Setup",
       "deployments": "Deployment",
       "upload": "Upload",
-      "label": "Label"
+      "label": "Label",
+      "identifications": "Identifications"
     },
     "label": {
       "subtitle": "Review AudioMoth recordings, mark calls by time and frequency, and build a clean label set for your field data.",
@@ -2678,6 +2680,36 @@
       "atprotoDesc": "An interactive tour of the open network everything here is built on.",
       "githubTitle": "Wallet service on GitHub",
       "githubDesc": "Read the source code and run the service yourself."
+    }
+  },
+  "identifications": {
+    "meta": {
+      "title": "Identifications",
+      "description": "Every AudioMoth sound label you've saved, gathered in one place."
+    },
+    "title": "Identifications",
+    "subtitle": "Every saved AudioMoth label across your recordings, in one place. Each one is a biodiversity occurrence in your account.",
+    "loading": "Loading identifications…",
+    "loadFailed": "We couldn't load your identifications. Please try again.",
+    "unknownRecording": "Unknown recording",
+    "summary": "{count, plural, one {# identification} other {# identifications}}",
+    "summaryHint": "Read-only roll-up of your labelling workspace.",
+    "openLabeller": "Open labeller",
+    "export": "Export CSV",
+    "refresh": "Refresh",
+    "searchPlaceholder": "Search name, recording or note…",
+    "filterAll": "All · {count}",
+    "emptyTitle": "No identifications yet",
+    "emptyBody": "Draw and save a box in the AudioMoth labeller and it'll show up here.",
+    "noMatches": "No identifications match your filters.",
+    "signInTitle": "Sign in to view identifications",
+    "signInBody": "Your saved AudioMoth labels live in your account. Sign in to see them.",
+    "categories": {
+      "bird": "Bird",
+      "frog": "Frog",
+      "insect": "Insect",
+      "other": "Other",
+      "note": "Note"
     }
   }
 }
