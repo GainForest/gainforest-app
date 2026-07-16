@@ -103,13 +103,14 @@ function formatFrequency(hz: number): string {
 }
 
 /**
- * Prefer the researcher-entered species scientific name over the vernacular
- * name (which falls back to the broad group, e.g. "Bird", when the common
- * name was left blank).
+ * The name to show for a saved box: the researcher-entered species scientific
+ * name, else the common name they typed. Returns "" for an unnamed broad-group
+ * box so callers can fall back to the friendly category label rather than the
+ * raw broad taxon (e.g. "Aves").
  */
 function occurrenceDisplayName(item: AudioOccurrenceItem): string {
   if (item.record.taxonRank === "species" && item.scientificName) return item.scientificName;
-  return item.commonName || item.scientificName;
+  return item.commonName;
 }
 
 function boundsToBox(
@@ -321,7 +322,7 @@ export function LabelTab({ sessionDid }: { sessionDid: string | null }) {
       fileKey: selectedRecording.uri,
       fileName: selectedRecording.name,
       category: item.category,
-      species: occurrenceDisplayName(item),
+      species: occurrenceDisplayName(item) || item.scientificName,
       note: item.note,
       ...item.bounds,
       box: ready ? boundsToBox(item, ready.durationSeconds, ready.maxFrequencyHz) : { startX: 0, endX: 0, topY: 0, bottomY: 0 },
@@ -455,7 +456,7 @@ export function LabelTab({ sessionDid }: { sessionDid: string | null }) {
                       <div key={item.uri} className={cn("flex items-center gap-2 rounded-xl border p-2.5", editingUri === item.uri ? "border-primary bg-primary/[0.04]" : "border-border") }>
                         <button type="button" onClick={() => selectExisting(item)} className="min-w-0 flex-1 text-left">
                           <span className={cn("inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold", CATEGORY_STYLES[item.category].chip)}>{t(`categories.${item.category}`)}</span>
-                          <p className="mt-1 truncate text-xs font-medium text-foreground">{occurrenceDisplayName(item)}</p>
+                          <p className="mt-1 truncate text-xs font-medium text-foreground">{occurrenceDisplayName(item) || t(`categories.${item.category}`)}</p>
                           <p className="mt-0.5 text-[10px] text-muted-foreground">{formatTime(item.bounds.startTimeSeconds)}–{formatTime(item.bounds.endTimeSeconds)} · {formatFrequency(item.bounds.minFrequencyHz)}–{formatFrequency(item.bounds.maxFrequencyHz)}</p>
                         </button>
                         <span className="text-[10px] font-medium text-primary">{t("saved")}</span>

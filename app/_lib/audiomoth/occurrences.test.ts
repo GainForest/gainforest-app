@@ -69,6 +69,21 @@ describe("AudioMoth Darwin Core occurrences", () => {
     expect(buildAudioOccurrenceRecord({ ...draft, category, commonName: undefined })).toMatchObject(expected);
   });
 
+  it("never synthesizes a vernacularName from the broad group", () => {
+    const record = buildAudioOccurrenceRecord({ ...draft, category: "bird", commonName: undefined });
+    expect(record.vernacularName).toBeUndefined();
+    // The grouping still lives in taxonomy + tags + labelCategory.
+    expect(record).toMatchObject({ scientificName: "Aves", class: "Aves", taxonRank: "class" });
+    expect(record.tags).toEqual(["bioacoustics", "bird"]);
+  });
+
+  it("drops a stale broad-group vernacularName when re-saving without a common name", () => {
+    const existing = buildAudioOccurrenceRecord({ ...draft, category: "bird", commonName: "Bird" });
+    expect(existing.vernacularName).toBe("Bird");
+    const resaved = buildAudioOccurrenceRecord({ ...draft, category: "bird", commonName: undefined }, existing);
+    expect(resaved.vernacularName).toBeUndefined();
+  });
+
   it("uses a supplied scientific name while retaining broad taxonomy", () => {
     expect(buildAudioOccurrenceRecord({ ...draft, scientificName: "Boana faber" })).toMatchObject({
       scientificName: "Boana faber",

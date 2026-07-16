@@ -81,8 +81,8 @@ A filename alone is not globally unique.
 | Future model-created box | `basisOfRecord` | `MachineObservation` |
 | Sound evidence | `dcType` | `Sound` |
 | Species scientific name | `scientificName` | Use the accepted scientific name when known |
-| Common/local name | `vernacularName` | Optional |
-| Broad animal choice | taxonomy fields | Use the broad fallback mapping below |
+| Common/local name | `vernacularName` | Optional — write **only** what the user typed; never synthesize it from the broad group |
+| Broad animal choice | taxonomy fields, `tags`, `dynamicProperties.labelCategory` | Use the broad fallback mapping below |
 | Recording segment time | `eventDate` | Absolute ISO-8601 interval derived from recording start + box offsets |
 | Source audio record | `associatedMedia` | Exact `at://.../app.gainforest.ac.audio/...` URI |
 | Survey event | `eventRef` | Resolve through the audio's deployment when available |
@@ -110,6 +110,13 @@ species.
 When a taxon picker resolves a species, replace the broad fallback with the
 resolved scientific name and populate the available taxonomy fields. Do not
 put a common name into `scientificName`.
+
+The broad choice is captured by the taxonomy fields above, by the `tags`
+(`bioacoustics` + the category), and by `dynamicProperties.labelCategory`. It
+must **not** be copied into `vernacularName`: that field is reserved for a
+common/local name the user actually typed, and stays absent otherwise. Displays
+fall back to the localized category label ("Bird") when no name was entered
+rather than showing the raw broad taxon ("Aves").
 
 A note about rain, machinery, wind, or another non-biological sound is not a
 biodiversity occurrence. It can remain a recording-level note or use a future

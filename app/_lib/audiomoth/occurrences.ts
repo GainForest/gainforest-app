@@ -57,7 +57,6 @@ const CATEGORIES = new Set<AudioLabelCategory>(["bird", "frog", "insect", "other
 const BROAD_TAXONOMY: Record<AudioLabelCategory, Record<string, unknown>> = {
   bird: {
     scientificName: "Aves",
-    vernacularName: "Bird",
     kingdom: "Animalia",
     phylum: "Chordata",
     class: "Aves",
@@ -65,7 +64,6 @@ const BROAD_TAXONOMY: Record<AudioLabelCategory, Record<string, unknown>> = {
   },
   frog: {
     scientificName: "Anura",
-    vernacularName: "Frog",
     kingdom: "Animalia",
     phylum: "Chordata",
     class: "Amphibia",
@@ -74,7 +72,6 @@ const BROAD_TAXONOMY: Record<AudioLabelCategory, Record<string, unknown>> = {
   },
   insect: {
     scientificName: "Insecta",
-    vernacularName: "Insect",
     kingdom: "Animalia",
     phylum: "Arthropoda",
     class: "Insecta",
@@ -82,11 +79,9 @@ const BROAD_TAXONOMY: Record<AudioLabelCategory, Record<string, unknown>> = {
   },
   other: {
     scientificName: "Biota",
-    vernacularName: "Unidentified organism",
   },
   note: {
     scientificName: "Biota",
-    vernacularName: "Unidentified biological sound",
   },
 };
 
@@ -200,7 +195,11 @@ export function buildAudioOccurrenceRecord(
   const suppliedScientificName = clean(draft.scientificName);
   const suppliedCommonName = clean(draft.commonName);
   const scientificName = suppliedScientificName ?? String(fallback.scientificName);
-  const vernacularName = suppliedCommonName ?? String(fallback.vernacularName);
+  // Never synthesize a common name from the broad group. The grouping already
+  // lives in the taxonomy fields (e.g. class: Aves), `tags`, and the
+  // dynamicProperties `labelCategory`; leaving `vernacularName` blank keeps it
+  // an honest "the user did not name this" rather than a fake local name.
+  const vernacularName = suppliedCommonName;
   const now = new Date().toISOString();
   const base = { ...(existing ?? {}) };
   const previousSegment = parseAudioSegmentDynamicProperties(existing?.dynamicProperties);
