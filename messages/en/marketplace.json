@@ -959,6 +959,7 @@
       "showDetails": "Show details",
       "loading": "Loading projects",
       "donate": "Donate",
+      "gainforestBadge": "Donate on GainForest",
       "acceptsDonations": "Accepts donations",
       "openForSupport": "Open for support",
       "donationSummary": "{amount} from {donors, plural, one {# supporter} other {# supporters}}",

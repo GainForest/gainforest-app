@@ -65,6 +65,12 @@ type ProjectDonationSummary = {
   totalUsd: number;
   donorCount: number;
   gainforest: { totalUsd: number; donorCount: number } | null;
+  gainforestDonation: {
+    organizationDid: string;
+    rkey: string;
+    minDonationInUSD: string | null;
+    maxDonationInUSD: string | null;
+  } | null;
   maEarth: { totalUsd: number; donorCount: number; donateUrl: string; rounds: number[] } | null;
 };
 
@@ -690,6 +696,9 @@ function ProjectCard({
   const canFilterOwner = Boolean(onFilterOwner) && Boolean(record.did);
   const place = countryName(record.country);
   const maEarthRounds = donationSummary?.maEarth?.rounds ?? [];
+  const acceptsGainForestDonations = Boolean(
+    donationSummary?.gainforestDonation || record.donationSources?.gainforest,
+  );
 
   return (
     <button type="button" onClick={() => onOpen(record)} className="group flex h-full flex-col overflow-hidden rounded-3xl border border-border bg-card text-left shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 animate-in" style={{ animationDelay: `${Math.min(index, 10) * 35}ms` }}>
@@ -711,11 +720,17 @@ function ProjectCard({
             <FolderKanbanIcon className="h-12 w-12" />
           </div>
         )}
+        {acceptsGainForestDonations ? (
+          <span className="absolute right-3 top-3 z-10 inline-flex items-center gap-1.5 whitespace-nowrap rounded-full bg-background/85 py-1 pl-1.5 pr-3 text-xs font-semibold text-foreground shadow-lg backdrop-blur-lg">
+            <Image src="/assets/media/images/gainforest-logo.svg" width={16} height={16} alt="" className="h-4 w-4 shrink-0 object-contain" />
+            {t("gainforestBadge")}
+          </span>
+        ) : null}
         {maEarthRounds.length > 0 ? (
-          <span className="absolute right-3 top-3 z-10 rounded-full bg-foreground px-3 py-1 text-xs font-semibold text-background shadow-lg">
+          <span className={`absolute right-3 z-10 rounded-full bg-foreground px-3 py-1 text-xs font-semibold text-background shadow-lg ${acceptsGainForestDonations ? "bottom-3" : "top-3"}`}>
             {t("round", { round: maEarthRounds[maEarthRounds.length - 1]! })}
           </span>
-        ) : donationSummary?.acceptsDonations || record.acceptsDonations ? (
+        ) : !acceptsGainForestDonations && (donationSummary?.acceptsDonations || record.acceptsDonations) ? (
           <span className="absolute right-3 top-3 z-10 rounded-full bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground shadow-lg">
             {t("donate")}
           </span>

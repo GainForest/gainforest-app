@@ -601,7 +601,8 @@
   },
   "accountDonations": {
     "emptyHeroDescription": "Support a project and your contributions show up here, each linked to the project you backed.",
-    "emptyHeroCta": "Explore projects"
+    "emptyHeroCta": "Explore projects",
+    "anonymousNote": "Donations made with “Donate anonymously” checked are never linked to your profile, so they don’t appear here. Leave it unchecked at checkout to see future donations on this page."
   },
   "accountProjects": {
     "emptyEyebrow": "No projects",

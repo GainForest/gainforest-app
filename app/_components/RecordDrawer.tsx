@@ -51,8 +51,19 @@ import {
   localObservationHref,
   localProjectHref,
 } from "../_lib/urls";
+import { DonateButton } from "../cert/[did]/[rkey]/_components/donate/DonateButton";
 
 type RecordDrawerT = ReturnType<typeof useTranslations<"marketplace.recordDrawer">>;
+
+type DrawerProjectDonationSummary = {
+  gainforestDonation: {
+    organizationDid: string;
+    rkey: string;
+    minDonationInUSD: string | null;
+    maxDonationInUSD: string | null;
+  } | null;
+  maEarth: { donateUrl: string } | null;
+};
 
 // Right-side detail sheet for any explorer record. Slides in over a dimmed
 // scrim; Escape or a scrim click closes it. A full-bleed hero image fades into
@@ -106,6 +117,7 @@ export function RecordDrawer({
   // Whether this Bumicert is currently accepting donations — drives the Donate
   // button. `null` while we don't yet know (loading / non-bumicert).
   const [donatable, setDonatable] = useState<boolean | null>(null);
+  const [projectDonation, setProjectDonation] = useState<DrawerProjectDonationSummary | null>(null);
   const recordIdentity = record?.atUri ?? null;
   useEffect(() => {
     setImgError(false);
@@ -145,6 +157,32 @@ export function RecordDrawer({
       .catch(() => {});
     return () => ctrl.abort();
   }, [record]);
+
+  useEffect(() => {
+    setProjectDonation(null);
+    if (!record || record.kind !== "project") return;
+    const ctrl = new AbortController();
+    fetch("/api/projects/donation-summaries", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        items: [{
+          key: record.atUri,
+          did: record.did,
+          atUri: record.atUri,
+          bumicertUris: record.bumicertUris,
+        }],
+      }),
+      signal: ctrl.signal,
+    })
+      .then((response) => response.ok ? response.json() : null)
+      .then((data: { summaries?: Record<string, DrawerProjectDonationSummary> } | null) => {
+        if (!ctrl.signal.aborted) setProjectDonation(data?.summaries?.[record.atUri] ?? null);
+      })
+      .catch(() => {});
+    return () => ctrl.abort();
+  }, [record]);
+
   useEffect(() => {
     if (!record) return;
     const onKey = (e: KeyboardEvent) => {
@@ -614,6 +652,35 @@ export function RecordDrawer({
               {shortLead}
             </p>
           )}
+
+          {record.kind === "project" && projectDonation?.gainforestDonation ? (
+            <div className="mt-5">
+              <DonateButton
+                bumicert={{
+                  organizationDid: projectDonation.gainforestDonation.organizationDid,
+                  rkey: projectDonation.gainforestDonation.rkey,
+                  title: record.title,
+                  organizationName: record.creatorName ?? record.title,
+                  image: record.imageUrl,
+                }}
+                fundingConfig={projectDonation.gainforestDonation}
+                disabled={false}
+                label={t("actions.donate")}
+                className="h-14 rounded-2xl text-base font-semibold shadow-md shadow-primary/15"
+              />
+            </div>
+          ) : record.kind === "project" && projectDonation?.maEarth ? (
+            <a
+              href={projectDonation.maEarth.donateUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-5 inline-flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-primary px-5 text-base font-semibold text-primary-foreground shadow-md shadow-primary/15 transition-colors hover:bg-primary/90"
+            >
+              <HeartIcon className="size-5" aria-hidden />
+              {t("actions.donate")}
+              <ArrowUpRightIcon className="size-4" aria-hidden />
+            </a>
+          ) : null}
 
           {/* Primary actions — donate (only when accepting), open the full
               page, share */}

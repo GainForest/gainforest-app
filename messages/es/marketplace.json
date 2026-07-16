@@ -959,6 +959,7 @@
       "showDetails": "Mostrar detalles",
       "loading": "Cargando proyectos",
       "donate": "Donar",
+      "gainforestBadge": "Dona en GainForest",
       "acceptsDonations": "Acepta donaciones",
       "openForSupport": "Abierto a apoyo",
       "donationSummary": "{amount} de {donors, plural, one {# persona} other {# personas}}",

@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import { fetchReceipts } from "@/app/_lib/dashboard";
-import { fetchAccountMaEarthRounds } from "@/app/_lib/indexer";
+import { fetchAccountMaEarthRounds, indexerQuery } from "@/app/_lib/indexer";
 import { fetchMaEarthDonationSummary, maEarthDonationUrl } from "@/app/_lib/maearth-donations";
 
 export const revalidate = 1800;
@@ -17,6 +17,20 @@ type DonationSourceSummary = {
   donorCount: number;
 };
 
+type GainForestDonationTarget = {
+  organizationDid: string;
+  rkey: string;
+  minDonationInUSD: string | null;
+  maxDonationInUSD: string | null;
+};
+
+type RawFundingConfig = {
+  receivingWallet?: { uri?: string | null } | null;
+  status?: string | null;
+  minDonationInUSD?: string | null;
+  maxDonationInUSD?: string | null;
+} | null;
+
 function asString(value: unknown): string | null {
   return typeof value === "string" && value.trim() ? value.trim() : null;
 }
@@ -27,6 +41,49 @@ function donorKey(from: { type: "did" | "wallet"; id: string } | null): string |
 
 function usdAmount(receipt: { amount: number; currency: string }): number {
   return ["USD", "USDC"].includes(receipt.currency.toUpperCase()) ? receipt.amount : 0;
+}
+
+function activityParts(uri: string): { did: string; rkey: string } | null {
+  const match = /^at:\/\/([^/]+)\/org\.hypercerts\.claim\.activity\/([^/?#]+)$/.exec(uri);
+  return match ? { did: match[1]!, rkey: match[2]! } : null;
+}
+
+async function fetchGainForestDonationTargets(activityUris: string[]): Promise<Map<string, GainForestDonationTarget>> {
+  const entries = [...new Set(activityUris)]
+    .map((activityUri) => {
+      const parts = activityParts(activityUri);
+      return parts
+        ? { activityUri, parts, configUri: `at://${parts.did}/app.gainforest.funding.config/${parts.rkey}` }
+        : null;
+    })
+    .filter((entry): entry is NonNullable<typeof entry> => Boolean(entry));
+  if (entries.length === 0) return new Map();
+
+  const selections = entries.map((entry, index) => `
+    f${index}: appGainforestFundingConfigByUri(uri: ${JSON.stringify(entry.configUri)}) {
+      receivingWallet { ... on AppGainforestFundingConfigEvmLinkRef { uri } }
+      status
+      minDonationInUSD
+      maxDonationInUSD
+    }
+  `);
+  const data = await indexerQuery<Record<string, RawFundingConfig>>(
+    `query ProjectDonationTargets { ${selections.join("\n")} }`,
+    {},
+  ).catch(() => null);
+
+  const targets = new Map<string, GainForestDonationTarget>();
+  entries.forEach((entry, index) => {
+    const config = data?.[`f${index}`];
+    if (!config?.receivingWallet?.uri || (config.status ?? "open") !== "open") return;
+    targets.set(entry.activityUri, {
+      organizationDid: entry.parts.did,
+      rkey: entry.parts.rkey,
+      minDonationInUSD: config.minDonationInUSD ?? null,
+      maxDonationInUSD: config.maxDonationInUSD ?? null,
+    });
+  });
+  return targets;
 }
 
 export async function POST(request: NextRequest) {
@@ -48,6 +105,7 @@ export async function POST(request: NextRequest) {
 
   const uniqueDids = [...new Set(normalized.map((item) => item.did))];
   const receiptsPromise = fetchReceipts().catch(() => []);
+  const gainForestTargetsPromise = fetchGainForestDonationTargets(normalized.flatMap((item) => item.bumicertUris));
   const maEarthByDidPromise = Promise.all(
     uniqueDids.map(async (did) => {
       const donateUrl = maEarthDonationUrl(did);
@@ -60,13 +118,18 @@ export async function POST(request: NextRequest) {
     }),
   );
 
-  const [receipts, maEarthEntries] = await Promise.all([receiptsPromise, maEarthByDidPromise]);
+  const [receipts, gainForestTargets, maEarthEntries] = await Promise.all([
+    receiptsPromise,
+    gainForestTargetsPromise,
+    maEarthByDidPromise,
+  ]);
   const maEarthByDid = new Map(maEarthEntries);
   const summaries: Record<string, {
     acceptsDonations: boolean;
     totalUsd: number;
     donorCount: number;
     gainforest: DonationSourceSummary | null;
+    gainforestDonation: GainForestDonationTarget | null;
     maEarth: (DonationSourceSummary & { donateUrl: string; rounds: number[] }) | null;
   }> = {};
 
@@ -75,7 +138,10 @@ export async function POST(request: NextRequest) {
     const matchingReceipts = receipts.filter((receipt) => receipt.bumicertUri && certUris.has(receipt.bumicertUri));
     const gainforestTotal = matchingReceipts.reduce((sum, receipt) => sum + usdAmount(receipt), 0);
     const gainforestDonors = new Set(matchingReceipts.map((receipt) => donorKey(receipt.from)).filter(Boolean)).size;
-    const gainforest = matchingReceipts.length > 0 || gainforestTotal > 0
+    const gainforestDonation = item.bumicertUris
+      .map((uri) => gainForestTargets.get(uri) ?? null)
+      .find((target): target is GainForestDonationTarget => Boolean(target)) ?? null;
+    const gainforest = matchingReceipts.length > 0 || gainforestTotal > 0 || gainforestDonation
       ? { totalUsd: gainforestTotal, donorCount: gainforestDonors }
       : null;
 
@@ -92,10 +158,11 @@ export async function POST(request: NextRequest) {
     const totalUsd = (gainforest?.totalUsd ?? 0) + (maEarth?.totalUsd ?? 0);
     const donorCount = (gainforest?.donorCount ?? 0) + (maEarth?.donorCount ?? 0);
     summaries[item.key] = {
-      acceptsDonations: Boolean(gainforest || maEarth),
+      acceptsDonations: Boolean(gainforestDonation || maEarth),
       totalUsd,
       donorCount,
       gainforest,
+      gainforestDonation,
       maEarth,
     };
   }

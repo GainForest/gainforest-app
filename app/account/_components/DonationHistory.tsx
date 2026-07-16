@@ -12,6 +12,8 @@ import { blockExplorerUrl } from "../../_lib/urls";
 
 interface DonationHistoryProps {
   receipts: FundingReceipt[];
+  /** Owner view only: explain that anonymous donations are never listed. */
+  showAnonymousNote?: boolean;
 }
 
 function extractBumicertInfo(uri: string | null): { did: string; rkey: string } | null {
@@ -110,22 +112,35 @@ function DonationCard({
   );
 }
 
-export function DonationHistory({ receipts }: DonationHistoryProps) {
+function AnonymousNote() {
+  const t = useTranslations("common.accountDonations");
+  return (
+    <p className="rounded-lg border border-border bg-muted/50 px-3 py-2 text-xs leading-5 text-muted-foreground">
+      {t("anonymousNote")}
+    </p>
+  );
+}
+
+export function DonationHistory({ receipts, showAnonymousNote = false }: DonationHistoryProps) {
   const t = useTranslations("common.accountDonations");
   const totalDonated = useMemo(() => receipts.reduce((sum, receipt) => sum + receipt.amount, 0), [receipts]);
 
   if (receipts.length === 0) {
     return (
-      <EmptyHeroBanner
-        description={t("emptyHeroDescription")}
-        ctaLabel={t("emptyHeroCta")}
-        ctaHref="/projects"
-      />
+      <div className="w-full space-y-4">
+        <EmptyHeroBanner
+          description={t("emptyHeroDescription")}
+          ctaLabel={t("emptyHeroCta")}
+          ctaHref="/projects"
+        />
+        {showAnonymousNote ? <AnonymousNote /> : null}
+      </div>
     );
   }
 
   return (
     <div className="w-full space-y-4">
+      {showAnonymousNote ? <AnonymousNote /> : null}
       <div>
         <h2 className="text-lg font-semibold text-foreground mb-4">
           Donation History

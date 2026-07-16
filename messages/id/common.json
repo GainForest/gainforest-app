@@ -601,7 +601,8 @@
   },
   "accountDonations": {
     "emptyHeroDescription": "Dukung sebuah proyek dan kontribusi Anda akan muncul di sini, masing-masing tertaut ke proyek yang Anda dukung.",
-    "emptyHeroCta": "Jelajahi proyek"
+    "emptyHeroCta": "Jelajahi proyek",
+    "anonymousNote": "Donasi yang diberikan dengan pilihan “Donasi secara anonim” tidak pernah ditautkan ke profil Anda, sehingga tidak muncul di sini. Jangan centang pilihan itu saat pembayaran agar donasi berikutnya tampil di halaman ini."
   },
   "accountProjects": {
     "emptyEyebrow": "Belum ada proyek",

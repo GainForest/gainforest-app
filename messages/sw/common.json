@@ -601,7 +601,8 @@
   },
   "accountDonations": {
     "emptyHeroDescription": "Unga mkono mradi na michango yako itaonekana hapa, kila moja ikiwa na kiungo kwa mradi uliouunga mkono.",
-    "emptyHeroCta": "Gundua miradi"
+    "emptyHeroCta": "Gundua miradi",
+    "anonymousNote": "Michango iliyotolewa ukiwa umechagua “Changia bila kutajwa jina” haiunganishwi kamwe na wasifu wako, kwa hivyo haionekani hapa. Acha chaguo hilo bila kuteuliwa unapolipa ili michango yako ijayo ionekane kwenye ukurasa huu."
   },
   "accountProjects": {
     "emptyEyebrow": "Hakuna miradi",

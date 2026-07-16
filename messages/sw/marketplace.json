@@ -959,6 +959,7 @@
       "showDetails": "Onyesha maelezo",
       "loading": "Inapakia miradi",
       "donate": "Changia",
+      "gainforestBadge": "Changia kwenye GainForest",
       "acceptsDonations": "Hupokea michango",
       "openForSupport": "Iko wazi kwa msaada",
       "donationSummary": "{amount} kutoka kwa {donors, plural, one {mchangiaji #} other {wachangiaji #}}",

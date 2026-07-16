@@ -4,17 +4,20 @@ import { HeartIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useModal } from "@/components/ui/modal/context";
 import { AmountModal, type DonationBumicert, type DonationFundingConfig } from "./DonationModals";
+import { cn } from "@/lib/utils";
 
 export function DonateButton({
   bumicert,
   fundingConfig,
   disabled,
   label,
+  className,
 }: {
   bumicert: DonationBumicert;
   fundingConfig: DonationFundingConfig;
   disabled: boolean;
   label: string;
+  className?: string;
 }) {
   const { pushModal, show } = useModal();
 
@@ -22,7 +25,7 @@ export function DonateButton({
     <Button
       type="button"
       disabled={disabled}
-      className="h-9 w-full opacity-90 hover:opacity-100"
+      className={cn("h-11 w-full font-semibold opacity-90 hover:opacity-100", className)}
       onClick={async () => {
         pushModal(
           {

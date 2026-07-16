@@ -601,7 +601,8 @@
   },
   "accountDonations": {
     "emptyHeroDescription": "Apoie um projeto e suas contribuições aparecerão aqui, cada uma vinculada ao projeto que você apoiou.",
-    "emptyHeroCta": "Explorar projetos"
+    "emptyHeroCta": "Explorar projetos",
+    "anonymousNote": "Doações feitas com “Doar anonimamente” marcado nunca são vinculadas ao seu perfil, por isso não aparecem aqui. Deixe a opção desmarcada no checkout para ver doações futuras nesta página."
   },
   "accountProjects": {
     "emptyEyebrow": "Sem projetos",

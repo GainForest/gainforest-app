@@ -959,6 +959,7 @@
       "showDetails": "Tampilkan detail",
       "loading": "Memuat proyek",
       "donate": "Donasi",
+      "gainforestBadge": "Donasi di GainForest",
       "acceptsDonations": "Menerima donasi",
       "openForSupport": "Terbuka untuk dukungan",
       "donationSummary": "{amount} dari {donors, plural, other {# pendukung}}",
