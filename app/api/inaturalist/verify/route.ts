@@ -24,7 +24,7 @@ export async function POST(request: Request) {
     const user = await fetchINaturalistPublicUser(profile);
     if (!user.verificationText.includes(code)) {
       return Response.json({
-        error: "We could not find your GainForest DID link on that iNaturalist profile.",
+        error: "We could not find your GainForest DID link in that iNaturalist profile bio.",
         code,
       }, { status: 400 });
     }

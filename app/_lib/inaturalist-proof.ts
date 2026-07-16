@@ -107,11 +107,10 @@ export function parseINaturalistPublicUser(payload: unknown): INaturalistPublicU
   const name = stringValue(candidate.name);
   const iconUrl = stringValue(candidate.icon_url) ?? stringValue(candidate.iconUrl) ?? stringValue(candidate.icon);
   const publicFields = [
-    login,
-    name,
-    stringValue(candidate.orcid),
     stringValue(candidate.description),
     stringValue(candidate.bio),
+    stringValue(candidate.about),
+    stringValue(candidate.profile),
   ].filter((value): value is string => Boolean(value));
   return {
     userId,

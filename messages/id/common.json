@@ -218,7 +218,7 @@
       "connectedAs": "Terverifikasi sebagai @{account}",
       "disconnect": "Hapus verifikasi",
       "proofLabel": "Tautan DID GainForest Anda",
-      "proofHint": "Tambahkan teks persis ini ke nama profil publik iNaturalist Anda, lalu tempel handle atau tautan profil iNaturalist di bawah. Anda dapat menghapusnya setelah verifikasi.",
+      "proofHint": "Tambahkan teks persis ini ke bio/tentang iNaturalist Anda. Anda dapat menghapusnya setelah verifikasi.",
       "copy": "Salin",
       "copied": "Disalin",
       "profileLabel": "Handle atau tautan iNaturalist",
@@ -228,7 +228,18 @@
       "verifyFailed": "Tidak dapat memverifikasi akun iNaturalist itu.",
       "connectFirst": "Verifikasi akun iNaturalist Anda terlebih dahulu.",
       "chooseProject": "Pilih proyek GainForest terlebih dahulu.",
-      "projectLabel": "Proyek GainForest"
+      "projectLabel": "Proyek GainForest",
+      "inatProjectLabel": "Proyek iNaturalist",
+      "projectsLoading": "Memuat proyek iNaturalist…",
+      "projectsLoadFailed": "Tidak dapat memuat proyek iNaturalist Anda.",
+      "noINaturalistProjects": "Tidak ada proyek iNaturalist yang ditemukan di akun terverifikasi Anda.",
+      "chooseINaturalistProject": "Pilih proyek iNaturalist terlebih dahulu.",
+      "steps": {
+        "openSettings": "1. Buka iNaturalist → Pengaturan Akun → Profil.",
+        "editBio": "2. Temukan kolom bio/tentang Anda.",
+        "pasteCode": "3. Tempel tautan DID GainForest di atas ke bio itu lalu simpan.",
+        "returnVerify": "4. Kembali ke sini, tempel handle atau tautan profil iNaturalist Anda, lalu verifikasi."
+      }
     }
   },
   "bumicertCard": {

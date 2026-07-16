@@ -218,7 +218,7 @@
       "connectedAs": "Verificado como @{account}",
       "disconnect": "Remover verificação",
       "proofLabel": "Seu link DID do GainForest",
-      "proofHint": "Adicione este texto exato ao seu nome público de perfil do iNaturalist e depois cole abaixo seu usuário ou link de perfil. Você pode removê-lo depois da verificação.",
+      "proofHint": "Adicione este texto exato à sua bio/sobre do iNaturalist. Você pode removê-lo depois da verificação.",
       "copy": "Copiar",
       "copied": "Copiado",
       "profileLabel": "Usuário ou link do iNaturalist",
@@ -228,7 +228,18 @@
       "verifyFailed": "Não foi possível verificar essa conta do iNaturalist.",
       "connectFirst": "Verifique primeiro sua conta do iNaturalist.",
       "chooseProject": "Escolha primeiro um projeto do GainForest.",
-      "projectLabel": "Projeto do GainForest"
+      "projectLabel": "Projeto do GainForest",
+      "inatProjectLabel": "Projeto do iNaturalist",
+      "projectsLoading": "Carregando projetos do iNaturalist…",
+      "projectsLoadFailed": "Não foi possível carregar seus projetos do iNaturalist.",
+      "noINaturalistProjects": "Nenhum projeto do iNaturalist foi encontrado na sua conta verificada.",
+      "chooseINaturalistProject": "Escolha primeiro um projeto do iNaturalist.",
+      "steps": {
+        "openSettings": "1. Abra iNaturalist → Configurações da conta → Perfil.",
+        "editBio": "2. Encontre o campo de bio/sobre.",
+        "pasteCode": "3. Cole o link DID do GainForest acima nessa bio e salve.",
+        "returnVerify": "4. Volte aqui, cole seu usuário ou link de perfil do iNaturalist e verifique."
+      }
     }
   },
   "bumicertCard": {

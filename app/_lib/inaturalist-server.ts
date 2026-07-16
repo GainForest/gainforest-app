@@ -10,13 +10,18 @@ const INATURALIST_API_BASE = "https://api.inaturalist.org/v1";
 const INATURALIST_PAGE_SIZE = 200;
 const INATURALIST_MAX_OBSERVATIONS = 5_000;
 
+type INaturalistProjectPayload = {
+  id?: unknown;
+  title?: unknown;
+  slug?: unknown;
+  description?: unknown;
+};
+
 type INaturalistProjectApiResponse = {
-  results?: Array<{
-    id?: unknown;
-    title?: unknown;
-    slug?: unknown;
-    description?: unknown;
-  }>;
+  total_results?: unknown;
+  page?: unknown;
+  per_page?: unknown;
+  results?: INaturalistProjectPayload[];
 };
 
 type INaturalistObservationApiResponse = {
@@ -127,16 +132,11 @@ async function inaturalistGet<T>(path: string, params: URLSearchParams, accessTo
   return payload;
 }
 
-export async function fetchINaturalistProject(input: string): Promise<INaturalistProjectSummary> {
-  const parsed = parseINaturalistProjectUrl(input);
-  if (!parsed) throw new Error("Enter an iNaturalist project page link.");
-  const params = new URLSearchParams();
-  const data = await inaturalistGet<INaturalistProjectApiResponse>(`/projects/${encodeURIComponent(parsed.slug)}`, params);
-  const project = data.results?.[0];
+function projectSummary(project: INaturalistProjectPayload | undefined, fallbackSlug?: string): INaturalistProjectSummary | null {
   const id = numberValue(project?.id);
   const title = stringValue(project?.title);
-  const slug = stringValue(project?.slug) ?? parsed.slug;
-  if (id === null || !title) throw new Error("We could not find that iNaturalist project.");
+  const slug = stringValue(project?.slug) ?? fallbackSlug;
+  if (id === null || !title || !slug) return null;
   return {
     id,
     title,
@@ -145,6 +145,44 @@ export async function fetchINaturalistProject(input: string): Promise<INaturalis
     url: `https://www.inaturalist.org/projects/${encodeURIComponent(slug)}`,
     observationCount: 0,
   };
+}
+
+export async function fetchINaturalistProject(input: string): Promise<INaturalistProjectSummary> {
+  const parsed = parseINaturalistProjectUrl(input);
+  if (!parsed) throw new Error("Enter an iNaturalist project page link.");
+  const params = new URLSearchParams();
+  const data = await inaturalistGet<INaturalistProjectApiResponse>(`/projects/${encodeURIComponent(parsed.slug)}`, params);
+  const project = projectSummary(data.results?.[0], parsed.slug);
+  if (!project) throw new Error("We could not find that iNaturalist project.");
+  return project;
+}
+
+export async function fetchINaturalistProjectById(id: number): Promise<INaturalistProjectSummary> {
+  const params = new URLSearchParams();
+  const data = await inaturalistGet<INaturalistProjectApiResponse>(`/projects/${encodeURIComponent(String(id))}`, params);
+  const project = projectSummary(data.results?.[0]);
+  if (!project) throw new Error("We could not find that iNaturalist project.");
+  return project;
+}
+
+export async function fetchINaturalistUserProjects(userId: number): Promise<INaturalistProjectSummary[]> {
+  const projects: INaturalistProjectSummary[] = [];
+  const seen = new Set<number>();
+  const perPage = 200;
+  for (let page = 1; page <= 10; page += 1) {
+    const params = new URLSearchParams({ per_page: String(perPage), page: String(page), order: "asc", order_by: "title" });
+    const data = await inaturalistGet<INaturalistProjectApiResponse>(`/users/${encodeURIComponent(String(userId))}/projects`, params);
+    const rows = data.results ?? [];
+    for (const row of rows) {
+      const project = projectSummary(row);
+      if (!project || seen.has(project.id)) continue;
+      seen.add(project.id);
+      projects.push(project);
+    }
+    const total = numberValue(data.total_results);
+    if (rows.length === 0 || rows.length < perPage || (total !== null && projects.length >= total)) break;
+  }
+  return projects.sort((left, right) => left.title.localeCompare(right.title));
 }
 
 export async function fetchINaturalistProjectObservations(options: {

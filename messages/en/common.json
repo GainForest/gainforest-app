@@ -218,7 +218,7 @@
       "connectedAs": "Verified as @{account}",
       "disconnect": "Remove verification",
       "proofLabel": "Your GainForest DID link",
-      "proofHint": "Add this exact text to your public iNaturalist profile name, then paste your iNaturalist handle or profile link below. You can remove it after verification.",
+      "proofHint": "Add this exact text to your iNaturalist bio/about text. You can remove it after verification.",
       "copy": "Copy",
       "copied": "Copied",
       "profileLabel": "iNaturalist handle or profile link",
@@ -228,7 +228,18 @@
       "verifyFailed": "Could not verify that iNaturalist account.",
       "connectFirst": "Verify your iNaturalist account first.",
       "chooseProject": "Choose a GainForest project first.",
-      "projectLabel": "GainForest project"
+      "projectLabel": "GainForest project",
+      "inatProjectLabel": "iNaturalist project",
+      "projectsLoading": "Loading iNaturalist projects…",
+      "projectsLoadFailed": "Could not load your iNaturalist projects.",
+      "noINaturalistProjects": "No iNaturalist projects were found on your verified account.",
+      "chooseINaturalistProject": "Choose an iNaturalist project first.",
+      "steps": {
+        "openSettings": "1. Open iNaturalist → Account Settings → Profile.",
+        "editBio": "2. Find your bio/about field.",
+        "pasteCode": "3. Paste the GainForest DID link above into that bio and save.",
+        "returnVerify": "4. Return here, paste your iNaturalist handle or profile link, and verify."
+      }
     }
   },
   "bumicertCard": {

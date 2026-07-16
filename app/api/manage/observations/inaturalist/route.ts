@@ -1,5 +1,5 @@
 import { cookies } from "next/headers";
-import { fetchINaturalistProject, fetchINaturalistProjectObservations } from "@/app/_lib/inaturalist-server";
+import { fetchINaturalistProject, fetchINaturalistProjectById, fetchINaturalistProjectObservations } from "@/app/_lib/inaturalist-server";
 import { INATURALIST_CONNECTION_COOKIE, unsealJson, type INaturalistConnection } from "@/app/_lib/inaturalist-proof";
 import { resolvePdsHost } from "@/app/_lib/pds";
 import { fetchAuthSession } from "@/app/_lib/auth-server";
@@ -115,14 +115,17 @@ export async function GET(request: Request) {
 
   const url = new URL(request.url);
   const inputUrl = url.searchParams.get("url")?.trim() ?? "";
+  const rawProjectId = url.searchParams.get("projectId")?.trim() ?? "";
+  const projectId = rawProjectId ? Number(rawProjectId) : null;
+  const hasProjectId = projectId !== null && Number.isFinite(projectId) && projectId > 0;
   const projectRef = url.searchParams.get("projectRef")?.trim() || null;
-  if (!inputUrl) {
-    return Response.json({ error: "Enter an iNaturalist project page link." }, { status: 400 });
+  if (!inputUrl && !hasProjectId) {
+    return Response.json({ error: "Choose an iNaturalist project." }, { status: 400 });
   }
 
   try {
     const [project, existing] = await Promise.all([
-      fetchINaturalistProject(inputUrl),
+      hasProjectId ? fetchINaturalistProjectById(projectId) : fetchINaturalistProject(inputUrl),
       listExistingINaturalistRecords(target.did).catch(() => new Map<number, ExistingINaturalistRecord>()),
     ]);
     const { observations, totalResults, truncated } = await fetchINaturalistProjectObservations({

@@ -41,6 +41,11 @@ type INaturalistPreviewResponse = {
   error?: string;
 };
 
+type INaturalistProjectsResponse = {
+  projects?: INaturalistProjectSummary[];
+  error?: string;
+};
+
 function omitEmptyRecord<T extends Record<string, unknown>>(record: T): T {
   for (const key of Object.keys(record)) {
     const value = record[key];
@@ -117,11 +122,13 @@ export function INaturalistSettingsSection({
   const [status, setStatus] = useState<ConnectionStatus | null>(null);
   const [selectedProjectUri, setSelectedProjectUri] = useState<string | null>(projects[0]?.projectUri ?? null);
   const [profileInput, setProfileInput] = useState("");
-  const [inputUrl, setInputUrl] = useState("");
+  const [inaturalistProjects, setINaturalistProjects] = useState<INaturalistProjectSummary[]>([]);
+  const [selectedINaturalistProjectId, setSelectedINaturalistProjectId] = useState<string | null>(null);
   const [sourceProject, setSourceProject] = useState<INaturalistProjectSummary | null>(null);
   const [observations, setObservations] = useState<INaturalistObservationSummary[]>([]);
   const [localStatuses, setLocalStatuses] = useState<Map<number, LocalSyncState>>(() => new Map());
   const [loading, setLoading] = useState(false);
+  const [loadingProjects, setLoadingProjects] = useState(false);
   const [syncing, setSyncing] = useState(false);
   const [verifying, setVerifying] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -144,6 +151,36 @@ export function INaturalistSettingsSection({
       cancelled = true;
     };
   }, []);
+
+  useEffect(() => {
+    if (!status?.connected) {
+      setINaturalistProjects([]);
+      setSelectedINaturalistProjectId(null);
+      return;
+    }
+    let cancelled = false;
+    setLoadingProjects(true);
+    fetch("/api/inaturalist/projects", { cache: "no-store" })
+      .then(async (response) => {
+        const data = (await response.json().catch(() => null)) as INaturalistProjectsResponse | null;
+        if (!response.ok || !Array.isArray(data?.projects)) throw new Error(data?.error ?? t("projectsLoadFailed"));
+        return data.projects;
+      })
+      .then((nextProjects) => {
+        if (cancelled) return;
+        setINaturalistProjects(nextProjects);
+        setSelectedINaturalistProjectId((current) => current ?? (nextProjects[0] ? String(nextProjects[0].id) : null));
+      })
+      .catch((caught) => {
+        if (!cancelled) setError(caught instanceof Error ? caught.message : t("projectsLoadFailed"));
+      })
+      .finally(() => {
+        if (!cancelled) setLoadingProjects(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [status?.connected, t]);
 
   const mergedObservations = useMemo(
     () => observations.map((observation) => ({ ...observation, ...(localStatuses.get(observation.id) ?? {}) })),
@@ -196,6 +233,8 @@ export function INaturalistSettingsSection({
     setError(null);
     await fetch("/api/inaturalist/disconnect", { method: "POST" });
     setStatus((current) => ({ connected: false, verificationCode: current?.verificationCode }));
+    setINaturalistProjects([]);
+    setSelectedINaturalistProjectId(null);
     setSourceProject(null);
     setObservations([]);
   }
@@ -209,9 +248,8 @@ export function INaturalistSettingsSection({
       setError(t("chooseProject"));
       return;
     }
-    const trimmed = inputUrl.trim();
-    if (!trimmed) {
-      setError(uploadT("urlRequired"));
+    if (!selectedINaturalistProjectId) {
+      setError(t("chooseINaturalistProject"));
       return;
     }
     setLoading(true);
@@ -221,7 +259,7 @@ export function INaturalistSettingsSection({
     setLocalStatuses(new Map());
     try {
       const response = await fetch(manageApiHref("/api/manage/observations/inaturalist", target, {
-        url: trimmed,
+        projectId: selectedINaturalistProjectId,
         projectRef: selectedProject.projectUri,
       }), { cache: "no-store" });
       const data = (await response.json().catch(() => null)) as INaturalistPreviewResponse | null;
@@ -348,6 +386,12 @@ export function INaturalistSettingsSection({
                 </Button>
               </div>
               <p className="mt-2 text-xs leading-5 text-muted-foreground">{t("proofHint")}</p>
+              <ol className="mt-3 space-y-1.5 text-xs leading-5 text-muted-foreground">
+                <li>{t("steps.openSettings")}</li>
+                <li>{t("steps.editBio")}</li>
+                <li>{t("steps.pasteCode")}</li>
+                <li>{t("steps.returnVerify")}</li>
+              </ol>
             </div>
             <div className="flex flex-col gap-2 sm:flex-row">
               <Input
@@ -368,7 +412,7 @@ export function INaturalistSettingsSection({
 
         {connected ? (
           <div className="mt-4 space-y-3 border-t border-border/60 pt-4">
-            <div className="grid gap-2 sm:grid-cols-[minmax(12rem,18rem)_1fr_auto]">
+            <div className="grid gap-2 lg:grid-cols-[minmax(12rem,18rem)_minmax(14rem,1fr)_auto]">
               <Select value={selectedProjectUri ?? ""} onValueChange={(value) => setSelectedProjectUri(value)} disabled={loading || syncing || projects.length === 0}>
                 <SelectTrigger className="h-9 bg-background" aria-label={t("projectLabel")}>
                   <SelectValue placeholder={t("projectLabel")} />
@@ -379,19 +423,34 @@ export function INaturalistSettingsSection({
                   ))}
                 </SelectContent>
               </Select>
-              <Input
-                value={inputUrl}
-                onChange={(event) => setInputUrl(event.target.value)}
-                placeholder={uploadT("placeholder")}
-                aria-label={uploadT("urlLabel")}
-                disabled={loading || syncing}
-                className="h-9 bg-background"
-              />
-              <Button type="button" variant="outline" size="sm" onClick={() => void preview()} disabled={loading || syncing || projects.length === 0}>
+              <Select
+                value={selectedINaturalistProjectId ?? ""}
+                onValueChange={(value) => {
+                  setSelectedINaturalistProjectId(value);
+                  setSourceProject(null);
+                  setObservations([]);
+                  setLocalStatuses(new Map());
+                  setError(null);
+                }}
+                disabled={loading || syncing || loadingProjects || inaturalistProjects.length === 0}
+              >
+                <SelectTrigger className="h-9 bg-background" aria-label={t("inatProjectLabel")}>
+                  <SelectValue placeholder={loadingProjects ? t("projectsLoading") : t("inatProjectLabel")} />
+                </SelectTrigger>
+                <SelectContent>
+                  {inaturalistProjects.map((project) => (
+                    <SelectItem key={project.id} value={String(project.id)}>{project.title}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Button type="button" variant="outline" size="sm" onClick={() => void preview()} disabled={loading || syncing || loadingProjects || projects.length === 0 || !selectedINaturalistProjectId}>
                 {loading ? <Loader2Icon className="size-4 animate-spin" /> : <RotateCcwIcon className="size-4" />}
                 {loading ? uploadT("loading") : sourceProject ? uploadT("refresh") : uploadT("preview")}
               </Button>
             </div>
+            {connected && !loadingProjects && inaturalistProjects.length === 0 ? (
+              <p className="text-xs text-muted-foreground">{t("noINaturalistProjects")}</p>
+            ) : null}
 
             {sourceProject ? (
               <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-background/70 px-3 py-2 text-xs text-muted-foreground">

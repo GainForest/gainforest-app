@@ -218,7 +218,7 @@
       "connectedAs": "Imethibitishwa kama @{account}",
       "disconnect": "Ondoa uthibitisho",
       "proofLabel": "Kiungo chako cha DID cha GainForest",
-      "proofHint": "Ongeza maandishi haya kamili kwenye jina lako la wasifu wa umma wa iNaturalist, kisha bandika jina au kiungo cha wasifu hapa chini. Unaweza kuyaondoa baada ya kuthibitisha.",
+      "proofHint": "Ongeza maandishi haya kamili kwenye wasifu/kuhusu wako wa iNaturalist. Unaweza kuyaondoa baada ya kuthibitisha.",
       "copy": "Nakili",
       "copied": "Imenakiliwa",
       "profileLabel": "Jina au kiungo cha iNaturalist",
@@ -228,7 +228,18 @@
       "verifyFailed": "Haikuweza kuthibitisha akaunti hiyo ya iNaturalist.",
       "connectFirst": "Thibitisha akaunti yako ya iNaturalist kwanza.",
       "chooseProject": "Chagua mradi wa GainForest kwanza.",
-      "projectLabel": "Mradi wa GainForest"
+      "projectLabel": "Mradi wa GainForest",
+      "inatProjectLabel": "Mradi wa iNaturalist",
+      "projectsLoading": "Inapakia miradi ya iNaturalist…",
+      "projectsLoadFailed": "Haikuweza kupakia miradi yako ya iNaturalist.",
+      "noINaturalistProjects": "Hakuna miradi ya iNaturalist iliyopatikana kwenye akaunti yako iliyothibitishwa.",
+      "chooseINaturalistProject": "Chagua mradi wa iNaturalist kwanza.",
+      "steps": {
+        "openSettings": "1. Fungua iNaturalist → Mipangilio ya Akaunti → Wasifu.",
+        "editBio": "2. Tafuta sehemu ya wasifu/kuhusu.",
+        "pasteCode": "3. Bandika kiungo cha DID cha GainForest hapo juu kwenye wasifu huo na uhifadhi.",
+        "returnVerify": "4. Rudi hapa, bandika jina au kiungo chako cha wasifu wa iNaturalist, kisha thibitisha."
+      }
     }
   },
   "bumicertCard": {
