@@ -398,7 +398,7 @@
     "emptyHint": "Unda pochi ya michango ya shirika kwa ufunguo wako wa siri (Face ID, alama ya kidole, au ufunguo wa usalama). Hakuna maneno ya siri, hakuna cha kusakinisha.",
     "creating": "Inasubiri ufunguo wako wa siri…",
     "createButton": "Unda pochi kwa ufunguo wa siri",
-    "onlyOwnerCanCreate": "Mmiliki wa shirika pekee ndiye anayeweza kuunda pochi.",
+    "onlyOwnerCanCreate": "Mmiliki wa shirika au msimamizi pekee ndiye anayeweza kuunda pochi.",
     "defaultName": "Pochi ya shirika",
     "copyAddress": "Nakili anwani",
     "copied": "Imenakiliwa",

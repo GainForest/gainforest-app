@@ -398,7 +398,7 @@
     "emptyHint": "Buat dompet donasi organisasi dengan kunci sandi Anda (Face ID, sidik jari, atau kunci keamanan). Tanpa frasa rahasia, tanpa perlu memasang apa pun.",
     "creating": "Menunggu kunci sandi Anda…",
     "createButton": "Buat dompet dengan kunci sandi",
-    "onlyOwnerCanCreate": "Hanya pemilik organisasi yang dapat membuat dompet.",
+    "onlyOwnerCanCreate": "Hanya pemilik organisasi atau admin yang dapat membuat dompet.",
     "defaultName": "Dompet organisasi",
     "copyAddress": "Salin alamat",
     "copied": "Tersalin",

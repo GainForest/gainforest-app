@@ -305,10 +305,10 @@ export function FundingConfigModal({
                 className="flex items-center justify-center gap-1.5 h-9 w-full rounded-md bg-primary text-sm font-medium text-primary-foreground shadow-xs hover:opacity-90 transition-opacity"
               >
                 <FingerprintIcon className="size-3.5" />
-                {vault.viewerRole === "owner" ? walletT("createButton") : walletT("title")}
+                {vault.viewerRole !== "member" ? walletT("createButton") : walletT("title")}
               </button>
               <p className="text-xs text-muted-foreground text-center">
-                {vault.viewerRole === "owner" ? walletT("emptyHint") : walletT("onlyOwnerCanCreate")}
+                {vault.viewerRole !== "member" ? walletT("emptyHint") : walletT("onlyOwnerCanCreate")}
               </p>
             </div>
           ) : (

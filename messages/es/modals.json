@@ -398,7 +398,7 @@
     "emptyHint": "Crea la billetera de donaciones de la organización con tu llave de acceso (Face ID, huella digital o llave de seguridad). Sin frase secreta y sin instalar nada.",
     "creating": "Esperando tu llave de acceso…",
     "createButton": "Crear billetera con llave de acceso",
-    "onlyOwnerCanCreate": "Solo la persona propietaria de la organización puede crear la billetera.",
+    "onlyOwnerCanCreate": "Solo la persona propietaria de la organización o un administrador puede crear la billetera.",
     "defaultName": "Billetera de la organización",
     "copyAddress": "Copiar dirección",
     "copied": "Copiado",

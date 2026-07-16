@@ -398,7 +398,7 @@
     "emptyHint": "Create the organization's donation wallet with your passkey (Face ID, fingerprint, or security key). No seed phrase, nothing to install.",
     "creating": "Waiting for your passkey…",
     "createButton": "Create wallet with passkey",
-    "onlyOwnerCanCreate": "Only the organization owner can create the wallet.",
+    "onlyOwnerCanCreate": "Only the organization owner or an admin can create the wallet.",
     "defaultName": "Organization wallet",
     "copyAddress": "Copy address",
     "copied": "Copied",

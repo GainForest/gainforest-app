@@ -155,8 +155,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
   }
   const role = await viewerRole(repo, session.did);
-  if (role !== "owner") {
-    return NextResponse.json({ error: "Only the organization owner can create the wallet" }, { status: 403 });
+  if (role !== "owner" && role !== "admin") {
+    return NextResponse.json({ error: "Only the organization owner or an admin can create the wallet" }, { status: 403 });
   }
   if (await fetchSplitsVaultRecord(repo)) {
     return NextResponse.json({ error: "This organization already has a wallet" }, { status: 409 });
@@ -241,8 +241,8 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
   }
   const role = await viewerRole(repo, session.did);
-  if (role !== "owner") {
-    return NextResponse.json({ error: "Only the organization owner can remove the wallet" }, { status: 403 });
+  if (role !== "owner" && role !== "admin") {
+    return NextResponse.json({ error: "Only the organization owner or an admin can remove the wallet" }, { status: 403 });
   }
 
   const existing = await fetchSplitsVaultRecord(repo);

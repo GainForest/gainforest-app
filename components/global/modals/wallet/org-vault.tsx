@@ -216,6 +216,7 @@ export function OrgWalletModal({ orgDid, orgName, onBack, onChanged }: OrgWallet
   const role = state?.viewerRole;
   const deployed = state?.deployed === true;
   const viewerIsSigner = !!record && !!viewer.did && record.signers.some((signer) => signer.memberDid === viewer.did);
+  const canManageVault = role === "owner" || role === "admin";
   const canRemove = (signer: VaultPasskeySigner) =>
     !deployed && (role === "owner" || role === "admin" || signer.memberDid === viewer.did) && record!.signers.length > 1;
 
@@ -244,7 +245,7 @@ export function OrgWalletModal({ orgDid, orgName, onBack, onChanged }: OrgWallet
               <p className="text-xs text-muted-foreground max-w-sm">{t("emptyHint")}</p>
             </div>
             {actionError ? <p className="text-sm text-destructive text-center">{actionError}</p> : null}
-            {role === "owner" ? (
+            {canManageVault ? (
               <Button className="w-full" onClick={() => void handleCreate()} disabled={isBusy}>
                 {isBusy ? <Loader2Icon className="size-3.5 animate-spin" /> : <FingerprintIcon className="size-3.5" />}
                 {isBusy ? t("creating") : t("createButton")}
@@ -325,7 +326,7 @@ export function OrgWalletModal({ orgDid, orgName, onBack, onChanged }: OrgWallet
 
             {actionError ? <p className="text-sm text-destructive">{actionError}</p> : null}
 
-            {role === "owner" && !deployed ? (
+            {canManageVault && !deployed ? (
               <Button variant="ghost" className="w-full text-muted-foreground hover:text-destructive" onClick={() => void handleDelete()} disabled={isBusy}>
                 <Trash2Icon className="size-3.5" />
                 {t("deleteButton")}

@@ -398,7 +398,7 @@
     "emptyHint": "Crie a carteira de doações da organização com sua chave de acesso (Face ID, impressão digital ou chave de segurança). Sem frase secreta e sem instalar nada.",
     "creating": "Aguardando sua chave de acesso…",
     "createButton": "Criar carteira com chave de acesso",
-    "onlyOwnerCanCreate": "Somente a pessoa proprietária da organização pode criar a carteira.",
+    "onlyOwnerCanCreate": "Somente a pessoa proprietária da organização ou um administrador pode criar a carteira.",
     "defaultName": "Carteira da organização",
     "copyAddress": "Copiar endereço",
     "copied": "Copiado",
