@@ -121,6 +121,21 @@ describe("AudioMoth Darwin Core occurrences", () => {
     });
   });
 
+  it("ignores a stale broad-group vernacular when reading a legacy record", () => {
+    const record = buildAudioOccurrenceRecord({ ...draft, category: "bird", commonName: undefined });
+    // Simulate a record saved by an older build that wrote vernacularName "Bird".
+    const legacy = { ...record, vernacularName: "Bird", scientificName: "Phylloscopus ibericus", taxonRank: "species" };
+    const item = parseAudioOccurrenceItem({ uri: "at://did:plc:test/app.gainforest.dwc.occurrence/legacy", cid: "bafy", value: legacy }, source.uri);
+    expect(item?.commonName).toBe("");
+    expect(item?.scientificName).toBe("Phylloscopus ibericus");
+  });
+
+  it("keeps a real common name that happens to differ from the broad label", () => {
+    const record = buildAudioOccurrenceRecord({ ...draft, category: "bird", commonName: "European Robin" });
+    const item = parseAudioOccurrenceItem({ uri: "at://did:plc:test/app.gainforest.dwc.occurrence/robin", cid: "bafy", value: record }, source.uri);
+    expect(item?.commonName).toBe("European Robin");
+  });
+
   it("parses only occurrences linked to the exact source audio", () => {
     const record = buildAudioOccurrenceRecord(draft);
     const item = parseAudioOccurrenceItem({ uri: "at://did:plc:test/app.gainforest.dwc.occurrence/one", cid: "bafy-occ", value: record }, source.uri);

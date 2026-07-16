@@ -25,7 +25,7 @@
 
 import { cachedAsync } from "./async-cache";
 import type { AudioLabelCategory } from "./audiomoth/labels";
-import { parseAudioSegmentDynamicProperties } from "./audiomoth/occurrences";
+import { LEGACY_BROAD_VERNACULARS, parseAudioSegmentDynamicProperties } from "./audiomoth/occurrences";
 import { fetchHiddenAccountDids, fetchHiddenRecordUris, indexerQuery } from "./indexer";
 import { mentionCandidatesFromFacets, type MentionCandidate, type RawIndexedFacet } from "./mentions";
 import { normaliseRef } from "./pds";
@@ -460,12 +460,16 @@ function mapProjects(nodes: RawProject[]): ActivityFeedItem[] {
   });
 }
 
-function observationTitle(n: RawOccurrence): string | null {
-  return (
-    n.vernacularName?.trim() ||
-    n.scientificName?.trim() ||
-    null
-  );
+function observationTitle(n: RawOccurrence, bioacoustics: FeedBioacousticsClip | null): string | null {
+  const vernacular = n.vernacularName?.trim() || "";
+  const scientific = n.scientificName?.trim() || "";
+  // For bioacoustic sightings, an older build could persist a synthetic broad
+  // label ("Bird") as the vernacular name. That is not a real common name, so
+  // prefer the scientific name and never title the sighting with it.
+  if (bioacoustics && vernacular && vernacular === LEGACY_BROAD_VERNACULARS[bioacoustics.category]) {
+    return scientific || null;
+  }
+  return vernacular || scientific || null;
 }
 
 function observationText(n: RawOccurrence): string | null {
@@ -496,6 +500,7 @@ function mapOccurrences(nodes: RawOccurrence[]): ActivityFeedItem[] {
   return nodes.map((n) => {
     const external = n.thumbnailUrl?.trim() || n.speciesImageUrl?.trim() || null;
     const imageRef = normaliseRef(n.imageEvidence?.file?.ref);
+    const bioacoustics = occurrenceBioacoustics(n);
     return {
       id: n.uri ?? `at://${n.did}/app.gainforest.dwc.occurrence/${n.rkey}`,
       kind: "observation",
@@ -503,14 +508,14 @@ function mapOccurrences(nodes: RawOccurrence[]): ActivityFeedItem[] {
       actorDid: n.did,
       actorName: profileName(n.certifiedProfileData),
       actorAvatarRef: profileAvatarRef(n.certifiedProfileData),
-      title: observationTitle(n),
+      title: observationTitle(n, bioacoustics),
       text: observationText(n),
       href: localObservationHref(n.did, n.rkey),
       imageUrl: external,
       imageRef,
       observationEventId: n.eventID?.trim() || null,
       observationBatchNote: clampText(n.fieldNotes, 600),
-      bioacoustics: occurrenceBioacoustics(n),
+      bioacoustics,
       targetTitle: null,
       targetHref: null,
       amount: null,

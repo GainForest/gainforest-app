@@ -54,6 +54,19 @@ type MutationResult = { uri: string; cid: string };
 
 const CATEGORIES = new Set<AudioLabelCategory>(["bird", "frog", "insect", "other", "note"]);
 
+/**
+ * Vernacular labels that earlier versions synthesized from the broad group.
+ * They are not real common names, so we ignore them on read: the labelling UI
+ * treats the box as unnamed and drops the stale value on the next save.
+ */
+export const LEGACY_BROAD_VERNACULARS: Record<AudioLabelCategory, string> = {
+  bird: "Bird",
+  frog: "Frog",
+  insect: "Insect",
+  other: "Unidentified organism",
+  note: "Unidentified biological sound",
+};
+
 const BROAD_TAXONOMY: Record<AudioLabelCategory, Record<string, unknown>> = {
   bird: {
     scientificName: "Aves",
@@ -239,6 +252,11 @@ export function buildAudioOccurrenceRecord(
   return record;
 }
 
+function readCommonName(value: unknown, category: AudioLabelCategory): string {
+  if (typeof value !== "string") return "";
+  return value.trim() === LEGACY_BROAD_VERNACULARS[category] ? "" : value;
+}
+
 export function parseAudioOccurrenceItem(
   entry: { uri?: unknown; cid?: unknown; value?: unknown },
   sourceAudioUri?: string,
@@ -257,7 +275,7 @@ export function parseAudioOccurrenceItem(
     rkey: rkeyFromUri(entry.uri),
     record: entry.value,
     category: segment.labelCategory,
-    commonName: typeof entry.value.vernacularName === "string" ? entry.value.vernacularName : "",
+    commonName: readCommonName(entry.value.vernacularName, segment.labelCategory),
     scientificName: typeof entry.value.scientificName === "string" ? entry.value.scientificName : "",
     note: typeof entry.value.occurrenceRemarks === "string" ? entry.value.occurrenceRemarks : "",
     bounds: {
