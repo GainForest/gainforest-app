@@ -81,6 +81,18 @@ type CompletedLine = {
 
 const TIP_LINE_KEY = "gainforest-tip";
 
+/**
+ * Client-side guards so the checkout can never hang on "Processing…"
+ * forever when the settlement request stalls (server killed, connection
+ * dropped, stuck transaction). Slightly above the payment routes'
+ * maxDuration (300s) so a slow-but-alive server still gets to answer.
+ */
+const SETTLE_TIMEOUT_MS = 180_000;
+const BATCH_SETTLE_TIMEOUT_MS = 320_000;
+
+/** Payment state unknown — it may still complete; never retry blindly. */
+const SETTLEMENT_TIMEOUT_RAW = { code: "SETTLEMENT_TIMEOUT" } as const;
+
 function socialShareUrl(platform: "x" | "bluesky" | "telegram", text: string): string {
   const encoded = encodeURIComponent(text);
   if (platform === "x") return `https://x.com/intent/tweet?text=${encoded}`;
@@ -132,11 +144,19 @@ async function signAndSettle(params: {
     validBefore,
   });
 
-  const response = await fetch(params.endpoint, {
-    method: "POST",
-    headers: { "content-type": "application/json", "PAYMENT-SIGNATURE": sigHeader },
-    body: JSON.stringify(params.body),
-  });
+  let response: Response;
+  try {
+    response = await fetch(params.endpoint, {
+      method: "POST",
+      headers: { "content-type": "application/json", "PAYMENT-SIGNATURE": sigHeader },
+      body: JSON.stringify(params.body),
+      signal: AbortSignal.timeout(SETTLE_TIMEOUT_MS),
+    });
+  } catch {
+    // Timed out or the connection dropped mid-settlement: the payment may
+    // still have gone through, so surface the "check your wallet" message.
+    return { errorRaw: SETTLEMENT_TIMEOUT_RAW };
+  }
   const raw = (await response.json().catch(() => null)) as { transactionHash?: string } | null;
   if (!response.ok || typeof raw?.transactionHash !== "string") return { errorRaw: raw };
   return { txHash: raw.transactionHash };
@@ -208,11 +228,19 @@ async function signAndSettleBatch(params: {
     validBefore,
   });
 
-  const response = await fetch("/api/checkout", {
-    method: "POST",
-    headers: { "content-type": "application/json", "PAYMENT-SIGNATURE": sigHeader },
-    body: JSON.stringify(params.body),
-  });
+  let response: Response;
+  try {
+    response = await fetch("/api/checkout", {
+      method: "POST",
+      headers: { "content-type": "application/json", "PAYMENT-SIGNATURE": sigHeader },
+      body: JSON.stringify(params.body),
+      signal: AbortSignal.timeout(BATCH_SETTLE_TIMEOUT_MS),
+    });
+  } catch {
+    // Timed out or the connection dropped mid-settlement: the payment may
+    // still have gone through, so surface the "check your wallet" message.
+    return { ok: false, errorRaw: SETTLEMENT_TIMEOUT_RAW };
+  }
   const raw = (await response.json().catch(() => null)) as BatchResponse | null;
   if (!response.ok || !raw?.success) return { ok: false, errorRaw: raw };
   return { ok: true, response: raw };
@@ -318,6 +346,7 @@ export function CheckoutView({ authSession }: { authSession: AuthSession }) {
     if (raw && typeof raw === "object") {
       const code = Reflect.get(raw, "code");
       if (code === "NON_ANONYMOUS_DONATION_REQUIRES_DONOR_DID") return t("errorProfile");
+      if (code === "SETTLEMENT_TIMEOUT") return t("errorTimeout");
       const error = Reflect.get(raw, "error");
       if (typeof error === "string") {
         const lower = error.toLowerCase();

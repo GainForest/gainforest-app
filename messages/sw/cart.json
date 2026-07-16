@@ -73,6 +73,7 @@
     "errorAmount": "Kagua kiasi cha mchango kisha ujaribu tena.",
     "errorChanged": "Maelezo ya malipo yamebadilika. Tafadhali anza mchango upya.",
     "errorGeneric": "Malipo yameshindikana. Tafadhali jaribu tena.",
+    "errorTimeout": "Malipo haya yanachukua muda mrefu kuliko ilivyotarajiwa na huenda bado yakakamilika. Angalia shughuli za hivi karibuni za pochi yako kabla ya kujaribu tena ili usilipe mara mbili.",
     "tipFailed": "Bahashishi haikuweza kukamilika — michango yako haikuathiriwa.",
     "tipSkipped": "Bahashishi iliruka kwa sababu hakuna mchango uliokamilika.",
     "thankYou": "Asante",

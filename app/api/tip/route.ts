@@ -1,11 +1,14 @@
 import { formatUsdcAmount, normalizeUsdcAmountString, parseUsdcAmount } from "@/lib/facilitator/amount";
 import { parsePaymentSignature } from "@/lib/facilitator/eip3009";
-import { executeTransferWithAuthorization } from "@/lib/facilitator";
+import { executeTransferWithAuthorization, SettlementTimeoutError } from "@/lib/facilitator";
 import { getTipWalletAddress, TIP_ENS_NAME } from "@/lib/facilitator/tip";
 import { isDidIdentifier, writeTipReceipt, type DidIdentifier } from "@/lib/facilitator/receipts";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+// A mainnet transfer + receipt wait can exceed the platform's default
+// duration limit, which would drop the request and hang the donor's UI.
+export const maxDuration = 300;
 
 /**
  * Optional GainForest tip at checkout. The tip is a plain USDC
@@ -64,6 +67,16 @@ export async function POST(request: Request) {
     transactionHash = (await executeTransferWithAuthorization({ authorization, signature })).transactionHash;
   } catch (error) {
     console.error("[tip] On-chain transfer failed:", error);
+    if (error instanceof SettlementTimeoutError) {
+      return Response.json(
+        {
+          code: "SETTLEMENT_TIMEOUT",
+          error: "The payment is taking longer than expected and may still complete.",
+          transactionHash: error.transactionHash,
+        },
+        { status: 504 },
+      );
+    }
     return Response.json({ error: "Payment could not be completed. Please try again later." }, { status: 500 });
   }
 

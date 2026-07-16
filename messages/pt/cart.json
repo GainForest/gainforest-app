@@ -73,6 +73,7 @@
     "errorAmount": "Verifique o valor da doação e tente novamente.",
     "errorChanged": "Os detalhes do pagamento mudaram. Reinicie a doação.",
     "errorGeneric": "O pagamento falhou. Tente novamente.",
+    "errorTimeout": "Este pagamento está demorando mais do que o esperado e ainda pode ser concluído. Verifique a atividade recente da sua carteira antes de tentar novamente para não pagar duas vezes.",
     "tipFailed": "A gorjeta não pôde ser concluída — suas doações não foram afetadas.",
     "tipSkipped": "A gorjeta foi ignorada porque nenhuma doação foi concluída.",
     "thankYou": "Obrigado",

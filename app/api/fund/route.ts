@@ -1,6 +1,6 @@
 import { formatUsdcAmount, normalizeUsdcAmountString, parseUsdcAmount } from "@/lib/facilitator/amount";
 import { parsePaymentSignature } from "@/lib/facilitator/eip3009";
-import { executeTransferWithAuthorization } from "@/lib/facilitator";
+import { executeTransferWithAuthorization, SettlementTimeoutError } from "@/lib/facilitator";
 import { fetchActivityCid, fetchVerifiedRecipientAddress } from "@/lib/facilitator/recipient";
 import {
   isDidIdentifier,
@@ -12,6 +12,9 @@ import {
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+// A mainnet transfer + receipt wait can exceed the platform's default
+// duration limit, which would drop the request and hang the donor's UI.
+export const maxDuration = 300;
 
 type SettlementBody = {
   activityUri?: unknown;
@@ -139,6 +142,18 @@ export async function POST(request: Request) {
     transactionHash = (await executeTransferWithAuthorization({ authorization, signature })).transactionHash;
   } catch (error) {
     console.error("[fund] On-chain transfer failed:", error);
+    if (error instanceof SettlementTimeoutError) {
+      // Broadcast but unconfirmed — it may still settle. Never invite a
+      // blind retry: a new authorization could double-charge the donor.
+      return Response.json(
+        {
+          code: "SETTLEMENT_TIMEOUT",
+          error: "The payment is taking longer than expected and may still complete.",
+          transactionHash: error.transactionHash,
+        },
+        { status: 504 },
+      );
+    }
     return Response.json({ error: "Payment could not be completed. Please try again later." }, { status: 500 });
   }
 

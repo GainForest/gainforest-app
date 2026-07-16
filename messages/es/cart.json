@@ -73,6 +73,7 @@
     "errorAmount": "Revisa el monto de la donación e inténtalo de nuevo.",
     "errorChanged": "Los detalles del pago cambiaron. Reinicia la donación.",
     "errorGeneric": "El pago falló. Inténtalo de nuevo.",
+    "errorTimeout": "Este pago está tardando más de lo esperado y aún podría completarse. Revisa la actividad reciente de tu billetera antes de intentarlo de nuevo para no pagar dos veces.",
     "tipFailed": "La propina no se pudo completar — tus donaciones no se vieron afectadas.",
     "tipSkipped": "La propina se omitió porque ninguna donación se completó.",
     "thankYou": "Gracias",

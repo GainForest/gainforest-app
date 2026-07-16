@@ -1,6 +1,6 @@
 import { formatUsdcAmount, normalizeUsdcAmountString, parseUsdcAmount } from "@/lib/facilitator/amount";
 import { parsePaymentSignature } from "@/lib/facilitator/eip3009";
-import { executeTransferWithAuthorization, executeUsdcTransfer, getFacilitatorAddress } from "@/lib/facilitator";
+import { executeTransferWithAuthorization, executeUsdcTransfer, getFacilitatorAddress, SettlementTimeoutError } from "@/lib/facilitator";
 import { fetchActivityCid, fetchVerifiedRecipientAddress } from "@/lib/facilitator/recipient";
 import { getTipWalletAddress, TIP_ENS_NAME } from "@/lib/facilitator/tip";
 import {
@@ -13,6 +13,10 @@ import {
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+// One pull + up to MAX_LINES fan-outs + tip, all sequential mainnet txs.
+// Without this, the platform's default limit kills the request mid-settlement
+// and the donor's checkout hangs on "Processing…" with no response.
+export const maxDuration = 300;
 
 /**
  * Batched checkout settlement: ONE wallet approval for the whole cart.
@@ -172,6 +176,18 @@ export async function POST(request: Request) {
     pullTransactionHash = (await executeTransferWithAuthorization({ authorization, signature })).transactionHash;
   } catch (error) {
     console.error("[checkout] Pull transfer failed:", error);
+    if (error instanceof SettlementTimeoutError) {
+      // The pull tx was broadcast but not confirmed in time. It may still
+      // settle, so the client must warn the donor before any retry.
+      return Response.json(
+        {
+          code: "SETTLEMENT_TIMEOUT",
+          error: "The payment is taking longer than expected and may still complete.",
+          transactionHash: error.transactionHash,
+        },
+        { status: 504 },
+      );
+    }
     return Response.json({ error: "Payment could not be completed. Please try again later." }, { status: 500 });
   }
 

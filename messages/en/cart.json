@@ -73,6 +73,7 @@
     "errorAmount": "Check the donation amount and try again.",
     "errorChanged": "The payment details changed. Please restart the donation.",
     "errorGeneric": "Payment failed. Please try again.",
+    "errorTimeout": "This payment is taking longer than expected and may still complete. Check your wallet’s recent activity before trying again so you don’t pay twice.",
     "tipFailed": "The tip could not be completed — your donations were not affected.",
     "tipSkipped": "The tip was skipped because no donation completed.",
     "thankYou": "Thank you",

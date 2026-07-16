@@ -73,6 +73,7 @@
     "errorAmount": "Periksa jumlah donasi dan coba lagi.",
     "errorChanged": "Detail pembayaran berubah. Mulai ulang donasi.",
     "errorGeneric": "Pembayaran gagal. Silakan coba lagi.",
+    "errorTimeout": "Pembayaran ini memakan waktu lebih lama dari perkiraan dan mungkin masih berhasil. Periksa aktivitas terbaru dompet Anda sebelum mencoba lagi agar tidak membayar dua kali.",
     "tipFailed": "Tip tidak dapat diselesaikan — donasi Anda tidak terpengaruh.",
     "tipSkipped": "Tip dilewati karena tidak ada donasi yang selesai.",
     "thankYou": "Terima kasih",

@@ -1,8 +1,41 @@
-import { createPublicClient, createWalletClient, http } from "viem";
+import { createPublicClient, createWalletClient, http, WaitForTransactionReceiptTimeoutError } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { mainnet } from "viem/chains";
 import { RPC_URL, USDC_ABI, USDC_CONTRACT } from "./usdc";
 import { splitSignature, type Eip3009Authorization } from "./eip3009";
+
+/**
+ * How long to poll for a transaction receipt before giving up. Mainnet
+ * blocks are ~12s; anything unconfirmed after this is stuck (e.g. gas
+ * spike or a queued nonce) and must fail fast instead of hanging the
+ * donation request until the platform kills it — which left donors
+ * staring at an endless "Processing…" spinner.
+ */
+const RECEIPT_TIMEOUT_MS = 90_000;
+
+/**
+ * The transaction was broadcast but not confirmed within the timeout.
+ * It may STILL confirm later, so callers must not blindly retry —
+ * a retry mints a brand-new authorization and can double-charge.
+ */
+export class SettlementTimeoutError extends Error {
+  constructor(public readonly transactionHash: `0x${string}`) {
+    super(`Transaction ${transactionHash} was not confirmed within ${RECEIPT_TIMEOUT_MS / 1000}s`);
+    this.name = "SettlementTimeoutError";
+  }
+}
+
+async function waitForReceipt(
+  publicClient: ReturnType<typeof getPublicClient>,
+  txHash: `0x${string}`,
+): Promise<void> {
+  try {
+    await publicClient.waitForTransactionReceipt({ hash: txHash, timeout: RECEIPT_TIMEOUT_MS });
+  } catch (error) {
+    if (error instanceof WaitForTransactionReceiptTimeoutError) throw new SettlementTimeoutError(txHash);
+    throw error;
+  }
+}
 
 function getRequiredEnv(name: string): string {
   const value = process.env[name];
@@ -35,7 +68,7 @@ export async function executeUsdcTransfer(params: { to: `0x${string}`; value: bi
     account,
     args: [params.to, params.value],
   });
-  await publicClient.waitForTransactionReceipt({ hash: txHash });
+  await waitForReceipt(publicClient, txHash);
   return { transactionHash: txHash };
 }
 
@@ -84,6 +117,6 @@ export async function executeTransferWithAuthorization(params: TransferWithAuthP
     ],
   });
 
-  await publicClient.waitForTransactionReceipt({ hash: txHash });
+  await waitForReceipt(publicClient, txHash);
   return { transactionHash: txHash };
 }
