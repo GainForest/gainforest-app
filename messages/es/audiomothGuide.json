@@ -31,7 +31,6 @@
     "managerTab": "Gestión del proyecto",
     "fieldTab": "Equipo de campo",
     "equipment": {
-      "phone": "Teléfono Android",
       "computer": "Portátil u ordenador",
       "recorder": "AudioMoth y 3 pilas AA",
       "cable": "Cable de datos Micro USB compatible con tu ordenador",

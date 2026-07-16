@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { AnimatePresence, motion } from "framer-motion";
@@ -36,6 +37,7 @@ import {
 import { cn } from "@/lib/utils";
 
 type PrepTab = "equipment" | "manager" | "field";
+type ChecklistItem = { id: string; text: string; images?: string[] };
 type ConfigTab = "flash" | "time" | "record" | "card";
 type SwitchMode = "off" | "custom" | "default";
 
@@ -252,6 +254,7 @@ function PreparationChecklist() {
   const t = useTranslations("audiomothGuide.prepare");
   const [tab, setTab] = useState<PrepTab>("equipment");
   const [checked, setChecked] = useState<Set<string>>(new Set());
+  const [previewedItem, setPreviewedItem] = useState<ChecklistItem | null>(null);
   const [hasLoadedStoredProgress, setHasLoadedStoredProgress] = useState(false);
 
   useEffect(() => {
@@ -260,7 +263,7 @@ function PreparationChecklist() {
       if (stored) {
         const values: unknown = JSON.parse(stored);
         if (Array.isArray(values)) {
-          setChecked(new Set(values.filter((value): value is string => typeof value === "string")));
+          setChecked(new Set(values.filter((value): value is string => typeof value === "string" && value !== "equipment:phone")));
         }
       }
     } catch {
@@ -284,15 +287,21 @@ function PreparationChecklist() {
     { id: "manager", label: t("managerTab") },
     { id: "field", label: t("fieldTab") },
   ];
-  const items: Record<PrepTab, { id: string; text: string }[]> = {
+  const items: Record<PrepTab, ChecklistItem[]> = {
     equipment: [
-      { id: "phone", text: t("equipment.phone") },
-      { id: "computer", text: t("equipment.computer") },
-      { id: "recorder", text: t("equipment.recorder") },
-      { id: "cable", text: t("equipment.cable") },
-      { id: "reader", text: t("equipment.reader") },
-      { id: "card", text: t("equipment.card") },
-      { id: "case", text: t("equipment.case") },
+      { id: "computer", text: t("equipment.computer"), images: ["/images/audiomoth/equipment/laptop.webp"] },
+      {
+        id: "recorder",
+        text: t("equipment.recorder"),
+        images: [
+          "/images/audiomoth/equipment/audiomoth.webp",
+          "/images/audiomoth/equipment/aa-batteries.webp",
+        ],
+      },
+      { id: "cable", text: t("equipment.cable"), images: ["/images/audiomoth/equipment/micro-usb-cable.webp"] },
+      { id: "reader", text: t("equipment.reader"), images: ["/images/audiomoth/equipment/microsd-card-and-adapter.webp"] },
+      { id: "card", text: t("equipment.card"), images: ["/images/audiomoth/equipment/microsd-card-and-adapter.webp"] },
+      { id: "case", text: t("equipment.case"), images: ["/images/audiomoth/equipment/waterproof-case.webp"] },
     ],
     manager: [
       { id: "arbimon", text: t("manager.arbimon") },
@@ -330,7 +339,10 @@ function PreparationChecklist() {
             type="button"
             role="tab"
             aria-selected={tab === item.id}
-            onClick={() => setTab(item.id)}
+            onClick={() => {
+              setTab(item.id);
+              setPreviewedItem(null);
+            }}
             className={cn(
               "min-w-max flex-1 rounded-lg px-3 py-2 text-[12.5px] font-medium transition-colors",
               tab === item.id ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground",
@@ -349,33 +361,86 @@ function PreparationChecklist() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -4 }}
             transition={{ duration: 0.15 }}
-            className="grid gap-2"
+            className={cn("grid gap-4", tab === "equipment" && "md:grid-cols-[minmax(0,1fr)_12rem]")}
           >
-            {visible.map((item) => {
-              const selected = checked.has(scopedKey(item.id));
-              return (
-                <button
-                  key={item.id}
-                  type="button"
-                  role="checkbox"
-                  aria-checked={selected}
-                  onClick={() => toggle(item.id)}
-                  className="group flex items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-colors hover:bg-muted/50"
-                >
-                  <span
-                    className={cn(
-                      "flex h-5 w-5 shrink-0 items-center justify-center rounded-md border transition-colors",
-                      selected ? "border-primary bg-primary text-primary-foreground" : "border-border bg-background",
-                    )}
+            <div className="grid content-start gap-2" onMouseLeave={() => setPreviewedItem(null)}>
+              {visible.map((item) => {
+                const selected = checked.has(scopedKey(item.id));
+                const showingPreview = previewedItem?.id === item.id && item.images;
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    role="checkbox"
+                    aria-checked={selected}
+                    onMouseEnter={() => item.images && setPreviewedItem(item)}
+                    onFocus={() => item.images && setPreviewedItem(item)}
+                    onBlur={() => setPreviewedItem(null)}
+                    onClick={() => toggle(item.id)}
+                    className="group rounded-xl px-3 py-2.5 text-left transition-colors hover:bg-muted/50 focus-visible:bg-muted/50"
                   >
-                    {selected && <CheckIcon className="h-3.5 w-3.5" />}
-                  </span>
-                  <span className={cn("text-[13.5px] text-foreground", selected && "text-muted-foreground line-through")}>
-                    {item.text}
-                  </span>
-                </button>
-              );
-            })}
+                    <span className="flex items-center gap-3">
+                      <span
+                        className={cn(
+                          "flex h-5 w-5 shrink-0 items-center justify-center rounded-md border transition-colors",
+                          selected ? "border-primary bg-primary text-primary-foreground" : "border-border bg-background",
+                        )}
+                      >
+                        {selected && <CheckIcon className="h-3.5 w-3.5" />}
+                      </span>
+                      <span className={cn("text-[13.5px] text-foreground", selected && "text-muted-foreground line-through")}>
+                        {item.text}
+                      </span>
+                    </span>
+                    <AnimatePresence initial={false}>
+                      {showingPreview && (
+                        <motion.span
+                          initial={{ opacity: 0, height: 0, marginTop: 0 }}
+                          animate={{ opacity: 1, height: 144, marginTop: 12 }}
+                          exit={{ opacity: 0, height: 0, marginTop: 0 }}
+                          className={cn(
+                            "grid overflow-hidden rounded-xl border border-border/60 bg-white md:hidden",
+                            item.images && item.images.length > 1 && "grid-cols-2",
+                          )}
+                        >
+                          {item.images?.map((src) => (
+                            <span key={src} className="relative min-h-0">
+                              <Image src={src} alt="" fill sizes="(max-width: 768px) 80vw" className="object-contain p-2" />
+                            </span>
+                          ))}
+                        </motion.span>
+                      )}
+                    </AnimatePresence>
+                  </button>
+                );
+              })}
+            </div>
+
+            {tab === "equipment" && (
+              <div className="relative hidden min-h-48 md:block">
+                <AnimatePresence mode="wait">
+                  {previewedItem?.images && (
+                    <motion.div
+                      key={previewedItem.id}
+                      initial={{ opacity: 0, scale: 0.96, y: 4 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.96, y: -4 }}
+                      transition={{ duration: 0.15 }}
+                      className={cn(
+                        "sticky top-24 grid h-48 overflow-hidden rounded-xl border border-border/60 bg-white shadow-sm",
+                        previewedItem.images.length > 1 && "grid-rows-2",
+                      )}
+                    >
+                      {previewedItem.images.map((src) => (
+                        <div key={src} className="relative min-h-0">
+                          <Image src={src} alt="" fill sizes="192px" className="object-contain p-2" />
+                        </div>
+                      ))}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            )}
           </motion.div>
         </AnimatePresence>
 
