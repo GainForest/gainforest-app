@@ -12,6 +12,11 @@
  * CORS-open trust model as blob fetching — and carries the spectrogram PNG
  * blob, the playable preview blob / archival URL, and the duration +
  * sample-rate needed to place the box.
+ *
+ * Not every recording stored a spectrogram blob (e.g. sounds imported before
+ * spectrograms were saved). For those the card computes one client-side from
+ * the audio itself — the same FFT pipeline the AudioMoth labelling workspace
+ * uses — lazily, only once the card scrolls into view.
  */
 
 import Image from "next/image";
@@ -21,8 +26,14 @@ import { Loader2Icon, PauseIcon, PlayIcon, WavesIcon } from "lucide-react";
 import type { FeedBioacousticsClip } from "../_lib/feed";
 import type { AudioLabelCategory } from "../_lib/audiomoth/labels";
 import { pauseOtherAudio } from "../_lib/audio-coordinator";
+import { colorForSpectrogram, computeSpectrogram } from "../_lib/audiomoth/spectrogram";
 import { blobUrl, getPdsRecord, parseAtUri, resolvePdsHost } from "../_lib/pds";
 import { cn } from "@/lib/utils";
+
+/** FFT settings for the client-side fallback spectrogram — a lighter pass
+ *  than the labelling workspace (the feed card is small and read-only). */
+const FALLBACK_FFT_SIZE = 512;
+const FALLBACK_MAX_COLUMNS = 800;
 
 /** Box + chip tints per label category — mirrors the labelling workspace. */
 const CATEGORY_STYLES: Record<AudioLabelCategory, { box: string; chip: string }> = {
@@ -102,7 +113,16 @@ export function FeedAudioClip({ clip }: { clip: FeedBioacousticsClip }) {
   const t = useTranslations("common.feed.audio");
   const tCategories = useTranslations("common.audiomoth.label.categories");
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [source, setSource] = useState<SourceAudio | null | undefined>(undefined);
+  // Lazy trigger for the computed fallback: only decode audio once the card
+  // has actually scrolled into (or near) the viewport.
+  const [inView, setInView] = useState(false);
+  const [fallback, setFallback] = useState<"pending" | "done" | "failed" | null>(null);
+  // Nyquist measured from the decoded audio — authoritative when we computed
+  // the spectrogram ourselves.
+  const [computedNyquist, setComputedNyquist] = useState<number | null>(null);
   // Duration measured by the <audio> element — fills in when metadata lacks it.
   const [measuredDuration, setMeasuredDuration] = useState<number | null>(null);
   const [playing, setPlaying] = useState(false);
@@ -115,6 +135,8 @@ export function FeedAudioClip({ clip }: { clip: FeedBioacousticsClip }) {
     setSource(undefined);
     setAudioIndex(0);
     setAudioFailed(false);
+    setFallback(null);
+    setComputedNyquist(null);
     const controller = new AbortController();
     loadSourceAudio(clip.audioUri, controller.signal)
       .then((next) => setSource(next))
@@ -124,8 +146,104 @@ export function FeedAudioClip({ clip }: { clip: FeedBioacousticsClip }) {
     return () => controller.abort();
   }, [clip.audioUri]);
 
+  // Watch for the card entering the viewport (once), so the computed fallback
+  // below never decodes audio for rows far offscreen.
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el || typeof IntersectionObserver === "undefined") {
+      setInView(true);
+      return;
+    }
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) {
+          setInView(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: "200px" },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  // Computed fallback: when the record stored no spectrogram PNG, build one
+  // from the playable audio (decode → Hann/FFT magnitudes → inferno colours),
+  // exactly like the labelling workspace but at a lighter resolution.
+  useEffect(() => {
+    if (!inView || !source || source.spectrogramUrl || source.audioUrls.length === 0) return;
+    let cancelled = false;
+    setFallback("pending");
+
+    async function render() {
+      const AudioContextClass = window.AudioContext ?? window.webkitAudioContext;
+      if (!AudioContextClass) throw new Error("unsupported");
+      const context = new AudioContextClass();
+      try {
+        let buffer: AudioBuffer | null = null;
+        for (const candidate of source!.audioUrls) {
+          try {
+            const response = await fetch(candidate);
+            if (!response.ok) continue;
+            buffer = await context.decodeAudioData(await response.arrayBuffer());
+            break;
+          } catch {
+            /* Try the next playable URL. */
+          }
+        }
+        if (!buffer || cancelled) {
+          if (!buffer) throw new Error("audio_load_failed");
+          return;
+        }
+        const channel = buffer.getChannelData(0);
+        const samples = new Int16Array(channel.length);
+        for (let index = 0; index < channel.length; index += 1) {
+          samples[index] = Math.round(Math.max(-1, Math.min(1, channel[index]!)) * 32_767);
+        }
+        const hopSize = Math.max(
+          256,
+          Math.ceil(Math.max(1, samples.length - FALLBACK_FFT_SIZE) / FALLBACK_MAX_COLUMNS),
+        );
+        const data = computeSpectrogram(samples, { fftSize: FALLBACK_FFT_SIZE, hopSize });
+        const canvas = canvasRef.current;
+        if (!canvas || data.columns < 2) throw new Error("empty");
+        if (cancelled) return;
+        canvas.width = data.columns;
+        canvas.height = data.bins;
+        const paint = canvas.getContext("2d");
+        if (!paint) throw new Error("canvas");
+        const image = paint.createImageData(data.columns, data.bins);
+        for (let column = 0; column < data.columns; column += 1) {
+          for (let bin = 0; bin < data.bins; bin += 1) {
+            const [red, green, blue] = colorForSpectrogram(
+              (data.magnitudesDb[column * data.bins + bin]! + 100) / 80,
+            );
+            const offset = ((data.bins - 1 - bin) * data.columns + column) * 4;
+            image.data[offset] = Math.round(red);
+            image.data[offset + 1] = Math.round(green);
+            image.data[offset + 2] = Math.round(blue);
+            image.data[offset + 3] = 255;
+          }
+        }
+        paint.putImageData(image, 0, 0);
+        setComputedNyquist(buffer.sampleRate / 2);
+        setMeasuredDuration(buffer.duration);
+        setFallback("done");
+      } finally {
+        void context.close();
+      }
+    }
+
+    void render().catch(() => {
+      if (!cancelled) setFallback("failed");
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [inView, source]);
+
   const duration = source?.durationSeconds ?? measuredDuration;
-  const nyquist = source?.nyquistHz ?? null;
+  const nyquist = computedNyquist ?? source?.nyquistHz ?? null;
   const styles = CATEGORY_STYLES[clip.category] ?? CATEGORY_STYLES.other;
 
   // Where the labelled section sits on the full spectrogram, as fractions.
@@ -178,16 +296,17 @@ export function FeedAudioClip({ clip }: { clip: FeedBioacousticsClip }) {
   };
 
   const showPlayhead = playing && playhead !== null && duration && duration > 0;
+  const computingFallback = Boolean(
+    source && !source.spectrogramUrl && source.audioUrls.length > 0 && fallback !== "done" && fallback !== "failed",
+  );
 
   return (
-    <div className="mt-2 overflow-hidden rounded-xl border border-border/60">
+    <div ref={containerRef} className="mt-2 overflow-hidden rounded-xl border border-border/60">
       {/* Spectrogram of the whole recording with the labelled box on top. */}
       <div className="relative h-32 w-full bg-[#06040b] sm:h-36">
-        {source === undefined ? (
-          <div className="absolute inset-0 grid place-items-center text-white/60">
-            <Loader2Icon className="size-4 animate-spin" aria-hidden />
-          </div>
-        ) : source.spectrogramUrl ? (
+        {/* Backdrop for loading / failed states. */}
+        <div className="absolute inset-0 bg-linear-to-b from-[#1a1430] via-[#0d0a18] to-[#06040b]" aria-hidden />
+        {source?.spectrogramUrl ? (
           <Image
             src={source.spectrogramUrl}
             alt={t("spectrogramAlt")}
@@ -197,8 +316,19 @@ export function FeedAudioClip({ clip }: { clip: FeedBioacousticsClip }) {
             className="object-fill"
           />
         ) : (
-          <div className="absolute inset-0 bg-linear-to-b from-[#1a1430] via-[#0d0a18] to-[#06040b]" aria-hidden />
+          /* Client-computed fallback spectrogram, painted once decoded. */
+          <canvas
+            ref={canvasRef}
+            role="img"
+            aria-label={t("spectrogramAlt")}
+            className={cn("relative h-full w-full", fallback !== "done" && "opacity-0")}
+          />
         )}
+        {source === undefined || computingFallback ? (
+          <div className="absolute inset-0 grid place-items-center text-white/60">
+            <Loader2Icon className="size-4 animate-spin" aria-hidden />
+          </div>
+        ) : null}
         {box ? (
           <span
             aria-hidden
