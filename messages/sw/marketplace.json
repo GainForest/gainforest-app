@@ -926,11 +926,12 @@
       "description": "Uteuzi wa miradi iliyoandikwa vizuri kutoka kwa wasimamizi wa mazingira duniani kote.",
       "badge": "Teule",
       "action": "Gundua mradi",
+      "previous": "Miradi teule iliyotangulia",
+      "next": "Miradi teule inayofuata",
       "manage": {
         "add": "Teua mradi huu",
         "remove": "Ondoa kwenye miradi teule",
-        "error": "Imeshindikana kusasisha miradi teule. Tafadhali jaribu tena.",
-        "max": "Unaweza kuteua hadi miradi mitatu. Ondoa mmoja kabla ya kuongeza mwingine."
+        "error": "Imeshindikana kusasisha miradi teule. Tafadhali jaribu tena."
       }
     },
     "support": {

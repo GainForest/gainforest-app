@@ -926,11 +926,12 @@
       "description": "A selection of richly documented projects from nature stewards around the world.",
       "badge": "Featured",
       "action": "Explore project",
+      "previous": "Previous featured projects",
+      "next": "Next featured projects",
       "manage": {
         "add": "Feature this project",
         "remove": "Remove from featured projects",
-        "error": "Couldn’t update the featured projects. Please try again.",
-        "max": "You can feature up to three projects. Remove one before adding another."
+        "error": "Couldn’t update the featured projects. Please try again."
       }
     },
     "support": {

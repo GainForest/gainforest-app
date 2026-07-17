@@ -926,11 +926,12 @@
       "description": "Una selección de proyectos bien documentados de guardianes de la naturaleza de todo el mundo.",
       "badge": "Destacado",
       "action": "Explorar proyecto",
+      "previous": "Proyectos destacados anteriores",
+      "next": "Siguientes proyectos destacados",
       "manage": {
         "add": "Destacar este proyecto",
         "remove": "Quitar de proyectos destacados",
-        "error": "No se pudieron actualizar los proyectos destacados. Inténtalo de nuevo.",
-        "max": "Puedes destacar hasta tres proyectos. Quita uno antes de añadir otro."
+        "error": "No se pudieron actualizar los proyectos destacados. Inténtalo de nuevo."
       }
     },
     "support": {

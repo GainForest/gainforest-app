@@ -926,11 +926,12 @@
       "description": "Pilihan proyek yang terdokumentasi lengkap dari para penjaga alam di seluruh dunia.",
       "badge": "Unggulan",
       "action": "Jelajahi proyek",
+      "previous": "Proyek unggulan sebelumnya",
+      "next": "Proyek unggulan berikutnya",
       "manage": {
         "add": "Jadikan proyek unggulan",
         "remove": "Hapus dari proyek unggulan",
-        "error": "Tidak dapat memperbarui proyek unggulan. Silakan coba lagi.",
-        "max": "Anda dapat menampilkan hingga tiga proyek. Hapus satu sebelum menambahkan yang lain."
+        "error": "Tidak dapat memperbarui proyek unggulan. Silakan coba lagi."
       }
     },
     "support": {

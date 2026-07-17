@@ -15,7 +15,6 @@ export const FEATURED_PROJECTS_CACHE_TAG = "featured-projects";
 const FEATURED_PROJECT_BADGE_TITLE = "featured-project";
 const FEATURED_PROJECT_BADGE_DESCRIPTION = "Marks a project for the featured projects shelf on GainForest.";
 const FEATURED_PROJECT_AWARD_NOTE = "Selected for the featured projects section on GainForest.";
-export const MAX_FEATURED_PROJECTS = 3;
 
 export class FeaturedProjectMutationError extends Error {
   status: number;
@@ -106,10 +105,6 @@ export async function featureProject(repoDid: string, cookie: string | null, sub
   let definition = findDefinition(data.definitions);
   const awards = matchingAwards(definition, data.awards);
   if (awards.some((award) => award.subjectLabel === subjectUri)) return;
-  if (awards.length >= MAX_FEATURED_PROJECTS) {
-    throw new FeaturedProjectMutationError("Only three projects can be featured at a time.", 409);
-  }
-
   const cid = await fetchRecordCid(subjectUri);
   definition = definition ?? (await ensureDefinition(repoDid, cookie));
   await cgsMutate(repoDid, cookie, {

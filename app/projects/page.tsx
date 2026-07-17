@@ -80,7 +80,7 @@ export default async function ProjectsPage() {
     fetchFeaturedProjectUris(GAINFOREST_MODERATION_REPO_DID).catch(() => []),
   ]);
   const initialFeaturedRecords = (await Promise.all(
-    initialFeaturedUris.slice(0, 3).map((uri) => fetchRecordByUri(uri).catch(() => null)),
+    initialFeaturedUris.map((uri) => fetchRecordByUri(uri).catch(() => null)),
   )).filter((record): record is ProjectRecord => record?.kind === "project");
   const mergedInitialRecords = mergeFeaturedProjects(initialFeaturedRecords, initialPage?.records ?? []);
   const title = t("title");

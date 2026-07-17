@@ -3,6 +3,8 @@
 import Image from "next/image";
 import {
   ArrowRightIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
   CloudSunIcon,
   DropletsIcon,
   FolderKanbanIcon,
@@ -327,7 +329,7 @@ export function ProjectsExploreClient({
     return featuredUris.flatMap((uri) => {
       const record = byUri.get(uri);
       return record ? [record] : [];
-    }).slice(0, 3);
+    });
   }, [featuredUris, records]);
   const supportRecords = useMemo(() => {
     const featuredIds = new Set(featuredRecords.map((record) => record.id));
@@ -409,11 +411,11 @@ export function ProjectsExploreClient({
         body: JSON.stringify({ uri: record.atUri }),
       });
       const data = (await response.json().catch(() => null)) as { uris?: string[]; error?: string } | null;
-      if (!response.ok) throw new Error(response.status === 409 ? "max" : "update");
+      if (!response.ok) throw new Error("update");
       if (Array.isArray(data?.uris)) setFeaturedUris(data.uris);
       else setFeaturedUris((current) => wasFeatured ? current.filter((uri) => uri !== record.atUri) : [record.atUri, ...current]);
-    } catch (error) {
-      setFeatureError(error instanceof Error && error.message === "max" ? t("featured.manage.max") : t("featured.manage.error"));
+    } catch {
+      setFeatureError(t("featured.manage.error"));
     } finally {
       setFeatureBusyUri(null);
     }
@@ -650,25 +652,57 @@ function HeroBackdrop() {
 
 function FeaturedProjects({ records, onOpen }: { records: ProjectRecord[]; onOpen: (record: ProjectRecord) => void }) {
   const t = useTranslations("marketplace.projects.featured");
+  const carouselRef = useRef<HTMLDivElement | null>(null);
+  const isCarousel = records.length > 3;
+  const scrollCarousel = (direction: -1 | 1) => {
+    const node = carouselRef.current;
+    if (!node) return;
+    node.scrollBy({ left: direction * node.clientWidth * 0.9, behavior: "smooth" });
+  };
+
   return (
     <section aria-labelledby="featured-projects-heading" className="mt-14 sm:mt-16">
-      <div className="mb-6 flex flex-col justify-between gap-2 sm:flex-row sm:items-end">
+      <div className="mb-6 flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">{t("eyebrow")}</p>
           <h2 id="featured-projects-heading" className="mt-1 text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">{t("title")}</h2>
         </div>
-        <p className="max-w-md text-sm leading-6 text-muted-foreground">{t("description")}</p>
+        <div className="flex items-end gap-3">
+          <p className="max-w-md text-sm leading-6 text-muted-foreground">{t("description")}</p>
+          {isCarousel ? (
+            <div className="flex shrink-0 gap-2">
+              <button type="button" onClick={() => scrollCarousel(-1)} aria-label={t("previous")} className="grid h-9 w-9 place-items-center rounded-full border border-border bg-background text-foreground transition hover:border-primary/30 hover:text-primary">
+                <ChevronLeftIcon className="h-4 w-4" aria-hidden />
+              </button>
+              <button type="button" onClick={() => scrollCarousel(1)} aria-label={t("next")} className="grid h-9 w-9 place-items-center rounded-full border border-border bg-background text-foreground transition hover:border-primary/30 hover:text-primary">
+                <ChevronRightIcon className="h-4 w-4" aria-hidden />
+              </button>
+            </div>
+          ) : null}
+        </div>
       </div>
-      <div className="grid gap-4 md:grid-cols-3">
+      <div
+        ref={carouselRef}
+        className={cn(
+          isCarousel
+            ? "flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            : "grid gap-4 md:grid-cols-3",
+        )}
+      >
         {records.map((record) => (
-          <FeaturedProjectCard key={record.id} record={record} onOpen={onOpen} />
+          <FeaturedProjectCard
+            key={record.id}
+            record={record}
+            onOpen={onOpen}
+            className={isCarousel ? "w-[86%] shrink-0 snap-start sm:w-[calc((100%-1rem)/2)] lg:w-[calc((100%-2rem)/3)]" : undefined}
+          />
         ))}
       </div>
     </section>
   );
 }
 
-function FeaturedProjectCard({ record, onOpen }: { record: ProjectRecord; onOpen: (record: ProjectRecord) => void }) {
+function FeaturedProjectCard({ record, onOpen, className }: { record: ProjectRecord; onOpen: (record: ProjectRecord) => void; className?: string }) {
   const t = useTranslations("marketplace.projects.featured");
   const cardT = useTranslations("marketplace.projects.card");
   const [imgError, setImgError] = useState(false);
@@ -678,31 +712,34 @@ function FeaturedProjectCard({ record, onOpen }: { record: ProjectRecord; onOpen
       type="button"
       onClick={() => onOpen(record)}
       aria-label={cardT("open", { title: record.title })}
-      className="group relative isolate min-h-72 overflow-hidden rounded-[1.5rem] border border-border/70 bg-primary text-left shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
-    >
-      {record.imageUrl && !imgError ? (
-        <Image src={record.imageUrl} alt="" fill sizes="(min-width: 768px) 33vw, 100vw" unoptimized={!isPdsBlobUrl(record.imageUrl)} onError={() => setImgError(true)} className="object-cover transition-transform duration-700 group-hover:scale-[1.04]" />
-      ) : (
-        <div className="absolute inset-0 grid place-items-center bg-primary text-primary-foreground/30"><FolderKanbanIcon className="h-16 w-16" /></div>
+      className={cn(
+        "group flex h-full min-w-0 flex-col overflow-hidden rounded-[1.5rem] border border-border/70 bg-card text-left shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/25 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60",
+        className,
       )}
-      <div className="absolute inset-0 bg-linear-to-t from-black/90 via-black/35 to-black/5" />
-      <div className="relative flex min-h-72 flex-col justify-between p-5">
-        <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-white/90 px-3 py-1.5 text-xs font-semibold text-emerald-950 shadow-sm backdrop-blur">
+    >
+      <span className="relative block aspect-[16/8] w-full overflow-hidden bg-muted">
+        {record.imageUrl && !imgError ? (
+          <Image src={record.imageUrl} alt="" fill sizes="(min-width: 768px) 33vw, 86vw" unoptimized={!isPdsBlobUrl(record.imageUrl)} onError={() => setImgError(true)} className="object-cover transition-transform duration-700 group-hover:scale-[1.04]" />
+        ) : (
+          <span className="grid h-full place-items-center bg-primary/8 text-primary/40"><FolderKanbanIcon className="h-10 w-10" aria-hidden /></span>
+        )}
+        <span className="absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-full bg-background/92 px-3 py-1.5 text-xs font-semibold text-primary shadow-sm backdrop-blur">
           <LeafIcon className="h-3.5 w-3.5" aria-hidden />
           {t("badge")}
         </span>
-        <div className="mt-20 text-white">
-          <div className="mb-3 flex flex-wrap items-center gap-2 text-xs font-medium text-white/80">
-            {place ? <span className="inline-flex items-center gap-1"><MapPinIcon className="h-3.5 w-3.5" aria-hidden />{place}</span> : null}
-            {record.creatorName ? <span>{record.creatorName}</span> : null}
-          </div>
-          <h3 className="line-clamp-3 max-w-xl font-instrument text-3xl italic leading-[1.02]">{record.title}</h3>
-          {record.shortDescription ? <p className="mt-3 line-clamp-2 max-w-2xl text-sm leading-6 text-white/75">{record.shortDescription}</p> : null}
-          <span className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-white">
-            {t("action")} <ArrowRightIcon className="h-4 w-4 transition-transform group-hover:translate-x-1" aria-hidden />
-          </span>
-        </div>
-      </div>
+      </span>
+
+      <span className="flex flex-1 flex-col p-4">
+        <span className="flex min-w-0 flex-wrap items-center gap-2 text-xs font-medium text-muted-foreground">
+          {place ? <span className="inline-flex items-center gap-1"><MapPinIcon className="h-3.5 w-3.5" aria-hidden />{place}</span> : null}
+          {record.creatorName ? <span className="truncate">{record.creatorName}</span> : null}
+        </span>
+        <span className="mt-2 line-clamp-2 font-instrument text-2xl italic leading-tight text-foreground">{record.title}</span>
+        {record.shortDescription ? <span className="mt-2 line-clamp-2 text-sm leading-5 text-muted-foreground">{record.shortDescription}</span> : null}
+        <span className="mt-auto inline-flex items-center gap-2 pt-4 text-sm font-semibold text-primary">
+          {t("action")} <ArrowRightIcon className="h-4 w-4 transition-transform group-hover:translate-x-1" aria-hidden />
+        </span>
+      </span>
     </button>
   );
 }
